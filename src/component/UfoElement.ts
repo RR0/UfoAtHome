@@ -117,6 +117,8 @@ export class UfoElement extends HTMLElement {
   private static readonly OBSERVER_MAP_IMAGERY_PX = 768
 
   private readonly fullscreenButton: HTMLButtonElement
+  /** The picture's top-right row — see showToolbar. */
+  private readonly cornerButtons: HTMLElement
   private readonly observerMapButton: HTMLButtonElement
   /** The pictures of the place: on or off, and how much of them shows — see SceneReference. The
    * reader's own choice, kept across recordings; the slider starts where the recording's first
@@ -551,6 +553,7 @@ export class UfoElement extends HTMLElement {
     })
     this.playPauseButton = this.shadow.getElementById("play-pause") as HTMLButtonElement
     this.fullscreenButton = this.shadow.getElementById("fullscreen") as HTMLButtonElement
+    this.cornerButtons = this.shadow.getElementById("corner-buttons")!
     this.observerMapButton = this.shadow.getElementById("observer-map") as HTMLButtonElement
     this.referencesButton = this.shadow.getElementById("references") as HTMLButtonElement
     this.referenceOpacityInput = this.shadow.getElementById("reference-opacity") as HTMLInputElement
@@ -910,9 +913,16 @@ export class UfoElement extends HTMLElement {
    * drives an external playback UI of its own instead (see SightingEditorElement, which needs the
    * bottom of the canvas free for dragging/resizing shapes; the overlay's seek `<input>` is
    * `flex: 1` and would otherwise intercept nearly the full width of that area). Only `.toolbar`
-   * is affected — the fullscreen button (top-right corner) is unrelated and stays as-is. */
+   * is affected — except the fullscreen button at its end, which goes back to the picture's
+   * top-right corner rather than disappearing with it: once fullscreen, the picture is all there
+   * is, and a way out has to stand on it. */
   set showToolbar(show: boolean) {
     this.toolbar.classList.toggle("hidden", !show)
+    if (show) {
+      this.toolbar.appendChild(this.fullscreenButton)
+    } else {
+      this.cornerButtons.appendChild(this.fullscreenButton)
+    }
   }
 
   /** Exposed so SightingEditorElement can avoid editing/resyncing appearance while actively
@@ -996,8 +1006,8 @@ export class UfoElement extends HTMLElement {
   /**
    * Puts the toggles — the account's moments, the pictures of the place and their opacity, the
    * observer's map — into `host`, or, when `host` is undefined, into this element's own playback
-   * bar, at its end. Never over the picture: the fullscreen button is the one control
-   * that belongs to the picture itself, and the corner is its alone. A composing element with a
+   * bar, just before the fullscreen button that ends it. Never over the picture: its top-right
+   * corner is the observer's map's. A composing element with a
    * toolbar of its own (see SightingElement, and the editor) hosts them there so that they stand
    * with the rest of what that element says about the observation. The buttons are the same
    * elements wherever they stand, so every listener and every state they carry move with them;
@@ -1008,7 +1018,8 @@ export class UfoElement extends HTMLElement {
     if (host) {
       for (const control of controls) host.appendChild(control)
     } else {
-      for (const control of controls) this.toolbar.appendChild(control)
+      const end = this.fullscreenButton.parentElement === this.toolbar ? this.fullscreenButton : null
+      for (const control of controls) this.toolbar.insertBefore(control, end)
     }
   }
 

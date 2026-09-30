@@ -9,17 +9,18 @@ export const html = `
   <div id="playback-flash" class="playback-flash" aria-hidden="true"></div>
   <!-- The corner's own row, rather than one absolutely-positioned button per corner: a second
        button placed by its own right offset would have to hardcode the first one's width, and
-       every language names them differently the moment either grows a label. -->
+       every language names them differently the moment either grows a label. Empty in the player,
+       where every control stands in the playback bar and the map has the corner to itself; the
+       fullscreen button comes back here only when that bar is hidden (see UfoElement.showToolbar). -->
   <div class="corner-buttons auto-hide" id="corner-buttons">
     <button id="milestones" type="button" title="Named moments" aria-label="Named moments" aria-pressed="true" hidden>🔖</button>
-    <!-- The toggles below are parsed here and moved at once — into the playback bar beside the loop
-         button, or wherever a composing element hosts them (see UfoElement.hostControls). Only the
-         fullscreen button stays over the picture. The pictures of the place (see SceneReference)
+    <!-- The toggles below are parsed here and moved at once — into the playback bar, before the
+         fullscreen button, or wherever a composing element hosts them (see UfoElement.hostControls).
+         The pictures of the place (see SceneReference)
          have a slider for how much of them shows, then a button for whether they show at all. -->
     <input id="reference-opacity" type="range" min="0" max="1" step="0.05" value="0.5" title="Picture opacity" aria-label="Picture opacity" hidden/>
     <button id="references" type="button" title="Pictures of the place" aria-label="Pictures of the place" aria-pressed="true" hidden>🖼</button>
     <button id="observer-map" type="button" title="Observer's position" aria-label="Observer's position" aria-pressed="false" hidden>🗺</button>
-    <button id="fullscreen" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
   </div>
   <!-- What in the recording was not played as written (see RecordingIssue): a key nothing reads, a
        value made up because the file left it out. Hidden for a recording with nothing to say, which
@@ -33,7 +34,7 @@ export const html = `
     </div>
   </div>
   <!-- Where the observer stood and which way they faced, on real ground — see ObserverMapRenderer.
-       Under the buttons that toggle it, and inert to the pointer: the canvas beneath it is the
+       Its toggle stands in the playback bar, and it is inert to the pointer: the canvas beneath it is the
        recording, and clicking it plays. -->
   <div id="observer-map-panel" class="observer-map-panel" hidden>
     <canvas id="observer-map-canvas" width="240" height="240"></canvas>
@@ -66,6 +67,8 @@ export const html = `
       <div id="milestone-marks" class="milestone-marks"></div>
     </div>
     <span id="time-end" class="time-label" title="Duration">0:00</span>
+    <!-- At the far right of the timeline, as on a video site: the picture's top-right corner is the map's. -->
+    <button id="fullscreen" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
   </div>
   </div>
 </div>
@@ -459,12 +462,12 @@ canvas[data-cursor="rotate"] {
 .corner-buttons button[aria-pressed="true"] {
   outline: 2px solid #39f;
 }
-/* Below the buttons that open it, same right edge. A share of the stage rather than a fixed pixel
-   size, so it stays the same fraction of the picture in a 320 px embed and in fullscreen — but
+/* In the picture's top-right corner, which the playback bar leaves free. A share of the stage
+   rather than a fixed pixel size, so it stays the same fraction of the picture in a 320 px embed and in fullscreen — but
    floored, since a map too small to tell a road from a wash is not worth the tiles it costs. */
 .observer-map-panel {
   position: absolute;
-  top: 2.7em;
+  top: 0.4em;
   right: 0.4em;
   width: clamp(140px, 30%, 280px);
   aspect-ratio: 1;
@@ -478,6 +481,11 @@ canvas[data-cursor="rotate"] {
 }
 .observer-map-panel[hidden] {
   display: none;
+}
+/* Under the corner's buttons when there are any — the fullscreen button, when the playback bar is
+   hidden (see UfoElement.showToolbar). */
+.stage:has(.corner-buttons > :not([hidden])) .observer-map-panel {
+  top: 2.7em;
 }
 /* Out of the phenomenon's way — see UfoElement.keepObserverMapClear. The corner it normally sits in
    is the emptiest part of most of these skies, which is exactly why it is there; when it is not,
