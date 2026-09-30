@@ -118,11 +118,21 @@ export const css = `
 .account select {
   max-width: 12em;
 }
+/* The interpretation's name is long ("A straight, level flight 100 m up, in the plane fitted to…"), and
+   the row has room: the choice takes what the account's own name and the buttons leave, instead of a
+   cap that cut it after a dozen letters. */
 .interpretation-choice {
+  flex: 1 1 0;
+  min-width: 12em;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
   white-space: nowrap;
 }
 .interpretation-choice select {
-  max-width: 16em;
+  flex: 1 1 0;
+  min-width: 0;
+  text-overflow: ellipsis;
 }
 .confrontation {
   margin-top: 0.4em;
