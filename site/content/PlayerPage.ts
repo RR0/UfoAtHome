@@ -384,7 +384,13 @@ if (asked) {
   // Arriving with a recording named in the URL means being shown it, not being shown a form: the
   // stage already sits above that form, and this puts it in view straight away rather than leaving
   // the reader to guess that the thing they followed a link for is further down.
-  void openUrl(asked).then(() => showStage(false))
+  // \`play=true\` — what a demo's link carries — means being shown it PLAYING, not being left to find the
+  // button: the reader followed a link to watch.
+  const autoplay = new URLSearchParams(location.search).get("play") === "true"
+  void openUrl(asked).then(() => {
+    showStage(false)
+    if (autoplay) stage.scene?.ufoElement?.play()
+  })
 }`
   }
 
