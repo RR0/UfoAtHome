@@ -845,9 +845,11 @@ canvas[data-cursor="rotate"] {
 .controls.narrow.more-open .controls-left {
   display: none;
 }
-/* The picture's opacity slider is the widest thing in the row, and a narrow player has none to spare. */
+/* The opacity slider is the widest thing in the row: a little shorter where there is little room. It
+   is folded with the other buttons, and there when they are unfolded — never dropped, since on a
+   phone there is no other way to reach it. */
 .controls.narrow #reference-opacity {
-  display: none !important;
+  width: 4em;
 }
 /* Unfolded, the buttons still may not all fit a very small player: the pill then scrolls sideways,
    its scrollbar out of sight, rather than run out of the picture. */
@@ -937,8 +939,8 @@ canvas[data-cursor="rotate"] {
 /* A small picture — a catalogue card, a sidebar embed. The map is not offered there: at this size
    it would be too small to read and would cover most of the sky it is meant to explain, and its
    button is what pushed the playback bar's last controls out of the picture. The bar itself
-   tightens so what remains fits: the photo's opacity slider goes too, and the seek bar gives up
-   its width before any button does. The stage is the container (see .stage). */
+   tightens so what remains fits, and folds what still does not (see UfoElement.fitControls).
+   The stage is the container (see .stage). */
 @container (max-width: 420px) {
   #observer-map,
   .observer-map-panel {
@@ -953,10 +955,6 @@ canvas[data-cursor="rotate"] {
   }
   .time-pill {
     padding: 0 0.6em;
-  }
-  /* The picture's opacity slider too: its on/off button stays, and the full-size player has both. */
-  .controls #reference-opacity {
-    display: none !important;
   }
 }
 .tooltip {
