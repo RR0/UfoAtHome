@@ -142,5 +142,5 @@ export const sceneNames_it: SceneNames = {
   satelliteTooltip: "{name} — satellite, mag {mag}, a {height} km di quota",
   credits: "Crediti",
   notAVideo: "Questo non è un video",
-  isASimulation: "È una simulazione calcolata in tempo reale nel tuo browser."
+  isASimulation: "È una simulazione in tempo reale."
 }

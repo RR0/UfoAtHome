@@ -8,7 +8,7 @@ export const html = `
     <div id="scene-loader" class="scene-loader" role="progressbar" hidden>
       <p id="scene-loader-not-video" class="scene-loader-note scene-loader-not-video">This is not a video</p>
       <div class="scene-loader-spinner"></div>
-      <p id="scene-loader-note" class="scene-loader-note scene-loader-is-simulation">It is a simulation, computed in real time in your browser.</p>
+      <p id="scene-loader-note" class="scene-loader-note scene-loader-is-simulation">It is a real-time simulation.</p>
     </div>
   </div>
   <div id="ufo-slot"></div>
@@ -186,6 +186,7 @@ export const css = `
 }
 .scene-loader-not-video {
   align-self: end;
+  font-weight: bold;
 }
 .scene-loader-is-simulation {
   align-self: start;
