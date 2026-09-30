@@ -692,9 +692,14 @@ export class UfoElement extends HTMLElement {
       this.observerMapViewChanged()
     })
     this.seekInput.addEventListener("input", () => this.player.seek(this.snapSeekToMark(Number(this.seekInput.value))))
-    this.seekInput.addEventListener("pointerdown", event => { this.seekSnapArmed = true; this.nameMarkUnder(event) })
-    this.seekInput.addEventListener("pointerup", () => { this.seekSnapArmed = false })
-    this.seekInput.addEventListener("pointermove", event => { this.nameMarkUnder(event); this.hoverSeek(event) })
+    this.seekInput.addEventListener("pointerdown", event => {
+      this.seekSnapArmed = true
+      this.nameMarkUnder(event)
+      this.beginTouchScrub(event)
+    })
+    this.seekInput.addEventListener("pointerup", event => { this.seekSnapArmed = false; this.endTouchScrub(event) })
+    this.seekInput.addEventListener("pointercancel", event => this.endTouchScrub(event))
+    this.seekInput.addEventListener("pointermove", event => { this.nameMarkUnder(event); this.hoverSeek(event); this.touchScrub(event) })
     this.seekInput.addEventListener("pointerleave", () => { this.seekInput.removeAttribute("title"); this.leaveSeek() })
     this.seekInput.addEventListener("keydown", this.handleSeekKey)
     // A touch screen has no hover to show the controls by, nor to take them away by: they show on a
@@ -1305,6 +1310,45 @@ export class UfoElement extends HTMLElement {
     const painter = this.seekPreviewPainter
     this.seekPreviewCanvas.hidden = painter === undefined
     painter?.(t, this.seekPreviewCanvas)
+  }
+
+  /** The pointer that is dragging the bar with a finger or a pen, if any. */
+  private scrubbingPointer?: number
+
+  /**
+   * A finger drags the bar itself, rather than leaving that to the range input underneath: its thumb
+   * is zero-wide (see .seek-track #seek, so that a position along the input is the same along the
+   * segments), and a touch screen only drags a slider by grabbing its thumb. A tap on the bar jumped
+   * to where it landed, and a drag from there did nothing — the picture and the preview followed the
+   * finger, the playhead did not. A mouse needs none of this: the input drags perfectly well.
+   */
+  private beginTouchScrub(event: PointerEvent): void {
+    if (event.pointerType === "mouse") return
+    this.scrubbingPointer = event.pointerId
+    try {
+      this.seekInput.setPointerCapture(event.pointerId)
+    } catch {
+      // Captured or gone already: the moves still reach the bar while the finger is over it.
+    }
+    this.seekToPointer(event)
+  }
+
+  private touchScrub(event: PointerEvent): void {
+    if (event.pointerId === this.scrubbingPointer) this.seekToPointer(event)
+  }
+
+  private endTouchScrub(event: PointerEvent): void {
+    if (event.pointerId !== this.scrubbingPointer) return
+    this.scrubbingPointer = undefined
+    this.seekToPointer(event)
+  }
+
+  private seekToPointer(event: PointerEvent): void {
+    const rect = this.seekInput.getBoundingClientRect()
+    const duration = this.player.seekableDuration
+    if (rect.width <= 0 || duration <= 0) return
+    const share = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1)
+    this.player.seek(this.snapSeekToMark(share * duration))
   }
 
   /** Whether the next seek from the bar may snap to a mark: only the first one of a press, so that

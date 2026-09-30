@@ -1691,6 +1691,24 @@ describe("the account's named moments", () => {
     expect(toggles).toBe(1)
   })
 
+  it("follows a finger dragged along the bar, which the zero-wide thumb cannot be grabbed by", () => {
+    const element = mount()
+    element.sightingData = withMilestones() as never
+    const seek = element.shadowRoot!.getElementById("seek")!
+    // jsdom lays nothing out: the bar is given the box a phone would.
+    seek.getBoundingClientRect = () => ({ left: 0, top: 0, right: 200, bottom: 20, width: 200, height: 20, x: 0, y: 0, toJSON: () => ({}) })
+    const touch = (type: string, clientX: number) =>
+      seek.dispatchEvent(Object.assign(new MouseEvent(type, { bubbles: true, clientX }), { pointerType: "touch", pointerId: 3 }))
+    touch("pointerdown", 20)
+    touch("pointermove", 100)
+    expect(element.currentTime).toBe(500)
+    touch("pointermove", 180)
+    expect(element.currentTime).toBe(900)
+    touch("pointerup", 180)
+    touch("pointermove", 20) // no longer held: the bar is left alone
+    expect(element.currentTime).toBe(900)
+  })
+
   it("mutes and unmutes from the button beside play, and says so", () => {
     const element = mount()
     element.sightingData = withMilestones() as never

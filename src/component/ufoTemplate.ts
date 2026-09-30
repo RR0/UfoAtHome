@@ -398,6 +398,8 @@ canvas[data-cursor="rotate"] {
   opacity: 0;
   appearance: none;
   cursor: pointer;
+  /* A drag along the bar is the bar's, and a drag across it is still the page's scroll. */
+  touch-action: pan-y;
 }
 .seek-track #seek::-webkit-slider-thumb {
   appearance: none;
