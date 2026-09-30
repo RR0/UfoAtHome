@@ -159,6 +159,7 @@ export class UfoElement extends HTMLElement {
   /** The one shape the position and the length share, and the one thing to click to switch them. */
   private readonly timePill: HTMLElement
   private readonly muteButton: HTMLButtonElement
+  private readonly volumeInput: HTMLInputElement
   private readonly controlsRight: HTMLElement
   private readonly seekSegments: HTMLElement
   private readonly seekDot: HTMLElement
@@ -599,7 +600,12 @@ export class UfoElement extends HTMLElement {
       event.preventDefault()
       this.toggleTimeDisplay()
     })
+    this.volumeInput = this.shadow.getElementById("volume") as HTMLInputElement
     this.muteButton.addEventListener("click", () => this.toggleMuted())
+    this.volumeInput.addEventListener("input", () => {
+      // Dragging down to nothing is muting, and dragging up from it is not: as on the video sites.
+      this.setVolume(Number(this.volumeInput.value))
+    })
     this.fullscreenTarget = this.stageElement
 
     this.playPauseButton.addEventListener("click", () => this.togglePlayPause())
@@ -1077,6 +1083,7 @@ export class UfoElement extends HTMLElement {
     this.referencesButton.hidden = !any
     this.referenceOpacityInput.hidden = !any || !this.referencesShownState
     this.referencesButton.setAttribute("aria-pressed", String(this.referencesShownState))
+    this.referencesButton.innerHTML = this.referencesShownState ? PlayerIcons.PICTURES_ON : PlayerIcons.PICTURES_OFF
     const label = this.referencesShownState ? this.messages.hideReferences : this.messages.showReferences
     this.referencesButton.title = label
     this.referencesButton.setAttribute("aria-label", label)
@@ -1182,9 +1189,11 @@ export class UfoElement extends HTMLElement {
     })
     const milestones = this.milestonesShown ? this.sighting.milestones : []
     const moment = milestones.length > 0 ? resolveMilestoneAt(milestones, t) : undefined
-    const title = moment ? this.said.read(moment.label) ?? "" : ""
+    // The label AND the account's sentence: "D" alone says nothing to whoever has not read the list.
+    const label = moment ? this.said.read(moment.label) ?? "" : ""
+    const note = moment ? this.said.read(moment.note) : undefined
+    const title = note ? `${label} — ${note}` : label
     this.seekPreviewTitle.textContent = title
-    this.seekPreviewTitle.hidden = title === ""
     this.seekPreviewTime.textContent = this.formatPosition(t)
     this.seekPreview.hidden = false
     const width = this.seekPreview.offsetWidth
@@ -1761,6 +1770,7 @@ export class UfoElement extends HTMLElement {
 
   private updateObserverMapButton(): void {
     const open = !this.observerMapPanel.hidden
+    this.observerMapButton.innerHTML = open ? PlayerIcons.MAP_ON : PlayerIcons.MAP_OFF
     const label = open ? this.messages.hideObserverMap : this.messages.showObserverMap
     this.observerMapButton.title = label
     this.observerMapButton.setAttribute("aria-label", label)
@@ -2079,6 +2089,7 @@ export class UfoElement extends HTMLElement {
    * gets none — most name none. */
   private updateMilestonesButton(): void {
     this.milestonesButton.hidden = this.currentSighting.milestones.length === 0
+    this.milestonesButton.innerHTML = this.milestonesShown ? PlayerIcons.MILESTONES_ON : PlayerIcons.MILESTONES_OFF
     const label = this.milestonesShown ? this.messages.hideMilestones : this.messages.showMilestones
     this.milestonesButton.title = label
     this.milestonesButton.setAttribute("aria-label", label)
@@ -2196,9 +2207,39 @@ export class UfoElement extends HTMLElement {
   set muted(muted: boolean) {
     if (muted === this.mutedState) return
     this.mutedState = muted
-    this.sightingAudio.setMuted(muted)
+    // Unmuting from nothing has nothing to restore: back to a heard level.
+    if (!muted && this.volumeState === 0) this.volumeState = UfoElement.RESTORED_VOLUME
+    this.applyLevel()
+  }
+
+  /** How loud, 0 to 1, when not muted. Kept while muted, so that unmuting gives it back. */
+  private volumeState = 1
+
+  private static readonly RESTORED_VOLUME = 0.5
+
+  get volume(): number {
+    return this.volumeState
+  }
+
+  set volume(volume: number) {
+    this.setVolume(volume)
+  }
+
+  private setVolume(volume: number): void {
+    this.volumeState = Math.min(Math.max(volume, 0), 1)
+    this.mutedState = this.volumeState === 0
+    this.applyLevel()
+  }
+
+  /** What is actually heard: nothing when muted, the volume otherwise. */
+  get level(): number {
+    return this.mutedState ? 0 : this.volumeState
+  }
+
+  private applyLevel(): void {
+    this.sightingAudio.setLevel(this.level)
     this.updateMuteButton()
-    this.dispatchEvent(new CustomEvent("mutedchange", { bubbles: true, composed: true, detail: { muted } }))
+    this.dispatchEvent(new CustomEvent("mutedchange", { bubbles: true, composed: true, detail: { muted: this.mutedState, volume: this.volumeState } }))
   }
 
   toggleMuted(): void {
@@ -2211,6 +2252,7 @@ export class UfoElement extends HTMLElement {
     this.muteButton.title = label
     this.muteButton.setAttribute("aria-label", label)
     this.muteButton.setAttribute("aria-pressed", String(this.mutedState))
+    this.volumeInput.value = String(this.level)
   }
 
   private updateFullscreenButton(): void {

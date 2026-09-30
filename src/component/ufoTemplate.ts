@@ -13,14 +13,14 @@ export const html = `
        where every control stands in the playback bar and the map has the corner to itself; the
        fullscreen button comes back here only when that bar is hidden (see UfoElement.showToolbar). -->
   <div class="corner-buttons auto-hide" id="corner-buttons">
-    <button id="milestones" type="button" title="Named moments" aria-label="Named moments" aria-pressed="true" hidden>🔖</button>
+    <button id="milestones" type="button" title="Named moments" aria-label="Named moments" aria-pressed="true" hidden></button>
     <!-- The toggles below are parsed here and moved at once — into the playback bar, before the
          fullscreen button, or wherever a composing element hosts them (see UfoElement.hostControls).
          The pictures of the place (see SceneReference)
          have a slider for how much of them shows, then a button for whether they show at all. -->
     <input id="reference-opacity" type="range" min="0" max="1" step="0.05" value="0.5" title="Picture opacity" aria-label="Picture opacity" hidden/>
-    <button id="references" type="button" title="Pictures of the place" aria-label="Pictures of the place" aria-pressed="true" hidden>🖼</button>
-    <button id="observer-map" type="button" title="Observer's position" aria-label="Observer's position" aria-pressed="false" hidden>🗺</button>
+    <button id="references" type="button" title="Pictures of the place" aria-label="Pictures of the place" aria-pressed="true" hidden></button>
+    <button id="observer-map" type="button" title="Observer's position" aria-label="Observer's position" aria-pressed="false" hidden></button>
   </div>
   <!-- What in the recording was not played as written (see RecordingIssue): a key nothing reads, a
        value made up because the file left it out. Hidden for a recording with nothing to say, which
@@ -73,14 +73,17 @@ export const html = `
            element composing this one can draw it (see UfoElement.seekPreviewPainter). -->
       <div id="seek-preview" class="seek-preview" hidden>
         <canvas id="seek-preview-canvas" class="seek-preview-canvas" width="160" height="90" hidden></canvas>
-        <div id="seek-preview-title" class="seek-preview-title" hidden></div>
-        <div id="seek-preview-time" class="seek-preview-time"></div>
+        <div class="seek-preview-caption"><b id="seek-preview-time" class="seek-preview-time"></b><span id="seek-preview-title" class="seek-preview-title"></span></div>
       </div>
     </div>
     <div class="controls">
       <div class="controls-left">
         <button id="play-pause" type="button" class="round" title="Play" aria-label="Play"></button>
-        <button id="mute" type="button" class="round" title="Mute" aria-label="Mute" aria-pressed="false"></button>
+        <!-- The slider unfolds beside the button while the pointer is over either, as on the video sites. -->
+        <div class="volume">
+          <button id="mute" type="button" class="round" title="Mute" aria-label="Mute" aria-pressed="false"></button>
+          <input id="volume" type="range" min="0" max="1" step="0.05" value="1" title="Volume" aria-label="Volume"/>
+        </div>
         <!-- The position and the length in one place, and one click for both: they switch together
              between the time of day and the time elapsed. -->
         <span id="time" class="time-pill">
@@ -414,6 +417,7 @@ canvas[data-cursor="rotate"] {
 /* What the pointer is over: the moment's picture, its name, its time — above the bar, following
    the pointer and kept inside the picture. */
 .seek-preview {
+  width: 244px;
   position: absolute;
   bottom: 100%;
   left: 0;
@@ -430,12 +434,11 @@ canvas[data-cursor="rotate"] {
   pointer-events: none;
 }
 .seek-preview[hidden],
-.seek-preview-canvas[hidden],
-.seek-preview-title[hidden] {
+.seek-preview-canvas[hidden] {
   display: none;
 }
 .seek-preview-canvas {
-  width: 160px;
+  width: 240px;
   height: auto;
   border: 2px solid #fff;
   border-radius: 6px;
@@ -446,14 +449,32 @@ canvas[data-cursor="rotate"] {
 .seek-preview-canvas:not([data-ready]) {
   visibility: hidden;
 }
-.seek-preview-title {
-  font-weight: 700;
+/* The time and the moment's sentence on one line, on one shape, the sentence cut short with an
+   ellipsis at the width of the picture rather than wrapped. */
+.seek-preview-caption {
+  display: flex;
+  gap: 0.6em;
+  align-items: baseline;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.35em 0.9em;
+  border-radius: 1.2em;
+  background: rgba(0, 0, 0, 0.55);
+  text-shadow: none;
+  white-space: nowrap;
 }
 .seek-preview-time {
-  padding: 0.1em 0.5em;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.55);
+  flex: 0 0 auto;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+.seek-preview-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.seek-preview-title:empty {
+  display: none;
 }
 .playback-flash {
   position: absolute;
@@ -730,14 +751,7 @@ canvas[data-cursor="rotate"] {
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
 }
-/* A toggle that is on says so with a line under it, not with a frame around it. */
-.controls button[aria-pressed="true"] {
-  box-shadow: inset 0 -3px 0 #f03;
-  border-radius: 0.3em;
-}
-.controls .round[aria-pressed="true"] {
-  box-shadow: none;
-}
+/* A toggle that is on says so by its glyph, solid where it was an outline — see PlayerIcons. */
 .controls button svg {
   display: block;
 }
@@ -781,6 +795,29 @@ canvas[data-cursor="rotate"] {
 }
 .time-label {
   text-align: center;
+}
+/* The position, a little heavier than the length it is read against. */
+#time-start {
+  font-weight: 600;
+}
+.volume {
+  display: flex;
+  align-items: center;
+}
+/* Folded until the pointer is over the button or the slider, or the keyboard is on either. */
+.volume input[type="range"] {
+  width: 0;
+  min-width: 0;
+  margin: 0;
+  opacity: 0;
+  accent-color: #fff;
+  transition: width 0.15s ease, margin 0.15s ease, opacity 0.15s ease;
+}
+.volume:hover input[type="range"],
+.volume:has(:focus-visible) input[type="range"] {
+  width: 4.5em;
+  margin: 0 0.6em 0 0.3em;
+  opacity: 1;
 }
 .time-separator {
   opacity: 0.75;

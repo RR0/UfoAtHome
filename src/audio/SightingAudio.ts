@@ -70,24 +70,24 @@ export class SightingAudio {
    * for now rather than the one captured when loading began. */
   private requested?: SightingSound
 
-  private muted = false
+  private level = 1
   private master?: GainNode
 
   /** Where every voice is sent, so that one gain silences them all at once, whatever is playing. */
   private output(context: AudioContext): GainNode {
     if (!this.master) {
       this.master = context.createGain()
-      this.master.gain.value = this.muted ? 0 : 1
+      this.master.gain.value = this.level
       this.master.connect(context.destination)
     }
     return this.master
   }
 
-  /** Silences or restores the whole sound, without touching what it is doing — a track heard again
-   * is where it would have got to, not where it was left. */
-  setMuted(muted: boolean): void {
-    this.muted = muted
-    if (this.master) this.master.gain.value = muted ? 0 : 1
+  /** How loud everything is, 0 (silent) to 1, without touching what it is doing — a track heard
+   * again is where it would have got to, not where it was left. */
+  setLevel(level: number): void {
+    this.level = level
+    if (this.master) this.master.gain.value = level
   }
 
   /** Unlocks the AudioContext — must be called from a real user gesture. Safe to call repeatedly.

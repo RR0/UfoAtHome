@@ -608,7 +608,7 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.addEventListener("timeupdate", this.handleTimeUpdate)
     this.ufoElement.seekPreviewPainter = (t, canvas) => this.seekPreviewOf(canvas).paint(t, canvas)
     // The weather is heard through this element, the button that silences it is the player's.
-    this.ufoElement.addEventListener("mutedchange", event => this.weatherAudio.setMuted((event as CustomEvent<{ muted: boolean }>).detail.muted))
+    this.ufoElement.addEventListener("mutedchange", () => this.weatherAudio.setLevel(this.ufoElement.level))
     this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<{ shown: boolean; opacity: number }>).detail))
     this.ufoElement.canvasElement.addEventListener("pointermove", this.handlePointerMove)
     this.ufoElement.canvasElement.addEventListener("pointerleave", this.handlePointerLeave)
