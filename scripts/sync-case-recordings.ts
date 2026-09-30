@@ -54,7 +54,10 @@ const RECORDINGS: CaseRecording[] = [
   // What that recording lays over the scene, at the address it states: relative to the file, so
   // it has to sit at the same place beside it on both hosts.
   { published: "maffliers/vue-p024-2012-09-09.jpg", dossier: "Maffliers/maffliers/vue-p024-2012-09-09.jpg" },
-  { published: "observer-silly-le-long.json", dossier: "SillyLeLong/observer-silly-le-long.json" }
+  { published: "observer-silly-le-long.json", dossier: "SillyLeLong/observer-silly-le-long.json" },
+  { published: "observer-braine-le-comte-akh.json", dossier: "BraineLeComte/observer-braine-le-comte-akh.json" },
+  { published: "observer-braine-le-comte-bjn.json", dossier: "BraineLeComte/observer-braine-le-comte-bjn.json" },
+  { published: "observer-braine-le-comte-fwy.json", dossier: "BraineLeComte/observer-braine-le-comte-fwy.json" }
 ]
 
 class CaseRecordingSync {
