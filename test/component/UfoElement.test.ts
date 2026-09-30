@@ -1756,6 +1756,34 @@ describe("the account's named moments", () => {
     expect(ids.indexOf("reference-opacity")).toBe(ids.indexOf("references") + 1)
   })
 
+  it("offers a picker of the account's moments after the time, and going to one is choosing it", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 1000, shapes: [] }] } } as never
+    expect(shadow.getElementById("moments")!.hidden).toBe(true) // nothing to choose from
+
+    element.sightingData = withMilestones() as never
+    const box = shadow.getElementById("moments")!
+    expect(box.hidden).toBe(false)
+    const items = [...shadow.querySelectorAll<HTMLButtonElement>("#moments-menu button")]
+    expect(items.map(item => item.textContent)).toEqual(["A — He hears a roar", "B — The sound stops"])
+
+    ;(shadow.getElementById("moments-button") as HTMLButtonElement).click()
+    expect(shadow.getElementById("moments-menu")!.hidden).toBe(false)
+    items[1]!.click()
+    expect(element.currentTime).toBe(500)
+    expect(shadow.getElementById("moments-menu")!.hidden).toBe(true)
+    expect(shadow.getElementById("moments-current")!.textContent).toBe("B")
+  })
+
+  it("takes the picker away with the moments themselves", () => {
+    const element = mount()
+    element.sightingData = withMilestones() as never
+    const shadow = element.shadowRoot!
+    ;(shadow.getElementById("milestones") as HTMLButtonElement).click()
+    expect(shadow.getElementById("moments")!.hidden).toBe(true)
+  })
+
   it("mutes and unmutes from the button beside play, and says so", () => {
     const element = mount()
     element.sightingData = withMilestones() as never

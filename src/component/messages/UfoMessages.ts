@@ -18,6 +18,8 @@ export interface UfoMessages {
   mute: string
   unmute: string
   /** The chevron that folds and unfolds the buttons a narrow player has no room for. */
+  /** The moment picker beside the time: what it says before any moment is reached, and its title. */
+  moments: string
   moreControls: string
   fewerControls: string
   /** Names the reader's own gesture, not the feature — see the project's wording rules. */

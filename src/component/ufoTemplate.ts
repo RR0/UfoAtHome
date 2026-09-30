@@ -92,7 +92,15 @@ export const html = `
           <span class="time-separator" aria-hidden="true">/</span>
           <span id="time-end" class="time-label" title="Duration">0:00</span>
         </span>
+        <!-- For a recording whose account names moments: the moment now on show, and a list of them to
+             go to — one choice and the recording is there. See UfoElement.refreshMomentsPicker. -->
+        <div id="moments" class="moments" hidden>
+          <button id="moments-button" type="button" class="moments-button" title="Moments" aria-haspopup="true" aria-expanded="false">
+            <span id="moments-current" class="moments-current">Moments</span><svg viewBox="0 0 24 24" width="1.2em" height="1.2em" aria-hidden="true" focusable="false"><path d="M8.6 16.6 10 18l6-6-6-6-1.4 1.4 4.6 4.6z" fill="currentColor"/></svg>
+          </button>
+        </div>
       </div>
+      <ul id="moments-menu" class="moments-menu" hidden></ul>
       <!-- Everything else, on one shape: the toggles parsed above land here, then the fullscreen
            button that closes the row. -->
       <div class="controls-right" id="controls-right">
@@ -776,6 +784,7 @@ canvas[data-cursor="rotate"] {
 /* The buttons under the bar, each on a translucent dark shape — over the picture, never a panel of
    their own — and the fewer of the picture they cover the better. */
 .controls {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -862,6 +871,9 @@ canvas[data-cursor="rotate"] {
   display: none;
 }
 /* Further steps of the same fit: the length of the recording goes from the time, then the sound. */
+.controls.nomoments .moments {
+  display: none;
+}
 .controls.compact .time-separator,
 .controls.compact #time-end {
   display: none;
@@ -909,6 +921,86 @@ canvas[data-cursor="rotate"] {
 }
 .time-label {
   text-align: center;
+}
+/* The moment picker: the current moment's name on a shape of its own, after the time, and the list it
+   opens above the row. */
+.moments[hidden] {
+  display: none;
+}
+.controls .moments-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+  max-width: 11em;
+  height: 2.6em;
+  padding: 0 0.8em 0 1em;
+  border: none;
+  border-radius: 1.3em;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font: inherit;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+.controls .moments-button:hover,
+.controls .moments-button:focus-visible {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2));
+}
+.moments-button svg {
+  flex: 0 0 auto;
+}
+.moments-current {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.moments-menu {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  z-index: 4;
+  margin: 0 0 0.4em;
+  padding: 0.3em;
+  list-style: none;
+  width: max-content;
+  max-width: min(24em, 100%);
+  max-height: 14em;
+  overflow-y: auto;
+  border-radius: 0.8em;
+  background: rgba(20, 20, 20, 0.92);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 0.9em;
+}
+.moments-menu[hidden] {
+  display: none;
+}
+/* Buttons of the row's own kind are shaped for icons (a fixed height, a round corner): the list's are
+   lines of text. */
+.controls .moments-menu button {
+  display: block;
+  flex: none;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  padding: 0.5em 0.8em;
+  border: none;
+  border-radius: 0.5em;
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+}
+.controls .moments-menu button:hover,
+.controls .moments-menu button:focus-visible {
+  background: rgba(255, 255, 255, 0.18);
+}
+.controls .moments-menu button[aria-current="true"] {
+  background: rgba(255, 255, 255, 0.1);
+  font-weight: 600;
 }
 /* The position, a little heavier than the length it is read against. */
 #time-start {

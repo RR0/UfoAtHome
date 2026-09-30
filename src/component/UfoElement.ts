@@ -161,6 +161,10 @@ export class UfoElement extends HTMLElement {
   private readonly muteButton: HTMLButtonElement
   private readonly volumeInput: HTMLInputElement
   private readonly controlsRow: HTMLElement
+  private readonly momentsBox: HTMLElement
+  private readonly momentsButton: HTMLButtonElement
+  private readonly momentsCurrent: HTMLElement
+  private readonly momentsMenu: HTMLElement
   private readonly moreButton: HTMLButtonElement
   private readonly controlsRight: HTMLElement
   private readonly seekSegments: HTMLElement
@@ -340,16 +344,20 @@ export class UfoElement extends HTMLElement {
     const row = this.controlsRow
     const wasOpen = row.classList.contains("more-open")
     const overflows = () => row.scrollWidth > row.clientWidth + 1
-    row.classList.remove("narrow", "more-open", "compact", "tiny")
+    // The open list hangs over the row: it is not part of what has to fit.
+    const menuWasOpen = !this.momentsMenu.hidden
+    this.momentsMenu.hidden = true
+    row.classList.remove("narrow", "more-open", "nomoments", "compact", "tiny")
     if (row.clientWidth > 0 && overflows()) {
       row.classList.add("narrow")
-      for (const step of ["compact", "tiny"]) {
+      for (const step of ["nomoments", "compact", "tiny"]) {
         if (!overflows()) break
         row.classList.add(step)
       }
       // What the reader unfolded stays unfolded through a resize, for as long as it is still needed.
       if (wasOpen) row.classList.add("more-open")
     }
+    this.momentsMenu.hidden = !menuWasOpen
     this.updateMoreButton()
   }
 
@@ -658,6 +666,11 @@ export class UfoElement extends HTMLElement {
     })
     this.volumeInput = this.shadow.getElementById("volume") as HTMLInputElement
     this.controlsRow = this.shadow.querySelector(".controls") as HTMLElement
+    this.momentsBox = this.shadow.getElementById("moments")!
+    this.momentsButton = this.shadow.getElementById("moments-button") as HTMLButtonElement
+    this.momentsCurrent = this.shadow.getElementById("moments-current")!
+    this.momentsMenu = this.shadow.getElementById("moments-menu")!
+    this.momentsButton.addEventListener("click", () => this.toggleMomentsMenu())
     this.moreButton = this.shadow.getElementById("controls-more") as HTMLButtonElement
     this.moreButton.addEventListener("click", () => this.setControlsFolded(this.controlsRow.classList.contains("more-open")))
     this.muteButton.addEventListener("click", () => this.toggleMuted())
@@ -735,6 +748,8 @@ export class UfoElement extends HTMLElement {
     this.canvas.addEventListener("pointermove", this.handlePointerMove)
     this.canvas.addEventListener("pointerleave", this.handlePointerLeave)
     document.addEventListener("fullscreenchange", this.handleFullscreenChange)
+    document.addEventListener("pointerdown", this.handleMomentsDismiss, true)
+    document.addEventListener("keydown", this.handleMomentsDismiss, true)
     document.addEventListener("visibilitychange", this.handleVisibility)
     window.addEventListener("pagehide", this.handleHidden)
     document.addEventListener("pointerup", this.handlePointerRelease, true)
@@ -776,6 +791,8 @@ export class UfoElement extends HTMLElement {
 
   disconnectedCallback(): void {
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
+    document.removeEventListener("pointerdown", this.handleMomentsDismiss, true)
+    document.removeEventListener("keydown", this.handleMomentsDismiss, true)
     document.removeEventListener("visibilitychange", this.handleVisibility)
     window.removeEventListener("pagehide", this.handleHidden)
     document.removeEventListener("pointerup", this.handlePointerRelease, true)
@@ -1221,6 +1238,71 @@ export class UfoElement extends HTMLElement {
       })
     )
     this.refreshSeekSegments(duration, milestones.map(milestone => milestone.t))
+    this.refreshMomentsPicker(milestones)
+  }
+
+  /**
+   * The picker of moments: present when the account names some (and they are on), it shows the one
+   * now on show, and a list of them all to go to. Choosing one is going there — the recording is
+   * where that moment begins, playing or not, as a chapter of a video is.
+   */
+  private refreshMomentsPicker(milestones: ReadonlyArray<{ t: number; label?: unknown; note?: unknown }>): void {
+    const shown = this.milestonesShown && milestones.length > 0
+    this.momentsBox.hidden = !shown
+    this.closeMomentsMenu()
+    this.momentsMenu.replaceChildren(...milestones.map(milestone => {
+      const item = document.createElement("li")
+      const button = document.createElement("button")
+      button.type = "button"
+      button.dataset.t = String(milestone.t)
+      const label = this.said.read(milestone.label as never) ?? ""
+      const note = this.said.read(milestone.note as never)
+      button.textContent = note ? `${label} — ${note}` : label
+      button.addEventListener("click", () => {
+        this.player.seek(milestone.t)
+        this.closeMomentsMenu()
+      })
+      item.appendChild(button)
+      return item
+    }))
+    this.momentsButton.title = this.messages.moments
+    this.showCurrentMoment(undefined)
+  }
+
+  /** Names the moment on show in the picker's button, and marks it in the list. Written only when it
+   * changes: this runs on every frame. */
+  private showCurrentMoment(current: { t: number; label?: unknown; note?: unknown } | undefined): void {
+    const text = current ? this.said.read(current.label as never) ?? "" : ""
+    const shown = text || this.messages.moments
+    if (this.momentsCurrent.textContent !== shown) this.momentsCurrent.textContent = shown
+    for (const button of this.momentsMenu.querySelectorAll("button")) {
+      const isCurrent = current !== undefined && Number(button.dataset.t) === current.t
+      if ((button.getAttribute("aria-current") === "true") !== isCurrent) button.setAttribute("aria-current", String(isCurrent))
+    }
+  }
+
+  private toggleMomentsMenu(): void {
+    if (this.momentsMenu.hidden) {
+      this.momentsMenu.hidden = false
+      this.momentsButton.setAttribute("aria-expanded", "true")
+    } else {
+      this.closeMomentsMenu()
+    }
+  }
+
+  private closeMomentsMenu(): void {
+    this.momentsMenu.hidden = true
+    this.momentsButton.setAttribute("aria-expanded", "false")
+  }
+
+  /** A press anywhere else, or Escape, closes the list. */
+  private readonly handleMomentsDismiss = (event: Event): void => {
+    if (this.momentsMenu.hidden) return
+    if (event instanceof KeyboardEvent) {
+      if (event.key === "Escape") this.closeMomentsMenu()
+      return
+    }
+    if (!event.composedPath().some(node => node === this.momentsMenu || node === this.momentsButton)) this.closeMomentsMenu()
   }
 
   /** The bar's segments, one per stretch between two moments (or the one whole bar, without any),
@@ -1406,6 +1488,7 @@ export class UfoElement extends HTMLElement {
     const current =
       this.milestonesShown && this.sighting.milestones.length > 0 ? resolveMilestoneAt(this.sighting.milestones, t) : undefined
     this.milestoneCaption.hidden = current === undefined
+    this.showCurrentMoment(current)
     if (!current) return
     const label = document.createElement("b")
     label.textContent = this.said.read(current.label) ?? ""
@@ -1846,7 +1929,7 @@ export class UfoElement extends HTMLElement {
     window.clearTimeout(this.controlsIdleTimer)
     if (this.player.playbackState !== "playing") return
     // Held down, they are in use: released, and only then, the few seconds begin (see handlePointerRelease).
-    if (this.pointerHeld) return
+    if (this.pointerHeld || !this.momentsMenu.hidden) return
     this.controlsIdleTimer = window.setTimeout(() => {
       this.stageElement.classList.remove("touched")
       this.tapRevealedOnly = false
@@ -2354,6 +2437,7 @@ export class UfoElement extends HTMLElement {
   private setMilestonesShown(shown: boolean): void {
     this.milestonesShown = shown
     this.milestoneMarks.hidden = !shown
+    this.momentsBox.hidden = !shown || this.sighting.milestones.length === 0
     this.refreshSeekSegments(this.player.seekableDuration, sortedMilestones(this.sighting.milestones).map(milestone => milestone.t))
     this.milestonesButton.setAttribute("aria-pressed", String(shown))
     this.updateMilestonesButton()
@@ -2367,6 +2451,7 @@ export class UfoElement extends HTMLElement {
    * gets none — most name none. */
   private updateMilestonesButton(): void {
     this.milestonesButton.hidden = this.currentSighting.milestones.length === 0
+    this.momentsButton.title = this.messages.moments
     UfoElement.setIcon(this.milestonesButton, this.milestonesShown ? PlayerIcons.MILESTONES_ON : PlayerIcons.MILESTONES_OFF)
     const label = this.milestonesShown ? this.messages.hideMilestones : this.messages.showMilestones
     this.milestonesButton.title = label
