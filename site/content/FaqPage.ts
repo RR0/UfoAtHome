@@ -188,6 +188,16 @@ export class FaqPage implements SitePage {
         and the right size, and the next person can look at it.</p>
     </div>
 
+    <div class="faq-item">
+      <h3>Does it replace the investigation?</h3>
+      <p>No: it rests on it. A recording is a simulation of the observation, built from what the investigation
+        established: the account, the place and time, the weather, the measurements. Laid beside the investigation, it can
+        help check that an account is plausible, verify a measurement, show what another observer or another point of view
+        would have seen, bring out the gaps between accounts or between an account and the record, and test a hypothesis
+        (do a planet, an aircraft, a flock of birds fit the angles that were given?). Or it can simply illustrate the
+        investigation and summarise it visually. Investigating stays the investigators' work.</p>
+    </div>
+
     <h2>Compared with other tools</h2>
 
     <div class="faq-item">
@@ -487,6 +497,16 @@ export class FaqPage implements SitePage {
       <p>Si la réponse est non, c'est un résultat aussi, et meilleur qu'une note écrite disant que le
         observateur n'était pas d'accord : ce qu'il rejette est à l'écran, au bon endroit et à la bonne
         taille, et le suivant pourra le regarder.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Remplace-t-il l'enquête ?</h3>
+      <p>Non : il s'appuie dessus. Un enregistrement est une simulation de l'observation, construite à partir de ce que
+        l'enquête a établi : le compte rendu, le lieu et l'heure, la météo, les mesures. Placée à côté de l'enquête, elle peut
+        aider à vérifier qu'un compte rendu est plausible, à contrôler une mesure, à montrer ce qu'aurait vu un autre
+        observateur ou un autre point de vue, à faire ressortir les écarts entre comptes rendus ou entre un compte rendu et le
+        relevé, et à tester une hypothèse (une planète, un avion, un vol d'oiseaux collent-ils aux angles donnés ?). Ou
+        simplement à illustrer l'enquête et à la synthétiser visuellement. Enquêter reste le travail des enquêteurs.</p>
     </div>
 
     <h2>Face aux autres outils</h2>
@@ -790,6 +810,16 @@ export class FaqPage implements SitePage {
         y con el tamaño correcto, y la siguiente persona puede mirarlo.</p>
     </div>
 
+    <div class="faq-item">
+      <h3>¿Sustituye a la investigación?</h3>
+      <p>No: se apoya en ella. Un registro es una simulación de la observación, construida a partir de lo que la
+        investigación estableció: el relato, el lugar y la hora, el tiempo, las mediciones. Junto a la investigación, puede
+        ayudar a comprobar que un relato es verosímil, a verificar una medición, a mostrar lo que habría visto otro
+        observador o desde otro punto de vista, a poner de relieve las diferencias entre relatos o entre un relato y el
+        registro, y a probar una hipótesis (¿encajan un planeta, un avión, una bandada de aves con los ángulos dados?). O
+        simplemente a ilustrar la investigación y resumirla visualmente. Investigar sigue siendo trabajo de los investigadores.</p>
+    </div>
+
     <h2>Frente a otras herramientas</h2>
 
     <div class="faq-item">
@@ -1078,6 +1108,16 @@ export class FaqPage implements SitePage {
       <p>Se la risposta è no, anche questo è un risultato, e migliore di una nota scritta che dice che
         l'osservatore non era d'accordo — perché ciò che rifiuta è sullo schermo, nel punto giusto
         e della giusta grandezza, e chi viene dopo può guardarlo.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Sostituisce l'indagine?</h3>
+      <p>No: poggia su di essa. Una registrazione è una simulazione dell'osservazione, costruita a partire da ciò che
+        l'indagine ha stabilito: il resoconto, il luogo e l'ora, il tempo atmosferico, le misure. Affiancata all'indagine, può
+        aiutare a verificare che un resoconto sia plausibile, a controllare una misura, a mostrare che cosa avrebbe visto un altro
+        osservatore o da un altro punto di vista, a far emergere le differenze fra resoconti o fra un resoconto e il
+        rilievo, e a mettere alla prova un'ipotesi (un pianeta, un aereo, uno stormo di uccelli combaciano con gli angoli
+        forniti?). Oppure semplicemente a illustrare l'indagine e a sintetizzarla visivamente. Indagare resta il lavoro degli investigatori.</p>
     </div>
 
     <h2>A confronto con altri strumenti</h2>
