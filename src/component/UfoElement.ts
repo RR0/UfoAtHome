@@ -1083,7 +1083,7 @@ export class UfoElement extends HTMLElement {
     this.referencesButton.hidden = !any
     this.referenceOpacityInput.hidden = !any || !this.referencesShownState
     this.referencesButton.setAttribute("aria-pressed", String(this.referencesShownState))
-    this.referencesButton.innerHTML = this.referencesShownState ? PlayerIcons.PICTURES_ON : PlayerIcons.PICTURES_OFF
+    UfoElement.setIcon(this.referencesButton, this.referencesShownState ? PlayerIcons.PICTURES_ON : PlayerIcons.PICTURES_OFF)
     const label = this.referencesShownState ? this.messages.hideReferences : this.messages.showReferences
     this.referencesButton.title = label
     this.referencesButton.setAttribute("aria-label", label)
@@ -1572,7 +1572,7 @@ export class UfoElement extends HTMLElement {
    * now pauses — as a video site does, since the toolbar that says so may well be hidden. */
   private flashPlayback(): void {
     const flash = this.playbackFlash
-    flash.textContent = this.player.playbackState === "playing" ? "▶" : "⏸"
+    flash.innerHTML = this.player.playbackState === "playing" ? PlayerIcons.PLAY : PlayerIcons.PAUSE
     // Restarted on every toggle, even one within the last: the class is taken off, a reflow read,
     // and put back, or the browser would see no change and not replay the animation.
     flash.classList.remove("flashing")
@@ -1580,9 +1580,23 @@ export class UfoElement extends HTMLElement {
     flash.classList.add("flashing")
   }
 
+  private static readonly icons = new WeakMap<HTMLElement, string>()
+
+  /**
+   * Puts a glyph in a button, unless it already wears it. Not a nicety: the play button is redrawn on
+   * every tick of playback, and a click is a press and a release on the SAME element — replacing the
+   * glyph between the two left the release on a node that was gone, and pausing by clicking the very
+   * button that says "pause" did nothing.
+   */
+  private static setIcon(button: HTMLElement, icon: string): void {
+    if (UfoElement.icons.get(button) === icon) return
+    UfoElement.icons.set(button, icon)
+    button.innerHTML = icon
+  }
+
   private updatePlayPauseButton(): void {
     const isPlaying = this.player.playbackState === "playing"
-    this.playPauseButton.innerHTML = isPlaying ? PlayerIcons.PAUSE : PlayerIcons.PLAY
+    UfoElement.setIcon(this.playPauseButton, isPlaying ? PlayerIcons.PAUSE : PlayerIcons.PLAY)
     // Nothing to play with zero observation duration (no declared duration and nothing recorded
     // yet) — disabled rather than silently doing nothing on click, which otherwise briefly
     // flickers into "playing" and straight back out again every time (see Player.play()'s
@@ -1770,7 +1784,7 @@ export class UfoElement extends HTMLElement {
 
   private updateObserverMapButton(): void {
     const open = !this.observerMapPanel.hidden
-    this.observerMapButton.innerHTML = open ? PlayerIcons.MAP_ON : PlayerIcons.MAP_OFF
+    UfoElement.setIcon(this.observerMapButton, open ? PlayerIcons.MAP_ON : PlayerIcons.MAP_OFF)
     const label = open ? this.messages.hideObserverMap : this.messages.showObserverMap
     this.observerMapButton.title = label
     this.observerMapButton.setAttribute("aria-label", label)
@@ -2089,7 +2103,7 @@ export class UfoElement extends HTMLElement {
    * gets none — most name none. */
   private updateMilestonesButton(): void {
     this.milestonesButton.hidden = this.currentSighting.milestones.length === 0
-    this.milestonesButton.innerHTML = this.milestonesShown ? PlayerIcons.MILESTONES_ON : PlayerIcons.MILESTONES_OFF
+    UfoElement.setIcon(this.milestonesButton, this.milestonesShown ? PlayerIcons.MILESTONES_ON : PlayerIcons.MILESTONES_OFF)
     const label = this.milestonesShown ? this.messages.hideMilestones : this.messages.showMilestones
     this.milestonesButton.title = label
     this.milestonesButton.setAttribute("aria-label", label)
@@ -2247,7 +2261,7 @@ export class UfoElement extends HTMLElement {
   }
 
   private updateMuteButton(): void {
-    this.muteButton.innerHTML = this.mutedState ? PlayerIcons.MUTED : PlayerIcons.VOLUME
+    UfoElement.setIcon(this.muteButton, this.mutedState ? PlayerIcons.MUTED : PlayerIcons.VOLUME)
     const label = this.mutedState ? this.messages.unmute : this.messages.mute
     this.muteButton.title = label
     this.muteButton.setAttribute("aria-label", label)
@@ -2257,7 +2271,7 @@ export class UfoElement extends HTMLElement {
 
   private updateFullscreenButton(): void {
     const isFullscreen = this.simulatedFullscreen || document.fullscreenElement === this.fullscreenTarget
-    this.fullscreenButton.innerHTML = isFullscreen ? PlayerIcons.EXIT_FULLSCREEN : PlayerIcons.ENTER_FULLSCREEN
+    UfoElement.setIcon(this.fullscreenButton, isFullscreen ? PlayerIcons.EXIT_FULLSCREEN : PlayerIcons.ENTER_FULLSCREEN)
     this.fullscreenButton.title = isFullscreen ? this.messages.exitFullscreen : this.messages.fullscreen
     this.fullscreenButton.setAttribute("aria-label", this.fullscreenButton.title)
   }

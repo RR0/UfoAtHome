@@ -60,6 +60,7 @@ export const html = `
        the picture with no panel behind it, and under it the buttons, each on a translucent dark
        shape of its own. -->
   <div class="toolbar auto-hide" id="toolbar">
+   <div class="toolbar-inner">
     <!-- The moments cut the bar into segments (see refreshMilestoneMarks); what has played, and what
          the pointer is over, fill them. The range input on top keeps the pointer, the keyboard and
          the accessibility of a slider, and draws nothing itself. The marks stay real buttons over
@@ -73,7 +74,7 @@ export const html = `
            element composing this one can draw it (see UfoElement.seekPreviewPainter). -->
       <div id="seek-preview" class="seek-preview" hidden>
         <canvas id="seek-preview-canvas" class="seek-preview-canvas" width="160" height="90" hidden></canvas>
-        <div class="seek-preview-caption"><b id="seek-preview-time" class="seek-preview-time"></b><span id="seek-preview-title" class="seek-preview-title"></span></div>
+        <div class="seek-preview-caption"><span id="seek-preview-time" class="seek-preview-time"></span><span id="seek-preview-title" class="seek-preview-title"></span></div>
       </div>
     </div>
     <div class="controls">
@@ -98,6 +99,8 @@ export const html = `
         <button id="fullscreen" type="button" title="Fullscreen" aria-label="Fullscreen"></button>
       </div>
     </div>
+   </div>
+  </div>
   </div>
 </div>
 `
@@ -258,12 +261,17 @@ canvas[data-cursor="rotate"] {
 }
 .toolbar {
   pointer-events: auto;
+  display: grid;
+  grid-template-rows: 1fr;
+  padding: 0 0.7em 0.5em;
+  transition: opacity 0.15s ease, grid-template-rows 0.15s ease;
+  color: #fff;
+}
+.toolbar-inner {
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 0.1em;
-  padding: 0 0.7em 0.5em;
-  transition: opacity 0.15s ease;
-  color: #fff;
 }
 /* The toolbar and the corner buttons show only while the pointer is over the picture, playing or
    paused. Not :focus-within: a clicked button or range keeps focus after the pointer leaves, and
@@ -274,6 +282,14 @@ canvas[data-cursor="rotate"] {
   .auto-hide {
     opacity: 0;
     pointer-events: none;
+  }
+  /* The toolbar gives up its height as well as its opacity, so that the account's sentence above it
+     comes down to take its place instead of hanging where the bar was. */
+  .toolbar.auto-hide {
+    grid-template-rows: 0fr;
+  }
+  .toolbar.auto-hide .toolbar-inner {
+    overflow: hidden;
   }
 }
 /* A compound class selector (0,2,0) so this reliably beats the plain .toolbar rule above (0,1,0)
@@ -318,11 +334,14 @@ canvas[data-cursor="rotate"] {
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.35);
   transition: height 0.1s ease;
 }
-/* Only the segment under the pointer grows, as on the video sites: it is the one that would be
-   jumped to. Reaching the bar by keyboard grows them all, since none is pointed at. */
-.seek-segment.hovered,
+/* Two levels, as on the video sites: the whole bar thickens once the pointer is over it, and the
+   segment under the pointer thickens a little more — it is the one that would be jumped to. */
+.seek-track:hover .seek-segment,
 .seek-track:has(:focus-visible) .seek-segment {
   height: 5px;
+}
+.seek-track:hover .seek-segment.hovered {
+  height: 7px;
 }
 /* Filled up to the pointer while it is over the bar, lighter than what has played. */
 .seek-hover,
@@ -465,7 +484,7 @@ canvas[data-cursor="rotate"] {
 }
 .seek-preview-time {
   flex: 0 0 auto;
-  font-weight: 600;
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
 }
 .seek-preview-title {
@@ -486,12 +505,16 @@ canvas[data-cursor="rotate"] {
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
-  font-size: 28px;
-  line-height: 64px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
   opacity: 0;
   z-index: 3;
+}
+.playback-flash svg {
+  width: 34px;
+  height: 34px;
 }
 .playback-flash.flashing {
   animation: playback-flash 0.6s ease-out;
@@ -526,6 +549,14 @@ canvas[data-cursor="rotate"] {
 .stage:has(:focus-visible) .auto-hide {
   opacity: 1;
   pointer-events: auto;
+}
+.stage:hover .toolbar.auto-hide,
+.stage:has(:focus-visible) .toolbar.auto-hide {
+  grid-template-rows: 1fr;
+}
+.stage:hover .toolbar.auto-hide .toolbar-inner,
+.stage:has(:focus-visible) .toolbar.auto-hide .toolbar-inner {
+  overflow: visible;
 }
 .issues {
   position: absolute;
@@ -614,11 +645,6 @@ canvas[data-cursor="rotate"] {
   background: rgba(0, 0, 0, 0.22);
   color: rgba(255, 255, 255, 0.9);
   transition: opacity 0.15s ease, background-color 0.15s ease;
-}
-.corner-buttons button:hover,
-.corner-buttons button:focus-visible {
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
 }
 .corner-buttons button[aria-pressed="true"] {
   outline: 2px solid #39f;
@@ -719,7 +745,7 @@ canvas[data-cursor="rotate"] {
   min-width: 0;
 }
 .controls-right {
-  padding: 0 0.3em;
+  padding: 0.25em 0.3em;
   border-radius: 1.3em;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(4px);
@@ -729,11 +755,11 @@ canvas[data-cursor="rotate"] {
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  min-width: 2.4em;
-  height: 2.6em;
+  min-width: 2.1em;
+  height: 2.1em;
   padding: 0 0.3em;
   border: none;
-  border-radius: 50%;
+  border-radius: 1.05em;
   cursor: pointer;
   font-size: 1em;
   line-height: 1;
@@ -742,13 +768,21 @@ canvas[data-cursor="rotate"] {
   transition: background-color 0.15s ease;
 }
 .controls .round {
+  min-width: 2.6em;
+  height: 2.6em;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(4px);
 }
+/* One hover for every button, on whatever it stands on: a veil a little lighter than the shape it is
+   laid over, kept within it — the pill's buttons have a little padding of their own for it to fill. */
 .controls button:hover,
-.controls button:focus-visible {
-  background: rgba(255, 255, 255, 0.2);
+.controls button:focus-visible,
+.time-pill.switchable:hover,
+.time-pill.switchable:focus-visible,
+.corner-buttons button:hover,
+.corner-buttons button:focus-visible {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2));
   color: #fff;
 }
 /* A toggle that is on says so by its glyph, solid where it was an outline — see PlayerIcons. */
@@ -788,10 +822,6 @@ canvas[data-cursor="rotate"] {
 }
 .time-pill.switchable {
   cursor: pointer;
-}
-.time-pill.switchable:hover,
-.time-pill.switchable:focus-visible {
-  background: rgba(0, 0, 0, 0.65);
 }
 .time-label {
   text-align: center;

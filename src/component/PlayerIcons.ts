@@ -32,7 +32,9 @@ export class PlayerIcons {
   static readonly MAP_OFF = PlayerIcons.outline(`${PlayerIcons.PIN}${PlayerIcons.PIN_HOLE}`)
   static readonly MAP_ON = PlayerIcons.solid(`${PlayerIcons.PIN}${PlayerIcons.PIN_HOLE}`)
 
-  static readonly PLAY = PlayerIcons.svg("M8 5v14l11-7z")
+  /** The triangle sits a little left of where its box would centre it: its mass is at the wide
+   * end, and a triangle centred by its box looks pushed to the right. */
+  static readonly PLAY = PlayerIcons.svg("M7.4 5v14l11-7z")
   static readonly PAUSE = PlayerIcons.svg("M6 5h4v14H6zM14 5h4v14h-4z")
   static readonly VOLUME = PlayerIcons.svg("M2 9.5v5h3.5l4.5 4.5V5L5.5 9.5H2zm12.5 2.5A4 4 0 0 0 12.5 8.5v7A4 4 0 0 0 14.5 12zM12.5 4.2v2.1a6.5 6.5 0 0 1 0 11.4v2.1a8.6 8.6 0 0 0 0-15.6z")
   /** The speaker drawn smaller and to the left, so that the cross has a place of its own. */
