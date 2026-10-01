@@ -1034,11 +1034,19 @@ canvas[data-cursor="rotate"] {
   opacity: 1;
 }
 /* Unfolded by hovering ONLY where there is a hover. On a touch screen the first tap on a control whose
-   :hover rule changes the page is taken for the hover and does nothing else — which is the mute button
-   asking for two taps, the first of them unfolding a slider nobody wanted. There the slider stays
-   folded, and a tap is the click it is: a phone has its own volume keys. */
+   :hover rule changes the page is taken for the hover and does nothing else — which was the mute button
+   asking for two taps. There the slider is unfolded by the controls being shown at all (a touch brought
+   them), and the tap on the button is the click it is. */
 @media (hover: hover) {
   .volume:hover input[type="range"] {
+    width: 4.5em;
+    margin: 0 0.6em 0 0.3em;
+    opacity: 1;
+  }
+}
+@media (hover: none) {
+  .stage.touched .volume input[type="range"],
+  .stage.paused:not(.quiet) .volume input[type="range"] {
     width: 4.5em;
     margin: 0 0.6em 0 0.3em;
     opacity: 1;

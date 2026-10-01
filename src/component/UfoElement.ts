@@ -1957,7 +1957,11 @@ export class UfoElement extends HTMLElement {
     this.stageElement.classList.toggle("paused", !isPlaying)
     // Playing begins with the controls in sight, and their few seconds start there. Only when it
     // begins: this runs on every tick, and would keep them there for ever.
-    if (isPlaying !== this.wasPlaying && isPlaying && this.hoverless && !this.quietControlsValue) this.revealControls()
+    // Not at the start of a recording that began quietly (see quietControls) — unless a touch has
+    // already brought them: they were shown while nothing played, so no timer is running, and only
+    // playing starts the few seconds that take them away again. Without this they stayed for ever.
+    if (isPlaying !== this.wasPlaying && isPlaying && this.hoverless
+      && (!this.quietControlsValue || this.stageElement.classList.contains("touched"))) this.revealControls()
     this.wasPlaying = isPlaying
     UfoElement.setIcon(this.playPauseButton, isPlaying ? PlayerIcons.PAUSE : PlayerIcons.PLAY)
     // Nothing to play with zero observation duration (no declared duration and nothing recorded
