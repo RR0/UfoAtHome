@@ -287,19 +287,21 @@ if (excerpts.length > 0) {
       and its bodies inline or in a file at <code>url</code>. A account whose observer said what
       it was is drawn in the round, as they said; one that says nothing in metres is drawn as the
       angles it states. The player offers it and each analyst's interpretation, one at a time.</p>
-    <pre data-json="none"><code>"interpretation": {
-  "title": "A craft standing on its legs",
-  "bodies": [{
-    "id": "craft",
-    "explains": ["ufo-1"],
-    "model": { "id": "ellipsoid" },
-    "track": [
-      { "t": 52000, "eastM": -571.6, "northM": -965.5, "onGround": true,
-        "sizeM": { "widthM": 3.36, "lengthM": 3.36, "heightM": 1.73 },
-        "appearance": { "color": "#e8e6df", "albedo": 0.7 } },
-      { "t": 83000, "azimuthDeg": 195.9, "altitudeDeg": 4.1, "distanceM": 44 }
-    ]
-  }]
+    <pre data-json=""><code>{
+  "interpretation": {
+    "title": "A craft standing on its legs",
+    "bodies": [{
+      "id": "craft",
+      "explains": ["ufo-1"],
+      "model": { "id": "ellipsoid" },
+      "track": [
+        { "t": 52000, "eastM": -571.6, "northM": -965.5, "onGround": true,
+          "sizeM": { "widthM": 3.36, "lengthM": 3.36, "heightM": 1.73 },
+          "appearance": { "color": "#e8e6df", "albedo": 0.7 } },
+        { "t": 83000, "azimuthDeg": 195.9, "altitudeDeg": 4.1, "distanceM": 44 }
+      ]
+    }]
+  }
 }</code></pre>
     <div class="table-scroll">
     <table>
@@ -397,10 +399,12 @@ if (excerpts.length > 0) {
 
     <h2>Where each value comes from</h2>
     <p>Any value in a recording can be written bare, or wrapped with where it came from:</p>
-    <pre data-json="none"><code>"durationSeconds": {
-  "value": 15,
-  "basis": "derived",
-  "rationale": "13 to 18 s in the investigator's synthesis; the middle taken"
+    <pre data-json=""><code>{
+  "durationSeconds": {
+    "value": 15,
+    "basis": "derived",
+    "rationale": "13 to 18 s in the investigator's synthesis; the middle taken"
+  }
 }</code></pre>
     <p><code>basis</code> is <code>stated</code> (the observer said it, and what a bare value
       means), <code>derived</code> (worked out from what they said plus something checkable: a
@@ -663,19 +667,21 @@ if (excerpts.length > 0) {
       compte rendu dont l'observateur a dit ce que c'était se dessine en volume, comme il l'a dit ;
       celui qui ne dit rien en mètres se dessine avec les angles qu'il énonce. Le lecteur le
       propose, ainsi que chaque interprétation d'analyste, une à la fois.</p>
-    <pre data-json="none"><code>"interpretation": {
-  "title": "Un engin posé sur ses pieds",
-  "bodies": [{
-    "id": "craft",
-    "explains": ["ufo-1"],
-    "model": { "id": "ellipsoid" },
-    "track": [
-      { "t": 52000, "eastM": -571.6, "northM": -965.5, "onGround": true,
-        "sizeM": { "widthM": 3.36, "lengthM": 3.36, "heightM": 1.73 },
-        "appearance": { "color": "#e8e6df", "albedo": 0.7 } },
-      { "t": 83000, "azimuthDeg": 195.9, "altitudeDeg": 4.1, "distanceM": 44 }
-    ]
-  }]
+    <pre data-json=""><code>{
+  "interpretation": {
+    "title": "Un engin posé sur ses pieds",
+    "bodies": [{
+      "id": "craft",
+      "explains": ["ufo-1"],
+      "model": { "id": "ellipsoid" },
+      "track": [
+        { "t": 52000, "eastM": -571.6, "northM": -965.5, "onGround": true,
+          "sizeM": { "widthM": 3.36, "lengthM": 3.36, "heightM": 1.73 },
+          "appearance": { "color": "#e8e6df", "albedo": 0.7 } },
+        { "t": 83000, "azimuthDeg": 195.9, "altitudeDeg": 4.1, "distanceM": 44 }
+      ]
+    }]
+  }
 }</code></pre>
     <div class="table-scroll">
     <table>
@@ -774,10 +780,12 @@ if (excerpts.length > 0) {
 
     <h2>D'où vient chaque valeur</h2>
     <p>Toute valeur d'un enregistrement peut s'écrire nue, ou enveloppée de sa provenance :</p>
-    <pre data-json="none"><code>"durationSeconds": {
-  "value": 15,
-  "basis": "derived",
-  "rationale": "13 à 18 s dans la synthèse de l'enquêteur ; le milieu retenu"
+    <pre data-json=""><code>{
+  "durationSeconds": {
+    "value": 15,
+    "basis": "derived",
+    "rationale": "13 à 18 s dans la synthèse de l'enquêteur ; le milieu retenu"
+  }
 }</code></pre>
     <p><code>basis</code> vaut <code>stated</code> (l'observateur l'a dit, et c'est ce que signifie
       une valeur nue), <code>derived</code> (déduit de ce qu'il a dit et de quelque chose de
@@ -1036,19 +1044,21 @@ if (excerpts.length > 0) {
       y sus cuerpos en línea o en un archivo en <code>url</code>. Un relato cuyo observador dijo lo que
       era se dibuja en volumen, como lo dijo; uno que no dice nada en metros se dibuja como los
       ángulos que expresa. El reproductor lo ofrece, junto con la interpretación de cada analista, una cada vez.</p>
-    <pre data-json="none"><code>"interpretation": {
-  "title": "Una nave posada sobre sus patas",
-  "bodies": [{
-    "id": "craft",
-    "explains": ["ufo-1"],
-    "model": { "id": "ellipsoid" },
-    "track": [
-      { "t": 52000, "eastM": -571.6, "northM": -965.5, "onGround": true,
-        "sizeM": { "widthM": 3.36, "lengthM": 3.36, "heightM": 1.73 },
-        "appearance": { "color": "#e8e6df", "albedo": 0.7 } },
-      { "t": 83000, "azimuthDeg": 195.9, "altitudeDeg": 4.1, "distanceM": 44 }
-    ]
-  }]
+    <pre data-json=""><code>{
+  "interpretation": {
+    "title": "Una nave posada sobre sus patas",
+    "bodies": [{
+      "id": "craft",
+      "explains": ["ufo-1"],
+      "model": { "id": "ellipsoid" },
+      "track": [
+        { "t": 52000, "eastM": -571.6, "northM": -965.5, "onGround": true,
+          "sizeM": { "widthM": 3.36, "lengthM": 3.36, "heightM": 1.73 },
+          "appearance": { "color": "#e8e6df", "albedo": 0.7 } },
+        { "t": 83000, "azimuthDeg": 195.9, "altitudeDeg": 4.1, "distanceM": 44 }
+      ]
+    }]
+  }
 }</code></pre>
     <div class="table-scroll">
     <table>
@@ -1146,10 +1156,12 @@ if (excerpts.length > 0) {
 
     <h2>De dónde viene cada valor</h2>
     <p>Cualquier valor de una grabación puede escribirse tal cual, o envuelto con su procedencia:</p>
-    <pre data-json="none"><code>"durationSeconds": {
-  "value": 15,
-  "basis": "derived",
-  "rationale": "De 13 a 18 s en la síntesis del investigador; se toma el punto medio"
+    <pre data-json=""><code>{
+  "durationSeconds": {
+    "value": 15,
+    "basis": "derived",
+    "rationale": "De 13 a 18 s en la síntesis del investigador; se toma el punto medio"
+  }
 }</code></pre>
     <p><code>basis</code> es <code>stated</code> (lo dijo el observador, y es lo que significa un valor
       sin envolver), <code>derived</code> (deducido de lo que dijo más algo comprobable: la anchura de una
@@ -1407,19 +1419,21 @@ if (excerpts.length > 0) {
       e i suoi corpi in linea o in un file a <code>url</code>. Un resoconto il cui osservatore ha detto che cosa
       fosse viene disegnato a tutto tondo, come l'ha detto; uno che non dice nulla in metri viene disegnato come gli
       angoli che esprime. Il lettore lo propone, insieme all'interpretazione di ciascun analista, una alla volta.</p>
-    <pre data-json="none"><code>"interpretation": {
-  "title": "Un velivolo posato sulle sue zampe",
-  "bodies": [{
-    "id": "craft",
-    "explains": ["ufo-1"],
-    "model": { "id": "ellipsoid" },
-    "track": [
-      { "t": 52000, "eastM": -571.6, "northM": -965.5, "onGround": true,
-        "sizeM": { "widthM": 3.36, "lengthM": 3.36, "heightM": 1.73 },
-        "appearance": { "color": "#e8e6df", "albedo": 0.7 } },
-      { "t": 83000, "azimuthDeg": 195.9, "altitudeDeg": 4.1, "distanceM": 44 }
-    ]
-  }]
+    <pre data-json=""><code>{
+  "interpretation": {
+    "title": "Un velivolo posato sulle sue zampe",
+    "bodies": [{
+      "id": "craft",
+      "explains": ["ufo-1"],
+      "model": { "id": "ellipsoid" },
+      "track": [
+        { "t": 52000, "eastM": -571.6, "northM": -965.5, "onGround": true,
+          "sizeM": { "widthM": 3.36, "lengthM": 3.36, "heightM": 1.73 },
+          "appearance": { "color": "#e8e6df", "albedo": 0.7 } },
+        { "t": 83000, "azimuthDeg": 195.9, "altitudeDeg": 4.1, "distanceM": 44 }
+      ]
+    }]
+  }
 }</code></pre>
     <div class="table-scroll">
     <table>
@@ -1517,10 +1531,12 @@ if (excerpts.length > 0) {
 
     <h2>Da dove viene ogni valore</h2>
     <p>Qualsiasi valore di una registrazione può essere scritto così com'è, o avvolto con la sua provenienza:</p>
-    <pre data-json="none"><code>"durationSeconds": {
-  "value": 15,
-  "basis": "derived",
-  "rationale": "Da 13 a 18 s nella sintesi dell'inquirente; preso il valore medio"
+    <pre data-json=""><code>{
+  "durationSeconds": {
+    "value": 15,
+    "basis": "derived",
+    "rationale": "Da 13 a 18 s nella sintesi dell'inquirente; preso il valore medio"
+  }
 }</code></pre>
     <p><code>basis</code> è <code>stated</code> (l'ha detto l'osservatore, ed è ciò che significa un valore
       semplice), <code>derived</code> (ricavato da ciò che ha detto più qualcosa di verificabile: la larghezza di una
