@@ -150,6 +150,9 @@ class SiteBuilder {
     // The re-entries on record, one file per year, which the editor's sky line reads the year of a
     // recording from (see ReentryArchive, and `npm run build:reentries`).
     await cp(join(this.root, "public", "reentries"), join(this.out, "reentries"), { recursive: true })
+    // The fireballs the Global Meteor Network recorded, one file per month, which a scene draws in a
+    // recording since December 2018 (see FireballArchive, and `npm run build:fireballs`).
+    await cp(join(this.root, "public", "fireballs"), join(this.out, "fireballs"), { recursive: true })
 
     await mkdir(join(this.out, "lib"), { recursive: true })
     for (const dir of this.bundleDirs) {
@@ -338,6 +341,11 @@ ${retired}
 # The re-entries on record: a day of cache, like the orbital elements, since a rebuild from a newer
 # CORDS export rewrites the latest years under the same names.
 /reentries/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
+
+# The recorded fireballs: fetched by scenes embedded anywhere, a day of cache for the same reason.
+/fireballs/*
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
 `, "utf8")

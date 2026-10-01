@@ -2,6 +2,9 @@ import type { SceneElement } from "./SceneElement.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { HostLocale } from "../i18n/locale.js"
 
+/** Who recorded the fireballs a scene draws — see FireballArchive. */
+const FIREBALL_CREDIT = "Global Meteor Network"
+const FIREBALL_CREDIT_URL = "https://globalmeteornetwork.org/data/"
 /**
  * The thunder recording every scene carries, bundled whether or not a storm is drawn — see
  * CREDITS.md.
@@ -65,6 +68,13 @@ export class SceneCredits {
     if (satellites.status === "ready" && satellites.credit) {
       const item = document.createElement("li")
       item.appendChild(SceneCredits.link(satellites.creditUrl ?? "", satellites.credit))
+      add(item)
+    }
+    // The network whose cameras recorded a fireball this sky draws, when it draws one: its data is
+    // given on condition of being credited (CC BY 4.0).
+    if (scene.fireballState.status === "ready" && scene.fireballState.records.length > 0) {
+      const item = document.createElement("li")
+      item.append(SceneCredits.link(FIREBALL_CREDIT_URL, FIREBALL_CREDIT), document.createTextNode(" (CC BY 4.0)"))
       add(item)
     }
     const thunder = SceneCredits.text(`${THUNDER_CREDIT_TEXT} (`)

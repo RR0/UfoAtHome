@@ -300,6 +300,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "fireball",
+          src: "/demo-data/sky-test-fireball.json",
+          title: { en: "A recorded fireball", fr: "Un bolide enregistré", es: "Un bólido registrado", it: "Un bolide registrato" },
+          blurb: {
+            en: "Edinburgh, 27 December 2025 at 03:16: a bolide 13 cameras of the Global Meteor Network triangulated, found in its archive and drawn from here as it burned.",
+            fr: "Édimbourg, 27 décembre 2025 à 3 h 16 : un bolide que 13 caméras du Global Meteor Network ont triangulé, trouvé dans son archive et dessiné d'ici tel qu'il a brûlé.",
+            es: "Edimburgo, 27 de diciembre de 2025 a las 3:16: un bólido que 13 cámaras de la Global Meteor Network triangularon, encontrado en su archivo y dibujado desde aquí tal como ardió.",
+            it: "Edimburgo, 27 dicembre 2025 alle 3:16: un bolide che 13 telecamere della Global Meteor Network hanno triangolato, trovato nel suo archivio e disegnato da qui come è bruciato."
+          }
+        },
+        {
           id: "reentry",
           src: "/demo-data/sky-test-reentry.json",
           title: { en: "A re-entry", fr: "Une rentrée atmosphérique", es: "Una reentrada", it: "Un rientro atmosferico" },

@@ -545,6 +545,18 @@ export interface SightingEditorMessages extends SightingLabels {
   skyReentryPredicted: string
   /** A decay day from the satellite catalogue: {name}, {date}; neither the hour nor the place known. */
   skyReentryDay: string
+  /**
+   * The fireballs a camera network recorded during the observation that were striking from here
+   * (see FireballArchive): {count} of them, and the brightest — {magnitude} at its peak as seen from
+   * here, {time} on the observer's clock, {altitude} degrees up {bearing}, {distance} km away,
+   * triangulated by {stations} stations.
+   */
+  skyFireballs: string
+  /** The same for exactly one. */
+  skyFireballsOne: string
+  /** Seeks to the brightest recorded fireball the timeline reaches, at its peak, and turns the
+   * observer to it. The next press takes the next brightest. */
+  showFireball: string
   /** Seeks to the brightest satellite pass the timeline reaches, at its peak, and turns the observer
    * to it. The next press takes the next brightest. */
   showSatellite: string

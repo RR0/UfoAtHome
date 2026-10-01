@@ -131,6 +131,10 @@ export class ContextPage implements SitePage {
       few chronicled dates for 1054 and 1181; each one says which.</p>
     <p><strong>Meteor showers</strong> come with their radiant and their hourly rate for that night,
       over the sporadic background that never stops.</p>
+    <p><strong>Recorded fireballs</strong> are events, not rates: since December 2018 the Global
+      Meteor Network's cameras have triangulated where each bright one began and ended and how bright
+      it peaked, and a recording of that date draws every one that burned during it, from where the
+      observer stood, as bright as its distance makes it.</p>
     <p><strong>Satellites</strong> get the harder question, because being lit is not the same as
       being seen: the Earth's shadow is computed for the date and hour to say whether one could
       have caught the Sun at all, and how many objects were in orbit on that date is known, and
@@ -317,6 +321,11 @@ export class ContextPage implements SitePage {
       qu'il en est.</p>
     <p>Les <strong>pluies de météores</strong> ont leur radiant et leur taux horaire pour cette
       nuit-là, au-dessus du fond sporadique qui, lui, ne s'arrête jamais.</p>
+    <p>Les <strong>bolides enregistrés</strong> sont des événements, pas des taux : depuis décembre
+      2018, les caméras du Global Meteor Network triangulent où chaque bolide brillant a commencé et
+      fini et quel éclat il a atteint, et un enregistrement de cette date dessine chacun de ceux qui
+      ont brûlé pendant qu'il dure, depuis la place de l'observateur, aussi brillant que sa distance
+      le permet.</p>
     <p>Les <strong>satellites</strong> reçoivent la question la plus difficile, car être éclairé
       n'est pas être vu : l'ombre de la Terre est calculée pour la date et l'heure afin de dire si
       l'un d'eux pouvait seulement recevoir le Soleil, et le nombre d'objets en orbite à cette
@@ -511,6 +520,10 @@ export class ContextPage implements SitePage {
       una dice cuál es su caso.</p>
     <p><strong>Las lluvias de meteoros</strong> llegan con su radiante y su tasa horaria de esa noche,
       sobre el fondo esporádico que nunca se detiene.</p>
+    <p><strong>Los bólidos registrados</strong> son sucesos, no tasas: desde diciembre de 2018 las
+      cámaras de la Global Meteor Network triangulan dónde empezó y terminó cada bólido brillante y qué
+      brillo alcanzó, y una grabación de esa fecha dibuja cada uno de los que ardieron mientras dura,
+      desde el lugar del observador, tan brillante como lo permite su distancia.</p>
     <p><strong>Los satélites</strong> reciben la pregunta más difícil, porque estar iluminado no es lo
       mismo que ser visto: la sombra de la Tierra se calcula para la fecha y la hora para decir si
       alguno podía siquiera recibir el Sol, y cuántos objetos había en órbita en esa fecha se sabe, y
@@ -705,6 +718,10 @@ export class ContextPage implements SitePage {
       suo caso.</p>
     <p><strong>Gli sciami meteorici</strong> arrivano con il loro radiante e il loro tasso orario per
       quella notte, sopra il fondo sporadico che non si ferma mai.</p>
+    <p><strong>I bolidi registrati</strong> sono eventi, non tassi: dal dicembre 2018 le telecamere
+      della Global Meteor Network triangolano dove ogni bolide luminoso è iniziato e finito e quale
+      luminosità ha raggiunto, e una registrazione di quella data disegna ciascuno di quelli che sono
+      bruciati mentre dura, dal punto dell'osservatore, luminoso quanto la sua distanza consente.</p>
     <p><strong>I satelliti</strong> ricevono la domanda più difficile, perché essere illuminati non è
       la stessa cosa che essere visti: l'ombra della Terra è calcolata per la data e l'ora per dire se
       uno di essi poteva anche solo ricevere il Sole, e quanti oggetti fossero in orbita in quella

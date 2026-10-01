@@ -71,6 +71,9 @@ import type { PlacedPhenomenon } from "../render3d/PhenomenonSystem.js"
 import { Vector3 } from "three"
 import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
 import { ReentrySighting } from "../engine/interpretation/Reentry.js"
+import type { ReentryJson } from "../engine/interpretation/Reentry.js"
+import { FireballArchive } from "../engine/astronomy/FireballArchive.js"
+import type { FireballRecord } from "../engine/astronomy/FireballArchive.js"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
 import type { ConfrontationReading } from "../engine/interpretation/BodyConfrontation.js"
@@ -122,6 +125,8 @@ const SATELLITE_TOOLTIP = "{name} — satellite, mag {mag}, {height} km up"
 
 /** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */
 export const SATELLITES_CHANGE_EVENT = "satellites-change"
+/** Fired by a scene when the fireballs on record for its recording have arrived — see fireballState. */
+export const FIREBALLS_CHANGE_EVENT = "fireballs-change"
 /** Fired whenever what the interpretation on show says against the account changes — see
  * SceneElement.confrontation. */
 export const CONFRONTATION_EVENT = "rr0-confrontation"
@@ -319,6 +324,11 @@ export class SceneElement extends HTMLElement {
   private satelliteStatus: SatelliteStatus = "none"
   private satellites?: { snapshot: TleSnapshot; passes: SatellitePasses }
   private satellitePassesMemo?: { key: string; passes: SatellitePass[] }
+  /** One archive of recorded fireballs for every scene on the page — see FireballArchive. */
+  private static readonly fireballArchive = new FireballArchive()
+  /** The fireballs on record during this recording, for the start and span they were asked for:
+   * `records` once they came (empty for none), absent while loading or when nothing could be asked. */
+  private fireballs?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; records?: FireballRecord[]; reentries: ReentryJson[] }
   /** How faint the catalogue now loaded goes — what ensureStarsDeepEnough compares this recording's
    * own optics against. Zero until the first load, which is "nothing loaded" rather than a depth. */
   private starCatalogDepth = 0
@@ -1321,8 +1331,10 @@ export class SceneElement extends HTMLElement {
     this.pushSatellitesAt(startDate, t, observer)
     // The re-entries the interpretation on show claims, every instant too: a piece crosses degrees
     // a second. Placed on the Earth, so seen from the observer's real place, not the scene's origin.
-    this.sceneRenderer.setReentries(ReentrySighting.viewsAt(this.interpretationShown?.reentries ?? [], t,
-      { lat, lng, heightM: observer.elevationM }))
+    // And the fireballs a camera network recorded during it, drawn the same way at their real instant.
+    this.ensureFireballs(startDate)
+    const burning = [...(this.interpretationShown?.reentries ?? []), ...(this.fireballs?.reentries ?? [])]
+    this.sceneRenderer.setReentries(burning.length === 0 ? [] : ReentrySighting.viewsAt(burning, t, { lat, lng, heightM: observer.elevationM }))
 
     // Everything above moves with the instant and costs almost nothing; the sky below costs about
     // 8 ms to restate, and an instant that only carries an aeroplane a few pixels further has no
@@ -1422,6 +1434,41 @@ export class SceneElement extends HTMLElement {
       })
     }
     this.sceneRenderer.setSatellites(drawn)
+  }
+
+  /**
+   * Fetches the fireballs on record that began during this recording, once per start and span — see
+   * FireballArchive. Nothing is asked for a date before the archive begins, which is nearly every
+   * recording here.
+   */
+  private ensureFireballs(startDate: Date | undefined): void {
+    const sighting = this.ufoElement.sighting
+    const spanMs = Math.max((sighting.event.durationSeconds ?? 0) * 1000, this.ufoElement.seekableDuration)
+    const startMs = startDate?.getTime()
+    const key = startMs === undefined ? "" : `${startMs}+${spanMs}`
+    if (this.fireballs?.key === key) return
+    if (startMs === undefined || !FireballArchive.mayCover(startMs + spanMs)) {
+      this.fireballs = { key, status: "outside", reentries: [] }
+      return
+    }
+    const asked: NonNullable<SceneElement["fireballs"]> = { key, status: "loading", reentries: [] }
+    this.fireballs = asked
+    void SceneElement.fireballArchive.between(startMs, startMs + spanMs).then(records => {
+      asked.status = records ? "ready" : "unavailable"
+      asked.records = records ?? []
+      asked.reentries = asked.records.map(record => FireballArchive.asReentry(record, startMs))
+      if (this.fireballs !== asked || !this.isConnected) return
+      this.dispatchEvent(new CustomEvent(FIREBALLS_CHANGE_EVENT))
+      if (asked.reentries.length > 0) this.updateAstronomy(this.lastTimeMs)
+    })
+  }
+
+  /**
+   * What is known of the fireballs recorded during this recording, for a readout: `outside` the
+   * archive's dates, still `loading`, `unavailable`, or `ready` with the records (possibly none).
+   */
+  get fireballState(): { status: "none" | "loading" | "ready" | "outside" | "unavailable"; records: readonly FireballRecord[] } {
+    return { status: this.fireballs?.status ?? "none", records: this.fireballs?.records ?? [] }
   }
 
   /**

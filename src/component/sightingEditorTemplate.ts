@@ -336,6 +336,7 @@ export const html = `
     <button id="show-comet" type="button" class="icon-btn" title="Show me the comet" aria-label="Show me the comet" hidden>☄</button>
     <button id="show-nova" type="button" class="icon-btn" title="Show me the new star" aria-label="Show me the new star" hidden>🌟</button>
     <button id="show-satellite" type="button" class="icon-btn" title="Show me a satellite" aria-label="Show me a satellite" hidden>🛰</button>
+    <button id="show-fireball" type="button" class="icon-btn" title="Show me the fireball" aria-label="Show me the fireball" hidden>✴</button>
   </div>
   <!-- The weather in three parts — what falls (first, and open on arrival: the user's own order), the
        clouds, and what blows — as a strip of handles

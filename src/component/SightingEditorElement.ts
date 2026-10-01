@@ -17,7 +17,7 @@ import type { SummaryEntry, SummaryGroup } from "./SightingSummary.js"
 import { UfoElement, registerUfo, OBSERVER_MAP_ATTRIBUTE } from "./UfoElement.js"
 import { TimelineMarks } from "./TimelineMarks.js"
 import type { TimelineMark } from "./TimelineMarks.js"
-import { SceneElement, registerScene, SCENE_ELEMENT_NAME, SATELLITES_CHANGE_EVENT } from "./SceneElement.js"
+import { SceneElement, registerScene, SCENE_ELEMENT_NAME, SATELLITES_CHANGE_EVENT, FIREBALLS_CHANGE_EVENT } from "./SceneElement.js"
 import type { SatellitePass } from "../engine/astronomy/SatellitePasses.js"
 import { Recorder } from "../engine/record/Recorder.js"
 import { RafSamplingClock } from "../engine/record/SamplingClock.js"
@@ -34,6 +34,8 @@ import type { OutburstAppearance } from "../engine/astronomy/Novae.js"
 import { Sporadics } from "../engine/astronomy/Sporadics.js"
 import { Satellites } from "../engine/astronomy/Satellites.js"
 import { ReentryArchive } from "../engine/astronomy/ReentryArchive.js"
+import { FireballArchive } from "../engine/astronomy/FireballArchive.js"
+import type { FireballSighting } from "../engine/astronomy/FireballArchive.js"
 import type { ReentryCandidate } from "../engine/astronomy/ReentryArchive.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
@@ -445,6 +447,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly showCometButton: HTMLButtonElement
   private readonly showNovaButton: HTMLButtonElement
   private readonly showSatelliteButton: HTMLButtonElement
+  private readonly showFireballButton: HTMLButtonElement
   private readonly weatherSourceLink: HTMLAnchorElement
   /** Every field the weather record itself provides — the ones locked while it does, and the ones
    * whose edits write a keyframe while it doesn't. */
@@ -1094,6 +1097,7 @@ export class SightingEditorElement extends HTMLElement {
     this.showCometButton = this.shadow.getElementById("show-comet") as HTMLButtonElement
     this.showNovaButton = this.shadow.getElementById("show-nova") as HTMLButtonElement
     this.showSatelliteButton = this.shadow.getElementById("show-satellite") as HTMLButtonElement
+    this.showFireballButton = this.shadow.getElementById("show-fireball") as HTMLButtonElement
     this.weatherSourceLink = this.shadow.getElementById("weather-source-link") as HTMLAnchorElement
     this.weatherFields = [
       this.cloudCoverInput,
@@ -1539,6 +1543,12 @@ export class SightingEditorElement extends HTMLElement {
     this.showCometButton.addEventListener("click", () => this.lookAtComet())
     this.showNovaButton.addEventListener("click", () => this.lookAtNova())
     this.showSatelliteButton.addEventListener("click", () => this.showNextSatellite())
+    this.showFireballButton.addEventListener("click", () => this.showNextFireball())
+    // The fireballs on record arrive after the line was first stated: the clause has news.
+    this.sceneElement.addEventListener(FIREBALLS_CHANGE_EVENT, () => {
+      this.skyCandidatesKey = undefined
+      this.refreshSkyCandidates()
+    })
     // The element sets arrive after the line was first stated, or turn out not to exist: either way
     // the satellite clause has something new to say.
     this.sceneElement.addEventListener(SATELLITES_CHANGE_EVENT, () => {
@@ -7095,7 +7105,7 @@ export class SightingEditorElement extends HTMLElement {
     const key = JSON.stringify([
       date?.getTime(), place?.lat, place?.lng, this.groundElevationM, sighting.instrumentId, sighting.exposureSeconds, sighting.lightPollution,
       resolveWeatherAt(sighting, 0), this.messages.skyLine, this.meteorRankFor,
-      this.sceneElement.satelliteState.status, this.satelliteSpanMs()
+      this.sceneElement.satelliteState.status, this.satelliteSpanMs(), this.sceneElement.fireballState.status
     ])
     if (key === this.skyCandidatesKey) return
     this.skyCandidatesKey = key
@@ -7104,6 +7114,7 @@ export class SightingEditorElement extends HTMLElement {
       this.showCometButton.hidden = true
       this.showNovaButton.hidden = true
       this.showSatelliteButton.hidden = true
+      this.showFireballButton.hidden = true
       this.skyCandidatesOutput.textContent = this.messages.skyLine.replace("{parts}", this.messages.skyUnknown)
       return
     }
@@ -7115,6 +7126,7 @@ export class SightingEditorElement extends HTMLElement {
       this.novaClause(date, observer),
       this.satelliteClause(date, observer),
       this.reentryClause(date, observer),
+      this.fireballClause(date, observer),
       this.opticsClause(date, observer),
       this.rainbowClause(date, observer),
       this.glowClause(date, observer)
@@ -7486,6 +7498,70 @@ export class SightingEditorElement extends HTMLElement {
 
   private satelliteRankFor?: string
   private satelliteRank = 0
+
+  /**
+   * The fireballs a camera network recorded during this observation that were striking from here —
+   * above the horizon and brighter than STRIKING_MAGNITUDE at their peak — brightest first. See
+   * FireballArchive; loaded by the scene, which draws them.
+   */
+  private strikingFireballs(date: Date, observer: { lat: number; lng: number; elevationM: number }): FireballSighting[] {
+    return this.sceneElement.fireballState.records
+      .map(record => FireballArchive.seenFrom(record, { lat: observer.lat, lng: observer.lng, heightM: observer.elevationM }))
+      .filter((seen): seen is FireballSighting => seen !== undefined && seen.magnitude <= FireballArchive.STRIKING_MAGNITUDE)
+      .filter(seen => seen.record.t >= date.getTime())
+      .sort((a, b) => a.magnitude - b.magnitude)
+  }
+
+  /** Where a fireball's peak falls on the timeline: its start, plus how far along it peaked. */
+  private fireballTimelineMs(seen: FireballSighting, date: Date): number {
+    const { record } = seen
+    const span = record.from[2] - record.to[2]
+    const f = Math.abs(span) < 1e-6 ? 0.5 : Math.min(1, Math.max(0, (record.from[2] - record.peakHeightKm) / span))
+    return record.t - date.getTime() + f * record.durationS * 1000
+  }
+
+  /**
+   * The fireballs on record during the observation — see strikingFireballs. Silent when there were
+   * none, or the archive does not reach that date: the network covers some skies and not others, so
+   * its silence is no statement.
+   */
+  private fireballClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
+    const seen = this.sceneElement.fireballState.status === "ready" ? this.strikingFireballs(date, observer) : []
+    this.showFireballButton.hidden = !seen.some(fireball => this.fireballTimelineMs(fireball, date) <= this.ufoElement.seekableDuration)
+    if (seen.length === 0) return undefined
+    const brightest = seen[0]
+    const template = seen.length === 1 ? this.messages.skyFireballsOne : this.messages.skyFireballs
+    return template
+      .replace("{count}", String(seen.length))
+      .replace("{magnitude}", brightest.magnitude.toLocaleString(this.showerLanguage(), { maximumFractionDigits: 1 }))
+      .replace("{time}", this.observerClock(new Date(brightest.record.t)))
+      .replace("{altitude}", String(Math.round(brightest.peak.altitudeDeg)))
+      .replace("{bearing}", this.naming.towards(brightest.peak.azimuthDeg))
+      .replace("{distance}", String(Math.round(brightest.peak.distanceKm / 10) * 10))
+      .replace("{stations}", String(brightest.record.stations ?? 2))
+  }
+
+  /** Seeks to the next brightest fireball the timeline reaches, at its peak, and turns the observer
+   * to it — the satellite button's behaviour. */
+  private showNextFireball(): void {
+    const sighting = this.ufoElement.sighting
+    const place = sighting.event.place?.[0]
+    const time = sighting.event.time
+    if (!place || place.lng === undefined || !time) return
+    const date = sightingTimeToDate(time, place.lng, sighting.event.utcOffsetHours)
+    if (!date) return
+    const reachable = this.strikingFireballs(date, this.observerAtStart())
+      .filter(fireball => this.fireballTimelineMs(fireball, date) <= this.ufoElement.seekableDuration)
+    if (reachable.length === 0) return
+    const fireball = reachable[this.fireballRank++ % reachable.length]
+    if (this.ufoElement.playbackState === "playing") this.ufoElement.togglePlayPause()
+    this.ufoElement.currentTime = this.fireballTimelineMs(fireball, date)
+    this.headingInput.value = String(Math.round(fireball.peak.azimuthDeg * 10) / 10)
+    this.pitchInput.value = String(Math.round(fireball.peak.altitudeDeg * 10) / 10)
+    this.updateObserver()
+  }
+
+  private fireballRank = 0
 
   /**
    * What ice crystals could have put beside the Sun or the Moon — see IceHalos.ts.
@@ -8117,6 +8193,8 @@ export class SightingEditorElement extends HTMLElement {
     this.showNovaButton.setAttribute("aria-label", messages.showNova)
     this.showSatelliteButton.title = messages.showSatellite
     this.showSatelliteButton.setAttribute("aria-label", messages.showSatellite)
+    this.showFireballButton.title = messages.showFireball
+    this.showFireballButton.setAttribute("aria-label", messages.showFireball)
     this.lookAtDecorButton.title = messages.lookAtDecor
     this.lookAtDecorButton.setAttribute("aria-label", messages.lookAtDecor)
     this.optionDecorObserver.textContent = messages.decorObserver

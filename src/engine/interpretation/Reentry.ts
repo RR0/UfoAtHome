@@ -132,7 +132,8 @@ export class ReentrySighting {
   static readonly DEFAULT_COLOR = "#ffb347"
   static readonly DEFAULT_TRAIN_S = 1.5
   /** How long a piece takes to brighten when it appears and to go out when it ends, ms: a burning
-   * piece flares and dies over a moment, not between two frames. */
+   * piece flares and dies over a moment, not between two frames. A quarter of its life when that is
+   * shorter. */
   static readonly FADE_MS = 600
   /** How finely the train follows the path, points per train. */
   private static readonly TRAIN_POINTS = 8
@@ -171,7 +172,9 @@ export class ReentrySighting {
         if (!at) return
         const head = ReentrySighting.seenFrom(observer, at)
         if (head.altitudeDeg < 0) return
-        const fade = Math.min(1, (t - fromT) / ReentrySighting.FADE_MS, (untilT - t) / ReentrySighting.FADE_MS)
+        // A quarter of its life at most, so a meteor burning one second still reaches its peak.
+        const fadeMs = Math.min(ReentrySighting.FADE_MS, (untilT - fromT) / 4)
+        const fade = fadeMs > 0 ? Math.min(1, (t - fromT) / fadeMs, (untilT - t) / fadeMs) : 1
         // A fraction of its light, as a magnitude: 2.5 log of the share. Floored so a piece at the
         // very instant it appears is merely too faint, not infinitely so.
         const fadeMagnitudes = -2.5 * Math.log10(Math.max(fade, 1e-3))
