@@ -192,7 +192,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       pointing at.</p>
     <p>The <q>©</q> button in its corner lists the credits of what it shows — the imagery under the
       ground and on the map, the models, the pictures of the place, the sounds. Inside
-      <code>&lt;rr0-sighting&gt;</code> the button is hidden: they are in its <q>?</q> panel.</p>
+      <code>&lt;rr0-sighting&gt;</code> the button is hidden: they are in its <q>i</q> panel.</p>
 
     <h2>Playback, on <code>ufoElement</code></h2>
     <p>Everything about replaying the recording lives one property down, on the playback layer —
@@ -264,7 +264,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       vous pointez.</p>
     <p>Le bouton <q>©</q> dans son coin liste les crédits de ce qu'il montre — l'imagerie du sol et
       de la carte, les modèles, les photos du lieu, les sons. Dans <code>&lt;rr0-sighting&gt;</code>,
-      ce bouton est masqué : ils sont dans son panneau <q>?</q>.</p>
+      ce bouton est masqué : ils sont dans son panneau <q>i</q>.</p>
 
     <h2>La lecture, sur <code>ufoElement</code></h2>
     <p>Tout ce qui rejoue l'enregistrement vit une propriété plus bas, sur la couche de lecture —
@@ -337,7 +337,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       señalas.</p>
     <p>El botón <q>©</q> de su esquina enumera los créditos de lo que muestra — las imágenes del
       suelo y del mapa, los modelos, las fotos del lugar, los sonidos. Dentro de
-      <code>&lt;rr0-sighting&gt;</code> el botón está oculto: están en su panel <q>?</q>.</p>
+      <code>&lt;rr0-sighting&gt;</code> el botón está oculto: están en su panel <q>i</q>.</p>
 
     <h2>La reproducción, en <code>ufoElement</code></h2>
     <p>Todo lo relativo a reproducir la grabación vive una propiedad más abajo, en la capa de reproducción —
@@ -409,7 +409,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       indicando.</p>
     <p>Il pulsante <q>©</q> nel suo angolo elenca i crediti di ciò che mostra — le immagini del
       suolo e della mappa, i modelli, le foto del luogo, i suoni. Dentro
-      <code>&lt;rr0-sighting&gt;</code> il pulsante è nascosto: sono nel suo pannello <q>?</q>.</p>
+      <code>&lt;rr0-sighting&gt;</code> il pulsante è nascosto: sono nel suo pannello <q>i</q>.</p>
 
     <h2>La riproduzione, su <code>ufoElement</code></h2>
     <p>Tutto ciò che riguarda la riproduzione della registrazione sta una proprietà più in basso, nel livello di riproduzione —
@@ -479,7 +479,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
 <section class="band">
   <div class="wrap prose-wide">
     <p>The default for a real sighting, one observer or several. It composes an
-      <code>&lt;rr0-scene&gt;</code> and adds the toolbar: who is testifying, and the <q>?</q> panel
+      <code>&lt;rr0-scene&gt;</code> and adds the toolbar: who is testifying, and the <q>i</q> panel
       with the observation's own metadata and its credits, and a share button: the link that replays it, and its embed lines.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
 &lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- a case, and all its observers --&gt;</code></pre>
@@ -491,7 +491,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>sightingData</code></td><td>property</td><td>One recording, set directly — for a page holding one in memory rather than at a URL</td></tr>
       <tr><td><code>scene</code></td><td>property (read)</td><td>The composed <code>&lt;rr0-scene&gt;</code>, and through <code>scene.ufoElement</code> the playback members</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>method (async)</td><td>What the attribute triggers</td></tr>
-      <tr><td><code>show-labels</code></td><td>attribute</td><td>The strip of the recording's own parameters under the picture. Off by default — and a reader can open or close it themselves from the <q>?</q> panel</td></tr>
+      <tr><td><code>show-labels</code></td><td>attribute</td><td>The strip of the recording's own parameters under the picture. Off by default — and a reader can open or close it themselves from the <q>i</q> panel</td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attribute</td><td>Passed down through the composed <code>&lt;rr0-scene&gt;</code> to the player that owns them</td></tr>
     </table>
     </div>
@@ -500,7 +500,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <p>Every observer's recording is fetched as soon as the list is known, so picking another one
       is immediate. The list names each by its <code>title</code>, else first names and last name,
       else <code>id</code>; one that names nobody is numbered by its place in the list.</p>
-    <p>The <q>?</q> panel opens as a popover, which Escape or a click outside closes (a click
+    <p>The <q>i</q> panel opens as a popover, which Escape or a click outside closes (a click
       outside only, on a browser without popovers). It states the case, the date, the place, the
       account and the tags; date, place and tags leave it while the <code>show-labels</code> strip
       already states them. The date is on the observer's own clock (<code>utcOffsetHours</code>, or
@@ -516,7 +516,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
   <div class="wrap prose-wide">
     <p>Le choix par défaut pour une observation réelle, à un observateur ou plusieurs. Il compose un
       <code>&lt;rr0-scene&gt;</code> et ajoute la barre d'outils : qui témoigne, et le panneau
-      <q>?</q> avec les métadonnées de l'observation et ses crédits, et un bouton de partage : le lien qui la rejoue, et ses lignes d'intégration.</p>
+      <q>i</q> avec les métadonnées de l'observation et ses crédits, et un bouton de partage : le lien qui la rejoue, et ses lignes d'intégration.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
 &lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un dossier, et tous ses observateurs --&gt;</code></pre>
     <div class="table-scroll">
@@ -527,7 +527,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>sightingData</code></td><td>propriété</td><td>Un enregistrement posé directement — pour une page qui en tient un en mémoire plutôt qu'à une URL</td></tr>
       <tr><td><code>scene</code></td><td>propriété (lecture)</td><td>Le <code>&lt;rr0-scene&gt;</code> composé, et par <code>scene.ufoElement</code> les membres de lecture</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut</td></tr>
-      <tr><td><code>show-labels</code></td><td>attribut</td><td>Le bandeau des paramètres de l'enregistrement sous l'image. Absent par défaut — et un lecteur peut l'ouvrir ou le fermer lui-même depuis le panneau <q>?</q></td></tr>
+      <tr><td><code>show-labels</code></td><td>attribut</td><td>Le bandeau des paramètres de l'enregistrement sous l'image. Absent par défaut — et un lecteur peut l'ouvrir ou le fermer lui-même depuis le panneau <q>i</q></td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attribut</td><td>Transmis à travers le <code>&lt;rr0-scene&gt;</code> composé jusqu'au lecteur qui les porte</td></tr>
     </table>
     </div>
@@ -537,7 +537,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       un autre est immédiat. La liste nomme chacun par son <code>title</code>, sinon ses prénoms et
       son nom, sinon son <code>id</code> ; celui qui ne nomme personne est numéroté selon sa place
       dans la liste.</p>
-    <p>Le panneau <q>?</q> s'ouvre en <i lang="en">popover</i>, que ferment Échap ou un clic à
+    <p>Le panneau <q>i</q> s'ouvre en <i lang="en">popover</i>, que ferment Échap ou un clic à
       l'extérieur (seulement un clic à l'extérieur, sur un navigateur sans <i lang="en">popover</i>).
       Il énonce le dossier, la date, le lieu, le compte rendu et les tags ; date, lieu et tags le
       quittent tant que le bandeau <code>show-labels</code> les énonce déjà. La date est à l'heure de
@@ -552,7 +552,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
 <section class="band">
   <div class="wrap prose-wide">
     <p>La opción por defecto para un avistamiento real, con uno o varios observadores. Compone un
-      <code>&lt;rr0-scene&gt;</code> y añade la barra de herramientas: quién da su relato, y el panel <q>?</q>
+      <code>&lt;rr0-scene&gt;</code> y añade la barra de herramientas: quién da su relato, y el panel <q>i</q>
       con los metadatos propios de la observación y sus créditos, y un botón de compartir: el enlace que la reproduce, y sus líneas de inserción.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
 &lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un caso, y todos sus observadores --&gt;</code></pre>
@@ -564,7 +564,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>sightingData</code></td><td>propiedad</td><td>Una grabación, asignada directamente — para una página que la tiene en memoria en lugar de en una URL</td></tr>
       <tr><td><code>scene</code></td><td>propiedad (lectura)</td><td>El <code>&lt;rr0-scene&gt;</code> compuesto, y a través de <code>scene.ufoElement</code> los miembros de reproducción</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>método (async)</td><td>Lo que el atributo desencadena</td></tr>
-      <tr><td><code>show-labels</code></td><td>atributo</td><td>La franja con los parámetros propios de la grabación bajo la imagen. Desactivada por defecto — y un lector puede abrirla o cerrarla por sí mismo desde el panel <q>?</q></td></tr>
+      <tr><td><code>show-labels</code></td><td>atributo</td><td>La franja con los parámetros propios de la grabación bajo la imagen. Desactivada por defecto — y un lector puede abrirla o cerrarla por sí mismo desde el panel <q>i</q></td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>atributo</td><td>Se transmiten a través del <code>&lt;rr0-scene&gt;</code> compuesto hasta el reproductor que los posee</td></tr>
     </table>
     </div>
@@ -573,7 +573,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <p>La grabación de cada observador se carga en cuanto se conoce la lista, así que elegir otra
       es inmediato. La lista nombra a cada uno por su <code>title</code>, si no por sus nombres y apellido,
       si no por su <code>id</code>; uno que no nombra a nadie se numera según su lugar en la lista.</p>
-    <p>El panel <q>?</q> se abre como un <i lang="en">popover</i>, que Escape o un clic fuera cierran (solo un clic
+    <p>El panel <q>i</q> se abre como un <i lang="en">popover</i>, que Escape o un clic fuera cierran (solo un clic
       fuera, en un navegador sin <i lang="en">popover</i>). Indica el caso, la fecha, el lugar, el
       relato y las etiquetas; fecha, lugar y etiquetas desaparecen de él mientras la franja <code>show-labels</code>
       ya los indica. La fecha está en la hora del propio observador (<code>utcOffsetHours</code>, o
@@ -588,7 +588,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
 <section class="band">
   <div class="wrap prose-wide">
     <p>La scelta predefinita per un avvistamento reale, con uno o più osservatori. Compone un
-      <code>&lt;rr0-scene&gt;</code> e aggiunge la barra degli strumenti: chi rende il resoconto, e il pannello <q>?</q>
+      <code>&lt;rr0-scene&gt;</code> e aggiunge la barra degli strumenti: chi rende il resoconto, e il pannello <q>i</q>
       con i metadati propri dell'osservazione e i suoi crediti, e un pulsante di condivisione: il link che la riproduce, e le sue righe di incorporamento.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
 &lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un caso, e tutti i suoi osservatori --&gt;</code></pre>
@@ -600,7 +600,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>sightingData</code></td><td>proprietà</td><td>Una registrazione, impostata direttamente — per una pagina che ne tiene una in memoria invece che a un URL</td></tr>
       <tr><td><code>scene</code></td><td>proprietà (lettura)</td><td>Il <code>&lt;rr0-scene&gt;</code> composto, e attraverso <code>scene.ufoElement</code> i membri di riproduzione</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>metodo (async)</td><td>Ciò che l'attributo innesca</td></tr>
-      <tr><td><code>show-labels</code></td><td>attributo</td><td>La striscia dei parametri propri della registrazione sotto l'immagine. Disattivata per impostazione predefinita — e un lettore può aprirla o chiuderla da sé dal pannello <q>?</q></td></tr>
+      <tr><td><code>show-labels</code></td><td>attributo</td><td>La striscia dei parametri propri della registrazione sotto l'immagine. Disattivata per impostazione predefinita — e un lettore può aprirla o chiuderla da sé dal pannello <q>i</q></td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attributo</td><td>Passati attraverso il <code>&lt;rr0-scene&gt;</code> composto fino al lettore che li possiede</td></tr>
     </table>
     </div>
@@ -609,7 +609,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <p>La registrazione di ogni osservatore viene caricata non appena la lista è nota, quindi sceglierne un'altra
       è immediato. La lista nomina ciascuno con il suo <code>title</code>, altrimenti con nomi e cognome,
       altrimenti con il suo <code>id</code>; uno che non nomina nessuno è numerato secondo il suo posto nella lista.</p>
-    <p>Il pannello <q>?</q> si apre come <i lang="en">popover</i>, che Esc o un clic all'esterno chiudono (solo un clic
+    <p>Il pannello <q>i</q> si apre come <i lang="en">popover</i>, che Esc o un clic all'esterno chiudono (solo un clic
       all'esterno, su un browser senza <i lang="en">popover</i>). Indica il caso, la data, il luogo, il
       resoconto e i tag; data, luogo e tag ne escono finché la striscia <code>show-labels</code>
       li indica già. La data è all'ora dell'osservatore stesso (<code>utcOffsetHours</code>, o

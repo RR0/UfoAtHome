@@ -253,6 +253,14 @@ const answeredButUnreadable = async url => {
   }
 }
 
+/* The player PLAYS what it has just been given: somebody who followed a link, pasted an address or chose
+   a file came to watch, not to hunt for the button. \`play=false\` in the page's own address turns that
+   off, for a link meant to open the recording stopped. */
+const playsAtOnce = new URLSearchParams(location.search).get("play") !== "false"
+const startPlaying = () => {
+  if (playsAtOnce) stage.scene?.ufoElement?.play()
+}
+
 const openUrl = async requested => {
   say(messages.loading)
   const candidates = resolve(requested)
@@ -266,6 +274,7 @@ const openUrl = async requested => {
       showInEditor(JSON.stringify(sighting, null, 2))
       reveal(new URL(candidate, location.href).href, sighting, requested)
       say("")
+      startPlaying()
       const next = new URL(location.href)
       next.searchParams.set("sighting", requested)
       history.replaceState(null, "", next)
@@ -319,6 +328,7 @@ pasteButton.addEventListener("click", () => {
     reveal(null, sighting, messages.pasted)
     say("")
     showStage(true)
+    startPlaying()
   } catch (error) {
     say(messages.badJson + error.message, "error")
   }
@@ -371,6 +381,7 @@ const openFiles = async files => {
   reveal(null, sighting, recording.name.replace(/\\.json$/i, ""))
   say(unresolved.size > 0 ? messages.unresolved + [...unresolved].join(", ") : "", unresolved.size > 0 ? "error" : undefined)
   showStage(true)
+  startPlaying()
 }
 
 filesField.addEventListener("change", () => {
@@ -384,13 +395,7 @@ if (asked) {
   // Arriving with a recording named in the URL means being shown it, not being shown a form: the
   // stage already sits above that form, and this puts it in view straight away rather than leaving
   // the reader to guess that the thing they followed a link for is further down.
-  // \`play=true\` — what a demo's link carries — means being shown it PLAYING, not being left to find the
-  // button: the reader followed a link to watch.
-  const autoplay = new URLSearchParams(location.search).get("play") === "true"
-  void openUrl(asked).then(() => {
-    showStage(false)
-    if (autoplay) stage.scene?.ufoElement?.play()
-  })
+  void openUrl(asked).then(() => showStage(false))
 }`
   }
 
@@ -480,7 +485,7 @@ ${this.form("en")}
       <code>ufoathome.org/play/?sighting=</code> followed by the address of a reconstruction.
       That is the link to hand someone when you want them to see an account rather than read it —
       in an email, a post, a forum that allows nothing but text.</p>
-    <p>It is also what every published reconstruction's own <q>?</q> panel hands out, and what the
+    <p>It is also what every published reconstruction's own <q>i</q> panel hands out, and what the
       older <code>ufoathome.org/&lt;name&gt;</code> links resolve to. A name with no slash is looked
       for among this site's demos first, then as an rr0.org case, read through its
       <code>case.json</code> or else its <code>sighting.json</code>.</p>
@@ -523,7 +528,7 @@ ${this.form("fr")}
       <code>ufoathome.org/play/?sighting=</code> suivi de l'adresse d'une reconstitution.
       C'est le lien à donner à quelqu'un quand on veut qu'il voie un récit plutôt qu'il le lise —
       dans un courriel, un message, un forum qui n'accepte que du texte.</p>
-    <p>C'est aussi ce que distribue le panneau <q>?</q> de chaque reconstitution publiée, et ce vers
+    <p>C'est aussi ce que distribue le panneau <q>i</q> de chaque reconstitution publiée, et ce vers
       quoi aboutissent les anciens liens <code>ufoathome.org/&lt;nom&gt;</code>. Un nom sans barre oblique est cherché
       d'abord parmi les démos de ce site, puis comme dossier de rr0.org, lu par son
       <code>case.json</code> ou à défaut son <code>sighting.json</code>.</p>
@@ -566,7 +571,7 @@ ${this.form("es")}
       <code>ufoathome.org/play/?sighting=</code> seguido de la dirección de una reconstrucción.
       Ese es el enlace que hay que dar a alguien cuando quieres que vea un relato en lugar de leerlo —
       en un correo, una publicación, un foro que no admite más que texto.</p>
-    <p>Es también lo que reparte el panel <q>?</q> de cada reconstrucción publicada, y a lo que
+    <p>Es también lo que reparte el panel <q>i</q> de cada reconstrucción publicada, y a lo que
       llevan los antiguos enlaces <code>ufoathome.org/&lt;nombre&gt;</code>. Un nombre sin barra se
       busca primero entre las demos de este sitio, y después como caso de rr0.org, leído a través de
       su <code>case.json</code> o, en su defecto, de su <code>sighting.json</code>.</p>
@@ -609,7 +614,7 @@ ${this.form("it")}
       <code>ufoathome.org/play/?sighting=</code> seguito dall'indirizzo di una ricostruzione.
       È il link da dare a qualcuno quando vuoi che veda un resoconto invece di leggerlo —
       in un'email, un post, un forum che accetta solo testo.</p>
-    <p>È anche ciò che distribuisce il pannello <q>?</q> di ogni ricostruzione pubblicata, e ciò a
+    <p>È anche ciò che distribuisce il pannello <q>i</q> di ogni ricostruzione pubblicata, e ciò a
       cui rimandano i vecchi link <code>ufoathome.org/&lt;nome&gt;</code>. Un nome senza barra viene
       cercato prima tra le demo di questo sito, poi come caso di rr0.org, letto tramite il suo
       <code>case.json</code> o, in mancanza, il suo <code>sighting.json</code>.</p>

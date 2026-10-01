@@ -138,7 +138,7 @@ for (const card of cards) {
           return `<figure class="demo-card" id="${demo.id}" data-src="${demo.src}">
           <div class="demo-mount"><p class="loading">${loading}</p></div>
           <figcaption>
-            <h3><a href="${playerPath}?sighting=${played}&amp;play=true">${demo.title[language]}</a></h3>
+            <h3><a href="${playerPath}?sighting=${played}">${demo.title[language]}</a></h3>
             <p>${demo.blurb[language]}</p>
           </figcaption>
         </figure>`
