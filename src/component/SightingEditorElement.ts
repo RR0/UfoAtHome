@@ -62,6 +62,8 @@ import type { DecorObject, DecorSide, DecorSize } from "../engine/model/Decor.js
 import { sortedMilestones } from "../engine/model/Milestone.js"
 import { DEFAULT_REFERENCE_FOV_DEG, DEFAULT_REFERENCE_OPACITY, REFERENCE_INLINE_WARNING_BYTES } from "../engine/model/Reference.js"
 import type { PictureLandmark, ReferenceKind, SceneReference } from "../engine/model/Reference.js"
+import type { InvestigatorTrace } from "../engine/model/Trace.js"
+import type { KmlImportResult } from "../engine/interop/KmlImport.js"
 import { PictureRegistration } from "../engine/reference/PictureRegistration.js"
 import type { Vector3 } from "three"
 import type { CanvasRenderer } from "../render/CanvasRenderer.js"
@@ -748,6 +750,17 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelReferenceLandmarkLabel: HTMLElement
   private readonly referenceAdoptPoseButton: HTMLButtonElement
   private readonly referenceStreetSearchButton: HTMLButtonElement
+  private readonly addTraceFileInput: HTMLInputElement
+  private readonly traceSelect: HTMLSelectElement
+  private readonly deleteTraceButton: HTMLButtonElement
+  private readonly traceTitleInput: HTMLInputElement
+  private readonly traceSourceInput: HTMLInputElement
+  private readonly traceStatus: HTMLElement
+  private readonly labelTraceImport: HTMLElement
+  private readonly labelTrace: HTMLElement
+  private readonly labelTraceTitle: HTMLElement
+  private readonly labelTraceSource: HTMLElement
+  private currentTraceId?: string
   private readonly referenceStreetSelect: HTMLSelectElement
   private readonly referenceStreetAddButton: HTMLButtonElement
   /** What the canvas last handed itself to — see canvasMode; kept so leaving a mode can undo
@@ -1236,6 +1249,16 @@ export class SightingEditorElement extends HTMLElement {
     this.labelReferenceLandmarkLabel = this.shadow.getElementById("label-reference-landmark-label")!
     this.referenceAdoptPoseButton = this.shadow.getElementById("reference-adopt-pose") as HTMLButtonElement
     this.referenceStreetSearchButton = this.shadow.getElementById("reference-street-search") as HTMLButtonElement
+    this.addTraceFileInput = this.shadow.getElementById("add-trace-file") as HTMLInputElement
+    this.traceSelect = this.shadow.getElementById("trace") as HTMLSelectElement
+    this.deleteTraceButton = this.shadow.getElementById("delete-trace") as HTMLButtonElement
+    this.traceTitleInput = this.shadow.getElementById("traceTitle") as HTMLInputElement
+    this.traceSourceInput = this.shadow.getElementById("traceSource") as HTMLInputElement
+    this.traceStatus = this.shadow.getElementById("trace-status")!
+    this.labelTraceImport = this.shadow.getElementById("label-trace-import")!
+    this.labelTrace = this.shadow.getElementById("label-trace")!
+    this.labelTraceTitle = this.shadow.getElementById("label-trace-title")!
+    this.labelTraceSource = this.shadow.getElementById("label-trace-source")!
     this.referenceStreetSelect = this.shadow.getElementById("reference-street") as HTMLSelectElement
     this.referenceStreetAddButton = this.shadow.getElementById("reference-street-add") as HTMLButtonElement
     this.referenceFields = [
@@ -1452,6 +1475,11 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceLandmarkLabelInput.addEventListener("input", () => this.updateLandmarkLabel())
     this.referenceAdoptPoseButton.addEventListener("click", () => this.adoptReferencePose())
     this.referenceStreetSearchButton.addEventListener("click", () => void this.searchStreetPictures())
+    this.addTraceFileInput.addEventListener("change", () => void this.addTracesFromFile())
+    this.traceSelect.addEventListener("change", () => this.selectTrace(this.traceSelect.value))
+    this.deleteTraceButton.addEventListener("click", () => this.deleteTrace())
+    this.traceTitleInput.addEventListener("input", () => this.writeTraceFields())
+    this.traceSourceInput.addEventListener("input", () => this.writeTraceFields())
     this.referenceStreetAddButton.addEventListener("click", () => this.addStreetPicture())
     // The wheel changes the picture's field while it is being lined up — and only then, so that a
     // page scrolls as usual over a scene nobody is registering anything on.
@@ -1695,6 +1723,8 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshDecorList()
     this.currentReferenceId = this.ufoElement.sighting.references[0]?.id
     this.refreshReferenceList()
+    this.currentTraceId = this.ufoElement.sighting.traces[0]?.id
+    this.refreshTraceList()
     this.sceneElement.setCloudRendering("volume")
     this.cloudEditor = setupCloudEditor(this.shadow.getElementById("cloud-editor")!, this.sceneElement, (detachWeatherSource = true) => {
       if (!detachWeatherSource) return
@@ -1793,6 +1823,8 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshDecorList()
     this.currentReferenceId = this.ufoElement.sighting.references[0]?.id
     this.refreshReferenceList()
+    this.currentTraceId = this.ufoElement.sighting.traces[0]?.id
+    this.refreshTraceList()
     this.currentMilestoneT = this.ufoElement.sighting.milestones[0]?.t
     this.refreshMilestoneList()
     this.onSelectionOrTimeChanged()
@@ -3636,6 +3668,120 @@ export class SightingEditorElement extends HTMLElement {
       creditUrl: picture.creditUrl,
       registration: { headingDeg: picture.azimuthDeg ?? 0, pitchDeg: 0, fovDeg: DEFAULT_REFERENCE_FOV_DEG }
     })
+  }
+
+  // ---- What an investigator drew over the place — see InvestigatorTrace and the Pictures group.
+
+  private traceLabel(trace: InvestigatorTrace): string {
+    const kind = trace.kind === "point" ? this.messages.traceKindPoint : trace.kind === "line" ? this.messages.traceKindLine : this.messages.traceKindPolygon
+    const name = this.said.read(trace.title)
+    return name ? `${name} (${kind})` : `${trace.id} (${kind})`
+  }
+
+  private refreshTraceList(): void {
+    const traces = this.ufoElement.sighting.traces
+    this.traceSelect.innerHTML = ""
+    for (const trace of traces) {
+      const option = document.createElement("option")
+      option.value = trace.id
+      option.textContent = this.traceLabel(trace)
+      this.traceSelect.appendChild(option)
+    }
+    if (!traces.some(trace => trace.id === this.currentTraceId)) this.currentTraceId = traces[0]?.id
+    if (this.currentTraceId !== undefined) this.traceSelect.value = this.currentTraceId
+    this.syncTraceFields()
+  }
+
+  private selectTrace(id: string): void {
+    this.currentTraceId = id
+    this.syncTraceFields()
+  }
+
+  private syncTraceFields(): void {
+    const trace = this.ufoElement.sighting.traces.find(candidate => candidate.id === this.currentTraceId)
+    const hasSelection = trace !== undefined
+    for (const field of [this.traceSelect, this.deleteTraceButton, this.traceTitleInput, this.traceSourceInput]) {
+      field.disabled = !hasSelection
+      this.setRowVisible(field, hasSelection)
+    }
+    this.traceTitleInput.value = this.said.read(trace?.title) ?? ""
+    this.traceSourceInput.value = this.said.read(trace?.source) ?? ""
+  }
+
+  private writeTraceFields(): void {
+    const sighting = this.ufoElement.sighting
+    if (this.currentTraceId === undefined) return
+    sighting.traces = sighting.traces.map(trace => trace.id !== this.currentTraceId ? trace : {
+      ...trace,
+      title: this.said.write(trace.title, this.traceTitleInput.value, this.writingLanguage),
+      source: this.said.write(trace.source, this.traceSourceInput.value, this.writingLanguage)
+    })
+    // Not refreshTraceList: rebuilding the options on every keystroke would move the caret's own
+    // row under the author's hand. The label catches up on the next refresh.
+    const option = Array.from(this.traceSelect.options).find(candidate => candidate.value === this.currentTraceId)
+    const trace = sighting.traces.find(candidate => candidate.id === this.currentTraceId)
+    if (option && trace) option.textContent = this.traceLabel(trace)
+    this.ufoElement.refresh()
+  }
+
+  /**
+   * Reads a Google Earth file the author chose and adds what it draws — see KmlImport. Each trace is
+   * credited to the file it came from until the author says better, because a line without an
+   * author is an illustration; the reader module is loaded here, not with the editor, as most
+   * recordings never import one.
+   */
+  private async addTracesFromFile(): Promise<void> {
+    const file = this.addTraceFileInput.files?.[0]
+    if (!file) return
+    this.addTraceFileInput.value = ""
+    let result: KmlImportResult
+    try {
+      const { KmlImport } = await import("../engine/interop/KmlImport.js")
+      const bytes = await new Promise<ArrayBuffer>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as ArrayBuffer)
+        reader.onerror = () => reject(reader.error)
+        reader.readAsArrayBuffer(file)
+      })
+      result = await KmlImport.fromBytes(new Uint8Array(bytes))
+    } catch {
+      this.traceStatus.textContent = this.messages.traceFailed
+      return
+    }
+    if (result.traces.length === 0) {
+      this.traceStatus.textContent = this.messages.traceNone
+      return
+    }
+    const sighting = this.ufoElement.sighting
+    const taken = new Set(sighting.traces.map(trace => trace.id))
+    let next = 1
+    const source = this.said.write(undefined, result.documentName ?? file.name, this.writingLanguage)
+    const added = result.traces.map(trace => {
+      while (taken.has(`trace-${next}`)) next++
+      const id = `trace-${next}`
+      taken.add(id)
+      return {
+        ...trace,
+        id,
+        title: trace.title === undefined ? undefined : this.said.write(undefined, trace.title as string, this.writingLanguage),
+        source
+      } satisfies InvestigatorTrace
+    })
+    sighting.traces = [...sighting.traces, ...added]
+    this.currentTraceId = added[0].id
+    this.refreshTraceList()
+    const left = result.skipped.length > 0 ? ` ${this.messages.traceSkipped.replace("{what}", result.skipped.join(", "))}` : ""
+    this.traceStatus.textContent = this.messages.traceImported.replace("{n}", String(added.length)).replace("{name}", file.name) + left
+    this.ufoElement.refresh()
+  }
+
+  private deleteTrace(): void {
+    if (this.currentTraceId === undefined) return
+    const sighting = this.ufoElement.sighting
+    sighting.traces = sighting.traces.filter(trace => trace.id !== this.currentTraceId)
+    this.currentTraceId = sighting.traces[0]?.id
+    this.refreshTraceList()
+    this.ufoElement.refresh()
   }
 
   private deleteReference(): void {
@@ -8064,6 +8210,13 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceLandmarkLabelInput.placeholder = messages.referenceLandmarkLabelPlaceholder
     this.referenceAdoptPoseButton.textContent = messages.referenceAdoptPose
     this.referenceStreetSearchButton.textContent = messages.referenceStreetSearch
+    this.labelTraceImport.textContent = messages.traceImport
+    this.labelTrace.textContent = messages.trace
+    this.labelTraceTitle.textContent = messages.traceTitle
+    this.labelTraceSource.textContent = messages.traceSource
+    this.deleteTraceButton.title = messages.deleteTrace
+    this.deleteTraceButton.setAttribute("aria-label", messages.deleteTrace)
+    this.refreshTraceList()
     this.referenceStreetAddButton.textContent = messages.referenceStreetAdd
     for (const [kind, option] of this.soundKindOptions) option.textContent = this.soundKindLabel(kind, messages)
     this.labelInstrument.textContent = messages.instrument

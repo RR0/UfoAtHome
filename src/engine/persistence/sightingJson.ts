@@ -16,6 +16,7 @@ import type { People } from "../model/People.js"
 import type { Account } from "../model/Account.js"
 import type { DecorObject } from "../model/Decor.js"
 import type { StatedRoad } from "../model/Road.js"
+import type { InvestigatorTrace } from "../model/Trace.js"
 import type { Milestone } from "../model/Milestone.js"
 import type { SceneReference } from "../model/Reference.js"
 import type { SaidText } from "../model/SaidText.js"
@@ -84,6 +85,9 @@ export interface SightingRecordingJson {
   /** The roads the account's own plan draws — see Sighting.roads and Road.ts. Absent means none is
    * stated, and the scene then shows only what a survey of today reports, drawn faint. */
   roads?: StatedRoad[]
+  /** What an investigator drew over the place, imported from their file — see Sighting.traces and
+   * Trace.ts. Absent means none. */
+  traces?: InvestigatorTrace[]
   /** Which meteorological record `weatherTrack` was looked up from, when it wasn't the observer who
    * stated the conditions — see Sighting.weatherSource. Absent means they ARE the observer's (or
    * predate this field), and a reader must not treat them as measurements. */
@@ -156,6 +160,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     milestones: sighting.milestones.length > 0 ? sighting.milestones : undefined,
     references: sighting.references.length > 0 ? sighting.references : undefined,
     roads: sighting.roads.length > 0 ? sighting.roads : undefined,
+    traces: sighting.traces.length > 0 ? sighting.traces : undefined,
     weatherSource: sighting.weatherSource,
     instrument: sighting.instrumentId,
     exposureSeconds: sighting.exposureSeconds,
@@ -217,7 +222,8 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
         .find(seconds => seconds !== undefined),
     sortedMilestones(json.milestones ?? []),
     json.references ?? [],
-    json.roads ?? []
+    json.roads ?? [],
+    json.traces ?? []
   )
   // The file states an angle; the drawing has to follow it. Done here rather than in
   // Timeline.fromJSON because the projection needs the pose's own field of view, which lives on

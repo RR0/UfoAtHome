@@ -456,6 +456,16 @@ export const html = `
       <select id="reference-street" hidden></select>
       <button id="reference-street-add" type="button" hidden>Add</button>
     </div>
+    <!-- What an investigator drew over the place, from their own file (see InvestigatorTrace): lines
+         of sight, axes, markers. Drawn over the scene as theirs, not as part of the reconstruction. -->
+    <div class="decor-add-row">
+      <label><span id="label-trace-import">Investigator's lines (KML, KMZ)</span> <input id="add-trace-file" type="file" accept=".kml,.kmz,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz"/></label>
+      <label><span id="label-trace">Trace</span> <select id="trace"></select></label>
+      <button id="delete-trace" type="button" class="icon-btn" title="Delete trace" aria-label="Delete trace">🗑</button>
+      <label><span id="label-trace-title">Name</span> <input id="traceTitle" class="trace-field" type="text"/></label>
+      <label><span id="label-trace-source">Source</span> <input id="traceSource" class="trace-field" type="text"/></label>
+      <span id="trace-status" class="apparent-size"></span>
+    </div>
   </div>
 </section>
 <section class="group-panel" id="group-shape" aria-labelledby="label-shape-group" hidden>

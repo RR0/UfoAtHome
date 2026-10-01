@@ -32,6 +32,8 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setGait(): void {}
     setTerrainOrigin(): void {}
     setStatedRoads(): void {}
+    setTraces(): void {}
+    setTracesShown(): void {}
     setTerrainProviders(): void {}
     get currentTerrainAttribution(): undefined {
       return undefined
@@ -6571,5 +6573,51 @@ describe("SightingEditorElement optics bounds", () => {
     expect(field.disabled).toBe(true)
     expect(field.max).toBe("2000")
     expect(shadow.getElementById("focal-fov")!.textContent).toBe("27° of field")
+  })
+})
+
+describe("SightingEditorElement investigator's lines", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  const KML = `<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Enquête</name>
+    <Placemark><name>Visée</name><LineString><coordinates>2.30,49.00,0 2.31,49.01,0</coordinates></LineString></Placemark>
+    <Placemark><name>Clocher</name><Point><coordinates>2.32,49.02</coordinates></Point></Placemark></Document></kml>`
+
+  async function importFile(element: SightingEditorElement, name: string, content: string): Promise<void> {
+    const input = element.shadowRoot!.getElementById("add-trace-file") as HTMLInputElement
+    const file = new File([content], name)
+    Object.defineProperty(input, "files", { configurable: true, value: [file] })
+    input.dispatchEvent(new Event("change"))
+    await vi.waitFor(() => expect(element.shadowRoot!.getElementById("trace-status")!.textContent).not.toBe(""))
+  }
+
+  it("adds what a KML file draws, credited to the file, and says how many", async () => {
+    const element = mount()
+    await importFile(element, "lignes.kml", KML)
+    const traces = element.sightingData.traces!
+    expect(traces.map(trace => [trace.id, trace.kind, trace.title])).toEqual([["trace-1", "line", "Visée"], ["trace-2", "point", "Clocher"]])
+    expect(traces[0]!.source).toBe("Enquête")
+    expect(element.shadowRoot!.getElementById("trace-status")!.textContent).toBe("2 imported from lignes.kml.")
+    expect([...(element.shadowRoot!.getElementById("trace") as HTMLSelectElement).options].map(option => option.textContent)).toEqual(["Visée (line)", "Clocher (place)"])
+  })
+
+  it("says so, and adds nothing, when the file holds no line or place", async () => {
+    const element = mount()
+    await importFile(element, "vide.kml", `<kml xmlns="http://www.opengis.net/kml/2.2"><Document/></kml>`)
+    expect(element.shadowRoot!.getElementById("trace-status")!.textContent).toBe(sightingEditorMessages_en.traceNone)
+    expect(element.sightingData.traces).toBeUndefined()
+  })
+
+  it("renames a trace and deletes it", async () => {
+    const element = mount()
+    await importFile(element, "lignes.kml", KML)
+    const title = element.shadowRoot!.getElementById("traceTitle") as HTMLInputElement
+    title.value = "Ligne de visée"
+    title.dispatchEvent(new Event("input"))
+    expect(element.sightingData.traces![0]!.title).toBe("Ligne de visée")
+    element.shadowRoot!.getElementById("delete-trace")!.click()
+    expect(element.sightingData.traces!.map(trace => trace.id)).toEqual(["trace-2"])
   })
 })

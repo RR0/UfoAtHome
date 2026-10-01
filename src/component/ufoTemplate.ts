@@ -20,6 +20,9 @@ export const html = `
          have a slider for how much of them shows, then a button for whether they show at all. -->
     <button id="references" type="button" title="Pictures of the place" aria-label="Pictures of the place" aria-pressed="true" hidden></button>
     <input id="reference-opacity" type="range" min="0" max="1" step="0.05" value="0.5" title="Picture opacity" aria-label="Picture opacity" hidden/>
+    <!-- An investigator's lines laid over the place (see InvestigatorTrace): offered only when the
+         recording carries some, and shown until the reader hides them. -->
+    <button id="traces" type="button" title="Investigator's lines" aria-label="Investigator's lines" aria-pressed="true" hidden></button>
     <button id="observer-map" type="button" title="Observer's position" aria-label="Observer's position" aria-pressed="false" hidden></button>
   </div>
   <!-- What in the recording was not played as written (see RecordingIssue): a key nothing reads, a

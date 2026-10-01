@@ -12,6 +12,7 @@ import type { People } from "./People.js"
 import type { DecorObject } from "./Decor.js"
 import type { Milestone } from "./Milestone.js"
 import type { StatedRoad } from "./Road.js"
+import type { InvestigatorTrace } from "./Trace.js"
 import type { SaidText } from "./SaidText.js"
 import type { RecordingSource } from "./RecordingSource.js"
 import type { SceneReference } from "./Reference.js"
@@ -335,7 +336,11 @@ export class Sighting {
      * Not readonly, same "reassigned wholesale on edit" reasoning as decor above. Empty for every
      * recording that states none, which is every recording made before a plan could be read into
      * one; those still get the roads a survey of today reports, drawn faint. */
-    public roads: StatedRoad[] = []
+    public roads: StatedRoad[] = [],
+    /** Lines, places and outlines an investigator drew over the place and the file imported — see
+     * InvestigatorTrace. Not readonly, same "reassigned wholesale on edit" reasoning as decor
+     * above. Empty for every recording that carries none. */
+    public traces: InvestigatorTrace[] = []
   ) {
   }
 

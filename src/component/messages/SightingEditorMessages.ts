@@ -336,6 +336,21 @@ export interface SightingEditorMessages extends SightingLabels {
   referenceStreetNone: string
   referenceStreetFailed: string
   referenceStreetAdd: string
+  /** Investigator's lines imported from a KML/KMZ file (see InvestigatorTrace): the file field, the
+   * dropdown, the delete button, the editable name and source, what an import says — {n} traces
+   * read from {name}, and {what} left out — and what each kind is called in the dropdown. */
+  traceImport: string
+  trace: string
+  deleteTrace: string
+  traceTitle: string
+  traceSource: string
+  traceImported: string
+  traceSkipped: string
+  traceNone: string
+  traceFailed: string
+  traceKindPoint: string
+  traceKindLine: string
+  traceKindPolygon: string
   referenceStreetItem: string
   referenceStreetPanorama: string
   referenceStreetTitle: string

@@ -24,6 +24,8 @@ export const ufoMessages_it: UfoMessages = {
   placeObserverHere: "Metti qui l'osservatore",
   showReferences: "Mostra le foto del luogo",
   hideReferences: "Nascondi le foto del luogo",
+  showTraces: "Mostra i tracciati dell'investigatore",
+  hideTraces: "Nascondi i tracciati dell'investigatore",
   referenceOpacity: "Opacità delle foto",
   showMilestones: "Mostra i momenti del resoconto",
   hideMilestones: "Nascondi i momenti del resoconto",

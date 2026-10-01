@@ -40,6 +40,8 @@ export interface UfoMessages {
    * slider beside it — see SceneReference. */
   showReferences: string
   hideReferences: string
+  showTraces: string
+  hideTraces: string
   referenceOpacity: string
   showMilestones: string
   hideMilestones: string

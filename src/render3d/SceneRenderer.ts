@@ -70,6 +70,8 @@ import { boundsAroundObserver, buildTerrainMesh } from "./terrain/TerrainMeshBui
 import { RoadSystem } from "./RoadSystem.js"
 import type { RoadWay } from "./terrain/RoadProvider.js"
 import type { StatedRoad } from "../engine/model/Road.js"
+import type { InvestigatorTrace } from "../engine/model/Trace.js"
+import type { TraceSystem } from "./TraceSystem.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
 import { DEFAULT_CLOUD_BASE_M, DEFAULT_ICE_CRYSTAL_ALIGNMENT, DEFAULT_WEATHER } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
@@ -927,6 +929,13 @@ export class SceneRenderer {
   private roadWays?: { lat: number; lng: number; radiusM: number; ways: RoadWay[] }
   /** The roads the recording itself states — held so a rebuilt patch can be re-draped with them. */
   private statedRoads: StatedRoad[] = []
+  /** What an investigator drew over the place, and the module that draws it — loaded the first time
+   * a recording carries any (see setTraces). */
+  private traces: InvestigatorTrace[] = []
+  private tracesShown = true
+  private traceSystem?: TraceSystem
+  private traceSystemLoading?: Promise<void>
+  private readonly traceResolution = new Vector2()
   /** Which catalogue resolves a recording's named 3D models — swappable exactly like the terrain's
    * own providers (see setDecorModelProvider), and built from the registry's first entry by
    * default so nothing has to configure it. */
@@ -1557,6 +1566,7 @@ export class SceneRenderer {
         this.buildRoads(lat, lng, radiusM)
         // The stated ones need no fetch and no permission: they are in the file already.
         this.drapeStatedRoads()
+        this.drapeTraces()
         this.render()
         onSettled?.()
       })
@@ -1689,6 +1699,46 @@ export class SceneRenderer {
     if (!patch) return
     this.roadSystem.group.position.copy(patch.position)
     this.roadSystem.setStated(this.statedRoads, (x, z) => this.groundYOfPatch(patch, x, z))
+  }
+
+  /**
+   * What an investigator drew over the place — see InvestigatorTrace. Cheap to call every tick: the
+   * renderer keeps the array it was last given, and loads the module that draws them only when
+   * there is something to draw.
+   */
+  setTraces(traces: InvestigatorTrace[]): void {
+    if (traces === this.traces) return
+    this.traces = traces
+    if (traces.length === 0 && !this.traceSystem) return
+    void this.loadTraceSystem().then(() => {
+      this.drapeTraces()
+      this.render()
+    })
+  }
+
+  /** Shows or hides the traces without forgetting them. */
+  setTracesShown(shown: boolean): void {
+    if (shown === this.tracesShown) return
+    this.tracesShown = shown
+    this.drapeTraces()
+    this.render()
+  }
+
+  private loadTraceSystem(): Promise<void> {
+    return this.traceSystemLoading ??= import("./TraceSystem.js").then(({ TraceSystem }) => {
+      const system = new TraceSystem(HUD_LAYER)
+      this.scene.add(system.group)
+      this.traceSystem = system
+    })
+  }
+
+  private drapeTraces(): void {
+    const system = this.traceSystem
+    const patch = this.terrainMesh
+    const origin = this.terrainOrigin
+    if (!system || !patch || !origin) return
+    system.group.position.copy(patch.position)
+    system.set(this.tracesShown ? this.traces : [], origin.lat, origin.lng, this.siteElevationM, (x, z) => this.groundYOfPatch(patch, x, z))
   }
 
   private drapeRoads(ways: RoadWay[], lat: number, lng: number, contemporary: boolean): void {
@@ -2127,6 +2177,7 @@ export class SceneRenderer {
       // what makes carrying its position over enough. Without this, a observer who walks eleven
       // hundred metres drags the whole network out from under the relief it was draped on.
       this.roadSystem.group.position.copy(this.terrainMesh.position)
+      this.traceSystem?.group.position.copy(this.terrainMesh.position)
     }
     if (!inhabited) {
       // The walking eye's own displacement, turned into the same "how far has the world moved under
@@ -3480,7 +3531,9 @@ export class SceneRenderer {
   }
 
   private renderHudPass(camera: PerspectiveCamera): void {
-    if (!this.compassSprites.some(sprite => sprite.visible)) return
+    const traces = this.traceSystem?.any && this.tracesShown
+    if (!traces && !this.compassSprites.some(sprite => sprite.visible)) return
+    if (traces) this.traceSystem!.setResolution(this.renderer.getDrawingBufferSize(this.traceResolution))
     const autoClear = this.renderer.autoClear
     const shadows = this.renderer.shadowMap.autoUpdate
     this.renderer.autoClear = false
@@ -4299,6 +4352,7 @@ export class SceneRenderer {
     this.disposeMesh(this.groundMesh)
     this.disposeMesh(this.terrainMesh)
     this.roadSystem.dispose()
+    this.traceSystem?.dispose()
     this.disposeCloudSystem()
     this.disposeCirrus()
     this.disposePrecipitationPoints()

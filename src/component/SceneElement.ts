@@ -657,6 +657,7 @@ export class SceneElement extends HTMLElement {
     // The weather is heard through this element, the button that silences it is the player's.
     this.ufoElement.addEventListener("mutedchange", () => this.weatherAudio.setLevel(this.ufoElement.level))
     this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<{ shown: boolean; opacity: number }>).detail))
+    this.ufoElement.addEventListener("traceview", event => this.sceneRenderer.setTracesShown((event as CustomEvent<{ shown: boolean }>).detail.shown))
     this.ufoElement.canvasElement.addEventListener("pointermove", this.handlePointerMove)
     this.ufoElement.canvasElement.addEventListener("pointerleave", this.handlePointerLeave)
     // On the element itself and while capturing, so any press inside it counts: the play button
@@ -1287,6 +1288,7 @@ export class SceneElement extends HTMLElement {
     // What the account's own plan draws, as opposed to what a survey of today reports — see
     // StatedRoad. Cheap to call every tick: the renderer keeps the array it was last given.
     this.sceneRenderer.setStatedRoads(sighting.roads)
+    this.sceneRenderer.setTraces(sighting.traces)
     // Last, once the camera and the decor stand where this instant puts them: what the decor says
     // along a line of sight is read from exactly that state (see pushPhenomenaAt).
     this.pushPhenomenaAt(t)

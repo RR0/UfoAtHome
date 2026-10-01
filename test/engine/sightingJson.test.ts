@@ -402,4 +402,14 @@ describe("observer count", () => {
     expect("observerCount" in toSightingJson(sighting)).toBe(false)
     expect(JSON.stringify(toSightingJson(sighting))).not.toContain("observerCount")
   })
+
+  it("round-trips what an investigator drew, and writes nothing when there is none", () => {
+    const sighting = Sighting.create({ year: 2012 })
+    expect("traces" in toSightingJson(sighting) && toSightingJson(sighting).traces !== undefined).toBe(false)
+    sighting.traces = [
+      { id: "trace-1", kind: "line", title: "Visée", altitude: "relative", color: "#ff0000", points: [{ lat: 49, lng: 2.3, altM: 2 }, { lat: 49.01, lng: 2.31, altM: 300 }], source: "Enquête" }
+    ]
+    const restored = fromSightingJson(JSON.parse(JSON.stringify(toSightingJson(sighting))))
+    expect(restored.traces).toEqual(sighting.traces)
+  })
 })

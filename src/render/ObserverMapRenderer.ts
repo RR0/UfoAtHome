@@ -3,6 +3,16 @@ import type { ImageryTexture } from "../render3d/terrain/ImageryProvider.js"
 import { fractionWithinBounds } from "../render3d/terrain/TileMath.js"
 import { geoToLocalMeters } from "../render3d/terrain/GeoProjection.js"
 import type { ObserverPath } from "../engine/place/ObserverPath.js"
+import { DEFAULT_TRACE_COLOR } from "../engine/model/Trace.js"
+
+/** A line, place or outline an investigator drew (see InvestigatorTrace), with its name already
+ * chosen for the reader's language. */
+export interface ObserverMapTrace {
+  kind: "point" | "line" | "polygon"
+  points: ReadonlyArray<{ lat: number; lng: number }>
+  color?: string
+  label?: string
+}
 
 /** A named moment of the account (see Milestone) at the place the observer had reached by then. */
 export interface ObserverMapMarker {
@@ -73,6 +83,8 @@ export interface ObserverMapFrame {
    * ImageProjection.halfWidthAngleDeg. */
   coneHalfAngleDeg?: number
   markers: ReadonlyArray<ObserverMapMarker>
+  /** What an investigator drew over this ground, drawn as theirs — see paintTraces. */
+  traces?: ReadonlyArray<ObserverMapTrace>
   /** The scenery the recording puts on this ground — the shack, the patrol car, the other
    * observers. Drawn because a cone that clears a landmark is only evidence once the landmark is on
    * the map too. */
@@ -184,6 +196,7 @@ export class ObserverMapRenderer {
     this.paintGround(frame)
     this.paintNight(frame.nightFraction)
     this.paintPath(frame)
+    this.paintTraces(frame)
     if (frame.position) {
       this.paintCone(frame, frame.position)
       // OVER the cone, not under it. Scenery is what the cone is checked against — "was the shack
@@ -302,6 +315,57 @@ export class ObserverMapRenderer {
     ctx.strokeStyle = "rgba(255, 255, 255, 0.9)"
     ctx.lineWidth = 2
     ctx.stroke()
+  }
+
+  /**
+   * What an investigator drew: lines of sight, axes, outlines, markers.
+   *
+   * In the colour they chose, or one nothing else on this map is, and dashed, so that a reader never
+   * takes somebody's line for the observer's own path (white, solid) or for the instrument's cone.
+   * Under the observer and the markers: it is a claim to be compared with where the observer stood,
+   * not a thing to hide them.
+   */
+  private paintTraces(frame: ObserverMapFrame): void {
+    const { ctx } = this
+    for (const trace of frame.traces ?? []) {
+      const points = trace.points.map(point => this.toCanvas(frame.bounds, point.lat, point.lng))
+      if (points.length === 0) continue
+      const color = trace.color ?? DEFAULT_TRACE_COLOR
+      if (trace.kind === "point") {
+        ctx.beginPath()
+        ctx.moveTo(points[0].x, points[0].y - 6)
+        ctx.lineTo(points[0].x + 6, points[0].y)
+        ctx.lineTo(points[0].x, points[0].y + 6)
+        ctx.lineTo(points[0].x - 6, points[0].y)
+        ctx.closePath()
+        ctx.fillStyle = color
+        ctx.fill()
+        ctx.lineWidth = 1.5
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.8)"
+        ctx.stroke()
+      } else {
+        ctx.beginPath()
+        ctx.moveTo(points[0].x, points[0].y)
+        for (const point of points.slice(1)) ctx.lineTo(point.x, point.y)
+        if (trace.kind === "polygon") ctx.closePath()
+        ctx.lineJoin = "round"
+        ctx.setLineDash([])
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.65)"
+        ctx.lineWidth = 4.5
+        ctx.stroke()
+        ctx.setLineDash([9, 5])
+        ctx.strokeStyle = color
+        ctx.lineWidth = 2.5
+        ctx.stroke()
+        ctx.setLineDash([])
+      }
+      if (trace.label) {
+        ctx.font = "11px sans-serif"
+        ctx.textAlign = "left"
+        ctx.textBaseline = "middle"
+        this.paintOutlinedText(trace.label, points[0].x + 9, points[0].y - 9)
+      }
+    }
   }
 
   /**

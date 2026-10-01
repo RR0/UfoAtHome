@@ -125,6 +125,8 @@ export class UfoElement extends HTMLElement {
    * reader's own choice, kept across recordings; the slider starts where the recording's first
    * picture asks until the reader moves it. */
   private readonly referencesButton: HTMLButtonElement
+  private readonly tracesButton: HTMLButtonElement
+  private tracesShownState = true
   private readonly referenceOpacityInput: HTMLInputElement
   private referencesShownState = true
   private referenceOpacityTouched = false
@@ -633,6 +635,7 @@ export class UfoElement extends HTMLElement {
     this.cornerButtons = this.shadow.getElementById("corner-buttons")!
     this.observerMapButton = this.shadow.getElementById("observer-map") as HTMLButtonElement
     this.referencesButton = this.shadow.getElementById("references") as HTMLButtonElement
+    this.tracesButton = this.shadow.getElementById("traces") as HTMLButtonElement
     this.referenceOpacityInput = this.shadow.getElementById("reference-opacity") as HTMLInputElement
     this.milestonesButton = this.shadow.getElementById("milestones") as HTMLButtonElement
     this.observerMapPanel = this.shadow.getElementById("observer-map-panel")!
@@ -686,6 +689,7 @@ export class UfoElement extends HTMLElement {
     this.addEventListener("keydown", this.handleFullscreenKey)
     this.observerMapButton.addEventListener("click", () => this.toggleObserverMap())
     this.referencesButton.addEventListener("click", () => this.toggleReferences())
+    this.tracesButton.addEventListener("click", () => this.toggleTraces())
     this.referenceOpacityInput.addEventListener("input", () => {
       this.referenceOpacityTouched = true
       this.dispatchReferenceView()
@@ -773,6 +777,7 @@ export class UfoElement extends HTMLElement {
     this.updateMuteButton()
     this.updateObserverMapButton()
     this.updateReferencesButton()
+    this.updateTracesButton()
     this.updateMilestonesButton()
     this.refresh()
   }
@@ -1141,6 +1146,7 @@ export class UfoElement extends HTMLElement {
     this.updateMilestonesButton()
     this.updateObserverMap()
     this.updateReferences()
+    this.updateTracesButton()
     this.player.seek(this.player.time)
   }
 
@@ -1156,7 +1162,7 @@ export class UfoElement extends HTMLElement {
    */
   hostControls(host: HTMLElement | undefined): void {
     // The slider after the button it is the slider of, as the volume's is after the sound's.
-    const controls = [this.milestonesButton, this.referencesButton, this.referenceOpacityInput, this.observerMapButton]
+    const controls = [this.milestonesButton, this.referencesButton, this.referenceOpacityInput, this.tracesButton, this.observerMapButton]
     if (host) {
       for (const control of controls) host.appendChild(control)
     } else {
@@ -1204,6 +1210,28 @@ export class UfoElement extends HTMLElement {
     this.referencesButton.setAttribute("aria-label", label)
     this.referenceOpacityInput.title = this.messages.referenceOpacity
     this.referenceOpacityInput.setAttribute("aria-label", this.messages.referenceOpacity)
+  }
+
+  /** Whether the reader has the investigator's lines on — see InvestigatorTrace. */
+  get tracesShown(): boolean {
+    return this.tracesShownState
+  }
+
+  toggleTraces(): void {
+    this.tracesShownState = !this.tracesShownState
+    this.updateTracesButton()
+    this.updateObserverMap()
+    this.dispatchEvent(new CustomEvent("traceview", { detail: { shown: this.tracesShown } }))
+  }
+
+  /** Offered for every recording that carries a trace, and for no other. */
+  private updateTracesButton(): void {
+    this.tracesButton.hidden = this.currentSighting.traces.length === 0
+    this.tracesButton.setAttribute("aria-pressed", String(this.tracesShownState))
+    UfoElement.setIcon(this.tracesButton, this.tracesShownState ? PlayerIcons.TRACES_ON : PlayerIcons.TRACES_OFF)
+    const label = this.tracesShownState ? this.messages.hideTraces : this.messages.showTraces
+    this.tracesButton.title = label
+    this.tracesButton.setAttribute("aria-label", label)
   }
 
   /** Tells whoever draws the scene what the reader wants of the pictures — see SceneElement. */
@@ -2436,6 +2464,12 @@ export class UfoElement extends HTMLElement {
         ? ImageProjection.of(instrument, this.canvas.height, pose.fovDeg).halfWidthAngleDeg(Instruments.aspectOf(instrument))
         : undefined,
       markers,
+      traces: (this.tracesShownState ? this.currentSighting.traces : []).map(trace => ({
+        kind: trace.kind,
+        points: trace.points,
+        color: trace.color,
+        label: this.said.read(trace.title)
+      })),
       decor: this.observerMapDecorAt(t),
       observerLabel: this.said.read(this.currentSighting.observer?.title) ?? this.messages.observerHere,
       nightFraction: this.observerMapNightFraction,
@@ -2708,6 +2742,7 @@ export class UfoElement extends HTMLElement {
     this.updateMuteButton()
     this.updateObserverMapButton()
     this.updateReferencesButton()
+    this.updateTracesButton()
     this.updateMilestonesButton()
     this.renderIssues()
   }

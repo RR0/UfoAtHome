@@ -423,6 +423,12 @@ if (docs) {
         the fitted heading, pitch and roll into the pose at the playhead as a measurement, with its
         provenance. <strong>Street-level pictures nearby</strong> asks Panoramax for pictures taken
         within 300 m of the observer's spot, each arriving already lined up in heading.</p>
+      <p><strong>Investigator's lines (KML, KMZ)</strong> reads a Google Earth file and adds what it
+        draws: lines of sight, axes, outlines and markers, with their names, colours and heights. They
+        are drawn over the scene and on the map in their own colour, dashed on the map, as the
+        investigator's and not the reconstruction's: nothing is fitted to them, and each is credited to
+        the file it came from until you say better. Rename one, set its <strong>source</strong>, or
+        delete it; the player offers a button to hide them all.</p>
       <p>A picture holds from one point only, so lining it up also records <em>where</em> it was
         lined up from: the observer's position at the playhead. Playing, it fades out as the observer
         walks away from that point (fully shown within 2 m, gone beyond 20 m) and back in as they
@@ -847,6 +853,12 @@ if (docs) {
         la pose au point de lecture, comme une mesure, avec sa provenance. <strong>Photos de rue à
         proximité</strong> demande à Panoramax les photos prises à moins de 300 m de l'observateur, chacune
         arrivant déjà recalée en cap.</p>
+      <p><strong>Tracés d'enquêteur (KML, KMZ)</strong> lit un fichier Google Earth et ajoute ce qu'il
+        dessine : lignes de visée, axes, contours et repères, avec leurs noms, couleurs et hauteurs. Ils
+        sont affichés sur la scène et sur la carte dans leur couleur propre, en pointillés sur la carte,
+        comme ceux de l'enquêteur et non de la reconstitution : rien n'est ajusté sur eux, et chacun est
+        crédité au fichier d'où il vient tant que vous n'avez pas mieux à dire. Renommez-en un, indiquez sa
+        <strong>source</strong>, ou supprimez-le ; le lecteur offre un bouton pour les masquer tous.</p>
       <p>Une photo ne vaut que depuis un point : la recaler enregistre donc aussi <em>d'où</em> elle a
         été recalée, la position de l'observateur à la tête de lecture. En lecture, elle s'efface en
         fondu quand l'observateur s'éloigne de ce point (entière à moins de 2 m, disparue au-delà de
@@ -1266,6 +1278,12 @@ if (docs) {
         una medición, con su procedencia. <strong>Fotos a pie de calle cercanas</strong> pide a
         Panoramax las imágenes tomadas a menos de 300 m del punto del observador, cada una ya alineada en
         rumbo.</p>
+      <p><strong>Trazos del investigador (KML, KMZ)</strong> lee un archivo de Google Earth y añade lo que
+        dibuja: líneas de visión, ejes, contornos y marcadores, con sus nombres, colores y alturas. Se
+        muestran sobre la escena y en el mapa con su propio color, discontinuos en el mapa, como del
+        investigador y no de la reconstrucción: nada se ajusta a ellos, y cada uno se atribuye al archivo
+        de donde viene mientras no diga algo mejor. Renombre uno, indique su <strong>fuente</strong> o
+        elimínelo; el reproductor ofrece un botón para ocultarlos todos.</p>
       <p>Una foto solo vale desde un punto, así que alinearla registra también <em>desde dónde</em> se
         alineó: la posición del observador en el cabezal de reproducción. Durante la reproducción se
         desvanece cuando el observador se aleja de ese punto (visible del todo a menos de 2 m,
@@ -1689,6 +1707,12 @@ if (docs) {
         rosso oltre, e ciascuna delle sue estremità si può trascinare. <strong>Adotta come posa dell'osservatore</strong> scrive allora direzione, beccheggio e rollio adattati nella posa alla
         testina di riproduzione, come una misura, con la sua provenienza. <strong>Foto stradali nei dintorni</strong> chiede a Panoramax le immagini scattate entro 300 m dal punto dell'osservatore,
         ciascuna già allineata in direzione.</p>
+      <p><strong>Tracciati dell'investigatore (KML, KMZ)</strong> legge un file Google Earth e aggiunge ciò
+        che disegna: linee di vista, assi, contorni e segnaposto, con i loro nomi, colori e altezze. Sono
+        mostrati sulla scena e sulla mappa nel loro colore, tratteggiati sulla mappa, come
+        dell'investigatore e non della ricostruzione: nulla vi si adatta, e ciascuno è attribuito al file da
+        cui proviene finché non si dice di meglio. Rinominane uno, indica la sua <strong>fonte</strong> o
+        eliminalo; il lettore offre un pulsante per nasconderli tutti.</p>
       <p>Una foto vale da un solo punto, quindi allinearla registra anche <em>da dove</em> è stata
         allineata: la posizione dell'osservatore alla testina di riproduzione. Durante la riproduzione
         svanisce in dissolvenza quando l'osservatore si allontana da quel punto (piena entro 2 m,

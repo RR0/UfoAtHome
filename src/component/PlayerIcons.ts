@@ -29,6 +29,11 @@ export class PlayerIcons {
   static readonly MILESTONES_ON = PlayerIcons.solid(PlayerIcons.BOOKMARK)
   static readonly PICTURES_OFF = PlayerIcons.outline(`${PlayerIcons.PICTURE}${PlayerIcons.PICTURE_HILLS}`)
   static readonly PICTURES_ON = PlayerIcons.solid(`${PlayerIcons.PICTURE}${PlayerIcons.PICTURE_HILLS}`)
+  /** A dashed line to a marker: what an investigator draws on a map. */
+  private static readonly TRACE_LINE = "M3 19.5l2.2-2.2 1.4 1.4L4.4 20.9zM8 14.5l2.2-2.2 1.4 1.4-2.2 2.2zM13 9.5l2.2-2.2 1.4 1.4-2.2 2.2z"
+  private static readonly TRACE_MARK = "M18.5 2.5l3.5 3.5-3.5 3.5-3.5-3.5z"
+  static readonly TRACES_OFF = PlayerIcons.outline(`${PlayerIcons.TRACE_LINE}${PlayerIcons.TRACE_MARK}`)
+  static readonly TRACES_ON = PlayerIcons.solid(`${PlayerIcons.TRACE_LINE}${PlayerIcons.TRACE_MARK}`)
   static readonly MAP_OFF = PlayerIcons.outline(`${PlayerIcons.PIN}${PlayerIcons.PIN_HOLE}`)
   static readonly MAP_ON = PlayerIcons.solid(`${PlayerIcons.PIN}${PlayerIcons.PIN_HOLE}`)
 
