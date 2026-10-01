@@ -44,15 +44,14 @@ INCLINATION_DEG = 51.54
 R_KM = 6371.0
 MU = 398600.4418
 UTC_OFFSET = -5
-# The recording starts at 21:45:50 EST = 02:45:50 UTC on 4 March, fifteen seconds after the first
-# pieces began to glow: the three main ones are then burning some 15 degrees up with their tails, so a
-# reader sees what this sky is about at once rather than after half a minute of an empty one. The
-# track starts before the recording, at negative instants.
-START = (1968, 3, 4, 2, 45, 50)
-DURATION_S = 130
+# The recording starts at 21:45:35 EST = 02:45:35 UTC on 4 March, half a second before the first piece
+# begins to glow: a reader sees it appear, low in the south-south-west, rather than waiting half a
+# minute in an empty sky or arriving after it has begun.
+START = (1968, 3, 4, 2, 45, 35)
+DURATION_S = 145
 # The leading piece passes nearest Lexington at this many seconds into the recording; chosen so it
 # goes out over south-western Pennsylvania at 02:48:00 UTC, Molczan's decay time (see TIMING).
-LEXINGTON_PASS_S = 55
+LEXINGTON_PASS_S = 70.5
 # The luminous phase, seconds from the Lexington passage: from over northern Alabama (Florence, the
 # first place of the list) to past Bethany, into Pennsylvania where it was also seen.
 FIRST_S, LAST_S = -70, 70
@@ -142,7 +141,7 @@ def main():
         lat, lng = orbit.ground(s + nearest)
         f = (s - FIRST_S) / (LAST_S - FIRST_S)
         track.append({
-            "t": (LEXINGTON_PASS_S + s) * 1000,
+            "t": round((LEXINGTON_PASS_S + s) * 1000),
             "lat": derived(round(lat, 4), PATH),
             "lng": derived(round(lng, 4), PATH),
             "altitudeKm": assumed(round(TOP_KM + (BOTTOM_KM - TOP_KM) * f, 1), HEIGHT),
@@ -154,7 +153,7 @@ def main():
     late_pieces = ("Hartmann: 'observers near the end of the trajectory saw more'. When and how many are not given: "
                    "the leading piece is assumed to shed three more over West Virginia.")
     end = "Burned out over south-western Pennsylvania at 02:48 UTC, Molczan's decay time; the smaller pieces a little before."
-    late_from = (LEXINGTON_PASS_S + 40) * 1000
+    late_from = round((LEXINGTON_PASS_S + 40) * 1000)
     fragments = [
         {"id": "a", "lagS": assumed(0, main_pieces), "absoluteMagnitude": assumed(-3, main_pieces), "color": stated("#ffc070", HARTMANN + ": golden-orange"), "trainS": assumed(2, HARTMANN + ": glittering tails")},
         {"id": "b", "lagS": assumed(3, main_pieces), "absoluteMagnitude": assumed(-2.2, main_pieces), "color": "#ffb060", "trainS": 1.8},
@@ -221,7 +220,7 @@ def main():
         "version": 1,
         "id": "sky-test-reentry",
         "description": description,
-        "time": {"year": 1968, "month": 3, "day": 3, "hour": 21, "minute": 45, "second": 50},
+        "time": {"year": 1968, "month": 3, "day": 3, "hour": 21, "minute": 45, "second": 35},
         "utcOffsetHours": UTC_OFFSET,
         "durationSeconds": DURATION_S,
         "place": [{"lat": lat, "lng": lng, "name": "Owensboro, Kentucky"}],
