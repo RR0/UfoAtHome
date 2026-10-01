@@ -13,10 +13,10 @@
     "day": 13,
     "hour": 4,
     "minute": 5,
-    "second": 33
+    "second": 30
   },
   "utcOffsetHours": 2,
-  "durationSeconds": 120,
+  "durationSeconds": 10,
   "place": [
     {
       "lat": 45.7,
@@ -67,29 +67,7 @@
         }
       },
       {
-        "t": 40000,
-        "pose": {
-          "lat": 45.7,
-          "lng": 4.8,
-          "elevationM": 0,
-          "headingDeg": 70,
-          "pitchDeg": 58,
-          "fovDeg": 70
-        }
-      },
-      {
-        "t": 80000,
-        "pose": {
-          "lat": 45.7,
-          "lng": 4.8,
-          "elevationM": 0,
-          "headingDeg": 20,
-          "pitchDeg": 38,
-          "fovDeg": 70
-        }
-      },
-      {
-        "t": 120000,
+        "t": 10000,
         "pose": {
           "lat": 45.7,
           "lng": 4.8,

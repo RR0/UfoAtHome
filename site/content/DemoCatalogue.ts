@@ -416,10 +416,10 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-aircraft.json",
           title: { en: "An airliner on a 20-second exposure", fr: "Un avion de ligne sur une pose de 20\u00a0s", es: "Un avión de pasajeros en una exposición de 20\u00a0s", it: "Un aereo di linea in una posa di 20\u00a0s" },
           blurb: {
-            en: "No phenomenon is drawn here — there isn't one. Steady lamps draw lines, flashing ones drop dots, and their spacing is the angular speed divided by the flash rate.",
-            fr: "Aucun phénomène n'est dessiné ici — il n'y en a pas. Les feux fixes tracent des lignes, les clignotants posent des points, et leur espacement est la vitesse angulaire divisée par la cadence.",
-            es: "Aquí no se dibuja ningún fenómeno — no lo hay. Las luces fijas trazan líneas, las intermitentes dejan puntos, y su separación es la velocidad angular dividida por la frecuencia de destello.",
-            it: "Qui non è disegnato alcun fenomeno — non ce n'è uno. Le luci fisse tracciano linee, quelle lampeggianti lasciano punti, e la loro spaziatura è la velocità angolare divisa per la frequenza dei lampi."
+            en: "What is seen is an airliner on final approach, its landing lights facing the lens. Pause it and the 20-second exposure develops: steady lamps draw lines, flashing ones drop dots, and their spacing is the angular speed divided by the flash rate.",
+            fr: "Ce qu'on voit est un avion de ligne en finale, phares d'atterrissage face à l'objectif. Mettez en pause et la pose de 20 s se développe : les feux fixes tracent des lignes, les clignotants posent des points, et leur espacement est la vitesse angulaire divisée par la cadence.",
+            es: "Lo que se ve es un avión de pasajeros en aproximación final, con las luces de aterrizaje hacia el objetivo. Ponlo en pausa y la exposición de 20 s se revela: las luces fijas trazan líneas, las intermitentes dejan puntos, y su separación es la velocidad angular dividida por la frecuencia de destello.",
+            it: "Ciò che si vede è un aereo di linea in finale, con i fari di atterraggio rivolti all'obiettivo. Mettilo in pausa e la posa di 20 s si sviluppa: le luci fisse tracciano linee, quelle lampeggianti lasciano punti, e la loro spaziatura è la velocità angolare divisa per la frequenza dei lampi."
           }
         }
       ]

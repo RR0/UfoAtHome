@@ -13,10 +13,10 @@
     "day": 3,
     "hour": 21,
     "minute": 45,
-    "second": 0
+    "second": 50
   },
   "utcOffsetHours": -5,
-  "durationSeconds": 200,
+  "durationSeconds": 130,
   "place": [
     {
       "lat": 37.7719,
@@ -65,68 +65,13 @@
           "lat": 37.7719,
           "lng": -87.1112,
           "elevationM": 120,
-          "headingDeg": 189.3,
-          "pitchDeg": 8.0,
-          "fovDeg": 80
-        }
-      },
-      {
-        "t": 10000,
-        "pose": {
-          "lat": 37.7719,
-          "lng": -87.1112,
-          "elevationM": 120,
-          "headingDeg": 189.3,
-          "pitchDeg": 8.0,
-          "fovDeg": 80
-        }
-      },
-      {
-        "t": 20000,
-        "pose": {
-          "lat": 37.7719,
-          "lng": -87.1112,
-          "elevationM": 120,
-          "headingDeg": 189.3,
-          "pitchDeg": 8.0,
-          "fovDeg": 80
-        }
-      },
-      {
-        "t": 30000,
-        "pose": {
-          "lat": 37.7719,
-          "lng": -87.1112,
-          "elevationM": 120,
-          "headingDeg": 189.3,
-          "pitchDeg": 8.0,
-          "fovDeg": 80
-        }
-      },
-      {
-        "t": 40000,
-        "pose": {
-          "lat": 37.7719,
-          "lng": -87.1112,
-          "elevationM": 120,
-          "headingDeg": 189.3,
-          "pitchDeg": 8.0,
-          "fovDeg": 80
-        }
-      },
-      {
-        "t": 50000,
-        "pose": {
-          "lat": 37.7719,
-          "lng": -87.1112,
-          "elevationM": 120,
           "headingDeg": 183.3,
           "pitchDeg": 10.5,
           "fovDeg": 80
         }
       },
       {
-        "t": 60000,
+        "t": 10000,
         "pose": {
           "lat": 37.7719,
           "lng": -87.1112,
@@ -137,7 +82,7 @@
         }
       },
       {
-        "t": 70000,
+        "t": 20000,
         "pose": {
           "lat": 37.7719,
           "lng": -87.1112,
@@ -148,7 +93,7 @@
         }
       },
       {
-        "t": 80000,
+        "t": 30000,
         "pose": {
           "lat": 37.7719,
           "lng": -87.1112,
@@ -159,7 +104,7 @@
         }
       },
       {
-        "t": 90000,
+        "t": 40000,
         "pose": {
           "lat": 37.7719,
           "lng": -87.1112,
@@ -170,7 +115,7 @@
         }
       },
       {
-        "t": 100000,
+        "t": 50000,
         "pose": {
           "lat": 37.7719,
           "lng": -87.1112,
@@ -181,7 +126,7 @@
         }
       },
       {
-        "t": 110000,
+        "t": 60000,
         "pose": {
           "lat": 37.7719,
           "lng": -87.1112,
@@ -192,7 +137,7 @@
         }
       },
       {
-        "t": 120000,
+        "t": 70000,
         "pose": {
           "lat": 37.7719,
           "lng": -87.1112,
@@ -203,7 +148,7 @@
         }
       },
       {
-        "t": 130000,
+        "t": 80000,
         "pose": {
           "lat": 37.7719,
           "lng": -87.1112,
@@ -214,7 +159,7 @@
         }
       },
       {
-        "t": 140000,
+        "t": 90000,
         "pose": {
           "lat": 37.7719,
           "lng": -87.1112,
@@ -225,7 +170,7 @@
         }
       },
       {
-        "t": 150000,
+        "t": 100000,
         "pose": {
           "lat": 37.7719,
           "lng": -87.1112,
@@ -236,7 +181,7 @@
         }
       },
       {
-        "t": 160000,
+        "t": 110000,
         "pose": {
           "lat": 37.7719,
           "lng": -87.1112,
@@ -247,7 +192,7 @@
         }
       },
       {
-        "t": 170000,
+        "t": 120000,
         "pose": {
           "lat": 37.7719,
           "lng": -87.1112,
@@ -258,29 +203,7 @@
         }
       },
       {
-        "t": 180000,
-        "pose": {
-          "lat": 37.7719,
-          "lng": -87.1112,
-          "elevationM": 120,
-          "headingDeg": 46.5,
-          "pitchDeg": 8.0,
-          "fovDeg": 80
-        }
-      },
-      {
-        "t": 190000,
-        "pose": {
-          "lat": 37.7719,
-          "lng": -87.1112,
-          "elevationM": 120,
-          "headingDeg": 46.5,
-          "pitchDeg": 8.0,
-          "fovDeg": 80
-        }
-      },
-      {
-        "t": 200000,
+        "t": 130000,
         "pose": {
           "lat": 37.7719,
           "lng": -87.1112,
@@ -320,7 +243,7 @@
         },
         "track": [
           {
-            "t": 35000,
+            "t": -15000,
             "lat": {
               "value": 34.8129,
               "basis": "derived",
@@ -338,7 +261,7 @@
             }
           },
           {
-            "t": 45000,
+            "t": -5000,
             "lat": {
               "value": 35.2669,
               "basis": "derived",
@@ -356,7 +279,7 @@
             }
           },
           {
-            "t": 55000,
+            "t": 5000,
             "lat": {
               "value": 35.7174,
               "basis": "derived",
@@ -374,7 +297,7 @@
             }
           },
           {
-            "t": 65000,
+            "t": 15000,
             "lat": {
               "value": 36.1644,
               "basis": "derived",
@@ -392,7 +315,7 @@
             }
           },
           {
-            "t": 75000,
+            "t": 25000,
             "lat": {
               "value": 36.6076,
               "basis": "derived",
@@ -410,7 +333,7 @@
             }
           },
           {
-            "t": 85000,
+            "t": 35000,
             "lat": {
               "value": 37.0471,
               "basis": "derived",
@@ -428,7 +351,7 @@
             }
           },
           {
-            "t": 95000,
+            "t": 45000,
             "lat": {
               "value": 37.4826,
               "basis": "derived",
@@ -446,7 +369,7 @@
             }
           },
           {
-            "t": 105000,
+            "t": 55000,
             "lat": {
               "value": 37.9142,
               "basis": "derived",
@@ -464,7 +387,7 @@
             }
           },
           {
-            "t": 115000,
+            "t": 65000,
             "lat": {
               "value": 38.3416,
               "basis": "derived",
@@ -482,7 +405,7 @@
             }
           },
           {
-            "t": 125000,
+            "t": 75000,
             "lat": {
               "value": 38.7648,
               "basis": "derived",
@@ -500,7 +423,7 @@
             }
           },
           {
-            "t": 135000,
+            "t": 85000,
             "lat": {
               "value": 39.1837,
               "basis": "derived",
@@ -518,7 +441,7 @@
             }
           },
           {
-            "t": 145000,
+            "t": 95000,
             "lat": {
               "value": 39.598,
               "basis": "derived",
@@ -536,7 +459,7 @@
             }
           },
           {
-            "t": 155000,
+            "t": 105000,
             "lat": {
               "value": 40.0078,
               "basis": "derived",
@@ -554,7 +477,7 @@
             }
           },
           {
-            "t": 165000,
+            "t": 115000,
             "lat": {
               "value": 40.4129,
               "basis": "derived",
@@ -572,7 +495,7 @@
             }
           },
           {
-            "t": 175000,
+            "t": 125000,
             "lat": {
               "value": 40.8132,
               "basis": "derived",
@@ -614,7 +537,7 @@
               "rationale": "Hartmann 1968, Condon report section VI chapter 2: glittering tails"
             },
             "untilT": {
-              "value": 175000,
+              "value": 125000,
               "basis": "assumed",
               "rationale": "Burned out over south-western Pennsylvania at 02:48 UTC, Molczan's decay time; the smaller pieces a little before."
             }
@@ -634,7 +557,7 @@
             "color": "#ffb060",
             "trainS": 1.8,
             "untilT": {
-              "value": 175000,
+              "value": 125000,
               "basis": "assumed",
               "rationale": "Burned out over south-western Pennsylvania at 02:48 UTC, Molczan's decay time; the smaller pieces a little before."
             }
@@ -654,7 +577,7 @@
             "color": "#ffa050",
             "trainS": 1.5,
             "untilT": {
-              "value": 167000,
+              "value": 117000,
               "basis": "assumed",
               "rationale": "Burned out over south-western Pennsylvania at 02:48 UTC, Molczan's decay time; the smaller pieces a little before."
             }
@@ -667,12 +590,12 @@
               "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. When and how many are not given: the leading piece is assumed to shed three more over West Virginia."
             },
             "fromT": {
-              "value": 145000,
+              "value": 95000,
               "basis": "assumed",
               "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. When and how many are not given: the leading piece is assumed to shed three more over West Virginia."
             },
             "untilT": {
-              "value": 171000,
+              "value": 121000,
               "basis": "assumed",
               "rationale": "Burned out over south-western Pennsylvania at 02:48 UTC, Molczan's decay time; the smaller pieces a little before."
             },
@@ -692,12 +615,12 @@
               "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. When and how many are not given: the leading piece is assumed to shed three more over West Virginia."
             },
             "fromT": {
-              "value": 151000,
+              "value": 101000,
               "basis": "assumed",
               "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. When and how many are not given: the leading piece is assumed to shed three more over West Virginia."
             },
             "untilT": {
-              "value": 165000,
+              "value": 115000,
               "basis": "assumed",
               "rationale": "Burned out over south-western Pennsylvania at 02:48 UTC, Molczan's decay time; the smaller pieces a little before."
             },
@@ -717,12 +640,12 @@
               "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. When and how many are not given: the leading piece is assumed to shed three more over West Virginia."
             },
             "fromT": {
-              "value": 157000,
+              "value": 107000,
               "basis": "assumed",
               "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. When and how many are not given: the leading piece is assumed to shed three more over West Virginia."
             },
             "untilT": {
-              "value": 161000,
+              "value": 111000,
               "basis": "assumed",
               "rationale": "Burned out over south-western Pennsylvania at 02:48 UTC, Molczan's decay time; the smaller pieces a little before."
             },

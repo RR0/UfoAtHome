@@ -4,6 +4,9 @@ The fireball itself is NOT in the file: the scene finds it in the Global Meteor 
 (public/fireballs, see FireballArchive) for the recording's date and draws it where and when it
 burned. This file only says where to stand and where to look.
 
+The recording opens at 03:16:31 and lasts 5 s, so the bolide (03:16:31.844, 2.78 s) is seen 0.84 s
+in: a test sky shows what it is about at once.
+
 The event: trajectory 20251227031631_xiL2Z, triangulated by 13 stations, from 99.8 km over the
 Scottish Borders down to 39 km over the Solway coast in 2.78 s, absolute magnitude -7.45 at its peak
 (50 km up). From Edinburgh, 144 km away, about magnitude -6.7, 20 degrees up to the south-south-west.
@@ -50,9 +53,9 @@ def main():
                    "costa del Solway in meno di tre secondi, e lo disegna da qui come è bruciato, verso la magnitudine "
                    "-6,7, a venti gradi di altezza a sud-sud-ovest."),
         },
-        "time": {"year": 2025, "month": 12, "day": 27, "hour": 3, "minute": 16, "second": 0},
+        "time": {"year": 2025, "month": 12, "day": 27, "hour": 3, "minute": 16, "second": 31},
         "utcOffsetHours": 0,
-        "durationSeconds": 60,
+        "durationSeconds": 5,
         "place": [{"lat": LAT, "lng": LNG, "name": "Edinburgh, Scotland"}],
         "weatherTrack": {"keyframes": [{"t": 0, "weather": {
             "cloudCover": clear, "cloudDarkness": 0, "cloudBaseM": 2000, "lowerCloudCover": 0, "highCloudCover": 0,
@@ -60,7 +63,7 @@ def main():
         "timeline": {"keyframes": [{"t": 0, "shapes": []}], "order": [], "groups": []},
         "observerTrack": {"keyframes": [
             {"t": 0, "pose": {"lat": LAT, "lng": LNG, "elevationM": 50, "headingDeg": 195, "pitchDeg": 18, "fovDeg": 80}},
-            {"t": 60000, "pose": {"lat": LAT, "lng": LNG, "elevationM": 50, "headingDeg": 195, "pitchDeg": 18, "fovDeg": 80}},
+            {"t": 5000, "pose": {"lat": LAT, "lng": LNG, "elevationM": 50, "headingDeg": 195, "pitchDeg": 18, "fovDeg": 80}},
         ]},
         "soundTrack": {"keyframes": []},
         "decor": [],

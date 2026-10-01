@@ -13,10 +13,10 @@
     "day": 27,
     "hour": 3,
     "minute": 16,
-    "second": 0
+    "second": 31
   },
   "utcOffsetHours": 0,
-  "durationSeconds": 60,
+  "durationSeconds": 5,
   "place": [
     {
       "lat": 55.953,
@@ -71,7 +71,7 @@
         }
       },
       {
-        "t": 60000,
+        "t": 5000,
         "pose": {
           "lat": 55.953,
           "lng": -3.189,
