@@ -932,6 +932,7 @@ export class SceneRenderer {
   /** What an investigator drew over the place, and the module that draws it — loaded the first time
    * a recording carries any (see setTraces). */
   private traces: InvestigatorTrace[] = []
+  private traceLabels: ReadonlyMap<string, string> = new Map()
   private tracesShown = true
   private traceSystem?: TraceSystem
   private traceSystemLoading?: Promise<void>
@@ -1706,9 +1707,10 @@ export class SceneRenderer {
    * renderer keeps the array it was last given, and loads the module that draws them only when
    * there is something to draw.
    */
-  setTraces(traces: InvestigatorTrace[]): void {
-    if (traces === this.traces) return
+  setTraces(traces: InvestigatorTrace[], labels: ReadonlyMap<string, string> = new Map()): void {
+    if (traces === this.traces && labels === this.traceLabels) return
     this.traces = traces
+    this.traceLabels = labels
     if (traces.length === 0 && !this.traceSystem) return
     void this.loadTraceSystem().then(() => {
       this.drapeTraces()
@@ -1738,7 +1740,7 @@ export class SceneRenderer {
     const origin = this.terrainOrigin
     if (!system || !patch || !origin) return
     system.group.position.copy(patch.position)
-    system.set(this.tracesShown ? this.traces : [], origin.lat, origin.lng, this.siteElevationM, (x, z) => this.groundYOfPatch(patch, x, z))
+    system.set(this.tracesShown ? this.traces : [], this.traceLabels, origin.lat, origin.lng, this.siteElevationM, (x, z) => this.groundYOfPatch(patch, x, z))
   }
 
   private drapeRoads(ways: RoadWay[], lat: number, lng: number, contemporary: boolean): void {
@@ -3533,7 +3535,7 @@ export class SceneRenderer {
   private renderHudPass(camera: PerspectiveCamera): void {
     const traces = this.traceSystem?.any && this.tracesShown
     if (!traces && !this.compassSprites.some(sprite => sprite.visible)) return
-    if (traces) this.traceSystem!.setResolution(this.renderer.getDrawingBufferSize(this.traceResolution))
+    if (traces) this.traceSystem!.setView(this.renderer.getDrawingBufferSize(this.traceResolution), camera.fov)
     const autoClear = this.renderer.autoClear
     const shadows = this.renderer.shadowMap.autoUpdate
     this.renderer.autoClear = false

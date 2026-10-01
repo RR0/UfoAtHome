@@ -1,4 +1,5 @@
 import type { GeoBounds } from "../render3d/terrain/GeoBounds.js"
+import { geoToLocalMeters, localMetersToGeo } from "../render3d/terrain/GeoProjection.js"
 
 /**
  * Which part of the observer's ground the map is showing — the fitted box by default, and whatever
@@ -110,6 +111,34 @@ export class ObserverMapView {
       east: fitted.west + (this.centerX + half) * width,
       north: ObserverMapView.latitudeAt(north + (this.centerY - half) * (south - north)),
       south: ObserverMapView.latitudeAt(north + (this.centerY + half) * (south - north))
+    }
+  }
+
+  /**
+   * `bounds` (a square in metres) grown, still square, to take in the `points` that lie within
+   * `reach` times its own half-side of its centre.
+   *
+   * Bounded because a line of sight runs to the horizon: a map fitted to all of it would be a map of
+   * the department with the observer a dot in it. What lies nearer than that is the investigator's
+   * own subject — the church tower, the field, the farm — and is worth framing; what lies beyond is
+   * left to run off the edge, as a line does, and the reader can zoom out (see MIN_ZOOM).
+   */
+  static including(bounds: GeoBounds, points: ReadonlyArray<{ lat: number; lng: number }>, reach = 3): GeoBounds {
+    const lat = (bounds.north + bounds.south) / 2
+    const lng = (bounds.east + bounds.west) / 2
+    const half = geoToLocalMeters(lat, bounds.east, lat, lng).x
+    let need = half
+    for (const point of points) {
+      const { x, z } = geoToLocalMeters(point.lat, point.lng, lat, lng)
+      const distance = Math.max(Math.abs(x), Math.abs(z))
+      if (distance <= half * reach) need = Math.max(need, distance * 1.15)
+    }
+    if (need <= half) return bounds
+    return {
+      north: localMetersToGeo(0, -need, lat, lng).lat,
+      south: localMetersToGeo(0, need, lat, lng).lat,
+      east: localMetersToGeo(need, 0, lat, lng).lng,
+      west: localMetersToGeo(-need, 0, lat, lng).lng
     }
   }
 

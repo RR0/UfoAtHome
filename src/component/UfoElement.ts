@@ -2219,7 +2219,8 @@ export class UfoElement extends HTMLElement {
       this.observerMapBounds = undefined
       return
     }
-    const bounds = this.observerPath.boundsAround(UfoElement.OBSERVER_MAP_MIN_SPAN_M, UfoElement.OBSERVER_MAP_MARGIN)
+    const traced = this.tracesShownState ? this.currentSighting.traces.flatMap(trace => trace.points) : []
+    const bounds = ObserverMapView.including(this.observerPath.boundsAround(UfoElement.OBSERVER_MAP_MIN_SPAN_M, UfoElement.OBSERVER_MAP_MARGIN), traced)
     // Only a real change of ground throws the photograph away. An editor nudging a coordinate moves
     // these bounds by a metre on every keystroke, and refetching a tile grid for that would be one
     // request per keypress for an image indistinguishable from the one already held.

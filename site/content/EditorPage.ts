@@ -428,7 +428,7 @@ if (docs) {
         are drawn over the scene and on the map in their own colour, dashed on the map, as the
         investigator's and not the reconstruction's: nothing is fitted to them, and each is credited to
         the file it came from until you say better. Rename one, set its <strong>source</strong>, or
-        delete it; the player offers a button to hide them all.</p>
+        delete it; the player offers a button to hide them all. Names stand beside what they name, in the scene as on the map; the map widens to frame what lies near the observer (a line running off to the horizon is left to run off), and each source is listed in the credits. GPS tracks (<code>gx:Track</code>) are read as lines.</p>
       <p>A picture holds from one point only, so lining it up also records <em>where</em> it was
         lined up from: the observer's position at the playhead. Playing, it fades out as the observer
         walks away from that point (fully shown within 2 m, gone beyond 20 m) and back in as they
@@ -858,7 +858,7 @@ if (docs) {
         sont affichés sur la scène et sur la carte dans leur couleur propre, en pointillés sur la carte,
         comme ceux de l'enquêteur et non de la reconstitution : rien n'est ajusté sur eux, et chacun est
         crédité au fichier d'où il vient tant que vous n'avez pas mieux à dire. Renommez-en un, indiquez sa
-        <strong>source</strong>, ou supprimez-le ; le lecteur offre un bouton pour les masquer tous.</p>
+        <strong>source</strong>, ou supprimez-le ; le lecteur offre un bouton pour les masquer tous. Les noms s'affichent à côté de ce qu'ils nomment, sur la scène comme sur la carte ; la carte s'élargit pour cadrer ce qui est proche de l'observateur (une ligne qui file vers l'horizon est laissée filer), et chaque source figure dans les crédits. Les traces GPS (<code>gx:Track</code>) sont lues comme des lignes.</p>
       <p>Une photo ne vaut que depuis un point : la recaler enregistre donc aussi <em>d'où</em> elle a
         été recalée, la position de l'observateur à la tête de lecture. En lecture, elle s'efface en
         fondu quand l'observateur s'éloigne de ce point (entière à moins de 2 m, disparue au-delà de
@@ -1283,7 +1283,7 @@ if (docs) {
         muestran sobre la escena y en el mapa con su propio color, discontinuos en el mapa, como del
         investigador y no de la reconstrucción: nada se ajusta a ellos, y cada uno se atribuye al archivo
         de donde viene mientras no diga algo mejor. Renombre uno, indique su <strong>fuente</strong> o
-        elimínelo; el reproductor ofrece un botón para ocultarlos todos.</p>
+        elimínelo; el reproductor ofrece un botón para ocultarlos todos. Los nombres se muestran junto a lo que nombran, en la escena y en el mapa; el mapa se ensancha para encuadrar lo que queda cerca del observador (una línea que corre hasta el horizonte se deja correr) y cada fuente figura en los créditos. Las trazas GPS (<code>gx:Track</code>) se leen como líneas.</p>
       <p>Una foto solo vale desde un punto, así que alinearla registra también <em>desde dónde</em> se
         alineó: la posición del observador en el cabezal de reproducción. Durante la reproducción se
         desvanece cuando el observador se aleja de ese punto (visible del todo a menos de 2 m,
@@ -1712,7 +1712,7 @@ if (docs) {
         mostrati sulla scena e sulla mappa nel loro colore, tratteggiati sulla mappa, come
         dell'investigatore e non della ricostruzione: nulla vi si adatta, e ciascuno è attribuito al file da
         cui proviene finché non si dice di meglio. Rinominane uno, indica la sua <strong>fonte</strong> o
-        eliminalo; il lettore offre un pulsante per nasconderli tutti.</p>
+        eliminalo; il lettore offre un pulsante per nasconderli tutti. I nomi compaiono accanto a ciò che nominano, sulla scena come sulla mappa; la mappa si allarga per inquadrare ciò che è vicino all'osservatore (una linea che fila verso l'orizzonte è lasciata filare) e ogni fonte figura nei crediti. Le tracce GPS (<code>gx:Track</code>) sono lette come linee.</p>
       <p>Una foto vale da un solo punto, quindi allinearla registra anche <em>da dove</em> è stata
         allineata: la posizione dell'osservatore alla testina di riproduzione. Durante la riproduzione
         svanisce in dissolvenza quando l'osservatore si allontana da quel punto (piena entro 2 m,

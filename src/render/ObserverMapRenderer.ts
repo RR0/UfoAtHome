@@ -363,7 +363,14 @@ export class ObserverMapRenderer {
         ctx.font = "11px sans-serif"
         ctx.textAlign = "left"
         ctx.textBaseline = "middle"
-        this.paintOutlinedText(trace.label, points[0].x + 9, points[0].y - 9)
+        // At a line's far end from the observer, where it says what it points at — the same rule as
+        // the scene's (see TraceSystem.labelAnchor).
+        let at = points[0]
+        if (trace.kind === "line" && frame.position) {
+          const here = this.toCanvas(frame.bounds, frame.position.lat, frame.position.lng)
+          at = points.reduce((far, point) => Math.hypot(point.x - here.x, point.y - here.y) > Math.hypot(far.x - here.x, far.y - here.y) ? point : far)
+        }
+        this.paintOutlinedText(trace.label, at.x + 9, at.y - 9)
       }
     }
   }

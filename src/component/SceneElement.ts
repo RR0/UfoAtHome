@@ -38,6 +38,7 @@ import type { UfoLanguage } from "./messages/index.js"
 import { SceneNaming } from "./messages/SceneNames.js"
 import { SceneCredits } from "./SceneCredits.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
+import type { InvestigatorTrace } from "../engine/model/Trace.js"
 import { WeatherAudio } from "../render3d/WeatherAudio.js"
 import { Comets } from "../engine/astronomy/Comets.js"
 import { BRIGHT_COMETS } from "../engine/astronomy/cometCatalog.js"
@@ -684,6 +685,23 @@ export class SceneElement extends HTMLElement {
 
   private saidTexts?: SaidTexts
 
+  /** The names of the investigator's lines in this reader's language, held until the traces or the
+   * language change so that the renderer is handed the same map every tick. */
+  private traceLabelsFor?: { traces: unknown; language: string; labels: ReadonlyMap<string, string> }
+
+  private traceLabels(traces: InvestigatorTrace[]): ReadonlyMap<string, string> {
+    const language = HostLocale.preferencesFor(this).join()
+    if (this.traceLabelsFor?.traces !== traces || this.traceLabelsFor.language !== language) {
+      const labels = new Map<string, string>()
+      for (const trace of traces) {
+        const name = this.said.read(trace.title)
+        if (name) labels.set(trace.id, name)
+      }
+      this.traceLabelsFor = { traces, language, labels }
+    }
+    return this.traceLabelsFor.labels
+  }
+
   connectedCallback(): void {
     this.saidTexts = undefined
     void this.loadSceneNames()
@@ -1288,7 +1306,7 @@ export class SceneElement extends HTMLElement {
     // What the account's own plan draws, as opposed to what a survey of today reports — see
     // StatedRoad. Cheap to call every tick: the renderer keeps the array it was last given.
     this.sceneRenderer.setStatedRoads(sighting.roads)
-    this.sceneRenderer.setTraces(sighting.traces)
+    this.sceneRenderer.setTraces(sighting.traces, this.traceLabels(sighting.traces))
     // Last, once the camera and the decor stand where this instant puts them: what the decor says
     // along a line of sight is read from exactly that state (see pushPhenomenaAt).
     this.pushPhenomenaAt(t)

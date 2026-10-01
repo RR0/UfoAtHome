@@ -14,7 +14,7 @@ const KML = `<?xml version="1.0" encoding="UTF-8"?>
     <Placemark><name>Ferme</name><Point><coordinates>2.30,49.00,0</coordinates></Point></Placemark>
     <Placemark><name>Zone</name><Polygon><outerBoundaryIs><LinearRing><coordinates>
       2.3,49.0 2.4,49.0 2.4,49.1 2.3,49.0</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>
-    <Placemark><name>Trace GPS</name><gx:Track><gx:coord>2.3 49.0 10</gx:coord></gx:Track></Placemark>
+    <Placemark><name>Trace GPS</name><gx:Track><altitudeMode>absolute</altitudeMode><when>2012-06-29T06:06:00Z</when><gx:coord>2.3 49.0 110</gx:coord><gx:coord>2.31 49.01 120</gx:coord></gx:Track></Placemark>
     <Placemark><name>Mauvaise</name><LineString><coordinates>2.3,49.0</coordinates></LineString></Placemark>
   </Folder>
   <GroundOverlay><name>carte</name></GroundOverlay>
@@ -24,16 +24,21 @@ describe("KmlImport", () => {
   it("reads lines, places and outlines with their names, colours and altitude modes", () => {
     const { traces, documentName } = KmlImport.fromText(KML)
     expect(documentName).toBe("Enquête Maffliers")
-    expect(traces.map(trace => [trace.kind, trace.title])).toEqual([["line", "Visée P024"], ["point", "Ferme"], ["polygon", "Zone"]])
+    expect(traces.map(trace => [trace.kind, trace.title])).toEqual([["line", "Visée P024"], ["point", "Ferme"], ["polygon", "Zone"], ["line", "Trace GPS"]])
     expect(traces[0]).toMatchObject({ altitude: "relative", color: "#ff0000", points: [{ lat: 49, lng: 2.3, altM: 2 }, { lat: 49.01, lng: 2.31, altM: 300 }] })
     expect(traces[1].points).toEqual([{ lat: 49, lng: 2.3 }])
     expect(traces[1].altitude).toBeUndefined()
   })
 
+  it("reads a GPS track's fixes as a line, at the altitude it states", () => {
+    const track = KmlImport.fromText(KML).traces[3]
+    expect(track).toMatchObject({ kind: "line", altitude: "absolute", points: [{ lat: 49, lng: 2.3, altM: 110 }, { lat: 49.01, lng: 2.31, altM: 120 }] })
+  })
+
   it("drops the point that closes a ring, and says what it left out", () => {
     const { traces, skipped } = KmlImport.fromText(KML)
     expect(traces[2].points).toHaveLength(3)
-    expect(skipped.sort()).toEqual(["GroundOverlay", "Track"])
+    expect(skipped).toEqual(["GroundOverlay"])
   })
 
   it("refuses what is not XML", () => {
@@ -43,6 +48,6 @@ describe("KmlImport", () => {
   it("reads a KMZ as the KML it zips", async () => {
     const zipped = zipSync({ "doc.kml": strToU8(KML) })
     const { traces } = await KmlImport.fromBytes(zipped)
-    expect(traces).toHaveLength(3)
+    expect(traces).toHaveLength(4)
   })
 })

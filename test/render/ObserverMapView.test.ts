@@ -84,4 +84,16 @@ describe("ObserverMapView", () => {
     expect(fraction.x).toBeCloseTo(0.2, 9)
     expect(fraction.y).toBeCloseTo(0.7, 9)
   })
+
+  it("takes in what an investigator drew within reach, and lets a line run off to the horizon", () => {
+    const box = { north: 49.0809, south: 49.0769, west: 2.324384, east: 2.330416 } // about 440 m square
+    const metres = (box.north - box.south) * 111_320
+    // A tower 400 m north-east of the centre is framed...
+    const near = ObserverMapView.including(box, [{ lat: 49.0789 + 400 / 111_320, lng: 2.3274 + 400 / (111_320 * Math.cos(49.0789 * Math.PI / 180)) }])
+    expect((near.north - near.south) * 111_320).toBeGreaterThan(metres * 1.5)
+    expect((near.east - near.west) / (near.north - near.south)).toBeCloseTo((box.east - box.west) / (box.north - box.south), 1) // still the same shape
+    // ...a vertex 20 km away is not, so the map does not become one of the department.
+    expect(ObserverMapView.including(box, [{ lat: 49.26, lng: 2.3274 }])).toBe(box)
+    expect(ObserverMapView.including(box, [])).toBe(box)
+  })
 })

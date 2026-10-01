@@ -15,8 +15,9 @@ export interface KmlImportResult {
  * Reads the lines, places and outlines out of a Google Earth file (KML, or KMZ — the same thing
  * zipped, which is what Google Earth saves by default).
  *
- * Only geometry is read: points, lines (`LineString`), outlines (`Polygon`'s outer ring and
- * `LinearRing`), and a `MultiGeometry` as the several traces it is. Names, colours and altitude
+ * Only geometry is read: points, lines (`LineString`, and the `gx:Track` a GPS export writes, whose
+ * timestamps are dropped: a trace is a place, not a schedule), outlines (`Polygon`'s outer ring and
+ * `LinearRing`), and a `MultiGeometry` or `gx:MultiTrack` as the several traces it is. Names, colours and altitude
  * modes come along, because they are part of what the author said. Everything else a KML can hold
  * — overlays, tours, models, look-at cameras — is reported as skipped rather than guessed at.
  * Coordinates are kept exactly as written: nothing is smoothed, thinned or snapped to a road.
@@ -24,11 +25,11 @@ export interface KmlImportResult {
 export class KmlImport {
 
   private static readonly ZIP_MAGIC = [0x50, 0x4b, 0x03, 0x04]
-  private static readonly GEOMETRY = new Set(["Point", "LineString", "LinearRing", "Polygon", "MultiGeometry"])
+  private static readonly GEOMETRY = new Set(["Point", "LineString", "LinearRing", "Polygon", "MultiGeometry", "Track", "MultiTrack"])
   /** Elements that are neither a container nor a geometry, and that Google Earth writes where a
    * line could have been — told apart from the plain bookkeeping (`Style`, `name`…) that is not
    * worth mentioning. */
-  private static readonly UNSUPPORTED = new Set(["GroundOverlay", "ScreenOverlay", "PhotoOverlay", "Model", "Tour", "NetworkLink", "Track", "MultiTrack"])
+  private static readonly UNSUPPORTED = new Set(["GroundOverlay", "ScreenOverlay", "PhotoOverlay", "Model", "Tour", "NetworkLink"])
 
   /** A file's bytes: unzipped first if it is a KMZ, then read as KML. */
   static async fromBytes(bytes: Uint8Array): Promise<KmlImportResult> {
@@ -79,7 +80,7 @@ export class KmlImport {
 
   private static geometry(node: Element, title: string | undefined, color: string | undefined, out: Omit<InvestigatorTrace, "id">[]): void {
     const tag = KmlImport.local(node)
-    if (tag === "MultiGeometry") {
+    if (tag === "MultiGeometry" || tag === "MultiTrack") {
       for (const child of Array.from(node.children)) if (KmlImport.GEOMETRY.has(KmlImport.local(child))) KmlImport.geometry(child, title, color, out)
       return
     }
@@ -87,8 +88,11 @@ export class KmlImport {
       ? KmlImport.firstChild(KmlImport.firstChild(node, "outerBoundaryIs") ?? node, "LinearRing")
       : node
     const coordinates = KmlImport.firstChild(ring ?? node, "coordinates")
-    const points = coordinates ? KmlImport.points(coordinates.textContent ?? "") : []
-    const kind = tag === "Point" ? "point" : tag === "LineString" ? "line" : "polygon"
+    // A gx:Track holds one `gx:coord` ("lng lat alt", spaces) per fix instead of a coordinates list.
+    const points = tag === "Track"
+      ? Array.from(node.children).filter(child => KmlImport.local(child) === "coord").flatMap(child => KmlImport.points((child.textContent ?? "").trim().split(/\s+/).join(",")))
+      : coordinates ? KmlImport.points(coordinates.textContent ?? "") : []
+    const kind = tag === "Point" ? "point" : tag === "LineString" || tag === "Track" ? "line" : "polygon"
     // A ring written closed repeats its first point at the end; the model closes it by being a
     // polygon, so the repeat would be drawn as a zero-length edge.
     if (kind === "polygon" && points.length > 1) {

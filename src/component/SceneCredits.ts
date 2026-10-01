@@ -1,4 +1,6 @@
 import type { SceneElement } from "./SceneElement.js"
+import { SaidTexts } from "../engine/model/SaidText.js"
+import { HostLocale } from "../i18n/locale.js"
 
 /**
  * The thunder recording every scene carries, bundled whether or not a storm is drawn — see
@@ -49,6 +51,13 @@ export class SceneCredits {
       if (reference.creditUrl) item.appendChild(SceneCredits.link(reference.creditUrl, reference.credit))
       else item.textContent = reference.credit
       add(item)
+    }
+    // Whose each investigator's line is, once each: a trace nobody can trace back to somebody is an
+    // illustration (see InvestigatorTrace.source).
+    if (scene.ufoElement.sighting.traces.length > 0) {
+      const said = new SaidTexts(HostLocale.preferencesFor(scene))
+      const sources = new Set(scene.ufoElement.sighting.traces.map(trace => said.read(trace.source)).filter((source): source is string => !!source))
+      for (const source of sources) add(SceneCredits.text(source))
     }
     // The orbital elements the satellites in this sky were propagated from, once they have arrived:
     // an archive somebody kept for years so that exactly this could be done.
