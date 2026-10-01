@@ -527,6 +527,24 @@ export interface SightingEditorMessages extends SightingLabels {
   skySatellitePassesNone: string
   /** Inside the archive's span, but in a hole where no element set was recent enough to use. */
   skySatelliteElementsGap: string
+  /**
+   * The re-entries on record that could have been in this sky (see ReentryArchive): {list} is the
+   * items below, joined.
+   */
+  skyReentries: string
+  /** Appended to the list past three: {count} more. */
+  skyReentriesMore: string
+  /** One seen on record: {name}, {time} on the observer's clock, {place} it was seen from and its
+   * {distance} from this observer, km. */
+  skyReentrySeen: string
+  /** One seen on record with no place: {name}, {time}. */
+  skyReentryObserved: string
+  /** Appended when that time is outside the observation: {minutes} away from it. */
+  skyReentryOffset: string
+  /** A prediction: {name}, {time} on the observer's clock, ± {hours}; where it fell is unknown. */
+  skyReentryPredicted: string
+  /** A decay day from the satellite catalogue: {name}, {date}; neither the hour nor the place known. */
+  skyReentryDay: string
   /** Seeks to the brightest satellite pass the timeline reaches, at its peak, and turns the observer
    * to it. The next press takes the next brightest. */
   showSatellite: string

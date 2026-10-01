@@ -147,6 +147,9 @@ class SiteBuilder {
     // The World Atlas of the artificial night sky brightness, cut into tiles the editor reads a
     // place's night sky from (see AtlasLightPollutionProvider, and `npm run build:light-pollution`).
     await cp(join(this.root, "public", "light-pollution"), join(this.out, "light-pollution"), { recursive: true })
+    // The re-entries on record, one file per year, which the editor's sky line reads the year of a
+    // recording from (see ReentryArchive, and `npm run build:reentries`).
+    await cp(join(this.root, "public", "reentries"), join(this.out, "reentries"), { recursive: true })
 
     await mkdir(join(this.out, "lib"), { recursive: true })
     for (const dir of this.bundleDirs) {
@@ -331,6 +334,12 @@ ${retired}
 /light-pollution/index.json
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=0, must-revalidate
+
+# The re-entries on record: a day of cache, like the orbital elements, since a rebuild from a newer
+# CORDS export rewrites the latest years under the same names.
+/reentries/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
 `, "utf8")
 
     await writeFile(join(this.out, "robots.txt"),

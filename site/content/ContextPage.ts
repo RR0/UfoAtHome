@@ -143,7 +143,11 @@ export class ContextPage implements SitePage {
       by minutes in the last orbit). It is placed on the Earth, 70 to 100 km up, and seen through
       the Earth's curvature from where the observer stood, each piece as bright as its distance
       makes it, with its tail along its own path, until it has burned. It glows from its own
-      heating, so the Earth's shadow does not put it out.</p>
+      heating, so the Earth's shadow does not put it out. Which re-entries could have been in a
+      sky is stated from the record (CORDS since 2000, the satellite catalogue's decay days since
+      1957), each with its precision: a sighting on record near enough in time and place, a
+      prediction whose window meets the observation, or a bare day. An orbit that never comes within
+      sight of the observer's latitude is never listed.</p>
 
     <h2 id="ice">Ice and water</h2>
     <p>22° and 46° haloes, sundogs, the parhelic circle, tangent, circumzenithal and circumhorizontal
@@ -328,7 +332,11 @@ export class ContextPage implements SitePage {
       travers la courbure de la Terre depuis l'endroit où se tenait l'observateur, chaque morceau
       aussi brillant que sa distance le permet, avec sa traînée le long de son propre chemin,
       jusqu'à ce qu'il ait brûlé. Elle brille de son propre échauffement : l'ombre de la Terre ne
-      l'éteint pas.</p>
+      l'éteint pas. Les rentrées qui ont pu être dans un ciel sont énoncées depuis le registre (CORDS
+      depuis 2000, les jours de rentrée du catalogue des satellites depuis 1957), chacune avec sa
+      précision : une observation au registre assez proche dans le temps et l'espace, une prévision
+      dont la fenêtre rencontre l'observation, ou un simple jour. Une orbite qui ne passe jamais en
+      vue de la latitude de l'observateur n'est jamais listée.</p>
 
     <h2 id="ice">La glace et l'eau</h2>
     <p>Halos à 22° et 46°, parhélies, cercle parhélique, arcs tangents, circumzénithal et
@@ -517,7 +525,11 @@ export class ContextPage implements SitePage {
       Se sitúa sobre la Tierra, entre 70 y 100 km de altura, y se ve a través de la curvatura de la
       Tierra desde donde estaba el observador, cada pedazo tan brillante como lo permite su
       distancia, con su estela a lo largo de su propio camino, hasta que ha ardido. Brilla por su
-      propio calentamiento: la sombra de la Tierra no la apaga.</p>
+      propio calentamiento: la sombra de la Tierra no la apaga. Las reentradas que pudieron estar en
+      un cielo se enuncian desde el registro (CORDS desde 2000, los días de reentrada del catálogo de
+      satélites desde 1957), cada una con su precisión: una observación registrada lo bastante
+      cercana en tiempo y lugar, una predicción cuya ventana alcanza la observación, o un simple
+      día. Una órbita que nunca pasa a la vista de la latitud del observador nunca se lista.</p>
 
     <h2 id="ice">Hielo y agua</h2>
     <p>Halos de 22° y 46°, parhelios, el círculo parhélico, arcos tangentes, circuncenital y
@@ -707,7 +719,11 @@ export class ContextPage implements SitePage {
       sulla Terra, tra 70 e 100 km di quota, e visto attraverso la curvatura della Terra dal punto
       in cui stava l'osservatore, ogni pezzo luminoso quanto la sua distanza consente, con la sua
       scia lungo il proprio percorso, finché non è bruciato. Brilla del proprio riscaldamento:
-      l'ombra della Terra non lo spegne.</p>
+      l'ombra della Terra non lo spegne. I rientri che possono essere stati in un cielo sono
+      enunciati dal registro (CORDS dal 2000, i giorni di rientro del catalogo dei satelliti dal
+      1957), ciascuno con la sua precisione: un'osservazione registrata abbastanza vicina nel tempo e
+      nello spazio, una previsione la cui finestra incontra l'osservazione, o un semplice giorno.
+      Un'orbita che non passa mai in vista della latitudine dell'osservatore non è mai elencata.</p>
 
     <h2 id="ice">Ghiaccio e acqua</h2>
     <p>Aloni di 22° e 46°, pareli, il cerchio parelico, archi tangenti, circumzenitale e

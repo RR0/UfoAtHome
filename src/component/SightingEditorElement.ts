@@ -33,6 +33,8 @@ import { Novae } from "../engine/astronomy/Novae.js"
 import type { OutburstAppearance } from "../engine/astronomy/Novae.js"
 import { Sporadics } from "../engine/astronomy/Sporadics.js"
 import { Satellites } from "../engine/astronomy/Satellites.js"
+import { ReentryArchive } from "../engine/astronomy/ReentryArchive.js"
+import type { ReentryCandidate } from "../engine/astronomy/ReentryArchive.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
 import type { BowForm } from "../engine/atmosphere/Rainbows.js"
@@ -7014,6 +7016,11 @@ export class SightingEditorElement extends HTMLElement {
   /** What the sky line was last stated from — see refreshSkyCandidates. */
   private skyCandidatesKey?: string
 
+  /** The re-entries on record, shared by every editor of the page — see reentryClause. */
+  private static readonly reentryArchive = new ReentryArchive()
+  /** What was last asked of it, and its answer once it came. */
+  private reentries?: { key: string; status: "loading" | "ready" | "unavailable"; candidates?: ReentryCandidate[] }
+
   /** How far down the brightness ranking the ☄ button has walked. Reset whenever the sky changes,
    * so a reader who edits the date is offered that night's best example rather than resuming at
    * rank seven of a shower that is no longer running. */
@@ -7107,6 +7114,7 @@ export class SightingEditorElement extends HTMLElement {
       this.cometClause(date, observer),
       this.novaClause(date, observer),
       this.satelliteClause(date, observer),
+      this.reentryClause(date, observer),
       this.opticsClause(date, observer),
       this.rainbowClause(date, observer),
       this.glowClause(date, observer)
@@ -7299,6 +7307,62 @@ export class SightingEditorElement extends HTMLElement {
     if (!sky.lowOrbitLit) return filled(this.messages.skySatellitesShadowed)
     if (bright.length === 0) return filled(this.messages.skySatellitesLit)
     return filled(this.messages.skySatellitesLitWith).replace("{eras}", named)
+  }
+
+  /**
+   * The re-entries on record that could have been in this sky — see ReentryArchive.
+   *
+   * Asked for once per date, span and place, and stated when the answer arrives: the archive is a
+   * file per year, fetched for the year of the recording only. A sighting of it on record is always
+   * stated, since somebody saw it; a prediction or a bare decay day only after dusk, since they say
+   * no more than that it fell somewhere inside the window, and in daylight nobody would have seen it.
+   * At most three are named, the most precise first.
+   */
+  private reentryClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
+    const start = date.getTime()
+    const end = start + this.satelliteSpanMs()
+    const key = [start, end, observer.lat.toFixed(3), observer.lng.toFixed(3)].join()
+    if (this.reentries?.key !== key) {
+      const asked: NonNullable<SightingEditorElement["reentries"]> = { key, status: "loading" }
+      this.reentries = asked
+      void SightingEditorElement.reentryArchive.candidates(start, end, observer).then(candidates => {
+        asked.status = candidates ? "ready" : "unavailable"
+        asked.candidates = candidates
+        if (this.reentries !== asked) return
+        this.skyCandidatesKey = undefined
+        this.refreshSkyCandidates()
+      })
+      return undefined
+    }
+    if (this.reentries.status !== "ready") return undefined
+    const dark = Satellites.visibilityAt(date, observer).sunAltitudeDeg < -6
+    const shown = (this.reentries.candidates ?? []).filter(candidate => candidate.record.precision === "minute" || dark)
+    if (shown.length === 0) return undefined
+    const named = shown.slice(0, 3).map(candidate => this.reentryText(candidate))
+    if (shown.length > 3) named.push(this.messages.skyReentriesMore.replace("{count}", String(shown.length - 3)))
+    // Semicolons rather than a list's "and": each item is a clause with commas of its own.
+    return this.messages.skyReentries.replace("{list}", named.join("; "))
+  }
+
+  private reentryText(candidate: ReentryCandidate): string {
+    const { record } = candidate
+    const name = record.cosparId ? `${record.name} (${record.cosparId})` : record.name
+    const when = new Date(candidate.timeMs)
+    if (record.precision === "day") {
+      const day = when.toLocaleDateString(this.showerLanguage(), { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
+      return this.messages.skyReentryDay.replace("{name}", name).replace("{date}", day)
+    }
+    const time = this.observerClock(when).replace(/:\d\d$/, "")
+    if (record.precision === "hours") {
+      return this.messages.skyReentryPredicted.replace("{name}", name).replace("{time}", time)
+        .replace("{hours}", (record.uncertaintyHours ?? 0).toLocaleString(this.showerLanguage()))
+    }
+    const offset = candidate.offsetMinutes ? this.messages.skyReentryOffset.replace("{minutes}", String(candidate.offsetMinutes)) : ""
+    if (record.seenFrom && candidate.seenKm !== undefined) {
+      return this.messages.skyReentrySeen.replace("{name}", name).replace("{time}", time).replace("{place}", record.seenFrom)
+        .replace("{distance}", String(Math.round(candidate.seenKm / 10) * 10)) + offset
+    }
+    return this.messages.skyReentryObserved.replace("{name}", name).replace("{time}", time) + offset
   }
 
   /**
