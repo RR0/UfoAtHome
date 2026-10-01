@@ -300,6 +300,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "ben-alder",
+          src: "/demo-data/sky-test-ben-alder.json",
+          title: { en: "The Ben Alder fireball", fr: "Le bolide du Ben Alder", es: "El bólido del Ben Alder", it: "Il bolide del Ben Alder" },
+          blurb: {
+            en: "Inverness, 3 July 2025 at 01:15, a summer night's half-light: the fireball that went viral and dropped meteorites on Ben Alder, along the path the Global Meteor Network measured.",
+            fr: "Inverness, 3 juillet 2025 à 1 h 15, dans la pénombre d'une nuit d'été : le bolide devenu viral qui a semé des météorites sur le Ben Alder, le long du chemin mesuré par le Global Meteor Network.",
+            es: "Inverness, 3 de julio de 2025 a la 1:15, en la penumbra de una noche de verano: el bólido que se hizo viral y sembró meteoritos en el Ben Alder, a lo largo del camino que midió la Global Meteor Network.",
+            it: "Inverness, 3 luglio 2025 alle 1:15, nella penombra di una notte d'estate: il bolide diventato virale che ha seminato meteoriti sul Ben Alder, lungo il percorso misurato dalla Global Meteor Network."
+          }
+        },
+        {
           id: "fireball",
           src: "/demo-data/sky-test-fireball.json",
           title: { en: "A recorded fireball", fr: "Un bolide enregistré", es: "Un bólido registrado", it: "Un bolide registrato" },
