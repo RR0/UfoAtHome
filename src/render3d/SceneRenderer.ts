@@ -843,6 +843,17 @@ export class SceneRenderer {
       if (this.skyHoldUntilMs) this.redrawHeld()
     }
     const timer = patienceMs === undefined ? undefined : setTimeout(stopWaiting, patienceMs)
+    // A frame held for something that is allowed to take longer than the hold itself is held that
+    // long: the hold's own ceiling (SKY_HOLD_MS) is for a scene that never settles, not for ground
+    // and roads that are on their way. Otherwise a slow tile server meant a scene shown bare at four
+    // seconds and the ground arriving under it a moment after.
+    if (patienceMs !== undefined) {
+      this.arrivalDeadlineMs = Math.max(this.arrivalDeadlineMs, performance.now() + patienceMs)
+      if (this.skyHoldUntilMs && this.arrivalDeadlineMs > this.skyHoldUntilMs) {
+        this.skyHoldUntilMs = this.arrivalDeadlineMs
+        setTimeout(() => this.render(), patienceMs + 20)
+      }
+    }
     return arrival.finally(() => {
       clearTimeout(timer)
       stopWaiting()
@@ -851,7 +862,13 @@ export class SceneRenderer {
 
   /** How long a held frame waits for its roads — see awaitArrival. An archived square of ground is
    * two small files away; the live survey is not. */
-  private static readonly ROADS_PATIENCE_MS = 1500
+  private static readonly ROADS_PATIENCE_MS = 4000
+  /** How long a held frame waits for its relief and the photograph of the ground: tiles from servers
+   * that answer in a second or two, and sometimes ten. Past this the scene is shown on the flat
+   * ground, which it always falls back to. */
+  private static readonly TERRAIN_PATIENCE_MS = 12000
+  /** The latest moment a frame held for ground or roads has been promised to wait until — see awaitArrival. */
+  private arrivalDeadlineMs = 0
 
   /** Asks the held frame to look again at whether it can be shown, WITHOUT counting as a change of
    * the scene (see render): what it was waiting for may have come to nothing, or to no change. */
@@ -881,7 +898,8 @@ export class SceneRenderer {
   }
 
   private startHold(): void {
-    this.skyHoldUntilMs = performance.now() + SKY_HOLD_MS
+    // Not before a ground or roads fetch that began earlier has had the patience it was promised.
+    this.skyHoldUntilMs = Math.max(performance.now() + SKY_HOLD_MS, this.arrivalDeadlineMs)
     this.eyeSettledVersion = -1
     this.lastArrivalVersion = this.sceneVersion + 1
     this.iceHalos?.setUrgent(true)
@@ -1490,7 +1508,7 @@ export class SceneRenderer {
     this.terrainOrigin = { lat, lng }
     this.terrainRadius = radiusM
     const token = ++this.terrainBuildToken
-    this.awaitArrival(buildTerrainMesh(lat, lng, this.terrainProviders, radiusM))
+    this.awaitArrival(buildTerrainMesh(lat, lng, this.terrainProviders, radiusM), SceneRenderer.TERRAIN_PATIENCE_MS)
       .then(({ mesh, attribution, originElevationM }) => {
         if (token !== this.terrainBuildToken) return // superseded by a newer call while this was in flight
         this.setSiteElevation(originElevationM ?? 0)
