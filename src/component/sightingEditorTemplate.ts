@@ -1138,6 +1138,9 @@ select.weather-field:disabled {
 .param-summary {
   display: flex;
   flex-wrap: wrap;
+  /* Each chip at its own height, centred on the line: stretched to the height of a boxed group
+     beside it (see .param-nest), a chip kept its text at the top of a taller pill. */
+  align-items: center;
   gap: 0.3em;
   margin-top: 0.5em;
 }
