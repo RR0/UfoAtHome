@@ -611,7 +611,8 @@ export class BodyEditor {
   private write(interpretation: InterpretationJson, refill = false): void {
     // An interpretation left with no body and no title says nothing, and is not kept as an empty
     // statement.
-    const empty = interpretation.bodies.length === 0 && interpretation.title === undefined && interpretation.smoke === undefined
+    const empty = interpretation.bodies.length === 0 && interpretation.title === undefined && interpretation.smoke === undefined &&
+      interpretation.reentries === undefined
     this.host.sighting().interpretation = empty ? undefined : interpretation
     this.host.changed()
     if (refill) {

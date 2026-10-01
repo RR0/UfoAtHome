@@ -138,6 +138,12 @@ export class ContextPage implements SitePage {
       day by Laurent Chabin (SCEAU) give every satellite's real pass, lit through the Earth's shadow
       and as bright as it was measured to be, Starlink trains included. Before that date no
       individual pass is drawn, because none could be drawn truthfully.</p>
+    <p><strong>Re-entries</strong> are placed by an interpretation, not found: a satellite or rocket
+      stage breaking up into burning pieces, on a path somebody established (orbital elements are off
+      by minutes in the last orbit). It is placed on the Earth, 70 to 100 km up, and seen through
+      the Earth's curvature from where the observer stood, each piece as bright as its distance
+      makes it, with its tail along its own path, until it has burned. It glows from its own
+      heating, so the Earth's shadow does not put it out.</p>
 
     <h2 id="ice">Ice and water</h2>
     <p>22° and 46° haloes, sundogs, the parhelic circle, tangent, circumzenithal and circumhorizontal
@@ -315,6 +321,14 @@ export class ContextPage implements SitePage {
       passage de chaque satellite, éclairé à travers l'ombre de la Terre et aussi brillant qu'on l'a
       mesuré, trains de Starlink compris. Avant cette date, aucun passage individuel n'est tracé,
       faute de pouvoir l'être honnêtement.</p>
+    <p><strong>Les rentrées atmosphériques</strong> sont posées par une interprétation, pas
+      trouvées : un satellite ou un étage de fusée se désagrégeant en morceaux qui brûlent, sur un
+      chemin que quelqu'un a établi (les éléments orbitaux sont faux de plusieurs minutes sur la
+      dernière orbite). La rentrée est placée sur la Terre, entre 70 et 100 km d'altitude, et vue à
+      travers la courbure de la Terre depuis l'endroit où se tenait l'observateur, chaque morceau
+      aussi brillant que sa distance le permet, avec sa traînée le long de son propre chemin,
+      jusqu'à ce qu'il ait brûlé. Elle brille de son propre échauffement : l'ombre de la Terre ne
+      l'éteint pas.</p>
 
     <h2 id="ice">La glace et l'eau</h2>
     <p>Halos à 22° et 46°, parhélies, cercle parhélique, arcs tangents, circumzénithal et
@@ -497,6 +511,13 @@ export class ContextPage implements SitePage {
       través de la sombra de la Tierra y tan brillante como se midió, trenes de Starlink incluidos.
       Antes de esa fecha no se dibuja ningún paso individual, porque ninguno podría dibujarse con
       veracidad.</p>
+    <p><strong>Las reentradas atmosféricas</strong> las coloca una interpretación, no se
+      encuentran: un satélite o una etapa de cohete que se desintegra en pedazos que arden, sobre un
+      camino que alguien estableció (los elementos orbitales yerran en minutos en la última órbita).
+      Se sitúa sobre la Tierra, entre 70 y 100 km de altura, y se ve a través de la curvatura de la
+      Tierra desde donde estaba el observador, cada pedazo tan brillante como lo permite su
+      distancia, con su estela a lo largo de su propio camino, hasta que ha ardido. Brilla por su
+      propio calentamiento: la sombra de la Tierra no la apaga.</p>
 
     <h2 id="ice">Hielo y agua</h2>
     <p>Halos de 22° y 46°, parhelios, el círculo parhélico, arcos tangentes, circuncenital y
@@ -680,6 +701,13 @@ export class ContextPage implements SitePage {
       illuminato attraverso l'ombra della Terra e luminoso quanto è stato misurato, treni di Starlink
       compresi. Prima di quella data non viene disegnato alcun passaggio individuale, perché nessuno
       potrebbe esserlo in modo veritiero.</p>
+    <p><strong>I rientri atmosferici</strong> sono collocati da un'interpretazione, non trovati:
+      un satellite o uno stadio di razzo che si disintegra in pezzi che bruciano, su un percorso che
+      qualcuno ha stabilito (gli elementi orbitali sbagliano di minuti nell'ultima orbita). È posto
+      sulla Terra, tra 70 e 100 km di quota, e visto attraverso la curvatura della Terra dal punto
+      in cui stava l'osservatore, ogni pezzo luminoso quanto la sua distanza consente, con la sua
+      scia lungo il proprio percorso, finché non è bruciato. Brilla del proprio riscaldamento:
+      l'ombra della Terra non lo spegne.</p>
 
     <h2 id="ice">Ghiaccio e acqua</h2>
     <p>Aloni di 22° e 46°, pareli, il cerchio parelico, archi tangenti, circumzenitale e

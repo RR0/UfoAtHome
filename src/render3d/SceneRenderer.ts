@@ -93,6 +93,8 @@ import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
 import { CometTail } from "./CometTail.js"
 import { SatelliteField } from "./SatelliteField.js"
+import { ReentrySystem } from "./ReentrySystem.js"
+import type { ReentryFragmentView } from "../engine/interpretation/Reentry.js"
 import { LightningBolt } from "./LightningBolt.js"
 import { LightningSchedule } from "../engine/weather/LightningSchedule.js"
 import type { LightningFlash } from "../engine/weather/LightningSchedule.js"
@@ -1248,6 +1250,9 @@ export class SceneRenderer {
   /** The satellites standing in this sky, if the recording's date has element sets — see
    * setSatellites. Built on first use and kept. */
   private satelliteField?: SatelliteField
+  /** The burning pieces of the re-entries an interpretation claims — see setReentries. Built on
+   * first use and kept. */
+  private reentrySystem?: ReentrySystem
   /** What ice crystals did to the light of the Sun or Moon — see IceHaloEffect. */
   private iceHalos?: IceHaloEffect
   /** The aureole and corona round the Moon — see SourceDiffraction. */
@@ -2802,6 +2807,29 @@ export class SceneRenderer {
     this.satelliteField.set(satellites, magnitudeLimit, position => this.cloudTransmission(position),
       (position, magnitude) => this.arrivingIlluminance(position, magnitude, 1))
     this.render()
+  }
+
+  /**
+   * Draws the burning pieces of re-entries, as the observer sees them at this instant (see
+   * ReentrySighting.viewsAt): against the same magnitude limit, clouds and air as the satellites.
+   */
+  setReentries(views: ReadonlyArray<ReentryFragmentView>): void {
+    if (views.length === 0 && !this.reentrySystem?.count) return
+    if (!this.reentrySystem) {
+      this.reentrySystem = new ReentrySystem()
+      this.celestialGroup.add(this.reentrySystem.object)
+    }
+    const magnitudeLimit = this.lastAstronomy
+      ? this.magnitudeLimitOf(this.lastAstronomy)
+      : visibleMagnitudeLimit(-90, this.instrumentMagnitudeGain)
+    this.reentrySystem.set(views, magnitudeLimit, position => this.cloudTransmission(position),
+      (position, magnitude) => this.arrivingIlluminance(position, magnitude, 1))
+    this.render()
+  }
+
+  /** How many burning pieces of a re-entry are drawn — see setReentries. */
+  get reentryCount(): number {
+    return this.reentrySystem?.count ?? 0
   }
 
   /** The drawn satellite under a screen point, the same angular nearest-neighbour as pickStarAt. */
@@ -4380,6 +4408,8 @@ export class SceneRenderer {
     this.cometTail = undefined
     this.satelliteField?.dispose()
     this.satelliteField = undefined
+    this.reentrySystem?.dispose()
+    this.reentrySystem = undefined
     this.lightningBolt?.dispose()
     this.lightningBolt = undefined
     for (const mesh of this.bodyMeshes.values()) {

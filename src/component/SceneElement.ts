@@ -70,6 +70,7 @@ import { PhenomenonSystem } from "../render3d/PhenomenonSystem.js"
 import type { PlacedPhenomenon } from "../render3d/PhenomenonSystem.js"
 import { Vector3 } from "three"
 import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
+import { ReentrySighting } from "../engine/interpretation/Reentry.js"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
 import type { ConfrontationReading } from "../engine/interpretation/BodyConfrontation.js"
@@ -1318,6 +1319,10 @@ export class SceneElement extends HTMLElement {
     // Every instant, like the decor: a satellite crosses a pixel in a fraction of a frame, and a pose
     // long enough to trail the stars trails a satellite across the whole picture.
     this.pushSatellitesAt(startDate, t, observer)
+    // The re-entries the interpretation on show claims, every instant too: a piece crosses degrees
+    // a second. Placed on the Earth, so seen from the observer's real place, not the scene's origin.
+    this.sceneRenderer.setReentries(ReentrySighting.viewsAt(this.interpretationShown?.reentries ?? [], t,
+      { lat, lng, heightM: observer.elevationM }))
 
     // Everything above moves with the instant and costs almost nothing; the sky below costs about
     // 8 ms to restate, and an instant that only carries an aeroplane a few pixels further has no

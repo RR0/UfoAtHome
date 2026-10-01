@@ -298,6 +298,17 @@ export class DemoCatalogue {
             es: "París, 29 de julio de 2025 a las 23:00, dos días después de un lanzamiento: los nuevos satélites cruzan en fila, cada uno propagado a partir de los elementos orbitales archivados ese día.",
             it: "Parigi, 29 luglio 2025 alle 23, due giorni dopo un lancio: i nuovi satelliti passano in fila, ciascuno propagato dagli elementi orbitali archiviati quel giorno."
           }
+        },
+        {
+          id: "reentry",
+          src: "/demo-data/sky-test-reentry.json",
+          title: { en: "A re-entry", fr: "Une rentrée atmosphérique", es: "Una reentrada", it: "Un rientro atmosferico" },
+          blurb: {
+            en: "Zond 4's launcher breaking up over Kentucky, 3 March 1968 at 21:45: the burning string that 78 reports turned into a formation, a cigar with windows, a silent craft.",
+            fr: "Le lanceur de Zond 4 se désagrégeant au-dessus du Kentucky, 3 mars 1968 à 21 h 45 : la file brûlante dont 78 signalements ont fait une formation, un cigare à fenêtres, un appareil silencieux.",
+            es: "El lanzador de Zond 4 desintegrándose sobre Kentucky, 3 de marzo de 1968 a las 21:45: la fila ardiente que 78 informes convirtieron en una formación, un cigarro con ventanas, una nave silenciosa.",
+            it: "Il lanciatore di Zond 4 che si disintegra sopra il Kentucky, 3 marzo 1968 alle 21:45: la fila ardente che 78 segnalazioni trasformarono in una formazione, un sigaro con finestre, un velivolo silenzioso."
+          }
         }
       ]
     },
