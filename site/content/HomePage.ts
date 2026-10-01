@@ -88,6 +88,8 @@ const show = async position => {
     if (player) {
       // Looping would mean this slide never ends, and the sequence never moves.
       player.autoReplayEnabled = false
+      // Nobody asked for these recordings one by one: the controls come with a touch, not with each start.
+      player.quietControls = true
       if (onScreen) player.play()
     }
   } catch {

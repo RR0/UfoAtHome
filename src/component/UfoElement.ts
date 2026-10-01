@@ -1841,6 +1841,22 @@ export class UfoElement extends HTMLElement {
 
   private controlsIdleTimer?: number
   private wasPlaying = false
+  private quietControlsValue = false
+
+  /**
+   * Whether the controls stay away until the reader asks for them, on a screen with no hover: not at
+   * the start of a recording that began by itself, and not between two recordings either. For a page
+   * that sequences recordings (the front page's carousel), where each one starting showed the whole
+   * interface again though nobody had touched anything since the last. A touch still brings them.
+   */
+  get quietControls(): boolean {
+    return this.quietControlsValue
+  }
+
+  set quietControls(quiet: boolean) {
+    this.quietControlsValue = quiet
+    this.stageElement.classList.toggle("quiet", quiet)
+  }
   /** Set by a touch that found the controls hidden over a playing recording: it shows them and does
    * nothing else — the click that follows it must not pause. */
   private tapRevealedOnly = false
@@ -1941,7 +1957,7 @@ export class UfoElement extends HTMLElement {
     this.stageElement.classList.toggle("paused", !isPlaying)
     // Playing begins with the controls in sight, and their few seconds start there. Only when it
     // begins: this runs on every tick, and would keep them there for ever.
-    if (isPlaying !== this.wasPlaying && isPlaying && this.hoverless) this.revealControls()
+    if (isPlaying !== this.wasPlaying && isPlaying && this.hoverless && !this.quietControlsValue) this.revealControls()
     this.wasPlaying = isPlaying
     UfoElement.setIcon(this.playPauseButton, isPlaying ? PlayerIcons.PAUSE : PlayerIcons.PLAY)
     // Nothing to play with zero observation duration (no declared duration and nothing recorded

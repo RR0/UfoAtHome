@@ -596,16 +596,16 @@ canvas[data-cursor="rotate"] {
   .toolbar.auto-hide .toolbar-inner {
     overflow: hidden;
   }
-  .stage.paused .auto-hide,
+  .stage.paused:not(.quiet) .auto-hide,
   .stage.touched .auto-hide {
     opacity: 1;
     pointer-events: auto;
   }
-  .stage.paused .toolbar.auto-hide,
+  .stage.paused:not(.quiet) .toolbar.auto-hide,
   .stage.touched .toolbar.auto-hide {
     grid-template-rows: 1fr;
   }
-  .stage.paused .toolbar.auto-hide .toolbar-inner,
+  .stage.paused:not(.quiet) .toolbar.auto-hide .toolbar-inner,
   .stage.touched .toolbar.auto-hide .toolbar-inner {
     overflow: visible;
   }
@@ -1028,11 +1028,21 @@ canvas[data-cursor="rotate"] {
   accent-color: #fff;
   transition: width 0.15s ease, margin 0.15s ease, opacity 0.15s ease;
 }
-.volume:hover input[type="range"],
 .volume:has(:focus-visible) input[type="range"] {
   width: 4.5em;
   margin: 0 0.6em 0 0.3em;
   opacity: 1;
+}
+/* Unfolded by hovering ONLY where there is a hover. On a touch screen the first tap on a control whose
+   :hover rule changes the page is taken for the hover and does nothing else — which is the mute button
+   asking for two taps, the first of them unfolding a slider nobody wanted. There the slider stays
+   folded, and a tap is the click it is: a phone has its own volume keys. */
+@media (hover: hover) {
+  .volume:hover input[type="range"] {
+    width: 4.5em;
+    margin: 0 0.6em 0 0.3em;
+    opacity: 1;
+  }
 }
 .time-separator {
   opacity: 0.75;
