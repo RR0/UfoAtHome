@@ -64,7 +64,17 @@ export class ReflectionProbe {
    */
   capture(renderer: WebGLRenderer, scene: Scene, position: Vector3, hidden: readonly Object3D[] = []): void {
     const shadows = renderer.shadowMap.autoUpdate
-    renderer.shadowMap.autoUpdate = false
+    // The six faces are not to redraw the shadows six times over: they reuse the ones the scene's own
+    // frame drew. Unless there are none yet — a probe taken before the first frame, or the moment a
+    // light starts casting. A shadow sampler reading a map that was never made is a texture of the
+    // wrong kind for it, which is what filled the console with "Mismatch between texture format and
+    // sampler type" on every night sky. Then the first capture draws them itself, once.
+    let unmade = false
+    scene.traverse(object => {
+      const light = object as Object3D & { isLight?: boolean; castShadow: boolean; shadow?: { map: unknown } }
+      if (light.isLight && light.castShadow && light.shadow && !light.shadow.map) unmade = true
+    })
+    renderer.shadowMap.autoUpdate = unmade ? shadows : false
     const shown = hidden.map(object => object.visible)
     for (const object of hidden) object.visible = false
     this.camera.position.copy(position)
