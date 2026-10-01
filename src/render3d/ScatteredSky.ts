@@ -295,12 +295,24 @@ export class ScatteredSky {
       return
     }
     this.reading = true
+    let failed = false
     try {
       const [sun, moon] = await Promise.all([this.tables.readSkyView("sun"), this.tables.readSkyView("moon")])
       const state = this.state
       if (state) this.adaptFromViews(sun, moon, state)
+    } catch {
+      // The context was lost under the read: a card scrolled out of a page of many skies gives its
+      // context back (see SceneRenderer.releaseContext) while the read it had asked for is still on
+      // its way, and the read then comes back rejected, with nothing in it. There is nobody left to
+      // adapt: the views are drawn again, and read again, when the context comes back.
+      failed = true
+      this.drawnKey = ""
     } finally {
       this.reading = false
+    }
+    if (failed) {
+      this.readAgain = false
+      return
     }
     if (this.readAgain) {
       this.readAgain = false
