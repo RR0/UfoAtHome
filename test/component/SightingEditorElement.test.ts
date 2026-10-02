@@ -52,6 +52,8 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setDecor(): void {}
     setDecorPresence(): void {}
     setDecorSunlight(): void {}
+    setContrails(): void {}
+    setContrailSunlight(): void {}
     setReferences(): void {}
     setReferencesShown(): void {}
     setReferenceView(): void {}

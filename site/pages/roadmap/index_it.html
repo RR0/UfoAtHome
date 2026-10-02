@@ -34,8 +34,9 @@
       <h3>Anomalie di propagazione radar <span class="status status-later">in attesa di dati</span></h3>
       <p>Inversioni termiche e condotti — la spiegazione di un'intera famiglia di casi radar/visivi. Il
         criterio è un gradiente di rifrattività inferiore a −157 unità per chilometro, il che richiede
-        il profilo di temperatura e umidità in quota. Verificato ed escluso: Open-Meteo non fornisce i
-        livelli di pressione in modalità archivio. La fonte vera è IGRA, l'archivio dei radiosondaggi,
+        il profilo di temperatura e umidità in quota. Verificato: l'archivio di rianalisi di Open-Meteo non fornisce i
+        livelli di pressione; la sua API delle previsioni storiche sì, ma solo dal 2022, il che non serve ai
+        casi più vecchi di cui qui si tratta. La fonte vera è IGRA, l'archivio dei radiosondaggi,
         con i sondaggi dell'Università del Wyoming e i dati pubblici di Météo-France come altri punti
         di accesso, ed è questo che si sta aspettando.</p>
     </div>
@@ -47,19 +48,15 @@
     </div>
 
     <div class="timeline-step">
-      <h3>Traffico aereo <span class="status status-later">in attesa di dati</span></h3>
-      <p>L'archivio di Flightradar24 è a pagamento e recente, e i casi più vecchi non hanno alcuna
-        traccia. Ciò che resta per loro: le aerovie e le procedure di avvicinamento pubblicate (l'eAIP
-        francese), il calendario delle zone militari temporanee e gli aerodromi vicini
-        all'osservatore. Per i casi recenti, una traccia KML esportata da un servizio di tracciamento
-        dei voli basta a collocare l'aereo.</p>
-    </div>
-
-    <div class="timeline-step">
-      <h3>Scie di condensazione <span class="status status-later">pianificato</span></h3>
-      <p>Se un aereo quel giorno ha lasciato una scia dipende dalla temperatura e dall'umidità alla sua
-        quota (il diagramma di Appleman), che la rianalisi in quota già usata per le nuvole
-        fornisce.</p>
+      <h3>Traffico aereo e scie prima del 2022 <span class="status status-later">in attesa di dati</span></h3>
+      <p>Dal 2022 gli aerei intorno all'osservatore sono disegnati dalla cronologia aperta di adsb.lol,
+        con la scia che i loro motori lasciano quando l'aria lo consente (vedi la pagina delle fonti).
+        Prima non c'è alcuna traccia: l'archivio di Flightradar24 è a pagamento e recente. Per i casi
+        più vecchi restano le aerovie e le procedure di avvicinamento pubblicate (l'eAIP francese), il
+        calendario delle zone militari temporanee e gli aerodromi vicini all'osservatore. Per un caso
+        recente fuori dall'archivio, una traccia KML esportata da un servizio di tracciamento dei voli
+        basta a collocare l'aereo. Quanto all'aria in quota, l'archivio dei radiosondaggi che le
+        anomalie radar aspettano è l'unica fonte nota per quegli anni.</p>
     </div>
 
     <h2>Dalla parte dell'oggetto</h2>

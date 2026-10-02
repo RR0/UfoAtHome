@@ -34,8 +34,9 @@
       <h3>Radar propagation anomalies <span class="status status-later">blocked on data</span></h3>
       <p>Temperature inversions and ducting — the explanation behind a whole family of radar/visual
         cases. The criterion is a refractivity gradient below −157 units per kilometre, which needs
-        the temperature and humidity profile with height. Checked and ruled out: Open-Meteo does not
-        serve pressure levels in archive mode. The real source is IGRA, the radiosonde archive,
+        the temperature and humidity profile with height. Checked: Open-Meteo's archive of the
+        reanalysis does not serve pressure levels. Its historical forecast API does, but only from
+        2022, which is no use to the older cases this is about. The real source is IGRA, the radiosonde archive,
         with the University of Wyoming soundings and Météo-France's public data as other entry
         points, and that is what this is waiting on.</p>
     </div>
@@ -47,18 +48,15 @@
     </div>
 
     <div class="timeline-step">
-      <h3>Air traffic <span class="status status-later">blocked on data</span></h3>
-      <p>Flightradar24's archive is paid and recent, and older cases have no track at all. What is
-        left for them: published airways and approach procedures (the French eAIP), the calendar of
-        temporary military areas, and the airfields near the observer. For recent cases, a KML
-        track exported from a flight tracker is enough to place the aircraft.</p>
-    </div>
-
-    <div class="timeline-step">
-      <h3>Contrails <span class="status status-later">planned</span></h3>
-      <p>Whether an aircraft that day left a trail follows from the temperature and humidity at its
-        altitude (the Appleman chart), which the upper-air reanalysis already used for the clouds
-        provides.</p>
+      <h3>Air traffic and contrails before 2022 <span class="status status-later">blocked on data</span></h3>
+      <p>From 2022 on, the aircraft around the observer are drawn from adsb.lol's open history, with
+        the trail their engines leave where the air allows one (see the sources page). Before, there
+        is no track at all: Flightradar24's archive is paid and recent. What is left for older cases:
+        published airways and approach procedures (the French eAIP), the calendar of temporary
+        military areas, and the airfields near the observer. For a recent case outside the archive, a
+        KML track exported from a flight tracker is enough to place the aircraft. As for the air
+        aloft, the radiosonde archive the radar anomalies wait on is the only record known for those
+        years.</p>
     </div>
 
     <h2>On the object's side</h2>

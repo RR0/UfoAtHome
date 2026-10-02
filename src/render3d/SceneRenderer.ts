@@ -72,6 +72,8 @@ import type { RoadWay } from "./terrain/RoadProvider.js"
 import type { StatedRoad } from "../engine/model/Road.js"
 import type { InvestigatorTrace } from "../engine/model/Trace.js"
 import type { TraceSystem } from "./TraceSystem.js"
+import type { ContrailSystem } from "./ContrailSystem.js"
+import type { ContrailTrail } from "../engine/traffic/AircraftContrails.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
 import { DEFAULT_CLOUD_BASE_M, DEFAULT_ICE_CRYSTAL_ALIGNMENT, DEFAULT_WEATHER } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
@@ -988,6 +990,12 @@ export class SceneRenderer {
   private decorPresence: ReadonlyMap<string, { fromMs: number; untilMs: number }> = new Map()
   /** Where the Sun stands for each decor object that flies, by id — see setDecorSunlight. */
   private decorSunlight: ReadonlyMap<string, DecorSunlight> = new Map()
+  /** The trails the aircraft of a record leave, and what draws them: brought in with the first trail, never for a scene without one. */
+  private contrails: readonly ContrailTrail[] = []
+  private contrailSystem?: ContrailSystem
+  private contrailSystemLoading?: Promise<void>
+  /** Where the Sun stands for each trail, by the id of its aircraft — see setContrailSunlight. */
+  private contrailSunlight: ReadonlyMap<string, DecorSunlight> = new Map()
   /** The Sun's beam on the ground the scene stands on, per channel, in the units of its lights: what the scene's own
    * directional light already gives every object. Zero when the light is the Moon's, or when no light is on. */
   private sceneSunBeam: [number, number, number] = [0, 0, 0]
@@ -2005,6 +2013,73 @@ export class SceneRenderer {
     this.decorSunlight = sunlight
   }
 
+  /**
+   * Draws the trails the aircraft of a record leave (see AircraftContrails). Cheap to call at every tick: the renderer keeps the array it was
+   * last given, and loads the code that draws them only when there is a trail to draw.
+   */
+  setContrails(trails: readonly ContrailTrail[]): void {
+    if (trails === this.contrails) return
+    this.contrails = trails
+    if (trails.length === 0 && !this.contrailSystem) return
+    void this.loadContrailSystem().then(() => {
+      this.contrailSystem?.set(this.contrails)
+      // At the instant already shown: a still scene has no next tick to draw them at.
+      this.updateContrails()
+      this.render()
+    })
+  }
+
+  /**
+   * Tells where the Sun stands for the aircraft that leave trails, by id: unlike a decor object's (see setDecorSunlight), the trail is there
+   * after its aircraft has gone, and is lit by the Sun at the height it was left at.
+   */
+  setContrailSunlight(sunlight: ReadonlyMap<string, DecorSunlight>): void {
+    this.contrailSunlight = sunlight
+  }
+
+  private loadContrailSystem(): Promise<void> {
+    return this.contrailSystemLoading ??= import("./ContrailSystem.js").then(({ ContrailSystem }) => {
+      const system = new ContrailSystem()
+      this.scene.add(system.group)
+      this.contrailSystem = system
+    })
+  }
+
+  /**
+   * What a trail of ice scatters of the Sun that reaches it, per channel, in the scene's own units: the light of the Sun at the height of its
+   * aircraft, through the air above that height alone and over every cloud there is (see lightFromAbove), turned back by ice, which is a white
+   * and bright reflector (Lambert, albedo 0.8), and the sky's own light on it. Nothing once the Sun has set for that height: a trail is not a lamp.
+   */
+  private contrailTint(id: string): [number, number, number] {
+    const sunlight = this.contrailSunlight.get(id)
+    const sun = this.lastAstronomy?.sun
+    const k = SceneRenderer.CONTRAIL_ALBEDO / Math.PI
+    const sky = this.skyLight.color
+    const tint: [number, number, number] = [sky.r * k * 0.5, sky.g * k * 0.5, sky.b * k * 0.5]
+    if (sunlight && sun) {
+      const lit = AircraftLighting.litFraction(sunlight.sunElevationDeg, sunlight.heightM)
+      if (lit > 0) {
+        const through = this.air.transmittanceFromSpace(sunlight.heightM, sunlight.sunElevationDeg)
+        const illuminance = ForwardDiffraction.illuminanceOf(sun.magnitude) * this.relativeScale
+        for (let c = 0; c < 3; c++) tint[c] += k * illuminance * through[c] * lit
+      }
+    }
+    return tint
+  }
+
+  private static readonly CONTRAIL_ALBEDO = 0.8
+
+  /** Builds the trails as they stand at the instant the decor was last placed at. */
+  private updateContrails(): void {
+    this.contrailSystem?.update(this.decorTime, { origin: this.bodyOrigin, eye: this.camera.position, pixelRad: this.contrailPixelRad() }, id => this.contrailTint(id))
+  }
+
+  /** The angle of one pixel of the picture, radians: what a trail is never drawn thinner than. */
+  private contrailPixelRad(): number {
+    const heightPx = Math.max(1, this.renderer.getDrawingBufferSize(this.bloomSize).y)
+    return Math.max(this.lampBloomRadiusRad() ?? 0, ((this.camera.fov * Math.PI) / 180) / heightPx)
+  }
+
   /** Tells which decor objects are there only for a while, and when — see decorPresence. Applied at the next
    * updateDecorAnchoring, which every tick runs. */
   setDecorPresence(presence: ReadonlyMap<string, { fromMs: number; untilMs: number }>): void {
@@ -2306,6 +2381,7 @@ export class SceneRenderer {
       // Not for one that is not there: its resting place would push the far plane out for nothing.
       if (!absent) furthestDecorM = Math.max(furthestDecorM, group.position.distanceTo(this.camera.position))
     }
+    this.updateContrails()
     // Decor used to be local scenery, a couple of hundred meters out at most, so a far plane sized
     // for the sky and the ground was always enough. An aircraft is 5 to 10 km away, and would be
     // clipped away entirely. Widened here rather than in setObserverPose because a moving object's
@@ -4497,6 +4573,8 @@ export class SceneRenderer {
     this.disposeMesh(this.terrainMesh)
     this.roadSystem.dispose()
     this.traceSystem?.dispose()
+    this.contrailSystem?.dispose()
+    this.contrailSystem = undefined
     this.disposeCloudSystem()
     this.disposeCirrus()
     this.disposePrecipitationPoints()

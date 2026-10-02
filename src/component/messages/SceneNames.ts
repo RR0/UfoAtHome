@@ -38,6 +38,9 @@ export interface TrafficTexts {
   readonly inaudible: string
   /** When its sound cannot be worked out. */
   readonly soundUnknown: string
+  /** What the air makes of its exhaust: {rhi}, the humidity over ice, in per cent. */
+  readonly contrailPersistent: string
+  readonly contrailShort: string
   readonly military: string
   readonly restricted: string
   /** What a record of aircraft says, and does not. */

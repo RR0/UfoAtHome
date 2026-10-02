@@ -154,6 +154,8 @@ export const sceneNames_it: SceneNames = {
     pitchLower: ", suono più grave del {percent} %",
     inaudible: "Non si sente qui: {level} dB(A) contro {ambient} dB(A) di rumore ambientale",
     soundUnknown: "Suono non calcolabile: l'aereo non era ancora registrato quando è partito",
+    contrailPersistent: "Lascia una scia che dura: l'aria è sovrasatura rispetto al ghiaccio ({rhi} % rispetto al ghiaccio)",
+    contrailShort: "Lascia una scia breve: l'aria è secca rispetto al ghiaccio ({rhi} % rispetto al ghiaccio)",
     military: "militare",
     restricted: "identità nascosta dal proprietario",
     candidate: "Un candidato compatibile, non un'identificazione"

@@ -157,6 +157,8 @@ export const sceneNames_es: SceneNames = {
     pitchLower: ", sonido {percent} % más grave",
     inaudible: "Inaudible aquí: {level} dB(A) frente a {ambient} dB(A) de ruido ambiente",
     soundUnknown: "Sonido no calculable: el avión aún no estaba registrado cuando salió",
+    contrailPersistent: "Deja una estela que dura: el aire está sobresaturado respecto al hielo ({rhi} % respecto al hielo)",
+    contrailShort: "Deja una estela breve: el aire está seco respecto al hielo ({rhi} % respecto al hielo)",
     military: "militar",
     restricted: "identidad oculta por su propietario",
     candidate: "Un candidato compatible, no una identificación"

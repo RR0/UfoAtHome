@@ -23,6 +23,8 @@ export class TrafficTooltip {
     pitchLower: ", pitch {percent} % lower",
     inaudible: "Not audible here: {level} dB(A) against {ambient} dB(A) of ambient noise",
     soundUnknown: "Its sound cannot be worked out: the aircraft was not recorded yet when it left",
+    contrailPersistent: "Leaves a trail that lasts: the air is supersaturated over ice ({rhi} % over ice)",
+    contrailShort: "Leaves a short-lived trail: the air is dry over ice ({rhi} % over ice)",
     military: "military",
     restricted: "identity withheld by its owner",
     candidate: "A compatible candidate, not an identification"
@@ -71,6 +73,7 @@ export class TrafficTooltip {
         pitch
       }))
     }
+    if (info.contrail) lines.push(fill(info.contrail.persistent ? texts.contrailPersistent : texts.contrailShort, { rhi: number(Math.round(info.contrail.iceRelativeHumidity * 100)) }))
     const flags = [info.military ? texts.military : undefined, info.restricted ? texts.restricted : undefined].filter(Boolean)
     if (flags.length > 0) lines.push(flags.join(" · "))
     lines.push(texts.candidate)

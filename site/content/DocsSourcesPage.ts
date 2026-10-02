@@ -299,6 +299,99 @@ export class DocsSourcesPage extends DocsSection {
       ]
     },
     {
+      id: "aircraft",
+      heading: { en: "Aircraft and their trails", fr: "Avions et traînées", es: "Aviones y estelas", it: "Aerei e scie" },
+      intro: {
+        en: "From 2022, the aircraft that were in the observer's sky at the hour of a recording, the air they flew in, and the trail their engines left there. What is drawn is a compatible candidate, never an identification, and an empty sky in the record excludes nothing.",
+        fr: "Depuis 2022, les avions qui étaient dans le ciel de l'observateur à l'heure d'un enregistrement, l'air dans lequel ils volaient, et la traînée que leurs moteurs y laissaient. Ce qui est dessiné est un candidat compatible, jamais une identification, et un ciel vide dans le relevé n'exclut rien.",
+        es: "Desde 2022, los aviones que estaban en el cielo del observador a la hora de una grabación, el aire en el que volaban y la estela que sus motores dejaban en él. Lo que se dibuja es un candidato compatible, nunca una identificación, y un cielo vacío en el registro no excluye nada.",
+        it: "Dal 2022, gli aerei che erano nel cielo dell'osservatore all'ora di una registrazione, l'aria in cui volavano e la scia che i loro motori vi lasciavano. Ciò che è disegnato è un candidato compatibile, mai un'identificazione, e un cielo vuoto nell'archivio non esclude nulla."
+      },
+      rows: [
+        {
+          name: "adsb.lol open history", url: "https://www.adsb.lol/docs/open-data/historical/",
+          provides: {
+            en: "Where every aircraft that broadcast its position was, from 2022: its track, and its type, registration and category. Each is drawn with its real size, lamps (from dusk, by kind of aircraft), the Sun that still lights it after the ground has lost it, the haze between, and the sound it makes if it can be heard.",
+            fr: "Où était chaque avion qui a émis sa position, depuis 2022 : sa trace, son type, son immatriculation et sa catégorie. Chacun est dessiné à sa vraie taille, avec ses feux (à la nuit tombée, selon le type d'appareil), le Soleil qui l'éclaire encore quand le sol l'a perdu, la brume entre lui et l'observateur, et le son qu'il fait s'il peut être entendu.",
+            es: "Dónde estaba cada avión que emitió su posición, desde 2022: su trayectoria, su tipo, su matrícula y su categoría. Cada uno se dibuja con su tamaño real, sus luces (desde el anochecer, según el tipo de aeronave), el Sol que aún lo ilumina cuando el suelo ya lo ha perdido, la bruma intermedia y el sonido que hace si puede oírse.",
+            it: "Dove si trovava ogni aereo che ha trasmesso la propria posizione, dal 2022: la sua traccia, il tipo, la marca di registrazione e la categoria. Ognuno è disegnato con la sua vera dimensione, le sue luci (dal crepuscolo, secondo il tipo di velivolo), il Sole che lo illumina ancora quando il suolo l'ha perso, la foschia in mezzo e il suono che produce se può essere udito."
+          },
+          when: {
+            en: "Reduced once per day (build:aircraft) into one packed file per hour and per 1-degree tile. The page reads only the tiles within 150 km of the observer, for the hour of the recording and the five minutes before it, and never for a date before 2022. The code that draws, labels and plays the aircraft is loaded only when a scene has some.",
+            fr: "Réduit une fois par jour (build:aircraft) en un fichier compacté par heure et par tuile d'un degré. La page ne lit que les tuiles à moins de 150 km de l'observateur, pour l'heure de l'enregistrement et les cinq minutes qui la précèdent, et jamais pour une date antérieure à 2022. Le code qui dessine, étiquette et fait entendre les avions n'est chargé que si une scène en a.",
+            es: "Reducido una vez al día (build:aircraft) a un archivo empaquetado por hora y por casilla de un grado. La página solo lee las casillas a menos de 150 km del observador, para la hora de la grabación y los cinco minutos anteriores, y nunca para una fecha anterior a 2022. El código que dibuja, etiqueta y reproduce los aviones solo se carga si una escena los tiene.",
+            it: "Ridotto una volta al giorno (build:aircraft) in un file compattato per ora e per riquadro di un grado. La pagina legge solo i riquadri entro 150 km dall'osservatore, per l'ora della registrazione e i cinque minuti precedenti, e mai per una data anteriore al 2022. Il codice che disegna, etichetta e fa sentire gli aerei è caricato solo se una scena ne ha."
+          },
+          hosting: {
+            en: "Built from the daily releases of the adsb.lol history (ODbL 1.0), credited in the player's credits. Not hosted yet: until the archive is served from ufoathome.org/aircraft/, aircraft show only from a local copy.",
+            fr: "Construit à partir des publications quotidiennes de l'historique d'adsb.lol (ODbL 1.0), crédité dans les crédits du lecteur. Pas encore hébergé : tant que l'archive n'est pas servie depuis ufoathome.org/aircraft/, les avions ne s'affichent qu'à partir d'une copie locale.",
+            es: "Construido a partir de las publicaciones diarias del historial de adsb.lol (ODbL 1.0), acreditado en los créditos del reproductor. Aún no alojado: hasta que el archivo se sirva desde ufoathome.org/aircraft/, los aviones solo se muestran desde una copia local.",
+            it: "Costruito dalle pubblicazioni quotidiane della cronologia di adsb.lol (ODbL 1.0), citato nei crediti del lettore. Non ancora ospitato: finché l'archivio non è servito da ufoathome.org/aircraft/, gli aerei compaiono solo da una copia locale."
+          },
+          choices: {
+            en: "One feeder instance is enough: prod-0, with staging-0 as a fallback, hold the same flights to 0.02 %. Only the positions of a release's own UTC day are kept, so the result does not depend on the order days were read in; airport vehicles are dropped. What no receiver heard is absent: light aircraft, gliders, balloons and military aircraft that switch their transponder off are under-represented, and about one aircraft in seven states no type, so it is drawn as a generic airliner.",
+            fr: "Une seule instance suffit : prod-0, avec staging-0 en repli, contiennent les mêmes vols à 0,02 % près. Seules les positions du jour UTC propre à une publication sont gardées, pour que le résultat ne dépende pas de l'ordre dans lequel les jours ont été lus ; les véhicules d'aéroport sont écartés. Ce qu'aucun récepteur n'a entendu est absent : avions légers, planeurs, ballons et militaires qui coupent leur transpondeur sont sous-représentés, et un avion sur sept n'indique aucun type, donc il est dessiné comme un avion de ligne générique.",
+            es: "Una sola instancia basta: prod-0, con staging-0 de respaldo, contienen los mismos vuelos con una diferencia del 0,02 %. Solo se conservan las posiciones del día UTC propio de cada publicación, para que el resultado no dependa del orden en que se leyeron los días; se descartan los vehículos de aeropuerto. Lo que ningún receptor oyó está ausente: aviones ligeros, planeadores, globos y militares que apagan su transpondedor están infrarrepresentados, y uno de cada siete aviones no indica tipo, así que se dibuja como un avión de línea genérico.",
+            it: "Basta una sola istanza: prod-0, con staging-0 di riserva, contengono gli stessi voli con una differenza dello 0,02 %. Si conservano solo le posizioni del giorno UTC proprio di ogni pubblicazione, così che il risultato non dipenda dall'ordine in cui i giorni sono stati letti; i veicoli aeroportuali sono scartati. Ciò che nessun ricevitore ha sentito è assente: aerei leggeri, alianti, palloni e militari che spengono il transponder sono sottorappresentati, e un aereo su sette non dichiara alcun tipo, quindi è disegnato come un aereo di linea generico."
+          }
+        },
+        {
+          name: "Open-Meteo, historical forecast API", url: "https://open-meteo.com/en/docs/historical-forecast-api",
+          provides: {
+            en: "Temperature, humidity and wind at 500, 400, 300, 250, 200 and 150 hPa, hour by hour, from 2022: the air the aircraft fly in.",
+            fr: "Température, humidité et vent à 500, 400, 300, 250, 200 et 150 hPa, heure par heure, depuis 2022 : l'air dans lequel les avions volent.",
+            es: "Temperatura, humedad y viento a 500, 400, 300, 250, 200 y 150 hPa, hora a hora, desde 2022: el aire en el que vuelan los aviones.",
+            it: "Temperatura, umidità e vento a 500, 400, 300, 250, 200 e 150 hPa, ora per ora, dal 2022: l'aria in cui volano gli aerei."
+          },
+          when: {
+            en: "Fetched by the page, once per recording that has aircraft, for the observer's place and the hours of the window: never for a date before 2022, and never for a scene with no aircraft.",
+            fr: "Chargé par la page, une fois par enregistrement qui a des avions, pour le lieu de l'observateur et les heures de la fenêtre : jamais pour une date antérieure à 2022, ni pour une scène sans avion.",
+            es: "Cargado por la página, una vez por grabación que tiene aviones, para el lugar del observador y las horas de la ventana: nunca para una fecha anterior a 2022, ni para una escena sin aviones.",
+            it: "Caricato dalla pagina, una volta per registrazione che ha aerei, per il luogo dell'osservatore e le ore della finestra: mai per una data anteriore al 2022, né per una scena senza aerei."
+          },
+          hosting: {
+            en: "Open-Meteo.com, CC BY 4.0, no key, credited in the player's credits.",
+            fr: "Open-Meteo.com, CC BY 4.0, sans clé, crédité dans les crédits du lecteur.",
+            es: "Open-Meteo.com, CC BY 4.0, sin clave, acreditado en los créditos del reproductor.",
+            it: "Open-Meteo.com, CC BY 4.0, senza chiave, citato nei crediti del lettore."
+          },
+          choices: {
+            en: "Not the reanalysis the weather uses: its archive serves no pressure levels. These are the forecasting models' own analyses, which are known to underestimate how often the air at cruise level is supersaturated over ice, so a trail that lasts in the sky may be one the record says should not. Read at the observer's place only: an aircraft a hundred kilometres off flies in air the model may state differently. The humidity is relative to water (checked against the ceiling the data make at saturation over ice, near 60 % at -47 C).",
+            fr: "Pas la réanalyse qu'utilise la météo : son archive ne sert aucun niveau de pression. Ce sont les analyses propres aux modèles de prévision, connues pour sous-estimer la fréquence à laquelle l'air est sursaturé en glace à l'altitude de croisière : une traînée qui dure dans le ciel peut donc être une traînée que le relevé dit ne pas devoir durer. Lu au lieu de l'observateur seulement : un avion à cent kilomètres vole dans un air que le modèle peut décrire autrement. L'humidité est relative à l'eau (vérifié sur le plafond que font les données à la saturation par rapport à la glace, près de 60 % à -47 C).",
+            es: "No es la reanálisis que usa la meteorología: su archivo no sirve niveles de presión. Son los análisis propios de los modelos de predicción, que se sabe que subestiman la frecuencia con que el aire a altitud de crucero está sobresaturado respecto al hielo, de modo que una estela que dura en el cielo puede ser una que el registro dice que no debería. Se lee solo en el lugar del observador: un avión a cien kilómetros vuela en un aire que el modelo puede describir de otro modo. La humedad es relativa al agua (comprobado con el techo que dan los datos en la saturación respecto al hielo, cerca del 60 % a -47 C).",
+            it: "Non è la rianalisi usata dal meteo: il suo archivio non fornisce livelli di pressione. Sono le analisi proprie dei modelli di previsione, note per sottostimare la frequenza con cui l'aria a quota di crociera è sovrasatura rispetto al ghiaccio, per cui una scia che dura nel cielo può essere una che l'archivio dice non dovrebbe. Letto solo nel luogo dell'osservatore: un aereo a cento chilometri vola in un'aria che il modello può descrivere diversamente. L'umidità è relativa all'acqua (verificato sul tetto che i dati fanno alla saturazione rispetto al ghiaccio, vicino al 60 % a -47 C)."
+          }
+        },
+        {
+          name: "Schmidt-Appleman criterion (Schumann 1996)", url: "https://doi.org/10.1127/metz/5/1996/4",
+          provides: {
+            en: "Whether an engine's exhaust leaves a trail in that air, and whether it lasts. The exhaust cools along a line fixed by the engine's efficiency and the pressure; a trail forms if that line crosses saturation over water, and it lasts only where the air is saturated over ice.",
+            fr: "Si l'échappement d'un moteur laisse une traînée dans cet air, et si elle dure. L'échappement se refroidit le long d'une droite fixée par le rendement du moteur et la pression ; une traînée se forme si cette droite croise la saturation par rapport à l'eau, et elle ne dure que là où l'air est saturé par rapport à la glace.",
+            es: "Si el escape de un motor deja una estela en ese aire, y si dura. El escape se enfría a lo largo de una recta fijada por el rendimiento del motor y la presión; se forma una estela si esa recta cruza la saturación respecto al agua, y solo dura donde el aire está saturado respecto al hielo.",
+            it: "Se lo scarico di un motore lascia una scia in quell'aria, e se dura. Lo scarico si raffredda lungo una retta fissata dal rendimento del motore e dalla pressione; una scia si forma se quella retta incrocia la saturazione rispetto all'acqua, e dura solo dove l'aria è satura rispetto al ghiaccio."
+          },
+          when: {
+            en: "Computed in the page for each position of each aircraft, at the pressure its barometric altitude is (a barometric altitude is a pressure), and carried by the wind at that level.",
+            fr: "Calculé dans la page pour chaque position de chaque avion, à la pression que donne son altitude barométrique (une altitude barométrique est une pression), et emporté par le vent de ce niveau.",
+            es: "Calculado en la página para cada posición de cada avión, a la presión que da su altitud barométrica (una altitud barométrica es una presión), y arrastrado por el viento de ese nivel.",
+            it: "Calcolato nella pagina per ogni posizione di ogni aereo, alla pressione data dalla sua quota barometrica (una quota barometrica è una pressione), e trasportato dal vento di quel livello."
+          },
+          hosting: {
+            en: "Formula and constants in the code, with the saturation pressures of Murphy and Koop (2005).",
+            fr: "Formule et constantes dans le code, avec les pressions de saturation de Murphy et Koop (2005).",
+            es: "Fórmula y constantes en el código, con las presiones de saturación de Murphy y Koop (2005).",
+            it: "Formula e costanti nel codice, con le pressioni di saturazione di Murphy e Koop (2005)."
+          },
+          choices: {
+            en: "The engine is a typical one for the kind of aircraft, not the one of that airframe: overall efficiency 0.38 for a wide-body, 0.34 for a narrow-body, 0.30 for a business jet, 0.22 for a fighter. Propellers, rotors, gliders and balloons are given no trail. How a trail ages (its width, how it fades, how long a short one lasts) is a parameterisation of observed orders of magnitude, not a simulation. A trail drawn is estimated, never a fact; and one left by an aircraft that had gone before the five minutes the record is asked for is missing.",
+            fr: "Le moteur est un moteur typique du type d'appareil, pas celui de cette cellule : rendement global 0,38 pour un gros-porteur, 0,34 pour un monocouloir, 0,30 pour un jet d'affaires, 0,22 pour un chasseur. Hélices, rotors, planeurs et ballons n'ont aucune traînée. La façon dont une traînée vieillit (sa largeur, son estompage, la durée d'une traînée courte) est une paramétrisation d'ordres de grandeur observés, pas une simulation. Une traînée dessinée est estimée, jamais un fait ; et celle d'un avion déjà parti avant les cinq minutes demandées au relevé manque.",
+            es: "El motor es uno típico del tipo de aeronave, no el de esa célula: rendimiento global 0,38 para un fuselaje ancho, 0,34 para un pasillo único, 0,30 para un jet ejecutivo, 0,22 para un caza. Hélices, rotores, planeadores y globos no tienen estela. Cómo envejece una estela (su anchura, cómo se desvanece, cuánto dura una corta) es una parametrización de órdenes de magnitud observados, no una simulación. Una estela dibujada es estimada, nunca un hecho; y falta la de un avión que ya se había ido antes de los cinco minutos que se piden al registro.",
+            it: "Il motore è uno tipico del tipo di velivolo, non quello di quella cellula: rendimento globale 0,38 per un widebody, 0,34 per un single-aisle, 0,30 per un jet executive, 0,22 per un caccia. Eliche, rotori, alianti e palloni non hanno scia. Come invecchia una scia (la larghezza, come svanisce, quanto dura una breve) è una parametrizzazione di ordini di grandezza osservati, non una simulazione. Una scia disegnata è stimata, mai un fatto; e manca quella di un aereo già andato via prima dei cinque minuti richiesti all'archivio."
+          }
+        }
+      ]
+    },
+    {
       id: "weather",
       heading: { en: "Weather", fr: "Météo", es: "Meteorología", it: "Meteo" },
       rows: [

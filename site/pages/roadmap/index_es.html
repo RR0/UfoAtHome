@@ -35,7 +35,9 @@
       <p>Inversiones de temperatura y conductos — la explicación de toda una familia de casos
         radar/visuales. El criterio es un gradiente de refractividad inferior a −157 unidades por
         kilómetro, lo que requiere el perfil de temperatura y humedad en altura. Comprobado y
-        descartado: Open-Meteo no sirve niveles de presión en modo archivo. La fuente real es IGRA, el
+        descartado: el archivo de reanálisis de Open-Meteo no sirve niveles de presión; su API de pronósticos
+        históricos sí, pero solo desde 2022, lo que no sirve a los casos más antiguos de los que aquí se trata.
+        La fuente real es IGRA, el
         archivo de radiosondeos, con los sondeos de la Universidad de Wyoming y los datos públicos de
         Météo-France como otras vías de acceso, y eso es lo que esto espera.</p>
     </div>
@@ -47,19 +49,15 @@
     </div>
 
     <div class="timeline-step">
-      <h3>Tráfico aéreo <span class="status status-later">a la espera de datos</span></h3>
-      <p>El archivo de Flightradar24 es de pago y reciente, y los casos más antiguos no tienen
-        trayectoria alguna. Lo que queda para ellos: las aerovías y los procedimientos de aproximación
-        publicados (el eAIP francés), el calendario de las zonas militares temporales y los
-        aeródromos cercanos al observador. Para los casos recientes, una trayectoria KML exportada de
-        un rastreador de vuelos basta para situar la aeronave.</p>
-    </div>
-
-    <div class="timeline-step">
-      <h3>Estelas de condensación <span class="status status-later">planificado</span></h3>
-      <p>Si una aeronave dejó ese día una estela se deduce de la temperatura y la humedad a su
-        altitud (el diagrama de Appleman), que ya proporciona el reanálisis en altura usado para las
-        nubes.</p>
+      <h3>Tráfico aéreo y estelas antes de 2022 <span class="status status-later">a la espera de datos</span></h3>
+      <p>Desde 2022, los aviones alrededor del observador se dibujan a partir del historial abierto de
+        adsb.lol, con la estela que dejan sus motores cuando el aire lo permite (véase la página de
+        fuentes). Antes no hay trayectoria alguna: el archivo de Flightradar24 es de pago y reciente. Lo
+        que queda para los casos más antiguos: las aerovías y los procedimientos de aproximación
+        publicados (el eAIP francés), el calendario de las zonas militares temporales y los aeródromos
+        cercanos al observador. Para un caso reciente fuera del archivo, una trayectoria KML exportada de
+        un rastreador de vuelos basta para situar la aeronave. En cuanto al aire en altura, el archivo de
+        radiosondeos que esperan las anomalías radar es la única fuente conocida para esos años.</p>
     </div>
 
     <h2>Del lado del objeto</h2>

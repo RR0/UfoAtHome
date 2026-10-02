@@ -43,6 +43,8 @@ export interface TrafficInfo {
   sky: SkyPoint
   /** How fast it crosses the sky, degrees per second. */
   angularRateDegPerS?: number
+  /** The trail its exhaust leaves in the air it flies in, when it leaves one (see AircraftContrails): whether it lasts, and the humidity over ice that decides it. */
+  contrail?: { persistent: boolean; iceRelativeHumidity: number }
   /** Its sound, when it can be worked out: undefined when the aircraft was not recorded yet when the sound left it. */
   hearing?: TrafficHearing
 }

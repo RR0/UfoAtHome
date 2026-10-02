@@ -35,7 +35,9 @@
       <p>Inversions de température et conduits — l'explication derrière toute une famille de cas
         radar/visuels. Le critère est un gradient de réfractivité inférieur à −157 unités par
         kilomètre, ce qui demande le profil de température et d'humidité avec l'altitude. Vérifié et
-        écarté : Open-Meteo ne sert pas les niveaux de pression en archive. La vraie source est
+        écarté : l'archive de réanalyse d'Open-Meteo ne sert pas les niveaux de pression ; son API de prévisions
+        historiques le fait, mais seulement depuis 2022, ce qui ne sert à rien aux cas plus anciens dont il
+        s'agit ici. La vraie source est
         IGRA, l'archive des radiosondages, avec les sondages de l'université du Wyoming et les
         données publiques de Météo-France comme autres portes d'entrée, et c'est ce que cet élément
         attend.</p>
@@ -48,19 +50,15 @@
     </div>
 
     <div class="timeline-step">
-      <h3>Trafic aérien <span class="status status-later">en attente de données</span></h3>
-      <p>L'archive de Flightradar24 est payante et récente, et les cas plus anciens n'ont aucune
-        trace. Il leur reste les routes aériennes et procédures d'approche publiées (l'eAIP
+      <h3>Trafic aérien et traînées avant 2022 <span class="status status-later">en attente de données</span></h3>
+      <p>Depuis 2022, les avions autour de l'observateur sont dessinés d'après l'historique ouvert
+        d'adsb.lol, avec la traînée que laissent leurs moteurs quand l'air le permet (voir la page des
+        sources). Avant, il n'y a aucune trace : l'archive de Flightradar24 est payante et récente. Il
+        reste pour les cas plus anciens les routes aériennes et procédures d'approche publiées (l'eAIP
         français), le calendrier des zones militaires temporaires, et les aérodromes proches de
-        l'observateur. Pour un cas récent, une trace KML exportée d'un suivi de vols suffit à placer
-        l'avion.</p>
-    </div>
-
-    <div class="timeline-step">
-      <h3>Traînées de condensation <span class="status status-later">planifié</span></h3>
-      <p>Qu'un avion ait laissé une traînée ce jour-là se déduit de la température et de l'humidité
-        à son altitude (le diagramme d'Appleman), que fournit déjà la réanalyse en altitude
-        utilisée pour les nuages.</p>
+        l'observateur. Pour un cas récent hors de l'archive, une trace KML exportée d'un suivi de vols
+        suffit à placer l'avion. Quant à l'air en altitude, l'archive de radiosondages qu'attendent les
+        anomalies radar est la seule source connue pour ces années.</p>
     </div>
 
     <h2>Du côté de l'objet</h2>

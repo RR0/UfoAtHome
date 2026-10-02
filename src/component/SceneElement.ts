@@ -79,6 +79,8 @@ import { AircraftLighting } from "../engine/traffic/AircraftLighting.js"
 import type { AircraftModel } from "../engine/traffic/AircraftModels.js"
 import type { AircraftDescription, AircraftPoint, AircraftTrack } from "../engine/traffic/AircraftProvider.js"
 import type { TrafficInfo } from "../engine/traffic/TrafficInfo.js"
+import type { ContrailTrail } from "../engine/traffic/AircraftContrails.js"
+import type { UpperAirProvider, UpperAirSample, UpperAirSource } from "../engine/traffic/UpperAirProvider.js"
 import { TrafficIds } from "../engine/traffic/TrafficIds.js"
 import type { TrafficDecorSet } from "../engine/traffic/TrafficDecor.js"
 import type { DecorObject } from "../engine/model/Decor.js"
@@ -350,6 +352,8 @@ export class SceneElement extends HTMLElement {
   private static readonly aircraftProviders = new Map<string, AircraftProvider>()
   /** How far before a recording the record of air traffic is asked for: the time the sound of an aircraft a hundred kilometres off takes to arrive, near enough. */
   private static readonly SOUND_LOOKBACK_MS = 300_000
+  private static readonly NO_CONTRAILS: readonly ContrailTrail[] = []
+  private static readonly upperAirProviders = new Map<string, UpperAirProvider>()
   private static readonly NO_PRESENCE: ReadonlyMap<string, { fromMs: number; untilMs: number }> = new Map()
   /** Where the air traffic is read from — see AircraftProvider. The editor's picker changes it. */
   private aircraftSource: DataSource<AircraftProvider> = AIRCRAFT_SOURCES[0]
@@ -363,7 +367,7 @@ export class SceneElement extends HTMLElement {
     SceneElement.trafficRuntimeLoading.catch(() => { SceneElement.trafficRuntimeLoading = undefined })
     return SceneElement.trafficRuntimeLoading
   }
-  private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription>; audible?: Set<string> }
+  private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription>; audible?: Set<string>; air?: UpperAirSample[]; airSource?: UpperAirSource; contrails?: ContrailTrail[] }
   /** Where the Sun stood at the last restatement of the sky, from the observer: what the aircraft are lit by, each from its own place. */
   private lastSun?: { altitudeDeg: number; azimuthDeg: number }
   /** The decor the recording states plus the traffic, rebuilt only when either changes: the renderer
@@ -1313,6 +1317,8 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setDecor(this.decorWithTraffic(sighting))
     this.sceneRenderer.setDecorPresence(this.traffic?.set?.presence ?? SceneElement.NO_PRESENCE)
     this.sceneRenderer.setDecorSunlight(this.trafficSunlight(t))
+    this.sceneRenderer.setContrails(this.traffic?.contrails ?? SceneElement.NO_CONTRAILS)
+    this.sceneRenderer.setContrailSunlight(this.contrailSunlight(t))
     const pose = resolveObserverPoseAt(sighting, t)
     // Where the observer is, so a picture taken from somewhere else fades — see SceneReference.from.
     this.sceneRenderer.setReferences(sighting.references,
@@ -1595,6 +1601,8 @@ export class SceneElement extends HTMLElement {
       this.startAircraftSound(asked, runtime)
       this.announceTraffic()
       void this.describeTraffic(provider, asked, runtime, build)
+      // Only for a sky that has aircraft: with none there is no trail to work out, and the air is not asked for.
+      if (asked.set.shown > 0) void this.readUpperAir(asked, runtime, startMs - before, startMs + spanMs + after)
     })
     return undefined
   }
@@ -1644,7 +1652,21 @@ export class SceneElement extends HTMLElement {
     const here = { lat: traffic.observer.lat, lng: traffic.observer.lng, heightM: pose?.elevationM ?? 0 }
     // Against the same ambient noise as what is played, so that the label and the sound say the same.
     const ambientDbA = runtime.AmbientNoise.dbA(resolveActualWeatherAt(this.ufoElement.sighting, this.lastTimeMs))
-    return runtime.TrafficInfos.at(flight, description, here, traffic.startMs + this.lastTimeMs, { ambientDbA })
+    const info = runtime.TrafficInfos.at(flight, description, here, traffic.startMs + this.lastTimeMs, { ambientDbA })
+    const contrail = info && this.contrailAt(id, this.lastTimeMs)
+    return info && contrail ? { ...info, contrail } : info
+  }
+
+  /** What the air makes of the exhaust of that aircraft at `t` (ms from the start), when it leaves a trail there: the last position of the flight at which it formed one. */
+  private contrailAt(id: string, t: number): TrafficInfo["contrail"] {
+    const trail = this.traffic?.contrails?.find(candidate => candidate.id === id)
+    if (!trail) return undefined
+    let here: (typeof trail.points)[number] | undefined
+    for (const point of trail.points) {
+      if (point.tMs > t) break
+      here = point
+    }
+    return here?.forms ? { persistent: here.persistent, iceRelativeHumidity: here.iceRelativeHumidity } : undefined
   }
 
   /**
@@ -1721,14 +1743,69 @@ export class SceneElement extends HTMLElement {
     asked.descriptions = descriptions
     asked.models = models
     asked.set = build(runtime, models)
+    this.planContrails(asked, runtime)
     this.sortOutAudible(asked, runtime)
     this.announceTraffic()
+  }
+
+  /**
+   * Asks the record of the air aloft for the temperature, humidity and wind at the levels the aircraft fly at, and, once it has come, works out
+   * which of them leave a trail and where it goes (see AircraftContrails). Nothing is drawn of a trail the record cannot state.
+   */
+  private async readUpperAir(asked: NonNullable<SceneElement["traffic"]>, runtime: TrafficRuntime, fromMs: number, untilMs: number): Promise<void> {
+    if (!asked.observer) return
+    const source = this.upperAirSource ?? runtime.UPPER_AIR_SOURCES[0]
+    let provider = SceneElement.upperAirProviders.get(source.id)
+    if (!provider) SceneElement.upperAirProviders.set(source.id, provider = source.create())
+    const answer = await provider.between(asked.observer, fromMs, untilMs)
+    if (this.traffic !== asked || answer.status !== "found") return
+    asked.air = answer.samples
+    asked.airSource = answer.source
+    this.planContrails(asked, runtime)
+    this.announceTraffic()
+  }
+
+  private planContrails(asked: NonNullable<SceneElement["traffic"]>, runtime: TrafficRuntime): void {
+    if (!asked.set || !asked.air || asked.startMs === undefined) return
+    asked.contrails = runtime.AircraftContrails.plan(asked.set, asked.models, asked.air, asked.startMs)
+  }
+
+  /**
+   * Where the Sun stands for each aircraft that leaves a trail, at the place it was at `t`, or at the end of its flight in the record once it
+   * has left it: the trail stays lit, as the Sun at that height lights it (see SceneRenderer.setContrailSunlight).
+   */
+  private contrailSunlight(t: number): Map<string, DecorSunlight> {
+    const sunlight = new Map<string, DecorSunlight>()
+    const traffic = this.traffic
+    const set = traffic?.set
+    const sun = this.lastSun
+    if (!set || !sun || !traffic.contrails?.length || traffic.startMs === undefined || !traffic.observer) return sunlight
+    for (const trail of traffic.contrails) {
+      const presence = set.presence.get(trail.id)
+      const flight = set.flights.get(trail.id)
+      if (!presence || !flight) continue
+      const at = AircraftSighting.positionAt(flight, traffic.startMs + Math.min(presence.untilMs, Math.max(presence.fromMs, t)))
+      if (at) sunlight.set(trail.id, { heightM: at.geo.heightM, sunElevationDeg: AircraftLighting.sunElevationDeg(sun, traffic.observer, at.geo) })
+    }
+    return sunlight
   }
 
   /** The Sun's elevation over the horizon at the place of an aircraft, at the instant of one of its positions. */
   private sunElevationAt(point: AircraftPoint, observer: ObserverGeo): number {
     const sun = computeBodyPosition("Sun", new Date(point.t), observer)
     return AircraftLighting.sunElevationDeg(sun, observer, point)
+  }
+
+  /** Where the air aloft the trails are worked out from is read: the first of the registry's unless it is pointed elsewhere (see UpperAirProvider). */
+  private upperAirSource?: DataSource<UpperAirProvider>
+
+  /** Points the scene at another record of the air aloft, and works the trails out again. */
+  setUpperAirSource(source: DataSource<UpperAirProvider>): void {
+    if (source.id === this.upperAirSource?.id) return
+    this.upperAirSource = source
+    this.traffic = undefined
+    this.decorMemo = undefined
+    this.updateAstronomy(this.lastTimeMs)
   }
 
   /** Points the scene at another source of air traffic and asks it again — see AircraftProvider. */
@@ -1746,8 +1823,11 @@ export class SceneElement extends HTMLElement {
    * aircraft the record gave and how many are drawn (a record of an hour near a big airport holds
    * more than is worth drawing).
    */
-  get aircraftState(): { status: "none" | "loading" | "ready" | "outside" | "unavailable"; total: number; shown: number; credit: string; creditUrl: string } {
+  get aircraftState(): { status: "none" | "loading" | "ready" | "outside" | "unavailable"; total: number; shown: number; credit: string; creditUrl: string; trailCredit?: { credit: string; creditUrl: string } } {
+    // Where the air the trails were worked out from comes from, once there are trails.
+    const trailSource = this.traffic?.contrails?.length ? this.upperAirSource ?? SceneElement.trafficRuntime?.UPPER_AIR_SOURCES[0] : undefined
     return {
+      trailCredit: trailSource && { credit: trailSource.credit, creditUrl: trailSource.creditUrl },
       status: this.traffic?.status ?? "none",
       total: this.traffic?.set?.total ?? 0,
       shown: this.traffic?.set?.shown ?? 0,

@@ -1,6 +1,7 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
 import { registerScene, SCENE_ELEMENT_NAME, AIRCRAFT_CHANGE_EVENT } from "../../src/component/SceneElement.js"
 import type { AircraftProvider, AircraftTraffic } from "../../src/engine/traffic/AircraftProvider.js"
+import type { UpperAir, UpperAirProvider } from "../../src/engine/traffic/UpperAirProvider.js"
 import { AircraftAudio } from "../../src/audio/AircraftAudio.js"
 import type { DataSource } from "../../src/engine/source/DataSource.js"
 import type { SceneElement } from "../../src/component/SceneElement.js"
@@ -22,6 +23,18 @@ const pickedTraffic: { id?: string } = {}
 /** Every decor list and presence table the element hands the renderer, to see what air traffic reaches it. */
 const decorSet: { id: string }[][] = []
 const presenceSet: ReadonlyMap<string, { fromMs: number; untilMs: number }>[] = []
+/** Every list of trails the element hands the renderer. */
+const contrailsSet: { id: string; points: { forms: boolean; persistent: boolean }[] }[][] = []
+/**
+ * What the record of the air aloft answers: nothing real, ever. "Could not be read" unless a test says otherwise (see upperAirSource), and the
+ * places it was asked for, so that a test can see where.
+ */
+const upperAirAsked: { lat: number; lng: number }[] = []
+let upperAirAnswer: UpperAir = { status: "failed" }
+const upperAirSource: DataSource<UpperAirProvider> = {
+  id: "stub-air", name: "Stub air", credit: "Weather data by Open-Meteo.com (stub)", creditUrl: "https://example.test/air",
+  create: () => ({ between: async place => { upperAirAsked.push(place); return upperAirAnswer } })
+}
 
 // jsdom's <canvas> can back neither WebGL nor Web Audio, so both are stubbed whole — same reason
 // and shape as SightingElement.test.ts's identical SceneRenderer mock.
@@ -53,6 +66,8 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setDecor(decor: { id: string }[]): void { decorSet.push(decor) }
     setDecorPresence(presence: ReadonlyMap<string, { fromMs: number; untilMs: number }>): void { presenceSet.push(presence) }
     setDecorSunlight(): void {}
+    setContrails(trails: { id: string; points: { forms: boolean; persistent: boolean }[] }[]): void { contrailsSet.push(trails) }
+    setContrailSunlight(): void {}
     setReferences(): void {}
     setReferencesShown(): void {}
     setReferenceView(): void {}
@@ -499,6 +514,7 @@ describe("SceneElement air traffic", () => {
   const mountAt = (time: object | undefined, source: DataSource<AircraftProvider>, weather?: object) => {
     const element = mount()
     element.setAircraftSource(source)
+    element.setUpperAirSource(upperAirSource)
     element.sightingData = { ...rainyJson, ...(weather ? { weatherTrack: weatherOf(weather) } : {}), time, utcOffsetHours: 0, place: [{ lat: paris.lat, lng: paris.lng }] } as never
     element.ufoElement.sighting.observerTrack.addKeyframe(0, paris)
     const internal = element as unknown as { applySceneAt(t: number): void; sceneCanvas: HTMLCanvasElement }
@@ -522,6 +538,71 @@ describe("SceneElement air traffic", () => {
     expect(presenceSet[presenceSet.length - 1].get("traffic-abc123-0")).toEqual({ fromMs: 0, untilMs: 60_000 })
     expect(element.aircraftState).toMatchObject({ status: "ready", shown: 1, total: 1, credit: "Stub credit" })
     element.remove()
+  })
+
+  describe("the trails of the aircraft", () => {
+    /** The air aloft as the record states it: the same at every level, hour by hour. */
+    const air = (temperatureC: number, relativeHumidity: number): UpperAir => {
+      const level = (pressureHpa: number) => ({ pressureHpa, temperatureC, relativeHumidity, windSpeedMs: 20, windFromDeg: 270 })
+      const levels = [500, 400, 300, 250, 200, 150].map(level)
+      return { status: "found", source: { id: "stub-air", name: "Stub air", url: "https://example.test/air" }, samples: [{ t: noon - 3_600_000, levels }, { t: noon + 3_600_000, levels }] }
+    }
+
+    afterEach(() => {
+      contrailsSet.length = 0
+      upperAirAsked.length = 0
+      upperAirAnswer = { status: "failed" }
+    })
+
+    it("asks the air aloft at the observer's place and gives the renderer the trails the exhaust makes in it", async () => {
+      upperAirAnswer = air(-58, 0.6)
+      const { source } = stubSource(overhead)
+      const { element, tick } = mountAt(AT, source)
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+      await vi.waitFor(() => expect(element.aircraftState.trailCredit).toBeDefined())
+      tick()
+      expect(upperAirAsked).toContainEqual({ lat: 48.99, lng: 2.45 })
+      const trails = contrailsSet[contrailsSet.length - 1]
+      expect(trails.map(trail => trail.id)).toEqual(["traffic-abc123-0"])
+      expect(trails[0].points.every(point => point.forms)).toBe(true)
+      expect(element.aircraftState.trailCredit).toMatchObject({ credit: expect.stringContaining("Open-Meteo") })
+      element.remove()
+    })
+
+    it("says what the air makes of the exhaust of an aircraft pointed at", async () => {
+      upperAirAnswer = air(-58, 0.6)
+      const { source } = stubSource(overhead)
+      const { element, tick } = mountAt(AT, source)
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.trailCredit).toBeDefined())
+      tick()
+      expect(element.trafficInfoAt("traffic-abc123-0")?.contrail).toMatchObject({ persistent: expect.any(Boolean) })
+      element.remove()
+    })
+
+    it("draws no trail when the record of the air could not be read, and leaves the aircraft as they are", async () => {
+      const { source } = stubSource(overhead)
+      const { element, tick } = mountAt(AT, source)
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+      await vi.waitFor(() => expect(upperAirAsked.length).toBeGreaterThan(0))
+      tick()
+      expect(contrailsSet.every(trails => trails.length === 0)).toBe(true)
+      expect(element.aircraftState.trailCredit).toBeUndefined()
+      expect(decorSet[decorSet.length - 1].map(object => object.id)).toEqual(["traffic-abc123-0"])
+      element.remove()
+    })
+
+    it("asks nothing for a scene whose record holds no aircraft", async () => {
+      const { source } = stubSource({ status: "found", tracks: [] })
+      const { element, tick } = mountAt(AT, source)
+      const before = upperAirAsked.length
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+      expect(upperAirAsked).toHaveLength(before)
+      element.remove()
+    })
   })
 
   it("asks five minutes before the recording and a minute after: its first instant is not an empty sky, and the sound of what is heard then left earlier", async () => {

@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest"
+import { sceneNames_es } from "../../src/component/messages/SceneNames_es.js"
 import { sceneNames_fr } from "../../src/component/messages/SceneNames_fr.js"
+import { sceneNames_it } from "../../src/component/messages/SceneNames_it.js"
 import { TrafficTooltip } from "../../src/component/TrafficTooltip.js"
 import type { TrafficInfo } from "../../src/engine/traffic/TrafficInfo.js"
 
@@ -64,6 +66,20 @@ describe("TrafficTooltip", () => {
     expect(heard(1.01)).not.toContain("pitch")
   })
 
+  test("says what the air makes of its exhaust, when it does leave a trail: one that lasts, or a short one", () => {
+    const lasting = english({ contrail: { persistent: true, iceRelativeHumidity: 1.12 } }).split("\n")
+    expect(lasting).toContain("Leaves a trail that lasts: the air is supersaturated over ice (112 % over ice)")
+    const brief = english({ contrail: { persistent: false, iceRelativeHumidity: 0.47 } }).split("\n")
+    expect(brief).toContain("Leaves a short-lived trail: the air is dry over ice (47 % over ice)")
+    expect(english().split("\n").some(line => line.includes("trail"))).toBe(false)
+  })
+
+  test("says it just before the candidate disclaimer, which stays last", () => {
+    const lines = english({ contrail: { persistent: true, iceRelativeHumidity: 1.1 } }).split("\n")
+    expect(lines[lines.length - 1]).toBe("A compatible candidate, not an identification")
+    expect(lines[lines.length - 2]).toContain("trail")
+  })
+
   test("says whose it is when the database does: military, identity withheld", () => {
     const text = english({ military: true, restricted: true })
     expect(text).toContain("military · identity withheld by its owner")
@@ -77,5 +93,13 @@ describe("TrafficTooltip", () => {
     expect(lines[2]).toBe("à 14 km, 42° au-dessus de l'horizon, au 212")
     expect(lines[3]).toBe("Entendu à 41 dB(A), parti de l'avion il y a 29 s, 36° derrière lui : un grondement grave, rien au-delà de 250 Hz")
     expect(lines[4]).toBe("Un candidat compatible, pas une identification")
+  })
+
+  test("says the trail in each language the label has", () => {
+    for (const texts of [sceneNames_fr.trafficTooltip, sceneNames_es.trafficTooltip, sceneNames_it.trafficTooltip]) {
+      const text = TrafficTooltip.text(info({ contrail: { persistent: true, iceRelativeHumidity: 1.12 } }), texts, () => "x", "en")
+      expect(text).toContain("112")
+      expect(text).not.toContain("{")
+    }
   })
 })

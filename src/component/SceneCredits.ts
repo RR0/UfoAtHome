@@ -84,6 +84,12 @@ export class SceneCredits {
       const item = document.createElement("li")
       item.appendChild(SceneCredits.link(aircraft.creditUrl, aircraft.credit))
       add(item)
+      // And the air their trails were worked out from, when there are any.
+      if (aircraft.trailCredit) {
+        const air = document.createElement("li")
+        air.appendChild(SceneCredits.link(aircraft.trailCredit.creditUrl, aircraft.trailCredit.credit))
+        add(air)
+      }
     }
     const thunder = SceneCredits.text(`${THUNDER_CREDIT_TEXT} (`)
     thunder.append(SceneCredits.link(THUNDER_CREDIT_LICENSE_URL, THUNDER_CREDIT_LICENSE), document.createTextNode(")"))
