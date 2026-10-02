@@ -336,18 +336,18 @@ export class DocsSourcesPage extends DocsSection {
           }
         },
         {
-          name: "amvlab aircraft models (A320, 737)", url: "https://github.com/amvlab/aircraft-models",
+          name: "amvlab aircraft models (A320, 737, A350, A380, 787)", url: "https://github.com/amvlab/aircraft-models",
           provides: {
-            en: "The airframe of an Airbus A320 or a Boeing 737, for an aircraft of those types that is near enough for its shape to be seen: engines, wing tips, tail.",
-            fr: "La cellule d'un Airbus A320 ou d'un Boeing 737, pour un avion de ces types assez proche pour que sa forme se voie : réacteurs, bouts d'ailes, empennage.",
-            es: "La célula de un Airbus A320 o de un Boeing 737, para un avión de esos tipos lo bastante cerca como para que se vea su forma: motores, puntas de ala, cola.",
-            it: "La cellula di un Airbus A320 o di un Boeing 737, per un aereo di quei tipi abbastanza vicino da vederne la forma: motori, estremità alari, coda."
+            en: "The airframe of an Airbus A320, A350 or A380, or of a Boeing 737 or 787, for an aircraft of those types that is near enough for its shape to be seen: engines, wing tips, tail.",
+            fr: "La cellule d'un Airbus A320, A350 ou A380, ou d'un Boeing 737 ou 787, pour un avion de ces types assez proche pour que sa forme se voie : réacteurs, bouts d'ailes, empennage.",
+            es: "La célula de un Airbus A320, A350 o A380, o de un Boeing 737 o 787, para un avión de esos tipos lo bastante cerca como para que se vea su forma: motores, puntas de ala, cola.",
+            it: "La cellula di un Airbus A320, A350 o A380, o di un Boeing 737 o 787, per un aereo di quei tipi abbastanza vicino da vederne la forma: motori, estremità alari, coda."
           },
           when: {
-            en: "Fetched by the page only for an aircraft of those types within 5 km of the observer, once for the scene (250 KB and 170 KB). Further off an aircraft is a few pixels, and the built-in shape and its lamps are drawn.",
-            fr: "Chargé par la page seulement pour un avion de ces types à moins de 5 km de l'observateur, une fois pour la scène (250 Ko et 170 Ko). Plus loin un avion fait quelques pixels, et la forme intégrée avec ses feux est dessinée.",
-            es: "Cargado por la página solo para un avión de esos tipos a menos de 5 km del observador, una vez para la escena (250 KB y 170 KB). Más lejos un avión son unos píxeles, y se dibuja la forma integrada con sus luces.",
-            it: "Caricato dalla pagina solo per un aereo di quei tipi entro 5 km dall'osservatore, una volta per la scena (250 KB e 170 KB). Più lontano un aereo sono pochi pixel, e si disegna la forma integrata con le sue luci."
+            en: "Fetched by the page only for an aircraft of those types within about 130 times its own length of the observer (5 km for an A320, 10 km for an A380), once for the scene (170 to 250 KB each). Further off an aircraft is a few pixels, and the built-in shape and its lamps are drawn.",
+            fr: "Chargé par la page seulement pour un avion de ces types à moins de 130 fois sa propre longueur de l'observateur (5 km pour un A320, 10 km pour un A380), une fois pour la scène (170 à 250 Ko chacun). Plus loin un avion fait quelques pixels, et la forme intégrée avec ses feux est dessinée.",
+            es: "Cargado por la página solo para un avión de esos tipos a menos de unas 130 veces su propia longitud del observador (5 km para un A320, 10 km para un A380), una vez para la escena (170 a 250 KB cada uno). Más lejos un avión son unos píxeles, y se dibuja la forma integrada con sus luces.",
+            it: "Caricato dalla pagina solo per un aereo di quei tipi entro circa 130 volte la sua lunghezza dall'osservatore (5 km per un A320, 10 km per un A380), una volta per la scena (da 170 a 250 KB ciascuno). Più lontano un aereo sono pochi pixel, e si disegna la forma integrata con le sue luci."
           },
           hosting: {
             en: "Re-hosted on ufoathome.org/models/ with their licence, CC BY 4.0, © 2026 amvlab, and credited in the player's credits.",
@@ -356,10 +356,10 @@ export class DocsSourcesPage extends DocsSection {
             it: "Ospitati di nuovo su ufoathome.org/models/ con la loro licenza, CC BY 4.0, © 2026 amvlab, e citati nei crediti del lettore."
           },
           choices: {
-            en: "The plain variants, without a livery, since the airline is not known. One model for the whole A320 family and one for every 737, scaled to the real length of the type (an A321 is the A320 model drawn longer). Which 737 variant they depict, and how faithfully, is not documented by their author. Every other type keeps the built-in shape: a model is a catalogue entry and a row of a table, not code.",
-            fr: "Les variantes sans livrée, puisque la compagnie n'est pas connue. Un modèle pour toute la famille A320 et un pour tous les 737, mis à l'échelle de la longueur réelle du type (un A321 est le modèle A320 dessiné plus long). Quelle variante de 737 ils représentent, et avec quelle fidélité, leur auteur ne le documente pas. Tous les autres types gardent la forme intégrée : un modèle est une entrée de catalogue et une ligne d'un tableau, pas du code.",
-            es: "Las variantes sin librea, ya que no se conoce la aerolínea. Un modelo para toda la familia A320 y uno para todos los 737, escalados a la longitud real del tipo (un A321 es el modelo A320 dibujado más largo). Qué variante de 737 representan, y con qué fidelidad, su autor no lo documenta. Todos los demás tipos conservan la forma integrada: un modelo es una entrada de catálogo y una fila de una tabla, no código.",
-            it: "Le varianti senza livrea, poiché la compagnia non è nota. Un modello per tutta la famiglia A320 e uno per tutti i 737, scalati alla lunghezza reale del tipo (un A321 è il modello A320 disegnato più lungo). Quale variante di 737 rappresentino, e con quale fedeltà, il loro autore non lo documenta. Tutti gli altri tipi mantengono la forma integrata: un modello è una voce di catalogo e una riga di una tabella, non codice."
+            en: "The plain variants, without a livery, since the airline is not known. One model for the whole A320 family, one for every 737, one for the A350 (-900 and -1000), one for the A380 and one for the 787 (-8, -9 and -10), each scaled to the real length of the type (an A321 is the A320 model drawn longer). Which variant each depicts, and how faithfully, is not documented by their author. Every other type keeps the built-in shape: a model is a catalogue entry and a row of a table, not code.",
+            fr: "Les variantes sans livrée, puisque la compagnie n'est pas connue. Un modèle pour toute la famille A320, un pour tous les 737, un pour l'A350 (-900 et -1000), un pour l'A380 et un pour le 787 (-8, -9 et -10), chacun mis à l'échelle de la longueur réelle du type (un A321 est le modèle A320 dessiné plus long). Quelle variante chacun représente, et avec quelle fidélité, leur auteur ne le documente pas. Tous les autres types gardent la forme intégrée : un modèle est une entrée de catalogue et une ligne d'un tableau, pas du code.",
+            es: "Las variantes sin librea, ya que no se conoce la aerolínea. Un modelo para toda la familia A320, uno para todos los 737, uno para el A350 (-900 y -1000), uno para el A380 y uno para el 787 (-8, -9 y -10), cada uno escalado a la longitud real del tipo (un A321 es el modelo A320 dibujado más largo). Qué variante representa cada uno, y con qué fidelidad, su autor no lo documenta. Todos los demás tipos conservan la forma integrada: un modelo es una entrada de catálogo y una fila de una tabla, no código.",
+            it: "Le varianti senza livrea, poiché la compagnia non è nota. Un modello per tutta la famiglia A320, uno per tutti i 737, uno per l'A350 (-900 e -1000), uno per l'A380 e uno per il 787 (-8, -9 e -10), ciascuno scalato alla lunghezza reale del tipo (un A321 è il modello A320 disegnato più lungo). Quale variante rappresenti ciascuno, e con quale fedeltà, il loro autore non lo documenta. Tutti gli altri tipi mantengono la forma integrata: un modello è una voce di catalogo e una riga di una tabella, non codice."
           }
         },
         {

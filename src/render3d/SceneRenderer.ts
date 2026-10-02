@@ -993,11 +993,16 @@ export class SceneRenderer {
   private decorSunlight: ReadonlyMap<string, DecorSunlight> = new Map()
   /**
    * The model of an aircraft of the record of air traffic is fetched only when it is near enough for its shape to be seen: further off it is a few
-   * pixels, and the built-in shape and its lamps say all there is to see. Within this distance, metres, an A320 spans some twenty pixels in a frame
-   * 60 degrees across. What waits for it is here, by id; what has been fetched stays (an aircraft that has gone out again is not unloaded, to be
-   * fetched anew when it comes back).
+   * pixels, and the built-in shape and its lamps say all there is to see. That is a distance in proportion to its length: within 133 times it
+   * (5 km for an A320, 10 km for an A380) an aircraft spans some twenty pixels or more in a frame 60 degrees across. What waits for it is here,
+   * by id; what has been fetched stays (an aircraft that has gone out again is not unloaded, to be fetched anew when it comes back).
    */
-  private static readonly TRAFFIC_MODEL_RANGE_M = 5000
+  private static readonly TRAFFIC_MODEL_RANGE_PER_METRE = 133
+  /** The length of the aircraft a range is worked out for when the object does not say, m: an A320's. */
+  private static readonly TRAFFIC_MODEL_DEFAULT_LENGTH_M = 37.6
+  private static trafficModelRangeM(object: DecorObject): number {
+    return (object.sizeM?.lengthM ?? SceneRenderer.TRAFFIC_MODEL_DEFAULT_LENGTH_M) * SceneRenderer.TRAFFIC_MODEL_RANGE_PER_METRE
+  }
   private readonly pendingTrafficModels = new Map<string, DecorObject>()
   /** The trails the aircraft of a record leave, and what draws them: brought in with the first trail, never for a scene without one. */
   private contrails: readonly ContrailTrail[] = []
@@ -2397,8 +2402,8 @@ export class SceneRenderer {
       if (!absent) {
         const distanceM = group.position.distanceTo(this.camera.position)
         furthestDecorM = Math.max(furthestDecorM, distanceM)
-        // Near enough now for its model to be worth fetching — see TRAFFIC_MODEL_RANGE_M. Not awaited: nothing is held for it.
-        if (distanceM < SceneRenderer.TRAFFIC_MODEL_RANGE_M && this.pendingTrafficModels.delete(object.id)) void this.loadDecorModel(object, this.decorModelToken)
+        // Near enough now for its model to be worth fetching — see TRAFFIC_MODEL_RANGE_PER_METRE. Not awaited: nothing is held for it.
+        if (distanceM < SceneRenderer.trafficModelRangeM(object) && this.pendingTrafficModels.delete(object.id)) void this.loadDecorModel(object, this.decorModelToken)
       }
     }
     this.updateContrails()

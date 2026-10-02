@@ -22,13 +22,13 @@ describe("the decor model catalogue shipped with the site", () => {
   })
 
   it("has every model the traffic is drawn with, as an aircraft with the size of the real thing", () => {
-    for (const id of ["amvlab-a320", "amvlab-b737"]) {
+    for (const id of ["amvlab-a320", "amvlab-b737", "amvlab-a350", "amvlab-a380", "amvlab-b787"]) {
       const entry = catalogue.models.find(model => model.id === id)!
       expect(entry, id).toBeDefined()
       expect(entry.kind).toBe("aircraft")
       expect(entry.sizeM).toBeDefined()
     }
-    for (const type of ["A320", "B738"]) expect(catalogue.models.some(model => model.id === TrafficModels.idOf(type))).toBe(true)
+    for (const type of ["A320", "B738", "A359", "A388", "B789"]) expect(catalogue.models.some(model => model.id === TrafficModels.idOf(type))).toBe(true)
   })
 
   it("keeps the licence of the models it re-hosts beside them", () => {

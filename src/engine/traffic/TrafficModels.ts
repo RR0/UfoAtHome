@@ -8,7 +8,10 @@
 export class TrafficModels {
   private static readonly FAMILIES: Record<string, readonly string[]> = {
     "amvlab-a320": ["A318", "A319", "A320", "A321", "A19N", "A20N", "A21N"],
-    "amvlab-b737": ["B732", "B733", "B734", "B735", "B736", "B737", "B738", "B739", "B37M", "B38M", "B39M", "B3XM"]
+    "amvlab-b737": ["B732", "B733", "B734", "B735", "B736", "B737", "B738", "B739", "B37M", "B38M", "B39M", "B3XM"],
+    "amvlab-a350": ["A359", "A35K"],
+    "amvlab-a380": ["A388"],
+    "amvlab-b787": ["B788", "B789", "B78X"]
   }
 
   private static readonly BY_TYPE = new Map<string, string>(

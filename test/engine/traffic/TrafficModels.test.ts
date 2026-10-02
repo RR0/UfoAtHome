@@ -10,6 +10,12 @@ describe("TrafficModels", () => {
     for (const type of ["B732", "B733", "B734", "B735", "B736", "B737", "B738", "B739", "B37M", "B38M", "B39M", "B3XM"]) expect(TrafficModels.idOf(type)).toBe("amvlab-b737")
   })
 
+  it("gives the wide-bodies theirs: the A350 in both lengths, the A380, the 787 in all three", () => {
+    for (const type of ["A359", "A35K"]) expect(TrafficModels.idOf(type)).toBe("amvlab-a350")
+    expect(TrafficModels.idOf("A388")).toBe("amvlab-a380")
+    for (const type of ["B788", "B789", "B78X"]) expect(TrafficModels.idOf(type)).toBe("amvlab-b787")
+  })
+
   it("reads a type designator in whichever case it was written", () => {
     expect(TrafficModels.idOf("a320")).toBe("amvlab-a320")
   })

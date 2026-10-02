@@ -300,6 +300,22 @@ describe("decor that exists only for a while", () => {
       expect(r.pendingTrafficModels.size).toBe(0)
     })
 
+    it("is fetched from further off for a longer aircraft, in proportion: an A380 is seen from twice the distance of an A320", () => {
+      const at9km = (lengthM: number) => {
+        const r = renderer()
+        const object = { id: "traffic-1-0", kind: "aircraft" as const, eastM: 9_000, northM: 0, sizeM: { lengthM }, model: { id: "m" },
+          track: [{ t: 0, eastM: 9_000, northM: 0, altitudeM: 100 }, { t: 20_000, eastM: 9_000, northM: 0, altitudeM: 100 }] }
+        r.decorObjects = [object]
+        r.decorGroups.set(object.id, new Group())
+        r.pendingTrafficModels.set(object.id, object)
+        r.loadDecorModel = vi.fn(async () => undefined)
+        r.updateDecorAnchoring(pose, pose, 5_000)
+        return r.loadDecorModel as ReturnType<typeof vi.fn>
+      }
+      expect(at9km(37.6)).not.toHaveBeenCalled()
+      expect(at9km(72.7)).toHaveBeenCalledTimes(1)
+    })
+
     it("is not fetched for an aircraft that is not there, however near its resting place", () => {
       const { r, load } = withModelledAircraft()
       r.setDecorPresence(new Map([["traffic-1-0", { fromMs: 12_000, untilMs: 20_000 }]]))

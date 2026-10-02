@@ -223,6 +223,48 @@
         "license": "CC BY 4.0",
         "sourceUrl": "https://github.com/amvlab/aircraft-models"
       }
+    },
+    {
+      "id": "amvlab-a350",
+      "kind": "aircraft",
+      "name": "Airbus A350 (plain, no livery)",
+      "file": "amvlab-aircraft/A350_nologo.glb",
+      "headingOffsetDeg": -90,
+      "sizeM": { "widthM": 64.75, "lengthM": 66.8, "heightM": 17.05 },
+      "credit": {
+        "title": "Airbus A350, logo-free variant",
+        "author": "amvlab",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://github.com/amvlab/aircraft-models"
+      }
+    },
+    {
+      "id": "amvlab-a380",
+      "kind": "aircraft",
+      "name": "Airbus A380 (plain, no livery)",
+      "file": "amvlab-aircraft/A380_nologo.glb",
+      "headingOffsetDeg": -90,
+      "sizeM": { "widthM": 79.75, "lengthM": 72.7, "heightM": 24.1 },
+      "credit": {
+        "title": "Airbus A380, logo-free variant",
+        "author": "amvlab",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://github.com/amvlab/aircraft-models"
+      }
+    },
+    {
+      "id": "amvlab-b787",
+      "kind": "aircraft",
+      "name": "Boeing 787 (plain, no livery)",
+      "file": "amvlab-aircraft/B787_nologo.glb",
+      "headingOffsetDeg": -90,
+      "sizeM": { "widthM": 60.1, "lengthM": 62.8, "heightM": 17.0 },
+      "credit": {
+        "title": "Boeing 787, logo-free variant",
+        "author": "amvlab",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://github.com/amvlab/aircraft-models"
+      }
     }
   ]
 }
