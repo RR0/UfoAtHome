@@ -190,6 +190,17 @@ export class DemoCatalogue {
       },
       demos: [
         {
+          id: "aircraft",
+          src: "/demo-data/sky-test-aircraft.json",
+          title: { en: "Air traffic and trails", fr: "Trafic aérien et traînées", es: "Tráfico aéreo y estelas", it: "Traffico aereo e scie" },
+          blurb: {
+            en: "Gonesse, 30 December 2025, 16:10 UTC: the aircraft that were really in this sky, from adsb.lol's record. Their lamps, the Sun still lighting them after the ground has lost it, the trail their engines leave where the air aloft allows one, and the sound of those that could be heard. Point at one to read what the record says of it. A compatible candidate, never an identification.",
+            fr: "Gonesse, 30 décembre 2025, 16 h 10 UTC : les avions qui étaient réellement dans ce ciel, d'après le relevé d'adsb.lol. Leurs feux, le Soleil qui les éclaire encore quand le sol l'a perdu, la traînée que leurs moteurs laissent là où l'air en altitude le permet, et le son de ceux qu'on pouvait entendre. Pointez-en un pour lire ce que le relevé en dit. Un candidat compatible, jamais une identification.",
+            es: "Gonesse, 30 de diciembre de 2025, 16:10 UTC: los aviones que realmente estaban en este cielo, según el registro de adsb.lol. Sus luces, el Sol que aún los ilumina cuando el suelo lo ha perdido, la estela que dejan sus motores donde el aire en altura lo permite y el sonido de los que podían oírse. Apunte a uno para leer lo que el registro dice de él. Un candidato compatible, nunca una identificación.",
+            it: "Gonesse, 30 dicembre 2025, 16:10 UTC: gli aerei che erano davvero in questo cielo, secondo l'archivio di adsb.lol. Le loro luci, il Sole che li illumina ancora quando il suolo l'ha perso, la scia che i loro motori lasciano dove l'aria in quota lo consente e il suono di quelli che si potevano sentire. Puntatene uno per leggere cosa dice l'archivio. Un candidato compatibile, mai un'identificazione."
+          }
+        },
+        {
           id: "clouds",
           src: "/demo-data/sky-test-clouds.json",
           title: { en: "Cloud layers in motion", fr: "Couches nuageuses en mouvement", es: "Capas de nubes en movimiento", it: "Strati di nubi in movimento" },

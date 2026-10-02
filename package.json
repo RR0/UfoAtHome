@@ -56,6 +56,7 @@
     "build:reentries": "node --import tsx scripts/build-reentry-catalog.ts",
     "build:fireballs": "node --import tsx scripts/build-fireball-archive.ts",
     "build:aircraft": "node --import tsx scripts/build-aircraft-archive.ts",
+    "build:aircraft-demo": "node --import tsx scripts/build-aircraft-demo-slice.ts",
     "fetch:aircraft": "node --import tsx scripts/fetch-aircraft-release.ts"
   },
   "dependencies": {

@@ -1,0 +1,13 @@
+{
+ "credit": "adsb.lol feeders and contributors (ODbL 1.0)",
+ "license": "ODbL 1.0",
+ "source": "https://github.com/adsblol (globe_history_YYYY releases)",
+ "stepSeconds": 5,
+ "record": "u32 icao (bit 24: non-ICAO), u16 dt (ds from hour start), i32 lat 1e-5, i32 lng 1e-5, i16 alt (25 ft), u16 gs (0.1 kt), u16 track (0.1 deg); little-endian, 0xFFFF unknown",
+ "from": "2025-12-30",
+ "to": "2025-12-30",
+ "days": [
+  "2025-12-30"
+ ],
+ "sources": {}
+}

@@ -154,6 +154,10 @@ class SiteBuilder {
     // recording since December 2018 (see FireballArchive, and `npm run build:fireballs`).
     await cp(join(this.root, "public", "fireballs"), join(this.out, "fireballs"), { recursive: true })
 
+    // A slice of the aircraft archive, one hour round Gonesse: what the air traffic demonstration reads, beside the page (see
+    // AdsbLolArchiveProvider.defaultIndexUrls, and `npm run build:aircraft-demo`). The archive itself is not hosted.
+    await cp(join(this.root, "public", "aircraft"), join(this.out, "aircraft"), { recursive: true })
+
     await mkdir(join(this.out, "lib"), { recursive: true })
     for (const dir of this.bundleDirs) {
       await cp(join(this.root, dir), join(this.out, "lib"), { recursive: true })
