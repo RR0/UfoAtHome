@@ -4,8 +4,8 @@ import path from "node:path"
 import { gunzipSync, gzipSync } from "node:zlib"
 import { afterEach, beforeEach, describe, expect, test } from "vitest"
 import { AircraftArchiveBuild } from "../../scripts/AircraftArchiveBuild.js"
-import { AircraftTile } from "../../src/engine/astronomy/AircraftTile.js"
-import type { AircraftPosition } from "../../src/engine/astronomy/AircraftTile.js"
+import { AircraftTile } from "../../src/engine/traffic/providers/AircraftTile.js"
+import type { AircraftPosition } from "../../src/engine/traffic/providers/AircraftTile.js"
 import { TarFixture } from "./TarFixture.js"
 
 /** 2025-12-30 00:00:00 UTC, as an ADSB.lol trace's `timestamp`. */

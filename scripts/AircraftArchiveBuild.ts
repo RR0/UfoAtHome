@@ -2,7 +2,7 @@
 import { existsSync, mkdirSync, readFileSync, createReadStream, writeFileSync } from "node:fs"
 import path from "node:path"
 import { gunzipSync, gzipSync } from "node:zlib"
-import { AircraftTile } from "../src/engine/astronomy/AircraftTile.js"
+import { AircraftTile } from "../src/engine/traffic/providers/AircraftTile.js"
 import { AircraftTileWriter } from "./AircraftTileWriter.js"
 import { ByteStream, TarReader } from "./TarReader.js"
 
