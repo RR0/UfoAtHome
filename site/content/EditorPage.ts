@@ -1,4 +1,5 @@
 import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
+import { RecordingTitle } from "./RecordingTitle.js"
 
 /** The editor itself, followed by its manual: what each of the eight groups is for. */
 export class EditorPage implements SitePage {
@@ -35,9 +36,44 @@ export class EditorPage implements SitePage {
    * meant to open recordings hosted anywhere, and the editor's own "load from URL" field would do
    * exactly the same thing by hand.
    */
-  script(): string {
+  script(language: SiteLanguage): string {
+    const demoTitles = JSON.stringify(RecordingTitle.demoTitles(language))
+    const editing = JSON.stringify(({ en: "Editing {title}", fr: "Éditer {title}", es: "Editar {title}", it: "Modifica {title}" })[language])
     return `const editor = document.getElementById("editor")
 const requested = new URLSearchParams(location.search).get("sighting")
+const demoTitles = ${demoTitles}
+const editing = ${editing}
+const heading = document.querySelector(".hero h1")
+const generalHeading = heading && heading.textContent
+const generalTitle = document.title
+
+${RecordingTitle.SCRIPT}
+
+/* Names the observation being edited, as the Player names the one it plays: "Record a sighting" says what the editor is for, and
+   once it holds one in particular the heading says which. Nothing is renamed for a new, unnamed recording. */
+const announce = title => {
+  if (!heading) return
+  if (!title) {
+    heading.textContent = generalHeading
+    document.title = generalTitle
+    return
+  }
+  const sentence = editing.replace("{title}", title)
+  heading.textContent = sentence + "."
+  document.title = sentence + " — UFO@home"
+}
+/* The recording arrives after its address is set, so the name is asked again until the editor holds it (its own id or its observer, which
+   is what names it) or the wait is long enough to say it never will. A demo is named at once, by this site's own name for it. */
+const announceWhenLoaded = src => {
+  announce(titleOf(undefined, src))
+  let tries = 0
+  const timer = setInterval(() => {
+    const sighting = editor.sightingData
+    const named = sighting && (sighting.id || sighting.observer || sighting.title)
+    if (named) announce(titleOf(sighting, src))
+    if (named || ++tries > 50) clearInterval(timer)
+  }, 200)
+}
 
 /* The example under the editor is the recording being edited, when it came from an address, and
    the link that replays it beside it: the one a reader wants to hand on once they are done. Socorro
@@ -56,6 +92,7 @@ if (editor) {
   new MutationObserver(() => {
     const src = editor.getAttribute("src")
     if (!src) return
+    announceWhenLoaded(src)
     // A demo's own file is named back by its name, as it was asked for.
     const prefix = "/demo-data/observer-"
     const demo = src.startsWith(prefix) && src.endsWith(".json") ? src.slice(prefix.length, -".json".length) : undefined

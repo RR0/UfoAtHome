@@ -106,6 +106,8 @@ export interface SightingRecordingJson {
    * magnitudes per square arcsecond, a Sky Quality Meter's reading or the World Atlas's "SQM" figure
    * (Falchi et al. 2016) — see Sighting.lightPollution. 22.0 is a natural sky. Absent means a natural sky. */
   lightPollution?: number
+  /** Whether the map of where the observer stood starts open — see Sighting.observerMap. Absent says nothing: the player decides. */
+  observerMap?: boolean
   /** The named moments of the account — see Milestone. Absent/omitted means none, which is what
    * every recording made before this field existed says. */
   milestones?: Milestone[]
@@ -166,6 +168,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     exposureSeconds: sighting.exposureSeconds,
     iso: sighting.iso,
     lightPollution: sighting.lightPollution,
+    observerMap: sighting.observerMap,
     interpretation: sighting.interpretation
   }
 }
@@ -233,6 +236,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.sway = json.sway
   sighting.iso = json.iso
   sighting.lightPollution = json.lightPollution
+  sighting.observerMap = json.observerMap
   sighting.vehicle = json.vehicle
   sighting.interpretation = json.interpretation
   sighting.loadIssues = issues

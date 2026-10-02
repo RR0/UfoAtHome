@@ -40,6 +40,15 @@ class FakeNode {
 
 class FakeGain extends FakeNode {
   gain = new FakeParam()
+  /** The gain wired to the speakers is the player's volume, not one of a voice's: it is kept apart, so that a voice's gains keep their places. */
+  override connect<T>(to: T): T {
+    super.connect(to)
+    if (made.contexts.some(context => context.destination === to)) {
+      made.gains.splice(made.gains.indexOf(this), 1)
+      made.masters.push(this)
+    }
+    return to
+  }
 }
 
 class FakeFilter extends FakeNode {
@@ -76,7 +85,7 @@ class FakePanner extends FakeNode {
 }
 
 /** What the last context made, for a test to look at. */
-const made = { gains: [] as FakeGain[], filters: [] as FakeFilter[], oscillators: [] as FakeOscillator[], sources: [] as FakeSource[], panners: [] as FakePanner[], compressors: [] as FakeCompressor[], convolvers: [] as FakeConvolver[], contexts: [] as FakeContext[] }
+const made = { masters: [] as FakeGain[], gains: [] as FakeGain[], filters: [] as FakeFilter[], oscillators: [] as FakeOscillator[], sources: [] as FakeSource[], panners: [] as FakePanner[], compressors: [] as FakeCompressor[], convolvers: [] as FakeConvolver[], contexts: [] as FakeContext[] }
 
 class FakeContext {
   state = "running"
@@ -465,7 +474,40 @@ describe("AircraftAudio", () => {
     audio.setVoices([voice({ id: "a" }), voice({ id: "b" })])
     expect(made.compressors).toHaveLength(1)
     expect(made.panners.every(panner => panner.connections[0] === made.compressors[0])).toBe(true)
-    expect(made.compressors[0].connections[0]).toBe(made.contexts[0].destination)
+    // Through the master gain, which the player's volume sets, and only then the speakers.
+    expect(made.masters).toHaveLength(1)
+    expect(made.compressors[0].connections[0]).toBe(made.masters[0])
+    expect(made.masters[0].connections[0]).toBe(made.contexts[0].destination)
+  })
+
+  describe("the player's volume and mute button", () => {
+    /** The last gain before the speakers. */
+    const masterOf = () => made.masters[0]
+
+    test("is heard at full level until it is told otherwise", () => {
+      const audio = playing()
+      audio.setVoices([voice()])
+      expect(masterOf().gain.value).toBe(1)
+    })
+
+    test("silences everything when muted, and gives it back when it is not, without touching the voices", () => {
+      const audio = playing()
+      audio.setVoices([voice({ id: "a" })])
+      audio.setLevel(0)
+      expect(masterOf().gain.value).toBe(0)
+      expect(made.sources.every(source => !source.stopped)).toBe(true)
+      audio.setLevel(0.6)
+      expect(masterOf().gain.value).toBe(0.6)
+    })
+
+    test("is honoured when it was set before anything was heard: a reader who muted the player first", () => {
+      const audio = new AircraftAudio()
+      audio.setLevel(0)
+      audio.resume()
+      audio.setPaused(false)
+      audio.setVoices([voice()])
+      expect(masterOf().gain.value).toBe(0)
+    })
   })
 
   test("a voice that is no longer heard fades out, and is taken down once it has", () => {

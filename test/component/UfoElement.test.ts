@@ -1433,6 +1433,38 @@ describe("the observer's own map", () => {
     expect(mapParts(standing).panel.hidden).toBe(true)
   })
 
+  it("follows the recording's own word on the map when the page says nothing, whichever way the observer moved", () => {
+    const shown = mount()
+    shown.sightingData = { ...stationaryObserver(), observerMap: true } as never
+    expect(mapParts(shown).panel.hidden).toBe(false)
+    document.body.innerHTML = ""
+    const hidden = mount()
+    hidden.sightingData = { ...movingObserver(), observerMap: false } as never
+    expect(mapParts(hidden).panel.hidden).toBe(true)
+  })
+
+  it("lets the page overrule the recording's own word, as it overrules the default", () => {
+    const element = mount()
+    element.setAttribute("show-observer-map", "false")
+    element.sightingData = { ...movingObserver(), observerMap: true } as never
+    expect(mapParts(element).panel.hidden).toBe(true)
+    document.body.innerHTML = ""
+    const forced = mount()
+    forced.setAttribute("show-observer-map", "")
+    forced.sightingData = { ...stationaryObserver(), observerMap: false } as never
+    expect(mapParts(forced).panel.hidden).toBe(false)
+  })
+
+  it("says so when the map is opened or closed by hand, for an editor to write it into the recording", () => {
+    const element = mount()
+    element.sightingData = stationaryObserver() as never
+    const heard: boolean[] = []
+    element.addEventListener("observermapchange", event => heard.push((event as CustomEvent<{ open: boolean }>).detail.open))
+    mapParts(element).button.click()
+    mapParts(element).button.click()
+    expect(heard).toEqual([true, false])
+  })
+
   it("lets the page overrule that default either way", () => {
     const element = mount()
     element.setAttribute("show-observer-map", "false")

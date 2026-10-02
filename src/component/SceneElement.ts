@@ -612,6 +612,14 @@ export class SceneElement extends HTMLElement {
 
   private interacted = false
 
+  /** The player's volume and mute button over every sound this scene plays: the weather, the vehicles, the aircraft. */
+  private applyLevel(): void {
+    const level = this.ufoElement.level
+    this.weatherAudio.setLevel(level)
+    this.vehicleAudio.setLevel(level)
+    this.aircraftAudio?.setLevel(level)
+  }
+
   /**
    * A gesture anywhere on the page counts while the recording plays: a replay that starts on its own (the player's page, from the
    * button that loads it, which is outside this element) must not stay silent until the reader happens to press inside the scene. Not
@@ -739,7 +747,7 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.addEventListener("timeupdate", this.handleTimeUpdate)
     this.ufoElement.seekPreviewPainter = (t, canvas) => this.seekPreviewOf(canvas).paint(t, canvas)
     // The weather is heard through this element, the button that silences it is the player's.
-    this.ufoElement.addEventListener("mutedchange", () => this.weatherAudio.setLevel(this.ufoElement.level))
+    this.ufoElement.addEventListener("mutedchange", () => this.applyLevel())
     this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<{ shown: boolean; opacity: number }>).detail))
     this.ufoElement.addEventListener("traceview", event => this.sceneRenderer.setTracesShown((event as CustomEvent<{ shown: boolean }>).detail.shown))
     this.ufoElement.canvasElement.addEventListener("pointermove", this.handlePointerMove)
@@ -1696,6 +1704,7 @@ export class SceneElement extends HTMLElement {
   private startAircraftSound(asked: NonNullable<SceneElement["traffic"]>, runtime: TrafficRuntime): void {
     if (!this.aircraftAudio) {
       this.aircraftAudio = new runtime.AircraftAudio()
+      this.aircraftAudio.setLevel(this.ufoElement.level)
       if (this.interacted) this.aircraftAudio.resume()
       this.aircraftAudio.setPaused(this.ufoElement.playbackState !== "playing")
     }

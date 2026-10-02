@@ -14,7 +14,7 @@ import type { Basis } from "../engine/persistence/Provenance.js"
 import { html, css } from "./sightingEditorTemplate.js"
 import { SightingSummary } from "./SightingSummary.js"
 import type { SummaryEntry, SummaryGroup } from "./SightingSummary.js"
-import { UfoElement, registerUfo, OBSERVER_MAP_ATTRIBUTE } from "./UfoElement.js"
+import { UfoElement, registerUfo } from "./UfoElement.js"
 import { TimelineMarks } from "./TimelineMarks.js"
 import type { TimelineMark } from "./TimelineMarks.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME, SATELLITES_CHANGE_EVENT, FIREBALLS_CHANGE_EVENT } from "./SceneElement.js"
@@ -941,12 +941,14 @@ export class SightingEditorElement extends HTMLElement {
     // N/NE/E/SE/S/SO/O/NO reference labels on the horizon — useful while authoring a heading, not
     // meaningful in the plain playback case, so this is opt-in on SceneElement rather than always on.
     this.sceneElement.setAttribute("show-compass", "")
-    // And the map of where the observer stood, for the same reason and by the same rule: an author
-    // typing a latitude, a longitude and a heading is stating where somebody was and which way they
-    // faced, and the only way to see whether that is the right spot is to look at the ground. Opt-in
-    // everywhere else (see OBSERVER_MAP_ATTRIBUTE — a page embedding a player has not asked for a
-    // second thing to read), on here, because this is the tool that writes those numbers.
-    this.sceneElement.setAttribute(OBSERVER_MAP_ATTRIBUTE, "")
+    // The map of where the observer stood follows the RECORDING being edited, as it does in the player: open when the recording says so, or when
+    // the observer went somewhere, closed otherwise. Opening or closing it here is the author stating it, and goes into the recording (see
+    // observermapchange below), so that a reader is shown what the author left. Not forced open, as it once was for every recording: the one
+    // being edited may have chosen not to have it.
+    this.sceneElement.addEventListener("observermapchange", event => {
+      this.ufoElement.sighting.observerMap = (event as CustomEvent<{ open: boolean }>).detail.open
+      this.dispatchEvent(new CustomEvent("sightingchange"))
+    })
     // An author stating the weather has to be able to SEE it: a scene frozen until the recording
     // plays is a preview of nothing, and a recording with no duration yet cannot be played at all.
     // Replays keep the opposite rule — see SceneElement.syncAnimationsToPlayback.
@@ -2591,12 +2593,22 @@ export class SightingEditorElement extends HTMLElement {
    * has stated outranks what a service would infer. Debounced, and skipped for a move too small to
    * change the answer.
    */
+  /**
+   * Whether the author has already said which clock the observation was on, so that a service must not answer for them: a zone they picked
+   * (not one a lookup filled in), or a bare offset, which is how a recording states it without a zone (see SightingEvent.utcOffsetHours).
+   * A recording stating 16:10 UTC at Gonesse must stay 16:10 UTC when the editor opens it, not become 16:10 in Paris, an hour of sky earlier.
+   */
+  private timeZoneIsStated(): boolean {
+    const event = this.ufoElement.sighting.event
+    if (event.timeZone) return event.timeZone !== this.autoFilledTimeZone
+    return event.utcOffsetHours !== undefined
+  }
+
   private scheduleTimeZoneLookup(): void {
     const lat = this.numberOrUndefined(this.latInput.value)
     const lng = this.numberOrUndefined(this.lngInput.value)
     if (lat === undefined || lng === undefined) return
-    const stated = this.ufoElement.sighting.event.timeZone
-    if (stated && stated !== this.autoFilledTimeZone) return
+    if (this.timeZoneIsStated()) return
     const previous = this.timeZoneLookedUpAt
     if (previous && Math.abs(lat - previous.lat) < SAME_PLACE_DEG && Math.abs(lng - previous.lng) < SAME_PLACE_DEG) return
     clearTimeout(this.timeZoneLookupTimer)
@@ -2608,8 +2620,7 @@ export class SightingEditorElement extends HTMLElement {
     const zone = await this.timeZoneProvider.zoneAt(lat, lng)
     // Re-checked after the await, not only before it: the author may have picked one meanwhile, and
     // a service's answer must never win over a stated one.
-    const stated = this.ufoElement.sighting.event.timeZone
-    if (!zone || (stated && stated !== this.autoFilledTimeZone)) return
+    if (!zone || this.timeZoneIsStated()) return
     if (!this.timeZones.available().includes(zone)) return
     this.autoFilledTimeZone = zone
     this.timeZoneSelect.value = zone

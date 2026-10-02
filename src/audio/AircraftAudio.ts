@@ -126,6 +126,9 @@ export class AircraftAudio {
   /** Where the reverberation goes in: the room a far sound arrives in. */
   private reverb?: AudioNode
   private reverbOut?: AudioNode
+  /** What the reader's volume and mute button say, 0 to 1, over everything it plays: the last gain before the speakers. */
+  private level = 1
+  private master?: GainNode
   private paused = true
   private requested: AircraftVoice[] = []
   private headingDeg = 0
@@ -142,6 +145,12 @@ export class AircraftAudio {
     }
     AudioUnlock.unlock(this.context)
     this.apply()
+  }
+
+  /** How loud everything is, 0 (muted) to 1, without touching what it is doing: the player's volume and its mute button. */
+  setLevel(level: number): void {
+    this.level = level
+    if (this.master) this.master.gain.value = level
   }
 
   setPaused(paused: boolean): void {
@@ -161,6 +170,8 @@ export class AircraftAudio {
     for (const id of [...this.voices.keys()]) this.release(id)
     void this.context?.close()
     this.context = undefined
+    this.master = undefined
+    this.bus = undefined
   }
 
   private apply(): void {
@@ -384,6 +395,10 @@ export class AircraftAudio {
 
   private busOf(context: AudioContext): AudioNode {
     if (this.bus) return this.bus
+    const master = context.createGain()
+    master.gain.value = this.level
+    master.connect(context.destination)
+    this.master = master
     if (typeof context.createConvolver === "function") {
       const convolver = context.createConvolver()
       convolver.buffer = this.roomImpulse(context)
@@ -403,9 +418,9 @@ export class AircraftAudio {
       compressor.ratio.value = 4
       compressor.attack.value = 0.005
       compressor.release.value = 0.25
-      compressor.connect(context.destination)
+      compressor.connect(master)
       this.bus = compressor
-    } else this.bus = context.destination
+    } else this.bus = master
     this.reverbOut?.connect(this.bus)
     return this.bus
   }

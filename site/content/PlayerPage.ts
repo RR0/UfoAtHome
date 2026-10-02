@@ -1,4 +1,4 @@
-import { DemoCatalogue } from "./DemoCatalogue.js"
+import { RecordingTitle } from "./RecordingTitle.js"
 import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 
 /**
@@ -31,21 +31,8 @@ export class PlayerPage implements SitePage {
     modules: ["/lib/rr0-sighting.mjs"]
   }
 
-  private readonly catalogue = new DemoCatalogue()
-
   script(language: SiteLanguage): string {
-    // This site knows what its own demos are called; a case id like `sky-test-halos` does not.
-    // Only for these — anything else is named from what the recording itself carries.
-    // As they read inside the heading's sentence: a title that is not a name loses the capital it
-    // only had for starting a card (see Demo.titleIsName).
-    // Under the case the Player is handed too (see Demo.playSrc), so a case opened with all its
-    // observers is called by this site's name for it.
-    const demoTitles = JSON.stringify(Object.fromEntries(
-      this.catalogue.demos.flatMap(demo => {
-        const title = demo.title[language]
-        const said = demo.titleIsName ? title : title.charAt(0).toLocaleLowerCase(language) + title.slice(1)
-        return [demo.src, ...(demo.playSrc ? [demo.playSrc] : [])].map(src => [src, said])
-      })))
+    const demoTitles = JSON.stringify(RecordingTitle.demoTitles(language))
     const messages = JSON.stringify({
       loading: ({ en: "Loading…", fr: "Chargement…", es: "Cargando…", it: "Caricamento…" })[language],
       notFound: ({
@@ -148,26 +135,8 @@ const say = (text, kind) => {
   status.className = "player-status" + (kind ? " is-" + kind : "")
 }
 
-/**
- * What to call the observation now on screen.
- *
- * A case by its title, because that is the name a case is filed and argued under; a recording by
- * its observer's name, since an account is known by who gave it (it does not name its case); then
- * its own id, and the file's own name last, which at least distinguishes one recording from another. A recording that says none of these
- * keeps the page's general title, which is then the accurate one.
- */
-const titleOf = (sighting, source) => {
-  const known = source && demoTitles[new URL(source, location.href).pathname]
-  if (known) return known
-  // A case (a case.json with its events, and no timeline of its own) is named by its title.
-  if (sighting && Array.isArray(sighting.events) && !sighting.timeline) return sighting.title || sighting.id || undefined
-  const observer = sighting && sighting.observer
-  const fullName = observer && [...(observer.firstNames || []), observer.lastName].filter(Boolean).join(" ")
-  return (observer && (observer.title || fullName || observer.id))
-    || (sighting && sighting.id)
-    || (source && decodeURIComponent(source.split("/").pop() || "").replace(/\.json$/, ""))
-    || undefined
-}
+/* What to call the observation now on screen: see RecordingTitle. */
+${RecordingTitle.SCRIPT}
 
 const announce = (sighting, source, fallbackTitle) => {
   const title = titleOf(sighting, source) || fallbackTitle

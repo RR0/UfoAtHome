@@ -190,8 +190,8 @@ export class DemoCatalogue {
       },
       demos: [
         {
-          id: "aircraft",
-          src: "/demo-data/sky-test-aircraft.json",
+          id: "air-traffic",
+          src: "/demo-data/sky-test-air-traffic.json",
           title: { en: "Air traffic and trails", fr: "Trafic aérien et traînées", es: "Tráfico aéreo y estelas", it: "Traffico aereo e scie" },
           blurb: {
             en: "Gonesse, 30 December 2025, 16:10 UTC: the aircraft that were really in this sky, from adsb.lol's record. Their lamps, the Sun still lighting them after the ground has lost it, the trail their engines leave where the air aloft allows one, and the sound of those that could be heard. Point at one to read what the record says of it. A compatible candidate, never an identification.",

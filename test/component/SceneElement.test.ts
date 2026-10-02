@@ -147,6 +147,7 @@ vi.mock("../../src/render3d/WeatherAudio.js", () => ({
   WeatherAudio: class {
     resume(): void {}
     setAmbient(): void {}
+    setLevel(): void {}
     dispose(): void {}
     playThunder(): void {
       thunderPlayed.push(1)
@@ -886,6 +887,17 @@ describe("SceneElement air traffic", () => {
     }
     const playbackOf = (element: HTMLElement, state: string) =>
       vi.spyOn((element as unknown as { ufoElement: { playbackState: string } }).ufoElement, "playbackState", "get").mockReturnValue(state)
+
+    it("follows the player's volume and mute button, as the weather and the vehicles do", async () => {
+      const setLevel = vi.spyOn(AircraftAudio.prototype, "setLevel")
+      const { element } = await playingScene()
+      setLevel.mockClear()
+      const ufo = (element as unknown as { ufoElement: HTMLElement }).ufoElement
+      vi.spyOn(ufo as unknown as { level: number }, "level", "get").mockReturnValue(0)
+      ufo.dispatchEvent(new CustomEvent("mutedchange", { bubbles: true, composed: true, detail: { muted: true, volume: 1 } }))
+      expect(setLevel).toHaveBeenCalledWith(0)
+      element.remove()
+    })
 
     it("is unlocked by a gesture anywhere on the page while it plays: the button that loads it is not inside the scene", async () => {
       const { element, resume } = await playingScene()

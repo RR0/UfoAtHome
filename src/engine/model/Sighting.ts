@@ -416,6 +416,16 @@ export class Sighting {
   lightPollution?: number
 
   /**
+   * Whether the map of where the observer stood starts open when this recording is played or edited. Absent says nothing, and the player
+   * decides: open for an observer who went somewhere (see ObserverPath.travels), closed for one who stayed put. A page embedding the
+   * player has the last word (the `show-observer-map` attribute).
+   *
+   * The author's own choice, written by the editor when the map is opened or closed there: having it open while writing a place is what
+   * a reader of the recording is then shown, and the other way round.
+   */
+  observerMap?: boolean
+
+  /**
    * The speed of the film or sensor the picture was taken on, ISO — what a photographer loaded, as
    * the shutter is what they set (see exposureSeconds). Absent means the device's own (see
    * Instrument.medium); meaningless for an eye. Not readonly, same reasoning as account above.

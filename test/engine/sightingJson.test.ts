@@ -23,6 +23,22 @@ describe("sightingJson", () => {
     expect(restored.timeline.getShapeAt(0, "ufo-1")?.bounds).toEqual({ x: 10, y: 20, width: 40, height: 24 })
   })
 
+  it("round-trips whether the map of where the observer stood starts open, and writes nothing when the recording does not say", () => {
+    const open = Sighting.create({ year: 2025 }, [{ lat: 48.99, lng: 2.45 }], { id: "o" })
+    open.observerMap = true
+    expect(toSightingJson(open).observerMap).toBe(true)
+    expect(fromSightingJson(toSightingJson(open)).observerMap).toBe(true)
+
+    // Closed is something a recording says too, and not the same as saying nothing.
+    const closed = Sighting.create({ year: 2025 }, [{ lat: 48.99, lng: 2.45 }], { id: "o" })
+    closed.observerMap = false
+    expect(fromSightingJson(toSightingJson(closed)).observerMap).toBe(false)
+
+    const silent = Sighting.create({ year: 2025 }, [{ lat: 48.99, lng: 2.45 }], { id: "o" })
+    expect(JSON.stringify(toSightingJson(silent))).not.toContain("observerMap")
+    expect(fromSightingJson(toSightingJson(silent)).observerMap).toBeUndefined()
+  })
+
   it("round-trips the account's named moments, sorted, and writes nothing when there are none", () => {
     const sighting = Sighting.create({ year: 1964 })
     sighting.milestones = [

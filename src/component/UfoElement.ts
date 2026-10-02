@@ -2144,6 +2144,8 @@ export class UfoElement extends HTMLElement {
     this.observerMapAsked = open
     this.setObserverMapOpen(open)
     this.keepObserverMapClear()
+    // An editor writes it into the recording: what the author leaves open is what a reader is shown.
+    this.dispatchEvent(new CustomEvent("observermapchange", { bubbles: true, composed: true, detail: { open } }))
   }
 
   /** Whether the reader opened the map themselves, which outranks its stepping aside. */
@@ -2159,7 +2161,8 @@ export class UfoElement extends HTMLElement {
    */
   private applyObserverMapDefault(): void {
     const stated = this.getAttribute(OBSERVER_MAP_ATTRIBUTE)
-    const open = stated === null ? this.observerPath?.travels === true : stated !== "false"
+    // The page's word, then the recording's own, then whether the observer went anywhere.
+    const open = stated === null ? this.sighting.observerMap ?? this.observerPath?.travels === true : stated !== "false"
     this.setObserverMapOpen(open && this.observerPath !== undefined)
   }
 

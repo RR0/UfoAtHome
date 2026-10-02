@@ -5732,6 +5732,46 @@ describe("SightingEditorElement time zone picker", () => {
     expect(element.sightingData.utcOffsetHours).toBe(1)
   })
 
+  describe("a zone looked up from the place", () => {
+    /** Answers "Europe/Paris" wherever it is asked, and counts how often it is. */
+    const stubLookup = (element: SightingEditorElement) => {
+      const zoneAt = vi.fn(async () => "Europe/Paris")
+      ;(element as unknown as { timeZoneProvider: { zoneAt: typeof zoneAt } }).timeZoneProvider = { zoneAt }
+      return zoneAt
+    }
+    const recording = (extra: object) => ({
+      version: 1,
+      time: { year: 2025, month: 12, day: 30, hour: 16, minute: 10, raw: "2025-12-30T16:10" },
+      place: [{ lat: 48.99, lng: 2.45 }],
+      timeline: { keyframes: [] },
+      ...extra
+    })
+
+    it("does not move a recording whose own offset is stated without a zone: what the author states outranks what a service infers", async () => {
+      const element = mount()
+      const zoneAt = stubLookup(element)
+      element.sightingData = recording({ utcOffsetHours: 0 }) as never
+      // The first edit of the place, which is what asks where the observer is.
+      setInput(element, "lat", "48.99")
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      expect(zoneAt).not.toHaveBeenCalled()
+      expect(element.sightingData.utcOffsetHours).toBe(0)
+      expect(element.sightingData.timeZone).toBeUndefined()
+    })
+
+    it("still looks the zone up for a recording that states neither, and derives the offset from it", async () => {
+      const element = mount()
+      const zoneAt = stubLookup(element)
+      element.sightingData = recording({}) as never
+      setInput(element, "lat", "48.99")
+      await vi.waitFor(() => expect(element.sightingData.timeZone).toBe("Europe/Paris"), { timeout: 3000 })
+
+      expect(zoneAt).toHaveBeenCalled()
+      expect(element.sightingData.utcOffsetHours).toBe(1)
+    })
+  })
+
   it("restores a loaded recording's zone", () => {
     const element = mount()
     element.sightingData = {
@@ -5744,6 +5784,57 @@ describe("SightingEditorElement time zone picker", () => {
 
     expect((element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement).value).toBe("Europe/Paris")
     expect(offset(element).readOnly).toBe(true)
+  })
+})
+
+describe("the map of where the observer stood, in the editor", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  const stationary = (extra: object = {}) => ({
+    version: 1,
+    place: [{ lat: 48.99, lng: 2.45 }],
+    timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 20000, shapes: [] }] },
+    observerTrack: {
+      keyframes: [
+        { t: 0, pose: { lat: 48.99, lng: 2.45, elevationM: 0, headingDeg: 95, pitchDeg: 28, fovDeg: 60 } },
+        { t: 20000, pose: { lat: 48.99, lng: 2.45, elevationM: 0, headingDeg: 95, pitchDeg: 28, fovDeg: 60 } }
+      ]
+    },
+    ...extra
+  })
+  const panelOf = (element: SightingEditorElement) =>
+    (nestedUfo(element) as unknown as { shadowRoot: ShadowRoot }).shadowRoot.getElementById("observer-map-panel") as HTMLElement
+
+  it("is not forced open for a recording that did not have it: what is edited is what is shown", () => {
+    const element = mount()
+    element.sightingData = stationary() as never
+    expect(panelOf(element).hidden).toBe(true)
+  })
+
+  it("is open for a recording that asked for it", () => {
+    const element = mount()
+    element.sightingData = stationary({ observerMap: true }) as never
+    expect(panelOf(element).hidden).toBe(false)
+  })
+
+  it("writes what the author leaves open or closed into the recording, so that a reader is shown the same", () => {
+    const element = mount()
+    element.sightingData = stationary() as never
+    const changed = vi.fn()
+    element.addEventListener("sightingchange", changed)
+    ;(nestedUfo(element) as unknown as { toggleObserverMap(): void }).toggleObserverMap()
+    expect(element.sightingData.observerMap).toBe(true)
+    expect(changed).toHaveBeenCalled()
+    ;(nestedUfo(element) as unknown as { toggleObserverMap(): void }).toggleObserverMap()
+    expect(element.sightingData.observerMap).toBe(false)
+  })
+
+  it("says nothing of it for a recording the author never touched the map of", () => {
+    const element = mount()
+    element.sightingData = stationary() as never
+    expect(element.sightingData.observerMap).toBeUndefined()
   })
 })
 

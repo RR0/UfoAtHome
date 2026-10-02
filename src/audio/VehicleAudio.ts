@@ -53,6 +53,9 @@ export class VehicleAudio {
   private context?: AudioContext
   private noiseBuffer?: AudioBuffer
   private readonly voices = new Map<string, Voice>()
+  /** What the reader's volume and mute button say, 0 to 1, over everything it plays: the last gain before the speakers. */
+  private level = 1
+  private master?: GainNode
   private paused = true
   private requested: VehicleVoice[] = []
 
@@ -68,6 +71,12 @@ export class VehicleAudio {
     }
     AudioUnlock.unlock(this.context)
     this.apply()
+  }
+
+  /** How loud everything is, 0 (muted) to 1, without touching what it is doing: the player's volume and its mute button. */
+  setLevel(level: number): void {
+    this.level = level
+    if (this.master) this.master.gain.value = level
   }
 
   setPaused(paused: boolean): void {
@@ -86,6 +95,16 @@ export class VehicleAudio {
     for (const id of [...this.voices.keys()]) this.release(id)
     void this.context?.close()
     this.context = undefined
+    this.master = undefined
+  }
+
+  private masterOf(context: AudioContext): GainNode {
+    if (!this.master) {
+      this.master = context.createGain()
+      this.master.gain.value = this.level
+      this.master.connect(context.destination)
+    }
+    return this.master
   }
 
   private apply(): void {
@@ -105,7 +124,7 @@ export class VehicleAudio {
     output.gain.value = 0
     const cabin = context.createBiquadFilter()
     cabin.type = "lowpass"
-    cabin.connect(output).connect(context.destination)
+    cabin.connect(output).connect(this.masterOf(context))
 
     const firing = context.createOscillator()
     firing.type = "sawtooth"
