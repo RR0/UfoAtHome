@@ -43,7 +43,10 @@ export class DemosPage implements SitePage {
 // now gives its context back at once (see SceneElement's disconnection), so twelve alive stay
 // well inside that; and twelve is what a wide screen with its mounting margin actually reaches —
 // at eight, a 1440 px window mounted and took down the same cards over and over as it scrolled.
-const MAX_LIVE = 12
+// On a phone the budget is memory, not contexts: each live sky holds tens of megabytes of scene and of
+// graphics memory, and a phone's browser does not lose the oldest, it takes the whole tab down. One or
+// two cards are on screen at a time there, so four alive leave a card's worth of room to scroll back.
+const MAX_LIVE = matchMedia("(pointer: coarse)").matches ? 4 : 12
 const cards = [...document.querySelectorAll(".demo-card")]
 const live = []
 
