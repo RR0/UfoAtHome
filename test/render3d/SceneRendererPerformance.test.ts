@@ -10,7 +10,7 @@ function renderer() {
   return Object.assign(Object.create(SceneRenderer.prototype), {
     cloudRendering: "surface", weather: { cloudCover: 0.3, cloudDarkness: 0.2, highCloudCover: 0.1 },
     observerElevationM: 0, cloudFieldOffset: new Vector3(), celestialGroup: new Group(),
-    camera: new PerspectiveCamera(), scene: new Group(), decorGroups: new Map(), decorPresence: new Map(), decorSunlight: new Map(), sceneSunBeam: [0, 0, 0], groundRadius: 1000,
+    camera: new PerspectiveCamera(), scene: new Group(), decorGroups: new Map(), decorPresence: new Map(), decorSunlight: new Map(), pendingTrafficModels: new Map(), sceneSunBeam: [0, 0, 0], groundRadius: 1000,
     compassHovered: false, compassForced: false,
     gaitOffset: { eastM: 0, northM: 0, upM: 0 }, poseCameraY: 1.6,
     // What the real constructor builds from the card — see AdaptiveResolution; nothing here has a card.
@@ -263,6 +263,49 @@ describe("decor that exists only for a while", () => {
       r.updateDecorAnchoring(pose, pose, t)
       expect(group.visible, `at ${t} ms`).toBe(visible)
     }
+  })
+
+  describe("its 3D model", () => {
+    /** An aircraft that flies from far off, over the observer, to far off again: 20 km, 3 km, 20 km. */
+    function withModelledAircraft() {
+      const r = renderer()
+      const object = {
+        id: "traffic-1-0", kind: "aircraft" as const, eastM: 20_000, northM: 0, model: { id: "amvlab-a320" },
+        track: [{ t: 0, eastM: 20_000, northM: 0, altitudeM: 100 }, { t: 10_000, eastM: 3_000, northM: 0, altitudeM: 100 }, { t: 20_000, eastM: 20_000, northM: 0, altitudeM: 100 }]
+      }
+      r.decorObjects = [object]
+      r.decorGroups.set(object.id, new Group())
+      r.pendingTrafficModels.set(object.id, object)
+      const load = vi.fn(async () => undefined)
+      r.loadDecorModel = load
+      return { r, load, object }
+    }
+    const pose = { lat: 43, lng: 6 }
+
+    it("is not fetched while the aircraft is further off than its shape can be seen from", () => {
+      const { r, load } = withModelledAircraft()
+      r.updateDecorAnchoring(pose, pose, 0)
+      expect(load).not.toHaveBeenCalled()
+      expect(r.pendingTrafficModels.size).toBe(1)
+    })
+
+    it("is fetched once the aircraft comes within 5 km, and only once", () => {
+      const { r, load, object } = withModelledAircraft()
+      r.updateDecorAnchoring(pose, pose, 10_000)
+      expect(load).toHaveBeenCalledTimes(1)
+      expect(load).toHaveBeenCalledWith(object, r.decorModelToken)
+      r.updateDecorAnchoring(pose, pose, 10_500)
+      r.updateDecorAnchoring(pose, pose, 15_000)
+      expect(load).toHaveBeenCalledTimes(1)
+      expect(r.pendingTrafficModels.size).toBe(0)
+    })
+
+    it("is not fetched for an aircraft that is not there, however near its resting place", () => {
+      const { r, load } = withModelledAircraft()
+      r.setDecorPresence(new Map([["traffic-1-0", { fromMs: 12_000, untilMs: 20_000 }]]))
+      r.updateDecorAnchoring(pose, pose, 10_000)
+      expect(load).not.toHaveBeenCalled()
+    })
   })
 
   it("does not push the far plane out for an aircraft that is not there", () => {

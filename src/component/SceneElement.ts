@@ -1125,7 +1125,9 @@ export class SceneElement extends HTMLElement {
    * SceneRenderer.currentDecorModelCredits, and DataSource on why a credit that isn't displayed
    * isn't a licence. */
   get decorModelCredits(): DecorModelCredit[] {
-    return this.sceneRenderer.currentDecorModelCredits
+    // Once each: forty aircraft drawn with one A320 model are one credit, not forty lines of it.
+    const once = new Map(this.sceneRenderer.currentDecorModelCredits.map(credit => [`${credit.title}|${credit.author ?? ""}|${credit.license}|${credit.sourceUrl ?? ""}`, credit]))
+    return [...once.values()]
   }
 
   /**

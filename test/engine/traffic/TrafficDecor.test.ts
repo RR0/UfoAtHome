@@ -32,6 +32,15 @@ describe("TrafficDecor", () => {
     expect(object.lights!.filter(light => light.pattern.kind === "flash")).toHaveLength(4)
   })
 
+  test("an aircraft of a type that has a model names it, for the renderer to draw it with when it is near; any other keeps the built-in shape", () => {
+    const track = Tracks.eastbound(0xabc123, 30, 0, 30)
+    const named = (code: string) => TrafficDecor.from([track], observer, START, undefined, { models: new Map([["abc123", AircraftModels.of({ type: code })]]) }).objects[0]
+    expect(named("A320").model).toEqual({ id: "amvlab-a320" })
+    expect(named("B738").model).toEqual({ id: "amvlab-b737" })
+    expect(named("B77W").model).toBeUndefined()
+    expect(TrafficDecor.from([track], observer, START).objects[0].model).toBeUndefined()
+  })
+
   test("its keyframes are in ms from the start of the recording, and it exists only between the first and the last", () => {
     const set = TrafficDecor.from([Tracks.eastbound(1, 30, 10, 20)], observer, START)
     const [object] = set.objects

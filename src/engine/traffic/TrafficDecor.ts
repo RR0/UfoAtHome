@@ -7,6 +7,7 @@ import { AircraftModels } from "./AircraftModels.js"
 import { AircraftSighting } from "./AircraftSighting.js"
 import { TrafficIds } from "./TrafficIds.js"
 import { TrafficLights } from "./TrafficLights.js"
+import { TrafficModels } from "./TrafficModels.js"
 
 /** When one piece of traffic is there: it exists only between its first and last position, ms from the recording's start. */
 export interface TrafficPresence {
@@ -153,6 +154,8 @@ class TrafficDecorSetBuilder {
             northM: keyframes[0].northM,
             headingDeg: keyframes[0].headingDeg,
             sizeM: TrafficDecor.sizeOf(model),
+            // The real model, for when it is near enough for its shape to be seen: the renderer decides that (see SceneRenderer).
+            model: TrafficModels.idOf(model.code) ? { id: TrafficModels.idOf(model.code) } : undefined,
             color: TrafficLights.bodyColor(model),
             lights: TrafficLights.lights(model, sunElevationDeg),
             track: keyframes

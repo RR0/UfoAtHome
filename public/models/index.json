@@ -195,6 +195,34 @@
         "license": "CC0 1.0",
         "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-chiles-whitted-craft.ts"
       }
+    },
+    {
+      "id": "amvlab-a320",
+      "kind": "aircraft",
+      "name": "Airbus A320 (plain, no livery)",
+      "file": "amvlab-aircraft/A320_nologo.glb",
+      "headingOffsetDeg": -90,
+      "sizeM": { "widthM": 34.1, "lengthM": 37.6, "heightM": 11.8 },
+      "credit": {
+        "title": "Airbus A320, logo-free variant",
+        "author": "amvlab",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://github.com/amvlab/aircraft-models"
+      }
+    },
+    {
+      "id": "amvlab-b737",
+      "kind": "aircraft",
+      "name": "Boeing 737 (plain, no livery)",
+      "file": "amvlab-aircraft/B737_nologo.glb",
+      "headingOffsetDeg": -90,
+      "sizeM": { "widthM": 35.8, "lengthM": 39.5, "heightM": 12.5 },
+      "credit": {
+        "title": "Boeing 737, logo-free variant",
+        "author": "amvlab",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://github.com/amvlab/aircraft-models"
+      }
     }
   ]
 }

@@ -22,6 +22,8 @@ const astronomySet = vi.fn()
 const pickedTraffic: { id?: string } = {}
 /** Every decor list and presence table the element hands the renderer, to see what air traffic reaches it. */
 const decorSet: { id: string }[][] = []
+/** What the mocked renderer says its 3D models are credited as: one entry per object that wears one, so the same credit as often as it is worn. */
+const rendererModelCredits: { title: string; author?: string; license: string; sourceUrl?: string }[] = []
 const presenceSet: ReadonlyMap<string, { fromMs: number; untilMs: number }>[] = []
 /** Every list of trails the element hands the renderer. */
 const contrailsSet: { id: string; points: { forms: boolean; persistent: boolean }[] }[][] = []
@@ -53,8 +55,8 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return undefined
     }
     setDecorModelProvider(): void {}
-    get currentDecorModelCredits(): never[] {
-      return []
+    get currentDecorModelCredits(): unknown[] {
+      return rendererModelCredits
     }
     setAstronomy(): void { astronomySet() }
     setShowCompass(): void {}
@@ -539,6 +541,18 @@ describe("SceneElement air traffic", () => {
     expect(presenceSet[presenceSet.length - 1].get("traffic-abc123-0")).toEqual({ fromMs: 0, untilMs: 60_000 })
     expect(element.aircraftState).toMatchObject({ status: "ready", shown: 1, total: 1, credit: "Stub credit" })
     element.remove()
+  })
+
+  it("credits a 3D model once however many aircraft wear it", () => {
+    const { element } = mountAt(AT, stubSource({ status: "found", tracks: [] }).source)
+    const a320 = { title: "Airbus A320, logo-free variant", author: "amvlab", license: "CC BY 4.0", sourceUrl: "https://github.com/amvlab/aircraft-models" }
+    rendererModelCredits.push(a320, { ...a320 }, { ...a320 }, { title: "Boeing 737, logo-free variant", author: "amvlab", license: "CC BY 4.0" })
+    try {
+      expect(element.decorModelCredits.map(credit => credit.title)).toEqual(["Airbus A320, logo-free variant", "Boeing 737, logo-free variant"])
+    } finally {
+      rendererModelCredits.length = 0
+      element.remove()
+    }
   })
 
   describe("the trails of the aircraft", () => {

@@ -21,6 +21,7 @@ import {
   Matrix3,
   MeshBasicMaterial,
   MeshLambertMaterial,
+  MeshStandardMaterial,
   Object3D,
   OrthographicCamera,
   PCFShadowMap,
@@ -990,6 +991,14 @@ export class SceneRenderer {
   private decorPresence: ReadonlyMap<string, { fromMs: number; untilMs: number }> = new Map()
   /** Where the Sun stands for each decor object that flies, by id — see setDecorSunlight. */
   private decorSunlight: ReadonlyMap<string, DecorSunlight> = new Map()
+  /**
+   * The model of an aircraft of the record of air traffic is fetched only when it is near enough for its shape to be seen: further off it is a few
+   * pixels, and the built-in shape and its lamps say all there is to see. Within this distance, metres, an A320 spans some twenty pixels in a frame
+   * 60 degrees across. What waits for it is here, by id; what has been fetched stays (an aircraft that has gone out again is not unloaded, to be
+   * fetched anew when it comes back).
+   */
+  private static readonly TRAFFIC_MODEL_RANGE_M = 5000
+  private readonly pendingTrafficModels = new Map<string, DecorObject>()
   /** The trails the aircraft of a record leave, and what draws them: brought in with the first trail, never for a scene without one. */
   private contrails: readonly ContrailTrail[] = []
   private contrailSystem?: ContrailSystem
@@ -1976,6 +1985,7 @@ export class SceneRenderer {
     this.decorObjects = decor
     this.decorModelToken++
     this.decorModelCredits.clear()
+    this.pendingTrafficModels.clear()
     for (const group of this.decorGroups.values()) {
       group.removeFromParent()
       DecorSystem.dispose(group)
@@ -1994,7 +2004,8 @@ export class SceneRenderer {
       // Fired and forgotten on purpose: the primitive is already in the scene and is a complete,
       // correct answer on its own, so a model that takes a second to arrive (or never arrives)
       // costs the viewer nothing but detail. See loadDecorModel.
-      void this.awaitArrival(this.loadDecorModel(object, this.decorModelToken))
+      if (object.model && object.id.startsWith(TrafficIds.ID_PREFIX)) this.pendingTrafficModels.set(object.id, object)
+      else void this.awaitArrival(this.loadDecorModel(object, this.decorModelToken))
     }
     // Toggled here too (not just in updateCelestialLight, which only runs on the next
     // setAstronomy tick): adding the sighting's first-ever decor object shouldn't have to wait an
@@ -2383,7 +2394,12 @@ export class SceneRenderer {
         }
       }
       // Not for one that is not there: its resting place would push the far plane out for nothing.
-      if (!absent) furthestDecorM = Math.max(furthestDecorM, group.position.distanceTo(this.camera.position))
+      if (!absent) {
+        const distanceM = group.position.distanceTo(this.camera.position)
+        furthestDecorM = Math.max(furthestDecorM, distanceM)
+        // Near enough now for its model to be worth fetching — see TRAFFIC_MODEL_RANGE_M. Not awaited: nothing is held for it.
+        if (distanceM < SceneRenderer.TRAFFIC_MODEL_RANGE_M && this.pendingTrafficModels.delete(object.id)) void this.loadDecorModel(object, this.decorModelToken)
+      }
     }
     this.updateContrails()
     // Decor used to be local scenery, a couple of hundred meters out at most, so a far plane sized
@@ -3099,7 +3115,13 @@ export class SceneRenderer {
     }
     group.traverse(object => {
       const material = (object as Mesh).material
-      if (!(material instanceof MeshLambertMaterial) || (object.userData as { emissive?: boolean }).emissive) return
+      // The built-in shapes are Lambert, a model's own is physically based: both take an emissive colour, which is how the Sun the aircraft sees
+      // is added to the scene's. A model's colour is mostly its texture, so the texture is what the emissive colour is multiplied by.
+      if (!(material instanceof MeshLambertMaterial || material instanceof MeshStandardMaterial) || (object.userData as { emissive?: boolean }).emissive) return
+      if (material.map && !material.emissiveMap) {
+        material.emissiveMap = material.map
+        material.needsUpdate = true
+      }
       const k = SceneRenderer.MEAN_COSINE / Math.PI
       material.emissive.setRGB(material.color.r * extra[0] * k, material.color.g * extra[1] * k, material.color.b * extra[2] * k)
     })
