@@ -131,6 +131,8 @@ for (const card of cards) {
     // a "View · Edit" pair under each card repeated both.
     const loading = DemosPage.LOADING[language]
 
+    // The heading has an id of its own, so that the site does not give it the "#" link it gives every other: a card is already a link, to its
+    // player, and the card itself (by the demo's id) is what a reader would share.
     const groups = this.catalogue.groups.map(group => `
     <section class="demo-group">
       <h2>${group.heading[language]}</h2>
@@ -141,7 +143,7 @@ for (const card of cards) {
           return `<figure class="demo-card" id="${demo.id}" data-src="${demo.src}">
           <div class="demo-mount"><p class="loading">${loading}</p></div>
           <figcaption>
-            <h3><a href="${playerPath}?sighting=${played}">${demo.title[language]}</a></h3>
+            <h3 id="${demo.id}-title"><a href="${playerPath}?sighting=${played}">${demo.title[language]}</a></h3>
             <p>${demo.blurb[language]}</p>
           </figcaption>
         </figure>`
