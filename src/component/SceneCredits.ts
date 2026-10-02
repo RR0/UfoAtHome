@@ -77,6 +77,14 @@ export class SceneCredits {
       item.append(SceneCredits.link(FIREBALL_CREDIT_URL, FIREBALL_CREDIT), document.createTextNode(" (CC BY 4.0)"))
       add(item)
     }
+    // Where the aircraft this sky draws were recorded, when it draws any: an open database whose licence
+    // asks to be credited (ODbL), and whose absence of a trace excludes nothing.
+    const aircraft = scene.aircraftState
+    if (aircraft.status === "ready" && aircraft.shown > 0) {
+      const item = document.createElement("li")
+      item.appendChild(SceneCredits.link(aircraft.creditUrl, aircraft.credit))
+      add(item)
+    }
     const thunder = SceneCredits.text(`${THUNDER_CREDIT_TEXT} (`)
     thunder.append(SceneCredits.link(THUNDER_CREDIT_LICENSE_URL, THUNDER_CREDIT_LICENSE), document.createTextNode(")"))
     add(thunder)

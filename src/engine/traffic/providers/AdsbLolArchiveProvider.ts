@@ -37,6 +37,10 @@ export class AdsbLolArchiveProvider implements AircraftProvider {
 
   /** How far around the observer aircraft are looked for, km: the far ones are the ones taken for something else. */
   static readonly DEFAULT_RADIUS_KM = 150
+  /** The aircraft database's flags, as the ingestion keeps them. */
+  private static readonly FLAG_MILITARY = 1
+  private static readonly FLAG_PIA = 4
+  private static readonly FLAG_LADD = 8
   private static readonly KM_PER_DEG = 111.32
   private static readonly HOUR_MS = 3600_000
 
@@ -45,7 +49,7 @@ export class AdsbLolArchiveProvider implements AircraftProvider {
   private index?: Promise<{ index: ArchiveIndex; base: string } | undefined>
   private readonly hours = new Map<string, Promise<Record<string, [number, number]>>>()
   private readonly tiles = new Map<string, Promise<AircraftTrack[]>>()
-  private readonly shards = new Map<string, Promise<Record<string, [string, string]>>>()
+  private readonly shards = new Map<string, Promise<Record<string, [string, string, string?, number?]>>>()
 
   constructor(options: AdsbLolArchiveProviderOptions = {}) {
     // fetch.bind(globalThis): an unbound fetch loses the `this` it requires once called as a field.
@@ -61,6 +65,13 @@ export class AdsbLolArchiveProvider implements AircraftProvider {
     }
     if (!urls.includes(UFOATHOME_AIRCRAFT_INDEX_URL)) urls.push(UFOATHOME_AIRCRAFT_INDEX_URL)
     return urls
+  }
+
+  /** The first day of the archive, known without asking it: ADSB.lol's open history begins in 2022 at the earliest. */
+  static readonly FIRST_DAY = "2022-01-01"
+
+  mayCover(ms: number): boolean {
+    return new Date(ms).toISOString().slice(0, 10) >= AdsbLolArchiveProvider.FIRST_DAY
   }
 
   async between(observer: GeoPoint, startMs: number, endMs: number, radiusKm = AdsbLolArchiveProvider.DEFAULT_RADIUS_KM): Promise<AircraftTraffic> {
@@ -88,12 +99,21 @@ export class AdsbLolArchiveProvider implements AircraftProvider {
     let described = this.shards.get(key)
     if (!described) {
       described = this.fetchImpl(new URL(`${day}/aircraft/${shard}.json`, loaded.base).href)
-        .then(response => response.ok ? response.json() as Promise<Record<string, [string, string]>> : {})
+        .then(response => response.ok ? response.json() as Promise<Record<string, [string, string, string?, number?]>> : {})
         .catch(() => ({}))
       this.shards.set(key, described)
     }
     const entry = (await described)[track.nonIcao ? `~${hex}` : hex]
-    return entry && (entry[0] || entry[1]) ? { registration: entry[0] || undefined, type: entry[1] || undefined } : undefined
+    if (!entry) return undefined
+    const [registration, type, category, flags = 0] = entry
+    const description: AircraftDescription = {
+      registration: registration || undefined,
+      type: type || undefined,
+      category: category || undefined,
+      military: (flags & AdsbLolArchiveProvider.FLAG_MILITARY) !== 0 || undefined,
+      restricted: (flags & (AdsbLolArchiveProvider.FLAG_PIA | AdsbLolArchiveProvider.FLAG_LADD)) !== 0 || undefined
+    }
+    return Object.values(description).some(value => value !== undefined) ? description : undefined
   }
 
   /**

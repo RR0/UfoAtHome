@@ -129,6 +129,8 @@ import { AerialPerspective } from "../engine/atmosphere/AerialPerspective.js"
 import type { Rgb } from "../engine/atmosphere/AerialPerspective.js"
 import { AerialFog } from "./AerialFog.js"
 import { ForwardDiffraction } from "../engine/atmosphere/ForwardDiffraction.js"
+import { AircraftLighting } from "../engine/traffic/AircraftLighting.js"
+import { TrafficDecor } from "../engine/traffic/TrafficDecor.js"
 import { AtmosphereProfile } from "../engine/atmosphere/AtmosphereProfile.js"
 import { SourceDiffraction } from "./SourceDiffraction.js"
 import { Reflections } from "./Reflections.js"
@@ -272,6 +274,12 @@ const WATER_DECK_OPACITY = 0.97
 const ICE_DECK_OPACITY = 0.38
 /** Same threshold as BODY_HIDE_BELOW_DEG, named separately for updateCelestialLight's own use —
  * a body that isn't even rendered shouldn't be lighting anything either. */
+/** Where the Sun stands for one thing that flies: its height above the sea, metres, and the Sun's elevation over its own horizon, degrees. */
+export interface DecorSunlight {
+  heightM: number
+  sunElevationDeg: number
+}
+
 const CELESTIAL_LIGHT_MIN_ALTITUDE_DEG = BODY_HIDE_BELOW_DEG
 /** A streetlight's lamp, candela below it: a 10 000 lumen road lamp throws about this much down. */
 const STREETLIGHT_CANDELA = 1500
@@ -973,6 +981,16 @@ export class SceneRenderer {
    * per-tick allocation, unlike weatherEquals' field-by-field compare). */
   private decorObjects: DecorObject[] = []
   private readonly decorGroups = new Map<string, Group>()
+  /** When each decor object that exists only for a while is there, ms from the recording's start, by id:
+   * the aircraft a record of air traffic gives (see TrafficDecor). Outside its span an object is not
+   * drawn, instead of standing frozen where its first or last position left it. Absent means always
+   * there, which is what every object a recording states is. */
+  private decorPresence: ReadonlyMap<string, { fromMs: number; untilMs: number }> = new Map()
+  /** Where the Sun stands for each decor object that flies, by id — see setDecorSunlight. */
+  private decorSunlight: ReadonlyMap<string, DecorSunlight> = new Map()
+  /** The Sun's beam on the ground the scene stands on, per channel, in the units of its lights: what the scene's own
+   * directional light already gives every object. Zero when the light is the Moon's, or when no light is on. */
+  private sceneSunBeam: [number, number, number] = [0, 0, 0]
   /** Last anchoring inputs, retained because terrain arrives asynchronously. Once it does, the
    * camera and every object must be placed again against the real mesh rather than the flat
    * fallback they were initially shown on. */
@@ -1977,6 +1995,23 @@ export class SceneRenderer {
   }
 
   /**
+   * Tells where the Sun stands for the decor objects that fly: for each, its height above the sea and the Sun's
+   * elevation over ITS horizon (see AircraftLighting). The scene's own light is the Sun as the ground sees it, and
+   * an aircraft at cruising height keeps the Sun after the ground has lost it, and sees it through the thin air
+   * above it, whiter by day and redder at the end of it than the ground does: what it is lit by is worked out
+   * again for each, at every tick (see lightFromAbove).
+   */
+  setDecorSunlight(sunlight: ReadonlyMap<string, DecorSunlight>): void {
+    this.decorSunlight = sunlight
+  }
+
+  /** Tells which decor objects are there only for a while, and when — see decorPresence. Applied at the next
+   * updateDecorAnchoring, which every tick runs. */
+  setDecorPresence(presence: ReadonlyMap<string, { fromMs: number; untilMs: number }>): void {
+    this.decorPresence = presence
+  }
+
+  /**
    * Points the decor at a different model catalogue, and rebuilds what is already showing from it.
    *
    * Same shape and same reason as setTerrainProviders: choosing a source is the editor's to do (see
@@ -2252,6 +2287,11 @@ export class SceneRenderer {
         const distance = Math.hypot(x, z)
         group.visible = distance <= CROP_VISIBLE_DISTANCE_M
       }
+      const presence = this.decorPresence.get(object.id)
+      const absent = presence !== undefined && (t < presence.fromMs || t > presence.untilMs)
+      if (presence) group.visible = !absent
+      const sunlight = this.decorSunlight.get(object.id)
+      if (sunlight && !absent) this.lightFromAbove(group, sunlight)
       if (placement.headingDeg !== undefined) group.rotation.y = -placement.headingDeg * DEG_TO_RAD
       if (object.kind === "crop" && group.visible) {
         const terrain = this.terrainMesh
@@ -2263,7 +2303,8 @@ export class SceneRenderer {
           group.userData.cropGroundKey = key
         }
       }
-      furthestDecorM = Math.max(furthestDecorM, group.position.distanceTo(this.camera.position))
+      // Not for one that is not there: its resting place would push the far plane out for nothing.
+      if (!absent) furthestDecorM = Math.max(furthestDecorM, group.position.distanceTo(this.camera.position))
     }
     // Decor used to be local scenery, a couple of hundred meters out at most, so a far plane sized
     // for the sky and the ground was always enough. An aircraft is 5 to 10 km away, and would be
@@ -2478,6 +2519,13 @@ export class SceneRenderer {
 
   private readonly bloomSize = new Vector2()
 
+  /** What the air lets through of the light of a lamp on that group, per channel, along the line from the eye to it. */
+  private lampTransmittance(group: Group): [number, number, number] {
+    const from = this.siteElevationM + this.camera.position.y
+    const to = this.siteElevationM + group.position.y
+    return this.air.transmittance(from, to, group.position.distanceTo(this.camera.position))
+  }
+
   updateDecorLitState(t: number, stepMs = 0): void {
     const bloomRadiusRad = this.lampBloomRadiusRad()
     for (const object of this.decorObjects) {
@@ -2495,7 +2543,8 @@ export class SceneRenderer {
           // length, so the lamp is INTEGRATED over it — see DecorSystem.setLights.
           stepMs,
           this.relativeScale,
-          bloomRadiusRad
+          bloomRadiusRad,
+          this.lampTransmittance(lampGroup)
         )
       }
       if (object.kind !== "streetlight" && object.kind !== "vehicle") continue
@@ -2832,6 +2881,30 @@ export class SceneRenderer {
     return this.reentrySystem?.count ?? 0
   }
 
+  /**
+   * The aircraft of a record of air traffic under a screen point, by the id of its decor: the one whose direction is nearest the
+   * pointer's, within the same angle as a star's. By angle and not by hit: an aircraft ten kilometres off is under a pixel across,
+   * and a ray never meets it, so it could never be pointed at.
+   */
+  pickTrafficAt(ndcX: number, ndcY: number): string | undefined {
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
+    const aim = this.raycaster.ray.direction
+    const thresholdCos = Math.cos((STAR_HOVER_FIELD_FRACTION * this.camera.fov * Math.PI) / 180)
+    let best: string | undefined
+    let bestCos = thresholdCos
+    const toward = new Vector3()
+    for (const [id, group] of this.decorGroups) {
+      if (!group.visible || !id.startsWith(TrafficDecor.ID_PREFIX)) continue
+      toward.copy(group.position).sub(this.camera.position).normalize()
+      const cos = toward.dot(aim)
+      if (cos > bestCos) {
+        bestCos = cos
+        best = id
+      }
+    }
+    return best && !this.groundHides(ndcX, ndcY) ? best : undefined
+  }
+
   /** The drawn satellite under a screen point, the same angular nearest-neighbour as pickStarAt. */
   pickSatelliteAt(ndcX: number, ndcY: number): SceneSatellite | undefined {
     if (!this.satelliteField?.count) return undefined
@@ -2898,6 +2971,7 @@ export class SceneRenderer {
         albedo * (irradiance[0] + beam[0] * level), albedo * (irradiance[1] + beam[1] * level), albedo * (irradiance[2] + beam[2] * level))
     }
     this.skyLight.intensity = 1
+    this.sceneSunBeam = useSun ? [beam[0], beam[1], beam[2]] : [0, 0, 0]
     if (!useSun && !useMoon) {
       this.celestialLight.intensity = 0
       return
@@ -2909,6 +2983,46 @@ export class SceneRenderer {
     this.celestialLight.color.setRGB(beam[0] / peak, beam[1] / peak, beam[2] / peak)
     this.celestialLight.intensity = peak
     this.celestialLight.castShadow = this.decorGroups.size > 0 || this.bodySystem.any
+  }
+
+  /** The share of the light that falls on a body that a surface turned any way takes: the mean of the cosine over the lit half. */
+  private static readonly MEAN_COSINE = 0.5
+  /** Above this height an aircraft is over every deck of cloud there is: the Sun reaches it whatever the observer's sky holds. */
+  private static readonly ABOVE_CLOUD_M = 8000
+
+  /**
+   * Lights an aircraft with the Sun it sees, over what the scene's light already gives it.
+   *
+   * The scene lights everything with the Sun as the observer's ground has it: out when it is under their horizon,
+   * reddened by all the air it crosses, dimmed by the clouds over their head. An aircraft is lit by another Sun:
+   * still up after the ground has lost it (see AircraftLighting.litFraction), seen through the air above its own
+   * height alone (see AerialPerspective.transmittanceFromSpace) — which is why its body is orange against a dusk
+   * sky that is already dark — and, above the clouds, through none. What the scene does not already give it is
+   * added as an emissive term of the body, per channel, as the Lambert light that body would take on average:
+   * albedo / pi times the beam, over a surface turned any way. Never subtracted: where the scene lights it more than
+   * this would, the scene's light stays, so that at noon on a clear day nothing changes at all.
+   *
+   * Uniform over the body, which has no side in the dark: an aircraft that is a few pixels across has none worth
+   * drawing, and one close enough to show its shaded side is a case this does not yet serve.
+   */
+  private lightFromAbove(group: Group, sunlight: DecorSunlight): void {
+    const sun = this.lastAstronomy?.sun
+    const extra: [number, number, number] = [0, 0, 0]
+    if (sun) {
+      const lit = AircraftLighting.litFraction(sunlight.sunElevationDeg, sunlight.heightM)
+      if (lit > 0) {
+        const through = this.air.transmittanceFromSpace(sunlight.heightM, sunlight.sunElevationDeg)
+        const illuminance = ForwardDiffraction.illuminanceOf(sun.magnitude) * this.relativeScale
+        const clouds = sunlight.heightM >= SceneRenderer.ABOVE_CLOUD_M ? 1 : this.cloudTransmission(sun)
+        for (let c = 0; c < 3; c++) extra[c] = Math.max(0, illuminance * through[c] * lit * clouds - this.sceneSunBeam[c])
+      }
+    }
+    group.traverse(object => {
+      const material = (object as Mesh).material
+      if (!(material instanceof MeshLambertMaterial) || (object.userData as { emissive?: boolean }).emissive) return
+      const k = SceneRenderer.MEAN_COSINE / Math.PI
+      material.emissive.setRGB(material.color.r * extra[0] * k, material.color.g * extra[1] * k, material.color.b * extra[2] * k)
+    })
   }
 
   /** Where the Sun or the Moon lighting the scene stands, a unit vector. */

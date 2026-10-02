@@ -1,4 +1,4 @@
-import { BackSide, Box3, DoubleSide, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
+import { AdditiveBlending, BackSide, Box3, DoubleSide, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
 import type { Object3D } from "three"
 import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize } from "../engine/model/Decor.js"
 import { canHoldObserver, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
@@ -1084,6 +1084,17 @@ export class DecorSystem {
       mesh.position.set(light.offsetM.x, light.offsetM.y, light.offsetM.z)
       mesh.userData = { emissive: true, lightId: light.id, lightColor: colour } satisfies DecorMeshUserData
       mesh.visible = false
+      // A lamp ADDS its light to what is behind it: an opaque disc of the lamp's (small, relative) luminance would
+      // REPLACE the sky with a near-black point, which on a night sky nobody can tell from the sky and by day, or at dusk,
+      // is a black dot where a light should be lost in the glare. Additive, then, and out of the fog: the air between
+      // dims the lamp (see setLights' `transmittance`) and lays its own light over the sky behind it, which the sky
+      // already holds — drawn through the fog, the lamp would add that airlight a second time and shine brighter the
+      // further it was.
+      const material = mesh.material as MeshBasicMaterial
+      material.blending = AdditiveBlending
+      material.transparent = true
+      material.depthWrite = false
+      material.fog = false
     }
   }
 
@@ -1100,6 +1111,10 @@ export class DecorSystem {
    * `distanceM` is measured to the object as a whole; a wingtip is not meaningfully further away
    * than a tail at any distance where this matters.
    *
+   * `transmittance` is what the air between the eye and the object lets through of its light, per channel: a lamp
+   * is out of the fog (see addLights), so the haze has to be taken off its light here. A lamp ten kilometres off
+   * through the haze of a low sun is a small part of what it is at one.
+   *
    * `bloomRadiusRad` is that glare's own size, the eye's by default. A camera's is its grain's
    * (see SceneRenderer.lampBloomRadiusRad), several times smaller: drawn with an eye's bloom, a
    * lamp on a pose spread its light along a trail five times too wide, and the trail an aircraft
@@ -1112,7 +1127,8 @@ export class DecorSystem {
     distanceM: number,
     stepMs = 0,
     relativeScale = 1,
-    bloomRadiusRad = LAMP_MIN_ANGULAR_RADIUS_RAD
+    bloomRadiusRad = LAMP_MIN_ANGULAR_RADIUS_RAD,
+    transmittance: readonly [number, number, number] = [1, 1, 1]
   ): void {
     if (!lights || lights.length === 0) return
     const byId = new Map(lights.map(light => [light.id, light]))
@@ -1137,7 +1153,7 @@ export class DecorSystem {
       const base = (child.userData as DecorMeshUserData).lightColor
       if (base) {
         const emitted = share * LAMP_CANDELA * (light.intensity ?? 1) * luminancePerCandela
-        material.color.setRGB(base[0] * emitted, base[1] * emitted, base[2] * emitted)
+        material.color.setRGB(base[0] * emitted * transmittance[0], base[1] * emitted * transmittance[1], base[2] * emitted * transmittance[2])
       }
       child.scale.setScalar(scale)
     }

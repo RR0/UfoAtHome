@@ -12,7 +12,7 @@ import type { PreviewableScene } from "./SeekPreview.js"
 import type { TerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
 import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import type { DecorModelCredit } from "../engine/model/Decor.js"
-import type { SceneAstronomy, SceneComet, SceneNova } from "../render3d/SceneRenderer.js"
+import type { DecorSunlight, SceneAstronomy, SceneComet, SceneNova } from "../render3d/SceneRenderer.js"
 import { StarCatalogs, STAR_CATALOG_MAGNITUDE_LIMIT, DEEP_STAR_CATALOG_MAGNITUDE_LIMIT } from "../render3d/StarCatalog.js"
 import type { StarCatalogTier } from "../render3d/StarCatalog.js"
 import type { StarCatalog } from "../render3d/StarCatalog.js"
@@ -72,6 +72,20 @@ import { Vector3 } from "three"
 import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
 import { ReentrySighting } from "../engine/interpretation/Reentry.js"
 import type { ReentryJson } from "../engine/interpretation/Reentry.js"
+import { AIRCRAFT_SOURCES } from "../engine/traffic/aircraftSources.js"
+import type { AircraftProvider } from "../engine/traffic/AircraftProvider.js"
+import { AircraftSighting } from "../engine/traffic/AircraftSighting.js"
+import { AircraftLighting } from "../engine/traffic/AircraftLighting.js"
+import { AircraftModels } from "../engine/traffic/AircraftModels.js"
+import type { AircraftModel } from "../engine/traffic/AircraftModels.js"
+import type { AircraftDescription, AircraftPoint, AircraftTrack } from "../engine/traffic/AircraftProvider.js"
+import { TrafficInfos } from "../engine/traffic/TrafficInfo.js"
+import type { TrafficInfo } from "../engine/traffic/TrafficInfo.js"
+import { TrafficTooltip } from "./TrafficTooltip.js"
+import { TrafficDecor } from "../engine/traffic/TrafficDecor.js"
+import type { TrafficDecorSet } from "../engine/traffic/TrafficDecor.js"
+import type { DecorObject } from "../engine/model/Decor.js"
+import type { DataSource } from "../engine/source/DataSource.js"
 import { FireballArchive } from "../engine/astronomy/FireballArchive.js"
 import type { FireballRecord } from "../engine/astronomy/FireballArchive.js"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
@@ -127,6 +141,8 @@ const SATELLITE_TOOLTIP = "{name} — satellite, mag {mag}, {height} km up"
 export const SATELLITES_CHANGE_EVENT = "satellites-change"
 /** Fired by a scene when the fireballs on record for its recording have arrived — see fireballState. */
 export const FIREBALLS_CHANGE_EVENT = "fireballs-change"
+/** Fired by a scene when the air traffic recorded around its observer for its recording has arrived — see aircraftState. */
+export const AIRCRAFT_CHANGE_EVENT = "aircraft-change"
 /** Fired whenever what the interpretation on show says against the account changes — see
  * SceneElement.confrontation. */
 export const CONFRONTATION_EVENT = "rr0-confrontation"
@@ -329,6 +345,21 @@ export class SceneElement extends HTMLElement {
   /** The fireballs on record during this recording, for the start and span they were asked for:
    * `records` once they came (empty for none), absent while loading or when nothing could be asked. */
   private fireballs?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; records?: FireballRecord[]; reentries: ReentryJson[] }
+  /** One provider per source for every scene on the page, so two embedded recordings of the same hour
+   * share the tiles they fetched. */
+  private static readonly aircraftProviders = new Map<string, AircraftProvider>()
+  /** How far before a recording the record of air traffic is asked for: the time the sound of an aircraft a hundred kilometres off takes to arrive, near enough. */
+  private static readonly SOUND_LOOKBACK_MS = 300_000
+  private static readonly NO_PRESENCE: ReadonlyMap<string, { fromMs: number; untilMs: number }> = new Map()
+  /** Where the air traffic is read from — see AircraftProvider. The editor's picker changes it. */
+  private aircraftSource: DataSource<AircraftProvider> = AIRCRAFT_SOURCES[0]
+  /** The air traffic recorded around the observer during this recording, for the source, window and place it was asked for. */
+  private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription> }
+  /** Where the Sun stood at the last restatement of the sky, from the observer: what the aircraft are lit by, each from its own place. */
+  private lastSun?: { altitudeDeg: number; azimuthDeg: number }
+  /** The decor the recording states plus the traffic, rebuilt only when either changes: the renderer
+   * rebuilds every group when the list it is given is not the one it had. */
+  private decorMemo?: { base: DecorObject[]; traffic: DecorObject[]; merged: DecorObject[] }
   /** How faint the catalogue now loaded goes — what ensureStarsDeepEnough compares this recording's
    * own optics against. Zero until the first load, which is "nothing loaded" rather than a depth. */
   private starCatalogDepth = 0
@@ -406,6 +437,12 @@ export class SceneElement extends HTMLElement {
     // A star is what is left when nothing nearer is under the pointer.
     // Before the stars: a satellite crossing in front of a star is the moving light the reader is
     // most likely pointing at.
+    // An aircraft of the record of air traffic: moving, and a candidate for what was seen.
+    const traffic = this.trafficTooltipAt(ndcX, ndcY)
+    if (traffic) {
+      this.showHoverTooltip(event, traffic)
+      return
+    }
     const satellite = this.sceneRenderer.pickSatelliteAt(ndcX, ndcY)
     if (satellite) {
       this.showHoverTooltip(event, (names?.satelliteTooltip ?? SATELLITE_TOOLTIP)
@@ -1187,7 +1224,7 @@ export class SceneElement extends HTMLElement {
       sky,
       this.ufoElement.exposureTimes(t).length,
       ExposureSampling.instants(
-        this.ufoElement.sighting.decor,
+        this.decorWithTraffic(this.ufoElement.sighting),
         resolveObserverPoseAt(this.ufoElement.sighting, t)?.elevationM ?? 0,
         window.fromMs,
         exposureSeconds,
@@ -1257,7 +1294,9 @@ export class SceneElement extends HTMLElement {
     if (!instant) this.vehicleAudio.setVoices(this.vehicleHearing.at(sighting, t))
     this.updateMeteorShower(sighting, t)
     this.updateLightning(sighting, t, instant !== undefined)
-    this.sceneRenderer.setDecor(sighting.decor)
+    this.sceneRenderer.setDecor(this.decorWithTraffic(sighting))
+    this.sceneRenderer.setDecorPresence(this.traffic?.set?.presence ?? SceneElement.NO_PRESENCE)
+    this.sceneRenderer.setDecorSunlight(this.trafficSunlight(t))
     const pose = resolveObserverPoseAt(sighting, t)
     // Where the observer is, so a picture taken from somewhere else fades — see SceneReference.from.
     this.sceneRenderer.setReferences(sighting.references,
@@ -1374,6 +1413,7 @@ export class SceneElement extends HTMLElement {
     }
     this.lastSkyKey = skyKey
     const sun = { ...computeBodyPosition("Sun", date, observer), magnitude: computeBodyMagnitude("Sun", date) }
+    this.lastSun = { altitudeDeg: sun.altitudeDeg, azimuthDeg: sun.azimuthDeg }
     const moon = {
       ...computeBodyPosition("Moon", date, observer),
       phase: computeMoonPhase(date),
@@ -1461,6 +1501,179 @@ export class SceneElement extends HTMLElement {
       this.dispatchEvent(new CustomEvent(FIREBALLS_CHANGE_EVENT))
       if (asked.reentries.length > 0) this.updateAstronomy(this.lastTimeMs)
     })
+  }
+
+  /**
+   * The decor the recording states, with the aircraft the record of air traffic puts around its observer
+   * at the hour of the recording (see TrafficDecor). The traffic is never part of the recording: it is
+   * looked up, as the weather is, and not saved with it.
+   */
+  private decorWithTraffic(sighting: Sighting): DecorObject[] {
+    const set = this.ensureTraffic(sighting)
+    if (!set || set.objects.length === 0) return sighting.decor
+    const memo = this.decorMemo
+    if (memo && memo.base === sighting.decor && memo.traffic === set.objects) return memo.merged
+    const merged = [...sighting.decor, ...set.objects]
+    this.decorMemo = { base: sighting.decor, traffic: set.objects, merged }
+    return merged
+  }
+
+  /**
+   * Asks the air traffic source for the aircraft around the observer during this recording, once per
+   * source, window and place. Nothing is asked without a date and a recorded place, nor for dates the
+   * source cannot hold (nearly every recording here is older than any record of air traffic).
+   */
+  private ensureTraffic(sighting: Sighting): TrafficDecorSet | undefined {
+    const pose = resolveObserverPoseAt(sighting, 0)
+    const startDate = pose?.lng === undefined ? undefined : sightingTimeToDate(sighting.event.time ?? {}, pose.lng, sighting.event.utcOffsetHours)
+    const spanMs = Math.max((sighting.event.durationSeconds ?? 0) * 1000, this.ufoElement.seekableDuration)
+    const startMs = startDate?.getTime()
+    const key = startMs === undefined || pose?.lat === undefined || pose.lng === undefined ? ""
+      : `${this.aircraftSource.id}|${startMs}+${spanMs}|${pose.lat.toFixed(3)},${pose.lng.toFixed(3)}|${Math.round(pose.elevationM ?? 0)}`
+    if (this.traffic?.key === key) return this.traffic.set
+    if (key === "" || startMs === undefined || pose?.lat === undefined || pose.lng === undefined) {
+      this.traffic = { key, status: "outside" }
+      return undefined
+    }
+    let provider = SceneElement.aircraftProviders.get(this.aircraftSource.id)
+    if (!provider) SceneElement.aircraftProviders.set(this.aircraftSource.id, provider = this.aircraftSource.create())
+    if (provider.mayCover && !provider.mayCover(startMs + spanMs)) {
+      this.traffic = { key, status: "outside" }
+      return undefined
+    }
+    const asked: NonNullable<SceneElement["traffic"]> = { key, status: "loading", startMs, observer: { lat: pose.lat, lng: pose.lng } }
+    this.traffic = asked
+    const observer = { lat: pose.lat, lng: pose.lng, heightM: pose.elevationM ?? 0 }
+    // A minute after the recording, and five before. An aircraft heard only a few seconds after it begins was there before,
+    // and the still image of a paused scene at its first instant would otherwise be an empty sky: a minute is the longest gap
+    // across which a track is still one flight. And the sound of an aircraft is the sound that left it long before: one forty
+    // kilometres off is heard as it was two minutes ago, and one a hundred off five (see AircraftHearing), so what it was doing
+    // then has to be in the record asked for.
+    const after = AircraftSighting.MAX_GAP_S * 1000
+    const before = SceneElement.SOUND_LOOKBACK_MS
+    const geo = { lat: pose.lat, lng: pose.lng, elevationM: pose.elevationM ?? 0 }
+    const build = (models?: Map<string, AircraftModel>) =>
+      TrafficDecor.from(asked.tracks ?? [], observer, startMs, TrafficDecor.MAX_OBJECTS, { models, sunElevationAt: point => this.sunElevationAt(point, geo) })
+    void provider.between(observer, startMs - before, startMs + spanMs + after).then(answer => {
+      if (this.traffic !== asked) return
+      if (answer.status === "found") {
+        asked.status = "ready"
+        asked.tracks = answer.tracks
+        asked.set = build()
+      } else {
+        asked.status = answer.status === "outside" ? "outside" : "unavailable"
+      }
+      this.announceTraffic()
+      if (answer.status === "found") void this.describeTraffic(provider, asked, build)
+    })
+    return undefined
+  }
+
+  /**
+   * Where the Sun stands for each aircraft in the sky at `t`: its height, and the Sun's elevation over the horizon of the
+   * place it really is at — which is not the observer's (see AircraftLighting). Empty until the sky has been stated once.
+   */
+  private trafficSunlight(t: number): Map<string, DecorSunlight> {
+    const sunlight = new Map<string, DecorSunlight>()
+    const traffic = this.traffic
+    const set = traffic?.set
+    const sun = this.lastSun
+    if (!set || !sun || traffic.startMs === undefined || !traffic.observer) return sunlight
+    for (const [id, presence] of set.presence) {
+      if (t < presence.fromMs || t > presence.untilMs) continue
+      const flight = set.flights.get(id)
+      const at = flight ? AircraftSighting.positionAt(flight, traffic.startMs + t) : undefined
+      if (at) sunlight.set(id, { heightM: at.geo.heightM, sunElevationDeg: AircraftLighting.sunElevationDeg(sun, traffic.observer, at.geo) })
+    }
+    return sunlight
+  }
+
+  /** What is said of the aircraft under that point of the screen, if there is one. */
+  private trafficTooltipAt(ndcX: number, ndcY: number): string | undefined {
+    const id = this.sceneRenderer.pickTrafficAt(ndcX, ndcY)
+    const info = id ? this.trafficInfoAt(id) : undefined
+    if (!info) return undefined
+    const naming = this.naming
+    return TrafficTooltip.text(info, naming.names?.trafficTooltip ?? TrafficTooltip.ENGLISH, azimuth => naming.towards(azimuth))
+  }
+
+  /**
+   * What is known of one aircraft drawn from the record of air traffic, as the observer has it at the instant shown: who it is
+   * as far as the record says, how it flies, where it is in their sky, and how it sounds. Undefined for an id that is not an
+   * aircraft of the record, or one that is not in the sky then.
+   */
+  trafficInfoAt(id: string): TrafficInfo | undefined {
+    const traffic = this.traffic
+    const flight = traffic?.set?.flights.get(id)
+    if (!traffic || !flight || traffic.startMs === undefined || !traffic.observer) return undefined
+    const description = traffic.descriptions?.get(TrafficDecor.keyOf(flight))
+    const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.lastTimeMs)
+    const here = { lat: traffic.observer.lat, lng: traffic.observer.lng, heightM: pose?.elevationM ?? 0 }
+    return TrafficInfos.at(flight, description, here, traffic.startMs + this.lastTimeMs)
+  }
+
+  /** Tells whoever listens that the traffic changed, and draws it. */
+  private announceTraffic(): void {
+    if (!this.isConnected) return
+    this.dispatchEvent(new CustomEvent(AIRCRAFT_CHANGE_EVENT))
+    this.updateAstronomy(this.lastTimeMs)
+  }
+
+  /**
+   * Asks the record what the aircraft it drew are — their type and category — and draws them again as what they are: the
+   * size of a real A320, the rotor and lamps of a helicopter, the lamps a light aircraft carries only from dusk. They are
+   * drawn at once as a generic airliner and refined when the answer comes, which leaves their ids and their presence as
+   * they were.
+   */
+  private async describeTraffic(provider: AircraftProvider, asked: NonNullable<SceneElement["traffic"]>, build: (models?: Map<string, AircraftModel>) => TrafficDecorSet): Promise<void> {
+    if (!provider.describe || !asked.set || !asked.tracks) return
+    const shown = new Set([...asked.set.flights.values()].map(flight => TrafficDecor.keyOf(flight)))
+    const wanted = asked.tracks.filter(track => shown.has(TrafficDecor.keyOf(track)) && track.points.length > 0)
+    const models = new Map<string, AircraftModel>()
+    const descriptions = new Map<string, AircraftDescription>()
+    await Promise.all(wanted.map(async track => {
+      const day = new Date(track.points[0].t).toISOString().slice(0, 10)
+      const description = await provider.describe!(track, day).catch(() => undefined)
+      if (!description) return
+      descriptions.set(TrafficDecor.keyOf(track), description)
+      models.set(TrafficDecor.keyOf(track), AircraftModels.of(description))
+    }))
+    if (this.traffic !== asked || models.size === 0) return
+    asked.descriptions = descriptions
+    asked.models = models
+    asked.set = build(models)
+    this.announceTraffic()
+  }
+
+  /** The Sun's elevation over the horizon at the place of an aircraft, at the instant of one of its positions. */
+  private sunElevationAt(point: AircraftPoint, observer: ObserverGeo): number {
+    const sun = computeBodyPosition("Sun", new Date(point.t), observer)
+    return AircraftLighting.sunElevationDeg(sun, observer, point)
+  }
+
+  /** Points the scene at another source of air traffic and asks it again — see AircraftProvider. */
+  setAircraftSource(source: DataSource<AircraftProvider>): void {
+    if (source.id === this.aircraftSource.id) return
+    this.aircraftSource = source
+    this.traffic = undefined
+    this.decorMemo = undefined
+    this.updateAstronomy(this.lastTimeMs)
+  }
+
+  /**
+   * What is known of the air traffic around the observer during this recording, for a readout and the
+   * credits: `outside` what the source holds, still `loading`, `unavailable`, or `ready` — with how many
+   * aircraft the record gave and how many are drawn (a record of an hour near a big airport holds
+   * more than is worth drawing).
+   */
+  get aircraftState(): { status: "none" | "loading" | "ready" | "outside" | "unavailable"; total: number; shown: number; credit: string; creditUrl: string } {
+    return {
+      status: this.traffic?.status ?? "none",
+      total: this.traffic?.set?.total ?? 0,
+      shown: this.traffic?.set?.shown ?? 0,
+      credit: this.aircraftSource.credit,
+      creditUrl: this.aircraftSource.creditUrl
+    }
   }
 
   /**

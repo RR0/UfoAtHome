@@ -15,6 +15,35 @@ import { Compass } from "../../engine/astronomy/Compass.js"
  * after its discoverers read the same in every language, and are then shown as the catalogue has
  * them.
  */
+/** The sentences of the label of an aircraft pointed at, with their {fields}: see TrafficTooltip. */
+export interface TrafficTexts {
+  /** An aircraft the record does not name: {hex}. */
+  readonly unnamed: string
+  /** The fields of the line of flight: {value}. */
+  readonly altitude: string
+  readonly speed: string
+  readonly heading: string
+  /** Where it is in the sky: {distance}, {elevation}, {bearing}. */
+  readonly position: string
+  /** Its sound when it is heard: {level}, {delay}, {lag}, {character}, {pitch}. */
+  readonly heard: string
+  /** How it sounds, by how far up the sound goes: {cutoff}. */
+  readonly rumble: string
+  readonly muffled: string
+  readonly broad: string
+  /** The pitch heard against the pitch made: {percent}. */
+  readonly pitchHigher: string
+  readonly pitchLower: string
+  /** When it is not heard: {level}, {ambient}. */
+  readonly inaudible: string
+  /** When its sound cannot be worked out. */
+  readonly soundUnknown: string
+  readonly military: string
+  readonly restricted: string
+  /** What a record of aircraft says, and does not. */
+  readonly candidate: string
+}
+
 export interface SceneNames {
   /** The Sun, the Moon and the planets, by SceneRenderer's own body key ("sun", "moon", "Venus"…). */
   readonly bodies: Readonly<Record<string, string>>
@@ -44,6 +73,8 @@ export interface SceneNames {
   readonly starTooltipBelow: string
   /** A satellite's hover tooltip: {name}, {mag}, {height}. */
   readonly satelliteTooltip: string
+  /** What is said of an aircraft pointed at: see TrafficTooltip. */
+  readonly trafficTooltip: TrafficTexts
   /** The scene's credits button. */
   readonly credits: string
   /** Said above the spinner while the picture loads: what it shows is not a video. */

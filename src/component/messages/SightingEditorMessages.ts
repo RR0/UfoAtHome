@@ -173,6 +173,8 @@ export interface SightingEditorMessages extends SightingLabels {
   according: string
   sourceElevation: string
   sourceImagery: string
+  /** The label of the air traffic source picker: where the aircraft around the observer are read from. */
+  sourceAircraft: string
   placeNamePlaceholder: string
   /** The button (and Enter) that runs the search. */
   searchPlace: string

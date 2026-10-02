@@ -67,7 +67,7 @@ export class AircraftSighting {
   }
 
   /** The position of a track at `t`: on the line between its two surrounding points, none across a long gap. */
-  private static positionAt(track: AircraftTrack, t: number): { geo: GeoPoint; altitudeFt: number; groundSpeedKt?: number; trackDeg?: number } | undefined {
+  static positionAt(track: AircraftTrack, t: number): { geo: GeoPoint; altitudeFt: number; groundSpeedKt?: number; trackDeg?: number } | undefined {
     const points = track.points
     if (points.length === 0 || t < points[0].t || t > points[points.length - 1].t) return undefined
     let i = 0

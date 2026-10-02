@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { BoxGeometry, BufferGeometry, DirectionalLight, Float32BufferAttribute, Group, Mesh, Object3D, PerspectiveCamera, Sprite, Vector3 } from "three"
+import { BoxGeometry, BufferGeometry, DirectionalLight, Float32BufferAttribute, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, Object3D, PerspectiveCamera, Raycaster, Sprite, Vector3 } from "three"
 import { SceneRenderer } from "../../src/render3d/SceneRenderer.js"
 import { DecorSystem } from "../../src/render3d/DecorSystem.js"
 import { RoadSystem } from "../../src/render3d/RoadSystem.js"
@@ -10,7 +10,7 @@ function renderer() {
   return Object.assign(Object.create(SceneRenderer.prototype), {
     cloudRendering: "surface", weather: { cloudCover: 0.3, cloudDarkness: 0.2, highCloudCover: 0.1 },
     observerElevationM: 0, cloudFieldOffset: new Vector3(), celestialGroup: new Group(),
-    camera: new PerspectiveCamera(), scene: new Group(), decorGroups: new Map(), groundRadius: 1000,
+    camera: new PerspectiveCamera(), scene: new Group(), decorGroups: new Map(), decorPresence: new Map(), decorSunlight: new Map(), sceneSunBeam: [0, 0, 0], groundRadius: 1000,
     compassHovered: false, compassForced: false,
     gaitOffset: { eastM: 0, northM: 0, upM: 0 }, poseCameraY: 1.6,
     // What the real constructor builds from the card — see AdaptiveResolution; nothing here has a card.
@@ -238,6 +238,184 @@ describe("scene playback resource reuse", () => {
     fit.mockRestore()
     DecorSystem.dispose(group)
     geometry.dispose()
+  })
+})
+
+describe("decor that exists only for a while", () => {
+  /** A renderer with one moving aircraft whose track starts at 10 s and ends at 20 s. */
+  function withAircraft() {
+    const r = renderer()
+    const object = {
+      id: "traffic-1-0", kind: "aircraft" as const, eastM: 0, northM: 50_000,
+      track: [{ t: 10_000, eastM: 0, northM: 50_000, altitudeM: 8000 }, { t: 20_000, eastM: 0, northM: 51_000, altitudeM: 8000 }]
+    }
+    const group = new Group()
+    r.decorObjects = [object]
+    r.decorGroups.set(object.id, group)
+    r.setDecorPresence(new Map([[object.id, { fromMs: 10_000, untilMs: 20_000 }]]))
+    return { r, group }
+  }
+  const pose = { lat: 43, lng: 6 }
+
+  it("is drawn from its first position to its last, and not before or after", () => {
+    const { r, group } = withAircraft()
+    for (const [t, visible] of [[0, false], [9_999, false], [10_000, true], [15_000, true], [20_000, true], [20_001, false], [60_000, false]] as const) {
+      r.updateDecorAnchoring(pose, pose, t)
+      expect(group.visible, `at ${t} ms`).toBe(visible)
+    }
+  })
+
+  it("does not push the far plane out for an aircraft that is not there", () => {
+    const { r } = withAircraft()
+    r.updateDecorAnchoring(pose, pose, 0)
+    const farWhileAbsent = r.camera.far
+    r.updateDecorAnchoring(pose, pose, 15_000)
+    expect(r.camera.far).toBeGreaterThan(farWhileAbsent)
+    expect(r.camera.far).toBeGreaterThan(50_000)
+  })
+
+  it("leaves alone an object with no presence, which is always there", () => {
+    const { r } = withAircraft()
+    const still = new Group()
+    r.decorObjects = [...r.decorObjects, { id: "shack", kind: "building", eastM: 5, northM: 5 }]
+    r.decorGroups.set("shack", still)
+    for (const t of [0, 15_000, 60_000]) {
+      r.updateDecorAnchoring(pose, pose, t)
+      expect(still.visible).toBe(true)
+    }
+  })
+})
+
+describe("the Sun on an aircraft", () => {
+  const pose = { lat: 43, lng: 6 }
+  const SUN_MAGNITUDE = -26.74
+
+  /** One aircraft: a white body and a lamp, in a scene whose own light is the Sun at `groundSun` degrees (a beam of what the ground gives it, or none under the horizon). */
+  function aircraftUnder(groundSunDeg: number, sunlight: { heightM: number; sunElevationDeg: number }, cloudTransmission = 1) {
+    const r = renderer()
+    r.lastAstronomy = { sun: { altitudeDeg: groundSunDeg, azimuthDeg: 250, magnitude: SUN_MAGNITUDE } }
+    r.cloudTransmission = () => cloudTransmission
+    // What the scene's own light is: the beam the ground sees, the way updateCelestialLight works it out, or none.
+    const illuminance = 1.3e5 * 1e-4 * 0 + (r.relativeScale as number) * 1.3e5
+    const ground = groundSunDeg >= 0 ? r.air.transmittanceFromSpace(0, groundSunDeg).map((t: number) => illuminance * t * cloudTransmission) : [0, 0, 0]
+    r.sceneSunBeam = ground
+    const group = new Group()
+    const body = new Mesh(new BoxGeometry(1, 1, 1), new MeshLambertMaterial({ color: 0xffffff }))
+    const lamp = new Mesh(new BoxGeometry(1, 1, 1), new MeshBasicMaterial({ color: 0xff0000 }))
+    lamp.userData = { emissive: true }
+    group.add(body, lamp)
+    const object = { id: "traffic-1-0", kind: "aircraft" as const, eastM: 0, northM: 0 }
+    r.decorObjects = [object]
+    r.decorGroups.set(object.id, group)
+    r.setDecorSunlight(new Map([[object.id, sunlight]]))
+    r.updateDecorAnchoring(pose, pose, 0)
+    const emissive = (body.material as MeshLambertMaterial).emissive
+    return { r, emissive: [emissive.r, emissive.g, emissive.b], lamp, body }
+  }
+
+  it("lights an airliner at cruising height orange against a dusk that has already gone dark on the ground", () => {
+    const { emissive } = aircraftUnder(-2, { heightM: 10668, sunElevationDeg: -2 })
+    expect(emissive[0]).toBeGreaterThan(0)
+    // Reddened by the air the light crosses at a grazing angle, over the thin air above it.
+    expect(emissive[0] / emissive[2]).toBeGreaterThan(1.5)
+    expect(emissive[0]).toBeGreaterThan(emissive[1])
+  })
+
+  it("leaves it dark once the Sun is under its own horizon, and in the night", () => {
+    expect(aircraftUnder(-6, { heightM: 10668, sunElevationDeg: -6 }).emissive).toEqual([0, 0, 0])
+    expect(aircraftUnder(-30, { heightM: 10668, sunElevationDeg: -30 }).emissive).toEqual([0, 0, 0])
+  })
+
+  it("does not light a low aircraft in the dusk that has put the ground in the dark: its horizon is the ground's", () => {
+    expect(aircraftUnder(-2, { heightM: 300, sunElevationDeg: -2 }).emissive).toEqual([0, 0, 0])
+  })
+
+  it("adds almost nothing at noon, when the scene's own light is already the Sun", () => {
+    const dusk = aircraftUnder(-2, { heightM: 10668, sunElevationDeg: -2 }).emissive
+    const noon = aircraftUnder(45, { heightM: 10668, sunElevationDeg: 45 }).emissive
+    // At altitude the beam is only slightly whiter than at the ground: a fraction of what the dusk adds to an unlit body.
+    expect(noon[1]).toBeLessThan(dusk[1] * 0.5)
+  })
+
+  it("keeps the Sun off an aircraft under the observer's overcast, but not one above every deck", () => {
+    const under = aircraftUnder(-0.2, { heightM: 5000, sunElevationDeg: -0.2 }, 0.0)
+    const above = aircraftUnder(-0.2, { heightM: 10668, sunElevationDeg: -0.2 }, 0.0)
+    expect(under.emissive).toEqual([0, 0, 0])
+    expect(above.emissive[0]).toBeGreaterThan(0)
+  })
+
+  it("never touches the lamps, which are lights and not surfaces", () => {
+    const { lamp } = aircraftUnder(-2, { heightM: 10668, sunElevationDeg: -2 })
+    expect((lamp.material as MeshBasicMaterial).color.getHex()).toBe(0xff0000)
+    expect("emissive" in (lamp.material as object)).toBe(false)
+  })
+
+  it("is the same body again once the Sun has left it", () => {
+    const { r, body, emissive } = aircraftUnder(-2, { heightM: 10668, sunElevationDeg: -2 })
+    expect(emissive[0]).toBeGreaterThan(0)
+    r.setDecorSunlight(new Map([["traffic-1-0", { heightM: 10668, sunElevationDeg: -9 }]]))
+    r.updateDecorAnchoring(pose, pose, 0)
+    expect((body.material as MeshLambertMaterial).emissive.r).toBe(0)
+  })
+
+  it("leaves a still object alone: only what the scene was told flies is lit from above", () => {
+    const r = renderer()
+    r.lastAstronomy = { sun: { altitudeDeg: -2, azimuthDeg: 250, magnitude: SUN_MAGNITUDE } }
+    const group = new Group()
+    const body = new Mesh(new BoxGeometry(1, 1, 1), new MeshLambertMaterial({ color: 0xffffff }))
+    group.add(body)
+    r.decorObjects = [{ id: "shack", kind: "building", eastM: 5, northM: 5 }]
+    r.decorGroups.set("shack", group)
+    r.updateDecorAnchoring(pose, pose, 0)
+    expect((body.material as MeshLambertMaterial).emissive.r).toBe(0)
+  })
+})
+
+describe("pointing at an aircraft of the record of air traffic", () => {
+  /** Aircraft ten kilometres off, none of them a pixel across: a ray never meets them, so they are picked by angle. */
+  function sky() {
+    const r = renderer()
+    r.raycaster = new Raycaster()
+    r.camera.position.set(0, 0, 0)
+    r.camera.fov = 60
+    r.camera.updateProjectionMatrix()
+    r.camera.updateMatrixWorld(true)
+    const place = (id: string, x: number, y: number, z: number, visible = true) => {
+      const group = new Group()
+      group.position.set(x, y, z)
+      group.visible = visible
+      r.decorGroups.set(id, group)
+    }
+    place("traffic-aaaaaa-0", 0, 1000, -10000)
+    place("traffic-bbbbbb-0", 5000, 1000, -10000)
+    place("traffic-cccccc-0", 0, 1000, -10000, false)
+    place("shack", 0, 0, -50)
+    return r
+  }
+
+  it("picks the aircraft nearest the pointer, though it is under a pixel across", () => {
+    const r = sky()
+    // The first stands 5.7 degrees up, dead ahead; the second 26.6 degrees to the right.
+    const ahead = new Vector3(0, 1000, -10000).project(r.camera)
+    expect(r.pickTrafficAt(ahead.x, ahead.y)).toBe("traffic-aaaaaa-0")
+    const right = new Vector3(5000, 1000, -10000).project(r.camera)
+    expect(r.pickTrafficAt(right.x, right.y)).toBe("traffic-bbbbbb-0")
+  })
+
+  it("picks nothing when the pointer is far from every aircraft", () => {
+    const r = sky()
+    expect(r.pickTrafficAt(-0.9, -0.9)).toBeUndefined()
+  })
+
+  it("does not pick an aircraft that is not there, nor anything the recording stands in the decor", () => {
+    const r = sky()
+    r.decorGroups.get("traffic-aaaaaa-0")!.visible = false
+    const hidden = new Vector3(0, 1000, -10000).project(r.camera)
+    // The hidden ones are not picked; what is near the pointer is the next, or none.
+    expect(r.pickTrafficAt(hidden.x, hidden.y)).not.toBe("traffic-aaaaaa-0")
+    expect(r.pickTrafficAt(hidden.x, hidden.y)).not.toBe("traffic-cccccc-0")
+    const shack = new Vector3(0, 0, -50).project(r.camera)
+    expect(r.pickTrafficAt(shack.x, shack.y)).not.toBe("shack")
   })
 })
 

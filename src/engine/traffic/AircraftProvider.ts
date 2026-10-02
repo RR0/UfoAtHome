@@ -23,7 +23,17 @@ export interface AircraftTrack {
 
 export interface AircraftDescription {
   registration?: string
+  /** The ICAO type designator: A320, B738, EC35, C172. Absent for what broadcasts none (about one in seven). */
   type?: string
+  /**
+   * The emitter category the aircraft states: A1 light, A2 small, A3 large, A4 high-vortex, A5 heavy, A6 high-performance,
+   * A7 rotorcraft; B1 glider, B2 lighter-than-air, B4 ultralight, B6 unmanned. Absent for what states none.
+   */
+  category?: string
+  /** Flagged military by the aircraft database. Only those that broadcast are in a record at all. */
+  military?: boolean
+  /** Whose owner asked that its identity not be shown (privacy or limited-display programmes): its type and registration are kept back. */
+  restricted?: boolean
 }
 
 /**
@@ -55,6 +65,13 @@ export type AircraftTraffic =
 export interface AircraftProvider {
   /** The citation the record's licence requires. */
   readonly citation: string
+
+  /**
+   * Whether the record could hold that instant at all, known without fetching anything: nearly every
+   * recording here is older than any record of air traffic, and asking for those would be a request that
+   * can only fail. Optional: a record that cannot tell is asked.
+   */
+  mayCover?(ms: number): boolean
 
   /**
    * The aircraft that came within `radiusKm` of `observer` between `startMs` and `endMs`, each with its

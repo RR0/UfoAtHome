@@ -62,7 +62,7 @@ describe("AdsbLolArchiveProvider reading what build-aircraft-archive.ts writes",
     dir = mkdtempSync(path.join(tmpdir(), "aircraft-provider-"))
     const tar = new TarFixture().file("./README.txt", "x")
     // Near Paris, flying east, then three aircraft that test the radius, the tile boundary and the hour.
-    tar.file(...Object.values(Release.trace("aaaaaa", [0, 5, 10, 15, 20, 25, 30].map(s => [hhmmss(12, 0, s), 48.9, 2.0 + s / 300, 35000, 450, 90]), { r: "F-GAAA", t: "A320" })) as [string, Buffer])
+    tar.file(...Object.values(Release.trace("aaaaaa", [0, 5, 10, 15, 20, 25, 30].map(s => [hhmmss(12, 0, s), 48.9, 2.0 + s / 300, 35000, 450, 90, 0, 0, { category: "A3" }]), { r: "F-GAAA", t: "A320" })) as [string, Buffer])
     tar.file(...Object.values(Release.trace("bbbbbb", [[hhmmss(12, 0, 10), 49.5, 2.4, 20000, 300, 180], [hhmmss(12, 0, 20), 49.49, 2.4, 19000, 300, 180]])) as [string, Buffer])
     tar.file(...Object.values(Release.trace("cccccc", [[hhmmss(12, 0, 10), 51.6, 2.4, 30000, 400, 180]])) as [string, Buffer])
     tar.file(...Object.values(Release.trace("dddddd", [[hhmmss(12, 59, 50), 48.9, 2.3, 10000, 250, 0], [hhmmss(13, 0, 10), 48.91, 2.3, 10500, 250, 0]])) as [string, Buffer])
@@ -158,9 +158,22 @@ describe("AdsbLolArchiveProvider reading what build-aircraft-archive.ts writes",
   test("an aircraft is described by the registration and type of its day", async () => {
     const source = provider()
     const [a, b] = tracks(await source.between(paris, NOON_MS, NOON_MS + 60_000))
-    expect(await source.describe(a, "2025-12-30")).toEqual({ registration: "F-GAAA", type: "A320" })
+    expect(await source.describe(a, "2025-12-30")).toEqual({ registration: "F-GAAA", type: "A320", category: "A3" })
     expect((await source.describe(b, "2025-12-30"))).toEqual(undefined)
     expect(await source.describe(a, "2025-01-01")).toBeUndefined()
+  })
+
+  test("a military aircraft, and one whose owner asked to be left out, are said to be", async () => {
+    const source = provider()
+    const known = (flags: number) => ({ icao: 0xf1a600 + flags, nonIcao: false, points: [] })
+    // The fixture's shard f1 is written by a second build of aircraft carrying the flags.
+    const tar = new TarFixture().file("./README.txt", "x")
+    tar.file(...Object.values(Release.trace("f1a601", [[hhmmss(12, 0, 0), 48.9, 2.0, 5000, 100, 0]], { r: "ZZ123", t: "H60", dbFlags: 1 })) as [string, Buffer])
+    tar.file(...Object.values(Release.trace("f1a608", [[hhmmss(12, 0, 0), 48.9, 2.0, 5000, 100, 0]], { r: "", t: "", dbFlags: 8 })) as [string, Buffer])
+    writeFileSync(path.join(dir, "flags.tar"), tar.build())
+    await new AircraftArchiveBuild(path.join(dir, "out"), 5).run([path.join(dir, "flags.tar")])
+    expect(await source.describe(known(1), "2025-12-30")).toEqual({ registration: "ZZ123", type: "H60", military: true })
+    expect(await source.describe(known(8), "2025-12-30")).toEqual({ restricted: true })
   })
 
   test("it states where the positions come from, and under what licence", () => {

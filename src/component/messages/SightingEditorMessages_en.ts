@@ -85,6 +85,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   according: "according to",
   sourceElevation: "Relief",
   sourceImagery: "Imagery",
+  sourceAircraft: "Air traffic",
   placeNamePlaceholder: "Valensole, France",
   searchPlace: "Locate",
   placeMatch: "Matches",

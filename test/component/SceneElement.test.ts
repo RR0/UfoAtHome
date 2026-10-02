@@ -1,5 +1,7 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
-import { registerScene, SCENE_ELEMENT_NAME } from "../../src/component/SceneElement.js"
+import { registerScene, SCENE_ELEMENT_NAME, AIRCRAFT_CHANGE_EVENT } from "../../src/component/SceneElement.js"
+import type { AircraftProvider, AircraftTraffic } from "../../src/engine/traffic/AircraftProvider.js"
+import type { DataSource } from "../../src/engine/source/DataSource.js"
 import type { SceneElement } from "../../src/component/SceneElement.js"
 
 registerScene()
@@ -14,6 +16,11 @@ const thunderPlayed: number[] = []
  * actually rebuilt the fall or silently left the previous one standing. */
 const meteorShowersSet: { count: number; altitudeDeg: number }[] = []
 const astronomySet = vi.fn()
+/** The id the mocked renderer answers to a pick of air traffic, if a test points at one. */
+const pickedTraffic: { id?: string } = {}
+/** Every decor list and presence table the element hands the renderer, to see what air traffic reaches it. */
+const decorSet: { id: string }[][] = []
+const presenceSet: ReadonlyMap<string, { fromMs: number; untilMs: number }>[] = []
 
 // jsdom's <canvas> can back neither WebGL nor Web Audio, so both are stubbed whole — same reason
 // and shape as SightingElement.test.ts's identical SceneRenderer mock.
@@ -42,7 +49,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setCompassForced(): void {}
     setIndoorLook(): void {}
     setWeather(): void {}
-    setDecor(): void {}
+    setDecor(decor: { id: string }[]): void { decorSet.push(decor) }
+    setDecorPresence(presence: ReadonlyMap<string, { fromMs: number; untilMs: number }>): void { presenceSet.push(presence) }
+    setDecorSunlight(): void {}
     setReferences(): void {}
     setReferencesShown(): void {}
     setReferenceView(): void {}
@@ -73,6 +82,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     updateLightning(): void {}
     setSatellites(): void {}
     setReentries(): void {}
+    pickTrafficAt(): string | undefined {
+      return pickedTraffic.id
+    }
     pickSatelliteAt(): undefined {
       return undefined
     }
@@ -446,5 +458,232 @@ describe("A account whose observer said what it was", () => {
     element.accountInTheRound = false
     element.sightingData = recording
     expect(element.interpretation).toBeUndefined()
+  })
+})
+
+describe("SceneElement air traffic", () => {
+  const AT = { year: 2025, month: 12, day: 30, hour: 12, minute: 0 }
+  const paris = { lat: 48.99, lng: 2.45, pitchDeg: 0, fovDeg: 60, elevationM: 0 }
+  const noon = Date.UTC(2025, 11, 30, 12)
+  let sourceNumber = 0
+
+  afterEach(() => {
+    document.body.innerHTML = ""
+    decorSet.length = 0
+    presenceSet.length = 0
+  })
+
+  /** A source whose provider answers as told, and counts what it was asked. */
+  const stubSource = (answer: AircraftTraffic, mayCover = true) => {
+    const asked: { startMs: number; endMs: number }[] = []
+    const provider: AircraftProvider = {
+      citation: "stub citation",
+      mayCover: () => mayCover,
+      between: async (_observer, startMs, endMs) => {
+        asked.push({ startMs, endMs })
+        return answer
+      }
+    }
+    const source: DataSource<AircraftProvider> = { id: `stub-${++sourceNumber}`, name: "Stub", credit: "Stub credit", creditUrl: "https://example.test/", create: () => provider }
+    return { source, asked }
+  }
+
+  /** One aircraft flying over the observer for a minute from the recording's start. */
+  const overhead: AircraftTraffic = {
+    status: "found",
+    tracks: [{ icao: 0xabc123, nonIcao: false, points: [0, 20_000, 40_000, 60_000].map(t => ({ t: noon + t, lat: 48.99, lng: 2.45 + t * 1e-7, altitudeFt: 30000 })) }]
+  }
+
+  const mountAt = (time: object | undefined, source: DataSource<AircraftProvider>) => {
+    const element = mount()
+    element.setAircraftSource(source)
+    element.sightingData = { ...rainyJson, time, utcOffsetHours: 0, place: [{ lat: paris.lat, lng: paris.lng }] } as never
+    element.ufoElement.sighting.observerTrack.addKeyframe(0, paris)
+    const internal = element as unknown as { applySceneAt(t: number): void; sceneCanvas: HTMLCanvasElement }
+    internal.sceneCanvas.height = 600
+    return { element, tick: (t = 0) => internal.applySceneAt(t) }
+  }
+
+  it("puts the aircraft of the record into the scene's decor, each there only while it was recorded", async () => {
+    const { source, asked } = stubSource(overhead)
+    const { element, tick } = mountAt(AT, source)
+    const changed = vi.fn()
+    element.addEventListener(AIRCRAFT_CHANGE_EVENT, changed)
+    tick()
+    expect(element.aircraftState.status).toBe("loading")
+    await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+    expect(changed).toHaveBeenCalled()
+    expect(asked).toHaveLength(1)
+    tick()
+    const decor = decorSet[decorSet.length - 1]
+    expect(decor.map(object => object.id)).toEqual(["traffic-abc123-0"])
+    expect(presenceSet[presenceSet.length - 1].get("traffic-abc123-0")).toEqual({ fromMs: 0, untilMs: 60_000 })
+    expect(element.aircraftState).toMatchObject({ status: "ready", shown: 1, total: 1, credit: "Stub credit" })
+    element.remove()
+  })
+
+  it("asks five minutes before the recording and a minute after: its first instant is not an empty sky, and the sound of what is heard then left earlier", async () => {
+    const { source, asked } = stubSource({ status: "found", tracks: [] })
+    const { element, tick } = mountAt(AT, source)
+    tick()
+    await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+    expect(asked[0].startMs).toBe(noon - 300_000)
+    expect(asked[0].endMs).toBeGreaterThanOrEqual(noon + 60_000)
+    element.remove()
+  })
+
+  it("hands the renderer the same list while nothing has changed, so that it does not rebuild the decor", async () => {
+    const { source } = stubSource(overhead)
+    const { element, tick } = mountAt(AT, source)
+    tick()
+    await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+    tick(0)
+    tick(10_000)
+    tick(20_000)
+    const last = decorSet.slice(-3)
+    expect(last[1]).toBe(last[0])
+    expect(last[2]).toBe(last[0])
+    element.remove()
+  })
+
+  it("asks once per window and place, not once per tick", async () => {
+    const { source, asked } = stubSource(overhead)
+    const { element, tick } = mountAt(AT, source)
+    for (let t = 0; t < 5; t++) tick(t * 1000)
+    await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+    for (let t = 0; t < 5; t++) tick(t * 1000)
+    expect(asked).toHaveLength(1)
+    element.remove()
+  })
+
+  it("does not ask a source about a date it cannot hold", () => {
+    const { source, asked } = stubSource(overhead, false)
+    const { element, tick } = mountAt({ year: 1965, month: 7, day: 1, hour: 5, minute: 45 }, source)
+    tick()
+    expect(element.aircraftState.status).toBe("outside")
+    expect(asked).toHaveLength(0)
+    element.remove()
+  })
+
+  it("does not ask without a date", () => {
+    const { source, asked } = stubSource(overhead)
+    const { element, tick } = mountAt(undefined, source)
+    tick()
+    expect(element.aircraftState.status).toBe("outside")
+    expect(asked).toHaveLength(0)
+    element.remove()
+  })
+
+  it("leaves the recording's own decor as it was when the record does not cover the window or cannot be read", async () => {
+    for (const status of ["outside", "failed"] as const) {
+      const { source } = stubSource({ status })
+      const { element, tick } = mountAt(AT, source)
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.status).toBe(status === "failed" ? "unavailable" : "outside"))
+      tick()
+      expect(decorSet[decorSet.length - 1]).toBe(element.ufoElement.sighting.decor)
+      element.remove()
+    }
+  })
+
+  it("draws them again as what they are once the record says: a helicopter's size and lamps, from its type", async () => {
+    const described = stubSource(overhead)
+    ;(described.source as { create: () => AircraftProvider }).create = () => ({
+      citation: "stub", mayCover: () => true, between: async () => overhead,
+      describe: async () => ({ registration: "F-HABC", type: "EC35", category: "A7" })
+    })
+    const { element, tick } = mountAt(AT, described.source)
+    tick()
+    await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+    // Drawn at once as a generic airliner, then refined.
+    await vi.waitFor(() => {
+      tick()
+      const object = decorSet[decorSet.length - 1].find(candidate => candidate.id === "traffic-abc123-0") as { sizeM?: { widthM: number } } | undefined
+      expect(object?.sizeM?.widthM).toBeCloseTo(10.2, 1)
+    })
+    const refined = decorSet[decorSet.length - 1].find(candidate => candidate.id === "traffic-abc123-0") as { lights?: { id: string }[] }
+    // By day, a light helicopter's lamps are taken as off.
+    expect(refined.lights).toEqual([])
+    element.remove()
+  })
+
+  it("keeps drawing what it has when the record cannot say what the aircraft are", async () => {
+    const failing = stubSource(overhead)
+    ;(failing.source as { create: () => AircraftProvider }).create = () => ({
+      citation: "stub", mayCover: () => true, between: async () => overhead,
+      describe: async () => { throw new Error("shard unreachable") }
+    })
+    const { element, tick } = mountAt(AT, failing.source)
+    tick()
+    await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+    await new Promise(resolve => setTimeout(resolve, 20))
+    tick()
+    const object = decorSet[decorSet.length - 1].find(candidate => candidate.id === "traffic-abc123-0") as { sizeM?: { widthM: number } } | undefined
+    expect(object?.sizeM?.widthM).toBeCloseTo(34.1, 1)
+    element.remove()
+  })
+
+  /** Hovers the canvas, as the reader's pointer does, and returns what the tooltip says. */
+  const hover = (element: SceneElement): string | undefined => {
+    const canvas = element.ufoElement.canvasElement
+    canvas.getBoundingClientRect = () =>
+      ({ left: 0, top: 0, width: canvas.width, height: canvas.height, right: canvas.width, bottom: canvas.height, x: 0, y: 0, toJSON: () => "" }) as DOMRect
+    // Away from the recording's own shape, which is painted over everything and would answer for it.
+    canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: 200, clientY: 100, bubbles: true, composed: true }))
+    const tooltip = element.shadowRoot!.getElementById("hover-tooltip")!
+    return tooltip.hidden ? undefined : tooltip.textContent!
+  }
+
+  it("tells who an aircraft pointed at is, how it flies, where it is and how it sounds", async () => {
+    const described = stubSource(overhead)
+    ;(described.source as { create: () => AircraftProvider }).create = () => ({
+      citation: "stub", mayCover: () => true, between: async () => overhead,
+      describe: async () => ({ registration: "F-GKXA", type: "A320", category: "A3" })
+    })
+    const { element, tick } = mountAt(AT, described.source)
+    tick()
+    await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+    await vi.waitFor(() => expect(element.trafficInfoAt("traffic-abc123-0")?.registration).toBe("F-GKXA"))
+    // Half way through its minute over the observer.
+    ;(element as unknown as { lastTimeMs: number }).lastTimeMs = 30_000
+    pickedTraffic.id = "traffic-abc123-0"
+    const lines = hover(element)!.split("\n")
+    pickedTraffic.id = undefined
+    expect(lines[0]).toBe("F-GKXA · Airbus A320")
+    expect(lines[1]).toBe("30,000 ft")
+    expect(lines[2]).toMatch(/km away, \d+° above the horizon/)
+    expect(lines[lines.length - 1]).toBe("A compatible candidate, not an identification")
+    expect(lines.some(line => /Heard at|Not audible|cannot be worked out/.test(line))).toBe(true)
+    element.remove()
+  })
+
+  it("says nothing of an id that is not an aircraft of the record, nor of one no longer in the sky", async () => {
+    const { source } = stubSource(overhead)
+    const { element, tick } = mountAt(AT, source)
+    tick()
+    await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+    expect(element.trafficInfoAt("shack")).toBeUndefined()
+    expect(element.trafficInfoAt("traffic-abc123-0")).toBeDefined()
+    ;(element as unknown as { lastTimeMs: number }).lastTimeMs = 10 * 60_000
+    expect(element.trafficInfoAt("traffic-abc123-0")).toBeUndefined()
+    pickedTraffic.id = "traffic-abc123-0"
+    expect(hover(element)).toBeUndefined()
+    pickedTraffic.id = undefined
+    element.remove()
+  })
+
+  it("asks again when another source is chosen", async () => {
+    const first = stubSource(overhead)
+    const second = stubSource({ status: "found", tracks: [] })
+    const { element, tick } = mountAt(AT, first.source)
+    tick()
+    await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+    element.setAircraftSource(second.source)
+    tick()
+    await vi.waitFor(() => expect(second.asked).toHaveLength(1))
+    expect(first.asked).toHaveLength(1)
+    await vi.waitFor(() => expect(element.aircraftState.shown).toBe(0))
+    expect(element.aircraftState.credit).toBe("Stub credit")
+    element.remove()
   })
 })

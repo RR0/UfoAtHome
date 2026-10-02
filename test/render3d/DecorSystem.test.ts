@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { Box3, BoxGeometry, Group, Mesh, Vector3, type Object3D } from "three"
+import { AdditiveBlending, Box3, BoxGeometry, Group, Mesh, MeshBasicMaterial, Vector3, type Object3D } from "three"
 import { DecorSystem } from "../../src/render3d/DecorSystem.js"
 import type { DecorObject } from "../../src/engine/model/Decor.js"
 
@@ -358,5 +358,42 @@ describe("decor terrain anchoring", () => {
     const counted = (px: number) => { reads++; return eastRidge(px) }
     expect(DecorSystem.groundUnderFootprint(car, 0, 0, 90, counted, 300)).toBe(0)
     expect(reads).toBe(1)
+  })
+})
+
+describe("DecorSystem declared lamps seen against a sky", () => {
+  const beacon = { id: "beacon", offsetM: { x: 0, y: 2, z: 0 }, color: "#ff2200", intensity: 1.5, pattern: { kind: "steady" as const } }
+  const lamp = (group: Group) => group.children.find(child => (child.userData as { lightId?: string }).lightId === "beacon") as Mesh
+  const aircraft = (): Group => DecorSystem.build({ id: "plane", kind: "aircraft", eastM: 0, northM: 0, lights: [beacon] }, false)
+
+  it("adds its light to what is behind it instead of replacing it: a lamp is no black dot against a bright sky", () => {
+    const material = lamp(aircraft()).material as MeshBasicMaterial
+    expect(material.blending).toBe(AdditiveBlending)
+    expect(material.transparent).toBe(true)
+    expect(material.depthWrite).toBe(false)
+  })
+
+  it("is out of the fog, whose airlight it would otherwise add a second time, and the further the brighter", () => {
+    expect((lamp(aircraft()).material as MeshBasicMaterial).fog).toBe(false)
+  })
+
+  it("loses the light the air between takes from it, per channel: the blues first", () => {
+    const near = aircraft()
+    const far = aircraft()
+    DecorSystem.setLights(near, [beacon], 0, 5000, 0, 1)
+    DecorSystem.setLights(far, [beacon], 0, 5000, 0, 1, undefined, [0.8, 0.4, 0.1])
+    const a = (lamp(near).material as MeshBasicMaterial).color
+    const b = (lamp(far).material as MeshBasicMaterial).color
+    expect(b.r / a.r).toBeCloseTo(0.8, 6)
+    expect(b.g / a.g).toBeCloseTo(0.4, 6)
+    expect(b.b === 0 || a.b === 0 || Math.abs(b.b / a.b - 0.1) < 1e-6).toBe(true)
+  })
+
+  it("is not drawn at all while it is dark in its cycle, so that nothing is left in its place", () => {
+    const group = DecorSystem.build({ id: "plane", kind: "aircraft", eastM: 0, northM: 0, lights: [{ ...beacon, pattern: { kind: "flash" as const, perMinute: 60, dutyCycle: 0.1 } }] }, false)
+    DecorSystem.setLights(group, [{ ...beacon, pattern: { kind: "flash" as const, perMinute: 60, dutyCycle: 0.1 } }], 500, 5000)
+    expect(lamp(group).visible).toBe(false)
+    DecorSystem.setLights(group, [{ ...beacon, pattern: { kind: "flash" as const, perMinute: 60, dutyCycle: 0.1 } }], 50, 5000)
+    expect(lamp(group).visible).toBe(true)
   })
 })

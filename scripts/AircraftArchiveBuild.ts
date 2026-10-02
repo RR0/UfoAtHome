@@ -14,7 +14,7 @@ export class AircraftArchiveBuild {
   /** [day][hour][tile "lat_lng"] → records. */
   private readonly tiles = new Map<string, Map<number, Map<string, AircraftTileWriter>>>()
   /** [day][shard] → aircraft descriptions, for the aircraft that have at least one position kept. */
-  private readonly aircraft = new Map<string, Map<string, Record<string, [string, string]>>>()
+  private readonly aircraft = new Map<string, Map<string, Record<string, [string, string, string, number]>>>()
 
   /** `source` names the instance the release comes from (e.g. readsb-prod-0); the index records it for each day written. */
   constructor(private readonly out: string, private readonly step: number, private readonly source?: string) {}
@@ -51,9 +51,15 @@ export class AircraftArchiveBuild {
   }
 
   /** Files one aircraft's day into the tiles its positions fall in. */
-  private addTrace(hex: string, json: { r?: string; t?: string; timestamp: number; trace: any[][] }): { read: number; kept: number } {
+  private addTrace(hex: string, json: { r?: string; t?: string; dbFlags?: number; timestamp: number; trace: any[][] }): { read: number; kept: number } {
     const nonIcao = hex.startsWith("~")
     const icao = parseInt(nonIcao ? hex.slice(1) : hex, 16) | (nonIcao ? AircraftTile.NON_ICAO_FLAG : 0)
+    // The emitter category the aircraft states, in the detail object some of its positions carry (A1 light ... A7 rotorcraft,
+    // B gliders and balloons and UAVs, C surface vehicles and obstacles).
+    const category = json.trace.map(point => point[8]?.category).find((value): value is string => typeof value === "string")
+    // What stands on the ground is not what flies: an airport's service vehicles and fixed obstacles are in the source because
+    // they broadcast, and a record of the sky has no use for them.
+    if (category?.startsWith("C")) return { read: json.trace.length, kept: 0 }
     // A release holds a day: the few positions its traces carry past midnight are the next release's
     // to give. Keeping them would make a day's hours depend on the order the releases are ingested in
     // (the next day's own first hour, if ingested before, would be overwritten by their few points).
@@ -80,7 +86,7 @@ export class AircraftArchiveBuild {
         typeof speed === "number" ? Math.min(0xfffe, Math.round(speed * 10)) : AircraftTile.UNKNOWN,
         typeof track === "number" ? Math.round(((track % 360) + 360) % 360 * 10) : AircraftTile.UNKNOWN
       )
-      this.noteAircraft(day, hex, json)
+      this.noteAircraft(day, hex, json, category)
     }
     return { read: json.trace.length, kept }
   }
@@ -95,13 +101,13 @@ export class AircraftArchiveBuild {
     return tile
   }
 
-  private noteAircraft(day: string, hex: string, json: { r?: string; t?: string }): void {
+  private noteAircraft(day: string, hex: string, json: { r?: string; t?: string; dbFlags?: number }, category?: string): void {
     let shards = this.aircraft.get(day)
     if (!shards) this.aircraft.set(day, shards = new Map())
     const shard = hex.startsWith("~") ? "non-icao" : hex.slice(0, 2)
     let described = shards.get(shard)
     if (!described) shards.set(shard, described = {})
-    described[hex] ??= [json.r ?? "", json.t ?? ""]
+    described[hex] ??= [json.r ?? "", json.t ?? "", category ?? "", json.dbFlags ?? 0]
   }
 
   /** Writes the days' packs, indexes and aircraft shards, and merges the days into the root index. */

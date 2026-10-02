@@ -103,6 +103,7 @@ import type { WeatherProvider } from "../engine/weather/WeatherProvider.js"
 import { defaultPlaceProvider } from "../engine/place/defaultPlaceProvider.js"
 import { PLACE_SOURCES } from "../engine/place/placeSources.js"
 import { WEATHER_SOURCES } from "../engine/weather/weatherSources.js"
+import { AIRCRAFT_SOURCES } from "../engine/traffic/aircraftSources.js"
 import { SOUND_KINDS } from "../engine/model/Sound.js"
 import type { SightingSound, SoundKind } from "../engine/model/Sound.js"
 import { ELEVATION_SOURCES, IMAGERY_SOURCES } from "../render3d/terrain/terrainSources.js"
@@ -2375,6 +2376,7 @@ export class SightingEditorElement extends HTMLElement {
     this.terrainSourceRows.replaceChildren(
       this.labelledPicker("elevation", this.messages.sourceElevation, ELEVATION_SOURCES, () => this.applyTerrainSources()),
       this.labelledPicker("imagery", this.messages.sourceImagery, IMAGERY_SOURCES, () => this.applyTerrainSources()),
+      this.labelledPicker("aircraft", this.messages.sourceAircraft, AIRCRAFT_SOURCES, () => this.applyAircraftSource()),
       this.labelledPicker("decor-model", this.messages.decorModel, DECOR_MODEL_SOURCES, () => this.applyDecorModelSource())
     )
   }
@@ -2437,6 +2439,13 @@ export class SightingEditorElement extends HTMLElement {
     // SceneElement.updateAstronomy), and a scene sitting paused at t=0 has no next tick — so
     // without this the new source took effect at some arbitrary later moment, or never. Same
     // "surface the edit as a timeupdate" idiom every other editor change here uses.
+    this.ufoElement.refresh()
+  }
+
+  /** The air traffic around the observer is read again from the source now chosen — see
+   * SceneElement.setAircraftSource, and AircraftProvider on why it is a seam. */
+  private applyAircraftSource(): void {
+    this.sceneElement.setAircraftSource(dataSourceById(AIRCRAFT_SOURCES, this.chosenSourceId.get("aircraft")))
     this.ufoElement.refresh()
   }
 

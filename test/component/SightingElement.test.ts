@@ -35,6 +35,8 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setCompassForced(): void {}
     setWeather(): void {}
     setDecor(): void {}
+    setDecorPresence(): void {}
+    setDecorSunlight(): void {}
     setReferences(): void {}
     setReferencesShown(): void {}
     setReferenceView(): void {}
@@ -65,6 +67,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     updateLightning(): void {}
     setSatellites(): void {}
     setReentries(): void {}
+    pickTrafficAt(): undefined {
+      return undefined
+    }
     pickSatelliteAt(): undefined {
       return undefined
     }

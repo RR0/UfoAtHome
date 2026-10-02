@@ -268,6 +268,7 @@ export const css = `
   font-size: 0.85em;
   border-radius: 3px;
   pointer-events: none;
-  white-space: nowrap;
+  /* Kept on the lines it is given, and not wrapped: the label of an aircraft has several. */
+  white-space: pre;
 }
 `
