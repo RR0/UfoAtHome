@@ -25,6 +25,8 @@ export interface ContrailPoint {
   /** Where the air moves what the aircraft left in it, m/s east and north. */
   driftEastMs: number
   driftNorthMs: number
+  /** How fast the wind changes with height there, per second: how much the trail is spread. */
+  shearPerS: number
   iceRelativeHumidity: number
 }
 
@@ -72,6 +74,7 @@ export class AircraftContrails {
           lifetimeS: forecast ? ContrailGrowth.lifetimeS(forecast.iceRelativeHumidity) : 0,
           driftEastMs: aloft?.driftEastMs ?? 0,
           driftNorthMs: aloft?.driftNorthMs ?? 0,
+          shearPerS: aloft?.shearPerS ?? ContrailGrowth.TYPICAL_SHEAR_PER_S,
           iceRelativeHumidity: forecast?.iceRelativeHumidity ?? 0
         })
       })

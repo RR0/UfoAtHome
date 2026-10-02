@@ -8,6 +8,8 @@ export interface AirAloft {
   /** Where the air moves, m/s east and north: the opposite of where the wind comes from. */
   driftEastMs: number
   driftNorthMs: number
+  /** How fast the wind changes with height, per second (m/s per m): the vector difference of the winds at the two levels either side, over the height between them. */
+  shearPerS: number
 }
 
 /** Reads the air at any pressure and instant between the levels and hours a record states. */
@@ -15,6 +17,8 @@ export class UpperAirProfile {
   /** Beyond the first or last hour of a series, how far it is still held: a window that ends within the hour. */
   private static readonly HOLD_MS = 3_600_000
   private static readonly DEG = Math.PI / 180
+  /** R/g for dry air, m/K: a layer of mean temperature T and pressure ratio r is (R/g) T ln r deep. */
+  private static readonly GAS_CONSTANT_OVER_GRAVITY = 287.05 / 9.80665
 
   /**
    * The air at `pressureHpa` and `t`, undefined when the series says nothing of them: no sample, an instant more than an hour
@@ -42,7 +46,8 @@ export class UpperAirProfile {
       temperatureC: lerp(from.temperatureC, to.temperatureC),
       relativeHumidity: lerp(from.relativeHumidity, to.relativeHumidity),
       driftEastMs: lerp(from.driftEastMs, to.driftEastMs),
-      driftNorthMs: lerp(from.driftNorthMs, to.driftNorthMs)
+      driftNorthMs: lerp(from.driftNorthMs, to.driftNorthMs),
+      shearPerS: lerp(from.shearPerS, to.shearPerS)
     }
   }
 
@@ -61,12 +66,15 @@ export class UpperAirProfile {
       }
       const a = drift(low)
       const b = drift(high)
+      // The height between the levels, from the hypsometric equation with their mean temperature.
+      const heightM = UpperAirProfile.GAS_CONSTANT_OVER_GRAVITY * ((low.temperatureC + high.temperatureC) / 2 + 273.15) * Math.log(low.pressureHpa / high.pressureHpa)
       return {
         pressureHpa,
         temperatureC: lerp(low.temperatureC, high.temperatureC),
         relativeHumidity: lerp(low.relativeHumidity, high.relativeHumidity),
         driftEastMs: lerp(a.east, b.east),
-        driftNorthMs: lerp(a.north, b.north)
+        driftNorthMs: lerp(a.north, b.north),
+        shearPerS: Math.hypot(b.east - a.east, b.north - a.north) / heightM
       }
     }
     return undefined

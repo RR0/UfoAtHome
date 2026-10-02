@@ -39,6 +39,12 @@ export class ContrailSystem {
   private static readonly MAX_SEGMENTS = 4000
   /** The least a ribbon is drawn across, in pixels, edge to edge: its core is soft, so one pixel would be hit and missed by the rasteriser along its length and break into beads. */
   private static readonly MIN_PIXELS = 2
+  /**
+   * How much fainter a ribbon is drawn for being widened to the least it is drawn at: 1 would keep all the light of the trail, 0.5 keeps
+   * the contrast of a thin line, which is what the eye (blurred by its own optics) still sees. Keeping all of it made the young part of
+   * a distant trail, which is thin, as faint as its old part, which is wide, and no trail seemed to fade at all.
+   */
+  private static readonly UNRESOLVED_CONTRAST = 0.5
   private static readonly VERTICES_PER_SEGMENT = 12
 
   readonly object: Mesh
@@ -127,7 +133,7 @@ export class ContrailSystem {
   }
 
   private pushSegment(vertex: number, a: Sample, b: Sample, spanM: number, tint: readonly [number, number, number], frame: ContrailFrame): number {
-    const kind = { persistent: a.point.persistent, lifetimeS: a.point.lifetimeS, spanM }
+    const kind = { persistent: a.point.persistent, lifetimeS: a.point.lifetimeS, spanM, shearPerS: a.point.shearPerS }
     const opacityA = ContrailGrowth.opacity(a.age, kind)
     const opacityB = ContrailGrowth.opacity(b.age, kind)
     if (opacityA <= 0 && opacityB <= 0) return vertex
@@ -137,9 +143,9 @@ export class ContrailSystem {
     const across = this.normalise(this.cross(along, toMid))
     const endOf = (sample: Sample, opacity: number) => {
       const distance = Math.hypot(sample.x - frame.eye.x, sample.y - frame.eye.y, sample.z - frame.eye.z)
-      const width = ContrailGrowth.widthM(spanM, sample.age)
+      const width = ContrailGrowth.widthM(spanM, sample.age, sample.point.shearPerS)
       const shown = Math.max(width, ContrailSystem.MIN_PIXELS * frame.pixelRad * distance)
-      return { half: shown / 2, alpha: opacity * (width / shown) }
+      return { half: shown / 2, alpha: opacity * (width / shown) ** ContrailSystem.UNRESOLVED_CONTRAST }
     }
     // Alpha is nil at the edges of the ribbon, so that a trail has no hard side.
     const ends = [{ sample: a, ...endOf(a, opacityA) }, { sample: b, ...endOf(b, opacityB) }]

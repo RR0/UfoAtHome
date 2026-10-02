@@ -8,11 +8,28 @@ describe("ContrailGrowth", () => {
       expect(ContrailGrowth.widthM(35, 600)).toBeGreaterThan(ContrailGrowth.widthM(35, 60))
     })
 
-    it("is some hundreds of metres after ten minutes and about a kilometre and a half after an hour", () => {
+    it("is some hundreds of metres after ten minutes and some kilometres after an hour, in the shear that is typical", () => {
       expect(ContrailGrowth.widthM(35, 600)).toBeGreaterThan(200)
-      expect(ContrailGrowth.widthM(35, 600)).toBeLessThan(500)
-      expect(ContrailGrowth.widthM(35, 3600)).toBeGreaterThan(1000)
-      expect(ContrailGrowth.widthM(35, 3600)).toBeLessThan(2500)
+      expect(ContrailGrowth.widthM(35, 600)).toBeLessThan(700)
+      expect(ContrailGrowth.widthM(35, 3600)).toBeGreaterThan(1500)
+      expect(ContrailGrowth.widthM(35, 3600)).toBeLessThan(6000)
+    })
+
+    it("is spread more by a wind that changes faster with height, and only diffuses in a steady one", () => {
+      const calm = ContrailGrowth.widthM(35, 3600, 0)
+      const typical = ContrailGrowth.widthM(35, 3600, 0.003)
+      const strong = ContrailGrowth.widthM(35, 3600, 0.006)
+      expect(calm).toBeLessThan(typical)
+      expect(typical).toBeLessThan(strong)
+      expect(calm).toBeGreaterThan(500)
+      expect(calm).toBeLessThan(1200)
+      // The shear's own share doubles with it.
+      expect((strong - calm) / (typical - calm)).toBeCloseTo(2, 6)
+    })
+
+    it("grows faster and faster in a shear, because the trail also deepens", () => {
+      const at = (age: number) => ContrailGrowth.widthM(35, age, 0.004) - ContrailGrowth.widthM(35, age, 0)
+      expect(at(3600) / at(1800)).toBeGreaterThan(2.5)
     })
   })
 
@@ -48,11 +65,25 @@ describe("ContrailGrowth", () => {
       expect(ContrailGrowth.opacity(30, brief)).toBeLessThan(ContrailGrowth.opacity(5, brief))
     })
 
-    it("thins as a trail that lasts spreads, but does not vanish", () => {
-      const young = ContrailGrowth.opacity(10, persistent)
-      const old = ContrailGrowth.opacity(3000, persistent)
-      expect(old).toBeLessThan(young)
-      expect(old).toBeGreaterThan(0.02)
+    it("is visibly fainter after a few minutes than where the exhaust has just cooled, and much fainter after ten", () => {
+      const young = ContrailGrowth.opacity(1, persistent)
+      expect(ContrailGrowth.opacity(240, persistent)).toBeLessThan(young * 0.6)
+      expect(ContrailGrowth.opacity(600, persistent)).toBeLessThan(young * 0.35)
+    })
+
+    it("thins faster in a shear that spreads it faster", () => {
+      expect(ContrailGrowth.opacity(300, { ...persistent, shearPerS: 0.008 })).toBeLessThan(ContrailGrowth.opacity(300, { ...persistent, shearPerS: 0.001 }))
+    })
+
+    it("thins as a trail that lasts spreads, and is still there after a quarter of an hour", () => {
+      expect(ContrailGrowth.opacity(900, persistent)).toBeGreaterThan(0)
+      expect(ContrailGrowth.opacity(900, persistent)).toBeLessThan(ContrailGrowth.opacity(10, persistent))
+    })
+
+    it("disperses in the end: a trail that lasts is not seen after an hour, whatever the shear", () => {
+      for (const shearPerS of [0, 0.001, 0.003, 0.008]) {
+        expect(ContrailGrowth.opacity(3600, { ...persistent, shearPerS })).toBe(0)
+      }
     })
 
     it("stays a share", () => {

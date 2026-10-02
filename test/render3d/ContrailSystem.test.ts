@@ -11,7 +11,7 @@ const white = () => [1, 1, 1] as const
 function point(s: number, over: Partial<ContrailPoint> = {}): ContrailPoint {
   return {
     tMs: s * 1000, eastM: 20_000 + SPEED_MS * s, northM: 30_000, upM: 11_000,
-    forms: true, persistent: true, lifetimeS: 60, driftEastMs: 0, driftNorthMs: 0, iceRelativeHumidity: 1.1, ...over
+    forms: true, persistent: true, lifetimeS: 60, driftEastMs: 0, driftNorthMs: 0, shearPerS: 0.003, iceRelativeHumidity: 1.1, ...over
   }
 }
 
@@ -126,6 +126,14 @@ describe("ContrailSystem", () => {
     expect(widthAt(thin, 23_750)).toBeGreaterThanOrEqual(distance * pixelRad * 2 * 0.95)
     const peakAlpha = (system: ContrailSystem) => Math.max(...vertices(system).filter(v => Math.abs(v.x - 23_750) < 150).map(v => v.alpha))
     expect(peakAlpha(thin)).toBeLessThanOrEqual(peakAlpha(wide))
+  })
+
+  it("is wider where the wind shears it more", () => {
+    const calm = made([trail(60, { shearPerS: 0 })])
+    const sheared = made([trail(60, { shearPerS: 0.01 })])
+    calm.update(600_000, frame, white)
+    sheared.update(600_000, frame, white)
+    expect(widthAt(sheared, 20_000)).toBeGreaterThan(widthAt(calm, 20_000) * 1.5)
   })
 
   it("is lit as it is told, per aircraft", () => {

@@ -78,6 +78,16 @@ describe("AircraftContrails", () => {
     expect(Math.abs(trail.points[0].driftNorthMs)).toBeLessThan(1e-6)
   })
 
+  it("carries the shear of the air each position flew in, from the winds at the levels either side of it", () => {
+    const set = TrafficDecor.from([flight(1, 36000)], observer, START)
+    const level = (pressureHpa: number, windSpeedMs: number): UpperAirLevel => ({ pressureHpa, temperatureC: -58, relativeHumidity: 1, windSpeedMs, windFromDeg: 270 })
+    const samples: UpperAirSample[] = [{ t: START, levels: [level(500, 10), level(400, 15), level(300, 20), level(250, 30), level(200, 45), level(150, 45)] }]
+    const [trail] = AircraftContrails.plan(set, undefined, samples, START)
+    // 36 000 ft is 220 hPa, between 250 (30 m/s) and 200 (45 m/s), 1.3 km apart or so: about 0.011 per second.
+    expect(trail.points[0].shearPerS).toBeGreaterThan(0.009)
+    expect(trail.points[0].shearPerS).toBeLessThan(0.014)
+  })
+
   it("starts a trail only where the air allows one: a climb into the cold makes it begin on the way", () => {
     const points: AircraftPoint[] = []
     for (let s = 0; s <= 60; s += 5) points.push({ t: START + s * 1000, lat: 48, lng: 2.4 + s * 0.0001, altitudeFt: 20000 + s * 300 })

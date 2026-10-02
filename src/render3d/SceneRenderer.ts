@@ -2047,13 +2047,17 @@ export class SceneRenderer {
 
   /**
    * What a trail of ice scatters of the Sun that reaches it, per channel, in the scene's own units: the light of the Sun at the height of its
-   * aircraft, through the air above that height alone and over every cloud there is (see lightFromAbove), turned back by ice, which is a white
-   * and bright reflector (Lambert, albedo 0.8), and the sky's own light on it. Nothing once the Sun has set for that height: a trail is not a lamp.
+   * aircraft, through the air above that height alone and over every cloud there is (see lightFromAbove), and the sky's own light on it.
+   * Nothing once the Sun has set for that height: a trail is not a lamp.
+   *
+   * Single scattering by a thin sheet, not a white body: the light it sends back per unit of its opacity is the irradiance over 4 pi (the same in
+   * every direction), which is a third of what a white surface lit by the same Sun would send. Lighting it as a body made it so much brighter
+   * than the sky that the faintest, oldest part of a trail was as white on the screen as the youngest, and none seemed to fade.
    */
   private contrailTint(id: string): [number, number, number] {
     const sunlight = this.contrailSunlight.get(id)
     const sun = this.lastAstronomy?.sun
-    const k = SceneRenderer.CONTRAIL_ALBEDO / Math.PI
+    const k = SceneRenderer.CONTRAIL_SCATTERING
     const sky = this.skyLight.color
     const tint: [number, number, number] = [sky.r * k * 0.5, sky.g * k * 0.5, sky.b * k * 0.5]
     if (sunlight && sun) {
@@ -2067,7 +2071,7 @@ export class SceneRenderer {
     return tint
   }
 
-  private static readonly CONTRAIL_ALBEDO = 0.8
+  private static readonly CONTRAIL_SCATTERING = 1 / (4 * Math.PI)
 
   /** Builds the trails as they stand at the instant the decor was last placed at. */
   private updateContrails(): void {

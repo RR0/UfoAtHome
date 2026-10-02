@@ -45,6 +45,23 @@ describe("UpperAirProfile", () => {
       expect(UpperAirProfile.at([], 0, 250)).toBeUndefined()
     })
 
+    it("states the shear: how much the wind changes per second of height between the two levels that bracket the pressure", () => {
+      const sheared = UpperAirProfile.at([{ t: 0, levels: [level(300, -50, 0.4, 10, 270), level(250, -50, 0.4, 20, 270)] }], 0, 270)!
+      // 300 to 250 hPa at -50 C is about 1.19 km: 10 m/s over it.
+      expect(sheared.shearPerS).toBeGreaterThan(0.0075)
+      expect(sheared.shearPerS).toBeLessThan(0.0095)
+    })
+
+    it("counts a change of direction as shear too, not only of speed", () => {
+      const turning = UpperAirProfile.at([{ t: 0, levels: [level(300, -50, 0.4, 20, 270), level(250, -50, 0.4, 20, 360)] }], 0, 270)!
+      expect(turning.shearPerS).toBeGreaterThan(0.01)
+    })
+
+    it("has none where the wind is the same at both levels", () => {
+      const steady = UpperAirProfile.at([{ t: 0, levels: [level(300, -50, 0.4, 15, 250), level(250, -50, 0.4, 15, 250)] }], 0, 270)!
+      expect(steady.shearPerS).toBeCloseTo(0, 6)
+    })
+
     it("turns the wind into a drift: east and north, towards where it blows", () => {
       const west = UpperAirProfile.at([{ t: 0, levels: [level(300, -45, 0.4, 20, 270), level(200, -58, 0.2, 20, 270)] }], 0, 250)!
       expect(west.driftEastMs).toBeCloseTo(20, 6)
