@@ -76,13 +76,10 @@ import { AIRCRAFT_SOURCES } from "../engine/traffic/aircraftSources.js"
 import type { AircraftProvider } from "../engine/traffic/AircraftProvider.js"
 import { AircraftSighting } from "../engine/traffic/AircraftSighting.js"
 import { AircraftLighting } from "../engine/traffic/AircraftLighting.js"
-import { AircraftModels } from "../engine/traffic/AircraftModels.js"
 import type { AircraftModel } from "../engine/traffic/AircraftModels.js"
 import type { AircraftDescription, AircraftPoint, AircraftTrack } from "../engine/traffic/AircraftProvider.js"
-import { TrafficInfos } from "../engine/traffic/TrafficInfo.js"
 import type { TrafficInfo } from "../engine/traffic/TrafficInfo.js"
-import { TrafficTooltip } from "./TrafficTooltip.js"
-import { TrafficDecor } from "../engine/traffic/TrafficDecor.js"
+import { TrafficIds } from "../engine/traffic/TrafficIds.js"
 import type { TrafficDecorSet } from "../engine/traffic/TrafficDecor.js"
 import type { DecorObject } from "../engine/model/Decor.js"
 import type { DataSource } from "../engine/source/DataSource.js"
@@ -146,6 +143,9 @@ export const AIRCRAFT_CHANGE_EVENT = "aircraft-change"
 /** Fired whenever what the interpretation on show says against the account changes — see
  * SceneElement.confrontation. */
 export const CONFRONTATION_EVENT = "rr0-confrontation"
+
+/** The module of what draws the aircraft of a record, as it is once loaded. */
+type TrafficRuntime = typeof import("./trafficRuntime.js")
 
 export type SatelliteStatus = "none" | "loading" | "outside" | "unavailable" | "ready"
 
@@ -354,6 +354,15 @@ export class SceneElement extends HTMLElement {
   /** Where the air traffic is read from — see AircraftProvider. The editor's picker changes it. */
   private aircraftSource: DataSource<AircraftProvider> = AIRCRAFT_SOURCES[0]
   /** The air traffic recorded around the observer during this recording, for the source, window and place it was asked for. */
+  /** What draws, labels and hears the aircraft of a record: brought in on the first aircraft found, and never by a scene that has none —
+   * see trafficRuntime. Shared by every scene of the page once it has come. */
+  private static trafficRuntimeLoading?: Promise<TrafficRuntime>
+  private static trafficRuntime?: TrafficRuntime
+  private static loadTrafficRuntime(): Promise<TrafficRuntime> {
+    SceneElement.trafficRuntimeLoading ??= import("./trafficRuntime.js").then(runtime => (SceneElement.trafficRuntime = runtime))
+    SceneElement.trafficRuntimeLoading.catch(() => { SceneElement.trafficRuntimeLoading = undefined })
+    return SceneElement.trafficRuntimeLoading
+  }
   private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription> }
   /** Where the Sun stood at the last restatement of the sky, from the observer: what the aircraft are lit by, each from its own place. */
   private lastSun?: { altitudeDeg: number; azimuthDeg: number }
@@ -1552,19 +1561,32 @@ export class SceneElement extends HTMLElement {
     const after = AircraftSighting.MAX_GAP_S * 1000
     const before = SceneElement.SOUND_LOOKBACK_MS
     const geo = { lat: pose.lat, lng: pose.lng, elevationM: pose.elevationM ?? 0 }
-    const build = (models?: Map<string, AircraftModel>) =>
-      TrafficDecor.from(asked.tracks ?? [], observer, startMs, TrafficDecor.MAX_OBJECTS, { models, sunElevationAt: point => this.sunElevationAt(point, geo) })
-    void provider.between(observer, startMs - before, startMs + spanMs + after).then(answer => {
+    const build = (runtime: TrafficRuntime, models?: Map<string, AircraftModel>) =>
+      runtime.TrafficDecor.from(asked.tracks ?? [], observer, startMs, runtime.TrafficDecor.MAX_OBJECTS, { models, sunElevationAt: point => this.sunElevationAt(point, geo) })
+    void provider.between(observer, startMs - before, startMs + spanMs + after).then(async answer => {
       if (this.traffic !== asked) return
-      if (answer.status === "found") {
-        asked.status = "ready"
-        asked.tracks = answer.tracks
-        asked.set = build()
-      } else {
+      if (answer.status !== "found") {
         asked.status = answer.status === "outside" ? "outside" : "unavailable"
+        this.announceTraffic()
+        return
       }
+      // The code that draws them is only fetched now that there are aircraft to draw.
+      let runtime: TrafficRuntime
+      try {
+        runtime = await SceneElement.loadTrafficRuntime()
+      } catch {
+        if (this.traffic === asked) {
+          asked.status = "unavailable"
+          this.announceTraffic()
+        }
+        return
+      }
+      if (this.traffic !== asked) return
+      asked.status = "ready"
+      asked.tracks = answer.tracks
+      asked.set = build(runtime)
       this.announceTraffic()
-      if (answer.status === "found") void this.describeTraffic(provider, asked, build)
+      void this.describeTraffic(provider, asked, runtime, build)
     })
     return undefined
   }
@@ -1594,7 +1616,8 @@ export class SceneElement extends HTMLElement {
     const info = id ? this.trafficInfoAt(id) : undefined
     if (!info) return undefined
     const naming = this.naming
-    return TrafficTooltip.text(info, naming.names?.trafficTooltip ?? TrafficTooltip.ENGLISH, azimuth => naming.towards(azimuth))
+    const runtime = SceneElement.trafficRuntime
+    return runtime?.TrafficTooltip.text(info, naming.names?.trafficTooltip ?? runtime.TrafficTooltip.ENGLISH, azimuth => naming.towards(azimuth))
   }
 
   /**
@@ -1606,10 +1629,12 @@ export class SceneElement extends HTMLElement {
     const traffic = this.traffic
     const flight = traffic?.set?.flights.get(id)
     if (!traffic || !flight || traffic.startMs === undefined || !traffic.observer) return undefined
-    const description = traffic.descriptions?.get(TrafficDecor.keyOf(flight))
+    const runtime = SceneElement.trafficRuntime
+    if (!runtime) return undefined
+    const description = traffic.descriptions?.get(TrafficIds.keyOf(flight))
     const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.lastTimeMs)
     const here = { lat: traffic.observer.lat, lng: traffic.observer.lng, heightM: pose?.elevationM ?? 0 }
-    return TrafficInfos.at(flight, description, here, traffic.startMs + this.lastTimeMs)
+    return runtime.TrafficInfos.at(flight, description, here, traffic.startMs + this.lastTimeMs)
   }
 
   /** Tells whoever listens that the traffic changed, and draws it. */
@@ -1625,23 +1650,23 @@ export class SceneElement extends HTMLElement {
    * drawn at once as a generic airliner and refined when the answer comes, which leaves their ids and their presence as
    * they were.
    */
-  private async describeTraffic(provider: AircraftProvider, asked: NonNullable<SceneElement["traffic"]>, build: (models?: Map<string, AircraftModel>) => TrafficDecorSet): Promise<void> {
+  private async describeTraffic(provider: AircraftProvider, asked: NonNullable<SceneElement["traffic"]>, runtime: TrafficRuntime, build: (runtime: TrafficRuntime, models?: Map<string, AircraftModel>) => TrafficDecorSet): Promise<void> {
     if (!provider.describe || !asked.set || !asked.tracks) return
-    const shown = new Set([...asked.set.flights.values()].map(flight => TrafficDecor.keyOf(flight)))
-    const wanted = asked.tracks.filter(track => shown.has(TrafficDecor.keyOf(track)) && track.points.length > 0)
+    const shown = new Set([...asked.set.flights.values()].map(flight => TrafficIds.keyOf(flight)))
+    const wanted = asked.tracks.filter(track => shown.has(TrafficIds.keyOf(track)) && track.points.length > 0)
     const models = new Map<string, AircraftModel>()
     const descriptions = new Map<string, AircraftDescription>()
     await Promise.all(wanted.map(async track => {
       const day = new Date(track.points[0].t).toISOString().slice(0, 10)
       const description = await provider.describe!(track, day).catch(() => undefined)
       if (!description) return
-      descriptions.set(TrafficDecor.keyOf(track), description)
-      models.set(TrafficDecor.keyOf(track), AircraftModels.of(description))
+      descriptions.set(TrafficIds.keyOf(track), description)
+      models.set(TrafficIds.keyOf(track), runtime.AircraftModels.of(description))
     }))
     if (this.traffic !== asked || models.size === 0) return
     asked.descriptions = descriptions
     asked.models = models
-    asked.set = build(models)
+    asked.set = build(runtime, models)
     this.announceTraffic()
   }
 

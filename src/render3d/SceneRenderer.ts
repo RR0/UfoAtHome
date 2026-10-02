@@ -130,7 +130,7 @@ import type { Rgb } from "../engine/atmosphere/AerialPerspective.js"
 import { AerialFog } from "./AerialFog.js"
 import { ForwardDiffraction } from "../engine/atmosphere/ForwardDiffraction.js"
 import { AircraftLighting } from "../engine/traffic/AircraftLighting.js"
-import { TrafficDecor } from "../engine/traffic/TrafficDecor.js"
+import { TrafficIds } from "../engine/traffic/TrafficIds.js"
 import { AtmosphereProfile } from "../engine/atmosphere/AtmosphereProfile.js"
 import { SourceDiffraction } from "./SourceDiffraction.js"
 import { Reflections } from "./Reflections.js"
@@ -2894,7 +2894,7 @@ export class SceneRenderer {
     let bestCos = thresholdCos
     const toward = new Vector3()
     for (const [id, group] of this.decorGroups) {
-      if (!group.visible || !id.startsWith(TrafficDecor.ID_PREFIX)) continue
+      if (!group.visible || !id.startsWith(TrafficIds.ID_PREFIX)) continue
       toward.copy(group.position).sub(this.camera.position).normalize()
       const cos = toward.dot(aim)
       if (cos > bestCos) {

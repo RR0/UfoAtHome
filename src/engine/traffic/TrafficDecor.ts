@@ -5,6 +5,7 @@ import type { AircraftPoint, AircraftTrack } from "./AircraftProvider.js"
 import type { AircraftModel } from "./AircraftModels.js"
 import { AircraftModels } from "./AircraftModels.js"
 import { AircraftSighting } from "./AircraftSighting.js"
+import { TrafficIds } from "./TrafficIds.js"
 import { TrafficLights } from "./TrafficLights.js"
 
 /** When one piece of traffic is there: it exists only between its first and last position, ms from the recording's start. */
@@ -50,8 +51,8 @@ export interface TrafficDecorOptions {
 }
 
 export class TrafficDecor {
-  /** What every id of an aircraft drawn from a record begins with, which is how the scene tells them from what a recording states. */
-  static readonly ID_PREFIX = "traffic-"
+  /** What every id of an aircraft drawn from a record begins with: see TrafficIds, which the scene has without this module. */
+  static readonly ID_PREFIX = TrafficIds.ID_PREFIX
 
   /** The most that are drawn: the nearest at their closest, which are the ones taken for something else. */
   static readonly MAX_OBJECTS = 40
@@ -64,11 +65,11 @@ export class TrafficDecor {
 
   /** What identifies an aircraft among the rest: its address, and whether that address is its own. */
   static idOf(track: { icao: number; nonIcao: boolean }, segment: number): string {
-    return `${TrafficDecor.ID_PREFIX}${TrafficDecor.keyOf(track)}-${segment}`
+    return TrafficIds.idOf(track, segment)
   }
 
   static keyOf(track: { icao: number; nonIcao: boolean }): string {
-    return `${track.nonIcao ? "x" : ""}${track.icao.toString(16).padStart(6, "0")}`
+    return TrafficIds.keyOf(track)
   }
 
   /** The height of an aircraft over its span, which the primitive keeps its own proportions of until it is told: a tenth of the length for the fuselage, the fin on top. */

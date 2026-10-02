@@ -1,6 +1,8 @@
 import type { GeoPoint } from "../../interpretation/Reentry.js"
 import type { AircraftDescription, AircraftProvider, AircraftTraffic, AircraftTrack } from "../AircraftProvider.js"
 import { AircraftSighting } from "../AircraftSighting.js"
+import { AircraftCoverage } from "../AircraftCoverage.js"
+import { ADSB_LOL_CITATION } from "../aircraftSources.js"
 import { AircraftTile } from "./AircraftTile.js"
 
 /**
@@ -33,7 +35,7 @@ export interface AdsbLolArchiveProviderOptions {
  * tiles that cover the radius, for the hours that cover the window — with no server and no key.
  */
 export class AdsbLolArchiveProvider implements AircraftProvider {
-  readonly citation = "Aircraft positions: adsb.lol feeders and contributors, Open Database License 1.0 (https://www.adsb.lol/docs/open-data/historical/)"
+  readonly citation = ADSB_LOL_CITATION
 
   /** How far around the observer aircraft are looked for, km: the far ones are the ones taken for something else. */
   static readonly DEFAULT_RADIUS_KM = 150
@@ -67,11 +69,8 @@ export class AdsbLolArchiveProvider implements AircraftProvider {
     return urls
   }
 
-  /** The first day of the archive, known without asking it: ADSB.lol's open history begins in 2022 at the earliest. */
-  static readonly FIRST_DAY = "2022-01-01"
-
   mayCover(ms: number): boolean {
-    return new Date(ms).toISOString().slice(0, 10) >= AdsbLolArchiveProvider.FIRST_DAY
+    return AircraftCoverage.mayCover(ms)
   }
 
   async between(observer: GeoPoint, startMs: number, endMs: number, radiusKm = AdsbLolArchiveProvider.DEFAULT_RADIUS_KM): Promise<AircraftTraffic> {
