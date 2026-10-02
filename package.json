@@ -54,7 +54,9 @@
     "build:roads": "tsx scripts/build-road-archive.ts",
     "build:light-pollution": "node --import tsx scripts/build-light-pollution-tiles.ts",
     "build:reentries": "node --import tsx scripts/build-reentry-catalog.ts",
-    "build:fireballs": "node --import tsx scripts/build-fireball-archive.ts"
+    "build:fireballs": "node --import tsx scripts/build-fireball-archive.ts",
+    "build:aircraft": "node --import tsx scripts/build-aircraft-archive.ts",
+    "fetch:aircraft": "node --import tsx scripts/fetch-aircraft-release.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
