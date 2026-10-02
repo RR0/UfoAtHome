@@ -612,6 +612,23 @@ export class SceneElement extends HTMLElement {
 
   private interacted = false
 
+  /**
+   * A gesture anywhere on the page counts while the recording plays: a replay that starts on its own (the player's page, from the
+   * button that loads it, which is outside this element) must not stay silent until the reader happens to press inside the scene. Not
+   * for one that is paused, which is not asking for any sound: a page of many scenes does not open them all on the first click.
+   */
+  private readonly handlePageGesture = () => {
+    if (this.ufoElement.playbackState === "playing") this.handleFirstInteraction()
+  }
+
+  /** The reader has already pressed something on this page, which lets sound start without another gesture where the browser says so (sticky user activation). */
+  private unlockIfAlreadyActivated(): void {
+    if (this.interacted) return
+    if ((navigator as { userActivation?: { hasBeenActive: boolean } }).userActivation?.hasBeenActive) this.handleFirstInteraction()
+  }
+
+  private static readonly GESTURES = ["pointerdown", "pointerup", "touchend", "click", "keydown"]
+
   /** Reuses the nested <rr0-ufo>'s own playback clock (it already dispatches this on every
    * Player tick and every seek, mirroring <video>'s timeupdate) instead of running a second,
    * separate animation loop just for astronomy. */
@@ -655,6 +672,7 @@ export class SceneElement extends HTMLElement {
     this.weatherAudio.setPaused(!playing)
     this.vehicleAudio.setPaused(!playing)
     this.aircraftAudio?.setPaused(!playing)
+    if (playing) this.unlockIfAlreadyActivated()
     // A thunderclap is deliberately delayed by the distance sound travels (see
     // handleLightningFlash); one still in flight belongs to a flash that is no longer happening.
     if (!playing) clearTimeout(this.thunderTimeoutId)
@@ -732,7 +750,7 @@ export class SceneElement extends HTMLElement {
     // shadow trees inside are composed and reach this element retargeted.
     // Kept, not removed after the first: a phone counts only a touch's END (or a click) as the gesture
     // that unlocks sound, and unlocks it again after an interruption — see AudioUnlock.
-    for (const type of ["pointerdown", "pointerup", "touchend", "click", "keydown"]) {
+    for (const type of SceneElement.GESTURES) {
       this.addEventListener(type, this.handleFirstInteraction, true)
     }
   }
@@ -786,6 +804,7 @@ export class SceneElement extends HTMLElement {
     // explicitly reacting to fullscreenchange too removes any doubt. Same event UfoElement
     // already listens to for its own button icon sync.
     document.addEventListener("fullscreenchange", this.handleFullscreenChange)
+    for (const type of SceneElement.GESTURES) document.addEventListener(type, this.handlePageGesture, true)
 
     const src = this.getAttribute("src")
     if (src) {
@@ -796,6 +815,7 @@ export class SceneElement extends HTMLElement {
   disconnectedCallback(): void {
     this.resizeObserver?.disconnect()
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
+    for (const type of SceneElement.GESTURES) document.removeEventListener(type, this.handlePageGesture, true)
     // Otherwise the twinkle animation loop (a continuous requestAnimationFrame chain, unlike the
     // one-shot renders before it) keeps running forever into a detached canvas after unmount.
     this.sceneRenderer.stopTwinkle()

@@ -874,6 +874,57 @@ describe("SceneElement air traffic", () => {
       element.remove()
     })
 
+    /** A scene whose recording is playing, as the player's page makes it. */
+    const playingScene = async () => {
+      const resume = spyOn("resume")
+      const { source } = stubSource(low)
+      const { element, tick } = mountAt(AT, source, calm)
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+      resume.mockClear()
+      return { element, resume }
+    }
+    const playbackOf = (element: HTMLElement, state: string) =>
+      vi.spyOn((element as unknown as { ufoElement: { playbackState: string } }).ufoElement, "playbackState", "get").mockReturnValue(state)
+
+    it("is unlocked by a gesture anywhere on the page while it plays: the button that loads it is not inside the scene", async () => {
+      const { element, resume } = await playingScene()
+      playbackOf(element, "playing")
+      document.body.dispatchEvent(new Event("pointerdown", { bubbles: true }))
+      expect(resume).toHaveBeenCalled()
+      element.remove()
+    })
+
+    it("is not unlocked by a gesture elsewhere while it is paused: a page of many scenes does not open them all", async () => {
+      const { element, resume } = await playingScene()
+      playbackOf(element, "paused")
+      document.body.dispatchEvent(new Event("pointerdown", { bubbles: true }))
+      expect(resume).not.toHaveBeenCalled()
+      element.remove()
+    })
+
+    it("is unlocked as soon as it plays when the reader has already pressed something on the page", async () => {
+      const { element, resume } = await playingScene()
+      Object.defineProperty(navigator, "userActivation", { value: { hasBeenActive: true }, configurable: true })
+      try {
+        playbackOf(element, "playing")
+        ;(element as unknown as { syncAnimationsToPlayback(): void }).syncAnimationsToPlayback()
+        expect(resume).toHaveBeenCalled()
+      } finally {
+        Reflect.deleteProperty(navigator, "userActivation")
+      }
+      element.remove()
+    })
+
+    it("stops listening to the page once it is removed", async () => {
+      const { element, resume } = await playingScene()
+      playbackOf(element, "playing")
+      element.remove()
+      resume.mockClear()
+      document.body.dispatchEvent(new Event("pointerdown", { bubbles: true }))
+      expect(resume).not.toHaveBeenCalled()
+    })
+
     it("is unlocked by the reader's first gesture, whenever it was made", async () => {
       const resume = spyOn("resume")
       const { source } = stubSource(low)
