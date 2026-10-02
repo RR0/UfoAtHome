@@ -43,6 +43,17 @@ describe("AircraftHearing", () => {
     expect(bands("regional-turboprop")[0]).toBeGreaterThan(bands("airliner-narrow")[0])
   })
 
+  test("a turbine hums as it turns, and a rotor does not: the hum is what a far jet has when its roar is gone", () => {
+    for (const kind of ["airliner-narrow", "airliner-wide", "regional-jet", "business-jet"] as const) {
+      const character = AircraftHearing.noiseOfKind(kind).character
+      expect(character?.humHz, kind).toBeGreaterThan(50)
+      expect(character?.humHz, kind).toBeLessThan(130)
+      expect(character?.humShare, kind).toBeGreaterThan(0)
+    }
+    expect(AircraftHearing.noiseOfKind("helicopter-light").character?.humHz).toBeUndefined()
+    expect(AircraftHearing.noiseOfKind("unmanned").character?.humHz).toBeUndefined()
+  })
+
   test("what is not known is the noise of a narrow-body airliner", () => {
     expect(AircraftHearing.noiseOfKind("unknown").id).toBe("turbofan-narrow-body")
   })
@@ -156,6 +167,21 @@ describe("AircraftHearing", () => {
     // Heard at its loudest later than it is overhead: the delay is those seconds.
     expect(profile.peakAtMs).toBeGreaterThan(T0 + 200_000)
     expect(profile.peakDelayS).toBeGreaterThan(4)
+  })
+
+  test("the sound of an aircraft that has just left the record is still heard: it left the aircraft while it was there", () => {
+    const full = Flights.eastbound(5000, 250, 200, -400, 600, 2)
+    const track = { ...full, points: full.points.filter(point => point.t <= T0 + 205_000) }
+    const heard = AircraftHearing.heardAt(track, observer, T0 + 209_000)!
+    expect(heard).toBeDefined()
+    expect(heard.delayS).toBeGreaterThan(3)
+    expect(heard.emittedAtMs).toBeLessThanOrEqual(T0 + 205_000)
+    // Long after, what is heard would have left it after the record ends, and is not known.
+    expect(AircraftHearing.heardAt(track, observer, T0 + 260_000)).toBeUndefined()
+  })
+
+  test("an aircraft with no position is not heard", () => {
+    expect(AircraftHearing.heardAt({ icao: 1, nonIcao: false, points: [] }, observer, T0)).toBeUndefined()
   })
 
   test("a hotter day carries the sound a little faster, so it is a little less late", () => {

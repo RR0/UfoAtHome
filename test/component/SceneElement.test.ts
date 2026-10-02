@@ -1,6 +1,7 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
 import { registerScene, SCENE_ELEMENT_NAME, AIRCRAFT_CHANGE_EVENT } from "../../src/component/SceneElement.js"
 import type { AircraftProvider, AircraftTraffic } from "../../src/engine/traffic/AircraftProvider.js"
+import { AircraftAudio } from "../../src/audio/AircraftAudio.js"
 import type { DataSource } from "../../src/engine/source/DataSource.js"
 import type { SceneElement } from "../../src/component/SceneElement.js"
 
@@ -494,10 +495,11 @@ describe("SceneElement air traffic", () => {
     tracks: [{ icao: 0xabc123, nonIcao: false, points: [0, 20_000, 40_000, 60_000].map(t => ({ t: noon + t, lat: 48.99, lng: 2.45 + t * 1e-7, altitudeFt: 30000 })) }]
   }
 
-  const mountAt = (time: object | undefined, source: DataSource<AircraftProvider>) => {
+  const weatherOf = (weather: object) => ({ keyframes: [{ t: 0, weather: { cloudCover: 0, cloudDarkness: 0, cloudBaseM: 2000, precipitationType: "none", precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0, storm: false, ...weather } }] })
+  const mountAt = (time: object | undefined, source: DataSource<AircraftProvider>, weather?: object) => {
     const element = mount()
     element.setAircraftSource(source)
-    element.sightingData = { ...rainyJson, time, utcOffsetHours: 0, place: [{ lat: paris.lat, lng: paris.lng }] } as never
+    element.sightingData = { ...rainyJson, ...(weather ? { weatherTrack: weatherOf(weather) } : {}), time, utcOffsetHours: 0, place: [{ lat: paris.lat, lng: paris.lng }] } as never
     element.ufoElement.sighting.observerTrack.addKeyframe(0, paris)
     const internal = element as unknown as { applySceneAt(t: number): void; sceneCanvas: HTMLCanvasElement }
     internal.sceneCanvas.height = 600
@@ -670,6 +672,137 @@ describe("SceneElement air traffic", () => {
     expect(hover(element)).toBeUndefined()
     pickedTraffic.id = undefined
     element.remove()
+  })
+
+  describe("the sound of the aircraft", () => {
+    const calm = {}
+    /** An aircraft low over the observer, near enough to be heard: 600 m up, passing at a minute into the recording, from a minute before it to `untilS` seconds in. */
+    const lowUntil = (untilS: number): AircraftTraffic => ({
+      status: "found",
+      tracks: [{
+        icao: 0xabc123, nonIcao: false,
+        points: Array.from({ length: Math.floor((untilS + 60) / 5) + 1 }, (_, i) => -60_000 + i * 5000)
+          .map(t => ({ t: noon + t, lat: 48.99, lng: 2.45 + (t - 60_000) * 1.5e-6, altitudeFt: 2000 }))
+      }]
+    })
+    const low = lowUntil(180)
+
+    /** Only the spies of these tests are taken off: the file's own (the canvas's context, the fetch) stand for all of them. */
+    const spies: { mockRestore(): void }[] = []
+    const spyOn = <M extends "setVoices" | "setPaused" | "resume">(method: M) => {
+      const spy = vi.spyOn(AircraftAudio.prototype, method)
+      spies.push(spy)
+      return spy
+    }
+    afterEach(() => {
+      for (const spy of spies) spy.mockRestore()
+      spies.length = 0
+    })
+
+    it("plays what is heard at the instant shown, from the first tick, once there are aircraft", async () => {
+      const setVoices = spyOn("setVoices")
+      const { source } = stubSource(low)
+      const { element, tick } = mountAt(AT, source, calm)
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+      tick(60_000)
+      const heard = setVoices.mock.calls[setVoices.mock.calls.length - 1][0]
+      expect(heard.map(voice => voice.id)).toEqual(["traffic-abc123-0"])
+      expect(heard[0].levelDbA).toBeGreaterThan(50)
+      expect(heard[0].bandAmplitudes.some(amplitude => amplitude > 0)).toBe(true)
+      expect(typeof setVoices.mock.calls[setVoices.mock.calls.length - 1][1]).toBe("number")
+      element.remove()
+    })
+
+    it("keeps the sound of an aircraft after it has left the record, which is still arriving", async () => {
+      const setVoices = spyOn("setVoices")
+      // Recorded until 65 s into the recording, five seconds after it passes over: at 67 s it is gone from the record and its sound, which left it two seconds before, is not.
+      const { source } = stubSource(lowUntil(66))
+      const { element, tick } = mountAt(AT, source, calm)
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+      tick(67_000)
+      expect(setVoices.mock.calls[setVoices.mock.calls.length - 1][0].map(voice => voice.id)).toEqual(["traffic-abc123-0"])
+      element.remove()
+    })
+
+    it("plays an aircraft against the calm and not against a wind that masks it, as the same sound is no louder for the weather", async () => {
+      const setVoices = spyOn("setVoices")
+      // Twelve kilometres off, at 2 000 ft: a faint rumble over a calm night, and nothing over a fresh wind in the trees.
+      const farOff: AircraftTraffic = { status: "found", tracks: [{ icao: 0xabc123, nonIcao: false, points: Array.from({ length: 49 }, (_, i) => i * 5000 - 120_000).map(t => ({ t: noon + 60_000 + t, lat: 48.99 + 0.11, lng: 2.45 + t * 1.5e-6, altitudeFt: 2000 })) }] }
+      const voicesIn = async (weather: object) => {
+        setVoices.mockClear()
+        const { source } = stubSource(farOff)
+        const { element, tick } = mountAt(AT, source, weather)
+        tick()
+        await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+        tick(70_000)
+        const voices = setVoices.mock.calls[setVoices.mock.calls.length - 1][0]
+        element.remove()
+        return voices
+      }
+      expect((await voicesIn({})).length).toBe(1)
+      expect((await voicesIn({ windSpeed: 12 })).length).toBe(0)
+    })
+
+    it("is played in proportion to the weather the scene plays: as loud as its bed for a sound at the weather's own level", async () => {
+      const setVoices = spyOn("setVoices")
+      const { source } = stubSource(low)
+      const { element, tick } = mountAt(AT, source, { windSpeed: 4 })
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+      tick(60_000)
+      const [voice] = setVoices.mock.calls[setVoices.mock.calls.length - 1][0]
+      // A bed of wind at 4 m/s over 20 is played at a fifth, and a sound over it by that much, at the amplitude of the level over it.
+      expect(voice.bandAmplitudes.some(amplitude => amplitude > 0.04)).toBe(true)
+      element.remove()
+    })
+
+    it("plays nothing before there are aircraft, and builds no sound for a scene that never has any", async () => {
+      const setVoices = spyOn("setVoices")
+      const { source } = stubSource(low, false)
+      const { element, tick } = mountAt({ year: 1965, month: 7, day: 1, hour: 5, minute: 45 }, source, calm)
+      tick()
+      tick(1000)
+      expect(setVoices).not.toHaveBeenCalled()
+      element.remove()
+    })
+
+    it("is silenced when the traffic goes", async () => {
+      const setVoices = spyOn("setVoices")
+      const { source } = stubSource(low)
+      const { element, tick } = mountAt(AT, source, calm)
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+      tick(60_000)
+      expect(setVoices.mock.calls[setVoices.mock.calls.length - 1][0]).toHaveLength(1)
+      element.setAircraftSource(stubSource({ status: "outside" }).source)
+      tick(60_000)
+      expect(setVoices.mock.calls[setVoices.mock.calls.length - 1][0]).toEqual([])
+      element.remove()
+    })
+
+    it("is paused with the clock, as every sound of the scene is", async () => {
+      const setPaused = spyOn("setPaused")
+      const { source } = stubSource(low)
+      const { element, tick } = mountAt(AT, source, calm)
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+      // Made paused, since the recording is not playing.
+      expect(setPaused).toHaveBeenCalledWith(true)
+      element.remove()
+    })
+
+    it("is unlocked by the reader's first gesture, whenever it was made", async () => {
+      const resume = spyOn("resume")
+      const { source } = stubSource(low)
+      const { element, tick } = mountAt(AT, source, calm)
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+      element.resumeWeatherAudio()
+      expect(resume).toHaveBeenCalled()
+      element.remove()
+    })
   })
 
   it("asks again when another source is chosen", async () => {

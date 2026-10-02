@@ -5,7 +5,10 @@
  * Its own module so that it is its own chunk, brought in by a dynamic import on the first aircraft found (see SceneElement.loadTrafficRuntime) and
  * not by every page that shows a scene. The scene itself keeps only what it needs to tell whether there is anything to load.
  */
+export { AircraftAudio } from "../audio/AircraftAudio.js"
+export { AmbientNoise } from "../engine/traffic/AmbientNoise.js"
 export { AircraftModels } from "../engine/traffic/AircraftModels.js"
 export { TrafficDecor } from "../engine/traffic/TrafficDecor.js"
 export { TrafficInfos } from "../engine/traffic/TrafficInfo.js"
+export { TrafficSound } from "../engine/traffic/TrafficSound.js"
 export { TrafficTooltip } from "./TrafficTooltip.js"

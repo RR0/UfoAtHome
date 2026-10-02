@@ -363,7 +363,7 @@ export class SceneElement extends HTMLElement {
     SceneElement.trafficRuntimeLoading.catch(() => { SceneElement.trafficRuntimeLoading = undefined })
     return SceneElement.trafficRuntimeLoading
   }
-  private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription> }
+  private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription>; audible?: Set<string> }
   /** Where the Sun stood at the last restatement of the sky, from the observer: what the aircraft are lit by, each from its own place. */
   private lastSun?: { altitudeDeg: number; azimuthDeg: number }
   /** The decor the recording states plus the traffic, rebuilt only when either changes: the renderer
@@ -378,6 +378,8 @@ export class SceneElement extends HTMLElement {
   private readonly weatherAudio = new WeatherAudio()
   /** The vehicles the observer hears — see VehicleHearing and VehicleAudio. */
   private readonly vehicleAudio = new VehicleAudio()
+  /** The sound of the aircraft of a record, once there are any: its code comes with them (see trafficRuntime). */
+  private aircraftAudio?: InstanceType<TrafficRuntime["AircraftAudio"]>
   private readonly vehicleHearing = new VehicleHearing()
 
   /**
@@ -598,6 +600,7 @@ export class SceneElement extends HTMLElement {
   private readonly handleFirstInteraction = () => {
     this.weatherAudio.resume()
     this.vehicleAudio.resume()
+    this.aircraftAudio?.resume()
     if (this.interacted) return
     this.interacted = true
     this.setWeather(resolveActualWeatherAt(this.ufoElement.sighting, this.lastTimeMs))
@@ -647,6 +650,7 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setAnimationsRunning(running, playing)
     this.weatherAudio.setPaused(!playing)
     this.vehicleAudio.setPaused(!playing)
+    this.aircraftAudio?.setPaused(!playing)
     // A thunderclap is deliberately delayed by the distance sound travels (see
     // handleLightningFlash); one still in flight belongs to a flash that is no longer happening.
     if (!playing) clearTimeout(this.thunderTimeoutId)
@@ -794,6 +798,7 @@ export class SceneElement extends HTMLElement {
     clearTimeout(this.thunderTimeoutId)
     this.weatherAudio.dispose()
     this.vehicleAudio.dispose()
+    this.aircraftAudio?.dispose()
     this.seekPreview?.dispose()
     this.seekPreview = undefined
     // The graphics context goes back to the browser once it is clear this element is not merely
@@ -940,6 +945,7 @@ export class SceneElement extends HTMLElement {
   resumeWeatherAudio(): void {
     this.weatherAudio.resume()
     this.vehicleAudio.resume()
+    this.aircraftAudio?.resume()
   }
 
   /** Fetches a SightingRecordingJson from `url` and loads it — what the `src` attribute uses. */
@@ -1301,6 +1307,7 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setLightPollution(sighting.lightPollution)
     // Heard at the instant shown, not at each instant of a pose being developed.
     if (!instant) this.vehicleAudio.setVoices(this.vehicleHearing.at(sighting, t))
+    if (!instant) this.pushAircraftSound(sighting, t)
     this.updateMeteorShower(sighting, t)
     this.updateLightning(sighting, t, instant !== undefined)
     this.sceneRenderer.setDecor(this.decorWithTraffic(sighting))
@@ -1585,6 +1592,7 @@ export class SceneElement extends HTMLElement {
       asked.status = "ready"
       asked.tracks = answer.tracks
       asked.set = build(runtime)
+      this.startAircraftSound(asked, runtime)
       this.announceTraffic()
       void this.describeTraffic(provider, asked, runtime, build)
     })
@@ -1634,7 +1642,53 @@ export class SceneElement extends HTMLElement {
     const description = traffic.descriptions?.get(TrafficIds.keyOf(flight))
     const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.lastTimeMs)
     const here = { lat: traffic.observer.lat, lng: traffic.observer.lng, heightM: pose?.elevationM ?? 0 }
-    return runtime.TrafficInfos.at(flight, description, here, traffic.startMs + this.lastTimeMs)
+    // Against the same ambient noise as what is played, so that the label and the sound say the same.
+    const ambientDbA = runtime.AmbientNoise.dbA(resolveActualWeatherAt(this.ufoElement.sighting, this.lastTimeMs))
+    return runtime.TrafficInfos.at(flight, description, here, traffic.startMs + this.lastTimeMs, { ambientDbA })
+  }
+
+  /**
+   * Starts the sound of the aircraft of a record: the player is made, and unlocked and set to the clock exactly as it would have been had it been
+   * there from the start; and which aircraft could be heard at all is sorted out, once.
+   */
+  private startAircraftSound(asked: NonNullable<SceneElement["traffic"]>, runtime: TrafficRuntime): void {
+    if (!this.aircraftAudio) {
+      this.aircraftAudio = new runtime.AircraftAudio()
+      if (this.interacted) this.aircraftAudio.resume()
+      this.aircraftAudio.setPaused(this.ufoElement.playbackState !== "playing")
+    }
+    this.sortOutAudible(asked, runtime)
+  }
+
+  /** Which of the aircraft could be heard at all, from the nearest each comes — the only ones worked out at every instant. */
+  private sortOutAudible(asked: NonNullable<SceneElement["traffic"]>, runtime: TrafficRuntime): void {
+    if (!asked.set || !asked.observer) return
+    // Against the quietest the place could be: the weather only ever adds to it, so what cannot be heard there cannot be heard at all.
+    asked.audible = runtime.TrafficSound.candidates(asked.set.flights, asked.descriptions ?? new Map(), TrafficIds.keyOf, { ...asked.observer, heightM: 0 }, { ambientDbA: runtime.AmbientNoise.BASE_DB_A })
+  }
+
+  /**
+   * Plays the aircraft that are heard at `t`, if there are any to be: the loudest few of those that could be heard, each as it sounded when its
+   * sound left it. Nothing is worked out for a scene with no aircraft, and a scene that had some and has none now is silenced.
+   */
+  private pushAircraftSound(sighting: Sighting, t: number): void {
+    const audio = this.aircraftAudio
+    if (!audio) return
+    const runtime = SceneElement.trafficRuntime
+    const traffic = this.traffic
+    const set = traffic?.set
+    if (!runtime || !traffic || !set || !traffic.audible || traffic.startMs === undefined || !traffic.observer) {
+      audio.setVoices([])
+      return
+    }
+    const pose = resolveObserverPoseAt(sighting, t)
+    const observer = { lat: traffic.observer.lat, lng: traffic.observer.lng, heightM: pose?.elevationM ?? 0 }
+    // Heard against the weather the scene plays, and in proportion to it: an aircraft at the level of the wind is played as loud as the wind bed is.
+    // Not only the aircraft that are in the record now: the sound of one that has left it is still arriving.
+    const weather = resolveActualWeatherAt(sighting, t)
+    const voices = runtime.TrafficSound.voices(traffic.audible, set.flights, traffic.descriptions ?? new Map(), TrafficIds.keyOf, observer, traffic.startMs + t,
+      { ambientDbA: runtime.AmbientNoise.dbA(weather), referenceAmplitude: runtime.AmbientNoise.referenceAmplitude(weather) })
+    audio.setVoices(voices, pose?.headingDeg ?? 0)
   }
 
   /** Tells whoever listens that the traffic changed, and draws it. */
@@ -1667,6 +1721,7 @@ export class SceneElement extends HTMLElement {
     asked.descriptions = descriptions
     asked.models = models
     asked.set = build(runtime, models)
+    this.sortOutAudible(asked, runtime)
     this.announceTraffic()
   }
 

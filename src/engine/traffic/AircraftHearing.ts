@@ -21,30 +21,57 @@ export interface AircraftNoise {
   name: string
   /** One figure per band of SoundInAir.OCTAVES. */
   soundPowerA: number[]
+  /** What makes it more than a hiss when it is played: see AircraftSoundCharacter. */
+  character?: AircraftSoundCharacter
+}
+
+/**
+ * What a noise has besides its broad spectrum, which is what tells a machine by ear: a rotor's blades beat the air at ten to thirty
+ * times a second, a propeller or a piston engine hums at a few tens of hertz, a fan whines, a drone's small rotors whistle. Each is a
+ * datum of the class, and a played sound is the broad noise with these laid on it.
+ */
+export interface AircraftSoundCharacter {
+  /** The rate its loudness beats at, Hz, and how much of it: 0 to 1. */
+  modulationHz?: number
+  modulationDepth?: number
+  /** A tone it carries, Hz, and how strong it is against the band it stands in: 0 to 1. It has harmonics, each as strong as its own band lets it be. */
+  toneHz?: number
+  toneShare?: number
+  /**
+   * The hum of its engine turning, Hz, and how strong it is against the band it stands in: a turbine spins at fifty to a hundred times a second, and its
+   * low tone, with its harmonics, outlasts everything the air takes away: what a distant jet has when its roar is gone, and what tells it from the wind.
+   */
+  humHz?: number
+  humShare?: number
+  /**
+   * How much its loudness fluctuates, irregularly, as a fraction of it: a jet's roar is rough, crackling with the turbulence of its exhaust and the
+   * air it crosses, and a noise that did not fluctuate would be that of a wind tunnel. Defaults to what a jet has.
+   */
+  roughness?: number
 }
 
 /**
  * The noises of the classes of aircraft: a total sound power, dB(A), and the way it falls over the octaves, dB under the total.
  * The totals and the shapes are representative of each class and not measured on any one machine (see AircraftNoise).
  */
-const NOISE_CLASSES: { id: string; name: string; kinds: AircraftKind[]; totalDbA: number; shapeDb: number[] }[] = [
-  { id: "turbofan-narrow-body", name: "Turbofan airliner, narrow-body", kinds: ["airliner-narrow"], totalDbA: 148, shapeDb: [-32, -17, -9, -6, -5, -7, -12, -22] },
-  { id: "turbofan-wide-body", name: "Turbofan airliner, wide-body", kinds: ["airliner-wide"], totalDbA: 151, shapeDb: [-28, -14, -7, -4, -3, -6, -12, -22] },
-  { id: "regional-jet", name: "Regional jet", kinds: ["regional-jet"], totalDbA: 144, shapeDb: [-32, -17, -9, -5, -4, -6, -11, -21] },
-  { id: "business-jet", name: "Business jet", kinds: ["business-jet"], totalDbA: 141, shapeDb: [-30, -15, -8, -4, -3, -4, -9, -19] },
+const NOISE_CLASSES: { id: string; name: string; kinds: AircraftKind[]; totalDbA: number; shapeDb: number[]; character?: AircraftSoundCharacter }[] = [
+  { id: "turbofan-narrow-body", name: "Turbofan airliner, narrow-body", kinds: ["airliner-narrow"], totalDbA: 148, shapeDb: [-32, -17, -9, -6, -5, -7, -12, -22], character: { toneHz: 1800, toneShare: 0.3, humHz: 90, humShare: 0.7 } },
+  { id: "turbofan-wide-body", name: "Turbofan airliner, wide-body", kinds: ["airliner-wide"], totalDbA: 151, shapeDb: [-28, -14, -7, -4, -3, -6, -12, -22], character: { toneHz: 1200, toneShare: 0.3, humHz: 70, humShare: 0.7 } },
+  { id: "regional-jet", name: "Regional jet", kinds: ["regional-jet"], totalDbA: 144, shapeDb: [-32, -17, -9, -5, -4, -6, -11, -21], character: { toneHz: 1900, toneShare: 0.3, humHz: 95, humShare: 0.7 } },
+  { id: "business-jet", name: "Business jet", kinds: ["business-jet"], totalDbA: 141, shapeDb: [-30, -15, -8, -4, -3, -4, -9, -19], character: { toneHz: 2500, toneShare: 0.25, humHz: 110, humShare: 0.7 } },
   // A propeller's blade-passing tone, a few tens of hertz, carries most of what a turboprop sends.
-  { id: "turboprop", name: "Turboprop", kinds: ["regional-turboprop", "turboprop-light"], totalDbA: 138, shapeDb: [-14, -9, -8, -6, -8, -13, -20, -28] },
-  { id: "light-piston", name: "Light piston aircraft", kinds: ["light-piston"], totalDbA: 130, shapeDb: [-18, -9, -5, -4, -8, -14, -22, -30] },
-  { id: "ultralight", name: "Ultralight", kinds: ["ultralight"], totalDbA: 124, shapeDb: [-16, -8, -5, -4, -9, -15, -23, -31] },
+  { id: "turboprop", name: "Turboprop", kinds: ["regional-turboprop", "turboprop-light"], totalDbA: 138, shapeDb: [-14, -9, -8, -6, -8, -13, -20, -28], character: { toneHz: 80, toneShare: 0.5 } },
+  { id: "light-piston", name: "Light piston aircraft", kinds: ["light-piston"], totalDbA: 130, shapeDb: [-18, -9, -5, -4, -8, -14, -22, -30], character: { toneHz: 80, toneShare: 0.4 } },
+  { id: "ultralight", name: "Ultralight", kinds: ["ultralight"], totalDbA: 124, shapeDb: [-16, -8, -5, -4, -9, -15, -23, -31], character: { toneHz: 140, toneShare: 0.4 } },
   // A rotor's blades beat the air at ten to twenty times a second, and the low harmonics are what carry far.
-  { id: "helicopter-light", name: "Light helicopter", kinds: ["helicopter-light"], totalDbA: 134, shapeDb: [-15, -8, -4, -3, -6, -10, -16, -24] },
-  { id: "helicopter-medium", name: "Medium helicopter", kinds: ["helicopter-medium"], totalDbA: 138, shapeDb: [-14, -7, -4, -3, -6, -10, -16, -24] },
-  { id: "helicopter-heavy", name: "Heavy helicopter", kinds: ["helicopter-heavy"], totalDbA: 144, shapeDb: [-12, -6, -4, -4, -7, -11, -17, -25] },
+  { id: "helicopter-light", name: "Light helicopter", kinds: ["helicopter-light"], totalDbA: 134, shapeDb: [-15, -8, -4, -3, -6, -10, -16, -24], character: { modulationHz: 20, modulationDepth: 0.5 } },
+  { id: "helicopter-medium", name: "Medium helicopter", kinds: ["helicopter-medium"], totalDbA: 138, shapeDb: [-14, -7, -4, -3, -6, -10, -16, -24], character: { modulationHz: 22, modulationDepth: 0.5 } },
+  { id: "helicopter-heavy", name: "Heavy helicopter", kinds: ["helicopter-heavy"], totalDbA: 144, shapeDb: [-12, -6, -4, -4, -7, -11, -17, -25], character: { modulationHz: 17, modulationDepth: 0.5 } },
   { id: "military-jet", name: "Military jet", kinds: ["military-jet"], totalDbA: 152, shapeDb: [-26, -12, -6, -3, -2, -3, -7, -15] },
   { id: "glider", name: "Glider", kinds: ["glider"], totalDbA: 85, shapeDb: [-30, -22, -15, -10, -8, -8, -14, -22] },
   { id: "balloon", name: "Hot-air balloon", kinds: ["balloon"], totalDbA: 100, shapeDb: [-25, -15, -9, -5, -3, -6, -12, -20] },
   // A rotor's whine, thin and high: little under a kilohertz.
-  { id: "unmanned", name: "Unmanned aircraft", kinds: ["unmanned"], totalDbA: 88, shapeDb: [-40, -30, -20, -12, -6, -3, -3, -8] }
+  { id: "unmanned", name: "Unmanned aircraft", kinds: ["unmanned"], totalDbA: 88, shapeDb: [-40, -30, -20, -12, -6, -3, -3, -8], character: { toneHz: 450, toneShare: 1 } }
 ]
 
 export const AIRCRAFT_NOISES: AircraftNoise[] = NOISE_CLASSES.map(noise => ({
@@ -52,7 +79,8 @@ export const AIRCRAFT_NOISES: AircraftNoise[] = NOISE_CLASSES.map(noise => ({
   name: noise.name,
   // The shape, brought to the total: energies add, so what is added to every band is the difference between the
   // total wanted and the total the shape makes.
-  soundPowerA: noise.shapeDb.map(level => level + noise.totalDbA - SoundInAir.sumDb(noise.shapeDb))
+  soundPowerA: noise.shapeDb.map(level => level + noise.totalDbA - SoundInAir.sumDb(noise.shapeDb)),
+  character: noise.character
 }))
 
 /** What a listener would hear of one aircraft at one instant. */
@@ -127,8 +155,11 @@ export interface AircraftHearingOptions {
  */
 export class AircraftHearing {
   static readonly DEFAULT_AMBIENT_DB_A = 35
-  /** How far a band must stand above the ambient's own to be told from it, dB. */
-  static readonly DETECTION_MARGIN_DB = 0
+  /**
+   * How far a band must stand above the ambient's own to be noticed, dB. Not merely to be separable from it by someone listening for it: the sound
+   * of a distant aircraft at the noise's own level is the commonest thing that is not heard, and three decibels over it is where it begins to be.
+   */
+  static readonly DETECTION_MARGIN_DB = 3
   /** The A-weighted shape of an ordinary outdoor noise across the octaves, dB re its total: more in the lows. */
   private static readonly AMBIENT_SHAPE_DB = [-12, -7, -5, -5, -7, -11, -17, -25]
   /** Below this a band is not heard whatever it stands against, dB(A): the threshold of hearing, near enough. */
@@ -141,6 +172,25 @@ export class AircraftHearing {
   static noiseOfKind(kind: AircraftKind): AircraftNoise {
     const noise = NOISE_CLASSES.find(candidate => candidate.kinds.includes(kind))
     return AIRCRAFT_NOISES.find(candidate => candidate.id === (noise?.id ?? "turbofan-narrow-body"))!
+  }
+
+  /**
+   * What reaches a listener `distanceKm` from the source, in each octave band, dB(A): the source's power less the spreading of the
+   * wavefront from a point in free air (20 log r, and the 11 dB of a power spread over a sphere, 4 pi r squared), less the air's
+   * absorption band by band.
+   */
+  static bandsAt(noise: AircraftNoise, distanceKm: number, air: AirConditions = SoundInAir.STANDARD): number[] {
+    const spreading = 20 * Math.log10(Math.max(distanceKm * 1000, 1)) + 11
+    return SoundInAir.OCTAVES.map((frequency, i) => noise.soundPowerA[i] - spreading - SoundInAir.absorptionDbPerKm(frequency, air) * distanceKm)
+  }
+
+  /**
+   * Whether anything of a noise could stand above the ambient at `distanceKm`: the nearest an aircraft ever comes is the loudest it is ever
+   * heard, so one that cannot be heard there cannot be heard at all, and nothing more need be worked out for it.
+   */
+  static couldBeHeard(noise: AircraftNoise, distanceKm: number, ambientDbA = AircraftHearing.DEFAULT_AMBIENT_DB_A, air: AirConditions = SoundInAir.STANDARD): boolean {
+    const ambient = AircraftHearing.ambientBands(ambientDbA)
+    return AircraftHearing.bandsAt(noise, distanceKm, air).some((level, i) => level >= Math.max(ambient[i] + AircraftHearing.DETECTION_MARGIN_DB, AircraftHearing.HEARING_FLOOR_DB_A))
   }
 
   /** The ambient noise in each band, dB(A), for a total of `ambientDbA`. */
@@ -157,8 +207,11 @@ export class AircraftHearing {
   static heardAt(track: AircraftTrack, observer: GeoPoint, t: number, options: AircraftHearingOptions = {}): HeardAircraft | undefined {
     const air = options.air ?? SoundInAir.STANDARD
     const speed = SoundInAir.speedOfSound(air.temperatureC)
-    // Where it left from: the instant at which the distance covered by the sound is the time since.
-    let emitted = t
+    // Where it left from: the instant at which the distance covered by the sound is the time since. The search starts from where the
+    // aircraft is, or from the last place it was recorded when it has left the record already: what is heard then left it while it was there.
+    const last = track.points[track.points.length - 1]?.t
+    if (last === undefined) return undefined
+    let emitted = Math.min(t, last)
     let at = AircraftSighting.positionAt(track, emitted)
     if (!at) return undefined
     let sound = ReentrySighting.seenFrom(observer, at.geo)
@@ -176,10 +229,7 @@ export class AircraftHearing {
     const noise = options.noise ?? AIRCRAFT_NOISES[0]
     const ambientDbA = options.ambientDbA ?? AircraftHearing.DEFAULT_AMBIENT_DB_A
     const ambient = AircraftHearing.ambientBands(ambientDbA)
-    const metres = sound.distanceKm * 1000
-    // Spreading from a point in free air: 20 log r, and the 11 dB of a power spread over a sphere (4 pi r squared).
-    const spreading = 20 * Math.log10(Math.max(metres, 1)) + 11
-    const bandsDbA = SoundInAir.OCTAVES.map((frequency, i) => noise.soundPowerA[i] - spreading - SoundInAir.absorptionDbPerKm(frequency, air) * sound.distanceKm)
+    const bandsDbA = AircraftHearing.bandsAt(noise, sound.distanceKm, air)
     const audibleBands = bandsDbA.map((level, i) => level >= Math.max(ambient[i] + AircraftHearing.DETECTION_MARGIN_DB, AircraftHearing.HEARING_FLOOR_DB_A))
     const loudest = bandsDbA.indexOf(Math.max(...bandsDbA))
     const highest = audibleBands.lastIndexOf(true)
