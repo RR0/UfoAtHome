@@ -1,6 +1,10 @@
 {
  "version": 1,
  "id": "2026-09-28-GreenstreetSteven",
+  "tags": [
+    "orb",
+    "dusk"
+  ],
  "time": {
   "year": 2026,
   "month": 9,

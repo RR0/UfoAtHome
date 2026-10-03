@@ -185,7 +185,7 @@ export class ContextPage implements SitePage {
     <p>An eye is not a lens. Naked-eye viewing maps an angle to an angle; a camera maps it to
       <code>f·tan θ</code>, with a sensor, a focal length, an aperture and an exposure that draws
       star trails and dots a flashing light. Switch the device and the whole frame changes —
-      <a href="/demos/#instrument-eye">the same sighting through three of them</a>.</p>
+      <a href="/demos/instruments/#instrument-eye">the same sighting through three of them</a>.</p>
     <p>Only what that device could actually have been set to is offered: an Instamatic had one
       aperture and one shutter speed, so there is nothing to choose, and a camera that did not exist
       yet is flagged against the observation's own date.</p>
@@ -204,7 +204,7 @@ export class ContextPage implements SitePage {
       street-level capture — each laid over the render at an opacity the reader slides between all
       picture and all render, with the phenomenon drawn over both. Every tree the thirty-metre relief
       smoothed away, every ridge, the actual hedge, is then one picture with the reconstruction.
-      <a href="/demos/#cussac">Cussac</a> carries its first: the 1968 view from the spot with the
+      <a href="/demos/sightings/#cussac">Cussac</a> carries its first: the 1968 view from the spot with the
       sphere and its climb drawn on by hand.</p>
     <p>A picture is a field of directions from one point, and it is lined up as one: heading, pitch,
       roll and the lens's field, angles and nothing else. It stands in the three-dimensional scene as
@@ -381,7 +381,7 @@ export class ContextPage implements SitePage {
     <p>Un œil n'est pas un objectif. À l'œil nu, un angle reste un angle ; un appareil le projette en
       <code>f·tan θ</code>, avec un capteur, une focale, un diaphragme et une pose qui trace les
       filés d'étoiles et ponctue un feu clignotant. Changez d'appareil et toute l'image change —
-      <a href="/demos/#instrument-eye">la même observation à travers trois d'entre eux</a>.</p>
+      <a href="/demos/instruments/#instrument-eye">la même observation à travers trois d'entre eux</a>.</p>
     <p>Seuls les réglages que cet appareil pouvait réellement avoir sont proposés : un Instamatic
       avait un diaphragme et une vitesse, donc il n'y a rien à choisir, et un appareil qui n'existait
       pas encore est signalé face à la date de l'observation.</p>
@@ -402,7 +402,7 @@ export class ContextPage implements SitePage {
       enquêteur, la page d'une revue, une capture de rue — chacune posée sur le rendu à une opacité
       que le lecteur fait glisser entre tout photo et tout rendu, le phénomène dessiné par-dessus.
       Chaque arbre que le relief à trente mètres avait lissé, chaque crête, la vraie haie, ne font
-      plus qu'une image avec la reconstitution. <a href="/demos/#cussac">Cussac</a> porte la
+      plus qu'une image avec la reconstitution. <a href="/demos/sightings/#cussac">Cussac</a> porte la
       première : la vue de 1968 depuis le lieu, avec la sphère et son envol dessinés à la main.</p>
     <p>Une photo est un champ de directions depuis un point, et se recale comme tel : cap, assiette,
       roulis et champ de l'objectif, des angles et rien d'autre. Elle se tient dans la scène en trois
@@ -578,7 +578,7 @@ export class ContextPage implements SitePage {
       proyecta en <code>f·tan θ</code>, con un sensor, una distancia focal, una apertura y una
       exposición que dibuja trazos de estrellas y convierte en puntos una luz intermitente. Cambia de
       aparato y todo el encuadre cambia —
-      <a href="/demos/#instrument-eye">el mismo avistamiento a través de tres de ellos</a>.</p>
+      <a href="/demos/instruments/#instrument-eye">el mismo avistamiento a través de tres de ellos</a>.</p>
     <p>Solo se ofrece lo que ese aparato podía tener realmente: una Instamatic tenía una apertura y
       una velocidad de obturación, así que no hay nada que elegir, y una cámara que aún no existía
       queda señalada frente a la fecha de la propia observación.</p>
@@ -600,7 +600,7 @@ export class ContextPage implements SitePage {
       render con una opacidad que el lector desliza entre todo foto y todo render, con el fenómeno
       dibujado sobre ambos. Cada árbol que el relieve de treinta metros había alisado, cada cresta,
       el seto real, forman entonces una sola imagen con la reconstrucción.
-      <a href="/demos/#cussac">Cussac</a> lleva la primera: la vista de 1968 desde el lugar, con la
+      <a href="/demos/sightings/#cussac">Cussac</a> lleva la primera: la vista de 1968 desde el lugar, con la
       esfera y su ascenso dibujados a mano.</p>
     <p>Una foto es un campo de direcciones desde un punto, y se alinea como tal: rumbo, cabeceo,
       alabeo y el campo del objetivo, ángulos y nada más. Se sitúa en la escena tridimensional como
@@ -776,7 +776,7 @@ export class ContextPage implements SitePage {
       lo proietta in <code>f·tan θ</code>, con un sensore, una lunghezza focale, un diaframma e una
       posa che disegna le scie delle stelle e trasforma in puntini una luce lampeggiante. Cambia
       apparecchio e tutta l'inquadratura cambia —
-      <a href="/demos/#instrument-eye">lo stesso avvistamento attraverso tre di essi</a>.</p>
+      <a href="/demos/instruments/#instrument-eye">lo stesso avvistamento attraverso tre di essi</a>.</p>
     <p>Viene offerto solo ciò su cui quell'apparecchio poteva davvero essere impostato: una Instamatic
       aveva un solo diaframma e un solo tempo di posa, quindi non c'è nulla da scegliere, e una
       fotocamera che non esisteva ancora viene segnalata rispetto alla data dell'osservazione
@@ -799,7 +799,7 @@ export class ContextPage implements SitePage {
       sovrapposta al rendering con un'opacità che il lettore fa scorrere fra tutta foto e tutto
       rendering, con il fenomeno disegnato sopra entrambi. Ogni albero che il rilievo a trenta metri
       aveva spianato, ogni cresta, la vera siepe, diventano allora un'unica immagine con la
-      ricostruzione. <a href="/demos/#cussac">Cussac</a> porta la prima: la vista del 1968 dal luogo,
+      ricostruzione. <a href="/demos/sightings/#cussac">Cussac</a> porta la prima: la vista del 1968 dal luogo,
       con la sfera e la sua salita disegnate a mano.</p>
     <p>Una foto è un campo di direzioni da un punto, e si allinea come tale: rotta, beccheggio, rollio
       e il campo dell'obiettivo, angoli e nient'altro. Sta nella scena tridimensionale come un

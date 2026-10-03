@@ -249,9 +249,6 @@ if (docs) {
         account's own, the day and then who saw it (<code>1964-04-24-ZamoraLonnie</code>); a recording
         does not name its case, it is <a href="/docs/format/#several-observers-the-case">the case</a>
         that names its accounts and gives a page its observer picker.</p>
-      <p><strong>Moments</strong> names the instant at the playhead (A, B, C… as case sketches do),
-        with a sentence of what happens then. Picking one in the list goes there; <strong>🎯</strong>
-        goes back to the one shown, which the list cannot do once playback has moved on past it.</p>
     </div>
 
     <div class="group-doc">
@@ -339,6 +336,9 @@ if (docs) {
         <em>uncertain</em> (<code>?</code>) and <em>approximate</em> (<code>~</code>). Most archives
         need it — of 241 case files on rr0.org, 43% state a bare year and only 17% a date with a
         time.</p>
+      <p><strong>Moments</strong> names the instant at the playhead (A, B, C… as case sketches do),
+        with a sentence of what happens then. Picking one in the list goes there; <strong>🎯</strong>
+        goes back to the one shown, which the list cannot do once playback has moved on past it.</p>
     </div>
 
     <div class="group-doc">
@@ -655,10 +655,6 @@ if (docs) {
         (<code>1964-04-24-ZamoraLonnie</code>) ; un enregistrement ne nomme pas son dossier, c'est
         <a href="/docs/format/#several-observers-the-case">le dossier</a> qui nomme ses comptes rendus
         et donne à une page son sélecteur d'observateur.</p>
-      <p><strong>Moments</strong> nomme l'instant de la tête de lecture (A, B, C… comme les croquis
-        des enquêtes), avec une phrase de ce qui s'y passe. En choisir un dans la liste y va ;
-        <strong>🎯</strong> retourne à celui affiché, ce que la liste ne peut pas faire une fois la
-        lecture passée au-delà.</p>
     </div>
 
     <div class="group-doc">
@@ -755,6 +751,10 @@ if (docs) {
         date, et les qualificatifs <em>incertain</em> (<code>?</code>) et <em>approximatif</em>
         (<code>~</code>). La plupart des archives en ont besoin : sur 241 dossiers de rr0.org, 43 %
         n'énoncent qu'une année et 17 % seulement une date avec une heure.</p>
+      <p><strong>Moments</strong> nomme l'instant de la tête de lecture (A, B, C… comme les croquis
+        des enquêtes), avec une phrase de ce qui s'y passe. En choisir un dans la liste y va ;
+        <strong>🎯</strong> retourne à celui affiché, ce que la liste ne peut pas faire une fois la
+        lecture passée au-delà.</p>
     </div>
 
     <div class="group-doc">
@@ -1091,10 +1091,6 @@ if (docs) {
         el propio de este relato, el día y luego quién lo vio (<code>1964-04-24-ZamoraLonnie</code>); un
         registro no nombra su caso, es <a href="/docs/format/#several-observers-the-case">el caso</a>
         el que nombra sus relatos y da a una página su selector de observador.</p>
-      <p><strong>Momentos</strong> nombra el instante del cabezal de reproducción (A, B, C…, como hacen
-        los croquis de los casos), con una frase sobre lo que ocurre entonces. Elegir uno en la lista
-        lleva hasta él; <strong>🎯</strong> vuelve al que se muestra, cosa que la lista no puede hacer
-        una vez que la reproducción lo ha dejado atrás.</p>
     </div>
 
     <div class="group-doc">
@@ -1188,6 +1184,10 @@ if (docs) {
         calificativos <em>incierto</em> (<code>?</code>) y <em>aproximado</em> (<code>~</code>). La
         mayoría de los archivos lo necesitan: de 241 casos de rr0.org, el 43 % indica solo un año y
         apenas el 17 % una fecha con hora.</p>
+      <p><strong>Momentos</strong> nombra el instante del cabezal de reproducción (A, B, C…, como hacen
+        los croquis de los casos), con una frase sobre lo que ocurre entonces. Elegir uno en la lista
+        lleva hasta él; <strong>🎯</strong> vuelve al que se muestra, cosa que la lista no puede hacer
+        una vez que la reproducción lo ha dejado atrás.</p>
     </div>
 
     <div class="group-doc">

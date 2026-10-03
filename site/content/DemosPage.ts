@@ -2,14 +2,9 @@ import { DemoCatalogue } from "./DemoCatalogue.js"
 import type { PageMeta, Said, SiteLanguage, SitePage } from "../SitePage.js"
 
 /**
- * The catalogue, and it really is one: every entry has its own live player, all of them on the
- * page at once, grouped by what they show.
- *
- * The one concession to the machine is that a scene is MOUNTED as it comes near the viewport and
- * unmounted once it is far behind, keeping at most a handful of WebGL contexts alive — a browser
- * hands out about sixteen and silently loses the oldest beyond that, which on a page of fourteen
- * skies would blank the ones the reader had already scrolled past. Everything on screen is
- * running; the budget is spent on what is being looked at.
+ * The hub of the catalogue, like the documentation's: a card for each part, and nothing live on
+ * the page itself. The skies are on the sub-pages (see `DemoSectionPage`), because fifteen of them
+ * on one page made a reader scroll past the ones they did not come for to reach the ones they did.
  */
 export class DemosPage implements SitePage {
 
@@ -26,155 +21,176 @@ export class DemosPage implements SitePage {
         + "la Vía Láctea, un cometa, una estrella nueva, una lluvia de meteoros, un tren de Starlink, una tormenta, un avión de línea en exposición larga.",
       it: "Avvistamenti reali ricostruiti, e cieli preparati per un fenomeno alla volta: aloni, arcobaleni, "
         + "la Via Lattea, una cometa, una stella nuova, uno sciame meteorico, un treno di Starlink, un temporale, un aereo di linea in posa lunga."
-    },
-    modules: ["/lib/rr0-scene.mjs"]
+    }
   }
 
   private readonly catalogue = new DemoCatalogue()
 
+  private static readonly WORDS: Said<{
+    search: string, placeholder: string, tags: string, none: string, results: (n: number) => string, clear: string
+  }> = {
+    en: { search: "Search the demos", placeholder: "Text, date (1965, 1965-07) or tag", tags: "Tags",
+      none: "No demo matches.", results: n => `${n} demo${n === 1 ? "" : "s"}`, clear: "Clear" },
+    fr: { search: "Chercher dans les démos", placeholder: "Texte, date (1965, 1965-07) ou tag", tags: "Tags",
+      none: "Aucune démo ne correspond.", results: n => `${n} démo${n > 1 ? "s" : ""}`, clear: "Effacer" },
+    es: { search: "Buscar en las demos", placeholder: "Texto, fecha (1965, 1965-07) o etiqueta", tags: "Etiquetas",
+      none: "Ninguna demo coincide.", results: n => `${n} demo${n === 1 ? "" : "s"}`, clear: "Borrar" },
+    it: { search: "Cerca nelle demo", placeholder: "Testo, data (1965, 1965-07) o tag", tags: "Tag",
+      none: "Nessuna demo corrisponde.", results: n => `${n} demo`, clear: "Cancella" }
+  }
+
   /**
-   * Mounts a scene as its card nears the viewport, plays it while it is actually on screen, and
-   * takes the oldest ones down once too many are alive at once.
+   * The search, and the redirect of old links.
+   *
+   * The index is fetched when the page loads, not on first use: the chips are drawn from it, and a
+   * reader who has to touch the field before seeing what they could search for is not told. It is
+   * one small file per language; loading it on focus instead is the optimisation if it grows.
+   *
+   * Filtering is text AND tags, both narrowing: every word typed must be found in the title, blurb,
+   * date or tags of a demo (accents and case ignored), and a demo must carry every chosen tag. The
+   * state is in the address (`?q=…&tag=…`), so a search can be sent to somebody.
    */
   script(language: SiteLanguage): string {
-    const loading = DemosPage.LOADING[language]
-    return `// A browser hands out about sixteen WebGL contexts and silently loses the oldest past that,
-// which on a page of seventeen skies blanks the ones already scrolled through. A card taken down
-// now gives its context back at once (see SceneElement's disconnection), so twelve alive stay
-// well inside that; and twelve is what a wide screen with its mounting margin actually reaches —
-// at eight, a 1440 px window mounted and took down the same cards over and over as it scrolled.
-// On a phone the budget is memory, not contexts: each live sky holds tens of megabytes of scene and of
-// graphics memory, and a phone's browser does not lose the oldest, it takes the whole tab down. One or
-// two cards are on screen at a time there, so four alive leave a card's worth of room to scroll back.
-const MAX_LIVE = matchMedia("(pointer: coarse)").matches ? 4 : 12
-const cards = [...document.querySelectorAll(".demo-card")]
-const live = []
-
-const mount = async card => {
-  if (card.dataset.mounted) return
-  card.dataset.mounted = "1"
-  live.push(card)
-  while (live.length > MAX_LIVE) {
-    // Never the one being looked at. If every live card is on screen there is nothing to give up:
-    // going one over the budget is better than blanking a scene under the reader's eyes.
-    const victim = live.find(other => !other.dataset.visible)
-    if (!victim) break
-    unmount(victim)
-  }
-  const scene = document.createElement("rr0-scene")
-  // No map open on a card, even for an observer who travelled (see OBSERVER_MAP_ATTRIBUTE, whose
-  // default would open it): the map is 140 px square in a card 181 px tall, so it covered three
-  // quarters of the sky it was meant to sit in a corner of. The button stays, and the full-size
-  // View page opens the map on its own.
-  scene.setAttribute("show-observer-map", "false")
-  card.querySelector(".demo-mount").replaceChildren(scene)
-  await customElements.whenDefined("rr0-scene")
-  await scene.loadFromSrc(card.dataset.src)
-}
-
-const unmount = card => {
-  const index = live.indexOf(card)
-  if (index >= 0) live.splice(index, 1)
-  delete card.dataset.mounted
-  // Removing the element runs its own disconnectedCallback, which disposes the renderer and hands
-  // the context back. A placeholder goes in so the card keeps its size.
-  const placeholder = document.createElement("p")
-  placeholder.className = "loading"
-  placeholder.textContent = ${JSON.stringify(loading)}
-  card.querySelector(".demo-mount").replaceChildren(placeholder)
-}
-
-const nearby = new IntersectionObserver(entries => {
-  for (const entry of entries) {
-    if (entry.isIntersecting) void mount(entry.target)
-  }
-}, { rootMargin: "200px 0px" })
-
-const onScreen = new IntersectionObserver(entries => {
-  for (const entry of entries) {
-    const card = entry.target
-    card.dataset.visible = entry.isIntersecting ? "1" : ""
-    // Also the repair path: a card the budget took down while it was off screen would otherwise
-    // stay a placeholder for good, since the observer that mounts it only fires on ENTERING its
-    // margin and this card never left it.
-    if (entry.isIntersecting && !card.dataset.mounted) {
-      void mount(card)
-      continue
+    const where: Record<string, string> = {}
+    for (const group of this.catalogue.groups) {
+      for (const demo of group.demos) where[demo.id] = `/demos/${group.section}/#${demo.id}`
     }
-    // Nothing starts on its own. Seventeen skies playing at once is seventeen WebGL contexts each
-    // asking for sixty frames a second, and the reader is looking at one of them — so a card shows
-    // its first frame and its own play button, and runs when it is asked to. What is still
-    // automatic is STOPPING: a scene the reader has scrolled past keeps its context but gives back
-    // the frames.
-    const scene = card.querySelector("rr0-scene")
-    if (!entry.isIntersecting) scene?.ufoElement?.pause()
-  }
-}, { threshold: 0.1 })
+    const words = DemosPage.WORDS[language]
+    const said = { ...words, results: undefined }
+    return `// Links given out before the catalogue was split: /demos/#cussac now lives on a sub-page.
+const where = ${JSON.stringify(where)}
+const moved = where[decodeURIComponent(location.hash.slice(1))]
+if (moved) location.replace(moved)
 
-for (const card of cards) {
-  nearby.observe(card)
-  onScreen.observe(card)
-}`
-  }
+const said = ${JSON.stringify(said)}
+const plural = ${words.results.toString()}
+const form = document.getElementById("demo-search")
+const input = document.getElementById("demo-q")
+const tagBox = document.getElementById("demo-tags")
+const resultBox = document.getElementById("demo-results")
+const sections = document.getElementById("demo-sections")
+const status = document.getElementById("demo-status")
 
-  /** The placeholder a card shows while its scene is not mounted. */
-  private static readonly LOADING: Said<string> = {
-    en: "Loading the sky…",
-    fr: "Chargement du ciel…",
-    es: "Cargando el cielo…",
-    it: "Caricamento del cielo…"
+const fold = text => text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+const chosen = new Set()
+let entries = []
+
+const render = () => {
+  const terms = fold(input.value).split(/\s+/).filter(Boolean)
+  const matching = entries.filter(entry =>
+    [...chosen].every(tag => entry.tags.includes(tag))
+    && terms.every(term => entry.haystack.includes(term)))
+  const filtering = terms.length > 0 || chosen.size > 0
+  sections.hidden = filtering
+  resultBox.hidden = !filtering
+  status.textContent = filtering ? (matching.length ? plural(matching.length) : said.none) : ""
+  resultBox.replaceChildren(...matching.map(entry => {
+    const link = document.createElement("a")
+    link.className = "use"
+    link.href = entry.href
+    const title = document.createElement("h3")
+    title.textContent = entry.title
+    const blurb = document.createElement("p")
+    blurb.textContent = entry.blurb
+    const meta = document.createElement("p")
+    meta.className = "demo-meta"
+    meta.textContent = [entry.date, ...entry.tags].filter(Boolean).join(" · ")
+    link.append(title, blurb, meta)
+    return link
+  }))
+  for (const chip of tagBox.querySelectorAll("button")) {
+    chip.setAttribute("aria-pressed", String(chosen.has(chip.dataset.tag)))
+  }
+  const query = new URLSearchParams()
+  if (input.value.trim()) query.set("q", input.value.trim())
+  for (const tag of chosen) query.append("tag", tag)
+  history.replaceState(null, "", location.pathname + (query.size ? "?" + query : ""))
+}
+
+const load = async () => {
+  const response = await fetch("/demos/index.${language}.json")
+  if (!response.ok) return
+  entries = (await response.json()).map(entry => ({
+    ...entry,
+    haystack: fold([entry.title, entry.blurb, entry.date ?? "", ...entry.tags].join(" "))
+  }))
+  const counts = new Map()
+  for (const entry of entries) for (const tag of entry.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
+  // A tag on one demo only is found by typing it; offering all of them as chips would bury the
+  // few that actually group anything.
+  const offered = [...counts].filter(([, count]) => count > 1).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  tagBox.replaceChildren(...offered.map(([tag, count]) => {
+    const chip = document.createElement("button")
+    chip.type = "button"
+    chip.className = "tag-chip"
+    chip.dataset.tag = tag
+    chip.append(tag + " ")
+    const number = document.createElement("span")
+    number.className = "tag-count"
+    number.textContent = "(" + count + ")"
+    chip.append(number)
+    chip.addEventListener("click", () => {
+      if (!chosen.delete(tag)) chosen.add(tag)
+      render()
+    })
+    return chip
+  }))
+  const params = new URLSearchParams(location.search)
+  input.value = params.get("q") ?? ""
+  for (const tag of params.getAll("tag")) chosen.add(tag)
+  render()
+}
+
+input.addEventListener("input", render)
+form.addEventListener("submit", event => event.preventDefault())
+form.hidden = false
+void load()`
   }
 
   render(language: SiteLanguage): string {
-    const playerPath = "/play/"
-    // The title is the way to watch a demo in full, and editing is one button away from there:
-    // a "View · Edit" pair under each card repeated both.
-    const loading = DemosPage.LOADING[language]
-
-    // The heading has an id of its own, so that the site does not give it the "#" link it gives every other: a card is already a link, to its
-    // player, and the card itself (by the demo's id) is what a reader would share.
-    const groups = this.catalogue.groups.map(group => `
-    <section class="demo-group">
-      <h2>${group.heading[language]}</h2>
-      <p class="prose-wide">${group.intro[language]}</p>
-      <div class="demo-grid">
-        ${group.demos.map(demo => {
-          const played = encodeURIComponent(demo.playSrc ?? demo.editSrc ?? demo.src)
-          return `<figure class="demo-card" id="${demo.id}" data-src="${demo.src}">
-          <div class="demo-mount"><p class="loading">${loading}</p></div>
-          <figcaption>
-            <h3 id="${demo.id}-title"><a href="${playerPath}?sighting=${played}">${demo.title[language]}</a></h3>
-            <p>${demo.blurb[language]}</p>
-          </figcaption>
-        </figure>`
-        }).join("\n        ")}
-      </div>
-    </section>`).join("\n")
-
-    // Counted, not written: the lede said "seventeen" long after the catalogue had grown past it.
+    const words = DemosPage.WORDS[language]
     const count = this.catalogue.groups.reduce((total, group) => total + group.demos.length, 0)
+    const open = { en: "Open", fr: "Ouvrir", es: "Abrir", it: "Apri" }
+    const cards = this.catalogue.sections.map(section => {
+      const demos = this.catalogue.groups.filter(group => group.section === section.id)
+        .reduce((total, group) => total + group.demos.length, 0)
+      return `      <a class="use" href="/demos/${section.id}/">
+        <h3>${section.title[language]}</h3>
+        <p>${section.blurb[language]}</p>
+        <p class="use-more">${open[language]} (${demos}) →</p>
+      </a>`
+    }).join("\n")
     return `
 <section class="band hero">
   <div class="wrap">
-    <p class="eyebrow">${({ en: "Catalogue", fr: "Catalogue", es: "Catálogo", it: "Catalogo" })[language]}</p>
-    <h1>${({ en: "What it can do.", fr: "Ce qu'il sait faire.", es: "Lo que sabe hacer.", it: "Cosa sa fare." })[language]}</h1>
+    <p class="eyebrow">${({ en: "Examples", fr: "Exemples", es: "Ejemplos", it: "Esempi" })[language]}</p>
+    <h1>${this.meta.title[language]}.</h1>
     <p class="lede">${({
       en: `${count} reconstructions. None of them is a video: each is computed while you watch it, from `
-        + "a real date, a real hour and a real place — press play on whichever interests you.",
+        + "a real date, a real hour and a real place — choose where to start.",
       fr: `${count} reconstitutions. Aucune n'est une vidéo : chacune est calculée pendant que vous la `
-        + "regardez, à partir d'une date, d'une heure et d'un lieu réels — appuyez sur lecture là où "
-        + "cela vous intéresse.",
+        + "regardez, à partir d'une date, d'une heure et d'un lieu réels — choisissez par où commencer.",
       es: `${count} reconstrucciones. Ninguna es un vídeo: cada una se calcula mientras la miras, a partir `
-        + "de una fecha real, una hora real y un lugar real — pulsa reproducir en la que te interese.",
+        + "de una fecha real, una hora real y un lugar real — elige por dónde empezar.",
       it: `${count} ricostruzioni. Nessuna è un video: ognuna viene calcolata mentre la guardi, a partire `
-        + "da una data reale, un'ora reale e un luogo reale — premi play su quella che ti interessa."
+        + "da una data reale, un'ora reale e un luogo reale — scegli da dove cominciare."
     })[language]}</p>
   </div>
 </section>
 
 <section class="band">
   <div class="wrap">
-${groups}
+    <!-- Hidden until the script runs: without it there is nothing to search with, and the cards below are the whole page. -->
+    <form id="demo-search" class="demo-search" role="search" hidden>
+      <label class="visually-hidden" for="demo-q">${words.search}</label>
+      <input id="demo-q" type="search" placeholder="${words.placeholder}" autocomplete="off">
+      <div id="demo-tags" class="demo-tags" role="group" aria-label="${words.tags}"></div>
+      <p id="demo-status" class="demo-status" aria-live="polite"></p>
+    </form>
+    <div id="demo-results" class="uses" hidden></div>
+    <div id="demo-sections" class="uses">
+${cards}
+    </div>
   </div>
 </section>
 
@@ -187,13 +203,13 @@ ${groups}
       it: "Ciò che non c'è ancora"
     })[language]}</h2>
     <p>${({
-      en: `Atmospheric re-entries, observing from an aircraft, radar propagation anomalies. What each one is waiting
+      en: `Observing from an aircraft, radar propagation anomalies. What each one is waiting
          on is on <a href="/roadmap/">the roadmap</a>.`,
-      fr: `Les rentrées atmosphériques, l'observation depuis un avion, les anomalies de propagation radar.
+      fr: `L'observation depuis un avion, les anomalies de propagation radar.
          Le détail, et ce que chacun attend, est sur <a href="/roadmap/">la page des futures évolutions</a>.`,
-      es: `Las reentradas atmosféricas, la observación desde un avión, las anomalías de propagación del radar. Lo que
+      es: `La observación desde un avión, las anomalías de propagación del radar. Lo que
          espera cada una está en <a href="/roadmap/">la hoja de ruta</a>.`,
-      it: `I rientri atmosferici, l'osservazione da un aereo, le anomalie di propagazione radar. Ciò che ciascuna
+      it: `L'osservazione da un aereo, le anomalie di propagazione radar. Ciò che ciascuna
          aspetta è nella <a href="/roadmap/">tabella di marcia</a>.`
     })[language]}</p>
   </div>

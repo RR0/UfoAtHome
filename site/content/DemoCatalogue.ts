@@ -26,7 +26,19 @@ export interface Demo {
   readonly blurb: Said<string>
 }
 
+/** The sub-pages the catalogue is split over, in the order the hub shows their cards. */
+export type DemoSectionId = "sightings" | "sky" | "instruments"
+
+export interface DemoSection {
+  readonly id: DemoSectionId
+  readonly title: Said<string>
+  /** What the hub's card says, and the sub-page's lede. */
+  readonly blurb: Said<string>
+}
+
 export interface DemoGroup {
+  /** The sub-page this group is on. */
+  readonly section: DemoSectionId
   readonly heading: Said<string>
   readonly intro: Said<string>
   readonly demos: readonly Demo[]
@@ -41,8 +53,42 @@ export interface DemoGroup {
  */
 export class DemoCatalogue {
 
+  readonly sections: readonly DemoSection[] = [
+    {
+      id: "sightings",
+      title: { en: "Real sightings", fr: "Observations réelles", es: "Avistamientos reales", it: "Avvistamenti reali" },
+      blurb: {
+        en: "Documented cases, each replayed in the sky of its own reported date, time and place.",
+        fr: "Des dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
+        es: "Casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
+        it: "Casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
+      }
+    },
+    {
+      id: "sky",
+      title: { en: "What the sky contains", fr: "Ce que contient le ciel", es: "Lo que contiene el cielo", it: "Ciò che contiene il cielo" },
+      blurb: {
+        en: "Haloes, rainbows, the Milky Way, a comet, a nova, meteors, satellites, a fireball: one sight at a time.",
+        fr: "Halos, arcs-en-ciel, Voie lactée, comète, nova, météores, satellites, bolide : un phénomène à la fois.",
+        es: "Halos, arcoíris, la Vía Láctea, un cometa, una nova, meteoros, satélites, un bólido: un fenómeno cada vez.",
+        it: "Aloni, arcobaleni, la Via Lattea, una cometa, una nova, meteore, satelliti, un bolide: un fenomeno alla volta."
+      }
+    },
+    {
+      id: "instruments",
+      title: { en: "Instrument and weather", fr: "Instrument et météo", es: "Instrumento y tiempo", it: "Strumento e meteo" },
+      blurb: {
+        en: "The same sighting through an eye, an Instamatic and a reflex; a storm; an airliner on a long exposure.",
+        fr: "La même observation à l'œil, à l'Instamatic et au reflex ; un orage ; un avion en pose longue.",
+        es: "El mismo avistamiento a ojo, con una Instamatic y con una réflex; una tormenta; un avión en exposición larga.",
+        it: "Lo stesso avvistamento a occhio, con una Instamatic e con una reflex; un temporale; un aereo in posa lunga."
+      }
+    }
+  ]
+
   readonly groups: readonly DemoGroup[] = [
     {
+      section: "sightings",
       heading: { en: "Real sightings", fr: "Des observations réelles", es: "Avistamientos reales", it: "Avvistamenti reali" },
       intro: {
         en: "Nine documented cases, each replayed in the sky of its own reported date, time and place.",
@@ -171,6 +217,7 @@ export class DemoCatalogue {
       ]
     },
     {
+      section: "sky",
       heading: { en: "What the sky can hold", fr: "Ce que le ciel peut contenir", es: "Lo que puede contener el cielo", it: "Ciò che il cielo può contenere" },
       intro: {
         en: "These hold no recorded phenomenon at all. They are skies set up with the conditions one "
@@ -337,6 +384,7 @@ export class DemoCatalogue {
       ]
     },
     {
+      section: "instruments",
       heading: {
         en: "One sighting, three instruments",
         fr: "Une observation, trois instruments",
@@ -405,6 +453,7 @@ export class DemoCatalogue {
       ]
     },
     {
+      section: "instruments",
       heading: { en: "Weather, and the instrument", fr: "La météo, et l'instrument", es: "El tiempo, y el instrumento", it: "Il meteo, e lo strumento" },
       intro: {
         en: "The two things that most often turn an ordinary object into an extraordinary account.",

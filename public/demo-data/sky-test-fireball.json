@@ -1,6 +1,11 @@
 {
   "version": 1,
   "id": "sky-test-fireball",
+  "tags": [
+    "fireball",
+    "meteor",
+    "astronomy"
+  ],
   "description": {
     "en": "A test sky for a recorded fireball: Edinburgh, 27 December 2025 at 03:16. Nothing in this file draws it: the scene finds it in the Global Meteor Network's archive for that night, a bolide 13 stations triangulated from 100 km over the Scottish Borders down to 39 km over the Solway coast in under three seconds, and draws it from here as it burned, about magnitude -6.7, twenty degrees up to the south-south-west.",
     "fr": "Un ciel d'essai pour un bolide enregistré : Édimbourg, 27 décembre 2025 à 3 h 16. Rien dans ce fichier ne le dessine : la scène le trouve dans l'archive du Global Meteor Network pour cette nuit-là, un bolide que 13 stations ont triangulé de 100 km au-dessus des Borders écossais jusqu'à 39 km au-dessus de la côte du Solway en moins de trois secondes, et le dessine d'ici tel qu'il a brûlé, vers la magnitude -6,7, à vingt degrés de hauteur au sud-sud-ouest.",

@@ -7,6 +7,9 @@ import { HomePage } from "./content/HomePage.js"
 import { PlayerPage } from "./content/PlayerPage.js"
 import { EditorPage } from "./content/EditorPage.js"
 import { DemosPage } from "./content/DemosPage.js"
+import { DemoSectionPage } from "./content/DemoSectionPage.js"
+import { DemoCatalogue } from "./content/DemoCatalogue.js"
+import { DemoIndex } from "./content/DemoIndex.js"
 import { DocsPage } from "./content/DocsPage.js"
 import { DocsCreatePage } from "./content/DocsCreatePage.js"
 import { DocsFormatPage } from "./content/DocsFormatPage.js"
@@ -88,7 +91,7 @@ class SiteBuilder {
     const version = JSON.parse(await readFile(join(this.root, "package.json"), "utf8")).version as string
     const example = await readFile(join(this.root, "public", "demo-data", "example-minimal.json"), "utf8")
     this.pages = [
-      new HomePage(), new PlayerPage(), new EditorPage(), new DemosPage(), new DocsPage(),
+      new HomePage(), new PlayerPage(), new EditorPage(), new DemosPage(), ...new DemoCatalogue().sections.map(section => new DemoSectionPage(section, new DemoCatalogue())), new DocsPage(),
       // The documentation pages sit under the hub above and stay out of the navigation, which names
       // only it — see DocsSection for why they are split by question rather than by subject.
       new DocsCreatePage(), new DocsFormatPage(example.trim()), new DocsSharePage(), new DocsComponentsPage(), new DocsSourcesPage(),
@@ -117,6 +120,11 @@ class SiteBuilder {
       }
     }
 
+    // The demos' search index, one file per language, fetched by the hub (see DemosPage).
+    const demoIndex = await new DemoIndex(this.root, new DemoCatalogue()).build()
+    for (const language of SITE_LANGUAGES) {
+      await writeFile(join(this.out, "demos", `index.${language}.json`), JSON.stringify(demoIndex[language]), "utf8")
+    }
     await cp(join(this.root, "site", "style.css"), join(this.out, "style.css"))
     await cp(join(this.root, "site", "assets", "favicon.svg"), join(this.out, "favicon.svg"))
     await cp(join(this.root, "public", "demo-data"), join(this.out, "demo-data"), { recursive: true })

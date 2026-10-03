@@ -27,18 +27,6 @@ export const html = `
          interpretations filed in it name this account by (see Sighting.id). -->
     <label><span id="label-sighting-id">ID</span> <input id="sightingId" type="text" placeholder="1964-04-24-ZamoraLonnie"/></label>
     <label><span id="label-tags">Tags</span> <input id="tags" type="text" placeholder="comma-separated"/></label>
-    <!-- The named moments of the account (see Milestone) — with the observation, because that is
-         what they belong to: they are how the account READS, not anything about a shape. Added at
-         the playhead, which is the only instant a reader has in mind when they name one. -->
-    <span id="label-milestones">Moments</span>
-    <button id="add-milestone" type="button" class="icon-btn" title="Add" aria-label="Add">+</button>
-    <select id="milestone"></select>
-    <!-- A select says nothing when the moment already shown is picked again, which is the one to go
-         back to after playing on past it: this goes there whatever the list shows. -->
-    <button id="go-to-milestone" type="button" class="icon-btn" title="Go to this moment" aria-label="Go to this moment">🎯</button>
-    <button id="delete-milestone" type="button" class="icon-btn" title="Delete moment" aria-label="Delete moment">🗑</button>
-    <label><span id="label-milestone-label">Label</span> <input id="milestoneLabel" type="text" size="4"/></label>
-    <label><span id="label-milestone-note">What happens</span> <input id="milestoneNote" type="text"/></label>
   </div>
   <!-- The account, and the button that reads it.
        One field, not two. The description IS the account: a paragraph in the observer's own words,
@@ -299,6 +287,18 @@ export const html = `
          yourself, which is all a recording used to be able to say. -->
     <label><span id="label-utc-offset">Time zone</span> <select id="timeZone"></select>
       <input id="utcOffsetHours" type="number" min="-12" max="14" step="0.5" placeholder="from longitude" title="Hours ahead of UTC on the observer's own clock — legal time, which the longitude cannot know (France was on UTC+1 in 1965)"/> UTC&plusmn;h</label>
+    <!-- The named moments of the account (see Milestone) — in the Moment group, because they are
+         instants: they name times of the account, not anything about a shape. Added at
+         the playhead, which is the only instant a reader has in mind when they name one. -->
+    <span id="label-milestones">Moments</span>
+    <button id="add-milestone" type="button" class="icon-btn" title="Add" aria-label="Add">+</button>
+    <select id="milestone"></select>
+    <!-- A select says nothing when the moment already shown is picked again, which is the one to go
+         back to after playing on past it: this goes there whatever the list shows. -->
+    <button id="go-to-milestone" type="button" class="icon-btn" title="Go to this moment" aria-label="Go to this moment">🎯</button>
+    <button id="delete-milestone" type="button" class="icon-btn" title="Delete moment" aria-label="Delete moment">🗑</button>
+    <label><span id="label-milestone-label">Label</span> <input id="milestoneLabel" type="text" size="4"/></label>
+    <label><span id="label-milestone-note">What happens</span> <input id="milestoneNote" type="text"/></label>
   </div>
 </section>
 <section class="group-panel" id="group-weather" aria-labelledby="label-weather-group" hidden>

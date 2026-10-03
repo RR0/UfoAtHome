@@ -1,6 +1,12 @@
 {
   "version": 1,
   "id": "sky-test-reentry",
+  "tags": [
+    "reentry",
+    "space debris",
+    "Zond 4",
+    "historical"
+  ],
   "description": {
     "en": "A test sky for a re-entry: Zond 4's launcher coming down over the eastern United States on 3 March 1968 at about 21:45 EST, seen from Owensboro, Kentucky, one of the places it was reported from. Not an observer's account: the re-entry as the sources establish it. Hundreds saw it; William Hartmann studied 78 reports for the Condon committee and found the pieces called a 'formation', a cigar with lit windows, or a craft passing low and silent. The path follows the orbit's inclination through the places it was seen from; its timing, height and the pieces' brightness are assumed, each with its reason in the file.",
     "fr": "Un ciel d'essai pour une rentrée atmosphérique : le lanceur de Zond 4 retombant sur l'est des États-Unis le 3 mars 1968 vers 21 h 45 heure de l'Est, vu d'Owensboro (Kentucky), l'un des lieux d'où il a été signalé. Ce n'est pas le compte rendu d'un observateur : c'est la rentrée telle que les sources l'établissent. Des centaines de personnes l'ont vue ; William Hartmann a étudié 78 signalements pour la commission Condon et y a trouvé une « formation », un cigare aux fenêtres éclairées, un appareil passant bas et en silence. La trajectoire suit l'inclinaison de l'orbite à travers les lieux d'observation ; son horaire, sa hauteur et l'éclat des morceaux sont supposés, chacun avec sa raison dans le fichier.",
