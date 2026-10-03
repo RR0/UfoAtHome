@@ -164,7 +164,8 @@ export class ContextPage implements SitePage {
 
     <h2 id="weather">The weather that day</h2>
     <p>Cloud cover, cloud base, rain, snow, hail, storms and their thunder, and wind are read from
-      ERA5, the ECMWF reanalysis: hourly, worldwide, from 1940 on. They are keyframed along the
+      ERA5, the ECMWF reanalysis: hourly, worldwide, from 1940 on (for the last five days, which it has
+      not caught up with, the forecast model's own analysis). They are keyframed along the
       observation, so a sky that cleared during those four minutes clears in the reconstruction.</p>
     <p>Cloud attenuates every celestial body rather than merely covering it, which is what makes a
       Moon behind thin cloud read as a Moon behind thin cloud.</p>
@@ -358,7 +359,8 @@ export class ContextPage implements SitePage {
 
     <h2 id="weather">La météo de ce jour-là</h2>
     <p>Couverture nuageuse, base des nuages, pluie, neige, grêle, orages et leur tonnerre, vent sont
-      lus dans ERA5, la réanalyse de l'ECMWF : horaire, mondiale, depuis 1940. Ils sont keyframés le
+      lus dans ERA5, la réanalyse de l'ECMWF : horaire, mondiale, depuis 1940 (pour les cinq derniers jours,
+      qu'elle n'a pas rattrapés, l'analyse du modèle de prévision). Ils sont keyframés le
       long de l'observation, si bien qu'un ciel qui s'est dégagé pendant ces quatre minutes se
       dégage aussi dans la reconstitution.</p>
     <p>Les nuages atténuent chaque astre au lieu de simplement le couvrir, et c'est ce qui fait
@@ -555,7 +557,8 @@ export class ContextPage implements SitePage {
 
     <h2 id="weather">El tiempo de aquel día</h2>
     <p>La nubosidad, la base de las nubes, la lluvia, la nieve, el granizo, las tormentas y sus
-      truenos, y el viento se leen de ERA5, el reanálisis del ECMWF: horario, mundial, desde 1940. Se
+      truenos, y el viento se leen de ERA5, el reanálisis del ECMWF: horario, mundial, desde 1940 (para los últimos cinco días, que aún
+      no ha alcanzado, el análisis del modelo de previsión). Se
       interpolan por fotogramas clave a lo largo de la observación, así que un cielo que se despejó
       durante esos cuatro minutos se despeja en la reconstrucción.</p>
     <p>Las nubes atenúan cada cuerpo celeste en lugar de limitarse a taparlo, que es lo que hace que
@@ -753,7 +756,8 @@ export class ContextPage implements SitePage {
 
     <h2 id="weather">Il meteo di quel giorno</h2>
     <p>Copertura nuvolosa, base delle nubi, pioggia, neve, grandine, temporali e i loro tuoni, e vento
-      sono letti da ERA5, la rianalisi dell'ECMWF: oraria, mondiale, dal 1940. Sono interpolati per
+      sono letti da ERA5, la rianalisi dell'ECMWF: oraria, mondiale, dal 1940 (per gli ultimi cinque giorni, che non ha
+      ancora raggiunto, l'analisi del modello di previsione). Sono interpolati per
       fotogrammi chiave lungo l'osservazione, così che un cielo che si è rasserenato durante quei
       quattro minuti si rasserena nella ricostruzione.</p>
     <p>Le nuvole attenuano ogni corpo celeste invece di coprirlo soltanto, ed è ciò che fa sì che una

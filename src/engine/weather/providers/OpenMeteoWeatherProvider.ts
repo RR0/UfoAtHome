@@ -97,16 +97,32 @@ interface HourlyRecord {
   dewPointC: number
 }
 
+/**
+ * How many days back ERA5 has not caught up with the present. Its recent days are preliminary, and
+ * hourly: a front that closed the sky between two of its rows is drawn as a ramp across them
+ * (Nanterre, 3 October 2026 at 15:15 UTC, 28% middle cloud in ERA5 against 88% in the forecast
+ * model's analysis, under a sky that was closed). Within it, the forecast endpoint is read instead.
+ */
+const ERA5_LAG_DAYS = 5
+
 export interface OpenMeteoWeatherProviderOptions {
   fetchImpl?: typeof fetch
   /** Defaults to Open-Meteo's public, keyless historical archive endpoint. */
   baseUrl?: string
+  /** The endpoint read for the last {@link ERA5_LAG_DAYS} days, and for any date after them. */
+  forecastUrl?: string
+  /** The present, for deciding what is "the last days". */
+  now?: () => Date
 }
 
 /**
  * Real recorded weather from ERA5, the ECMWF reanalysis, served by Open-Meteo's historical archive
  * API — hourly, worldwide, from 1940 on, no API key, CORS-open (verified against rr0.org's own
  * origin), which is what makes it usable straight from a browser-embedded recorder.
+ *
+ * For the last few days, which ERA5 has not caught up with (see ERA5_LAG_DAYS), the forecast
+ * endpoint is read instead: the same variables, from the forecast model's analysis of those hours.
+ * The source a lookup returns says which of the two answered.
  *
  * Reanalysis, not a station reading: ERA5 assimilates the observations that DO exist (stations,
  * ships, radiosondes, later satellites) into a physical model on a ~28 km grid, so it states what
@@ -124,6 +140,8 @@ export interface OpenMeteoWeatherProviderOptions {
 export class OpenMeteoWeatherProvider implements WeatherProvider {
   private readonly fetchImpl: typeof fetch
   private readonly baseUrl: string
+  private readonly forecastUrl: string
+  private readonly now: () => Date
   /** Same request, same answer — the editor re-asks on every debounced date/place edit, and a
    * reanalysis of 1965 will not have changed since the last keystroke. What is kept is the ARCHIVE's
    * reply to a request (a place and a day), never the sample read from it: a request covers every
@@ -137,6 +155,8 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
     // comment on the "Illegal invocation" this avoids.
     this.fetchImpl = options.fetchImpl ?? fetch.bind(globalThis)
     this.baseUrl = options.baseUrl ?? "https://archive-api.open-meteo.com/v1/archive"
+    this.forecastUrl = options.forecastUrl ?? "https://api.open-meteo.com/v1/forecast"
+    this.now = options.now ?? (() => new Date())
   }
 
   async getWeather(query: WeatherQuery): Promise<WeatherObservation | undefined> {
@@ -154,7 +174,10 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
       if (!cells.has(key)) cells.set(key, { lat: point.lat, lng: point.lng, index: cells.size })
     }
 
-    const url = this.requestUrl([...cells.values()], new Date(startMs), new Date(Math.max(...stamps)))
+    // One source for the whole question: the one the observation STARTS in. An observation running
+    // across the boundary is read from the forecast, which holds both sides.
+    const recent = startMs >= this.now().getTime() - ERA5_LAG_DAYS * 86_400_000
+    const url = this.requestUrl([...cells.values()], new Date(startMs), new Date(Math.max(...stamps)), recent)
     let perCell = this.cache.get(url)
     if (!perCell) {
       const response = await this.fetchImpl(url)
@@ -170,7 +193,9 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
       this.cache.set(url, perCell)
     }
 
-    const source: WeatherSource = { id: "era5", name: "ERA5 (Open-Meteo)", url }
+    const source: WeatherSource = recent
+      ? { id: "open-meteo-forecast", name: "Open-Meteo (forecast model)", url }
+      : { id: "era5", name: "ERA5 (Open-Meteo)", url }
     const samples = query.points.map(point =>
       this.sampleAt(perCell[cells.get(this.cellKey(point))!.index].hourly!, point.time)
     )
@@ -185,7 +210,7 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
   /** Comma-separated coordinate lists are how the archive takes several locations in ONE request —
    * which keeps `WeatherSource.url` a single, replayable request even for a observer who moved,
    * rather than a lookup nobody could re-run in full. */
-  private requestUrl(cells: { lat: number; lng: number }[], start: Date, end: Date): string {
+  private requestUrl(cells: { lat: number; lng: number }[], start: Date, end: Date, recent: boolean): string {
     const params = new URLSearchParams({
       latitude: cells.map(cell => cell.lat).join(","),
       longitude: cells.map(cell => cell.lng).join(","),
@@ -197,7 +222,7 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
       wind_speed_unit: "ms",
       timezone: "UTC"
     })
-    return `${this.baseUrl}?${params}`
+    return `${recent ? this.forecastUrl : this.baseUrl}?${params}`
   }
 
   private isoDate(date: Date): string {

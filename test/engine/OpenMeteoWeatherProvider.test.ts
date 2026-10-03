@@ -291,6 +291,59 @@ describe("OpenMeteoWeatherProvider", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
+  // ERA5 trails the present by days, and until it has caught up it can say a very different thing from the
+  // forecast model's analysis of the same hours (Nanterre, 3 October 2026, 15:15 UTC: 28% middle cloud in ERA5,
+  // 88% in the forecast, under a sky that was in fact closed).
+  describe("for the last days, which ERA5 has not caught up with", () => {
+    const NOW = new Date(Date.UTC(2026, 9, 3, 15, 30))
+    const recent = (days: number) => new Date(NOW.getTime() - days * 86_400_000)
+
+    function recentProvider() {
+      const day = (date: Date) => date.toISOString().slice(0, 10)
+      const fetchMock = vi.fn().mockImplementation((url: string) => {
+        const date = new URL(url).searchParams.get("start_date")!
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ hourly: { ...hourly(), time: [`${date}T00:00`, `${date}T23:00`] } })
+        })
+      })
+      const provider = new OpenMeteoWeatherProvider({ fetchImpl: fetchMock as unknown as typeof fetch, now: () => NOW })
+      return { provider, fetchMock, day }
+    }
+
+    it("reads the forecast model's analysis, and says so", async () => {
+      const { provider, fetchMock } = recentProvider()
+      const observation = await provider.getWeather({ points: [{ lat: 48.9, lng: 2.2, time: recent(0) }] })
+      const url = fetchMock.mock.calls[0][0] as string
+      expect(url).toContain("https://api.open-meteo.com/v1/forecast?")
+      expect(url).toContain("start_date=2026-10-03")
+      expect(url).toContain("wind_speed_unit=ms")
+      expect(url).toContain("timezone=UTC")
+      expect(observation?.source.id).toBe("open-meteo-forecast")
+      expect(observation?.source.name).toContain("forecast")
+      expect(observation?.source.url).toBe(url)
+    })
+
+    it("still reads the forecast four days back", async () => {
+      const { provider, fetchMock } = recentProvider()
+      await provider.getWeather({ points: [{ lat: 48.9, lng: 2.2, time: recent(4) }] })
+      expect(fetchMock.mock.calls[0][0]).toContain("api.open-meteo.com/v1/forecast")
+    })
+
+    it("goes back to ERA5 once it has caught up", async () => {
+      const { provider, fetchMock } = recentProvider()
+      const observation = await provider.getWeather({ points: [{ lat: 48.9, lng: 2.2, time: recent(6) }] })
+      expect(fetchMock.mock.calls[0][0]).toContain("archive-api.open-meteo.com/v1/archive")
+      expect(observation?.source.id).toBe("era5")
+    })
+
+    it("treats a date the forecast no longer holds as 'no record'", async () => {
+      const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ error: true, reason: "out of allowed range" }) })
+      const provider = new OpenMeteoWeatherProvider({ fetchImpl: fetchMock as unknown as typeof fetch, now: () => NOW })
+      await expect(provider.getWeather({ points: [{ lat: 48.9, lng: 2.2, time: recent(0) }] })).resolves.toBeUndefined()
+    })
+  })
+
   it("keeps clear bands at zero instead of inserting default cloud coverage", async () => {
     const { provider } = providerReturning(hourly())
     const result = await provider.getWeather({ points: [{ lat: 43.8, lng: 6, time: AT_04 }] })

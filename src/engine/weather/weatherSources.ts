@@ -6,7 +6,7 @@ import { OpenMeteoWeatherProvider } from "./providers/OpenMeteoWeatherProvider.j
 export const WEATHER_SOURCES: DataSource<WeatherProvider>[] = [
   {
     id: "era5",
-    name: "ERA5 (Open-Meteo)",
+    name: "Open-Meteo",
     credit: "© Copernicus/ECMWF",
     creditUrl: "https://open-meteo.com/en/docs/historical-weather-api",
     create: () => new OpenMeteoWeatherProvider()
