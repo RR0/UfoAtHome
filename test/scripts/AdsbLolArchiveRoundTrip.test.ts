@@ -70,7 +70,9 @@ describe("AdsbLolArchiveProvider reading what build-aircraft-archive.ts writes",
     await new AircraftArchiveBuild(path.join(dir, "out"), 5).run([path.join(dir, "release.tar")])
     host = new FakeHost(path.join(dir, "out"))
   })
-  afterEach(() => rmSync(dir, { recursive: true, force: true }))
+  // Retried: Windows keeps a deleted file listed for a moment, and Node 20's rmSync answers ENOTEMPTY at once
+  // (CI, windows-latest, Node 20, from 2026-10-02), where Node 22 waits.
+  afterEach(() => rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }))
 
   const provider = (options: { indexUrls?: string[] } = {}) => new AdsbLolArchiveProvider({ fetchImpl: host.fetch, indexUrls: [`${BASE}index.json`], ...options })
   const tracks = (traffic: AircraftTraffic) => {

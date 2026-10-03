@@ -62,7 +62,9 @@ describe("AircraftReleaseFetch", () => {
     dir = mkdtempSync(path.join(tmpdir(), "aircraft-fetch-"))
     github = new FakeGithub()
   })
-  afterEach(() => rmSync(dir, { recursive: true, force: true }))
+  // Retried: Windows keeps a deleted file listed for a moment, and Node 20's rmSync answers ENOTEMPTY at once
+  // (CI, windows-latest, Node 20, from 2026-10-02), where Node 22 waits.
+  afterEach(() => rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }))
 
   const fetcher = (options: { instances?: string[]; retries?: number } = {}) =>
     new AircraftReleaseFetch({ dir, fetchImpl: github.fetch, wait: async () => {}, ...options })

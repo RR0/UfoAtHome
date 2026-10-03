@@ -55,7 +55,9 @@ describe("AircraftArchiveBuild", () => {
     archive = new Archive(path.join(dir, "out"))
     source = path.join(dir, "release.tar")
   })
-  afterEach(() => rmSync(dir, { recursive: true, force: true }))
+  // Retried: Windows keeps a deleted file listed for a moment, and Node 20's rmSync answers ENOTEMPTY at once
+  // (CI, windows-latest, Node 20, from 2026-10-02), where Node 22 waits.
+  afterEach(() => rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }))
 
   async function build(tar: Buffer, step = 5, parts = 1): Promise<void> {
     const files = TarFixture.split(tar, Math.ceil(tar.length / parts)).map((part, i) => {

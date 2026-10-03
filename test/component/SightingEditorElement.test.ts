@@ -6689,7 +6689,8 @@ describe("SightingEditorElement investigator's lines", () => {
     const file = new File([content], name)
     Object.defineProperty(input, "files", { configurable: true, value: [file] })
     input.dispatchEvent(new Event("change"))
-    await vi.waitFor(() => expect(element.shadowRoot!.getElementById("trace-status")!.textContent).not.toBe(""))
+    // Read asynchronously, and slow on a shared Windows runner (a second was not always enough there).
+    await vi.waitFor(() => expect(element.shadowRoot!.getElementById("trace-status")!.textContent).not.toBe(""), { timeout: 10000 })
   }
 
   it("adds what a KML file draws, credited to the file, and says how many", async () => {
