@@ -14,8 +14,8 @@
  * enforce "exactly one of" anything.
  */
 export interface People {
-  /** Who this is, as a reference: on RR0, their directory's name, last name then first names
-   * ("ZamoraLonnie"), whether or not a page exists there yet. */
+  /** Who this is, as a reference: last name then first names, run together ("ZamoraLonnie"),
+   * whether or not a page exists for them yet. */
   id?: string
   title?: string
   lastName?: string

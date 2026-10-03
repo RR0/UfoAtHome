@@ -114,7 +114,7 @@ export interface SightingRecordingJson {
   /** Pictures of the place, laid over the reconstruction at the direction each was registered in —
    * see SceneReference. Absent/omitted means none. */
   references?: SceneReference[]
-  /** Where the account can be read as it was given, in the shape of an RR0 source — see
+  /** Where the account can be read as it was given, each one a source — see
    * RecordingSource. Absent means the recording does not say. */
   sources?: RecordingSource[]
   /** What the observer took it to be, in metres — see InterpretationJson. Absent means they said

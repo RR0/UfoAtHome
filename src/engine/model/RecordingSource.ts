@@ -14,7 +14,7 @@ export interface RecordingSource {
   authors?: string[]
   /** Where it can be read. For a post, the post's own address. */
   url?: string
-  /** Who published it and when (EDTF), as RR0 states it. Optional for a post, whose publisher is the
+  /** Who published it and when (EDTF). Optional for a post, whose publisher is the
    * network itself. */
   publication?: { publisher?: string, time?: string }
   /** Chapter, page, etc. */
