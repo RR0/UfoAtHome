@@ -77,6 +77,8 @@ One or more stylised low-poly models for every decor kind:
 | tree | broadleaf, conifer | Kenney, City Kit Suburban / Survival Kit (CC0) |
 | streetlight | curved-arm street lamp | Kenney, City Kit Roads 2.0 (CC0) |
 | aircraft | narrow-body airliner | Poly by Google (CC BY 3.0) |
+| observer, entity | five realistic people in plain country clothes | MakeHuman system assets (CC0), built by `scripts/people/build_people.py` |
+| entity | the Valensole being, after Maurice Masse's account (child's body, head three times the volume, no helmet) | MakeHuman system assets (CC0), built by `scripts/people/build_people.py` |
 | aircraft | the Socorro craft, a stand-in after Lonnie Zamora's account, with either insignia | UFO@home (CC0), built by `scripts/build-socorro-craft.ts` |
 
 Every one of them is a placeholder and the picker says so: right KIND, no particular model, make or

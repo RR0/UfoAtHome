@@ -265,6 +265,90 @@
         "license": "CC BY 4.0",
         "sourceUrl": "https://github.com/amvlab/aircraft-models"
       }
+    },
+    {
+      "id": "makehuman-farmer-40s",
+      "kind": ["observer", "entity"],
+      "name": "Man in his forties, denim shirt and jeans (realistic, MakeHuman)",
+      "file": "makehuman-people/farmer-40s.glb",
+      "headingOffsetDeg": 180,
+      "sizeM": { "heightM": 1.74 },
+      "credit": {
+        "title": "Man in his forties, denim shirt and jeans",
+        "author": "MakeHuman community (MPFB), assembled by UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/people/build_people.py"
+      }
+    },
+    {
+      "id": "makehuman-man-overalls",
+      "kind": ["observer", "entity"],
+      "name": "Man in overalls (realistic, MakeHuman)",
+      "file": "makehuman-people/man-overalls.glb",
+      "headingOffsetDeg": 180,
+      "sizeM": { "heightM": 1.78 },
+      "credit": {
+        "title": "Man in overalls",
+        "author": "MakeHuman community (MPFB), assembled by UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/people/build_people.py"
+      }
+    },
+    {
+      "id": "makehuman-man-jacket",
+      "kind": ["observer", "entity"],
+      "name": "Man in a green jacket and jeans (realistic, MakeHuman)",
+      "file": "makehuman-people/man-jacket.glb",
+      "headingOffsetDeg": 180,
+      "sizeM": { "heightM": 1.8 },
+      "credit": {
+        "title": "Man in a green jacket and jeans",
+        "author": "MakeHuman community (MPFB), assembled by UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/people/build_people.py"
+      }
+    },
+    {
+      "id": "makehuman-old-man",
+      "kind": ["observer", "entity"],
+      "name": "Old man, striped shirt (realistic, MakeHuman)",
+      "file": "makehuman-people/old-man.glb",
+      "headingOffsetDeg": 180,
+      "sizeM": { "heightM": 1.7 },
+      "credit": {
+        "title": "Old man, striped shirt",
+        "author": "MakeHuman community (MPFB), assembled by UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/people/build_people.py"
+      }
+    },
+    {
+      "id": "makehuman-woman",
+      "kind": ["observer", "entity"],
+      "name": "Woman, plain top and jeans (realistic, MakeHuman)",
+      "file": "makehuman-people/woman.glb",
+      "headingOffsetDeg": 180,
+      "sizeM": { "heightM": 1.65 },
+      "credit": {
+        "title": "Woman, plain top and jeans",
+        "author": "MakeHuman community (MPFB), assembled by UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/people/build_people.py"
+      }
+    },
+    {
+      "id": "ufoathome-valensole-being",
+      "kind": "entity",
+      "name": "Valensole being, after Maurice Masse's account (realistic, MakeHuman)",
+      "file": "makehuman-people/valensole-being.glb",
+      "headingOffsetDeg": 180,
+      "sizeM": { "heightM": 1.0 },
+      "credit": {
+        "title": "Valensole being, a stand-in after Maurice Masse's account",
+        "author": "MakeHuman community (MPFB), assembled by UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/people/build_people.py"
+      }
     }
   ]
 }

@@ -12,8 +12,10 @@ import type { DecorKind, DecorModelCredit, DecorSize } from "../../engine/model/
 export interface DecorModelEntry {
   /** Stable id a recording names (see DecorModelRef.id). It outlives the address below. */
   id: string
-  /** Which decor kind this model can stand for — what the editor's picker filters on. */
-  kind: DecorKind
+  /** Which decor kind this model can stand for — what the editor's picker filters on. A list when
+   * one model serves several: a realistic person is as much a companion who was there (observer) as
+   * a being that was seen (entity), the two being the same silhouette and opposite claims. */
+  kind: DecorKind | DecorKind[]
   /** Short name for that picker: what the thing IS ("Pontiac Catalina, 1964"), not its licence. */
   name: string
   /** Where the glTF/GLB actually lives right now. Must be readable cross-origin. */

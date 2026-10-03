@@ -52,7 +52,7 @@ export class UfoAtHomeModelCatalogue implements DecorModelProvider {
 
   async entries(kind?: DecorKind): Promise<DecorModelEntry[]> {
     const all = await this.load()
-    return kind ? all.filter(entry => entry.kind === kind) : all
+    return kind ? all.filter(entry => [entry.kind].flat().includes(kind)) : all
   }
 
   async entry(id: string): Promise<DecorModelEntry | undefined> {
