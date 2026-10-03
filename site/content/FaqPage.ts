@@ -56,7 +56,7 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Where does the name come from?</h3>
-      <p>From SETI@home. In its day that application ran as a screensaver, so that anybody could lend their computer to the
+      <p>From <a href="https://setiathome.berkeley.edu">SETI@home</a>. In its day that application ran as a screensaver, so that anybody could lend their computer to the
         calculations of the search for extraterrestrial intelligence, and perhaps find on their own machine an interesting signal from a
         potential extraterrestrial intelligence. UFO@home borrows the idea: the work is done at home, on your own machine, in your
         browser, and anybody can take part in it.</p>
@@ -364,7 +364,7 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>D'où vient le nom ?</h3>
-      <p>De SETI@home. À l'époque, cette application existait sous forme d'économiseur d'écran, pour permettre à chacun de
+      <p>De <a href="https://setiathome.berkeley.edu">SETI@home</a>. À l'époque, cette application existait sous forme d'économiseur d'écran, pour permettre à chacun de
         participer aux calculs de la recherche SETI, et peut-être de trouver sur sa machine un signal intéressant d'une intelligence
         extraterrestre potentielle. UFO@home en reprend l'idée : le travail se fait chez soi, sur sa propre machine, dans son
         navigateur, et chacun peut y participer.</p>
@@ -694,7 +694,7 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>¿De dónde viene el nombre?</h3>
-      <p>De SETI@home. En su día, esa aplicación existía como salvapantallas, para que cualquiera pudiera participar en los
+      <p>De <a href="https://setiathome.berkeley.edu">SETI@home</a>. En su día, esa aplicación existía como salvapantallas, para que cualquiera pudiera participar en los
         cálculos de la búsqueda SETI, y quizá encontrar en su máquina una señal interesante de una posible inteligencia
         extraterrestre. UFO@home retoma la idea: el trabajo se hace en casa, en tu propia máquina, en tu navegador, y cualquiera
         puede participar.</p>
@@ -1002,7 +1002,7 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Da dove viene il nome?</h3>
-      <p>Da SETI@home. All'epoca quell'applicazione esisteva come salvaschermo, per permettere a chiunque di partecipare ai
+      <p>Da <a href="https://setiathome.berkeley.edu">SETI@home</a>. All'epoca quell'applicazione esisteva come salvaschermo, per permettere a chiunque di partecipare ai
         calcoli della ricerca SETI, e magari di trovare sulla propria macchina un segnale interessante di una potenziale intelligenza
         extraterrestre. UFO@home ne riprende l'idea: il lavoro si fa a casa, sulla propria macchina, nel proprio browser, e
         chiunque può partecipare.</p>

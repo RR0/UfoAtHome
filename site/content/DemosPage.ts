@@ -26,6 +26,13 @@ export class DemosPage implements SitePage {
 
   private readonly catalogue = new DemoCatalogue()
 
+  /**
+   * Tags that are rr0.org's own classifications (RR3 and NL are its categories of encounter and
+   * of light, GEIPAN D the agency's class): a visitor from outside has no use for them as buttons.
+   * They stay in the index, so typing one still finds its demos.
+   */
+  private static readonly INTERNAL_TAGS = ["RR3", "NL", "GEIPAN D"]
+
   private static readonly WORDS: Said<{
     search: string, placeholder: string, tags: string, none: string, results: (n: number) => string, clear: string
   }> = {
@@ -63,6 +70,7 @@ const moved = where[decodeURIComponent(location.hash.slice(1))]
 if (moved) location.replace(moved)
 
 const said = ${JSON.stringify(said)}
+const internal = ${JSON.stringify(DemosPage.INTERNAL_TAGS)}
 const plural = ${words.results.toString()}
 const form = document.getElementById("demo-search")
 const input = document.getElementById("demo-q")
@@ -116,9 +124,9 @@ const load = async () => {
   }))
   const counts = new Map()
   for (const entry of entries) for (const tag of entry.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
-  // A tag on one demo only is found by typing it; offering all of them as chips would bury the
-  // few that actually group anything.
-  const offered = [...counts].filter(([, count]) => count > 1).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  // A tag on one demo only is found by typing it, and so is an rr0.org classification; offering
+  // all of them as chips would bury the few that actually group anything for an outside visitor.
+  const offered = [...counts].filter(([tag, count]) => count > 1 && !internal.includes(tag)).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
   tagBox.replaceChildren(...offered.map(([tag, count]) => {
     const chip = document.createElement("button")
     chip.type = "button"
