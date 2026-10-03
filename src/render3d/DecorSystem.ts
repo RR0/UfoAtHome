@@ -1,7 +1,7 @@
 import { AdditiveBlending, BackSide, Box3, DoubleSide, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
 import type { Object3D } from "three"
 import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize } from "../engine/model/Decor.js"
-import { canHoldObserver, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
+import { canHoldObserver, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
 import { BridgeGeometry } from "./BridgeGeometry.js"
 
@@ -992,7 +992,7 @@ export class DecorSystem {
    * instead of from the primitive's own seat.
    */
   static usesModel(object: DecorObject): boolean {
-    return object.model !== undefined && !(object.observerSide !== undefined && canHoldObserver(object.kind))
+    return decorModelOf(object) !== undefined && !(object.observerSide !== undefined && canHoldObserver(object.kind))
   }
 
   /**

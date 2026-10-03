@@ -106,6 +106,7 @@ export const sightingLabels_en: SightingLabels = {
   decorHeight: "Height",
   decorModel: "3D model",
   decorModelNone: "Built-in shape",
+  decorModelDefault: "Default model",
   decorModelAdvanced: "Model from an address",
   decorModelFromCatalogue: "From the catalogue, which the recording names it by. Change a field and it becomes this recording's own address.",
   decorModelUrl: "glTF/GLB address",

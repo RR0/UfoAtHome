@@ -106,6 +106,7 @@ export const sightingLabels_es: SightingLabels = {
   decorHeight: "Altura",
   decorModel: "Modelo 3D",
   decorModelNone: "Forma integrada",
+  decorModelDefault: "Modelo por defecto",
   decorModelAdvanced: "Modelo desde una dirección",
   decorModelFromCatalogue: "Del catálogo, por el que la grabación lo nombra. Cambia un campo y pasará a ser la dirección propia de esta grabación.",
   decorModelUrl: "Dirección glTF/GLB",

@@ -802,7 +802,7 @@ export class BodySystem {
   }
 
   /** A primitive, one metre along each axis and centred on the origin. */
-  private static unitGeometry(primitive: BodyPrimitive): BufferGeometry {
+  static unitGeometry(primitive: BodyPrimitive): BufferGeometry {
     let geometry: BufferGeometry
     switch (primitive) {
       case "ellipsoid":

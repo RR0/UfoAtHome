@@ -83,9 +83,9 @@ import {
   defaultWindows,
   decorSidesFor,
   observerSidesFor,
-  hasWindows,
   isWindowOpenable,
-  canHoldObserver
+  canHoldObserver,
+  DEFAULT_DECOR_MODEL
 } from "../engine/model/Decor.js"
 import {
   sightingDurationMs,
@@ -109,6 +109,8 @@ import { SOUND_KINDS } from "../engine/model/Sound.js"
 import type { SightingSound, SoundKind } from "../engine/model/Sound.js"
 import { ELEVATION_SOURCES, IMAGERY_SOURCES } from "../render3d/terrain/terrainSources.js"
 import { DECOR_MODEL_SOURCES } from "../render3d/decor/decorModelSources.js"
+import { ModelPicker } from "./ModelPicker.js"
+import { DecorTraits } from "../engine/model/DecorTraits.js"
 import type { DecorModelEntry, DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import { DecorSystem } from "../render3d/DecorSystem.js"
 import { GroundElevation } from "../render3d/terrain/ElevationProvider.js"
@@ -1331,6 +1333,17 @@ export class SightingEditorElement extends HTMLElement {
     this.decorLengthInput = this.shadow.getElementById("decorLength") as HTMLInputElement
     this.decorHeightInput = this.shadow.getElementById("decorHeight") as HTMLInputElement
     this.decorModelSelect = this.shadow.getElementById("decorModel") as HTMLSelectElement
+    // The drop-down gives way to a window of pictures (see ModelPicker), over the same options.
+    this.modelPicker = new ModelPicker(this.shadow, () => ({
+      title: this.messages.modelPickerTitle, close: this.messages.modelPickerClose, choose: this.messages.modelPickerChoose
+    }))
+    this.modelPicker.enhance(this.decorModelSelect, async id => {
+      const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
+      // "No model" is the kind's default model where it has one, and else its built-in shape.
+      const modelId = id !== "" ? id : decor ? DEFAULT_DECOR_MODEL[decor.kind]?.id : undefined
+      if (modelId !== undefined) return this.decorModelProvider.entry(modelId).then(entry => entry && { url: entry.url, headingOffsetDeg: entry.headingOffsetDeg })
+      return decor === undefined ? undefined : { decorKind: decor.kind }
+    })
     this.decorModelAdvanced = this.shadow.getElementById("decor-model-advanced") as HTMLDetailsElement
     this.decorModelCatalogueNote = this.shadow.getElementById("decor-model-catalogue")!
     this.decorModelUrlInput = this.shadow.getElementById("decorModelUrl") as HTMLInputElement
@@ -6141,6 +6154,7 @@ export class SightingEditorElement extends HTMLElement {
         said: () => this.said,
         writingLanguage: () => this.writingLanguage,
         modelProvider: () => this.decorModelProvider,
+        modelPicker: () => this.modelPicker,
         shapes: () => this.ufoElement.sighting.timeline.sourceIds.map(id => ({ id, label: this.shapeLabel(id) })),
         changed: () => {
           this.ufoElement.refresh()
@@ -6460,17 +6474,19 @@ export class SightingEditorElement extends HTMLElement {
     this.currentDecorId = decor.id
     this.refreshDecorList()
     this.ufoElement.refresh()
-    if (kind === "entity" || kind === "observer") void this.adoptDefaultPersonModel(decor.id, kind)
+    if (kind !== "building") void this.adoptDefaultModel(decor.id, kind)
   }
 
   /**
-   * A person added to the scene starts as a person, not as the built-in marker post: the
-   * catalogue's first realistic human for the kind, at its own height. Nothing is lost by it,
-   * since "no model" stays the first option of the picker, and a model already stated (by a
-   * choice made while the catalogue answered) is never overwritten. An unreachable catalogue
-   * leaves the built-in shape, as everywhere else.
+   * Whatever is added to the scene starts as the catalogue's first model for its kind (a person, an
+   * airliner, a car, a tree, a street lamp) at that model's own size, rather than as the built-in
+   * marker; the picker beside it then offers the others of the kind. A building is left to its
+   * built-in shape, which is the one that states floors and windows. Nothing is lost by it, since
+   * "no model" stays the first option of the picker, and a model already stated (by a choice made
+   * while the catalogue answered) is never overwritten. An unreachable catalogue leaves the
+   * built-in shape, as everywhere else.
    */
-  private async adoptDefaultPersonModel(id: string, kind: DecorObject["kind"]): Promise<void> {
+  private async adoptDefaultModel(id: string, kind: DecorObject["kind"]): Promise<void> {
     const entry = (await this.decorModelProvider.entries(kind).catch(() => []))[0]
     if (!entry) return
     const added = this.ufoElement.sighting.decor.find(d => d.id === id)
@@ -6543,6 +6559,9 @@ export class SightingEditorElement extends HTMLElement {
     this.decorSelect.value = id
     this.syncDecorFields()
     this.syncCanvasMode()
+    // The frame of handles is drawn round the selected object: moving the selection moves it, which
+    // syncCanvasMode alone does not repaint while the canvas stays in the same mode.
+    if (this.canvasMode() === "decor") this.ufoElement.refresh()
   }
 
   /** Writes the East/North/Heading/Name/URL/Floors/Occupied-floor/Observer-location fields back
@@ -6668,10 +6687,14 @@ export class SightingEditorElement extends HTMLElement {
     this.decorModelAuthorInput.value = entry.credit.author ?? ""
     this.decorModelLicenseInput.value = entry.credit.license
     this.decorModelSourceInput.value = entry.credit.sourceUrl ?? ""
+    // What the model publishes about itself decides which fields apply (see DecorTraits).
+    this.syncDecorVisibility()
   }
 
   /** The catalogue model the decor's address block is showing, if it is showing one. */
   private shownDecorEntry?: DecorModelEntry
+  /** The window that shows the 3D models as pictures, for the decor's picker and the bodies'. */
+  private readonly modelPicker: ModelPicker
 
   /** The catalogue's own entries for this kind, plus the "no model" option that heads the list.
    * Asked on every decor selection and answered from the provider's own cache (see
@@ -6683,7 +6706,8 @@ export class SightingEditorElement extends HTMLElement {
     const chosen = selected?.model?.id ?? ""
     const none = document.createElement("option")
     none.value = ""
-    none.textContent = this.messages.decorModelNone
+    // A kind with a default model is never drawn as its built-in shape: "none" then means that model.
+    none.textContent = selected && DEFAULT_DECOR_MODEL[selected.kind] ? this.messages.decorModelDefault : this.messages.decorModelNone
     this.decorModelSelect.replaceChildren(
       none,
       ...entries.map(entry => {
@@ -7093,16 +7117,18 @@ export class SightingEditorElement extends HTMLElement {
     this.setRowVisible(this.decorWidthInput, hasSelection)
     this.setRowVisible(this.decorLengthInput, hasSelection)
     this.setRowVisible(this.decorHeightInput, hasSelection)
-    // A model is drawn with its own materials: the colour paints only the built-in shape, so the
-    // picker would offer a choice that changes nothing (see DecorSystem.applyModel).
-    this.setRowVisible(this.decorColorInput, hasSelection && !(decor?.model !== undefined && !(decor.observerSide !== undefined && canHoldObserver(decor.kind))))
+    // What can be set on it is what the object says (see DecorTraits): the colour only paints the
+    // built-in shape, a lamp switch needs something to switch, windows and floors belong to the shape.
+    const traits = decor ? DecorTraits.of(decor, this.shownDecorEntry?.id === decor.model?.id ? this.shownDecorEntry?.parameters : undefined) : undefined
+    this.setRowVisible(this.decorColorInput, traits?.color === true)
     this.setRowVisible(this.decorModelSelect, hasSelection)
     this.decorModelAdvanced.hidden = !hasSelection
     // Lit is the legacy single switch (a streetlamp, a car's headlights). An aircraft's lamps are a
     // rig of their own (see LightRig.ts), so the checkbox would sit there doing nothing at all —
     // which is exactly how it was read.
-    this.setRowVisible(this.decorLitInput, hasSelection && decor?.kind !== "aircraft")
-    const showWindows = hasSelection && kind !== undefined && hasWindows(kind)
+    this.setRowVisible(this.decorLitInput, traits?.lit === true)
+    this.setRowVisible(this.decorLightRigSelect, traits?.lights === true)
+    const showWindows = traits?.windows === true
     this.setRowVisible(this.labelDecorWindows, showWindows)
     // Which of the 8 DecorSide values actually apply to this kind — a building shows plain
     // Left/Right, a vehicle shows its own 4 door corners instead (see decorSidesFor's own doc
@@ -7120,7 +7146,7 @@ export class SightingEditorElement extends HTMLElement {
       this.decorWindowInputs[side].min = String(kind !== undefined && isWindowOpenable(kind, side) ? 0 : FIXED_WINDOW_MIN_OPACITY_PERCENT)
       this.setRowVisible(this.decorWindowInputs[side], showWindows && applicableSides.includes(side))
     }
-    const showObserverSide = hasSelection && kind !== undefined && canHoldObserver(kind)
+    const showObserverSide = traits?.observerSide === true
     this.setRowVisible(this.decorObserverSideSelect, showObserverSide)
     // Which of the 8 DecorSide values are valid SEATS for this kind (a subset of applicableSides
     // — see observerSidesFor's own doc comment: a vehicle's occupant sits at one of its 4 doors,
@@ -7134,7 +7160,7 @@ export class SightingEditorElement extends HTMLElement {
     // as picking which floor the observer would be on if/when they're placed inside), even though
     // DecorSystem only actually USES occupiedFloor once observerSide is also set (see its own doc
     // comment) — pre-setting it here just means it's already right the moment a location IS set.
-    const showFloors = hasSelection && kind === "building"
+    const showFloors = traits?.floors === true
     this.setRowVisible(this.decorFloorsInput, showFloors)
     this.setRowVisible(this.decorOccupiedFloorInput, showFloors)
     this.decorOccupiedFloorInput.max = String(decor?.floors ?? DEFAULT_BUILDING_FLOORS)

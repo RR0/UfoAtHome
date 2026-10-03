@@ -1,4 +1,5 @@
 import type { DecorKind, DecorModelCredit, DecorSize } from "../../engine/model/Decor.js"
+import type { ModelParameters } from "../../engine/model/DecorTraits.js"
 
 /**
  * One model a catalogue offers, resolved but not yet fetched.
@@ -30,6 +31,9 @@ export interface DecorModelEntry {
    * states 5.4 m of car rather than leaving a reader to invent one. Never imposed: the recording's
    * own DecorObject.sizeM always wins (see DecorSystem.sizeOf). */
   sizeM?: DecorSize
+  /** What the model says can be set on it, over the defaults of its kind (see DecorTraits): the
+   * model publishes its own parameters, and the editor offers only those. */
+  parameters?: ModelParameters
 }
 
 /**

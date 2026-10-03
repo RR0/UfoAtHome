@@ -112,7 +112,7 @@ import type { Instrument, ProjectionKind, RecordingMedium } from "../engine/inst
 import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
-import { resolveDecorLitAt, resolveDecorPlacementAt, canHoldObserver } from "../engine/model/Decor.js"
+import { resolveDecorLitAt, resolveDecorPlacementAt, canHoldObserver, decorModelOf, DEFAULT_DECOR_MODEL } from "../engine/model/Decor.js"
 import type { DecorModelCredit, DecorModelRef } from "../engine/model/Decor.js"
 import type { DecorModelEntry, DecorModelProvider } from "./decor/DecorModelProvider.js"
 import { DECOR_MODEL_SOURCES } from "./decor/decorModelSources.js"
@@ -2010,7 +2010,12 @@ export class SceneRenderer {
       // Fired and forgotten on purpose: the primitive is already in the scene and is a complete,
       // correct answer on its own, so a model that takes a second to arrive (or never arrives)
       // costs the viewer nothing but detail. See loadDecorModel.
-      if (object.model && object.id.startsWith(TrafficIds.ID_PREFIX)) this.pendingTrafficModels.set(object.id, object)
+      if (object.model && object.id.startsWith(TrafficIds.ID_PREFIX)) {
+        this.pendingTrafficModels.set(object.id, object)
+        // Until it is near enough for its own model, it is drawn as the kind's generic model rather
+        // than as the built-in shape (see DEFAULT_DECOR_MODEL).
+        void this.awaitArrival(this.loadDecorModel(object, this.decorModelToken, true))
+      }
       else if (!this.reuseLoadedDecorModel(object, group)) void this.awaitArrival(this.loadDecorModel(object, this.decorModelToken))
     }
     // Toggled here too (not just in updateCelestialLight, which only runs on the next
@@ -2241,7 +2246,7 @@ export class SceneRenderer {
    * tells DecorSystem.dispose to leave alone. */
   private reuseLoadedDecorModel(object: DecorObject, group: Object3D): boolean {
     const loaded = this.loadedDecorModels.get(object.id)
-    if (!loaded || loaded.ref !== JSON.stringify(object.model) || !DecorSystem.usesModel(object)) return false
+    if (!loaded || loaded.ref !== JSON.stringify(decorModelOf(object)) || !DecorSystem.usesModel(object)) return false
     this.applyLoadedDecorModel(object, group, loaded)
     return true
   }
@@ -2255,8 +2260,17 @@ export class SceneRenderer {
     this.decorModelCredits.set(object.id, loaded.credit)
   }
 
-  private async loadDecorModel(object: DecorObject, token: number): Promise<void> {
-    const ref = object.model
+  /** The generic models drawn in the place of the exact ones still to come, by address: one parsed file
+   * shared by every aircraft waiting for its own. */
+  private readonly standInScenes = new Map<string, Promise<Object3D>>()
+
+  /**
+   * Draws a decor object's model; with `standIn`, the default model of its kind in the place of the
+   * one it names, for an object whose own is not worth fetching yet (see TRAFFIC_MODEL_RANGE_PER_METRE).
+   * A stand-in never replaces a model that has arrived since.
+   */
+  private async loadDecorModel(object: DecorObject, token: number, standIn = false): Promise<void> {
+    const ref = standIn ? DEFAULT_DECOR_MODEL[object.kind] : decorModelOf(object)
     // usesModel, not just "does it name one": a model is the EXTERIOR, and an object the observer is
     // inside of is being looked at from within. See its own doc comment.
     if (!ref || !DecorSystem.usesModel(object)) return
@@ -2267,22 +2281,35 @@ export class SceneRenderer {
       // A bare url with no credit is refused rather than drawn: an unattributed model is not a
       // model this project can show (see DecorModelRef.credit).
       if (!url || !credit) return
-      const scene = await loadGltfScene(url)
-      // The decor list may have been replaced entirely while this was in flight.
-      if (token !== this.decorModelToken) return
+      const scene = standIn ? await this.standInScene(url) : await loadGltfScene(url)
+      // The decor list may have been replaced entirely while this was in flight, and a stand-in is
+      // too late once the object's own model is on its way.
+      if (token !== this.decorModelToken || (standIn && !this.pendingTrafficModels.has(object.id))) return
       const group = this.decorGroups.get(object.id)
       if (!group) return
       // What stands round it, for whatever of it is shiny — see Reflections.
-      Reflections.reflectOn(scene)
+      if (!standIn) Reflections.reflectOn(scene)
       // Only the catalogue can say what the real thing is; a bare url states a file and nothing
       // about what it depicts (see DecorModelEntry.sizeM and DecorSystem.applyModel).
       const loaded = { ref: JSON.stringify(ref), scene, headingOffsetDeg: ref.headingOffsetDeg ?? entry?.headingOffsetDeg, depictedSizeM: entry?.sizeM, credit }
-      this.loadedDecorModels.set(object.id, loaded)
+      if (!standIn) this.loadedDecorModels.set(object.id, loaded)
       this.applyLoadedDecorModel(object, group, loaded)
       this.render()
     } catch (error) {
       console.warn(`Keeping the built-in shape for decor "${object.id}":`, error)
     }
+  }
+
+  private standInScene(url: string): Promise<Object3D> {
+    let scene = this.standInScenes.get(url)
+    if (!scene) {
+      scene = loadGltfScene(url).then(loaded => {
+        Reflections.reflectOn(loaded)
+        return loaded
+      })
+      this.standInScenes.set(url, scene)
+    }
+    return scene
   }
 
   /** Keeps every decor object anchored to its own fixed real-world spot as the observer moves,

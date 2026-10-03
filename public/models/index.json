@@ -3,20 +3,6 @@
   "attribution": "3D models re-hosted by UFO@home, each under its own author's licence",
   "models": [
     {
-      "id": "kenney-car-kit-police",
-      "kind": "vehicle",
-      "name": "Patrol car (generic, stylised)",
-      "file": "kenney-car-kit/police.glb",
-      "headingOffsetDeg": 180,
-      "sizeM": { "widthM": 1.8, "lengthM": 4.6, "heightM": 1.45 },
-      "credit": {
-        "title": "Car Kit 3.1 — police",
-        "author": "Kenney",
-        "license": "CC0 1.0",
-        "sourceUrl": "https://kenney.nl/assets/car-kit"
-      }
-    },
-    {
       "id": "kenney-car-kit-sedan",
       "kind": "vehicle",
       "name": "Saloon car (generic, stylised)",
@@ -25,6 +11,20 @@
       "sizeM": { "widthM": 1.8, "lengthM": 4.6, "heightM": 1.45 },
       "credit": {
         "title": "Car Kit 3.1 — sedan",
+        "author": "Kenney",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://kenney.nl/assets/car-kit"
+      }
+    },
+    {
+      "id": "kenney-car-kit-police",
+      "kind": "vehicle",
+      "name": "Patrol car (generic, stylised)",
+      "file": "kenney-car-kit/police.glb",
+      "headingOffsetDeg": 180,
+      "sizeM": { "widthM": 1.8, "lengthM": 4.6, "heightM": 1.45 },
+      "credit": {
+        "title": "Car Kit 3.1 — police",
         "author": "Kenney",
         "license": "CC0 1.0",
         "sourceUrl": "https://kenney.nl/assets/car-kit"
@@ -82,6 +82,20 @@
         "author": "Kenney",
         "license": "CC0 1.0",
         "sourceUrl": "https://kenney.nl/assets/city-kit-roads"
+      }
+    },
+    {
+      "id": "amvlab-a320",
+      "kind": "aircraft",
+      "name": "Airbus A320 (plain, no livery)",
+      "file": "amvlab-aircraft/A320_nologo.glb",
+      "headingOffsetDeg": -90,
+      "sizeM": { "widthM": 34.1, "lengthM": 37.6, "heightM": 11.8 },
+      "credit": {
+        "title": "Airbus A320, logo-free variant",
+        "author": "amvlab",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://github.com/amvlab/aircraft-models"
       }
     },
     {
@@ -194,20 +208,6 @@
         "author": "UFO@home",
         "license": "CC0 1.0",
         "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-chiles-whitted-craft.ts"
-      }
-    },
-    {
-      "id": "amvlab-a320",
-      "kind": "aircraft",
-      "name": "Airbus A320 (plain, no livery)",
-      "file": "amvlab-aircraft/A320_nologo.glb",
-      "headingOffsetDeg": -90,
-      "sizeM": { "widthM": 34.1, "lengthM": 37.6, "heightM": 11.8 },
-      "credit": {
-        "title": "Airbus A320, logo-free variant",
-        "author": "amvlab",
-        "license": "CC BY 4.0",
-        "sourceUrl": "https://github.com/amvlab/aircraft-models"
       }
     },
     {

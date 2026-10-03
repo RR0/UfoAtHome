@@ -1,3 +1,4 @@
+import { ModelPicker } from "../../src/component/ModelPicker.js"
 import { describe, expect, it } from "vitest"
 import { BodyEditor } from "../../src/component/BodyEditor.js"
 import type { BodyEditorHost } from "../../src/component/BodyEditor.js"
@@ -34,11 +35,13 @@ class Fixture {
   constructor(stated: InterpretationJson | null = interpretation) {
     this.sighting = { interpretation: stated === null ? undefined : structuredClone(stated) } as Sighting
     document.body.append(this.container)
+    const picker = new ModelPicker(this.container, () => ({ title: "Choose", close: "Close", choose: "Choose" }))
     const host: BodyEditorHost = {
       sighting: () => this.sighting,
       said: () => new SaidTexts(["en"]),
       writingLanguage: () => "en",
       modelProvider: () => provider,
+      modelPicker: () => picker,
       shapes: () => [{ id: "ufo-1", label: "Object" }, { id: "flame", label: "Flame" }],
       changed: () => { this.changes++ },
       newBodyStart: () => this.start,

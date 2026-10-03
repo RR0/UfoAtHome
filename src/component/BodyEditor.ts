@@ -1,10 +1,12 @@
 import type { BodyJson, BodyKeyframe, InterpretationJson } from "../engine/interpretation/Interpretation.js"
 import { BODY_PRIMITIVES } from "../engine/interpretation/Interpretation.js"
+import type { BodyPrimitive } from "../engine/interpretation/Interpretation.js"
 import type { DecorModelRef } from "../engine/model/Decor.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { SaidTexts } from "../engine/model/SaidText.js"
 import type { DecorModelEntry, DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import type { BodyReading } from "./SceneElement.js"
+import type { ModelPicker } from "./ModelPicker.js"
 import { NumberFields } from "./NumberFields.js"
 import type { BodyEditorMessages } from "./messages/BodyEditorMessages.js"
 import { bodyEditorMessages_en } from "./messages/BodyEditorMessages_en.js"
@@ -18,6 +20,8 @@ export interface BodyEditorHost {
   said(): SaidTexts
   writingLanguage(): string
   modelProvider(): DecorModelProvider
+  /** The window that shows the models as pictures, in the editor's language. */
+  modelPicker(): ModelPicker
   /** The shapes of the recording, as the Shape picker names them. */
   shapes(): { id: string, label: string }[]
   /** An edit was written onto the recording. */
@@ -261,6 +265,10 @@ export class BodyEditor {
     }
     this.select("body-key-mode").addEventListener("change", () => this.updateKeyframe())
     this.element("body-key-delete").addEventListener("click", () => this.deleteKeyframe())
+    // The drop-down gives way to a window of pictures, over the same options and the same "change".
+    this.host.modelPicker().enhance(this.select("body-model"), async id => (BODY_PRIMITIVES as readonly string[]).includes(id)
+      ? { shape: id as BodyPrimitive }
+      : this.host.modelProvider().entry(id).then(entry => entry && { url: entry.url, headingOffsetDeg: entry.headingOffsetDeg }))
     NumberFields.fit(this.container)
     this.sync()
   }

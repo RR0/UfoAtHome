@@ -625,6 +625,10 @@ export interface SightingEditorMessages extends SightingLabels {
   masks: string
   /** The Masks flyout's own line when the recording has no shape yet, so it never opens as an empty bar. */
   masksNone: string
+  /** The window that shows the 3D models as pictures to choose one: its title, its close button, and the tooltip of the button that opens it. */
+  modelPickerTitle: string
+  modelPickerClose: string
+  modelPickerChoose: string
   /** Button in the Observer group that adds a new "other observer" decor object (see
    * SightingEditorElement's addDecorObserverButton) — distinct from decorObserver, that dropdown
    * option's own (now-hidden) label. */

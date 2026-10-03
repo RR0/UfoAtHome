@@ -203,6 +203,21 @@ export interface DecorSize {
 export type MeasuredDecorSize = Required<DecorSize>
 
 /**
+ * The model a kind of object is drawn as when it names none: the catalogue's generic airliner for an
+ * aircraft, whose built-in shape is a stand-in with nothing of an aeroplane's silhouette. A kind not
+ * listed has no default and is drawn as its built-in shape. A model of the catalogue, so its credit
+ * is shown with the scene's like any other.
+ */
+export const DEFAULT_DECOR_MODEL: Partial<Record<DecorKind, DecorModelRef>> = {
+  aircraft: { id: "poly-google-airliner" }
+}
+
+/** The model an object is drawn as: the one it names, or else the default of its kind. */
+export function decorModelOf(object: Pick<DecorObject, "kind" | "model">): DecorModelRef | undefined {
+  return object.model ?? DEFAULT_DECOR_MODEL[object.kind]
+}
+
+/**
  * Which real 3D model stands in for this object, if one does.
  *
  * Named rather than embedded, and named in TWO ways on purpose. `id` is a catalogue entry resolved

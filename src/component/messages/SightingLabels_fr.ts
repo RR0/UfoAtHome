@@ -106,6 +106,7 @@ export const sightingLabels_fr: SightingLabels = {
   decorHeight: "Hauteur",
   decorModel: "Modèle 3D",
   decorModelNone: "Forme intégrée",
+  decorModelDefault: "Modèle par défaut",
   decorModelAdvanced: "Modèle depuis une adresse",
   decorModelFromCatalogue: "Du catalogue, par lequel l'enregistrement le nomme. Modifiez un champ et il devient l'adresse propre à cet enregistrement.",
   decorModelUrl: "Adresse glTF/GLB",
