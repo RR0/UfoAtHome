@@ -67,13 +67,15 @@ export class DemoCatalogue {
         {
           id: "valensole",
           src: "/demo-data/observer-valensole.json",
+          // The case, for the player: the witness told it twice to the gendarmerie, and the two statements differ.
+          playSrc: "/demo-data/case-valensole.json",
           title: { en: "Valensole, 1965", fr: "Valensole, 1965", es: "Valensole, 1965", it: "Valensole, 1965" },
           titleIsName: true,
           blurb: {
-            en: "Early morning on the plateau, 05:45, the Sun forty minutes up and 7° high in the north-east — and the real relief of that field under the observer's feet.",
-            fr: "Petit matin sur le plateau, 05:45, le Soleil levé depuis quarante minutes, à 7° de hauteur au nord-est — et le relief réel de ce champ sous les pieds de l'observateur.",
-            es: "Primera hora de la mañana en la meseta, 05:45, el Sol salido hace cuarenta minutos y a 7° de altura al nordeste — y el relieve real de ese campo bajo los pies del observador.",
-            it: "Primo mattino sull'altopiano, 05:45, il Sole sorto da quaranta minuti e alto 7° a nord-est — e il rilievo reale di quel campo sotto i piedi dell'osservatore."
+            en: "Early morning on the plateau, 05:45, the Sun forty minutes up and 7° high in the north-east — and the real relief of that field under the observer's feet. Two statements of the same witness, the gendarmerie's report of 2 July and his deposition of 18 August — open it full size to switch.",
+            fr: "Petit matin sur le plateau, 05:45, le Soleil levé depuis quarante minutes, à 7° de hauteur au nord-est — et le relief réel de ce champ sous les pieds de l'observateur. Deux déclarations du même témoin, le procès-verbal du 2 juillet et sa déposition du 18 août — ouvrez-le en grand pour passer de l'une à l'autre.",
+            es: "Primera hora de la mañana en la meseta, 05:45, el Sol salido hace cuarenta minutos y a 7° de altura al nordeste — y el relieve real de ese campo bajo los pies del observador. Dos declaraciones del mismo testigo, el acta del 2 de julio y su declaración del 18 de agosto — ábrelo a tamaño completo para pasar de una a otra.",
+            it: "Primo mattino sull'altopiano, 05:45, il Sole sorto da quaranta minuti e alto 7° a nord-est — e il rilievo reale di quel campo sotto i piedi dell'osservatore. Due dichiarazioni dello stesso testimone, il verbale del 2 luglio e la sua deposizione del 18 agosto — aprilo a schermo intero per passare dall'una all'altra."
           }
         },
         {
