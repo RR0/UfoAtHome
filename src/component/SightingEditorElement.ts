@@ -961,10 +961,6 @@ export class SightingEditorElement extends HTMLElement {
       this.ufoElement.sighting.observerMap = (event as CustomEvent<{ open: boolean }>).detail.open
       this.dispatchEvent(new CustomEvent("sightingchange"))
     })
-    // An author stating the weather has to be able to SEE it: a scene frozen until the recording
-    // plays is a preview of nothing, and a recording with no duration yet cannot be played at all.
-    // Replays keep the opposite rule — see SceneElement.syncAnimationsToPlayback.
-    this.sceneElement.animateWhilePaused = true
     // The editor draws the angles it edits, never a observer's bodies over them — see
     // SceneElement.accountInTheRound.
     this.sceneElement.accountInTheRound = false

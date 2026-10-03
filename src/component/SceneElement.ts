@@ -386,21 +386,6 @@ export class SceneElement extends HTMLElement {
   private aircraftAudio?: InstanceType<TrafficRuntime["AircraftAudio"]>
   private readonly vehicleHearing = new VehicleHearing()
 
-  /**
-   * Keeps the scene's own weather moving while the recording is not playing — set by the editor
-   * that composes this element, never by a replay. See syncAnimationsToPlayback.
-   */
-  private animateWhilePausedValue = false
-
-  set animateWhilePaused(animate: boolean) {
-    if (animate === this.animateWhilePausedValue) return
-    this.animateWhilePausedValue = animate
-    this.syncAnimationsToPlayback()
-  }
-
-  get animateWhilePaused(): boolean {
-    return this.animateWhilePausedValue
-  }
   private thunderTimeoutId?: number
 
   /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
@@ -662,21 +647,15 @@ export class SceneElement extends HTMLElement {
    * through the nested player's single onFrame sink.
    */
   private syncAnimationsToPlayback(): void {
-    // "Running" is not quite "playing", and the difference is what an editor needs. The rule above
-    // is about a REPLAY: a reader paused on one instant of somebody's sighting, over which weather
-    // still going on would be the reader's own room. It says nothing about an author who is at
-    // that moment STATING the weather — for them a frozen sky is a preview of nothing, and there
-    // is often no way out of it either, since a recording with no duration yet cannot be played at
-    // all. So the editor asks for the scene to keep moving (see animateWhilePaused).
-    //
-    // The PICTURE follows that, the SOUND does not: paused is paused, in the editor as anywhere, and
-    // rain or wind or an engine going on while nothing plays is noise over a stopped clock (the
-    // author said so). Sound is heard only while the recording actually plays.
+    // Paused is paused, in the editor as anywhere: the picture, the weather and the sound all stop
+    // with the clock. An editor once kept the weather moving over a paused recording so that an
+    // author stating it could see it, and that is not the observation: a sky that moves while no
+    // time passes is wrong, and it kept the editor redrawing, and its graphics card busy, for as
+    // long as the page was open. Playing is how the weather is seen to move.
     const playing = this.ufoElement.playbackState === "playing"
-    const running = playing || this.animateWhilePaused
     // While playing, the player's own tick is the frame clock (see handleTimeUpdate) and the
     // renderer runs no loop beside it.
-    this.sceneRenderer.setAnimationsRunning(running, playing)
+    this.sceneRenderer.setAnimationsRunning(playing, playing)
     this.weatherAudio.setPaused(!playing)
     this.vehicleAudio.setPaused(!playing)
     this.aircraftAudio?.setPaused(!playing)
@@ -807,6 +786,7 @@ export class SceneElement extends HTMLElement {
     // doesn't necessarily change just because a shadow-DOM-nested descendant goes fullscreen.
     this.resizeObserver = new ResizeObserver(() => this.resizeToStage())
     this.resizeObserver.observe(this.frameElement)
+    this.watchVisibility()
     // Belt-and-suspenders: ResizeObserver timing around fullscreen transitions is inconsistent
     // across browsers (some fire a frame late, or with an intermediate size mid-transition) —
     // explicitly reacting to fullscreenchange too removes any doubt. Same event UfoElement
@@ -820,7 +800,36 @@ export class SceneElement extends HTMLElement {
     }
   }
 
+  /**
+   * Suspends the scene while it is out of the reader's sight (scrolled past, in a closed panel, in a
+   * hidden tab of the page) and wakes it when it comes back: nothing is drawn or computed for a
+   * picture nobody sees, which is most of what an open editor or a long catalogue page cost.
+   * Playback is paused, not just hidden: a replay going on behind the reader's back is a clock
+   * running for nobody, with its sound still on. It stays paused when the scene returns, the way the
+   * catalogue's own cards do (see DemosPage); the play button is where it starts again.
+   *
+   * A margin around the viewport, so that the first frame is drawn before the scene arrives rather
+   * than after.
+   */
+  private watchVisibility(): void {
+    this.visibilityObserver?.disconnect()
+    if (typeof IntersectionObserver === "undefined") return
+    this.visibilityObserver = new IntersectionObserver(entries => {
+      const visible = entries[entries.length - 1].isIntersecting
+      if (visible) {
+        this.sceneRenderer.resume()
+        return
+      }
+      this.ufoElement.pause()
+      this.sceneRenderer.suspend()
+    }, { rootMargin: "100px" })
+    this.visibilityObserver.observe(this)
+  }
+
+  private visibilityObserver?: IntersectionObserver
+
   disconnectedCallback(): void {
+    this.visibilityObserver?.disconnect()
     this.resizeObserver?.disconnect()
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
     for (const type of SceneElement.GESTURES) document.removeEventListener(type, this.handlePageGesture, true)

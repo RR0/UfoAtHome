@@ -1,4 +1,4 @@
-import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
+import { describe, expect, it, afterEach, beforeAll, beforeEach, vi } from "vitest"
 import { registerScene, SCENE_ELEMENT_NAME, AIRCRAFT_CHANGE_EVENT } from "../../src/component/SceneElement.js"
 import type { AircraftProvider, AircraftTraffic } from "../../src/engine/traffic/AircraftProvider.js"
 import type { UpperAir, UpperAirProvider } from "../../src/engine/traffic/UpperAirProvider.js"
@@ -13,6 +13,8 @@ registerScene()
  * neither) and cleared per test. */
 const animationsRunning: boolean[] = []
 const audioPaused: boolean[] = []
+/** What the element told the renderer about being in sight or not. */
+const sightCalls: string[] = []
 const thunderPlayed: number[] = []
 /** Every sky the element hands the renderer, so a test can see whether editing the observation
  * actually rebuilt the fall or silently left the previous one standing. */
@@ -136,6 +138,12 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     frame(): void {}
     compileNextFrameOffThread(): void {}
     holdForNewScene(): void {}
+    suspend(): void {
+      sightCalls.push("suspend")
+    }
+    resume(): void {
+      sightCalls.push("resume")
+    }
     releaseContext(): void {}
     restoreContext(): void {}
     stopTwinkle(): void {}
@@ -284,6 +292,45 @@ describe("SceneElement weather follows the player", () => {
     document.body.innerHTML = ""
   })
 
+describe("a scene out of sight", () => {
+  let notify: (visible: boolean) => void
+  const original = globalThis.IntersectionObserver
+
+  beforeEach(() => {
+    sightCalls.length = 0
+    globalThis.IntersectionObserver = class {
+      constructor(callback: (entries: { isIntersecting: boolean }[]) => void) {
+        notify = visible => callback([{ isIntersecting: visible }])
+      }
+      observe(): void {}
+      disconnect(): void {}
+    } as unknown as typeof IntersectionObserver
+  })
+
+  afterEach(() => {
+    globalThis.IntersectionObserver = original
+  })
+
+  it("is suspended when it leaves the screen, and woken when it returns", () => {
+    mount()
+    notify(false)
+    expect(sightCalls.at(-1)).toBe("suspend")
+    notify(true)
+    expect(sightCalls.at(-1)).toBe("resume")
+  })
+
+  it("pauses a replay that is playing, and leaves it paused on its return", async () => {
+    const element = mount()
+    element.ufoElement.togglePlayPause()
+    await new Promise(resolve => setTimeout(resolve, 50))
+    expect(element.ufoElement.playbackState).toBe("playing")
+    notify(false)
+    expect(element.ufoElement.playbackState).not.toBe("playing")
+    notify(true)
+    expect(element.ufoElement.playbackState).not.toBe("playing")
+  })
+})
+
   // A paused replay is one frozen instant of a sighting: rain still falling and still audible over
   // it would be the reader's own room, not the observer's evening.
   it("runs the animations and the beds only while playing", async () => {
@@ -307,13 +354,12 @@ describe("SceneElement weather follows the player", () => {
     expect(audioPaused.every(paused => paused)).toBe(true)
   })
 
-  // An editor keeps the PICTURE moving while paused (there may be no way to play a recording still
-  // being written), but paused is paused for the sound: nothing is heard over a stopped clock.
-  it("keeps the sound stopped while an editor animates the paused picture", () => {
+  // Paused is paused for the picture as for the sound, in an editor as in a replay: a sky that moves
+  // while no time passes is wrong, and an editor left open cost a graphics card's worth of redrawing.
+  it("leaves the picture and the sound stopped while paused, whoever composes the element", () => {
     const element = mount()
-    element.animateWhilePaused = true
     element.ufoElement.currentTime = 2000
-    expect(animationsRunning.at(-1)).toBe(true)
+    expect(animationsRunning.every(running => !running)).toBe(true)
     expect(audioPaused.length).toBeGreaterThan(0)
     expect(audioPaused.every(paused => paused)).toBe(true)
   })

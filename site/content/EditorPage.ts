@@ -552,6 +552,9 @@ if (docs) {
         <li><strong>Paused is paused.</strong> Falling rain, twinkling stars, lightning, lens flare,
           ambient sound — all stop with the player. A paused replay is one instant of a sighting;
           weather still going on over it would be your own room, not the observer's evening.</li>
+        <li><strong>Out of sight, nothing runs.</strong> A scene scrolled past, or in a panel that is
+          closed, draws and computes nothing, and a replay that was playing is paused. It is
+          drawn again when it comes back, and the play button starts the replay again.</li>
         <li><strong>Nothing is invented.</strong> Where a record does not exist — before 1940 for
           the weather, before 1957 for satellites, orbital elements before 2021 — the field
           stays editable and the interface says which of the two it is.</li>
@@ -1001,6 +1004,9 @@ if (docs) {
           éclairs, reflets d'objectif, ambiances sonores — tout s'arrête avec le lecteur. Une lecture
           en pause est un instant d'observation ; une météo qui continuerait par-dessus serait votre
           pièce, pas la soirée de l'observateur.</li>
+        <li><strong>Hors de vue, rien ne tourne.</strong> Une scène qu'on a fait défiler, ou dans un
+          panneau fermé, ne dessine ni ne calcule rien, et une lecture en cours est mise en pause.
+          Elle est redessinée à son retour, et c'est le bouton de lecture qui relance la lecture.</li>
         <li><strong>Rien n'est inventé.</strong> Là où le relevé n'existe pas — avant 1940 pour la
           météo, avant 1957 pour les satellites, avant 2021 pour les éléments orbitaux —
           le champ reste modifiable et l'interface dit lequel des deux cas s'applique.</li>
@@ -1442,6 +1448,9 @@ if (docs) {
           rayos, los destellos del objetivo, el sonido ambiente: todo se detiene con el reproductor. Una
           reproducción en pausa es un instante de un avistamiento; un tiempo que siguiera corriendo
           encima sería tu propia habitación, no la tarde del observador.</li>
+        <li><strong>Fuera de la vista, nada funciona.</strong> Una escena que se ha dejado atrás, o en
+          un panel cerrado, no dibuja ni calcula nada, y una reproducción en curso se pone en pausa.
+          Se vuelve a dibujar cuando regresa, y el botón de reproducción reanuda la reproducción.</li>
         <li><strong>Nada se inventa.</strong> Donde no existe registro (antes de 1940 para el tiempo,
           antes de 1957 para los satélites, antes de 2021 para los elementos orbitales), el campo
           sigue siendo editable y la interfaz dice cuál de los dos casos es.</li>
@@ -1886,6 +1895,9 @@ if (docs) {
           fulmini, i riflessi dell'obiettivo, il suono ambientale: tutto si ferma con il lettore. Una
           riproduzione in pausa è un istante di un avvistamento; un meteo che continuasse sopra di esso
           sarebbe la tua stanza, non la serata dell'osservatore.</li>
+        <li><strong>Fuori dalla vista, nulla gira.</strong> Una scena che è stata superata scorrendo, o
+          in un pannello chiuso, non disegna né calcola nulla, e una riproduzione in corso viene messa
+          in pausa. Viene ridisegnata al ritorno, e il pulsante di riproduzione riavvia la riproduzione.</li>
         <li><strong>Nulla è inventato.</strong> Dove i dati non esistono (prima del 1940 per il meteo,
           prima del 1957 per i satelliti, prima del 2021 per gli elementi orbitali), il campo
           resta modificabile e l'interfaccia dice quale dei due casi si applica.</li>

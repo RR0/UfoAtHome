@@ -274,6 +274,42 @@ describe("what keeps the animation loop running", () => {
   })
 })
 
+describe("a scene out of sight", () => {
+  function suspendable() {
+    const draws: string[] = []
+    const r = Object.assign(renderer(), {
+      suspended: false, frameDirty: false, contextReleased: false, flushFrameId: null, animationFrameId: null,
+      exposureFrameId: null, scatteredSkyFrameId: null, reflectionTimer: undefined, framesDriven: false, animationsRunning: true,
+      starTiers: [{ brightness: new Float32Array(3) }], sceneVersion: 0,
+      resolution: { noteChange(): void {}, beginDrawing(): void {}, endDrawing(): void {}, update(): undefined { return undefined }, reset(): void {} },
+      skyColoursStale: false, lastAstronomy: undefined, compileBeforeNextDraw: false, compiling: undefined, skyHoldUntilMs: null
+    })
+    return { r, draws }
+  }
+
+  it("keeps no animation loop, even for stars to twinkle", () => {
+    const { r } = suspendable()
+    expect(r.needsAnimationLoop()).toBe(true)
+    r.suspend()
+    expect(r.needsAnimationLoop()).toBe(false)
+    r.suspended = false
+    expect(r.needsAnimationLoop()).toBe(true)
+  })
+
+  it("remembers a change without scheduling a frame for it", () => {
+    const { r } = suspendable()
+    const requested = vi.spyOn(globalThis, "requestAnimationFrame").mockReturnValue(1)
+    try {
+      r.suspend()
+      r.render()
+      expect(r.frameDirty).toBe(true)
+      expect(requested).not.toHaveBeenCalled()
+    } finally {
+      requested.mockRestore()
+    }
+  })
+})
+
 describe("decor that exists only for a while", () => {
   /** A renderer with one moving aircraft whose track starts at 10 s and ends at 20 s. */
   function withAircraft() {

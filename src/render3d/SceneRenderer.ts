@@ -2919,7 +2919,7 @@ export class SceneRenderer {
    */
   private pumpScatteredSky(): void {
     const sky = this.scatteredSky
-    if (!sky || sky.tables.ready || this.scatteredSkyFrameId !== null || this.contextReleased) return
+    if (!sky || sky.tables.ready || this.scatteredSkyFrameId !== null || this.contextReleased || this.suspended) return
     this.scatteredSkyFrameId = requestAnimationFrame(() => {
       this.scatteredSkyFrameId = null
       if (this.contextReleased) return
@@ -3364,6 +3364,8 @@ export class SceneRenderer {
     this.frameDirty = true
     // A change, which the ambient motions (see animate) are not: see AdaptiveResolution.noteChange.
     this.resolution.noteChange(performance.now())
+    // Out of sight, a change is only remembered: resume() draws it.
+    if (this.suspended) return
     // What moves on its own may have changed with this (the camera turned to the Sun, or away).
     this.syncAnimationLoop()
     if (this.animationFrameId !== null || this.framesDriven || this.flushFrameId !== null) return
@@ -3376,7 +3378,7 @@ export class SceneRenderer {
   /** Draws the frame that render() asked for, if any — the single place the scene is drawn from
    * outside an exposure. */
   private drawIfDirty(): void {
-    if (!this.frameDirty || this.contextReleased) return
+    if (!this.frameDirty || this.contextReleased || this.suspended) return
     if (this.skyColoursStale && this.lastAstronomy) this.applySkyColours(this.lastAstronomy)
     if (this.compileBeforeNextDraw) {
       // See compileNextFrameOffThread: the frame stays dirty and is drawn once the programs exist.
@@ -3501,6 +3503,36 @@ export class SceneRenderer {
     this.scatteredSky?.invalidate()
     this.pumpScatteredSky()
     this.compileNextFrameOffThread()
+    this.syncAnimationLoop()
+    this.render()
+  }
+
+  /** Whether the scene is out of sight, and so draws and computes nothing — see suspend. */
+  private suspended = false
+
+  /**
+   * Stops everything this scene does on its own while it is out of the reader's sight: the animation
+   * loop, the frame a change asked for, the pose being developed, the sky's tables being built, the
+   * wait for the next reflection. The graphics context is kept, unlike in releaseContext: a scene
+   * scrolled past comes back, and rebuilding its programs and textures at that moment would be
+   * worse than holding them. Changes made meanwhile are remembered (the frame stays dirty) and
+   * drawn once, by {@link resume}.
+   */
+  suspend(): void {
+    if (this.suspended) return
+    this.suspended = true
+    this.stopTwinkle()
+    this.cancelFlush()
+    this.cancelExposure()
+    this.cancelScatteredSkyPump()
+    clearTimeout(this.reflectionTimer)
+    this.reflectionTimer = undefined
+  }
+
+  resume(): void {
+    if (!this.suspended) return
+    this.suspended = false
+    this.pumpScatteredSky()
     this.syncAnimationLoop()
     this.render()
   }
@@ -4703,8 +4735,8 @@ export class SceneRenderer {
    * `driven` says that the caller will call frame() itself at every animation frame for as long as
    * the animations run — which the player does, from its own tick — so this renderer runs no loop of
    * its own beside it: two loops meant two drawings of every frame. Left false, this renderer's own
-   * loop advances the animations, as the editor needs when it keeps the weather moving over a
-   * paused recording (see SceneElement.animateWhilePaused).
+   * loop advances the animations (nothing in this package asks for that now: the scene's weather
+   * moves only while the recording plays, see SceneElement.syncAnimationsToPlayback).
    *
    * Lightning is not among these: its flashes are on the recording's clock (see setLightning).
    */
@@ -4741,7 +4773,7 @@ export class SceneRenderer {
   }
 
   private needsAnimationLoop(): boolean {
-    return this.animationsRunning && !this.framesDriven && this.hasAnimations()
+    return this.animationsRunning && !this.framesDriven && !this.suspended && this.hasAnimations()
   }
 
   /** Whether anything in the scene moves on its own between two instants of the recording. */
