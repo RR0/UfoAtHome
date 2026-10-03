@@ -276,6 +276,29 @@ describe("OpenMeteoWeatherProvider", () => {
     expect(result!.samples[0].weather.cloudLayers!.map(layer => layer.density)).toEqual([2, 2, 0.35])
   })
 
+  // The cache held the observation computed for the FIRST hour asked of a given place and day, and handed it
+  // back for every other: moving an observation from noon to seven in the morning left the clouds as they were.
+  it("answers each hour of a day it has already fetched with that hour's own record", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        hourly: {
+          ...hourly(),
+          cloud_cover_mid: [10, 90],
+          cloud_cover_high: [0, 50]
+        }
+      })
+    })
+    const provider = new OpenMeteoWeatherProvider({ fetchImpl: fetchMock as unknown as typeof fetch })
+    const at = (hour: number) => new Date(Date.UTC(1965, 6, 1, hour, 0))
+    const mid = async (hour: number) => (await provider.getWeather({ points: [{ lat: 43.8, lng: 6, time: at(hour) }] }))!
+      .samples[0].weather.cloudLayers![1].coverage
+
+    expect(await mid(4)).toBeCloseTo(0.1, 5)
+    expect(await mid(5)).toBeCloseTo(0.9, 5)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
   it("keeps clear bands at zero instead of inserting default cloud coverage", async () => {
     const { provider } = providerReturning(hourly())
     const result = await provider.getWeather({ points: [{ lat: 43.8, lng: 6, time: AT_04 }] })

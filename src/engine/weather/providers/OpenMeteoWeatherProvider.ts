@@ -132,9 +132,13 @@ export interface OpenMeteoWeatherProviderOptions {
 export class OpenMeteoWeatherProvider implements WeatherProvider {
   private readonly fetchImpl: typeof fetch
   private readonly baseUrl: string
-  /** Same query, same answer — the editor re-asks on every debounced date/place edit, and a
-   * reanalysis of 1965 will not have changed since the last keystroke. */
-  private readonly cache = new Map<string, WeatherObservation>()
+  /** Same request, same answer — the editor re-asks on every debounced date/place edit, and a
+   * reanalysis of 1965 will not have changed since the last keystroke. What is kept is the ARCHIVE's
+   * reply to a request (a place and a day), never the sample read from it: a request covers every
+   * hour of its day, and the samples are the hours one question asked about. Keeping those gave the
+   * first hour asked to every later one — an observation moved from noon to seven in the morning
+   * kept the clouds of noon. */
+  private readonly cache = new Map<string, OpenMeteoArchiveResponse[]>()
 
   constructor(options: OpenMeteoWeatherProviderOptions = {}) {
     // fetch.bind(globalThis), not the bare reference — see AwsTerrariumElevationProvider's own
@@ -159,28 +163,27 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
     }
 
     const url = this.requestUrl([...cells.values()], new Date(startMs), new Date(Math.max(...stamps)))
-    const cached = this.cache.get(url)
-    if (cached) return cached
-
-    const response = await this.fetchImpl(url)
-    if (!response.ok) throw new Error(`Open-Meteo HTTP ${response.status}`)
-    const json = (await response.json()) as OpenMeteoArchiveResponse | OpenMeteoArchiveResponse[]
-    // Open-Meteo answers a single location with an object and several with an array — normalized
-    // here so the rest of this reads one way.
-    const perCell = Array.isArray(json) ? json : [json]
-    // An `error` payload is all but always an out-of-range date ("Invalid date" for anything
-    // before 1940, or a date the archive hasn't caught up to yet) — "no record", not "the lookup
-    // broke", so it takes the undefined path rather than throwing.
-    if (perCell.length < cells.size || perCell.some(entry => entry.error || !entry.hourly)) return undefined
+    let perCell = this.cache.get(url)
+    if (!perCell) {
+      const response = await this.fetchImpl(url)
+      if (!response.ok) throw new Error(`Open-Meteo HTTP ${response.status}`)
+      const json = (await response.json()) as OpenMeteoArchiveResponse | OpenMeteoArchiveResponse[]
+      // Open-Meteo answers a single location with an object and several with an array — normalized
+      // here so the rest of this reads one way.
+      perCell = Array.isArray(json) ? json : [json]
+      // An `error` payload is all but always an out-of-range date ("Invalid date" for anything
+      // before 1940, or a date the archive hasn't caught up to yet) — "no record", not "the lookup
+      // broke", so it takes the undefined path rather than throwing.
+      if (perCell.length < cells.size || perCell.some(entry => entry.error || !entry.hourly)) return undefined
+      this.cache.set(url, perCell)
+    }
 
     const source: WeatherSource = { id: "era5", name: "ERA5 (Open-Meteo)", url }
     const samples = query.points.map(point =>
       this.sampleAt(perCell[cells.get(this.cellKey(point))!.index].hourly!, point.time)
     )
     if (samples.some(sample => sample === undefined)) return undefined
-    const observation: WeatherObservation = { samples: samples as WeatherSample[], source }
-    this.cache.set(url, observation)
-    return observation
+    return { samples: samples as WeatherSample[], source }
   }
 
   private cellKey(point: WeatherPoint): string {
