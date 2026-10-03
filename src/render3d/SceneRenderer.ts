@@ -3364,6 +3364,8 @@ export class SceneRenderer {
     this.frameDirty = true
     // A change, which the ambient motions (see animate) are not: see AdaptiveResolution.noteChange.
     this.resolution.noteChange(performance.now())
+    // What moves on its own may have changed with this (the camera turned to the Sun, or away).
+    this.syncAnimationLoop()
     if (this.animationFrameId !== null || this.framesDriven || this.flushFrameId !== null) return
     this.flushFrameId = requestAnimationFrame(() => {
       this.flushFrameId = null
@@ -4685,8 +4687,12 @@ export class SceneRenderer {
     // The loop draws every frame from now on; a one-shot still pending would draw the same frame twice.
     this.cancelFlush()
     const tick = (timeMs: number) => {
+      this.animationFrameId = null
       this.frame(timeMs)
-      this.animationFrameId = requestAnimationFrame(tick)
+      // Asked again after the frame, not assumed: drawing it can have shown that nothing is left to
+      // animate (the Sun's flare gone out of the picture), and the loop then ends here. A frame that
+      // started a loop of its own (syncAnimationLoop) has already set the next one.
+      if (this.animationFrameId === null && this.needsAnimationLoop()) this.animationFrameId = requestAnimationFrame(tick)
     }
     this.animationFrameId = requestAnimationFrame(tick)
   }
@@ -4741,12 +4747,40 @@ export class SceneRenderer {
   /** Whether anything in the scene moves on its own between two instants of the recording. */
   private hasAnimations(): boolean {
     return (
-      this.starTiers.length > 0 ||
+      // Tiers can exist with no star in them (all of them below what the sky lets an eye pick out, by day),
+      // and a tier of nothing twinkles nothing.
+      this.starTiers.some(tier => tier.brightness.length > 0) ||
       this.precipitationPoints !== undefined ||
       this.rainSystem !== undefined ||
-      (this.lensFlare !== undefined && this.sunVisible)
+      this.flareMayShow()
     )
   }
+
+  /** Scratch for flareMayShow, which asks on every change of the scene. */
+  private readonly flareAimScratch = new Vector3()
+
+  /**
+   * Whether the Sun's flare could be on the picture, which is the only time its shimmer (the
+   * artifacts turn with the clock) is something to redraw for.
+   *
+   * It used to be asked as "is there a Sun mesh", which stays true a few degrees under the horizon
+   * and wherever the camera is turned away from it: an editor opened on an empty observation then
+   * redrew the whole picture every frame, forever, of a flare that was not in it. Here it is the
+   * Sun above the horizon and in front of the camera; whether something stands in front of the disc
+   * is left to the draw, which costs a raycast and has to be right, where this only has to be
+   * cheap and never say no to a flare that is drawn.
+   */
+  private flareMayShow(): boolean {
+    if (this.lensFlare === undefined || !this.sunVisible) return false
+    const sun = this.lastAstronomy?.sun
+    if (sun !== undefined && sun.altitudeDeg < SceneRenderer.FLARE_ANIMATION_MIN_ALTITUDE_DEG) return false
+    this.camera.getWorldDirection(this.flareAimScratch)
+    return this.flareAimScratch.dot(this.lensFlareScratch.copy(this.sunWorldPosition).sub(this.camera.position)) > 0
+  }
+
+  /** Below this the Sun is under the horizon whatever the relief: refraction lifts it by about a
+   * half degree, and an observer on a height sees a little further. */
+  private static readonly FLARE_ANIMATION_MIN_ALTITUDE_DEG = -3
 
   /** Starts/stops the shared RAF loop based on the combined "does anything need animating" state —
    * replaces buildStars' own direct startTwinkle()/stopTwinkle() calls, since stars becoming empty

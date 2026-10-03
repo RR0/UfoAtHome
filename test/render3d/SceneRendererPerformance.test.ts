@@ -241,6 +241,39 @@ describe("scene playback resource reuse", () => {
   })
 })
 
+// An editor opened on an empty observation redrew its whole picture sixty to a hundred and twenty times a
+// second for as long as it was open, of a Sun's flare that was under the horizon and out of the picture.
+describe("what keeps the animation loop running", () => {
+  function sunAt(altitudeDeg: number, position: Vector3) {
+    return Object.assign(renderer(), {
+      starTiers: [], precipitationPoints: undefined, rainSystem: undefined,
+      lensFlare: { mesh: {} }, sunVisible: true, sunWorldPosition: position,
+      lastAstronomy: { sun: { altitudeDeg } }, lensFlareScratch: new Vector3(), flareAimScratch: new Vector3()
+    })
+  }
+
+  it("runs for a Sun above the horizon and in front of the camera", () => {
+    expect(sunAt(10, new Vector3(0, 100, -500)).hasAnimations()).toBe(true)
+  })
+
+  it("does not run for a Sun behind the camera", () => {
+    expect(sunAt(10, new Vector3(0, 100, 500)).hasAnimations()).toBe(false)
+  })
+
+  it("does not run for a Sun under the horizon, though its mesh still stands", () => {
+    expect(sunAt(-2.9, new Vector3(0, -20, -500)).hasAnimations()).toBe(true)
+    expect(sunAt(-10, new Vector3(0, -80, -500)).hasAnimations()).toBe(false)
+  })
+
+  it("runs for stars to twinkle, but not for tiers with none in them", () => {
+    const r = sunAt(-30, new Vector3(0, -300, 500))
+    r.starTiers = [{ brightness: new Float32Array(0) }]
+    expect(r.hasAnimations()).toBe(false)
+    r.starTiers = [{ brightness: new Float32Array(0) }, { brightness: new Float32Array(3) }]
+    expect(r.hasAnimations()).toBe(true)
+  })
+})
+
 describe("decor that exists only for a while", () => {
   /** A renderer with one moving aircraft whose track starts at 10 s and ends at 20 s. */
   function withAircraft() {
