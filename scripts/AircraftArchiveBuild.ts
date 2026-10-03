@@ -20,7 +20,18 @@ export class AircraftArchiveBuild {
   constructor(private readonly out: string, private readonly step: number, private readonly source?: string) {}
 
   async run(parts: string[]): Promise<void> {
-    const reader = new TarReader(new ByteStream(this.chunksOf(parts)))
+    // Closed explicitly, whatever happens: the tar reader stops at the end-of-archive marker without reading the
+    // stream to its end, which leaves the generator suspended over an open file. Linux lets that go; Windows
+    // refuses to remove the directory of a file that is still open (CI, windows-latest, Node 20).
+    const chunks = this.chunksOf(parts)
+    try {
+      await this.ingest(new TarReader(new ByteStream(chunks)))
+    } finally {
+      await chunks.return(undefined)
+    }
+  }
+
+  private async ingest(reader: TarReader): Promise<void> {
     let traces = 0
     let read = 0
     let kept = 0
