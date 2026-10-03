@@ -15,6 +15,8 @@ const animationsRunning: boolean[] = []
 const audioPaused: boolean[] = []
 /** What the element told the renderer about being in sight or not. */
 const sightCalls: string[] = []
+/** The offsets the element hands the renderer for the clouds, per tick. */
+const cloudOffsets: { global: { x: number; z: number }; layers: Record<string, { x: number; z: number }> }[] = []
 const thunderPlayed: number[] = []
 /** Every sky the element hands the renderer, so a test can see whether editing the observation
  * actually rebuilt the fall or silently left the previous one standing. */
@@ -47,7 +49,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     resize(): void {}
     setObserverPose(): void {}
     setCloudRendering(): void {}
-    setCloudOffset(): void {}
+    setCloudOffset(global: { x: number; z: number }, layers: Record<string, { x: number; z: number }>): void {
+      cloudOffsets.push({ global, layers })
+    }
     setGait(): void {}
     setTerrainOrigin(): void {}
     setStatedRoads(): void {}
@@ -291,6 +295,48 @@ describe("SceneElement weather follows the player", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
+
+describe("the clouds of a record along the day", () => {
+  const record = { id: "era5", name: "ERA5 (Open-Meteo)", url: "https://example.org/era5" }
+  const layers = [{ id: "record-mid", type: "unknown", baseM: 3500, thicknessM: 800, coverage: 0.6, sizeM: 2500, density: 1 }]
+  const weather = { cloudLayers: layers, cloudCover: 0.6, windSpeed: 10, windDirectionDeg: 90 }
+
+  /** The offset of the middle layer at the start of an observation at `hour` UTC. */
+  function offsetAt(hour: number, source: boolean, extra: object = {}): { x: number; z: number } {
+    const element = document.createElement(SCENE_ELEMENT_NAME) as SceneElement
+    document.body.appendChild(element)
+    cloudOffsets.length = 0
+    element.sightingData = {
+      ...rainyJson,
+      time: { year: 2026, month: 10, day: 3, hour, minute: 0 },
+      utcOffsetHours: 0,
+      place: [{ lat: 48.9, lng: 2.2 }],
+      weatherTrack: { keyframes: [{ t: 0, weather }] },
+      ...(source ? { weatherSource: record } : {}),
+      ...extra
+    } as never
+    element.ufoElement.currentTime = 0
+    const last = cloudOffsets.at(-1)!
+    element.remove()
+    return last.layers["record-mid"]
+  }
+
+  it("drifts them with the wind as the hours go by, when the weather is a record's", () => {
+    const noon = offsetAt(12, true)
+    const one = offsetAt(13, true)
+    expect(noon.x - one.x).toBeCloseTo(36_000, -1)
+  })
+
+  it("leaves a sky somebody wrote where it is, whatever the hour", () => {
+    expect(offsetAt(12, false)).toEqual(offsetAt(13, false))
+  })
+
+  it("leaves a layer holding clouds somebody placed where they put them", () => {
+    const held = [{ ...layers[0], instances: [{ id: "c", eastM: 0, northM: 1000, baseM: 3500, thicknessM: 800, widthM: 1500, depthM: 1500, rotationDeg: 0, density: 1 }] }]
+    const track = { keyframes: [{ t: 0, weather: { ...weather, cloudLayers: held } }] }
+    expect(offsetAt(12, true, { weatherTrack: track })).toEqual(offsetAt(13, true, { weatherTrack: track }))
+  })
+})
 
 describe("a scene out of sight", () => {
   let notify: (visible: boolean) => void

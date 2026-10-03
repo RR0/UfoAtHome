@@ -2,7 +2,7 @@ import { VehicleAudio } from "../audio/VehicleAudio.js"
 import { VehicleHearing } from "../engine/place/VehicleHearing.js"
 import { resolveCloudLayers } from "../engine/model/CloudLayer.js"
 import type { CloudRendering } from "../render3d/LayeredCloudSystem.js"
-import { cloudOffsetAt } from "../render3d/CloudMotion.js"
+import { cloudOffsetAt, cloudPrerollAt } from "../render3d/CloudMotion.js"
 import { html, css } from "./sceneTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { UfoElement, registerUfo, UFO_ELEMENT_NAME, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
@@ -1364,9 +1364,15 @@ export class SceneElement extends HTMLElement {
       pose?.lat !== undefined && pose.lng !== undefined ? { lat: pose.lat, lng: pose.lng } : undefined)
     const cloudOrigin = resolveObserverPoseAt(sighting, 0)
     const initialWeather = resolveWeatherAt(sighting, 0)
+    // A record knows how much of the sky each layer covered, not where: its clouds are drifted along
+    // the day by its wind (see CloudPreroll). A layer holding clouds somebody placed is left where
+    // they put them, which is the same time zero as the instances' own positions.
+    const cloudStart = sightingTimeToDate(sighting.event.time ?? {}, pose?.lng ?? DEFAULT_OBSERVER_POSE.lng!, sighting.event.utcOffsetHours)
+    const preroll = sighting.weatherSource !== undefined && cloudStart ? cloudPrerollAt(cloudStart) : undefined
     const layerOffsets = Object.fromEntries(resolveCloudLayers(resolveWeatherAt(sighting, t)).map(layer =>
-      [layer.id, cloudOffsetAt(t, sighting.weatherTrack, initialWeather, cloudOrigin, pose, layer.id)]))
-    this.sceneRenderer.setCloudOffset(cloudOffsetAt(t, sighting.weatherTrack, initialWeather, cloudOrigin, pose), layerOffsets)
+      [layer.id, cloudOffsetAt(t, sighting.weatherTrack, initialWeather, cloudOrigin, pose, layer.id,
+        layer.instances?.length ? undefined : preroll)]))
+    this.sceneRenderer.setCloudOffset(cloudOffsetAt(t, sighting.weatherTrack, initialWeather, cloudOrigin, pose, undefined, preroll), layerOffsets)
     this.sceneRenderer.setObserverPose(pose ?? DEFAULT_OBSERVER_POSE)
     this.sceneRenderer.setLensOptics(this.lensOpticsAt(t))
     // What that instrument could actually have RECORDED, which is a second thing entirely from how

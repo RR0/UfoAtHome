@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { Color } from "three"
 import { DEFAULT_WEATHER } from "../../src/engine/model/Weather.js"
 import { WeatherTrack } from "../../src/engine/model/WeatherTrack.js"
-import { cloudOffsetAt } from "../../src/render3d/CloudMotion.js"
+import { cloudOffsetAt, cloudPrerollAt } from "../../src/render3d/CloudMotion.js"
 import { buildCloudMaterial, CloudField } from "../../src/render3d/CloudSystem.js"
 
 describe("cloud motion", () => {
@@ -58,5 +58,49 @@ describe("cloud motion", () => {
       expect(material.fragmentShader).toContain("dir * t + fieldOffset")
       material.dispose()
     }
+  })
+
+  describe("the drift a record's clouds have had since the start of the day", () => {
+    const wind = { ...DEFAULT_WEATHER, windSpeed: 10, windDirectionDeg: 90 }
+    const at = (hour: number, day = 3) => cloudPrerollAt(new Date(Date.UTC(2026, 9, day, hour)))
+
+    it("counts the hours since midnight UTC", () => {
+      expect(at(0).elapsedMs).toBe(0)
+      expect(at(5).elapsedMs).toBe(5 * 3_600_000)
+    })
+
+    it("moves the pattern at the wind's speed as the hours go by", () => {
+      const noon = cloudOffsetAt(0, new WeatherTrack(), wind, undefined, undefined, undefined, at(12))
+      const one = cloudOffsetAt(0, new WeatherTrack(), wind, undefined, undefined, undefined, at(13))
+      // 10 m/s toward the east, for an hour: 36 km, the field sliding the other way.
+      expect(noon.x - one.x).toBeCloseTo(36_000)
+      expect(noon.z - one.z).toBeCloseTo(0)
+    })
+
+    it("leaves the pattern where it was without a preroll, and moves it on from there during the recording", () => {
+      const without = cloudOffsetAt(60_000, new WeatherTrack(), wind)
+      const withIt = cloudOffsetAt(60_000, new WeatherTrack(), wind, undefined, undefined, undefined, at(0))
+      expect(without.x).toBeCloseTo(-600)
+      expect(withIt.x - without.x).toBeCloseTo(at(0).shiftM.x)
+    })
+
+    it("sets one day's pattern apart from the next's, and keeps a day's own", () => {
+      expect(at(12, 3).shiftM).toEqual(at(1, 3).shiftM)
+      expect(at(12, 3).shiftM).not.toEqual(at(12, 4).shiftM)
+      for (const day of [1, 2, 3, 4, 5, 6, 7]) {
+        expect(Math.abs(at(0, day).shiftM.x)).toBeLessThanOrEqual(40_000)
+        expect(Math.abs(at(0, day).shiftM.z)).toBeLessThanOrEqual(40_000)
+      }
+    })
+
+    it("uses the layer's own wind when it states one", () => {
+      const track = new WeatherTrack()
+      const weather = { ...wind, cloudLayers: [{ id: "high", type: "cirrus" as const, baseM: 8000, thicknessM: 400, coverage: 1, sizeM: 2200, density: 1, windSpeed: 30, windDirectionDeg: 90 }] }
+      const zero = at(0)
+      const layer = cloudOffsetAt(0, track, weather, undefined, undefined, "high", { elapsedMs: 3_600_000, shiftM: zero.shiftM })
+      const general = cloudOffsetAt(0, track, weather, undefined, undefined, undefined, { elapsedMs: 3_600_000, shiftM: zero.shiftM })
+      expect(zero.shiftM.x - layer.x).toBeCloseTo(108_000)
+      expect(zero.shiftM.x - general.x).toBeCloseTo(36_000)
+    })
   })
 })

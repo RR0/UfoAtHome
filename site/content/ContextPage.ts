@@ -167,6 +167,10 @@ export class ContextPage implements SitePage {
       ERA5, the ECMWF reanalysis: hourly, worldwide, from 1940 on (for the last five days, which it has
       not caught up with, the forecast model's own analysis). They are keyframed along the
       observation, so a sky that cleared during those four minutes clears in the reconstruction.</p>
+    <p>A record says how much of the sky each layer covered, never where: the arrangement of the clouds
+      is the reconstruction's own. It is drifted along the day by the record's wind and set apart from
+      one day to the next, so that scrolling through the hours shows clouds that move and change, but
+      it is not a picture of the clouds that were there.</p>
     <p>Cloud attenuates every celestial body rather than merely covering it, which is what makes a
       Moon behind thin cloud read as a Moon behind thin cloud.</p>
     <p>The exact query is kept in the recording. That is the part that matters: the claim stays
@@ -363,6 +367,10 @@ export class ContextPage implements SitePage {
       qu'elle n'a pas rattrapés, l'analyse du modèle de prévision). Ils sont keyframés le
       long de l'observation, si bien qu'un ciel qui s'est dégagé pendant ces quatre minutes se
       dégage aussi dans la reconstitution.</p>
+    <p>Un relevé dit quelle part du ciel chaque couche couvrait, jamais où : la disposition des nuages
+      est celle de la reconstitution. Elle dérive au fil de la journée avec le vent du relevé et diffère
+      d'un jour à l'autre, si bien qu'en faisant défiler les heures on voit des nuages bouger et
+      changer, mais ce n'est pas une image des nuages qui étaient là.</p>
     <p>Les nuages atténuent chaque astre au lieu de simplement le couvrir, et c'est ce qui fait
       qu'une Lune derrière un voile se lit comme une Lune derrière un voile.</p>
     <p>La requête exacte est conservée dans l'enregistrement. C'est la partie qui compte :
@@ -561,6 +569,10 @@ export class ContextPage implements SitePage {
       no ha alcanzado, el análisis del modelo de previsión). Se
       interpolan por fotogramas clave a lo largo de la observación, así que un cielo que se despejó
       durante esos cuatro minutos se despeja en la reconstrucción.</p>
+    <p>Un registro dice qué parte del cielo cubría cada capa, nunca dónde: la disposición de las nubes
+      es la de la reconstrucción. Deriva a lo largo del día con el viento del registro y difiere de un
+      día a otro, de modo que al recorrer las horas se ven nubes que se mueven y cambian, pero no es
+      una imagen de las nubes que había.</p>
     <p>Las nubes atenúan cada cuerpo celeste en lugar de limitarse a taparlo, que es lo que hace que
       una Luna tras nubes finas se lea como una Luna tras nubes finas.</p>
     <p>La consulta exacta se guarda en la grabación. Esa es la parte que importa: la afirmación sigue
@@ -760,6 +772,10 @@ export class ContextPage implements SitePage {
       ancora raggiunto, l'analisi del modello di previsione). Sono interpolati per
       fotogrammi chiave lungo l'osservazione, così che un cielo che si è rasserenato durante quei
       quattro minuti si rasserena nella ricostruzione.</p>
+    <p>Un dato dice quanta parte del cielo ogni strato coprisse, mai dove: la disposizione delle nubi è
+      quella della ricostruzione. Deriva lungo la giornata con il vento del dato e differisce da un
+      giorno all'altro, così scorrendo le ore si vedono nubi che si muovono e cambiano, ma non è
+      un'immagine delle nubi che c'erano.</p>
     <p>Le nuvole attenuano ogni corpo celeste invece di coprirlo soltanto, ed è ciò che fa sì che una
       Luna dietro nubi sottili si legga come una Luna dietro nubi sottili.</p>
     <p>La richiesta esatta è conservata nella registrazione. È la parte che conta: l'affermazione
