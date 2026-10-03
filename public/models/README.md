@@ -78,7 +78,7 @@ One or more stylised low-poly models for every decor kind:
 | streetlight | curved-arm street lamp | Kenney, City Kit Roads 2.0 (CC0) |
 | aircraft | narrow-body airliner | Poly by Google (CC BY 3.0) |
 | observer, entity | five realistic people in plain country clothes | MakeHuman system assets (CC0), built by `scripts/people/build_people.py` |
-| entity | the Valensole being, after Maurice Masse's account (child's body, head three times the volume, no helmet) | MakeHuman system assets (CC0), built by `scripts/people/build_people.py` |
+| entity | the Valensole man (2 July 1965) and being (18 August 1965), one per procès-verbal | MakeHuman system assets (CC0), built by `scripts/people/build_people.py` |
 | aircraft | the Socorro craft, a stand-in after Lonnie Zamora's account, with either insignia | UFO@home (CC0), built by `scripts/build-socorro-craft.ts` |
 
 Every one of them is a placeholder and the picker says so: right KIND, no particular model, make or

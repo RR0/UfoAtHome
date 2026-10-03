@@ -36,9 +36,10 @@ asset packs are NOT all CC0: use none without checking its licence file by file.
 
    (the first step paints the logo out with a patch of plain fabric, the others turn the top olive).
 
-4. The Valensole being's suit. `clothes/male_coverall01/` is a copy of `male_casualsuit01` (files renamed,
+4. The Valensole beings' suits. `clothes/male_coverall01/` (grey-green, for 2 July) and `clothes/male_coverall02/` (darker, for 18 August: "assez foncée") are copies of `male_casualsuit01` (files renamed,
    `casualsuit01` replaced by `coverall01` in the `.mhclo` and `.mhmat`) whose diffuse texture is replaced by a
-   plain grey-green with a little grain, so that no jeans, belt or logo shows:
+   plain colour with a little grain, so that no jeans, belt or logo shows (`#7d8574` for the first, `#4b5147`
+   for the second):
 
    ```
    magick -size 2048x2048 xc:'#7d8574' -attenuate 0.35 +noise Gaussian -blur 0x0.8 -depth 8 -alpha off \
@@ -57,9 +58,9 @@ Blender needs the GPU even in the background, so it does not start inside a sand
 The output is one GLB per person: standing, arms down (the rig's arms are dropped 38 degrees), geometry
 baked at that pose, no skeleton, 512 px textures, scaled to the height written in `PEOPLE`.
 
-The being (`BEING`, id `valensole-being`) adds MPFB targets for the ears, cheeks, mouth and eyes, and
+The beings (`BEING_PV_0702`, `BEING_PV_0818`, one per procès-verbal) add MPFB targets for the ears, mouth and chin, and
 `reshape_head`, which scales every vertex above the neck by the cube root of the volume ratio and sinks
-the head into the shoulders; see the comment above `BEING` for what is the account's and what is assumed.
+the head into the shoulders; see the comments above each for what the procès-verbal says and what is assumed.
 
 What is chosen there is ASSUMED (ages, builds, clothes): these are nobody's likeness and say nothing
 about any witness.

@@ -18,14 +18,25 @@ mark); every texture is reduced to 512 px; the triangles of the body, clothes an
 | `man-jacket.glb` | Man in a green jacket and jeans |
 | `old-man.glb` | Old man, striped shirt |
 | `woman.glb` | Woman, plain top and jeans |
-| `valensole-being.glb` | One of the two beings Maurice Masse reported at Valensole, 1965 (see below) |
+| `valensole-being-pv-1965-07-02.glb` | The man Maurice Masse described on 2 July 1965 (see below) |
+| `valensole-being-pv-1965-08-18.glb` | The beings he described on 18 August 1965 (see below) |
 
-## The Valensole being
+## The Valensole beings
 
-A stand-in built from the account (the dossier page on rr0.org), not from any illustration: about 1 m
-tall, a head three times a human head's volume, set into the shoulders without a neck, bald, white skin,
-long ears, prominent cheekbones, a small round mouth, large black eyes, a small nose, a globular head (he later compared it to a pumpkin), a tight one-piece grey-green suit. Stocky ("de forte corpulence") and bare-headed ("tête nue"), as the gendarmerie's summary of 2 July
-1965 puts it; no version of the account mentions a helmet. Assumed, because the account does not say: the child's
-build, the exact grey-green, and the standing pose. The skin is kept pale and smooth: "bronzée" is a later
-journalistic image, not Masse's word. Its suit is the pack's `male_casualsuit01`
-with its texture replaced by a plain grey-green, so that it carries no jeans, belt or logo.
+Two stand-ins, one per procès-verbal the gendarmerie wrote (GEIPAN, "PV n° 445" and "PV n° 145"), because
+the two statements do not describe the same being.
+
+- **2 July 1965** (`valensole-being-pv-1965-07-02.glb`): "un homme était déjà à terre", "habillé d'une
+  combinaison semble-t-il, tête nue, les mains vides", "d'environ un mètre, mais de corpulence assez
+  importante", "de type européen". An adult man's proportions, a metre tall, stocky, an ordinary face and
+  short hair, in a grey-green suit. Assumed: his age, his hair (bare-headed says no hat, not no hair), the
+  colour of the suit.
+- **18 August 1965** (`valensole-being-pv-1965-08-18.glb`): "n'atteignaient pas un mètre", "une tête en forme
+  de potiron d'un volume égal à trois fois la tête d'un homme normal", "des oreilles assez grandes, pas de
+  menton, un trou rond à la place de notre bouche, des yeux [...] ressembler aux nôtres mais sans sourcils",
+  "un grand crâne sans aucun cheveu", "leur peau était lisse", "leur carrure était à peine plus large que leur
+  tête", "la tête rentrée dans les épaules", "une combinaison assez foncée d'une seule pièce". Assumed: the
+  child's build, the colour of the eyes, the shoes ("je n'ai pas fait attention à leurs pieds").
+
+Nothing is drawn that neither procès-verbal says: the large black eyes, prominent cheekbones, pointed ears
+and tiny nose that later retellings add are in neither, and the second says the opposite for the eyes.

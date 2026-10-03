@@ -60,42 +60,44 @@ PEOPLE = [
          eyebrows="eyebrow004", eyelashes="eyelashes01"),
 ]
 
-# The beings seen at Valensole, after Maurice Masse's account (the dossier page on rr0.org): "1 m
-# environ", "morphologie générale proche de la nôtre", a head "anormalement grosse par rapport au
-# corps (3 fois celle d'un humain)", bald, white skin, long ears, prominent fleshy cheekbones, a small
-# round mouth, "presque pas de cou tant leur tête était rentrée dans les épaules", eyes that move,
-# one-piece grey-green suits. Nothing on the head: no helmet is reported in any version (the only
-# helmet is the "American helicopter pilot" hypothesis, which is an interpretation of its own).
-# Later precisions (from a statement of his, source to be cited): "environ un mètre" or "1 m à 1,10 m", faces
-# without hair, an unusual, unwrinkled skin, a globular head he later compared to a pumpkin, large black eyes
-# and no ordinary human features. "Tanned" is a later journalistic image, not his word, so the skin stays pale.
-# The 2 July 1965 gendarmerie summary says "taille 1 m environ, de forte corpulence, vêtu d'une combinaison,
-# tête nue": stocky, in a suit, bare-headed.
-# ASSUMED: a child's body at about 8 years (the account gives no build), eye size, the exact grey-green,
-# and a standing pose (he first saw them crouched).
+# The beings seen at Valensole are drawn from what Maurice Masse said to the gendarmerie, in the two
+# statements the procès-verbaux record (below), and from nothing said elsewhere: a face described only
+# by later retellings (large black eyes, prominent cheekbones, a pointed ear, a very small nose) is not
+# in them, and the procès-verbal of 18 August says the opposite for the eyes.
 HEAD_VOLUME_RATIO = 3.0
-BEING = dict(id="valensole-being", name="Valensole being, after Maurice Masse's account", gender=1.0, age=0.15,
-             weight=0.8, muscle=0.4, heightM=1.0, skin="young_caucasian_male",
-             clothes=["male_coverall01"], shoes="shoes03", hair=None, eyebrows=None, eyelashes=None,
-             targets={"ears/l-ear-scale-vert-incr": 1.0, "ears/r-ear-scale-vert-incr": 1.0,
-                      "ears/l-ear-scale-incr": 1.0, "ears/r-ear-scale-incr": 1.0,
-                      "ears/l-ear-wing-incr": 1.0, "ears/r-ear-wing-incr": 1.0,
-                      "ears/l-ear-shape-pointed": 0.8, "ears/r-ear-shape-pointed": 0.8,
-                      "cheek/l-cheek-bones-incr": 1.0, "cheek/r-cheek-bones-incr": 1.0,
-                      "cheek/l-cheek-volume-incr": 1.0, "cheek/r-cheek-volume-incr": 1.0,
-                      "mouth/mouth-scale-horiz-decr": 1.0, "mouth/mouth-scale-vert-decr": 1.0,
-                      "mouth/mouth-lowerlip-volume-decr": 0.6, "mouth/mouth-upperlip-volume-decr": 0.6,
-                      "eyes/l-eye-scale-incr": 2.0, "eyes/r-eye-scale-incr": 2.0,
-                      "eyes/l-eye-trans-out": 0.6, "eyes/r-eye-trans-out": 0.6,
-                      "eyes/l-eye-height1-incr": 1.0, "eyes/r-eye-height1-incr": 1.0,
-                      "eyes/l-eye-height2-incr": 1.0, "eyes/r-eye-height2-incr": 1.0,
-                      "nose/nose-scale-vert-decr": 0.4, "nose/nose-scale-horiz-decr": 0.4,
-                      "nose/nose-scale-depth-decr": 0.4, "nose/nose-volume-decr": 0.3,
-                      "head/head-round": 1.0, "head/head-scale-horiz-incr": 0.6,
-                      "chin/chin-width-decr": 1.0, "chin/chin-height-decr": 0.5},
-             black_eyes=True,
-             head=dict(volumeRatio=HEAD_VOLUME_RATIO, sinkShare=0.4, girth=(1.3, 1.2)))
-PEOPLE.append(BEING)
+
+# The two statements the gendarmerie wrote down (GEIPAN, PV n° 445 of 2 July 1965 and n° 145 of 18 August,
+# closed on 23 August), which do not describe the same being.
+#
+# 2 July: "un homme était déjà à terre. Il était habillé d'une combinaison semble-t-il, tête nue, les mains
+# vides", "d'environ un mètre, mais de corpulence assez importante", and "il me semble qu'ils étaient de
+# type européen". Said of a MAN: so an ordinary adult man's proportions, a metre tall, stocky, with an
+# ordinary face. ASSUMED: his age, his hair (bare-headed says no hat, not no hair), the colour of the suit.
+BEING_PV_0702 = dict(id="valensole-being-pv-1965-07-02", name="Valensole man, as told on 2 July 1965", gender=1.0, age=0.5,
+                     weight=0.75, muscle=0.5, heightM=1.0, skin="young_caucasian_male",
+                     clothes=["male_coverall01"], shoes="shoes03", hair="short02", eyebrows="eyebrow001",
+                     eyelashes=None)
+PEOPLE.append(BEING_PV_0702)
+
+# 18 August: "ces deux êtres n'atteignaient pas un mètre de hauteur", "une tête en forme de potiron d'un
+# volume égal à trois fois la tête d'un homme normal", "des oreilles assez grandes, pas de menton, un trou
+# rond à la place de notre bouche, des yeux qui m'ont semblé ressembler aux nôtres mais sans sourcils", "un
+# grand crâne sans aucun cheveu, leur peau était lisse, sans barbe", "leur carrure était à peine plus large
+# que leur tête", "la tête rentrée dans les épaules", "une combinaison assez foncée d'une seule pièce".
+# ASSUMED: the child's build, the eyes' colour, their shoes ("je n'ai pas fait attention à leurs pieds").
+BEING_PV_0818 = dict(id="valensole-being-pv-1965-08-18", name="Valensole being, as told on 18 August 1965", gender=1.0,
+                     age=0.15, weight=0.25, muscle=0.15, heightM=0.95, skin="young_caucasian_male",
+                     clothes=["male_coverall02"], shoes="shoes03", hair=None, eyebrows=None, eyelashes=None,
+                     targets={"ears/l-ear-scale-vert-incr": 1.0, "ears/r-ear-scale-vert-incr": 1.0,
+                              "ears/l-ear-scale-incr": 1.0, "ears/r-ear-scale-incr": 1.0,
+                              "ears/l-ear-wing-incr": 1.0, "ears/r-ear-wing-incr": 1.0,
+                              "mouth/mouth-scale-horiz-decr": 1.0, "mouth/mouth-scale-vert-decr": 1.0,
+                              "mouth/mouth-lowerlip-volume-decr": 0.6, "mouth/mouth-upperlip-volume-decr": 0.6,
+                              "chin/chin-prominent-decr": 1.0, "chin/chin-height-decr": 1.0,
+                              "chin/chin-width-decr": 0.5, "chin/chin-bones-decr": 1.0,
+                              "head/head-round": 1.0, "head/head-scale-horiz-incr": 0.6},
+                     head=dict(volumeRatio=HEAD_VOLUME_RATIO, sinkShare=0.4, girth=(0.85, 0.9)))
+PEOPLE.append(BEING_PV_0818)
 
 
 def mhclo(assets, kind, name):
@@ -282,20 +284,6 @@ def reshape_head(baked, head):
     return scale
 
 
-def blacken_eyes():
-    """\"De grands yeux noirs\": the eye asset's material is a textured eyeball (white, iris, pupil);
-    its colour is cut loose from the texture and set to black, glossy like a wet surface."""
-    for material in bpy.data.materials:
-        if "low-poly" not in material.name.lower() or not material.node_tree:
-            continue
-        for node in material.node_tree.nodes:
-            if node.type == "BSDF_PRINCIPLED":
-                for link in list(node.inputs["Base Color"].links):
-                    material.node_tree.links.remove(link)
-                node.inputs["Base Color"].default_value = (0.01, 0.01, 0.012, 1.0)
-                node.inputs["Roughness"].default_value = 0.15
-
-
 def shrink_textures():
     for image in bpy.data.images:
         if image.size[0] > TEXTURE_PX or image.size[1] > TEXTURE_PX:
@@ -353,8 +341,6 @@ def main():
         drop_arms(rig)
         family = [basemesh] + [o for o in set(basemesh.children_recursive) | set(rig.children_recursive) if o is not basemesh]
         make_opaque()
-        if spec.get("black_eyes"):
-            blacken_eyes()
         shrink_textures()
         baked = bake(family)
         if spec.get("head"):
