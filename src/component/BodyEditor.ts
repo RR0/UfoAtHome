@@ -150,6 +150,10 @@ export class BodyEditor {
     for (const id of ["body-key-azimuth", "body-key-elevation", "body-key-distance"]) this.input(id).closest("label")!.hidden = shown !== "observer"
     for (const id of ["body-key-east", "body-key-north"]) this.input(id).closest("label")!.hidden = shown !== "world"
     this.input("body-key-above").closest("label")!.hidden = shown !== "world" || onGround
+    // Only the built-in shapes are painted: a model keeps the materials of its file, so a colour
+    // picked for it would change nothing (see BodySystem.build).
+    const drawnFromModel = body.model.url !== undefined || !(BODY_PRIMITIVES as readonly string[]).includes(body.model.id ?? "")
+    this.input("body-key-colour").closest("label")!.hidden = drawnFromModel
     if (!reading) return
     const values: Record<string, number> = {
       "body-key-azimuth": reading.azimuthDeg, "body-key-elevation": reading.altitudeDeg, "body-key-distance": reading.distanceM,

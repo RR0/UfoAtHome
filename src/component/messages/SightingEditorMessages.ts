@@ -623,6 +623,8 @@ export interface SightingEditorMessages extends SightingLabels {
    * shape/source as a checkbox (see DecorObject.occludesSourceIds), which needs no translation of
    * its own since each entry is just that shape's own name/sourceId. */
   masks: string
+  /** The Masks flyout's own line when the recording has no shape yet, so it never opens as an empty bar. */
+  masksNone: string
   /** Button in the Observer group that adds a new "other observer" decor object (see
    * SightingEditorElement's addDecorObserverButton) — distinct from decorObserver, that dropdown
    * option's own (now-hidden) label. */

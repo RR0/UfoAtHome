@@ -279,6 +279,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   viewAccount: "View the account",
   noObserverRecording: "No recording URL set for this observer",
   masks: "Masks",
+  masksNone: "No phenomenon to mask yet",
   addObserver: "Add observer",
   narrativePlaceholder: "What the observer reported, in their own words",
   narrativeSource: "Drafted by",

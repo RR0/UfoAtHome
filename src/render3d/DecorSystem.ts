@@ -1189,7 +1189,9 @@ export class DecorSystem {
    * meshes this used to walk straight past and leak. */
   static dispose(group: Object3D): void {
     group.traverse(child => {
-      if (!(child instanceof Mesh)) return
+      // A cloned model's meshes share the loaded file's resources with the next build (see
+      // SceneRenderer.reuseLoadedDecorModel); disposing them would blank every later copy.
+      if (!(child instanceof Mesh) || child.userData.sharedModel) return
       child.geometry.dispose()
       const material = child.material
       for (const one of Array.isArray(material) ? material : [material]) one.dispose()

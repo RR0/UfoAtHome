@@ -969,6 +969,17 @@ export class SceneElement extends HTMLElement {
     return this.sceneRenderer.pickDecorAt(ndcX, ndcY)
   }
 
+  /** The rectangle a decor object covers on the picture — see SceneRenderer.decorScreenBox. */
+  decorScreenBox(id: string): { minX: number, minY: number, maxX: number, maxY: number } | undefined {
+    return this.sceneRenderer.decorScreenBox(id)
+  }
+
+  /** Where a point of the picture meets the ground the decor object stands on — see
+   * SceneRenderer.decorGroundPointAt. */
+  decorGroundPointAt(id: string, ndcX: number, ndcY: number): { x: number, z: number } | undefined {
+    return this.sceneRenderer.decorGroundPointAt(id, ndcX, ndcY)
+  }
+
   /** The rectangle a body covers on the picture — see SceneRenderer.bodyScreenBox. */
   bodyScreenBox(id: string): { minX: number, minY: number, maxX: number, maxY: number } | undefined {
     return this.sceneRenderer.bodyScreenBox(id)

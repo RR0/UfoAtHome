@@ -181,6 +181,9 @@ const MAX_LEGAL_SOLAR_OFFSET_GAP_HOURS = 3
  * across the canvas's own 640px internal width is ~130deg, a reasonable full sweep without being
  * so twitchy that fine-tuning a heading/pitch by hand becomes fiddly. */
 const CAMERA_DRAG_DEG_PER_PX = 0.2
+/** How far a decor object's heading turns per canvas pixel its rotation handle is dragged: a
+ * heading wants the whole circle within a few drags, unlike the fine sweep of the view. */
+const DECOR_ROTATE_DEG_PER_PX = 0.5
 /** How far, in canvas pixels, a press may wander and still be a click rather than the start of a
  * drag of the view — a click on a decor object selects it, a drag turns the view. */
 const CAMERA_DRAG_CLICK_TOLERANCE_PX = 3
@@ -212,7 +215,23 @@ const DEFAULT_APPEARANCE: Appearance = { presetId: "oval", color: "#39ff14", tra
  * every one of these names is turned into an actual cursor by a plain CSS rule (see
  * ufoTemplate's own canvas[data-cursor] block) rather than by assigning style.cursor here. */
 /** What the canvas edits — see SightingEditorElement.canvasMode. */
-type CanvasMode = "picture" | "shape" | "body" | "scene"
+type CanvasMode = "picture" | "shape" | "body" | "decor" | "scene"
+
+/**
+ * What a frame of handles on the picture edits. A body and a decor object are framed, sized and
+ * turned the same way (see beginFrameDrag); they differ in what the numbers are written to, and in
+ * what turning means: a body has a heading, a pitch and a roll, a decor object only a heading.
+ */
+interface FrameTarget {
+  /** The frame on the canvas, in canvas pixels, when the thing is on the picture. */
+  bounds(): ShapeBounds | undefined
+  /** What it is sized at now, and how it is turned now, or nothing while it cannot be edited. */
+  reading(): { sizeM: { widthM: number; lengthM: number; heightM: number }; attitude: { headingDeg: number; pitchDeg: number; rollDeg: number } } | undefined
+  resize(sizeM: { widthM: number; lengthM: number; heightM: number }): void
+  turnTo(attitude: { headingDeg: number; pitchDeg: number; rollDeg: number }): void
+  /** Degrees of turn per canvas pixel dragged on the rotation handle. */
+  rotateDegPerPx: number
+}
 type CanvasCursor = "record" | "select" | "move" | "vertex" | "pan" | "panning" | "landmark" | "rotate" | `resize-${ResizeAxis}`
 
 /** Best-effort reverse mapping from a recorded/loaded shape back to a preset id, so the preset
@@ -837,8 +856,9 @@ export class SightingEditorElement extends HTMLElement {
     | { kind: "resize" | "rotate"; sourceId: string; original: Shape; handle: HandleId; startPointer: { x: number; y: number } }
     | { kind: "vertex"; sourceId: string; original: PolygonShape; vertexIndex: number }
     | { kind: "body"; pointerAzimuthDeg: number; pointerAltitudeDeg: number; bodyAzimuthDeg: number; bodyAltitudeDeg: number }
-    | { kind: "body-resize"; handle: Exclude<HandleId, "rotate">; centre: { x: number; y: number }; startPointer: { x: number; y: number }; startSizeM: { widthM: number; lengthM: number; heightM: number } }
-    | { kind: "body-rotate"; startPointer: { x: number; y: number }; startAttitude: { headingDeg: number; pitchDeg: number; rollDeg: number } }
+    | { kind: "frame-resize"; target: FrameTarget; handle: Exclude<HandleId, "rotate">; centre: { x: number; y: number }; startPointer: { x: number; y: number }; startSizeM: { widthM: number; lengthM: number; heightM: number } }
+    | { kind: "frame-rotate"; target: FrameTarget; startPointer: { x: number; y: number }; startAttitude: { headingDeg: number; pitchDeg: number; rollDeg: number } }
+    | { kind: "decor-move"; id: string; startEastM: number; startNorthM: number; startGround: { x: number; z: number } }
     | { kind: "group-resize"; group: ShapeGroup; handle: Exclude<HandleId, "rotate"> }
     | { kind: "group-rotate"; group: ShapeGroup; startPointer: { x: number; y: number } }
 
@@ -5008,6 +5028,8 @@ export class SightingEditorElement extends HTMLElement {
     // The Bodies part of the group moves the bodies (see beginBodyDrag); the Shapes part the shapes.
     if (this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-bodies")?.hidden === false) return "body"
     if (this.isGroupIdOpen("group-shape")) return "shape"
+    // The Environment group frames the object it has selected, as the Bodies part does a body.
+    if (this.isGroupIdOpen("group-decor") && this.editableDecor() !== undefined) return "decor"
     return "scene"
   }
 
@@ -5020,7 +5042,7 @@ export class SightingEditorElement extends HTMLElement {
     // What is selected on the canvas is what the canvas edits: the shapes' handles in their own
     // group, the picture's frame and landmarks in its own, nothing elsewhere.
     this.ufoElement.selectionShown = mode === "shape"
-    this.ufoElement.overlayPainter = pictureNow ? this.paintPictureOverlay : mode === "body" ? this.paintBodyOverlay : undefined
+    this.ufoElement.overlayPainter = pictureNow ? this.paintPictureOverlay : mode === "body" ? this.paintBodyOverlay : mode === "decor" ? this.paintDecorOverlay : undefined
     if (changed) this.ufoElement.refresh()
     // Click-to-play is off for the whole editor already (see the constructor): the canvas is for
     // editing here, whichever mode it is in.
@@ -6438,6 +6460,26 @@ export class SightingEditorElement extends HTMLElement {
     this.currentDecorId = decor.id
     this.refreshDecorList()
     this.ufoElement.refresh()
+    if (kind === "entity" || kind === "observer") void this.adoptDefaultPersonModel(decor.id, kind)
+  }
+
+  /**
+   * A person added to the scene starts as a person, not as the built-in marker post: the
+   * catalogue's first realistic human for the kind, at its own height. Nothing is lost by it,
+   * since "no model" stays the first option of the picker, and a model already stated (by a
+   * choice made while the catalogue answered) is never overwritten. An unreachable catalogue
+   * leaves the built-in shape, as everywhere else.
+   */
+  private async adoptDefaultPersonModel(id: string, kind: DecorObject["kind"]): Promise<void> {
+    const entry = (await this.decorModelProvider.entries(kind).catch(() => []))[0]
+    if (!entry) return
+    const added = this.ufoElement.sighting.decor.find(d => d.id === id)
+    if (!added || added.model || added.sizeM) return
+    this.ufoElement.sighting.decor = this.ufoElement.sighting.decor.map(d =>
+      d.id === id ? { ...d, model: { id: entry.id }, sizeM: entry.sizeM } : d)
+    if (this.currentDecorId === id) this.syncDecorModelFields(this.ufoElement.sighting.decor.find(d => d.id === id))
+    this.refreshDecorList()
+    this.ufoElement.refresh()
   }
 
   /**
@@ -6500,6 +6542,7 @@ export class SightingEditorElement extends HTMLElement {
     this.currentDecorId = id
     this.decorSelect.value = id
     this.syncDecorFields()
+    this.syncCanvasMode()
   }
 
   /** Writes the East/North/Heading/Name/URL/Floors/Occupied-floor/Observer-location fields back
@@ -6669,7 +6712,22 @@ export class SightingEditorElement extends HTMLElement {
     void (async () => {
       const entry = id ? await this.decorModelProvider.entry(id).catch(() => undefined) : undefined
       const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
-      if (entry?.sizeM && decor && !decor.sizeM) {
+      // The address block showed the PREVIOUS pick, and statedDecorModel reads an untouched block as
+      // that entry, ahead of the picker: left as it was, a new choice was ignored. Showing the
+      // chosen entry (or nothing, for "no model") makes the block agree with the picker first.
+      const previous = this.shownDecorEntry
+      this.shownDecorEntry = entry
+      this.decorModelCatalogueNote.hidden = entry === undefined
+      this.decorModelUrlInput.value = entry?.url ?? ""
+      this.decorModelTitleInput.value = entry?.credit.title ?? ""
+      this.decorModelAuthorInput.value = entry?.credit.author ?? ""
+      this.decorModelLicenseInput.value = entry?.credit.license ?? ""
+      this.decorModelSourceInput.value = entry?.credit.sourceUrl ?? ""
+      // A size is the previous model's own catalogue size, not a measurement, when it is exactly that:
+      // it then follows the new model (a woman is not drawn at the farmer's height).
+      const sizeIsPrevious = decor?.sizeM !== undefined && previous?.sizeM !== undefined
+        && decor.sizeM.widthM === previous.sizeM.widthM && decor.sizeM.lengthM === previous.sizeM.lengthM && decor.sizeM.heightM === previous.sizeM.heightM
+      if (entry?.sizeM && decor && (!decor.sizeM || sizeIsPrevious)) {
         const fields = [
           [this.decorWidthInput, entry.sizeM.widthM],
           [this.decorLengthInput, entry.sizeM.lengthM],
@@ -6936,6 +6994,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     if (this.currentDecorId !== undefined) this.decorSelect.value = this.currentDecorId
     this.syncDecorFields()
+    this.syncCanvasMode()
   }
 
   private syncDecorFields(): void {
@@ -7034,6 +7093,9 @@ export class SightingEditorElement extends HTMLElement {
     this.setRowVisible(this.decorWidthInput, hasSelection)
     this.setRowVisible(this.decorLengthInput, hasSelection)
     this.setRowVisible(this.decorHeightInput, hasSelection)
+    // A model is drawn with its own materials: the colour paints only the built-in shape, so the
+    // picker would offer a choice that changes nothing (see DecorSystem.applyModel).
+    this.setRowVisible(this.decorColorInput, hasSelection && !(decor?.model !== undefined && !(decor.observerSide !== undefined && canHoldObserver(decor.kind))))
     this.setRowVisible(this.decorModelSelect, hasSelection)
     this.decorModelAdvanced.hidden = !hasSelection
     // Lit is the legacy single switch (a streetlamp, a car's headlights). An aircraft's lamps are a
@@ -8519,6 +8581,7 @@ export class SightingEditorElement extends HTMLElement {
       if (!this.beginBodyHandleDrag(point) && !this.beginBodyDrag(event)) this.beginCameraDrag(point)
       return
     }
+    if (mode === "decor" && this.ufoElement.playbackState !== "playing" && this.beginDecorDrag(event, point)) return
     const timeline = this.ufoElement.sighting.timeline
     const t = this.ufoElement.currentTime
     const playing = this.ufoElement.playbackState === "playing"
@@ -8847,7 +8910,14 @@ export class SightingEditorElement extends HTMLElement {
    * a moment at a time, so there's nothing to gain from a more incremental update. */
   private refreshContextMasksSubmenu(decor: DecorObject): void {
     this.contextMasksSubmenu.innerHTML = ""
-    for (const sourceId of this.ufoElement.sighting.timeline.sourceIds) {
+    const sourceIds = [...this.ufoElement.sighting.timeline.sourceIds]
+    if (sourceIds.length === 0) {
+      const none = document.createElement("span")
+      none.className = "submenu-empty"
+      none.textContent = this.messages.masksNone
+      this.contextMasksSubmenu.appendChild(none)
+    }
+    for (const sourceId of sourceIds) {
       const label = document.createElement("label")
       const checkbox = document.createElement("input")
       checkbox.type = "checkbox"
@@ -9034,7 +9104,12 @@ export class SightingEditorElement extends HTMLElement {
    * drawn round (see paintBodyOverlay) and hit-tested against. */
   private bodyCanvasBounds(): ShapeBounds | undefined {
     const id = this.bodyEditor?.currentBodyId
-    const box = id === undefined ? undefined : this.sceneElement.bodyScreenBox(id)
+    return this.canvasBoundsOf(id === undefined ? undefined : this.sceneElement.bodyScreenBox(id))
+  }
+
+  /** A frame on the picture (normalised device coordinates) as canvas pixels, never smaller than a
+   * few handles across. */
+  private canvasBoundsOf(box: { minX: number, minY: number, maxX: number, maxY: number } | undefined): ShapeBounds | undefined {
     if (!box) return undefined
     const canvas = this.ufoElement.canvasElement
     // Never smaller than a few handles across: a craft a hundred metres off is a few pixels, and
@@ -9060,39 +9135,43 @@ export class SightingEditorElement extends HTMLElement {
    * the pointer goes left or right, as the landscape turns under a drag (see beginCameraDrag), and
    * with Shift held pitches it as the pointer goes up or down and rolls it as it goes sideways.
    */
-  private beginBodyHandleDrag(point: { x: number; y: number }): boolean {
-    const bounds = this.bodyCanvasBounds()
-    const reading = this.bodyEditor?.readingNow()
+  private beginFrameDrag(target: FrameTarget, point: { x: number; y: number }): boolean {
+    const bounds = target.bounds()
+    const reading = target.reading()
     if (!bounds || !reading) return false
     const handle = ShapeHandles.hitTestHandle({ bounds, angle: 0 }, point)
     if (!handle) return false
     if (handle === "rotate") {
-      this.dragState = { kind: "body-rotate", startPointer: point, startAttitude: { ...reading.attitude } }
+      this.dragState = { kind: "frame-rotate", target, startPointer: point, startAttitude: { ...reading.attitude } }
     } else {
       const centre = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
-      this.dragState = { kind: "body-resize", handle, centre, startPointer: point, startSizeM: { ...reading.sizeM } }
+      this.dragState = { kind: "frame-resize", target, handle, centre, startPointer: point, startSizeM: { ...reading.sizeM } }
     }
     this.setCanvasCursor(this.cursorForHandle(handle, 0))
     this.startDragListening()
     return true
   }
 
-  private onBodyHandleDragPointerMove(event: PointerEvent): void {
+  private beginBodyHandleDrag(point: { x: number; y: number }): boolean {
+    return this.beginFrameDrag(this.bodyFrame, point)
+  }
+
+  private onFrameDragPointerMove(event: PointerEvent): void {
     const drag = this.dragState
     const point = this.canvasPointFromEvent(event)
     if (!point || !drag) return
-    if (drag.kind === "body-rotate") {
+    if (drag.kind === "frame-rotate") {
       // From the attitude it was grabbed at, every move: pressing or letting go of Shift mid-drag
-      // switches axes without the body jumping by what the other axis had been given.
-      const dx = (point.x - drag.startPointer.x) * CAMERA_DRAG_DEG_PER_PX
-      const dy = (drag.startPointer.y - point.y) * CAMERA_DRAG_DEG_PER_PX
+      // switches axes without the thing jumping by what the other axis had been given.
+      const dx = (point.x - drag.startPointer.x) * drag.target.rotateDegPerPx
+      const dy = (drag.startPointer.y - point.y) * drag.target.rotateDegPerPx
       const start = drag.startAttitude
-      this.bodyEditor?.turnTo(event.shiftKey
+      drag.target.turnTo(event.shiftKey
         ? { headingDeg: start.headingDeg, pitchDeg: start.pitchDeg + dy, rollDeg: start.rollDeg + dx }
         : { headingDeg: start.headingDeg + dx, pitchDeg: start.pitchDeg, rollDeg: start.rollDeg })
       return
     }
-    if (drag.kind !== "body-resize") return
+    if (drag.kind !== "frame-resize") return
     const { centre, startPointer, startSizeM, handle } = drag
     const ratio = (now: number, then: number) => Math.max(0.05, Math.abs(now) / Math.max(1, Math.abs(then)))
     const horizontal = handle === "e" || handle === "w"
@@ -9100,11 +9179,45 @@ export class SightingEditorElement extends HTMLElement {
     const factor = horizontal ? ratio(point.x - centre.x, startPointer.x - centre.x)
       : vertical ? ratio(point.y - centre.y, startPointer.y - centre.y)
       : ratio(Math.hypot(point.x - centre.x, point.y - centre.y), Math.hypot(startPointer.x - centre.x, startPointer.y - centre.y))
-    this.bodyEditor?.resize({
+    drag.target.resize({
       widthM: vertical ? startSizeM.widthM : startSizeM.widthM * factor,
       lengthM: vertical ? startSizeM.lengthM : startSizeM.lengthM * factor,
       heightM: horizontal ? startSizeM.heightM : startSizeM.heightM * factor
     })
+  }
+
+  /** The body on show, as a frame to size and turn. */
+  private readonly bodyFrame: FrameTarget = {
+    bounds: () => this.bodyCanvasBounds(),
+    reading: () => this.bodyEditor?.readingNow(),
+    resize: sizeM => this.bodyEditor?.resize(sizeM),
+    turnTo: attitude => this.bodyEditor?.turnTo(attitude),
+    rotateDegPerPx: CAMERA_DRAG_DEG_PER_PX
+  }
+
+  /** The selected decor object, as a frame to size and turn. Its sizes are what the fields state, or
+   * else what it is drawn at; it turns about the vertical only, so a pitch or a roll is dropped. */
+  private readonly decorFrame: FrameTarget = {
+    bounds: () => this.decorCanvasBounds(),
+    reading: () => this.editableDecor() === undefined ? undefined : {
+      sizeM: {
+        widthM: this.decorSizeFieldM(this.decorWidthInput),
+        lengthM: this.decorSizeFieldM(this.decorLengthInput),
+        heightM: this.decorSizeFieldM(this.decorHeightInput)
+      },
+      attitude: { headingDeg: this.numberOrUndefined(this.decorHeadingInput.value) ?? 0, pitchDeg: 0, rollDeg: 0 }
+    },
+    resize: sizeM => {
+      this.decorWidthInput.value = String(this.roundedMeters(sizeM.widthM))
+      this.decorLengthInput.value = String(this.roundedMeters(sizeM.lengthM))
+      this.decorHeightInput.value = String(this.roundedMeters(sizeM.heightM))
+      this.updateDecor()
+    },
+    turnTo: attitude => {
+      this.decorHeadingInput.value = String(this.rounded(((attitude.headingDeg % 360) + 360) % 360))
+      this.updateDecor()
+    },
+    rotateDegPerPx: DECOR_ROTATE_DEG_PER_PX
   }
 
   /** The wheel over a body takes it nearer or further, a tenth a notch; elsewhere it does what it
@@ -9118,6 +9231,66 @@ export class SightingEditorElement extends HTMLElement {
     event.preventDefault()
     editor.show(id)
     editor.scaleDistance(Math.exp(Math.sign(event.deltaY) * 0.1))
+  }
+
+  /** The selected decor object, when the mouse may handle it: not while the observer is inside it,
+   * where the picture is its inside. */
+  private editableDecor(): DecorObject | undefined {
+    const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
+    return decor && decor.observerSide === undefined ? decor : undefined
+  }
+
+  /** The frame the selected decor object covers on the canvas, in canvas pixels. */
+  private decorCanvasBounds(): ShapeBounds | undefined {
+    const decor = this.editableDecor()
+    return decor ? this.canvasBoundsOf(this.sceneElement.decorScreenBox(decor.id)) : undefined
+  }
+
+  /** The selected decor object framed with the shapes' own handles, as a body is: corners to size
+   * it as a whole, sides to stretch it level, top and bottom to raise it, the stem to turn it. */
+  private readonly paintDecorOverlay = (renderer: CanvasRenderer): void => {
+    const bounds = this.decorCanvasBounds()
+    if (bounds) renderer.paintGroupHandles(bounds)
+  }
+
+  /** What a size field states, or else what the object is drawn at (its placeholder). */
+  private decorSizeFieldM(input: HTMLInputElement): number {
+    return this.positiveMeters(input.value) ?? this.positiveMeters(input.placeholder) ?? 1
+  }
+
+  /**
+   * Starts a manipulation of the selected decor object when the press is on it: a handle sizes or
+   * turns it (see beginFrameDrag), the object itself is carried across the ground. A press anywhere
+   * else is not taken (false), and turns the view or selects as it always did — which is also why
+   * only the SELECTED object is carried: a tree line must still let the view be turned from over it.
+   */
+  private beginDecorDrag(event: PointerEvent, point: { x: number; y: number }): boolean {
+    const decor = this.editableDecor()
+    if (!decor) return false
+    if (this.beginFrameDrag(this.decorFrame, point)) return true
+    if (this.pickDecorAt(event) !== decor.id) return false
+    const ndc = this.ndcOf(event)
+    const ground = ndc && this.sceneElement.decorGroundPointAt(decor.id, ndc.x, ndc.y)
+    if (!ground) return false
+    this.dragState = {
+      kind: "decor-move", id: decor.id, startGround: ground,
+      startEastM: Number(this.decorEastInput.value) || 0, startNorthM: Number(this.decorNorthInput.value) || 0
+    }
+    this.setCanvasCursor("move")
+    this.startDragListening()
+    return true
+  }
+
+  private onDecorMovePointerMove(event: PointerEvent): void {
+    const drag = this.dragState
+    if (drag?.kind !== "decor-move") return
+    const ndc = this.ndcOf(event)
+    const ground = ndc && this.sceneElement.decorGroundPointAt(drag.id, ndc.x, ndc.y)
+    if (!ground) return
+    // x is east and z is south: the ground moved by the pointer, from where it was grabbed.
+    this.decorEastInput.value = String(this.roundedMeters(drag.startEastM + ground.x - drag.startGround.x))
+    this.decorNorthInput.value = String(this.roundedMeters(drag.startNorthM - (ground.z - drag.startGround.z)))
+    this.updateDecor()
   }
 
   private beginCameraDrag(startPointer: { x: number; y: number }, pressedDecorId?: string): void {
@@ -9181,8 +9354,12 @@ export class SightingEditorElement extends HTMLElement {
       this.onBodyDragPointerMove(event)
       return
     }
-    if (this.dragState?.kind === "body-resize" || this.dragState?.kind === "body-rotate") {
-      this.onBodyHandleDragPointerMove(event)
+    if (this.dragState?.kind === "frame-resize" || this.dragState?.kind === "frame-rotate") {
+      this.onFrameDragPointerMove(event)
+      return
+    }
+    if (this.dragState?.kind === "decor-move") {
+      this.onDecorMovePointerMove(event)
       return
     }
     if (this.cameraDragState) {
@@ -9393,6 +9570,12 @@ export class SightingEditorElement extends HTMLElement {
       const ndc = this.ndcOf(event)
       const over = ndc && this.bodyEditor ? this.sceneElement.pickPlacedBodyAt(ndc.x, ndc.y) : undefined
       return editable && over ? "move" : editable ? "pan" : undefined
+    }
+    if (mode === "decor" && editable) {
+      const bounds = this.decorCanvasBounds()
+      const handle = bounds && ShapeHandles.hitTestHandle({ bounds, angle: 0 }, point)
+      if (handle) return this.cursorForHandle(handle, 0)
+      if (this.pickDecorAt(event) === this.currentDecorId) return "move"
     }
     const shapeMode = mode === "shape"
     if (editable && shapeMode) {

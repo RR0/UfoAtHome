@@ -1483,6 +1483,12 @@ select.weather-field:disabled {
   cursor: pointer;
   white-space: nowrap;
 }
+.submenu-empty {
+  display: block;
+  padding: 0.3em 0.8em;
+  color: #888;
+  white-space: nowrap;
+}
 .submenu label:hover {
   background: #eef;
 }

@@ -23,6 +23,7 @@ import {
   MeshLambertMaterial,
   MeshStandardMaterial,
   Object3D,
+  Plane,
   OrthographicCamera,
   PCFShadowMap,
   PerspectiveCamera,
@@ -113,7 +114,7 @@ import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
 import { resolveDecorLitAt, resolveDecorPlacementAt, canHoldObserver } from "../engine/model/Decor.js"
 import type { DecorModelCredit, DecorModelRef } from "../engine/model/Decor.js"
-import type { DecorModelProvider } from "./decor/DecorModelProvider.js"
+import type { DecorModelEntry, DecorModelProvider } from "./decor/DecorModelProvider.js"
 import { DECOR_MODEL_SOURCES } from "./decor/decorModelSources.js"
 import { loadGltfScene } from "./decor/loadGltfScene.js"
 import { BodySystem } from "./BodySystem.js"
@@ -2010,7 +2011,7 @@ export class SceneRenderer {
       // correct answer on its own, so a model that takes a second to arrive (or never arrives)
       // costs the viewer nothing but detail. See loadDecorModel.
       if (object.model && object.id.startsWith(TrafficIds.ID_PREFIX)) this.pendingTrafficModels.set(object.id, object)
-      else void this.awaitArrival(this.loadDecorModel(object, this.decorModelToken))
+      else if (!this.reuseLoadedDecorModel(object, group)) void this.awaitArrival(this.loadDecorModel(object, this.decorModelToken))
     }
     // Toggled here too (not just in updateCelestialLight, which only runs on the next
     // setAstronomy tick): adding the sighting's first-ever decor object shouldn't have to wait an
@@ -2228,6 +2229,32 @@ export class SceneRenderer {
    * a CDN was down would be worse than one drawn as boxes. Only a genuinely unexpected failure is
    * worth a word in the console, and even that is a warning.
    */
+  /** What a decor object's model resolved to the last time it was loaded, by object id, so that
+   * rebuilding the decor for an unrelated edit (a heading, a colour, a size) does not show the
+   * built-in shape again for as long as the file takes to come back. Valid only while the object
+   * names the same model (see reuseLoadedDecorModel). */
+  private readonly loadedDecorModels = new Map<string, { ref: string, scene: Object3D, headingOffsetDeg?: number, depictedSizeM?: DecorModelEntry["sizeM"], credit: DecorModelCredit }>()
+
+  /** Draws the object's model at once from what a previous build loaded, when it is still the
+   * model the object names. The scene is cloned, not moved: the old group is disposed with the
+   * rebuild, and its meshes' geometry and materials are shared, which is what the flag on them
+   * tells DecorSystem.dispose to leave alone. */
+  private reuseLoadedDecorModel(object: DecorObject, group: Object3D): boolean {
+    const loaded = this.loadedDecorModels.get(object.id)
+    if (!loaded || loaded.ref !== JSON.stringify(object.model) || !DecorSystem.usesModel(object)) return false
+    this.applyLoadedDecorModel(object, group, loaded)
+    return true
+  }
+
+  private applyLoadedDecorModel(object: DecorObject, group: Object3D, loaded: { scene: Object3D, headingOffsetDeg?: number, depictedSizeM?: DecorModelEntry["sizeM"], credit: DecorModelCredit }): void {
+    const copy = loaded.scene.clone(true)
+    copy.traverse(child => {
+      if (child instanceof Mesh) child.userData.sharedModel = true
+    })
+    DecorSystem.applyModel(group, object, copy, { headingOffsetDeg: loaded.headingOffsetDeg, depictedSizeM: loaded.depictedSizeM })
+    this.decorModelCredits.set(object.id, loaded.credit)
+  }
+
   private async loadDecorModel(object: DecorObject, token: number): Promise<void> {
     const ref = object.model
     // usesModel, not just "does it name one": a model is the EXTERIOR, and an object the observer is
@@ -2247,13 +2274,11 @@ export class SceneRenderer {
       if (!group) return
       // What stands round it, for whatever of it is shiny — see Reflections.
       Reflections.reflectOn(scene)
-      DecorSystem.applyModel(group, object, scene, {
-        headingOffsetDeg: ref.headingOffsetDeg ?? entry?.headingOffsetDeg,
-        // Only the catalogue can say what the real thing is; a bare url states a file and nothing
-        // about what it depicts (see DecorModelEntry.sizeM and DecorSystem.applyModel).
-        depictedSizeM: entry?.sizeM
-      })
-      this.decorModelCredits.set(object.id, credit)
+      // Only the catalogue can say what the real thing is; a bare url states a file and nothing
+      // about what it depicts (see DecorModelEntry.sizeM and DecorSystem.applyModel).
+      const loaded = { ref: JSON.stringify(ref), scene, headingOffsetDeg: ref.headingOffsetDeg ?? entry?.headingOffsetDeg, depictedSizeM: entry?.sizeM, credit }
+      this.loadedDecorModels.set(object.id, loaded)
+      this.applyLoadedDecorModel(object, group, loaded)
       this.render()
     } catch (error) {
       console.warn(`Keeping the built-in shape for decor "${object.id}":`, error)
@@ -4607,6 +4632,41 @@ export class SceneRenderer {
     this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
     return this.bodySystem.pick(this.raycaster)
   }
+
+  /** The rectangle a decor object covers on the picture, in the same normalised device
+   * coordinates as bodyScreenBox — what the editor frames it with. Undefined when any corner of
+   * its box is behind the eye. */
+  decorScreenBox(id: string): { minX: number, minY: number, maxX: number, maxY: number } | undefined {
+    const group = this.decorGroups.get(id)
+    if (!group || !group.visible) return undefined
+    const box = this.bodyBoxScratch.setFromObject(group)
+    if (box.isEmpty()) return undefined
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+    for (let corner = 0; corner < 8; corner++) {
+      const point = this.bodyCornerScratch.set(
+        corner & 1 ? box.max.x : box.min.x, corner & 2 ? box.max.y : box.min.y, corner & 4 ? box.max.z : box.min.z)
+      const ndc = this.screenPointOf(point.sub(this.camera.position).normalize())
+      if (!ndc) return undefined
+      minX = Math.min(minX, ndc.ndcX)
+      maxX = Math.max(maxX, ndc.ndcX)
+      minY = Math.min(minY, ndc.ndcY)
+      maxY = Math.max(maxY, ndc.ndcY)
+    }
+    return { minX, minY, maxX, maxY }
+  }
+
+  /** Where a point of the picture meets the level the decor object stands on, as scene metres
+   * (x east, z south), or undefined when the ray goes up or never reaches it. Dragging an object
+   * across the ground is the difference between two of these. */
+  decorGroundPointAt(id: string, ndcX: number, ndcY: number): { x: number, z: number } | undefined {
+    const group = this.decorGroups.get(id)
+    if (!group) return undefined
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
+    const hit = this.raycaster.ray.intersectPlane(this.decorPlaneScratch.setComponents(0, 1, 0, -group.position.y), this.decorHitScratch)
+    return hit ? { x: hit.x, z: hit.z } : undefined
+  }
+  private readonly decorPlaneScratch = new Plane()
+  private readonly decorHitScratch = new Vector3()
 
   pickDecorAt(ndcX: number, ndcY: number): string | undefined {
     this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)

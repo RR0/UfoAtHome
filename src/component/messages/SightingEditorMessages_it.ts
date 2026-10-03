@@ -279,6 +279,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   viewAccount: "Vedi il resoconto",
   noObserverRecording: "Nessun URL di registrazione per questo osservatore",
   masks: "Nasconde",
+  masksNone: "Nessun fenomeno da nascondere per ora",
   addObserver: "Aggiungi osservatore",
   narrativePlaceholder: "Ciò che l'osservatore ha riferito, con parole sue",
   narrativeSource: "Redatto da",
