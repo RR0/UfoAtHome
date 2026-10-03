@@ -46,6 +46,7 @@ interface CaseRecording {
 const RECORDINGS: CaseRecording[] = [
   { published: "observer-socorro.json", dossier: "Socorro/sighting.json" },
   { published: "observer-valensole.json", dossier: "Valensole/sighting.json" },
+  { published: "observer-valensole-pv-1965-07-02.json", dossier: "Valensole/observer-valensole-pv-1965-07-02.json" },
   { published: "observer-wilcox.json", dossier: "Wilcox/sighting.json" },
   { published: "observer-cussac.json", dossier: "Cussac/sighting.json" },
   { published: "observer-chiles.json", dossier: "ChilesWhitted/observer-chiles.json" },
