@@ -239,6 +239,12 @@ export interface SightingEditorMessages extends SightingLabels {
    * sky is computed at.
    */
   temporalGroup: string
+  /** The group that shows the recording as text, and where it is loaded from and exported. */
+  fileGroup: string
+  /** Said while the text editor, a chunk of its own, is being fetched. */
+  fileLoading: string
+  /** What a screen reader calls the text editor. */
+  fileEditorLabel: string
   /** The four states EDTF_TIME_PATTERN can express about a whole value, offered beside the native
    * picker so that "around 05:00" needs no text mode. */
   timeQualifierExact: string

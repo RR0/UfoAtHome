@@ -17,12 +17,10 @@ export const html = `
   <button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false"><span id="label-sound-group">Sound</span></button>
   <button class="group-tab" type="button" aria-controls="group-reference" aria-expanded="false"><span id="label-reference-group">Pictures</span></button>
   <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false"><span id="label-shape-group">Phenomenon</span></button>
+  <button class="group-tab" type="button" aria-controls="group-file" aria-expanded="false"><span id="label-file-group">File</span></button>
 </div>
 <section class="group-panel" id="group-observation" aria-labelledby="label-observation-group" hidden>
   <div class="toolbar">
-    <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
-    <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
-    <button id="import-url-button" type="button">Load</button>
     <!-- The observation's own id, not the observer's nor the case's: what a case and the
          interpretations filed in it name this account by (see Sighting.id). -->
     <label><span id="label-sighting-id">ID</span> <input id="sightingId" type="text" placeholder="1964-04-24-ZamoraLonnie"/></label>
@@ -301,6 +299,22 @@ export const html = `
     <label><span id="label-milestone-note">What happens</span> <input id="milestoneNote" type="text"/></label>
   </div>
 </section>
+<!-- The recording itself, as the file it will be saved as. Last on the strip because it is about the
+     whole rather than about any one thing: it is where a recording comes in (a file, an address)
+     and goes out (Export), and where it can be read and edited as the text it is, in both
+     directions with the form (see SightingEditorElement.loadFileEditor). The editor is a chunk of
+     its own, fetched the first time this group is opened — CodeMirror is the heaviest thing the
+     component could carry and most authors never need it. -->
+<section class="group-panel" id="group-file" aria-labelledby="label-file-group" hidden>
+  <div class="toolbar">
+    <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
+    <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
+    <button id="import-url-button" type="button">Load</button>
+    <button id="export" type="button">Export</button>
+  </div>
+  <p id="file-note" class="file-note" hidden role="status"></p>
+  <div id="file-editor" class="file-editor"></div>
+</section>
 <section class="group-panel" id="group-weather" aria-labelledby="label-weather-group" hidden>
   <div class="toolbar">
     <!-- Weather is the one thing in this editor that isn't account: it's a measurable fact about
@@ -568,9 +582,6 @@ export const html = `
      SightingEditorElement.refreshParamSummary); a value a data source supplied rather than the
      author is marked, which is the one thing the form itself never showed at a glance. -->
 <div id="param-summary" class="param-summary"></div>
-<div class="export-row">
-  <button id="export" type="button">Export</button>
-</div>
 <!-- The editor's own confirmation, NOT window.confirm(). A native dialog is suppressed outright in
      several of the places this component is meant to run — a sandboxed iframe without allow-modals,
      an embedded browser view — and a suppressed confirm() returns FALSE, which is indistinguishable
@@ -695,6 +706,11 @@ button.preset[aria-pressed="true"] {
    default overridden inside a prefers-color-scheme:dark media query, not a manual toggle (see
    e.g. rr0.org's own link.css/rr0.css). */
 :host {
+  /* The colours of the File group's editor: a key, a string, and a number or a word. Said here and
+     not in the editor, so that dark mode redefines three values rather than a theme. */
+  --file-key: #1a5fb4;
+  --file-string: #26662f;
+  --file-literal: #a5321f;
   /* The one alert colour, said once. input.invalid's border was the only thing wearing it, and the
      two "something is missing" marks below now wear it too — so a reader learns one colour rather
      than three, and changing it changes all of them. */
@@ -706,6 +722,11 @@ input.invalid {
   color: #611;
 }
 @media (prefers-color-scheme: dark) {
+  :host {
+    --file-key: #8cb8ff;
+    --file-string: #8fd39a;
+    --file-literal: #ffa08a;
+  }
   input.invalid {
     background: #3a1414;
     color: #fff;
@@ -1130,10 +1151,9 @@ select.weather-field:disabled {
 #import-url {
   flex: 1 1 16em;
 }
-.export-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 0.5em;
+.file-note {
+  margin: 0.5em 0;
+  opacity: 0.8;
 }
 .param-summary {
   display: flex;

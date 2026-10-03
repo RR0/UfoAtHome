@@ -3,7 +3,7 @@ import { EditorState } from "@codemirror/state"
 import { json, jsonLanguage, jsonParseLinter } from "@codemirror/lang-json"
 import { linter, lintGutter } from "@codemirror/lint"
 import { SiteCodeTheme } from "./codeTheme.js"
-import { SightingCompletion } from "./sightingCompletion.js"
+import { SightingCompletion } from "../../src/component/SightingCompletion.js"
 import type { CompletionContext, CompletionResult } from "@codemirror/autocomplete"
 
 /**

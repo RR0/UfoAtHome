@@ -532,7 +532,8 @@ describe("SceneElement air traffic", () => {
     element.addEventListener(AIRCRAFT_CHANGE_EVENT, changed)
     tick()
     expect(element.aircraftState.status).toBe("loading")
-    await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+    // The traffic runtime is a chunk imported on first use, which under the whole suite's load takes longer than waitFor's default second.
+    await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"), { timeout: 10_000 })
     expect(changed).toHaveBeenCalled()
     expect(asked).toHaveLength(1)
     tick()

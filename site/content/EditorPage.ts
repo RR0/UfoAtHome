@@ -237,14 +237,14 @@ if (docs) {
 
 <section class="band">
   <div class="wrap">
-    <h2>The nine groups</h2>
+    <h2>The ten groups</h2>
     <p class="lede prose-wide">One panel opens at a time, so the render stays on screen while you
       edit.</p>
 
     <div class="group-docs">
       <div class="group-doc">
       <h3>Observation</h3>
-      <p>Load an existing recording (from a file or a URL), and state what this one is about: an
+      <p>State what this recording is about: an
         <strong>ID</strong>, a <strong>description</strong>, <strong>tags</strong>. The ID is this
         account's own, the day and then who saw it (<code>1964-04-24-ZamoraLonnie</code>); a recording
         does not name its case, it is <a href="/docs/format/#several-observers-the-case">the case</a>
@@ -557,6 +557,19 @@ if (docs) {
           stays editable and the interface says which of the two it is.</li>
       </ul>
     </div>
+
+    <div class="group-doc">
+      <h3>File</h3>
+      <p>The recording itself. <strong>Load JSON file</strong> and <strong>Or load from URL</strong>
+        bring an existing recording in, and <strong>Export</strong> hands you the file. Under them,
+        the same recording as JSON text, kept in step both ways: what you change in the form or on
+        the render appears in it, and a text that parses becomes the recording as soon as you stop
+        typing (the playhead stays where it was). A text that does not parse is flagged on its own
+        line and changes nothing until it does.</p>
+      <p>The editor knows the format: <kbd>Ctrl</kbd>+<kbd>Space</kbd> lists the keys an object can
+        take, with what the model says of each, and the words a key accepts. It is fetched only the
+        first time this group is opened, so it costs nothing to those who never leave the form.</p>
+    </div>
   </div>
 </section>
 
@@ -642,14 +655,14 @@ if (docs) {
 
 <section class="band">
   <div class="wrap">
-    <h2>Les neuf groupes</h2>
+    <h2>Les dix groupes</h2>
     <p class="lede prose-wide">Un seul panneau s'ouvre à la fois, pour que le rendu reste à l'écran
       pendant que vous éditez.</p>
 
     <div class="group-docs">
       <div class="group-doc">
       <h3>Observation</h3>
-      <p>Charger un enregistrement existant (fichier ou URL), et énoncer ce dont il s'agit :
+      <p>Énoncer ce dont il s'agit :
         <strong>identifiant</strong>, <strong>description</strong>, <strong>mots-clés</strong>.
         L'identifiant est celui de ce compte rendu, le jour puis qui a vu
         (<code>1964-04-24-ZamoraLonnie</code>) ; un enregistrement ne nomme pas son dossier, c'est
@@ -993,6 +1006,21 @@ if (docs) {
           le champ reste modifiable et l'interface dit lequel des deux cas s'applique.</li>
       </ul>
     </div>
+
+    <div class="group-doc">
+      <h3>Fichier</h3>
+      <p>L'enregistrement lui-même. <strong>Charger un fichier JSON</strong> et <strong>Ou charger
+        depuis une URL</strong> font entrer un enregistrement existant, et <strong>Exporter</strong>
+        vous remet le fichier. Dessous, le même enregistrement en texte JSON, tenu à jour dans les
+        deux sens : ce que vous changez dans le formulaire ou sur le rendu y apparaît, et un texte
+        qui s'analyse devient l'enregistrement dès que vous cessez de taper (la tête de lecture
+        reste où elle était). Un texte qui ne s'analyse pas est signalé sur sa ligne et ne change
+        rien tant qu'il ne s'analyse pas.</p>
+      <p>L'éditeur connaît le format : <kbd>Ctrl</kbd>+<kbd>Espace</kbd> liste les clés qu'un objet
+        peut prendre, avec ce que le modèle en dit, et les mots qu'une clé accepte. Il n'est chargé
+        qu'à la première ouverture de ce groupe, donc il ne coûte rien à qui ne quitte pas le
+        formulaire.</p>
+    </div>
   </div>
 </section>
 
@@ -1079,14 +1107,14 @@ if (docs) {
 
 <section class="band">
   <div class="wrap">
-    <h2>Los nueve grupos</h2>
+    <h2>Los diez grupos</h2>
     <p class="lede prose-wide">Se abre un solo panel a la vez, para que el render siga en pantalla
       mientras editas.</p>
 
     <div class="group-docs">
       <div class="group-doc">
       <h3>Observación</h3>
-      <p>Carga un registro existente (desde un archivo o una URL) e indica de qué trata este: un
+      <p>Indica de qué trata este registro: un
         <strong>ID</strong>, una <strong>Descripción</strong>, unas <strong>Etiquetas</strong>. El ID es
         el propio de este relato, el día y luego quién lo vio (<code>1964-04-24-ZamoraLonnie</code>); un
         registro no nombra su caso, es <a href="/docs/format/#several-observers-the-case">el caso</a>
@@ -1419,6 +1447,20 @@ if (docs) {
           sigue siendo editable y la interfaz dice cuál de los dos casos es.</li>
       </ul>
     </div>
+
+    <div class="group-doc">
+      <h3>Archivo</h3>
+      <p>El registro en sí. <strong>Cargar archivo JSON</strong> y <strong>O cargar desde una
+        URL</strong> traen un registro existente, y <strong>Exportar</strong> te entrega el archivo.
+        Debajo, el mismo registro como texto JSON, mantenido al día en los dos sentidos: lo que
+        cambias en el formulario o en el render aparece en él, y un texto que se analiza pasa a ser
+        el registro en cuanto dejas de teclear (el cabezal se queda donde estaba). Un texto que no
+        se analiza se señala en su línea y no cambia nada mientras tanto.</p>
+      <p>El editor conoce el formato: <kbd>Ctrl</kbd>+<kbd>Espacio</kbd> lista las claves que puede
+        llevar un objeto, con lo que el modelo dice de cada una, y las palabras que admite una
+        clave. Solo se descarga la primera vez que se abre este grupo, así que no cuesta nada a quien
+        no sale del formulario.</p>
+    </div>
   </div>
 </section>
 
@@ -1505,14 +1547,14 @@ if (docs) {
 
 <section class="band">
   <div class="wrap">
-    <h2>I nove gruppi</h2>
+    <h2>I dieci gruppi</h2>
     <p class="lede prose-wide">Si apre un solo pannello alla volta, così il rendering resta sullo
       schermo mentre modifichi.</p>
 
     <div class="group-docs">
       <div class="group-doc">
       <h3>Osservazione</h3>
-      <p>Carica una registrazione esistente (da un file o da un URL) e indica di cosa tratta questa:
+      <p>Indica di cosa tratta questa registrazione:
         un <strong>ID</strong>, una <strong>Descrizione</strong>, delle <strong>Etichette</strong>. L'ID è quello
         proprio di questo resoconto, il giorno e poi chi ha visto (<code>1964-04-24-ZamoraLonnie</code>);
         una registrazione non nomina il suo caso, è <a href="/docs/format/#several-observers-the-case">il
@@ -1848,6 +1890,20 @@ if (docs) {
           prima del 1957 per i satelliti, prima del 2021 per gli elementi orbitali), il campo
           resta modificabile e l'interfaccia dice quale dei due casi si applica.</li>
       </ul>
+    </div>
+
+    <div class="group-doc">
+      <h3>File</h3>
+      <p>La registrazione stessa. <strong>Carica file JSON</strong> e <strong>Oppure carica da
+        URL</strong> portano dentro una registrazione esistente, ed <strong>Esporta</strong> ti
+        consegna il file. Sotto, la stessa registrazione come testo JSON, tenuta allineata nei due
+        sensi: ciò che cambi nel modulo o nel rendering vi compare, e un testo che si interpreta
+        diventa la registrazione appena smetti di digitare (il cursore di lettura resta dov'era). Un
+        testo che non si interpreta è segnalato sulla sua riga e non cambia nulla finché non lo fa.</p>
+      <p>L'editor conosce il formato: <kbd>Ctrl</kbd>+<kbd>Spazio</kbd> elenca le chiavi che un
+        oggetto può avere, con ciò che il modello dice di ciascuna, e le parole che una chiave
+        accetta. Viene scaricato solo alla prima apertura di questo gruppo, quindi non costa nulla a
+        chi non lascia il modulo.</p>
     </div>
   </div>
 </section>

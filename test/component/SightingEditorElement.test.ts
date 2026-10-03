@@ -1,5 +1,6 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
 import { Vector3 } from "three"
+import { EditorView } from "@codemirror/view"
 import { register, ELEMENT_NAME, LEGACY_ELEMENT_NAME } from "../../src/component/SightingEditorElement.js"
 import type { SightingEditorElement } from "../../src/component/SightingEditorElement.js"
 import type { PolygonShape, Shape } from "../../src/engine/shape/Shape.js"
@@ -134,6 +135,10 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
 // native `canvas` package) — stub it, same as test/render/CanvasRenderer.test.ts's mock,
 // so mounting the component doesn't throw when it paints its initial preview.
 beforeAll(() => {
+  // jsdom lays nothing out and has no Range geometry; CodeMirror (the File group's text editor) measures with it.
+  const emptyRects = () => ({ length: 0, item: () => null, [Symbol.iterator]: function* () {} }) as unknown as DOMRectList
+  Range.prototype.getClientRects ??= emptyRects
+  Range.prototype.getBoundingClientRect ??= () => new DOMRect()
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
     // mockImplementation, not mockReturnValue: a renderer that sizes itself from its own canvas
     // (see ObserverMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
@@ -2853,11 +2858,65 @@ describe("SightingEditorElement toolbar groups", () => {
       "label-weather-group",
       "label-sound-group",
       "label-reference-group",
-      "label-shape-group"
+      "label-shape-group",
+      "label-file-group"
     ])
     for (const tab of tabs(element)) {
       expect(element.shadowRoot!.getElementById(tab.getAttribute("aria-controls")!)).not.toBeNull()
     }
+  })
+
+  describe("the File group", () => {
+    const fileTab = (element: SightingEditorElement) => tabs(element).find(tab => tab.getAttribute("aria-controls") === "group-file")!
+    const cmEditor = (element: SightingEditorElement) => element.shadowRoot!.querySelector<HTMLElement>("#file-editor .cm-editor")
+    const text = (element: SightingEditorElement) => EditorView.findFromDOM(cmEditor(element)!)!.state.doc.toString()
+
+    it("holds the controls that bring a recording in and take it out", () => {
+      const element = mount()
+      const panel = element.shadowRoot!.getElementById("group-file")!
+      for (const id of ["import-file", "import-url", "import-url-button", "export"]) {
+        expect(panel.querySelector(`#${id}`), id).not.toBeNull()
+      }
+    })
+
+    it("loads its text editor only when it is first opened", async () => {
+      const element = mount()
+      expect(cmEditor(element)).toBeNull()
+      fileTab(element).click()
+      await waitFor(() => cmEditor(element) !== null)
+      expect(JSON.parse(text(element)).version).toBe(element.sightingData.version)
+    })
+
+    it("follows the form: a change made elsewhere reaches the text", async () => {
+      const element = mount()
+      fileTab(element).click()
+      await waitFor(() => cmEditor(element) !== null)
+      element.sightingData = { ...element.sightingData, tags: ["from-the-form"] }
+      await waitFor(() => text(element).includes("from-the-form"))
+    })
+
+    it("drives the form: a text that parses becomes the recording, and one that does not changes nothing", async () => {
+      const element = mount()
+      fileTab(element).click()
+      await waitFor(() => cmEditor(element) !== null)
+      const view = EditorView.findFromDOM(cmEditor(element)!)!
+      const replace = (insert: string) => view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert } })
+      replace(JSON.stringify({ ...element.sightingData, tags: ["typed"] }, null, 2))
+      await waitFor(() => element.sightingData.tags?.[0] === "typed")
+      replace('{ "version": 1, ')
+      await new Promise(resolve => setTimeout(resolve, 800))
+      expect(element.sightingData.tags?.[0]).toBe("typed")
+    })
+
+    it("leaves the arrow keys and Delete to the text rather than to the shapes", async () => {
+      const element = mount()
+      fileTab(element).click()
+      await waitFor(() => cmEditor(element) !== null)
+      const shapes = element.sightingData.timeline?.keyframes?.length
+      cmEditor(element)!.querySelector(".cm-content")!.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Delete", bubbles: true, composed: true }))
+      expect(element.sightingData.timeline?.keyframes?.length).toBe(shapes)
+    })
   })
 
   it("opens shape on load and nothing else — the group whose every field changes what the canvas right below it draws", () => {

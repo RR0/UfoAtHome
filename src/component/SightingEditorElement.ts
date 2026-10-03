@@ -1,5 +1,6 @@
 import { setupCloudEditor } from "./CloudEditor.js"
 import type { BodyEditor } from "./BodyEditor.js"
+import type { SightingFileEditor } from "./SightingFileEditor.js"
 import { NumberFields } from "./NumberFields.js"
 import type { BodyJson, BodyKeyframe } from "../engine/interpretation/Interpretation.js"
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
@@ -432,6 +433,15 @@ export class SightingEditorElement extends HTMLElement {
   /** The Bodies part, loaded the first time it is opened — see loadBodyEditor. */
   private bodyEditor?: BodyEditor
   private bodyEditorLoading?: Promise<BodyEditor>
+  /** The File group's text editor, loaded the first time the group is opened — see loadFileEditor. */
+  private fileEditor?: SightingFileEditor
+  private fileEditorLoading?: Promise<SightingFileEditor>
+  private readonly fileEditorHost: HTMLElement
+  private readonly fileNote: HTMLElement
+  /** Waiting to put the form's changes into the text, and the text's into the form — see syncFileEditor. */
+  private fileSyncTimer?: ReturnType<typeof setTimeout>
+  private fileApplyTimer?: ReturnType<typeof setTimeout>
+  private readonly labelFileGroup: HTMLElement
   private readonly cloudCoverInput: HTMLInputElement
   private readonly cloudDarknessInput: HTMLInputElement
   private readonly cloudBaseInput: HTMLInputElement
@@ -904,6 +914,8 @@ export class SightingEditorElement extends HTMLElement {
       // element it nests.)
       const target = event.composedPath()[0]
       if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return
+      // The File group's text editor is a contenteditable, not one of those: its arrows and Delete are the text's.
+      if (target instanceof HTMLElement && (target.isContentEditable || target.closest(".cm-editor"))) return
       if (ARROW_KEYS.has(event.key)) {
         this.moveOrResizeSelectedShapes(event)
       } else {
@@ -1202,6 +1214,9 @@ export class SightingEditorElement extends HTMLElement {
     this.labelNarrativeRemember = this.shadow.getElementById("label-narrative-remember")!
     this.labelShapeGroup = this.shadow.getElementById("label-shape-group")!
     this.labelTemporalGroup = this.shadow.getElementById("label-temporal-group")!
+    this.labelFileGroup = this.shadow.getElementById("label-file-group")!
+    this.fileEditorHost = this.shadow.getElementById("file-editor")!
+    this.fileNote = this.shadow.getElementById("file-note")!
     this.labelLocationGroup = this.shadow.getElementById("label-location-group")!
     this.labelObservationGroup = this.shadow.getElementById("label-observation-group")!
     this.labelObserverGroup = this.shadow.getElementById("label-observer-group")!
@@ -1567,6 +1582,7 @@ export class SightingEditorElement extends HTMLElement {
     this.ufoElement.addEventListener("timeupdate", () => {
       this.onSelectionOrTimeChanged()
       this.syncPlaybackControls()
+      this.scheduleFileSync()
       this.dispatchEvent(new CustomEvent("sightingchange"))
     })
     // On the editor itself, NEVER on document. A keydown only reaches this if it was dispatched
@@ -1726,7 +1742,8 @@ export class SightingEditorElement extends HTMLElement {
     this.paramSummary.addEventListener("click", event => this.onParamSummaryClick(event))
     // Shape is the group left open on load — of the eight it's the one whose every field changes
     // what the canvas right below it draws, so it's the one worth having open while looking at it.
-    this.toggleGroup(this.groupTabs[this.groupTabs.length - 1], true)
+    this.toggleGroup(this.groupTabs[this.groupPanels.findIndex(panel => panel.id === "group-shape")], true)
+    this.fileEditorHost.addEventListener("focusout", () => this.leaveFileEditor())
 
     this.updatePresetButtons()
     this.setRecordButtonLabel(false)
@@ -4834,6 +4851,107 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.syncCanvasMode()
     this.refreshTimelineMarks()
+    if (open && tab.getAttribute("aria-controls") === "group-file") {
+      void this.loadFileEditor().then(() => this.syncFileEditor(), () => this.showFileNote(this.messages.importError))
+    }
+  }
+
+  /**
+   * The recording as text, in an editor loaded the first time the File group is opened: a chunk of
+   * its own, since CodeMirror is the heaviest thing this component could carry and most authors
+   * never leave the form (see SightingFileEditor, and loadBodyEditor for the same arrangement).
+   */
+  private loadFileEditor(): Promise<SightingFileEditor> {
+    this.fileEditorLoading ??= (async () => {
+      this.showFileNote(this.messages.fileLoading)
+      try {
+        const { SightingFileEditor } = await import("./SightingFileEditor.js")
+        this.fileEditor = new SightingFileEditor(this.fileEditorHost, this.fileText(), text => this.onFileTextEdited(text),
+          this.messages.fileEditorLabel)
+        return this.fileEditor
+      } catch (error) {
+        // Not remembered: opening the group again is a second try.
+        this.fileEditorLoading = undefined
+        throw error
+      } finally {
+        this.showFileNote(undefined)
+      }
+    })()
+    return this.fileEditorLoading
+  }
+
+  private showFileNote(text: string | undefined): void {
+    this.fileNote.textContent = text ?? ""
+    this.fileNote.hidden = text === undefined
+  }
+
+  /** What the file would be if saved now — the same text Export writes. */
+  private fileText(): string {
+    return JSON.stringify(this.sightingData, null, 2)
+  }
+
+  /**
+   * Form to text. Held back while the author is typing in the text (the form is then following the
+   * text, and rewriting it under their caret would undo what they are doing), and spaced out
+   * otherwise: every frame of playback ends here, and a recording is hundreds of lines.
+   */
+  private scheduleFileSync(): void {
+    if (this.fileEditor === undefined || this.fileSyncTimer !== undefined || !this.isGroupIdOpen("group-file")) return
+    this.fileSyncTimer = setTimeout(() => {
+      this.fileSyncTimer = undefined
+      this.syncFileEditor()
+    }, 250)
+  }
+
+  private syncFileEditor(): void {
+    const editor = this.fileEditor
+    if (editor === undefined || !this.isGroupIdOpen("group-file") || editor.focused) return
+    // A text left broken is the author's draft, not stale: the form has nothing to say about it.
+    try {
+      JSON.parse(editor.text)
+    } catch {
+      return
+    }
+    editor.text = this.fileText()
+  }
+
+  /** Text to form: a text that parses is the recording, a text that does not is left alone (the
+   * editor marks the line) and the form keeps the last recording that was valid. */
+  private onFileTextEdited(text: string): void {
+    clearTimeout(this.fileApplyTimer)
+    this.fileApplyTimer = setTimeout(() => this.applyFileText(text), 500)
+  }
+
+  private applyFileText(text: string): void {
+    this.fileApplyTimer = undefined
+    let json: unknown
+    try {
+      json = JSON.parse(text)
+    } catch {
+      return
+    }
+    if (typeof json !== "object" || json === null || Array.isArray(json)) return
+    if (JSON.stringify(json) === JSON.stringify(this.sightingData)) return
+    const playhead = this.ufoElement.currentTime
+    try {
+      this.sightingData = json as SightingRecordingJson
+      this.ufoElement.currentTime = playhead
+      this.showFileNote(undefined)
+    } catch {
+      this.showFileNote(this.messages.importErrorMalformed)
+    }
+  }
+
+  /** Leaving the text: what was typed is applied at once, and the text takes the form's own
+   * spelling of it (key order, what the model drops), so that it never disagrees with Export. */
+  private leaveFileEditor(): void {
+    const editor = this.fileEditor
+    if (editor === undefined) return
+    if (this.fileApplyTimer !== undefined) {
+      clearTimeout(this.fileApplyTimer)
+      this.applyFileText(editor.text)
+    }
+    setTimeout(() => this.syncFileEditor(), 0)
   }
 
   /**
@@ -8292,6 +8410,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelBodiesSubgroup.textContent = messages.bodiesSubgroup
     this.bodyEditor?.setLanguage(this.language)
     this.labelTemporalGroup.textContent = messages.temporalGroup
+    this.labelFileGroup.textContent = messages.fileGroup
     this.labelLocationGroup.textContent = messages.locationGroup
     this.labelObservationGroup.textContent = messages.observationGroup
     this.labelObserverGroup.textContent = messages.observerGroup

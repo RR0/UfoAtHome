@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { EditorState } from "@codemirror/state"
 import { CompletionContext } from "@codemirror/autocomplete"
 import { json } from "@codemirror/lang-json"
-import { SightingCompletion } from "../../site/scripts/sightingCompletion.js"
+import { SightingCompletion } from "../../src/component/SightingCompletion.js"
 
 /**
  * What the Player page's editor offers, and where.
