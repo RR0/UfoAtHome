@@ -16,7 +16,7 @@ describe("ModelPicker", () => {
     const label = document.createElement("label")
     label.append(select)
     container.append(label)
-    new ModelPicker(container, () => ({ title: "Choose a model", close: "Close", choose: "Choose" }))
+    new ModelPicker(container, () => ({ title: "Choose a model", close: "Close", choose: "Choose", address: "Address", addressUrl: "Url", addressName: "Name", addressAuthor: "Author", addressLicense: "Licence", addressSource: "Source", addressUse: "Use", addressIncomplete: "Incomplete" }))
       .enhance(select, async () => undefined)
     const changes: string[] = []
     select.addEventListener("change", () => changes.push(select.value))
@@ -54,5 +54,54 @@ describe("ModelPicker", () => {
     expect(container.querySelector(".model-picker")).toBeNull()
     expect(select.value).toBe("car")
     expect(changes).toEqual([])
+  })
+
+  describe("a model at an address", () => {
+    function withAddress(current?: { url: string, title: string, author: string, license: string, source: string }) {
+      const select = document.createElement("select")
+      select.append(new Option("None", ""), new Option("Car", "car"))
+      const label = document.createElement("label")
+      label.append(select)
+      container.append(label)
+      const applied: unknown[] = []
+      new ModelPicker(container, () => ({ title: "Choose", close: "Close", choose: "Choose", address: "Address", addressUrl: "Url", addressName: "Name", addressAuthor: "Author", addressLicense: "Licence", addressSource: "Source", addressUse: "Use", addressIncomplete: "Incomplete" }))
+        .enhance(select, async () => undefined, { current: () => current, apply: address => applied.push(address) })
+      container.querySelector<HTMLButtonElement>(".model-picker-button")!.click()
+      return applied
+    }
+
+    it("keeps the form out of sight until the + is pressed", () => {
+      withAddress()
+      expect(container.querySelector<HTMLElement>(".model-picker-address")!.hidden).toBe(true)
+      container.querySelector<HTMLButtonElement>(".model-picker-add")!.click()
+      expect(container.querySelector<HTMLElement>(".model-picker-address")!.hidden).toBe(false)
+    })
+
+    it("gives the address and its credit, and says the model is not drawn until named and licensed", () => {
+      const applied = withAddress()
+      container.querySelector<HTMLButtonElement>(".model-picker-add")!.click()
+      const [url, title, , license] = [...container.querySelectorAll<HTMLInputElement>(".model-picker-address input")]
+      const note = container.querySelector<HTMLElement>(".model-picker-address p")!
+      expect(container.querySelector<HTMLButtonElement>(".model-picker-use")!.disabled).toBe(true)
+      url.value = "https://x/m.glb"
+      url.dispatchEvent(new Event("input"))
+      expect(note.hidden).toBe(false)
+      title.value = "Mine"
+      license.value = "CC0 1.0"
+      title.dispatchEvent(new Event("input"))
+      expect(note.hidden).toBe(true)
+      container.querySelector<HTMLButtonElement>(".model-picker-address")!.dispatchEvent(new Event("submit", { cancelable: true }))
+      expect(applied).toEqual([{ url: "https://x/m.glb", title: "Mine", author: "", license: "CC0 1.0", source: "" }])
+      expect(container.querySelector(".model-picker")).toBeNull()
+    })
+
+    it("shows the model it has at an address as the card chosen, and fills the form with it", () => {
+      withAddress({ url: "https://x/m.glb", title: "Mine", author: "Me", license: "CC0 1.0", source: "" })
+      const cards = [...container.querySelectorAll<HTMLElement>(".model-card")]
+      expect(cards[0].querySelector(".model-name")!.textContent).toBe("Mine")
+      expect(cards.map(card => card.getAttribute("aria-pressed"))).toEqual(["true", "false", "false"])
+      container.querySelector<HTMLButtonElement>(".model-picker-add")!.click()
+      expect(container.querySelector<HTMLInputElement>(".model-picker-address input")!.value).toBe("https://x/m.glb")
+    })
   })
 })

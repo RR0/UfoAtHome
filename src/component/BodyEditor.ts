@@ -194,7 +194,7 @@ export class BodyEditor {
         ${field("body-title", m.title)}
         <fieldset class="body-explains"><legend>${m.explains}</legend><div id="body-explains"></div></fieldset>
         <label><span>${m.model}</span> <select id="body-model"></select></label>
-        <details id="body-model-advanced" class="decor-model-advanced">
+        <details id="body-model-advanced" class="decor-model-advanced" hidden>
           <summary>${m.modelAdvanced}</summary>
           ${field("body-model-url", m.modelUrl, "text", m.modelUrlHint)}
           ${field("body-model-title", m.modelTitle)}
@@ -268,7 +268,27 @@ export class BodyEditor {
     // The drop-down gives way to a window of pictures, over the same options and the same "change".
     this.host.modelPicker().enhance(this.select("body-model"), async id => (BODY_PRIMITIVES as readonly string[]).includes(id)
       ? { shape: id as BodyPrimitive }
-      : this.host.modelProvider().entry(id).then(entry => entry && { url: entry.url, headingOffsetDeg: entry.headingOffsetDeg }))
+      : this.host.modelProvider().entry(id).then(entry => entry && { url: entry.url, headingOffsetDeg: entry.headingOffsetDeg }), {
+      current: () => {
+        const model = this.current?.model
+        return model?.url === undefined ? undefined : {
+          url: model.url, title: model.credit?.title ?? "", author: model.credit?.author ?? "",
+          license: model.credit?.license ?? "", source: model.credit?.sourceUrl ?? ""
+        }
+      },
+      apply: address => {
+        // The hidden fields still carry what the form states, and statedModel reads them.
+        this.input("body-model-url").value = address.url
+        this.input("body-model-title").value = address.title
+        this.input("body-model-author").value = address.author
+        this.input("body-model-license").value = address.license
+        this.input("body-model-source").value = address.source
+        this.shownEntry = undefined
+        this.select("body-model").value = ""
+        this.updateCurrent()
+        void this.syncModelOptions(this.current!)
+      }
+    })
     NumberFields.fit(this.container)
     this.sync()
   }

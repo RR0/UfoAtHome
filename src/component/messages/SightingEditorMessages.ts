@@ -629,6 +629,9 @@ export interface SightingEditorMessages extends SightingLabels {
   modelPickerTitle: string
   modelPickerClose: string
   modelPickerChoose: string
+  /** The window's form of a model at an address: its button, and what it says of a model that cannot be drawn yet. */
+  modelPickerUse: string
+  modelPickerIncomplete: string
   /** Button in the Observer group that adds a new "other observer" decor object (see
    * SightingEditorElement's addDecorObserverButton) — distinct from decorObserver, that dropdown
    * option's own (now-hidden) label. */

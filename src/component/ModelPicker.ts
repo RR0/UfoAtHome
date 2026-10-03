@@ -6,6 +6,33 @@ export interface ModelPickerMessages {
   close: string
   /** The button that opens the window, beside the model now chosen. */
   choose: string
+  /** The form of a model at an address: the "+" that shows it, and its fields. */
+  address: string
+  addressUrl: string
+  addressName: string
+  addressAuthor: string
+  addressLicense: string
+  addressSource: string
+  /** The button that takes the form's model, and what it says while the model cannot be drawn yet. */
+  addressUse: string
+  addressIncomplete: string
+}
+
+/** A model at an address of the author's own, with the credit it is shown under. */
+export interface ModelAddress {
+  url: string
+  title: string
+  author: string
+  license: string
+  source: string
+}
+
+/** What the window needs of the object whose model it chooses, for a model at an address: the one it
+ * has now, and how to give it another. The fields of the object stay where they were; the window only
+ * asks for them. */
+export interface ModelAddressHost {
+  current(): ModelAddress | undefined
+  apply(address: ModelAddress): void
 }
 
 /** What the model behind an option is made from, to be drawn as a picture and shown live: undefined
@@ -32,9 +59,17 @@ export class ModelPicker {
 .model-picker-button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .model-picker-backdrop { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .55); }
 .model-picker { box-sizing: border-box; width: min(56em, 94vw); max-height: 86vh; display: flex; flex-direction: column; background: #fff; color: #222; border-radius: 6px; box-shadow: 0 4px 24px rgba(0, 0, 0, .5); font-size: .95em; }
-.model-picker header { display: flex; align-items: center; justify-content: space-between; padding: .6em 1em; border-bottom: 1px solid #ddd; }
+.model-picker header { display: flex; align-items: center; padding: .6em 1em; border-bottom: 1px solid #ddd; }
 .model-picker .model-picker-close { width: 2em; height: 2em; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: #fff; color: #222; border: none; border-radius: 50%; font-size: 1em; line-height: 1; cursor: pointer; }
 .model-picker .model-picker-close:hover, .model-picker .model-picker-close:focus-visible { background: #ddd; outline: none; }
+.model-picker .model-picker-add { width: 2em; height: 2em; padding: 0; margin-left: auto; margin-right: .4em; display: inline-flex; align-items: center; justify-content: center; background: #fff; color: #222; border: none; border-radius: 50%; font-size: 1.2em; line-height: 1; cursor: pointer; }
+.model-picker .model-picker-add:hover, .model-picker .model-picker-add:focus-visible, .model-picker .model-picker-add[aria-expanded="true"] { background: #ddd; outline: none; }
+.model-picker .model-picker-address { display: grid; gap: .4em; padding: .6em 1em; border-bottom: 1px solid #ddd; background: #f6f6f8; }
+.model-picker .model-picker-address[hidden] { display: none; }
+.model-picker .model-picker-address label { display: grid; grid-template-columns: 11em 1fr; align-items: center; gap: .5em; }
+.model-picker .model-picker-address input { min-width: 0; font: inherit; }
+.model-picker .model-picker-address p { margin: 0; font-size: .85em; color: #a40; }
+.model-picker .model-picker-address .model-picker-use { justify-self: start; }
 .model-picker h2 { margin: 0; font-size: 1.1em; }
 .model-picker .model-picker-body { overflow-y: auto; padding: .5em 1em 1em; }
 .model-picker h3 { margin: .8em 0 .4em; font-size: .95em; color: #555; }
@@ -59,7 +94,7 @@ export class ModelPicker {
   }
 
   /** Replaces the drop-down by a button that opens the window over its options. */
-  enhance(select: HTMLSelectElement, source: ModelSourceOf): void {
+  enhance(select: HTMLSelectElement, source: ModelSourceOf, address?: ModelAddressHost): void {
     this.ensureStyle()
     const button = document.createElement("button")
     button.type = "button"
@@ -72,13 +107,15 @@ export class ModelPicker {
       // last one to ask is drawn, so the button never collects the pictures of the earlier calls.
       const asked = ++showing
       const chosen = select.selectedOptions[0]
+      // A model at an address is no option of the list: it is named by what the author called it.
+      const own = select.value === "" ? address?.current() : undefined
       button.replaceChildren()
       const name = document.createElement("span")
-      name.textContent = `${chosen?.textContent ?? ""} \u2026`
+      name.textContent = `${own ? own.title || own.url : chosen?.textContent ?? ""} \u2026`
       button.title = this.messages().choose
       button.append(name)
       const id = select.value
-      void source(id).then(found => ModelPicker.pictureOf(found)).then(src => {
+      void (own ? Promise.resolve({ url: own.url }) : source(id)).then(found => ModelPicker.pictureOf(found)).then(src => {
         if (!src || asked !== showing) return
         const image = new Image()
         image.src = src
@@ -90,7 +127,15 @@ export class ModelPicker {
     // The options are replaced whenever the catalogue answers or the selection moves on, and the
     // value is set from code, which fires no "change": the button follows the options instead.
     new MutationObserver(show).observe(select, { childList: true, subtree: true })
-    button.addEventListener("click", () => void this.open(select, source))
+    // Giving an address changes the object but not the list, so the button is told itself.
+    const given: ModelAddressHost | undefined = address && {
+      current: () => address.current(),
+      apply: value => {
+        address.apply(value)
+        show()
+      }
+    }
+    button.addEventListener("click", () => void this.open(select, source, given))
     show()
   }
 
@@ -104,7 +149,7 @@ export class ModelPicker {
     container.append(style)
   }
 
-  private open(select: HTMLSelectElement, source: ModelSourceOf): void {
+  private open(select: HTMLSelectElement, source: ModelSourceOf, address?: ModelAddressHost): void {
     const messages = this.messages()
     const backdrop = document.createElement("div")
     backdrop.className = "model-picker-backdrop"
@@ -136,9 +181,14 @@ export class ModelPicker {
       event.stopPropagation()
       finish()
     }
+    // The model the object has at an address of its own is no option of the list: it is shown as a card
+    // of its own, first, which keeps it (choosing it is closing the window).
+    const current = address?.current()
+    const ADDRESS_ID = "\u0000address"
+    const sourceOf: ModelSourceOf = id => id === ADDRESS_ID && current ? Promise.resolve({ url: current.url }) : source(id)
     const pick = (value: string): void => {
       finish()
-      if (value === select.value) return
+      if (value === ADDRESS_ID || value === select.value) return
       select.value = value
       select.dispatchEvent(new Event("change", { bubbles: true }))
     }
@@ -148,7 +198,7 @@ export class ModelPicker {
       const element = document.createElement("button")
       element.type = "button"
       element.className = "model-card"
-      element.setAttribute("aria-pressed", String(option.value === select.value))
+      element.setAttribute("aria-pressed", String(option.value === ADDRESS_ID || (option.value === select.value && !current)))
       const thumb = document.createElement("div")
       thumb.className = "model-thumb"
       const name = document.createElement("span")
@@ -161,7 +211,7 @@ export class ModelPicker {
         credit.textContent = option.title
         element.append(credit)
       }
-      void source(option.value).then(found => ModelPicker.pictureOf(found)).then(src => {
+      void sourceOf(option.value).then(found => ModelPicker.pictureOf(found)).then(src => {
         if (!src) return
         const image = new Image()
         image.src = src
@@ -176,7 +226,7 @@ export class ModelPicker {
         // Another card's view replaces this one's: a view that has been stopped is started again.
         if (watching && !(viewer && !viewer.active)) return
         watching = true
-        void Promise.all([source(option.value), import("../render3d/decor/ModelViewer.js")]).then(([found, { ModelViewer }]) => {
+        void Promise.all([sourceOf(option.value), import("../render3d/decor/ModelViewer.js")]).then(([found, { ModelViewer }]) => {
           if (!found || !watching) return
           viewer = ModelViewer.show(thumb, found)
         }).catch(() => undefined)
@@ -209,6 +259,11 @@ export class ModelPicker {
       body.append(grid)
       return grid
     }
+    if (current) {
+      const option = new Option(current.title || current.url, ADDRESS_ID)
+      option.title = [current.author, current.license].filter(Boolean).join(" \u2014 ")
+      newGrid().append(card(option))
+    }
     for (const child of Array.from(select.children)) {
       if (child instanceof HTMLOptGroupElement) {
         const label = document.createElement("h3")
@@ -221,6 +276,7 @@ export class ModelPicker {
         ;(grid ?? newGrid()).append(card(child))
       }
     }
+    if (address) this.addAddressForm(header, close, dialog, body, address, messages, finish)
     close.addEventListener("click", finish)
     backdrop.addEventListener("click", event => {
       if (event.target === backdrop) finish()
@@ -232,5 +288,76 @@ export class ModelPicker {
     ;(chosen ?? close).focus()
     // The model now chosen is already turning when the window opens, whether or not the page has the focus.
     if (chosen) watchers.get(chosen)?.()
+  }
+
+  /**
+   * The form of a model at an address, behind a "+" in the window's header: the file, and the credit
+   * it has to be shown under. Filled with the model the object has now, when that is one, so that it
+   * can be corrected. The model is not drawn until its name and licence are given (a credit-less model
+   * is not one this project can show), which the form says rather than leaving a blank scene.
+   */
+  private addAddressForm(header: HTMLElement, close: HTMLElement, dialog: HTMLElement, body: HTMLElement,
+                         address: ModelAddressHost, messages: ModelPickerMessages, finish: () => void): void {
+    const add = document.createElement("button")
+    add.type = "button"
+    add.className = "model-picker-add"
+    add.textContent = "+"
+    add.title = messages.address
+    add.setAttribute("aria-label", messages.address)
+    add.setAttribute("aria-expanded", "false")
+    header.insertBefore(add, close)
+    const form = document.createElement("form")
+    form.className = "model-picker-address"
+    form.hidden = true
+    const field = (label: string, type: string, placeholder = ""): HTMLInputElement => {
+      const row = document.createElement("label")
+      const text = document.createElement("span")
+      text.textContent = label
+      const input = document.createElement("input")
+      input.type = type
+      input.placeholder = placeholder
+      row.append(text, input)
+      form.append(row)
+      return input
+    }
+    const url = field(messages.addressUrl, "url", "https://\u2026/model.glb")
+    const title = field(messages.addressName, "text")
+    const author = field(messages.addressAuthor, "text")
+    const license = field(messages.addressLicense, "text", "CC0 1.0")
+    const source = field(messages.addressSource, "url", "https://\u2026")
+    const note = document.createElement("p")
+    note.textContent = messages.addressIncomplete
+    const use = document.createElement("button")
+    use.type = "submit"
+    use.className = "model-picker-use"
+    use.textContent = messages.addressUse
+    form.append(note, use)
+    dialog.insertBefore(form, body)
+    const sync = (): void => {
+      use.disabled = url.value.trim() === ""
+      note.hidden = url.value.trim() === "" || (title.value.trim() !== "" && license.value.trim() !== "")
+    }
+    for (const input of [url, title, author, license, source]) input.addEventListener("input", sync)
+    add.addEventListener("click", () => {
+      const showing = form.hidden
+      form.hidden = !showing
+      add.setAttribute("aria-expanded", String(showing))
+      if (!showing) return
+      const now = address.current()
+      url.value = now?.url ?? ""
+      title.value = now?.title ?? ""
+      author.value = now?.author ?? ""
+      license.value = now?.license ?? ""
+      source.value = now?.source ?? ""
+      sync()
+      url.focus()
+    })
+    form.addEventListener("submit", event => {
+      event.preventDefault()
+      if (url.value.trim() === "") return
+      address.apply({ url: url.value.trim(), title: title.value.trim(), author: author.value.trim(), license: license.value.trim(), source: source.value.trim() })
+      finish()
+    })
+    sync()
   }
 }

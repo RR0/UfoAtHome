@@ -35,7 +35,7 @@ class Fixture {
   constructor(stated: InterpretationJson | null = interpretation) {
     this.sighting = { interpretation: stated === null ? undefined : structuredClone(stated) } as Sighting
     document.body.append(this.container)
-    const picker = new ModelPicker(this.container, () => ({ title: "Choose", close: "Close", choose: "Choose" }))
+    const picker = new ModelPicker(this.container, () => ({ title: "Choose", close: "Close", choose: "Choose", address: "Address", addressUrl: "Url", addressName: "Name", addressAuthor: "Author", addressLicense: "Licence", addressSource: "Source", addressUse: "Use", addressIncomplete: "Incomplete" }))
     const host: BodyEditorHost = {
       sighting: () => this.sighting,
       said: () => new SaidTexts(["en"]),

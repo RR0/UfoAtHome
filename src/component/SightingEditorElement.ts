@@ -1335,7 +1335,10 @@ export class SightingEditorElement extends HTMLElement {
     this.decorModelSelect = this.shadow.getElementById("decorModel") as HTMLSelectElement
     // The drop-down gives way to a window of pictures (see ModelPicker), over the same options.
     this.modelPicker = new ModelPicker(this.shadow, () => ({
-      title: this.messages.modelPickerTitle, close: this.messages.modelPickerClose, choose: this.messages.modelPickerChoose
+      title: this.messages.modelPickerTitle, close: this.messages.modelPickerClose, choose: this.messages.modelPickerChoose,
+      address: this.messages.decorModelAdvanced, addressUrl: this.messages.decorModelUrl, addressName: this.messages.decorModelTitle,
+      addressAuthor: this.messages.decorModelAuthor, addressLicense: this.messages.decorModelLicense, addressSource: this.messages.decorModelSource,
+      addressUse: this.messages.modelPickerUse, addressIncomplete: this.messages.modelPickerIncomplete
     }))
     this.modelPicker.enhance(this.decorModelSelect, async id => {
       const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
@@ -1343,6 +1346,26 @@ export class SightingEditorElement extends HTMLElement {
       const modelId = id !== "" ? id : decor ? DEFAULT_DECOR_MODEL[decor.kind]?.id : undefined
       if (modelId !== undefined) return this.decorModelProvider.entry(modelId).then(entry => entry && { url: entry.url, headingOffsetDeg: entry.headingOffsetDeg })
       return decor === undefined ? undefined : { decorKind: decor.kind }
+    }, {
+      current: () => {
+        const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
+        const model = decor?.model
+        return model?.url === undefined ? undefined : {
+          url: model.url, title: model.credit?.title ?? "", author: model.credit?.author ?? "",
+          license: model.credit?.license ?? "", source: model.credit?.sourceUrl ?? ""
+        }
+      },
+      apply: address => {
+        // The hidden fields still carry what the form states, and statedDecorModel reads them.
+        this.decorModelUrlInput.value = address.url
+        this.decorModelTitleInput.value = address.title
+        this.decorModelAuthorInput.value = address.author
+        this.decorModelLicenseInput.value = address.license
+        this.decorModelSourceInput.value = address.source
+        this.shownDecorEntry = undefined
+        this.decorModelSelect.value = ""
+        this.updateDecor()
+      }
     })
     this.decorModelAdvanced = this.shadow.getElementById("decor-model-advanced") as HTMLDetailsElement
     this.decorModelCatalogueNote = this.shadow.getElementById("decor-model-catalogue")!
@@ -7122,7 +7145,8 @@ export class SightingEditorElement extends HTMLElement {
     const traits = decor ? DecorTraits.of(decor, this.shownDecorEntry?.id === decor.model?.id ? this.shownDecorEntry?.parameters : undefined) : undefined
     this.setRowVisible(this.decorColorInput, traits?.color === true)
     this.setRowVisible(this.decorModelSelect, hasSelection)
-    this.decorModelAdvanced.hidden = !hasSelection
+    // The address of a model is given in the model window now (see ModelPicker); its fields only carry the state.
+    this.decorModelAdvanced.hidden = true
     // Lit is the legacy single switch (a streetlamp, a car's headlights). An aircraft's lamps are a
     // rig of their own (see LightRig.ts), so the checkbox would sit there doing nothing at all —
     // which is exactly how it was read.

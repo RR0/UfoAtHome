@@ -283,6 +283,8 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   modelPickerTitle: "Scegliere un modello 3D",
   modelPickerClose: "Chiudere",
   modelPickerChoose: "Scegliere un modello 3D",
+  modelPickerUse: "Usa questo modello",
+  modelPickerIncomplete: "Non disegnato finché non sono indicati il nome e la licenza del modello",
   addObserver: "Aggiungi osservatore",
   narrativePlaceholder: "Ciò che l'osservatore ha riferito, con parole sue",
   narrativeSource: "Redatto da",
