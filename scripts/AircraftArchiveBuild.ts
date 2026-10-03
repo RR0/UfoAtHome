@@ -57,7 +57,14 @@ export class AircraftArchiveBuild {
   /** The parts, in order, as one stream of chunks. */
   private async *chunksOf(parts: string[]): AsyncGenerator<Buffer> {
     for (const part of parts) {
-      for await (const chunk of createReadStream(part, { highWaterMark: 1 << 20 })) yield chunk as Buffer
+      const stream = createReadStream(part, { highWaterMark: 1 << 20 })
+      try {
+        for await (const chunk of stream) yield chunk as Buffer
+      } finally {
+        // Destroying a stream closes its file later: waited for, so that nothing holds the file once this returns.
+        stream.destroy()
+        if (!stream.closed) await new Promise<void>(resolve => stream.once("close", () => resolve()))
+      }
     }
   }
 
