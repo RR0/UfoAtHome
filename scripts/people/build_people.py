@@ -69,11 +69,13 @@ PEOPLE = [
 # Later precisions (from a statement of his, source to be cited): "environ un mètre" or "1 m à 1,10 m", faces
 # without hair, an unusual, unwrinkled skin, a globular head he later compared to a pumpkin, large black eyes
 # and no ordinary human features. "Tanned" is a later journalistic image, not his word, so the skin stays pale.
+# The 2 July 1965 gendarmerie summary says "taille 1 m environ, de forte corpulence, vêtu d'une combinaison,
+# tête nue": stocky, in a suit, bare-headed.
 # ASSUMED: a child's body at about 8 years (the account gives no build), eye size, the exact grey-green,
 # and a standing pose (he first saw them crouched).
 HEAD_VOLUME_RATIO = 3.0
 BEING = dict(id="valensole-being", name="Valensole being, after Maurice Masse's account", gender=1.0, age=0.15,
-             weight=0.35, muscle=0.2, heightM=1.0, skin="young_caucasian_male",
+             weight=0.8, muscle=0.4, heightM=1.0, skin="young_caucasian_male",
              clothes=["male_coverall01"], shoes="shoes03", hair=None, eyebrows=None, eyelashes=None,
              targets={"ears/l-ear-scale-vert-incr": 1.0, "ears/r-ear-scale-vert-incr": 1.0,
                       "ears/l-ear-scale-incr": 1.0, "ears/r-ear-scale-incr": 1.0,
@@ -92,7 +94,7 @@ BEING = dict(id="valensole-being", name="Valensole being, after Maurice Masse's 
                       "head/head-round": 1.0, "head/head-scale-horiz-incr": 0.6,
                       "chin/chin-width-decr": 1.0, "chin/chin-height-decr": 0.5},
              black_eyes=True,
-             head=dict(volumeRatio=HEAD_VOLUME_RATIO, sinkShare=0.4))
+             head=dict(volumeRatio=HEAD_VOLUME_RATIO, sinkShare=0.4, girth=(1.3, 1.2)))
 PEOPLE.append(BEING)
 
 
@@ -253,6 +255,8 @@ def reshape_head(baked, head):
     above = [o.matrix_world @ v.co for o in baked for v in o.data.vertices if (o.matrix_world @ v.co).z > neck_z + margin]
     centre_x = sum(p.x for p in above) / len(above)
     centre_y = sum(p.y for p in above) / len(above)
+    below = [o.matrix_world @ v.co for o in baked for v in o.data.vertices if (o.matrix_world @ v.co).z < neck_z - margin]
+    body_centre_y = sum(p.y for p in below) / len(below)
     for obj in baked:
         mesh = obj.data
         for vertex in mesh.vertices:
@@ -260,6 +264,14 @@ def reshape_head(baked, head):
             weight = min(max((world.z - (neck_z - margin)) / (2 * margin), 0.0), 1.0)
             weight = weight * weight * (3 - 2 * weight)
             if weight <= 0.0:
+                # Below the head: the body is made stockier about its own axis ("de forte corpulence").
+                girth = head.get("girth")
+                if girth:
+                    body_x = 1.0 + (girth[0] - 1.0) * (1.0 - weight)
+                    body_y = 1.0 + (girth[1] - 1.0) * (1.0 - weight)
+                    world.x = centre_x + (world.x - centre_x) * body_x
+                    world.y = body_centre_y + (world.y - body_centre_y) * body_y
+                    vertex.co = obj.matrix_world.inverted() @ world
                 continue
             factor = 1.0 + (scale - 1.0) * weight
             world.x = centre_x + (world.x - centre_x) * factor

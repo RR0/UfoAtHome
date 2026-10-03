@@ -24,8 +24,8 @@ mark); every texture is reduced to 512 px; the triangles of the body, clothes an
 
 A stand-in built from the account (the dossier page on rr0.org), not from any illustration: about 1 m
 tall, a head three times a human head's volume, set into the shoulders without a neck, bald, white skin,
-long ears, prominent cheekbones, a small round mouth, large black eyes, a small nose, a globular head (he later compared it to a pumpkin), a tight one-piece grey-green suit. Nothing on the head:
-no version of the account mentions a helmet. Assumed, because the account does not say: the child's
+long ears, prominent cheekbones, a small round mouth, large black eyes, a small nose, a globular head (he later compared it to a pumpkin), a tight one-piece grey-green suit. Stocky ("de forte corpulence") and bare-headed ("tête nue"), as the gendarmerie's summary of 2 July
+1965 puts it; no version of the account mentions a helmet. Assumed, because the account does not say: the child's
 build, the exact grey-green, and the standing pose. The skin is kept pale and smooth: "bronzée" is a later
 journalistic image, not Masse's word. Its suit is the pack's `male_casualsuit01`
 with its texture replaced by a plain grey-green, so that it carries no jeans, belt or logo.
