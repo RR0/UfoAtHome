@@ -40,6 +40,14 @@ const MIN_LOW_BASE_M = 100
 const MAX_LOW_BASE_M = 2500
 const MID_BASE_M = 3500
 const HIGH_BASE_M = 8000
+/**
+ * The optical density the low and middle bands are drawn with: the most the format allows (see
+ * CloudLayer.density). Their coverage comes from the dataset, their thickness does not, and a
+ * stratiform layer hundreds of metres thick is a lid: at 1 the deck stayed translucent enough to
+ * show the cirrus above it (Nanterre, an October evening, 88% middle cloud and 99% high: the
+ * fibres were drawn through it, where from under that sky none is to be seen).
+ */
+const WATER_LAYER_DENSITY = 2
 
 /** WMO codes 95..99 are the thunderstorm family; 96 and 99 are the two that state hail. */
 const STORM_CODE_MIN = 95
@@ -287,8 +295,8 @@ export class OpenMeteoWeatherProvider implements WeatherProvider {
   private cloudLayersFrom(record: HourlyRecord): CloudLayer[] {
     const lowBase = Math.round(this.clamp(METERS_PER_SPREAD_DEG * (record.temperatureC - record.dewPointC), MIN_LOW_BASE_M, MAX_LOW_BASE_M))
     return [
-      { id: "record-low", type: "unknown", baseM: lowBase, thicknessM: 650, coverage: this.clamp(record.cloudCoverLow, 0, 1), sizeM: 1400, density: 1 },
-      { id: "record-mid", type: "unknown", baseM: MID_BASE_M, thicknessM: 800, coverage: this.clamp(record.cloudCoverMid, 0, 1), sizeM: 2500, density: 1 },
+      { id: "record-low", type: "unknown", baseM: lowBase, thicknessM: 650, coverage: this.clamp(record.cloudCoverLow, 0, 1), sizeM: 1400, density: WATER_LAYER_DENSITY },
+      { id: "record-mid", type: "unknown", baseM: MID_BASE_M, thicknessM: 800, coverage: this.clamp(record.cloudCoverMid, 0, 1), sizeM: 2500, density: WATER_LAYER_DENSITY },
       { id: "record-high", type: "cirrus", baseM: HIGH_BASE_M, thicknessM: 400, coverage: this.clamp(record.cloudCoverHigh, 0, 1), sizeM: 2200, density: 0.35 }
     ]
   }

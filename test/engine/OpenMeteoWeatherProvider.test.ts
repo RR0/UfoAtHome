@@ -268,6 +268,14 @@ describe("OpenMeteoWeatherProvider", () => {
     expect(layers.every(layer => layer.instances === undefined && layer.windSpeed === undefined)).toBe(true)
   })
 
+  // A layer hundreds of metres thick is a lid: drawn at density 1 the middle deck was translucent enough
+  // to show the cirrus above it, which from under such a sky is not to be seen.
+  it("draws the low and middle bands as dense as the format allows, and the cirrus thin", async () => {
+    const { provider } = providerReturning(hourly({ cloud_cover: 100, cloud_cover_mid: 88, cloud_cover_high: 99 }))
+    const result = await provider.getWeather({ points: [{ lat: 48.9, lng: 2.2, time: AT_04 }] })
+    expect(result!.samples[0].weather.cloudLayers!.map(layer => layer.density)).toEqual([2, 2, 0.35])
+  })
+
   it("keeps clear bands at zero instead of inserting default cloud coverage", async () => {
     const { provider } = providerReturning(hourly())
     const result = await provider.getWeather({ points: [{ lat: 43.8, lng: 6, time: AT_04 }] })
