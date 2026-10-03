@@ -11,15 +11,33 @@ The base mesh, the targets, the skins, the clothes and the hair of the "MakeHuma
 so a person built from them can be re-hosted and redistributed with the rest of the catalogue. Community
 asset packs are NOT all CC0: use none without checking its licence file by file.
 
-## Setting it up (Blender 4.0, which is what this was done with)
+## Setting it up
 
-1. MPFB: `mpfb-2.0.6-rc2.zip` from https://files.makehumancommunity.org/releases/ is the last release
-   that is not tied to Blender 4.2's extension platform. Unzip it into a scripts directory, as
-   `<scripts>/addons/mpfb/`, then apply two patches to it for Blender 4.0:
+Two setups give the same models (checked: same vertices, same bounds, same materials, to the byte on the
+first), so use the simpler one.
+
+**Blender 5.2 (or 4.2 and later) with the official MPFB extension, nothing to patch.**
+
+1. MPFB 2.0.17 from the extension repository (https://extensions.blender.org/add-ons/mpfb/, the `.zip` whose
+   address is in https://extensions.blender.org/api/v1/extensions/ under `mpfb`, `archive_url`, with its
+   sha256), installed in a scratch profile:
+
+   ```
+   BLENDER_USER_RESOURCES=/path/to/scratch/res "/Applications/Blender 5.2.app/Contents/MacOS/Blender" -b \
+     --command extension install-file -r user_default --enable mpfb-2.0.17.zip
+   ```
+
+**Blender 4.0 with MPFB 2.0.6-rc2** (the last release that is not tied to Blender 4.2's extension platform):
+
+1. `mpfb-2.0.6-rc2.zip` from https://files.makehumancommunity.org/releases/. Unzip it into a scripts directory,
+   as `<scripts>/addons/mpfb/`, then apply two patches to it for Blender 4.0:
    - at the top of `mpfb/__init__.py`, a literal `bl_info = {"name": "mpfb", "version": (2, 0, 6), "blender": (3, 6, 0), "category": "MakeHuman"}`
    - in `mpfb/services/systemservice.py`, `LOWEST_FUNCTIONAL_BLENDER_VERSION = (4, 0, 0)`, and at the end of
      `mpfb/services/__init__.py`, `from .systemservice import LOWEST_FUNCTIONAL_BLENDER_VERSION`
-   (MPFB 2.0.17 needs Blender 4.2 or later and needs none of this.)
+   Run with `BLENDER_USER_SCRIPTS=<scripts>` set.
+
+Either way:
+
 2. The system assets: https://files.makehumancommunity.org/asset_packs/makehuman_system_assets/makehuman_system_assets_cc0.zip
    (281 MB), unzipped anywhere (`MH_ASSETS`).
 3. The woman's top. The stock `female_casualsuit01` carries the MakeHuman logo, so a copy is made as
@@ -50,7 +68,7 @@ asset packs are NOT all CC0: use none without checking its licence file by file.
 
 ```
 MH_ASSETS=/path/to/makehuman_system_assets_cc0 \
-BLENDER_USER_RESOURCES=/path/to/scratch/res BLENDER_USER_SCRIPTS=/path/to/scratch/scripts \
+BLENDER_USER_RESOURCES=/path/to/scratch/res [BLENDER_USER_SCRIPTS=/path/to/scratch/scripts] \
 /Applications/Blender.app/Contents/MacOS/Blender -b --python scripts/people/build_people.py -- <output dir> [<id> ...]
 ```
 

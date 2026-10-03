@@ -11,13 +11,11 @@ what is chosen here, and therefore ASSUMED, is their age, build and clothes, nev
 Run, with Blender 4.0 or later (background mode needs the GPU, so not inside a sandbox):
 
     MH_ASSETS=/path/to/unzipped/makehuman_system_assets_cc0 \
-    MPFB_ADDONS=/path/to/dir/containing/mpfb \
     BLENDER_USER_RESOURCES=/path/to/scratch/res \
-    BLENDER_USER_SCRIPTS=/path/to/scratch/scripts \
     blender -b --python scripts/people/build_people.py -- <output dir> [<id> ...]
 
-MPFB 2.0.6 is an "extension": for Blender 4.0 it needs `bl_info` added to its __init__.py, and
-LOWEST_FUNCTIONAL_BLENDER_VERSION exported by services/__init__.py (see README.md beside this file).
+Works with Blender 5.2 and MPFB 2.0.17 (an extension of Blender 4.2 and later), and with Blender 4.0 and
+MPFB 2.0.6-rc2 patched for it (see README.md beside this file).
 
 What comes out of it: one GLB per person, standing, arms down, geometry baked at that pose (no
 skeleton: a static decor object does not need one, and it is most of a rigged file's weight),
@@ -31,9 +29,23 @@ import math
 
 import bpy
 import addon_utils
+import importlib
 from mathutils import Matrix, Vector
 
 TEXTURE_PX = 512
+# MPFB 2.0.6 and earlier are add-ons (package `mpfb`); 2.0.8 and later are extensions of Blender 4.2+, whose
+# package lives under `bl_ext.<repository>.mpfb`.
+MPFB_PACKAGES = ("mpfb", "bl_ext.user_default.mpfb", "bl_ext.blender_org.mpfb")
+
+
+def mpfb_module(name):
+    """MPFB's module `name` (e.g. "services.humanservice"), from whichever package it is installed as."""
+    for package in MPFB_PACKAGES:
+        try:
+            return importlib.import_module(package + "." + name)
+        except ModuleNotFoundError:
+            continue
+    raise ModuleNotFoundError("MPFB is not installed (looked for " + ", ".join(MPFB_PACKAGES) + ")")
 ARM_DROP_RAD = math.radians(38)
 # What to keep of each mesh's triangles. People are seen from three to ninety metres, so the clothes
 # and the body, whose surfaces are smooth, give up half of them; the head's features and the hair,
@@ -107,7 +119,7 @@ def mhclo(assets, kind, name):
 def stage_assets(assets):
     """Copies the system assets to where MPFB looks, with the plain woman's suit made from the
     stock one: the same garment, its logo painted out and its colours muted (see recolor_suit)."""
-    from mpfb.services.locationservice import LocationService
+    LocationService = mpfb_module("services.locationservice").LocationService
     data = LocationService.get_user_data()
     for sub in os.listdir(assets):
         src = os.path.join(assets, sub)
@@ -132,7 +144,7 @@ def load_targets(basemesh, targets):
     """Face and body targets MPFB offers beyond the macros (ears, cheeks, mouth, eyes), by name.
     A weight above 1 is allowed (a slider's range is only a convention), but MPFB's own
     reapply_all_details clamps every key back to 1, so the weights are written AFTER it."""
-    from mpfb.services.targetservice import TargetService
+    TargetService = mpfb_module("services.targetservice").TargetService
     for name, weight in targets.items():
         path = TargetService.target_full_path(name.split("/")[-1])
         if not path:
@@ -149,7 +161,7 @@ def load_targets(basemesh, targets):
 
 
 def create_person(spec, data):
-    from mpfb.services.humanservice import HumanService
+    HumanService = mpfb_module("services.humanservice").HumanService
     macros = {"gender": spec["gender"], "age": spec["age"], "muscle": spec["muscle"], "weight": spec["weight"],
               "proportions": 0.5, "height": 0.5, "cupsize": 0.5, "firmness": 0.5,
               "race": {"caucasian": 1.0, "african": 0.0, "asian": 0.0}}
@@ -231,8 +243,22 @@ def make_opaque():
         if not material.node_tree:
             continue
         cut = any(word in material.name.lower() for word in ("hair", "eyebrow", "eyelash", "short0", "ponytail", "bob0", "long0", "afro", "braid"))
-        material.blend_method = "CLIP" if cut else "OPAQUE"
-        material.alpha_threshold = 0.5
+        if hasattr(material, "blend_method"):
+            material.blend_method = "CLIP" if cut else "OPAQUE"
+            material.alpha_threshold = 0.5
+        if hasattr(material, "surface_render_method"):
+            # Blender 4.2 and later: dithered is what the glTF exporter reads as opaque or alpha-masked.
+            material.surface_render_method = "DITHERED"
+        if cut and hasattr(material, "surface_render_method"):
+            # Blender 4.2 and later: the exporter reads an alpha cut-out from a Round node set
+            # between the texture's alpha and the shader's.
+            tree = material.node_tree
+            for link in list(tree.links):
+                if link.to_socket.name == "Alpha" and link.from_node.type != "MATH":
+                    rounding = tree.nodes.new("ShaderNodeMath")
+                    rounding.operation = "ROUND"
+                    tree.links.new(link.from_socket, rounding.inputs[0])
+                    tree.links.new(rounding.outputs[0], link.to_socket)  # replaces the old link into the socket
         if not cut:
             for link in list(material.node_tree.links):
                 if link.to_socket.name == "Alpha":
@@ -330,7 +356,12 @@ def main():
     argv = sys.argv[sys.argv.index("--") + 1:]
     out_dir, only = argv[0], argv[1:]
     os.makedirs(out_dir, exist_ok=True)
-    addon_utils.enable("mpfb", default_set=True, persistent=False, handle_error=None)
+    for package in MPFB_PACKAGES:
+        try:
+            if addon_utils.enable(package, default_set=True, persistent=False, handle_error=None):
+                break
+        except Exception:  # a package this Blender does not know (bl_ext on 4.0)
+            continue
     data = stage_assets(os.environ["MH_ASSETS"])
     report = {}
     for spec in PEOPLE:
