@@ -8,14 +8,14 @@ nothing more is known, so they are deliberately ordinary: plain country clothes,
 brand. Their body proportions come from MPFB's macro targets (gender, age, height, weight, muscle);
 what is chosen here, and therefore ASSUMED, is their age, build and clothes, never anyone's likeness.
 
-Run, with Blender 4.0 or later (background mode needs the GPU, so not inside a sandbox):
+Run, with Blender 4.2 or later (background mode needs the GPU, so not inside a sandbox):
 
     MH_ASSETS=/path/to/unzipped/makehuman_system_assets_cc0 \
     BLENDER_USER_RESOURCES=/path/to/scratch/res \
     blender -b --python scripts/people/build_people.py -- <output dir> [<id> ...]
 
-Works with Blender 5.2 and MPFB 2.0.17 (an extension of Blender 4.2 and later), and with Blender 4.0 and
-MPFB 2.0.6-rc2 patched for it (see README.md beside this file).
+Made with Blender 5.2 and MPFB 2.0.17, an extension of Blender 4.2 and later (see README.md beside this
+file). MPFB 2.0.6 and earlier, which are add-ons for Blender 4.0, are still found, but are no longer used.
 
 What comes out of it: one GLB per person, standing, arms down, geometry baked at that pose (no
 skeleton: a static decor object does not need one, and it is most of a rigged file's weight),
