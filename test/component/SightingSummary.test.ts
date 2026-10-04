@@ -157,4 +157,24 @@ describe("SightingSummary", () => {
       expect(fields.map(entry => entry.field)).toContain("decorEast")
     })
   })
+
+  describe("the phenomenon", () => {
+    const reading = (): Sighting => {
+      const sighting = Sighting.create(undefined, [{ lat: 45.1, lng: -123.3 }])
+      sighting.interpretation = {
+        title: { en: "A model" },
+        bodies: [{ id: "model", title: { en: "The model" }, model: { id: "ufoathome-mcminnville-object" }, track: [{ t: 0, eastM: 1, northM: 2, sizeM: { widthM: 0.12, lengthM: 0.12, heightM: 0.04 } }] }]
+      }
+      return sighting
+    }
+
+    it("lists the bodies of the interpretation with their model and size, when the caller asks", () => {
+      const entries = summary.entriesFor(reading(), 0, { phenomena: true }).filter(entry => entry.group === "phenomenon")
+      expect(entries).toEqual([expect.objectContaining({ field: "body:model", label: "The model", value: "ufoathome-mcminnville-object, 0.12 m" })])
+    })
+
+    it("says nothing of them to a caller that does not ask: a player draws them", () => {
+      expect(summary.entriesFor(reading(), 0).some(entry => entry.group === "phenomenon")).toBe(false)
+    })
+  })
 })

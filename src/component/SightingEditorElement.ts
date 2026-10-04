@@ -5364,6 +5364,8 @@ export class SightingEditorElement extends HTMLElement {
       // A chip naming a decor object opens that object here, so the list of them is worth its
       // room; under a player it would be a wall of chips leading nowhere. See SummaryContext.
       decorPicker: true,
+      // The shapes and the bodies are what the recording is about: each chip is a way into its own part.
+      phenomena: true,
       // The one thing the file can't tell the summary: a pose's elevationM is height above the
       // GROUND, and this toolbar's "Altitude" field is height above sea level. See SummaryContext.
       // Zero rather than undefined when no terrain has resolved yet, because that is exactly what
@@ -5382,7 +5384,7 @@ export class SightingEditorElement extends HTMLElement {
     // every such collision was with one of these two, so the box replaced that mechanism outright
     // rather than joining it. A collision between two FLAT groups would need answering again, and
     // there is currently no pair of them that can produce one.
-    const chips = entries.map(entry => ({ ...entry, panel: SightingEditorElement.SUMMARY_GROUPS.indexOf(entry.group) }))
+    const chips = entries.map(entry => ({ ...entry, panel: this.summaryPanelIndex(entry.group) }))
     const signature = chips.map(chip => `${chip.field}=${chip.label}=${chip.value}${chip.unit}${chip.fromSource ? "*" : ""}`).join("|")
     if (signature === this.paramSummarySignature) {
       return
@@ -5427,7 +5429,7 @@ export class SightingEditorElement extends HTMLElement {
           ? this.messages.assessmentGroup
           // The tab's LABEL, not the whole button: a tab also carries its count of unanswered
           // questions (see badgeOn), and reading the button whole named a nest "Observer3".
-          : SightingEditorElement.tabLabel(this.groupTabs[SightingEditorElement.SUMMARY_GROUPS.indexOf(chip.group)])
+          : SightingEditorElement.tabLabel(this.groupTabs[this.summaryPanelIndex(chip.group)])
         box.append(name)
         openNest = { group: chip.group, element: box }
         strip.push(box)
@@ -5445,7 +5447,12 @@ export class SightingEditorElement extends HTMLElement {
   /** Which summary groups describe a sub-element rather than the observation itself, and so read
    * as a chip holding chips: the observer who gave the account, and whichever decor object is
    * being worked on (or, with none selected, the list of them). */
-  private static readonly NESTED_GROUPS: SummaryGroup[] = ["observer", "decor", "assessment"]
+  private static readonly NESTED_GROUPS: SummaryGroup[] = ["observer", "decor", "phenomenon", "assessment"]
+
+  /** The tab a summary group leads to: by position for the groups that predate the Pictures tab, and by the panel it controls for the Phenomenon. */
+  private summaryPanelIndex(group: SummaryGroup): number {
+    return group === "phenomenon" ? this.panelIndex("shape") : SightingEditorElement.SUMMARY_GROUPS.indexOf(group)
+  }
 
   /**
    * Which fields would answer each of the coverage assessor's questions, and which panel holds
@@ -5642,6 +5649,20 @@ export class SightingEditorElement extends HTMLElement {
     // SightingSummary.addDecor): there is no control to focus, so the click selects that object,
     // which is what makes its own fields appear in the panel just opened.
     const field = chip.dataset.field!
+    // A shape or a body the summary listed: the click opens its own part of the Phenomenon panel and
+    // selects it, which is what makes its own fields appear there.
+    if (field.startsWith("shape:")) {
+      this.selectedSourceIds = new Set([field.slice("shape:".length)])
+      this.revealShapePanel()
+      this.ufoElement.refresh()
+      return
+    }
+    if (field.startsWith("body:")) {
+      const tab = this.subgroupTabs.find(candidate => candidate.getAttribute("aria-controls") === "shape-bodies")
+      if (tab) this.openSubgroup(tab)
+      void this.loadBodyEditor().then(editor => editor.show(field.slice("body:".length)))
+      return
+    }
     if (field.startsWith("decor:")) {
       this.currentDecorId = field.slice("decor:".length)
       this.refreshDecorList()

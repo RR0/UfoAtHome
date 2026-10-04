@@ -16,6 +16,10 @@ import type { SceneNaming } from "./messages/SceneNames.js"
  * the field. */
 export type SummaryGroup =
   | "observation" | "observer" | "location" | "decor" | "temporal" | "weather" | "sound"
+  /** What was seen, and what it is claimed to be: the shapes of the account at the instant on show, and
+   * the bodies of the interpretation. The editor's own panel is the Phenomenon one (see
+   * SummaryContext.phenomena). */
+  | "phenomenon"
   /** Not a group of fields at all, and the only one that is not: what an assessor made of the
    * recording, which has no panel to open and is produced after the fact rather than gathered here
    * (see SightingEditorElement.runAssessments). It travels as a group so that it can nest and be
@@ -70,6 +74,12 @@ export interface SummaryContext {
    * the wall shorter; what a reader can do nothing with does not belong on the strip.
    */
   decorPicker?: boolean
+  /**
+   * True when the shapes and the bodies are listed, each a way INTO its own part of the Phenomenon
+   * panel. Only the editor asks: a player draws the shapes and the bodies, and a strip of chips
+   * restating them leads nowhere there.
+   */
+  phenomena?: boolean
 }
 
 /**
@@ -127,6 +137,7 @@ export class SightingSummary {
     this.addObserver(entries, sighting, timeMs)
     this.addLocation(entries, sighting, timeMs, context.groundElevationM)
     this.addDecor(entries, sighting, timeMs, context)
+    if (context.phenomena === true) this.addPhenomena(entries, sighting, timeMs)
     this.addTemporal(entries, sighting)
     this.addWeather(entries, sighting, timeMs)
     this.addSound(entries, sighting, timeMs)
@@ -374,6 +385,27 @@ export class SightingSummary {
     this.push(entries, "sound", "soundVolume", this.labels.soundVolume, this.percentShown(sound.volume))
     this.push(entries, "sound", "soundPitch", this.labels.soundPitch, this.roundedShown(sound.pitchHz), "Hz")
     this.push(entries, "sound", "soundSrc", this.labels.soundSrc, sound.src)
+  }
+
+  /**
+   * The phenomenon: each shape of the account, with its apparent size at the instant on show, then each
+   * body of the interpretation, with the model it is drawn as and its size where it states one. A
+   * reading has no shape of its own, and its bodies are all there is of it to see; without them the
+   * strip told of the decor and nothing of what the recording is about.
+   */
+  private addPhenomena(entries: SummaryEntry[], sighting: Sighting, timeMs: number): void {
+    for (const sourceId of sighting.timeline.sourceIds) {
+      const shape = sighting.timeline.getInterpolatedShapeAt(timeMs, sourceId)
+      const angular = shape?.angular
+      const size = angular ? `${this.rounded(angular.widthDeg, 2)} × ${this.rounded(angular.heightDeg, 2)}°` : undefined
+      this.push(entries, "phenomenon", `shape:${sourceId}`, this.said.read(shape?.title) ?? sourceId, size)
+    }
+    for (const body of sighting.interpretation?.bodies ?? []) {
+      const width = body.track.find(key => key.sizeM?.widthM !== undefined)?.sizeM?.widthM
+      const model = body.model.id ?? body.model.url?.replace(/^.*\//, "")
+      this.push(entries, "phenomenon", `body:${body.id}`, this.said.read(body.title) ?? body.id,
+        [model, width !== undefined ? `${this.rounded(width, 2)} m` : undefined].filter(Boolean).join(", "))
+    }
   }
 
   /** What to call a decor object with no name of its own — the same "{kind} {n}" fallback the
