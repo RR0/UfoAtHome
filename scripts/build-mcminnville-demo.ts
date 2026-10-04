@@ -496,10 +496,13 @@ const modelBodies = () => [
   }
 ]
 
-/** The thread, the second part's finding: drawn only there, since the first found no trace of one. */
-const threadBody = () => ({
+/** The thread the model hangs from: a hanging model needs one. The second part of the study found it on the
+ * prints ("detected"); the first did not see it, and it is drawn there as what the hypothesis requires. */
+const threadBody = (detected: boolean) => ({
   id: "thread",
-  title: title("Le fil de suspension (mis en évidence)", "The suspension thread (detected)", "El hilo de suspensión (detectado)", "Il filo di sospensione (rilevato)"),
+  title: detected
+    ? title("Le fil de suspension (mis en évidence)", "The suspension thread (detected)", "El hilo de suspensión (detectado)", "Il filo di sospensione (rilevato)")
+    : title("Le fil de suspension (supposé)", "The suspension thread (required)", "El hilo de suspensión (supuesto)", "Il filo di sospensione (richiesto)"),
   explains: [],
   model: { id: "cylinder" },
   track: [
@@ -564,7 +567,54 @@ const sameAngleBody = (id: string, label: Said<string>, sizeM: number, stations:
   }
 }
 
-const comparison = (sizeCm: number, fr: string, en: string, es: string, it: string, by?: { people: string }[]) => {
+/**
+ * An object that was hung up for the photographs: there when each was taken and not between, since
+ * the hypothesis is that it was hung and photographed twice, not that it moved. It has to hang from
+ * a thread, drawn like the model's (see threadBody), of the same length: the study gives none for
+ * these, so the model's 70 cm is ASSUMED. Placed in the world where the photograph's own direction and
+ * angular width put it from the camera that took it, which is the same place the account's shapes are.
+ */
+const HUNG_LEAD_MS = 500
+const HUNG_HOLD_MS = 1000
+const hungBodies = (id: string, label: Said<string>, sizeM: number) => {
+  const heightM = Geometry.round(sizeM * Study.MODEL_HEIGHT_M / Study.MODEL_WIDTH_M, 3)
+  const stands = [
+    { t: T_FIRST_MS, camera: first, ...PHOTOGRAPHED[0] },
+    { t: T_SECOND_MS, camera: second, ...PHOTOGRAPHED[2] }
+  ].map(station => {
+    const distanceM = sizeM / (station.widthDeg * Geometry.DEG)
+    const at = Geometry.along(station.camera, station.azimuthDeg, distanceM * Math.cos(station.altitudeDeg * Geometry.DEG))
+    const centreM = Study.CAMERA_HEIGHT_M + distanceM * Math.sin(station.altitudeDeg * Geometry.DEG)
+    return { ...station, east: Geometry.round(at.e, 3), north: Geometry.round(at.n, 3), topM: Geometry.round(centreM + heightM / 2, 3), bottomM: Geometry.round(centreM - heightM / 2, 3) }
+  })
+  /** The keyframes of something that is there for each photograph and gone after it. */
+  const presence = (state: (stand: typeof stands[number]) => Record<string, unknown>, sized: Record<string, unknown>) => stands.flatMap((stand, index) => [
+    { t: stand.t - HUNG_LEAD_MS, present: true, ...state(stand), ...(index === 0 ? sized : {}) },
+    { t: stand.t + HUNG_HOLD_MS, present: false }
+  ])
+  return [
+    {
+      id,
+      title: label,
+      explains: ["ufo-1"],
+      model: { id: "ufoathome-mcminnville-object" },
+      track: presence(stand => ({
+        eastM: stand.east, northM: stand.north, altitudeAboveGroundM: stand.bottomM, attitude: stand.pose
+      }), { sizeM: { widthM: sizeM, lengthM: sizeM, heightM }, appearance: { color: "#8a8d91", albedo: 0.3 } })
+    },
+    {
+      id: `${id}-thread`,
+      title: title("Son fil de suspension", "Its suspension thread", "Su hilo de suspensión", "Il suo filo di sospensione"),
+      explains: [],
+      model: { id: "cylinder" },
+      track: presence(stand => ({
+        eastM: stand.east, northM: stand.north, altitudeAboveGroundM: stand.topM, attitude: { headingDeg: stand.azimuthDeg, pitchDeg: 0, rollDeg: 0 }
+      }), { sizeM: { widthM: THREAD_DRAWN_M, lengthM: THREAD_DRAWN_M, heightM: Study.THREAD_M }, appearance: { color: "#303030", albedo: 0.1 } })
+    }
+  ]
+}
+
+const comparison = (sizeCm: number, fr: string, en: string, es: string, it: string, by?: { people: string }[], hung = false) => {
   const metres = sizeCm / 100
   const metresAway = Geometry.round(metres / (Study.WIDTH_FIRST_DEG * Geometry.DEG), 1)
   const fmt = (value: number, language: string): string => value.toLocaleString(language, { maximumFractionDigits: value >= 100 ? 0 : 1 })
@@ -575,7 +625,9 @@ const comparison = (sizeCm: number, fr: string, en: string, es: string, it: stri
     sighting: observer.id,
     ...(by ? { by } : {}),
     title: title(label(fr, "fr"), label(en, "en"), label(es, "es"), label(it, "it")),
-    bodies: [sameAngleBody("object", title(label(fr, "fr"), label(en, "en"), label(es, "es"), label(it, "it")), metres)]
+    bodies: hung
+      ? hungBodies("object", title(label(fr, "fr"), label(en, "en"), label(es, "es"), label(it, "it")), metres)
+      : [sameAngleBody("object", title(label(fr, "fr"), label(en, "en"), label(es, "es"), label(it, "it")), metres)]
   }
 }
 
@@ -587,12 +639,12 @@ const firstPart = {
   sighting: observer.id,
   time: "2013-04",
   title: title(
-    "Avril 2013 : une maquette d'environ 12 cm sous le fil inférieur de la ligne, qui oscille de 9° entre les deux photographies (aucun fil visible)",
-    "April 2013: a model about 12 cm across under the lower wire of the line, swinging 9° between the two photographs (no thread seen)",
-    "Abril de 2013: una maqueta de unos 12 cm bajo el cable inferior de la línea, que oscila 9° entre las dos fotografías (ningún hilo visible)",
-    "Aprile 2013: un modellino di circa 12 cm sotto il filo inferiore della linea, che oscilla di 9° fra le due fotografie (nessun filo visibile)"),
+    "Avril 2013 : une maquette d'environ 12 cm sous le fil inférieur de la ligne, qui oscille de 9° entre les deux photographies (le fil, qu'elle suppose, ne se voit pas sur les clichés)",
+    "April 2013: a model about 12 cm across under the lower wire of the line, swinging 9° between the two photographs (the thread it needs does not show on the prints)",
+    "Abril de 2013: una maqueta de unos 12 cm bajo el cable inferior de la línea, que oscila 9° entre las dos fotografías (el hilo que necesita no se ve en las copias)",
+    "Aprile 2013: un modellino di circa 12 cm sotto il filo inferiore della linea, che oscilla di 9° fra le due fotografie (il filo che richiede non si vede sulle stampe)"),
   by: authors,
-  bodies: modelBodies()
+  bodies: [...modelBodies(), threadBody(false)]
 }
 
 const secondPart = {
@@ -606,7 +658,7 @@ const secondPart = {
     "Junio de 2013: la misma maqueta al extremo de un hilo de 70 cm, detectado en las dos fotografías",
     "Giugno 2013: lo stesso modellino all'estremità di un filo di 70 cm, rilevato su entrambe le fotografie"),
   by: authors,
-  bodies: [...modelBodies(), threadBody()]
+  bodies: [...modelBodies(), threadBody(true)]
 }
 
 /**
@@ -684,14 +736,14 @@ const closeUp = (() => {
 const interpretations = [
   firstPart,
   secondPart,
-  comparison(30, "Pour comparer : un enjoliveur de 30 cm à {d} m, même largeur angulaire et même aspect",
-    "For comparison: a 30 cm hubcap at {d} m, the same angular width and the same look",
-    "Para comparar: un tapacubos de 30 cm a {d} m, misma anchura angular y mismo aspecto",
-    "Per confronto: un copricerchio di 30 cm a {d} m, stessa larghezza angolare e stesso aspetto"),
-  comparison(18, "Pour comparer : un rétroviseur de voiture de 18 cm à {d} m, même largeur angulaire et même aspect",
-    "For comparison: an 18 cm car mirror at {d} m, the same angular width and the same look",
-    "Para comparar: un retrovisor de coche de 18 cm a {d} m, misma anchura angular y mismo aspecto",
-    "Per confronto: uno specchietto retrovisore di 18 cm a {d} m, stessa larghezza angolare e stesso aspetto"),
+  comparison(30, "Pour comparer : un enjoliveur de 30 cm à {d} m, même largeur angulaire et même aspect, accroché à un fil pour chaque photographie",
+    "For comparison: a 30 cm hubcap at {d} m, the same angular width and the same look, hung on a thread for each photograph",
+    "Para comparar: un tapacubos de 30 cm a {d} m, misma anchura angular y mismo aspecto, colgado de un hilo para cada fotografía",
+    "Per confronto: un copricerchio di 30 cm a {d} m, stessa larghezza angolare e stesso aspetto, appeso a un filo per ogni fotografia", undefined, true),
+  comparison(18, "Pour comparer : un rétroviseur de voiture de 18 cm à {d} m, même largeur angulaire et même aspect, accroché à un fil pour chaque photographie",
+    "For comparison: an 18 cm car mirror at {d} m, the same angular width and the same look, hung on a thread for each photograph",
+    "Para comparar: un retrovisor de coche de 18 cm a {d} m, misma anchura angular y mismo aspecto, colgado de un hilo para cada fotografía",
+    "Per confronto: uno specchietto retrovisore di 18 cm a {d} m, stessa larghezza angolare e stesso aspetto, appeso a un filo per ogni fotografia", undefined, true),
   comparison(1200, "Rapport Condon : un disque de l'ordre de la dizaine de mètres, ici 12 m à {d} m (Hartmann donne 0,44 km), même largeur angulaire et même aspect",
     "Condon report: a disc of the order of ten metres, here 12 m at {d} m (Hartmann gives 0.44 km), the same angular width and the same look",
     "Informe Condon: un disco del orden de diez metros, aquí 12 m a {d} m (Hartmann da 0,44 km), misma anchura angular y mismo aspecto",
