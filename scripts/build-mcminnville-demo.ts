@@ -584,26 +584,74 @@ const secondPart = {
   bodies: [...modelBodies(), threadBody()]
 }
 
+/**
+ * The same account seen close up: a view 2.4 degrees across, kept on the object, so that its form can
+ * be looked at. At the 33 degrees of the photographs it is 25 pixels wide, and a dome, a base and a
+ * lean are only a shape; at 2.4 it is a third of the screen, and the hypotheses that match its angular
+ * width (a model, a hubcap, a disc) are seen to be one look at three sizes. It looks through no
+ * instrument, since an enlargement is not a camera, and keeps the plates over it.
+ */
+const closeUp = (() => {
+  const centred = (headingDeg: number, altitudeDeg: number) => ({ headingDeg: Geometry.round(headingDeg, 2), pitchDeg: Geometry.round(altitudeDeg, 2), fovDeg: 2.4 })
+  const keyframes = observer.observerTrack.keyframes.map((key, index) => ({
+    t: key.t,
+    pose: {
+      lat: key.pose.lat,
+      lng: key.pose.lng,
+      elevationM: key.pose.elevationM,
+      ...(index < 2 ? centred(Study.BEARING_FIRST_DEG, seenFirst.altitudeDeg) : centred(Study.BEARING_SECOND_DEG, seenSecond.altitudeDeg))
+    }
+  }))
+  const { exposureSeconds, iso, ...rest } = observer
+  void exposureSeconds
+  void iso
+  return {
+    ...rest,
+    id: `${observer.id}-closeup`,
+    observer: { id: "TrentPaul-closeup", title: "Gros plan sur l'objet (champ de 2,4°)" },
+    description: {
+      fr: "Le même compte rendu, agrandi : une vue de 2,4° de large, gardée sur l'objet, pour en voir la forme (base sombre, dôme, petite antenne, inclinaison) à la taille où chacune des hypothèses la montre.",
+      en: "The same account, enlarged: a view 2.4° across, kept on the object, to see its form (dark base, dome, small stub, lean) at the size where each hypothesis shows it.",
+      es: "El mismo relato, ampliado: una vista de 2,4° de ancho, mantenida sobre el objeto, para ver su forma (base oscura, cúpula, pequeña antena, inclinación) al tamaño en que cada hipótesis la muestra.",
+      it: "Lo stesso resoconto, ingrandito: una vista di 2,4° di larghezza, tenuta sull'oggetto, per vederne la forma (base scura, cupola, piccola antenna, inclinazione) alla dimensione in cui ogni ipotesi la mostra."
+    },
+    instrument: "eye",
+    // An enlargement is held by nobody: the sway a standing observer's view has would shake a field
+    // 2.4 degrees across by a third of its width.
+    sway: 0,
+    // The plates are magnified with it, fourteen-fold: kept faint, so that they do not wash the
+    // object's form out, and fully there under the slider.
+    references: observer.references.map(reference => ({ ...reference, opacity: 0.15 })),
+    observerTrack: { keyframes }
+  }
+})()
+
+const interpretations = [
+  firstPart,
+  secondPart,
+  comparison(30, "Pour comparer : un enjoliveur de 30 cm à {d} m, même largeur angulaire et même aspect",
+    "For comparison: a 30 cm hubcap at {d} m, the same angular width and the same look",
+    "Para comparar: un tapacubos de 30 cm a {d} m, misma anchura angular y mismo aspecto",
+    "Per confronto: un copricerchio di 30 cm a {d} m, stessa larghezza angolare e stesso aspetto"),
+  comparison(18, "Pour comparer : un rétroviseur de voiture de 18 cm à {d} m, même largeur angulaire et même aspect",
+    "For comparison: an 18 cm car mirror at {d} m, the same angular width and the same look",
+    "Para comparar: un retrovisor de coche de 18 cm a {d} m, misma anchura angular y mismo aspecto",
+    "Per confronto: uno specchietto retrovisore di 18 cm a {d} m, stessa larghezza angolare e stesso aspetto"),
+  comparison(2500, "Pour comparer : un disque de 25 m à {d} m (Hartmann retient 20 à 30 m), même largeur angulaire et même aspect",
+    "For comparison: a 25 m disc at {d} m (Hartmann holds 20 to 30 m), the same angular width and the same look",
+    "Para comparar: un disco de 25 m a {d} m (Hartmann retiene de 20 a 30 m), misma anchura angular y mismo aspecto",
+    "Per confronto: un disco di 25 m a {d} m (Hartmann ritiene da 20 a 30 m), stessa larghezza angolare e stesso aspetto")
+]
+
 const caseJson = {
   id: "McMinnville1950",
   title: "McMinnville",
   time: "1950-05-11 19:45",
   events: [
     { type: "event", eventType: "sighting", time: "1950-05-11 19:45", title: "Paul Trent", url: "observer-mcminnville.json" },
-    firstPart,
-    secondPart,
-    comparison(30, "Pour comparer : un enjoliveur de 30 cm à {d} m, même largeur angulaire et même aspect",
-      "For comparison: a 30 cm hubcap at {d} m, the same angular width and the same look",
-      "Para comparar: un tapacubos de 30 cm a {d} m, misma anchura angular y mismo aspecto",
-      "Per confronto: un copricerchio di 30 cm a {d} m, stessa larghezza angolare e stesso aspetto"),
-    comparison(18, "Pour comparer : un rétroviseur de voiture de 18 cm à {d} m, même largeur angulaire et même aspect",
-      "For comparison: an 18 cm car mirror at {d} m, the same angular width and the same look",
-      "Para comparar: un retrovisor de coche de 18 cm a {d} m, misma anchura angular y mismo aspecto",
-      "Per confronto: uno specchietto retrovisore di 18 cm a {d} m, stessa larghezza angolare e stesso aspetto"),
-    comparison(2500, "Pour comparer : un disque de 25 m à {d} m (Hartmann retient 20 à 30 m), même largeur angulaire et même aspect",
-      "For comparison: a 25 m disc at {d} m (Hartmann holds 20 to 30 m), the same angular width and the same look",
-      "Para comparar: un disco de 25 m a {d} m (Hartmann retiene de 20 a 30 m), misma anchura angular y mismo aspecto",
-      "Per confronto: un disco di 25 m a {d} m (Hartmann ritiene da 20 a 30 m), stessa larghezza angolare e stesso aspetto")
+    { type: "event", eventType: "sighting", time: "1950-05-11 19:45", title: "Paul Trent, gros plan", url: "observer-mcminnville-closeup.json" },
+    ...interpretations,
+    ...interpretations.map(event => ({ ...event, sighting: closeUp.id }))
   ]
 }
 
@@ -615,5 +663,6 @@ const write = (name: string, json: unknown): void => {
   console.log(`Wrote public/demo-data/${name}`)
 }
 write("observer-mcminnville.json", observer)
+write("observer-mcminnville-closeup.json", closeUp)
 write("case-mcminnville.json", caseJson)
 console.log(`second camera ${Geometry.round(second.e, 2)} E ${Geometry.round(second.n, 2)} N; model seen at ${seenFirst.altitudeDeg.toFixed(1)} deg from ${seenFirst.distanceM.toFixed(2)} m, then ${seenSecond.altitudeDeg.toFixed(1)} deg from ${seenSecond.distanceM.toFixed(2)} m`)

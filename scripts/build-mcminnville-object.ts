@@ -33,9 +33,11 @@ class McMinnvilleObject {
   /** Where the stub stands: 28 px left of the centre on the disc's 470 px (plate 26), a twelfth of its width. */
   static readonly ANTENNA_OFFSET_M = -0.0071
 
-  /** Silver with a touch of bronze on top ("argenté, un peu bronze"), a dark underside. */
+  /** Silver with a touch of bronze on top ("argenté, un peu bronze"), a dark underside. Matt: a
+   * metallic material without an environment to reflect draws black, and a dome that is one flat black
+   * shape shows nothing of its form. */
   readonly materials = [
-    GltfWriter.material("hull", "#b4aea3", 0.7, 0.45),
+    GltfWriter.material("hull", "#c8c2b6", 0.05, 0.55),
     GltfWriter.material("underside", "#1e1e20", 0.1, 0.8)
   ]
 
