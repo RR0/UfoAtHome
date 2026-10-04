@@ -163,6 +163,20 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "mcminnville",
+          src: "/demo-data/observer-mcminnville.json",
+          // The case, for the player: it holds the IPACO study's model on its thread beside the account.
+          playSrc: "/demo-data/case-mcminnville.json",
+          title: { en: "McMinnville, 1950", fr: "McMinnville, 1950", es: "McMinnville, 1950", it: "McMinnville, 1950" },
+          titleIsName: true,
+          blurb: {
+            en: "Evening on an Oregon farm, 19:45: Paul Trent's two photographs, through the Roamer 1 he took them with. Switch to the 2013 study by Cousyn, Louange and Quick to see what they found: a model 12 cm across on a 70 cm thread under the electric line, swinging 9° between the two exposures.",
+            fr: "Soir sur une ferme de l'Oregon, 19:45 : les deux photographies de Paul Trent, à travers le Roamer 1 qui les a prises. Passez à l'étude de 2013 de Cousyn, Louange et Quick pour voir ce qu'ils ont trouvé : une maquette de 12 cm au bout d'un fil de 70 cm sous la ligne électrique, qui oscille de 9° entre les deux poses.",
+            es: "Tarde en una granja de Oregón, 19:45: las dos fotografías de Paul Trent, a través de la Roamer 1 con la que las hizo. Pasa al estudio de 2013 de Cousyn, Louange y Quick para ver lo que encontraron: una maqueta de 12 cm colgada de un hilo de 70 cm bajo la línea eléctrica, que oscila 9° entre las dos tomas.",
+            it: "Sera in una fattoria dell'Oregon, 19:45: le due fotografie di Paul Trent, attraverso la Roamer 1 con cui le scattò. Passa allo studio del 2013 di Cousyn, Louange e Quick per vedere cosa trovarono: un modellino di 12 cm appeso a un filo di 70 cm sotto la linea elettrica, che oscilla di 9° fra i due scatti."
+          }
+        },
+        {
           id: "silly-le-long",
           src: "/demo-data/observer-silly-le-long.json",
           // The case, for the player: it holds the GEIPAN's reading beside the account.

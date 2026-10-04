@@ -249,6 +249,28 @@ export const INSTRUMENTS: Instrument[] = [
     apertureBlades: 6
   },
   {
+    // The box camera Paul Trent photographed McMinnville with on 11 May 1950: a Roamer 1 on 120
+    // film, whose negative is 6 x 9 cm behind a 100 mm lens (Cousyn, Louange and Quick, IPACO,
+    // 2013), which is 48 degrees across and 33 up. The frame is that of the negative as Maccabee
+    // measured it after it had been cropped, not the 6 x 9 the maker gave: it is the one that
+    // the scans every study works from are cut to.
+    id: "roamer-1-120",
+    name: "Roamer 1, 120 film",
+    projection: "rectilinear",
+    frame: { widthMm: 90, heightMm: 60, focalLengthMm: 100 },
+    // A shutter of 1/50 s is the figure the study gives. The aperture it does NOT give, and a box
+    // camera of the day had a single small one: f/11 is the usual for the type, and so ASSUMED here.
+    fNumber: 11,
+    exposureSeconds: 1 / 50,
+    // The Roamer was sold from 1950 on a design of the Ensign works that went back to the 1930s,
+    // and the box and folding cameras of that kind are what a farm family owned until the Instamatic.
+    years: { from: 1930, to: 1965 },
+    // A black and white film of the period (Verichrome, ASA 125), printed: about 15 line pairs a
+    // millimetre behind a simple meniscus lens, so coarser than the 35 mm cameras' 20 µm.
+    detailUm: 40,
+    medium: { kind: "negative", iso: 125 }
+  },
+  {
     // The camera of the snapshot era, and a square one — which is the clearest demonstration that a
     // format is not decoration: the same sighting photographed on 126 film comes back in a frame
     // that is neither the scene's 16:9 nor a phone's tall rectangle. 28 x 28 mm of image behind a

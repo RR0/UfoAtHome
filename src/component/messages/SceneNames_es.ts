@@ -117,6 +117,7 @@ export const sceneNames_es: SceneNames = {
   instruments: {
     eye: "A simple vista",
     "rectilinear-lens": "Cámara, modelo desconocido",
+    "roamer-1-120": "Roamer 1, película 120",
     "instamatic-126": "Instamatic, película 126",
     "slr-35mm-50": "Réflex 35 mm, objetivo 50 mm",
     "slr-35mm-zoom": "Réflex 35 mm, zoom 70-210 mm",

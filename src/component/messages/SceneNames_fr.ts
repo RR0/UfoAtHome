@@ -116,6 +116,7 @@ export const sceneNames_fr: SceneNames = {
   instruments: {
     eye: "Œil nu",
     "rectilinear-lens": "Appareil, modèle inconnu",
+    "roamer-1-120": "Roamer 1, film 120",
     "instamatic-126": "Instamatic, film 126",
     "slr-35mm-50": "Reflex 35 mm, objectif 50 mm",
     "slr-35mm-zoom": "Reflex 35 mm, zoom 70-210 mm",
