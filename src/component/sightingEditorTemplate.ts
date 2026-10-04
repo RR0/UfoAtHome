@@ -1176,15 +1176,16 @@ select.weather-field:disabled {
   gap: 0.5em;
 }
 .render-line { display: flex; flex-wrap: wrap; align-items: center; gap: .25em .75em; }
-.render-line > #case-row, .render-line > .scene-controls { margin: 0; flex: 0 1 auto; min-width: 0; }
-#case-row { flex-wrap: wrap; }
+.render-line > #case-row { margin: 0; flex: 1 1 14em; min-width: 0; }
+.render-line > .scene-controls { margin: 0 0 0 auto; flex: 0 0 auto; }
+#case-row { flex-wrap: nowrap; }
 .case-dialog { max-width: min(28em, 92vw); }
 .case-dialog label { display: flex; align-items: center; gap: .5em; margin: .4em 0; }
 .case-dialog label span { flex: 0 0 9em; }
 .case-dialog input, .case-dialog select { flex: 1 1 auto; min-width: 0; }
-#case-row label { display: flex; align-items: center; gap: .5em; flex: 0 1 auto; min-width: 0; }
+#case-row label { display: flex; align-items: center; gap: .5em; flex: 1 1 auto; min-width: 0; }
 /* A reading is titled with a sentence: the picker is as wide as the row lets it be and cuts the rest. */
-#case-track { flex: 0 1 auto; min-width: 0; max-width: 16em; text-overflow: ellipsis; }
+#case-track { flex: 1 1 auto; min-width: 0; max-width: 100%; text-overflow: ellipsis; }
 #import-url {
   flex: 1 1 16em;
 }
