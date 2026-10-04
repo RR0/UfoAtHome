@@ -690,6 +690,8 @@ export class SceneElement extends HTMLElement {
       // The sentence saying what this is not (a video) has the picture to itself while it waits: the
       // account's first moment would be printed over it, both centred, and neither could be read.
       this.ufoElement.captionHeld = holding
+      // And the clock: the observation does not begin behind the loader.
+      this.ufoElement.holdClock(holding)
     }
     this.hoverTooltip = this.shadow.getElementById("hover-tooltip")!
 

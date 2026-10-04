@@ -69,6 +69,15 @@ export interface BodyFrame {
 }
 
 /**
+ * The layer every part of a body is ALSO on, so that it can be drawn a second time over the pictures
+ * of the place (see SceneRenderer.renderBodiesOverReferences). A body is in the scene, and a picture
+ * laid over the scene covers it like everything else of the scene: a photograph at half opacity
+ * showed the observer's phenomenon at half strength, the one thing in the picture that was not
+ * supposed to be the picture's.
+ */
+export const BODY_OVER_LAYER = 4
+
+/**
  * The bodies of an interpretation, standing in the scene — see InterpretationJson.
  *
  * Unlike the account's phenomena (PhenomenonSystem), these are real objects of the scene: they
@@ -576,6 +585,11 @@ export class BodySystem {
   private static readonly SHINY_ROUGHNESS = 0.6
   private static readonly SHINY_METALNESS = 0.3
 
+  /** Puts every part of a body on BODY_OVER_LAYER as well as the main one. */
+  private static overlay(holder: Group): void {
+    holder.traverse(object => object.layers.enable(BODY_OVER_LAYER))
+  }
+
   /** Whether any body is on show. */
   get any(): boolean {
     return [...this.built.values()].some(({ holder }) => holder.visible)
@@ -604,6 +618,7 @@ export class BodySystem {
         child.receiveShadow = true
       })
       holder.add(BodySystem.fit(figure, 0))
+      BodySystem.overlay(holder)
       return { holder, signature, material }
     }
     if (primitive) {
@@ -613,6 +628,7 @@ export class BodySystem {
       mesh.castShadow = true
       mesh.receiveShadow = true
       holder.add(mesh)
+      BodySystem.overlay(holder)
       return { holder, signature, material }
     }
     // A model arrives later; until then (and if it never does) the body is its bounding ellipsoid,
@@ -623,6 +639,7 @@ export class BodySystem {
     placeholder.castShadow = true
     placeholder.receiveShadow = true
     holder.add(placeholder)
+    BodySystem.overlay(holder)
     const token = this.token
     void this.loadModel(state.model).then(loaded => {
       if (!loaded || token !== this.token || this.built.get(state.id)?.holder !== holder) return
@@ -631,6 +648,7 @@ export class BodySystem {
       material.dispose()
       BodySystem.glaze(loaded.scene)
       holder.add(BodySystem.fit(loaded.scene, loaded.headingOffsetDeg ?? state.model.headingOffsetDeg ?? 0))
+      BodySystem.overlay(holder)
       this.credits.set(state.id, loaded.credit)
       const entry = this.built.get(state.id)
       if (entry) {

@@ -37,7 +37,7 @@ class McMinnvilleObject {
    * metal shows what it reflects, and what it reflects here is an evening sky, so that it would read as
    * the sky itself. A paint takes the light and shows its form. */
   readonly materials = [
-    GltfWriter.material("hull", "#d4cfc4", 0.25, 0.5),
+    GltfWriter.material("hull", "#9c978d", 0.25, 0.5),
     GltfWriter.material("underside", "#2a2a2d", 0, 0.9)
   ]
 

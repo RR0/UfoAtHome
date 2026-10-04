@@ -365,6 +365,27 @@ describe("a scene out of sight", () => {
     expect(sightCalls.at(-1)).toBe("resume")
   })
 
+  it("holds the clock behind the loader and starts a replay from where it was", async () => {
+    const element = mount()
+    element.ufoElement.togglePlayPause()
+    await new Promise(resolve => setTimeout(resolve, 50))
+    expect(element.ufoElement.playbackState).toBe("playing")
+    // The loader comes: what was playing stops, and a request to play waits for it to go.
+    element.ufoElement.holdClock(true)
+    expect(element.ufoElement.playbackState).not.toBe("playing")
+    element.ufoElement.play()
+    expect(element.ufoElement.playbackState).not.toBe("playing")
+    element.ufoElement.holdClock(false)
+    expect(element.ufoElement.playbackState).toBe("playing")
+  })
+
+  it("leaves a replay that was paused paused when the loader goes", async () => {
+    const element = mount()
+    element.ufoElement.holdClock(true)
+    element.ufoElement.holdClock(false)
+    expect(element.ufoElement.playbackState).not.toBe("playing")
+  })
+
   it("pauses a replay that is playing, and leaves it paused on its return", async () => {
     const element = mount()
     element.ufoElement.togglePlayPause()

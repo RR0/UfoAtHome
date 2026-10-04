@@ -995,11 +995,53 @@ export class UfoElement extends HTMLElement {
    */
   play(): void {
     if (this.player.seekableDuration <= 0 || this.playbackState === "playing") return
+    // Asked while a composing element's loader is up: it starts when the loader goes, not behind it.
+    if (this.clockHeld) {
+      this.playAfterHold = true
+      return
+    }
     this.togglePlayPause()
+  }
+
+  /** Whether a composing element has the clock held behind its loader — see holdClock. */
+  private clockHeld = false
+  /** Whether the recording is to start (or go on) playing once the clock is released. */
+  private playAfterHold = false
+
+  /**
+   * Holds the observation's clock while a composing element shows its loader (see SceneElement's),
+   * and lets it go when the loader does.
+   *
+   * The time of a recording is the observer's evening, not the page's: a loader that took two
+   * seconds, with the recording already playing behind it, took two seconds off the start of the
+   * account — the reader saw it begin at its second chapter and never saw its first. What was
+   * playing when the loader came, or was asked to play while it was up, plays from the same instant
+   * when it goes; what was paused stays paused.
+   */
+  holdClock(held: boolean): void {
+    if (held === this.clockHeld) return
+    this.clockHeld = held
+    if (held) {
+      if (this.playbackState !== "playing") return
+      this.playAfterHold = true
+      this.player.pause()
+      this.soundPreview = undefined
+      this.sightingAudio.silence()
+      this.refresh()
+      this.updatePlayPauseButton()
+      return
+    }
+    if (!this.playAfterHold) return
+    this.playAfterHold = false
+    if (this.player.seekableDuration <= 0 || this.playbackState === "playing") return
+    this.sightingAudio.resume()
+    this.player.play()
+    this.updatePlayPauseButton()
   }
 
   /** Stops playback where it stands. See `play()` for why this is not just the toggle. */
   pause(): void {
+    this.playAfterHold = false
     if (this.playbackState !== "playing") return
     this.togglePlayPause()
   }
@@ -1821,6 +1863,10 @@ export class UfoElement extends HTMLElement {
       // (hidden while playing) reappears immediately instead of staying hidden until some
       // unrelated repaint happens to occur.
       this.refresh()
+    } else if (this.clockHeld) {
+      // Pressed behind the loader: it is what starts the recording when the loader goes.
+      this.playAfterHold = !this.playAfterHold
+      return
     } else {
       // This call is only ever reached from a real user gesture (the Play button, the canvas's own
       // click-to-play, or a composing element's external button) — exactly what AudioContext.

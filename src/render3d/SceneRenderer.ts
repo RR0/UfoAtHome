@@ -118,7 +118,7 @@ import type { DecorModelCredit, DecorModelRef } from "../engine/model/Decor.js"
 import type { DecorModelEntry, DecorModelProvider } from "./decor/DecorModelProvider.js"
 import { DECOR_MODEL_SOURCES } from "./decor/decorModelSources.js"
 import { loadGltfScene } from "./decor/loadGltfScene.js"
-import { BodySystem } from "./BodySystem.js"
+import { BodySystem, BODY_OVER_LAYER } from "./BodySystem.js"
 import type { BodyState, Ground } from "../engine/interpretation/BodyPlacement.js"
 import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
 import { PhenomenonSystem, PHENOMENON_LAYER } from "./PhenomenonSystem.js"
@@ -3884,6 +3884,7 @@ export class SceneRenderer {
    * observer's own phenomena over them — see renderReferencesPass and renderPhenomenaPass. */
   private renderOverlayPasses(camera: PerspectiveCamera = this.camera): void {
     this.renderReferencesPass(camera)
+    this.renderBodiesOverReferences(camera)
     this.renderPhenomenaPass(camera)
     this.renderHudPass(camera)
   }
@@ -3897,6 +3898,33 @@ export class SceneRenderer {
     this.renderer.autoClear = false
     this.renderer.shadowMap.autoUpdate = false
     camera.layers.set(HUD_LAYER)
+    this.renderer.render(this.scene, camera)
+    camera.layers.set(0)
+    this.renderer.autoClear = autoClear
+    this.renderer.shadowMap.autoUpdate = shadows
+  }
+
+  /**
+   * Draws the bodies of the interpretation again, over the pictures just laid on the scene.
+   *
+   * A picture is laid over everything and is not hidden by anything (see renderReferencesPass), which
+   * includes the 3D bodies: they are in the scene, so a photograph at half opacity left them at half
+   * strength — Cussac's sphere behind its 1968 view, McMinnville's model behind Trent's print — where
+   * the pictures' point is to be compared WITH the phenomenon. So the bodies alone are drawn once
+   * more, against the depth the scene left (the pictures write none): where the body was in front it
+   * is whole again, and where something of the decor stood in front of it, the decor still hides it.
+   * The lights are on the bodies' layer too, or three would draw them unlit.
+   */
+  private renderBodiesOverReferences(camera: PerspectiveCamera): void {
+    if (!this.references.any || !this.bodySystem.any) return
+    this.scene.traverse(object => {
+      if ((object as { isLight?: boolean }).isLight) object.layers.enable(BODY_OVER_LAYER)
+    })
+    const autoClear = this.renderer.autoClear
+    const shadows = this.renderer.shadowMap.autoUpdate
+    this.renderer.autoClear = false
+    this.renderer.shadowMap.autoUpdate = false
+    camera.layers.set(BODY_OVER_LAYER)
     this.renderer.render(this.scene, camera)
     camera.layers.set(0)
     this.renderer.autoClear = autoClear

@@ -513,37 +513,53 @@ const threadBody = () => ({
  * the lines (a model hung under them is 4 m off, a disc 900 m away is not) and the photometry, which
  * is what the study measures.
  */
-const sameAngleBody = (id: string, label: Said<string>, sizeM: number) => {
-  const distanceAt = (widthDeg: number): number => Geometry.round(sizeM / (widthDeg * Geometry.DEG), 1)
+/** One instant of an object seen at a bearing and a height, `widthDeg` wide: what the account gives. */
+interface Station {
+  t: number
+  azimuthDeg: number
+  altitudeDeg: number
+  widthDeg: number
+  pose?: { headingDeg: number, pitchDeg: number, rollDeg: number }
+  present?: boolean
+}
+
+/** The stations the photographs fix, and between them the testimony's coming on and leaving. */
+const PHOTOGRAPHED: Station[] = [
+  { t: T_FIRST_MS, azimuthDeg: Study.BEARING_FIRST_DEG, altitudeDeg: seenFirst.altitudeDeg, widthDeg: Study.WIDTH_FIRST_DEG, pose: Pose.FIRST },
+  { t: T_STEP_MS, azimuthDeg: Study.BEARING_FIRST_DEG, altitudeDeg: seenFirst.altitudeDeg, widthDeg: Study.WIDTH_FIRST_DEG, pose: Pose.FIRST },
+  { t: T_SECOND_MS, azimuthDeg: Study.BEARING_SECOND_DEG, altitudeDeg: seenSecond.altitudeDeg, widthDeg: Study.WIDTH_SECOND_DEG, pose: Pose.SECOND }
+]
+
+/** A comparison stands where the first photograph has it from the start of the recording: a body
+ * is hidden before its first keyframe, and one that began at the first photograph was not there at
+ * the very instant the print is laid over it. */
+const HELD_FROM_START: Station[] = [{ ...PHOTOGRAPHED[0], t: 0 }, ...PHOTOGRAPHED]
+
+const sameAngleBody = (id: string, label: Said<string>, sizeM: number, stations: Station[] = HELD_FROM_START) => {
   const size = { widthM: sizeM, lengthM: sizeM, heightM: Geometry.round(sizeM * Study.MODEL_HEIGHT_M / Study.MODEL_WIDTH_M, 3) }
   return {
     id,
     title: label,
     explains: ["ufo-1"],
     model: { id: "ufoathome-mcminnville-object" },
-    track: [
-      {
-        t: T_FIRST_MS,
-        azimuthDeg: Study.BEARING_FIRST_DEG,
-        altitudeDeg: Geometry.round(seenFirst.altitudeDeg, 2),
-        distanceM: distanceAt(Study.WIDTH_FIRST_DEG),
-        sizeM: size,
-        attitude: Pose.FIRST,
-        appearance: { color: "#8a8d91", albedo: 0.3 }
-      },
-      { t: T_STEP_MS, attitude: Pose.FIRST },
-      {
-        t: T_SECOND_MS,
-        azimuthDeg: Study.BEARING_SECOND_DEG,
-        altitudeDeg: Geometry.round(seenSecond.altitudeDeg, 2),
-        distanceM: distanceAt(Study.WIDTH_SECOND_DEG),
-        attitude: Pose.SECOND
-      }
-    ]
+    track: stations.map((station, index) => ({
+      t: station.t,
+      // Stationary stations are held by the keyframe before: only what changes is restated.
+      ...(index === 0 || station.azimuthDeg !== stations[index - 1].azimuthDeg || station.altitudeDeg !== stations[index - 1].altitudeDeg || station.widthDeg !== stations[index - 1].widthDeg
+        ? {
+          azimuthDeg: Geometry.round(station.azimuthDeg, 2),
+          altitudeDeg: Geometry.round(station.altitudeDeg, 2),
+          // The size is the same all through, so the distance is what makes the angle.
+          distanceM: Geometry.round(sizeM / (station.widthDeg * Geometry.DEG), 1)
+        } : {}),
+      ...(index === 0 ? { sizeM: size, appearance: { color: "#8a8d91", albedo: 0.3 } } : {}),
+      ...(station.pose ? { attitude: station.pose } : {}),
+      ...(station.present === undefined ? {} : { present: station.present })
+    }))
   }
 }
 
-const comparison = (sizeCm: number, fr: string, en: string, es: string, it: string) => {
+const comparison = (sizeCm: number, fr: string, en: string, es: string, it: string, by?: { people: string }[]) => {
   const metres = sizeCm / 100
   const metresAway = Geometry.round(metres / (Study.WIDTH_FIRST_DEG * Geometry.DEG), 1)
   const fmt = (value: number, language: string): string => value.toLocaleString(language, { maximumFractionDigits: value >= 100 ? 0 : 1 })
@@ -552,6 +568,7 @@ const comparison = (sizeCm: number, fr: string, en: string, es: string, it: stri
     type: "event",
     eventType: "interpretation",
     sighting: observer.id,
+    ...(by ? { by } : {}),
     title: title(label(fr, "fr"), label(en, "en"), label(es, "es"), label(it, "it")),
     bodies: [sameAngleBody("object", title(label(fr, "fr"), label(en, "en"), label(es, "es"), label(it, "it")), metres)]
   }
@@ -588,12 +605,42 @@ const secondPart = {
 }
 
 /**
+ * What Trent himself said it was, so that the account is drawn in the round and not only as angles.
+ *
+ * He would not guess its size or distance, "the only thing I know is that it was moving terribly
+ * fast", but one early reference has him estimating a diameter of "20 or 30 feet" (Condon, case 46,
+ * reference 3): a disc 7.6 m across, the middle of it. That is all the size there is, and the
+ * distance follows from it and the angle the photographs measure (1.63 degrees: 267 m). It comes on,
+ * is photographed twice and leaves, as the shapes do.
+ */
+const WITNESS_SIZE_M = 7.62
+const WITNESS_STATIONS: Station[] = [
+  { t: 0, azimuthDeg: Study.BEARING_FIRST_DEG + 13, altitudeDeg: seenFirst.altitudeDeg + 1.5, widthDeg: 1.2, pose: Pose.FIRST },
+  ...PHOTOGRAPHED,
+  { t: T_SECOND_MS + 2000, azimuthDeg: 8, altitudeDeg: seenSecond.altitudeDeg - 2, widthDeg: 1.3, pose: Pose.SECOND },
+  { t: T_SECOND_MS + 5000, azimuthDeg: 300, altitudeDeg: 8, widthDeg: 0.6, pose: Pose.SECOND },
+  { t: T_END_MS, azimuthDeg: 270, altitudeDeg: 3, widthDeg: 0.3, pose: Pose.SECOND },
+  { t: T_END_MS + 500, azimuthDeg: 270, altitudeDeg: 3, widthDeg: 0.3, present: false }
+]
+const witnessMetres = Math.round(WITNESS_SIZE_M / (Study.WIDTH_FIRST_DEG * Geometry.DEG))
+const witnessReading = {
+  title: title(
+    `Selon Trent : un disque de 20 à 30 pieds (environ 8 m), donc à ${witnessMetres} m pour la largeur mesurée`,
+    `As Trent put it: a disc 20 or 30 feet across (about 8 m), so ${witnessMetres} m off for the measured width`,
+    `Según Trent: un disco de 20 o 30 pies (unos 8 m), es decir a ${witnessMetres} m para el ancho medido`,
+    `Secondo Trent: un disco di 20 o 30 piedi (circa 8 m), dunque a ${witnessMetres} m per la larghezza misurata`),
+  bodies: [sameAngleBody("disc", title("Le disque de Trent", "Trent's disc", "El disco de Trent", "Il disco di Trent"), WITNESS_SIZE_M, WITNESS_STATIONS)]
+}
+
+/**
  * The same account seen close up: a view 2.4 degrees across, kept on the object, so that its form can
  * be looked at. At the 33 degrees of the photographs it is 25 pixels wide, and a dome, a base and a
  * lean are only a shape; at 2.4 it is a third of the screen, and the hypotheses that match its angular
  * width (a model, a hubcap, a disc) are seen to be one look at three sizes. It looks through no
  * instrument, since an enlargement is not a camera, and keeps the plates over it.
  */
+const observerWithReading = { ...observer, interpretation: witnessReading }
+
 const closeUp = (() => {
   const centred = (headingDeg: number, altitudeDeg: number) => ({ headingDeg: Geometry.round(headingDeg, 2), pitchDeg: Geometry.round(altitudeDeg, 2), fovDeg: 2.4 })
   const keyframes = observer.observerTrack.keyframes.map((key, index) => ({
@@ -605,7 +652,7 @@ const closeUp = (() => {
       ...(index < 2 ? centred(Study.BEARING_FIRST_DEG, seenFirst.altitudeDeg) : centred(Study.BEARING_SECOND_DEG, seenSecond.altitudeDeg))
     }
   }))
-  const { exposureSeconds, iso, ...rest } = observer
+  const { exposureSeconds, iso, ...rest } = observerWithReading
   void exposureSeconds
   void iso
   return {
@@ -640,10 +687,11 @@ const interpretations = [
     "For comparison: an 18 cm car mirror at {d} m, the same angular width and the same look",
     "Para comparar: un retrovisor de coche de 18 cm a {d} m, misma anchura angular y mismo aspecto",
     "Per confronto: uno specchietto retrovisore di 18 cm a {d} m, stessa larghezza angolare e stesso aspetto"),
-  comparison(2500, "Pour comparer : un disque de 25 m à {d} m (Hartmann retient 20 à 30 m), même largeur angulaire et même aspect",
-    "For comparison: a 25 m disc at {d} m (Hartmann holds 20 to 30 m), the same angular width and the same look",
-    "Para comparar: un disco de 25 m a {d} m (Hartmann retiene de 20 a 30 m), misma anchura angular y mismo aspecto",
-    "Per confronto: un disco di 25 m a {d} m (Hartmann ritiene da 20 a 30 m), stessa larghezza angolare e stesso aspetto")
+  comparison(1200, "Rapport Condon : un disque de l'ordre de la dizaine de mètres, ici 12 m à {d} m (Hartmann donne 0,44 km), même largeur angulaire et même aspect",
+    "Condon report: a disc of the order of ten metres, here 12 m at {d} m (Hartmann gives 0.44 km), the same angular width and the same look",
+    "Informe Condon: un disco del orden de diez metros, aquí 12 m a {d} m (Hartmann da 0,44 km), misma anchura angular y mismo aspecto",
+    "Rapporto Condon: un disco dell'ordine di una decina di metri, qui 12 m a {d} m (Hartmann dà 0,44 km), stessa larghezza angolare e stesso aspetto",
+    [{ people: "HartmannWilliam" }])
 ]
 
 const caseJson = {
@@ -665,7 +713,7 @@ const write = (name: string, json: unknown): void => {
   writeFileSync(path.join(directory, name), JSON.stringify(json, null, 1) + "\n")
   console.log(`Wrote public/demo-data/${name}`)
 }
-write("observer-mcminnville.json", observer)
+write("observer-mcminnville.json", observerWithReading)
 write("observer-mcminnville-closeup.json", closeUp)
 write("case-mcminnville.json", caseJson)
 console.log(`second camera ${Geometry.round(second.e, 2)} E ${Geometry.round(second.n, 2)} N; model seen at ${seenFirst.altitudeDeg.toFixed(1)} deg from ${seenFirst.distanceM.toFixed(2)} m, then ${seenSecond.altitudeDeg.toFixed(1)} deg from ${seenSecond.distanceM.toFixed(2)} m`)

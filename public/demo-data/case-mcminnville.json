@@ -273,7 +273,7 @@
      },
      "track": [
       {
-       "t": 12000,
+       "t": 0,
        "azimuthDeg": 45,
        "altitudeDeg": 17.74,
        "distanceM": 10.5,
@@ -282,14 +282,22 @@
         "lengthM": 0.3,
         "heightM": 0.103
        },
+       "appearance": {
+        "color": "#8a8d91",
+        "albedo": 0.3
+       },
        "attitude": {
         "headingDeg": 45,
         "pitchDeg": -3.2,
         "rollDeg": 19
-       },
-       "appearance": {
-        "color": "#8a8d91",
-        "albedo": 0.3
+       }
+      },
+      {
+       "t": 12000,
+       "attitude": {
+        "headingDeg": 45,
+        "pitchDeg": -3.2,
+        "rollDeg": 19
        }
       },
       {
@@ -342,7 +350,7 @@
      },
      "track": [
       {
-       "t": 12000,
+       "t": 0,
        "azimuthDeg": 45,
        "altitudeDeg": 17.74,
        "distanceM": 6.3,
@@ -351,14 +359,22 @@
         "lengthM": 0.18,
         "heightM": 0.062
        },
+       "appearance": {
+        "color": "#8a8d91",
+        "albedo": 0.3
+       },
        "attitude": {
         "headingDeg": 45,
         "pitchDeg": -3.2,
         "rollDeg": 19
-       },
-       "appearance": {
-        "color": "#8a8d91",
-        "albedo": 0.3
+       }
+      },
+      {
+       "t": 12000,
+       "attitude": {
+        "headingDeg": 45,
+        "pitchDeg": -3.2,
+        "rollDeg": 19
        }
       },
       {
@@ -388,20 +404,25 @@
    "type": "event",
    "eventType": "interpretation",
    "sighting": "1950-05-11-TrentPaul",
+   "by": [
+    {
+     "people": "HartmannWilliam"
+    }
+   ],
    "title": {
-    "fr": "Pour comparer : un disque de 25 m à 879 m (Hartmann retient 20 à 30 m), même largeur angulaire et même aspect",
-    "en": "For comparison: a 25 m disc at 879 m (Hartmann holds 20 to 30 m), the same angular width and the same look",
-    "es": "Para comparar: un disco de 25 m a 879 m (Hartmann retiene de 20 a 30 m), misma anchura angular y mismo aspecto",
-    "it": "Per confronto: un disco di 25 m a 879 m (Hartmann ritiene da 20 a 30 m), stessa larghezza angolare e stesso aspetto"
+    "fr": "Rapport Condon : un disque de l'ordre de la dizaine de mètres, ici 12 m à 422 m (Hartmann donne 0,44 km), même largeur angulaire et même aspect",
+    "en": "Condon report: a disc of the order of ten metres, here 12 m at 422 m (Hartmann gives 0.44 km), the same angular width and the same look",
+    "es": "Informe Condon: un disco del orden de diez metros, aquí 12 m a 422 m (Hartmann da 0,44 km), misma anchura angular y mismo aspecto",
+    "it": "Rapporto Condon: un disco dell'ordine di una decina di metri, qui 12 m a 422 m (Hartmann dà 0,44 km), stessa larghezza angolare e stesso aspetto"
    },
    "bodies": [
     {
      "id": "object",
      "title": {
-      "fr": "Pour comparer : un disque de 25 m à 879 m (Hartmann retient 20 à 30 m), même largeur angulaire et même aspect",
-      "en": "For comparison: a 25 m disc at 879 m (Hartmann holds 20 to 30 m), the same angular width and the same look",
-      "es": "Para comparar: un disco de 25 m a 879 m (Hartmann retiene de 20 a 30 m), misma anchura angular y mismo aspecto",
-      "it": "Per confronto: un disco di 25 m a 879 m (Hartmann ritiene da 20 a 30 m), stessa larghezza angolare e stesso aspetto"
+      "fr": "Rapport Condon : un disque de l'ordre de la dizaine de mètres, ici 12 m à 422 m (Hartmann donne 0,44 km), même largeur angulaire et même aspect",
+      "en": "Condon report: a disc of the order of ten metres, here 12 m at 422 m (Hartmann gives 0.44 km), the same angular width and the same look",
+      "es": "Informe Condon: un disco del orden de diez metros, aquí 12 m a 422 m (Hartmann da 0,44 km), misma anchura angular y mismo aspecto",
+      "it": "Rapporto Condon: un disco dell'ordine di una decina di metri, qui 12 m a 422 m (Hartmann dà 0,44 km), stessa larghezza angolare e stesso aspetto"
      },
      "explains": [
       "ufo-1"
@@ -411,23 +432,31 @@
      },
      "track": [
       {
-       "t": 12000,
+       "t": 0,
        "azimuthDeg": 45,
        "altitudeDeg": 17.74,
-       "distanceM": 878.8,
+       "distanceM": 421.8,
        "sizeM": {
-        "widthM": 25,
-        "lengthM": 25,
-        "heightM": 8.542
+        "widthM": 12,
+        "lengthM": 12,
+        "heightM": 4.1
+       },
+       "appearance": {
+        "color": "#8a8d91",
+        "albedo": 0.3
        },
        "attitude": {
         "headingDeg": 45,
         "pitchDeg": -3.2,
         "rollDeg": 19
-       },
-       "appearance": {
-        "color": "#8a8d91",
-        "albedo": 0.3
+       }
+      },
+      {
+       "t": 12000,
+       "attitude": {
+        "headingDeg": 45,
+        "pitchDeg": -3.2,
+        "rollDeg": 19
        }
       },
       {
@@ -442,7 +471,7 @@
        "t": 42000,
        "azimuthDeg": 32,
        "altitudeDeg": 16.28,
-       "distanceM": 974.4,
+       "distanceM": 467.7,
        "attitude": {
         "headingDeg": 32,
         "pitchDeg": 21.6,
@@ -709,7 +738,7 @@
      },
      "track": [
       {
-       "t": 12000,
+       "t": 0,
        "azimuthDeg": 45,
        "altitudeDeg": 17.74,
        "distanceM": 10.5,
@@ -718,14 +747,22 @@
         "lengthM": 0.3,
         "heightM": 0.103
        },
+       "appearance": {
+        "color": "#8a8d91",
+        "albedo": 0.3
+       },
        "attitude": {
         "headingDeg": 45,
         "pitchDeg": -3.2,
         "rollDeg": 19
-       },
-       "appearance": {
-        "color": "#8a8d91",
-        "albedo": 0.3
+       }
+      },
+      {
+       "t": 12000,
+       "attitude": {
+        "headingDeg": 45,
+        "pitchDeg": -3.2,
+        "rollDeg": 19
        }
       },
       {
@@ -778,7 +815,7 @@
      },
      "track": [
       {
-       "t": 12000,
+       "t": 0,
        "azimuthDeg": 45,
        "altitudeDeg": 17.74,
        "distanceM": 6.3,
@@ -787,14 +824,22 @@
         "lengthM": 0.18,
         "heightM": 0.062
        },
+       "appearance": {
+        "color": "#8a8d91",
+        "albedo": 0.3
+       },
        "attitude": {
         "headingDeg": 45,
         "pitchDeg": -3.2,
         "rollDeg": 19
-       },
-       "appearance": {
-        "color": "#8a8d91",
-        "albedo": 0.3
+       }
+      },
+      {
+       "t": 12000,
+       "attitude": {
+        "headingDeg": 45,
+        "pitchDeg": -3.2,
+        "rollDeg": 19
        }
       },
       {
@@ -824,20 +869,25 @@
    "type": "event",
    "eventType": "interpretation",
    "sighting": "1950-05-11-TrentPaul-closeup",
+   "by": [
+    {
+     "people": "HartmannWilliam"
+    }
+   ],
    "title": {
-    "fr": "Pour comparer : un disque de 25 m à 879 m (Hartmann retient 20 à 30 m), même largeur angulaire et même aspect",
-    "en": "For comparison: a 25 m disc at 879 m (Hartmann holds 20 to 30 m), the same angular width and the same look",
-    "es": "Para comparar: un disco de 25 m a 879 m (Hartmann retiene de 20 a 30 m), misma anchura angular y mismo aspecto",
-    "it": "Per confronto: un disco di 25 m a 879 m (Hartmann ritiene da 20 a 30 m), stessa larghezza angolare e stesso aspetto"
+    "fr": "Rapport Condon : un disque de l'ordre de la dizaine de mètres, ici 12 m à 422 m (Hartmann donne 0,44 km), même largeur angulaire et même aspect",
+    "en": "Condon report: a disc of the order of ten metres, here 12 m at 422 m (Hartmann gives 0.44 km), the same angular width and the same look",
+    "es": "Informe Condon: un disco del orden de diez metros, aquí 12 m a 422 m (Hartmann da 0,44 km), misma anchura angular y mismo aspecto",
+    "it": "Rapporto Condon: un disco dell'ordine di una decina di metri, qui 12 m a 422 m (Hartmann dà 0,44 km), stessa larghezza angolare e stesso aspetto"
    },
    "bodies": [
     {
      "id": "object",
      "title": {
-      "fr": "Pour comparer : un disque de 25 m à 879 m (Hartmann retient 20 à 30 m), même largeur angulaire et même aspect",
-      "en": "For comparison: a 25 m disc at 879 m (Hartmann holds 20 to 30 m), the same angular width and the same look",
-      "es": "Para comparar: un disco de 25 m a 879 m (Hartmann retiene de 20 a 30 m), misma anchura angular y mismo aspecto",
-      "it": "Per confronto: un disco di 25 m a 879 m (Hartmann ritiene da 20 a 30 m), stessa larghezza angolare e stesso aspetto"
+      "fr": "Rapport Condon : un disque de l'ordre de la dizaine de mètres, ici 12 m à 422 m (Hartmann donne 0,44 km), même largeur angulaire et même aspect",
+      "en": "Condon report: a disc of the order of ten metres, here 12 m at 422 m (Hartmann gives 0.44 km), the same angular width and the same look",
+      "es": "Informe Condon: un disco del orden de diez metros, aquí 12 m a 422 m (Hartmann da 0,44 km), misma anchura angular y mismo aspecto",
+      "it": "Rapporto Condon: un disco dell'ordine di una decina di metri, qui 12 m a 422 m (Hartmann dà 0,44 km), stessa larghezza angolare e stesso aspetto"
      },
      "explains": [
       "ufo-1"
@@ -847,23 +897,31 @@
      },
      "track": [
       {
-       "t": 12000,
+       "t": 0,
        "azimuthDeg": 45,
        "altitudeDeg": 17.74,
-       "distanceM": 878.8,
+       "distanceM": 421.8,
        "sizeM": {
-        "widthM": 25,
-        "lengthM": 25,
-        "heightM": 8.542
+        "widthM": 12,
+        "lengthM": 12,
+        "heightM": 4.1
+       },
+       "appearance": {
+        "color": "#8a8d91",
+        "albedo": 0.3
        },
        "attitude": {
         "headingDeg": 45,
         "pitchDeg": -3.2,
         "rollDeg": 19
-       },
-       "appearance": {
-        "color": "#8a8d91",
-        "albedo": 0.3
+       }
+      },
+      {
+       "t": 12000,
+       "attitude": {
+        "headingDeg": 45,
+        "pitchDeg": -3.2,
+        "rollDeg": 19
        }
       },
       {
@@ -878,7 +936,7 @@
        "t": 42000,
        "azimuthDeg": 32,
        "altitudeDeg": 16.28,
-       "distanceM": 974.4,
+       "distanceM": 467.7,
        "attitude": {
         "headingDeg": 32,
         "pitchDeg": 21.6,
