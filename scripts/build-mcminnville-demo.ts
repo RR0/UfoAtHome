@@ -438,6 +438,8 @@ const observer = {
 
 // -- The interpretation: the study's model, its thread and the line, in metres ---------------------
 
+const THREAD_DRAWN_M = 0.004
+
 /** The thread, from the pivot on the lower line down to the top of the model. */
 const thread = (swungAway: boolean) => {
   const drop = swungAway ? dropSwung : dropAtRest
@@ -447,7 +449,10 @@ const thread = (swungAway: boolean) => {
     eastM: Geometry.round(middle.e, 3),
     northM: Geometry.round(middle.n, 3),
     altitudeAboveGroundM: Geometry.round(Study.LOWER_LINE_M - drop / 2 - Study.THREAD_M / 2, 3),
-    sizeM: { widthM: 0.0004, lengthM: 0.0004, heightM: Study.THREAD_M },
+    // A thread is a fraction of a millimetre across, a hundredth of a pixel at 5 m: the study found
+    // it only by enhancing the prints. Drawn four millimetres across, as the line's wires are drawn
+    // thicker than they are (see WireGeometry.DEFAULT_DIAMETER_M), so that "detected" can be seen.
+    sizeM: { widthM: THREAD_DRAWN_M, lengthM: THREAD_DRAWN_M, heightM: Study.THREAD_M },
     // Top displaced the way it hangs back from: the same rule as the model's tip.
     attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: swungAway ? Study.SWING_DEG : 0, rollDeg: 0 }
   }

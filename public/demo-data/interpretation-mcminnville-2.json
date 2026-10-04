@@ -322,8 +322,8 @@
       "northM": 2.828,
       "altitudeAboveGroundM": 2.8,
       "sizeM": {
-       "widthM": 0.0004,
-       "lengthM": 0.0004,
+       "widthM": 0.004,
+       "lengthM": 0.004,
        "heightM": 0.7
       },
       "attitude": {
@@ -342,8 +342,8 @@
       "northM": 2.828,
       "altitudeAboveGroundM": 2.8,
       "sizeM": {
-       "widthM": 0.0004,
-       "lengthM": 0.0004,
+       "widthM": 0.004,
+       "lengthM": 0.004,
        "heightM": 0.7
       },
       "attitude": {
@@ -358,8 +358,8 @@
       "northM": 2.875,
       "altitudeAboveGroundM": 2.804,
       "sizeM": {
-       "widthM": 0.0004,
-       "lengthM": 0.0004,
+       "widthM": 0.004,
+       "lengthM": 0.004,
        "heightM": 0.7
       },
       "attitude": {
