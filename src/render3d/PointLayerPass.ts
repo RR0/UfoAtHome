@@ -125,7 +125,6 @@ export class PointLayerPass {
     EquidistantProjectionPass.clearTransparent(renderer, this.target)
     renderer.setRenderTarget(this.target)
     renderer.render(this.scene, camera)
-
     renderer.autoClear = autoClear
     renderer.shadowMap.autoUpdate = shadows
     renderer.setRenderTarget(originalTarget)
@@ -181,8 +180,13 @@ export class PointLayerPass {
         this.scene.add(proxy)
       }
       proxy.geometry = points.geometry
+      // Into `matrix`, not `matrixWorld`: three works the world matrix out again from `matrix` when it
+      // renders this scene, and would put every star back at the origin — which is exactly right for
+      // an observer on the ground under an unscaled sky, and wrong for one at fifteen hundred metres
+      // under a sky scaled to thirty thousand.
       points.updateWorldMatrix(true, false)
-      proxy.matrixWorld.copy(points.matrixWorld)
+      proxy.matrix.copy(points.matrixWorld)
+      proxy.matrixWorldNeedsUpdate = true
       proxy.visible = true
     }
     for (const [points, proxy] of this.proxies) {

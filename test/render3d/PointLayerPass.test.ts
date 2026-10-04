@@ -39,4 +39,23 @@ describe("PointLayerPass", () => {
   it("says there is nothing to draw when the scene has no point source", () => {
     expect(new PointLayerPass(64, 36).take(hostOf())).toBe(false)
   })
+
+  it("keeps each point source where its own sky puts it, scaled and raised, once the layer's scene works its matrices out", () => {
+    // An observer at fifteen hundred metres under a sky scaled to thirty thousand: three recomputes a
+    // child's world matrix from its local one, so the stand-in has to carry the real placement there.
+    const sky = new Group()
+    sky.scale.setScalar(100 / 3)
+    sky.position.y = 1499.5
+    const source = stars(3, sky)
+    sky.updateMatrixWorld(true)
+    const layer = new PointLayerPass(64, 36)
+    layer.take(hostOf(source))
+    const inside = layer as unknown as { placeProxies(): void; scene: Group; proxies: Map<Points, Points> }
+    inside.placeProxies()
+    inside.scene.updateMatrixWorld(true)
+    const proxy = inside.proxies.get(source)!
+    expect(proxy.matrixWorld.elements[0]).toBeCloseTo(100 / 3, 6)
+    expect(proxy.matrixWorld.elements[13]).toBeCloseTo(1499.5, 6)
+  })
 })
+
