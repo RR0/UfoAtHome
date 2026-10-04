@@ -363,6 +363,20 @@
         "license": "CC0 1.0",
         "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/people/build_people.py"
       }
+    },
+    {
+      "id": "ufoathome-mcminnville-object",
+      "kind": "aircraft",
+      "name": "McMinnville object as the 1950 prints show it: flat dark base, shouldered dome, small stub on top (stand-in)",
+      "file": "ufoathome-mcminnville-object/object.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 0.12, "lengthM": 0.12, "heightM": 0.041 },
+      "credit": {
+        "title": "McMinnville object, a stand-in after Paul Trent's photographs and the IPACO study",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-mcminnville-object.ts"
+      }
     }
   ]
 }

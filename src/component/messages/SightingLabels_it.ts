@@ -82,6 +82,7 @@ export const sightingLabels_it: SightingLabels = {
   decorTree: "Albero",
   decorShrub: "Cespuglio",
   decorBridge: "Ponte",
+  decorWire: "Linea aerea",
   decorCrop: "Filare di coltura",
   decorMound: "Mucchio di pietre",
   decorStreetlight: "Lampione",

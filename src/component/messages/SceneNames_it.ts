@@ -126,6 +126,7 @@ export const sceneNames_it: SceneNames = {
     tree: "Albero",
     shrub: "Arbusto",
     bridge: "Ponte",
+    wire: "Linea aerea",
     crop: "Filare di coltura",
     mound: "Mucchio di pietre",
     streetlight: "Lampione",

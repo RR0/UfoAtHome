@@ -4,6 +4,7 @@ import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, Measured
 import { canHoldObserver, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
 import { BridgeGeometry } from "./BridgeGeometry.js"
+import { WireGeometry } from "./WireGeometry.js"
 
 const DEG_TO_RAD = Math.PI / 180
 
@@ -386,6 +387,15 @@ function buildBridge(object: DecorObject): Group {
   const earth = addPart(group, parts.earth, [0.3, 0.36, 0.22], 0)
   for (const mesh of [road, earth]) (mesh.material as MeshLambertMaterial).side = DoubleSide
   addPart(group, parts.railing, [0.5, 0.52, 0.55], 0)
+  return group
+}
+
+/** An overhead line: its strands, dark against the sky, and its poles of weathered wood. */
+function buildWire(object: DecorObject): Group {
+  const group = new Group()
+  const parts = new WireGeometry(DecorSystem.sizeOf(object), object.wire).build()
+  for (const strand of parts.strands) addPart(group, strand, [0.1, 0.1, 0.11], 0)
+  for (const pole of parts.poles) addPart(group, pole, [0.3, 0.24, 0.18], 0)
   return group
 }
 
@@ -876,6 +886,8 @@ export class DecorSystem {
             ? buildShrub()
           : object.kind === "bridge"
             ? buildBridge(object)
+          : object.kind === "wire"
+            ? buildWire(object)
           : object.kind === "crop"
             ? buildCrop()
             : object.kind === "mound"
@@ -921,7 +933,7 @@ export class DecorSystem {
   private static scaleFor(object: DecorObject): Vector3 {
     const size = object.sizeM
     // A bridge is built at its own size already: stretching it would turn its posts into planks.
-    if (!size || object.kind === "bridge") return new Vector3(1, 1, 1)
+    if (!size || object.kind === "bridge" || object.kind === "wire") return new Vector3(1, 1, 1)
     const natural = this.naturalSize(object.kind, object.floors)
     // Axis by axis, because a size is allowed to be partial: an axis nobody measured keeps the
     // built-in shape's own proportion rather than being invented to match the ones that were.
@@ -945,6 +957,7 @@ export class DecorSystem {
     const levels = kind === "building" ? Math.max(1, (floors ?? DEFAULT_BUILDING_FLOORS) + 1) : 0
     // Stated rather than measured: a bridge has no stock shape, its geometry IS its size.
     if (kind === "bridge") return BridgeGeometry.NATURAL_SIZE
+    if (kind === "wire") return WireGeometry.NATURAL_SIZE
     const key = `${kind}:${levels}`
     const cached = NATURAL_SIZES.get(key)
     if (cached) return cached

@@ -727,6 +727,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly optionDecorTree: HTMLElement
   private readonly optionDecorShrub: HTMLElement
   private readonly optionDecorBridge: HTMLElement
+  private readonly optionDecorWire: HTMLElement
   private readonly optionDecorCrop: HTMLElement
   private readonly optionDecorMound: HTMLElement
   private readonly optionDecorStreetlight: HTMLElement
@@ -1438,6 +1439,7 @@ export class SightingEditorElement extends HTMLElement {
     this.optionDecorTree = this.shadow.getElementById("option-decor-tree")!
     this.optionDecorShrub = this.shadow.getElementById("option-decor-shrub")!
     this.optionDecorBridge = this.shadow.getElementById("option-decor-bridge")!
+    this.optionDecorWire = this.shadow.getElementById("option-decor-wire")!
     this.optionDecorCrop = this.shadow.getElementById("option-decor-crop")!
     this.optionDecorMound = this.shadow.getElementById("option-decor-mound")!
     this.optionDecorStreetlight = this.shadow.getElementById("option-decor-streetlight")!
@@ -8423,6 +8425,7 @@ export class SightingEditorElement extends HTMLElement {
     this.optionDecorTree.textContent = messages.decorTree
     this.optionDecorShrub.textContent = messages.decorShrub
     this.optionDecorBridge.textContent = messages.decorBridge
+    this.optionDecorWire.textContent = messages.decorWire
     this.optionDecorCrop.textContent = messages.decorCrop
     this.optionDecorMound.textContent = messages.decorMound
     this.optionDecorStreetlight.textContent = messages.decorStreetlight

@@ -176,6 +176,7 @@ const DECOR_KIND_NAMES: Record<DecorKind, string> = {
   tree: "Tree",
   shrub: "Shrub",
   bridge: "Bridge",
+  wire: "Overhead line",
   crop: "Crop row",
   mound: "Stone heap",
   streetlight: "Streetlight",

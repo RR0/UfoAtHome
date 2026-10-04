@@ -43,6 +43,22 @@ export type DecorKind =
    */
   | "bridge"
   /**
+   * An overhead line, electric or telephone: one or several straight strands hung between poles.
+   * The poles are part of it, since a line with nothing holding it up is not one: at both ends by
+   * default, at one only where the other end is anchored on a building (see WireStructure.poles).
+   *
+   * Built at its own measurements, like a bridge, and for the same reason: a strand a centimetre
+   * thick stretched from a stock shape would be a plank. `sizeM.lengthM` is the span between the
+   * two poles, `heightM` the height of the lowest strand (the default for a single one), along the
+   * object's `headingDeg`; `widthM` is not used. Several of these laid end to end make a longer
+   * line; a line's own sag is not drawn.
+   *
+   * It exists because a thing that stands in the way of a photograph, or crosses a sky behind a
+   * light, is scenery in every view of a recording and not one interpretation's claim: McMinnville's
+   * two wires are in both of Trent's photographs, whoever explains the object between them.
+   */
+  | "wire"
+  /**
    * A being the observer reported seeing — the two figures beside the craft at Valensole, the pair
    * at Socorro.
    *
@@ -396,6 +412,10 @@ export interface DecorObject {
   /** Kind "bridge" only: how it is built, where that is known — see BridgeStructure. Absent means
    * the defaults, which are those of an ordinary French overpass. Ignored for every other kind. */
   bridge?: BridgeStructure
+  /** Kind "wire" only: how many strands, where they hang, and which ends stand on a pole — see
+   * WireStructure. Absent means one strand at `sizeM.heightM`, a pole at each end. Ignored for every
+   * other kind. */
+  wire?: WireStructure
   /** Kind "building" only: number of upper stories above the ground floor, set when the building
    * is created (default 2, see SightingEditorElement.addDecor) and editable afterward. Drives the
    * window rows in the 3D model and the valid range for occupiedFloor (0 = ground floor, up to and
@@ -441,6 +461,23 @@ export interface BridgeStructure {
    * many horizontal rails it has — two rails make two rows of rectangular openings. Defaults 1.05 m,
    * 1.5 m and 2, a French S8 railing. */
   railing?: { heightM?: number; postSpacingM?: number; rails?: number }
+}
+
+/**
+ * How an overhead line is built (see the "wire" kind), every field optional.
+ */
+export interface WireStructure {
+  /** The strands: each one's height above the ground and, for a crossarm, how far it hangs to one
+   * side of the line (positive to the right of its heading). Stacked wires, as at McMinnville, are
+   * two strands at the same `acrossM`. Default: one, at `sizeM.heightM`. */
+  strands?: { heightM: number; acrossM?: number }[]
+  /** Which ends stand on a pole: both (default), the one the object's heading points away from
+   * (`start`) or towards (`end`), or none, for a line anchored on buildings at both ends. */
+  poles?: "both" | "start" | "end" | "none"
+  /** How thick a strand is, metres. Default 8 mm. */
+  diameterM?: number
+  /** How tall a pole is, metres. Default half a metre over the highest strand. */
+  poleHeightM?: number
 }
 
 /** Where a moving decor object is at one instant — see DecorObject.track. */

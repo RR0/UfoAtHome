@@ -46,9 +46,10 @@ class Study {
   static readonly LINE_SPACING_M = 0.14
   /** The thread: "60 à 80 cm", about 70. */
   static readonly THREAD_M = 0.7
-  /** The model: "11 à 14 cm", about 12, and a lens a third as thick as it is wide. */
+  /** The model: "11 à 14 cm", about 12, and as thick as the stand-in's dome, base and stub make it
+   * (see build-mcminnville-object.ts). */
   static readonly MODEL_WIDTH_M = 0.12
-  static readonly MODEL_HEIGHT_M = 0.05
+  static readonly MODEL_HEIGHT_M = 0.041
   /** Its swing between the photographs, in the vertical plane of the sightline, away from the lens. */
   static readonly SWING_DEG = 9
   /** How much it tips: the base seen from below on the first (d1 = 21.2 degrees, of which 17.7 are
@@ -198,6 +199,19 @@ const house = (() => {
 
 const headingFirst = Study.BEARING_FIRST_DEG - Study.OFFSET_FIRST.azimuthDeg
 const headingSecond = Study.BEARING_SECOND_DEG - Study.OFFSET_SECOND.azimuthDeg
+
+/** The line: it runs across the first sightline, as in both plates, from the house's eave (anchored
+ * 2.2 m along it from the point above the model, where it meets the house's front) to an end the
+ * plates do not show and that is made long enough to leave the frame. */
+const lineBearingDeg = Study.BEARING_FIRST_DEG + 90
+const towardHouse = Geometry.along({ e: 0, n: 0 }, lineBearingDeg + 180, 1)
+const lineFrom = 6
+const lineTo = -9
+const lineLength = lineFrom - lineTo
+const lineCentre = {
+  e: Geometry.round(pivot.e + towardHouse.e * (lineFrom + lineTo) / 2, 2),
+  n: Geometry.round(pivot.n + towardHouse.n * (lineFrom + lineTo) / 2, 2)
+}
 
 const observer = {
   version: 1,
@@ -368,6 +382,18 @@ const observer = {
       headingDeg: Geometry.round(headingFirst, 1),
       sizeM: { widthM: House.WIDTH_M, lengthM: House.DEPTH_M, heightM: House.RIDGE_M },
       model: { id: "kenney-suburban-house" }
+    },
+    {
+      id: "line",
+      kind: "wire",
+      title: title("Ligne électrique (deux fils superposés, 3,5 m et 3,64 m)", "The electric line (two stacked wires, 3.5 m and 3.64 m)",
+        "La línea eléctrica (dos cables superpuestos, 3,5 m y 3,64 m)", "La linea elettrica (due fili sovrapposti, 3,5 m e 3,64 m)"),
+      eastM: lineCentre.e,
+      northM: lineCentre.n,
+      // Pointing to the south-east end, where its pole stands; the other end is anchored on the house.
+      headingDeg: lineBearingDeg,
+      sizeM: { widthM: 1, lengthM: lineLength, heightM: Study.LOWER_LINE_M },
+      wire: { strands: [{ heightM: Study.LOWER_LINE_M }, { heightM: Study.LOWER_LINE_M + Study.LINE_SPACING_M }], poles: "end", diameterM: 0.006 }
     }
   ],
   weatherTrack: {
@@ -402,38 +428,6 @@ const observer = {
 
 // -- The interpretation: the study's model, its thread and the line, in metres ---------------------
 
-/** The line: it runs across the first sightline, as in both plates, from the house's eave (anchored
- * 2.2 m along it from the point above the model, where it meets the house's front) to an end the
- * plates do not show and that is made long enough to leave the frame. */
-const lineBearingDeg = Study.BEARING_FIRST_DEG + 90
-const towardHouse = Geometry.along({ e: 0, n: 0 }, lineBearingDeg + 180, 1)
-const lineFrom = 6
-const lineTo = -9
-const lineLength = lineFrom - lineTo
-const lineCentre = {
-  e: Geometry.round(pivot.e + towardHouse.e * (lineFrom + lineTo) / 2, 2),
-  n: Geometry.round(pivot.n + towardHouse.n * (lineFrom + lineTo) / 2, 2)
-}
-
-/** A cylinder (the primitive's axis is up) laid along the east-west line, centred where it is. */
-const wireBody = (id: string, heightM: number, label: Said<string>) => ({
-  id,
-  title: label,
-  explains: [],
-  model: { id: "cylinder" },
-  track: [{
-    t: 0,
-    eastM: lineCentre.e,
-    northM: lineCentre.n,
-    // altitudeAboveGroundM is the lowest point of the body UNturned, so it is the height minus half of its length.
-    altitudeAboveGroundM: Geometry.round(heightM - lineLength / 2, 3),
-    sizeM: { widthM: 0.006, lengthM: 0.006, heightM: lineLength },
-    // Laid flat (a quarter turn about its own axis of the up-pointing primitive), then turned onto the line's bearing.
-    attitude: { headingDeg: lineBearingDeg - 90, pitchDeg: 0, rollDeg: 90 },
-    appearance: { color: "#202020", albedo: 0.05 }
-  }]
-})
-
 /** The thread, from the pivot on the lower line down to the top of the model. */
 const thread = (swungAway: boolean) => {
   const drop = swungAway ? dropSwung : dropAtRest
@@ -449,14 +443,14 @@ const thread = (swungAway: boolean) => {
   }
 }
 
-/** The model and the small stub on top of it, as both studies have them: the position and the tip
+/** The model, with its small stub on top, as both studies have it: the position and the tip
  * come from the geometry of the photographs, which both parts of the study share. */
 const modelBodies = () => [
   {
     id: "model",
     title: title("La maquette", "The model", "La maqueta", "Il modellino"),
     explains: ["ufo-1"],
-    model: { id: "disc" },
+    model: { id: "ufoathome-mcminnville-object" },
     track: [
       {
         t: 0,
@@ -476,38 +470,7 @@ const modelBodies = () => [
         attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_SECOND_DEG }
       }
     ]
-  },
-  {
-    id: "antenna",
-    title: title("La petite « antenne » du dessus", "The small \"antenna\" on top", "La pequeña \"antena\" de arriba", "La piccola \"antenna\" in cima"),
-    explains: [],
-    model: { id: "cylinder" },
-    track: [
-      {
-        t: 0,
-        eastM: Geometry.round(pivot.e, 3),
-        northM: Geometry.round(pivot.n, 3),
-        altitudeAboveGroundM: Geometry.round(restTop, 3),
-        sizeM: { widthM: 0.006, lengthM: 0.006, heightM: 0.008 },
-        attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_FIRST_DEG },
-        appearance: { color: "#8a8d91", albedo: 0.3 }
-      },
-      { t: T_STEP_MS, attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_FIRST_DEG } },
-      {
-        t: T_SECOND_MS,
-        eastM: Geometry.round(swungTo.e, 3),
-        northM: Geometry.round(swungTo.n, 3),
-        altitudeAboveGroundM: Geometry.round(swungTop, 3),
-        attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_SECOND_DEG }
-      }
-    ]
   }
-]
-
-/** The two electric wires: in both parts of the study, and in both plates. */
-const lineBodies = () => [
-  wireBody("line-lower", Study.LOWER_LINE_M, title("Fil électrique inférieur (3,5 m)", "Lower electric wire (3.5 m)", "Cable eléctrico inferior (3,5 m)", "Filo elettrico inferiore (3,5 m)")),
-  wireBody("line-upper", Study.LOWER_LINE_M + Study.LINE_SPACING_M, title("Fil électrique supérieur", "Upper electric wire", "Cable eléctrico superior", "Filo elettrico superiore"))
 ]
 
 /** The thread, the second part's finding: drawn only there, since the first found no trace of one. */
@@ -523,6 +486,59 @@ const threadBody = () => ({
   ]
 })
 
+/**
+ * The same object, as something else: what the photographs say is an angular width (c, 1.63 and 1.47
+ * degrees) and an aspect (the base seen from below on the first, not on the second), and both are
+ * the same for an object of any size at the distance that fits it. So each comparison keeps the
+ * model's tip and its look and changes only its size and, with it, its distance along the very
+ * direction the photographs give: a hubcap, a car mirror, a disc 25 m wide. What separates them is
+ * the lines (a model hung under them is 4 m off, a disc 900 m away is not) and the photometry, which
+ * is what the study measures.
+ */
+const sameAngleBody = (id: string, label: Said<string>, sizeM: number) => {
+  const distanceAt = (widthDeg: number): number => Geometry.round(sizeM / (widthDeg * Geometry.DEG), 1)
+  const size = { widthM: sizeM, lengthM: sizeM, heightM: Geometry.round(sizeM * Study.MODEL_HEIGHT_M / Study.MODEL_WIDTH_M, 3) }
+  return {
+    id,
+    title: label,
+    explains: ["ufo-1"],
+    model: { id: "ufoathome-mcminnville-object" },
+    track: [
+      {
+        t: T_FIRST_MS,
+        azimuthDeg: Study.BEARING_FIRST_DEG,
+        altitudeDeg: Geometry.round(seenFirst.altitudeDeg, 2),
+        distanceM: distanceAt(Study.WIDTH_FIRST_DEG),
+        sizeM: size,
+        attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_FIRST_DEG },
+        appearance: { color: "#8a8d91", albedo: 0.3 }
+      },
+      { t: T_STEP_MS, attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_FIRST_DEG } },
+      {
+        t: T_SECOND_MS,
+        azimuthDeg: Study.BEARING_SECOND_DEG,
+        altitudeDeg: Geometry.round(seenSecond.altitudeDeg, 2),
+        distanceM: distanceAt(Study.WIDTH_SECOND_DEG),
+        attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_SECOND_DEG }
+      }
+    ]
+  }
+}
+
+const comparison = (sizeCm: number, fr: string, en: string, es: string, it: string) => {
+  const metres = sizeCm / 100
+  const metresAway = Geometry.round(metres / (Study.WIDTH_FIRST_DEG * Geometry.DEG), 1)
+  const fmt = (value: number, language: string): string => value.toLocaleString(language, { maximumFractionDigits: value >= 100 ? 0 : 1 })
+  const label = (text: string, language: string): string => text.replace("{d}", fmt(metresAway, language))
+  return {
+    type: "event",
+    eventType: "interpretation",
+    sighting: observer.id,
+    title: title(label(fr, "fr"), label(en, "en"), label(es, "es"), label(it, "it")),
+    bodies: [sameAngleBody("object", title(label(fr, "fr"), label(en, "en"), label(es, "es"), label(it, "it")), metres)]
+  }
+}
+
 const authors = [{ people: "CousynAntoine" }, { people: "LouangeFrancois" }, { people: "QuickGeoff" }]
 
 const firstPart = {
@@ -536,7 +552,7 @@ const firstPart = {
     "Abril de 2013: una maqueta de unos 12 cm bajo el cable inferior de la línea, que oscila 9° entre las dos fotografías (ningún hilo visible)",
     "Aprile 2013: un modellino di circa 12 cm sotto il filo inferiore della linea, che oscilla di 9° fra le due fotografie (nessun filo visibile)"),
   by: authors,
-  bodies: [...modelBodies(), ...lineBodies()]
+  bodies: modelBodies()
 }
 
 const secondPart = {
@@ -550,7 +566,7 @@ const secondPart = {
     "Junio de 2013: la misma maqueta al extremo de un hilo de 70 cm, detectado en las dos fotografías",
     "Giugno 2013: lo stesso modellino all'estremità di un filo di 70 cm, rilevato su entrambe le fotografie"),
   by: authors,
-  bodies: [...modelBodies(), threadBody(), ...lineBodies()]
+  bodies: [...modelBodies(), threadBody()]
 }
 
 const caseJson = {
@@ -560,7 +576,19 @@ const caseJson = {
   events: [
     { type: "event", eventType: "sighting", time: "1950-05-11 19:45", title: "Paul Trent", url: "observer-mcminnville.json" },
     firstPart,
-    secondPart
+    secondPart,
+    comparison(30, "Pour comparer : un enjoliveur de 30 cm à {d} m, même largeur angulaire et même aspect",
+      "For comparison: a 30 cm hubcap at {d} m, the same angular width and the same look",
+      "Para comparar: un tapacubos de 30 cm a {d} m, misma anchura angular y mismo aspecto",
+      "Per confronto: un copricerchio di 30 cm a {d} m, stessa larghezza angolare e stesso aspetto"),
+    comparison(18, "Pour comparer : un rétroviseur de voiture de 18 cm à {d} m, même largeur angulaire et même aspect",
+      "For comparison: an 18 cm car mirror at {d} m, the same angular width and the same look",
+      "Para comparar: un retrovisor de coche de 18 cm a {d} m, misma anchura angular y mismo aspecto",
+      "Per confronto: uno specchietto retrovisore di 18 cm a {d} m, stessa larghezza angolare e stesso aspetto"),
+    comparison(2500, "Pour comparer : un disque de 25 m à {d} m (Hartmann retient 20 à 30 m), même largeur angulaire et même aspect",
+      "For comparison: a 25 m disc at {d} m (Hartmann holds 20 to 30 m), the same angular width and the same look",
+      "Para comparar: un disco de 25 m a {d} m (Hartmann retiene de 20 a 30 m), misma anchura angular y mismo aspecto",
+      "Per confronto: un disco di 25 m a {d} m (Hartmann ritiene da 20 a 30 m), stessa larghezza angolare e stesso aspetto")
   ]
 }
 
