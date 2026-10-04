@@ -149,6 +149,13 @@ export const CONFRONTATION_EVENT = "rr0-confrontation"
 /** The module of what draws the aircraft of a record, as it is once loaded. */
 type TrafficRuntime = typeof import("./trafficRuntime.js")
 
+/** What the player's picture controls say: the whole, and for several pictures each one's own view. */
+interface ReferenceViewDetail {
+  shown: boolean
+  opacity: number
+  views?: Record<string, { shown: boolean, opacity: number }>
+}
+
 export type SatelliteStatus = "none" | "loading" | "outside" | "unavailable" | "ready"
 
 const STAR_TOOLTIP_BELOW = "{name} — mag {mag}, {alt}° below the horizontal"
@@ -730,7 +737,7 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.seekPreviewPainter = (t, canvas) => this.seekPreviewOf(canvas).paint(t, canvas)
     // The weather is heard through this element, the button that silences it is the player's.
     this.ufoElement.addEventListener("mutedchange", () => this.applyLevel())
-    this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<{ shown: boolean; opacity: number }>).detail))
+    this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<ReferenceViewDetail>).detail))
     this.ufoElement.addEventListener("traceview", event => this.sceneRenderer.setTracesShown((event as CustomEvent<{ shown: boolean }>).detail.shown))
     this.ufoElement.canvasElement.addEventListener("pointermove", this.handlePointerMove)
     this.ufoElement.canvasElement.addEventListener("pointerleave", this.handlePointerLeave)
@@ -1110,10 +1117,12 @@ export class SceneElement extends HTMLElement {
 
   /** What the reader wants of the pictures of the place — the player's own toggle and slider,
    * applied to every picture the recording carries (see SceneReference and UfoElement). */
-  private applyReferenceView(view: { shown: boolean; opacity: number }): void {
+  private applyReferenceView(view: ReferenceViewDetail): void {
     this.sceneRenderer.setReferencesShown(view.shown)
     for (const reference of this.ufoElement.sighting.references) {
-      this.sceneRenderer.setReferenceView(reference.id, { opacity: view.opacity })
+      // With several pictures each has its own view: one hidden is one drawn at no opacity.
+      const own = view.views?.[reference.id]
+      this.sceneRenderer.setReferenceView(reference.id, { opacity: own ? (own.shown ? own.opacity : 0) : view.opacity })
     }
   }
 

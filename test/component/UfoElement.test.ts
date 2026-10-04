@@ -1788,6 +1788,47 @@ describe("the account's named moments", () => {
     expect(ids.indexOf("reference-opacity")).toBe(ids.indexOf("references") + 1)
   })
 
+  describe("with several pictures", () => {
+    const picture = (id: string, opacity: number) => ({
+      id, kind: "view", src: `${id}.jpg`, title: { en: `Picture ${id}` }, opacity, registration: { headingDeg: 0, pitchDeg: 0, fovDeg: 30 }
+    })
+    const withPictures = (...pictures: ReturnType<typeof picture>[]) => ({ version: 1, timeline: { keyframes: [] }, references: pictures })
+
+    it("keeps the single button for one picture, and opens a list of them for several", () => {
+      const element = mount()
+      const shadow = element.shadowRoot!
+      element.sightingData = withPictures(picture("a", 0.5)) as never
+      shadow.getElementById("references")!.click()
+      expect(shadow.getElementById("references-menu")!.hidden).toBe(true)
+      expect(element.referencesShown).toBe(false)
+
+      element.sightingData = withPictures(picture("a", 0.5), picture("b", 0.3)) as never
+      shadow.getElementById("references")!.click()
+      expect(shadow.getElementById("references-menu")!.hidden).toBe(false)
+      expect(shadow.querySelectorAll("#references-menu .reference-row")).toHaveLength(2)
+      expect(shadow.getElementById("reference-opacity")!.hidden).toBe(true)
+    })
+
+    it("tells each picture's own view when one is hidden or faded", () => {
+      const element = mount()
+      const shadow = element.shadowRoot!
+      element.sightingData = withPictures(picture("a", 0.5), picture("b", 0.3)) as never
+      const seen: { views: Record<string, { shown: boolean, opacity: number }> }[] = []
+      element.addEventListener("referenceview", event => seen.push((event as CustomEvent).detail))
+      shadow.getElementById("references")!.click()
+      const [boxA] = shadow.querySelectorAll<HTMLInputElement>("#references-menu .reference-row input[type=checkbox]")
+      boxA.checked = false
+      boxA.dispatchEvent(new Event("change"))
+      const sliders = shadow.querySelectorAll<HTMLInputElement>("#references-menu input[type=range]")
+      sliders[1].value = "0.8"
+      sliders[1].dispatchEvent(new Event("input"))
+      const last = seen[seen.length - 1]!
+      expect(last.views).toEqual({ a: { shown: false, opacity: 0.5 }, b: { shown: true, opacity: 0.8 } })
+      shadow.getElementById("references")!.click()
+      expect(shadow.getElementById("references-menu")!.hidden).toBe(true)
+    })
+  })
+
   it("offers a picker of the account's moments after the time, and going to one is choosing it", () => {
     const element = mount()
     const shadow = element.shadowRoot!

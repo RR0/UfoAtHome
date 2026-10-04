@@ -210,7 +210,9 @@ export class ContextPage implements SitePage {
       picture and all render, with the phenomenon drawn over both. Every tree the thirty-metre relief
       smoothed away, every ridge, the actual hedge, is then one picture with the reconstruction.
       <a href="/demos/sightings/#cussac">Cussac</a> carries its first: the 1968 view from the spot with the
-      sphere and its climb drawn on by hand.</p>
+      sphere and its climb drawn on by hand. With several pictures, the button opens a list above it,
+      where each one is shown or hidden and faded on its own: <a href="/demos/sightings/#mcminnville">McMinnville</a>
+      lays two prints over the same scene.</p>
     <p>A picture is a field of directions from one point, and it is lined up as one: heading, pitch,
       roll and the lens's field, angles and nothing else. It stands in the three-dimensional scene as
       a flat panel at that field — which is what a lens makes — and is drawn through whatever the
@@ -413,7 +415,10 @@ export class ContextPage implements SitePage {
       que le lecteur fait glisser entre tout photo et tout rendu, le phénomène dessiné par-dessus.
       Chaque arbre que le relief à trente mètres avait lissé, chaque crête, la vraie haie, ne font
       plus qu'une image avec la reconstitution. <a href="/demos/sightings/#cussac">Cussac</a> porte la
-      première : la vue de 1968 depuis le lieu, avec la sphère et son envol dessinés à la main.</p>
+      première : la vue de 1968 depuis le lieu, avec la sphère et son envol dessinés à la main. Avec
+      plusieurs photos, le bouton ouvre au-dessus de lui une liste où chacune se montre, se cache et
+      s'estompe pour elle seule : <a href="/demos/sightings/#mcminnville">McMinnville</a> pose deux
+      clichés sur la même scène.</p>
     <p>Une photo est un champ de directions depuis un point, et se recale comme tel : cap, assiette,
       roulis et champ de l'objectif, des angles et rien d'autre. Elle se tient dans la scène en trois
       dimensions comme un panneau plan à ce champ — ce qu'un objectif produit — et se rend à travers

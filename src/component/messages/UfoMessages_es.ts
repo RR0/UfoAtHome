@@ -27,6 +27,7 @@ export const ufoMessages_es: UfoMessages = {
   showTraces: "Ver los trazos del investigador",
   hideTraces: "Ocultar los trazos del investigador",
   referenceOpacity: "Opacidad de las fotos",
+  referencesMenu: "Fotos del lugar",
   showMilestones: "Ver los momentos del relato",
   hideMilestones: "Ocultar los momentos del relato",
   observerHere: "El observador, aquí",

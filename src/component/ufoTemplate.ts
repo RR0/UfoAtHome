@@ -4,6 +4,10 @@ export const html = `
     <canvas id="canvas" width="640" height="360"></canvas>
   </div>
   <div id="tooltip" class="tooltip" hidden></div>
+  <!-- For a recording with several pictures, the button above opens this list instead of toggling
+       them all: one row per picture, to show it or hide it and to say how much of it shows. Fixed
+       above the button (see UfoElement.placeReferencesMenu), so it is not cut by the playback bar. -->
+  <div id="references-menu" class="references-menu" role="group" hidden></div>
   <!-- What a play or pause just did, shown for a moment over the picture as on a video site (see
        UfoElement.flashPlayback). Inert to the pointer: a click through it still reaches the canvas. -->
   <div id="playback-flash" class="playback-flash" aria-hidden="true"></div>
@@ -635,6 +639,47 @@ canvas[data-cursor="rotate"] {
 }
 .issues button:hover, .issues button:focus-visible {
   background: rgba(0, 0, 0, 0.8);
+}
+.references-menu {
+  position: fixed;
+  z-index: 40;
+  box-sizing: border-box;
+  max-width: min(22em, calc(100vw - 1em));
+  max-height: 60vh;
+  overflow: auto;
+  padding: 0.5em 0.7em;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.88);
+  color: #fff;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+.references-menu[hidden] {
+  display: none;
+}
+.references-menu .reference-row {
+  display: grid;
+  grid-template-columns: 1fr 6em;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.25em 0;
+}
+.references-menu .reference-row label {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  min-width: 0;
+  cursor: pointer;
+}
+.references-menu .reference-row label span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.references-menu input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: #f03;
 }
 .issues-panel {
   margin-top: 0.3em;

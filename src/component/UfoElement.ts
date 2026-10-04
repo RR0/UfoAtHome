@@ -129,6 +129,9 @@ export class UfoElement extends HTMLElement {
   private tracesShownState = true
   private readonly referenceOpacityInput: HTMLInputElement
   private referencesShownState = true
+  /** The pictures' own views, for a recording with several: which show, and how much of each. */
+  private readonly referenceViews = new Map<string, { shown: boolean, opacity: number }>()
+  private readonly referencesMenu: HTMLElement
   private referenceOpacityTouched = false
   private readonly milestonesButton: HTMLButtonElement
   private readonly observerMapPanel: HTMLElement
@@ -637,6 +640,7 @@ export class UfoElement extends HTMLElement {
     this.referencesButton = this.shadow.getElementById("references") as HTMLButtonElement
     this.tracesButton = this.shadow.getElementById("traces") as HTMLButtonElement
     this.referenceOpacityInput = this.shadow.getElementById("reference-opacity") as HTMLInputElement
+    this.referencesMenu = this.shadow.getElementById("references-menu")!
     this.milestonesButton = this.shadow.getElementById("milestones") as HTMLButtonElement
     this.observerMapPanel = this.shadow.getElementById("observer-map-panel")!
     this.observerMapCanvas = this.shadow.getElementById("observer-map-canvas") as HTMLCanvasElement
@@ -1223,7 +1227,16 @@ export class UfoElement extends HTMLElement {
     return Number(this.referenceOpacityInput.value)
   }
 
+  /** Whether the recording has several pictures, which the reader then handles one by one. */
+  private get severalReferences(): boolean {
+    return this.currentSighting.references.length > 1
+  }
+
   toggleReferences(): void {
+    if (this.severalReferences) {
+      this.toggleReferencesMenu()
+      return
+    }
     this.referencesShownState = !this.referencesShownState
     this.updateReferencesButton()
     this.dispatchReferenceView()
@@ -1238,16 +1251,122 @@ export class UfoElement extends HTMLElement {
     if (!this.referenceOpacityTouched && references.length > 0) {
       this.referenceOpacityInput.value = String(references[0]!.opacity)
     }
+    // What the reader chose for a picture stays while the picture is there; a picture gone takes its view with it.
+    for (const id of [...this.referenceViews.keys()]) if (!references.some(reference => reference.id === id)) this.referenceViews.delete(id)
+    if (!this.severalReferences) this.closeReferencesMenu()
+    else if (!this.referencesMenu.hidden) this.renderReferencesMenu()
     this.updateReferencesButton()
+    if (this.severalReferences) this.dispatchReferenceView()
+  }
+
+  private viewOfReference(reference: { id: string, opacity: number }): { shown: boolean, opacity: number } {
+    let view = this.referenceViews.get(reference.id)
+    if (!view) {
+      view = { shown: true, opacity: reference.opacity }
+      this.referenceViews.set(reference.id, view)
+    }
+    return view
+  }
+
+  private toggleReferencesMenu(): void {
+    if (this.referencesMenu.hidden) this.openReferencesMenu()
+    else this.closeReferencesMenu()
+  }
+
+  private openReferencesMenu(): void {
+    this.renderReferencesMenu()
+    this.referencesMenu.hidden = false
+    this.placeReferencesMenu()
+    this.referencesButton.setAttribute("aria-expanded", "true")
+    document.addEventListener("pointerdown", this.handleReferencesMenuOutside, true)
+    document.addEventListener("keydown", this.handleReferencesMenuKey, true)
+  }
+
+  private closeReferencesMenu(): void {
+    if (this.referencesMenu.hidden) return
+    this.referencesMenu.hidden = true
+    this.referencesButton.setAttribute("aria-expanded", "false")
+    document.removeEventListener("pointerdown", this.handleReferencesMenuOutside, true)
+    document.removeEventListener("keydown", this.handleReferencesMenuKey, true)
+  }
+
+  /** A press anywhere but on the list or its button closes it. */
+  private readonly handleReferencesMenuOutside = (event: Event): void => {
+    const path = event.composedPath()
+    if (path.includes(this.referencesMenu) || path.includes(this.referencesButton)) return
+    this.closeReferencesMenu()
+  }
+
+  private readonly handleReferencesMenuKey = (event: KeyboardEvent): void => {
+    if (event.key !== "Escape") return
+    this.closeReferencesMenu()
+    this.referencesButton.focus()
+  }
+
+  /** Above the button, as a select opening upwards: its left edge on the button's, kept within the window. */
+  private placeReferencesMenu(): void {
+    const button = this.referencesButton.getBoundingClientRect()
+    const menu = this.referencesMenu
+    const margin = 4
+    menu.style.bottom = `${Math.max(margin, window.innerHeight - button.top + margin)}px`
+    menu.style.top = "auto"
+    const width = menu.getBoundingClientRect().width
+    menu.style.left = `${Math.max(margin, Math.min(button.left, window.innerWidth - width - margin))}px`
+  }
+
+  /** One row per picture: a box to show it or hide it, its name, and how much of it shows. */
+  private renderReferencesMenu(): void {
+    const rows = this.currentSighting.references.map(reference => {
+      const view = this.viewOfReference(reference)
+      const name = this.said.read(reference.title as never) ?? reference.id
+      const row = document.createElement("div")
+      row.className = "reference-row"
+      const label = document.createElement("label")
+      const box = document.createElement("input")
+      box.type = "checkbox"
+      box.checked = view.shown
+      const text = document.createElement("span")
+      text.textContent = name
+      text.title = name
+      label.append(box, text)
+      const slider = document.createElement("input")
+      slider.type = "range"
+      slider.min = "0"
+      slider.max = "1"
+      slider.step = "0.05"
+      slider.value = String(view.opacity)
+      slider.title = this.messages.referenceOpacity
+      slider.setAttribute("aria-label", `${this.messages.referenceOpacity}: ${name}`)
+      slider.disabled = !view.shown
+      box.addEventListener("change", () => {
+        view.shown = box.checked
+        slider.disabled = !view.shown
+        this.updateReferencesButton()
+        this.dispatchReferenceView()
+      })
+      slider.addEventListener("input", () => {
+        view.opacity = Number(slider.value)
+        this.dispatchReferenceView()
+      })
+      row.append(label, slider)
+      return row
+    })
+    this.referencesMenu.setAttribute("aria-label", this.messages.referencesMenu)
+    this.referencesMenu.replaceChildren(...rows)
   }
 
   private updateReferencesButton(): void {
     const any = this.currentSighting.references.length > 0
+    const several = this.severalReferences
+    // With several pictures the button opens their list, and is lit while any of them shows.
+    const lit = several ? this.currentSighting.references.some(reference => this.viewOfReference(reference).shown) : this.referencesShownState
     this.referencesButton.hidden = !any
-    this.referenceOpacityInput.hidden = !any || !this.referencesShownState
-    this.referencesButton.setAttribute("aria-pressed", String(this.referencesShownState))
-    UfoElement.setIcon(this.referencesButton, this.referencesShownState ? PlayerIcons.PICTURES_ON : PlayerIcons.PICTURES_OFF)
-    const label = this.referencesShownState ? this.messages.hideReferences : this.messages.showReferences
+    this.referenceOpacityInput.hidden = !any || !this.referencesShownState || several
+    this.referencesButton.setAttribute("aria-pressed", String(lit))
+    if (several) this.referencesButton.setAttribute("aria-haspopup", "true")
+    else this.referencesButton.removeAttribute("aria-haspopup")
+    UfoElement.setIcon(this.referencesButton, lit ? PlayerIcons.PICTURES_ON : PlayerIcons.PICTURES_OFF)
+    const label = several ? this.messages.referencesMenu : this.referencesShownState ? this.messages.hideReferences : this.messages.showReferences
     this.referencesButton.title = label
     this.referencesButton.setAttribute("aria-label", label)
     this.referenceOpacityInput.title = this.messages.referenceOpacity
@@ -1278,7 +1397,11 @@ export class UfoElement extends HTMLElement {
 
   /** Tells whoever draws the scene what the reader wants of the pictures — see SceneElement. */
   private dispatchReferenceView(): void {
-    this.dispatchEvent(new CustomEvent("referenceview", { detail: { shown: this.referencesShown, opacity: this.referenceOpacity } }))
+    // For several pictures, each one's own view: the picture is drawn with `opacity` if `shown`, and not at all otherwise.
+    const views = this.severalReferences
+      ? Object.fromEntries(this.currentSighting.references.map(reference => [reference.id, { ...this.viewOfReference(reference) }]))
+      : undefined
+    this.dispatchEvent(new CustomEvent("referenceview", { detail: { shown: this.referencesShown, opacity: this.referenceOpacity, views } }))
   }
 
   /**

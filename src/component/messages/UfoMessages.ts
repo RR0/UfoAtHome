@@ -43,6 +43,8 @@ export interface UfoMessages {
   showTraces: string
   hideTraces: string
   referenceOpacity: string
+  /** The name of the menu that lists the pictures, for a recording with several. */
+  referencesMenu: string
   showMilestones: string
   hideMilestones: string
   /** What the map calls the two things a recording may not have named: the observer themselves, and
