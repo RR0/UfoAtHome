@@ -1,7 +1,7 @@
 {
   "name": "@rr0/ufoathome",
   "type": "module",
-  "version": "0.92.0",
+  "version": "0.92.1",
   "description": "UFO@home — record and replay a UFO sighting's shape, movement and appearance",
   "author": "Jérôme Beau <rr0@rr0.org> (https://rr0.org)",
   "license": "MIT",
@@ -41,6 +41,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:render": "node scripts/perf/star-quality.mjs",
     "build:stars": "tsx scripts/build-star-catalog.ts",
     "build:comets": "tsx scripts/build-comet-catalog.ts",
     "build:novae": "node scripts/build-nova-catalog.ts",
