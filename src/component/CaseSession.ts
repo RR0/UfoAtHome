@@ -1,0 +1,124 @@
+import type { CaseEventJson, CaseJson } from "../engine/persistence/caseJson.js"
+import { CaseFile } from "../engine/persistence/caseJson.js"
+import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
+import type { AgentRef } from "../engine/interpretation/Interpretation.js"
+import type { SaidText } from "../engine/model/SaidText.js"
+
+/** One recording a case lists: an observer's account, or a reading of one. */
+export interface CaseTrack {
+  /** The event of the case that lists it — the one place its title, its date and its author live. */
+  event: CaseEventJson & { by?: AgentRef[] }
+  /** Where the recording is, absolute. */
+  url: string
+  kind: "observer" | "reading"
+  /** The recording as loaded or as edited since, once it has been fetched. */
+  recording?: SightingRecordingJson
+  /** The recording as it was when loaded, to tell what was changed. Absent for one added here. */
+  loaded?: string
+}
+
+/**
+ * A case being edited: the recordings it lists, the ones fetched so far and what was changed in them.
+ *
+ * The case is what the editor opens when it is given a `case.json`, since a reading of a sighting is
+ * another observation (see InterpretationEventJson) and the case is where they are all listed. Each
+ * track is a recording the editor edits as any other; this keeps them between visits, adds a reading
+ * (a recording of its own, with the place, the time and the pose of the account it reads), deletes
+ * one, and says what has to be written back.
+ */
+export class CaseSession {
+  readonly tracks: CaseTrack[]
+
+  constructor(readonly json: CaseJson, readonly url: string) {
+    this.tracks = (json.events ?? [])
+      .filter(event => event.eventType === CaseFile.SIGHTING_EVENT && typeof event.url === "string" && event.url !== "")
+      .map(event => ({
+        event,
+        url: new URL(event.url!, url).href,
+        kind: event.interpretationOf === undefined ? "observer" : "reading"
+      }))
+  }
+
+  /** The account a reading reads: the first recording it names that the case lists. */
+  accountOf(track: CaseTrack): CaseTrack | undefined {
+    if (track.kind !== "reading") return undefined
+    const ids = [track.event.interpretationOf].flat()
+    return this.tracks.find(other => other.kind === "observer" && other.recording?.id !== undefined && ids.includes(other.recording.id))
+      ?? this.tracks.find(other => other.kind === "observer")
+  }
+
+  /** Remembers what a track's recording is now, as loaded or as edited. */
+  keep(track: CaseTrack, recording: SightingRecordingJson, fresh = false): void {
+    track.recording = recording
+    if (fresh) track.loaded = JSON.stringify(recording)
+    // What a reading is called is what its own interpretation says: the case's event follows it.
+    if (track.kind === "reading" && recording.interpretation?.title !== undefined) track.event.title = recording.interpretation.title
+  }
+
+  /** Whether a track has to be written: added here, or changed since it was loaded. */
+  changed(track: CaseTrack): boolean {
+    return track.recording !== undefined && (track.loaded === undefined || JSON.stringify(track.recording) !== track.loaded)
+  }
+
+  /**
+   * Adds a reading of an account: an event of type `sighting` marked `interpretationOf`, and a recording
+   * of its own that shares the account's place, time and pose and holds no body yet.
+   */
+  addReading(account: CaseTrack, when: string, title?: SaidText): CaseTrack {
+    const base = account.recording
+    if (!base) throw new Error("A reading is added to an account that has been loaded")
+    const stem = account.event.url!.replace(/^.*\//, "").replace(/^observer-/, "").replace(/\.json$/, "")
+    const files = new Set(this.tracks.map(track => track.event.url))
+    const ids = new Set(this.tracks.map(track => track.recording?.id))
+    // After the readings the case already has, and past any file or id that is taken.
+    let number = this.tracks.filter(track => track.kind === "reading").length + 1
+    while (files.has(`interpretation-${stem}-${number}.json`) || ids.has(`${base.id ?? stem}-interpretation-${number}`)) number++
+    const file = `interpretation-${stem}-${number}.json`
+    const directory = account.event.url!.includes("/") ? account.event.url!.replace(/[^/]*$/, "") : ""
+    const recording: SightingRecordingJson = {
+      version: 1,
+      id: `${base.id ?? stem}-interpretation-${number}`,
+      ...(base.time !== undefined ? { time: base.time } : {}),
+      ...(base.durationSeconds !== undefined ? { durationSeconds: base.durationSeconds } : {}),
+      ...(base.utcOffsetHours !== undefined ? { utcOffsetHours: base.utcOffsetHours } : {}),
+      ...(base.timeZone !== undefined ? { timeZone: base.timeZone } : {}),
+      ...(base.place !== undefined ? { place: base.place } : {}),
+      tags: ["interpretation"],
+      ...(base.observerTrack !== undefined ? { observerTrack: base.observerTrack } : {}),
+      timeline: { keyframes: [], order: [], groups: [] },
+      interpretation: { ...(title !== undefined ? { title } : {}), bodies: [] }
+    } as SightingRecordingJson
+    const event: CaseTrack["event"] = {
+      type: "event",
+      eventType: "sighting",
+      interpretationOf: base.id ?? stem,
+      time: when,
+      ...(title !== undefined ? { title } : {}),
+      url: directory + file
+    }
+    this.json.events = [...(this.json.events ?? []), event]
+    const track: CaseTrack = { event, url: new URL(event.url!, this.url).href, kind: "reading", recording }
+    this.tracks.push(track)
+    return track
+  }
+
+  /** Removes a reading from the case. An account is not removed: a case is its sightings. */
+  deleteReading(track: CaseTrack): boolean {
+    if (track.kind !== "reading") return false
+    const index = this.tracks.indexOf(track)
+    if (index < 0) return false
+    this.tracks.splice(index, 1)
+    this.json.events = (this.json.events ?? []).filter(event => event !== track.event)
+    return true
+  }
+
+  /** What has to be written: the case, and every recording added or changed. Paths are relative to the case. */
+  files(): { path: string, content: string }[] {
+    const directory = this.url.replace(/[^/]*$/, "")
+    const relative = (url: string): string => url.startsWith(directory) ? url.slice(directory.length) : url
+    const written = this.tracks.filter(track => this.changed(track))
+      .map(track => ({ path: relative(track.url), content: JSON.stringify(track.recording, null, 2) + "\n" }))
+    const name = decodeURIComponent(this.url.replace(/[?#].*$/, "").replace(/^.*\//, "")) || "case.json"
+    return [{ path: name, content: JSON.stringify(this.json, null, 2) + "\n" }, ...written]
+  }
+}

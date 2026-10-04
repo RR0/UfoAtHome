@@ -138,13 +138,17 @@ let shownSrc
 stage.addEventListener("observerchange", event => {
   shownSrc = event.detail && event.detail.src ? event.detail.src : undefined
   describe()
-  if (shownSrc && !editLink.hidden) editLink.href = editorPath + "?sighting=" + encodeURIComponent(shownSrc)
+  if (shownSrc && !editLink.hidden) editLink.href = stage.editorHref || editorPath + "?sighting=" + encodeURIComponent(shownSrc)
+})
+/* A reading chosen in the menu is a recording of its own: the editor opens on it, in its case. */
+stage.addEventListener("interpretationchange", () => {
+  if (!editLink.hidden && stage.editorHref) editLink.href = stage.editorHref
 })
 
 const reveal = (source, sighting, fallbackTitle) => {
   stageBox.hidden = false
   if (source) {
-    editLink.href = editorPath + "?sighting=" + encodeURIComponent(shownSrc || source)
+    editLink.href = stage.editorHref || editorPath + "?sighting=" + encodeURIComponent(shownSrc || source)
     editLink.hidden = false
   } else {
     editLink.hidden = true

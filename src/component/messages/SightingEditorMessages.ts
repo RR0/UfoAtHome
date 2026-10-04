@@ -149,6 +149,16 @@ export interface SightingEditorMessages extends SightingLabels {
    * it is also what one does to a recording.
    */
   export: string
+  /** The case being edited: the picker of its recordings (accounts and readings), and its buttons. */
+  caseRecording: string
+  /** A reading in the picker: {title} is its title, or caseUntitled when it has none. */
+  caseReading: string
+  caseUntitled: string
+  caseAddReading: string
+  caseDeleteReading: string
+  caseDeleteConfirm: string
+  /** The case with what was changed, as a zip. */
+  caseExport: string
   importFile: string
   importUrl: string
   importUrlPlaceholder: string

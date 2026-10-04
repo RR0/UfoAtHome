@@ -562,7 +562,28 @@ export class SightingElement extends HTMLElement {
   private editorUrl(): string {
     if (!this.currentSrc) return APP_EDITOR_URL
     const url = new URL(this.currentSrc, location.href)
+    // A recording that is one of a case's is opened in its case: the readings are recordings of their
+    // own, listed there, and the editor shows them all and opens on the one on show.
+    const source = this.caseSource
+    if (source) {
+      return `${APP_EDITOR_URL}?sighting=${encodeURIComponent(source.url)}&track=${encodeURIComponent(this.shownTrackUrl() ?? url.href)}`
+    }
     return `${APP_EDITOR_URL}?sighting=${encodeURIComponent(url.href)}`
+  }
+
+  /** Where to open the editor for what is on show: the recording of the reading chosen, else the account's own. */
+  get editorHref(): string {
+    return this.editorUrl()
+  }
+
+  /** The address of the recording of the reading chosen in the menu, when one is (see offerInterpretations). */
+  private shownTrackUrl(): string | undefined {
+    const source = this.caseSource
+    const entry = this.entries.find(e => e.src === this.currentSrc)
+    const chosen = /^case-(\d+)$/.exec(this.interpretationSelect.value)
+    if (!source || !entry || !chosen) return undefined
+    const event = CaseFile.interpretationEvents(source.json, this.plain(entry).id)[Number(chosen[1])]
+    return event?.url ? new URL(event.url, source.url).href : undefined
   }
 
   /**
@@ -757,6 +778,8 @@ export class SightingElement extends HTMLElement {
     }) : undefined
     if (token !== this.interpretationToken) return
     this.sceneElement.interpretation = interpretation
+    this.editLink.href = this.editorUrl()
+    this.dispatchEvent(new CustomEvent("interpretationchange", { detail: { track: this.shownTrackUrl() } }))
     this.updateCompareButton()
     this.showConfrontation(this.sceneElement.confrontation)
   }
