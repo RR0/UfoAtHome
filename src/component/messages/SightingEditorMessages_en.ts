@@ -71,7 +71,6 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   durationImprecise: "These dates don't precisely enough determine a duration — enter it manually.",
   export: "Export",
   caseRecording: "Recording",
-  caseReading: "Reading: {title}",
   caseUntitled: "Reading {n}",
   caseAddReading: "Add a reading (an interpretation) of this account",
   caseDeleteReading: "Delete this reading",

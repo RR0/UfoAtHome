@@ -71,7 +71,6 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   durationImprecise: "Estas fechas no determinan con suficiente precisión una duración — introdúcela manualmente.",
   export: "Exportar",
   caseRecording: "Grabación",
-  caseReading: "Lectura: {title}",
   caseUntitled: "Lectura {n}",
   caseAddReading: "Añadir una lectura (una interpretación) de este relato",
   caseDeleteReading: "Eliminar esta lectura",

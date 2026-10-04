@@ -2067,7 +2067,7 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshCaseRow()
   }
 
-  /** The row above the groups: the recordings of the case, and what can be done with them. */
+  /** The row just above the render: the recordings of the case, and what can be done with them. */
   private refreshCaseRow(): void {
     const session = this.caseSession
     this.caseRow.hidden = session === undefined
@@ -2075,10 +2075,10 @@ export class SightingEditorElement extends HTMLElement {
     const readings = session.tracks.filter(track => track.kind === "reading")
     this.caseTrackSelect.replaceChildren(...session.tracks.map((track, index) => {
       const said = this.said.read(track.event.title as never) ?? this.said.read(track.recording?.interpretation?.title as never)
-      const when = typeof track.event.time === "string" ? ` (${track.event.time})` : ""
+      // A reading is told from an account by the picker's order and its own title: no "Reading:" in front of every one.
       const label = track.kind === "observer"
         ? said ?? this.said.read(track.recording?.observer?.title as never) ?? track.event.url ?? ""
-        : this.messages.caseReading.replace("{title}", said ?? this.messages.caseUntitled.replace("{n}", String(readings.indexOf(track) + 1))) + when
+        : said ?? this.messages.caseUntitled.replace("{n}", String(readings.indexOf(track) + 1))
       return new Option(label, String(index))
     }))
     const current = this.caseCurrent ? session.tracks.indexOf(this.caseCurrent) : 0

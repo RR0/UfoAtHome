@@ -161,7 +161,7 @@ if (excerpts.length > 0) {
       <tr><th>Field</th><th>Meaning</th></tr>
       <tr><td><code>id</code></td><td>The case's own identifier. On rr0.org it is the dossier's directory and may be left out; a case file standing alone states it</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>The case's name, and when it happened as RR0 writes a time (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). The player names a case it opens by its title</td></tr>
-      <tr><td><code>events</code></td><td>The case's chronology. Only the <code>sighting</code> ones are replayed, each by its <code>url</code>, read relative to the case file's own address (so the same case works from its dossier's page and from anywhere else); the others (an analysis, an article, a film, a confession) are RR0's</td></tr>
+      <tr><td><code>events</code></td><td>The case's chronology. Only the <code>sighting</code> ones are replayed, each by its <code>url</code>, read relative to the case file's own address (so the same case works from its dossier's page and from anywhere else); the ones marked <code>interpretationOf</code> are readings of one of them (see below); the others (an article, a film, a confession) are RR0's</td></tr>
     </table>
     </div>
     <p>Give it to <code>&lt;rr0-sighting src&gt;</code> or to the player, and each observer can be
@@ -282,16 +282,7 @@ if (excerpts.length > 0) {
       <code>&lt;rr0-sighting&gt;</code>), the player draws everything the observer saw beside it as
       dashed outlines and lists how far off the direction is and how many times wider and taller
       each body looks, in red when an observer could not have been that far off.</p>
-    <p>The observer's own reading goes in the recording, as <code>interpretation</code>. An
-      analyst's is another observation, the one that was as they hold it: an event of type
-      <code>sighting</code> in the case, like the original, marked <code>interpretationOf</code> with
-      the <code>id</code> (or the ids) of the sighting it interprets, dated by <code>time</code> when
-      it was elaborated, with who claims it in <code>by</code>
-      (<code>{ "people": id }</code>, <code>{ "org": id }</code>, or a person described in value),
-      and a recording at <code>url</code> (the same format, its own <code>interpretation</code>
-      holding the bodies). The player does not offer it as an observer, but as a reading of the
-      account it names. The older form, an event of type <code>interpretation</code> naming the
-      recording in <code>sighting</code> with bodies inline, is still read. A account whose observer said what
+    <p>The observer's own reading goes in the recording, as <code>interpretation</code>. Someone else's reading is not part of the account: it is another sighting, listed in the case (see below). A account whose observer said what
       it was is drawn in the round, as they said; one that says nothing in metres is drawn as the
       angles it states. The player offers it and each analyst's interpretation, one at a time.</p>
     <pre data-json=""><code>{
@@ -323,6 +314,63 @@ if (excerpts.length > 0) {
       <tr><td><code>reentries</code></td><td>On the interpretation itself: the atmospheric re-entries it claims were seen, a satellite or rocket stage breaking up into burning pieces. Not bodies: a re-entry burns 70 to 100 km up and is seen from hundreds of kilometres, so it is placed on the Earth and seen through its curvature from wherever the observer stood. Its <code>track</code> gives the leading point at instants of the recording, <code>{ t, lat, lng, altitudeKm }</code>, joined by great circles; each of its <code>fragments</code> follows the same path <code>lagS</code> seconds behind, is seen from <code>fromT</code> until it burns out at <code>untilT</code>, shines with its <code>absoluteMagnitude</code> (at 100 km, as for a fireball) moved to its real distance, in its <code>color</code>, with a tail of the last <code>trainS</code> seconds of its path. Its light is its own: it shows whether or not the Sun reaches it. <code>object</code> names what came down (<code>name</code>, <code>cosparId</code>, <code>norad</code>). Nothing is propagated from orbital elements, which are off by minutes in the last orbit: the path is what the sources establish, with its provenance</td></tr>
     </table>
     </div>
+
+    <h2>Another reading: an interpretation is another sighting</h2>
+    <p>Someone else's reading of an account (an analyst's, an investigator's, a comparison made to test it)
+      is not part of the account: it is another observation, the one that took place as its author holds
+      it. So it is listed in the case like the original, as an event of type <code>sighting</code>, marked as a
+      reading by <code>interpretationOf</code>, and has a recording of its own at <code>url</code>:</p>
+    <pre data-json="none"><code>{
+  "id": "McMinnville1950",
+  "events": [
+    { "type": "event", "eventType": "sighting", "title": "Paul Trent", "url": "observer-mcminnville.json" },
+    { "type": "event", "eventType": "sighting",
+      "interpretationOf": "1950-05-11-TrentPaul",
+      "time": "2013-06",
+      "by": [{ "people": "CousynAntoine" }, { "people": "LouangeFrancois" }],
+      "title": "A model on a thread under the line",
+      "url": "interpretation-mcminnville-2.json" }
+  ]
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Field</th><th>Meaning</th></tr>
+      <tr><td><code>interpretationOf</code></td><td>The <code>id</code> of the sighting it is a reading of, or a list of ids when one reading serves several accounts (the photographs and a close-up of them). What tells it from an account: the events <em>without</em> it are the case's observers</td></tr>
+      <tr><td><code>time</code></td><td>When the interpretation was elaborated, as RR0 writes a time (<code>"2013-06"</code>): not when the sighting happened</td></tr>
+      <tr><td><code>by</code></td><td>Who claims it: <code>{ "people": id }</code> or <code>{ "org": id }</code>, which name an entry that lives elsewhere (on RR0, a people or an org directory), or a person described in value. Absent for a comparison nobody claims</td></tr>
+      <tr><td><code>title</code></td><td>What the reading is called in the player's menu and the editor's picker: a few words, one string or one per language</td></tr>
+      <tr><td><code>url</code></td><td>Its recording, read relative to the case file's own address, like an observer's</td></tr>
+    </table>
+    </div>
+    <p>The recording at <code>url</code> is a recording like any other. It shares the place, the time and the observer's
+      pose of the account it reads, so that a body placed from the observer, or in metres from where they stood,
+      means the same in both; it draws no shape of its own (an empty <code>timeline</code>); and it holds the bodies in
+      its own <code>interpretation</code>, described above. A body's <code>explains</code> names the shapes of the account.</p>
+    <pre data-json="none"><code>{
+  "version": 1,
+  "id": "1950-05-11-TrentPaul-interpretation-2",
+  "time": { "year": 1950, "month": 5, "day": 11, "hour": 19, "minute": 45 },
+  "utcOffsetHours": -7,
+  "place": [{ "value": { "lat": 45.104167, "lng": -123.330556 } }],
+  "observerTrack": { "keyframes": [{ "t": 0, "pose": { "lat": 45.104167, "lng": -123.330556, "headingDeg": 41.3, "pitchDeg": 14.85, "fovDeg": 33.4 } }] },
+  "tags": ["interpretation"],
+  "timeline": { "keyframes": [], "order": [], "groups": [] },
+  "interpretation": {
+    "title": "A model on a thread under the line",
+    "bodies": [{ "id": "model", "explains": ["ufo-1"], "model": { "id": "disc" }, "track": [ … ] }]
+  }
+}</code></pre>
+    <p>The player lists the case's observers from the events with no <code>interpretationOf</code> and offers each
+      reading beside the account it names, one at a time (the ◌ button measures it against the account). A recording
+      standing alone has no reading but its own <code>interpretation</code>. The older form, an event of type
+      <code>interpretation</code> naming the recording in <code>sighting</code> with its bodies inline or in a file at
+      <code>url</code>, is still read. The editor opens a case: its picker above the render lists the accounts and
+      the readings, each opening as the recording it is, with a button to add a reading (a new recording that shares the
+      account's place, time and pose, and an event for it), one to delete it, and one to export the case and every
+      recording added or changed as a zip. Try it with
+      <a href="/demo-data/case-mcminnville.json"><code>case-mcminnville.json</code></a>
+      (<a href="/play/?sighting=/demo-data/case-mcminnville.json">play it</a>,
+      <a href="/edit/?sighting=/demo-data/case-mcminnville.json">edit it</a>).</p>
 
     <h2>The weather, and its clouds</h2>
     <p>A <code>weather</code> keyframe states the sky's conditions at one moment of the recording's
@@ -545,7 +593,7 @@ if (excerpts.length > 0) {
       <tr><th>Champ</th><th>Sens</th></tr>
       <tr><td><code>id</code></td><td>L'identifiant du dossier lui-même. Sur rr0.org c'est le répertoire du dossier, et il peut être omis ; un fichier de cas isolé l'énonce</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>Le nom du cas, et sa date comme RR0 l'écrit (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). Le lecteur nomme un cas qu'il ouvre par son titre</td></tr>
-      <tr><td><code>events</code></td><td>La chronologie du cas. Seuls les <code>sighting</code> sont rejoués, chacun par son <code>url</code>, lue relativement à l'adresse du fichier de cas (si bien que le même cas marche depuis la page de son dossier comme depuis n'importe où) ; les autres (une analyse, un article, un film, un aveu) sont ceux de RR0</td></tr>
+      <tr><td><code>events</code></td><td>La chronologie du cas. Seuls les <code>sighting</code> sont rejoués, chacun par son <code>url</code>, lue relativement à l'adresse du fichier de cas (si bien que le même cas marche depuis la page de son dossier comme depuis n'importe où) ; ceux marqués <code>interpretationOf</code> sont des lectures de l'un d'eux (voir plus bas) ; les autres (un article, un film, un aveu) sont ceux de RR0</td></tr>
     </table>
     </div>
     <p>Donnez-le à <code>&lt;rr0-sighting src&gt;</code> ou au lecteur, et chaque observateur se choisit
@@ -669,16 +717,7 @@ if (excerpts.length > 0) {
       contours pointillés, et indique l'écart de direction et combien de fois plus large et plus
       haut chaque corps paraît, en rouge quand un observateur n'aurait pas pu se tromper d'autant.</p>
     <p>La lecture de l'observateur lui-même va dans l'enregistrement, en <code>interpretation</code>.
-      Celle d'un analyste est une autre observation, celle qui a eu lieu telle qu'il la tient :
-      un événement de type <code>sighting</code> du dossier, comme l'original, marqué
-      <code>interpretationOf</code> avec l'<code>id</code> (ou les ids) de l'observation qu'il
-      interprète, daté par <code>time</code> de son élaboration, avec qui l'avance dans
-      <code>by</code> (<code>{ "people": id }</code>, <code>{ "org": id }</code>, ou une personne
-      décrite en valeur), et un enregistrement à <code>url</code> (même format, son propre
-      <code>interpretation</code> portant les corps). Le lecteur ne l'offre pas comme observateur,
-      mais comme lecture du compte rendu qu'elle désigne. L'ancienne forme, un événement de type
-      <code>interpretation</code> qui désigne l'enregistrement dans <code>sighting</code> avec ses
-      corps sur place, est encore lue. Un
+      Celle d'un autre n'est pas dans le compte rendu : c'est une autre observation, listée dans le dossier (voir plus bas). Un
       compte rendu dont l'observateur a dit ce que c'était se dessine en volume, comme il l'a dit ;
       celui qui ne dit rien en mètres se dessine avec les angles qu'il énonce. Le lecteur le
       propose, ainsi que chaque interprétation d'analyste, une à la fois.</p>
@@ -711,6 +750,66 @@ if (excerpts.length > 0) {
       <tr><td><code>reentries</code></td><td>Sur l'interprétation elle-même : les rentrées atmosphériques qu'elle dit avoir été vues, un satellite ou un étage de fusée se désagrégeant en morceaux qui brûlent. Pas des corps : une rentrée brûle entre 70 et 100 km d'altitude et se voit à des centaines de kilomètres, elle est donc placée sur la Terre et vue à travers sa courbure depuis l'endroit où se tenait l'observateur. Sa <code>track</code> donne le point de tête à des instants de l'enregistrement, <code>{ t, lat, lng, altitudeKm }</code>, reliés par des grands cercles ; chacun de ses <code>fragments</code> suit le même chemin <code>lagS</code> secondes derrière, se voit de <code>fromT</code> jusqu'à s'éteindre à <code>untilT</code>, brille de sa <code>absoluteMagnitude</code> (à 100 km, comme pour un bolide) ramenée à sa distance réelle, de sa couleur <code>color</code>, avec une traînée des <code>trainS</code> dernières secondes de son chemin. Sa lumière est la sienne : elle se voit que le Soleil l'atteigne ou non. <code>object</code> nomme ce qui est retombé (<code>name</code>, <code>cosparId</code>, <code>norad</code>). Rien n'est propagé depuis des éléments orbitaux, faux de plusieurs minutes sur la dernière orbite : le chemin est ce que les sources établissent, avec sa provenance</td></tr>
     </table>
     </div>
+
+    <h2>Une autre lecture : une interprétation est une autre observation</h2>
+    <p>La lecture qu'un autre fait d'un compte rendu (celle d'un analyste, d'un enquêteur, une comparaison faite pour
+      la mettre à l'épreuve) n'est pas dans le compte rendu : c'est une autre observation, celle qui a eu lieu telle que
+      son auteur la tient. Elle est donc listée dans le dossier comme l'original, en événement de type
+      <code>sighting</code>, marqué comme lecture par <code>interpretationOf</code>, et a un enregistrement à elle à
+      <code>url</code> :</p>
+    <pre data-json="none"><code>{
+  "id": "McMinnville1950",
+  "events": [
+    { "type": "event", "eventType": "sighting", "title": "Paul Trent", "url": "observer-mcminnville.json" },
+    { "type": "event", "eventType": "sighting",
+      "interpretationOf": "1950-05-11-TrentPaul",
+      "time": "2013-06",
+      "by": [{ "people": "CousynAntoine" }, { "people": "LouangeFrancois" }],
+      "title": "A model on a thread under the line",
+      "url": "interpretation-mcminnville-2.json" }
+  ]
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Champ</th><th>Sens</th></tr>
+      <tr><td><code>interpretationOf</code></td><td>L'<code>id</code> de l'observation dont c'est une lecture, ou une liste d'ids quand une lecture sert plusieurs comptes rendus (les photographies et un gros plan). Ce qui la distingue d'un compte rendu : les événements <em>sans</em> ce champ sont les observateurs du dossier</td></tr>
+      <tr><td><code>time</code></td><td>Quand l'interprétation a été élaborée, comme RR0 écrit un temps (<code>"2013-06"</code>) : pas quand l'observation a eu lieu</td></tr>
+      <tr><td><code>by</code></td><td>Qui l'avance : <code>{ "people": id }</code> ou <code>{ "org": id }</code>, qui désignent une entrée qui vit ailleurs (sur RR0, un répertoire de personnes ou d'organisations), ou une personne décrite en valeur. Absent pour une comparaison que personne n'avance</td></tr>
+      <tr><td><code>title</code></td><td>Comment la lecture s'appelle dans le menu du lecteur et le sélecteur de l'éditeur : quelques mots, une chaîne ou une par langue</td></tr>
+      <tr><td><code>url</code></td><td>Son enregistrement, lu relativement à l'adresse du fichier du dossier, comme celui d'un observateur</td></tr>
+    </table>
+    </div>
+    <p>L'enregistrement à <code>url</code> est un enregistrement comme les autres. Il partage le lieu, l'heure et la pose
+      de l'observateur du compte rendu qu'il lit, si bien qu'un corps placé depuis l'observateur, ou en mètres depuis
+      l'endroit où il se tenait, veut dire la même chose dans les deux ; il ne dessine aucune forme (une
+      <code>timeline</code> vide) ; et il porte les corps dans son propre <code>interpretation</code>, décrit plus haut.
+      Les <code>explains</code> d'un corps désignent les formes du compte rendu.</p>
+    <pre data-json="none"><code>{
+  "version": 1,
+  "id": "1950-05-11-TrentPaul-interpretation-2",
+  "time": { "year": 1950, "month": 5, "day": 11, "hour": 19, "minute": 45 },
+  "utcOffsetHours": -7,
+  "place": [{ "value": { "lat": 45.104167, "lng": -123.330556 } }],
+  "observerTrack": { "keyframes": [{ "t": 0, "pose": { "lat": 45.104167, "lng": -123.330556, "headingDeg": 41.3, "pitchDeg": 14.85, "fovDeg": 33.4 } }] },
+  "tags": ["interpretation"],
+  "timeline": { "keyframes": [], "order": [], "groups": [] },
+  "interpretation": {
+    "title": "A model on a thread under the line",
+    "bodies": [{ "id": "model", "explains": ["ufo-1"], "model": { "id": "disc" }, "track": [ … ] }]
+  }
+}</code></pre>
+    <p>Le lecteur liste les observateurs du dossier d'après les événements sans <code>interpretationOf</code> et propose
+      chaque lecture à côté du compte rendu qu'elle désigne, une à la fois (le bouton ◌ la mesure contre le compte
+      rendu). Un enregistrement seul n'a d'autre lecture que son propre <code>interpretation</code>. L'ancienne forme, un
+      événement de type <code>interpretation</code> qui désigne l'enregistrement dans <code>sighting</code> avec ses corps
+      sur place ou dans un fichier à <code>url</code>, est encore lue. L'éditeur ouvre un dossier : son sélecteur
+      au-dessus du rendu liste les comptes rendus et les lectures, chacun s'ouvrant comme l'enregistrement qu'il est, avec
+      un bouton pour ajouter une lecture (un nouvel enregistrement qui partage le lieu, l'heure et la pose du compte
+      rendu, et un événement pour lui), un pour la supprimer, et un pour exporter le dossier et chaque enregistrement
+      ajouté ou modifié en zip. Essayez avec
+      <a href="/demo-data/case-mcminnville.json"><code>case-mcminnville.json</code></a>
+      (<a href="/play/?sighting=/demo-data/case-mcminnville.json">le jouer</a>,
+      <a href="/edit/?sighting=/demo-data/case-mcminnville.json">l'éditer</a>).</p>
 
     <h2>La météo, et ses nuages</h2>
     <p>Un point <code>weather</code> énonce l'état du ciel à un instant de l'horloge de
@@ -933,7 +1032,7 @@ if (excerpts.length > 0) {
       <tr><th>Campo</th><th>Significado</th></tr>
       <tr><td><code>id</code></td><td>El identificador propio del caso. En rr0.org es el directorio del expediente y puede omitirse; un archivo de caso independiente lo indica</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>El nombre del caso, y cuándo ocurrió tal como RR0 escribe una hora (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). El reproductor nombra un caso que abre por su título</td></tr>
-      <tr><td><code>events</code></td><td>La cronología del caso. Solo se reproducen los <code>sighting</code>, cada uno por su <code>url</code>, leída respecto a la dirección del propio archivo de caso (de modo que el mismo caso funciona desde la página de su expediente y desde cualquier otro lugar); los demás (un análisis, un artículo, una película, una confesión) son de RR0</td></tr>
+      <tr><td><code>events</code></td><td>La cronología del caso. Solo se reproducen los <code>sighting</code>, cada uno por su <code>url</code>, leída respecto a la dirección del propio archivo de caso (de modo que el mismo caso funciona desde la página de su expediente y desde cualquier otro lugar); los marcados con <code>interpretationOf</code> son lecturas de uno de ellos (véase abajo); los demás (un artículo, una película, una confesión) son de RR0</td></tr>
     </table>
     </div>
     <p>Dáselo a <code>&lt;rr0-sighting src&gt;</code> o al reproductor, y cada observador podrá
@@ -1054,16 +1153,7 @@ if (excerpts.length > 0) {
       <code>&lt;rr0-sighting&gt;</code>), el reproductor dibuja a su lado todo lo que vio el observador como
       contornos discontinuos e indica cuánto se desvía la dirección y cuántas veces más ancho y más alto
       parece cada cuerpo, en rojo cuando un observador no podría haberse equivocado tanto.</p>
-    <p>La lectura del propio observador va en la grabación, como <code>interpretation</code>. La de un
-      analista es otra observación, la que ocurrió tal como él la sostiene: un evento de tipo
-      <code>sighting</code> del caso, como el original, marcado con <code>interpretationOf</code> con el
-      <code>id</code> (o los ids) de la observación que interpreta, fechado por <code>time</code> cuando
-      se elaboró, con quién la sostiene en <code>by</code>
-      (<code>{ "people": id }</code>, <code>{ "org": id }</code>, o una persona descrita en el valor),
-      y una grabación en <code>url</code> (el mismo formato, su propia <code>interpretation</code> con los
-      cuerpos). El reproductor no la ofrece como observador, sino como lectura del relato que nombra. La
-      forma antigua, un evento de tipo <code>interpretation</code> que nombra la grabación en
-      <code>sighting</code> con los cuerpos en línea, se sigue leyendo. Un relato cuyo observador dijo lo que
+    <p>La lectura del propio observador va en la grabación, como <code>interpretation</code>. La de otro no está en el relato: es otra observación, listada en el caso (véase abajo). Un relato cuyo observador dijo lo que
       era se dibuja en volumen, como lo dijo; uno que no dice nada en metros se dibuja como los
       ángulos que expresa. El reproductor lo ofrece, junto con la interpretación de cada analista, una cada vez.</p>
     <pre data-json=""><code>{
@@ -1095,6 +1185,63 @@ if (excerpts.length > 0) {
       <tr><td><code>reentries</code></td><td>En la propia interpretación: las reentradas atmosféricas que afirma que se vieron, un satélite o una etapa de cohete que se desintegra en pedazos que arden. No son cuerpos: una reentrada arde entre 70 y 100 km de altura y se ve a cientos de kilómetros, así que se sitúa sobre la Tierra y se ve a través de su curvatura desde donde estaba el observador. Su <code>track</code> da el punto de cabeza en instantes de la grabación, <code>{ t, lat, lng, altitudeKm }</code>, unidos por círculos máximos; cada uno de sus <code>fragments</code> sigue el mismo camino <code>lagS</code> segundos detrás, se ve desde <code>fromT</code> hasta apagarse en <code>untilT</code>, brilla con su <code>absoluteMagnitude</code> (a 100 km, como un bólido) llevada a su distancia real, en su <code>color</code>, con una estela de los últimos <code>trainS</code> segundos de su camino. Su luz es propia: se ve tanto si el Sol la alcanza como si no. <code>object</code> nombra lo que cayó (<code>name</code>, <code>cosparId</code>, <code>norad</code>). Nada se propaga desde elementos orbitales, errados en minutos en la última órbita: el camino es lo que establecen las fuentes, con su procedencia</td></tr>
     </table>
     </div>
+
+    <h2>Otra lectura: una interpretación es otra observación</h2>
+    <p>La lectura que otro hace de un relato (la de un analista, de un investigador, una comparación hecha para
+      ponerla a prueba) no forma parte del relato: es otra observación, la que ocurrió tal como la sostiene su autor.
+      Por eso se lista en el caso como el original, como un evento de tipo <code>sighting</code>, marcado como lectura
+      con <code>interpretationOf</code>, y tiene una grabación propia en <code>url</code>:</p>
+    <pre data-json="none"><code>{
+  "id": "McMinnville1950",
+  "events": [
+    { "type": "event", "eventType": "sighting", "title": "Paul Trent", "url": "observer-mcminnville.json" },
+    { "type": "event", "eventType": "sighting",
+      "interpretationOf": "1950-05-11-TrentPaul",
+      "time": "2013-06",
+      "by": [{ "people": "CousynAntoine" }, { "people": "LouangeFrancois" }],
+      "title": "A model on a thread under the line",
+      "url": "interpretation-mcminnville-2.json" }
+  ]
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significado</th></tr>
+      <tr><td><code>interpretationOf</code></td><td>El <code>id</code> de la observación de la que es lectura, o una lista de ids cuando una lectura sirve a varios relatos (las fotografías y un primer plano). Lo que la distingue de un relato: los eventos <em>sin</em> este campo son los observadores del caso</td></tr>
+      <tr><td><code>time</code></td><td>Cuándo se elaboró la interpretación, como RR0 escribe un tiempo (<code>"2013-06"</code>): no cuándo ocurrió la observación</td></tr>
+      <tr><td><code>by</code></td><td>Quién la sostiene: <code>{ "people": id }</code> o <code>{ "org": id }</code>, que nombran una entrada que vive en otro sitio (en RR0, un directorio de personas u organizaciones), o una persona descrita en el valor. Ausente en una comparación que nadie sostiene</td></tr>
+      <tr><td><code>title</code></td><td>Cómo se llama la lectura en el menú del reproductor y el selector del editor: unas palabras, una cadena o una por idioma</td></tr>
+      <tr><td><code>url</code></td><td>Su grabación, leída relativa a la dirección del archivo del caso, como la de un observador</td></tr>
+    </table>
+    </div>
+    <p>La grabación en <code>url</code> es una grabación como las demás. Comparte el lugar, la hora y la pose del observador
+      del relato que lee, de modo que un cuerpo situado desde el observador, o en metros desde donde estaba, significa lo
+      mismo en ambas; no dibuja ninguna forma (una <code>timeline</code> vacía); y guarda los cuerpos en su propia
+      <code>interpretation</code>, descrita arriba. El <code>explains</code> de un cuerpo nombra las formas del relato.</p>
+    <pre data-json="none"><code>{
+  "version": 1,
+  "id": "1950-05-11-TrentPaul-interpretation-2",
+  "time": { "year": 1950, "month": 5, "day": 11, "hour": 19, "minute": 45 },
+  "utcOffsetHours": -7,
+  "place": [{ "value": { "lat": 45.104167, "lng": -123.330556 } }],
+  "observerTrack": { "keyframes": [{ "t": 0, "pose": { "lat": 45.104167, "lng": -123.330556, "headingDeg": 41.3, "pitchDeg": 14.85, "fovDeg": 33.4 } }] },
+  "tags": ["interpretation"],
+  "timeline": { "keyframes": [], "order": [], "groups": [] },
+  "interpretation": {
+    "title": "A model on a thread under the line",
+    "bodies": [{ "id": "model", "explains": ["ufo-1"], "model": { "id": "disc" }, "track": [ … ] }]
+  }
+}</code></pre>
+    <p>El reproductor lista los observadores del caso a partir de los eventos sin <code>interpretationOf</code> y ofrece
+      cada lectura junto al relato que nombra, una cada vez (el botón ◌ la mide contra el relato). Una grabación sola no
+      tiene más lectura que su propia <code>interpretation</code>. La forma antigua, un evento de tipo
+      <code>interpretation</code> que nombra la grabación en <code>sighting</code> con sus cuerpos en línea o en un
+      archivo en <code>url</code>, se sigue leyendo. El editor abre un caso: su selector sobre el render lista los
+      relatos y las lecturas, cada uno abriéndose como la grabación que es, con un botón para añadir una lectura (una
+      grabación nueva que comparte el lugar, la hora y la pose del relato, y un evento para ella), otro para eliminarla,
+      y otro para exportar el caso y cada grabación añadida o modificada en un zip. Pruébalo con
+      <a href="/demo-data/case-mcminnville.json"><code>case-mcminnville.json</code></a>
+      (<a href="/play/?sighting=/demo-data/case-mcminnville.json">reproducirlo</a>,
+      <a href="/edit/?sighting=/demo-data/case-mcminnville.json">editarlo</a>).</p>
 
     <h2>El tiempo, y sus nubes</h2>
     <p>Un fotograma clave <code>weather</code> expresa las condiciones del cielo en un momento del reloj
@@ -1315,7 +1462,7 @@ if (excerpts.length > 0) {
       <tr><th>Campo</th><th>Significato</th></tr>
       <tr><td><code>id</code></td><td>L'identificativo proprio del caso. Su rr0.org è la directory del fascicolo e può essere omesso; un file di caso a sé stante lo indica</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>Il nome del caso, e quando è avvenuto come RR0 scrive un'ora (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). Il lettore designa un caso che apre con il suo titolo</td></tr>
-      <tr><td><code>events</code></td><td>La cronologia del caso. Vengono riprodotti solo i <code>sighting</code>, ciascuno tramite il suo <code>url</code>, letto rispetto all'indirizzo del file di caso stesso (così lo stesso caso funziona dalla pagina del suo fascicolo e da qualsiasi altro luogo); gli altri (un'analisi, un articolo, un filmato, una confessione) sono di RR0</td></tr>
+      <tr><td><code>events</code></td><td>La cronologia del caso. Vengono riprodotti solo i <code>sighting</code>, ciascuno tramite il suo <code>url</code>, letto rispetto all'indirizzo del file di caso stesso (così lo stesso caso funziona dalla pagina del suo fascicolo e da qualsiasi altro luogo); quelli contrassegnati da <code>interpretationOf</code> sono letture di uno di essi (vedi sotto); gli altri (un articolo, un filmato, una confessione) sono di RR0</td></tr>
     </table>
     </div>
     <p>Dallo a <code>&lt;rr0-sighting src&gt;</code> o al lettore, e ogni osservatore potrà essere
@@ -1436,16 +1583,7 @@ if (excerpts.length > 0) {
       <code>&lt;rr0-sighting&gt;</code>), il lettore disegna accanto tutto ciò che l'osservatore ha visto come
       contorni tratteggiati e indica di quanto si discosta la direzione e quante volte più largo e più alto
       appare ciascun corpo, in rosso quando un osservatore non avrebbe potuto sbagliarsi di tanto.</p>
-    <p>La lettura dell'osservatore stesso va nella registrazione, come <code>interpretation</code>. Quella di un
-      analista è un'altra osservazione, quella che c'è stata come la sostiene lui: un evento di tipo
-      <code>sighting</code> del caso, come l'originale, contrassegnato da <code>interpretationOf</code> con
-      l'<code>id</code> (o gli id) dell'osservazione che interpreta, datato da <code>time</code> quando è
-      stata elaborata, con chi la sostiene in <code>by</code>
-      (<code>{ "people": id }</code>, <code>{ "org": id }</code>, o una persona descritta nel valore),
-      e una registrazione a <code>url</code> (stesso formato, la sua <code>interpretation</code> con i
-      corpi). Il lettore non la propone come osservatore, ma come lettura del resoconto che designa. La
-      forma più vecchia, un evento di tipo <code>interpretation</code> che designa la registrazione in
-      <code>sighting</code> con i corpi in linea, si legge ancora. Un resoconto il cui osservatore ha detto che cosa
+    <p>La lettura dell'osservatore stesso va nella registrazione, come <code>interpretation</code>. Quella di un altro non è nel resoconto: è un'altra osservazione, elencata nel caso (vedi sotto). Un resoconto il cui osservatore ha detto che cosa
       fosse viene disegnato a tutto tondo, come l'ha detto; uno che non dice nulla in metri viene disegnato come gli
       angoli che esprime. Il lettore lo propone, insieme all'interpretazione di ciascun analista, una alla volta.</p>
     <pre data-json=""><code>{
@@ -1477,6 +1615,64 @@ if (excerpts.length > 0) {
       <tr><td><code>reentries</code></td><td>Sull'interpretazione stessa: i rientri atmosferici che afferma siano stati visti, un satellite o uno stadio di razzo che si disintegra in pezzi che bruciano. Non sono corpi: un rientro brucia tra 70 e 100 km di quota e si vede a centinaia di chilometri, quindi è collocato sulla Terra e visto attraverso la sua curvatura dal punto in cui stava l'osservatore. La sua <code>track</code> dà il punto di testa in istanti della registrazione, <code>{ t, lat, lng, altitudeKm }</code>, uniti da cerchi massimi; ciascuno dei suoi <code>fragments</code> segue lo stesso percorso <code>lagS</code> secondi dietro, si vede da <code>fromT</code> finché si spegne a <code>untilT</code>, brilla della sua <code>absoluteMagnitude</code> (a 100 km, come per un bolide) riportata alla distanza reale, nel suo <code>color</code>, con una scia degli ultimi <code>trainS</code> secondi del percorso. La sua luce è propria: si vede che il Sole la raggiunga o no. <code>object</code> nomina ciò che è ricaduto (<code>name</code>, <code>cosparId</code>, <code>norad</code>). Nulla è propagato da elementi orbitali, sbagliati di minuti nell'ultima orbita: il percorso è ciò che le fonti stabiliscono, con la sua provenienza</td></tr>
     </table>
     </div>
+
+    <h2>Un'altra lettura: un'interpretazione è un'altra osservazione</h2>
+    <p>La lettura che un altro fa di un resoconto (quella di un analista, di un investigatore, un confronto fatto per
+      metterla alla prova) non fa parte del resoconto: è un'altra osservazione, quella che c'è stata come la sostiene il
+      suo autore. Perciò è elencata nel caso come l'originale, come evento di tipo <code>sighting</code>, contrassegnato
+      come lettura da <code>interpretationOf</code>, e ha una registrazione propria a <code>url</code>:</p>
+    <pre data-json="none"><code>{
+  "id": "McMinnville1950",
+  "events": [
+    { "type": "event", "eventType": "sighting", "title": "Paul Trent", "url": "observer-mcminnville.json" },
+    { "type": "event", "eventType": "sighting",
+      "interpretationOf": "1950-05-11-TrentPaul",
+      "time": "2013-06",
+      "by": [{ "people": "CousynAntoine" }, { "people": "LouangeFrancois" }],
+      "title": "A model on a thread under the line",
+      "url": "interpretation-mcminnville-2.json" }
+  ]
+}</code></pre>
+    <div class="table-scroll">
+    <table>
+      <tr><th>Campo</th><th>Significato</th></tr>
+      <tr><td><code>interpretationOf</code></td><td>L'<code>id</code> dell'osservazione di cui è una lettura, o un elenco di id quando una lettura serve più resoconti (le fotografie e un primo piano). Ciò che la distingue da un resoconto: gli eventi <em>senza</em> questo campo sono gli osservatori del caso</td></tr>
+      <tr><td><code>time</code></td><td>Quando l'interpretazione è stata elaborata, come RR0 scrive un tempo (<code>"2013-06"</code>): non quando l'osservazione è avvenuta</td></tr>
+      <tr><td><code>by</code></td><td>Chi la sostiene: <code>{ "people": id }</code> o <code>{ "org": id }</code>, che designano una voce che vive altrove (su RR0, una directory di persone o di organizzazioni), o una persona descritta nel valore. Assente per un confronto che nessuno sostiene</td></tr>
+      <tr><td><code>title</code></td><td>Come si chiama la lettura nel menu del lettore e nel selettore dell'editor: poche parole, una stringa o una per lingua</td></tr>
+      <tr><td><code>url</code></td><td>La sua registrazione, letta relativamente all'indirizzo del file del caso, come quella di un osservatore</td></tr>
+    </table>
+    </div>
+    <p>La registrazione a <code>url</code> è una registrazione come le altre. Condivide il luogo, l'ora e la posa
+      dell'osservatore del resoconto che legge, così che un corpo collocato dall'osservatore, o in metri da dove si
+      trovava, significa la stessa cosa in entrambe; non disegna alcuna forma (una <code>timeline</code> vuota); e tiene i
+      corpi nella propria <code>interpretation</code>, descritta sopra. L'<code>explains</code> di un corpo designa le
+      forme del resoconto.</p>
+    <pre data-json="none"><code>{
+  "version": 1,
+  "id": "1950-05-11-TrentPaul-interpretation-2",
+  "time": { "year": 1950, "month": 5, "day": 11, "hour": 19, "minute": 45 },
+  "utcOffsetHours": -7,
+  "place": [{ "value": { "lat": 45.104167, "lng": -123.330556 } }],
+  "observerTrack": { "keyframes": [{ "t": 0, "pose": { "lat": 45.104167, "lng": -123.330556, "headingDeg": 41.3, "pitchDeg": 14.85, "fovDeg": 33.4 } }] },
+  "tags": ["interpretation"],
+  "timeline": { "keyframes": [], "order": [], "groups": [] },
+  "interpretation": {
+    "title": "A model on a thread under the line",
+    "bodies": [{ "id": "model", "explains": ["ufo-1"], "model": { "id": "disc" }, "track": [ … ] }]
+  }
+}</code></pre>
+    <p>Il lettore elenca gli osservatori del caso dagli eventi senza <code>interpretationOf</code> e propone ogni lettura
+      accanto al resoconto che designa, una alla volta (il pulsante ◌ la misura contro il resoconto). Una registrazione
+      da sola non ha altra lettura che la propria <code>interpretation</code>. La forma più vecchia, un evento di tipo
+      <code>interpretation</code> che designa la registrazione in <code>sighting</code> con i corpi in linea o in un file
+      a <code>url</code>, si legge ancora. L'editor apre un caso: il suo selettore sopra il rendering elenca i resoconti e
+      le letture, ciascuno aprendosi come la registrazione che è, con un pulsante per aggiungere una lettura (una nuova
+      registrazione che condivide luogo, ora e posa del resoconto, e un evento per essa), uno per eliminarla, e uno per
+      esportare il caso e ogni registrazione aggiunta o modificata in uno zip. Provalo con
+      <a href="/demo-data/case-mcminnville.json"><code>case-mcminnville.json</code></a>
+      (<a href="/play/?sighting=/demo-data/case-mcminnville.json">riprodurlo</a>,
+      <a href="/edit/?sighting=/demo-data/case-mcminnville.json">modificarlo</a>).</p>
 
     <h2>Il meteo, e le sue nuvole</h2>
     <p>Un fotogramma chiave <code>weather</code> esprime le condizioni del cielo in un momento dell'orologio
