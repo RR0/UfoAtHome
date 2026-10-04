@@ -115,3 +115,37 @@ noise. The cost is the procedural cloud noise, evaluated per pixel of sky:
 
 Valensole is not deterministic from one load to the next (126 000 pixels of 2.7 million differ
 between two runs of the same build), so it cannot be used for pixel comparisons.
+
+## October 2026: cold load of a demo page (Lighthouse, 0.89.2)
+
+A Lighthouse run of `/demos/sightings/` reported a Total Blocking Time of 2.4 s, 6 s of script
+evaluation in `rr0-scene.mjs` and 20 long tasks. `scripts/perf/page-load.mjs` reproduces it on the
+built site (CPU slowed 4x, 1350 × 940, nothing scrolled) and prints the long tasks, their sum, and
+with `PROFILE=n` / `INCLUSIVE=n` where the time went:
+
+```sh
+node scripts/perf/page-load.mjs http://localhost:5182/demos/sightings/index_fr.html
+NO_WORKER=1 node scripts/perf/page-load.mjs   # the same build, halo tracing back on the page thread
+```
+
+What the profile found, in order of weight (six scenes mounted, 4x throttle):
+
+- **Ice-halo tracing, about a quarter of the main thread.** Nine hundred thousand rays per scene with
+  ice in its sky, traced in 6 ms slices that never let the page go idle. It is arithmetic on typed
+  arrays, so it now runs in a small pool of inline workers (`OffThreadHaloTracer`, `HaloTraceWorker`),
+  loaded by a dynamic import only for a sky with ice, and the page copies the finished texture. The
+  first frame still waits for the whole display (`awaitingFirstDisplay`); without `Worker`, or if
+  one dies, `IceHaloEffect` traces on its own thread exactly as before. Inline (a blob), because a
+  worker must come from the page's origin and rr0.org loads these components from ufoathome.org.
+  Same build, long tasks over a 25 to 30 s window, in two runs each: 12.6 s and 9.5 s with the worker
+  against 22.2 s and 20.1 s without it; Total Blocking Time 10.1 s and 7.6 s against 15.3 s and
+  14.0 s; the main thread quiet after about 16.5 s, where it had not settled by the end of the window.
+  (Four runs with the worker ranged from 7.6 to 10.1 s of blocking: compare on one machine only.)
+- **Catalogue indexes fetched once per scene**: `/models/index.json` and `/roads/index.json` are now
+  one request per page (an empty answer is forgotten, so an offline moment is not remembered).
+- **Hashed chunks cached a year, immutable** (`_headers`), as the file's own comment already argued.
+
+Still on the main thread, in order: the reflection probes (`Reflections.refresh`, about 30 % of what
+remains: the eye's photograph is part of the exposure, so it cannot be skipped, only made cheaper or
+cut into smaller tasks), the cloud bake in `setWeather`, and the Milky Way / zodiacal walk
+(`SkyGlowMaps`, sliced at 6 ms, night skies only; the next candidate for the same worker).

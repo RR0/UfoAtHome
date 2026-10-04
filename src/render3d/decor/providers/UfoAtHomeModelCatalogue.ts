@@ -42,8 +42,14 @@ export class UfoAtHomeModelCatalogue implements DecorModelProvider {
   /** The one in-flight (or settled) load. A catalogue is small and never changes within a session,
    * and the editor asks for it on every decor selection. */
   private loading?: Promise<DecorModelEntry[]>
+  /** The same load, shared by every catalogue of a page that asks the real network — a page of nine
+   * scenes made nine copies of the same request. Not used when a fetch is injected (tests), and an
+   * empty answer is forgotten so that a page which was offline for a moment can ask again. */
+  private static readonly shared = new Map<string, Promise<DecorModelEntry[]>>()
+  private readonly sharing: boolean
 
   constructor(options: UfoAtHomeModelCatalogueOptions = {}) {
+    this.sharing = !options.fetchImpl
     // fetch.bind(globalThis) — an unbound fetch loses the `this` it requires once called as a
     // field (see AwsTerrariumElevationProvider, which learned the same thing).
     this.fetchImpl = options.fetchImpl ?? fetch.bind(globalThis)
@@ -60,8 +66,18 @@ export class UfoAtHomeModelCatalogue implements DecorModelProvider {
   }
 
   private load(): Promise<DecorModelEntry[]> {
-    this.loading ??= this.fetchFirstAvailable()
-    return this.loading
+    if (this.loading) return this.loading
+    if (!this.sharing) return (this.loading = this.fetchFirstAvailable())
+    const key = this.indexUrls.join("\n")
+    let shared = UfoAtHomeModelCatalogue.shared.get(key)
+    if (!shared) {
+      shared = this.fetchFirstAvailable()
+      UfoAtHomeModelCatalogue.shared.set(key, shared)
+      void shared.then(entries => {
+        if (entries.length === 0) UfoAtHomeModelCatalogue.shared.delete(key)
+      })
+    }
+    return (this.loading = shared)
   }
 
   private async fetchFirstAvailable(): Promise<DecorModelEntry[]> {

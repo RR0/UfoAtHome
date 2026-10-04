@@ -3,7 +3,6 @@ import {
   BackSide,
   ClampToEdgeWrapping,
   DataTexture,
-  DataUtils,
   HalfFloatType,
   LinearFilter,
   Mesh,
@@ -13,6 +12,8 @@ import {
   Vector3
 } from "three"
 import { HaloSky } from "../engine/atmosphere/HaloSky.js"
+import { HaloTexels } from "./HaloTexels.js"
+import type { HaloTraceJob, OffThreadHaloTracer } from "./OffThreadHaloTracer.js"
 import { CIRRUS_COVER_GLSL, CLOUD_NOISE_GLSL, ICE_HALO_LIGHT_GLSL } from "./CloudSystem.js"
 
 /**
@@ -305,10 +306,62 @@ export class IceHaloEffect {
     this.next = undefined
     this.pendingAltitudeDeg = sourceAltitudeDeg
     this.pendingAlignment = alignment
-    this.sky.begin(sourceAltitudeDeg, alignment)
+    this.stopWork()
     this.tracing = true
-    this.scheduleWork()
+    this.startTracing(sourceAltitudeDeg, alignment)
   }
+
+  /**
+   * Where the display is traced: in a worker where there is one, and on the page's own thread, a
+   * frame's worth at a time, where there is not (tests, an old browser, a page that forbids blob
+   * workers) or where the worker dies.
+   *
+   * The worker's code is a separate chunk, fetched the first time a sky with ice asks for it. Until
+   * it has arrived the display counts as being traced — a scene's first frame waits for it either
+   * way — and a request that was abandoned meanwhile is recognised by its ticket.
+   */
+  private startTracing(sourceAltitudeDeg: number, alignment: number): void {
+    const ticket = ++this.ticket
+    const inThread = () => {
+      if (ticket !== this.ticket || !this.tracing) return
+      this.sky.begin(sourceAltitudeDeg, alignment)
+      this.scheduleWork()
+    }
+    const pool = IceHaloEffect.pool
+    if (pool === null) {
+      inThread()
+      return
+    }
+    const submit = (tracer: OffThreadHaloTracer) => {
+      if (ticket !== this.ticket || !this.tracing) return
+      this.job = tracer.trace(sourceAltitudeDeg, alignment, IceHaloEffect.RAYS, texels => {
+        this.job = undefined
+        this.texels.set(texels)
+        this.display()
+        this.finishTracing()
+      }, inThread)
+    }
+    if (pool) {
+      submit(pool)
+      return
+    }
+    void import("./OffThreadHaloTracer.js").then(
+      ({ OffThreadHaloTracer: Tracer }) => {
+        IceHaloEffect.pool = Tracer.get()
+        if (IceHaloEffect.pool) submit(IceHaloEffect.pool)
+        else inThread()
+      },
+      () => {
+        IceHaloEffect.pool = null
+        inThread()
+      }
+    )
+  }
+
+  /** The pool of workers, `null` once known to be unavailable, `undefined` until first asked for. */
+  private static pool?: OffThreadHaloTracer | null = typeof Worker === "undefined" ? null : undefined
+  private ticket = 0
+  private job?: HaloTraceJob
 
   private pendingAltitudeDeg = Number.NaN
   private pendingAlignment = Number.NaN
@@ -343,11 +396,7 @@ export class IceHaloEffect {
       const done = this.sky.tracedRays >= IceHaloEffect.RAYS
       if (done) {
         this.publish()
-        this.tracing = false
-        this.mappedAltitudeDeg = this.pendingAltitudeDeg
-        this.mappedAlignment = this.pendingAlignment
-        const next = this.next
-        if (next) this.requestMap(next.sourceAltitudeDeg, next.alignment)
+        this.finishTracing()
         return
       }
       this.workHandle = requestAnimationFrame(step)
@@ -355,25 +404,33 @@ export class IceHaloEffect {
     this.workHandle = requestAnimationFrame(step)
   }
 
+  /** The display just shown is the one that was asked for; trace the one asked for since, if any. */
+  private finishTracing(): void {
+    this.tracing = false
+    this.mappedAltitudeDeg = this.pendingAltitudeDeg
+    this.mappedAlignment = this.pendingAlignment
+    const next = this.next
+    if (next) this.requestMap(next.sourceAltitudeDeg, next.alignment)
+  }
+
   private stopWork(): void {
+    this.ticket++
+    this.job?.cancel()
+    this.job = undefined
     if (this.workHandle !== undefined) cancelAnimationFrame(this.workHandle)
     this.workHandle = undefined
     this.tracing = false
     this.next = undefined
   }
 
-  /** Copies the traced sky onto the texture the shader reads. Half-float rather than byte, because
-   * a display spans three orders of magnitude between a sundog and the outer ring, and a byte
-   * would band the faint end into steps. */
+  /** Copies the sky traced on this thread onto the texture the shader reads (see HaloTexels for why
+   * half-float). A worker hands over the texels already converted, and goes straight to `display`. */
   private publish(): void {
-    const map = this.sky.harvest()
-    const data = map.data
-    for (let texel = 0, at = 0; at < data.length; texel += 4, at += 3) {
-      this.texels[texel] = DataUtils.toHalfFloat(data[at])
-      this.texels[texel + 1] = DataUtils.toHalfFloat(data[at + 1])
-      this.texels[texel + 2] = DataUtils.toHalfFloat(data[at + 2])
-      this.texels[texel + 3] = 1
-    }
+    HaloTexels.fromRadiance(this.sky.harvest().data, this.texels)
+    this.display()
+  }
+
+  private display(): void {
     this.texture.needsUpdate = true
     this.everDisplayed = true
     this.show(this.material.uniforms.uStrength.value > 0)

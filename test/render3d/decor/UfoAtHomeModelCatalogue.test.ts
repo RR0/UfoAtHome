@@ -112,4 +112,30 @@ describe("UfoAtHomeModelCatalogue", () => {
     await Promise.all([catalogue.entries(), catalogue.entries("vehicle"), catalogue.entry("powder-magazine")])
     expect(fetchImpl).toHaveBeenCalledTimes(1)
   })
+
+  it("asks the network once for the catalogue however many scenes of a page build their own", async () => {
+    const fetched = respondingWith({ "https://shared.test/models/index.json": CATALOGUE })
+    vi.stubGlobal("fetch", fetched)
+    try {
+      const indexUrls = ["https://shared.test/models/index.json"]
+      const scenes = Array.from({ length: 4 }, () => new UfoAtHomeModelCatalogue({ indexUrls }))
+      const answers = await Promise.all(scenes.map(scene => scene.entries()))
+      expect(answers.every(entries => entries.length === 2)).toBe(true)
+      expect(fetched).toHaveBeenCalledTimes(1)
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it("forgets an empty answer, so a page that was offline for a moment can ask again", async () => {
+    const indexUrls = ["https://later.test/models/index.json"]
+    vi.stubGlobal("fetch", respondingWith({}))
+    try {
+      expect(await new UfoAtHomeModelCatalogue({ indexUrls }).entries()).toEqual([])
+      vi.stubGlobal("fetch", respondingWith({ "https://later.test/models/index.json": CATALOGUE }))
+      expect(await new UfoAtHomeModelCatalogue({ indexUrls }).entries()).toHaveLength(2)
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
 })

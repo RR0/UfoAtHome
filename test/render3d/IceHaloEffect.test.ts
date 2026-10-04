@@ -90,4 +90,60 @@ describe("IceHaloEffect under a changing sky", () => {
     update(0.3)
     expect(begun).toEqual([0.95, 0.3])
   })
+
+  describe("with a worker to trace in", () => {
+    interface Asked { altitude: number, alignment: number, rays: number, done: (texels: Uint16Array) => void, failed: () => void, cancelled: boolean }
+
+    /** A pool that only records what it was asked, and answers when the test says so. */
+    const withPool = () => {
+      const asked: Asked[] = []
+      const pool = {
+        trace: (altitude: number, alignment: number, rays: number, done: (texels: Uint16Array) => void, failed: () => void) => {
+          const job: Asked = { altitude, alignment, rays, done, failed, cancelled: false }
+          asked.push(job)
+          return { cancel: () => { job.cancelled = true } }
+        }
+      }
+      ;(IceHaloEffect as unknown as { pool: unknown }).pool = pool
+      return asked
+    }
+    afterEach(() => { (IceHaloEffect as unknown as { pool: unknown }).pool = null })
+
+    it("hands the tracing over and traces nothing itself, then shows what comes back", () => {
+      const asked = withPool()
+      const { halo, begun, update, mapped } = effect()
+      update(0.9)
+      expect(asked).toHaveLength(1)
+      expect(asked[0].rays).toBe(900_000)
+      expect(asked[0].alignment).toBe(0.9)
+      expect(begun).toEqual([])
+      expect(frames).toHaveLength(0)
+      expect(halo.awaitingFirstDisplay).toBe(true)
+      const texels = new Uint16Array(HaloSky.AZIMUTH_BINS * HaloSky.ALTITUDE_BINS * 4).fill(7)
+      asked[0].done(texels)
+      expect(halo.awaitingFirstDisplay).toBe(false)
+      expect(mapped()).toBe(0.9)
+      expect((halo as unknown as { texels: Uint16Array }).texels[5]).toBe(7)
+    })
+
+    it("calls off the worker's tracing for a jump, and asks for the display the reader jumped to", () => {
+      const asked = withPool()
+      const { update } = effect()
+      update(0.95)
+      update(0.3)
+      expect(asked.map(job => job.cancelled)).toEqual([true, false])
+      expect(asked[1].alignment).toBe(0.3)
+    })
+
+    it("traces on its own thread when the worker fails", () => {
+      const asked = withPool()
+      const { halo, begun, update, mapped } = effect()
+      update(0.9)
+      asked[0].failed()
+      expect(begun).toEqual([0.9])
+      runFrames(10)
+      expect(halo.awaitingFirstDisplay).toBe(false)
+      expect(mapped()).toBe(0.9)
+    })
+  })
 })

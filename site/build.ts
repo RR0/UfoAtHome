@@ -285,10 +285,11 @@ ${retired}
 # demo recordings, which exist to be pointed at from anywhere.
 #
 # Everything under /lib except the four entry modules carries a content hash in its own name, so
-# the same name is always the same bytes and a year is as safe as a week.
+# the same name is always the same bytes and a year is as safe as a week. (Lighthouse asks for the
+# year, and "immutable" spares a returning reader even the conditional request.)
 /lib/*
   Access-Control-Allow-Origin: *
-  Cache-Control: public, max-age=604800
+  Cache-Control: public, max-age=31536000, immutable
 
 # The four entry modules do NOT carry a hash — their names are the published API, pasted into other
 # people's pages — so the same name means different bytes at every release. A week of hard caching

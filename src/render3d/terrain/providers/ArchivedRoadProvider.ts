@@ -66,8 +66,14 @@ export class ArchivedRoadProvider implements RoadProvider {
   private readonly fallback?: RoadProvider
   /** The one in-flight (or settled) index load — small, and unchanged within a session. */
   private index?: Promise<{ entry: RoadArchiveEntry; indexUrl: string }[]>
+  /** The same index load, shared by every provider of a page that asks the real network: nine
+   * scenes made nine requests for one file. Not used when a fetch is injected (tests); an empty
+   * answer is forgotten so that a page which was offline for a moment can ask again. */
+  private static readonly shared = new Map<string, Promise<{ entry: RoadArchiveEntry; indexUrl: string }[]>>()
+  private readonly sharing: boolean
 
   constructor(options: ArchivedRoadProviderOptions = {}) {
+    this.sharing = !options.fetchImpl
     // fetch.bind(globalThis) — an unbound fetch loses the `this` it requires once called as a
     // field (see AwsTerrariumElevationProvider, which learned the same thing).
     this.fetchImpl = options.fetchImpl ?? fetch.bind(globalThis)
@@ -122,8 +128,18 @@ export class ArchivedRoadProvider implements RoadProvider {
   }
 
   private load(): Promise<{ entry: RoadArchiveEntry; indexUrl: string }[]> {
-    this.index ??= this.fetchFirstAvailable()
-    return this.index
+    if (this.index) return this.index
+    if (!this.sharing) return (this.index = this.fetchFirstAvailable())
+    const key = this.indexUrls.join("\n")
+    let shared = ArchivedRoadProvider.shared.get(key)
+    if (!shared) {
+      shared = this.fetchFirstAvailable()
+      ArchivedRoadProvider.shared.set(key, shared)
+      void shared.then(entries => {
+        if (entries.length === 0) ArchivedRoadProvider.shared.delete(key)
+      })
+    }
+    return (this.index = shared)
   }
 
   private async fetchFirstAvailable(): Promise<{ entry: RoadArchiveEntry; indexUrl: string }[]> {

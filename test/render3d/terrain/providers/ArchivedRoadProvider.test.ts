@@ -81,4 +81,21 @@ describe("ArchivedRoadProvider", () => {
       .filter(call => String(call[0]) === INDEX_URL)
     expect(indexReads).toHaveLength(1)
   })
+
+  it("asks the network once for the index however many scenes of a page build their own provider", async () => {
+    const url = "https://shared.test/roads/index.json"
+    const fetched = serving({
+      [url]: index(),
+      "https://shared.test/roads/socorro.json": { version: 1, attribution: "x", contemporary: true, ways: ARCHIVED }
+    })
+    vi.stubGlobal("fetch", fetched)
+    try {
+      const providers = Array.from({ length: 4 }, () => new ArchivedRoadProvider({ indexUrls: [url] }))
+      await Promise.all(providers.map(provider => provider.getRoads(PATCH)))
+      const asked = (fetched as unknown as { mock: { calls: unknown[][] } }).mock.calls.map(call => String(call[0]))
+      expect(asked.filter(address => address === url)).toHaveLength(1)
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
 })
