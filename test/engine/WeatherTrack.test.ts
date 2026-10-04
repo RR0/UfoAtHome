@@ -152,3 +152,13 @@ describe("cloudBaseM", () => {
     expect(DEFAULT_CLOUD_BASE_M).toBeGreaterThan(0)
   })
 })
+
+describe("WeatherTrack.fromJSON", () => {
+  it("fills what a recording leaves out from the defaults, a wind with no direction first", () => {
+    const track = WeatherTrack.fromJSON({ keyframes: [{ t: 0, weather: { cloudCover: 0.4, windSpeed: 1.5 } as Weather }] })
+    const weather = track.getLatestWeatherAt(0)
+    expect(weather?.windDirectionDeg).toBe(0)
+    expect(Number.isNaN(weather?.cloudDarkness)).toBe(false)
+    expect(weather?.windSpeed).toBe(1.5)
+  })
+})

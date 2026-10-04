@@ -1,6 +1,7 @@
 import { PrecipitationRamp } from "../weather/PrecipitationRamp.js"
 import { resolveCloudLayers } from "./CloudLayer.js"
 import type { CloudInstance, CloudLayer } from "./CloudLayer.js"
+import { DEFAULT_WEATHER } from "./Weather.js"
 import type { Weather } from "./Weather.js"
 
 /**
@@ -222,7 +223,10 @@ export class WeatherTrack {
   static fromJSON(json: WeatherTrackJson): WeatherTrack {
     const track = new WeatherTrack()
     for (const keyframe of json.keyframes) {
-      track.addKeyframe(keyframe.t, keyframe.weather)
+      // What a recording leaves out is the default, not undefined: a wind with a speed and no
+      // direction made every number built from the direction NaN, and with the cloud drift the
+      // Sun's own light, so that the whole scene drew as flat dark grey.
+      track.addKeyframe(keyframe.t, { ...DEFAULT_WEATHER, ...keyframe.weather })
     }
     return track
   }

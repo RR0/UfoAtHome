@@ -408,15 +408,18 @@ const observer = {
       {
         t: 0,
         weather: {
-          cloudLayers: [{ id: "ceiling", type: "stratus", baseM: 1500, thicknessM: 500, coverage: 0.7, sizeM: 2500, density: 1 }],
-          cloudCover: 0.7,
-          cloudDarkness: 0.4,
+          cloudLayers: [{ id: "ceiling", type: "stratus", baseM: 1500, thicknessM: 500, coverage: 0.4, sizeM: 2500, density: 1 }],
+          cloudCover: 0.4,
+          cloudDarkness: 0.3,
           cloudBaseM: 1500,
           highCloudCover: 0,
-          lowerCloudCover: 0.7,
+          lowerCloudCover: 0.4,
           relativeHumidity: 0.7,
           precipitationType: "none",
           precipitationIntensity: 0,
+          // A light breeze (IPACO: earlier investigators noted one); where it blew from is not given, and a wind
+          // with no direction drove the clouds, and so the Sun's light through them, to NaN: west, ASSUMED.
+          windDirectionDeg: 270,
           windSpeed: 1.5,
           storm: false
         }
@@ -425,7 +428,7 @@ const observer = {
   },
   weatherSource: {
     id: "condon-46",
-    name: "Condon, case 46: overcast, ceiling about 5,000 ft \"confirmed by the photographs\"; light wind noted by earlier investigators (IPACO)",
+    name: "Condon, case 46: overcast, ceiling about 5,000 ft \"confirmed by the photographs\" (the recording takes 4/10: the prints' shadows need a Sun that shone through, which a full overcast does not allow, and the study itself suspects the cloud changed between the two); light wind noted by earlier investigators (IPACO), its direction not given (west assumed)",
     url: "https://rr0.org/time/1/9/6/8/CondonReport/s4/c3/46/case46.html"
   },
   instrument: "roamer-1-120",
