@@ -145,7 +145,13 @@ What the profile found, in order of weight (six scenes mounted, 4x throttle):
   one request per page (an empty answer is forgotten, so an offline moment is not remembered).
 - **Hashed chunks cached a year, immutable** (`_headers`), as the file's own comment already argued.
 
-Still on the main thread, in order: the reflection probes (`Reflections.refresh`, about 30 % of what
-remains: the eye's photograph is part of the exposure, so it cannot be skipped, only made cheaper or
-cut into smaller tasks), the cloud bake in `setWeather`, and the Milky Way / zodiacal walk
+Reflection probes (`Reflections.refresh`, about 30 % of what remained): a capture is six renders of
+the scene, about 14 ms natively, and a page of six scenes took 57 of them, 25 while the first frame is
+held (the eye's adaptation iterates: photograph, measure, photograph) and the rest after. Captures
+taken while a relief patch, the roads or a model was still on its way were stale by construction (the
+hold wants a photograph taken after the last arrival), so the held frame no longer takes them: 57 → 40
+captures, long tasks 9.5 s → 8.6 to 9.1 s. Cutting a capture into faces would not shorten the long
+tasks (one capture is barely over 50 ms at 4x); the remaining ones are the adaptation's own passes.
+
+Still on the main thread, in order: the cloud bake in `setWeather`, and the Milky Way / zodiacal walk
 (`SkyGlowMaps`, sliced at 6 ms, night skies only; the next candidate for the same worker).

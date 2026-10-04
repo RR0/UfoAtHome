@@ -63,6 +63,7 @@ try {
   })
   if (process.env.PROFILE) {
     const { profile } = await cdp.send("Profiler.stop")
+    if (process.env.PROFILE_FILE) (await import("node:fs")).writeFileSync(process.env.PROFILE_FILE, JSON.stringify(profile))
     const self = new Map()
     const byId = new Map(profile.nodes.map(node => [node.id, node]))
     const dt = profile.timeDeltas

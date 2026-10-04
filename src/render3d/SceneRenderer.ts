@@ -3448,7 +3448,10 @@ export class SceneRenderer {
       if (!this.sceneSettled() && performance.now() < this.skyHoldUntilMs) {
         // The eye adapts behind the loader: its probe is photographed and measured with no frame
         // drawn, and measureSurroundings asks for the next pass until nothing moves.
-        if (this.firstFrameReady()) this.refreshReflections(true)
+        // Not while something is still on its way: a photograph taken now is older than the arrival
+        // (see lastArrivalVersion), so the eye would have to take another, and each is six renders
+        // of the whole scene. The arrival asks for the next pass itself (see awaitArrival).
+        if (this.firstFrameReady() && this.arrivalsPending === 0) this.refreshReflections(true)
         return
       }
       this.skyHoldUntilMs = null
