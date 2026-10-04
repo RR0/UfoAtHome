@@ -17,17 +17,24 @@ export function cloudSeed(layer: CloudLayer): number {
   return hash >>> 0
 }
 
-/** A small, periodic density texture shared by the layers of one renderer. */
-export function createCloudNoise(): Data3DTexture {
+/** The octaves of the noise: the period of each, and its weight. */
+const NOISE_OCTAVES: readonly (readonly [number, number])[] = [[4, 0.65], [8, 0.25], [16, 0.1]]
+
+/** The noise's bytes, worked out the first time they are asked for: they depend on nothing but the
+ * constants above, so every scene of a page can read the same ones. A page of six scenes worked the
+ * same quarter-million voxels out six times, a long task apiece. */
+let cloudNoiseBytes: Uint8Array | undefined
+
+function buildCloudNoiseBytes(): Uint8Array {
   const bytes = new Uint8Array(NOISE_SIZE ** 3)
   const hash = (x: number, y: number, z: number, period: number): number => {
     let h = Math.imul(x % period + 1, 374761393) ^ Math.imul(y % period + 1, 668265263) ^ Math.imul(z % period + 1, 1274126177)
     h = Math.imul(h ^ (h >>> 13), 1274126177)
     return ((h ^ (h >>> 16)) >>> 0) / 4294967295
   }
+  const smooth = (v: number) => v * v * (3 - 2 * v)
   const noise = (x: number, y: number, z: number, period: number): number => {
     const ix = Math.floor(x), iy = Math.floor(y), iz = Math.floor(z)
-    const smooth = (v: number) => v * v * (3 - 2 * v)
     const fx = smooth(x - ix), fy = smooth(y - iy), fz = smooth(z - iz)
     let value = 0
     for (let dz = 0; dz < 2; dz++) for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) {
@@ -37,12 +44,20 @@ export function createCloudNoise(): Data3DTexture {
   }
   for (let z = 0; z < NOISE_SIZE; z++) for (let y = 0; y < NOISE_SIZE; y++) for (let x = 0; x < NOISE_SIZE; x++) {
     let value = 0
-    for (const [period, weight] of [[4, 0.65], [8, 0.25], [16, 0.1]]) {
+    for (const [period, weight] of NOISE_OCTAVES) {
       value += noise(x / NOISE_SIZE * period, y / NOISE_SIZE * period, z / NOISE_SIZE * period, period) * weight
     }
     bytes[x + NOISE_SIZE * (y + NOISE_SIZE * z)] = Math.round(value * 255)
   }
-  const texture = new Data3DTexture(bytes, NOISE_SIZE, NOISE_SIZE, NOISE_SIZE)
+  return bytes
+}
+
+/** A small, periodic density texture shared by the layers of one renderer. Its bytes are shared by
+ * every renderer of the page (see cloudNoiseBytes); the texture is the renderer's own, since each
+ * has its own graphics context to upload it into. */
+export function createCloudNoise(): Data3DTexture {
+  cloudNoiseBytes ??= buildCloudNoiseBytes()
+  const texture = new Data3DTexture(cloudNoiseBytes, NOISE_SIZE, NOISE_SIZE, NOISE_SIZE)
   texture.format = RedFormat
   texture.minFilter = texture.magFilter = LinearFilter
   texture.wrapS = texture.wrapT = texture.wrapR = RepeatWrapping

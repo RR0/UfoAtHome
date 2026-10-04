@@ -139,3 +139,13 @@ describe("local cloud masses", () => {
     clouds.dispose()
   })
 })
+
+describe("the cloud noise", () => {
+  it("is worked out once, however many renderers ask: each gets a texture of its own over the same bytes", () => {
+    const first = createCloudNoise()
+    const second = createCloudNoise()
+    expect(second).not.toBe(first)
+    expect(second.image.data).toBe(first.image.data)
+    expect(first.image.data).toHaveLength(64 ** 3)
+  })
+})

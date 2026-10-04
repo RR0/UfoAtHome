@@ -153,5 +153,11 @@ hold wants a photograph taken after the last arrival), so the held frame no long
 captures, long tasks 9.5 s → 8.6 to 9.1 s. Cutting a capture into faces would not shorten the long
 tasks (one capture is barely over 50 ms at 4x); the remaining ones are the adaptation's own passes.
 
-Still on the main thread, in order: the cloud bake in `setWeather`, and the Milky Way / zodiacal walk
+Cloud noise: `buildClouds` was about 2.1 s of the profile, nearly all of it `createCloudNoise`
+working out the same 64³ voxel noise (three octaves, eight corners each) once per scene. Its bytes
+depend on constants only, so they are now worked out once per page and each scene keeps its own
+`Data3DTexture` over them (same arithmetic, same bytes). Long tasks 8.6 to 9.1 s → 7.1 s, Total
+Blocking Time 6.7 to 7.3 s → 5.1 s (two runs each, 4x throttle).
+
+Still on the main thread, in order: the Milky Way / zodiacal walk
 (`SkyGlowMaps`, sliced at 6 ms, night skies only; the next candidate for the same worker).
