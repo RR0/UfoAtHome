@@ -441,13 +441,6 @@ h2[id], h3[id] { scroll-margin-top: 4.5rem; }
   border: 1px solid var(--line-strong); background: var(--ground-raised); color: var(--ink);
 }
 .player-row input:focus-visible { outline: 2px solid var(--glow); outline-offset: 1px; }
-.player-paste { border: 1px solid var(--line); border-radius: 10px; background: var(--ground-raised); }
-.player-paste > summary { cursor: pointer; padding: 0.7rem 1rem; font-weight: 600; }
-.player-paste-body { padding: 0 1rem 1rem; display: grid; gap: 0.8rem; justify-items: start; }
-.player-paste-mount {
-  width: 100%; border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
-  background: var(--ground-sunken); min-height: 8rem;
-}
 .player-status { min-height: 1.4em; font-size: 0.92rem; color: var(--ink-dim); }
 .player-status.is-error { color: var(--error); }
 

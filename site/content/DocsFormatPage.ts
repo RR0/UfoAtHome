@@ -419,7 +419,7 @@ if (excerpts.length > 0) {
       generated from the same types as the player: every key it knows, what each may hold, and the
       words a closed list accepts. A misspelt key or an unknown value fails it. It says nothing
       about what may be left out, which is a question of meaning this page answers. To see the
-      result, open the file in <a href="/play/">the player</a>, from a link, by pasting it, or
+      result, open the file in <a href="/play/">the player</a>, from a link, or
       from your disk with the pictures and models it names. The player checks it the same way on
       loading, and says what it could not play as written behind a ⚠ over the picture: a key
       nothing reads, a word outside its list, and what it had to make up because a shape's first
@@ -431,8 +431,8 @@ if (excerpts.length > 0) {
       twelve seconds, on a real date at a real place. Everything else in the format is optional, and
       everything below is doing work:</p>
     <pre data-json=""><code>${this.escape(this.example)}</code></pre>
-    <p class="small">To change it and see it play, paste it into <a href="/play/">the player</a>,
-      whose editor completes on every key the format has, offers the words each one accepts, and
+    <p class="small">To change it and see it play, paste it into <a href="/edit/">the editor</a>,
+      which completes on every key the format has, offers the words each one accepts, and
       says what the model says about it.</p>
     <p>It is <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       on this site, so you can fetch it, and
@@ -803,7 +803,7 @@ if (excerpts.length > 0) {
       contenir, et les mots qu'accepte une liste fermée. Une clé mal orthographiée ou une valeur
       inconnue y échoue. Il ne dit rien de ce qui peut être omis, question de sens à laquelle répond
       cette page. Pour voir le résultat, ouvrez le fichier dans <a href="/play/">le lecteur</a>,
-      depuis un lien, en le collant, ou depuis votre disque avec les images et modèles qu'il nomme.
+      depuis un lien, ou depuis votre disque avec les images et modèles qu'il nomme.
       Le lecteur le vérifie de la même façon au chargement, et dit derrière un ⚠ sur l'image ce
       qu'il n'a pas pu jouer comme écrit : une clé que rien ne lit, un mot hors de sa liste, et ce
       qu'il a dû inventer parce que la première keyframe d'une forme l'omettait (un champ tenu
@@ -814,8 +814,8 @@ if (excerpts.length > 0) {
       le ciel en douze secondes, à une date réelle et en un lieu réel. Tout le reste du format est
       facultatif, et tout ce qui suit sert à quelque chose :</p>
     <pre data-json=""><code>${this.escape(this.example)}</code></pre>
-    <p class="small">Pour le modifier et le voir jouer, collez-le dans <a href="/play/">le lecteur</a>,
-      dont l'éditeur complète sur chaque clé du format, propose les mots que chacune accepte, et dit
+    <p class="small">Pour le modifier et le voir jouer, collez-le dans <a href="/edit/">l'éditeur</a>,
+      qui complète sur chaque clé du format, propose les mots que chacune accepte, et dit
       ce que le modèle en dit.</p>
     <p>C'est <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       sur ce site : vous pouvez le récupérer, et
@@ -1179,7 +1179,7 @@ if (excerpts.length > 0) {
       contener cada una, y las palabras que acepta una lista cerrada. Una clave mal escrita o un valor
       desconocido no lo superan. No dice nada de lo que puede omitirse, que es una cuestión de sentido que
       responde esta página. Para ver el resultado, abre el archivo en <a href="/play/">el reproductor</a>,
-      desde un enlace, pegándolo, o desde tu disco con las imágenes y los modelos que nombra. El reproductor
+      desde un enlace, o desde tu disco con las imágenes y los modelos que nombra. El reproductor
       lo comprueba del mismo modo al cargar, e indica tras un ⚠ sobre la imagen lo que no pudo reproducir
       tal como está escrito: una clave que nada lee, una palabra fuera de su lista, y lo que tuvo que
       inventar porque el primer fotograma clave de una forma lo omitía (un campo mantenido desde el
@@ -1190,8 +1190,8 @@ if (excerpts.length > 0) {
       doce segundos, en una fecha real y en un lugar real. Todo lo demás del formato es opcional, y
       todo lo que sigue cumple una función:</p>
     <pre data-json=""><code>${this.escape(this.example)}</code></pre>
-    <p class="small">Para modificarlo y verlo reproducirse, pégalo en <a href="/play/">el reproductor</a>,
-      cuyo editor completa cada clave que tiene el formato, ofrece las palabras que acepta cada una, y
+    <p class="small">Para modificarlo y verlo reproducirse, pégalo en <a href="/edit/">el editor</a>,
+      que completa cada clave que tiene el formato, ofrece las palabras que acepta cada una, y
       dice lo que el modelo dice de ella.</p>
     <p>Es <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       en este sitio, así que puedes descargarlo, y
@@ -1555,7 +1555,7 @@ if (excerpts.length > 0) {
       contenere, e le parole che accetta un elenco chiuso. Una chiave scritta male o un valore
       sconosciuto non lo superano. Non dice nulla di ciò che si può omettere, che è una questione di senso a cui
       risponde questa pagina. Per vedere il risultato, apri il file nel <a href="/play/">lettore</a>,
-      da un link, incollandolo, o dal tuo disco con le immagini e i modelli che nomina. Il lettore
+      da un link, o dal tuo disco con le immagini e i modelli che nomina. Il lettore
       lo verifica allo stesso modo al caricamento, e indica dietro un ⚠ sull'immagine ciò che non ha potuto riprodurre
       così come è scritto: una chiave che nulla legge, una parola fuori dal suo elenco, e ciò che ha dovuto
       inventare perché il primo fotogramma chiave di una forma lo ometteva (un campo mantenuto dal
@@ -1566,8 +1566,8 @@ if (excerpts.length > 0) {
       dodici secondi, in una data reale e in un luogo reale. Tutto il resto del formato è facoltativo, e
       tutto ciò che segue ha una funzione:</p>
     <pre data-json=""><code>${this.escape(this.example)}</code></pre>
-    <p class="small">Per modificarlo e vederlo riprodotto, incollalo nel <a href="/play/">lettore</a>,
-      il cui editor completa ogni chiave del formato, propone le parole che ciascuna accetta, e
+    <p class="small">Per modificarlo e vederlo riprodotto, incollalo nell'<a href="/edit/">editor</a>,
+      che completa ogni chiave del formato, propone le parole che ciascuna accetta, e
       dice ciò che il modello ne dice.</p>
     <p>È <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       su questo sito, quindi puoi scaricarlo, e

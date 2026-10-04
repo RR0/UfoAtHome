@@ -271,7 +271,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       Netlify, S3 — either send it already or let you add it in a line of configuration; if the
       server is not yours, that is the single thing to ask its administrator for. The player and
       the editor both say so when they detect it, so you should not have to guess.</p>
-    <p>Nowhere to put it yet? <a href="/play/">The player</a> also takes a recording pasted
+    <p>Nowhere to put it yet? <a href="/edit/">The editor</a> also takes a recording pasted
       straight in, which is enough to check one before publishing it — though a pasted one cannot,
       of course, be shared by link.</p>
     <p>Don't have a recording at all? <a href="/docs/create/">Make one</a>; what goes in the file
@@ -356,7 +356,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       de l'ajouter en une ligne de configuration ; si le serveur n'est pas le vôtre, c'est la seule
       chose à demander à son administrateur. Le lecteur et l'éditeur le disent quand ils le
       détectent, vous ne devriez donc pas avoir à le deviner.</p>
-    <p>Nulle part où le poser encore ? <a href="/play/">Le lecteur</a> accepte aussi un
+    <p>Nulle part où le poser encore ? <a href="/edit/">L'éditeur</a> accepte aussi un
       enregistrement collé directement, ce qui suffit à en vérifier un avant de le publier — mais un
       enregistrement collé ne se partage évidemment pas par lien.</p>
     <p>Pas d'enregistrement du tout ? <a href="/docs/create/">Créez-en un</a> ; ce que contient le
@@ -441,7 +441,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       línea de configuración; si el servidor no es tuyo, eso es lo único que hay que pedirle a su
       administrador. El reproductor y el editor lo indican cuando lo detectan, así que no deberías
       tener que adivinarlo.</p>
-    <p>¿Todavía no tienes dónde ponerla? <a href="/play/">El reproductor</a> también acepta una
+    <p>¿Todavía no tienes dónde ponerla? <a href="/edit/">El editor</a> también acepta una
       grabación pegada directamente, lo que basta para comprobarla antes de publicarla — aunque una
       grabación pegada, claro está, no se puede compartir por enlace.</p>
     <p>¿No tienes ninguna grabación? <a href="/docs/create/">Crea una</a>; lo que contiene el archivo
@@ -525,7 +525,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       statici — GitHub Pages, Netlify, S3 — la inviano già o permettono di aggiungerla con una riga di
       configurazione; se il server non è tuo, è l'unica cosa da chiedere al suo amministratore. Il
       lettore e l'editor lo segnalano quando lo rilevano, quindi non dovresti doverlo indovinare.</p>
-    <p>Non hai ancora dove metterla? <a href="/play/">Il lettore</a> accetta anche una
+    <p>Non hai ancora dove metterla? <a href="/edit/">L'editor</a> accetta anche una
       registrazione incollata direttamente, il che basta per verificarla prima di pubblicarla — anche
       se una registrazione incollata, ovviamente, non si può condividere tramite link.</p>
     <p>Non hai nessuna registrazione? <a href="/docs/create/">Creane una</a>; che cosa contiene

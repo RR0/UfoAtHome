@@ -2,7 +2,7 @@ import { RecordingTitle } from "./RecordingTitle.js"
 import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 
 /**
- * Replays any reconstruction, from a link or from pasted text.
+ * Replays any reconstruction, from a link or from the reader's own files.
  *
  * The page the `?sighting=` links point at — the convention ufoathome.org has carried since it was
  * a single page on rr0.org, and the one every published reconstruction's own "open it" link uses.
@@ -19,13 +19,13 @@ export class PlayerPage implements SitePage {
       it: "Riprodurre qualsiasi ricostruzione"
     },
     description: {
-      en: "Open a reconstruction from a link, or paste one in. Nothing is uploaded — it is replayed "
+      en: "Open a reconstruction from a link, or from your own files. Nothing is uploaded — it is replayed "
         + "in your own browser, in the real sky of the date and place it states.",
-      fr: "Ouvrez une reconstitution depuis un lien, ou collez-en une. Rien n'est téléversé : elle est "
+      fr: "Ouvrez une reconstitution depuis un lien, ou depuis vos fichiers. Rien n'est téléversé : elle est "
         + "rejouée dans votre navigateur, sous le ciel réel de la date et du lieu qu'elle énonce.",
-      es: "Abre una reconstrucción desde un enlace, o pega una. No se sube nada: se reproduce "
+      es: "Abre una reconstrucción desde un enlace, o desde tus archivos. No se sube nada: se reproduce "
         + "en tu propio navegador, bajo el cielo real de la fecha y el lugar que indica.",
-      it: "Apri una ricostruzione da un link, oppure incollane una. Non viene caricato nulla: viene riprodotta "
+      it: "Apri una ricostruzione da un link, oppure dai tuoi file. Non viene caricato nulla: viene riprodotta "
         + "nel tuo browser, sotto il cielo reale della data e del luogo che indica."
     },
     modules: ["/lib/rr0-sighting.mjs"]
@@ -53,31 +53,7 @@ export class PlayerPage implements SitePage {
         es: "Ese texto no es una reconstrucción válida: ",
         it: "Questo testo non è una ricostruzione valida: "
       })[language],
-      empty: ({
-        en: "Nothing to play — paste a reconstruction first.",
-        fr: "Rien à jouer — collez une reconstitution d'abord.",
-        es: "Nada que reproducir — pega primero una reconstrucción.",
-        it: "Niente da riprodurre — incolla prima una ricostruzione."
-      })[language],
       playing: ({ en: "Playing {title}", fr: "Rejouer {title}", es: "Reproduciendo {title}", it: "In riproduzione: {title}" })[language],
-      pasted: ({
-        en: "the pasted reconstruction",
-        fr: "la reconstitution collée",
-        es: "la reconstrucción pegada",
-        it: "la ricostruzione incollata"
-      })[language],
-      pasteEmpty: ({
-        en: "Or paste a reconstruction in",
-        fr: "Ou coller une reconstitution",
-        es: "O pega una reconstrucción",
-        it: "Oppure incolla una ricostruzione"
-      })[language],
-      pasteLoaded: ({
-        en: "See or edit this file",
-        fr: "Voir ou modifier ce fichier",
-        es: "Ver o editar este archivo",
-        it: "Vedi o modifica questo file"
-      })[language],
       noRecording: ({
         en: "None of the chosen files is a .json: choose the recording, and with it the pictures or models it names.",
         fr: "Aucun fichier .json parmi ceux choisis : choisissez l'enregistrement, et avec lui les images ou modèles qu'il nomme.",
@@ -112,23 +88,10 @@ const description = document.getElementById("player-description")
 const pageLanguage = ${JSON.stringify(language)}
 const urlField = document.getElementById("player-url")
 const urlForm = document.getElementById("player-url-form")
-const pastePanel = document.getElementById("player-paste")
-const pasteMount = document.getElementById("player-paste-mount")
-const pasteButton = document.getElementById("player-paste-play")
 const heading = document.getElementById("player-heading")
 const lede = document.getElementById("player-lede")
 const editorPath = "/edit/"
-const pasteSummary = pastePanel.querySelector("summary")
 const filesField = document.getElementById("player-files")
-
-/* The recording currently on the stage, as text — what the editor below should be holding, so that
-   opening that panel shows THIS observation rather than an empty shell. Pretty-printed from the
-   parsed object rather than kept as fetched: a minified file is not something to read or edit, and
-   nothing but whitespace is lost on the way. */
-let loadedText
-/* What was last put in the editor by this page, as against by the reader. Only text still equal to
-   it may be overwritten when another recording is loaded — anything else is somebody's own work. */
-let editorFilled
 
 const say = (text, kind) => {
   status.textContent = text ?? ""
@@ -222,7 +185,7 @@ const answeredButUnreadable = async url => {
   }
 }
 
-/* The player PLAYS what it has just been given: somebody who followed a link, pasted an address or chose
+/* The player PLAYS what it has just been given: somebody who followed a link, typed an address or chose
    a file came to watch, not to hunt for the button. \`play=false\` in the page's own address turns that
    off, for a link meant to open the recording stopped. */
 const playsAtOnce = new URLSearchParams(location.search).get("play") !== "false"
@@ -240,7 +203,6 @@ const openUrl = async requested => {
       if (!response.ok) continue
       const sighting = await response.json() // fail here rather than inside the element
       await stage.loadFromSrc(candidate)
-      showInEditor(JSON.stringify(sighting, null, 2))
       reveal(new URL(candidate, location.href).href, sighting, requested)
       say("")
       startPlaying()
@@ -261,46 +223,6 @@ urlForm.addEventListener("submit", event => {
   event.preventDefault()
   const value = urlField.value.trim()
   if (value) void openUrl(value)
-})
-
-// CodeMirror is worth its weight on a page where someone is about to paste JSON and get a comma
-// wrong — and worth nothing to the majority who arrive here with a link. So it is fetched the
-// first time the panel is opened, and never otherwise.
-let editor
-
-const showInEditor = text => {
-  loadedText = text
-  pasteSummary.textContent = messages.pasteLoaded
-  // An editor already open and already changed is left alone: replacing what somebody has typed
-  // because a second recording finished loading would throw their work away without asking.
-  if (editor && editor.value !== editorFilled) return
-  if (editor) {
-    editor.value = text
-    editorFilled = text
-  }
-}
-
-pastePanel.addEventListener("toggle", async () => {
-  if (!pastePanel.open || editor) return
-  const { JsonEditor } = await import(SITE_LIB + "/site-json-editor.mjs")
-  editorFilled = loadedText ?? pasteMount.dataset.sample ?? ""
-  editor = new JsonEditor(pasteMount, editorFilled)
-  editor.focus()
-})
-
-pasteButton.addEventListener("click", () => {
-  const text = editor?.value?.trim()
-  if (!text) return say(messages.empty, "error")
-  try {
-    const sighting = JSON.parse(text)
-    stage.sightingData = sighting
-    reveal(null, sighting, messages.pasted)
-    say("")
-    showStage(true)
-    startPlaying()
-  } catch (error) {
-    say(messages.badJson + error.message, "error")
-  }
 })
 
 /* Addresses made for the files last opened from disk, released when others are opened. */
@@ -346,7 +268,6 @@ const openFiles = async files => {
   }
   const played = withLocalFiles(sighting)
   stage.sightingData = played
-  showInEditor(JSON.stringify(sighting, null, 2))
   reveal(null, sighting, recording.name.replace(/\\.json$/i, ""))
   say(unresolved.size > 0 ? messages.unresolved + [...unresolved].join(", ") : "", unresolved.size > 0 ? "error" : undefined)
   showStage(true)
@@ -405,20 +326,6 @@ if (asked) {
           it: "Scegli la registrazione (.json), e insieme a essa le foto, i modelli o i suoni che nomina con un percorso relativo: vengono ritrovati in base al nome. Non viene caricato nulla."
         })[language]}</p>
       </div>
-
-      <details class="player-paste" id="player-paste">
-        <summary>${({ en: "Or paste a reconstruction in", fr: "Ou coller une reconstitution", es: "O pega una reconstrucción", it: "Oppure incolla una ricostruzione" })[language]}</summary>
-        <div class="player-paste-body">
-          <div id="player-paste-mount" class="player-paste-mount" data-sample='{"version": 1, "timeline": {"keyframes": []}}'></div>
-          <button class="btn" type="button" id="player-paste-play">${({ en: "Play this", fr: "Jouer ce texte", es: "Reproducir esto", it: "Riproduci questo testo" })[language]}</button>
-          <p class="small">${({
-            en: "Nothing leaves your browser. The format is described in <a href=\"/docs/format/\">the sighting file's page</a>.",
-            fr: "Rien ne quitte votre navigateur. Le format est décrit dans <a href=\"/docs/format/\">la page du fichier d'observation</a>.",
-            es: "Nada sale de tu navegador. El formato se describe en <a href=\"/docs/format/\">la página del archivo de avistamiento</a>.",
-            it: "Nulla lascia il tuo browser. Il formato è descritto nella <a href=\"/docs/format/\">pagina del file di avvistamento</a>."
-          })[language]}</p>
-        </div>
-      </details>
     </div>
     <p class="player-status" id="player-status" role="status" aria-live="polite"></p>`
   }
@@ -429,8 +336,8 @@ if (asked) {
   <div class="wrap">
     <p class="eyebrow">Player</p>
     <h1 id="player-heading">Play any reconstruction.</h1>
-    <p class="lede" id="player-lede">Point it at a reconstruction someone published, or paste one
-      in. It is replayed in the real sky of the date and place it states.</p>
+    <p class="lede" id="player-lede">Point it at a reconstruction someone published, or open one
+      from your own files. It is replayed in the real sky of the date and place it states.</p>
   </div>
 </section>
 
@@ -473,7 +380,7 @@ ${this.form("en")}
     <p class="eyebrow">Lecteur</p>
     <h1 id="player-heading">Rejouer n'importe quelle reconstitution.</h1>
     <p class="lede" id="player-lede">Pointez-le vers une reconstitution publiée par quelqu'un, ou
-      collez-en une. Elle est rejouée sous le ciel réel de la date et du lieu qu'elle énonce.</p>
+      ouvrez-en une depuis vos fichiers. Elle est rejouée sous le ciel réel de la date et du lieu qu'elle énonce.</p>
   </div>
 </section>
 
@@ -515,8 +422,8 @@ ${this.form("fr")}
   <div class="wrap">
     <p class="eyebrow">Reproductor</p>
     <h1 id="player-heading">Reproducir cualquier reconstrucción.</h1>
-    <p class="lede" id="player-lede">Apúntalo a una reconstrucción que alguien haya publicado, o pega
-      una. Se reproduce bajo el cielo real de la fecha y el lugar que indica.</p>
+    <p class="lede" id="player-lede">Apúntalo a una reconstrucción que alguien haya publicado, o abre
+      una desde tus archivos. Se reproduce bajo el cielo real de la fecha y el lugar que indica.</p>
   </div>
 </section>
 
@@ -559,7 +466,7 @@ ${this.form("es")}
     <p class="eyebrow">Lettore</p>
     <h1 id="player-heading">Riprodurre qualsiasi ricostruzione.</h1>
     <p class="lede" id="player-lede">Puntalo su una ricostruzione pubblicata da qualcuno, oppure
-      incollane una. Viene riprodotta sotto il cielo reale della data e del luogo che indica.</p>
+      aprine una dai tuoi file. Viene riprodotta sotto il cielo reale della data e del luogo che indica.</p>
   </div>
 </section>
 
