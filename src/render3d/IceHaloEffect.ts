@@ -13,7 +13,8 @@ import {
 } from "three"
 import { HaloSky } from "../engine/atmosphere/HaloSky.js"
 import { HaloTexels } from "./HaloTexels.js"
-import type { HaloTraceJob, OffThreadHaloTracer } from "./OffThreadHaloTracer.js"
+import type { TraceJob } from "./OffThreadTracer.js"
+import { TracerPool } from "./TracerPool.js"
 import { CIRRUS_COVER_GLSL, CLOUD_NOISE_GLSL, ICE_HALO_LIGHT_GLSL } from "./CloudSystem.js"
 
 /**
@@ -327,41 +328,19 @@ export class IceHaloEffect {
       this.sky.begin(sourceAltitudeDeg, alignment)
       this.scheduleWork()
     }
-    const pool = IceHaloEffect.pool
-    if (pool === null) {
-      inThread()
-      return
-    }
-    const submit = (tracer: OffThreadHaloTracer) => {
+    TracerPool.with(pool => {
       if (ticket !== this.ticket || !this.tracing) return
-      this.job = tracer.trace(sourceAltitudeDeg, alignment, IceHaloEffect.RAYS, texels => {
+      this.job = pool.trace(sourceAltitudeDeg, alignment, IceHaloEffect.RAYS, texels => {
         this.job = undefined
         this.texels.set(texels)
         this.display()
         this.finishTracing()
       }, inThread)
-    }
-    if (pool) {
-      submit(pool)
-      return
-    }
-    void import("./OffThreadHaloTracer.js").then(
-      ({ OffThreadHaloTracer: Tracer }) => {
-        IceHaloEffect.pool = Tracer.get()
-        if (IceHaloEffect.pool) submit(IceHaloEffect.pool)
-        else inThread()
-      },
-      () => {
-        IceHaloEffect.pool = null
-        inThread()
-      }
-    )
+    }, inThread)
   }
 
-  /** The pool of workers, `null` once known to be unavailable, `undefined` until first asked for. */
-  private static pool?: OffThreadHaloTracer | null = typeof Worker === "undefined" ? null : undefined
   private ticket = 0
-  private job?: HaloTraceJob
+  private job?: TraceJob
 
   private pendingAltitudeDeg = Number.NaN
   private pendingAlignment = Number.NaN

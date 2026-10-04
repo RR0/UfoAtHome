@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { HaloSky } from "../../src/engine/atmosphere/HaloSky.js"
 import { IceHaloEffect } from "../../src/render3d/IceHaloEffect.js"
+import { TracerPool } from "../../src/render3d/TracerPool.js"
 
 /**
  * A weather track may change the crystals' alignment during a recording. The display must follow
@@ -104,10 +105,10 @@ describe("IceHaloEffect under a changing sky", () => {
           return { cancel: () => { job.cancelled = true } }
         }
       }
-      ;(IceHaloEffect as unknown as { pool: unknown }).pool = pool
+      ;(TracerPool as unknown as { pool: unknown }).pool = pool
       return asked
     }
-    afterEach(() => { (IceHaloEffect as unknown as { pool: unknown }).pool = null })
+    afterEach(() => { (TracerPool as unknown as { pool: unknown }).pool = null })
 
     it("hands the tracing over and traces nothing itself, then shows what comes back", () => {
       const asked = withPool()

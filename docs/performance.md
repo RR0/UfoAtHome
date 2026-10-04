@@ -159,5 +159,13 @@ depend on constants only, so they are now worked out once per page and each scen
 `Data3DTexture` over them (same arithmetic, same bytes). Long tasks 8.6 to 9.1 s → 7.1 s, Total
 Blocking Time 6.7 to 7.3 s → 5.1 s (two runs each, 4x throttle).
 
-Still on the main thread, in order: the Milky Way / zodiacal walk
-(`SkyGlowMaps`, sliced at 6 ms, night skies only; the next candidate for the same worker).
+Milky Way and zodiacal light maps (`SkyGlowMaps`, night skies only): the same worker now walks them
+(`TraceWorker` does both jobs; `OffThreadTracer` is the pool, `TracerPool` the part that knows whether
+there is one). The worker's texels are bit-identical to the page's own walk (`TraceWorker.test.ts`),
+and the walk, `radianceTowards` and `trace` no longer appear on the main thread's profile. Long tasks
+5.6 to 7.0 s, Total Blocking Time 4.5 to 5.8 s over six passes (the first two, taken while the build
+was still cooling the machine, were 7.9 and 8.3 s, 6.7 and 7.1 s: compare on one machine, quiet).
+From the start of this audit, 4x throttle, same build: Total Blocking Time about 15 s → 5 s.
+
+Still on the main thread: the reflection probes' remaining captures, the rest of the first frame's
+renders, and the imagery tile decoding (`decodeTileInto`).

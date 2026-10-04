@@ -3,7 +3,6 @@ import {
   BackSide,
   ClampToEdgeWrapping,
   DataTexture,
-  DataUtils,
   HalfFloatType,
   LinearFilter,
   Matrix3,
@@ -17,8 +16,10 @@ import {
 import { MilkyWay } from "../engine/astronomy/MilkyWay.js"
 import { ZodiacalLight } from "../engine/astronomy/ZodiacalLight.js"
 import { NightSkyBrightness } from "../engine/atmosphere/NightSkyBrightness.js"
-import type { SkyBrightnessMap } from "../engine/astronomy/SurfaceBrightness.js"
 import { SRGB_ENCODE_GLSL } from "./colorSpace.js"
+import { GlowTexels } from "./GlowTexels.js"
+import type { TraceJob } from "./OffThreadTracer.js"
+import { TracerPool } from "./TracerPool.js"
 
 /**
  * The two things left in a naked-eye sky that are neither a star nor weather: the Milky Way, and the
@@ -412,14 +413,40 @@ export class SkyGlowMaps {
   }
 
   /** Walks the maps if they are not done yet, and calls `ready` once they are — at once if they
-   * already are. */
+   * already are. In a worker where there is one (see TraceWorker), on the page's own thread, a
+   * frame's worth at a time, where there is not or where the worker dies. */
   request(ready: () => void): void {
     if (this.published) {
       ready()
       return
     }
     this.waiting.add(ready)
-    if (this.workHandle !== undefined) return
+    if (this.workHandle !== undefined || this.job || this.starting) return
+    this.starting = true
+    TracerPool.with(pool => {
+      this.starting = false
+      if (this.waiting.size === 0) return
+      this.job = pool.glow((milkyWay, zodiacal) => {
+        this.job = undefined
+        this.milkyWayTexels.set(milkyWay)
+        this.zodiacalTexels.set(zodiacal)
+        this.finish()
+      }, () => {
+        this.job = undefined
+        this.walkHere()
+      })
+    }, () => {
+      this.starting = false
+      this.walkHere()
+    })
+  }
+
+  private job?: TraceJob
+  /** Whether the pool is being fetched, so that a second scene does not ask for it again. */
+  private starting = false
+
+  private walkHere(): void {
+    if (this.waiting.size === 0 || this.workHandle !== undefined) return
     const step = () => {
       this.workHandle = undefined
       const until = performance.now() + SkyGlowMaps.WORK_BUDGET_MS
@@ -442,30 +469,24 @@ export class SkyGlowMaps {
    * nobody is left. */
   cancel(ready: () => void): void {
     this.waiting.delete(ready)
-    if (this.waiting.size > 0 || this.workHandle === undefined) return
+    if (this.waiting.size > 0) return
+    this.job?.cancel()
+    this.job = undefined
+    if (this.workHandle === undefined) return
     cancelAnimationFrame(this.workHandle)
     this.workHandle = undefined
   }
 
   private publish(): void {
-    SkyGlowMaps.fill(this.milkyWayTexels, this.galaxy.harvest())
-    SkyGlowMaps.fill(this.zodiacalTexels, this.dust.harvest())
+    GlowTexels.fromMap(this.galaxy.harvest(), this.milkyWayTexels)
+    GlowTexels.fromMap(this.dust.harvest(), this.zodiacalTexels)
+    this.finish()
+  }
+
+  private finish(): void {
     this.published = true
     const listeners = [...this.waiting]
     this.waiting.clear()
     for (const ready of listeners) ready()
-  }
-
-  /** The largest finite half float. The brightest texels of the Milky Way map come out above it in
-   * nanolamberts, and DataUtils.toHalfFloat clamps them itself — after a console warning per texel,
-   * which is what a reader's console filled with on every night sky. Clamped here, to the same value,
-   * silently. */
-  private static readonly HALF_FLOAT_MAX = 65504
-
-  private static fill(texels: Uint16Array, map: SkyBrightnessMap): void {
-    for (let at = 0; at < map.data.length; at++) {
-      texels[at * 4] = DataUtils.toHalfFloat(Math.min(SkyGlowMaps.HALF_FLOAT_MAX, NightSkyBrightness.nanolambertsOfS10(map.data[at])))
-      texels[at * 4 + 3] = DataUtils.toHalfFloat(1)
-    }
   }
 }
