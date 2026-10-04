@@ -199,3 +199,20 @@ Pitfall found on the way: the stand-in of each point source must carry the real 
 in its LOCAL matrix. Three works the world matrix out again from it when the layer's scene renders, so
 a copied world matrix was overwritten by the identity: right for an observer on the ground under an
 unscaled sky, every star at the origin for one at 1500 m under a sky scaled 33x (Chiles-Whitted).
+
+## Guarding the picture itself: `npm run test:render`
+
+The unit tests guard the mechanism (the anchors in three's shaders, the placement of the stand-ins,
+what is taken into the layer and given back); none can see a picture, vitest having no WebGL, and the
+stars were wrong twice with every unit test green. `scripts/perf/star-quality.mjs` renders three skies
+on a real Chromium with a real card (the ground observer, the observer at 1500 m, the re-entry at
+60 s) and fails when a sky has too few stars or a bright star is too wide:
+
+```sh
+node scripts/perf/star-quality.mjs http://localhost:5182   # npm run test:render, after serving dist-site
+```
+
+Run against production 0.92.0 it fails where it should (Chiles-Whitted 4 stars against 90, the
+milkyway card 130 against 792). It is not in CI: the runners have no graphics card, and a software
+renderer draws something else. It does not see the ribbons' stairs (only the stars are measured), nor
+anything that is a matter of taste: it makes a regression visible, a person still looks at the sky.

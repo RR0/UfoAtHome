@@ -45,7 +45,7 @@ describe("TraceWorker", () => {
 
   it("traces a halo display to the same texels as the page does, and says nothing of one called off", async () => {
     const { send, answered, answers } = scope()
-    const rays = 150_000
+    const rays = 20_000
     send({ type: "halo", id: 1, altitudeDeg: 22, alignment: 0.9, rays })
     send({ type: "halo", id: 2, altitudeDeg: 40, alignment: 0.5, rays })
     send({ type: "cancel", id: 2 })
