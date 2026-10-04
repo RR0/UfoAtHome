@@ -693,6 +693,14 @@ export class SightingElement extends HTMLElement {
     // Provenance), the same object the scene is showing.
     const own = entry === this.entries.find(e => e.src === this.currentSrc) ? this.sceneElement.ufoElement.sighting.interpretation : undefined
     offer(ACCOUNT_OPTION, this.messages.account, () => Promise.resolve(own))
+    // The other readings the recording itself holds, with or without a case around it.
+    const filed = entry === this.entries.find(e => e.src === this.currentSrc) ? this.sceneElement.ufoElement.sighting.interpretations ?? [] : []
+    filed.forEach((interpretation, index) => {
+      const title = this.said.read(interpretation.title) ?? `#${index + 1}`
+      const by = (interpretation.by ?? []).map(agent => this.agentName(agent)).filter(Boolean).join(", ")
+      offer(`rec-${index}`, by ? this.messages.interpretationBy.replace("{title}", title).replace("{by}", by) : title,
+        () => Promise.resolve(interpretation))
+    })
     const source = this.caseSource
     if (source) {
       CaseFile.interpretationEvents(source.json, this.plain(entry).id).forEach((event, index) => {

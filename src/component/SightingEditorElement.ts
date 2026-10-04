@@ -1896,6 +1896,7 @@ export class SightingEditorElement extends HTMLElement {
     // keep writing into the newly-loaded one
     this.ufoElement.sightingData = json
     this.cloudEditor.reset()
+    this.bodyEditor?.showAccount()
     this.bodyEditor?.sync()
     this.syncBodiesShown()
     // Resets to the first source actually present in the loaded data, not the hardcoded
@@ -5105,7 +5106,8 @@ export class SightingEditorElement extends HTMLElement {
    */
   private syncBodiesShown(): void {
     const shown = !(this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-shapes")?.hidden === false)
-    const interpretation = shown ? this.ufoElement.sighting.interpretation : undefined
+    const sighting = this.ufoElement.sighting
+    const interpretation = shown ? (this.bodyEditor ? this.bodyEditor.interpretationOnShow : sighting.interpretation) : undefined
     this.sceneElement.compareAccount = interpretation !== undefined
     if (this.sceneElement.interpretation !== interpretation) this.sceneElement.interpretation = interpretation
   }

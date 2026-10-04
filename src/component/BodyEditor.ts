@@ -56,6 +56,11 @@ export class BodyEditor {
   /** The language last asked for, so a slower load cannot overwrite a later choice. */
   private languageToken = 0
   private currentId?: string
+  /** Which reading is being edited: -1 for the observer's own (`Sighting.interpretation`), else the
+   * index of one of `Sighting.interpretations`. */
+  private track = -1
+  /** Whether the delete button has been pressed once and waits for the second press. */
+  private confirmingDelete?: number
   private catalogueToken = 0
   /** The catalogue model the address block is showing, if it is showing one — see showCatalogueModel. */
   private shownEntry?: DecorModelEntry
@@ -93,6 +98,7 @@ export class BodyEditor {
 
   /** Shows what the recording states now: after a recording is loaded, or a shape renamed. */
   sync(): void {
+    this.syncTracks()
     const bodies = this.bodies
     if (!bodies.some(body => body.id === this.currentId)) this.currentId = bodies[0]?.id
     this.input("body-interpretation-title").value = this.host.said().read(this.interpretation?.title) ?? ""
@@ -183,6 +189,9 @@ export class BodyEditor {
       `<label><span>${label}</span> <input id="${id}" type="${type}" placeholder="${placeholder}" ${bounds} autocomplete="off"/>${unit ? ` ${unit}` : ""}</label>`
     this.container.innerHTML = `<div class="body-editor">
       <p class="body-intro">${m.intro}</p>
+      <label><span>${m.reading}</span> <select id="track-select"></select></label>
+      <button id="track-add" type="button" class="icon-btn" title="${m.addReading}" aria-label="${m.addReading}">+</button>
+      <button id="track-delete" type="button" class="icon-btn" title="${m.deleteReading}" aria-label="${m.deleteReading}">🗑</button>
       ${field("body-interpretation-title", m.interpretationTitle)}
       <p id="body-none" class="body-intro">${m.none}</p>
       <label><span>${m.body}</span> <select id="body-select"></select></label>
@@ -232,6 +241,9 @@ export class BodyEditor {
         </fieldset>
       </div>
     </div>`
+    this.select("track-select").addEventListener("change", () => this.chooseTrack(Number(this.select("track-select").value)))
+    this.element("track-add").addEventListener("click", () => this.addTrack())
+    this.element("track-delete").addEventListener("click", () => this.deleteTrack())
     this.select("body-select").addEventListener("change", () => {
       this.currentId = this.select("body-select").value
       this.sync()
@@ -645,7 +657,7 @@ export class BodyEditor {
     // statement.
     const empty = interpretation.bodies.length === 0 && interpretation.title === undefined && interpretation.smoke === undefined &&
       interpretation.reentries === undefined
-    this.host.sighting().interpretation = empty ? undefined : interpretation
+    this.setInterpretation(empty ? undefined : interpretation)
     this.host.changed()
     if (refill) {
       this.sync()
@@ -676,7 +688,104 @@ export class BodyEditor {
   }
 
   private get interpretation(): InterpretationJson | undefined {
-    return this.host.sighting().interpretation
+    const sighting = this.host.sighting()
+    return this.track < 0 ? sighting.interpretation : sighting.interpretations?.[this.track]
+  }
+
+  /** Back to the observer's own reading: what a recording just loaded opens on. */
+  showAccount(): void {
+    this.track = -1
+    this.currentId = undefined
+  }
+
+  /** What the scene should draw for the reading on show: the one being edited. */
+  get interpretationOnShow(): InterpretationJson | undefined {
+    return this.interpretation
+  }
+
+  private setInterpretation(interpretation: InterpretationJson | undefined): void {
+    const sighting = this.host.sighting()
+    if (this.track < 0) {
+      sighting.interpretation = interpretation
+      return
+    }
+    // An alternative is deleted by the button, never by being emptied: an empty one stays as a
+    // reading waiting for its bodies.
+    const list = [...(sighting.interpretations ?? [])]
+    list[this.track] = interpretation ?? { bodies: [] }
+    sighting.interpretations = list
+  }
+
+  /** The picker: the observer's own reading, then each alternative the recording holds. */
+  private syncTracks(): void {
+    const sighting = this.host.sighting()
+    const alternatives = sighting.interpretations ?? []
+    if (this.track >= alternatives.length) this.track = -1
+    const label = (interpretation: InterpretationJson | undefined, index: number): string =>
+      this.host.said().read(interpretation?.title) ?? this.messages.readingUntitled.replace("{n}", String(index + 1))
+    const select = this.select("track-select")
+    select.replaceChildren(
+      new Option(sighting.interpretation === undefined ? this.messages.readingAccount : `${this.messages.readingAccount}${this.titleSuffix(sighting.interpretation)}`, "-1"),
+      ...alternatives.map((interpretation, index) => new Option(label(interpretation, index), String(index))))
+    select.value = String(this.track)
+    const deleteButton = this.element("track-delete") as HTMLButtonElement
+    // The observer's own reading with nothing in it has nothing to delete.
+    deleteButton.disabled = this.track < 0 && sighting.interpretation === undefined
+    if (this.confirmingDelete !== this.track) this.resetDeleteConfirmation()
+  }
+
+  private titleSuffix(interpretation: InterpretationJson): string {
+    const title = this.host.said().read(interpretation.title)
+    return title ? ` — ${title}` : ""
+  }
+
+  private chooseTrack(track: number): void {
+    this.track = track
+    this.resetDeleteConfirmation()
+    this.currentId = undefined
+    this.host.changed()
+    this.sync()
+  }
+
+  private addTrack(): void {
+    const sighting = this.host.sighting()
+    sighting.interpretations = [...(sighting.interpretations ?? []), { bodies: [] }]
+    this.chooseTrack(sighting.interpretations.length - 1)
+  }
+
+  /**
+   * Deletes the reading on show, asked twice: a native confirm dialog is refused inside a pane, and
+   * a reading is a dozen bodies and their tracks. The observer's own is emptied rather than removed
+   * (the account stays), and the alternatives after a deleted one move up.
+   */
+  private deleteTrack(): void {
+    const button = this.element("track-delete")
+    if (this.confirmingDelete !== this.track) {
+      this.confirmingDelete = this.track
+      button.textContent = "✓"
+      button.title = this.messages.deleteReadingConfirm
+      window.setTimeout(() => this.resetDeleteConfirmation(), 4000)
+      return
+    }
+    this.resetDeleteConfirmation()
+    const sighting = this.host.sighting()
+    if (this.track < 0) {
+      sighting.interpretation = undefined
+    } else {
+      sighting.interpretations = (sighting.interpretations ?? []).filter((_, index) => index !== this.track)
+      this.track = -1
+    }
+    this.currentId = undefined
+    this.host.changed()
+    this.sync()
+  }
+
+  private resetDeleteConfirmation(): void {
+    this.confirmingDelete = undefined
+    const button = this.container.querySelector<HTMLElement>("#track-delete")
+    if (!button) return
+    button.textContent = "🗑"
+    button.title = this.messages.deleteReading
   }
 
   private get bodies(): BodyJson[] {

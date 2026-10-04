@@ -289,6 +289,11 @@ if (excerpts.length > 0) {
       and its bodies inline or in a file at <code>url</code>. A account whose observer said what
       it was is drawn in the round, as they said; one that says nothing in metres is drawn as the
       angles it states. The player offers it and each analyst's interpretation, one at a time.</p>
+    <p>A recording may also hold other readings of its account, as <code>interpretations</code>: an
+      array of the same objects (<code>title</code>, <code>bodies</code>, and optionally <code>by</code>
+      and <code>time</code>), with or without a case around it — a sighting with several
+      interpretations is one file. The player lists them after the observer's own, and the editor's
+      Bodies part has a <em>Reading</em> picker to choose which one is edited, add one and delete one.</p>
     <pre data-json=""><code>{
   "interpretation": {
     "title": "A craft standing on its legs",
@@ -671,6 +676,12 @@ if (excerpts.length > 0) {
       compte rendu dont l'observateur a dit ce que c'était se dessine en volume, comme il l'a dit ;
       celui qui ne dit rien en mètres se dessine avec les angles qu'il énonce. Le lecteur le
       propose, ainsi que chaque interprétation d'analyste, une à la fois.</p>
+    <p>Un enregistrement peut aussi porter d'autres lectures de son compte rendu, en
+      <code>interpretations</code> : un tableau des mêmes objets (<code>title</code>,
+      <code>bodies</code>, et en option <code>by</code> et <code>time</code>), avec ou sans dossier
+      autour — une observation à plusieurs interprétations tient dans un seul fichier. Le lecteur les
+      liste après celle de l'observateur, et la partie Corps de l'éditeur a un sélecteur
+      <em>Lecture</em> pour choisir celle qu'on édite, en ajouter une et en supprimer une.</p>
     <pre data-json=""><code>{
   "interpretation": {
     "title": "Un engin posé sur ses pieds",
@@ -1050,6 +1061,12 @@ if (excerpts.length > 0) {
       y sus cuerpos en línea o en un archivo en <code>url</code>. Un relato cuyo observador dijo lo que
       era se dibuja en volumen, como lo dijo; uno que no dice nada en metros se dibuja como los
       ángulos que expresa. El reproductor lo ofrece, junto con la interpretación de cada analista, una cada vez.</p>
+    <p>Una grabación puede llevar además otras lecturas de su relato, como <code>interpretations</code>:
+      una lista de los mismos objetos (<code>title</code>, <code>bodies</code> y, opcionalmente,
+      <code>by</code> y <code>time</code>), con o sin caso alrededor — una observación con varias
+      interpretaciones cabe en un solo archivo. El reproductor las lista tras la del observador, y
+      la parte Cuerpos del editor tiene un selector <em>Lectura</em> para elegir cuál se edita,
+      añadir una y eliminar una.</p>
     <pre data-json=""><code>{
   "interpretation": {
     "title": "Una nave posada sobre sus patas",
@@ -1427,6 +1444,11 @@ if (excerpts.length > 0) {
       e i suoi corpi in linea o in un file a <code>url</code>. Un resoconto il cui osservatore ha detto che cosa
       fosse viene disegnato a tutto tondo, come l'ha detto; uno che non dice nulla in metri viene disegnato come gli
       angoli che esprime. Il lettore lo propone, insieme all'interpretazione di ciascun analista, una alla volta.</p>
+    <p>Una registrazione può portare anche altre letture del proprio resoconto, come <code>interpretations</code>: un elenco
+      degli stessi oggetti (<code>title</code>, <code>bodies</code> e, facoltativi, <code>by</code> e <code>time</code>),
+      con o senza un caso attorno — un'osservazione con più interpretazioni sta in un solo file. Il lettore le elenca dopo
+      quella dell'osservatore, e la parte Corpi dell'editor ha un selettore <em>Lettura</em> per scegliere quale si
+      modifica, aggiungerne una ed eliminarne una.</p>
     <pre data-json=""><code>{
   "interpretation": {
     "title": "Un velivolo posato sulle sue zampe",

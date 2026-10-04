@@ -386,6 +386,14 @@ export class Sighting {
    * same "reassigned wholesale" reasoning as account above.
    */
   interpretation?: InterpretationJson
+  /**
+   * Other readings of the same account, filed in the recording: an analyst's, a comparison's (the
+   * same angular width at another size and distance). A recording may hold any number, with or
+   * without a case around it: a case adds the readings of whoever interpreted it later, but a
+   * standalone recording is a sighting with several interpretations all the same. Absent or empty
+   * means only the observer's own, if that. Reassigned wholesale, like `interpretation`.
+   */
+  interpretations?: InterpretationJson[]
 
   /**
    * How much the observer's body moves the view when they are not walking — see Stance. 1 is a

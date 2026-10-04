@@ -694,15 +694,25 @@ const interpretations = [
     [{ people: "HartmannWilliam" }])
 ]
 
+/** A reading as the recording files it: the event without its envelope. */
+const filed = (event: { title: Said<string>, by?: unknown, time?: string, bodies: unknown[] }) => ({
+  title: event.title,
+  ...(event.by ? { by: event.by } : {}),
+  ...(event.time ? { time: event.time } : {}),
+  bodies: event.bodies
+})
+
+// The readings live in the recording itself, so that it is a sighting with several interpretations
+// whether or not a case is around it: the observer's own (the account) and these.
+const withReadings = <T extends object>(recording: T) => ({ ...recording, interpretations: interpretations.map(filed) })
+
 const caseJson = {
   id: "McMinnville1950",
   title: "McMinnville",
   time: "1950-05-11 19:45",
   events: [
     { type: "event", eventType: "sighting", time: "1950-05-11 19:45", title: "Paul Trent", url: "observer-mcminnville.json" },
-    { type: "event", eventType: "sighting", time: "1950-05-11 19:45", title: "Paul Trent, gros plan", url: "observer-mcminnville-closeup.json" },
-    ...interpretations,
-    ...interpretations.map(event => ({ ...event, sighting: closeUp.id }))
+    { type: "event", eventType: "sighting", time: "1950-05-11 19:45", title: "Paul Trent, gros plan", url: "observer-mcminnville-closeup.json" }
   ]
 }
 
@@ -713,7 +723,7 @@ const write = (name: string, json: unknown): void => {
   writeFileSync(path.join(directory, name), JSON.stringify(json, null, 1) + "\n")
   console.log(`Wrote public/demo-data/${name}`)
 }
-write("observer-mcminnville.json", observerWithReading)
-write("observer-mcminnville-closeup.json", closeUp)
+write("observer-mcminnville.json", withReadings(observerWithReading))
+write("observer-mcminnville-closeup.json", withReadings(closeUp))
 write("case-mcminnville.json", caseJson)
 console.log(`second camera ${Geometry.round(second.e, 2)} E ${Geometry.round(second.n, 2)} N; model seen at ${seenFirst.altitudeDeg.toFixed(1)} deg from ${seenFirst.distanceM.toFixed(2)} m, then ${seenSecond.altitudeDeg.toFixed(1)} deg from ${seenSecond.distanceM.toFixed(2)} m`)

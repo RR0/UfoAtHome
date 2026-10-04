@@ -27,6 +27,11 @@ import type { ReentryJson } from "./Reentry.js"
 export interface InterpretationJson {
   /** What the claim is, in a few words — "Craft on its legs", "Weather balloon at 3 km". */
   title?: SaidText
+  /** Who claims it, when it is not the observer: an analyst's reading filed in the recording itself,
+   * as a case's own interpretation events name theirs (see InterpretationEventJson.by). */
+  by?: AgentRef[]
+  /** When it was claimed, as RR0 writes a time ("2013-04"). */
+  time?: string
   bodies: BodyJson[]
   /** Fires the interpretation lights on the ground, as their smoke — see SmokeSource. */
   smoke?: SmokeSource[]
