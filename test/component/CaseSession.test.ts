@@ -3,7 +3,7 @@ import { CaseSession } from "../../src/component/CaseSession.js"
 import type { CaseJson } from "../../src/engine/persistence/caseJson.js"
 import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
-const account = { version: 1, id: "1950-05-11-TrentPaul", time: { year: 1950 }, utcOffsetHours: -7, place: [{ value: { lat: 45, lng: -123 } }], observerTrack: { keyframes: [] }, timeline: { keyframes: [] } } as unknown as SightingRecordingJson
+const account = { version: 1, id: "1950-05-11-TrentPaul", time: { year: 1950 }, utcOffsetHours: -7, place: [{ value: { lat: 45, lng: -123 } }], observer: { id: "TrentPaul" }, description: "Account", decor: [{ id: "house", kind: "building", eastM: 1, northM: 2 }], weatherTrack: { keyframes: [] }, instrument: "roamer-1-120", observerTrack: { keyframes: [] }, timeline: { keyframes: [] }, interpretation: { bodies: [] } } as unknown as SightingRecordingJson
 const caseJson = (): CaseJson => ({
   id: "McMinnville1950",
   events: [
@@ -36,6 +36,10 @@ describe("A case being edited", () => {
     expect(added.event).toMatchObject({ eventType: "sighting", interpretationOf: "1950-05-11-TrentPaul", time: "2026-10-04", url: "interpretation-mcminnville-2.json" })
     expect(session.json.events).toContain(added.event)
     expect(added.recording).toMatchObject({ id: "1950-05-11-TrentPaul-interpretation-2", utcOffsetHours: -7, tags: ["interpretation"], interpretation: { bodies: [] } })
+    // The whole scene comes along, so that the reading is not bodies over bare ground; the account's own words and observer do not.
+    expect(added.recording).toMatchObject({ decor: account.decor, instrument: "roamer-1-120", weatherTrack: { keyframes: [] } })
+    expect(added.recording).not.toHaveProperty("observer")
+    expect(added.recording).not.toHaveProperty("description")
     expect(added.recording!.timeline).toEqual({ keyframes: [], order: [], groups: [] })
     expect(session.changed(added)).toBe(true)
   })

@@ -16,9 +16,6 @@
    "lng": -106.891693
   }
  ],
- "tags": [
-  "interpretation"
- ],
  "observerTrack": {
   "keyframes": [
    {
@@ -210,6 +207,665 @@
    }
   ]
  },
+ "weatherTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "weather": {
+     "cloudLayers": [
+      {
+       "id": "record-low",
+       "type": "unknown",
+       "baseM": 2500,
+       "thicknessM": 650,
+       "coverage": 0,
+       "sizeM": 1400,
+       "density": 1
+      },
+      {
+       "id": "record-mid",
+       "type": "unknown",
+       "baseM": 3500,
+       "thicknessM": 800,
+       "coverage": 0,
+       "sizeM": 2500,
+       "density": 1
+      },
+      {
+       "id": "record-high",
+       "type": "cirrus",
+       "baseM": 8000,
+       "thicknessM": 400,
+       "coverage": 0,
+       "sizeM": 2200,
+       "density": 0.35
+      }
+     ],
+     "cloudCover": 0,
+     "cloudDarkness": 0,
+     "highCloudCover": 0,
+     "lowerCloudCover": 0,
+     "relativeHumidity": 0.09,
+     "precipitationType": "none",
+     "precipitationIntensity": 0,
+     "windDirectionDeg": 31.5,
+     "windSpeed": 7.885,
+     "storm": false
+    }
+   },
+   {
+    "t": 120000,
+    "weather": {
+     "cloudLayers": [
+      {
+       "id": "record-low",
+       "type": "unknown",
+       "baseM": 2500,
+       "thicknessM": 650,
+       "coverage": 0,
+       "sizeM": 1400,
+       "density": 1
+      },
+      {
+       "id": "record-mid",
+       "type": "unknown",
+       "baseM": 3500,
+       "thicknessM": 800,
+       "coverage": 0,
+       "sizeM": 2500,
+       "density": 1
+      },
+      {
+       "id": "record-high",
+       "type": "cirrus",
+       "baseM": 8000,
+       "thicknessM": 400,
+       "coverage": 0,
+       "sizeM": 2200,
+       "density": 0.35
+      }
+     ],
+     "cloudCover": 0,
+     "cloudDarkness": 0,
+     "highCloudCover": 0,
+     "lowerCloudCover": 0,
+     "relativeHumidity": 0.09,
+     "precipitationType": "none",
+     "precipitationIntensity": 0,
+     "windDirectionDeg": 31.600000000000023,
+     "windSpeed": 7.862,
+     "storm": false
+    }
+   }
+  ]
+ },
+ "decor": [
+  {
+   "id": "patrol-car",
+   "kind": "vehicle",
+   "title": {
+    "fr": "Voiture de patrouille de Zamora",
+    "en": "Zamora's patrol car",
+    "es": "El coche patrulla de Zamora",
+    "it": "L'auto di pattuglia di Zamora"
+   },
+   "eastM": -561.3,
+   "northM": -929.1,
+   "headingDeg": 225,
+   "lit": false,
+   "occludesSourceIds": [
+    "flamme",
+    "flamme-base",
+    "insigne",
+    "ufo-1"
+   ],
+   "sizeM": {
+    "widthM": 2.02,
+    "lengthM": 5.44,
+    "heightM": 1.42
+   },
+   "model": {
+    "id": "kenney-car-kit-police"
+   },
+   "track": [
+    {
+     "t": 0,
+     "eastM": 2.6,
+     "northM": 0,
+     "altitudeM": 0,
+     "headingDeg": 200
+    },
+    {
+     "t": 8000,
+     "eastM": -60,
+     "northM": -171.6,
+     "altitudeM": 0,
+     "headingDeg": 200
+    },
+    {
+     "t": 12000,
+     "eastM": -91.1,
+     "northM": -257.5,
+     "altitudeM": 0,
+     "headingDeg": 230
+    },
+    {
+     "t": 18000,
+     "eastM": -196.1,
+     "northM": -345.6,
+     "altitudeM": 0,
+     "headingDeg": 260
+    },
+    {
+     "t": 25000,
+     "eastM": -353.4,
+     "northM": -373.3,
+     "altitudeM": 0,
+     "headingDeg": 200
+    },
+    {
+     "t": 45000,
+     "eastM": -435.6,
+     "northM": -598.8,
+     "altitudeM": 0,
+     "headingDeg": 200
+    },
+    {
+     "t": 52000,
+     "eastM": -464.3,
+     "northM": -677.7,
+     "altitudeM": 0,
+     "headingDeg": 200
+    },
+    {
+     "t": 68000,
+     "eastM": -530.1,
+     "northM": -858.3,
+     "altitudeM": 0,
+     "headingDeg": 200
+    },
+    {
+     "t": 72000,
+     "eastM": -551.5,
+     "northM": -917.4,
+     "altitudeM": 0,
+     "headingDeg": 200
+    },
+    {
+     "t": 75000,
+     "eastM": -561.3,
+     "northM": -929.1,
+     "altitudeM": 0,
+     "headingDeg": 225
+    },
+    {
+     "t": 120000,
+     "eastM": -561.3,
+     "northM": -929.1,
+     "altitudeM": 0,
+     "headingDeg": 225
+    }
+   ]
+  },
+  {
+   "id": "dynamite-shack",
+   "kind": "building",
+   "title": {
+    "fr": "Abri à dynamite",
+    "en": "Dynamite shack",
+    "es": "Caseta de la dinamita",
+    "it": "Baracca della dinamite"
+   },
+   "eastM": -635,
+   "northM": -988.7,
+   "floors": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 3,
+    "lengthM": 2.4,
+    "heightM": 2.2
+   }
+  },
+  {
+   "id": "greasewood-burnt-1",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood (brûlé)",
+    "en": "Greasewood (burnt)",
+    "es": "Greasewood (quemado)",
+    "it": "Greasewood (bruciato)"
+   },
+   "eastM": -570.89,
+   "northM": -965.08,
+   "sizeM": {
+    "widthM": 1.1,
+    "lengthM": 1.1,
+    "heightM": 0.9
+   }
+  },
+  {
+   "id": "greasewood-burnt-2",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood (brûlé)",
+    "en": "Greasewood (burnt)",
+    "es": "Greasewood (quemado)",
+    "it": "Greasewood (bruciato)"
+   },
+   "eastM": -572.33,
+   "northM": -965.51,
+   "sizeM": {
+    "widthM": 1.1,
+    "lengthM": 1.1,
+    "heightM": 0.9
+   }
+  },
+  {
+   "id": "greasewood-burnt-3",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood (brûlé)",
+    "en": "Greasewood (burnt)",
+    "es": "Greasewood (quemado)",
+    "it": "Greasewood (bruciato)"
+   },
+   "eastM": -571.76,
+   "northM": -966.57,
+   "sizeM": {
+    "widthM": 1.1,
+    "lengthM": 1.1,
+    "heightM": 0.9
+   }
+  },
+  {
+   "id": "greasewood-burnt-4",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood (brûlé)",
+    "en": "Greasewood (burnt)",
+    "es": "Greasewood (quemado)",
+    "it": "Greasewood (bruciato)"
+   },
+   "eastM": -568.23,
+   "northM": -964.77,
+   "sizeM": {
+    "widthM": 1.1,
+    "lengthM": 1.1,
+    "heightM": 0.9
+   }
+  },
+  {
+   "id": "greasewood-1",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -596.39,
+   "northM": -986.02,
+   "sizeM": {
+    "widthM": 0.76,
+    "lengthM": 0.76,
+    "heightM": 0.61
+   }
+  },
+  {
+   "id": "greasewood-2",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -606.1,
+   "northM": -966.95,
+   "sizeM": {
+    "widthM": 0.69,
+    "lengthM": 0.69,
+    "heightM": 0.55
+   }
+  },
+  {
+   "id": "greasewood-3",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -561.77,
+   "northM": -935.78,
+   "sizeM": {
+    "widthM": 0.93,
+    "lengthM": 0.93,
+    "heightM": 0.74
+   }
+  },
+  {
+   "id": "greasewood-4",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -576.41,
+   "northM": -933.48,
+   "sizeM": {
+    "widthM": 0.94,
+    "lengthM": 0.94,
+    "heightM": 0.75
+   }
+  },
+  {
+   "id": "greasewood-5",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -549.47,
+   "northM": -950.36,
+   "sizeM": {
+    "widthM": 1.13,
+    "lengthM": 1.13,
+    "heightM": 0.9
+   }
+  },
+  {
+   "id": "greasewood-6",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -542.66,
+   "northM": -946.55,
+   "sizeM": {
+    "widthM": 0.87,
+    "lengthM": 0.87,
+    "heightM": 0.7
+   }
+  },
+  {
+   "id": "greasewood-7",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -584.52,
+   "northM": -986.52,
+   "sizeM": {
+    "widthM": 0.97,
+    "lengthM": 0.97,
+    "heightM": 0.78
+   }
+  },
+  {
+   "id": "greasewood-8",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -559.02,
+   "northM": -979.35,
+   "sizeM": {
+    "widthM": 1.25,
+    "lengthM": 1.25,
+    "heightM": 1.0
+   }
+  },
+  {
+   "id": "greasewood-9",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -581.38,
+   "northM": -967.97,
+   "sizeM": {
+    "widthM": 0.8,
+    "lengthM": 0.8,
+    "heightM": 0.64
+   }
+  },
+  {
+   "id": "greasewood-10",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -544.57,
+   "northM": -992.81,
+   "sizeM": {
+    "widthM": 0.82,
+    "lengthM": 0.82,
+    "heightM": 0.66
+   }
+  },
+  {
+   "id": "greasewood-11",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -588.14,
+   "northM": -966.32,
+   "sizeM": {
+    "widthM": 1.1,
+    "lengthM": 1.1,
+    "heightM": 0.88
+   }
+  },
+  {
+   "id": "greasewood-12",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -561.89,
+   "northM": -952.31,
+   "sizeM": {
+    "widthM": 0.74,
+    "lengthM": 0.74,
+    "heightM": 0.59
+   }
+  },
+  {
+   "id": "greasewood-13",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -561.89,
+   "northM": -959.66,
+   "sizeM": {
+    "widthM": 0.64,
+    "lengthM": 0.64,
+    "heightM": 0.51
+   }
+  },
+  {
+   "id": "greasewood-14",
+   "kind": "shrub",
+   "title": {
+    "fr": "Greasewood",
+    "en": "Greasewood",
+    "es": "Greasewood",
+    "it": "Greasewood"
+   },
+   "eastM": -551.66,
+   "northM": -971.65,
+   "sizeM": {
+    "widthM": 0.98,
+    "lengthM": 0.98,
+    "heightM": 0.78
+   }
+  }
+ ],
+ "weatherSource": {
+  "id": "era5",
+  "name": "ERA5 (Open-Meteo)",
+  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=34.050918&longitude=-106.891693&start_date=1964-04-25&end_date=1964-04-25&hourly=cloud_cover%2Ccloud_cover_low%2Ccloud_cover_mid%2Ccloud_cover_high%2Cprecipitation%2Csnowfall%2Cweather_code%2Cwind_speed_10m%2Cwind_direction_10m%2Ctemperature_2m%2Cdew_point_2m&wind_speed_unit=ms&timezone=UTC"
+ },
+ "instrument": "eye",
+ "soundTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "sound": {
+     "kind": "whistle",
+     "volume": 0.5,
+     "pitchHz": 1400
+    }
+   },
+   {
+    "t": 6000,
+    "sound": {
+     "kind": "whistle",
+     "volume": 0.55,
+     "pitchHz": 500
+    }
+   },
+   {
+    "t": 10000,
+    "sound": {
+     "kind": "rumble",
+     "volume": 0.5,
+     "pitchHz": 120
+    }
+   },
+   {
+    "t": 14000,
+    "sound": {
+     "kind": "rumble",
+     "volume": 0.25,
+     "pitchHz": 60
+    }
+   },
+   {
+    "t": 15000,
+    "sound": {
+     "kind": "none",
+     "volume": 0,
+     "pitchHz": 60
+    }
+   },
+   {
+    "t": 73800,
+    "sound": {
+     "kind": "rumble",
+     "volume": 0.35,
+     "pitchHz": 55
+    }
+   },
+   {
+    "t": 74400,
+    "sound": {
+     "kind": "none",
+     "volume": 0,
+     "pitchHz": 55
+    }
+   },
+   {
+    "t": 74900,
+    "sound": {
+     "kind": "rumble",
+     "volume": 0.35,
+     "pitchHz": 55
+    }
+   },
+   {
+    "t": 75500,
+    "sound": {
+     "kind": "none",
+     "volume": 0,
+     "pitchHz": 55
+    }
+   },
+   {
+    "t": 76000,
+    "sound": {
+     "kind": "rumble",
+     "volume": 0.9,
+     "pitchHz": 70
+    }
+   },
+   {
+    "t": 81000,
+    "sound": {
+     "kind": "rumble",
+     "volume": 0.95,
+     "pitchHz": 170
+    }
+   },
+   {
+    "t": 85500,
+    "sound": {
+     "kind": "rumble",
+     "volume": 0.95,
+     "pitchHz": 200
+    }
+   },
+   {
+    "t": 85600,
+    "sound": {
+     "kind": "whistle",
+     "volume": 0.6,
+     "pitchHz": 1400
+    }
+   },
+   {
+    "t": 86500,
+    "sound": {
+     "kind": "whistle",
+     "volume": 0.4,
+     "pitchHz": 500
+    }
+   },
+   {
+    "t": 86600,
+    "sound": {
+     "kind": "none",
+     "volume": 0,
+     "pitchHz": 500
+    }
+   }
+  ]
+ },
+ "tags": [
+  "interpretation"
+ ],
  "timeline": {
   "keyframes": [],
   "order": [],

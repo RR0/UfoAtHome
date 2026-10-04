@@ -62,7 +62,8 @@ export class CaseSession {
 
   /**
    * Adds a reading of an account: an event of type `sighting` marked `interpretationOf`, and a recording
-   * of its own that shares the account's place, time and pose and holds no body yet.
+   * of its own that shares the account's whole scene (place, time, pose, instrument, weather, decor, pictures)
+   * and holds no body yet.
    */
   addReading(account: CaseTrack, when: string, title?: SaidText): CaseTrack {
     const base = account.recording
@@ -75,16 +76,16 @@ export class CaseSession {
     while (files.has(`interpretation-${stem}-${number}.json`) || ids.has(`${base.id ?? stem}-interpretation-${number}`)) number++
     const file = `interpretation-${stem}-${number}.json`
     const directory = account.event.url!.includes("/") ? account.event.url!.replace(/[^/]*$/, "") : ""
-    const recording: SightingRecordingJson = {
+    // The scene the account is in, whole: its place, time, pose, instrument, weather, decor, pictures.
+    // A reading edited without them shows bodies over bare ground, and a reading is a recording of its own.
+    const { id: _id, version: _version, observer: _observer, account: _account, description: _description, sources: _sources,
+      tags: _tags, timeline: _timeline, milestones: _milestones, interpretation: _interpretation, ...scene } = structuredClone(base)
+    void [_id, _version, _observer, _account, _description, _sources, _tags, _timeline, _milestones, _interpretation]
+    const recording = {
       version: 1,
       id: `${base.id ?? stem}-interpretation-${number}`,
-      ...(base.time !== undefined ? { time: base.time } : {}),
-      ...(base.durationSeconds !== undefined ? { durationSeconds: base.durationSeconds } : {}),
-      ...(base.utcOffsetHours !== undefined ? { utcOffsetHours: base.utcOffsetHours } : {}),
-      ...(base.timeZone !== undefined ? { timeZone: base.timeZone } : {}),
-      ...(base.place !== undefined ? { place: base.place } : {}),
+      ...scene,
       tags: ["interpretation"],
-      ...(base.observerTrack !== undefined ? { observerTrack: base.observerTrack } : {}),
       timeline: { keyframes: [], order: [], groups: [] },
       interpretation: { ...(title !== undefined ? { title } : {}), bodies: [] }
     } as SightingRecordingJson

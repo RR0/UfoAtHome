@@ -705,15 +705,16 @@ const readings = interpretations.map((reading, index) => {
   const url = `interpretation-mcminnville-${index + 1}.json`
   const { type: _type, eventType: _eventType, sighting: _sighting, by, time, title: readingTitle, ...held } = reading as typeof reading & { by?: unknown, time?: string }
   void _type; void _eventType; void _sighting
+  // The whole scene of the account: a reading edited without its decor, its weather and its pose shows
+  // bodies over bare ground, and a reading is a recording of its own.
+  const { id: _id, version: _version, observer: _observer, account: _account, description: _description, sources: _sources,
+    tags: _tags, timeline: _timeline, milestones: _milestones, interpretation: _interpretation, ...scene } = observerWithReading
+  void [_id, _version, _observer, _account, _description, _sources, _tags, _timeline, _milestones, _interpretation]
   const recording = {
     version: 1,
     id: `${observer.id}-interpretation-${index + 1}`,
-    time: observer.time,
-    durationSeconds: observer.durationSeconds,
-    utcOffsetHours: observer.utcOffsetHours,
-    place: observer.place,
+    ...scene,
     tags: ["interpretation"],
-    observerTrack: observer.observerTrack,
     timeline: { keyframes: [], order: [], groups: [] },
     interpretation: { title: readingTitle, ...held }
   }
