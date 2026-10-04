@@ -2662,25 +2662,47 @@ describe("SightingEditorElement import controls", () => {
       expect(element.sightingData.id).toBe("x-1-interpretation-1")
     })
 
-    it("adds a reading of the account as a recording of its own, and deletes it on the second press", async () => {
+    it("asks for the reading's fields, adds it as a recording of its own, and deletes it once confirmed", async () => {
       const element = await open()
       const { select, add, remove } = row(element)
+      const shadow = element.shadowRoot!
+      const field = (id: string) => shadow.getElementById(id) as HTMLInputElement
       add.click()
+      field("case-title").value = "A hubcap"
+      field("case-author").value = "Cousyn"
+      field("case-date").value = "2013-06-01"
+      shadow.getElementById("case-form")!.dispatchEvent(new Event("submit", { cancelable: true }))
       await new Promise(resolve => setTimeout(resolve, 20))
       expect([...select.options]).toHaveLength(3)
       expect(element.sightingData.id).toBe("x-1-interpretation-2")
-      expect(remove.disabled).toBe(false)
+      expect(element.sightingData.interpretation?.title).toBe("A hubcap")
+      expect(add.hidden).toBe(true)
+      expect(remove.hidden).toBe(false)
       remove.click()
       expect([...select.options]).toHaveLength(3)
-      remove.click()
+      shadow.getElementById("case-form")!.dispatchEvent(new Event("submit", { cancelable: true }))
       await new Promise(resolve => setTimeout(resolve, 20))
       expect([...select.options]).toHaveLength(2)
       expect(element.sightingData.id).toBe("x-1")
     })
 
-    it("does not offer to delete an account", async () => {
+    it("offers to interpret an account but not a reading, and to delete a reading but not an account", async () => {
       const element = await open()
-      expect(row(element).remove.disabled).toBe(true)
+      const { select, add, remove } = row(element)
+      expect(add.hidden).toBe(false)
+      expect(remove.hidden).toBe(true)
+      select.value = "1"
+      select.dispatchEvent(new Event("change"))
+      await new Promise(resolve => setTimeout(resolve, 20))
+      expect(add.hidden).toBe(true)
+      expect(remove.hidden).toBe(false)
+    })
+
+    it("keeps the export of the case in the file group", async () => {
+      const element = await open()
+      const button = element.shadowRoot!.getElementById("case-export") as HTMLButtonElement
+      expect(button.hidden).toBe(false)
+      expect(button.closest("#group-file")).not.toBeNull()
     })
 
     it("leaves case mode when a plain recording is loaded", async () => {

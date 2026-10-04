@@ -579,13 +579,14 @@ export class SightingEditorElement extends HTMLElement {
   private caseSession?: CaseSession
   private caseCurrent?: CaseTrack
   /** Whether the delete button has been pressed once, and waits for the second press. */
-  private caseDeleting = false
   private readonly caseRow: HTMLElement
   private readonly caseTrackSelect: HTMLSelectElement
   private readonly caseAddButton: HTMLButtonElement
   private readonly caseDeleteButton: HTMLButtonElement
   private readonly caseExportButton: HTMLButtonElement
   private readonly labelCaseRecording: HTMLElement
+  private readonly caseDialog: HTMLDialogElement
+  private caseDialogMode: "add" | "delete" = "add"
   private readonly labelNarrativeSource: HTMLElement
   private readonly labelNarrativeRemember: HTMLElement
   private readonly groupTabs: HTMLButtonElement[]
@@ -1249,6 +1250,7 @@ export class SightingEditorElement extends HTMLElement {
     this.caseDeleteButton = this.shadow.getElementById("case-delete") as HTMLButtonElement
     this.caseExportButton = this.shadow.getElementById("case-export") as HTMLButtonElement
     this.labelCaseRecording = this.shadow.getElementById("label-case-recording")!
+    this.caseDialog = this.shadow.getElementById("case-dialog") as HTMLDialogElement
     this.labelNarrativeSource = this.shadow.getElementById("label-narrative-source")!
     this.labelNarrativeRemember = this.shadow.getElementById("label-narrative-remember")!
     this.labelShapeGroup = this.shadow.getElementById("label-shape-group")!
@@ -1516,8 +1518,15 @@ export class SightingEditorElement extends HTMLElement {
       const track = this.caseSession?.tracks[Number(this.caseTrackSelect.value)]
       if (track) void this.showCaseTrack(track)
     })
-    this.caseAddButton.addEventListener("click", () => this.addCaseReading())
-    this.caseDeleteButton.addEventListener("click", () => this.deleteCaseReading())
+    this.caseAddButton.addEventListener("click", () => this.askCaseReading())
+    this.caseDeleteButton.addEventListener("click", () => this.askDeleteCaseReading())
+    this.shadow.getElementById("case-form")!.addEventListener("submit", event => {
+      event.preventDefault()
+      this.closeCaseDialog()
+      if (this.caseDialogMode === "add") this.addCaseReading()
+      else this.deleteCaseReading()
+    })
+    this.shadow.getElementById("case-cancel")!.addEventListener("click", () => this.closeCaseDialog())
     this.caseExportButton.addEventListener("click", () => void this.exportCase())
     this.accountSourceSelect.addEventListener("change", () => this.updateObserverMetadata())
     this.accountUrlInput.addEventListener("input", () => this.updateSourceUrl())
@@ -2063,7 +2072,6 @@ export class SightingEditorElement extends HTMLElement {
     } catch (error) {
       window.alert(this.importErrorFor(error))
     }
-    this.caseDeleting = false
     this.refreshCaseRow()
   }
 
@@ -2071,6 +2079,7 @@ export class SightingEditorElement extends HTMLElement {
   private refreshCaseRow(): void {
     const session = this.caseSession
     this.caseRow.hidden = session === undefined
+    this.caseExportButton.hidden = session === undefined
     if (!session) return
     const readings = session.tracks.filter(track => track.kind === "reading")
     this.caseTrackSelect.replaceChildren(...session.tracks.map((track, index) => {
@@ -2083,44 +2092,85 @@ export class SightingEditorElement extends HTMLElement {
     }))
     const current = this.caseCurrent ? session.tracks.indexOf(this.caseCurrent) : 0
     this.caseTrackSelect.value = String(Math.max(0, current))
-    this.caseDeleteButton.disabled = this.caseCurrent?.kind !== "reading"
-    this.resetCaseDeleteConfirmation()
+    // Only an account that no reading is of can be interpreted; only a reading can be deleted.
+    this.caseAddButton.hidden = this.caseCurrent?.kind !== "observer"
+    this.caseDeleteButton.hidden = this.caseCurrent?.kind !== "reading"
   }
 
-  /** Adds a reading of the account on show (or the account the reading on show reads), and opens it. */
+  /** Opens the dialog that asks what the reading is: its title, its author, when it was elaborated, what it interprets. */
+  private askCaseReading(): void {
+    const session = this.caseSession
+    if (!session || this.caseCurrent?.kind !== "observer") return
+    this.caseDialogMode = "add"
+    const field = (id: string): HTMLInputElement => this.shadow.getElementById(id) as HTMLInputElement
+    const messages = this.messages
+    this.shadow.getElementById("case-dialog-message")!.hidden = true
+    this.shadow.getElementById("case-dialog-fields")!.hidden = false
+    this.shadow.getElementById("label-case-title")!.textContent = messages.caseTitleField
+    this.shadow.getElementById("label-case-author")!.textContent = messages.caseAuthorField
+    this.shadow.getElementById("label-case-date")!.textContent = messages.caseDateField
+    this.shadow.getElementById("label-case-of")!.textContent = messages.caseOfField
+    this.shadow.getElementById("case-ok")!.textContent = messages.caseOk
+    this.shadow.getElementById("case-cancel")!.textContent = messages.caseCancel
+    field("case-title").value = ""
+    field("case-author").value = ""
+    field("case-date").value = new Date().toISOString().slice(0, 10)
+    const accounts = session.tracks.filter(track => track.kind === "observer")
+    const of = this.shadow.getElementById("case-of") as HTMLSelectElement
+    of.replaceChildren(...accounts.map(track => new Option(
+      this.said.read(track.event.title as never) ?? this.said.read(track.recording?.observer?.title as never) ?? track.event.url ?? "",
+      String(session.tracks.indexOf(track)))))
+    of.value = String(session.tracks.indexOf(this.caseCurrent))
+    this.showCaseDialog()
+    field("case-title").focus()
+  }
+
+  private closeCaseDialog(): void {
+    if (typeof this.caseDialog.close === "function") this.caseDialog.close()
+    else this.caseDialog.removeAttribute("open")
+  }
+
+  private showCaseDialog(): void {
+    if (typeof this.caseDialog.showModal === "function") this.caseDialog.showModal()
+    else this.caseDialog.setAttribute("open", "")
+  }
+
+  /** Adds a reading of the account chosen in the dialog, and opens it. */
   private addCaseReading(): void {
     const session = this.caseSession
-    if (!session || !this.caseCurrent) return
+    if (!session) return
     this.commitCaseTrack()
-    const account = this.caseCurrent.kind === "observer" ? this.caseCurrent : session.accountOf(this.caseCurrent)
-    if (!account?.recording) return
-    const reading = session.addReading(account, new Date().toISOString().slice(0, 10))
+    const value = (id: string): string => (this.shadow.getElementById(id) as HTMLInputElement).value.trim()
+    const account = session.tracks[Number(value("case-of"))]
+    if (account?.kind !== "observer" || !account.recording) return
+    const title = value("case-title")
+    const author = value("case-author")
+    const reading = session.addReading(account, value("case-date") || new Date().toISOString().slice(0, 10),
+      title !== "" ? title : undefined, author !== "" ? [{ title: author }] : undefined)
     void this.showCaseTrack(reading)
   }
 
-  /** Deletes the reading on show on the second press, as a native confirm is refused in a pane. */
+  /** Asks, in the dialog, whether to delete the reading on show: a native confirm is refused in a pane. */
+  private askDeleteCaseReading(): void {
+    if (this.caseCurrent?.kind !== "reading") return
+    this.caseDialogMode = "delete"
+    const message = this.shadow.getElementById("case-dialog-message")!
+    message.textContent = this.messages.caseDeleteConfirm
+    message.hidden = false
+    this.shadow.getElementById("case-dialog-fields")!.hidden = true
+    this.shadow.getElementById("case-ok")!.textContent = this.messages.caseOk
+    this.shadow.getElementById("case-cancel")!.textContent = this.messages.caseCancel
+    this.showCaseDialog()
+  }
+
   private deleteCaseReading(): void {
     const session = this.caseSession
     const track = this.caseCurrent
     if (!session || !track || track.kind !== "reading") return
-    if (!this.caseDeleting) {
-      this.caseDeleting = true
-      this.caseDeleteButton.textContent = "✓"
-      this.caseDeleteButton.title = this.messages.caseDeleteConfirm
-      window.setTimeout(() => this.resetCaseDeleteConfirmation(), 4000)
-      return
-    }
     const account = session.accountOf(track) ?? session.tracks.find(other => other.kind === "observer")
     session.deleteReading(track)
     this.caseCurrent = undefined
     if (account) void this.showCaseTrack(account)
-  }
-
-  private resetCaseDeleteConfirmation(): void {
-    this.caseDeleting = false
-    this.caseDeleteButton.textContent = "🗑"
-    this.caseDeleteButton.title = this.messages.caseDeleteReading
-    this.caseDeleteButton.setAttribute("aria-label", this.messages.caseDeleteReading)
   }
 
   /** The case, and every recording of it added or changed, as one zip laid out as the case is. */
@@ -8566,8 +8616,10 @@ export class SightingEditorElement extends HTMLElement {
     this.labelImportFile.textContent = messages.importFile
     this.labelImportUrl.textContent = messages.importUrl
     this.labelCaseRecording.textContent = messages.caseRecording
+    this.caseAddButton.textContent = messages.caseInterpret
     this.caseAddButton.title = messages.caseAddReading
-    this.caseAddButton.setAttribute("aria-label", messages.caseAddReading)
+    this.caseDeleteButton.title = messages.caseDeleteReading
+    this.caseDeleteButton.setAttribute("aria-label", messages.caseDeleteReading)
     this.caseExportButton.textContent = messages.caseExport
     this.refreshCaseRow()
     this.importUrlInput.placeholder = messages.importUrlPlaceholder

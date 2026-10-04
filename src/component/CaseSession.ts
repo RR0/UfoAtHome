@@ -65,7 +65,7 @@ export class CaseSession {
    * of its own that shares the account's whole scene (place, time, pose, instrument, weather, decor, pictures)
    * and holds no body yet.
    */
-  addReading(account: CaseTrack, when: string, title?: SaidText): CaseTrack {
+  addReading(account: CaseTrack, when: string, title?: SaidText, by?: AgentRef[]): CaseTrack {
     const base = account.recording
     if (!base) throw new Error("A reading is added to an account that has been loaded")
     const stem = account.event.url!.replace(/^.*\//, "").replace(/^observer-/, "").replace(/\.json$/, "")
@@ -94,6 +94,7 @@ export class CaseSession {
       eventType: "sighting",
       interpretationOf: base.id ?? stem,
       time: when,
+      ...(by !== undefined && by.length > 0 ? { by } : {}),
       ...(title !== undefined ? { title } : {}),
       url: directory + file
     }

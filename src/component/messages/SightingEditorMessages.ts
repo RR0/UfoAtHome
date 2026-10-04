@@ -156,6 +156,13 @@ export interface SightingEditorMessages extends SightingLabels {
   caseDeleteReading: string
   caseDeleteConfirm: string
   /** The case with what was changed, as a zip. */
+  caseInterpret: string
+  caseTitleField: string
+  caseAuthorField: string
+  caseDateField: string
+  caseOfField: string
+  caseOk: string
+  caseCancel: string
   caseExport: string
   importFile: string
   importUrl: string

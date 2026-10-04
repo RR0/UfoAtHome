@@ -312,6 +312,7 @@ export const html = `
     <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
     <button id="import-url-button" type="button">Load</button>
     <button id="export" type="button">Export</button>
+    <button id="case-export" type="button" hidden>Export the case</button>
   </div>
   <p id="file-note" class="file-note" hidden role="status"></p>
   <div id="file-editor" class="file-editor"></div>
@@ -561,11 +562,25 @@ export const html = `
 <!-- A case opened for editing: the recordings it lists (the accounts, and the readings of them, which
      are recordings of their own), one open at a time. Hidden for a single recording. Just above the render, as the player puts its own pickers: what
      is picked here is what the render shows. -->
+<dialog id="case-dialog" class="case-dialog">
+  <form method="dialog" id="case-form">
+    <p id="case-dialog-message" hidden></p>
+    <div id="case-dialog-fields">
+      <label><span id="label-case-title">Title</span> <input id="case-title" type="text"/></label>
+      <label><span id="label-case-author">Author</span> <input id="case-author" type="text"/></label>
+      <label><span id="label-case-date">Date</span> <input id="case-date" type="date"/></label>
+      <label><span id="label-case-of">Interprets</span> <select id="case-of"></select></label>
+    </div>
+    <div class="toolbar">
+      <button id="case-ok" type="submit" value="ok">OK</button>
+      <button id="case-cancel" type="button">Cancel</button>
+    </div>
+  </form>
+</dialog>
 <div id="case-row" class="toolbar" hidden>
   <label><span id="label-case-recording">Recording</span> <select id="case-track"></select></label>
-  <button id="case-add" type="button" class="icon-btn" title="Add a reading" aria-label="Add a reading">+</button>
+  <button id="case-add" type="button">Interpret…</button>
   <button id="case-delete" type="button" class="icon-btn" title="Delete this reading" aria-label="Delete this reading">🗑</button>
-  <button id="case-export" type="button">Export the case</button>
 </div>
 <!-- The playback layer's own toggles, taken out of the picture — see UfoElement.hostControls. -->
 <div id="scene-controls" class="scene-controls"></div>
@@ -1159,6 +1174,10 @@ select.weather-field:disabled {
   gap: 0.5em;
 }
 #case-row { flex-wrap: wrap; }
+.case-dialog { max-width: min(28em, 92vw); }
+.case-dialog label { display: flex; align-items: center; gap: .5em; margin: .4em 0; }
+.case-dialog label span { flex: 0 0 9em; }
+.case-dialog input, .case-dialog select { flex: 1 1 auto; min-width: 0; }
 #case-row label { display: flex; align-items: center; gap: .5em; flex: 1 1 16em; min-width: 0; }
 /* A reading is titled with a sentence: the picker is as wide as the row lets it be and cuts the rest. */
 #case-track { flex: 1 1 auto; min-width: 0; max-width: 100%; text-overflow: ellipsis; }
