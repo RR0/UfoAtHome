@@ -48,3 +48,37 @@ describe("PointSources", () => {
     expect(PointSources.patch(ShaderLib.points.vertexShader)).toContain("vRaster = gl_PointSize")
   })
 })
+
+describe("points drawn into the eye's picture", () => {
+  const patched = PointSources.patchOutput(ShaderLib.points.vertexShader)
+
+  it("hooks into three's own projection line, which would otherwise leave every star where a pinhole puts it", () => {
+    expect(ShaderLib.points.vertexShader).toContain(PointSources.PROJECT_ANCHOR)
+    expect(patched).toContain("uOutputHalfFovRad")
+    expect(patched.indexOf("uOutputHalfFovRad")).toBeLessThan(patched.indexOf("void main"))
+  })
+
+  it("lights a point by the picture's pixel, not by a pinhole's", () => {
+    expect(patched).not.toContain("projectionMatrix[1][1]")
+    expect(patched).toContain("float pixelAngle = uOutputPixelAngle;")
+  })
+
+  it("keeps the light and the scintillation of the ordinary material", () => {
+    const ordinary = PointSources.patch(ShaderLib.points.vertexShader)
+    for (const line of ["vColor.rgb /=", "vTotal =", "vRaster = gl_PointSize;", "float amplitude = min(0.35"]) {
+      expect(patched).toContain(line)
+      expect(ordinary).toContain(line)
+    }
+  })
+
+  it("is one twin per material, drawn without depth", () => {
+    const material = PointSources.material(2)
+    const twin = PointSources.outputMaterial(material)
+    expect(PointSources.outputMaterial(material)).toBe(twin)
+    expect(twin).not.toBe(material)
+    expect(twin.depthTest).toBe(false)
+    expect(twin.size).toBe(2)
+    expect(PointSources.outputMaterial(PointSources.material(2, false)).customProgramCacheKey()).not.toBe(twin.customProgramCacheKey())
+  })
+})
+

@@ -169,3 +169,26 @@ From the start of this audit, 4x throttle, same build: Total Blocking Time about
 
 Still on the main thread: the reflection probes' remaining captures, the rest of the first frame's
 renders, and the imagery tile decoding (`decodeTileInto`).
+
+## October 2026: stars at the picture's own pixels
+
+Stars came out as flat blocks with a stair at their rim (prod 0.91.0 too, and every version since the
+eye's picture was drawn from a smaller render). Cause: the eye's picture (`EquidistantProjectionPass`)
+is resampled from a render of the scene that carries about 0.42 pixel per output pixel at the centre
+of a 70° field, so a star drawn into it is a point magnified two and a half times, and the eye's
+response clips its top into a disc whose contour follows the magnified source pixels. A cubic filter
+cannot invent what the render does not hold (Catmull-Rom rings black round every star; held between
+its neighbours it is bilinear again).
+
+So point sources (anything `PointSources.track`ed: stars, planets, satellites, re-entries) are no
+longer drawn into that render. `PointLayerPass` draws them into a target of the picture's own size,
+with `PointSources.outputMaterial` (the same light and disc, `r = f·θ` in the vertex shader, the
+picture's pixel for the acuity maths), and the resampling adds that layer to the scene's light before
+the eye's response. What hides a star is read from a small picture (half the source's size) of the
+foreground drawn in black, then the cloud decks over it with their own alpha: a star shows through
+what is left of that cover along its direction. Fields too wide for one source (the cube path) and
+pinhole pictures are unchanged. Cost: lower than before (the stars leave the big render): Total
+Blocking Time 3.0 to 3.5 s against 4.5 to 5.8 s, same page, same 4x throttle.
+
+Not covered: a comet's tail and a meteor's ribbon are meshes, not point sources, and are still drawn
+at the source's resolution.

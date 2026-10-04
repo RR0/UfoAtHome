@@ -1,5 +1,5 @@
 import { Color, CustomBlending, Mesh, NormalBlending, OneFactor, OneMinusSrcAlphaFactor, Vector3 } from "three"
-import type { Group, ShaderMaterial, SphereGeometry } from "three"
+import type { Group, Object3D, ShaderMaterial, SphereGeometry } from "three"
 import type { CloudInstance, CloudLayer } from "../engine/model/CloudLayer.js"
 import { resolveCloudLayers } from "../engine/model/CloudLayer.js"
 import type { CloudPick } from "./CloudManipulation.js"
@@ -190,6 +190,11 @@ export class LayeredCloudSystem {
   private get cirrusDeck(): Deck | undefined {
     return [...this.decks.values()].filter(deck => deck.layer.type === "cirrus" && deck.uniforms)
       .sort((a, b) => b.layer.coverage - a.layer.coverage)[0]
+  }
+
+  /** Every mesh the decks are drawn with — what hides the stars behind them (see PointLayerPass). */
+  get meshes(): Object3D[] {
+    return [...this.decks.values()].flatMap(deck => [deck.volume?.mesh, deck.surface].filter((mesh): mesh is NonNullable<typeof mesh> => mesh !== undefined))
   }
 
   get volumes(): VolumetricCloudLayer[] {

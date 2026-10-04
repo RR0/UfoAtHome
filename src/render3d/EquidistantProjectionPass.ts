@@ -12,6 +12,7 @@ import {
   Vector2,
   HalfFloatType,
   LinearFilter,
+  Texture,
   WebGLCubeRenderTarget,
   WebGLRenderTarget,
   type Camera,
@@ -20,6 +21,7 @@ import {
 } from "three"
 import { FINISH_BY_MODE_GLSL, EYE_UNIFORMS, FINISH_GLSL, FinishMode } from "./colorSpace.js"
 import type { UnfinishedFrame } from "./colorSpace.js"
+import { PointLayerPass, type PointLayerHost } from "./PointLayerPass.js"
 
 /**
  * Renders the scene the way an eye sees it rather than the way a lens photographs it.
@@ -69,6 +71,7 @@ export class EquidistantProjectionPass {
    */
   static readonly SAMPLES = 4
 
+  private pointLayer?: PointLayerPass
   private cubeTarget?: WebGLCubeRenderTarget
   private cubeCamera?: CubeCamera
   private cubeMaterial?: ShaderMaterial
@@ -108,6 +111,9 @@ export class EquidistantProjectionPass {
         uSrcTanHalfFovY: { value: 1 },
         uResolution: { value: new Vector2(this.width, this.height) },
         uOverlay: { value: this.overlayTarget.texture },
+        /** The point sources drawn at the picture's own pixels (see PointLayerPass), and whether there are any. */
+        uPoints: { value: null as Texture | null },
+        uPointsOn: { value: 0 },
         /** See FinishMode. */
         uMode: { value: FinishMode.Finished }
       },
@@ -123,6 +129,8 @@ export class EquidistantProjectionPass {
         ${FINISH_GLSL}
         uniform sampler2D uSource;
         uniform sampler2D uOverlay;
+        uniform sampler2D uPoints;
+        uniform float uPointsOn;
         uniform float uHalfFovRad;
         uniform float uAspect;
         uniform float uSrcTanHalfFovY;
@@ -153,6 +161,9 @@ export class EquidistantProjectionPass {
               overlay = texture2D(uOverlay, src * 0.5 + 0.5);
             }
           }
+          // The stars and planets, already at this picture's pixels and already behind whatever hides
+          // them: light added to the scene's, before the eye's response is applied to the sum.
+          scene += uPointsOn * texture2D(uPoints, vNdc * 0.5 + 0.5).rgb;
           // Finished here because this pass draws to the CANVAS, which three.js would have encoded
           // for itself had the scene gone there directly — see colorSpace.ts. Left as its two layers
           // when the frame is on its way into a longer exposure, which has to add up light.
@@ -222,6 +233,7 @@ export class EquidistantProjectionPass {
     this.height = Math.max(1, height)
     this.target.setSize(this.width, this.height)
     this.overlayTarget.setSize(this.width, this.height)
+    this.pointLayer?.resize(this.width, this.height)
     this.material.uniforms.uResolution.value.set(this.width, this.height)
     this.material.uniforms.uAspect.value = this.width / this.height
   }
@@ -247,7 +259,8 @@ export class EquidistantProjectionPass {
     overlays?: (camera: PerspectiveCamera) => void,
     beforeCube?: (cube: boolean) => void,
     afterResample?: () => void,
-    into?: UnfinishedFrame
+    into?: UnfinishedFrame,
+    points?: PointLayerHost
   ): void {
     const aspect = this.width / this.height
     if (!EquidistantProjectionPass.supports(fovDeg, aspect)) {
@@ -268,6 +281,11 @@ export class EquidistantProjectionPass {
     // it and then be resampled from the wrong direction entirely.
     onCameraWidened?.()
     const originalTarget = renderer.getRenderTarget()
+    // The point sources (stars, planets, satellites) are not drawn into this render: it carries
+    // fewer pixels per radian than the picture, and a point magnified is a block. They are drawn
+    // into the picture's own pixels below, from the same camera.
+    if (points) this.pointLayer ??= new PointLayerPass(this.width, this.height)
+    const drawnApart = points ? this.pointLayer!.take(points) : false
     renderer.setRenderTarget(this.target)
     renderer.render(scene, camera)
     // What is laid over the picture — the observer's own phenomena, depth-tested against the decor
@@ -277,6 +295,12 @@ export class EquidistantProjectionPass {
       EquidistantProjectionPass.clearTransparent(renderer, this.overlayTarget)
       overlays(camera)
     }
+    if (drawnApart) {
+      this.pointLayer!.restore()
+      this.pointLayer!.draw(renderer, scene, camera, points!, (fovDeg / 2) * Math.PI / 180, this.sourceTanHalfFovY(fovDeg, aspect))
+    }
+    this.material.uniforms.uPoints.value = this.pointLayer?.target.texture ?? null
+    this.material.uniforms.uPointsOn.value = drawnApart ? 1 : 0
     renderer.setRenderTarget(originalTarget)
     camera.fov = originalFov
     camera.updateProjectionMatrix()
@@ -641,6 +665,7 @@ export class EquidistantProjectionPass {
   dispose(): void {
     this.target.dispose()
     this.overlayTarget.dispose()
+    this.pointLayer?.dispose()
     this.material.dispose()
     this.cubeTarget?.dispose()
     this.overlayCubeTarget?.dispose()

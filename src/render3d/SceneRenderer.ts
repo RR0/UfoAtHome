@@ -89,6 +89,7 @@ import type { CloudUniforms } from "./CloudSystem.js"
 import { CloudField } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
+import type { PointLayerHost } from "./PointLayerPass.js"
 import { DepthOfFieldPass } from "./DepthOfFieldPass.js"
 import { FinishPass } from "./FinishPass.js"
 import { EYE_UNIFORMS, type UnfinishedFrame } from "./colorSpace.js"
@@ -3842,8 +3843,23 @@ export class SceneRenderer {
         if (this.lensFlare) this.lensFlare.mesh.visible = cube ? false : this.sunVisible
       },
       () => this.renderDazzleOnResample(),
-      target
+      target,
+      this.pointLayerHost
     )
+  }
+
+  /** What the eye's picture needs to draw the scene's point sources at its own pixels — see
+   * PointLayerPass. */
+  private readonly pointLayerHost: PointLayerHost = {
+    points: () => {
+      const found: Points[] = []
+      this.celestialGroup.traverse(object => {
+        if (object instanceof Points && object.userData.pointSource) found.push(object)
+      })
+      return found
+    },
+    clouds: () => [...(this.layeredClouds?.meshes ?? []), ...(this.cloudMesh ? [this.cloudMesh] : []), ...(this.cirrusMesh ? [this.cirrusMesh] : [])],
+    sky: this.celestialGroup
   }
 
   /**

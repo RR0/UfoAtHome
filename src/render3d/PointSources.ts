@@ -1,4 +1,4 @@
-import { AdditiveBlending, PointsMaterial, Vector4, type Object3D, type WebGLRenderer } from "three"
+import { AdditiveBlending, PointsMaterial, Texture, Vector4, type Object3D, type WebGLRenderer } from "three"
 import { RoundPoints } from "./RoundPoints.js"
 
 /**
@@ -60,6 +60,9 @@ export class PointSources {
    * pixel is what the drawn disc's solid angle comes from, and it differs on every path (the canvas,
    * a widened camera, the faces of a cube, a reflection probe). */
   static track(object: Object3D): void {
+    // Marked too, so that a renderer can find every point source of a scene without being told of
+    // each (see PointLayerPass): they are what the eye's picture draws at the picture's own pixels.
+    object.userData.pointSource = true
     object.onBeforeRender = (renderer: WebGLRenderer) => {
       PointSources.shared.uViewportHeight.value = Math.max(1, renderer.getCurrentViewport(PointSources.viewport).w)
     }
@@ -96,6 +99,95 @@ export class PointSources {
     }
     material.customProgramCacheKey = () => (scintillates ? "point-sources" : "point-sources-steady")
     return material
+  }
+
+  /**
+   * What the points drawn at the picture's own resolution are told each frame (see PointLayerPass):
+   * the mapping of the eye's picture, and what stands in front of the sky.
+   */
+  static readonly output = {
+    uOutputHalfFovRad: { value: 0.5236 },
+    uOutputAspect: { value: 1 },
+    /** The angle one pixel of the picture covers at its centre, radians. */
+    uOutputPixelAngle: { value: 0.003 },
+    /** `tan` of half the SOURCE render's vertical field: where a direction is found in it. */
+    uSrcTanHalfFovY: { value: 1 },
+    /** What stands between the eye and the sky, as the alpha of a small picture of the source's view. */
+    uOcclusion: { value: null as Texture | null }
+  }
+
+  private static readonly twins = new WeakMap<PointsMaterial, PointsMaterial>()
+
+  /**
+   * The same points material, to be drawn into the picture itself rather than into the render the
+   * picture is resampled from.
+   *
+   * The eye's picture is resampled from a render that carries fewer pixels per radian than the
+   * picture does (a 70 degree field gives it about two fifths of them), so a point source drawn
+   * there is a point magnified two and a half times, and a bright one, clipped by the eye's response,
+   * comes out a flat block with a stair at its rim as wide as a source pixel. Drawn here, in the
+   * picture's own pixels, it is as fine as the picture is. Its light and its shape are the same
+   * (patchOutput only changes WHERE the point lands and what a pixel is); it is the light of the
+   * point alone, which the clouds and the ground still have to be allowed to hide — read off the
+   * small picture of them that PointLayerPass draws.
+   */
+  static outputMaterial(material: PointsMaterial): PointsMaterial {
+    let twin = PointSources.twins.get(material)
+    if (twin) return twin
+    const scintillates = material.customProgramCacheKey() === "point-sources"
+    twin = new PointsMaterial({ vertexColors: true, size: material.size, sizeAttenuation: false, fog: false })
+    twin.transparent = true
+    twin.depthWrite = false
+    twin.depthTest = false
+    twin.blending = AdditiveBlending
+    twin.onBeforeCompile = shader => {
+      shader.uniforms.uRodSolidAngle = PointSources.shared.uRodSolidAngle
+      shader.uniforms.uConeThreshold = PointSources.shared.uConeThreshold
+      shader.uniforms.uViewportHeight = PointSources.shared.uViewportHeight
+      shader.uniforms.uScintillationTime = PointSources.shared.uScintillationTime
+      Object.assign(shader.uniforms, PointSources.output)
+      shader.vertexShader = PointSources.patchOutput(shader.vertexShader, scintillates)
+      shader.fragmentShader = PointSources.patchFragment(shader.fragmentShader)
+    }
+    twin.customProgramCacheKey = () => (scintillates ? "point-sources-output" : "point-sources-output-steady")
+    PointSources.twins.set(material, twin)
+    return twin
+  }
+
+  /** The anchor in three.js's own points vertex shader the output mapping hooks into. */
+  static readonly PROJECT_ANCHOR = "#include <project_vertex>"
+
+  /**
+   * The vertex shader of a point drawn into the eye's picture: the same light and the same disc as
+   * patch() gives it, put where `r = f·θ` puts its direction (see EquidistantProjectionPass), and
+   * lit by the pixel the picture has rather than the pixel of a pinhole render.
+   */
+  static patchOutput(vertexShader: string, scintillates = true): string {
+    return PointSources.patch(vertexShader, scintillates)
+      .replace("uniform float uRodSolidAngle;", `uniform float uOutputHalfFovRad;
+uniform float uOutputAspect;
+uniform float uOutputPixelAngle;
+uniform float uSrcTanHalfFovY;
+uniform sampler2D uOcclusion;
+uniform float uRodSolidAngle;`)
+      .replace(PointSources.PROJECT_ANCHOR, `${PointSources.PROJECT_ANCHOR}
+  {
+    // The eye is at the origin of view space: the point's direction is its position, and the picture
+    // puts it at an angle from the axis proportional to that angle, whichever way it lies.
+    vec3 viewDirection = normalize(mvPosition.xyz);
+    float lateral = length(viewDirection.xy);
+    float theta = acos(clamp(-viewDirection.z, -1.0, 1.0));
+    vec2 angle = lateral < 1e-6 ? vec2(0.0) : viewDirection.xy / lateral * theta;
+    // Behind the eye there is no picture: left outside it, where nothing is drawn.
+    gl_Position = viewDirection.z > 0.0 ? vec4(2.0, 2.0, 2.0, 1.0)
+      : vec4(angle.x / (uOutputHalfFovRad * uOutputAspect), angle.y / uOutputHalfFovRad, 0.0, 1.0);
+    // What is in front of the sky along that direction: found in the small picture of the source's
+    // view, where the ground and the clouds were drawn (alpha is their cover).
+    vec2 seenAt = vec2(viewDirection.x / -viewDirection.z / (uSrcTanHalfFovY * uOutputAspect), viewDirection.y / -viewDirection.z / uSrcTanHalfFovY) * 0.5 + 0.5;
+    float covered = viewDirection.z < 0.0 && all(lessThan(abs(seenAt - 0.5), vec2(0.5))) ? texture2D(uOcclusion, seenAt).a : 0.0;
+    vColor.rgb *= 1.0 - covered;
+  }`)
+      .replace("float pixelAngle = 2.0 / (projectionMatrix[1][1] * uViewportHeight);", "float pixelAngle = uOutputPixelAngle;")
   }
 
   /**
