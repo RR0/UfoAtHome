@@ -5,6 +5,8 @@ import type { CloudRendering } from "./LayeredCloudSystem.js"
 // statically analyzable, which was the difference between an ~850KB and an ~180KB bundle here.
 import {
   AdditiveBlending,
+  CustomBlending,
+  ZeroFactor,
   BackSide,
   Box3,
   BufferAttribute,
@@ -3905,31 +3907,43 @@ export class SceneRenderer {
   }
 
   /**
-   * Draws the bodies of the interpretation again, over the pictures just laid on the scene.
+   * Keeps the pictures laid on the scene from covering the 3D bodies.
    *
    * A picture is laid over everything and is not hidden by anything (see renderReferencesPass), which
    * includes the 3D bodies: they are in the scene, so a photograph at half opacity left them at half
    * strength — Cussac's sphere behind its 1968 view, McMinnville's model behind Trent's print — where
-   * the pictures' point is to be compared WITH the phenomenon. So the bodies alone are drawn once
-   * more, against the depth the scene left (the pictures write none): where the body was in front it
-   * is whole again, and where something of the decor stood in front of it, the decor still hides it.
-   * The lights are on the bodies' layer too, or three would draw them unlit.
+   * the pictures' point is to be compared WITH the phenomenon. The bodies are not drawn again: what
+   * is laid over the picture is already an eye's picture, premultiplied (see FINISH_GLSL), and a body
+   * drawn there in the scene's own luminance came out white, and past the trees it should be behind,
+   * since that layer has no depth of the scene's. Instead the bodies' silhouettes are cut out of the
+   * pictures' layer — everything it holds there goes to nothing — so that the scene's own pixels show
+   * through: the body as the scene drew it, hidden by whatever stands in front of it as the scene drew
+   * that too.
    */
   private renderBodiesOverReferences(camera: PerspectiveCamera): void {
     if (!this.references.any || !this.bodySystem.any) return
-    this.scene.traverse(object => {
-      if ((object as { isLight?: boolean }).isLight) object.layers.enable(BODY_OVER_LAYER)
-    })
     const autoClear = this.renderer.autoClear
     const shadows = this.renderer.shadowMap.autoUpdate
     this.renderer.autoClear = false
     this.renderer.shadowMap.autoUpdate = false
     camera.layers.set(BODY_OVER_LAYER)
+    this.scene.overrideMaterial = this.bodyCutOutMaterial
     this.renderer.render(this.scene, camera)
+    this.scene.overrideMaterial = null
     camera.layers.set(0)
     this.renderer.autoClear = autoClear
     this.renderer.shadowMap.autoUpdate = shadows
   }
+
+  /** Writes nothing, colour and alpha, wherever it is drawn: what a body's silhouette cuts out of the pictures' layer. */
+  private readonly bodyCutOutMaterial = new MeshBasicMaterial({
+    blending: CustomBlending,
+    blendSrc: ZeroFactor,
+    blendDst: ZeroFactor,
+    blendSrcAlpha: ZeroFactor,
+    blendDstAlpha: ZeroFactor,
+    toneMapped: false
+  })
 
   /**
    * Lays the pictures of the place over the picture the scene was just drawn in — over everything,

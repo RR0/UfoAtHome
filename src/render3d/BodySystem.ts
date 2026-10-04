@@ -69,7 +69,7 @@ export interface BodyFrame {
 }
 
 /**
- * The layer every part of a body is ALSO on, so that it can be drawn a second time over the pictures
+ * The layer every part of a body is ALSO on, so that its silhouette can be cut out of the pictures
  * of the place (see SceneRenderer.renderBodiesOverReferences). A body is in the scene, and a picture
  * laid over the scene covers it like everything else of the scene: a photograph at half opacity
  * showed the observer's phenomenon at half strength, the one thing in the picture that was not
