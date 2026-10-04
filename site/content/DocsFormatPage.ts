@@ -283,17 +283,17 @@ if (excerpts.length > 0) {
       dashed outlines and lists how far off the direction is and how many times wider and taller
       each body looks, in red when an observer could not have been that far off.</p>
     <p>The observer's own reading goes in the recording, as <code>interpretation</code>. An
-      analyst's goes in the case, as an event of type <code>interpretation</code> naming the
-      recording by its <code>id</code>, with who claims it in <code>by</code>
-      (<code>{ "people": id }</code>, <code>{ "org": id }</code>, or a person described in value)
-      and its bodies inline or in a file at <code>url</code>. A account whose observer said what
+      analyst's is another observation, the one that was as they hold it: an event of type
+      <code>sighting</code> in the case, like the original, marked <code>interpretationOf</code> with
+      the <code>id</code> (or the ids) of the sighting it interprets, dated by <code>time</code> when
+      it was elaborated, with who claims it in <code>by</code>
+      (<code>{ "people": id }</code>, <code>{ "org": id }</code>, or a person described in value),
+      and a recording at <code>url</code> (the same format, its own <code>interpretation</code>
+      holding the bodies). The player does not offer it as an observer, but as a reading of the
+      account it names. The older form, an event of type <code>interpretation</code> naming the
+      recording in <code>sighting</code> with bodies inline, is still read. A account whose observer said what
       it was is drawn in the round, as they said; one that says nothing in metres is drawn as the
       angles it states. The player offers it and each analyst's interpretation, one at a time.</p>
-    <p>A recording may also hold other readings of its account, as <code>interpretations</code>: an
-      array of the same objects (<code>title</code>, <code>bodies</code>, and optionally <code>by</code>
-      and <code>time</code>), with or without a case around it — a sighting with several
-      interpretations is one file. The player lists them after the observer's own, and the editor's
-      Bodies part has a <em>Reading</em> picker to choose which one is edited, add one and delete one.</p>
     <pre data-json=""><code>{
   "interpretation": {
     "title": "A craft standing on its legs",
@@ -669,19 +669,19 @@ if (excerpts.length > 0) {
       contours pointillés, et indique l'écart de direction et combien de fois plus large et plus
       haut chaque corps paraît, en rouge quand un observateur n'aurait pas pu se tromper d'autant.</p>
     <p>La lecture de l'observateur lui-même va dans l'enregistrement, en <code>interpretation</code>.
-      Celle d'un analyste va dans le dossier, en événement de type <code>interpretation</code>
-      qui désigne l'enregistrement par son <code>id</code>, avec qui l'avance dans
+      Celle d'un analyste est une autre observation, celle qui a eu lieu telle qu'il la tient :
+      un événement de type <code>sighting</code> du dossier, comme l'original, marqué
+      <code>interpretationOf</code> avec l'<code>id</code> (ou les ids) de l'observation qu'il
+      interprète, daté par <code>time</code> de son élaboration, avec qui l'avance dans
       <code>by</code> (<code>{ "people": id }</code>, <code>{ "org": id }</code>, ou une personne
-      décrite en valeur) et ses corps sur place ou dans un fichier à <code>url</code>. Un
+      décrite en valeur), et un enregistrement à <code>url</code> (même format, son propre
+      <code>interpretation</code> portant les corps). Le lecteur ne l'offre pas comme observateur,
+      mais comme lecture du compte rendu qu'elle désigne. L'ancienne forme, un événement de type
+      <code>interpretation</code> qui désigne l'enregistrement dans <code>sighting</code> avec ses
+      corps sur place, est encore lue. Un
       compte rendu dont l'observateur a dit ce que c'était se dessine en volume, comme il l'a dit ;
       celui qui ne dit rien en mètres se dessine avec les angles qu'il énonce. Le lecteur le
       propose, ainsi que chaque interprétation d'analyste, une à la fois.</p>
-    <p>Un enregistrement peut aussi porter d'autres lectures de son compte rendu, en
-      <code>interpretations</code> : un tableau des mêmes objets (<code>title</code>,
-      <code>bodies</code>, et en option <code>by</code> et <code>time</code>), avec ou sans dossier
-      autour — une observation à plusieurs interprétations tient dans un seul fichier. Le lecteur les
-      liste après celle de l'observateur, et la partie Corps de l'éditeur a un sélecteur
-      <em>Lecture</em> pour choisir celle qu'on édite, en ajouter une et en supprimer une.</p>
     <pre data-json=""><code>{
   "interpretation": {
     "title": "Un engin posé sur ses pieds",
@@ -1055,18 +1055,17 @@ if (excerpts.length > 0) {
       contornos discontinuos e indica cuánto se desvía la dirección y cuántas veces más ancho y más alto
       parece cada cuerpo, en rojo cuando un observador no podría haberse equivocado tanto.</p>
     <p>La lectura del propio observador va en la grabación, como <code>interpretation</code>. La de un
-      analista va en el caso, como un evento de tipo <code>interpretation</code> que nombra la
-      grabación por su <code>id</code>, con quién la sostiene en <code>by</code>
-      (<code>{ "people": id }</code>, <code>{ "org": id }</code>, o una persona descrita en el valor)
-      y sus cuerpos en línea o en un archivo en <code>url</code>. Un relato cuyo observador dijo lo que
+      analista es otra observación, la que ocurrió tal como él la sostiene: un evento de tipo
+      <code>sighting</code> del caso, como el original, marcado con <code>interpretationOf</code> con el
+      <code>id</code> (o los ids) de la observación que interpreta, fechado por <code>time</code> cuando
+      se elaboró, con quién la sostiene en <code>by</code>
+      (<code>{ "people": id }</code>, <code>{ "org": id }</code>, o una persona descrita en el valor),
+      y una grabación en <code>url</code> (el mismo formato, su propia <code>interpretation</code> con los
+      cuerpos). El reproductor no la ofrece como observador, sino como lectura del relato que nombra. La
+      forma antigua, un evento de tipo <code>interpretation</code> que nombra la grabación en
+      <code>sighting</code> con los cuerpos en línea, se sigue leyendo. Un relato cuyo observador dijo lo que
       era se dibuja en volumen, como lo dijo; uno que no dice nada en metros se dibuja como los
       ángulos que expresa. El reproductor lo ofrece, junto con la interpretación de cada analista, una cada vez.</p>
-    <p>Una grabación puede llevar además otras lecturas de su relato, como <code>interpretations</code>:
-      una lista de los mismos objetos (<code>title</code>, <code>bodies</code> y, opcionalmente,
-      <code>by</code> y <code>time</code>), con o sin caso alrededor — una observación con varias
-      interpretaciones cabe en un solo archivo. El reproductor las lista tras la del observador, y
-      la parte Cuerpos del editor tiene un selector <em>Lectura</em> para elegir cuál se edita,
-      añadir una y eliminar una.</p>
     <pre data-json=""><code>{
   "interpretation": {
     "title": "Una nave posada sobre sus patas",
@@ -1438,17 +1437,17 @@ if (excerpts.length > 0) {
       contorni tratteggiati e indica di quanto si discosta la direzione e quante volte più largo e più alto
       appare ciascun corpo, in rosso quando un osservatore non avrebbe potuto sbagliarsi di tanto.</p>
     <p>La lettura dell'osservatore stesso va nella registrazione, come <code>interpretation</code>. Quella di un
-      analista va nel caso, come evento di tipo <code>interpretation</code> che designa la
-      registrazione con il suo <code>id</code>, con chi la sostiene in <code>by</code>
-      (<code>{ "people": id }</code>, <code>{ "org": id }</code>, o una persona descritta nel valore)
-      e i suoi corpi in linea o in un file a <code>url</code>. Un resoconto il cui osservatore ha detto che cosa
+      analista è un'altra osservazione, quella che c'è stata come la sostiene lui: un evento di tipo
+      <code>sighting</code> del caso, come l'originale, contrassegnato da <code>interpretationOf</code> con
+      l'<code>id</code> (o gli id) dell'osservazione che interpreta, datato da <code>time</code> quando è
+      stata elaborata, con chi la sostiene in <code>by</code>
+      (<code>{ "people": id }</code>, <code>{ "org": id }</code>, o una persona descritta nel valore),
+      e una registrazione a <code>url</code> (stesso formato, la sua <code>interpretation</code> con i
+      corpi). Il lettore non la propone come osservatore, ma come lettura del resoconto che designa. La
+      forma più vecchia, un evento di tipo <code>interpretation</code> che designa la registrazione in
+      <code>sighting</code> con i corpi in linea, si legge ancora. Un resoconto il cui osservatore ha detto che cosa
       fosse viene disegnato a tutto tondo, come l'ha detto; uno che non dice nulla in metri viene disegnato come gli
       angoli che esprime. Il lettore lo propone, insieme all'interpretazione di ciascun analista, una alla volta.</p>
-    <p>Una registrazione può portare anche altre letture del proprio resoconto, come <code>interpretations</code>: un elenco
-      degli stessi oggetti (<code>title</code>, <code>bodies</code> e, facoltativi, <code>by</code> e <code>time</code>),
-      con o senza un caso attorno — un'osservazione con più interpretazioni sta in un solo file. Il lettore le elenca dopo
-      quella dell'osservatore, e la parte Corpi dell'editor ha un selettore <em>Lettura</em> per scegliere quale si
-      modifica, aggiungerne una ed eliminarne una.</p>
     <pre data-json=""><code>{
   "interpretation": {
     "title": "Un velivolo posato sulle sue zampe",

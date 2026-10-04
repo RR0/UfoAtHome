@@ -52,6 +52,39 @@ describe("A case's interpretations", () => {
   })
 })
 
+describe("An interpretation as another observation", () => {
+  const reading = { type: "event", eventType: "sighting", interpretationOf: "x-1", time: "2013-04", by: [{ people: "CousynAntoine" }], title: "A model", url: "reading.json" }
+  const shared = { type: "event", eventType: "sighting", interpretationOf: ["x-1", "x-2"], title: "Shared", url: "shared.json" }
+  const together: CaseJson = {
+    events: [
+      { type: "event", eventType: "sighting", url: "one.json" },
+      { type: "event", eventType: "sighting", url: "two.json" },
+      reading as never,
+      shared as never
+    ]
+  }
+
+  it("is an event of type sighting marked interpretationOf, and is not offered as an observer", () => {
+    expect(CaseFile.sightingUrls(together, "https://example.org/d/case.json")).toEqual(["https://example.org/d/one.json", "https://example.org/d/two.json"])
+  })
+
+  it("names the sightings it is a reading of, one or several", () => {
+    expect(CaseFile.interpretationEvents(together, "x-1")).toHaveLength(2)
+    expect(CaseFile.interpretationEvents(together, "x-2")).toHaveLength(1)
+    expect(CaseFile.interpretationEvents(together, "x-3")).toEqual([])
+  })
+
+  it("reads its bodies from the interpretation of the recording at its url", async () => {
+    const recording = { version: 1, id: "x-1-interpretation-1", timeline: { keyframes: [] }, interpretation: { title: "From the recording", bodies: [body] } }
+    const events = CaseFile.interpretationEvents(together, "x-1")
+    const asked: string[] = []
+    const read = await CaseFile.interpretationOf(events[0], "https://example.org/d/case.json", async url => { asked.push(url); return recording })
+    // The case calls it what its event does; the bodies are the recording's.
+    expect(read).toEqual({ title: "A model", bodies: [body] })
+    expect(asked).toEqual(["https://example.org/d/reading.json"])
+  })
+})
+
 describe("The observer's own interpretation", () => {
   it("travels with the recording, unchanged", () => {
     const interpretation = { title: "On its legs", bodies: [body] }

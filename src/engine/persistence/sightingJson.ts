@@ -120,8 +120,6 @@ export interface SightingRecordingJson {
   /** What the observer took it to be, in metres — see InterpretationJson. Absent means they said
    * nothing a body could be made of, which is most of them. */
   interpretation?: InterpretationJson
-  /** Other readings of the account — see Sighting.interpretations. */
-  interpretations?: InterpretationJson[]
 }
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
@@ -171,8 +169,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     iso: sighting.iso,
     lightPollution: sighting.lightPollution,
     observerMap: sighting.observerMap,
-    interpretation: sighting.interpretation,
-    interpretations: sighting.interpretations?.length ? sighting.interpretations : undefined
+    interpretation: sighting.interpretation
   }
 }
 
@@ -242,7 +239,6 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.observerMap = json.observerMap
   sighting.vehicle = json.vehicle
   sighting.interpretation = json.interpretation
-  sighting.interpretations = json.interpretations
   sighting.loadIssues = issues
   SightingShapes.toBounds(sighting)
   // Positions follow the stated directions the way sizes follow the stated angles — and this is the

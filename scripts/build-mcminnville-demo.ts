@@ -694,17 +694,40 @@ const interpretations = [
     [{ people: "HartmannWilliam" }])
 ]
 
-/** A reading as the recording files it: the event without its envelope. */
-const filed = (event: { title: Said<string>, by?: unknown, time?: string, bodies: unknown[] }) => ({
-  title: event.title,
-  ...(event.by ? { by: event.by } : {}),
-  ...(event.time ? { time: event.time } : {}),
-  bodies: event.bodies
+/**
+ * Each reading is another observation (see InterpretationEventJson): a recording of its own, with the
+ * place, the time and the observer's pose of the account it reads, and its bodies in its own
+ * `interpretation`; and an event of type `sighting` in the case, marked `interpretationOf` the two
+ * recordings of the account (the photographs, and the close-up of them), dated when it was
+ * elaborated and attributed.
+ */
+const readings = interpretations.map((reading, index) => {
+  const url = `interpretation-mcminnville-${index + 1}.json`
+  const { type: _type, eventType: _eventType, sighting: _sighting, by, time, title: readingTitle, ...held } = reading as typeof reading & { by?: unknown, time?: string }
+  void _type; void _eventType; void _sighting
+  const recording = {
+    version: 1,
+    id: `${observer.id}-interpretation-${index + 1}`,
+    time: observer.time,
+    durationSeconds: observer.durationSeconds,
+    utcOffsetHours: observer.utcOffsetHours,
+    place: observer.place,
+    tags: ["interpretation"],
+    observerTrack: observer.observerTrack,
+    timeline: { keyframes: [], order: [], groups: [] },
+    interpretation: { title: readingTitle, ...held }
+  }
+  const event = {
+    type: "event",
+    eventType: "sighting",
+    interpretationOf: [observer.id, closeUp.id],
+    ...(time ? { time } : {}),
+    ...(by ? { by } : {}),
+    title: readingTitle,
+    url
+  }
+  return { url, recording, event }
 })
-
-// The readings live in the recording itself, so that it is a sighting with several interpretations
-// whether or not a case is around it: the observer's own (the account) and these.
-const withReadings = <T extends object>(recording: T) => ({ ...recording, interpretations: interpretations.map(filed) })
 
 const caseJson = {
   id: "McMinnville1950",
@@ -712,7 +735,8 @@ const caseJson = {
   time: "1950-05-11 19:45",
   events: [
     { type: "event", eventType: "sighting", time: "1950-05-11 19:45", title: "Paul Trent", url: "observer-mcminnville.json" },
-    { type: "event", eventType: "sighting", time: "1950-05-11 19:45", title: "Paul Trent, gros plan", url: "observer-mcminnville-closeup.json" }
+    { type: "event", eventType: "sighting", time: "1950-05-11 19:45", title: "Paul Trent, gros plan", url: "observer-mcminnville-closeup.json" },
+    ...readings.map(reading => reading.event)
   ]
 }
 
@@ -723,7 +747,8 @@ const write = (name: string, json: unknown): void => {
   writeFileSync(path.join(directory, name), JSON.stringify(json, null, 1) + "\n")
   console.log(`Wrote public/demo-data/${name}`)
 }
-write("observer-mcminnville.json", withReadings(observerWithReading))
-write("observer-mcminnville-closeup.json", withReadings(closeUp))
+write("observer-mcminnville.json", observerWithReading)
+write("observer-mcminnville-closeup.json", closeUp)
+for (const reading of readings) write(reading.url, reading.recording)
 write("case-mcminnville.json", caseJson)
 console.log(`second camera ${Geometry.round(second.e, 2)} E ${Geometry.round(second.n, 2)} N; model seen at ${seenFirst.altitudeDeg.toFixed(1)} deg from ${seenFirst.distanceM.toFixed(2)} m, then ${seenSecond.altitudeDeg.toFixed(1)} deg from ${seenSecond.distanceM.toFixed(2)} m`)

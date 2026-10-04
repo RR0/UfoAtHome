@@ -3,16 +3,6 @@ import type { BodyPrimitive } from "../../engine/interpretation/Interpretation.j
 /** What the Bodies part of the Phenomenon group says — see BodyEditor. */
 export interface BodyEditorMessages {
   intro: string
-  /** The picker of the readings a recording holds. */
-  reading: string
-  /** The first of them: the observer's own, the one the account itself carries. */
-  readingAccount: string
-  /** An alternative with no title yet; {n} is its number. */
-  readingUntitled: string
-  addReading: string
-  deleteReading: string
-  /** The delete button once pressed, until it is pressed again. */
-  deleteReadingConfirm: string
   interpretationTitle: string
   body: string
   none: string

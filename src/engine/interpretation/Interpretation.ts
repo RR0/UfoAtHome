@@ -27,11 +27,6 @@ import type { ReentryJson } from "./Reentry.js"
 export interface InterpretationJson {
   /** What the claim is, in a few words — "Craft on its legs", "Weather balloon at 3 km". */
   title?: SaidText
-  /** Who claims it, when it is not the observer: an analyst's reading filed in the recording itself,
-   * as a case's own interpretation events name theirs (see InterpretationEventJson.by). */
-  by?: AgentRef[]
-  /** When it was claimed, as RR0 writes a time ("2013-04"). */
-  time?: string
   bodies: BodyJson[]
   /** Fires the interpretation lights on the ground, as their smoke — see SmokeSource. */
   smoke?: SmokeSource[]
@@ -63,21 +58,28 @@ export interface SmokeSource {
 export type AgentRef = { people: string } | { org: string } | People
 
 /**
- * One analyst's interpretation, as an event of a case — beside its `sighting` events, which it
- * interprets one of.
+ * One interpretation of a sighting, as an event of a case — beside the `sighting` events it interprets.
  *
- * The bodies are either inline or in a file of their own at `url`, read relative to the case file
- * like a sighting's own `url`: a track of keyframes is long, and a case is a chronology someone
- * reads.
+ * An interpretation is another observation: the one that was, as whoever interprets holds it. So it
+ * is an event of type `sighting` like the original, with a recording at its `url` (the same format,
+ * its `interpretation` holding the bodies), marked by `interpretationOf` — the `id` of the sighting
+ * (or the ids of the several) it interprets — and dated when the interpretation was elaborated
+ * (`time`), by whom (`by`). A case lists the recordings that are observers' accounts by the events
+ * with no `interpretationOf`, and those that are readings of them by the ones that have.
+ *
+ * The older form is still read: an event of type `interpretation` naming the sighting in `sighting`,
+ * its bodies inline or in a file of their own at `url`.
  */
 export interface InterpretationEventJson {
   type?: "event"
-  eventType: "interpretation"
-  /** The `id` of the recording this interprets — see Sighting.id. */
-  sighting: string
+  eventType: "sighting" | "interpretation"
+  /** The `id` of the recording (or the ids of the recordings) this interprets — see Sighting.id. */
+  interpretationOf?: string | string[]
+  /** Older form: the `id` of the recording this interprets. */
+  sighting?: string
   /** Who claims it. */
   by?: AgentRef[]
-  /** When it was claimed, as RR0 writes a time. */
+  /** When it was elaborated, as RR0 writes a time. */
   time?: string
   title?: SaidText
   url?: string

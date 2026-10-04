@@ -9,6 +9,40 @@
       "time": "1964-04-24 17:50",
       "title": "Lonnie Zamora",
       "url": "observer-socorro.json"
+    },
+    {
+      "type": "event",
+      "eventType": "sighting",
+      "interpretationOf": "1964-04-24-ZamoraLonnie",
+      "by": [
+        {
+          "title": "UFO@home"
+        }
+      ],
+      "title": {
+        "fr": "Démonstration : trois fois plus grand, trois fois plus loin",
+        "en": "Demonstration: three times as large, three times as far",
+        "es": "Demostración: tres veces más grande, tres veces más lejos",
+        "it": "Dimostrazione: tre volte più grande, tre volte più lontano"
+      },
+      "url": "interpretation-socorro-1.json"
+    },
+    {
+      "type": "event",
+      "eventType": "sighting",
+      "interpretationOf": "1964-04-24-ZamoraLonnie",
+      "by": [
+        {
+          "people": "StanfordRay"
+        }
+      ],
+      "title": {
+        "fr": "Le récit de Zamora, avec l'insigne que Ray Stanford tient pour le vrai",
+        "en": "Zamora's account, with the insignia Ray Stanford holds was the real one",
+        "es": "El relato de Zamora, con la insignia que según Ray Stanford era la verdadera",
+        "it": "Il resoconto di Zamora, con l'insegna che secondo Ray Stanford era quella vera"
+      },
+      "url": "interpretation-socorro-2.json"
     }
   ]
 }

@@ -29,8 +29,11 @@ export interface CaseEventJson {
   url?: string
   time?: string
   title?: unknown
-  /** An interpretation's: the `id` of the recording it interprets. */
+  /** An interpretation's, in the older form: the `id` of the recording it interprets. */
   sighting?: string
+  /** An interpretation's: the `id`, or the ids, of the sightings this one is a reading of. Set on an
+   * event of type `sighting` whose recording is a reading and not an observer's account. */
+  interpretationOf?: string | string[]
 }
 
 /** Reading a case file for what UFO@home replays of it. */
@@ -55,24 +58,31 @@ export class CaseFile {
    */
   static sightingUrls(json: CaseJson, caseUrl: string): string[] {
     return (json.events ?? [])
-      .filter(event => event.eventType === CaseFile.SIGHTING_EVENT && typeof event.url === "string" && event.url !== "")
+      // An event that is a reading of a sighting has a recording too, which is not an observer's.
+      .filter(event => event.eventType === CaseFile.SIGHTING_EVENT && !event.interpretationOf && typeof event.url === "string" && event.url !== "")
       .map(event => new URL(event.url!, caseUrl).href)
   }
 
-  /** The analysts' interpretations of one recording, in the order the case lists them: its events
-   * of type `interpretation` naming that recording's `id`. A recording with no id is named by
-   * none. */
+  /** The interpretations of one recording, in the order the case lists them: its events of type
+   * `sighting` that name it in `interpretationOf`, and (the older form) its events of type
+   * `interpretation` naming it in `sighting`. A recording with no id is named by none. */
   static interpretationEvents(json: CaseJson, sightingId: string | undefined): InterpretationEventJson[] {
     if (!sightingId) return []
     return (json.events ?? [])
-      .filter(event => event.eventType === CaseFile.INTERPRETATION_EVENT && event.sighting === sightingId)
+      .filter(event => {
+        if (event.eventType === CaseFile.INTERPRETATION_EVENT) return event.sighting === sightingId
+        if (event.eventType !== CaseFile.SIGHTING_EVENT || event.interpretationOf === undefined) return false
+        return [event.interpretationOf].flat().includes(sightingId)
+      })
       .map(event => event as unknown as InterpretationEventJson)
   }
 
   /**
-   * What an interpretation event claims: its bodies where it states them itself, or the file at its
-   * `url`, read relative to the case file's own address as a sighting's is. Its title is the
-   * event's, which is what the case calls it.
+   * What an interpretation claims. Its event's title is what the case calls it.
+   *
+   * Newer form: the recording at the event's `url`, read relative to the case file's own address as
+   * a sighting's is, whose `interpretation` holds the bodies. Older form: the bodies stated in the
+   * event itself, or in a file at `url` that holds them directly.
    */
   static async interpretationOf(event: InterpretationEventJson, caseUrl: string, fetchJson: (url: string) => Promise<unknown>): Promise<InterpretationJson> {
     // Any value may be written with its provenance beside it, as in a recording (see Provenance);
@@ -82,8 +92,10 @@ export class CaseFile {
     }
     if (!event.url) return { title: event.title, bodies: [] }
     const fileUrl = new URL(event.url, caseUrl).href
-    const file = await fetchJson(fileUrl) as InterpretationJson
-    return CaseFile.withModelsFrom(Provenance.strip({ title: event.title ?? file.title, bodies: file.bodies ?? [], smoke: file.smoke, reentries: file.reentries }).recording, fileUrl)
+    const file = await fetchJson(fileUrl) as InterpretationJson & { interpretation?: InterpretationJson }
+    // A recording keeps its bodies in its own `interpretation`; an older file is the interpretation.
+    const stated = "timeline" in file && file.interpretation ? file.interpretation : file
+    return CaseFile.withModelsFrom(Provenance.strip({ title: event.title ?? stated.title, bodies: stated.bodies ?? [], smoke: stated.smoke, reentries: stated.reentries }).recording, fileUrl)
   }
 
   /** An interpretation with its bodies' model addresses made absolute against the file that states
