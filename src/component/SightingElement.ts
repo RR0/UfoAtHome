@@ -112,6 +112,9 @@ export class SightingElement extends HTMLElement {
   private readonly shareEmbedLabel: HTMLElement
   private readonly shareLink: HTMLInputElement
   private readonly shareCopy: HTMLButtonElement
+  private readonly shareStartOn: HTMLInputElement
+  private readonly shareStart: HTMLInputElement
+  private readonly shareStartLabel: HTMLElement
   private readonly embedReplayRadio: HTMLInputElement
   private readonly embedEditRadio: HTMLInputElement
   private readonly labelEmbedReplay: HTMLElement
@@ -226,6 +229,9 @@ export class SightingElement extends HTMLElement {
     this.shareEmbedLabel = this.shadow.getElementById("share-embed-label")!
     this.shareLink = this.shadow.getElementById("share-link") as HTMLInputElement
     this.shareCopy = this.shadow.getElementById("share-copy") as HTMLButtonElement
+    this.shareStartOn = this.shadow.getElementById("share-start-on") as HTMLInputElement
+    this.shareStart = this.shadow.getElementById("share-start") as HTMLInputElement
+    this.shareStartLabel = this.shadow.getElementById("share-start-label")!
     this.embedReplayRadio = this.shadow.getElementById("embed-kind-replay") as HTMLInputElement
     this.embedEditRadio = this.shadow.getElementById("embed-kind-edit") as HTMLInputElement
     this.labelEmbedReplay = this.shadow.getElementById("label-embed-replay")!
@@ -276,6 +282,7 @@ export class SightingElement extends HTMLElement {
     this.shareClose.addEventListener("click", () => this.closeShare())
     this.shareBack.addEventListener("click", () => this.showShareView("main"))
     this.shareEmbedOption.addEventListener("click", () => this.showShareView("embed"))
+    for (const control of [this.shareStartOn, this.shareStart]) control.addEventListener("input", () => this.refreshShareLinks())
     this.shareCopy.addEventListener("click", () => void this.copyText(this.shareLink.value, this.shareLink, this.shareCopy))
     // A press on the dimmed page around the card, which the dialog itself receives, closes it.
     this.shareDialog.addEventListener("click", event => {
@@ -351,6 +358,8 @@ export class SightingElement extends HTMLElement {
     this.shareClose.setAttribute("aria-label", this.messages.close)
     this.shareBack.setAttribute("aria-label", this.messages.back)
     this.shareCopy.textContent = this.messages.embedCopy
+    this.shareStartLabel.textContent = this.messages.shareStartAt
+    this.shareStart.setAttribute("aria-label", this.messages.shareStartAt)
     this.shareEmbedLabel.textContent = this.messages.embed
     this.syncShareTitle()
     this.labelEmbedReplay.textContent = this.messages.embedReplay
@@ -547,7 +556,9 @@ export class SightingElement extends HTMLElement {
     const tag = kind === "edit" ? "rr0-sighting-editor" : "rr0-sighting"
     const script = new URL(`${tag}.mjs`, import.meta.url).href
     const src = this.currentSrc ? new URL(this.currentSrc, location.href).href : ""
-    return `<script type="module" src="${script}"></script>\n<${tag} src="${src}"></${tag}>`
+    // The replay can open at a stated position; the editor has no such attribute.
+    const start = kind === "replay" && this.shareStartSeconds !== undefined ? ` ${START_TIME_ATTRIBUTE}="${this.shareStartSeconds}"` : ""
+    return `<script type="module" src="${script}"></script>\n<${tag} src="${src}"${start}></${tag}>`
   }
 
   private refreshEmbedMarkup(): void {
@@ -577,15 +588,31 @@ export class SightingElement extends HTMLElement {
    * link is the player's own page.
    */
   private playUrl(): string {
-    if (!this.currentSrc) return `${APP_HOME_URL}/play/`
-    return `${APP_HOME_URL}/play/?sighting=${encodeURIComponent(new URL(this.currentSrc, location.href).href)}`
+    const start = this.shareStartSeconds !== undefined ? `t=${this.shareStartSeconds}` : ""
+    if (!this.currentSrc) return `${APP_HOME_URL}/play/${start && "?" + start}`
+    return `${APP_HOME_URL}/play/?sighting=${encodeURIComponent(new URL(this.currentSrc, location.href).href)}${start && "&" + start}`
+  }
+
+  /** The position the shared link opens at, in whole seconds, when the reader asked for one. */
+  private get shareStartSeconds(): number | undefined {
+    const seconds = Math.floor(Number(this.shareStart.value))
+    return this.shareStartOn.checked && Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined
+  }
+
+  private refreshShareLinks(): void {
+    this.shareLink.value = this.playUrl()
+    this.refreshEmbedMarkup()
   }
 
   private shareView: "main" | "embed" = "main"
 
   private openShare(): void {
-    this.shareLink.value = this.playUrl()
-    this.refreshEmbedMarkup()
+    // Offered at the position on show, as the video sites do, and off until the reader wants it.
+    const ufo = this.sceneElement.ufoElement
+    this.shareStart.max = String(Math.floor(ufo.seekableDuration / 1000))
+    this.shareStart.value = String(Math.floor(ufo.currentTime / 1000))
+    this.shareStartOn.checked = false
+    this.refreshShareLinks()
     this.showShareView("main")
     if (typeof this.shareDialog.showModal === "function") this.shareDialog.showModal()
     else this.shareDialog.setAttribute("open", "")

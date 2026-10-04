@@ -23,6 +23,7 @@ export const sightingMessages_en: SightingMessages = {
   embedObservation: "Embed the observation",
   back: "Back",
   embedCopy: "Copy",
+  shareStartAt: "Start at",
   embedCopied: "Copied",
   showLabels: "Show what it states",
   interpretation: "Interpretation",

@@ -58,6 +58,11 @@ export const html = `
         <span id="share-embed-label">Embed</span>
       </button>
     </div>
+    <div class="share-start">
+      <label><input id="share-start-on" type="checkbox"/> <span id="share-start-label">Start at</span></label>
+      <input id="share-start" class="share-start-input" type="number" min="0" step="1" value="0" aria-label="Start at"/>
+      <span id="share-start-unit">s</span>
+    </div>
     <div class="share-link">
       <input id="share-link" class="share-link-input" type="text" readonly spellcheck="false" aria-label="Link"/>
       <button id="share-copy" class="share-copy" type="button">Copy</button>
@@ -535,6 +540,16 @@ export const css = `
   padding: 0.5em 0.6em 0.5em 1em;
   border: 1px solid #ccc;
   border-radius: 0.9em;
+}
+.share-start {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-bottom: 0.7em;
+}
+.share-start-input {
+  width: 7em;
+  font: inherit;
 }
 .share-link-input {
   flex: 1;

@@ -36,6 +36,8 @@ export interface SightingMessages extends SightingLabels {
   embedObservation: string
   back: string
   embedCopy: string
+  /** The share dialog's option to open the link at the position on show, its value in seconds. */
+  shareStartAt: string
   embedCopied: string
   /** The info panel's toggle for the parameter strip under the render — what the recording states,
    * field by field, in the same words the editor uses for the same fields. */
