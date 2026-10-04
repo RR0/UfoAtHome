@@ -12,6 +12,7 @@ interface ShellWords {
   readonly createdBy: string
   readonly thisSite: string
   readonly theCode: string
+  readonly contact: string
   readonly requestFeature: string
   readonly licence: string
 }
@@ -54,25 +55,25 @@ export class Layout {
       locale: "en_US", mainNavigation: "Main navigation", sectionLink: "Link to this section",
       licensed: version => `UFO@home v${version} — MIT licensed`,
       createdBy: `Created and maintained by <a href="https://rr0.org">RR0</a> — usable without it.`,
-      thisSite: "This site", theCode: "The code", requestFeature: "Request a feature", licence: "MIT licence"
+      thisSite: "This site", theCode: "The code", contact: "Contact", requestFeature: "Request a feature", licence: "MIT licence"
     },
     fr: {
       locale: "fr_FR", mainNavigation: "Navigation principale", sectionLink: "Lien vers cette section",
       licensed: version => `UFO@home v${version} — sous licence MIT`,
       createdBy: `Créé et maintenu par <a href="https://rr0.org">RR0</a> — utilisable sans lui.`,
-      thisSite: "Le site", theCode: "Le code", requestFeature: "Proposer une amélioration", licence: "Licence MIT"
+      thisSite: "Le site", theCode: "Le code", contact: "Contact", requestFeature: "Proposer une amélioration", licence: "Licence MIT"
     },
     es: {
       locale: "es_ES", mainNavigation: "Navegación principal", sectionLink: "Enlace a esta sección",
       licensed: version => `UFO@home v${version} — con licencia MIT`,
       createdBy: `Creado y mantenido por <a href="https://rr0.org">RR0</a> — utilizable sin él.`,
-      thisSite: "Este sitio", theCode: "El código", requestFeature: "Proponer una mejora", licence: "Licencia MIT"
+      thisSite: "Este sitio", theCode: "El código", contact: "Contacto", requestFeature: "Proponer una mejora", licence: "Licencia MIT"
     },
     it: {
       locale: "it_IT", mainNavigation: "Navigazione principale", sectionLink: "Link a questa sezione",
       licensed: version => `UFO@home v${version} — con licenza MIT`,
       createdBy: `Creato e mantenuto da <a href="https://rr0.org">RR0</a> — utilizzabile senza di esso.`,
-      thisSite: "Questo sito", theCode: "Il codice", requestFeature: "Proporre un miglioramento", licence: "Licenza MIT"
+      thisSite: "Questo sito", theCode: "Il codice", contact: "Contatti", requestFeature: "Proporre un miglioramento", licence: "Licenza MIT"
     }
   }
 
@@ -269,6 +270,13 @@ ${script ? `<script type="module">\n// Where this site's own pages load their mo
         <li><a href="https://www.npmjs.com/package/@rr0/ufoathome">npm</a></li>
         <li><a href="https://github.com/RR0/UfoAtHome/issues/new">${words.requestFeature}</a></li>
         <li><a href="https://github.com/RR0/UfoAtHome/blob/master/LICENSE">${words.licence}</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>${words.contact}</h4>
+      <ul>
+        <li><a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a></li>
+        <li><a href="https://x.com/ufo_at_home" rel="me">@ufo_at_home</a></li>
       </ul>
     </div>
   </div>
