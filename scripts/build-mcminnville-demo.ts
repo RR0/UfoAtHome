@@ -466,6 +466,9 @@ class Pose {
   static readonly SECOND = { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_SECOND_DEG, rollDeg: Study.LEAN_SECOND_DEG }
 }
 
+const HUNG_LEAD_MS = 500
+const HUNG_HOLD_MS = 1000
+
 /** The model, with its small stub on top, as both studies have it: the position and the tip
  * come from the geometry of the photographs, which both parts of the study share. */
 const modelBodies = () => [
@@ -474,9 +477,12 @@ const modelBodies = () => [
     title: title("La maquette", "The model", "La maqueta", "Il modellino"),
     explains: ["ufo-1"],
     model: { id: "ufoathome-mcminnville-object" },
+    // Hung up and photographed twice, not seen swinging: it is there for each photograph and gone after
+    // it, and the swing is only the difference between the two places (see HUNG_LEAD_MS).
     track: [
       {
-        t: 0,
+        t: T_FIRST_MS - HUNG_LEAD_MS,
+        present: true,
         eastM: Geometry.round(pivot.e, 3),
         northM: Geometry.round(pivot.n, 3),
         altitudeAboveGroundM: Geometry.round(restTop - Study.MODEL_HEIGHT_M, 3),
@@ -484,14 +490,16 @@ const modelBodies = () => [
         attitude: Pose.FIRST,
         appearance: { color: "#8a8d91", albedo: 0.3 }
       },
-      { t: T_STEP_MS, attitude: Pose.FIRST },
+      { t: T_FIRST_MS + HUNG_HOLD_MS, present: false },
       {
-        t: T_SECOND_MS,
+        t: T_SECOND_MS - HUNG_LEAD_MS,
+        present: true,
         eastM: Geometry.round(swungTo.e, 3),
         northM: Geometry.round(swungTo.n, 3),
         altitudeAboveGroundM: Geometry.round(swungTop - Study.MODEL_HEIGHT_M, 3),
         attitude: Pose.SECOND
-      }
+      },
+      { t: T_SECOND_MS + HUNG_HOLD_MS, present: false }
     ]
   }
 ]
@@ -506,9 +514,10 @@ const threadBody = (detected: boolean) => ({
   explains: [],
   model: { id: "cylinder" },
   track: [
-    { t: 0, ...thread(false), appearance: { color: "#303030", albedo: 0.1 } },
-    { t: T_STEP_MS, ...thread(false) },
-    { t: T_SECOND_MS, ...thread(true) }
+    { t: T_FIRST_MS - HUNG_LEAD_MS, present: true, ...thread(false), appearance: { color: "#303030", albedo: 0.1 } },
+    { t: T_FIRST_MS + HUNG_HOLD_MS, present: false },
+    { t: T_SECOND_MS - HUNG_LEAD_MS, present: true, ...thread(true) },
+    { t: T_SECOND_MS + HUNG_HOLD_MS, present: false }
   ]
 })
 
@@ -574,8 +583,6 @@ const sameAngleBody = (id: string, label: Said<string>, sizeM: number, stations:
  * these, so the model's 70 cm is ASSUMED. Placed in the world where the photograph's own direction and
  * angular width put it from the camera that took it, which is the same place the account's shapes are.
  */
-const HUNG_LEAD_MS = 500
-const HUNG_HOLD_MS = 1000
 const hungBodies = (id: string, label: Said<string>, sizeM: number) => {
   const heightM = Geometry.round(sizeM * Study.MODEL_HEIGHT_M / Study.MODEL_WIDTH_M, 3)
   const stands = [
@@ -639,10 +646,10 @@ const firstPart = {
   sighting: observer.id,
   time: "2013-04",
   title: title(
-    "Avril 2013 : une maquette d'environ 12 cm sous le fil inférieur de la ligne, qui oscille de 9° entre les deux photographies (le fil, qu'elle suppose, ne se voit pas sur les clichés)",
-    "April 2013: a model about 12 cm across under the lower wire of the line, swinging 9° between the two photographs (the thread it needs does not show on the prints)",
-    "Abril de 2013: una maqueta de unos 12 cm bajo el cable inferior de la línea, que oscila 9° entre las dos fotografías (el hilo que necesita no se ve en las copias)",
-    "Aprile 2013: un modellino di circa 12 cm sotto il filo inferiore della linea, che oscilla di 9° fra le due fotografie (il filo che richiede non si vede sulle stampe)"),
+    "Avril 2013 : une maquette d'environ 12 cm sous le fil inférieur de la ligne, décalée de 9° d'une photographie à l'autre (le fil, qu'elle suppose, ne se voit pas sur les clichés)",
+    "April 2013: a model about 12 cm across under the lower wire of the line, offset by 9° from one photograph to the other (the thread it needs does not show on the prints)",
+    "Abril de 2013: una maqueta de unos 12 cm bajo el cable inferior de la línea, desplazada 9° de una fotografía a la otra (el hilo que necesita no se ve en las copias)",
+    "Aprile 2013: un modellino di circa 12 cm sotto il filo inferiore della linea, spostato di 9° da una fotografia all'altra (il filo che richiede non si vede sulle stampe)"),
   by: authors,
   bodies: [...modelBodies(), threadBody(false)]
 }
