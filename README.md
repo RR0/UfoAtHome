@@ -1,4 +1,4 @@
-<img src="doc/web/ufoathome/UFOAtHome.png" align=right alt="UFO@home logo">
+<img src="site/assets/logo.png" width="128" align="right" alt="UFO@home logo: a flying saucer with a play button">
 
 # UFO@home
 

@@ -41,6 +41,14 @@ export class Layout {
 
   static readonly ORIGIN = "https://ufoathome.org"
 
+  /** The logo is a flying saucer holding a play button: what the project does, replaying an account. */
+  static readonly LOGO_ALT = "UFO@home logo: a flying saucer with a play button"
+
+  /** Tab icon, home-screen icon: one logo, in the sizes each of those asks for. */
+  static readonly ICON_LINKS = `<link rel="icon" href="/favicon.ico" sizes="48x48 32x32 16x16">
+  <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">`
+
   private static readonly SHELL: Record<SiteLanguage, ShellWords> = {
     en: {
       locale: "en_US", mainNavigation: "Main navigation", sectionLink: "Link to this section",
@@ -166,8 +174,12 @@ ${this.languageRedirect(page, language)}
   <meta property="og:description" content="${this.attribute(meta.description[language])}">
   <meta property="og:url" content="${Layout.ORIGIN}${self}">
   <meta property="og:locale" content="${words.locale}">
-  <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta property="og:image" content="${Layout.ORIGIN}/logo.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="${Layout.LOGO_ALT}">
+  <meta name="twitter:card" content="summary">
+  ${Layout.ICON_LINKS}
   <link rel="stylesheet" href="/style.css">
   ${modules}
 </head>
@@ -224,7 +236,7 @@ ${script ? `<script type="module">\n// Where this site's own pages load their mo
       return `<a href="${this.path(page.meta)}"${currentAttr}>${this.text(page.meta.navLabel[language])}</a>`
     }).join("\n    ")
     return `<header class="site-header">
-  <a class="brand" href="/">UFO<span class="at">@</span>home</a>
+  <a class="brand" href="/"><img class="brand-logo" src="/logo-96.png" width="28" height="28" alt="">UFO<span class="at">@</span>home</a>
   <nav class="site-nav" aria-label="${Layout.SHELL[language].mainNavigation}">
     ${links}
   </nav>

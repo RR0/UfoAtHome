@@ -126,7 +126,9 @@ class SiteBuilder {
       await writeFile(join(this.out, "demos", `index.${language}.json`), JSON.stringify(demoIndex[language]), "utf8")
     }
     await cp(join(this.root, "site", "style.css"), join(this.out, "style.css"))
-    await cp(join(this.root, "site", "assets", "favicon.svg"), join(this.out, "favicon.svg"))
+    for (const asset of ["favicon.ico", "icon-192.png", "apple-touch-icon.png", "logo.png", "logo-96.png"]) {
+      await cp(join(this.root, "site", "assets", asset), join(this.out, asset))
+    }
     await cp(join(this.root, "public", "demo-data"), join(this.out, "demo-data"), { recursive: true })
     // The recording format as a JSON Schema, generated from the types by build:schema, so that a file
     // written by hand or by a language model can be checked before it is played. Linked from the
@@ -389,7 +391,7 @@ ${retired}
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Not found — UFO@home</title>
 <meta name="robots" content="noindex">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+${Layout.ICON_LINKS}
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>

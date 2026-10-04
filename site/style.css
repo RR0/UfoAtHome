@@ -154,6 +154,8 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 3rem 0; }
    advance width — its side bearings alone are already more air than the wordmark wants, so this
    trims a little off them and leaves the rest. */
 .brand .at { color: var(--glow); margin: 0 -0.02em; }
+/* The logo's own yellow square, so a corner radius is all it needs to sit beside the wordmark. */
+.brand-logo { align-self: center; border-radius: 6px; margin-right: 0.5rem; }
 .site-nav { display: flex; gap: 1.1rem; flex-wrap: wrap; margin-left: auto; align-items: center; }
 .site-nav a { color: var(--ink-dim); font-size: 0.95rem; padding: 0.2rem 0; border-bottom: 2px solid transparent; }
 .site-nav a:hover { color: var(--ink); }
