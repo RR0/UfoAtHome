@@ -57,6 +57,9 @@ const RECORDINGS: CaseRecording[] = [
   { published: "maffliers/vue-p024-2012-09-09.jpg", dossier: "Maffliers/maffliers/vue-p024-2012-09-09.jpg" },
   { published: "observer-silly-le-long.json", dossier: "SillyLeLong/observer-silly-le-long.json" },
   { published: "observer-mcminnville.json", dossier: "McMinnville/observer-mcminnville.json" },
+  // The two plates the recording lays over the scene, at the address it states.
+  { published: "mcminnville/mm1.jpg", dossier: "McMinnville/mcminnville/mm1.jpg" },
+  { published: "mcminnville/mm2.jpg", dossier: "McMinnville/mcminnville/mm2.jpg" },
   { published: "observer-braine-le-comte-akh.json", dossier: "BraineLeComte/observer-braine-le-comte-akh.json" },
   { published: "observer-braine-le-comte-bjn.json", dossier: "BraineLeComte/observer-braine-le-comte-bjn.json" },
   { published: "observer-braine-le-comte-fwy.json", dossier: "BraineLeComte/observer-braine-le-comte-fwy.json" }

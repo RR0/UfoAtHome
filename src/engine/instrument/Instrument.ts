@@ -251,13 +251,13 @@ export const INSTRUMENTS: Instrument[] = [
   {
     // The box camera Paul Trent photographed McMinnville with on 11 May 1950: a Roamer 1 on 120
     // film, whose negative is 6 x 9 cm behind a 100 mm lens (Cousyn, Louange and Quick, IPACO,
-    // 2013), which is 48 degrees across and 33 up. The frame is that of the negative as Maccabee
-    // measured it after it had been cropped, not the 6 x 9 the maker gave: it is the one that
-    // the scans every study works from are cut to.
+    // 2013), which is 33 degrees up. The frame is the picture as it is in the scans every study
+    // works from (Condon's plates are 800 x 645 pixels, so 74 x 60 mm), the negative having been
+    // cut narrower than the 6 x 9 the maker gave: 41 degrees across rather than 48.
     id: "roamer-1-120",
     name: "Roamer 1, 120 film",
     projection: "rectilinear",
-    frame: { widthMm: 90, heightMm: 60, focalLengthMm: 100 },
+    frame: { widthMm: 74, heightMm: 60, focalLengthMm: 100 },
     // A shutter of 1/50 s is the figure the study gives. The aperture it does NOT give, and a box
     // camera of the day had a single small one: f/11 is the usual for the type, and so ASSUMED here.
     fNumber: 11,

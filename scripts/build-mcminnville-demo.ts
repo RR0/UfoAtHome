@@ -60,13 +60,20 @@ class Study {
    * two lines of sight are the study's; which way Trent faced is Condon's "north-east". */
   static readonly BEARING_FIRST_DEG = 45
   static readonly BEARING_SECOND_DEG = 32
-  static readonly PITCH_DEG = 12
+  /** Where the object lies in each plate (Condon's plates 23 and 24, 19.3 px per degree, 645 px for
+   * the 33.4 degrees of the frame): 3.7 degrees right of the centre and 2.9 above on the first,
+   * 2.7 left and 1.3 above on the second. That gives the camera's own axis: the same 14.85 degrees
+   * of pitch from both (so the two photographs agree, which is the check), and a heading that is
+   * the object's bearing less its offset. */
+  static readonly OFFSET_FIRST = { azimuthDeg: 3.7, altitudeDeg: 2.9 }
+  static readonly OFFSET_SECOND = { azimuthDeg: -2.7, altitudeDeg: 1.3 }
+  static readonly PITCH_DEG = 14.85
   /** The object's angular width on each photograph, c: 1.630 and 1.470 degrees. */
   static readonly WIDTH_FIRST_DEG = 1.63
   static readonly WIDTH_SECOND_DEG = 1.47
   /** Eccentricity of the base on the first photograph, e1 = 0.362: its height over its width. */
   static readonly ECCENTRICITY_FIRST = 0.362
-  /** The negative as Maccabee measured it, over the lens: 33 degrees up. */
+  /** The negative, over the lens: 33 degrees up. */
   static readonly FIELD_DEG = 2 * Math.atan(30 / 100) * 180 / Math.PI
 }
 
@@ -114,30 +121,90 @@ const swungTop = Study.LOWER_LINE_M - dropSwung
 const seenFirst = view(first, pivot, restTop)
 const seenSecond = view(second, swungTo, swungTop)
 
-const T_SECOND_MS = 30000
+/** The timeline: the object seen coming on, the first photograph, the step to the right and the second
+ * 30 seconds later (Trent's estimate), then the departure. The lead-in and the departure are the
+ * testimony's, with no measure: the lengths given here are ASSUMED. */
+const T_FIRST_MS = 12000
+const T_SECOND_MS = T_FIRST_MS + 30000
+const T_STEP_MS = T_SECOND_MS - 4000
+const T_END_MS = T_SECOND_MS + 8000
 
 const title = (fr: string, en: string, es: string, it: string): Said<string> => ({ fr, en, es, it })
 
 // -- The account: what the photographs show, each as one keyframe -------------------------------------
 
-const shapeAt = (widthDeg: number, heightDeg: number, altitudeDeg: number, azimuthDeg: number, rationale: string) => ({
+/** An oval of the object at a bearing and height, `widthDeg` wide. */
+const ovalAt = (widthDeg: number, heightDeg: number, altitudeDeg: number, azimuthDeg: number, rationale: string, transparency?: number) => ({
   sourceId: "ufo-1",
   shape: {
     aim: Claim.of({ azimuthDeg: Geometry.round(azimuthDeg, 2), altitudeDeg: Geometry.round(altitudeDeg, 2) }, "derived", rationale),
     kind: "oval",
-    angular: { widthDeg, heightDeg: Geometry.round(heightDeg, 3) },
+    angular: { widthDeg: Geometry.round(widthDeg, 3), heightDeg: Geometry.round(heightDeg, 3) },
     // The prints show it dark against the sky, its base in shadow: the witnesses' "silvery" is the account, this is the photograph.
     color: "#2c2c2e",
+    ...(transparency === undefined ? {} : { transparency }),
     title: title("Objet", "Object", "Objeto", "Oggetto")
   }
 })
+
+/** The small stub on top of the object that Cousyn's model has too, and that plate 26 shows: about
+ * 0.08 degrees wide and 0.05 high on the first photograph, a little left of the middle. Scaled with
+ * the object. Where it is on the second is not measured, and it is kept in the same place on it. */
+const antennaAt = (objectWidthDeg: number, objectHeightDeg: number, altitudeDeg: number, azimuthDeg: number, transparency?: number) => {
+  const scale = objectWidthDeg / Study.WIDTH_FIRST_DEG
+  return {
+    sourceId: "antenna",
+    shape: {
+      aim: Claim.of({
+        azimuthDeg: Geometry.round(azimuthDeg - 0.1 * scale, 3),
+        altitudeDeg: Geometry.round(altitudeDeg + objectHeightDeg / 2 + 0.02 * scale, 3)
+      }, "assumed", "Plate 26 (MM1 enlarged): a stub about 22 px wide on the 470 px of the disc, 28 px left of its centre, standing just over its top edge."),
+      kind: "oval",
+      angular: { widthDeg: Geometry.round(0.077 * scale, 4), heightDeg: Geometry.round(0.05 * scale, 4) },
+      color: "#2c2c2e",
+      ...(transparency === undefined ? {} : { transparency }),
+      title: title("Petite antenne", "Small antenna", "Pequeña antena", "Piccola antenna")
+    }
+  }
+}
+
+/** Both shapes of the object at one instant. */
+const objectAt = (widthDeg: number, heightDeg: number, altitudeDeg: number, azimuthDeg: number, rationale: string, transparency?: number) =>
+  [ovalAt(widthDeg, heightDeg, altitudeDeg, azimuthDeg, rationale, transparency), antennaAt(widthDeg, heightDeg, altitudeDeg, azimuthDeg, transparency)]
+
+/** The Trents' house, from where its right-hand end shows in plate 23 (13.6 degrees left of the
+ * centre) and plate 24 (10.2 left): the parallax of the two puts that corner about 15 m off, with
+ * wide error bars (a degree of reading is 5 m), and a roof edge 14 degrees up in plate 23, which at
+ * that distance is 5 m up: a big roof, as the overlay shows it. Its front is square to the
+ * first sightline. The plans (Maccabee's) are not in the study, so this is a placement, not a measure. */
+class House {
+  static readonly CORNER_DISTANCE_M = 15
+  static readonly WIDTH_M = 12
+  static readonly DEPTH_M = 8
+  static readonly RIDGE_M = 8
+  static readonly CORNER_BEARING_DEG = Study.BEARING_FIRST_DEG - Study.OFFSET_FIRST.azimuthDeg - 13.6
+}
+const houseCorner = Geometry.along(first, House.CORNER_BEARING_DEG, House.CORNER_DISTANCE_M)
+const house = (() => {
+  const toLeft = Geometry.along({ e: 0, n: 0 }, Study.BEARING_FIRST_DEG - Study.OFFSET_FIRST.azimuthDeg - 90, 1)
+  const away = Geometry.along({ e: 0, n: 0 }, Study.BEARING_FIRST_DEG - Study.OFFSET_FIRST.azimuthDeg, 1)
+  return {
+    centre: {
+      e: Geometry.round(houseCorner.e + toLeft.e * House.WIDTH_M / 2 + away.e * House.DEPTH_M / 2, 2),
+      n: Geometry.round(houseCorner.n + toLeft.n * House.WIDTH_M / 2 + away.n * House.DEPTH_M / 2, 2)
+    }
+  }
+})()
+
+const headingFirst = Study.BEARING_FIRST_DEG - Study.OFFSET_FIRST.azimuthDeg
+const headingSecond = Study.BEARING_SECOND_DEG - Study.OFFSET_SECOND.azimuthDeg
 
 const observer = {
   version: 1,
   id: "1950-05-11-TrentPaul",
   time: Claim.of({ year: 1950, month: 5, day: 11, hour: 19, minute: 45, second: 0 }, "derived",
     "Condon's case 46 gives 19:45 (Evelyn Trent: \"about 8 o'clock less a quarter\"), others 19:30. Read as Pacific STANDARD time the Sun would already be 2.4 degrees below the horizon (sunset 19:27) and the sky of the photographs is in daylight, so the clock the Trents read is taken to be summer time, as the Sun's height in the plates needs."),
-  durationSeconds: Claim.of(30, "stated", "Trent: both photographs \"within 30 seconds\" (Condon, case 46, from the Telephone Register of 8 June 1950)."),
+  durationSeconds: Claim.of(T_END_MS / 1000, "assumed", "Trent: both photographs \"within 30 seconds\" (Condon, case 46, from the Telephone Register of 8 June 1950); the object's coming on before the first and its leaving after the second are the account's, and their lengths are not given."),
   utcOffsetHours: Claim.of(-7, "assumed", "See the time: daylight time. In standard time (-8) the Sun has set."),
   place: [{
     value: { lat: Geometry.round(place.lat, 6), lng: Geometry.round(place.lng, 6), name: "Trent farm, Sheridan road, Yamhill County, Oregon, USA" },
@@ -178,30 +245,58 @@ const observer = {
     keyframes: [
       {
         t: 0,
-        shapes: [shapeAt(Study.WIDTH_FIRST_DEG, Study.WIDTH_FIRST_DEG * Study.ECCENTRICITY_FIRST, seenFirst.altitudeDeg, Study.BEARING_FIRST_DEG,
-          "MM1: the study measures sizes, not where the object lies in the frame, so it is put on the camera's axis horizontally, and at the height the wire geometry gives (the lower line 3.5 m up, the model 0.7 m under it, the camera at 1.5 m and 4 m from the line). Its width is the study's c, 1.630 degrees, its height the base's eccentricity e1 = 0.362 times that.")]
+        shapes: objectAt(1.2, 0.54, seenFirst.altitudeDeg + 1.5, Study.BEARING_FIRST_DEG + 13,
+          "Condon: first seen \"apparently towards the north-east\", coming towards the Trents and \"moving slowly towards the west\". Where and how big it was then is not given: a little to the right of where the first photograph finds it, a little smaller and higher, ASSUMED.")
+      },
+      {
+        t: T_FIRST_MS,
+        shapes: objectAt(Study.WIDTH_FIRST_DEG, Study.WIDTH_FIRST_DEG * Study.ECCENTRICITY_FIRST, seenFirst.altitudeDeg, Study.BEARING_FIRST_DEG,
+          "MM1: where the object lies in plate 23 (3.7 degrees right of the centre, 2.9 above), on the camera's axis: its bearing is the one the wire geometry gives (the lower line 3.5 m up, the model 0.7 m under it, the camera at 1.5 m and 4 m from the line). Its width is the study's c, 1.630 degrees, its height the base's eccentricity e1 = 0.362 times that.")
       },
       {
         t: T_SECOND_MS,
-        shapes: [shapeAt(Study.WIDTH_SECOND_DEG, Study.WIDTH_SECOND_DEG * 0.4, seenSecond.altitudeDeg, Study.BEARING_SECOND_DEG,
-          "MM2: the same, from the second position, 4.3 m from the line, the model swung 9 degrees away. Its width is c = 1.470 degrees. Its height, 0.4 of that, is ASSUMED: the base is no longer seen (e2 = 0.063), the dome's side is, and the study does not measure its height.")]
+        shapes: objectAt(Study.WIDTH_SECOND_DEG, Study.WIDTH_SECOND_DEG * 0.4, seenSecond.altitudeDeg, Study.BEARING_SECOND_DEG,
+          "MM2: where the object lies in plate 24 (2.7 degrees left of the centre, 1.3 above), from the second position, 4.3 m from the line, the model swung 9 degrees away. Its width is c = 1.470 degrees. Its height, 0.4 of that, is ASSUMED: the base is no longer seen (e2 = 0.063), the dome's side is, and the study does not measure its height.")
+      },
+      {
+        t: T_SECOND_MS + 2000,
+        shapes: objectAt(1.3, 0.52, seenSecond.altitudeDeg - 2, 8,
+          "Condon: after the second photograph it \"accelerated slowly\" and went off \"rapidly towards the west\". How fast is not given: a swing to the left, out of the frame, in two seconds, ASSUMED.")
+      },
+      {
+        t: T_SECOND_MS + 5000,
+        shapes: objectAt(0.6, 0.24, 8, 300, "As above: still going west, smaller as it goes. ASSUMED.")
+      },
+      {
+        t: T_END_MS,
+        shapes: objectAt(0.3, 0.12, 3, 270, "\"Fading faintly towards the west\" (Condon, from Mrs Trent): gone, due west, low. ASSUMED.", 1)
       }
     ],
-    order: ["ufo-1"],
+    order: ["ufo-1", "antenna"],
     groups: []
   },
   milestones: [
     {
       t: 0,
+      label: "A",
+      note: title("Evelyn Trent voit l'objet au nord-est et appelle son mari ; il vient vers eux.", "Evelyn Trent sees the object to the north-east and calls her husband; it comes towards them.",
+        "Evelyn Trent ve el objeto al nordeste y llama a su marido; viene hacia ellos.", "Evelyn Trent vede l'oggetto a nord-est e chiama il marito; viene verso di loro.")
+    },
+    {
+      t: T_FIRST_MS,
       label: "MM1",
-      note: title("La première photographie : l'objet vient vers eux.", "The first photograph: the object comes towards them.",
-        "La primera fotografía: el objeto viene hacia ellos.", "La prima fotografia: l'oggetto viene verso di loro.")
+      note: title("La première photographie.", "The first photograph.", "La primera fotografía.", "La prima fotografia.")
     },
     {
       t: T_SECOND_MS,
       label: "MM2",
       note: title("La seconde, après un pas à droite : l'objet a « tourné vers le nord-ouest ».", "The second, after a step to his right: the object has \"turned towards the north-west\".",
         "La segunda, tras un paso a la derecha: el objeto ha \"girado hacia el noroeste\".", "La seconda, dopo un passo a destra: l'oggetto \"ha girato verso nord-ovest\".")
+    },
+    {
+      t: T_END_MS,
+      label: "B",
+      note: title("L'objet s'éloigne rapidement vers l'ouest.", "The object leaves quickly to the west.", "El objeto se aleja rápidamente hacia el oeste.", "L'oggetto si allontana rapidamente verso ovest.")
     }
   ],
   observerTrack: {
@@ -212,8 +307,18 @@ const observer = {
           ...geographic(first),
           elevationM: Geometry.round(Study.CAMERA_HEIGHT_M - 1.6, 2),
           fovDeg: Geometry.round(Study.FIELD_DEG, 2),
-          headingDeg: Claim.of(Study.BEARING_FIRST_DEG, "stated", "Condon, case 46: \"apparently towards the north-east\" when first seen, and the first photograph taken as the object came on."),
-          pitchDeg: Claim.of(Study.PITCH_DEG, "derived", "The study gives the line of sight a rise of about 11.5 degrees; 12 puts both lines inside the 33-degree frame, as they are in the plates.")
+          headingDeg: Claim.of(Geometry.round(headingFirst, 2), "derived", "Condon, case 46: \"apparently towards the north-east\"; the heading is the object's bearing less its 3.7 degrees right of the centre in plate 23."),
+          pitchDeg: Claim.of(Study.PITCH_DEG, "derived", "The object is at 17.7 degrees by the wire geometry and 2.9 above the centre in plate 23, 16.2 and 1.3 in plate 24: 14.85 degrees both times, which is how the two plates agree. The study gives a line of sight of about 11.5 degrees.")
+        }
+      },
+      {
+        t: T_STEP_MS,
+        pose: {
+          ...geographic(first),
+          elevationM: Geometry.round(Study.CAMERA_HEIGHT_M - 1.6, 2),
+          fovDeg: Geometry.round(Study.FIELD_DEG, 2),
+          headingDeg: Geometry.round(headingFirst, 2),
+          pitchDeg: Study.PITCH_DEG
         }
       },
       {
@@ -222,12 +327,49 @@ const observer = {
           ...geographic(second),
           elevationM: Geometry.round(Study.CAMERA_HEIGHT_M - 1.6, 2),
           fovDeg: Geometry.round(Study.FIELD_DEG, 2),
-          headingDeg: Claim.of(Study.BEARING_SECOND_DEG, "derived", "13 degrees from the first (the study: the line of sight turns by 13 degrees between the photographs), to the left while Trent steps right, as he must to keep a thing that has not moved in the frame."),
+          headingDeg: Claim.of(Geometry.round(headingSecond, 2), "derived", "The object's bearing from the second position (13 degrees from the first, the study's turn of the line of sight) less its 2.7 degrees left of the centre in plate 24."),
           pitchDeg: Study.PITCH_DEG
         }
       }
     ]
   },
+  references: [1, 2].map(number => {
+    const isSecond = number === 2
+    return {
+      id: `mm${number}`,
+      kind: "photo",
+      src: `mcminnville/mm${number}.jpg`,
+      title: title(
+        `MM${number}, planche ${22 + number} du rapport Condon (annotée à la craie par l'équipe)`,
+        `MM${number}, plate ${22 + number} of the Condon report (chalk-marked by the team)`,
+        `MM${number}, lámina ${22 + number} del informe Condon (marcada con tiza por el equipo)`,
+        `MM${number}, tavola ${22 + number} del rapporto Condon (segnata a gesso dal gruppo)`),
+      credit: `Condon report, case 46, plate ${22 + number} (photograph: UPI)`,
+      creditUrl: "https://rr0.org/time/1/9/6/8/CondonReport/s4/c3/46/case46.html",
+      t: isSecond ? T_SECOND_MS : T_FIRST_MS,
+      from: geographic(isSecond ? second : first),
+      drawing: true,
+      opacity: 0.5,
+      registration: {
+        headingDeg: Geometry.round(isSecond ? headingSecond : headingFirst, 2),
+        pitchDeg: Study.PITCH_DEG,
+        fovDeg: Geometry.round(Study.FIELD_DEG, 2)
+      }
+    }
+  }),
+  decor: [
+    {
+      id: "house",
+      kind: "building",
+      title: title("Maison des Trent (avec sa citerne, à gauche des deux photographies)", "The Trents' house (with its tank, at the left of both photographs)",
+        "Casa de los Trent (con su depósito, a la izquierda de las dos fotografías)", "Casa dei Trent (con la sua cisterna, a sinistra nelle due fotografie)"),
+      eastM: house.centre.e,
+      northM: house.centre.n,
+      headingDeg: Geometry.round(headingFirst, 1),
+      sizeM: { widthM: House.WIDTH_M, lengthM: House.DEPTH_M, heightM: House.RIDGE_M },
+      model: { id: "kenney-suburban-house" }
+    }
+  ],
   weatherTrack: {
     keyframes: [
       {
@@ -260,12 +402,18 @@ const observer = {
 
 // -- The interpretation: the study's model, its thread and the line, in metres ---------------------
 
-/** The line's length: the study gives none (its ends are anchored on the house and the garage, which
- * Maccabee's plan places and the study does not quote), so it is made long enough to leave the frame
- * on both sides. It runs across the first sightline, as in both plates. */
-const lineLength = 14
+/** The line: it runs across the first sightline, as in both plates, from the house's eave (anchored
+ * 2.2 m along it from the point above the model, where it meets the house's front) to an end the
+ * plates do not show and that is made long enough to leave the frame. */
 const lineBearingDeg = Study.BEARING_FIRST_DEG + 90
-const lineCentre = { e: Geometry.round(pivot.e, 2), n: Geometry.round(pivot.n, 2) }
+const towardHouse = Geometry.along({ e: 0, n: 0 }, lineBearingDeg + 180, 1)
+const lineFrom = 6
+const lineTo = -9
+const lineLength = lineFrom - lineTo
+const lineCentre = {
+  e: Geometry.round(pivot.e + towardHouse.e * (lineFrom + lineTo) / 2, 2),
+  n: Geometry.round(pivot.n + towardHouse.n * (lineFrom + lineTo) / 2, 2)
+}
 
 /** A cylinder (the primitive's axis is up) laid along the east-west line, centred where it is. */
 const wireBody = (id: string, heightM: number, label: Said<string>) => ({
@@ -301,54 +449,108 @@ const thread = (swungAway: boolean) => {
   }
 }
 
-const interpretation = {
+/** The model and the small stub on top of it, as both studies have them: the position and the tip
+ * come from the geometry of the photographs, which both parts of the study share. */
+const modelBodies = () => [
+  {
+    id: "model",
+    title: title("La maquette", "The model", "La maqueta", "Il modellino"),
+    explains: ["ufo-1"],
+    model: { id: "disc" },
+    track: [
+      {
+        t: 0,
+        eastM: Geometry.round(pivot.e, 3),
+        northM: Geometry.round(pivot.n, 3),
+        altitudeAboveGroundM: Geometry.round(restTop - Study.MODEL_HEIGHT_M, 3),
+        sizeM: { widthM: Study.MODEL_WIDTH_M, lengthM: Study.MODEL_WIDTH_M, heightM: Study.MODEL_HEIGHT_M },
+        attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_FIRST_DEG },
+        appearance: { color: "#8a8d91", albedo: 0.3 }
+      },
+      { t: T_STEP_MS, attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_FIRST_DEG } },
+      {
+        t: T_SECOND_MS,
+        eastM: Geometry.round(swungTo.e, 3),
+        northM: Geometry.round(swungTo.n, 3),
+        altitudeAboveGroundM: Geometry.round(swungTop - Study.MODEL_HEIGHT_M, 3),
+        attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_SECOND_DEG }
+      }
+    ]
+  },
+  {
+    id: "antenna",
+    title: title("La petite « antenne » du dessus", "The small \"antenna\" on top", "La pequeña \"antena\" de arriba", "La piccola \"antenna\" in cima"),
+    explains: [],
+    model: { id: "cylinder" },
+    track: [
+      {
+        t: 0,
+        eastM: Geometry.round(pivot.e, 3),
+        northM: Geometry.round(pivot.n, 3),
+        altitudeAboveGroundM: Geometry.round(restTop, 3),
+        sizeM: { widthM: 0.006, lengthM: 0.006, heightM: 0.008 },
+        attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_FIRST_DEG },
+        appearance: { color: "#8a8d91", albedo: 0.3 }
+      },
+      { t: T_STEP_MS, attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_FIRST_DEG } },
+      {
+        t: T_SECOND_MS,
+        eastM: Geometry.round(swungTo.e, 3),
+        northM: Geometry.round(swungTo.n, 3),
+        altitudeAboveGroundM: Geometry.round(swungTop, 3),
+        attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_SECOND_DEG }
+      }
+    ]
+  }
+]
+
+/** The two electric wires: in both parts of the study, and in both plates. */
+const lineBodies = () => [
+  wireBody("line-lower", Study.LOWER_LINE_M, title("Fil électrique inférieur (3,5 m)", "Lower electric wire (3.5 m)", "Cable eléctrico inferior (3,5 m)", "Filo elettrico inferiore (3,5 m)")),
+  wireBody("line-upper", Study.LOWER_LINE_M + Study.LINE_SPACING_M, title("Fil électrique supérieur", "Upper electric wire", "Cable eléctrico superior", "Filo elettrico superiore"))
+]
+
+/** The thread, the second part's finding: drawn only there, since the first found no trace of one. */
+const threadBody = () => ({
+  id: "thread",
+  title: title("Le fil de suspension (mis en évidence)", "The suspension thread (detected)", "El hilo de suspensión (detectado)", "Il filo di sospensione (rilevato)"),
+  explains: [],
+  model: { id: "cylinder" },
+  track: [
+    { t: 0, ...thread(false), appearance: { color: "#303030", albedo: 0.1 } },
+    { t: T_STEP_MS, ...thread(false) },
+    { t: T_SECOND_MS, ...thread(true) }
+  ]
+})
+
+const authors = [{ people: "CousynAntoine" }, { people: "LouangeFrancois" }, { people: "QuickGeoff" }]
+
+const firstPart = {
   type: "event",
   eventType: "interpretation",
   sighting: observer.id,
+  time: "2013-04",
   title: title(
-    "Une maquette d'environ 12 cm suspendue à un fil de 70 cm sous la ligne électrique, qui oscille de 9° entre les deux photographies",
-    "A model about 12 cm across, hung on a 70 cm thread under the electric line, swinging 9° between the two photographs",
-    "Una maqueta de unos 12 cm colgada de un hilo de 70 cm bajo la línea eléctrica, que oscila 9° entre las dos fotografías",
-    "Un modellino di circa 12 cm appeso a un filo di 70 cm sotto la linea elettrica, che oscilla di 9° fra le due fotografie"),
-  by: [{ people: "CousynAntoine" }, { people: "LouangeFrancois" }, { people: "QuickGeoff" }],
-  bodies: [
-    {
-      id: "model",
-      title: title("La maquette", "The model", "La maqueta", "Il modellino"),
-      explains: ["ufo-1"],
-      model: { id: "disc" },
-      track: [
-        {
-          t: 0,
-          eastM: Geometry.round(pivot.e, 3),
-          northM: Geometry.round(pivot.n, 3),
-          altitudeAboveGroundM: Geometry.round(restTop - Study.MODEL_HEIGHT_M, 3),
-          sizeM: { widthM: Study.MODEL_WIDTH_M, lengthM: Study.MODEL_WIDTH_M, heightM: Study.MODEL_HEIGHT_M },
-          attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_FIRST_DEG },
-          appearance: { color: "#8a8d91", albedo: 0.3 }
-        },
-        {
-          t: T_SECOND_MS,
-          eastM: Geometry.round(swungTo.e, 3),
-          northM: Geometry.round(swungTo.n, 3),
-          altitudeAboveGroundM: Geometry.round(swungTop - Study.MODEL_HEIGHT_M, 3),
-          attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_SECOND_DEG }
-        }
-      ]
-    },
-    {
-      id: "thread",
-      title: title("Le fil de suspension (supposé)", "The suspension thread (supposed)", "El hilo de suspensión (supuesto)", "Il filo di sospensione (supposto)"),
-      explains: [],
-      model: { id: "cylinder" },
-      track: [
-        { t: 0, ...thread(false), appearance: { color: "#303030", albedo: 0.1 } },
-        { t: T_SECOND_MS, ...thread(true) }
-      ]
-    },
-    wireBody("line-lower", Study.LOWER_LINE_M, title("Fil électrique inférieur (3,5 m)", "Lower electric wire (3.5 m)", "Cable eléctrico inferior (3,5 m)", "Filo elettrico inferiore (3,5 m)")),
-    wireBody("line-upper", Study.LOWER_LINE_M + Study.LINE_SPACING_M, title("Fil électrique supérieur", "Upper electric wire", "Cable eléctrico superior", "Filo elettrico superiore"))
-  ]
+    "Avril 2013 : une maquette d'environ 12 cm sous le fil inférieur de la ligne, qui oscille de 9° entre les deux photographies (aucun fil visible)",
+    "April 2013: a model about 12 cm across under the lower wire of the line, swinging 9° between the two photographs (no thread seen)",
+    "Abril de 2013: una maqueta de unos 12 cm bajo el cable inferior de la línea, que oscila 9° entre las dos fotografías (ningún hilo visible)",
+    "Aprile 2013: un modellino di circa 12 cm sotto il filo inferiore della linea, che oscilla di 9° fra le due fotografie (nessun filo visibile)"),
+  by: authors,
+  bodies: [...modelBodies(), ...lineBodies()]
+}
+
+const secondPart = {
+  type: "event",
+  eventType: "interpretation",
+  sighting: observer.id,
+  time: "2013-06",
+  title: title(
+    "Juin 2013 : la même maquette au bout d'un fil de 70 cm, mis en évidence sur les deux photographies",
+    "June 2013: the same model at the end of a 70 cm thread, detected on both photographs",
+    "Junio de 2013: la misma maqueta al extremo de un hilo de 70 cm, detectado en las dos fotografías",
+    "Giugno 2013: lo stesso modellino all'estremità di un filo di 70 cm, rilevato su entrambe le fotografie"),
+  by: authors,
+  bodies: [...modelBodies(), threadBody(), ...lineBodies()]
 }
 
 const caseJson = {
@@ -357,7 +559,8 @@ const caseJson = {
   time: "1950-05-11 19:45",
   events: [
     { type: "event", eventType: "sighting", time: "1950-05-11 19:45", title: "Paul Trent", url: "observer-mcminnville.json" },
-    interpretation
+    firstPart,
+    secondPart
   ]
 }
 
