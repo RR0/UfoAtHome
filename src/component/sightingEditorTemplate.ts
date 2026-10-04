@@ -7,14 +7,6 @@ export const html = `
      1210px tall and pushed the render, the whole point of editing here, off the bottom of the
      screen. What's set across ALL groups stays legible without opening any of them: see the
      parameter summary under the render. -->
-<!-- A case opened for editing: the recordings it lists (the accounts, and the readings of them, which
-     are recordings of their own), one open at a time. Hidden for a single recording. -->
-<div id="case-row" class="toolbar" hidden>
-  <label><span id="label-case-recording">Recording</span> <select id="case-track"></select></label>
-  <button id="case-add" type="button" class="icon-btn" title="Add a reading" aria-label="Add a reading">+</button>
-  <button id="case-delete" type="button" class="icon-btn" title="Delete this reading" aria-label="Delete this reading">🗑</button>
-  <button id="case-export" type="button">Export the case</button>
-</div>
 <div id="group-tabs" class="group-tabs">
   <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false"><span id="label-observation-group">Observation</span></button>
   <button class="group-tab" type="button" aria-controls="group-observer" aria-expanded="false"><span id="label-observer-group">Observer</span></button>
@@ -566,6 +558,15 @@ export const html = `
   </section>
 </section>
 
+<!-- A case opened for editing: the recordings it lists (the accounts, and the readings of them, which
+     are recordings of their own), one open at a time. Hidden for a single recording. Just above the render, as the player puts its own pickers: what
+     is picked here is what the render shows. -->
+<div id="case-row" class="toolbar" hidden>
+  <label><span id="label-case-recording">Recording</span> <select id="case-track"></select></label>
+  <button id="case-add" type="button" class="icon-btn" title="Add a reading" aria-label="Add a reading">+</button>
+  <button id="case-delete" type="button" class="icon-btn" title="Delete this reading" aria-label="Delete this reading">🗑</button>
+  <button id="case-export" type="button">Export the case</button>
+</div>
 <!-- The playback layer's own toggles, taken out of the picture — see UfoElement.hostControls. -->
 <div id="scene-controls" class="scene-controls"></div>
 <div id="ufo-slot"></div>
@@ -1157,6 +1158,10 @@ select.weather-field:disabled {
   justify-content: flex-end;
   gap: 0.5em;
 }
+#case-row { flex-wrap: wrap; }
+#case-row label { display: flex; align-items: center; gap: .5em; flex: 1 1 16em; min-width: 0; }
+/* A reading is titled with a sentence: the picker is as wide as the row lets it be and cuts the rest. */
+#case-track { flex: 1 1 auto; min-width: 0; max-width: 100%; text-overflow: ellipsis; }
 #import-url {
   flex: 1 1 16em;
 }
