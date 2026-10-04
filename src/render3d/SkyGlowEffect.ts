@@ -118,7 +118,7 @@ export class SkyGlowEffect {
         uSkyColor: { value: new Vector3(0, 0, 0) },
         uMilkyWayTint: { value: new Vector3(...SkyGlowEffect.MILKY_WAY_TINT) },
         uZodiacalTint: { value: new Vector3(...SkyGlowEffect.ZODIACAL_TINT) },
-        uReady: { value: this.maps.done ? 1 : 0 },
+        uReady: { value: 0 },
         uEncodeDestination: { value: 1 }
       },
       vertexShader: `
@@ -249,6 +249,8 @@ export class SkyGlowEffect {
       side: BackSide,
       fog: false
     })
+    this.mapsDone = this.maps.done
+    this.syncReady()
     this.object = new Mesh(new SphereGeometry(SkyGlowEffect.RADIUS, 64, 32), this.material)
     this.object.renderOrder = -1
     this.object.frustumCulled = false
@@ -270,6 +272,31 @@ export class SkyGlowEffect {
    * animation loop only runs during playback. */
   set onReady(repaint: () => void) {
     this.repaint = repaint
+  }
+
+  /**
+   * Keeps the glows out of the scene while its first frame is held for the eye's adaptation, and
+   * shows them once it is let go.
+   *
+   * The glows have always arrived after the first frame — the walk took two seconds on the page's
+   * own thread — so the eye adapted to a sky without them and they were then added to it, which is
+   * the look every reconstruction has had. Walked in a worker they arrive at once, the eye adapts to
+   * a sky that already holds them, and the same night comes out dimmer, its band lost: not wrong
+   * physics, but not the picture that was published, and one that would have depended on how fast
+   * the machine was. So the order is kept by rule rather than by the speed of a thread.
+   */
+  setWithheld(withheld: boolean): void {
+    if (this.withheld === withheld) return
+    this.withheld = withheld
+    this.syncReady()
+    if (!withheld && this.mapsDone) this.repaint?.()
+  }
+
+  private withheld = false
+  private mapsDone = false
+
+  private syncReady(): void {
+    this.material.uniforms.uReady.value = this.mapsDone && !this.withheld ? 1 : 0
   }
 
   /**
@@ -315,7 +342,7 @@ export class SkyGlowEffect {
     this.object.visible = true
     // Walked only once a sky has turned up that could actually show them — most sightings are
     // daylight ones and should not pay for a Galaxy they will not draw.
-    if (uniforms.uReady.value < 0.5) this.scheduleWork()
+    if (!this.mapsDone) this.scheduleWork()
   }
 
   /**
@@ -357,7 +384,8 @@ export class SkyGlowEffect {
   private readonly publish = (): void => {
     this.milkyWayTexture.needsUpdate = true
     this.zodiacalTexture.needsUpdate = true
-    this.material.uniforms.uReady.value = 1
+    this.mapsDone = true
+    this.syncReady()
     this.repaint?.()
   }
 

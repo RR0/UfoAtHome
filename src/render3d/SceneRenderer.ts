@@ -919,6 +919,7 @@ export class SceneRenderer {
     this.eyeSettledVersion = -1
     this.lastArrivalVersion = this.sceneVersion + 1
     this.iceHalos?.setUrgent(true)
+    this.skyGlow?.setWithheld(true)
     this.onFirstFrameHold?.(true)
     // The hold ends on its own even if the scene never settles (a context lost mid-build, a tile
     // server that does not answer).
@@ -3455,6 +3456,7 @@ export class SceneRenderer {
         return
       }
       this.skyHoldUntilMs = null
+      this.skyGlow?.setWithheld(false)
       this.iceHalos?.setUrgent(false)
       this.onFirstFrameHold?.(false)
       if (this.skyColoursStale && this.lastAstronomy) this.applySkyColours(this.lastAstronomy)
@@ -5473,6 +5475,7 @@ export class SceneRenderer {
     }
     if (!this.skyGlow) {
       this.skyGlow = new SkyGlowEffect()
+      this.skyGlow.setWithheld(Boolean(this.skyHoldUntilMs))
       // A map arriving a second after the sky it belongs to still has to be shown, and a reader who
       // has paused on a night scene has no animation loop running to show it — the same reason the
       // ice display asks for its own repaint.
