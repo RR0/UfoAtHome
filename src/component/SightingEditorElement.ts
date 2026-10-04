@@ -5336,9 +5336,9 @@ export class SightingEditorElement extends HTMLElement {
    * interpretation it was last handed.
    */
   private syncBodiesShown(): void {
-    // A recording with no shape of its own (a reading of an account) has none to protect: its bodies are all there is to see.
+    // A reading of an account has no shape of its own to protect: its bodies are all there is to see.
     const editingShapes = this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-shapes")?.hidden === false
-    const shown = !editingShapes || this.ufoElement.sighting.timeline.sourceIds.length === 0
+    const shown = !editingShapes || this.caseCurrent?.kind === "reading"
     const interpretation = shown ? this.ufoElement.sighting.interpretation : undefined
     this.sceneElement.compareAccount = interpretation !== undefined
     if (this.sceneElement.interpretation !== interpretation) this.sceneElement.interpretation = interpretation
