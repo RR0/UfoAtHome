@@ -434,6 +434,16 @@ export class SceneElement extends HTMLElement {
       this.showHoverTooltip(event, this.bodyName(bodyKey))
       return
     }
+    // What the account says was there — a craft, a being, a person — by the name the interpretation gives it.
+    const standing = this.interpretationShown ? this.sceneRenderer.pickInterpretationBodyAt(ndcX, ndcY) : undefined
+    const standingBody = standing ? this.interpretationShown?.bodies.find(body => body.id === standing) : undefined
+    const standingName = standingBody
+      ? this.said.read(standingBody.title) || (standingBody.model.id === "figure" ? naming.decorKind("entity", DECOR_KIND_NAMES.entity) : undefined)
+      : undefined
+    if (standingName) {
+      this.showHoverTooltip(event, standingName)
+      return
+    }
     const decorId = this.sceneRenderer.pickDecorAt(ndcX, ndcY)
     const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
     if (decor) {
@@ -1049,6 +1059,7 @@ export class SceneElement extends HTMLElement {
     // An interpretation is OF one recording: another one's bodies have nothing to stand for here.
     // What the new one starts as is its observer's own account of what it was, if they gave one.
     this.interpretationShown = this.inTheRound ? this.ufoElement.sighting.interpretation : undefined
+    this.syncAccountHidden()
     // A loaded recording may have been made through something with a format of its own.
     this.applyFrameFormat()
     this.lastTimeMs = 0
@@ -2164,6 +2175,7 @@ export class SceneElement extends HTMLElement {
 
   set interpretation(interpretation: InterpretationJson | undefined) {
     this.interpretationShown = interpretation
+    this.syncAccountHidden()
     this.updateAstronomy(this.lastTimeMs)
   }
 
@@ -2179,6 +2191,11 @@ export class SceneElement extends HTMLElement {
    * otherwise. The editor does: what it edits is the angles, and drawing bodies over them would hide
    * the very thing being drawn. Read when a recording is set.
    */
+  /** The account's shapes are not drawn when an interpretation stands alone, and they then name nothing under the pointer either. */
+  private syncAccountHidden(): void {
+    this.ufoElement.accountHidden = this.interpretationShown !== undefined && !this.comparing
+  }
+
   get accountInTheRound(): boolean {
     return this.inTheRound
   }
@@ -2193,6 +2210,7 @@ export class SceneElement extends HTMLElement {
 
   set compareAccount(comparing: boolean) {
     this.comparing = comparing
+    this.syncAccountHidden()
     this.updateAstronomy(this.lastTimeMs)
   }
 

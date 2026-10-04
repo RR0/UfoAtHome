@@ -129,6 +129,8 @@ export class UfoElement extends HTMLElement {
   private tracesShownState = true
   private readonly referenceOpacityInput: HTMLInputElement
   private referencesShownState = true
+  /** Set by whoever draws the scene when the account's shapes are not on show — an interpretation stands alone — so that they hit nothing. */
+  accountHidden = false
   /** The pictures' own views, for a recording with several: which show, and how much of each. */
   private readonly referenceViews = new Map<string, { shown: boolean, opacity: number }>()
   private readonly referencesMenu: HTMLElement
@@ -1772,6 +1774,7 @@ export class UfoElement extends HTMLElement {
     y: number,
     excludeSourceIds?: ReadonlySet<string>
   ): { sourceId: string; shape: Shape } | undefined {
+    if (this.accountHidden) return undefined
     for (const instant of this.exposureTimes()) {
       const hit = this.currentSighting.timeline.hitTest(instant, x, y, excludeSourceIds)
       if (hit) return hit

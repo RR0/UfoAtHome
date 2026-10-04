@@ -215,6 +215,8 @@ const STAR_RADIUS = 850
  * with an oversized invisible proxy each, and there is no proxy to give a point in a Points cloud.
  */
 const STAR_HOVER_FIELD_FRACTION = 0.03
+/** How near the pointer has to be to a body of the interpretation, as a fraction of the field: half a star's, since there are few of them and they stand close together. */
+const BODY_HOVER_FIELD_FRACTION = 0.015
 const BODY_PLACEMENT_RADIUS = 850
 /** How far in front of and behind the shadow box's centre the sun's shadow map records depth,
  * metres — enough for the ±120 m box at any angle and the relief standing in it. */
@@ -4630,6 +4632,49 @@ export class SceneRenderer {
     // them — see groundHides.
     if (this.groundHides(ndcX, ndcY)) return undefined
     return entries.find(([, sprite]) => sprite === intersection.object)?.[0]
+  }
+
+  /**
+   * Finds which of the interpretation's bodies (a craft, a being, a person) is under the pointer,
+   * by its `id` — the nearest within a small angle of it, or nothing.
+   *
+   * An angular nearest, as for a star, rather than a raycast on the mesh: a figure a hundred metres
+   * off is a few pixels, impossible to point at exactly. And hidden by the decor in front of it, as
+   * it is hidden in the picture: a being behind a hedge is not what the pointer is over.
+   */
+  pickInterpretationBodyAt(ndcX: number, ndcY: number): string | undefined {
+    const holders = this.bodySystem.group.children.filter(holder => holder.visible && holder.name.startsWith("body:"))
+    if (holders.length === 0) return undefined
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
+    const aim = this.raycaster.ray.direction
+    const origin = this.raycaster.ray.origin
+    const fieldRad = (BODY_HOVER_FIELD_FRACTION * this.camera.fov * Math.PI) / 180
+    const decor = [...this.decorGroups.values()]
+    const blocker = decor.length > 0 ? this.raycaster.intersectObjects(decor, true)[0]?.distance : undefined
+    // Of the bodies the pointer is over, the smallest on screen: a being standing against a craft is
+    // the being, when the pointer is over it, though the craft's own outline covers it too.
+    let best: string | undefined
+    let bestReach = Infinity
+    const box = new Box3()
+    const centre = new Vector3()
+    for (const holder of holders) {
+      box.setFromObject(holder)
+      if (box.isEmpty()) continue
+      box.getCenter(centre)
+      const radiusM = box.getSize(new Vector3()).length() / 2
+      const toBody = centre.clone().sub(origin)
+      const distanceM = toBody.length()
+      if (distanceM === 0 || toBody.dot(aim) <= 0) continue
+      // Hidden: something of the decor is nearer along this very ray than the body's near side.
+      if (blocker !== undefined && blocker < distanceM - radiusM) continue
+      const angle = Math.acos(Math.min(1, toBody.normalize().dot(aim)))
+      const reach = Math.max(fieldRad, Math.atan(radiusM / distanceM))
+      if (angle <= reach && reach < bestReach) {
+        bestReach = reach
+        best = holder.name.slice("body:".length)
+      }
+    }
+    return best
   }
 
   /**
