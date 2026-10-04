@@ -57,6 +57,12 @@ class Study {
    * (d2 = 3.6 degrees past edge on), 25 degrees in all. */
   static readonly TIP_FIRST_DEG = -3.2
   static readonly TIP_SECOND_DEG = 21.6
+  /** How the object's axis leans in the image, c: 19 degrees on the first photograph and 17 on the
+   * second (the study), clockwise, its right end the lower. The study gives the size of the angle and
+   * not its sense, which the plates do: measured on the prints' blob (second moments), the long axis
+   * runs 19.2 degrees clockwise on plate 23 and 14.7 to 9.2 on plate 24, the right end down. */
+  static readonly LEAN_FIRST_DEG = 19
+  static readonly LEAN_SECOND_DEG = 17
   /** The sightline's bearing from each camera, and the camera's pitch. The 13 degrees between the
    * two lines of sight are the study's; which way Trent faced is Condon's "north-east". */
   static readonly BEARING_FIRST_DEG = 45
@@ -135,12 +141,13 @@ const title = (fr: string, en: string, es: string, it: string): Said<string> => 
 // -- The account: what the photographs show, each as one keyframe -------------------------------------
 
 /** An oval of the object at a bearing and height, `widthDeg` wide. */
-const ovalAt = (widthDeg: number, heightDeg: number, altitudeDeg: number, azimuthDeg: number, rationale: string, transparency?: number) => ({
+const ovalAt = (widthDeg: number, heightDeg: number, altitudeDeg: number, azimuthDeg: number, rationale: string, transparency?: number, leanDeg = 0) => ({
   sourceId: "ufo-1",
   shape: {
     aim: Claim.of({ azimuthDeg: Geometry.round(azimuthDeg, 2), altitudeDeg: Geometry.round(altitudeDeg, 2) }, "derived", rationale),
     kind: "oval",
     angular: { widthDeg: Geometry.round(widthDeg, 3), heightDeg: Geometry.round(heightDeg, 3) },
+    ...(leanDeg === 0 ? {} : { angle: Geometry.round(leanDeg * Geometry.DEG, 4) }),
     // The prints show it dark against the sky, its base in shadow: the witnesses' "silvery" is the account, this is the photograph.
     color: "#2c2c2e",
     ...(transparency === undefined ? {} : { transparency }),
@@ -170,8 +177,8 @@ const antennaAt = (objectWidthDeg: number, objectHeightDeg: number, altitudeDeg:
 }
 
 /** Both shapes of the object at one instant. */
-const objectAt = (widthDeg: number, heightDeg: number, altitudeDeg: number, azimuthDeg: number, rationale: string, transparency?: number) =>
-  [ovalAt(widthDeg, heightDeg, altitudeDeg, azimuthDeg, rationale, transparency), antennaAt(widthDeg, heightDeg, altitudeDeg, azimuthDeg, transparency)]
+const objectAt = (widthDeg: number, heightDeg: number, altitudeDeg: number, azimuthDeg: number, rationale: string, transparency?: number, leanDeg = 0) =>
+  [ovalAt(widthDeg, heightDeg, altitudeDeg, azimuthDeg, rationale, transparency, leanDeg), antennaAt(widthDeg, heightDeg, altitudeDeg, azimuthDeg, transparency)]
 
 /** The Trents' house, from where its right-hand end shows in plate 23 (13.6 degrees left of the
  * centre) and plate 24 (10.2 left): the parallax of the two puts that corner about 15 m off, with
@@ -265,12 +272,12 @@ const observer = {
       {
         t: T_FIRST_MS,
         shapes: objectAt(Study.WIDTH_FIRST_DEG, Study.WIDTH_FIRST_DEG * Study.ECCENTRICITY_FIRST, seenFirst.altitudeDeg, Study.BEARING_FIRST_DEG,
-          "MM1: where the object lies in plate 23 (3.7 degrees right of the centre, 2.9 above), on the camera's axis: its bearing is the one the wire geometry gives (the lower line 3.5 m up, the model 0.7 m under it, the camera at 1.5 m and 4 m from the line). Its width is the study's c, 1.630 degrees, its height the base's eccentricity e1 = 0.362 times that.")
+          "MM1: where the object lies in plate 23 (3.7 degrees right of the centre, 2.9 above), on the camera's axis: its bearing is the one the wire geometry gives (the lower line 3.5 m up, the model 0.7 m under it, the camera at 1.5 m and 4 m from the line). Its width is the study's c, 1.630 degrees, its height the base's eccentricity e1 = 0.362 times that. Its axis leans 19 degrees clockwise (the study's c1, its sense measured on the plate).", undefined, Study.LEAN_FIRST_DEG)
       },
       {
         t: T_SECOND_MS,
         shapes: objectAt(Study.WIDTH_SECOND_DEG, Study.WIDTH_SECOND_DEG * 0.4, seenSecond.altitudeDeg, Study.BEARING_SECOND_DEG,
-          "MM2: where the object lies in plate 24 (2.7 degrees left of the centre, 1.3 above), from the second position, 4.3 m from the line, the model swung 9 degrees away. Its width is c = 1.470 degrees. Its height, 0.4 of that, is ASSUMED: the base is no longer seen (e2 = 0.063), the dome's side is, and the study does not measure its height.")
+          "MM2: where the object lies in plate 24 (2.7 degrees left of the centre, 1.3 above), from the second position, 4.3 m from the line, the model swung 9 degrees away. Its width is c = 1.470 degrees. Its height, 0.4 of that, is ASSUMED: the base is no longer seen (e2 = 0.063), the dome's side is, and the study does not measure its height. Its axis leans 17 degrees clockwise (the study's c2, the sense measured on the plate).", undefined, Study.LEAN_SECOND_DEG)
       },
       {
         t: T_SECOND_MS + 2000,
@@ -443,6 +450,14 @@ const thread = (swungAway: boolean) => {
   }
 }
 
+/** How the object stands at each photograph, in the body's own terms. Its heading is the bearing of
+ * the sightline, so that a tip (pitch) is along the line of sight, which is what shows or hides the
+ * base, and a roll is about it, which is the lean in the image. */
+class Pose {
+  static readonly FIRST = { headingDeg: Study.BEARING_FIRST_DEG, pitchDeg: Study.TIP_FIRST_DEG, rollDeg: Study.LEAN_FIRST_DEG }
+  static readonly SECOND = { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_SECOND_DEG, rollDeg: Study.LEAN_SECOND_DEG }
+}
+
 /** The model, with its small stub on top, as both studies have it: the position and the tip
  * come from the geometry of the photographs, which both parts of the study share. */
 const modelBodies = () => [
@@ -458,16 +473,16 @@ const modelBodies = () => [
         northM: Geometry.round(pivot.n, 3),
         altitudeAboveGroundM: Geometry.round(restTop - Study.MODEL_HEIGHT_M, 3),
         sizeM: { widthM: Study.MODEL_WIDTH_M, lengthM: Study.MODEL_WIDTH_M, heightM: Study.MODEL_HEIGHT_M },
-        attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_FIRST_DEG },
+        attitude: Pose.FIRST,
         appearance: { color: "#8a8d91", albedo: 0.3 }
       },
-      { t: T_STEP_MS, attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_FIRST_DEG } },
+      { t: T_STEP_MS, attitude: Pose.FIRST },
       {
         t: T_SECOND_MS,
         eastM: Geometry.round(swungTo.e, 3),
         northM: Geometry.round(swungTo.n, 3),
         altitudeAboveGroundM: Geometry.round(swungTop - Study.MODEL_HEIGHT_M, 3),
-        attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_SECOND_DEG }
+        attitude: Pose.SECOND
       }
     ]
   }
@@ -510,16 +525,16 @@ const sameAngleBody = (id: string, label: Said<string>, sizeM: number) => {
         altitudeDeg: Geometry.round(seenFirst.altitudeDeg, 2),
         distanceM: distanceAt(Study.WIDTH_FIRST_DEG),
         sizeM: size,
-        attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_FIRST_DEG },
+        attitude: Pose.FIRST,
         appearance: { color: "#8a8d91", albedo: 0.3 }
       },
-      { t: T_STEP_MS, attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_FIRST_DEG } },
+      { t: T_STEP_MS, attitude: Pose.FIRST },
       {
         t: T_SECOND_MS,
         azimuthDeg: Study.BEARING_SECOND_DEG,
         altitudeDeg: Geometry.round(seenSecond.altitudeDeg, 2),
         distanceM: distanceAt(Study.WIDTH_SECOND_DEG),
-        attitude: { headingDeg: Study.BEARING_SECOND_DEG, pitchDeg: Study.TIP_SECOND_DEG }
+        attitude: Pose.SECOND
       }
     ]
   }
