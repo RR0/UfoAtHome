@@ -188,6 +188,9 @@ const answeredButUnreadable = async url => {
 /* The player PLAYS what it has just been given: somebody who followed a link, typed an address or chose
    a file came to watch, not to hunt for the button. \`play=false\` in the page's own address turns that
    off, for a link meant to open the recording stopped. */
+/* \`t=\` in the page's own address is where the recording opens, in seconds: \`?sighting=...&t=125\`. */
+const startAt = new URLSearchParams(location.search).get("t")
+if (startAt !== null && startAt.trim() !== "" && Number.isFinite(Number(startAt))) stage.setAttribute("start-time", startAt)
 const playsAtOnce = new URLSearchParams(location.search).get("play") !== "false"
 const startPlaying = () => {
   if (playsAtOnce) stage.scene?.ufoElement?.play()
@@ -360,7 +363,8 @@ ${this.form("en")}
     <p>Anything on this page can be reached directly:
       <code>ufoathome.org/play/?sighting=</code> followed by the address of a reconstruction.
       That is the link to hand someone when you want them to see an account rather than read it —
-      in an email, a post, a forum that allows nothing but text.</p>
+      in an email, a post, a forum that allows nothing but text.
+      Add <code>&amp;t=125</code> to open it 125 seconds in.</p>
     <p>It is also what every published reconstruction's own <q>i</q> panel hands out, and what the
       older <code>ufoathome.org/&lt;name&gt;</code> links resolve to. A name with no slash is looked
       for among this site's demos first, then as an rr0.org case, read through its
@@ -403,7 +407,8 @@ ${this.form("fr")}
     <p>Tout ce que porte cette page est atteignable directement :
       <code>ufoathome.org/play/?sighting=</code> suivi de l'adresse d'une reconstitution.
       C'est le lien à donner à quelqu'un quand on veut qu'il voie un récit plutôt qu'il le lise —
-      dans un courriel, un message, un forum qui n'accepte que du texte.</p>
+      dans un courriel, un message, un forum qui n'accepte que du texte.
+      Ajoutez <code>&amp;t=125</code> pour l'ouvrir à 125 secondes.</p>
     <p>C'est aussi ce que distribue le panneau <q>i</q> de chaque reconstitution publiée, et ce vers
       quoi aboutissent les anciens liens <code>ufoathome.org/&lt;nom&gt;</code>. Un nom sans barre oblique est cherché
       d'abord parmi les démos de ce site, puis comme dossier de rr0.org, lu par son
@@ -446,7 +451,8 @@ ${this.form("es")}
     <p>Todo lo que hay en esta página se puede alcanzar directamente:
       <code>ufoathome.org/play/?sighting=</code> seguido de la dirección de una reconstrucción.
       Ese es el enlace que hay que dar a alguien cuando quieres que vea un relato en lugar de leerlo —
-      en un correo, una publicación, un foro que no admite más que texto.</p>
+      en un correo, una publicación, un foro que no admite más que texto.
+      Añade <code>&amp;t=125</code> para abrirlo en el segundo 125.</p>
     <p>Es también lo que reparte el panel <q>i</q> de cada reconstrucción publicada, y a lo que
       llevan los antiguos enlaces <code>ufoathome.org/&lt;nombre&gt;</code>. Un nombre sin barra se
       busca primero entre las demos de este sitio, y después como caso de rr0.org, leído a través de
@@ -489,7 +495,8 @@ ${this.form("it")}
     <p>Tutto ciò che c'è in questa pagina è raggiungibile direttamente:
       <code>ufoathome.org/play/?sighting=</code> seguito dall'indirizzo di una ricostruzione.
       È il link da dare a qualcuno quando vuoi che veda un resoconto invece di leggerlo —
-      in un'email, un post, un forum che accetta solo testo.</p>
+      in un'email, un post, un forum che accetta solo testo.
+      Aggiungi <code>&amp;t=125</code> per aprirlo al secondo 125.</p>
     <p>È anche ciò che distribuisce il pannello <q>i</q> di ogni ricostruzione pubblicata, e ciò a
       cui rimandano i vecchi link <code>ufoathome.org/&lt;nome&gt;</code>. Un nome senza barra viene
       cercato prima tra le demo di questo sito, poi come caso di rr0.org, letto tramite il suo

@@ -42,6 +42,13 @@ const APP_HOME_URL = "https://ufoathome.org"
  */
 export const COMPARE_ACCOUNT_ATTRIBUTE = "compare-account"
 
+/**
+ * Where the recording opens, in seconds from its start: `start-time="125"`. Applied once, to the
+ * recording the element loads next (`src`, or one set directly), not to each observer the reader
+ * then picks. A value past the end opens at the end, an unreadable one at the start.
+ */
+export const START_TIME_ATTRIBUTE = "start-time"
+
 /** The choice's value for the recording's own account — see offerInterpretations. */
 const ACCOUNT_OPTION = "account"
 
@@ -75,7 +82,7 @@ const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
  */
 export class SightingElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "show-labels", OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
+    return ["src", "show-labels", START_TIME_ATTRIBUTE, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -421,6 +428,7 @@ export class SightingElement extends HTMLElement {
    * apart by shape (see CaseFile.isCase). A bare JSON array, the observer list this element read
    * before cases, is refused by name rather than misread. */
   async loadFromSrc(url: string): Promise<void> {
+    this.startPending = true
     const fetching = SightingFetch.json(url)
     // The loader from the moment a recording is asked for — see SceneElement.holdForNewScene.
     this.sceneElement.holdForNewScene(fetching)
@@ -453,6 +461,7 @@ export class SightingElement extends HTMLElement {
   }
 
   set sightingData(sighting: SightingRecordingJson) {
+    this.startPending = true
     this.currentSrc = ""
     this.setEntries([{ src: "", sighting }], undefined)
   }
@@ -746,6 +755,9 @@ export class SightingElement extends HTMLElement {
     }
   }
 
+  /** Whether the next recording shown is the one `start-time` is about — see START_TIME_ATTRIBUTE. */
+  private startPending = false
+
   private selectObserver(src: string): void {
     const entry = this.entries.find(e => e.src === src)
     if (!entry) return
@@ -759,6 +771,11 @@ export class SightingElement extends HTMLElement {
     // Another recording: shown once it is whole, not built in view — see SceneElement.holdForNewScene.
     this.sceneElement.holdForNewScene()
     this.sceneElement.sightingData = entry.sighting
+    if (this.startPending) {
+      this.startPending = false
+      const seconds = Number(this.getAttribute(START_TIME_ATTRIBUTE))
+      if (this.hasAttribute(START_TIME_ATTRIBUTE) && Number.isFinite(seconds)) this.sceneElement.ufoElement.currentTime = Math.max(0, seconds) * 1000
+    }
     this.offerInterpretations(entry)
     this.updateAccountLine()
     // A different observer is a different recording: what it states, and what an assessor makes of
