@@ -190,5 +190,12 @@ what is left of that cover along its direction. Fields too wide for one source (
 pinhole pictures are unchanged. Cost: lower than before (the stars leave the big render): Total
 Blocking Time 3.0 to 3.5 s against 4.5 to 5.8 s, same page, same 4x throttle.
 
-Not covered: a comet's tail and a meteor's ribbon are meshes, not point sources, and are still drawn
-at the source's resolution.
+The ribbons the sky's moving lights leave (a meteor's streak, a comet's tail, a re-entering piece's
+train) go the same way (`SkyRibbons`: one material, tracked like the points, an output twin with the
+same vertex mapping), with four samples to an edge on the layer's target since a ribbon is a fraction
+of a pixel wide: they were staircases of blocks two and a half pixels across.
+
+Pitfall found on the way: the stand-in of each point source must carry the real placement of its sky
+in its LOCAL matrix. Three works the world matrix out again from it when the layer's scene renders, so
+a copied world matrix was overwritten by the identity: right for an observer on the ground under an
+unscaled sky, every star at the origin for one at 1500 m under a sky scaled 33x (Chiles-Whitted).

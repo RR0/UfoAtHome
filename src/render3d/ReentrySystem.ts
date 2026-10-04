@@ -1,8 +1,9 @@
-import { AdditiveBlending, BufferAttribute, BufferGeometry, Color, DoubleSide, Group, Mesh, MeshBasicMaterial, Points, PointsMaterial } from "three"
+import { BufferAttribute, BufferGeometry, Color, Group, Mesh, Points, type MeshBasicMaterial, type PointsMaterial } from "three"
 import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
 import type { HorizontalPosition } from "../engine/astronomy/CelestialPositions.js"
 import type { ReentryFragmentView, SkyPoint } from "../engine/interpretation/Reentry.js"
 import { PointSources } from "./PointSources.js"
+import { SkyRibbons } from "./SkyRibbons.js"
 import { horizontalToCartesian, magnitudeToBrightness, STAR_BRIGHTNESS_TIERS, starBrightnessTierIndex } from "./skyColors.js"
 
 interface Vector {
@@ -60,8 +61,9 @@ export class ReentrySystem {
     geometry.setAttribute("color", new BufferAttribute(this.colors, 3))
     geometry.setDrawRange(0, 0)
     this.trains = new Mesh(geometry,
-      new MeshBasicMaterial({ vertexColors: true, transparent: true, blending: AdditiveBlending, depthWrite: false, fog: false, side: DoubleSide }))
+      SkyRibbons.material())
     this.trains.frustumCulled = false
+    SkyRibbons.track(this.trains)
     this.object.add(this.trains)
   }
 

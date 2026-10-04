@@ -164,15 +164,26 @@ export class PointSources {
    */
   static patchOutput(vertexShader: string, scintillates = true): string {
     return PointSources.patch(vertexShader, scintillates)
-      .replace("uniform float uRodSolidAngle;", `uniform float uOutputHalfFovRad;
+      .replace("uniform float uRodSolidAngle;", `${PointSources.OUTPUT_UNIFORMS_GLSL}\nuniform float uRodSolidAngle;`)
+      .replace(PointSources.PROJECT_ANCHOR, `${PointSources.PROJECT_ANCHOR}\n${PointSources.OUTPUT_PROJECTION_GLSL}`)
+      .replace("float pixelAngle = 2.0 / (projectionMatrix[1][1] * uViewportHeight);", "float pixelAngle = uOutputPixelAngle;")
+  }
+
+  /** What the output vertex shaders read each frame (see `output`). */
+  static readonly OUTPUT_UNIFORMS_GLSL = `uniform float uOutputHalfFovRad;
 uniform float uOutputAspect;
 uniform float uOutputPixelAngle;
 uniform float uSrcTanHalfFovY;
-uniform sampler2D uOcclusion;
-uniform float uRodSolidAngle;`)
-      .replace(PointSources.PROJECT_ANCHOR, `${PointSources.PROJECT_ANCHOR}
+uniform sampler2D uOcclusion;`
+
+  /**
+   * Puts a vertex where the eye's picture puts its direction, and dims it by what stands in front of
+   * the sky there. Shared by every sky light drawn into the picture's own pixels: the points, and the
+   * ribbons of meteors, comets' tails and re-entries (see SkyRibbons). Needs `mvPosition` and `vColor`.
+   */
+  static readonly OUTPUT_PROJECTION_GLSL = `
   {
-    // The eye is at the origin of view space: the point's direction is its position, and the picture
+    // The eye is at the origin of view space: the vertex's direction is its position, and the picture
     // puts it at an angle from the axis proportional to that angle, whichever way it lies.
     vec3 viewDirection = normalize(mvPosition.xyz);
     float lateral = length(viewDirection.xy);
@@ -186,9 +197,7 @@ uniform float uRodSolidAngle;`)
     vec2 seenAt = vec2(viewDirection.x / -viewDirection.z / (uSrcTanHalfFovY * uOutputAspect), viewDirection.y / -viewDirection.z / uSrcTanHalfFovY) * 0.5 + 0.5;
     float covered = viewDirection.z < 0.0 && all(lessThan(abs(seenAt - 0.5), vec2(0.5))) ? texture2D(uOcclusion, seenAt).a : 0.0;
     vColor.rgb *= 1.0 - covered;
-  }`)
-      .replace("float pixelAngle = 2.0 / (projectionMatrix[1][1] * uViewportHeight);", "float pixelAngle = uOutputPixelAngle;")
-  }
+  }`
 
   /**
    * The eye's acuity cell for a given share of the seeing done by the rods: a minute of arc for the

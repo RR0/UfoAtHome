@@ -13,12 +13,13 @@ import {
   type WebGLRenderer
 } from "three"
 import { PointSources } from "./PointSources.js"
+import { SkyRibbons } from "./SkyRibbons.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
 
 /** What the layer needs to know about the scene it draws for. */
 export interface PointLayerHost {
-  /** Every point source of the scene (see PointSources.track). */
-  points(): Points[]
+  /** Every point source (see PointSources.track) and ribbon (see SkyRibbons.track) of the scene. */
+  points(): (Points | Mesh)[]
   /** The meshes of the sky that hide what is behind them by covering it: the cloud decks. */
   clouds(): Object3D[]
   /** The sky and everything in it, which is never a foreground. */
@@ -26,8 +27,8 @@ export interface PointLayerHost {
 }
 
 /**
- * Draws the scene's point sources — stars, planets, satellites — into the eye's picture at the
- * picture's own pixels, and tells the resampling what they add.
+ * Draws the scene's point sources — stars, planets, satellites — and the ribbons of its meteors, comet
+ * tails and re-entries into the eye's picture at the picture's own pixels, and tells the resampling what they add.
  *
  * WHY. The eye's picture is resampled from a render that carries about two fifths of its pixels per
  * radian at the centre (a 70 degree field; see EquidistantProjectionPass), so a star drawn into that
@@ -58,12 +59,14 @@ export class PointLayerPass {
   private readonly scene = new Scene()
   /** What stands in for each point source in this layer's own scene: the same geometry, drawn with
    * the output material, at the source's own place. */
-  private readonly proxies = new Map<Points, Points>()
+  private readonly proxies = new Map<Points | Mesh, Points | Mesh>()
   private readonly foreground = new MeshBasicMaterial({ color: 0x000000, fog: false })
-  private hidden: Points[] = []
+  private hidden: (Points | Mesh)[] = []
 
   constructor(private width: number, private height: number) {
-    this.target = new WebGLRenderTarget(width, height, { type: HalfFloatType })
+    // Four samples to an edge: a ribbon is a fraction of a pixel wide, and a point's disc is drawn
+    // from its own Gaussian, which needs none.
+    this.target = new WebGLRenderTarget(width, height, { type: HalfFloatType, samples: 4 })
     this.occlusion = new WebGLRenderTarget(...PointLayerPass.occlusionSize(width, height))
   }
 
@@ -99,7 +102,7 @@ export class PointLayerPass {
   }
 
   private static holdsPoints(geometry: BufferGeometry): boolean {
-    return (geometry.getAttribute("position")?.count ?? 0) > 0
+    return (geometry.getAttribute("position")?.count ?? 0) > 0 && geometry.drawRange.count > 0
   }
 
   /**
@@ -173,7 +176,9 @@ export class PointLayerPass {
     for (const points of this.hidden) {
       let proxy = this.proxies.get(points)
       if (!proxy) {
-        proxy = new Points(points.geometry, PointSources.outputMaterial(points.material as PointsMaterial))
+        proxy = points instanceof Points
+          ? new Points(points.geometry, PointSources.outputMaterial(points.material as PointsMaterial))
+          : new Mesh(points.geometry, SkyRibbons.outputMaterial(points.material as MeshBasicMaterial))
         proxy.matrixAutoUpdate = false
         proxy.frustumCulled = false
         this.proxies.set(points, proxy)

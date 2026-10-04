@@ -3852,9 +3852,9 @@ export class SceneRenderer {
    * PointLayerPass. */
   private readonly pointLayerHost: PointLayerHost = {
     points: () => {
-      const found: Points[] = []
+      const found: (Points | Mesh)[] = []
       this.celestialGroup.traverse(object => {
-        if (object instanceof Points && object.userData.pointSource) found.push(object)
+        if ((object instanceof Points && object.userData.pointSource) || (object instanceof Mesh && object.userData.skyRibbon)) found.push(object)
       })
       return found
     },

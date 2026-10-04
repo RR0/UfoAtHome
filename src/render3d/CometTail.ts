@@ -1,5 +1,6 @@
 import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
-import { AdditiveBlending, BufferAttribute, BufferGeometry, DoubleSide, Mesh, MeshBasicMaterial } from "three"
+import { BufferAttribute, BufferGeometry, Mesh, type MeshBasicMaterial } from "three"
+import { SkyRibbons } from "./SkyRibbons.js"
 import { horizontalToCartesian } from "./skyColors.js"
 
 interface Vector {
@@ -69,9 +70,10 @@ export class CometTail {
       // Additive and unlit, like every other emitting thing in this sky. Fog off: it is at the
       // distance of the planets, not inside the weather. Both sides, since a band built from a
       // cross product faces whichever way the geometry took it.
-      new MeshBasicMaterial({ vertexColors: true, transparent: true, blending: AdditiveBlending, depthWrite: false, fog: false, side: DoubleSide })
+      SkyRibbons.material()
     )
     this.object.frustumCulled = false
+    SkyRibbons.track(this.object)
   }
 
   /**

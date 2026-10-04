@@ -1,7 +1,8 @@
 import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
-import { AdditiveBlending, BufferAttribute, BufferGeometry, DoubleSide, Mesh, MeshBasicMaterial } from "three"
+import { BufferAttribute, BufferGeometry, Mesh, type MeshBasicMaterial } from "three"
 import { MeteorFall } from "../engine/astronomy/MeteorFall.js"
 import type { Meteor } from "../engine/astronomy/MeteorFall.js"
+import { SkyRibbons } from "./SkyRibbons.js"
 import { horizontalToCartesian } from "./skyColors.js"
 
 interface Vector {
@@ -77,9 +78,10 @@ export class MeteorSystem {
       // Additive and unlit, like every other real light source in this scene: a meteor emits, it is
       // not lit by anything. Fog off — it burns above every atmosphere this scene models. Both
       // sides, because a ribbon built from a cross product faces whichever way the geometry took it.
-      new MeshBasicMaterial({ vertexColors: true, transparent: true, blending: AdditiveBlending, depthWrite: false, fog: false, side: DoubleSide })
+      SkyRibbons.material()
     )
     this.object.frustumCulled = false
+    SkyRibbons.track(this.object)
   }
 
   /** What is falling — read by anything that needs to find a meteor rather than draw one. */
