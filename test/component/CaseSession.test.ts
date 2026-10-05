@@ -117,4 +117,13 @@ describe("A case being edited", () => {
     made.markExported(true)
     expect(made.dirty).toBe(false)
   })
+
+  it("writes every recording the case lists when asked, not only the ones that changed", () => {
+    const session = new CaseSession(caseJson(), url)
+    session.keep(session.tracks[0], account, true)
+    session.keep(session.tracks[1], { ...account, id: "reading" } as SightingRecordingJson, true)
+    expect(session.files(true).map(file => file.path)).toEqual(["case.json"])
+    expect(session.files(true, true).map(file => file.path)).toEqual(["case.json", "observer-mcminnville.json", "interpretation-mcminnville-1.json"])
+    expect(session.files(false, true).map(file => file.path)).toEqual(["case.json"])
+  })
 })

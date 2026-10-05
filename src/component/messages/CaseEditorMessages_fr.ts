@@ -38,5 +38,7 @@ export const caseEditorMessages_fr: CaseEditorMessages = {
   unsavedChanges: "Modifications non exportées",
   discardQuestion: "Des modifications ne sont pas encore exportées. Charger quand même et les perdre ?",
   discardTitle: "Modifications non exportées",
-  discardOk: "Charger quand même"
+  discardOk: "Charger quand même",
+  leaveQuestion: "Des modifications ne sont pas encore exportées. Quitter quand même et les perdre ?",
+  leaveOk: "Quitter quand même"
 }

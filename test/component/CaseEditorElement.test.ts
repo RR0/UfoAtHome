@@ -541,5 +541,70 @@ describe("CaseEditorElement", () => {
       expect(element.dirty).toBe(true)
       expect(leave().defaultPrevented).toBe(true)
     })
+
+    it("exports every observation next to the case, the ones never opened included, when asked", async () => {
+      const element = await open()
+      const fetched: string[] = []
+      const before = globalThis.fetch
+      vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+        fetched.push(url)
+        return { ok: true, json: () => Promise.resolve(structuredClone(files[url])), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }
+      }))
+      const written: string[] = []
+      const click = HTMLAnchorElement.prototype.click
+      HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) { written.push(this.download) }
+      vi.stubGlobal("URL", Object.assign(URL, { createObjectURL: () => "blob:x", revokeObjectURL: () => {} }))
+      try {
+        parts(element).exportButton.click()
+        await submit(element)
+        await wait(100)
+      } finally {
+        HTMLAnchorElement.prototype.click = click
+        void before
+      }
+      expect(fetched).toContain("https://example.org/d/reading.json") // never opened, fetched to be written
+      expect(written).toEqual(["X.zip"])
+      expect(element.dirty).toBe(false)
+    })
+
+    it("marks a recording that was changed, in a case or alone, apart from the case", async () => {
+      const element = await open()
+      const root = element.shadowRoot!
+      const recordingMark = root.getElementById("recording-dirty")!
+      expect(recordingMark.hidden).toBe(true)
+      const description = element.sightingEditor.shadowRoot!.getElementById("description") as HTMLTextAreaElement
+      description.value = "Something the author typed"
+      // As a browser sends it: it crosses the editor's shadow root.
+      description.dispatchEvent(new Event("input", { bubbles: true, composed: true }))
+      await wait(700)
+      expect(recordingMark.hidden).toBe(false)
+      expect(root.getElementById("dirty")!.hidden).toBe(false)
+    })
+
+    it("asks in the page before one of its links is followed with changes not exported, and follows nothing if declined", async () => {
+      const element = await open()
+      parts(element).field("case-title").value = "Another title"
+      parts(element).field("case-title").dispatchEvent(new Event("input"))
+      const link = document.createElement("a")
+      link.href = "https://example.org/elsewhere"
+      document.body.appendChild(link)
+      const event = new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 })
+      link.dispatchEvent(event)
+      expect(event.defaultPrevented).toBe(true)
+      expect((element.shadowRoot!.getElementById("dialog") as HTMLDialogElement).open).toBe(true)
+      expect(element.shadowRoot!.getElementById("dialog-message")!.textContent).toContain("Leave anyway")
+      element.shadowRoot!.getElementById("cancel")!.click()
+    })
+
+    it("lets a link be followed when nothing would be lost", async () => {
+      const element = await open()
+      const link = document.createElement("a")
+      link.href = "https://example.org/elsewhere"
+      document.body.appendChild(link)
+      const event = new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 })
+      link.addEventListener("click", e => e.preventDefault()) // so that jsdom does not try to navigate
+      link.dispatchEvent(event)
+      expect((element.shadowRoot!.getElementById("dialog") as HTMLDialogElement).open).toBe(false)
+    })
   })
 })

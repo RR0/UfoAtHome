@@ -38,4 +38,6 @@ export interface CaseEditorMessages {
   discardQuestion: string
   discardTitle: string
   discardOk: string
+  leaveQuestion: string
+  leaveOk: string
 }

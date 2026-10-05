@@ -47,6 +47,7 @@ const TEMPLATE = `
   dialog label.check > span { flex: 1 1 auto; }
   .row.header { justify-content: space-between; }
   .dirty { flex: 1 1 auto; color: #b45309; font-size: .85em; }
+  p.dirty { margin: 0 0 .4em; }
   .row.header h2 { margin: 0; }
   dialog input[type="text"], dialog input[type="date"], dialog input[type="url"], dialog select { flex: 1 1 auto; min-width: 0; }
   dialog .actions { display: flex; gap: .5em; margin-top: .6em; }
@@ -72,6 +73,7 @@ const TEMPLATE = `
   </div>
 </section>
 <section id="recording" class="recording">
+  <p id="recording-dirty" class="dirty" role="status" hidden>● Changes not exported</p>
   <rr0-sighting-editor id="editor"></rr0-sighting-editor>
 </section>
 <p id="make-case-row" class="make-case"><button id="make-case" type="button" class="link">Add to a case</button></p>
@@ -160,7 +162,7 @@ export class CaseEditorElement extends HTMLElement {
       this.pendingLoad = (event as CustomEvent<{ proceed: () => void }>).detail.proceed
       this.openDialog("discard", this.messages.discardTitle, this.messages.discardQuestion)
     })
-    for (const type of ["input", "change", "datechange"]) this.shadow.addEventListener(type, () => this.scheduleDirtyCheck(), true)
+    for (const type of ["input", "change", "datechange", "click", "pointerup", "keyup"]) this.shadow.addEventListener(type, () => this.scheduleDirtyCheck(), true)
     for (const [id, field] of [["case-id", "id"], ["case-title", "title"]] as const) {
       this.input(id).addEventListener("input", () => this.writeCaseField(field, this.input(id).value))
     }
@@ -198,12 +200,13 @@ export class CaseEditorElement extends HTMLElement {
   }
 
   private readonly warnBeforeLeaving = (event: BeforeUnloadEvent): void => {
-    if (!this.dirty) return
+    if (this.leaving || !this.dirty) return
     event.preventDefault()
     event.returnValue = ""
   }
 
   disconnectedCallback(): void {
+    document.removeEventListener("click", this.askBeforeFollowing, true)
     window.removeEventListener("beforeunload", this.warnBeforeLeaving)
     window.clearTimeout(this.dirtyTimer)
   }
@@ -224,11 +227,44 @@ export class CaseEditorElement extends HTMLElement {
     this.dirtyTimer = window.setTimeout(() => this.refreshDirty(), 600)
   }
 
+  /**
+   * Shows what there is to lose, at the two levels it is lost at: the case (anything of it, or of any recording, not
+   * exported) and the recording on show (changed since it was loaded, in a case, or since it was loaded or exported, alone).
+   */
   private refreshDirty(): void {
-    this.byId("dirty").hidden = !(this.session && this.dirty)
+    const session = this.session
+    if (session) this.commit()
+    this.byId("dirty").hidden = !(session && session.dirty)
+    const recording = session ? (this.current !== undefined && session.changed(this.current)) : this.editor.dirty
+    this.byId("recording-dirty").hidden = !recording
+  }
+
+  /** Set once the author agreed to leave, so that the page going away is not asked about a second time. */
+  private leaving = false
+
+  /**
+   * Leaving by one of the page's own links is asked here, in the page, since a browser asks for the page being left
+   * only when it chooses to — and not at all of a page nobody typed in. A modified click, a new tab, a link to the
+   * same page are left alone.
+   */
+  private readonly askBeforeFollowing = (event: MouseEvent): void => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    const anchor = event.composedPath().find((node): node is HTMLAnchorElement => node instanceof HTMLAnchorElement)
+    if (!anchor || !anchor.href || (anchor.target && anchor.target !== "_self") || anchor.hasAttribute("download")) return
+    const target = new URL(anchor.href, location.href)
+    if (target.href === location.href || (target.origin === location.origin && target.pathname === location.pathname && target.search === location.search && target.hash !== "")) return
+    if (!this.dirty) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.pendingLoad = () => {
+      this.leaving = true
+      location.assign(target.href)
+    }
+    this.openDialog("discard", this.messages.discardTitle, this.messages.leaveQuestion, this.messages.leaveOk)
   }
 
   connectedCallback(): void {
+    document.addEventListener("click", this.askBeforeFollowing, true)
     window.addEventListener("beforeunload", this.warnBeforeLeaving)
     const src = this.getAttribute("src")
     if (src && this.editor.getAttribute("src") !== src) this.editor.setAttribute("src", src)
@@ -285,6 +321,7 @@ export class CaseEditorElement extends HTMLElement {
     text("label-recording", m.recording)
     text("make-case", m.addToCase)
     text("dirty", `● ${m.unsavedChanges}`)
+    text("recording-dirty", `● ${m.unsavedChanges}`)
     text("add", "+")
     text("export", m.exportButton)
     text("label-export-recordings", m.exportAlso)
@@ -345,7 +382,8 @@ export class CaseEditorElement extends HTMLElement {
   private async loadTrack(track: CaseTrack): Promise<void> {
     if (track.recording) return
     track.recording = (await SightingFetch.json(track.url)) as SightingRecordingJson
-    track.loaded = undefined
+    // As it was fetched: what a recording is changed from. A recording shown has it taken again from the form (see showTrack).
+    track.loaded = JSON.stringify(track.recording)
   }
 
   /** Shows a recording of the case in the editor, the one on show having been kept first. */
@@ -471,7 +509,7 @@ export class CaseEditorElement extends HTMLElement {
     return this.byId("dialog") as HTMLDialogElement
   }
 
-  private openDialog(mode: DialogMode, heading: string, message?: string): void {
+  private openDialog(mode: DialogMode, heading: string, message?: string, okLabel?: string): void {
     this.dialogMode = mode
     this.byId("dialog-title").textContent = heading
     const note = this.byId("dialog-message")
@@ -481,7 +519,7 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("fields-add").hidden = mode !== "add"
     this.byId("fields-export").hidden = mode !== "export"
     this.byId("ok").hidden = false
-    this.byId("ok").textContent = mode === "discard" ? this.messages.discardOk : this.messages.ok
+    this.byId("ok").textContent = okLabel ?? (mode === "discard" ? this.messages.discardOk : this.messages.ok)
     if (typeof this.dialog.showModal === "function") this.dialog.showModal()
     else this.dialog.setAttribute("open", "")
   }
@@ -568,8 +606,8 @@ export class CaseEditorElement extends HTMLElement {
         return
       }
       case "export":
-        this.closeDialog()
-        await this.exportCase(this.input("export-recordings").checked)
+        if (await this.exportCase(this.input("export-recordings").checked)) this.closeDialog()
+        else this.showError(this.messages.loadFailed)
         return
       case "add":
         if (await this.addRecording()) this.closeDialog()
@@ -660,23 +698,34 @@ export class CaseEditorElement extends HTMLElement {
     if (next) void this.showTrack(next)
   }
 
-  /** The case, and every recording of it added or changed, as one zip laid out as the case is. */
-  private async exportCase(withRecordings = true): Promise<void> {
+  /**
+   * The case, and with `withRecordings` every recording it lists beside it — the ones not looked at yet are fetched for it —
+   * as one zip laid out as the case is; the case alone as the plain file. Says whether it could be written.
+   */
+  private async exportCase(withRecordings = true): Promise<boolean> {
     const session = this.session
-    if (!session) return
+    if (!session) return true
     this.commit()
-    const files = session.files(withRecordings)
+    if (withRecordings) {
+      try {
+        for (const track of session.tracks) await this.loadTrack(track)
+      } catch {
+        return false
+      }
+    }
+    const files = session.files(withRecordings, true)
     session.markExported(withRecordings)
     this.refreshDirty()
     // The case alone is the one file it is: no archive around it.
     if (files.length === 1) {
       this.download(new Blob([files[0].content], { type: "application/json" }), files[0].path)
-      return
+      return true
     }
     const { zipSync, strToU8 } = await import("fflate")
     const archive: Record<string, Uint8Array> = {}
     for (const file of files) archive[file.path] = strToU8(file.content)
     this.download(new Blob([zipSync(archive) as BlobPart], { type: "application/zip" }), `${session.json.id ?? "case"}.zip`)
+    return true
   }
 
   private download(blob: Blob, name: string): void {

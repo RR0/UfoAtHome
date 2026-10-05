@@ -232,10 +232,11 @@ export class CaseSession {
   }
 
   /** What has to be written: the case, and (unless asked not to) every recording added or changed. Paths are relative to the case. */
-  files(withRecordings = true): { path: string, content: string }[] {
+  files(withRecordings = true, every = false): { path: string, content: string }[] {
     const directory = this.url.replace(/[^/]*$/, "")
     const relative = (url: string): string => url.startsWith(directory) ? url.slice(directory.length) : url
-    const written = this.tracks.filter(track => withRecordings && this.changed(track))
+    // Every recording the case lists once asked for, or just the ones added or changed: the others are already where the case is.
+    const written = this.tracks.filter(track => withRecordings && track.recording !== undefined && (every || this.changed(track)))
       .map(track => ({ path: relative(track.url), content: JSON.stringify(track.recording, null, 2) + "\n" }))
     const name = decodeURIComponent(this.url.replace(/[?#].*$/, "").replace(/^.*\//, "")) || "case.json"
     return [{ path: name, content: JSON.stringify(this.json, null, 2) + "\n" }, ...written]
