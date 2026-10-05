@@ -4,7 +4,7 @@ import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 /**
  * Replays any reconstruction, from a link or from the reader's own files.
  *
- * The page the `?sighting=` links point at — the convention ufoathome.org has carried since it was
+ * The page the `?file=` links point at — the convention ufoathome.org has carried since it was
  * a single page on rr0.org, and the one every published reconstruction's own "open it" link uses.
  */
 export class PlayerPage implements SitePage {
@@ -138,7 +138,7 @@ let shownSrc
 stage.addEventListener("observerchange", event => {
   shownSrc = event.detail && event.detail.src ? event.detail.src : undefined
   describe()
-  if (shownSrc && !editLink.hidden) editLink.href = stage.editorHref || editorPath + "?sighting=" + encodeURIComponent(shownSrc)
+  if (shownSrc && !editLink.hidden) editLink.href = stage.editorHref || editorPath + "?file=" + encodeURIComponent(shownSrc)
 })
 /* A reading chosen in the menu is a recording of its own: the editor opens on it, in its case. */
 stage.addEventListener("interpretationchange", () => {
@@ -148,7 +148,7 @@ stage.addEventListener("interpretationchange", () => {
 const reveal = (source, sighting, fallbackTitle) => {
   stageBox.hidden = false
   if (source) {
-    editLink.href = stage.editorHref || editorPath + "?sighting=" + encodeURIComponent(shownSrc || source)
+    editLink.href = stage.editorHref || editorPath + "?file=" + encodeURIComponent(shownSrc || source)
     editLink.hidden = false
   } else {
     editLink.hidden = true
@@ -192,7 +192,7 @@ const answeredButUnreadable = async url => {
 /* The player PLAYS what it has just been given: somebody who followed a link, typed an address or chose
    a file came to watch, not to hunt for the button. \`play=false\` in the page's own address turns that
    off, for a link meant to open the recording stopped. */
-/* \`t=\` in the page's own address is where the recording opens, in seconds: \`?sighting=...&t=125\`. */
+/* \`t=\` in the page's own address is where the recording opens, in seconds: \`?file=...&t=125\`. */
 const startAt = new URLSearchParams(location.search).get("t")
 if (startAt !== null && startAt.trim() !== "" && Number.isFinite(Number(startAt))) stage.setAttribute("start-time", startAt)
 const playsAtOnce = new URLSearchParams(location.search).get("play") !== "false"
@@ -214,7 +214,8 @@ const openUrl = async requested => {
       say("")
       startPlaying()
       const next = new URL(location.href)
-      next.searchParams.set("sighting", requested)
+      next.searchParams.delete("sighting")
+      next.searchParams.set("file", requested)
       history.replaceState(null, "", next)
       return
     } catch {
@@ -286,7 +287,9 @@ filesField.addEventListener("change", () => {
   if (files.length > 0) void openFiles(files)
 })
 
-const asked = new URLSearchParams(location.search).get("sighting")
+/* "file=" names what is played, a recording or a case; "sighting=", which the first links used, is still read. */
+const query = new URLSearchParams(location.search)
+const asked = query.get("file") ?? query.get("sighting")
 if (asked) {
   urlField.value = asked
   // Arriving with a recording named in the URL means being shown it, not being shown a form: the
@@ -365,7 +368,7 @@ ${this.form("en")}
   <div class="wrap prose-wide">
     <h2>A link that opens a sighting</h2>
     <p>Anything on this page can be reached directly:
-      <code>ufoathome.org/play/?sighting=</code> followed by the address of a reconstruction.
+      <code>ufoathome.org/play/?file=</code> followed by the address of a reconstruction.
       That is the link to hand someone when you want them to see an account rather than read it —
       in an email, a post, a forum that allows nothing but text.
       Add <code>&amp;t=125</code> to open it 125 seconds in.</p>
@@ -409,7 +412,7 @@ ${this.form("fr")}
   <div class="wrap prose-wide">
     <h2>Un lien qui ouvre une observation</h2>
     <p>Tout ce que porte cette page est atteignable directement :
-      <code>ufoathome.org/play/?sighting=</code> suivi de l'adresse d'une reconstitution.
+      <code>ufoathome.org/play/?file=</code> suivi de l'adresse d'une reconstitution.
       C'est le lien à donner à quelqu'un quand on veut qu'il voie un récit plutôt qu'il le lise —
       dans un courriel, un message, un forum qui n'accepte que du texte.
       Ajoutez <code>&amp;t=125</code> pour l'ouvrir à 125 secondes.</p>
@@ -453,7 +456,7 @@ ${this.form("es")}
   <div class="wrap prose-wide">
     <h2>Un enlace que abre un avistamiento</h2>
     <p>Todo lo que hay en esta página se puede alcanzar directamente:
-      <code>ufoathome.org/play/?sighting=</code> seguido de la dirección de una reconstrucción.
+      <code>ufoathome.org/play/?file=</code> seguido de la dirección de una reconstrucción.
       Ese es el enlace que hay que dar a alguien cuando quieres que vea un relato en lugar de leerlo —
       en un correo, una publicación, un foro que no admite más que texto.
       Añade <code>&amp;t=125</code> para abrirlo en el segundo 125.</p>
@@ -497,7 +500,7 @@ ${this.form("it")}
   <div class="wrap prose-wide">
     <h2>Un link che apre un avvistamento</h2>
     <p>Tutto ciò che c'è in questa pagina è raggiungibile direttamente:
-      <code>ufoathome.org/play/?sighting=</code> seguito dall'indirizzo di una ricostruzione.
+      <code>ufoathome.org/play/?file=</code> seguito dall'indirizzo di una ricostruzione.
       È il link da dare a qualcuno quando vuoi che veda un resoconto invece di leggerlo —
       in un'email, un post, un forum che accetta solo testo.
       Aggiungi <code>&amp;t=125</code> per aprirlo al secondo 125.</p>

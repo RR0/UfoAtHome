@@ -1855,7 +1855,7 @@ export class SightingEditorElement extends HTMLElement {
 
   /** `src` loads an existing recording straight into the editor, the same attribute every other
    * element in this package already takes — what makes a per-observation editor URL possible at
-   * all (rr0.org's own editor page maps `?sighting=` onto it, so ufoathome.org/<path> opens that
+   * all (rr0.org's own editor page maps `?file=` onto it, so ufoathome.org/<path> opens that
    * observation for editing rather than an empty canvas). */
   static get observedAttributes(): string[] {
     return ["src"]
@@ -2038,7 +2038,7 @@ export class SightingEditorElement extends HTMLElement {
       this.sceneElement.documentUrl = new URL(url, location.href).href
       this.sightingData = json
       // Says where the open recording came from, whichever way it was asked for: typed here, the
-      // `src` attribute (a site's `?sighting=` link), or a observer's own file. Absolute, so the
+      // `src` attribute (a site's `?file=` link), or a observer's own file. Absolute, so the
       // address can be copied out of the field and still work, and so the field is a valid URL.
       this.importUrlInput.value = new URL(url, location.href).href
       this.dispatchEvent(new CustomEvent("recordingloaded", { bubbles: true, composed: true }))

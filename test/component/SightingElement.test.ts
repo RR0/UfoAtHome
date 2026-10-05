@@ -615,7 +615,7 @@ describe("SightingElement", () => {
     const editLink = element.shadowRoot!.getElementById("edit-link") as HTMLAnchorElement
     expect(editLink.hidden).toBe(false)
     expect(editLink.href).toBe(
-      `https://ufoathome.org/edit/?sighting=${encodeURIComponent(new URL("john.json", location.href).href)}`)
+      `https://ufoathome.org/edit/?file=${encodeURIComponent(new URL("john.json", location.href).href)}`)
     const appLink = element.shadowRoot!.getElementById("info-app-link") as HTMLAnchorElement
     expect(appLink.href).toBe("https://ufoathome.org/")
     expect(appLink.textContent).toMatch(/^UFO@home v\d+\.\d+\.\d+$/)
@@ -861,7 +861,7 @@ describe("SightingElement sharing", () => {
     const shadow = await mounted()
     ;(findDeep(shadow, "share-button") as HTMLButtonElement).click()
     expect((shadow.getElementById("share-link") as HTMLInputElement).value)
-      .toBe("https://ufoathome.org/play/?sighting=" + encodeURIComponent("http://localhost:3000/john.json"))
+      .toBe("https://ufoathome.org/play/?file=" + encodeURIComponent("http://localhost:3000/john.json"))
     expect(shadow.getElementById("share-dialog")!.hasAttribute("open")).toBe(true)
   })
 

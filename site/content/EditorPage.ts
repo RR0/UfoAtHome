@@ -27,7 +27,7 @@ export class EditorPage implements SitePage {
   }
 
   /**
-   * `?sighting=` opens the editor on an existing recording — the parameter every "edit this
+   * `?file=` opens the editor on an existing recording — the parameter every "edit this
    * observation" link in a published reconstruction carries.
    *
    * A bare name with no slash is resolved against this site's own demo recordings first, then
@@ -40,7 +40,9 @@ export class EditorPage implements SitePage {
     const demoTitles = JSON.stringify(RecordingTitle.demoTitles(language))
     const editing = JSON.stringify(({ en: "Editing {title}", fr: "Éditer {title}", es: "Editar {title}", it: "Modifica {title}" })[language])
     return `const editor = document.getElementById("editor")
-const requested = new URLSearchParams(location.search).get("sighting")
+/* "file=" names what is opened, a recording or a case; "sighting=", which the first links used, is still read. */
+const query = new URLSearchParams(location.search)
+const requested = query.get("file") ?? query.get("sighting")
 /* Which recording of a case it opens on, when what is asked for is a case. */
 const requestedTrack = new URLSearchParams(location.search).get("track")
 const demoTitles = ${demoTitles}
@@ -85,8 +87,8 @@ const showExample = value => {
   for (const [id, path] of [["sighting-edit", "/edit/"], ["sighting-play", "/play/"]]) {
     const link = document.getElementById(id)
     if (!link) continue
-    link.href = path + "?sighting=" + encodeURIComponent(value)
-    link.querySelector("code").textContent = path + "?sighting=" + value
+    link.href = path + "?file=" + encodeURIComponent(value)
+    link.querySelector("code").textContent = path + "?file=" + value
   }
 }
 showExample(requested || "Socorro")
@@ -192,11 +194,11 @@ if (docs) {
     <div class="stage stage-padded">
       <rr0-case-editor id="editor"></rr0-case-editor>
     </div>
-    <p class="small">Opening it on an existing recording: add <code>?sighting=</code> and a URL, or
+    <p class="small">Opening it on an existing recording or case: add <code>?file=</code> and a URL (<code>?sighting=</code>, its former name, still works), or
       the name of one of <a href="/demos/">the demos</a> (a name that is none of them is looked for as an
       rr0.org case, by its <code>sighting.json</code>) — for instance
-      <a id="sighting-edit" href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>,
-      which replays at <a id="sighting-play" href="/play/?sighting=Socorro"><code>/play/?sighting=Socorro</code></a>.</p>
+      <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
+      which replays at <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
     <p class="small">The address may be a case's <code>case.json</code>: the editor then lists the recordings the case holds, the observers' accounts and the readings of them, each a recording of its own, with a picker to open one, a button to interpret an account (add a reading of it), one to add another observer's account (blank, from a file or from an address) and one to delete a recording — refused while a reading still interprets it — and, in the File group, one to export the case and what changed as a zip. This is <code>&lt;rr0-case-editor&gt;</code>, which holds the editor of one recording and hands it one at a time. <code>&amp;track=</code> names the recording it opens on.</p>
   </div>
 </section>
@@ -614,11 +616,11 @@ if (docs) {
     <div class="stage stage-padded">
       <rr0-case-editor id="editor"></rr0-case-editor>
     </div>
-    <p class="small">Pour l'ouvrir sur un enregistrement existant : ajoutez <code>?sighting=</code>
+    <p class="small">Pour l'ouvrir sur un enregistrement ou un dossier existant : ajoutez <code>?file=</code> (<code>?sighting=</code>, son ancien nom, fonctionne toujours)
       suivi d'une URL, ou du nom d'une <a href="/demos/">démo</a> (un nom qui n'en est pas une est
       cherché comme dossier de rr0.org, par son <code>sighting.json</code>) — par exemple
-      <a id="sighting-edit" href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>,
-      qui se rejoue à <a id="sighting-play" href="/play/?sighting=Socorro"><code>/play/?sighting=Socorro</code></a>.</p>
+      <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
+      qui se rejoue à <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
     <p class="small">L'adresse peut être le <code>case.json</code> d'un dossier : l'éditeur liste alors les enregistrements qu'il contient, les comptes rendus des observateurs et les lectures qu'on en fait, chacune un enregistrement à part, avec un sélecteur pour en ouvrir un, un bouton pour interpréter un compte rendu (en ajouter une lecture), un pour ajouter le compte rendu d'un autre témoin (vierge, depuis un fichier ou une adresse) et un pour supprimer un enregistrement — refusé tant qu'une lecture l'interprète — et, dans le groupe Fichier, un pour exporter le dossier et ce qui a changé en zip. C'est <code>&lt;rr0-case-editor&gt;</code>, qui contient l'éditeur d'un enregistrement et le lui présente un à la fois. <code>&amp;track=</code> nomme l'enregistrement sur lequel il s'ouvre.</p>
   </div>
 </section>
@@ -1070,11 +1072,11 @@ if (docs) {
     <div class="stage stage-padded">
       <rr0-case-editor id="editor"></rr0-case-editor>
     </div>
-    <p class="small">Para abrirlo sobre un registro existente: añade <code>?sighting=</code> y una URL, o
+    <p class="small">Para abrirlo sobre un registro o un caso existente: añade <code>?file=</code> (<code>?sighting=</code>, su nombre anterior, sigue funcionando) y una URL, o
       el nombre de una de <a href="/demos/">las demos</a> (un nombre que no sea ninguna de ellas se busca
       como caso de rr0.org, por su <code>sighting.json</code>); por ejemplo
-      <a id="sighting-edit" href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>,
-      que se reproduce en <a id="sighting-play" href="/play/?sighting=Socorro"><code>/play/?sighting=Socorro</code></a>.</p>
+      <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
+      que se reproduce en <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
     <p class="small">La dirección puede ser el <code>case.json</code> de un caso: el editor lista entonces las grabaciones que contiene, los relatos de los observadores y las lecturas que se hacen de ellos, cada una una grabación aparte, con un selector para abrir una, un botón para interpretar un relato (añadir una lectura), otro para añadir el relato de otro testigo (en blanco, desde un archivo o una dirección) y otro para eliminar una grabación — rechazado mientras una lectura la interprete — y, en el grupo Archivo, otro para exportar el caso y lo que cambió en un zip. Es <code>&lt;rr0-case-editor&gt;</code>, que contiene el editor de una grabación y se la presenta de una en una. <code>&amp;track=</code> nombra la grabación en la que se abre.</p>
   </div>
 </section>
@@ -1514,11 +1516,11 @@ if (docs) {
     <div class="stage stage-padded">
       <rr0-case-editor id="editor"></rr0-case-editor>
     </div>
-    <p class="small">Per aprirlo su una registrazione esistente: aggiungi <code>?sighting=</code> e un
+    <p class="small">Per aprirlo su una registrazione o un caso esistente: aggiungi <code>?file=</code> (<code>?sighting=</code>, il suo vecchio nome, funziona ancora) e un
       URL, oppure il nome di una delle <a href="/demos/">demo</a> (un nome che non corrisponde a nessuna
       di esse viene cercato come caso di rr0.org, tramite il suo <code>sighting.json</code>); per esempio
-      <a id="sighting-edit" href="/edit/?sighting=Socorro"><code>/edit/?sighting=Socorro</code></a>,
-      che si riproduce in <a id="sighting-play" href="/play/?sighting=Socorro"><code>/play/?sighting=Socorro</code></a>.</p>
+      <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
+      che si riproduce in <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
     <p class="small">L'indirizzo può essere il <code>case.json</code> di un caso: l'editor elenca allora le registrazioni che contiene, i resoconti degli osservatori e le letture che se ne fanno, ciascuna una registrazione a sé, con un selettore per aprirne una, un pulsante per interpretare un resoconto (aggiungerne una lettura), uno per aggiungere il resoconto di un altro testimone (vuoto, da un file o da un indirizzo) e uno per eliminare una registrazione — rifiutato finché una lettura la interpreta — e, nel gruppo File, uno per esportare il caso e ciò che è cambiato in uno zip. È <code>&lt;rr0-case-editor&gt;</code>, che contiene l'editor di una registrazione e gliela presenta una alla volta. <code>&amp;track=</code> indica la registrazione su cui si apre.</p>
   </div>
 </section>

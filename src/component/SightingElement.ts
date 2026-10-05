@@ -552,7 +552,7 @@ export class SightingElement extends HTMLElement {
    * point at the application's bare home page and so dropped the one thing the reader was looking
    * at.
    *
-   * Always the explicit `?sighting=` form, with an absolute URL. It used to shorten a same-origin
+   * Always the explicit `?file=` form, with an absolute URL. It used to shorten a same-origin
    * recording to a bare path on the app's own domain, relying on that domain redirecting any
    * unknown path into the editor — which stopped being true the day ufoathome.org became a site
    * with files of its own: `/demo-data/observer-socorro.json` now resolves to the recording itself,
@@ -566,9 +566,9 @@ export class SightingElement extends HTMLElement {
     // own, listed there, and the editor shows them all and opens on the one on show.
     const source = this.caseSource
     if (source) {
-      return `${APP_EDITOR_URL}?sighting=${encodeURIComponent(source.url)}&track=${encodeURIComponent(this.shownTrackUrl() ?? url.href)}`
+      return `${APP_EDITOR_URL}?file=${encodeURIComponent(source.url)}&track=${encodeURIComponent(this.shownTrackUrl() ?? url.href)}`
     }
-    return `${APP_EDITOR_URL}?sighting=${encodeURIComponent(url.href)}`
+    return `${APP_EDITOR_URL}?file=${encodeURIComponent(url.href)}`
   }
 
   /** Where to open the editor for what is on show: the recording of the reading chosen, else the account's own. */
@@ -629,14 +629,14 @@ export class SightingElement extends HTMLElement {
 
   /**
    * The address that replays THIS observation for whoever is given it: the site's own player with the
-   * recording's absolute address in it (the `?sighting=` convention every "open it" link on the site
+   * recording's absolute address in it (the `?file=` convention every "open it" link on the site
    * already follows). A recording with no address (set by script, pasted) has none to give, and the
    * link is the player's own page.
    */
   private playUrl(): string {
     const start = this.shareStartSeconds !== undefined ? `t=${this.shareStartSeconds}` : ""
     if (!this.currentSrc) return `${APP_HOME_URL}/play/${start && "?" + start}`
-    return `${APP_HOME_URL}/play/?sighting=${encodeURIComponent(new URL(this.currentSrc, location.href).href)}${start && "&" + start}`
+    return `${APP_HOME_URL}/play/?file=${encodeURIComponent(new URL(this.currentSrc, location.href).href)}${start && "&" + start}`
   }
 
   /** The position the shared link opens at, in whole seconds, when the reader asked for one. */
@@ -1345,7 +1345,7 @@ export const OBSERVER_CHANGE_EVENT = "observerchange"
  *
  * The name was wrong by then: the element takes several observers and lets a reader move between
  * their points of view, so it is not AN eyeobserver, it is the sighting seen through whichever one
- * you pick — and everything around it already said so (a sighting.json, a ?sighting= parameter, a
+ * you pick — and everything around it already said so (a sighting.json, a ?file= parameter, a
  * `sighting` attribute on <rr0-ufo>). But pages were loading it under the old name before the new
  * one existed, and a rename that breaks them is a rename that punishes the people who used the
  * thing early. Both names, one element, indefinitely.

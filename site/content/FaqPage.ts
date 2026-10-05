@@ -305,7 +305,7 @@ export class FaqPage implements SitePage {
         <a href="/edit/">the editor page</a>, and every published reconstruction hands them out
         itself. Most forums do not allow that, for good reasons. Two things that usually work
         instead: an <code>&lt;iframe&gt;</code> pointing at a page of your own that holds the
-        component, or simply a link to <code>ufoathome.org/edit/?sighting=</code> followed by the
+        component, or simply a link to <code>ufoathome.org/edit/?file=</code> followed by the
         URL of your recording, which opens it here for anyone.</p>
     </div>
 
@@ -633,7 +633,7 @@ export class FaqPage implements SitePage {
         distribue elle-même. La plupart des forums ne l'acceptent pas, pour de bonnes raisons. Deux
         solutions qui marchent en général : une <code>&lt;iframe&gt;</code> pointant vers une page à
         vous qui porte le composant, ou tout simplement un lien vers
-        <code>ufoathome.org/edit/?sighting=</code> suivi de l'URL de votre enregistrement, qui
+        <code>ufoathome.org/edit/?file=</code> suivi de l'URL de votre enregistrement, qui
         l'ouvre ici pour tout le monde.</p>
     </div>
 
@@ -943,7 +943,7 @@ export class FaqPage implements SitePage {
         <a href="/edit/">la página del editor</a>, y cada reconstrucción publicada las proporciona
         ella misma. La mayoría de los foros no lo admiten, por buenas razones. Dos cosas que suelen funcionar
         en su lugar: un <code>&lt;iframe&gt;</code> que apunte a una página tuya que contenga el
-        componente, o simplemente un enlace a <code>ufoathome.org/edit/?sighting=</code> seguido de la
+        componente, o simplemente un enlace a <code>ufoathome.org/edit/?file=</code> seguido de la
         URL de tu grabación, que la abre aquí para cualquiera.</p>
     </div>
 
@@ -1251,7 +1251,7 @@ export class FaqPage implements SitePage {
         <a href="/edit/">pagina dell'editor</a>, e ogni ricostruzione pubblicata le fornisce
         da sé. La maggior parte dei forum non lo consente, per buone ragioni. Due cose che di solito funzionano
         al loro posto: un <code>&lt;iframe&gt;</code> che punta a una tua pagina contenente il
-        componente, o semplicemente un link a <code>ufoathome.org/edit/?sighting=</code> seguito
+        componente, o semplicemente un link a <code>ufoathome.org/edit/?file=</code> seguito
         dall'URL della tua registrazione, che la apre qui per chiunque.</p>
     </div>
 

@@ -205,7 +205,7 @@ ${script ? `<script type="module">\n// Where this site's own pages load their mo
    * deferred is too late.
    *
    * `location.search` and `location.hash` are carried across, which is not a nicety:
-   * `/play/?sighting=…` is the whole point of that page, and a redirect that dropped the query
+   * `/play/?file=…` is the whole point of that page, and a redirect that dropped the query
    * would turn every shared link into an empty player for anyone whose browser is not English.
    *
    * There is no picker, here or anywhere — same rule the components follow. And no server-side

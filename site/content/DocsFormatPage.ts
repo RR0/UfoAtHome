@@ -168,7 +168,7 @@ if (excerpts.length > 0) {
       picked from a list. One recording can be given directly, with no case, but a case with one
       sighting works the same way and names what it shows. Try it with
       <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>
-      (<a href="/play/?sighting=/demo-data/case-chiles-whitted.json">play it</a>).</p>
+      (<a href="/play/?file=/demo-data/case-chiles-whitted.json">play it</a>).</p>
 
     <h2>Saying it in more than one language</h2>
     <p>A recording is handed from one reader to another, so every field an author writes can hold
@@ -369,8 +369,8 @@ if (excerpts.length > 0) {
       account's place, time and pose, and an event for it), one to delete it, and one to export the case and every
       recording added or changed as a zip. Try it with
       <a href="/demo-data/case-mcminnville.json"><code>case-mcminnville.json</code></a>
-      (<a href="/play/?sighting=/demo-data/case-mcminnville.json">play it</a>,
-      <a href="/edit/?sighting=/demo-data/case-mcminnville.json">edit it</a>).</p>
+      (<a href="/play/?file=/demo-data/case-mcminnville.json">play it</a>,
+      <a href="/edit/?file=/demo-data/case-mcminnville.json">edit it</a>).</p>
 
     <h2>The weather, and its clouds</h2>
     <p>A <code>weather</code> keyframe states the sky's conditions at one moment of the recording's
@@ -490,7 +490,7 @@ if (excerpts.length > 0) {
       says what the model says about it.</p>
     <p>It is <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       on this site, so you can fetch it, and
-      <a href="/play/?sighting=/demo-data/example-minimal.json">play it</a> before changing
+      <a href="/play/?file=/demo-data/example-minimal.json">play it</a> before changing
       anything. Note that <code>angular</code> and <code>bounds</code> both appear: the angle is what
       the file MEANS, and the pixels are re-derived from it on load — write the angle, and let a
       wrong guess at the pixels be corrected for you.</p>
@@ -600,7 +600,7 @@ if (excerpts.length > 0) {
       dans une liste. Un enregistrement peut être donné directement, sans dossier, mais un dossier à
       un seul compte rendu marche de la même façon et nomme ce qu'il montre. Essayez avec
       <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>
-      (<a href="/play/?sighting=/demo-data/case-chiles-whitted.json">le jouer</a>).</p>
+      (<a href="/play/?file=/demo-data/case-chiles-whitted.json">le jouer</a>).</p>
 
     <h2>Le dire en plusieurs langues</h2>
     <p>Un enregistrement se transmet d'un lecteur à un autre : chaque champ écrit par un auteur peut
@@ -808,8 +808,8 @@ if (excerpts.length > 0) {
       rendu, et un événement pour lui), un pour la supprimer, et un pour exporter le dossier et chaque enregistrement
       ajouté ou modifié en zip. Essayez avec
       <a href="/demo-data/case-mcminnville.json"><code>case-mcminnville.json</code></a>
-      (<a href="/play/?sighting=/demo-data/case-mcminnville.json">le jouer</a>,
-      <a href="/edit/?sighting=/demo-data/case-mcminnville.json">l'éditer</a>).</p>
+      (<a href="/play/?file=/demo-data/case-mcminnville.json">le jouer</a>,
+      <a href="/edit/?file=/demo-data/case-mcminnville.json">l'éditer</a>).</p>
 
     <h2>La météo, et ses nuages</h2>
     <p>Un point <code>weather</code> énonce l'état du ciel à un instant de l'horloge de
@@ -931,7 +931,7 @@ if (excerpts.length > 0) {
       ce que le modèle en dit.</p>
     <p>C'est <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       sur ce site : vous pouvez le récupérer, et
-      <a href="/play/?sighting=/demo-data/example-minimal.json">le jouer</a> avant d'y toucher.
+      <a href="/play/?file=/demo-data/example-minimal.json">le jouer</a> avant d'y toucher.
       Remarquez que <code>angular</code> et <code>bounds</code> y figurent tous deux : l'angle est ce
       que le fichier SIGNIFIE, et les pixels en sont redérivés au chargement — écrivez l'angle, et
       laissez corriger une mauvaise estimation des pixels.</p>
@@ -1039,7 +1039,7 @@ if (excerpts.length > 0) {
       elegirse de una lista. Una grabación puede darse directamente, sin caso, pero un caso con un solo
       avistamiento funciona igual y nombra lo que muestra. Pruébalo con
       <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>
-      (<a href="/play/?sighting=/demo-data/case-chiles-whitted.json">reproducirlo</a>).</p>
+      (<a href="/play/?file=/demo-data/case-chiles-whitted.json">reproducirlo</a>).</p>
 
     <h2>Decirlo en más de un idioma</h2>
     <p>Una grabación pasa de un lector a otro, así que cada campo que escribe un autor puede contener
@@ -1240,8 +1240,8 @@ if (excerpts.length > 0) {
       grabación nueva que comparte el lugar, la hora y la pose del relato, y un evento para ella), otro para eliminarla,
       y otro para exportar el caso y cada grabación añadida o modificada en un zip. Pruébalo con
       <a href="/demo-data/case-mcminnville.json"><code>case-mcminnville.json</code></a>
-      (<a href="/play/?sighting=/demo-data/case-mcminnville.json">reproducirlo</a>,
-      <a href="/edit/?sighting=/demo-data/case-mcminnville.json">editarlo</a>).</p>
+      (<a href="/play/?file=/demo-data/case-mcminnville.json">reproducirlo</a>,
+      <a href="/edit/?file=/demo-data/case-mcminnville.json">editarlo</a>).</p>
 
     <h2>El tiempo, y sus nubes</h2>
     <p>Un fotograma clave <code>weather</code> expresa las condiciones del cielo en un momento del reloj
@@ -1361,7 +1361,7 @@ if (excerpts.length > 0) {
       dice lo que el modelo dice de ella.</p>
     <p>Es <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       en este sitio, así que puedes descargarlo, y
-      <a href="/play/?sighting=/demo-data/example-minimal.json">reproducirlo</a> antes de cambiar
+      <a href="/play/?file=/demo-data/example-minimal.json">reproducirlo</a> antes de cambiar
       nada. Observa que aparecen tanto <code>angular</code> como <code>bounds</code>: el ángulo es lo que
       el archivo SIGNIFICA, y los píxeles se vuelven a derivar de él al cargar — escribe el ángulo, y deja
       que se te corrija una estimación errónea de los píxeles.</p>
@@ -1469,7 +1469,7 @@ if (excerpts.length > 0) {
       scelto da un elenco. Una registrazione può essere data direttamente, senza caso, ma un caso con un solo
       avvistamento funziona allo stesso modo e nomina ciò che mostra. Provalo con
       <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>
-      (<a href="/play/?sighting=/demo-data/case-chiles-whitted.json">riproducilo</a>).</p>
+      (<a href="/play/?file=/demo-data/case-chiles-whitted.json">riproducilo</a>).</p>
 
     <h2>Dirlo in più di una lingua</h2>
     <p>Una registrazione passa da un lettore all'altro, quindi ogni campo scritto da un autore può contenere
@@ -1671,8 +1671,8 @@ if (excerpts.length > 0) {
       registrazione che condivide luogo, ora e posa del resoconto, e un evento per essa), uno per eliminarla, e uno per
       esportare il caso e ogni registrazione aggiunta o modificata in uno zip. Provalo con
       <a href="/demo-data/case-mcminnville.json"><code>case-mcminnville.json</code></a>
-      (<a href="/play/?sighting=/demo-data/case-mcminnville.json">riprodurlo</a>,
-      <a href="/edit/?sighting=/demo-data/case-mcminnville.json">modificarlo</a>).</p>
+      (<a href="/play/?file=/demo-data/case-mcminnville.json">riprodurlo</a>,
+      <a href="/edit/?file=/demo-data/case-mcminnville.json">modificarlo</a>).</p>
 
     <h2>Il meteo, e le sue nuvole</h2>
     <p>Un fotogramma chiave <code>weather</code> esprime le condizioni del cielo in un momento dell'orologio
@@ -1792,7 +1792,7 @@ if (excerpts.length > 0) {
       dice ciò che il modello ne dice.</p>
     <p>È <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       su questo sito, quindi puoi scaricarlo, e
-      <a href="/play/?sighting=/demo-data/example-minimal.json">riprodurlo</a> prima di cambiare
+      <a href="/play/?file=/demo-data/example-minimal.json">riprodurlo</a> prima di cambiare
       qualsiasi cosa. Nota che compaiono sia <code>angular</code> sia <code>bounds</code>: l'angolo è ciò che
       il file SIGNIFICA, e i pixel ne vengono ricavati di nuovo al caricamento — scrivi l'angolo, e lascia
       che una stima errata dei pixel venga corretta per te.</p>

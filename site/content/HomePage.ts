@@ -79,7 +79,7 @@ const show = async position => {
   index = (position + slides.length) % slides.length
   const slide = slides[index]
   caption.innerHTML = "<strong>" + slide.title + "</strong> " + slide.blurb
-  editLink.href = editorPath + "?sighting=" + encodeURIComponent(slide.edit)
+  editLink.href = editorPath + "?file=" + encodeURIComponent(slide.edit)
   for (const [at, dot] of dots.entries()) dot.setAttribute("aria-current", String(at === index))
   clearTimeout(slideTimer)
   try {

@@ -240,7 +240,7 @@ class SiteBuilder {
     ["/fr/lecteur/", "/play/"],
     ["/fr/editeur/", "/edit/"],
     // The two pages' own first addresses, shortened in 0.55.0. Netlify carries the query string of
-    // a 301 across, so a saved `/player/?sighting=…` still opens that observation.
+    // a 301 across, so a saved `/player/?file=…` still opens that observation.
     ["/player/", "/play/"],
     ["/editor/", "/edit/"],
     ["/fr/demos/", "/demos/"],
@@ -410,7 +410,7 @@ ${Layout.ICON_LINKS}
 // redirect rule that would sit ahead of every future page of this site.
 const path = decodeURIComponent(location.pathname.replace(/^\\/+|\\/+$/g, ""))
 if (path && !path.includes("..")) {
-  location.replace("${player}?sighting=" + encodeURIComponent(path))
+  location.replace("${player}?file=" + encodeURIComponent(path))
 }
 </script>
 </body>

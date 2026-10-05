@@ -101,7 +101,7 @@ const embedCopy = document.getElementById("share-embed-copy")
 const embedTry = document.getElementById("share-embed-try")
 const preview = document.getElementById("share-preview")
 
-const playerLink = url => location.origin + player + "?sighting=" + encodeURIComponent(url)
+const playerLink = url => location.origin + player + "?file=" + encodeURIComponent(url)
 
 const embedMarkup = url =>
   '<script type="module" src="' + location.origin + '/lib/rr0-sighting.mjs"><' + '/script>\\n' +
