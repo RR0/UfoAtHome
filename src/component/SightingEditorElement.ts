@@ -430,10 +430,6 @@ export class SightingEditorElement extends HTMLElement {
   private groundElevationTimer?: ReturnType<typeof setTimeout>
   private groundElevationToken = 0
   private readonly obsTimeInput: HTMLInputElement
-  private readonly edtfModeButton: HTMLButtonElement
-  /** Whether the two observation times are typed as EDTF rather than picked. Chosen for the
-   * author when a recording loads (see chooseTimeInputMode) and theirs to change afterwards. */
-  private edtfMode = false
   private startDate!: DateInputElement
   private endDate!: DateInputElement
   private readonly obsEndTimeInput: HTMLInputElement
@@ -1107,7 +1103,6 @@ export class SightingEditorElement extends HTMLElement {
     this.groundElevationOutput = this.shadow.getElementById("ground-elevation")!
     this.obsTimeInput = this.shadow.getElementById("obs-time") as HTMLInputElement
     this.obsEndTimeInput = this.shadow.getElementById("obs-end-time") as HTMLInputElement
-    this.edtfModeButton = this.shadow.getElementById("edtf-mode") as HTMLButtonElement
     this.observerIdInput = this.shadow.getElementById("observerId") as HTMLInputElement
     this.observerTitleInput = this.shadow.getElementById("observerTitle") as HTMLInputElement
     this.observerLastNameInput = this.shadow.getElementById("observerLastName") as HTMLInputElement
@@ -1749,7 +1744,6 @@ export class SightingEditorElement extends HTMLElement {
       const { time } = (event as CustomEvent<{ time: SightingTime | undefined }>).detail
       this.editDate(() => { this.ufoElement.sighting.event.endTime = time })
     })
-    this.edtfModeButton.addEventListener("click", () => this.setEdtfMode(!this.edtfMode))
     for (const input of [
       this.observerIdInput,
       this.observerTitleInput,
@@ -4532,17 +4526,9 @@ export class SightingEditorElement extends HTMLElement {
    */
   private chooseTimeInputMode(): void {
     const event = this.ufoElement.sighting.event
-    this.setEdtfMode(!EdtfDateField.opensInPicker(event.time, event.endTime))
-  }
-
-  /** Swaps which control is showing. Writes nothing: a mode is a way of saying something, not a
-   * statement, and switching on a value the picker cannot hold would otherwise read as clearing
-   * it. */
-  private setEdtfMode(edtf: boolean): void {
-    this.edtfMode = edtf
-    this.edtfModeButton.setAttribute("aria-pressed", String(edtf))
-    this.startDate.setMode(edtf)
-    this.endDate.setMode(edtf)
+    // Each date opens the way it can be said: the picker for a full instant, the text for less. Its own toggle changes that after.
+    this.startDate.setMode(!EdtfDateField.opensInPicker(event.time))
+    this.endDate.setMode(!EdtfDateField.opensInPicker(event.endTime))
   }
 
   private syncObservationTimeFields(): void {
@@ -8534,8 +8520,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelWeatherGroup.textContent = messages.weather
     this.startDate.messages = messages
     this.endDate.messages = messages
-    this.edtfModeButton.title = messages.edtfModeTitle
-    this.edtfModeButton.setAttribute("aria-label", messages.edtfModeTitle)
     // The chips hold translated labels, so they are rebuilt with the new ones — and the signature
     // check lets that happen without a diff, since every label changed.
     this.paramSummaryBuilder = new SightingSummary(messages, this.naming, this.said, this.tagNames)

@@ -353,7 +353,7 @@ if (docs) {
         no clock at that longitude could have kept is flagged, the meridian's solar time in its
         tooltip. Editing either date drops an explicit duration once the two dates give an exact
         length of their own.</p>
-      <p>Each date is a <strong>picker</strong> for a full instant, with a <strong>qualifier</strong> beside it: exact, approximate (<code>~</code>), uncertain (<code>?</code>) or both (<code>%</code>). The <strong>EDTF</strong> button switches both date fields to text, for everything a picker cannot say: a bare year, a month, a time with no date. Most archives need it — of 241 case files on rr0.org, 43% state a bare year and only 17% a date with a time. A case's own date is the same field.
+      <p>Each date is a <strong>picker</strong> for a full instant, with a <strong>qualifier</strong> beside it, which stays there whichever way the date is shown: exact, approximate (<code>~</code>), uncertain (<code>?</code>) or both (<code>%</code>). The <strong>EDTF</strong> button, on each date, switches it to text, for everything a picker cannot say: a bare year, a month, a time with no date. Most archives need it — of 241 case files on rr0.org, 43% state a bare year and only 17% a date with a time. A case's own date is the same field.
       <p><strong>Moments</strong> names the instant at the playhead (A, B, C… as case sketches do),
         with a sentence of what happens then. Picking one in the list goes there; <strong>🎯</strong>
         goes back to the one shown, which the list cannot do once playback has moved on past it.</p>
@@ -797,7 +797,7 @@ if (docs) {
         n'aurait pu suivre est signalé, l'heure solaire du méridien dans son infobulle. Modifier l'une
         des deux dates retire une durée explicite dès que les deux dates donnent une durée exacte à
         elles seules.</p>
-      <p>Chaque date est un <strong>sélecteur</strong> pour un instant complet, avec un <strong>qualificatif</strong> à côté : exact, approximatif (<code>~</code>), incertain (<code>?</code>) ou les deux (<code>%</code>). Le bouton <strong>EDTF</strong> bascule les deux champs de date en texte, pour tout ce qu'un sélecteur ne sait pas dire : une année seule, un mois, une heure sans date. La plupart des archives en ont besoin : sur 241 dossiers de rr0.org, 43 % n'énoncent qu'une année et 17 % seulement une date avec une heure. La date d'un dossier est le même champ.
+      <p>Chaque date est un <strong>sélecteur</strong> pour un instant complet, avec un <strong>qualificatif</strong> à côté, qui y reste quelle que soit la façon dont la date est montrée : exact, approximatif (<code>~</code>), incertain (<code>?</code>) ou les deux (<code>%</code>). Le bouton <strong>EDTF</strong>, sur chaque date, la bascule en texte, pour tout ce qu'un sélecteur ne sait pas dire : une année seule, un mois, une heure sans date. La plupart des archives en ont besoin : sur 241 dossiers de rr0.org, 43 % n'énoncent qu'une année et 17 % seulement une date avec une heure. La date d'un dossier est le même champ.
       <p><strong>Moments</strong> nomme l'instant de la tête de lecture (A, B, C… comme les croquis
         des enquêtes), avec une phrase de ce qui s'y passe. En choisir un dans la liste y va ;
         <strong>🎯</strong> retourne à celui affiché, ce que la liste ne peut pas faire une fois la
@@ -1261,7 +1261,7 @@ if (docs) {
         podido llevar se señala, con la hora solar del meridiano en su información emergente. Editar
         cualquiera de las dos fechas elimina una duración explícita en cuanto ambas fechas dan por sí
         solas una duración exacta.</p>
-      <p>Cada fecha es un <strong>selector</strong> para un instante completo, con un <strong>calificativo</strong> al lado: exacto, aproximado (<code>~</code>), incierto (<code>?</code>) o ambos (<code>%</code>). El botón <strong>EDTF</strong> cambia ambos campos de fecha a texto, para todo lo que un selector no sabe decir: un año solo, un mes, una hora sin fecha. La mayoría de los archivos lo necesitan: de 241 casos de rr0.org, el 43 % indica solo un año y apenas el 17 % una fecha con hora. La fecha de un caso es el mismo campo.
+      <p>Cada fecha es un <strong>selector</strong> para un instante completo, con un <strong>calificativo</strong> al lado, que permanece ahí sea cual sea la forma en que se muestra la fecha: exacto, aproximado (<code>~</code>), incierto (<code>?</code>) o ambos (<code>%</code>). El botón <strong>EDTF</strong>, en cada fecha, la cambia a texto, para todo lo que un selector no sabe decir: un año solo, un mes, una hora sin fecha. La mayoría de los archivos lo necesitan: de 241 casos de rr0.org, el 43 % indica solo un año y apenas el 17 % una fecha con hora. La fecha de un caso es el mismo campo.
       <p><strong>Momentos</strong> nombra el instante del cabezal de reproducción (A, B, C…, como hacen
         los croquis de los casos), con una frase sobre lo que ocurre entonces. Elegir uno en la lista
         lleva hasta él; <strong>🎯</strong> vuelve al que se muestra, cosa que la lista no puede hacer
@@ -1724,7 +1724,7 @@ if (docs) {
         orologio a quella longitudine avrebbe potuto tenere viene segnalato, con l'ora solare del
         meridiano nel suo suggerimento. Modificare una delle due date elimina una durata esplicita non
         appena le due date danno da sole una durata esatta.</p>
-      <p>Ogni data è un <strong>selettore</strong> per un istante completo, con un <strong>qualificatore</strong> accanto: esatto, approssimativo (<code>~</code>), incerto (<code>?</code>) o entrambi (<code>%</code>). Il pulsante <strong>EDTF</strong> trasforma entrambi i campi data in testo, per tutto ciò che un selettore non sa esprimere: un anno da solo, un mese, un'ora senza data. La maggior parte degli archivi ne ha bisogno: su 241 casi di rr0.org, il 43 % indica solo un anno e appena il 17 % una data con un'ora. La data di un caso è lo stesso campo.
+      <p>Ogni data è un <strong>selettore</strong> per un istante completo, con un <strong>qualificatore</strong> accanto, che resta lì comunque la data sia mostrata: esatto, approssimativo (<code>~</code>), incerto (<code>?</code>) o entrambi (<code>%</code>). Il pulsante <strong>EDTF</strong>, su ogni data, la trasforma in testo, per tutto ciò che un selettore non sa esprimere: un anno da solo, un mese, un'ora senza data. La maggior parte degli archivi ne ha bisogno: su 241 casi di rr0.org, il 43 % indica solo un anno e appena il 17 % una data con un'ora. La data di un caso è lo stesso campo.
     </div>
 
     <div class="group-doc">

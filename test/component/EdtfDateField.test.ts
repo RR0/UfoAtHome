@@ -33,7 +33,8 @@ describe("EdtfDateField", () => {
     const { field, picker, text, qualifier } = make()
     field.set(parseEdtfTime("1965-07-01T05:00~"))
     expect(picker.value).toBe("1965-07-01T05:00")
-    expect(text.value).toBe("1965-07-01T05:00~")
+    // The date alone in the text; how sure it is stands in the qualifier, whichever way the date is shown.
+    expect(text.value).toBe("1965-07-01T05:00")
     expect(qualifier.value).toBe("~")
     field.set(parseEdtfTime("1954"))
     expect(picker.value).toBe("")
@@ -79,10 +80,32 @@ describe("EdtfDateField", () => {
   it("swaps the picker for the text, and back, without writing anything", () => {
     const { field, picker, text, qualifier, told } = make()
     field.setMode(true)
-    expect([picker.hidden, text.hidden, qualifier.hidden]).toEqual([true, false, true])
+    expect([picker.hidden, text.hidden, qualifier.hidden]).toEqual([true, false, false])
     field.setMode(false)
     expect([picker.hidden, text.hidden, qualifier.hidden]).toEqual([false, true, false])
     expect(told).toEqual([])
+  })
+})
+
+describe("EdtfDateField qualifier", () => {
+  it("moves a qualifier typed after the date into the qualifier, so that there is one place to say it", () => {
+    const { text, qualifier, told } = make()
+    text.value = "2025-06?"
+    text.dispatchEvent(new Event("input"))
+    expect(text.value).toBe("2025-06")
+    expect(qualifier.value).toBe("?")
+    expect(told[0]).toEqual(parseEdtfTime("2025-06?"))
+  })
+
+  it("qualifies a date typed as text, from the qualifier beside it", () => {
+    const { field, text, qualifier, told } = make()
+    field.setMode(true)
+    text.value = "1965"
+    text.dispatchEvent(new Event("input"))
+    qualifier.value = "~"
+    qualifier.dispatchEvent(new Event("change"))
+    expect(told[told.length - 1]).toEqual(parseEdtfTime("1965~"))
+    expect(text.value).toBe("1965") // the date was not erased by choosing how sure it is
   })
 })
 

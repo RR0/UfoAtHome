@@ -269,14 +269,9 @@ export const html = `
            doc comment has no per-component qualifiers): four states, so a select says all of it — and it composes with a complete date,
            which is why "vers 05:00" needs no text mode at all. See DateInputElement for the controls it makes (obs-time-native, obs-time,
            obs-time-qualifier). -->
-      <rr0-date-input name="obs-time"></rr0-date-input></label>
+      <rr0-date-input name="obs-time" toggle></rr0-date-input></label>
     <label><span id="label-observation-end-time">Observation end</span>
-      <rr0-date-input name="obs-end-time"></rr0-date-input></label>
-    <!-- One switch for both fields, not one each. sightingDurationMs needs the two times to share
-         the same set of stated fields to yield a duration at all, so letting one be a picked
-         instant while the other is a bare year is a way to lose the duration without being told
-         why. -->
-    <button id="edtf-mode" type="button" aria-pressed="false">EDTF</button>
+      <rr0-date-input name="obs-end-time" toggle></rr0-date-input></label>
     <label><span id="label-duration">Duration</span> <input id="durationSeconds" type="number" min="0" max="86400" step="0.1" placeholder="observation length" aria-required="true"/> s</label>
     <!-- The zone is the RULE, the number is what that rule produced for this sighting's own date —
          summer time included, and as it was then (see engine/time/TimeZones.ts). Pick a zone and

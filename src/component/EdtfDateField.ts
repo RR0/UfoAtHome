@@ -61,7 +61,8 @@ export class EdtfDateField {
     // "change", not "input": a datetime-local reports an empty value while it is still half typed,
     // and only a committed change can be told apart from a field in mid-entry.
     parts.picker.addEventListener("change", () => this.writeFromPicker())
-    parts.qualifier.addEventListener("change", () => this.writeFromPicker())
+    // Beside the picker it rewrites the date the picker holds; beside the text, the date typed.
+    parts.qualifier.addEventListener("change", () => (this.edtfMode ? this.readText() : this.writeFromPicker()))
     // Diagnosed on blur only, never while the text is being typed: a live "you're wrong" on every
     // character of "1965-07-01T05:00" is illegible and distracting.
     parts.text.addEventListener("blur", () => this.validate())
@@ -99,17 +100,18 @@ export class EdtfDateField {
     this.edtfMode = edtf
     this.parts.text.hidden = !edtf
     this.parts.picker.hidden = edtf
-    this.parts.qualifier.hidden = edtf
+    // The qualifier is the one place how sure a date is gets said, whichever way the date is: the text holds the date alone.
     if (this.toggle) this.toggle.setAttribute("aria-pressed", String(edtf))
   }
 
   /** Shows a time as the field says it, from what was loaded. Writes nothing and tells nobody. */
   set(time: SightingTime | undefined): void {
     const { text, picker, qualifier } = this.parts
-    text.value = time ? formatEdtfTime(time) : ""
+    const whole = time ? formatEdtfTime(time) : ""
+    text.value = EdtfDateField.withoutQualifier(whole)
     picker.step = EdtfDateField.stepFor(time)
     picker.value = EdtfDateField.pickerValueOf(time)
-    qualifier.value = EdtfDateField.qualifierOf(text.value)
+    qualifier.value = EdtfDateField.qualifierOf(whole)
     text.setCustomValidity("")
     text.classList.remove("invalid")
   }
@@ -142,6 +144,11 @@ export class EdtfDateField {
     return time?.second ? "1" : "60"
   }
 
+  /** An EDTF value without its trailing [?~%]: the date alone, which is what the text holds. */
+  static withoutQualifier(edtf: string): string {
+    return EdtfDateField.qualifierOf(edtf) === "" ? edtf.trim() : edtf.trim().slice(0, -1)
+  }
+
   /** The trailing [?~%] of an EDTF value, or "" — the only qualifier a value carries. */
   static qualifierOf(edtf: string): string {
     const last = edtf.trim().slice(-1)
@@ -154,14 +161,20 @@ export class EdtfDateField {
    * earlier blur goes the moment the text reads, so fixing a typo does not stay red while it is fixed.
    */
   private readText(): void {
-    const { text } = this.parts
-    const value = text.value.trim()
-    if (value === "") {
+    const { text, qualifier } = this.parts
+    // A qualifier typed after the date goes where qualifiers are said, so that there is one place for it.
+    const typed = EdtfDateField.qualifierOf(text.value)
+    if (typed !== "") {
+      qualifier.value = typed
+      text.value = EdtfDateField.withoutQualifier(text.value)
+    }
+    const date = text.value.trim()
+    if (date === "") {
       this.clean()
       this.onChange(undefined)
       return
     }
-    const parsed = parseEdtfTime(value)
+    const parsed = parseEdtfTime(`${date}${qualifier.value}`)
     if (!parsed) return
     this.clean()
     this.onChange(parsed)
@@ -180,18 +193,18 @@ export class EdtfDateField {
    * an empty text reads as "no date at all" and would erase the date between a day and its hour.
    */
   private writeFromPicker(): void {
-    const { picker, qualifier, text } = this.parts
+    const { picker, text } = this.parts
     if (picker.value === "" && picker.validity.badInput) return
     // A picker stepped to the second may report "02:45:30.000", which EDTF does not take.
-    text.value = picker.value === "" ? "" : `${picker.value.replace(/\.\d+$/, "")}${qualifier.value}`
+    text.value = picker.value === "" ? "" : picker.value.replace(/\.\d+$/, "")
     this.readText()
   }
 
   /** Flags a text that does not read — now, on blur, and not while it is being typed. Empty or valid: nothing to say. */
   private validate(): void {
-    const { text } = this.parts
+    const { text, qualifier } = this.parts
     const value = text.value.trim()
-    if (value === "" || parseEdtfTime(value)) return
+    if (value === "" || parseEdtfTime(`${EdtfDateField.withoutQualifier(value)}${EdtfDateField.qualifierOf(value) || qualifier.value}`)) return
     text.setCustomValidity(this.messages.edtfInvalid)
     text.classList.add("invalid")
   }

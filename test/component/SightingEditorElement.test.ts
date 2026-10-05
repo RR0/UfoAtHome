@@ -5299,8 +5299,13 @@ describe("SightingEditorElement date picker", () => {
     select.dispatchEvent(new Event("change"))
   }
 
+  /** Whether the start date shows its text rather than its picker: each date has a toggle of its own. */
   function edtfMode(element: SightingEditorElement): boolean {
-    return control(element, "edtf-mode").getAttribute("aria-pressed") === "true"
+    return !control<HTMLInputElement>(element, "obs-time").hidden
+  }
+
+  function toggleOf(element: SightingEditorElement, name: string): HTMLButtonElement {
+    return element.shadowRoot!.querySelector(`rr0-date-input[name="${name}"] button`) as HTMLButtonElement
   }
 
   const COMPLETE = { version: 1 as const, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 }, timeline: { keyframes: [] }, durationSeconds: 10 }
@@ -5363,11 +5368,11 @@ describe("SightingEditorElement date picker", () => {
     element.sightingData = COMPLETE
     const before = JSON.stringify(element.sightingData.time)
 
-    control<HTMLButtonElement>(element, "edtf-mode").click()
+    toggleOf(element, "obs-time").click()
     expect(edtfMode(element)).toBe(true)
     expect(JSON.stringify(element.sightingData.time)).toBe(before)
 
-    control<HTMLButtonElement>(element, "edtf-mode").click()
+    toggleOf(element, "obs-time").click()
     expect(JSON.stringify(element.sightingData.time)).toBe(before)
   })
 
