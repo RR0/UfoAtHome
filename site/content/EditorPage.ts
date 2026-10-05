@@ -199,7 +199,23 @@ if (docs) {
       rr0.org case, by its <code>sighting.json</code>) — for instance
       <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
       which replays at <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
-    <p class="small">The address may be a case's <code>case.json</code>: the editor then lists the recordings the case holds, the observers' accounts and the readings of them, each a recording of its own, with a picker to open one, a button to interpret an account (add a reading of it), one to add another observer's account (blank, from a file or from an address) and one to delete a recording — refused while a reading still interprets it — and, at the top right of the case, <strong>Save</strong>, which writes the case and, if asked, every observation beside it, as a zip. This is <code>&lt;rr0-case-editor&gt;</code>, which holds the editor of one recording and hands it one at a time. A recording opened alone has an <em>Add to a case</em> link under it: it makes a case around the recording, without touching what is being edited. While changes to a recording or to the case are not saved, the editor says so, and asks before the page is left or the recording replaced. <code>&amp;track=</code> names the recording it opens on.</p>
+      </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2 id="case">A case, and its observations</h2>
+    <p>The address may be a case's <code>case.json</code>. The editor then shows <strong>the case</strong> on top and, inside the same container, the observation being edited in a container of its own. <code>&amp;track=</code> names the recording it opens on.</p>
+    <ul class="plain">
+      <li><strong>The case</strong> has an <strong>ID</strong>, a <strong>title</strong> and a date — the same picker, qualifier and EDTF text as an observation's start — and <strong>Save</strong> at its top right.</li>
+      <li><strong>Observations</strong>: a picker lists the recordings the case holds, the observers' accounts and the readings of them, each a recording of its own. Choosing one opens it below, and what was changed in the others is kept.</li>
+      <li><strong>+</strong> adds a recording: blank, from a file or from an address. Name an account in the last field, <em>Interpretation of</em>, and what is added is a reading of it — another observation, which the case lists marked <code>interpretationOf</code>, dated and signed. Blank, it starts as a copy of the whole scene of the account it reads.</li>
+      <li>The <strong>bin</strong> removes the recording on show from the case; its file is not deleted. An observation a reading still interprets cannot be removed: delete its readings first. A case keeps at least one recording.</li>
+      <li><strong>Save</strong> asks whether to save the observations too: yes writes a zip of the case and every observation beside it, no writes only <code>case.json</code>.</li>
+      <li>A recording opened alone has <em>Add to a case</em> under it. It makes a case around that recording, without touching what is being edited.</li>
+      <li>A dot ● after the case's title, and one after the <strong>File</strong> tab of the observation, say that the case or the observation holds changes not saved. While they do, the editor asks before the page is left or the recording replaced.</li>
+    </ul>
+    <p>This is <code>&lt;rr0-case-editor&gt;</code>, which holds the editor of one recording and hands it one at a time.</p>
   </div>
 </section>
 
@@ -337,11 +353,7 @@ if (docs) {
         no clock at that longitude could have kept is flagged, the meridian's solar time in its
         tooltip. Editing either date drops an explicit duration once the two dates give an exact
         length of their own.</p>
-      <p>The <strong>EDTF</strong> button switches both date fields to text, for everything a
-        calendar picker cannot say: a bare year, a month, a time with no date, and the qualifiers
-        <em>uncertain</em> (<code>?</code>) and <em>approximate</em> (<code>~</code>). Most archives
-        need it — of 241 case files on rr0.org, 43% state a bare year and only 17% a date with a
-        time.</p>
+      <p>Each date is a <strong>picker</strong> for a full instant, with a <strong>qualifier</strong> beside it: exact, approximate (<code>~</code>), uncertain (<code>?</code>) or both (<code>%</code>). The <strong>EDTF</strong> button switches both date fields to text, for everything a picker cannot say: a bare year, a month, a time with no date. Most archives need it — of 241 case files on rr0.org, 43% state a bare year and only 17% a date with a time. A case's own date is the same field.
       <p><strong>Moments</strong> names the instant at the playhead (A, B, C… as case sketches do),
         with a sentence of what happens then. Picking one in the list goes there; <strong>🎯</strong>
         goes back to the one shown, which the list cannot do once playback has moved on past it.</p>
@@ -505,7 +517,7 @@ if (docs) {
         catalogue, or a glTF file at an address. The address can be relative to the recording's own
         file, so a <code>sighting.json</code> and the <code>craft.gltf</code> beside it work together
         from any page; its credit (name and licence) is required before it is drawn.
-        <strong>+</strong> adds a body (and the interpretation, when the recording has none): it
+        <strong>Interpretation title</strong>, at the top of this part, names what the recording claims — “Craft on its legs”, “April 2013: a model on a thread” — and is always offered: typing one creates the interpretation before any body does. <strong>+</strong> adds a body (and the interpretation, when the recording has none): it
         stands for the selected shape, in its direction, at the distance the scene draws it and as
         big as its apparent width makes it there, in a single keyframe at the playhead; on the ground
         at that distance when the line of sight goes into it first; with no shape, where the observer
@@ -570,7 +582,7 @@ if (docs) {
     <div class="group-doc">
       <h3>File</h3>
       <p>The recording itself. <strong>Load JSON file</strong> and <strong>Or load from URL</strong>
-        bring an existing recording in, and <strong>Save</strong> hands you the file. Under them,
+        bring an existing recording in, and <strong>Save</strong> hands you the file. A dot after this tab says the recording holds changes not saved; loading another file or address while it does asks first. Under them,
         the same recording as JSON text, kept in step both ways: what you change in the form or on
         the render appears in it, and a text that parses becomes the recording as soon as you stop
         typing (the playhead stays where it was). A text that does not parse is flagged on its own
@@ -621,7 +633,23 @@ if (docs) {
       cherché comme dossier de rr0.org, par son <code>sighting.json</code>) — par exemple
       <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
       qui se rejoue à <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
-    <p class="small">L'adresse peut être le <code>case.json</code> d'un dossier : l'éditeur liste alors les enregistrements qu'il contient, les comptes rendus des observateurs et les lectures qu'on en fait, chacune un enregistrement à part, avec un sélecteur pour en ouvrir un, un bouton pour interpréter un compte rendu (en ajouter une lecture), un pour ajouter le compte rendu d'un autre témoin (vierge, depuis un fichier ou une adresse) et un pour supprimer un enregistrement — refusé tant qu'une lecture l'interprète — et, en haut à droite du dossier, <strong>Sauver</strong>, qui écrit le dossier et, si on le demande, toutes les observations à côté, en zip. C'est <code>&lt;rr0-case-editor&gt;</code>, qui contient l'éditeur d'un enregistrement et le lui présente un à la fois. Un enregistrement ouvert seul a dessous un lien <em>Ajouter à un dossier</em> : il crée un dossier autour de l'enregistrement, sans toucher à ce qu'on est en train d'éditer. Tant que des modifications d'un enregistrement ou du dossier ne sont pas sauvées, l'éditeur le dit, et demande confirmation avant que la page soit quittée ou l'enregistrement remplacé. <code>&amp;track=</code> nomme l'enregistrement sur lequel il s'ouvre.</p>
+      </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2 id="case">Un dossier, et ses observations</h2>
+    <p>L'adresse peut être le <code>case.json</code> d'un dossier. L'éditeur montre alors <strong>le dossier</strong> en haut et, dans le même conteneur, l'observation en cours d'édition dans un conteneur à part. <code>&amp;track=</code> nomme l'enregistrement sur lequel il s'ouvre.</p>
+    <ul class="plain">
+      <li><strong>Le dossier</strong> a un <strong>identifiant</strong>, un <strong>titre</strong> et une date — le même sélecteur, le même qualificatif et le même texte EDTF que le début d'une observation — et <strong>Sauver</strong> en haut à droite.</li>
+      <li><strong>Observations</strong> : un sélecteur liste les enregistrements du dossier, les comptes rendus des observateurs et les lectures qu'on en fait, chacun un enregistrement à part. En choisir un l'ouvre dessous, et ce qu'on a changé dans les autres est conservé.</li>
+      <li><strong>+</strong> ajoute un enregistrement : vierge, depuis un fichier ou depuis une adresse. Nommez un compte rendu dans le dernier champ, <em>Interprétation de</em>, et ce qu'on ajoute est une lecture de celui-ci — une autre observation, que le dossier liste marquée <code>interpretationOf</code>, datée et signée. Vierge, elle commence comme une copie de toute la scène du compte rendu qu'elle lit.</li>
+      <li>La <strong>corbeille</strong> retire du dossier l'enregistrement affiché ; son fichier n'est pas supprimé. Une observation qu'une lecture interprète encore ne peut pas être retirée : supprimez d'abord ses lectures. Un dossier garde au moins un enregistrement.</li>
+      <li><strong>Sauver</strong> demande s'il faut sauver aussi les observations : oui écrit un zip du dossier et de chaque observation à côté, non n'écrit que <code>case.json</code>.</li>
+      <li>Un enregistrement ouvert seul a dessous <em>Ajouter à un dossier</em> : cela crée un dossier autour de cet enregistrement, sans toucher à ce qu'on est en train d'éditer.</li>
+      <li>Un point ● après le titre du dossier, et un autre après l'onglet <strong>Fichier</strong> de l'observation, disent que le dossier ou l'observation contient des modifications non sauvées. Tant que c'est le cas, l'éditeur demande confirmation avant que la page soit quittée ou l'enregistrement remplacé.</li>
+    </ul>
+    <p>C'est <code>&lt;rr0-case-editor&gt;</code>, qui contient l'éditeur d'un enregistrement et le lui présente un à la fois.</p>
   </div>
 </section>
 
@@ -769,11 +797,7 @@ if (docs) {
         n'aurait pu suivre est signalé, l'heure solaire du méridien dans son infobulle. Modifier l'une
         des deux dates retire une durée explicite dès que les deux dates donnent une durée exacte à
         elles seules.</p>
-      <p>Le bouton <strong>EDTF</strong> bascule les deux champs de date en texte, pour tout ce
-        qu'un sélecteur de calendrier ne sait pas dire : une année seule, un mois, une heure sans
-        date, et les qualificatifs <em>incertain</em> (<code>?</code>) et <em>approximatif</em>
-        (<code>~</code>). La plupart des archives en ont besoin : sur 241 dossiers de rr0.org, 43 %
-        n'énoncent qu'une année et 17 % seulement une date avec une heure.</p>
+      <p>Chaque date est un <strong>sélecteur</strong> pour un instant complet, avec un <strong>qualificatif</strong> à côté : exact, approximatif (<code>~</code>), incertain (<code>?</code>) ou les deux (<code>%</code>). Le bouton <strong>EDTF</strong> bascule les deux champs de date en texte, pour tout ce qu'un sélecteur ne sait pas dire : une année seule, un mois, une heure sans date. La plupart des archives en ont besoin : sur 241 dossiers de rr0.org, 43 % n'énoncent qu'une année et 17 % seulement une date avec une heure. La date d'un dossier est le même champ.
       <p><strong>Moments</strong> nomme l'instant de la tête de lecture (A, B, C… comme les croquis
         des enquêtes), avec une phrase de ce qui s'y passe. En choisir un dans la liste y va ;
         <strong>🎯</strong> retourne à celui affiché, ce que la liste ne peut pas faire une fois la
@@ -955,7 +979,7 @@ if (docs) {
         modèle du catalogue, ou un fichier glTF à une adresse. Cette adresse peut être relative au
         fichier de l'enregistrement : un <code>sighting.json</code> et le <code>craft.gltf</code> posé
         à côté fonctionnent ensemble depuis n'importe quelle page ; son crédit (nom et licence) est
-        exigé avant qu'il soit dessiné. <strong>+</strong> ajoute un corps (et l'interprétation, si
+        exigé avant qu'il soit dessiné. <strong>Titre de l'interprétation</strong>, en haut de cette partie, nomme ce que l'enregistrement affirme — « Engin sur ses jambes », « Avril 2013 : une maquette au bout d'un fil » — et est toujours proposé : en saisir un crée l'interprétation avant qu'un corps le fasse. <strong>+</strong> ajoute un corps (et l'interprétation, si
         l'enregistrement n'en a pas) : il représente la forme sélectionnée, dans sa direction, à la
         distance où la scène la dessine et à la taille que sa largeur apparente donne là, en une
         seule image clé à la tête de lecture ; posé au sol à cette distance quand la ligne de visée y
@@ -1024,7 +1048,7 @@ if (docs) {
       <h3>Fichier</h3>
       <p>L'enregistrement lui-même. <strong>Charger un fichier JSON</strong> et <strong>Ou charger
         depuis une URL</strong> font entrer un enregistrement existant, et <strong>Sauver</strong>
-        vous remet le fichier. Dessous, le même enregistrement en texte JSON, tenu à jour dans les
+        vous remet le fichier. Un point après cet onglet dit que l\'enregistrement contient des modifications non sauvées ; charger un autre fichier ou une autre adresse alors qu\'il en contient demande d\'abord confirmation. Dessous, le même enregistrement en texte JSON, tenu à jour dans les
         deux sens : ce que vous changez dans le formulaire ou sur le rendu y apparaît, et un texte
         qui s'analyse devient l'enregistrement dès que vous cessez de taper (la tête de lecture
         reste où elle était). Un texte qui ne s'analyse pas est signalé sur sa ligne et ne change
@@ -1077,7 +1101,23 @@ if (docs) {
       como caso de rr0.org, por su <code>sighting.json</code>); por ejemplo
       <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
       que se reproduce en <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
-    <p class="small">La dirección puede ser el <code>case.json</code> de un caso: el editor lista entonces las grabaciones que contiene, los relatos de los observadores y las lecturas que se hacen de ellos, cada una una grabación aparte, con un selector para abrir una, un botón para interpretar un relato (añadir una lectura), otro para añadir el relato de otro testigo (en blanco, desde un archivo o una dirección) y otro para eliminar una grabación — rechazado mientras una lectura la interprete — y, arriba a la derecha del caso, <strong>Guardar</strong>, que escribe el caso y, si se pide, todas las observaciones a su lado, en un zip. Es <code>&lt;rr0-case-editor&gt;</code>, que contiene el editor de una grabación y se la presenta de una en una. Una grabación abierta sola tiene debajo un enlace <em>Añadir a un caso</em>: crea un caso alrededor de la grabación, sin tocar lo que se está editando. Mientras haya cambios de una grabación o del caso sin guardar, el editor lo dice y pide confirmación antes de abandonar la página o reemplazar la grabación. <code>&amp;track=</code> nombra la grabación en la que se abre.</p>
+      </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2 id="case">Un caso, y sus observaciones</h2>
+    <p>La dirección puede ser el <code>case.json</code> de un caso. El editor muestra entonces <strong>el caso</strong> arriba y, dentro del mismo contenedor, la observación que se edita en un contenedor aparte. <code>&amp;track=</code> nombra la grabación en la que se abre.</p>
+    <ul class="plain">
+      <li><strong>El caso</strong> tiene un <strong>identificador</strong>, un <strong>título</strong> y una fecha — el mismo selector, el mismo calificativo y el mismo texto EDTF que el inicio de una observación — y <strong>Guardar</strong> arriba a la derecha.</li>
+      <li><strong>Observaciones</strong>: un selector lista las grabaciones del caso, los relatos de los observadores y las lecturas que se hacen de ellos, cada una una grabación aparte. Elegir una la abre debajo, y lo que se cambió en las demás se conserva.</li>
+      <li><strong>+</strong> añade una grabación: en blanco, desde un archivo o desde una dirección. Nombre un relato en el último campo, <em>Interpretación de</em>, y lo que se añade es una lectura de él — otra observación, que el caso lista marcada <code>interpretationOf</code>, fechada y firmada. En blanco, empieza como una copia de toda la escena del relato que lee.</li>
+      <li>La <strong>papelera</strong> quita del caso la grabación mostrada; su archivo no se borra. Una observación que una lectura aún interpreta no se puede quitar: elimine antes sus lecturas. Un caso conserva al menos una grabación.</li>
+      <li><strong>Guardar</strong> pregunta si guardar también las observaciones: sí escribe un zip del caso y de cada observación a su lado, no escribe solo <code>case.json</code>.</li>
+      <li>Una grabación abierta sola tiene debajo <em>Añadir a un caso</em>: crea un caso alrededor de esa grabación, sin tocar lo que se está editando.</li>
+      <li>Un punto ● tras el título del caso, y otro tras la pestaña <strong>Archivo</strong> de la observación, indican que el caso o la observación tiene cambios sin guardar. Mientras sea así, el editor pide confirmación antes de abandonar la página o reemplazar la grabación.</li>
+    </ul>
+    <p>Es <code>&lt;rr0-case-editor&gt;</code>, que contiene el editor de una grabación y se la presenta de una en una.</p>
   </div>
 </section>
 
@@ -1221,11 +1261,7 @@ if (docs) {
         podido llevar se señala, con la hora solar del meridiano en su información emergente. Editar
         cualquiera de las dos fechas elimina una duración explícita en cuanto ambas fechas dan por sí
         solas una duración exacta.</p>
-      <p>El botón <strong>EDTF</strong> cambia ambos campos de fecha a texto, para todo lo que un
-        selector de calendario no sabe decir: un año solo, un mes, una hora sin fecha, y los
-        calificativos <em>incierto</em> (<code>?</code>) y <em>aproximado</em> (<code>~</code>). La
-        mayoría de los archivos lo necesitan: de 241 casos de rr0.org, el 43 % indica solo un año y
-        apenas el 17 % una fecha con hora.</p>
+      <p>Cada fecha es un <strong>selector</strong> para un instante completo, con un <strong>calificativo</strong> al lado: exacto, aproximado (<code>~</code>), incierto (<code>?</code>) o ambos (<code>%</code>). El botón <strong>EDTF</strong> cambia ambos campos de fecha a texto, para todo lo que un selector no sabe decir: un año solo, un mes, una hora sin fecha. La mayoría de los archivos lo necesitan: de 241 casos de rr0.org, el 43 % indica solo un año y apenas el 17 % una fecha con hora. La fecha de un caso es el mismo campo.
       <p><strong>Momentos</strong> nombra el instante del cabezal de reproducción (A, B, C…, como hacen
         los croquis de los casos), con una frase sobre lo que ocurre entonces. Elegir uno en la lista
         lleva hasta él; <strong>🎯</strong> vuelve al que se muestra, cosa que la lista no puede hacer
@@ -1399,7 +1435,7 @@ if (docs) {
         archivo del registro, de modo que un <code>sighting.json</code> y el <code>craft.gltf</code>
         situado a su lado funcionan juntos desde cualquier página; su crédito (nombre y licencia) es
         obligatorio antes de que se dibuje.
-        <strong>+</strong> añade un cuerpo (y la interpretación, si el registro no tiene ninguna):
+        <strong>Título de la interpretación</strong>, arriba de esta parte, nombra lo que la grabación afirma — «Nave sobre sus patas», «Abril de 2013: una maqueta de un hilo» — y se ofrece siempre: escribir uno crea la interpretación antes de que lo haga un cuerpo. <strong>+</strong> añade un cuerpo (y la interpretación, si el registro no tiene ninguna):
         representa la forma seleccionada, en su dirección, a la distancia a la que la escena la dibuja
         y tan grande como allí la hace su anchura aparente, en un único fotograma clave en el cabezal de
         reproducción; sobre el suelo a esa distancia cuando la línea de visión entra antes en él; sin
@@ -1468,7 +1504,7 @@ if (docs) {
     <div class="group-doc">
       <h3>Archivo</h3>
       <p>El registro en sí. <strong>Cargar archivo JSON</strong> y <strong>O cargar desde una
-        URL</strong> traen un registro existente, y <strong>Guardar</strong> te entrega el archivo.
+        URL</strong> traen un registro existente, y <strong>Guardar</strong> te entrega el archivo. Un punto tras esta pestaña indica que la grabación tiene cambios sin guardar; cargar otro archivo u otra dirección mientras los tenga pide confirmación antes.
         Debajo, el mismo registro como texto JSON, mantenido al día en los dos sentidos: lo que
         cambias en el formulario o en el render aparece en él, y un texto que se analiza pasa a ser
         el registro en cuanto dejas de teclear (el cabezal se queda donde estaba). Un texto que no
@@ -1521,7 +1557,23 @@ if (docs) {
       di esse viene cercato come caso di rr0.org, tramite il suo <code>sighting.json</code>); per esempio
       <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
       che si riproduce in <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
-    <p class="small">L'indirizzo può essere il <code>case.json</code> di un caso: l'editor elenca allora le registrazioni che contiene, i resoconti degli osservatori e le letture che se ne fanno, ciascuna una registrazione a sé, con un selettore per aprirne una, un pulsante per interpretare un resoconto (aggiungerne una lettura), uno per aggiungere il resoconto di un altro testimone (vuoto, da un file o da un indirizzo) e uno per eliminare una registrazione — rifiutato finché una lettura la interpreta — e, in alto a destra del caso, <strong>Salva</strong>, che scrive il caso e, se richiesto, tutte le osservazioni accanto, in uno zip. È <code>&lt;rr0-case-editor&gt;</code>, che contiene l'editor di una registrazione e gliela presenta una alla volta. Una registrazione aperta da sola ha sotto un link <em>Aggiungi a un caso</em>: crea un caso attorno alla registrazione, senza toccare ciò che si sta modificando. Finché ci sono modifiche di una registrazione o del caso non salvate, l'editor lo dice e chiede conferma prima che la pagina venga lasciata o la registrazione sostituita. <code>&amp;track=</code> indica la registrazione su cui si apre.</p>
+      </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2 id="case">Un caso, e le sue osservazioni</h2>
+    <p>L'indirizzo può essere il <code>case.json</code> di un caso. L'editor mostra allora <strong>il caso</strong> in alto e, nello stesso contenitore, l'osservazione in modifica in un contenitore a parte. <code>&amp;track=</code> indica la registrazione su cui si apre.</p>
+    <ul class="plain">
+      <li><strong>Il caso</strong> ha un <strong>identificativo</strong>, un <strong>titolo</strong> e una data — lo stesso selettore, lo stesso qualificatore e lo stesso testo EDTF dell'inizio di un'osservazione — e <strong>Salva</strong> in alto a destra.</li>
+      <li><strong>Osservazioni</strong>: un selettore elenca le registrazioni del caso, i resoconti degli osservatori e le letture che se ne fanno, ciascuna una registrazione a sé. Sceglierne una la apre sotto, e ciò che è stato cambiato nelle altre viene conservato.</li>
+      <li><strong>+</strong> aggiunge una registrazione: vuota, da un file o da un indirizzo. Indichi un resoconto nell'ultimo campo, <em>Interpretazione di</em>, e ciò che si aggiunge è una lettura di esso — un'altra osservazione, che il caso elenca marcata <code>interpretationOf</code>, datata e firmata. Vuota, parte come una copia dell'intera scena del resoconto che legge.</li>
+      <li>Il <strong>cestino</strong> toglie dal caso la registrazione mostrata; il suo file non viene cancellato. Un'osservazione che una lettura interpreta ancora non può essere tolta: elimini prima le sue letture. Un caso conserva almeno una registrazione.</li>
+      <li><strong>Salva</strong> chiede se salvare anche le osservazioni: sì scrive uno zip del caso e di ogni osservazione accanto, no scrive solo <code>case.json</code>.</li>
+      <li>Una registrazione aperta da sola ha sotto <em>Aggiungi a un caso</em>: crea un caso attorno a quella registrazione, senza toccare ciò che si sta modificando.</li>
+      <li>Un punto ● dopo il titolo del caso, e uno dopo la scheda <strong>File</strong> dell'osservazione, indicano che il caso o l'osservazione contiene modifiche non salvate. Finché è così, l'editor chiede conferma prima che la pagina venga lasciata o la registrazione sostituita.</li>
+    </ul>
+    <p>È <code>&lt;rr0-case-editor&gt;</code>, che contiene l'editor di una registrazione e gliela presenta una alla volta.</p>
   </div>
 </section>
 
@@ -1672,11 +1724,7 @@ if (docs) {
         orologio a quella longitudine avrebbe potuto tenere viene segnalato, con l'ora solare del
         meridiano nel suo suggerimento. Modificare una delle due date elimina una durata esplicita non
         appena le due date danno da sole una durata esatta.</p>
-      <p>Il pulsante <strong>EDTF</strong> trasforma entrambi i campi data in testo, per tutto ciò che
-        un selettore di calendario non sa esprimere: un anno da solo, un mese, un'ora senza data, e i
-        qualificatori <em>incerto</em> (<code>?</code>) e <em>approssimativo</em> (<code>~</code>). La
-        maggior parte degli archivi ne ha bisogno: su 241 casi di rr0.org, il 43 % indica solo un anno e
-        appena il 17 % una data con un'ora.</p>
+      <p>Ogni data è un <strong>selettore</strong> per un istante completo, con un <strong>qualificatore</strong> accanto: esatto, approssimativo (<code>~</code>), incerto (<code>?</code>) o entrambi (<code>%</code>). Il pulsante <strong>EDTF</strong> trasforma entrambi i campi data in testo, per tutto ciò che un selettore non sa esprimere: un anno da solo, un mese, un'ora senza data. La maggior parte degli archivi ne ha bisogno: su 241 casi di rr0.org, il 43 % indica solo un anno e appena il 17 % una data con un'ora. La data di un caso è lo stesso campo.
     </div>
 
     <div class="group-doc">
@@ -1847,7 +1895,7 @@ if (docs) {
         registrazione stessa, così un <code>sighting.json</code> e il <code>craft.gltf</code> accanto a
         esso funzionano insieme da qualsiasi pagina; il suo credito (nome e licenza) è obbligatorio
         prima che venga disegnato.
-        <strong>+</strong> aggiunge un corpo (e l'interpretazione, quando la registrazione non ne ha):
+        <strong>Titolo dell'interpretazione</strong>, in cima a questa parte, indica ciò che la registrazione afferma — «Velivolo sulle sue zampe», «Aprile 2013: un modellino appeso a un filo» — ed è sempre offerto: scriverne uno crea l'interpretazione prima che lo faccia un corpo. <strong>+</strong> aggiunge un corpo (e l'interpretazione, quando la registrazione non ne ha):
         rappresenta la forma selezionata, nella sua direzione, alla distanza a cui la scena la disegna e
         grande quanto la rende lì la sua larghezza apparente, in un unico fotogramma chiave alla testina
         di riproduzione; sul terreno a quella distanza quando la linea di vista vi entra prima; senza
@@ -1917,7 +1965,7 @@ if (docs) {
       <h3>File</h3>
       <p>La registrazione stessa. <strong>Carica file JSON</strong> e <strong>Oppure carica da
         URL</strong> portano dentro una registrazione esistente, ed <strong>Salva</strong> ti
-        consegna il file. Sotto, la stessa registrazione come testo JSON, tenuta allineata nei due
+        consegna il file. Un punto dopo questa scheda indica che la registrazione contiene modifiche non salvate; caricare un altro file o un altro indirizzo mentre ne contiene chiede prima conferma. Sotto, la stessa registrazione come testo JSON, tenuta allineata nei due
         sensi: ciò che cambi nel modulo o nel rendering vi compare, e un testo che si interpreta
         diventa la registrazione appena smetti di digitare (il cursore di lettura resta dov'era). Un
         testo che non si interpreta è segnalato sulla sua riga e non cambia nulla finché non lo fa.</p>
