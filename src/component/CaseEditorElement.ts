@@ -46,6 +46,7 @@ const TEMPLATE = `
   dialog label > span { flex: 0 0 9em; }
   dialog label.check > span { flex: 1 1 auto; }
   .row.header { justify-content: space-between; }
+  .dirty { flex: 1 1 auto; color: #b45309; font-size: .85em; }
   .row.header h2 { margin: 0; }
   dialog input[type="text"], dialog input[type="date"], dialog input[type="url"], dialog select { flex: 1 1 auto; min-width: 0; }
   dialog .actions { display: flex; gap: .5em; margin-top: .6em; }
@@ -55,6 +56,7 @@ const TEMPLATE = `
 <section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
   <div class="row header">
     <h2 id="case-heading">Case</h2>
+    <span id="dirty" class="dirty" role="status" hidden>● Changes not exported</span>
     <button id="export" type="button">Export</button>
   </div>
   <div class="row fields">
@@ -102,7 +104,7 @@ const TEMPLATE = `
 </dialog>
 `
 
-type DialogMode = "add" | "delete" | "export"
+type DialogMode = "add" | "delete" | "export" | "discard"
 
 /**
  * Edits a case: the recordings its `case.json` lists, the accounts of the observers and the readings
@@ -127,6 +129,9 @@ export class CaseEditorElement extends HTMLElement {
   private said = new SaidTexts(["en"])
   private localeToken = 0
   private dialogMode: DialogMode = "add"
+  /** What loading waits for, while the author is asked about changes that would be lost. */
+  private pendingLoad?: () => void
+  private dirtyTimer?: number
   private caseDate!: DateInputElement
   /** The case the date field last opened its way in for: a mode is the author's once it is shown. */
   private dateModeFor?: CaseSession
@@ -146,6 +151,16 @@ export class CaseEditorElement extends HTMLElement {
     })
     // A recording loaded into the editor by its own fields is not the case's any more.
     this.editor.addEventListener("recordingloaded", () => this.closeCase())
+    // The case keeps the watch over what would be lost by leaving, for the recordings it holds: the editor does not.
+    this.editor.guardsLeaving = false
+    // Loading a recording or a case into the editor replaces what is open: asked first when changes were not exported.
+    this.editor.addEventListener("beforeload", event => {
+      if (!this.dirty) return
+      event.preventDefault()
+      this.pendingLoad = (event as CustomEvent<{ proceed: () => void }>).detail.proceed
+      this.openDialog("discard", this.messages.discardTitle, this.messages.discardQuestion)
+    })
+    for (const type of ["input", "change", "datechange"]) this.shadow.addEventListener(type, () => this.scheduleDirtyCheck(), true)
     for (const [id, field] of [["case-id", "id"], ["case-title", "title"]] as const) {
       this.input(id).addEventListener("input", () => this.writeCaseField(field, this.input(id).value))
     }
@@ -166,6 +181,8 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("source").addEventListener("change", () => this.syncSourceFields())
     this.byId("of").addEventListener("change", () => this.syncSourceFields())
     this.byId("cancel").addEventListener("click", () => this.closeDialog())
+    // Escape closes the dialog without going through the button.
+    this.byId("dialog").addEventListener("close", () => { this.pendingLoad = undefined })
     this.byId("form").addEventListener("submit", event => {
       event.preventDefault()
       void this.submitDialog()
@@ -180,7 +197,39 @@ export class CaseEditorElement extends HTMLElement {
     if (name === "src" && value) this.editor.setAttribute("src", value)
   }
 
+  private readonly warnBeforeLeaving = (event: BeforeUnloadEvent): void => {
+    if (!this.dirty) return
+    event.preventDefault()
+    event.returnValue = ""
+  }
+
+  disconnectedCallback(): void {
+    window.removeEventListener("beforeunload", this.warnBeforeLeaving)
+    window.clearTimeout(this.dirtyTimer)
+  }
+
+  /**
+   * Whether anything would be lost by leaving: in a case, the case or any recording of it changed and not exported; and for a
+   * recording alone, the recording. What the editor holds is read first, since the case only sees it when asked.
+   */
+  get dirty(): boolean {
+    if (!this.session) return this.editor.dirty
+    this.commit()
+    return this.session.dirty
+  }
+
+  /** Shows whether there is something to lose, a moment after the author stops: a recording is large, and this reads all of it. */
+  private scheduleDirtyCheck(): void {
+    window.clearTimeout(this.dirtyTimer)
+    this.dirtyTimer = window.setTimeout(() => this.refreshDirty(), 600)
+  }
+
+  private refreshDirty(): void {
+    this.byId("dirty").hidden = !(this.session && this.dirty)
+  }
+
   connectedCallback(): void {
+    window.addEventListener("beforeunload", this.warnBeforeLeaving)
     const src = this.getAttribute("src")
     if (src && this.editor.getAttribute("src") !== src) this.editor.setAttribute("src", src)
     void this.loadLocale()
@@ -235,6 +284,7 @@ export class CaseEditorElement extends HTMLElement {
     text("recordings-heading", m.recordingsHeading)
     text("label-recording", m.recording)
     text("make-case", m.addToCase)
+    text("dirty", `● ${m.unsavedChanges}`)
     text("add", "+")
     text("export", m.exportButton)
     text("label-export-recordings", m.exportAlso)
@@ -283,9 +333,13 @@ export class CaseEditorElement extends HTMLElement {
     this.refreshRow()
   }
 
-  /** Keeps what the editor holds in the track on show, to be put back when it is shown again. */
+  /**
+   * Keeps what the editor holds in the track on show, to be put back when it is shown again — once the author has done
+   * something to it. A recording only looked at keeps what was loaded: the editor fills in what it can derive (a weather, a
+   * zone) a moment after, and that is not a change anybody made, nor one worth warning about.
+   */
   private commit(): void {
-    if (this.session && this.current) this.session.keep(this.current, this.editor.sightingData)
+    if (this.session && this.current && this.editor.edited) this.session.keep(this.current, this.editor.sightingData)
   }
 
   private async loadTrack(track: CaseTrack): Promise<void> {
@@ -357,6 +411,8 @@ export class CaseEditorElement extends HTMLElement {
     if (!json) return
     if (value.trim() === "") delete json[field]
     else json[field] = value
+    this.session?.touch()
+    this.scheduleDirtyCheck()
   }
 
   /** RR0 writes "1950-05-11 19:45" where EDTF writes "1950-05-11T19:45". */
@@ -391,7 +447,10 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("make-case-row").hidden = session !== undefined
     this.byId("case").classList.toggle("in-case", session !== undefined)
     this.byId("recording").classList.toggle("in-case", session !== undefined)
-    if (!session) return
+    if (!session) {
+      this.refreshDirty()
+      return
+    }
     const active = this.shadow.activeElement
     for (const [id, field] of [["case-id", "id"], ["case-title", "title"]] as const) {
       const input = this.input(id)
@@ -403,6 +462,7 @@ export class CaseEditorElement extends HTMLElement {
     select.value = String(Math.max(0, this.current ? session.tracks.indexOf(this.current) : 0))
     // Any recording can leave the case, while the case keeps one.
     this.byId("delete").hidden = session.tracks.length <= 1
+    this.refreshDirty()
   }
 
   // -- The dialog ----------------------------------------------------------------------------------
@@ -421,11 +481,14 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("fields-add").hidden = mode !== "add"
     this.byId("fields-export").hidden = mode !== "export"
     this.byId("ok").hidden = false
+    this.byId("ok").textContent = mode === "discard" ? this.messages.discardOk : this.messages.ok
     if (typeof this.dialog.showModal === "function") this.dialog.showModal()
     else this.dialog.setAttribute("open", "")
   }
 
   private closeDialog(): void {
+    // Leaving the dialog, agreeing or not, ends what waited for it: agreeing took it first.
+    this.pendingLoad = undefined
     if (typeof this.dialog.close === "function") this.dialog.close()
     else this.dialog.removeAttribute("open")
   }
@@ -498,6 +561,12 @@ export class CaseEditorElement extends HTMLElement {
         this.closeDialog()
         this.deleteCurrent()
         return
+      case "discard": {
+        const proceed = this.pendingLoad
+        this.closeDialog()
+        proceed?.()
+        return
+      }
       case "export":
         this.closeDialog()
         await this.exportCase(this.input("export-recordings").checked)
@@ -597,6 +666,8 @@ export class CaseEditorElement extends HTMLElement {
     if (!session) return
     this.commit()
     const files = session.files(withRecordings)
+    session.markExported(withRecordings)
+    this.refreshDirty()
     // The case alone is the one file it is: no archive around it.
     if (files.length === 1) {
       this.download(new Blob([files[0].content], { type: "application/json" }), files[0].path)

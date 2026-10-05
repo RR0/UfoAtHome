@@ -34,5 +34,9 @@ export const caseEditorMessages_fr: CaseEditorMessages = {
   exportButton: "Exporter",
   exportTitle: "Exporter le dossier",
   exportAlso: "Exporter aussi les observations",
-  addToCase: "Ajouter à un dossier"
+  addToCase: "Ajouter à un dossier",
+  unsavedChanges: "Modifications non exportées",
+  discardQuestion: "Des modifications ne sont pas encore exportées. Charger quand même et les perdre ?",
+  discardTitle: "Modifications non exportées",
+  discardOk: "Charger quand même"
 }

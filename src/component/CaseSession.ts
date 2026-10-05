@@ -33,6 +33,8 @@ export interface CaseTrack {
  */
 export class CaseSession {
   readonly tracks: CaseTrack[]
+  /** Whether the case itself was changed since it was opened or exported: a recording added or deleted, a field edited. */
+  private caseChanged = false
 
   constructor(readonly json: CaseJson, readonly url: string) {
     this.tracks = (json.events ?? [])
@@ -68,6 +70,7 @@ export class CaseSession {
     const track = session.tracks[0]
     track.recording = recording
     track.base = { url: from }
+    session.caseChanged = true
     return session
   }
 
@@ -85,6 +88,26 @@ export class CaseSession {
     if (fresh) track.loaded = JSON.stringify(recording)
     // What a reading is called is what its own interpretation says: the case's event follows it.
     if (track.kind === "reading" && recording.interpretation?.title !== undefined) track.event.title = recording.interpretation.title
+  }
+
+  /** Says the case itself was edited — a field of it, which the session cannot see being written. */
+  touch(): void {
+    this.caseChanged = true
+  }
+
+  /** Whether anything would be lost by leaving: the case was changed, or a recording of it added or edited, and not exported. */
+  get dirty(): boolean {
+    return this.caseChanged || this.tracks.some(track => this.changed(track))
+  }
+
+  /**
+   * Says what an export wrote: the case, and, when `withRecordings`, the recordings that were added or changed — which are then
+   * what they were exported as. A recording not exported is still changed, and leaving would still lose it.
+   */
+  markExported(withRecordings: boolean): void {
+    this.caseChanged = false
+    if (!withRecordings) return
+    for (const track of this.tracks) if (track.recording) track.loaded = JSON.stringify(track.recording)
   }
 
   /** Whether a track has to be written: added here, or changed since it was loaded. */
@@ -131,6 +154,7 @@ export class CaseSession {
       url: directory + file
     }
     this.json.events = [...(this.json.events ?? []), event]
+    this.caseChanged = true
     const track: CaseTrack = { event, url: new URL(event.url!, this.url).href, kind: "reading", recording }
     this.tracks.push(track)
     return track
@@ -174,6 +198,7 @@ export class CaseSession {
       url: directory + file
     }
     this.json.events = [...(this.json.events ?? []), event]
+    this.caseChanged = true
     const track: CaseTrack = { event, url: new URL(event.url!, this.url).href, kind: reads ? "reading" : "observer", recording: stated }
     this.tracks.push(track)
     return track
@@ -191,6 +216,7 @@ export class CaseSession {
     if (index < 0) return { deleted: false, readings: 0 }
     this.tracks.splice(index, 1)
     this.json.events = (this.json.events ?? []).filter(event => event !== track.event)
+    this.caseChanged = true
     return { deleted: true }
   }
 
@@ -201,6 +227,7 @@ export class CaseSession {
     if (index < 0) return false
     this.tracks.splice(index, 1)
     this.json.events = (this.json.events ?? []).filter(event => event !== track.event)
+    this.caseChanged = true
     return true
   }
 

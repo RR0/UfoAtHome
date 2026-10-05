@@ -91,4 +91,30 @@ describe("A case being edited", () => {
     expect(session.deleteObservation(session.tracks[0])).toEqual({ deleted: true })
     expect(session.json.events).toEqual([])
   })
+
+  it("is clean as opened, dirty once a recording is edited, a field touched or a recording added, and clean again once exported", () => {
+    const session = new CaseSession(caseJson(), url)
+    session.keep(session.tracks[0], account, true)
+    session.keep(session.tracks[1], { ...account, id: "reading" } as SightingRecordingJson, true)
+    expect(session.dirty).toBe(false)
+    session.keep(session.tracks[0], { ...account, description: "Edited" } as SightingRecordingJson)
+    expect(session.dirty).toBe(true)
+    session.markExported(false) // the case only: the edited recording is still lost by leaving
+    expect(session.dirty).toBe(true)
+    session.markExported(true)
+    expect(session.dirty).toBe(false)
+    session.touch()
+    expect(session.dirty).toBe(true)
+    session.markExported(false)
+    expect(session.dirty).toBe(false)
+    session.addReading(session.tracks[0], "2026-10-05")
+    expect(session.dirty).toBe(true)
+  })
+
+  it("is dirty when made around a recording that is open, until exported", () => {
+    const made = CaseSession.around(account, "1950-05-11 19:45", "Trent", undefined, "https://example.org/edit/")
+    expect(made.dirty).toBe(true)
+    made.markExported(true)
+    expect(made.dirty).toBe(false)
+  })
 })

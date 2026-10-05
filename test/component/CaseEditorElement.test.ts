@@ -456,4 +456,90 @@ describe("CaseEditorElement", () => {
     expect(parts(element).row.hidden).toBe(true)
     expect(element.sightingData.id).toBe("plain")
   })
+
+  describe("leaving with changes not exported", () => {
+    const leave = (): BeforeUnloadEvent => {
+      const event = new Event("beforeunload", { cancelable: true }) as BeforeUnloadEvent
+      window.dispatchEvent(event)
+      return event
+    }
+
+    it("lets a case that was only opened be left, and warns once a field of it, or a recording, has changed", async () => {
+      const element = await open()
+      expect(element.dirty).toBe(false)
+      expect(leave().defaultPrevented).toBe(false)
+      const { field } = parts(element)
+      field("case-title").value = "Another title"
+      field("case-title").dispatchEvent(new Event("input"))
+      expect(element.dirty).toBe(true)
+      expect(leave().defaultPrevented).toBe(true)
+    })
+
+    it("shows that there is something to lose, and stops once the case is exported", async () => {
+      const element = await open()
+      const root = element.shadowRoot!
+      const indicator = root.getElementById("dirty")!
+      expect(indicator.hidden).toBe(true)
+      parts(element).field("case-title").value = "Another title"
+      parts(element).field("case-title").dispatchEvent(new Event("input"))
+      await wait(700)
+      expect(indicator.hidden).toBe(false)
+      const click = HTMLAnchorElement.prototype.click
+      HTMLAnchorElement.prototype.click = () => {}
+      vi.stubGlobal("URL", Object.assign(URL, { createObjectURL: () => "blob:x", revokeObjectURL: () => {} }))
+      try {
+        parts(element).exportButton.click()
+        ;(root.getElementById("export-recordings") as HTMLInputElement).checked = true
+        await submit(element)
+        await wait()
+      } finally {
+        HTMLAnchorElement.prototype.click = click
+      }
+      expect(element.dirty).toBe(false)
+      expect(indicator.hidden).toBe(true)
+    })
+
+    it("asks before replacing what is open by what the editor loads, and loads nothing if the author declines", async () => {
+      const element = await open()
+      parts(element).field("case-title").value = "Another title"
+      parts(element).field("case-title").dispatchEvent(new Event("input"))
+      files["https://example.org/d/plain.json"] = { version: 1, id: "plain", timeline: { keyframes: [] } }
+      const editorRoot = element.sightingEditor.shadowRoot!
+      const load = () => {
+        ;(editorRoot.getElementById("import-url") as HTMLInputElement).value = "https://example.org/d/plain.json"
+        ;(editorRoot.getElementById("import-url-button") as HTMLButtonElement).click()
+      }
+      load()
+      await wait()
+      expect((element.shadowRoot!.getElementById("dialog") as HTMLDialogElement).open).toBe(true)
+      expect(element.sightingData.id).toBe("x-1") // nothing was replaced
+      element.shadowRoot!.getElementById("cancel")!.click()
+      await wait()
+      expect(parts(element).row.hidden).toBe(false)
+      expect(element.sightingData.id).toBe("x-1")
+      // And once the author agrees, the load goes on and the case is left.
+      load()
+      await wait()
+      await submit(element)
+      await wait(60)
+      expect(element.sightingData.id).toBe("plain")
+      expect(parts(element).row.hidden).toBe(true)
+    })
+
+    it("warns for a recording alone as well, and not for one that was only opened", async () => {
+      files["https://example.org/d/plain.json"] = { version: 1, id: "plain", observer: { id: "p" }, timeline: { keyframes: [] } }
+      vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: () => Promise.resolve(structuredClone(files[url])), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) })))
+      const element = document.createElement("rr0-case-editor") as CaseEditorElement
+      document.body.appendChild(element)
+      element.setAttribute("src", "https://example.org/d/plain.json")
+      await wait()
+      expect(element.dirty).toBe(false)
+      expect(leave().defaultPrevented).toBe(false)
+      const description = element.sightingEditor.shadowRoot!.getElementById("description") as HTMLTextAreaElement
+      description.value = "Something the author typed"
+      description.dispatchEvent(new Event("input"))
+      expect(element.dirty).toBe(true)
+      expect(leave().defaultPrevented).toBe(true)
+    })
+  })
 })

@@ -1873,6 +1873,11 @@ export class SightingEditorElement extends HTMLElement {
     // The constructor could only read the browser's list if this editor was created before being put
     // anywhere; the page it now stands in may declare a language (see HostLocale).
     if (HostLocale.preferencesFor(this).join() !== this.preferences.join()) void this.loadLocaleMessages()
+    // What the author does to the form, told from what the editor derives by itself: see `touched`.
+    this.shadow.addEventListener("input", this.touch, true)
+    this.shadow.addEventListener("change", this.touch, true)
+    this.shadow.addEventListener("keydown", this.touchByKey as EventListener, true)
+    window.addEventListener("beforeunload", this.warnBeforeLeaving)
     const src = this.getAttribute("src")
     if (src) void this.importFromUrl(src)
   }
@@ -1884,6 +1889,10 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   disconnectedCallback(): void {
+    window.removeEventListener("beforeunload", this.warnBeforeLeaving)
+    this.shadow.removeEventListener("input", this.touch, true)
+    this.shadow.removeEventListener("change", this.touch, true)
+    this.shadow.removeEventListener("keydown", this.touchByKey as EventListener, true)
     this.cloudEditor.stopManipulation()
     document.removeEventListener("click", this.handleOutsideContextMenuClick)
     this.endDrag()
@@ -1940,6 +1949,62 @@ export class SightingEditorElement extends HTMLElement {
     // and SceneElement's own updateAstronomy() (driven by the sightingData assignment above,
     // which surfaces as a timeupdate) already resolves+applies it, unlike before this was a
     // keyframed track.
+    this.markClean()
+  }
+
+  /** The recording as it was when it was loaded or last exported, to tell whether leaving would lose anything. */
+  private baseline = ""
+  /** Whether the author did anything to the form since: what tells an edit from what the editor itself derived (a weather, a zone). */
+  private touched = false
+  /**
+   * Whether this editor warns a page that is being left with changes not exported. On, unless whoever holds it
+   * (see CaseEditorElement) keeps that watch for the case it is a part of.
+   */
+  guardsLeaving = true
+
+  /**
+   * Whether the recording holds changes that were not exported: the author did something, and what the form states
+   * is no longer what was loaded. Computed when asked, since a recording is large and an answer is wanted only
+   * when something is about to be lost.
+   */
+  get dirty(): boolean {
+    return this.touched && JSON.stringify(this.sightingData) !== this.baseline
+  }
+
+  /** Whether the author did anything to the form since the recording was loaded or exported — what the editor derives by itself does not count. */
+  get edited(): boolean {
+    return this.touched
+  }
+
+  /** Says the recording as it stands is the one that was loaded or exported: nothing to lose. */
+  markClean(): void {
+    this.baseline = JSON.stringify(this.sightingData)
+    this.touched = false
+  }
+
+  private readonly touch = (): void => {
+    this.touched = true
+  }
+
+  /** Moving through the form by keyboard is no edit; deleting a shape from the picture is. */
+  private readonly touchByKey = (event: KeyboardEvent): void => {
+    if (event.key === "Delete" || event.key === "Backspace") this.touched = true
+  }
+
+  private readonly warnBeforeLeaving = (event: BeforeUnloadEvent): void => {
+    if (!this.guardsLeaving || !this.dirty) return
+    event.preventDefault()
+    event.returnValue = ""
+  }
+
+  /**
+   * Asks whoever holds this editor whether replacing the recording is allowed: the event is cancelable and carries
+   * `proceed`, to call once the author has agreed, and whether this recording holds `dirty` changes. The holder may hold
+   * more than this recording (a case), so it is told even when this one is clean. Unanswered, the replacement goes on
+   * as it always did. Returns whether the replacement waits.
+   */
+  private holdLoad(proceed: () => void): boolean {
+    return !this.dispatchEvent(new CustomEvent("beforeload", { detail: { proceed, dirty: this.dirty }, cancelable: true, bubbles: true, composed: true }))
   }
 
   /** Downloads the current recording as a standalone SightingRecordingJson file — a plain
@@ -1955,6 +2020,7 @@ export class SightingEditorElement extends HTMLElement {
     link.download = fileName
     link.click()
     URL.revokeObjectURL(url)
+    this.markClean()
   }
 
   /** Loads a SightingRecordingJson from a user-picked local file — the counterpart to
@@ -1966,6 +2032,15 @@ export class SightingEditorElement extends HTMLElement {
   private async importFromFile(): Promise<void> {
     const file = this.importFileInput.files?.[0]
     if (!file) return
+    if (this.holdLoad(() => void this.loadFile(file))) {
+      // Not read yet: the picked file is read when the author agrees, and the field is free again meanwhile.
+      this.importFileInput.value = ""
+      return
+    }
+    await this.loadFile(file)
+  }
+
+  private async loadFile(file: File): Promise<void> {
     try {
       const text = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader()
@@ -2022,6 +2097,11 @@ export class SightingEditorElement extends HTMLElement {
    * in a shared link should leave a usable empty editor, not a broken page. */
   private async importFromUrl(url: string = this.importUrlInput.value.trim()): Promise<void> {
     if (!url) return
+    if (this.holdLoad(() => void this.loadUrl(url))) return
+    await this.loadUrl(url)
+  }
+
+  private async loadUrl(url: string): Promise<void> {
     try {
       const fetched = await SightingFetch.json(url)
       // A case is not a recording: whoever edits cases takes it (see offerCase).

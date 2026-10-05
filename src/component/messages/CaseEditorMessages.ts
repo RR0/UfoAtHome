@@ -34,4 +34,8 @@ export interface CaseEditorMessages {
   exportTitle: string
   exportAlso: string
   addToCase: string
+  unsavedChanges: string
+  discardQuestion: string
+  discardTitle: string
+  discardOk: string
 }
