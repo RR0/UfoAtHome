@@ -131,7 +131,7 @@ https://ufoathome.org/sighting.schema.json .
         recognise what they saw.</li>
     </ul>
     <p>An observer who has only their own account can do this inside the editor: type it in the
-      <em>Observation</em> tab, choose what drafts it (Claude today: your own API key, and the
+      <em>Summary</em> tab, choose what drafts it (Claude today: your own API key, and the
       model), and the editor drafts the rest of the recording from it, sending nothing anywhere but
       to that model.</p>
     <p class="small">An account is personal data. Before handing documents to an online assistant,
@@ -226,7 +226,7 @@ https://ufoathome.org/sighting.schema.json .
         ce qu'il a vu.</li>
     </ul>
     <p>Un observateur qui n'a que son propre récit peut le faire dans l'éditeur : il le tape dans
-      l'onglet <em>Observation</em>, choisit ce qui le rédige (Claude aujourd'hui : sa propre clé
+      l'onglet <em>Résumé</em>, choisit ce qui le rédige (Claude aujourd'hui : sa propre clé
       d'API, et le modèle), et l'éditeur rédige le reste de l'enregistrement à partir de lui, sans
       rien envoyer ailleurs qu'à ce modèle.</p>
     <p class="small">Un compte rendu est une donnée personnelle. Avant de confier des documents à un
@@ -320,7 +320,7 @@ https://ufoathome.org/sighting.schema.json .
         vio.</li>
     </ul>
     <p>Un observador que solo tiene su propio relato puede hacerlo dentro del editor: lo escribe en
-      la pestaña <em>Observación</em>, elige qué lo redacta (hoy Claude: su propia clave de API, y el
+      la pestaña <em>Resumen</em>, elige qué lo redacta (hoy Claude: su propia clave de API, y el
       modelo), y el editor redacta el resto de la grabación a partir de él, sin enviar nada a ningún
       sitio salvo a ese modelo.</p>
     <p class="small">Un relato es un dato personal. Antes de dar documentos a un asistente en línea,
@@ -413,7 +413,7 @@ https://ufoathome.org/sighting.schema.json .
         ha visto.</li>
     </ul>
     <p>Un osservatore che ha solo il proprio resoconto può farlo dentro l'editor: lo scrive nella
-      scheda <em>Osservazione</em>, sceglie che cosa lo redige (oggi Claude: la propria chiave API, e
+      scheda <em>Riepilogo</em>, sceglie che cosa lo redige (oggi Claude: la propria chiave API, e
       il modello), e l'editor redige il resto della registrazione a partire da esso, senza inviare
       nulla da nessuna parte se non a quel modello.</p>
     <p class="small">Un resoconto è un dato personale. Prima di affidare documenti a un assistente

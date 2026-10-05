@@ -247,7 +247,7 @@ if (docs) {
 
     <div class="group-docs">
       <div class="group-doc">
-      <h3>Observation</h3>
+      <h3>Summary</h3>
       <p>State what this recording is about: an
         <strong>ID</strong>, a <strong>description</strong>, <strong>tags</strong>. The ID is this
         account's own, the day and then who saw it (<code>1964-04-24-ZamoraLonnie</code>); a recording
@@ -669,7 +669,7 @@ if (docs) {
 
     <div class="group-docs">
       <div class="group-doc">
-      <h3>Observation</h3>
+      <h3>Résumé</h3>
       <p>Énoncer ce dont il s'agit :
         <strong>identifiant</strong>, <strong>description</strong>, <strong>mots-clés</strong>.
         L'identifiant est celui de ce compte rendu, le jour puis qui a vu
@@ -1125,7 +1125,7 @@ if (docs) {
 
     <div class="group-docs">
       <div class="group-doc">
-      <h3>Observación</h3>
+      <h3>Resumen</h3>
       <p>Indica de qué trata este registro: un
         <strong>ID</strong>, una <strong>Descripción</strong>, unas <strong>Etiquetas</strong>. El ID es
         el propio de este relato, el día y luego quién lo vio (<code>1964-04-24-ZamoraLonnie</code>); un
@@ -1569,7 +1569,7 @@ if (docs) {
 
     <div class="group-docs">
       <div class="group-doc">
-      <h3>Osservazione</h3>
+      <h3>Riepilogo</h3>
       <p>Indica di cosa tratta questa registrazione:
         un <strong>ID</strong>, una <strong>Descrizione</strong>, delle <strong>Etichette</strong>. L'ID è quello
         proprio di questo resoconto, il giorno e poi chi ha visto (<code>1964-04-24-ZamoraLonnie</code>);

@@ -125,7 +125,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   timeQualifierBoth: "Incierta y aproximada",
   edtfModeTitle: "Escribe en su lugar una fecha imprecisa: solo un año, un mes, una hora sin fecha",
   locationGroup: "Lugar",
-  observationGroup: "Observación",
+  observationGroup: "Resumen",
   weatherWhilePlaying: "Pausa la grabación para indicar el tiempo — mientras se reproduce, el instante en que se escribiría se está moviendo",
   weatherInferred: "Según los registros",
   weatherInferredTitle:

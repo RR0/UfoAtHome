@@ -125,7 +125,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   timeQualifierBoth: "Incertaine et approximative",
   edtfModeTitle: "Saisir plutôt une date imprécise : une année seule, un mois, une heure sans date",
   locationGroup: "Lieu",
-  observationGroup: "Observation",
+  observationGroup: "Résumé",
   weatherWhilePlaying: "Mettez la lecture en pause pour décrire le temps — pendant qu'elle tourne, l'instant où ceci s'écrirait se déplace",
   weatherInferred: "D'après les relevés",
   weatherInferredTitle:
