@@ -342,10 +342,8 @@ section.band:first-of-type { border-top: 0; }
 
 /* The edit link ends the description rather than sitting among the dots: it is about the
    reconstruction being described, not about moving between them. */
-.carousel-edit { font-weight: 600; white-space: nowrap; }
 /* The dash separates the two and belongs to neither, so it is a sibling rather than the link's own
    ::before — which would have made it part of what you click and part of what is underlined. */
-.carousel-sep { color: var(--ink-faint); }
 
 /* ---------------------------------------------------------------- demo catalogue */
 

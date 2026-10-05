@@ -42,7 +42,6 @@ export class HomePage implements SitePage {
   script(language: SiteLanguage): string {
     const slides = JSON.stringify(this.catalogue.demos.map(demo => ({
       src: demo.src,
-      edit: demo.editSrc ?? demo.src,
       title: demo.title[language],
       blurb: demo.blurb[language]
     })))
@@ -53,11 +52,8 @@ export class HomePage implements SitePage {
 const MAX_SLIDE_MS = 25000
 // How long the carousel stays out of the way after the reader has touched it.
 const RESUME_MS = 60000
-const editorPath = "/edit/"
-
 const stage = document.getElementById("hero-stage")
 const caption = document.getElementById("hero-caption")
-const editLink = document.getElementById("hero-edit")
 const dots = [...document.querySelectorAll(".carousel-dot")]
 const carousel = document.getElementById("hero-carousel")
 
@@ -79,7 +75,6 @@ const show = async position => {
   index = (position + slides.length) % slides.length
   const slide = slides[index]
   caption.innerHTML = "<strong>" + slide.title + "</strong> " + slide.blurb
-  editLink.href = editorPath + "?file=" + encodeURIComponent(slide.edit)
   for (const [at, dot] of dots.entries()) dot.setAttribute("aria-current", String(at === index))
   clearTimeout(slideTimer)
   try {
@@ -173,8 +168,6 @@ show(0)`
         </div>
         <p class="stage-caption">
           <span id="hero-caption"></span>
-          <span class="carousel-sep" aria-hidden="true"> — </span>
-          <a class="carousel-edit" id="hero-edit" href="/edit/">${({ en: "Edit this sighting", fr: "Éditer cette observation", es: "Editar este avistamiento", it: "Modifica questo avvistamento" })[language]}</a>
         </p>
       </div>
     </div>`
