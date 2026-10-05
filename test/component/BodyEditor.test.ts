@@ -133,11 +133,13 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.sighting.interpretation).toBeUndefined()
   })
 
-  it("asks for no interpretation title before there is an interpretation", () => {
+  it("offers the interpretation's title before there is any body, and typing one creates the interpretation", () => {
     const fixture = new Fixture(null)
-    expect(fixture.field("body-interpretation-title").closest("label")!.hidden).toBe(true)
-    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
-    expect(fixture.field("body-interpretation-title").closest("label")!.hidden).toBe(false)
+    const field = fixture.field("body-interpretation-title")
+    expect(field.closest("label")!.hidden).toBe(false)
+    field.value = "A hubcap"
+    field.dispatchEvent(new Event("change"))
+    expect(fixture.sighting.interpretation).toEqual({ title: "A hubcap", bodies: [] })
   })
 
   it("adds a body where the observer is looking when no shape is drawn", () => {

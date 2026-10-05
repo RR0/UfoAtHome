@@ -104,8 +104,8 @@ export class BodyEditor {
     add.disabled = start === undefined
     add.title = !start ? this.messages.addBody
       : start.label !== undefined ? this.messages.addBodyHint.replace("{shape}", start.label) : this.messages.addBodyHintView
-    // Nothing to title before there is an interpretation: adding its first body creates it.
-    this.input("body-interpretation-title").closest("label")!.hidden = this.interpretation === undefined
+    // Always there, so that a recording can be named before it has a body: typing a title creates the interpretation.
+    this.input("body-interpretation-title").closest("label")!.hidden = false
     this.select("body-select").closest("label")!.hidden = bodies.length === 0
     const body = this.current
     this.element("body-none").hidden = bodies.length > 0
