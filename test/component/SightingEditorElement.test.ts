@@ -2480,7 +2480,8 @@ describe("SightingEditorElement duration input", () => {
 
     expect(durationInput.value).toBe("")
     expect(durationInput.classList.contains("missing-required")).toBe(true)
-    expect(durationInput.title).not.toBe("")
+    // The explanation stands on the duration element, which holds the number and the text alike.
+    expect(shadow.querySelector("rr0-duration-input")!.getAttribute("title")).toBeTruthy()
   })
 
   it("still computes a duration when only one side has seconds — a missing second defaults to :00, not a blocking mismatch", () => {

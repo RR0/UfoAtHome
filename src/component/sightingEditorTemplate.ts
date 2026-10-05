@@ -271,7 +271,7 @@ export const html = `
       <rr0-date-input name="obs-time"></rr0-date-input></label>
     <label><span id="label-observation-end-time">Observation end</span>
       <rr0-date-input name="obs-end-time"></rr0-date-input></label>
-    <label><span id="label-duration">Duration</span> <input id="durationSeconds" type="number" min="0" max="86400" step="0.1" placeholder="observation length" aria-required="true"/> s</label>
+    <label><span id="label-duration">Duration</span> <rr0-duration-input name="durationSeconds"></rr0-duration-input></label>
     <!-- The zone is the RULE, the number is what that rule produced for this sighting's own date —
          summer time included, and as it was then (see engine/time/TimeZones.ts). Pick a zone and
          the number is derived and read-only; leave it on the manual entry and type the number

@@ -85,15 +85,16 @@ export class RecordingRules {
    nothing of legal time. A time corrected by the investigator (a clock found fast) is "derived".`
     },
     {
-      draft: `Duration: \`durationSeconds\` is a bare number and cannot say "about". So when the account gives
-   a vague length ("a few minutes"), do NOT use it — write \`endTime\` instead, whose \`raw\` takes
-   the EDTF approximation suffix: {"raw": "1974-05-20T19:02~", "year": 1974, "month": 5, "day": 20,
-   "hour": 19, "minute": 2}. The tilde is the format saying "approximately", and it is the honest
-   way to write a duration nobody timed. Use \`durationSeconds\` only for a length that was.`,
-      file: `Duration: \`durationSeconds\` is a bare number and cannot say "about". For a vague length ("a few
-   minutes"), write \`endTime\` instead, whose \`raw\` takes the EDTF approximation suffix:
-   {"raw": "1974-05-20T19:02~", "year": 1974, "month": 5, "day": 20, "hour": 19, "minute": 2}. Use
-   \`durationSeconds\` for a length that was timed or bounded, with its provenance.`
+      draft: `Duration: \`durationSeconds\` is the one length the reconstruction is played at, a bare number. When the
+   account gives a vague length ("a few minutes", "five to ten"), write what was said in \`durationText\`,
+   an ISO 8601 duration with the doubt EDTF has (\`"PT3M~"\`, about three minutes) or a range
+   (\`"PT5M/PT10M"\`), AND the length to play at in \`durationSeconds\` (the duration, or the middle of the
+   range), marked "assumed". Or give \`endTime\`, whose \`raw\` takes the approximation suffix:
+   {"raw": "1974-05-20T19:02~", "year": 1974, "month": 5, "day": 20, "hour": 19, "minute": 2}.`,
+      file: `Duration: \`durationSeconds\` is the one length the reconstruction is played at, a bare number. For a
+   vague length ("a few minutes"), state it in \`durationText\` (an ISO 8601 duration with a doubt, \`"PT3M~"\`, or a
+   range, \`"PT5M/PT10M"\`) and put the length chosen to play at in \`durationSeconds\`, with its provenance. Use
+   \`durationSeconds\` alone for a length that was timed or bounded.`
     },
     {
       draft: `Give a keyframe only for a moment the account actually distinguishes — where it arrived, where it

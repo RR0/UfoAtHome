@@ -47,6 +47,8 @@ export interface SightingRecordingJson {
   endTime?: SightingTime
   /** See SightingEvent.durationSeconds. */
   durationSeconds?: number
+  /** See SightingEvent.durationText. */
+  durationText?: string
   /** See SightingEvent.utcOffsetHours — the legal time zone `time`/`endTime` are expressed in. */
   utcOffsetHours?: number
   /** See SightingEvent.timeZone — the IANA rule `utcOffsetHours` was derived from, when it was. */
@@ -143,6 +145,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     time: sighting.event.time,
     endTime: sighting.event.endTime,
     durationSeconds: sighting.event.durationSeconds,
+    durationText: sighting.event.durationText,
     utcOffsetHours: sighting.event.utcOffsetHours,
     timeZone: sighting.event.timeZone,
     place: sighting.event.place,
@@ -190,6 +193,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
       time: json.time,
       endTime: json.endTime,
       durationSeconds: json.durationSeconds,
+      durationText: json.durationText,
       utcOffsetHours: json.utcOffsetHours,
       timeZone: json.timeZone,
       place: json.place,

@@ -1,3 +1,4 @@
+import { DurationText } from "./DurationText.js"
 import type { ObserverVehicle } from "./Vehicle.js"
 import { Timeline } from "./Timeline.js"
 import { ObserverTrack } from "./ObserverTrack.js"
@@ -144,6 +145,12 @@ export interface SightingEvent {
   endTime?: SightingTime
   /** The observation's reported length, in seconds — an alternative to `endTime`. Takes precedence over `endTime` if both are set. */
   durationSeconds?: number
+  /**
+   * The length as the observer stated it when they could not state it exactly — an ISO 8601 duration with a doubt
+   * (`PT10M~`, about ten minutes) or a range (`PT5M/PT10M`) — see DurationText. Then `durationSeconds` is the one
+   * length the simulation is played at, chosen from it: this is what was said, that is what is used.
+   */
+  durationText?: string
   place?: SightingLocation[]
   /** The account itself, in prose. Translatable — see SaidText. */
   description?: SaidText
@@ -235,6 +242,9 @@ function timeShape(t: SightingTime, fields: readonly (keyof SightingTime)[]): st
  */
 export function sightingDurationMs(event: SightingEvent): number | undefined {
   if (event.durationSeconds !== undefined) return event.durationSeconds * 1000
+  // A duration stated as vaguer than a number says one length to play at all the same: see DurationText.
+  const stated = event.durationText === undefined ? undefined : DurationText.parse(event.durationText)
+  if (stated) return stated.chosenSeconds * 1000
   if (!event.time || !event.endTime) return undefined
   const bothHaveYear = event.time.year !== undefined && event.endTime.year !== undefined
   const fields = bothHaveYear ? CALENDAR_FIELDS : OFFSET_FIELDS

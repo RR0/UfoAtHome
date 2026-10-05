@@ -27,6 +27,8 @@ import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import { EdtfDateField } from "./EdtfDateField.js"
 import { DATE_INPUT_ELEMENT_NAME, register as registerDateInput } from "./DateInputElement.js"
+import { DURATION_INPUT_ELEMENT_NAME, register as registerDurationInput } from "./DurationInputElement.js"
+import type { DurationInputElement } from "./DurationInputElement.js"
 import type { DateInputElement } from "./DateInputElement.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
@@ -367,6 +369,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly timeStartLabel: HTMLElement
   private readonly timeEndLabel: HTMLElement
   private readonly durationInput: HTMLInputElement
+  /** The duration, exact or as stated: its number always holds the length the simulation is played at. */
+  private readonly durationElement: DurationInputElement
   private readonly exportButton: HTMLButtonElement
   private readonly importFileInput: HTMLInputElement
   private readonly importUrlInput: HTMLInputElement
@@ -971,6 +975,7 @@ export class SightingEditorElement extends HTMLElement {
     // not upgraded until it is: made now, since the controls are looked up below.
     customElements.upgrade(this.shadow)
     for (const date of this.shadow.querySelectorAll<DateInputElement>(DATE_INPUT_ELEMENT_NAME)) date.build()
+    for (const duration of this.shadow.querySelectorAll<DurationInputElement>(DURATION_INPUT_ELEMENT_NAME)) duration.build()
 
     // Created imperatively (not left inline in the template markup) and inserted via
     // document.createElement, which — for an already-defined custom element — synchronously
@@ -1072,7 +1077,8 @@ export class SightingEditorElement extends HTMLElement {
         this.switchTimeDisplay()
       })
     }
-    this.durationInput = this.shadow.getElementById("durationSeconds") as HTMLInputElement
+    this.durationElement = this.shadow.querySelector<DurationInputElement>(DURATION_INPUT_ELEMENT_NAME)!
+    this.durationInput = this.durationElement.input
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
     this.importFileInput = this.shadow.getElementById("import-file") as HTMLInputElement
     this.importUrlInput = this.shadow.getElementById("import-url") as HTMLInputElement
@@ -1521,8 +1527,11 @@ export class SightingEditorElement extends HTMLElement {
     // and from the provider — see refreshSourceRows and renderNarrativeSettings. Done here and not
     // only in applyMessages, which never runs for an English reader (see loadLocaleMessages).
     this.renderNarrativeSettings()
-    this.durationInput.addEventListener("input", () => {
-      this.ufoElement.durationSeconds = this.durationInput.value === "" ? undefined : Number(this.durationInput.value)
+    this.durationElement.addEventListener("durationchange", event => {
+      const { seconds, text } = (event as CustomEvent<{ seconds: number | undefined, text: string | undefined }>).detail
+      // What was stated, when it was not exact, goes beside the one length the simulation is played at.
+      this.ufoElement.sighting.event.durationText = text
+      this.ufoElement.durationSeconds = seconds
       this.ufoElement.refresh() // otherwise the seek bar's max (seekableDuration) only updates on the next tick
       this.updateDurationValidity()
       // A longer observation spans more hours of record, so its weather is a different (possibly
@@ -2995,6 +3004,7 @@ export class SightingEditorElement extends HTMLElement {
     const event = this.ufoElement.sighting.event
     if (event.durationSeconds === undefined) return
     if (sightingDurationMs({ ...event, durationSeconds: undefined }) === undefined) return
+    this.ufoElement.sighting.event.durationText = undefined
     this.ufoElement.durationSeconds = undefined
   }
 
@@ -4409,9 +4419,12 @@ export class SightingEditorElement extends HTMLElement {
    * updateDurationValidity() always runs regardless of focus, since that only reads the field's
    * current value rather than overwriting it. */
   private syncDurationField(): void {
-    if (this.shadow.activeElement !== this.durationInput) {
-      const durationMs = sightingDurationMs(this.ufoElement.sighting.event)
-      this.durationInput.value = durationMs !== undefined ? String(durationMs / 1000) : ""
+    const active = this.shadow.activeElement
+    if (active !== this.durationInput && active !== this.durationElement.textField) {
+      const event = this.ufoElement.sighting.event
+      const durationMs = sightingDurationMs(event)
+      // As stated when it was not exact; the one length the simulation is played at beside it.
+      this.durationElement.set(durationMs !== undefined ? durationMs / 1000 : undefined, event.durationText)
     }
     this.updateDurationValidity()
   }
@@ -4432,7 +4445,7 @@ export class SightingEditorElement extends HTMLElement {
     this.markUnansweredQuestions()
     this.durationInput.setAttribute("aria-invalid", String(missing))
     const blockedReason = sightingDurationBlockedReason(this.ufoElement.sighting.event)
-    this.durationInput.title = blockedReason === "imprecise" ? this.messages.durationImprecise : ""
+    this.durationElement.title = blockedReason === "imprecise" ? this.messages.durationImprecise : ""
   }
 
   /** Keeps the external Play/Pause/Seek/Loop row (see the constructor's ufoElement.showToolbar
@@ -8339,6 +8352,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelSamplingRate.textContent = messages.samplingRate
     this.labelDuration.textContent = messages.duration
     this.durationInput.placeholder = messages.durationPlaceholder
+    this.durationElement.messages = messages
     this.addShapeButton.title = messages.addShape
     this.addShapeButton.setAttribute("aria-label", messages.addShape)
     this.deleteShapeButton.title = messages.deleteShape
@@ -9713,6 +9727,7 @@ class LegacyRecorderElement extends SightingEditorElement {
 
 export function register(): void {
   registerDateInput()
+  registerDurationInput()
   registerUfo()
   if (!customElements.get(ELEMENT_NAME)) {
     customElements.define(ELEMENT_NAME, SightingEditorElement)

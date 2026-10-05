@@ -255,6 +255,15 @@ export interface SightingEditorMessages extends SightingLabels {
   timeQualifierBoth: string
   /** Title of the switch between the native picker and the EDTF text field — the picker cannot
    * state a bare year, a month, or a time without a date. */
+  durationPrecise: string
+  durationIso: string
+  durationModeTitle: string
+  durationInvalid: string
+  durationHelpTitle: string
+  /** One line per line of the string. */
+  durationHelpLines: string
+  /** Shown after a duration that was not stated exactly, in brackets: the length the simulation is played at. */
+  durationChosen: string
   datePrecise: string
   dateEdtf: string
   dateHelpTitle: string
