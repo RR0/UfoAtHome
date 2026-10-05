@@ -26,9 +26,6 @@ export interface CaseEditorMessages {
   caseTitle: string
   caseTime: string
   recordingsHeading: string
-  editing: string
-  kindObservation: string
-  kindReading: string
   add: string
   addHint: string
   interpretationOf: string

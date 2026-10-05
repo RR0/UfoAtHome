@@ -32,11 +32,11 @@ const TEMPLATE = `
   .icon-btn { width: 1.8em; height: 1.8em; padding: 0; line-height: 1; cursor: pointer; }
   /* The observation being edited, inside: a frame of its own once there is a case around it. */
   .recording.in-case { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .5em .7em .7em; }
-  .recording .heading { margin: 0 0 .5em; font-size: .9em; opacity: .8; }
   dialog { max-width: min(30em, 92vw); }
   dialog label { display: flex; align-items: center; gap: .5em; margin: .4em 0; }
   dialog label > span { flex: 0 0 9em; }
   dialog label.check > span { flex: 1 1 auto; }
+  .row.header { justify-content: space-between; }
   .row.header h2 { margin: 0; }
   dialog input[type="text"], dialog input[type="date"], dialog input[type="url"], dialog select { flex: 1 1 auto; min-width: 0; }
   dialog .actions { display: flex; gap: .5em; margin-top: .6em; }
@@ -45,8 +45,8 @@ const TEMPLATE = `
 <div id="case" class="case">
 <section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
   <div class="row header">
-    <button id="export" type="button">Export</button>
     <h2 id="case-heading">Case</h2>
+    <button id="export" type="button">Export</button>
   </div>
   <div class="row fields">
     <label><span id="label-case-id">ID</span> <input id="case-id" type="text" size="18"/></label>
@@ -61,7 +61,6 @@ const TEMPLATE = `
   </div>
 </section>
 <section id="recording" class="recording">
-  <p id="recording-heading" class="heading" hidden></p>
   <rr0-sighting-editor id="editor"></rr0-sighting-editor>
 </section>
 </div>
@@ -71,7 +70,6 @@ const TEMPLATE = `
     <p id="dialog-message" hidden></p>
     <p id="dialog-error" role="alert" hidden></p>
     <div id="fields-add">
-      <label><span id="label-of">Interpretation of</span> <select id="of"></select></label>
       <label><span id="label-source">Source</span> <select id="source">
         <option value="blank"></option><option value="file"></option><option value="url"></option>
       </select></label>
@@ -81,6 +79,7 @@ const TEMPLATE = `
       <label><span id="label-date">Date</span> <input id="date" type="date"/></label>
       <label id="row-file"><span id="label-file">File</span> <input id="file" type="file" accept="application/json,.json"/></label>
       <label id="row-url"><span id="label-url">Address</span> <input id="url" type="url" placeholder="https://…"/></label>
+      <label><span id="label-of">Interpretation of</span> <select id="of"></select></label>
     </div>
     <div id="fields-export">
       <label class="check"><input id="export-recordings" type="checkbox" checked/> <span id="label-export-recordings">Also export the observations</span></label>
@@ -322,7 +321,6 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("case-panel").hidden = session === undefined
     this.byId("case").classList.toggle("in-case", session !== undefined)
     this.byId("recording").classList.toggle("in-case", session !== undefined)
-    this.byId("recording-heading").hidden = session === undefined
     if (!session) return
     const active = this.shadow.activeElement
     for (const [id, field] of [["case-id", "id"], ["case-title", "title"], ["case-time", "time"]] as const) {
@@ -334,9 +332,6 @@ export class CaseEditorElement extends HTMLElement {
     select.value = String(Math.max(0, this.current ? session.tracks.indexOf(this.current) : 0))
     // Any recording can leave the case, while the case keeps one.
     this.byId("delete").hidden = session.tracks.length <= 1
-    const kind = this.current?.kind === "reading" ? this.messages.kindReading : this.messages.kindObservation
-    const label = this.current ? this.labelOf(this.current, session.tracks.indexOf(this.current)) : ""
-    this.byId("recording-heading").textContent = `${this.messages.editing} ${kind}${label ? ` — ${label}` : ""}`
   }
 
   // -- The dialog ----------------------------------------------------------------------------------

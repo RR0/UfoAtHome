@@ -300,10 +300,11 @@ describe("CaseEditorElement", () => {
     expect(frame.classList.contains("in-case")).toBe(true)
     expect(frame.contains(root.getElementById("editor"))).toBe(true)
     expect(panel.contains(parts(element).exportButton)).toBe(true)
-    // The export stands first, at the top left of the case's own part, before its observations.
+    // The export stands last on the heading's line: top right of the case's own part, before its observations.
     const header = root.querySelector(".case-panel .header")!
-    expect(header.firstElementChild).toBe(parts(element).exportButton)
-    expect(root.getElementById("recording-heading")!.textContent).toContain("An account")
+    expect(header.lastElementChild).toBe(parts(element).exportButton)
+    // What is selected is not repeated inside the observation's container.
+    expect(root.getElementById("recording-heading")).toBeNull()
   })
 
   it("edits the case's own fields, and writes them with the case", async () => {
