@@ -78,7 +78,7 @@ export class DocsCreatePage extends DocsSection {
       <a class="btn btn-primary" href="/edit/">Open the editor</a>
       <a class="btn" href="/edit/#manual">Read the manual</a>
     </p>
-    <p>It ends with <strong>Export</strong>, which hands you a file. That file is the whole
+    <p>It ends with <strong>Save</strong>, which hands you a file. That file is the whole
       recording: there is no account and nothing kept here. Put it somewhere with a public address
       and it is ready to <a href="/docs/share/">share</a>.</p>
     <p>Already have one and want to change it? The editor opens on an existing recording — the
@@ -171,7 +171,7 @@ https://ufoathome.org/sighting.schema.json .
       <a class="btn btn-primary" href="/edit/">Ouvrir l'éditeur</a>
       <a class="btn" href="/edit/#manual">Lire le manuel</a>
     </p>
-    <p>Cela se termine par <strong>Exporter</strong>, qui vous remet un fichier. Ce fichier est
+    <p>Cela se termine par <strong>Sauver</strong>, qui vous remet un fichier. Ce fichier est
       l'enregistrement complet : il n'y a pas de compte, et rien n'est conservé ici. Posez-le
       quelque part avec une adresse publique et il est prêt à <a href="/docs/share/">partager</a>.</p>
     <p>Vous en avez déjà un et voulez le modifier ? L'éditeur s'ouvre sur un enregistrement
@@ -266,7 +266,7 @@ https://ufoathome.org/sighting.schema.json .
       <a class="btn btn-primary" href="/edit/">Abrir el editor</a>
       <a class="btn" href="/edit/#manual">Leer el manual</a>
     </p>
-    <p>Termina con <strong>Exportar</strong>, que te entrega un archivo. Ese archivo es la grabación
+    <p>Termina con <strong>Guardar</strong>, que te entrega un archivo. Ese archivo es la grabación
       completa: no hay cuenta y aquí no se guarda nada. Ponlo en algún lugar con una dirección
       pública y estará listo para <a href="/docs/share/">compartir</a>.</p>
     <p>¿Ya tienes una y quieres cambiarla? El editor se abre con una grabación existente — el panel
@@ -360,7 +360,7 @@ https://ufoathome.org/sighting.schema.json .
       <a class="btn btn-primary" href="/edit/">Apri l'editor</a>
       <a class="btn" href="/edit/#manual">Leggi il manuale</a>
     </p>
-    <p>Si conclude con <strong>Esporta</strong>, che ti consegna un file. Quel file è l'intera
+    <p>Si conclude con <strong>Salva</strong>, che ti consegna un file. Quel file è l'intera
       registrazione: non c'è alcun account e qui non si conserva nulla. Mettilo da qualche parte con
       un indirizzo pubblico ed è pronto da <a href="/docs/share/">condividere</a>.</p>
     <p>Ne hai già una e vuoi modificarla? L'editor si apre su una registrazione esistente — il

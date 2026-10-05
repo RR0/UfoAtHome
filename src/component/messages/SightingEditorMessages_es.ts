@@ -69,7 +69,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   switchToClockTime: "haz clic para mostrar la hora del día",
   durationPlaceholder: "duración de la observación",
   durationImprecise: "Estas fechas no determinan con suficiente precisión una duración — introdúcela manualmente.",
-  export: "Exportar",
+  export: "Guardar",
   importFile: "Cargar archivo JSON",
   importUrl: "O cargar desde una URL",
   importUrlPlaceholder: "https://…/sighting.json",

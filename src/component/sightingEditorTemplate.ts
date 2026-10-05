@@ -18,6 +18,8 @@ export const html = `
   <button class="group-tab" type="button" aria-controls="group-reference" aria-expanded="false"><span id="label-reference-group">Pictures</span></button>
   <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false"><span id="label-shape-group">Phenomenon</span></button>
   <button class="group-tab" type="button" aria-controls="group-file" aria-expanded="false"><span id="label-file-group">File</span></button>
+  <!-- What an element that holds this editor puts after the last tab (see CaseEditorElement): a mark of its own, which takes its room whether it shows or not. -->
+  <slot name="tab-status"></slot>
 </div>
 <section class="group-panel" id="group-observation" aria-labelledby="label-observation-group" hidden>
   <div class="toolbar">
@@ -307,7 +309,7 @@ export const html = `
     <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
     <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
     <button id="import-url-button" type="button">Load</button>
-    <button id="export" type="button">Export</button>
+    <button id="export" type="button">Save</button>
   </div>
   <p id="file-note" class="file-note" hidden role="status"></p>
   <div id="file-editor" class="file-editor"></div>

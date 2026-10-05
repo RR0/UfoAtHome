@@ -82,7 +82,7 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>What does it send over the network?</h3>
       <p>Recordings stay in your browser: there is no account and no server-side storage.
-        <strong>Export</strong> writes a file to your disk, and that file is the whole recording.</p>
+        <strong>Save</strong> writes a file to your disk, and that file is the whole recording.</p>
       <p>Everything that is fetched — from where, when, and under which licence — is listed source by
         source on <a href="/docs/sources/">Sources and choices</a>, the one list there is, so that
         this answer does not have to keep a second copy of it. In short:</p>
@@ -391,7 +391,7 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>Qu'est-ce qui passe sur le réseau ?</h3>
       <p>Les enregistrements restent dans votre navigateur : il n'y a ni compte ni stockage côté
-        serveur. <strong>Exporter</strong> écrit un fichier sur votre disque, et ce fichier est
+        serveur. <strong>Sauver</strong> écrit un fichier sur votre disque, et ce fichier est
         l'enregistrement complet.</p>
       <p>Tout ce qui est appelé — d'où, quand, et sous quelle licence — est listé source par source
         sur <a href="/docs/sources/">Les sources et les choix</a>, la seule liste qui existe, pour que
@@ -720,7 +720,7 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>¿Qué envía por la red?</h3>
       <p>Las grabaciones se quedan en tu navegador: no hay cuenta ni almacenamiento en el servidor.
-        <strong>Exportar</strong> escribe un archivo en tu disco, y ese archivo es la grabación completa.</p>
+        <strong>Guardar</strong> escribe un archivo en tu disco, y ese archivo es la grabación completa.</p>
       <p>Todo lo que se descarga — de dónde, cuándo y bajo qué licencia — figura fuente por fuente en
         <a href="/docs/sources/">Fuentes y decisiones</a>, la única lista que existe, para que esta
         respuesta no tenga que mantener una segunda copia. En resumen:</p>
@@ -1028,7 +1028,7 @@ export class FaqPage implements SitePage {
     <div class="faq-item">
       <h3>Che cosa invia in rete?</h3>
       <p>Le registrazioni restano nel tuo browser: non c'è alcun account né alcuna archiviazione lato server.
-        <strong>Esporta</strong> scrive un file sul tuo disco, e quel file è l'intera registrazione.</p>
+        <strong>Salva</strong> scrive un file sul tuo disco, e quel file è l'intera registrazione.</p>
       <p>Tutto ciò che viene scaricato — da dove, quando e con quale licenza — è elencato fonte per
         fonte in <a href="/docs/sources/">Fonti e scelte</a>, l'unico elenco che esista, perché
         questa risposta non debba tenerne una seconda copia. In breve:</p>

@@ -46,9 +46,11 @@ const TEMPLATE = `
   dialog label > span { flex: 0 0 9em; }
   dialog label.check > span { flex: 1 1 auto; }
   .row.header { justify-content: space-between; }
-  /* A dot in the corner of the container it speaks of, out of the flow: it comes and goes without moving anything. */
-  .dirty { position: absolute; top: -.1em; right: .2em; z-index: 2; color: #b45309; font-size: .9em; line-height: 1; cursor: help; }
-  .case-panel, .recording { position: relative; }
+  /* A dot after what it speaks of — the case's title, the recording's last tab. It takes its room whether it shows or not, so that
+     it comes and goes without moving anything. */
+  .title { display: flex; align-items: center; gap: .35em; }
+  .dirty { color: #b45309; line-height: 1; cursor: help; align-self: center; margin-left: .3em; }
+  .dirty[hidden] { display: inline !important; visibility: hidden; }
   .row.header h2 { margin: 0; }
   dialog input[type="text"], dialog input[type="date"], dialog input[type="url"], dialog select { flex: 1 1 auto; min-width: 0; }
   dialog .actions { display: flex; gap: .5em; margin-top: .6em; }
@@ -57,9 +59,8 @@ const TEMPLATE = `
 <div id="case" class="case">
 <section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
   <div class="row header">
-    <h2 id="case-heading">Case</h2>
-    <span id="dirty" class="dirty" role="status" title="Changes not exported" hidden>●</span>
-    <button id="export" type="button">Export</button>
+    <div class="title"><h2 id="case-heading">Case</h2><span id="dirty" class="dirty" role="status" title="Changes not saved" hidden>●</span></div>
+    <button id="export" type="button">Save</button>
   </div>
   <div class="row fields">
     <label><span id="label-case-id">ID</span> <input id="case-id" type="text" size="18"/></label>
@@ -74,8 +75,7 @@ const TEMPLATE = `
   </div>
 </section>
 <section id="recording" class="recording">
-  <span id="recording-dirty" class="dirty" role="status" title="Changes not exported" hidden>●</span>
-  <rr0-sighting-editor id="editor"></rr0-sighting-editor>
+  <rr0-sighting-editor id="editor"><span id="recording-dirty" slot="tab-status" class="dirty" role="status" title="Changes not saved" hidden>●</span></rr0-sighting-editor>
 </section>
 <p id="make-case-row" class="make-case"><button id="make-case" type="button" class="link">Add to a case</button></p>
 </div>

@@ -184,7 +184,7 @@ if (docs) {
     <p class="eyebrow">The editor</p>
     <h1>Record a sighting.</h1>
     <p class="lede">Everything below is live. Nothing you do here is uploaded anywhere — the
-      recording exists in your browser until you press <strong>Export</strong>, which hands you a JSON
+      recording exists in your browser until you press <strong>Save</strong>, which hands you a JSON
       file that is yours.</p>
   </div>
 </section>
@@ -199,7 +199,7 @@ if (docs) {
       rr0.org case, by its <code>sighting.json</code>) — for instance
       <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
       which replays at <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
-    <p class="small">The address may be a case's <code>case.json</code>: the editor then lists the recordings the case holds, the observers' accounts and the readings of them, each a recording of its own, with a picker to open one, a button to interpret an account (add a reading of it), one to add another observer's account (blank, from a file or from an address) and one to delete a recording — refused while a reading still interprets it — and, in the File group, one to export the case and what changed as a zip. This is <code>&lt;rr0-case-editor&gt;</code>, which holds the editor of one recording and hands it one at a time. A recording opened alone has an <em>Add to a case</em> link under it: it makes a case around the recording, without touching what is being edited. While changes to a recording or to the case are not exported, the editor says so, and asks before the page is left or the recording replaced. <code>&amp;track=</code> names the recording it opens on.</p>
+    <p class="small">The address may be a case's <code>case.json</code>: the editor then lists the recordings the case holds, the observers' accounts and the readings of them, each a recording of its own, with a picker to open one, a button to interpret an account (add a reading of it), one to add another observer's account (blank, from a file or from an address) and one to delete a recording — refused while a reading still interprets it — and, at the top right of the case, <strong>Save</strong>, which writes the case and, if asked, every observation beside it, as a zip. This is <code>&lt;rr0-case-editor&gt;</code>, which holds the editor of one recording and hands it one at a time. A recording opened alone has an <em>Add to a case</em> link under it: it makes a case around the recording, without touching what is being edited. While changes to a recording or to the case are not saved, the editor says so, and asks before the page is left or the recording replaced. <code>&amp;track=</code> names the recording it opens on.</p>
   </div>
 </section>
 
@@ -570,7 +570,7 @@ if (docs) {
     <div class="group-doc">
       <h3>File</h3>
       <p>The recording itself. <strong>Load JSON file</strong> and <strong>Or load from URL</strong>
-        bring an existing recording in, and <strong>Export</strong> hands you the file. Under them,
+        bring an existing recording in, and <strong>Save</strong> hands you the file. Under them,
         the same recording as JSON text, kept in step both ways: what you change in the form or on
         the render appears in it, and a text that parses becomes the recording as soon as you stop
         typing (the playhead stays where it was). A text that does not parse is flagged on its own
@@ -584,9 +584,9 @@ if (docs) {
 
 <section class="band">
   <div class="wrap">
-    <h2>What Export gives you</h2>
+    <h2>What Save gives you</h2>
     <div class="prose-wide">
-      <p><strong>Export</strong> gives you a JSON file. That file <em>is</em> the whole recording —
+      <p><strong>Save</strong> gives you a JSON file. That file <em>is</em> the whole recording —
         there is no account, no database, and no copy kept here. Host it wherever you like. What is
         in it, field by field, is on <a href="/docs/format/">the sighting file</a>'s page.</p>
       <p>What to do with it next has its own pages, with examples you can run and copy:
@@ -607,7 +607,7 @@ if (docs) {
     <h1>Enregistrer une observation.</h1>
     <p class="lede">Tout ce qui suit est en état de marche. Rien de ce que vous faites ici n'est
       envoyé nulle part : l'enregistrement n'existe que dans votre navigateur jusqu'à ce que vous
-      appuyiez sur <strong>Exporter</strong>, qui vous remet un fichier JSON qui est le vôtre.</p>
+      appuyiez sur <strong>Sauver</strong>, qui vous remet un fichier JSON qui est le vôtre.</p>
   </div>
 </section>
 
@@ -621,7 +621,7 @@ if (docs) {
       cherché comme dossier de rr0.org, par son <code>sighting.json</code>) — par exemple
       <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
       qui se rejoue à <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
-    <p class="small">L'adresse peut être le <code>case.json</code> d'un dossier : l'éditeur liste alors les enregistrements qu'il contient, les comptes rendus des observateurs et les lectures qu'on en fait, chacune un enregistrement à part, avec un sélecteur pour en ouvrir un, un bouton pour interpréter un compte rendu (en ajouter une lecture), un pour ajouter le compte rendu d'un autre témoin (vierge, depuis un fichier ou une adresse) et un pour supprimer un enregistrement — refusé tant qu'une lecture l'interprète — et, dans le groupe Fichier, un pour exporter le dossier et ce qui a changé en zip. C'est <code>&lt;rr0-case-editor&gt;</code>, qui contient l'éditeur d'un enregistrement et le lui présente un à la fois. Un enregistrement ouvert seul a dessous un lien <em>Ajouter à un dossier</em> : il crée un dossier autour de l'enregistrement, sans toucher à ce qu'on est en train d'éditer. Tant que des modifications d'un enregistrement ou du dossier ne sont pas exportées, l'éditeur le dit, et demande confirmation avant que la page soit quittée ou l'enregistrement remplacé. <code>&amp;track=</code> nomme l'enregistrement sur lequel il s'ouvre.</p>
+    <p class="small">L'adresse peut être le <code>case.json</code> d'un dossier : l'éditeur liste alors les enregistrements qu'il contient, les comptes rendus des observateurs et les lectures qu'on en fait, chacune un enregistrement à part, avec un sélecteur pour en ouvrir un, un bouton pour interpréter un compte rendu (en ajouter une lecture), un pour ajouter le compte rendu d'un autre témoin (vierge, depuis un fichier ou une adresse) et un pour supprimer un enregistrement — refusé tant qu'une lecture l'interprète — et, en haut à droite du dossier, <strong>Sauver</strong>, qui écrit le dossier et, si on le demande, toutes les observations à côté, en zip. C'est <code>&lt;rr0-case-editor&gt;</code>, qui contient l'éditeur d'un enregistrement et le lui présente un à la fois. Un enregistrement ouvert seul a dessous un lien <em>Ajouter à un dossier</em> : il crée un dossier autour de l'enregistrement, sans toucher à ce qu'on est en train d'éditer. Tant que des modifications d'un enregistrement ou du dossier ne sont pas sauvées, l'éditeur le dit, et demande confirmation avant que la page soit quittée ou l'enregistrement remplacé. <code>&amp;track=</code> nomme l'enregistrement sur lequel il s'ouvre.</p>
   </div>
 </section>
 
@@ -1023,7 +1023,7 @@ if (docs) {
     <div class="group-doc">
       <h3>Fichier</h3>
       <p>L'enregistrement lui-même. <strong>Charger un fichier JSON</strong> et <strong>Ou charger
-        depuis une URL</strong> font entrer un enregistrement existant, et <strong>Exporter</strong>
+        depuis une URL</strong> font entrer un enregistrement existant, et <strong>Sauver</strong>
         vous remet le fichier. Dessous, le même enregistrement en texte JSON, tenu à jour dans les
         deux sens : ce que vous changez dans le formulaire ou sur le rendu y apparaît, et un texte
         qui s'analyse devient l'enregistrement dès que vous cessez de taper (la tête de lecture
@@ -1039,9 +1039,9 @@ if (docs) {
 
 <section class="band">
   <div class="wrap">
-    <h2>Ce qu'Exporter vous remet</h2>
+    <h2>Ce que Sauver vous remet</h2>
     <div class="prose-wide">
-      <p><strong>Exporter</strong> vous remet un fichier JSON. Ce fichier <em>est</em>
+      <p><strong>Sauver</strong> vous remet un fichier JSON. Ce fichier <em>est</em>
         l'enregistrement complet : il n'y a ni compte, ni base de données, ni copie conservée ici.
         Hébergez-le où vous voulez. Ce qu'il contient, champ par champ, est sur la page du
         <a href="/docs/format/">fichier d'observation</a>.</p>
@@ -1062,7 +1062,7 @@ if (docs) {
     <p class="eyebrow">El editor</p>
     <h1>Registrar un avistamiento.</h1>
     <p class="lede">Todo lo que sigue funciona de verdad. Nada de lo que hagas aquí se envía a ningún
-      sitio: el registro existe en tu navegador hasta que pulses <strong>Exportar</strong>, que te entrega
+      sitio: el registro existe en tu navegador hasta que pulses <strong>Guardar</strong>, que te entrega
       un archivo JSON que es tuyo.</p>
   </div>
 </section>
@@ -1077,7 +1077,7 @@ if (docs) {
       como caso de rr0.org, por su <code>sighting.json</code>); por ejemplo
       <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
       que se reproduce en <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
-    <p class="small">La dirección puede ser el <code>case.json</code> de un caso: el editor lista entonces las grabaciones que contiene, los relatos de los observadores y las lecturas que se hacen de ellos, cada una una grabación aparte, con un selector para abrir una, un botón para interpretar un relato (añadir una lectura), otro para añadir el relato de otro testigo (en blanco, desde un archivo o una dirección) y otro para eliminar una grabación — rechazado mientras una lectura la interprete — y, en el grupo Archivo, otro para exportar el caso y lo que cambió en un zip. Es <code>&lt;rr0-case-editor&gt;</code>, que contiene el editor de una grabación y se la presenta de una en una. Una grabación abierta sola tiene debajo un enlace <em>Añadir a un caso</em>: crea un caso alrededor de la grabación, sin tocar lo que se está editando. Mientras haya cambios de una grabación o del caso sin exportar, el editor lo dice y pide confirmación antes de abandonar la página o reemplazar la grabación. <code>&amp;track=</code> nombra la grabación en la que se abre.</p>
+    <p class="small">La dirección puede ser el <code>case.json</code> de un caso: el editor lista entonces las grabaciones que contiene, los relatos de los observadores y las lecturas que se hacen de ellos, cada una una grabación aparte, con un selector para abrir una, un botón para interpretar un relato (añadir una lectura), otro para añadir el relato de otro testigo (en blanco, desde un archivo o una dirección) y otro para eliminar una grabación — rechazado mientras una lectura la interprete — y, arriba a la derecha del caso, <strong>Guardar</strong>, que escribe el caso y, si se pide, todas las observaciones a su lado, en un zip. Es <code>&lt;rr0-case-editor&gt;</code>, que contiene el editor de una grabación y se la presenta de una en una. Una grabación abierta sola tiene debajo un enlace <em>Añadir a un caso</em>: crea un caso alrededor de la grabación, sin tocar lo que se está editando. Mientras haya cambios de una grabación o del caso sin guardar, el editor lo dice y pide confirmación antes de abandonar la página o reemplazar la grabación. <code>&amp;track=</code> nombra la grabación en la que se abre.</p>
   </div>
 </section>
 
@@ -1468,7 +1468,7 @@ if (docs) {
     <div class="group-doc">
       <h3>Archivo</h3>
       <p>El registro en sí. <strong>Cargar archivo JSON</strong> y <strong>O cargar desde una
-        URL</strong> traen un registro existente, y <strong>Exportar</strong> te entrega el archivo.
+        URL</strong> traen un registro existente, y <strong>Guardar</strong> te entrega el archivo.
         Debajo, el mismo registro como texto JSON, mantenido al día en los dos sentidos: lo que
         cambias en el formulario o en el render aparece en él, y un texto que se analiza pasa a ser
         el registro en cuanto dejas de teclear (el cabezal se queda donde estaba). Un texto que no
@@ -1483,9 +1483,9 @@ if (docs) {
 
 <section class="band">
   <div class="wrap">
-    <h2>Lo que te entrega Exportar</h2>
+    <h2>Lo que te entrega Guardar</h2>
     <div class="prose-wide">
-      <p><strong>Exportar</strong> te entrega un archivo JSON. Ese archivo <em>es</em> el registro
+      <p><strong>Guardar</strong> te entrega un archivo JSON. Ese archivo <em>es</em> el registro
         completo: no hay cuenta, ni base de datos, ni copia guardada aquí. Alójalo donde quieras. Lo que
         contiene, campo por campo, está en la página del <a href="/docs/format/">archivo de
         avistamiento</a>.</p>
@@ -1507,7 +1507,7 @@ if (docs) {
     <h1>Registrare un avvistamento.</h1>
     <p class="lede">Tutto ciò che segue funziona davvero. Niente di ciò che fai qui viene inviato da
       nessuna parte: la registrazione esiste nel tuo browser finché non premi
-      <strong>Esporta</strong>, che ti consegna un file JSON che è tuo.</p>
+      <strong>Salva</strong>, che ti consegna un file JSON che è tuo.</p>
   </div>
 </section>
 
@@ -1521,7 +1521,7 @@ if (docs) {
       di esse viene cercato come caso di rr0.org, tramite il suo <code>sighting.json</code>); per esempio
       <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
       che si riproduce in <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
-    <p class="small">L'indirizzo può essere il <code>case.json</code> di un caso: l'editor elenca allora le registrazioni che contiene, i resoconti degli osservatori e le letture che se ne fanno, ciascuna una registrazione a sé, con un selettore per aprirne una, un pulsante per interpretare un resoconto (aggiungerne una lettura), uno per aggiungere il resoconto di un altro testimone (vuoto, da un file o da un indirizzo) e uno per eliminare una registrazione — rifiutato finché una lettura la interpreta — e, nel gruppo File, uno per esportare il caso e ciò che è cambiato in uno zip. È <code>&lt;rr0-case-editor&gt;</code>, che contiene l'editor di una registrazione e gliela presenta una alla volta. Una registrazione aperta da sola ha sotto un link <em>Aggiungi a un caso</em>: crea un caso attorno alla registrazione, senza toccare ciò che si sta modificando. Finché ci sono modifiche di una registrazione o del caso non esportate, l'editor lo dice e chiede conferma prima che la pagina venga lasciata o la registrazione sostituita. <code>&amp;track=</code> indica la registrazione su cui si apre.</p>
+    <p class="small">L'indirizzo può essere il <code>case.json</code> di un caso: l'editor elenca allora le registrazioni che contiene, i resoconti degli osservatori e le letture che se ne fanno, ciascuna una registrazione a sé, con un selettore per aprirne una, un pulsante per interpretare un resoconto (aggiungerne una lettura), uno per aggiungere il resoconto di un altro testimone (vuoto, da un file o da un indirizzo) e uno per eliminare una registrazione — rifiutato finché una lettura la interpreta — e, in alto a destra del caso, <strong>Salva</strong>, che scrive il caso e, se richiesto, tutte le osservazioni accanto, in uno zip. È <code>&lt;rr0-case-editor&gt;</code>, che contiene l'editor di una registrazione e gliela presenta una alla volta. Una registrazione aperta da sola ha sotto un link <em>Aggiungi a un caso</em>: crea un caso attorno alla registrazione, senza toccare ciò che si sta modificando. Finché ci sono modifiche di una registrazione o del caso non salvate, l'editor lo dice e chiede conferma prima che la pagina venga lasciata o la registrazione sostituita. <code>&amp;track=</code> indica la registrazione su cui si apre.</p>
   </div>
 </section>
 
@@ -1916,7 +1916,7 @@ if (docs) {
     <div class="group-doc">
       <h3>File</h3>
       <p>La registrazione stessa. <strong>Carica file JSON</strong> e <strong>Oppure carica da
-        URL</strong> portano dentro una registrazione esistente, ed <strong>Esporta</strong> ti
+        URL</strong> portano dentro una registrazione esistente, ed <strong>Salva</strong> ti
         consegna il file. Sotto, la stessa registrazione come testo JSON, tenuta allineata nei due
         sensi: ciò che cambi nel modulo o nel rendering vi compare, e un testo che si interpreta
         diventa la registrazione appena smetti di digitare (il cursore di lettura resta dov'era). Un
@@ -1931,9 +1931,9 @@ if (docs) {
 
 <section class="band">
   <div class="wrap">
-    <h2>Che cosa ti consegna Esporta</h2>
+    <h2>Che cosa ti consegna Salva</h2>
     <div class="prose-wide">
-      <p><strong>Esporta</strong> ti consegna un file JSON. Quel file <em>è</em> l'intera
+      <p><strong>Salva</strong> ti consegna un file JSON. Quel file <em>è</em> l'intera
         registrazione: non c'è nessun account, nessun database e nessuna copia conservata qui. Ospitalo
         dove vuoi. Ciò che contiene, campo per campo, è sulla pagina del <a href="/docs/format/">file
         di avvistamento</a>.</p>
