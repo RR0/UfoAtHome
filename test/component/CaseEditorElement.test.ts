@@ -184,8 +184,8 @@ const caseJson = () => ({
 const files: Record<string, unknown> = {}
 const wait = (ms = 30) => new Promise(resolve => setTimeout(resolve, ms))
 
-const open = async (track?: string): Promise<CaseEditorElement> => {
-  files["https://example.org/d/case.json"] = caseJson()
+const open = async (track?: string, own?: Record<string, unknown>): Promise<CaseEditorElement> => {
+  files["https://example.org/d/case.json"] = { ...caseJson(), ...own }
   files["https://example.org/d/account.json"] = account
   files["https://example.org/d/reading.json"] = reading
   vi.stubGlobal("fetch", vi.fn(async (url: string) => ({
@@ -203,7 +203,7 @@ const parts = (element: CaseEditorElement) => {
   const root = element.shadowRoot!
   const get = <T extends HTMLElement>(id: string) => root.getElementById(id) as T
   return {
-    row: get("case-row"), select: get<HTMLSelectElement>("track"), interpret: get<HTMLButtonElement>("interpret"),
+    row: get("case-panel"), select: get<HTMLSelectElement>("track"), interpret: get<HTMLButtonElement>("interpret"),
     add: get<HTMLButtonElement>("add"), remove: get<HTMLButtonElement>("delete"), exportButton: get<HTMLButtonElement>("export"),
     form: get<HTMLFormElement>("form"), field: (id: string) => get<HTMLInputElement>(id), error: get("dialog-error")
   }
@@ -275,11 +275,30 @@ describe("CaseEditorElement", () => {
     expect(interpret.hidden).toBe(true)
   })
 
-  it("keeps the export of the case in the editor's file group", async () => {
+  it("shows the case above the recording being edited, which stands inside a frame of its own", async () => {
     const element = await open()
-    const { exportButton } = parts(element)
-    expect(exportButton.hidden).toBe(false)
-    expect(exportButton.getAttribute("slot")).toBe("file-actions")
+    const root = element.shadowRoot!
+    const panel = root.getElementById("case-panel")!
+    const frame = root.getElementById("recording")!
+    expect(panel.hidden).toBe(false)
+    expect(panel.compareDocumentPosition(frame) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(frame.classList.contains("in-case")).toBe(true)
+    expect(frame.contains(root.getElementById("editor"))).toBe(true)
+    expect(panel.contains(parts(element).exportButton)).toBe(true)
+    expect(root.getElementById("recording-heading")!.textContent).toContain("An account")
+  })
+
+  it("edits the case's own fields, and writes them with the case", async () => {
+    const element = await open(undefined, { id: "X", title: "Old", time: "1950" })
+    const { field } = parts(element)
+    expect(field("case-title").value).toBe("Old")
+    field("case-title").value = "New"
+    field("case-title").dispatchEvent(new Event("input"))
+    field("case-time").value = ""
+    field("case-time").dispatchEvent(new Event("input"))
+    const json = element.caseSession!.json as unknown as Record<string, unknown>
+    expect(json.title).toBe("New")
+    expect("time" in json).toBe(false)
   })
 
   it("adds a blank observation to the case and opens it", async () => {

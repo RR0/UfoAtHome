@@ -30,5 +30,13 @@ export const caseEditorMessages_es: CaseEditorMessages = {
   loadFailed: "No se pudo leer esa grabación.",
   isACase: "Eso es un caso, no una grabación.",
   ok: "Aceptar",
-  cancel: "Cancelar"
+  cancel: "Cancelar",
+  caseHeading: "Caso",
+  caseId: "Identificador",
+  caseTitle: "Título",
+  caseTime: "Fecha",
+  recordingsHeading: "Observaciones",
+  editing: "Se está editando:",
+  kindObservation: "observación",
+  kindReading: "lectura"
 }

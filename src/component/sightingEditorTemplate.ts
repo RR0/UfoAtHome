@@ -312,7 +312,6 @@ export const html = `
     <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
     <button id="import-url-button" type="button">Load</button>
     <button id="export" type="button">Export</button>
-    <slot name="file-actions"></slot>
   </div>
   <p id="file-note" class="file-note" hidden role="status"></p>
   <div id="file-editor" class="file-editor"></div>
@@ -562,9 +561,7 @@ export const html = `
 <!-- A case opened for editing: the recordings it lists (the accounts, and the readings of them, which
      are recordings of their own), one open at a time. Hidden for a single recording. Just above the render, as the player puts its own pickers: what
      is picked here is what the render shows. -->
-<!-- What an element that edits a case puts on the render's own line (see CaseEditorElement): the picker of the case's recordings and what is done with them. -->
 <div class="render-line">
-<slot name="render-line"></slot>
 <!-- The playback layer's own toggles, taken out of the picture — see UfoElement.hostControls. -->
 <div id="scene-controls" class="scene-controls"></div>
 </div>
@@ -1158,7 +1155,6 @@ select.weather-field:disabled {
   gap: 0.5em;
 }
 .render-line { display: flex; flex-wrap: wrap; align-items: center; gap: .25em .75em; }
-::slotted([slot="render-line"]) { margin: 0; flex: 1 1 14em; min-width: 0; }
 .render-line > .scene-controls { margin: 0 0 0 auto; flex: 0 0 auto; }
 /* A reading is titled with a sentence: the picker is as wide as the row lets it be and cuts the rest. */
 #import-url {

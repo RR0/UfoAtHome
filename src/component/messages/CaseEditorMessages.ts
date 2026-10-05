@@ -30,4 +30,12 @@ export interface CaseEditorMessages {
   isACase: string
   ok: string
   cancel: string
+  caseHeading: string
+  caseId: string
+  caseTitle: string
+  caseTime: string
+  recordingsHeading: string
+  editing: string
+  kindObservation: string
+  kindReading: string
 }

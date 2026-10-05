@@ -17,30 +17,47 @@ export const CASE_EDITOR_ELEMENT_NAME = "rr0-case-editor"
 const TEMPLATE = `
 <style>
   :host { display: block; }
-  #case-row { display: flex; align-items: center; gap: .5em; flex-wrap: nowrap; }
-  #case-row[hidden] { display: none; }
-  #case-row label { display: flex; align-items: center; gap: .5em; flex: 1 1 auto; min-width: 0; }
-  #case-row select { flex: 1 1 auto; min-width: 0; max-width: 100%; text-overflow: ellipsis; }
-  #case-row button { white-space: nowrap; }
-  #case-row button[hidden], #export[hidden] { display: none; }
+  [hidden] { display: none !important; }
+  /* The case, above: what it is, then its observations and what is done with them. */
+  .case-panel { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .6em .9em .4em; margin-bottom: .8em; }
+  .case-panel h2 { margin: 0 0 .4em; font-size: 1.05em; }
+  .case-panel h3 { margin: .6em 0 .3em; font-size: .95em; }
+  .row { display: flex; align-items: center; gap: .5em; flex-wrap: wrap; margin-bottom: .5em; }
+  .row label { display: flex; align-items: center; gap: .4em; }
+  .row.recordings label { flex: 1 1 14em; min-width: 0; }
+  .row.recordings select { flex: 1 1 auto; min-width: 0; max-width: 100%; text-overflow: ellipsis; }
+  .row button { white-space: nowrap; }
   .icon-btn { width: 1.8em; height: 1.8em; padding: 0; line-height: 1; cursor: pointer; }
+  /* The observation being edited, inside: a frame of its own once there is a case around it. */
+  .recording.in-case { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .5em .7em .7em; }
+  .recording .heading { margin: 0 0 .5em; font-size: .9em; opacity: .8; }
   dialog { max-width: min(30em, 92vw); }
   dialog label { display: flex; align-items: center; gap: .5em; margin: .4em 0; }
   dialog label > span { flex: 0 0 9em; }
   dialog input[type="text"], dialog input[type="date"], dialog input[type="url"], dialog select { flex: 1 1 auto; min-width: 0; }
-  dialog [hidden] { display: none; }
   dialog .actions { display: flex; gap: .5em; margin-top: .6em; }
   #dialog-error { color: #c00; }
 </style>
-<rr0-sighting-editor id="editor">
-  <div slot="render-line" id="case-row" hidden>
+<section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
+  <h2 id="case-heading">Case</h2>
+  <div class="row fields">
+    <label><span id="label-case-id">ID</span> <input id="case-id" type="text" size="18"/></label>
+    <label><span id="label-case-title">Title</span> <input id="case-title" type="text" size="24"/></label>
+    <label><span id="label-case-time">When</span> <input id="case-time" type="text" size="16" placeholder="1950-05-11 19:45"/></label>
+  </div>
+  <h3 id="recordings-heading">Observations</h3>
+  <div class="row recordings">
     <label><span id="label-recording">Recording</span> <select id="track"></select></label>
     <button id="interpret" type="button">Interpret…</button>
     <button id="add" type="button">Add an observation…</button>
     <button id="delete" type="button" class="icon-btn">🗑</button>
+    <button id="export" type="button">Export the case</button>
   </div>
-  <button slot="file-actions" id="export" type="button" hidden>Export the case</button>
-</rr0-sighting-editor>
+</section>
+<section id="recording" class="recording">
+  <p id="recording-heading" class="heading" hidden></p>
+  <rr0-sighting-editor id="editor"></rr0-sighting-editor>
+</section>
 <dialog id="dialog">
   <form method="dialog" id="form">
     <h3 id="dialog-title"></h3>
@@ -107,6 +124,9 @@ export class CaseEditorElement extends HTMLElement {
     })
     // A recording loaded into the editor by its own fields is not the case's any more.
     this.editor.addEventListener("recordingloaded", () => this.closeCase())
+    for (const [id, field] of [["case-id", "id"], ["case-title", "title"], ["case-time", "time"]] as const) {
+      this.input(id).addEventListener("input", () => this.writeCaseField(field, this.input(id).value))
+    }
     this.byId("track").addEventListener("change", () => {
       const track = this.session?.tracks[Number((this.byId("track") as HTMLSelectElement).value)]
       if (track) void this.showTrack(track)
@@ -176,6 +196,11 @@ export class CaseEditorElement extends HTMLElement {
   private applyMessages(): void {
     const m = this.messages
     const text = (id: string, value: string): void => { this.byId(id).textContent = value }
+    text("case-heading", m.caseHeading)
+    text("label-case-id", m.caseId)
+    text("label-case-title", m.caseTitle)
+    text("label-case-time", m.caseTime)
+    text("recordings-heading", m.recordingsHeading)
     text("label-recording", m.recording)
     text("interpret", m.interpret)
     text("add", m.addObservation)
@@ -277,18 +302,35 @@ export class CaseEditorElement extends HTMLElement {
     return this.messages.untitledReading.replace("{n}", String(number || index + 1))
   }
 
-  /** The picker of the recordings, and what can be done with the one on show. */
+  /** The case's own fields, written back as typed: a case holds them as plain text, and an empty one is not kept. */
+  private writeCaseField(field: "id" | "title" | "time", value: string): void {
+    const json = this.session?.json as Record<string, unknown> | undefined
+    if (!json) return
+    if (value.trim() === "") delete json[field]
+    else json[field] = value
+  }
+
+  /** The case on top, when there is one, and the picker of its recordings with what can be done with the one on show. */
   private refreshRow(): void {
     const session = this.session
-    this.byId("case-row").hidden = session === undefined
-    this.byId("export").hidden = session === undefined
+    this.byId("case-panel").hidden = session === undefined
+    this.byId("recording").classList.toggle("in-case", session !== undefined)
+    this.byId("recording-heading").hidden = session === undefined
     if (!session) return
+    const active = this.shadow.activeElement
+    for (const [id, field] of [["case-id", "id"], ["case-title", "title"], ["case-time", "time"]] as const) {
+      const input = this.input(id)
+      if (input !== active) input.value = String((session.json as Record<string, unknown>)[field] ?? "")
+    }
     const select = this.byId("track") as HTMLSelectElement
     select.replaceChildren(...session.tracks.map((track, index) => new Option(this.labelOf(track, index), String(index))))
     select.value = String(Math.max(0, this.current ? session.tracks.indexOf(this.current) : 0))
     // Only an account is interpreted; any recording can leave the case, while the case keeps one.
     this.byId("interpret").hidden = this.current?.kind !== "observer"
     this.byId("delete").hidden = session.tracks.length <= 1
+    const kind = this.current?.kind === "reading" ? this.messages.kindReading : this.messages.kindObservation
+    const label = this.current ? this.labelOf(this.current, session.tracks.indexOf(this.current)) : ""
+    this.byId("recording-heading").textContent = `${this.messages.editing} ${kind}${label ? ` — ${label}` : ""}`
   }
 
   // -- The dialog ----------------------------------------------------------------------------------

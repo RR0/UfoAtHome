@@ -30,5 +30,13 @@ export const caseEditorMessages_en: CaseEditorMessages = {
   loadFailed: "That recording could not be read.",
   isACase: "That is a case, not a recording.",
   ok: "OK",
-  cancel: "Cancel"
+  cancel: "Cancel",
+  caseHeading: "Case",
+  caseId: "ID",
+  caseTitle: "Title",
+  caseTime: "When",
+  recordingsHeading: "Observations",
+  editing: "Being edited:",
+  kindObservation: "observation",
+  kindReading: "reading"
 }

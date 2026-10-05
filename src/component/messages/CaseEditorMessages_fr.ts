@@ -30,5 +30,13 @@ export const caseEditorMessages_fr: CaseEditorMessages = {
   loadFailed: "Cet enregistrement n'a pas pu être lu.",
   isACase: "C'est un dossier, pas un enregistrement.",
   ok: "OK",
-  cancel: "Annuler"
+  cancel: "Annuler",
+  caseHeading: "Dossier",
+  caseId: "Identifiant",
+  caseTitle: "Titre",
+  caseTime: "Date",
+  recordingsHeading: "Observations",
+  editing: "En cours d'édition :",
+  kindObservation: "observation",
+  kindReading: "lecture"
 }
