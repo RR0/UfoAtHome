@@ -15,6 +15,11 @@ export interface CaseTrack {
   recording?: SightingRecordingJson
   /** The recording as it was when loaded, to tell what was changed. Absent for one added here. */
   loaded?: string
+  /**
+   * What the recording's relative addresses (a model, a picture) are relative to, when that is not `url`: a recording
+   * that was open before a case was made around it still stands where it came from.
+   */
+  base?: { url: string | undefined }
 }
 
 /**
@@ -37,6 +42,33 @@ export class CaseSession {
         url: new URL(event.url!, url).href,
         kind: event.interpretationOf === undefined ? "observer" : "reading"
       }))
+  }
+
+  /**
+   * A case made around a recording that is already open: one event of type `sighting` listing it, at a file of its own
+   * beside a `case.json` that does not exist yet. The recording is kept as it stands — it is the editor's, edited — and
+   * counts as added, so that the case and it are what an export writes.
+   *
+   * @param from Where the recording came from, if it came from an address: what its relative addresses stay relative to.
+   */
+  static around(recording: SightingRecordingJson, time: string | undefined, title: SaidText | undefined, from: string | undefined, here: string): CaseSession {
+    const stem = (recording.observer?.id ?? recording.id ?? "observation").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "observation"
+    const json: CaseJson = {
+      id: recording.id ?? "case",
+      ...(time !== undefined ? { time } : {}),
+      events: [{
+        type: "event",
+        eventType: CaseFile.SIGHTING_EVENT,
+        ...(time !== undefined ? { time } : {}),
+        ...(title !== undefined ? { title } : {}),
+        url: `observer-${stem}.json`
+      }]
+    }
+    const session = new CaseSession(json, new URL("case.json", here).href)
+    const track = session.tracks[0]
+    track.recording = recording
+    track.base = { url: from }
+    return session
   }
 
   /** The account a reading reads: the first recording it names that the case lists. */

@@ -33,4 +33,5 @@ export interface CaseEditorMessages {
   exportButton: string
   exportTitle: string
   exportAlso: string
+  addToCase: string
 }

@@ -252,6 +252,31 @@ describe("CaseEditorElement", () => {
     of.dispatchEvent(new Event("change"))
   }
 
+  it("makes a case around a recording that is open, without giving the editor the recording again", async () => {
+    files["https://example.org/d/plain.json"] = { version: 1, id: "1965-07-01-Plain", observer: { id: "Plain", title: "A witness" }, time: { year: 1965, month: 7, day: 1, hour: 5, minute: 0 }, timeline: { keyframes: [] } }
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: () => Promise.resolve(structuredClone(files[url])), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) })))
+    const element = document.createElement("rr0-case-editor") as CaseEditorElement
+    document.body.appendChild(element)
+    element.setAttribute("src", "https://example.org/d/plain.json")
+    await wait()
+    const root = element.shadowRoot!
+    expect((root.getElementById("make-case-row") as HTMLElement).hidden).toBe(false)
+    expect(parts(element).row.hidden).toBe(true)
+    // An edit in progress, which must survive the case being made.
+    element.sightingEditor.sightingData = { ...element.sightingData, description: "Edited, not saved" }
+    const editorBefore = element.sightingEditor
+    ;(root.getElementById("make-case") as HTMLButtonElement).click()
+    expect(parts(element).row.hidden).toBe(false)
+    expect((root.getElementById("make-case-row") as HTMLElement).hidden).toBe(true)
+    expect(element.sightingEditor).toBe(editorBefore)
+    expect(element.sightingData.description).toBe("Edited, not saved")
+    expect([...parts(element).select.options]).toHaveLength(1)
+    const written = element.caseSession!.files()
+    expect(written.map(file => file.path)).toEqual(["case.json", "observer-plain.json"])
+    expect(JSON.parse(written[0].content).time).toBe("1965-07-01 05:00")
+    expect(JSON.parse(written[1].content).description).toBe("Edited, not saved")
+  })
+
   it("adds a reading through the one + button: naming the account it interprets, with a title and an author", async () => {
     const element = await open()
     const { select, add, remove, field } = parts(element)

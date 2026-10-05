@@ -33,5 +33,6 @@ export const caseEditorMessages_es: CaseEditorMessages = {
   interpretationOfNone: "—",
   exportButton: "Exportar",
   exportTitle: "Exportar el caso",
-  exportAlso: "Exportar también las observaciones"
+  exportAlso: "Exportar también las observaciones",
+  addToCase: "Añadir a un caso"
 }

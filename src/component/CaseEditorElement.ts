@@ -36,6 +36,8 @@ const TEMPLATE = `
   .row.recordings label { flex: 1 1 14em; min-width: 0; }
   .row.recordings select { flex: 1 1 auto; min-width: 0; max-width: 100%; text-overflow: ellipsis; }
   .row button { white-space: nowrap; }
+  .make-case { margin: .5em 0 0; }
+  button.link { border: 0; background: none; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
   .icon-btn { width: 1.8em; height: 1.8em; padding: 0; line-height: 1; cursor: pointer; }
   /* The observation being edited, inside: a frame of its own once there is a case around it. */
   .recording.in-case { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .5em .7em .7em; }
@@ -70,6 +72,7 @@ const TEMPLATE = `
 <section id="recording" class="recording">
   <rr0-sighting-editor id="editor"></rr0-sighting-editor>
 </section>
+<p id="make-case-row" class="make-case"><button id="make-case" type="button" class="link">Add to a case</button></p>
 </div>
 <dialog id="dialog">
   <form method="dialog" id="form">
@@ -157,6 +160,7 @@ export class CaseEditorElement extends HTMLElement {
       if (track) void this.showTrack(track)
     })
     this.byId("add").addEventListener("click", () => this.askAdd())
+    this.byId("make-case").addEventListener("click", () => this.makeCase())
     this.byId("delete").addEventListener("click", () => this.askDelete())
     this.byId("export").addEventListener("click", () => this.askExport())
     this.byId("source").addEventListener("change", () => this.syncSourceFields())
@@ -230,6 +234,7 @@ export class CaseEditorElement extends HTMLElement {
     text("label-case-time", m.caseTime)
     text("recordings-heading", m.recordingsHeading)
     text("label-recording", m.recording)
+    text("make-case", m.addToCase)
     text("add", "+")
     text("export", m.exportButton)
     text("label-export-recordings", m.exportAlso)
@@ -301,7 +306,7 @@ export class CaseEditorElement extends HTMLElement {
       const account = session.accountOf(track)
       if (account) await this.loadTrack(account)
       this.current = track
-      this.editor.documentUrl = track.url
+      this.editor.documentUrl = track.base ? track.base.url : track.url
       this.editor.reading = track.kind === "reading"
       this.editor.accountShapeIds = track.kind === "reading" && account?.recording ? CaseEditorElement.shapesOf(account.recording) : undefined
       this.editor.sightingData = structuredClone(track.recording!)
@@ -327,6 +332,23 @@ export class CaseEditorElement extends HTMLElement {
     if (track.kind === "observer") return this.said.read(track.recording?.observer?.title as never) ?? track.event.url ?? ""
     const number = this.session!.tracks.filter(other => other.kind === "reading").indexOf(track) + 1
     return this.messages.untitledReading.replace("{n}", String(number || index + 1))
+  }
+
+  /**
+   * Makes a case around the recording on show, which stays exactly where it is: the editor is not given it again, so what is
+   * being edited is not lost, and the case appears above it. Nothing is written anywhere: the case is the one an export makes.
+   */
+  private makeCase(): void {
+    if (this.session) return
+    const recording = this.editor.sightingData
+    const when = recording.time ? CaseEditorElement.rr0TimeOf(formatEdtfTime(recording.time)) : undefined
+    const title = this.said.read(recording.observer?.title as never)
+    const from = this.getAttribute("src") ? new URL(this.getAttribute("src")!, location.href).href : undefined
+    this.session = CaseSession.around(recording, when, title, from, location.href)
+    this.current = this.session.tracks[0]
+    this.session.keep(this.current, recording)
+    this.dateModeFor = undefined
+    this.refreshRow()
   }
 
   /** The case's own fields, written back as typed: a case holds them as plain text, and an empty one is not kept. */
@@ -366,6 +388,7 @@ export class CaseEditorElement extends HTMLElement {
   private refreshRow(): void {
     const session = this.session
     this.byId("case-panel").hidden = session === undefined
+    this.byId("make-case-row").hidden = session !== undefined
     this.byId("case").classList.toggle("in-case", session !== undefined)
     this.byId("recording").classList.toggle("in-case", session !== undefined)
     if (!session) return
