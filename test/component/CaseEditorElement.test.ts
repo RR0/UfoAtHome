@@ -281,6 +281,11 @@ describe("CaseEditorElement", () => {
     const panel = root.getElementById("case-panel")!
     const frame = root.getElementById("recording")!
     expect(panel.hidden).toBe(false)
+    // One container for the case, holding the case's own part and the recording's, which is a container of its own.
+    const container = root.getElementById("case")!
+    expect(container.classList.contains("in-case")).toBe(true)
+    expect(container.contains(panel) && container.contains(frame)).toBe(true)
+    expect(frame.parentElement).toBe(container)
     expect(panel.compareDocumentPosition(frame) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(frame.classList.contains("in-case")).toBe(true)
     expect(frame.contains(root.getElementById("editor"))).toBe(true)

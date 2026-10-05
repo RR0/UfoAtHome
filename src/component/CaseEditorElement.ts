@@ -19,7 +19,9 @@ const TEMPLATE = `
   :host { display: block; }
   [hidden] { display: none !important; }
   /* The case, above: what it is, then its observations and what is done with them. */
-  .case-panel { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .6em .9em .4em; margin-bottom: .8em; }
+  /* One container for the case, with its observation inside as a container of its own. */
+  .case.in-case { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .6em .9em .8em; }
+  .case-panel { margin-bottom: .6em; }
   .case-panel h2 { margin: 0 0 .4em; font-size: 1.05em; }
   .case-panel h3 { margin: .6em 0 .3em; font-size: .95em; }
   .row { display: flex; align-items: center; gap: .5em; flex-wrap: wrap; margin-bottom: .5em; }
@@ -38,6 +40,7 @@ const TEMPLATE = `
   dialog .actions { display: flex; gap: .5em; margin-top: .6em; }
   #dialog-error { color: #c00; }
 </style>
+<div id="case" class="case">
 <section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
   <h2 id="case-heading">Case</h2>
   <div class="row fields">
@@ -58,6 +61,7 @@ const TEMPLATE = `
   <p id="recording-heading" class="heading" hidden></p>
   <rr0-sighting-editor id="editor"></rr0-sighting-editor>
 </section>
+</div>
 <dialog id="dialog">
   <form method="dialog" id="form">
     <h3 id="dialog-title"></h3>
@@ -314,6 +318,7 @@ export class CaseEditorElement extends HTMLElement {
   private refreshRow(): void {
     const session = this.session
     this.byId("case-panel").hidden = session === undefined
+    this.byId("case").classList.toggle("in-case", session !== undefined)
     this.byId("recording").classList.toggle("in-case", session !== undefined)
     this.byId("recording-heading").hidden = session === undefined
     if (!session) return
