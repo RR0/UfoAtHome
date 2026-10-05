@@ -33,5 +33,5 @@ export const caseEditorMessages_fr: CaseEditorMessages = {
   interpretationOfNone: "—",
   exportButton: "Exporter",
   exportTitle: "Exporter le dossier",
-  exportAlso: "Exporter aussi les observations ajoutées ou modifiées"
+  exportAlso: "Exporter aussi les observations"
 }

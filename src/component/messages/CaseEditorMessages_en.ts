@@ -33,5 +33,5 @@ export const caseEditorMessages_en: CaseEditorMessages = {
   interpretationOfNone: "—",
   exportButton: "Export",
   exportTitle: "Export the case",
-  exportAlso: "Also export the observations added or changed"
+  exportAlso: "Also export the observations"
 }
