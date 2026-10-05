@@ -28,8 +28,6 @@ export interface EdtfDateParts {
   text: HTMLInputElement
   /** Tells which of the two says the date, and swaps them. */
   mode: HTMLButtonElement
-  /** What is deduced from the text, shown above it. */
-  deduction?: HTMLElement
   /** The (?) inside the text field that opens the help on the syntax: only there while the text is what shows. */
   help?: HTMLElement
 }
@@ -51,6 +49,8 @@ export interface EdtfDateParts {
  */
 export class EdtfDateField {
   private precise = true
+  /** What the text's tooltip says when there is nothing to deduce from it. */
+  private hint = ""
 
   /**
    * @param onChange Told what the field now says: a time, or `undefined` once it is cleared. Never told
@@ -175,20 +175,25 @@ export class EdtfDateField {
     return word ? `${said} — ${word.toLowerCase()}` : said
   }
 
-  /** Shows, above the text, what it is understood as — or what is wrong with it. Nothing while the picker is what shows. */
+  /** The tooltip of the text when nothing is deduced from it: what it takes. */
+  setHint(hint: string): void {
+    this.hint = hint
+    this.showDeduction()
+  }
+
+  /**
+   * Says, in the text's tooltip, what it is understood as — or that it is not. What the text takes when there is nothing
+   * to understand yet, or while the picker is what shows.
+   */
   private showDeduction(): void {
-    const { deduction, text } = this.parts
-    if (!deduction) return
+    const { text } = this.parts
     const value = text.value.trim()
     if (this.precise || value === "") {
-      deduction.textContent = ""
-      deduction.hidden = true
+      text.title = this.hint
       return
     }
     const parsed = parseEdtfTime(value)
-    deduction.textContent = parsed ? `→ ${this.describe(parsed)}` : this.messages.edtfInvalid
-    deduction.classList.toggle("bad", !parsed)
-    deduction.hidden = false
+    text.title = parsed ? `→ ${this.describe(parsed)}` : this.messages.edtfInvalid
   }
 
   /**

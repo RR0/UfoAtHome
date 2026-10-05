@@ -11,14 +11,11 @@ rr0-date-input { position: relative; display: inline-flex; align-items: center; 
 rr0-date-input .edtf-field { position: relative; display: inline-flex; align-items: center; }
 rr0-date-input .edtf-field input[type="text"] { padding-right: 1.6em; }
 rr0-date-input .edtf-help { position: absolute; right: .25em; top: 50%; transform: translateY(-50%); width: 1.2em; height: 1.2em; padding: 0; border: 1px solid currentColor; border-radius: 50%; background: none; color: inherit; font-size: .75em; line-height: 1; cursor: help; opacity: .7; }
-rr0-date-input .edtf-deduction, rr0-date-input .edtf-helppop { position: absolute; left: 0; bottom: calc(100% + .35em); z-index: 5; max-width: 26em; padding: .35em .6em; border-radius: 4px; background: rgba(0, 0, 0, .88); color: #fff; font-size: .8rem; line-height: 1.35; white-space: normal; pointer-events: none; }
-rr0-date-input .edtf-deduction.bad { color: #ffb4a8; }
+rr0-date-input .edtf-helppop { position: absolute; left: 0; bottom: calc(100% + .35em); z-index: 5; max-width: 26em; padding: .35em .6em; border-radius: 4px; background: rgba(0, 0, 0, .88); color: #fff; font-size: .8rem; line-height: 1.35; white-space: normal; pointer-events: none; }
 rr0-date-input .edtf-helppop { pointer-events: auto; min-width: 16em; }
 rr0-date-input .edtf-helppop p { margin: 0 0 .3em; font-weight: 600; }
 rr0-date-input .edtf-helppop ul { margin: 0; padding-left: 1.1em; }
 rr0-date-input [hidden] { display: none !important; }
-rr0-date-input .edtf-deduction { display: none !important; }
-rr0-date-input:hover .edtf-deduction:not([hidden]), rr0-date-input:focus-within .edtf-deduction:not([hidden]) { display: block !important; }
 `
 
 /**
@@ -27,8 +24,8 @@ rr0-date-input:hover .edtf-deduction:not([hidden]), rr0-date-input:focus-within 
  *
  * `<rr0-date-input name="obs-time">` makes, in its own light DOM so that the page's styles reach them, a
  * datetime-local (`obs-time-native`), a text (`obs-time`) and a button that says which of the two the date is said
- * in («precise» or «EDTF») and swaps them. Above the text, while it is hovered or has the focus, what is deduced
- * from it ("→ May 1950 — uncertain"); in it, a (?) that opens the syntax the text takes. The ids derive from `name`,
+ * in («precise» or «EDTF») and swaps them. The text's tooltip says what is deduced from it ("→ May 1950 — uncertain"); in
+ * it, a (?) opens the syntax the text takes. The ids derive from `name`,
  * which is how an editor that holds several finds the control it means.
  *
  * It says what the date now is by a `datechange` event, whose `detail.time` is a SightingTime or `undefined` once
@@ -63,10 +60,6 @@ export class DateInputElement extends HTMLElement {
     help.className = "edtf-help"
     help.textContent = "?"
     help.hidden = true
-    const deduction = doc.createElement("span")
-    deduction.className = "edtf-deduction"
-    deduction.hidden = true
-    deduction.setAttribute("role", "status")
     const popup = doc.createElement("div")
     popup.className = "edtf-helppop"
     popup.hidden = true
@@ -75,12 +68,12 @@ export class DateInputElement extends HTMLElement {
       picker.id = `${name}-native`
       text.id = name
     }
-    field.append(picker, text, help, deduction, popup)
+    field.append(picker, text, help, popup)
     const mode = doc.createElement("button")
     mode.type = "button"
     mode.className = "edtf-mode"
     this.append(style, field, mode)
-    this.dateField = new EdtfDateField({ picker, text, mode, deduction, help }, this.wording,
+    this.dateField = new EdtfDateField({ picker, text, mode, help }, this.wording,
       time => this.dispatchEvent(new CustomEvent("datechange", { detail: { time }, bubbles: true, composed: true })),
       HostLocale.preferencesFor(this)[0] ?? "en")
     help.addEventListener("click", () => this.toggleHelp())
@@ -124,6 +117,11 @@ export class DateInputElement extends HTMLElement {
       list.append(item)
     }
     popup.replaceChildren(title, list)
+  }
+
+  /** What the text's tooltip says when there is nothing to deduce from it. */
+  set hint(hint: string) {
+    this.field.setHint(hint)
   }
 
   /** The field this element is made of, for whoever needs the detail of it. */

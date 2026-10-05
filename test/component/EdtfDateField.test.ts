@@ -15,10 +15,9 @@ const make = () => {
   const picker = element.querySelector("input[type=datetime-local]") as HTMLInputElement
   const text = element.querySelector("input[type=text]") as HTMLInputElement
   const mode = element.querySelector("button.edtf-mode") as HTMLButtonElement
-  const deduction = element.querySelector(".edtf-deduction") as HTMLElement
   const help = element.querySelector("button.edtf-help") as HTMLButtonElement
   const popup = element.querySelector(".edtf-helppop") as HTMLElement
-  return { element, field: element.field, picker, text, mode, deduction, help, popup, told }
+  return { element, field: element.field, picker, text, mode, help, popup, told }
 }
 
 describe("EdtfDateField", () => {
@@ -90,33 +89,35 @@ describe("EdtfDateField", () => {
     expect(told).toEqual([])
   })
 
-  it("shows what it understood of the text, above it: a date in words, with its doubt", () => {
-    const { field, text, deduction } = make()
+  it("says in the text's tooltip what it understood: a date in words, with its doubt", () => {
+    const { field, text } = make()
     field.setPrecise(false)
     text.value = "1965-07?"
     text.dispatchEvent(new Event("input"))
-    expect(deduction.hidden).toBe(false)
-    expect(deduction.textContent).toContain("July 1965")
-    expect(deduction.textContent).toContain("uncertain")
+    expect(text.title).toContain("July 1965")
+    expect(text.title).toContain("uncertain")
     text.value = "1965-07-01T05:00~"
     text.dispatchEvent(new Event("input"))
-    expect(deduction.textContent).toContain("July 1, 1965")
-    expect(deduction.textContent).toContain("05:00")
-    expect(deduction.textContent).toContain("approximate")
+    expect(text.title).toContain("July 1, 1965")
+    expect(text.title).toContain("05:00")
+    expect(text.title).toContain("approximate")
     text.value = "05:00"
     text.dispatchEvent(new Event("input"))
-    expect(deduction.textContent).toBe("→ 05:00")
+    expect(text.title).toBe("→ 05:00")
   })
 
-  it("says that the text is not understood, in place of a deduction, and shows none while the date is precise", () => {
-    const { field, text, deduction } = make()
+  it("says that the text is not understood, in its tooltip, and goes back to what it takes when there is nothing to understand", () => {
+    const { element, field, text } = make()
+    element.hint = "Type an EDTF date"
     field.setPrecise(false)
+    expect(text.title).toBe("Type an EDTF date")
     text.value = "not a date"
     text.dispatchEvent(new Event("input"))
-    expect(deduction.textContent).not.toContain("→")
-    expect(deduction.classList.contains("bad")).toBe(true)
-    field.setPrecise(true)
-    expect(deduction.hidden).toBe(true)
+    expect(text.title).not.toContain("→")
+    expect(text.title).not.toBe("Type an EDTF date")
+    text.value = ""
+    text.dispatchEvent(new Event("input"))
+    expect(text.title).toBe("Type an EDTF date")
   })
 
   it("offers a (?) in the text field, only while the text shows, which opens the syntax it takes", () => {

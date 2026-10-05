@@ -8418,9 +8418,9 @@ export class SightingEditorElement extends HTMLElement {
     this.labelObservationTime.textContent = messages.observationTime
     this.labelObservationEndTime.textContent = messages.observationEndTime
     this.obsTimeInput.placeholder = messages.edtfPlaceholder
-    this.obsTimeInput.title = messages.observationTimeHint
+    this.startDate.hint = messages.observationTimeHint
     this.obsEndTimeInput.placeholder = messages.edtfPlaceholder
-    this.obsEndTimeInput.title = messages.observationEndTimeHint
+    this.endDate.hint = messages.observationEndTimeHint
     this.presetsGroup.setAttribute("aria-label", messages.presetsGroupLabel)
     this.labelDecor.textContent = messages.decor
     this.labelDecorGroup.textContent = messages.decor

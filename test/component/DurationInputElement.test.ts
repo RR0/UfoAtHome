@@ -16,7 +16,6 @@ const make = () => {
     number: element.input, text: element.textField,
     mode: element.querySelector("button.duration-mode") as HTMLButtonElement,
     chosen: element.querySelector(".duration-chosen") as HTMLElement,
-    deduction: element.querySelector(".duration-deduction") as HTMLElement,
     help: element.querySelector("button.duration-help") as HTMLButtonElement,
     popup: element.querySelector(".duration-helppop") as HTMLElement
   }
@@ -51,6 +50,13 @@ describe("DurationText", () => {
 })
 
 describe("<rr0-duration-input>", () => {
+  it("puts the mode button right after the input, before what the simulation is played at", () => {
+    const { element, mode, chosen } = make()
+    const order = [...element.children].filter(child => child === mode || child === chosen || child.classList.contains("duration-field"))
+    expect(order.map(child => child.className)).toEqual(["duration-field", "duration-mode", "duration-chosen"])
+    element.remove()
+  })
+
   it("makes a number and a text, with ids derived from its name, precise to begin with", () => {
     const { element, number, text, mode } = make()
     expect(number.id).toBe("durationSeconds")
@@ -71,7 +77,7 @@ describe("<rr0-duration-input>", () => {
   it("says a vague duration as it was stated, and tells the length chosen for the simulation, shown after it in brackets", () => {
     const { number, text, mode, chosen, told } = make()
     mode.click()
-    expect(mode.textContent).toBe("ISO 8601")
+    expect(mode.textContent).toBe("EDTF")
     text.value = "PT5M/PT10M"
     text.dispatchEvent(new Event("input"))
     expect(told).toEqual([{ seconds: 450, text: "PT5M/PT10M" }])
@@ -99,23 +105,22 @@ describe("<rr0-duration-input>", () => {
     expect(number.value).toBe("600")
   })
 
-  it("tells nothing of a text that does not read yet, and says so above it", () => {
-    const { mode, text, deduction, told } = make()
+  it("tells nothing of a text that does not read yet, and says so in its tooltip", () => {
+    const { mode, text, told } = make()
     mode.click()
     text.value = "10 minutes"
     text.dispatchEvent(new Event("input"))
     expect(told).toEqual([])
-    expect(deduction.hidden).toBe(false)
-    expect(deduction.classList.contains("bad")).toBe(true)
+    expect(text.title).not.toContain("→")
     text.value = "PT10M~"
     text.dispatchEvent(new Event("input"))
-    expect(deduction.textContent).toBe("→ 10 min — approximate")
+    expect(text.title).toBe("→ 10 min — approximate")
   })
 
   it("shows a recording's duration: exact in the number, or as stated in the text with the length chosen", () => {
     const { element, number, text, mode, chosen } = make()
     element.set(450, "PT5M/PT10M")
-    expect(mode.textContent).toBe("ISO 8601")
+    expect(mode.textContent).toBe("EDTF")
     expect(text.value).toBe("PT5M/PT10M")
     expect(number.value).toBe("450")
     expect(chosen.hidden).toBe(false)

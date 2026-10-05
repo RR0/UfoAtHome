@@ -21,22 +21,20 @@ rr0-duration-input { position: relative; display: inline-flex; align-items: cent
 rr0-duration-input .duration-field { position: relative; display: inline-flex; align-items: center; gap: .25em; }
 rr0-duration-input .duration-field input[type="text"] { padding-right: 1.6em; }
 rr0-duration-input .duration-help { position: absolute; right: .25em; top: 50%; transform: translateY(-50%); width: 1.2em; height: 1.2em; padding: 0; border: 1px solid currentColor; border-radius: 50%; background: none; color: inherit; font-size: .75em; line-height: 1; cursor: help; opacity: .7; }
-rr0-duration-input .duration-deduction, rr0-duration-input .duration-helppop { position: absolute; left: 0; bottom: calc(100% + .35em); z-index: 5; max-width: 26em; padding: .35em .6em; border-radius: 4px; background: rgba(0, 0, 0, .88); color: #fff; font-size: .8rem; line-height: 1.35; white-space: normal; pointer-events: none; }
-rr0-duration-input .duration-deduction.bad { color: #ffb4a8; }
+rr0-duration-input .duration-helppop { position: absolute; left: 0; bottom: calc(100% + .35em); z-index: 5; max-width: 26em; padding: .35em .6em; border-radius: 4px; background: rgba(0, 0, 0, .88); color: #fff; font-size: .8rem; line-height: 1.35; white-space: normal; pointer-events: none; }
 rr0-duration-input .duration-helppop { pointer-events: auto; min-width: 16em; }
 rr0-duration-input .duration-helppop p { margin: 0 0 .3em; font-weight: 600; }
 rr0-duration-input .duration-helppop ul { margin: 0; padding-left: 1.1em; }
 rr0-duration-input [hidden] { display: none !important; }
-rr0-duration-input .duration-deduction { display: none !important; }
-rr0-duration-input:hover .duration-deduction:not([hidden]), rr0-duration-input:focus-within .duration-deduction:not([hidden]) { display: block !important; }
 `
 
 /**
  * A length of time, as a date is said: PRECISE (a number of seconds) or as it was STATED when it could not be exact — an
- * ISO 8601 duration with a doubt or a range (`PT10M~`, `PT5M/PT10M`), see DurationText. One button says which, and swaps them.
+ * ISO 8601 duration with a doubt or a range (`PT10M~`, `PT5M/PT10M`), see DurationText. One button, right after the input, says which — "precise" or
+ * "EDTF", as a date's does — and swaps them.
  *
  * `<rr0-duration-input name="durationSeconds">` makes a number (id `durationSeconds`), a text (`durationSeconds-text`) and that
- * button; above the text, while it is hovered or has the focus, what is understood of it; in it, a (?) that opens the syntax.
+ * button; in the text's tooltip, what is understood of it; in it, a (?) that opens the syntax.
  * After a duration that was not stated exactly, in brackets, the one length the simulation is played at, chosen from it
  * (the duration, or the middle of a range). The number always holds that length, so that whoever reads it need not know
  * how the duration was said.
@@ -53,7 +51,6 @@ export class DurationInputElement extends HTMLElement {
   private textInput!: HTMLInputElement
   private modeButton!: HTMLButtonElement
   private helpButton!: HTMLButtonElement
-  private deduction!: HTMLElement
   private popup!: HTMLElement
   private chosen!: HTMLElement
 
@@ -84,10 +81,6 @@ export class DurationInputElement extends HTMLElement {
     this.helpButton.className = "duration-help"
     this.helpButton.textContent = "?"
     this.helpButton.hidden = true
-    this.deduction = doc.createElement("span")
-    this.deduction.className = "duration-deduction"
-    this.deduction.hidden = true
-    this.deduction.setAttribute("role", "status")
     this.popup = doc.createElement("div")
     this.popup.className = "duration-helppop"
     this.popup.hidden = true
@@ -101,8 +94,9 @@ export class DurationInputElement extends HTMLElement {
       this.numberInput.id = name
       this.textInput.id = `${name}-text`
     }
-    field.append(this.numberInput, unit, this.textInput, this.helpButton, this.deduction, this.popup)
-    this.append(style, field, this.chosen, this.modeButton)
+    field.append(this.numberInput, unit, this.textInput, this.helpButton, this.popup)
+    // The button right after the input, then what the simulation is played at.
+    this.append(style, field, this.modeButton, this.chosen)
     this.numberInput.addEventListener("input", () => {
       const value = this.numberInput.value
       this.tell(value === "" ? undefined : Number(value), undefined)
@@ -235,18 +229,15 @@ export class DurationInputElement extends HTMLElement {
     return word ? `${said} — ${word.toLowerCase()}` : said
   }
 
-  /** Above the text: what is understood of it, or that it is not. Nothing while the number shows. */
+  /** In the text's tooltip: what is understood of it, or that it is not. Nothing while the number shows. */
   private showDeduction(): void {
     const value = this.textInput.value.trim()
     if (this.precise || value === "") {
-      this.deduction.textContent = ""
-      this.deduction.hidden = true
+      this.textInput.title = ""
       return
     }
     const reading = DurationText.parse(value)
-    this.deduction.textContent = reading ? `→ ${this.describe(reading)}` : this.wording.durationInvalid
-    this.deduction.classList.toggle("bad", !reading)
-    this.deduction.hidden = false
+    this.textInput.title = reading ? `→ ${this.describe(reading)}` : this.wording.durationInvalid
   }
 
   /** After a duration that was not stated exactly, in brackets: the one length the simulation is played at. */
