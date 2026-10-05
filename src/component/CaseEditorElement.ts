@@ -36,13 +36,18 @@ const TEMPLATE = `
   dialog { max-width: min(30em, 92vw); }
   dialog label { display: flex; align-items: center; gap: .5em; margin: .4em 0; }
   dialog label > span { flex: 0 0 9em; }
+  dialog label.check > span { flex: 1 1 auto; }
+  .row.header h2 { margin: 0; }
   dialog input[type="text"], dialog input[type="date"], dialog input[type="url"], dialog select { flex: 1 1 auto; min-width: 0; }
   dialog .actions { display: flex; gap: .5em; margin-top: .6em; }
   #dialog-error { color: #c00; }
 </style>
 <div id="case" class="case">
 <section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
-  <h2 id="case-heading">Case</h2>
+  <div class="row header">
+    <button id="export" type="button">Export</button>
+    <h2 id="case-heading">Case</h2>
+  </div>
   <div class="row fields">
     <label><span id="label-case-id">ID</span> <input id="case-id" type="text" size="18"/></label>
     <label><span id="label-case-title">Title</span> <input id="case-title" type="text" size="24"/></label>
@@ -51,10 +56,8 @@ const TEMPLATE = `
   <h3 id="recordings-heading">Observations</h3>
   <div class="row recordings">
     <label><span id="label-recording">Recording</span> <select id="track"></select></label>
-    <button id="interpret" type="button">Interpret…</button>
-    <button id="add" type="button">Add an observation…</button>
+    <button id="add" type="button" class="icon-btn">+</button>
     <button id="delete" type="button" class="icon-btn">🗑</button>
-    <button id="export" type="button">Export the case</button>
   </div>
 </section>
 <section id="recording" class="recording">
@@ -67,20 +70,20 @@ const TEMPLATE = `
     <h3 id="dialog-title"></h3>
     <p id="dialog-message" hidden></p>
     <p id="dialog-error" role="alert" hidden></p>
-    <div id="fields-interpret">
-      <label><span id="label-title">Title</span> <input id="title" type="text"/></label>
-      <label><span id="label-author">Author</span> <input id="author" type="text"/></label>
-      <label><span id="label-date">Date</span> <input id="date" type="date"/></label>
-      <label><span id="label-of">Interprets</span> <select id="of"></select></label>
-    </div>
     <div id="fields-add">
+      <label><span id="label-of">Interpretation of</span> <select id="of"></select></label>
       <label><span id="label-source">Source</span> <select id="source">
         <option value="blank"></option><option value="file"></option><option value="url"></option>
       </select></label>
-      <label><span id="label-observer">Observer</span> <input id="observer" type="text"/></label>
-      <label><span id="label-observed">Observed on</span> <input id="observed" type="date"/></label>
+      <label id="row-observer"><span id="label-observer">Observer</span> <input id="observer" type="text"/></label>
+      <label id="row-title"><span id="label-title">Title</span> <input id="title" type="text"/></label>
+      <label id="row-author"><span id="label-author">Author</span> <input id="author" type="text"/></label>
+      <label><span id="label-date">Date</span> <input id="date" type="date"/></label>
       <label id="row-file"><span id="label-file">File</span> <input id="file" type="file" accept="application/json,.json"/></label>
       <label id="row-url"><span id="label-url">Address</span> <input id="url" type="url" placeholder="https://…"/></label>
+    </div>
+    <div id="fields-export">
+      <label class="check"><input id="export-recordings" type="checkbox" checked/> <span id="label-export-recordings">Also export the observations</span></label>
     </div>
     <div class="actions">
       <button id="ok" type="submit" value="ok">OK</button>
@@ -90,7 +93,7 @@ const TEMPLATE = `
 </dialog>
 `
 
-type DialogMode = "interpret" | "add" | "delete"
+type DialogMode = "add" | "delete" | "export"
 
 /**
  * Edits a case: the recordings its `case.json` lists, the accounts of the observers and the readings
@@ -114,7 +117,7 @@ export class CaseEditorElement extends HTMLElement {
   private messages: CaseEditorMessages = caseEditorMessages_en
   private said = new SaidTexts(["en"])
   private localeToken = 0
-  private dialogMode: DialogMode = "interpret"
+  private dialogMode: DialogMode = "add"
 
   constructor() {
     super()
@@ -135,11 +138,11 @@ export class CaseEditorElement extends HTMLElement {
       const track = this.session?.tracks[Number((this.byId("track") as HTMLSelectElement).value)]
       if (track) void this.showTrack(track)
     })
-    this.byId("interpret").addEventListener("click", () => this.askInterpret())
     this.byId("add").addEventListener("click", () => this.askAdd())
     this.byId("delete").addEventListener("click", () => this.askDelete())
-    this.byId("export").addEventListener("click", () => void this.exportCase())
+    this.byId("export").addEventListener("click", () => this.askExport())
     this.byId("source").addEventListener("change", () => this.syncSourceFields())
+    this.byId("of").addEventListener("change", () => this.syncSourceFields())
     this.byId("cancel").addEventListener("click", () => this.closeDialog())
     this.byId("form").addEventListener("submit", event => {
       event.preventDefault()
@@ -206,24 +209,23 @@ export class CaseEditorElement extends HTMLElement {
     text("label-case-time", m.caseTime)
     text("recordings-heading", m.recordingsHeading)
     text("label-recording", m.recording)
-    text("interpret", m.interpret)
-    text("add", m.addObservation)
-    text("export", m.export)
+    text("add", "+")
+    text("export", m.exportButton)
+    text("label-export-recordings", m.exportAlso)
     text("label-title", m.titleField)
     text("label-author", m.authorField)
-    text("label-date", m.dateField)
-    text("label-of", m.ofField)
+    text("label-date", m.caseTime)
+    text("label-of", m.interpretationOf)
     text("label-source", m.sourceField)
     text("label-observer", m.observerField)
-    text("label-observed", m.observedField)
     text("label-file", m.fileField)
     text("label-url", m.urlField)
     text("ok", m.ok)
     text("cancel", m.cancel)
     const source = this.byId("source") as HTMLSelectElement
     ;[m.sourceBlank, m.sourceFile, m.sourceUrl].forEach((label, index) => { source.options[index].textContent = label })
-    this.byId("interpret").title = m.interpretHint
-    this.byId("add").title = m.addObservationHint
+    this.byId("add").title = m.addHint
+    this.byId("add").setAttribute("aria-label", m.addHint)
     this.byId("delete").title = m.deleteRecording
     this.byId("delete").setAttribute("aria-label", m.deleteRecording)
   }
@@ -330,8 +332,7 @@ export class CaseEditorElement extends HTMLElement {
     const select = this.byId("track") as HTMLSelectElement
     select.replaceChildren(...session.tracks.map((track, index) => new Option(this.labelOf(track, index), String(index))))
     select.value = String(Math.max(0, this.current ? session.tracks.indexOf(this.current) : 0))
-    // Only an account is interpreted; any recording can leave the case, while the case keeps one.
-    this.byId("interpret").hidden = this.current?.kind !== "observer"
+    // Any recording can leave the case, while the case keeps one.
     this.byId("delete").hidden = session.tracks.length <= 1
     const kind = this.current?.kind === "reading" ? this.messages.kindReading : this.messages.kindObservation
     const label = this.current ? this.labelOf(this.current, session.tracks.indexOf(this.current)) : ""
@@ -351,8 +352,8 @@ export class CaseEditorElement extends HTMLElement {
     note.textContent = message ?? ""
     note.hidden = message === undefined
     this.showError(undefined)
-    this.byId("fields-interpret").hidden = mode !== "interpret"
     this.byId("fields-add").hidden = mode !== "add"
+    this.byId("fields-export").hidden = mode !== "export"
     this.byId("ok").hidden = false
     if (typeof this.dialog.showModal === "function") this.dialog.showModal()
     else this.dialog.setAttribute("open", "")
@@ -377,35 +378,37 @@ export class CaseEditorElement extends HTMLElement {
     return new Date().toISOString().slice(0, 10)
   }
 
-  private askInterpret(): void {
-    const session = this.session
-    if (!session || this.current?.kind !== "observer") return
-    this.openDialog("interpret", this.messages.interpretTitle)
-    this.input("title").value = ""
-    this.input("author").value = ""
-    this.input("date").value = this.today()
-    const of = this.byId("of") as HTMLSelectElement
-    of.replaceChildren(...session.tracks.filter(track => track.kind === "observer")
-      .map(track => new Option(this.labelOf(track, session.tracks.indexOf(track)), String(session.tracks.indexOf(track)))))
-    of.value = String(session.tracks.indexOf(this.current))
-    this.input("title").focus()
-  }
-
+  /** Adds a recording: an observation, or, when an account is named, a reading of it (another observation, see InterpretationEventJson). */
   private askAdd(): void {
-    if (!this.session) return
+    const session = this.session
+    if (!session) return
     this.openDialog("add", this.messages.addTitle)
+    const of = this.byId("of") as HTMLSelectElement
+    of.replaceChildren(new Option(this.messages.interpretationOfNone, ""),
+      ...session.tracks.filter(track => track.kind === "observer")
+        .map(track => new Option(this.labelOf(track, session.tracks.indexOf(track)), String(session.tracks.indexOf(track)))))
+    of.value = ""
     ;(this.byId("source") as HTMLSelectElement).value = "blank"
-    this.input("observer").value = ""
-    this.input("observed").value = ""
-    this.input("file").value = ""
-    this.input("url").value = ""
+    for (const id of ["observer", "title", "author", "file", "url"]) this.input(id).value = ""
+    this.input("date").value = ""
     this.syncSourceFields()
   }
 
+  /** What the dialog asks depends on what is added: an observer for an observation, a title and an author for a reading. */
   private syncSourceFields(): void {
     const source = (this.byId("source") as HTMLSelectElement).value
+    const reading = (this.byId("of") as HTMLSelectElement).value !== ""
     this.byId("row-file").hidden = source !== "file"
     this.byId("row-url").hidden = source !== "url"
+    this.byId("row-observer").hidden = reading
+    this.byId("row-title").hidden = !reading
+    this.byId("row-author").hidden = !reading
+  }
+
+  private askExport(): void {
+    if (!this.session) return
+    this.openDialog("export", this.messages.exportTitle)
+    ;(this.input("export-recordings")).checked = true
   }
 
   private askDelete(): void {
@@ -425,51 +428,53 @@ export class CaseEditorElement extends HTMLElement {
 
   private async submitDialog(): Promise<void> {
     switch (this.dialogMode) {
-      case "interpret":
-        this.closeDialog()
-        this.addReading()
-        return
       case "delete":
         this.closeDialog()
         this.deleteCurrent()
         return
+      case "export":
+        this.closeDialog()
+        await this.exportCase(this.input("export-recordings").checked)
+        return
       case "add":
-        if (await this.addObservation()) this.closeDialog()
+        if (await this.addRecording()) this.closeDialog()
     }
   }
 
   // -- What is done to the case --------------------------------------------------------------------
 
-  /** Adds a reading of the account chosen in the dialog, and opens it. */
-  private addReading(): void {
-    const session = this.session
-    if (!session) return
-    this.commit()
-    const account = session.tracks[Number((this.byId("of") as HTMLSelectElement).value)]
-    if (account?.kind !== "observer" || !account.recording) return
-    const title = this.input("title").value.trim()
-    const author = this.input("author").value.trim()
-    const reading = session.addReading(account, this.input("date").value || this.today(),
-      title !== "" ? title : undefined, author !== "" ? [{ title: author }] : undefined)
-    void this.showTrack(reading)
-  }
-
-  /** Adds an account of another observer: blank, or read from a file or an address. Says what went wrong in the dialog. */
-  private async addObservation(): Promise<boolean> {
+  /**
+   * Adds what the dialog describes — blank, or read from a file or an address — as an observation, or
+   * as a reading of the account it names. A blank reading shares the whole scene of that account; says
+   * what went wrong in the dialog.
+   */
+  private async addRecording(): Promise<boolean> {
     const session = this.session
     if (!session) return false
+    const of = (this.byId("of") as HTMLSelectElement).value
+    const account = of === "" ? undefined : session.tracks[Number(of)]
     const source = (this.byId("source") as HTMLSelectElement).value
+    this.commit()
+    if (account && source === "blank") {
+      if (account.kind !== "observer" || !account.recording) return false
+      const title = this.input("title").value.trim()
+      const author = this.input("author").value.trim()
+      const reading = session.addReading(account, this.input("date").value || this.today(),
+        title !== "" ? title : undefined, author !== "" ? [{ title: author }] : undefined)
+      void this.showTrack(reading)
+      return true
+    }
     const observer = this.input("observer").value.trim()
-    const observed = this.input("observed").value.trim()
+    const when = this.input("date").value.trim()
     let recording: SightingRecordingJson
     try {
       if (source === "blank") {
         const stem = (observer || "observation").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "observation"
         recording = {
           version: 1,
-          id: `${observed ? `${observed}-` : ""}${stem}`,
+          id: `${when ? `${when}-` : ""}${stem}`,
           ...(observer ? { observer: { title: observer } } : {}),
-          ...(observed ? { time: observed } : {}),
+          ...(when ? { time: when } : {}),
           timeline: { keyframes: [], order: [], groups: [] }
         } as unknown as SightingRecordingJson
       } else {
@@ -485,9 +490,11 @@ export class CaseEditorElement extends HTMLElement {
       this.showError(this.messages.loadFailed)
       return false
     }
-    this.commit()
-    const title = observer !== "" ? observer : this.said.read(recording.observer?.title as never)
-    const track = session.addObservation(recording, observed !== "" ? observed : undefined, title)
+    const typedTitle = (account ? this.input("title").value : observer).trim()
+    const title = typedTitle !== "" ? typedTitle : this.said.read(recording.observer?.title as never)
+    const author = this.input("author").value.trim()
+    const track = session.addObservation(recording, when !== "" ? when : undefined, title,
+      account ? { account, by: author !== "" ? [{ title: author }] : undefined } : undefined)
     void this.showTrack(track)
     return true
   }
@@ -519,18 +526,27 @@ export class CaseEditorElement extends HTMLElement {
   }
 
   /** The case, and every recording of it added or changed, as one zip laid out as the case is. */
-  private async exportCase(): Promise<void> {
+  private async exportCase(withRecordings = true): Promise<void> {
     const session = this.session
     if (!session) return
     this.commit()
+    const files = session.files(withRecordings)
+    // The case alone is the one file it is: no archive around it.
+    if (files.length === 1) {
+      this.download(new Blob([files[0].content], { type: "application/json" }), files[0].path)
+      return
+    }
     const { zipSync, strToU8 } = await import("fflate")
     const archive: Record<string, Uint8Array> = {}
-    for (const file of session.files()) archive[file.path] = strToU8(file.content)
-    const blob = new Blob([zipSync(archive) as BlobPart], { type: "application/zip" })
+    for (const file of files) archive[file.path] = strToU8(file.content)
+    this.download(new Blob([zipSync(archive) as BlobPart], { type: "application/zip" }), `${session.json.id ?? "case"}.zip`)
+  }
+
+  private download(blob: Blob, name: string): void {
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.href = url
-    link.download = `${session.json.id ?? "case"}.zip`
+    link.download = name
     link.click()
     URL.revokeObjectURL(url)
   }

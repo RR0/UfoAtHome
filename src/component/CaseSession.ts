@@ -119,14 +119,15 @@ export class CaseSession {
    * Adds an observer's account to the case — a recording of its own and an event of type `sighting`
    * listing it, as the case's others are. Its file and its id are made unique among the case's.
    */
-  addObservation(recording: SightingRecordingJson, when?: string, title?: SaidText): CaseTrack {
+  addObservation(recording: SightingRecordingJson, when?: string, title?: SaidText, reads?: { account: CaseTrack, by?: AgentRef[] }): CaseTrack {
     const names = new Set(this.tracks.map(track => track.event.url))
     const ids = new Set(this.tracks.map(track => track.recording?.id))
     const slug = (recording.id ?? "observation").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "observation"
-    let file = `observer-${slug}.json`
+    const prefix = reads ? "interpretation" : "observer"
+    let file = `${prefix}-${slug}.json`
     let id = recording.id ?? slug
     for (let n = 2; names.has(file) || ids.has(id); n++) {
-      file = `observer-${slug}-${n}.json`
+      file = `${prefix}-${slug}-${n}.json`
       id = `${recording.id ?? slug}-${n}`
     }
     const stated = { ...recording, id }
@@ -134,12 +135,14 @@ export class CaseSession {
     const event: CaseTrack["event"] = {
       type: "event",
       eventType: "sighting",
+      ...(reads ? { interpretationOf: reads.account.recording?.id ?? id } : {}),
       ...(when !== undefined ? { time: when } : {}),
+      ...(reads?.by && reads.by.length > 0 ? { by: reads.by } : {}),
       ...(title !== undefined ? { title } : {}),
       url: directory + file
     }
     this.json.events = [...(this.json.events ?? []), event]
-    const track: CaseTrack = { event, url: new URL(event.url!, this.url).href, kind: "observer", recording: stated }
+    const track: CaseTrack = { event, url: new URL(event.url!, this.url).href, kind: reads ? "reading" : "observer", recording: stated }
     this.tracks.push(track)
     return track
   }
@@ -169,11 +172,11 @@ export class CaseSession {
     return true
   }
 
-  /** What has to be written: the case, and every recording added or changed. Paths are relative to the case. */
-  files(): { path: string, content: string }[] {
+  /** What has to be written: the case, and (unless asked not to) every recording added or changed. Paths are relative to the case. */
+  files(withRecordings = true): { path: string, content: string }[] {
     const directory = this.url.replace(/[^/]*$/, "")
     const relative = (url: string): string => url.startsWith(directory) ? url.slice(directory.length) : url
-    const written = this.tracks.filter(track => this.changed(track))
+    const written = this.tracks.filter(track => withRecordings && this.changed(track))
       .map(track => ({ path: relative(track.url), content: JSON.stringify(track.recording, null, 2) + "\n" }))
     const name = decodeURIComponent(this.url.replace(/[?#].*$/, "").replace(/^.*\//, "")) || "case.json"
     return [{ path: name, content: JSON.stringify(this.json, null, 2) + "\n" }, ...written]

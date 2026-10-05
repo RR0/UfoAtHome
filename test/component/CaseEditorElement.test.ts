@@ -203,7 +203,7 @@ const parts = (element: CaseEditorElement) => {
   const root = element.shadowRoot!
   const get = <T extends HTMLElement>(id: string) => root.getElementById(id) as T
   return {
-    row: get("case-panel"), select: get<HTMLSelectElement>("track"), interpret: get<HTMLButtonElement>("interpret"),
+    row: get("case-panel"), select: get<HTMLSelectElement>("track"),
     add: get<HTMLButtonElement>("add"), remove: get<HTMLButtonElement>("delete"), exportButton: get<HTMLButtonElement>("export"),
     form: get<HTMLFormElement>("form"), field: (id: string) => get<HTMLInputElement>(id), error: get("dialog-error")
   }
@@ -246,10 +246,17 @@ describe("CaseEditorElement", () => {
     expect(element.sightingData.id).toBe("plain")
   })
 
-  it("asks for the reading's fields, adds it as a recording of its own, and deletes it once confirmed", async () => {
+  const chooseAccount = (element: CaseEditorElement, index: string) => {
+    const of = element.shadowRoot!.getElementById("of") as HTMLSelectElement
+    of.value = index
+    of.dispatchEvent(new Event("change"))
+  }
+
+  it("adds a reading through the one + button: naming the account it interprets, with a title and an author", async () => {
     const element = await open()
-    const { select, interpret, remove, field } = parts(element)
-    interpret.click()
+    const { select, add, remove, field } = parts(element)
+    add.click()
+    chooseAccount(element, "0")
     field("title").value = "A hubcap"
     field("author").value = "Cousyn"
     field("date").value = "2013-06-01"
@@ -257,7 +264,8 @@ describe("CaseEditorElement", () => {
     expect([...select.options]).toHaveLength(3)
     expect(element.sightingData.id).toBe("x-1-interpretation-2")
     expect(element.sightingData.interpretation?.title).toBe("A hubcap")
-    expect(interpret.hidden).toBe(true)
+    const event = element.caseSession!.json.events!.at(-1)!
+    expect(event.interpretationOf).toBe("x-1")
     remove.click()
     expect([...select.options]).toHaveLength(3)
     await submit(element)
@@ -265,14 +273,16 @@ describe("CaseEditorElement", () => {
     expect(element.sightingData.id).toBe("x-1")
   })
 
-  it("offers to interpret an account but not a reading", async () => {
+  it("asks only for an observer and a date when no account is named, and for a title and an author when one is", async () => {
     const element = await open()
-    const { select, interpret } = parts(element)
-    expect(interpret.hidden).toBe(false)
-    select.value = "1"
-    select.dispatchEvent(new Event("change"))
-    await wait()
-    expect(interpret.hidden).toBe(true)
+    const root = element.shadowRoot!
+    parts(element).add.click()
+    expect((root.getElementById("row-observer") as HTMLElement).hidden).toBe(false)
+    expect((root.getElementById("row-title") as HTMLElement).hidden).toBe(true)
+    chooseAccount(element, "0")
+    expect((root.getElementById("row-observer") as HTMLElement).hidden).toBe(true)
+    expect((root.getElementById("row-title") as HTMLElement).hidden).toBe(false)
+    expect((root.getElementById("row-author") as HTMLElement).hidden).toBe(false)
   })
 
   it("shows the case above the recording being edited, which stands inside a frame of its own", async () => {
@@ -290,6 +300,9 @@ describe("CaseEditorElement", () => {
     expect(frame.classList.contains("in-case")).toBe(true)
     expect(frame.contains(root.getElementById("editor"))).toBe(true)
     expect(panel.contains(parts(element).exportButton)).toBe(true)
+    // The export stands first, at the top left of the case's own part, before its observations.
+    const header = root.querySelector(".case-panel .header")!
+    expect(header.firstElementChild).toBe(parts(element).exportButton)
     expect(root.getElementById("recording-heading")!.textContent).toContain("An account")
   })
 
@@ -311,7 +324,7 @@ describe("CaseEditorElement", () => {
     const { add, select, field } = parts(element)
     add.click()
     field("observer").value = "Second Witness"
-    field("observed").value = "1950-05-11"
+    field("date").value = "1950-05-11"
     await submit(element)
     expect([...select.options]).toHaveLength(3)
     expect(element.sightingData.observer?.title).toBe("Second Witness")
@@ -319,6 +332,26 @@ describe("CaseEditorElement", () => {
     expect(event.eventType).toBe("sighting")
     expect(event.interpretationOf).toBeUndefined()
     expect(element.caseSession!.tracks.at(-1)!.kind).toBe("observer")
+  })
+
+  it("asks, in a dialog, whether to export the observations too, and exports the case alone as a plain file", async () => {
+    const element = await open()
+    const downloads: string[] = []
+    const click = HTMLAnchorElement.prototype.click
+    HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) { downloads.push(this.download) }
+    vi.stubGlobal("URL", Object.assign(URL, { createObjectURL: () => "blob:x", revokeObjectURL: () => {} }))
+    try {
+      const { exportButton, field } = parts(element)
+      exportButton.click()
+      expect(element.shadowRoot!.getElementById("dialog-title")!.textContent).toBeTruthy()
+      expect(field("export-recordings").checked).toBe(true)
+      field("export-recordings").checked = false
+      await submit(element)
+      await wait()
+      expect(downloads).toEqual(["case.json"])
+    } finally {
+      HTMLAnchorElement.prototype.click = click
+    }
   })
 
   it("adds an observation read from an address", async () => {
