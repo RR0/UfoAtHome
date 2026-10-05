@@ -96,7 +96,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   placeSearchFailed: "Place search temporarily unavailable",
   utcOffsetImplausible:
     "This time zone doesn't match the longitude entered, whose own solar time is UTC{solar} — yet the scene and the weather record both obey what is declared here. Clear the field to derive it from the longitude.",
-  timeZoneManual: "offset entered",
+  timeZoneManual: "unknown",
   altitudeAboveSeaLevel:
     "The observer's altitude above sea level — the ground at the location entered sets its floor: an observer in the Alps is not at 0 m.",
   groundAt: "ground at {m} m",

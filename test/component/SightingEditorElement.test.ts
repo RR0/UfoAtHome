@@ -5749,7 +5749,7 @@ describe("SightingEditorElement time zone picker", () => {
     return element.shadowRoot!.getElementById("utcOffsetHours") as HTMLInputElement
   }
 
-  it("offers the platform's zones alongside a plain entered offset", () => {
+  it("offers the platform's zones, and \"unknown\" first", () => {
     const element = mount()
     const options = [...(element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement).options]
 
@@ -5778,16 +5778,32 @@ describe("SightingEditorElement time zone picker", () => {
     expect(element.sightingData.utcOffsetHours).toBe(2)
   })
 
-  it("stops the offset being typed while a zone is deciding it, and hands it back when none is", () => {
+  it("follows a zone's offset, and leaves the number free to type: the zone is the one in force only while the number is its own", () => {
     const element = mount()
     setInput(element, "obs-time", "1965-07-01T05:45")
     pickZone(element, "Europe/Paris")
-    expect(offset(element).readOnly).toBe(true)
+    expect(offset(element).readOnly).toBe(false)
+    const select = element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement
+
+    // The number the zone gives: the zone stays.
+    setInput(element, "utcOffsetHours", "1")
+    expect(select.value).toBe("Europe/Paris")
+    expect(element.sightingData.timeZone).toBe("Europe/Paris")
+
+    // Another number: it is the observer's own, and the selector says no zone is stated.
+    setInput(element, "utcOffsetHours", "-7")
+    expect(select.value).toBe("")
+    expect(element.sightingData.timeZone).toBeUndefined()
+    expect(element.sightingData.utcOffsetHours).toBe(-7)
+  })
+
+  it("hands the offset back when no zone is chosen, keeping the zone's last answer as the starting point", () => {
+    const element = mount()
+    setInput(element, "obs-time", "1965-07-01T05:45")
+    pickZone(element, "Europe/Paris")
 
     pickZone(element, "")
 
-    expect(offset(element).readOnly).toBe(false)
-    // The zone's last answer stays as the observer's starting point.
     expect(element.sightingData.utcOffsetHours).toBe(1)
     expect(element.sightingData.timeZone).toBeUndefined()
   })
@@ -5852,7 +5868,6 @@ describe("SightingEditorElement time zone picker", () => {
     }
 
     expect((element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement).value).toBe("Europe/Paris")
-    expect(offset(element).readOnly).toBe(true)
   })
 })
 

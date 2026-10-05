@@ -96,7 +96,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   placeSearchFailed: "Ricerca dei luoghi momentaneamente non disponibile",
   utcOffsetImplausible:
     "Questo fuso orario non corrisponde alla longitudine inserita, la cui ora solare è UTC{solar} — eppure la scena e il rilevamento meteo obbediscono a ciò che è dichiarato qui. Svuota il campo per ricavarlo dalla longitudine.",
-  timeZoneManual: "scarto inserito",
+  timeZoneManual: "sconosciuto",
   altitudeAboveSeaLevel:
     "Altitudine dell'osservatore sul livello del mare — il suolo del luogo inserito ne fissa il minimo: un osservatore sulle Alpi non è a 0 m.",
   groundAt: "suolo a {m} m",

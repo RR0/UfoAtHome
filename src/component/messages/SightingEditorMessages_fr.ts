@@ -96,7 +96,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   placeSearchFailed: "Recherche de lieu momentanément indisponible",
   utcOffsetImplausible:
     "Ce fuseau ne correspond pas à la longitude saisie, dont l'heure solaire est UTC{solar} — la scène et le relevé météo obéissent pourtant à ce qui est déclaré ici. Videz le champ pour le déduire de la longitude.",
-  timeZoneManual: "décalage saisi",
+  timeZoneManual: "inconnu",
   altitudeAboveSeaLevel:
     "Altitude de l'observateur au-dessus du niveau de la mer — le sol du lieu saisi en fixe le minimum : un observateur dans les Alpes n'est pas à 0 m.",
   groundAt: "sol à {m} m",

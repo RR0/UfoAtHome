@@ -1943,7 +1943,6 @@ export class SightingEditorElement extends HTMLElement {
     this.chooseTimeInputMode()
     this.syncObserverMetadataFields()
     this.refreshTimeZoneOptions()
-    this.utcOffsetInput.readOnly = this.ufoElement.sighting.event.timeZone !== undefined
     this.syncUtcOffsetField()
     this.syncPlaceNameField()
     this.syncGroundElevationField()
@@ -3047,9 +3046,9 @@ export class SightingEditorElement extends HTMLElement {
     this.timeZoneSelect.value = this.ufoElement.sighting.event.timeZone ?? ""
   }
 
-  /** Picking a zone hands the offset over to that zone's own rules; picking the manual entry hands
-   * it back to the observer, keeping whatever number the zone last produced as their starting
-   * point. */
+  /** Picking a zone hands the offset over to that zone's own rules (the number follows it, and typing a
+   * different one puts the selector back on "unknown"); picking "unknown" lets the number stand as the
+   * observer's own, keeping whatever the zone last produced as their starting point. */
   private updateTimeZone(): void {
     const zone = this.stringOrUndefined(this.timeZoneSelect.value)
     this.ufoElement.sighting.event.timeZone = zone
@@ -3066,16 +3065,24 @@ export class SightingEditorElement extends HTMLElement {
     const event = this.ufoElement.sighting.event
     const derived = event.timeZone && event.time ? this.timeZones.offsetHoursAt(event.timeZone, event.time) : undefined
     if (derived !== undefined) event.utcOffsetHours = derived
-    // Read-only, not disabled: the number is still the thing that matters and still worth reading,
-    // it just isn't the observer's to type while a zone is deciding it.
-    this.utcOffsetInput.readOnly = event.timeZone !== undefined
     this.syncUtcOffsetField()
     this.ufoElement.refresh()
     this.scheduleWeatherLookup()
   }
 
   private updateUtcOffset(): void {
-    this.ufoElement.sighting.event.utcOffsetHours = this.numberOrUndefined(this.utcOffsetInput.value)
+    const event = this.ufoElement.sighting.event
+    event.utcOffsetHours = this.numberOrUndefined(this.utcOffsetInput.value)
+    // A number the zone would not give is the observer saying the clock was another one: the zone is no longer the one in
+    // force, and the selector follows what was typed — unknown, a zone nobody stated. The same number keeps the zone.
+    if (event.timeZone) {
+      const derived = event.time ? this.timeZones.offsetHoursAt(event.timeZone, event.time) : undefined
+      if (derived === undefined || derived !== event.utcOffsetHours) {
+        event.timeZone = undefined
+        this.autoFilledTimeZone = undefined
+        this.timeZoneSelect.value = ""
+      }
+    }
     this.updateUtcOffsetValidity()
     this.ufoElement.refresh()
     // The offset is what turns the observer's wall clock into a real instant, so it decides which

@@ -96,7 +96,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   placeSearchFailed: "Búsqueda de lugares no disponible por el momento",
   utcOffsetImplausible:
     "Esta zona horaria no corresponde a la longitud introducida, cuya hora solar es UTC{solar} — aun así, la escena y el registro meteorológico obedecen a lo que se declara aquí. Vacía el campo para deducirla de la longitud.",
-  timeZoneManual: "desfase introducido",
+  timeZoneManual: "desconocido",
   altitudeAboveSeaLevel:
     "Altitud del observador sobre el nivel del mar — el suelo del lugar introducido fija su mínimo: un observador en los Alpes no está a 0 m.",
   groundAt: "suelo a {m} m",
