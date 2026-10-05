@@ -65,7 +65,7 @@ const TEMPLATE = `
   <div class="row fields">
     <label><span id="label-case-id">ID</span> <input id="case-id" type="text" size="18"/></label>
     <label><span id="label-case-title">Title</span> <input id="case-title" type="text" size="24"/></label>
-    <div class="field"><span id="label-case-time">When</span> <rr0-date-input id="case-date" name="case-time" toggle></rr0-date-input></div>
+    <div class="field"><span id="label-case-time">When</span> <rr0-date-input id="case-date" name="case-time"></rr0-date-input></div>
   </div>
   <h3 id="recordings-heading">Observations</h3>
   <div class="row recordings">
@@ -476,7 +476,7 @@ export class CaseEditorElement extends HTMLElement {
       text.value = raw
     }
     if (this.dateModeFor !== session) {
-      this.caseDate.setMode(raw !== "" && !time || !EdtfDateField.opensInPicker(time))
+      this.caseDate.setPrecise(!(raw !== "" && !time) && EdtfDateField.opensPrecise(time))
       this.dateModeFor = session
     }
   }

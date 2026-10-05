@@ -5293,19 +5293,13 @@ describe("SightingEditorElement date picker", () => {
     input.dispatchEvent(new Event("change"))
   }
 
-  function choose(element: SightingEditorElement, id: string, value: string): void {
-    const select = control<HTMLSelectElement>(element, id)
-    select.value = value
-    select.dispatchEvent(new Event("change"))
-  }
-
   /** Whether the start date shows its text rather than its picker: each date has a toggle of its own. */
   function edtfMode(element: SightingEditorElement): boolean {
     return !control<HTMLInputElement>(element, "obs-time").hidden
   }
 
   function toggleOf(element: SightingEditorElement, name: string): HTMLButtonElement {
-    return element.shadowRoot!.querySelector(`rr0-date-input[name="${name}"] button`) as HTMLButtonElement
+    return element.shadowRoot!.querySelector(`rr0-date-input[name="${name}"] button.edtf-mode`) as HTMLButtonElement
   }
 
   const COMPLETE = { version: 1 as const, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 }, timeline: { keyframes: [] }, durationSeconds: 10 }
@@ -5320,19 +5314,29 @@ describe("SightingEditorElement date picker", () => {
     expect(control<HTMLInputElement>(element, "obs-time").value).toBe("1965-07-01T05:45")
   })
 
-  // "Around 05:45" is a complete instant plus one character, so it needs no text mode at all.
-  it("qualifies a picked instant without leaving the picker, and replaces rather than stacks", () => {
+  // "Around 05:45" is a doubt, which a picker cannot say: it is said in EDTF, as the last character of the text.
+  it("says a doubt in EDTF, where the text carries it as its last character", () => {
     const element = mount()
-    pick(element, "obs-time-native", "1965-07-01T05:45")
-
-    choose(element, "obs-time-qualifier", "~")
+    const typeIn = (value: string): void => {
+      const input = control<HTMLInputElement>(element, "obs-time")
+      input.value = value
+      input.dispatchEvent(new Event("input"))
+    }
+    toggleOf(element, "obs-time").click()
+    typeIn("1965-07-01T05:45~")
     expect(element.sightingData.time!.raw).toBe("1965-07-01T05:45~")
-
-    choose(element, "obs-time-qualifier", "?")
+    typeIn("1965-07-01T05:45?")
     expect(element.sightingData.time!.raw).toBe("1965-07-01T05:45?")
-
-    choose(element, "obs-time-qualifier", "")
+    typeIn("1965-07-01T05:45")
     expect(element.sightingData.time!.raw).toBe("1965-07-01T05:45")
+  })
+
+  it("opens a date in doubt in EDTF, and an exact full instant in the picker", () => {
+    const element = mount()
+    element.sightingData = { ...COMPLETE, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45, raw: "1948-07-24T02:45~" } }
+    expect(edtfMode(element)).toBe(true)
+    element.sightingData = COMPLETE
+    expect(edtfMode(element)).toBe(false)
   })
 
   it("opens on the picker for an instant it can hold, and on the text field for one it cannot", () => {

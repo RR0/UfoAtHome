@@ -255,6 +255,11 @@ export interface SightingEditorMessages extends SightingLabels {
   timeQualifierBoth: string
   /** Title of the switch between the native picker and the EDTF text field — the picker cannot
    * state a bare year, a month, or a time without a date. */
+  datePrecise: string
+  dateEdtf: string
+  dateHelpTitle: string
+  /** One line per line of the string. */
+  dateHelpLines: string
   edtfModeTitle: string
   locationGroup: string
   observationGroup: string

@@ -265,13 +265,12 @@ export const html = `
          canonical whichever control produced it, which matters because formatEdtfTime returns it
          verbatim and would otherwise display a stale string over fresh numbers. -->
     <label><span id="label-observation-time">Observation start</span>
-      <!-- The whole of what this parser can qualify is one optional [?~%] on the whole value (see EDTF_TIME_PATTERN, which by its own
-           doc comment has no per-component qualifiers): four states, so a select says all of it — and it composes with a complete date,
-           which is why "vers 05:00" needs no text mode at all. See DateInputElement for the controls it makes (obs-time-native, obs-time,
-           obs-time-qualifier). -->
-      <rr0-date-input name="obs-time" toggle></rr0-date-input></label>
+      <!-- A date is precise (a picker) or said in EDTF (a text: a year, a month, a time with no date, or a doubt: one optional [?~%] at the
+           end of the value, see EDTF_TIME_PATTERN, which by its own doc comment has no per-component qualifiers). See DateInputElement
+           for the controls it makes (obs-time-native, obs-time) and the button that swaps them. -->
+      <rr0-date-input name="obs-time"></rr0-date-input></label>
     <label><span id="label-observation-end-time">Observation end</span>
-      <rr0-date-input name="obs-end-time" toggle></rr0-date-input></label>
+      <rr0-date-input name="obs-end-time"></rr0-date-input></label>
     <label><span id="label-duration">Duration</span> <input id="durationSeconds" type="number" min="0" max="86400" step="0.1" placeholder="observation length" aria-required="true"/> s</label>
     <!-- The zone is the RULE, the number is what that rule produced for this sighting's own date —
          summer time included, and as it was then (see engine/time/TimeZones.ts). Pick a zone and

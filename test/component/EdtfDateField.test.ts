@@ -11,50 +11,52 @@ const make = () => {
   const told: (SightingTime | undefined)[] = []
   const element = document.createElement("rr0-date-input") as DateInputElement
   element.addEventListener("datechange", event => told.push((event as CustomEvent<{ time: SightingTime | undefined }>).detail.time))
-  element.build()
-  const field = element.field
+  document.body.appendChild(element)
   const picker = element.querySelector("input[type=datetime-local]") as HTMLInputElement
   const text = element.querySelector("input[type=text]") as HTMLInputElement
-  const qualifier = element.querySelector("select") as HTMLSelectElement
-  return { element, field, picker, text, qualifier, told }
+  const mode = element.querySelector("button.edtf-mode") as HTMLButtonElement
+  const deduction = element.querySelector(".edtf-deduction") as HTMLElement
+  const help = element.querySelector("button.edtf-help") as HTMLButtonElement
+  const popup = element.querySelector(".edtf-helppop") as HTMLElement
+  return { element, field: element.field, picker, text, mode, deduction, help, popup, told }
 }
 
 describe("EdtfDateField", () => {
-  it("says which times a picker can hold: a full instant, with or without seconds", () => {
+  it("says which times a picker can hold, and which a date opens precise on: an exact full instant", () => {
     expect(EdtfDateField.isPickable(parseEdtfTime("1965-07-01T05:00"))).toBe(true)
     expect(EdtfDateField.isPickable(parseEdtfTime("1965-07-01T05:00:30"))).toBe(true)
     expect(EdtfDateField.isPickable(parseEdtfTime("1965-07-01"))).toBe(false)
     expect(EdtfDateField.isPickable(parseEdtfTime("1954"))).toBe(false)
-    expect(EdtfDateField.opensInPicker(undefined, parseEdtfTime("1965-07-01T05:00"))).toBe(true)
-    expect(EdtfDateField.opensInPicker(parseEdtfTime("1954"))).toBe(false)
+    expect(EdtfDateField.opensPrecise(undefined, parseEdtfTime("1965-07-01T05:00"))).toBe(true)
+    expect(EdtfDateField.opensPrecise(parseEdtfTime("1954"))).toBe(false)
+    // A doubt is not something a picker can say.
+    expect(EdtfDateField.opensPrecise(parseEdtfTime("1965-07-01T05:00~"))).toBe(false)
+    expect(EdtfDateField.opensPrecise(parseEdtfTime("1965-07-01T05:00?"))).toBe(false)
   })
 
-  it("shows a time in the picker, the text and the qualifier, whichever it can", () => {
-    const { field, picker, text, qualifier } = make()
+  it("shows a time in the picker and the text, the doubt staying at the end of the text", () => {
+    const { field, picker, text } = make()
     field.set(parseEdtfTime("1965-07-01T05:00~"))
     expect(picker.value).toBe("1965-07-01T05:00")
-    // The date alone in the text; how sure it is stands in the qualifier, whichever way the date is shown.
-    expect(text.value).toBe("1965-07-01T05:00")
-    expect(qualifier.value).toBe("~")
+    expect(text.value).toBe("1965-07-01T05:00~")
     field.set(parseEdtfTime("1954"))
     expect(picker.value).toBe("")
     expect(text.value).toBe("1954")
-    expect(qualifier.value).toBe("")
     field.set(parseEdtfTime("1965-07-01T05:00:30"))
     expect(picker.step).toBe("1")
   })
 
-  it("tells what the picker and its qualifier say, as the time a typed text would give", () => {
-    const { picker, qualifier, told } = make()
+  it("tells what the picker says, as the time a typed text would give", () => {
+    const { picker, told } = make()
     picker.value = "1965-07-01T05:00"
-    qualifier.value = "?"
     picker.dispatchEvent(new Event("change"))
     expect(told).toHaveLength(1)
-    expect(told[0]).toEqual(parseEdtfTime("1965-07-01T05:00?"))
+    expect(told[0]).toEqual(parseEdtfTime("1965-07-01T05:00"))
   })
 
   it("tells nothing of a text that does not read yet, and flags it only on blur", () => {
-    const { text, told } = make()
+    const { field, text, told } = make()
+    field.setPrecise(false)
     text.value = "1965-07-"
     text.dispatchEvent(new Event("input"))
     expect(told).toEqual([])
@@ -67,45 +69,68 @@ describe("EdtfDateField", () => {
     expect(told).toHaveLength(1)
   })
 
-  it("tells that the date was cleared, and a picker half entered is not a clearing", () => {
-    const { field, picker, text, told } = make()
+  it("tells that the date was cleared", () => {
+    const { field, text, told } = make()
     field.set(parseEdtfTime("1965-07-01T05:00"))
     text.value = ""
     text.dispatchEvent(new Event("input"))
     expect(told).toEqual([undefined])
-    // badInput is the browser's: jsdom has none, so only the cleared case is checked here.
-    expect(picker.value).toBe("1965-07-01T05:00")
   })
 
-  it("swaps the picker for the text, and back, without writing anything", () => {
-    const { field, picker, text, qualifier, told } = make()
-    field.setMode(true)
-    expect([picker.hidden, text.hidden, qualifier.hidden]).toEqual([true, false, false])
-    field.setMode(false)
-    expect([picker.hidden, text.hidden, qualifier.hidden]).toEqual([false, true, false])
+  it("has a button that says how the date is said — precise or EDTF — and swaps the two without writing anything", () => {
+    const { field, picker, text, mode, told } = make()
+    expect(mode.textContent).toBe("precise")
+    expect([picker.hidden, text.hidden]).toEqual([false, true])
+    mode.click()
+    expect(mode.textContent).toBe("EDTF")
+    expect([picker.hidden, text.hidden]).toEqual([true, false])
+    expect(field.isPrecise).toBe(false)
+    mode.click()
+    expect(mode.textContent).toBe("precise")
     expect(told).toEqual([])
   })
-})
 
-describe("EdtfDateField qualifier", () => {
-  it("moves a qualifier typed after the date into the qualifier, so that there is one place to say it", () => {
-    const { text, qualifier, told } = make()
-    text.value = "2025-06?"
+  it("shows what it understood of the text, above it: a date in words, with its doubt", () => {
+    const { field, text, deduction } = make()
+    field.setPrecise(false)
+    text.value = "1965-07?"
     text.dispatchEvent(new Event("input"))
-    expect(text.value).toBe("2025-06")
-    expect(qualifier.value).toBe("?")
-    expect(told[0]).toEqual(parseEdtfTime("2025-06?"))
+    expect(deduction.hidden).toBe(false)
+    expect(deduction.textContent).toContain("July 1965")
+    expect(deduction.textContent).toContain("uncertain")
+    text.value = "1965-07-01T05:00~"
+    text.dispatchEvent(new Event("input"))
+    expect(deduction.textContent).toContain("July 1, 1965")
+    expect(deduction.textContent).toContain("05:00")
+    expect(deduction.textContent).toContain("approximate")
+    text.value = "05:00"
+    text.dispatchEvent(new Event("input"))
+    expect(deduction.textContent).toBe("→ 05:00")
   })
 
-  it("qualifies a date typed as text, from the qualifier beside it", () => {
-    const { field, text, qualifier, told } = make()
-    field.setMode(true)
-    text.value = "1965"
+  it("says that the text is not understood, in place of a deduction, and shows none while the date is precise", () => {
+    const { field, text, deduction } = make()
+    field.setPrecise(false)
+    text.value = "not a date"
     text.dispatchEvent(new Event("input"))
-    qualifier.value = "~"
-    qualifier.dispatchEvent(new Event("change"))
-    expect(told[told.length - 1]).toEqual(parseEdtfTime("1965~"))
-    expect(text.value).toBe("1965") // the date was not erased by choosing how sure it is
+    expect(deduction.textContent).not.toContain("→")
+    expect(deduction.classList.contains("bad")).toBe(true)
+    field.setPrecise(true)
+    expect(deduction.hidden).toBe(true)
+  })
+
+  it("offers a (?) in the text field, only while the text shows, which opens the syntax it takes", () => {
+    const { field, help, popup } = make()
+    expect(help.hidden).toBe(true)
+    field.setPrecise(false)
+    expect(help.hidden).toBe(false)
+    expect(popup.hidden).toBe(true)
+    help.click()
+    expect(popup.hidden).toBe(false)
+    expect(popup.textContent).toContain("1965-07-01T05:00")
+    expect(popup.textContent).toContain("?")
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
+    expect(popup.hidden).toBe(true)
   })
 })
 
@@ -116,20 +141,7 @@ describe("<rr0-date-input>", () => {
     document.body.appendChild(element)
     expect(element.querySelector("#obs-time-native")).not.toBeNull()
     expect(element.querySelector("#obs-time")).not.toBeNull()
-    expect(element.querySelector("#obs-time-qualifier")).not.toBeNull()
-    expect(element.querySelector("button")).toBeNull() // no toggle unless asked for
-    element.remove()
-  })
-
-  it("has a toggle of its own when asked, which swaps the picker for the text", () => {
-    const element = document.createElement("rr0-date-input") as DateInputElement
-    element.setAttribute("toggle", "")
-    document.body.appendChild(element)
-    const toggle = element.querySelector("button")!
-    expect(element.edtf).toBe(false)
-    toggle.click()
-    expect(element.edtf).toBe(true)
-    expect(toggle.getAttribute("aria-pressed")).toBe("true")
+    expect(element.querySelector("select")).toBeNull() // no third control for a doubt
     element.remove()
   })
 
@@ -140,6 +152,7 @@ describe("<rr0-date-input>", () => {
     document.body.appendChild(element)
     element.time = parseEdtfTime("1965-07-01T05:00")
     expect(told).toEqual([])
+    element.setPrecise(false)
     const text = element.querySelector("input[type=text]") as HTMLInputElement
     text.value = "1965"
     text.dispatchEvent(new Event("input"))

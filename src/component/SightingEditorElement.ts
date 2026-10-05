@@ -4526,9 +4526,9 @@ export class SightingEditorElement extends HTMLElement {
    */
   private chooseTimeInputMode(): void {
     const event = this.ufoElement.sighting.event
-    // Each date opens the way it can be said: the picker for a full instant, the text for less. Its own toggle changes that after.
-    this.startDate.setMode(!EdtfDateField.opensInPicker(event.time))
-    this.endDate.setMode(!EdtfDateField.opensInPicker(event.endTime))
+    // Each date opens the way it can be said: precise (the picker) for an exact full instant, EDTF (the text) for anything less or in doubt. Its own toggle changes that after.
+    this.startDate.setPrecise(EdtfDateField.opensPrecise(event.time))
+    this.endDate.setPrecise(EdtfDateField.opensPrecise(event.endTime))
   }
 
   private syncObservationTimeFields(): void {

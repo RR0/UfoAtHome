@@ -1,131 +1,129 @@
 import { formatEdtfTime, parseEdtfTime } from "../engine/model/Sighting.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 
-/** What a date field says in words: its qualifiers, and what is wrong with a text it cannot read. */
+/** What a date field says in words. */
 export interface EdtfDateFieldMessages {
   edtfInvalid: string
-  timeQualifierExact: string
+  /** What the mode button reads while the date is precise, and while it is said in EDTF. */
+  datePrecise: string
+  dateEdtf: string
+  /** The mode button's tooltip. */
+  edtfModeTitle: string
+  /** How a doubt reads in what is deduced from a text: "approximate", "uncertain", "approximate and uncertain". */
   timeQualifierApproximate: string
   timeQualifierUncertain: string
   timeQualifierBoth: string
-  /** The text field's placeholder and its tooltip, when the field has any to say. */
+  /** The text field's placeholder and its tooltip. */
   edtfPlaceholder?: string
-  /** The toggle between the picker and the text, when the field has one of its own. */
-  edtfModeTitle?: string
+  /** The help popup: its title, and its lines, one per line of the string. */
+  dateHelpTitle: string
+  dateHelpLines: string
 }
 
-/** The three controls one date is said with. */
+/** The controls one date is said with. */
 export interface EdtfDateParts {
-  /** A date and a time to the minute (or the second), by the browser's own picker. */
+  /** A date and a time to the minute (or the second), by the browser's own picker: for a date that is precise. */
   picker: HTMLInputElement
-  /** The same date as text, for what the picker cannot hold: a bare year, a month, a second. */
+  /** The same date as EDTF text, for what the picker cannot hold: a bare year, a month, a time with no date, a doubt. */
   text: HTMLInputElement
-  /** How sure it is: none, `~` approximate, `?` uncertain, `%` both — the whole of what a value can qualify. */
-  qualifier: HTMLSelectElement
+  /** Tells which of the two says the date, and swaps them. */
+  mode: HTMLButtonElement
+  /** What is deduced from the text, shown above it. */
+  deduction?: HTMLElement
+  /** The (?) inside the text field that opens the help on the syntax: only there while the text is what shows. */
+  help?: HTMLElement
 }
 
 /**
- * A date said two ways, and written to whoever asks as one thing: a time as a recording states it
- * (see SightingTime, which carries as much of it as was known, and EDTF for the text it is written as).
+ * A date said one of two ways, and written to whoever asks as one thing: a time as a recording states it
+ * (see SightingTime, which carries as much of it as was known).
  *
- * The picker is the default because a reconstruction needs a full instant to compute a sky at all;
- * the text is not removed, only folded away, because the corpus says otherwise — most case files
- * state a bare year, and a case does not need an instant. The picker writes THROUGH the text: it
- * composes an EDTF string, puts it in the field and goes down the path a typed one goes, so there is
- * one parse, one validation, and the stored string stays canonical whichever control wrote it.
+ * A date is either PRECISE — a full instant, which a picker holds, and which is exact — or it is said in
+ * EDTF: a bare year, a month, a time with no date, or any date with a doubt (`?` uncertain, `~` approximate,
+ * `%` both), which only a text holds. The mode button says which it is and swaps them. There is no third
+ * control for the doubt: it is the last character of the text, as the format has it.
+ *
+ * The picker writes THROUGH the text: it composes an EDTF string, puts it in the field and goes down the path a
+ * typed one goes, so there is one parse, one validation, and the stored string stays canonical whichever
+ * control wrote it.
  *
  * It binds controls it is given rather than building them: see DateInputElement, the element that makes them.
  */
 export class EdtfDateField {
-  /** The four things a whole value can say about how sure it is, in the order they get less certain. */
-  private static readonly QUALIFIERS: { value: string, key: "timeQualifierExact" | "timeQualifierApproximate" | "timeQualifierUncertain" | "timeQualifierBoth" }[] = [
-    { value: "", key: "timeQualifierExact" },
-    { value: "~", key: "timeQualifierApproximate" },
-    { value: "?", key: "timeQualifierUncertain" },
-    { value: "%", key: "timeQualifierBoth" }
-  ]
-
-  private edtfMode = false
+  private precise = true
 
   /**
    * @param onChange Told what the field now says: a time, or `undefined` once it is cleared. Never told
    *   of a text that does not read yet (it is half typed), nor of a picker that is half entered.
+   * @param locale What a deduction is worded in: a language tag, as `Intl` takes it.
    */
   constructor(
     private readonly parts: EdtfDateParts,
     private messages: EdtfDateFieldMessages,
-    private readonly onChange: (time: SightingTime | undefined) => void
+    private readonly onChange: (time: SightingTime | undefined) => void,
+    private locale = "en"
   ) {
     this.setMessages(messages)
-    parts.text.addEventListener("input", () => this.readText())
+    parts.text.addEventListener("input", () => {
+      this.readText()
+      this.showDeduction()
+    })
     // "change", not "input": a datetime-local reports an empty value while it is still half typed,
     // and only a committed change can be told apart from a field in mid-entry.
     parts.picker.addEventListener("change", () => this.writeFromPicker())
-    // Beside the picker it rewrites the date the picker holds; beside the text, the date typed.
-    parts.qualifier.addEventListener("change", () => (this.edtfMode ? this.readText() : this.writeFromPicker()))
+    parts.mode.addEventListener("click", () => this.setPrecise(!this.precise))
     // Diagnosed on blur only, never while the text is being typed: a live "you're wrong" on every
     // character of "1965-07-01T05:00" is illegible and distracting.
     parts.text.addEventListener("blur", () => this.validate())
+    parts.text.addEventListener("focus", () => this.showDeduction())
   }
 
-  /** A button of its own that swaps the picker for the text, when the field has one (see DateInputElement). */
-  toggle?: HTMLButtonElement
-
-  /** Whether the text is what shows, rather than the picker. */
-  get edtf(): boolean {
-    return this.edtfMode
+  /** Whether the date is said as a precise instant, in the picker, rather than in EDTF. */
+  get isPrecise(): boolean {
+    return this.precise
   }
 
-  /** Words the field again — its qualifiers, its placeholder — keeping the qualifier chosen. */
-  setMessages(messages: EdtfDateFieldMessages): void {
+  /** Words the field again — its mode button, its placeholder — and what a deduction is worded in. */
+  setMessages(messages: EdtfDateFieldMessages, locale = this.locale): void {
     this.messages = messages
-    const select = this.parts.qualifier
-    const chosen = select.value
-    select.replaceChildren(...EdtfDateField.QUALIFIERS.map(qualifier => {
-      const option = select.ownerDocument.createElement("option")
-      option.value = qualifier.value
-      option.textContent = messages[qualifier.key]
-      return option
-    }))
-    select.value = chosen
+    this.locale = locale
     if (messages.edtfPlaceholder !== undefined) this.parts.text.placeholder = messages.edtfPlaceholder
-    if (this.toggle && messages.edtfModeTitle !== undefined) {
-      this.toggle.title = messages.edtfModeTitle
-      this.toggle.setAttribute("aria-label", messages.edtfModeTitle)
-    }
+    this.parts.mode.title = messages.edtfModeTitle
+    this.parts.mode.setAttribute("aria-label", messages.edtfModeTitle)
+    this.setPrecise(this.precise)
   }
 
-  /** Shows one of the two ways of saying a date. Writes nothing: a mode is a way of saying something, not a statement. */
-  setMode(edtf: boolean): void {
-    this.edtfMode = edtf
-    this.parts.text.hidden = !edtf
-    this.parts.picker.hidden = edtf
-    // The qualifier is the one place how sure a date is gets said, whichever way the date is: the text holds the date alone.
-    if (this.toggle) this.toggle.setAttribute("aria-pressed", String(edtf))
+  /** Shows the picker or the text. A mode is a way of saying a date, not a statement of it: nothing is written. */
+  setPrecise(precise: boolean): void {
+    this.precise = precise
+    this.parts.picker.hidden = !precise
+    this.parts.text.hidden = precise
+    this.parts.mode.textContent = precise ? this.messages.datePrecise : this.messages.dateEdtf
+    this.parts.mode.setAttribute("aria-pressed", String(!precise))
+    if (this.parts.help) this.parts.help.hidden = precise
+    this.showDeduction()
   }
 
   /** Shows a time as the field says it, from what was loaded. Writes nothing and tells nobody. */
   set(time: SightingTime | undefined): void {
-    const { text, picker, qualifier } = this.parts
-    const whole = time ? formatEdtfTime(time) : ""
-    text.value = EdtfDateField.withoutQualifier(whole)
+    const { text, picker } = this.parts
+    text.value = time ? formatEdtfTime(time) : ""
     picker.step = EdtfDateField.stepFor(time)
     picker.value = EdtfDateField.pickerValueOf(time)
-    qualifier.value = EdtfDateField.qualifierOf(whole)
     text.setCustomValidity("")
     text.classList.remove("invalid")
-  }
-
-  /** The way in to open on: the picker when what is stated is a full instant (or nothing), the text otherwise. */
-  static opensInPicker(...times: (SightingTime | undefined)[]): boolean {
-    return times.every(time => time === undefined || EdtfDateField.isPickable(time))
+    this.showDeduction()
   }
 
   /**
-   * Whether a stated time is one the native picker can hold: a full instant to the minute. Seconds
-   * count too: a datetime-local holds them once its step is a second. A qualifier is no obstacle: the
-   * select beside the picker carries it.
+   * The way in to open on: precise when what is stated is an exact full instant (or nothing at all), EDTF otherwise —
+   * a doubt, a bare year or a time with no date is not something a picker can hold.
    */
+  static opensPrecise(...times: (SightingTime | undefined)[]): boolean {
+    return times.every(time => time === undefined || (EdtfDateField.isPickable(time) && EdtfDateField.qualifierOf(formatEdtfTime(time)) === ""))
+  }
+
+  /** Whether a stated time is a full instant to the minute, which the native picker can hold (seconds too, once stepped to them). */
   static isPickable(time: SightingTime | undefined): boolean {
     return !!time && time.year !== undefined && time.month !== undefined && time.day !== undefined &&
       time.hour !== undefined && time.minute !== undefined
@@ -144,15 +142,53 @@ export class EdtfDateField {
     return time?.second ? "1" : "60"
   }
 
-  /** An EDTF value without its trailing [?~%]: the date alone, which is what the text holds. */
-  static withoutQualifier(edtf: string): string {
-    return EdtfDateField.qualifierOf(edtf) === "" ? edtf.trim() : edtf.trim().slice(0, -1)
-  }
-
-  /** The trailing [?~%] of an EDTF value, or "" — the only qualifier a value carries. */
+  /** The trailing [?~%] of an EDTF value, or "" — the only doubt a value carries. */
   static qualifierOf(edtf: string): string {
     const last = edtf.trim().slice(-1)
     return "?~%".includes(last) ? last : ""
+  }
+
+  /**
+   * What a time says, in words: "11 May 1950, 19:45", "May 1950 — uncertain", "05:00 — approximate".
+   * What an author reads above the text to be sure of what was understood.
+   */
+  describe(time: SightingTime): string {
+    const raw = formatEdtfTime(time)
+    const doubt = EdtfDateField.qualifierOf(raw)
+    const pad = (n: number): string => String(n).padStart(2, "0")
+    const parts: string[] = []
+    if (time.year !== undefined) {
+      const options: Intl.DateTimeFormatOptions = time.day !== undefined
+        ? { year: "numeric", month: "long", day: "numeric" }
+        : time.month !== undefined ? { year: "numeric", month: "long" } : { year: "numeric" }
+      // A date built in UTC, so that the reader's own zone cannot move the day.
+      const date = new Date(Date.UTC(time.year, (time.month ?? 1) - 1, time.day ?? 1))
+      parts.push(new Intl.DateTimeFormat(this.locale, { ...options, timeZone: "UTC" }).format(date))
+    }
+    if (time.hour !== undefined) {
+      parts.push(`${pad(time.hour)}:${pad(time.minute ?? 0)}${time.second !== undefined ? `:${pad(time.second)}` : ""}`)
+    }
+    const said = parts.join(", ")
+    const word = doubt === "~" ? this.messages.timeQualifierApproximate
+      : doubt === "?" ? this.messages.timeQualifierUncertain
+        : doubt === "%" ? this.messages.timeQualifierBoth : ""
+    return word ? `${said} — ${word.toLowerCase()}` : said
+  }
+
+  /** Shows, above the text, what it is understood as — or what is wrong with it. Nothing while the picker is what shows. */
+  private showDeduction(): void {
+    const { deduction, text } = this.parts
+    if (!deduction) return
+    const value = text.value.trim()
+    if (this.precise || value === "") {
+      deduction.textContent = ""
+      deduction.hidden = true
+      return
+    }
+    const parsed = parseEdtfTime(value)
+    deduction.textContent = parsed ? `→ ${this.describe(parsed)}` : this.messages.edtfInvalid
+    deduction.classList.toggle("bad", !parsed)
+    deduction.hidden = false
   }
 
   /**
@@ -161,20 +197,13 @@ export class EdtfDateField {
    * earlier blur goes the moment the text reads, so fixing a typo does not stay red while it is fixed.
    */
   private readText(): void {
-    const { text, qualifier } = this.parts
-    // A qualifier typed after the date goes where qualifiers are said, so that there is one place for it.
-    const typed = EdtfDateField.qualifierOf(text.value)
-    if (typed !== "") {
-      qualifier.value = typed
-      text.value = EdtfDateField.withoutQualifier(text.value)
-    }
-    const date = text.value.trim()
-    if (date === "") {
+    const value = this.parts.text.value.trim()
+    if (value === "") {
       this.clean()
       this.onChange(undefined)
       return
     }
-    const parsed = parseEdtfTime(`${date}${qualifier.value}`)
+    const parsed = parseEdtfTime(value)
     if (!parsed) return
     this.clean()
     this.onChange(parsed)
@@ -186,7 +215,7 @@ export class EdtfDateField {
   }
 
   /**
-   * Turns what the picker and its qualifier now say into EDTF and sends it down the typed path.
+   * Turns what the picker now says into EDTF and sends it down the typed path.
    *
    * An empty picker is two different statements, told apart by badInput: genuinely cleared, which is
    * a date withdrawn and must be recorded; or half typed, which is nothing yet and must NOT be, since
@@ -202,9 +231,9 @@ export class EdtfDateField {
 
   /** Flags a text that does not read — now, on blur, and not while it is being typed. Empty or valid: nothing to say. */
   private validate(): void {
-    const { text, qualifier } = this.parts
+    const { text } = this.parts
     const value = text.value.trim()
-    if (value === "" || parseEdtfTime(`${EdtfDateField.withoutQualifier(value)}${EdtfDateField.qualifierOf(value) || qualifier.value}`)) return
+    if (value === "" || parseEdtfTime(value)) return
     text.setCustomValidity(this.messages.edtfInvalid)
     text.classList.add("invalid")
   }
