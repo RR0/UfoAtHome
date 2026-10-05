@@ -150,20 +150,7 @@ export interface SightingEditorMessages extends SightingLabels {
    */
   export: string
   /** The case being edited: the picker of its recordings (accounts and readings), and its buttons. */
-  caseRecording: string
-  caseUntitled: string
-  caseAddReading: string
-  caseDeleteReading: string
-  caseDeleteConfirm: string
   /** The case with what was changed, as a zip. */
-  caseInterpret: string
-  caseTitleField: string
-  caseAuthorField: string
-  caseDateField: string
-  caseOfField: string
-  caseOk: string
-  caseCancel: string
-  caseExport: string
   importFile: string
   importUrl: string
   importUrlPlaceholder: string

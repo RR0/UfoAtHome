@@ -5,6 +5,7 @@
  * ES module loaded via <script type="module" src="..."></script>, no
  * separate bootstrap script needed on the page.
  */
-import { register } from "./component/SightingEditorElement.js"
+import { register } from "./component/CaseEditorElement.js"
 
+// The editor of a case, which holds the editor of a recording: both are registered.
 register()

@@ -5,6 +5,7 @@ import type { TagNames } from "./TagNames.js"
 import type { SceneNames } from "./SceneNames.js"
 import type { CloudEditorMessages } from "./CloudEditorMessages.js"
 import type { BodyEditorMessages } from "./BodyEditorMessages.js"
+import type { CaseEditorMessages } from "./CaseEditorMessages.js"
 
 export const UFO_SUPPORTED_LANGUAGES = ["en", "fr", "es", "it"] as const
 export type UfoLanguage = (typeof UFO_SUPPORTED_LANGUAGES)[number]
@@ -65,6 +66,17 @@ const bodyEditorLoaders: Record<UfoLanguage, () => Promise<BodyEditorMessages>> 
   fr: () => import("./BodyEditorMessages_fr.js").then(m => m.bodyEditorMessages_fr),
   es: () => import("./BodyEditorMessages_es.js").then(m => m.bodyEditorMessages_es),
   it: () => import("./BodyEditorMessages_it.js").then(m => m.bodyEditorMessages_it)
+}
+
+const caseEditorLoaders: Record<UfoLanguage, () => Promise<CaseEditorMessages>> = {
+  en: () => import("./CaseEditorMessages_en.js").then(m => m.caseEditorMessages_en),
+  fr: () => import("./CaseEditorMessages_fr.js").then(m => m.caseEditorMessages_fr),
+  es: () => import("./CaseEditorMessages_es.js").then(m => m.caseEditorMessages_es),
+  it: () => import("./CaseEditorMessages_it.js").then(m => m.caseEditorMessages_it)
+}
+
+export function loadCaseEditorMessages(language: UfoLanguage): Promise<CaseEditorMessages> {
+  return caseEditorLoaders[language]()
 }
 
 export function loadBodyEditorMessages(language: UfoLanguage): Promise<BodyEditorMessages> {

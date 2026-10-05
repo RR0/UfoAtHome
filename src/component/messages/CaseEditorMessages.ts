@@ -1,0 +1,33 @@
+/** What the case editor says — see CaseEditorElement. */
+export interface CaseEditorMessages {
+  recording: string
+  untitledReading: string
+  untitledObservation: string
+  interpret: string
+  interpretHint: string
+  addObservation: string
+  addObservationHint: string
+  deleteRecording: string
+  deleteReadingQuestion: string
+  deleteObservationQuestion: string
+  deleteRefused: string
+  export: string
+  interpretTitle: string
+  titleField: string
+  authorField: string
+  dateField: string
+  ofField: string
+  addTitle: string
+  sourceField: string
+  sourceBlank: string
+  sourceFile: string
+  sourceUrl: string
+  observerField: string
+  observedField: string
+  fileField: string
+  urlField: string
+  loadFailed: string
+  isACase: string
+  ok: string
+  cancel: string
+}

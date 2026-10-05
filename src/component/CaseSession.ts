@@ -104,6 +104,61 @@ export class CaseSession {
     return track
   }
 
+  /** The ids a reading may name an account by: its recording's own, once loaded. */
+  private idsOf(account: CaseTrack): string[] {
+    return account.recording?.id !== undefined ? [account.recording.id] : []
+  }
+
+  /** The readings that interpret an account. */
+  readingsOf(account: CaseTrack): CaseTrack[] {
+    const ids = this.idsOf(account)
+    return this.tracks.filter(track => track.kind === "reading" && [track.event.interpretationOf].flat().some(id => id !== undefined && ids.includes(id)))
+  }
+
+  /**
+   * Adds an observer's account to the case — a recording of its own and an event of type `sighting`
+   * listing it, as the case's others are. Its file and its id are made unique among the case's.
+   */
+  addObservation(recording: SightingRecordingJson, when?: string, title?: SaidText): CaseTrack {
+    const names = new Set(this.tracks.map(track => track.event.url))
+    const ids = new Set(this.tracks.map(track => track.recording?.id))
+    const slug = (recording.id ?? "observation").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "observation"
+    let file = `observer-${slug}.json`
+    let id = recording.id ?? slug
+    for (let n = 2; names.has(file) || ids.has(id); n++) {
+      file = `observer-${slug}-${n}.json`
+      id = `${recording.id ?? slug}-${n}`
+    }
+    const stated = { ...recording, id }
+    const directory = this.tracks[0]?.event.url?.includes("/") ? this.tracks[0].event.url.replace(/[^/]*$/, "") : ""
+    const event: CaseTrack["event"] = {
+      type: "event",
+      eventType: "sighting",
+      ...(when !== undefined ? { time: when } : {}),
+      ...(title !== undefined ? { title } : {}),
+      url: directory + file
+    }
+    this.json.events = [...(this.json.events ?? []), event]
+    const track: CaseTrack = { event, url: new URL(event.url!, this.url).href, kind: "observer", recording: stated }
+    this.tracks.push(track)
+    return track
+  }
+
+  /**
+   * Removes an observer's account from the case — unless a reading still interprets it, which would
+   * be left reading nothing. Says how many do, so that they can be deleted first.
+   */
+  deleteObservation(track: CaseTrack): { deleted: true } | { deleted: false, readings: number } {
+    if (track.kind !== "observer") return { deleted: false, readings: 0 }
+    const readings = this.readingsOf(track).length
+    if (readings > 0) return { deleted: false, readings }
+    const index = this.tracks.indexOf(track)
+    if (index < 0) return { deleted: false, readings: 0 }
+    this.tracks.splice(index, 1)
+    this.json.events = (this.json.events ?? []).filter(event => event !== track.event)
+    return { deleted: true }
+  }
+
   /** Removes a reading from the case. An account is not removed: a case is its sightings. */
   deleteReading(track: CaseTrack): boolean {
     if (track.kind !== "reading") return false

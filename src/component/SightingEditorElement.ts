@@ -24,8 +24,6 @@ import { Recorder } from "../engine/record/Recorder.js"
 import { RafSamplingClock } from "../engine/record/SamplingClock.js"
 import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
-import { CaseSession } from "./CaseSession.js"
-import type { CaseTrack } from "./CaseSession.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
@@ -575,18 +573,13 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelTags: HTMLElement
   private readonly labelImportFile: HTMLElement
   private readonly labelImportUrl: HTMLElement
-  /** The case being edited, when the editor was opened on a case.json: its recordings, and the one on show. */
-  private caseSession?: CaseSession
-  private caseCurrent?: CaseTrack
-  /** Whether the delete button has been pressed once, and waits for the second press. */
-  private readonly caseRow: HTMLElement
-  private readonly caseTrackSelect: HTMLSelectElement
-  private readonly caseAddButton: HTMLButtonElement
-  private readonly caseDeleteButton: HTMLButtonElement
-  private readonly caseExportButton: HTMLButtonElement
-  private readonly labelCaseRecording: HTMLElement
-  private readonly caseDialog: HTMLDialogElement
-  private caseDialogMode: "add" | "delete" = "add"
+  /**
+   * Set by whoever holds this recording as a reading of another (see CaseEditorElement): it has no
+   * shape of its own, and its bodies are all there is to see, even while the Shapes part is open.
+   */
+  reading = false
+  /** The shapes a body of this recording can stand for when they are not its own: those of the account it reads. */
+  accountShapeIds?: readonly string[]
   private readonly labelNarrativeSource: HTMLElement
   private readonly labelNarrativeRemember: HTMLElement
   private readonly groupTabs: HTMLButtonElement[]
@@ -1244,13 +1237,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelTags = this.shadow.getElementById("label-tags")!
     this.labelImportFile = this.shadow.getElementById("label-import-file")!
     this.labelImportUrl = this.shadow.getElementById("label-import-url")!
-    this.caseRow = this.shadow.getElementById("case-row")!
-    this.caseTrackSelect = this.shadow.getElementById("case-track") as HTMLSelectElement
-    this.caseAddButton = this.shadow.getElementById("case-add") as HTMLButtonElement
-    this.caseDeleteButton = this.shadow.getElementById("case-delete") as HTMLButtonElement
-    this.caseExportButton = this.shadow.getElementById("case-export") as HTMLButtonElement
-    this.labelCaseRecording = this.shadow.getElementById("label-case-recording")!
-    this.caseDialog = this.shadow.getElementById("case-dialog") as HTMLDialogElement
     this.labelNarrativeSource = this.shadow.getElementById("label-narrative-source")!
     this.labelNarrativeRemember = this.shadow.getElementById("label-narrative-remember")!
     this.labelShapeGroup = this.shadow.getElementById("label-shape-group")!
@@ -1514,20 +1500,6 @@ export class SightingEditorElement extends HTMLElement {
     this.exportButton.addEventListener("click", () => this.exportJson())
     this.importFileInput.addEventListener("change", () => this.importFromFile())
     this.importUrlButton.addEventListener("click", () => this.importFromUrl())
-    this.caseTrackSelect.addEventListener("change", () => {
-      const track = this.caseSession?.tracks[Number(this.caseTrackSelect.value)]
-      if (track) void this.showCaseTrack(track)
-    })
-    this.caseAddButton.addEventListener("click", () => this.askCaseReading())
-    this.caseDeleteButton.addEventListener("click", () => this.askDeleteCaseReading())
-    this.shadow.getElementById("case-form")!.addEventListener("submit", event => {
-      event.preventDefault()
-      this.closeCaseDialog()
-      if (this.caseDialogMode === "add") this.addCaseReading()
-      else this.deleteCaseReading()
-    })
-    this.shadow.getElementById("case-cancel")!.addEventListener("click", () => this.closeCaseDialog())
-    this.caseExportButton.addEventListener("click", () => void this.exportCase())
     this.accountSourceSelect.addEventListener("change", () => this.updateObserverMetadata())
     this.accountUrlInput.addEventListener("input", () => this.updateSourceUrl())
     this.accountFollowedUpSelect.addEventListener("change", () => this.updateObserverMetadata())
@@ -1884,7 +1856,7 @@ export class SightingEditorElement extends HTMLElement {
    * all (rr0.org's own editor page maps `?sighting=` onto it, so ufoathome.org/<path> opens that
    * observation for editing rather than an empty canvas). */
   static get observedAttributes(): string[] {
-    return ["src", "track"]
+    return ["src"]
   }
 
   connectedCallback(): void {
@@ -1907,7 +1879,6 @@ export class SightingEditorElement extends HTMLElement {
     if (name === "src" && newValue && newValue !== oldValue && this.isConnected) {
       void this.importFromUrl(newValue)
     }
-    // Which recording of a case it opens on is read when the case is: the attribute is set before `src`.
   }
 
   disconnectedCallback(): void {
@@ -2001,10 +1972,14 @@ export class SightingEditorElement extends HTMLElement {
         reader.readAsText(file)
       })
       const json = JSON.parse(text) as SightingRecordingJson
+      if (CaseFile.isCase(json)) {
+        if (this.offerCase(json, undefined)) return
+        throw new Error("A case has no recording to edit here")
+      }
       // A picked file has no address of its own: its relative addresses can only mean the page's.
-      this.closeCase()
       this.sceneElement.documentUrl = undefined
       this.sightingData = json
+      this.dispatchEvent(new CustomEvent("recordingloaded", { bubbles: true, composed: true }))
       // The recording now open came from a file, not from the address still sitting in the field.
       this.importUrlInput.value = ""
     } catch {
@@ -2014,191 +1989,25 @@ export class SightingEditorElement extends HTMLElement {
     }
   }
 
-  // -- A case opened for editing ------------------------------------------------------------------
+  // -- A case, which this editor does not hold ---------------------------------------------------
 
   /**
-   * Opens a case: the recordings it lists are the tracks, the accounts of the observers and the
-   * readings of them (which are recordings of their own, see InterpretationEventJson), one on show at
-   * a time. Opens on the one the `track` attribute names, else the first account.
+   * Hands a case's `case.json` to whoever edits cases (see CaseEditorElement) — the `src` attribute and the
+   * address and file fields may be given one. An editor of one recording holds no case, and says so
+   * when nobody takes it.
    */
-  private async openCase(json: Parameters<typeof CaseFile.sightingUrls>[0], url: string): Promise<void> {
-    const session = new CaseSession(json, url)
-    if (session.tracks.length === 0) throw new Error("A case with no recording has nothing to edit")
-    this.caseSession = session
-    this.caseCurrent = undefined
-    const wanted = this.getAttribute("track")
-    // Relative to the case, as a recording of it is.
-    const absolute = wanted ? new URL(wanted, url).href : undefined
-    const start = session.tracks.find(track => track.url === absolute) ?? session.tracks.find(track => track.kind === "observer") ?? session.tracks[0]
-    await this.showCaseTrack(start)
-    this.importUrlInput.value = url
+  private offerCase(json: unknown, url: string | undefined): boolean {
+    return !this.dispatchEvent(new CustomEvent("caseloaded", { detail: { json, url }, bubbles: true, composed: true, cancelable: true }))
   }
 
-  private closeCase(): void {
-    this.caseSession = undefined
-    this.caseCurrent = undefined
-    this.refreshCaseRow()
-  }
-
-  /** Keeps what the form holds in the track on show, to be put back when it is shown again. */
-  private commitCaseTrack(): void {
-    if (this.caseSession && this.caseCurrent) this.caseSession.keep(this.caseCurrent, this.sightingData)
-  }
-
-  private async loadCaseTrack(track: CaseTrack): Promise<void> {
-    if (track.recording) return
-    track.recording = (await SightingFetch.json(track.url)) as SightingRecordingJson
-    track.loaded = undefined
-  }
-
-  /** Shows a recording of the case in the form, the one on show having been kept first. */
-  private async showCaseTrack(track: CaseTrack): Promise<void> {
-    const session = this.caseSession
-    if (!session) return
-    this.commitCaseTrack()
-    try {
-      const fresh = !track.recording
-      await this.loadCaseTrack(track)
-      // A reading's `explains` are the shapes of the account it reads: that one is loaded too.
-      const account = session.accountOf(track)
-      if (account) await this.loadCaseTrack(account)
-      this.caseCurrent = track
-      this.sceneElement.documentUrl = track.url
-      this.sightingData = structuredClone(track.recording!)
-      // What the form holds right after loading is what "changed" is measured from: the form does not
-      // write a recording back byte for byte, and a track only looked at is not one to write.
-      if (fresh) session.keep(track, this.sightingData, true)
-      if (account && account.loaded === undefined) session.keep(account, account.recording!, true)
-    } catch (error) {
-      window.alert(this.importErrorFor(error))
-    }
-    this.refreshCaseRow()
-  }
-
-  /** The row just above the render: the recordings of the case, and what can be done with them. */
-  private refreshCaseRow(): void {
-    const session = this.caseSession
-    this.caseRow.hidden = session === undefined
-    this.caseExportButton.hidden = session === undefined
-    if (!session) return
-    const readings = session.tracks.filter(track => track.kind === "reading")
-    this.caseTrackSelect.replaceChildren(...session.tracks.map((track, index) => {
-      const said = this.said.read(track.event.title as never) ?? this.said.read(track.recording?.interpretation?.title as never)
-      // A reading is told from an account by the picker's order and its own title: no "Reading:" in front of every one.
-      const label = track.kind === "observer"
-        ? said ?? this.said.read(track.recording?.observer?.title as never) ?? track.event.url ?? ""
-        : said ?? this.messages.caseUntitled.replace("{n}", String(readings.indexOf(track) + 1))
-      return new Option(label, String(index))
-    }))
-    const current = this.caseCurrent ? session.tracks.indexOf(this.caseCurrent) : 0
-    this.caseTrackSelect.value = String(Math.max(0, current))
-    // Only an account that no reading is of can be interpreted; only a reading can be deleted.
-    this.caseAddButton.hidden = this.caseCurrent?.kind !== "observer"
-    this.caseDeleteButton.hidden = this.caseCurrent?.kind !== "reading"
-  }
-
-  /** Opens the dialog that asks what the reading is: its title, its author, when it was elaborated, what it interprets. */
-  private askCaseReading(): void {
-    const session = this.caseSession
-    if (!session || this.caseCurrent?.kind !== "observer") return
-    this.caseDialogMode = "add"
-    const field = (id: string): HTMLInputElement => this.shadow.getElementById(id) as HTMLInputElement
-    const messages = this.messages
-    this.shadow.getElementById("case-dialog-message")!.hidden = true
-    this.shadow.getElementById("case-dialog-fields")!.hidden = false
-    this.shadow.getElementById("label-case-title")!.textContent = messages.caseTitleField
-    this.shadow.getElementById("label-case-author")!.textContent = messages.caseAuthorField
-    this.shadow.getElementById("label-case-date")!.textContent = messages.caseDateField
-    this.shadow.getElementById("label-case-of")!.textContent = messages.caseOfField
-    this.shadow.getElementById("case-ok")!.textContent = messages.caseOk
-    this.shadow.getElementById("case-cancel")!.textContent = messages.caseCancel
-    field("case-title").value = ""
-    field("case-author").value = ""
-    field("case-date").value = new Date().toISOString().slice(0, 10)
-    const accounts = session.tracks.filter(track => track.kind === "observer")
-    const of = this.shadow.getElementById("case-of") as HTMLSelectElement
-    of.replaceChildren(...accounts.map(track => new Option(
-      this.said.read(track.event.title as never) ?? this.said.read(track.recording?.observer?.title as never) ?? track.event.url ?? "",
-      String(session.tracks.indexOf(track)))))
-    of.value = String(session.tracks.indexOf(this.caseCurrent))
-    this.showCaseDialog()
-    field("case-title").focus()
-  }
-
-  private closeCaseDialog(): void {
-    if (typeof this.caseDialog.close === "function") this.caseDialog.close()
-    else this.caseDialog.removeAttribute("open")
-  }
-
-  private showCaseDialog(): void {
-    if (typeof this.caseDialog.showModal === "function") this.caseDialog.showModal()
-    else this.caseDialog.setAttribute("open", "")
-  }
-
-  /** Adds a reading of the account chosen in the dialog, and opens it. */
-  private addCaseReading(): void {
-    const session = this.caseSession
-    if (!session) return
-    this.commitCaseTrack()
-    const value = (id: string): string => (this.shadow.getElementById(id) as HTMLInputElement).value.trim()
-    const account = session.tracks[Number(value("case-of"))]
-    if (account?.kind !== "observer" || !account.recording) return
-    const title = value("case-title")
-    const author = value("case-author")
-    const reading = session.addReading(account, value("case-date") || new Date().toISOString().slice(0, 10),
-      title !== "" ? title : undefined, author !== "" ? [{ title: author }] : undefined)
-    void this.showCaseTrack(reading)
-  }
-
-  /** Asks, in the dialog, whether to delete the reading on show: a native confirm is refused in a pane. */
-  private askDeleteCaseReading(): void {
-    if (this.caseCurrent?.kind !== "reading") return
-    this.caseDialogMode = "delete"
-    const message = this.shadow.getElementById("case-dialog-message")!
-    message.textContent = this.messages.caseDeleteConfirm
-    message.hidden = false
-    this.shadow.getElementById("case-dialog-fields")!.hidden = true
-    this.shadow.getElementById("case-ok")!.textContent = this.messages.caseOk
-    this.shadow.getElementById("case-cancel")!.textContent = this.messages.caseCancel
-    this.showCaseDialog()
-  }
-
-  private deleteCaseReading(): void {
-    const session = this.caseSession
-    const track = this.caseCurrent
-    if (!session || !track || track.kind !== "reading") return
-    const account = session.accountOf(track) ?? session.tracks.find(other => other.kind === "observer")
-    session.deleteReading(track)
-    this.caseCurrent = undefined
-    if (account) void this.showCaseTrack(account)
-  }
-
-  /** The case, and every recording of it added or changed, as one zip laid out as the case is. */
-  private async exportCase(): Promise<void> {
-    const session = this.caseSession
-    if (!session) return
-    this.commitCaseTrack()
-    const { zipSync, strToU8 } = await import("fflate")
-    const archive: Record<string, Uint8Array> = {}
-    for (const file of session.files()) archive[file.path] = strToU8(file.content)
-    const blob = new Blob([zipSync(archive) as BlobPart], { type: "application/zip" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `${session.json.id ?? "case"}.zip`
-    link.click()
-    URL.revokeObjectURL(url)
-  }
-
-  /** The shapes a body can stand for: those of the account on show, or of the account a reading reads. */
+  /** The shapes a body can stand for: those of the account the reading on show reads, or the recording's own. */
   private bodyShapeIds(): string[] {
-    const own = this.ufoElement.sighting.timeline.sourceIds
-    const track = this.caseCurrent
-    if (!this.caseSession || track?.kind !== "reading") return own
-    const account = this.caseSession.accountOf(track)?.recording
-    const ids = new Set<string>()
-    for (const keyframe of account?.timeline?.keyframes ?? []) for (const entry of keyframe.shapes ?? []) ids.add(entry.sourceId)
-    return [...ids]
+    return this.accountShapeIds ? [...this.accountShapeIds] : this.ufoElement.sighting.timeline.sourceIds
+  }
+
+  /** What the page's own relative addresses (a model, a picture) are relative to: where the recording on show lives. */
+  set documentUrl(url: string | undefined) {
+    this.sceneElement.documentUrl = url
   }
 
   /** Loads a SightingRecordingJson fetched from a user-entered URL — same failure handling as
@@ -2213,13 +2022,16 @@ export class SightingEditorElement extends HTMLElement {
     if (!url) return
     try {
       const fetched = await SightingFetch.json(url)
-      // A case: the recordings it lists are the editor's tracks (see openCase).
+      // A case is not a recording: whoever edits cases takes it (see offerCase).
       if (CaseFile.isCase(fetched)) {
-        await this.openCase(fetched, new URL(url, location.href).href)
-        return
+        const address = new URL(url, location.href).href
+        if (this.offerCase(fetched, address)) {
+          this.importUrlInput.value = address
+          return
+        }
+        throw new Error("A case has no recording to edit here")
       }
       const json = fetched as SightingRecordingJson
-      this.closeCase()
       // What the models it names by `url` are relative to — see SceneElement.documentUrl.
       this.sceneElement.documentUrl = new URL(url, location.href).href
       this.sightingData = json
@@ -2227,6 +2039,7 @@ export class SightingEditorElement extends HTMLElement {
       // `src` attribute (a site's `?sighting=` link), or a observer's own file. Absolute, so the
       // address can be copied out of the field and still work, and so the field is a valid URL.
       this.importUrlInput.value = new URL(url, location.href).href
+      this.dispatchEvent(new CustomEvent("recordingloaded", { bubbles: true, composed: true }))
     } catch (error) {
       window.alert(this.importErrorFor(error))
     }
@@ -5338,7 +5151,7 @@ export class SightingEditorElement extends HTMLElement {
   private syncBodiesShown(): void {
     // A reading of an account has no shape of its own to protect: its bodies are all there is to see.
     const editingShapes = this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-shapes")?.hidden === false
-    const shown = !editingShapes || this.caseCurrent?.kind === "reading"
+    const shown = !editingShapes || this.reading
     const interpretation = shown ? this.ufoElement.sighting.interpretation : undefined
     this.sceneElement.compareAccount = interpretation !== undefined
     if (this.sceneElement.interpretation !== interpretation) this.sceneElement.interpretation = interpretation
@@ -8617,13 +8430,6 @@ export class SightingEditorElement extends HTMLElement {
     this.exportButton.textContent = messages.export
     this.labelImportFile.textContent = messages.importFile
     this.labelImportUrl.textContent = messages.importUrl
-    this.labelCaseRecording.textContent = messages.caseRecording
-    this.caseAddButton.textContent = messages.caseInterpret
-    this.caseAddButton.title = messages.caseAddReading
-    this.caseDeleteButton.title = messages.caseDeleteReading
-    this.caseDeleteButton.setAttribute("aria-label", messages.caseDeleteReading)
-    this.caseExportButton.textContent = messages.caseExport
-    this.refreshCaseRow()
     this.importUrlInput.placeholder = messages.importUrlPlaceholder
     this.importUrlButton.textContent = messages.importButton
     this.labelObserverAge.textContent = messages.observerAge
