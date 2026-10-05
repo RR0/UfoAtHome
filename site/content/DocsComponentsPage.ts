@@ -40,6 +40,7 @@ export class DocsComponentsPage extends DocsSection {
   private static readonly PAGES: ReadonlyArray<readonly [string, string]> = [
     ["rr0-scene", "/docs/components/scene/"],
     ["rr0-case-editor", "/docs/components/edit/"],
+    ["rr0-date-input", "/docs/components/edit/"],
     ["rr0-sighting-editor", "/docs/components/edit/"],
     ["rr0-sighting", "/docs/components/sighting/"]
   ]
@@ -92,7 +93,7 @@ export class DocsComponentsPage extends DocsSection {
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Standard, and that is the whole design</h2>
-    <p>These are four <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Components</a> — the browser's own standard for a
+    <p>These are five <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Components</a> — the browser's own standard for a
       custom element, not a component of anybody's framework. What follows from that is worth
       spelling out, because it is why the tool can be handed to you at all:</p>
     <ul class="plain">
@@ -129,6 +130,10 @@ export class DocsComponentsPage extends DocsSection {
         Holds a <code>&lt;rr0-sighting-editor&gt;</code> and gives it one recording of a
         <code>case.json</code> at a time: the observers' accounts and the readings of them. It adds, selects and
         deletes them, and exports the case.</li>
+
+      <li><strong><code>&lt;rr0-date-input&gt;</code> — a date, with its precision.</strong>
+        A picker for a full instant, a text for anything less (EDTF), and how sure it is. The editors use it for an
+        observation's start and end and for a case's date; it tells what it holds by a <code>datechange</code> event.</li>
     </ul>
 
     <h2>How they fit together</h2>
@@ -209,7 +214,7 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Standards, et c'est toute la conception</h2>
-    <p>Ce sont quatre <a href="https://developer.mozilla.org/fr/docs/Web/API/Web_components">composants web</a> — le standard du navigateur pour un
+    <p>Ce sont cinq <a href="https://developer.mozilla.org/fr/docs/Web/API/Web_components">composants web</a> — le standard du navigateur pour un
       élément personnalisé, et non le composant du <i lang="en">framework</i> de quelqu'un. Ce qui
       en découle mérite d'être dit, car c'est ce qui permet de vous le remettre :</p>
     <ul class="plain">
@@ -248,6 +253,10 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
         <code>&lt;rr0-sighting-editor&gt;</code> et lui présente un enregistrement d'un <code>case.json</code> à la fois :
         les comptes rendus des observateurs et les lectures qu'on en fait. Il les ajoute, les sélectionne et les
         supprime, et exporte le dossier.</li>
+
+      <li><strong><code>&lt;rr0-date-input&gt;</code> — une date, avec sa précision.</strong> Un sélecteur pour un instant
+        complet, un texte pour moins (EDTF), et le degré de certitude. Les éditeurs s'en servent pour le début et la fin d'une
+        observation et pour la date d'un dossier ; il dit ce qu'il contient par un événement <code>datechange</code>.</li>
     </ul>
 
     <h2>Comment ils s'emboîtent</h2>
@@ -330,7 +339,7 @@ import "@rr0/ufoathome/editor"   // enregistre &lt;rr0-sighting-editor&gt;</code
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Estándar, y ese es todo el diseño</h2>
-    <p>Son cuatro <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Components</a> — el estándar del propio navegador para un
+    <p>Son cinco <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Components</a> — el estándar del propio navegador para un
       elemento personalizado, no un componente del <i lang="en">framework</i> de nadie. Lo que de
       ello se deriva merece explicarse, porque es lo que permite ponerte la herramienta en las manos:</p>
     <ul class="plain">
@@ -370,6 +379,10 @@ import "@rr0/ufoathome/editor"   // enregistre &lt;rr0-sighting-editor&gt;</code
         <code>&lt;rr0-sighting-editor&gt;</code> y le presenta una grabación de un <code>case.json</code> cada vez: los
         relatos de los observadores y las lecturas que se hacen de ellos. Los añade, los selecciona y los elimina, y
         exporta el caso.</li>
+
+      <li><strong><code>&lt;rr0-date-input&gt;</code> — una fecha, con su precisión.</strong> Un selector para un instante
+        completo, un texto para menos (EDTF), y el grado de certeza. Los editores lo usan para el inicio y el fin de una
+        observación y para la fecha de un caso; dice lo que contiene con un evento <code>datechange</code>.</li>
     </ul>
 
     <h2>Cómo encajan entre sí</h2>
@@ -451,7 +464,7 @@ import "@rr0/ufoathome/editor"   // registra &lt;rr0-sighting-editor&gt;</code><
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Standard, ed è questo tutto il progetto</h2>
-    <p>Sono quattro <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Component</a> — lo standard del browser stesso per un
+    <p>Sono cinque <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Component</a> — lo standard del browser stesso per un
       elemento personalizzato, non un componente del <i lang="en">framework</i> di qualcuno. Ciò che
       ne consegue merita di essere detto, perché è ciò che permette di metterti in mano lo strumento:</p>
     <ul class="plain">
@@ -491,6 +504,10 @@ import "@rr0/ufoathome/editor"   // registra &lt;rr0-sighting-editor&gt;</code><
         <code>&lt;rr0-sighting-editor&gt;</code> e gli presenta una registrazione di un <code>case.json</code> alla volta: i
         resoconti degli osservatori e le letture che se ne fanno. Li aggiunge, li seleziona e li elimina, ed esporta il
         caso.</li>
+
+      <li><strong><code>&lt;rr0-date-input&gt;</code> — una data, con la sua precisione.</strong> Un selettore per un istante
+        completo, un testo per meno (EDTF), e il grado di certezza. Gli editor lo usano per l'inizio e la fine di
+        un'osservazione e per la data di un caso; dice ciò che contiene con un evento <code>datechange</code>.</li>
     </ul>
 
     <h2>Come si incastrano</h2>

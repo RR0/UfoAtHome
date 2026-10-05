@@ -34,8 +34,7 @@ export interface EdtfDateParts {
  * composes an EDTF string, puts it in the field and goes down the path a typed one goes, so there is
  * one parse, one validation, and the stored string stays canonical whichever control wrote it.
  *
- * It binds controls it is given rather than building them, so that the editor of a recording keeps
- * its own markup and a case editor makes the ones it needs (see `build`).
+ * It binds controls it is given rather than building them: see DateInputElement, the element that makes them.
  */
 export class EdtfDateField {
   /** The four things a whole value can say about how sure it is, in the order they get less certain. */
@@ -68,42 +67,7 @@ export class EdtfDateField {
     parts.text.addEventListener("blur", () => this.validate())
   }
 
-  /** The whole of one date field — the three controls, and a toggle of its own when `withToggle` — made for a page. */
-  static build(
-    doc: Document,
-    messages: EdtfDateFieldMessages,
-    onChange: (time: SightingTime | undefined) => void,
-    withToggle = true
-  ): { element: HTMLElement, field: EdtfDateField } {
-    const element = doc.createElement("span")
-    element.className = "edtf-date-field"
-    const picker = doc.createElement("input")
-    picker.type = "datetime-local"
-    picker.step = "60"
-    const text = doc.createElement("input")
-    text.type = "text"
-    text.hidden = true
-    const qualifier = doc.createElement("select")
-    qualifier.className = "time-qualifier"
-    element.append(picker, text, qualifier)
-    const field = new EdtfDateField({ picker, text, qualifier }, messages, onChange)
-    if (withToggle) {
-      const toggle = doc.createElement("button")
-      toggle.type = "button"
-      toggle.textContent = "EDTF"
-      toggle.setAttribute("aria-pressed", "false")
-      toggle.title = messages.edtfModeTitle ?? ""
-      toggle.addEventListener("click", () => {
-        field.setMode(!field.edtf)
-        toggle.setAttribute("aria-pressed", String(field.edtf))
-      })
-      element.append(toggle)
-      field.toggle = toggle
-    }
-    return { element, field }
-  }
-
-  /** The toggle `build` made, for whoever lays the field out and has to name it again. */
+  /** A button of its own that swaps the picker for the text, when the field has one (see DateInputElement). */
   toggle?: HTMLButtonElement
 
   /** Whether the text is what shows, rather than the picker. */

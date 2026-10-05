@@ -323,7 +323,7 @@ describe("CaseEditorElement", () => {
   it("dates the case as a recording is dated: a picker for a full instant, the text for less, written as RR0 writes", async () => {
     const full = await open(undefined, { time: "1950-05-11 19:45" })
     const root = full.shadowRoot!
-    const picker = root.querySelector(".edtf-date-field input[type=datetime-local]") as HTMLInputElement
+    const picker = root.querySelector("rr0-date-input input[type=datetime-local]") as HTMLInputElement
     const text = root.getElementById("case-time") as HTMLInputElement
     expect(picker.hidden).toBe(false)
     expect(picker.value).toBe("1950-05-11T19:45")

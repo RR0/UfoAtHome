@@ -6,7 +6,9 @@ import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { formatEdtfTime, parseEdtfTime } from "../engine/model/Sighting.js"
 import { CaseSession } from "./CaseSession.js"
 import { EdtfDateField } from "./EdtfDateField.js"
-import type { EdtfDateFieldMessages } from "./EdtfDateField.js"
+import { register as registerDateInput } from "./DateInputElement.js"
+import type { DateInputElement } from "./DateInputElement.js"
+import type { SightingTime } from "../engine/model/Sighting.js"
 import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 import type { CaseTrack } from "./CaseSession.js"
 import { register as registerSightingEditor } from "./SightingEditorElement.js"
@@ -30,7 +32,7 @@ const TEMPLATE = `
   .case-panel h3 { margin: .6em 0 .3em; font-size: .95em; }
   .row { display: flex; align-items: center; gap: .5em; flex-wrap: wrap; margin-bottom: .5em; }
   .row label, .row .field { display: flex; align-items: center; gap: .4em; }
-  .edtf-date-field { display: inline-flex; align-items: center; gap: .3em; flex-wrap: wrap; }
+  rr0-date-input { display: inline-flex; align-items: center; gap: .3em; flex-wrap: wrap; }
   .row.recordings label { flex: 1 1 14em; min-width: 0; }
   .row.recordings select { flex: 1 1 auto; min-width: 0; max-width: 100%; text-overflow: ellipsis; }
   .row button { white-space: nowrap; }
@@ -56,7 +58,7 @@ const TEMPLATE = `
   <div class="row fields">
     <label><span id="label-case-id">ID</span> <input id="case-id" type="text" size="18"/></label>
     <label><span id="label-case-title">Title</span> <input id="case-title" type="text" size="24"/></label>
-    <div class="field"><span id="label-case-time">When</span> <span id="case-time-slot"></span></div>
+    <div class="field"><span id="label-case-time">When</span> <rr0-date-input id="case-date" name="case-time" toggle></rr0-date-input></div>
   </div>
   <h3 id="recordings-heading">Observations</h3>
   <div class="row recordings">
@@ -122,16 +124,17 @@ export class CaseEditorElement extends HTMLElement {
   private said = new SaidTexts(["en"])
   private localeToken = 0
   private dialogMode: DialogMode = "add"
-  /** What the date field says in words: the recording editor's own, since a date is said the same. */
-  private dateMessages: EdtfDateFieldMessages = sightingEditorMessages_en
-  private caseDate!: EdtfDateField
+  private caseDate!: DateInputElement
   /** The case the date field last opened its way in for: a mode is the author's once it is shown. */
   private dateModeFor?: CaseSession
 
   constructor() {
     super()
     registerSightingEditor()
+    registerDateInput()
     this.shadow.innerHTML = TEMPLATE
+    customElements.upgrade(this.shadow)
+    ;(this.shadow.getElementById("case-date") as DateInputElement).build()
     this.editor = this.shadow.getElementById("editor") as SightingEditorElement
     this.editor.addEventListener("caseloaded", event => {
       event.preventDefault()
@@ -143,11 +146,12 @@ export class CaseEditorElement extends HTMLElement {
     for (const [id, field] of [["case-id", "id"], ["case-title", "title"]] as const) {
       this.input(id).addEventListener("input", () => this.writeCaseField(field, this.input(id).value))
     }
-    // A case dates itself as a recording does — see EdtfDateField — and writes the date as RR0 does.
-    const built = EdtfDateField.build(document, this.dateMessages, time => this.writeCaseField("time", time ? CaseEditorElement.rr0TimeOf(formatEdtfTime(time)) : ""))
-    this.caseDate = built.field
-    built.element.querySelector<HTMLInputElement>('input[type="text"]')!.id = "case-time"
-    this.byId("case-time-slot").append(built.element)
+    // A case dates itself as a recording does — see DateInputElement — and writes the date as RR0 does.
+    this.caseDate = this.byId("case-date") as DateInputElement
+    this.caseDate.addEventListener("datechange", event => {
+      const { time } = (event as CustomEvent<{ time: SightingTime | undefined }>).detail
+      this.writeCaseField("time", time ? CaseEditorElement.rr0TimeOf(formatEdtfTime(time)) : "")
+    })
     this.byId("track").addEventListener("change", () => {
       const track = this.session?.tracks[Number((this.byId("track") as HTMLSelectElement).value)]
       if (track) void this.showTrack(track)
@@ -212,8 +216,7 @@ export class CaseEditorElement extends HTMLElement {
     if (token !== this.localeToken) return
     this.said = new SaidTexts(preferences)
     this.messages = messages
-    this.dateMessages = editorMessages
-    this.caseDate.setMessages(editorMessages)
+    this.caseDate.messages = editorMessages
     this.applyMessages()
     this.refreshRow()
   }
@@ -347,7 +350,7 @@ export class CaseEditorElement extends HTMLElement {
   private showCaseTime(session: CaseSession): void {
     const raw = String((session.json as Record<string, unknown>).time ?? "")
     const time = raw === "" ? undefined : parseEdtfTime(CaseEditorElement.edtfOf(raw))
-    this.caseDate.set(time)
+    this.caseDate.time = time
     if (raw !== "" && !time) {
       // A date this field cannot read is shown as it is written, in the text, and left alone until it is edited.
       const text = this.input("case-time")
@@ -371,7 +374,7 @@ export class CaseEditorElement extends HTMLElement {
       const input = this.input(id)
       if (input !== active) input.value = String((session.json as Record<string, unknown>)[field] ?? "")
     }
-    if (!active?.closest?.(".edtf-date-field")) this.showCaseTime(session)
+    if (!active?.closest?.("rr0-date-input")) this.showCaseTime(session)
     const select = this.byId("track") as HTMLSelectElement
     select.replaceChildren(...session.tracks.map((track, index) => new Option(this.labelOf(track, index), String(index))))
     select.value = String(Math.max(0, this.current ? session.tracks.indexOf(this.current) : 0))

@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest"
 import { EdtfDateField } from "../../src/component/EdtfDateField.js"
-import { sightingEditorMessages_en } from "../../src/component/messages/SightingEditorMessages_en.js"
+import { register } from "../../src/component/DateInputElement.js"
+import type { DateInputElement } from "../../src/component/DateInputElement.js"
 import { parseEdtfTime } from "../../src/engine/model/Sighting.js"
 import type { SightingTime } from "../../src/engine/model/Sighting.js"
 
+register()
+
 const make = () => {
   const told: (SightingTime | undefined)[] = []
-  const { element, field } = EdtfDateField.build(document, sightingEditorMessages_en, time => told.push(time))
+  const element = document.createElement("rr0-date-input") as DateInputElement
+  element.addEventListener("datechange", event => told.push((event as CustomEvent<{ time: SightingTime | undefined }>).detail.time))
+  element.build()
+  const field = element.field
   const picker = element.querySelector("input[type=datetime-local]") as HTMLInputElement
   const text = element.querySelector("input[type=text]") as HTMLInputElement
   const qualifier = element.querySelector("select") as HTMLSelectElement
@@ -77,5 +83,44 @@ describe("EdtfDateField", () => {
     field.setMode(false)
     expect([picker.hidden, text.hidden, qualifier.hidden]).toEqual([false, true, false])
     expect(told).toEqual([])
+  })
+})
+
+describe("<rr0-date-input>", () => {
+  it("makes its controls in its own light DOM, with ids derived from its name", () => {
+    const element = document.createElement("rr0-date-input") as DateInputElement
+    element.setAttribute("name", "obs-time")
+    document.body.appendChild(element)
+    expect(element.querySelector("#obs-time-native")).not.toBeNull()
+    expect(element.querySelector("#obs-time")).not.toBeNull()
+    expect(element.querySelector("#obs-time-qualifier")).not.toBeNull()
+    expect(element.querySelector("button")).toBeNull() // no toggle unless asked for
+    element.remove()
+  })
+
+  it("has a toggle of its own when asked, which swaps the picker for the text", () => {
+    const element = document.createElement("rr0-date-input") as DateInputElement
+    element.setAttribute("toggle", "")
+    document.body.appendChild(element)
+    const toggle = element.querySelector("button")!
+    expect(element.edtf).toBe(false)
+    toggle.click()
+    expect(element.edtf).toBe(true)
+    expect(toggle.getAttribute("aria-pressed")).toBe("true")
+    element.remove()
+  })
+
+  it("says what it shows without telling anybody, and tells what the author changes", () => {
+    const element = document.createElement("rr0-date-input") as DateInputElement
+    const told: unknown[] = []
+    element.addEventListener("datechange", event => told.push((event as CustomEvent).detail.time))
+    document.body.appendChild(element)
+    element.time = parseEdtfTime("1965-07-01T05:00")
+    expect(told).toEqual([])
+    const text = element.querySelector("input[type=text]") as HTMLInputElement
+    text.value = "1965"
+    text.dispatchEvent(new Event("input"))
+    expect(told).toHaveLength(1)
+    element.remove()
   })
 })

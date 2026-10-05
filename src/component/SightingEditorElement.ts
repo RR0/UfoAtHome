@@ -26,6 +26,9 @@ import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import { EdtfDateField } from "./EdtfDateField.js"
+import { DATE_INPUT_ELEMENT_NAME, register as registerDateInput } from "./DateInputElement.js"
+import type { DateInputElement } from "./DateInputElement.js"
+import type { SightingTime } from "../engine/model/Sighting.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
 import type { Instrument } from "../engine/instrument/Instrument.js"
@@ -427,16 +430,12 @@ export class SightingEditorElement extends HTMLElement {
   private groundElevationTimer?: ReturnType<typeof setTimeout>
   private groundElevationToken = 0
   private readonly obsTimeInput: HTMLInputElement
-  private readonly obsTimeNativeInput: HTMLInputElement
-  private readonly obsEndTimeNativeInput: HTMLInputElement
-  private readonly obsTimeQualifier: HTMLSelectElement
-  private readonly obsEndTimeQualifier: HTMLSelectElement
   private readonly edtfModeButton: HTMLButtonElement
   /** Whether the two observation times are typed as EDTF rather than picked. Chosen for the
    * author when a recording loads (see chooseTimeInputMode) and theirs to change afterwards. */
   private edtfMode = false
-  private startDate!: EdtfDateField
-  private endDate!: EdtfDateField
+  private startDate!: DateInputElement
+  private endDate!: DateInputElement
   private readonly obsEndTimeInput: HTMLInputElement
   private readonly observerIdInput: HTMLInputElement
   private readonly observerTitleInput: HTMLInputElement
@@ -972,6 +971,10 @@ export class SightingEditorElement extends HTMLElement {
     const template = document.createElement("template")
     template.innerHTML = `<style>${css}</style>${html}`
     this.shadow.appendChild(template.content.cloneNode(true))
+    // The dates are elements that make their own controls, and an element of a template that is not yet in a page is
+    // not upgraded until it is: made now, since the controls are looked up below.
+    customElements.upgrade(this.shadow)
+    for (const date of this.shadow.querySelectorAll<DateInputElement>(DATE_INPUT_ELEMENT_NAME)) date.build()
 
     // Created imperatively (not left inline in the template markup) and inserted via
     // document.createElement, which — for an already-defined custom element — synchronously
@@ -1104,10 +1107,6 @@ export class SightingEditorElement extends HTMLElement {
     this.groundElevationOutput = this.shadow.getElementById("ground-elevation")!
     this.obsTimeInput = this.shadow.getElementById("obs-time") as HTMLInputElement
     this.obsEndTimeInput = this.shadow.getElementById("obs-end-time") as HTMLInputElement
-    this.obsTimeNativeInput = this.shadow.getElementById("obs-time-native") as HTMLInputElement
-    this.obsEndTimeNativeInput = this.shadow.getElementById("obs-end-time-native") as HTMLInputElement
-    this.obsTimeQualifier = this.shadow.getElementById("obs-time-qualifier") as HTMLSelectElement
-    this.obsEndTimeQualifier = this.shadow.getElementById("obs-end-time-qualifier") as HTMLSelectElement
     this.edtfModeButton = this.shadow.getElementById("edtf-mode") as HTMLButtonElement
     this.observerIdInput = this.shadow.getElementById("observerId") as HTMLInputElement
     this.observerTitleInput = this.shadow.getElementById("observerTitle") as HTMLInputElement
@@ -1736,11 +1735,20 @@ export class SightingEditorElement extends HTMLElement {
       this.autoFilledTimeZone = undefined
       this.updateTimeZone()
     })
-    // The two dates say it the same way: see EdtfDateField, which holds the picker, the text and the qualifier.
-    this.startDate = new EdtfDateField({ picker: this.obsTimeNativeInput, text: this.obsTimeInput, qualifier: this.obsTimeQualifier },
-      this.messages, time => this.editDate(() => { this.ufoElement.sighting.event.time = time }))
-    this.endDate = new EdtfDateField({ picker: this.obsEndTimeNativeInput, text: this.obsEndTimeInput, qualifier: this.obsEndTimeQualifier },
-      this.messages, time => this.editDate(() => { this.ufoElement.sighting.event.endTime = time }))
+    // The two dates say it the same way: see DateInputElement, which makes the picker, the text and the qualifier.
+    const dateOf = (name: string): DateInputElement => this.shadow.querySelector<DateInputElement>(`${DATE_INPUT_ELEMENT_NAME}[name="${name}"]`)!
+    this.startDate = dateOf("obs-time")
+    this.endDate = dateOf("obs-end-time")
+    this.startDate.messages = this.messages
+    this.endDate.messages = this.messages
+    this.startDate.addEventListener("datechange", event => {
+      const { time } = (event as CustomEvent<{ time: SightingTime | undefined }>).detail
+      this.editDate(() => { this.ufoElement.sighting.event.time = time })
+    })
+    this.endDate.addEventListener("datechange", event => {
+      const { time } = (event as CustomEvent<{ time: SightingTime | undefined }>).detail
+      this.editDate(() => { this.ufoElement.sighting.event.endTime = time })
+    })
     this.edtfModeButton.addEventListener("click", () => this.setEdtfMode(!this.edtfMode))
     for (const input of [
       this.observerIdInput,
@@ -4458,13 +4466,13 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private syncObservationTimeFields(): void {
-    this.startDate.set(this.ufoElement.sighting.event.time)
+    this.startDate.time = this.ufoElement.sighting.event.time
   }
 
   /** Resyncs the observation-end date/time field from a freshly loaded sighting — same role and
    * timing as syncObservationTimeFields(), for event.endTime instead of event.time. */
   private syncObservationEndTimeFields(): void {
-    this.endDate.set(this.ufoElement.sighting.event.endTime)
+    this.endDate.time = this.ufoElement.sighting.event.endTime
   }
 
   /** Resyncs observer/case/description/tags from a freshly loaded sighting — same role as
@@ -8444,8 +8452,8 @@ export class SightingEditorElement extends HTMLElement {
     // message serves both and "Circumstances" — which never named what the group actually holds —
     // is gone.
     this.labelWeatherGroup.textContent = messages.weather
-    this.startDate.setMessages(messages)
-    this.endDate.setMessages(messages)
+    this.startDate.messages = messages
+    this.endDate.messages = messages
     this.edtfModeButton.title = messages.edtfModeTitle
     this.edtfModeButton.setAttribute("aria-label", messages.edtfModeTitle)
     // The chips hold translated labels, so they are rebuilt with the new ones — and the signature
@@ -9640,6 +9648,7 @@ class LegacyRecorderElement extends SightingEditorElement {
 }
 
 export function register(): void {
+  registerDateInput()
   registerUfo()
   if (!customElements.get(ELEMENT_NAME)) {
     customElements.define(ELEMENT_NAME, SightingEditorElement)

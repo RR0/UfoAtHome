@@ -263,17 +263,13 @@ export const html = `
          canonical whichever control produced it, which matters because formatEdtfTime returns it
          verbatim and would otherwise display a stale string over fresh numbers. -->
     <label><span id="label-observation-time">Observation start</span>
-      <input id="obs-time-native" type="datetime-local" step="60"/>
-      <input id="obs-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%] or hh:mm" title="EDTF — e.g. 1965-07-01T05:00, 2025-06? (uncertain), 2025~ (approximate), or just 05:00 if the date isn't known" hidden/>
-      <!-- The whole of what this parser can qualify: one optional [?~%] on the whole value (see
-           EDTF_TIME_PATTERN, which by its own doc comment has no per-component qualifiers). Four
-           states, so a select says all of it — and it composes with a complete date, which is why
-           "vers 05:00" needs no text mode at all. -->
-      <select id="obs-time-qualifier" class="time-qualifier"></select></label>
+      <!-- The whole of what this parser can qualify is one optional [?~%] on the whole value (see EDTF_TIME_PATTERN, which by its own
+           doc comment has no per-component qualifiers): four states, so a select says all of it — and it composes with a complete date,
+           which is why "vers 05:00" needs no text mode at all. See DateInputElement for the controls it makes (obs-time-native, obs-time,
+           obs-time-qualifier). -->
+      <rr0-date-input name="obs-time"></rr0-date-input></label>
     <label><span id="label-observation-end-time">Observation end</span>
-      <input id="obs-end-time-native" type="datetime-local" step="60"/>
-      <input id="obs-end-time" type="text" placeholder="YYYY-MM-DDThh:mm[?~%] or hh:mm" title="EDTF — e.g. 1965-07-01T05:10, 2025-06? (uncertain), 2025~ (approximate), or just 05:10 if the date isn't known" hidden/>
-      <select id="obs-end-time-qualifier" class="time-qualifier"></select></label>
+      <rr0-date-input name="obs-end-time"></rr0-date-input></label>
     <!-- One switch for both fields, not one each. sightingDurationMs needs the two times to share
          the same set of stated fields to yield a duration at all, so letting one be a picked
          instant while the other is a bare year is a way to lose the duration without being told
