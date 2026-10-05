@@ -6841,3 +6841,54 @@ describe("SightingEditorElement investigator's lines", () => {
     expect(element.sightingData.traces!.map(trace => trace.id)).toEqual(["trace-2"])
   })
 })
+
+describe("the account's view selector: shapes (2D) or bodies (3D)", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  const ACCOUNT = {
+    version: 1 as const,
+    timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 100, width: 20, height: 10 } } }] }] },
+    interpretation: { bodies: [{ id: "craft", model: { id: "disc" }, track: [{ t: 0, eastM: 0, northM: 30, altitudeAboveGroundM: 5, sizeM: { widthM: 4, lengthM: 4, heightM: 1 } }] }] }
+  }
+
+  const select = (element: SightingEditorElement) => element.shadowRoot!.getElementById("account-view") as HTMLSelectElement
+  const part = (element: SightingEditorElement, id: string) => element.shadowRoot!.getElementById(id) as HTMLElement
+
+  it("opens the part of the Phenomenon group that edits the way chosen", () => {
+    const element = mountEmpty()
+    element.sightingData = ACCOUNT as never
+    select(element).value = "bodies"
+    select(element).dispatchEvent(new Event("change"))
+    expect(part(element, "group-shape").hidden).toBe(false)
+    expect(part(element, "shape-bodies").hidden).toBe(false)
+    expect(part(element, "shape-shapes").hidden).toBe(true)
+
+    select(element).value = "shapes"
+    select(element).dispatchEvent(new Event("change"))
+    expect(part(element, "shape-shapes").hidden).toBe(false)
+    expect(part(element, "shape-bodies").hidden).toBe(true)
+  })
+
+  it("says what the render shows as the panels are opened: shapes alone while the Shapes part is open, bodies otherwise", () => {
+    const element = mountEmpty()
+    element.sightingData = ACCOUNT as never
+    select(element).value = "shapes"
+    select(element).dispatchEvent(new Event("change"))
+    expect(select(element).value).toBe("shapes")
+    // Another group: the render shows the bodies, with the shapes beside them.
+    const tabs = [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")]
+    tabs.find(tab => tab.getAttribute("aria-controls") === "group-location")!.click()
+    expect(select(element).value).toBe("bodies")
+  })
+
+  it("is a recording with no interpretation drawn as shapes, and is not offered to a reading", () => {
+    const element = mountEmpty()
+    element.sightingData = { version: 1, timeline: { keyframes: [] } } as never
+    expect(select(element).value).toBe("shapes")
+    expect(part(element, "account-view-row").hidden).toBe(false)
+    element.reading = true
+    expect(part(element, "account-view-row").hidden).toBe(true)
+  })
+})

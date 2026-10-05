@@ -511,7 +511,7 @@ if (docs) {
         stands at that one's distance, just in front of it, so a light on a craft stays on the
         craft.</p>
       <p><strong>Sampling rate</strong> is how often the pointer is read while recording.</p>
-      <p>Those are the group's <strong>Shapes</strong>: what the observer drew. Its
+      <p>The selector above the render, <strong>Account</strong>, says how the account is drawn and edited: <em>2D · shapes</em>, the angles the observer drew, or <em>3D · bodies</em>, what they said those were. Choosing one opens the matching part of this group, and opening a part sets the selector; a reading of an account has no shapes, and no selector. Those are the group's <strong>Shapes</strong>: what the observer drew. Its
         <strong>Bodies</strong> are what the observer said those shapes were, in 3D: each body names
         the shapes it stands for and the model it is drawn as, a built-in shape, a model of the
         catalogue, or a glTF file at an address. The address can be relative to the recording's own
@@ -972,7 +972,7 @@ if (docs) {
         engin reste sur l'engin.</p>
       <p>La <strong>fréquence d'échantillonnage</strong> est la cadence à laquelle le curseur est lu
         pendant l'enregistrement.</p>
-      <p>Voilà pour les <strong>Formes</strong> du groupe : ce que l'observateur a dessiné. Ses
+      <p>Le sélecteur au-dessus du rendu, <strong>Compte rendu</strong>, dit comment le compte rendu est dessiné et édité : <em>2D · formes</em>, les angles que l'observateur a dessinés, ou <em>3D · corps</em>, ce qu'il a dit qu'ils étaient. En choisir un ouvre la partie correspondante de ce groupe, et ouvrir une partie règle le sélecteur ; une lecture d'un compte rendu n'a pas de formes, donc pas de sélecteur. Voilà pour les <strong>Formes</strong> du groupe : ce que l'observateur a dessiné. Ses
         <strong>Corps</strong> sont ce que l'observateur a dit que ces formes étaient, en 3D : chaque
         corps désigne les formes qu'il représente et le modèle qui le dessine, une forme de base, un
         modèle du catalogue, ou un fichier glTF à une adresse. Cette adresse peut être relative au
@@ -1426,7 +1426,7 @@ if (docs) {
         aparato.</p>
       <p><strong>Frecuencia de muestreo</strong> es la frecuencia con que se lee el puntero durante la
         grabación.</p>
-      <p>Esas son las <strong>Formas</strong> del grupo: lo que dibujó el observador. Sus
+      <p>El selector encima del render, <strong>Relato</strong>, dice cómo se dibuja y se edita el relato: <em>2D · formas</em>, los ángulos que dibujó el observador, o <em>3D · cuerpos</em>, lo que dijo que eran. Elegir uno abre la parte correspondiente de este grupo, y abrir una parte fija el selector; una lectura de un relato no tiene formas, ni selector. Esas son las <strong>Formas</strong> del grupo: lo que dibujó el observador. Sus
         <strong>Cuerpos</strong> son lo que el observador dijo que eran esas formas, en 3D: cada cuerpo
         nombra las formas que representa y el modelo con que se dibuja, una forma integrada, un modelo
         del catálogo o un archivo glTF en una dirección. La dirección puede ser relativa al propio
@@ -1885,7 +1885,7 @@ if (docs) {
         velivolo.</p>
       <p><strong>Frequenza di campionamento</strong> è quanto spesso viene letto il puntatore durante la
         registrazione.</p>
-      <p>Queste sono le <strong>Forme</strong> del gruppo: ciò che l'osservatore ha disegnato. I suoi
+      <p>Il selettore sopra il render, <strong>Resoconto</strong>, dice come il resoconto è disegnato e modificato: <em>2D · forme</em>, gli angoli che l'osservatore ha disegnato, o <em>3D · corpi</em>, ciò che ha detto che fossero. Sceglierne uno apre la parte corrispondente di questo gruppo, e aprire una parte imposta il selettore; una lettura di un resoconto non ha forme, né selettore. Queste sono le <strong>Forme</strong> del gruppo: ciò che l'osservatore ha disegnato. I suoi
         <strong>Corpi</strong> sono ciò che l'osservatore ha detto che quelle forme erano, in 3D: ogni
         corpo nomina le forme che rappresenta e il modello con cui è disegnato, una forma predefinita, un
         modello del catalogo o un file glTF a un indirizzo. L'indirizzo può essere relativo al file della

@@ -377,6 +377,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly timeStartLabel: HTMLElement
   private readonly timeEndLabel: HTMLElement
   private readonly durationInput: HTMLInputElement
+  /** Which way the account is drawn and edited: its shapes (2D) or its bodies (3D) — see syncBodiesShown. */
+  private readonly accountViewSelect: HTMLSelectElement
   /** The duration, exact or as stated: its number always holds the length the simulation is played at. */
   private readonly durationElement: DurationInputElement
   private readonly exportButton: HTMLButtonElement
@@ -584,7 +586,16 @@ export class SightingEditorElement extends HTMLElement {
    * Set by whoever holds this recording as a reading of another (see CaseEditorElement): it has no
    * shape of its own, and its bodies are all there is to see, even while the Shapes part is open.
    */
-  reading = false
+  get reading(): boolean {
+    return this.isReading
+  }
+
+  set reading(reading: boolean) {
+    this.isReading = reading
+    this.syncBodiesShown()
+  }
+
+  private isReading = false
   /** The shapes a body of this recording can stand for when they are not its own: those of the account it reads. */
   accountShapeIds?: readonly string[]
   private readonly labelNarrativeSource: HTMLElement
@@ -1085,6 +1096,7 @@ export class SightingEditorElement extends HTMLElement {
         this.switchTimeDisplay()
       })
     }
+    this.accountViewSelect = this.shadow.getElementById("account-view") as HTMLSelectElement
     this.durationElement = this.shadow.querySelector<DurationInputElement>(DURATION_INPUT_ELEMENT_NAME)!
     this.durationInput = this.durationElement.input
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
@@ -1741,6 +1753,8 @@ export class SightingEditorElement extends HTMLElement {
       this.ufoElement.refresh()
       this.dispatchEvent(new CustomEvent("sightingchange"))
     })
+    // Choosing how the account is drawn opens the part of the Phenomenon group that edits it.
+    this.accountViewSelect.addEventListener("change", () => this.chooseAccountView(this.accountViewSelect.value === "bodies"))
     this.utcOffsetInput.addEventListener("input", () => this.updateUtcOffset())
     this.timeZoneSelect.addEventListener("change", () => {
       // Picked by hand: from here on it is the author's, and moving the place no longer touches it.
@@ -5169,10 +5183,24 @@ export class SightingEditorElement extends HTMLElement {
   private syncBodiesShown(): void {
     // A reading of an account has no shape of its own to protect: its bodies are all there is to see.
     const editingShapes = this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-shapes")?.hidden === false
-    const shown = !editingShapes || this.reading
+    const shown = !editingShapes || this.isReading
     const interpretation = shown ? this.ufoElement.sighting.interpretation : undefined
     this.sceneElement.compareAccount = interpretation !== undefined
     if (this.sceneElement.interpretation !== interpretation) this.sceneElement.interpretation = interpretation
+    // The selector says what is shown, and a reading has no shapes to choose between.
+    this.accountViewSelect.value = interpretation !== undefined ? "bodies" : "shapes"
+    this.shadow.getElementById("account-view-row")!.hidden = this.isReading
+  }
+
+  /**
+   * Draws and edits the account as its shapes (the angles the observer drew) or as its bodies (what they said those were,
+   * in 3D): opens the part of the Phenomenon group that does, and the render follows it.
+   */
+  private chooseAccountView(bodies: boolean): void {
+    const group = this.groupTabs.find(candidate => candidate.getAttribute("aria-controls") === "group-shape")
+    if (group) this.toggleGroup(group, true)
+    const part = this.subgroupTabs.find(candidate => candidate.getAttribute("aria-controls") === (bodies ? "shape-bodies" : "shape-shapes"))
+    if (part) this.openSubgroup(part)
   }
 
   /** One part of a group open at a time, among the handles of the same strip — the groups' own
@@ -8435,6 +8463,10 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshApparentSize()
     this.labelSamplingRate.textContent = messages.samplingRate
     this.labelDuration.textContent = messages.duration
+    this.shadow.getElementById("label-account-view")!.textContent = messages.accountView
+    this.accountViewSelect.options[0].textContent = messages.accountView2d
+    this.accountViewSelect.options[1].textContent = messages.accountView3d
+    this.accountViewSelect.title = messages.accountViewHint
     this.durationInput.placeholder = messages.durationPlaceholder
     this.durationElement.messages = messages
     this.addShapeButton.title = messages.addShape

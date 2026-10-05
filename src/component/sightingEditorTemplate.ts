@@ -554,6 +554,10 @@ export const html = `
      are recordings of their own), one open at a time. Hidden for a single recording. Just above the render, as the player puts its own pickers: what
      is picked here is what the render shows. -->
 <div class="render-line">
+<!-- How the account is drawn, and which part of the Phenomenon group edits it: the angles the observer drew (2D, the shapes) or what
+     they said those were, in 3D (the bodies). Follows the panels as they are opened, and opens them when chosen. -->
+<label id="account-view-row" class="account-view"><span id="label-account-view">Account</span>
+  <select id="account-view"><option value="shapes">2D · shapes</option><option value="bodies">3D · bodies</option></select></label>
 <!-- The playback layer's own toggles, taken out of the picture — see UfoElement.hostControls. -->
 <div id="scene-controls" class="scene-controls"></div>
 </div>
@@ -1146,6 +1150,8 @@ select.weather-field:disabled {
   justify-content: flex-end;
   gap: 0.5em;
 }
+.account-view { display: inline-flex; align-items: center; gap: .4em; flex: 1 1 auto; }
+.account-view[hidden] { display: none; }
 .render-line { display: flex; flex-wrap: wrap; align-items: center; gap: .25em .75em; }
 .render-line > .scene-controls { margin: 0 0 0 auto; flex: 0 0 auto; }
 /* A reading is titled with a sentence: the picker is as wide as the row lets it be and cuts the rest. */

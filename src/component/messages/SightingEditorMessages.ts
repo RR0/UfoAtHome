@@ -266,6 +266,10 @@ export interface SightingEditorMessages extends SightingLabels {
   durationHelpLines: string
   /** Shown after a duration that was not stated exactly, in brackets: the length the simulation is played at. */
   durationChosen: string
+  accountView: string
+  accountView2d: string
+  accountView3d: string
+  accountViewHint: string
   datePrecise: string
   dateEdtf: string
   dateHelpTitle: string
