@@ -25,6 +25,7 @@ import { RafSamplingClock } from "../engine/record/SamplingClock.js"
 import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
+import { EdtfDateField } from "./EdtfDateField.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
 import type { Instrument } from "../engine/instrument/Instrument.js"
@@ -91,13 +92,10 @@ import {
 import {
   sightingDurationMs,
   sightingDurationBlockedReason,
-  parseEdtfTime,
-  formatEdtfTime,
   resolveSoundAt,
   resolveWeatherAt,
   resolveObserverPoseAt
 } from "../engine/model/Sighting.js"
-import type { SightingTime } from "../engine/model/Sighting.js"
 import { WeatherInference } from "../engine/weather/WeatherInference.js"
 import type { WeatherInferenceResult } from "../engine/weather/WeatherInference.js"
 import { defaultWeatherProvider } from "../engine/weather/defaultWeatherProvider.js"
@@ -437,6 +435,8 @@ export class SightingEditorElement extends HTMLElement {
   /** Whether the two observation times are typed as EDTF rather than picked. Chosen for the
    * author when a recording loads (see chooseTimeInputMode) and theirs to change afterwards. */
   private edtfMode = false
+  private startDate!: EdtfDateField
+  private endDate!: EdtfDateField
   private readonly obsEndTimeInput: HTMLInputElement
   private readonly observerIdInput: HTMLInputElement
   private readonly observerTitleInput: HTMLInputElement
@@ -1736,17 +1736,12 @@ export class SightingEditorElement extends HTMLElement {
       this.autoFilledTimeZone = undefined
       this.updateTimeZone()
     })
-    this.obsTimeInput.addEventListener("input", () => this.updateObservationTime())
-    this.obsEndTimeInput.addEventListener("input", () => this.updateObservationEndTime())
-    // "change", not "input": a datetime-local reports an empty value while it is still half
-    // typed, and only a committed change can be told apart from a field in mid-entry.
-    this.obsTimeNativeInput.addEventListener("change", () => this.writeFromPicker(this.obsTimeNativeInput, this.obsTimeQualifier, this.obsTimeInput, () => this.updateObservationTime()))
-    this.obsEndTimeNativeInput.addEventListener("change", () => this.writeFromPicker(this.obsEndTimeNativeInput, this.obsEndTimeQualifier, this.obsEndTimeInput, () => this.updateObservationEndTime()))
-    this.obsTimeQualifier.addEventListener("change", () => this.writeFromPicker(this.obsTimeNativeInput, this.obsTimeQualifier, this.obsTimeInput, () => this.updateObservationTime()))
-    this.obsEndTimeQualifier.addEventListener("change", () => this.writeFromPicker(this.obsEndTimeNativeInput, this.obsEndTimeQualifier, this.obsEndTimeInput, () => this.updateObservationEndTime()))
+    // The two dates say it the same way: see EdtfDateField, which holds the picker, the text and the qualifier.
+    this.startDate = new EdtfDateField({ picker: this.obsTimeNativeInput, text: this.obsTimeInput, qualifier: this.obsTimeQualifier },
+      this.messages, time => this.editDate(() => { this.ufoElement.sighting.event.time = time }))
+    this.endDate = new EdtfDateField({ picker: this.obsEndTimeNativeInput, text: this.obsEndTimeInput, qualifier: this.obsEndTimeQualifier },
+      this.messages, time => this.editDate(() => { this.ufoElement.sighting.event.endTime = time }))
     this.edtfModeButton.addEventListener("click", () => this.setEdtfMode(!this.edtfMode))
-    this.obsTimeInput.addEventListener("blur", () => this.validateEdtfTimeInput(this.obsTimeInput))
-    this.obsEndTimeInput.addEventListener("blur", () => this.validateEdtfTimeInput(this.obsEndTimeInput))
     for (const input of [
       this.observerIdInput,
       this.observerTitleInput,
@@ -1842,7 +1837,6 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshSourceRows()
     // Synchronously, with the English defaults: loadLocaleMessages() below is async, and an empty
     // qualifier picker on first paint would read as a control with nothing to offer.
-    this.refreshTimeQualifierOptions()
     this.refreshTimeZoneOptions()
     // An empty editor has no date or place yet, so this only states what's missing — the lookup
     // itself starts the moment those fields say enough (see scheduleWeatherLookup's callers).
@@ -2881,26 +2875,14 @@ export class SightingEditorElement extends HTMLElement {
     this.updateUtcOffsetValidity()
   }
 
-  /** Parses `input`'s EDTF text and hands the result to `assign` on every keystroke — empty
-   * clears the field entirely (valid, "not specified"); text that fails EDTF_TIME_PATTERN leaves
-   * the sighting's previous value untouched (never overwritten with garbage mid-typing) but does
-   * NOT mark the field invalid here — see validateEdtfTimeInput for why that's deferred to blur.
-   * Whenever the text IS valid (or empty), any invalid flag from a previous blur is cleared
-   * immediately rather than waiting for another blur, so fixing a typo doesn't stay red while
-   * you're actively correcting it. Either way that data changes, refresh()es and re-derives
-   * Duration, since a start/end edit can newly make it computable (or newly make it ambiguous —
-   * see sightingDurationBlockedReason). */
-  private applyEdtfTimeInput(input: HTMLInputElement, assign: (time: SightingTime | undefined) => void): void {
-    const value = input.value.trim()
-    if (value === "") {
-      assign(undefined)
-    } else {
-      const parsed = parseEdtfTime(value)
-      if (!parsed) return // leave the sighting's previous value untouched until this becomes valid
-      assign(parsed)
-    }
-    input.setCustomValidity("")
-    input.classList.remove("invalid")
+  /**
+   * What a start or end date edited to a new value does to the recording: it is written, then
+   * Duration is re-derived — a start/end edit can newly make it computable (or newly make it
+   * ambiguous, see sightingDurationBlockedReason). What the date field itself does with text that does
+   * not read yet is its own (see EdtfDateField).
+   */
+  private editDate(assign: () => void): void {
+    assign()
     this.dropDurationOutrankedByDates()
     // A zone's offset depends on the date it is asked about — see applyTimeZoneOffset.
     if (this.ufoElement.sighting.event.timeZone) this.applyTimeZoneOffset()
@@ -2932,19 +2914,6 @@ export class SightingEditorElement extends HTMLElement {
     if (event.durationSeconds === undefined) return
     if (sightingDurationMs({ ...event, durationSeconds: undefined }) === undefined) return
     this.ufoElement.durationSeconds = undefined
-  }
-
-  /** Diagnoses `input`'s EDTF text as invalid only now, on blur — never while the observer is
-   * still mid-typing (see applyEdtfTimeInput's own doc comment: a live "you're wrong" on every
-   * character of e.g. "1965-07-01T05:00" is both illegible against the shared `.invalid` styling
-   * and just distracting). Blur only fires once the field was actually focused, so a field the
-   * observer never touched can never end up flagged. A no-op when the text is empty or already
-   * valid (applyEdtfTimeInput already cleared the flag in that case). */
-  private validateEdtfTimeInput(input: HTMLInputElement): void {
-    const value = input.value.trim()
-    if (value === "" || parseEdtfTime(value)) return
-    input.setCustomValidity(this.messages.edtfInvalid)
-    input.classList.add("invalid")
   }
 
   /** Writes the sighting's reported observation-start time (event.time) from the EDTF text field. */
@@ -3021,21 +2990,6 @@ export class SightingEditorElement extends HTMLElement {
     // hour of record the sighting even falls in — an hour out is a different sky AND a different
     // weather row (see SightingEvent.utcOffsetHours).
     this.scheduleWeatherLookup()
-  }
-
-  private updateObservationTime(): void {
-    this.applyEdtfTimeInput(this.obsTimeInput, time => {
-      this.ufoElement.sighting.event.time = time
-    })
-  }
-
-  /** Writes the sighting's reported observation-end time (event.endTime) from the EDTF text
-   * field. See SightingEvent.endTime's own doc comment: durationSeconds takes precedence over
-   * this when both are set. */
-  private updateObservationEndTime(): void {
-    this.applyEdtfTimeInput(this.obsEndTimeInput, time => {
-      this.ufoElement.sighting.event.endTime = time
-    })
   }
 
   /** Builds a People object from the 4 observer inputs and writes it (plus the sighting's own id) straight onto
@@ -4477,94 +4431,6 @@ export class SightingEditorElement extends HTMLElement {
    * sighting-wide metadata, not a per-instant keyframe like the observer's own pose (see
    * syncObserverFromTimeline for that), so this only needs to run once on load. */
   /**
-   * The four things EDTF_TIME_PATTERN can say about a value as a whole, in the order they get
-   * less certain. Built in script rather than spelled out as eight <option> ids, the same rule the
-   * sound kinds and the data sources follow: the list IS the set the parser accepts.
-   */
-  private static readonly TIME_QUALIFIERS: { value: string, key: "timeQualifierExact" | "timeQualifierApproximate" | "timeQualifierUncertain" | "timeQualifierBoth" }[] = [
-    { value: "", key: "timeQualifierExact" },
-    { value: "~", key: "timeQualifierApproximate" },
-    { value: "?", key: "timeQualifierUncertain" },
-    { value: "%", key: "timeQualifierBoth" }
-  ]
-
-  private refreshTimeQualifierOptions(): void {
-    for (const select of [this.obsTimeQualifier, this.obsEndTimeQualifier]) {
-      const chosen = select.value
-      select.replaceChildren(...SightingEditorElement.TIME_QUALIFIERS.map(qualifier => {
-        const option = document.createElement("option")
-        option.value = qualifier.value
-        option.textContent = this.messages[qualifier.key]
-        return option
-      }))
-      select.value = chosen
-    }
-  }
-
-  /** The trailing [?~%] of an EDTF value, or "" — the only qualifier this parser carries. */
-  private qualifierOf(edtf: string): string {
-    const last = edtf.trim().slice(-1)
-    return "?~%".includes(last) ? last : ""
-  }
-
-  /**
-   * Whether a stated time is one the native picker can hold: a full instant to the minute.
-   *
-   * Seconds are the reason this asks about them at all — the picker is stepped to the minute, so
-   * a recording that states a second would quietly lose it on the first edit. Such a value opens
-   * in the text field instead, where nothing is dropped. A qualifier is no obstacle: the select
-   * beside the picker carries it.
-   */
-  private isPickable(time: SightingTime | undefined): boolean {
-    if (!time) {
-      return false
-    }
-    // Seconds too: a datetime-local holds them once its step is a second (see pickerValueOf). Refusing
-    // them sent any recording timed to the second — Chiles-Whitted, once its start was stated as
-    // 02:45:03 — to the bare EDTF text field, with the picker and its qualifier gone.
-    return time.year !== undefined && time.month !== undefined && time.day !== undefined &&
-      time.hour !== undefined && time.minute !== undefined
-  }
-
-  /** The value a datetime-local takes for a stated time — "" for anything it cannot hold. */
-  private pickerValueOf(time: SightingTime | undefined): string {
-    if (!this.isPickable(time)) {
-      return ""
-    }
-    const pad = (n: number, width = 2): string => String(n).padStart(width, "0")
-    const seconds = time!.second ? `:${pad(time!.second)}` : ""
-    return `${pad(time!.year!, 4)}-${pad(time!.month!)}-${pad(time!.day!)}T${pad(time!.hour!)}:${pad(time!.minute!)}${seconds}`
-  }
-
-  /** A picker steps by the minute unless the time it shows states a second: then by the second, or
-   * the browser would call the value out of step and the picker would show nothing. */
-  private static stepFor(time: SightingTime | undefined): string {
-    return time?.second ? "1" : "60"
-  }
-
-  /**
-   * Turns what the picker and its qualifier now say into EDTF, and sends it down the ordinary
-   * typed-input path.
-   *
-   * Through the text field rather than into the sighting directly, so there is one write path and
-   * one parse — and so the stored raw string stays canonical whatever produced it (formatEdtfTime
-   * returns it verbatim, and would otherwise show a stale string over fresh numbers).
-   *
-   * An empty picker is two different statements, told apart by badInput: genuinely cleared, which
-   * is a observer withdrawing a time and must be recorded; or half typed, which is nothing yet and
-   * must NOT be, since applyEdtfTimeInput reads an empty string as "no time at all" and would
-   * erase the date between a date being entered and its hour.
-   */
-  private writeFromPicker(picker: HTMLInputElement, qualifier: HTMLSelectElement, text: HTMLInputElement, apply: () => void): void {
-    if (picker.value === "" && picker.validity.badInput) {
-      return
-    }
-    // A picker stepped to the second may report "02:45:30.000", which EDTF does not take.
-    text.value = picker.value === "" ? "" : `${picker.value.replace(/\.\d+$/, "")}${qualifier.value}`
-    apply()
-  }
-
-  /**
    * Picks the mode a freshly loaded recording opens in: the picker whenever both stated times are
    * full instants, the text field otherwise.
    *
@@ -4578,8 +4444,7 @@ export class SightingEditorElement extends HTMLElement {
    */
   private chooseTimeInputMode(): void {
     const event = this.ufoElement.sighting.event
-    const statable = (time: SightingTime | undefined): boolean => time === undefined || this.isPickable(time)
-    this.setEdtfMode(!(statable(event.time) && statable(event.endTime)))
+    this.setEdtfMode(!EdtfDateField.opensInPicker(event.time, event.endTime))
   }
 
   /** Swaps which control is showing. Writes nothing: a mode is a way of saying something, not a
@@ -4588,36 +4453,18 @@ export class SightingEditorElement extends HTMLElement {
   private setEdtfMode(edtf: boolean): void {
     this.edtfMode = edtf
     this.edtfModeButton.setAttribute("aria-pressed", String(edtf))
-    for (const [text, picker, qualifier] of [
-      [this.obsTimeInput, this.obsTimeNativeInput, this.obsTimeQualifier],
-      [this.obsEndTimeInput, this.obsEndTimeNativeInput, this.obsEndTimeQualifier]
-    ] as [HTMLInputElement, HTMLInputElement, HTMLSelectElement][]) {
-      text.hidden = !edtf
-      picker.hidden = edtf
-      qualifier.hidden = edtf
-    }
+    this.startDate.setMode(edtf)
+    this.endDate.setMode(edtf)
   }
 
   private syncObservationTimeFields(): void {
-    const time = this.ufoElement.sighting.event.time
-    this.obsTimeInput.value = time ? formatEdtfTime(time) : ""
-    this.obsTimeNativeInput.step = SightingEditorElement.stepFor(time)
-    this.obsTimeNativeInput.value = this.pickerValueOf(time)
-    this.obsTimeQualifier.value = this.qualifierOf(this.obsTimeInput.value)
-    this.obsTimeInput.setCustomValidity("")
-    this.obsTimeInput.classList.remove("invalid")
+    this.startDate.set(this.ufoElement.sighting.event.time)
   }
 
   /** Resyncs the observation-end date/time field from a freshly loaded sighting — same role and
    * timing as syncObservationTimeFields(), for event.endTime instead of event.time. */
   private syncObservationEndTimeFields(): void {
-    const endTime = this.ufoElement.sighting.event.endTime
-    this.obsEndTimeInput.value = endTime ? formatEdtfTime(endTime) : ""
-    this.obsEndTimeNativeInput.step = SightingEditorElement.stepFor(endTime)
-    this.obsEndTimeNativeInput.value = this.pickerValueOf(endTime)
-    this.obsEndTimeQualifier.value = this.qualifierOf(this.obsEndTimeInput.value)
-    this.obsEndTimeInput.setCustomValidity("")
-    this.obsEndTimeInput.classList.remove("invalid")
+    this.endDate.set(this.ufoElement.sighting.event.endTime)
   }
 
   /** Resyncs observer/case/description/tags from a freshly loaded sighting — same role as
@@ -8597,7 +8444,8 @@ export class SightingEditorElement extends HTMLElement {
     // message serves both and "Circumstances" — which never named what the group actually holds —
     // is gone.
     this.labelWeatherGroup.textContent = messages.weather
-    this.refreshTimeQualifierOptions()
+    this.startDate.setMessages(messages)
+    this.endDate.setMessages(messages)
     this.edtfModeButton.title = messages.edtfModeTitle
     this.edtfModeButton.setAttribute("aria-label", messages.edtfModeTitle)
     // The chips hold translated labels, so they are rebuilt with the new ones — and the signature

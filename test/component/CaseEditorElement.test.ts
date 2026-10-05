@@ -320,6 +320,28 @@ describe("CaseEditorElement", () => {
     expect("time" in json).toBe(false)
   })
 
+  it("dates the case as a recording is dated: a picker for a full instant, the text for less, written as RR0 writes", async () => {
+    const full = await open(undefined, { time: "1950-05-11 19:45" })
+    const root = full.shadowRoot!
+    const picker = root.querySelector(".edtf-date-field input[type=datetime-local]") as HTMLInputElement
+    const text = root.getElementById("case-time") as HTMLInputElement
+    expect(picker.hidden).toBe(false)
+    expect(picker.value).toBe("1950-05-11T19:45")
+    picker.value = "1950-05-12T20:10"
+    picker.dispatchEvent(new Event("change"))
+    expect((full.caseSession!.json as unknown as Record<string, unknown>).time).toBe("1950-05-12 20:10")
+    document.body.innerHTML = ""
+
+    const bare = await open(undefined, { time: "1954" })
+    const bareText = bare.shadowRoot!.getElementById("case-time") as HTMLInputElement
+    expect(bareText.hidden).toBe(false)
+    expect(bareText.value).toBe("1954")
+    bareText.value = "1954-03"
+    bareText.dispatchEvent(new Event("input"))
+    expect((bare.caseSession!.json as unknown as Record<string, unknown>).time).toBe("1954-03")
+    expect(text).not.toBe(bareText)
+  })
+
   it("adds a blank observation to the case and opens it", async () => {
     const element = await open()
     const { add, select, field } = parts(element)

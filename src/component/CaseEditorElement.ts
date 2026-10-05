@@ -3,13 +3,17 @@ import type { SightingRecordingJson } from "../engine/persistence/sightingJson.j
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
+import { formatEdtfTime, parseEdtfTime } from "../engine/model/Sighting.js"
 import { CaseSession } from "./CaseSession.js"
+import { EdtfDateField } from "./EdtfDateField.js"
+import type { EdtfDateFieldMessages } from "./EdtfDateField.js"
+import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 import type { CaseTrack } from "./CaseSession.js"
 import { register as registerSightingEditor } from "./SightingEditorElement.js"
 import type { SightingEditorElement } from "./SightingEditorElement.js"
 import type { CaseEditorMessages } from "./messages/CaseEditorMessages.js"
 import { caseEditorMessages_en } from "./messages/CaseEditorMessages_en.js"
-import { loadCaseEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { loadCaseEditorMessages, loadSightingEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 
 export const CASE_EDITOR_ELEMENT_NAME = "rr0-case-editor"
@@ -25,7 +29,8 @@ const TEMPLATE = `
   .case-panel h2 { margin: 0 0 .4em; font-size: 1.05em; }
   .case-panel h3 { margin: .6em 0 .3em; font-size: .95em; }
   .row { display: flex; align-items: center; gap: .5em; flex-wrap: wrap; margin-bottom: .5em; }
-  .row label { display: flex; align-items: center; gap: .4em; }
+  .row label, .row .field { display: flex; align-items: center; gap: .4em; }
+  .edtf-date-field { display: inline-flex; align-items: center; gap: .3em; flex-wrap: wrap; }
   .row.recordings label { flex: 1 1 14em; min-width: 0; }
   .row.recordings select { flex: 1 1 auto; min-width: 0; max-width: 100%; text-overflow: ellipsis; }
   .row button { white-space: nowrap; }
@@ -51,7 +56,7 @@ const TEMPLATE = `
   <div class="row fields">
     <label><span id="label-case-id">ID</span> <input id="case-id" type="text" size="18"/></label>
     <label><span id="label-case-title">Title</span> <input id="case-title" type="text" size="24"/></label>
-    <label><span id="label-case-time">When</span> <input id="case-time" type="text" size="16" placeholder="1950-05-11 19:45"/></label>
+    <div class="field"><span id="label-case-time">When</span> <span id="case-time-slot"></span></div>
   </div>
   <h3 id="recordings-heading">Observations</h3>
   <div class="row recordings">
@@ -117,6 +122,11 @@ export class CaseEditorElement extends HTMLElement {
   private said = new SaidTexts(["en"])
   private localeToken = 0
   private dialogMode: DialogMode = "add"
+  /** What the date field says in words: the recording editor's own, since a date is said the same. */
+  private dateMessages: EdtfDateFieldMessages = sightingEditorMessages_en
+  private caseDate!: EdtfDateField
+  /** The case the date field last opened its way in for: a mode is the author's once it is shown. */
+  private dateModeFor?: CaseSession
 
   constructor() {
     super()
@@ -130,9 +140,14 @@ export class CaseEditorElement extends HTMLElement {
     })
     // A recording loaded into the editor by its own fields is not the case's any more.
     this.editor.addEventListener("recordingloaded", () => this.closeCase())
-    for (const [id, field] of [["case-id", "id"], ["case-title", "title"], ["case-time", "time"]] as const) {
+    for (const [id, field] of [["case-id", "id"], ["case-title", "title"]] as const) {
       this.input(id).addEventListener("input", () => this.writeCaseField(field, this.input(id).value))
     }
+    // A case dates itself as a recording does — see EdtfDateField — and writes the date as RR0 does.
+    const built = EdtfDateField.build(document, this.dateMessages, time => this.writeCaseField("time", time ? CaseEditorElement.rr0TimeOf(formatEdtfTime(time)) : ""))
+    this.caseDate = built.field
+    built.element.querySelector<HTMLInputElement>('input[type="text"]')!.id = "case-time"
+    this.byId("case-time-slot").append(built.element)
     this.byId("track").addEventListener("change", () => {
       const track = this.session?.tracks[Number((this.byId("track") as HTMLSelectElement).value)]
       if (track) void this.showTrack(track)
@@ -191,10 +206,14 @@ export class CaseEditorElement extends HTMLElement {
     const token = ++this.localeToken
     const preferences = HostLocale.preferencesFor(this)
     const language = selectLocale(preferences, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
-    const messages = language === "en" ? caseEditorMessages_en : await loadCaseEditorMessages(language)
+    const [messages, editorMessages] = language === "en"
+      ? [caseEditorMessages_en, sightingEditorMessages_en]
+      : await Promise.all([loadCaseEditorMessages(language), loadSightingEditorMessages(language)])
     if (token !== this.localeToken) return
     this.said = new SaidTexts(preferences)
     this.messages = messages
+    this.dateMessages = editorMessages
+    this.caseDate.setMessages(editorMessages)
     this.applyMessages()
     this.refreshRow()
   }
@@ -315,6 +334,31 @@ export class CaseEditorElement extends HTMLElement {
     else json[field] = value
   }
 
+  /** RR0 writes "1950-05-11 19:45" where EDTF writes "1950-05-11T19:45". */
+  private static rr0TimeOf(edtf: string): string {
+    return edtf.replace(/^(\d{4}-\d\d-\d\d)T/, "$1 ")
+  }
+
+  private static edtfOf(rr0: string): string {
+    return rr0.replace(/^(\d{4}-\d\d-\d\d) (?=\d)/, "$1T")
+  }
+
+  /** Shows the case's date in the field: opens in the picker for a full instant, in the text for anything less (or anything it cannot read). */
+  private showCaseTime(session: CaseSession): void {
+    const raw = String((session.json as Record<string, unknown>).time ?? "")
+    const time = raw === "" ? undefined : parseEdtfTime(CaseEditorElement.edtfOf(raw))
+    this.caseDate.set(time)
+    if (raw !== "" && !time) {
+      // A date this field cannot read is shown as it is written, in the text, and left alone until it is edited.
+      const text = this.input("case-time")
+      text.value = raw
+    }
+    if (this.dateModeFor !== session) {
+      this.caseDate.setMode(raw !== "" && !time || !EdtfDateField.opensInPicker(time))
+      this.dateModeFor = session
+    }
+  }
+
   /** The case on top, when there is one, and the picker of its recordings with what can be done with the one on show. */
   private refreshRow(): void {
     const session = this.session
@@ -323,10 +367,11 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("recording").classList.toggle("in-case", session !== undefined)
     if (!session) return
     const active = this.shadow.activeElement
-    for (const [id, field] of [["case-id", "id"], ["case-title", "title"], ["case-time", "time"]] as const) {
+    for (const [id, field] of [["case-id", "id"], ["case-title", "title"]] as const) {
       const input = this.input(id)
       if (input !== active) input.value = String((session.json as Record<string, unknown>)[field] ?? "")
     }
+    if (!active?.closest?.(".edtf-date-field")) this.showCaseTime(session)
     const select = this.byId("track") as HTMLSelectElement
     select.replaceChildren(...session.tracks.map((track, index) => new Option(this.labelOf(track, index), String(index))))
     select.value = String(Math.max(0, this.current ? session.tracks.indexOf(this.current) : 0))
