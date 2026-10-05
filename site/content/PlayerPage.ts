@@ -83,14 +83,12 @@ const showStage = smooth => {
   stageBox.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "auto" })
 }
 const status = document.getElementById("player-status")
-const editLink = document.getElementById("player-edit")
 const description = document.getElementById("player-description")
 const pageLanguage = ${JSON.stringify(language)}
 const urlField = document.getElementById("player-url")
 const urlForm = document.getElementById("player-url-form")
 const heading = document.getElementById("player-heading")
 const lede = document.getElementById("player-lede")
-const editorPath = "/edit/"
 const filesField = document.getElementById("player-files")
 
 const say = (text, kind) => {
@@ -132,27 +130,15 @@ const describe = () => {
   }))
   description.hidden = description.childElementCount === 0
 }
-/* The recording the player is showing, as its own address: on a case with several observers, the one
-   picked. The editor opens one recording and not a case, so this is where its button points. */
+/* The recording the player is showing, as its own address: on a case with several observers, the one picked. */
 let shownSrc
 stage.addEventListener("observerchange", event => {
   shownSrc = event.detail && event.detail.src ? event.detail.src : undefined
   describe()
-  if (shownSrc && !editLink.hidden) editLink.href = stage.editorHref || editorPath + "?file=" + encodeURIComponent(shownSrc)
-})
-/* A reading chosen in the menu is a recording of its own: the editor opens on it, in its case. */
-stage.addEventListener("interpretationchange", () => {
-  if (!editLink.hidden && stage.editorHref) editLink.href = stage.editorHref
 })
 
 const reveal = (source, sighting, fallbackTitle) => {
   stageBox.hidden = false
-  if (source) {
-    editLink.href = stage.editorHref || editorPath + "?file=" + encodeURIComponent(shownSrc || source)
-    editLink.hidden = false
-  } else {
-    editLink.hidden = true
-  }
   announce(sighting, source, fallbackTitle)
   describe()
 }
@@ -357,7 +343,6 @@ if (asked) {
       <rr0-sighting id="player-stage"></rr0-sighting>
       <div class="stage-caption">
         <div class="player-description" id="player-description" hidden></div>
-        <a class="btn" id="player-edit" href="/edit/" hidden>Edit this sighting</a>
       </div>
     </div>
 ${this.form("en")}
@@ -401,7 +386,6 @@ ${this.form("en")}
       <rr0-sighting id="player-stage"></rr0-sighting>
       <div class="stage-caption">
         <div class="player-description" id="player-description" hidden></div>
-        <a class="btn" id="player-edit" href="/edit/" hidden>Éditer cette observation</a>
       </div>
     </div>
 ${this.form("fr")}
@@ -445,7 +429,6 @@ ${this.form("fr")}
       <rr0-sighting id="player-stage"></rr0-sighting>
       <div class="stage-caption">
         <div class="player-description" id="player-description" hidden></div>
-        <a class="btn" id="player-edit" href="/edit/" hidden>Editar este avistamiento</a>
       </div>
     </div>
 ${this.form("es")}
@@ -489,7 +472,6 @@ ${this.form("es")}
       <rr0-sighting id="player-stage"></rr0-sighting>
       <div class="stage-caption">
         <div class="player-description" id="player-description" hidden></div>
-        <a class="btn" id="player-edit" href="/edit/" hidden>Modifica questo avvistamento</a>
       </div>
     </div>
 ${this.form("it")}
