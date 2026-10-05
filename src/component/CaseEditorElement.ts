@@ -19,8 +19,8 @@ const TEMPLATE = `
   :host { display: block; }
   [hidden] { display: none !important; }
   /* The case, above: what it is, then its observations and what is done with them. */
-  /* One container for the case, with its observation inside as a container of its own. */
-  .case.in-case { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .6em .9em .8em; }
+  /* The case is the container the element stands in (the page's own frame, when there is one): it draws none of its own, so that
+     there is one container for the case and one inside it for the observation. */
   .case-panel { margin-bottom: .6em; }
   .case-panel h2 { margin: 0 0 .4em; font-size: 1.05em; }
   .case-panel h3 { margin: .6em 0 .3em; font-size: .95em; }
