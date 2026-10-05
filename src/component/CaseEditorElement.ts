@@ -46,8 +46,9 @@ const TEMPLATE = `
   dialog label > span { flex: 0 0 9em; }
   dialog label.check > span { flex: 1 1 auto; }
   .row.header { justify-content: space-between; }
-  .dirty { flex: 1 1 auto; color: #b45309; font-size: .85em; }
-  p.dirty { margin: 0 0 .4em; }
+  /* A dot in the corner of the container it speaks of, out of the flow: it comes and goes without moving anything. */
+  .dirty { position: absolute; top: -.1em; right: .2em; z-index: 2; color: #b45309; font-size: .9em; line-height: 1; cursor: help; }
+  .case-panel, .recording { position: relative; }
   .row.header h2 { margin: 0; }
   dialog input[type="text"], dialog input[type="date"], dialog input[type="url"], dialog select { flex: 1 1 auto; min-width: 0; }
   dialog .actions { display: flex; gap: .5em; margin-top: .6em; }
@@ -57,7 +58,7 @@ const TEMPLATE = `
 <section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
   <div class="row header">
     <h2 id="case-heading">Case</h2>
-    <span id="dirty" class="dirty" role="status" hidden>● Changes not exported</span>
+    <span id="dirty" class="dirty" role="status" title="Changes not exported" hidden>●</span>
     <button id="export" type="button">Export</button>
   </div>
   <div class="row fields">
@@ -73,7 +74,7 @@ const TEMPLATE = `
   </div>
 </section>
 <section id="recording" class="recording">
-  <p id="recording-dirty" class="dirty" role="status" hidden>● Changes not exported</p>
+  <span id="recording-dirty" class="dirty" role="status" title="Changes not exported" hidden>●</span>
   <rr0-sighting-editor id="editor"></rr0-sighting-editor>
 </section>
 <p id="make-case-row" class="make-case"><button id="make-case" type="button" class="link">Add to a case</button></p>
@@ -320,8 +321,10 @@ export class CaseEditorElement extends HTMLElement {
     text("recordings-heading", m.recordingsHeading)
     text("label-recording", m.recording)
     text("make-case", m.addToCase)
-    text("dirty", `● ${m.unsavedChanges}`)
-    text("recording-dirty", `● ${m.unsavedChanges}`)
+    for (const id of ["dirty", "recording-dirty"]) {
+      this.byId(id).title = m.unsavedChanges
+      this.byId(id).setAttribute("aria-label", m.unsavedChanges)
+    }
     text("add", "+")
     text("export", m.exportButton)
     text("label-export-recordings", m.exportAlso)
