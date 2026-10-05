@@ -325,6 +325,14 @@ export class SightingEditorElement extends HTMLElement {
   /** The coordinates the last zone lookup was made for, so moving within the same spot doesn't
    * ask again — same guard as schedulePlaceReverse's own namedCoordinates. */
   private timeZoneLookedUpAt?: { lat: number; lng: number }
+  /**
+   * Whether the number is what the author stated, and the zone only follows it — a typed offset — rather than the zone
+   * deciding the number, which is what a zone picked or stated in a recording does. A date edit then moves the zone to
+   * another that still reads the number, instead of letting the number drift with the old zone's rules.
+   */
+  private offsetIsAuthors = false
+  /** The zone the place was last found to be in: what a typed offset is matched to first, since it is the zone the observer was most likely on. */
+  private placeZone?: string
   /** The zone this element filled in itself, as opposed to one the author picked. Only its own
    * answer may be replaced when the place moves — what the author states outranks what a service
    * infers, the same rule the weather follows, and without this marker the two are
@@ -1942,6 +1950,7 @@ export class SightingEditorElement extends HTMLElement {
     // After the two syncs above, which is what it reads to decide.
     this.chooseTimeInputMode()
     this.syncObserverMetadataFields()
+    this.offsetIsAuthors = false
     this.refreshTimeZoneOptions()
     this.syncUtcOffsetField()
     this.syncPlaceNameField()
@@ -2818,6 +2827,7 @@ export class SightingEditorElement extends HTMLElement {
   private async lookUpTimeZone(lat: number, lng: number): Promise<void> {
     this.timeZoneLookedUpAt = { lat, lng }
     const zone = await this.timeZoneProvider.zoneAt(lat, lng)
+    this.placeZone = zone ?? undefined
     // Re-checked after the await, not only before it: the author may have picked one meanwhile, and
     // a service's answer must never win over a stated one.
     if (!zone || this.timeZoneIsStated()) return
@@ -3043,15 +3053,39 @@ export class SightingEditorElement extends HTMLElement {
       parent?.insertBefore(this.timeZoneSelect, next)
     }
     manual.textContent = this.messages.timeZoneManual
-    this.timeZoneSelect.value = this.ufoElement.sighting.event.timeZone ?? ""
+    this.timeZoneSelect.value = this.zoneShown()
   }
 
-  /** Picking a zone hands the offset over to that zone's own rules (the number follows it, and typing a
-   * different one puts the selector back on "unknown"); picking "unknown" lets the number stand as the
-   * observer's own, keeping whatever the zone last produced as their starting point. */
+  /** The zone to show: the recording's own, or, for one that only states an offset, the zone that reads it — shown, not written. */
+  private zoneShown(): string {
+    const event = this.ufoElement.sighting.event
+    if (event.timeZone) return event.timeZone
+    return event.utcOffsetHours === undefined ? "" : this.preferredZoneFor(event.utcOffsetHours) ?? ""
+  }
+
+  /**
+   * What a time zone and an offset are, in this editor: ONE thing said two ways, kept in step both ways.
+   *
+   * - Picking a zone gives the offset: the zone's own rules at the observation's date.
+   * - Typing an offset picks a zone: one whose clocks read that number then (see preferredZoneFor) — the zone the place
+   *   was found in if it fits, else one that does.
+   * - The only other state is "unknown": no zone, and so no number. A number that no zone reads on that day is not
+   *   accepted, and says so, rather than standing with a zone nobody chose.
+   */
   private updateTimeZone(): void {
+    const event = this.ufoElement.sighting.event
     const zone = this.stringOrUndefined(this.timeZoneSelect.value)
-    this.ufoElement.sighting.event.timeZone = zone
+    event.timeZone = zone
+    // A zone picked decides the number from here on.
+    this.offsetIsAuthors = false
+    if (zone === undefined) {
+      // Unknown: nothing decides a number, so there is none.
+      event.utcOffsetHours = undefined
+      this.syncUtcOffsetField()
+      this.ufoElement.refresh()
+      this.scheduleWeatherLookup()
+      return
+    }
     this.applyTimeZoneOffset()
   }
 
@@ -3059,29 +3093,72 @@ export class SightingEditorElement extends HTMLElement {
    * Re-derives `utcOffsetHours` from the chosen zone for the observation's OWN date — which is why
    * this runs again on every date edit, not just when the zone changes: the same zone gives a
    * different answer in January and July, and gave different answers in 1965 and today (see
-   * TimeZones). A no-op while the offset is the observer's to state.
+   * TimeZones). A no-op while no zone is chosen.
    */
   private applyTimeZoneOffset(): void {
     const event = this.ufoElement.sighting.event
-    const derived = event.timeZone && event.time ? this.timeZones.offsetHoursAt(event.timeZone, event.time) : undefined
-    if (derived !== undefined) event.utcOffsetHours = derived
+    if (this.offsetIsAuthors && event.utcOffsetHours !== undefined) {
+      // The number is the author's: the zone moves to one that still reads it on this day.
+      const zone = this.preferredZoneFor(event.utcOffsetHours)
+      event.timeZone = zone
+      this.timeZoneSelect.value = zone ?? ""
+    } else {
+      const derived = event.timeZone ? this.timeZones.offsetHoursAt(event.timeZone, this.timeZoneReference()) : undefined
+      if (derived !== undefined) event.utcOffsetHours = derived
+    }
     this.syncUtcOffsetField()
     this.ufoElement.refresh()
     this.scheduleWeatherLookup()
   }
 
+  /** The day a zone's rules are asked about: the observation's own, or, with none stated, a winter day of this year. */
+  private timeZoneReference(): SightingTime {
+    const time = this.ufoElement.sighting.event.time
+    return time?.year !== undefined ? time : { year: new Date().getFullYear(), month: 1, day: 1, hour: 12 }
+  }
+
+  /**
+   * The zone to show for an offset: the one already chosen if it still reads that number, else the one the place was found
+   * in, else a fixed-offset zone (`Etc/GMT-1` is UTC+1), else the first the platform lists. undefined when no zone reads it.
+   */
+  private preferredZoneFor(offset: number): string | undefined {
+    const candidates = this.timeZones.zonesAt(offset, this.timeZoneReference())
+    if (candidates.length === 0) return undefined
+    const current = this.ufoElement.sighting.event.timeZone
+    if (current && candidates.includes(current)) return current
+    if (this.placeZone && candidates.includes(this.placeZone)) return this.placeZone
+    // POSIX names the fixed zones the other way round: Etc/GMT-1 is one hour AHEAD of UTC.
+    const fixed = Number.isInteger(offset) ? (offset === 0 ? "UTC" : `Etc/GMT${offset > 0 ? "-" : "+"}${Math.abs(offset)}`) : undefined
+    if (fixed && candidates.includes(fixed)) return fixed
+    return candidates[0]
+  }
+
+  /**
+   * Typing an offset picks the zone that reads it. An empty field is "unknown". A number no zone reads on that day is
+   * flagged and not written: there would be a number with no clock behind it.
+   */
   private updateUtcOffset(): void {
     const event = this.ufoElement.sighting.event
-    event.utcOffsetHours = this.numberOrUndefined(this.utcOffsetInput.value)
-    // A number the zone would not give is the observer saying the clock was another one: the zone is no longer the one in
-    // force, and the selector follows what was typed — unknown, a zone nobody stated. The same number keeps the zone.
-    if (event.timeZone) {
-      const derived = event.time ? this.timeZones.offsetHoursAt(event.timeZone, event.time) : undefined
-      if (derived === undefined || derived !== event.utcOffsetHours) {
-        event.timeZone = undefined
-        this.autoFilledTimeZone = undefined
-        this.timeZoneSelect.value = ""
+    const typed = this.numberOrUndefined(this.utcOffsetInput.value)
+    if (typed === undefined) {
+      // Cleared: unknown again.
+      event.utcOffsetHours = undefined
+      event.timeZone = undefined
+      this.autoFilledTimeZone = undefined
+      this.timeZoneSelect.value = ""
+    } else {
+      const zone = this.preferredZoneFor(typed)
+      if (zone === undefined) {
+        this.utcOffsetInput.classList.add("invalid")
+        this.utcOffsetInput.title = this.messages.utcOffsetNoZone
+        return
       }
+      event.utcOffsetHours = typed
+      event.timeZone = zone
+      this.offsetIsAuthors = true
+      // Picked by the author's number: from here on it is theirs, and moving the place no longer touches it.
+      this.autoFilledTimeZone = undefined
+      this.timeZoneSelect.value = zone
     }
     this.updateUtcOffsetValidity()
     this.ufoElement.refresh()

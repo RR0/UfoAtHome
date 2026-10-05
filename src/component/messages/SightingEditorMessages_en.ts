@@ -94,6 +94,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   placeMatchesFound: "places found",
   placeNotFound: "No place by that name",
   placeSearchFailed: "Place search temporarily unavailable",
+  utcOffsetNoZone: "No time zone reads this offset on that day",
   utcOffsetImplausible:
     "This time zone doesn't match the longitude entered, whose own solar time is UTC{solar} — yet the scene and the weather record both obey what is declared here. Clear the field to derive it from the longitude.",
   timeZoneManual: "unknown",

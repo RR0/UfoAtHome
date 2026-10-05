@@ -5778,34 +5778,70 @@ describe("SightingEditorElement time zone picker", () => {
     expect(element.sightingData.utcOffsetHours).toBe(2)
   })
 
-  it("follows a zone's offset, and leaves the number free to type: the zone is the one in force only while the number is its own", () => {
+  // Dual sync: a zone gives a number, a number picks a zone, and the only other state is "unknown", which has no number.
+  it("picks a zone from a typed offset, keeping the zone already chosen when it still reads that number", () => {
     const element = mount()
     setInput(element, "obs-time", "1965-07-01T05:45")
-    pickZone(element, "Europe/Paris")
-    expect(offset(element).readOnly).toBe(false)
     const select = element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement
+    pickZone(element, "Europe/Paris")
 
-    // The number the zone gives: the zone stays.
-    setInput(element, "utcOffsetHours", "1")
+    setInput(element, "utcOffsetHours", "1") // Paris' own number that day
     expect(select.value).toBe("Europe/Paris")
-    expect(element.sightingData.timeZone).toBe("Europe/Paris")
 
-    // Another number: it is the observer's own, and the selector says no zone is stated.
     setInput(element, "utcOffsetHours", "-7")
-    expect(select.value).toBe("")
-    expect(element.sightingData.timeZone).toBeUndefined()
+    expect(select.value).not.toBe("")
+    expect(select.value).not.toBe("Europe/Paris")
+    expect(element.sightingData.timeZone).toBe(select.value)
     expect(element.sightingData.utcOffsetHours).toBe(-7)
   })
 
-  it("hands the offset back when no zone is chosen, keeping the zone's last answer as the starting point", () => {
+  it("keeps a typed number when the date moves, the zone following it to one that still reads it", () => {
+    const element = mount()
+    setInput(element, "utcOffsetHours", "1")
+    setInput(element, "obs-time", "1965-07-01T05:45")
+    expect(element.sightingData.utcOffsetHours).toBe(1)
+    expect(element.sightingData.timeZone).toBeTruthy()
+  })
+
+  it("has no number for an unknown zone: choosing it clears the number, and clearing the number chooses it", () => {
     const element = mount()
     setInput(element, "obs-time", "1965-07-01T05:45")
+    const select = element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement
     pickZone(element, "Europe/Paris")
+    expect(offset(element).value).toBe("1")
 
     pickZone(element, "")
-
-    expect(element.sightingData.utcOffsetHours).toBe(1)
+    expect(offset(element).value).toBe("")
+    expect(element.sightingData.utcOffsetHours).toBeUndefined()
     expect(element.sightingData.timeZone).toBeUndefined()
+
+    pickZone(element, "Europe/Paris")
+    setInput(element, "utcOffsetHours", "")
+    expect(select.value).toBe("")
+    expect(element.sightingData.timeZone).toBeUndefined()
+    expect(element.sightingData.utcOffsetHours).toBeUndefined()
+  })
+
+  it("does not accept a number that no zone reads on that day, and says so", () => {
+    const element = mount()
+    setInput(element, "obs-time", "1965-07-01T05:45")
+    setInput(element, "utcOffsetHours", "1")
+    setInput(element, "utcOffsetHours", "1.3")
+    expect(offset(element).classList.contains("invalid")).toBe(true)
+    expect(element.sightingData.utcOffsetHours).toBe(1) // the last one that a zone reads
+  })
+
+  it("shows the zone that reads the offset of a recording that states only a number, without writing it", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45, raw: "1965-07-01T05:45" },
+      utcOffsetHours: 1,
+      timeline: { keyframes: [] }
+    }
+    expect((element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement).value).not.toBe("")
+    expect(element.sightingData.timeZone).toBeUndefined()
+    expect(element.sightingData.utcOffsetHours).toBe(1)
   })
 
   it("records the rule alongside the number it produced", () => {

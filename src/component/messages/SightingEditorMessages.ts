@@ -195,6 +195,8 @@ export interface SightingEditorMessages extends SightingLabels {
   placeSearchFailed: string
   /** Tooltip on a time zone no country has ever placed on that longitude — "{solar}" is replaced
    * with the offset the meridian itself implies. See SightingEditorElement.updateUtcOffsetValidity. */
+  /** A typed offset that no zone reads on the observation's day. */
+  utcOffsetNoZone: string
   utcOffsetImplausible: string
   /** The zone picker's first entry: no zone, type the offset yourself. */
   timeZoneManual: string

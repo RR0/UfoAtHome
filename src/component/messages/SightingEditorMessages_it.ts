@@ -94,6 +94,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   placeMatchesFound: "luoghi trovati",
   placeNotFound: "Nessun luogo con questo nome",
   placeSearchFailed: "Ricerca dei luoghi momentaneamente non disponibile",
+  utcOffsetNoZone: "Nessun fuso indica questo scarto quel giorno",
   utcOffsetImplausible:
     "Questo fuso orario non corrisponde alla longitudine inserita, la cui ora solare è UTC{solar} — eppure la scena e il rilevamento meteo obbediscono a ciò che è dichiarato qui. Svuota il campo per ricavarlo dalla longitudine.",
   timeZoneManual: "sconosciuto",

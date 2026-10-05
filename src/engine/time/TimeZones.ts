@@ -15,6 +15,9 @@ import type { SightingTime } from "../model/Sighting.js"
  * why a plain offset can still be stated instead of a zone.
  */
 export class TimeZones {
+  /** A formatter per zone: building one is the cost of asking, and asking is done for every zone when a number is matched. */
+  private readonly formatters = new Map<string, Intl.DateTimeFormat | null>()
+
   /** Every IANA zone the platform knows, sorted. Empty on a platform without
    * `Intl.supportedValuesOf` (pre-2022), where the picker simply offers nothing and the plain
    * numeric offset carries on being the way to state a time zone. */
@@ -43,18 +46,31 @@ export class TimeZones {
 
   /** The zone's offset at a real instant, read off the platform's own formatter ("GMT+01:00"). */
   private zoneOffsetHours(zone: string, at: Date): number | undefined {
-    let formatted: string
-    try {
-      formatted = new Intl.DateTimeFormat("en-US", { timeZone: zone, timeZoneName: "longOffset" })
-        .formatToParts(at)
-        .find(part => part.type === "timeZoneName")?.value ?? ""
-    } catch {
-      return undefined // not a zone this platform knows
+    let formatter = this.formatters.get(zone)
+    if (formatter === undefined) {
+      try {
+        formatter = new Intl.DateTimeFormat("en-US", { timeZone: zone, timeZoneName: "longOffset" })
+      } catch {
+        formatter = null // not a zone this platform knows
+      }
+      this.formatters.set(zone, formatter)
     }
+    if (formatter === null) return undefined
+    const formatted = formatter.formatToParts(at).find(part => part.type === "timeZoneName")?.value ?? ""
     // "GMT" alone means UTC; otherwise "GMT+05:30" / "GMT-03:00".
     const match = /^GMT(?:([+-])(\d{2}):(\d{2}))?$/.exec(formatted)
     if (!match) return undefined
     if (!match[1]) return 0
     return (match[1] === "-" ? -1 : 1) * (Number(match[2]) + Number(match[3]) / 60)
+  }
+
+  /**
+   * The zones whose clocks read `offset` hours ahead of UTC at `time` — the time the sighting states, or, when it states
+   * no date, a winter day of this year, since an offset is a rule's answer and a rule needs a day to answer for.
+   * Sorted, as `available()` is.
+   */
+  zonesAt(offset: number, time?: SightingTime): string[] {
+    const when = time?.year !== undefined ? time : { year: new Date().getFullYear(), month: 1, day: 1, hour: 12 }
+    return this.available().filter(zone => this.offsetHoursAt(zone, when) === offset)
   }
 }

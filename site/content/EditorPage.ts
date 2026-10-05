@@ -349,7 +349,7 @@ if (docs) {
         UTC+2, because France only reintroduced summer time in 1976.</p>
       <p>The zone is filled in from the coordinates, and never replaces one you chose. Zone
         boundaries are coarse (Montgomery, Alabama falls in America/Chicago, which kept summer time
-        in 1948 when Alabama did not), so the offset can always be typed: a number the zone would not give puts the selector back on <em>unknown</em>, the observer's own clock, and the same number keeps the zone. An offset that
+        in 1948 when Alabama did not), so the two are one thing said both ways, kept in step: pick a zone and the offset follows; type an offset and a zone that reads it that day is picked (the place's own when it fits). The only other choice is <em>unknown</em>, which has no offset, and a number no zone reads that day is refused. An offset that
         no clock at that longitude could have kept is flagged, the meridian's solar time in its
         tooltip. Editing either date drops an explicit duration once the two dates give an exact
         length of their own.</p>
@@ -792,7 +792,7 @@ if (docs) {
         l'UTC+2 d'aujourd'hui, la France n'ayant rétabli l'heure d'été qu'en 1976.</p>
       <p>Le fuseau est rempli d'après les coordonnées, et ne remplace jamais celui que vous avez
         choisi. Les frontières de fuseaux sont grossières (Montgomery, en Alabama, tombe dans
-        America/Chicago, qui avait l'heure d'été en 1948 quand l'Alabama ne l'avait pas) : le décalage peut donc toujours être saisi : un nombre que le fuseau ne donnerait pas remet le sélecteur sur <em>inconnu</em>, l'horloge propre à l'observateur, et le même nombre garde le fuseau. Un décalage qu'aucune horloge à cette longitude
+        America/Chicago, qui avait l'heure d'été en 1948 quand l'Alabama ne l'avait pas) : les deux sont donc une seule chose dite dans les deux sens, tenue en phase : choisissez un fuseau et le décalage suit ; saisissez un décalage et un fuseau qui l'indique ce jour-là est choisi (celui du lieu quand il convient). Le seul autre choix est <em>inconnu</em>, qui n'a pas de décalage, et un nombre qu'aucun fuseau n'indique ce jour-là est refusé. Un décalage qu'aucune horloge à cette longitude
         n'aurait pu suivre est signalé, l'heure solaire du méridien dans son infobulle. Modifier l'une
         des deux dates retire une durée explicite dès que les deux dates donnent une durée exacte à
         elles seules.</p>
@@ -1255,7 +1255,7 @@ if (docs) {
         porque Francia no reintrodujo el horario de verano hasta 1976.</p>
       <p>La zona se rellena a partir de las coordenadas, y nunca sustituye a una que tú hayas
         elegido. Los límites de las zonas son toscos (Montgomery, Alabama, cae en America/Chicago, que
-        tenía horario de verano en 1948 cuando Alabama no lo tenía), así que el desfase siempre puede escribirse: un número que la zona no daría devuelve el selector a <em>desconocido</em>, el reloj propio del observador, y el mismo número conserva la zona. Un desfase que ningún reloj a esa longitud habría
+        tenía horario de verano en 1948 cuando Alabama no lo tenía), así que ambos son una sola cosa dicha en los dos sentidos, mantenida en fase: elija una zona y el desfase la sigue; escriba un desfase y se elige una zona que lo marque ese día (la del lugar cuando encaja). La única otra opción es <em>desconocido</em>, que no tiene desfase, y un número que ninguna zona marca ese día se rechaza. Un desfase que ningún reloj a esa longitud habría
         podido llevar se señala, con la hora solar del meridiano en su información emergente. Editar
         cualquiera de las dos fechas elimina una duración explícita en cuanto ambas fechas dan por sí
         solas una duración exacta.</p>
@@ -1717,7 +1717,7 @@ if (docs) {
         perché la Francia ha reintrodotto l'ora legale solo nel 1976.</p>
       <p>Il fuso viene compilato a partire dalle coordinate, e non sostituisce mai quello che hai
         scelto tu. I confini dei fusi sono approssimativi (Montgomery, in Alabama, ricade in
-        America/Chicago, che nel 1948 aveva l'ora legale quando l'Alabama non l'aveva), quindi lo scarto si può sempre digitare: un numero che il fuso non darebbe riporta il selettore su <em>sconosciuto</em>, l'orologio proprio dell'osservatore, e lo stesso numero mantiene il fuso. Uno scarto che nessun
+        America/Chicago, che nel 1948 aveva l'ora legale quando l'Alabama non l'aveva), quindi i due sono una cosa sola detta nei due sensi, tenuta in fase: scelga un fuso e lo scarto lo segue; digiti uno scarto e viene scelto un fuso che lo indica quel giorno (quello del luogo quando va bene). L'unica altra scelta è <em>sconosciuto</em>, che non ha scarto, e un numero che nessun fuso indica quel giorno viene rifiutato. Uno scarto che nessun
         orologio a quella longitudine avrebbe potuto tenere viene segnalato, con l'ora solare del
         meridiano nel suo suggerimento. Modificare una delle due date elimina una durata esplicita non
         appena le due date danno da sole una durata esatta.</p>

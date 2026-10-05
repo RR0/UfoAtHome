@@ -94,6 +94,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   placeMatchesFound: "lieux trouvés",
   placeNotFound: "Aucun lieu de ce nom",
   placeSearchFailed: "Recherche de lieu momentanément indisponible",
+  utcOffsetNoZone: "Aucun fuseau n'indique ce décalage ce jour-là",
   utcOffsetImplausible:
     "Ce fuseau ne correspond pas à la longitude saisie, dont l'heure solaire est UTC{solar} — la scène et le relevé météo obéissent pourtant à ce qui est déclaré ici. Videz le champ pour le déduire de la longitude.",
   timeZoneManual: "inconnu",
