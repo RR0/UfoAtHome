@@ -6560,6 +6560,7 @@ describe("SightingEditorElement missing-value marks, in detail", () => {
 })
 
 describe("integrated cloud weather editor", () => {
+  // Imports a large fixture and edits the weather through the whole editor: slow on a loaded runner, where the 30 s default timed it out once (CI of 0.97.0).
   it("edits at the playhead, preserves future weather, and round-trips individual clouds", async () => {
     const { default: fixture } = await import("../../public/demo-data/sky-test-clouds.json")
     const { fromSightingJson } = await import("../../src/engine/persistence/sightingJson.js")
@@ -6612,7 +6613,7 @@ describe("integrated cloud weather editor", () => {
     expect(aimed.pitchDeg).toBeCloseTo(Math.round(Math.atan2(up, horizontal) * 180 / Math.PI * 10) / 10)
     expect(JSON.stringify(ufo.sighting.weatherTrack.toJSON())).toBe(weatherBeforeAim)
     await new Promise(resolve => setTimeout(resolve, 100))
-  })
+  }, 120_000)
   it("adds and removes layers and preserves an explicitly empty sky on export", async () => {
     const element = mount()
     const shadow = element.shadowRoot!
