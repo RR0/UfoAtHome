@@ -1857,9 +1857,24 @@ describe("the account's named moments", () => {
     expect(shadow.getElementById("moments")!.hidden).toBe(true)
   })
 
-  it("mutes and unmutes from the button beside play, and says so", () => {
+  it("shows the sound button as a muted speaker that cannot be pressed, with no volume, when the recording has no sound track", () => {
     const element = mount()
     element.sightingData = withMilestones() as never
+    const mute = element.shadowRoot!.getElementById("mute") as HTMLButtonElement
+    const volume = element.shadowRoot!.getElementById("volume") as HTMLInputElement
+    expect(mute.disabled).toBe(true)
+    expect(volume.hidden).toBe(true)
+    expect(mute.title).toBe("No sound recorded")
+    mute.click()
+    expect(element.muted).toBe(false) // a button that does nothing, and says so
+    element.sightingData = { ...withMilestones(), soundTrack: { keyframes: [{ t: 0, sound: { kind: "hum", volume: 0.8, pitchHz: 200 } }] } } as never
+    expect(mute.disabled).toBe(false)
+    expect(volume.hidden).toBe(false)
+  })
+
+  it("mutes and unmutes from the button beside play, and says so", () => {
+    const element = mount()
+    element.sightingData = { ...withMilestones(), soundTrack: { keyframes: [{ t: 0, sound: { kind: "hum", volume: 0.8, pitchHz: 200 } }] } } as never
     const mute = element.shadowRoot!.getElementById("mute") as HTMLButtonElement
     const events: boolean[] = []
     element.addEventListener("mutedchange", event => events.push((event as CustomEvent<{ muted: boolean }>).detail.muted))

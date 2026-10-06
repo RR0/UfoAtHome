@@ -1184,6 +1184,7 @@ export class UfoElement extends HTMLElement {
    */
   refresh(): void {
     this.applyFrameFormat()
+    this.updateMuteButton()
     // Re-derives the real start/duration too: editing the observation's own start time (an EDTF
     // field in the editor) mutates event.time in place, and the clock the player shows is built
     // from a cached copy of it — without this, changing "Observation start" left the seek bar's
@@ -2836,10 +2837,27 @@ export class UfoElement extends HTMLElement {
   }
 
   toggleMuted(): void {
+    if (!this.hasSound) return
     this.muted = !this.mutedState
   }
 
+  /** Whether the recording has anything to hear: a sound track. None at all means nobody was asked, which is not silence. */
+  private get hasSound(): boolean {
+    return this.currentSighting.soundTrack.allKeyframes.length > 0
+  }
+
   private updateMuteButton(): void {
+    // With no sound track the button is still there, as a muted speaker that cannot be pressed, and there is no volume to set.
+    const silent = !this.hasSound
+    this.muteButton.disabled = silent
+    this.volumeInput.hidden = silent
+    if (silent) {
+      UfoElement.setIcon(this.muteButton, PlayerIcons.MUTED)
+      this.muteButton.title = this.messages.noSound
+      this.muteButton.setAttribute("aria-label", this.messages.noSound)
+      this.muteButton.setAttribute("aria-pressed", "true")
+      return
+    }
     UfoElement.setIcon(this.muteButton, this.mutedState ? PlayerIcons.MUTED : PlayerIcons.VOLUME)
     const label = this.mutedState ? this.messages.unmute : this.messages.mute
     this.muteButton.title = label

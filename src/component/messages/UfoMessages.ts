@@ -17,6 +17,8 @@ export interface UfoMessages {
   /** The button beside play, for the recording's sound (the reader's gesture, so a verb). */
   mute: string
   unmute: string
+  /** The sound button's tooltip when the recording has no sound track: nobody was asked, so there is nothing to hear. */
+  noSound: string
   /** The chevron that folds and unfolds the buttons a narrow player has no room for. */
   /** The moment picker beside the time: what it says before any moment is reached, and its title. */
   moments: string

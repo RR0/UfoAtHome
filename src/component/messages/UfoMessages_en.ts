@@ -13,6 +13,7 @@ export const ufoMessages_en: UfoMessages = {
   exitFullscreen: "Exit fullscreen",
   mute: "Mute",
   unmute: "Unmute",
+  noSound: "No sound recorded",
   moments: "Moments",
   moreControls: "More controls",
   fewerControls: "Fewer controls",
