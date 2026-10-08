@@ -4664,7 +4664,7 @@ export class SceneRenderer {
     const origin = this.raycaster.ray.origin
     const fieldRad = (BODY_HOVER_FIELD_FRACTION * this.camera.fov * Math.PI) / 180
     const decor = [...this.decorGroups.values()]
-    const blocker = decor.length > 0 ? this.raycaster.intersectObjects(decor, true)[0]?.distance : undefined
+    const blocker = decor.length > 0 ? SceneRenderer.firstSolid(this.raycaster.intersectObjects(decor, true))?.distance : undefined
     // Of the bodies the pointer is over, the smallest on screen: a being standing against a craft is
     // the being, when the pointer is over it, though the craft's own outline covers it too.
     let best: string | undefined
@@ -4817,13 +4817,29 @@ export class SceneRenderer {
   private readonly decorPlaneScratch = new Plane()
   private readonly decorHitScratch = new Vector3()
 
+  /**
+   * The first thing a ray meets that one cannot see through: a pane of glass, a veil, anything drawn
+   * mostly transparent is not what the pointer is over, what lies behind it is. Pointing through a
+   * windscreen at a hill named "the patrol car" would be naming the glass.
+   */
+  static firstSolid<T extends { object: Object3D }>(hits: readonly T[]): T | undefined {
+    return hits.find(hit => {
+      const material = (hit.object as Mesh).material
+      const materials = Array.isArray(material) ? material : [material]
+      return !materials.some(each => each && each.transparent && each.opacity < SceneRenderer.SEE_THROUGH_BELOW)
+    })
+  }
+
+  /** Below this opacity a surface is looked through, and a pointer goes through it with the eye. */
+  private static readonly SEE_THROUGH_BELOW = 0.9
+
   pickDecorAt(ndcX: number, ndcY: number): string | undefined {
     this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
     const entries = [...this.decorGroups.entries()]
-    const intersection = this.raycaster.intersectObjects(
+    const intersection = SceneRenderer.firstSolid(this.raycaster.intersectObjects(
       entries.map(([, group]) => group),
       true
-    )[0]
+    ))
     if (!intersection) return undefined
     let object: Object3D | null = intersection.object
     while (object && !entries.some(([, group]) => group === object)) object = object.parent
