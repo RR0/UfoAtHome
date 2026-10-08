@@ -131,9 +131,10 @@ export class SightingElement extends HTMLElement {
   private readonly shareButton: HTMLButtonElement
   private readonly shareDialog: HTMLDialogElement
   private readonly shareTitle: HTMLElement
-  private readonly shareMain: HTMLElement
+  private readonly shareLinkOption: HTMLButtonElement
+  private readonly shareLinkLabel: HTMLElement
+  private readonly shareLinkBox: HTMLElement
   private readonly shareEmbed: HTMLElement
-  private readonly shareBack: HTMLButtonElement
   private readonly shareClose: HTMLButtonElement
   private readonly shareEmbedOption: HTMLButtonElement
   private readonly shareEmbedLabel: HTMLElement
@@ -251,9 +252,10 @@ export class SightingElement extends HTMLElement {
     this.sceneElement.ufoElement.addControl(this.shareButton)
     this.shareDialog = this.shadow.getElementById("share-dialog") as HTMLDialogElement
     this.shareTitle = this.shadow.getElementById("share-title")!
-    this.shareMain = this.shadow.getElementById("share-main")!
+    this.shareLinkOption = this.shadow.getElementById("share-link-option") as HTMLButtonElement
+    this.shareLinkLabel = this.shadow.getElementById("share-link-label")!
+    this.shareLinkBox = this.shadow.querySelector(".share-link")!
     this.shareEmbed = this.shadow.getElementById("share-embed")!
-    this.shareBack = this.shadow.getElementById("share-back") as HTMLButtonElement
     this.shareClose = this.shadow.getElementById("share-close") as HTMLButtonElement
     this.shareEmbedOption = this.shadow.getElementById("share-embed-option") as HTMLButtonElement
     this.shareEmbedLabel = this.shadow.getElementById("share-embed-label")!
@@ -317,7 +319,7 @@ export class SightingElement extends HTMLElement {
     this.infoCreditsToggle.addEventListener("click", () => this.toggleCredits())
     this.shareButton.addEventListener("click", () => this.openShare())
     this.shareClose.addEventListener("click", () => this.closeShare())
-    this.shareBack.addEventListener("click", () => this.showShareView("main"))
+    this.shareLinkOption.addEventListener("click", () => this.showShareView("link"))
     this.shareEmbedOption.addEventListener("click", () => this.showShareView("embed"))
     for (const control of [this.shareStartOn, this.shareStart, ...Object.values(this.shareOptions).map(o => o.input)]) {
       control.addEventListener("input", () => this.refreshShareLinks())
@@ -395,7 +397,6 @@ export class SightingElement extends HTMLElement {
     this.shareButton.title = this.messages.share
     this.shareButton.setAttribute("aria-label", this.messages.share)
     this.shareClose.setAttribute("aria-label", this.messages.close)
-    this.shareBack.setAttribute("aria-label", this.messages.back)
     this.shareCopy.textContent = this.messages.embedCopy
     this.shareStartLabel.textContent = this.messages.shareStartAt
     this.shareOptions.labels.label.textContent = this.messages.shareOptionLabels
@@ -404,7 +405,8 @@ export class SightingElement extends HTMLElement {
     this.shareOptions.compare.label.textContent = this.messages.shareOptionCompare
     this.shareStart.setAttribute("aria-label", this.messages.shareStartAt)
     this.shareEmbedLabel.textContent = this.messages.embed
-    this.syncShareTitle()
+    this.shareLinkLabel.textContent = this.messages.shareLink
+    this.shareTitle.textContent = this.messages.share
     this.labelEmbedReplay.textContent = this.messages.embedReplay
     this.labelEmbedEdit.textContent = this.messages.embedEdit
     this.embedCopyButton.textContent = this.messages.embedCopy
@@ -675,12 +677,13 @@ export class SightingElement extends HTMLElement {
     return attributes
   }
 
-  /** The same options as the player's address takes them: `labels=1`, `map=1`, `moments=0`, `compare=1`. */
+  /** The same options as the player's address takes them: `labels=0`, `map=1`, `moments=0`, `compare=1`. */
   private replayQuery(): string[] {
     const options = this.shareOptions
     const query: string[] = []
     if (this.shareStartSeconds !== undefined) query.push(`t=${this.shareStartSeconds}`)
-    if (options.labels.input.checked) query.push("labels=1")
+    // The player shows them unless told not to, so it is the absence that is said.
+    if (!options.labels.input.checked) query.push("labels=0")
     if (options.map.input.checked) query.push("map=1")
     if (!options.milestones.input.checked) query.push("moments=0")
     if (options.compare.input.checked) query.push("compare=1")
@@ -724,7 +727,6 @@ export class SightingElement extends HTMLElement {
     }).catch(() => { this.shareCodeLoading = undefined })
   }
 
-  private shareView: "main" | "embed" = "main"
 
   private openShare(): void {
     // Offered at the position on show, as the video sites do, and off until the reader wants it.
@@ -738,7 +740,7 @@ export class SightingElement extends HTMLElement {
     this.shareOptions.milestones.input.checked = ufo.milestonesVisible
     this.shareOptions.compare.input.checked = this.sceneElement.compareAccount
     this.refreshShareLinks()
-    this.showShareView("main")
+    this.showShareView("link")
     if (typeof this.shareDialog.showModal === "function") this.shareDialog.showModal()
     else this.shareDialog.setAttribute("open", "")
     this.fitShareLink()
@@ -750,17 +752,14 @@ export class SightingElement extends HTMLElement {
     else this.shareDialog.removeAttribute("open")
   }
 
-  private showShareView(view: "main" | "embed"): void {
-    this.shareView = view
-    this.shareMain.hidden = view !== "main"
+  /** What the dialog gives: the link, or the code — the same options above either, so only what is below them changes. */
+  private showShareView(view: "link" | "embed"): void {
+    this.shareLinkBox.hidden = view !== "link"
     this.shareEmbed.hidden = view !== "embed"
-    this.shareBack.hidden = view === "main"
+    this.shareLinkOption.setAttribute("aria-pressed", String(view === "link"))
+    this.shareEmbedOption.setAttribute("aria-pressed", String(view === "embed"))
     if (view === "embed") this.loadShareCode()
-    this.syncShareTitle()
-  }
-
-  private syncShareTitle(): void {
-    this.shareTitle.textContent = this.shareView === "embed" ? this.messages.embedObservation : this.messages.share
+    else this.fitShareLink()
   }
 
   /**

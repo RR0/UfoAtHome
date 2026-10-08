@@ -48,20 +48,24 @@ export const html = `
 </div>
 <dialog id="share-dialog" class="share-dialog" aria-labelledby="share-title">
   <div class="share-head">
-    <button id="share-back" class="share-icon-button share-back" type="button" aria-label="Back" hidden>‹</button>
     <h3 id="share-title" class="share-title">Share</h3>
     <button id="share-close" class="share-icon-button share-close" type="button" aria-label="Close">×</button>
   </div>
   <div id="share-main">
+    <!-- What is given: the link to the replay, or the code that puts it on another page. -->
     <div class="share-options">
-      <button id="share-embed-option" class="share-option" type="button">
+      <button id="share-link-option" class="share-option" type="button" aria-pressed="true">
+        <span class="share-option-icon"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span id="share-link-label">Link</span>
+      </button>
+      <button id="share-embed-option" class="share-option" type="button" aria-pressed="false">
         <span class="share-option-icon"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <span id="share-embed-label">Embed</span>
       </button>
     </div>
     <!-- What the link and the embed open: the replay, or the editor on the same recording. -->
     <div class="share-kind">
-      <label><input type="radio" name="embed-kind" id="embed-kind-replay" value="replay" checked/> <span id="label-embed-replay">Replay</span></label>
+      <label><input type="radio" name="embed-kind" id="embed-kind-replay" value="replay" checked/> <span id="label-embed-replay">Player</span></label>
       <label><input type="radio" name="embed-kind" id="embed-kind-edit" value="edit"/> <span id="label-embed-edit">Editor</span></label>
     </div>
     <!-- How a shared replay opens; the editor takes none of them, which disables the group. -->
@@ -80,14 +84,14 @@ export const html = `
       <textarea id="share-link" class="share-link-input" rows="2" spellcheck="false" aria-label="Link"></textarea>
       <button id="share-copy" class="share-copy" type="button">Copy</button>
     </div>
-  </div>
-  <!-- The markup to put this observation on another page, in an editor that wraps its lines (its code
+    <!-- The markup to put this observation on another page, in an editor that wraps its lines (its code
        is fetched when this view is first shown); the textarea is what stands in until then. -->
-  <div id="share-embed" class="share-embed" hidden>
-    <div id="embed-code" class="embed-code"></div>
-    <textarea id="embed-markup" class="embed-markup" rows="6" spellcheck="false"></textarea>
-    <div class="embed-row">
-      <button id="embed-copy" class="share-copy" type="button">Copy</button>
+    <div id="share-embed" class="share-embed" hidden>
+      <div id="embed-code" class="embed-code"></div>
+      <textarea id="embed-markup" class="embed-markup" rows="6" spellcheck="false"></textarea>
+      <div class="embed-row">
+        <button id="embed-copy" class="share-copy" type="button">Copy</button>
+      </div>
     </div>
   </div>
 </dialog>
@@ -498,10 +502,6 @@ ${SummaryDescription.CSS}
   font-weight: 500;
   text-align: center;
 }
-.share-back {
-  grid-column: 1;
-  grid-row: 1;
-}
 .share-close {
   grid-column: 3;
   grid-row: 1;
@@ -555,6 +555,11 @@ ${SummaryDescription.CSS}
 }
 .share-option:hover .share-option-icon, .share-option:focus-visible .share-option-icon {
   background: #e4e4e4;
+}
+/* The one being given: its icon filled, as a pressed tab is. */
+.share-option[aria-pressed="true"] .share-option-icon {
+  background: #dbe6f7;
+  border-color: #9bb6e0;
 }
 .share-kind {
   display: flex;
@@ -621,7 +626,7 @@ ${SummaryDescription.CSS}
 .share-copy:hover, .share-copy:focus-visible {
   background: #eee;
 }
-.share-embed[hidden], #share-main[hidden] {
+.share-embed[hidden], .share-link[hidden] {
   display: none;
 }
 .info-footer-actions {
@@ -638,14 +643,6 @@ ${SummaryDescription.CSS}
    until then, and the model the editor mirrors. */
 .embed-code:empty, .embed-code[hidden], .embed-markup[hidden] {
   display: none;
-}
-.embed-code .cm-editor {
-  border: 1px solid #ccc;
-  border-radius: 0.6em;
-  font-size: 0.8em;
-}
-.embed-code .cm-scroller {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 .embed-markup {
   width: 100%;

@@ -865,7 +865,7 @@ describe("SightingElement sharing", () => {
     const shadow = await mounted()
     ;(findDeep(shadow, "share-button") as HTMLButtonElement).click()
     expect((shadow.getElementById("share-link") as HTMLInputElement).value)
-      .toBe("https://ufoathome.org/play/?file=" + encodeURIComponent("http://localhost:3000/john.json"))
+      .toBe("https://ufoathome.org/play/?file=" + encodeURIComponent("http://localhost:3000/john.json") + "&labels=0")
     expect(shadow.getElementById("share-dialog")!.hasAttribute("open")).toBe(true)
   })
 
@@ -891,29 +891,31 @@ describe("SightingElement sharing", () => {
     const markup = () => (shadow.querySelector("#embed-markup") as HTMLTextAreaElement).value
     expect((shadow.getElementById("share-opt-labels") as HTMLInputElement).checked).toBe(false)
     expect((shadow.getElementById("share-opt-milestones") as HTMLInputElement).checked).toBe(true)
-    expect(link()).not.toContain("labels=1")
+    expect(link()).toContain("&labels=0")
     tick("share-opt-labels")
-    expect(link()).toContain("&labels=1")
+    expect(link()).not.toContain("labels=")
     expect(markup()).toContain(" show-labels></rr0-sighting>")
     tick("share-opt-labels")
     tick("share-opt-map")
     tick("share-opt-milestones")
     tick("share-opt-compare")
     expect(link()).toContain("&map=1&moments=0&compare=1")
-    expect(link()).not.toContain("labels=1")
+    expect(link()).toContain("labels=0")
     expect(markup()).toContain(' show-observer-map hide-milestones compare-account></rr0-sighting>')
     expect(markup()).not.toContain("show-labels")
   })
 
-  it("keeps the embed markup behind the Embed option, and comes back from it", async () => {
+  it("gives the link or the embed code on one screen, under the same options", async () => {
     const shadow = await mounted()
     ;(findDeep(shadow, "share-button") as HTMLButtonElement).click()
     expect(shadow.getElementById("share-embed")!.hidden).toBe(true)
+    expect((shadow.querySelector(".share-link") as HTMLElement).hidden).toBe(false)
     ;(shadow.getElementById("share-embed-option") as HTMLButtonElement).click()
     expect(shadow.getElementById("share-embed")!.hidden).toBe(false)
-    expect(shadow.getElementById("share-main")!.hidden).toBe(true)
-    ;(shadow.getElementById("share-back") as HTMLButtonElement).click()
-    expect(shadow.getElementById("share-main")!.hidden).toBe(false)
+    expect((shadow.querySelector(".share-link") as HTMLElement).hidden).toBe(true)
+    expect(shadow.getElementById("share-replay-options")).not.toBeNull()
+    ;(shadow.getElementById("share-link-option") as HTMLButtonElement).click()
+    expect((shadow.querySelector(".share-link") as HTMLElement).hidden).toBe(false)
   })
 
   it("no longer has the embed in the info panel", async () => {

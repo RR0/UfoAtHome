@@ -128,7 +128,8 @@ const describe = () => {
     paragraph.textContent = part
     return paragraph
   }))
-  description.hidden = description.childElementCount === 0
+  // The chips carry it (their Summary box, opened on a click): not twice on the page.
+  description.hidden = description.childElementCount === 0 || stage.hasAttribute("show-labels")
 }
 /* The recording the player is showing, as its own address: on a case with several observers, the one picked. */
 let shownSrc
@@ -181,10 +182,10 @@ const answeredButUnreadable = async url => {
 /* \`t=\` in the page's own address is where the recording opens, in seconds: \`?file=...&t=125\`. */
 const startAt = new URLSearchParams(location.search).get("t")
 if (startAt !== null && startAt.trim() !== "" && Number.isFinite(Number(startAt))) stage.setAttribute("start-time", startAt)
-/* The other options a shared link carries: \`labels=1\` shows the summary chips, \`map=1\` opens the observer map,
+/* The other options a shared link carries: the summary chips are on, \`labels=0\` hides them, \`map=1\` opens the observer map,
    \`moments=0\` hides the named moments, \`compare=1\` sets the account beside the interpretation. */
 const shared = new URLSearchParams(location.search)
-if (shared.get("labels") === "1") stage.setAttribute("show-labels", "")
+if (shared.get("labels") !== "0") stage.setAttribute("show-labels", "")
 if (shared.get("map") === "1") stage.setAttribute("show-observer-map", "")
 if (shared.get("moments") === "0") stage.setAttribute("hide-milestones", "")
 if (shared.get("compare") === "1") stage.setAttribute("compare-account", "")

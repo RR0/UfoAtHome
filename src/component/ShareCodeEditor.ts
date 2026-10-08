@@ -35,6 +35,12 @@ export class ShareCodeEditor {
         drawSelection(),
         keymap.of([...defaultKeymap, ...historyKeymap]),
         EditorView.lineWrapping,
+        // The same stack as the link's field, spelled out: CodeMirror's own bare `monospace` is drawn smaller
+        // than a named monospace family at the same size.
+        EditorView.theme({
+          "&": { fontSize: "0.8em", border: "1px solid #ccc", borderRadius: "0.6em" },
+          ".cm-scroller": { fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", lineHeight: "1.4" }
+        }),
         syntaxHighlighting(ShareCodeEditor.COLOURS, { fallback: true }),
         html(),
         EditorView.contentAttributes.of({ "aria-label": label }),
