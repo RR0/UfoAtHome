@@ -58,13 +58,13 @@ export class ModelPicker {
 .model-picker-button img { width: 2em; height: 1.5em; object-fit: contain; }
 .model-picker-button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .model-picker-backdrop { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .55); }
-.model-picker { box-sizing: border-box; width: min(56em, 94vw); max-height: 86vh; display: flex; flex-direction: column; background: #fff; color: #222; border-radius: 6px; box-shadow: 0 4px 24px rgba(0, 0, 0, .5); font-size: .95em; }
-.model-picker header { display: flex; align-items: center; padding: .6em 1em; border-bottom: 1px solid #ddd; }
-.model-picker .model-picker-close { width: 2em; height: 2em; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: #fff; color: #222; border: none; border-radius: 50%; font-size: 1em; line-height: 1; cursor: pointer; }
-.model-picker .model-picker-close:hover, .model-picker .model-picker-close:focus-visible { background: #ddd; outline: none; }
-.model-picker .model-picker-add { width: 2em; height: 2em; padding: 0; margin-left: auto; margin-right: .4em; display: inline-flex; align-items: center; justify-content: center; background: #fff; color: #222; border: none; border-radius: 50%; font-size: 1.2em; line-height: 1; cursor: pointer; }
-.model-picker .model-picker-add:hover, .model-picker .model-picker-add:focus-visible, .model-picker .model-picker-add[aria-expanded="true"] { background: #ddd; outline: none; }
-.model-picker .model-picker-address { display: grid; gap: .4em; padding: .6em 1em; border-bottom: 1px solid #ddd; background: #f6f6f8; }
+.model-picker { color-scheme: light dark; box-sizing: border-box; width: min(56em, 94vw); max-height: 86vh; display: flex; flex-direction: column; background: light-dark(#fff, #1e1f22); color: light-dark(#222, #e6e6e6); border-radius: 6px; box-shadow: 0 4px 24px rgba(0, 0, 0, .5); font-size: .95em; }
+.model-picker header { display: flex; align-items: center; padding: .6em 1em; border-bottom: 1px solid light-dark(#ddd, #4a4c52); }
+.model-picker .model-picker-close { width: 2em; height: 2em; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: light-dark(#fff, #1e1f22); color: light-dark(#222, #e6e6e6); border: none; border-radius: 50%; font-size: 1em; line-height: 1; cursor: pointer; }
+.model-picker .model-picker-close:hover, .model-picker .model-picker-close:focus-visible { background: light-dark(#ddd, #4a4c52); outline: none; }
+.model-picker .model-picker-add { width: 2em; height: 2em; padding: 0; margin-left: auto; margin-right: .4em; display: inline-flex; align-items: center; justify-content: center; background: light-dark(#fff, #1e1f22); color: light-dark(#222, #e6e6e6); border: none; border-radius: 50%; font-size: 1.2em; line-height: 1; cursor: pointer; }
+.model-picker .model-picker-add:hover, .model-picker .model-picker-add:focus-visible, .model-picker .model-picker-add[aria-expanded="true"] { background: light-dark(#ddd, #4a4c52); outline: none; }
+.model-picker .model-picker-address { display: grid; gap: .4em; padding: .6em 1em; border-bottom: 1px solid light-dark(#ddd, #4a4c52); background: light-dark(#f6f6f8, #2c2e33); }
 .model-picker .model-picker-address[hidden] { display: none; }
 .model-picker .model-picker-address label { display: grid; grid-template-columns: 11em 1fr; align-items: center; gap: .5em; }
 .model-picker .model-picker-address input { min-width: 0; font: inherit; }
@@ -74,7 +74,7 @@ export class ModelPicker {
 .model-picker .model-picker-body { overflow-y: auto; padding: .5em 1em 1em; }
 .model-picker h3 { margin: .8em 0 .4em; font-size: .95em; color: #555; }
 .model-picker .model-picker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(10em, 1fr)); gap: .6em; }
-.model-picker .model-card { display: flex; flex-direction: column; align-items: center; gap: .25em; padding: .5em; text-align: center; background: #f6f6f8; color: inherit; border: 2px solid transparent; border-radius: 4px; cursor: pointer; font: inherit; }
+.model-picker .model-card { display: flex; flex-direction: column; align-items: center; gap: .25em; padding: .5em; text-align: center; background: light-dark(#f6f6f8, #2c2e33); color: inherit; border: 2px solid transparent; border-radius: 4px; cursor: pointer; font: inherit; }
 .model-picker .model-card:hover, .model-picker .model-card:focus-visible { background: #eef; border-color: #99c; outline: none; }
 .model-picker .model-card[aria-pressed="true"] { border-color: #46c; }
 .model-picker .model-thumb { position: relative; overflow: hidden; width: 100%; aspect-ratio: 4 / 3; display: flex; align-items: center; justify-content: center; background: #e4e4ea; border-radius: 3px; color: #889; }

@@ -15,10 +15,10 @@ import { tags } from "@lezer/highlight"
 export class ShareCodeEditor {
 
   private static readonly COLOURS = HighlightStyle.define([
-    { tag: tags.tagName, color: "#1a5fb4" },
-    { tag: tags.angleBracket, color: "#777" },
-    { tag: tags.attributeName, color: "#8a4b00" },
-    { tag: [tags.string, tags.attributeValue], color: "#1a7f37" }
+    { tag: tags.tagName, color: "var(--pop-tag)" },
+    { tag: tags.angleBracket, color: "var(--pop-faint)" },
+    { tag: tags.attributeName, color: "var(--pop-attr)" },
+    { tag: [tags.string, tags.attributeValue], color: "var(--pop-string)" }
   ])
 
   private readonly view: EditorView
@@ -38,7 +38,7 @@ export class ShareCodeEditor {
         // The same stack as the link's field, spelled out: CodeMirror's own bare `monospace` is drawn smaller
         // than a named monospace family at the same size.
         EditorView.theme({
-          "&": { fontSize: "0.8em", border: "1px solid #ccc", borderRadius: "0.6em" },
+          "&": { fontSize: "0.8em", border: "1px solid var(--pop-border)", borderRadius: "0.6em" },
           ".cm-scroller": { fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", lineHeight: "1.4" }
         }),
         syntaxHighlighting(ShareCodeEditor.COLOURS, { fallback: true }),

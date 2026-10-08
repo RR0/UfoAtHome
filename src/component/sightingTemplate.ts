@@ -112,6 +112,7 @@ export const html = `
 
 export const css = `
 :host {
+  color-scheme: light dark;
   display: block;
   font-family: sans-serif;
 }
@@ -327,12 +328,51 @@ ${SummaryDescription.CSS}
   border-radius: 2px;
   vertical-align: -1px;
 }
+/* What the popups (the info panel, the share dialog) are drawn with: light by default, and the
+   dark set when the system asks for it, as the editor does. The form controls follow through
+   color-scheme. */
+:host {
+  --pop-bg: #fff;
+  --pop-fg: #222;
+  --pop-border: #ccc;
+  --pop-soft: #eee;
+  --pop-faint: #666;
+  --pop-fill: #f2f2f2;
+  --pop-fill-hover: #e4e4e4;
+  --pop-on: #dbe6f7;
+  --pop-on-border: #9bb6e0;
+  --pop-link: #06c;
+  --pop-derived: #2a6fb0;
+  --pop-assumed: #b06a00;
+  --pop-tag: #1a5fb4;
+  --pop-attr: #8a4b00;
+  --pop-string: #1a7f37;
+}
+@media (prefers-color-scheme: dark) {
+  :host {
+    --pop-bg: #1e1f22;
+    --pop-fg: #e6e6e6;
+    --pop-border: #4a4c52;
+    --pop-soft: #34363b;
+    --pop-faint: #a0a3aa;
+    --pop-fill: #2c2e33;
+    --pop-fill-hover: #3a3d43;
+    --pop-on: #274066;
+    --pop-on-border: #4f7bc4;
+    --pop-link: #7fb2ff;
+    --pop-derived: #7fb2ff;
+    --pop-assumed: #e0a040;
+    --pop-tag: #8cb8ff;
+    --pop-attr: #e0a860;
+    --pop-string: #7fd08a;
+  }
+}
 .info-panel {
   padding: 0.6em 0.8em;
-  border: 1px solid #ccc;
+  border: 1px solid var(--pop-border);
   border-radius: 4px;
-  background: #fff;
-  color: #222;
+  background: var(--pop-bg);
+  color: var(--pop-fg);
   max-width: 28em;
   overflow-y: auto;
   /* Its own scrolling shouldn't carry on into the page behind it once it reaches an end. */
@@ -419,7 +459,7 @@ ${SummaryDescription.CSS}
   height: 1.6em;
   border: none;
   background: transparent;
-  color: #666;
+  color: var(--pop-faint);
   cursor: pointer;
   font-size: 1.1em;
   line-height: 1;
@@ -436,7 +476,7 @@ ${SummaryDescription.CSS}
   gap: 0.15em 0.6em;
 }
 .info-dl dt {
-  color: #666;
+  color: var(--pop-faint);
 }
 .info-dl dd {
   margin: 0;
@@ -455,14 +495,14 @@ ${SummaryDescription.CSS}
   cursor: help;
 }
 .basis-stated {
-  color: #888;
-  border-color: #ccc;
+  color: var(--pop-faint);
+  border-color: var(--pop-border);
 }
 .basis-derived {
-  color: #2a6fb0;
+  color: var(--pop-derived);
 }
 .basis-assumed {
-  color: #b06a00;
+  color: var(--pop-assumed);
 }
 /* The smaller, secondary row below the observation details — app identity on the left, the
    credits reveal on the right, matching the reduced visual weight of "fine print" rather than
@@ -476,12 +516,13 @@ ${SummaryDescription.CSS}
    title and a close button on one line, the ways of sharing as round buttons, and the link to copy
    in a field with its button inside. Native <dialog>, so the page behind is inert and Escape closes. */
 .share-dialog {
+  color-scheme: light dark;
   width: min(28em, calc(100vw - 2em));
   padding: 1em 1.2em 1.2em;
   border: none;
   border-radius: 1.2em;
-  background: #fff;
-  color: #111;
+  background: var(--pop-bg);
+  color: var(--pop-fg);
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
   font-size: 0.95em;
 }
@@ -522,7 +563,7 @@ ${SummaryDescription.CSS}
   display: none;
 }
 .share-icon-button:hover, .share-icon-button:focus-visible {
-  background: #eee;
+  background: var(--pop-soft);
 }
 .share-options {
   display: flex;
@@ -549,17 +590,17 @@ ${SummaryDescription.CSS}
   justify-content: center;
   width: 3.2em;
   height: 3.2em;
-  border: 1px solid #ddd;
+  border: 1px solid var(--pop-border);
   border-radius: 50%;
-  background: #f2f2f2;
+  background: var(--pop-fill);
 }
 .share-option:hover .share-option-icon, .share-option:focus-visible .share-option-icon {
-  background: #e4e4e4;
+  background: var(--pop-fill-hover);
 }
 /* The one being given: its icon filled, as a pressed tab is. */
 .share-option[aria-pressed="true"] .share-option-icon {
-  background: #dbe6f7;
-  border-color: #9bb6e0;
+  background: var(--pop-on);
+  border-color: var(--pop-on-border);
 }
 .share-kind {
   display: flex;
@@ -584,7 +625,7 @@ ${SummaryDescription.CSS}
   align-items: flex-start;
   gap: 0.5em;
   padding: 0.5em 0.6em 0.5em 0.8em;
-  border: 1px solid #ccc;
+  border: 1px solid var(--pop-border);
   border-radius: 0.9em;
 }
 .share-start {
@@ -615,16 +656,16 @@ ${SummaryDescription.CSS}
 .share-copy {
   flex: 0 0 auto;
   padding: 0.5em 1.1em;
-  border: 1px solid #ccc;
+  border: 1px solid var(--pop-border);
   border-radius: 1.2em;
-  background: #fff;
+  background: var(--pop-bg);
   color: inherit;
   font: inherit;
   font-weight: 500;
   cursor: pointer;
 }
 .share-copy:hover, .share-copy:focus-visible {
-  background: #eee;
+  background: var(--pop-soft);
 }
 .share-embed[hidden], .share-link[hidden] {
   display: none;
@@ -670,17 +711,17 @@ ${SummaryDescription.CSS}
   margin-top: 0.6em;
   padding-top: 0.4em;
   padding-bottom: 0.2em;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--pop-soft);
   font-size: 0.8em;
 }
 #info-app-link {
-  color: #555;
+  color: var(--pop-faint);
 }
 .info-credits-toggle {
   border: none;
   background: none;
   padding: 0;
-  color: #06c;
+  color: var(--pop-link);
   cursor: pointer;
   font-size: 1em;
   text-decoration: underline;

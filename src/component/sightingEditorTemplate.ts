@@ -622,6 +622,7 @@ export const html = `
 
 export const css = `
 :host {
+  color-scheme: light dark;
   display: block;
   font-family: sans-serif;
 }
@@ -1383,8 +1384,8 @@ select.weather-field:disabled {
 .confirm-box {
   max-width: 26em;
   padding: 1.2em;
-  background: #fff;
-  color: #222;
+  background: light-dark(#fff, #1e1f22);
+  color: light-dark(#222, #e6e6e6);
   border-radius: 6px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   font-size: 0.95em;
@@ -1409,9 +1410,9 @@ select.weather-field:disabled {
   flex-direction: column;
   min-width: 9em;
   padding: 0.3em 0;
-  background: #fff;
-  color: #222;
-  border: 1px solid #ccc;
+  background: light-dark(#fff, #1e1f22);
+  color: light-dark(#222, #e6e6e6);
+  border: 1px solid light-dark(#ccc, #4a4c52);
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   font-size: 0.9em;
@@ -1483,9 +1484,9 @@ select.weather-field:disabled {
   max-height: 16em;
   overflow-y: auto;
   padding: 0.3em 0;
-  background: #fff;
-  color: #222;
-  border: 1px solid #ccc;
+  background: light-dark(#fff, #1e1f22);
+  color: light-dark(#222, #e6e6e6);
+  border: 1px solid light-dark(#ccc, #4a4c52);
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   font-size: 0.9em;

@@ -24,6 +24,7 @@ export const html = `
 
 export const css = `
 :host {
+  color-scheme: light dark;
   display: block;
 }
 /* What this scene owes for what it shows, behind a small button in its corner — the terrain's
@@ -66,10 +67,10 @@ export const css = `
 }
 .credits-panel {
   padding: 0.5em 0.8em;
-  border: 1px solid #ccc;
+  border: 1px solid light-dark(#ccc, #4a4c52);
   border-radius: 4px;
-  background: #fff;
-  color: #222;
+  background: light-dark(#fff, #1e1f22);
+  color: light-dark(#222, #e6e6e6);
   max-width: 28em;
   max-height: 60vh;
   overflow-y: auto;
