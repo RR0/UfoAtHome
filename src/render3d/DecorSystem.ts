@@ -111,6 +111,8 @@ const LIT_HEADLIGHT_COLOR: RgbColor = [1, 0.97, 0.85]
  * box with actual thickness, so it reads correctly from the room's own interior too (see addRoom
  * below), no extra double-sided material needed. */
 const WINDOW_COLOR: RgbColor = [0.55, 0.68, 0.72]
+/** How much of its own colour a pane keeps: it darkens what is behind it, it does not light it. */
+const PANE_DARKNESS = 0.12
 const WINDOW_MARGIN = 0.03
 const WINDOW_THICKNESS = 0.05
 
@@ -137,7 +139,10 @@ function windowOpacityPercent(windows: DecorObject["windows"], side: DecorSide):
 
 function addWindowPane(group: Group, sizeX: number, sizeY: number, sizeZ: number, x: number, y: number, z: number, opacityPercent: number | undefined): void {
   if (opacityPercent === undefined) return
-  const material = new MeshLambertMaterial({ color: new Color(...WINDOW_COLOR), transparent: true, opacity: opacityPercent / 100 })
+  // Unlit, and dark: glass takes light out of what is behind it (a few per cent, grey) and adds next
+  // to none of its own. A lit pale pane mixed in a share of the Sun's whole illumination, so a 12 %
+  // pane veiled the view like frosted plastic, the more so the more the sun faced it.
+  const material = new MeshBasicMaterial({ color: new Color(...WINDOW_COLOR).multiplyScalar(PANE_DARKNESS), transparent: true, opacity: opacityPercent / 100 })
   const mesh = new Mesh(new BoxGeometry(sizeX, sizeY, sizeZ), material)
   mesh.position.set(x, y, z)
   group.add(mesh)
@@ -498,16 +503,18 @@ const VEHICLE_CABIN_HALF_WIDTH = 0.8
 const VEHICLE_CABIN_HALF_DEPTH = 1.0
 const VEHICLE_CABIN_Y = 1.7
 const VEHICLE_CABIN_HEIGHT = 0.6
-const VEHICLE_WINDOW_HEIGHT = 0.4
-const VEHICLE_WINDSHIELD_WIDTH = 1.2
+/** Glazing as large as a car's really is within the cabin box: from inside, with the eye a third of
+ * a metre from the door, a pillar a fifth of a metre thick hid a sixth of the field. */
+const VEHICLE_WINDOW_HEIGHT = 0.46
+const VEHICLE_WINDSHIELD_WIDTH = 1.5
 /** Was one VEHICLE_SIDE_WINDOW_LENGTH=1.6 pane spanning nearly the whole cabin depth per side —
  * replaced by two shorter door windows (front-left/front-right/behind-left/behind-right, see
  * DecorSide's own doc comment) once a real car's left/right side turned out to have 2 windows
  * each, not 1. */
-const VEHICLE_DOOR_WINDOW_LENGTH = 0.7
+const VEHICLE_DOOR_WINDOW_LENGTH = 0.8
 /** Front door window centered at -this along Z, behind door at +this — cabin half-depth is
- * VEHICLE_CABIN_HALF_DEPTH=1.0, so this leaves ~0.15 margin at the cabin's own front/rear edges
- * and a ~0.3 gap at Z=0 for the B-pillar between the two doors. Also what sideOffset uses to seat
+ * VEHICLE_CABIN_HALF_DEPTH=1.0, so this leaves ~0.1 margin at the cabin's own front/rear edges
+ * and a ~0.2 gap at Z=0 for the B-pillar between the two doors. Also what sideOffset uses to seat
  * a front-left/front-right/behind-left/behind-right occupant exactly under their own window. */
 const VEHICLE_DOOR_WINDOW_Z = 0.5
 /** The camera's own absolute eye height while inside a vehicle — set to VEHICLE_CABIN_Y itself
