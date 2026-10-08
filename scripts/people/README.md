@@ -67,3 +67,7 @@ the head into the shoulders; see the comments above each for what the procès-ve
 
 What is chosen there is ASSUMED (ages, builds, clothes): these are nobody's likeness and say nothing
 about any witness.
+
+`derive_socorro_figure.py` is the exception that runs without Blender: the Socorro figure (two figures "in white
+coveralls") is the man of 2 July 1965 with his suit's texture replaced by off-white cloth, written into the .glb
+directly. Run it with `python3 scripts/people/derive_socorro_figure.py` (ImageMagick for the cloth).

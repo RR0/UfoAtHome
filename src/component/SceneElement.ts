@@ -85,6 +85,7 @@ import type { UpperAirProvider, UpperAirSample, UpperAirSource } from "../engine
 import { TrafficIds } from "../engine/traffic/TrafficIds.js"
 import type { TrafficDecorSet } from "../engine/traffic/TrafficDecor.js"
 import type { DecorObject } from "../engine/model/Decor.js"
+import { resolveDecorSeatAt } from "../engine/model/Decor.js"
 import type { DataSource } from "../engine/source/DataSource.js"
 import { FireballArchive } from "../engine/astronomy/FireballArchive.js"
 import type { FireballRecord } from "../engine/astronomy/FireballArchive.js"
@@ -382,6 +383,7 @@ export class SceneElement extends HTMLElement {
   /** The decor the recording states plus the traffic, rebuilt only when either changes: the renderer
    * rebuilds every group when the list it is given is not the one it had. */
   private decorMemo?: { base: DecorObject[]; traffic: DecorObject[]; merged: DecorObject[] }
+  private seatedMemo?: { base: DecorObject[]; seats: string; seated: DecorObject[] }
   /** How faint the catalogue now loaded goes — what ensureStarsDeepEnough compares this recording's
    * own optics against. Zero until the first load, which is "nothing loaded" rather than a depth. */
   private starCatalogDepth = 0
@@ -1402,7 +1404,7 @@ export class SceneElement extends HTMLElement {
     if (!instant) this.pushAircraftSound(sighting, t)
     this.updateMeteorShower(sighting, t)
     this.updateLightning(sighting, t, instant !== undefined)
-    this.sceneRenderer.setDecor(this.decorWithTraffic(sighting))
+    this.sceneRenderer.setDecor(this.seatedDecor(this.decorWithTraffic(sighting), t))
     this.sceneRenderer.setDecorPresence(this.traffic?.set?.presence ?? SceneElement.NO_PRESENCE)
     this.sceneRenderer.setDecorSunlight(this.trafficSunlight(t))
     this.sceneRenderer.setContrails(this.traffic?.contrails ?? SceneElement.NO_CONTRAILS)
@@ -1634,6 +1636,34 @@ export class SceneElement extends HTMLElement {
     const merged = [...sighting.decor, ...set.objects]
     this.decorMemo = { base: sighting.decor, traffic: set.objects, merged }
     return merged
+  }
+
+  /**
+   * The decor as it stands at t for the one thing about it that CHANGES the object: who is inside.
+   * An object whose seat is keyframed (see DecorObject.observerKeyframes) is handed on with the seat
+   * the observer is in at t, which is what lets the renderer build the cabin around them while they
+   * drive and take it away when they step out.
+   *
+   * The array is kept as long as nobody changes seat, because the renderer rebuilds every object when
+   * it is given a different one: a car driven for seventy seconds is one array, and the rebuild
+   * happens twice, when its driver gets in and when they get out.
+   */
+  private seatedDecor(decor: DecorObject[], t: number): DecorObject[] {
+    if (!decor.some(object => object.observerKeyframes?.length)) return decor
+    const seats = decor.map(object => {
+      if (!object.observerKeyframes?.length) return ""
+      const seat = resolveDecorSeatAt(object, t)
+      return `${seat.side ?? "-"}/${seat.facing ?? "-"}`
+    }).join("|")
+    const memo = this.seatedMemo
+    if (memo && memo.base === decor && memo.seats === seats) return memo.seated
+    const seated = decor.map(object => {
+      if (!object.observerKeyframes?.length) return object
+      const seat = resolveDecorSeatAt(object, t)
+      return { ...object, observerSide: seat.side, observerFacing: seat.facing }
+    })
+    this.seatedMemo = { base: decor, seats, seated }
+    return seated
   }
 
   /**

@@ -83,6 +83,13 @@ describe("DecorSystem.build vehicle door-window rendering", () => {
 })
 
 describe("DecorSystem.occupantView", () => {
+  it("looks through the window observerFacing names, not the one at the seat, and turns with the heading it is given", () => {
+    const driver = vehicle({ observerSide: "front-left", observerFacing: "front", headingDeg: 0 })
+    expect(DecorSystem.occupantView(driver).headingDeg).toBeCloseTo(0)
+    expect(DecorSystem.occupantView(vehicle({ observerSide: "front-left", headingDeg: 0 })).headingDeg).toBeCloseTo(-90)
+    expect(DecorSystem.occupantView(driver, 200).headingDeg).toBeCloseTo(200)
+  })
+
   it("throws when observerSide is unset", () => {
     expect(() => DecorSystem.occupantView(building())).toThrow()
   })

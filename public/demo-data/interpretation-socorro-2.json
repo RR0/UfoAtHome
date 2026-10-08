@@ -1083,7 +1083,7 @@
      "silhouette-1"
     ],
     "model": {
-     "id": "figure"
+     "id": "ufoathome-socorro-figure"
     },
     "track": [
      {
@@ -1092,16 +1092,12 @@
       "northM": -966.33,
       "onGround": true,
       "sizeM": {
-       "widthM": 0.45,
-       "lengthM": 0.3,
+       "widthM": 0.39,
+       "lengthM": 0.37,
        "heightM": 1.3
       },
       "attitude": {
        "headingDeg": 20
-      },
-      "appearance": {
-       "color": "#f2f2ee",
-       "albedo": 0.7
       }
      },
      {
@@ -1122,7 +1118,7 @@
      "silhouette-2"
     ],
     "model": {
-     "id": "figure"
+     "id": "ufoathome-socorro-figure"
     },
     "track": [
      {
@@ -1131,16 +1127,12 @@
       "northM": -964.61,
       "onGround": true,
       "sizeM": {
-       "widthM": 0.45,
-       "lengthM": 0.3,
+       "widthM": 0.39,
+       "lengthM": 0.37,
        "heightM": 1.3
       },
       "attitude": {
        "headingDeg": 20
-      },
-      "appearance": {
-       "color": "#f2f2ee",
-       "albedo": 0.7
       }
      },
      {

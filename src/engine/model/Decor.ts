@@ -406,6 +406,21 @@ export interface DecorObject {
    */
   color?: string
   observerSide?: DecorSide
+  /** Which window the observer looks through, when it is not the one at their own seat: a driver sits
+   * at "front-left" and looks through the windshield ("front"). Absent means the window of the seat
+   * itself, which is what every recording written before this said by saying nothing. Meaningful
+   * only while the observer is inside (observerSide, or a seat from observerKeyframes). */
+  observerFacing?: DecorSide
+  /** Where the observer sits over time, when they do not stay where they are: a driver is in the car
+   * until the moment they get out of it. Sorted by t, hold-last-value (see resolveDecorSeatAt); a
+   * keyframe without `side` means outside the object from then on. Absent means `observerSide` above
+   * holds for the whole recording, which is what a parked car or a room needs.
+   *
+   * Without this, a vehicle that DRIVES could not be inhabited at all: the seat was a fixed fact of
+   * the object, so the observer was either always in the car or never, and a recording of someone
+   * who drives up to what they saw and gets out had to leave them standing beside a car they were
+   * supposed to be in. */
+  observerKeyframes?: DecorSeatKeyframe[]
   /** A vehicle heard running — see DecorEngine: its engine turning with its own `track`, heard less
    * the further it is from the observer. Absent means silent (parked, or nobody said). */
   engine?: DecorEngine
@@ -480,6 +495,15 @@ export interface WireStructure {
   poleHeightM?: number
 }
 
+/** Where the observer sits in a decor object from an instant on — see DecorObject.observerKeyframes. */
+export interface DecorSeatKeyframe {
+  t: number
+  /** The seat they are in from this instant; absent means they are outside the object. */
+  side?: DecorSide
+  /** The window they look through from this instant, when it is not the one at their seat. */
+  facing?: DecorSide
+}
+
 /** Where a moving decor object is at one instant — see DecorObject.track. */
 export interface DecorPlacementKeyframe {
   t: number
@@ -505,6 +529,23 @@ export function resolveDecorLitAt(decor: DecorObject, t: number): boolean {
     latest = keyframe
   }
   return latest.lit
+}
+
+/**
+ * Where the observer sits in this object at time t: the keyframes' latest seat at or before t (the
+ * first one before any of them), or the object's own fixed `observerSide`/`observerFacing` when it
+ * has no keyframes. Same hold-last-value resolution as resolveDecorLitAt, for the same reason: a seat
+ * is a state that changes a handful of times, not a quantity that is interpolated.
+ */
+export function resolveDecorSeatAt(decor: DecorObject, t: number): { side?: DecorSide, facing?: DecorSide } {
+  const keyframes = decor.observerKeyframes
+  if (!keyframes || keyframes.length === 0) return { side: decor.observerSide, facing: decor.observerFacing }
+  let latest = keyframes[0]
+  for (const keyframe of keyframes) {
+    if (keyframe.t > t) break
+    latest = keyframe
+  }
+  return { side: latest.side, facing: latest.facing }
 }
 
 /**

@@ -2393,22 +2393,28 @@ export class SceneRenderer {
     }
     const shift = { x: 0, z: 0 }
     let furthestDecorM = 0
+    let seatEyeY: number | undefined
     if (inhabited) {
-      const view = DecorSystem.occupantView(inhabited)
+      // Where the object IS at this instant, not where it was first put: a car that drives carries
+      // its occupant with it, and its heading turns the view (see DecorObject.observerKeyframes).
+      // Read off eastM/northM/headingDeg, this was only ever right for a car that stands.
+      const placed = resolveDecorPlacementAt(inhabited, t)
+      const view = DecorSystem.occupantView(inhabited, placed.headingDeg)
       // Rotates the occupant's own LOCAL (x,z) by the inhabited object's world rotation (same
       // "-headingDeg, clockwise from north" convention DecorSystem.build applies to the whole
       // group) to get the world-space delta from that object's own anchor point to its exact
       // standing spot — same rotation math setObserverPose/DecorSystem.build both already use.
-      const rotationRad = -(inhabited.headingDeg ?? 0) * DEG_TO_RAD
+      const rotationRad = -(placed.headingDeg ?? 0) * DEG_TO_RAD
       const worldDx = view.x * Math.cos(rotationRad) + view.z * Math.sin(rotationRad)
       const worldDz = -view.x * Math.sin(rotationRad) + view.z * Math.cos(rotationRad)
-      const anchorX = inhabited.eastM + offset.x
-      const anchorZ = -inhabited.northM + offset.z
+      const anchorX = placed.eastM + offset.x
+      const anchorZ = -placed.northM + offset.z
       shift.x = -(anchorX + worldDx)
       shift.z = -(anchorZ + worldDz)
       // Above the ground the object itself stands on, not above the observer's own — see
       // groundYUnder. A observer sitting in a car parked on a rise looks out from that rise.
       this.camera.position.y = this.groundYUnder(anchorX, anchorZ) + view.eyeY
+      seatEyeY = view.eyeY
       this.camera.rotation.set(this.indoorLookPitchDeg * DEG_TO_RAD, -(view.headingDeg + this.indoorLookYawDeg) * DEG_TO_RAD, 0, "YXZ")
     }
     this.bodyOrigin = { x: offset.x + shift.x, z: offset.z + shift.z }
@@ -2463,6 +2469,14 @@ export class SceneRenderer {
         // Near enough now for its model to be worth fetching — see TRAFFIC_MODEL_RANGE_PER_METRE. Not awaited: nothing is held for it.
         if (distanceM < SceneRenderer.trafficModelRangeM(object) && this.pendingTrafficModels.delete(object.id)) void this.loadDecorModel(object, this.decorModelToken)
       }
+    }
+    // The seat is on the object, and the object stands where the loop above put it: on the HIGHEST
+    // ground under its footprint (a car must not have a wheel in a slope), which on a hillside is
+    // higher than the ground under its seat. An eye measured from the ground under the seat then sat
+    // below the cabin's own floor, looking up at the car's wheels from underneath.
+    if (inhabited && seatEyeY !== undefined) {
+      const seatGroup = this.decorGroups.get(inhabited.id)
+      if (seatGroup) this.camera.position.y = seatGroup.position.y + seatEyeY
     }
     this.updateContrails()
     // Decor used to be local scenery, a couple of hundred meters out at most, so a far plane sized

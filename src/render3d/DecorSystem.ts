@@ -289,10 +289,10 @@ function sideOffset(side: DecorSide, halfWidth: number, halfDepth: number, inset
  * the occupied floor's own ground level for a building, roughly seat height for a vehicle), offset
  * from center toward `side` so it reads as standing near that side's window, and rotated to look
  * outward through it. `halfExtentAlongSide`/`inset` control how close to the wall it stands. */
-function addOccupant(group: Group, side: DecorSide, y: number, scale: number, halfWidth: number, halfDepth: number, inset: number): void {
+function addOccupant(group: Group, side: DecorSide, facing: DecorSide, y: number, scale: number, halfWidth: number, halfDepth: number, inset: number): void {
   const figure = buildObserver()
   figure.scale.setScalar(scale)
-  figure.rotation.y = SIDE_YAW_RAD[side]
+  figure.rotation.y = SIDE_YAW_RAD[facing]
   const { x, z } = sideOffset(side, halfWidth, halfDepth, inset)
   figure.position.set(x, y, z)
   group.add(figure)
@@ -319,7 +319,7 @@ const VEHICLE_OBSERVER_Y = 0.75
  * case (see VEHICLE_EYE_Y) — nobody stands fully upright inside a car-sized cabin. */
 const EYE_HEIGHT_M = 1.6
 
-function buildBuilding(floors: number, windows: DecorObject["windows"], observerSide: DecorSide | undefined, occupiedFloor: number | undefined): Group {
+function buildBuilding(floors: number, windows: DecorObject["windows"], observerSide: DecorSide | undefined, occupiedFloor: number | undefined, facing?: DecorSide): Group {
   const group = new Group()
   // "floors" counts upper stories above the ground floor (French "étages", not counting the "rez-
   // de-chaussée") — a building with floors=2 has 3 levels total, matching the previous fixed
@@ -338,7 +338,7 @@ function buildBuilding(floors: number, windows: DecorObject["windows"], observer
   }
   if (observerSide) {
     const level = Math.min(Math.max(occupiedFloor ?? 0, 0), levels - 1)
-    addOccupant(group, observerSide, level * BUILDING_FLOOR_HEIGHT, 0.72, halfWidth, halfDepth, BUILDING_OBSERVER_INSET)
+    addOccupant(group, observerSide, facing ?? observerSide, level * BUILDING_FLOOR_HEIGHT, 0.72, halfWidth, halfDepth, BUILDING_OBSERVER_INSET)
     const wallWindow = (side: DecorSide): WallWindow[] => (windowOpacityPercent(windows, side) !== undefined ? [{ main: BUILDING_WINDOW_WIDTH, center: 0 }] : [])
     addRoom(
       group,
@@ -518,7 +518,7 @@ const VEHICLE_DOOR_WINDOW_Z = 0.5
  * figure's visual base and the camera's own eye height are different concerns). */
 const VEHICLE_EYE_Y = VEHICLE_CABIN_Y
 
-function buildVehicle(lit: boolean, windows: DecorObject["windows"], observerSide: DecorSide | undefined): Group {
+function buildVehicle(lit: boolean, windows: DecorObject["windows"], observerSide: DecorSide | undefined, facing?: DecorSide): Group {
   const group = new Group()
   // BoxGeometry(width=X, height=Y, depth=Z) — the car's LENGTH must be along Z, not X: heading 0
   // faces -Z (see DecorSystem's own module doc comment on headingDeg / GeoProjection's "north
@@ -563,7 +563,7 @@ function buildVehicle(lit: boolean, windows: DecorObject["windows"], observerSid
   addWindowPane(group, WINDOW_THICKNESS, VEHICLE_WINDOW_HEIGHT, VEHICLE_DOOR_WINDOW_LENGTH, VEHICLE_CABIN_HALF_WIDTH + WINDOW_MARGIN, VEHICLE_CABIN_Y, -VEHICLE_DOOR_WINDOW_Z, windowOpacityPercent(windows, "front-right"))
   addWindowPane(group, WINDOW_THICKNESS, VEHICLE_WINDOW_HEIGHT, VEHICLE_DOOR_WINDOW_LENGTH, VEHICLE_CABIN_HALF_WIDTH + WINDOW_MARGIN, VEHICLE_CABIN_Y, VEHICLE_DOOR_WINDOW_Z, windowOpacityPercent(windows, "behind-right"))
   if (observerSide) {
-    addOccupant(group, observerSide, VEHICLE_OBSERVER_Y, 0.5, VEHICLE_CABIN_HALF_WIDTH, VEHICLE_CABIN_HALF_DEPTH, VEHICLE_OBSERVER_INSET)
+    addOccupant(group, observerSide, facing ?? observerSide, VEHICLE_OBSERVER_Y, 0.5, VEHICLE_CABIN_HALF_WIDTH, VEHICLE_CABIN_HALF_DEPTH, VEHICLE_OBSERVER_INSET)
     const doorWindow = (frontSide: DecorSide, behindSide: DecorSide): WallWindow[] => {
       const result: WallWindow[] = []
       if (windowOpacityPercent(windows, frontSide) !== undefined) result.push({ main: VEHICLE_DOOR_WINDOW_LENGTH, center: -VEHICLE_DOOR_WINDOW_Z })
@@ -746,8 +746,13 @@ export class DecorSystem {
    * position (VEHICLE_OBSERVER_Y) — a figure's visual "feet" placement and a camera's own eye
    * height serve different purposes and don't need to be the same value. Throws if
    * object.observerSide is unset — callers (SceneRenderer) only call this after finding an object
-   * that has one. */
-  static occupantView(object: DecorObject): { x: number; z: number; eyeY: number; headingDeg: number } {
+   * that has one.
+   *
+   * `headingDeg` is where the object points AT THE INSTANT: a car that drives has a heading per
+   * keyframe (see resolveDecorPlacementAt), and the view out of it turns with it. It defaults to the
+   * object's fixed one, which is the whole story for a car that stands. Through the window the
+   * observer's `observerFacing` names, or else the one at their seat. */
+  static occupantView(object: DecorObject, headingDeg = object.headingDeg): { x: number; z: number; eyeY: number; headingDeg: number } {
     const side = object.observerSide
     if (!side) throw new Error("occupantView requires object.observerSide to be set")
     const { x, z } =
@@ -755,13 +760,13 @@ export class DecorSystem {
         ? sideOffset(side, VEHICLE_CABIN_HALF_WIDTH, VEHICLE_CABIN_HALF_DEPTH, VEHICLE_OBSERVER_INSET)
         : sideOffset(side, BUILDING_WIDTH / 2, BUILDING_DEPTH / 2, BUILDING_OBSERVER_INSET)
     const eyeY = object.kind === "vehicle" ? VEHICLE_EYE_Y : (object.occupiedFloor ?? 0) * BUILDING_FLOOR_HEIGHT + EYE_HEIGHT_M
-    const headingDeg = (object.headingDeg ?? 0) - SIDE_YAW_RAD[side] / DEG_TO_RAD
+    const lookDeg = (headingDeg ?? 0) - SIDE_YAW_RAD[object.observerFacing ?? side] / DEG_TO_RAD
     // Scaled the same way the body is (see build/scaleFor): the seat is a place ON the object, so
     // in a car stated a meter longer than the primitive, the driver sits a proportionate distance
     // further forward and the camera has to follow. Without this the viewpoint stayed at the
     // primitive's own seat and the observer ended up looking out through their own door.
     const scale = this.scaleFor(object)
-    return { x: x * scale.x, z: z * scale.z, eyeY: eyeY * scale.y, headingDeg }
+    return { x: x * scale.x, z: z * scale.z, eyeY: eyeY * scale.y, headingDeg: lookDeg }
   }
 
   /** headingDeg rotates the whole group around Y, same "-heading, clockwise from north" convention
@@ -879,7 +884,7 @@ export class DecorSystem {
   static build(object: DecorObject, lit: boolean): Group {
     const body =
       object.kind === "building"
-        ? buildBuilding(object.floors ?? DEFAULT_BUILDING_FLOORS, object.windows, object.observerSide, object.occupiedFloor)
+        ? buildBuilding(object.floors ?? DEFAULT_BUILDING_FLOORS, object.windows, object.observerSide, object.occupiedFloor, object.observerFacing)
         : object.kind === "tree"
           ? buildTree()
           : object.kind === "shrub"
@@ -895,7 +900,7 @@ export class DecorSystem {
               : object.kind === "streetlight"
             ? buildStreetlight(lit)
             : object.kind === "vehicle"
-              ? buildVehicle(lit, object.windows, object.observerSide)
+              ? buildVehicle(lit, object.windows, object.observerSide, object.observerFacing)
               : object.kind === "aircraft"
                 ? buildAircraft()
                 : object.kind === "entity"

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
   resolveDecorLitAt,
+  resolveDecorSeatAt,
   hasWindows,
   isWindowOpenable,
   canHoldObserver,
@@ -16,6 +17,27 @@ import type { DecorObject, DecorKind } from "../../src/engine/model/Decor.js"
 function streetlight(overrides: Partial<DecorObject> = {}): DecorObject {
   return { id: "decor-1", kind: "streetlight", eastM: 0, northM: 0, ...overrides }
 }
+
+describe("resolveDecorSeatAt", () => {
+  const car = (overrides: Partial<DecorObject> = {}): DecorObject => ({ id: "car", kind: "vehicle", eastM: 0, northM: 0, ...overrides })
+
+  it("falls back to the fixed seat when there are no keyframes", () => {
+    expect(resolveDecorSeatAt(car({ observerSide: "front-left", observerFacing: "front" }), 5000)).toEqual({ side: "front-left", facing: "front" })
+    expect(resolveDecorSeatAt(car(), 5000)).toEqual({ side: undefined, facing: undefined })
+  })
+
+  it("holds the seat of the last keyframe at or before t, and none once they have got out", () => {
+    const driven = car({ observerKeyframes: [{ t: 0, side: "front-left", facing: "front" }, { t: 75000 }] })
+    expect(resolveDecorSeatAt(driven, 0)).toEqual({ side: "front-left", facing: "front" })
+    expect(resolveDecorSeatAt(driven, 74999)).toEqual({ side: "front-left", facing: "front" })
+    expect(resolveDecorSeatAt(driven, 75000)).toEqual({ side: undefined, facing: undefined })
+    expect(resolveDecorSeatAt(driven, 99999).side).toBeUndefined()
+  })
+
+  it("uses the first keyframe before any of them", () => {
+    expect(resolveDecorSeatAt(car({ observerKeyframes: [{ t: 5000, side: "front-right" }] }), 0).side).toBe("front-right")
+  })
+})
 
 describe("resolveDecorLitAt", () => {
   it("falls back to the static lit field when there are no keyframes", () => {

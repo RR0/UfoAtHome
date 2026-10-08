@@ -20,6 +20,7 @@ mark); every texture is reduced to 512 px; the triangles of the body, clothes an
 | `woman.glb` | Woman, plain top and jeans |
 | `valensole-being-pv-1965-07-02.glb` | The man Maurice Masse described on 2 July 1965 (see below) |
 | `valensole-being-pv-1965-08-18.glb` | The beings he described on 18 August 1965 (see below) |
+| `socorro-figure.glb` | A figure in white coveralls, as Lonnie Zamora saw two of them at Socorro (see below) |
 
 ## The Valensole beings
 
@@ -40,3 +41,12 @@ the two statements do not describe the same being.
 
 Nothing is drawn that neither procès-verbal says: the large black eyes, prominent cheekbones, pointed ears
 and tiny nose that later retellings add are in neither, and the second says the opposite for the eyes.
+
+## The Socorro figure
+
+Lonnie Zamora saw "two figures in white coveralls" beside the craft, small, "possibly small adults or large
+children" (Project Blue Book's Socorro file, his own statement). `socorro-figure.glb` is the man of
+`valensole-being-pv-1965-07-02.glb`, a bare-headed adult in a one-piece suit, whose suit's texture is replaced by
+off-white cloth by `scripts/people/derive_socorro_figure.py`. Nothing else changes, so it needs no Blender and
+no MakeHuman assets, and it stays CC0 like the file it comes from. Assumed: the whiteness of the cloth, the
+beings' age and build, their height (1.3 m, which is the recording's, not a measurement).
