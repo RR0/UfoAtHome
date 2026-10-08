@@ -1378,7 +1378,8 @@ export class SightingElement extends HTMLElement {
         }
       }
       const description = this.said.read(this.plain(entry).description)
-      if (description) {
+      // Not while the strip shows: its Summary box has the description, opened on a click.
+      if (description && !this.labelsShown) {
         this.appendInfoRow(this.infoObservationList, this.messages.description, description)
       }
       // Where the words above can be read as they were given (see RecordingSource).

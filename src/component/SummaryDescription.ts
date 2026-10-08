@@ -74,6 +74,9 @@ export class SummaryDescription {
 }
 .param-description-text {
   margin: 0.4em 0 0;
+  /* Scrolls like the info panel does, rather than pushing the page down by a long account. */
+  max-height: min(50vh, 20em);
+  overflow-y: auto;
   white-space: pre-wrap;
   font-size: 1.1em;
 }
