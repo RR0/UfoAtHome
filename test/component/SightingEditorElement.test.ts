@@ -3025,8 +3025,8 @@ describe("SightingEditorElement parameter summary", () => {
     const decorNest = chips(element).find(c => c.dataset.field === "decorAltitude")!.closest(".param-nest")!
     expect(decorNest.querySelector(".param-nest-label")!.textContent)
       .toBe(element.shadowRoot!.getElementById("label-decor-group")!.textContent)
-    // The sighting's own altitude is outside it, and neither one wears a prefix any more.
-    expect(chips(element).find(c => c.dataset.field === "elevation")!.closest(".param-nest")).toBe(null)
+    // The sighting's own altitude is in the location's box, not the decor's, and neither one wears a prefix any more.
+    expect(chips(element).find(c => c.dataset.field === "elevation")!.closest(".param-nest")).not.toBe(decorNest)
     expect(chips(element).find(c => c.dataset.field === "elevation")!.textContent).not.toContain("·")
     expect(chips(element).find(c => c.dataset.field === "decorAltitude")!.textContent).not.toContain("·")
   })
@@ -3039,12 +3039,14 @@ describe("SightingEditorElement parameter summary", () => {
       .toBe(element.shadowRoot!.getElementById("label-observer-group")!.textContent)
   })
 
-  it("leaves what describes the observation itself unboxed", () => {
+  it("boxes the chips of every group under a chip bearing the group's name", () => {
     const element = mount()
     setInput(element.shadowRoot!, "tags", "landing")
     setInput(element.shadowRoot!, "cloudCover", "0.4")
-    for (const field of ["tags", "cloudCover"]) {
-      expect(chips(element).find(c => c.dataset.field === field)!.closest(".param-nest")).toBe(null)
+    setInput(element.shadowRoot!, "elevation", "220")
+    for (const [field, group] of [["tags", "observation"], ["cloudCover", "weather"], ["elevation", "location"]]) {
+      const nest = chips(element).find(c => c.dataset.field === field)!.closest<HTMLElement>(".param-nest")
+      expect(nest?.dataset.group).toBe(group)
     }
   })
 

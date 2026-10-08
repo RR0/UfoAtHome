@@ -11,6 +11,11 @@ export interface EdtfDateFieldMessages {
   edtfModeTitle: string
   /** How a doubt reads in what is deduced from a text: "approximate", "uncertain", "approximate and uncertain". */
   timeQualifierApproximate: string
+  /** The four seasons a date can be known to be in ("Spring 2022"). */
+  timeSeasonSpring: string
+  timeSeasonSummer: string
+  timeSeasonAutumn: string
+  timeSeasonWinter: string
   timeQualifierUncertain: string
   timeQualifierBoth: string
   /** The text field's placeholder and its tooltip. */
@@ -142,10 +147,14 @@ export class EdtfDateField {
     return time?.second ? "1" : "60"
   }
 
-  /** The trailing [?~%] of an EDTF value, or "" — the only doubt a value carries. */
+  /**
+   * The doubt an EDTF value carries, or "": `?` uncertain, `~` approximate, `%` both — whether it is stated on the
+   * whole date ("1950-05?") or on one component ("1950-?05"). A mix of the two says both.
+   */
   static qualifierOf(edtf: string): string {
-    const last = edtf.trim().slice(-1)
-    return "?~%".includes(last) ? last : ""
+    const uncertain = /[?%]/.test(edtf)
+    const approximate = /[~%]/.test(edtf)
+    return uncertain && approximate ? "%" : uncertain ? "?" : approximate ? "~" : ""
   }
 
   /**
@@ -153,25 +162,33 @@ export class EdtfDateField {
    * What an author reads above the text to be sure of what was understood.
    */
   describe(time: SightingTime): string {
+    return EdtfDateField.describeTime(time, this.messages, this.locale)
+  }
+
+  /** `describe` without a field: the same words, for whoever shows a time elsewhere (the summary's chips). */
+  static describeTime(time: SightingTime, messages: EdtfDateFieldMessages, locale: string): string {
     const raw = formatEdtfTime(time)
     const doubt = EdtfDateField.qualifierOf(raw)
     const pad = (n: number): string => String(n).padStart(2, "0")
     const parts: string[] = []
-    if (time.year !== undefined) {
+    if (time.season !== undefined) {
+      const season = { spring: messages.timeSeasonSpring, summer: messages.timeSeasonSummer, autumn: messages.timeSeasonAutumn, winter: messages.timeSeasonWinter }[time.season]
+      parts.push(time.year !== undefined ? `${season} ${time.year}` : season)
+    } else if (time.year !== undefined) {
       const options: Intl.DateTimeFormatOptions = time.day !== undefined
         ? { year: "numeric", month: "long", day: "numeric" }
         : time.month !== undefined ? { year: "numeric", month: "long" } : { year: "numeric" }
       // A date built in UTC, so that the reader's own zone cannot move the day.
       const date = new Date(Date.UTC(time.year, (time.month ?? 1) - 1, time.day ?? 1))
-      parts.push(new Intl.DateTimeFormat(this.locale, { ...options, timeZone: "UTC" }).format(date))
+      parts.push(new Intl.DateTimeFormat(locale, { ...options, timeZone: "UTC" }).format(date))
     }
     if (time.hour !== undefined) {
       parts.push(`${pad(time.hour)}:${pad(time.minute ?? 0)}${time.second !== undefined ? `:${pad(time.second)}` : ""}`)
     }
     const said = parts.join(", ")
-    const word = doubt === "~" ? this.messages.timeQualifierApproximate
-      : doubt === "?" ? this.messages.timeQualifierUncertain
-        : doubt === "%" ? this.messages.timeQualifierBoth : ""
+    const word = doubt === "~" ? messages.timeQualifierApproximate
+      : doubt === "?" ? messages.timeQualifierUncertain
+        : doubt === "%" ? messages.timeQualifierBoth : ""
     return word ? `${said} — ${word.toLowerCase()}` : said
   }
 

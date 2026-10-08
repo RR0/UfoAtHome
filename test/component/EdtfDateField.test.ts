@@ -31,6 +31,21 @@ describe("EdtfDateField", () => {
     // A doubt is not something a picker can say.
     expect(EdtfDateField.opensPrecise(parseEdtfTime("1965-07-01T05:00~"))).toBe(false)
     expect(EdtfDateField.opensPrecise(parseEdtfTime("1965-07-01T05:00?"))).toBe(false)
+    expect(EdtfDateField.opensPrecise(parseEdtfTime("1965-?07-01T05:00"))).toBe(false)
+  })
+
+  it("says a season in words, with its year and its doubt", () => {
+    const { field } = make()
+    expect(field.describe(parseEdtfTime("2022-21")!)).toBe("Spring 2022")
+    expect(field.describe(parseEdtfTime("2022-24~")!)).toMatch(/^Winter 2022 — approximate$/i)
+  })
+
+  it("tells the doubt a text carries, on the whole date or on one component", () => {
+    expect(EdtfDateField.qualifierOf("1965-07")).toBe("")
+    expect(EdtfDateField.qualifierOf("1965-07?")).toBe("?")
+    expect(EdtfDateField.qualifierOf("1965-~07")).toBe("~")
+    expect(EdtfDateField.qualifierOf("1965-?07-01~")).toBe("%")
+    expect(EdtfDateField.qualifierOf("1965%")).toBe("%")
   })
 
   it("shows a time in the picker and the text, the doubt staying at the end of the text", () => {

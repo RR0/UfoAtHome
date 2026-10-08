@@ -265,8 +265,8 @@ export const html = `
          canonical whichever control produced it, which matters because formatEdtfTime returns it
          verbatim and would otherwise display a stale string over fresh numbers. -->
     <label><span id="label-observation-time">Observation start</span>
-      <!-- A date is precise (a picker) or said in EDTF (a text: a year, a month, a time with no date, or a doubt: one optional [?~%] at the
-           end of the value, see EDTF_TIME_PATTERN, which by its own doc comment has no per-component qualifiers). See DateInputElement
+      <!-- A date is precise (a picker) or said in EDTF (a text: a year, a month, a time with no date, or a doubt: [?~%] at the
+           end of the value, or before one of its parts, as @rr0/time reads it: see parseEdtfTime). See DateInputElement
            for the controls it makes (obs-time-native, obs-time) and the button that swaps them. -->
       <rr0-date-input name="obs-time"></rr0-date-input></label>
     <label><span id="label-observation-end-time">Observation end</span>
@@ -1179,6 +1179,7 @@ select.weather-field:disabled {
    heading it is. Drawn as a frame rather than as a filled pill: the members already carry an
    outline each, and a second solid shape around them would read as a button they sit on. */
 .param-nest {
+  transition: border-color 0.12s, background-color 0.12s;
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1187,6 +1188,15 @@ select.weather-field:disabled {
   border-radius: 12px;
   padding: 0.25em 0.5em;
   max-width: 100%;
+}
+/* Hovering anywhere in the box, its name or a member's gap included, lights the whole frame and
+   its name, so the group reads as one thing before one of its chips is picked. */
+.param-nest:hover {
+  border-color: color-mix(in srgb, currentColor 70%, transparent);
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+.param-nest:hover .param-nest-label {
+  color: inherit;
 }
 .param-nest-label {
   font-weight: 600;

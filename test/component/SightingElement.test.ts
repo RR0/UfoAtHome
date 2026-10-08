@@ -1118,7 +1118,7 @@ describe("SightingElement parameter labels", () => {
     stubFetch({ "john.json": { ...johnSighting, place: [{ lat: 32.4, lng: -86.3 }] } })
     const element = await mounted(true)
     expect(element.shadowRoot!.getElementById("param-summary")!.hidden).toBe(false)
-    expect(labels(element).some(text => text.includes("32.4"))).toBe(true)
+    expect(labels(element).some(text => text.includes("32°24′00″ N"))).toBe(true)
   })
 
   it("takes the same instruction from a script as from the markup", async () => {

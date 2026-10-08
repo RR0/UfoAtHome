@@ -1,4 +1,5 @@
-import type { Sighting } from "../engine/model/Sighting.js"
+import type { Sighting, SightingTime } from "../engine/model/Sighting.js"
+import { EdtfDateField, type EdtfDateFieldMessages } from "./EdtfDateField.js"
 import { formatEdtfTime, resolveObserverPoseAt, resolveSoundAt, resolveWeatherAt, sightingDurationMs } from "../engine/model/Sighting.js"
 import type { DecorKind, DecorObject, DecorSide } from "../engine/model/Decor.js"
 import { resolveDecorLitAt, resolveDecorPlacementAt } from "../engine/model/Decor.js"
@@ -124,7 +125,10 @@ export class SightingSummary {
      * `naming` above, which name the fields rather than say what is in them. */
     private readonly said: SaidTexts,
     /** Names the recording's tags for this reader — they are stored in English, see TagNames. */
-    private readonly tags: SightingTags = new SightingTags({})
+    private readonly tags: SightingTags = new SightingTags({}),
+    /** What a stated time is worded with, to read it as the editor's date field does ("11 May 1950, 19:45 — approximate")
+     * instead of as raw EDTF. Absent where those words are not loaded: the chip then shows the EDTF. */
+    private readonly timeWords?: { messages: EdtfDateFieldMessages, locale: string }
   ) {
   }
 
@@ -248,6 +252,17 @@ export class SightingSummary {
     }
   }
 
+  /** A coordinate as navigators write it, 43°50′12″ N, its hemisphere letter in the reader's language
+   * (O for ouest in French). `positive` and `negative` are the compass azimuths the letters are taken from. */
+  private degreesMinutesSeconds(degrees: number | undefined, positive: number, negative: number): string | undefined {
+    if (degrees === undefined || !Number.isFinite(degrees)) return undefined
+    const total = Math.round(Math.abs(degrees) * 3600)
+    const d = Math.floor(total / 3600)
+    const m = Math.floor(total % 3600 / 60)
+    const sec = total % 60
+    return `${d}°${String(m).padStart(2, "0")}′${String(sec).padStart(2, "0")}″ ${this.naming.point(degrees < 0 ? negative : positive)}`
+  }
+
   private addLocation(entries: SummaryEntry[], sighting: Sighting, timeMs: number, groundElevationM: number | undefined): void {
     const place = sighting.event.place?.[0]
     this.push(entries, "location", "placeName", this.labels.placeName, place?.name)
@@ -255,8 +270,8 @@ export class SightingSummary {
     if (!pose) {
       return
     }
-    this.push(entries, "location", "lat", this.labels.latitude, this.rounded(pose.lat, 6))
-    this.push(entries, "location", "lng", this.labels.longitude, this.rounded(pose.lng, 6))
+    this.push(entries, "location", "lat", this.labels.latitude, this.degreesMinutesSeconds(pose.lat, 0, 180))
+    this.push(entries, "location", "lng", this.labels.longitude, this.degreesMinutesSeconds(pose.lng, 90, 270))
     // The compass point beside the degrees: "129°" is a number, "(SE)" is where the observer faced.
     // In the unit, not the value, so the value stays the number the field holds.
     const heading = this.rounded(pose.headingDeg)
@@ -319,10 +334,15 @@ export class SightingSummary {
     }
   }
 
+  /** A stated time as its chip says it: the generated wording the date field shows, else its EDTF. */
+  private timeText(time: SightingTime): string {
+    return this.timeWords ? EdtfDateField.describeTime(time, this.timeWords.messages, this.timeWords.locale) : formatEdtfTime(time)
+  }
+
   private addTemporal(entries: SummaryEntry[], sighting: Sighting): void {
     const event = sighting.event
-    this.push(entries, "temporal", "obs-time", this.labels.observationTime, event.time && formatEdtfTime(event.time))
-    this.push(entries, "temporal", "obs-end-time", this.labels.observationEndTime, event.endTime && formatEdtfTime(event.endTime))
+    this.push(entries, "temporal", "obs-time", this.labels.observationTime, event.time && this.timeText(event.time))
+    this.push(entries, "temporal", "obs-end-time", this.labels.observationEndTime, event.endTime && this.timeText(event.endTime))
     const durationMs = sightingDurationMs(event)
     this.push(entries, "temporal", "durationSeconds", this.labels.duration, this.roundedShown(durationMs && durationMs / 1000, 1), "s")
     this.push(entries, "temporal", "timeZone", this.labels.utcOffset, event.timeZone)

@@ -195,9 +195,54 @@ describe("parseEdtfTime", () => {
   it("accepts a single-digit hour with no leading zero, with a date", () => {
     expect(parseEdtfTime("1948-07-24T5:30")).toMatchObject({ year: 1948, month: 7, day: 24, hour: 5, minute: 30 })
   })
+
+  it("accepts a doubt on one component, which the text keeps verbatim", () => {
+    expect(parseEdtfTime("2024-?08-15")).toMatchObject({ year: 2024, month: 8, day: 15, raw: "2024-?08-15" })
+    expect(parseEdtfTime("1965-07-01T05:00~")).toMatchObject({ year: 1965, month: 7, day: 1, hour: 5, minute: 0 })
+  })
+
+  it("reads a masked component as unknown, not as a number", () => {
+    expect(parseEdtfTime("1948-0X")).toMatchObject({ year: 1948, month: undefined })
+  })
+
+  it("reads a season as a season, with no month: \"in the spring of 2022\"", () => {
+    expect(parseEdtfTime("2022-21")).toMatchObject({ year: 2022, month: undefined, day: undefined, season: "spring", raw: "2022-21" })
+    expect(parseEdtfTime("2022-22")?.season).toBe("summer")
+    expect(parseEdtfTime("2022-23")?.season).toBe("autumn")
+    expect(parseEdtfTime("2022-24")?.season).toBe("winter")
+    expect(parseEdtfTime("2022-25")?.season).toBe("spring") // northern hemisphere
+    expect(parseEdtfTime("2022-31")?.season).toBe("autumn") // southern hemisphere
+    expect(parseEdtfTime("2022-21~")).toMatchObject({ season: "spring", raw: "2022-21~" })
+  })
+
+  it("has no season on a date that is not one", () => {
+    expect(parseEdtfTime("2022-06")?.season).toBeUndefined()
+    expect(parseEdtfTime("2022")?.season).toBeUndefined()
+  })
+
+  it("rejects what a SightingTime cannot hold: a quarter, a day in a season, a time zone, a year of more than four digits", () => {
+    expect(parseEdtfTime("2024-33")).toBeUndefined() // a quarter, not a season
+    expect(parseEdtfTime("2024-41")).toBeUndefined() // a semester
+    expect(parseEdtfTime("2024-21-15")).toBeUndefined() // no day in a season
+    expect(parseEdtfTime("1948-07-24T02:45:30Z")).toBeUndefined()
+    expect(parseEdtfTime("1948-07-24T02:45+01:00")).toBeUndefined()
+    expect(parseEdtfTime("19650701")).toBeUndefined()
+  })
+
+  it("rejects text that only starts like a date, such as one still being typed", () => {
+    expect(parseEdtfTime("1948abc")).toBeUndefined()
+    expect(parseEdtfTime("x1948")).toBeUndefined()
+    expect(parseEdtfTime("1965-07-")).toBeUndefined()
+    expect(parseEdtfTime("1965-07-01T05:")).toBeUndefined()
+  })
 })
 
 describe("formatEdtfTime", () => {
+  it("says a season in EDTF when there is no raw text", () => {
+    expect(formatEdtfTime({ year: 2022, season: "spring" })).toBe("2022-21")
+    expect(formatEdtfTime({ year: 2022, season: "winter" })).toBe("2022-24")
+  })
+
   it("returns raw verbatim when present, qualifiers and all", () => {
     expect(formatEdtfTime({ year: 2025, month: 6, raw: "2025-06?" })).toBe("2025-06?")
   })

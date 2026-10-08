@@ -206,8 +206,8 @@ export interface SightingEditorMessages extends SightingLabels {
   /** Shown beside Altitude: the ground's own height there. "{m}" is replaced with the metres. */
   groundAt: string
   headingPlaceholder: string
-  /** Custom-validity message shown when an observation start/end field's text doesn't match
-   * EDTF_TIME_PATTERN — see SightingEditorElement.applyEdtfTimeInput. */
+  /** Custom-validity message shown when an observation start/end field's text isn't EDTF
+   * (see parseEdtfTime) — see SightingEditorElement.applyEdtfTimeInput. */
   edtfInvalid: string
   /** Shared placeholder for both the start and end EDTF text fields. */
   edtfPlaceholder: string
@@ -249,10 +249,15 @@ export interface SightingEditorMessages extends SightingLabels {
   fileLoading: string
   /** What a screen reader calls the text editor. */
   fileEditorLabel: string
-  /** The four states EDTF_TIME_PATTERN can express about a whole value, offered beside the native
+  /** The four states of doubt (see parseEdtfTime) that a whole value can have, offered beside the native
    * picker so that "around 05:00" needs no text mode. */
   timeQualifierExact: string
   timeQualifierApproximate: string
+  /** The four seasons a date can be known to be in ("Spring 2022"). */
+  timeSeasonSpring: string
+  timeSeasonSummer: string
+  timeSeasonAutumn: string
+  timeSeasonWinter: string
   timeQualifierUncertain: string
   timeQualifierBoth: string
   /** Title of the switch between the native picker and the EDTF text field — the picker cannot

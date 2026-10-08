@@ -62,9 +62,9 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
-    "@rr0/data": "^0.3.41",
+    "@rr0/data": "^0.3.49",
     "@rr0/place": "^0.5.4",
-    "@rr0/time": "^0.11.2",
+    "@rr0/time": "^2.2.0",
     "astronomy-engine": "^2.1.19",
     "satellite.js": "6.0.1",
     "three": "^0.185.1"

@@ -23,6 +23,8 @@ import { Provenance } from "../persistence/Provenance.js"
 import type { RecordingIssue } from "../persistence/RecordingIssue.js"
 import type { InterpretationJson } from "../interpretation/Interpretation.js"
 import type { Account } from "./Account.js"
+import { Level2Date } from "@rr0/time/core"
+import { Level2DateParser } from "@rr0/time/parsers"
 
 /**
  * A fuzzy date, structurally aligned with @rr0/time's Level2Date fields
@@ -36,6 +38,9 @@ export interface SightingTime {
   hour?: number
   minute?: number
   second?: number
+  /** The season, when the date is only known to be "in the spring of 2022" (EDTF `2022-21`): then `month` and `day` are
+   * undefined. Hemisphere is not kept, only which season. */
+  season?: Season
   /** The exact EDTF-ish text as typed in the editor UI (e.g. "2025-06?", "1948-07-24T02:45~") —
    * the source of truth for display/re-editing and for round-tripping uncertain/approximate/
    * imprecise qualifiers through JSON (see parseEdtfTime/formatEdtfTime). year/month/... above are
@@ -46,39 +51,82 @@ export interface SightingTime {
   raw?: string
 }
 
-/** Level 0 EDTF date/time (YYYY[-MM[-DD]][Thh:mm[:ss]]) plus the three Level 1 suffix qualifiers
- * ("?"=uncertain, "~"=approximate, "%"=both) and basic year-masking ("199X"/"19XX") — not a real
- * EDTF parser (no seasons, no per-component qualifiers, no intervals), just enough to (a) reject
- * obvious garbage in the editor's date fields and (b) recover the numeric components
- * SightingTime's other consumers need. The second alternative (own group names, to avoid relying
- * on duplicate-named-group support) is a deliberate departure from real EDTF: a bare hh:mm[:ss]
- * with no date at all, for a observer who remembers a time of day but not (or not precisely) which
- * date it was — sightingTimeOffsetMs already treats a year-less SightingTime as "compare
- * hour/minute/second only" for duration purposes, so this needs no changes downstream. */
-const EDTF_TIME_PATTERN =
-  /^(?:(?<year>\d{4}|\d{3}X|\d{2}XX)(-(?<month>0[1-9]|1[0-2]))?(-(?<day>0[1-9]|[12]\d|3[01]))?(?:[T ](?<hour>[01]?\d|2[0-3]):(?<minute>[0-5]\d)(?::(?<second>[0-5]\d))?)?|(?<timeOnlyHour>[01]?\d|2[0-3]):(?<timeOnlyMinute>[0-5]\d)(?::(?<timeOnlySecond>[0-5]\d))?)[?~%]?$/
+/** The seasons EDTF can state in place of a month: 21 to 24 (not tied to a hemisphere), 25 to 28 (northern) and 29 to 32
+ * (southern), in the order spring, summer, autumn, winter. The 33 to 41 that follow are quarters, quadrimesters and
+ * semesters, which are not a season. */
+export type Season = "spring" | "summer" | "autumn" | "winter"
+const SEASONS: readonly Season[] = ["spring", "summer", "autumn", "winter"]
 
-/** Best-effort EDTF text -> SightingTime, or undefined if `raw` doesn't match EDTF_TIME_PATTERN at
- * all (the caller shows a custom-validity error and leaves the previous value alone rather than
- * overwriting it with garbage — see SightingEditorElement.applyEdtfTimeInput). A masked year
- * component ("199X"/"19XX") parses to `year: undefined` — genuinely unknown for duration/astronomy
- * purposes, not a real number to guess at. Likewise a bare "hh:mm[:ss]" (no date at all) parses to
- * year/month/day all undefined, hour/minute/second set. */
+/** The first EDTF "month" that is a season, and the last. */
+const FIRST_SEASON_CODE = 21
+const LAST_SEASON_CODE = 32
+
+/** A bare hh:mm[:ss] with no date at all, with an optional doubt suffix. A deliberate departure from EDTF, which has no
+ * such thing: for an observer who remembers a time of day but not (or not precisely) which date it was.
+ * sightingTimeOffsetMs already treats a year-less SightingTime as "compare hour/minute/second only" for duration
+ * purposes, so this needs no changes downstream. It is read here, and not by @rr0/time, which would take "22:30" for a
+ * year. */
+const TIME_ONLY_PATTERN = /^(?<hour>[01]?\d|2[0-3]):(?<minute>[0-5]\d)(?::(?<second>[0-5]\d))?[?~%]?$/
+
+/** The parser. @rr0/time's parsers read the whole text (they throw on "1948abc" or "1965-07-"), as a field being typed
+ * in requires. Created at the first date read, not when this module loads: its patterns are compiled on construction. */
+let edtfDate: InstanceType<typeof Level2DateParser> | undefined
+
+function edtfDateParser(): InstanceType<typeof Level2DateParser> {
+  return edtfDate ??= new Level2DateParser()
+}
+
+/** A component's number, or undefined when it is not one: masked ("199X", "1948-0X") is a range, not a value. */
+function componentNumber(component: { value: unknown } | undefined): number | undefined {
+  return typeof component?.value === "number" ? component.value : undefined
+}
+
+/** EDTF text (or a bare "hh:mm[:ss]" with no date) -> SightingTime, or undefined if `raw` is neither. EDTF is read by
+ * @rr0/time at Level 2: uncertain `?`, approximate `~` or both `%` on the whole date or on any component, masked
+ * digits, ... The caller shows a custom-validity error and leaves the previous value alone rather than overwriting it with garbage — see
+ * SightingEditorElement.applyEdtfTimeInput.
+ *
+ * Only what a SightingTime can hold is accepted: a season (a "month" of 21 to 32) is read as `season`, with no month
+ * or day, but a quarter or a semester (33 to 41), a time zone or a year of more than four digits is not, and a masked component ("199X", "1948-0X") is read as unknown (`undefined`), not as a number to guess at.
+ * A bare "hh:mm[:ss]" has year/month/day all undefined. */
 export function parseEdtfTime(raw: string): SightingTime | undefined {
-  const match = EDTF_TIME_PATTERN.exec(raw.trim())
-  if (!match?.groups) return undefined
-  const { year, month, day, hour, minute, second, timeOnlyHour, timeOnlyMinute, timeOnlySecond } = match.groups
-  const resolvedHour = hour ?? timeOnlyHour
-  const resolvedMinute = minute ?? timeOnlyMinute
-  const resolvedSecond = second ?? timeOnlySecond
+  const text = raw.trim()
+  // What starts like a time of day is one, or garbage: @rr0/time would read "25:00" as a year.
+  if (/^\d{1,2}:/.test(text)) {
+    const timeOnly = TIME_ONLY_PATTERN.exec(text)?.groups
+    if (!timeOnly) return undefined
+    return {
+      year: undefined,
+      month: undefined,
+      day: undefined,
+      hour: Number(timeOnly.hour),
+      minute: Number(timeOnly.minute),
+      second: timeOnly.second ? Number(timeOnly.second) : undefined,
+      raw: text
+    }
+  }
+  let date: Level2Date
+  try {
+    date = Level2Date.fromString(text, edtfDateParser())
+  } catch {
+    return undefined
+  }
+  const year = componentNumber(date.year)
+  const monthCode = componentNumber(date.month)
+  const isSeason = monthCode !== undefined && monthCode >= FIRST_SEASON_CODE && monthCode <= LAST_SEASON_CODE
+  if (date.timeshift || (year !== undefined && Math.abs(year) > 9999)) return undefined
+  if (monthCode !== undefined && monthCode > 12 && !isSeason) return undefined
+  // A season is the whole of a quarter of the year: it has no day, nor a time of day.
+  if (isSeason && (date.day || date.hour)) return undefined
   return {
-    year: year && !year.includes("X") ? Number(year) : undefined,
-    month: month ? Number(month) : undefined,
-    day: day ? Number(day) : undefined,
-    hour: resolvedHour ? Number(resolvedHour) : undefined,
-    minute: resolvedMinute ? Number(resolvedMinute) : undefined,
-    second: resolvedSecond ? Number(resolvedSecond) : undefined,
-    raw: raw.trim()
+    year,
+    month: isSeason ? undefined : monthCode,
+    ...(isSeason ? { season: SEASONS[(monthCode - FIRST_SEASON_CODE) % 4] } : {}),
+    day: componentNumber(date.day),
+    hour: componentNumber(date.hour),
+    minute: componentNumber(date.minute),
+    second: componentNumber(date.second),
+    raw: text
   }
 }
 
@@ -95,6 +143,7 @@ export function formatEdtfTime(time: SightingTime): string {
     return s
   }
   let s = String(time.year).padStart(4, "0")
+  if (time.season !== undefined) return `${s}-${FIRST_SEASON_CODE + SEASONS.indexOf(time.season)}`
   if (time.month === undefined) return s
   s += `-${String(time.month).padStart(2, "0")}`
   if (time.day === undefined) return s

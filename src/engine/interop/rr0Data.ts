@@ -12,7 +12,7 @@
  * import graph is what lets `vite build` produce a self-contained browser
  * bundle at all. See engine/model/Sighting.ts for the full rationale.
  */
-import { RR0Event } from "@rr0/data"
+import { EventTime, RR0Event } from "@rr0/data"
 import { Level2Date } from "@rr0/time"
 import { Place, PlaceLocation } from "@rr0/place"
 import type { SightingEvent, SightingLocation, SightingTime } from "../model/Sighting.js"
@@ -58,9 +58,11 @@ export function toRR0Event(event: SightingEvent, languages: readonly string[] = 
 }
 
 export function fromRR0Event(rr0Event: RR0Event<"sighting">): SightingEvent {
+  // An RR0Event's time can be an interval ("between x and y"), which a SightingTime cannot hold: it is read by its start.
+  const time = EventTime.start(rr0Event.time)
   return {
     eventType: "sighting",
-    time: rr0Event.time ? fromLevel2Date(rr0Event.time) : undefined,
+    time: time ? fromLevel2Date(time) : undefined,
     place: rr0Event.place ? fromPlace(rr0Event.place) : undefined,
     description: rr0Event.description,
     tags: rr0Event.tags

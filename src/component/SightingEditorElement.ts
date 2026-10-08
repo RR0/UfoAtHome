@@ -1825,7 +1825,7 @@ export class SightingEditorElement extends HTMLElement {
     // Every number field as wide as the values it takes, from its own bounds — see NumberFields.
     NumberFields.fit(this.shadow)
     this.paramSummary = this.shadow.getElementById("param-summary")!
-    this.paramSummaryBuilder = new SightingSummary(this.messages, this.naming, this.said, this.tagNames)
+    this.paramSummaryBuilder = new SightingSummary(this.messages, this.naming, this.said, this.tagNames, { messages: this.messages, locale: this.language })
     // One listener on the strip rather than one per chip: the chips are rebuilt from scratch on
     // every refresh, and re-binding 37 handlers each time is how a summary meant to be cheap stops
     // being cheap.
@@ -5358,7 +5358,7 @@ export class SightingEditorElement extends HTMLElement {
   /** Which summary groups describe a sub-element rather than the observation itself, and so read
    * as a chip holding chips: the observer who gave the account, and whichever decor object is
    * being worked on (or, with none selected, the list of them). */
-  private static readonly NESTED_GROUPS: SummaryGroup[] = ["observer", "decor", "phenomenon", "assessment"]
+  private static readonly NESTED_GROUPS: SummaryGroup[] = ["observation", "observer", "location", "temporal", "weather", "sound", "decor", "phenomenon", "assessment"]
 
   /** The tab a summary group leads to: by position for the groups that predate the Pictures tab, and by the panel it controls for the Phenomenon. */
   private summaryPanelIndex(group: SummaryGroup): number {
@@ -8376,7 +8376,7 @@ export class SightingEditorElement extends HTMLElement {
     } else {
       // Same interface language, but perhaps a longer list behind it ("en", then "es"): the
       // summary reads the recording's texts through the new one.
-      this.paramSummaryBuilder = new SightingSummary(messages, this.naming, this.said, this.tagNames)
+      this.paramSummaryBuilder = new SightingSummary(messages, this.naming, this.said, this.tagNames, { messages, locale: this.language })
       this.refreshParamSummary()
     }
     // Every field and list showing the recording's own texts showed them through the previous
@@ -8652,7 +8652,7 @@ export class SightingEditorElement extends HTMLElement {
     this.endDate.messages = messages
     // The chips hold translated labels, so they are rebuilt with the new ones — and the signature
     // check lets that happen without a diff, since every label changed.
-    this.paramSummaryBuilder = new SightingSummary(messages, this.naming, this.said, this.tagNames)
+    this.paramSummaryBuilder = new SightingSummary(messages, this.naming, this.said, this.tagNames, { messages, locale: this.language })
     this.refreshParamSummary()
     const skyExpanded = this.skyDetailsButton.getAttribute("aria-expanded") === "true"
     this.skyDetailsButton.title = skyExpanded ? messages.skyDetailsHide : messages.skyDetails

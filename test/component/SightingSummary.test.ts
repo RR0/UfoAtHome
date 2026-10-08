@@ -120,10 +120,17 @@ describe("SightingSummary", () => {
       expect(valueOf(sighting, "utcOffsetHours")).toBe("0")
     })
 
+    it("writes a coordinate in degrees, minutes and seconds with its hemisphere", () => {
+      const sighting = Sighting.create(undefined, [{ lat: 32.4, lng: -86.3 }])
+      sighting.observerTrack.addKeyframe(0, { lat: 32.4, lng: -86.3, elevationM: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 60 })
+      expect(valueOf(sighting, "lat")).toBe("32°24′00″ N")
+      expect(valueOf(sighting, "lng")).toBe("86°18′00″ W")
+    })
+
     it("keeps a longitude on the prime meridian", () => {
       const sighting = Sighting.create(undefined, [{ lat: 51.5, lng: 0 }])
       sighting.observerTrack.addKeyframe(0, { lat: 51.5, lng: 0, elevationM: 0, headingDeg: 12, pitchDeg: 3, fovDeg: 60 })
-      expect(valueOf(sighting, "lng")).toBe("0")
+      expect(valueOf(sighting, "lng")).toBe("0°00′00″ E")
     })
   })
 
