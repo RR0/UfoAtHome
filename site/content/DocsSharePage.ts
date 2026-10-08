@@ -101,11 +101,36 @@ const embedCopy = document.getElementById("share-embed-copy")
 const embedTry = document.getElementById("share-embed-try")
 const preview = document.getElementById("share-preview")
 
-const playerLink = url => location.origin + player + "?file=" + encodeURIComponent(url)
+/* How it opens, from the options block: the same words the player's Share button writes. */
+const option = id => document.getElementById("share-opt-" + id)
+const startSeconds = () => {
+  const seconds = Math.floor(Number(option("start").value))
+  return option("start-on").checked && Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined
+}
+const query = () => {
+  const parts = []
+  if (startSeconds() !== undefined) parts.push("t=" + startSeconds())
+  if (!option("labels").checked) parts.push("labels=0")
+  if (option("map").checked) parts.push("map=1")
+  if (!option("moments").checked) parts.push("moments=0")
+  if (option("compare").checked) parts.push("compare=1")
+  return parts.length ? "&" + parts.join("&") : ""
+}
+const attributes = () => {
+  let text = ""
+  if (startSeconds() !== undefined) text += ' start-time="' + startSeconds() + '"'
+  if (option("labels").checked) text += " show-labels"
+  if (option("map").checked) text += " show-observer-map"
+  if (!option("moments").checked) text += " hide-milestones"
+  if (option("compare").checked) text += " compare-account"
+  return text
+}
+
+const playerLink = url => location.origin + player + "?file=" + encodeURIComponent(url) + query()
 
 const embedMarkup = url =>
   '<script type="module" src="' + location.origin + '/lib/rr0-sighting.mjs"><' + '/script>\\n' +
-  '<rr0-sighting src="' + url + '"><' + '/rr0-sighting>'
+  '<rr0-sighting src="' + url + '"' + attributes() + '><' + '/rr0-sighting>'
 
 /** Clipboard writes are refused in an insecure context and by some permission settings, so the
  * fallback selects the text instead of failing silently — the reader can then copy it themselves. */
@@ -174,6 +199,12 @@ embedTry.addEventListener("click", () => {
   if (url) preview.setAttribute("src", url)
 })
 refreshEmbed()
+for (const id of ["start-on", "start", "labels", "map", "moments", "compare"]) {
+  option(id).addEventListener("input", () => {
+    refreshLink()
+    refreshEmbed()
+  })
+}
 preview.setAttribute("src", embedField.value.trim())
 
 /* Highlighting is worth having and worth nothing to wait for, so the snippet is plain text first
@@ -201,6 +232,30 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
   private en(): string {
     const sample = DocsSharePage.SAMPLE
     return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>How it opens</h2>
+    <p>The player's <strong>Share</strong> button gives the same two things as this page, on one screen: the <strong>Link</strong> or the <strong>Embed</strong> code, for the <strong>Player</strong> or for the <strong>Editor</strong> opened on the same recording. The options below are those it offers, each starting as the player is at that moment; they apply to the link and to the code of the sections that follow.</p>
+    <fieldset class="doc-options">
+      <label class="doc-option-start"><input id="share-opt-start-on" type="checkbox"> Start at
+        <input id="share-opt-start" type="number" min="0" step="1" value="0" aria-label="Start at"> s</label>
+      <label><input id="share-opt-labels" type="checkbox" checked> Show summary chips</label>
+      <label><input id="share-opt-map" type="checkbox"> Open map</label>
+      <label><input id="share-opt-moments" type="checkbox" checked> Show moments</label>
+      <label><input id="share-opt-compare" type="checkbox"> Compare account</label>
+    </fieldset>
+    <h3>What each one writes</h3>
+    <div class="table-scroll"><table>
+      <tr><th>Option</th><th>In the address</th><th>On the element</th></tr>
+      <tr><td>Start at <code>n</code> seconds</td><td><code>t=n</code></td><td><code>start-time="n"</code></td></tr>
+      <tr><td>Show summary chips</td><td>nothing — they are on; <code>labels=0</code> hides them</td><td><code>show-labels</code></td></tr>
+      <tr><td>Open map</td><td><code>map=1</code></td><td><code>show-observer-map</code></td></tr>
+      <tr><td>Show moments</td><td><code>moments=0</code> hides them</td><td><code>hide-milestones</code> when off</td></tr>
+      <tr><td>Compare account</td><td><code>compare=1</code></td><td><code>compare-account</code></td></tr>
+      </table></div>
+    <p class="small">The summary chips are the strip of what the recording states, under the picture: the date said in words with its weekday, the position, the observer, the weather, and a <q>Description</q> chip showing the first words of the account, which opens the whole text in place of the chips (a cross puts them back). The player's own page shows them unless <code>labels=0</code>; the element itself shows them only with <code>show-labels</code>. The Editor takes no option, only the recording.</p>
+  </div>
+</section>
 <section class="band">
   <div class="wrap prose-wide">
     <h2>1. A link to ufoathome's player</h2>
@@ -284,6 +339,30 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
   private fr(): string {
     const sample = DocsSharePage.SAMPLE
     return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Comment elle s'ouvre</h2>
+    <p>Le bouton <strong>Partager</strong> du lecteur donne les mêmes deux choses que cette page, sur un seul écran : le <strong>lien</strong> ou le code d'<strong>intégration</strong>, pour le <strong>lecteur</strong> ou pour l'<strong>éditeur</strong> ouvert sur le même enregistrement. Les options ci-dessous sont celles qu'il propose, chacune partant de l'état du lecteur à cet instant ; elles s'appliquent au lien et au code des sections suivantes.</p>
+    <fieldset class="doc-options">
+      <label class="doc-option-start"><input id="share-opt-start-on" type="checkbox"> Commencer à
+        <input id="share-opt-start" type="number" min="0" step="1" value="0" aria-label="Commencer à"> s</label>
+      <label><input id="share-opt-labels" type="checkbox" checked> Afficher les chips</label>
+      <label><input id="share-opt-map" type="checkbox"> Ouvrir la carte</label>
+      <label><input id="share-opt-moments" type="checkbox" checked> Afficher les moments</label>
+      <label><input id="share-opt-compare" type="checkbox"> Comparer au compte rendu</label>
+    </fieldset>
+    <h3>Ce que chacune écrit</h3>
+    <div class="table-scroll"><table>
+      <tr><th>Option</th><th>Dans l'adresse</th><th>Sur l'élément</th></tr>
+      <tr><td>Commencer à <code>n</code> secondes</td><td><code>t=n</code></td><td><code>start-time="n"</code></td></tr>
+      <tr><td>Afficher les chips</td><td>rien — ils sont affichés ; <code>labels=0</code> les masque</td><td><code>show-labels</code></td></tr>
+      <tr><td>Ouvrir la carte</td><td><code>map=1</code></td><td><code>show-observer-map</code></td></tr>
+      <tr><td>Afficher les moments</td><td><code>moments=0</code> les masque</td><td><code>hide-milestones</code> quand décoché</td></tr>
+      <tr><td>Comparer au compte rendu</td><td><code>compare=1</code></td><td><code>compare-account</code></td></tr>
+      </table></div>
+    <p class="small">Les chips de résumé sont le bandeau de ce que l'enregistrement énonce, sous l'image : la date dite en toutes lettres avec son jour de la semaine, la position, l'observateur, la météo, et un chip <q>Description</q> qui montre les premiers mots du récit et ouvre le texte entier à la place des chips (une croix les rend). La page du lecteur les affiche sauf avec <code>labels=0</code> ; l'élément lui-même ne les affiche qu'avec <code>show-labels</code>. L'éditeur ne prend aucune option, seulement l'enregistrement.</p>
+  </div>
+</section>
 <section class="band">
   <div class="wrap prose-wide">
     <h2>1. Un lien vers le lecteur d'ufoathome</h2>
@@ -371,6 +450,30 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     return `
 <section class="band">
   <div class="wrap prose-wide">
+    <h2>Cómo se abre</h2>
+    <p>El botón <strong>Compartir</strong> del reproductor da las mismas dos cosas que esta página, en una sola pantalla: el <strong>enlace</strong> o el código para <strong>insertar</strong>, para el <strong>reproductor</strong> o para el <strong>editor</strong> abierto sobre la misma grabación. Las opciones de abajo son las que ofrece, cada una partiendo del estado del reproductor en ese momento; se aplican al enlace y al código de las secciones siguientes.</p>
+    <fieldset class="doc-options">
+      <label class="doc-option-start"><input id="share-opt-start-on" type="checkbox"> Empezar en
+        <input id="share-opt-start" type="number" min="0" step="1" value="0" aria-label="Empezar en"> s</label>
+      <label><input id="share-opt-labels" type="checkbox" checked> Mostrar los chips</label>
+      <label><input id="share-opt-map" type="checkbox"> Abrir el mapa</label>
+      <label><input id="share-opt-moments" type="checkbox" checked> Mostrar los momentos</label>
+      <label><input id="share-opt-compare" type="checkbox"> Comparar con el relato</label>
+    </fieldset>
+    <h3>Lo que escribe cada una</h3>
+    <div class="table-scroll"><table>
+      <tr><th>Opción</th><th>En la dirección</th><th>En el elemento</th></tr>
+      <tr><td>Empezar en <code>n</code> segundos</td><td><code>t=n</code></td><td><code>start-time="n"</code></td></tr>
+      <tr><td>Mostrar los chips</td><td>nada — están activados; <code>labels=0</code> los oculta</td><td><code>show-labels</code></td></tr>
+      <tr><td>Abrir el mapa</td><td><code>map=1</code></td><td><code>show-observer-map</code></td></tr>
+      <tr><td>Mostrar los momentos</td><td><code>moments=0</code> los oculta</td><td><code>hide-milestones</code> si se desmarca</td></tr>
+      <tr><td>Comparar con el relato</td><td><code>compare=1</code></td><td><code>compare-account</code></td></tr>
+      </table></div>
+    <p class="small">Los chips del resumen son la franja de lo que la grabación enuncia, bajo la imagen: la fecha dicha con palabras y su día de la semana, la posición, el observador, el tiempo, y un chip <q>Descripción</q> que muestra las primeras palabras del relato y abre el texto entero en lugar de los chips (una cruz los devuelve). La página del reproductor los muestra salvo con <code>labels=0</code>; el elemento solo los muestra con <code>show-labels</code>. El editor no admite ninguna opción, solo la grabación.</p>
+  </div>
+</section>
+<section class="band">
+  <div class="wrap prose-wide">
     <h2>1. Un enlace al reproductor de ufoathome</h2>
     <p>La más sencilla de las dos, y la única que no exige nada del lugar al que lo envías. Quien lo
       siga verá la observación reproducida bajo el cielo real de la fecha y el lugar que indica, en
@@ -454,6 +557,30 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
   private it(): string {
     const sample = DocsSharePage.SAMPLE
     return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Come si apre</h2>
+    <p>Il pulsante <strong>Condividi</strong> del lettore dà le stesse due cose di questa pagina, in una sola schermata: il <strong>link</strong> o il codice da <strong>incorporare</strong>, per il <strong>lettore</strong> o per l'<strong>editor</strong> aperto sulla stessa registrazione. Le opzioni qui sotto sono quelle che offre, ciascuna a partire dallo stato del lettore in quel momento; valgono per il link e per il codice delle sezioni seguenti.</p>
+    <fieldset class="doc-options">
+      <label class="doc-option-start"><input id="share-opt-start-on" type="checkbox"> Inizia a
+        <input id="share-opt-start" type="number" min="0" step="1" value="0" aria-label="Inizia a"> s</label>
+      <label><input id="share-opt-labels" type="checkbox" checked> Mostra i chip</label>
+      <label><input id="share-opt-map" type="checkbox"> Apri la mappa</label>
+      <label><input id="share-opt-moments" type="checkbox" checked> Mostra i momenti</label>
+      <label><input id="share-opt-compare" type="checkbox"> Confronta col resoconto</label>
+    </fieldset>
+    <h3>Che cosa scrive ciascuna</h3>
+    <div class="table-scroll"><table>
+      <tr><th>Opzione</th><th>Nell'indirizzo</th><th>Sull'elemento</th></tr>
+      <tr><td>Inizia a <code>n</code> secondi</td><td><code>t=n</code></td><td><code>start-time="n"</code></td></tr>
+      <tr><td>Mostra i chip</td><td>niente — sono attivi; <code>labels=0</code> li nasconde</td><td><code>show-labels</code></td></tr>
+      <tr><td>Apri la mappa</td><td><code>map=1</code></td><td><code>show-observer-map</code></td></tr>
+      <tr><td>Mostra i momenti</td><td><code>moments=0</code> li nasconde</td><td><code>hide-milestones</code> se deselezionato</td></tr>
+      <tr><td>Confronta col resoconto</td><td><code>compare=1</code></td><td><code>compare-account</code></td></tr>
+      </table></div>
+    <p class="small">I chip del riepilogo sono la striscia di ciò che la registrazione enuncia, sotto l'immagine: la data detta a parole con il suo giorno della settimana, la posizione, l'osservatore, il meteo, e un chip <q>Descrizione</q> che mostra le prime parole del resoconto e apre il testo intero al posto dei chip (una croce li riporta). La pagina del lettore li mostra salvo con <code>labels=0</code>; l'elemento stesso li mostra solo con <code>show-labels</code>. L'editor non accetta opzioni, solo la registrazione.</p>
+  </div>
+</section>
 <section class="band">
   <div class="wrap prose-wide">
     <h2>1. Un link al lettore di ufoathome</h2>

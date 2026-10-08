@@ -491,8 +491,10 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>sightingData</code></td><td>property</td><td>One recording, set directly — for a page holding one in memory rather than at a URL</td></tr>
       <tr><td><code>scene</code></td><td>property (read)</td><td>The composed <code>&lt;rr0-scene&gt;</code>, and through <code>scene.ufoElement</code> the playback members</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>method (async)</td><td>What the attribute triggers</td></tr>
-      <tr><td><code>show-labels</code></td><td>attribute</td><td>The strip of the recording's own parameters under the picture. Off by default — and a reader can open or close it themselves from the <q>i</q> panel</td></tr>
+      <tr><td><code>show-labels</code></td><td>attribute</td><td>The strip of chips stating the recording under the picture, boxed by group (summary, observation, position, time, weather, sound, observer): the date said in words with its weekday, and a <q>Description</q> chip that shows the first words of the account and opens the whole text, scrolling past a height cap, in place of the chips. Off by default on the element — the player's own page turns it on — and a reader can open or close it from the <q>i</q> panel</td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attribute</td><td>Passed down through the composed <code>&lt;rr0-scene&gt;</code> to the player that owns them</td></tr>
+      <tr><td><code>start-time</code></td><td>attribute</td><td>Where the recording opens, in seconds. Applied once, to the recording the element loads next; a value past the end opens at the end</td></tr>
+      <tr><td><code>compare-account</code></td><td>attribute</td><td>Starts with the observer's account shown beside any interpretation chosen, and measured against it</td></tr>
     </table>
     </div>
     <p>A recording that names no observer gets no “account by” line at all, which is the accurate
@@ -505,8 +507,12 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       account and the tags; date, place and tags leave it while the <code>show-labels</code> strip
       already states them. The date is on the observer's own clock (<code>utcOffsetHours</code>, or
       one approximated from the longitude), not the reader's. The version at its foot opens this
-      observation in the editor, and its embed lines load the element from wherever this copy of
-      it was itself loaded, so a snippet copied from a local or staging copy points back at that
+      observation in the editor. The description leaves it too while the chips show: it is in their
+      <q>Summary</q> box, opened with a click.</p>
+    <p>The <q>Share</q> button, among the player's own, opens one dialog giving the link or the embed code
+      (the code in an editor that wraps its lines and can be edited), for the player or for the editor, with
+      the options of <a href="/docs/share/">the sharing page</a> each offered as the player is. The embed code loads the element from wherever
+      this copy of it was itself loaded, so a snippet copied from a local or staging copy points back at that
       copy.</p>
   </div>
 </section>
@@ -527,8 +533,10 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>sightingData</code></td><td>propriété</td><td>Un enregistrement posé directement — pour une page qui en tient un en mémoire plutôt qu'à une URL</td></tr>
       <tr><td><code>scene</code></td><td>propriété (lecture)</td><td>Le <code>&lt;rr0-scene&gt;</code> composé, et par <code>scene.ufoElement</code> les membres de lecture</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut</td></tr>
-      <tr><td><code>show-labels</code></td><td>attribut</td><td>Le bandeau des paramètres de l'enregistrement sous l'image. Absent par défaut — et un lecteur peut l'ouvrir ou le fermer lui-même depuis le panneau <q>i</q></td></tr>
+      <tr><td><code>show-labels</code></td><td>attribut</td><td>Le bandeau de chips qui énoncent l'enregistrement sous l'image, rangés par groupe (résumé, observation, position, moment, météo, son, observateur) : la date dite en toutes lettres avec son jour de la semaine, et un chip <q>Description</q> qui montre les premiers mots du récit et ouvre le texte entier, défilant au-delà d'une hauteur maximale, à la place des chips. Absent par défaut sur l'élément — la page du lecteur l'active — et un lecteur peut l'ouvrir ou le fermer depuis le panneau <q>i</q></td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attribut</td><td>Transmis à travers le <code>&lt;rr0-scene&gt;</code> composé jusqu'au lecteur qui les porte</td></tr>
+      <tr><td><code>start-time</code></td><td>attribut</td><td>Où l'enregistrement s'ouvre, en secondes. Appliqué une fois, à l'enregistrement que l'élément charge ensuite ; une valeur au-delà de la fin ouvre à la fin</td></tr>
+      <tr><td><code>compare-account</code></td><td>attribut</td><td>Démarre avec le récit de l'observateur montré à côté de l'interprétation choisie, et mesuré contre elle</td></tr>
     </table>
     </div>
     <p>Un enregistrement qui ne nomme aucun observateur n'affiche aucune ligne « compte rendu de » — ce qui
@@ -542,8 +550,11 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       Il énonce le dossier, la date, le lieu, le compte rendu et les tags ; date, lieu et tags le
       quittent tant que le bandeau <code>show-labels</code> les énonce déjà. La date est à l'heure de
       l'observateur (<code>utcOffsetHours</code>, ou une heure approchée depuis la longitude), pas à
-      celle du lecteur. La version en pied de panneau ouvre cette observation dans l'éditeur, et ses
-      lignes d'intégration chargent l'élément depuis l'endroit d'où cette copie a elle-même été
+      celle du lecteur. La version en pied de panneau ouvre cette observation dans l'éditeur. La description le
+      quitte aussi tant que les chips sont affichés : elle est dans leur boîte <q>Résumé</q>, qu'un clic ouvre.</p>
+    <p>Le bouton <q>Partager</q>, parmi ceux du lecteur, ouvre une seule fenêtre qui donne le lien ou le code d'intégration
+      (le code dans un éditeur qui passe à la ligne et qu'on peut modifier), pour le lecteur ou pour l'éditeur, avec
+      les options de <a href="/docs/share/">la page de partage</a>, chacune proposée telle que le lecteur est. Le code d'intégration charge l'élément depuis l'endroit d'où cette copie a elle-même été
       chargée : un extrait copié depuis une copie locale ou de recette renvoie à cette copie.</p>
   </div>
 </section>
@@ -564,8 +575,10 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>sightingData</code></td><td>propiedad</td><td>Una grabación, asignada directamente — para una página que la tiene en memoria en lugar de en una URL</td></tr>
       <tr><td><code>scene</code></td><td>propiedad (lectura)</td><td>El <code>&lt;rr0-scene&gt;</code> compuesto, y a través de <code>scene.ufoElement</code> los miembros de reproducción</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>método (async)</td><td>Lo que el atributo desencadena</td></tr>
-      <tr><td><code>show-labels</code></td><td>atributo</td><td>La franja con los parámetros propios de la grabación bajo la imagen. Desactivada por defecto — y un lector puede abrirla o cerrarla por sí mismo desde el panel <q>i</q></td></tr>
+      <tr><td><code>show-labels</code></td><td>atributo</td><td>La franja de chips que enuncian la grabación bajo la imagen, agrupados (resumen, observación, posición, momento, tiempo, sonido, observador): la fecha dicha con palabras y su día de la semana, y un chip <q>Descripción</q> que muestra las primeras palabras del relato y abre el texto entero, con desplazamiento pasada una altura máxima, en lugar de los chips. Desactivada por defecto en el elemento — la página del reproductor la activa — y un lector puede abrirla o cerrarla desde el panel <q>i</q></td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>atributo</td><td>Se transmiten a través del <code>&lt;rr0-scene&gt;</code> compuesto hasta el reproductor que los posee</td></tr>
+      <tr><td><code>start-time</code></td><td>atributo</td><td>Dónde se abre la grabación, en segundos. Se aplica una vez, a la grabación que el elemento carga a continuación; un valor más allá del final abre al final</td></tr>
+      <tr><td><code>compare-account</code></td><td>atributo</td><td>Empieza con el relato del observador mostrado junto a la interpretación elegida, y medido contra ella</td></tr>
     </table>
     </div>
     <p>Una grabación que no nombra a ningún observador no muestra ninguna línea “relato de”, que es lo exacto
@@ -578,7 +591,11 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       relato y las etiquetas; fecha, lugar y etiquetas desaparecen de él mientras la franja <code>show-labels</code>
       ya los indica. La fecha está en la hora del propio observador (<code>utcOffsetHours</code>, o
       una aproximada a partir de la longitud), no en la del lector. La versión al pie abre esta
-      observación en el editor, y sus líneas de inserción cargan el elemento desde dondequiera que esta copia
+      observación en el editor. La descripción también lo deja mientras los chips se muestran: está en su caja
+      <q>Resumen</q>, que se abre con un clic.</p>
+    <p>El botón <q>Compartir</q>, entre los del reproductor, abre una sola ventana que da el enlace o el código para insertar
+      (el código en un editor que ajusta las líneas y se puede modificar), para el reproductor o para el editor, con
+      las opciones de <a href="/docs/share/">la página de compartir</a>, cada una ofrecida tal como está el reproductor. El código carga el elemento desde dondequiera que esta copia
       se cargó a su vez, así que un fragmento copiado desde una copia local o de pruebas apunta de vuelta a esa
       copia.</p>
   </div>
@@ -600,8 +617,10 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>sightingData</code></td><td>proprietà</td><td>Una registrazione, impostata direttamente — per una pagina che ne tiene una in memoria invece che a un URL</td></tr>
       <tr><td><code>scene</code></td><td>proprietà (lettura)</td><td>Il <code>&lt;rr0-scene&gt;</code> composto, e attraverso <code>scene.ufoElement</code> i membri di riproduzione</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>metodo (async)</td><td>Ciò che l'attributo innesca</td></tr>
-      <tr><td><code>show-labels</code></td><td>attributo</td><td>La striscia dei parametri propri della registrazione sotto l'immagine. Disattivata per impostazione predefinita — e un lettore può aprirla o chiuderla da sé dal pannello <q>i</q></td></tr>
+      <tr><td><code>show-labels</code></td><td>attributo</td><td>La striscia di chip che enunciano la registrazione sotto l'immagine, raggruppati (riepilogo, osservazione, posizione, momento, meteo, suono, osservatore): la data detta a parole con il suo giorno della settimana, e un chip <q>Descrizione</q> che mostra le prime parole del resoconto e apre il testo intero, con scorrimento oltre un'altezza massima, al posto dei chip. Disattivata per impostazione predefinita sull'elemento — la pagina del lettore la attiva — e un lettore può aprirla o chiuderla dal pannello <q>i</q></td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attributo</td><td>Passati attraverso il <code>&lt;rr0-scene&gt;</code> composto fino al lettore che li possiede</td></tr>
+      <tr><td><code>start-time</code></td><td>attributo</td><td>Dove si apre la registrazione, in secondi. Applicato una volta, alla registrazione che l'elemento carica dopo; un valore oltre la fine apre alla fine</td></tr>
+      <tr><td><code>compare-account</code></td><td>attributo</td><td>Parte con il resoconto dell'osservatore mostrato accanto all'interpretazione scelta, e misurato rispetto ad essa</td></tr>
     </table>
     </div>
     <p>Una registrazione che non nomina alcun osservatore non ha nessuna riga “resoconto di”, ed è la cosa esatta
@@ -614,7 +633,11 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       resoconto e i tag; data, luogo e tag ne escono finché la striscia <code>show-labels</code>
       li indica già. La data è all'ora dell'osservatore stesso (<code>utcOffsetHours</code>, o
       un'ora approssimata dalla longitudine), non a quella del lettore. La versione in fondo apre questa
-      osservazione nell'editor, e le sue righe di incorporamento caricano l'elemento da dovunque questa copia
+      osservazione nell'editor. Anche la descrizione lo lascia finché i chip sono mostrati: è nella loro scatola
+      <q>Riepilogo</q>, che si apre con un clic.</p>
+    <p>Il pulsante <q>Condividi</q>, tra quelli del lettore, apre un'unica finestra che dà il link o il codice da incorporare
+      (il codice in un editor che va a capo e si può modificare), per il lettore o per l'editor, con
+      le opzioni della <a href="/docs/share/">pagina di condivisione</a>, ciascuna offerta com'è il lettore. Il codice carica l'elemento da dovunque questa copia
       sia stata a sua volta caricata, così che uno snippet copiato da una copia locale o di staging rimandi a quella
       copia.</p>
   </div>
