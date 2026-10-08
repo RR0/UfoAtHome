@@ -60,6 +60,13 @@ export interface SightingLabels {
   /** The observer as a WHOLE, naming the chip that holds everything said about them — not
    * observerTitle, which names one field of theirs. Shared because both components box those
    * chips inside it, and only the editor has a tab strip to read the name off. */
+  /** The box naming the summary's own chips, the description's short start among them; that chip's
+   * label, and the label of the button that closes the whole description it opens. */
+  /** The boxes naming the other groups of chips in the player, which has no tab strip to read them off. */
+  summaryGroups: Record<"observation" | "location" | "temporal" | "weather" | "sound", string>
+  summaryGroup: string
+  summaryDescription: string
+  closeDescription: string
   observerGroup: string
   observerId: string
   observerTitle: string

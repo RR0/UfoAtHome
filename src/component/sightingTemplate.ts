@@ -1,3 +1,4 @@
+import { SummaryDescription } from "./SummaryDescription.js"
 export const html = `
 <div class="toolbar" id="toolbar" hidden>
   <span id="account" class="account">
@@ -47,9 +48,9 @@ export const html = `
 </div>
 <dialog id="share-dialog" class="share-dialog" aria-labelledby="share-title">
   <div class="share-head">
-    <button id="share-back" class="share-icon-button" type="button" aria-label="Back" hidden>‹</button>
+    <button id="share-back" class="share-icon-button share-back" type="button" aria-label="Back" hidden>‹</button>
     <h3 id="share-title" class="share-title">Share</h3>
-    <button id="share-close" class="share-icon-button" type="button" aria-label="Close">×</button>
+    <button id="share-close" class="share-icon-button share-close" type="button" aria-label="Close">×</button>
   </div>
   <div id="share-main">
     <div class="share-options">
@@ -58,22 +59,34 @@ export const html = `
         <span id="share-embed-label">Embed</span>
       </button>
     </div>
-    <div class="share-start">
-      <label><input id="share-start-on" type="checkbox"/> <span id="share-start-label">Start at</span></label>
-      <input id="share-start" class="share-start-input" type="number" min="0" step="1" value="0" aria-label="Start at"/>
-      <span id="share-start-unit">s</span>
+    <!-- What the link and the embed open: the replay, or the editor on the same recording. -->
+    <div class="share-kind">
+      <label><input type="radio" name="embed-kind" id="embed-kind-replay" value="replay" checked/> <span id="label-embed-replay">Replay</span></label>
+      <label><input type="radio" name="embed-kind" id="embed-kind-edit" value="edit"/> <span id="label-embed-edit">Editor</span></label>
     </div>
+    <!-- How a shared replay opens; the editor takes none of them, which disables the group. -->
+    <fieldset id="share-replay-options" class="share-flags">
+      <span class="share-start">
+        <label><input id="share-start-on" type="checkbox"/> <span id="share-start-label">Start at</span></label>
+        <input id="share-start" class="share-start-input" type="number" min="0" step="1" value="0" aria-label="Start at"/>
+        <span id="share-start-unit">s</span>
+      </span>
+      <label><input id="share-opt-labels" type="checkbox" checked/> <span id="share-opt-labels-label">Show summary chips</span></label>
+      <label><input id="share-opt-map" type="checkbox"/> <span id="share-opt-map-label">Open map</span></label>
+      <label><input id="share-opt-milestones" type="checkbox" checked/> <span id="share-opt-milestones-label">Show moments</span></label>
+      <label><input id="share-opt-compare" type="checkbox"/> <span id="share-opt-compare-label">Compare account</span></label>
+    </fieldset>
     <div class="share-link">
-      <input id="share-link" class="share-link-input" type="text" readonly spellcheck="false" aria-label="Link"/>
+      <textarea id="share-link" class="share-link-input" rows="2" spellcheck="false" aria-label="Link"></textarea>
       <button id="share-copy" class="share-copy" type="button">Copy</button>
     </div>
   </div>
-  <!-- The markup to put this observation on another page: a replay of it, or the editor opened on it. -->
+  <!-- The markup to put this observation on another page, in an editor that wraps its lines (its code
+       is fetched when this view is first shown); the textarea is what stands in until then. -->
   <div id="share-embed" class="share-embed" hidden>
-    <textarea id="embed-markup" class="embed-markup" rows="4" readonly spellcheck="false"></textarea>
+    <div id="embed-code" class="embed-code"></div>
+    <textarea id="embed-markup" class="embed-markup" rows="6" spellcheck="false"></textarea>
     <div class="embed-row">
-      <label><input type="radio" name="embed-kind" id="embed-kind-replay" value="replay" checked/> <span id="label-embed-replay">Replay</span></label>
-      <label><input type="radio" name="embed-kind" id="embed-kind-edit" value="edit"/> <span id="label-embed-edit">Editor</span></label>
       <button id="embed-copy" class="share-copy" type="button">Copy</button>
     </div>
   </div>
@@ -272,6 +285,7 @@ export const css = `
   padding: 0.25em 0.5em;
   max-width: 100%;
 }
+${SummaryDescription.CSS}
 .param-nest-label {
   font-weight: 600;
   color: color-mix(in srgb, currentColor 62%, transparent);
@@ -471,18 +485,26 @@ export const css = `
   background: rgba(0, 0, 0, 0.55);
 }
 .share-head {
-  display: flex;
+  display: grid;
+  grid-template-columns: 2em 1fr 2em;
   align-items: center;
-  justify-content: space-between;
   gap: 0.5em;
-  margin-bottom: 0.9em;
+  margin-bottom: 0.3em;
 }
 .share-title {
-  flex: 1;
+  grid-column: 2;
   margin: 0;
   font-size: 1.15em;
   font-weight: 500;
   text-align: center;
+}
+.share-back {
+  grid-column: 1;
+  grid-row: 1;
+}
+.share-close {
+  grid-column: 3;
+  grid-row: 1;
 }
 .share-icon-button {
   width: 2em;
@@ -504,15 +526,16 @@ export const css = `
 }
 .share-options {
   display: flex;
+  justify-content: center;
   gap: 1em;
-  margin-bottom: 1em;
+  margin-bottom: 0.5em;
 }
 .share-option {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4em;
-  padding: 0.3em;
+  gap: 0.3em;
+  padding: 0.2em;
   border: none;
   border-radius: 0.6em;
   background: none;
@@ -524,8 +547,8 @@ export const css = `
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3.6em;
-  height: 3.6em;
+  width: 3.2em;
+  height: 3.2em;
   border: 1px solid #ddd;
   border-radius: 50%;
   background: #f2f2f2;
@@ -533,22 +556,40 @@ export const css = `
 .share-option:hover .share-option-icon, .share-option:focus-visible .share-option-icon {
   background: #e4e4e4;
 }
+.share-kind {
+  display: flex;
+  justify-content: center;
+  gap: 1.5em;
+  margin-bottom: 0.7em;
+}
+.share-flags {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45em 1em;
+  margin: 0 0 0.8em;
+  padding: 0;
+  border: none;
+  font-size: 0.9em;
+}
+.share-flags:disabled {
+  opacity: 0.45;
+}
 .share-link {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5em;
-  padding: 0.5em 0.6em 0.5em 1em;
+  padding: 0.5em 0.6em 0.5em 0.8em;
   border: 1px solid #ccc;
   border-radius: 0.9em;
 }
 .share-start {
   display: flex;
   align-items: center;
-  gap: 0.5em;
-  margin-bottom: 0.7em;
+  gap: 0.4em;
+  grid-column: 1 / -1;
 }
 .share-start-input {
-  width: 7em;
+  width: 4.5em;
   font: inherit;
 }
 .share-link-input {
@@ -557,9 +598,14 @@ export const css = `
   border: none;
   outline: none;
   background: none;
-  font: inherit;
+  resize: none;
+  overflow: hidden;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8em;
+  line-height: 1.4;
   color: inherit;
-  text-overflow: ellipsis;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .share-copy {
   flex: 0 0 auto;
@@ -585,19 +631,31 @@ export const css = `
 }
 .embed-row {
   display: flex;
-  align-items: center;
-  gap: 0.75em;
-  flex-wrap: wrap;
-  margin-bottom: 0.4em;
+  justify-content: flex-end;
+  margin-top: 0.5em;
+}
+/* The embed code is edited in CodeMirror once its chunk has loaded; the textarea is the stand-in
+   until then, and the model the editor mirrors. */
+.embed-code:empty, .embed-code[hidden], .embed-markup[hidden] {
+  display: none;
+}
+.embed-code .cm-editor {
+  border: 1px solid #ccc;
+  border-radius: 0.6em;
+  font-size: 0.8em;
+}
+.embed-code .cm-scroller {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 .embed-markup {
   width: 100%;
   box-sizing: border-box;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.75em;
+  font-size: 0.8em;
   line-height: 1.4;
   resize: vertical;
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .embed-row .share-copy {
   margin-left: auto;

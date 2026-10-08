@@ -181,6 +181,13 @@ const answeredButUnreadable = async url => {
 /* \`t=\` in the page's own address is where the recording opens, in seconds: \`?file=...&t=125\`. */
 const startAt = new URLSearchParams(location.search).get("t")
 if (startAt !== null && startAt.trim() !== "" && Number.isFinite(Number(startAt))) stage.setAttribute("start-time", startAt)
+/* The other options a shared link carries: \`labels=1\` shows the summary chips, \`map=1\` opens the observer map,
+   \`moments=0\` hides the named moments, \`compare=1\` sets the account beside the interpretation. */
+const shared = new URLSearchParams(location.search)
+if (shared.get("labels") === "1") stage.setAttribute("show-labels", "")
+if (shared.get("map") === "1") stage.setAttribute("show-observer-map", "")
+if (shared.get("moments") === "0") stage.setAttribute("hide-milestones", "")
+if (shared.get("compare") === "1") stage.setAttribute("compare-account", "")
 const playsAtOnce = new URLSearchParams(location.search).get("play") !== "false"
 const startPlaying = () => {
   if (playsAtOnce) stage.scene?.ufoElement?.play()

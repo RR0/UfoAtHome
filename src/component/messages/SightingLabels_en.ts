@@ -34,6 +34,10 @@ export const sightingLabels_en: SightingLabels = {
     "hynek.ce2": "CE2 — with a physical trace",
     "hynek.ce3": "CE3 — with entities"
   },
+  summaryGroups: { observation: "Observation", location: "Location", temporal: "Time", weather: "Weather", sound: "Sound" },
+  summaryGroup: "Summary",
+  summaryDescription: "Description",
+  closeDescription: "Close the description",
   observerGroup: "Observer",
   observerId: "ID",
   observerTitle: "Title",

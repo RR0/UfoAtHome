@@ -24,7 +24,9 @@ import { loadSceneNames, loadSightingMessages, loadTagNames, UFO_SUPPORTED_LANGU
 import { SceneNaming } from "./messages/SceneNames.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { sightingMessages_en } from "./messages/SightingMessages_en.js"
+import type { ShareCodeEditor } from "./ShareCodeEditor.js"
 import type { SightingMessages } from "./messages/SightingMessages.js"
+import { SummaryDescription } from "./SummaryDescription.js"
 
 registerScene()
 
@@ -135,11 +137,14 @@ export class SightingElement extends HTMLElement {
   private readonly shareClose: HTMLButtonElement
   private readonly shareEmbedOption: HTMLButtonElement
   private readonly shareEmbedLabel: HTMLElement
-  private readonly shareLink: HTMLInputElement
+  private readonly shareLink: HTMLTextAreaElement
+  private readonly shareReplayOptions: HTMLFieldSetElement
+  private readonly embedCode: HTMLElement
   private readonly shareCopy: HTMLButtonElement
   private readonly shareStartOn: HTMLInputElement
   private readonly shareStart: HTMLInputElement
   private readonly shareStartLabel: HTMLElement
+  private readonly shareOptions: Record<"labels" | "map" | "milestones" | "compare", { input: HTMLInputElement, label: HTMLElement }>
   private readonly embedReplayRadio: HTMLInputElement
   private readonly embedEditRadio: HTMLInputElement
   private readonly labelEmbedReplay: HTMLElement
@@ -252,11 +257,18 @@ export class SightingElement extends HTMLElement {
     this.shareClose = this.shadow.getElementById("share-close") as HTMLButtonElement
     this.shareEmbedOption = this.shadow.getElementById("share-embed-option") as HTMLButtonElement
     this.shareEmbedLabel = this.shadow.getElementById("share-embed-label")!
-    this.shareLink = this.shadow.getElementById("share-link") as HTMLInputElement
+    this.shareLink = this.shadow.getElementById("share-link") as HTMLTextAreaElement
+    this.shareReplayOptions = this.shadow.getElementById("share-replay-options") as HTMLFieldSetElement
+    this.embedCode = this.shadow.getElementById("embed-code")!
     this.shareCopy = this.shadow.getElementById("share-copy") as HTMLButtonElement
     this.shareStartOn = this.shadow.getElementById("share-start-on") as HTMLInputElement
     this.shareStart = this.shadow.getElementById("share-start") as HTMLInputElement
     this.shareStartLabel = this.shadow.getElementById("share-start-label")!
+    const option = (name: string) => ({
+      input: this.shadow.getElementById(`share-opt-${name}`) as HTMLInputElement,
+      label: this.shadow.getElementById(`share-opt-${name}-label`)!
+    })
+    this.shareOptions = { labels: option("labels"), map: option("map"), milestones: option("milestones"), compare: option("compare") }
     this.embedReplayRadio = this.shadow.getElementById("embed-kind-replay") as HTMLInputElement
     this.embedEditRadio = this.shadow.getElementById("embed-kind-edit") as HTMLInputElement
     this.labelEmbedReplay = this.shadow.getElementById("label-embed-replay")!
@@ -307,14 +319,16 @@ export class SightingElement extends HTMLElement {
     this.shareClose.addEventListener("click", () => this.closeShare())
     this.shareBack.addEventListener("click", () => this.showShareView("main"))
     this.shareEmbedOption.addEventListener("click", () => this.showShareView("embed"))
-    for (const control of [this.shareStartOn, this.shareStart]) control.addEventListener("input", () => this.refreshShareLinks())
+    for (const control of [this.shareStartOn, this.shareStart, ...Object.values(this.shareOptions).map(o => o.input)]) {
+      control.addEventListener("input", () => this.refreshShareLinks())
+    }
     this.shareCopy.addEventListener("click", () => void this.copyText(this.shareLink.value, this.shareLink, this.shareCopy))
     // A press on the dimmed page around the card, which the dialog itself receives, closes it.
     this.shareDialog.addEventListener("click", event => {
       if (event.target === this.shareDialog) this.closeShare()
     })
     for (const radio of [this.embedReplayRadio, this.embedEditRadio]) {
-      radio.addEventListener("change", () => this.refreshEmbedMarkup())
+      radio.addEventListener("change", () => this.refreshShareLinks())
     }
     this.embedCopyButton.addEventListener("click", () => void this.copyEmbedMarkup())
 
@@ -384,6 +398,10 @@ export class SightingElement extends HTMLElement {
     this.shareBack.setAttribute("aria-label", this.messages.back)
     this.shareCopy.textContent = this.messages.embedCopy
     this.shareStartLabel.textContent = this.messages.shareStartAt
+    this.shareOptions.labels.label.textContent = this.messages.shareOptionLabels
+    this.shareOptions.map.label.textContent = this.messages.shareOptionMap
+    this.shareOptions.milestones.label.textContent = this.messages.shareOptionMilestones
+    this.shareOptions.compare.label.textContent = this.messages.shareOptionCompare
     this.shareStart.setAttribute("aria-label", this.messages.shareStartAt)
     this.shareEmbedLabel.textContent = this.messages.embed
     this.syncShareTitle()
@@ -603,12 +621,14 @@ export class SightingElement extends HTMLElement {
     const script = new URL(`${tag}.mjs`, import.meta.url).href
     const src = this.currentSrc ? new URL(this.currentSrc, location.href).href : ""
     // The replay can open at a stated position; the editor has no such attribute.
-    const start = kind === "replay" && this.shareStartSeconds !== undefined ? ` ${START_TIME_ATTRIBUTE}="${this.shareStartSeconds}"` : ""
+    const start = kind === "replay" ? this.replayAttributes().map(([name, value]) => value === "" ? ` ${name}` : ` ${name}="${value}"`).join("") : ""
     return `<script type="module" src="${script}"></script>\n<${tag} src="${src}"${start}></${tag}>`
   }
 
   private refreshEmbedMarkup(): void {
-    this.embedMarkup.value = this.embedMarkupFor(this.embedEditRadio.checked ? "edit" : "replay")
+    const markup = this.embedMarkupFor(this.embedEditRadio.checked ? "edit" : "replay")
+    this.embedMarkup.value = markup
+    if (this.shareCodeEditor) this.shareCodeEditor.text = markup
   }
 
   /** Clipboard write can be refused (permissions, insecure context) — falls back to selecting the
@@ -624,7 +644,7 @@ export class SightingElement extends HTMLElement {
   }
 
   private async copyEmbedMarkup(): Promise<void> {
-    await this.copyText(this.embedMarkup.value, this.embedMarkup, this.embedCopyButton)
+    await this.copyText(this.shareCodeEditor?.text ?? this.embedMarkup.value, this.embedMarkup, this.embedCopyButton)
   }
 
   /**
@@ -634,9 +654,37 @@ export class SightingElement extends HTMLElement {
    * link is the player's own page.
    */
   private playUrl(): string {
-    const start = this.shareStartSeconds !== undefined ? `t=${this.shareStartSeconds}` : ""
-    if (!this.currentSrc) return `${APP_HOME_URL}/play/${start && "?" + start}`
-    return `${APP_HOME_URL}/play/?file=${encodeURIComponent(new URL(this.currentSrc, location.href).href)}${start && "&" + start}`
+    const query = this.replayQuery().join("&")
+    if (!this.currentSrc) return `${APP_HOME_URL}/play/${query && "?" + query}`
+    return `${APP_HOME_URL}/play/?file=${encodeURIComponent(new URL(this.currentSrc, location.href).href)}${query && "&" + query}`
+  }
+
+  /**
+   * What the share dialog's options say about how the replay opens, as attributes: the chips
+   * (`show-labels`, on unless unticked), the observer map, the named moments (`hide-milestones` once
+   * unticked), the comparison, and the position. The editor takes none of them, only its `src`.
+   */
+  private replayAttributes(): [string, string][] {
+    const options = this.shareOptions
+    const attributes: [string, string][] = []
+    if (this.shareStartSeconds !== undefined) attributes.push([START_TIME_ATTRIBUTE, String(this.shareStartSeconds)])
+    if (options.labels.input.checked) attributes.push(["show-labels", ""])
+    if (options.map.input.checked) attributes.push([OBSERVER_MAP_ATTRIBUTE, ""])
+    if (!options.milestones.input.checked) attributes.push([MILESTONES_ATTRIBUTE, ""])
+    if (options.compare.input.checked) attributes.push([COMPARE_ACCOUNT_ATTRIBUTE, ""])
+    return attributes
+  }
+
+  /** The same options as the player's address takes them: `labels=1`, `map=1`, `moments=0`, `compare=1`. */
+  private replayQuery(): string[] {
+    const options = this.shareOptions
+    const query: string[] = []
+    if (this.shareStartSeconds !== undefined) query.push(`t=${this.shareStartSeconds}`)
+    if (options.labels.input.checked) query.push("labels=1")
+    if (options.map.input.checked) query.push("map=1")
+    if (!options.milestones.input.checked) query.push("moments=0")
+    if (options.compare.input.checked) query.push("compare=1")
+    return query
   }
 
   /** The position the shared link opens at, in whole seconds, when the reader asked for one. */
@@ -646,8 +694,34 @@ export class SightingElement extends HTMLElement {
   }
 
   private refreshShareLinks(): void {
-    this.shareLink.value = this.playUrl()
+    // The editor takes none of the replay's options, so they are put aside while it is chosen.
+    const editing = this.embedEditRadio.checked
+    this.shareReplayOptions.disabled = editing
+    this.shareLink.value = editing ? this.editorUrl() : this.playUrl()
+    this.fitShareLink()
     this.refreshEmbedMarkup()
+  }
+
+  /** The link wraps, so its field is as tall as the link is long. */
+  private fitShareLink(): void {
+    this.shareLink.style.height = "auto"
+    this.shareLink.style.height = `${this.shareLink.scrollHeight}px`
+  }
+
+  private shareCodeEditor?: ShareCodeEditor
+  private shareCodeLoading?: Promise<void>
+
+  /**
+   * Swaps the embed view's textarea for an editor that wraps and highlights, the first time that
+   * view is shown. Its chunk (CodeMirror) is fetched then and not before, so a player nobody shares
+   * from never loads it; the textarea stands in meanwhile, and stays if the chunk cannot load.
+   */
+  private loadShareCode(): void {
+    this.shareCodeLoading ??= import("./ShareCodeEditor.js").then(({ ShareCodeEditor }) => {
+      this.shareCodeEditor = new ShareCodeEditor(this.embedCode, this.embedMarkup.value,
+        text => { this.embedMarkup.value = text }, this.messages.embed)
+      this.embedMarkup.hidden = true
+    }).catch(() => { this.shareCodeLoading = undefined })
   }
 
   private shareView: "main" | "embed" = "main"
@@ -658,10 +732,16 @@ export class SightingElement extends HTMLElement {
     this.shareStart.max = String(Math.floor(ufo.seekableDuration / 1000))
     this.shareStart.value = String(Math.floor(ufo.currentTime / 1000))
     this.shareStartOn.checked = false
+    // Each option offered as the player is NOW, so that what is shared is what is on show.
+    this.shareOptions.labels.input.checked = this.labelsShown
+    this.shareOptions.map.input.checked = ufo.observerMapOpen
+    this.shareOptions.milestones.input.checked = ufo.milestonesVisible
+    this.shareOptions.compare.input.checked = this.sceneElement.compareAccount
     this.refreshShareLinks()
     this.showShareView("main")
     if (typeof this.shareDialog.showModal === "function") this.shareDialog.showModal()
     else this.shareDialog.setAttribute("open", "")
+    this.fitShareLink()
     this.shareLink.select()
   }
 
@@ -675,6 +755,7 @@ export class SightingElement extends HTMLElement {
     this.shareMain.hidden = view !== "main"
     this.shareEmbed.hidden = view !== "embed"
     this.shareBack.hidden = view === "main"
+    if (view === "embed") this.loadShareCode()
     this.syncShareTitle()
   }
 
@@ -1175,7 +1256,7 @@ export class SightingElement extends HTMLElement {
       ...this.summaryBuilder.entriesFor(sighting, this.sceneElement.ufoElement.currentTime),
       ...this.assessmentEntries
     ]
-    const signature = entries.map(entry => `${entry.field}=${entry.label}=${entry.value}${entry.unit}${entry.fromSource ? "*" : ""}`).join("|")
+    const signature = entries.map(entry => `${entry.field}=${entry.label}=${entry.value}${entry.unit}${entry.full ?? ""}${entry.fromSource ? "*" : ""}`).join("|")
     if (signature === this.summarySignature) {
       return
     }
@@ -1194,7 +1275,9 @@ export class SightingElement extends HTMLElement {
       if (open && open.group !== entry.group) {
         open = undefined
       }
-      const boxName = entry.group === "observer" ? this.messages.observerGroup
+      const boxName = entry.group === "summary" ? this.messages.summaryGroup
+        : entry.group === "observer" ? this.messages.observerGroup
+        : entry.group in this.messages.summaryGroups ? this.messages.summaryGroups[entry.group as keyof typeof this.messages.summaryGroups]
         // Named by its GROUP and never by what it leads to — an assessment of the observer's own
         // account still belongs in a box saying Assessment.
         : entry.group === "assessment" ? this.messages.assessmentGroup : undefined
@@ -1216,11 +1299,43 @@ export class SightingElement extends HTMLElement {
       }
     }
     this.paramSummary.replaceChildren(...strip)
+    this.syncDescription(entries)
+  }
+
+  /** The whole description on show in place of the chips, while one has been opened from its chip. */
+  private openDescription: string | undefined
+
+  private syncDescription(entries: SummaryEntry[]): void {
+    // A description that is no longer the recording's (another observer, another language) closes.
+    if (this.openDescription !== undefined && !entries.some(entry => entry.full === this.openDescription)) {
+      this.openDescription = undefined
+    }
+    SummaryDescription.sync(this.paramSummary, this.openDescription, this.messages.summaryDescription,
+      this.messages.closeDescription, () => {
+        this.openDescription = undefined
+        this.syncDescription(entries)
+      })
   }
 
   private paramItem(entry: SummaryEntry): HTMLElement {
     const item = document.createElement("span")
     item.className = entry.fromSource ? "param-label from-source" : "param-label"
+    if (entry.full !== undefined) {
+      item.classList.add("describable")
+      item.tabIndex = 0
+      item.setAttribute("role", "button")
+      const open = () => {
+        this.openDescription = entry.full
+        this.syncDescription([entry])
+      }
+      item.addEventListener("click", open)
+      item.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault()
+          open()
+        }
+      })
+    }
     const label = document.createElement("span")
     label.className = "param-label-label"
     label.textContent = `${entry.label} `

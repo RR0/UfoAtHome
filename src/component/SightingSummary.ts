@@ -16,7 +16,7 @@ import type { SceneNaming } from "./messages/SceneNames.js"
  * these; the editor maps them onto its panels, so that clicking a chip opens the one holding
  * the field. */
 export type SummaryGroup =
-  | "observation" | "observer" | "location" | "decor" | "temporal" | "weather" | "sound"
+  | "summary" | "observation" | "observer" | "location" | "decor" | "temporal" | "weather" | "sound"
   /** What was seen, and what it is claimed to be: the shapes of the account at the instant on show, and
    * the bodies of the interpretation. The editor's own panel is the Phenomenon one (see
    * SummaryContext.phenomena). */
@@ -37,6 +37,8 @@ export interface SummaryEntry {
   value: string
   /** "m", "°", "%"… — a symbol, never translated. Empty when the value carries its own. */
   unit: string
+  /** The whole text, when `value` is only its beginning: what the chip opens on a click (the description). */
+  full?: string
   /** A colour to show as a swatch beside the value, when the value IS a colour. */
   color?: string
   /** True when a real record supplied this value rather than the observer — see Sighting.weatherSource. */
@@ -137,6 +139,7 @@ export class SightingSummary {
    * to pick one silently. */
   entriesFor(sighting: Sighting, timeMs: number, context: SummaryContext = {}): SummaryEntry[] {
     const entries: SummaryEntry[] = []
+    this.addSummary(entries, sighting)
     this.addObservation(entries, sighting)
     this.addObserver(entries, sighting, timeMs)
     this.addLocation(entries, sighting, timeMs, context.groundElevationM)
@@ -206,6 +209,23 @@ export class SightingSummary {
   /** The number, but only while it isn't a rounded zero — see `shows`. */
   private roundedShown(value: number | undefined, decimals = 0): string | undefined {
     return this.shows(value, decimals) ? this.rounded(value, decimals) : undefined
+  }
+
+  /** How many words of the description its chip shows before the ellipsis. */
+  private static readonly DESCRIPTION_WORDS = 3
+
+  /** The description, as a chip showing only its first words: prose does not fit on a chip, so the
+   * rest is what a click on it opens (`full`). */
+  private addSummary(entries: SummaryEntry[], sighting: Sighting): void {
+    const description = this.said.read(sighting.event.description)?.trim()
+    if (!description) {
+      return
+    }
+    const words = description.split(/\s+/)
+    const start = words.length > SightingSummary.DESCRIPTION_WORDS
+      ? `${words.slice(0, SightingSummary.DESCRIPTION_WORDS).join(" ")}…` : description
+    this.push(entries, "summary", "description", this.labels.summaryDescription, start)
+    entries[entries.length - 1].full = description
   }
 
   private addObservation(entries: SummaryEntry[], sighting: Sighting): void {

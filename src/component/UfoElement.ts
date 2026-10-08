@@ -2321,6 +2321,16 @@ export class UfoElement extends HTMLElement {
     this.dispatchEvent(new CustomEvent("observermapchange", { bubbles: true, composed: true, detail: { open } }))
   }
 
+  /** Whether the map of where the observer stood is open now. */
+  get observerMapOpen(): boolean {
+    return !this.observerMapPanel.hidden
+  }
+
+  /** Whether the account's named moments are shown now. */
+  get milestonesVisible(): boolean {
+    return this.milestonesShown
+  }
+
   /** Whether the reader opened the map themselves, which outranks its stepping aside. */
   private observerMapAsked = false
 

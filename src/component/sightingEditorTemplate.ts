@@ -1,3 +1,4 @@
+import { SummaryDescription } from "./SummaryDescription.js"
 export const html = `
 <!-- The groups' own handles, gathered onto one wrapping strip instead of standing as seven stacked
      <summary> rows down the left edge. Seven collapsed rows cost 259px of pure chrome before a
@@ -1195,7 +1196,8 @@ select.weather-field:disabled {
   border-color: color-mix(in srgb, currentColor 70%, transparent);
   background: color-mix(in srgb, currentColor 8%, transparent);
 }
-.param-nest:hover .param-nest-label {
+.param-nest:hover ${SummaryDescription.CSS}
+.param-nest-label {
   color: inherit;
 }
 .param-nest-label {

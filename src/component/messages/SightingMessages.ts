@@ -38,6 +38,11 @@ export interface SightingMessages extends SightingLabels {
   embedCopy: string
   /** The share dialog's option to open the link at the position on show, its value in seconds. */
   shareStartAt: string
+  /** The share dialog's options on how the shared replay opens: the chips, the observer map, the named moments, the comparison. */
+  shareOptionLabels: string
+  shareOptionMap: string
+  shareOptionMilestones: string
+  shareOptionCompare: string
   embedCopied: string
   /** The info panel's toggle for the parameter strip under the render — what the recording states,
    * field by field, in the same words the editor uses for the same fields. */

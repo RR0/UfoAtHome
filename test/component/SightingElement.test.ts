@@ -163,6 +163,10 @@ beforeAll(() => {
   } as unknown as typeof ResizeObserver
 })
 
+// CodeMirror, which the share dialog loads for the embed code, measures text with ranges jsdom lacks.
+Range.prototype.getClientRects ??= () => [] as unknown as DOMRectList
+Range.prototype.getBoundingClientRect ??= () => new DOMRect()
+
 describe("the name this element had before 0.41.0", () => {
   afterEach(() => {
     document.body.innerHTML = ""
@@ -863,6 +867,42 @@ describe("SightingElement sharing", () => {
     expect((shadow.getElementById("share-link") as HTMLInputElement).value)
       .toBe("https://ufoathome.org/play/?file=" + encodeURIComponent("http://localhost:3000/john.json"))
     expect(shadow.getElementById("share-dialog")!.hasAttribute("open")).toBe(true)
+  })
+
+  it("offers the link of the editor on the same recording, with no replay option", async () => {
+    const shadow = await mounted()
+    ;(findDeep(shadow, "share-button") as HTMLButtonElement).click()
+    const edit = shadow.getElementById("embed-kind-edit") as HTMLInputElement
+    edit.checked = true
+    edit.dispatchEvent(new Event("change"))
+    expect((shadow.getElementById("share-link") as HTMLInputElement).value).toContain("/edit/?file=")
+    expect((shadow.getElementById("share-replay-options") as HTMLFieldSetElement).disabled).toBe(true)
+  })
+
+  it("carries the share options, each offered as the player is now", async () => {
+    const shadow = await mounted()
+    ;(findDeep(shadow, "share-button") as HTMLButtonElement).click()
+    const tick = (id: string) => {
+      const box = shadow.getElementById(id) as HTMLInputElement
+      box.checked = !box.checked
+      box.dispatchEvent(new Event("input"))
+    }
+    const link = () => (shadow.getElementById("share-link") as HTMLInputElement).value
+    const markup = () => (shadow.querySelector("#embed-markup") as HTMLTextAreaElement).value
+    expect((shadow.getElementById("share-opt-labels") as HTMLInputElement).checked).toBe(false)
+    expect((shadow.getElementById("share-opt-milestones") as HTMLInputElement).checked).toBe(true)
+    expect(link()).not.toContain("labels=1")
+    tick("share-opt-labels")
+    expect(link()).toContain("&labels=1")
+    expect(markup()).toContain(" show-labels></rr0-sighting>")
+    tick("share-opt-labels")
+    tick("share-opt-map")
+    tick("share-opt-milestones")
+    tick("share-opt-compare")
+    expect(link()).toContain("&map=1&moments=0&compare=1")
+    expect(link()).not.toContain("labels=1")
+    expect(markup()).toContain(' show-observer-map hide-milestones compare-account></rr0-sighting>')
+    expect(markup()).not.toContain("show-labels")
   })
 
   it("keeps the embed markup behind the Embed option, and comes back from it", async () => {

@@ -30,6 +30,25 @@ describe("SightingSummary", () => {
   const valueOf = (sighting: Sighting, field: string): string | undefined =>
     summary.entriesFor(sighting, 0).find(entry => entry.field === field)?.value
 
+  describe("the description", () => {
+    it("is a chip of the summary showing only its first words, and keeps the whole text", () => {
+      const sighting = Sighting.create(undefined, [{ lat: 32.4, lng: -86.3 }])
+      sighting.event.description = "A silent disc hovered above the field for ten minutes."
+      const entry = summary.entriesFor(sighting, 0).find(e => e.field === "description")!
+      expect(entry.group).toBe("summary")
+      expect(entry.value).toBe("A silent disc…")
+      expect(entry.full).toBe("A silent disc hovered above the field for ten minutes.")
+    })
+
+    it("is not abbreviated when it is already short, and absent when there is none", () => {
+      const sighting = Sighting.create(undefined, [{ lat: 32.4, lng: -86.3 }])
+      sighting.event.description = "A light"
+      expect(valueOf(sighting, "description")).toBe("A light")
+      sighting.event.description = undefined
+      expect(valueOf(sighting, "description")).toBeUndefined()
+    })
+  })
+
   describe("a quantity whose zero means absence", () => {
     it("says nothing about a sky nobody described", () => {
       // The whole point, in the shape the user saw it: an untouched recording used to open with

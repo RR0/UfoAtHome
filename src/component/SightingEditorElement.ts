@@ -133,6 +133,7 @@ import { SceneNaming } from "./messages/SceneNames.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
+import { SummaryDescription } from "./SummaryDescription.js"
 
 /** Hides nothing from a hit test: an occluded shape is still the author's to select, unlike a
  * reader's hover (see UfoElement.shapeAt's own default). */
@@ -5296,7 +5297,7 @@ export class SightingEditorElement extends HTMLElement {
     // rather than joining it. A collision between two FLAT groups would need answering again, and
     // there is currently no pair of them that can produce one.
     const chips = entries.map(entry => ({ ...entry, panel: this.summaryPanelIndex(entry.group) }))
-    const signature = chips.map(chip => `${chip.field}=${chip.label}=${chip.value}${chip.unit}${chip.fromSource ? "*" : ""}`).join("|")
+    const signature = chips.map(chip => `${chip.field}=${chip.label}=${chip.value}${chip.unit}${chip.full ?? ""}${chip.fromSource ? "*" : ""}`).join("|")
     if (signature === this.paramSummarySignature) {
       return
     }
@@ -5338,6 +5339,7 @@ export class SightingEditorElement extends HTMLElement {
         // Assessment. An assessment is not a group of fields, so its name is its own message.
         name.textContent = chip.group === "assessment"
           ? this.messages.assessmentGroup
+          : chip.group === "summary" ? this.messages.summaryGroup
           // The tab's LABEL, not the whole button: a tab also carries its count of unanswered
           // questions (see badgeOn), and reading the button whole named a nest "Observer3".
           : SightingEditorElement.tabLabel(this.groupTabs[this.summaryPanelIndex(chip.group)])
@@ -5353,12 +5355,27 @@ export class SightingEditorElement extends HTMLElement {
       }
     }
     this.paramSummary.replaceChildren(...strip)
+    this.syncDescription()
+  }
+
+  /** The whole description on show in place of the chips, while one has been opened from its chip. */
+  private openDescription: string | undefined
+
+  private syncDescription(): void {
+    if (this.openDescription !== undefined && !this.paramChips.some(chip => chip.full === this.openDescription)) {
+      this.openDescription = undefined
+    }
+    SummaryDescription.sync(this.paramSummary, this.openDescription, this.messages.summaryDescription,
+      this.messages.closeDescription, () => {
+        this.openDescription = undefined
+        this.syncDescription()
+      })
   }
 
   /** Which summary groups describe a sub-element rather than the observation itself, and so read
    * as a chip holding chips: the observer who gave the account, and whichever decor object is
    * being worked on (or, with none selected, the list of them). */
-  private static readonly NESTED_GROUPS: SummaryGroup[] = ["observation", "observer", "location", "temporal", "weather", "sound", "decor", "phenomenon", "assessment"]
+  private static readonly NESTED_GROUPS: SummaryGroup[] = ["summary", "observation", "observer", "location", "temporal", "weather", "sound", "decor", "phenomenon", "assessment"]
 
   /** The tab a summary group leads to: by position for the groups that predate the Pictures tab, and by the panel it controls for the Phenomenon. */
   private summaryPanelIndex(group: SummaryGroup): number {
@@ -5545,6 +5562,12 @@ export class SightingEditorElement extends HTMLElement {
   private onParamSummaryClick(event: Event): void {
     const chip = (event.target as HTMLElement).closest<HTMLElement>(".param-chip")
     if (chip === undefined || chip === null) {
+      return
+    }
+    // The description's chip opens the whole text rather than a field.
+    if (chip.dataset.field === "description") {
+      this.openDescription = this.paramChips.find(candidate => candidate.field === "description")?.full
+      this.syncDescription()
       return
     }
     // An assessment chip names no panel: it is what was made OF the fields, not one of them, so
