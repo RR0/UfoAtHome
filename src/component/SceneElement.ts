@@ -1,3 +1,4 @@
+import { RoadGrade } from "../engine/place/RoadGrade.js"
 import { VehicleAudio } from "../audio/VehicleAudio.js"
 import { VehicleHearing } from "../engine/place/VehicleHearing.js"
 import { resolveCloudLayers } from "../engine/model/CloudLayer.js"
@@ -747,6 +748,10 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.seekPreviewPainter = (t, canvas) => this.seekPreviewOf(canvas).paint(t, canvas)
     // The weather is heard through this element, the button that silences it is the player's.
     this.ufoElement.addEventListener("mutedchange", () => this.applyLevel())
+    // What the player's sound button must also answer for: the van's engine, the rain and the wind (see UfoElement.ambientSound).
+    this.ufoElement.ambientSound = sighting => sighting.vehicle !== undefined
+      || sighting.decor.some(decor => decor.engine !== undefined)
+      || sighting.weatherTrack.allKeyframes.some(frame => frame.weather.precipitationType !== "none" || frame.weather.windSpeed > 1)
     this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<ReferenceViewDetail>).detail))
     this.ufoElement.addEventListener("traceview", event => this.sceneRenderer.setTracesShown((event as CustomEvent<{ shown: boolean }>).detail.shown))
     this.ufoElement.canvasElement.addEventListener("pointermove", this.handlePointerMove)
@@ -1364,6 +1369,16 @@ export class SceneElement extends HTMLElement {
     return SightingShapes.fovOf(this.ufoElement.sighting, t) / height
   }
 
+  /** The grade of the road under the observer at `t`, in degrees, uphill positive — see RoadGrade. */
+  roadGradeAt(sighting: Sighting, t: number): number {
+    return sighting.observerTrack.allKeyframes.length < 2 ? 0 : RoadGrade.at(sighting, t, this.sceneRenderer.bodyGround)
+  }
+
+  /** The grade of the road at the instant on show: what the summary's Tilt adds to the pose's own. */
+  get roadGradeDeg(): number {
+    return this.roadGradeAt(this.ufoElement.sighting, this.ufoElement.currentTime)
+  }
+
   /** Everything the scene has to be told to stand at one instant — the whole of what this element
    * pushes into the renderer. Called once for an ordinary frame, and once per instant of a pose long
    * enough that the sky itself moved across it (see updateAstronomy). */
@@ -1407,7 +1422,9 @@ export class SceneElement extends HTMLElement {
       [layer.id, cloudOffsetAt(t, sighting.weatherTrack, initialWeather, cloudOrigin, pose, layer.id,
         layer.instances?.length ? undefined : preroll)]))
     this.sceneRenderer.setCloudOffset(cloudOffsetAt(t, sighting.weatherTrack, initialWeather, cloudOrigin, pose, undefined, preroll), layerOffsets)
-    this.sceneRenderer.setObserverPose(pose ?? DEFAULT_OBSERVER_POSE)
+    // The view is raised by the grade of the road being driven (see RoadGrade): the file says where they looked in the
+    // vehicle's frame, and a climb tilts that whole frame.
+    this.sceneRenderer.setObserverPose(pose ? { ...pose, pitchDeg: pose.pitchDeg + this.roadGradeAt(sighting, t) } : DEFAULT_OBSERVER_POSE)
     this.sceneRenderer.setLensOptics(this.lensOpticsAt(t))
     // What that instrument could actually have RECORDED, which is a second thing entirely from how
     // it maps an angle: an Instamatic's ninetieth of a second reaches two magnitudes short of the

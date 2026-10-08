@@ -11,9 +11,9 @@ export const html = `
 <div id="group-tabs" class="group-tabs">
   <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false"><span id="label-observation-group">Summary</span></button>
   <button class="group-tab" type="button" aria-controls="group-observer" aria-expanded="false"><span id="label-observer-group">Observer</span></button>
-  <button class="group-tab" type="button" aria-controls="group-location" aria-expanded="false"><span id="label-location-group">Location</span></button>
+  <button class="group-tab" type="button" aria-controls="group-location" aria-expanded="false"><span id="label-location-group">Position</span></button>
   <button class="group-tab" type="button" aria-controls="group-decor" aria-expanded="false"><span id="label-decor-group">Environment</span></button>
-  <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false"><span id="label-temporal-group">Moment</span></button>
+  <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false"><span id="label-temporal-group">Time</span></button>
   <button class="group-tab" type="button" aria-controls="group-weather" aria-expanded="false"><span id="label-weather-group">Weather</span></button>
   <button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false"><span id="label-sound-group">Sound</span></button>
   <button class="group-tab" type="button" aria-controls="group-reference" aria-expanded="false"><span id="label-reference-group">Pictures</span></button>

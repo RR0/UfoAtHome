@@ -5283,7 +5283,8 @@ export class SightingEditorElement extends HTMLElement {
       // Zero rather than undefined when no terrain has resolved yet, because that is exactly what
       // the field itself then shows (see syncElevationField's own `ground ?? 0`) — a chip is a way
       // back to a field, so it has to say what that field says.
-      groundElevationM: this.groundElevationM ?? 0
+      groundElevationM: this.groundElevationM ?? 0,
+      roadGradeDeg: this.sceneElement.roadGradeDeg
     })
     // "Altitude 220 m" and "Altitude 0 m" side by side are the observer's own height above the sea
     // and a building's — two different assertions under one word, which is fine inside a panel

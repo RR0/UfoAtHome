@@ -2,6 +2,9 @@ import { formatEdtfTime, parseEdtfTime } from "../engine/model/Sighting.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 
 /** What a date field says in words. */
+/** The words a time is said with: how a doubt reads, and the seasons. */
+export type TimeWords = Pick<EdtfDateFieldMessages, "timeQualifierApproximate" | "timeQualifierUncertain" | "timeQualifierBoth" | "timeSeasonSpring" | "timeSeasonSummer" | "timeSeasonAutumn" | "timeSeasonWinter">
+
 export interface EdtfDateFieldMessages {
   edtfInvalid: string
   /** What the mode button reads while the date is precise, and while it is said in EDTF. */
@@ -166,7 +169,7 @@ export class EdtfDateField {
   }
 
   /** `describe` without a field: the same words, for whoever shows a time elsewhere (the summary's chips). */
-  static describeTime(time: SightingTime, messages: EdtfDateFieldMessages, locale: string): string {
+  static describeTime(time: SightingTime, messages: TimeWords, locale: string): string {
     const raw = formatEdtfTime(time)
     const doubt = EdtfDateField.qualifierOf(raw)
     const pad = (n: number): string => String(n).padStart(2, "0")
@@ -176,7 +179,9 @@ export class EdtfDateField {
       parts.push(time.year !== undefined ? `${season} ${time.year}` : season)
     } else if (time.year !== undefined) {
       const options: Intl.DateTimeFormatOptions = time.day !== undefined
-        ? { year: "numeric", month: "long", day: "numeric" }
+        // The weekday too, once the date is a whole day. Not before the Gregorian calendar (1583), which Intl
+        // would extend backwards into days nobody counted that way.
+        ? { ...(time.year >= 1583 ? { weekday: "long" as const } : {}), year: "numeric", month: "long", day: "numeric" }
         : time.month !== undefined ? { year: "numeric", month: "long" } : { year: "numeric" }
       // A date built in UTC, so that the reader's own zone cannot move the day.
       const date = new Date(Date.UTC(time.year, (time.month ?? 1) - 1, time.day ?? 1))

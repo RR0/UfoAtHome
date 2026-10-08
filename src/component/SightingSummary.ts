@@ -1,5 +1,5 @@
 import type { Sighting, SightingTime } from "../engine/model/Sighting.js"
-import { EdtfDateField, type EdtfDateFieldMessages } from "./EdtfDateField.js"
+import { EdtfDateField, type TimeWords } from "./EdtfDateField.js"
 import { formatEdtfTime, resolveObserverPoseAt, resolveSoundAt, resolveWeatherAt, sightingDurationMs } from "../engine/model/Sighting.js"
 import type { DecorKind, DecorObject, DecorSide } from "../engine/model/Decor.js"
 import { resolveDecorLitAt, resolveDecorPlacementAt } from "../engine/model/Decor.js"
@@ -63,6 +63,8 @@ export interface SummaryEntry {
  * level.
  */
 export interface SummaryContext {
+  /** How much the road under the observer raises their view, in degrees (see RoadGrade): the Tilt chip adds it to the pose's own. */
+  roadGradeDeg?: number
   decorId?: string
   groundElevationM?: number
   /**
@@ -130,7 +132,7 @@ export class SightingSummary {
     private readonly tags: SightingTags = new SightingTags({}),
     /** What a stated time is worded with, to read it as the editor's date field does ("11 May 1950, 19:45 — approximate")
      * instead of as raw EDTF. Absent where those words are not loaded: the chip then shows the EDTF. */
-    private readonly timeWords?: { messages: EdtfDateFieldMessages, locale: string }
+    private readonly timeWords?: { messages: TimeWords, locale: string }
   ) {
   }
 
@@ -142,7 +144,7 @@ export class SightingSummary {
     this.addSummary(entries, sighting)
     this.addObservation(entries, sighting)
     this.addObserver(entries, sighting, timeMs)
-    this.addLocation(entries, sighting, timeMs, context.groundElevationM)
+    this.addLocation(entries, sighting, timeMs, context.groundElevationM, context.roadGradeDeg ?? 0)
     this.addDecor(entries, sighting, timeMs, context)
     if (context.phenomena === true) this.addPhenomena(entries, sighting, timeMs)
     this.addTemporal(entries, sighting)
@@ -283,7 +285,7 @@ export class SightingSummary {
     return `${d}°${String(m).padStart(2, "0")}′${String(sec).padStart(2, "0")}″ ${this.naming.point(degrees < 0 ? negative : positive)}`
   }
 
-  private addLocation(entries: SummaryEntry[], sighting: Sighting, timeMs: number, groundElevationM: number | undefined): void {
+  private addLocation(entries: SummaryEntry[], sighting: Sighting, timeMs: number, groundElevationM: number | undefined, roadGradeDeg: number): void {
     const place = sighting.event.place?.[0]
     this.push(entries, "location", "placeName", this.labels.placeName, place?.name)
     const pose = resolveObserverPoseAt(sighting, timeMs)
@@ -297,7 +299,8 @@ export class SightingSummary {
     const heading = this.rounded(pose.headingDeg)
     this.push(entries, "location", "heading", this.labels.heading, heading,
       pose.headingDeg === undefined ? "°" : `° (${this.naming.point(pose.headingDeg)})`)
-    this.push(entries, "location", "pitch", this.labels.pitch, this.rounded(pose.pitchDeg), "°")
+    // What the view is raised to, not only what the file says: on a climb the road tilts it (see RoadGrade).
+    this.push(entries, "location", "pitch", this.labels.pitch, pose.pitchDeg === undefined ? undefined : this.rounded(pose.pitchDeg + roadGradeDeg), "°")
     // Told apart rather than guessed at: with the terrain's height known this is an altitude above
     // sea level, which is what "Altitude" means in both components; without it, the only true
     // thing that can be said is the height above the ground the pose actually holds — and zero of

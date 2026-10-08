@@ -2851,9 +2851,16 @@ export class UfoElement extends HTMLElement {
     this.muted = !this.mutedState
   }
 
-  /** Whether the recording has anything to hear: a sound track. None at all means nobody was asked, which is not silence. */
+  /**
+   * Whether a composing element has something to hear besides the sound track: the vehicle the observer rode in,
+   * the weather, an engine in the decor. The scene sets it, since those are played by the scene and not by this player,
+   * which the same button silences.
+   */
+  ambientSound?: (sighting: Sighting) => boolean
+
+  /** Whether the recording has anything to hear: a sound track, or what the scene plays around it. None at all means nobody was asked, which is not silence. */
   private get hasSound(): boolean {
-    return this.currentSighting.soundTrack.allKeyframes.length > 0
+    return this.currentSighting.soundTrack.allKeyframes.length > 0 || this.ambientSound?.(this.currentSighting) === true
   }
 
   private updateMuteButton(): void {

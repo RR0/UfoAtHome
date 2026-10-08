@@ -154,7 +154,7 @@ export class SightingElement extends HTMLElement {
   private readonly embedCopyButton: HTMLButtonElement
   private readonly labelsToggle: HTMLButtonElement
   private readonly paramSummary: HTMLElement
-  private summaryBuilder = new SightingSummary(sightingMessages_en, new SceneNaming(), new SaidTexts(["en"]), new SightingTags({}))
+  private summaryBuilder = new SightingSummary(sightingMessages_en, new SceneNaming(), new SaidTexts(["en"]), new SightingTags({}), { messages: sightingMessages_en, locale: "en" })
   /** What the strip last rendered. It refreshes on every playback tick (see the timeupdate
    * listener), and replacing forty elements sixty times a second — under a reader's own text
    * selection, at that — for values that changed in none of them is not free. */
@@ -375,7 +375,7 @@ export class SightingElement extends HTMLElement {
     this.messages = messages
     this.tags = new SightingTags(tagNames)
     this.said = new SaidTexts(preferences)
-    this.summaryBuilder = new SightingSummary(this.messages, new SceneNaming(sceneNames), this.said, this.tags)
+    this.summaryBuilder = new SightingSummary(this.messages, new SceneNaming(sceneNames), this.said, this.tags, { messages: this.messages, locale: language })
     this.accountPrefix.textContent = this.messages.accountBy
     this.interpretationLabel.textContent = this.messages.interpretation
     this.confrontationHeading.textContent = this.messages.confrontation
@@ -1252,7 +1252,7 @@ export class SightingElement extends HTMLElement {
     // from the assessors rather than from the file, so they are held here and appended (see
     // runAssessments) instead of being emitted by the summary.
     const entries = [
-      ...this.summaryBuilder.entriesFor(sighting, this.sceneElement.ufoElement.currentTime),
+      ...this.summaryBuilder.entriesFor(sighting, this.sceneElement.ufoElement.currentTime, { roadGradeDeg: this.sceneElement.roadGradeDeg }),
       ...this.assessmentEntries
     ]
     const signature = entries.map(entry => `${entry.field}=${entry.label}=${entry.value}${entry.unit}${entry.full ?? ""}${entry.fromSource ? "*" : ""}`).join("|")

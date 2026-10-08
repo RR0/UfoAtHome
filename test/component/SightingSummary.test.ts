@@ -30,6 +30,18 @@ describe("SightingSummary", () => {
   const valueOf = (sighting: Sighting, field: string): string | undefined =>
     summary.entriesFor(sighting, 0).find(entry => entry.field === field)?.value
 
+  describe("a time, said in words rather than as EDTF", () => {
+    const worded = new SightingSummary(sightingLabels_en, new SceneNaming(), new SaidTexts(["en"]), undefined,
+      { messages: sightingLabels_en, locale: "en" })
+
+    it("shows the date and hour the field would say, not the ISO text", () => {
+      const sighting = Sighting.create(undefined, [{ lat: 48.5, lng: 2.4 }])
+      sighting.event.time = { year: 2015, month: 5, day: 31, hour: 0, minute: 50, second: 34 }
+      const value = worded.entriesFor(sighting, 0).find(e => e.field === "obs-time")!.value
+      expect(value).toBe("Sunday, May 31, 2015, 00:50:34")
+    })
+  })
+
   describe("the description", () => {
     it("is a chip of the summary showing only its first words, and keeps the whole text", () => {
       const sighting = Sighting.create(undefined, [{ lat: 32.4, lng: -86.3 }])

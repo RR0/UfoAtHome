@@ -62,6 +62,15 @@ export interface SightingLabels {
    * chips inside it, and only the editor has a tab strip to read the name off. */
   /** The box naming the summary's own chips, the description's short start among them; that chip's
    * label, and the label of the button that closes the whole description it opens. */
+  /** How a doubt reads in a date said in words ("approximate", "uncertain", both), and the four seasons
+   * a date can be known to be in ("Spring 2022"): what a date chip and the editor's date field share. */
+  timeQualifierApproximate: string
+  timeQualifierUncertain: string
+  timeQualifierBoth: string
+  timeSeasonSpring: string
+  timeSeasonSummer: string
+  timeSeasonAutumn: string
+  timeSeasonWinter: string
   /** The boxes naming the other groups of chips in the player, which has no tab strip to read them off. */
   summaryGroups: Record<"observation" | "location" | "temporal" | "weather" | "sound", string>
   summaryGroup: string

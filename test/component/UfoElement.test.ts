@@ -1872,6 +1872,16 @@ describe("the account's named moments", () => {
     expect(volume.hidden).toBe(false)
   })
 
+  it("enables the sound button for what the scene plays around the recording: the van it rode in", () => {
+    const element = mount()
+    element.ambientSound = sighting => sighting.vehicle !== undefined
+    element.sightingData = { ...withMilestones(), vehicle: { kind: "van" } } as never
+    const mute = element.shadowRoot!.getElementById("mute") as HTMLButtonElement
+    expect(mute.disabled).toBe(false)
+    element.sightingData = withMilestones() as never
+    expect(mute.disabled).toBe(true)
+  })
+
   it("mutes and unmutes from the button beside play, and says so", () => {
     const element = mount()
     element.sightingData = { ...withMilestones(), soundTrack: { keyframes: [{ t: 0, sound: { kind: "hum", volume: 0.8, pitchHz: 200 } }] } } as never

@@ -252,14 +252,6 @@ export interface SightingEditorMessages extends SightingLabels {
   /** The four states of doubt (see parseEdtfTime) that a whole value can have, offered beside the native
    * picker so that "around 05:00" needs no text mode. */
   timeQualifierExact: string
-  timeQualifierApproximate: string
-  /** The four seasons a date can be known to be in ("Spring 2022"). */
-  timeSeasonSpring: string
-  timeSeasonSummer: string
-  timeSeasonAutumn: string
-  timeSeasonWinter: string
-  timeQualifierUncertain: string
-  timeQualifierBoth: string
   /** Title of the switch between the native picker and the EDTF text field — the picker cannot
    * state a bare year, a month, or a time without a date. */
   durationPrecise: string
