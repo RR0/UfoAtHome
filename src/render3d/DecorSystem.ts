@@ -142,9 +142,15 @@ function addWindowPane(group: Group, sizeX: number, sizeY: number, sizeZ: number
   // Unlit, and dark: glass takes light out of what is behind it (a few per cent, grey) and adds next
   // to none of its own. A lit pale pane mixed in a share of the Sun's whole illumination, so a 12 %
   // pane veiled the view like frosted plastic, the more so the more the sun faced it.
-  const material = new MeshBasicMaterial({ color: new Color(...WINDOW_COLOR).multiplyScalar(PANE_DARKNESS), transparent: true, opacity: opacityPercent / 100 })
+  const material = new MeshBasicMaterial({ color: new Color(...WINDOW_COLOR).multiplyScalar(PANE_DARKNESS), transparent: true, opacity: opacityPercent / 100,
+    depthWrite: false })
   const mesh = new Mesh(new BoxGeometry(sizeX, sizeY, sizeZ), material)
   mesh.position.set(x, y, z)
+  // After the relief (renderOrder 1, itself transparent) and before the flame and the clouds. A pane
+  // that wrote its depth, drawn before the relief, hid everything behind it from the relief: the
+  // ground was simply never drawn there, and the window showed only the sky shading down to the
+  // bottom of the frame, which read as frosted glass.
+  mesh.renderOrder = 2
   group.add(mesh)
 }
 
