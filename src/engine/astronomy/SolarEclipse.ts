@@ -80,21 +80,65 @@ export class SolarEclipse {
   }
 
   /**
-   * The glow all round the horizon at totality, as a share of the day sky's own horizon: three
-   * thousandths. The observer stands in a shadow a hundred kilometres across, and the horizon
-   * is seen over ground that is not: lit air, a hundred kilometres and more away, scattering a Sun that is
-   * only partly eclipsed there, and seen through all the air between. Photometry of this very eclipse
-   * (Winkler et al. 2005) has the horizon tens of times brighter than the zenith, itself a ten-thousandth
-   * of a midday sky's; this takes a value in that range (SUPPOSED: thirty times). Isotropic: the shadow is longer
-   * along its track than across it, and the glow is a little fainter that way — not drawn.
+   * How far, along the ground, the air that lights the horizon extends: the length over which a line of
+   * sight at the horizon gathers its scattered light before haze and curvature stop it. Thirty kilometres
+   * is a clear day's (SUPPOSED: it is what the visibility of the day makes of it).
    */
-  static readonly HORIZON_GLOW = 3e-3
+  static readonly HORIZON_PATH_KM = 30
 
-  /** The horizon glow of this eclipse, as a share of the day horizon: none until nearly total, all of it at totality. */
-  static horizonGlow(view: SolarEclipseView | undefined): number {
-    if (!view) return 0
-    const ramp = Math.min(1, Math.max(0, (view.obscuration - 0.99) / 0.01))
-    return SolarEclipse.HORIZON_GLOW * ramp * ramp * (3 - 2 * ramp)
+  /** How many azimuths the horizon's light is worked out for, evenly round: every 15°. */
+  static readonly HORIZON_AZIMUTHS = 24
+
+  /**
+   * How much of a normal day's light the sky at the horizon keeps, in each direction round it, 0..1 — the
+   * answer to an observer being in the Moon's shadow and not seeing the horizon over ground that is.
+   *
+   * The sky at the horizon is lit by the air along the line of sight, and the air a few tens of
+   * kilometres off is under a Sun that is less eclipsed than it is here: the Moon, seen from
+   * somewhere else, is somewhere else against it (parallax: 100 km along the ground moves it by 0.015°,
+   * more than half its own diameter's difference from the Sun's). So the horizon stays brighter than
+   * the zenith through the whole partial phase, as a real one does — and at totality, when the zenith
+   * has a ten-thousandth of its light, the horizon keeps a few thousandths and the colour of the air it
+   * crosses: the orange ring.
+   *
+   * Worked out by taking the air along each direction at distances drawn evenly from the exponential
+   * that light gathered along a sightline follows (HORIZON_PATH_KM), moving the Moon against the Sun by
+   * the parallax of that distance, and averaging what the eclipse there leaves of the Sun.
+   *
+   * @param sunFromMoon where the Sun's centre is from the Moon's, as OFFSET (see offsetOf)
+   * @param sunAltitudeDeg, sunAzimuthDeg where the Sun is: the parallax is the part of the ground
+   * @param moonDistanceKm of the Moon from the observer, which turns kilometres on the ground into angle
+   */
+  static horizonShare(
+    view: SolarEclipseView,
+    sunFromMoon: { upDeg: number; rightDeg: number },
+    sunAltitudeDeg: number,
+    sunAzimuthDeg: number,
+    moonDistanceKm: number
+  ): number[] {
+    const rad = Math.PI / 180
+    const SAMPLES = 16
+    const sinAltitude = Math.sin(sunAltitudeDeg * rad)
+    const degreesPerKm = (1 / moonDistanceKm) / rad
+    const distances = Array.from({ length: SAMPLES }, (_, j) => -SolarEclipse.HORIZON_PATH_KM * Math.log(1 - (j + 0.5) / SAMPLES))
+    return Array.from({ length: SolarEclipse.HORIZON_AZIMUTHS }, (_, k) => {
+      const azimuth = (k / SolarEclipse.HORIZON_AZIMUTHS) * 360
+      // Walking to this azimuth, in the sky's own two directions at the Sun: the ground's direction less its part along the line of sight.
+      const up = -sinAltitude * Math.cos((azimuth - sunAzimuthDeg) * rad)
+      const right = Math.sin((azimuth - sunAzimuthDeg) * rad)
+      let light = 0
+      for (const km of distances) {
+        const shift = km * degreesPerKm
+        const separation = Math.hypot(sunFromMoon.upDeg + shift * up, sunFromMoon.rightDeg + shift * right)
+        light += 1 - SolarEclipse.overlap(view.sunRadiusDeg, view.moonRadiusDeg, separation)
+      }
+      return light / SAMPLES
+    })
+  }
+
+  /** What `shares` leaves above what the zenith's own dimming already gives every direction. */
+  static horizonExcess(shares: readonly number[], skyFraction: number): number[] {
+    return shares.map(share => Math.max(0, share - skyFraction))
   }
 
   /** Share of the Sun's beam that reaches the observer: what the Moon leaves of the disc, plus the corona. */

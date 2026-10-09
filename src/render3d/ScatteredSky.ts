@@ -14,11 +14,12 @@ export interface ScatteredSkyState {
   /** The share of the Sun's light the sky is lit with, 1 when nothing is in front of it: an eclipse's (see SolarEclipse.skyFraction). */
   readonly sunLight?: number
   /**
-   * The glow all round the horizon at totality (see SolarEclipse.horizonGlow): `glow` is its brightness as a share of the
-   * day sky's horizon, 0 for none, and `tint` the colour of light that has crossed a hundred kilometres of air,
-   * as XYZ with a luminance of one.
+   * The light the horizon keeps beyond what the whole sky's dimming leaves it, at each of
+   * SolarEclipse.HORIZON_AZIMUTHS azimuths evenly round from north (see SolarEclipse.horizonShare): `excess` is its
+   * brightness as a share of the day sky's horizon, and `tint` the colour of light that has crossed tens
+   * of kilometres of air, as XYZ with a luminance of one.
    */
-  readonly umbra?: { readonly glow: number; readonly tint: readonly [number, number, number] }
+  readonly umbra?: { readonly excess: readonly number[]; readonly tint: readonly [number, number, number] }
   readonly moon: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number; readonly phaseAngleDeg: number }
 }
 
@@ -115,6 +116,7 @@ export class ScatteredSky {
         uMoonScale: { value: 0 },
         uSunScale: { value: 1 },
         uUmbraGlow: { value: 0 },
+        uUmbraExcess: { value: new Array<number>(ScatteredSky.UMBRA_AZIMUTHS).fill(0) },
         uUmbraTint: { value: new Vector3(0, 1, 0) },
         uUmbraRefUv: { value: new Vector2(0.5, 0.5) },
         uObserverRadius: { value: AtmosphereProfile.GROUND_RADIUS_M + 2 },
@@ -144,6 +146,7 @@ export class ScatteredSky {
         uniform float uMoonScale;
         uniform float uSunScale;
         uniform float uUmbraGlow;
+        uniform float uUmbraExcess[${ScatteredSky.UMBRA_AZIMUTHS}];
         uniform vec3 uUmbraTint;
         uniform vec2 uUmbraRefUv;
         uniform float uObserverRadius;
@@ -207,7 +210,13 @@ export class ScatteredSky {
             // light that comes from lit air beyond the Moon's shadow, a hundred kilometres off.
             vec4 reference = fetchView(uSunView, uUmbraRefUv);
             float glowProfile = exp(-degrees(asin(clamp(dir.y, 0.0, 1.0))) / UMBRA_GLOW_SCALE_DEG);
-            light += uUmbraGlow * glowProfile * vec4(reference.y * uUmbraTint, reference.w);
+            // Round the horizon by azimuth: north is -z and east +x (see azimuthVector).
+            float turns = fract(atan(dir.x, -dir.z) / (2.0 * PI));
+            float at = turns * float(${ScatteredSky.UMBRA_AZIMUTHS});
+            int below = int(floor(at));
+            int above = below + 1 == ${ScatteredSky.UMBRA_AZIMUTHS} ? 0 : below + 1;
+            float excess = mix(uUmbraExcess[below], uUmbraExcess[above], fract(at));
+            light += excess * glowProfile * vec4(reference.y * uUmbraTint, reference.w);
           }
           if (dir.y > 0.0) {
             float sinZenith2 = 1.0 - dir.y * dir.y;
@@ -307,9 +316,10 @@ export class ScatteredSky {
     uniforms.uMoonScale.value = 10 ** (-0.4 * (state.moon.magnitude - ScatteredSky.SUN_MAGNITUDE))
     const sunScale = state.sunLight ?? 1
     uniforms.uSunScale.value = sunScale
-    const glow = state.umbra?.glow ?? 0
+    const glow = state.umbra ? state.umbra.excess.reduce((sum, value) => sum + value, 0) : 0
     uniforms.uUmbraGlow.value = glow
     if (state.umbra) {
+      uniforms.uUmbraExcess.value = [...state.umbra.excess]
       uniforms.uUmbraTint.value.set(...state.umbra.tint)
       const reference = ScatteredSky.umbraReferenceUv(state)
       uniforms.uUmbraRefUv.value.set(reference.u, reference.v)
@@ -338,6 +348,18 @@ export class ScatteredSky {
 
   private drawnSunScale = 1
   private drawnGlow = 0
+
+  /** The azimuths the umbra's excess is stated at (see SolarEclipse.HORIZON_AZIMUTHS). */
+  static readonly UMBRA_AZIMUTHS = 24
+
+  /** The excess at this azimuth, degrees from north, linear between the stated ones round the ring. */
+  private static excessAt(excess: readonly number[], azimuthDeg: number): number {
+    const n = excess.length
+    const at = ((((azimuthDeg / 360) * n) % n) + n) % n
+    const below = Math.floor(at)
+    const fraction = at - below
+    return excess[below] * (1 - fraction) + excess[(below + 1) % n] * fraction
+  }
 
   /** How high, in degrees, the horizon's glow at totality reaches before it is a third of what it is on the horizon. */
   static readonly UMBRA_GLOW_SCALE_DEG = 5
@@ -412,7 +434,7 @@ export class ScatteredSky {
     const sunScale = state.sunLight ?? 1
     const umbra = state.umbra
     let umbraReference: number[] | undefined
-    if (umbra && umbra.glow > 0) {
+    if (umbra && umbra.excess.some(value => value > 0)) {
       const uv = ScatteredSky.umbraReferenceUv(state)
       umbraReference = ScatteredSky.bilinear(sun, uv.u, uv.v)
     }
@@ -427,7 +449,9 @@ export class ScatteredSky {
       const glow = withAirglow && altitudeDeg > 0 ? ScatteredSky.airglowFactor(altitudeDeg) : 0
       const towns = altitudeDeg > 0 ? NightSkyBrightness.artificialShape(altitudeDeg) : 0
       // The ring of lit air beyond the Moon's shadow, at totality: the day sky's horizon, three thousandths of it, the colour of a long path of air.
-      const umbraGlow = umbraReference && umbra && altitudeDeg > 0 ? umbra.glow * Math.exp(-altitudeDeg / ScatteredSky.UMBRA_GLOW_SCALE_DEG) : 0
+      const umbraGlow = umbraReference && umbra && altitudeDeg > 0
+        ? ScatteredSky.excessAt(umbra.excess, azimuthDeg) * Math.exp(-altitudeDeg / ScatteredSky.UMBRA_GLOW_SCALE_DEG)
+        : 0
       const fromUmbra = (c: number): number => !umbraReference || !umbra ? 0 : umbraGlow * (c < 3 ? umbraReference[1] * umbra.tint[c] : umbraReference[3])
       return [0, 1, 2, 3].map(c => sunScale * s[c] + moonScale * m[c] + airglow[c] * glow + artificial[c] * towns + fromUmbra(c)) as [number, number, number, number]
     }

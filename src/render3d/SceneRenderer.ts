@@ -763,6 +763,8 @@ export interface SceneAstronomy {
    * the observer. This tells the renderer how to cut the disc and when to show the corona.
    */
   eclipse?: SolarEclipseView & {
+    /** The light the horizon keeps in each direction round it (see SolarEclipse.horizonShare). */
+    horizonShare?: number[]
     /** The Moon's edge as the observer sees it, when the eclipse is close to total and the relief of the Moon has arrived (see LunarLimb). */
     limb?: LimbProfile
   }
@@ -3055,7 +3057,15 @@ export class SceneRenderer {
       ? [(0.4124 * r + 0.3576 * g + 0.1805 * b) / y, 1, (0.0193 * r + 0.1192 * g + 0.9505 * b) / y]
       : [0.9505, 1, 1.089]
   }
-  private static readonly UMBRA_PATH_M = 100_000
+  private static readonly UMBRA_PATH_M = 80_000
+
+  /** What the horizon keeps beyond the sky's own dimming, round the ring — nothing worth stating until it is more than a thousandth. */
+  private umbraOf(astronomy: SceneAstronomy): { excess: number[]; tint: [number, number, number] } | undefined {
+    const shares = astronomy.eclipse?.horizonShare
+    if (!shares) return undefined
+    const excess = SolarEclipse.horizonExcess(shares, SolarEclipse.skyFraction(astronomy.eclipse))
+    return excess.some(value => value > 1e-4) ? { excess, tint: this.umbraTint() } : undefined
+  }
 
   /** The scattered sky's view of this astronomy: the eye's height above sea level, the Sun and the Moon. */
   private scatteredSkyState(astronomy: SceneAstronomy) {
@@ -3065,9 +3075,7 @@ export class SceneRenderer {
       sun: { altitudeDeg: astronomy.sun.altitudeDeg, azimuthDeg: astronomy.sun.azimuthDeg, magnitude: astronomy.sun.magnitude },
       // The sky keeps more of its light than the beam does: the air beyond the Moon's shadow still lights it.
       sunLight: SolarEclipse.skyFraction(astronomy.eclipse),
-      umbra: SolarEclipse.horizonGlow(astronomy.eclipse) > 0
-        ? { glow: SolarEclipse.horizonGlow(astronomy.eclipse), tint: this.umbraTint() }
-        : undefined,
+      umbra: this.umbraOf(astronomy),
       moon: {
         altitudeDeg: astronomy.moon.altitudeDeg,
         azimuthDeg: astronomy.moon.azimuthDeg,

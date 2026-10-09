@@ -1546,13 +1546,20 @@ export class SceneElement extends HTMLElement {
     // Worked out for every date and place, never declared: the ephemeris is only asked once the two
     // discs are within a degree of each other, which is a handful of minutes in a year.
     let eclipse: SceneAstronomy["eclipse"] = SolarEclipse.separationOf(sunPosition, moonPosition) < 1 ? SolarEclipse.viewAt(date, observer) : undefined
-    // Near totality the edge of the Moon is not a circle: its valleys are Baily's beads. Asked for only then.
-    if (eclipse && eclipse.obscuration > SceneElement.LIMB_FROM_OBSCURATION) {
-      const limb = this.limbFor(date, observer)
-      if (limb) {
-        const uncovered = LunarLimb.uncoveredFraction(limb, eclipse.sunRadiusDeg,
-          SolarEclipse.offsetOf(sunPosition, moonPosition, eclipse.separationDeg))
-        eclipse = { ...eclipse, obscuration: 1 - uncovered, limb }
+    if (eclipse) {
+      const sunFromMoon = SolarEclipse.offsetOf(sunPosition, moonPosition, eclipse.separationDeg)
+      // Near totality the edge of the Moon is not a circle: its valleys are Baily's beads. Asked for only then.
+      if (eclipse.obscuration > SceneElement.LIMB_FROM_OBSCURATION) {
+        const limb = this.limbFor(date, observer)
+        if (limb) {
+          eclipse = { ...eclipse, obscuration: 1 - LunarLimb.uncoveredFraction(limb, eclipse.sunRadiusDeg, sunFromMoon), limb }
+        }
+      }
+      // And the horizon, which sees the eclipse from the ground round it (twenty microseconds).
+      eclipse = {
+        ...eclipse,
+        horizonShare: SolarEclipse.horizonShare(eclipse, sunFromMoon, sunPosition.altitudeDeg, sunPosition.azimuthDeg,
+          LunarDisc.distanceKm(date, observer))
       }
     }
     // What reaches the observer is what the Moon leaves of the Sun's disc (plus the corona).

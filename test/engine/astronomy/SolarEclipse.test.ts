@@ -106,21 +106,35 @@ describe("the eclipse of a day, for a sky line", () => {
   })
 })
 
-describe("the glow all round the horizon at totality", () => {
-  const view = (obscuration: number) => ({ sunRadiusDeg: 0.2666, moonRadiusDeg: 0.27, separationDeg: 0, obscuration, magnitude: 1 })
+describe("the light the horizon keeps", () => {
+  const SUN = 0.2629
+  const MOON = 0.2704
+  const view = (separation: number) => ({
+    sunRadiusDeg: SUN, moonRadiusDeg: MOON, separationDeg: separation, obscuration: SolarEclipse.overlap(SUN, MOON, separation), magnitude: 1
+  })
+  const sharesAt = (separation: number) => SolarEclipse.horizonShare(view(separation), { upDeg: separation, rightDeg: 0 }, 52, 146, 383_000)
+  const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length
 
-  it("is nothing without an eclipse and nothing until nearly total", () => {
-    expect(SolarEclipse.horizonGlow(undefined)).toBe(0)
-    expect(SolarEclipse.horizonGlow(view(0.5))).toBe(0)
-    expect(SolarEclipse.horizonGlow(view(0.99))).toBe(0)
+  it("is what a partial eclipse leaves everywhere, to within a few per cent: the Moon is the same size seen from ground a hundred kilometres off", () => {
+    for (const separation of [0.1, 0.2, 0.3]) {
+      const shares = sharesAt(separation)
+      expect(shares).toHaveLength(SolarEclipse.HORIZON_AZIMUTHS)
+      for (const share of shares) expect(share).toBeCloseTo(1 - view(separation).obscuration, 1)
+    }
   })
 
-  it("rises smoothly to its whole at totality, and is a hundred times the zenith's share of the sky", () => {
-    expect(SolarEclipse.horizonGlow(view(0.995))).toBeGreaterThan(0)
-    expect(SolarEclipse.horizonGlow(view(0.995))).toBeLessThan(SolarEclipse.horizonGlow(view(0.999)))
-    expect(SolarEclipse.horizonGlow(view(1))).toBe(SolarEclipse.HORIZON_GLOW)
-    expect(SolarEclipse.HORIZON_GLOW / SolarEclipse.UMBRA_SKY_LIGHT).toBeGreaterThan(10)
-    expect(SolarEclipse.HORIZON_GLOW / SolarEclipse.UMBRA_SKY_LIGHT).toBeLessThan(100)
+  it("is all of the day's where there is no eclipse", () => {
+    for (const share of sharesAt(0.7)) expect(share).toBeCloseTo(1, 6)
+  })
+
+  it("is a thousandth or so at totality, and not the same all round: the shadow is longer along one way than across", () => {
+    const shares = sharesAt(0)
+    expect(mean(shares)).toBeGreaterThan(2e-4)
+    expect(mean(shares)).toBeLessThan(5e-3)
+    expect(Math.max(...shares) / Math.min(...shares)).toBeGreaterThan(1.5)
+  })
+
+  it("keeps only what the whole sky's own dimming has not already given", () => {
+    expect(SolarEclipse.horizonExcess([0.5, 1e-4, 1e-3], 1e-4)).toEqual([0.4999, 0, 9e-4].map(value => expect.closeTo(value, 8)))
   })
 })
-
