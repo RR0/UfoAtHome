@@ -48,15 +48,16 @@ export class SolarEclipse {
    */
   static readonly CORONA_LIGHT = 1.5e-6
   /**
-   * What the sky keeps at totality, as a share of its ordinary light: a ten-thousandth. A sky lit by
-   * the Sun's beam alone would go to the millionth, and it does not, because the Moon's shadow is a
-   * couple of hundred kilometres across and the air beyond its edge, lit as usual, scatters light
-   * into it from all round the horizon. Photometry of totality skies (Winkler et al. on this very
-   * eclipse of 1999) puts the zenith between a thousandth and a hundred-thousandth of a midday
-   * sky's, the horizon brighter; this takes a value in that range (SUPPOSED). The glow's colour, the
-   * orange ring on the horizon, is not drawn yet.
+   * What the zenith keeps at totality, cd/m²: 0.7. A sky lit by the Sun's beam alone would go to the millionth,
+   * and it does not, because the Moon's shadow is a hundred kilometres across and the air beyond its edge, lit as
+   * usual, scatters light into it. MEASURED: Sky Quality Meters read 12.85 (Strickling, Jackson Hole, 2017), 12.88 (Bangka
+   * Island, 2016, Nanyang Technological University's repository) and 13.0 to 13.3 magnitudes per square arcsecond
+   * (Birriel et al., 2024, JAAVSO) at the zenith at mid-totality: 0.5 to 0.8 cd/m² (L = 1.08·10⁵·10^(−0.4 m)),
+   * about a ten-thousandth of a midday sky's (Shaw et al., SPIE 12214, 2022: "four orders of magnitude").
+   * In absolute terms and not as a share, because that is what was measured: a share of this scene's own day
+   * zenith, which its tables give.
    */
-  static readonly UMBRA_SKY_LIGHT = 1e-4
+  static readonly UMBRA_ZENITH_CD_M2 = 0.7
 
   /**
    * The eclipse seen from here within half a day of this date, if there is one. Unlike viewAt, which
@@ -85,6 +86,10 @@ export class SolarEclipse {
    * is a clear day's (SUPPOSED: it is what the visibility of the day makes of it).
    */
   static readonly HORIZON_PATH_KM = 30
+  // CHECKED against Strickling's Sky Quality Meter readings at Jackson Hole at mid-totality in 2017 (astro-geo-gis.com, one observer): with the zenith
+  // set at its measured value, 15° up the model is within 1.3 of the four directions' mean (1.97 cd/m² against 2.6) and 45° up within 1.4
+  // (0.9 against 1.24) — as close as Shaw et al.'s own model (a factor of 2). The azimuthal pattern of that one observer (south darkest, where this
+  // has it brightest) is not reproduced; it may be his sky, and is not fitted.
 
   /** How many azimuths the horizon's light is worked out for, evenly round: every 15°. */
   static readonly HORIZON_AZIMUTHS = 24
@@ -136,21 +141,10 @@ export class SolarEclipse {
     })
   }
 
-  /** What `shares` leaves above what the zenith's own dimming already gives every direction. */
-  static horizonExcess(shares: readonly number[], skyFraction: number): number[] {
-    return shares.map(share => Math.max(0, share - skyFraction))
-  }
-
   /** Share of the Sun's beam that reaches the observer: what the Moon leaves of the disc, plus the corona. */
   static beamFraction(view: SolarEclipseView | undefined): number {
     if (!view) return 1
     return Math.max(1 - view.obscuration, SolarEclipse.CORONA_LIGHT)
-  }
-
-  /** Share of the sky's ordinary daylight that remains: the beam's share, but never less than what the air outside the shadow sends in. */
-  static skyFraction(view: SolarEclipseView | undefined): number {
-    if (!view) return 1
-    return Math.max(1 - view.obscuration, SolarEclipse.UMBRA_SKY_LIGHT)
   }
 
   /**

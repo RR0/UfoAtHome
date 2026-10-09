@@ -66,15 +66,17 @@ describe("the light an eclipse leaves", () => {
 
   it("is all of it without an eclipse, and what the Moon leaves with one", () => {
     expect(SolarEclipse.beamFraction(undefined)).toBe(1)
-    expect(SolarEclipse.skyFraction(undefined)).toBe(1)
     expect(SolarEclipse.beamFraction(view(0.75))).toBeCloseTo(0.25, 10)
-    expect(SolarEclipse.skyFraction(view(0.75))).toBeCloseTo(0.25, 10)
   })
 
-  it("never falls below the corona's for the beam, nor below what the air outside the shadow sends for the sky", () => {
+  it("never falls below the corona's for the beam", () => {
     expect(SolarEclipse.beamFraction(view(1))).toBe(SolarEclipse.CORONA_LIGHT)
-    expect(SolarEclipse.skyFraction(view(1))).toBe(SolarEclipse.UMBRA_SKY_LIGHT)
-    expect(SolarEclipse.skyFraction(view(1))).toBeGreaterThan(SolarEclipse.beamFraction(view(1)))
+  })
+
+  it("keeps the zenith at about a magnitude of 13 per square arcsecond at totality, as it was measured", () => {
+    const magnitude = -2.5 * Math.log10(SolarEclipse.UMBRA_ZENITH_CD_M2 / 1.08e5)
+    expect(magnitude).toBeGreaterThan(12.8)
+    expect(magnitude).toBeLessThan(13.3)
   })
 
   it("measures the angle between two altitudes and azimuths", () => {
@@ -132,9 +134,5 @@ describe("the light the horizon keeps", () => {
     expect(mean(shares)).toBeGreaterThan(2e-4)
     expect(mean(shares)).toBeLessThan(5e-3)
     expect(Math.max(...shares) / Math.min(...shares)).toBeGreaterThan(1.5)
-  })
-
-  it("keeps only what the whole sky's own dimming has not already given", () => {
-    expect(SolarEclipse.horizonExcess([0.5, 1e-4, 1e-3], 1e-4)).toEqual([0.4999, 0, 9e-4].map(value => expect.closeTo(value, 8)))
   })
 })

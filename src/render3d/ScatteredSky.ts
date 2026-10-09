@@ -11,15 +11,21 @@ export interface ScatteredSkyState {
    * Sighting.lightPollution); undefined for a natural sky. */
   readonly lightPollution?: number
   readonly sun: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number }
-  /** The share of the Sun's light the sky is lit with, 1 when nothing is in front of it: an eclipse's (see SolarEclipse.skyFraction). */
+  /** The share of the Sun's light the sky is lit with by the beam itself, 1 when nothing is in front of it: an eclipse's (see SolarEclipse.beamFraction). */
   readonly sunLight?: number
   /**
-   * The light the horizon keeps beyond what the whole sky's dimming leaves it, at each of
-   * SolarEclipse.HORIZON_AZIMUTHS azimuths evenly round from north (see SolarEclipse.horizonShare): `excess` is its
-   * brightness as a share of the day sky's horizon, and `tint` the colour of light that has crossed tens
-   * of kilometres of air, as XYZ with a luminance of one.
+   * What the zenith keeps at totality whatever the beam says, cd/m²: the light of the air beyond the Moon's shadow (see
+   * SolarEclipse.UMBRA_ZENITH_CD_M2). In absolute terms because it is a measurement; the share of this sky's own day
+   * zenith that comes to is worked out from its tables.
    */
-  readonly umbra?: { readonly excess: readonly number[]; readonly tint: readonly [number, number, number] }
+  readonly zenithFloorCdM2?: number
+  /**
+   * The light the horizon keeps at each of SolarEclipse.HORIZON_AZIMUTHS azimuths evenly round from north (see
+   * SolarEclipse.horizonShare), as a share of the day sky's horizon: what the sky keeps all over already (see
+   * zenithFloorCdM2) is taken off it, and what is left is added as a glow of its own, of the colour `tint` — light
+   * that has crossed tens of kilometres of air, as XYZ with a luminance of one.
+   */
+  readonly umbra?: { readonly share: readonly number[]; readonly tint: readonly [number, number, number] }
   readonly moon: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number; readonly phaseAngleDeg: number }
 }
 
@@ -314,12 +320,13 @@ export class ScatteredSky {
     uniforms.uSunAzimuth.value.copy(ScatteredSky.azimuthVector(state.sun.azimuthDeg))
     uniforms.uMoonAzimuth.value.copy(ScatteredSky.azimuthVector(state.moon.azimuthDeg))
     uniforms.uMoonScale.value = 10 ** (-0.4 * (state.moon.magnitude - ScatteredSky.SUN_MAGNITUDE))
-    const sunScale = state.sunLight ?? 1
+    const sunScale = this.effectiveSunScale(state)
     uniforms.uSunScale.value = sunScale
-    const glow = state.umbra ? state.umbra.excess.reduce((sum, value) => sum + value, 0) : 0
+    const excess = ScatteredSky.excessOf(state, sunScale)
+    const glow = excess.reduce((sum, value) => sum + value, 0)
     uniforms.uUmbraGlow.value = glow
     if (state.umbra) {
-      uniforms.uUmbraExcess.value = [...state.umbra.excess]
+      uniforms.uUmbraExcess.value = excess
       uniforms.uUmbraTint.value.set(...state.umbra.tint)
       const reference = ScatteredSky.umbraReferenceUv(state)
       uniforms.uUmbraRefUv.value.set(reference.u, reference.v)
@@ -348,6 +355,26 @@ export class ScatteredSky {
 
   private drawnSunScale = 1
   private drawnGlow = 0
+  /** The day sky's own zenith under this Sun, cd/m², once the views are known: what an absolute floor is a share of. */
+  private dayZenithY?: number
+
+  /**
+   * The share of the Sun's light the whole sky is lit with: the beam's, or at least what the zenith keeps at
+   * totality (a measurement in cd/m², so a share of THIS sky's day zenith, not of an assumed one).
+   */
+  private effectiveSunScale(state: ScatteredSkyState): number {
+    const beam = state.sunLight ?? 1
+    if (!state.zenithFloorCdM2) return beam
+    return Math.max(beam, state.zenithFloorCdM2 / (this.dayZenithY ?? ScatteredSky.ASSUMED_DAY_ZENITH_CD_M2))
+  }
+
+  /** Before the views say, a clear day's zenith with the Sun well up. */
+  private static readonly ASSUMED_DAY_ZENITH_CD_M2 = 3000
+
+  /** What the horizon keeps beyond the whole sky's own light, by azimuth (see ScatteredSkyState.umbra). */
+  private static excessOf(state: ScatteredSkyState, sunScale: number): number[] {
+    return state.umbra ? state.umbra.share.map(share => Math.max(0, share - sunScale)) : []
+  }
 
   /** The azimuths the umbra's excess is stated at (see SolarEclipse.HORIZON_AZIMUTHS). */
   static readonly UMBRA_AZIMUTHS = 24
@@ -431,8 +458,11 @@ export class ScatteredSky {
   private adaptFromViews(sun: Float32Array, moon: Float32Array, state: ScatteredSkyState): void {
     this.views = { sun, moon }
     const moonScale = 10 ** (-0.4 * (state.moon.magnitude - ScatteredSky.SUN_MAGNITUDE))
-    const sunScale = state.sunLight ?? 1
-    const umbra = state.umbra
+    // What the zenith of this Sun's day sky is: what an absolute floor at totality is a share of.
+    const zenith = AtmosphereTables.skyViewUv(state.altitudeM, 0, 0)
+    this.dayZenithY = ScatteredSky.bilinear(sun, zenith.u, zenith.v)[1]
+    const sunScale = this.effectiveSunScale(state)
+    const umbra = state.umbra ? { excess: ScatteredSky.excessOf(state, sunScale), tint: state.umbra.tint } : undefined
     let umbraReference: number[] | undefined
     if (umbra && umbra.excess.some(value => value > 0)) {
       const uv = ScatteredSky.umbraReferenceUv(state)

@@ -3060,11 +3060,10 @@ export class SceneRenderer {
   private static readonly UMBRA_PATH_M = 80_000
 
   /** What the horizon keeps beyond the sky's own dimming, round the ring — nothing worth stating until it is more than a thousandth. */
-  private umbraOf(astronomy: SceneAstronomy): { excess: number[]; tint: [number, number, number] } | undefined {
+  private umbraOf(astronomy: SceneAstronomy): { share: number[]; tint: [number, number, number] } | undefined {
     const shares = astronomy.eclipse?.horizonShare
-    if (!shares) return undefined
-    const excess = SolarEclipse.horizonExcess(shares, SolarEclipse.skyFraction(astronomy.eclipse))
-    return excess.some(value => value > 1e-4) ? { excess, tint: this.umbraTint() } : undefined
+    // Under a tenth of the day's it is the beam's own dimming that decides, which the sky has all over.
+    return shares && Math.max(...shares) < 0.1 ? { share: shares, tint: this.umbraTint() } : undefined
   }
 
   /** The scattered sky's view of this astronomy: the eye's height above sea level, the Sun and the Moon. */
@@ -3073,8 +3072,9 @@ export class SceneRenderer {
       altitudeM: this.siteElevationM + this.observerElevationM + 1.6,
       lightPollution: this.lightPollution,
       sun: { altitudeDeg: astronomy.sun.altitudeDeg, azimuthDeg: astronomy.sun.azimuthDeg, magnitude: astronomy.sun.magnitude },
+      sunLight: SolarEclipse.beamFraction(astronomy.eclipse),
       // The sky keeps more of its light than the beam does: the air beyond the Moon's shadow still lights it.
-      sunLight: SolarEclipse.skyFraction(astronomy.eclipse),
+      zenithFloorCdM2: astronomy.eclipse ? SolarEclipse.UMBRA_ZENITH_CD_M2 : undefined,
       umbra: this.umbraOf(astronomy),
       moon: {
         altitudeDeg: astronomy.moon.altitudeDeg,
