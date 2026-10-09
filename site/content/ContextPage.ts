@@ -217,8 +217,8 @@ export class ContextPage implements SitePage {
     <p>Something can also be held <em>in front of</em> the instrument. A solar filter — eclipse glasses, or
       the film that goes over a lens — cuts everything by a hundred-thousandfold: the sky goes black, no
       star is drawn, and the Sun is left alone, which is the only way the shape of a partly eclipsed Sun
-      can be seen at all (<a href="/demos/sky/#eclipse-partial">a partial eclipse through one</a>).
-      It changes no angle, only the light; the glasses come off for totality.</p>
+      can be seen at all (<a href="/demos/sky/#eclipse">the partial phases of 1999, through one</a>).
+      It changes no angle, only the light, and it is put on and taken off along the recording: the glasses come off for totality.</p>
 
     <h2 id="pictures">A picture of the place</h2>
     <p>Everything above is computed, and a reader looking at the result has no way to tell a faithful
@@ -441,8 +441,8 @@ export class ContextPage implements SitePage {
     <p>On peut aussi tenir quelque chose <em>devant</em> l'instrument. Un filtre solaire — lunettes d'éclipse,
       ou film posé sur un objectif — réduit tout d'un facteur 100 000 : le ciel devient noir, aucune étoile
       n'est dessinée, et il ne reste que le Soleil, ce qui est la seule façon de voir la forme d'un Soleil
-      en partie éclipsé (<a href="/demos/sky/#eclipse-partial">une éclipse partielle à travers l'un d'eux</a>).
-      Il ne change aucun angle, seulement la lumière ; les lunettes s'ôtent pour la totalité.</p>
+      en partie éclipsé (<a href="/demos/sky/#eclipse">les phases partielles de 1999, à travers l'un d'eux</a>).
+      Il ne change aucun angle, seulement la lumière, et se met et s'ôte le long de l'enregistrement : les lunettes s'ôtent pour la totalité.</p>
 
     <h2 id="pictures">Une photo des lieux</h2>
     <p>Tout ce qui précède est calculé, et un lecteur devant le résultat n'a aucun moyen de
@@ -664,8 +664,8 @@ export class ContextPage implements SitePage {
     <p>También se puede sostener algo <em>delante</em> del instrumento. Un filtro solar — gafas de eclipse, o la
       película que se pone sobre un objetivo — reduce todo cien mil veces: el cielo se vuelve negro, no se
       dibuja ninguna estrella, y solo queda el Sol, que es la única manera de ver la forma de un Sol
-      parcialmente eclipsado (<a href="/demos/sky/#eclipse-partial">un eclipse parcial a través de uno</a>).
-      No cambia ningún ángulo, solo la luz; las gafas se quitan para la totalidad.</p>
+      parcialmente eclipsado (<a href="/demos/sky/#eclipse">las fases parciales de 1999, a través de uno</a>).
+      No cambia ningún ángulo, solo la luz, y se pone y se quita a lo largo de la grabación: las gafas se quitan para la totalidad.</p>
 
     <h2 id="pictures">Una foto del lugar</h2>
     <p>Todo lo anterior está calculado, y un lector que mira el resultado no tiene forma de
@@ -885,8 +885,8 @@ export class ContextPage implements SitePage {
     <p>Si può anche tenere qualcosa <em>davanti</em> allo strumento. Un filtro solare — occhiali da eclissi, o la
       pellicola che si mette su un obiettivo — riduce tutto di centomila volte: il cielo diventa nero, nessuna
       stella è disegnata, e resta solo il Sole, che è l'unico modo di vedere la forma di un Sole parzialmente
-      eclissato (<a href="/demos/sky/#eclipse-partial">un'eclissi parziale attraverso uno</a>).
-      Non cambia alcun angolo, solo la luce; gli occhiali si tolgono per la totalità.</p>
+      eclissato (<a href="/demos/sky/#eclipse">le fasi parziali del 1999, attraverso uno</a>).
+      Non cambia alcun angolo, solo la luce, e si mette e si toglie lungo la registrazione: gli occhiali si tolgono per la totalità.</p>
 
     <h2 id="pictures">Una foto del luogo</h2>
     <p>Tutto ciò che precede è calcolato, e un lettore che guarda il risultato non ha modo di

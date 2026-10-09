@@ -75,6 +75,17 @@ export interface ObserverPose {
    * focused close that shows it sharp says it was NOT.
    */
   focusDistanceM?: number
+  /**
+   * What was held in front of the instrument — a FILTERS id, a solar filter for an eclipse. Absent
+   * means none, which is every recording made before this existed.
+   *
+   * On the POSE, like the aperture, because it is a fact about this moment of the observation and
+   * not about the device: eclipse glasses are put on for the partial phases and taken off for the
+   * two minutes of totality, and a recording that keeps it can say exactly when. HELD between
+   * keyframes, not blended — nobody wears half a pair of glasses — and so to say "taken off" a pose
+   * states "none" outright, which is the one case where that id is written down.
+   */
+  filter?: string
 }
 
 export interface ObserverKeyframe {
@@ -116,7 +127,8 @@ export function lerpObserverPose(a: ObserverPose, b: ObserverPose, t: number): O
     // Held, not blended — see ObserverPose's own doc comment: a camera setting is discrete, and a
     // lens on its way from f/2 to f/16 was never really at f/7.3.
     fNumber: a.fNumber,
-    focusDistanceM: a.focusDistanceM
+    focusDistanceM: a.focusDistanceM,
+    filter: a.filter
   }
 }
 

@@ -6228,17 +6228,27 @@ describe("the sky under an observation being edited", () => {
     typeInto(element, "lng", lng)
   }
 
-  it("puts a solar filter in front of the instrument, and keeps it in the recording", async () => {
+  it("puts a solar filter on at the playhead, takes it off later, and says so only where it takes something off", async () => {
     const element = mount()
     const select = element.shadowRoot!.getElementById("filter") as HTMLSelectElement
+    const choose = (value: string) => {
+      select.value = value
+      select.dispatchEvent(new Event("change"))
+    }
+    const poses = () => element.sightingData!.observerTrack!.keyframes
+    typeInto(element, "durationSeconds", "60")
     expect([...select.options].map(option => option.value)).toEqual(["none", "solar-visual", "solar-photo"])
     expect(select.value).toBe("none")
-    select.value = "solar-visual"
-    select.dispatchEvent(new Event("change"))
-    expect(element.sightingData?.filter).toBe("solar-visual")
-    select.value = "none"
-    select.dispatchEvent(new Event("change"))
-    expect(element.sightingData?.filter).toBeUndefined()
+    // Choosing none where nothing was on says nothing, and leaves no keyframe.
+    choose("none")
+    expect(poses().filter(keyframe => keyframe.pose.filter !== undefined)).toHaveLength(0)
+    choose("solar-visual")
+    expect(poses().find(keyframe => keyframe.t === 0)?.pose.filter).toBe("solar-visual")
+    // Later on the timeline, the glasses come off: that keyframe states "none" outright.
+    ;(element as unknown as { ufoElement: { currentTime: number } }).ufoElement.currentTime = 5000
+    choose("none")
+    expect(poses().find(keyframe => keyframe.t === 5000)?.pose.filter).toBe("none")
+    expect(poses().find(keyframe => keyframe.t === 0)?.pose.filter).toBe("solar-visual")
   })
 
   it("names a total eclipse, and its two minutes, without anyone declaring it", async () => {

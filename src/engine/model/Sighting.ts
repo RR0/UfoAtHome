@@ -19,8 +19,6 @@ import type { RecordingSource } from "./RecordingSource.js"
 import type { SceneReference } from "./Reference.js"
 import { Instruments } from "../instrument/Instrument.js"
 import type { Instrument } from "../instrument/Instrument.js"
-import { Filters } from "../instrument/Filter.js"
-import type { Filter } from "../instrument/Filter.js"
 import { Provenance } from "../persistence/Provenance.js"
 import type { RecordingIssue } from "../persistence/RecordingIssue.js"
 import type { InterpretationJson } from "../interpretation/Interpretation.js"
@@ -401,10 +399,7 @@ export class Sighting {
     /** Lines, places and outlines an investigator drew over the place and the file imported — see
      * InvestigatorTrace. Not readonly, same "reassigned wholesale on edit" reasoning as decor
      * above. Empty for every recording that carries none. */
-    public traces: InvestigatorTrace[] = [],
-    /** Which FILTERS entry was held in front of the instrument — a solar filter, for an eclipse. Absent
-     * means none, which is every recording made before this existed. */
-    public filterId?: string
+    public traces: InvestigatorTrace[] = []
   ) {
   }
 
@@ -535,11 +530,6 @@ export class Sighting {
    * absent id falls back to the naked eye (see Instruments.byId). */
   get instrument(): Instrument {
     return Instruments.byId(this.instrumentId)
-  }
-
-  /** The filter in front of it, resolved — never undefined: an absent or unknown id is none (see Filters.byId). */
-  get filter(): Filter {
-    return Filters.byId(this.filterId)
   }
 
   static create(time?: SightingTime, place?: SightingLocation[], observer?: People): Sighting {

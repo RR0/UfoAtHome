@@ -25,6 +25,7 @@ import {
   TRACKED_PLANETS
 } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
+import { Filters } from "../engine/instrument/Filter.js"
 import { LunarDisc } from "../engine/astronomy/LunarDisc.js"
 import { SolarEclipse } from "../engine/astronomy/SolarEclipse.js"
 import { geoToLocalMeters } from "../render3d/terrain/GeoProjection.js"
@@ -1443,7 +1444,7 @@ export class SceneElement extends HTMLElement {
       // A film or a sensor — anything with a grain — records the sky; an eye sees it (see
       // ScatteredSky.setInstrument).
       sighting.instrument.detailUm !== undefined,
-      sighting.filter.opticalDensity
+      Filters.byId(pose?.filter).opticalDensity
     )
     // And how the picture answers it: a film's own curve at the exposure it was given, not an
     // eye's adapting response (see RecordingMedium).

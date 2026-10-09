@@ -1740,13 +1740,9 @@ export class SightingEditorElement extends HTMLElement {
     this.headingInput.addEventListener("focus", () => this.sceneElement.setCompassForced(true))
     this.headingInput.addEventListener("input", () => this.refreshHeadingPoint())
     this.headingInput.addEventListener("blur", () => this.sceneElement.setCompassForced(false))
-    // A filter changes no angle and no shape: only what the instrument lets through of the light, so
-    // the scene is told and nothing else has to be redrawn (see SceneElement, which pushes it each tick).
-    this.filterSelect.addEventListener("change", () => {
-      this.ufoElement.sighting.filterId = this.filterSelect.value === Filters.NONE.id ? undefined : this.filterSelect.value
-      this.ufoElement.refresh()
-      this.dispatchEvent(new CustomEvent("sightingchange"))
-    })
+    // A filter is a pose field like the aperture (see ObserverPose.filter): put on or taken off at
+    // the playhead, and held until the next keyframe that says otherwise.
+    this.filterSelect.addEventListener("change", () => this.updateObserver())
     this.instrumentSelect.addEventListener("change", () => {
       const previous = this.ufoElement.sighting.instrument
       this.ufoElement.sighting.instrumentId = this.instrumentSelect.value
@@ -2949,6 +2945,13 @@ export class SightingEditorElement extends HTMLElement {
         ? Instruments.fieldOfViewDegAt(instrument, stated)
         : stated) ?? this.currentFovDeg()
     const fNumber = this.numberOrUndefined(this.fNumberInput.value)
+    // "None" is only written down where it TAKES something off: after a filter, a pose that says
+    // nothing would be held on under it. Anywhere else it is what every recording already says.
+    const chosenFilter = this.filterSelect.value
+    const filterBefore = Filters.byId(observerTrack.getLatestPoseAt(t - 1)?.filter)
+    const filter = chosenFilter === Filters.NONE.id || chosenFilter === ""
+      ? (filterBefore === Filters.NONE ? undefined : Filters.NONE.id)
+      : chosenFilter
     // Not a pose field, and deliberately not keyframed: one observation was photographed one way
     // (see Sighting.exposureSeconds). Written straight onto the recording from here, since this is
     // the method every optics input reports to.
@@ -2964,7 +2967,8 @@ export class SightingEditorElement extends HTMLElement {
     const opticsStated =
       Math.abs(fovDeg - Instruments.fieldOfViewDeg(instrument)) > 0.01 ||
       fNumber !== instrument.fNumber ||
-      focusDistanceM !== undefined
+      focusDistanceM !== undefined ||
+      filter !== undefined
     const nothingSet =
       lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0 && rollDeg === 0 &&
       elevationM === 0 && !opticsStated
@@ -2983,7 +2987,8 @@ export class SightingEditorElement extends HTMLElement {
         rollDeg: rollDeg === 0 ? undefined : rollDeg,
         fovDeg,
         fNumber,
-        focusDistanceM
+        focusDistanceM,
+        filter
       })
     }
     // Neither field affects the 2D shape canvas, so this refresh() is only for its side effect —
@@ -4809,7 +4814,6 @@ export class SightingEditorElement extends HTMLElement {
     this.descriptionInput.value = this.said.read(sighting.event.description) ?? ""
     this.showTags()
     this.instrumentSelect.value = sighting.instrument.id
-    this.filterSelect.value = sighting.filter.id
     this.swayInput.value = sighting.sway?.toString() ?? ""
     this.lightPollutionInput.value = sighting.lightPollution?.toString() ?? ""
   }
@@ -5923,7 +5927,7 @@ export class SightingEditorElement extends HTMLElement {
       [Filters.SOLAR_VISUAL.id]: this.messages.filterSolarVisual,
       [Filters.SOLAR_PHOTO.id]: this.messages.filterSolarPhoto
     }
-    const selected = this.filterSelect.value || this.ufoElement.sighting.filter.id
+    const selected = this.filterSelect.value || Filters.NONE.id
     this.filterSelect.replaceChildren()
     for (const filter of Filters.ALL) {
       const option = document.createElement("option")
@@ -6068,6 +6072,7 @@ export class SightingEditorElement extends HTMLElement {
       this.focusDistanceInput.value = pose?.focusDistanceM === undefined ? "" : String(pose.focusDistanceM)
     }
     this.setRowVisible(this.focusDistanceInput, frame !== undefined && instrument.fNumber !== undefined)
+    if (this.filterSelect !== this.shadow.activeElement) this.filterSelect.value = Filters.byId(pose?.filter).id
   }
 
   /**

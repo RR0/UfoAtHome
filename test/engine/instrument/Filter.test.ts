@@ -16,12 +16,19 @@ describe("a filter in front of the instrument", () => {
     expect(Filters.transmittance(Filters.NONE)).toBe(1)
   })
 
-  it("is written to the file and read back from it", () => {
+  it("is a pose field: written to the file, read back, and held between keyframes", () => {
     const sighting = Sighting.create({ year: 1999, month: 8, day: 11 })
-    expect(toSightingJson(sighting).filter).toBeUndefined()
-    sighting.filterId = "solar-visual"
-    const json = toSightingJson(sighting)
-    expect(json.filter).toBe("solar-visual")
-    expect(fromSightingJson(json).filter.id).toBe("solar-visual")
+    const pose = { elevationM: 0, pitchDeg: 40, fovDeg: 5 }
+    sighting.observerTrack.addKeyframe(0, { ...pose, filter: "solar-visual" })
+    sighting.observerTrack.addKeyframe(60000, { ...pose, filter: "none" })
+    sighting.observerTrack.addKeyframe(120000, { ...pose })
+    const back = fromSightingJson(toSightingJson(sighting))
+    const at = (t: number) => Filters.byId(back.observerTrack.getInterpolatedPoseAt(t)?.filter).id
+    expect(at(0)).toBe("solar-visual")
+    // Held, never blended: not half a pair of glasses a minute in.
+    expect(at(30000)).toBe("solar-visual")
+    expect(at(59999)).toBe("solar-visual")
+    expect(at(60000)).toBe("none")
+    expect(at(90000)).toBe("none")
   })
 })

@@ -8,20 +8,20 @@
     "moon"
   ],
   "description": {
-    "fr": "Un ciel d'essai pour une éclipse totale de Soleil : celle du 11 août 1999, vue de Reims, de 12 h 23 à 12 h 28 (heure d'été), le Soleil à 52° de hauteur au sud-est. Rien n'y est déclaré : à chaque instant, les positions du Soleil et de la Lune vues d'ici (parallaxe comprise, d'où une totalité à Reims et un simple 99 % à Paris) donnent la part du disque cachée, et la scène en tire seule le croissant, le jour qui baisse, la couronne quand le disque est tout caché, et les étoiles et planètes quand le ciel est assez sombre. La totalité commence à 12 h 24 min 30 s et dure deux minutes. Le même calcul montre l'éclipse dans n'importe quelle observation datée, sans qu'on le lui demande. Approximations assumées : couronne ronde (ses jets dépendent du Soleil du jour), pas de perles de Baily ni de reflet orangé à l'horizon, ciel de la totalité réglé à environ 1/10 000 du ciel de midi.",
-    "en": "A test sky for a total solar eclipse: that of 11 August 1999, seen from Reims, from 12:23 to 12:28 (summer time), the Sun 52° up in the south-east. Nothing is declared: at every instant, the Sun's and the Moon's positions as seen from here (parallax included, which is why Reims has totality and Paris a mere 99%) give the share of the disc that is hidden, and the scene works out the crescent, the failing daylight, the corona once the disc is all covered, and the stars and planets once the sky is dark enough, on its own. Totality begins at 12:24:30 and lasts two minutes. The same calculation shows an eclipse in any dated observation, without being asked to. Approximations, stated: a round corona (its streamers depend on the day's Sun), no Baily's beads nor orange glow on the horizon, a totality sky set at about 1/10,000 of the midday sky.",
-    "es": "Un cielo de prueba para un eclipse total de Sol: el del 11 de agosto de 1999, visto desde Reims, de 12:23 a 12:28 (hora de verano), con el Sol a 52° de altura en el sureste. Nada se declara: en cada instante, las posiciones del Sol y de la Luna vistas desde aquí (paralaje incluida, por lo que Reims tiene totalidad y París un simple 99 %) dan la parte del disco oculta, y la escena deduce sola el creciente, la luz que baja, la corona cuando el disco queda del todo cubierto, y las estrellas y los planetas cuando el cielo es lo bastante oscuro. La totalidad empieza a las 12:24:30 y dura dos minutos. El mismo cálculo muestra un eclipse en cualquier observación fechada, sin que se le pida. Aproximaciones asumidas: corona redonda (sus chorros dependen del Sol de ese día), sin perlas de Baily ni resplandor anaranjado en el horizonte, cielo de la totalidad ajustado a cerca de 1/10 000 del cielo de mediodía.",
-    "it": "Un cielo di prova per un'eclissi totale di Sole: quella dell'11 agosto 1999, vista da Reims, dalle 12:23 alle 12:28 (ora estiva), con il Sole a 52° di altezza a sud-est. Nulla è dichiarato: a ogni istante, le posizioni del Sole e della Luna viste da qui (parallasse compresa, per cui Reims ha la totalità e Parigi un semplice 99 %) danno la parte di disco nascosta, e la scena ricava da sola la falce, la luce che cala, la corona quando il disco è tutto coperto e le stelle e i pianeti quando il cielo è abbastanza buio. La totalità comincia alle 12:24:30 e dura due minuti. Lo stesso calcolo mostra un'eclissi in qualsiasi osservazione datata, senza che glielo si chieda. Approssimazioni dichiarate: corona rotonda (i suoi getti dipendono dal Sole di quel giorno), niente grani di Baily né bagliore arancione all'orizzonte, cielo della totalità regolato a circa 1/10 000 del cielo di mezzogiorno."
+    "fr": "Une éclipse totale de Soleil : celle du 11 août 1999, vue de Reims, de 12 h 15 à 12 h 35 (heure d'été). Rien n'y est déclaré : à chaque instant, les positions du Soleil et de la Lune vues d'ici (parallaxe comprise, d'où une totalité à Reims et un simple 99 % à Paris) donnent la part du disque cachée, et la scène en tire seule le croissant, le jour qui baisse, la couronne quand le disque est tout caché, et les étoiles et planètes quand le ciel est assez sombre. On regarde d'abord à travers un filtre solaire (lunettes d'éclipse, densité 5), seule façon de voir la forme du Soleil : sans lui un croissant éblouit autant qu'un Soleil entier. Les lunettes s'ôtent à 12 h 24 min 15 s, quinze secondes avant la totalité, qui commence à 12 h 24 min 30 s et dure deux minutes ; elles se remettent à 12 h 27, quand le Soleil reparaît. Le filtre est un champ de l'enregistrement comme l'ouverture de l'objectif : il se met et s'ôte à l'endroit voulu de la durée, et se tient jusqu'à la clé suivante. Approximations assumées : couronne ronde (ses jets dépendent du Soleil du jour), pas de perles de Baily ni de reflet orangé à l'horizon, ciel de la totalité réglé à environ 1/10 000 du ciel de midi.",
+    "en": "A total solar eclipse: that of 11 August 1999, seen from Reims, from 12:15 to 12:35 (summer time). Nothing is declared: at every instant, the Sun's and the Moon's positions as seen from here (parallax included, which is why Reims has totality and Paris a mere 99%) give the share of the disc that is hidden, and the scene works out the crescent, the failing daylight, the corona once the disc is all covered, and the stars and planets once the sky is dark enough, on its own. It is first watched through a solar filter (eclipse glasses, density 5), the only way to see the Sun's shape: without one a crescent dazzles as much as a whole Sun. The glasses come off at 12:24:15, fifteen seconds before totality, which begins at 12:24:30 and lasts two minutes; they go back on at 12:27, when the Sun returns. The filter is a field of the recording like the lens's aperture: it is put on and taken off at the chosen point of the timeline, and held until the next keyframe. Approximations, stated: a round corona (its streamers depend on the day's Sun), no Baily's beads nor orange glow on the horizon, a totality sky set at about 1/10,000 of the midday sky.",
+    "es": "Un eclipse total de Sol: el del 11 de agosto de 1999, visto desde Reims, de 12:15 a 12:35 (hora de verano). Nada se declara: en cada instante, las posiciones del Sol y de la Luna vistas desde aquí (paralaje incluida, por lo que Reims tiene totalidad y París un simple 99 %) dan la parte del disco oculta, y la escena deduce sola el creciente, la luz que baja, la corona cuando el disco queda del todo cubierto, y las estrellas y los planetas cuando el cielo es lo bastante oscuro. Se mira primero a través de un filtro solar (gafas de eclipse, densidad 5), la única manera de ver la forma del Sol: sin él un creciente deslumbra tanto como un Sol entero. Las gafas se quitan a las 12:24:15, quince segundos antes de la totalidad, que empieza a las 12:24:30 y dura dos minutos; se vuelven a poner a las 12:27, cuando reaparece el Sol. El filtro es un campo de la grabación como la apertura del objetivo: se pone y se quita en el punto elegido de la duración, y se mantiene hasta la siguiente clave. Aproximaciones asumidas: corona redonda (sus chorros dependen del Sol de ese día), sin perlas de Baily ni resplandor anaranjado en el horizonte, cielo de la totalidad ajustado a cerca de 1/10 000 del cielo de mediodía.",
+    "it": "Un'eclissi totale di Sole: quella dell'11 agosto 1999, vista da Reims, dalle 12:15 alle 12:35 (ora estiva). Nulla è dichiarato: a ogni istante, le posizioni del Sole e della Luna viste da qui (parallasse compresa, per cui Reims ha la totalità e Parigi un semplice 99 %) danno la parte di disco nascosta, e la scena ricava da sola la falce, la luce che cala, la corona quando il disco è tutto coperto e le stelle e i pianeti quando il cielo è abbastanza buio. Si guarda prima attraverso un filtro solare (occhiali da eclissi, densità 5), l'unico modo di vedere la forma del Sole: senza di esso una falce abbaglia quanto un Sole intero. Gli occhiali si tolgono alle 12:24:15, quindici secondi prima della totalità, che comincia alle 12:24:30 e dura due minuti; si rimettono alle 12:27, quando il Sole riappare. Il filtro è un campo della registrazione come l'apertura dell'obiettivo: si mette e si toglie nel punto scelto della durata, e si mantiene fino al fotogramma chiave successivo. Approssimazioni dichiarate: corona rotonda (i suoi getti dipendono dal Sole di quel giorno), niente grani di Baily né bagliore arancione all'orizzonte, cielo della totalità regolato a circa 1/10 000 del cielo di mezzogiorno."
   },
   "time": {
     "year": 1999,
     "month": 8,
     "day": 11,
     "hour": 12,
-    "minute": 23
+    "minute": 15
   },
   "utcOffsetHours": 2,
-  "durationSeconds": 300,
+  "durationSeconds": 1200,
   "place": [
     {
       "lat": 49.2583,
@@ -66,20 +66,10 @@
           "lat": 49.2583,
           "lng": 4.0317,
           "elevationM": 0,
-          "headingDeg": 146,
-          "pitchDeg": 45,
-          "fovDeg": 60
-        }
-      },
-      {
-        "t": 20000,
-        "pose": {
-          "lat": 49.2583,
-          "lng": 4.0317,
-          "elevationM": 0,
-          "headingDeg": 146,
-          "pitchDeg": 50,
-          "fovDeg": 30
+          "headingDeg": 142.25,
+          "pitchDeg": 51.04,
+          "fovDeg": 5,
+          "filter": "solar-visual"
         }
       },
       {
@@ -88,9 +78,82 @@
           "lat": 49.2583,
           "lng": 4.0317,
           "elevationM": 0,
-          "headingDeg": 146,
-          "pitchDeg": 50,
-          "fovDeg": 30
+          "headingDeg": 144.01,
+          "pitchDeg": 51.53,
+          "fovDeg": 5,
+          "filter": "solar-visual"
+        }
+      },
+      {
+        "t": 555000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 145.53,
+          "pitchDeg": 51.93,
+          "fovDeg": 5,
+          "filter": "none"
+        }
+      },
+      {
+        "t": 590000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 145.8,
+          "pitchDeg": 46,
+          "fovDeg": 25,
+          "filter": "none"
+        }
+      },
+      {
+        "t": 680000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 146.3,
+          "pitchDeg": 46,
+          "fovDeg": 25,
+          "filter": "none"
+        }
+      },
+      {
+        "t": 702000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 146.4,
+          "pitchDeg": 52.1,
+          "fovDeg": 5,
+          "filter": "none"
+        }
+      },
+      {
+        "t": 712000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 146.5,
+          "pitchDeg": 52.16,
+          "fovDeg": 5,
+          "filter": "solar-visual"
+        }
+      },
+      {
+        "t": 1200000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 149.49,
+          "pitchDeg": 52.87,
+          "fovDeg": 5,
+          "filter": "solar-visual"
         }
       }
     ]
