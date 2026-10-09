@@ -173,35 +173,38 @@ vi.mock("../../src/render3d/WeatherAudio.js", () => ({
 }))
 
 beforeAll(() => {
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
-    // mockImplementation, not mockReturnValue: a renderer that sizes itself from its own canvas
+  HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement) {
+    // A fresh object per canvas, not one shared: a renderer that sizes itself from its own canvas
     // (see ObserverMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
     // be the same one.
+    // Plain no-ops, not vi.fn(): vitest keeps every mock it ever made, and the `this` each was called on
+    // (here the context, so its canvas and the element around it), for the life of the worker.
+    const noop = (): void => {}
     return {
       canvas: this,
-      save: vi.fn(),
-      restore: vi.fn(),
-      beginPath: vi.fn(),
-      closePath: vi.fn(),
-      fill: vi.fn(),
-      ellipse: vi.fn(),
-      moveTo: vi.fn(),
-      lineTo: vi.fn(),
-      translate: vi.fn(),
-      rotate: vi.fn(),
-      clearRect: vi.fn(),
-      strokeRect: vi.fn(),
-      stroke: vi.fn(),
-      fillRect: vi.fn(),
-      arc: vi.fn(),
-      fillText: vi.fn(),
-      strokeText: vi.fn(),
-      drawImage: vi.fn(),
-      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
-      measureText: vi.fn((text: string) => ({ width: text.length * 5 })),
+      save: noop,
+      restore: noop,
+      beginPath: noop,
+      closePath: noop,
+      fill: noop,
+      ellipse: noop,
+      moveTo: noop,
+      lineTo: noop,
+      translate: noop,
+      rotate: noop,
+      clearRect: noop,
+      strokeRect: noop,
+      stroke: noop,
+      fillRect: noop,
+      arc: noop,
+      fillText: noop,
+      strokeText: noop,
+      drawImage: noop,
+      createRadialGradient: () => ({ addColorStop: noop }),
+      measureText: (text: string) => ({ width: text.length * 5 }),
     } as unknown as CanvasRenderingContext2D
-  })
-  globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
+  } as unknown as typeof HTMLCanvasElement.prototype.getContext
+  globalThis.fetch = (() => Promise.resolve({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) })) as unknown as typeof fetch
   globalThis.ResizeObserver = class {
     observe(): void {}
     unobserve(): void {}
@@ -1013,15 +1016,16 @@ describe("SceneElement air traffic", () => {
       resume.mockClear()
       return { element, resume }
     }
+    // Defined on the instance, not spied: a spy is kept by vitest, and keeps the element it was set on.
     const playbackOf = (element: HTMLElement, state: string) =>
-      vi.spyOn((element as unknown as { ufoElement: { playbackState: string } }).ufoElement, "playbackState", "get").mockReturnValue(state)
+      Object.defineProperty((element as unknown as { ufoElement: object }).ufoElement, "playbackState", { get: () => state, configurable: true })
 
     it("follows the player's volume and mute button, as the weather and the vehicles do", async () => {
       const setLevel = vi.spyOn(AircraftAudio.prototype, "setLevel")
       const { element } = await playingScene()
       setLevel.mockClear()
       const ufo = (element as unknown as { ufoElement: HTMLElement }).ufoElement
-      vi.spyOn(ufo as unknown as { level: number }, "level", "get").mockReturnValue(0)
+      Object.defineProperty(ufo, "level", { get: () => 0, configurable: true })
       ufo.dispatchEvent(new CustomEvent("mutedchange", { bubbles: true, composed: true, detail: { muted: true, volume: 1 } }))
       expect(setLevel).toHaveBeenCalledWith(0)
       element.remove()
