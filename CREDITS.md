@@ -15,6 +15,14 @@ attribution for.
   [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) — **attribution required**. Source:
   <https://opengameart.org/content/thunder>.
 
+## Lunar relief (`src/assets/lunar-relief.bin.gz`)
+
+- Heights of the Moon's surface on a 16-samples-a-degree grid (1.9 km), kept only within the band that
+  the limb can fall in: the LOLA shape map LDEM_16 (Smith, Zuber, Neumann et al.; Lunar Reconnaissance
+  Orbiter / NASA, PDS product `LRO-L-LOLA-4-GDR-V1.0`), public domain. Source:
+  <https://imbrium.mit.edu/DATA/LOLA_GDR/CYLINDRICAL/IMG/>. It draws the Moon's ragged edge, which is
+  Baily's beads, in an eclipse (`scripts/build-lunar-limb.ts`).
+
 ## Published models, computed rather than bundled
 
 The Milky Way and the zodiacal light are not images and no data is shipped for either: both are

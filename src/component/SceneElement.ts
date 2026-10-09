@@ -25,6 +25,9 @@ import {
   TRACKED_PLANETS
 } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
+import { LunarLimb } from "../engine/astronomy/LunarLimb.js"
+import type { LimbProfile, LunarRelief } from "../engine/astronomy/LunarLimb.js"
+import { LunarReliefLoader } from "../engine/astronomy/LunarReliefLoader.js"
 import { Filters } from "../engine/instrument/Filter.js"
 import { LunarDisc } from "../engine/astronomy/LunarDisc.js"
 import { SolarEclipse } from "../engine/astronomy/SolarEclipse.js"
@@ -204,6 +207,8 @@ const DECOR_KIND_NAMES: Record<DecorKind, string> = {
  * resolved relative to this module's own URL so it works both from this package's own demo and
  * once bundled/consumed by another site, without hardcoding a site-relative path. Overridable via
  * the star-catalog-src attribute for a consuming site that hosts its own copy. */
+/** The Moon's limb relief, built from NASA's LOLA shape map by scripts/build-lunar-limb.ts. */
+const DEFAULT_LUNAR_RELIEF_URL = new URL("../assets/lunar-relief.bin.gz", import.meta.url).href
 const DEFAULT_STAR_CATALOG_URL = new URL("../assets/stars-mag7.5.bin", import.meta.url).href
 
 /** And where the deep tier is — the stars between magnitude 7.5 and 9, which only a recording made
@@ -1540,7 +1545,16 @@ export class SceneElement extends HTMLElement {
     const moonPosition = computeBodyPosition("Moon", date, observer)
     // Worked out for every date and place, never declared: the ephemeris is only asked once the two
     // discs are within a degree of each other, which is a handful of minutes in a year.
-    const eclipse = SolarEclipse.separationOf(sunPosition, moonPosition) < 1 ? SolarEclipse.viewAt(date, observer) : undefined
+    let eclipse: SceneAstronomy["eclipse"] = SolarEclipse.separationOf(sunPosition, moonPosition) < 1 ? SolarEclipse.viewAt(date, observer) : undefined
+    // Near totality the edge of the Moon is not a circle: its valleys are Baily's beads. Asked for only then.
+    if (eclipse && eclipse.obscuration > SceneElement.LIMB_FROM_OBSCURATION) {
+      const limb = this.limbFor(date, observer)
+      if (limb) {
+        const uncovered = LunarLimb.uncoveredFraction(limb, eclipse.sunRadiusDeg,
+          SolarEclipse.offsetOf(sunPosition, moonPosition, eclipse.separationDeg))
+        eclipse = { ...eclipse, obscuration: 1 - uncovered, limb }
+      }
+    }
     // What reaches the observer is what the Moon leaves of the Sun's disc (plus the corona).
     const sun = {
       ...sunPosition,
@@ -1583,6 +1597,36 @@ export class SceneElement extends HTMLElement {
     // here because this is where the real Sun is already computed; the player carries no astronomy
     // of its own and must not start.
     this.ufoElement.setSunAltitude(sun.altitudeDeg)
+  }
+
+  /** Above this share of the Sun hidden, the Moon's ragged edge is worked out: under it, a limb a few seconds of arc out of round shows in nothing. */
+  private static readonly LIMB_FROM_OBSCURATION = 0.98
+  /** The relief of the Moon's limb (see LunarRelief), once it has come; asked for the first time an eclipse comes near totality. */
+  private limbRelief?: LunarRelief
+  private limbRequested = false
+  /** The edge last worked out, kept for the seconds in which it does not move: 70 ms of arithmetic is not for every frame. */
+  private limbCache?: { profile: LimbProfile; atMs: number; lat: number; lng: number; elevationM: number }
+
+  private limbFor(date: Date, observer: ObserverGeo): LimbProfile | undefined {
+    if (!this.limbRelief) {
+      if (!this.limbRequested) {
+        this.limbRequested = true
+        void LunarReliefLoader.load(DEFAULT_LUNAR_RELIEF_URL).then(relief => {
+          this.limbRelief = relief
+          // The sky was last stated without it.
+          this.lastSkyKey = ""
+          if (relief && this.isConnected) this.updateAstronomy(this.lastTimeMs)
+        })
+      }
+      return undefined
+    }
+    const cached = this.limbCache
+    if (cached && Math.abs(date.getTime() - cached.atMs) < 5000 && cached.lat === observer.lat && cached.lng === observer.lng && cached.elevationM === observer.elevationM) {
+      return cached.profile
+    }
+    const profile = LunarLimb.profile(date, observer, this.limbRelief)
+    this.limbCache = { profile, atMs: date.getTime(), lat: observer.lat, lng: observer.lng, elevationM: observer.elevationM }
+    return profile
   }
 
   /**

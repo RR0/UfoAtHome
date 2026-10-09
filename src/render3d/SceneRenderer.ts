@@ -136,6 +136,7 @@ import { AerialPerspective } from "../engine/atmosphere/AerialPerspective.js"
 import type { Rgb } from "../engine/atmosphere/AerialPerspective.js"
 import { AerialFog } from "./AerialFog.js"
 import { LunarDisc } from "../engine/astronomy/LunarDisc.js"
+import type { LimbProfile } from "../engine/astronomy/LunarLimb.js"
 import { SolarEclipse, type SolarEclipseView } from "../engine/astronomy/SolarEclipse.js"
 import { EclipsedSun, SolarCorona } from "./EclipsedSun.js"
 import { ForwardDiffraction } from "../engine/atmosphere/ForwardDiffraction.js"
@@ -761,7 +762,10 @@ export interface SceneAstronomy {
    * magnitude above is already the dimmed one: what the Moon leaves of the disc, which is what reaches
    * the observer. This tells the renderer how to cut the disc and when to show the corona.
    */
-  eclipse?: SolarEclipseView
+  eclipse?: SolarEclipseView & {
+    /** The Moon's edge as the observer sees it, when the eclipse is close to total and the relief of the Moon has arrived (see LunarLimb). */
+    limb?: LimbProfile
+  }
 }
 
 /**
@@ -2855,7 +2859,7 @@ export class SceneRenderer {
     const view = astronomy.eclipse
     if (!view || astronomy.sun.altitudeDeg < BODY_HIDE_BELOW_DEG) {
       this.eclipsedSun.setMoon(undefined)
-      this.solarCorona?.show(undefined, { x: 0, y: 1, z: 0 }, 2, [0, 0, 0])
+      this.solarCorona?.show(undefined, [0, 0, 0])
       return
     }
     const drawnRadiusDeg = (SUN_MOON_VISUAL_RADIUS / BODY_PLACEMENT_RADIUS) * (180 / Math.PI)
@@ -2871,17 +2875,24 @@ export class SceneRenderer {
       : [1, 0]
     const centre = { x: sun.x * from + moon.x * to, y: sun.y * from + moon.y * to, z: sun.z * from + moon.z * to }
     const moonRadiusDeg = view.moonRadiusDeg * scale
-    this.eclipsedSun.setMoon(centre, moonRadiusDeg)
+    // The two directions the edge's position angles are measured from, on the sky at the Sun: up, and
+    // towards increasing azimuth — found by stepping the Sun's own altitude and azimuth, which is the
+    // one way to be right about which way the scene's axes run.
+    const step = 0.01
+    const around = (dAlt: number, dAz: number) => horizontalToCartesian(astronomy.sun.altitudeDeg + dAlt, astronomy.sun.azimuthDeg + dAz, 1)
+    const up = { x: around(step, 0).x - around(-step, 0).x, y: around(step, 0).y - around(-step, 0).y, z: around(step, 0).z - around(-step, 0).z }
+    const right = { x: around(0, step).x - around(0, -step).x, y: around(0, step).y - around(0, -step).y, z: around(0, step).z - around(0, -step).z }
+    this.eclipsedSun.setMoon(centre, moonRadiusDeg, view.limb ? { profile: view.limb, scale, up, right } : undefined)
     // Under nine tenths hidden the corona is a millionth of a light that is still there: nothing to draw.
     if (view.obscuration < 0.9) {
-      this.solarCorona?.show(undefined, centre, 2, [0, 0, 0])
+      this.solarCorona?.show(undefined, [0, 0, 0])
       return
     }
     if (!this.solarCorona) {
-      this.solarCorona = new SolarCorona((drawnRadiusDeg * Math.PI) / 180)
+      this.solarCorona = new SolarCorona((drawnRadiusDeg * Math.PI) / 180, this.eclipsedSun.cut)
       this.celestialGroup.add(this.solarCorona.object)
     }
-    this.solarCorona.show(sun, centre, Math.cos(moonRadiusDeg * DEG_TO_RAD), this.sunDiscRadiance)
+    this.solarCorona.show(sun, this.sunDiscRadiance)
   }
 
   /** The relative scale the bodies were last placed at: a body is drawn from its light in the

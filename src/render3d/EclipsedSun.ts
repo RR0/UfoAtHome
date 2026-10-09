@@ -1,4 +1,8 @@
-import { AdditiveBlending, BackSide, Mesh, MeshBasicMaterial, ShaderMaterial, SphereGeometry, Vector3 } from "three"
+import {
+  AdditiveBlending, BackSide, ClampToEdgeWrapping, DataTexture, DataUtils, HalfFloatType, LinearFilter, Mesh, MeshBasicMaterial, RedFormat,
+  RepeatWrapping, ShaderMaterial, SphereGeometry, Vector3
+} from "three"
+import type { LimbProfile } from "../engine/astronomy/LunarLimb.js"
 import { IceHaloEffect } from "./IceHaloEffect.js"
 
 /**
@@ -10,9 +14,45 @@ import { IceHaloEffect } from "./IceHaloEffect.js"
  * view and through any lens, and its edge is anti-aliased by the width of the pixel itself.
  */
 export class EclipsedSun {
-  /** Where the Moon's disc is, and how wide: a direction and the cosine of its angular radius. cos = 2 means no Moon. */
-  readonly moonDirection = new Vector3(0, 1, 0)
-  readonly moonCosRadius = { value: 2 }
+  /**
+   * What every pixel asks of the Moon: where its centre is, how wide it is, and how ragged its edge. The
+   * same uniforms serve the Sun's disc and the corona, so that the two are cut by the one edge.
+   *
+   * The edge is a radius at each position angle (see LunarLimb): a circle's sine plus the profile's
+   * departure from it, which is seconds of arc, kept as such in a texture of its own and added to the
+   * circle here. A pixel's distance from the Moon's centre is taken as the length of the part of its
+   * direction that is not along it, which keeps a hundredth of an arcsecond where an arccosine would
+   * have kept ten.
+   */
+  readonly cut = {
+    uMoon: { value: new Vector3(0, 1, 0) },
+    uSinRadius: { value: -1 },
+    uUp: { value: new Vector3(0, 1, 0) },
+    uRight: { value: new Vector3(1, 0, 0) },
+    uLimbMap: { value: EclipsedSun.flatMap() as DataTexture },
+    uLimbScale: { value: 0 },
+    uLimbHalfTexel: { value: 0 }
+  }
+
+  /** The cut's GLSL: `moonCover(direction)` is 1 where the Moon is in front, 0 where it is not, anti-aliased by the pixel's own width. */
+  static readonly GLSL = `
+    uniform vec3 uMoon;
+    uniform float uSinRadius;
+    uniform vec3 uUp;
+    uniform vec3 uRight;
+    uniform sampler2D uLimbMap;
+    uniform float uLimbScale;
+    uniform float uLimbHalfTexel;
+    float moonCover(vec3 direction) {
+      if (uSinRadius < 0.0) return 0.0;
+      vec3 away = direction - uMoon * dot(direction, uMoon);
+      float distance = length(away);
+      float angle = atan(dot(away, uRight), dot(away, uUp));
+      float ragged = texture2D(uLimbMap, vec2(angle / 6.283185307 + uLimbHalfTexel, 0.5)).r * uLimbScale;
+      float edge = max(fwidth(distance), 1e-9);
+      return 1.0 - smoothstep(uSinRadius + ragged - edge, uSinRadius + ragged + edge, distance);
+    }
+  `
 
   /**
    * The Sun's material, a plain self-lit one that discards nothing and covers what the Moon does:
@@ -21,34 +61,77 @@ export class EclipsedSun {
    */
   material(): MeshBasicMaterial {
     const material = new MeshBasicMaterial({ fog: false, transparent: true })
-    const moonDirection = this.moonDirection
-    const moonCosRadius = this.moonCosRadius
+    const cut = this.cut
     material.onBeforeCompile = shader => {
-      shader.uniforms.uMoon = { value: moonDirection }
-      shader.uniforms.uMoonCos = moonCosRadius
+      Object.assign(shader.uniforms, cut)
       shader.vertexShader = shader.vertexShader
         .replace("void main() {", "varying vec3 vEclipseDirection;\nvoid main() {")
         .replace("#include <begin_vertex>", "#include <begin_vertex>\n  vEclipseDirection = (modelMatrix * vec4(position, 1.0)).xyz - cameraPosition;")
       shader.fragmentShader = shader.fragmentShader
-        .replace("void main() {", "uniform vec3 uMoon;\nuniform float uMoonCos;\nvarying vec3 vEclipseDirection;\nvoid main() {")
+        .replace("void main() {", EclipsedSun.GLSL + "\nvarying vec3 vEclipseDirection;\nvoid main() {")
         .replace("#include <opaque_fragment>", `
-          float eclipseCosine = dot(normalize(vEclipseDirection), uMoon);
-          float eclipseEdge = max(fwidth(eclipseCosine), 1e-9);
-          float eclipseCovered = smoothstep(uMoonCos - eclipseEdge, uMoonCos + eclipseEdge, eclipseCosine);
-          diffuseColor.a *= 1.0 - eclipseCovered;
+          diffuseColor.a *= 1.0 - moonCover(normalize(vEclipseDirection));
           #include <opaque_fragment>`)
     }
     return material
   }
 
-  /** Points the cut at the Moon, `radiusDeg` wide; undefined takes it away. */
-  setMoon(direction: { x: number, y: number, z: number } | undefined, radiusDeg = 0): void {
+  /**
+   * Points the cut at the Moon, `radiusDeg` wide; undefined takes it away.
+   *
+   * `limb`, when there is one, is the Moon's ragged edge (see LunarLimb): its departures from the
+   * mean radius, scaled by `scale` like every other angle of the drawn eclipse, over the position
+   * angles of `up` (0°) and `right` (90°), two directions on the sky at the Moon, in the scene's frame.
+   */
+  setMoon(
+    direction: { x: number, y: number, z: number } | undefined,
+    radiusDeg = 0,
+    limb?: { profile: LimbProfile, scale: number, up: { x: number, y: number, z: number }, right: { x: number, y: number, z: number } }
+  ): void {
     if (!direction) {
-      this.moonCosRadius.value = 2
+      this.cut.uSinRadius.value = -1
       return
     }
-    this.moonDirection.set(direction.x, direction.y, direction.z).normalize()
-    this.moonCosRadius.value = Math.cos((radiusDeg * Math.PI) / 180)
+    this.cut.uMoon.value.set(direction.x, direction.y, direction.z).normalize()
+    this.cut.uSinRadius.value = Math.sin((radiusDeg * Math.PI) / 180)
+    if (!limb) {
+      this.cut.uLimbScale.value = 0
+      return
+    }
+    this.cut.uUp.value.set(limb.up.x, limb.up.y, limb.up.z).normalize()
+    this.cut.uRight.value.set(limb.right.x, limb.right.y, limb.right.z).normalize()
+    this.uploadLimb(limb.profile)
+    // Arcseconds in the texture, radians of sine here.
+    this.cut.uLimbScale.value = (limb.scale * Math.PI) / 180 / 3600
+  }
+
+  private limbUploaded?: LimbProfile
+  private limbTexture?: DataTexture
+
+  private uploadLimb(profile: LimbProfile): void {
+    if (this.limbUploaded === profile) return
+    const n = profile.radiusDeg.length
+    const texels = new Uint16Array(n)
+    for (let i = 0; i < n; i++) texels[i] = DataUtils.toHalfFloat((profile.radiusDeg[i] - profile.meanRadiusDeg) * 3600)
+    this.limbTexture?.dispose()
+    const texture = new DataTexture(texels, n, 1, RedFormat, HalfFloatType)
+    texture.minFilter = LinearFilter
+    texture.magFilter = LinearFilter
+    // The position angle goes once round: the edge of the strip meets its other edge.
+    texture.wrapS = RepeatWrapping
+    texture.wrapT = ClampToEdgeWrapping
+    texture.needsUpdate = true
+    this.limbTexture = texture
+    this.cut.uLimbMap.value = texture
+    this.cut.uLimbHalfTexel.value = 0.5 / n
+    this.limbUploaded = profile
+  }
+
+  /** A one-texel map of no departure at all, for a Moon with no relief to give. */
+  private static flatMap(): DataTexture {
+    const texture = new DataTexture(new Uint16Array([0]), 1, 1, RedFormat, HalfFloatType)
+    texture.needsUpdate = true
+    return texture
   }
 }
 
@@ -74,13 +157,12 @@ export class SolarCorona {
   private readonly up = new Vector3(0, 1, 0)
   private readonly towards = new Vector3()
 
-  constructor(sunRadiusRad: number) {
+  constructor(sunRadiusRad: number, cut: EclipsedSun["cut"]) {
     const maxAngle = sunRadiusRad * SolarCorona.MAX_RADII
     const material = new ShaderMaterial({
       uniforms: {
+        ...cut,
         uSun: { value: new Vector3(0, 1, 0) },
-        uMoon: { value: new Vector3(0, 1, 0) },
-        uMoonCos: { value: 2 },
         uSunRadius: { value: sunRadiusRad },
         uMaxRadii: { value: SolarCorona.MAX_RADII },
         uRadiance: { value: new Vector3(0, 0, 0) },
@@ -97,25 +179,21 @@ export class SolarCorona {
       fragmentShader: `
         precision highp float;
         uniform vec3 uSun;
-        uniform vec3 uMoon;
-        uniform float uMoonCos;
         uniform float uSunRadius;
         uniform float uMaxRadii;
         uniform vec3 uRadiance;
         uniform float uCoefficient;
         uniform float uExponent;
         varying vec3 vDirection;
+        ${EclipsedSun.GLSL}
         void main() {
           vec3 direction = normalize(vDirection);
           float angle = acos(clamp(dot(direction, uSun), -1.0, 1.0));
           float radii = max(angle / uSunRadius, 1.0);
           if (radii > uMaxRadii) discard;
-          float cosine = dot(direction, uMoon);
-          float edge = max(fwidth(cosine), 1e-9);
-          float covered = smoothstep(uMoonCos - edge, uMoonCos + edge, cosine);
           // Fades to nothing over the last radius of the cap, so that its rim never shows.
           float fade = clamp(uMaxRadii - radii, 0.0, 1.0);
-          float brightness = uCoefficient * pow(radii, -uExponent) * (1.0 - covered) * fade;
+          float brightness = uCoefficient * pow(radii, -uExponent) * (1.0 - moonCover(direction)) * fade;
           gl_FragColor = vec4(uRadiance * brightness, 1.0);
         }
       `,
@@ -135,7 +213,7 @@ export class SolarCorona {
    * Shows the corona round the Sun, with the Moon in front of it, in a Sun whose disc is
    * `radiance` bright (relative units, per channel); or hides it.
    */
-  show(sun: { x: number, y: number, z: number } | undefined, moon: { x: number, y: number, z: number }, moonCosRadius: number, radiance: readonly number[]): void {
+  show(sun: { x: number, y: number, z: number } | undefined, radiance: readonly number[]): void {
     if (!sun) {
       this.object.visible = false
       return
@@ -144,8 +222,6 @@ export class SolarCorona {
     this.towards.set(sun.x, sun.y, sun.z).normalize()
     this.object.quaternion.setFromUnitVectors(this.up, this.towards)
     ;(uniforms.uSun.value as Vector3).copy(this.towards)
-    ;(uniforms.uMoon.value as Vector3).set(moon.x, moon.y, moon.z).normalize()
-    uniforms.uMoonCos.value = moonCosRadius
     ;(uniforms.uRadiance.value as Vector3).set(radiance[0], radiance[1], radiance[2])
     this.object.visible = true
   }

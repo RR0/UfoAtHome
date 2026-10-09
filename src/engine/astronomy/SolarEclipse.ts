@@ -91,6 +91,21 @@ export class SolarEclipse {
     return Math.max(1 - view.obscuration, SolarEclipse.UMBRA_SKY_LIGHT)
   }
 
+  /**
+   * Where the Sun's centre is from the Moon's, on the sky, degrees: `upDeg` towards the zenith and
+   * `rightDeg` towards increasing azimuth, the frame the Moon's edge is stated in (see LunarLimb).
+   * Rescaled to the separation the ephemeris gives, which is the exact one: refracted heights are
+   * a little squeezed at a low Sun.
+   */
+  static offsetOf(sun: HorizontalPosition, moon: HorizontalPosition, separationDeg: number): { upDeg: number; rightDeg: number } {
+    const wrapped = ((((sun.azimuthDeg - moon.azimuthDeg) % 360) + 540) % 360) - 180
+    const upDeg = sun.altitudeDeg - moon.altitudeDeg
+    const rightDeg = wrapped * Math.cos((((sun.altitudeDeg + moon.altitudeDeg) / 2) * Math.PI) / 180)
+    const length = Math.hypot(upDeg, rightDeg)
+    const scale = length > 0 ? separationDeg / length : 0
+    return { upDeg: upDeg * scale, rightDeg: rightDeg * scale }
+  }
+
   /** The angle between two directions given as altitude and azimuth, in degrees — cheap enough to ask before the ephemeris is. */
   static separationOf(a: HorizontalPosition, b: HorizontalPosition): number {
     const rad = Math.PI / 180

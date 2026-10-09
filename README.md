@@ -63,6 +63,7 @@ Each script's header comment says what it takes, what it deliberately leaves out
 | Command | Source | Input | Output |
 |---|---|---|---|
 | `npm run build:stars` | [HYG Database v4.1](https://github.com/astronexus/HYG-Database) | download `hyg/CURRENT/hygdata_v41.csv` to `scripts/data/` | `src/assets/stars-mag7.5*` |
+| `npm run build:lunar-limb` | [LOLA LDEM_16](https://imbrium.mit.edu/DATA/LOLA_GDR/CYLINDRICAL/IMG/) (NASA, shape map of the Moon, 16 samples a degree) | download `LDEM_16.IMG` and `.LBL` to `scripts/data/lola/` | `src/assets/lunar-relief.bin.gz` |
 | `npm run build:comets` | [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/) (network) | cached in `scripts/data/horizons/` | `src/engine/astronomy/cometCatalog.ts` |
 | `npm run build:novae` | AAVSO/Strope 2010 curves, SN 1987A | committed in `scripts/data/novae/` | `src/engine/astronomy/novaCatalog.ts` |
 | `npm run build:satellites` | [CelesTrak SATCAT](https://celestrak.org/pub/satcat.csv) (network) | cached as `scripts/data/satcat.csv` | `src/engine/astronomy/satelliteCatalog.ts` |
