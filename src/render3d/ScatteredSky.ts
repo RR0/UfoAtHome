@@ -1,4 +1,4 @@
-import { BackSide, GLSL3, ShaderMaterial, Vector2, Vector4, type WebGLRenderer } from "three"
+import { BackSide, GLSL3, ShaderMaterial, Vector2, Vector3, Vector4, type WebGLRenderer } from "three"
 import { AtmosphereProfile, type AtmosphereConditions } from "../engine/atmosphere/AtmosphereProfile.js"
 import { EyeAdaptation, type DisplayRgb } from "../engine/atmosphere/EyeAdaptation.js"
 import { NightSkyBrightness } from "../engine/atmosphere/NightSkyBrightness.js"
@@ -13,6 +13,12 @@ export interface ScatteredSkyState {
   readonly sun: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number }
   /** The share of the Sun's light the sky is lit with, 1 when nothing is in front of it: an eclipse's (see SolarEclipse.skyFraction). */
   readonly sunLight?: number
+  /**
+   * The glow all round the horizon at totality (see SolarEclipse.horizonGlow): `glow` is its brightness as a share of the
+   * day sky's horizon, 0 for none, and `tint` the colour of light that has crossed a hundred kilometres of air,
+   * as XYZ with a luminance of one.
+   */
+  readonly umbra?: { readonly glow: number; readonly tint: readonly [number, number, number] }
   readonly moon: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number; readonly phaseAngleDeg: number }
 }
 
@@ -108,6 +114,9 @@ export class ScatteredSky {
         uMoonAzimuth: { value: new Vector2(0, -1) },
         uMoonScale: { value: 0 },
         uSunScale: { value: 1 },
+        uUmbraGlow: { value: 0 },
+        uUmbraTint: { value: new Vector3(0, 1, 0) },
+        uUmbraRefUv: { value: new Vector2(0.5, 0.5) },
         uObserverRadius: { value: AtmosphereProfile.GROUND_RADIUS_M + 2 },
         uAirglow: { value: new Vector4(...ScatteredSky.airglowXyzs()) },
         uArtificial: { value: new Vector4(0, 0, 0, 0) },
@@ -134,6 +143,9 @@ export class ScatteredSky {
         uniform vec2 uMoonAzimuth;
         uniform float uMoonScale;
         uniform float uSunScale;
+        uniform float uUmbraGlow;
+        uniform vec3 uUmbraTint;
+        uniform vec2 uUmbraRefUv;
         uniform float uObserverRadius;
         uniform vec4 uAirglow;
         uniform vec4 uArtificial;
@@ -141,6 +153,7 @@ export class ScatteredSky {
         uniform float uInverseSemiSaturation;
         uniform float uExposureScale;
         const float PI = 3.141592653589793;
+        const float UMBRA_GLOW_SCALE_DEG = ${ScatteredSky.UMBRA_GLOW_SCALE_DEG.toFixed(2)};
         const float GROUND = ${AtmosphereProfile.GROUND_RADIUS_M.toFixed(1)};
         const float AIRGLOW_RATIO = ${(AtmosphereProfile.GROUND_RADIUS_M / (AtmosphereProfile.GROUND_RADIUS_M + ScatteredSky.AIRGLOW_LAYER_ALTITUDE_M)).toFixed(6)};
         const float EXTINCTION = ${NightSkyBrightness.EXTINCTION_PER_AIR_MASS.toFixed(4)};
@@ -189,6 +202,13 @@ export class ScatteredSky {
         void main() {
           vec3 dir = normalize(vDirection);
           vec4 light = uSunScale * fetchView(uSunView, viewUv(dir, uSunAzimuth)) + uMoonScale * fetchView(uMoonView, viewUv(dir, uMoonAzimuth));
+          if (dir.y > 0.0 && uUmbraGlow > 0.0) {
+            // The day sky's own horizon, at a quarter of the way round from the Sun, as the glow's measure: the
+            // light that comes from lit air beyond the Moon's shadow, a hundred kilometres off.
+            vec4 reference = fetchView(uSunView, uUmbraRefUv);
+            float glowProfile = exp(-degrees(asin(clamp(dir.y, 0.0, 1.0))) / UMBRA_GLOW_SCALE_DEG);
+            light += uUmbraGlow * glowProfile * vec4(reference.y * uUmbraTint, reference.w);
+          }
           if (dir.y > 0.0) {
             float sinZenith2 = 1.0 - dir.y * dir.y;
             float vanRhijn = inversesqrt(max(1.0 - AIRGLOW_RATIO * AIRGLOW_RATIO * sinZenith2, 1e-4));
@@ -287,6 +307,13 @@ export class ScatteredSky {
     uniforms.uMoonScale.value = 10 ** (-0.4 * (state.moon.magnitude - ScatteredSky.SUN_MAGNITUDE))
     const sunScale = state.sunLight ?? 1
     uniforms.uSunScale.value = sunScale
+    const glow = state.umbra?.glow ?? 0
+    uniforms.uUmbraGlow.value = glow
+    if (state.umbra) {
+      uniforms.uUmbraTint.value.set(...state.umbra.tint)
+      const reference = ScatteredSky.umbraReferenceUv(state)
+      uniforms.uUmbraRefUv.value.set(reference.u, reference.v)
+    }
     uniforms.uObserverRadius.value = AtmosphereProfile.GROUND_RADIUS_M + Math.max(state.altitudeM, 2)
     const redrawn = key !== this.drawnKey
     if (redrawn) {
@@ -301,14 +328,24 @@ export class ScatteredSky {
     }
     // A Sun that has dimmed or come back without moving (an eclipse) changes no key above, and the
     // views it is drawn from are the same: only what the eye makes of them is stale.
-    if (sunScale !== this.drawnSunScale) {
+    if (sunScale !== this.drawnSunScale || glow !== this.drawnGlow) {
       this.drawnSunScale = sunScale
+      this.drawnGlow = glow
       if (this.views && !redrawn) this.adaptFromViews(this.views.sun, this.views.moon, state)
     }
     this.onChange()
   }
 
   private drawnSunScale = 1
+  private drawnGlow = 0
+
+  /** How high, in degrees, the horizon's glow at totality reaches before it is a third of what it is on the horizon. */
+  static readonly UMBRA_GLOW_SCALE_DEG = 5
+
+  /** Where in the sun's sky view the glow is measured: one degree above the horizon, 100° of azimuth round from the Sun. */
+  private static umbraReferenceUv(state: ScatteredSkyState): { u: number; v: number } {
+    return AtmosphereTables.skyViewUv(state.altitudeM, (89 * Math.PI) / 180, ScatteredSky.azimuthBetween(state.sun.azimuthDeg + 100, state.sun.azimuthDeg))
+  }
 
   /** Reads the views back for the eye's adaptation and the ambient colours; one read at a time. */
   private async readBack(): Promise<void> {
@@ -373,6 +410,12 @@ export class ScatteredSky {
     this.views = { sun, moon }
     const moonScale = 10 ** (-0.4 * (state.moon.magnitude - ScatteredSky.SUN_MAGNITUDE))
     const sunScale = state.sunLight ?? 1
+    const umbra = state.umbra
+    let umbraReference: number[] | undefined
+    if (umbra && umbra.glow > 0) {
+      const uv = ScatteredSky.umbraReferenceUv(state)
+      umbraReference = ScatteredSky.bilinear(sun, uv.u, uv.v)
+    }
     const airglow = ScatteredSky.airglowXyzs()
     const artificial = ScatteredSky.artificialXyzs(state.lightPollution)
     const lightAt = (altitudeDeg: number, azimuthDeg: number, withAirglow = true): [number, number, number, number] => {
@@ -383,7 +426,10 @@ export class ScatteredSky {
       const m = ScatteredSky.bilinear(moon, moonUv.u, moonUv.v)
       const glow = withAirglow && altitudeDeg > 0 ? ScatteredSky.airglowFactor(altitudeDeg) : 0
       const towns = altitudeDeg > 0 ? NightSkyBrightness.artificialShape(altitudeDeg) : 0
-      return [0, 1, 2, 3].map(c => sunScale * s[c] + moonScale * m[c] + airglow[c] * glow + artificial[c] * towns) as [number, number, number, number]
+      // The ring of lit air beyond the Moon's shadow, at totality: the day sky's horizon, three thousandths of it, the colour of a long path of air.
+      const umbraGlow = umbraReference && umbra && altitudeDeg > 0 ? umbra.glow * Math.exp(-altitudeDeg / ScatteredSky.UMBRA_GLOW_SCALE_DEG) : 0
+      const fromUmbra = (c: number): number => !umbraReference || !umbra ? 0 : umbraGlow * (c < 3 ? umbraReference[1] * umbra.tint[c] : umbraReference[3])
+      return [0, 1, 2, 3].map(c => sunScale * s[c] + moonScale * m[c] + airglow[c] * glow + artificial[c] * towns + fromUmbra(c)) as [number, number, number, number]
     }
     // The eye adapts to the upper hemisphere, weighted by solid angle, in log.
     let logSum = 0

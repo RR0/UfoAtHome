@@ -79,6 +79,24 @@ export class SolarEclipse {
     }
   }
 
+  /**
+   * The glow all round the horizon at totality, as a share of the day sky's own horizon: three
+   * thousandths. The observer stands in a shadow a hundred kilometres across, and the horizon
+   * is seen over ground that is not: lit air, a hundred kilometres and more away, scattering a Sun that is
+   * only partly eclipsed there, and seen through all the air between. Photometry of this very eclipse
+   * (Winkler et al. 2005) has the horizon tens of times brighter than the zenith, itself a ten-thousandth
+   * of a midday sky's; this takes a value in that range (SUPPOSED: thirty times). Isotropic: the shadow is longer
+   * along its track than across it, and the glow is a little fainter that way — not drawn.
+   */
+  static readonly HORIZON_GLOW = 3e-3
+
+  /** The horizon glow of this eclipse, as a share of the day horizon: none until nearly total, all of it at totality. */
+  static horizonGlow(view: SolarEclipseView | undefined): number {
+    if (!view) return 0
+    const ramp = Math.min(1, Math.max(0, (view.obscuration - 0.99) / 0.01))
+    return SolarEclipse.HORIZON_GLOW * ramp * ramp * (3 - 2 * ramp)
+  }
+
   /** Share of the Sun's beam that reaches the observer: what the Moon leaves of the disc, plus the corona. */
   static beamFraction(view: SolarEclipseView | undefined): number {
     if (!view) return 1

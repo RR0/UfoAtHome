@@ -106,3 +106,21 @@ describe("the eclipse of a day, for a sky line", () => {
   })
 })
 
+describe("the glow all round the horizon at totality", () => {
+  const view = (obscuration: number) => ({ sunRadiusDeg: 0.2666, moonRadiusDeg: 0.27, separationDeg: 0, obscuration, magnitude: 1 })
+
+  it("is nothing without an eclipse and nothing until nearly total", () => {
+    expect(SolarEclipse.horizonGlow(undefined)).toBe(0)
+    expect(SolarEclipse.horizonGlow(view(0.5))).toBe(0)
+    expect(SolarEclipse.horizonGlow(view(0.99))).toBe(0)
+  })
+
+  it("rises smoothly to its whole at totality, and is a hundred times the zenith's share of the sky", () => {
+    expect(SolarEclipse.horizonGlow(view(0.995))).toBeGreaterThan(0)
+    expect(SolarEclipse.horizonGlow(view(0.995))).toBeLessThan(SolarEclipse.horizonGlow(view(0.999)))
+    expect(SolarEclipse.horizonGlow(view(1))).toBe(SolarEclipse.HORIZON_GLOW)
+    expect(SolarEclipse.HORIZON_GLOW / SolarEclipse.UMBRA_SKY_LIGHT).toBeGreaterThan(10)
+    expect(SolarEclipse.HORIZON_GLOW / SolarEclipse.UMBRA_SKY_LIGHT).toBeLessThan(100)
+  })
+})
+

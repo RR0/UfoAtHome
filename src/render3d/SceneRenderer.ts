@@ -3043,6 +3043,20 @@ export class SceneRenderer {
     if (this.lastAstronomy) this.scatteredSky?.update(this.scatteredSkyState(this.lastAstronomy))
   }
 
+  /**
+   * The colour of the light that comes in over the horizon at totality, as XYZ with a luminance of one: what is left of
+   * white after a hundred kilometres of the scene's own air and haze, which is orange.
+   */
+  private umbraTint(): [number, number, number] {
+    const eye = this.siteElevationM + this.observerElevationM + 1.6
+    const [r, g, b] = this.air.transmittance(eye, eye, SceneRenderer.UMBRA_PATH_M)
+    const y = 0.2126 * r + 0.7152 * g + 0.0722 * b
+    return y > 0
+      ? [(0.4124 * r + 0.3576 * g + 0.1805 * b) / y, 1, (0.0193 * r + 0.1192 * g + 0.9505 * b) / y]
+      : [0.9505, 1, 1.089]
+  }
+  private static readonly UMBRA_PATH_M = 100_000
+
   /** The scattered sky's view of this astronomy: the eye's height above sea level, the Sun and the Moon. */
   private scatteredSkyState(astronomy: SceneAstronomy) {
     return {
@@ -3051,6 +3065,9 @@ export class SceneRenderer {
       sun: { altitudeDeg: astronomy.sun.altitudeDeg, azimuthDeg: astronomy.sun.azimuthDeg, magnitude: astronomy.sun.magnitude },
       // The sky keeps more of its light than the beam does: the air beyond the Moon's shadow still lights it.
       sunLight: SolarEclipse.skyFraction(astronomy.eclipse),
+      umbra: SolarEclipse.horizonGlow(astronomy.eclipse) > 0
+        ? { glow: SolarEclipse.horizonGlow(astronomy.eclipse), tint: this.umbraTint() }
+        : undefined,
       moon: {
         altitudeDeg: astronomy.moon.altitudeDeg,
         azimuthDeg: astronomy.moon.azimuthDeg,
