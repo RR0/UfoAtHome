@@ -1,4 +1,5 @@
 import { Headings } from "./Headings.js"
+import { OfflineKit } from "./OfflineKit.js"
 import {
   FALLBACK_LANGUAGE, type PageMeta, SITE_LANGUAGES, type SiteLanguage, type SitePage
 } from "./SitePage.js"
@@ -181,6 +182,7 @@ ${this.languageRedirect(page, language)}
   <meta property="og:image:alt" content="${Layout.LOGO_ALT}">
   <meta name="twitter:card" content="summary">
   ${Layout.ICON_LINKS}
+  ${OfflineKit.HEAD}
   <link rel="stylesheet" href="/style.css">
   ${modules}
 </head>
@@ -191,6 +193,7 @@ ${this.headings.withAnchors(page.render(language), words.sectionLink, this.ancho
 </main>
 ${this.siteFooter(language)}
 ${script ? `<script type="module">\n// Where this site's own pages load their modules from — see Layout.versioned.\nconst SITE_LIB = ${JSON.stringify(this.versioned("/lib"))}\n${script}\n</script>` : ""}
+${OfflineKit.REGISTER}
 </body>
 </html>
 `

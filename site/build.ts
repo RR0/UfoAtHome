@@ -21,6 +21,7 @@ import { FaqPage } from "./content/FaqPage.js"
 import { HtmlPageTree } from "./HtmlPageTree.js"
 import { ContextPage } from "./content/ContextPage.js"
 import { SkillPackage } from "./SkillPackage.js"
+import { OfflineKit } from "./OfflineKit.js"
 
 /**
  * Builds ufoathome.org into `dist-site/`.
@@ -109,6 +110,7 @@ class SiteBuilder {
     await mkdir(this.out, { recursive: true })
 
     const written: string[] = []
+    const rendered: string[] = []
     for (const page of this.pages) {
       for (const language of SITE_LANGUAGES) {
         const file = join(this.out, layout.fileName(page.meta, language))
@@ -117,6 +119,7 @@ class SiteBuilder {
         await mkdir(dirname(file), { recursive: true })
         await writeFile(file, html, "utf8")
         written.push(file)
+        rendered.push(html)
       }
     }
 
@@ -178,10 +181,36 @@ class SiteBuilder {
       await cp(join(this.root, dir), join(this.out, "lib", version), { recursive: true })
     }
     await this.writeLegacyBundle()
+    await this.writeOfflineKit(layout, version, rendered)
 
     await this.writeNetlifyFiles(layout)
     await this.writeSitemap(layout)
     console.log(`dist-site: ${written.length} pages, ${this.bundleDirs.length} bundles, v${version}`)
+  }
+
+  /**
+   * Makes the site installable and usable offline: the manifest, the page shown when an unvisited
+   * address is asked for without a network, and the service worker with the list of what an
+   * installation fetches (see OfflineKit, and site/assets/sw.js for how the worker uses it).
+   */
+  private async writeOfflineKit(layout: Layout, version: string, rendered: readonly string[]): Promise<void> {
+    const kit = new OfflineKit()
+    const installed = [new HomePage().meta, new PlayerPage().meta]
+    const pageUrls = installed.flatMap(meta => SITE_LANGUAGES.map(language => layout.fileUrl(meta, language)))
+    const libDir = join(this.out, "lib", version)
+    const libFiles = [...new Set(await Promise.all(
+      ["rr0-sighting.mjs"].map(entry => kit.staticClosure(libDir, entry))).then(closures => closures.flat()))]
+    const precache = kit.precache(pageUrls, libFiles, version)
+
+    const manifest = kit.manifest()
+    const offline = kit.offlinePage()
+    await writeFile(join(this.out, "manifest.webmanifest"), manifest, "utf8")
+    await writeFile(join(this.out, "offline.html"), offline, "utf8")
+    const closure = await Promise.all(libFiles.map(file => readFile(join(libDir, file))))
+    const build = kit.buildId([...rendered, manifest, offline, await readFile(join(this.root, "site", "style.css")),
+      ...closure, JSON.stringify(precache)])
+    const template = await readFile(join(this.root, "site", "assets", "sw.js"), "utf8")
+    await writeFile(join(this.out, "sw.js"), await kit.worker(template, precache, build), "utf8")
   }
 
   /**
@@ -300,6 +329,16 @@ ${retired}
 # while the bytes are unchanged, and picked up within one visit when they change.
 /lib/*.mjs
   Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+# The service worker and the manifest are revalidated on every visit: a worker the browser keeps for
+# a week is an app that cannot be updated for a week. (Browsers cap the worker's own cache at a day,
+# but a CDN in front of it is not bound by that.)
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/manifest.webmanifest
+  Content-Type: application/manifest+json
   Cache-Control: public, max-age=0, must-revalidate
 
 /demo-data/*
