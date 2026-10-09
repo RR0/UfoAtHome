@@ -37,6 +37,7 @@ import type { Instrument } from "../engine/instrument/Instrument.js"
 import { LightRigs } from "../engine/model/LightRig.js"
 import { DARK_SKY_LIMITING_MAGNITUDE, MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { Comets } from "../engine/astronomy/Comets.js"
+import { Filters } from "../engine/instrument/Filter.js"
 import { LunarDisc } from "../engine/astronomy/LunarDisc.js"
 import { RedMoon } from "../engine/astronomy/RedMoon.js"
 import { SolarEclipse } from "../engine/astronomy/SolarEclipse.js"
@@ -527,6 +528,8 @@ export class SightingEditorElement extends HTMLElement {
   /** Which instrument the sighting was made through — sighting data, not a view preference, and the
    * one control here that changes the geometry of every shape (see Instrument.ts). */
   private readonly instrumentSelect: HTMLSelectElement
+  private readonly filterSelect: HTMLSelectElement
+  private readonly labelFilter: HTMLElement
   /** What that instrument was SET to. Each writes the pose at the playhead, exactly as the
    * heading and the pitch do, and each is disabled when the device leaves nothing to set — see
    * syncOpticsFromInstrument. */
@@ -1188,6 +1191,8 @@ export class SightingEditorElement extends HTMLElement {
     this.soundFields = [this.soundKindSelect, this.soundVolumeInput, this.soundPitchInput, this.soundSrcInput]
     this.buildSoundKindOptions()
     this.instrumentSelect = this.shadow.getElementById("instrument") as HTMLSelectElement
+    this.filterSelect = this.shadow.getElementById("filter") as HTMLSelectElement
+    this.labelFilter = this.shadow.getElementById("label-filter")!
     this.focalLengthInput = this.shadow.getElementById("focalLength") as HTMLInputElement
     this.labelFocalLength = this.shadow.getElementById("label-focal-length")!
     this.focalFovOutput = this.shadow.getElementById("focal-fov") as HTMLOutputElement
@@ -1199,6 +1204,7 @@ export class SightingEditorElement extends HTMLElement {
     this.focusDistanceInput = this.shadow.getElementById("focusDistance") as HTMLInputElement
     this.labelFocusDistance = this.shadow.getElementById("label-focus-distance")!
     this.refreshInstrumentOptions()
+    this.refreshFilterOptions()
     this.labelColor = this.shadow.getElementById("label-color")!
     this.labelTransparency = this.shadow.getElementById("label-transparency")!
     this.labelHalo = this.shadow.getElementById("label-halo")!
@@ -1734,6 +1740,13 @@ export class SightingEditorElement extends HTMLElement {
     this.headingInput.addEventListener("focus", () => this.sceneElement.setCompassForced(true))
     this.headingInput.addEventListener("input", () => this.refreshHeadingPoint())
     this.headingInput.addEventListener("blur", () => this.sceneElement.setCompassForced(false))
+    // A filter changes no angle and no shape: only what the instrument lets through of the light, so
+    // the scene is told and nothing else has to be redrawn (see SceneElement, which pushes it each tick).
+    this.filterSelect.addEventListener("change", () => {
+      this.ufoElement.sighting.filterId = this.filterSelect.value === Filters.NONE.id ? undefined : this.filterSelect.value
+      this.ufoElement.refresh()
+      this.dispatchEvent(new CustomEvent("sightingchange"))
+    })
     this.instrumentSelect.addEventListener("change", () => {
       const previous = this.ufoElement.sighting.instrument
       this.ufoElement.sighting.instrumentId = this.instrumentSelect.value
@@ -4796,6 +4809,7 @@ export class SightingEditorElement extends HTMLElement {
     this.descriptionInput.value = this.said.read(sighting.event.description) ?? ""
     this.showTags()
     this.instrumentSelect.value = sighting.instrument.id
+    this.filterSelect.value = sighting.filter.id
     this.swayInput.value = sighting.sway?.toString() ?? ""
     this.lightPollutionInput.value = sighting.lightPollution?.toString() ?? ""
   }
@@ -5902,6 +5916,24 @@ export class SightingEditorElement extends HTMLElement {
    * said to be out of its period rather than dropped. Dropping it would silently re-instrument a
    * account; saying so leaves the reader to judge, which is this project's whole posture.
    */
+  /** The filters, named in the reader's language: the registry is the options, as for the instruments. */
+  private refreshFilterOptions(): void {
+    const names: Record<string, string> = {
+      [Filters.NONE.id]: this.messages.filterNone,
+      [Filters.SOLAR_VISUAL.id]: this.messages.filterSolarVisual,
+      [Filters.SOLAR_PHOTO.id]: this.messages.filterSolarPhoto
+    }
+    const selected = this.filterSelect.value || this.ufoElement.sighting.filter.id
+    this.filterSelect.replaceChildren()
+    for (const filter of Filters.ALL) {
+      const option = document.createElement("option")
+      option.value = filter.id
+      option.textContent = names[filter.id] ?? filter.name
+      this.filterSelect.appendChild(option)
+    }
+    this.filterSelect.value = selected
+  }
+
   private refreshInstrumentOptions(): void {
     const sighting = this.ufoElement.sighting
     const year = sighting.event.time?.year
@@ -8810,6 +8842,8 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceStreetAddButton.textContent = messages.referenceStreetAdd
     for (const [kind, option] of this.soundKindOptions) option.textContent = this.soundKindLabel(kind, messages)
     this.labelInstrument.textContent = messages.instrument
+    this.labelFilter.textContent = messages.filter
+    this.refreshFilterOptions()
     this.setRecordButtonLabel(this.isRecording)
     // Refreshes the Play/Pause button's own title/aria-label, which depends on this.messages.
     this.syncPlaybackControls()

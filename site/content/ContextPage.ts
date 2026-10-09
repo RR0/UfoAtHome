@@ -214,6 +214,11 @@ export class ContextPage implements SitePage {
       focal length settle it against the sky's own brightness.</p>
     <p>A longer pose stops helping once the sky has slid further than the lens can resolve, which is
       why an hour on a tripod is no deeper than five seconds on one — only longer trails.</p>
+    <p>Something can also be held <em>in front of</em> the instrument. A solar filter — eclipse glasses, or
+      the film that goes over a lens — cuts everything by a hundred-thousandfold: the sky goes black, no
+      star is drawn, and the Sun is left alone, which is the only way the shape of a partly eclipsed Sun
+      can be seen at all (<a href="/demos/sky/#eclipse-partial">a partial eclipse through one</a>).
+      It changes no angle, only the light; the glasses come off for totality.</p>
 
     <h2 id="pictures">A picture of the place</h2>
     <p>Everything above is computed, and a reader looking at the result has no way to tell a faithful
@@ -433,6 +438,11 @@ export class ContextPage implements SitePage {
     <p>Allonger la pose cesse d'aider dès que le ciel a glissé plus loin que ce que l'objectif sait
       séparer : une heure sur trépied ne va pas plus loin que cinq secondes, elle fait seulement des
       filés plus longs.</p>
+    <p>On peut aussi tenir quelque chose <em>devant</em> l'instrument. Un filtre solaire — lunettes d'éclipse,
+      ou film posé sur un objectif — réduit tout d'un facteur 100 000 : le ciel devient noir, aucune étoile
+      n'est dessinée, et il ne reste que le Soleil, ce qui est la seule façon de voir la forme d'un Soleil
+      en partie éclipsé (<a href="/demos/sky/#eclipse-partial">une éclipse partielle à travers l'un d'eux</a>).
+      Il ne change aucun angle, seulement la lumière ; les lunettes s'ôtent pour la totalité.</p>
 
     <h2 id="pictures">Une photo des lieux</h2>
     <p>Tout ce qui précède est calculé, et un lecteur devant le résultat n'a aucun moyen de
@@ -651,6 +661,11 @@ export class ContextPage implements SitePage {
     <p>Una exposición más larga deja de ayudar en cuanto el cielo se ha desplazado más de lo que el
       objetivo puede resolver, y por eso una hora sobre un trípode no llega más hondo que cinco
       segundos — solo da trazos más largos.</p>
+    <p>También se puede sostener algo <em>delante</em> del instrumento. Un filtro solar — gafas de eclipse, o la
+      película que se pone sobre un objetivo — reduce todo cien mil veces: el cielo se vuelve negro, no se
+      dibuja ninguna estrella, y solo queda el Sol, que es la única manera de ver la forma de un Sol
+      parcialmente eclipsado (<a href="/demos/sky/#eclipse-partial">un eclipse parcial a través de uno</a>).
+      No cambia ningún ángulo, solo la luz; las gafas se quitan para la totalidad.</p>
 
     <h2 id="pictures">Una foto del lugar</h2>
     <p>Todo lo anterior está calculado, y un lector que mira el resultado no tiene forma de
@@ -867,6 +882,11 @@ export class ContextPage implements SitePage {
     <p>Una posa più lunga smette di aiutare appena il cielo è scivolato più di quanto l'obiettivo
       possa risolvere, ed è per questo che un'ora su un treppiede non va più in profondità di cinque
       secondi — dà solo scie più lunghe.</p>
+    <p>Si può anche tenere qualcosa <em>davanti</em> allo strumento. Un filtro solare — occhiali da eclissi, o la
+      pellicola che si mette su un obiettivo — riduce tutto di centomila volte: il cielo diventa nero, nessuna
+      stella è disegnata, e resta solo il Sole, che è l'unico modo di vedere la forma di un Sole parzialmente
+      eclissato (<a href="/demos/sky/#eclipse-partial">un'eclissi parziale attraverso uno</a>).
+      Non cambia alcun angolo, solo la luce; gli occhiali si tolgono per la totalità.</p>
 
     <h2 id="pictures">Una foto del luogo</h2>
     <p>Tutto ciò che precede è calcolato, e un lettore che guarda il risultato non ha modo di

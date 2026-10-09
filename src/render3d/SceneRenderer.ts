@@ -2689,7 +2689,7 @@ export class SceneRenderer {
     const metered = medium.autoExposure ? this.scatteredSky?.sceneAdaptation : undefined
     EYE_UNIFORMS.uMediumExposure.value = metered !== undefined && metered > 0
       ? 1 / (relativeScale * metered)
-      : (0.065 * medium.exposureSeconds * medium.iso) / (medium.fNumber * medium.fNumber * relativeScale)
+      : (0.065 * medium.exposureSeconds * medium.iso * this.filterTransmittance) / (medium.fNumber * medium.fNumber * relativeScale)
   }
 
   /** What a recording medium resolves, when the instrument has one — see lampBloomRadiusRad. */
@@ -3471,10 +3471,17 @@ export class SceneRenderer {
     if (this.lastAstronomy) this.scatteredSky?.update(this.scatteredSkyState(this.lastAstronomy))
   }
 
-  setInstrumentGain(gain: number, recordsOnMedium = false): void {
-    this.instrumentMagnitudeGain = Number.isFinite(gain) ? gain : 0
-    this.scatteredSky?.setInstrument(recordsOnMedium, this.instrumentMagnitudeGain)
+  setInstrumentGain(gain: number, recordsOnMedium = false, filterDensity = 0): void {
+    const instrumentGain = Number.isFinite(gain) ? gain : 0
+    // A filter takes magnitudes off everything that is looked at: 2.5 for each unit of density, so
+    // that no star is drawn through a solar filter, and the Sun alone is left.
+    this.instrumentMagnitudeGain = instrumentGain - 2.5 * filterDensity
+    this.filterTransmittance = 10 ** -filterDensity
+    this.scatteredSky?.setInstrument(recordsOnMedium, instrumentGain, filterDensity)
   }
+
+  /** The share of the light a filter in front of the instrument lets through (see Filters). */
+  private filterTransmittance = 1
 
   /**
    * Asks for the scene to be drawn — once, at the next animation frame, however many times it is

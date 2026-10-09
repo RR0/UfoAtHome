@@ -363,6 +363,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "eclipse-partial",
+          src: "/demo-data/sky-test-eclipse-partial.json",
+          title: { en: "A partial eclipse, through a solar filter", fr: "Une éclipse partielle, à travers un filtre solaire", es: "Un eclipse parcial, a través de un filtro solar", it: "Un'eclissi parziale, attraverso un filtro solare" },
+          blurb: {
+            en: "Reims, 11 August 1999, 11:00 to 12:20: the Moon biting the Sun, seen through eclipse glasses. Without a filter a crescent Sun dazzles as much as a whole one; with one the sky goes black and the shape shows.",
+            fr: "Reims, 11 août 1999, de 11 h à 12 h 20 : la Lune qui entame le Soleil, vue à travers des lunettes d'éclipse. Sans filtre, un Soleil en croissant éblouit autant qu'un Soleil entier ; avec, le ciel devient noir et la forme apparaît.",
+            es: "Reims, 11 de agosto de 1999, de 11:00 a 12:20: la Luna mordiendo el Sol, vista a través de gafas de eclipse. Sin filtro, un Sol en creciente deslumbra tanto como uno entero; con él, el cielo se vuelve negro y la forma aparece.",
+            it: "Reims, 11 agosto 1999, dalle 11:00 alle 12:20: la Luna che morde il Sole, vista attraverso occhiali da eclissi. Senza filtro, un Sole a falce abbaglia quanto uno intero; con esso, il cielo diventa nero e la forma appare."
+          }
+        },
+        {
           id: "supermoon",
           src: "/demo-data/sky-test-supermoon.json",
           title: { en: "The giant moon", fr: "La lune géante", es: "La luna gigante", it: "La luna gigante" },

@@ -1,0 +1,169 @@
+{
+  "version": 1,
+  "id": "sky-test-eclipse-partial",
+  "tags": [
+    "eclipse",
+    "astronomy",
+    "sun",
+    "solar filter"
+  ],
+  "description": {
+    "fr": "Les phases partielles de la même éclipse totale du 11 août 1999, vues de Reims à travers un filtre solaire (lunettes d'éclipse, densité 5), de 11 h à 12 h 20 (heure d'été). Sans filtre, un Soleil en croissant éblouit autant qu'un Soleil entier et sa forme ne se voit pas ; avec lui, tout est ramené d'un facteur 100 000, le ciel devient noir, et il ne reste que le disque, que la Lune entame à partir de 11 h 06 min 30 s. La scène suit le Soleil toute seule. Le filtre se choisit dans l'éditeur (« Devant lui ») ; il ne change aucun angle, seulement la lumière qui passe, et il vaut pour l'enregistrement entier : pour la totalité, qui commence à 12 h 24 min 30 s, on retire les lunettes, ce que montre la démo précédente.",
+    "en": "The partial phases of the same total eclipse of 11 August 1999, seen from Reims through a solar filter (eclipse glasses, density 5), from 11:00 to 12:20 (summer time). Without a filter a crescent Sun dazzles as much as a whole one and its shape cannot be seen; with one, everything is cut a hundred-thousandfold, the sky goes black, and only the disc is left, which the Moon begins to bite at 11:06:30. The scene follows the Sun on its own. The filter is chosen in the editor (“In front of it”); it changes no angle, only the light that gets through, and it holds for the whole recording: for totality, which begins at 12:24:30, the glasses come off, which the previous demo shows.",
+    "es": "Las fases parciales del mismo eclipse total del 11 de agosto de 1999, vistas desde Reims a través de un filtro solar (gafas de eclipse, densidad 5), de 11:00 a 12:20 (hora de verano). Sin filtro, un Sol en creciente deslumbra tanto como uno entero y su forma no se ve; con él, todo se reduce cien mil veces, el cielo se vuelve negro y solo queda el disco, que la Luna empieza a morder a las 11:06:30. La escena sigue al Sol sola. El filtro se elige en el editor («Delante»); no cambia ningún ángulo, solo la luz que pasa, y vale para toda la grabación: para la totalidad, que empieza a las 12:24:30, se quitan las gafas, como muestra la demostración anterior.",
+    "it": "Le fasi parziali della stessa eclissi totale dell'11 agosto 1999, viste da Reims attraverso un filtro solare (occhiali da eclissi, densità 5), dalle 11:00 alle 12:20 (ora estiva). Senza filtro, un Sole a falce abbaglia quanto uno intero e la sua forma non si vede; con esso, tutto è ridotto di centomila volte, il cielo diventa nero e resta solo il disco, che la Luna comincia a mordere alle 11:06:30. La scena segue il Sole da sola. Il filtro si sceglie nell'editor («Davanti»); non cambia alcun angolo, solo la luce che passa, e vale per tutta la registrazione: per la totalità, che comincia alle 12:24:30, si tolgono gli occhiali, come mostra la demo precedente."
+  },
+  "time": {
+    "year": 1999,
+    "month": 8,
+    "day": 11,
+    "hour": 11,
+    "minute": 0
+  },
+  "utcOffsetHours": 2,
+  "durationSeconds": 4800,
+  "place": [
+    {
+      "lat": 49.2583,
+      "lng": 4.0317,
+      "name": "Reims, France"
+    }
+  ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0,
+          "cloudDarkness": 0,
+          "cloudBaseM": 2000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 0,
+          "windSpeed": 0,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 119.54,
+          "pitchDeg": 41.79,
+          "fovDeg": 5
+        }
+      },
+      {
+        "t": 600000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 122.21,
+          "pitchDeg": 43.19,
+          "fovDeg": 5
+        }
+      },
+      {
+        "t": 1200000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 124.97,
+          "pitchDeg": 44.55,
+          "fovDeg": 5
+        }
+      },
+      {
+        "t": 1800000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 127.84,
+          "pitchDeg": 45.86,
+          "fovDeg": 5
+        }
+      },
+      {
+        "t": 2400000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 130.83,
+          "pitchDeg": 47.12,
+          "fovDeg": 5
+        }
+      },
+      {
+        "t": 3000000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 133.93,
+          "pitchDeg": 48.32,
+          "fovDeg": 5
+        }
+      },
+      {
+        "t": 3600000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 137.16,
+          "pitchDeg": 49.46,
+          "fovDeg": 5
+        }
+      },
+      {
+        "t": 4200000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 140.52,
+          "pitchDeg": 50.53,
+          "fovDeg": 5
+        }
+      },
+      {
+        "t": 4800000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 144.01,
+          "pitchDeg": 51.53,
+          "fovDeg": 5
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": [],
+  "filter": "solar-visual"
+}

@@ -151,6 +151,11 @@ export interface SightingLabels {
   /** What the observation was made THROUGH — see Instrument.ts. Sighting data, unlike the view
    * above: it changes the geometry of every shape, so it belongs in the file. */
   instrument: string
+  /** What stood in front of the instrument — see Filter.ts — and the names of the choices, by Filters id. */
+  filter: string
+  filterNone: string
+  filterSolarVisual: string
+  filterSolarPhoto: string
   /**
    * The group of everything standing around the observer, and the dropdown listing it.
    *

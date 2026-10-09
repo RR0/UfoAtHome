@@ -6228,6 +6228,19 @@ describe("the sky under an observation being edited", () => {
     typeInto(element, "lng", lng)
   }
 
+  it("puts a solar filter in front of the instrument, and keeps it in the recording", async () => {
+    const element = mount()
+    const select = element.shadowRoot!.getElementById("filter") as HTMLSelectElement
+    expect([...select.options].map(option => option.value)).toEqual(["none", "solar-visual", "solar-photo"])
+    expect(select.value).toBe("none")
+    select.value = "solar-visual"
+    select.dispatchEvent(new Event("change"))
+    expect(element.sightingData?.filter).toBe("solar-visual")
+    select.value = "none"
+    select.dispatchEvent(new Event("change"))
+    expect(element.sightingData?.filter).toBeUndefined()
+  })
+
   it("names a total eclipse, and its two minutes, without anyone declaring it", async () => {
     const element = mount()
     overPlace(element, "1999-08-11 12:23", "2", "49.2583", "4.0317")

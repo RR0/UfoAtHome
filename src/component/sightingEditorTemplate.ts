@@ -86,6 +86,7 @@ export const html = `
       <option id="option-followed-no" value="no">no</option>
     </select></label>
     <label><span id="label-instrument">Observed through</span> <select id="instrument"></select></label>
+    <label><span id="label-filter">In front of it</span> <select id="filter"></select></label>
     <!-- What the device was SET to, when it could be set at all: the lens's focal length (shown as
          the field of view for an eye, which has no focal length), how far it was stopped down, and
          how long its shutter stayed open. Each falls back to the instrument's own value and each is

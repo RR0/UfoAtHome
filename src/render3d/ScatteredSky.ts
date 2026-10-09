@@ -87,6 +87,8 @@ export class ScatteredSky {
   private reading = false
   /** How much more light the instrument gathers than an eye, as a factor (see setInstrument). */
   private exposureScale = 1
+  /** The share of the light a filter in front of the instrument lets through (see setInstrument): 1 for none. */
+  private filterScale = 1
   /** Whether what is shown was seen by an eye — rods, Purkinje — or recorded by a camera. */
   private seenByEye = true
   private readAgain = false
@@ -229,12 +231,17 @@ export class ScatteredSky {
    * (LimitingMagnitude.gainFor): that light enters the same response, as if the sky were that much
    * brighter. Automatic exposure is not modelled apart from the response's own partial adaptation.
    */
-  setInstrument(recordsOnMedium: boolean, gainMagnitudes: number): void {
+  setInstrument(recordsOnMedium: boolean, gainMagnitudes: number, filterDensity = 0): void {
+    // A filter dims what is LOOKED AT and not what the eye is adapted to: whoever wears eclipse
+    // glasses stands in daylight, adapted to it, and sees the sky black through them — which is why
+    // it is a separate factor from the exposure, which a camera's adaptation does follow.
     const scale = recordsOnMedium ? 10 ** (0.4 * gainMagnitudes) : 1
-    if (scale === this.exposureScale && this.seenByEye === !recordsOnMedium) return
+    const filter = 10 ** -filterDensity
+    if (scale === this.exposureScale && filter === this.filterScale && this.seenByEye === !recordsOnMedium) return
     this.exposureScale = scale
+    this.filterScale = filter
     this.seenByEye = !recordsOnMedium
-    this.material.uniforms.uExposureScale.value = scale
+    this.material.uniforms.uExposureScale.value = scale * filter
     this.applyAdaptation(this.adaptingLuminance)
     this.onChange()
   }
@@ -391,8 +398,8 @@ export class ScatteredSky {
     this.clearAdaptation = Math.exp(logSum / weightSum)
     this.applyAdaptation(this.clearAdaptation * this.surroundingsFactor)
     const relative = ([x, y, z, s]: readonly number[]) => {
-      const scale = this.exposureScale
-      const adapted = this.adaptingLuminance * scale
+      const scale = this.exposureScale * this.filterScale
+      const adapted = this.adaptingLuminance * this.exposureScale
       // Photopic: the rods' shift is the finish's, on the whole picture (see EYE_RESPONSE_GLSL).
       return EyeAdaptation.relativeOf([x * scale, y * scale, z * scale], s * scale, adapted, 0)
     }
@@ -464,8 +471,8 @@ export class ScatteredSky {
       luminanceCdM2,
       k * (0.0193 * r + 0.1192 * g + 0.9505 * b)
     ]
-    const scale = this.exposureScale
-    const adapted = this.adaptingLuminance * scale
+    const scale = this.exposureScale * this.filterScale
+    const adapted = this.adaptingLuminance * this.exposureScale
     return EyeAdaptation.relativeOf(
       [xyz[0] * scale, xyz[1] * scale, xyz[2] * scale], xyz[1] * scale, adapted, 0)
   }
@@ -480,7 +487,7 @@ export class ScatteredSky {
    * eye's semi-saturation. A light of the scene given in physical units is multiplied by this. */
   get relativeScale(): number {
     const adapted = this.adaptingLuminance * this.exposureScale
-    return this.exposureScale / EyeAdaptation.semiSaturation(adapted)
+    return (this.exposureScale * this.filterScale) / EyeAdaptation.semiSaturation(adapted)
   }
 
   /** `adaptingLuminance` is the sky's own; what the eye or the film adapts to is that times the exposure. */

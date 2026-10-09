@@ -97,6 +97,8 @@ export interface SightingRecordingJson {
   /** Which INSTRUMENTS entry this was observed through — see Sighting.instrumentId. Absent means
    * the naked eye, and every recording made before this field existed is one. */
   instrument?: string
+  /** Which FILTERS entry stood in front of it, by id — see Sighting.filterId. Absent means none. */
+  filter?: string
   /** How long the shutter stayed open, seconds — one value for the whole observation, see
    * Sighting.exposureSeconds. Absent means the device's own. Recordings written while this lived on
    * each pose are read back through the first pose that stated one (see fromSightingJson). */
@@ -168,6 +170,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     traces: sighting.traces.length > 0 ? sighting.traces : undefined,
     weatherSource: sighting.weatherSource,
     instrument: sighting.instrumentId,
+    filter: sighting.filterId,
     exposureSeconds: sighting.exposureSeconds,
     iso: sighting.iso,
     lightPollution: sighting.lightPollution,
@@ -230,7 +233,8 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
     sortedMilestones(json.milestones ?? []),
     json.references ?? [],
     json.roads ?? [],
-    json.traces ?? []
+    json.traces ?? [],
+    json.filter
   )
   // The file states an angle; the drawing has to follow it. Done here rather than in
   // Timeline.fromJSON because the projection needs the pose's own field of view, which lives on
