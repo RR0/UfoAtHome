@@ -139,41 +139,44 @@ beforeAll(() => {
   const emptyRects = () => ({ length: 0, item: () => null, [Symbol.iterator]: function* () {} }) as unknown as DOMRectList
   Range.prototype.getClientRects ??= emptyRects
   Range.prototype.getBoundingClientRect ??= () => new DOMRect()
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
-    // mockImplementation, not mockReturnValue: a renderer that sizes itself from its own canvas
+  HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement) {
+    // A fresh object per canvas, not one shared: a renderer that sizes itself from its own canvas
     // (see ObserverMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
-    // be the same one.
+    // be the same one. Plain no-ops, not vi.fn(): vitest keeps every mock it ever made (and the `this` each
+    // was called on, here the context and so its canvas and the whole editor around it) for the life of
+    // the worker, which is what held every mounted editor in memory after its test.
+    const noop = (): void => {}
     return {
       canvas: this,
-      save: vi.fn(),
-      restore: vi.fn(),
-      beginPath: vi.fn(),
-      closePath: vi.fn(),
-      fill: vi.fn(),
-      ellipse: vi.fn(),
-      moveTo: vi.fn(),
-      lineTo: vi.fn(),
-      translate: vi.fn(),
-      rotate: vi.fn(),
-      clearRect: vi.fn(),
-      strokeRect: vi.fn(),
-      stroke: vi.fn(),
-      fillRect: vi.fn(),
-      arc: vi.fn(),
-      fillText: vi.fn(),
-      strokeText: vi.fn(),
-      drawImage: vi.fn(),
-      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
-      measureText: vi.fn((text: string) => ({ width: text.length * 5 })),
+      save: noop,
+      restore: noop,
+      beginPath: noop,
+      closePath: noop,
+      fill: noop,
+      ellipse: noop,
+      moveTo: noop,
+      lineTo: noop,
+      translate: noop,
+      rotate: noop,
+      clearRect: noop,
+      strokeRect: noop,
+      stroke: noop,
+      fillRect: noop,
+      arc: noop,
+      fillText: noop,
+      strokeText: noop,
+      drawImage: noop,
+      createRadialGradient: () => ({ addColorStop: noop }),
+      measureText: (text: string) => ({ width: text.length * 5 }),
     } as unknown as CanvasRenderingContext2D
-  })
+  } as unknown as typeof HTMLCanvasElement.prototype.getContext
   // The nested <rr0-scene> lazily fetches the star catalog on connect — stub a tiny valid
   // response so that fire-and-forget fetch resolves instead of rejecting (jsdom's fetch can't
   // resolve a relative URL against a real page origin anyway). Plain assignment, not
   // vi.stubGlobal: the "export button" describe block below calls vi.unstubAllGlobals() in its
   // own afterEach to clean up its own Blob/URL stubs, which would otherwise also wipe these two
   // needed by every other describe block's mount().
-  globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
+  globalThis.fetch = (() => Promise.resolve({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) })) as unknown as typeof fetch
   // jsdom has no ResizeObserver — SceneElement.connectedCallback() (also nested now) uses one to
   // track its canvas size.
   globalThis.ResizeObserver = class {
@@ -181,6 +184,15 @@ beforeAll(() => {
     unobserve(): void {}
     disconnect(): void {}
   } as unknown as typeof ResizeObserver
+})
+
+// Whatever a test spied on (a canvas' getBoundingClientRect, a window method) is released with it, and the
+// editors it mounted go with the page. vitest keeps every spy in a registry for the life of the worker, and a
+// spy holds what it was set on: a spied canvas kept its editor, and everything the editor nests, alive
+// until the file ended, which took this file past 4 GB of heap.
+afterEach(() => {
+  document.body.innerHTML = ""
+  vi.restoreAllMocks()
 })
 
 /** Weather is looked up from a real meteorological record as soon as a recording states a date and
@@ -313,7 +325,7 @@ describe("SightingEditorElement appearance toolbar", () => {
     // describe block for the same drag mechanics, reused inline here since this test cares about
     // what happens to the RESULT after that edit, not the drag itself).
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
-    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     const shapeBefore = element.sightingData.timeline.keyframes[0].shapes[0].shape as { bounds: { x: number; y: number } }
     canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: shapeBefore.bounds.x, clientY: shapeBefore.bounds.y }))
     document.dispatchEvent(new MouseEvent("pointermove", { clientX: shapeBefore.bounds.x - 15, clientY: shapeBefore.bounds.y - 10 }))
@@ -1046,7 +1058,7 @@ describe("SightingEditorElement composes a nested rr0-ufo", () => {
     const shadow = element.shadowRoot!
     const recordButton = shadow.getElementById("record") as HTMLButtonElement
     const canvas = nestedUfo(element).shadowRoot!.getElementById("canvas") as HTMLCanvasElement
-    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0 } as DOMRect)
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0 } as DOMRect)
 
     recordButton.click()
     // jsdom has no global PointerEvent; onPointerMove only reads clientX/clientY, so a
@@ -1543,7 +1555,7 @@ describe("SightingEditorElement click-to-select", () => {
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     // 1:1 scale (matches the canvas's own 640x360 drawing buffer) so click coordinates map
     // directly onto Shape.bounds without needing to account for scaling in the test itself.
-    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return canvas
   }
 
@@ -1702,7 +1714,7 @@ describe("SightingEditorElement right-click context menu", () => {
 
   function nestedCanvas(element: SightingEditorElement): HTMLCanvasElement {
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
-    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return canvas
   }
 
@@ -1734,10 +1746,9 @@ describe("SightingEditorElement right-click context menu", () => {
     const menu = element.shadowRoot!.getElementById("context-menu") as HTMLElement
 
     const event = new MouseEvent("contextmenu", { clientX: 105, clientY: 105, bubbles: true, cancelable: true, composed: true })
-    const preventDefault = vi.spyOn(event, "preventDefault")
     canvas.dispatchEvent(event)
 
-    expect(preventDefault).toHaveBeenCalled()
+    expect(event.defaultPrevented).toBe(true)
     expect(menu.hidden).toBe(false)
     const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
     expect(sourceSelect.value).toBe("ufo-2") // the shape actually under the cursor, not whatever was selected before
@@ -2015,7 +2026,7 @@ describe("SightingEditorElement Delete/Backspace key", () => {
   it("takes the focus when the canvas is used, so its own keys reach it at all", () => {
     const element = mount()
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
-    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     const foreign = document.createElement("input")
     document.body.appendChild(foreign)
     foreign.focus()
@@ -2037,7 +2048,7 @@ describe("SightingEditorElement drag-to-move/resize/rotate", () => {
 
   function nestedCanvas(element: SightingEditorElement): HTMLCanvasElement {
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
-    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return canvas
   }
 
@@ -2774,10 +2785,10 @@ describe("SightingEditorElement canvas mode", () => {
    * then never under the pointer. */
   function lookingAsTheObserver(element: SightingEditorElement): void {
     const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as { directionAt: (x: number, y: number) => Vector3 }
-    vi.spyOn(scene, "directionAt").mockImplementation((ndcX: number, ndcY: number) => {
+    scene.directionAt = (ndcX: number, ndcY: number) => {
       const az = ((288 + ndcX * 53) * Math.PI) / 180, alt = ((2 + ndcY * 30) * Math.PI) / 180
       return new Vector3(Math.cos(alt) * Math.sin(az), Math.sin(alt), -Math.cos(alt) * Math.cos(az))
-    })
+    }
   }
 
   function open(element: SightingEditorElement, groupId: string): void {
@@ -2787,7 +2798,7 @@ describe("SightingEditorElement canvas mode", () => {
 
   function drag(element: SightingEditorElement, from: { x: number; y: number }, to: { x: number; y: number }): void {
     const canvas = nestedUfo(element).shadowRoot!.getElementById("canvas") as HTMLCanvasElement
-    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: from.x, clientY: from.y }))
     document.dispatchEvent(new MouseEvent("pointermove", { clientX: to.x, clientY: to.y }))
     document.dispatchEvent(new MouseEvent("pointerup", { clientX: to.x, clientY: to.y }))
@@ -3180,7 +3191,7 @@ describe("SightingEditorElement multi-select", () => {
 
   function nestedCanvas(element: SightingEditorElement): HTMLCanvasElement {
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
-    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return canvas
   }
 
@@ -4274,13 +4285,13 @@ describe("SightingEditorElement decor click-to-select", () => {
       decor: [{ id: "decor-1", kind: "building", eastM: 0, northM: 10, title: "Maison" }]
     }
     const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
-    const pickDecorAtSpy = vi.fn(() => "decor-1")
-    sceneEl.pickDecorAt = pickDecorAtSpy
+    let pickDecorAtCalls = 0
+    sceneEl.pickDecorAt = () => { pickDecorAtCalls++; return "decor-1" }
 
     clickCanvas(element)
 
     const shadow = element.shadowRoot!
-    expect(pickDecorAtSpy).not.toHaveBeenCalled()
+    expect(pickDecorAtCalls).toBe(0)
     expect((shadow.getElementById("source") as HTMLSelectElement).value).toBe("ufo-9")
   })
 
@@ -4302,7 +4313,7 @@ describe("SightingEditorElement polygon vertex editing", () => {
 
   function nestedCanvas(element: SightingEditorElement): HTMLCanvasElement {
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
-    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return canvas
   }
 
@@ -4485,7 +4496,7 @@ describe("SightingEditorElement hover cursor", () => {
 
   function nestedCanvas(element: SightingEditorElement): HTMLCanvasElement {
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
-    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return canvas
   }
 
@@ -5944,11 +5955,11 @@ describe("the map of where the observer stood, in the editor", () => {
   it("writes what the author leaves open or closed into the recording, so that a reader is shown the same", () => {
     const element = mount()
     element.sightingData = stationary() as never
-    const changed = vi.fn()
-    element.addEventListener("sightingchange", changed)
+    let changes = 0
+    element.addEventListener("sightingchange", () => { changes++ })
     ;(nestedUfo(element) as unknown as { toggleObserverMap(): void }).toggleObserverMap()
     expect(element.sightingData.observerMap).toBe(true)
-    expect(changed).toHaveBeenCalled()
+    expect(changes).toBeGreaterThan(0)
     ;(nestedUfo(element) as unknown as { toggleObserverMap(): void }).toggleObserverMap()
     expect(element.sightingData.observerMap).toBe(false)
   })
@@ -6718,7 +6729,7 @@ describe("SightingEditorElement body handles", () => {
     tab("shape-bodies", ".subgroup-tab").click()
     await waitFor(() => shadow.getElementById("body-title") !== null)
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
-    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return { element, canvas }
   }
 
