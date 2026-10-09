@@ -129,6 +129,12 @@ export class ContextPage implements SitePage {
       1006 to RS Ophiuchi in 2021. Their brightness is measured by the AAVSO for every nova up to
       2006, reconstructed from Tycho's and Kepler's own comparisons for 1572 and 1604, and held to a
       few chronicled dates for 1054 and 1181; each one says which.</p>
+    <p><strong>Eclipses</strong> are never declared. At every instant the Sun's and the Moon's positions
+      as seen from the observer's own place, parallax included, say how much of the Sun's disc the
+      Moon covers; the scene draws that crescent, the daylight it leaves, the corona when nothing is
+      left, and the stars and planets the darker sky then allows. It is why 11 August 1999 is total at
+      Reims and a mere 99&nbsp;% at Paris. Seen bare-eyed, a crescent Sun is still a dazzling one: the
+      shape shows through a filter, as it does for anyone who looks.</p>
     <p><strong>Meteor showers</strong> come with their radiant and their hourly rate for that night,
       over the sporadic background that never stops.</p>
     <p><strong>Recorded fireballs</strong> are events, not rates: since December 2018 the Global
@@ -326,6 +332,13 @@ export class ContextPage implements SitePage {
       novae jusqu'en 2006, reconstitué d'après les comparaisons de Tycho et de Kepler eux-mêmes pour
       1572 et 1604, et tenu à quelques dates des chroniques pour 1054 et 1181 ; chacune dit ce
       qu'il en est.</p>
+    <p>Les <strong>éclipses</strong> ne sont jamais déclarées. À chaque instant, les positions du Soleil
+      et de la Lune vues de la place même de l'observateur, parallaxe comprise, disent quelle part du
+      disque solaire la Lune recouvre ; la scène dessine ce croissant, le jour qu'il laisse, la couronne
+      quand il ne reste rien, et les étoiles et planètes que le ciel plus sombre permet alors. C'est ce
+      qui rend le 11 août 1999 total à Reims et seulement à 99&nbsp;% à Paris. À l'œil nu, un Soleil en
+      croissant reste éblouissant : sa forme ne se voit qu'à travers un filtre, comme pour quiconque
+      regarde.</p>
     <p>Les <strong>pluies de météores</strong> ont leur radiant et leur taux horaire pour cette
       nuit-là, au-dessus du fond sporadique qui, lui, ne s'arrête jamais.</p>
     <p>Les <strong>bolides enregistrés</strong> sont des événements, pas des taux : depuis décembre
@@ -533,6 +546,13 @@ export class ContextPage implements SitePage {
       para cada nova hasta 2006, reconstruido a partir de las propias comparaciones de Tycho y de
       Kepler para 1572 y 1604, y ceñido a unas pocas fechas de las crónicas para 1054 y 1181; cada
       una dice cuál es su caso.</p>
+    <p>Los <strong>eclipses</strong> nunca se declaran. En cada instante, las posiciones del Sol y de la
+      Luna vistas desde el lugar mismo del observador, paralaje incluida, dicen qué parte del disco
+      solar cubre la Luna; la escena dibuja ese creciente, la luz del día que deja, la corona cuando no
+      queda nada, y las estrellas y los planetas que permite entonces el cielo más oscuro. Por eso el
+      11 de agosto de 1999 es total en Reims y solo del 99&nbsp;% en París. A simple vista, un Sol en
+      creciente sigue deslumbrando: su forma solo se ve a través de un filtro, como para cualquiera
+      que mire.</p>
     <p><strong>Las lluvias de meteoros</strong> llegan con su radiante y su tasa horaria de esa noche,
       sobre el fondo esporádico que nunca se detiene.</p>
     <p><strong>Los bólidos registrados</strong> son sucesos, no tasas: desde diciembre de 2018 las
@@ -736,6 +756,12 @@ export class ContextPage implements SitePage {
       per ogni nova fino al 2006, ricostruita dai confronti di Tycho e di Keplero stessi per il 1572 e
       il 1604, e ancorata a poche date delle cronache per il 1054 e il 1181; ciascuna dice quale sia il
       suo caso.</p>
+    <p>Le <strong>eclissi</strong> non sono mai dichiarate. A ogni istante, le posizioni del Sole e della
+      Luna viste dal luogo stesso dell'osservatore, parallasse compresa, dicono quanta parte del disco
+      solare la Luna copre; la scena disegna quella falce, la luce del giorno che lascia, la corona
+      quando non resta nulla, e le stelle e i pianeti che il cielo più buio consente allora. Per questo
+      l'11 agosto 1999 è totale a Reims e solo al 99&nbsp;% a Parigi. A occhio nudo, un Sole a falce
+      resta abbagliante: la sua forma si vede solo attraverso un filtro, come per chiunque guardi.</p>
     <p><strong>Gli sciami meteorici</strong> arrivano con il loro radiante e il loro tasso orario per
       quella notte, sopra il fondo sporadico che non si ferma mai.</p>
     <p><strong>I bolidi registrati</strong> sono eventi, non tassi: dal dicembre 2018 le telecamere

@@ -11,6 +11,8 @@ export interface ScatteredSkyState {
    * Sighting.lightPollution); undefined for a natural sky. */
   readonly lightPollution?: number
   readonly sun: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number }
+  /** The share of the Sun's light the sky is lit with, 1 when nothing is in front of it: an eclipse's (see SolarEclipse.skyFraction). */
+  readonly sunLight?: number
   readonly moon: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number; readonly phaseAngleDeg: number }
 }
 
@@ -103,6 +105,7 @@ export class ScatteredSky {
         uSunAzimuth: { value: new Vector2(0, -1) },
         uMoonAzimuth: { value: new Vector2(0, -1) },
         uMoonScale: { value: 0 },
+        uSunScale: { value: 1 },
         uObserverRadius: { value: AtmosphereProfile.GROUND_RADIUS_M + 2 },
         uAirglow: { value: new Vector4(...ScatteredSky.airglowXyzs()) },
         uArtificial: { value: new Vector4(0, 0, 0, 0) },
@@ -128,6 +131,7 @@ export class ScatteredSky {
         uniform vec2 uSunAzimuth;
         uniform vec2 uMoonAzimuth;
         uniform float uMoonScale;
+        uniform float uSunScale;
         uniform float uObserverRadius;
         uniform vec4 uAirglow;
         uniform vec4 uArtificial;
@@ -182,7 +186,7 @@ export class ScatteredSky {
 
         void main() {
           vec3 dir = normalize(vDirection);
-          vec4 light = fetchView(uSunView, viewUv(dir, uSunAzimuth)) + uMoonScale * fetchView(uMoonView, viewUv(dir, uMoonAzimuth));
+          vec4 light = uSunScale * fetchView(uSunView, viewUv(dir, uSunAzimuth)) + uMoonScale * fetchView(uMoonView, viewUv(dir, uMoonAzimuth));
           if (dir.y > 0.0) {
             float sinZenith2 = 1.0 - dir.y * dir.y;
             float vanRhijn = inversesqrt(max(1.0 - AIRGLOW_RATIO * AIRGLOW_RATIO * sinZenith2, 1e-4));
@@ -274,8 +278,11 @@ export class ScatteredSky {
     uniforms.uSunAzimuth.value.copy(ScatteredSky.azimuthVector(state.sun.azimuthDeg))
     uniforms.uMoonAzimuth.value.copy(ScatteredSky.azimuthVector(state.moon.azimuthDeg))
     uniforms.uMoonScale.value = 10 ** (-0.4 * (state.moon.magnitude - ScatteredSky.SUN_MAGNITUDE))
+    const sunScale = state.sunLight ?? 1
+    uniforms.uSunScale.value = sunScale
     uniforms.uObserverRadius.value = AtmosphereProfile.GROUND_RADIUS_M + Math.max(state.altitudeM, 2)
-    if (key !== this.drawnKey) {
+    const redrawn = key !== this.drawnKey
+    if (redrawn) {
       this.tables.renderSkyViews(state.altitudeM, state.sun.altitudeDeg, state.moon.altitudeDeg)
       const first = !this.hasViews
       this.hasViews = true
@@ -285,8 +292,16 @@ export class ScatteredSky {
       // and it is cheap to have the first frame's adaptation confirmed a frame later.
       void this.readBack()
     }
+    // A Sun that has dimmed or come back without moving (an eclipse) changes no key above, and the
+    // views it is drawn from are the same: only what the eye makes of them is stale.
+    if (sunScale !== this.drawnSunScale) {
+      this.drawnSunScale = sunScale
+      if (this.views && !redrawn) this.adaptFromViews(this.views.sun, this.views.moon, state)
+    }
     this.onChange()
   }
+
+  private drawnSunScale = 1
 
   /** Reads the views back for the eye's adaptation and the ambient colours; one read at a time. */
   private async readBack(): Promise<void> {
@@ -350,6 +365,7 @@ export class ScatteredSky {
   private adaptFromViews(sun: Float32Array, moon: Float32Array, state: ScatteredSkyState): void {
     this.views = { sun, moon }
     const moonScale = 10 ** (-0.4 * (state.moon.magnitude - ScatteredSky.SUN_MAGNITUDE))
+    const sunScale = state.sunLight ?? 1
     const airglow = ScatteredSky.airglowXyzs()
     const artificial = ScatteredSky.artificialXyzs(state.lightPollution)
     const lightAt = (altitudeDeg: number, azimuthDeg: number, withAirglow = true): [number, number, number, number] => {
@@ -360,7 +376,7 @@ export class ScatteredSky {
       const m = ScatteredSky.bilinear(moon, moonUv.u, moonUv.v)
       const glow = withAirglow && altitudeDeg > 0 ? ScatteredSky.airglowFactor(altitudeDeg) : 0
       const towns = altitudeDeg > 0 ? NightSkyBrightness.artificialShape(altitudeDeg) : 0
-      return [0, 1, 2, 3].map(c => s[c] + moonScale * m[c] + airglow[c] * glow + artificial[c] * towns) as [number, number, number, number]
+      return [0, 1, 2, 3].map(c => sunScale * s[c] + moonScale * m[c] + airglow[c] * glow + artificial[c] * towns) as [number, number, number, number]
     }
     // The eye adapts to the upper hemisphere, weighted by solid angle, in log.
     let logSum = 0

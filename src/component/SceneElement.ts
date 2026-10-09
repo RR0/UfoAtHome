@@ -25,6 +25,7 @@ import {
   TRACKED_PLANETS
 } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
+import { SolarEclipse } from "../engine/astronomy/SolarEclipse.js"
 import { geoToLocalMeters } from "../render3d/terrain/GeoProjection.js"
 import { resolveActualWeatherAt, resolveObserverPoseAt, resolveWeatherAt } from "../engine/model/Sighting.js"
 import { Gait } from "../engine/place/Gait.js"
@@ -1532,10 +1533,19 @@ export class SceneElement extends HTMLElement {
       return
     }
     this.lastSkyKey = skyKey
-    const sun = { ...computeBodyPosition("Sun", date, observer), magnitude: computeBodyMagnitude("Sun", date) }
+    const sunPosition = computeBodyPosition("Sun", date, observer)
+    const moonPosition = computeBodyPosition("Moon", date, observer)
+    // Worked out for every date and place, never declared: the ephemeris is only asked once the two
+    // discs are within a degree of each other, which is a handful of minutes in a year.
+    const eclipse = SolarEclipse.separationOf(sunPosition, moonPosition) < 1 ? SolarEclipse.viewAt(date, observer) : undefined
+    // What reaches the observer is what the Moon leaves of the Sun's disc (plus the corona).
+    const sun = {
+      ...sunPosition,
+      magnitude: computeBodyMagnitude("Sun", date) - 2.5 * Math.log10(SolarEclipse.beamFraction(eclipse))
+    }
     this.lastSun = { altitudeDeg: sun.altitudeDeg, azimuthDeg: sun.azimuthDeg }
     const moon = {
-      ...computeBodyPosition("Moon", date, observer),
+      ...moonPosition,
       phase: computeMoonPhase(date),
       magnitude: computeBodyMagnitude("Moon", date)
     }
@@ -1561,7 +1571,8 @@ export class SceneElement extends HTMLElement {
       stars: this.starCatalog ? { catalog: this.starCatalog, date, observer } : undefined,
       // The same date and place again, and deliberately not folded into `stars`: the Milky Way and
       // the zodiacal light need no catalog to arrive first (see SceneAstronomy.frame).
-      frame: { date, observer }
+      frame: { date, observer },
+      eclipse
     })
     // The player's own map borrows a daytime photograph of this ground whatever hour the account is
     // about, so it has to be told what hour that was — see UfoElement.setSunAltitude. Told from

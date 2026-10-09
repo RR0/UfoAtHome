@@ -352,6 +352,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "eclipse",
+          src: "/demo-data/sky-test-eclipse.json",
+          title: { en: "A total solar eclipse", fr: "Une éclipse totale de Soleil", es: "Un eclipse total de Sol", it: "Un'eclissi totale di Sole" },
+          blurb: {
+            en: "Reims, 11 August 1999, 12:23 to 12:28: totality begins at 12:24:30. Nothing is declared: the Moon's position over the Sun's, worked out for this place and this second, gives the light that fails, the corona and the stars. Paris, 130 km away, had only 99%.",
+            fr: "Reims, 11 août 1999, de 12 h 23 à 12 h 28 : la totalité commence à 12 h 24 min 30 s. Rien n'est déclaré : la position de la Lune sur celle du Soleil, calculée pour ce lieu et cette seconde, donne le jour qui baisse, la couronne et les étoiles. Paris, à 130 km, n'avait que 99 %.",
+            es: "Reims, 11 de agosto de 1999, de 12:23 a 12:28: la totalidad empieza a las 12:24:30. Nada se declara: la posición de la Luna sobre la del Sol, calculada para este lugar y este segundo, da la luz que baja, la corona y las estrellas. París, a 130 km, solo tuvo el 99 %.",
+            it: "Reims, 11 agosto 1999, dalle 12:23 alle 12:28: la totalità comincia alle 12:24:30. Nulla è dichiarato: la posizione della Luna sopra quella del Sole, calcolata per questo luogo e questo secondo, dà la luce che cala, la corona e le stelle. Parigi, a 130 km, ebbe solo il 99 %."
+          }
+        },
+        {
           id: "meteors",
           src: "/demo-data/sky-test-meteors.json",
           title: { en: "A meteor shower", fr: "Une pluie de météores", es: "Una lluvia de meteoros", it: "Uno sciame meteorico" },

@@ -135,6 +135,8 @@ import { HumidHaze } from "../engine/atmosphere/HumidHaze.js"
 import { AerialPerspective } from "../engine/atmosphere/AerialPerspective.js"
 import type { Rgb } from "../engine/atmosphere/AerialPerspective.js"
 import { AerialFog } from "./AerialFog.js"
+import { SolarEclipse, type SolarEclipseView } from "../engine/astronomy/SolarEclipse.js"
+import { EclipsedSun, SolarCorona } from "./EclipsedSun.js"
 import { ForwardDiffraction } from "../engine/atmosphere/ForwardDiffraction.js"
 import { AircraftLighting } from "../engine/traffic/AircraftLighting.js"
 import { TrafficIds } from "../engine/traffic/TrafficIds.js"
@@ -748,6 +750,12 @@ export interface SceneAstronomy {
    * reason it could name.
    */
   frame?: { date: Date; observer: ObserverGeo }
+  /**
+   * The Moon's disc over the Sun's, when the two are close enough to touch (see SolarEclipse). The Sun's
+   * magnitude above is already the dimmed one: what the Moon leaves of the disc, which is what reaches
+   * the observer. This tells the renderer how to cut the disc and when to show the corona.
+   */
+  eclipse?: SolarEclipseView
 }
 
 /**
@@ -1304,6 +1312,12 @@ export class SceneRenderer {
   private iceHalos?: IceHaloEffect
   /** The aureole and corona round the Moon — see SourceDiffraction. */
   private lunarDiffraction?: SourceDiffraction
+  /** The cut the Moon makes in the Sun's disc, and the corona seen when it is whole (see EclipsedSun). */
+  private readonly eclipsedSun = new EclipsedSun()
+  private solarCorona?: SolarCorona
+  /** The beam's share the Moon leaves, and the Sun's disc radiance in the scene's units: what the corona is a millionth of. */
+  private sunBeamFraction = 1
+  private sunDiscRadiance: [number, number, number] = [0, 0, 0]
   /** What the Moon's glow was last worked out for, so it is only worked out again when that changes. */
   private lunarDiffractionKey = ""
   /** What falling water did to it — see RainbowEffect. The two are independent and a sky may
@@ -2815,11 +2829,53 @@ export class SceneRenderer {
   /** The Sun, the Moon, the planets, a comet and any nova, at what arrives of their light. */
   private placeBodies(astronomy: SceneAstronomy, magnitudeLimit: number): void {
     this.bodiesScale = this.relativeScale
+    this.sunBeamFraction = SolarEclipse.beamFraction(astronomy.eclipse)
     this.setBodyMesh("sun", astronomy.sun, SUN_MOON_VISUAL_RADIUS, new Color(1, 0.96, 0.88), astronomy.sun.magnitude)
+    this.placeEclipse(astronomy)
     this.setMoonMesh(astronomy.moon, magnitudeLimit)
     this.buildPlanets(astronomy.planets, magnitudeLimit)
     this.buildComet(astronomy.comet, magnitudeLimit)
     this.buildNovae(astronomy.novae ?? [], magnitudeLimit)
+  }
+
+  /**
+   * The Moon in front of the Sun: cuts its disc, and shows the corona once nothing but the Moon is in
+   * the way of it. The two discs are drawn at the Sun's drawn size (see SUN_MOON_VISUAL_RADIUS), their
+   * radii and the distance between their centres all scaled by the same factor from the real ones, so
+   * that however the drawn Sun differs from the true one on the day, what the Moon covers of it is
+   * what SolarEclipse worked out.
+   */
+  private placeEclipse(astronomy: SceneAstronomy): void {
+    const view = astronomy.eclipse
+    if (!view || astronomy.sun.altitudeDeg < BODY_HIDE_BELOW_DEG) {
+      this.eclipsedSun.setMoon(undefined)
+      this.solarCorona?.show(undefined, { x: 0, y: 1, z: 0 }, 2, [0, 0, 0])
+      return
+    }
+    const drawnRadiusDeg = (SUN_MOON_VISUAL_RADIUS / BODY_PLACEMENT_RADIUS) * (180 / Math.PI)
+    const scale = drawnRadiusDeg / view.sunRadiusDeg
+    const sun = horizontalToCartesian(astronomy.sun.altitudeDeg, astronomy.sun.azimuthDeg, 1)
+    const moon = horizontalToCartesian(astronomy.moon.altitudeDeg, astronomy.moon.azimuthDeg, 1)
+    // The Moon's drawn centre: along the arc from the Sun to the Moon, as far as the scaled separation.
+    const angle = Math.acos(clamp(sun.x * moon.x + sun.y * moon.y + sun.z * moon.z, -1, 1))
+    const along = angle > 1e-9 ? clamp((view.separationDeg * scale * DEG_TO_RAD) / angle, 0, 2) : 0
+    const sinAngle = Math.sin(angle)
+    const [from, to] = angle > 1e-9
+      ? [Math.sin((1 - along) * angle) / sinAngle, Math.sin(along * angle) / sinAngle]
+      : [1, 0]
+    const centre = { x: sun.x * from + moon.x * to, y: sun.y * from + moon.y * to, z: sun.z * from + moon.z * to }
+    const moonRadiusDeg = view.moonRadiusDeg * scale
+    this.eclipsedSun.setMoon(centre, moonRadiusDeg)
+    // Under nine tenths hidden the corona is a millionth of a light that is still there: nothing to draw.
+    if (view.obscuration < 0.9) {
+      this.solarCorona?.show(undefined, centre, 2, [0, 0, 0])
+      return
+    }
+    if (!this.solarCorona) {
+      this.solarCorona = new SolarCorona((drawnRadiusDeg * Math.PI) / 180)
+      this.celestialGroup.add(this.solarCorona.object)
+    }
+    this.solarCorona.show(sun, centre, Math.cos(moonRadiusDeg * DEG_TO_RAD), this.sunDiscRadiance)
   }
 
   /** The relative scale the bodies were last placed at: a body is drawn from its light in the
@@ -2976,6 +3032,8 @@ export class SceneRenderer {
       altitudeM: this.siteElevationM + this.observerElevationM + 1.6,
       lightPollution: this.lightPollution,
       sun: { altitudeDeg: astronomy.sun.altitudeDeg, azimuthDeg: astronomy.sun.azimuthDeg, magnitude: astronomy.sun.magnitude },
+      // The sky keeps more of its light than the beam does: the air beyond the Moon's shadow still lights it.
+      sunLight: SolarEclipse.skyFraction(astronomy.eclipse),
       moon: {
         altitudeDeg: astronomy.moon.altitudeDeg,
         azimuthDeg: astronomy.moon.azimuthDeg,
@@ -5231,10 +5289,15 @@ export class SceneRenderer {
     if (key === "sun") {
       // The Sun's disc is resolved: its illuminance over its own solid angle is its luminance.
       const solidAngle = Math.PI * (visualRadius / BODY_PLACEMENT_RADIUS) ** 2
-      const shown = [0, 1, 2].map(c => Math.min(SceneRenderer.BRIGHTEST_RELATIVE, (hue[c] * arriving[c]) / solidAngle))
+      // The luminance of the disc is the same in an eclipse as out of it: the Moon takes away part of
+      // the disc, not light from each of its points. What arrives is what the Moon left, so the disc's
+      // own light is that over the share left (and the corona is a millionth of this one).
+      const fullDisc = [0, 1, 2].map(c => (hue[c] * arriving[c]) / (this.sunBeamFraction * solidAngle)) as [number, number, number]
+      this.sunDiscRadiance = fullDisc
+      const shown = fullDisc.map(light => Math.min(SceneRenderer.BRIGHTEST_RELATIVE, light))
       if (!(mesh instanceof Mesh)) {
         this.disposeMesh(mesh)
-        mesh = new Mesh(new SphereGeometry(1, 16, 16), new MeshBasicMaterial({ fog: false }))
+        mesh = new Mesh(new SphereGeometry(1, 16, 16), this.eclipsedSun.material())
         this.celestialGroup.add(mesh)
         this.bodyMeshes.set(key, mesh)
       }

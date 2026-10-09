@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "id": "sky-test-eclipse",
+  "tags": [
+    "eclipse",
+    "astronomy",
+    "sun",
+    "moon"
+  ],
+  "description": {
+    "fr": "Un ciel d'essai pour une éclipse totale de Soleil : celle du 11 août 1999, vue de Reims, de 12 h 23 à 12 h 28 (heure d'été), le Soleil à 52° de hauteur au sud-est. Rien n'y est déclaré : à chaque instant, les positions du Soleil et de la Lune vues d'ici (parallaxe comprise, d'où une totalité à Reims et un simple 99 % à Paris) donnent la part du disque cachée, et la scène en tire seule le croissant, le jour qui baisse, la couronne quand le disque est tout caché, et les étoiles et planètes quand le ciel est assez sombre. La totalité commence à 12 h 24 min 30 s et dure deux minutes. Le même calcul montre l'éclipse dans n'importe quelle observation datée, sans qu'on le lui demande. Approximations assumées : couronne ronde (ses jets dépendent du Soleil du jour), pas de perles de Baily ni de reflet orangé à l'horizon, ciel de la totalité réglé à environ 1/10 000 du ciel de midi.",
+    "en": "A test sky for a total solar eclipse: that of 11 August 1999, seen from Reims, from 12:23 to 12:28 (summer time), the Sun 52° up in the south-east. Nothing is declared: at every instant, the Sun's and the Moon's positions as seen from here (parallax included, which is why Reims has totality and Paris a mere 99%) give the share of the disc that is hidden, and the scene works out the crescent, the failing daylight, the corona once the disc is all covered, and the stars and planets once the sky is dark enough, on its own. Totality begins at 12:24:30 and lasts two minutes. The same calculation shows an eclipse in any dated observation, without being asked to. Approximations, stated: a round corona (its streamers depend on the day's Sun), no Baily's beads nor orange glow on the horizon, a totality sky set at about 1/10,000 of the midday sky.",
+    "es": "Un cielo de prueba para un eclipse total de Sol: el del 11 de agosto de 1999, visto desde Reims, de 12:23 a 12:28 (hora de verano), con el Sol a 52° de altura en el sureste. Nada se declara: en cada instante, las posiciones del Sol y de la Luna vistas desde aquí (paralaje incluida, por lo que Reims tiene totalidad y París un simple 99 %) dan la parte del disco oculta, y la escena deduce sola el creciente, la luz que baja, la corona cuando el disco queda del todo cubierto, y las estrellas y los planetas cuando el cielo es lo bastante oscuro. La totalidad empieza a las 12:24:30 y dura dos minutos. El mismo cálculo muestra un eclipse en cualquier observación fechada, sin que se le pida. Aproximaciones asumidas: corona redonda (sus chorros dependen del Sol de ese día), sin perlas de Baily ni resplandor anaranjado en el horizonte, cielo de la totalidad ajustado a cerca de 1/10 000 del cielo de mediodía.",
+    "it": "Un cielo di prova per un'eclissi totale di Sole: quella dell'11 agosto 1999, vista da Reims, dalle 12:23 alle 12:28 (ora estiva), con il Sole a 52° di altezza a sud-est. Nulla è dichiarato: a ogni istante, le posizioni del Sole e della Luna viste da qui (parallasse compresa, per cui Reims ha la totalità e Parigi un semplice 99 %) danno la parte di disco nascosta, e la scena ricava da sola la falce, la luce che cala, la corona quando il disco è tutto coperto e le stelle e i pianeti quando il cielo è abbastanza buio. La totalità comincia alle 12:24:30 e dura due minuti. Lo stesso calcolo mostra un'eclissi in qualsiasi osservazione datata, senza che glielo si chieda. Approssimazioni dichiarate: corona rotonda (i suoi getti dipendono dal Sole di quel giorno), niente grani di Baily né bagliore arancione all'orizzonte, cielo della totalità regolato a circa 1/10 000 del cielo di mezzogiorno."
+  },
+  "time": {
+    "year": 1999,
+    "month": 8,
+    "day": 11,
+    "hour": 12,
+    "minute": 23
+  },
+  "utcOffsetHours": 2,
+  "durationSeconds": 300,
+  "place": [
+    {
+      "lat": 49.2583,
+      "lng": 4.0317,
+      "name": "Reims, France"
+    }
+  ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0,
+          "cloudDarkness": 0,
+          "cloudBaseM": 2000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 0,
+          "windSpeed": 0,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 146,
+          "pitchDeg": 45,
+          "fovDeg": 60
+        }
+      },
+      {
+        "t": 20000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 146,
+          "pitchDeg": 50,
+          "fovDeg": 30
+        }
+      },
+      {
+        "t": 300000,
+        "pose": {
+          "lat": 49.2583,
+          "lng": 4.0317,
+          "elevationM": 0,
+          "headingDeg": 146,
+          "pitchDeg": 50,
+          "fovDeg": 30
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": []
+}
