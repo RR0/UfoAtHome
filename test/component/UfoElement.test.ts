@@ -13,31 +13,34 @@ beforeAll(() => {
   // mockImplementation rather than mockReturnValue, so `ctx.canvas` is the real element this
   // context was asked of — a renderer sizing itself from its own canvas (see ObserverMapRenderer)
   // reads it, and a single shared stub would have every canvas claiming to be the same one.
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
+  HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement) {
+    // Plain no-ops, not vi.fn(): vitest keeps every mock it ever made, and the `this` each was called on
+    // (here the context, so its canvas and the element around it), for the life of the worker.
+    const noop = (): void => {}
     return {
       canvas: this,
-      save: vi.fn(),
-      restore: vi.fn(),
-      beginPath: vi.fn(),
-      closePath: vi.fn(),
-      fill: vi.fn(),
-      ellipse: vi.fn(),
-      arc: vi.fn(),
-      moveTo: vi.fn(),
-      lineTo: vi.fn(),
-      translate: vi.fn(),
-      rotate: vi.fn(),
-      clearRect: vi.fn(),
-      strokeRect: vi.fn(),
-      stroke: vi.fn(),
-      fillRect: vi.fn(),
-      fillText: vi.fn(),
-      strokeText: vi.fn(),
-      drawImage: vi.fn(),
-      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
-      measureText: vi.fn((text: string) => ({ width: text.length * 5 }))
+      save: noop,
+      restore: noop,
+      beginPath: noop,
+      closePath: noop,
+      fill: noop,
+      ellipse: noop,
+      arc: noop,
+      moveTo: noop,
+      lineTo: noop,
+      translate: noop,
+      rotate: noop,
+      clearRect: noop,
+      strokeRect: noop,
+      stroke: noop,
+      fillRect: noop,
+      fillText: noop,
+      strokeText: noop,
+      drawImage: noop,
+      createRadialGradient: () => ({ addColorStop: noop }),
+      measureText: (text: string) => ({ width: text.length * 5 })
     } as unknown as CanvasRenderingContext2D
-  })
+  } as unknown as typeof HTMLCanvasElement.prototype.getContext
 })
 
 // jsdom doesn't implement the Fullscreen API at all — stub it as configurable so tests can
@@ -929,7 +932,7 @@ describe("UfoElement hover tooltip", () => {
   // directly onto Shape.bounds — same trick as SightingEditorElement.test.ts's nestedCanvas().
   function canvasSized(element: UfoElement): HTMLCanvasElement {
     const canvas = element.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
-    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return canvas
   }
 

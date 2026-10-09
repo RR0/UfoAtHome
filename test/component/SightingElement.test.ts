@@ -120,34 +120,37 @@ beforeAll(async () => {
 })
 
 beforeAll(() => {
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
-    // mockImplementation, not mockReturnValue: a renderer that sizes itself from its own canvas
+  HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement) {
+    // A fresh object per canvas, not one shared: a renderer that sizes itself from its own canvas
     // (see ObserverMapRenderer) reads ctx.canvas, and one shared object makes every canvas claim to
     // be the same one.
+    // Plain no-ops, not vi.fn(): vitest keeps every mock it ever made, and the `this` each was called on
+    // (here the context, so its canvas and the element around it), for the life of the worker.
+    const noop = (): void => {}
     return {
       canvas: this,
-      save: vi.fn(),
-      restore: vi.fn(),
-      beginPath: vi.fn(),
-      closePath: vi.fn(),
-      fill: vi.fn(),
-      ellipse: vi.fn(),
-      moveTo: vi.fn(),
-      lineTo: vi.fn(),
-      translate: vi.fn(),
-      rotate: vi.fn(),
-      clearRect: vi.fn(),
-      strokeRect: vi.fn(),
-      stroke: vi.fn(),
-      fillRect: vi.fn(),
-      arc: vi.fn(),
-      fillText: vi.fn(),
-      strokeText: vi.fn(),
-      drawImage: vi.fn(),
-      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
-      measureText: vi.fn((text: string) => ({ width: text.length * 5 })),
+      save: noop,
+      restore: noop,
+      beginPath: noop,
+      closePath: noop,
+      fill: noop,
+      ellipse: noop,
+      moveTo: noop,
+      lineTo: noop,
+      translate: noop,
+      rotate: noop,
+      clearRect: noop,
+      strokeRect: noop,
+      stroke: noop,
+      fillRect: noop,
+      arc: noop,
+      fillText: noop,
+      strokeText: noop,
+      drawImage: noop,
+      createRadialGradient: () => ({ addColorStop: noop }),
+      measureText: (text: string) => ({ width: text.length * 5 }),
     } as unknown as CanvasRenderingContext2D
-  })
+  } as unknown as typeof HTMLCanvasElement.prototype.getContext
   // The nested <rr0-scene> lazily fetches the star catalog on connect — a safe default so that
   // fire-and-forget fetch resolves instead of rejecting whenever a test's own stubFetch() (below)
   // isn't active yet/covers other URLs. Plain assignment, not vi.stubGlobal, so per-test
