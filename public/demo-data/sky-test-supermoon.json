@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "id": "sky-test-supermoon",
+  "tags": [
+    "moon",
+    "astronomy",
+    "supermoon"
+  ],
+  "description": {
+    "fr": "Un ciel d'essai pour la « lune géante » : la pleine Lune du 14 novembre 2016, à son lever sur Paris (17 h 41), la plus proche de la Terre depuis 1948. Elle est à 356 600 km : son disque fait 0,558° de large, 8 % de plus qu'à la distance moyenne et 14 % de plus qu'à l'apogée, et elle donne 30 % de lumière de plus qu'à l'apogée. C'est tout ce qu'il y a de vrai dans le mot, et c'est ce que la scène dessine, avec la distance de chaque instant. Elle ne l'agrandit pas à l'horizon : la Lune basse n'est pas plus grosse que la Lune haute (un appareil photo en mesure le même disque ; elle est même un peu plus loin, d'un rayon terrestre), et l'impression contraire est une illusion de l'esprit, non un fait du ciel. Ce qui est vrai de la Lune basse, c'est sa couleur : l'air lui retire le bleu.",
+    "en": "A test sky for the “giant moon”: the full Moon of 14 November 2016, rising over Paris (17:41), the closest to the Earth since 1948. It is 356,600 km away: its disc is 0.558° across, 8% wider than at the mean distance and 14% wider than at apogee, and gives 30% more light than at apogee. That is all there is that is true in the word, and it is what the scene draws, from the distance of each instant. It does not enlarge it at the horizon: a low Moon is no bigger than a high one (a camera measures the same disc; it is even a little farther, by an Earth radius), and the impression that it is is an illusion of the mind, not a fact of the sky. What is true of a low Moon is its colour: the air takes the blue out of it.",
+    "es": "Un cielo de prueba para la «luna gigante»: la Luna llena del 14 de noviembre de 2016, saliendo sobre París (17:41), la más cercana a la Tierra desde 1948. Está a 356 600 km: su disco mide 0,558° de ancho, un 8 % más que a la distancia media y un 14 % más que en el apogeo, y da un 30 % más de luz que en el apogeo. Es todo lo que hay de cierto en la palabra, y es lo que la escena dibuja, con la distancia de cada instante. No la agranda en el horizonte: una Luna baja no es más grande que una alta (una cámara mide el mismo disco; está incluso un poco más lejos, un radio terrestre), y la impresión contraria es una ilusión de la mente, no un hecho del cielo. Lo que sí es cierto de una Luna baja es su color: el aire le quita el azul.",
+    "it": "Un cielo di prova per la «luna gigante»: la Luna piena del 14 novembre 2016, al sorgere su Parigi (17:41), la più vicina alla Terra dal 1948. È a 356 600 km: il suo disco misura 0,558° di larghezza, l'8 % in più che alla distanza media e il 14 % in più che all'apogeo, e dà il 30 % di luce in più che all'apogeo. È tutto ciò che c'è di vero nella parola, ed è ciò che la scena disegna, con la distanza di ogni istante. Non la ingrandisce all'orizzonte: una Luna bassa non è più grande di una alta (una fotocamera ne misura lo stesso disco; è anzi un po' più lontana, di un raggio terrestre), e l'impressione contraria è un'illusione della mente, non un fatto del cielo. Ciò che è vero di una Luna bassa è il suo colore: l'aria le toglie il blu."
+  },
+  "time": {
+    "year": 2016,
+    "month": 11,
+    "day": 14,
+    "hour": 17,
+    "minute": 52
+  },
+  "utcOffsetHours": 1,
+  "durationSeconds": 900,
+  "place": [
+    {
+      "lat": 48.8566,
+      "lng": 2.3522,
+      "name": "Paris, France"
+    }
+  ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0,
+          "cloudDarkness": 0,
+          "cloudBaseM": 2000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 0,
+          "windSpeed": 0,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 48.8566,
+          "lng": 2.3522,
+          "elevationM": 0,
+          "headingDeg": 68.5,
+          "pitchDeg": 3.0,
+          "fovDeg": 14
+        }
+      },
+      {
+        "t": 900000,
+        "pose": {
+          "lat": 48.8566,
+          "lng": 2.3522,
+          "elevationM": 0,
+          "headingDeg": 68.5,
+          "pitchDeg": 3.0,
+          "fovDeg": 14
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": []
+}

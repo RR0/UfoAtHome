@@ -363,6 +363,28 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "supermoon",
+          src: "/demo-data/sky-test-supermoon.json",
+          title: { en: "The giant moon", fr: "La lune géante", es: "La luna gigante", it: "La luna gigante" },
+          blurb: {
+            en: "Paris, 14 November 2016, moonrise: the closest full Moon since 1948, 356,600 km away, 8% wider than on average. What is true of a “giant moon”, and nothing more: it is no bigger on the horizon than overhead.",
+            fr: "Paris, 14 novembre 2016, lever de Lune : la pleine Lune la plus proche depuis 1948, à 356 600 km, 8 % plus large qu'en moyenne. Ce qu'il y a de vrai dans une « lune géante », et rien de plus : elle n'est pas plus grosse à l'horizon qu'au zénith.",
+            es: "París, 14 de noviembre de 2016, salida de la Luna: la Luna llena más cercana desde 1948, a 356 600 km, un 8 % más ancha que de media. Lo que hay de cierto en una «luna gigante», y nada más: no es más grande en el horizonte que en lo alto.",
+            it: "Parigi, 14 novembre 2016, sorgere della Luna: la Luna piena più vicina dal 1948, a 356 600 km, l'8 % più larga della media. Ciò che c'è di vero in una «luna gigante», e nulla di più: non è più grande all'orizzonte che in alto."
+          }
+        },
+        {
+          id: "red-moon",
+          src: "/demo-data/sky-test-red-moon.json",
+          title: { en: "The lune rousse", fr: "La lune rousse", es: "La luna rojiza", it: "La luna rossa" },
+          blurb: {
+            en: "Paris, 1 May 2026, moonrise: the full Moon of the lunation after Easter, which stands low and is reddened by the air it crosses — and is neither bigger nor brighter than another.",
+            fr: "Paris, 1er mai 2026, lever de Lune : la pleine Lune de la lunaison qui suit Pâques, basse, rougie par l'air qu'elle traverse — et ni plus grosse ni plus brillante qu'une autre.",
+            es: "París, 1 de mayo de 2026, salida de la Luna: la Luna llena de la lunación que sigue a la Pascua, baja y enrojecida por el aire que atraviesa — y ni más grande ni más brillante que otra.",
+            it: "Parigi, 1° maggio 2026, sorgere della Luna: la Luna piena della lunazione che segue la Pasqua, bassa e arrossata dall'aria che attraversa — e né più grande né più luminosa di un'altra."
+          }
+        },
+        {
           id: "meteors",
           src: "/demo-data/sky-test-meteors.json",
           title: { en: "A meteor shower", fr: "Une pluie de météores", es: "Una lluvia de meteoros", it: "Uno sciame meteorico" },

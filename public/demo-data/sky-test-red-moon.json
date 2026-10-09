@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "id": "sky-test-red-moon",
+  "tags": [
+    "moon",
+    "astronomy",
+    "lune rousse"
+  ],
+  "description": {
+    "fr": "Un ciel d'essai pour la « lune rousse » : la pleine Lune du 1er mai 2026, à son lever sur Paris (21 h 24). La lune rousse est la lunaison qui commence à la première nouvelle Lune après Pâques (ici le 17 avril, Pâques étant le 5) : sa pleine Lune se lève à l'opposé d'un Soleil déjà haut, donc basse. Elle ne culmine ici qu'à 20° (contre 56° en novembre), vue à travers beaucoup d'air, qui lui retire le bleu : c'est ce qui la rend rousse. Elle n'est ni plus grosse ni plus brillante qu'une autre (celle-ci est même près de l'apogée, à 402 000 km, 0,495° de large), et ce n'est pas elle qui brûle les jeunes pousses : ce sont les nuits claires du printemps, qui laissent partir la chaleur du jour, Lune ou pas. La scène ne fait que ce que fait l'air : la couleur vient de la traversée de l'atmosphère à chaque hauteur.",
+    "en": "A test sky for the “lune rousse” (the red moon of French lore): the full Moon of 1 May 2026, rising over Paris (21:24). The lune rousse is the lunation that begins with the first new Moon after Easter (here 17 April, Easter being the 5th): its full Moon rises opposite a Sun that is already high, and so low. It culminates at only 20° here (against 56° in November), seen through a great deal of air, which takes the blue out of it: that is what makes it red. It is neither bigger nor brighter than any other (this one is even near apogee, at 402,000 km, 0.495° across), and it is not what burns the young shoots: the clear spring nights do that, letting the day's warmth escape, Moon or no Moon. The scene does only what the air does: the colour comes from the path through the atmosphere at each height.",
+    "es": "Un cielo de prueba para la «luna rojiza» (la «lune rousse» del folclore francés): la Luna llena del 1 de mayo de 2026, saliendo sobre París (21:24). La «lune rousse» es la lunación que empieza con la primera Luna nueva después de Pascua (aquí el 17 de abril, siendo Pascua el 5): su Luna llena sale frente a un Sol ya alto, y por tanto baja. Culmina aquí a solo 20° (frente a 56° en noviembre), vista a través de mucho aire, que le quita el azul: eso es lo que la vuelve rojiza. No es ni más grande ni más brillante que otra (esta incluso está cerca del apogeo, a 402 000 km, 0,495° de ancho), y no es ella quien quema los brotes jóvenes: son las noches despejadas de primavera, que dejan escapar el calor del día, haya Luna o no. La escena solo hace lo que hace el aire: el color viene del recorrido por la atmósfera a cada altura.",
+    "it": "Un cielo di prova per la «luna rossa» (la «lune rousse» del folclore francese): la Luna piena del 1° maggio 2026, al sorgere su Parigi (21:24). La «lune rousse» è la lunazione che comincia con la prima Luna nuova dopo Pasqua (qui il 17 aprile, essendo Pasqua il 5): la sua Luna piena sorge di fronte a un Sole già alto, e quindi bassa. Culmina qui a soli 20° (contro 56° a novembre), vista attraverso molta aria, che le toglie il blu: è questo che la rende rossastra. Non è né più grande né più luminosa di un'altra (questa è anzi vicina all'apogeo, a 402 000 km, 0,495° di larghezza), e non è lei a bruciare i germogli: sono le notti serene di primavera, che lasciano fuggire il calore del giorno, con o senza Luna. La scena fa solo ciò che fa l'aria: il colore viene dal percorso nell'atmosfera a ogni altezza."
+  },
+  "time": {
+    "year": 2026,
+    "month": 5,
+    "day": 1,
+    "hour": 21,
+    "minute": 30
+  },
+  "utcOffsetHours": 2,
+  "durationSeconds": 900,
+  "place": [
+    {
+      "lat": 48.8566,
+      "lng": 2.3522,
+      "name": "Paris, France"
+    }
+  ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": 0,
+          "cloudDarkness": 0,
+          "cloudBaseM": 2000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 0,
+          "windSpeed": 0,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 48.8566,
+          "lng": 2.3522,
+          "elevationM": 0,
+          "headingDeg": 121.0,
+          "pitchDeg": 3.0,
+          "fovDeg": 14
+        }
+      },
+      {
+        "t": 900000,
+        "pose": {
+          "lat": 48.8566,
+          "lng": 2.3522,
+          "elevationM": 0,
+          "headingDeg": 121.0,
+          "pitchDeg": 3.0,
+          "fovDeg": 14
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": []
+}

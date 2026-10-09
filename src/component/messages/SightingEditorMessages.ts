@@ -538,6 +538,14 @@ export interface SightingEditorMessages extends SightingLabels {
   showComet: string
   /** Turns the observer to face the nova or supernova. Like the comet, it was there all night. */
   showNova: string
+  /** A solar eclipse seen from here, partial or total: {percent}, {time} (the peak, or the start of totality), {duration}, {altitude}, {bearing}. */
+  skyEclipsePartial: string
+  skyEclipseTotal: string
+  /** A full Moon markedly nearer or farther than its mean: {distance} km, {diameter}° across, {percent} wider or narrower. */
+  skySupermoon: string
+  skyMicromoon: string
+  /** The full Moon of the lunation after Easter: {altitude}, {bearing}. */
+  skyRedMoon: string
   /**
    * Real passes, from the element sets archived for that date (see TleArchive): how many satellites
    * crossed that sky lit and brighter than its limit during the observation, and the brightest of

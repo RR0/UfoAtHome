@@ -37,6 +37,9 @@ import type { Instrument } from "../engine/instrument/Instrument.js"
 import { LightRigs } from "../engine/model/LightRig.js"
 import { DARK_SKY_LIMITING_MAGNITUDE, MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { Comets } from "../engine/astronomy/Comets.js"
+import { LunarDisc } from "../engine/astronomy/LunarDisc.js"
+import { RedMoon } from "../engine/astronomy/RedMoon.js"
+import { SolarEclipse } from "../engine/astronomy/SolarEclipse.js"
 import { Novae } from "../engine/astronomy/Novae.js"
 import type { OutburstAppearance } from "../engine/astronomy/Novae.js"
 import { Sporadics } from "../engine/astronomy/Sporadics.js"
@@ -7510,6 +7513,8 @@ export class SightingEditorElement extends HTMLElement {
       this.showerClause(date, observer),
       this.cometClause(date, observer),
       this.novaClause(date, observer),
+      this.eclipseClause(date, observer),
+      this.moonClause(date, observer),
       this.satelliteClause(date, observer),
       this.reentryClause(date, observer),
       this.fireballClause(date, observer),
@@ -7651,6 +7656,57 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.showNovaButton.hidden = nova.position.altitudeDeg <= 0
     return this.novaText(nova)
+  }
+
+  /**
+   * Whether the Moon crossed the Sun from here that day — worked out, never declared (see SolarEclipse).
+   * One line for the whole event, at its peak or at the start of totality: what plays is drawn instant
+   * by instant from the same positions.
+   */
+  private eclipseClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
+    const eclipse = SolarEclipse.around(date, observer)
+    if (!eclipse || eclipse.peakAltitudeDeg <= 0) return undefined
+    const sun = computeBodyPosition("Sun", eclipse.peak, observer)
+    const where = (template: string) => template
+      .replace("{altitude}", String(Math.round(sun.altitudeDeg)))
+      .replace("{bearing}", this.naming.towards(sun.azimuthDeg))
+    if (eclipse.totality) {
+      const minutes = Math.floor(eclipse.totality.seconds / 60)
+      const seconds = Math.round(eclipse.totality.seconds % 60)
+      return where(this.messages.skyEclipseTotal)
+        .replace("{time}", this.observerClock(eclipse.totality.begin))
+        .replace("{duration}", `${minutes} min ${seconds} s`)
+    }
+    return where(this.messages.skyEclipsePartial)
+      .replace("{percent}", String(Math.round(eclipse.obscuration * 100)))
+      .replace("{time}", this.observerClock(eclipse.peak).replace(/:\d\d$/, ""))
+  }
+
+  /**
+   * What is true of a full Moon that has a name in the lore, and only that: how far it is and so how
+   * wide (the "supermoon", and its opposite), and which lunation it is (the "lune rousse"). Neither
+   * says anything of the Moon's size on the horizon, which is the same as overhead.
+   */
+  private moonClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
+    const position = computeBodyPosition("Moon", date, observer)
+    if (position.altitudeDeg <= 0 || computeMoonPhase(date).illuminatedFraction < 0.97) return undefined
+    const parts: string[] = []
+    const distance = LunarDisc.distanceKm(date, observer)
+    const relative = LunarDisc.relativeToMean(LunarDisc.radiusAtKm(distance))
+    const sized = distance <= LunarDisc.SUPERMOON_DISTANCE_KM ? this.messages.skySupermoon
+      : distance >= LunarDisc.MICROMOON_DISTANCE_KM ? this.messages.skyMicromoon : undefined
+    if (sized) {
+      parts.push(sized
+        .replace("{distance}", (Math.round(distance / 100) * 100).toLocaleString(this.showerLanguage()))
+        .replace("{diameter}", this.decimal(LunarDisc.radiusAtKm(distance) * 2, 3))
+        .replace("{percent}", String(Math.round(Math.abs(relative) * 100))))
+    }
+    if (RedMoon.isIn(date)) {
+      parts.push(this.messages.skyRedMoon
+        .replace("{altitude}", String(Math.round(position.altitudeDeg)))
+        .replace("{bearing}", this.naming.towards(position.azimuthDeg)))
+    }
+    return parts.length > 0 ? parts.join(" · ") : undefined
   }
 
   private novaText(nova: OutburstAppearance): string {

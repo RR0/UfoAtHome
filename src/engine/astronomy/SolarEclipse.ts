@@ -23,6 +23,18 @@ export interface SolarEclipseView {
   magnitude: number
 }
 
+/** One eclipse as one place sees it, from the library's own search — what a sky line says before anything plays. */
+export interface LocalEclipse {
+  /** Share of the Sun's disc hidden at the peak, 0..1. */
+  obscuration: number
+  total: boolean
+  peak: Date
+  /** The Sun's height at the peak, degrees: below zero, nobody here saw it. */
+  peakAltitudeDeg: number
+  /** Present for a total eclipse: when the Sun is wholly hidden, and for how long, seconds. */
+  totality?: { begin: Date; seconds: number }
+}
+
 export class SolarEclipse {
   private static readonly SUN_RADIUS_KM = 695_700
   private static readonly MOON_RADIUS_KM = 1737.4
@@ -45,6 +57,27 @@ export class SolarEclipse {
    * orange ring on the horizon, is not drawn yet.
    */
   static readonly UMBRA_SKY_LIGHT = 1e-4
+
+  /**
+   * The eclipse seen from here within half a day of this date, if there is one. Unlike viewAt, which
+   * says what the Moon covers at one instant, this finds the whole event: for a line that names it
+   * where no instant is being drawn.
+   */
+  static around(date: Date, observer: ObserverGeo, halfSpanHours = 12): LocalEclipse | undefined {
+    const place = new Astronomy.Observer(observer.lat, observer.lng, observer.elevationM)
+    const found = Astronomy.SearchLocalSolarEclipse(new Date(date.getTime() - halfSpanHours * 3_600_000), place)
+    if (Math.abs(found.peak.time.date.getTime() - date.getTime()) > halfSpanHours * 3_600_000) return undefined
+    const total = found.kind === Astronomy.EclipseKind.Total
+    return {
+      obscuration: found.obscuration,
+      total,
+      peak: found.peak.time.date,
+      peakAltitudeDeg: found.peak.altitude,
+      totality: total && found.total_begin && found.total_end
+        ? { begin: found.total_begin.time.date, seconds: (found.total_end.time.date.getTime() - found.total_begin.time.date.getTime()) / 1000 }
+        : undefined
+    }
+  }
 
   /** Share of the Sun's beam that reaches the observer: what the Moon leaves of the disc, plus the corona. */
   static beamFraction(view: SolarEclipseView | undefined): number {

@@ -135,6 +135,13 @@ export class ContextPage implements SitePage {
       left, and the stars and planets the darker sky then allows. It is why 11 August 1999 is total at
       Reims and a mere 99&nbsp;% at Paris. Seen bare-eyed, a crescent Sun is still a dazzling one: the
       shape shows through a filter, as it does for anyone who looks.</p>
+    <p><strong>The Moon</strong> is drawn at the size it has that day: its orbit is an ellipse, so its disc is
+      0.56° across at perigee and 0.49° at apogee, the 14&nbsp;% that “a supermoon” is made of. It is
+      <em>not</em> larger on the horizon, where it is even a little farther: that impression is an illusion of the
+      mind, which a camera does not share, and the scene does not copy it. What is true of a low Moon is its
+      colour, which is the air's: the long path takes out its blue. That is all there is to the “lune rousse”
+      of French lore, the full Moon of the lunation after Easter, which stands low because the Sun opposite it is
+      already high.</p>
     <p><strong>Meteor showers</strong> come with their radiant and their hourly rate for that night,
       over the sporadic background that never stops.</p>
     <p><strong>Recorded fireballs</strong> are events, not rates: since December 2018 the Global
@@ -339,6 +346,13 @@ export class ContextPage implements SitePage {
       qui rend le 11 août 1999 total à Reims et seulement à 99&nbsp;% à Paris. À l'œil nu, un Soleil en
       croissant reste éblouissant : sa forme ne se voit qu'à travers un filtre, comme pour quiconque
       regarde.</p>
+    <p>La <strong>Lune</strong> est dessinée à la taille qu'elle a ce jour-là : son orbite est une ellipse, son
+      disque fait donc 0,56° au périgée et 0,49° à l'apogée, les 14&nbsp;% dont est faite une « super-lune ».
+      Elle n'est <em>pas</em> plus grosse à l'horizon, où elle est même un peu plus loin : cette impression est
+      une illusion de l'esprit, qu'un appareil photo ne partage pas, et la scène ne la copie pas. Ce qui est
+      vrai d'une Lune basse, c'est sa couleur, qui est celle de l'air : le long trajet lui retire le bleu. C'est
+      tout ce qu'il y a dans la « lune rousse » du folklore, la pleine Lune de la lunaison qui suit Pâques, basse
+      parce que le Soleil qui lui fait face est déjà haut.</p>
     <p>Les <strong>pluies de météores</strong> ont leur radiant et leur taux horaire pour cette
       nuit-là, au-dessus du fond sporadique qui, lui, ne s'arrête jamais.</p>
     <p>Les <strong>bolides enregistrés</strong> sont des événements, pas des taux : depuis décembre
@@ -553,6 +567,12 @@ export class ContextPage implements SitePage {
       11 de agosto de 1999 es total en Reims y solo del 99&nbsp;% en París. A simple vista, un Sol en
       creciente sigue deslumbrando: su forma solo se ve a través de un filtro, como para cualquiera
       que mire.</p>
+    <p>La <strong>Luna</strong> se dibuja con el tamaño que tiene ese día: su órbita es una elipse, por lo que su
+      disco mide 0,56° en el perigeo y 0,49° en el apogeo, el 14&nbsp;% del que está hecha una «superluna». <em>No</em>
+      es más grande en el horizonte, donde incluso está un poco más lejos: esa impresión es una ilusión de la mente,
+      que una cámara no comparte, y la escena no la copia. Lo que es cierto de una Luna bassa es su color, que es el
+      del aire: el largo recorrido le quita el azul. Eso es todo lo que hay en la «lune rousse» del folclore, la Luna
+      llena de la lunación que sigue a la Pascua, baja porque el Sol que tiene enfrente ya está alto.</p>
     <p><strong>Las lluvias de meteoros</strong> llegan con su radiante y su tasa horaria de esa noche,
       sobre el fondo esporádico que nunca se detiene.</p>
     <p><strong>Los bólidos registrados</strong> son sucesos, no tasas: desde diciembre de 2018 las
@@ -762,6 +782,12 @@ export class ContextPage implements SitePage {
       quando non resta nulla, e le stelle e i pianeti che il cielo più buio consente allora. Per questo
       l'11 agosto 1999 è totale a Reims e solo al 99&nbsp;% a Parigi. A occhio nudo, un Sole a falce
       resta abbagliante: la sua forma si vede solo attraverso un filtro, come per chiunque guardi.</p>
+    <p>La <strong>Luna</strong> è disegnata della dimensione che ha quel giorno: la sua orbita è un'ellisse, quindi il
+      suo disco misura 0,56° al perigeo e 0,49° all'apogeo, il 14&nbsp;% di cui è fatta una «superluna». <em>Non</em> è
+      più grande all'orizzonte, dove è anzi un po' più lontana: quell'impressione è un'illusione della mente, che una
+      fotocamera non condivide, e la scena non la copia. Ciò che è vero di una Luna bassa è il suo colore, che è quello
+      dell'aria: il lungo percorso le toglie il blu. È tutto ciò che c'è nella «lune rousse» del folclore, la Luna piena
+      della lunazione che segue la Pasqua, bassa perché il Sole che le sta di fronte è già alto.</p>
     <p><strong>Gli sciami meteorici</strong> arrivano con il loro radiante e il loro tasso orario per
       quella notte, sopra il fondo sporadico che non si ferma mai.</p>
     <p><strong>I bolidi registrati</strong> sono eventi, non tassi: dal dicembre 2018 le telecamere

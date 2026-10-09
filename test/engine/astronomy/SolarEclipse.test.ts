@@ -84,3 +84,25 @@ describe("the light an eclipse leaves", () => {
     expect(SolarEclipse.separationOf({ altitudeDeg: 60, azimuthDeg: 10 }, { altitudeDeg: 60, azimuthDeg: 11 })).toBeCloseTo(0.5, 2)
   })
 })
+
+describe("the eclipse of a day, for a sky line", () => {
+  it("finds the total eclipse of 11 August 1999 from Reims, and its two minutes", () => {
+    const found = SolarEclipse.around(new Date(Date.UTC(1999, 7, 11, 10, 0)), REIMS)!
+    expect(found.total).toBe(true)
+    expect(found.peakAltitudeDeg).toBeGreaterThan(50)
+    expect(found.totality!.seconds).toBeGreaterThan(110)
+    expect(found.totality!.seconds).toBeLessThan(130)
+  })
+
+  it("finds the partial one from Paris, at 99 %", () => {
+    const found = SolarEclipse.around(new Date(Date.UTC(1999, 7, 11, 10, 0)), PARIS)!
+    expect(found.total).toBe(false)
+    expect(found.obscuration).toBeCloseTo(0.993, 2)
+    expect(found.totality).toBeUndefined()
+  })
+
+  it("finds none on an ordinary day", () => {
+    expect(SolarEclipse.around(new Date(Date.UTC(1999, 7, 20, 10)), REIMS)).toBeUndefined()
+  })
+})
+

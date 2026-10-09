@@ -25,6 +25,7 @@ import {
   TRACKED_PLANETS
 } from "../engine/astronomy/CelestialPositions.js"
 import type { ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
+import { LunarDisc } from "../engine/astronomy/LunarDisc.js"
 import { SolarEclipse } from "../engine/astronomy/SolarEclipse.js"
 import { geoToLocalMeters } from "../render3d/terrain/GeoProjection.js"
 import { resolveActualWeatherAt, resolveObserverPoseAt, resolveWeatherAt } from "../engine/model/Sighting.js"
@@ -1547,7 +1548,8 @@ export class SceneElement extends HTMLElement {
     const moon = {
       ...moonPosition,
       phase: computeMoonPhase(date),
-      magnitude: computeBodyMagnitude("Moon", date)
+      magnitude: computeBodyMagnitude("Moon", date),
+      radiusDeg: LunarDisc.apparentRadiusDeg(date, observer)
     }
     const planets = TRACKED_PLANETS.map(body => ({
       body,

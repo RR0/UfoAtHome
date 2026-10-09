@@ -135,6 +135,7 @@ import { HumidHaze } from "../engine/atmosphere/HumidHaze.js"
 import { AerialPerspective } from "../engine/atmosphere/AerialPerspective.js"
 import type { Rgb } from "../engine/atmosphere/AerialPerspective.js"
 import { AerialFog } from "./AerialFog.js"
+import { LunarDisc } from "../engine/astronomy/LunarDisc.js"
 import { SolarEclipse, type SolarEclipseView } from "../engine/astronomy/SolarEclipse.js"
 import { EclipsedSun, SolarCorona } from "./EclipsedSun.js"
 import { ForwardDiffraction } from "../engine/atmosphere/ForwardDiffraction.js"
@@ -733,7 +734,12 @@ export interface SceneNova {
  * until then. */
 export interface SceneAstronomy {
   sun: HorizontalPosition & { magnitude: number }
-  moon: HorizontalPosition & { phase: MoonPhase; magnitude: number }
+  moon: HorizontalPosition & {
+    phase: MoonPhase
+    magnitude: number
+    /** Angular radius of its disc from here, degrees: from 0.245 at apogee to 0.279 at perigee (see LunarDisc). Absent, its mean. */
+    radiusDeg?: number
+  }
   planets: ReadonlyArray<ScenePlanet>
   comet?: SceneComet
   /** Usually empty: a naked-eye nova is up a few weeks in a decade. */
@@ -5371,7 +5377,7 @@ export class SceneRenderer {
    * from Earth (its phase doesn't meaningfully depend on the camera's viewing angle around it).
    * `material.color` (which multiplies against the texture) carries the same altitude-based
    * atmospheric tint as setBodyMesh, so a low Moon reddens the same way a real moonrise does. */
-  private setMoonMesh(position: HorizontalPosition & { phase: MoonPhase; magnitude: number }, magnitudeLimit: number): void {
+  private setMoonMesh(position: HorizontalPosition & { phase: MoonPhase; magnitude: number; radiusDeg?: number }, magnitudeLimit: number): void {
     const key = "moon"
     // The Moon passes this at almost every phase — it is magnitude -10 at the quarter, six
     // magnitudes clear of what a daylit sky hides, which is exactly why a daytime Moon is an
@@ -5389,7 +5395,11 @@ export class SceneRenderer {
     // is what its magnitude already counts, is the luminance of that part.
     const through = this.cloudTransmission(position)
     const arriving = this.arrivingIlluminance(position, position.magnitude, through)
-    const lit = Math.max(clamp(position.phase.illuminatedFraction, 0, 1), 0.01) * Math.PI * (SUN_MOON_VISUAL_RADIUS / BODY_PLACEMENT_RADIUS) ** 2
+    // Its own size on the day: a disc 14 % wider at perigee than at apogee, with the same light over it
+    // spread on that much more sky (the magnitude it is drawn from already counts the distance).
+    const radiusDeg = position.radiusDeg ?? LunarDisc.MEAN_RADIUS_DEG
+    const radius = BODY_PLACEMENT_RADIUS * Math.tan(radiusDeg * DEG_TO_RAD)
+    const lit = Math.max(clamp(position.phase.illuminatedFraction, 0, 1), 0.01) * Math.PI * (radius / BODY_PLACEMENT_RADIUS) ** 2
     const tintColor = new Color(...arriving.map(value => Math.min(SceneRenderer.BRIGHTEST_RELATIVE, value / lit)) as [number, number, number])
     // The disc is drawn again only once its lit part has moved by a fifth of a percent of its
     // width, a quarter of a pixel of the 128 px texture: the phase turns a thirtieth per day, so a
@@ -5400,8 +5410,6 @@ export class SceneRenderer {
       this.disposeMesh(sprite)
       sprite = new Sprite(new SpriteMaterial({ map: createMoonPhaseTexture(position.phase), color: tintColor, fog: false }))
       sprite.userData.phaseKey = phaseKey
-      const diameter = SUN_MOON_VISUAL_RADIUS * 2
-      sprite.scale.set(diameter, diameter, 1)
       this.celestialGroup.add(sprite)
       this.bodyMeshes.set(key, sprite)
     } else {
@@ -5412,9 +5420,10 @@ export class SceneRenderer {
       }
       sprite.material.color.copy(tintColor)
     }
+    sprite.scale.set(radius * 2, radius * 2, 1)
     sprite.position.set(x, y, z)
-    this.setHitArea(key, x, y, z, SUN_MOON_VISUAL_RADIUS)
-    this.setGlare(key, x, y, z, arriving, (SUN_MOON_VISUAL_RADIUS / BODY_PLACEMENT_RADIUS) * (180 / Math.PI))
+    this.setHitArea(key, x, y, z, radius)
+    this.setGlare(key, x, y, z, arriving, radiusDeg)
   }
 
   /**
