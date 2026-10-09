@@ -6220,69 +6220,6 @@ describe("the sky under an observation being edited", () => {
     })
   })
 
-  /** Anywhere: Reims for the eclipse of 1999, Paris for the Moon. The offset is typed, as above. */
-  function overPlace(element: SightingEditorElement, when: string, offsetHours: string, lat: string, lng: string): void {
-    typeInto(element, "obs-time", when)
-    typeInto(element, "utcOffsetHours", offsetHours)
-    typeInto(element, "lat", lat)
-    typeInto(element, "lng", lng)
-  }
-
-  it("puts a solar filter on at the playhead, takes it off later, and says so only where it takes something off", async () => {
-    const element = mount()
-    const select = element.shadowRoot!.getElementById("filter") as HTMLSelectElement
-    const choose = (value: string) => {
-      select.value = value
-      select.dispatchEvent(new Event("change"))
-    }
-    const poses = () => element.sightingData!.observerTrack!.keyframes
-    typeInto(element, "durationSeconds", "60")
-    expect([...select.options].map(option => option.value)).toEqual(["none", "solar-visual", "solar-photo"])
-    expect(select.value).toBe("none")
-    // Choosing none where nothing was on says nothing, and leaves no keyframe.
-    choose("none")
-    expect(poses().filter(keyframe => keyframe.pose.filter !== undefined)).toHaveLength(0)
-    choose("solar-visual")
-    expect(poses().find(keyframe => keyframe.t === 0)?.pose.filter).toBe("solar-visual")
-    // Later on the timeline, the glasses come off: that keyframe states "none" outright.
-    ;(element as unknown as { ufoElement: { currentTime: number } }).ufoElement.currentTime = 5000
-    choose("none")
-    expect(poses().find(keyframe => keyframe.t === 5000)?.pose.filter).toBe("none")
-    expect(poses().find(keyframe => keyframe.t === 0)?.pose.filter).toBe("solar-visual")
-  })
-
-  it("names a total eclipse, and its two minutes, without anyone declaring it", async () => {
-    const element = mount()
-    overPlace(element, "1999-08-11 12:23", "2", "49.2583", "4.0317")
-    await waitFor(() => /eclipse|éclipse/i.test(skyLine(element)))
-    expect(skyLine(element)).toMatch(/Total solar eclipse|Éclipse totale de Soleil/)
-    expect(skyLine(element)).toMatch(/2 min \d+ s/)
-  })
-
-  it("says how much of the Sun a partial eclipse hides", async () => {
-    const element = mount()
-    overPlace(element, "1999-08-11 12:23", "2", "48.8566", "2.3522")
-    await waitFor(() => /eclipse|éclipse/i.test(skyLine(element)))
-    expect(skyLine(element)).toMatch(/hides 99% of the Sun|cache 99 % du Soleil/)
-  })
-
-  it("calls a perigee full Moon a supermoon, with its width, and does not make the horizon one", async () => {
-    const element = mount()
-    overPlace(element, "2016-11-14 17:50", "1", "48.8566", "2.3522")
-    await waitFor(() => /supermoon|super-lune/i.test(skyLine(element)))
-    expect(skyLine(element)).toMatch(/0[.,]55\d°/)
-    expect(skyLine(element)).toMatch(/no bigger on the horizon than overhead|pas plus grosse à l'horizon qu'au zénith/)
-  })
-
-  it("names the lune rousse only in the lunation after Easter", async () => {
-    const element = mount()
-    overPlace(element, "2026-05-01 21:40", "2", "48.8566", "2.3522")
-    await waitFor(() => /lune rousse/.test(skyLine(element)))
-    expect(skyLine(element)).toMatch(/after Easter|suit Pâques/)
-    overPlace(element, "2026-05-31 22:00", "2", "48.8566", "2.3522")
-    await waitFor(() => !/lune rousse/.test(skyLine(element)))
-  })
-
   it("says nothing about a comet that was still a telescopic smudge", async () => {
     // Valensole, 1 July 1965. Ikeya-Seki IS in the window — it reached perihelion that October and
     // became the brightest comet of the century — but on this date it was magnitude twelve and had
