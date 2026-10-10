@@ -33,7 +33,7 @@ export class GrassDetail {
    * How far the grain swings the ground's brightness at most, either way, with every octave in play. Grass
    * seen from a metre or two is that contrasty and no more.
    */
-  static readonly CONTRAST = 0.7
+  static readonly CONTRAST = 0.5
 
   /**
    * Puts the grain into the material's own shader. Safe to call once per material.
@@ -80,8 +80,9 @@ float grassNoise(vec2 p) {
   float grass = ${everywhere ? "1.0" : `smoothstep(${GrassDetail.GREEN_FROM.toFixed(4)}, ${GrassDetail.GREEN_FULL.toFixed(4)}, green) * smoothstep(0.02, 0.06, lightness)`};
   float eye = length(vViewPosition);
   // Patches of thick and thin grass, then tufts, then blades: each let go of before it is finer than a pixel.
-  float grain = (grassNoise(vGrassPatchXZ * 0.35) - 0.5) * 0.9 * (1.0 - smoothstep(60.0, 220.0, eye))
-    + (grassNoise(vGrassPatchXZ * 1.7) - 0.5) * 0.8 * (1.0 - smoothstep(25.0, 90.0, eye))
+  // The patches are kept faint: a band of shadow a hand's breadth wide (a trunk's) is lost in a coarse grain.
+  float grain = (grassNoise(vGrassPatchXZ * 0.35) - 0.5) * 0.5 * (1.0 - smoothstep(60.0, 220.0, eye))
+    + (grassNoise(vGrassPatchXZ * 1.7) - 0.5) * 0.55 * (1.0 - smoothstep(25.0, 90.0, eye))
     + (grassNoise(vGrassPatchXZ * 6.3) - 0.5) * 0.7 * (1.0 - smoothstep(8.0, 35.0, eye))
     + (grassNoise(vGrassPatchXZ * 21.0) - 0.5) * 0.6 * (1.0 - smoothstep(2.5, 12.0, eye));
   float d = grain * uGrassContrast * grass;
