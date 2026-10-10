@@ -1004,7 +1004,10 @@ export class SightingEditorElement extends HTMLElement {
   private readonly handleDragPointerUp = () => {
     const clicked = this.cameraDragState && !this.cameraDragState.moved ? this.cameraDragState.pressedDecorId : undefined
     this.endDrag()
-    if (clicked !== undefined) this.selectDecor(clicked)
+    if (clicked !== undefined) {
+      this.selectDecor(clicked)
+      this.revealDecorPanel()
+    }
   }
 
   constructor() {
@@ -8947,7 +8950,10 @@ export class SightingEditorElement extends HTMLElement {
       if (!this.beginBodyHandleDrag(point) && !this.beginBodyDrag(event)) this.beginCameraDrag(point)
       return
     }
-    if (mode === "decor" && this.ufoElement.playbackState !== "playing" && this.beginDecorDrag(event, point)) return
+    // A key held down with the press (Shift, Ctrl, Alt, Cmd) says "not the scenery": the press then turns the view, as over bare ground,
+    // whatever stands under it — which is what lets the view be turned from over a forest, where every press lands on a tree.
+    const plain = !(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
+    if (mode === "decor" && plain && this.ufoElement.playbackState !== "playing" && this.beginDecorDrag(event, point)) return
     const timeline = this.ufoElement.sighting.timeline
     const t = this.ufoElement.currentTime
     const playing = this.ufoElement.playbackState === "playing"
@@ -9004,13 +9010,16 @@ export class SightingEditorElement extends HTMLElement {
       // one. Only reached once a shape hit is already ruled out, matching the same "shape wins"
       // precedent as SceneElement's own hover tooltip (a shape is painted on top of decor, so it
       // should win a click there too).
-      const decorId = this.pickDecorAt(event)
+      const decorId = plain ? this.pickDecorAt(event) : undefined
       if (decorId !== undefined) {
         // A tree line or a building fills much of the lower view, and the view has to turn from over
         // it too: the press starts the same drag as over bare ground, and only a press released
-        // without moving is taken as the click that selects it (see endDrag).
-        if (playing) this.selectDecor(decorId)
-        else this.beginCameraDrag(point, decorId)
+        // without moving is taken as the click that selects it (see endDrag) — and opens the
+        // Environment group, where the object is framed and carried, as a click on a shape opens its own.
+        if (playing) {
+          this.selectDecor(decorId)
+          this.revealDecorPanel()
+        } else this.beginCameraDrag(point, decorId)
         return
       }
       // Nothing at all under the pointer to select/move — the "landscape" itself becomes the drag
@@ -9046,6 +9055,13 @@ export class SightingEditorElement extends HTMLElement {
     }))
     this.dragState = { kind: "move", sources, startPointer: point }
     this.startDragListening()
+  }
+
+  /** Opens the Environment panel, where the decor object just clicked is framed and edited — idempotent,
+   * as revealShapePanel is, and found by the panel it controls for the same reason. */
+  private revealDecorPanel(): void {
+    const tab = this.groupTabs.find(candidate => candidate.getAttribute("aria-controls") === "group-decor")
+    if (tab) this.toggleGroup(tab, true)
   }
 
   /** Opens the Phenomenon panel, whichever one is open — idempotent, so a click on a shape while
@@ -9937,7 +9953,7 @@ export class SightingEditorElement extends HTMLElement {
       const over = ndc && this.bodyEditor ? this.sceneElement.pickPlacedBodyAt(ndc.x, ndc.y) : undefined
       return editable && over ? "move" : editable ? "pan" : undefined
     }
-    if (mode === "decor" && editable) {
+    if (mode === "decor" && editable && !(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)) {
       const bounds = this.decorCanvasBounds()
       const handle = bounds && ShapeHandles.hitTestHandle({ bounds, angle: 0 }, point)
       if (handle) return this.cursorForHandle(handle, 0)

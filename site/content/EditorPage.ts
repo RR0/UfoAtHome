@@ -325,6 +325,7 @@ if (docs) {
         tree, at most. Each crossing narrows the object's real width from one side for the whole
         recording; the result appears under the apparent size, and reads “unknown” when nothing
         crosses its line of sight, which is the honest answer for most sightings.</p>
+      <p><strong>Click an object in the picture to select it:</strong> the Environment group opens on it, framed, ready to move, size or turn. Hold <kbd>Shift</kbd>, <kbd>Ctrl</kbd>, <kbd>Alt</kbd> or <kbd>Cmd</kbd> with the press and it is the view that turns, as over bare ground — the way to turn it from over a forest, where every press lands on a tree.</p>
       <p><strong>Several observers, and their points of view.</strong> An observer placed here can
         carry the URL of their <em>own</em> recording, and right-clicking them in the scene offers
         to view it — which loads their account and puts you where they stood, looking the way they
@@ -768,6 +769,7 @@ if (docs) {
         réelle de l'objet, pour tout l'enregistrement ; le résultat s'affiche sous la taille
         apparente, et dit « inconnue » quand rien ne croise sa ligne de visée — la réponse honnête
         pour la plupart des observations.</p>
+      <p><strong>Cliquez un objet sur l'image pour le sélectionner :</strong> le groupe Environnement s'ouvre sur lui, encadré, prêt à être déplacé, dimensionné ou tourné. Maintenez <kbd>Maj</kbd>, <kbd>Ctrl</kbd>, <kbd>Alt</kbd> ou <kbd>Cmd</kbd> pendant l'appui et c'est la vue qui tourne, comme au-dessus du sol nu — le moyen de la tourner depuis une forêt, où chaque appui tombe sur un arbre.</p>
       <p><strong>Plusieurs observateurs, et leurs points de vue.</strong> Un observateur placé ici peut porter
         l'URL de son <em>propre</em> enregistrement, et un clic droit sur lui dans la scène propose
         de le consulter — ce qui charge son récit et vous place là où il se tenait, regardant où il
@@ -1232,6 +1234,7 @@ if (docs) {
         de ese árbol, como mucho. Cada cruce acota por un lado la anchura real del objeto para todo el
         registro; el resultado aparece bajo el tamaño aparente, y dice «desconocida» cuando nada cruza
         su línea de visión, que es la respuesta honesta para la mayoría de los avistamientos.</p>
+      <p><strong>Haz clic en un objeto de la imagen para seleccionarlo:</strong> el grupo Entorno se abre sobre él, enmarcado, listo para moverlo, dimensionarlo o girarlo. Mantén <kbd>Mayús</kbd>, <kbd>Ctrl</kbd>, <kbd>Alt</kbd> o <kbd>Cmd</kbd> al pulsar y lo que gira es la vista, como sobre el suelo desnudo: la manera de girarla desde un bosque, donde cada pulsación cae sobre un árbol.</p>
       <p><strong>Varios observadores y sus puntos de vista.</strong> Un observador colocado aquí puede
         llevar la URL de su <em>propio</em> registro, y un clic derecho sobre él en la escena ofrece
         verlo: eso carga su relato y te sitúa donde él estaba, mirando hacia donde él miraba.
@@ -1695,6 +1698,7 @@ if (docs) {
         tutta la registrazione; il risultato compare sotto la dimensione apparente, e dice «sconosciuta»
         quando nulla attraversa la sua linea di vista, che è la risposta onesta per la maggior parte
         degli avvistamenti.</p>
+      <p><strong>Fai clic su un oggetto nell'immagine per selezionarlo:</strong> il gruppo Ambiente si apre su di esso, incorniciato, pronto per essere spostato, ridimensionato o ruotato. Tieni premuto <kbd>Maiusc</kbd>, <kbd>Ctrl</kbd>, <kbd>Alt</kbd> o <kbd>Cmd</kbd> mentre premi e a ruotare è la vista, come sul terreno nudo: il modo per ruotarla da sopra un bosco, dove ogni pressione cade su un albero.</p>
       <p><strong>Più osservatori, e i loro punti di vista.</strong> Un osservatore posizionato qui può
         portare l'URL della sua <em>propria</em> registrazione, e un clic destro su di lui nella scena
         propone di vederla: questo carica il suo resoconto e ti mette dove si trovava lui, guardando
