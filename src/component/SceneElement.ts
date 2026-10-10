@@ -1130,6 +1130,7 @@ export class SceneElement extends HTMLElement {
     if (this.sceneRenderer.framesDrawn === this.framesAtAsk) return false
     const context = target.getContext("2d")
     if (!context) return false
+    context.imageSmoothingQuality = "high"
     context.drawImage(this.sceneCanvas, 0, 0, target.width, target.height)
     return true
   }

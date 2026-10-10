@@ -36,8 +36,9 @@ export class SeekPreview {
 
   /** How long a frame is waited for, in animation frames, before giving the request up. */
   private static readonly PATIENCE_FRAMES = 600
-  /** The width of the hidden scene, in CSS pixels: what the preview is drawn from. */
-  private static readonly SCENE_WIDTH_PX = 320
+  /** The width of the hidden scene, in CSS pixels: what the preview is drawn from. The picture is shown 240 pixels
+   * wide, on screens that put two device pixels in one: drawn smaller than that, it came out soft. */
+  private static readonly SCENE_WIDTH_PX = 480
 
   constructor(private readonly source: PreviewableScene, private readonly create: () => PreviewableScene) {
   }

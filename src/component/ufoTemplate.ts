@@ -80,7 +80,7 @@ export const html = `
       <!-- What is under the pointer: the moment's name and time, and the picture itself when the
            element composing this one can draw it (see UfoElement.seekPreviewPainter). -->
       <div id="seek-preview" class="seek-preview" hidden>
-        <canvas id="seek-preview-canvas" class="seek-preview-canvas" width="160" height="90" hidden></canvas>
+        <canvas id="seek-preview-canvas" class="seek-preview-canvas" width="480" height="270" hidden></canvas>
         <div class="seek-preview-caption"><span id="seek-preview-time" class="seek-preview-time"></span><span id="seek-preview-title" class="seek-preview-title"></span></div>
       </div>
     </div>
