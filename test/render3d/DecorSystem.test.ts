@@ -405,17 +405,22 @@ describe("DecorSystem declared lamps seen against a sky", () => {
   })
 })
 
-describe("DecorSystem.build terrace", () => {
-  it("is built at the size stated, a wall of stone under a thin layer of earth, and stands on the lowest ground under it like a bank", () => {
-    const terrace: DecorObject = { id: "decor-3", kind: "terrace", eastM: 0, northM: 20, sizeM: { widthM: 44, lengthM: 8, heightM: 2 } }
+describe("DecorSystem.fitTerrace", () => {
+  const terrace: DecorObject = { id: "decor-3", kind: "terrace", eastM: 0, northM: 20, sizeM: { widthM: 44, lengthM: 8, heightM: 1 } }
+
+  it("lays a flat level at the stated height above the relief under its centre, a wall carried down into the ground below it", () => {
     const group = DecorSystem.build(terrace, false)
     expect(parts(group)).toHaveLength(2)
+    // A slope falling 0.5 m per metre across the depth: 12 m at the back, 8 m at the front, 10 m under the centre.
+    const ground = (_x: number, z: number) => 10 + z * 0.5
+    const level = DecorSystem.fitTerrace(group, terrace, ground)
+    expect(level).toBeCloseTo(11, 5)
     const box = new Box3().setFromObject(group)
     expect(box.max.x - box.min.x).toBeCloseTo(44, 0)
     expect(box.max.z - box.min.z).toBeCloseTo(8, 0)
-    expect(box.max.y - box.min.y).toBeGreaterThan(1.9)
-    // A slope falling 0.5 m per metre of depth, which an 8 m deep terrace spans from 12 m to 8 m: it stands on the low side.
-    const ground = (_x: number, z: number) => 10 - z * 0.5
-    expect(DecorSystem.groundUnderFootprint(terrace, 0, 0, 0, ground)).toBeCloseTo(8, 0)
+    // The back wall stands to the level or to the ground sunk into, whichever is higher: 12 - 0.8 here.
+    expect(box.max.y).toBeCloseTo(11.2, 1)
+    // 0.8 m below the lowest ground under the wall, whose foot is at 8 m.
+    expect(box.min.y).toBeCloseTo(7.2, 1)
   })
 })

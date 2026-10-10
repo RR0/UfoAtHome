@@ -1025,6 +1025,8 @@ export class SceneRenderer {
    * always writes a fresh array on add/remove/edit, so reference equality alone is enough — no
    * per-tick allocation, unlike weatherEquals' field-by-field compare). */
   private decorObjects: DecorObject[] = []
+  /** The terraces as placed at this instant, in the scene's frame: where ground is raised (see groundYUnder). */
+  private terraces: { x: number, z: number, cos: number, sin: number, halfWidthM: number, halfLengthM: number, levelY: number }[] = []
   private readonly decorGroups = new Map<string, Group>()
   /** When each decor object that exists only for a while is there, ms from the recording's start, by id:
    * the aircraft a record of air traffic gives (see TrafficDecor). Outside its span an object is not
@@ -2467,7 +2469,10 @@ export class SceneRenderer {
     }
     this.bodyOrigin = { x: offset.x + shift.x, z: offset.z + shift.z }
     this.placeShadowFrustum()
+    this.placeTerraces(t, offset, shift)
     for (const object of this.decorObjects) {
+      // Laid on the ground by placeTerraces, which has to come first: everything else stands on them.
+      if (object.kind === "terrace") continue
       const group = this.decorGroups.get(object.id)
       if (!group) continue
       // Resolved rather than read straight off the object: scenery stays where it was put, but an
@@ -2564,6 +2569,54 @@ export class SceneRenderer {
    * placed kilometres out) — which is exactly where decor stood before any of this existed.
    */
   private groundYUnder(x: number, z: number): number {
+    const relief = this.terrainYUnder(x, z)
+    // A terrace is part of the ground its people stand on: what stands on it (an observer, a body, a
+    // cabin) stands on its top, which is the relief raised by the level's own height (see fitTerrace).
+    let raised = relief
+    for (const terrace of this.terraces) {
+      const dx = x - terrace.x
+      const dz = z - terrace.z
+      const lx = dx * terrace.cos - dz * terrace.sin
+      const lz = dx * terrace.sin + dz * terrace.cos
+      if (Math.abs(lx) <= terrace.halfWidthM && Math.abs(lz) <= terrace.halfLengthM) raised = Math.max(raised, terrace.levelY)
+    }
+    return raised
+  }
+
+  /**
+   * Lays every terrace on the relief and registers it as ground (see groundYUnder). Before all the
+   * other decor, which stands on them. The wall is re-laid only when the terrace, or the patch under
+   * it, has moved: reading the relief every few metres of a long wall is not a per-frame job.
+   */
+  private placeTerraces(t: number, offset: { x: number, z: number }, shift: { x: number, z: number }): void {
+    this.terraces = []
+    const terrain = this.terrainMesh
+    for (const object of this.decorObjects) {
+      if (object.kind !== "terrace") continue
+      const group = this.decorGroups.get(object.id)
+      if (!group) continue
+      const placement = resolveDecorPlacementAt(object, t)
+      const x = placement.eastM + offset.x + shift.x
+      const z = -placement.northM + offset.z + shift.z
+      const size = DecorSystem.sizeOf(object)
+      const theta = -(placement.headingDeg ?? 0) * DEG_TO_RAD
+      const cos = Math.cos(theta)
+      const sin = Math.sin(theta)
+      const key = `${terrain?.geometry.uuid}:${(x - (terrain?.position.x ?? 0)).toFixed(3)}:${(z - (terrain?.position.z ?? 0)).toFixed(3)}:`
+        + `${(terrain?.position.y ?? 0).toFixed(3)}:${placement.headingDeg}:${size.widthM}:${size.lengthM}:${size.heightM}`
+      group.position.set(x, 0, z)
+      if (placement.headingDeg !== undefined) group.rotation.y = theta
+      if (group.userData.terraceKey !== key) {
+        // The terrace's own frame to the world's: a point (lx, lz) of it lies at x + lx cos + lz sin, z - lx sin + lz cos.
+        group.userData.terraceLevelY = DecorSystem.fitTerrace(group, object, (lx, lz) => this.terrainYUnder(x + lx * cos + lz * sin, z - lx * sin + lz * cos))
+        group.userData.terraceKey = key
+      }
+      this.terraces.push({ x, z, cos, sin, halfWidthM: size.widthM / 2, halfLengthM: size.lengthM / 2, levelY: group.userData.terraceLevelY as number })
+    }
+  }
+
+  /** The relief alone, with no terrace on it: what a terrace is laid on. */
+  private terrainYUnder(x: number, z: number): number {
     const mesh = this.terrainMesh
     if (!mesh) return DECOR_GROUND_Y
     // The patch stands where its own origin really is relative to the observer (see setObserverPose),

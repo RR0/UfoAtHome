@@ -492,14 +492,18 @@ function buildMound(): Group {
 }
 
 /**
- * One terrace: a block of earth held by a dry-stone wall, 1 m on each side before it is sized. The
- * wall's face is on the -Z side (the "front", as a building's is), grey-beige; the level's top is a
- * thin layer of bare earth, which a recording may repaint (a vegetable garden is not a bare earth).
+ * One terrace, before it is laid on the ground (see fitTerrace): a flat block of the size stated,
+ * which is all an editor with no relief under it can show. Two meshes, in this order: the wall
+ * (dry stone) and the level's top (grass and bare earth, the colour of the field it is part of).
  */
+const TERRACE_WALL_COLOR: RgbColor = [0.42, 0.39, 0.33]
+const TERRACE_TOP_COLOR: RgbColor = [0.34, 0.38, 0.2]
+
 function buildTerrace(): Group {
   const group = new Group()
-  addPart(group, new BoxGeometry(1, 1, 1), [0.5, 0.46, 0.38], 0.5)
-  addPart(group, new BoxGeometry(1, 0.03, 1), [0.33, 0.3, 0.18], 1.015)
+  const wall = addPart(group, new BoxGeometry(1, 1, 1), TERRACE_WALL_COLOR, 0.5)
+  const top = addPart(group, new BoxGeometry(1, 0.03, 1), TERRACE_TOP_COLOR, 1.015)
+  for (const mesh of [wall, top]) (mesh.material as MeshLambertMaterial).side = DoubleSide
   return group
 }
 
@@ -867,6 +871,57 @@ export class DecorSystem {
     return merged
   }
 
+  /**
+   * Lays a terrace on the ground it is part of: a LEVEL, flat on top, at `heightM` above the relief under
+   * its centre. A terrace is cut into a slope and filled on its low side, so its wall is high where the
+   * ground falls away from it and gone where the slope rises into it (there the relief shows through the
+   * top, as the bank of the cut). Walls on the front (the face looks down the slope), the back and both
+   * ends, carried down to the lowest ground under them and 0.8 m into it so that no seam shows.
+   * `ground` reads the relief at a point of the terrace's OWN frame (x along the wall, z across it), as a
+   * height in the frame the group is placed in; the group stands at height 0.
+   * Returns the height of the top, in that frame.
+   */
+  static fitTerrace(group: Group, object: DecorObject, ground: (x: number, z: number) => number): number {
+    const size = DecorSystem.sizeOf(object)
+    const halfW = size.widthM / 2
+    const halfL = size.lengthM / 2
+    const level = ground(0, 0) + size.heightM
+    const nx = Math.min(80, Math.max(1, Math.ceil(size.widthM / 2)))
+    const nz = Math.min(16, Math.max(1, Math.ceil(size.lengthM / 3)))
+    const meshes = DecorSystem.bodyOf(group).children.filter(child => (child as Mesh).isMesh) as Mesh[]
+    if (meshes.length < 2) return level
+    const xs = (i: number) => -halfW + (size.widthM * i) / nx
+    const zs = (j: number) => -halfL + (size.lengthM * j) / nz
+    const SINK_M = 0.8
+    const wall: number[] = []
+    const strip = (from: number[], to: number[]) => {
+      const lowA = ground(from[0], from[1]) - SINK_M, lowB = ground(to[0], to[1]) - SINK_M
+      const highA = Math.max(level, lowA), highB = Math.max(level, lowB)
+      wall.push(from[0], lowA, from[1], to[0], lowB, to[1], from[0], highA, from[1])
+      wall.push(to[0], lowB, to[1], to[0], highB, to[1], from[0], highA, from[1])
+    }
+    for (let i = 0; i < nx; i++) {
+      strip([xs(i), -halfL], [xs(i + 1), -halfL])
+      strip([xs(i), halfL], [xs(i + 1), halfL])
+    }
+    for (let j = 0; j < nz; j++) {
+      strip([-halfW, zs(j)], [-halfW, zs(j + 1)])
+      strip([halfW, zs(j)], [halfW, zs(j + 1)])
+    }
+    const top = [-halfW, level, -halfL, -halfW, level, halfL, halfW, level, -halfL, halfW, level, -halfL, -halfW, level, halfL, halfW, level, halfL]
+    const lay = (mesh: Mesh, positions: number[]) => {
+      const geometry = new BufferGeometry()
+      geometry.setAttribute("position", new Float32BufferAttribute(positions, 3))
+      geometry.computeVertexNormals()
+      mesh.geometry.dispose()
+      mesh.geometry = geometry
+      mesh.position.y = 0
+    }
+    lay(meshes[0], wall)
+    lay(meshes[1], top)
+    return level
+  }
+
   /** Keep each plant upright, with its own base on the terrain, even across a sloping patch.
    * Heights are restored from the original geometry on every update, so seeking cannot accumulate
    * deformation. The caller caches the terrain-relative placement to avoid work during playback. */
@@ -965,7 +1020,7 @@ export class DecorSystem {
   private static scaleFor(object: DecorObject): Vector3 {
     const size = object.sizeM
     // A bridge is built at its own size already: stretching it would turn its posts into planks.
-    if (!size || object.kind === "bridge" || object.kind === "wire") return new Vector3(1, 1, 1)
+    if (!size || object.kind === "bridge" || object.kind === "wire" || object.kind === "terrace") return new Vector3(1, 1, 1)
     const natural = this.naturalSize(object.kind, object.floors)
     // Axis by axis, because a size is allowed to be partial: an axis nobody measured keeps the
     // built-in shape's own proportion rather than being invented to match the ones that were.
@@ -990,6 +1045,8 @@ export class DecorSystem {
     // Stated rather than measured: a bridge has no stock shape, its geometry IS its size.
     if (kind === "bridge") return BridgeGeometry.NATURAL_SIZE
     if (kind === "wire") return WireGeometry.NATURAL_SIZE
+    // Stated rather than measured: a terrace is laid on the ground at its own size (see fitTerrace).
+    if (kind === "terrace") return { widthM: 1, lengthM: 1, heightM: 1 }
     const key = `${kind}:${levels}`
     const cached = NATURAL_SIZES.get(key)
     if (cached) return cached
@@ -1002,8 +1059,6 @@ export class DecorSystem {
             ? buildShrub()
           : kind === "crop"
             ? buildCrop()
-            : kind === "terrace"
-              ? buildTerrace()
             : kind === "mound"
               ? buildMound()
               : kind === "streetlight"

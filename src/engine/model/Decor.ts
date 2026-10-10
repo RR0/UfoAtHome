@@ -27,11 +27,13 @@ export type DecorKind =
   /**
    * A terrace: one step of a hillside the people there cut into levels, each held by a dry-stone
    * retaining wall (a "restanque" in Provence, a bancal in Languedoc). `sizeM.widthM` is how far the
-   * wall runs, `lengthM` how deep the level goes back from it, `heightM` the height of the level above
-   * the ground at the foot of the wall, `headingDeg` the direction the wall's face looks (down the slope). It
+   * wall runs, `lengthM` how deep the level goes back from it, `heightM` the height of its flat top above
+   * the relief under its centre, `headingDeg` the direction the wall's face looks (down the slope). It
    * earns its own kind because the elevation model cannot say it: a terrace is a step of one or two
-   * metres that no height grid at tens of metres resolves, and it is what hid the craft from Nicolaï
-   * until he stood above it. Steps are several of these side by side.
+   * metres that no height grid at tens of metres resolves, and whoever stands on one (an observer, a
+   * body, a building) stands on its top: the ground the scene reads includes it. Steps are several of
+   * these side by side; the level is flat, which is what "terrace" means, so on a sloping hillside its
+   * wall is as high as the ground falls away from it.
    */
   | "terrace"
   | "building" | "tree" | "crop" | "mound" | "streetlight" | "vehicle" | "observer" | "aircraft"
