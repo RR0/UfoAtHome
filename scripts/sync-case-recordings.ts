@@ -77,7 +77,8 @@ const RECORDINGS: CaseRecording[] = [
   { published: "observer-braine-le-comte-akh.json", dossier: "BraineLeComte/observer-braine-le-comte-akh.json" },
   { published: "observer-braine-le-comte-bjn.json", dossier: "BraineLeComte/observer-braine-le-comte-bjn.json" },
   { published: "observer-braine-le-comte-fwy.json", dossier: "BraineLeComte/observer-braine-le-comte-fwy.json" },
-  { published: "observer-trans-en-provence.json", dossier: "TransEnProvence/observer-trans-en-provence.json" }
+  { published: "observer-trans-en-provence.json", dossier: "TransEnProvence/observer-trans-en-provence.json" },
+  { published: "interpretation-trans-en-provence-gepan.json", dossier: "TransEnProvence/interpretation-trans-en-provence-gepan.json" }
 ]
 
 class CaseRecordingSync {
