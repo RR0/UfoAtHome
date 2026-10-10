@@ -1174,6 +1174,7 @@ export class DecorSystem {
       child.receiveShadow = true
     })
     holder.add(model)
+    if (object.kind === "tree") holder.add(DecorSystem.trunkShadow(natural.heightM * scale))
     // Replaced rather than hidden: the primitive's geometry and materials are real GPU resources,
     // and a scene can rebuild its decor many times.
     if (body.parent) {
@@ -1184,6 +1185,34 @@ export class DecorSystem {
     }
     this.dispose(body)
   }
+
+  /**
+   * What the trunk of a tree throws on the ground, which its model cannot.
+   *
+   * A tree fitted to a stated height of four or five metres has a trunk of a few centimetres, and the
+   * sun's shadow map is a texel of a quarter of a metre: the crown's shadow came out on the ground and
+   * the trunk's did not, so that nothing led from the foot of the tree to the shadow it threw. A real trunk
+   * of such a tree is a hand's breadth or two across. This is that trunk for the light and for nothing
+   * else: it casts and draws nothing, and every tree shares the one geometry.
+   */
+  private static trunkShadow(treeHeightM: number): Mesh {
+    DecorSystem.trunkProxy ??= {
+      geometry: new CylinderGeometry(1, 1.15, 1, 8),
+      material: new MeshBasicMaterial({ colorWrite: false, depthWrite: false })
+    }
+    const mesh = new Mesh(DecorSystem.trunkProxy.geometry, DecorSystem.trunkProxy.material)
+    const radiusM = Math.min(0.3, Math.max(0.12, treeHeightM * 0.035))
+    const heightM = treeHeightM * 0.45
+    mesh.scale.set(radiusM, heightM, radiusM)
+    mesh.position.y = heightM / 2
+    mesh.castShadow = true
+    mesh.receiveShadow = false
+    // Shared by every tree: DecorSystem.dispose leaves what carries this flag alone.
+    mesh.userData.sharedModel = true
+    mesh.name = "trunk-shadow"
+    return mesh
+  }
+  private static trunkProxy?: { geometry: CylinderGeometry, material: MeshBasicMaterial }
 
   /**
    * The size a decor object is actually drawn at: what it says, or what its primitive naturally is.
