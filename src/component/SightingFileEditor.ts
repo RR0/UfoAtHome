@@ -11,6 +11,13 @@ import { SightingCompletion } from "./SightingCompletion.js"
 import { JsonPaths, type JsonPath } from "./JsonPaths.js"
 import { LineDiff } from "./LineDiff.js"
 
+/** What a text has changed from the one it is compared to: the lines changed, and the places lines were taken away. */
+interface ChangeMarks {
+  baseline: string[]
+  changed: ReadonlySet<number>
+  removed: ReadonlySet<number>
+}
+
 /** What the editor is told besides the text it starts with. */
 export interface SightingFileEditorOptions {
   /** The text the changed lines are changed from: what the recording was when it was last saved or exported. Default: the text it starts with. */
@@ -49,7 +56,7 @@ export class SightingFileEditor {
   private readonly view: EditorView
   private changing = false
 
-  private readonly changedField: StateField<{ baseline: string[], changed: ReadonlySet<number> }>
+  private readonly changedField: StateField<ChangeMarks>
 
   /** Set when the text is put in the editor's own hands by the caller (a reveal), so that its caret does not report itself. */
   private silent = false
@@ -59,13 +66,25 @@ export class SightingFileEditor {
    * every edit from the baseline and the text (see LineDiff), the baseline replaced by {@link markSaved}.
    */
   private static readonly SET_BASELINE = StateEffect.define<string>()
-  private static readonly CHANGED_MARKER = new (class extends GutterMarker {
-    override toDOM(): Node {
-      const bar = document.createElement("div")
-      bar.className = "cm-changed-bar"
-      return bar
-    }
-  })()
+  /** A blue bar for a line changed, a red tick where lines were taken away, both when a line stands where others were taken away. */
+  private static marker(changed: boolean, removed: boolean): GutterMarker {
+    return new (class extends GutterMarker {
+      override toDOM(): Node {
+        const mark = document.createElement("div")
+        mark.className = changed ? "cm-changed-bar" : "cm-changed-none"
+        if (removed) {
+          const tick = document.createElement("div")
+          tick.className = "cm-removed-tick"
+          mark.appendChild(tick)
+        }
+        return mark
+      }
+    })()
+  }
+
+  private static readonly CHANGED_MARKER = SightingFileEditor.marker(true, false)
+  private static readonly REMOVED_MARKER = SightingFileEditor.marker(false, true)
+  private static readonly BOTH_MARKER = SightingFileEditor.marker(true, true)
 
   /**
    * The lines the picture has shown the author (see {@link reveal}): tinted and edged in the margin whether or not the
@@ -91,26 +110,54 @@ export class SightingFileEditor {
     })
   })
 
-  private static changeMarks(initial: string): { field: StateField<{ baseline: string[], changed: ReadonlySet<number> }>, extensions: import("@codemirror/state").Extension[] } {
-    const field = StateField.define<{ baseline: string[], changed: ReadonlySet<number> }>({
-      create: state => ({ baseline: initial.split("\n"), changed: new Set(LineDiff.changed(initial.split("\n"), state.doc.toString().split("\n"))) }),
+  /**
+   * The lines of the doc that stand where lines were taken away (a place, not a line: the index of the one that is there now, or the
+   * last when they were at the end).
+   */
+  private static removedLines(state: EditorState, removed: ReadonlySet<number>): Set<number> {
+    return new Set([...removed].map(position => Math.min(position, state.doc.lines - 1)))
+  }
+
+  private static changeMarks(initial: string): { field: StateField<ChangeMarks>, extensions: import("@codemirror/state").Extension[] } {
+    const compute = (baseline: string[], state: EditorState): ChangeMarks => {
+      const { changed, removed } = LineDiff.compare(baseline, state.doc.toString().split("\n"))
+      return { baseline, changed: new Set(changed), removed: new Set(removed) }
+    }
+    const field = StateField.define<ChangeMarks>({
+      create: state => compute(initial.split("\n"), state),
       update: (value, transaction) => {
         let baseline = value.baseline
         for (const effect of transaction.effects) if (effect.is(SightingFileEditor.SET_BASELINE)) baseline = effect.value.split("\n")
         if (!transaction.docChanged && baseline === value.baseline) return value
-        return { baseline, changed: new Set(LineDiff.changed(baseline, transaction.state.doc.toString().split("\n"))) }
+        return compute(baseline, transaction.state)
       }
     })
     const tint = EditorView.decorations.compute([field], state => {
+      const marks = state.field(field)
+      const removedAt = SightingFileEditor.removedLines(state, marks.removed)
+      const lines = new Set([...marks.changed, ...removedAt])
       const builder = new RangeSetBuilder<Decoration>()
-      for (const index of [...state.field(field).changed].sort((a, b) => a - b)) {
-        if (index < state.doc.lines) builder.add(state.doc.line(index + 1).from, state.doc.line(index + 1).from, Decoration.line({ class: "cm-changed-line" }))
+      for (const index of [...lines].sort((a, b) => a - b)) {
+        if (index >= state.doc.lines) continue
+        const classes = [
+          marks.changed.has(index) ? "cm-changed-line" : "",
+          // Where lines were taken away: an edge on the line that stands there now, or under the last when they were at the end.
+          [...marks.removed].some(position => position === index) ? "cm-removed-above" : "",
+          [...marks.removed].some(position => position >= state.doc.lines) && index === state.doc.lines - 1 ? "cm-removed-below" : ""
+        ].filter(Boolean).join(" ")
+        builder.add(state.doc.line(index + 1).from, state.doc.line(index + 1).from, Decoration.line({ class: classes }))
       }
       return builder.finish()
     })
     const margin = gutter({
       class: "cm-changed-gutter",
-      lineMarker: (view, line) => view.state.field(field).changed.has(view.state.doc.lineAt(line.from).number - 1) ? SightingFileEditor.CHANGED_MARKER : null,
+      lineMarker: (view, line) => {
+        const marks = view.state.field(field)
+        const index = view.state.doc.lineAt(line.from).number - 1
+        const changed = marks.changed.has(index)
+        const removed = SightingFileEditor.removedLines(view.state, marks.removed).has(index)
+        return changed && removed ? SightingFileEditor.BOTH_MARKER : changed ? SightingFileEditor.CHANGED_MARKER : removed ? SightingFileEditor.REMOVED_MARKER : null
+      },
       lineMarkerChange: update => update.docChanged || update.transactions.some(transaction => transaction.effects.some(effect => effect.is(SightingFileEditor.SET_BASELINE))),
       initialSpacer: () => SightingFileEditor.CHANGED_MARKER
     })
@@ -167,6 +214,12 @@ export class SightingFileEditor {
           // The lines changed since the last save: a bar in the margin and a light tint, in the blue of a selection.
           ".cm-changed-gutter": { width: "4px" },
           ".cm-changed-bar": { width: "3px", height: "100%", backgroundColor: "#2f81f7" },
+          ".cm-changed-gutter .cm-gutterElement": { position: "relative" },
+          ".cm-changed-none": { width: "3px", height: "100%" },
+          // Lines taken away: a red tick on the margin and a red edge where they were.
+          ".cm-removed-tick": { position: "absolute", left: "0", top: "0", width: "0", height: "0", borderTop: "4px solid transparent", borderBottom: "4px solid transparent", borderLeft: "6px solid #e5534b" },
+          ".cm-removed-above": { boxShadow: "inset 0 2px 0 #e5534b" },
+          ".cm-removed-below": { boxShadow: "inset 0 -2px 0 #e5534b" },
           ".cm-changed-line": { backgroundColor: "color-mix(in srgb, #2f81f7 13%, transparent)" },
           // What the picture showed: warmer and edged, over the changed lines' tint when both are there.
           ".cm-revealed-line": { backgroundColor: "color-mix(in srgb, #f2cc60 30%, transparent)", boxShadow: "inset 3px 0 0 #f2cc60" },
@@ -245,7 +298,8 @@ export class SightingFileEditor {
    * when nothing is changed.
    */
   gotoChange(direction: 1 | -1): boolean {
-    const lines = [...this.view.state.field(this.changedField).changed].sort((a, b) => a - b)
+    const marks = this.view.state.field(this.changedField)
+    const lines = [...new Set([...marks.changed, ...SightingFileEditor.removedLines(this.view.state, marks.removed)])].sort((a, b) => a - b)
     if (lines.length === 0) return false
     const zones: Array<{ first: number, last: number }> = []
     for (const line of lines) {

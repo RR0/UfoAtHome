@@ -16,8 +16,27 @@ describe("LineDiff", () => {
     expect(LineDiff.changed(lines("abcdef"), lines("abcXdef"))).toEqual([3])
   })
 
-  it("marks nothing for a line that was taken away, since there is no line of the new text to mark", () => {
+  it("marks no line for one that was taken away, since there is no line of the new text to mark", () => {
     expect(LineDiff.changed(lines("abcdef"), lines("abdef"))).toEqual([])
+  })
+
+  it("says where lines were taken away: the line of the new text that now stands in their place", () => {
+    expect(LineDiff.compare(lines("abcdef"), lines("abdef")).removed).toEqual([2])
+    expect(LineDiff.compare(lines("abcdef"), lines("abcd")).removed).toEqual([4])
+    expect(LineDiff.compare(lines("abcdef"), lines("cdef")).removed).toEqual([0])
+    expect(LineDiff.compare(lines("abcdef"), lines("")).removed).toEqual([0])
+    expect(LineDiff.compare(lines("abcdefghij"), lines("abdefhij")).removed).toEqual([2, 5])
+  })
+
+  it("says nothing was taken away where lines were only added or changed", () => {
+    expect(LineDiff.compare(lines("abcdef"), lines("abXdef")).removed).toEqual([])
+    expect(LineDiff.compare(lines("abcdef"), lines("abcXdef")).removed).toEqual([])
+  })
+
+  it("marks both a line that replaced others and the place of the ones it replaced", () => {
+    const { changed, removed } = LineDiff.compare(lines("abcdef"), lines("abXf"))
+    expect(changed).toEqual([2])
+    expect(removed).toEqual([3])
   })
 
   it("follows several edits apart from each other", () => {

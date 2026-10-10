@@ -371,6 +371,38 @@ describe("going from one changed zone to the next", () => {
   })
 })
 
+describe("lines taken away", () => {
+  it("are shown where they were, and F7 goes there", async () => {
+    const { SightingFileEditor } = await import("../../src/component/SightingFileEditor.js")
+    const lines = Array.from({ length: 30 }, (_, i) => `line ${i}`)
+    const host = document.body.appendChild(document.createElement("div"))
+    const editor = new SightingFileEditor(host, lines.join("\n"), () => undefined, "text")
+    const edited = lines.filter((_, i) => i !== 12 && i !== 13)
+    editor.replaceText(edited.join("\n"), false)
+
+    // Nothing is changed or new in what is left, yet the place where two lines were is marked.
+    expect(host.querySelectorAll(".cm-changed-line")).toHaveLength(0)
+    expect(host.querySelector(".cm-removed-above")?.textContent).toBe("line 14")
+    expect(host.querySelector(".cm-removed-tick")).not.toBeNull()
+    const view = (editor as unknown as { view: { state: { selection: { main: { from: number } }, doc: { lineAt(position: number): { number: number } } } } }).view
+    expect(editor.gotoChange(1)).toBe(true)
+    expect(view.state.doc.lineAt(view.state.selection.main.from).number - 1).toBe(12)
+    editor.destroy()
+  })
+
+  it("are shown under the last line when they were at the end", async () => {
+    const { SightingFileEditor } = await import("../../src/component/SightingFileEditor.js")
+    const lines = Array.from({ length: 10 }, (_, i) => `line ${i}`)
+    const host = document.body.appendChild(document.createElement("div"))
+    const editor = new SightingFileEditor(host, lines.join("\n"), () => undefined, "text")
+
+    editor.replaceText(lines.slice(0, 7).join("\n"), false)
+
+    expect(host.querySelector(".cm-removed-below")?.textContent).toBe("line 6")
+    editor.destroy()
+  })
+})
+
 describe("editing an object that is named in several languages", () => {
   it("keeps the other languages of its name when something else about it is edited", async () => {
     const element = mount()
