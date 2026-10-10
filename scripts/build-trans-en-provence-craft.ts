@@ -52,13 +52,16 @@ class TransEnProvenceCraft {
   ]
 
   readonly materials: GltfMaterial[] = [
-    GltfWriter.material("hull", "#666a6f", 0.2, 0.55),
-    // The ledge a little lighter than the bowls, so that from above it reads as a rim round the machine, not as its shadow.
-    GltfWriter.material("ledge", "#8d9196", 0.25, 0.7),
-    GltfWriter.material("underside", "#4f5358", 0.3, 0.8),
+    // Zinc grey and DULL (the private group's witness: "dark gray in color, dull"; the GEPAN's: "gray, comparable to
+    // zinc"): matt, and not metallic, so that it does not mirror the orange of a dusk sky and turn the colour of the
+    // wood beside it.
+    GltfWriter.material("hull", "#8a8e92", 0, 0.92),
+    // "Darker and more flat in the thick lateral region": the ledge is darker than the bowls.
+    GltfWriter.material("ledge", "#4d5155", 0, 0.95),
+    GltfWriter.material("underside", "#4f5358", 0, 0.9),
     // The lower bowl: darker and flatter than the upper (GEPAN: "darker and more flat in the thick lateral region"). Matt, so that
     // it does not mirror the pale ground it stands on, which made the machine look sunk into it.
-    GltfWriter.material("lower", "#3b3e42", 0.1, 0.95)
+    GltfWriter.material("lower", "#6e7276", 0, 0.95)
   ]
 
   write(writer: GltfWriter): void {

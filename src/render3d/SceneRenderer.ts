@@ -1538,6 +1538,7 @@ export class SceneRenderer {
     // a patch reads zero at its own origin, so a observer who never moves is exactly where they were.
     // Kept as its own field so the gait's rise can be added to it absolutely rather than
     // incrementally — see setGait, applied in updateDecorAnchoring a moment later.
+    this.poseElevationM = pose.elevationM
     this.poseCameraY = this.groundYUnder(0, 0) + 1.6 + pose.elevationM
     this.camera.position.y = this.poseCameraY
     // Keeps the observer at the centre of their own sky, whatever altitude they are at — see
@@ -2470,6 +2471,14 @@ export class SceneRenderer {
     this.bodyOrigin = { x: offset.x + shift.x, z: offset.z + shift.z }
     this.placeShadowFrustum()
     this.placeTerraces(t, offset, shift)
+    if (!inhabited && this.terraces.length > 0) {
+      // The eye stands on the ground as it is NOW, terraces included: setObserverPose read it before the terraces were
+      // put where this instant's frame has them, one tick behind, and a witness walking along a terrace had his eye
+      // a metre too low until the next tick (and for good on a paused one).
+      this.poseCameraY = this.groundYUnder(0, 0) + 1.6 + this.poseElevationM
+      this.camera.position.y = this.poseCameraY + this.gaitOffset.upM
+      this.celestialGroup.position.y = this.camera.position.y
+    }
     for (const object of this.decorObjects) {
       // Laid on the ground by placeTerraces, which has to come first: everything else stands on them.
       if (object.kind === "terrace") continue
@@ -2698,6 +2707,7 @@ export class SceneRenderer {
 
   /** Where the pose alone puts the eye, before the gait is added — see setGait. */
   private poseCameraY = 1.6
+  private poseElevationM = 0
 
   /**
    * How far the observer's own walking has carried their eye off the path at this instant, metres —
