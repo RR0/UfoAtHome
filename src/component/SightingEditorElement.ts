@@ -477,6 +477,18 @@ export class SightingEditorElement extends HTMLElement {
   /** Waiting to put the form's changes into the text, and the text's into the form — see syncFileEditor. */
   private fileSyncTimer?: ReturnType<typeof setTimeout>
   private fileApplyTimer?: ReturnType<typeof setTimeout>
+  /**
+   * The recording's text as the history last saw it: what the form said when the last step was written into
+   * the File group's editor, whose own history is the undo. Undefined until the author first touches the form
+   * (see armHistory), and again on loading another recording.
+   */
+  private historySnapshot?: string
+  private historyTimer?: ReturnType<typeof setTimeout>
+  /** Set after an undo or a redo, until the next real edit: the form may spell the text it was given
+   * differently, and writing that spelling back into the editor would be a new step, and end the redo. */
+  private historyAnswering = false
+  private readonly undoButton: HTMLButtonElement
+  private readonly redoButton: HTMLButtonElement
   private readonly labelFileGroup: HTMLElement
   private readonly cloudCoverInput: HTMLInputElement
   private readonly cloudDarknessInput: HTMLInputElement
@@ -958,6 +970,16 @@ export class SightingEditorElement extends HTMLElement {
       if (!this.contextMenu.hidden) this.hideContextMenu()
       if (!this.decorContextMenu.hidden) this.hideDecorContextMenu()
     }
+    if ((event.ctrlKey || event.metaKey) && !event.altKey && ["z", "y"].includes(event.key.toLowerCase())) {
+      // The editor's own fields and the text editor keep their own undo: this is the recording's.
+      const target = event.composedPath()[0]
+      if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return
+      if (target instanceof HTMLElement && (target.isContentEditable || target.closest(".cm-editor"))) return
+      event.preventDefault()
+      if (event.key.toLowerCase() === "y" || event.shiftKey) this.redo()
+      else this.undo()
+      return
+    }
     if (ARROW_KEYS.has(event.key) || event.key === "Delete" || event.key === "Backspace") {
       // Which of the EDITOR'S OWN controls the key came from — this listener is scoped to the
       // editor (see the constructor), so a field elsewhere on the page never gets here in the first
@@ -976,10 +998,12 @@ export class SightingEditorElement extends HTMLElement {
       if (ARROW_KEYS.has(event.key)) {
         this.moveOrResizeSelectedShapes(event)
       } else {
-        // deleteShape() itself is the single confirm()-gated entry point every deletion path
-        // (this key, the toolbar button, the context menu) funnels through — see its own doc
-        // comment for why that matters.
-        this.deleteShape()
+        // deleteShape() and deleteDecor() are the single confirmation-gated entry points every deletion path
+        // (this key, the toolbar button, the context menu) funnels through — see deleteShape's own doc
+        // comment for why that matters. What the key deletes is what the canvas is editing: the decor
+        // object framed in the Environment group, the shapes elsewhere.
+        if (this.canvasMode() === "decor") this.deleteDecor()
+        else this.deleteShape()
       }
     }
   }
@@ -1304,6 +1328,8 @@ export class SightingEditorElement extends HTMLElement {
     this.addDecorObserverButton = this.shadow.getElementById("add-decor-observer") as HTMLButtonElement
     this.addDecorBuildingButton = this.shadow.getElementById("add-decor-building") as HTMLButtonElement
     this.deleteDecorButton = this.shadow.getElementById("delete-decor") as HTMLButtonElement
+    this.undoButton = this.shadow.getElementById("undo") as HTMLButtonElement
+    this.redoButton = this.shadow.getElementById("redo") as HTMLButtonElement
     this.decorSelect = this.shadow.getElementById("decor") as HTMLSelectElement
     this.referenceSelect = this.shadow.getElementById("reference") as HTMLSelectElement
     this.deleteReferenceButton = this.shadow.getElementById("delete-reference") as HTMLButtonElement
@@ -1583,6 +1609,8 @@ export class SightingEditorElement extends HTMLElement {
     this.addDecorObserverButton.addEventListener("click", () => this.addDecor("observer"))
     this.addDecorBuildingButton.addEventListener("click", () => this.addDecor())
     this.deleteDecorButton.addEventListener("click", () => this.deleteDecor())
+    this.undoButton.addEventListener("click", () => this.undo())
+    this.redoButton.addEventListener("click", () => this.redo())
     this.decorSelect.addEventListener("change", () => this.selectDecor(this.decorSelect.value))
     this.referenceSelect.addEventListener("change", () => this.selectReference(this.referenceSelect.value))
     this.deleteReferenceButton.addEventListener("click", () => this.deleteReference())
@@ -1914,6 +1942,9 @@ export class SightingEditorElement extends HTMLElement {
     // anywhere; the page it now stands in may declare a language (see HostLocale).
     if (HostLocale.preferencesFor(this).join() !== this.preferences.join()) void this.loadLocaleMessages()
     // What the author does to the form, told from what the editor derives by itself: see `touched`.
+    this.shadow.addEventListener("pointerdown", this.armHistory, true)
+    this.shadow.addEventListener("keydown", this.armHistory as EventListener, true)
+    for (const type of ["input", "change", "click", "keyup", "pointerup"]) this.shadow.addEventListener(type, this.scheduleHistoryRecord, true)
     this.shadow.addEventListener("input", this.touch, true)
     this.shadow.addEventListener("change", this.touch, true)
     this.shadow.addEventListener("keydown", this.touchByKey as EventListener, true)
@@ -1930,6 +1961,10 @@ export class SightingEditorElement extends HTMLElement {
 
   disconnectedCallback(): void {
     window.removeEventListener("beforeunload", this.warnBeforeLeaving)
+    this.shadow.removeEventListener("pointerdown", this.armHistory, true)
+    this.shadow.removeEventListener("keydown", this.armHistory as EventListener, true)
+    for (const type of ["input", "change", "click", "keyup", "pointerup"]) this.shadow.removeEventListener(type, this.scheduleHistoryRecord, true)
+    clearTimeout(this.historyTimer)
     this.shadow.removeEventListener("input", this.touch, true)
     this.shadow.removeEventListener("change", this.touch, true)
     this.shadow.removeEventListener("keydown", this.touchByKey as EventListener, true)
@@ -2026,6 +2061,81 @@ export class SightingEditorElement extends HTMLElement {
     this.touched = true
   }
 
+  /**
+   * Undo and redo are the File group's text editor's own (see SightingFileEditor): the recording as text, kept in step
+   * with the form, whose history is therefore the recording's. The editor is loaded the first time the author touches
+   * anything, with the recording as it stood BEFORE that touch (taken on the press or the key, ahead of its effect), and
+   * each change after is written into it as a step of its own: undoing is asking it to take back its last change, and
+   * applying the text it then holds is what the File group already does for an author typing in it.
+   */
+  private readonly armHistory = (): void => {
+    this.historySnapshot ??= this.fileText()
+    if (this.fileEditor === undefined) void this.loadFileEditor().then(() => this.syncHistoryButtons(), () => undefined)
+  }
+
+  private readonly scheduleHistoryRecord = (): void => {
+    if (this.historySnapshot === undefined) return
+    clearTimeout(this.historyTimer)
+    this.historyTimer = setTimeout(() => this.recordHistory(), 350)
+  }
+
+  /** Writes what the form now says into the history, as one step — when it says something other than what the
+   * history last saw, which is not the case after the text itself was applied (see applyFileText). */
+  private recordHistory(): void {
+    this.historyTimer = undefined
+    const editor = this.fileEditor
+    if (editor === undefined || this.historySnapshot === undefined) return
+    const now = this.fileText()
+    if (now === this.historySnapshot) return
+    this.historySnapshot = now
+    this.historyAnswering = false
+    editor.text = now
+    this.syncHistoryButtons()
+  }
+
+  /** Takes back the last change. */
+  private undo(): void {
+    this.stepHistory(editor => editor.undo())
+  }
+
+  private redo(): void {
+    this.stepHistory(editor => editor.redo())
+  }
+
+  private stepHistory(step: (editor: SightingFileEditor) => boolean): void {
+    // What was just done is written first, or it would be what the step takes back instead of what came before.
+    if (this.historyTimer !== undefined) {
+      clearTimeout(this.historyTimer)
+      this.recordHistory()
+    }
+    const editor = this.fileEditor
+    if (editor === undefined || this.isRecording || this.ufoElement.playbackState === "playing") return
+    if (!step(editor)) return
+    // At once, not after the half second an author's typing is given: a key pressed to undo is answered now.
+    clearTimeout(this.fileApplyTimer)
+    this.applyFileText(editor.text)
+    this.historyAnswering = true
+    this.syncHistoryButtons()
+  }
+
+  private syncHistoryButtons(): void {
+    this.undoButton.disabled = !(this.fileEditor?.canUndo ?? false)
+    this.redoButton.disabled = !(this.fileEditor?.canRedo ?? false)
+  }
+
+  /** Forgets what was edited: another recording was loaded, and what came before it is not its past. */
+  private resetHistory(): void {
+    clearTimeout(this.historyTimer)
+    this.historyTimer = undefined
+    this.historySnapshot = undefined
+    this.historyAnswering = false
+    this.fileEditor?.destroy()
+    this.fileEditor = undefined
+    this.fileEditorLoading = undefined
+    this.syncHistoryButtons()
+    if (this.isGroupIdOpen("group-file")) void this.loadFileEditor().then(() => this.syncFileEditor(), () => undefined)
+  }
+
   /** Moving through the form by keyboard is no edit; deleting a shape from the picture is. */
   private readonly touchByKey = (event: KeyboardEvent): void => {
     if (event.key === "Delete" || event.key === "Backspace") this.touched = true
@@ -2096,6 +2206,7 @@ export class SightingEditorElement extends HTMLElement {
       // A picked file has no address of its own: its relative addresses can only mean the page's.
       this.sceneElement.documentUrl = undefined
       this.sightingData = json
+      this.resetHistory()
       this.dispatchEvent(new CustomEvent("recordingloaded", { bubbles: true, composed: true }))
       // The recording now open came from a file, not from the address still sitting in the field.
       this.importUrlInput.value = ""
@@ -2157,6 +2268,7 @@ export class SightingEditorElement extends HTMLElement {
       // What the models it names by `url` are relative to — see SceneElement.documentUrl.
       this.sceneElement.documentUrl = new URL(url, location.href).href
       this.sightingData = json
+      this.resetHistory()
       // Says where the open recording came from, whichever way it was asked for: typed here, the
       // `src` attribute (a site's `?file=` link), or a observer's own file. Absolute, so the
       // address can be copied out of the field and still work, and so the field is a valid URL.
@@ -5021,7 +5133,9 @@ export class SightingEditorElement extends HTMLElement {
       this.showFileNote(this.messages.fileLoading)
       try {
         const { SightingFileEditor } = await import("./SightingFileEditor.js")
-        this.fileEditor = new SightingFileEditor(this.fileEditorHost, this.fileText(), text => this.onFileTextEdited(text),
+        // What it starts from is the recording as it stood before the first touch, when there was one (see armHistory).
+        this.historySnapshot ??= this.fileText()
+        this.fileEditor = new SightingFileEditor(this.fileEditorHost, this.historySnapshot, text => this.onFileTextEdited(text),
           this.messages.fileEditorLabel)
         return this.fileEditor
       } catch (error) {
@@ -5061,6 +5175,9 @@ export class SightingEditorElement extends HTMLElement {
   private syncFileEditor(): void {
     const editor = this.fileEditor
     if (editor === undefined || !this.isGroupIdOpen("group-file") || editor.focused) return
+    // After an undo or a redo the text holds what the history gave back, and the form is what that text made: rewriting
+    // the text in the form's spelling would be a new step in the history, and end the redo.
+    if (this.historyAnswering) return
     // A text left broken is the author's draft, not stale: the form has nothing to say about it.
     try {
       JSON.parse(editor.text)
@@ -5092,6 +5209,8 @@ export class SightingEditorElement extends HTMLElement {
       this.sightingData = json as SightingRecordingJson
       this.ufoElement.currentTime = playhead
       this.showFileNote(undefined)
+      // The history already holds this text (it is what typing in it, or an undo, made): not a change to write in.
+      this.historySnapshot = this.fileText()
     } catch {
       this.showFileNote(this.messages.importErrorMalformed)
     }
@@ -6749,10 +6868,19 @@ export class SightingEditorElement extends HTMLElement {
    * (or none at all — unlike deleteShape, a sighting with zero decor is the normal, common case,
    * not a state nothing else is built to handle). */
   private deleteDecor(): void {
-    if (this.currentDecorId === undefined) return
     const sighting = this.ufoElement.sighting
-    sighting.decor = sighting.decor.filter(d => d.id !== this.currentDecorId)
-    this.currentDecorId = sighting.decor[0]?.id
+    const going = sighting.decor.find(d => d.id === this.currentDecorId)
+    if (going === undefined) return
+    // The bin, the Delete key and the Backspace key all end here, and all ask: scenery is deleted as seldom
+    // by mistake as a shape and as hard to put back. What goes is what the question NAMED, as for a shape.
+    this.askConfirm(this.messages.confirmDeleteDecor.replace("{name}", this.decorLabel(going)), () => this.removeDecor(going.id))
+  }
+
+  /** The deletion itself, once confirmed — see deleteDecor, which is the only caller. */
+  private removeDecor(id: string): void {
+    const sighting = this.ufoElement.sighting
+    sighting.decor = sighting.decor.filter(d => d.id !== id)
+    if (this.currentDecorId === id) this.currentDecorId = sighting.decor[0]?.id
     this.refreshDecorList()
     this.ufoElement.refresh()
   }
@@ -8688,6 +8816,10 @@ export class SightingEditorElement extends HTMLElement {
     this.lookAtDecorButton.title = messages.lookAtDecor
     this.lookAtDecorButton.setAttribute("aria-label", messages.lookAtDecor)
     this.optionDecorObserver.textContent = messages.decorObserver
+    this.undoButton.title = messages.undo
+    this.undoButton.setAttribute("aria-label", messages.undo)
+    this.redoButton.title = messages.redo
+    this.redoButton.setAttribute("aria-label", messages.redo)
     this.deleteDecorButton.title = messages.deleteDecor
     this.deleteDecorButton.setAttribute("aria-label", messages.deleteDecor)
     this.labelDecorTitle.textContent = messages.decorTitle

@@ -1,6 +1,6 @@
 import { EditorView, keymap, lineNumbers, highlightSpecialChars, drawSelection, type KeyBinding } from "@codemirror/view"
 import { EditorState } from "@codemirror/state"
-import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands"
+import { defaultKeymap, history, historyKeymap, indentWithTab, isolateHistory, redo, redoDepth, undo, undoDepth } from "@codemirror/commands"
 import { bracketMatching, foldGutter, foldKeymap, HighlightStyle, indentOnInput, syntaxHighlighting } from "@codemirror/language"
 import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from "@codemirror/autocomplete"
 import { json, jsonLanguage, jsonParseLinter } from "@codemirror/lang-json"
@@ -84,14 +84,51 @@ export class SightingFileEditor {
     return this.view.state.doc.toString()
   }
 
-  /** Puts the model's text in, keeping the caret where it was when it still makes sense. Silent. */
+  /**
+   * Puts the model's text in, keeping the caret where it was when it still makes sense. Silent.
+   *
+   * Each one is a step of its own in the editor's history, however close to the last: that history is the
+   * recording's undo (see {@link undo}), and the model changes the form makes are the steps an author wants
+   * to take back one by one, not merged because they came within half a second of each other.
+   */
   set text(text: string) {
     const current = this.view.state.doc.toString()
     if (text === current) return
     this.changing = true
     try {
       const head = Math.min(this.view.state.selection.main.head, text.length)
-      this.view.dispatch({ changes: { from: 0, to: current.length, insert: text }, selection: { anchor: head } })
+      this.view.dispatch({
+        changes: { from: 0, to: current.length, insert: text }, selection: { anchor: head }, annotations: isolateHistory.of("full")
+      })
+    } finally {
+      this.changing = false
+    }
+  }
+
+  /** Takes back the last change to the text — the form's own as much as the author's typing, since the
+   * form is written into this text as it changes. False when there is nothing left to take back. The
+   * caller applies the result: this does not tell the model (see SightingEditorElement.undo). */
+  undo(): boolean {
+    return this.step(undo)
+  }
+
+  redo(): boolean {
+    return this.step(redo)
+  }
+
+  get canUndo(): boolean {
+    return undoDepth(this.view.state) > 0
+  }
+
+  get canRedo(): boolean {
+    return redoDepth(this.view.state) > 0
+  }
+
+  /** Silent too, as {@link text} is: the caller applies the text it leaves, at once. */
+  private step(command: (target: { state: EditorState, dispatch: (transaction: any) => void }) => boolean): boolean {
+    this.changing = true
+    try {
+      return command(this.view)
     } finally {
       this.changing = false
     }

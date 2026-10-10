@@ -19,6 +19,11 @@ export const html = `
   <button class="group-tab" type="button" aria-controls="group-reference" aria-expanded="false"><span id="label-reference-group">Pictures</span></button>
   <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false"><span id="label-shape-group">Phenomenon</span></button>
   <button class="group-tab" type="button" aria-controls="group-file" aria-expanded="false"><span id="label-file-group">File</span></button>
+  <!-- Step back and forward through what was edited, whichever group it was edited in: the File group's text editor keeps the history (see SightingEditorElement.undo). -->
+  <span class="history" role="group">
+    <button id="undo" type="button" class="icon-btn" title="Undo" aria-label="Undo" disabled>↶</button>
+    <button id="redo" type="button" class="icon-btn" title="Redo" aria-label="Redo" disabled>↷</button>
+  </span>
   <!-- What an element that holds this editor puts after the last tab (see CaseEditorElement): a mark of its own, which takes its room whether it shows or not. -->
   <slot name="tab-status"></slot>
 </div>
@@ -938,6 +943,15 @@ select.weather-field:disabled {
   flex-wrap: wrap;
   gap: 0.35em;
   margin-bottom: 0.5em;
+}
+.history {
+  display: inline-flex;
+  gap: 0.2em;
+  margin-inline-start: auto;
+}
+.history .icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 .group-tab, .subgroup-tab {
   font: inherit;

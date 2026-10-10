@@ -3914,9 +3914,13 @@ describe("SightingEditorElement decor group", () => {
     addButton.click()
     expect(element.sightingData.decor).toHaveLength(2)
 
+    // Asked first, as for a shape: nothing goes until it is accepted.
     deleteButton.click()
+    expect(element.sightingData.decor).toHaveLength(2)
+    answerConfirm(element, true)
     expect(element.sightingData.decor).toHaveLength(1)
     deleteButton.click()
+    answerConfirm(element, true)
     expect(element.sightingData.decor).toEqual([])
     expect(deleteButton.disabled).toBe(true)
   })
