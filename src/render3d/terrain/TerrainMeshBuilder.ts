@@ -1,4 +1,5 @@
 // Named imports only — see SceneRenderer.ts's own top-of-file comment on why (tree-shaking).
+import { GrassDetail } from "./GrassDetail.js"
 import { BufferAttribute, BufferGeometry, CanvasTexture, Color, Mesh, MeshLambertMaterial, SRGBColorSpace } from "three"
 import type { ElevationProvider } from "./ElevationProvider.js"
 import type { ImageryProvider } from "./ImageryProvider.js"
@@ -215,6 +216,8 @@ export async function buildTerrainMesh(
     // covered by this patch anyway, so its depth was pure redundancy — and the only thing it was
     // actually hiding was the scenery.
   })
+
+  GrassDetail.install(material)
 
   const mesh = new Mesh(geometry, material)
   mesh.receiveShadow = true

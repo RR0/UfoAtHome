@@ -1,3 +1,4 @@
+import { GrassDetail } from "./terrain/GrassDetail.js"
 import { AdditiveBlending, BackSide, Box3, DoubleSide, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
 import type { Object3D } from "three"
 import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize } from "../engine/model/Decor.js"
@@ -507,6 +508,8 @@ function buildTerrace(): Group {
   const wall = addPart(group, new BoxGeometry(1, 1, 1), TERRACE_WALL_COLOR, 0.5)
   const top = addPart(group, new BoxGeometry(1, 0.03, 1), TERRACE_TOP_COLOR, 1.015)
   for (const mesh of [wall, top]) (mesh.material as MeshLambertMaterial).side = DoubleSide
+  // The top is cultivated ground, grass or crop by what the witness describes: the grain of one, whatever its flat colour.
+  GrassDetail.install(top.material as MeshLambertMaterial, true)
   return group
 }
 
