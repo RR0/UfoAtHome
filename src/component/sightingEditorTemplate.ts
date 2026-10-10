@@ -314,6 +314,12 @@ export const html = `
     <button id="export" type="button">Save</button>
   </div>
   <p id="file-note" class="file-note" hidden role="status"></p>
+  <!-- A question about what an edit of the text just touched: data the editor reads dynamically (see SightingEditorElement.askAboutRecord). Not a dialog: it stays where it is, and the text goes on being edited. -->
+  <div id="file-ask" class="file-ask" hidden role="alert">
+    <span id="file-ask-text"></span>
+    <button id="file-ask-stop" type="button"></button>
+    <button id="file-ask-keep" type="button"></button>
+  </div>
   <div id="file-editor" class="file-editor"></div>
 </section>
 <section class="group-panel" id="group-weather" aria-labelledby="label-weather-group" hidden>
@@ -1165,6 +1171,24 @@ select.weather-field:disabled {
 .file-note {
   margin: 0.5em 0;
   opacity: 0.8;
+}
+.file-ask {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em;
+  margin: 0.5em 0;
+  padding: 0.5em 0.7em;
+  border: 1px solid color-mix(in srgb, #f2cc60 80%, transparent);
+  border-left-width: 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, #f2cc60 18%, transparent);
+}
+.file-ask[hidden] {
+  display: none;
+}
+.file-ask span {
+  flex: 1 1 18em;
 }
 .param-summary {
   display: flex;

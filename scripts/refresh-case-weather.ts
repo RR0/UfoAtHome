@@ -14,7 +14,8 @@
  * whose weather IS a record's is touched: one with no weatherSource holds what the observer said,
  * which no lookup may replace (the editor's own gate, see WeatherInference.applyTo).
  *
- * Usage: npx tsx scripts/refresh-case-weather.ts
+ * Usage: npx tsx scripts/refresh-case-weather.ts [part of a file's name]
+ * With a name, only the recordings whose file name has it in it are asked again.
  */
 import fs from "node:fs"
 import path from "node:path"
@@ -28,12 +29,12 @@ class CaseWeatherRefresh {
 
   private readonly inference = new WeatherInference(new OpenMeteoWeatherProvider())
 
-  constructor(private readonly directory: string) {
+  constructor(private readonly directory: string, private readonly only?: string) {
   }
 
   async run(): Promise<number> {
     let failures = 0
-    for (const name of fs.readdirSync(this.directory).filter(name => /^observer-.*\.json$/.test(name)).sort()) {
+    for (const name of fs.readdirSync(this.directory).filter(name => /^observer-.*\.json$/.test(name) && (this.only === undefined || name.includes(this.only))).sort()) {
       const file = path.join(this.directory, name)
       const text = fs.readFileSync(file, "utf8")
       const json = JSON.parse(text) as SightingRecordingJson
@@ -63,6 +64,6 @@ class CaseWeatherRefresh {
 }
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
-new CaseWeatherRefresh(path.join(root, "public", "demo-data")).run().then(failures => {
+new CaseWeatherRefresh(path.join(root, "public", "demo-data"), process.argv[2]).run().then(failures => {
   process.exitCode = failures > 0 ? 1 : 0
 })

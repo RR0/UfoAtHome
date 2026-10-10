@@ -116,6 +116,9 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   temporalGroup: "Momento",
   fileGroup: "File",
   fileLoading: "Caricamento dell'editor…",
+  weatherEditedAsk: "Questa modifica tocca il meteo, un dato letto dinamicamente da {source}. Vuoi smettere di leggerlo da {source}?",
+  weatherEditedStop: "Smetti di leggerlo",
+  weatherEditedKeep: "Continua a leggerlo (annulla la mia modifica)",
   fileEditorLabel: "La registrazione come testo JSON",
   fileSearchPhrases: {
     "Find": "Cerca", "Replace": "Sostituisci", "next": "successivo", "previous": "precedente", "all": "tutti",

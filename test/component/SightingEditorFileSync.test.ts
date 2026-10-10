@@ -417,19 +417,61 @@ describe("the weather of a recording", () => {
     expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.25)
   })
 
-  it("is the author's once they have written it in the text, and nothing gives the record's back", async () => {
+  /** A recording whose weather a record gave, with the text edited where it is read from the record. */
+  async function editedWeather(): Promise<{ element: SightingEditorElement, ask: HTMLElement }> {
     const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
     element.weatherProvider = record
     document.body.appendChild(element)
     element.sightingData = { ...station, weatherSource: { id: "era5", name: "Open-Meteo" } } as unknown as typeof element.sightingData
     const edited = JSON.parse(JSON.stringify(element.sightingData))
     edited.weatherTrack.keyframes[0].weather.cloudCover = 0.8
+    ;(element as unknown as { applyFileText(text: string): void }).applyFileText(JSON.stringify(edited))
+    return { element, ask: element.shadowRoot!.getElementById("file-ask")! }
+  }
+
+  it("asks what is meant when the text is edited where it is read from a record, and lets no lookup undo the edit meanwhile", async () => {
+    const { element, ask } = await editedWeather()
+    await new Promise(resolve => setTimeout(resolve, 2500))
+
+    expect(ask.hidden).toBe(false)
+    expect(ask.textContent).toContain("Open-Meteo")
+    expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.8)
+    expect(element.edited).toBe(true)
+  })
+
+  it("makes the weather the author's when they say they mean it", async () => {
+    const { element, ask } = await editedWeather()
+
+    ;(element.shadowRoot!.getElementById("file-ask-stop") as HTMLButtonElement).click()
+    await new Promise(resolve => setTimeout(resolve, 2500))
+
+    expect(ask.hidden).toBe(true)
+    expect(element.sightingData.weatherSource).toBeUndefined()
+    expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.8)
+  })
+
+  it("puts the record's weather back when they say they do not", async () => {
+    const { element, ask } = await editedWeather()
+
+    ;(element.shadowRoot!.getElementById("file-ask-keep") as HTMLButtonElement).click()
+
+    expect(ask.hidden).toBe(true)
+    expect(element.sightingData.weatherSource?.id).toBe("era5")
+    expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.25)
+  })
+
+  it("does not ask for a weather that no record owns", async () => {
+    const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
+    element.weatherProvider = record
+    document.body.appendChild(element)
+    element.sightingData = { ...station, weatherSource: undefined } as unknown as typeof element.sightingData
+    const edited = JSON.parse(JSON.stringify(element.sightingData))
+    edited.weatherTrack.keyframes[0].weather.cloudCover = 0.8
 
     ;(element as unknown as { applyFileText(text: string): void }).applyFileText(JSON.stringify(edited))
     await new Promise(resolve => setTimeout(resolve, 2500))
 
+    expect(element.shadowRoot!.getElementById("file-ask")!.hidden).toBe(true)
     expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.8)
-    expect(element.sightingData.weatherSource).toBeUndefined()
-    expect(element.edited).toBe(true)
   })
 })

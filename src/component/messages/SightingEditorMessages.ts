@@ -237,6 +237,10 @@ export interface SightingEditorMessages extends SightingLabels {
   fileGroup: string
   /** Said while the text editor, a chunk of its own, is being fetched. */
   fileLoading: string
+  /** Asked when an edit of the text touches the weather the editor reads from a record: `{source}` names the record. */
+  weatherEditedAsk: string
+  weatherEditedStop: string
+  weatherEditedKeep: string
   /** What a screen reader calls the text editor. */
   fileEditorLabel: string
   /** The search panel of the text's editor, in this language: CodeMirror's own English words, each by its translation. */

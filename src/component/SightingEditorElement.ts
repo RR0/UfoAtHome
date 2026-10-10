@@ -478,6 +478,7 @@ export class SightingEditorElement extends HTMLElement {
   private fileEditorLoading?: Promise<SightingFileEditor>
   private readonly fileEditorHost: HTMLElement
   private readonly fileNote: HTMLElement
+  private readonly fileAsk: HTMLElement
   /** Waiting to put the form's changes into the text, and the text's into the form — see syncFileEditor. */
   private fileSyncTimer?: ReturnType<typeof setTimeout>
   private fileApplyTimer?: ReturnType<typeof setTimeout>
@@ -1297,6 +1298,9 @@ export class SightingEditorElement extends HTMLElement {
     this.labelFileGroup = this.shadow.getElementById("label-file-group")!
     this.fileEditorHost = this.shadow.getElementById("file-editor")!
     this.fileNote = this.shadow.getElementById("file-note")!
+    this.fileAsk = this.shadow.getElementById("file-ask")!
+    this.shadow.getElementById("file-ask-stop")!.addEventListener("click", () => this.stopReadingWeather())
+    this.shadow.getElementById("file-ask-keep")!.addEventListener("click", () => this.keepReadingWeather())
     this.labelLocationGroup = this.shadow.getElementById("label-location-group")!
     this.labelObservationGroup = this.shadow.getElementById("label-observation-group")!
     this.labelObserverGroup = this.shadow.getElementById("label-observer-group")!
@@ -4347,7 +4351,7 @@ export class SightingEditorElement extends HTMLElement {
    * WEATHER_LOOKUP_DEBOUNCE_MS. A no-op while the observer owns these fields: their account is
    * never re-derived behind their back. */
   private scheduleWeatherLookup(asked = false): void {
-    if (!this.weatherFromRecords) return
+    if (!this.weatherFromRecords || this.pendingWeatherEdit !== undefined) return
     // A weather the report itself gives (a station's, named and linked) is no lookup's to redo behind the author's back: loading
     // the recording sets its time zone, its duration, its place, and each of these asked, and the reanalysis replaced it. Only when
     // the author ticks the box (`asked`).
@@ -4514,8 +4518,10 @@ export class SightingEditorElement extends HTMLElement {
    * imported case pick up its real conditions the moment it states a date and a place. */
   private syncWeatherOwnership(): void {
     const sighting = this.ufoElement.sighting
-    // Anything the previous recording had in flight is about a different sighting now.
+    // Anything the previous recording had in flight is about a different sighting now — a question about its weather included.
     this.cancelWeatherLookup()
+    this.pendingWeatherEdit = undefined
+    this.fileAsk.hidden = true
     this.weatherLookupResult = undefined
     this.weatherFromRecords = sighting.weatherSource !== undefined || sighting.weatherTrack.allKeyframes.length === 0
     this.syncWeatherSourceState()
@@ -5277,6 +5283,7 @@ export class SightingEditorElement extends HTMLElement {
     if (JSON.stringify(json) === JSON.stringify(this.sightingData)) return
     const playhead = this.ufoElement.currentTime
     const weatherEdited = JSON.stringify((json as SightingRecordingJson).weatherTrack) !== JSON.stringify(this.sightingData.weatherTrack)
+    const previousWeather = { track: this.sightingData.weatherTrack, source: this.sightingData.weatherSource }
     // The text edited is not a recording loaded: what the recording was when it was loaded or exported stays what the
     // changes are changed from, and the author has done something.
     this.applyingFileText = true
@@ -5284,13 +5291,18 @@ export class SightingEditorElement extends HTMLElement {
       this.sightingData = json as SightingRecordingJson
       this.touched = true
       this.ufoElement.currentTime = playhead
-      // A weather the author wrote is theirs, as one typed in its fields is (see applyWeatherAtPlayhead): no lookup may give the
-      // record's back in its place, which is what happened to a cloud cover edited in the text a moment after it was applied.
-      if (weatherEdited && this.weatherFromRecords) {
-        this.weatherFromRecords = false
-        this.cancelWeatherLookup()
-        this.ufoElement.sighting.weatherSource = undefined
-        this.syncWeatherSourceState()
+      // A weather the author wrote in the text, where it is read dynamically from a record: that is theirs to say they mean (see
+      // askAboutWeather) — the lookup must not give the record's back in its place, which is what happened to a cloud cover
+      // edited in the text a moment after it was applied. Where no record owns it, it is theirs without asking.
+      if (weatherEdited && !this.restoringWeather && this.weatherFromRecords) {
+        const source = this.ufoElement.sighting.weatherSource
+        if (source === undefined) {
+          this.weatherFromRecords = false
+          this.cancelWeatherLookup()
+          this.syncWeatherSourceState()
+        } else if (WEATHER_SOURCES.some(known => known.id === source.id)) {
+          this.askAboutWeather(previousWeather, source.name ?? source.id)
+        }
       }
       this.showFileNote(undefined)
       // The history already holds this text (it is what typing in it, or an undo, made): not a change to write in.
@@ -5300,6 +5312,51 @@ export class SightingEditorElement extends HTMLElement {
     } finally {
       this.applyingFileText = false
     }
+  }
+
+  /** What the weather was before an edit of the text that touched a record's, while the author has not said what they mean by it. */
+  private pendingWeatherEdit?: { track: SightingRecordingJson["weatherTrack"], source: SightingRecordingJson["weatherSource"] }
+  private restoringWeather = false
+
+  /**
+   * The text was edited where the weather is read dynamically from a record: said, so that the author knows what they did, not
+   * assumed either way. The edit stands meanwhile, and no lookup runs over it. Not a dialog (see the editor's rule on native ones,
+   * which return false in a pane): a line above the text with its two answers, which the text goes on being edited under.
+   */
+  private askAboutWeather(previous: NonNullable<typeof this.pendingWeatherEdit>, source: string): void {
+    this.cancelWeatherLookup()
+    this.pendingWeatherEdit = previous
+    this.shadow.getElementById("file-ask-text")!.textContent = this.messages.weatherEditedAsk.replaceAll("{source}", source)
+    this.shadow.getElementById("file-ask-stop")!.textContent = this.messages.weatherEditedStop
+    this.shadow.getElementById("file-ask-keep")!.textContent = this.messages.weatherEditedKeep
+    this.fileAsk.hidden = false
+  }
+
+  /** The author means it: the weather is theirs, no longer read from the record. */
+  private stopReadingWeather(): void {
+    this.pendingWeatherEdit = undefined
+    this.fileAsk.hidden = true
+    this.weatherFromRecords = false
+    this.cancelWeatherLookup()
+    this.ufoElement.sighting.weatherSource = undefined
+    this.syncWeatherSourceState()
+    this.ufoElement.refresh()
+    this.syncFileEditor(false)
+  }
+
+  /** The record keeps the weather: what was edited goes back to what was read. */
+  private keepReadingWeather(): void {
+    const previous = this.pendingWeatherEdit
+    this.pendingWeatherEdit = undefined
+    this.fileAsk.hidden = true
+    if (previous === undefined) return
+    this.restoringWeather = true
+    try {
+      this.applyFileText(JSON.stringify({ ...this.sightingData, weatherTrack: previous.track, weatherSource: previous.source }))
+    } finally {
+      this.restoringWeather = false
+    }
+    this.syncFileEditor(false)
   }
 
   /** Set while the text the author edited is made the recording, which is not a recording loaded (see markClean). */
