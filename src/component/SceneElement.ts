@@ -1012,8 +1012,13 @@ export class SceneElement extends HTMLElement {
 
   /** Where a point of the picture meets the ground the decor object stands on — see
    * SceneRenderer.decorGroundPointAt. */
-  decorGroundPointAt(id: string, ndcX: number, ndcY: number): { x: number, z: number } | undefined {
-    return this.sceneRenderer.decorGroundPointAt(id, ndcX, ndcY)
+  decorGroundPointAt(id: string, ndcX: number, ndcY: number, heightM = 0): { x: number, z: number } | undefined {
+    return this.sceneRenderer.decorGroundPointAt(id, ndcX, ndcY, heightM)
+  }
+
+  /** How high above its base a decor object is pressed — see SceneRenderer.decorGrabHeightAt. */
+  decorGrabHeightAt(id: string, ndcX: number, ndcY: number): number {
+    return this.sceneRenderer.decorGrabHeightAt(id, ndcX, ndcY)
   }
 
   /** The rectangle a body covers on the picture — see SceneRenderer.bodyScreenBox. */

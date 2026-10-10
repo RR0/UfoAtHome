@@ -900,7 +900,7 @@ export class SightingEditorElement extends HTMLElement {
     | { kind: "body"; pointerAzimuthDeg: number; pointerAltitudeDeg: number; bodyAzimuthDeg: number; bodyAltitudeDeg: number }
     | { kind: "frame-resize"; target: FrameTarget; handle: Exclude<HandleId, "rotate">; centre: { x: number; y: number }; startPointer: { x: number; y: number }; startSizeM: { widthM: number; lengthM: number; heightM: number } }
     | { kind: "frame-rotate"; target: FrameTarget; startPointer: { x: number; y: number }; startAttitude: { headingDeg: number; pitchDeg: number; rollDeg: number } }
-    | { kind: "decor-move"; id: string; startEastM: number; startNorthM: number; startGround: { x: number; z: number } }
+    | { kind: "decor-move"; id: string; startEastM: number; startNorthM: number; startGround: { x: number; z: number }; grabHeightM: number }
     | { kind: "group-resize"; group: ShapeGroup; handle: Exclude<HandleId, "rotate"> }
     | { kind: "group-rotate"; group: ShapeGroup; startPointer: { x: number; y: number } }
 
@@ -9668,10 +9668,11 @@ export class SightingEditorElement extends HTMLElement {
     if (this.beginFrameDrag(this.decorFrame, point)) return true
     if (!this.grabsDecor(event, point, decor)) return false
     const ndc = this.ndcOf(event)
-    const ground = ndc && this.sceneElement.decorGroundPointAt(decor.id, ndc.x, ndc.y)
+    const grabHeightM = ndc ? this.sceneElement.decorGrabHeightAt?.(decor.id, ndc.x, ndc.y) ?? 0 : 0
+    const ground = ndc && this.sceneElement.decorGroundPointAt(decor.id, ndc.x, ndc.y, grabHeightM)
     if (!ground) return false
     this.dragState = {
-      kind: "decor-move", id: decor.id, startGround: ground,
+      kind: "decor-move", id: decor.id, startGround: ground, grabHeightM,
       startEastM: Number(this.decorEastInput.value) || 0, startNorthM: Number(this.decorNorthInput.value) || 0
     }
     this.setCanvasCursor("move")
@@ -9683,7 +9684,7 @@ export class SightingEditorElement extends HTMLElement {
     const drag = this.dragState
     if (drag?.kind !== "decor-move") return
     const ndc = this.ndcOf(event)
-    const ground = ndc && this.sceneElement.decorGroundPointAt(drag.id, ndc.x, ndc.y)
+    const ground = ndc && this.sceneElement.decorGroundPointAt(drag.id, ndc.x, ndc.y, drag.grabHeightM)
     if (!ground) return
     // x is east and z is south: the ground moved by the pointer, from where it was grabbed.
     this.decorEastInput.value = String(this.roundedMeters(drag.startEastM + ground.x - drag.startGround.x))

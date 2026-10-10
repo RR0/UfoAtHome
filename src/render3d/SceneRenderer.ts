@@ -5051,15 +5051,32 @@ export class SceneRenderer {
     return { minX, minY, maxX, maxY }
   }
 
-  /** Where a point of the picture meets the level the decor object stands on, as scene metres
-   * (x east, z south), or undefined when the ray goes up or never reaches it. Dragging an object
-   * across the ground is the difference between two of these. */
-  decorGroundPointAt(id: string, ndcX: number, ndcY: number): { x: number, z: number } | undefined {
+  /** Where a point of the picture meets the horizontal level `heightM` above the one the decor object
+   * stands on, as scene metres (x east, z south), or undefined when the ray goes up or never reaches it.
+   * Dragging an object across the ground is the difference between two of these. At its base (0) a press
+   * on the upper part of a tree meets the ground far behind it, and a few pixels throw it a hundred
+   * metres: grabbed at the height where it was pressed, the object follows the pointer one to one. */
+  decorGroundPointAt(id: string, ndcX: number, ndcY: number, heightM = 0): { x: number, z: number } | undefined {
     const group = this.decorGroups.get(id)
     if (!group) return undefined
     this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
-    const hit = this.raycaster.ray.intersectPlane(this.decorPlaneScratch.setComponents(0, 1, 0, -group.position.y), this.decorHitScratch)
+    const hit = this.raycaster.ray.intersectPlane(this.decorPlaneScratch.setComponents(0, 1, 0, -(group.position.y + heightM)), this.decorHitScratch)
     return hit ? { x: hit.x, z: hit.z } : undefined
+  }
+
+  /** How high above its base the decor object is pressed at a point of the picture: where the ray meets
+   * the upright plane through the object that faces the eye, kept within the object. 0 when it misses. */
+  decorGrabHeightAt(id: string, ndcX: number, ndcY: number): number {
+    const group = this.decorGroups.get(id)
+    if (!group) return 0
+    const top = this.bodyBoxScratch.setFromObject(group).max.y - group.position.y
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
+    const toEye = this.decorHitScratch.set(this.camera.position.x - group.position.x, 0, this.camera.position.z - group.position.z)
+    if (toEye.lengthSq() < 1e-6) return 0
+    toEye.normalize()
+    const plane = this.decorPlaneScratch.setFromNormalAndCoplanarPoint(toEye, group.position)
+    const hit = this.raycaster.ray.intersectPlane(plane, this.decorHitScratch)
+    return hit ? Math.min(Math.max(hit.y - group.position.y, 0), Math.max(top, 0)) : 0
   }
   private readonly decorPlaneScratch = new Plane()
   private readonly decorHitScratch = new Vector3()
