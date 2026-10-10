@@ -370,3 +370,66 @@ describe("going from one changed zone to the next", () => {
     editor.destroy()
   })
 })
+
+describe("editing an object that is named in several languages", () => {
+  it("keeps the other languages of its name when something else about it is edited", async () => {
+    const element = mount()
+    addBuildings(element, 1)
+    const json = element.sightingData
+    element.sightingData = { ...json, decor: json.decor!.map(decor => ({ ...decor, title: { fr: "Arbre", en: "Tree", es: "Árbol" } })) }
+    const inside = element as unknown as { selectDecor(id: string): void, updateDecor(): void }
+    inside.selectDecor(element.sightingData.decor![0].id)
+    const east = element.shadowRoot!.getElementById("decorEast") as HTMLInputElement
+    east.value = "12.5"
+
+    inside.updateDecor()
+
+    const decor = element.sightingData.decor![0]
+    expect(decor.eastM).toBe(12.5)
+    expect(decor.title).toEqual({ fr: "Arbre", en: "Tree", es: "Árbol" })
+  })
+})
+
+describe("the weather of a recording", () => {
+  const record = {
+    getWeather: () => Promise.resolve({
+      samples: [{ time: new Date(), weather: { cloudCover: 0.99, cloudBaseM: 1000, relativeHumidity: 0.5, precipitationType: "none", precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0 } }],
+      source: { id: "era5", name: "Open-Meteo" }
+    })
+  } as unknown as WeatherProvider
+
+  const station = {
+    version: 1, id: "case", time: { value: { year: 1981, month: 1, day: 8, hour: 17, minute: 0, second: 0 }, basis: "stated", rationale: "r" },
+    durationSeconds: 40, timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 40000, shapes: [] }] }, place: [{ lat: 43.4, lng: 6.5 }],
+    weatherSource: { id: "station", name: "A station" },
+    weatherTrack: { keyframes: [{ t: 0, weather: { cloudCover: 0.25, cloudBaseM: 3000, relativeHumidity: 0.3, precipitationType: "none", precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0 } }] }
+  }
+
+  it("is not replaced by a record's when the report gave it, whatever else loading sets", async () => {
+    const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
+    element.weatherProvider = record
+    document.body.appendChild(element)
+    element.sightingData = station as unknown as typeof element.sightingData
+    // Time zone, duration, place: each asked a lookup once, and the lookup answers within a second or so.
+    await new Promise(resolve => setTimeout(resolve, 2500))
+
+    expect(element.sightingData.weatherSource?.id).toBe("station")
+    expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.25)
+  })
+
+  it("is the author's once they have written it in the text, and nothing gives the record's back", async () => {
+    const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
+    element.weatherProvider = record
+    document.body.appendChild(element)
+    element.sightingData = { ...station, weatherSource: { id: "era5", name: "Open-Meteo" } } as unknown as typeof element.sightingData
+    const edited = JSON.parse(JSON.stringify(element.sightingData))
+    edited.weatherTrack.keyframes[0].weather.cloudCover = 0.8
+
+    ;(element as unknown as { applyFileText(text: string): void }).applyFileText(JSON.stringify(edited))
+    await new Promise(resolve => setTimeout(resolve, 2500))
+
+    expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.8)
+    expect(element.sightingData.weatherSource).toBeUndefined()
+    expect(element.edited).toBe(true)
+  })
+})

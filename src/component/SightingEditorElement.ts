@@ -2041,6 +2041,7 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Says the recording as it stands is the one that was loaded or exported: nothing to lose. */
   markClean(): void {
+    if (this.applyingFileText) return
     this.baseline = JSON.stringify(this.sightingData)
     this.touched = false
     // The text's changed lines are changed from this: the recording as it was loaded or last exported.
@@ -4334,7 +4335,7 @@ export class SightingEditorElement extends HTMLElement {
   private onWeatherInferredToggled(): void {
     this.weatherFromRecords = this.weatherInferredInput.checked
     if (this.weatherFromRecords) {
-      this.scheduleWeatherLookup()
+      this.scheduleWeatherLookup(true)
     } else {
       this.cancelWeatherLookup()
       this.ufoElement.sighting.weatherSource = undefined
@@ -4345,8 +4346,13 @@ export class SightingEditorElement extends HTMLElement {
   /** Coalesces the burst of edits a single date or coordinate produces into one lookup — see
    * WEATHER_LOOKUP_DEBOUNCE_MS. A no-op while the observer owns these fields: their account is
    * never re-derived behind their back. */
-  private scheduleWeatherLookup(): void {
+  private scheduleWeatherLookup(asked = false): void {
     if (!this.weatherFromRecords) return
+    // A weather the report itself gives (a station's, named and linked) is no lookup's to redo behind the author's back: loading
+    // the recording sets its time zone, its duration, its place, and each of these asked, and the reanalysis replaced it. Only when
+    // the author ticks the box (`asked`).
+    const source = this.ufoElement.sighting.weatherSource
+    if (!asked && source !== undefined && !WEATHER_SOURCES.some(known => known.id === source.id)) return
     clearTimeout(this.weatherLookupTimer)
     this.weatherLookupTimer = setTimeout(() => void this.inferWeather(), WEATHER_LOOKUP_DEBOUNCE_MS)
   }
@@ -4404,7 +4410,10 @@ export class SightingEditorElement extends HTMLElement {
    * request. Only ever for a track the record owns — a observer's own account is never re-derived.
    */
   private ensureWeatherTrackSpan(): void {
-    if (!this.weatherFromRecords || this.ufoElement.sighting.weatherSource === undefined) return
+    const source = this.ufoElement.sighting.weatherSource
+    // Only for a track a lookup wrote: a weather the report itself gives (a station's, named and linked) is no lookup's to redo, and
+    // was replaced by the reanalysis's the moment the clock changed length — loading the recording was enough.
+    if (!this.weatherFromRecords || source === undefined || !WEATHER_SOURCES.some(known => known.id === source.id)) return
     const span = this.ufoElement.seekableDuration
     if (this.weatherTrackSpan === undefined || span === this.weatherTrackSpan) return
     // Claimed before the lookup runs, so a span that keeps changing (a recording in progress)
@@ -5267,16 +5276,34 @@ export class SightingEditorElement extends HTMLElement {
     if (typeof json !== "object" || json === null || Array.isArray(json)) return
     if (JSON.stringify(json) === JSON.stringify(this.sightingData)) return
     const playhead = this.ufoElement.currentTime
+    const weatherEdited = JSON.stringify((json as SightingRecordingJson).weatherTrack) !== JSON.stringify(this.sightingData.weatherTrack)
+    // The text edited is not a recording loaded: what the recording was when it was loaded or exported stays what the
+    // changes are changed from, and the author has done something.
+    this.applyingFileText = true
     try {
       this.sightingData = json as SightingRecordingJson
+      this.touched = true
       this.ufoElement.currentTime = playhead
+      // A weather the author wrote is theirs, as one typed in its fields is (see applyWeatherAtPlayhead): no lookup may give the
+      // record's back in its place, which is what happened to a cloud cover edited in the text a moment after it was applied.
+      if (weatherEdited && this.weatherFromRecords) {
+        this.weatherFromRecords = false
+        this.cancelWeatherLookup()
+        this.ufoElement.sighting.weatherSource = undefined
+        this.syncWeatherSourceState()
+      }
       this.showFileNote(undefined)
       // The history already holds this text (it is what typing in it, or an undo, made): not a change to write in.
       this.historySnapshot = this.fileText()
     } catch {
       this.showFileNote(this.messages.importErrorMalformed)
+    } finally {
+      this.applyingFileText = false
     }
   }
+
+  /** Set while the text the author edited is made the recording, which is not a recording loaded (see markClean). */
+  private applyingFileText = false
 
   /** Leaving the text: what was typed is applied at once, and the text takes the form's own
    * spelling of it (key order, what the model drops), so that it never disagrees with Export. */
@@ -6980,7 +7007,9 @@ export class SightingEditorElement extends HTMLElement {
       }
       return {
         ...d,
-        title: this.said.write(undefined, this.decorTitleInput.value, this.writingLanguage),
+        // The title as it was, with this language's put back in it: written from nothing, an edit of anything about an
+        // object (its east, its size) took every other language of its name away.
+        title: this.said.write(d.title, this.decorTitleInput.value, this.writingLanguage),
         color: this.statedDecorColor(d),
         eastM,
         northM,
