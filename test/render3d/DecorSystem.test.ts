@@ -423,4 +423,12 @@ describe("DecorSystem.fitTerrace", () => {
     // 0.8 m below the lowest ground under the wall, whose foot is at 8 m.
     expect(box.min.y).toBeCloseTo(7.2, 1)
   })
+
+  it("has a top that receives shadows and throws none, so that it cannot shadow itself in bands", () => {
+    const [wall, top] = parts(DecorSystem.build(terrace, false))
+
+    expect(wall.castShadow).toBe(true)
+    expect(top.castShadow).toBe(false)
+    expect(top.receiveShadow).toBe(true)
+  })
 })

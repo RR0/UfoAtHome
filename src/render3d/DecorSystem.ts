@@ -508,6 +508,10 @@ function buildTerrace(): Group {
   const wall = addPart(group, new BoxGeometry(1, 1, 1), TERRACE_WALL_COLOR, 0.5)
   const top = addPart(group, new BoxGeometry(1, 0.03, 1), TERRACE_TOP_COLOR, 1.015)
   for (const mesh of [wall, top]) (mesh.material as MeshLambertMaterial).side = DoubleSide
+  // The top receives the shadow of what stands on it but throws none: a plane that is both a double-sided
+  // caster and a receiver shadows itself in bands, whose width and direction follow the Sun's (shadow acne).
+  // What the level throws over the one below is its wall's.
+  top.castShadow = false
   // The top is cultivated ground, grass or crop by what the witness describes: the grain of one, whatever its flat colour.
   GrassDetail.install(top.material as MeshLambertMaterial, true)
   return group
