@@ -217,6 +217,19 @@ function nestedCanvas(element: SightingEditorElement): HTMLCanvasElement {
   return canvas
 }
 
+/** Waits for what the click started in the background (the body editor loads on demand), so that none of it outlives the test. */
+async function waitFor(check: () => boolean, timeoutMs = 20000): Promise<void> {
+  const start = Date.now()
+  while (!check()) {
+    if (Date.now() - start > timeoutMs) throw new Error("waitFor timed out")
+    await new Promise(resolve => setTimeout(resolve, 5))
+  }
+}
+
+function bodyShown(element: SightingEditorElement): boolean {
+  return (element as unknown as { bodyEditor?: { currentBodyId?: string } }).bodyEditor?.currentBodyId === "craft"
+}
+
 function press(canvas: HTMLCanvasElement, init: MouseEventInit = {}): void {
   canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 300, clientY: 200, bubbles: true, composed: true, ...init }))
   document.dispatchEvent(new MouseEvent("pointerup", { clientX: 300, clientY: 200, ...init }))
@@ -274,6 +287,7 @@ describe("picking scenery on the picture", () => {
       expect((element.shadowRoot!.getElementById("decor") as HTMLSelectElement).value).toBe(selected)
       expect(openGroups(element)).toEqual(["group-shape"])
       expect(element.shadowRoot!.getElementById("shape-bodies")!.hidden).toBe(false)
+      await waitFor(() => bodyShown(element))
     } finally {
       pickedBody = undefined
     }
@@ -294,6 +308,7 @@ describe("picking scenery on the picture", () => {
       }
       press(nestedCanvas(element))
       expect(openGroups(element)).toEqual(["group-shape"])
+      await waitFor(() => bodyShown(element))
 
       // Now over the scenery, with nothing of the body under the pointer: the scenery is what is selected, and its group opens.
       pickedBody = undefined
