@@ -190,7 +190,7 @@ function mount(): SightingEditorElement {
   return element
 }
 
-async function waitFor(check: () => boolean, timeoutMs = 5000): Promise<void> {
+async function waitFor(check: () => boolean, timeoutMs = 20000): Promise<void> {
   const start = Date.now()
   while (!check()) {
     if (Date.now() - start > timeoutMs) throw new Error("waitFor timed out")

@@ -5445,7 +5445,9 @@ export class SightingEditorElement extends HTMLElement {
   private async runAssessments(): Promise<void> {
     const token = ++this.assessmentToken
     const reading = await new SightingAssessments(this.messages).read(this.ufoElement.sighting)
-    if (token !== this.assessmentToken) return
+    // Nothing to draw into once the editor has left the page (or the page itself is gone, as it is when
+    // a test file ends while a reading is still under way).
+    if (token !== this.assessmentToken || !this.isConnected) return
     this.assessmentChips = reading.entries.map(entry => ({
       ...entry,
       // The group this reading is about, so the chip leads somewhere: a figure a reader cannot act
