@@ -71,6 +71,97 @@
       }
     },
     {
+      "id": "jungle-jim-tree-large-a",
+      "kind": "tree",
+      "name": "Large broadleaf tree A (realistic)",
+      "file": "jungle-jim-realistic-trees/large-a.glb",
+      "sizeM": { "widthM": 9.8, "lengthM": 9.9, "heightM": 10.3 },
+      "credit": {
+        "title": "Realistic Trees Collection — Large broadleaf tree A",
+        "author": "Jungle Jim",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/realistic-trees-collection-fe67c886eebf4bcb988d7c45e69995ad"
+      }
+    },
+    {
+      "id": "jungle-jim-tree-large-b",
+      "kind": "tree",
+      "name": "Large broadleaf tree B (realistic)",
+      "file": "jungle-jim-realistic-trees/large-b.glb",
+      "sizeM": { "widthM": 7, "lengthM": 6.6, "heightM": 8.1 },
+      "credit": {
+        "title": "Realistic Trees Collection — Large broadleaf tree B",
+        "author": "Jungle Jim",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/realistic-trees-collection-fe67c886eebf4bcb988d7c45e69995ad"
+      }
+    },
+    {
+      "id": "jungle-jim-tree-large-c",
+      "kind": "tree",
+      "name": "Large broadleaf tree C (realistic)",
+      "file": "jungle-jim-realistic-trees/large-c.glb",
+      "sizeM": { "widthM": 10.8, "lengthM": 10.8, "heightM": 10.7 },
+      "credit": {
+        "title": "Realistic Trees Collection — Large broadleaf tree C",
+        "author": "Jungle Jim",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/realistic-trees-collection-fe67c886eebf4bcb988d7c45e69995ad"
+      }
+    },
+    {
+      "id": "jungle-jim-tree-medium-a",
+      "kind": "tree",
+      "name": "Medium broadleaf tree A (realistic)",
+      "file": "jungle-jim-realistic-trees/medium-a.glb",
+      "sizeM": { "widthM": 5.7, "lengthM": 5.8, "heightM": 6.7 },
+      "credit": {
+        "title": "Realistic Trees Collection — Medium broadleaf tree A",
+        "author": "Jungle Jim",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/realistic-trees-collection-fe67c886eebf4bcb988d7c45e69995ad"
+      }
+    },
+    {
+      "id": "jungle-jim-tree-medium-b",
+      "kind": "tree",
+      "name": "Medium broadleaf tree B (realistic)",
+      "file": "jungle-jim-realistic-trees/medium-b.glb",
+      "sizeM": { "widthM": 4.2, "lengthM": 4.3, "heightM": 4.7 },
+      "credit": {
+        "title": "Realistic Trees Collection — Medium broadleaf tree B",
+        "author": "Jungle Jim",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/realistic-trees-collection-fe67c886eebf4bcb988d7c45e69995ad"
+      }
+    },
+    {
+      "id": "jungle-jim-tree-medium-c",
+      "kind": "tree",
+      "name": "Medium broadleaf tree C (realistic)",
+      "file": "jungle-jim-realistic-trees/medium-c.glb",
+      "sizeM": { "widthM": 4.4, "lengthM": 3.8, "heightM": 4.9 },
+      "credit": {
+        "title": "Realistic Trees Collection — Medium broadleaf tree C",
+        "author": "Jungle Jim",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/realistic-trees-collection-fe67c886eebf4bcb988d7c45e69995ad"
+      }
+    },
+    {
+      "id": "jungle-jim-tree-bush",
+      "kind": "shrub",
+      "name": "Bush (realistic)",
+      "file": "jungle-jim-realistic-trees/bush.glb",
+      "sizeM": { "widthM": 3.3, "lengthM": 3.2, "heightM": 2.1 },
+      "credit": {
+        "title": "Realistic Trees Collection — Bush",
+        "author": "Jungle Jim",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/realistic-trees-collection-fe67c886eebf4bcb988d7c45e69995ad"
+      }
+    },
+    {
       "id": "kenney-street-light-curved",
       "kind": "streetlight",
       "name": "Street lamp, curved arm (generic, stylised)",

@@ -1151,7 +1151,10 @@ export class DecorSystem {
     model.updateMatrixWorld(true)
     const box = new Box3().setFromObject(model)
     const natural = { lengthM: box.max.z - box.min.z, heightM: box.max.y - box.min.y, widthM: box.max.x - box.min.x }
-    const scale = fitScale(object.sizeM, natural) ?? fitScale(options.depictedSizeM, natural) ?? 1
+    // A tree is fitted by its height: that is what a tree's size says (a crown is as wide as it is), and a
+    // photographed or surveyed trunk-and-crown never was the footprint of the cone the primitive draws.
+    const stated = object.kind === "tree" && object.sizeM?.heightM !== undefined ? { heightM: object.sizeM.heightM } : object.sizeM
+    const scale = fitScale(stated, natural) ?? fitScale(options.depictedSizeM, natural) ?? 1
     model.scale.multiplyScalar(scale)
     const centre = box.getCenter(new Vector3()).multiplyScalar(scale)
     model.position.x -= centre.x

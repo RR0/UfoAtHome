@@ -237,12 +237,29 @@ export type MeasuredDecorSize = Required<DecorSize>
  * is shown with the scene's like any other.
  */
 export const DEFAULT_DECOR_MODEL: Partial<Record<DecorKind, DecorModelRef>> = {
-  aircraft: { id: "poly-google-airliner" }
+  aircraft: { id: "poly-google-airliner" },
+  tree: { id: "jungle-jim-tree-large-a" }
 }
 
-/** The model an object is drawn as: the one it names, or else the default of its kind. */
-export function decorModelOf(object: Pick<DecorObject, "kind" | "model">): DecorModelRef | undefined {
-  return object.model ?? DEFAULT_DECOR_MODEL[object.kind]
+/**
+ * The broadleaf trees a tree names no model for is drawn as, one per tree: a row of a hundred trees that
+ * are all the same one is the tell of a pasted model, so each takes its own by its id, which keeps it the
+ * same one at every reload. A tree that is a conifer says so, by naming one (`kenney-tree-conifer`).
+ */
+export const TREE_MODEL_VARIANTS: readonly string[] = [
+  "jungle-jim-tree-large-a", "jungle-jim-tree-medium-a", "jungle-jim-tree-large-b",
+  "jungle-jim-tree-medium-b", "jungle-jim-tree-large-c", "jungle-jim-tree-medium-c"
+]
+
+/** The model an object is drawn as: the one it names, or else the default of its kind (a tree's by its id, see TREE_MODEL_VARIANTS). */
+export function decorModelOf(object: Pick<DecorObject, "kind" | "model"> & { id?: string }): DecorModelRef | undefined {
+  if (object.model) return object.model
+  if (object.kind === "tree" && object.id !== undefined) {
+    let hash = 0
+    for (const char of object.id) hash = (hash * 31 + char.charCodeAt(0)) >>> 0
+    return { id: TREE_MODEL_VARIANTS[hash % TREE_MODEL_VARIANTS.length] }
+  }
+  return DEFAULT_DECOR_MODEL[object.kind]
 }
 
 /**

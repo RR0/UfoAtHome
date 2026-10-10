@@ -134,3 +134,14 @@ and the occupant's viewpoint placed from the model rather than from the primitiv
 Nothing breaks. A recording naming a model no catalogue can resolve, or one whose file cannot be
 fetched, draws the built-in shape at the size the recording states — which is what every recording
 did before models existed. The models are detail, never the reconstruction itself.
+
+## The trees
+
+A tree that names no model is drawn as one of the six broadleaf trees of Jungle Jim's "Realistic Trees
+Collection" (CC BY 4.0, `jungle-jim-realistic-trees/`), picked by the tree's id (`TREE_MODEL_VARIANTS` in
+`src/engine/model/Decor.ts`); a conifer says so by naming `kenney-tree-conifer`. The seventh, a bush, is a
+`shrub` of the catalogue and is drawn by nobody until a recording names it. The collection was one 11 MB scene
+of seven trees: `scripts/build-realistic-trees.ts` splits it into one file per tree, simplified to about five
+thousand triangles, with 256 px bark and 512 px leaf sheets, the leaves cut out rather than blended. A tree is
+fitted to its stated height, not to its footprint.
+

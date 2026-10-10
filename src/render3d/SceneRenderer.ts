@@ -2338,14 +2338,16 @@ export class SceneRenderer {
       // A bare url with no credit is refused rather than drawn: an unattributed model is not a
       // model this project can show (see DecorModelRef.credit).
       if (!url || !credit) return
-      const scene = standIn ? await this.standInScene(url) : await loadGltfScene(url)
+      // A tree is one of a few models standing a hundred times: parsed and uploaded once, cloned for each
+      // (see applyLoadedDecorModel), not read again for every trunk of a wood.
+      const scene = standIn || object.kind === "tree" ? await this.standInScene(url) : await loadGltfScene(url)
       // The decor list may have been replaced entirely while this was in flight, and a stand-in is
       // too late once the object's own model is on its way.
       if (token !== this.decorModelToken || (standIn && !this.pendingTrafficModels.has(object.id))) return
       const group = this.decorGroups.get(object.id)
       if (!group) return
       // What stands round it, for whatever of it is shiny — see Reflections.
-      if (!standIn) Reflections.reflectOn(scene)
+      if (!standIn && object.kind !== "tree") Reflections.reflectOn(scene)
       // Only the catalogue can say what the real thing is; a bare url states a file and nothing
       // about what it depicts (see DecorModelEntry.sizeM and DecorSystem.applyModel).
       const loaded = { ref: JSON.stringify(ref), scene, headingOffsetDeg: ref.headingOffsetDeg ?? entry?.headingOffsetDeg, depictedSizeM: entry?.sizeM, credit }
@@ -2361,7 +2363,8 @@ export class SceneRenderer {
     let scene = this.standInScenes.get(url)
     if (!scene) {
       scene = loadGltfScene(url).then(loaded => {
-        Reflections.reflectOn(loaded)
+        // Leaves and bark are not shiny: nothing to reflect, and a shared scene is reflected on once.
+        if (!/jungle-jim-realistic-trees/.test(url)) Reflections.reflectOn(loaded)
         return loaded
       })
       this.standInScenes.set(url, scene)
