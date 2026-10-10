@@ -314,12 +314,14 @@ export const html = `
     <button id="export" type="button">Save</button>
   </div>
   <p id="file-note" class="file-note" hidden role="status"></p>
-  <!-- A question about what an edit of the text just touched: data the editor reads dynamically (see SightingEditorElement.askAboutRecord). Not a dialog: it stays where it is, and the text goes on being edited. -->
-  <div id="file-ask" class="file-ask" hidden role="alert">
-    <span id="file-ask-text"></span>
-    <button id="file-ask-stop" type="button"></button>
-    <button id="file-ask-keep" type="button"></button>
-  </div>
+  <!-- A question about what an edit of the text just touched: data the editor reads dynamically (see SightingEditorElement.askAboutWeather). Modal: the author has to say what they mean before anything else is done, and the edit stands meanwhile. Escape is the safe answer, which puts back what was read. -->
+  <dialog id="file-ask" class="file-ask" aria-labelledby="file-ask-text">
+    <p id="file-ask-text"></p>
+    <div class="file-ask-buttons">
+      <button id="file-ask-stop" type="button"></button>
+      <button id="file-ask-keep" type="button"></button>
+    </div>
+  </dialog>
   <div id="file-editor" class="file-editor"></div>
 </section>
 <section class="group-panel" id="group-weather" aria-labelledby="label-weather-group" hidden>
@@ -1173,22 +1175,26 @@ select.weather-field:disabled {
   opacity: 0.8;
 }
 .file-ask {
+  max-width: min(34em, calc(100vw - 2em));
+  padding: 1em 1.2em;
+  border: 1px solid color-mix(in srgb, CanvasText 35%, transparent);
+  border-radius: 8px;
+  background: Canvas;
+  color: CanvasText;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+.file-ask::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+.file-ask p {
+  margin: 0 0 1em;
+  line-height: 1.4;
+}
+.file-ask-buttons {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  justify-content: flex-end;
   gap: 0.5em;
-  margin: 0.5em 0;
-  padding: 0.5em 0.7em;
-  border: 1px solid color-mix(in srgb, #f2cc60 80%, transparent);
-  border-left-width: 4px;
-  border-radius: 4px;
-  background: color-mix(in srgb, #f2cc60 18%, transparent);
-}
-.file-ask[hidden] {
-  display: none;
-}
-.file-ask span {
-  flex: 1 1 18em;
 }
 .param-summary {
   display: flex;

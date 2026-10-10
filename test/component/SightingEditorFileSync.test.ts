@@ -418,7 +418,7 @@ describe("the weather of a recording", () => {
   })
 
   /** A recording whose weather a record gave, with the text edited where it is read from the record. */
-  async function editedWeather(): Promise<{ element: SightingEditorElement, ask: HTMLElement }> {
+  async function editedWeather(): Promise<{ element: SightingEditorElement, ask: HTMLDialogElement }> {
     const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
     element.weatherProvider = record
     document.body.appendChild(element)
@@ -426,14 +426,14 @@ describe("the weather of a recording", () => {
     const edited = JSON.parse(JSON.stringify(element.sightingData))
     edited.weatherTrack.keyframes[0].weather.cloudCover = 0.8
     ;(element as unknown as { applyFileText(text: string): void }).applyFileText(JSON.stringify(edited))
-    return { element, ask: element.shadowRoot!.getElementById("file-ask")! }
+    return { element, ask: element.shadowRoot!.getElementById("file-ask") as HTMLDialogElement }
   }
 
   it("asks what is meant when the text is edited where it is read from a record, and lets no lookup undo the edit meanwhile", async () => {
     const { element, ask } = await editedWeather()
     await new Promise(resolve => setTimeout(resolve, 2500))
 
-    expect(ask.hidden).toBe(false)
+    expect(ask.open).toBe(true)
     expect(ask.textContent).toContain("Open-Meteo")
     expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.8)
     expect(element.edited).toBe(true)
@@ -445,7 +445,7 @@ describe("the weather of a recording", () => {
     ;(element.shadowRoot!.getElementById("file-ask-stop") as HTMLButtonElement).click()
     await new Promise(resolve => setTimeout(resolve, 2500))
 
-    expect(ask.hidden).toBe(true)
+    expect(ask.open).toBe(false)
     expect(element.sightingData.weatherSource).toBeUndefined()
     expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.8)
   })
@@ -455,8 +455,17 @@ describe("the weather of a recording", () => {
 
     ;(element.shadowRoot!.getElementById("file-ask-keep") as HTMLButtonElement).click()
 
-    expect(ask.hidden).toBe(true)
+    expect(ask.open).toBe(false)
     expect(element.sightingData.weatherSource?.id).toBe("era5")
+    expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.25)
+  })
+
+  it("takes Escape for the safe answer: what was read is put back", async () => {
+    const { element, ask } = await editedWeather()
+
+    ask.dispatchEvent(new Event("cancel", { cancelable: true }))
+
+    expect(ask.open).toBe(false)
     expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.25)
   })
 
@@ -471,7 +480,7 @@ describe("the weather of a recording", () => {
     ;(element as unknown as { applyFileText(text: string): void }).applyFileText(JSON.stringify(edited))
     await new Promise(resolve => setTimeout(resolve, 2500))
 
-    expect(element.shadowRoot!.getElementById("file-ask")!.hidden).toBe(true)
+    expect((element.shadowRoot!.getElementById("file-ask") as HTMLDialogElement).open).toBe(false)
     expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.8)
   })
 })

@@ -478,7 +478,7 @@ export class SightingEditorElement extends HTMLElement {
   private fileEditorLoading?: Promise<SightingFileEditor>
   private readonly fileEditorHost: HTMLElement
   private readonly fileNote: HTMLElement
-  private readonly fileAsk: HTMLElement
+  private readonly fileAsk: HTMLDialogElement
   /** Waiting to put the form's changes into the text, and the text's into the form — see syncFileEditor. */
   private fileSyncTimer?: ReturnType<typeof setTimeout>
   private fileApplyTimer?: ReturnType<typeof setTimeout>
@@ -1298,7 +1298,12 @@ export class SightingEditorElement extends HTMLElement {
     this.labelFileGroup = this.shadow.getElementById("label-file-group")!
     this.fileEditorHost = this.shadow.getElementById("file-editor")!
     this.fileNote = this.shadow.getElementById("file-note")!
-    this.fileAsk = this.shadow.getElementById("file-ask")!
+    this.fileAsk = this.shadow.getElementById("file-ask") as HTMLDialogElement
+    // Escape answers it, and answers with the safe one: what was read goes back.
+    this.fileAsk.addEventListener("cancel", event => {
+      event.preventDefault()
+      this.keepReadingWeather()
+    })
     this.shadow.getElementById("file-ask-stop")!.addEventListener("click", () => this.stopReadingWeather())
     this.shadow.getElementById("file-ask-keep")!.addEventListener("click", () => this.keepReadingWeather())
     this.labelLocationGroup = this.shadow.getElementById("label-location-group")!
@@ -4521,7 +4526,7 @@ export class SightingEditorElement extends HTMLElement {
     // Anything the previous recording had in flight is about a different sighting now — a question about its weather included.
     this.cancelWeatherLookup()
     this.pendingWeatherEdit = undefined
-    this.fileAsk.hidden = true
+    this.closeFileAsk()
     this.weatherLookupResult = undefined
     this.weatherFromRecords = sighting.weatherSource !== undefined || sighting.weatherTrack.allKeyframes.length === 0
     this.syncWeatherSourceState()
@@ -5329,13 +5334,20 @@ export class SightingEditorElement extends HTMLElement {
     this.shadow.getElementById("file-ask-text")!.textContent = this.messages.weatherEditedAsk.replaceAll("{source}", source)
     this.shadow.getElementById("file-ask-stop")!.textContent = this.messages.weatherEditedStop
     this.shadow.getElementById("file-ask-keep")!.textContent = this.messages.weatherEditedKeep
-    this.fileAsk.hidden = false
+    // As the share dialog is opened (see SightingElement.share): where there is no modal, it is shown all the same.
+    if (typeof this.fileAsk.showModal === "function") this.fileAsk.showModal()
+    else this.fileAsk.setAttribute("open", "")
+  }
+
+  private closeFileAsk(): void {
+    if (typeof this.fileAsk.close === "function") this.fileAsk.close()
+    else this.fileAsk.removeAttribute("open")
   }
 
   /** The author means it: the weather is theirs, no longer read from the record. */
   private stopReadingWeather(): void {
     this.pendingWeatherEdit = undefined
-    this.fileAsk.hidden = true
+    this.closeFileAsk()
     this.weatherFromRecords = false
     this.cancelWeatherLookup()
     this.ufoElement.sighting.weatherSource = undefined
@@ -5348,7 +5360,7 @@ export class SightingEditorElement extends HTMLElement {
   private keepReadingWeather(): void {
     const previous = this.pendingWeatherEdit
     this.pendingWeatherEdit = undefined
-    this.fileAsk.hidden = true
+    this.closeFileAsk()
     if (previous === undefined) return
     this.restoringWeather = true
     try {

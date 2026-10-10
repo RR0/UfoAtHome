@@ -168,7 +168,16 @@ export class SightingFileEditor {
           ".cm-revealed-line": { backgroundColor: "color-mix(in srgb, #f2cc60 30%, transparent)", boxShadow: "inset 3px 0 0 #f2cc60" },
           // The search panel's colours are the page's own, in the dark as in the light.
           ".cm-panels": { backgroundColor: "Canvas", color: "CanvasText", borderColor: "color-mix(in srgb, CanvasText 25%, transparent)" },
+          // Fields and buttons in the colours of the system's own, light or dark: left to the search panel's defaults they took the
+          // page's text colour on a white ground, and the text typed was not legible (white on white on a light page).
           ".cm-panel.cm-search input, .cm-panel.cm-search button": { fontSize: "inherit" },
+          ".cm-panel.cm-search input[type=text], .cm-panel.cm-search input:not([type])": {
+            backgroundColor: "Field", color: "FieldText", border: "1px solid color-mix(in srgb, CanvasText 35%, transparent)", borderRadius: "3px", padding: "2px 5px"
+          },
+          ".cm-panel.cm-search button": {
+            backgroundImage: "none", backgroundColor: "ButtonFace", color: "ButtonText", border: "1px solid color-mix(in srgb, CanvasText 35%, transparent)", borderRadius: "3px"
+          },
+          ".cm-panel.cm-search label, .cm-panel.cm-search [name=close]": { color: "CanvasText" },
           ".cm-searchMatch": { backgroundColor: "color-mix(in srgb, #f2cc60 40%, transparent)" },
           ".cm-searchMatch-selected": { backgroundColor: "color-mix(in srgb, #f2cc60 75%, transparent)" }
         }),
