@@ -37,6 +37,8 @@ class UfoAtHomeWorker {
 
   static MAX_DATA_ENTRIES = 150
 
+  static MAX_KEPT_AT_ONCE = 300
+
   /** Releases whose /lib/<version>/ files are kept: the current one, and the one a tab left open
    * across a deploy may still be loading chunks from. */
   static KEPT_VERSIONS = 2
@@ -151,6 +153,63 @@ class UfoAtHomeWorker {
     }
   }
 
+  /**
+   * Keeps what a page already loaded before this worker controlled it.
+   *
+   * A first visit is made without a worker, so nothing it fetched went through one: the page lists
+   * its own resources and hands them over, and they are fetched again (from the browser's HTTP
+   * cache, which has just filled) under the same rules as any other file.
+   */
+  async keep(urls, page) {
+    const wanted = [...urls].slice(0, UfoAtHomeWorker.MAX_KEPT_AT_ONCE)
+    for (const href of wanted) {
+      const url = this.sameOrigin(href)
+      if (!url || url.pathname === "/sw.js") {
+        continue
+      }
+      const data = UfoAtHomeWorker.isData(url)
+      const cache = await caches.open(data ? UfoAtHomeWorker.DATA_CACHE : UfoAtHomeWorker.CACHE)
+      if (await cache.match(url.href)) {
+        continue
+      }
+      try {
+        const response = await fetch(url.href)
+        if (UfoAtHomeWorker.storable(response) && this.small(response, data)) {
+          await cache.put(url.href, response)
+          if (data) {
+            await this.trim(cache)
+          }
+        }
+      } catch (offline) {
+        // Gone while it was being kept: nothing to do, it is only a head start.
+      }
+    }
+    // The page itself, under the key a navigation to it will look for.
+    const document = this.sameOrigin(page)
+    if (document) {
+      try {
+        const response = await fetch(document.origin + document.pathname)
+        if (UfoAtHomeWorker.storable(response)) {
+          await (await caches.open(UfoAtHomeWorker.CACHE)).put(document.origin + document.pathname, response)
+        }
+      } catch (offline) {
+        // As above.
+      }
+    }
+  }
+
+  sameOrigin(href) {
+    if (!href) {
+      return undefined
+    }
+    try {
+      const url = new URL(href, self.location.origin)
+      return url.origin === self.location.origin ? url : undefined
+    } catch (invalid) {
+      return undefined
+    }
+  }
+
   async cacheFirst(request, cacheName) {
     const cache = await caches.open(cacheName)
     const cached = await cache.match(request)
@@ -201,6 +260,11 @@ class UfoAtHomeWorker {
 const worker = new UfoAtHomeWorker()
 self.addEventListener("install", event => event.waitUntil(worker.install().then(() => self.skipWaiting())))
 self.addEventListener("activate", event => event.waitUntil(worker.activate().then(() => self.clients.claim())))
+self.addEventListener("message", event => {
+  if (event.data && Array.isArray(event.data.keep)) {
+    event.waitUntil(worker.keep(event.data.keep, event.data.page))
+  }
+})
 self.addEventListener("fetch", event => {
   const response = worker.respond(event)
   if (response) {

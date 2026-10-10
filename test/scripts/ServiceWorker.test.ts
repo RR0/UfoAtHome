@@ -49,6 +49,7 @@ interface Worker {
   respond(event: unknown): Promise<Response> | undefined
   install(): Promise<void>
   activate(): Promise<void>
+  keep(urls: string[], page: string): Promise<void>
 }
 
 describe("sw.js", () => {
@@ -225,6 +226,40 @@ describe("sw.js", () => {
       stores.set("ufoathome-v0", new FakeCache())
       await worker.activate()
       expect([...stores.keys()]).not.toContain("ufoathome-v0")
+    })
+  })
+
+  describe("what a page loaded before it had a worker", () => {
+    it("keeps the files and the page it hands over, and only this site's", async () => {
+      network = () => basic("body", {headers: {"content-length": "4"}})
+      await worker.keep([
+        `${ORIGIN}/demo-data/socorro.json`, `${ORIGIN}/lib/0.103.0/Chunk-2vNkvjL5.js`,
+        "https://api.open-meteo.com/v1/forecast", `${ORIGIN}/sw.js`
+      ], `${ORIGIN}/?utm=1#top`)
+      expect([...(await cacheNamed("ufoathome-data")).entries.keys()]).toEqual([`${ORIGIN}/demo-data/socorro.json`])
+      expect([...(await cacheNamed("ufoathome")).entries.keys()].sort())
+        .toEqual([`${ORIGIN}/`, `${ORIGIN}/lib/0.103.0/Chunk-2vNkvjL5.js`])
+    })
+
+    it("does not fetch again what it already holds", async () => {
+      const cache = await cacheNamed("ufoathome")
+      stores.set("ufoathome", cache)
+      await cache.put("/style.css", basic("css"))
+      await worker.keep([`${ORIGIN}/style.css`], `${ORIGIN}/docs/`)
+      expect(fetched).toEqual([`${ORIGIN}/docs/`])
+    })
+
+    it("ignores an address that is not one", async () => {
+      await worker.keep(["http://[bad"], "")
+      expect(fetched).toEqual([])
+    })
+
+    it("then serves that page offline", async () => {
+      network = () => basic("home")
+      await worker.keep([], `${ORIGIN}/faq/`)
+      network = () => Promise.reject(new TypeError("offline"))
+      const response = await worker.respond(event(requestFor("/faq/", {mode: "navigate"})))!
+      expect(await response.text()).toBe("home")
     })
   })
 

@@ -20,10 +20,31 @@ export class OfflineKit {
   <meta name="theme-color" content="${OfflineKit.THEME_LIGHT}" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="${OfflineKit.THEME_DARK}" media="(prefers-color-scheme: dark)">`
 
-  /** Registers the worker once the page has loaded, so that it never competes with the page itself. */
+  /**
+   * Registers the worker once the page has loaded, so that it never competes with the page itself.
+   *
+   * And, on a first visit, hands it the list of what the page has loaded so far: this page was made
+   * without a worker, so none of it went through one, and the first thing a reader tries offline is
+   * the page they were just on. Sent again a few seconds later for what the page loads on its own
+   * (a scene's data, its models), which the worker keeps if it did not already see it go by.
+   */
   static readonly REGISTER = `<script>
 if ("serviceWorker" in navigator) {
-  addEventListener("load", function () { navigator.serviceWorker.register("/sw.js").catch(function () {}) })
+  addEventListener("load", function () {
+    var uncontrolled = !navigator.serviceWorker.controller
+    navigator.serviceWorker.register("/sw.js").then(function () { return navigator.serviceWorker.ready }).then(function (registration) {
+      if (!uncontrolled || !registration.active) { return }
+      var hand = function () {
+        registration.active.postMessage({
+          keep: performance.getEntriesByType("resource").map(function (entry) { return entry.name })
+            .filter(function (name) { return name.indexOf(location.origin + "/") === 0 }),
+          page: location.href
+        })
+      }
+      hand()
+      setTimeout(hand, 8000)
+    }).catch(function () {})
+  })
 }
 </script>`
 
