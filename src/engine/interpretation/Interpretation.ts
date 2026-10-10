@@ -162,6 +162,14 @@ export interface BodyKeyframe {
   present?: boolean
   /** Metres between the ground under it and its lowest point. Ignored with `onGround`. */
   altitudeAboveGroundM?: number
+  /**
+   * Metres between its lowest point and the ground at the recording's own origin (where the observer
+   * stands at the start) — a height in the air that does NOT follow what is under the body. For
+   * something that flies over a wall, a terrace or a ridge: with `altitudeAboveGroundM` it rises and
+   * falls with the ground it passes over, so crossing the edge of a 2 m wall is a 2 m jump in the air.
+   * Ignored with `onGround`, and with `altitudeAboveGroundM`.
+   */
+  altitudeM?: number
   sizeM?: BodySize
   attitude?: BodyAttitude
   appearance?: BodyAppearance

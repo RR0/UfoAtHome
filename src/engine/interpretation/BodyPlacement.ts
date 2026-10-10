@@ -322,10 +322,10 @@ export class BodyPlacement {
         albedo: key.appearance?.albedo ?? previous?.appearance.albedo ?? BodyPlacement.DEFAULT_APPEARANCE.albedo,
         luminanceCdM2: key.appearance?.luminanceCdM2 ?? previous?.appearance.luminanceCdM2 ?? BodyPlacement.DEFAULT_APPEARANCE.luminanceCdM2
       }
-      const position = this.positionOf(key, eyeAt) ?? (previous && {
+      const position = this.positionOf(key, sizeM, eyeAt) ?? (previous && {
         eastM: previous.eastM,
         northM: previous.northM,
-        vertical: this.verticalOf(key) ?? previous.vertical
+        vertical: this.verticalOf(key, sizeM) ?? previous.vertical
       })
       if (!position) continue
       const flame = key.flame ?? previous?.flame
@@ -336,16 +336,18 @@ export class BodyPlacement {
     return placed
   }
 
-  private verticalOf(key: BodyKeyframe): Vertical | undefined {
+  private verticalOf(key: BodyKeyframe, sizeM: BodySize): Vertical | undefined {
     if (key.onGround) return { aboveGroundM: 0 }
     if (key.altitudeAboveGroundM !== undefined) return { aboveGroundM: key.altitudeAboveGroundM }
+    // Its lowest point is where it says: the middle is half its height above that.
+    if (key.altitudeM !== undefined) return { upM: key.altitudeM + sizeM.heightM / 2 }
     return undefined
   }
 
-  private positionOf(key: BodyKeyframe, eyeAt: (t: number) => (LocalPoint & { headingDeg?: number }) | undefined):
+  private positionOf(key: BodyKeyframe, sizeM: BodySize, eyeAt: (t: number) => (LocalPoint & { headingDeg?: number }) | undefined):
     Pick<PlacedKey, "eastM" | "northM" | "vertical"> | undefined {
     if (key.eastM !== undefined && key.northM !== undefined) {
-      return { eastM: key.eastM, northM: key.northM, vertical: this.verticalOf(key) ?? { aboveGroundM: 0 } }
+      return { eastM: key.eastM, northM: key.northM, vertical: this.verticalOf(key, sizeM) ?? { aboveGroundM: 0 } }
     }
     if (key.azimuthDeg === undefined || key.altitudeDeg === undefined) return undefined
     const eye = eyeAt(key.t)
@@ -362,7 +364,7 @@ export class BodyPlacement {
     return {
       eastM,
       northM,
-      vertical: this.verticalOf(key) ?? { upM: eye.upM + direction.upM * distanceM }
+      vertical: this.verticalOf(key, sizeM) ?? { upM: eye.upM + direction.upM * distanceM }
     }
   }
 
