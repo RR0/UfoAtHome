@@ -174,7 +174,7 @@ class UfoAtHomeWorker {
       }
       try {
         const response = await fetch(url.href)
-        if (UfoAtHomeWorker.storable(response) && this.small(response, data)) {
+        if (UfoAtHomeWorker.storable(response) && await this.small(response, data)) {
           await cache.put(url.href, response)
           if (data) {
             await this.trim(cache)
@@ -227,7 +227,7 @@ class UfoAtHomeWorker {
     const cache = await caches.open(cacheName)
     const cached = await cache.match(key)
     const network = fetch(request).then(async response => {
-      if (UfoAtHomeWorker.storable(response) && this.small(response, capped)) {
+      if (UfoAtHomeWorker.storable(response) && await this.small(response, capped)) {
         await cache.put(key, response.clone())
         if (capped) {
           await this.trim(cache)
@@ -244,8 +244,14 @@ class UfoAtHomeWorker {
     return Promise.race([answer, patience])
   }
 
-  small(response, capped) {
-    return !capped || Number(response.headers.get("content-length") ?? 0) <= UfoAtHomeWorker.MAX_DATA_BYTES
+  /** A compressed answer carries no content-length, so its size is read off the body rather than assumed. */
+  async small(response, capped) {
+    if (!capped) {
+      return true
+    }
+    const declared = response.headers.get("content-length")
+    const size = declared !== null ? Number(declared) : (await response.clone().blob()).size
+    return size <= UfoAtHomeWorker.MAX_DATA_BYTES
   }
 
   /** Oldest first: the cache lists its keys in insertion order. */

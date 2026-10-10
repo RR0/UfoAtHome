@@ -197,6 +197,14 @@ describe("sw.js", () => {
       expect([...(await cacheNamed("ufoathome-data")).entries.keys()]).toEqual([`${ORIGIN}/demo-data/socorro.json`])
     })
 
+    it("measures a compressed answer, which declares no length, instead of trusting it", async () => {
+      network = () => basic("x".repeat(3 * 1024 * 1024 + 1))
+      await worker.respond(event(requestFor("/tle/big.json")))!
+      network = () => basic("small")
+      await worker.respond(event(requestFor("/tle/small.json")))!
+      expect([...(await cacheNamed("ufoathome-data")).entries.keys()]).toEqual([`${ORIGIN}/tle/small.json`])
+    })
+
     it("forgets the oldest files past the cap", async () => {
       network = () => basic("x", {headers: {"content-length": "1"}})
       for (let i = 0; i < 152; i++) {
