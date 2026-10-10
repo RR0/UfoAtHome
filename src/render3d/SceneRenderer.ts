@@ -1026,7 +1026,7 @@ export class SceneRenderer {
    * per-tick allocation, unlike weatherEquals' field-by-field compare). */
   private decorObjects: DecorObject[] = []
   /** The terraces as placed at this instant, in the scene's frame: where ground is raised (see groundYUnder). */
-  private terraces: { x: number, z: number, cos: number, sin: number, halfWidthM: number, halfLengthM: number, levelY: number }[] = []
+  private terraces: { x: number, z: number, cos: number, sin: number, halfWidthM: number, halfLengthM: number, levelY: number, bankM: number }[] = []
   private readonly decorGroups = new Map<string, Group>()
   /** When each decor object that exists only for a while is there, ms from the recording's start, by id:
    * the aircraft a record of air traffic gives (see TrafficDecor). Outside its span an object is not
@@ -2578,7 +2578,12 @@ export class SceneRenderer {
       const dz = z - terrace.z
       const lx = dx * terrace.cos - dz * terrace.sin
       const lz = dx * terrace.sin + dz * terrace.cos
-      if (Math.abs(lx) <= terrace.halfWidthM && Math.abs(lz) <= terrace.halfLengthM) raised = Math.max(raised, terrace.levelY)
+      if (Math.abs(lx) <= terrace.halfWidthM && Math.abs(lz) <= terrace.halfLengthM) {
+        // Flat along the whole of it but the two ends, which come down to the ground as a bank (see fitTerrace).
+        const into = Math.min(1, Math.max(0, (terrace.halfWidthM - Math.abs(lx)) / terrace.bankM))
+        const eased = into * into * (3 - 2 * into)
+        raised = Math.max(raised, eased * terrace.levelY + (1 - eased) * Math.min(terrace.levelY, relief))
+      }
     }
     return raised
   }
@@ -2611,7 +2616,7 @@ export class SceneRenderer {
         group.userData.terraceLevelY = DecorSystem.fitTerrace(group, object, (lx, lz) => this.terrainYUnder(x + lx * cos + lz * sin, z - lx * sin + lz * cos))
         group.userData.terraceKey = key
       }
-      this.terraces.push({ x, z, cos, sin, halfWidthM: size.widthM / 2, halfLengthM: size.lengthM / 2, levelY: group.userData.terraceLevelY as number })
+      this.terraces.push({ x, z, cos, sin, halfWidthM: size.widthM / 2, halfLengthM: size.lengthM / 2, levelY: group.userData.terraceLevelY as number, bankM: Math.min(10, size.widthM / 4) })
     }
   }
 

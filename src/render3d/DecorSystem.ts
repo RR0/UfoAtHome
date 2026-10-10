@@ -496,8 +496,11 @@ function buildMound(): Group {
  * which is all an editor with no relief under it can show. Two meshes, in this order: the wall
  * (dry stone) and the level's top (grass and bare earth, the colour of the field it is part of).
  */
-const TERRACE_WALL_COLOR: RgbColor = [0.42, 0.39, 0.33]
-const TERRACE_TOP_COLOR: RgbColor = [0.34, 0.38, 0.2]
+// Darker than they look in daylight: at dusk a Lambert surface here is lit by the whole sky, and a terrace
+// as bright as the dry grass it is would stand out of the textured ground it lies on, and lift the light the
+// scene measures round the observer (the undersides of every bush then took its pale colour).
+const TERRACE_WALL_COLOR: RgbColor = [0.24, 0.22, 0.18]
+const TERRACE_TOP_COLOR: RgbColor = [0.14, 0.17, 0.08]
 
 function buildTerrace(): Group {
   const group = new Group()
@@ -886,29 +889,43 @@ export class DecorSystem {
     const halfW = size.widthM / 2
     const halfL = size.lengthM / 2
     const level = ground(0, 0) + size.heightM
-    const nx = Math.min(80, Math.max(1, Math.ceil(size.widthM / 2)))
     const nz = Math.min(16, Math.max(1, Math.ceil(size.lengthM / 3)))
     const meshes = DecorSystem.bodyOf(group).children.filter(child => (child as Mesh).isMesh) as Mesh[]
     if (meshes.length < 2) return level
-    const xs = (i: number) => -halfW + (size.widthM * i) / nx
+    // The two ends are not walls: the level runs out as a bank that comes down to the ground over
+    // END_BANK_M, the way a cut terrace ends in a field, so that nothing reads as the end of a box.
+    const END_BANK_M = Math.min(10, size.widthM / 4)
+    const xs: number[] = [-halfW]
+    for (const share of [0.25, 0.5, 0.75, 1]) xs.push(-halfW + END_BANK_M * share)
+    // The middle is cut every 3 m, which is how often the relief is read along the foot of the wall.
+    const middle = Math.max(1, Math.ceil((size.widthM - 2 * END_BANK_M) / 3))
+    for (let k = 1; k < middle; k++) xs.push(-halfW + END_BANK_M + ((size.widthM - 2 * END_BANK_M) * k) / middle)
+    for (const share of [1, 0.75, 0.5, 0.25, 0]) xs.push(halfW - END_BANK_M * share)
     const zs = (j: number) => -halfL + (size.lengthM * j) / nz
     const SINK_M = 0.8
+    const topAt = (x: number, z: number): number => {
+      const into = Math.min(1, Math.max(0, (halfW - Math.abs(x)) / END_BANK_M))
+      const eased = into * into * (3 - 2 * into)
+      return eased * level + (1 - eased) * Math.min(level, ground(x, z))
+    }
     const wall: number[] = []
     const strip = (from: number[], to: number[]) => {
       const lowA = ground(from[0], from[1]) - SINK_M, lowB = ground(to[0], to[1]) - SINK_M
-      const highA = Math.max(level, lowA), highB = Math.max(level, lowB)
+      const highA = Math.max(topAt(from[0], from[1]), lowA), highB = Math.max(topAt(to[0], to[1]), lowB)
       wall.push(from[0], lowA, from[1], to[0], lowB, to[1], from[0], highA, from[1])
       wall.push(to[0], lowB, to[1], to[0], highB, to[1], from[0], highA, from[1])
     }
-    for (let i = 0; i < nx; i++) {
-      strip([xs(i), -halfL], [xs(i + 1), -halfL])
-      strip([xs(i), halfL], [xs(i + 1), halfL])
+    for (let i = 0; i < xs.length - 1; i++) {
+      strip([xs[i], -halfL], [xs[i + 1], -halfL])
+      strip([xs[i], halfL], [xs[i + 1], halfL])
     }
-    for (let j = 0; j < nz; j++) {
-      strip([-halfW, zs(j)], [-halfW, zs(j + 1)])
-      strip([halfW, zs(j)], [halfW, zs(j + 1)])
+    const top: number[] = []
+    for (let i = 0; i < xs.length - 1; i++) {
+      for (let j = 0; j < nz; j++) {
+        const a = [xs[i], zs(j)], b = [xs[i + 1], zs(j)], c = [xs[i], zs(j + 1)], d = [xs[i + 1], zs(j + 1)]
+        for (const [p, q, r] of [[a, c, b], [b, c, d]]) for (const v of [p, q, r]) top.push(v[0], topAt(v[0], v[1]), v[1])
+      }
     }
-    const top = [-halfW, level, -halfL, -halfW, level, halfL, halfW, level, -halfL, halfW, level, -halfL, -halfW, level, halfL, halfW, level, halfL]
     const lay = (mesh: Mesh, positions: number[]) => {
       const geometry = new BufferGeometry()
       geometry.setAttribute("position", new Float32BufferAttribute(positions, 3))
