@@ -229,12 +229,29 @@ export class SightingFileEditor {
     if (range === undefined) return false
     this.silent = true
     try {
-      this.view.dispatch({ effects: [SightingFileEditor.REVEAL.of(range), EditorView.scrollIntoView(range.from, { y: "start", yMargin: 24 })] })
+      this.view.dispatch({ effects: SightingFileEditor.REVEAL.of(range) })
     } finally {
       this.silent = false
     }
+    this.scrollTo(range.from)
     return true
   }
+
+  /**
+   * Scrolls the text's own box to a position, and nothing else. The editor's `scrollIntoView` also scrolls every
+   * ancestor, the page included: each selection made on the picture then took the page up to the text above it, and
+   * away from the picture the author was working on. The text's lines are placed by their measured height, which for
+   * those far from the ones on show is an estimate until they have been shown: so once more when they have.
+   */
+  private scrollTo(position: number): void {
+    const place = (): void => {
+      this.view.scrollDOM.scrollTop = Math.max(0, this.view.lineBlockAt(position).top - SightingFileEditor.SCROLL_MARGIN_PX)
+    }
+    place()
+    this.view.requestMeasure({ read: () => undefined, write: () => requestAnimationFrame(place) })
+  }
+
+  private static readonly SCROLL_MARGIN_PX = 24
 
   /** The text of what was last revealed, or undefined — for a test, which cannot see the tint. */
   get revealedText(): string | undefined {
