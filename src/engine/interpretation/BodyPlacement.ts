@@ -29,8 +29,6 @@ export interface BodyState {
   explains: string[]
   /** See BodyJson.outlineNode. */
   outlineNode?: string
-  /** See BodyJson.outlineWhenHidden. */
-  outlineWhenHidden?: boolean
   eastM: number
   northM: number
   upM: number
@@ -246,7 +244,6 @@ export class BodyPlacement {
       model: this.body.model,
       explains: this.body.explains ?? [],
       outlineNode: this.body.outlineNode,
-      outlineWhenHidden: this.body.outlineWhenHidden,
       eastM,
       northM,
       upM,

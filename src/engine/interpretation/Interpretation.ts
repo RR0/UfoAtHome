@@ -123,14 +123,6 @@ export interface BodyJson {
    * model when absent, and always for a primitive.
    */
   outlineNode?: string
-  /**
-   * Draws its edges, dotted, over whatever hides it from the observer's eye — the ground, a terrace,
-   * a wall — whenever most of it is hidden. For an interpretation that puts a body where the
-   * observer could not have seen it: it says where the account holds it to be, and the scene shows
-   * that nothing stood in the way of the claim except the very thing the observer named. Absent or
-   * false, a hidden body is simply hidden, as it is in life.
-   */
-  outlineWhenHidden?: boolean
   track: BodyKeyframe[]
 }
 

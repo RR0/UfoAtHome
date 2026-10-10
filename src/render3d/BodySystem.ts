@@ -1,5 +1,5 @@
 import {
-  AnimationAction, AnimationMixer, EdgesGeometry, LineDashedMaterial, LineSegments, LoopOnce, Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Mesh,
+  AnimationAction, AnimationMixer, LoopOnce, Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Mesh,
   MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Quaternion, Raycaster, SphereGeometry, TorusGeometry, Vector2, Vector3
 } from "three"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
@@ -162,7 +162,6 @@ export class BodySystem {
       holder.position.set(frame.originX + state.eastM, frame.originGroundY + state.upM, frame.originZ - state.northM)
       holder.rotation.set(state.attitude.pitchDeg * DEG_TO_RAD, -state.attitude.headingDeg * DEG_TO_RAD, -state.attitude.rollDeg * DEG_TO_RAD, "YXZ")
       holder.scale.set(state.sizeM.widthM, state.sizeM.heightM, state.sizeM.lengthM)
-      this.outlineIfHidden(holder, state, frame)
       if (material) BodySystem.paint(material, state, display)
       if (glowing) BodySystem.light(glowing, state, display)
       if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
@@ -181,64 +180,6 @@ export class BodySystem {
       } else {
         this.remove(id)
       }
-    }
-  }
-
-  /** The dotted edges of the bodies that ask for them (see BodyJson.outlineWhenHidden), one set per part. */
-  private readonly outlines = new Map<Mesh, LineSegments>()
-  private static readonly OUTLINE_CORNERS: ReadonlyArray<readonly [number, number, number]> = [
-    [0, 0, 0], ...[-1, 1].flatMap(x => [-1, 1].flatMap(y => [-1, 1].map(z => [x * 0.4, y * 0.4, z * 0.4] as const)))
-  ]
-
-  /**
-   * Shows the edges of a body, dotted, over what hides it — when most of what the eye sees of it is
-   * hidden by the ground, which includes the terraces (see SceneRenderer.groundYUnder).
-   *
-   * Nine points of the body (its middle and the corners of a box four fifths its size, so that none
-   * is at the ground it stands on) are each looked at from the eye along a line walked across the
-   * relief half a metre at a time. Half or more of them behind it and the body is "hidden": its
-   * edges are then drawn without a depth test, so that the wall that hides it does not hide them.
-   */
-  private outlineIfHidden(holder: Group, state: BodyState, frame: BodyFrame): void {
-    const parts: Mesh[] = []
-    holder.traverse(object => {
-      if (object instanceof Mesh && !(object.material instanceof GlassMaterial)) parts.push(object)
-    })
-    const eye = frame.eye
-    const ground = frame.groundYAt
-    let hidden = false
-    if (state.outlineWhenHidden && eye && ground && parts.length > 0) {
-      holder.updateMatrixWorld(true)
-      let blocked = 0
-      for (const corner of BodySystem.OUTLINE_CORNERS) {
-        const point = holder.localToWorld(new Vector3(corner[0], corner[1], corner[2]))
-        const distance = point.distanceTo(eye)
-        const steps = Math.max(2, Math.ceil(distance / 0.5) - 1)
-        let behind = false
-        for (let step = 1; step < steps && !behind; step++) {
-          const share = step / (steps + 1)
-          const x = eye.x + (point.x - eye.x) * share
-          const y = eye.y + (point.y - eye.y) * share
-          const z = eye.z + (point.z - eye.z) * share
-          behind = ground(x, z) > y + 0.05
-        }
-        if (behind) blocked++
-      }
-      hidden = blocked >= BodySystem.OUTLINE_CORNERS.length / 2
-    }
-    for (const part of parts) {
-      let lines = this.outlines.get(part)
-      if (!lines && state.outlineWhenHidden) {
-        lines = new LineSegments(new EdgesGeometry(part.geometry, 25), new LineDashedMaterial({
-          color: "#ffffff", dashSize: 0.03, gapSize: 0.025, depthTest: false, depthWrite: false, transparent: true, opacity: 0.95
-        }))
-        lines.computeLineDistances()
-        lines.renderOrder = 20
-        lines.name = "outline"
-        part.add(lines)
-        this.outlines.set(part, lines)
-      }
-      if (lines) lines.visible = hidden
     }
   }
 
@@ -931,13 +872,7 @@ export class BodySystem {
     if (!entry) return
     entry.holder.removeFromParent()
     entry.holder.traverse(child => {
-      if (child instanceof LineSegments) {
-        child.geometry.dispose()
-        ;(child.material as LineDashedMaterial).dispose()
-        return
-      }
       if (!(child instanceof Mesh)) return
-      this.outlines.delete(child)
       child.geometry.dispose()
       const materials = Array.isArray(child.material) ? child.material : [child.material]
       for (const material of materials) material.dispose()
