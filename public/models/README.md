@@ -137,11 +137,15 @@ did before models existed. The models are detail, never the reconstruction itsel
 
 ## The trees
 
-A tree that names no model is drawn as one of the six broadleaf trees of Jungle Jim's "Realistic Trees
-Collection" (CC BY 4.0, `jungle-jim-realistic-trees/`), picked by the tree's id (`TREE_MODEL_VARIANTS` in
-`src/engine/model/Decor.ts`); a conifer says so by naming `kenney-tree-conifer`. The seventh, a bush, is a
-`shrub` of the catalogue and is drawn by nobody until a recording names it. The collection was one 11 MB scene
-of seven trees: `scripts/build-realistic-trees.ts` splits it into one file per tree, simplified to about five
-thousand triangles, with 256 px bark and 512 px leaf sheets, the leaves cut out rather than blended. A tree is
-fitted to its stated height, not to its footprint.
+A tree that names no model is drawn as one of thirteen broadleaf trees, picked by the tree's id
+(`TREE_MODEL_VARIANTS` in `src/engine/model/Decor.ts`): six of Jungle Jim's "Realistic Trees Collection"
+(`jungle-jim-realistic-trees/`) and four (two maples, two aspens) of Jagobo's "Mountain Trees"
+(`jagobo-mountain-trees/`) and three of Nicholas-3D's "Low Poly Trees Free" (`nicholas-3d-low-poly-trees/`, 450 triangles each), all CC BY 4.0. The same Mountain Trees hold two pines and a juniper, which are
+in the catalogue and drawn only when a recording names them: a conifer says so by naming one
+(`jagobo-tree-pine-a`, `jagobo-tree-pine-b`, `jagobo-tree-juniper`). The bush of the
+first collection is a `shrub` of the catalogue, drawn by nobody until a recording names it.
 
+Each collection was one scene of a few trees (11 and 14 MB for the first two): `scripts/build-realistic-trees.ts` splits it into
+one file per tree, simplified to a few thousand triangles, with 256 px bark and 512 px leaf sheets, the leaves
+cut out rather than blended. A tree is fitted to its stated height, not to its footprint. Two bare trunks of the
+second collection (a pine and a juniper snag) are not kept.

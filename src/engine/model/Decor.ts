@@ -244,11 +244,13 @@ export const DEFAULT_DECOR_MODEL: Partial<Record<DecorKind, DecorModelRef>> = {
 /**
  * The broadleaf trees a tree names no model for is drawn as, one per tree: a row of a hundred trees that
  * are all the same one is the tell of a pasted model, so each takes its own by its id, which keeps it the
- * same one at every reload. A tree that is a conifer says so, by naming one (`kenney-tree-conifer`).
+ * same one at every reload. A tree that is a conifer says so, by naming one (`jagobo-tree-pine-a`, `jagobo-tree-pine-b`, `jagobo-tree-juniper`).
  */
 export const TREE_MODEL_VARIANTS: readonly string[] = [
   "jungle-jim-tree-large-a", "jungle-jim-tree-medium-a", "jungle-jim-tree-large-b",
-  "jungle-jim-tree-medium-b", "jungle-jim-tree-large-c", "jungle-jim-tree-medium-c"
+  "jungle-jim-tree-medium-b", "jungle-jim-tree-large-c", "jungle-jim-tree-medium-c",
+  "jagobo-tree-maple-a", "jagobo-tree-maple-b", "jagobo-tree-aspen-a", "jagobo-tree-aspen-b",
+  "nicholas-3d-tree-a", "nicholas-3d-tree-b", "nicholas-3d-tree-c"
 ]
 
 /** The model an object is drawn as: the one it names, or else the default of its kind (a tree's by its id, see TREE_MODEL_VARIANTS). */

@@ -1,6 +1,9 @@
 /**
- * Splits Jungle Jim's "Realistic Trees Collection" (CC BY 4.0) into one light glTF per tree, and writes
- * them to public/models/jungle-jim-realistic-trees/ with the catalogue entries to paste in index.json.
+ * Splits three collections of trees found on Sketchfab (CC BY 4.0) into one light glTF per tree, and writes
+ * them to public/models/<directory>/ with the catalogue entries to paste in index.json:
+ * - "Realistic Trees Collection" by Jungle Jim (`realistic`, public/models/jungle-jim-realistic-trees/);
+ * - "Mountain Trees" by Jagobo (`mountain`, public/models/jagobo-mountain-trees/);
+ * - "Low Poly Trees Free" by Nicholas-3D (`lowpoly`, public/models/nicholas-3d-low-poly-trees/).
  *
  * The source is one scene of seven trees standing side by side, 11 MB of geometry and 21 PNGs of 1024 px
  * (twenty of which are the same four pictures: one bark, three leaf sheets). A decor object is one tree
@@ -14,8 +17,9 @@
  * - the textures are shrunk once (bark 256 px, leaf sheets 512 px, by `sips`, which only macOS has: pass the
  *   directory of the shrunk pictures as the third argument), and the normal maps are dropped.
  *
- * Run with: node scripts/build-realistic-trees.ts <collection dir> <out dir> <shrunk textures dir>
- * where the shrunk dir holds bark.png, leaves-A.png, leaves-B.png and leaves-C.png.
+ * Run with: node scripts/build-realistic-trees.ts <realistic|mountain|lowpoly> <collection dir> <out dir> <shrunk textures dir>
+ * where the shrunk dir holds the pictures each tree names (bark.png, leaves-A.png ... for the first collection;
+ * for the second, the names of the Sketchfab files at 256 or 512 px: aspen_bark_baseColor.png, ...).
  */
 import { MeshoptSimplifier } from "meshoptimizer"
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
@@ -32,26 +36,34 @@ interface SourceGltf {
   bufferViews: GltfView[]
 }
 
-/** The unit conversion left once the nodes' own matrices are applied: the collection's trees come out as 10 x too tall. */
+/** The unit conversion left once the nodes' own matrices are applied, for a tree with no stated height. */
 const METRES_PER_UNIT = 0.1
 
-/** A tree of the collection: which node group it is, what it is called here, and which leaf sheet it wears. */
+/** A tree of a collection: which of the file's nodes are its branches and its leaves, and which pictures they wear. */
 interface TreeSpec {
-  group: string
   slug: string
   name: string
-  leaves: "A" | "B" | "C"
+  /** Names of the nodes (or of the groups of them) that hold the trunk and the branches. */
+  branches: string[]
+  /** Names of the nodes that hold the foliage. */
+  leaves: string[]
+  barkFile: string
+  leafFile: string
+  /** The height of the tree in metres, when the file's unit does not say it. */
+  heightM?: number
+  /** Whether it is a conifer: named in the catalogue as such, and never drawn by default. */
+  conifer?: boolean
 }
 
-const TREES: TreeSpec[] = [
-  { group: "Tree EZTree0.Large", slug: "large-a", name: "Large broadleaf tree A", leaves: "A" },
-  { group: "Tree EZTree1.Large001", slug: "large-b", name: "Large broadleaf tree B", leaves: "A" },
-  { group: "Tree EZTree1.Large009", slug: "large-c", name: "Large broadleaf tree C", leaves: "B" },
-  { group: "Tree EZTree0.Medium010", slug: "medium-a", name: "Medium broadleaf tree A", leaves: "B" },
-  { group: "Tree EZTree0.Medium011", slug: "medium-b", name: "Medium broadleaf tree B", leaves: "B" },
-  { group: "Tree EZTree1.Medium002", slug: "medium-c", name: "Medium broadleaf tree C", leaves: "A" },
-  { group: "Tree EZTree1.Bush006", slug: "bush", name: "Bush", leaves: "C" }
-]
+interface CollectionSpec {
+  /** What the ids of its catalogue entries start with. */
+  idPrefix: string
+  directory: string
+  title: string
+  author: string
+  sourceUrl: string
+  trees: (collection: Collection) => TreeSpec[]
+}
 
 /** Triangles kept: a tree seen at tens of metres has no use for the rest. */
 const BRANCH_TRIANGLES = 1800
@@ -88,10 +100,22 @@ class Collection {
     this.gltf.nodes.forEach((node, index) => node.children?.forEach(child => this.parents.set(child, index)))
   }
 
-  nodeNamed(name: string): number {
-    const index = this.gltf.nodes.findIndex(node => node.name === name)
-    if (index < 0) throw new Error(`No node named ${name}`)
-    return index
+  /** Every node of this name: a file may name two of them alike. */
+  nodesNamed(name: string): number[] {
+    const found = this.gltf.nodes.flatMap((node, index) => node.name === name ? [index] : [])
+    if (found.length === 0) throw new Error(`No node named ${name}`)
+    return found
+  }
+
+  /** The nodes that carry a mesh, at or under the node. */
+  meshNodesUnder(node: number): number[] {
+    const found: number[] = []
+    const visit = (index: number): void => {
+      if (this.gltf.nodes[index].mesh !== undefined) found.push(index)
+      this.gltf.nodes[index].children?.forEach(visit)
+    }
+    visit(node)
+    return found
   }
 
   world(node: number): number[] {
@@ -144,21 +168,15 @@ class TreeBuilder {
     this.spec = spec
   }
 
-  /** The parts of the tree: its branches, and its leaves (one or two meshes, joined). */
+  /** The parts of the tree: its branches, and its leaves (one or more meshes, joined). */
   parts(): { branches: Part, leaves: Part } {
     const { gltf } = this.collection
-    const group = this.collection.nodeNamed(this.spec.group)
-    const branches: Part[] = []
-    const leaves: Part[] = []
-    for (const child of gltf.nodes[group].children ?? []) {
-      const node = gltf.nodes[child]
-      const mesh = gltf.meshes[node.mesh!]
-      const matrix = this.collection.world(child)
-      for (const primitive of mesh.primitives) {
-        const part = this.read(primitive, matrix)
-        ;(mesh.name.includes("branches") ? branches : leaves).push(part)
-      }
-    }
+    const read = (names: string[]): Part[] => names.flatMap(name => this.collection.nodesNamed(name)).flatMap(node => this.collection.meshNodesUnder(node)).flatMap(node => {
+      const matrix = this.collection.world(node)
+      return gltf.meshes[gltf.nodes[node].mesh!].primitives.map(primitive => this.read(primitive, matrix))
+    })
+    const branches = read(this.spec.branches)
+    const leaves = read(this.spec.leaves)
     const joined = { branches: TreeBuilder.join(branches), leaves: TreeBuilder.join(leaves) }
     // Standing on its own trunk, at y = 0: the lowest part of the branches, where they are.
     let minY = Infinity
@@ -172,11 +190,17 @@ class TreeBuilder {
       }
     }
     const cx = sumX / n, cz = sumZ / n
+    let maxY = -Infinity
+    for (const part of [joined.branches, joined.leaves]) {
+      for (let i = 1; i < part.positions.length; i += 3) maxY = Math.max(maxY, part.positions[i])
+    }
+    // A tree whose height is stated is scaled to it: the unit of the file is nobody's guess to make.
+    const scale = this.spec.heightM === undefined ? 1 : this.spec.heightM / (maxY - minY)
     for (const part of [joined.branches, joined.leaves]) {
       for (let i = 0; i < part.positions.length; i += 3) {
-        part.positions[i] -= cx
-        part.positions[i + 1] -= minY
-        part.positions[i + 2] -= cz
+        part.positions[i] = (part.positions[i] - cx) * scale
+        part.positions[i + 1] = (part.positions[i + 1] - minY) * scale
+        part.positions[i + 2] = (part.positions[i + 2] - cz) * scale
       }
     }
     return joined
@@ -232,10 +256,10 @@ class Decimator {
         attributes.set(part.uvs.subarray(i * 2, i * 2 + 2), i * 5 + 3)
       }
       try {
-        ;[indices] = MeshoptSimplifier.simplifyWithAttributes(part.indices, part.positions, 3, attributes, 5, [0.5, 0.5, 0.5, 1, 1], null, triangles * 3, 0.2, ["Prune", "Permissive"])
+        ;[indices] = MeshoptSimplifier.simplifyWithAttributes(part.indices, part.positions, 3, attributes, 5, [0.5, 0.5, 0.5, 1, 1], null, triangles * 3, 0.2, ["Permissive"])
       } catch (error) {
         console.log(`  (simplifier failed on ${part.positions.length / 3} vertices, ${part.indices.length / 3} triangles: ${error}; trying positions alone)`)
-        ;[indices] = MeshoptSimplifier.simplify(part.indices, part.positions, 3, triangles * 3, 0.2, ["Prune", "Permissive"])
+        ;[indices] = MeshoptSimplifier.simplify(part.indices, part.positions, 3, triangles * 3, 0.2, ["Permissive"])
       }
     }
     const remap = new Map<number, number>()
@@ -320,7 +344,7 @@ const ARRAY_BUFFER = 34962
 const ELEMENT_ARRAY_BUFFER = 34963
 
 /** Writes one tree as a GLB: a branches mesh and a leaves mesh, two materials, two embedded pictures. */
-function writeTree(spec: TreeSpec, parts: { branches: Part, leaves: Part }, textures: string, file: string): { sizeM: { widthM: number, lengthM: number, heightM: number }, triangles: number } {
+function writeTree(collection: CollectionSpec, spec: TreeSpec, parts: { branches: Part, leaves: Part }, textures: string, file: string): { sizeM: { widthM: number, lengthM: number, heightM: number }, triangles: number } {
   const writer = new GlbWriter()
   const primitives = [parts.branches, parts.leaves].map((part, material) => ({
     attributes: {
@@ -331,10 +355,10 @@ function writeTree(spec: TreeSpec, parts: { branches: Part, leaves: Part }, text
     indices: writer.accessor(part.indices, "SCALAR", UNSIGNED_INT, ELEMENT_ARRAY_BUFFER),
     material
   }))
-  const barkView = writer.view(readFileSync(path.join(textures, "bark.png")))
-  const leafView = writer.view(readFileSync(path.join(textures, `leaves-${spec.leaves}.png`)))
+  const barkView = writer.view(readFileSync(path.join(textures, spec.barkFile)))
+  const leafView = writer.view(readFileSync(path.join(textures, spec.leafFile)))
   const json = {
-    asset: { version: "2.0", generator: "UFO@home scripts/build-realistic-trees.ts", extras: { source: "https://sketchfab.com/3d-models/realistic-trees-collection-fe67c886eebf4bcb988d7c45e69995ad", author: "Jungle Jim", license: "CC-BY-4.0" } },
+    asset: { version: "2.0", generator: "UFO@home scripts/build-realistic-trees.ts", extras: { source: collection.sourceUrl, author: collection.author, license: "CC-BY-4.0" } },
     scene: 0,
     scenes: [{ nodes: [0] }],
     nodes: [{ name: spec.slug, mesh: 0 }],
@@ -366,31 +390,88 @@ function writeTree(spec: TreeSpec, parts: { branches: Part, leaves: Part }, text
   }
 }
 
+/** The two collections, and which of their nodes make which tree. */
+class Collections {
+  static readonly REALISTIC: CollectionSpec = {
+    idPrefix: "jungle-jim-tree",
+    directory: "jungle-jim-realistic-trees",
+    title: "Realistic Trees Collection",
+    author: "Jungle Jim",
+    sourceUrl: "https://sketchfab.com/3d-models/realistic-trees-collection-fe67c886eebf4bcb988d7c45e69995ad",
+    trees: collection => {
+      const tree = (group: string, slug: string, name: string, leaf: string): TreeSpec => {
+        const [node] = collection.nodesNamed(group)
+        const children = [...new Set((collection.gltf.nodes[node].children ?? []).map(child => collection.gltf.nodes[child].name!))]
+        return {
+          slug, name, barkFile: "bark.png", leafFile: `leaves-${leaf}.png`,
+          branches: children.filter(child => child.includes("_branches")), leaves: children.filter(child => child.includes("_leaves"))
+        }
+      }
+      return [
+        tree("Tree EZTree0.Large", "large-a", "Large broadleaf tree A", "A"),
+        tree("Tree EZTree1.Large001", "large-b", "Large broadleaf tree B", "A"),
+        tree("Tree EZTree1.Large009", "large-c", "Large broadleaf tree C", "B"),
+        tree("Tree EZTree0.Medium010", "medium-a", "Medium broadleaf tree A", "B"),
+        tree("Tree EZTree0.Medium011", "medium-b", "Medium broadleaf tree B", "B"),
+        tree("Tree EZTree1.Medium002", "medium-c", "Medium broadleaf tree C", "A"),
+        tree("Tree EZTree1.Bush006", "bush", "Bush", "C")
+      ]
+    }
+  }
+
+  static readonly MOUNTAIN: CollectionSpec = {
+    idPrefix: "jagobo-tree",
+    directory: "jagobo-mountain-trees",
+    title: "Mountain Trees",
+    author: "Jagobo",
+    sourceUrl: "https://sketchfab.com/3d-models/mountain-trees-b914384f931d4b3585bd4f0bf48f0da3",
+    trees: () => [
+      { slug: "maple-a", name: "Maple A", branches: ["structure.003_1"], leaves: ["foliage.003_2"], barkFile: "Default_OBJ_baseColor.png", leafFile: "Material.001_baseColor.png", heightM: 13 },
+      { slug: "maple-b", name: "Maple B", branches: ["structure.004_3"], leaves: ["foliage.004_4"], barkFile: "Default_OBJ_baseColor.png", leafFile: "Material.001_baseColor.png", heightM: 17 },
+      { slug: "aspen-a", name: "Aspen A", branches: ["structure.007_13"], leaves: ["foliage.005_14"], barkFile: "aspen_bark_baseColor.png", leafFile: "aspen_branch_baseColor.png", heightM: 9 },
+      { slug: "aspen-b", name: "Aspen B", branches: ["structure.008_15"], leaves: ["foliage.006_16"], barkFile: "aspen_bark_baseColor.png", leafFile: "aspen_branch_baseColor.png", heightM: 13 },
+      { slug: "pine-a", name: "Pine A", branches: ["structure.002_8"], leaves: ["foliage.001_9"], barkFile: "pine_bark_baseColor.png", leafFile: "pine_branch_baseColor.png", heightM: 22, conifer: true },
+      { slug: "pine-b", name: "Pine B", branches: ["structure.006_11"], leaves: ["foliage.002_12"], barkFile: "pine_bark_baseColor.png", leafFile: "pine_branch_baseColor.png", heightM: 21, conifer: true },
+      { slug: "juniper", name: "Juniper", branches: ["structure.001_6"], leaves: ["foliage_7"], barkFile: "pine_bark_baseColor.png", leafFile: "juniper_branch_baseColor.png", heightM: 7.5, conifer: true }
+    ]
+  }
+}
+
+/** Nicholas-3D's three trees: a trunk and a crown of leafy branch cards each, about 450 triangles. */
+Collections.LOW_POLY = {
+  idPrefix: "nicholas-3d-tree",
+  directory: "nicholas-3d-low-poly-trees",
+  title: "Low Poly Trees Free",
+  author: "Nicholas-3D",
+  sourceUrl: "https://sketchfab.com/3d-models/low-poly-trees-free-6a2952e0ebdd41fa93cefda6ae0a4102",
+  trees: () => [
+    { slug: "a", name: "Tree A", branches: ["Object_4"], leaves: ["Object_5"], barkFile: "Bark_baseColor.png", leafFile: "Leaf_baseColor.png", heightM: 6.4 },
+    { slug: "b", name: "Tree B", branches: ["Object_7"], leaves: ["Object_8"], barkFile: "Bark_baseColor.png", leafFile: "Leaf_baseColor.png", heightM: 7.1 },
+    { slug: "c", name: "Tree C", branches: ["Object_10"], leaves: ["Object_11"], barkFile: "Bark_baseColor.png", leafFile: "Leaf_baseColor.png", heightM: 7 }
+  ]
+}
+
 async function main(): Promise<void> {
-  const [collectionDir, outDir, texturesDir] = process.argv.slice(2)
-  if (!collectionDir || !outDir || !texturesDir) throw new Error("Usage: node scripts/build-realistic-trees.ts <collection dir> <out dir> <shrunk textures dir>")
+  const [which, collectionDir, outDir, texturesDir] = process.argv.slice(2)
+  const spec = which === "realistic" ? Collections.REALISTIC : which === "mountain" ? Collections.MOUNTAIN : which === "lowpoly" ? Collections.LOW_POLY : undefined
+  if (!spec || !collectionDir || !outDir || !texturesDir) throw new Error("Usage: node scripts/build-realistic-trees.ts <realistic|mountain|lowpoly> <collection dir> <out dir> <shrunk textures dir>")
   await MeshoptSimplifier.ready
   mkdirSync(outDir, { recursive: true })
   const collection = new Collection(collectionDir)
   const entries = []
-  for (const spec of TREES) {
-    const raw = new TreeBuilder(collection, spec).parts()
+  for (const tree of spec.trees(collection)) {
+    const raw = new TreeBuilder(collection, tree).parts()
     const parts = { branches: Decimator.reduce(raw.branches, BRANCH_TRIANGLES), leaves: Decimator.reduce(raw.leaves, LEAF_TRIANGLES) }
-    const file = `${spec.slug}.glb`
-    const { sizeM, triangles } = writeTree(spec, parts, texturesDir, path.join(outDir, file))
-    console.log(`${spec.slug}: ${raw.branches.indices.length / 3 + raw.leaves.indices.length / 3} -> ${triangles} triangles, ${sizeM.widthM} x ${sizeM.lengthM} x ${sizeM.heightM} m`)
+    const file = `${tree.slug}.glb`
+    const { sizeM, triangles } = writeTree(spec, tree, parts, texturesDir, path.join(outDir, file))
+    console.log(`${tree.slug}: ${raw.branches.indices.length / 3 + raw.leaves.indices.length / 3} -> ${triangles} triangles, ${sizeM.widthM} x ${sizeM.lengthM} x ${sizeM.heightM} m`)
     entries.push({
-      id: `jungle-jim-tree-${spec.slug}`,
-      kind: "tree",
-      name: `${spec.name} (realistic)`,
-      file: `jungle-jim-realistic-trees/${file}`,
+      id: `${spec.idPrefix}-${tree.slug}`,
+      kind: tree.slug === "bush" ? "shrub" : "tree",
+      name: `${tree.name}${tree.conifer ? " (conifer)" : " (realistic)"}`,
+      file: `${spec.directory}/${file}`,
       sizeM,
-      credit: {
-        title: `Realistic Trees Collection — ${spec.name}`,
-        author: "Jungle Jim",
-        license: "CC BY 4.0",
-        sourceUrl: "https://sketchfab.com/3d-models/realistic-trees-collection-fe67c886eebf4bcb988d7c45e69995ad"
-      }
+      credit: { title: `${spec.title} — ${tree.name}`, author: spec.author, license: "CC BY 4.0", sourceUrl: spec.sourceUrl }
     })
   }
   copyFileSync(path.join(collectionDir, "license.txt"), path.join(outDir, "License.txt"))

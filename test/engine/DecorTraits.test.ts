@@ -43,10 +43,10 @@ describe("DecorTraits", () => {
   it("draws an aircraft that names no model as the generic airliner, and nothing else by default", () => {
     expect(decorModelOf({ kind: "aircraft" })).toEqual({ id: "poly-google-airliner" })
     expect(decorModelOf({ kind: "aircraft", model: { id: "amvlab-a320" } })).toEqual({ id: "amvlab-a320" })
-    expect(decorModelOf({ kind: "tree", id: "tree-1" })?.id).toMatch(/^jungle-jim-tree-/)
+    expect(decorModelOf({ kind: "tree", id: "tree-1" })?.id).toMatch(/-tree-/)
     expect(decorModelOf({ kind: "tree", id: "tree-1" })).toEqual(decorModelOf({ kind: "tree", id: "tree-1" }))
     expect(new Set(Array.from({ length: 40 }, (_, i) => decorModelOf({ kind: "tree", id: `tree-${i}` })?.id)).size).toBeGreaterThan(3)
-    expect(decorModelOf({ kind: "tree", id: "tree-1", model: { id: "kenney-tree-conifer" } })).toEqual({ id: "kenney-tree-conifer" })
+    expect(decorModelOf({ kind: "tree", id: "tree-1", model: { id: "jagobo-tree-pine-a" } })).toEqual({ id: "jagobo-tree-pine-a" })
     expect(DecorTraits.of({ kind: "aircraft" })).toMatchObject({ color: false, windows: false, lights: true })
   })
 })

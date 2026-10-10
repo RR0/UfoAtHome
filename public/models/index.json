@@ -58,19 +58,6 @@
       }
     },
     {
-      "id": "kenney-tree-conifer",
-      "kind": "tree",
-      "name": "Conifer (generic, stylised)",
-      "file": "kenney-survival-kit/tree-conifer.glb",
-      "sizeM": { "widthM": 3.9, "lengthM": 3.8, "heightM": 10 },
-      "credit": {
-        "title": "Survival Kit 1.0 — tree",
-        "author": "Kenney",
-        "license": "CC0 1.0",
-        "sourceUrl": "https://kenney.nl/assets/survival-kit"
-      }
-    },
-    {
       "id": "jungle-jim-tree-large-a",
       "kind": "tree",
       "name": "Large broadleaf tree A (realistic)",
@@ -159,6 +146,136 @@
         "author": "Jungle Jim",
         "license": "CC BY 4.0",
         "sourceUrl": "https://sketchfab.com/3d-models/realistic-trees-collection-fe67c886eebf4bcb988d7c45e69995ad"
+      }
+    },
+    {
+      "id": "jagobo-tree-maple-a",
+      "kind": "tree",
+      "name": "Maple A (realistic)",
+      "file": "jagobo-mountain-trees/maple-a.glb",
+      "sizeM": { "widthM": 8.3, "lengthM": 9.3, "heightM": 13 },
+      "credit": {
+        "title": "Mountain Trees — Maple A",
+        "author": "Jagobo",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/mountain-trees-b914384f931d4b3585bd4f0bf48f0da3"
+      }
+    },
+    {
+      "id": "jagobo-tree-maple-b",
+      "kind": "tree",
+      "name": "Maple B (realistic)",
+      "file": "jagobo-mountain-trees/maple-b.glb",
+      "sizeM": { "widthM": 10.8, "lengthM": 11.3, "heightM": 17 },
+      "credit": {
+        "title": "Mountain Trees — Maple B",
+        "author": "Jagobo",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/mountain-trees-b914384f931d4b3585bd4f0bf48f0da3"
+      }
+    },
+    {
+      "id": "jagobo-tree-aspen-a",
+      "kind": "tree",
+      "name": "Aspen A (realistic)",
+      "file": "jagobo-mountain-trees/aspen-a.glb",
+      "sizeM": { "widthM": 6.5, "lengthM": 7.3, "heightM": 9 },
+      "credit": {
+        "title": "Mountain Trees — Aspen A",
+        "author": "Jagobo",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/mountain-trees-b914384f931d4b3585bd4f0bf48f0da3"
+      }
+    },
+    {
+      "id": "jagobo-tree-aspen-b",
+      "kind": "tree",
+      "name": "Aspen B (realistic)",
+      "file": "jagobo-mountain-trees/aspen-b.glb",
+      "sizeM": { "widthM": 8.4, "lengthM": 8.4, "heightM": 12.9 },
+      "credit": {
+        "title": "Mountain Trees — Aspen B",
+        "author": "Jagobo",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/mountain-trees-b914384f931d4b3585bd4f0bf48f0da3"
+      }
+    },
+    {
+      "id": "jagobo-tree-pine-a",
+      "kind": "tree",
+      "name": "Pine A (conifer)",
+      "file": "jagobo-mountain-trees/pine-a.glb",
+      "sizeM": { "widthM": 11.3, "lengthM": 11.3, "heightM": 22 },
+      "credit": {
+        "title": "Mountain Trees — Pine A",
+        "author": "Jagobo",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/mountain-trees-b914384f931d4b3585bd4f0bf48f0da3"
+      }
+    },
+    {
+      "id": "jagobo-tree-pine-b",
+      "kind": "tree",
+      "name": "Pine B (conifer)",
+      "file": "jagobo-mountain-trees/pine-b.glb",
+      "sizeM": { "widthM": 12.2, "lengthM": 12.4, "heightM": 20.8 },
+      "credit": {
+        "title": "Mountain Trees — Pine B",
+        "author": "Jagobo",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/mountain-trees-b914384f931d4b3585bd4f0bf48f0da3"
+      }
+    },
+    {
+      "id": "jagobo-tree-juniper",
+      "kind": "tree",
+      "name": "Juniper (conifer)",
+      "file": "jagobo-mountain-trees/juniper.glb",
+      "sizeM": { "widthM": 5.9, "lengthM": 4.6, "heightM": 7.5 },
+      "credit": {
+        "title": "Mountain Trees — Juniper",
+        "author": "Jagobo",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/mountain-trees-b914384f931d4b3585bd4f0bf48f0da3"
+      }
+    },
+    {
+      "id": "nicholas-3d-tree-a",
+      "kind": "tree",
+      "name": "Tree A (realistic)",
+      "file": "nicholas-3d-low-poly-trees/a.glb",
+      "sizeM": { "widthM": 3.1, "lengthM": 3.3, "heightM": 6.5 },
+      "credit": {
+        "title": "Low Poly Trees Free — Tree A",
+        "author": "Nicholas-3D",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/low-poly-trees-free-6a2952e0ebdd41fa93cefda6ae0a4102"
+      }
+    },
+    {
+      "id": "nicholas-3d-tree-b",
+      "kind": "tree",
+      "name": "Tree B (realistic)",
+      "file": "nicholas-3d-low-poly-trees/b.glb",
+      "sizeM": { "widthM": 3.4, "lengthM": 3.2, "heightM": 7.1 },
+      "credit": {
+        "title": "Low Poly Trees Free — Tree B",
+        "author": "Nicholas-3D",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/low-poly-trees-free-6a2952e0ebdd41fa93cefda6ae0a4102"
+      }
+    },
+    {
+      "id": "nicholas-3d-tree-c",
+      "kind": "tree",
+      "name": "Tree C (realistic)",
+      "file": "nicholas-3d-low-poly-trees/c.glb",
+      "sizeM": { "widthM": 3.3, "lengthM": 3.4, "heightM": 7 },
+      "credit": {
+        "title": "Low Poly Trees Free — Tree C",
+        "author": "Nicholas-3D",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/low-poly-trees-free-6a2952e0ebdd41fa93cefda6ae0a4102"
       }
     },
     {
