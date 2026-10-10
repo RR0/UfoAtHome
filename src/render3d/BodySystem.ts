@@ -532,12 +532,18 @@ export class BodySystem {
 
   /** The body on show a ray meets first, by id — what a press on the editor's picture grabs. */
   pick(raycaster: Raycaster): string | undefined {
+    return this.pickHit(raycaster)?.id
+  }
+
+  /** As {@link pick}, with how far along the ray it was met: what tells a body in front of a decor object from one behind it. */
+  pickHit(raycaster: Raycaster): { id: string, distance: number } | undefined {
     const shown = [...this.built.entries()].filter(([, { holder }]) => holder.visible)
     const hit = raycaster.intersectObjects(shown.map(([, { holder }]) => holder), true)[0]
     if (!hit) return undefined
     let object: Object3D | null = hit.object
     while (object && !shown.some(([, { holder }]) => holder === object)) object = object.parent
-    return shown.find(([, { holder }]) => holder === object)?.[0]
+    const id = shown.find(([, { holder }]) => holder === object)?.[0]
+    return id === undefined ? undefined : { id, distance: hit.distance }
   }
 
   /** How far from `from`, level, the bodies on show reach: the furthest centre plus half its

@@ -930,6 +930,8 @@ export class SightingEditorElement extends HTMLElement {
     /** The decor object the press landed on, if any: a press that is released without moving is a
      * click on it and selects it; one that moves turns the view, as it does over bare sky or ground. */
     pressedDecorId?: string
+    /** The body the press landed on, if any: released without moving, it is selected in the Bodies part of the Phenomenon group. */
+    pressedBodyId?: string
     /** Whether the pointer has left the press point by more than a click's jitter. */
     moved?: boolean
   }
@@ -1008,7 +1010,9 @@ export class SightingEditorElement extends HTMLElement {
    * here and not in endDrag, which also runs when a recording is loaded mid-press. */
   private readonly handleDragPointerUp = () => {
     const clicked = this.cameraDragState && !this.cameraDragState.moved ? this.cameraDragState.pressedDecorId : undefined
+    const clickedBody = this.cameraDragState && !this.cameraDragState.moved ? this.cameraDragState.pressedBodyId : undefined
     this.endDrag()
+    if (clickedBody !== undefined) this.showBody(clickedBody)
     if (clicked !== undefined) {
       this.selectDecor(clicked)
       this.revealDecorPanel()
@@ -9219,6 +9223,14 @@ export class SightingEditorElement extends HTMLElement {
       // one. Only reached once a shape hit is already ruled out, matching the same "shape wins"
       // precedent as SceneElement's own hover tooltip (a shape is painted on top of decor, so it
       // should win a click there too).
+      // A body standing on the scenery (a craft on its platform) is what a click there means, and it is in front: the decor under it
+      // is what the ray meets next, and used to be what was selected (see SceneRenderer.pickDecorAt).
+      const bodyNdc = moveAxis === "ground" && !playing && !this.fileSyncActive() ? this.ndcOf(event) : undefined
+      const bodyId = bodyNdc ? this.sceneElement.pickPlacedBodyAt(bodyNdc.x, bodyNdc.y) : undefined
+      if (bodyId !== undefined) {
+        this.beginCameraDrag(point, undefined, bodyId)
+        return
+      }
       const decorId = moveAxis === "ground" ? this.pickDecorAt(event) : undefined
       if (decorId !== undefined) {
         // A tree line or a building fills much of the lower view, and the view has to turn from over
@@ -9264,6 +9276,14 @@ export class SightingEditorElement extends HTMLElement {
     }))
     this.dragState = { kind: "move", sources, startPointer: point }
     this.startDragListening()
+  }
+
+  /** Opens the Bodies part of the Phenomenon group on a body clicked on the picture — the same move the summary's chip makes. */
+  private showBody(id: string): void {
+    this.revealShapePanel()
+    const tab = this.subgroupTabs.find(candidate => candidate.getAttribute("aria-controls") === "shape-bodies")
+    if (tab) this.openSubgroup(tab)
+    void this.loadBodyEditor().then(editor => editor.show(id))
   }
 
   /** Opens the Environment panel, where the decor object just clicked is framed and edited — idempotent,
@@ -9934,10 +9954,11 @@ export class SightingEditorElement extends HTMLElement {
     this.updateDecor()
   }
 
-  private beginCameraDrag(startPointer: { x: number; y: number }, pressedDecorId?: string): void {
+  private beginCameraDrag(startPointer: { x: number; y: number }, pressedDecorId?: string, pressedBodyId?: string): void {
     const insideDecor = this.isObserverInsideDecor()
     this.cameraDragState = {
       pressedDecorId,
+      pressedBodyId,
       moved: false,
       startPointer,
       startHeadingDeg: insideDecor ? this.indoorLookYawDeg : (this.numberOrUndefined(this.headingInput.value) ?? 0),

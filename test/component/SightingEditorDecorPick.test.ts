@@ -18,6 +18,7 @@ register()
 // (see SceneRenderer.ts's own lack of a dedicated test file).
 /** What the picture says is under the pointer: set by each test. */
 let pickedDecor: string | undefined
+let pickedBody: string | undefined
 
 vi.mock("../../src/render3d/SceneRenderer.js", () => ({
   SceneRenderer: class {
@@ -70,7 +71,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     }
     updateDecorAnchoring(): void {}
     setBodies(): void {}
-    pickPlacedBodyAt(): undefined { return undefined }
+    pickPlacedBodyAt(): string | undefined { return pickedBody }
     /** Every body covers the middle of the picture, a fifth of it across. */
     bodyScreenBox() { return { minX: -0.1, minY: -0.1, maxX: 0.1, maxY: 0.1 } }
     get bodyGround() { return { heightAt: () => 0 } }
@@ -247,6 +248,23 @@ describe("picking scenery on the picture", () => {
 
     expect((element.shadowRoot!.getElementById("decor") as HTMLSelectElement).value).toBe("decor-1")
     expect(openGroups(element)).toEqual(["group-decor"])
+  })
+
+  it("selects the body standing on the scenery, not the scenery under it: the craft on its platform", async () => {
+    pickedDecor = "decor-1"
+    pickedBody = "craft"
+    try {
+      const element = twoBuildings()
+
+      press(nestedCanvas(element))
+
+      // The scenery is left as it was, and the Bodies part of the Phenomenon group opens on the body.
+      expect((element.shadowRoot!.getElementById("decor") as HTMLSelectElement).value).toBe("decor-2")
+      expect(openGroups(element)).toEqual(["group-shape"])
+      expect(element.shadowRoot!.getElementById("shape-bodies")!.hidden).toBe(false)
+    } finally {
+      pickedBody = undefined
+    }
   })
 
   it("leaves it alone when a key is held with the press, so that the press turns the view as over bare ground", () => {

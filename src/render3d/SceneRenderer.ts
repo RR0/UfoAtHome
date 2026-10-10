@@ -5145,6 +5145,10 @@ export class SceneRenderer {
       true
     ))
     if (!intersection) return undefined
+    // A body in front of it is what the pointer is over, and this object — the ground it stands on, a platform under a craft —
+    // is behind it: not the one to hand back.
+    const body = this.bodySystem.pickHit(this.raycaster)
+    if (body !== undefined && body.distance < intersection.distance) return undefined
     let object: Object3D | null = intersection.object
     while (object && !entries.some(([, group]) => group === object)) object = object.parent
     return entries.find(([, group]) => group === object)?.[0]
