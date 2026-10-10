@@ -330,6 +330,21 @@ export class FaqPage implements SitePage {
     </div>
 
     <div class="faq-item">
+      <h3>Can I install it as an app, and use it offline?</h3>
+      <p>Yes. UFO@home is a web app you can install: in Chrome or Edge use the install button of the
+        address bar, on an iPhone or iPad choose <em>Share</em> then <em>Add to Home Screen</em>, on
+        Android choose <em>Install app</em> in the browser menu. It then opens in its own window, with
+        its own icon.</p>
+      <p>Offline, the home page, the player and the component are kept on your device, and so is every
+        page, recording, model and map tile you have opened since — enough to replay an account again
+        in the field with no signal. What needs the network stays out of reach without it: the weather
+        and place names fetched for a new recording, imagery, and any recording you have never opened.</p>
+      <p>Online, nothing changes: the site always asks the network first, so you read the current
+        version, and the copy on your device is only used when the network does not answer. Removing
+        the app, or clearing the site's data in your browser, erases that copy.</p>
+    </div>
+
+    <div class="faq-item">
       <h3>What does it cost?</h3>
       <p>Nothing: no price, no account, no quota and no paid tier. The external services it uses
         while authoring are public ones whose usage policies it respects — which is why place search
@@ -659,6 +674,23 @@ export class FaqPage implements SitePage {
     </div>
 
     <div class="faq-item">
+      <h3>Puis-je l'installer comme une application, et m'en servir hors ligne ?</h3>
+      <p>Oui. UFO@home est une application web qu'on peut installer : dans Chrome ou Edge, avec le
+        bouton d'installation de la barre d'adresse ; sur iPhone ou iPad, <em>Partager</em> puis
+        <em>Sur l'écran d'accueil</em> ; sur Android, <em>Installer l'application</em> dans le menu du
+        navigateur. Elle s'ouvre alors dans sa propre fenêtre, avec sa propre icône.</p>
+      <p>Hors ligne, la page d'accueil, le lecteur et le composant sont conservés sur votre appareil,
+        ainsi que chaque page, enregistrement, modèle et tuile de carte ouverts depuis : de quoi rejouer
+        un compte rendu sur le terrain, sans réseau. Ce qui demande le réseau reste hors de portée : la
+        météo et les noms de lieux cherchés pour un nouvel enregistrement, l'imagerie, et tout
+        enregistrement que vous n'avez jamais ouvert.</p>
+      <p>En ligne, rien ne change : le site interroge toujours le réseau d'abord, vous lisez donc la
+        version courante, et la copie de votre appareil ne sert que lorsque le réseau ne répond pas.
+        Supprimer l'application, ou effacer les données du site dans votre navigateur, efface cette
+        copie.</p>
+    </div>
+
+    <div class="faq-item">
       <h3>Combien ça coûte ?</h3>
       <p>Rien : pas de prix, pas de compte, pas de quota, pas de palier payant. Les services
         externes utilisés pendant la saisie sont des services publics dont l'outil respecte les
@@ -968,6 +1000,22 @@ export class FaqPage implements SitePage {
     </div>
 
     <div class="faq-item">
+      <h3>¿Puedo instalarla como una aplicación y usarla sin conexión?</h3>
+      <p>Sí. UFO@home es una aplicación web que se puede instalar: en Chrome o Edge, con el botón de
+        instalación de la barra de direcciones; en iPhone o iPad, <em>Compartir</em> y luego <em>Añadir
+        a pantalla de inicio</em>; en Android, <em>Instalar aplicación</em> en el menú del navegador.
+        Se abre entonces en su propia ventana, con su propio icono.</p>
+      <p>Sin conexión, la página de inicio, el reproductor y el componente se conservan en tu
+        dispositivo, igual que cada página, grabación, modelo y tesela de mapa que hayas abierto desde
+        entonces: lo bastante para volver a reproducir un relato sobre el terreno, sin señal. Lo que
+        necesita la red sigue fuera de alcance: el tiempo y los nombres de lugar que se consultan para
+        una grabación nueva, las imágenes, y cualquier grabación que nunca hayas abierto.</p>
+      <p>Con conexión, nada cambia: el sitio pregunta siempre primero a la red, así que lees la versión
+        actual, y la copia del dispositivo solo se usa cuando la red no responde. Quitar la aplicación,
+        o borrar los datos del sitio en tu navegador, borra esa copia.</p>
+    </div>
+
+    <div class="faq-item">
       <h3>¿Cuánto cuesta?</h3>
       <p>Nada: ni precio, ni cuenta, ni cuota, ni nivel de pago. Los servicios externos que usa
         durante la redacción son servicios públicos cuyas políticas de uso respeta — por eso la búsqueda de lugares
@@ -1273,6 +1321,22 @@ export class FaqPage implements SitePage {
       <p>Non c'è alcun selettore di lingua, ed è proprio questo il punto: un indirizzo non porta con sé alcuna lingua, così un
         link che invii viene letto da chi lo apre nella <em>sua</em>. Invia una sezione di questa pagina a qualcuno
         a Lione e arriverà a quella stessa sezione, in francese.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Posso installarlo come un'app e usarlo offline?</h3>
+      <p>Sì. UFO@home è un'app web che si può installare: in Chrome o Edge con il pulsante di
+        installazione della barra degli indirizzi; su iPhone o iPad, <em>Condividi</em> e poi
+        <em>Aggiungi alla schermata Home</em>; su Android, <em>Installa app</em> nel menu del browser.
+        Si apre allora in una finestra tutta sua, con la sua icona.</p>
+      <p>Offline, la pagina iniziale, il lettore e il componente restano sul tuo dispositivo, insieme a
+        ogni pagina, registrazione, modello e tessera di mappa aperti da allora: abbastanza per
+        riprodurre di nuovo un resoconto sul campo, senza segnale. Quello che richiede la rete resta
+        fuori portata: il meteo e i nomi dei luoghi cercati per una nuova registrazione, le immagini, e
+        ogni registrazione che non hai mai aperto.</p>
+      <p>Online non cambia nulla: il sito interroga sempre prima la rete, quindi leggi la versione
+        attuale, e la copia sul dispositivo serve solo quando la rete non risponde. Rimuovere l'app, o
+        cancellare i dati del sito nel browser, cancella quella copia.</p>
     </div>
 
     <div class="faq-item">
