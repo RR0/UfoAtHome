@@ -271,6 +271,14 @@ export interface BodyReading {
  * not a separate animation loop of its own), so the sky, and the camera's own heading/pitch/fov,
  * both follow the observer as they change over the sighting's timeline.
  */
+/** What is under a point of the picture: what kind of thing, which one, and what it is called. */
+export interface ScenePick {
+  kind: "sky" | "body" | "decor" | "traffic" | "satellite" | "star"
+  /** The sky body's key, the interpretation body's id or the decor object's id, when it has one. */
+  id?: string
+  name: string
+}
+
 export class SceneElement extends HTMLElement {
   private creditsButton!: HTMLButtonElement
 
@@ -411,7 +419,7 @@ export class SceneElement extends HTMLElement {
   /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
   private readonly handleFullscreenChange = () => this.resizeToStage()
 
-  /** Identifies whatever's under the pointer — a celestial body, a decor object, or (checked
+  /** Identifies whatever's under the pointer (see pickAt) — a celestial body, a decor object, or (checked
    * first) a visible UFO shape — and shows/moves/hides a text label next to it — an on-demand
    * identification aid, not a rendering change (see pickBodyAt's own doc comment on why body
    * hit-testing uses a bigger invisible area than the real, true-to-scale visible disc). Also
@@ -439,29 +447,36 @@ export class SceneElement extends HTMLElement {
     }
     const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1
     const ndcY = -(((event.clientY - rect.top) / rect.height) * 2 - 1)
+    const pick = this.pickAt(ndcX, ndcY)
+    if (pick) this.showHoverTooltip(event, pick.name)
+    else this.hoverTooltip.hidden = true
+  }
+
+  /**
+   * What is under a point of the picture, and what it is called: the one answer the hover tooltip gives and a click on the picture
+   * takes — so that what a click selects is always what the tooltip said it was pointing at, and never another thing standing
+   * behind (a craft on its platform) or a different test of the same thing (an exact hit on the craft, where the tooltip allows a
+   * little around it).
+   *
+   * In the order a pointer means them: a celestial body, then what the account says was there (a craft, a being) by the name the
+   * interpretation gives it, then a decor object, an aircraft of the air traffic, a satellite and last a star — a shape is painted over
+   * all of these, and is looked for by whoever asks (see handlePointerMove) before this.
+   */
+  pickAt(ndcX: number, ndcY: number): ScenePick | undefined {
     const naming = this.naming
     const names = naming.names
     const bodyKey = this.sceneRenderer.pickBodyAt(ndcX, ndcY)
-    if (bodyKey) {
-      this.showHoverTooltip(event, this.bodyName(bodyKey))
-      return
-    }
+    if (bodyKey) return { kind: "sky", id: bodyKey, name: this.bodyName(bodyKey) }
     // What the account says was there — a craft, a being, a person — by the name the interpretation gives it.
     const standing = this.interpretationShown ? this.sceneRenderer.pickInterpretationBodyAt(ndcX, ndcY) : undefined
     const standingBody = standing ? this.interpretationShown?.bodies.find(body => body.id === standing) : undefined
     const standingName = standingBody
       ? this.said.read(standingBody.title) || (standingBody.model.id === "figure" ? naming.decorKind("entity", DECOR_KIND_NAMES.entity) : undefined)
       : undefined
-    if (standingName) {
-      this.showHoverTooltip(event, standingName)
-      return
-    }
-    const decorId = this.sceneRenderer.pickDecorAt(ndcX, ndcY)
+    if (standing !== undefined && standingName) return { kind: "body", id: standing, name: standingName }
+    const decorId = this.pickDecorAt(ndcX, ndcY)
     const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
-    if (decor) {
-      this.showHoverTooltip(event, this.said.read(decor.title) || naming.decorKind(decor.kind, DECOR_KIND_NAMES[decor.kind]))
-      return
-    }
+    if (decor) return { kind: "decor", id: decor.id, name: this.said.read(decor.title) || naming.decorKind(decor.kind, DECOR_KIND_NAMES[decor.kind]) }
     // Last of the four, and deliberately: a shape is painted over everything, a planet is a better
     // answer than the star behind it, and a building stands between the observer and the whole sky.
     // A star is what is left when nothing nearer is under the pointer.
@@ -469,17 +484,16 @@ export class SceneElement extends HTMLElement {
     // most likely pointing at.
     // An aircraft of the record of air traffic: moving, and a candidate for what was seen.
     const traffic = this.trafficTooltipAt(ndcX, ndcY)
-    if (traffic) {
-      this.showHoverTooltip(event, traffic)
-      return
-    }
+    if (traffic) return { kind: "traffic", name: traffic }
     const satellite = this.sceneRenderer.pickSatelliteAt(ndcX, ndcY)
     if (satellite) {
-      this.showHoverTooltip(event, (names?.satelliteTooltip ?? SATELLITE_TOOLTIP)
-        .replace("{name}", satellite.name)
-        .replace("{mag}", satellite.magnitude.toLocaleString(undefined, { maximumFractionDigits: 1 }))
-        .replace("{height}", Math.round(satellite.heightKm).toLocaleString()))
-      return
+      return {
+        kind: "satellite",
+        name: (names?.satelliteTooltip ?? SATELLITE_TOOLTIP)
+          .replace("{name}", satellite.name)
+          .replace("{mag}", satellite.magnitude.toLocaleString(undefined, { maximumFractionDigits: 1 }))
+          .replace("{height}", Math.round(satellite.heightKm).toLocaleString())
+      }
     }
     const star = this.sceneRenderer.pickStarAt(ndcX, ndcY)
     if (star) {
@@ -494,13 +508,15 @@ export class SceneElement extends HTMLElement {
       const template = altitudeDeg < 0
         ? names?.starTooltipBelow ?? STAR_TOOLTIP_BELOW
         : names?.starTooltip ?? STAR_TOOLTIP
-      this.showHoverTooltip(event, template
-        .replace("{name}", naming.star(star.star))
-        .replace("{mag}", magnitude.toLocaleString(undefined, { maximumFractionDigits: Math.abs(magnitude) < 1 ? 2 : 1 }))
-        .replace("{alt}", String(Math.round(Math.abs(altitudeDeg)))))
-      return
+      return {
+        kind: "star",
+        name: template
+          .replace("{name}", naming.star(star.star))
+          .replace("{mag}", magnitude.toLocaleString(undefined, { maximumFractionDigits: Math.abs(magnitude) < 1 ? 2 : 1 }))
+          .replace("{alt}", String(Math.round(Math.abs(altitudeDeg))))
+      }
     }
-    this.hoverTooltip.hidden = true
+    return undefined
   }
 
   /** What to call the thing under the pointer. The comets are not in BODY_NAMES because there are

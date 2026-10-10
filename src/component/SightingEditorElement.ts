@@ -9171,7 +9171,13 @@ export class SightingEditorElement extends HTMLElement {
     }
     if (mode === "body") {
       if (this.ufoElement.playbackState === "playing") return
-      if (!this.beginBodyHandleDrag(point) && !this.beginBodyDrag(event)) this.beginCameraDrag(point)
+      if (!this.beginBodyHandleDrag(point) && !this.beginBodyDrag(event)) {
+        // Not the selected body's own to grab: what the tooltip names there is what a click on it selects, another body or the
+        // scenery, where the press used to do nothing but turn the view — and once a craft was selected, nothing else could be.
+        const ndc = this.decorMoveAxis(event) === "ground" ? this.ndcOf(event) : undefined
+        const target = ndc ? this.sceneElement.pickAt(ndc.x, ndc.y) : undefined
+        this.beginCameraDrag(point, target?.kind === "decor" ? target.id : undefined, target?.kind === "body" ? target.id : undefined)
+      }
       return
     }
     // A key held down with the press (Shift, Ctrl, Alt, Cmd) says "not the scenery": the press then turns the view, as over bare ground,
@@ -9234,15 +9240,16 @@ export class SightingEditorElement extends HTMLElement {
       // one. Only reached once a shape hit is already ruled out, matching the same "shape wins"
       // precedent as SceneElement's own hover tooltip (a shape is painted on top of decor, so it
       // should win a click there too).
-      // A body standing on the scenery (a craft on its platform) is what a click there means, and it is in front: the decor under it
-      // is what the ray meets next, and used to be what was selected (see SceneRenderer.pickDecorAt).
-      const bodyNdc = moveAxis === "ground" && !playing ? this.ndcOf(event) : undefined
-      const bodyId = bodyNdc ? this.sceneElement.pickPlacedBodyAt(bodyNdc.x, bodyNdc.y) : undefined
-      if (bodyId !== undefined) {
-        this.beginCameraDrag(point, undefined, bodyId)
+      // What a click selects is what the tooltip names (see SceneElement.pickAt): a craft on its platform is the craft, where the
+      // platform under it was what the click used to find.
+      const targetNdc = moveAxis === "ground" ? this.ndcOf(event) : undefined
+      const target = targetNdc ? this.sceneElement.pickAt(targetNdc.x, targetNdc.y) : undefined
+      if (target?.kind === "body" && target.id !== undefined) {
+        if (playing) this.showBody(target.id)
+        else this.beginCameraDrag(point, undefined, target.id)
         return
       }
-      const decorId = moveAxis === "ground" ? this.pickDecorAt(event) : undefined
+      const decorId = target?.kind === "decor" ? target.id : undefined
       if (decorId !== undefined) {
         // A tree line or a building fills much of the lower view, and the view has to turn from over
         // it too: the press starts the same drag as over bare ground, and only a press released

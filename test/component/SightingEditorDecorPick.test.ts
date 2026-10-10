@@ -71,7 +71,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     }
     updateDecorAnchoring(): void {}
     setBodies(): void {}
-    pickPlacedBodyAt(): string | undefined { return pickedBody }
+    pickPlacedBodyAt(): undefined { return undefined }
+    /** What the tooltip names: a body of the interpretation, with a little allowed round it. */
+    pickInterpretationBodyAt(): string | undefined { return pickedBody }
     /** Every body covers the middle of the picture, a fifth of it across. */
     bodyScreenBox() { return { minX: -0.1, minY: -0.1, maxX: 0.1, maxY: 0.1 } }
     get bodyGround() { return { heightAt: () => 0 } }
@@ -255,13 +257,50 @@ describe("picking scenery on the picture", () => {
     pickedBody = "craft"
     try {
       const element = twoBuildings()
+      const json = element.sightingData
+      element.sightingData = { ...json, interpretation: { bodies: [{ id: "craft", title: "The craft", model: { id: "x" }, track: [{ t: 0, eastM: 10, northM: -20 }] }] } } as unknown as typeof json
 
+      // The interpretation is on show (the same condition as for its tooltip, which this click follows), with nothing open.
+      const view = element.shadowRoot!.getElementById("account-view") as HTMLSelectElement
+      view.value = "bodies"
+      view.dispatchEvent(new Event("change", { bubbles: true }))
+      for (const tab of element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")) {
+        if (tab.getAttribute("aria-expanded") === "true") tab.click()
+      }
+      const selected = (element.shadowRoot!.getElementById("decor") as HTMLSelectElement).value
       press(nestedCanvas(element))
 
       // The scenery is left as it was, and the Bodies part of the Phenomenon group opens on the body.
-      expect((element.shadowRoot!.getElementById("decor") as HTMLSelectElement).value).toBe("decor-2")
+      expect((element.shadowRoot!.getElementById("decor") as HTMLSelectElement).value).toBe(selected)
       expect(openGroups(element)).toEqual(["group-shape"])
       expect(element.shadowRoot!.getElementById("shape-bodies")!.hidden).toBe(false)
+    } finally {
+      pickedBody = undefined
+    }
+  })
+
+  it("lets the scenery be selected again once a body is: what the tooltip names is what a click selects, whatever is selected", async () => {
+    pickedDecor = "decor-1"
+    pickedBody = "craft"
+    try {
+      const element = twoBuildings()
+      const json = element.sightingData
+      element.sightingData = { ...json, interpretation: { bodies: [{ id: "craft", title: "The craft", model: { id: "x" }, track: [{ t: 0, eastM: 10, northM: -20 }] }] } } as unknown as typeof json
+      const view = element.shadowRoot!.getElementById("account-view") as HTMLSelectElement
+      view.value = "bodies"
+      view.dispatchEvent(new Event("change", { bubbles: true }))
+      for (const tab of element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")) {
+        if (tab.getAttribute("aria-expanded") === "true") tab.click()
+      }
+      press(nestedCanvas(element))
+      expect(openGroups(element)).toEqual(["group-shape"])
+
+      // Now over the scenery, with nothing of the body under the pointer: the scenery is what is selected, and its group opens.
+      pickedBody = undefined
+      press(nestedCanvas(element))
+
+      expect((element.shadowRoot!.getElementById("decor") as HTMLSelectElement).value).toBe("decor-1")
+      expect(openGroups(element)).toEqual(["group-decor"])
     } finally {
       pickedBody = undefined
     }
