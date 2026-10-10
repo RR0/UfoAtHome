@@ -215,7 +215,7 @@ const STAR_RADIUS = 850
  *
  * A fraction and not an angle, so it stays the same distance ON SCREEN whatever the instrument:
  * 1.8 degrees through an eye's 60-degree field, 0.2 through a 210 mm's 6.5. The same reasoning as
- * HOVER_HIT_RADIUS_SCALE for the bodies, which a star cannot use — those are individual meshes
+ * BODY_HOVER_REACH_FIELD_FRACTION for the bodies, which a star cannot use — those are individual meshes
  * with an oversized invisible proxy each, and there is no proxy to give a point in a Points cloud.
  */
 const STAR_HOVER_FIELD_FRACTION = 0.03
@@ -245,10 +245,25 @@ const SUN_MOON_VISUAL_RADIUS = 4
  * true-to-scale sub-pixel sphere), not a stylistic choice, so it's kept as small as still renders. */
 const PLANET_VISUAL_RADIUS = 1.5
 const BELOW_HORIZON_CUTOFF_DEG = -1
-/** How much bigger than its visual disc a body's raycasting hit-test target is — real Sun/Moon/
- * planet discs are too small to reliably point at exactly, so hover/click detection (see
- * pickBodyAt) uses a more forgiving invisible radius without changing what's actually drawn. */
-const HOVER_HIT_RADIUS_SCALE = 6
+/** Where the Sun's and the Moon's discs are drawn in an eclipse: unit directions and angular radii, radians. */
+export interface EclipseDiscs {
+  sun: Vector3
+  moon: Vector3
+  sunRadiusRad: number
+  moonRadiusRad: number
+}
+
+/**
+ * How far outside a body's drawn disc the pointer still names it, as a share of the field of view.
+ *
+ * Real Sun/Moon/planet discs are too small to point at exactly (the Sun is half a degree across, a
+ * planet a point), so hover and click detection (see pickBodyAt) are forgiving. A fraction of the FIELD
+ * and not a multiple of the disc, so that the reach stays the same few pixels on screen whatever the
+ * instrument, as a star's does (see STAR_HOVER_FIELD_FRACTION): a multiple of the disc made the Sun's
+ * reach grow with the zoom until it named empty sky, through a long lens, and shrink to nothing
+ * through a wide one.
+ */
+const BODY_HOVER_REACH_FIELD_FRACTION = 0.01
 /** Sun/Moon/planet meshes stop being built once this far below the horizon — well past the point
  * the opaque ground plane would occlude them anyway, so there's no point paying for the geometry. */
 const BODY_HIDE_BELOW_DEG = -4
@@ -996,7 +1011,7 @@ export class SceneRenderer {
   private starTiers: StarTier[] = []
   private readonly bodyMeshes = new Map<string, Mesh | Sprite | Points>()
   /** Invisible (opacity 0), larger-than-the-real-disc proxies used only for pickBodyAt's hover/
-   * click hit-testing — see HOVER_HIT_RADIUS_SCALE. Never rendered/visible, so this doesn't
+   * click hit-testing — see BODY_HOVER_REACH_FIELD_FRACTION. Never rendered/visible, so this doesn't
    * change how anything looks, only how forgiving it is to point at. */
   private readonly hitAreas = new Map<string, Sprite>()
   /** Additive-blended glare halos — real ocular/lens dazzle around a very bright body, driven by
@@ -1326,6 +1341,13 @@ export class SceneRenderer {
   private lunarDiffraction?: SourceDiffraction
   /** The cut the Moon makes in the Sun's disc, and the corona seen when it is whole (see EclipsedSun). */
   private readonly eclipsedSun = new EclipsedSun()
+  /**
+   * Where the two discs of an eclipse are drawn, for telling them apart under the pointer: the Moon's
+   * disc is over the Sun's, and the hit areas of the two bodies are far larger than either and lie on
+   * one another, so it is the discs' own geometry that says which one is pointed at. Undefined out of
+   * an eclipse (see placeEclipse).
+   */
+  private eclipseDiscs?: EclipseDiscs
   private solarCorona?: SolarCorona
   /** The beam's share the Moon leaves, and the Sun's disc radiance in the scene's units: what the corona is a millionth of. */
   private sunBeamFraction = 1
@@ -2861,6 +2883,7 @@ export class SceneRenderer {
     const view = astronomy.eclipse
     if (!view || astronomy.sun.altitudeDeg < BODY_HIDE_BELOW_DEG) {
       this.eclipsedSun.setMoon(undefined)
+      this.eclipseDiscs = undefined
       this.solarCorona?.show(undefined, [0, 0, 0])
       return
     }
@@ -2877,6 +2900,12 @@ export class SceneRenderer {
       : [1, 0]
     const centre = { x: sun.x * from + moon.x * to, y: sun.y * from + moon.y * to, z: sun.z * from + moon.z * to }
     const moonRadiusDeg = view.moonRadiusDeg * scale
+    this.eclipseDiscs = {
+      sun: new Vector3(sun.x, sun.y, sun.z).normalize(),
+      moon: new Vector3(centre.x, centre.y, centre.z).normalize(),
+      sunRadiusRad: drawnRadiusDeg * DEG_TO_RAD,
+      moonRadiusRad: moonRadiusDeg * DEG_TO_RAD
+    }
     // The two directions the edge's position angles are measured from, on the sky at the Sun: up, and
     // towards increasing azimuth — found by stepping the Sun's own altitude and azimuth, which is the
     // one way to be right about which way the scene's axes run.
@@ -4740,19 +4769,58 @@ export class SceneRenderer {
   /** Finds which celestial body (if any) sits under normalized device coordinates (each in
    * [-1,1], of the VISIBLE image — see aimAtScreenPoint, which is what turns that into a direction
    * under whichever projection the recording's instrument declares) — for hover/click identification, not
-   * anything that changes rendering. Tests against the invisible, larger-than-the-real-disc
-   * hitAreas (see HOVER_HIT_RADIUS_SCALE), not the tiny true-scale visible meshes themselves,
-   * which would be impractical to point at exactly. Returns the same key setBodyMesh/setMoonMesh
+   * anything that changes rendering. Tests the pointer's direction against each body's drawn disc, with the
+   * room BODY_HOVER_REACH_FIELD_FRACTION gives (see nearestBody). Returns the same key setBodyMesh/setMoonMesh
    * were called with (e.g. "sun", "moon", "Venus"). */
   pickBodyAt(ndcX: number, ndcY: number): string | undefined {
     this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
-    const entries = [...this.hitAreas.entries()]
-    const intersection = this.raycaster.intersectObjects(entries.map(([, sprite]) => sprite))[0]
-    if (!intersection) return undefined
+    const origin = this.raycaster.ray.origin
+    const aim = this.raycaster.ray.direction
+    const reachRad = (BODY_HOVER_REACH_FIELD_FRACTION * this.camera.fov * Math.PI) / 180
+    const bodies = [...this.hitAreas.entries()].map(([key, sprite]) => {
+      const toBody = sprite.getWorldPosition(new Vector3()).sub(origin)
+      return { key, direction: toBody.clone().normalize(), radiusRad: Math.atan2(sprite.scale.x / 2, toBody.length()) }
+    })
+    // An eclipse has its own discs, which the two bodies' do not tell apart (see sunOrMoonAt).
+    const eclipse = this.eclipseDiscs
+    const sunAndMoon = eclipse
+      ? [{ key: "sun", direction: eclipse.sun, radiusRad: eclipse.sunRadiusRad }, { key: "moon", direction: eclipse.moon, radiusRad: eclipse.moonRadiusRad, inFront: true }]
+      : []
+    const key = SceneRenderer.nearestBody(aim, [...bodies.filter(body => !eclipse || (body.key !== "sun" && body.key !== "moon")), ...sunAndMoon], reachRad)
+    if (!key) return undefined
     // Bodies are built down to four degrees below the horizon, where the ground already hides
     // them — see groundHides.
-    if (this.groundHides(ndcX, ndcY)) return undefined
-    return entries.find(([, sprite]) => sprite === intersection.object)?.[0]
+    return this.groundHides(ndcX, ndcY) ? undefined : key
+  }
+
+  /**
+   * Which body the pointer is on or nearest to: the one it is inside of, and failing that the one whose
+   * edge it is nearest to, if within `reachRad` of it. Inside takes precedence over near, and where two discs
+   * both hold the pointer the one `inFront` wins (the Moon over the Sun it covers), else the smaller (a
+   * planet against the Sun's disc).
+   */
+  static nearestBody(aim: Vector3, bodies: readonly { key: string; direction: Vector3; radiusRad: number; inFront?: boolean }[], reachRad: number): string | undefined {
+    let best: string | undefined
+    let bestEdge = Infinity
+    let bestRadius = Infinity
+    let bestFront = false
+    for (const body of bodies) {
+      const edge = Math.acos(clamp(body.direction.dot(aim), -1, 1)) - body.radiusRad
+      if (edge > reachRad) continue
+      const inside = edge <= 0
+      const bestInside = bestEdge <= 0
+      const front = body.inFront === true
+      const better = inside !== bestInside
+        ? inside
+        : inside ? (front !== bestFront ? front : body.radiusRad < bestRadius) : edge < bestEdge
+      if (better) {
+        best = body.key
+        bestEdge = edge
+        bestRadius = body.radiusRad
+        bestFront = front
+      }
+    }
+    return best
   }
 
   /**
@@ -5306,7 +5374,7 @@ export class SceneRenderer {
   /** Places (or updates) a single self-illuminated, true-to-scale disc mesh, keyed by name so
    * repeated calls (Sun each update, or one call per tracked planet) reuse/replace the same slot
    * instead of accumulating duplicates. Also places a matching invisible hitArea (see
-   * HOVER_HIT_RADIUS_SCALE) and, when the body is bright enough, a real glare halo (see setGlare)
+   * BODY_HOVER_REACH_FIELD_FRACTION) and, when the body is bright enough, a real glare halo (see setGlare)
    * so it stays practical to hover/click despite being small, and reads with the same dazzle a
    * human observer would actually perceive. `color` is tinted by the body's own current altitude
    * (see atmosphericTint) before being applied, so it warms near the horizon the same way a real
@@ -5528,7 +5596,8 @@ export class SceneRenderer {
       this.hitAreas.set(key, hitArea)
     }
     hitArea.position.set(x, y, z)
-    const size = visualRadius * HOVER_HIT_RADIUS_SCALE
+    // Only a record of the disc's size: the pointer is tested by angle (see pickBodyAt), not by casting at it.
+    const size = visualRadius * 2
     hitArea.scale.set(size, size, 1)
   }
 
