@@ -5373,8 +5373,29 @@ export class SceneRenderer {
     const material = this.groundMesh?.material as MeshLambertMaterial | undefined
     if (!material) return
     const depthWrite = this.terrainMesh === undefined
-    if (material.depthWrite === depthWrite) return
-    material.depthWrite = depthWrite
+    if (material.depthWrite !== depthWrite) {
+      material.depthWrite = depthWrite
+      material.needsUpdate = true
+    }
+    // With a patch the disc is a backdrop under it, and it has to BE under it. Its plane is at the height of the
+    // observer's ground, and a hillside falls away under that: a terrace, a clump of trees, a craft standing metres
+    // lower than the observer are then below the plane, which is nearer the eye than they are, and the disc (drawn
+    // after the opaque scene, tested against its depth) was drawn over every part of them below it — cutting them
+    // off flat and grey at the same height. So it goes down to just under the lowest ground within reach.
+    const terrain = this.terrainMesh
+    let lowest = 0
+    if (terrain) {
+      const position = terrain.geometry.getAttribute("position")
+      lowest = Infinity
+      for (let i = 0; i < position.count; i++) {
+        if (Math.abs(position.getX(i) + terrain.position.x) > 600 || Math.abs(position.getZ(i) + terrain.position.z) > 600) continue
+        lowest = Math.min(lowest, position.getY(i) + terrain.position.y)
+      }
+      lowest = Number.isFinite(lowest) ? Math.min(0, lowest) - 1 : 0
+    }
+    this.groundMesh!.position.y = lowest
+    this.groundMesh!.renderOrder = 0
+    material.depthTest = true
     material.needsUpdate = true
   }
 
