@@ -201,16 +201,6 @@ async function waitFor(check: () => boolean, timeoutMs = 20000): Promise<void> {
   }
 }
 
-function confirmQuestion(element: SightingEditorElement): string | null {
-  const shadow = element.shadowRoot!
-  const overlay = shadow.getElementById("confirm-overlay") as HTMLElement
-  return overlay.hidden ? null : shadow.getElementById("confirm-message")!.textContent
-}
-
-function answerConfirm(element: SightingEditorElement, accept: boolean): void {
-  ;(element.shadowRoot!.getElementById(accept ? "confirm-ok" : "confirm-cancel") as HTMLButtonElement).click()
-}
-
 function addBuildings(element: SightingEditorElement, count: number): void {
   const add = element.shadowRoot!.getElementById("add-decor-building") as HTMLButtonElement
   for (let i = 0; i < count; i++) add.click()
@@ -222,41 +212,45 @@ function openEnvironment(element: SightingEditorElement): void {
 }
 
 describe("deleting scenery", () => {
-  it("asks first when the bin is pressed, deletes only once it is accepted, and keeps it when it is declined", () => {
+  it("deletes at once from the bin, with nothing asked, and undo puts it back", async () => {
     const element = mount()
     addBuildings(element, 2)
-    const bin = element.shadowRoot!.getElementById("delete-decor") as HTMLButtonElement
+    const shadow = element.shadowRoot!
+    const bin = shadow.getElementById("delete-decor") as HTMLButtonElement
+    bin.dispatchEvent(new Event("pointerdown", { bubbles: true, composed: true }))
+    await new Promise(resolve => setTimeout(resolve, 50))
     bin.click()
-    expect(confirmQuestion(element)).toContain("Building")
-    expect(element.sightingData.decor ?? []).toHaveLength(2)
-    answerConfirm(element, false)
-    expect(element.sightingData.decor ?? []).toHaveLength(2)
-    bin.click()
-    answerConfirm(element, true)
     expect(element.sightingData.decor ?? []).toHaveLength(1)
+    const undo = shadow.getElementById("undo") as HTMLButtonElement
+    await waitFor(() => !undo.disabled)
+    undo.click()
+    expect(element.sightingData.decor ?? []).toHaveLength(2)
   })
 
-  it("is deleted by the Delete key and by Backspace when it is the scenery being edited, with the same question", () => {
+  it("is deleted by the Delete key and by Backspace when it is the scenery being edited", () => {
     for (const key of ["Delete", "Backspace"]) {
       const element = mount()
       addBuildings(element, 2)
       openEnvironment(element)
       element.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true }))
-      expect(confirmQuestion(element), key).toContain("Building")
-      expect(element.sightingData.decor ?? []).toHaveLength(2)
-      answerConfirm(element, true)
       expect(element.sightingData.decor ?? [], key).toHaveLength(1)
     }
   })
 
-  it("leaves the shapes alone when the key is pressed over the scenery, and the scenery alone when it is pressed over a shape", () => {
+  it("leaves the shapes alone when the key is pressed over the scenery", () => {
     const element = mount()
     addBuildings(element, 1)
     openEnvironment(element)
     element.dispatchEvent(new KeyboardEvent("keydown", { key: "Delete", bubbles: true, composed: true }))
-    expect(confirmQuestion(element)).toContain("Building")
-    answerConfirm(element, false)
+    expect(element.sightingData.decor ?? []).toHaveLength(0)
     expect(element.sightingData.timeline.keyframes.length).toBeGreaterThan(0)
+  })
+
+  it("leaves the scenery alone when the key is pressed over a shape", () => {
+    const element = mount()
+    addBuildings(element, 1)
+    element.dispatchEvent(new KeyboardEvent("keydown", { key: "Delete", bubbles: true, composed: true }))
+    expect(element.sightingData.decor ?? []).toHaveLength(1)
   })
 })
 

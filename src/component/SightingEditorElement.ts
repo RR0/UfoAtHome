@@ -699,13 +699,6 @@ export class SightingEditorElement extends HTMLElement {
   /** Which catalogue the 3D-model picker offers, and which the scene resolves a named model
    * through — chosen in Data sources like every other real-world source (see refreshSourceRows). */
   private decorModelProvider: DecorModelProvider = DECOR_MODEL_SOURCES[0].create()
-  private readonly confirmOverlay: HTMLElement
-  private readonly confirmMessage: HTMLElement
-  private readonly confirmAcceptButton: HTMLButtonElement
-  private readonly confirmDeclineButton: HTMLButtonElement
-  /** What to do if the reader accepts what askConfirm is currently asking. Absent while nothing is
-   * being asked. */
-  private confirmAnswer?: () => void
   private readonly milestoneSelect: HTMLSelectElement
   private readonly milestoneLabelInput: HTMLInputElement
   private readonly milestoneNoteInput: HTMLInputElement
@@ -965,7 +958,6 @@ export class SightingEditorElement extends HTMLElement {
         // recorded as trailing motion toward the button. Escape stops in place, no side trip.
         this.toggleRecording()
       }
-      if (!this.confirmOverlay.hidden) this.answerConfirm(false)
       if (this.armingLandmark || this.pendingLandmark) this.disarmLandmark()
       if (!this.contextMenu.hidden) this.hideContextMenu()
       if (!this.decorContextMenu.hidden) this.hideDecorContextMenu()
@@ -998,9 +990,8 @@ export class SightingEditorElement extends HTMLElement {
       if (ARROW_KEYS.has(event.key)) {
         this.moveOrResizeSelectedShapes(event)
       } else {
-        // deleteShape() and deleteDecor() are the single confirmation-gated entry points every deletion path
-        // (this key, the toolbar button, the context menu) funnels through — see deleteShape's own doc
-        // comment for why that matters. What the key deletes is what the canvas is editing: the decor
+        // deleteShape() and deleteDecor() are the single entry points every deletion path
+        // (this key, the toolbar button, the context menu) funnels through. What the key deletes is what the canvas is editing: the decor
         // object framed in the Environment group, the shapes elsewhere.
         if (this.canvasMode() === "decor") this.deleteDecor()
         else this.deleteShape()
@@ -1385,10 +1376,6 @@ export class SightingEditorElement extends HTMLElement {
     this.decorAltitudeInput = this.shadow.getElementById("decorAltitude") as HTMLInputElement
     this.labelDecorAltitude = this.shadow.getElementById("label-decor-altitude")!
     this.decorSightingUrlInput = this.shadow.getElementById("decorSightingUrl") as HTMLInputElement
-    this.confirmOverlay = this.shadow.getElementById("confirm-overlay")!
-    this.confirmMessage = this.shadow.getElementById("confirm-message")!
-    this.confirmAcceptButton = this.shadow.getElementById("confirm-ok") as HTMLButtonElement
-    this.confirmDeclineButton = this.shadow.getElementById("confirm-cancel") as HTMLButtonElement
     this.milestoneSelect = this.shadow.getElementById("milestone") as HTMLSelectElement
     this.milestoneLabelInput = this.shadow.getElementById("milestoneLabel") as HTMLInputElement
     this.milestoneNoteInput = this.shadow.getElementById("milestoneNote") as HTMLInputElement
@@ -1666,12 +1653,6 @@ export class SightingEditorElement extends HTMLElement {
     for (const input of [this.milestoneLabelInput, this.milestoneNoteInput]) {
       input.addEventListener("input", () => this.updateMilestone())
     }
-    this.confirmAcceptButton.addEventListener("click", () => this.answerConfirm(true))
-    this.confirmDeclineButton.addEventListener("click", () => this.answerConfirm(false))
-    // Clicking the darkened area around the box declines, like every other modal.
-    this.confirmOverlay.addEventListener("click", event => {
-      if (event.target === this.confirmOverlay) this.answerConfirm(false)
-    })
     for (const side of DECOR_SIDES) {
       this.decorWindowInputs[side].addEventListener("input", () => this.updateDecorWindows())
     }
@@ -3638,7 +3619,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** An empty picture whose address the author then types — no native prompt, which a sandboxed
-   * embed answers with nothing (see the rule in SightingEditorElement's confirm panel). */
+   * embed answers with nothing. */
   private addReferenceFromAddress(): void {
     this.addReference("")
     this.referenceSrcInput.focus()
@@ -6649,22 +6630,15 @@ export class SightingEditorElement extends HTMLElement {
    * recorder is actively writing keyframes into would be pulling the rug out from under it.
    *
    * The single entry point for every way to delete a shape — the toolbar button, the context
-   * menu's own Delete item, and the Delete/Backspace key — precisely so the confirmation below
-   * can't drift into being asked for some paths and not others. */
+   * menu's own Delete item, and the Delete/Backspace key. None of them asks first: the deletion is a change
+   * to the recording like any other, and undo (see undo) puts it back. */
   private deleteShape(): void {
     if (this.isRecording || this.ufoElement.playbackState === "playing") return
     const timeline = this.ufoElement.sighting.timeline
     const toDelete = timeline.sourceIds.filter(id => this.selectedSourceIds.has(id))
     if (toDelete.length === 0) return // nothing real to delete
-    const question =
-      toDelete.length === 1
-        ? this.messages.confirmDeleteShape.replace("{name}", this.shapeLabel(toDelete[0]))
-        : this.messages.confirmDeleteShapes.replace("{count}", String(toDelete.length))
-    // What gets deleted is what the question NAMED, not what happens to be selected once it is
-    // answered — the selection can move while the overlay is up (a click elsewhere, the playhead
-    // advancing), and a reader who agreed to delete "Shape 2" has not agreed to delete something
-    // else.
-    this.askConfirm(question, () => this.removeShapes(toDelete))
+    // Not asked first: the deletion is a change to the recording like any other, and undo (see undo) puts it back.
+    this.removeShapes(toDelete)
   }
 
   /** The deletion itself, once confirmed — see deleteShape, which is the only caller. */
@@ -6681,36 +6655,6 @@ export class SightingEditorElement extends HTMLElement {
     // button state to the new currentSourceId — same idiom addShape() and every drag path use,
     // rather than duplicating that resync here.
     this.ufoElement.refresh()
-  }
-
-  /**
-   * Asks the reader to confirm something, in the component's own overlay.
-   *
-   * NOT window.confirm(). A native dialog is suppressed outright in several of the places this
-   * component is meant to run — a sandboxed iframe without allow-modals, an embedded browser view —
-   * and a suppressed confirm() returns FALSE, which is indistinguishable from the reader declining.
-   * Deleting a shape then did nothing at all, silently, with nothing in the page to show why: the
-   * exact symptom this replaced.
-   *
-   * Resolves false if something else asks while this is open, so two questions can never both be
-   * waiting on one answer.
-   */
-  private askConfirm(question: string, onAccept: () => void): void {
-    this.answerConfirm(false)
-    this.confirmMessage.textContent = question
-    this.confirmOverlay.hidden = false
-    this.confirmAcceptButton.focus()
-    this.confirmAnswer = onAccept
-  }
-
-  /** Closes the overlay and, if the reader accepted, does the thing that was asked about. A
-   * callback rather than a promise: what follows a confirmation is one step, and keeping it
-   * synchronous means nothing between the click and the deletion can interleave. */
-  private answerConfirm(accepted: boolean): void {
-    const onAccept = this.confirmAnswer
-    this.confirmAnswer = undefined
-    this.confirmOverlay.hidden = true
-    if (accepted) onAccept?.()
   }
 
   /** Staggers each successive new shape diagonally by `index` (the count of shapes that
@@ -6871,9 +6815,8 @@ export class SightingEditorElement extends HTMLElement {
     const sighting = this.ufoElement.sighting
     const going = sighting.decor.find(d => d.id === this.currentDecorId)
     if (going === undefined) return
-    // The bin, the Delete key and the Backspace key all end here, and all ask: scenery is deleted as seldom
-    // by mistake as a shape and as hard to put back. What goes is what the question NAMED, as for a shape.
-    this.askConfirm(this.messages.confirmDeleteDecor.replace("{name}", this.decorLabel(going)), () => this.removeDecor(going.id))
+    // The bin, the Delete key and the Backspace key all end here. Not asked first: undo puts it back.
+    this.removeDecor(going.id)
   }
 
   /** The deletion itself, once confirmed — see deleteDecor, which is the only caller. */
@@ -7202,12 +7145,10 @@ export class SightingEditorElement extends HTMLElement {
     const sighting = this.ufoElement.sighting
     const going = sighting.milestones.find(milestone => milestone.t === t)
     if (!going) return
-    this.askConfirm(this.messages.confirmDeleteMilestone.replace("{name}", this.said.read(going.label) ?? ""), () => {
-      sighting.milestones = sighting.milestones.filter(milestone => milestone.t !== t)
-      this.currentMilestoneT = sighting.milestones[0]?.t
-      this.refreshMilestoneList()
-      this.ufoElement.refresh()
-    })
+    sighting.milestones = sighting.milestones.filter(milestone => milestone.t !== going.t)
+    this.currentMilestoneT = sighting.milestones[0]?.t
+    this.refreshMilestoneList()
+    this.ufoElement.refresh()
   }
 
   /** Selecting a moment moves the playhead to it: what a reader wants next after picking one out
@@ -8840,8 +8781,6 @@ export class SightingEditorElement extends HTMLElement {
     // screen reader (or a sighted hover) gets a real word, not just a symbol.
     this.addDecorBuildingButton.title = messages.addDecor
     this.addDecorBuildingButton.setAttribute("aria-label", messages.addDecor)
-    this.confirmAcceptButton.textContent = messages.confirmAccept
-    this.confirmDeclineButton.textContent = messages.confirmDecline
     this.labelMilestones.textContent = messages.milestones
     this.labelMilestoneLabel.textContent = messages.milestoneLabel
     this.labelMilestoneNote.textContent = messages.milestoneNote

@@ -116,8 +116,6 @@ export const sightingLabels_es: SightingLabels = {
   addMilestone: "Nombrar este momento",
   deleteMilestone: "Eliminar momento",
   goToMilestone: "Ir a este momento",
-  confirmAccept: "Eliminar",
-  confirmDecline: "Cancelar",
   decorWidth: "Anchura",
   decorLength: "Longitud",
   decorHeight: "Altura",

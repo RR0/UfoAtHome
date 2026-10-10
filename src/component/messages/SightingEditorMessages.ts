@@ -104,16 +104,6 @@ export interface SightingEditorMessages extends SightingLabels {
   bringToFront: string
   sendToBack: string
   contextMenuDelete: string
-  /** `{name}` gets replaced with the shape's own display label — its title if one's been given,
-   * else its raw sourceId (e.g. "ufo-1") — see deleteShape()/shapeLabel(). */
-  confirmDeleteShape: string
-  /** `{count}` gets replaced with the number of selected shapes — the multi-select counterpart of
-   * confirmDeleteShape, used whenever more than one shape is selected at once. */
-  confirmDeleteShapes: string
-  /** Asked before a named moment is unnamed — {name} is its own label. Nothing else goes with it:
-   * a milestone carries no keyframe of its own (see Milestone), so deleting one takes away a name
-   * and never a shape, a pose or a sound. */
-  confirmDeleteMilestone: string
   /** Explains, via the disabled context-menu items' own title, why front/back/delete are all
    * disabled together — see showContextMenu(). */
   onlyOneShape: string
@@ -639,8 +629,6 @@ export interface SightingEditorMessages extends SightingLabels {
    * being added. */
   addDecor: string
   deleteDecor: string
-  /** The question asked before a decor object is deleted, by the bin, Delete or Backspace. `{name}` is its label. */
-  confirmDeleteDecor: string
   /** The two buttons that step back and forward through what was edited, and their keys' hint. */
   undo: string
   redo: string

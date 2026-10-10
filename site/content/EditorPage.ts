@@ -576,7 +576,7 @@ if (docs) {
         <li><strong>Nothing is invented.</strong> Where a record does not exist — before 1940 for
           the weather, before 1957 for satellites, orbital elements before 2021 — the field
           stays editable and the interface says which of the two it is.</li>
-              <li><strong>Everything can be taken back.</strong> The two arrows at the end of the tabs, or <kbd>Ctrl</kbd>+<kbd>Z</kbd> and <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd>, step back and forward through what you changed, in any group and on the render. The history is that of the File group's text editor, loaded the first time you touch anything, and forgotten when another recording is loaded. Deleting a decor object, by the bin or with <kbd>Delete</kbd> or <kbd>Backspace</kbd>, asks first, as deleting a shape does.</li>
+              <li><strong>Everything can be taken back.</strong> The two arrows at the end of the tabs, or <kbd>Ctrl</kbd>+<kbd>Z</kbd> and <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd>, step back and forward through what you changed, in any group and on the render. The history is that of the File group's text editor, loaded the first time you touch anything, and forgotten when another recording is loaded. Deleting something (a shape, a decor object, a named moment), by its bin or with <kbd>Delete</kbd> or <kbd>Backspace</kbd>, asks nothing: undo puts it back.</li>
       </ul>
     </div>
 
@@ -1041,7 +1041,7 @@ if (docs) {
         <li><strong>Rien n'est inventé.</strong> Là où le relevé n'existe pas — avant 1940 pour la
           météo, avant 1957 pour les satellites, avant 2021 pour les éléments orbitaux —
           le champ reste modifiable et l'interface dit lequel des deux cas s'applique.</li>
-              <li><strong>Tout peut se défaire.</strong> Les deux flèches au bout des onglets, ou <kbd>Ctrl</kbd>+<kbd>Z</kbd> et <kbd>Ctrl</kbd>+<kbd>Maj</kbd>+<kbd>Z</kbd>, reviennent en arrière et en avant sur ce que vous avez changé, dans n'importe quel groupe et sur le rendu. L'historique est celui de l'éditeur de texte du groupe Fichier, chargé la première fois que vous touchez à quelque chose, et oublié quand un autre enregistrement est chargé. Supprimer un élément de décor, par la poubelle ou avec <kbd>Suppr</kbd> ou <kbd>Retour arrière</kbd>, demande d'abord confirmation, comme pour une forme.</li>
+              <li><strong>Tout peut se défaire.</strong> Les deux flèches au bout des onglets, ou <kbd>Ctrl</kbd>+<kbd>Z</kbd> et <kbd>Ctrl</kbd>+<kbd>Maj</kbd>+<kbd>Z</kbd>, reviennent en arrière et en avant sur ce que vous avez changé, dans n'importe quel groupe et sur le rendu. L'historique est celui de l'éditeur de texte du groupe Fichier, chargé la première fois que vous touchez à quelque chose, et oublié quand un autre enregistrement est chargé. Supprimer quelque chose (une forme, un élément de décor, un moment nommé), par sa poubelle ou avec <kbd>Suppr</kbd> ou <kbd>Retour arrière</kbd>, ne demande rien : annuler le remet.</li>
       </ul>
     </div>
 
@@ -1498,7 +1498,7 @@ if (docs) {
         <li><strong>Nada se inventa.</strong> Donde no existe registro (antes de 1940 para el tiempo,
           antes de 1957 para los satélites, antes de 2021 para los elementos orbitales), el campo
           sigue siendo editable y la interfaz dice cuál de los dos casos es.</li>
-              <li><strong>Todo se puede deshacer.</strong> Las dos flechas al final de las pestañas, o <kbd>Ctrl</kbd>+<kbd>Z</kbd> y <kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>Z</kbd>, retroceden y avanzan por lo que has cambiado, en cualquier grupo y en el render. El historial es el del editor de texto del grupo Archivo, que se carga la primera vez que tocas algo, y se olvida al cargar otro registro. Eliminar un elemento del decorado, con la papelera o con <kbd>Supr</kbd> o <kbd>Retroceso</kbd>, pide confirmación antes, como al eliminar una forma.</li>
+              <li><strong>Todo se puede deshacer.</strong> Las dos flechas al final de las pestañas, o <kbd>Ctrl</kbd>+<kbd>Z</kbd> y <kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>Z</kbd>, retroceden y avanzan por lo que has cambiado, en cualquier grupo y en el render. El historial es el del editor de texto del grupo Archivo, que se carga la primera vez que tocas algo, y se olvida al cargar otro registro. Eliminar algo (una forma, un elemento del decorado, un momento con nombre), con su papelera o con <kbd>Supr</kbd> o <kbd>Retroceso</kbd>, no pregunta nada: deshacer lo devuelve.</li>
       </ul>
     </div>
 
@@ -1958,7 +1958,7 @@ if (docs) {
         <li><strong>Nulla è inventato.</strong> Dove i dati non esistono (prima del 1940 per il meteo,
           prima del 1957 per i satelliti, prima del 2021 per gli elementi orbitali), il campo
           resta modificabile e l'interfaccia dice quale dei due casi si applica.</li>
-              <li><strong>Tutto si può annullare.</strong> Le due frecce in fondo alle schede, o <kbd>Ctrl</kbd>+<kbd>Z</kbd> e <kbd>Ctrl</kbd>+<kbd>Maiusc</kbd>+<kbd>Z</kbd>, tornano indietro e avanti su ciò che hai cambiato, in qualsiasi gruppo e sul render. La cronologia è quella dell'editor di testo del gruppo File, caricato la prima volta che tocchi qualcosa, e dimenticata quando si carica un'altra registrazione. Eliminare un elemento della scenografia, con il cestino o con <kbd>Canc</kbd> o <kbd>Backspace</kbd>, chiede prima conferma, come per una forma.</li>
+              <li><strong>Tutto si può annullare.</strong> Le due frecce in fondo alle schede, o <kbd>Ctrl</kbd>+<kbd>Z</kbd> e <kbd>Ctrl</kbd>+<kbd>Maiusc</kbd>+<kbd>Z</kbd>, tornano indietro e avanti su ciò che hai cambiato, in qualsiasi gruppo e sul render. La cronologia è quella dell'editor di testo del gruppo File, caricato la prima volta che tocchi qualcosa, e dimenticata quando si carica un'altra registrazione. Eliminare qualcosa (una forma, un elemento della scenografia, un momento con nome), con il suo cestino o con <kbd>Canc</kbd> o <kbd>Backspace</kbd>, non chiede nulla: annullare lo rimette.</li>
       </ul>
     </div>
 

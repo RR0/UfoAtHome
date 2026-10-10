@@ -236,21 +236,6 @@ async function waitFor(check: () => boolean, timeoutMs = 20000): Promise<void> {
 }
 
 
-/** What the editor is currently asking the reader to confirm, or null when it is asking nothing.
- * The editor uses its OWN overlay rather than window.confirm — see SightingEditorElement.askConfirm
- * for why a native dialog cannot be relied on here. */
-function confirmQuestion(element: SightingEditorElement): string | null {
-  const shadow = element.shadowRoot!
-  const overlay = shadow.getElementById("confirm-overlay") as HTMLElement
-  return overlay.hidden ? null : shadow.getElementById("confirm-message")!.textContent
-}
-
-/** Answers that question the way a reader would: by clicking one of its two buttons. Synchronous,
- * like the component's own confirmation. */
-function answerConfirm(element: SightingEditorElement, accept: boolean): void {
-  const shadow = element.shadowRoot!
-  ;(shadow.getElementById(accept ? "confirm-ok" : "confirm-cancel") as HTMLButtonElement).click()
-}
 
 describe("the name this element had before 0.42.0", () => {
   afterEach(() => {
@@ -1200,19 +1185,6 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
     expect(element.sightingData.timeline.keyframes[0].shapes.find(s => s.sourceId === "ufo-2")?.shape.title).toBeUndefined()
   })
 
-  it("names the shape in the delete-confirmation prompt once it has a title", () => {
-    const element = mount()
-    const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-shape") as HTMLButtonElement).click()
-    const titleInput = shadow.getElementById("shapeTitle") as HTMLInputElement
-    titleInput.value = "Vaisseau principal"
-    titleInput.dispatchEvent(new Event("input"))
-
-    ;(shadow.getElementById("delete-shape") as HTMLButtonElement).click()
-
-    expect(confirmQuestion(element)).toContain(("Vaisseau principal"))
-  })
-
   it("does not clobber the Name field's in-progress value while it's focused", () => {
     const element = mount()
     const titleInput = element.shadowRoot!.getElementById("shapeTitle") as HTMLInputElement
@@ -1322,34 +1294,9 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
 
     const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
     deleteShapeButton.click()
-    answerConfirm(element, true)
 
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-2"])
-  })
-
-  it("Delete shape asks for confirmation first, and does nothing if it's declined", () => {
-    const element = mount()
-    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
-    addShapeButton.click() // "ufo-1" + "ufo-2"
-
-    const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
-    deleteShapeButton.click()
-
-    expect(confirmQuestion(element)).not.toBeNull()
-    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
-    expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
-  })
-
-  it("names the actual shape being deleted in the confirmation prompt, not a generic message", () => {
-    const element = mount()
-    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
-    addShapeButton.click() // "ufo-1" + "ufo-2", "ufo-2" selected — auto-named "Shape 2" (see addShape's own nextShapeLabel)
-
-    const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
-    deleteShapeButton.click()
-
-    expect(confirmQuestion(element)).toContain(("Shape 2"))
   })
 
   it("auto-names a freshly added shape, matching the dropdown/tooltip label, instead of leaving it untitled", () => {
@@ -1401,7 +1348,6 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
 
     const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
     deleteShapeButton.click()
-    answerConfirm(element, true)
 
     expect(sourceSelect.value).toBe("ufo-2")
     expect(element.appearance).toEqual({ presetId: "oval", color: "#ff8800", transparency: 0.5, haloScale: 2, blur: 0, brightness: 0 })
@@ -1413,7 +1359,6 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
     expect(deleteShapeButton.disabled).toBe(false)
 
     deleteShapeButton.click()
-    answerConfirm(element, true)
 
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual([])
@@ -1422,56 +1367,21 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
     expect(deleteShapeButton.disabled).toBe(true)
   })
 
-  it("asks in its own overlay and never through window.confirm, so deleting works where a native dialog is suppressed", () => {
-    // The bug this replaced, reported from a browser that disables JavaScript dialogs: a suppressed
-    // confirm() returns FALSE, which is indistinguishable from the reader declining. Clicking the
-    // bin did nothing at all, silently, with nothing in the page to show why. A sandboxed iframe
-    // without allow-modals does the same — and this component exists to be embedded in other
-    // people's pages.
+  it("deletes at once, asking nothing and never through window.confirm: undo is what puts it back", () => {
+    // The bug this replaced, reported from a browser that disables JavaScript dialogs: a suppressed confirm() returns
+    // FALSE, which is indistinguishable from the reader declining. Clicking the bin did nothing at all, silently.
+    // Nothing asks any more, since a deletion can be undone, and nothing can be suppressed.
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false)
     const element = mount()
     const shadow = element.shadowRoot!
     ;(shadow.getElementById("add-shape") as HTMLButtonElement).click()
 
     ;(shadow.getElementById("delete-shape") as HTMLButtonElement).click()
-    expect(confirmQuestion(element)).not.toBeNull()
-    answerConfirm(element, true)
 
     expect(confirmSpy).not.toHaveBeenCalled()
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1"])
     confirmSpy.mockRestore()
-  })
-
-  it("closes the question without deleting when it is declined, and leaves nothing on screen", () => {
-    const element = mount()
-    const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-shape") as HTMLButtonElement).click()
-
-    ;(shadow.getElementById("delete-shape") as HTMLButtonElement).click()
-    answerConfirm(element, false)
-
-    expect(confirmQuestion(element)).toBeNull()
-    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
-    expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
-  })
-
-  it("deletes what the question NAMED, not whatever is selected once it is answered", () => {
-    // The selection can move while the overlay is up. A reader who agreed to delete "Shape 2" has
-    // not agreed to delete something else.
-    const element = mount()
-    const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-shape") as HTMLButtonElement).click() // "ufo-1" + "ufo-2" selected
-    ;(shadow.getElementById("delete-shape") as HTMLButtonElement).click()
-    expect(confirmQuestion(element)).toContain("Shape 2")
-
-    const sourceSelect = shadow.getElementById("source") as HTMLSelectElement
-    sourceSelect.value = "ufo-1"
-    sourceSelect.dispatchEvent(new Event("change"))
-    answerConfirm(element, true)
-
-    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
-    expect(sourceIds).toEqual(["ufo-1"])
   })
 
   it("Delete shape stays available once deletion brings the count back down to one", () => {
@@ -1482,7 +1392,6 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
     expect(deleteShapeButton.disabled).toBe(false)
 
     deleteShapeButton.click()
-    answerConfirm(element, true) // back down to just "ufo-1"
 
     expect(deleteShapeButton.disabled).toBe(false)
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
@@ -1784,7 +1693,7 @@ describe("SightingEditorElement right-click context menu", () => {
     expect(element.sightingData.timeline.order).toEqual(["ufo-1", "ufo-2"])
   })
 
-  it("Delete in the context menu asks for confirmation, same as the toolbar button", () => {
+  it("Delete in the context menu deletes, same as the toolbar button", () => {
     const element = mount()
     element.sightingData = twoShapesJson()
     const canvas = nestedCanvas(element)
@@ -1793,8 +1702,6 @@ describe("SightingEditorElement right-click context menu", () => {
     rightClickAt(canvas, 105, 105) // selects ufo-2
     contextDelete.click()
 
-    expect(confirmQuestion(element)).not.toBeNull()
-    answerConfirm(element, true)
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1"])
   })
@@ -1930,15 +1837,13 @@ describe("SightingEditorElement Delete/Backspace key", () => {
     element.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true }))
   }
 
-  it("deletes the selected shape, with the same confirmation as the toolbar button", () => {
+  it("deletes the selected shape, as the toolbar button does", () => {
     const element = mount()
     const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
     addShapeButton.click() // "ufo-1" + "ufo-2", "ufo-2" selected
 
     pressKey(element, "Delete")
 
-    expect(confirmQuestion(element)).not.toBeNull()
-    answerConfirm(element, true)
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1"])
   })
@@ -1949,28 +1854,15 @@ describe("SightingEditorElement Delete/Backspace key", () => {
     addShapeButton.click()
 
     pressKey(element, "Backspace")
-    answerConfirm(element, true)
 
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1"])
   })
 
-  it("declining the confirmation leaves the shape in place", () => {
-    const element = mount()
-    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
-    addShapeButton.click()
-
-    pressKey(element, "Delete")
-
-    const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
-    expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
-  })
-
-  it("deletes the only remaining shape too, once confirmed", () => {
+  it("deletes the only remaining shape too", () => {
     const element = mount() // just "ufo-1"
 
     pressKey(element, "Delete")
-    answerConfirm(element, true)
 
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual([])
@@ -1984,7 +1876,6 @@ describe("SightingEditorElement Delete/Backspace key", () => {
     latInput.focus()
     latInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Delete", bubbles: true, composed: true }))
 
-    expect(confirmQuestion(element)).toBeNull()
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
   })
@@ -1998,7 +1889,6 @@ describe("SightingEditorElement Delete/Backspace key", () => {
 
     foreign.dispatchEvent(new KeyboardEvent("keydown", { key: "Backspace", bubbles: true, composed: true }))
 
-    expect(confirmQuestion(element)).toBeNull()
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
   })
@@ -2019,7 +1909,6 @@ describe("SightingEditorElement Delete/Backspace key", () => {
 
     search.dispatchEvent(new KeyboardEvent("keydown", { key: "Backspace", bubbles: true, composed: true }))
 
-    expect(confirmQuestion(element)).toBeNull()
     const sourceIds = element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(s => s.sourceId))
     expect(sourceIds).toEqual(["ufo-1", "ufo-2"])
   })
@@ -3425,7 +3314,7 @@ describe("SightingEditorElement multi-select", () => {
     expect(selectedIdsOf(element)).toEqual(["ufo-1"]) // collapsed with no extra click needed
   })
 
-  it("bulk delete asks a pluralized confirmation, and may delete every shape", () => {
+  it("bulk delete removes every selected shape, and may delete every shape", () => {
     const element = mount()
     element.sightingData = twoShapesJson()
     const canvas = nestedCanvas(element)
@@ -3441,8 +3330,6 @@ describe("SightingEditorElement multi-select", () => {
 
     deleteShapeButton.click()
 
-    expect(confirmQuestion(element)).toBe("Delete 2 shapes? This can't be undone.")
-    answerConfirm(element, true)
     const sourceIds = element.sightingData.timeline.keyframes[0].shapes.map(s => s.sourceId)
     expect(sourceIds).toEqual(["ufo-3"])
   })
@@ -3914,13 +3801,9 @@ describe("SightingEditorElement decor group", () => {
     addButton.click()
     expect(element.sightingData.decor).toHaveLength(2)
 
-    // Asked first, as for a shape: nothing goes until it is accepted.
     deleteButton.click()
-    expect(element.sightingData.decor).toHaveLength(2)
-    answerConfirm(element, true)
     expect(element.sightingData.decor).toHaveLength(1)
     deleteButton.click()
-    answerConfirm(element, true)
     expect(element.sightingData.decor).toEqual([])
     expect(deleteButton.disabled).toBe(true)
   })
