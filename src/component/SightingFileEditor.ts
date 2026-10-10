@@ -49,6 +49,8 @@ export class SightingFileEditor {
   private readonly view: EditorView
   private changing = false
 
+  private readonly changedField: StateField<{ baseline: string[], changed: ReadonlySet<number> }>
+
   /** Set when the text is put in the editor's own hands by the caller (a reveal), so that its caret does not report itself. */
   private silent = false
 
@@ -121,6 +123,8 @@ export class SightingFileEditor {
     const keys: KeyBinding[] = [...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap, ...foldKeymap, ...completionKeymap,
       ...lintKeymap, ...searchKeymap, indentWithTab]
     const marks = SightingFileEditor.changeMarks(options.baseline ?? text)
+    this.changedField = marks.field
+    keys.unshift({ key: "F7", run: () => this.gotoChange(1), preventDefault: true }, { key: "Shift-F7", run: () => this.gotoChange(-1), preventDefault: true })
     this.view = new EditorView({
       parent,
       doc: text,
@@ -195,6 +199,15 @@ export class SightingFileEditor {
    * to take back one by one, not merged because they came within half a second of each other.
    */
   set text(text: string) {
+    this.replaceText(text, false)
+  }
+
+  /**
+   * As {@link text}, and with `show`, showing where the text changed (see revealChange): what an author edited on the
+   * form or on the picture is then shown where it was written, with the text on show. Not for a rewrite so wide
+   * (a weather worked out, the whole recording re-ordered) that it would show a screenful of lines and say nothing.
+   */
+  replaceText(text: string, show: boolean): void {
     const current = this.view.state.doc.toString()
     if (text === current) return
     this.changing = true
@@ -206,6 +219,36 @@ export class SightingFileEditor {
     } finally {
       this.changing = false
     }
+    if (show) this.revealChange(current, SightingFileEditor.MOST_LINES_SHOWN)
+  }
+
+  /** The widest change shown as an edit: past it the text was rewritten rather than edited. */
+  private static readonly MOST_LINES_SHOWN = 120
+
+  /**
+   * The next zone changed since the last save, from the caret (F7), or the previous one (Shift-F7): the caret goes to its first
+   * line and the zone is selected, going round from the last to the first. A zone is lines changed one after the other. False
+   * when nothing is changed.
+   */
+  gotoChange(direction: 1 | -1): boolean {
+    const lines = [...this.view.state.field(this.changedField).changed].sort((a, b) => a - b)
+    if (lines.length === 0) return false
+    const zones: Array<{ first: number, last: number }> = []
+    for (const line of lines) {
+      const zone = zones[zones.length - 1]
+      if (zone !== undefined && zone.last === line - 1) zone.last = line
+      else zones.push({ first: line, last: line })
+    }
+    const doc = this.view.state.doc
+    const here = doc.lineAt(this.view.state.selection.main.head).number - 1
+    const current = zones.find(zone => zone.first <= here && here <= zone.last)
+    const target = direction === 1
+      ? zones.find(zone => zone.first > here) ?? zones[0]
+      : [...zones].reverse().find(zone => zone.first < (current?.first ?? here)) ?? zones[zones.length - 1]
+    const from = doc.line(Math.min(target.first, doc.lines - 1) + 1).from
+    const to = doc.line(Math.min(target.last, doc.lines - 1) + 1).to
+    this.view.dispatch({ selection: { anchor: from, head: to }, scrollIntoView: true })
+    return true
   }
 
   /** The text as it stands is the one the changed lines are changed from — called when the recording is saved or exported. */
@@ -296,7 +339,7 @@ export class SightingFileEditor {
    * Shows where a step of the history changed the text: the lines that are not what they were, or the one where lines were
    * taken away, so that an undo done from the picture's side says what it undid.
    */
-  private revealChange(before: string): void {
+  private revealChange(before: string, atMostLines = Infinity): void {
     const doc = this.view.state.doc
     const was = before.split("\n")
     const now = doc.toString().split("\n")
@@ -308,6 +351,7 @@ export class SightingFileEditor {
       endWas--
       endNow--
     }
+    if (endNow - start > atMostLines) return
     const first = Math.min(start, doc.lines - 1) + 1
     const last = Math.min(Math.max(first, endNow), doc.lines)
     const range = { from: doc.line(first).from, to: doc.line(last).to }

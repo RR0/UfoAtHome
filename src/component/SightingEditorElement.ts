@@ -2087,7 +2087,7 @@ export class SightingEditorElement extends HTMLElement {
     if (now === this.historySnapshot) return
     this.historySnapshot = now
     this.historyAnswering = false
-    editor.text = now
+    editor.replaceText(now, this.fileSyncActive())
     this.syncHistoryButtons()
   }
 
@@ -2131,7 +2131,7 @@ export class SightingEditorElement extends HTMLElement {
     this.fileEditor = undefined
     this.fileEditorLoading = undefined
     this.syncHistoryButtons()
-    if (this.isGroupIdOpen("group-file")) void this.loadFileEditor().then(() => this.syncFileEditor(), () => undefined)
+    if (this.isGroupIdOpen("group-file")) void this.loadFileEditor().then(() => this.syncFileEditor(false), () => undefined)
   }
 
   /** Moving through the form by keyboard is no edit; deleting a shape from the picture is. */
@@ -5117,7 +5117,7 @@ export class SightingEditorElement extends HTMLElement {
     this.syncCanvasMode()
     this.refreshTimelineMarks()
     if (open && tab.getAttribute("aria-controls") === "group-file") {
-      void this.loadFileEditor().then(() => this.syncFileEditor(), () => this.showFileNote(this.messages.importError))
+      void this.loadFileEditor().then(() => this.syncFileEditor(false), () => this.showFileNote(this.messages.importError))
     }
   }
 
@@ -5233,7 +5233,8 @@ export class SightingEditorElement extends HTMLElement {
     }, 250)
   }
 
-  private syncFileEditor(): void {
+  /** `show`: whether to show where the text changed — not when it is being brought up to date as it opens, or respelled after the author's typing, which are no edit of the picture's or the form's. */
+  private syncFileEditor(show = true): void {
     const editor = this.fileEditor
     if (editor === undefined || !this.isGroupIdOpen("group-file") || editor.focused) return
     // After an undo or a redo the text holds what the history gave back, and the form is what that text made: rewriting
@@ -5245,7 +5246,7 @@ export class SightingEditorElement extends HTMLElement {
     } catch {
       return
     }
-    editor.text = this.fileText()
+    editor.replaceText(this.fileText(), show)
   }
 
   /** Text to form: a text that parses is the recording, a text that does not is left alone (the
@@ -5286,7 +5287,7 @@ export class SightingEditorElement extends HTMLElement {
       clearTimeout(this.fileApplyTimer)
       this.applyFileText(editor.text)
     }
-    setTimeout(() => this.syncFileEditor(), 0)
+    setTimeout(() => this.syncFileEditor(false), 0)
   }
 
   /**

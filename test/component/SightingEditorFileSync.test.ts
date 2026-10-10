@@ -299,11 +299,11 @@ describe("undo and redo with the text on show", () => {
     await new Promise(resolve => setTimeout(resolve, 50))
     addBuildings(element, 1)
     const undo = shadow.getElementById("undo") as HTMLButtonElement
-    await waitFor(() => !undo.disabled)
-    expect(inside.fileEditor!.revealedText).toBeUndefined()
+    await waitFor(() => !undo.disabled && inside.fileEditor!.revealedText?.includes('"building"') === true, 5000)
 
     undo.click()
     expect(inside.fileEditor!.revealedText).toBeDefined()
+    expect(inside.fileEditor!.revealedText).not.toContain('"building"')
 
     ;(shadow.getElementById("redo") as HTMLButtonElement).click()
     expect(inside.fileEditor!.revealedText).toContain('"building"')
@@ -317,11 +317,56 @@ describe("undo and redo with the text on show", () => {
     await new Promise(resolve => setTimeout(resolve, 50))
     addBuildings(element, 1)
     const undo = shadow.getElementById("undo") as HTMLButtonElement
-    await waitFor(() => !undo.disabled)
+    await waitFor(() => !undo.disabled && inside.fileEditor!.revealedText?.includes('"building"') === true, 5000)
     openGroup(element, "group-decor")
 
     undo.click()
 
+    // What was shown of the edit went with the lines the undo took away, and nothing was shown in their place.
+    expect(inside.fileEditor!.revealedText).toBe("")
+  })
+})
+
+describe("editing with the text on show", () => {
+  it("shows where the edit was written, once the form has put it in the text", async () => {
+    const element = mount()
+    const inside = await fileOpened(element)
     expect(inside.fileEditor!.revealedText).toBeUndefined()
+
+    addBuildings(element, 1)
+
+    await waitFor(() => inside.fileEditor!.revealedText !== undefined, 5000)
+    expect(inside.fileEditor!.revealedText).toContain('"building"')
+  })
+})
+
+describe("going from one changed zone to the next", () => {
+  it("goes to the next with F7 and the previous with Shift+F7, round the text", async () => {
+    const { SightingFileEditor } = await import("../../src/component/SightingFileEditor.js")
+    const lines = Array.from({ length: 40 }, (_, i) => `line ${i}`)
+    const editor = new SightingFileEditor(document.body.appendChild(document.createElement("div")), lines.join("\n"), () => undefined, "text")
+    expect(editor.gotoChange(1)).toBe(false)
+
+    const edited = [...lines]
+    edited[5] = "changed 5"
+    edited[6] = "changed 6"
+    edited[30] = "changed 30"
+    editor.replaceText(edited.join("\n"), false)
+    const view = (editor as unknown as { view: { state: { selection: { main: { from: number, to: number } }, doc: { lineAt(position: number): { number: number } } } } }).view
+    const at = () => view.state.doc.lineAt(view.state.selection.main.from).number - 1
+
+    expect(editor.gotoChange(1)).toBe(true)
+    expect(at()).toBe(5)
+    // The whole zone, two lines, is what is selected.
+    expect(view.state.doc.lineAt(view.state.selection.main.to).number - 1).toBe(6)
+    expect(editor.gotoChange(1)).toBe(true)
+    expect(at()).toBe(30)
+    expect(editor.gotoChange(1)).toBe(true)
+    expect(at()).toBe(5)
+    expect(editor.gotoChange(-1)).toBe(true)
+    expect(at()).toBe(30)
+    expect(editor.gotoChange(-1)).toBe(true)
+    expect(at()).toBe(5)
+    editor.destroy()
   })
 })
