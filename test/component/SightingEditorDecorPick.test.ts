@@ -86,6 +86,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return { minX: -0.5, minY: -0.5, maxX: 0.5, maxY: 0.5 }
     }
     /** Where the pointer meets the ground: east and south from it, as the picture's own coordinates say. */
+    decorGrabHeightAt() {
+      return 0
+    }
     decorGroundPointAt(_id: string, ndcX: number, ndcY: number) {
       return { x: ndcX * 100, z: -ndcY * 100 }
     }
