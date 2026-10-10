@@ -1,5 +1,6 @@
 import { Headings } from "./Headings.js"
 import { OfflineKit } from "./OfflineKit.js"
+import { ShareCard } from "./ShareCard.js"
 import {
   FALLBACK_LANGUAGE, type PageMeta, SITE_LANGUAGES, type SiteLanguage, type SitePage
 } from "./SitePage.js"
@@ -41,10 +42,7 @@ interface ShellWords {
  */
 export class Layout {
 
-  static readonly ORIGIN = "https://ufoathome.org"
-
-  /** The logo is a flying saucer holding a play button: what the project does, replaying an account. */
-  static readonly LOGO_ALT = "UFO@home logo: a flying saucer with a play button"
+  static readonly ORIGIN = ShareCard.ORIGIN
 
   /** Tab icon, home-screen icon: one logo, in the sizes each of those asks for. */
   static readonly ICON_LINKS = `<link rel="icon" href="/favicon.ico" sizes="48x48 32x32 16x16">
@@ -171,16 +169,11 @@ ${this.languageRedirect(page, language)}
   <link rel="canonical" href="${Layout.ORIGIN}${self}">
   ${alternates}
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="UFO@home">
   <meta property="og:title" content="${this.attribute(meta.title[language])} — UFO@home">
   <meta property="og:description" content="${this.attribute(meta.description[language])}">
   <meta property="og:url" content="${Layout.ORIGIN}${self}">
   <meta property="og:locale" content="${words.locale}">
-  <meta property="og:image" content="${Layout.ORIGIN}/logo.png">
-  <meta property="og:image:width" content="512">
-  <meta property="og:image:height" content="512">
-  <meta property="og:image:alt" content="${Layout.LOGO_ALT}">
-  <meta name="twitter:card" content="summary">
+  ${ShareCard.META}
   ${Layout.ICON_LINKS}
   ${OfflineKit.HEAD}
   <link rel="stylesheet" href="/style.css">

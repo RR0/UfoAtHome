@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto"
 import { readFile, readdir, stat } from "node:fs/promises"
 import { join } from "node:path"
+import { ShareCard } from "./ShareCard.js"
 
 /**
  * What makes ufoathome.org installable and usable without a network: the web app manifest, the
@@ -158,6 +159,7 @@ if ("serviceWorker" in navigator) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Offline — UFO@home</title>
 <meta name="robots" content="noindex">
+${ShareCard.META}
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>

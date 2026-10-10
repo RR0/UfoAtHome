@@ -1,7 +1,8 @@
-import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises"
+import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { Layout } from "./Layout.js"
+import { ShareCard } from "./ShareCard.js"
 import { SITE_LANGUAGES, type SiteLanguage, type SitePage } from "./SitePage.js"
 import { HomePage } from "./content/HomePage.js"
 import { PlayerPage } from "./content/PlayerPage.js"
@@ -185,7 +186,32 @@ class SiteBuilder {
 
     await this.writeNetlifyFiles(layout)
     await this.writeSitemap(layout)
+    await this.requireShareCards()
     console.log(`dist-site: ${written.length} pages, ${this.bundleDirs.length} bundles, v${version}`)
+  }
+
+  /**
+   * Fails the build if any page it wrote would be shared without the logo as its image (see ShareCard):
+   * the generated pages, the 404 and the offline page alike. A page added later that forgot it is found here,
+   * not by whoever shares its link.
+   */
+  private async requireShareCards(): Promise<void> {
+    const pages: string[] = []
+    const walk = async (directory: string): Promise<void> => {
+      for (const entry of await readdir(directory, { withFileTypes: true })) {
+        const path = join(directory, entry.name)
+        // The bundles, the recordings and the models hold no page of the site.
+        if (entry.isDirectory()) {
+          if (!["lib", "demo-data", "models", "roads", "tle", "aircraft", "fireballs", "reentries", "light-pollution"].includes(entry.name)) await walk(path)
+        } else if (entry.name.endsWith(".html")) pages.push(path)
+      }
+    }
+    await walk(this.out)
+    const without: string[] = []
+    for (const page of pages) {
+      if (!(await readFile(page, "utf8")).includes(`property="og:image" content="${ShareCard.ORIGIN}/logo.png"`)) without.push(page)
+    }
+    if (without.length > 0) throw new Error(`Pages without the share card (see ShareCard):\n${without.join("\n")}`)
   }
 
   /**
@@ -431,6 +457,7 @@ ${retired}
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Not found — UFO@home</title>
 <meta name="robots" content="noindex">
+${ShareCard.META}
 ${Layout.ICON_LINKS}
 <link rel="stylesheet" href="/style.css">
 </head>
