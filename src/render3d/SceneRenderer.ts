@@ -1637,6 +1637,7 @@ export class SceneRenderer {
         // would have opened Valensole a hundred metres up in the air on the strength of Socorro's
         // mesa. The old patch's own reach is the test, and it is the same reach the reading below
         // is clamped to.
+        this.anchorGrassTo(mesh, lat, lng)
         const outgoing = this.terrainMesh
         const centre = previousOrigin ? geoToLocalMeters(lat, lng, previousOrigin.lat, previousOrigin.lng) : undefined
         if (outgoing && centre && Math.hypot(centre.x, centre.z) <= previousRadius) {
@@ -1678,6 +1679,26 @@ export class SceneRenderer {
         console.warn("Terrain build failed, keeping the flat ground fallback:", error)
         onSettled?.()
       })
+  }
+
+  /** The point the grain of the grass is measured from, for as long as the recording stays near it (see GrassDetail). */
+  private grassReference?: { lat: number, lng: number }
+
+  /**
+   * Tells a new patch of ground where its own origin stands from the one fixed point the grass's grain is
+   * measured from, so that the next patch of a long drive carries on the same grain instead of starting
+   * another (and the crossfade between the two does not shimmer). The point is the first patch's, and a
+   * recording somewhere else entirely starts over from its own.
+   */
+  private anchorGrassTo(mesh: Mesh, lat: number, lng: number): void {
+    if (this.grassReference) {
+      const from = geoToLocalMeters(this.grassReference.lat, this.grassReference.lng, lat, lng)
+      if (Math.hypot(from.x, from.z) > 20000) this.grassReference = undefined
+    }
+    this.grassReference ??= { lat, lng }
+    const origin = geoToLocalMeters(this.grassReference.lat, this.grassReference.lng, lat, lng)
+    const grassOrigin = (mesh.material as { userData?: { grassOrigin?: { set: (x: number, y: number) => void } } }).userData?.grassOrigin
+    grassOrigin?.set(origin.x, origin.z)
   }
 
   /** How long a new patch of ground takes to replace the one the observer drove out of. */

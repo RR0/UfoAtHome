@@ -1,3 +1,4 @@
+import { Vector2 } from "three"
 import type { MeshLambertMaterial } from "three"
 
 /**
@@ -39,16 +40,24 @@ export class GrassDetail {
    *
    * By default it is laid where the material's own colour is green (the aerial photograph). With
    * `everywhere`, on a surface that is grass by construction (the top of a terrace of cultivated land), it
-   * is laid wherever the surface is, whatever its flat colour, and read off the world's own metres.
+   * is laid wherever the surface is, whatever its flat colour.
+   *
+   * The pattern is read in the surface's OWN metres, never in the world's: the world is the camera's frame
+   * (it slides under a walking observer, see SceneRenderer.updateDecorAnchoring), so a pattern read from it
+   * would stay where it is on the screen while the ground went by under it. The surface's own metres move
+   * with the surface. For a patch of terrain, which is rebuilt as the observer drives on, `material.userData
+   * .grassOrigin` says where the patch's own origin stands from one fixed point of the recording, so that
+   * the grain is the same grain from one patch to the next.
    */
   static install(material: MeshLambertMaterial, everywhere = false): void {
+    const origin = new Vector2()
+    material.userData.grassOrigin = origin
     material.onBeforeCompile = shader => {
       shader.uniforms.uGrassContrast = { value: GrassDetail.CONTRAST }
+      shader.uniforms.uGrassOrigin = { value: origin }
       shader.vertexShader = shader.vertexShader
-        .replace("#include <common>", "#include <common>\nvarying vec2 vGrassPatchXZ;")
-        .replace("#include <begin_vertex>", everywhere
-          ? "#include <begin_vertex>\nvGrassPatchXZ = (modelMatrix * vec4(transformed, 1.0)).xz;"
-          : "#include <begin_vertex>\nvGrassPatchXZ = position.xz;")
+        .replace("#include <common>", "#include <common>\nvarying vec2 vGrassPatchXZ;\nuniform vec2 uGrassOrigin;")
+        .replace("#include <begin_vertex>", "#include <begin_vertex>\nvGrassPatchXZ = position.xz + uGrassOrigin;")
       shader.fragmentShader = shader.fragmentShader
         .replace("#include <common>", `#include <common>
 varying vec2 vGrassPatchXZ;
