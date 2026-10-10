@@ -1459,7 +1459,7 @@ export class SceneElement extends HTMLElement {
     // centimetres of rise and sway for one who walked. Rebuilt each tick rather than cached: the
     // editor moves keyframes under this element without the recording ever changing identity (see
     // Gait.of).
-    this.sceneRenderer.setGait(Gait.bodyAt(sighting, t, this.ufoElement.steadyObserver))
+    this.sceneRenderer.setGait(Gait.bodyAt(sighting, t, this.ufoElement.steadyBody))
     // Keeps decor anchored to its own real-world spot rather than sliding along with a moving
     // observer — see SceneRenderer.updateDecorAnchoring's own doc comment. The reference pose is
     // always the recording's own t=0, regardless of what t is being rendered right now.
@@ -2257,7 +2257,7 @@ export class SceneElement extends HTMLElement {
     // — the same numbers the overlay used, so a starburst turns with the camera here as it did
     // there (see CanvasRenderer.setRoll).
     const pose = resolveObserverPoseAt(sighting, t)
-    const rollDeg = (pose?.rollDeg ?? 0) + Gait.bodyAt(sighting, t, this.ufoElement.steadyObserver).rollDeg
+    const rollDeg = (pose?.rollDeg ?? 0) + Gait.bodyAt(sighting, t, this.ufoElement.steadyBody).rollDeg
     this.sceneRenderer.setPhenomena(placed, {
       projection,
       canvasWidthPx: canvas.width,

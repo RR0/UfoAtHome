@@ -276,6 +276,21 @@ export class UfoElement extends HTMLElement {
    */
   steadyObserver = false
   /**
+   * The slowest a replay may run for the observer's body still to move the view (see Stance): its
+   * waves are a few tenths of a hertz in the observation's own time, so a replay run faster than this
+   * turns them into a tremor.
+   */
+  private static readonly LIVE_BODY_MAX_RATE = 2
+  /**
+   * Whether the observer's body is held still at this moment: always in an editor, and in a replay
+   * everywhere but while it plays at about its own pace. A body's sway belongs to the observation as it
+   * goes by; dragged through, or run fast, it is a tremor that gets in the way of seeing the whole.
+   * Derived each time and never recorded, so nothing in the file says it.
+   */
+  get steadyBody(): boolean {
+    return this.steadyObserver || this.player.playbackState !== "playing" || this.player.playbackRate > UfoElement.LIVE_BODY_MAX_RATE
+  }
+  /**
    * Whether the selected shapes' handles are drawn at all. Off when the canvas is not editing
    * the shapes (see SightingEditorElement.canvasMode): a handle is a promise that dragging it
    * does something, and a promise the canvas is not keeping is worse than no handle.
@@ -2797,7 +2812,7 @@ export class UfoElement extends HTMLElement {
    * stood still, which is most of them. Rebuilt on demand rather than cached, for the reason
    * Gait.of gives: an editor moves keyframes without the recording ever changing identity. */
   private gaitAt(t: number): GaitOffset {
-    return Gait.bodyAt(this.currentSighting, t, this.steadyObserver)
+    return Gait.bodyAt(this.currentSighting, t, this.steadyBody)
   }
 
   /** Whether the recording's sound is silenced — by the reader, with the button beside play. Kept

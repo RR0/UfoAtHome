@@ -265,6 +265,42 @@ describe("UfoElement", () => {
     expect(element.playbackState).toBe("paused")
   })
 
+  it("moves the observer's body only while the replay plays at about its own pace", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
+          { t: 1000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 10, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
+        ]
+      }
+    }
+    // Stopped, and dragged through: a tremor that gets in the way of seeing the whole.
+    expect(element.steadyBody).toBe(true)
+    const seekInput = element.shadowRoot!.getElementById("seek") as HTMLInputElement
+    seekInput.value = "400"
+    seekInput.dispatchEvent(new Event("input"))
+    expect(element.steadyBody).toBe(true)
+
+    element.togglePlayPause()
+    expect(element.playbackState).toBe("playing")
+    expect(element.steadyBody).toBe(false)
+
+    // Run fast, the same waves turn into a tremor again.
+    const player = (element as unknown as { player: { playbackRate: number } }).player
+    const rate = player.playbackRate
+    player.playbackRate = 20
+    expect(element.steadyBody).toBe(true)
+    player.playbackRate = rate
+
+    // An editor keeps it still under the author's pointer, playing or not.
+    element.steadyObserver = true
+    expect(element.steadyBody).toBe(true)
+    element.togglePlayPause()
+    expect(element.steadyBody).toBe(true)
+  })
+
   it("dispatches timeupdate with the current time on seek", () => {
     const element = mount()
     element.sightingData = {
