@@ -6922,6 +6922,8 @@ export class SightingEditorElement extends HTMLElement {
    * dropdown itself having been touched. */
   private selectDecor(id: string): void {
     this.currentDecorId = id
+    // With the text on show, what is selected is framed on the picture as in its own group (see canvasMode).
+    if (this.isGroupIdOpen("group-file")) this.fileFocus = "decor"
     this.decorSelect.value = id
     this.syncDecorFields()
     this.syncCanvasMode()
@@ -9198,6 +9200,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.selectedSourceIds = new Set(unit)
     this.currentSourceId = sourceId
+    if (this.isGroupIdOpen("group-file")) this.fileFocus = "shape"
     this.refreshSourceList()
     this.onSelectionOrTimeChanged()
     this.showInFile(this.shapePath(sourceId))

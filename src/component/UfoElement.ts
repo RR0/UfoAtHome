@@ -100,6 +100,14 @@ export class UfoElement extends HTMLElement {
   private readonly stageElement: HTMLElement
   private readonly canvas: HTMLCanvasElement
   private readonly canvasRenderer: CanvasRenderer
+  /** The screen-resolution layer over the picture, for what is drawn to be handled — see paintChrome. */
+  private readonly chromeCanvas: HTMLCanvasElement
+  private chromeRenderer?: CanvasRenderer
+  private readonly chromeResizeObserver = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(() => {
+    if (this.chromeDirty) this.refresh()
+  })
+  /** Whether the layer holds something that has to be cleared when nothing is to be drawn on it any more. */
+  private chromeDirty = false
   private readonly tooltip: HTMLElement
   private readonly toolbar: HTMLElement
   private readonly issuesBox: HTMLElement
@@ -640,6 +648,7 @@ export class UfoElement extends HTMLElement {
     this.stageElement = this.shadow.getElementById("stage")!
     this.canvas = this.shadow.getElementById("canvas") as HTMLCanvasElement
     this.canvasRenderer = new CanvasRenderer(this.canvas.getContext("2d")!)
+    this.chromeCanvas = this.shadow.getElementById("chrome") as HTMLCanvasElement
     this.tooltip = this.shadow.getElementById("tooltip")!
     this.toolbar = this.shadow.getElementById("toolbar")!
     this.issuesBox = this.shadow.getElementById("issues")!
@@ -782,6 +791,8 @@ export class UfoElement extends HTMLElement {
     document.addEventListener("pointerup", this.handlePointerRelease, true)
     document.addEventListener("pointercancel", this.handlePointerRelease, true)
     this.observerMapResizeObserver?.observe(this.observerMapPanel)
+    // The layer over the picture is the screen's size, and follows it.
+    this.chromeResizeObserver?.observe(this.chromeCanvas)
     this.controlsFitObserver?.observe(this.controlsRow)
     // The time grows when the recording's length arrives (a clock reads "10:30 / 10:30:27"), which
     // resizes neither the row nor the buttons.
@@ -827,6 +838,7 @@ export class UfoElement extends HTMLElement {
     document.removeEventListener("pointercancel", this.handlePointerRelease, true)
     window.clearTimeout(this.controlsIdleTimer)
     this.observerMapResizeObserver?.disconnect()
+    this.chromeResizeObserver?.disconnect()
     this.controlsFitObserver?.disconnect()
     this.controlsMutations?.disconnect()
     // Leaves the page as it was found: the stand-in holds document.body's own overflow, and an
@@ -1633,6 +1645,41 @@ export class UfoElement extends HTMLElement {
     painter?.(t, this.seekPreviewCanvas)
   }
 
+  /**
+   * Draws what the editor lays over the picture to be handled — a selected object's frame and handles, the picture's own —
+   * on a layer of the screen's resolution, still in the picture's coordinates.
+   *
+   * The picture is 360 pixels high whatever the screen: drawn on it, a one-pixel line is two or three pixels of blur once
+   * stretched, and a handle's square is a smudge. Everything that is drawn here is the author's to read to the pixel.
+   * Where there is no such layer to draw on (no layout, a drawing surface that cannot be scaled), it goes on the picture
+   * as it always did.
+   */
+  private paintChrome(draw: (renderer: CanvasRenderer) => void): void {
+    const context = this.chromeCanvas.getContext("2d")
+    const wanted = this.overlayPainter !== undefined || this.selectionShown
+    if (!wanted && !this.chromeDirty) return
+    const cssWidth = this.chromeCanvas.clientWidth
+    const cssHeight = this.chromeCanvas.clientHeight
+    if (!context || typeof context.setTransform !== "function" || cssWidth === 0 || cssHeight === 0) {
+      draw(this.canvasRenderer)
+      return
+    }
+    const ratio = window.devicePixelRatio || 1
+    const width = Math.max(1, Math.round(cssWidth * ratio))
+    const height = Math.max(1, Math.round(cssHeight * ratio))
+    // Assigning a size resets the surface: only when it is not the one it already has.
+    if (this.chromeCanvas.width !== width) this.chromeCanvas.width = width
+    if (this.chromeCanvas.height !== height) this.chromeCanvas.height = height
+    context.setTransform(1, 0, 0, 1, 0, 0)
+    context.clearRect(0, 0, width, height)
+    this.chromeDirty = false
+    if (!wanted) return
+    context.setTransform(width / this.canvas.width, 0, 0, height / this.canvas.height, 0, 0)
+    this.chromeRenderer ??= new CanvasRenderer(context)
+    this.chromeDirty = true
+    draw(this.chromeRenderer)
+  }
+
   /** The pointer that is dragging the bar with a finger or a pen, if any. */
   private scrubbingPointer?: number
 
@@ -1917,13 +1964,13 @@ export class UfoElement extends HTMLElement {
       else this.canvasRenderer.paintMemberOutline(shape)
     }
     void shapesBySource
-    if (this.selectionShown && selectedIds.size > 1) {
-      const bounds = ShapeHandles.groupBoundsFor(
-        [...shapesBySource].filter(([sourceId]) => selectedIds.has(sourceId)).map(([, shape]) => shape.bounds)
-      )
-      this.canvasRenderer.paintGroupHandles(bounds)
-    }
-    this.overlayPainter?.(this.canvasRenderer)
+    const groupBounds = this.selectionShown && selectedIds.size > 1
+      ? ShapeHandles.groupBoundsFor([...shapesBySource].filter(([sourceId]) => selectedIds.has(sourceId)).map(([, shape]) => shape.bounds))
+      : undefined
+    this.paintChrome(renderer => {
+      if (groupBounds) renderer.paintGroupHandles(groupBounds)
+      this.overlayPainter?.(renderer)
+    })
     this.mapShapeBounds = instants.flatMap(instant => [...instant.shapes.values()]
       .filter(shape => shape.transparency < 1).map(shape => this.shifted(shape, shift).bounds))
     this.keepObserverMapClear()

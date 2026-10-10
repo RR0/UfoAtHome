@@ -215,7 +215,7 @@ function openGroup(element: SightingEditorElement, id: string): void {
 }
 
 interface Private {
-  fileEditor?: { text: string, reveal(path: (string | number)[]): boolean, view: { state: { selection: { main: { from: number, to: number } }, doc: { sliceString(from: number, to: number): string } } } }
+  fileEditor?: { text: string, revealedText?: string, reveal(path: (string | number)[]): boolean, view: { state: { selection: { main: { from: number, to: number } } } } }
   focusFromFile(path: (string | number)[]): void
   selectDecor(id: string): void
   canvasMode(): string
@@ -249,12 +249,13 @@ describe("the text and the picture", () => {
     addBuildings(element, 2)
     const inside = await fileOpened(element)
     const first = element.sightingData.decor![0].id
+    const before = inside.fileEditor!.view.state.selection.main.from
 
     inside.selectDecor(first)
 
-    const { from, to } = inside.fileEditor!.view.state.selection.main
-    expect(to).toBeGreaterThan(from)
-    expect(inside.fileEditor!.view.state.doc.sliceString(from, to)).toContain(`"id": "${first}"`)
+    expect(inside.fileEditor!.revealedText).toContain(`"id": "${first}"`)
+    // Shown, not selected: the caret is the author's, and the text does not need the focus to show it.
+    expect(inside.fileEditor!.view.state.selection.main.from).toBe(before)
     const open = [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].filter(tab => tab.getAttribute("aria-expanded") === "true")
     expect(open.map(tab => tab.getAttribute("aria-controls"))).toEqual(["group-file"])
   })
@@ -264,11 +265,10 @@ describe("the text and the picture", () => {
     addBuildings(element, 2)
     const inside = await fileOpened(element)
     openGroup(element, "group-decor")
-    const before = inside.fileEditor!.view.state.selection.main.from
 
     inside.selectDecor(element.sightingData.decor![1].id)
 
-    expect(inside.fileEditor!.view.state.selection.main.from).toBe(before)
+    expect(inside.fileEditor!.revealedText).toBeUndefined()
   })
 })
 

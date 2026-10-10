@@ -65,6 +65,30 @@ export class SightingFileEditor {
     }
   })()
 
+  /**
+   * The lines the picture has shown the author (see {@link reveal}): tinted and edged in the margin whether or not the
+   * editor has the focus, where a selection is drawn pale and disappears with the focus. The text's own caret and
+   * selection are left where the author had them.
+   */
+  private static readonly REVEAL = StateEffect.define<{ from: number, to: number } | null>()
+  private static readonly revealed = StateField.define<{ from: number, to: number } | null>({
+    create: () => null,
+    update: (value, transaction) => {
+      for (const effect of transaction.effects) if (effect.is(SightingFileEditor.REVEAL)) return effect.value
+      return value === null ? null : { from: transaction.changes.mapPos(value.from, 1), to: transaction.changes.mapPos(value.to, -1) }
+    },
+    provide: field => EditorView.decorations.compute([field], state => {
+      const range = state.field(field)
+      const builder = new RangeSetBuilder<Decoration>()
+      if (range !== null) {
+        for (let n = state.doc.lineAt(range.from).number; n <= state.doc.lineAt(Math.min(range.to, state.doc.length)).number; n++) {
+          builder.add(state.doc.line(n).from, state.doc.line(n).from, Decoration.line({ class: "cm-revealed-line" }))
+        }
+      }
+      return builder.finish()
+    })
+  })
+
   private static changeMarks(initial: string): { field: StateField<{ baseline: string[], changed: ReadonlySet<number> }>, extensions: import("@codemirror/state").Extension[] } {
     const field = StateField.define<{ baseline: string[], changed: ReadonlySet<number> }>({
       create: state => ({ baseline: initial.split("\n"), changed: new Set(LineDiff.changed(initial.split("\n"), state.doc.toString().split("\n"))) }),
@@ -102,6 +126,7 @@ export class SightingFileEditor {
       doc: text,
       extensions: [
         ...marks.extensions,
+        SightingFileEditor.revealed,
         lineNumbers(),
         search({ top: true }),
         EditorState.phrases.of(options.phrases ?? {}),
@@ -135,6 +160,8 @@ export class SightingFileEditor {
           ".cm-changed-gutter": { width: "4px" },
           ".cm-changed-bar": { width: "3px", height: "100%", backgroundColor: "#2f81f7" },
           ".cm-changed-line": { backgroundColor: "color-mix(in srgb, #2f81f7 13%, transparent)" },
+          // What the picture showed: warmer and edged, over the changed lines' tint when both are there.
+          ".cm-revealed-line": { backgroundColor: "color-mix(in srgb, #f2cc60 30%, transparent)", boxShadow: "inset 3px 0 0 #f2cc60" },
           // The search panel's colours are the page's own, in the dark as in the light.
           ".cm-panels": { backgroundColor: "Canvas", color: "CanvasText", borderColor: "color-mix(in srgb, CanvasText 25%, transparent)" },
           ".cm-panel.cm-search input, .cm-panel.cm-search button": { fontSize: "inherit" },
@@ -144,8 +171,12 @@ export class SightingFileEditor {
         EditorView.updateListener.of(update => {
           if (update.docChanged && !this.changing) changed(update.state.doc.toString())
           // The caret of the author, not the one this class moves itself (see reveal), nor one that is not in the text.
-          if (update.selectionSet && !this.silent && !this.changing && update.view.hasFocus && options.caretMoved) {
-            options.caretMoved(JsonPaths.at(update.state, update.state.selection.main.head))
+          if (update.selectionSet && !this.silent && !this.changing && update.view.hasFocus) {
+            // The author has the caret now: what the picture showed is no longer what is shown.
+            if (update.state.field(SightingFileEditor.revealed) !== null) {
+              queueMicrotask(() => this.view.dispatch({ effects: SightingFileEditor.REVEAL.of(null) }))
+            }
+            options.caretMoved?.(JsonPaths.at(update.state, update.state.selection.main.head))
           }
         })
       ]
@@ -189,20 +220,26 @@ export class SightingFileEditor {
   }
 
   /**
-   * Shows what a place of the recording is in the text: selects it and scrolls it to the middle, and says
-   * whether the text had it. Not focused, and silent — the author is working on the picture, and the caret
-   * this moves is not theirs, or the picture would select what it has just been told to.
+   * Shows what a place of the recording is in the text: its lines tinted and scrolled to the top, and whether the text had it.
+   * Neither focused nor selected: the author is working on the picture, the caret stays where it was, and the lines are shown
+   * the same with the focus elsewhere (see REVEAL).
    */
   reveal(path: JsonPath): boolean {
     const range = JsonPaths.range(this.view.state, path)
     if (range === undefined) return false
     this.silent = true
     try {
-      this.view.dispatch({ selection: { anchor: range.from, head: range.to }, effects: EditorView.scrollIntoView(range.from, { y: "start", yMargin: 24 }) })
+      this.view.dispatch({ effects: [SightingFileEditor.REVEAL.of(range), EditorView.scrollIntoView(range.from, { y: "start", yMargin: 24 })] })
     } finally {
       this.silent = false
     }
     return true
+  }
+
+  /** The text of what was last revealed, or undefined — for a test, which cannot see the tint. */
+  get revealedText(): string | undefined {
+    const range = this.view.state.field(SightingFileEditor.revealed)
+    return range === null ? undefined : this.view.state.doc.sliceString(range.from, range.to)
   }
 
   /** Takes back the last change to the text — the form's own as much as the author's typing, since the

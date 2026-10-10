@@ -2,6 +2,10 @@ export const html = `
 <div class="stage" id="stage">
   <div class="frame" id="frame">
     <canvas id="canvas" width="640" height="360"></canvas>
+    <!-- What the editor draws over the picture to be handled (the frame of a selected object, its handles): on a canvas of the
+         screen's own resolution, drawn in the picture's coordinates, since the picture's own is 360 pixels high and stretched
+         to the screen, which blurred every line of it (see UfoElement.paintChrome). Inert to the pointer. -->
+    <canvas id="chrome" class="chrome" aria-hidden="true"></canvas>
   </div>
   <div id="tooltip" class="tooltip" hidden></div>
   <!-- For a recording with several pictures, the button above opens this list instead of toggling
@@ -197,6 +201,7 @@ export const css = `
    of width/height is the tighter constraint from the other — a real "contain, centered" fit,
    not just a single-axis cap that can let the other axis overflow and crop instead of shrink. */
 .frame {
+  position: relative;
   /* Contained inside the stage's own box rather than sizing it: the HEIGHT is taken from the
      stage and the width follows the format, so a square or upright frame leaves space to either
      side instead of making the widget taller. Width first (100%) with a max-height cap would not
@@ -218,6 +223,15 @@ canvas {
   background: var(--ufo-canvas-background, #050510);
   border: var(--ufo-canvas-border, 1px solid #333);
   box-sizing: border-box;
+}
+/* Over the picture, on the same box (its border is as wide, so that the two share one content box, and invisible). */
+canvas.chrome {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: transparent;
+  border-color: transparent;
+  pointer-events: none;
 }
 /* Hover feedback for the editor (<rr0-sighting-editor>): what the pointer is over is drawn INSIDE
    the canvas, so only script can hit-test it — but the appearance stays here, in CSS. The
