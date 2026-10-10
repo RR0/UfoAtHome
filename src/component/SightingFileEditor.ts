@@ -262,12 +262,12 @@ export class SightingFileEditor {
   /** Takes back the last change to the text — the form's own as much as the author's typing, since the
    * form is written into this text as it changes. False when there is nothing left to take back. The
    * caller applies the result: this does not tell the model (see SightingEditorElement.undo). */
-  undo(): boolean {
-    return this.step(undo)
+  undo(show = false): boolean {
+    return this.step(undo, show)
   }
 
-  redo(): boolean {
-    return this.step(redo)
+  redo(show = false): boolean {
+    return this.step(redo, show)
   }
 
   get canUndo(): boolean {
@@ -279,13 +279,45 @@ export class SightingFileEditor {
   }
 
   /** Silent too, as {@link text} is: the caller applies the text it leaves, at once. */
-  private step(command: (target: { state: EditorState, dispatch: (transaction: any) => void }) => boolean): boolean {
+  private step(command: (target: { state: EditorState, dispatch: (transaction: any) => void }) => boolean, show: boolean): boolean {
+    const before = this.view.state.doc.toString()
     this.changing = true
+    let done: boolean
     try {
-      return command(this.view)
+      done = command(this.view)
     } finally {
       this.changing = false
     }
+    if (done && show) this.revealChange(before)
+    return done
+  }
+
+  /**
+   * Shows where a step of the history changed the text: the lines that are not what they were, or the one where lines were
+   * taken away, so that an undo done from the picture's side says what it undid.
+   */
+  private revealChange(before: string): void {
+    const doc = this.view.state.doc
+    const was = before.split("\n")
+    const now = doc.toString().split("\n")
+    let start = 0
+    while (start < was.length && start < now.length && was[start] === now[start]) start++
+    let endWas = was.length
+    let endNow = now.length
+    while (endWas > start && endNow > start && was[endWas - 1] === now[endNow - 1]) {
+      endWas--
+      endNow--
+    }
+    const first = Math.min(start, doc.lines - 1) + 1
+    const last = Math.min(Math.max(first, endNow), doc.lines)
+    const range = { from: doc.line(first).from, to: doc.line(last).to }
+    this.silent = true
+    try {
+      this.view.dispatch({ effects: SightingFileEditor.REVEAL.of(range) })
+    } finally {
+      this.silent = false
+    }
+    this.scrollTo(range.from)
   }
 
   get focused(): boolean {

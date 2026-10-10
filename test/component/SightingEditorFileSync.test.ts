@@ -289,3 +289,39 @@ describe("the lines changed since the last save", () => {
     await waitFor(() => view.dom.querySelectorAll(".cm-changed-line").length === 0, 5000)
   })
 })
+
+describe("undo and redo with the text on show", () => {
+  it("shows where the step changed the text", async () => {
+    const element = mount()
+    const inside = await fileOpened(element)
+    const shadow = element.shadowRoot!
+    shadow.getElementById("add-decor-building")!.dispatchEvent(new Event("pointerdown", { bubbles: true, composed: true }))
+    await new Promise(resolve => setTimeout(resolve, 50))
+    addBuildings(element, 1)
+    const undo = shadow.getElementById("undo") as HTMLButtonElement
+    await waitFor(() => !undo.disabled)
+    expect(inside.fileEditor!.revealedText).toBeUndefined()
+
+    undo.click()
+    expect(inside.fileEditor!.revealedText).toBeDefined()
+
+    ;(shadow.getElementById("redo") as HTMLButtonElement).click()
+    expect(inside.fileEditor!.revealedText).toContain('"building"')
+  })
+
+  it("shows nothing when the text is not on show", async () => {
+    const element = mount()
+    const inside = await fileOpened(element)
+    const shadow = element.shadowRoot!
+    shadow.getElementById("add-decor-building")!.dispatchEvent(new Event("pointerdown", { bubbles: true, composed: true }))
+    await new Promise(resolve => setTimeout(resolve, 50))
+    addBuildings(element, 1)
+    const undo = shadow.getElementById("undo") as HTMLButtonElement
+    await waitFor(() => !undo.disabled)
+    openGroup(element, "group-decor")
+
+    undo.click()
+
+    expect(inside.fileEditor!.revealedText).toBeUndefined()
+  })
+})

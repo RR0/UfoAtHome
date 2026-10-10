@@ -2093,11 +2093,11 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Takes back the last change. */
   private undo(): void {
-    this.stepHistory(editor => editor.undo())
+    this.stepHistory(editor => editor.undo(this.fileSyncActive()))
   }
 
   private redo(): void {
-    this.stepHistory(editor => editor.redo())
+    this.stepHistory(editor => editor.redo(this.fileSyncActive()))
   }
 
   private stepHistory(step: (editor: SightingFileEditor) => boolean): void {
