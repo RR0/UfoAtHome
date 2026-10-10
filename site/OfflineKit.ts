@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto"
-import { readFile } from "node:fs/promises"
+import { readFile, readdir, stat } from "node:fs/promises"
 import { join } from "node:path"
 
 /**
@@ -27,9 +27,6 @@ if ("serviceWorker" in navigator) {
 }
 </script>`
 
-  /** Static imports of an ES module (`from"./x.js"`, `import "./x.js"`), not the `import("./x.js")` it loads later. */
-  private static readonly STATIC_IMPORT = /(?:\bfrom|\bimport)\s*["'](\.\/[^"']+)["']/g
-
   manifest(): string {
     return JSON.stringify({
       id: "/",
@@ -52,17 +49,41 @@ if ("serviceWorker" in navigator) {
     }, undefined, 2) + "\n"
   }
 
-  /** The files `module` needs before it can run: its static imports, followed all the way down. */
-  async staticClosure(libDir: string, entry: string): Promise<string[]> {
+  /** Above this, a file the entry mentions is left to be kept when it is used (the moon's relief, the thunder). */
+  static readonly MAX_PRECACHED_BYTES = 1024 * 1024
+
+  /**
+   * Every file `entry` can need, followed all the way down: its static imports, the chunks it loads
+   * later, and the assets it names (the star catalogue, the messages of each language).
+   *
+   * Found by the NAMES of the built files rather than by parsing imports, because a first visit is
+   * made before the worker exists: whatever the page loads then never goes through it, so a chunk
+   * not fetched on install is simply missing the first time the network is gone. It over-includes (a
+   * name can appear in a string that is never loaded), which costs a few kilobytes; leaving one out
+   * costs a component that cannot start offline.
+   */
+  async closure(libDir: string, entry: string): Promise<string[]> {
+    const sizes = new Map<string, number>()
+    for (const file of await readdir(libDir)) {
+      const info = await stat(join(libDir, file))
+      if (info.isFile()) {
+        sizes.set(file, info.size)
+      }
+    }
     const seen = new Set<string>()
     const visit = async (name: string): Promise<void> => {
       if (seen.has(name)) {
         return
       }
       seen.add(name)
+      if (!/\.m?js$/.test(name)) {
+        return
+      }
       const source = await readFile(join(libDir, name), "utf8")
-      for (const [, specifier] of source.matchAll(OfflineKit.STATIC_IMPORT)) {
-        await visit(specifier!.replace(/^\.\//, ""))
+      for (const [other, size] of sizes) {
+        if (other !== name && size <= OfflineKit.MAX_PRECACHED_BYTES && source.includes(other)) {
+          await visit(other)
+        }
       }
     }
     await visit(entry)
@@ -71,8 +92,8 @@ if ("serviceWorker" in navigator) {
 
   /**
    * An installation holds the shell and the player, nothing heavy: the home and the player pages in
-   * every language, the styles, the icons and the player's component with the modules it cannot run
-   * without. Recordings, models and tiles are kept as they are used (see sw.js), never up front: the
+   * every language, the styles, the icons and the player's component with everything it loads (see
+   * `closure`). Recordings, models and tiles are kept as they are used (see sw.js), never up front: the
    * orbital elements alone weigh 114 MB.
    */
   precache(pageUrls: readonly string[], libFiles: readonly string[], version: string): string[] {

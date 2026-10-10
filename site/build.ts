@@ -199,7 +199,7 @@ class SiteBuilder {
     const pageUrls = installed.flatMap(meta => SITE_LANGUAGES.map(language => layout.fileUrl(meta, language)))
     const libDir = join(this.out, "lib", version)
     const libFiles = [...new Set(await Promise.all(
-      ["rr0-sighting.mjs"].map(entry => kit.staticClosure(libDir, entry))).then(closures => closures.flat()))]
+      ["rr0-sighting.mjs"].map(entry => kit.closure(libDir, entry))).then(closures => closures.flat()))]
     const precache = kit.precache(pageUrls, libFiles, version)
 
     const manifest = kit.manifest()

@@ -14,20 +14,30 @@ describe("OfflineKit", () => {
     expect(manifest.icons.map((icon: { sizes: string }) => icon.sizes)).toEqual(["192x192", "512x512"])
   })
 
-  it("follows the static imports of a module all the way down, and not the ones it loads later", async () => {
+  it("follows what a module names, static imports, later chunks and assets alike", async () => {
     const dir = await mkdtemp(join(tmpdir(), "offline-kit-"))
-    await writeFile(join(dir, "entry.mjs"), `import{a}from"./a.js";import"./side.js";const lazy=()=>import("./lazy.js");export{a}`)
-    await writeFile(join(dir, "a.js"), `export const a=1;import { b } from './b.js'`)
+    await writeFile(join(dir, "entry.mjs"), `import{a}from"./a.js";const lazy=()=>import("./lazy-AbCd1234.js");new URL("stars-Zz9.bin",import.meta.url)`)
+    await writeFile(join(dir, "a.js"), `import { b } from './b.js'`)
     await writeFile(join(dir, "b.js"), `export const b=2`)
-    await writeFile(join(dir, "side.js"), ``)
-    await writeFile(join(dir, "lazy.js"), `import"./never.js"`)
-    expect((await kit.staticClosure(dir, "entry.mjs")).sort()).toEqual(["a.js", "b.js", "entry.mjs", "side.js"])
+    await writeFile(join(dir, "lazy-AbCd1234.js"), `export const messages="fr"`)
+    await writeFile(join(dir, "stars-Zz9.bin"), "binary")
+    await writeFile(join(dir, "unrelated.js"), `export {}`)
+    expect((await kit.closure(dir, "entry.mjs")).sort())
+      .toEqual(["a.js", "b.js", "entry.mjs", "lazy-AbCd1234.js", "stars-Zz9.bin"])
   })
 
-  it("survives a module that imports itself", async () => {
+  it("leaves a big optional file to be kept when it is used", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "offline-kit-"))
+    await writeFile(join(dir, "entry.mjs"), `fetch("thunder-X1.wav");fetch("small-X1.ogg")`)
+    await writeFile(join(dir, "thunder-X1.wav"), Buffer.alloc(OfflineKit.MAX_PRECACHED_BYTES + 1))
+    await writeFile(join(dir, "small-X1.ogg"), "ok")
+    expect((await kit.closure(dir, "entry.mjs")).sort()).toEqual(["entry.mjs", "small-X1.ogg"])
+  })
+
+  it("survives a module that names itself", async () => {
     const dir = await mkdtemp(join(tmpdir(), "offline-kit-"))
     await writeFile(join(dir, "loop.js"), `import"./loop.js"`)
-    expect(await kit.staticClosure(dir, "loop.js")).toEqual(["loop.js"])
+    expect(await kit.closure(dir, "loop.js")).toEqual(["loop.js"])
   })
 
   it("keeps the heavy data out of an installation", () => {
