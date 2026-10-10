@@ -337,6 +337,20 @@
       }
     },
     {
+      "id": "ufoathome-trans-en-provence-craft",
+      "kind": "aircraft",
+      "name": "Trans-en-Provence craft, after Renato Nicolaï's account: two inverted bowls, a ledge, two feet (stand-in)",
+      "file": "ufoathome-trans-en-provence-craft/craft.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 2.5, "lengthM": 2.5, "heightM": 1.8 },
+      "credit": {
+        "title": "Trans-en-Provence craft, a stand-in after the GEPAN's Technical Note 16",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-trans-en-provence-craft.ts"
+      }
+    },
+    {
       "id": "ufoathome-valensole-being-pv-1965-07-02",
       "kind": "entity",
       "name": "Valensole man, after Maurice Masse's statement of 2 July 1965 (stand-in)",

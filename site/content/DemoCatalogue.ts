@@ -91,10 +91,10 @@ export class DemoCatalogue {
       section: "sightings",
       heading: { en: "Real sightings", fr: "Des observations réelles", es: "Avistamientos reales", it: "Avvistamenti reali" },
       intro: {
-        en: "Nine documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Neuf dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
-        es: "Nueve casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
-        it: "Nove casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
+        en: "Eleven documented cases, each replayed in the sky of its own reported date, time and place.",
+        fr: "Onze dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
+        es: "Once casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
+        it: "Undici casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
       },
       demos: [
         {
@@ -202,6 +202,19 @@ export class DemoCatalogue {
             fr: "Une nuit de juillet dans le Hainaut, 00:45, sans Lune. Trois observateurs sur une pelouse, chacun regardant une partie différente du ciel, voient un boomerang sombre le traverser en dix secondes — avec des lumières orange pour l'un, des lumières rouges pour un autre, et aucune pour le troisième. Ouvrez-le en grand pour changer d'observateur.",
             es: "Una noche de julio en el Hainaut, 00:45, sin Luna. Tres observadores en un césped, cada uno mirando una parte distinta del cielo, ven cruzarlo un bumerán oscuro en diez segundos — con luces naranjas para uno, luces rojas para otro, y ninguna para el tercero. Ábrelo a tamaño completo para cambiar de observador.",
             it: "Una notte di luglio nell'Hainaut, 00:45, senza Luna. Tre osservatori su un prato, ciascuno rivolto a una parte diversa del cielo, vedono attraversarlo un boomerang scuro in dieci secondi — con luci arancioni per uno, luci rosse per un altro, e nessuna per il terzo. Aprilo a schermo intero per cambiare osservatore."
+          }
+        },
+        {
+          id: "trans-en-provence",
+          src: "/demo-data/observer-trans-en-provence.json",
+          playSrc: "/demo-data/case-trans-en-provence.json",
+          title: { en: "Trans-en-Provence, 1981", fr: "Trans-en-Provence, 1981", es: "Trans-en-Provence, 1981", it: "Trans-en-Provence, 1981" },
+          titleIsName: true,
+          blurb: {
+            en: "Dusk in the Var, 17:00, 8 January. A man building a pump shelter hears a faint whistle: a grey machine of two upturned saucers, 2.5 m across, drops onto his terrace, stays some twenty seconds against the retaining wall, then tilts and leaves to the north-east. The GEPAN measured its mark and the plants around it — the metres here are its reconstruction's.",
+            fr: "Crépuscule dans le Var, 17:00, le 8 janvier. Un homme qui construit l'abri d'une pompe entend un léger sifflement : un engin gris fait de deux assiettes renversées, de 2,5 m de diamètre, tombe sur sa terrasse, reste une vingtaine de secondes contre le mur de soutènement, puis bascule et repart vers le nord-est. Le GEPAN a mesuré sa trace et les plantes alentour — les mètres sont ceux de sa reconstitution.",
+            es: "Anochecer en el Var, 17:00, el 8 de enero. Un hombre que construye el cobertizo de una bomba oye un leve silbido: un aparato gris de dos platos invertidos, de 2,5 m de diámetro, cae sobre su terraza, se queda una veintena de segundos contra el muro de contención, luego se inclina y se va hacia el nordeste. El GEPAN midió su huella y las plantas de alrededor — los metros son los de su reconstrucción.",
+            it: "Crepuscolo nel Var, 17:00, l'8 gennaio. Un uomo che costruisce il riparo di una pompa sente un leggero sibilo: un velivolo grigio fatto di due piatti rovesciati, di 2,5 m di diametro, cade sulla sua terrazza, resta una ventina di secondi contro il muro di sostegno, poi si inclina e riparte verso nord-est. Il GEPAN ha misurato la sua traccia e le piante intorno — i metri sono quelli della sua ricostruzione."
           }
         },
         {

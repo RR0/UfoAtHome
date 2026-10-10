@@ -76,7 +76,8 @@ const RECORDINGS: CaseRecording[] = [
   { published: "mcminnville/mm2.jpg", dossier: "McMinnville/mcminnville/mm2.jpg" },
   { published: "observer-braine-le-comte-akh.json", dossier: "BraineLeComte/observer-braine-le-comte-akh.json" },
   { published: "observer-braine-le-comte-bjn.json", dossier: "BraineLeComte/observer-braine-le-comte-bjn.json" },
-  { published: "observer-braine-le-comte-fwy.json", dossier: "BraineLeComte/observer-braine-le-comte-fwy.json" }
+  { published: "observer-braine-le-comte-fwy.json", dossier: "BraineLeComte/observer-braine-le-comte-fwy.json" },
+  { published: "observer-trans-en-provence.json", dossier: "TransEnProvence/observer-trans-en-provence.json" }
 ]
 
 class CaseRecordingSync {
