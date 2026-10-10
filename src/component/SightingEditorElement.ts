@@ -762,6 +762,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly optionDecorBridge: HTMLElement
   private readonly optionDecorWire: HTMLElement
   private readonly optionDecorCrop: HTMLElement
+  private readonly optionDecorTerrace: HTMLElement
   private readonly optionDecorMound: HTMLElement
   private readonly optionDecorStreetlight: HTMLElement
   private readonly optionDecorVehicle: HTMLElement
@@ -1479,6 +1480,7 @@ export class SightingEditorElement extends HTMLElement {
     this.optionDecorBridge = this.shadow.getElementById("option-decor-bridge")!
     this.optionDecorWire = this.shadow.getElementById("option-decor-wire")!
     this.optionDecorCrop = this.shadow.getElementById("option-decor-crop")!
+    this.optionDecorTerrace = this.shadow.getElementById("option-decor-terrace")!
     this.optionDecorMound = this.shadow.getElementById("option-decor-mound")!
     this.optionDecorStreetlight = this.shadow.getElementById("option-decor-streetlight")!
     this.optionDecorVehicle = this.shadow.getElementById("option-decor-vehicle")!
@@ -8665,6 +8667,7 @@ export class SightingEditorElement extends HTMLElement {
     this.optionDecorBridge.textContent = messages.decorBridge
     this.optionDecorWire.textContent = messages.decorWire
     this.optionDecorCrop.textContent = messages.decorCrop
+    this.optionDecorTerrace.textContent = messages.decorTerrace
     this.optionDecorMound.textContent = messages.decorMound
     this.optionDecorStreetlight.textContent = messages.decorStreetlight
     this.optionDecorVehicle.textContent = messages.decorVehicle

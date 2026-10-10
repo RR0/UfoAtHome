@@ -238,6 +238,7 @@ export const html = `
         <option id="option-decor-bridge" value="bridge">Bridge</option>
         <option id="option-decor-wire" value="wire">Overhead line</option>
         <option id="option-decor-crop" value="crop">Crop row</option>
+        <option id="option-decor-terrace" value="terrace">Terrace (restanque)</option>
         <option id="option-decor-mound" value="mound">Stone heap</option>
         <option id="option-decor-streetlight" value="streetlight">Streetlight</option>
         <option id="option-decor-vehicle" value="vehicle">Vehicle</option>

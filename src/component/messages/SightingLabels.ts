@@ -173,6 +173,8 @@ export interface SightingLabels {
   decorWire: string
   /** One row of a cultivated field — see DecorKind's own "crop". */
   decorCrop: string
+  /** One step of a terraced hillside — see DecorKind's own "terrace". */
+  decorTerrace: string
   /** A heap of stones or earth — see DecorKind's own "mound". */
   decorMound: string
   decorStreetlight: string

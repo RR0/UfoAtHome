@@ -130,6 +130,7 @@ export const sceneNames_fr: SceneNames = {
     bridge: "Pont",
     wire: "Ligne aérienne",
     crop: "Rang de culture",
+    terrace: "Restanque (terrasse)",
     mound: "Tas de pierres",
     streetlight: "Lampadaire",
     vehicle: "Véhicule",

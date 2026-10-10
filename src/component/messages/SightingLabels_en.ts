@@ -99,6 +99,7 @@ export const sightingLabels_en: SightingLabels = {
   decorBridge: "Bridge",
   decorWire: "Overhead line",
   decorCrop: "Crop row",
+  decorTerrace: "Terrace (restanque)",
   decorMound: "Stone heap",
   decorStreetlight: "Streetlight",
   decorVehicle: "Vehicle",

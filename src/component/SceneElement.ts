@@ -193,6 +193,7 @@ const DECOR_KIND_NAMES: Record<DecorKind, string> = {
   bridge: "Bridge",
   wire: "Overhead line",
   crop: "Crop row",
+  terrace: "Terrace (restanque)",
   mound: "Stone heap",
   streetlight: "Streetlight",
   vehicle: "Vehicle",

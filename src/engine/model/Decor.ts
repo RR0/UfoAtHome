@@ -24,6 +24,16 @@ import type { SaidText } from "./SaidText.js"
  * metres high and is what kept the craft out of sight until he walked round it.
  */
 export type DecorKind =
+  /**
+   * A terrace: one step of a hillside the people there cut into levels, each held by a dry-stone
+   * retaining wall (a "restanque" in Provence, a bancal in Languedoc). `sizeM.widthM` is how far the
+   * wall runs, `lengthM` how deep the level goes back from it, `heightM` the height of the level above
+   * the ground at the foot of the wall, `headingDeg` the direction the wall's face looks (down the slope). It
+   * earns its own kind because the elevation model cannot say it: a terrace is a step of one or two
+   * metres that no height grid at tens of metres resolves, and it is what hid the craft from Nicolaï
+   * until he stood above it. Steps are several of these side by side.
+   */
+  | "terrace"
   | "building" | "tree" | "crop" | "mound" | "streetlight" | "vehicle" | "observer" | "aircraft"
   /** A low bush: the greasewood of a New Mexico wash, the scrub of a garrigue — a clump of rounded
    * crowns on the ground, with no trunk. */

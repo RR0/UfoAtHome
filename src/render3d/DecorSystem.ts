@@ -491,6 +491,18 @@ function buildMound(): Group {
   return group
 }
 
+/**
+ * One terrace: a block of earth held by a dry-stone wall, 1 m on each side before it is sized. The
+ * wall's face is on the -Z side (the "front", as a building's is), grey-beige; the level's top is a
+ * thin layer of bare earth, which a recording may repaint (a vegetable garden is not a bare earth).
+ */
+function buildTerrace(): Group {
+  const group = new Group()
+  addPart(group, new BoxGeometry(1, 1, 1), [0.5, 0.46, 0.38], 0.5)
+  addPart(group, new BoxGeometry(1, 0.03, 1), [0.33, 0.3, 0.18], 1.015)
+  return group
+}
+
 function buildStreetlight(lit: boolean): Group {
   const group = new Group()
   addPart(group, new CylinderGeometry(0.05, 0.08, 5, 8), [0.28, 0.28, 0.3], 2.5)
@@ -722,7 +734,7 @@ export class DecorSystem {
    * ground is what one sees in any field, while its downhill side floating is what one never sees —
    * at a wood's edge half a kilometre off, it was a band of sky under the whole edge.
    */
-  private static readonly GROWS_FROM_GROUND: ReadonlySet<DecorKind> = new Set(["tree", "shrub", "crop", "mound"])
+  private static readonly GROWS_FROM_GROUND: ReadonlySet<DecorKind> = new Set(["tree", "shrub", "crop", "mound", "terrace"])
 
   static groundUnderFootprint(object: DecorObject, x: number, z: number, headingDeg: number | undefined,
     ground: (x: number, z: number) => number, altitudeM = 0): number {
@@ -908,6 +920,8 @@ export class DecorSystem {
             ? buildWire(object)
           : object.kind === "crop"
             ? buildCrop()
+            : object.kind === "terrace"
+              ? buildTerrace()
             : object.kind === "mound"
               ? buildMound()
               : object.kind === "streetlight"
@@ -988,6 +1002,8 @@ export class DecorSystem {
             ? buildShrub()
           : kind === "crop"
             ? buildCrop()
+            : kind === "terrace"
+              ? buildTerrace()
             : kind === "mound"
               ? buildMound()
               : kind === "streetlight"

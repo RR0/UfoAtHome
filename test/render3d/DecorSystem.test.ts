@@ -404,3 +404,18 @@ describe("DecorSystem declared lamps seen against a sky", () => {
     expect(lamp(group).visible).toBe(true)
   })
 })
+
+describe("DecorSystem.build terrace", () => {
+  it("is built at the size stated, a wall of stone under a thin layer of earth, and stands on the lowest ground under it like a bank", () => {
+    const terrace: DecorObject = { id: "decor-3", kind: "terrace", eastM: 0, northM: 20, sizeM: { widthM: 44, lengthM: 8, heightM: 2 } }
+    const group = DecorSystem.build(terrace, false)
+    expect(parts(group)).toHaveLength(2)
+    const box = new Box3().setFromObject(group)
+    expect(box.max.x - box.min.x).toBeCloseTo(44, 0)
+    expect(box.max.z - box.min.z).toBeCloseTo(8, 0)
+    expect(box.max.y - box.min.y).toBeGreaterThan(1.9)
+    // A slope falling 0.5 m per metre of depth, which an 8 m deep terrace spans from 12 m to 8 m: it stands on the low side.
+    const ground = (_x: number, z: number) => 10 - z * 0.5
+    expect(DecorSystem.groundUnderFootprint(terrace, 0, 0, 0, ground)).toBeCloseTo(8, 0)
+  })
+})
