@@ -5637,7 +5637,10 @@ export class SceneRenderer {
     let sprite = this.bodyMeshes.get(key)
     if (!(sprite instanceof Sprite)) {
       this.disposeMesh(sprite)
-      sprite = new Sprite(new SpriteMaterial({ map: createMoonPhaseTexture(position.phase), color: tintColor, fog: false }))
+      // ADDED to the sky, not laid over it: the glow of the air is between the eye and the Moon, so it
+      // is still there over the Moon's dark part. An opaque disc cut a black hole in a bright dusk sky
+      // where a thin crescent (a sliver a fraction of a pixel wide) left only its dark side to be seen.
+      sprite = new Sprite(new SpriteMaterial({ map: createMoonPhaseTexture(position.phase), color: tintColor, fog: false, blending: AdditiveBlending, depthWrite: false }))
       sprite.userData.phaseKey = phaseKey
       this.celestialGroup.add(sprite)
       this.bodyMeshes.set(key, sprite)
