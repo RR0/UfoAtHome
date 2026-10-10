@@ -10,8 +10,9 @@
  *   lower and an upper bowl joined at a flat ledge ("une nervure tout autour de sa circonférence",
  *   "une couronne métallique qui séparait les 2 poids"). Outside diameter 2.5 m and height 1.7 to 1.8 m
  *   (GEPAN, the witness reasoning from the 2.5 m retaining wall he saw it against), so a diameter to
- *   height ratio of 1.42; the ledge ("a thick ridge") is 10 cm proud of the hull on each side, ASSUMED
- *   ("at least 15 cm" in the account to the private group, which is the same order).
+ *   height ratio of 1.42; the ledge ("a thick ridge") is 23 cm proud of the hull on each side, ASSUMED
+ *   ("at least 15 cm" in the account to the private group, which is the same order); seen from above it is
+ *   what tells a saucer resting on its ledge from half a ball set on the ground.
  * - Under it, on take-off: four circles "of smaller diameter, arranged symmetrically", which he
  *   compares to masonry pails (a pail is about 28 cm across: 14 cm radius), and two round pieces
  *   "which could be reactors or feet" that stand 20 cm below the body. The feet's section, and where
@@ -21,8 +22,10 @@
  *   of this machine's lower bowl and ledge, and are not drawn here: they are the ground's.
  * - Grey "comparable to zinc", "the colour of lead": no emission, a rough surface; the ledge "flat
  *   in colour, darker", and the four pods a little darker than the rest (the account).
- * - The hull is a node named "hull", which is what the shapes drawn from the account are measured
- *   against.
+ * - The hull is a node named "hull" (its upper bowl, its ledge and its lower bowl), which is what the
+ *   shapes drawn from the account are measured against. The lower bowl is darker and matt than the upper
+ *   one ("darker and more flat in the thick lateral region"): a bright one mirrored the pale ground it
+ *   stood on and read as sunk into it.
  *
  * Run with: node --import tsx scripts/build-trans-en-provence-craft.ts
  */
@@ -43,24 +46,32 @@ class TransEnProvenceCraft {
 
   /** The outline of the body, [radius, height] from the underside up the axis; 2.5 m across at the ledge, 1.8 m tall with the feet. */
   static readonly BODY: ReadonlyArray<[number, number]> = [
-    [0, 0.2], [0.7, 0.2], [0.95, 0.32], [1.15, 0.7], [1.15, 0.8],
-    [1.25, 0.8], [1.25, 0.9], [1.15, 0.9],
-    [1.1, 1.05], [0.85, 1.4], [0.5, 1.7], [0, 1.8]
+    [0, 0.2], [0.55, 0.2], [0.8, 0.32], [1.0, 0.7], [1.02, 0.8],
+    [1.25, 0.82], [1.25, 0.9], [1.02, 0.92],
+    [1.0, 1.05], [0.8, 1.4], [0.45, 1.7], [0, 1.8]
   ]
 
   readonly materials: GltfMaterial[] = [
-    GltfWriter.material("hull", "#7d8186", 0.35, 0.6),
-    GltfWriter.material("ledge", "#5f6368", 0.25, 0.85),
-    GltfWriter.material("underside", "#4f5358", 0.3, 0.8)
+    GltfWriter.material("hull", "#666a6f", 0.2, 0.55),
+    // The ledge a little lighter than the bowls, so that from above it reads as a rim round the machine, not as its shadow.
+    GltfWriter.material("ledge", "#8d9196", 0.25, 0.7),
+    GltfWriter.material("underside", "#4f5358", 0.3, 0.8),
+    // The lower bowl: darker and flatter than the upper (GEPAN: "darker and more flat in the thick lateral region"). Matt, so that
+    // it does not mirror the pale ground it stands on, which made the machine look sunk into it.
+    GltfWriter.material("lower", "#3b3e42", 0.1, 0.95)
   ]
 
   write(writer: GltfWriter): void {
-    writer.addMesh({ name: "hull", geometry: this.hull(), material: 0 })
+    // The three parts of the body under one node, "hull", which is what the drawn outlines are measured against.
+    const hull = writer.addGroup("hull")
+    writer.addMesh({ name: "upper", geometry: this.lathe(TransEnProvenceCraft.BODY.slice(7)), material: 0 }, hull)
+    writer.addMesh({ name: "ledge", geometry: this.lathe(TransEnProvenceCraft.BODY.slice(4, 8)), material: 1 }, hull)
+    writer.addMesh({ name: "lower", geometry: this.lathe(TransEnProvenceCraft.BODY.slice(0, 5)), material: 3 }, hull)
     for (const part of this.underside()) writer.addMesh(part)
   }
 
-  private hull(): BufferGeometry {
-    const geometry = new LatheGeometry(TransEnProvenceCraft.BODY.map(([r, y]) => new Vector2(r, y)), 64)
+  private lathe(points: ReadonlyArray<[number, number]>): BufferGeometry {
+    const geometry = new LatheGeometry(points.map(([r, y]) => new Vector2(r, y)), 64)
     geometry.computeVertexNormals()
     return geometry
   }
