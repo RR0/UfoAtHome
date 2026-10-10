@@ -5227,6 +5227,17 @@ export class SightingEditorElement extends HTMLElement {
     this.fileEditor!.reveal(path)
   }
 
+  /** Where a body of the interpretation is in the text, read off the text itself (the model keeps it apart from the recording's own). */
+  private bodyPath(id: string): JsonPath | undefined {
+    try {
+      const bodies = (JSON.parse(this.fileEditor!.text) as { interpretation?: { bodies?: Array<{ id?: string }> } }).interpretation?.bodies ?? []
+      const index = bodies.findIndex(body => body.id === id)
+      return index >= 0 ? ["interpretation", "bodies", index] : undefined
+    } catch {
+      return undefined
+    }
+  }
+
   /** Where a shape first stands in the text: the first keyframe that has it. */
   private shapePath(sourceId: string): JsonPath | undefined {
     const keyframes = this.ufoElement.sighting.timeline.allKeyframes
@@ -9225,7 +9236,7 @@ export class SightingEditorElement extends HTMLElement {
       // should win a click there too).
       // A body standing on the scenery (a craft on its platform) is what a click there means, and it is in front: the decor under it
       // is what the ray meets next, and used to be what was selected (see SceneRenderer.pickDecorAt).
-      const bodyNdc = moveAxis === "ground" && !playing && !this.fileSyncActive() ? this.ndcOf(event) : undefined
+      const bodyNdc = moveAxis === "ground" && !playing ? this.ndcOf(event) : undefined
       const bodyId = bodyNdc ? this.sceneElement.pickPlacedBodyAt(bodyNdc.x, bodyNdc.y) : undefined
       if (bodyId !== undefined) {
         this.beginCameraDrag(point, undefined, bodyId)
@@ -9280,6 +9291,11 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Opens the Bodies part of the Phenomenon group on a body clicked on the picture — the same move the summary's chip makes. */
   private showBody(id: string): void {
+    // With the text on show, the body is shown there, where it is written, as a decor object or a shape is: the group stays.
+    if (this.fileSyncActive()) {
+      this.showInFile(this.bodyPath(id))
+      return
+    }
     this.revealShapePanel()
     const tab = this.subgroupTabs.find(candidate => candidate.getAttribute("aria-controls") === "shape-bodies")
     if (tab) this.openSubgroup(tab)

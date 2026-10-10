@@ -222,6 +222,11 @@ interface Private {
   fileFocus?: string
 }
 
+function openGroups(element: SightingEditorElement): string[] {
+  return [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")]
+    .filter(tab => tab.getAttribute("aria-expanded") === "true").map(tab => tab.getAttribute("aria-controls")!)
+}
+
 async function fileOpened(element: SightingEditorElement): Promise<Private> {
   const inside = element as unknown as Private
   openGroup(element, "group-file")
@@ -368,6 +373,20 @@ describe("going from one changed zone to the next", () => {
     expect(editor.gotoChange(-1)).toBe(true)
     expect(at()).toBe(5)
     editor.destroy()
+  })
+})
+
+describe("a body of the interpretation clicked on the picture", () => {
+  it("is shown in the text, where it is written, when the text is on show", async () => {
+    const element = mount()
+    const json = element.sightingData
+    element.sightingData = { ...json, interpretation: { bodies: [{ id: "craft", title: "The craft", model: { id: "x" }, track: [{ t: 0, eastM: 10, northM: -20 }] }] } } as unknown as typeof json
+    const inside = await fileOpened(element)
+
+    ;(element as unknown as { showBody(id: string): void }).showBody("craft")
+
+    expect(inside.fileEditor!.revealedText).toContain('"id": "craft"')
+    expect(openGroups(element)).toEqual(["group-file"])
   })
 })
 
