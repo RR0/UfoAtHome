@@ -81,8 +81,13 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     pickDecorAt(): string | undefined {
       return pickedDecor
     }
-    decorScreenBox(): undefined {
-      return undefined
+    /** The object's frame: the middle of the picture, half of it across and up. */
+    decorScreenBox() {
+      return { minX: -0.5, minY: -0.5, maxX: 0.5, maxY: 0.5 }
+    }
+    /** Where the pointer meets the ground: east and south from it, as the picture's own coordinates say. */
+    decorGroundPointAt(_id: string, ndcX: number, ndcY: number) {
+      return { x: ndcX * 100, z: -ndcY * 100 }
     }
     setLightning(): void {}
     updateLightning(): void {}
@@ -254,5 +259,41 @@ describe("picking scenery on the picture", () => {
     press(nestedCanvas(element))
     expect((element.shadowRoot!.getElementById("decor") as HTMLSelectElement).value).toBe("decor-2")
     expect(openGroups(element)).toEqual([])
+  })
+
+  it("carries the selected object from anywhere in its frame, even where the picture shows only the ground behind it", () => {
+    pickedDecor = undefined
+    const element = twoBuildings()
+    ;[...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-decor")!.click()
+    const east = element.shadowRoot!.getElementById("decorEast") as HTMLInputElement
+    const before = east.value
+    const canvas = nestedCanvas(element)
+
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 320, clientY: 180, bubbles: true, composed: true }))
+    document.dispatchEvent(new MouseEvent("pointermove", { clientX: 420, clientY: 180, bubbles: true }))
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: 420, clientY: 180, bubbles: true }))
+
+    expect(east.value).not.toBe(before)
+  })
+
+  it("does not carry it when another object stands in front of that point, nor when a key is held", () => {
+    const element = twoBuildings()
+    ;[...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-decor")!.click()
+    const east = element.shadowRoot!.getElementById("decorEast") as HTMLInputElement
+    const before = east.value
+    const canvas = nestedCanvas(element)
+    const drag = (init: MouseEventInit) => {
+      canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 320, clientY: 180, bubbles: true, composed: true, ...init }))
+      document.dispatchEvent(new MouseEvent("pointermove", { clientX: 420, clientY: 180, bubbles: true, ...init }))
+      document.dispatchEvent(new MouseEvent("pointerup", { clientX: 420, clientY: 180, bubbles: true, ...init }))
+    }
+
+    pickedDecor = "decor-1" // not the selected one (decor-2, the last added): a nearer object
+    drag({})
+    expect(east.value).toBe(before)
+
+    pickedDecor = undefined
+    drag({ shiftKey: true })
+    expect(east.value).toBe(before)
   })
 })

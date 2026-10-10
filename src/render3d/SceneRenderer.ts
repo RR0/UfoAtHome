@@ -2471,6 +2471,10 @@ export class SceneRenderer {
     this.bodyOrigin = { x: offset.x + shift.x, z: offset.z + shift.z }
     this.placeShadowFrustum()
     this.placeTerraces(t, offset, shift)
+    // What the ground under a footprint was read against: a terrace moved, resized or re-levelled
+    // changes it, and a tree standing on it must read it again, not keep the relief it first saw.
+    const terraceStamp = this.terraces.map(terrace => [terrace.x, terrace.z, terrace.cos, terrace.sin, terrace.halfWidthM,
+      terrace.halfLengthM, terrace.levelY].map(v => v.toFixed(3)).join(",")).join(";")
     if (!inhabited && this.terraces.length > 0) {
       // The eye stands on the ground as it is NOW, terraces included: setObserverPose read it before the terraces were
       // put where this instant's frame has them, one tick behind, and a witness walking along a terrace had his eye
@@ -2498,7 +2502,7 @@ export class SceneRenderer {
       const terrain = this.terrainMesh
       const footprintKey = `${terrain?.geometry.uuid}:${(x - (terrain?.position.x ?? 0)).toFixed(3)}:`
         + `${(z - (terrain?.position.z ?? 0)).toFixed(3)}:${(terrain?.position.y ?? 0).toFixed(3)}:`
-        + `${placement.headingDeg}:${placement.altitudeM}`
+        + `${placement.headingDeg}:${placement.altitudeM}:${terraceStamp}`
       if (group.userData.footprintKey !== footprintKey) {
         group.userData.footprintGroundY = this.groundUnderFootprint(object, x, z, placement.headingDeg, placement.altitudeM)
         group.userData.footprintKey = footprintKey

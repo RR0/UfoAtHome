@@ -9641,6 +9641,22 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
+   * Whether a press at this point takes the selected decor object, to carry it: on the object itself, or
+   * anywhere in the frame drawn round it that no other object covers. The frame is what the author sees as "the
+   * object", and a tree is a thin trunk and a cone inside it: a press in its corner finds the ground behind, which
+   * is itself an object here (a terrace), and used to turn the view instead of carrying the tree. Another object
+   * in front of it (a nearer tree) still takes the press, as it would be selected by it.
+   */
+  private grabsDecor(event: PointerEvent, point: { x: number, y: number }, decor: DecorObject): boolean {
+    const picked = this.pickDecorAt(event)
+    if (picked === decor.id) return true
+    const frame = this.decorCanvasBounds()
+    const inFrame = frame !== undefined && point.x >= frame.x && point.x <= frame.x + frame.width && point.y >= frame.y && point.y <= frame.y + frame.height
+    if (!inFrame) return false
+    return picked === undefined || this.ufoElement.sighting.decor.find(candidate => candidate.id === picked)?.kind === "terrace"
+  }
+
+  /**
    * Starts a manipulation of the selected decor object when the press is on it: a handle sizes or
    * turns it (see beginFrameDrag), the object itself is carried across the ground. A press anywhere
    * else is not taken (false), and turns the view or selects as it always did — which is also why
@@ -9650,7 +9666,7 @@ export class SightingEditorElement extends HTMLElement {
     const decor = this.editableDecor()
     if (!decor) return false
     if (this.beginFrameDrag(this.decorFrame, point)) return true
-    if (this.pickDecorAt(event) !== decor.id) return false
+    if (!this.grabsDecor(event, point, decor)) return false
     const ndc = this.ndcOf(event)
     const ground = ndc && this.sceneElement.decorGroundPointAt(decor.id, ndc.x, ndc.y)
     if (!ground) return false
@@ -9957,7 +9973,8 @@ export class SightingEditorElement extends HTMLElement {
       const bounds = this.decorCanvasBounds()
       const handle = bounds && ShapeHandles.hitTestHandle({ bounds, angle: 0 }, point)
       if (handle) return this.cursorForHandle(handle, 0)
-      if (this.pickDecorAt(event) === this.currentDecorId) return "move"
+      const selected = this.editableDecor()
+      if (selected && this.grabsDecor(event, point, selected)) return "move"
     }
     const shapeMode = mode === "shape"
     if (editable && shapeMode) {
