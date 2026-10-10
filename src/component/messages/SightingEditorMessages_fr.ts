@@ -117,6 +117,12 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   fileGroup: "Fichier",
   fileLoading: "Chargement de l'éditeur…",
   fileEditorLabel: "L'enregistrement en texte JSON",
+  fileSearchPhrases: {
+    "Find": "Rechercher", "Replace": "Remplacer", "next": "suivant", "previous": "précédent", "all": "tout",
+    "match case": "casse", "by word": "mot entier", "regexp": "regexp", "replace": "remplacer", "replace all": "tout remplacer",
+    "close": "fermer", "current match": "occurrence courante", "on line": "à la ligne", "replaced $ matches": "$ occurrences remplacées",
+    "replaced match on line $": "occurrence remplacée à la ligne $", "Go to line": "Aller à la ligne", "go": "aller"
+  },
   timeQualifierExact: "Exacte",
   durationPrecise: "précise",
   durationIso: "EDTF",

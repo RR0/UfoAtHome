@@ -239,6 +239,8 @@ export interface SightingEditorMessages extends SightingLabels {
   fileLoading: string
   /** What a screen reader calls the text editor. */
   fileEditorLabel: string
+  /** The search panel of the text's editor, in this language: CodeMirror's own English words, each by its translation. */
+  fileSearchPhrases: Record<string, string>
   /** The four states of doubt (see parseEdtfTime) that a whole value can have, offered beside the native
    * picker so that "around 05:00" needs no text mode. */
   timeQualifierExact: string

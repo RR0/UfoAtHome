@@ -2305,6 +2305,8 @@ export class SceneElement extends HTMLElement {
 
   set interpretation(interpretation: InterpretationJson | undefined) {
     this.interpretationShown = interpretation
+    // What is played is then the interpretation, and is called so.
+    this.ufoElement.playerTitle = interpretation?.title
     this.syncAccountHidden()
     this.updateAstronomy(this.lastTimeMs)
   }

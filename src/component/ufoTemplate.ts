@@ -11,6 +11,9 @@ export const html = `
   <!-- What a play or pause just did, shown for a moment over the picture as on a video site (see
        UfoElement.flashPlayback). Inert to the pointer: a click through it still reaches the canvas. -->
   <div id="playback-flash" class="playback-flash" aria-hidden="true"></div>
+  <!-- What is being played, top left over the picture as on a video site, and there with the controls
+       only (see UfoElement.syncPlayerTitle). Inert to the pointer. -->
+  <div id="player-title" class="player-title auto-hide" hidden></div>
   <!-- The corner's own row, rather than one absolutely-positioned button per corner: a second
        button placed by its own right offset would have to hardcode the first one's width, and
        every language names them differently the moment either grows a label. Empty in the player,
@@ -616,6 +619,32 @@ canvas[data-cursor="rotate"] {
   .stage.touched .toolbar.auto-hide .toolbar-inner {
     overflow: visible;
   }
+}
+/* The title of what is played, over a fade from the top edge so that it reads on any picture, as on a video
+   site. It stays clear of the corner's own buttons on the right, and of the warning sign when there is one. */
+.player-title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 0.7em 6em 1.6em 0.9em;
+  color: #fff;
+  font-size: 1.05em;
+  font-weight: 600;
+  line-height: 1.25;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  z-index: 2;
+}
+.player-title[hidden] {
+  display: none;
+}
+.stage:has(.issues:not([hidden])) .player-title {
+  padding-left: 3.2em;
 }
 .issues {
   position: absolute;

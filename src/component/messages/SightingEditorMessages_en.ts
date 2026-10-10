@@ -117,6 +117,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   fileGroup: "File",
   fileLoading: "Loading the editor…",
   fileEditorLabel: "The recording as JSON text",
+  fileSearchPhrases: {},
   timeQualifierExact: "Exact",
   durationPrecise: "precise",
   durationIso: "EDTF",

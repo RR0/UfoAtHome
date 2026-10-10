@@ -1,6 +1,7 @@
 import { setupCloudEditor } from "./CloudEditor.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
+import type { JsonPath } from "./JsonPaths.js"
 import { NumberFields } from "./NumberFields.js"
 import type { BodyJson, BodyKeyframe } from "../engine/interpretation/Interpretation.js"
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
@@ -2042,7 +2043,17 @@ export class SightingEditorElement extends HTMLElement {
   markClean(): void {
     this.baseline = JSON.stringify(this.sightingData)
     this.touched = false
+    // The text's changed lines are changed from this: the recording as it was loaded or last exported.
+    this.savedFileText = this.fileText()
+    this.fileEditor?.markSaved()
   }
+
+  /**
+   * The text of the recording as it was when it was loaded or last exported, for the File group's changed lines. Used
+   * once the author has done something: before that, the changed lines are changed from the text as the form spells it,
+   * since what the editor derives by itself after a load (a weather, a zone) is no change of theirs.
+   */
+  private savedFileText?: string
 
   private readonly touch = (): void => {
     this.touched = true
@@ -5123,7 +5134,9 @@ export class SightingEditorElement extends HTMLElement {
         // What it starts from is the recording as it stood before the first touch, when there was one (see armHistory).
         this.historySnapshot ??= this.fileText()
         this.fileEditor = new SightingFileEditor(this.fileEditorHost, this.historySnapshot, text => this.onFileTextEdited(text),
-          this.messages.fileEditorLabel)
+          this.messages.fileEditorLabel, {
+            baseline: this.touched ? this.savedFileText : this.fileText(), phrases: this.messages.fileSearchPhrases, caretMoved: path => this.onFileCaret(path)
+          })
         return this.fileEditor
       } catch (error) {
         // Not remembered: opening the group again is a second try.
@@ -5134,6 +5147,67 @@ export class SightingEditorElement extends HTMLElement {
       }
     })()
     return this.fileEditorLoading
+  }
+
+  /** Whether the text is on show: the only time the text and the picture follow each other, and the only time anything is worked out for it. */
+  private fileSyncActive(): boolean {
+    return this.fileEditor !== undefined && this.isGroupIdOpen("group-file")
+  }
+
+  /** What the File group's caret or selection is in, framed on the picture: a decor object or a shape. */
+  private fileFocus?: "decor" | "shape"
+  private caretTimer?: ReturnType<typeof setTimeout>
+  /** Set while the picture is being told what the text's caret is in, so that it does not tell the text. */
+  private followingCaret = false
+
+  /** The author moved the caret in the text: the picture follows, once it has stopped for a moment. */
+  private onFileCaret(path: JsonPath): void {
+    clearTimeout(this.caretTimer)
+    this.caretTimer = setTimeout(() => this.focusFromFile(path), 120)
+  }
+
+  private focusFromFile(path: JsonPath): void {
+    if (!this.fileSyncActive()) return
+    const sighting = this.ufoElement.sighting
+    this.followingCaret = true
+    try {
+      const decor = path[0] === "decor" && typeof path[1] === "number" ? sighting.decor[path[1]] : undefined
+      if (decor !== undefined) {
+        this.fileFocus = "decor"
+        this.selectDecor(decor.id)
+        return
+      }
+      const shape = path[0] === "timeline" && path[1] === "keyframes" && typeof path[2] === "number" && path[3] === "shapes" && typeof path[4] === "number"
+        ? sighting.timeline.allKeyframes[path[2]]?.shapes[path[4]] : undefined
+      if (shape !== undefined) {
+        this.fileFocus = "shape"
+        this.selectUnit(shape.sourceId)
+        this.syncCanvasMode()
+        this.ufoElement.refresh()
+        return
+      }
+      this.fileFocus = undefined
+      this.syncCanvasMode()
+      this.ufoElement.refresh()
+    } finally {
+      this.followingCaret = false
+    }
+  }
+
+  /** What the picture selected is shown in the text, when the text is on show: its lines selected and scrolled into view. */
+  private showInFile(path: JsonPath | undefined): void {
+    if (this.followingCaret || path === undefined || !this.fileSyncActive()) return
+    this.fileEditor!.reveal(path)
+  }
+
+  /** Where a shape first stands in the text: the first keyframe that has it. */
+  private shapePath(sourceId: string): JsonPath | undefined {
+    const keyframes = this.ufoElement.sighting.timeline.allKeyframes
+    for (const [k, keyframe] of keyframes.entries()) {
+      const j = keyframe.shapes.findIndex(state => state.sourceId === sourceId)
+      if (j >= 0) return ["timeline", "keyframes", k, "shapes", j]
+    }
+    return undefined
   }
 
   private showFileNote(text: string | undefined): void {
@@ -5270,6 +5344,14 @@ export class SightingEditorElement extends HTMLElement {
    */
   private canvasMode(): CanvasMode {
     if (this.isGroupIdOpen("group-reference") && this.currentReferenceId !== undefined) return "picture"
+    // The File group has no panel of its own to edit what it shows, but it follows the text's caret to the picture
+    // (see focusFromFile) and the picture's selection to the text (see showInFile): what the caret is in is framed
+    // there as in its own group, and carried the same way.
+    if (this.isGroupIdOpen("group-file")) {
+      if (this.fileFocus === "decor" && this.editableDecor() !== undefined) return "decor"
+      if (this.fileFocus === "shape" && this.selectedSourceIds.size > 0) return "shape"
+      return "scene"
+    }
     // The Bodies part of the group moves the bodies (see beginBodyDrag); the Shapes part the shapes.
     if (this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-bodies")?.hidden === false) return "body"
     if (this.isGroupIdOpen("group-shape")) return "shape"
@@ -6846,6 +6928,8 @@ export class SightingEditorElement extends HTMLElement {
     // The frame of handles is drawn round the selected object: moving the selection moves it, which
     // syncCanvasMode alone does not repaint while the canvas stays in the same mode.
     if (this.canvasMode() === "decor") this.ufoElement.refresh()
+    const index = this.ufoElement.sighting.decor.findIndex(candidate => candidate.id === id)
+    if (index >= 0) this.showInFile(["decor", index])
   }
 
   /** Writes the East/North/Heading/Name/URL/Floors/Occupied-floor/Observer-location fields back
@@ -9063,6 +9147,12 @@ export class SightingEditorElement extends HTMLElement {
   /** Opens the Environment panel, where the decor object just clicked is framed and edited — idempotent,
    * as revealShapePanel is, and found by the panel it controls for the same reason. */
   private revealDecorPanel(): void {
+    // The text is open: what was clicked is framed where it is, and its text shown (see showInFile), not its panel.
+    if (this.fileSyncActive()) {
+      this.fileFocus = "decor"
+      this.syncCanvasMode()
+      return
+    }
     const tab = this.groupTabs.find(candidate => candidate.getAttribute("aria-controls") === "group-decor")
     if (tab) this.toggleGroup(tab, true)
   }
@@ -9072,6 +9162,11 @@ export class SightingEditorElement extends HTMLElement {
    * the strip: the strip's order is markup, and an index would go quietly wrong the day a group is
    * inserted before it. */
   private revealShapePanel(): void {
+    if (this.fileSyncActive()) {
+      this.fileFocus = "shape"
+      this.syncCanvasMode()
+      return
+    }
     const tab = this.groupTabs.find(candidate => candidate.getAttribute("aria-controls") === "group-shape")
     if (tab) {
       this.toggleGroup(tab, true)
@@ -9105,6 +9200,7 @@ export class SightingEditorElement extends HTMLElement {
     this.currentSourceId = sourceId
     this.refreshSourceList()
     this.onSelectionOrTimeChanged()
+    this.showInFile(this.shapePath(sourceId))
   }
 
   /** Shift-click selection semantics: toggles sourceId's whole "unit" (see selectUnit) in or out

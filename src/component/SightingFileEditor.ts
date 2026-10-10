@@ -1,5 +1,6 @@
-import { EditorView, keymap, lineNumbers, highlightSpecialChars, drawSelection, type KeyBinding } from "@codemirror/view"
-import { EditorState } from "@codemirror/state"
+import { Decoration, EditorView, GutterMarker, gutter, keymap, lineNumbers, highlightSpecialChars, drawSelection, type KeyBinding } from "@codemirror/view"
+import { EditorState, RangeSetBuilder, StateEffect, StateField } from "@codemirror/state"
+import { openSearchPanel, search, searchKeymap } from "@codemirror/search"
 import { defaultKeymap, history, historyKeymap, indentWithTab, isolateHistory, redo, redoDepth, undo, undoDepth } from "@codemirror/commands"
 import { bracketMatching, foldGutter, foldKeymap, HighlightStyle, indentOnInput, syntaxHighlighting } from "@codemirror/language"
 import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from "@codemirror/autocomplete"
@@ -7,6 +8,18 @@ import { json, jsonLanguage, jsonParseLinter } from "@codemirror/lang-json"
 import { linter, lintGutter, lintKeymap } from "@codemirror/lint"
 import { tags } from "@lezer/highlight"
 import { SightingCompletion } from "./SightingCompletion.js"
+import { JsonPaths, type JsonPath } from "./JsonPaths.js"
+import { LineDiff } from "./LineDiff.js"
+
+/** What the editor is told besides the text it starts with. */
+export interface SightingFileEditorOptions {
+  /** The text the changed lines are changed from: what the recording was when it was last saved or exported. Default: the text it starts with. */
+  baseline?: string
+  /** The words of the search panel in the reader's language, by CodeMirror's own English ones. */
+  phrases?: Record<string, string>
+  /** Called with the place of the caret, when the author moves it — what the picture selects. */
+  caretMoved?: (path: JsonPath) => void
+}
 
 /**
  * The recording as text, in the editor's File group: a JSON editor that knows the format.
@@ -16,7 +29,7 @@ import { SightingCompletion } from "./SightingCompletion.js"
  * What it imports is picked piece by piece for the same reason, rather than taken through the
  * `codemirror` package's `basicSetup`, which also brings search, rectangular selection, crosshair,
  * the highlight of every matching word and a panel for each — none of which editing a recording
- * has any use for. What stays is what a JSON editor is for: the keys the format has and what the
+ * has any use for, except the search, which is added back (Ctrl/Cmd+F, with replace). What stays is what a JSON editor is for: the keys the format has and what the
  * model says about each (SightingCompletion, read from the same schema the site's Player page
  * uses), a mistake reported on the line that has it, brackets that close themselves, and folding,
  * since a recording runs to hundreds of lines.
@@ -36,16 +49,62 @@ export class SightingFileEditor {
   private readonly view: EditorView
   private changing = false
 
+  /** Set when the text is put in the editor's own hands by the caller (a reveal), so that its caret does not report itself. */
+  private silent = false
+
+  /**
+   * What the margin and the tint of a line say about it: whether it is changed since the text last saved. Re-worked at
+   * every edit from the baseline and the text (see LineDiff), the baseline replaced by {@link markSaved}.
+   */
+  private static readonly SET_BASELINE = StateEffect.define<string>()
+  private static readonly CHANGED_MARKER = new (class extends GutterMarker {
+    override toDOM(): Node {
+      const bar = document.createElement("div")
+      bar.className = "cm-changed-bar"
+      return bar
+    }
+  })()
+
+  private static changeMarks(initial: string): { field: StateField<{ baseline: string[], changed: ReadonlySet<number> }>, extensions: import("@codemirror/state").Extension[] } {
+    const field = StateField.define<{ baseline: string[], changed: ReadonlySet<number> }>({
+      create: state => ({ baseline: initial.split("\n"), changed: new Set(LineDiff.changed(initial.split("\n"), state.doc.toString().split("\n"))) }),
+      update: (value, transaction) => {
+        let baseline = value.baseline
+        for (const effect of transaction.effects) if (effect.is(SightingFileEditor.SET_BASELINE)) baseline = effect.value.split("\n")
+        if (!transaction.docChanged && baseline === value.baseline) return value
+        return { baseline, changed: new Set(LineDiff.changed(baseline, transaction.state.doc.toString().split("\n"))) }
+      }
+    })
+    const tint = EditorView.decorations.compute([field], state => {
+      const builder = new RangeSetBuilder<Decoration>()
+      for (const index of [...state.field(field).changed].sort((a, b) => a - b)) {
+        if (index < state.doc.lines) builder.add(state.doc.line(index + 1).from, state.doc.line(index + 1).from, Decoration.line({ class: "cm-changed-line" }))
+      }
+      return builder.finish()
+    })
+    const margin = gutter({
+      class: "cm-changed-gutter",
+      lineMarker: (view, line) => view.state.field(field).changed.has(view.state.doc.lineAt(line.from).number - 1) ? SightingFileEditor.CHANGED_MARKER : null,
+      lineMarkerChange: update => update.docChanged || update.transactions.some(transaction => transaction.effects.some(effect => effect.is(SightingFileEditor.SET_BASELINE))),
+      initialSpacer: () => SightingFileEditor.CHANGED_MARKER
+    })
+    return { field, extensions: [field, tint, margin] }
+  }
+
   /** `changed` is called with the text after each edit made BY THE USER; replacing the text from
    * the model (see {@link text}) does not call it, or the two would answer each other forever. */
-  constructor(parent: HTMLElement, text: string, changed: (text: string) => void, label: string) {
+  constructor(parent: HTMLElement, text: string, changed: (text: string) => void, label: string, options: SightingFileEditorOptions = {}) {
     const keys: KeyBinding[] = [...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap, ...foldKeymap, ...completionKeymap,
-      ...lintKeymap, indentWithTab]
+      ...lintKeymap, ...searchKeymap, indentWithTab]
+    const marks = SightingFileEditor.changeMarks(options.baseline ?? text)
     this.view = new EditorView({
       parent,
       doc: text,
       extensions: [
+        ...marks.extensions,
         lineNumbers(),
+        search({ top: true }),
+        EditorState.phrases.of(options.phrases ?? {}),
         foldGutter(),
         highlightSpecialChars(),
         history(),
@@ -71,10 +130,23 @@ export class SightingFileEditor {
           // light ground.
           ".cm-tooltip": { backgroundColor: "Canvas", color: "CanvasText", border: "1px solid color-mix(in srgb, CanvasText 30%, transparent)" },
           ".cm-tooltip-autocomplete > ul > li[aria-selected]": { backgroundColor: "Highlight", color: "HighlightText" },
-          ".cm-gutters": { backgroundColor: "transparent", color: "color-mix(in srgb, currentColor 55%, transparent)", border: "none" }
+          ".cm-gutters": { backgroundColor: "transparent", color: "color-mix(in srgb, currentColor 55%, transparent)", border: "none" },
+          // The lines changed since the last save: a bar in the margin and a light tint, in the blue of a selection.
+          ".cm-changed-gutter": { width: "4px" },
+          ".cm-changed-bar": { width: "3px", height: "100%", backgroundColor: "#2f81f7" },
+          ".cm-changed-line": { backgroundColor: "color-mix(in srgb, #2f81f7 13%, transparent)" },
+          // The search panel's colours are the page's own, in the dark as in the light.
+          ".cm-panels": { backgroundColor: "Canvas", color: "CanvasText", borderColor: "color-mix(in srgb, CanvasText 25%, transparent)" },
+          ".cm-panel.cm-search input, .cm-panel.cm-search button": { fontSize: "inherit" },
+          ".cm-searchMatch": { backgroundColor: "color-mix(in srgb, #f2cc60 40%, transparent)" },
+          ".cm-searchMatch-selected": { backgroundColor: "color-mix(in srgb, #f2cc60 75%, transparent)" }
         }),
         EditorView.updateListener.of(update => {
           if (update.docChanged && !this.changing) changed(update.state.doc.toString())
+          // The caret of the author, not the one this class moves itself (see reveal), nor one that is not in the text.
+          if (update.selectionSet && !this.silent && !this.changing && update.view.hasFocus && options.caretMoved) {
+            options.caretMoved(JsonPaths.at(update.state, update.state.selection.main.head))
+          }
         })
       ]
     })
@@ -103,6 +175,34 @@ export class SightingFileEditor {
     } finally {
       this.changing = false
     }
+  }
+
+  /** The text as it stands is the one the changed lines are changed from — called when the recording is saved or exported. */
+  markSaved(): void {
+    this.view.dispatch({ effects: SightingFileEditor.SET_BASELINE.of(this.view.state.doc.toString()) })
+  }
+
+  /** Opens the search panel (with replace) over the text. */
+  openSearch(): void {
+    this.view.focus()
+    openSearchPanel(this.view)
+  }
+
+  /**
+   * Shows what a place of the recording is in the text: selects it and scrolls it to the middle, and says
+   * whether the text had it. Not focused, and silent — the author is working on the picture, and the caret
+   * this moves is not theirs, or the picture would select what it has just been told to.
+   */
+  reveal(path: JsonPath): boolean {
+    const range = JsonPaths.range(this.view.state, path)
+    if (range === undefined) return false
+    this.silent = true
+    try {
+      this.view.dispatch({ selection: { anchor: range.from, head: range.to }, effects: EditorView.scrollIntoView(range.from, { y: "start", yMargin: 24 }) })
+    } finally {
+      this.silent = false
+    }
+    return true
   }
 
   /** Takes back the last change to the text — the form's own as much as the author's typing, since the

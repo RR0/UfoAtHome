@@ -34,7 +34,8 @@ export const css = `
 .credits-btn {
   anchor-name: --credits-button;
   position: absolute;
-  top: 0.5em;
+  /* Under the title the player shows top left (see UfoElement.syncPlayerTitle), which a button at the very corner hid. */
+  top: 2.9em;
   left: 0.5em;
   z-index: 3;
   width: 1.6em;

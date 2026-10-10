@@ -22,7 +22,7 @@ import type { Shape } from "../engine/shape/Shape.js"
 import type { SightingSound } from "../engine/model/Sound.js"
 import { ShapeHandles } from "../engine/shape/ShapeHandles.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
-import { SaidTexts } from "../engine/model/SaidText.js"
+import { SaidTexts, type SaidText } from "../engine/model/SaidText.js"
 import { loadUfoMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { ufoMessages_en } from "./messages/UfoMessages_en.js"
@@ -176,6 +176,7 @@ export class UfoElement extends HTMLElement {
   private readonly controlsRight: HTMLElement
   private readonly seekSegments: HTMLElement
   private readonly seekDot: HTMLElement
+  private readonly playerTitleBox: HTMLElement
   private readonly seekPreview: HTMLElement
   private readonly seekPreviewCanvas: HTMLCanvasElement
   private readonly seekPreviewTitle: HTMLElement
@@ -676,6 +677,7 @@ export class UfoElement extends HTMLElement {
     this.controlsRight = this.shadow.getElementById("controls-right")!
     this.seekSegments = this.shadow.getElementById("seek-segments")!
     this.seekDot = this.shadow.getElementById("seek-dot")!
+    this.playerTitleBox = this.shadow.getElementById("player-title")!
     this.seekPreview = this.shadow.getElementById("seek-preview")!
     this.seekPreviewCanvas = this.shadow.getElementById("seek-preview-canvas") as HTMLCanvasElement
     this.seekPreviewTitle = this.shadow.getElementById("seek-preview-title")!
@@ -877,12 +879,30 @@ export class UfoElement extends HTMLElement {
     this.mapFitButton.hidden = true
     this.observerMapAsked = false
     this.player = this.createPlayer()
+    this.syncPlayerTitle()
     this.updateTimeLabels()
     this.updatePlayPauseButton()
     this.refresh()
     // After refresh, which is where the new recording's own path is worked out: a page's "start
     // with the map open" is about the recording being loaded, not the one just replaced.
     this.applyObserverMapDefault()
+  }
+
+  /** A title for what is played that is not the recording's own — the interpretation on show, for one — set by
+   * whoever composes this element. Absent, the title is the observer's account's (see syncPlayerTitle). */
+  set playerTitle(title: SaidText | undefined) {
+    this.titleOverride = title
+    this.syncPlayerTitle()
+  }
+
+  private titleOverride?: SaidText
+
+  /** What is played, over the picture's top left with the controls: the title the composing element gave it, or else
+   * the account's — whose it is, and of what (the observer's own title: "Renato Nicolaï (déposition du 9 janvier 1981)"). */
+  private syncPlayerTitle(): void {
+    const text = this.said.read(this.titleOverride) ?? this.currentSighting.observer?.title ?? ""
+    this.playerTitleBox.textContent = text
+    this.playerTitleBox.hidden = text === ""
   }
 
   /** What the recording on show has wrong with it: keys nothing reads, values of the wrong kind,
