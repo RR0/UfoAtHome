@@ -159,9 +159,10 @@ export class SightingFileEditor {
           // light ground.
           ".cm-tooltip": { backgroundColor: "Canvas", color: "CanvasText", border: "1px solid color-mix(in srgb, CanvasText 30%, transparent)" },
           ".cm-tooltip-autocomplete > ul > li[aria-selected]": { backgroundColor: "Highlight", color: "HighlightText" },
-          // The caret and the selection in the page's own colours: the caret is black by default, and invisible on a dark page.
-          ".cm-cursor, .cm-dropCursor": { borderLeftColor: "CanvasText" },
-          "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground": { backgroundColor: "color-mix(in srgb, Highlight 35%, transparent)" },
+          // The caret and the selection in the colour of the text, which is the page's own: the system's text colour is not, where the
+          // page's theme is not the system's (a light page on a dark system drew the caret white on white).
+          ".cm-cursor, .cm-dropCursor": { borderLeftColor: "currentColor" },
+          "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground": { backgroundColor: "color-mix(in srgb, currentColor 22%, transparent)" },
           ".cm-gutters": { backgroundColor: "transparent", color: "color-mix(in srgb, currentColor 55%, transparent)", border: "none" },
           // The lines changed since the last save: a bar in the margin and a light tint, in the blue of a selection.
           ".cm-changed-gutter": { width: "4px" },
@@ -170,17 +171,18 @@ export class SightingFileEditor {
           // What the picture showed: warmer and edged, over the changed lines' tint when both are there.
           ".cm-revealed-line": { backgroundColor: "color-mix(in srgb, #f2cc60 30%, transparent)", boxShadow: "inset 3px 0 0 #f2cc60" },
           // The search panel's colours are the page's own, in the dark as in the light.
-          ".cm-panels": { backgroundColor: "Canvas", color: "CanvasText", borderColor: "color-mix(in srgb, CanvasText 25%, transparent)" },
-          // Fields and buttons in the colours of the system's own, light or dark: left to the search panel's defaults they took the
-          // page's text colour on a white ground, and the text typed was not legible (white on white on a light page).
-          ".cm-panel.cm-search input, .cm-panel.cm-search button": { fontSize: "inherit" },
+          // The search panel follows the page, not the system: derived from the text colour the page gave, as the editor's own caret is.
+          ".cm-panels": { backgroundColor: "color-mix(in srgb, currentColor 6%, transparent)", color: "inherit", borderColor: "color-mix(in srgb, currentColor 25%, transparent)" },
+          // Fields and buttons likewise: left to the search panel's defaults they took the page's text colour on a white ground, and what was
+          // typed was not legible (white on white on a light page).
+          ".cm-panel.cm-search input, .cm-panel.cm-search button": { fontSize: "inherit", color: "inherit" },
           ".cm-panel.cm-search input[type=text], .cm-panel.cm-search input:not([type])": {
-            backgroundColor: "Field", color: "FieldText", border: "1px solid color-mix(in srgb, CanvasText 35%, transparent)", borderRadius: "3px", padding: "2px 5px"
+            backgroundColor: "color-mix(in srgb, currentColor 8%, transparent)", border: "1px solid color-mix(in srgb, currentColor 35%, transparent)", borderRadius: "3px", padding: "2px 5px"
           },
           ".cm-panel.cm-search button": {
-            backgroundImage: "none", backgroundColor: "ButtonFace", color: "ButtonText", border: "1px solid color-mix(in srgb, CanvasText 35%, transparent)", borderRadius: "3px"
+            backgroundImage: "none", backgroundColor: "color-mix(in srgb, currentColor 12%, transparent)", border: "1px solid color-mix(in srgb, currentColor 35%, transparent)", borderRadius: "3px"
           },
-          ".cm-panel.cm-search label, .cm-panel.cm-search [name=close]": { color: "CanvasText" },
+          ".cm-panel.cm-search label, .cm-panel.cm-search [name=close]": { color: "inherit" },
           ".cm-searchMatch": { backgroundColor: "color-mix(in srgb, #f2cc60 40%, transparent)" },
           ".cm-searchMatch-selected": { backgroundColor: "color-mix(in srgb, #f2cc60 75%, transparent)" }
         }),
