@@ -540,10 +540,10 @@ interface Station {
   present?: boolean
 }
 
-/** The stations the photographs fix, and between them the testimony's coming on and leaving. */
+/** The stations the photographs fix. Nothing holds the object still between them: Trent never says it hovered,
+ * and Evelyn has it "moving slowly towards the west", so it drifts from one to the other over the 30 seconds. */
 const PHOTOGRAPHED: Station[] = [
   { t: T_FIRST_MS, azimuthDeg: Study.BEARING_FIRST_DEG, altitudeDeg: seenFirst.altitudeDeg, widthDeg: Study.WIDTH_FIRST_DEG, pose: Pose.FIRST },
-  { t: T_STEP_MS, azimuthDeg: Study.BEARING_FIRST_DEG, altitudeDeg: seenFirst.altitudeDeg, widthDeg: Study.WIDTH_FIRST_DEG, pose: Pose.FIRST },
   { t: T_SECOND_MS, azimuthDeg: Study.BEARING_SECOND_DEG, altitudeDeg: seenSecond.altitudeDeg, widthDeg: Study.WIDTH_SECOND_DEG, pose: Pose.SECOND }
 ]
 
@@ -587,7 +587,7 @@ const hungBodies = (id: string, label: Said<string>, sizeM: number) => {
   const heightM = Geometry.round(sizeM * Study.MODEL_HEIGHT_M / Study.MODEL_WIDTH_M, 3)
   const stands = [
     { t: T_FIRST_MS, camera: first, ...PHOTOGRAPHED[0] },
-    { t: T_SECOND_MS, camera: second, ...PHOTOGRAPHED[2] }
+    { t: T_SECOND_MS, camera: second, ...PHOTOGRAPHED[1] }
   ].map(station => {
     const distanceM = sizeM / (station.widthDeg * Geometry.DEG)
     const at = Geometry.along(station.camera, station.azimuthDeg, distanceM * Math.cos(station.altitudeDeg * Geometry.DEG))
