@@ -7,6 +7,7 @@ import { LIGHT_RIGS } from "../engine/model/LightRig.js"
 import type { PrecipitationType } from "../engine/model/Weather.js"
 import type { SoundKind } from "../engine/model/Sound.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
+import { Filters, type Filter } from "../engine/instrument/Filter.js"
 import type { SightingLabels } from "./messages/SightingLabels.js"
 import type { SaidTexts } from "../engine/model/SaidText.js"
 import { SightingTags } from "./messages/TagNames.js"
@@ -239,6 +240,11 @@ export class SightingSummary {
       tags && tags.length > 0 ? tags.map(tag => this.tags.name(tag)).join(", ") : undefined)
   }
 
+  /** The filter as the editor's picker words it, in the language the labels are in. */
+  private filterName(filter: Filter): string {
+    return filter === Filters.SOLAR_VISUAL ? this.labels.filterSolarVisual : filter === Filters.SOLAR_PHOTO ? this.labels.filterSolarPhoto : filter.name
+  }
+
   private addObserver(entries: SummaryEntry[], sighting: Sighting, timeMs: number): void {
     const observer = sighting.observer
     this.push(entries, "observer", "observerId", this.labels.observerId, observer?.id)
@@ -271,6 +277,10 @@ export class SightingSummary {
       // With the instrument, not with the place: it says how the device was held, not where the
       // observer stood. Absent or zero is one held upright, which states nothing worth a chip.
       this.push(entries, "observer", "roll", this.labels.roll, this.roundedShown(pose.rollDeg), "°")
+      // Only while one is held up: "nothing" is the default and states nothing worth a chip. A pose
+      // field like the aperture, so it comes and goes with the instant (glasses off for the totality).
+      const filter = Filters.byId(pose.filter)
+      if (filter !== Filters.NONE) this.push(entries, "observer", "filter", this.labels.filter, this.filterName(filter))
     }
   }
 

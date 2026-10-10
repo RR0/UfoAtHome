@@ -126,6 +126,26 @@ describe("SightingSummary", () => {
     })
   })
 
+  describe("what is held in front of the instrument", () => {
+    const pose = { lat: 49.26, lng: 4.03, elevationM: 0, headingDeg: 145, pitchDeg: 52, fovDeg: 5 }
+
+    it("is a chip while a filter is held up, and gone once it is taken off", () => {
+      const sighting = Sighting.create(undefined, [{ lat: 49.26, lng: 4.03 }])
+      sighting.observerTrack.addKeyframe(0, { ...pose, filter: "solar-visual" })
+      sighting.observerTrack.addKeyframe(1000, { ...pose, filter: "none" })
+      const at = (timeMs: number) => summary.entriesFor(sighting, timeMs).find(entry => entry.field === "filter")
+      expect(at(0)?.label).toBe(sightingLabels_en.filter)
+      expect(at(0)?.value).toBe(sightingLabels_en.filterSolarVisual)
+      expect(at(1000)).toBeUndefined()
+    })
+
+    it("is absent for a pose that names none", () => {
+      const sighting = Sighting.create(undefined, [{ lat: 49.26, lng: 4.03 }])
+      sighting.observerTrack.addKeyframe(0, pose)
+      expect(fields(sighting)).not.toContain("filter")
+    })
+  })
+
   describe("a coordinate, where zero is a value and not a gap", () => {
     it("keeps a heading of due north", () => {
       const sighting = Sighting.create(undefined, [{ lat: 32.4, lng: -86.3 }])
