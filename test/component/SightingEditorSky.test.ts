@@ -78,6 +78,15 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     pickDecorAt(): undefined {
       return undefined
     }
+    decorScreenBox(): undefined {
+      return undefined
+    }
+    decorGrabHeightAt(): number {
+      return 0
+    }
+    decorMetresPerNdcY(): number {
+      return 0
+    }
     setLightning(): void {}
     updateLightning(): void {}
     setSatellites(): void {}
