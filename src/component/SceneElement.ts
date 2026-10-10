@@ -1016,6 +1016,11 @@ export class SceneElement extends HTMLElement {
     return this.sceneRenderer.decorGroundPointAt(id, ndcX, ndcY, heightM)
   }
 
+  /** Metres per unit of normalised picture height at a decor object — see SceneRenderer.decorMetresPerNdcY. */
+  decorMetresPerNdcY(id: string): number {
+    return this.sceneRenderer.decorMetresPerNdcY(id)
+  }
+
   /** How high above its base a decor object is pressed — see SceneRenderer.decorGrabHeightAt. */
   decorGrabHeightAt(id: string, ndcX: number, ndcY: number): number {
     return this.sceneRenderer.decorGrabHeightAt(id, ndcX, ndcY)

@@ -86,6 +86,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return { minX: -0.5, minY: -0.5, maxX: 0.5, maxY: 0.5 }
     }
     /** Where the pointer meets the ground: east and south from it, as the picture's own coordinates say. */
+    decorMetresPerNdcY() {
+      return 10
+    }
     decorGrabHeightAt() {
       return 0
     }
@@ -279,7 +282,7 @@ describe("picking scenery on the picture", () => {
     expect(east.value).not.toBe(before)
   })
 
-  it("does not carry it when another object stands in front of that point, nor when a key is held", () => {
+  it("does not carry it when another object stands in front of that point, nor when Cmd is held", () => {
     const element = twoBuildings()
     ;[...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-decor")!.click()
     const east = element.shadowRoot!.getElementById("decorEast") as HTMLInputElement
@@ -296,7 +299,32 @@ describe("picking scenery on the picture", () => {
     expect(east.value).toBe(before)
 
     pickedDecor = undefined
-    drag({ shiftKey: true })
+    drag({ metaKey: true })
     expect(east.value).toBe(before)
+  })
+
+  it("restricts the carry to one axis with Shift (east-west) or Alt (north-south)", () => {
+    pickedDecor = undefined
+    const element = twoBuildings()
+    ;[...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-decor")!.click()
+    const east = element.shadowRoot!.getElementById("decorEast") as HTMLInputElement
+    const north = element.shadowRoot!.getElementById("decorNorth") as HTMLInputElement
+    const canvas = nestedCanvas(element)
+    const drag = (init: MouseEventInit) => {
+      canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 320, clientY: 180, bubbles: true, composed: true, ...init }))
+      document.dispatchEvent(new MouseEvent("pointermove", { clientX: 420, clientY: 230, bubbles: true, ...init }))
+      document.dispatchEvent(new MouseEvent("pointerup", { clientX: 420, clientY: 230, bubbles: true, ...init }))
+    }
+    const startEast = east.value
+    const startNorth = north.value
+
+    drag({ shiftKey: true })
+    expect(east.value).not.toBe(startEast)
+    expect(north.value).toBe(startNorth)
+
+    const movedEast = east.value
+    drag({ altKey: true })
+    expect(east.value).toBe(movedEast)
+    expect(north.value).not.toBe(startNorth)
   })
 })

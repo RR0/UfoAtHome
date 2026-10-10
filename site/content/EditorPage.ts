@@ -325,7 +325,7 @@ if (docs) {
         tree, at most. Each crossing narrows the object's real width from one side for the whole
         recording; the result appears under the apparent size, and reads “unknown” when nothing
         crosses its line of sight, which is the honest answer for most sightings.</p>
-      <p><strong>Click an object in the picture to select it:</strong> the Environment group opens on it, framed, ready to move, size or turn. Hold <kbd>Shift</kbd>, <kbd>Ctrl</kbd>, <kbd>Alt</kbd> or <kbd>Cmd</kbd> with the press and it is the view that turns, as over bare ground — the way to turn it from over a forest, where every press lands on a tree.</p>
+      <p><strong>Click an object in the picture to select it:</strong> the Environment group opens on it, framed, ready to move, size or turn. Drag the selected object to carry it over the ground; hold <kbd>Shift</kbd> to carry it east-west only, <kbd>Alt</kbd> north-south only, <kbd>Ctrl</kbd> up and down only. Hold <kbd>Cmd</kbd> (or two of those keys) with the press and it is the view that turns, as over bare ground — the way to turn it from over a forest, where every press lands on a tree.</p>
       <p><strong>Several observers, and their points of view.</strong> An observer placed here can
         carry the URL of their <em>own</em> recording, and right-clicking them in the scene offers
         to view it — which loads their account and puts you where they stood, looking the way they
@@ -769,7 +769,7 @@ if (docs) {
         réelle de l'objet, pour tout l'enregistrement ; le résultat s'affiche sous la taille
         apparente, et dit « inconnue » quand rien ne croise sa ligne de visée — la réponse honnête
         pour la plupart des observations.</p>
-      <p><strong>Cliquez un objet sur l'image pour le sélectionner :</strong> le groupe Environnement s'ouvre sur lui, encadré, prêt à être déplacé, dimensionné ou tourné. Maintenez <kbd>Maj</kbd>, <kbd>Ctrl</kbd>, <kbd>Alt</kbd> ou <kbd>Cmd</kbd> pendant l'appui et c'est la vue qui tourne, comme au-dessus du sol nu — le moyen de la tourner depuis une forêt, où chaque appui tombe sur un arbre.</p>
+      <p><strong>Cliquez un objet sur l'image pour le sélectionner :</strong> le groupe Environnement s'ouvre sur lui, encadré, prêt à être déplacé, dimensionné ou tourné. Glissez l'objet sélectionné pour le porter sur le sol ; avec <kbd>Maj</kbd> il ne va qu'est-ouest, avec <kbd>Alt</kbd> que nord-sud, avec <kbd>Ctrl</kbd> que haut-bas. Maintenez <kbd>Cmd</kbd> (ou deux de ces touches) pendant l'appui et c'est la vue qui tourne, comme au-dessus du sol nu — le moyen de la tourner depuis une forêt, où chaque appui tombe sur un arbre.</p>
       <p><strong>Plusieurs observateurs, et leurs points de vue.</strong> Un observateur placé ici peut porter
         l'URL de son <em>propre</em> enregistrement, et un clic droit sur lui dans la scène propose
         de le consulter — ce qui charge son récit et vous place là où il se tenait, regardant où il

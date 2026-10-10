@@ -5064,6 +5064,14 @@ export class SceneRenderer {
     return hit ? { x: hit.x, z: hit.z } : undefined
   }
 
+  /** How many metres one unit of normalised picture height spans at the distance of a decor object: what
+   * turns a vertical drag of the pointer into a rise or a fall of that object. */
+  decorMetresPerNdcY(id: string): number {
+    const group = this.decorGroups.get(id)
+    if (!group) return 0
+    return group.position.distanceTo(this.camera.position) * Math.tan(this.camera.fov * DEG_TO_RAD / 2)
+  }
+
   /** How high above its base the decor object is pressed at a point of the picture: where the ray meets
    * the upright plane through the object that faces the eye, kept within the object. 0 when it misses. */
   decorGrabHeightAt(id: string, ndcX: number, ndcY: number): number {

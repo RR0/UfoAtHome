@@ -303,6 +303,9 @@ const GLOW_QUESTION_LIVE_BELOW_DEG = -6
  */
 const GLOW_NEEDS_SKY_MAG_PER_ARCSEC2 = 21
 
+/** Which way a press on the selected decor object carries it — see SightingEditorElement.decorMoveAxis. */
+type DecorMoveAxis = "ground" | "east" | "north" | "up"
+
 export class SightingEditorElement extends HTMLElement {
   private readonly shadow: ShadowRoot
   private readonly sceneElement: SceneElement
@@ -900,7 +903,7 @@ export class SightingEditorElement extends HTMLElement {
     | { kind: "body"; pointerAzimuthDeg: number; pointerAltitudeDeg: number; bodyAzimuthDeg: number; bodyAltitudeDeg: number }
     | { kind: "frame-resize"; target: FrameTarget; handle: Exclude<HandleId, "rotate">; centre: { x: number; y: number }; startPointer: { x: number; y: number }; startSizeM: { widthM: number; lengthM: number; heightM: number } }
     | { kind: "frame-rotate"; target: FrameTarget; startPointer: { x: number; y: number }; startAttitude: { headingDeg: number; pitchDeg: number; rollDeg: number } }
-    | { kind: "decor-move"; id: string; startEastM: number; startNorthM: number; startGround: { x: number; z: number }; grabHeightM: number }
+    | { kind: "decor-move"; id: string; startEastM: number; startNorthM: number; startGround: { x: number; z: number }; grabHeightM: number; axis: DecorMoveAxis; startAltitudeM: number; startNdcY: number; metresPerNdcY: number }
     | { kind: "group-resize"; group: ShapeGroup; handle: Exclude<HandleId, "rotate"> }
     | { kind: "group-rotate"; group: ShapeGroup; startPointer: { x: number; y: number } }
 
@@ -8952,8 +8955,8 @@ export class SightingEditorElement extends HTMLElement {
     }
     // A key held down with the press (Shift, Ctrl, Alt, Cmd) says "not the scenery": the press then turns the view, as over bare ground,
     // whatever stands under it — which is what lets the view be turned from over a forest, where every press lands on a tree.
-    const plain = !(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
-    if (mode === "decor" && plain && this.ufoElement.playbackState !== "playing" && this.beginDecorDrag(event, point)) return
+    const moveAxis = this.decorMoveAxis(event)
+    if (mode === "decor" && moveAxis && this.ufoElement.playbackState !== "playing" && this.beginDecorDrag(event, point, moveAxis)) return
     const timeline = this.ufoElement.sighting.timeline
     const t = this.ufoElement.currentTime
     const playing = this.ufoElement.playbackState === "playing"
@@ -9010,7 +9013,7 @@ export class SightingEditorElement extends HTMLElement {
       // one. Only reached once a shape hit is already ruled out, matching the same "shape wins"
       // precedent as SceneElement's own hover tooltip (a shape is painted on top of decor, so it
       // should win a click there too).
-      const decorId = plain ? this.pickDecorAt(event) : undefined
+      const decorId = moveAxis === "ground" ? this.pickDecorAt(event) : undefined
       if (decorId !== undefined) {
         // A tree line or a building fills much of the lower view, and the view has to turn from over
         // it too: the press starts the same drag as over bare ground, and only a press released
@@ -9647,6 +9650,22 @@ export class SightingEditorElement extends HTMLElement {
    * is itself an object here (a terrace), and used to turn the view instead of carrying the tree. Another object
    * in front of it (a nearer tree) still takes the press, as it would be selected by it.
    */
+  /**
+   * What a press does to the selected decor object, from the key held with it: nothing held carries it
+   * over the ground; Shift only east-west, Alt only north-south, Ctrl only up and down; Cmd (or two keys
+   * at once) is not for the object at all, the press then turns the view as over bare ground — which is
+   * also what lets the view be turned from over a forest, where every press lands on a tree.
+   */
+  private decorMoveAxis(event: { shiftKey: boolean, ctrlKey: boolean, altKey: boolean, metaKey: boolean }): DecorMoveAxis | undefined {
+    if (event.metaKey) return undefined
+    const held = [event.shiftKey, event.altKey, event.ctrlKey].filter(Boolean).length
+    if (held > 1) return undefined
+    if (event.shiftKey) return "east"
+    if (event.altKey) return "north"
+    if (event.ctrlKey) return "up"
+    return "ground"
+  }
+
   private grabsDecor(event: PointerEvent, point: { x: number, y: number }, decor: DecorObject): boolean {
     const picked = this.pickDecorAt(event)
     if (picked === decor.id) return true
@@ -9662,7 +9681,7 @@ export class SightingEditorElement extends HTMLElement {
    * else is not taken (false), and turns the view or selects as it always did — which is also why
    * only the SELECTED object is carried: a tree line must still let the view be turned from over it.
    */
-  private beginDecorDrag(event: PointerEvent, point: { x: number; y: number }): boolean {
+  private beginDecorDrag(event: PointerEvent, point: { x: number; y: number }, axis: DecorMoveAxis): boolean {
     const decor = this.editableDecor()
     if (!decor) return false
     if (this.beginFrameDrag(this.decorFrame, point)) return true
@@ -9670,9 +9689,11 @@ export class SightingEditorElement extends HTMLElement {
     const ndc = this.ndcOf(event)
     const grabHeightM = ndc ? this.sceneElement.decorGrabHeightAt?.(decor.id, ndc.x, ndc.y) ?? 0 : 0
     const ground = ndc && this.sceneElement.decorGroundPointAt(decor.id, ndc.x, ndc.y, grabHeightM)
-    if (!ground) return false
+    if (!ndc || !ground) return false
     this.dragState = {
-      kind: "decor-move", id: decor.id, startGround: ground, grabHeightM,
+      kind: "decor-move", id: decor.id, startGround: ground, grabHeightM, axis,
+      startAltitudeM: Number(this.decorAltitudeInput.value) || 0, startNdcY: ndc.y,
+      metresPerNdcY: this.sceneElement.decorMetresPerNdcY?.(decor.id) ?? 0,
       startEastM: Number(this.decorEastInput.value) || 0, startNorthM: Number(this.decorNorthInput.value) || 0
     }
     this.setCanvasCursor("move")
@@ -9684,11 +9705,13 @@ export class SightingEditorElement extends HTMLElement {
     const drag = this.dragState
     if (drag?.kind !== "decor-move") return
     const ndc = this.ndcOf(event)
-    const ground = ndc && this.sceneElement.decorGroundPointAt(drag.id, ndc.x, ndc.y, drag.grabHeightM)
-    if (!ground) return
+    if (!ndc) return
+    const ground = this.sceneElement.decorGroundPointAt(drag.id, ndc.x, ndc.y, drag.grabHeightM)
+    if (!ground && drag.axis !== "up") return
     // x is east and z is south: the ground moved by the pointer, from where it was grabbed.
-    this.decorEastInput.value = String(this.roundedMeters(drag.startEastM + ground.x - drag.startGround.x))
-    this.decorNorthInput.value = String(this.roundedMeters(drag.startNorthM - (ground.z - drag.startGround.z)))
+    if (ground && (drag.axis === "ground" || drag.axis === "east")) this.decorEastInput.value = String(this.roundedMeters(drag.startEastM + ground.x - drag.startGround.x))
+    if (ground && (drag.axis === "ground" || drag.axis === "north")) this.decorNorthInput.value = String(this.roundedMeters(drag.startNorthM - (ground.z - drag.startGround.z)))
+    if (drag.axis === "up") this.decorAltitudeInput.value = String(this.roundedMeters(drag.startAltitudeM + (ndc.y - drag.startNdcY) * drag.metresPerNdcY))
     this.updateDecor()
   }
 
@@ -9970,7 +9993,7 @@ export class SightingEditorElement extends HTMLElement {
       const over = ndc && this.bodyEditor ? this.sceneElement.pickPlacedBodyAt(ndc.x, ndc.y) : undefined
       return editable && over ? "move" : editable ? "pan" : undefined
     }
-    if (mode === "decor" && editable && !(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)) {
+    if (mode === "decor" && editable && this.decorMoveAxis(event)) {
       const bounds = this.decorCanvasBounds()
       const handle = bounds && ShapeHandles.hitTestHandle({ bounds, angle: 0 }, point)
       if (handle) return this.cursorForHandle(handle, 0)
