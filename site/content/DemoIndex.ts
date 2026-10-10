@@ -7,7 +7,7 @@ import { SITE_LANGUAGES, type SiteLanguage } from "../SitePage.js"
 export interface DemoIndexEntry {
   readonly id: string
   readonly section: DemoSectionId
-  /** Where the demo's card is: its sub-page and the card's own anchor. */
+  /** Where a result leads: straight to the player with the demo open, as the title of its card does (not to the card's anchor on its sub-page). */
   readonly href: string
   readonly title: string
   readonly blurb: string
@@ -26,6 +26,9 @@ export interface DemoIndexEntry {
  */
 export class DemoIndex {
 
+  /** The player, which hands a reader on to their own language (see PlayerPage). */
+  static readonly PLAYER_PATH = "/play/"
+
   constructor(private readonly root: string, private readonly catalogue: DemoCatalogue) {
   }
 
@@ -41,7 +44,7 @@ export class DemoIndex {
           index[language].push({
             id: demo.id,
             section: group.section,
-            href: `/demos/${group.section}/#${demo.id}`,
+            href: `${DemoIndex.PLAYER_PATH}?file=${encodeURIComponent(demo.playSrc ?? demo.editSrc ?? demo.src)}`,
             title: demo.title[language],
             blurb: demo.blurb[language],
             ...(date ? { date } : {}),
