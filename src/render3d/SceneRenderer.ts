@@ -234,6 +234,8 @@ const SHADOW_MAX_HALF_EXTENT_M = 700
 const SHADOW_BIAS_M = 0.03
 /** And how far along its own normal, which is what keeps grazing relief from shadowing itself. */
 const SHADOW_NORMAL_BIAS_M = 0.04
+/** The sine of the Sun's elevation (15 degrees) from which that bias is applied whole, and under which it is scaled down with it. */
+const SHADOW_FULL_BIAS_SINE = 0.26
 /** Sized to match the Sun/Moon's real ~0.53deg angular diameter at BODY_PLACEMENT_RADIUS
  * (radius = R*tan(0.265deg) =~ 3.9) — this is a simulation, not an illustration: rendering them
  * bigger or artificially brighter than they'd really appear would defeat the actual point (e.g.
@@ -3376,6 +3378,12 @@ export class SceneRenderer {
     }
     const { x, y, z } = horizontalToCartesian(body.altitudeDeg, body.azimuthDeg, 1)
     this.lightDirection.set(x, y, z)
+    // The push along the normal is what keeps relief from shadowing itself, and it moves where a surface is
+    // tested UP, by SHADOW_NORMAL_BIAS_M: which under a low sun is a long way TOWARDS the light along the
+    // ground (4 cm up is 1.3 m along it at 1.8 degrees), so a shadow began that far from the foot of what
+    // threw it, and a trunk's did not seem to touch the ground at all. A low sun lights level ground so
+    // slightly (its elevation's sine) that nothing shows of the acne the push was against.
+    this.celestialLight.shadow.normalBias = SHADOW_NORMAL_BIAS_M * clamp(y / SHADOW_FULL_BIAS_SINE, 0.1, 1)
     this.placeShadowFrustum()
     const peak = Math.max(beam[0], beam[1], beam[2], 1e-30)
     this.celestialLight.color.setRGB(beam[0] / peak, beam[1] / peak, beam[2] / peak)
