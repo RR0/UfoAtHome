@@ -368,6 +368,25 @@ describe("a scene out of sight", () => {
     expect(sightCalls.at(-1)).toBe("resume")
   })
 
+  it("is never suspended when it says it is always live, as the scene a seek preview is drawn from is", () => {
+    const Watching = globalThis.IntersectionObserver
+    let watchers = 0
+    globalThis.IntersectionObserver = class extends (Watching as unknown as new (callback: IntersectionObserverCallback) => object) {
+      constructor(callback: IntersectionObserverCallback) {
+        super(callback)
+        watchers++
+      }
+    } as unknown as typeof IntersectionObserver
+    const element = document.createElement(SCENE_ELEMENT_NAME) as SceneElement
+    element.setAttribute("always-live", "")
+    document.body.appendChild(element)
+    element.sightingData = rainyJson
+    expect(watchers).toBe(0)
+    // And one that does not say so is watched.
+    document.body.appendChild(document.createElement(SCENE_ELEMENT_NAME))
+    expect(watchers).toBe(1)
+  })
+
   it("holds the clock behind the loader and starts a replay from where it was", async () => {
     const element = mount()
     element.ufoElement.togglePlayPause()

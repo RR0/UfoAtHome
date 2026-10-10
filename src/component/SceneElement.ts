@@ -846,10 +846,15 @@ export class SceneElement extends HTMLElement {
    *
    * A margin around the viewport, so that the first frame is drawn before the scene arrives rather
    * than after.
+   *
+   * Not for a scene that is out of sight ON PURPOSE, which is drawn from all the same: the one the seek
+   * bar's preview is taken from stands outside the page (see SeekPreview) and, watched like the rest, was
+   * suspended at once, drew no frame, and the picture over the bar never came. It says so with the
+   * attribute `always-live`.
    */
   private watchVisibility(): void {
     this.visibilityObserver?.disconnect()
-    if (typeof IntersectionObserver === "undefined") return
+    if (typeof IntersectionObserver === "undefined" || this.hasAttribute("always-live")) return
     this.visibilityObserver = new IntersectionObserver(entries => {
       const visible = entries[entries.length - 1].isIntersecting
       if (visible) {

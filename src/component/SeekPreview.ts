@@ -63,6 +63,8 @@ export class SeekPreview {
     if (this.scene) return this.scene
     const scene = this.create()
     scene.setAttribute("max-pixel-ratio", "1")
+    // Out of the page, and drawn from all the same: a scene out of sight is otherwise suspended (see SceneElement.watchVisibility).
+    scene.setAttribute("always-live", "")
     // Laid out, so that it has a size to draw at, but out of the page and out of the pointer's way.
     Object.assign(scene.style, {
       position: "fixed", left: "-10000px", top: "0", width: `${SeekPreview.SCENE_WIDTH_PX}px`,
