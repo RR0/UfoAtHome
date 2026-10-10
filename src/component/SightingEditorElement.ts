@@ -2098,6 +2098,7 @@ export class SightingEditorElement extends HTMLElement {
     this.historySnapshot = now
     this.historyAnswering = false
     editor.replaceText(now, this.fileSyncActive())
+    this.fileTextApplied = editor.text
     this.syncHistoryButtons()
   }
 
@@ -2121,7 +2122,7 @@ export class SightingEditorElement extends HTMLElement {
     if (!step(editor)) return
     // At once, not after the half second an author's typing is given: a key pressed to undo is answered now.
     clearTimeout(this.fileApplyTimer)
-    this.applyFileText(editor.text)
+    this.applyFileText(editor.text, true)
     this.historyAnswering = true
     this.syncHistoryButtons()
   }
@@ -2139,6 +2140,7 @@ export class SightingEditorElement extends HTMLElement {
     this.historyAnswering = false
     this.fileEditor?.destroy()
     this.fileEditor = undefined
+    this.fileTextApplied = undefined
     this.fileEditorLoading = undefined
     this.syncHistoryButtons()
     if (this.isGroupIdOpen("group-file")) void this.loadFileEditor().then(() => this.syncFileEditor(false), () => undefined)
@@ -5153,6 +5155,7 @@ export class SightingEditorElement extends HTMLElement {
         const { SightingFileEditor } = await import("./SightingFileEditor.js")
         // What it starts from is the recording as it stood before the first touch, when there was one (see armHistory).
         this.historySnapshot ??= this.fileText()
+        this.fileTextApplied = this.historySnapshot
         this.fileEditor = new SightingFileEditor(this.fileEditorHost, this.historySnapshot, text => this.onFileTextEdited(text),
           this.messages.fileEditorLabel, {
             baseline: this.touched ? this.savedFileText : this.fileText(), phrases: this.messages.fileSearchPhrases, caretMoved: path => this.onFileCaret(path)
@@ -5267,6 +5270,7 @@ export class SightingEditorElement extends HTMLElement {
       return
     }
     editor.replaceText(this.fileText(), show)
+    this.fileTextApplied = editor.text
   }
 
   /** Text to form: a text that parses is the recording, a text that does not is left alone (the
@@ -5276,7 +5280,8 @@ export class SightingEditorElement extends HTMLElement {
     this.fileApplyTimer = setTimeout(() => this.applyFileText(text), 500)
   }
 
-  private applyFileText(text: string): void {
+  /** `history`: the text is one an undo or a redo gave back, which is no edit of the author's to ask about (see stepHistory). */
+  private applyFileText(text: string, history = false): void {
     this.fileApplyTimer = undefined
     let json: unknown
     try {
@@ -5287,7 +5292,11 @@ export class SightingEditorElement extends HTMLElement {
     if (typeof json !== "object" || json === null || Array.isArray(json)) return
     if (JSON.stringify(json) === JSON.stringify(this.sightingData)) return
     const playhead = this.ufoElement.currentTime
-    const weatherEdited = JSON.stringify((json as SightingRecordingJson).weatherTrack) !== JSON.stringify(this.sightingData.weatherTrack)
+    // The weather is the author's edit when the TEXT's weather is not what the text said the last time it was in step with the
+    // form: compared with the form's own, it differed for reasons that were not theirs (a lookup answered while they typed,
+    // a figure the form spells another way), and each of those asked what they meant by an edit of something else.
+    const weatherEdited = !history && this.fileTextApplied !== undefined
+      && JSON.stringify((json as SightingRecordingJson).weatherTrack) !== JSON.stringify(SightingEditorElement.weatherOf(this.fileTextApplied))
     const previousWeather = { track: this.sightingData.weatherTrack, source: this.sightingData.weatherSource }
     // The text edited is not a recording loaded: what the recording was when it was loaded or exported stays what the
     // changes are changed from, and the author has done something.
@@ -5314,8 +5323,20 @@ export class SightingEditorElement extends HTMLElement {
       this.historySnapshot = this.fileText()
     } catch {
       this.showFileNote(this.messages.importErrorMalformed)
+      this.fileTextApplied = text
     } finally {
       this.applyingFileText = false
+    }
+  }
+
+  /** What the text last in step with the recording said, to tell what the author changed in it. */
+  private fileTextApplied?: string
+
+  private static weatherOf(text: string): unknown {
+    try {
+      return (JSON.parse(text) as SightingRecordingJson).weatherTrack
+    } catch {
+      return undefined
     }
   }
 

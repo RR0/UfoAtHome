@@ -425,6 +425,8 @@ describe("the weather of a recording", () => {
     element.sightingData = { ...station, weatherSource: { id: "era5", name: "Open-Meteo" } } as unknown as typeof element.sightingData
     const edited = JSON.parse(JSON.stringify(element.sightingData))
     edited.weatherTrack.keyframes[0].weather.cloudCover = 0.8
+    // The text the author is editing was in step with the form: what the file editor holds once it has opened.
+    ;(element as unknown as { fileTextApplied: string }).fileTextApplied = JSON.stringify(element.sightingData)
     ;(element as unknown as { applyFileText(text: string): void }).applyFileText(JSON.stringify(edited))
     return { element, ask: element.shadowRoot!.getElementById("file-ask") as HTMLDialogElement }
   }
@@ -469,6 +471,38 @@ describe("the weather of a recording", () => {
     expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.25)
   })
 
+  it("does not ask when the text differs from the form's weather for a reason that is not the author's", async () => {
+    const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
+    element.weatherProvider = record
+    document.body.appendChild(element)
+    element.sightingData = { ...station, weatherSource: { id: "era5", name: "Open-Meteo" } } as unknown as typeof element.sightingData
+    const inside = element as unknown as { applyFileText(text: string, history?: boolean): void, fileTextApplied?: string }
+    inside.fileTextApplied = JSON.stringify(element.sightingData)
+    // The form's weather moves on by itself (a lookup answered): the text the author is typing in is stale, but they changed another thing.
+    const typed = JSON.parse(JSON.stringify(element.sightingData))
+    typed.description = "something else"
+
+    inside.applyFileText(JSON.stringify(typed))
+
+    expect((element.shadowRoot!.getElementById("file-ask") as HTMLDialogElement).open).toBe(false)
+  })
+
+  it("does not ask when an undo or a redo gives back a text with another weather", async () => {
+    const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
+    element.weatherProvider = record
+    document.body.appendChild(element)
+    element.sightingData = { ...station, weatherSource: { id: "era5", name: "Open-Meteo" } } as unknown as typeof element.sightingData
+    const inside = element as unknown as { applyFileText(text: string, history?: boolean): void, fileTextApplied?: string }
+    inside.fileTextApplied = JSON.stringify(element.sightingData)
+    const older = JSON.parse(JSON.stringify(element.sightingData))
+    older.weatherTrack.keyframes[0].weather.cloudCover = 0.6
+
+    inside.applyFileText(JSON.stringify(older), true)
+
+    expect((element.shadowRoot!.getElementById("file-ask") as HTMLDialogElement).open).toBe(false)
+    expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.6)
+  })
+
   it("does not ask for a weather that no record owns", async () => {
     const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
     element.weatherProvider = record
@@ -477,6 +511,7 @@ describe("the weather of a recording", () => {
     const edited = JSON.parse(JSON.stringify(element.sightingData))
     edited.weatherTrack.keyframes[0].weather.cloudCover = 0.8
 
+    ;(element as unknown as { fileTextApplied: string }).fileTextApplied = JSON.stringify(element.sightingData)
     ;(element as unknown as { applyFileText(text: string): void }).applyFileText(JSON.stringify(edited))
     await new Promise(resolve => setTimeout(resolve, 2500))
 

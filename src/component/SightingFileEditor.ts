@@ -159,6 +159,9 @@ export class SightingFileEditor {
           // light ground.
           ".cm-tooltip": { backgroundColor: "Canvas", color: "CanvasText", border: "1px solid color-mix(in srgb, CanvasText 30%, transparent)" },
           ".cm-tooltip-autocomplete > ul > li[aria-selected]": { backgroundColor: "Highlight", color: "HighlightText" },
+          // The caret and the selection in the page's own colours: the caret is black by default, and invisible on a dark page.
+          ".cm-cursor, .cm-dropCursor": { borderLeftColor: "CanvasText" },
+          "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground": { backgroundColor: "color-mix(in srgb, Highlight 35%, transparent)" },
           ".cm-gutters": { backgroundColor: "transparent", color: "color-mix(in srgb, currentColor 55%, transparent)", border: "none" },
           // The lines changed since the last save: a bar in the margin and a light tint, in the blue of a selection.
           ".cm-changed-gutter": { width: "4px" },
