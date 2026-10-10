@@ -257,5 +257,187 @@
   "soundTrack": {
     "keyframes": []
   },
-  "decor": []
+  "decor": [],
+  "milestones": [
+    {
+      "t": 0,
+      "label": {
+        "fr": "Partielle",
+        "en": "Partial",
+        "es": "Parcial",
+        "it": "Parziale"
+      },
+      "note": {
+        "fr": "12 h 15 : la Lune cache déjà 86 % du disque du Soleil. On le regarde à travers des lunettes d'éclipse (filtre solaire), seule façon de voir son croissant.",
+        "en": "12:15: the Moon already covers 86% of the Sun's disc. It is watched through eclipse glasses (a solar filter), the only way to see its crescent.",
+        "es": "12:15: la Luna ya cubre el 86 % del disco del Sol. Se mira con gafas de eclipse (filtro solar), la única forma de ver su creciente.",
+        "it": "12:15: la Luna copre già l'86 % del disco del Sole. Lo si guarda con occhiali da eclisse (filtro solare), l'unico modo per vederne la falce."
+      }
+    },
+    {
+      "t": 300000,
+      "label": {
+        "fr": "94 %",
+        "en": "94%",
+        "es": "94 %",
+        "it": "94 %"
+      },
+      "note": {
+        "fr": "12 h 20 : 94 % du disque est caché, le croissant s'amincit et le jour baisse.",
+        "en": "12:20: 94% of the disc is covered, the crescent thins and the daylight fades.",
+        "es": "12:20: el 94 % del disco está cubierto, el creciente se afina y la luz del día baja.",
+        "it": "12:20: il 94 % del disco è coperto, la falce si assottiglia e la luce del giorno cala."
+      }
+    },
+    {
+      "t": 556000,
+      "label": {
+        "fr": "Dernier croissant",
+        "en": "Last crescent",
+        "es": "Último creciente",
+        "it": "Ultima falce"
+      },
+      "note": {
+        "fr": "12 h 24 min 16 s : plus que 0,1 % du disque visible. On resserre le champ sur le Soleil (toujours à travers le filtre) pour suivre les dernières secondes avant la totalité.",
+        "en": "12:24:16: only 0.1% of the disc is still visible. The field narrows on the Sun (still through the filter) to follow the last seconds before totality.",
+        "es": "12:24:16: solo queda visible el 0,1 % del disco. Se estrecha el campo sobre el Sol (siempre con el filtro) para seguir los últimos segundos antes de la totalidad.",
+        "it": "12:24:16: resta visibile solo lo 0,1 % del disco. Si stringe il campo sul Sole (sempre attraverso il filtro) per seguire gli ultimi secondi prima della totalità."
+      }
+    },
+    {
+      "t": 564000,
+      "label": {
+        "fr": "Perles de Baily",
+        "en": "Baily's beads",
+        "es": "Perlas de Baily",
+        "it": "Grani di Baily"
+      },
+      "note": {
+        "fr": "Quelques secondes avant le 2e contact, les derniers grains de lumière passent entre les creux du relief du bord de la Lune (dessinés d'après les mesures LOLA de la NASA).",
+        "en": "A few seconds before second contact, the last grains of light pass between the valleys of the Moon's limb (drawn from NASA's LOLA measurements).",
+        "es": "Unos segundos antes del segundo contacto, los últimos granos de luz pasan entre los valles del borde de la Luna (dibujados a partir de las medidas LOLA de la NASA).",
+        "it": "Pochi secondi prima del secondo contatto, gli ultimi grani di luce passano tra le valli del bordo della Luna (disegnati dalle misure LOLA della NASA)."
+      }
+    },
+    {
+      "t": 570000,
+      "label": {
+        "fr": "C2",
+        "en": "C2",
+        "es": "C2",
+        "it": "C2"
+      },
+      "note": {
+        "fr": "12 h 24 min 30 s, deuxième contact : le disque de la Lune couvre tout le Soleil, c'est le début de la totalité (elle dure deux minutes).",
+        "en": "12:24:30, second contact: the Moon's disc covers the whole Sun, and totality begins (it lasts two minutes).",
+        "es": "12:24:30, segundo contacto: el disco de la Luna cubre todo el Sol, empieza la totalidad (dura dos minutos).",
+        "it": "12:24:30, secondo contatto: il disco della Luna copre tutto il Sole, inizia la totalità (dura due minuti)."
+      }
+    },
+    {
+      "t": 574000,
+      "label": {
+        "fr": "Sans filtre",
+        "en": "Filter off",
+        "es": "Sin filtro",
+        "it": "Senza filtro"
+      },
+      "note": {
+        "fr": "Quatre secondes après le début de la totalité, les lunettes s'ôtent : sans croissant, plus rien n'éblouit, et la couronne du Soleil se voit à l'œil nu.",
+        "en": "Four seconds into totality, the glasses come off: with no crescent left nothing dazzles, and the Sun's corona is seen with the naked eye.",
+        "es": "Cuatro segundos después del inicio de la totalidad se quitan las gafas: sin creciente nada deslumbra, y la corona del Sol se ve a simple vista.",
+        "it": "Quattro secondi dopo l'inizio della totalità si tolgono gli occhiali: senza falce nulla abbaglia, e la corona del Sole si vede a occhio nudo."
+      }
+    },
+    {
+      "t": 596000,
+      "label": {
+        "fr": "Vue large",
+        "en": "Wide view",
+        "es": "Vista amplia",
+        "it": "Vista ampia"
+      },
+      "note": {
+        "fr": "Le champ s'élargit à 25° : la couronne, un ciel de crépuscule, l'anneau orangé de l'horizon (l'air resté éclairé au-delà de l'ombre de la Lune) et les étoiles et planètes qui apparaissent.",
+        "en": "The field widens to 25°: the corona, a twilight sky, the orange ring on the horizon (the air still lit beyond the Moon's shadow) and the stars and planets coming out.",
+        "es": "El campo se ensancha a 25°: la corona, un cielo de crepúsculo, el anillo anaranjado del horizonte (el aire aún iluminado más allá de la sombra de la Luna) y las estrellas y planetas que aparecen.",
+        "it": "Il campo si allarga a 25°: la corona, un cielo crepuscolare, l'anello arancione dell'orizzonte (l'aria ancora illuminata oltre l'ombra della Luna) e le stelle e i pianeti che compaiono."
+      }
+    },
+    {
+      "t": 632500,
+      "label": {
+        "fr": "Maximum",
+        "en": "Maximum",
+        "es": "Máximo",
+        "it": "Massimo"
+      },
+      "note": {
+        "fr": "12 h 25 min 32 s, milieu de la totalité : la Lune est au plus près du centre du Soleil.",
+        "en": "12:25:32, middle of totality: the Moon is closest to the centre of the Sun.",
+        "es": "12:25:32, mitad de la totalidad: la Luna está lo más cerca posible del centro del Sol.",
+        "it": "12:25:32, metà della totalità: la Luna è il più vicino possibile al centro del Sole."
+      }
+    },
+    {
+      "t": 686000,
+      "label": {
+        "fr": "Avant C3",
+        "en": "Before C3",
+        "es": "Antes de C3",
+        "it": "Prima di C3"
+      },
+      "note": {
+        "fr": "On resserre à nouveau le champ sur le bord du Soleil, du côté où il va reparaître.",
+        "en": "The field narrows again on the edge of the Sun, on the side where it is about to reappear.",
+        "es": "El campo se estrecha de nuevo sobre el borde del Sol, por el lado donde va a reaparecer.",
+        "it": "Il campo si stringe di nuovo sul bordo del Sole, dal lato in cui sta per riapparire."
+      }
+    },
+    {
+      "t": 692000,
+      "label": {
+        "fr": "Lunettes remises",
+        "en": "Glasses back on",
+        "es": "Gafas puestas",
+        "it": "Occhiali rimessi"
+      },
+      "note": {
+        "fr": "12 h 26 min 32 s : les lunettes se remettent, deux secondes avant que le Soleil ne reparaisse.",
+        "en": "12:26:32: the glasses go back on, two seconds before the Sun reappears.",
+        "es": "12:26:32: se vuelven a poner las gafas, dos segundos antes de que el Sol reaparezca.",
+        "it": "12:26:32: si rimettono gli occhiali, due secondi prima che il Sole riappaia."
+      }
+    },
+    {
+      "t": 694000,
+      "label": {
+        "fr": "C3",
+        "en": "C3",
+        "es": "C3",
+        "it": "C3"
+      },
+      "note": {
+        "fr": "12 h 26 min 34 s, troisième contact : le premier rayon du Soleil reparaît, c'est la fin de la totalité.",
+        "en": "12:26:34, third contact: the first ray of the Sun reappears and totality ends.",
+        "es": "12:26:34, tercer contacto: reaparece el primer rayo del Sol y termina la totalidad.",
+        "it": "12:26:34, terzo contatto: riappare il primo raggio del Sole e la totalità finisce."
+      }
+    },
+    {
+      "t": 706000,
+      "label": {
+        "fr": "Partielle",
+        "en": "Partial",
+        "es": "Parcial",
+        "it": "Parziale"
+      },
+      "note": {
+        "fr": "La phase partielle reprend, le croissant grossit de l'autre côté. À 12 h 35 la Lune cache encore 88 % du Soleil, et l'éclipse se poursuivra jusqu'à 13 h 48.",
+        "en": "The partial phase resumes, the crescent growing on the other side. At 12:35 the Moon still covers 88% of the Sun, and the eclipse goes on until 13:48.",
+        "es": "Se reanuda la fase parcial, el creciente crece por el otro lado. A las 12:35 la Luna aún cubre el 88 % del Sol, y el eclipse continuará hasta las 13:48.",
+        "it": "Riprende la fase parziale, la falce cresce dall'altro lato. Alle 12:35 la Luna copre ancora l'88 % del Sole, e l'eclissi proseguirà fino alle 13:48."
+      }
+    }
+  ]
 }
