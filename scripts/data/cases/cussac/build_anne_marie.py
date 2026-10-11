@@ -59,6 +59,7 @@ def seen_from_her(p):
 
 d = json.load(open(SOURCE, encoding="utf-8"))
 d["id"] = "1967-08-29-DelpeuchAnneMarie"
+d.pop("image", None)  # her own photograph, written by scripts/share-cards/ShareCards.ts once this is generated
 d["observer"] = {"id": "DelpeuchAnneMarie", "title": "Anne-Marie Delpeuch"}
 d["account"] = {"observerAgeYears": 9, "source": "on-site", "followedUp": True}
 d["durationSeconds"] = END_MS // 1000

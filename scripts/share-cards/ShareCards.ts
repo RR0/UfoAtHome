@@ -1,0 +1,133 @@
+/**
+ * Photographs the recordings this project publishes, for the card a shared link to each one shows
+ * (see netlify/edge-functions/play-share-card.ts): the scene as the player draws it, stopped at one
+ * instant, written as a JPEG beside the recording.
+ *
+ * A real frame of the simulation and not an illustration, because that is what the link is to. By
+ * default the first one; for a recording whose first moment shows an empty sky, the instant is given
+ * below, chosen by looking (`--sheet` writes a few instants of each recording to look at).
+ *
+ * Run with (outside the sandbox: Chrome needs its own sockets):
+ *   PLAYWRIGHT_MODULE=/path/to/node_modules/playwright-core npx tsx scripts/share-cards/ShareCards.ts
+ *   ... --sheet [name...]     writes the contact sheets to $TMPDIR/share-sheets instead
+ *   ... [name...]             only the named recordings (observer-cussac, ...)
+ *   ... --link [name...]      writes the `image` fields from the photographs already taken, without photographing
+ *
+ * The last step of making a recording: once photographed, its `image` is written into it (see `link`), so that
+ * regenerating a recording from its source data and running this again leaves it as it was. A case needs none: the
+ * edge function takes the picture of its first account.
+ *
+ * Not part of the site build: Netlify has no Chrome, and a card is a picture to commit, not to derive
+ * on every deploy.
+ */
+import { createRequire } from "node:module"
+import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
+import { createServer } from "vite"
+
+/** Where the first image says nothing (an empty sky, the observer's back turned): the second to photograph instead. */
+const INSTANTS: Record<string, number> = {}
+
+class ShareCards {
+
+  /** Where the photographs are served from: absolute, so that the copies of a recording on rr0.org say the same. */
+  static readonly ORIGIN = "https://ufoathome.org"
+  static readonly SIZE = { width: 1200, height: 675 }
+  static readonly CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+  /** A frame needs the scene to be whole (the loader gone) and a moment for the last textures to be drawn. */
+  static readonly SETTLE_MS = 2000
+  static readonly TIMEOUT_MS = 120_000
+
+  private readonly root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..")
+  private readonly demoData = path.join(this.root, "public", "demo-data")
+
+  /** The accounts a case replays (not the readings of it): what a card is a picture of. */
+  recordings(names: string[]): string[] {
+    const all = readdirSync(this.demoData).filter(file => /^observer-.*\.json$/.test(file)).map(file => file.replace(/\.json$/, ""))
+    return names.length > 0 ? all.filter(name => names.includes(name)) : all
+  }
+
+  /** The first and last instants the recording states, in seconds: its keyframes, since a stated duration may come wrapped in its provenance. */
+  private span(name: string): { start: number, end: number } {
+    const json = JSON.parse(readFileSync(path.join(this.demoData, `${name}.json`), "utf8"))
+    const times = (json.timeline?.keyframes ?? []).map((keyframe: { t: number }) => keyframe.t / 1000)
+    return times.length > 0 ? { start: Math.min(...times), end: Math.max(...times) } : { start: 0, end: 10 }
+  }
+
+  async run(args: string[]): Promise<void> {
+    const sheet = args.includes("--sheet")
+    const names = this.recordings(args.filter(arg => !arg.startsWith("--")))
+    if (args.includes("--link")) {
+      names.forEach(name => this.link(name))
+      return
+    }
+    const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || "playwright-core")
+    const server = await createServer({ root: this.root, server: { port: 0, host: "127.0.0.1" }, logLevel: "error" })
+    await server.listen()
+    const origin = `http://127.0.0.1:${(server.httpServer!.address() as { port: number }).port}`
+    const browser = await chromium.launch({
+      executablePath: ShareCards.CHROME,
+      headless: true,
+      args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"]
+    })
+    try {
+      const out = sheet ? path.join(tmpdir(), "share-sheets") : path.join(this.demoData, "share")
+      mkdirSync(out, { recursive: true })
+      for (const name of names) {
+        const { start, end } = this.span(name)
+        const instants = sheet ? [0, 0.25, 0.5, 0.75].map(fraction => Math.round((start + fraction * (end - start)) * 10) / 10) : [INSTANTS[name] ?? start]
+        for (const seconds of instants) {
+          const file = path.join(out, sheet ? `${name}@${seconds}.jpg` : `${name.replace(/^observer-/, "")}.jpg`)
+          await this.photograph(browser, origin, name, seconds, file)
+          if (!sheet) this.link(name)
+          console.log(`${path.relative(this.root, file)} (${Math.round(statSync(file).size / 1024)} KB)`)
+        }
+      }
+    } finally {
+      await browser.close()
+      await server.close()
+    }
+  }
+
+  /** Writes (or replaces) the recording's top-level `image`, in the file's own layout so that nothing else moves. */
+  private link(name: string): void {
+    const file = path.join(this.demoData, `${name}.json`)
+    const image = `${ShareCards.ORIGIN}/demo-data/share/${name.replace(/^observer-/, "")}.jpg`
+    const text = readFileSync(file, "utf8")
+    const layout = /^( *)"version":( ?)/m.exec(text)
+    if (!layout) throw new Error(`${name}.json has no top-level "version" to read its layout from`)
+    const [, indent, space] = layout
+    const field = `${indent}"image":${space}${JSON.stringify(image)},\n`
+    const existing = new RegExp(`^${indent}"image":${space}"[^"]*",\\n`, "m")
+    const id = new RegExp(`^${indent}"id":${space}"[^"]*",\\n`, "m")
+    const written = existing.test(text) ? text.replace(existing, field) : text.replace(id, match => match + field)
+    if (written === text && !text.includes(field)) throw new Error(`${name}.json has no top-level "id" to put its image after`)
+    JSON.parse(written)
+    writeFileSync(file, written)
+    console.log(`${name}.json: ${image}`)
+  }
+
+  private async photograph(browser: any, origin: string, name: string, seconds: number, file: string): Promise<void> {
+    const page = await browser.newPage({ viewport: ShareCards.SIZE, deviceScaleFactor: 1 })
+    try {
+      await page.goto(`${origin}/scripts/share-cards/capture.html?src=${encodeURIComponent(`/demo-data/${name}.json`)}&t=${seconds}`)
+      await page.waitForFunction(() => {
+        const stage = (window as any).__stage
+        const loader = stage?.scene?.shadowRoot?.getElementById("scene-loader")
+        return loader && loader.hidden === true
+      }, null, { timeout: ShareCards.TIMEOUT_MS, polling: 500 })
+      await page.waitForTimeout(ShareCards.SETTLE_MS)
+      const frame = await page.evaluate(() => {
+        const box = (window as any).__stage.scene.shadowRoot.getElementById("frame").getBoundingClientRect()
+        return { x: box.x, y: box.y, width: box.width, height: box.height }
+      })
+      await page.screenshot({ path: file, type: "jpeg", quality: 85, clip: frame })
+    } finally {
+      await page.close()
+    }
+  }
+}
+
+await new ShareCards().run(process.argv.slice(2))

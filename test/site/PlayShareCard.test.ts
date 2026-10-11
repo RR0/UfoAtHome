@@ -75,6 +75,20 @@ describe("PlayShareCard", () => {
     expect(PlayShareCard.cardOf({ title: "C", events: [], time: "1954", summary: "Dite." }, "https://a.org/case.json", "fr").description).toBe("Dite.")
   })
 
+  it("gives a case without picture the one of its first account, not of a reading of it", async () => {
+    const recordings: Record<string, unknown> = {
+      "https://a.org/x/reading.json": { image: "reading.jpg", timeline: {} },
+      "https://a.org/x/first.json": { image: "pics/first.jpg", timeline: {} }
+    }
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => recordings[url] ? reply(recordings[url]) : new Response("", { status: 404 })))
+    const aCase = { title: "C", events: [
+      { eventType: "sighting", interpretationOf: "z", url: "reading.json" },
+      { eventType: "sighting", url: "first.json" }
+    ] }
+    expect(await PlayShareCard.firstAccountImage(aCase, "https://a.org/x/case.json")).toBe("https://a.org/x/pics/first.jpg")
+    expect(await PlayShareCard.firstAccountImage({ events: [] }, "https://a.org/x/case.json")).toBeUndefined()
+  })
+
   it("refuses a picture that is not a web address, and cuts a long description at a word", () => {
     const card = PlayShareCard.cardOf({ id: "x", summary: "word ".repeat(100), image: "javascript:alert(1)" }, "https://a.org/x.json", "en")
     expect(card.image).toBeUndefined()

@@ -56,22 +56,46 @@ export class PlayShareCard {
     })
   }
 
+  /** What a JSON address answers, if it answers in time with a JSON object of a reasonable size. */
+  static async fetchJson(url: string): Promise<{ json: Record<string, unknown>, url: string } | undefined> {
+    try {
+      const reply = await fetch(url, { signal: AbortSignal.timeout(PlayShareCard.TIMEOUT_MS) })
+      if (!reply.ok) return undefined
+      if (Number(reply.headers.get("content-length")) > PlayShareCard.MAX_BYTES) return undefined
+      const text = await reply.text()
+      if (text.length > PlayShareCard.MAX_BYTES) return undefined
+      const json = JSON.parse(text)
+      return typeof json === "object" && json !== null && !Array.isArray(json) ? { json, url: reply.url || url } : undefined
+    } catch {
+      // Unreachable, too slow, not JSON: the next candidate, then the logo.
+      return undefined
+    }
+  }
+
   /** The first candidate that answers with a JSON object, with where it came from. */
   static async find(requested: string, origin: string): Promise<{ json: Record<string, unknown>, url: string } | undefined> {
     for (const url of PlayShareCard.candidates(requested, origin)) {
-      try {
-        const reply = await fetch(url, { signal: AbortSignal.timeout(PlayShareCard.TIMEOUT_MS) })
-        if (!reply.ok) continue
-        if (Number(reply.headers.get("content-length")) > PlayShareCard.MAX_BYTES) continue
-        const text = await reply.text()
-        if (text.length > PlayShareCard.MAX_BYTES) continue
-        const json = JSON.parse(text)
-        if (typeof json === "object" && json !== null && !Array.isArray(json)) return { json, url: reply.url || url }
-      } catch {
-        // Unreachable, too slow, not JSON: the next candidate, then the logo.
-      }
+      const found = await PlayShareCard.fetchJson(url)
+      if (found) return found
     }
     return undefined
+  }
+
+  /** A case is a chronology of events and has no timeline of its own, which every recording has. */
+  static isCase(json: Record<string, unknown>): boolean {
+    return Array.isArray(json.events) && !json.timeline
+  }
+
+  /**
+   * The picture of a case that states none: the one of its first account, the first `sighting` event that is not a reading
+   * of another (an interpretation), since that is the observation the case is about.
+   */
+  static async firstAccountImage(caseJson: Record<string, unknown>, caseUrl: string): Promise<string | undefined> {
+    const events = Array.isArray(caseJson.events) ? caseJson.events as Array<Record<string, unknown>> : []
+    const first = events.find(event => event?.eventType === "sighting" && !event.interpretationOf && !event.sighting && typeof event.url === "string")
+    if (!first) return undefined
+    const account = await PlayShareCard.fetchJson(new URL(first.url as string, caseUrl).href)
+    return account ? PlayShareCard.imageOf(account.json.image, account.url) : undefined
   }
 
   /**
@@ -79,7 +103,7 @@ export class PlayShareCard {
    * account by its observer's name, then its id, then its file's name.
    */
   static cardOf(json: Record<string, unknown>, url: string, language: string): RecordingCard {
-    const isCase = Array.isArray(json.events) && !json.timeline
+    const isCase = PlayShareCard.isCase(json)
     const observer = json.observer as { title?: string, lastName?: string, firstNames?: string[], id?: string } | undefined
     const fullName = observer && [...(observer.firstNames ?? []), observer.lastName].filter(Boolean).join(" ")
     const fileName = decodeURIComponent(new URL(url).pathname.split("/").pop() ?? "").replace(/\.json$/, "")
@@ -227,10 +251,12 @@ export class PlayShareCard {
     if (!found) return response
     const language = /index_([a-z]{2})\.html$/.exec(url.pathname)?.[1] ?? "en"
     const html = await response.text()
+    const card = PlayShareCard.cardOf(found.json, found.url, language)
+    if (!card.image && PlayShareCard.isCase(found.json)) card.image = await PlayShareCard.firstAccountImage(found.json, found.url)
     const address = `${url.origin}${url.pathname}?file=${encodeURIComponent(requested)}`
     const headers = new Headers(response.headers)
     headers.delete("content-length")
-    return new Response(PlayShareCard.apply(html, PlayShareCard.cardOf(found.json, found.url, language), address), {
+    return new Response(PlayShareCard.apply(html, card, address), {
       status: response.status,
       headers
     })

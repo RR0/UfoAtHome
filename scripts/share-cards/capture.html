@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Share card capture</title>
+  <!-- What scripts/share-cards/ShareCards.ts photographs: one recording, stopped at one instant, with nothing around it.
+       The size is the card's. `?src=` is the recording, `&t=` the second it opens at. -->
+  <style>html, body { margin: 0; background: #000 }</style>
+</head>
+<body>
+<rr0-sighting id="stage" style="display:block;width:1200px;height:675px"></rr0-sighting>
+<script type="module">
+  import { registerSighting } from "/src/component/SightingElement.ts"
+  import { registerScene } from "/src/component/SceneElement.ts"
+
+  registerScene()
+  registerSighting()
+  const query = new URLSearchParams(location.search)
+  const stage = document.getElementById("stage")
+  if (query.get("t")) stage.setAttribute("start-time", query.get("t"))
+  stage.setAttribute("src", query.get("src"))
+  window.__stage = stage
+</script>
+</body>
+</html>
