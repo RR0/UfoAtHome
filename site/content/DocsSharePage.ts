@@ -278,6 +278,11 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       can put a URL. The field above starts on one of this site's own recordings so the button does
       something; the address you put there is your own, on your own host, and this site never needs
       a copy of it.</p>
+    <p>Where the link is shown as a card (a social network, a messaging app, a forum that unfolds
+      links), the card can carry your observation's picture: add an <code>image</code> field to the
+      recording, an address (absolute, or relative to the file). The server reads your file when the
+      link is fetched, so the card shows that picture, the observation's name and the first words of
+      its account. Without <code>image</code>, the card shows the project's logo.</p>
   </div>
 </section>
 
@@ -385,6 +390,11 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       partout où l'on peut mettre une URL. Le champ ci-dessus part d'un enregistrement de ce site
       pour que le bouton fasse quelque chose ; l'adresse que vous y mettez est la vôtre, sur votre
       hébergement, et ce site n'en a jamais besoin d'une copie.</p>
+    <p>Là où le lien s'affiche en carte (réseau social, messagerie, forum qui déplie les liens), la
+      carte peut porter l'image de votre observation : ajoutez un champ <code>image</code> à
+      l'enregistrement, une adresse (absolue, ou relative au fichier). Le serveur lit votre fichier
+      quand le lien est consulté, et la carte montre cette image, le nom de l'observation et les
+      premiers mots de son récit. Sans <code>image</code>, la carte montre le logo du projet.</p>
   </div>
 </section>
 
@@ -494,6 +504,11 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       sitio donde se pueda poner una URL. El campo de arriba empieza con una de las grabaciones de
       este sitio para que el botón haga algo; la dirección que pongas ahí es la tuya, en tu propio
       alojamiento, y este sitio nunca necesita una copia.</p>
+    <p>Donde el enlace se muestra como tarjeta (red social, mensajería, foro que despliega los enlaces),
+      la tarjeta puede llevar la imagen de tu observación: añade un campo <code>image</code> a la
+      grabación, una dirección (absoluta, o relativa al archivo). El servidor lee tu archivo cuando se
+      consulta el enlace, y la tarjeta muestra esa imagen, el nombre de la observación y las primeras
+      palabras de su relato. Sin <code>image</code>, la tarjeta muestra el logotipo del proyecto.</p>
   </div>
 </section>
 
@@ -603,6 +618,11 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       possa mettere un URL. Il campo qui sopra parte da una delle registrazioni di questo sito perché
       il pulsante faccia qualcosa; l'indirizzo che ci metti è il tuo, sul tuo hosting, e a
       questo sito non serve mai una copia.</p>
+    <p>Dove il link viene mostrato come scheda (social network, messaggistica, forum che espande i link),
+      la scheda può portare l'immagine della tua osservazione: aggiungi un campo <code>image</code> alla
+      registrazione, un indirizzo (assoluto, o relativo al file). Il server legge il tuo file quando il
+      link viene consultato, e la scheda mostra quell'immagine, il nome dell'osservazione e le prime
+      parole del suo racconto. Senza <code>image</code>, la scheda mostra il logo del progetto.</p>
   </div>
 </section>
 

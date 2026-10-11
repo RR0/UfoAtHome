@@ -65,6 +65,8 @@ export interface SightingRecordingJson {
   vehicle?: ObserverVehicle
   /** See SightingEvent.description — a plain string, or one per language. */
   description?: SaidText
+  /** See SightingEvent.image — the picture a shared link to this recording shows. */
+  image?: string
   /** See SightingEvent.tags. */
   tags?: string[]
   timeline: TimelineJson
@@ -155,6 +157,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     sway: sighting.sway,
     vehicle: sighting.vehicle,
     description: sighting.event.description,
+    image: sighting.event.image,
     tags: sighting.event.tags,
     timeline: sighting.timeline.toJSON(),
     observerTrack: sighting.observerTrack.toJSON(),
@@ -198,6 +201,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
       timeZone: json.timeZone,
       place: json.place,
       description: json.description,
+      image: json.image,
       tags: json.tags
     },
     Timeline.fromJSON(json.timeline, issues),

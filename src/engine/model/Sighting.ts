@@ -204,6 +204,12 @@ export interface SightingEvent {
   /** The account itself, in prose. Translatable — see SaidText. */
   description?: SaidText
   /**
+   * A picture standing for the observation where it is only linked to, never played: the card a link to it shows when
+   * it is shared (see the Player's share card). An address, absolute or relative to the file, or an RR0 path from the
+   * site root. Absent, the card shows the project's logo. `image` is the name RR0's own `case.json` already gives it.
+   */
+  image?: string
+  /**
     * Technical keywords, stored in ENGLISH and named for the reader by the components' own
     * messages — "landing" is displayed "atterrissage" to a French reader, and a tag no message
     * knows is displayed as it is stored (see SightingTags).
