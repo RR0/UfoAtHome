@@ -37,6 +37,8 @@ export interface BodyEditorHost {
   lookAt(body: BodyJson): void
   /** The playhead, ms. */
   currentTime(): number
+  /** Moves the playhead to `t`, ms: how a keyframe picked in the list is shown. */
+  seekTo(t: number): void
   /** The body as it stands at `t` — see SceneElement.bodyReading. */
   readingOf(body: BodyJson, t: number): BodyReading | undefined
   /** How far along a line of sight from the eye at `t` the ground is — see SceneElement.groundAlong. */
@@ -52,7 +54,8 @@ export interface BodyEditorHost {
  * A part of the Phenomenon group rather than a group of its own: a body is what a shape WAS, and
  * the two are edited side by side. What is typed is written as typed — an address whose credit is
  * incomplete is kept, and simply not drawn until it is complete (see SceneRenderer.loadBodyModel).
- * A body's movement (its track) is shown, not edited: it is stated in the file.
+ * A body's movement is its keyframes: listed here, picked to go to their instant, added at the playhead, deleted; what each one states is
+ * edited at the playhead by the form of the instant.
  */
 export class BodyEditor {
   /** English, the fallback baked in, until the chosen language's module has loaded. */
@@ -117,7 +120,6 @@ export class BodyEditor {
     details.open = model.url !== undefined || (details.open && body.id === this.syncedId)
     this.syncedId = body.id
     this.element("body-model-incomplete").hidden = model.url === undefined || (model.credit?.title !== undefined && model.credit.license !== undefined)
-    this.element("body-track").textContent = this.trackSummary(body)
     this.syncKeyframe()
   }
 
@@ -133,7 +135,8 @@ export class BodyEditor {
     const reading = this.host.readingOf(body, t)
     const here = body.track.find(key => key.t === t)
     this.element("body-key-note").textContent = !reading ? m.notPlaced : here ? m.keyframeHere : m.keyframeAdded
-    ;(this.element("body-key-delete") as HTMLButtonElement).disabled = here === undefined
+    this.keyList?.setItems(body.track.map(key => ({ id: String(key.t), label: BodyEditor.seconds(key.t) })), here ? String(here.t) : "")
+    this.keyList?.setAddState(reading !== undefined && here === undefined)
     this.element("body-key-parameters").hidden = !reading
     if (reading) this.keyForm?.sync()
   }
@@ -178,13 +181,12 @@ export class BodyEditor {
           <p id="body-model-incomplete" class="body-intro" hidden>${m.modelIncomplete}</p>
           <p id="body-model-catalogue" class="body-intro" hidden>${m.modelFromCatalogue}</p>
         </details>
-        <p class="body-track"><span>${m.track}</span> <output id="body-track"></output></p>
         <fieldset class="body-key">
           <legend id="body-key-legend"></legend>
           <p id="body-key-note" class="body-intro"></p>
+          <div id="body-keys" class="body-keys"></div>
           <div id="body-key-parameters" class="body-parameters"></div>
           <p class="body-intro">${m.appearanceNote}</p>
-          <button id="body-key-delete" type="button">${m.deleteKeyframe}</button>
           <p class="body-intro">${m.pictureHint}</p>
         </fieldset>
       </div>
@@ -213,7 +215,15 @@ export class BodyEditor {
       // A catalogue model's address and credit are shown as soon as it is picked; a built-in shape has none.
       ;(this.element("body-model-advanced") as HTMLDetailsElement).open = id !== "" && !(BODY_PRIMITIVES as readonly string[]).includes(id)
     })
-    this.element("body-key-delete").addEventListener("click", () => this.deleteKeyframe())
+    const keys = this.element("body-keys")
+    this.keyList = new ElementList({
+      header: keys, footer: keys, rowClass: "body-keys-add", optional: true,
+      ids: { list: "body-key", remove: "body-key-delete", add: "body-key-add" },
+      onSelect: id => { if (id !== "") this.host.seekTo(Number(id)); this.syncKeyframe() },
+      onAdd: () => this.editView(() => undefined),
+      onRemove: () => this.deleteKeyframe()
+    })
+    this.keyList.setLabels({ list: m.keyframes, remove: m.deleteKeyframe, add: m.addKeyframe, none: m.noKeyframeHere })
     // The drop-down gives way to a window of pictures, over the same options and the same "change".
     this.host.modelPicker().enhance(this.select("body-model"), async id => (BODY_PRIMITIVES as readonly string[]).includes(id)
       ? { shape: id as BodyPrimitive }
@@ -342,7 +352,6 @@ export class BodyEditor {
     const keyframe = BodyKeyframes.keyframeOf(view, t, body.track.find(key => key.t === t), appearanceEdited)
     const track = [...body.track.filter(key => key.t !== t), keyframe].sort((a, b) => a.t - b.t)
     this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, track } : other) })
-    this.element("body-track").textContent = this.trackSummary({ ...body, track })
     this.syncKeyframe()
   }
 
@@ -560,15 +569,6 @@ export class BodyEditor {
     void this.syncModelOptions(body)
   }
 
-  private trackSummary(body: BodyJson): string {
-    const times = body.track.map(key => key.t)
-    if (times.length === 0) return this.messages.trackEmpty
-    const seconds = (ms: number) => `${Math.round(ms / 100) / 10} s`
-    if (times.length === 1) return this.messages.trackSingle.replace("{at}", seconds(times[0]))
-    return this.messages.trackSpan.replace("{n}", String(times.length))
-      .replace("{from}", seconds(Math.min(...times))).replace("{to}", seconds(Math.max(...times)))
-  }
-
   private labelOf(body: BodyJson): string {
     const title = this.host.said().read(body.title)
     return title ? `${title} (${body.id})` : body.id
@@ -593,6 +593,8 @@ export class BodyEditor {
 
   /** The picker of the bodies, and what is done with them (see ElementList). */
   private list?: ElementList
+  /** The keyframes of the body on show, and the one at the playhead (see ElementList). */
+  private keyList?: ElementList
 
   private element(id: string): HTMLElement {
     return this.container.querySelector<HTMLElement>("#" + id)!

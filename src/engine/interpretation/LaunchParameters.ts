@@ -62,7 +62,6 @@ export class LaunchParameters {
           it: "Dove si trovava lo stadio in istanti della registrazione: la scia viene rilasciata lungo questo percorso, tra i suoi punti. Almeno due; può iniziare prima della registrazione." },
         addLabel: { en: "Add a place to the path, going on as it was going", fr: "Ajouter un point au chemin, dans la continuité", es: "Añadir un punto a la trayectoria, en su continuidad", it: "Aggiungi un punto al percorso, in continuità" },
         removeLabel: { en: "Remove this place", fr: "Retirer ce point", es: "Quitar este punto", it: "Rimuovi questo punto" },
-        group: { en: "Path", fr: "Chemin", es: "Trayectoria", it: "Percorso" },
         columns: [
           { key: "t", label: { en: "Time", fr: "Instant", es: "Instante", it: "Istante" }, min: -3600, max: 36000, step: 0.1, unit: "s", scale: 0.001 },
           { key: "lat", label: { en: "Latitude", fr: "Latitude", es: "Latitud", it: "Latitudine" }, min: -90, max: 90, step: 0.0001, unit: "°" },

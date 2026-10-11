@@ -90,6 +90,8 @@ export class ParameterForm {
         groups.set(heading, group)
         this.container.append(group)
       }
+      // A table takes the whole width of its group, whatever the others of the form are doing beside it.
+      if (spec.type === "rows") group.classList.add("parameter-group-rows")
       group.append(this.fieldOf(spec))
     }
     NumberFields.fit(this.container)

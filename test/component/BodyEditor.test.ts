@@ -47,6 +47,7 @@ class Fixture {
       newBodyStart: () => this.start,
       lookAt: body => { this.lookedAt = body.id },
       currentTime: () => this.time,
+      seekTo: t => { this.time = t },
       groundAlong: () => this.groundM,
       readingOf: body => ({ azimuthDeg: 10, altitudeDeg: 2, distanceM: 100, eastM: 17.36, northM: 98.48, aboveGroundM: 1.5, sizeM: { widthM: 4, lengthM: 5, heightM: 2 }, attitude: { headingDeg: 30, pitchDeg: 0, rollDeg: 0 }, appearance: { color: "#c8c8c8", albedo: 0.5, luminanceCdM2: 0, ...body.track.find(key => key.t === this.time)?.appearance } })
     }
@@ -76,7 +77,7 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.field("body-model").value).toBe("catalogue-craft")
     const checked = [...fixture.container.querySelectorAll<HTMLInputElement>('[data-key="explains"] input')].filter(check => check.checked).map(check => check.value)
     expect(checked).toEqual(["ufo-1"])
-    expect(fixture.field("body-track").textContent).toBe("2 keyframes, from 0 s to 5 s")
+    expect([...fixture.container.querySelectorAll<HTMLOptionElement>("#body-key option")].map(option => option.textContent)).toEqual(["No keyframe at this instant", "0 s", "5 s"])
   })
 
   it("shows a model given by address, with its credit", () => {
@@ -179,6 +180,31 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.field("bodyKey.headingDeg").value).toBe("30")
     expect(fixture.field("bodyKey.azimuthDeg").closest("label")!.hidden).toBe(true)
     expect((fixture.container.querySelector("#body-key-delete") as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it("lists the keyframes, shows the one at the playhead, and goes to the one picked", () => {
+    const fixture = new Fixture()
+    const select = fixture.container.querySelector<HTMLSelectElement>("#body-key")!
+    expect(select.value).toBe("0")
+    fixture.time = 2500
+    fixture.editor.syncKeyframe()
+    expect(select.value).toBe("")
+    select.value = "5000"
+    select.dispatchEvent(new Event("change", { bubbles: true }))
+    expect(fixture.time).toBe(5000)
+    expect(select.value).toBe("5000")
+  })
+
+  it("adds a keyframe at the playhead where there is none, and only there", () => {
+    const fixture = new Fixture()
+    const add = fixture.container.querySelector<HTMLButtonElement>("#body-key-add")!
+    expect(add.disabled).toBe(true)
+    fixture.time = 2500
+    fixture.editor.syncKeyframe()
+    expect(add.disabled).toBe(false)
+    add.click()
+    expect(fixture.sighting.interpretation!.bodies[0].track.map(key => key.t)).toEqual([0, 2500, 5000])
+    expect(add.disabled).toBe(true)
   })
 
   it("writes an edit at the playhead as a keyframe of position, size and attitude only", () => {

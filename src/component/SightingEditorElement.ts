@@ -6517,6 +6517,7 @@ export class SightingEditorElement extends HTMLElement {
         newBodyStart: () => this.newBodyStart(),
         lookAt: body => this.lookAtBody(body),
         currentTime: () => this.ufoElement.currentTime,
+        seekTo: t => { this.ufoElement.currentTime = t },
         readingOf: (body, t) => this.sceneElement.bodyReading(body, t),
         groundAlong: (azimuthDeg, altitudeDeg, t) => this.sceneElement.groundAlong(azimuthDeg, altitudeDeg, t)
       }, this.language)

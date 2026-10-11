@@ -26,12 +26,11 @@ export interface BodyEditorMessages {
   modelIncomplete: string
   /** Under the address block, when it shows a catalogue model. */
   modelFromCatalogue: string
-  track: string
-  trackEmpty: string
-  /** {n} keyframes, {from} and {to} in seconds. */
-  trackSpan: string
-  /** {at} in seconds. */
-  trackSingle: string
+  /** The picker of the body's keyframes, and the button that adds one at the playhead. */
+  keyframes: string
+  addKeyframe: string
+  /** What the picker says when the playhead is between two keyframes. */
+  noKeyframeHere: string
   /** {t} is the playhead, in seconds. */
   atPlayhead: string
   keyframeHere: string
