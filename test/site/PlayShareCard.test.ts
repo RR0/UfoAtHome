@@ -47,6 +47,25 @@ describe("PlayShareCard", () => {
     expect(card).toMatchObject({ title: "Socorro", image: "https://rr0.org/ufo/Socorro/portrait.jpg" })
   })
 
+  it("derives the description of what has none from its time and place, in the page's language", () => {
+    const recording = PlayShareCard.cardOf({ observer: { title: "X" }, time: { year: 2024, month: 8, day: 12, hour: 22, minute: 30 },
+      place: [{ name: "Grenoble, Isère, France" }] }, "https://a.org/x.json", "fr")
+    expect(recording.description).toBe("12 août 2024, 22:30 · Grenoble, Isère, France. À rejouer sous le ciel réel de la date et du lieu qu'elle énonce.")
+    const aCase = PlayShareCard.cardOf({ title: "Cussac", events: [], time: "1967-08-29 10:30" }, "https://a.org/case.json", "en")
+    expect(aCase.description).toBe("August 29, 1967, 10:30. Replay it in the real sky of the date and place it states.")
+  })
+
+  it("derives only as much as the time states, and nothing without one", () => {
+    expect(PlayShareCard.cardOf({ id: "x", time: "1954" }, "https://a.org/x.json", "en").description).toMatch(/^1954\. /)
+    expect(PlayShareCard.cardOf({ id: "x", time: "1954-06" }, "https://a.org/x.json", "en").description).toMatch(/^June 1954\. /)
+    expect(PlayShareCard.cardOf({ id: "x", time: "~-3150" }, "https://a.org/x.json", "en").description).toBeUndefined()
+    expect(PlayShareCard.cardOf({ id: "x" }, "https://a.org/x.json", "en").description).toBeUndefined()
+  })
+
+  it("prefers the description the file states to the one it would derive", () => {
+    expect(PlayShareCard.cardOf({ id: "x", time: "1954", description: { en: "Said." } }, "https://a.org/x.json", "en").description).toBe("Said.")
+  })
+
   it("refuses a picture that is not a web address, and cuts a long description at a word", () => {
     const card = PlayShareCard.cardOf({ id: "x", description: "word ".repeat(100), image: "javascript:alert(1)" }, "https://a.org/x.json", "en")
     expect(card.image).toBeUndefined()

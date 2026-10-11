@@ -1,6 +1,12 @@
 {
   "id": "Socorro",
   "title": "Socorro",
+  "description": {
+    "en": "24 April 1964, about 5:50 pm. Patrolman Lonnie Zamora's account near Socorro (New Mexico), replayed as one two-minute sequence with the six markers A to F of the Blue Book sketch.",
+    "fr": "24 avril 1964, vers 17 h 50. Le récit du policier Lonnie Zamora près de Socorro (Nouveau-Mexique), rejoué en une seule séquence de deux minutes, avec les six repères A à F du croquis du dossier Blue Book.",
+    "es": "24 de abril de 1964, hacia las 17:50. El relato del policía Lonnie Zamora cerca de Socorro (Nuevo México), reproducido en una sola secuencia de dos minutos, con los seis hitos A a F del croquis del expediente Blue Book.",
+    "it": "24 aprile 1964, verso le 17:50. Il racconto del poliziotto Lonnie Zamora presso Socorro (Nuovo Messico), riprodotto in un'unica sequenza di due minuti, con i sei punti A–F dello schizzo del fascicolo Blue Book."
+  },
   "time": "1964-04-24 17:50",
   "events": [
     {

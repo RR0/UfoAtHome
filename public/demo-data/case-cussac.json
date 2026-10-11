@@ -1,6 +1,12 @@
 {
   "id": "Cussac",
   "title": "La rencontre de Cussac",
+  "description": {
+    "en": "29 August 1967, about 10:30 am. At Cussac (Cantal), two children see small dark beings behind a hedge, then a sphere on the ground that vanishes in mid-air. Replay both accounts, on the spot the GEPAN surveyed.",
+    "fr": "29 août 1967, vers 10 h 30. À Cussac (Cantal), deux enfants voient de petits êtres sombres derrière une haie, puis une sphère posée au sol qui disparaît en plein air. Rejouez les deux récits, sur les lieux relevés par le GEPAN.",
+    "es": "29 de agosto de 1967, hacia las 10:30. En Cussac (Cantal), dos niños ven unos pequeños seres oscuros tras un seto y luego una esfera posada en el suelo que desaparece en pleno aire. Reproduce los dos relatos, en el lugar levantado por el GEPAN.",
+    "it": "29 agosto 1967, verso le 10:30. A Cussac (Cantal), due bambini vedono piccoli esseri scuri dietro una siepe, poi una sfera posata a terra che svanisce a mezz'aria. Riproduci i due racconti, nel luogo rilevato dal GEPAN."
+  },
   "image": "https://rr0.org/science/crypto/ufo/enquete/dossier/Cussac/DessinObservation.jpg",
   "time": "1967-08-29 10:30",
   "classification": {

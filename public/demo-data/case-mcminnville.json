@@ -1,6 +1,12 @@
 {
  "id": "McMinnville1950",
  "title": "McMinnville",
+ "description": {
+  "en": "11 May 1950, about 7:45 pm. Evelyn and Paul Trent see a silvery object over their farm, and Paul takes two photographs in 30 seconds. Replayed with five readings, from a model on a thread to the Condon report.",
+  "fr": "11 mai 1950, vers 19 h 45. Evelyn et Paul Trent voient un objet argenté au-dessus de leur ferme, et Paul prend deux photographies en 30 secondes. Rejoué avec cinq lectures, d'une maquette sur un fil au rapport Condon.",
+  "es": "11 de mayo de 1950, hacia las 19:45. Evelyn y Paul Trent ven un objeto plateado sobre su granja, y Paul toma dos fotografías en 30 segundos. Reproducido con cinco lecturas, de una maqueta en un hilo al informe Condon.",
+  "it": "11 maggio 1950, verso le 19:45. Evelyn e Paul Trent vedono un oggetto argenteo sopra la fattoria, e Paul scatta due fotografie in 30 secondi. Riprodotto con cinque letture, da un modellino su un filo al rapporto Condon."
+ },
  "time": "1950-05-11 19:45",
  "events": [
   {

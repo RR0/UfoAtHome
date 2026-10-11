@@ -34,7 +34,7 @@ export class PlayShareCard {
   /** Cases and recordings are a few hundred kilobytes; this stops a link to something else from being read whole. */
   static readonly MAX_BYTES = 8_000_000
 
-  static readonly MAX_DESCRIPTION = 200
+  static readonly MAX_DESCRIPTION = 260
 
   /** The Player's own list of where a bare name may be (see PlayerPage's `resolve`): a name is looked for in these, in order. */
   static candidates(requested: string, origin: string): string[] {
@@ -88,9 +88,59 @@ export class PlayShareCard {
       || PlayShareCard.text(json.id) || PlayShareCard.text(fileName)
     return {
       title,
-      description: PlayShareCard.summary(json.description, language),
+      description: PlayShareCard.summary(json.description, language) ?? PlayShareCard.derived(json, language),
       image: PlayShareCard.imageOf(json.image, url)
     }
+  }
+
+  /** What a recording or a case says of when it happened, which is all there is to say of one that has no description of its own. */
+  private static readonly REPLAY: Record<string, string> = {
+    en: "Replay it in the real sky of the date and place it states.",
+    fr: "À rejouer sous le ciel réel de la date et du lieu qu'elle énonce.",
+    es: "Para reproducir bajo el cielo real de la fecha y el lugar que indica.",
+    it: "Da riprodurre sotto il cielo reale della data e del luogo che indica."
+  }
+
+  /** A time as a recording states it (`{year, month, day, hour, minute}`) or a case does ("1967-08-29 10:30", "1954"). */
+  private static momentOf(time: unknown): { year: number, month?: number, day?: number, hour?: number, minute?: number } | undefined {
+    if (typeof time === "string") {
+      const found = /^(-?\d{1,4})(?:-(\d{2}))?(?:-(\d{2}))?(?:[ T](\d{2}):(\d{2}))?/.exec(time.trim())
+      if (!found) return undefined
+      const [, year, month, day, hour, minute] = found
+      return { year: Number(year), month: month ? Number(month) : undefined, day: day ? Number(day) : undefined, hour: hour ? Number(hour) : undefined, minute: minute ? Number(minute) : undefined }
+    }
+    const said = time as { year?: unknown, month?: unknown, day?: unknown, hour?: unknown, minute?: unknown } | undefined
+    if (typeof said?.year !== "number") return undefined
+    const number = (value: unknown) => typeof value === "number" ? value : undefined
+    return { year: said.year, month: number(said.month), day: number(said.day), hour: number(said.hour), minute: number(said.minute) }
+  }
+
+  /** "29 August 1967, 10:30", in the page's language; only as much as the time states. */
+  private static dateIn(language: string, time: unknown): string | undefined {
+    const moment = PlayShareCard.momentOf(time)
+    if (!moment) return undefined
+    let date = String(moment.year)
+    if (moment.year >= 1000 && moment.month) {
+      const when = new Date(Date.UTC(moment.year, moment.month - 1, moment.day ?? 1))
+      try {
+        date = new Intl.DateTimeFormat(language, moment.day
+          ? { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }
+          : { month: "long", year: "numeric", timeZone: "UTC" }).format(when)
+      } catch {
+        // A language the runtime does not know: the year alone is still true.
+      }
+    }
+    const hour = moment.day && moment.hour !== undefined
+      ? `, ${String(moment.hour).padStart(2, "0")}:${String(moment.minute ?? 0).padStart(2, "0")}` : ""
+    return date + hour
+  }
+
+  /** The date, the place when the recording names one, and what can be done with it. */
+  private static derived(json: Record<string, unknown>, language: string): string | undefined {
+    const date = PlayShareCard.dateIn(language, json.time)
+    if (!date) return undefined
+    const place = Array.isArray(json.place) ? PlayShareCard.text((json.place[0] as { name?: unknown } | undefined)?.name) : undefined
+    return `${date}${place ? ` · ${place}` : ""}. ${PlayShareCard.REPLAY[language] ?? PlayShareCard.REPLAY.en}`
   }
 
   /** The picture, as an absolute address: relative to the file, or from its site's root as RR0 writes it. */

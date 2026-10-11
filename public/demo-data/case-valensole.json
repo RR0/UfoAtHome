@@ -1,6 +1,12 @@
 {
   "id": "Valensole",
   "title": "La rencontre de Valensole",
+  "description": {
+    "en": "1 July 1965, about 5:45 am. Maurice Masse walks up to 6 m from a craft standing in his field, sees it draw back its central tube, rise and leave at a slant. His report of 2 July and his statement of 18 August, replayed.",
+    "fr": "1er juillet 1965, vers 5 h 45. Maurice Masse s'approche à 6 m d'un engin posé dans son champ, le voit rentrer son tube central, s'élever et partir en biais. Son procès-verbal du 2 juillet et sa déposition du 18 août, rejoués.",
+    "es": "1 de julio de 1965, hacia las 5:45. Maurice Masse se acerca a 6 m de un aparato posado en su campo, lo ve recoger su tubo central, elevarse y marcharse en diagonal. Su acta del 2 de julio y su declaración del 18 de agosto, reproducidas.",
+    "it": "1° luglio 1965, verso le 5:45. Maurice Masse si avvicina a 6 m da un velivolo posato nel suo campo, lo vede ritrarre il tubo centrale, alzarsi e andarsene in diagonale. Il suo verbale del 2 luglio e la sua deposizione del 18 agosto, riprodotti."
+  },
   "time": "1965-07-01 05:45",
   "classification": {
     "hynek": "CE3"

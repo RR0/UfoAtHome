@@ -1,6 +1,12 @@
 {
  "id": "SillyLeLong2015",
  "title": "Silly-le-Long",
+ "description": {
+  "en": "31 May 2015, about 12:50 am. Driving on the RN2 (Oise), a patrol sees two very bright white lights and a blinking red one around a wide dark mass. Replayed with the reading that identifies an aircraft on final approach.",
+  "fr": "31 mai 2015, vers 0 h 50. Sur la RN2 (Oise), une patrouille voit deux lumières blanches très intenses et un feu rouge clignotant autour d'une large masse sombre. Rejoué avec la lecture qui y reconnaît un avion en finale.",
+  "es": "31 de mayo de 2015, hacia las 0:50. En la RN2 (Oise), una patrulla ve dos luces blancas muy intensas y una roja intermitente alrededor de una ancha masa oscura. Reproducido con la lectura que identifica un avión en aproximación final.",
+  "it": "31 maggio 2015, verso le 0:50. Sulla RN2 (Oise), una pattuglia vede due luci bianche molto intense e una rossa lampeggiante attorno a un'ampia massa scura. Riprodotto con la lettura che vi riconosce un aereo in finale."
+ },
  "time": "2015-05-31 00:50",
  "events": [
   {
