@@ -615,6 +615,20 @@
       }
     },
     {
+      "id": "ufoathome-cussac-being",
+      "kind": "entity",
+      "name": "Cussac being, all black (stand-in)",
+      "file": "makehuman-people/cussac-being.glb",
+      "headingOffsetDeg": 180,
+      "sizeM": { "heightM": 1.1 },
+      "credit": {
+        "title": "Cussac being, a stand-in after the children's accounts of 29 August 1967",
+        "author": "MakeHuman community (MPFB), assembled by UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/people/derive_cussac_being.py"
+      }
+    },
+    {
       "id": "ufoathome-socorro-figure",
       "kind": "entity",
       "name": "Socorro figure in white coveralls, after Lonnie Zamora's account (stand-in)",
