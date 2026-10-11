@@ -2,6 +2,8 @@ import { GrassDetail } from "./terrain/GrassDetail.js"
 import { AdditiveBlending, BackSide, Box3, DoubleSide, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
 import type { Material, Object3D } from "three"
 import type { ModelParameters } from "../engine/model/DecorTraits.js"
+import { DecorBase } from "../engine/model/DecorBase.js"
+import { LightRigs } from "../engine/model/LightRig.js"
 import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize } from "../engine/model/Decor.js"
 import { canHoldObserver, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
@@ -1075,6 +1077,8 @@ export class DecorSystem {
     group.add(body)
     if (object.headingDeg !== undefined) group.rotation.y = -object.headingDeg * DEG_TO_RAD
     this.addLights(group, object.lights)
+    // A size the recording states carries the lamps of a recognised rig with it; unstated, the shape is the size the rig was written for.
+    DecorSystem.fitLights(group, object, object.sizeM ?? {})
     // No longer taken out of the fog, as aircraft had to be: the fog was a disguise for the ground
     // disc's rim that erased anything past 900 m. It is the air now (see AerialFog), and an
     // aircraft ten kilometres off is dimmed and blued by it, as one is.
@@ -1235,6 +1239,27 @@ export class DecorSystem {
       group.add(holder)
     }
     this.dispose(body)
+    DecorSystem.fitLights(group, object, { widthM: natural.widthM * scale, heightM: natural.heightM * scale, lengthM: natural.lengthM * scale })
+  }
+
+  /**
+   * Carries the lamps of a ready-made rig to where they stand on a machine of `size`: the rig's offsets are those of the machine
+   * it was written for (LightRig.referenceSizeM), and an airliner model of eighty metres has its wingtips further out than an
+   * A320's. An axis the size does not say stays as the rig has it; lamps that no rig made are the author's own and are left alone.
+   */
+  private static fitLights(group: Object3D, object: DecorObject, size: Partial<MeasuredDecorSize>): void {
+    const reference = LightRigs.byId(DecorBase.rigOf(object) || undefined)?.referenceSizeM
+    if (!reference || !object.lights) return
+    const by = (stated: number | undefined, wanted: number) => stated === undefined || wanted === 0 ? 1 : stated / wanted
+    const x = by(size.widthM, reference.widthM)
+    const y = by(size.heightM, reference.heightM)
+    const z = by(size.lengthM, reference.lengthM)
+    const offsets = new Map(object.lights.map(light => [light.id, light.offsetM]))
+    group.traverse(child => {
+      const lightId = (child.userData as DecorMeshUserData).lightId
+      const offset = lightId === undefined ? undefined : offsets.get(lightId)
+      if (offset) child.position.set(offset.x * x, offset.y * y, offset.z * z)
+    })
   }
 
   /**

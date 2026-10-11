@@ -1,3 +1,4 @@
+import { LightRigs } from "../../src/engine/model/LightRig.js"
 import { describe, expect, it } from "vitest"
 import { AdditiveBlending, Box3, BoxGeometry, Color, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, Vector3, type Object3D } from "three"
 import { DecorSystem } from "../../src/render3d/DecorSystem.js"
@@ -187,6 +188,40 @@ describe("DecorSystem stated size", () => {
     const lamp = group.children.find(child => (child.userData as { lightId?: string }).lightId === "beacon")
     expect(lamp?.position.toArray()).toEqual([0, 3, -2])
     expect(lamp?.scale.toArray()).toEqual([1, 1, 1])
+  })
+})
+
+describe("DecorSystem lamps of a ready-made rig", () => {
+  const aircraft = (extra: Partial<DecorObject>): DecorObject => ({ id: "a", kind: "aircraft", eastM: 0, northM: 0, lights: LightRigs.byId("airliner")!.create(), ...extra })
+  const lamp = (group: Object3D, id: string) => group.children.find(child => (child.userData as { lightId?: string }).lightId === id)!
+
+  it("follow a stated size: a wingtip light stays on the wingtip of an aircraft twice as wide", () => {
+    const group = DecorSystem.build(aircraft({ sizeM: { widthM: 68, lengthM: 72, heightM: 24 } }), false)
+    expect(lamp(group, "nav-port").position.x).toBeCloseTo(-34, 6)
+    expect(lamp(group, "nav-tail").position.z).toBeCloseTo(-36, 6)
+    expect(lamp(group, "beacon-top").position.y).toBeCloseTo(4, 6)
+  })
+
+  it("keep the rig's own places when no size is stated", () => {
+    expect(lamp(DecorSystem.build(aircraft({}), false), "nav-port").position.x).toBe(-17)
+  })
+
+  it("follow the size a model is fitted to", () => {
+    const object = aircraft({ sizeM: { lengthM: 8 } })
+    const group = DecorSystem.build(object, false)
+    const mesh = new Mesh(new BoxGeometry(2, 1, 4))
+    const scene = new Group()
+    scene.add(mesh)
+    DecorSystem.applyModel(group, object, scene)
+    // The model is 4 wide once fitted to 8 long: the rig, written for 34 metres of wing, is carried to it.
+    expect(lamp(group, "nav-port").position.x).toBeCloseTo(-17 * 4 / 34, 6)
+    expect(lamp(group, "nav-tail").position.z).toBeCloseTo(-18 * 8 / 36, 6)
+  })
+
+  it("leave lamps nobody's rig made where their author put them", () => {
+    const own = { id: "mine", offsetM: { x: 5, y: 0, z: 0 }, color: "#ffffff", pattern: { kind: "steady" } as const }
+    const group = DecorSystem.build(aircraft({ lights: [own], sizeM: { widthM: 68 } }), false)
+    expect(lamp(group, "mine").position.x).toBe(5)
   })
 })
 

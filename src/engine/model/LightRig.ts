@@ -22,6 +22,11 @@ export interface LightRig {
   name: string
   /** Which decor kinds this rig makes sense on; a picker offers only the matching ones. */
   kinds: DecorKind[]
+  /**
+   * The size of the machine its offsets were written for, metres: the lamps of an object drawn at another size (a model, or a size
+   * the recording states) are carried to the same places on it, a wingtip light staying on the wingtip. Absent: the offsets are absolute.
+   */
+  referenceSizeM?: { widthM: number, heightM: number, lengthM: number }
   /** Built fresh on each use, so an object owns its own lamps and can then be edited. */
   create(): DecorLight[]
 }
@@ -39,6 +44,7 @@ export const LIGHT_RIGS: LightRig[] = [
     id: "airliner",
     name: "Airliner",
     kinds: ["aircraft"],
+    referenceSizeM: { widthM: 34, heightM: 12, lengthM: 36 },
     // Half-span 17 m, tail 18 m behind the centre: a narrow-body of the 737/A320 class, which is
     // what most "it had lights in a row" photographs turn out to be.
     create: () => [
@@ -62,6 +68,7 @@ export const LIGHT_RIGS: LightRig[] = [
     id: "helicopter",
     name: "Helicopter",
     kinds: ["aircraft"],
+    referenceSizeM: { widthM: 10, heightM: 4, lengthM: 14 },
     // Same lamps, a much smaller frame — and it is the TRACK, not the body, that makes a helicopter
     // read as one: it can hover, which an aeroplane cannot, and a hovering strobe piles its dots in
     // one place instead of spreading them.
@@ -77,6 +84,7 @@ export const LIGHT_RIGS: LightRig[] = [
     id: "car-headlights",
     name: "Car, headlights on",
     kinds: ["vehicle"],
+    referenceSizeM: { widthM: 1.8, heightM: 1.5, lengthM: 4.5 },
     create: () => [
       { id: "head-left", offsetM: { x: -0.7, y: 0.6, z: 2 }, color: WHITE, intensity: 2, pattern: { kind: "steady" } },
       { id: "head-right", offsetM: { x: 0.7, y: 0.6, z: 2 }, color: WHITE, intensity: 2, pattern: { kind: "steady" } },
@@ -88,6 +96,7 @@ export const LIGHT_RIGS: LightRig[] = [
     id: "car-hazards",
     name: "Car, hazard flashers",
     kinds: ["vehicle"],
+    referenceSizeM: { widthM: 1.8, heightM: 1.5, lengthM: 4.5 },
     // Around 1.5 Hz at roughly half duty: the slow, soft blink of a filament flasher, nothing like
     // a strobe. On a long exposure it draws long dashes rather than dots.
     create: () => [
@@ -101,6 +110,7 @@ export const LIGHT_RIGS: LightRig[] = [
     id: "emergency-beacons",
     name: "Emergency vehicle beacons",
     kinds: ["vehicle"],
+    referenceSizeM: { widthM: 1.8, heightM: 1.5, lengthM: 4.5 },
     create: () => [
       { id: "beacon-blue", offsetM: { x: -0.4, y: 1.6, z: 0 }, color: BEACON_BLUE, intensity: 2.5, pattern: { kind: "flash", perMinute: 120, dutyCycle: 0.1 } },
       { id: "beacon-red", offsetM: { x: 0.4, y: 1.6, z: 0 }, color: TAIL_RED, intensity: 2.5, pattern: { kind: "flash", perMinute: 120, dutyCycle: 0.1, phase: 0.5 } }
@@ -110,6 +120,7 @@ export const LIGHT_RIGS: LightRig[] = [
     id: "streetlamp",
     name: "Streetlamp",
     kinds: ["streetlight"],
+    referenceSizeM: { widthM: 1, heightM: 5, lengthM: 1 },
     create: () => [{ id: "lamp", offsetM: { x: 0, y: 5, z: 0 }, color: "#ffd9a0", intensity: 2, pattern: { kind: "steady" } }]
   }
 ]
