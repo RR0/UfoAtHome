@@ -1,0 +1,24 @@
+{
+  "id": "Cussac",
+  "title": "La rencontre de Cussac",
+  "time": "1967-08-29 10:30",
+  "classification": {
+    "hynek": "CE3"
+  },
+  "events": [
+    {
+      "type": "event",
+      "eventType": "sighting",
+      "time": "1967-08-29 10:30",
+      "title": "François Delpeuch",
+      "url": "observer-cussac.json"
+    },
+    {
+      "type": "event",
+      "eventType": "sighting",
+      "time": "1967-08-29 10:30",
+      "title": "Anne-Marie Delpeuch",
+      "url": "observer-cussac-anne-marie.json"
+    }
+  ]
+}

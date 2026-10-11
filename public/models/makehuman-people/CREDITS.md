@@ -20,6 +20,8 @@ mark); every texture is reduced to 512 px; the triangles of the body, clothes an
 | `woman.glb` | Woman, plain top and jeans |
 | `valensole-being-pv-1965-07-02.glb` | The man Maurice Masse described on 2 July 1965 (see below) |
 | `valensole-being-pv-1965-08-18.glb` | The beings he described on 18 August 1965 (see below) |
+| `cussac-francois-13.glb` | François Delpeuch at 13 and a half, as the dossier's photographs show him: short dark hair, a dark top and trousers (see below) |
+| `cussac-anne-marie-9.glb` | Anne-Marie Delpeuch at 9: a bob, a dark jacket and trousers (see below) |
 | `socorro-figure.glb` | A figure in white coveralls, as Lonnie Zamora saw two of them at Socorro (see below) |
 
 ## The Valensole beings
@@ -50,3 +52,12 @@ children" (Project Blue Book's Socorro file, his own statement). `socorro-figure
 off-white cloth by `scripts/people/derive_socorro_figure.py`. Nothing else changes, so it needs no Blender and
 no MakeHuman assets, and it stays CC0 like the file it comes from. Assumed: the whiteness of the cloth, the
 beings' age and build, their height (1.3 m, which is the recording's, not a measurement).
+
+## The Cussac children
+
+Two stand-ins for the witnesses of 29 August 1967, built from the dossier's photographs of them (their
+faces are masked there, so nothing here is a likeness): a boy of 13 and a half (1.55 m) and a girl of 9
+(1.30 m), body proportions from MPFB's age macro, plain dark clothes (copies of the pack's casual suits
+whose texture is replaced by one colour with a little grain, no logo or pattern). Assumed: their height,
+build, hair and the colour of their clothes. François wore glasses; the CC0 system assets have none, so
+the model has none.

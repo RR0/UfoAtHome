@@ -49,6 +49,10 @@ Blender 5.2 (4.2 or later works too), with the official MPFB extension: there is
      male_coverall01_diffuse.png
    ```
 
+5. The Cussac children's clothes. `clothes/male_kidsuit01/` (`#34373d`) and `clothes/female_kidsuit01/` (`#5a4a3e`) are copies
+   of `male_casualsuit01` and `female_casualsuit01` (files renamed, the old name replaced inside the `.mhclo` and `.mhmat`)
+   whose diffuse texture is one plain colour with a little grain, made like the coveralls above, so that no logo shows.
+
 ## Running it
 
 ```

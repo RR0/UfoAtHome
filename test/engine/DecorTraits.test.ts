@@ -10,7 +10,7 @@ describe("DecorTraits", () => {
   })
 
   it("offers a built-in shape its colour", () => {
-    expect(DecorTraits.of({ kind: "entity" }).color).toBe(true)
+    expect(DecorTraits.of({ kind: "mound" }).color).toBe(true)
   })
 
   it("gives an aircraft its lamp rigs and no single switch, model or not", () => {
@@ -47,6 +47,9 @@ describe("DecorTraits", () => {
     expect(decorModelOf({ kind: "tree", id: "tree-1" })).toEqual(decorModelOf({ kind: "tree", id: "tree-1" }))
     expect(new Set(Array.from({ length: 40 }, (_, i) => decorModelOf({ kind: "tree", id: `tree-${i}` })?.id)).size).toBeGreaterThan(3)
     expect(decorModelOf({ kind: "tree", id: "tree-1", model: { id: "jagobo-tree-pine-a" } })).toEqual({ id: "jagobo-tree-pine-a" })
+    expect(decorModelOf({ kind: "observer", id: "anne-marie" })?.id).toMatch(/^makehuman-/)
+    expect(decorModelOf({ kind: "entity", id: "etre-1" })).toEqual(decorModelOf({ kind: "entity", id: "etre-1" }))
+    expect(decorModelOf({ kind: "observer", id: "x", model: { id: "child" } })).toEqual({ id: "child" })
     expect(DecorTraits.of({ kind: "aircraft" })).toMatchObject({ color: false, windows: false, lights: true })
   })
 })

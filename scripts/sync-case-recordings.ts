@@ -49,6 +49,7 @@ const RECORDINGS: CaseRecording[] = [
   { published: "observer-valensole-pv-1965-07-02.json", dossier: "Valensole/observer-valensole-pv-1965-07-02.json" },
   { published: "observer-wilcox.json", dossier: "Wilcox/sighting.json" },
   { published: "observer-cussac.json", dossier: "Cussac/sighting.json" },
+  { published: "observer-cussac-anne-marie.json", dossier: "Cussac/observer-cussac-anne-marie.json" },
   { published: "observer-chiles.json", dossier: "ChilesWhitted/observer-chiles.json" },
   { published: "observer-whitted.json", dossier: "ChilesWhitted/observer-whitted.json" },
   { published: "observer-maffliers.json", dossier: "Maffliers/observer-maffliers.json" },

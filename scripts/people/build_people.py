@@ -112,6 +112,22 @@ BEING_PV_0818 = dict(id="valensole-being-pv-1965-08-18", name="Valensole being, 
 PEOPLE.append(BEING_PV_0818)
 
 
+# The two children of Cussac (see public/demo-data/observer-cussac.json), from what the dossier's photographs
+# show of them: François, 13 and a half in August 1967, short dark hair, a dark knitted top and dark trousers
+# (photograph of late summer 1968); Anne-Marie, 9, a dark jacket and boots (the same photograph, and the winter
+# 1967 one). Their faces are masked in every photograph, so nothing here is anyone's likeness: ASSUMED are
+# the build, the hair, the colours (plain, no pattern, since neither photograph shows one). François wore
+# glasses ("François, qui porte des lunettes"): the CC0 system assets have none, so he does not have them.
+# MPFB's age macro is 0.1875 at 11 years and 0.5 at 25, 0 at 1 year: 9 years is 0.15, 13.5 years 0.243.
+CHILD_FRANCOIS = dict(id="cussac-francois-13", name="François, 13 and a half", gender=1.0, age=0.243, weight=0.4,
+                      muscle=0.35, heightM=1.55, skin="young_caucasian_male", clothes=["male_kidsuit01"],
+                      shoes="shoes03", hair="short02", eyebrows="eyebrow001", eyelashes=None)
+CHILD_ANNE_MARIE = dict(id="cussac-anne-marie-9", name="Anne-Marie, 9", gender=0.0, age=0.15, weight=0.4,
+                        muscle=0.3, heightM=1.30, skin="young_caucasian_female", clothes=["female_kidsuit01"],
+                        shoes="shoes02", hair="bob01", eyebrows="eyebrow004", eyelashes="eyelashes01")
+PEOPLE.extend([CHILD_FRANCOIS, CHILD_ANNE_MARIE])
+
+
 def mhclo(assets, kind, name):
     return os.path.join(assets, kind, name, name + ".mhclo")
 

@@ -238,7 +238,24 @@ export type MeasuredDecorSize = Required<DecorSize>
  */
 export const DEFAULT_DECOR_MODEL: Partial<Record<DecorKind, DecorModelRef>> = {
   aircraft: { id: "poly-google-airliner" },
-  tree: { id: "jungle-jim-tree-large-a" }
+  tree: { id: "jungle-jim-tree-large-a" },
+  observer: { id: "makehuman-farmer-40s" },
+  entity: { id: "makehuman-farmer-40s" }
+}
+
+/**
+ * The people an observer or an entity that names no model is drawn as, one per object, by its id (like
+ * TREE_MODEL_VARIANTS): a person is never the built-in shape, and two of them standing side by side are
+ * not the same one. A recording that knows who it was (a child, a being described in a statement) names a model.
+ */
+export const PERSON_MODEL_VARIANTS: readonly string[] = [
+  "makehuman-farmer-40s", "makehuman-man-overalls", "makehuman-man-jacket", "makehuman-old-man", "makehuman-woman"
+]
+
+function variantOf(variants: readonly string[], id: string): DecorModelRef {
+  let hash = 0
+  for (const char of id) hash = (hash * 31 + char.charCodeAt(0)) >>> 0
+  return { id: variants[hash % variants.length] }
 }
 
 /**
@@ -253,14 +270,11 @@ export const TREE_MODEL_VARIANTS: readonly string[] = [
   "nicholas-3d-tree-a", "nicholas-3d-tree-b", "nicholas-3d-tree-c"
 ]
 
-/** The model an object is drawn as: the one it names, or else the default of its kind (a tree's by its id, see TREE_MODEL_VARIANTS). */
+/** The model an object is drawn as: the one it names, or else the default of its kind (a tree's or a person's by its id, see TREE_MODEL_VARIANTS and PERSON_MODEL_VARIANTS). */
 export function decorModelOf(object: Pick<DecorObject, "kind" | "model"> & { id?: string }): DecorModelRef | undefined {
   if (object.model) return object.model
-  if (object.kind === "tree" && object.id !== undefined) {
-    let hash = 0
-    for (const char of object.id) hash = (hash * 31 + char.charCodeAt(0)) >>> 0
-    return { id: TREE_MODEL_VARIANTS[hash % TREE_MODEL_VARIANTS.length] }
-  }
+  if (object.kind === "tree" && object.id !== undefined) return variantOf(TREE_MODEL_VARIANTS, object.id)
+  if ((object.kind === "observer" || object.kind === "entity") && object.id !== undefined) return variantOf(PERSON_MODEL_VARIANTS, object.id)
   return DEFAULT_DECOR_MODEL[object.kind]
 }
 

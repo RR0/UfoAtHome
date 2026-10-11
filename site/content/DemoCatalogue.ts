@@ -127,13 +127,15 @@ export class DemoCatalogue {
         {
           id: "cussac",
           src: "/demo-data/observer-cussac.json",
+          // The case, for the player: the two children each saw it from their own spot, and the GEPAN measured both.
+          playSrc: "/demo-data/case-cussac.json",
           title: { en: "Cussac, 1967", fr: "Cussac, 1967", es: "Cussac, 1967", it: "Cussac, 1967" },
           titleIsName: true,
           blurb: {
-            en: "Mid-morning on a Cantal plateau, 10:30. A sphere 82 m off behind a hedge, four small black beings diving into it, a widening helix — every angle from the GEPAN's 1978 theodolite survey.",
-            fr: "Milieu de matinée sur un plateau du Cantal, 10:30. Une sphère à 82 m derrière une haie, quatre petits êtres noirs qui y plongent, une hélice qui s'élargit — chaque angle vient du relevé au théodolite du GEPAN en 1978.",
-            es: "Media mañana en una meseta del Cantal, 10:30. Una esfera a 82 m tras un seto, cuatro pequeños seres negros que se zambullen en ella, una hélice que se ensancha — cada ángulo procede del levantamiento con teodolito del GEPAN en 1978.",
-            it: "Metà mattina su un altopiano del Cantal, 10:30. Una sfera a 82 m dietro una siepe, quattro piccoli esseri neri che vi si tuffano dentro, un'elica che si allarga — ogni angolo viene dal rilievo al teodolite del GEPAN del 1978."
+            en: "Mid-morning on a Cantal plateau, 10:30. A sphere 82 m off behind a hedge, four small black beings diving into it, a widening helix — every angle from the GEPAN's 1978 theodolite survey. Two accounts, François's and his sister Anne-Marie's — open it full size to switch.",
+            fr: "Milieu de matinée sur un plateau du Cantal, 10:30. Une sphère à 82 m derrière une haie, quatre petits êtres noirs qui y plongent, une hélice qui s'élargit — chaque angle vient du relevé au théodolite du GEPAN en 1978. Deux comptes rendus, celui de François et celui de sa sœur Anne-Marie — ouvrez-le en grand pour passer de l'un à l'autre.",
+            es: "Media mañana en una meseta del Cantal, 10:30. Una esfera a 82 m tras un seto, cuatro pequeños seres negros que se zambullen en ella, una hélice que se ensancha — cada ángulo procede del levantamiento con teodolito del GEPAN en 1978. Dos relatos, el de François y el de su hermana Anne-Marie — ábrelo a tamaño completo para pasar de uno a otro.",
+            it: "Metà mattina su un altopiano del Cantal, 10:30. Una sfera a 82 m dietro una siepe, quattro piccoli esseri neri che vi si tuffano dentro, un'elica che si allarga — ogni angolo viene dal rilievo al teodolite del GEPAN del 1978. Due racconti, quello di François e quello della sorella Anne-Marie — aprilo a schermo intero per passare dall'uno all'altro."
           }
         },
         {
