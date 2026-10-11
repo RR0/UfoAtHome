@@ -44,17 +44,12 @@ export class CloudEditorTemplate {
     <p data-text="intro">${m.intro}</p>
     <div class="cloud-fields">
     <label>${t("editScope")}<select id="cloud-scope"><option value="instant" data-text="scopeInstant">${m.scopeInstant}</option><option value="observation" data-text="scopeObservation">${m.scopeObservation}</option></select></label>
-    <label>${t("layer")}<select id="cloud-layer"></select></label>
-    <div class="cloud-actions"><button id="cloud-layer-add" type="button" data-text="addLayer">${m.addLayer}</button>
-    <button id="cloud-layer-delete" type="button" data-text="deleteLayer">${m.deleteLayer}</button></div>
+    <div id="cloud-layer-list" class="cloud-list"></div>
     <div id="cloud-layer-parameters" class="cloud-parameters"></div>
     </div>
     <p data-text="editHelp">${m.editHelp}</p>
     <details><summary data-text="individualClouds">${m.individualClouds}</summary><div class="cloud-fields">
-    <label>${t("individualCloud")}<select id="cloud-instance"></select></label>
-    <div class="cloud-actions"><button id="cloud-instance-add" type="button" data-text="addIndividualCloud">${m.addIndividualCloud}</button>
-    <button id="cloud-instance-point" type="button" data-text="pointAtCloud">${m.pointAtCloud}</button>
-    <button id="cloud-instance-delete" type="button" data-text="deleteCloud">${m.deleteCloud}</button></div>
+    <div id="cloud-instance-list" class="cloud-list"></div>
     <label><input id="cloud-manipulate" type="checkbox">${t("manipulate")}</label>
     <div id="cloud-instance-parameters" class="cloud-parameters"></div>
     </div><p data-text="individualHelp">${m.individualHelp}</p></details>

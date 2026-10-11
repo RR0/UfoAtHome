@@ -9,6 +9,7 @@ import type { CloudPoint } from "../render3d/CloudManipulation.js"
 import { CloudEditorTemplate, cloudEditorMessages_en } from "./cloudEditorTemplate.js"
 import { loadCloudEditorMessages } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
+import { ElementList } from "./ElementList.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
 import { CloudParameterSets } from "../engine/model/CloudParameterSets.js"
 import type { CloudLayerContext } from "../engine/model/CloudParameterSets.js"
@@ -22,22 +23,38 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
   let messages = cloudEditorMessages_en
   controls.innerHTML = CloudEditorTemplate.html(messages)
   const input = (id: string) => controls.querySelector<HTMLElement>("#" + id) as HTMLInputElement
-  const layerSelect = controls.querySelector<HTMLElement>("#cloud-layer") as HTMLSelectElement
-  const instances = controls.querySelector<HTMLElement>("#cloud-instance") as HTMLSelectElement
+  // The layers, and the individual clouds of the layer picked: pickers with what is done with them (see ElementList). Their
+  // actions are the editor's own, which come further down.
+  const actions: { addLayer: () => void, removeLayer: () => void, addCloud: () => void, removeCloud: () => void, pointAtCloud: () => void, pickLayer: () => void, pickCloud: () => void } = {} as never
+  const layerList = new ElementList({
+    header: controls.querySelector<HTMLElement>("#cloud-layer-list")!, footer: controls.querySelector<HTMLElement>("#cloud-layer-list")!, rowClass: "cloud-actions",
+    ids: { list: "cloud-layer", remove: "cloud-layer-delete", add: "cloud-layer-add" },
+    onSelect: () => actions.pickLayer(), onAdd: () => actions.addLayer(), onRemove: () => actions.removeLayer()
+  })
+  const instanceList = new ElementList({
+    header: controls.querySelector<HTMLElement>("#cloud-instance-list")!, footer: controls.querySelector<HTMLElement>("#cloud-instance-list")!, rowClass: "cloud-actions",
+    ids: { list: "cloud-instance", remove: "cloud-instance-delete", add: "cloud-instance-add" }, optional: true,
+    actions: [{ id: "cloud-instance-point", glyph: "🎯", onClick: () => actions.pointAtCloud() }],
+    onSelect: () => actions.pickCloud(), onAdd: () => actions.addCloud(), onRemove: () => actions.removeCloud()
+  })
+  const label = () => {
+    layerList.setLabels({ list: messages.layer, remove: messages.deleteLayer, add: messages.addLayer })
+    instanceList.setLabels({ list: messages.individualCloud, remove: messages.deleteCloud, add: messages.addIndividualCloud, none: messages.none,
+      actions: { "cloud-instance-point": messages.pointAtCloud } })
+  }
+  label()
   const status = controls.querySelector<HTMLElement>("#cloud-status")!
   const scope = () => input("cloud-scope").value as "observation" | "instant"
-  const currentLayer = () => resolveCloudLayers(resolveWeatherAt(scene.ufoElement.sighting, scene.ufoElement.currentTime))[Number(layerSelect.value)]
+  const currentLayer = () => { const layers = resolveCloudLayers(resolveWeatherAt(scene.ufoElement.sighting, scene.ufoElement.currentTime)); return layers.find(layer => layer.id === layerList.value) ?? layers[0] }
   // The properties of a layer and of an individual cloud are drawn by the generic form from what the kinds publish
   // (see CloudParameterSets); what is edited here is the layer at the playhead, or the cloud picked in it.
-  const currentInstance = () => currentLayer()?.instances?.find(i => i.id === instances.value)
+  const currentInstance = () => currentLayer()?.instances?.find(i => i.id === instanceList.value)
   const layerHost = controls.querySelector<HTMLElement>("#cloud-layer-parameters")!
   const instanceHost = controls.querySelector<HTMLElement>("#cloud-instance-parameters")!
   const layerForm = new ParameterForm(layerHost, language, "cloudLayer.")
   const instanceForm = new ParameterForm(instanceHost, language, "cloudInstance.")
   const syncInstance = () => {
     const instance = currentInstance()
-    ;(controls.querySelector<HTMLElement>("#cloud-instance-delete") as HTMLButtonElement).disabled = !instance
-    ;(controls.querySelector("#cloud-instance-point") as HTMLButtonElement).disabled = !instance
     instanceHost.hidden = !instance
     if (instance) instanceForm.sync()
   }
@@ -48,21 +65,13 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     if (t === lastTime && active instanceof HTMLInputElement && controls.contains(active)) return
     lastTime = t
     const layers = resolveCloudLayers(resolveWeatherAt(scene.ufoElement.sighting, scene.ufoElement.currentTime))
-    const selectedLayer = layerSelect.selectedOptions[0]?.dataset.layerId
-    layerSelect.replaceChildren(...layers.map((layer, index) => {
-      const option = new Option(`${index + 1} · ${layer.type} · ${Math.round(layer.baseM)} m`, String(index))
-      option.dataset.layerId = layer.id
-      return option
-    }))
-    const selectedIndex = layers.findIndex(layer => layer.id === selectedLayer)
-    layerSelect.value = String(Math.max(0, selectedIndex))
+    layerList.setItems(layers.map((layer, index) => ({ id: layer.id, label: `${index + 1} · ${layer.type} · ${Math.round(layer.baseM)} m` })), layerList.value)
     const layer = currentLayer()
     layerHost.hidden = !layer
-    if (!layer) { instances.replaceChildren(new Option("—", "")); syncInstance(); return }
+    if (!layer) { instanceList.setItems([], ""); syncInstance(); return }
     layerForm.sync()
-    const selected = instances.value
-    instances.replaceChildren(new Option(messages.none, ""), ...(layer.instances ?? []).map((i, index) => new Option(`${messages.cloud} ${index + 1}`, i.id)))
-    instances.value = layer.instances?.some(i => i.id === selected) ? selected : ""
+    const selected = instanceList.value
+    instanceList.setItems((layer.instances ?? []).map((i, index) => ({ id: i.id, label: `${messages.cloud} ${index + 1}` })), layer.instances?.some(i => i.id === selected) ? selected : "")
     syncInstance()
   }
   const edit = (change: (layer: CloudLayer) => CloudLayer, detachWeatherSource = true) => {
@@ -89,7 +98,7 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
   instanceForm.show(CloudParameterSets.INSTANCE, new ParameterTarget(
     () => currentInstance() as unknown as ParameterHolder | undefined,
     apply => {
-      const id = instances.value
+      const id = instanceList.value
       edit(layer => ({ ...layer, instances: layer.instances?.map(i => {
         if (i.id !== id) return i
         const draft = structuredClone(i)
@@ -100,8 +109,8 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
   ), () => undefined)
   // Pause before any field is edited, so a user's values cannot be committed at a moving playhead.
   controls.addEventListener("focusin", () => scene.ufoElement.pause())
-  layerSelect.addEventListener("change", () => { instances.value = ""; sync() })
-  instances.addEventListener("change", syncInstance)
+  actions.pickLayer = () => { instanceList.show(""); sync() }
+  actions.pickCloud = syncInstance
   const editLayers = (change: (layers: CloudLayer[]) => CloudLayer[]) => {
     scene.ufoElement.pause()
     beforeEdit()
@@ -110,17 +119,17 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     scene.ufoElement.refresh()
     sync()
   }
-  controls.querySelector("#cloud-layer-add")!.addEventListener("click", () => {
+  actions.addLayer = () => {
     const weather = resolveWeatherAt(scene.ufoElement.sighting, scene.ufoElement.currentTime)
     const layer: CloudLayer = { id: crypto.randomUUID(), type: "cumulus", baseM: 1500, thicknessM: 800, coverage: 0.5, sizeM: 1400, density: 1, darkness: weather.cloudDarkness }
     editLayers(layers => [...layers, layer])
-    layerSelect.value = String(resolveCloudLayers(resolveWeatherAt(scene.ufoElement.sighting, scene.ufoElement.currentTime)).findIndex(i => i.id === layer.id))
+    layerList.show(layer.id)
     sync()
-  })
-  controls.querySelector("#cloud-layer-delete")!.addEventListener("click", () => {
+  }
+  actions.removeLayer = () => {
     const id = currentLayer()?.id
     if (id) editLayers(layers => layers.filter(layer => layer.id !== id))
-  })
+  }
   const canvas = scene.ufoElement.canvasElement
   const manipulate = input("cloud-manipulate")
   let drag: { pointerId: number; id: string; ray: CloudPoint; center: CloudPoint; minBase: number; delta: CloudPoint } | undefined
@@ -141,10 +150,9 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     scene.ufoElement.pause()
     const point = ndc(event), picked = scene.pickCloudAt(point.x, point.y)
     if (!picked) { status.textContent = messages.noCloudHere; return }
-    const layers = resolveCloudLayers(resolveWeatherAt(scene.ufoElement.sighting, scene.ufoElement.currentTime))
-    layerSelect.value = String(layers.findIndex(layer => layer.id === picked.layerId))
+    layerList.show(picked.layerId)
     sync()
-    instances.value = picked.instanceId
+    instanceList.show(picked.instanceId)
     syncInstance()
     const frames = scope() === "observation" ? scene.ufoElement.sighting.weatherTrack.allKeyframes.map(frame => frame.weather) : [resolveWeatherAt(scene.ufoElement.sighting, scene.ufoElement.currentTime)]
     const bases = frames.flatMap(weather => resolveCloudLayers(weather).filter(layer => layer.id === picked.layerId)
@@ -179,7 +187,7 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
   canvas.addEventListener("pointercancel", finishDrag)
   canvas.addEventListener("lostpointercapture", finishDrag)
 
-  controls.querySelector<HTMLElement>("#cloud-instance-add")!.addEventListener("click", () => {
+  actions.addCloud = () => {
     const layer = currentLayer()
     if (!layer) return
     const id = crypto.randomUUID()
@@ -194,18 +202,18 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
       density: 1, darkness: layer.darkness }
     edit(layer => ({ ...layer, instances: [...(layer.instances ?? []), instance] }))
     sync()
-    instances.value = id
+    instanceList.show(id)
     syncInstance()
     status.textContent += messages.cloudAdded
-  })
-  controls.querySelector<HTMLElement>("#cloud-instance-delete")!.addEventListener("click", () => {
-    const id = instances.value
+  }
+  actions.removeCloud = () => {
+    const id = instanceList.value
     if (!id) return
     edit(layer => ({ ...layer, instances: layer.instances?.filter(i => i.id !== id) }))
     sync()
-  })
-  controls.querySelector("#cloud-instance-point")!.addEventListener("click", () => {
-    const layer = currentLayer(), instance = layer?.instances?.find(i => i.id === instances.value)
+  }
+  actions.pointAtCloud = () => {
+    const layer = currentLayer(), instance = layer?.instances?.find(i => i.id === instanceList.value)
     if (!instance) return
     scene.ufoElement.pause()
     const sighting = scene.ufoElement.sighting, time = scene.ufoElement.currentTime
@@ -217,12 +225,13 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     const up = instance.baseM + instance.thicknessM / 2 - (pose?.elevationM ?? 0) - 1.6 - horizontal ** 2 / (2 * 6371000)
     if (horizontal === 0 && up === 0) return
     pointAt((Math.atan2(east, north) * 180 / Math.PI + 360) % 360, Math.atan2(up, horizontal) * 180 / Math.PI)
-  })
+  }
   if (language !== "en") {
     void loadCloudEditorMessages(language).then(loaded => {
       if (!loaded) return
       messages = loaded
       CloudEditorTemplate.localize(controls, messages)
+      label()
       // The instance picker's own options are written from the messages, not the template.
       lastTime = -1
       sync()
@@ -231,7 +240,7 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
   return {
     sync,
     stopManipulation() { drag = undefined; manipulate.checked = false; canvas.style.touchAction = ""; canvas.style.cursor = "" },
-    reset() { drag = undefined; manipulate.checked = false; canvas.style.cursor = ""; canvas.style.touchAction = ""; instances.value = ""; lastTime = -1; sync() },
+    reset() { drag = undefined; manipulate.checked = false; canvas.style.cursor = ""; canvas.style.touchAction = ""; instanceList.show(""); lastTime = -1; sync() },
 
   }
 }

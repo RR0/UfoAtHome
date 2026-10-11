@@ -64,4 +64,40 @@ describe("ElementList", () => {
     expect(select.options[1].textContent).toBe("Renamed")
     expect(header.querySelector("#look")!.getAttribute("aria-label")).toBe("Look")
   })
+
+  it("stays on show as a choice of none when it is optional, disabling what acts on the picked one until one is", () => {
+    const header = document.createElement("div")
+    const list = new ElementList({
+      header, footer: header, optional: true,
+      ids: { list: "clouds", remove: "remove-cloud", add: "add-cloud" },
+      actions: [{ id: "point", glyph: "🎯", onClick: () => undefined }],
+      onSelect: () => undefined, onAdd: () => undefined, onRemove: () => undefined
+    })
+    list.setLabels({ list: "Cloud", remove: "Remove", add: "Add", none: "None", actions: { point: "Point" } })
+    list.setItems([], "")
+    const select = header.querySelector<HTMLSelectElement>("#clouds")!
+    expect([...select.options].map(option => option.textContent)).toEqual(["None"])
+    expect(select.closest("label")!.hidden).toBe(false)
+    expect(header.querySelector<HTMLButtonElement>("#remove-cloud")!.disabled).toBe(true)
+    list.setItems([{ id: "c1", label: "Cloud 1" }], "c1")
+    expect(list.value).toBe("c1")
+    expect(header.querySelector<HTMLButtonElement>("#remove-cloud")!.disabled).toBe(false)
+    expect(header.querySelector<HTMLButtonElement>("#point")!.disabled).toBe(false)
+    list.show("")
+    expect(header.querySelector<HTMLButtonElement>("#remove-cloud")!.disabled).toBe(true)
+    list.show("c1")
+    expect(header.querySelector<HTMLButtonElement>("#remove-cloud")!.disabled).toBe(false)
+  })
+
+  it("says whether adding is possible, and where the new element will start", () => {
+    const { list, footer } = make()
+    const add = footer.querySelector<HTMLButtonElement>("#add-thing")!
+    list.setAddState(false)
+    expect(add.disabled).toBe(true)
+    list.setAddState(true, "Add one where the shape is")
+    expect(add.disabled).toBe(false)
+    expect(add.title).toBe("Add one where the shape is")
+    list.setAddState(true)
+    expect(add.title).toBe("Add")
+  })
 })

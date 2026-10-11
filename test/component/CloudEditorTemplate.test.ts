@@ -13,7 +13,9 @@ describe("CloudEditorTemplate", () => {
 
   it("is written in English, the language every reader has until theirs arrives", () => {
     const root = built()
-    expect(root.querySelector("#cloud-layer-add")!.textContent).toBe("Add layer")
+    // The pickers of the layers and of the clouds are drawn by ElementList into these hosts.
+    expect(root.querySelector("#cloud-layer-list")).not.toBeNull()
+    expect(root.querySelector("#cloud-instance-list")).not.toBeNull()
     // The properties of a layer and of a cloud are not in the template: the generic form draws them (see CloudParameterSets).
     expect(root.querySelector("#cloud-layer-parameters")).not.toBeNull()
     expect(root.querySelector("#cloud-instance-parameters")).not.toBeNull()
@@ -25,12 +27,11 @@ describe("CloudEditorTemplate", () => {
    */
   it("takes the reader's language in place, keeping its controls", () => {
     const root = built()
-    const button = root.querySelector("#cloud-layer-add")!
+    const list = root.querySelector("#cloud-layer-list")!
     const host = root.querySelector("#cloud-layer-parameters")!
     CloudEditorTemplate.localize(root, cloudEditorMessages_fr)
-    expect(root.querySelector("#cloud-layer-add")).toBe(button)
+    expect(root.querySelector("#cloud-layer-list")).toBe(list)
     expect(root.querySelector("#cloud-layer-parameters")).toBe(host)
-    expect(button.textContent).toBe("Ajouter une couche")
   })
 
   it("has every text in every language", () => {

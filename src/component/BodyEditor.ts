@@ -7,6 +7,7 @@ import type { SaidTexts } from "../engine/model/SaidText.js"
 import type { DecorModelEntry, DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import type { BodyReading } from "./SceneElement.js"
 import type { ModelPicker } from "./ModelPicker.js"
+import { ElementList } from "./ElementList.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
 import { BodyKeyframes, BodyParameterSets } from "../engine/interpretation/BodyParameterSets.js"
 import type { BodyContext, BodyKeyframeContext, BodyKeyframeView } from "../engine/interpretation/BodyParameterSets.js"
@@ -93,17 +94,12 @@ export class BodyEditor {
     const bodies = this.bodies
     if (!bodies.some(body => body.id === this.currentId)) this.currentId = bodies[0]?.id
     this.input("body-interpretation-title").value = this.host.said().read(this.interpretation?.title) ?? ""
-    const select = this.select("body-select")
-    select.replaceChildren(...bodies.map(body => new Option(this.labelOf(body), body.id)))
-    if (this.currentId !== undefined) select.value = this.currentId
+    this.list?.setItems(bodies.map(body => ({ id: body.id, label: this.labelOf(body) })), this.currentId)
     const start = this.host.newBodyStart()
-    const add = this.element("body-add") as HTMLButtonElement
-    add.disabled = start === undefined
-    add.title = !start ? this.messages.addBody
-      : start.label !== undefined ? this.messages.addBodyHint.replace("{shape}", start.label) : this.messages.addBodyHintView
+    this.list?.setAddState(start !== undefined, !start ? undefined
+      : start.label !== undefined ? this.messages.addBodyHint.replace("{shape}", start.label) : this.messages.addBodyHintView)
     // Always there, so that a recording can be named before it has a body: typing a title creates the interpretation.
     this.input("body-interpretation-title").closest("label")!.hidden = false
-    this.select("body-select").closest("label")!.hidden = bodies.length === 0
     const body = this.current
     this.element("body-none").hidden = bodies.length > 0
     this.element("body-fields").hidden = body === undefined
@@ -168,11 +164,8 @@ export class BodyEditor {
       <p class="body-intro">${m.intro}</p>
       ${field("body-interpretation-title", m.interpretationTitle)}
       <p id="body-none" class="body-intro">${m.none}</p>
-      <label><span>${m.body}</span> <select id="body-select"></select></label>
-      <button id="body-add" type="button" class="icon-btn" title="${m.addBody}" aria-label="${m.addBody}">+</button>
+      <div id="body-list" class="body-list"></div>
       <div id="body-fields" class="body-fields">
-        <button id="body-look" type="button" class="icon-btn" title="${m.lookAtBody}" aria-label="${m.lookAtBody}">🎯</button>
-        <button id="body-delete" type="button" class="icon-btn" title="${m.deleteBody}" aria-label="${m.deleteBody}">🗑</button>
         <div id="body-parameters" class="body-parameters"></div>
         <label><span>${m.model}</span> <select id="body-model"></select></label>
         <details id="body-model-advanced" class="decor-model-advanced" hidden>
@@ -196,17 +189,17 @@ export class BodyEditor {
         </fieldset>
       </div>
     </div>`
-    this.select("body-select").addEventListener("change", () => {
-      this.currentId = this.select("body-select").value
-      this.sync()
+    const list = this.element("body-list")
+    this.list = new ElementList({
+      header: list, footer: list, rowClass: "body-list-add",
+      ids: { list: "body-select", remove: "body-delete", add: "body-add" },
+      actions: [{ id: "body-look", glyph: "🎯", onClick: () => { const body = this.current; if (body) this.host.lookAt(body) } }],
+      onSelect: id => { this.currentId = id; this.sync() },
+      onAdd: () => this.addBody(),
+      onRemove: () => this.deleteCurrent()
     })
+    this.list.setLabels({ list: m.body, remove: m.deleteBody, add: m.addBody, actions: { "body-look": m.lookAtBody } })
     this.input("body-interpretation-title").addEventListener("change", () => this.updateInterpretationTitle())
-    this.element("body-delete").addEventListener("click", () => this.deleteCurrent())
-    this.element("body-add").addEventListener("click", () => this.addBody())
-    this.element("body-look").addEventListener("click", () => {
-      const body = this.current
-      if (body) this.host.lookAt(body)
-    })
     for (const id of ["body-model-url", "body-model-title", "body-model-author", "body-model-license", "body-model-source"]) {
       this.input(id).addEventListener("change", () => this.updateCurrent())
     }
@@ -560,9 +553,7 @@ export class BodyEditor {
       this.sync()
       return
     }
-    const select = this.select("body-select")
-    select.replaceChildren(...this.bodies.map(body => new Option(this.labelOf(body), body.id)))
-    if (this.currentId !== undefined) select.value = this.currentId
+    this.list?.setItems(this.bodies.map(body => ({ id: body.id, label: this.labelOf(body) })), this.currentId)
     const body = this.current
     if (!body) return
     this.element("body-model-incomplete").hidden = body.model.url === undefined || body.model.credit !== undefined
@@ -599,6 +590,9 @@ export class BodyEditor {
     const trimmed = value.trim()
     return trimmed === "" ? undefined : trimmed
   }
+
+  /** The picker of the bodies, and what is done with them (see ElementList). */
+  private list?: ElementList
 
   private element(id: string): HTMLElement {
     return this.container.querySelector<HTMLElement>("#" + id)!

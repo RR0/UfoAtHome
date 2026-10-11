@@ -24,7 +24,14 @@ export interface ElementListOptions {
   /** Where the adding goes: a row of its own, since what is edited sits between the two. */
   footer: HTMLElement
   /** The ids of the controls, which others find them by (a summary chip focuses the picker; tests read them). */
-  ids: { list: string, label: string, remove: string, add: string, kinds?: string, kind?: (value: string) => string }
+  ids: { list: string, label?: string, remove: string, add: string, kinds?: string, kind?: (value: string) => string }
+  /**
+   * The picker offers "none" as a choice of its own and stays on show without elements (the individual cloud of a layer: a layer
+   * has none until one is added). What acts on the picked element is then disabled, not hidden, while none is picked.
+   */
+  optional?: boolean
+  /** The class of the row of the adding controls: the decor panel puts it on a line of its own. */
+  rowClass?: string
   actions?: ElementListAction[]
   onSelect: (id: string) => void
   /** `kind` is the one picked beside the button, absent when the list has no kinds. */
@@ -50,11 +57,14 @@ export class ElementList {
   private readonly kindSelect?: HTMLSelectElement
   private readonly actionButtons = new Map<string, HTMLButtonElement>()
   private kinds: ElementListKind[] = []
+  private items: readonly ElementListItem[] = []
+  private noneLabel = "—"
+  private addLabel = ""
 
   constructor(private readonly options: ElementListOptions) {
     this.pickerRow = document.createElement("label")
     this.labelText = document.createElement("span")
-    this.labelText.id = options.ids.label
+    if (options.ids.label) this.labelText.id = options.ids.label
     this.select = document.createElement("select")
     this.select.id = options.ids.list
     this.select.addEventListener("change", () => options.onSelect(this.select.value))
@@ -71,7 +81,7 @@ export class ElementList {
     options.header.append(this.removeButton)
 
     const row = document.createElement("div")
-    row.className = "decor-add-row"
+    row.className = options.rowClass ?? "decor-add-row"
     this.addButton = this.iconButton(options.ids.add, "+")
     this.addButton.addEventListener("click", () => options.onAdd(this.kindSelect?.value))
     row.append(this.addButton)
@@ -93,8 +103,11 @@ export class ElementList {
   }
 
   /** What the controls say, in the reader's language: the picker's label, and what each button does (its tooltip and accessible name). */
-  setLabels(labels: { list: string, remove: string, add: string, actions?: Record<string, string> }): void {
+  setLabels(labels: { list: string, remove: string, add: string, actions?: Record<string, string>, none?: string }): void {
     this.labelText.textContent = labels.list
+    this.noneLabel = labels.none ?? this.noneLabel
+    this.addLabel = labels.add
+    if (this.options.optional) this.listed(this.items, this.select.value)
     for (const [button, text] of [[this.removeButton, labels.remove], [this.addButton, labels.add],
       ...[...this.actionButtons].map(([id, action]) => [action, labels.actions?.[id] ?? ""] as const)] as const) {
       button.title = text
@@ -129,9 +142,29 @@ export class ElementList {
 
   /** Lists these, with `selected` picked. Nothing to pick hides what acts on it (see the class). */
   setItems(items: readonly ElementListItem[], selected?: string): void {
-    this.select.replaceChildren(...items.map(item => new Option(item.label, item.id)))
+    this.items = items
+    this.listed(items, selected)
+  }
+
+  private listed(items: readonly ElementListItem[], selected?: string): void {
+    this.select.replaceChildren(...(this.options.optional ? [new Option(this.noneLabel, "")] : []), ...items.map(item => new Option(item.label, item.id)))
     if (selected !== undefined) this.select.value = selected
-    this.setPresent(items.length > 0)
+    // A pick the list no longer holds falls back to the first, or to none.
+    if (this.select.selectedIndex < 0) this.select.selectedIndex = 0
+    this.setPresent(this.options.optional ? this.select.value !== "" : items.length > 0)
+  }
+
+  /** The id of the element picked, "" for none. */
+  get value(): string {
+    return this.select.value
+  }
+
+  /** Whether adding is possible, and what the button says then (a hint on where the new element will start); without a text, its usual one. */
+  setAddState(enabled: boolean, title?: string): void {
+    this.addButton.disabled = !enabled
+    const text = title ?? this.addLabel
+    this.addButton.title = text
+    this.addButton.setAttribute("aria-label", text)
   }
 
   /** Renames an entry without redrawing the list, which would take the focus from whatever is being typed. */
@@ -143,16 +176,20 @@ export class ElementList {
   /** The picker shows this one, without saying it was picked by the reader. */
   show(id: string): void {
     this.select.value = id
+    // What acts on the picked element follows the pick, for a list where none can be picked.
+    if (this.options.optional) this.setPresent(this.select.value !== "")
   }
 
   /** What acts on the picked element is shown, and enabled, only while there is one. */
   private setPresent(present: boolean): void {
-    this.pickerRow.hidden = !present
-    this.removeButton.hidden = !present
+    const optional = this.options.optional === true
+    // An optional picker stays: it is where an element is picked from, or none.
+    this.pickerRow.hidden = !present && !optional
+    this.removeButton.hidden = !present && !optional
     this.removeButton.disabled = !present
-    this.select.disabled = !present
+    this.select.disabled = !present && !optional
     for (const button of this.actionButtons.values()) {
-      button.hidden = !present
+      button.hidden = !present && !optional
       button.disabled = !present
     }
   }
