@@ -165,7 +165,7 @@ export class BodySystem {
       if (material) BodySystem.paint(material, state, display)
       if (glowing) BodySystem.light(glowing, state, display)
       if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
-      this.shine(state, holder, glowing, display, frame.eye)
+      this.shine(state, holder, glowing, frame.eye)
       this.shineLights(state, holder, glowing, frame)
       this.throwFlame(state, holder, seconds, display, frame.eye)
     }
@@ -196,7 +196,7 @@ export class BodySystem {
    * tells against the sky, out to the width that carries its whole light at the cap, where it is
    * all the eye has left — which is what a observer means by "we could not look at it".
    */
-  private shine(state: BodyState, holder: Group, glowing: Glow[] | undefined, display: LuminanceDisplay | undefined, eye: Vector3 | undefined): void {
+  private shine(state: BodyState, holder: Group, glowing: Glow[] | undefined, eye: Vector3 | undefined): void {
     const luminanceCdM2 = state.appearance.luminanceCdM2
     let veil = this.glares.get(state.id)
     // Only a body that glows WHOLE throws a veil from its middle. A model whose windows alone are
@@ -221,8 +221,13 @@ export class BodySystem {
     const solidAngle = 2 * Math.PI * (1 - Math.cos(angularRadius))
     // A model's own brightest glowing part says what colour the veil is; a primitive's own colour does.
     const hue = glowing?.find(glow => glow.share >= 1)?.hue ?? BodySystem.rgbOf(state.appearance.color)
-    const light = this.throughAir(BodySystem.shown(hue, luminanceCdM2, display), holder.position)
-    veil.shine(holder.position, [light[0] * solidAngle, light[1] * solidAngle, light[2] * solidAngle], (angularRadius * 180) / Math.PI)
+    // From the luminance itself, as a star's illuminance and a model's own lights' are (see shineLights): never from the colour as shown. The
+    // screen's response is compressed — a body ten times brighter is only a little lighter on it — so a veil taken from that stayed as faint as
+    // the first few hundred cd/m² made it, whatever the luminance was raised to, and the body's glare never grew beyond its own disc.
+    const lux = luminanceCdM2 * solidAngle * this.sceneUnitsPerLux()
+    const peak = Math.max(...hue) || 1
+    const light = this.throughAir([hue[0] / peak * lux, hue[1] / peak * lux, hue[2] / peak * lux], holder.position)
+    veil.shine(holder.position, light, (angularRadius * 180) / Math.PI)
   }
 
 
