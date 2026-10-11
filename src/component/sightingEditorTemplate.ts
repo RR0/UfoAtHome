@@ -162,9 +162,8 @@ export const html = `
          an empty recording shows nothing here but the Add controls below. Shown first, above
          the Add row, once at least one decor object exists — see that row's own comment for why
          it's forced onto its own line after this block instead of just flowing after it. -->
-    <label><span id="label-decor">Environment</span> <select id="decor"></select></label>
-    <button id="look-at-decor" type="button" class="icon-btn" title="Look at it" aria-label="Look at it">🎯</button>
-    <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
+    <!-- What picks, and acts on, the selected object: drawn by ElementList, with the controls' ids the rest of the editor knows them by. -->
+    <div id="decor-list-header" class="decor-list-part"></div>
     <!-- The base properties — name, place, heading, colour, measures — are drawn from what a decor object says it has (see
          DecorBaseParameterSets and ParameterForm). The model it is drawn as is the last of them: a window of pictures over the same choice. -->
     <div id="decor-base" class="decor-parameters"></div>
@@ -177,29 +176,7 @@ export const html = `
     <!-- flex-basis:100% (see the CSS rule below) forces this row onto its own line, after
          whatever decor properties are showing above — the only thing shown at all when there's
          no decor yet (see the block above's own comment). -->
-    <div class="decor-add-row">
-      <button id="add-decor-building" type="button" class="icon-btn" title="Add" aria-label="Add">+</button>
-      <select id="decorKind">
-        <option id="option-decor-building" value="building">Building</option>
-        <option id="option-decor-tree" value="tree">Tree</option>
-        <option id="option-decor-shrub" value="shrub">Shrub</option>
-        <option id="option-decor-bridge" value="bridge">Bridge</option>
-        <option id="option-decor-wire" value="wire">Overhead line</option>
-        <option id="option-decor-crop" value="crop">Crop row</option>
-        <option id="option-decor-terrace" value="terrace">Terrace (restanque)</option>
-        <option id="option-decor-mound" value="mound">Stone heap</option>
-        <option id="option-decor-wall" value="wall">Dry-stone wall</option>
-        <option id="option-decor-streetlight" value="streetlight">Streetlight</option>
-        <option id="option-decor-vehicle" value="vehicle">Vehicle</option>
-        <option id="option-decor-aircraft" value="aircraft">Aircraft</option>
-        <option id="option-decor-entity" value="entity">Being</option>
-        <!-- Other observer is added from its own dedicated button instead (Observer group's own
-             "Add observer" — nothing else to configure beforehand) — hidden (not removed) so
-             decorLabel() can still look up its translated kind name by id for the fallback
-             "{kind} {n}" label, see SightingEditorElement.decorLabel. -->
-        <option id="option-decor-observer" value="observer" hidden>Other observer</option>
-      </select>
-    </div>
+    <div id="decor-list-footer" class="decor-list-part"></div>
   </div>
 </section>
 <section class="group-panel" id="group-temporal" aria-labelledby="label-temporal-group" hidden>
@@ -577,6 +554,10 @@ export const css = `
   display: block;
   font-family: sans-serif;
 }
+.decor-list-part {
+  display: contents;
+}
+
 .toolbar {
   display: flex;
   align-items: center;

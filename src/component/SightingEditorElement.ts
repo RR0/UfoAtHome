@@ -6,6 +6,7 @@ import { DecorParameterSets } from "../engine/model/DecorParameterSets.js"
 import { DecorBase } from "../engine/model/DecorBase.js"
 import type { DecorBaseContext } from "../engine/model/DecorBase.js"
 import { DecorBaseParameterSets } from "../engine/model/DecorBaseParameterSets.js"
+import { ElementList } from "./ElementList.js"
 import type { ChoiceParameter, ParameterHolder } from "../engine/interpretation/Parameters.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import type { JsonPath } from "./JsonPaths.js"
@@ -683,21 +684,12 @@ export class SightingEditorElement extends HTMLElement {
   private readonly optionPrecipitationRain: HTMLElement
   private readonly optionPrecipitationSnow: HTMLElement
   private readonly optionPrecipitationHail: HTMLElement
-  private readonly decorKindSelect: HTMLSelectElement
+  /** The picker of the decor objects, what acts on the selected one, and the adding of another (see ElementList). */
+  private readonly decorList: ElementList
   private readonly addDecorObserverButton: HTMLButtonElement
-  /** A plain "+" glyph (its accessible name/tooltip is "Add decor", not "Add building" — see
-   * template's own comment on this rename) that adds whatever kind decorKindSelect currently
-   * shows, building included now that it's no longer hidden from that dropdown — the ONLY way to
-   * add a building/tree/streetlight/vehicle. Only "other observer" still gets its own dedicated
-   * button (addDecorObserverButton) and stays hidden from the dropdown, since a observer has no
-   * other fields to configure via it beforehand. */
-  private readonly addDecorBuildingButton: HTMLButtonElement
-  private readonly deleteDecorButton: HTMLButtonElement
-  private readonly decorSelect: HTMLSelectElement
   /** Which set of lamps the selected decor object carries — see LightRig.ts. Rebuilt for each
    * selection, since the rigs that make sense on a tree are not the ones that make sense on an
    * aircraft. */
-  private readonly lookAtDecorButton: HTMLButtonElement
   /** Which catalogue the 3D-model picker offers, and which the scene resolves a named model
    * through — chosen in Data sources like every other real-world source (see refreshSourceRows). */
   private decorModelProvider: DecorModelProvider = DECOR_MODEL_SOURCES[0].create()
@@ -723,7 +715,6 @@ export class SightingEditorElement extends HTMLElement {
   private decorBaseShown = false
   private readonly decorParametersHost: HTMLElement
   private decorParametersShownFor?: string
-  private readonly labelDecor: HTMLElement
   /** The Decor group's own handle in the tab strip — reuses the same "Decor" text as labelDecor
    * (the object-picker's own label), just on a different element, so no separate message key is
    * needed. */
@@ -731,20 +722,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelMilestones: HTMLElement
   private readonly labelMilestoneLabel: HTMLElement
   private readonly labelMilestoneNote: HTMLElement
-  private readonly optionDecorBuilding: HTMLElement
-  private readonly optionDecorTree: HTMLElement
-  private readonly optionDecorShrub: HTMLElement
-  private readonly optionDecorWall: HTMLElement
-  private readonly optionDecorBridge: HTMLElement
-  private readonly optionDecorWire: HTMLElement
-  private readonly optionDecorCrop: HTMLElement
-  private readonly optionDecorTerrace: HTMLElement
-  private readonly optionDecorMound: HTMLElement
-  private readonly optionDecorStreetlight: HTMLElement
-  private readonly optionDecorVehicle: HTMLElement
-  private readonly optionDecorAircraft: HTMLElement
-  private readonly optionDecorEntity: HTMLElement
-  private readonly optionDecorObserver: HTMLElement
 
   private recorder?: Recorder
   private isRecording = false
@@ -1301,13 +1278,27 @@ export class SightingEditorElement extends HTMLElement {
     this.optionPrecipitationRain = this.shadow.getElementById("option-precipitation-rain")!
     this.optionPrecipitationSnow = this.shadow.getElementById("option-precipitation-snow")!
     this.optionPrecipitationHail = this.shadow.getElementById("option-precipitation-hail")!
-    this.decorKindSelect = this.shadow.getElementById("decorKind") as HTMLSelectElement
+    this.decorList = new ElementList({
+      header: this.shadow.getElementById("decor-list-header")!,
+      footer: this.shadow.getElementById("decor-list-footer")!,
+      ids: { list: "decor", label: "label-decor", remove: "delete-decor", add: "add-decor-building", kinds: "decorKind", kind: value => `option-decor-${value}` },
+      actions: [{ id: "look-at-decor", glyph: "🎯", onClick: () => this.lookAtDecor() }],
+      onSelect: id => this.selectDecor(id),
+      onAdd: kind => this.addDecor(kind as DecorObject["kind"]),
+      onRemove: () => this.deleteDecor()
+    })
+    // In English until the language arrives, which says what they are called: the controls exist, and mean something, from the start.
+    this.decorList.setKinds([
+      { value: "building", label: "Building" }, { value: "tree", label: "Tree" }, { value: "shrub", label: "Shrub" }, { value: "bridge", label: "Bridge" },
+      { value: "wire", label: "Overhead line" }, { value: "crop", label: "Crop row" }, { value: "terrace", label: "Terrace (restanque)" },
+      { value: "mound", label: "Stone heap" }, { value: "wall", label: "Dry-stone wall" }, { value: "streetlight", label: "Streetlight" },
+      { value: "vehicle", label: "Vehicle" }, { value: "aircraft", label: "Aircraft" }, { value: "entity", label: "Being" },
+      { value: "observer", label: "Other observer", hidden: true }
+    ])
+    this.decorList.setLabels({ list: "Environment", remove: "Delete decor", add: "Add", actions: { "look-at-decor": "Look at it" } })
     this.addDecorObserverButton = this.shadow.getElementById("add-decor-observer") as HTMLButtonElement
-    this.addDecorBuildingButton = this.shadow.getElementById("add-decor-building") as HTMLButtonElement
-    this.deleteDecorButton = this.shadow.getElementById("delete-decor") as HTMLButtonElement
     this.undoButton = this.shadow.getElementById("undo") as HTMLButtonElement
     this.redoButton = this.shadow.getElementById("redo") as HTMLButtonElement
-    this.decorSelect = this.shadow.getElementById("decor") as HTMLSelectElement
     this.referenceSelect = this.shadow.getElementById("reference") as HTMLSelectElement
     this.deleteReferenceButton = this.shadow.getElementById("delete-reference") as HTMLButtonElement
     this.referenceTitleInput = this.shadow.getElementById("referenceTitle") as HTMLInputElement
@@ -1351,7 +1342,6 @@ export class SightingEditorElement extends HTMLElement {
       this.referenceCreditUrlInput, this.referenceTInput, this.referenceDrawingInput, this.referenceOpacityInput,
       this.referenceHeadingInput, this.referencePitchInput, this.referenceRollInput, this.referenceFovInput
     ]
-    this.lookAtDecorButton = this.shadow.getElementById("look-at-decor") as HTMLButtonElement
     this.milestoneSelect = this.shadow.getElementById("milestone") as HTMLSelectElement
     this.milestoneLabelInput = this.shadow.getElementById("milestoneLabel") as HTMLInputElement
     this.milestoneNoteInput = this.shadow.getElementById("milestoneNote") as HTMLInputElement
@@ -1372,25 +1362,10 @@ export class SightingEditorElement extends HTMLElement {
     this.decorStateHost = this.shadow.getElementById("decor-state")!
     this.decorBaseForm = new ParameterForm(this.decorBaseHost, "en", "decorBase.", decorValues, (spec, select) => this.enhanceDecorModelChoice(spec, select))
     this.decorStateForm = new ParameterForm(this.decorStateHost, "en", "decorState.", decorValues)
-    this.labelDecor = this.shadow.getElementById("label-decor")!
     this.labelDecorGroup = this.shadow.getElementById("label-decor-group")!
     this.labelMilestones = this.shadow.getElementById("label-milestones")!
     this.labelMilestoneLabel = this.shadow.getElementById("label-milestone-label")!
     this.labelMilestoneNote = this.shadow.getElementById("label-milestone-note")!
-    this.optionDecorBuilding = this.shadow.getElementById("option-decor-building")!
-    this.optionDecorTree = this.shadow.getElementById("option-decor-tree")!
-    this.optionDecorShrub = this.shadow.getElementById("option-decor-shrub")!
-    this.optionDecorBridge = this.shadow.getElementById("option-decor-bridge")!
-    this.optionDecorWire = this.shadow.getElementById("option-decor-wire")!
-    this.optionDecorCrop = this.shadow.getElementById("option-decor-crop")!
-    this.optionDecorTerrace = this.shadow.getElementById("option-decor-terrace")!
-    this.optionDecorMound = this.shadow.getElementById("option-decor-mound")!
-    this.optionDecorWall = this.shadow.getElementById("option-decor-wall")!
-    this.optionDecorStreetlight = this.shadow.getElementById("option-decor-streetlight")!
-    this.optionDecorVehicle = this.shadow.getElementById("option-decor-vehicle")!
-    this.optionDecorAircraft = this.shadow.getElementById("option-decor-aircraft")!
-    this.optionDecorEntity = this.shadow.getElementById("option-decor-entity")!
-    this.optionDecorObserver = this.shadow.getElementById("option-decor-observer")!
 
     this.ufoElement.canvasElement.addEventListener("pointerdown", event => {
       // Touching the canvas is working in the editor, so the editor takes the focus — which is what
@@ -1484,11 +1459,8 @@ export class SightingEditorElement extends HTMLElement {
     this.sizeLockSelect.addEventListener("change", () => this.applySizeLock())
     this.clearDistanceHypothesisButton.addEventListener("click", () => this.clearDistanceHypothesis())
     this.addDecorObserverButton.addEventListener("click", () => this.addDecor("observer"))
-    this.addDecorBuildingButton.addEventListener("click", () => this.addDecor())
-    this.deleteDecorButton.addEventListener("click", () => this.deleteDecor())
     this.undoButton.addEventListener("click", () => this.undo())
     this.redoButton.addEventListener("click", () => this.redo())
-    this.decorSelect.addEventListener("change", () => this.selectDecor(this.decorSelect.value))
     this.referenceSelect.addEventListener("change", () => this.selectReference(this.referenceSelect.value))
     this.deleteReferenceButton.addEventListener("click", () => this.deleteReference())
     for (const field of this.referenceFields) field.addEventListener("input", () => this.updateReference())
@@ -1520,7 +1492,6 @@ export class SightingEditorElement extends HTMLElement {
     for (const input of [this.milestoneLabelInput, this.milestoneNoteInput]) {
       input.addEventListener("input", () => this.updateMilestone())
     }
-    this.lookAtDecorButton.addEventListener("click", () => this.lookAtDecor())
     this.showMeteorButton.addEventListener("click", () => this.showNextMeteor())
     this.showCometButton.addEventListener("click", () => this.lookAtComet())
     this.showNovaButton.addEventListener("click", () => this.lookAtNova())
@@ -5808,7 +5779,7 @@ export class SightingEditorElement extends HTMLElement {
     if (field.startsWith("decor:")) {
       this.currentDecorId = field.slice("decor:".length)
       this.refreshDecorList()
-      this.decorSelect.focus()
+      this.decorList.focus()
       return
     }
     // Looked up by id on the shadow root rather than through a selector: the field ids come from
@@ -6793,7 +6764,7 @@ export class SightingEditorElement extends HTMLElement {
     if (title) return title
     const sameKind = this.ufoElement.sighting.decor.filter(d => d.kind === decor.kind)
     const index = sameKind.indexOf(decor) + 1
-    const kindLabel = this.decorKindSelect.querySelector<HTMLOptionElement>(`option[value="${decor.kind}"]`)?.textContent ?? decor.kind
+    const kindLabel = this.decorList.kindLabel(decor.kind)
     return `${kindLabel} ${index}`
   }
 
@@ -6812,7 +6783,7 @@ export class SightingEditorElement extends HTMLElement {
    * Always reassigns sighting.decor to a new array (never mutates the existing one in place) —
    * see SceneRenderer.setDecor's own doc comment on why that reference-equality check depends on
    * it. */
-  private addDecor(kind: DecorObject["kind"] = this.decorKindSelect.value as DecorObject["kind"]): void {
+  private addDecor(kind: DecorObject["kind"] = (this.decorList.pickedKind ?? "building") as DecorObject["kind"]): void {
     const sighting = this.ufoElement.sighting
     const n = sighting.decor.length + 1
     const decor: DecorObject = {
@@ -6906,7 +6877,7 @@ export class SightingEditorElement extends HTMLElement {
    * with decorLabel so the two can never disagree. */
   private nextDecorLabel(kind: DecorObject["kind"]): string {
     const sameKindCount = this.ufoElement.sighting.decor.filter(d => d.kind === kind).length
-    const kindLabel = this.decorKindSelect.querySelector<HTMLOptionElement>(`option[value="${kind}"]`)?.textContent ?? kind
+    const kindLabel = this.decorList.kindLabel(kind)
     return `${kindLabel} ${sameKindCount + 1}`
   }
 
@@ -6938,7 +6909,7 @@ export class SightingEditorElement extends HTMLElement {
     this.currentDecorId = id
     // With the text on show, what is selected is framed on the picture as in its own group (see canvasMode).
     if (this.isGroupIdOpen("group-file")) this.fileFocus = "decor"
-    this.decorSelect.value = id
+    this.decorList.show(id)
     this.syncDecorFields()
     this.syncCanvasMode()
     // The frame of handles is drawn round the selected object: moving the selection moves it, which
@@ -7182,26 +7153,12 @@ export class SightingEditorElement extends HTMLElement {
    * refreshSourceList()'s role for shapes. Disables the field row entirely (rather than leaving
    * stale values editable) whenever there's no decor to edit at all. */
   private refreshDecorList(): void {
-    const decor = this.ufoElement.sighting.decor
-    this.decorSelect.innerHTML = ""
-    for (const object of decor) {
-      const option = document.createElement("option")
-      option.value = object.id
-      option.textContent = this.decorLabel(object)
-      this.decorSelect.appendChild(option)
-    }
-    if (this.currentDecorId !== undefined) this.decorSelect.value = this.currentDecorId
+    this.decorList.setItems(this.ufoElement.sighting.decor.map(object => ({ id: object.id, label: this.decorLabel(object) })), this.currentDecorId)
     this.syncDecorFields()
     this.syncCanvasMode()
   }
 
   private syncDecorFields(): void {
-    const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
-    const hasSelection = decor !== undefined
-    this.deleteDecorButton.disabled = !hasSelection
-    for (const input of [this.decorSelect, this.lookAtDecorButton]) {
-      input.disabled = !hasSelection
-    }
     this.syncDecorVisibility()
   }
 
@@ -7281,8 +7238,7 @@ export class SightingEditorElement extends HTMLElement {
     sighting.decor = sighting.decor.map(candidate => candidate.id === decor.id ? DecorBase.apply(candidate, view, key, t) : candidate)
     if (key === "model.id") void this.adoptCatalogueSize(decor, view.model?.id)
     const edited = sighting.decor.find(candidate => candidate.id === decor.id)!
-    const option = this.decorSelect.options[this.decorSelect.selectedIndex]
-    if (key === "title" && option) option.textContent = this.decorLabel(edited)
+    if (key === "title") this.decorList.rename(edited.id, this.decorLabel(edited))
     this.syncDecorVisibility()
     this.ufoElement.refresh()
     // The lamps are built into the object's group, which the scene rebuilds when the array's own identity changes.
@@ -7357,9 +7313,6 @@ export class SightingEditorElement extends HTMLElement {
    */
   private syncDecorVisibility(): void {
     const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
-    const hasSelection = decor !== undefined
-    this.setRowVisible(this.decorSelect, hasSelection)
-    this.setRowVisible(this.deleteDecorButton, hasSelection)
     this.refreshDecorModelOptions(decor)
     this.showDecorBase(decor)
     // The properties its kind publishes (floors, windows, a bridge's railing…) are drawn by the generic form.
@@ -8571,21 +8524,17 @@ export class SightingEditorElement extends HTMLElement {
     this.obsEndTimeInput.placeholder = messages.edtfPlaceholder
     this.endDate.hint = messages.observationEndTimeHint
     this.presetsGroup.setAttribute("aria-label", messages.presetsGroupLabel)
-    this.labelDecor.textContent = messages.decor
     this.labelDecorGroup.textContent = messages.decor
-    this.optionDecorBuilding.textContent = messages.decorBuilding
-    this.optionDecorTree.textContent = messages.decorTree
-    this.optionDecorShrub.textContent = messages.decorShrub
-    this.optionDecorBridge.textContent = messages.decorBridge
-    this.optionDecorWire.textContent = messages.decorWire
-    this.optionDecorCrop.textContent = messages.decorCrop
-    this.optionDecorTerrace.textContent = messages.decorTerrace
-    this.optionDecorMound.textContent = messages.decorMound
-    this.optionDecorWall.textContent = messages.decorWall
-    this.optionDecorStreetlight.textContent = messages.decorStreetlight
-    this.optionDecorVehicle.textContent = messages.decorVehicle
-    this.optionDecorAircraft.textContent = messages.decorAircraft
-    this.optionDecorEntity.textContent = messages.decorEntity
+    this.decorList.setKinds([
+      { value: "building", label: messages.decorBuilding }, { value: "tree", label: messages.decorTree }, { value: "shrub", label: messages.decorShrub },
+      { value: "bridge", label: messages.decorBridge }, { value: "wire", label: messages.decorWire }, { value: "crop", label: messages.decorCrop },
+      { value: "terrace", label: messages.decorTerrace }, { value: "mound", label: messages.decorMound }, { value: "wall", label: messages.decorWall },
+      { value: "streetlight", label: messages.decorStreetlight }, { value: "vehicle", label: messages.decorVehicle },
+      { value: "aircraft", label: messages.decorAircraft }, { value: "entity", label: messages.decorEntity },
+      // Added from its own button (the Observer group's): not offered here, but still named, for the label of one that is there.
+      { value: "observer", label: messages.decorObserver, hidden: true }
+    ])
+    this.decorList.setLabels({ list: messages.decor, remove: messages.deleteDecor, add: messages.addDecor, actions: { "look-at-decor": messages.lookAtDecor } })
     this.showMeteorButton.title = messages.showMeteor
     this.showMeteorButton.setAttribute("aria-label", messages.showMeteor)
     this.showCometButton.title = messages.showComet
@@ -8596,26 +8545,15 @@ export class SightingEditorElement extends HTMLElement {
     this.showSatelliteButton.setAttribute("aria-label", messages.showSatellite)
     this.showFireballButton.title = messages.showFireball
     this.showFireballButton.setAttribute("aria-label", messages.showFireball)
-    this.lookAtDecorButton.title = messages.lookAtDecor
-    this.lookAtDecorButton.setAttribute("aria-label", messages.lookAtDecor)
-    this.optionDecorObserver.textContent = messages.decorObserver
     this.undoButton.title = messages.undo
     this.undoButton.setAttribute("aria-label", messages.undo)
     this.redoButton.title = messages.redo
     this.redoButton.setAttribute("aria-label", messages.redo)
-    this.deleteDecorButton.title = messages.deleteDecor
-    this.deleteDecorButton.setAttribute("aria-label", messages.deleteDecor)
     this.contextViewAccountButton.textContent = messages.viewAccount
     // The arrow is appended here, not part of the translated string — see SightingEditorMessages.
     // masks's own doc comment.
     this.labelContextMasks.textContent = `${messages.masks} ▸`
     this.addDecorObserverButton.textContent = messages.addObserver
-    // The visible glyph itself is a plain "+" (baked into the template, not translated — see
-    // addDecorBuildingButton's own field doc comment) since the adjacent Kind dropdown already
-    // says what's being added; messages.addDecor still drives the accessible name/tooltip so a
-    // screen reader (or a sighted hover) gets a real word, not just a symbol.
-    this.addDecorBuildingButton.title = messages.addDecor
-    this.addDecorBuildingButton.setAttribute("aria-label", messages.addDecor)
     this.labelMilestones.textContent = messages.milestones
     this.labelMilestoneLabel.textContent = messages.milestoneLabel
     this.labelMilestoneNote.textContent = messages.milestoneNote
