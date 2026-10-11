@@ -442,6 +442,17 @@ export class DemoCatalogue {
             es: "El lanzador de Zond 4 desintegrándose sobre Kentucky, 3 de marzo de 1968 a las 21:45: la fila ardiente que 78 informes convirtieron en una formación, un cigarro con ventanas, una nave silenciosa.",
             it: "Il lanciatore di Zond 4 che si disintegra sopra il Kentucky, 3 marzo 1968 alle 21:45: la fila ardente che 78 segnalazioni trasformarono in una formazione, un sigaro con finestre, un velivolo silenzioso."
           }
+        },
+        {
+          id: "launch-plume",
+          src: "/demo-data/sky-test-launch-plume.json",
+          title: { en: "A space jellyfish", fr: "Une méduse spatiale", es: "Una medusa espacial", it: "Una medusa spaziale" },
+          blurb: {
+            en: "Hoboken, 25 August 2026 at 05:39: the exhaust of a Falcon 9 launched from Florida six minutes before, lit by a Sun that has not risen for the ground, spreading into a bell. The Earth's shadow, the light and the spreading are computed.",
+            fr: "Hoboken, 25 août 2026 à 5 h 39 : l'échappement d'un Falcon 9 lancé de Floride six minutes plus tôt, éclairé par un Soleil pas encore levé pour le sol, qui s'étale en cloche. L'ombre de la Terre, la lumière et l'étalement sont calculés.",
+            es: "Hoboken, 25 de agosto de 2026 a las 05:39: el escape de un Falcon 9 lanzado desde Florida seis minutos antes, iluminado por un Sol que aún no ha salido para el suelo, extendiéndose en campana. La sombra de la Tierra, la luz y la expansión se calculan.",
+            it: "Hoboken, 25 agosto 2026 alle 05:39: lo scarico di un Falcon 9 lanciato dalla Florida sei minuti prima, illuminato da un Sole non ancora sorto per il suolo, che si allarga a campana. L'ombra della Terra, la luce e l'espansione sono calcolate."
+          }
         }
       ]
     },

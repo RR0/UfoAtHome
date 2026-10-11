@@ -77,6 +77,7 @@ import { PhenomenonSystem } from "../render3d/PhenomenonSystem.js"
 import type { PlacedPhenomenon } from "../render3d/PhenomenonSystem.js"
 import { Vector3 } from "three"
 import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
+import { LaunchPlumeSighting } from "../engine/interpretation/LaunchPlume.js"
 import { ReentrySighting } from "../engine/interpretation/Reentry.js"
 import type { ReentryJson } from "../engine/interpretation/Reentry.js"
 import { AIRCRAFT_SOURCES } from "../engine/traffic/aircraftSources.js"
@@ -1536,6 +1537,10 @@ export class SceneElement extends HTMLElement {
     this.ensureFireballs(startDate)
     const burning = [...(this.interpretationShown?.reentries ?? []), ...(this.fireballs?.reentries ?? [])]
     this.sceneRenderer.setReentries(burning.length === 0 ? [] : ReentrySighting.viewsAt(burning, t, { lat, lng, heightM: observer.elevationM }))
+    // The plumes of the launches it claims: lit by the Sun at the real date and hour, so with no date there is no light to put on them.
+    const launches = this.interpretationShown?.launches ?? []
+    this.sceneRenderer.setLaunchPlumes(launches.length === 0 || !startDate ? []
+      : LaunchPlumeSighting.viewsAt(launches, t, { lat, lng, heightM: observer.elevationM }, LaunchPlumeSighting.sunDirectionAt(new Date(startDate.getTime() + t))))
 
     // Everything above moves with the instant and costs almost nothing; the sky below costs about
     // 8 ms to restate, and an instant that only carries an aeroplane a few pixels further has no

@@ -113,6 +113,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     updateLightning(): void {}
     setSatellites(): void {}
     setReentries(): void {}
+    setLaunchPlumes(): void {}
     pickTrafficAt(): undefined {
       return undefined
     }

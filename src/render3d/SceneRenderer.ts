@@ -100,7 +100,9 @@ import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
 import { CometTail } from "./CometTail.js"
 import { SatelliteField } from "./SatelliteField.js"
+import { PlumeSystem } from "./PlumeSystem.js"
 import { ReentrySystem } from "./ReentrySystem.js"
+import type { PlumePuffView } from "../engine/interpretation/LaunchPlume.js"
 import type { ReentryFragmentView } from "../engine/interpretation/Reentry.js"
 import { LightningBolt } from "./LightningBolt.js"
 import { LightningSchedule } from "../engine/weather/LightningSchedule.js"
@@ -1339,6 +1341,9 @@ export class SceneRenderer {
   /** The burning pieces of the re-entries an interpretation claims — see setReentries. Built on
    * first use and kept. */
   private reentrySystem?: ReentrySystem
+  /** The sunlit exhaust of the rocket launches an interpretation claims — see setLaunchPlumes. Built
+   * on first use and kept. */
+  private plumeSystem?: PlumeSystem
   /** What ice crystals did to the light of the Sun or Moon — see IceHaloEffect. */
   private iceHalos?: IceHaloEffect
   /** The aureole and corona round the Moon — see SourceDiffraction. */
@@ -3276,6 +3281,28 @@ export class SceneRenderer {
     this.render()
   }
 
+  /**
+   * Draws the exhaust plumes of rocket launches, as the observer sees them at this instant (see
+   * LaunchPlumeSighting.viewsAt): light the ground has lost and the plume has not, scattered towards
+   * the eye through the air above it and the clouds.
+   */
+  setLaunchPlumes(views: ReadonlyArray<PlumePuffView>): void {
+    if (views.length === 0 && !this.plumeSystem?.count) return
+    if (!this.plumeSystem) {
+      this.plumeSystem = new PlumeSystem()
+      this.celestialGroup.add(this.plumeSystem.object)
+    }
+    this.plumeSystem.set(views, this.relativeScale,
+      position => this.air.transmittanceFromSpace(this.siteElevationM + this.observerElevationM, position.altitudeDeg),
+      position => this.cloudTransmission(position))
+    this.render()
+  }
+
+  /** How many puffs of a launch's plume are drawn — see setLaunchPlumes. */
+  get plumePuffCount(): number {
+    return this.plumeSystem?.count ?? 0
+  }
+
   /** How many burning pieces of a re-entry are drawn — see setReentries. */
   get reentryCount(): number {
     return this.reentrySystem?.count ?? 0
@@ -5200,6 +5227,8 @@ export class SceneRenderer {
     this.satelliteField = undefined
     this.reentrySystem?.dispose()
     this.reentrySystem = undefined
+    this.plumeSystem?.dispose()
+    this.plumeSystem = undefined
     this.lightningBolt?.dispose()
     this.lightningBolt = undefined
     for (const mesh of this.bodyMeshes.values()) {
