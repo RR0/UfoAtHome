@@ -166,20 +166,8 @@ export const html = `
     <button id="look-at-decor" type="button" class="icon-btn" title="Look at it" aria-label="Look at it">🎯</button>
     <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
     <!-- The base properties — name, place, heading, colour, measures — are drawn from what a decor object says it has (see
-         DecorBaseParameterSets and ParameterForm). The model it is drawn as is chosen below, in a window of pictures. -->
+         DecorBaseParameterSets and ParameterForm). The model it is drawn as is the last of them: a window of pictures over the same choice. -->
     <div id="decor-base" class="decor-parameters"></div>
-    <label><span id="label-decor-model">3D model</span> <select id="decorModel"></select></label>
-    <!-- Collapsed by default, on the user's own instruction: naming a file by hand is the rare
-         case and would otherwise clutter every decor object with five fields it never uses. -->
-    <details id="decor-model-advanced" class="decor-model-advanced">
-      <summary id="label-decor-model-advanced">Model from an address</summary>
-      <label><span id="label-decor-model-url">glTF/GLB address</span> <input id="decorModelUrl" type="url" placeholder="https://…/model.glb"/></label>
-      <label><span id="label-decor-model-title">Model name</span> <input id="decorModelTitle" type="text"/></label>
-      <label><span id="label-decor-model-author">Author</span> <input id="decorModelAuthor" type="text"/></label>
-      <label><span id="label-decor-model-license">Licence</span> <input id="decorModelLicense" type="text" placeholder="CC0 1.0"/></label>
-      <label><span id="label-decor-model-source">Where it came from</span> <input id="decorModelSource" type="url" placeholder="https://…"/></label>
-      <p id="decor-model-catalogue" class="decor-model-note" hidden></p>
-    </details>
     <!-- The properties the kind of this object says it has beyond placement and size — floors, windows, a
          bridge's railing, a line's poles — drawn from what the kind publishes (see DecorParameterSets and
          ParameterForm), so that the editor knows no kind. -->
@@ -645,22 +633,6 @@ button.preset[aria-pressed="true"] {
 }
 /* The whole disclosure sits on its own line: five stacked rows inside a row of inline labels
    would otherwise be laid out beside the field before it. */
-.decor-model-note {
-  flex-basis: 100%;
-  font-size: .85em;
-  margin: 0;
-}
-.decor-model-advanced {
-  flex-basis: 100%;
-}
-
-.decor-model-advanced > summary {
-  cursor: pointer;
-}
-
-#decorModelUrl, #decorModelSource {
-  width: 16em;
-}
 /* Shared by Duration (no sane default — real playback pacing needs some notion of the
    observation's length, so an empty value is flagged rather than just left blank) and the two
    EDTF date fields (rejected text that doesn't parse as EDTF — see SightingEditorElement.

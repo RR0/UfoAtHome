@@ -6,7 +6,7 @@ import { DecorParameterSets } from "../engine/model/DecorParameterSets.js"
 import { DecorBase } from "../engine/model/DecorBase.js"
 import type { DecorBaseContext } from "../engine/model/DecorBase.js"
 import { DecorBaseParameterSets } from "../engine/model/DecorBaseParameterSets.js"
-import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
+import type { ChoiceParameter, ParameterHolder } from "../engine/interpretation/Parameters.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import type { JsonPath } from "./JsonPaths.js"
 import { NumberFields } from "./NumberFields.js"
@@ -711,14 +711,6 @@ export class SightingEditorElement extends HTMLElement {
    * identifies one, since two moments can share a label and neither has an id. Undefined when the
    * recording names none. */
   private currentMilestoneT?: number
-  private readonly decorModelSelect: HTMLSelectElement
-  private readonly decorModelAdvanced: HTMLDetailsElement
-  private readonly decorModelCatalogueNote: HTMLElement
-  private readonly decorModelUrlInput: HTMLInputElement
-  private readonly decorModelTitleInput: HTMLInputElement
-  private readonly decorModelAuthorInput: HTMLInputElement
-  private readonly decorModelLicenseInput: HTMLInputElement
-  private readonly decorModelSourceInput: HTMLInputElement
   /** The properties the selected object's kind publishes beyond placement and size — floors, windows, a bridge's railing —
    * drawn by the generic form (see DecorParameterSets), and which set it was last drawn for. */
   private readonly decorParameterForm: ParameterForm
@@ -739,13 +731,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelMilestones: HTMLElement
   private readonly labelMilestoneLabel: HTMLElement
   private readonly labelMilestoneNote: HTMLElement
-  private readonly labelDecorModel: HTMLElement
-  private readonly labelDecorModelAdvanced: HTMLElement
-  private readonly labelDecorModelUrl: HTMLElement
-  private readonly labelDecorModelTitle: HTMLElement
-  private readonly labelDecorModelAuthor: HTMLElement
-  private readonly labelDecorModelLicense: HTMLElement
-  private readonly labelDecorModelSource: HTMLElement
   private readonly optionDecorBuilding: HTMLElement
   private readonly optionDecorTree: HTMLElement
   private readonly optionDecorShrub: HTMLElement
@@ -1373,7 +1358,6 @@ export class SightingEditorElement extends HTMLElement {
     this.addMilestoneButton = this.shadow.getElementById("add-milestone") as HTMLButtonElement
     this.deleteMilestoneButton = this.shadow.getElementById("delete-milestone") as HTMLButtonElement
     this.goToMilestoneButton = this.shadow.getElementById("go-to-milestone") as HTMLButtonElement
-    this.decorModelSelect = this.shadow.getElementById("decorModel") as HTMLSelectElement
     // The drop-down gives way to a window of pictures (see ModelPicker), over the same options.
     this.modelPicker = new ModelPicker(this.shadow, () => ({
       title: this.messages.modelPickerTitle, close: this.messages.modelPickerClose, choose: this.messages.modelPickerChoose,
@@ -1381,59 +1365,18 @@ export class SightingEditorElement extends HTMLElement {
       addressAuthor: this.messages.decorModelAuthor, addressLicense: this.messages.decorModelLicense, addressSource: this.messages.decorModelSource,
       addressUse: this.messages.modelPickerUse, addressIncomplete: this.messages.modelPickerIncomplete
     }))
-    this.modelPicker.enhance(this.decorModelSelect, async id => {
-      const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
-      // "No model" is the kind's default model where it has one, and else its built-in shape.
-      const modelId = id !== "" ? id : decor ? DEFAULT_DECOR_MODEL[decor.kind]?.id : undefined
-      if (modelId !== undefined) return this.decorModelProvider.entry(modelId).then(entry => entry && { url: entry.url, headingOffsetDeg: entry.headingOffsetDeg })
-      return decor === undefined ? undefined : { decorKind: decor.kind }
-    }, {
-      current: () => {
-        const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
-        const model = decor?.model
-        return model?.url === undefined ? undefined : {
-          url: model.url, title: model.credit?.title ?? "", author: model.credit?.author ?? "",
-          license: model.credit?.license ?? "", source: model.credit?.sourceUrl ?? ""
-        }
-      },
-      apply: address => {
-        // The hidden fields still carry what the form states, and statedDecorModel reads them.
-        this.decorModelUrlInput.value = address.url
-        this.decorModelTitleInput.value = address.title
-        this.decorModelAuthorInput.value = address.author
-        this.decorModelLicenseInput.value = address.license
-        this.decorModelSourceInput.value = address.source
-        this.shownDecorEntry = undefined
-        this.decorModelSelect.value = ""
-        this.updateDecor()
-      }
-    })
-    this.decorModelAdvanced = this.shadow.getElementById("decor-model-advanced") as HTMLDetailsElement
-    this.decorModelCatalogueNote = this.shadow.getElementById("decor-model-catalogue")!
-    this.decorModelUrlInput = this.shadow.getElementById("decorModelUrl") as HTMLInputElement
-    this.decorModelTitleInput = this.shadow.getElementById("decorModelTitle") as HTMLInputElement
-    this.decorModelAuthorInput = this.shadow.getElementById("decorModelAuthor") as HTMLInputElement
-    this.decorModelLicenseInput = this.shadow.getElementById("decorModelLicense") as HTMLInputElement
-    this.decorModelSourceInput = this.shadow.getElementById("decorModelSource") as HTMLInputElement
     this.decorParametersHost = this.shadow.getElementById("decor-parameters")!
     this.decorParameterForm = new ParameterForm(this.decorParametersHost, "en", "decorParam.")
     const decorValues = { said: () => this.said, writingLanguage: () => this.writingLanguage }
     this.decorBaseHost = this.shadow.getElementById("decor-base")!
     this.decorStateHost = this.shadow.getElementById("decor-state")!
-    this.decorBaseForm = new ParameterForm(this.decorBaseHost, "en", "decorBase.", decorValues)
+    this.decorBaseForm = new ParameterForm(this.decorBaseHost, "en", "decorBase.", decorValues, (spec, select) => this.enhanceDecorModelChoice(spec, select))
     this.decorStateForm = new ParameterForm(this.decorStateHost, "en", "decorState.", decorValues)
     this.labelDecor = this.shadow.getElementById("label-decor")!
     this.labelDecorGroup = this.shadow.getElementById("label-decor-group")!
     this.labelMilestones = this.shadow.getElementById("label-milestones")!
     this.labelMilestoneLabel = this.shadow.getElementById("label-milestone-label")!
     this.labelMilestoneNote = this.shadow.getElementById("label-milestone-note")!
-    this.labelDecorModel = this.shadow.getElementById("label-decor-model")!
-    this.labelDecorModelAdvanced = this.shadow.getElementById("label-decor-model-advanced")!
-    this.labelDecorModelUrl = this.shadow.getElementById("label-decor-model-url")!
-    this.labelDecorModelTitle = this.shadow.getElementById("label-decor-model-title")!
-    this.labelDecorModelAuthor = this.shadow.getElementById("label-decor-model-author")!
-    this.labelDecorModelLicense = this.shadow.getElementById("label-decor-model-license")!
-    this.labelDecorModelSource = this.shadow.getElementById("label-decor-model-source")!
     this.optionDecorBuilding = this.shadow.getElementById("option-decor-building")!
     this.optionDecorTree = this.shadow.getElementById("option-decor-tree")!
     this.optionDecorShrub = this.shadow.getElementById("option-decor-shrub")!
@@ -1568,16 +1511,6 @@ export class SightingEditorElement extends HTMLElement {
     // page scrolls as usual over a scene nobody is registering anything on.
     this.ufoElement.canvasElement.addEventListener("wheel", event => this.onReferenceWheel(event), { passive: false })
     this.ufoElement.canvasElement.addEventListener("wheel", event => this.onBodyWheel(event), { passive: false })
-    for (const input of [
-      this.decorModelUrlInput,
-      this.decorModelTitleInput,
-      this.decorModelAuthorInput,
-      this.decorModelLicenseInput,
-      this.decorModelSourceInput
-    ]) {
-      input.addEventListener("input", () => this.updateDecor())
-    }
-    this.decorModelSelect.addEventListener("change", () => this.updateDecorModelChoice())
     this.addMilestoneButton.addEventListener("click", () => this.addMilestone())
     this.deleteMilestoneButton.addEventListener("click", () => this.deleteMilestone())
     this.goToMilestoneButton.addEventListener("click", () => {
@@ -2727,7 +2660,9 @@ export class SightingEditorElement extends HTMLElement {
   private applyDecorModelSource(): void {
     this.decorModelProvider = dataSourceById(DECOR_MODEL_SOURCES, this.chosenSourceId.get("decor-model")).create()
     this.sceneElement.setDecorModelProvider(this.decorModelProvider)
-    void this.refreshDecorModelOptions()
+    // What the previous source offered is not what this one does.
+    this.decorModelEntries = undefined
+    this.refreshDecorModelOptions(this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId))
     this.ufoElement.refresh()
   }
 
@@ -6930,7 +6865,7 @@ export class SightingEditorElement extends HTMLElement {
     if (!added || added.model || added.sizeM) return
     this.ufoElement.sighting.decor = this.ufoElement.sighting.decor.map(d =>
       d.id === id ? { ...d, model: { id: entry.id }, sizeM: entry.sizeM } : d)
-    if (this.currentDecorId === id) this.syncDecorModelFields(this.ufoElement.sighting.decor.find(d => d.id === id))
+    if (this.currentDecorId === id) this.syncDecorVisibility()
     this.refreshDecorList()
     this.ufoElement.refresh()
   }
@@ -7027,46 +6962,24 @@ export class SightingEditorElement extends HTMLElement {
     if (this.currentDecorId === undefined) return
     const sighting = this.ufoElement.sighting
     sighting.decor = sighting.decor.map(d => d.id !== this.currentDecorId ? d
-      : { ...d, ...extra, model: this.statedDecorModel() })
+      : { ...d, ...extra })
     this.syncDecorVisibility()
     this.ufoElement.refresh()
   }
 
-  /** Fills the model picker and the collapsed direct-address block from what the object names.
-   * The block is opened only when it actually holds something, so it stays out of the way for the
-   * ordinary case (a catalogue entry, or no model at all) — the user's own instruction. */
-  private syncDecorModelFields(decor: DecorObject | undefined): void {
-    void this.refreshDecorModelOptions(decor)
-    this.decorModelSelect.value = decor?.model?.id ?? ""
-    this.decorModelUrlInput.value = decor?.model?.url ?? ""
-    this.decorModelTitleInput.value = decor?.model?.credit?.title ?? ""
-    this.decorModelAuthorInput.value = decor?.model?.credit?.author ?? ""
-    this.decorModelLicenseInput.value = decor?.model?.credit?.license ?? ""
-    this.decorModelSourceInput.value = decor?.model?.credit?.sourceUrl ?? ""
-    this.decorModelAdvanced.open = decor?.model?.url !== undefined
-    void this.showDecorCatalogueModel(decor)
-  }
-
   /**
-   * Fills the decor's address block with what the catalogue says of the model it names — where the
-   * file is and whose it is — as the bodies' own does (see BodyEditor.showCatalogueModel). The
-   * recording still names it by its id; only a changed field makes the address its own.
+   * What the catalogue offers for the kind of the selected object, kept so that the form can say it at once (see decorBaseContext): asked
+   * once per kind and answered from the provider's own cache. An unreachable catalogue leaves the built-in shape as the only choice.
    */
-  private async showDecorCatalogueModel(decor: DecorObject | undefined): Promise<void> {
-    const id = decor?.model?.url === undefined ? decor?.model?.id : undefined
-    const entry = id === undefined ? undefined : await this.decorModelProvider.entry(id).catch(() => undefined)
-    // The selection may have moved on while the catalogue answered.
-    if (decor?.id !== this.currentDecorId) return
-    this.shownDecorEntry = entry
-    this.decorModelCatalogueNote.hidden = entry === undefined
-    if (!entry) return
-    this.decorModelUrlInput.value = entry.url
-    this.decorModelTitleInput.value = entry.credit.title
-    this.decorModelAuthorInput.value = entry.credit.author ?? ""
-    this.decorModelLicenseInput.value = entry.credit.license
-    this.decorModelSourceInput.value = entry.credit.sourceUrl ?? ""
-    // What the model publishes about itself decides which fields apply (see DecorTraits).
-    this.syncDecorVisibility()
+  private decorModelEntries?: { kind: DecorObject["kind"], entries: DecorModelEntry[] }
+
+  private refreshDecorModelOptions(decor: DecorObject | undefined): void {
+    if (!decor || this.decorModelEntries?.kind === decor.kind) return
+    const kind = decor.kind
+    void this.decorModelProvider.entries(kind).catch(() => []).then(entries => {
+      this.decorModelEntries = { kind, entries }
+      if (this.isConnected) this.decorBaseForm.sync()
+    })
   }
 
   /** The catalogue entry of the model an object is DRAWN as, which is where its published settings are — the one it names, or else
@@ -7095,113 +7008,70 @@ export class SightingEditorElement extends HTMLElement {
     return undefined
   }
 
-  /** The catalogue model the decor's address block is showing, if it is showing one. */
-  private shownDecorEntry?: DecorModelEntry
   /** The window that shows the 3D models as pictures, for the decor's picker and the bodies'. */
   private readonly modelPicker: ModelPicker
 
-  /** The catalogue's own entries for this kind, plus the "no model" option that heads the list.
-   * Asked on every decor selection and answered from the provider's own cache (see
-   * UfoAtHomeModelCatalogue), so this is a fetch once per session and a filter afterwards. An
-   * unreachable catalogue simply leaves the built-in shape as the only choice. */
-  private async refreshDecorModelOptions(decor?: DecorObject): Promise<void> {
-    const selected = decor ?? this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
-    const entries = selected ? await this.decorModelProvider.entries(selected.kind).catch(() => []) : []
-    const chosen = selected?.model?.id ?? ""
-    const none = document.createElement("option")
-    none.value = ""
-    // A kind with a default model is never drawn as its built-in shape: "none" then means that model.
-    none.textContent = selected && DEFAULT_DECOR_MODEL[selected.kind] ? this.messages.decorModelDefault : this.messages.decorModelNone
-    this.decorModelSelect.replaceChildren(
-      none,
-      ...entries.map(entry => {
-        const option = document.createElement("option")
-        option.value = entry.id
-        option.textContent = entry.name
-        option.title = `${entry.credit.title}${entry.credit.author ? ` — ${entry.credit.author}` : ""} (${entry.credit.license})`
-        return option
-      })
-    )
-    this.decorModelSelect.value = chosen
+  /**
+   * Turns the choice of model into a window of pictures (see ModelPicker), over the same options, and lets it name a model by an address as well.
+   * The picker sets the select and says "change"; the form writes on "input".
+   */
+  private enhanceDecorModelChoice(spec: ChoiceParameter, select: HTMLSelectElement): void {
+    if (spec.key !== "model.id") return
+    select.addEventListener("change", () => select.dispatchEvent(new Event("input", { bubbles: true })))
+    this.modelPicker.enhance(select, async id => {
+      const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
+      // "No model" is the kind's default model where it has one, and else its built-in shape.
+      const modelId = id !== "" ? id : decor ? DEFAULT_DECOR_MODEL[decor.kind]?.id : undefined
+      if (modelId !== undefined) return this.decorModelProvider.entry(modelId).then(entry => entry && { url: entry.url, headingOffsetDeg: entry.headingOffsetDeg })
+      return decor === undefined ? undefined : { decorKind: decor.kind }
+    }, {
+      current: () => {
+        const model = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)?.model
+        return model?.url === undefined ? undefined : {
+          url: model.url, title: model.credit?.title ?? "", author: model.credit?.author ?? "",
+          license: model.credit?.license ?? "", source: model.credit?.sourceUrl ?? ""
+        }
+      },
+      // A typed address wins over the catalogue (see DecorModelRef) and carries what credit has been typed beside it: an incomplete one is stored
+      // as typed and simply isn't DRAWN until it is complete (see SceneRenderer.loadDecorModel), which is what makes the missing field visible.
+      apply: address => this.commitDecorBase(view => {
+        const title = this.stringOrUndefined(address.title)
+        const license = this.stringOrUndefined(address.license)
+        view.model = {
+          url: address.url,
+          credit: title !== undefined && license !== undefined ? { title, license, author: this.stringOrUndefined(address.author), sourceUrl: this.stringOrUndefined(address.source) } : undefined
+        }
+      }, "model")
+    })
   }
 
   /**
-   * Picking a model states it, and — only when nothing else does — states how big the thing it
-   * depicts really is.
+   * Picking a model from the catalogue states it, and — only when nothing else does — states how big the thing it depicts really is.
    *
-   * A catalogue entry can carry the real object's measurements (see DecorModelEntry.sizeM): a 1964
-   * Catalina is 5.4 m of car whoever draws it. Adopting that when the recording says nothing is
-   * strictly better than the built-in shape's own arbitrary 4.35, and it is sourced rather than
-   * invented. It never overwrites a size the recording already states — a observer who measured
-   * their own car outranks a catalogue describing a similar one.
+   * A catalogue entry can carry the real object's measurements (see DecorModelEntry.sizeM): a 1964 Catalina is 5.4 m of car whoever draws it.
+   * Adopting that when the recording says nothing is strictly better than the built-in shape's own arbitrary 4.35, and it is sourced rather
+   * than invented. It never overwrites a size the recording already states — an observer who measured their own car outranks a catalogue
+   * describing a similar one — but a size that is exactly the previous model's own follows the new model (a woman is not drawn at the farmer's height).
    */
-  private updateDecorModelChoice(): void {
-    const id = this.decorModelSelect.value
-    void (async () => {
-      const entry = id ? await this.decorModelProvider.entry(id).catch(() => undefined) : undefined
-      const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
-      // The address block showed the PREVIOUS pick, and statedDecorModel reads an untouched block as
-      // that entry, ahead of the picker: left as it was, a new choice was ignored. Showing the
-      // chosen entry (or nothing, for "no model") makes the block agree with the picker first.
-      const previous = this.shownDecorEntry
-      this.shownDecorEntry = entry
-      this.decorModelCatalogueNote.hidden = entry === undefined
-      this.decorModelUrlInput.value = entry?.url ?? ""
-      this.decorModelTitleInput.value = entry?.credit.title ?? ""
-      this.decorModelAuthorInput.value = entry?.credit.author ?? ""
-      this.decorModelLicenseInput.value = entry?.credit.license ?? ""
-      this.decorModelSourceInput.value = entry?.credit.sourceUrl ?? ""
-      // A size is the previous model's own catalogue size, not a measurement, when it is exactly that:
-      // it then follows the new model (a woman is not drawn at the farmer's height).
-      const sizeIsPrevious = decor?.sizeM !== undefined && previous?.sizeM !== undefined
-        && decor.sizeM.widthM === previous.sizeM.widthM && decor.sizeM.lengthM === previous.sizeM.lengthM && decor.sizeM.heightM === previous.sizeM.heightM
-      // Only the axes the catalogue measured are stated; the others keep what they had.
-      const adopted = entry?.sizeM && decor && (!decor.sizeM || sizeIsPrevious)
-        ? { sizeM: { ...decor.sizeM, ...Object.fromEntries(Object.entries(entry.sizeM).filter(([, measured]) => measured !== undefined).map(([axis, measured]) => [axis, this.roundedMeters(measured as number)])) } }
-        : {}
-      this.updateDecor(adopted)
-    })()
+  private async adoptCatalogueSize(before: DecorObject, id: string | undefined): Promise<void> {
+    const [previous, entry] = await Promise.all([
+      before.model?.id ? this.decorModelProvider.entry(before.model.id).catch(() => undefined) : undefined,
+      id ? this.decorModelProvider.entry(id).catch(() => undefined) : undefined
+    ])
+    const decor = this.ufoElement.sighting.decor.find(d => d.id === before.id)
+    if (!decor || decor.model?.id !== id || !entry?.sizeM) return
+    const sizeIsPrevious = decor.sizeM !== undefined && previous?.sizeM !== undefined
+      && decor.sizeM.widthM === previous.sizeM.widthM && decor.sizeM.lengthM === previous.sizeM.lengthM && decor.sizeM.heightM === previous.sizeM.heightM
+    if (decor.sizeM && !sizeIsPrevious) return
+    // Only the axes the catalogue measured are stated; the others keep what they had.
+    const sizeM = { ...decor.sizeM, ...Object.fromEntries(Object.entries(entry.sizeM).filter(([, measured]) => measured !== undefined).map(([axis, measured]) => [axis, this.roundedMeters(measured as number)])) }
+    this.updateDecor({ sizeM })
   }
 
   /** Meters to the centimetre, so a field never reads 4.349999904632568 — a size is measured with
    * a tape, not to a float's last bit. */
   private roundedMeters(value: number): number {
     return Math.round(value * 100) / 100
-  }
-
-  /**
-   * What the three size fields state, or nothing at all when all three are empty.
-   *
-   * Each field stands on its own: pacing out the length of a shed and not its width states ONE
-   * number, and the other two stay unmeasured rather than being filled in from the built-in
-   * shape's own proportions — which the placeholder is already showing, honestly, in grey.
-   */
-  /** What the model picker and the direct-address block state. A typed address wins over the
-   * picker (see DecorModelRef), and carries whatever credit has been typed beside it — incomplete
-   * is stored as typed rather than silently dropped, and simply isn't DRAWN until it is complete
-   * (see SceneRenderer.loadDecorModel), which is what makes the missing field visible. */
-  private statedDecorModel(): DecorObject["model"] {
-    const url = this.stringOrUndefined(this.decorModelUrlInput.value)
-    // The block showing the catalogue's own entry, untouched, is still that entry.
-    const entry = this.shownDecorEntry
-    if (entry && url === entry.url && this.stringOrUndefined(this.decorModelTitleInput.value) === entry.credit.title
-      && this.stringOrUndefined(this.decorModelAuthorInput.value) === entry.credit.author
-      && this.stringOrUndefined(this.decorModelLicenseInput.value) === entry.credit.license
-      && this.stringOrUndefined(this.decorModelSourceInput.value) === entry.credit.sourceUrl) {
-      return { id: entry.id }
-    }
-    if (url) {
-      const title = this.stringOrUndefined(this.decorModelTitleInput.value)
-      const license = this.stringOrUndefined(this.decorModelLicenseInput.value)
-      return {
-        url,
-        credit: title !== undefined && license !== undefined
-          ? { title, license, author: this.stringOrUndefined(this.decorModelAuthorInput.value), sourceUrl: this.stringOrUndefined(this.decorModelSourceInput.value) }
-          : undefined
-      }
-    }
-    const id = this.stringOrUndefined(this.decorModelSelect.value)
-    return id === undefined ? undefined : { id }
   }
 
   /**
@@ -7329,11 +7199,9 @@ export class SightingEditorElement extends HTMLElement {
     const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
     const hasSelection = decor !== undefined
     this.deleteDecorButton.disabled = !hasSelection
-    for (const input of [this.decorSelect, this.decorModelSelect, this.decorModelUrlInput, this.decorModelTitleInput,
-      this.decorModelAuthorInput, this.decorModelLicenseInput, this.decorModelSourceInput, this.lookAtDecorButton]) {
+    for (const input of [this.decorSelect, this.lookAtDecorButton]) {
       input.disabled = !hasSelection
     }
-    this.syncDecorModelFields(decor)
     this.syncDecorVisibility()
   }
 
@@ -7390,7 +7258,9 @@ export class SightingEditorElement extends HTMLElement {
       natural: DecorSystem.naturalSize(decor.kind, decor.floors),
       traits: { color: traits.color, lit: traits.lit, lights: traits.lights, observerSide: traits.observerSide },
       lightRigs: DecorTraits.rigsFor(decor.kind, this.publishedParametersOf(decor)).map(rig => ({ value: rig.id, label: this.naming.lightRig(rig) })),
-      seats: DecorBaseParameterSets.seatsFor(decor.kind)
+      seats: DecorBaseParameterSets.seatsFor(decor.kind),
+      models: (this.decorModelEntries?.kind === decor.kind ? this.decorModelEntries.entries : []).map(entry => ({ value: entry.id, label: entry.name })),
+      defaultModelId: DEFAULT_DECOR_MODEL[decor.kind]?.id
     }
   }
 
@@ -7409,6 +7279,7 @@ export class SightingEditorElement extends HTMLElement {
     change(view as unknown as ParameterHolder)
     const sighting = this.ufoElement.sighting
     sighting.decor = sighting.decor.map(candidate => candidate.id === decor.id ? DecorBase.apply(candidate, view, key, t) : candidate)
+    if (key === "model.id") void this.adoptCatalogueSize(decor, view.model?.id)
     const edited = sighting.decor.find(candidate => candidate.id === decor.id)!
     const option = this.decorSelect.options[this.decorSelect.selectedIndex]
     if (key === "title" && option) option.textContent = this.decorLabel(edited)
@@ -7489,10 +7360,7 @@ export class SightingEditorElement extends HTMLElement {
     const hasSelection = decor !== undefined
     this.setRowVisible(this.decorSelect, hasSelection)
     this.setRowVisible(this.deleteDecorButton, hasSelection)
-    // Size and model apply to every kind — there is no scenery whose size is not a fact about it.
-    this.setRowVisible(this.decorModelSelect, hasSelection)
-    // The address of a model is given in the model window now (see ModelPicker); its fields only carry the state.
-    this.decorModelAdvanced.hidden = true
+    this.refreshDecorModelOptions(decor)
     this.showDecorBase(decor)
     // The properties its kind publishes (floors, windows, a bridge's railing…) are drawn by the generic form.
     this.syncDecorParameterVisibility()
@@ -8755,14 +8623,6 @@ export class SightingEditorElement extends HTMLElement {
       button.title = text
       button.setAttribute("aria-label", text)
     }
-    this.labelDecorModel.textContent = messages.decorModel
-    this.labelDecorModelAdvanced.textContent = messages.decorModelAdvanced
-    this.decorModelCatalogueNote.textContent = messages.decorModelFromCatalogue
-    this.labelDecorModelUrl.textContent = messages.decorModelUrl
-    this.labelDecorModelTitle.textContent = messages.decorModelTitle
-    this.labelDecorModelAuthor.textContent = messages.decorModelAuthor
-    this.labelDecorModelLicense.textContent = messages.decorModelLicense
-    this.labelDecorModelSource.textContent = messages.decorModelSource
     this.decorParameterForm.setLanguage(this.language)
     this.decorBaseForm.setLanguage(this.language)
     this.decorStateForm.setLanguage(this.language)

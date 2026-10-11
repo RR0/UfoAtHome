@@ -104,10 +104,35 @@ describe("DecorBase", () => {
   })
 })
 
+describe("DecorBase model", () => {
+  const house = (): DecorObject => ({ id: "h", kind: "building", eastM: 0, northM: 10 })
+
+  test("choosing a catalogue model states its id and no more", () => {
+    const view = DecorBase.viewOf(house(), 0)
+    view.model = { id: "some-house" }
+    expect(DecorBase.apply(house(), view, "model.id", 0).model).toEqual({ id: "some-house" })
+  })
+
+  test("choosing a catalogue model replaces a model at an address, and emptying the choice leaves none", () => {
+    const addressed = { ...house(), model: { url: "https://example.test/shed.glb", credit: { title: "Shed", license: "CC0 1.0" } } }
+    const view = DecorBase.viewOf(addressed, 0)
+    view.model = { ...view.model, id: "some-house" }
+    expect(DecorBase.apply(addressed, view, "model.id", 0).model).toEqual({ id: "some-house" })
+    view.model = undefined
+    expect(DecorBase.apply(addressed, view, "model.id", 0).model).toBeUndefined()
+  })
+
+  test("an address is stated whole, with its credit", () => {
+    const view = DecorBase.viewOf(house(), 0)
+    view.model = { url: "https://example.test/shed.glb", credit: { title: "Shed", license: "CC0 1.0" } }
+    expect(DecorBase.apply(house(), view, "model", 0).model).toEqual(view.model)
+  })
+})
+
 describe("DecorBaseParameterSets", () => {
   const context = (traits: Partial<DecorBaseContext["traits"]> = {}): DecorBaseContext => ({
     kind: "building", natural: { widthM: 6, lengthM: 7, heightM: 9 }, traits: { color: true, lit: false, lights: false, observerSide: true, ...traits },
-    lightRigs: [], seats: DecorBaseParameterSets.seatsFor("building")
+    lightRigs: [], seats: DecorBaseParameterSets.seatsFor("building"), models: []
   })
   const spec = (key: string) => [...DecorBaseParameterSets.BASE.parameters, ...DecorBaseParameterSets.STATE.parameters].find(candidate => candidate.key === key)!
 

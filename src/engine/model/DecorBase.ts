@@ -14,6 +14,10 @@ export interface DecorBaseContext {
   lightRigs: ReadonlyArray<{ value: string, label: string }>
   /** The seats an observer can have in this kind of object. */
   seats: ReadonlyArray<{ value: string, label: SaidText }>
+  /** The catalogue's models for this kind, which the object can be drawn as. */
+  models: ReadonlyArray<{ value: string, label: SaidText }>
+  /** The model this kind is drawn as when none is chosen, if it has one: what the empty choice stands for. */
+  defaultModelId?: string
 }
 
 /**
@@ -39,6 +43,8 @@ export interface DecorBaseView {
   /** The id of the rig the object's lamps came from, or "" for none. */
   lightRig: string
   observerSide?: string
+  /** The model it is drawn as, by catalogue id or by an address with its credit (see DecorModelRef). */
+  model?: DecorObject["model"]
 }
 
 export class DecorBase {
@@ -63,7 +69,8 @@ export class DecorBase {
       sizeM: decor.sizeM ? { ...decor.sizeM } : undefined,
       lit: resolveDecorLitAt(decor, t),
       lightRig: DecorBase.rigOf(decor),
-      observerSide: decor.observerSide
+      observerSide: decor.observerSide,
+      model: decor.model ? { ...decor.model } : undefined
     }
   }
 
@@ -102,6 +109,11 @@ export class DecorBase {
       case "observerSide":
         // Only a kind that can hold an observer states a seat, whatever a shared field was left showing.
         return { ...decor, observerSide: canHoldObserver(decor.kind) && view.observerSide ? view.observerSide as DecorSide : undefined }
+      case "model.id":
+        // Choosing from the catalogue replaces an address: the one that was chosen last is the model.
+        return { ...decor, model: view.model?.id ? { id: view.model.id } : undefined }
+      case "model":
+        return { ...decor, model: view.model }
       default:
         return decor
     }

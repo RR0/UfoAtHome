@@ -40,6 +40,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return undefined
     }
     setDecorModelProvider(): void {}
+    entryOfDecorModel(): Promise<undefined> { return Promise.resolve(undefined) }
     get currentDecorModelCredits(): never[] {
       return []
     }
@@ -3631,21 +3632,42 @@ describe("SightingEditorElement decor group", () => {
     expect(element.sightingData.decor![0].sizeM).toBeUndefined()
   })
 
-  it("keeps the direct-address model block collapsed until a recording actually uses one", () => {
-    // The user's own instruction: naming a glTF file by hand, with the credit that has to travel
-    // with it, is five fields the ordinary decor object never needs.
+  it("chooses the model an object is drawn as through the generic form, and adopts the size of what it depicts when none is stated", async () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const entry = (id: string, lengthM?: number) => ({ id, kind: "vehicle", name: id, url: `https://example.test/${id}.glb`, credit: { title: id, license: "CC0 1.0" }, sizeM: lengthM ? { lengthM } : undefined })
+    const entries = [entry("first"), entry("second", 5.4)]
+    ;(element as unknown as { decorModelProvider: unknown }).decorModelProvider = {
+      entries: () => Promise.resolve(entries), entry: (id: string) => Promise.resolve(entries.find(candidate => candidate.id === id))
+    }
+    ;(shadow.getElementById("decorKind") as HTMLSelectElement).value = "vehicle"
+    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    await new Promise(resolve => setTimeout(resolve, 20))
+    const select = shadow.getElementById("decorBase.model.id") as HTMLSelectElement
+    expect([...select.options].map(option => option.value)).toEqual(["", "first", "second"])
+    expect(element.sightingData.decor![0].model).toEqual({ id: "first" })
+
+    select.value = "second"
+    select.dispatchEvent(new Event("input"))
+    expect(element.sightingData.decor![0].model).toEqual({ id: "second" })
+    await new Promise(resolve => setTimeout(resolve, 20))
+    expect(element.sightingData.decor![0].sizeM?.lengthM).toBe(5.4)
+
+    select.value = ""
+    select.dispatchEvent(new Event("input"))
+    expect(element.sightingData.decor![0].model).toBeUndefined()
+  })
+
+  it("shows the model an object at an address is drawn as without offering it as a choice of the catalogue", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
-    expect((shadow.getElementById("decor-model-advanced") as HTMLDetailsElement).open).toBe(false)
-
     element.sightingData = {
       ...element.sightingData,
       decor: [{ id: "d1", kind: "building", eastM: 0, northM: 10, model: { url: "https://example.test/shed.glb", credit: { title: "Shed", license: "CC0 1.0" } } }]
     }
-    expect((shadow.getElementById("decor-model-advanced") as HTMLDetailsElement).open).toBe(true)
-    expect((shadow.getElementById("decorModelUrl") as HTMLInputElement).value).toBe("https://example.test/shed.glb")
-    expect((shadow.getElementById("decorModelLicense") as HTMLInputElement).value).toBe("CC0 1.0")
+    expect((shadow.getElementById("decorBase.model.id") as HTMLSelectElement).value).toBe("")
+    expect(element.sightingData.decor![0].model?.url).toBe("https://example.test/shed.glb")
   })
 
   it("hides only 'other observer' from the generic Decor group's own kind dropdown", () => {

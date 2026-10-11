@@ -57,7 +57,9 @@ export class ParameterForm {
    * a typed text is written into.
    */
   constructor(private readonly container: HTMLElement, language: string, private readonly idPrefix = "",
-    private readonly values?: { said: () => SaidTexts, writingLanguage: () => string }) {
+    private readonly values?: { said: () => SaidTexts, writingLanguage: () => string },
+    /** Lets the editor turn a field into a richer control over the same select (a window of pictures for the models): called once the field is made. */
+    private readonly enhance?: (spec: ChoiceParameter, select: HTMLSelectElement) => void) {
     this.said = new SaidTexts([language, "en"])
   }
 
@@ -185,6 +187,7 @@ export class ParameterForm {
       select.append(...spec.choices.map(choice => new Option(this.read(choice.label) ?? choice.value, choice.value)))
       select.addEventListener("input", () => this.write(spec, select.value === "" ? undefined : select.value))
       label.append(select)
+      this.enhance?.(spec, select)
     } else if (spec.type === "set") {
       // Ticks, as many as the list offers: a box of its own, since a label can hold one field.
       const box = document.createElement("div")

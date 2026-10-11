@@ -48,7 +48,15 @@ export class DecorBaseParameterSets {
       // to hold (see DecorSize).
       DecorBaseParameterSets.number("sizeM.widthM", { en: "Width", fr: "Largeur", es: "Anchura", it: "Larghezza" }, 0.1, 1000, 0.1, "m", { required: false, effective: DecorBaseParameterSets.natural("widthM") }),
       DecorBaseParameterSets.number("sizeM.lengthM", { en: "Length", fr: "Longueur", es: "Longitud", it: "Lunghezza" }, 0.1, 1000, 0.1, "m", { required: false, effective: DecorBaseParameterSets.natural("lengthM") }),
-      DecorBaseParameterSets.number("sizeM.heightM", { en: "Height", fr: "Hauteur", es: "Altura", it: "Altezza" }, 0.1, 1000, 0.1, "m", { required: false, effective: DecorBaseParameterSets.natural("heightM") })
+      DecorBaseParameterSets.number("sizeM.heightM", { en: "Height", fr: "Hauteur", es: "Altura", it: "Altezza" }, 0.1, 1000, 0.1, "m", { required: false, effective: DecorBaseParameterSets.natural("heightM") }),
+      {
+        // The catalogue's models for the kind, drawn in a window of pictures (the editor turns the choice into one). The empty choice is the
+        // kind's default model where it has one, and the built-in shape where it does not; a model at an address is no choice of the list.
+        type: "choice", key: "model.id", label: { en: "3D model", fr: "Modèle 3D", es: "Modelo 3D", it: "Modello 3D" }, choices: [],
+        empty: { en: "No model (built-in shape)", fr: "Aucun modèle (forme de base)", es: "Sin modelo (forma básica)", it: "Nessun modello (forma di base)" },
+        optionsOf: (_view, context) => [...((context as DecorBaseContext | undefined)?.models ?? [])],
+        effective: (_view, context) => (context as DecorBaseContext | undefined)?.defaultModelId
+      }
     ] satisfies ParameterSpec[])
   }
 

@@ -209,15 +209,12 @@ export interface SightingLabels {
    * The options come from whichever model catalogue is chosen in Data sources. */
   decorModel: string
   /** decorModel's own "no model, draw the built-in shape" option — the field's default. */
-  decorModelNone: string
   /** The picker's first choice for a kind that has a default model (see DEFAULT_DECOR_MODEL), where the others say "no model". */
-  decorModelDefault: string
   /** Summary of the collapsed block holding the direct-URL escape hatch below: a model no
    * catalogue has yet. Collapsed by default because naming a file by hand, with the credit that
    * has to travel with it, is the rare case — see DecorModelRef.url. */
   decorModelAdvanced: string
   /** Under the decor's address block, when it shows a catalogue model. */
-  decorModelFromCatalogue: string
   /** Address of a glTF/GLB file to use directly, taking precedence over the picker above. */
   decorModelUrl: string
   /** The credit a directly-addressed model cannot be shown without — what it is, who made it,
