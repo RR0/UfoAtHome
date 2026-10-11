@@ -1442,6 +1442,8 @@ export class SightingEditorElement extends HTMLElement {
       // What was stated, when it was not exact, goes beside the one length the simulation is played at.
       this.ufoElement.sighting.event.durationText = text
       this.ufoElement.durationSeconds = seconds
+      // Keyframes placed against the previous length keep their own positions on the new one.
+      if (this.ufoElement.sighting.timeline.hasSpan) this.ufoElement.sighting.timeline.setSpan((seconds ?? 0) * 1000)
       this.ufoElement.refresh() // otherwise the seek bar's max (seekableDuration) only updates on the next tick
       this.updateDurationValidity()
       // A longer observation spans more hours of record, so its weather is a different (possibly
@@ -6606,6 +6608,11 @@ export class SightingEditorElement extends HTMLElement {
     // save — so between two saves the scene stood a resized shape at the distance its OLD angle
     // implied, and the apparent-width field went on reading the old angle under new handles.
     const projection = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, SightingShapes.fovOf(sighting, t))
+    // The seek bar spans the whole declared observation while nothing is recorded; a keyframe placed
+    // on it is a position IN that observation, so the recording keeps its length instead of ending
+    // (and being stretched) at this keyframe — see Timeline.setSpan.
+    const seekable = this.ufoElement.seekableDuration
+    if (seekable > sighting.timeline.duration) sighting.timeline.setSpan(seekable)
     sighting.timeline.addKeyframe(
       t,
       shapes.map(state => {

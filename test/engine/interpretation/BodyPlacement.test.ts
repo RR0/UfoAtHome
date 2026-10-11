@@ -165,4 +165,29 @@ describe("The observer's eye", () => {
     const ground = { heightAt: () => 3 }
     expect(BodyPlacement.eyeOf(sighting, 0, ground)).toMatchObject({ eastM: 0, northM: 0, upM: 3 + BodyPlacement.EYE_HEIGHT_M })
   })
+
+  it("blends a colour between two keyframes instead of switching at the second", () => {
+    const placement = new BodyPlacement(craft([
+      { t: 0, eastM: 0, northM: 50, appearance: { color: "#000000" } },
+      { t: 1000, eastM: 0, northM: 50, appearance: { color: "#ff8000" } }
+    ]), flat, eyeAtOrigin(flat))
+    expect(placement.at(500)?.appearance.color).toBe("#804000")
+    expect(placement.at(0)?.appearance.color).toBe("#000000")
+    expect(placement.at(1000)?.appearance.color).toBe("#ff8000")
+  })
+
+  it("blends transparency and halo between keyframes, and holds them from the keyframe before", () => {
+    const placement = new BodyPlacement(craft([
+      { t: 0, eastM: 0, northM: 50, appearance: { transparency: 0, haloScale: 1 } },
+      { t: 1000, eastM: 0, northM: 50, appearance: { transparency: 1, haloScale: 3 } },
+      { t: 2000, eastM: 0, northM: 50 }
+    ]), flat, eyeAtOrigin(flat))
+    expect(placement.at(500)?.appearance).toMatchObject({ transparency: 0.5, haloScale: 2 })
+    expect(placement.at(2000)?.appearance).toMatchObject({ transparency: 1, haloScale: 3 })
+  })
+
+  it("is opaque and has a halo of its own size unless it says otherwise", () => {
+    const placement = new BodyPlacement(craft([{ t: 0, eastM: 0, northM: 50 }]), flat, eyeAtOrigin(flat))
+    expect(placement.at(0)?.appearance).toMatchObject({ transparency: 0, haloScale: 1 })
+  })
 })

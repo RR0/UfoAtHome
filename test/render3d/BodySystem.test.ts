@@ -8,7 +8,7 @@ import type { Veil } from "../../src/render3d/Veil.js"
 const glowing = (luminanceCdM2: number): BodyState => ({
   id: "ball", model: { id: "sphere" }, explains: [], eastM: 0, northM: 400, upM: 20,
   sizeM: { widthM: 10, lengthM: 10, heightM: 10 }, attitude: { headingDeg: 0, pitchDeg: 0, rollDeg: 0 },
-  appearance: { color: "#88ffaa", albedo: 0.5, luminanceCdM2 }, throwsFlame: false
+  appearance: { color: "#88ffaa", albedo: 0.5, luminanceCdM2, transparency: 0, haloScale: 1 }, throwsFlame: false
 })
 
 describe("BodySystem veil", () => {

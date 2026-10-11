@@ -1,5 +1,5 @@
 import {
-  AnimationAction, AnimationMixer, LoopOnce, Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Mesh,
+  AnimationAction, AnimationMixer, LoopOnce, Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Material, Mesh,
   MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Quaternion, Raycaster, SphereGeometry, TorusGeometry, Vector2, Vector3
 } from "three"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
@@ -163,6 +163,7 @@ export class BodySystem {
       holder.rotation.set(state.attitude.pitchDeg * DEG_TO_RAD, -state.attitude.headingDeg * DEG_TO_RAD, -state.attitude.rollDeg * DEG_TO_RAD, "YXZ")
       holder.scale.set(state.sizeM.widthM, state.sizeM.heightM, state.sizeM.lengthM)
       if (material) BodySystem.paint(material, state, display)
+      BodySystem.fade(holder, state.appearance.transparency)
       if (glowing) BodySystem.light(glowing, state, display)
       if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
       this.shine(state, holder, glowing, frame)
@@ -239,7 +240,14 @@ export class BodySystem {
     const lux = luminanceCdM2 * solidAngle * this.sceneUnitsPerLux()
     const peak = Math.max(...hue) || 1
     const light = this.throughAir([hue[0] / peak * lux, hue[1] / peak * lux, hue[2] / peak * lux], holder.position)
-    veil.shine(holder.position, light, (angularRadius * 180) / Math.PI)
+    // A body that is fading out takes its glare with it, and the halo is how far that glare reaches.
+    const seen = 1 - state.appearance.transparency
+    const reach = state.appearance.haloScale
+    if (!(seen > 0) || !(reach > 0)) {
+      veil.hide()
+      return
+    }
+    veil.shine(holder.position, [light[0] * seen, light[1] * seen, light[2] * seen], (angularRadius * 180) / Math.PI * reach)
   }
 
 
@@ -793,6 +801,30 @@ export class BodySystem {
     const brightest = Math.max(hue.r, hue.g, hue.b)
     BodySystem.glow(material, brightest > 0 ? [hue.r / brightest, hue.g / brightest, hue.b / brightest] : [1, 1, 1],
       state.appearance.luminanceCdM2, display)
+  }
+
+  /**
+   * How much of what is behind a body shows through it, on every surface it is made of — a primitive's and
+   * a model's alike. What a material was before (a model's own glass, its own opacity) is kept the first time
+   * it is touched, so that a body made opaque again is what its file said and not a flat 1.
+   */
+  private static fade(holder: Object3D, transparency: number): void {
+    const seen = 1 - Math.min(1, Math.max(0, transparency))
+    holder.traverse(child => {
+      if (!(child instanceof Mesh)) return
+      for (const material of Array.isArray(child.material) ? child.material : [child.material]) {
+        if (!(material instanceof Material)) continue
+        const own = (material.userData.bodyOpacity ??= { transparent: material.transparent, opacity: material.opacity, depthWrite: material.depthWrite }) as
+          { transparent: boolean, opacity: number, depthWrite: boolean }
+        const wanted = own.opacity * seen
+        const faded = seen < 1
+        if (material.opacity === wanted && material.transparent === (own.transparent || faded)) continue
+        material.transparent = own.transparent || faded
+        material.opacity = wanted
+        material.depthWrite = faded ? false : own.depthWrite
+        material.needsUpdate = true
+      }
+    })
   }
 
   /** The brightness a body's stated luminance gives whatever its model already says glows. */

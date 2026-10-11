@@ -87,7 +87,7 @@ export class BodyPlacement {
   /** What a body that never states a size is drawn at: one metre, a size nobody could take for a
    * claim. */
   static readonly DEFAULT_SIZE: BodySize = { widthM: 1, lengthM: 1, heightM: 1 }
-  static readonly DEFAULT_APPEARANCE: BodyState["appearance"] = { color: "#c8c8c8", albedo: 0.5, luminanceCdM2: 0 }
+  static readonly DEFAULT_APPEARANCE: BodyState["appearance"] = { color: "#c8c8c8", albedo: 0.5, luminanceCdM2: 0, transparency: 0, haloScale: 1 }
 
   private readonly keys: PlacedKey[]
 
@@ -250,10 +250,12 @@ export class BodyPlacement {
       sizeM,
       attitude,
       appearance: {
-        color: (fraction < 1 ? from : to).appearance.color,
+        color: BodyPlacement.lerpColor(from.appearance.color, to.appearance.color, fraction),
         albedo: BodyPlacement.lerp(from.appearance.albedo, to.appearance.albedo, fraction),
         // Blended like a size: a thing that brightens does it over the interval that says so.
-        luminanceCdM2: BodyPlacement.lerp(from.appearance.luminanceCdM2, to.appearance.luminanceCdM2, fraction)
+        luminanceCdM2: BodyPlacement.lerp(from.appearance.luminanceCdM2, to.appearance.luminanceCdM2, fraction),
+        transparency: BodyPlacement.lerp(from.appearance.transparency, to.appearance.transparency, fraction),
+        haloScale: BodyPlacement.lerp(from.appearance.haloScale, to.appearance.haloScale, fraction)
       },
       flame: BodyPlacement.flameBetween(from.flame, to.flame, fraction),
       motions: this.motionsAt(t),
@@ -320,7 +322,9 @@ export class BodyPlacement {
       const appearance = {
         color: key.appearance?.color ?? previous?.appearance.color ?? BodyPlacement.DEFAULT_APPEARANCE.color,
         albedo: key.appearance?.albedo ?? previous?.appearance.albedo ?? BodyPlacement.DEFAULT_APPEARANCE.albedo,
-        luminanceCdM2: key.appearance?.luminanceCdM2 ?? previous?.appearance.luminanceCdM2 ?? BodyPlacement.DEFAULT_APPEARANCE.luminanceCdM2
+        luminanceCdM2: key.appearance?.luminanceCdM2 ?? previous?.appearance.luminanceCdM2 ?? BodyPlacement.DEFAULT_APPEARANCE.luminanceCdM2,
+        transparency: key.appearance?.transparency ?? previous?.appearance.transparency ?? BodyPlacement.DEFAULT_APPEARANCE.transparency,
+        haloScale: key.appearance?.haloScale ?? previous?.appearance.haloScale ?? BodyPlacement.DEFAULT_APPEARANCE.haloScale
       }
       const position = this.positionOf(key, sizeM, eyeAt) ?? (previous && {
         eastM: previous.eastM,
@@ -373,6 +377,20 @@ export class BodyPlacement {
   }
 
   /** Blends two headings the short way round. */
+  /** Two colours blended like a size is, channel by channel; a colour that is not #rgb or #rrggbb steps at the end instead. */
+  private static lerpColor(from: string, to: string, fraction: number): string {
+    const a = BodyPlacement.rgbOf(from), b = BodyPlacement.rgbOf(to)
+    if (!a || !b) return fraction < 1 ? from : to
+    return "#" + a.map((channel, i) => Math.round(BodyPlacement.lerp(channel, b[i], fraction)).toString(16).padStart(2, "0")).join("")
+  }
+
+  private static rgbOf(colour: string): [number, number, number] | undefined {
+    const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(colour)
+    if (!match) return undefined
+    const hex = match[1].length === 3 ? match[1].replace(/./g, "$&$&") : match[1]
+    return [0, 2, 4].map(at => parseInt(hex.slice(at, at + 2), 16)) as [number, number, number]
+  }
+
   private static lerpAngle(from: number, to: number, fraction: number): number {
     const turn = ((((to - from) % 360) + 540) % 360) - 180
     return (((from + turn * fraction) % 360) + 360) % 360

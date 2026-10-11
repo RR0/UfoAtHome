@@ -58,6 +58,8 @@ export interface BodyEditorHost {
  * edited at the playhead by the form of the instant.
  */
 export class BodyEditor {
+  /** The fields of the look of an instant: an edit of one of them is this keyframe's own statement of its look. */
+  private static readonly APPEARANCE_KEYS: readonly string[] = ["color", "albedo", "luminanceCdM2", "transparency", "haloScale"]
   /** English, the fallback baked in, until the chosen language's module has loaded. */
   private messages: BodyEditorMessages = bodyEditorMessages_en
   /** The language last asked for, so a slower load cannot overwrite a later choice. */
@@ -272,7 +274,7 @@ export class BodyEditor {
     this.keyForm = new ParameterForm(this.element("body-key-parameters"), this.language, "bodyKey.")
     this.keyForm.show(BodyParameterSets.KEYFRAME, new ParameterTarget(
       () => this.keyframeView() as unknown as ParameterHolder | undefined,
-      (apply, spec) => this.editView(apply, spec.key === "color" || spec.key === "albedo" || spec.key === "luminanceCdM2"),
+      (apply, spec) => this.editView(apply, BodyEditor.APPEARANCE_KEYS.includes(spec.key)),
       () => this.keyframeContext()
     ), () => undefined)
     this.sync()

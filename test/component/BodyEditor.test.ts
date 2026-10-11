@@ -49,7 +49,7 @@ class Fixture {
       currentTime: () => this.time,
       seekTo: t => { this.time = t },
       groundAlong: () => this.groundM,
-      readingOf: body => ({ azimuthDeg: 10, altitudeDeg: 2, distanceM: 100, eastM: 17.36, northM: 98.48, aboveGroundM: 1.5, sizeM: { widthM: 4, lengthM: 5, heightM: 2 }, attitude: { headingDeg: 30, pitchDeg: 0, rollDeg: 0 }, appearance: { color: "#c8c8c8", albedo: 0.5, luminanceCdM2: 0, ...body.track.find(key => key.t === this.time)?.appearance } })
+      readingOf: body => ({ azimuthDeg: 10, altitudeDeg: 2, distanceM: 100, eastM: 17.36, northM: 98.48, aboveGroundM: 1.5, sizeM: { widthM: 4, lengthM: 5, heightM: 2 }, attitude: { headingDeg: 30, pitchDeg: 0, rollDeg: 0 }, appearance: { color: "#c8c8c8", albedo: 0.5, luminanceCdM2: 0, transparency: 0, haloScale: 1, ...body.track.find(key => key.t === this.time)?.appearance } })
     }
     this.editor = new BodyEditor(this.container, host, "en")
   }
@@ -342,6 +342,6 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.field("bodyKey.color").value).toBe("#c8c8c8")
     fixture.type("bodyKey.color", "#33aa77")
     fixture.type("bodyKey.luminanceCdM2", "12")
-    expect(fixture.sighting.interpretation!.bodies[0].track[0].appearance).toEqual({ color: "#33aa77", albedo: 0.5, luminanceCdM2: 12 })
+    expect(fixture.sighting.interpretation!.bodies[0].track[0].appearance).toEqual({ color: "#33aa77", albedo: 0.5, luminanceCdM2: 12, transparency: 0, haloScale: 1 })
   })
 })

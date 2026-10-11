@@ -43,6 +43,8 @@ export interface BodyKeyframeView {
   color: string
   albedo: number
   luminanceCdM2: number
+  transparency: number
+  haloScale: number
 }
 
 /** Where a body stands at the playhead, as the scene reads it. */
@@ -55,7 +57,7 @@ export interface BodyReadingLike {
   aboveGroundM: number
   sizeM: { widthM: number, lengthM: number, heightM: number }
   attitude: { headingDeg: number, pitchDeg: number, rollDeg: number }
-  appearance: { color: string, albedo: number, luminanceCdM2: number }
+  appearance: { color: string, albedo: number, luminanceCdM2: number, transparency?: number, haloScale?: number }
 }
 
 export class BodyKeyframes {
@@ -91,7 +93,9 @@ export class BodyKeyframes {
       rollDeg: round(reading.attitude.rollDeg),
       color: reading.appearance.color,
       albedo: round(reading.appearance.albedo),
-      luminanceCdM2: round(reading.appearance.luminanceCdM2)
+      luminanceCdM2: round(reading.appearance.luminanceCdM2),
+      transparency: round(reading.appearance.transparency ?? 0),
+      haloScale: round(reading.appearance.haloScale ?? 1)
     }
   }
 
@@ -109,7 +113,8 @@ export class BodyKeyframes {
       ? { t, eastM: finite(view.eastM), northM: finite(view.northM), ...(view.onGround ? { onGround: true } : { altitudeAboveGroundM: finite(view.aboveGroundM) }) }
       : { t, azimuthDeg: finite(view.azimuthDeg), altitudeDeg: finite(view.elevationDeg), distanceM: Math.max(0.1, finite(view.distanceM)), ...(view.onGround ? { onGround: true } : {}) }
     const appearance = appearanceEdited
-      ? { color: view.color, albedo: Math.max(0, Math.min(1, finite(view.albedo))), luminanceCdM2: Math.max(0, finite(view.luminanceCdM2)) }
+      ? { color: view.color, albedo: Math.max(0, Math.min(1, finite(view.albedo))), luminanceCdM2: Math.max(0, finite(view.luminanceCdM2)),
+          transparency: Math.max(0, Math.min(1, finite(view.transparency))), haloScale: Math.max(0, finite(view.haloScale)) }
       : existing?.appearance
     return {
       ...BodyKeyframes.withoutPlacement(existing),
@@ -206,7 +211,9 @@ export class BodyParameterSets {
         visibleWhen: (_view, context) => (context as BodyKeyframeContext | undefined)?.drawnFromModel !== true
       },
       BodyParameterSets.number("albedo", { en: "Albedo", fr: "Albédo", es: "Albedo", it: "Albedo" }, 0, 1, 0.01, undefined),
-      BodyParameterSets.number("luminanceCdM2", { en: "Light of its own", fr: "Lumière propre", es: "Luz propia", it: "Luce propria" }, 0, 1e10, 0.1, "cd/m²")
+      BodyParameterSets.number("luminanceCdM2", { en: "Light of its own", fr: "Lumière propre", es: "Luz propia", it: "Luce propria" }, 0, 1e10, 0.1, "cd/m²"),
+      BodyParameterSets.number("transparency", { en: "Transparency", fr: "Transparence", es: "Transparencia", it: "Trasparenza" }, 0, 1, 0.01, undefined),
+      BodyParameterSets.number("haloScale", { en: "Halo", fr: "Halo", es: "Halo", it: "Alone" }, 0, 20, 0.1, "×")
     ] satisfies ParameterSpec[])
   }
 }

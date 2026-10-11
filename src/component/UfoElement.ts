@@ -1680,6 +1680,20 @@ export class UfoElement extends HTMLElement {
     draw(this.chromeRenderer)
   }
 
+  /** What the last frame drew on the chrome layer, kept to draw again — see repaintChrome. */
+  private chromeDraw?: (renderer: CanvasRenderer) => void
+
+  /**
+   * Draws the chrome layer again from what the last frame drew, reading the overlay painter anew.
+   * The frame paints it BEFORE its timeupdate reaches a composing scene, so a frame laid over a
+   * 3D body (see overlayPainter) was read from the body's PREVIOUS instant: stepping through
+   * keyframes, the handles always stood one keyframe behind. The scene calls this once it has
+   * moved the body.
+   */
+  repaintChrome(): void {
+    if (this.chromeDraw && this.overlayPainter) this.paintChrome(this.chromeDraw)
+  }
+
   /** The pointer that is dragging the bar with a finger or a pen, if any. */
   private scrubbingPointer?: number
 
@@ -1967,10 +1981,11 @@ export class UfoElement extends HTMLElement {
     const groupBounds = this.selectionShown && selectedIds.size > 1
       ? ShapeHandles.groupBoundsFor([...shapesBySource].filter(([sourceId]) => selectedIds.has(sourceId)).map(([, shape]) => shape.bounds))
       : undefined
-    this.paintChrome(renderer => {
+    this.chromeDraw = renderer => {
       if (groupBounds) renderer.paintGroupHandles(groupBounds)
       this.overlayPainter?.(renderer)
-    })
+    }
+    this.paintChrome(this.chromeDraw)
     this.mapShapeBounds = instants.flatMap(instant => [...instant.shapes.values()]
       .filter(shape => shape.transparency < 1).map(shape => this.shifted(shape, shift).bounds))
     this.keepObserverMapClear()

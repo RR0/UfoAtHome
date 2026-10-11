@@ -364,4 +364,27 @@ describe("a source absent from a keyframe", () => {
     expect(timeline.getInterpolatedShapeAt(1000, "leg")?.transparency).toBe(1)
     expect(timeline.getInterpolatedShapeAt(99_999, "leg")?.transparency).toBe(1)
   })
+
+  describe("span", () => {
+    it("keeps the length an observation was authored against when the last keyframe is earlier", () => {
+      const timeline = new Timeline()
+      timeline.setSpan(10000)
+      timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }])
+      timeline.addKeyframe(5000, [{ sourceId: "a", shape: shapeAt(5) }])
+      expect(timeline.duration).toBe(10000)
+    })
+
+    it("lets a later keyframe extend it, and survives a JSON round trip", () => {
+      const timeline = new Timeline()
+      timeline.setSpan(1000)
+      timeline.addKeyframe(2000, [{ sourceId: "a", shape: shapeAt(0) }])
+      expect(timeline.duration).toBe(2000)
+      const copy = Timeline.fromJSON(JSON.parse(JSON.stringify(Timeline.fromJSON({ keyframes: [], span: 10000 }).toJSON())))
+      expect(copy.duration).toBe(10000)
+    })
+
+    it("is left out of the JSON when unset", () => {
+      expect("span" in new Timeline().toJSON()).toBe(false)
+    })
+  })
 })

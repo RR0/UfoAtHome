@@ -264,4 +264,16 @@ export interface BodyAppearance {
    * of it dark.
    */
   luminanceCdM2?: number
+  /**
+   * How much of what is behind it shows through, 0 (opaque, the default) to 1 (gone): the same
+   * statement a drawn shape's transparency makes, for a body of the scene. Blended between keyframes,
+   * so a body that fades out does it over the interval that says so.
+   */
+  transparency?: number
+  /**
+   * How far the glare it throws round itself reaches, as a multiple of what its light gives (1, the
+   * default): 0 puts the glare out, 2 doubles its width. Only a body that gives out light of its own
+   * has a glare to scale. Blended between keyframes.
+   */
+  haloScale?: number
 }

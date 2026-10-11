@@ -75,8 +75,8 @@ export class ModelPicker {
 .model-picker h3 { margin: .8em 0 .4em; font-size: .95em; color: #555; }
 .model-picker .model-picker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(10em, 1fr)); gap: .6em; }
 .model-picker .model-card { display: flex; flex-direction: column; align-items: center; gap: .25em; padding: .5em; text-align: center; background: light-dark(#f6f6f8, #2c2e33); color: inherit; border: 2px solid transparent; border-radius: 4px; cursor: pointer; font: inherit; }
-.model-picker .model-card:hover, .model-picker .model-card:focus-visible { background: #eef; border-color: #99c; outline: none; }
-.model-picker .model-card[aria-pressed="true"] { border-color: #46c; }
+.model-picker .model-card:hover, .model-picker .model-card:focus-visible { background: light-dark(#eef, #3a3d52); border-color: light-dark(#99c, #8a8fd0); outline: none; }
+.model-picker .model-card[aria-pressed="true"] { border-color: light-dark(#46c, #8fa2ff); }
 .model-picker .model-thumb { position: relative; overflow: hidden; width: 100%; aspect-ratio: 4 / 3; display: flex; align-items: center; justify-content: center; background: #e4e4ea; border-radius: 3px; color: #889; }
 .model-picker .model-thumb:has(.model-live) > img { visibility: hidden; }
 .model-picker .model-thumb img { width: 100%; height: 100%; object-fit: contain; }

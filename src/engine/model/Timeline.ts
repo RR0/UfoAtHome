@@ -13,6 +13,11 @@ export interface TimelineJson {
   /** Each inner array is one group's member sourceIds (always >= 2 members) — see Timeline's own
    * `groups` field. Optional/back-compat, same reasoning as `order`. */
   groups?: string[][]
+  /** The length of the observation the keyframes were placed against, in ms, when it is longer than
+   * the last keyframe — a shape placed at 0 s then moved at 5 s of a 10 s observation has keyframes
+   * at 0 and 5000 only, and without this the recording would end (and be stretched over the whole
+   * observation) at 5 s. Optional: absent means the last keyframe is the end. */
+  span?: number
 }
 
 /**
@@ -34,6 +39,8 @@ export class Timeline {
    * multi-selection: clicking any one member later re-selects the whole group. Unlike `order`
    * (per-source), a source belongs to at most one group at a time — see group()/ungroup(). */
   private groups: string[][] = []
+  /** Authored length when it outlasts the last keyframe — see TimelineJson.span and setSpan. */
+  private span = 0
 
   /**
    * Merges `shapes` into any existing keyframe at `t` by sourceId — untouched sources keep
@@ -242,7 +249,23 @@ export class Timeline {
   }
 
   get duration(): number {
-    return this.keyframes.length === 0 ? 0 : this.keyframes[this.keyframes.length - 1].t
+    const lastKeyframeMs = this.keyframes.length === 0 ? 0 : this.keyframes[this.keyframes.length - 1].t
+    return Math.max(lastKeyframeMs, this.span)
+  }
+
+  /** Whether keyframes were placed against a fixed observation length (see setSpan). */
+  get hasSpan(): boolean {
+    return this.span > 0
+  }
+
+  /**
+   * Pins the recording's length to `ms` even when its last keyframe is earlier. A keyframe placed
+   * at 5 s of a declared 10 s observation is at 5 s of it, not at its end: without a span the last
+   * keyframe IS the end, and the player stretches [0, last keyframe] over the declared duration —
+   * the playhead the author just put at 5 s jumped to 10 s. 0 releases it.
+   */
+  setSpan(ms: number): void {
+    this.span = Math.max(0, ms)
   }
 
   /** Back-to-front: index 0 is bottommost/backmost, the last entry is topmost/frontmost — see
@@ -257,7 +280,9 @@ export class Timeline {
   }
 
   toJSON(): TimelineJson {
-    return { keyframes: this.keyframes, order: this.order, groups: this.groups }
+    return this.span > 0
+      ? { keyframes: this.keyframes, order: this.order, groups: this.groups, span: this.span }
+      : { keyframes: this.keyframes, order: this.order, groups: this.groups }
   }
 
   /** `issues` receives what the file left out and had to be made up — see KeyframeCompletion. */
@@ -266,6 +291,7 @@ export class Timeline {
     for (const keyframe of KeyframeCompletion.complete(json.keyframes ?? [], issues)) {
       timeline.addKeyframe(keyframe.t, keyframe.shapes)
     }
+    if (json.span !== undefined && json.span > 0) timeline.span = json.span
     if (json.order) {
       // Respects a saved custom arrangement, but never silently drops a source the keyframes
       // actually contain just because an incomplete/stale `order` list omitted it — appended at

@@ -40,7 +40,7 @@ describe("BodyKeyframes", () => {
     const view = BodyKeyframes.viewOf(body([existing]), 5000, reading)
     expect(BodyKeyframes.keyframeOf(view, 5000, existing, false)).toMatchObject({ motions: { legs: 1 }, appearance: existing.appearance })
     view.color = "#33aa77"
-    expect(BodyKeyframes.keyframeOf(view, 5000, existing, true).appearance).toEqual({ color: "#33aa77", albedo: 0.5, luminanceCdM2: 0 })
+    expect(BodyKeyframes.keyframeOf(view, 5000, existing, true).appearance).toEqual({ color: "#33aa77", albedo: 0.5, luminanceCdM2: 0, transparency: 0, haloScale: 1 })
     expect(BodyKeyframes.keyframeOf(view, 5000, undefined, false).appearance).toBeUndefined()
   })
 

@@ -687,6 +687,8 @@ export class SceneElement extends HTMLElement {
     // the renderer's own one-shot frame request instead, so that a drag's many seeks per frame
     // still cost one drawing.
     if (this.ufoElement.playbackState === "playing") this.sceneRenderer.frame(performance.now())
+    // What the player laid over the picture from a body was measured before the body moved.
+    this.ufoElement.repaintChrome()
   }
 
   /**
