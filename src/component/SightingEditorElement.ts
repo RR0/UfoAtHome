@@ -98,6 +98,7 @@ import {
   DEFAULT_BUILDING_FLOORS,
   defaultWindows,
   canHoldObserver,
+  decorModelOf,
   DEFAULT_DECOR_MODEL
 } from "../engine/model/Decor.js"
 import {
@@ -120,6 +121,7 @@ import type { SightingSound, SoundKind } from "../engine/model/Sound.js"
 import { ELEVATION_SOURCES, IMAGERY_SOURCES } from "../render3d/terrain/terrainSources.js"
 import { DECOR_MODEL_SOURCES } from "../render3d/decor/decorModelSources.js"
 import { ModelPicker } from "./ModelPicker.js"
+import type { ModelParameters } from "../engine/model/DecorTraits.js"
 import { DecorTraits } from "../engine/model/DecorTraits.js"
 import type { DecorModelEntry, DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import { DecorSystem } from "../render3d/DecorSystem.js"
@@ -7072,6 +7074,32 @@ export class SightingEditorElement extends HTMLElement {
     this.syncDecorVisibility()
   }
 
+  /** The catalogue entry of the model an object is DRAWN as, which is where its published settings are — the one it names, or else
+   * the one its kind is drawn as when it names none (a tree is drawn as one of the catalogue's, whoever never chose it). */
+  private drawnEntry?: DecorModelEntry
+  private drawnEntryAsked?: string
+
+  /**
+   * What the model the object is drawn as publishes (see ModelParameters): its settings and its traits. Asked of the catalogue once for
+   * each model, then answered from what came; until it has come there is nothing to offer, and the form is drawn again when it does.
+   * A model at an address publishes nothing: nothing says what is in the file.
+   */
+  private publishedParametersOf(decor: DecorObject): ModelParameters | undefined {
+    const ref = decorModelOf(decor)
+    if (!ref?.id || ref.url !== undefined) return undefined
+    if (this.drawnEntry?.id === ref.id) return this.drawnEntry.parameters
+    if (this.drawnEntryAsked !== ref.id) {
+      this.drawnEntryAsked = ref.id
+      const id = ref.id
+      void this.decorModelProvider.entry(id).catch(() => undefined).then(entry => {
+        if (this.drawnEntryAsked !== id || !entry) return
+        this.drawnEntry = entry
+        if (this.isConnected) this.syncDecorVisibility()
+      })
+    }
+    return undefined
+  }
+
   /** The catalogue model the decor's address block is showing, if it is showing one. */
   private shownDecorEntry?: DecorModelEntry
   /** The window that shows the 3D models as pictures, for the decor's picker and the bodies'. */
@@ -7362,7 +7390,7 @@ export class SightingEditorElement extends HTMLElement {
   private decorBaseContext(): DecorBaseContext | undefined {
     const decor = this.ufoElement.sighting.decor.find(candidate => candidate.id === this.currentDecorId)
     if (!decor) return undefined
-    const traits = DecorTraits.of(decor, this.shownDecorEntry?.id === decor.model?.id ? this.shownDecorEntry?.parameters : undefined)
+    const traits = DecorTraits.of(decor, this.publishedParametersOf(decor))
     return {
       kind: decor.kind,
       natural: DecorSystem.naturalSize(decor.kind, decor.floors),
@@ -7418,7 +7446,7 @@ export class SightingEditorElement extends HTMLElement {
    * another field has since changed.
    */
   private showDecorParameters(decor: DecorObject | undefined): void {
-    const set = decor ? DecorParameterSets.of(decor, this.shownDecorEntry?.id === decor.model?.id ? this.shownDecorEntry?.parameters : undefined) : undefined
+    const set = decor ? DecorParameterSets.of(decor, this.publishedParametersOf(decor)) : undefined
     if (!decor || !set) {
       this.decorParametersShownFor = undefined
       this.decorParameterForm.clear()

@@ -616,6 +616,55 @@
       "id": "ufoathome-socorro-craft",
       "kind": "aircraft",
       "name": "Socorro craft, after Lonnie Zamora's account (stand-in)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "hullColor",
+            "fallback": "#b8bcc2",
+            "label": {
+              "en": "Hull colour",
+              "fr": "Couleur de la coque",
+              "es": "Color del casco",
+              "it": "Colore dello scafo"
+            },
+            "hint": {
+              "en": "The colour of the craft's hull, over the model's own: the legs, the dome and the markings keep theirs.",
+              "fr": "La couleur de la coque de l'engin, sur celle du modèle : les pieds, la coupole et les marques gardent les leurs.",
+              "es": "El color del casco del aparato, sobre el del modelo: las patas, la cúpula y las marcas conservan las suyas.",
+              "it": "Il colore dello scafo del velivolo, sopra quello del modello: le gambe, la cupola e i contrassegni mantengono i loro."
+            }
+          },
+          {
+            "type": "boolean",
+            "key": "legsUp",
+            "label": {
+              "en": "Landing legs retracted",
+              "fr": "Pieds rentrés",
+              "es": "Patas recogidas",
+              "it": "Gambe retratte"
+            },
+            "hint": {
+              "en": "A craft standing on its legs, or one that has drawn them up.",
+              "fr": "Un engin posé sur ses pieds, ou qui les a rentrés.",
+              "es": "Un aparato posado sobre sus patas, o que las ha recogido.",
+              "it": "Un velivolo posato sulle sue gambe, o che le ha ritirate."
+            }
+          }
+        ],
+        "bindings": {
+          "hullColor": {
+            "materials": [
+              "^hull$"
+            ]
+          },
+          "legsUp": {
+            "nodes": [
+              "^(leg|pad)-\\d+$"
+            ]
+          }
+        }
+      },
       "file": "ufoathome-socorro-craft/craft.gltf",
       "headingOffsetDeg": 0,
       "sizeM": { "widthM": 4.07, "lengthM": 4.65, "heightM": 2.8 },
@@ -630,6 +679,55 @@
       "id": "ufoathome-socorro-craft-stanford",
       "kind": "aircraft",
       "name": "Socorro craft with the inverted-V insignia Ray Stanford holds was the real one (stand-in)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "hullColor",
+            "fallback": "#b8bcc2",
+            "label": {
+              "en": "Hull colour",
+              "fr": "Couleur de la coque",
+              "es": "Color del casco",
+              "it": "Colore dello scafo"
+            },
+            "hint": {
+              "en": "The colour of the craft's hull, over the model's own: the legs, the dome and the markings keep theirs.",
+              "fr": "La couleur de la coque de l'engin, sur celle du modèle : les pieds, la coupole et les marques gardent les leurs.",
+              "es": "El color del casco del aparato, sobre el del modelo: las patas, la cúpula y las marcas conservan las suyas.",
+              "it": "Il colore dello scafo del velivolo, sopra quello del modello: le gambe, la cupola e i contrassegni mantengono i loro."
+            }
+          },
+          {
+            "type": "boolean",
+            "key": "legsUp",
+            "label": {
+              "en": "Landing legs retracted",
+              "fr": "Pieds rentrés",
+              "es": "Patas recogidas",
+              "it": "Gambe retratte"
+            },
+            "hint": {
+              "en": "A craft standing on its legs, or one that has drawn them up.",
+              "fr": "Un engin posé sur ses pieds, ou qui les a rentrés.",
+              "es": "Un aparato posado sobre sus patas, o que las ha recogido.",
+              "it": "Un velivolo posato sulle sue gambe, o che le ha ritirate."
+            }
+          }
+        ],
+        "bindings": {
+          "hullColor": {
+            "materials": [
+              "^hull$"
+            ]
+          },
+          "legsUp": {
+            "nodes": [
+              "^(leg|pad)-\\d+$"
+            ]
+          }
+        }
+      },
       "file": "ufoathome-socorro-craft/craft-stanford.gltf",
       "headingOffsetDeg": 0,
       "sizeM": { "widthM": 4.07, "lengthM": 4.65, "heightM": 2.8 },
@@ -644,6 +742,55 @@
       "id": "ufoathome-valensole-craft",
       "kind": "aircraft",
       "name": "Valensole craft, after Maurice Masse's account (stand-in)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "hullColor",
+            "fallback": "#b8bcc2",
+            "label": {
+              "en": "Hull colour",
+              "fr": "Couleur de la coque",
+              "es": "Color del casco",
+              "it": "Colore dello scafo"
+            },
+            "hint": {
+              "en": "The colour of the craft's hull, over the model's own: the legs, the dome and the markings keep theirs.",
+              "fr": "La couleur de la coque de l'engin, sur celle du modèle : les pieds, la coupole et les marques gardent les leurs.",
+              "es": "El color del casco del aparato, sobre el del modelo: las patas, la cúpula y las marcas conservan las suyas.",
+              "it": "Il colore dello scafo del velivolo, sopra quello del modello: le gambe, la cupola e i contrassegni mantengono i loro."
+            }
+          },
+          {
+            "type": "boolean",
+            "key": "legsUp",
+            "label": {
+              "en": "Landing legs retracted",
+              "fr": "Pieds rentrés",
+              "es": "Patas recogidas",
+              "it": "Gambe retratte"
+            },
+            "hint": {
+              "en": "A craft standing on its legs, or one that has drawn them up.",
+              "fr": "Un engin posé sur ses pieds, ou qui les a rentrés.",
+              "es": "Un aparato posado sobre sus patas, o que las ha recogido.",
+              "it": "Un velivolo posato sulle sue gambe, o che le ha ritirate."
+            }
+          }
+        ],
+        "bindings": {
+          "hullColor": {
+            "materials": [
+              "^hull$"
+            ]
+          },
+          "legsUp": {
+            "nodes": [
+              "^legs$"
+            ]
+          }
+        }
+      },
       "file": "ufoathome-valensole-craft/craft.gltf",
       "headingOffsetDeg": 0,
       "sizeM": { "widthM": 3.49, "lengthM": 3.49, "heightM": 2.42 },
@@ -658,6 +805,34 @@
       "id": "ufoathome-silly-le-long-craft",
       "kind": "aircraft",
       "name": "Silly-le-Long phenomenon, after T1's account: a flat concrete-grey triangle with its lights (stand-in)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "hullColor",
+            "fallback": "#b8bcc2",
+            "label": {
+              "en": "Hull colour",
+              "fr": "Couleur de la coque",
+              "es": "Color del casco",
+              "it": "Colore dello scafo"
+            },
+            "hint": {
+              "en": "The colour of the craft's hull, over the model's own: the legs, the dome and the markings keep theirs.",
+              "fr": "La couleur de la coque de l'engin, sur celle du modèle : les pieds, la coupole et les marques gardent les leurs.",
+              "es": "El color del casco del aparato, sobre el del modelo: las patas, la cúpula y las marcas conservan las suyas.",
+              "it": "Il colore dello scafo del velivolo, sopra quello del modello: le gambe, la cupola e i contrassegni mantengono i loro."
+            }
+          }
+        ],
+        "bindings": {
+          "hullColor": {
+            "materials": [
+              "^hull$"
+            ]
+          }
+        }
+      },
       "file": "ufoathome-silly-le-long-craft/craft.gltf",
       "headingOffsetDeg": 0,
       "sizeM": { "widthM": 34, "lengthM": 20.12, "heightM": 2.4 },
@@ -987,6 +1162,34 @@
       "id": "ufoathome-trans-en-provence-craft",
       "kind": "aircraft",
       "name": "Trans-en-Provence craft, after Renato Nicolaï's account: two inverted bowls, a ledge, two feet (stand-in)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "hullColor",
+            "fallback": "#b8bcc2",
+            "label": {
+              "en": "Hull colour",
+              "fr": "Couleur de la coque",
+              "es": "Color del casco",
+              "it": "Colore dello scafo"
+            },
+            "hint": {
+              "en": "The colour of the craft's hull, over the model's own: the legs, the dome and the markings keep theirs.",
+              "fr": "La couleur de la coque de l'engin, sur celle du modèle : les pieds, la coupole et les marques gardent les leurs.",
+              "es": "El color del casco del aparato, sobre el del modelo: las patas, la cúpula y las marcas conservan las suyas.",
+              "it": "Il colore dello scafo del velivolo, sopra quello del modello: le gambe, la cupola e i contrassegni mantengono i loro."
+            }
+          }
+        ],
+        "bindings": {
+          "hullColor": {
+            "materials": [
+              "^hull$"
+            ]
+          }
+        }
+      },
       "file": "ufoathome-trans-en-provence-craft/craft.gltf",
       "headingOffsetDeg": 0,
       "sizeM": { "widthM": 2.5, "lengthM": 2.5, "heightM": 1.8 },
@@ -1125,6 +1328,34 @@
       "id": "ufoathome-mcminnville-object",
       "kind": "aircraft",
       "name": "McMinnville object as the 1950 prints show it: flat dark base, shouldered dome, small stub on top (stand-in)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "hullColor",
+            "fallback": "#b8bcc2",
+            "label": {
+              "en": "Hull colour",
+              "fr": "Couleur de la coque",
+              "es": "Color del casco",
+              "it": "Colore dello scafo"
+            },
+            "hint": {
+              "en": "The colour of the craft's hull, over the model's own: the legs, the dome and the markings keep theirs.",
+              "fr": "La couleur de la coque de l'engin, sur celle du modèle : les pieds, la coupole et les marques gardent les leurs.",
+              "es": "El color del casco del aparato, sobre el del modelo: las patas, la cúpula y las marcas conservan las suyas.",
+              "it": "Il colore dello scafo del velivolo, sopra quello del modello: le gambe, la cupola e i contrassegni mantengono i loro."
+            }
+          }
+        ],
+        "bindings": {
+          "hullColor": {
+            "materials": [
+              "^hull$"
+            ]
+          }
+        }
+      },
       "file": "ufoathome-mcminnville-object/object.gltf",
       "headingOffsetDeg": 0,
       "sizeM": { "widthM": 0.12, "lengthM": 0.12, "heightM": 0.041 },

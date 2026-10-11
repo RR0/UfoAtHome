@@ -11,17 +11,18 @@ const catalogue: IndexEntry[] = JSON.parse(readFileSync(join(MODELS, "index.json
 /** The names a glTF binary gives its materials and its parts: what a published setting is bound by. */
 function namesOf(file: string): { materials: string[], nodes: string[] } {
   const bytes = readFileSync(join(MODELS, file))
-  const length = bytes.readUInt32LE(12)
-  const json = JSON.parse(bytes.subarray(20, 20 + length).toString("utf8")) as { materials?: Array<{ name?: string }>, nodes?: Array<{ name?: string }> }
+  // A binary glTF carries its description in its first chunk; a text one is that description.
+  const text = bytes.subarray(0, 4).toString("latin1") === "glTF" ? bytes.subarray(20, 20 + bytes.readUInt32LE(12)).toString("utf8") : bytes.toString("utf8")
+  const json = JSON.parse(text) as { materials?: Array<{ name?: string }>, nodes?: Array<{ name?: string }> }
   return { materials: (json.materials ?? []).map(material => material.name ?? ""), nodes: (json.nodes ?? []).map(node => node.name ?? "") }
 }
 
 const published = catalogue.filter(entry => entry.parameters?.parameters?.length)
 
 describe("the settings the catalogue's models publish", () => {
-  test("there are some, for figures, for trees and for an aircraft", () => {
+  test("there are some, for figures, for trees, for an airliner and for the project's own crafts", () => {
     const keys = new Set(published.flatMap(entry => entry.parameters!.parameters!.map(spec => spec.key)))
-    expect([...keys].sort()).toEqual(["costumeColor", "foliageColor", "gearUp"])
+    expect([...keys].sort()).toEqual(["costumeColor", "foliageColor", "gearUp", "hullColor", "legsUp"])
   })
 
   test.each(published.map(entry => [entry.id, entry] as const))("%s: every setting is bound, and bound to what the file holds", (_id, entry) => {
@@ -54,5 +55,19 @@ describe("the settings the catalogue's models publish", () => {
         }
       }
     }
+  })
+
+  test("what an object is drawn as when it names no model offers that model's settings: a tree its foliage, an aircraft its gear", async () => {
+    const { DecorParameterSets } = await import("../../src/engine/model/DecorParameterSets.js")
+    const { decorModelOf } = await import("../../src/engine/model/Decor.js")
+    const byId = new Map(catalogue.map(entry => [entry.id, entry]))
+    const offered = (kind: "tree" | "aircraft" | "entity" | "observer") => {
+      const object = { id: "x", kind }
+      return DecorParameterSets.of(object, byId.get(decorModelOf(object)!.id!)?.parameters)?.parameters.map(spec => spec.key)
+    }
+    expect(offered("tree")).toEqual(["modelParameters.foliageColor"])
+    expect(offered("aircraft")).toEqual(["modelParameters.gearUp"])
+    expect(offered("entity")).toEqual(["modelParameters.costumeColor"])
+    expect(offered("observer")).toEqual(["modelParameters.costumeColor"])
   })
 })

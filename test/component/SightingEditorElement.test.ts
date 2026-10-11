@@ -4052,7 +4052,8 @@ describe("SightingEditorElement decor group", () => {
       const set = DecorParameterSets.of({ kind: "vehicle", model: { id: "catalogue-car" } }, {
         parameters: [{ type: "number", key: "doorsOpenDeg", label: "Doors", min: 0, max: 90, step: 1, unit: "°" }]
       })
-      expect(set?.parameters.map(spec => spec.key)).toEqual(["modelParameters.doorsOpenDeg"])
+      // What every vehicle has (its engine) and what this model adds to it.
+      expect(set?.parameters.map(spec => spec.key)).toEqual(["engine.kind", "engine.noise", "modelParameters.doorsOpenDeg"])
     })
   })
 })

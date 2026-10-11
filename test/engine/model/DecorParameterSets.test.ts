@@ -15,10 +15,19 @@ describe("DecorParameterSets", () => {
   test("a vehicle has windows on its six openings, and the windscreen and rear window never open", () => {
     const set = DecorParameterSets.of({ kind: "vehicle" })!
     const bound = (key: string) => (set.parameters.find(spec => spec.key === key) as NumberParameter).min
-    expect(set.parameters.map(spec => spec.key)).toEqual(["windows.front", "windows.behind", "windows.front-left", "windows.front-right", "windows.behind-left", "windows.behind-right"])
+    expect(set.parameters.map(spec => spec.key).filter(key => key.startsWith("windows."))).toEqual(["windows.front", "windows.behind", "windows.front-left", "windows.front-right", "windows.behind-left", "windows.behind-right"])
     expect(bound("windows.front")).toBe(FIXED_WINDOW_MIN_OPACITY_PERCENT)
     expect(bound("windows.behind")).toBe(FIXED_WINDOW_MIN_OPACITY_PERCENT)
     expect(bound("windows.front-left")).toBe(0)
+  })
+
+  test("a vehicle is heard running or not, and how loud, whatever it is drawn as", () => {
+    expect(keys("vehicle", { model: { id: "kenney-car-kit-sedan" } })).toEqual(["engine.kind", "engine.noise"])
+    const noise = DecorParameterSets.of({ kind: "vehicle", model: { id: "kenney-car-kit-sedan" } })!.parameters.find(spec => spec.key === "engine.noise")!
+    // Its loudness means nothing for a parked car: it is not drawn until there is an engine.
+    expect(noise.visibleWhen!({})).toBe(false)
+    expect(noise.visibleWhen!({ engine: { kind: "van" } })).toBe(true)
+    expect(noise.visibleWhen!({ engine: {} })).toBe(true)
   })
 
   test("a bridge and an overhead line have the settings their structure takes", () => {

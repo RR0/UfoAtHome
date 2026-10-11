@@ -57,6 +57,7 @@ export class DecorParameterSets {
     const model = DecorTraits.drawnAsModel(object)
     if (!model && object.kind === "building") parameters.push(...DecorParameterSets.floors())
     if (!model && hasWindows(object.kind)) parameters.push(...DecorParameterSets.windows(object.kind))
+    if (object.kind === "vehicle") parameters.push(...DecorParameterSets.engine())
     if (object.kind === "bridge") parameters.push(...DecorParameterSets.bridge())
     if (object.kind === "wire") parameters.push(...DecorParameterSets.wire())
     // What the model publishes is written under `modelParameters`, so that no key of its can be taken for one of the object's own.
@@ -97,6 +98,39 @@ export class DecorParameterSets {
         es: "Opacidad de la ventana de este lado: 0 abierta, 100 cerrada. Vacío: sin ventana.", it: "Opacità della finestra di questo lato: 0 aperta, 100 chiusa. Vuoto: nessuna finestra." },
       group: DecorParameterSets.WINDOWS
     }))
+  }
+
+  /**
+   * Whether a decor vehicle is heard running, and what it sounds like (see DecorEngine): no engine is a parked car, silent. Choosing
+   * a sound states one, and emptying the choice takes the engine away with its noise.
+   */
+  private static engine(): ParameterSpec[] {
+    const group: SaidText = { en: "Engine sound", fr: "Bruit du moteur", es: "Sonido del motor", it: "Suono del motore" }
+    return [
+      {
+        type: "choice", key: "engine.kind", group,
+        label: { en: "Engine", fr: "Moteur", es: "Motor", it: "Motore" },
+        hint: { en: "Whether the vehicle is heard running, and what sort of engine: how many cylinders fire, how low they turn, how its gears are spaced.",
+          fr: "Si le véhicule s'entend rouler, et de quel moteur : combien de cylindres tirent, à quel régime bas ils tournent, comment ses vitesses sont étagées.",
+          es: "Si se oye el vehículo en marcha, y qué motor: cuántos cilindros disparan, cuán bajo giran, cómo se escalonan sus marchas.",
+          it: "Se il veicolo si sente in marcia, e di che motore: quanti cilindri sparano, quanto in basso girano, come sono distanziate le marce." },
+        empty: { en: "Silent (parked)", fr: "Silencieux (à l'arrêt)", es: "Silencioso (parado)", it: "Silenzioso (fermo)" },
+        choices: [
+          { value: "car", label: { en: "Car", fr: "Voiture", es: "Coche", it: "Auto" } },
+          { value: "van", label: { en: "Van", fr: "Camionnette", es: "Furgoneta", it: "Furgone" } },
+          { value: "truck", label: { en: "Truck", fr: "Camion", es: "Camión", it: "Camion" } },
+          { value: "motorcycle", label: { en: "Motorcycle", fr: "Moto", es: "Moto", it: "Moto" } },
+          { value: "generic", label: { en: "Unknown", fr: "Inconnu", es: "Desconocido", it: "Sconosciuto" } }
+        ]
+      },
+      {
+        type: "number", key: "engine.noise", min: 0.1, max: 3, step: 0.1, group, effective: () => 1,
+        label: { en: "Loudness", fr: "Volume", es: "Volumen", it: "Volume" },
+        hint: { en: "Against an ordinary one of its kind: 1 by default, 1.5 for a very noisy one.", fr: "Par rapport à un véhicule ordinaire de son genre : 1 par défaut, 1,5 pour un très bruyant.",
+          es: "Frente a uno ordinario de su tipo: 1 por defecto, 1,5 para uno muy ruidoso.", it: "Rispetto a uno ordinario del suo tipo: 1 per impostazione predefinita, 1,5 per uno molto rumoroso." },
+        visibleWhen: element => Parameters.read(element, "engine.kind") !== undefined || (element as { engine?: unknown }).engine !== undefined
+      }
+    ]
   }
 
   /** How a bridge is built: the defaults are those of an ordinary French overpass (see BridgeStructure). */
