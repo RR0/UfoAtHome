@@ -42,7 +42,6 @@ describe("LaunchEditor", () => {
     expect([...container.querySelectorAll<HTMLOptionElement>("#launch-select option")].map(option => option.textContent)).toEqual(["First (a)", "b"])
     expect(field("vehicle.engine.thrustKN").value).toBe("934")
     expect(field("vehicle.engine.propellant").value).toBe("rp1-lox")
-    expect(container.querySelector("#launch-track")!.textContent).toBe("2 points from 0 s to 60 s, up to 150 km")
   })
 
   test("an empty field shows what the plume will use, which follows the engine", () => {
@@ -145,5 +144,39 @@ describe("LaunchEditor", () => {
     expect(sighting.interpretation!.launches![0].burnFromT).toBe(-3000)
     typed(field("burnUntilT"), "")
     expect(sighting.interpretation!.launches![0].burnUntilT).toBeUndefined()
+  })
+
+  test("the path is a table of its places: one row each, typed in seconds and degrees, written as the whole path", () => {
+    const { sighting } = build()
+    const cell = (i: number, column: string) => container.querySelector<HTMLInputElement>(`[data-key="track"] input[data-row="${i}"][data-column="${column}"]`)!
+    expect(container.querySelectorAll('[data-key="track"] tbody tr')).toHaveLength(2)
+    expect(cell(1, "t").value).toBe("60")
+    expect(cell(1, "altitudeKm").value).toBe("150")
+    typed(cell(1, "altitudeKm"), "170.5")
+    typed(cell(0, "t"), "-5")
+    expect(sighting.interpretation!.launches![0].track).toEqual([{ t: -5000, lat: 28, lng: -80, altitudeKm: 0 }, { t: 60000, lat: 30, lng: -78, altitudeKm: 170.5 }])
+  })
+
+  test("adds a place that goes on as the path was going, and removes one down to two", () => {
+    const { sighting } = build()
+    container.querySelector<HTMLButtonElement>('[data-key="track"] button[data-action="add"]')!.click()
+    expect(sighting.interpretation!.launches![0].track[2]).toEqual({ t: 120000, lat: 32, lng: -76, altitudeKm: 300 })
+    expect(container.querySelectorAll('[data-key="track"] tbody tr')).toHaveLength(3)
+    container.querySelector<HTMLButtonElement>('[data-key="track"] button[data-action="remove"][data-row="0"]')!.click()
+    expect(sighting.interpretation!.launches![0].track.map(place => place.t)).toEqual([60000, 120000])
+    expect(container.querySelector<HTMLButtonElement>('[data-key="track"] button[data-action="remove"]')!.disabled).toBe(true)
+    container.querySelector<HTMLButtonElement>('[data-key="track"] button[data-action="remove"]')!.click()
+    expect(sighting.interpretation!.launches![0].track).toHaveLength(2)
+  })
+
+  test("puts the places in order of their time once a field is left, not while it is typed in", () => {
+    const { sighting } = build()
+    const cell = (i: number, column: string) => container.querySelector<HTMLInputElement>(`[data-key="track"] input[data-row="${i}"][data-column="${column}"]`)!
+    typed(cell(0, "t"), "90")
+    expect(sighting.interpretation!.launches![0].track.map(place => place.t)).toEqual([90000, 60000])
+    cell(0, "t").dispatchEvent(new Event("change", { bubbles: true }))
+    expect(sighting.interpretation!.launches![0].track.map(place => place.t)).toEqual([60000, 90000])
+    expect(cell(0, "t").value).toBe("60")
+    expect(cell(1, "t").value).toBe("90")
   })
 })

@@ -25,9 +25,8 @@ export interface LaunchEditorHost {
  * says was seen (see LaunchJson), each with the fields its kind publishes (see LaunchParameters) —
  * the engine, the plume, the collar — drawn by the generic ParameterForm.
  *
- * What is edited here is what a launch IS and how its exhaust behaves. Where it flew is its path,
- * stated in the file and shown, as a body's movement is: a path is a table of places and instants,
- * and typing one into fields is slower and worse than writing it down once with its sources.
+ * What is edited here is what a launch IS, how its exhaust behaves, and where it flew: its path is a table of places and instants,
+ * drawn by the form as one (see RowsParameter).
  */
 export class LaunchEditor {
   private messages: LaunchEditorMessages = launchEditorMessages_en
@@ -70,7 +69,6 @@ export class LaunchEditor {
     const launch = this.current
     this.element("launch-fields").hidden = launch === undefined
     if (!launch) return
-    this.element("launch-track").textContent = this.trackSummary(launch)
     const set = ParameterRegistry.of("launch")!
     this.form ??= new ParameterForm(this.element("launch-parameters"), this.language, "", { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() })
     this.form.show(set, launch as unknown as Record<string, unknown>, () => this.written())
@@ -106,7 +104,6 @@ export class LaunchEditor {
       <p id="launch-none" class="launch-intro">${m.none}</p>
       <div id="launch-list"></div>
       <div id="launch-fields" class="launch-fields">
-        <p class="launch-track"><span>${m.track}</span> <output id="launch-track"></output></p>
         <div id="launch-parameters" class="launch-parameters"></div>
         <p class="launch-intro">${m.derivedNote}</p>
       </div>
@@ -173,16 +170,6 @@ export class LaunchEditor {
     this.host.sighting().interpretation = empty ? undefined : next
     this.host.changed()
     this.sync()
-  }
-
-  private trackSummary(launch: LaunchJson): string {
-    const keys = launch.track ?? []
-    if (keys.length < 2) return this.messages.trackEmpty
-    const seconds = (ms: number) => `${Math.round(ms / 100) / 10} s`
-    const times = keys.map(key => key.t)
-    const top = Math.max(...keys.map(key => key.altitudeKm))
-    return this.messages.trackSpan.replace("{n}", String(keys.length)).replace("{from}", seconds(Math.min(...times)))
-      .replace("{to}", seconds(Math.max(...times))).replace("{top}", String(Math.round(top)))
   }
 
   private labelOf(launch: LaunchJson): string {
