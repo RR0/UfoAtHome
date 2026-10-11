@@ -4,8 +4,8 @@
  * instant, written as a JPEG beside the recording.
  *
  * A real frame of the simulation and not an illustration, because that is what the link is to. By
- * default the first one; for a recording whose first moment shows an empty sky, the instant is given
- * below, chosen by looking (`--sheet` writes a few instants of each recording to look at).
+ * default the first one (second 0); for a recording whose first moment shows an empty sky, the instant is the recording's own
+ * `summaryTime` (seconds), chosen by looking (`--sheet` writes a few instants of each recording to look at).
  *
  * Run with (outside the sandbox: Chrome needs its own sockets):
  *   PLAYWRIGHT_MODULE=/path/to/node_modules/playwright-core npx tsx scripts/share-cards/ShareCards.ts
@@ -27,9 +27,6 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { createServer } from "vite"
 
-/** Where the first image says nothing (an empty sky, the observer's back turned): the second to photograph instead. */
-const INSTANTS: Record<string, number> = {}
-
 class ShareCards {
 
   /** Where the photographs are served from: absolute, so that the copies of a recording on rr0.org say the same. */
@@ -47,6 +44,12 @@ class ShareCards {
   recordings(names: string[]): string[] {
     const all = readdirSync(this.demoData).filter(file => /^observer-.*\.json$/.test(file)).map(file => file.replace(/\.json$/, ""))
     return names.length > 0 ? all.filter(name => names.includes(name)) : all
+  }
+
+  /** The instant the recording asks to be photographed at, in seconds, if it says. */
+  private summaryTime(name: string): number | undefined {
+    const time = JSON.parse(readFileSync(path.join(this.demoData, `${name}.json`), "utf8")).summaryTime
+    return typeof time === "number" ? time : undefined
   }
 
   /** The first and last instants the recording states, in seconds: its keyframes, since a stated duration may come wrapped in its provenance. */
@@ -77,7 +80,7 @@ class ShareCards {
       mkdirSync(out, { recursive: true })
       for (const name of names) {
         const { start, end } = this.span(name)
-        const instants = sheet ? [0, 0.25, 0.5, 0.75].map(fraction => Math.round((start + fraction * (end - start)) * 10) / 10) : [INSTANTS[name] ?? start]
+        const instants = sheet ? [0, 0.25, 0.5, 0.75].map(fraction => Math.round((start + fraction * (end - start)) * 10) / 10) : [this.summaryTime(name) ?? 0]
         for (const seconds of instants) {
           const file = path.join(out, sheet ? `${name}@${seconds}.jpg` : `${name.replace(/^observer-/, "")}.jpg`)
           await this.photograph(browser, origin, name, seconds, file)

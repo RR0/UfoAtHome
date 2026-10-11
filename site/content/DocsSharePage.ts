@@ -283,7 +283,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       fetched: the card shows the observation's name, its <code>image</code> (an address, absolute or relative to the
       file) and its <code>summary</code> (a sentence or two, as a plain string or one per language). Without a
       <code>summary</code>, the card says who saw it, in which case and when, as far as the file and its address
-      tell; without an <code>image</code>, it shows the logo. A case file takes the same two fields.</p>
+      tell; without an <code>image</code>, it shows the logo. A case file takes the same two fields. <code>summaryTime</code> (seconds) tells the project's capture tool which instant of the simulation to photograph for the <code>image</code>, when the first one does not show the phenomenon.</p>
   </div>
 </section>
 
@@ -396,7 +396,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       la carte montre le nom de l'observation, son <code>image</code> (une adresse, absolue ou relative au
       fichier) et son <code>summary</code> (une phrase ou deux, en simple texte ou une par langue). Sans
       <code>summary</code>, la carte dit qui l'a vue, dans quel dossier et quand, autant que le fichier et son
-      adresse le disent ; sans <code>image</code>, elle montre le logo. Un fichier de dossier prend les deux mêmes champs.</p>
+      adresse le disent ; sans <code>image</code>, elle montre le logo. Un fichier de dossier prend les deux mêmes champs. <code>summaryTime</code> (secondes) dit à l'outil de capture du projet quel instant de la simulation photographier pour l'<code>image</code>, quand le premier ne montre pas le phénomène.</p>
   </div>
 </section>
 
@@ -511,7 +511,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       enlace: la tarjeta muestra el nombre de la observación, su <code>image</code> (una dirección, absoluta o
       relativa al archivo) y su <code>summary</code> (una frase o dos, en texto simple o una por idioma). Sin
       <code>summary</code>, la tarjeta dice quién la vio, en qué expediente y cuándo, en la medida en que el
-      archivo y su dirección lo dicen; sin <code>image</code>, muestra el logotipo. Un archivo de expediente admite los dos mismos campos.</p>
+      archivo y su dirección lo dicen; sin <code>image</code>, muestra el logotipo. Un archivo de expediente admite los dos mismos campos. <code>summaryTime</code> (segundos) indica a la herramienta de captura del proyecto qué instante de la simulación fotografiar para la <code>image</code>, cuando el primero no muestra el fenómeno.</p>
   </div>
 </section>
 
@@ -626,7 +626,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       la scheda mostra il nome dell'osservazione, la sua <code>image</code> (un indirizzo, assoluto o relativo al
       file) e il suo <code>summary</code> (una o due frasi, in testo semplice o una per lingua). Senza
       <code>summary</code>, la scheda dice chi l'ha vista, in quale fascicolo e quando, per quanto il file e il suo
-      indirizzo lo dicono; senza <code>image</code>, mostra il logo. Un file di fascicolo accetta gli stessi due campi.</p>
+      indirizzo lo dicono; senza <code>image</code>, mostra il logo. Un file di fascicolo accetta gli stessi due campi. <code>summaryTime</code> (secondi) dice allo strumento di cattura del progetto quale istante della simulazione fotografare per l'<code>image</code>, quando il primo non mostra il fenomeno.</p>
   </div>
 </section>
 

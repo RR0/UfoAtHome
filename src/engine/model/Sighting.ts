@@ -216,6 +216,12 @@ export interface SightingEvent {
    */
   summary?: SaidText
   /**
+   * The second of the recording (from its start) the project's capture tool photographs for `image`, when the first image
+   * is not the one that shows the phenomenon: `summaryTime: 3.2`. Absent, 0: the first image. Read by the tool that makes the
+   * pictures (scripts/share-cards), never by the player.
+   */
+  summaryTime?: number
+  /**
     * Technical keywords, stored in ENGLISH and named for the reader by the components' own
     * messages — "landing" is displayed "atterrissage" to a French reader, and a tag no message
     * knows is displayed as it is stored (see SightingTags).

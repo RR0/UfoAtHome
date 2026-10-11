@@ -69,6 +69,8 @@ export interface SightingRecordingJson {
   image?: string
   /** See SightingEvent.summary — what a shared link to this recording says of it. */
   summary?: SaidText
+  /** See SightingEvent.summaryTime — the second the picture of this recording's card is taken at. */
+  summaryTime?: number
   /** See SightingEvent.tags. */
   tags?: string[]
   timeline: TimelineJson
@@ -161,6 +163,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     description: sighting.event.description,
     image: sighting.event.image,
     summary: sighting.event.summary,
+    summaryTime: sighting.event.summaryTime,
     tags: sighting.event.tags,
     timeline: sighting.timeline.toJSON(),
     observerTrack: sighting.observerTrack.toJSON(),
@@ -206,6 +209,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
       description: json.description,
       image: json.image,
       summary: json.summary,
+      summaryTime: json.summaryTime,
       tags: json.tags
     },
     Timeline.fromJSON(json.timeline, issues),
