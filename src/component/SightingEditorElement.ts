@@ -5352,20 +5352,14 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * The Launches part has a handle only while the recording has a launch: most recordings have none,
-   * and a part with nothing in it is clutter. When the last launch goes while the part is open, the
-   * Shapes part is opened instead, so that the editor is never left on a part with no handle.
+   * The Launches part has its handle always: it is where a launch is added, and a recording with none says so there. What is
+   * on show is read again when the recording changes.
    */
   private syncLaunchesTab(): void {
     const tab = this.subgroupTabs.find(candidate => candidate.getAttribute("aria-controls") === "shape-launches")
     if (!tab) return
-    const has = (this.ufoElement.sighting.interpretation?.launches?.length ?? 0) > 0
-    tab.hidden = !has
-    if (!has && tab.getAttribute("aria-expanded") === "true") {
-      const shapes = this.subgroupTabs.find(candidate => candidate.getAttribute("aria-controls") === "shape-shapes")
-      if (shapes) this.openSubgroup(shapes)
-    }
-    if (has && this.launchEditor && this.shadow.getElementById("shape-launches")?.hidden === false) this.launchEditor.refresh()
+    tab.hidden = false
+    if (this.launchEditor && this.shadow.getElementById("shape-launches")?.hidden === false) this.launchEditor.refresh()
   }
 
   /**

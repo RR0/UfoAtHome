@@ -8,6 +8,7 @@ import type { LaunchEditorMessages } from "./messages/LaunchEditorMessages.js"
 import { launchEditorMessages_en } from "./messages/LaunchEditorMessages_en.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { loadLaunchEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { ElementList } from "./ElementList.js"
 import { ParameterForm } from "./ParameterForm.js"
 
 /** What the Launches part needs of the editor it stands in, read at every use. */
@@ -33,6 +34,7 @@ export class LaunchEditor {
   private languageToken = 0
   private currentId?: string
   private form?: ParameterForm
+  private list?: ElementList
   private language: string
   /** The launches the fields were last filled for, to tell a recording replaced from an edit written. */
   private shown: readonly LaunchJson[] = []
@@ -62,10 +64,8 @@ export class LaunchEditor {
     const launches = this.launches
     this.shown = [...launches]
     if (!launches.some(launch => launch.id === this.currentId)) this.currentId = launches[0]?.id
-    const select = this.select("launch-select")
-    select.replaceChildren(...launches.map(launch => new Option(this.labelOf(launch), launch.id)))
-    if (this.currentId !== undefined) select.value = this.currentId
-    select.closest("label")!.hidden = launches.length === 0
+    this.list?.setItems(launches.map(launch => ({ id: launch.id, label: this.labelOf(launch) })), this.currentId)
+    this.list?.setAddState(this.startOfNew() !== undefined, this.startOfNew() === undefined ? this.messages.addLaunchNowhere : undefined)
     this.element("launch-none").hidden = launches.length > 0
     const launch = this.current
     this.element("launch-fields").hidden = launch === undefined
@@ -104,19 +104,22 @@ export class LaunchEditor {
     this.container.innerHTML = `<div class="launch-editor">
       <p class="launch-intro">${m.intro}</p>
       <p id="launch-none" class="launch-intro">${m.none}</p>
-      <label><span>${m.launch}</span> <select id="launch-select"></select></label>
-      <button id="launch-delete" type="button" class="icon-btn" title="${m.deleteLaunch}" aria-label="${m.deleteLaunch}">🗑</button>
+      <div id="launch-list"></div>
       <div id="launch-fields" class="launch-fields">
         <p class="launch-track"><span>${m.track}</span> <output id="launch-track"></output></p>
         <div id="launch-parameters" class="launch-parameters"></div>
         <p class="launch-intro">${m.derivedNote}</p>
       </div>
     </div>`
-    this.select("launch-select").addEventListener("change", () => {
-      this.currentId = this.select("launch-select").value
-      this.sync()
+    const list = this.element("launch-list")
+    this.list = new ElementList({
+      header: list, footer: list, rowClass: "launch-list-add",
+      ids: { list: "launch-select", remove: "launch-delete", add: "launch-add" },
+      onSelect: id => { this.currentId = id; this.sync() },
+      onAdd: () => this.addLaunch(),
+      onRemove: () => this.deleteCurrent()
     })
-    this.element("launch-delete").addEventListener("click", () => this.deleteCurrent())
+    this.list.setLabels({ list: m.launch, remove: m.deleteLaunch, add: m.addLaunch })
   }
 
   /** A field of the form was written onto the launch. */
@@ -124,9 +127,38 @@ export class LaunchEditor {
     this.host.changed()
     const launch = this.current
     if (!launch) return
-    const select = this.select("launch-select")
-    const option = [...select.options].find(candidate => candidate.value === launch.id)
-    if (option) option.textContent = this.labelOf(launch)
+    this.list?.rename(launch.id, this.labelOf(launch))
+  }
+
+  /**
+   * Where a new launch starts: far enough from the observer that a stage is seen climbing, in the direction they face, since nothing
+   * else is known of it. Undefined where the recording has no place to put it. It is a placeholder to be given its real path in the file
+   * (see the class), and its plume needs the recording's date as any does.
+   */
+  private startOfNew(): LaunchJson["track"] | undefined {
+    const sighting = this.host.sighting()
+    const origin = sighting.event?.place?.[0]
+    if (origin?.lat === undefined || origin.lng === undefined) return undefined
+    const heading = (sighting.observerTrack?.getInterpolatedPoseAt(0)?.headingDeg ?? 0) * Math.PI / 180
+    const at = (distanceKm: number) => ({
+      lat: origin.lat + distanceKm * Math.cos(heading) / 111.32,
+      lng: origin.lng + distanceKm * Math.sin(heading) / (111.32 * Math.max(0.05, Math.cos(origin.lat * Math.PI / 180)))
+    })
+    return [{ t: 0, ...at(300), altitudeKm: 80 }, { t: 60000, ...at(450), altitudeKm: 160 }]
+  }
+
+  /** Adds a launch of the vehicle most launches are, to be told apart by the fields below. */
+  private addLaunch(): void {
+    const track = this.startOfNew()
+    if (!track) return
+    const interpretation = this.interpretation ?? { bodies: [] } as InterpretationJson
+    let n = this.launches.length + 1
+    while (this.launches.some(launch => launch.id === `launch-${n}`)) n++
+    const launch: LaunchJson = { id: `launch-${n}`, vehicle: { name: "Falcon 9" }, track }
+    this.host.sighting().interpretation = { ...interpretation, launches: [...this.launches, launch] }
+    this.currentId = launch.id
+    this.host.changed()
+    this.sync()
   }
 
   private deleteCurrent(): void {
@@ -168,10 +200,5 @@ export class LaunchEditor {
 
   private element(id: string): HTMLElement {
     return this.container.querySelector<HTMLElement>(`#${id}`)!
-  }
-
-
-  private select(id: string): HTMLSelectElement {
-    return this.element(id) as HTMLSelectElement
   }
 }

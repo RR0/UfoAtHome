@@ -20,7 +20,7 @@ describe("LaunchEditor", () => {
   afterEach(() => container.replaceChildren())
 
   const build = (interpretation: InterpretationJson | null = stated()) => {
-    const sighting = { interpretation: interpretation ?? undefined } as Sighting
+    const sighting = { interpretation: interpretation ?? undefined, event: { place: [{ lat: 48, lng: 2 }] }, observerTrack: { getInterpolatedPoseAt: () => ({ headingDeg: 90 }) } } as unknown as Sighting
     let changes = 0
     const editor = new LaunchEditor(container, {
       sighting: () => sighting,
@@ -98,5 +98,39 @@ describe("LaunchEditor", () => {
     sighting.interpretation = { bodies: [], launches: [{ id: "z", track }] }
     editor.refresh()
     expect([...container.querySelectorAll<HTMLOptionElement>("#launch-select option")].map(option => option.value)).toEqual(["z"])
+  })
+
+  test("adds a launch with a placeholder path in front of the observer, even to a recording with no interpretation", () => {
+    const { sighting, changes } = build(null)
+    container.querySelector<HTMLButtonElement>("#launch-add")!.click()
+    const launches = sighting.interpretation!.launches!
+    expect(launches).toHaveLength(1)
+    expect(launches[0].id).toBe("launch-1")
+    expect(launches[0].vehicle?.name).toBe("Falcon 9")
+    // The observer faces east: the stage climbs to the east of them, at the latitude they stand at.
+    expect(launches[0].track[0].lng).toBeGreaterThan(2)
+    expect(launches[0].track[0].lat).toBeCloseTo(48, 1)
+    expect(launches[0].track).toHaveLength(2)
+    expect(changes()).toBe(1)
+    expect(container.querySelector<HTMLElement>("#launch-none")!.hidden).toBe(true)
+    expect(container.querySelector<HTMLSelectElement>("#launch-select")!.value).toBe("launch-1")
+    expect(field("vehicle.name").value).toBe("Falcon 9")
+  })
+
+  test("numbers a new launch past the ones that exist, and selects it", () => {
+    const { sighting } = build()
+    container.querySelector<HTMLButtonElement>("#launch-add")!.click()
+    container.querySelector<HTMLButtonElement>("#launch-add")!.click()
+    expect(sighting.interpretation!.launches!.map(launch => launch.id)).toEqual(["a", "b", "launch-3", "launch-4"])
+    expect(container.querySelector<HTMLSelectElement>("#launch-select")!.value).toBe("launch-4")
+  })
+
+  test("cannot add a launch to a recording with no place, and says why", () => {
+    const sighting = { interpretation: undefined, event: {}, observerTrack: { getInterpolatedPoseAt: () => undefined } } as unknown as Sighting
+    const editor = new LaunchEditor(container, { sighting: () => sighting, said: () => new SaidTexts(["en"]), writingLanguage: () => "en", changed: () => undefined }, "en")
+    editor.sync()
+    const add = container.querySelector<HTMLButtonElement>("#launch-add")!
+    expect(add.disabled).toBe(true)
+    expect(add.title).not.toBe("")
   })
 })
