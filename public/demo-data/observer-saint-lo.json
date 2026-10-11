@@ -1,8 +1,6 @@
 {
  "version": 1,
  "id": "2026-08-11-SaintLo",
- "image": "https://ufoathome.org/demo-data/share/saint-lo.jpg",
- "summaryTime": 3.2,
  "tags": [
   "aerial observation"
  ],
@@ -989,7 +987,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 44.821
        },
-       "angle": -2.7109
+       "angle": 3.5722
       }
      },
      {
@@ -999,7 +997,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 42.936
        },
-       "angle": -2.7109
+       "angle": 3.5722
       }
      },
      {
@@ -1009,7 +1007,7 @@
         "azimuthDeg": 0.824,
         "altitudeDeg": 42.907
        },
-       "angle": -2.7109
+       "angle": 3.5722
       }
      },
      {
@@ -1019,7 +1017,7 @@
         "azimuthDeg": 0.417,
         "altitudeDeg": 43.207
        },
-       "angle": -2.7109
+       "angle": 3.5722
       }
      },
      {
@@ -1029,7 +1027,7 @@
         "azimuthDeg": 360.0,
         "altitudeDeg": 42.425
        },
-       "angle": -2.7109
+       "angle": 3.5722
       }
      },
      {
@@ -1039,7 +1037,7 @@
         "azimuthDeg": 359.58,
         "altitudeDeg": 43.035
        },
-       "angle": -2.7109
+       "angle": 3.5722
       }
      },
      {
@@ -1049,7 +1047,7 @@
         "azimuthDeg": 359.168,
         "altitudeDeg": 42.501
        },
-       "angle": -2.7109
+       "angle": 3.5722
       }
      },
      {
@@ -1059,7 +1057,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 42.538
        },
-       "angle": -2.7109
+       "angle": 3.5722
       }
      }
     ]
@@ -1074,7 +1072,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 49.732
        },
-       "angle": -2.1193
+       "angle": 4.1639
       }
      },
      {
@@ -1084,7 +1082,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 46.818
        },
-       "angle": -2.1193
+       "angle": 4.1639
       }
      },
      {
@@ -1094,7 +1092,7 @@
         "azimuthDeg": 1.423,
         "altitudeDeg": 46.44
        },
-       "angle": -2.1193
+       "angle": 4.1639
       }
      },
      {
@@ -1104,7 +1102,7 @@
         "azimuthDeg": 0.724,
         "altitudeDeg": 47.075
        },
-       "angle": -2.1193
+       "angle": 4.1639
       }
      },
      {
@@ -1114,7 +1112,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 46.017
        },
-       "angle": -2.1193
+       "angle": 4.1639
       }
      },
      {
@@ -1124,7 +1122,7 @@
         "azimuthDeg": 359.269,
         "altitudeDeg": 47.137
        },
-       "angle": -2.1193
+       "angle": 4.1639
       }
      },
      {
@@ -1134,7 +1132,7 @@
         "azimuthDeg": 358.554,
         "altitudeDeg": 46.466
        },
-       "angle": -2.1193
+       "angle": 4.1639
       }
      },
      {
@@ -1144,7 +1142,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 46.195
        },
-       "angle": -2.1193
+       "angle": 4.1639
       }
      }
     ]
@@ -1159,7 +1157,7 @@
         "azimuthDeg": 360.0,
         "altitudeDeg": 54.643
        },
-       "angle": -1.7277
+       "angle": 4.5555
       }
      },
      {
@@ -1169,7 +1167,7 @@
         "azimuthDeg": 360.0,
         "altitudeDeg": 51.416
        },
-       "angle": -1.7277
+       "angle": 4.5555
       }
      },
      {
@@ -1179,7 +1177,7 @@
         "azimuthDeg": 1.869,
         "altitudeDeg": 50.906
        },
-       "angle": -1.7277
+       "angle": 4.5555
       }
      },
      {
@@ -1189,7 +1187,7 @@
         "azimuthDeg": 0.951,
         "altitudeDeg": 51.662
        },
-       "angle": -1.7277
+       "angle": 4.5555
       }
      },
      {
@@ -1199,7 +1197,7 @@
         "azimuthDeg": 360.0,
         "altitudeDeg": 50.52
        },
-       "angle": -1.7277
+       "angle": 4.5555
       }
      },
      {
@@ -1209,7 +1207,7 @@
         "azimuthDeg": 359.043,
         "altitudeDeg": 51.81
        },
-       "angle": -1.7277
+       "angle": 4.5555
       }
      },
      {
@@ -1219,7 +1217,7 @@
         "azimuthDeg": 358.113,
         "altitudeDeg": 51.1
        },
-       "angle": -1.7277
+       "angle": 4.5555
       }
      },
      {
@@ -1229,7 +1227,7 @@
         "azimuthDeg": 360.0,
         "altitudeDeg": 50.719
        },
-       "angle": -1.7277
+       "angle": 4.5555
       }
      }
     ]
@@ -1244,7 +1242,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 59.554
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1254,7 +1252,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 56.334
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1264,7 +1262,7 @@
         "azimuthDeg": 2.132,
         "altitudeDeg": 55.816
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1274,7 +1272,7 @@
         "azimuthDeg": 1.086,
         "altitudeDeg": 56.578
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1284,7 +1282,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 55.434
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1294,7 +1292,7 @@
         "azimuthDeg": 358.91,
         "altitudeDeg": 56.728
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1304,7 +1302,7 @@
         "azimuthDeg": 357.858,
         "altitudeDeg": 56.016
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1314,7 +1312,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 55.634
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      }
     ]
@@ -1329,7 +1327,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 64.464
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1339,7 +1337,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 61.244
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1349,7 +1347,7 @@
         "azimuthDeg": 2.449,
         "altitudeDeg": 60.723
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1359,7 +1357,7 @@
         "azimuthDeg": 1.253,
         "altitudeDeg": 61.488
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1369,7 +1367,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 60.344
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1379,7 +1377,7 @@
         "azimuthDeg": 358.741,
         "altitudeDeg": 61.637
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1389,7 +1387,7 @@
         "azimuthDeg": 357.536,
         "altitudeDeg": 60.922
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1399,7 +1397,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 60.545
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      }
     ]
@@ -1414,7 +1412,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 69.375
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1424,7 +1422,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 66.155
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1434,7 +1432,7 @@
         "azimuthDeg": 2.903,
         "altitudeDeg": 65.628
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1444,7 +1442,7 @@
         "azimuthDeg": 1.494,
         "altitudeDeg": 66.397
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1454,7 +1452,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 65.255
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1464,7 +1462,7 @@
         "azimuthDeg": 358.497,
         "altitudeDeg": 66.547
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1474,7 +1472,7 @@
         "azimuthDeg": 357.075,
         "altitudeDeg": 65.828
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1484,7 +1482,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 65.455
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      }
     ]
@@ -1499,7 +1497,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 74.286
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1509,7 +1507,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 71.258
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1519,7 +1517,7 @@
         "azimuthDeg": 3.482,
         "altitudeDeg": 70.766
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1529,7 +1527,7 @@
         "azimuthDeg": 1.811,
         "altitudeDeg": 71.479
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1539,7 +1537,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 70.432
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1549,7 +1547,7 @@
         "azimuthDeg": 358.174,
         "altitudeDeg": 71.617
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1559,7 +1557,7 @@
         "azimuthDeg": 356.483,
         "altitudeDeg": 70.949
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      },
      {
@@ -1569,7 +1567,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 70.615
        },
-       "angle": -1.5708
+       "angle": 4.7124
       }
      }
     ]
@@ -1584,7 +1582,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 79.196
        },
-       "angle": -1.4359
+       "angle": 4.8473
       }
      },
      {
@@ -1594,7 +1592,7 @@
         "azimuthDeg": 360.0,
         "altitudeDeg": 76.05
        },
-       "angle": -1.4359
+       "angle": 4.8473
       }
      },
      {
@@ -1604,7 +1602,7 @@
         "azimuthDeg": 4.693,
         "altitudeDeg": 75.523
        },
-       "angle": -1.4359
+       "angle": 4.8473
       }
      },
      {
@@ -1614,7 +1612,7 @@
         "azimuthDeg": 2.477,
         "altitudeDeg": 76.277
        },
-       "angle": -1.4359
+       "angle": 4.8473
       }
      },
      {
@@ -1624,7 +1622,7 @@
         "azimuthDeg": 360.0,
         "altitudeDeg": 75.188
        },
-       "angle": -1.4359
+       "angle": 4.8473
       }
      },
      {
@@ -1634,7 +1632,7 @@
         "azimuthDeg": 357.496,
         "altitudeDeg": 76.422
        },
-       "angle": -1.4359
+       "angle": 4.8473
       }
      },
      {
@@ -1644,7 +1642,7 @@
         "azimuthDeg": 355.243,
         "altitudeDeg": 75.716
        },
-       "angle": -1.4359
+       "angle": 4.8473
       }
      },
      {
@@ -1654,7 +1652,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 75.379
        },
-       "angle": -1.4359
+       "angle": 4.8473
       }
      }
     ]
@@ -1669,7 +1667,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 84.107
        },
-       "angle": -1.0802
+       "angle": 5.203
       }
      },
      {
@@ -1679,7 +1677,7 @@
         "azimuthDeg": 360.0,
         "altitudeDeg": 80.887
        },
-       "angle": -1.0802
+       "angle": 5.203
       }
      },
      {
@@ -1689,7 +1687,7 @@
         "azimuthDeg": 7.087,
         "altitudeDeg": 80.319
        },
-       "angle": -1.0802
+       "angle": 5.203
       }
      },
      {
@@ -1699,7 +1697,7 @@
         "azimuthDeg": 3.857,
         "altitudeDeg": 81.113
        },
-       "angle": -1.0802
+       "angle": 5.203
       }
      },
      {
@@ -1709,7 +1707,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 80.0
        },
-       "angle": -1.0802
+       "angle": 5.203
       }
      },
      {
@@ -1719,7 +1717,7 @@
         "azimuthDeg": 356.078,
         "altitudeDeg": 81.263
        },
-       "angle": -1.0802
+       "angle": 5.203
       }
      },
      {
@@ -1729,7 +1727,7 @@
         "azimuthDeg": 352.765,
         "altitudeDeg": 80.52
        },
-       "angle": -1.0802
+       "angle": 5.203
       }
      },
      {
@@ -1739,7 +1737,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 80.197
        },
-       "angle": -1.0802
+       "angle": 5.203
       }
      }
     ]
@@ -1754,7 +1752,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 89.018
        },
-       "angle": -0.5771
+       "angle": 5.7061
       }
      },
      {
@@ -1764,7 +1762,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 85.769
        },
-       "angle": -0.5771
+       "angle": 5.7061
       }
      },
      {
@@ -1774,7 +1772,7 @@
         "azimuthDeg": 14.213,
         "altitudeDeg": 85.118
        },
-       "angle": -0.5771
+       "angle": 5.7061
       }
      },
      {
@@ -1784,7 +1782,7 @@
         "azimuthDeg": 8.56,
         "altitudeDeg": 85.973
        },
-       "angle": -0.5771
+       "angle": 5.7061
       }
      },
      {
@@ -1794,7 +1792,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 84.869
        },
-       "angle": -0.5771
+       "angle": 5.7061
       }
      },
      {
@@ -1804,7 +1802,7 @@
         "azimuthDeg": 351.111,
         "altitudeDeg": 86.123
        },
-       "angle": -0.5771
+       "angle": 5.7061
       }
      },
      {
@@ -1814,7 +1812,7 @@
         "azimuthDeg": 345.189,
         "altitudeDeg": 85.316
        },
-       "angle": -0.5771
+       "angle": 5.7061
       }
      },
      {
@@ -1824,7 +1822,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 85.069
        },
-       "angle": -0.5771
+       "angle": 5.7061
       }
      }
     ]
@@ -1839,7 +1837,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 87.639
        },
-       "angle": -0.0
+       "angle": 6.2832
       }
      },
      {
@@ -1849,7 +1847,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 89.111
        },
-       "angle": -0.0
+       "angle": 6.2832
       }
      },
      {
@@ -1859,7 +1857,7 @@
         "azimuthDeg": 40.761,
         "altitudeDeg": 88.163
        },
-       "angle": -0.0
+       "angle": 6.2832
       }
      },
      {
@@ -1869,7 +1867,7 @@
         "azimuthDeg": 43.187,
         "altitudeDeg": 89.124
        },
-       "angle": -0.0
+       "angle": 6.2832
       }
      },
      {
@@ -1879,7 +1877,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 88.208
        },
-       "angle": -0.0
+       "angle": 6.2832
       }
      },
      {
@@ -1889,7 +1887,7 @@
         "azimuthDeg": 309.165,
         "altitudeDeg": 89.227
        },
-       "angle": -0.0
+       "angle": 6.2832
       }
      },
      {
@@ -1899,7 +1897,7 @@
         "azimuthDeg": 314.789,
         "altitudeDeg": 88.313
        },
-       "angle": -0.0
+       "angle": 6.2832
       }
      },
      {
@@ -1909,7 +1907,7 @@
         "azimuthDeg": 0.0,
         "altitudeDeg": 88.409
        },
-       "angle": -0.0
+       "angle": 6.2832
       }
      }
     ]
@@ -1924,7 +1922,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 84.687
        },
-       "angle": 0.5771
+       "angle": 6.8602
       }
      },
      {
@@ -1934,7 +1932,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 87.932
        },
-       "angle": 0.5771
+       "angle": 6.8602
       }
      },
      {
@@ -1944,7 +1942,7 @@
         "azimuthDeg": 142.55,
         "altitudeDeg": 88.027
        },
-       "angle": 0.5771
+       "angle": 6.8602
       }
      },
      {
@@ -1954,7 +1952,7 @@
         "azimuthDeg": 165.5,
         "altitudeDeg": 87.605
        },
-       "angle": 0.5771
+       "angle": 6.8602
       }
      },
      {
@@ -1964,7 +1962,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 88.835
        },
-       "angle": 0.5771
+       "angle": 6.8602
       }
      },
      {
@@ -1974,7 +1972,7 @@
         "azimuthDeg": 193.648,
         "altitudeDeg": 87.46
        },
-       "angle": 0.5771
+       "angle": 6.8602
       }
      },
      {
@@ -1984,7 +1982,7 @@
         "azimuthDeg": 214.153,
         "altitudeDeg": 87.865
        },
-       "angle": 0.5771
+       "angle": 6.8602
       }
      },
      {
@@ -1994,7 +1992,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 88.634
        },
-       "angle": 0.5771
+       "angle": 6.8602
       }
      }
     ]
@@ -2009,7 +2007,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 81.736
        },
-       "angle": 1.0802
+       "angle": 7.3634
       }
      },
      {
@@ -2019,7 +2017,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 84.965
        },
-       "angle": 1.0802
+       "angle": 7.3634
       }
      },
      {
@@ -2029,7 +2027,7 @@
         "azimuthDeg": 165.18,
         "altitudeDeg": 85.309
        },
-       "angle": 1.0802
+       "angle": 7.3634
       }
      },
      {
@@ -2039,7 +2037,7 @@
         "azimuthDeg": 173.527,
         "altitudeDeg": 84.681
        },
-       "angle": 1.0802
+       "angle": 7.3634
       }
      },
      {
@@ -2049,7 +2047,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 85.866
        },
-       "angle": 1.0802
+       "angle": 7.3634
       }
      },
      {
@@ -2059,7 +2057,7 @@
         "azimuthDeg": 186.295,
         "altitudeDeg": 84.533
        },
-       "angle": 1.0802
+       "angle": 7.3634
       }
      },
      {
@@ -2069,7 +2067,7 @@
         "azimuthDeg": 194.214,
         "altitudeDeg": 85.117
        },
-       "angle": 1.0802
+       "angle": 7.3634
       }
      },
      {
@@ -2079,7 +2077,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 85.666
        },
-       "angle": 1.0802
+       "angle": 7.3634
       }
      }
     ]
@@ -2094,7 +2092,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 78.785
        },
-       "angle": 1.4359
+       "angle": 7.7191
       }
      },
      {
@@ -2104,7 +2102,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 81.98
        },
-       "angle": 1.4359
+       "angle": 7.7191
       }
      },
      {
@@ -2114,7 +2112,7 @@
         "azimuthDeg": 170.952,
         "altitudeDeg": 82.382
        },
-       "angle": 1.4359
+       "angle": 7.7191
       }
      },
      {
@@ -2124,7 +2122,7 @@
         "azimuthDeg": 175.86,
         "altitudeDeg": 81.71
        },
-       "angle": 1.4359
+       "angle": 7.7191
       }
      },
      {
@@ -2134,7 +2132,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 82.875
        },
-       "angle": 1.4359
+       "angle": 7.7191
       }
      },
      {
@@ -2144,7 +2142,7 @@
         "azimuthDeg": 184.067,
         "altitudeDeg": 81.563
        },
-       "angle": 1.4359
+       "angle": 7.7191
       }
      },
      {
@@ -2154,7 +2152,7 @@
         "azimuthDeg": 188.816,
         "altitudeDeg": 82.187
        },
-       "angle": 1.4359
+       "angle": 7.7191
       }
      },
      {
@@ -2164,7 +2162,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 82.676
        },
-       "angle": 1.4359
+       "angle": 7.7191
       }
      }
     ]
@@ -2179,7 +2177,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 75.833
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2189,7 +2187,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 78.976
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2199,7 +2197,7 @@
         "azimuthDeg": 173.535,
         "altitudeDeg": 79.4
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2209,7 +2207,7 @@
         "azimuthDeg": 176.972,
         "altitudeDeg": 78.716
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2219,7 +2217,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 79.86
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2229,7 +2227,7 @@
         "azimuthDeg": 182.988,
         "altitudeDeg": 78.57
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2239,7 +2237,7 @@
         "azimuthDeg": 186.345,
         "altitudeDeg": 79.205
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2249,7 +2247,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 79.663
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -2264,7 +2262,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 72.882
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2274,7 +2272,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 76.127
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2284,7 +2282,7 @@
         "azimuthDeg": 174.825,
         "altitudeDeg": 76.576
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2294,7 +2292,7 @@
         "azimuthDeg": 177.543,
         "altitudeDeg": 75.864
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2304,7 +2302,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 77.03
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2314,7 +2312,7 @@
         "azimuthDeg": 182.431,
         "altitudeDeg": 75.714
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2324,7 +2322,7 @@
         "azimuthDeg": 185.1,
         "altitudeDeg": 76.376
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2334,7 +2332,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 76.829
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -2349,7 +2347,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 69.931
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2359,7 +2357,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 73.175
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2369,7 +2367,7 @@
         "azimuthDeg": 175.738,
         "altitudeDeg": 73.634
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2379,7 +2377,7 @@
         "azimuthDeg": 177.958,
         "altitudeDeg": 72.915
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2389,7 +2387,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 74.079
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2399,7 +2397,7 @@
         "azimuthDeg": 182.025,
         "altitudeDeg": 72.764
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2409,7 +2407,7 @@
         "azimuthDeg": 184.212,
         "altitudeDeg": 73.434
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2419,7 +2417,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 73.878
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -2434,7 +2432,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 66.979
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2444,7 +2442,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 70.224
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2454,7 +2452,7 @@
         "azimuthDeg": 176.369,
         "altitudeDeg": 70.69
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2464,7 +2462,7 @@
         "azimuthDeg": 178.249,
         "altitudeDeg": 69.965
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2474,7 +2472,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 71.128
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2484,7 +2482,7 @@
         "azimuthDeg": 181.738,
         "altitudeDeg": 69.815
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2494,7 +2492,7 @@
         "azimuthDeg": 183.595,
         "altitudeDeg": 70.489
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2504,7 +2502,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 70.927
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -2519,7 +2517,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 64.028
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2529,7 +2527,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 67.273
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2539,7 +2537,7 @@
         "azimuthDeg": 176.831,
         "altitudeDeg": 67.744
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2549,7 +2547,7 @@
         "azimuthDeg": 178.464,
         "altitudeDeg": 67.015
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2559,7 +2557,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 68.176
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2569,7 +2567,7 @@
         "azimuthDeg": 181.527,
         "altitudeDeg": 66.864
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2579,7 +2577,7 @@
         "azimuthDeg": 183.142,
         "altitudeDeg": 67.543
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2589,7 +2587,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 67.975
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -2604,7 +2602,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 61.076
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2614,7 +2612,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 64.321
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2624,7 +2622,7 @@
         "azimuthDeg": 177.181,
         "altitudeDeg": 64.796
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2634,7 +2632,7 @@
         "azimuthDeg": 178.628,
         "altitudeDeg": 64.064
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2644,7 +2642,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 65.225
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2654,7 +2652,7 @@
         "azimuthDeg": 181.364,
         "altitudeDeg": 63.914
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2664,7 +2662,7 @@
         "azimuthDeg": 182.798,
         "altitudeDeg": 64.596
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2674,7 +2672,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 65.024
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -2689,7 +2687,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 58.125
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2699,7 +2697,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 61.37
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2709,7 +2707,7 @@
         "azimuthDeg": 177.456,
         "altitudeDeg": 61.848
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2719,7 +2717,7 @@
         "azimuthDeg": 178.758,
         "altitudeDeg": 61.114
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2729,7 +2727,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 62.273
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2739,7 +2737,7 @@
         "azimuthDeg": 181.236,
         "altitudeDeg": 60.963
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2749,7 +2747,7 @@
         "azimuthDeg": 182.527,
         "altitudeDeg": 61.647
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2759,7 +2757,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 62.072
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -2774,7 +2772,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 55.174
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2784,7 +2782,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 58.418
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2794,7 +2792,7 @@
         "azimuthDeg": 177.677,
         "altitudeDeg": 58.899
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2804,7 +2802,7 @@
         "azimuthDeg": 178.863,
         "altitudeDeg": 58.163
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2814,7 +2812,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 59.322
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2824,7 +2822,7 @@
         "azimuthDeg": 181.132,
         "altitudeDeg": 58.013
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2834,7 +2832,7 @@
         "azimuthDeg": 182.31,
         "altitudeDeg": 58.699
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2844,7 +2842,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 59.121
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -2859,7 +2857,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 52.222
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2869,7 +2867,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 55.467
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2879,7 +2877,7 @@
         "azimuthDeg": 177.857,
         "altitudeDeg": 55.95
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2889,7 +2887,7 @@
         "azimuthDeg": 178.949,
         "altitudeDeg": 55.212
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2899,7 +2897,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 56.371
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2909,7 +2907,7 @@
         "azimuthDeg": 181.047,
         "altitudeDeg": 55.062
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2919,7 +2917,7 @@
         "azimuthDeg": 182.132,
         "altitudeDeg": 55.75
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2929,7 +2927,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 56.17
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -2944,7 +2942,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 49.271
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2954,7 +2952,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 52.516
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2964,7 +2962,7 @@
         "azimuthDeg": 178.006,
         "altitudeDeg": 53.001
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2974,7 +2972,7 @@
         "azimuthDeg": 179.02,
         "altitudeDeg": 52.261
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2984,7 +2982,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 53.419
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -2994,7 +2992,7 @@
         "azimuthDeg": 180.977,
         "altitudeDeg": 52.111
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3004,7 +3002,7 @@
         "azimuthDeg": 181.985,
         "altitudeDeg": 52.8
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3014,7 +3012,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 53.218
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -3029,7 +3027,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 46.319
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3039,7 +3037,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 49.564
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3049,7 +3047,7 @@
         "azimuthDeg": 178.131,
         "altitudeDeg": 50.051
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3059,7 +3057,7 @@
         "azimuthDeg": 179.08,
         "altitudeDeg": 49.31
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3069,7 +3067,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 50.468
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3079,7 +3077,7 @@
         "azimuthDeg": 180.917,
         "altitudeDeg": 49.16
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3089,7 +3087,7 @@
         "azimuthDeg": 181.861,
         "altitudeDeg": 49.85
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3099,7 +3097,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 50.267
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -3114,7 +3112,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 43.368
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3124,7 +3122,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 46.613
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3134,7 +3132,7 @@
         "azimuthDeg": 178.237,
         "altitudeDeg": 47.101
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3144,7 +3142,7 @@
         "azimuthDeg": 179.131,
         "altitudeDeg": 46.359
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3154,7 +3152,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 47.516
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3164,7 +3162,7 @@
         "azimuthDeg": 180.867,
         "altitudeDeg": 46.209
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3174,7 +3172,7 @@
         "azimuthDeg": 181.756,
         "altitudeDeg": 46.9
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3184,7 +3182,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 47.316
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -3199,7 +3197,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 40.417
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3209,7 +3207,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 43.661
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3219,7 +3217,7 @@
         "azimuthDeg": 178.328,
         "altitudeDeg": 44.151
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3229,7 +3227,7 @@
         "azimuthDeg": 179.174,
         "altitudeDeg": 43.408
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3239,7 +3237,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 44.565
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3249,7 +3247,7 @@
         "azimuthDeg": 180.824,
         "altitudeDeg": 43.258
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3259,7 +3257,7 @@
         "azimuthDeg": 181.667,
         "altitudeDeg": 43.95
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3269,7 +3267,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 44.364
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -3284,7 +3282,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 37.465
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3294,7 +3292,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 40.71
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3304,7 +3302,7 @@
         "azimuthDeg": 178.405,
         "altitudeDeg": 41.201
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3314,7 +3312,7 @@
         "azimuthDeg": 179.212,
         "altitudeDeg": 40.457
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3324,7 +3322,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 41.614
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3334,7 +3332,7 @@
         "azimuthDeg": 180.786,
         "altitudeDeg": 40.307
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3344,7 +3342,7 @@
         "azimuthDeg": 181.59,
         "altitudeDeg": 41.0
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      },
      {
@@ -3354,7 +3352,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 41.413
        },
-       "angle": 1.5708
+       "angle": 7.854
       }
      }
     ]
@@ -3369,7 +3367,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 34.514
        },
-       "angle": 1.766
+       "angle": 8.0492
       }
      },
      {
@@ -3379,7 +3377,7 @@
         "azimuthDeg": 180.797,
         "altitudeDeg": 37.694
        },
-       "angle": 1.766
+       "angle": 8.0492
       }
      },
      {
@@ -3389,7 +3387,7 @@
         "azimuthDeg": 179.427,
         "altitudeDeg": 38.421
        },
-       "angle": 1.766
+       "angle": 8.0492
       }
      },
      {
@@ -3399,7 +3397,7 @@
         "azimuthDeg": 179.992,
         "altitudeDeg": 37.567
        },
-       "angle": 1.766
+       "angle": 8.0492
       }
      },
      {
@@ -3409,7 +3407,7 @@
         "azimuthDeg": 181.031,
         "altitudeDeg": 38.579
        },
-       "angle": 1.766
+       "angle": 8.0492
       }
      },
      {
@@ -3419,7 +3417,7 @@
         "azimuthDeg": 181.432,
         "altitudeDeg": 37.179
        },
-       "angle": 1.766
+       "angle": 8.0492
       }
      },
      {
@@ -3429,7 +3427,7 @@
         "azimuthDeg": 182.359,
         "altitudeDeg": 37.736
        },
-       "angle": 1.766
+       "angle": 8.0492
       }
      },
      {
@@ -3439,7 +3437,92 @@
         "azimuthDeg": 180.979,
         "altitudeDeg": 38.382
        },
-       "angle": 1.766
+       "angle": 8.0492
+      }
+     }
+    ]
+   },
+   {
+    "t": 3025,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.92,
+        "altitudeDeg": 34.192
+       },
+       "angle": 8.5804
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.607,
+        "altitudeDeg": 36.59
+       },
+       "angle": 8.5804
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.936,
+        "altitudeDeg": 37.774
+       },
+       "angle": 8.5804
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.847,
+        "altitudeDeg": 36.815
+       },
+       "angle": 8.5804
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.383,
+        "altitudeDeg": 37.245
+       },
+       "angle": 8.5804
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.807,
+        "altitudeDeg": 35.888
+       },
+       "angle": 8.5804
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.939,
+        "altitudeDeg": 35.982
+       },
+       "angle": 8.5804
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.209,
+        "altitudeDeg": 37.1
+       },
+       "angle": 8.5804
       }
      }
     ]
@@ -3454,7 +3537,7 @@
         "azimuthDeg": 179.56,
         "altitudeDeg": 34.156
        },
-       "angle": 2.9186
+       "angle": 9.2018
       }
      },
      {
@@ -3464,7 +3547,7 @@
         "azimuthDeg": 183.415,
         "altitudeDeg": 34.826
        },
-       "angle": 2.9186
+       "angle": 9.2018
       }
      },
      {
@@ -3474,7 +3557,7 @@
         "azimuthDeg": 183.749,
         "altitudeDeg": 36.095
        },
-       "angle": 2.9186
+       "angle": 9.2018
       }
      },
      {
@@ -3484,7 +3567,7 @@
         "azimuthDeg": 182.977,
         "altitudeDeg": 35.366
        },
-       "angle": 2.9186
+       "angle": 9.2018
       }
      },
      {
@@ -3494,7 +3577,7 @@
         "azimuthDeg": 184.495,
         "altitudeDeg": 34.991
        },
-       "angle": 2.9186
+       "angle": 9.2018
       }
      },
      {
@@ -3504,7 +3587,7 @@
         "azimuthDeg": 183.075,
         "altitudeDeg": 34.164
        },
-       "angle": 2.9186
+       "angle": 9.2018
       }
      },
      {
@@ -3514,7 +3597,7 @@
         "azimuthDeg": 184.035,
         "altitudeDeg": 33.708
        },
-       "angle": 2.9186
+       "angle": 9.2018
       }
      },
      {
@@ -3524,7 +3607,92 @@
         "azimuthDeg": 184.254,
         "altitudeDeg": 34.955
        },
-       "angle": 2.9186
+       "angle": 9.2018
+      }
+     }
+    ]
+   },
+   {
+    "t": 3075,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.839,
+        "altitudeDeg": 34.175
+       },
+       "angle": 9.2851
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.743,
+        "altitudeDeg": 34.602
+       },
+       "angle": 9.2851
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.193,
+        "altitudeDeg": 35.848
+       },
+       "angle": 9.2851
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.357,
+        "altitudeDeg": 35.169
+       },
+       "angle": 9.2851
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.832,
+        "altitudeDeg": 34.698
+       },
+       "angle": 9.2851
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.343,
+        "altitudeDeg": 33.962
+       },
+       "angle": 9.2851
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.259,
+        "altitudeDeg": 33.446
+       },
+       "angle": 9.2851
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.59,
+        "altitudeDeg": 34.678
+       },
+       "angle": 9.2851
       }
      }
     ]
@@ -3539,7 +3707,7 @@
         "azimuthDeg": 177.765,
         "altitudeDeg": 34.084
        },
-       "angle": 2.8858
+       "angle": 9.169
       }
      },
      {
@@ -3549,7 +3717,7 @@
         "azimuthDeg": 181.579,
         "altitudeDeg": 34.916
        },
-       "angle": 2.8858
+       "angle": 9.169
       }
      },
      {
@@ -3559,7 +3727,7 @@
         "azimuthDeg": 181.83,
         "altitudeDeg": 36.201
        },
-       "angle": 2.8858
+       "angle": 9.169
       }
      },
      {
@@ -3569,7 +3737,7 @@
         "azimuthDeg": 181.105,
         "altitudeDeg": 35.439
        },
-       "angle": 2.8858
+       "angle": 9.169
       }
      },
      {
@@ -3579,7 +3747,7 @@
         "azimuthDeg": 182.651,
         "altitudeDeg": 35.126
        },
-       "angle": 2.8858
+       "angle": 9.169
       }
      },
      {
@@ -3589,7 +3757,7 @@
         "azimuthDeg": 181.28,
         "altitudeDeg": 34.238
        },
-       "angle": 2.8858
+       "angle": 9.169
       }
      },
      {
@@ -3599,7 +3767,7 @@
         "azimuthDeg": 182.273,
         "altitudeDeg": 33.822
        },
-       "angle": 2.8858
+       "angle": 9.169
       }
      },
      {
@@ -3609,7 +3777,92 @@
         "azimuthDeg": 182.412,
         "altitudeDeg": 35.081
        },
-       "angle": 2.8858
+       "angle": 9.169
+      }
+     }
+    ]
+   },
+   {
+    "t": 3125,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.421,
+        "altitudeDeg": 33.743
+       },
+       "angle": 9.0003
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.983,
+        "altitudeDeg": 35.135
+       },
+       "angle": 9.0003
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.937,
+        "altitudeDeg": 36.435
+       },
+       "angle": 9.0003
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.398,
+        "altitudeDeg": 35.577
+       },
+       "angle": 9.0003
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.994,
+        "altitudeDeg": 35.503
+       },
+       "angle": 9.0003
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.839,
+        "altitudeDeg": 34.422
+       },
+       "angle": 9.0003
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.912,
+        "altitudeDeg": 34.162
+       },
+       "angle": 9.0003
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.769,
+        "altitudeDeg": 35.421
+       },
+       "angle": 9.0003
       }
      }
     ]
@@ -3624,7 +3877,7 @@
         "azimuthDeg": 174.951,
         "altitudeDeg": 33.056
        },
-       "angle": 2.5285
+       "angle": 8.8116
       }
      },
      {
@@ -3634,7 +3887,7 @@
         "azimuthDeg": 178.073,
         "altitudeDeg": 35.015
        },
-       "angle": 2.5285
+       "angle": 8.8116
       }
      },
      {
@@ -3644,7 +3897,7 @@
         "azimuthDeg": 177.696,
         "altitudeDeg": 36.278
        },
-       "angle": 2.5285
+       "angle": 8.8116
       }
      },
      {
@@ -3654,7 +3907,7 @@
         "azimuthDeg": 177.391,
         "altitudeDeg": 35.348
        },
-       "angle": 2.5285
+       "angle": 8.8116
       }
      },
      {
@@ -3664,7 +3917,7 @@
         "azimuthDeg": 178.969,
         "altitudeDeg": 35.546
        },
-       "angle": 2.5285
+       "angle": 8.8116
       }
      },
      {
@@ -3674,7 +3927,7 @@
         "azimuthDeg": 178.111,
         "altitudeDeg": 34.294
        },
-       "angle": 2.5285
+       "angle": 8.8116
       }
      },
      {
@@ -3684,7 +3937,7 @@
         "azimuthDeg": 179.224,
         "altitudeDeg": 34.219
        },
-       "angle": 2.5285
+       "angle": 8.8116
       }
      },
      {
@@ -3694,7 +3947,92 @@
         "azimuthDeg": 178.769,
         "altitudeDeg": 35.428
        },
-       "angle": 2.5285
+       "angle": 8.8116
+      }
+     }
+    ]
+   },
+   {
+    "t": 3175,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.53,
+        "altitudeDeg": 31.98
+       },
+       "angle": 8.6133
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.046,
+        "altitudeDeg": 34.441
+       },
+       "angle": 8.6133
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.347,
+        "altitudeDeg": 35.604
+       },
+       "angle": 8.6133
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.299,
+        "altitudeDeg": 34.645
+       },
+       "angle": 8.6133
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.773,
+        "altitudeDeg": 35.117
+       },
+       "angle": 8.6133
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.269,
+        "altitudeDeg": 33.744
+       },
+       "angle": 8.6133
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.368,
+        "altitudeDeg": 33.869
+       },
+       "angle": 8.6133
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.61,
+        "altitudeDeg": 34.967
+       },
+       "angle": 8.6133
       }
      }
     ]
@@ -3709,7 +4047,7 @@
         "azimuthDeg": 172.333,
         "altitudeDeg": 30.533
        },
-       "angle": 2.126
+       "angle": 8.4092
       }
      },
      {
@@ -3719,7 +4057,7 @@
         "azimuthDeg": 174.121,
         "altitudeDeg": 33.383
        },
-       "angle": 2.126
+       "angle": 8.4092
       }
      },
      {
@@ -3729,7 +4067,7 @@
         "azimuthDeg": 173.144,
         "altitudeDeg": 34.389
        },
-       "angle": 2.126
+       "angle": 8.4092
       }
      },
      {
@@ -3739,7 +4077,7 @@
         "azimuthDeg": 173.352,
         "altitudeDeg": 33.448
        },
-       "angle": 2.126
+       "angle": 8.4092
       }
      },
      {
@@ -3749,7 +4087,7 @@
         "azimuthDeg": 174.64,
         "altitudeDeg": 34.173
        },
-       "angle": 2.126
+       "angle": 8.4092
       }
      },
      {
@@ -3759,7 +4097,7 @@
         "azimuthDeg": 174.516,
         "altitudeDeg": 32.746
        },
-       "angle": 2.126
+       "angle": 8.4092
       }
      },
      {
@@ -3769,7 +4107,7 @@
         "azimuthDeg": 175.542,
         "altitudeDeg": 33.066
        },
-       "angle": 2.126
+       "angle": 8.4092
       }
      },
      {
@@ -3779,7 +4117,92 @@
         "azimuthDeg": 174.524,
         "altitudeDeg": 33.998
        },
-       "angle": 2.126
+       "angle": 8.4092
+      }
+     }
+    ]
+   },
+   {
+    "t": 3225,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.5,
+        "altitudeDeg": 28.788
+       },
+       "angle": 8.201
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.498,
+        "altitudeDeg": 31.89
+       },
+       "angle": 8.201
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.306,
+        "altitudeDeg": 32.69
+       },
+       "angle": 8.201
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.748,
+        "altitudeDeg": 31.812
+       },
+       "angle": 8.201
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.788,
+        "altitudeDeg": 32.754
+       },
+       "angle": 8.201
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.039,
+        "altitudeDeg": 31.342
+       },
+       "angle": 8.201
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.939,
+        "altitudeDeg": 31.842
+       },
+       "angle": 8.201
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.723,
+        "altitudeDeg": 32.562
+       },
+       "angle": 8.201
       }
      }
     ]
@@ -3794,7 +4217,7 @@
         "azimuthDeg": 171.118,
         "altitudeDeg": 26.856
        },
-       "angle": 1.7059
+       "angle": 7.989
       }
      },
      {
@@ -3804,7 +4227,7 @@
         "azimuthDeg": 171.315,
         "altitudeDeg": 30.063
        },
-       "angle": 1.7059
+       "angle": 7.989
       }
      },
      {
@@ -3814,7 +4237,7 @@
         "azimuthDeg": 169.982,
         "altitudeDeg": 30.622
        },
-       "angle": 1.7059
+       "angle": 7.989
       }
      },
      {
@@ -3824,7 +4247,7 @@
         "azimuthDeg": 170.622,
         "altitudeDeg": 29.849
        },
-       "angle": 1.7059
+       "angle": 7.989
       }
      },
      {
@@ -3834,7 +4257,7 @@
         "azimuthDeg": 171.373,
         "altitudeDeg": 30.958
        },
-       "angle": 1.7059
+       "angle": 7.989
       }
      },
      {
@@ -3844,7 +4267,7 @@
         "azimuthDeg": 171.968,
         "altitudeDeg": 29.629
        },
-       "angle": 1.7059
+       "angle": 7.989
       }
      },
      {
@@ -3854,7 +4277,7 @@
         "azimuthDeg": 172.702,
         "altitudeDeg": 30.284
        },
-       "angle": 1.7059
+       "angle": 7.989
       }
      },
      {
@@ -3864,7 +4287,92 @@
         "azimuthDeg": 171.36,
         "altitudeDeg": 30.759
        },
-       "angle": 1.7059
+       "angle": 7.989
+      }
+     }
+    ]
+   },
+   {
+    "t": 3275,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.218,
+        "altitudeDeg": 24.873
+       },
+       "angle": 7.773
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.642,
+        "altitudeDeg": 28.038
+       },
+       "angle": 7.773
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 169.238,
+        "altitudeDeg": 28.333
+       },
+       "angle": 7.773
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.034,
+        "altitudeDeg": 27.7
+       },
+       "angle": 7.773
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.476,
+        "altitudeDeg": 28.919
+       },
+       "angle": 7.773
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.371,
+        "altitudeDeg": 27.737
+       },
+       "angle": 7.773
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.91,
+        "altitudeDeg": 28.513
+       },
+       "angle": 7.773
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.513,
+        "altitudeDeg": 28.723
+       },
+       "angle": 7.773
       }
      }
     ]
@@ -3879,7 +4387,7 @@
         "azimuthDeg": 171.774,
         "altitudeDeg": 22.979
        },
-       "angle": 1.269
+       "angle": 7.5522
       }
      },
      {
@@ -3889,7 +4397,7 @@
         "azimuthDeg": 170.479,
         "altitudeDeg": 25.957
        },
-       "angle": 1.269
+       "angle": 7.5522
       }
      },
      {
@@ -3899,7 +4407,7 @@
         "azimuthDeg": 169.071,
         "altitudeDeg": 25.978
        },
-       "angle": 1.269
+       "angle": 7.5522
       }
      },
      {
@@ -3909,7 +4417,7 @@
         "azimuthDeg": 169.981,
         "altitudeDeg": 25.512
        },
-       "angle": 1.269
+       "angle": 7.5522
       }
      },
      {
@@ -3919,7 +4427,7 @@
         "azimuthDeg": 170.107,
         "altitudeDeg": 26.784
        },
-       "angle": 1.269
+       "angle": 7.5522
       }
      },
      {
@@ -3929,7 +4437,7 @@
         "azimuthDeg": 171.247,
         "altitudeDeg": 25.804
        },
-       "angle": 1.269
+       "angle": 7.5522
       }
      },
      {
@@ -3939,7 +4447,7 @@
         "azimuthDeg": 171.574,
         "altitudeDeg": 26.663
        },
-       "angle": 1.269
+       "angle": 7.5522
       }
      },
      {
@@ -3949,7 +4457,92 @@
         "azimuthDeg": 170.191,
         "altitudeDeg": 26.6
        },
-       "angle": 1.269
+       "angle": 7.5522
+      }
+     }
+    ]
+   },
+   {
+    "t": 3325,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.721,
+        "altitudeDeg": 21.302
+       },
+       "angle": 7.3248
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.776,
+        "altitudeDeg": 23.954
+       },
+       "angle": 7.3248
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 169.426,
+        "altitudeDeg": 23.697
+       },
+       "angle": 7.3248
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.406,
+        "altitudeDeg": 23.421
+       },
+       "angle": 7.3248
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.221,
+        "altitudeDeg": 24.687
+       },
+       "angle": 7.3248
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.548,
+        "altitudeDeg": 23.956
+       },
+       "angle": 7.3248
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.653,
+        "altitudeDeg": 24.858
+       },
+       "angle": 7.3248
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.345,
+        "altitudeDeg": 24.524
+       },
+       "angle": 7.3248
       }
      }
     ]
@@ -3964,7 +4557,7 @@
         "azimuthDeg": 173.955,
         "altitudeDeg": 19.949
        },
-       "angle": 0.8052
+       "angle": 7.0884
       }
      },
      {
@@ -3974,7 +4567,7 @@
         "azimuthDeg": 171.446,
         "altitudeDeg": 22.134
        },
-       "angle": 0.8052
+       "angle": 7.0884
       }
      },
      {
@@ -3984,7 +4577,7 @@
         "azimuthDeg": 170.216,
         "altitudeDeg": 21.605
        },
-       "angle": 0.8052
+       "angle": 7.0884
       }
      },
      {
@@ -3994,7 +4587,7 @@
         "azimuthDeg": 171.22,
         "altitudeDeg": 21.538
        },
-       "angle": 0.8052
+       "angle": 7.0884
       }
      },
      {
@@ -4004,7 +4597,7 @@
         "azimuthDeg": 170.735,
         "altitudeDeg": 22.734
        },
-       "angle": 0.8052
+       "angle": 7.0884
       }
      },
      {
@@ -4014,7 +4607,7 @@
         "azimuthDeg": 172.185,
         "altitudeDeg": 22.295
        },
-       "angle": 0.8052
+       "angle": 7.0884
       }
      },
      {
@@ -4024,7 +4617,7 @@
         "azimuthDeg": 172.063,
         "altitudeDeg": 23.196
        },
-       "angle": 0.8052
+       "angle": 7.0884
       }
      },
      {
@@ -4034,7 +4627,92 @@
         "azimuthDeg": 170.894,
         "altitudeDeg": 22.6
        },
-       "angle": 0.8052
+       "angle": 7.0884
+      }
+     }
+    ]
+   },
+   {
+    "t": 3375,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.351,
+        "altitudeDeg": 18.993
+       },
+       "angle": 6.8385
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.384,
+        "altitudeDeg": 20.566
+       },
+       "angle": 6.8385
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.339,
+        "altitudeDeg": 19.781
+       },
+       "angle": 6.8385
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.318,
+        "altitudeDeg": 19.936
+       },
+       "angle": 6.8385
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.55,
+        "altitudeDeg": 20.993
+       },
+       "angle": 6.8385
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.052,
+        "altitudeDeg": 20.886
+       },
+       "angle": 6.8385
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.703,
+        "altitudeDeg": 21.736
+       },
+       "angle": 6.8385
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.736,
+        "altitudeDeg": 20.898
+       },
+       "angle": 6.8385
       }
      }
     ]
@@ -4049,7 +4727,7 @@
         "azimuthDeg": 176.768,
         "altitudeDeg": 18.467
        },
-       "angle": 0.2839
+       "angle": 6.5671
       }
      },
      {
@@ -4059,7 +4737,7 @@
         "azimuthDeg": 173.487,
         "altitudeDeg": 19.271
        },
-       "angle": 0.2839
+       "angle": 6.5671
       }
      },
      {
@@ -4069,7 +4747,7 @@
         "azimuthDeg": 172.702,
         "altitudeDeg": 18.257
        },
-       "angle": 0.2839
+       "angle": 6.5671
       }
      },
      {
@@ -4079,7 +4757,7 @@
         "azimuthDeg": 173.597,
         "altitudeDeg": 18.644
        },
-       "angle": 0.2839
+       "angle": 6.5671
       }
      },
      {
@@ -4089,7 +4767,7 @@
         "azimuthDeg": 172.574,
         "altitudeDeg": 19.483
        },
-       "angle": 0.2839
+       "angle": 6.5671
       }
      },
      {
@@ -4099,7 +4777,7 @@
         "azimuthDeg": 174.039,
         "altitudeDeg": 19.743
        },
-       "angle": 0.2839
+       "angle": 6.5671
       }
      },
      {
@@ -4109,7 +4787,7 @@
         "azimuthDeg": 173.469,
         "altitudeDeg": 20.482
        },
-       "angle": 0.2839
+       "angle": 6.5671
       }
      },
      {
@@ -4119,7 +4797,92 @@
         "azimuthDeg": 172.777,
         "altitudeDeg": 19.436
        },
-       "angle": 0.2839
+       "angle": 6.5671
+      }
+     }
+    ]
+   },
+   {
+    "t": 3425,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.062,
+        "altitudeDeg": 18.358
+       },
+       "angle": 6.2594
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.686,
+        "altitudeDeg": 18.218
+       },
+       "angle": 6.2594
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.253,
+        "altitudeDeg": 17.027
+       },
+       "angle": 6.2594
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.984,
+        "altitudeDeg": 17.647
+       },
+       "angle": 6.2594
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.755,
+        "altitudeDeg": 18.17
+       },
+       "angle": 6.2594
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.062,
+        "altitudeDeg": 18.825
+       },
+       "angle": 6.2594
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.291,
+        "altitudeDeg": 19.375
+       },
+       "angle": 6.2594
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.962,
+        "altitudeDeg": 18.181
+       },
+       "angle": 6.2594
       }
      }
     ]
@@ -4134,7 +4897,7 @@
         "azimuthDeg": 179.099,
         "altitudeDeg": 18.609
        },
-       "angle": -0.3972
+       "angle": 5.886
       }
      },
      {
@@ -4144,7 +4907,7 @@
         "azimuthDeg": 176.003,
         "altitudeDeg": 17.335
        },
-       "angle": -0.3972
+       "angle": 5.886
       }
      },
      {
@@ -4154,7 +4917,7 @@
         "azimuthDeg": 176.045,
         "altitudeDeg": 16.069
        },
-       "angle": -0.3972
+       "angle": 5.886
       }
      },
      {
@@ -4164,7 +4927,7 @@
         "azimuthDeg": 176.494,
         "altitudeDeg": 16.899
        },
-       "angle": -0.3972
+       "angle": 5.886
       }
      },
      {
@@ -4174,7 +4937,7 @@
         "azimuthDeg": 175.158,
         "altitudeDeg": 16.976
        },
-       "angle": -0.3972
+       "angle": 5.886
       }
      },
      {
@@ -4184,7 +4947,7 @@
         "azimuthDeg": 176.124,
         "altitudeDeg": 18.031
        },
-       "angle": -0.3972
+       "angle": 5.886
       }
      },
      {
@@ -4194,7 +4957,7 @@
         "azimuthDeg": 175.202,
         "altitudeDeg": 18.287
        },
-       "angle": -0.3972
+       "angle": 5.886
       }
      },
      {
@@ -4204,7 +4967,92 @@
         "azimuthDeg": 175.345,
         "altitudeDeg": 17.056
        },
-       "angle": -0.3972
+       "angle": 5.886
+      }
+     }
+    ]
+   },
+   {
+    "t": 3475,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.769,
+        "altitudeDeg": 19.12
+       },
+       "angle": 5.3921
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.663,
+        "altitudeDeg": 16.615
+       },
+       "angle": 5.3921
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.315,
+        "altitudeDeg": 15.504
+       },
+       "angle": 5.3921
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.309,
+        "altitudeDeg": 16.443
+       },
+       "angle": 5.3921
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.093,
+        "altitudeDeg": 15.921
+       },
+       "angle": 5.3921
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.428,
+        "altitudeDeg": 17.287
+       },
+       "angle": 5.3921
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.492,
+        "altitudeDeg": 17.108
+       },
+       "angle": 5.3921
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.219,
+        "altitudeDeg": 16.075
+       },
+       "angle": 5.3921
       }
      }
     ]
@@ -4219,7 +5067,7 @@
         "azimuthDeg": 180.0,
         "altitudeDeg": 19.757
        },
-       "angle": -1.5541
+       "angle": 4.7291
       }
      },
      {
@@ -4229,7 +5077,7 @@
         "azimuthDeg": 179.944,
         "altitudeDeg": 16.541
        },
-       "angle": -1.5541
+       "angle": 4.7291
       }
      },
      {
@@ -4239,7 +5087,7 @@
         "azimuthDeg": 181.171,
         "altitudeDeg": 16.026
        },
-       "angle": -1.5541
+       "angle": 4.7291
       }
      },
      {
@@ -4249,7 +5097,7 @@
         "azimuthDeg": 180.569,
         "altitudeDeg": 16.777
        },
-       "angle": -1.5541
+       "angle": 4.7291
       }
      },
      {
@@ -4259,7 +5107,7 @@
         "azimuthDeg": 179.929,
         "altitudeDeg": 15.655
        },
-       "angle": -1.5541
+       "angle": 4.7291
       }
      },
      {
@@ -4269,7 +5117,7 @@
         "azimuthDeg": 179.329,
         "altitudeDeg": 16.944
        },
-       "angle": -1.5541
+       "angle": 4.7291
       }
      },
      {
@@ -4279,7 +5127,7 @@
         "azimuthDeg": 178.701,
         "altitudeDeg": 16.261
        },
-       "angle": -1.5541
+       "angle": 4.7291
       }
      },
      {
@@ -4289,7 +5137,92 @@
         "azimuthDeg": 179.932,
         "altitudeDeg": 15.852
        },
-       "angle": -1.5541
+       "angle": 4.7291
+      }
+     }
+    ]
+   },
+   {
+    "t": 3525,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.771,
+        "altitudeDeg": 20.369
+       },
+       "angle": 4.0191
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.949,
+        "altitudeDeg": 17.872
+       },
+       "angle": 4.0191
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.256,
+        "altitudeDeg": 18.232
+       },
+       "angle": 4.0191
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.273,
+        "altitudeDeg": 18.44
+       },
+       "angle": 4.0191
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.539,
+        "altitudeDeg": 17.178
+       },
+       "angle": 4.0191
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.198,
+        "altitudeDeg": 17.804
+       },
+       "angle": 4.0191
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.177,
+        "altitudeDeg": 16.891
+       },
+       "angle": 4.0191
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.409,
+        "altitudeDeg": 17.332
+       },
+       "angle": 4.0191
       }
      }
     ]
@@ -4304,7 +5237,7 @@
         "azimuthDeg": 179.119,
         "altitudeDeg": 20.806
        },
-       "angle": -2.8243
+       "angle": 3.4589
       }
      },
      {
@@ -4314,7 +5247,7 @@
         "azimuthDeg": 182.405,
         "altitudeDeg": 19.779
        },
-       "angle": -2.8243
+       "angle": 3.4589
       }
      },
      {
@@ -4324,7 +5257,7 @@
         "azimuthDeg": 183.33,
         "altitudeDeg": 20.745
        },
-       "angle": -2.8243
+       "angle": 3.4589
       }
      },
      {
@@ -4334,7 +5267,7 @@
         "azimuthDeg": 182.362,
         "altitudeDeg": 20.426
        },
-       "angle": -2.8243
+       "angle": 3.4589
       }
      },
      {
@@ -4344,7 +5277,7 @@
         "azimuthDeg": 183.308,
         "altitudeDeg": 19.484
        },
-       "angle": -2.8243
+       "angle": 3.4589
       }
      },
      {
@@ -4354,7 +5287,7 @@
         "azimuthDeg": 181.797,
         "altitudeDeg": 19.342
        },
-       "angle": -2.8243
+       "angle": 3.4589
       }
      },
      {
@@ -4364,7 +5297,7 @@
         "azimuthDeg": 182.292,
         "altitudeDeg": 18.551
        },
-       "angle": -2.8243
+       "angle": 3.4589
       }
      },
      {
@@ -4374,7 +5307,92 @@
         "azimuthDeg": 183.108,
         "altitudeDeg": 19.549
        },
-       "angle": -2.8243
+       "angle": 3.4589
+      }
+     }
+    ]
+   },
+   {
+    "t": 3575,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.14,
+        "altitudeDeg": 20.936
+       },
+       "angle": 3.0455
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.609,
+        "altitudeDeg": 21.25
+       },
+       "angle": 3.0455
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.039,
+        "altitudeDeg": 22.488
+       },
+       "angle": 3.0455
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.285,
+        "altitudeDeg": 21.826
+       },
+       "angle": 3.0455
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.575,
+        "altitudeDeg": 21.325
+       },
+       "angle": 3.0455
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.237,
+        "altitudeDeg": 20.618
+       },
+       "angle": 3.0455
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.037,
+        "altitudeDeg": 20.081
+       },
+       "angle": 3.0455
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.36,
+        "altitudeDeg": 21.309
+       },
+       "angle": 3.0455
       }
      }
     ]
@@ -4465,6 +5483,91 @@
     ]
    },
    {
+    "t": 3625,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.788,
+        "altitudeDeg": 19.974
+       },
+       "angle": 2.4325
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.387,
+        "altitudeDeg": 22.134
+       },
+       "angle": 2.4325
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.938,
+        "altitudeDeg": 23.364
+       },
+       "angle": 2.4325
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.756,
+        "altitudeDeg": 22.418
+       },
+       "angle": 2.4325
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.123,
+        "altitudeDeg": 22.727
+       },
+       "angle": 2.4325
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.487,
+        "altitudeDeg": 21.419
+       },
+       "angle": 2.4325
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.479,
+        "altitudeDeg": 21.426
+       },
+       "angle": 2.4325
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.959,
+        "altitudeDeg": 22.595
+       },
+       "angle": 2.4325
+      }
+     }
+    ]
+   },
+   {
     "t": 3650,
     "shapes": [
      {
@@ -4545,6 +5648,91 @@
         "altitudeDeg": 22.17
        },
        "angle": 2.1746
+      }
+     }
+    ]
+   },
+   {
+    "t": 3675,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.988,
+        "altitudeDeg": 17.426
+       },
+       "angle": 1.9322
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.094,
+        "altitudeDeg": 20.49
+       },
+       "angle": 1.9322
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.062,
+        "altitudeDeg": 21.347
+       },
+       "angle": 1.9322
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.407,
+        "altitudeDeg": 20.447
+       },
+       "angle": 1.9322
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.41,
+        "altitudeDeg": 21.341
+       },
+       "angle": 1.9322
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.555,
+        "altitudeDeg": 19.917
+       },
+       "angle": 1.9322
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.402,
+        "altitudeDeg": 20.38
+       },
+       "angle": 1.9322
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.339,
+        "altitudeDeg": 21.152
+       },
+       "angle": 1.9322
       }
      }
     ]
@@ -4635,6 +5823,91 @@
     ]
    },
    {
+    "t": 3725,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.631,
+        "altitudeDeg": 14.012
+       },
+       "angle": 1.4721
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.187,
+        "altitudeDeg": 17.214
+       },
+       "angle": 1.4721
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.889,
+        "altitudeDeg": 17.544
+       },
+       "angle": 1.4721
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.609,
+        "altitudeDeg": 16.887
+       },
+       "angle": 1.4721
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.061,
+        "altitudeDeg": 18.104
+       },
+       "angle": 1.4721
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.857,
+        "altitudeDeg": 16.897
+       },
+       "angle": 1.4721
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.38,
+        "altitudeDeg": 17.667
+       },
+       "angle": 1.4721
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.089,
+        "altitudeDeg": 17.906
+       },
+       "angle": 1.4721
+      }
+     }
+    ]
+   },
+   {
     "t": 3750,
     "shapes": [
      {
@@ -4715,6 +5988,91 @@
         "altitudeDeg": 15.994
        },
        "angle": 1.2466
+      }
+     }
+    ]
+   },
+   {
+    "t": 3775,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.851,
+        "altitudeDeg": 10.797
+       },
+       "angle": 1.0171
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.042,
+        "altitudeDeg": 13.498
+       },
+       "angle": 1.0171
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.753,
+        "altitudeDeg": 13.257
+       },
+       "angle": 1.0171
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.678,
+        "altitudeDeg": 12.964
+       },
+       "angle": 1.0171
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.533,
+        "altitudeDeg": 14.245
+       },
+       "angle": 1.0171
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.774,
+        "altitudeDeg": 13.491
+       },
+       "angle": 1.0171
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.89,
+        "altitudeDeg": 14.401
+       },
+       "angle": 1.0171
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.646,
+        "altitudeDeg": 14.079
+       },
+       "angle": 1.0171
       }
      }
     ]
@@ -4805,6 +6163,91 @@
     ]
    },
    {
+    "t": 3825,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.117,
+        "altitudeDeg": 8.705
+       },
+       "angle": 0.4017
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.089,
+        "altitudeDeg": 9.925
+       },
+       "angle": 0.4017
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.186,
+        "altitudeDeg": 9.013
+       },
+       "angle": 0.4017
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.102,
+        "altitudeDeg": 9.283
+       },
+       "angle": 0.4017
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.247,
+        "altitudeDeg": 10.259
+       },
+       "angle": 0.4017
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.685,
+        "altitudeDeg": 10.327
+       },
+       "angle": 0.4017
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.251,
+        "altitudeDeg": 11.139
+       },
+       "angle": 0.4017
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.434,
+        "altitudeDeg": 10.185
+       },
+       "angle": 0.4017
+      }
+     }
+    ]
+   },
+   {
     "t": 3850,
     "shapes": [
      {
@@ -4885,6 +6328,91 @@
         "altitudeDeg": 9.73
        },
        "angle": 0.3849
+      }
+     }
+    ]
+   },
+   {
+    "t": 3875,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 8.689
+       },
+       "angle": 0.4846
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.081,
+        "altitudeDeg": 10.186
+       },
+       "angle": 0.4846
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.08,
+        "altitudeDeg": 9.352
+       },
+       "angle": 0.4846
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.031,
+        "altitudeDeg": 9.54
+       },
+       "angle": 0.4846
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.266,
+        "altitudeDeg": 10.597
+       },
+       "angle": 0.4846
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.72,
+        "altitudeDeg": 10.534
+       },
+       "angle": 0.4846
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.365,
+        "altitudeDeg": 11.387
+       },
+       "angle": 0.4846
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.447,
+        "altitudeDeg": 10.505
+       },
+       "angle": 0.4846
       }
      }
     ]
@@ -4975,6 +6503,91 @@
     ]
    },
    {
+    "t": 3925,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 7.214
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 10.458
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.778,
+        "altitudeDeg": 10.958
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.391,
+        "altitudeDeg": 10.207
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 11.362
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.609,
+        "altitudeDeg": 10.057
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.221,
+        "altitudeDeg": 10.757
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 11.161
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
     "t": 3950,
     "shapes": [
      {
@@ -5053,6 +6666,91 @@
        "aim": {
         "azimuthDeg": 180.0,
         "altitudeDeg": 10.423
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 3975,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 5.738
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 8.983
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.783,
+        "altitudeDeg": 9.482
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.393,
+        "altitudeDeg": 8.732
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 9.886
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.607,
+        "altitudeDeg": 8.581
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.216,
+        "altitudeDeg": 9.282
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 9.685
        },
        "angle": 1.5708
       }

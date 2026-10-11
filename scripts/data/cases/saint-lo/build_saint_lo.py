@@ -18,6 +18,7 @@ OUT = pathlib.Path("public/demo-data/observer-saint-lo.json")
 LAT, LNG = 49.1043877, -1.0777321    # Musée du Bocage normand, given by the investigator
 DURATION_MS = 4000
 STEP_MS = 50
+SPIRAL_STEP_MS = 25                    # two turns in a second: 18 degrees a step, so the player's straight lines stay round
 SPIRAL_FROM_MS = 3000                  # the 720-degree turn is the last second
 EYE_LAG_S = 0.15
 HEAD_DEPTH, ACROSS = 1.5, 3.0          # degrees: along the motion, across it ("1.5 one-euro coins")
@@ -188,13 +189,14 @@ def shape_move(spec, aim, angle):
 
 def keyframes():
     out = []
-    for step, t in enumerate(range(0, DURATION_MS + 1, STEP_MS)):
-        if t >= SPIRAL_FROM_MS or t % 100 == 0:
-            pass
-        else:
-            continue
+    previous = None
+    for t in list(range(0, SPIRAL_FROM_MS, 100)) + list(range(SPIRAL_FROM_MS, DURATION_MS + 1, SPIRAL_STEP_MS)):
         pose, sh, motion = frame(t)
         angle = math.atan2(-motion[1], motion[0])
+        if previous is not None:
+            # The player interpolates the angle linearly: a jump of 2 pi would turn the shape the long way round.
+            angle += 2 * math.pi * round((previous - angle) / (2 * math.pi))
+        previous = angle
         shapes = []
         for spec in SHAPES:
             aim = place(sh, motion, spec[5], spec[6], pose)
