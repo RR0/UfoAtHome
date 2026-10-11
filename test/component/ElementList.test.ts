@@ -100,4 +100,33 @@ describe("ElementList", () => {
     list.setAddState(true)
     expect(add.title).toBe("Add")
   })
+
+  it("steps through its elements with buttons and Alt and the arrows inside its scope, and not once it has been replaced", () => {
+    const scope = document.createElement("div")
+    document.body.append(scope)
+    const steps: number[] = []
+    const build = () => {
+      const header = document.createElement("div")
+      scope.replaceChildren(header)
+      const list = new ElementList({
+        header, footer: header, ids: { list: "steps", remove: "remove-step", add: "add-step" },
+        navigation: { scope, onStep: direction => steps.push(direction) },
+        onSelect: () => undefined, onAdd: () => undefined, onRemove: () => undefined
+      })
+      list.setLabels({ list: "Step", remove: "Remove", add: "Add", previous: "Before", next: "After" })
+      list.setItems([{ id: "a", label: "A" }, { id: "b", label: "B" }], "a")
+      list.setStepState(true, true)
+      return { list, header }
+    }
+    build()
+    const { header } = build()
+    expect(header.querySelector("#steps-previous")!.getAttribute("title")).toBe("Before (Alt+↑)")
+    header.querySelector<HTMLButtonElement>("#steps-next")!.click()
+    expect(steps).toEqual([1])
+    scope.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", altKey: true, bubbles: true, cancelable: true }))
+    // The list that was replaced no longer answers: one step, not two.
+    expect(steps).toEqual([1, 1])
+    scope.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }))
+    expect(steps).toEqual([1, 1])
+  })
 })

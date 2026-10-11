@@ -38,7 +38,7 @@ export class LaunchParameters {
   }
 
   /** The path goes on as it was going: the step between the last two places, taken once more (ten seconds on from a path of one place). */
-  private static nextPlace(rows: ReadonlyArray<Record<string, number>>): Record<string, number> {
+  static nextPlace(rows: ReadonlyArray<Record<string, number>>): Record<string, number> {
     const last = rows[rows.length - 1] ?? { t: 0, lat: 0, lng: 0, altitudeKm: 0 }
     const before = rows[rows.length - 2] ?? last
     const step = (key: string, otherwise = 0) => rows.length > 1 ? last[key] - before[key] : otherwise
@@ -52,23 +52,6 @@ export class LaunchParameters {
     kind: "launch",
     title: { en: "Launch", fr: "Lancement", es: "Lanzamiento", it: "Lancio" },
     parameters: ([
-      {
-        // Where the stage stood at instants of the recording: the plume is let go along it. It may begin before the recording does.
-        type: "rows", key: "track", minRows: 2, sortBy: "t", added: LaunchParameters.nextPlace,
-        label: { en: "Path", fr: "Chemin", es: "Trayectoria", it: "Percorso" },
-        hint: { en: "Where the stage stood at instants of the recording: the plume is let go along this path, between its places. At least two; it may begin before the recording does.",
-          fr: "Où se trouvait l'étage à des instants de l'enregistrement : le panache est lâché le long de ce chemin, entre ses points. Au moins deux ; il peut commencer avant l'enregistrement.",
-          es: "Dónde estaba la etapa en instantes de la grabación: la estela se suelta a lo largo de esta trayectoria, entre sus puntos. Al menos dos; puede empezar antes de la grabación.",
-          it: "Dove si trovava lo stadio in istanti della registrazione: la scia viene rilasciata lungo questo percorso, tra i suoi punti. Almeno due; può iniziare prima della registrazione." },
-        addLabel: { en: "Add a place to the path, going on as it was going", fr: "Ajouter un point au chemin, dans la continuité", es: "Añadir un punto a la trayectoria, en su continuidad", it: "Aggiungi un punto al percorso, in continuità" },
-        removeLabel: { en: "Remove this place", fr: "Retirer ce point", es: "Quitar este punto", it: "Rimuovi questo punto" },
-        columns: [
-          { key: "t", label: { en: "Time", fr: "Instant", es: "Instante", it: "Istante" }, min: -3600, max: 36000, step: 0.1, unit: "s", scale: 0.001 },
-          { key: "lat", label: { en: "Latitude", fr: "Latitude", es: "Latitud", it: "Latitudine" }, min: -90, max: 90, step: 0.0001, unit: "°" },
-          { key: "lng", label: { en: "Longitude", fr: "Longitude", es: "Longitud", it: "Longitudine" }, min: -180, max: 180, step: 0.0001, unit: "°" },
-          { key: "altitudeKm", label: { en: "Altitude", fr: "Altitude", es: "Altitud", it: "Altitudine" }, min: 0, max: 2000, step: 0.1, unit: "km" }
-        ]
-      },
       { type: "said", key: "title", label: { en: "Name", fr: "Nom", es: "Nombre", it: "Nome" }, group: { en: "Vehicle", fr: "Lanceur", es: "Lanzador", it: "Lanciatore" } },
       {
         type: "text", key: "vehicle.name",
@@ -197,6 +180,28 @@ export class LaunchParameters {
         label: { en: "Collar lifetime", fr: "Durée de la collerette", es: "Duración del collar", it: "Durata del collare" },
         group: { en: "Collar", fr: "Collerette", es: "Collar", it: "Collare" }
       })
+    ] satisfies ParameterSpec[])
+  }
+
+  /**
+   * One place of the path: where the stage stood at an instant of the recording, which may be before the recording began (the stage had
+   * already been climbing for minutes when the observer looked up). The path is a list of them, edited one at a time (see LaunchEditor).
+   */
+  static readonly PLACE: ParameterSet = {
+    kind: "launch-place",
+    title: { en: "Place of the path", fr: "Point du chemin", es: "Punto de la trayectoria", it: "Punto del percorso" },
+    parameters: ([
+      {
+        type: "number", key: "t", min: -3600, max: 36000, step: 0.1, unit: "s", scale: 0.001, required: true,
+        label: { en: "Time", fr: "Instant", es: "Instante", it: "Istante" },
+        hint: { en: "Seconds of the recording; negative before it began: a stage seen minutes after its launch was already high when the recording started.",
+          fr: "Secondes de l'enregistrement ; négatives avant son début : un étage vu des minutes après son lancement était déjà haut quand l'enregistrement a commencé.",
+          es: "Segundos de la grabación; negativos antes de que empezara: una etapa vista minutos después de su lanzamiento ya estaba alta cuando empezó la grabación.",
+          it: "Secondi della registrazione; negativi prima del suo inizio: uno stadio visto minuti dopo il lancio era già alto quando la registrazione è iniziata." }
+      },
+      { type: "number", key: "lat", min: -90, max: 90, step: 0.0001, unit: "°", required: true, label: { en: "Latitude", fr: "Latitude", es: "Latitud", it: "Latitudine" } },
+      { type: "number", key: "lng", min: -180, max: 180, step: 0.0001, unit: "°", required: true, label: { en: "Longitude", fr: "Longitude", es: "Longitud", it: "Longitudine" } },
+      { type: "number", key: "altitudeKm", min: 0, max: 2000, step: 0.1, unit: "km", required: true, label: { en: "Altitude", fr: "Altitude", es: "Altitud", it: "Altitudine" } }
     ] satisfies ParameterSpec[])
   }
 

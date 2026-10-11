@@ -126,7 +126,7 @@ export class BodyEditor {
   /** The fields of the playhead's instant: what the body is there (interpolated between its
    * keyframes), in the form its own keyframes use. Called as the playhead moves; a field being
    * typed in is left alone. */
-  syncKeyframe(): void {
+  syncKeyframe(force = false): void {
     const body = this.current
     if (!body) return
     const t = this.host.currentTime()
@@ -137,8 +137,20 @@ export class BodyEditor {
     this.element("body-key-note").textContent = !reading ? m.notPlaced : here ? m.keyframeHere : m.keyframeAdded
     this.keyList?.setItems(body.track.map(key => ({ id: String(key.t), label: BodyEditor.seconds(key.t) })), here ? String(here.t) : "")
     this.keyList?.setAddState(reading !== undefined && here === undefined)
+    this.keyList?.setStepState(body.track.some(key => key.t < t), body.track.some(key => key.t > t))
     this.element("body-key-parameters").hidden = !reading
-    if (reading) this.keyForm?.sync()
+    if (reading) this.keyForm?.sync(force)
+  }
+
+  /** Goes to the keyframe before or after the playhead: the one picked, or the nearest where the playhead is between two. */
+  private stepKeyframe(direction: -1 | 1): void {
+    const body = this.current
+    if (!body) return
+    const t = this.host.currentTime()
+    const times = body.track.map(key => key.t).filter(at => direction < 0 ? at < t : at > t)
+    if (times.length === 0) return
+    this.host.seekTo(direction < 0 ? Math.max(...times) : Math.min(...times))
+    this.syncKeyframe(true)
   }
 
   /** What the form of the instant needs that the body alone cannot say. */
@@ -219,11 +231,12 @@ export class BodyEditor {
     this.keyList = new ElementList({
       header: keys, footer: keys, rowClass: "body-keys-add", optional: true,
       ids: { list: "body-key", remove: "body-key-delete", add: "body-key-add" },
-      onSelect: id => { if (id !== "") this.host.seekTo(Number(id)); this.syncKeyframe() },
+      navigation: { scope: this.container, onStep: direction => this.stepKeyframe(direction) },
+      onSelect: id => { if (id !== "") this.host.seekTo(Number(id)); this.syncKeyframe(true) },
       onAdd: () => this.editView(() => undefined),
       onRemove: () => this.deleteKeyframe()
     })
-    this.keyList.setLabels({ list: m.keyframes, remove: m.deleteKeyframe, add: m.addKeyframe, none: m.noKeyframeHere })
+    this.keyList.setLabels({ list: m.keyframes, remove: m.deleteKeyframe, add: m.addKeyframe, none: m.noKeyframeHere, previous: m.previousKeyframe, next: m.nextKeyframe })
     // The drop-down gives way to a window of pictures, over the same options and the same "change".
     this.host.modelPicker().enhance(this.select("body-model"), async id => (BODY_PRIMITIVES as readonly string[]).includes(id)
       ? { shape: id as BodyPrimitive }

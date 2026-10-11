@@ -33,6 +33,13 @@ export interface ElementListOptions {
   /** The class of the row of the adding controls: the decor panel puts it on a line of its own. */
   rowClass?: string
   actions?: ElementListAction[]
+  /**
+   * Buttons for the previous and next element, and the keys that do the same wherever in `scope` the focus is (Alt and the up and down
+   * arrows, which a field being edited does not use): going through the elements one after the other is the common thing, and choosing
+   * each one from the picker is a click and a search every time. `onStep` is the editor's, since which is "next" is not always the next
+   * of the list (the keyframe after the playhead, where none is picked).
+   */
+  navigation?: { scope: HTMLElement, onStep: (direction: -1 | 1) => void }
   onSelect: (id: string) => void
   /** `kind` is the one picked beside the button, absent when the list has no kinds. */
   onAdd: (kind: string | undefined) => void
@@ -55,6 +62,8 @@ export class ElementList {
   private readonly removeButton: HTMLButtonElement
   private readonly addButton: HTMLButtonElement
   private readonly kindSelect?: HTMLSelectElement
+  private readonly previousButton?: HTMLButtonElement
+  private readonly nextButton?: HTMLButtonElement
   private readonly actionButtons = new Map<string, HTMLButtonElement>()
   private kinds: ElementListKind[] = []
   private items: readonly ElementListItem[] = []
@@ -70,6 +79,23 @@ export class ElementList {
     this.select.addEventListener("change", () => options.onSelect(this.select.value))
     this.pickerRow.append(this.labelText, " ", this.select)
     options.header.append(this.pickerRow)
+    const navigation = options.navigation
+    if (navigation) {
+      this.previousButton = this.iconButton(`${options.ids.list}-previous`, "▲")
+      this.nextButton = this.iconButton(`${options.ids.list}-next`, "▼")
+      this.previousButton.addEventListener("click", () => navigation.onStep(-1))
+      this.nextButton.addEventListener("click", () => navigation.onStep(1))
+      options.header.append(this.previousButton, this.nextButton)
+      navigation.scope.addEventListener("keydown", event => {
+        if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || (event.key !== "ArrowUp" && event.key !== "ArrowDown")) return
+        // Only while this list is on show: the scope may hold the part of another.
+        if (this.pickerRow.closest("[hidden]") || !this.pickerRow.isConnected) return
+        event.preventDefault()
+        event.stopPropagation()
+        const button = event.key === "ArrowUp" ? this.previousButton : this.nextButton
+        if (button && !button.disabled) navigation.onStep(event.key === "ArrowUp" ? -1 : 1)
+      })
+    }
     for (const action of options.actions ?? []) {
       const button = this.iconButton(action.id, action.glyph)
       button.addEventListener("click", () => action.onClick())
@@ -103,7 +129,15 @@ export class ElementList {
   }
 
   /** What the controls say, in the reader's language: the picker's label, and what each button does (its tooltip and accessible name). */
-  setLabels(labels: { list: string, remove: string, add: string, actions?: Record<string, string>, none?: string }): void {
+  setLabels(labels: { list: string, remove: string, add: string, actions?: Record<string, string>, none?: string, previous?: string, next?: string }): void {
+    if (this.previousButton && this.nextButton) {
+      for (const [button, text, keys] of [[this.previousButton, labels.previous ?? "", "Alt+↑"], [this.nextButton, labels.next ?? "", "Alt+↓"]] as const) {
+        const title = text === "" ? keys : `${text} (${keys})`
+        button.title = title
+        button.setAttribute("aria-label", text || title)
+        button.setAttribute("aria-keyshortcuts", keys.replace("↑", "ArrowUp").replace("↓", "ArrowDown"))
+      }
+    }
     this.labelText.textContent = labels.list
     this.noneLabel = labels.none ?? this.noneLabel
     this.addLabel = labels.add
@@ -152,6 +186,17 @@ export class ElementList {
     // A pick the list no longer holds falls back to the first, or to none.
     if (this.select.selectedIndex < 0) this.select.selectedIndex = 0
     this.setPresent(this.options.optional ? this.select.value !== "" : items.length > 0)
+  }
+
+  /** Whether there is an element before and after the one on show to go to; the buttons say so. */
+  setStepState(canPrevious: boolean, canNext: boolean): void {
+    if (this.previousButton) this.previousButton.disabled = !canPrevious
+    if (this.nextButton) this.nextButton.disabled = !canNext
+  }
+
+  /** Whether the picked element can be removed (a path keeps two places): the button says so. */
+  setRemoveEnabled(enabled: boolean): void {
+    this.removeButton.disabled = !enabled
   }
 
   /** The id of the element picked, "" for none. */

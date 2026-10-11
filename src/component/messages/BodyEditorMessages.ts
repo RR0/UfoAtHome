@@ -31,6 +31,9 @@ export interface BodyEditorMessages {
   addKeyframe: string
   /** What the picker says when the playhead is between two keyframes. */
   noKeyframeHere: string
+  /** What the buttons that step to the keyframe before and after the playhead are called. */
+  previousKeyframe: string
+  nextKeyframe: string
   /** {t} is the playhead, in seconds. */
   atPlayhead: string
   keyframeHere: string

@@ -25,6 +25,8 @@ export const bodyEditorMessages_es: BodyEditorMessages = {
   keyframes: "Fotogramas clave",
   addKeyframe: "Añadir un fotograma clave en este instante",
   noKeyframeHere: "Ningún fotograma clave en este instante",
+  previousKeyframe: "Fotograma clave anterior",
+  nextKeyframe: "Fotograma clave siguiente",
   atPlayhead: "En {t}",
   keyframeHere: "Aquí hay un fotograma clave: editar lo modifica",
   keyframeAdded: "Editar añade aquí un fotograma clave",

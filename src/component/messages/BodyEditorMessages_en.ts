@@ -25,6 +25,8 @@ export const bodyEditorMessages_en: BodyEditorMessages = {
   keyframes: "Keyframes",
   addKeyframe: "Add a keyframe at this instant",
   noKeyframeHere: "No keyframe at this instant",
+  previousKeyframe: "Previous keyframe",
+  nextKeyframe: "Next keyframe",
   atPlayhead: "At {t}",
   keyframeHere: "A keyframe stands here: editing changes it",
   keyframeAdded: "Editing adds a keyframe here",

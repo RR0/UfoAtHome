@@ -195,6 +195,23 @@ describe("The Bodies part of the editor", () => {
     expect(select.value).toBe("5000")
   })
 
+  it("steps to the keyframe before and after the playhead, from between two as from one, with the buttons and with Alt and the arrows", () => {
+    const fixture = new Fixture()
+    const previous = fixture.container.querySelector<HTMLButtonElement>("#body-key-previous")!
+    const next = fixture.container.querySelector<HTMLButtonElement>("#body-key-next")!
+    expect(previous.disabled).toBe(true)
+    expect(next.disabled).toBe(false)
+    fixture.time = 2500
+    fixture.editor.syncKeyframe()
+    expect(previous.disabled).toBe(false)
+    next.click()
+    expect(fixture.time).toBe(5000)
+    expect(next.disabled).toBe(true)
+    fixture.container.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", altKey: true, bubbles: true, cancelable: true }))
+    expect(fixture.time).toBe(0)
+    expect(previous.title).toContain("Alt+↑")
+  })
+
   it("adds a keyframe at the playhead where there is none, and only there", () => {
     const fixture = new Fixture()
     const add = fixture.container.querySelector<HTMLButtonElement>("#body-key-add")!

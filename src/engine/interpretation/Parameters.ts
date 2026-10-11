@@ -13,7 +13,7 @@ import type { SaidText } from "../model/SaidText.js"
  * The labels are `SaidText`, so a kind published from outside this package (another repository's
  * asset) speaks the languages it has, and a reader whose language it lacks reads what it does have.
  */
-export type ParameterSpec = NumberParameter | ChoiceParameter | TextParameter | SaidParameter | SetParameter | BooleanParameter | ColourParameter | RowsParameter
+export type ParameterSpec = NumberParameter | ChoiceParameter | TextParameter | SaidParameter | SetParameter | BooleanParameter | ColourParameter
 
 interface ParameterBase {
   /**
@@ -128,33 +128,6 @@ export interface ColourParameter extends ParameterBase {
   type: "colour"
   /** The swatch a value the field cannot hold is shown as (a colour name, or no colour): a mid grey when absent. */
   fallback?: string
-}
-
-/** One column of a table of rows: a number, as a NumberParameter is, in what is typed (`scale` brings it to what is stored). */
-export interface RowColumn {
-  key: string
-  label: SaidText
-  min: number
-  max: number
-  step: number
-  unit?: string
-  scale?: number
-}
-
-/**
- * A table of rows the element holds — the places of a path, each with its instant — each row a record of numbers, written as a whole
- * array at `key`. Rows are added and removed, never fewer than `minRows`, and put in order of the column `sortBy` once a field is left
- * (not while it is typed in, which would move the row from under the caret).
- */
-export interface RowsParameter extends ParameterBase {
-  type: "rows"
-  columns: ReadonlyArray<RowColumn>
-  minRows?: number
-  sortBy?: string
-  /** The row that follows the last: a path goes on as it was going. */
-  added: (rows: ReadonlyArray<Record<string, number>>) => Record<string, number>
-  addLabel: SaidText
-  removeLabel: SaidText
 }
 
 /** An element as its JSON, which is all that the parameters read and write. */

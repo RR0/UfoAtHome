@@ -1,5 +1,5 @@
 import { Parameters } from "../engine/interpretation/Parameters.js"
-import type { ChoiceParameter, NumberParameter, ParameterHolder, ParameterSet, ParameterSpec, RowsParameter } from "../engine/interpretation/Parameters.js"
+import type { ChoiceParameter, NumberParameter, ParameterHolder, ParameterSet, ParameterSpec } from "../engine/interpretation/Parameters.js"
 import type { SaidText } from "../engine/model/SaidText.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { NumberFields } from "./NumberFields.js"
@@ -90,8 +90,6 @@ export class ParameterForm {
         groups.set(heading, group)
         this.container.append(group)
       }
-      // A table takes the whole width of its group, whatever the others of the form are doing beside it.
-      if (spec.type === "rows") group.classList.add("parameter-group-rows")
       group.append(this.fieldOf(spec))
     }
     NumberFields.fit(this.container)
@@ -112,22 +110,21 @@ export class ParameterForm {
 
   /**
    * Shows what the element states now, and what is in force where it states nothing. A field being
-   * typed in is left alone, as the editor's other fields are.
+   * typed in is left alone, as the editor's other fields are, unless `force` says the element itself changed.
    */
-  sync(): void {
+  sync(force = false): void {
     const element = this.target?.read()
     if (!this.set || !element) return
     const context = this.target!.context()
-    const active = (this.container.getRootNode() as Document | ShadowRoot).activeElement
+    // `force`: what is shown now is another element's (stepped to from the keyboard, with the focus still in a field): nothing is being typed.
+    const active = force ? null : (this.container.getRootNode() as Document | ShadowRoot).activeElement
     for (const spec of this.set.parameters) {
       const field = this.field(spec.key)
       if (!field) continue
       const row = (field.closest("label, .parameter-row") ?? field) as HTMLElement
       row.hidden = spec.visibleWhen !== undefined && !spec.visibleWhen(element, context)
       const stated = Parameters.read(element, spec.key)
-      if (spec.type === "rows") {
-        this.syncRows(spec, field as HTMLElement, stated)
-      } else if (spec.type === "number") {
+      if (spec.type === "number") {
         const input = field as HTMLInputElement
         if (input !== active) input.value = typeof stated === "number" ? ParameterForm.shown(stated, spec) : ""
         const bounds = ParameterForm.boundsOf(spec, element, context)
@@ -177,7 +174,6 @@ export class ParameterForm {
   }
 
   private fieldOf(spec: ParameterSpec): HTMLElement {
-    if (spec.type === "rows") return this.rowsField(spec)
     const label = document.createElement("label")
     const hint = this.read(spec.hint)
     if (hint) label.title = hint
@@ -277,108 +273,6 @@ export class ParameterForm {
     if (spec.type !== "said" || !spec.required) return
     input.classList.toggle("invalid", input.value === "")
     input.setAttribute("aria-invalid", String(input.value === ""))
-  }
-
-  /** A table of rows: a header, a row of number fields each with its remove button, and the button that adds one. */
-  private rowsField(spec: RowsParameter): HTMLElement {
-    const box = document.createElement("div")
-    this.identify(box, spec)
-    box.className = "parameter-rows"
-    const rowsOf = (): Record<string, number>[] => {
-      const element = this.target?.read()
-      const stated = element === undefined ? undefined : Parameters.read(element, spec.key)
-      return Array.isArray(stated) ? (stated as Record<string, number>[]).map(row => ({ ...row })) : []
-    }
-    box.addEventListener("input", event => {
-      const input = event.target as HTMLInputElement
-      const at = Number(input.dataset.row), column = spec.columns.find(candidate => candidate.key === input.dataset.column)
-      if (!column || !Number.isFinite(at)) return
-      const value = Number(input.value.trim())
-      // Empty, or on its way to a number ("-", "1."): nothing is written until one arrives.
-      if (input.value.trim() === "" || !Number.isFinite(value)) return
-      const rows = rowsOf()
-      if (!rows[at]) return
-      rows[at][column.key] = value / (column.scale ?? 1)
-      this.write(spec, rows)
-    })
-    box.addEventListener("change", event => {
-      // Put in order once a field is left; the table is drawn again, since the fields no longer hold the rows they did.
-      const column = spec.sortBy
-      if (!column || !(event.target as HTMLElement).matches?.("input")) return
-      const rows = rowsOf()
-      const ordered = [...rows].sort((a, b) => (a[column] ?? 0) - (b[column] ?? 0))
-      if (ordered.every((row, i) => row === rows[i])) return
-      this.write(spec, ordered)
-      this.syncRows(spec, box, ordered, true)
-    })
-    box.addEventListener("click", event => {
-      const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button")
-      if (!button) return
-      const rows = rowsOf()
-      if (button.dataset.action === "add") this.write(spec, [...rows, spec.added(rows)])
-      else if (button.dataset.action === "remove" && rows.length > (spec.minRows ?? 0)) this.write(spec, rows.filter((_, i) => i !== Number(button.dataset.row)))
-    })
-    return this.setRow(spec, box)
-  }
-
-  /** The rows as the element states them: drawn again when there are not as many, else read into the fields not being typed in. */
-  private syncRows(spec: RowsParameter, box: HTMLElement, stated: unknown, force = false): void {
-    const rows = Array.isArray(stated) ? stated as Record<string, number>[] : []
-    if (box.querySelectorAll("tbody tr").length !== rows.length || box.querySelector("table") === null) {
-      const table = document.createElement("table")
-      const head = table.createTHead().insertRow()
-      for (const column of spec.columns) {
-        const cell = document.createElement("th")
-        cell.textContent = (this.read(column.label) ?? column.key) + (column.unit ? ` (${column.unit})` : "")
-        head.append(cell)
-      }
-      head.append(document.createElement("th"))
-      const body = table.createTBody()
-      const removeText = this.read(spec.removeLabel) ?? ""
-      rows.forEach((_, i) => {
-        const tr = body.insertRow()
-        for (const column of spec.columns) {
-          const input = document.createElement("input")
-          input.type = "number"
-          input.min = String(column.min)
-          input.max = String(column.max)
-          input.step = String(column.step)
-          input.autocomplete = "off"
-          input.dataset.row = String(i)
-          input.dataset.column = column.key
-          if (this.idPrefix !== "") input.id = `${this.idPrefix}${spec.key}.${i}.${column.key}`
-          tr.insertCell().append(input)
-        }
-        const remove = document.createElement("button")
-        remove.type = "button"
-        remove.className = "icon-btn"
-        remove.dataset.action = "remove"
-        remove.dataset.row = String(i)
-        remove.textContent = "🗑"
-        remove.title = removeText
-        remove.setAttribute("aria-label", removeText)
-        tr.insertCell().append(remove)
-      })
-      const add = document.createElement("button")
-      add.type = "button"
-      add.className = "icon-btn"
-      add.dataset.action = "add"
-      add.textContent = "+"
-      const addText = this.read(spec.addLabel) ?? ""
-      add.title = addText
-      add.setAttribute("aria-label", addText)
-      box.replaceChildren(table, add)
-      NumberFields.fit(box)
-    }
-    const active = (box.getRootNode() as Document | ShadowRoot).activeElement
-    box.querySelectorAll<HTMLInputElement>("input").forEach(input => {
-      if (input === active && !force) return
-      const column = spec.columns.find(candidate => candidate.key === input.dataset.column)
-      const value = rows[Number(input.dataset.row)]?.[input.dataset.column!]
-      input.value = column && typeof value === "number" ? String(Number((value * (column.scale ?? 1)).toFixed(6))) : ""
-    })
-    const removable = rows.length > (spec.minRows ?? 0)
-    box.querySelectorAll<HTMLButtonElement>('button[data-action="remove"]').forEach(button => { button.disabled = !removable })
   }
 
   /** A set's row: its name, and its ticks under it. */

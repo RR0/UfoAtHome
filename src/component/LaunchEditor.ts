@@ -9,7 +9,8 @@ import { launchEditorMessages_en } from "./messages/LaunchEditorMessages_en.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { loadLaunchEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import { ElementList } from "./ElementList.js"
-import { ParameterForm } from "./ParameterForm.js"
+import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
+import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
 
 /** What the Launches part needs of the editor it stands in, read at every use. */
 export interface LaunchEditorHost {
@@ -34,6 +35,10 @@ export class LaunchEditor {
   private currentId?: string
   private form?: ParameterForm
   private list?: ElementList
+  /** The places of the path of the launch on show, and the one being edited — the only one whose fields are drawn. */
+  private places?: ElementList
+  private placeForm?: ParameterForm
+  private placeIndex = 0
   private language: string
   /** The launches the fields were last filled for, to tell a recording replaced from an edit written. */
   private shown: readonly LaunchJson[] = []
@@ -69,6 +74,7 @@ export class LaunchEditor {
     const launch = this.current
     this.element("launch-fields").hidden = launch === undefined
     if (!launch) return
+    this.syncPlaces(launch)
     const set = ParameterRegistry.of("launch")!
     this.form ??= new ParameterForm(this.element("launch-parameters"), this.language, "", { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() })
     this.form.show(set, launch as unknown as Record<string, unknown>, () => this.written())
@@ -93,6 +99,7 @@ export class LaunchEditor {
   /** Shows a launch by its id, as the summary's chip and the picture do for a body. */
   show(id: string): void {
     this.currentId = id
+    this.placeIndex = 0
     this.sync()
   }
 
@@ -104,6 +111,11 @@ export class LaunchEditor {
       <p id="launch-none" class="launch-intro">${m.none}</p>
       <div id="launch-list"></div>
       <div id="launch-fields" class="launch-fields">
+        <fieldset id="launch-path" class="launch-path">
+          <legend>${m.path}</legend>
+          <div id="launch-places"></div>
+          <div id="launch-place-parameters" class="launch-parameters"></div>
+        </fieldset>
         <div id="launch-parameters" class="launch-parameters"></div>
         <p class="launch-intro">${m.derivedNote}</p>
       </div>
@@ -112,11 +124,22 @@ export class LaunchEditor {
     this.list = new ElementList({
       header: list, footer: list, rowClass: "launch-list-add",
       ids: { list: "launch-select", remove: "launch-delete", add: "launch-add" },
-      onSelect: id => { this.currentId = id; this.sync() },
+      onSelect: id => { this.currentId = id; this.placeIndex = 0; this.sync() },
       onAdd: () => this.addLaunch(),
       onRemove: () => this.deleteCurrent()
     })
     this.list.setLabels({ list: m.launch, remove: m.deleteLaunch, add: m.addLaunch })
+    const places = this.element("launch-places")
+    this.places = new ElementList({
+      header: places, footer: places, rowClass: "launch-places-add",
+      ids: { list: "launch-place", remove: "launch-place-delete", add: "launch-place-add" },
+      navigation: { scope: this.container, onStep: direction => this.selectPlace(this.placeIndex + direction) },
+      onSelect: id => this.selectPlace(Number(id)),
+      onAdd: () => this.addPlace(),
+      onRemove: () => this.removePlace()
+    })
+    this.places.setLabels({ list: m.place, remove: m.deletePlace, add: m.addPlace, previous: m.previousPlace, next: m.nextPlace })
+    this.placeForm = undefined
   }
 
   /** A field of the form was written onto the launch. */
@@ -125,6 +148,82 @@ export class LaunchEditor {
     const launch = this.current
     if (!launch) return
     this.list?.rename(launch.id, this.labelOf(launch))
+  }
+
+  /** The places of the launch's path, the one being edited picked, and its fields drawn (see LaunchParameters.PLACE). */
+  private syncPlaces(launch: LaunchJson, force = false): void {
+    const track = launch.track ?? []
+    this.placeIndex = Math.max(0, Math.min(this.placeIndex, track.length - 1))
+    this.places?.setItems(track.map((place, i) => ({ id: String(i), label: this.seconds(place.t) })), String(this.placeIndex))
+    this.places?.setStepState(this.placeIndex > 0, this.placeIndex < track.length - 1)
+    this.places?.setRemoveEnabled(track.length > LaunchEditor.MIN_PLACES)
+    if (!this.placeForm) {
+      this.placeForm = new ParameterForm(this.element("launch-place-parameters"), this.language, "launchPlace.")
+      this.placeForm.show(LaunchParameters.PLACE, new ParameterTarget(
+        () => this.current?.track[this.placeIndex] as unknown as ParameterHolder | undefined,
+        apply => this.editPlace(apply)
+      ), () => undefined)
+    } else {
+      // Another place may have been stepped to with the focus still in a field of the last one: it is not being typed in.
+      this.placeForm.sync(force)
+    }
+  }
+
+  /** A path needs two places to be a path at all: the plume is let go between them. */
+  private static readonly MIN_PLACES = 2
+
+  private seconds(ms: number): string {
+    return `${Math.round(ms / 100) / 10} s`
+  }
+
+  /** Goes to the place at `index` of the path, or stays where it is past either end. */
+  private selectPlace(index: number): void {
+    const track = this.current?.track ?? []
+    if (index < 0 || index >= track.length) return
+    this.placeIndex = index
+    this.syncPlaces(this.current!, true)
+  }
+
+  /**
+   * One field of the place on show was edited: the place is replaced by an edited copy, and the path is put in order of the instants,
+   * the place being followed to where it now stands — the fields keep showing the place that was being edited.
+   */
+  private editPlace(apply: (place: ParameterHolder) => void): void {
+    const launch = this.current
+    if (!launch) return
+    const place = { ...launch.track[this.placeIndex] }
+    apply(place as unknown as ParameterHolder)
+    const track = launch.track.map((other, i) => i === this.placeIndex ? place : other).sort((a, b) => a.t - b.t)
+    this.replaceTrack(launch, track)
+    this.placeIndex = track.indexOf(place)
+    this.syncPlaces(this.current!)
+    this.written()
+  }
+
+  /** A place after the last, going on as the path was going. */
+  private addPlace(): void {
+    const launch = this.current
+    if (!launch) return
+    const rows = launch.track as unknown as Record<string, number>[]
+    const place = LaunchParameters.nextPlace(rows) as unknown as LaunchJson["track"][number]
+    const track = [...launch.track, place].sort((a, b) => a.t - b.t)
+    this.replaceTrack(launch, track)
+    this.placeIndex = track.indexOf(place)
+    this.syncPlaces(this.current!)
+    this.host.changed()
+  }
+
+  private removePlace(): void {
+    const launch = this.current
+    if (!launch || launch.track.length <= LaunchEditor.MIN_PLACES) return
+    this.replaceTrack(launch, launch.track.filter((_, i) => i !== this.placeIndex))
+    this.syncPlaces(this.current!)
+    this.host.changed()
+  }
+
+  /** The launch with another path. In place, as the other fields of the launch are edited (see ParameterForm.show): the form on show holds this very object. */
+  private replaceTrack(launch: LaunchJson, track: LaunchJson["track"]): void {
+    launch.track = track
   }
 
   /**

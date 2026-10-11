@@ -25,6 +25,8 @@ export const bodyEditorMessages_fr: BodyEditorMessages = {
   keyframes: "Images clés",
   addKeyframe: "Ajouter une image clé à cet instant",
   noKeyframeHere: "Aucune image clé à cet instant",
+  previousKeyframe: "Image clé précédente",
+  nextKeyframe: "Image clé suivante",
   atPlayhead: "À {t}",
   keyframeHere: "Une image clé est ici : l'éditer la modifie",
   keyframeAdded: "Éditer ajoute une image clé ici",
