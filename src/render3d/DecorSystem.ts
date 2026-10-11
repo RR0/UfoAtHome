@@ -1,6 +1,7 @@
 import { GrassDetail } from "./terrain/GrassDetail.js"
 import { AdditiveBlending, BackSide, Box3, DoubleSide, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
-import type { Object3D } from "three"
+import type { Material, Object3D } from "three"
+import type { ModelParameters } from "../engine/model/DecorTraits.js"
 import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize } from "../engine/model/Decor.js"
 import { canHoldObserver, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
@@ -975,6 +976,36 @@ export class DecorSystem {
     })
   }
 
+  /**
+   * Tints the parts of a model its own file says take a colour (see ModelParameters.bindings): the materials whose names match
+   * the binding get the colour the object states for it (DecorObject.modelParameters). A material is copied before it is
+   * painted, since a model's materials are shared by every copy of it on the page, and the copy is freed with the object
+   * (see dispose). What is not bound keeps the model's own colours, which is what a model carries.
+   */
+  static tintModel(model: Object3D, values: DecorObject["modelParameters"], bindings: ModelParameters["bindings"]): void {
+    if (!values || !bindings) return
+    for (const [key, binding] of Object.entries(bindings)) {
+      const value = values[key]
+      if (typeof value !== "string") continue
+      const patterns = binding.materials.map(source => new RegExp(source))
+      model.traverse(part => {
+        const mesh = part as Mesh
+        if (!mesh.isMesh) return
+        const owned: Material[] = (mesh.userData.tintedMaterials as Material[] | undefined) ?? []
+        const tinted = (material: Material): Material => {
+          const coloured = material as MeshLambertMaterial
+          if (!coloured.color || !patterns.some(pattern => pattern.test(material.name))) return material
+          const copy = material.clone() as MeshLambertMaterial
+          copy.color.set(value)
+          owned.push(copy)
+          return copy
+        }
+        mesh.material = Array.isArray(mesh.material) ? mesh.material.map(tinted) : tinted(mesh.material)
+        if (owned.length > 0) mesh.userData.tintedMaterials = owned
+      })
+    }
+  }
+
   /** Repaints every part of a built body that is not a light — see DecorObject.color. */
   private static paint(body: Object3D, color: string): void {
     body.traverse(part => {
@@ -1352,7 +1383,12 @@ export class DecorSystem {
     group.traverse(child => {
       // A cloned model's meshes share the loaded file's resources with the next build (see
       // SceneRenderer.reuseLoadedDecorModel); disposing them would blank every later copy.
-      if (!(child instanceof Mesh) || child.userData.sharedModel) return
+      if (!(child instanceof Mesh)) return
+      // Only the copy's own tinted materials are its to free: the rest is the loaded file's.
+      if (child.userData.sharedModel) {
+        for (const own of (child.userData.tintedMaterials as Material[] | undefined) ?? []) own.dispose()
+        return
+      }
       child.geometry.dispose()
       const material = child.material
       for (const one of Array.isArray(material) ? material : [material]) one.dispose()

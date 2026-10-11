@@ -344,24 +344,24 @@ export class SightingSummary {
       }
       return
     }
-    this.push(entries, "decor", "decorTitle", this.labels.decorTitle, this.said.read(selected.title))
+    this.push(entries, "decor", "decorBase.title", this.labels.decorTitle, this.said.read(selected.title))
     const placement = resolveDecorPlacementAt(selected, timeMs)
-    this.push(entries, "decor", "decorEast", this.labels.decorEast, this.rounded(placement.eastM, 1), "m")
-    this.push(entries, "decor", "decorNorth", this.labels.decorNorth, this.rounded(placement.northM, 1), "m")
+    this.push(entries, "decor", "decorBase.eastM", this.labels.decorEast, this.rounded(placement.eastM, 1), "m")
+    this.push(entries, "decor", "decorBase.northM", this.labels.decorNorth, this.rounded(placement.northM, 1), "m")
     // Unlike the two distances above it, which are coordinates: nought metres up is the ground,
     // where everything stands unless something says otherwise.
-    this.push(entries, "decor", "decorAltitude", this.labels.decorAltitude, this.roundedShown(placement.altitudeM), "m")
-    this.push(entries, "decor", "decorHeading", this.labels.decorHeading, this.rounded(placement.headingDeg), "°")
+    this.push(entries, "decor", "decorBase.altitudeM", this.labels.decorAltitude, this.roundedShown(placement.altitudeM), "m")
+    this.push(entries, "decor", "decorBase.headingDeg", this.labels.decorHeading, this.rounded(placement.headingDeg), "°")
     if (resolveDecorLitAt(selected, timeMs)) {
-      this.push(entries, "decor", "decorLit", this.labels.decorLit, "✓")
+      this.push(entries, "decor", "decorState.lit", this.labels.decorLit, "✓")
     }
     // A rig isn't stored as a rig: the object carries the lamps it made (see DecorObject.lights),
     // so it is recognised by the set of lamp ids it produced — the same identification the
     // editor's own picker makes to decide which entry to show as selected.
     const carried = selected.lights?.map(light => light.id).join() ?? ""
     const rig = carried === "" ? undefined : LIGHT_RIGS.find(candidate => candidate.create().map(light => light.id).join() === carried)
-    this.push(entries, "decor", "decorLightRig", this.labels.decorLights, rig?.name)
-    this.push(entries, "decor", "decorObserverSide", this.labels.decorObserverSide, this.decorSideName(selected.observerSide))
+    this.push(entries, "decor", "decorState.lightRig", this.labels.decorLights, rig?.name)
+    this.push(entries, "decor", "decorState.observerSide", this.labels.decorObserverSide, this.decorSideName(selected.observerSide))
     // What its kind publishes (floors, windows, a bridge's railing…), each stated value as a chip that leads to its own field.
     for (const spec of DecorParameterSets.of(selected)?.parameters ?? []) {
       const value = Parameters.read(selected as unknown as ParameterHolder, spec.key)

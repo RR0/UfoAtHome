@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { AdditiveBlending, Box3, BoxGeometry, Group, Mesh, MeshBasicMaterial, Vector3, type Object3D } from "three"
+import { AdditiveBlending, Box3, BoxGeometry, Color, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, Vector3, type Object3D } from "three"
 import { DecorSystem } from "../../src/render3d/DecorSystem.js"
 import type { DecorObject } from "../../src/engine/model/Decor.js"
 
@@ -432,3 +432,49 @@ describe("DecorSystem.fitTerrace", () => {
     expect(top.receiveShadow).toBe(true)
   })
 })
+
+describe("DecorSystem.tintModel: a setting a model publishes reaches its materials", () => {
+  const costume = { costumeColor: { materials: ["^Human\\.(fe)?male_[a-z]*(suit|coverall)"] } }
+  const being = () => {
+    const skin = new MeshStandardMaterial({ name: "Human.body", color: new Color("#d8a888") })
+    const suit = new MeshStandardMaterial({ name: "Human.male_coverall01", color: new Color("#ffffff") })
+    const shoes = new MeshStandardMaterial({ name: "Human.shoes03", color: new Color("#222222") })
+    const model = new Group()
+    const parts = [skin, suit, shoes].map(material => new Mesh(new BoxGeometry(), material))
+    model.add(...parts)
+    return { model, skin, suit, shoes, parts }
+  }
+
+  it("paints the materials the model binds the setting to, and only those, on copies of them", () => {
+    const { model, skin, suit, shoes, parts } = being()
+    DecorSystem.tintModel(model, { costumeColor: "#00aa44" }, costume)
+    expect((parts[1].material as MeshStandardMaterial).color.getHexString()).toBe("00aa44")
+    // The loaded file's own material is shared by every copy of the model: it keeps its colour.
+    expect(suit.color.getHexString()).toBe("ffffff")
+    expect(parts[1].material).not.toBe(suit)
+    expect(parts[0].material).toBe(skin)
+    expect(parts[2].material).toBe(shoes)
+  })
+
+  it("does nothing when the object states no value for it, or the model binds none", () => {
+    const { model, suit, parts } = being()
+    DecorSystem.tintModel(model, undefined, costume)
+    DecorSystem.tintModel(model, { costumeColor: "#00aa44" }, undefined)
+    DecorSystem.tintModel(model, { somethingElse: "#00aa44" }, costume)
+    expect(parts[1].material).toBe(suit)
+  })
+
+  it("frees the copies it made with the object, and only those", () => {
+    const { model, suit, skin, parts } = being()
+    let freed = 0
+    suit.dispose = () => { freed += 100 }
+    skin.dispose = () => { freed += 1000 }
+    DecorSystem.tintModel(model, { costumeColor: "#00aa44" }, costume)
+    const copy = parts[1].material as MeshStandardMaterial
+    copy.dispose = () => { freed += 1 }
+    for (const part of parts) part.userData.sharedModel = true
+    DecorSystem.dispose(model)
+    expect(freed).toBe(1)
+  })
+})
+

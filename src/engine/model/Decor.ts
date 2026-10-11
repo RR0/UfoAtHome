@@ -506,6 +506,12 @@ export interface DecorObject {
   /** How big it really is, in meters, along its own axes — see DecorSize. Absent means unmeasured,
    * and the primitive keeps its own natural size, so no recording made before this existed moves. */
   sizeM?: DecorSize
+  /**
+   * The settings of the model this object is drawn as, by the key the model publishes them under (see
+   * ModelParameters.parameters): a being's costume colour, say. Which of them applies, and how, is the model's own
+   * to say (ModelParameters.bindings); an object drawn as a built-in shape has none, since it is painted by `color`.
+   */
+  modelParameters?: Record<string, string | number | boolean>
   /** The real 3D model that stands in for the primitive, if one does — see DecorModelRef. Absent
    * means the built-in primitive, which is also what a failed or unreachable model falls back to. */
   model?: DecorModelRef

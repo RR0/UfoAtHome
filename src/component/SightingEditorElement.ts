@@ -3,6 +3,9 @@ import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
 import { DecorParameterSets } from "../engine/model/DecorParameterSets.js"
+import { DecorBase } from "../engine/model/DecorBase.js"
+import type { DecorBaseContext } from "../engine/model/DecorBase.js"
+import { DecorBaseParameterSets } from "../engine/model/DecorBaseParameterSets.js"
 import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import type { JsonPath } from "./JsonPaths.js"
@@ -79,7 +82,7 @@ import { DEFAULT_ICE_CRYSTAL_ALIGNMENT } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
 import type { Account } from "../engine/model/Account.js"
-import type { DecorObject, DecorSide, DecorSize } from "../engine/model/Decor.js"
+import type { DecorObject } from "../engine/model/Decor.js"
 import { sortedMilestones } from "../engine/model/Milestone.js"
 import { DEFAULT_REFERENCE_FOV_DEG, DEFAULT_REFERENCE_OPACITY, REFERENCE_INLINE_WARNING_BYTES } from "../engine/model/Reference.js"
 import type { PictureLandmark, ReferenceKind, SceneReference } from "../engine/model/Reference.js"
@@ -92,11 +95,8 @@ import type { PicturePoint } from "../engine/reference/PictureRegistration.js"
 import { PanoramaxPictures } from "../engine/reference/PanoramaxPictures.js"
 import type { StreetPicture } from "../engine/reference/PanoramaxPictures.js"
 import {
-  resolveDecorLitAt,
-  DECOR_SIDES,
   DEFAULT_BUILDING_FLOORS,
   defaultWindows,
-  observerSidesFor,
   canHoldObserver,
   DEFAULT_DECOR_MODEL
 } from "../engine/model/Decor.js"
@@ -692,19 +692,10 @@ export class SightingEditorElement extends HTMLElement {
   private readonly addDecorBuildingButton: HTMLButtonElement
   private readonly deleteDecorButton: HTMLButtonElement
   private readonly decorSelect: HTMLSelectElement
-  private readonly decorTitleInput: HTMLInputElement
-  private readonly decorEastInput: HTMLInputElement
-  private readonly decorNorthInput: HTMLInputElement
-  private readonly decorHeadingInput: HTMLInputElement
-  private readonly decorColorInput: HTMLInputElement
-  private readonly decorLitInput: HTMLInputElement
   /** Which set of lamps the selected decor object carries — see LightRig.ts. Rebuilt for each
    * selection, since the rigs that make sense on a tree are not the ones that make sense on an
    * aircraft. */
-  private readonly decorLightRigSelect: HTMLSelectElement
   private readonly lookAtDecorButton: HTMLButtonElement
-  private readonly decorAltitudeInput: HTMLInputElement
-  private readonly labelDecorAltitude: HTMLElement
   private readonly decorSightingUrlInput: HTMLInputElement
   /** Which catalogue the 3D-model picker offers, and which the scene resolves a named model
    * through — chosen in Data sources like every other real-world source (see refreshSourceRows). */
@@ -719,9 +710,6 @@ export class SightingEditorElement extends HTMLElement {
    * identifies one, since two moments can share a label and neither has an id. Undefined when the
    * recording names none. */
   private currentMilestoneT?: number
-  private readonly decorWidthInput: HTMLInputElement
-  private readonly decorLengthInput: HTMLInputElement
-  private readonly decorHeightInput: HTMLInputElement
   private readonly decorModelSelect: HTMLSelectElement
   private readonly decorModelAdvanced: HTMLDetailsElement
   private readonly decorModelCatalogueNote: HTMLElement
@@ -730,31 +718,27 @@ export class SightingEditorElement extends HTMLElement {
   private readonly decorModelAuthorInput: HTMLInputElement
   private readonly decorModelLicenseInput: HTMLInputElement
   private readonly decorModelSourceInput: HTMLInputElement
-  private readonly decorObserverSideSelect: HTMLSelectElement
   /** The properties the selected object's kind publishes beyond placement and size — floors, windows, a bridge's railing —
    * drawn by the generic form (see DecorParameterSets), and which set it was last drawn for. */
   private readonly decorParameterForm: ParameterForm
+  /** The base properties of the selected object (name, place, heading, colour, measures) and its state (lit, lamps, seat), drawn by the
+   * generic form from DecorBaseParameterSets: built when an object is first selected, then only re-read. */
+  private readonly decorBaseForm: ParameterForm
+  private readonly decorStateForm: ParameterForm
+  private readonly decorBaseHost: HTMLElement
+  private readonly decorStateHost: HTMLElement
+  private decorBaseShown = false
   private readonly decorParametersHost: HTMLElement
   private decorParametersShownFor?: string
-  private readonly optionObserverSide: Record<DecorSide, HTMLOptionElement>
   private readonly labelDecor: HTMLElement
   /** The Decor group's own handle in the tab strip — reuses the same "Decor" text as labelDecor
    * (the object-picker's own label), just on a different element, so no separate message key is
    * needed. */
   private readonly labelDecorGroup: HTMLElement
-  private readonly labelDecorTitle: HTMLElement
-  private readonly labelDecorEast: HTMLElement
-  private readonly labelDecorNorth: HTMLElement
-  private readonly labelDecorHeading: HTMLElement
-  private readonly labelDecorColor: HTMLElement
-  private readonly labelDecorLit: HTMLElement
   private readonly labelDecorSightingUrl: HTMLElement
   private readonly labelMilestones: HTMLElement
   private readonly labelMilestoneLabel: HTMLElement
   private readonly labelMilestoneNote: HTMLElement
-  private readonly labelDecorWidth: HTMLElement
-  private readonly labelDecorLength: HTMLElement
-  private readonly labelDecorHeight: HTMLElement
   private readonly labelDecorModel: HTMLElement
   private readonly labelDecorModelAdvanced: HTMLElement
   private readonly labelDecorModelUrl: HTMLElement
@@ -762,8 +746,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelDecorModelAuthor: HTMLElement
   private readonly labelDecorModelLicense: HTMLElement
   private readonly labelDecorModelSource: HTMLElement
-  private readonly labelDecorObserverSide: HTMLElement
-  private readonly optionObserverSideNone: HTMLOptionElement
   private readonly optionDecorBuilding: HTMLElement
   private readonly optionDecorTree: HTMLElement
   private readonly optionDecorShrub: HTMLElement
@@ -777,7 +759,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly optionDecorVehicle: HTMLElement
   private readonly optionDecorAircraft: HTMLElement
   private readonly optionDecorEntity: HTMLElement
-  private readonly labelDecorLights: HTMLElement
   private readonly optionDecorObserver: HTMLElement
 
   private recorder?: Recorder
@@ -1385,16 +1366,7 @@ export class SightingEditorElement extends HTMLElement {
       this.referenceCreditUrlInput, this.referenceTInput, this.referenceDrawingInput, this.referenceOpacityInput,
       this.referenceHeadingInput, this.referencePitchInput, this.referenceRollInput, this.referenceFovInput
     ]
-    this.decorTitleInput = this.shadow.getElementById("decorTitle") as HTMLInputElement
-    this.decorEastInput = this.shadow.getElementById("decorEast") as HTMLInputElement
-    this.decorNorthInput = this.shadow.getElementById("decorNorth") as HTMLInputElement
-    this.decorHeadingInput = this.shadow.getElementById("decorHeading") as HTMLInputElement
-    this.decorColorInput = this.shadow.getElementById("decorColor") as HTMLInputElement
-    this.decorLitInput = this.shadow.getElementById("decorLit") as HTMLInputElement
-    this.decorLightRigSelect = this.shadow.getElementById("decorLightRig") as HTMLSelectElement
     this.lookAtDecorButton = this.shadow.getElementById("look-at-decor") as HTMLButtonElement
-    this.decorAltitudeInput = this.shadow.getElementById("decorAltitude") as HTMLInputElement
-    this.labelDecorAltitude = this.shadow.getElementById("label-decor-altitude")!
     this.decorSightingUrlInput = this.shadow.getElementById("decorSightingUrl") as HTMLInputElement
     this.milestoneSelect = this.shadow.getElementById("milestone") as HTMLSelectElement
     this.milestoneLabelInput = this.shadow.getElementById("milestoneLabel") as HTMLInputElement
@@ -1402,9 +1374,6 @@ export class SightingEditorElement extends HTMLElement {
     this.addMilestoneButton = this.shadow.getElementById("add-milestone") as HTMLButtonElement
     this.deleteMilestoneButton = this.shadow.getElementById("delete-milestone") as HTMLButtonElement
     this.goToMilestoneButton = this.shadow.getElementById("go-to-milestone") as HTMLButtonElement
-    this.decorWidthInput = this.shadow.getElementById("decorWidth") as HTMLInputElement
-    this.decorLengthInput = this.shadow.getElementById("decorLength") as HTMLInputElement
-    this.decorHeightInput = this.shadow.getElementById("decorHeight") as HTMLInputElement
     this.decorModelSelect = this.shadow.getElementById("decorModel") as HTMLSelectElement
     // The drop-down gives way to a window of pictures (see ModelPicker), over the same options.
     this.modelPicker = new ModelPicker(this.shadow, () => ({
@@ -1447,35 +1416,19 @@ export class SightingEditorElement extends HTMLElement {
     this.decorModelAuthorInput = this.shadow.getElementById("decorModelAuthor") as HTMLInputElement
     this.decorModelLicenseInput = this.shadow.getElementById("decorModelLicense") as HTMLInputElement
     this.decorModelSourceInput = this.shadow.getElementById("decorModelSource") as HTMLInputElement
-    this.decorObserverSideSelect = this.shadow.getElementById("decorObserverSide") as HTMLSelectElement
     this.decorParametersHost = this.shadow.getElementById("decor-parameters")!
     this.decorParameterForm = new ParameterForm(this.decorParametersHost, "en", "decorParam.")
-    this.optionObserverSide = {
-      front: this.shadow.getElementById("option-observer-side-front") as HTMLOptionElement,
-      behind: this.shadow.getElementById("option-observer-side-behind") as HTMLOptionElement,
-      left: this.shadow.getElementById("option-observer-side-left") as HTMLOptionElement,
-      right: this.shadow.getElementById("option-observer-side-right") as HTMLOptionElement,
-      "front-left": this.shadow.getElementById("option-observer-side-front-left") as HTMLOptionElement,
-      "front-right": this.shadow.getElementById("option-observer-side-front-right") as HTMLOptionElement,
-      "behind-left": this.shadow.getElementById("option-observer-side-behind-left") as HTMLOptionElement,
-      "behind-right": this.shadow.getElementById("option-observer-side-behind-right") as HTMLOptionElement
-    }
-    this.optionObserverSideNone = this.shadow.getElementById("option-observer-side-none") as HTMLOptionElement
+    const decorValues = { said: () => this.said, writingLanguage: () => this.writingLanguage }
+    this.decorBaseHost = this.shadow.getElementById("decor-base")!
+    this.decorStateHost = this.shadow.getElementById("decor-state")!
+    this.decorBaseForm = new ParameterForm(this.decorBaseHost, "en", "decorBase.", decorValues)
+    this.decorStateForm = new ParameterForm(this.decorStateHost, "en", "decorState.", decorValues)
     this.labelDecor = this.shadow.getElementById("label-decor")!
     this.labelDecorGroup = this.shadow.getElementById("label-decor-group")!
-    this.labelDecorTitle = this.shadow.getElementById("label-decor-title")!
-    this.labelDecorEast = this.shadow.getElementById("label-decor-east")!
-    this.labelDecorNorth = this.shadow.getElementById("label-decor-north")!
-    this.labelDecorHeading = this.shadow.getElementById("label-decor-heading")!
-    this.labelDecorColor = this.shadow.getElementById("label-decor-color")!
-    this.labelDecorLit = this.shadow.getElementById("label-decor-lit")!
     this.labelDecorSightingUrl = this.shadow.getElementById("label-decor-sighting-url")!
     this.labelMilestones = this.shadow.getElementById("label-milestones")!
     this.labelMilestoneLabel = this.shadow.getElementById("label-milestone-label")!
     this.labelMilestoneNote = this.shadow.getElementById("label-milestone-note")!
-    this.labelDecorWidth = this.shadow.getElementById("label-decor-width")!
-    this.labelDecorLength = this.shadow.getElementById("label-decor-length")!
-    this.labelDecorHeight = this.shadow.getElementById("label-decor-height")!
     this.labelDecorModel = this.shadow.getElementById("label-decor-model")!
     this.labelDecorModelAdvanced = this.shadow.getElementById("label-decor-model-advanced")!
     this.labelDecorModelUrl = this.shadow.getElementById("label-decor-model-url")!
@@ -1483,7 +1436,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorModelAuthor = this.shadow.getElementById("label-decor-model-author")!
     this.labelDecorModelLicense = this.shadow.getElementById("label-decor-model-license")!
     this.labelDecorModelSource = this.shadow.getElementById("label-decor-model-source")!
-    this.labelDecorObserverSide = this.shadow.getElementById("label-decor-observer-side")!
     this.optionDecorBuilding = this.shadow.getElementById("option-decor-building")!
     this.optionDecorTree = this.shadow.getElementById("option-decor-tree")!
     this.optionDecorShrub = this.shadow.getElementById("option-decor-shrub")!
@@ -1497,7 +1449,6 @@ export class SightingEditorElement extends HTMLElement {
     this.optionDecorVehicle = this.shadow.getElementById("option-decor-vehicle")!
     this.optionDecorAircraft = this.shadow.getElementById("option-decor-aircraft")!
     this.optionDecorEntity = this.shadow.getElementById("option-decor-entity")!
-    this.labelDecorLights = this.shadow.getElementById("label-decor-lights")!
     this.optionDecorObserver = this.shadow.getElementById("option-decor-observer")!
 
     this.ufoElement.canvasElement.addEventListener("pointerdown", event => {
@@ -1620,16 +1571,7 @@ export class SightingEditorElement extends HTMLElement {
     this.ufoElement.canvasElement.addEventListener("wheel", event => this.onReferenceWheel(event), { passive: false })
     this.ufoElement.canvasElement.addEventListener("wheel", event => this.onBodyWheel(event), { passive: false })
     for (const input of [
-      this.decorTitleInput,
-      this.decorEastInput,
-      this.decorNorthInput,
-      this.decorAltitudeInput,
-      this.decorHeadingInput,
-      this.decorColorInput,
       this.decorSightingUrlInput,
-      this.decorWidthInput,
-      this.decorLengthInput,
-      this.decorHeightInput,
       this.decorModelUrlInput,
       this.decorModelTitleInput,
       this.decorModelAuthorInput,
@@ -1638,7 +1580,6 @@ export class SightingEditorElement extends HTMLElement {
     ]) {
       input.addEventListener("input", () => this.updateDecor())
     }
-    this.decorObserverSideSelect.addEventListener("change", () => this.updateDecor())
     this.decorModelSelect.addEventListener("change", () => this.updateDecorModelChoice())
     this.addMilestoneButton.addEventListener("click", () => this.addMilestone())
     this.deleteMilestoneButton.addEventListener("click", () => this.deleteMilestone())
@@ -1649,12 +1590,6 @@ export class SightingEditorElement extends HTMLElement {
     for (const input of [this.milestoneLabelInput, this.milestoneNoteInput]) {
       input.addEventListener("input", () => this.updateMilestone())
     }
-    // Lit is keyframed over time (see Decor.ts's own resolveDecorLitAt/litKeyframes), unlike the
-    // rest of a decor object's fields — a distinct write path (updateDecorLit) is what actually
-    // records it at the current playhead, same "at the current instant" idiom as
-    // applyWeatherAtPlayhead/updateObserver.
-    this.decorLitInput.addEventListener("input", () => this.updateDecorLit())
-    this.decorLightRigSelect.addEventListener("change", () => this.updateDecorLightRig())
     this.lookAtDecorButton.addEventListener("click", () => this.lookAtDecor())
     this.showMeteorButton.addEventListener("click", () => this.showNextMeteor())
     this.showCometButton.addEventListener("click", () => this.lookAtComet())
@@ -5974,8 +5909,7 @@ export class SightingEditorElement extends HTMLElement {
     // said where it happened. Costs a couple of comparisons: canInfer asks nothing of the network.
     this.syncWeatherSourceState()
     this.syncSoundFromTimeline()
-    this.syncDecorLitFromTimeline()
-    this.syncDecorPlacementFromTimeline()
+    this.syncDecorBaseFromTimeline()
     this.syncIndoorLookReset()
     this.updateAppearanceFieldsDisabledState()
     // Called unconditionally (not nested inside syncAppearanceFromTimeline's own early-return
@@ -7082,90 +7016,23 @@ export class SightingEditorElement extends HTMLElement {
     if (index >= 0) this.showInFile(["decor", index])
   }
 
-  /** Writes the East/North/Heading/Name/URL/Floors/Occupied-floor/Observer-location fields back
-   * onto the currently selected decor object — "spread and overwrite one field" style, same as
-   * onDragPointerMove's shape-bounds edits (see that method's own doc comment) — replacing the
-   * whole decor array with a new one (not mutating the existing entry in place) for the same
-   * setDecor reference-equality reason as addDecor. `lit` is deliberately NOT touched here — see
-   * updateDecorLit, its own dedicated write path now that it's keyframed over time rather than a
-   * plain static field; `windowsOpen` isn't touched here either — see updateDecorWindows, its own
-   * dedicated write path for that nested record. Resyncs visibility (not values — see
-   * syncDecorVisibility's own doc comment on why not the fuller syncDecorFields) since a
-   * floors/observer-location edit can change which rows apply.
+  /**
+   * Writes what the fields that are not the form's back onto the selected decor object: the address of the
+   * recording an observer has of their own, and the model the picker and the address block state — replacing the whole
+   * decor array with a new one (not mutating the existing entry in place) for the same setDecor reference-equality
+   * reason as addDecor. `extra` is what an edit that comes with it changes at the same time (the size a catalogue model
+   * is, when it is picked).
    *
-   * observerSide/floors/occupiedFloor are only ever WRITTEN when the current object's own kind
-   * actually supports them (canHoldObserver/kind==="building") — never just whatever the shared
-   * input elements happen to currently display. Those inputs are reused across every decor object
-   * (there's one <select>/<input> in the toolbar, not one per object), and syncDecorFields fills
-   * them with a fallback value (e.g. floors defaults to DEFAULT_BUILDING_FLOORS) purely for
-   * DISPLAY even when the selected object has no such field at all — a real bug this comment
-   * replaced: editing e.g. a vehicle's heading right after a building was selected silently wrote
-   * that building's leftover `floors` value onto the vehicle too, since the input's .value hadn't
-   * changed even though it no longer applied. */
-  private updateDecor(): void {
+   * The other properties — name, place, heading, colour, measures, the lamp switch, the rig, where the observer sits — are
+   * written by the generic form, one at a time (see commitDecorBase), so that editing one never restates the others.
+   */
+  private updateDecor(extra: Partial<DecorObject> = {}): void {
     if (this.currentDecorId === undefined) return
     const sighting = this.ufoElement.sighting
-    const headingDeg = this.wrapDegrees(Number(this.decorHeadingInput.value), this.decorHeadingInput) ?? 0
-    const observerSideValue = this.decorObserverSideSelect.value
-    sighting.decor = sighting.decor.map(d => {
-      if (d.id !== this.currentDecorId) return d
-      const observerSide = canHoldObserver(d.kind) && observerSideValue !== "" ? (observerSideValue as DecorSide) : undefined
-      const eastM = Number(this.decorEastInput.value)
-      const northM = Number(this.decorNorthInput.value)
-      const altitudeM = Number(this.decorAltitudeInput.value)
-      // An object that moves is edited AT THE PLAYHEAD, like everything else keyframed here: the
-      // fields showed its placement at this instant (see syncDecorFields), so writing them back
-      // has to land at this instant too. Giving a still object an altitude starts a trajectory of
-      // a single keyframe — which is exactly what "it sits up there" means, and saves inventing a
-      // second way to say the same thing.
-      const track = d.track ?? (altitudeM !== 0 ? [] : undefined)
-      if (track) {
-        const t = this.ufoElement.currentTime
-        const keyframe = { t, eastM, northM, altitudeM, headingDeg }
-        const kept = track.filter(existing => existing.t !== t)
-        return { ...d, title: this.said.write(d.title, this.decorTitleInput.value, this.writingLanguage), color: this.statedDecorColor(d), track: [...kept, keyframe].sort((a, b) => a.t - b.t), sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), observerSide, sizeM: this.statedDecorSize(), model: this.statedDecorModel() }
-      }
-      return {
-        ...d,
-        // The title as it was, with this language's put back in it: written from nothing, an edit of anything about an
-        // object (its east, its size) took every other language of its name away.
-        title: this.said.write(d.title, this.decorTitleInput.value, this.writingLanguage),
-        color: this.statedDecorColor(d),
-        eastM,
-        northM,
-        headingDeg,
-        sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value),
-        observerSide,
-        sizeM: this.statedDecorSize(),
-        model: this.statedDecorModel()
-      }
-    })
-    this.decorSelect.options[this.decorSelect.selectedIndex]!.textContent = this.decorLabel(sighting.decor.find(d => d.id === this.currentDecorId)!)
+    sighting.decor = sighting.decor.map(d => d.id !== this.currentDecorId ? d
+      : { ...d, ...extra, sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), model: this.statedDecorModel() })
     this.syncDecorVisibility()
-    this.updateDecorTitleValidity()
     this.ufoElement.refresh()
-  }
-
-  /**
-   * Fills the three size fields: the recording's own numbers as VALUES, and what the built-in
-   * shape measures as PLACEHOLDERS.
-   *
-   * The distinction is the whole point. A field showing 4.35 in grey says "this is what you are
-   * looking at, and nobody measured it"; the same 4.35 as a value would say a observer reported it.
-   * See DecorSize — this is the one field where the difference between drawn and measured had been
-   * lost, and it is the difference the rest of this data model is built on.
-   */
-  private syncDecorSizeFields(decor: DecorObject | undefined): void {
-    const natural = decor ? DecorSystem.naturalSize(decor.kind, decor.floors) : undefined
-    const fields = [
-      [this.decorWidthInput, decor?.sizeM?.widthM, natural?.widthM],
-      [this.decorLengthInput, decor?.sizeM?.lengthM, natural?.lengthM],
-      [this.decorHeightInput, decor?.sizeM?.heightM, natural?.heightM]
-    ] as const
-    for (const [input, stated, drawn] of fields) {
-      input.value = stated === undefined ? "" : String(this.roundedMeters(stated))
-      input.placeholder = drawn === undefined ? "" : String(this.roundedMeters(drawn))
-    }
   }
 
   /** Fills the model picker and the collapsed direct-address block from what the object names.
@@ -7265,17 +7132,11 @@ export class SightingEditorElement extends HTMLElement {
       // it then follows the new model (a woman is not drawn at the farmer's height).
       const sizeIsPrevious = decor?.sizeM !== undefined && previous?.sizeM !== undefined
         && decor.sizeM.widthM === previous.sizeM.widthM && decor.sizeM.lengthM === previous.sizeM.lengthM && decor.sizeM.heightM === previous.sizeM.heightM
-      if (entry?.sizeM && decor && (!decor.sizeM || sizeIsPrevious)) {
-        const fields = [
-          [this.decorWidthInput, entry.sizeM.widthM],
-          [this.decorLengthInput, entry.sizeM.lengthM],
-          [this.decorHeightInput, entry.sizeM.heightM]
-        ] as const
-        for (const [input, measured] of fields) {
-          if (measured !== undefined) input.value = String(this.roundedMeters(measured))
-        }
-      }
-      this.updateDecor()
+      // Only the axes the catalogue measured are stated; the others keep what they had.
+      const adopted = entry?.sizeM && decor && (!decor.sizeM || sizeIsPrevious)
+        ? { sizeM: { ...decor.sizeM, ...Object.fromEntries(Object.entries(entry.sizeM).filter(([, measured]) => measured !== undefined).map(([axis, measured]) => [axis, this.roundedMeters(measured as number)])) } }
+        : {}
+      this.updateDecor(adopted)
     })()
   }
 
@@ -7285,13 +7146,6 @@ export class SightingEditorElement extends HTMLElement {
     return Math.round(value * 100) / 100
   }
 
-  /** What a size field states, or nothing — an empty field, a non-number and a zero are all
-   * "unstated" rather than a measurement of nothing. */
-  private positiveMeters(value: string): number | undefined {
-    const parsed = Number(value)
-    return value.trim() === "" || !Number.isFinite(parsed) || parsed <= 0 ? undefined : parsed
-  }
-
   /**
    * What the three size fields state, or nothing at all when all three are empty.
    *
@@ -7299,23 +7153,6 @@ export class SightingEditorElement extends HTMLElement {
    * number, and the other two stay unmeasured rather than being filled in from the built-in
    * shape's own proportions — which the placeholder is already showing, honestly, in grey.
    */
-  /**
-   * The colour the picker is showing, or undefined when it is still showing what the object came
-   * with — so an object nobody has repainted stays uncoloured and keeps its kind's own, rather than
-   * being written out as the grey the control had to display in the meantime.
-   */
-  private statedDecorColor(decor: DecorObject): string | undefined {
-    const picked = this.decorColorInput.value
-    return picked === "#808080" && decor.color === undefined ? undefined : picked
-  }
-
-  private statedDecorSize(): DecorSize | undefined {
-    const widthM = this.positiveMeters(this.decorWidthInput.value)
-    const lengthM = this.positiveMeters(this.decorLengthInput.value)
-    const heightM = this.positiveMeters(this.decorHeightInput.value)
-    return widthM === undefined && lengthM === undefined && heightM === undefined ? undefined : { widthM, lengthM, heightM }
-  }
-
   /** What the model picker and the direct-address block state. A typed address wins over the
    * picker (see DecorModelRef), and carries whatever credit has been typed beside it — incomplete
    * is stored as typed rather than silently dropped, and simply isn't DRAWN until it is complete
@@ -7447,41 +7284,6 @@ export class SightingEditorElement extends HTMLElement {
     this.milestoneNoteInput.value = this.said.read(current?.note) ?? ""
   }
 
-  /** Name is mandatory once a decor object exists — addDecor() always fills it with a real
-   * generated label from the start (see its own doc comment), so an empty field here only ever
-   * means the observer/recorder cleared it afterward, which decorLabel()'s own fallback then
-   * papers back over with a plain, unnumbered kind name wherever it's displayed (the dropdown,
-   * the "Masks" flyout, SceneElement's own hover tooltip) — exactly the ambiguous "Lampadaire"
-   * vs. "Lampadaire 1" mismatch this flag exists to steer away from. Same "flagged, not blocked"
-   * convention as Duration (see updateDurationValidity) — nothing here prevents saving/exporting
-   * with a blank title, it's just made visibly wrong so it doesn't happen by accident. */
-  private updateDecorTitleValidity(): void {
-    const missing = this.currentDecorId !== undefined && this.decorTitleInput.value === ""
-    this.decorTitleInput.classList.toggle("invalid", missing)
-    this.decorTitleInput.setAttribute("aria-invalid", String(missing))
-  }
-
-  /** Records the Lit checkbox at the current playhead as a litKeyframes entry — same "at the
-   * current instant" idiom as applyWeatherAtPlayhead/updateObserver, and the same playing-state
-   * bailout (merely scrubbing/playing must never itself write a keyframe). Replaces any existing
-   * keyframe at exactly this instant rather than accumulating duplicates (same "re-recording the
-   * same instant overwrites, doesn't pile up" behavior ObserverTrack.addKeyframe gives for free —
-   * this is the plain-array equivalent, since a single boolean doesn't warrant a full Track
-   * class, see litKeyframes' own doc comment). */
-  private updateDecorLit(): void {
-    if (this.currentDecorId === undefined) return
-    if (this.ufoElement.playbackState === "playing") return
-    const sighting = this.ufoElement.sighting
-    const t = this.ufoElement.currentTime
-    const lit = this.decorLitInput.checked
-    sighting.decor = sighting.decor.map(d => {
-      if (d.id !== this.currentDecorId) return d
-      const litKeyframes = [...(d.litKeyframes ?? []).filter(k => k.t !== t), { t, lit }].sort((a, b) => a.t - b.t)
-      return { ...d, litKeyframes }
-    })
-    this.ufoElement.refresh()
-  }
-
   /** Rebuilds the decor dropdown's own option list and resyncs the East/North/Heading/Lit fields
    * from whichever decor object is now selected — called after add/delete/load, mirroring
    * refreshSourceList()'s role for shapes. Disables the field row entirely (rather than leaving
@@ -7504,49 +7306,13 @@ export class SightingEditorElement extends HTMLElement {
     const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
     const hasSelection = decor !== undefined
     this.deleteDecorButton.disabled = !hasSelection
-    for (const input of [
-      this.decorSelect,
-      this.decorTitleInput,
-      this.decorEastInput,
-      this.decorNorthInput,
-      this.decorHeadingInput,
-      this.decorLitInput,
-      this.decorSightingUrlInput,
-      this.decorWidthInput,
-      this.decorLengthInput,
-      this.decorHeightInput,
-      this.decorModelSelect,
-      this.decorModelUrlInput,
-      this.decorModelTitleInput,
-      this.decorModelAuthorInput,
-      this.decorModelLicenseInput,
-      this.decorModelSourceInput,
-      this.decorObserverSideSelect,
-      this.decorLightRigSelect,
-      this.decorAltitudeInput,
-      this.lookAtDecorButton
-    ]) {
+    for (const input of [this.decorSelect, this.decorSightingUrlInput, this.decorModelSelect, this.decorModelUrlInput, this.decorModelTitleInput,
+      this.decorModelAuthorInput, this.decorModelLicenseInput, this.decorModelSourceInput, this.lookAtDecorButton]) {
       input.disabled = !hasSelection
     }
-    this.decorTitleInput.value = this.said.read(decor?.title) ?? ""
-    // Grey when the recording states none, which is what "the kind's own colour" looks like in a
-    // control that has no empty value of its own — see DecorObject.color.
-    this.decorColorInput.value = decor?.color ?? "#808080"
-    // Where the object actually IS at the playhead, not the static fields it may never use. An
-    // object with a trajectory (an aircraft, a passing car) is somewhere quite else than the
-    // eastM/northM it was created with, and a form showing those reads as a plain lie: "15 m north"
-    // beside an aeroplane three kilometres up. Same principle as every other keyframed field in
-    // this toolbar — the weather, the lit state, the observer's own pose all show the instant.
-    this.showDecorPlacement(decor)
-    this.decorLitInput.checked = decor ? resolveDecorLitAt(decor, this.ufoElement.currentTime) : false
-    this.refreshDecorLightRigOptions(decor)
     this.decorSightingUrlInput.value = decor?.sightingUrl ?? ""
-    this.syncDecorSizeFields(decor)
     this.syncDecorModelFields(decor)
-    this.decorObserverSideSelect.value = decor?.observerSide ?? ""
-    this.showDecorParameters(decor)
     this.syncDecorVisibility()
-    this.updateDecorTitleValidity()
   }
 
   /** Hides `field`'s whole row (its wrapping `<label>`, so its text goes with it — falls back to
@@ -7557,6 +7323,88 @@ export class SightingEditorElement extends HTMLElement {
   private setRowVisible(field: HTMLElement, visible: boolean): void {
     const row = field.closest("label") ?? field
     ;(row as HTMLElement).hidden = !visible
+  }
+
+  /**
+   * Draws the base properties of the selected object and its state (see DecorBaseParameterSets), written back as they are typed,
+   * each on its own (see commitDecorBase). Built once, when there is first an object to edit, and then only re-read: the
+   * fields that do not apply to this object (a colour for a model, a lamp switch for a house) are left out by the form itself,
+   * from what the object says it has (see decorBaseContext).
+   */
+  private showDecorBase(decor: DecorObject | undefined): void {
+    this.decorBaseHost.hidden = decor === undefined
+    this.decorStateHost.hidden = decor === undefined
+    if (!decor) {
+      this.decorBaseForm.clear()
+      this.decorStateForm.clear()
+      this.decorBaseShown = false
+      return
+    }
+    if (this.decorBaseShown) {
+      this.decorBaseForm.sync()
+      this.decorStateForm.sync()
+      return
+    }
+    this.decorBaseShown = true
+    const target = () => new ParameterTarget(
+      () => {
+        const current = this.ufoElement.sighting.decor.find(candidate => candidate.id === this.currentDecorId)
+        return current ? DecorBase.viewOf(current, this.ufoElement.currentTime) as unknown as ParameterHolder : undefined
+      },
+      (apply, spec) => this.commitDecorBase(apply, spec.key),
+      () => this.decorBaseContext()
+    )
+    this.decorBaseForm.show(DecorBaseParameterSets.BASE, target(), () => undefined)
+    this.decorStateForm.show(DecorBaseParameterSets.STATE, target(), () => undefined)
+  }
+
+  /** What the form of the base properties needs of the object it edits, and of this editor. */
+  private decorBaseContext(): DecorBaseContext | undefined {
+    const decor = this.ufoElement.sighting.decor.find(candidate => candidate.id === this.currentDecorId)
+    if (!decor) return undefined
+    const traits = DecorTraits.of(decor, this.shownDecorEntry?.id === decor.model?.id ? this.shownDecorEntry?.parameters : undefined)
+    return {
+      kind: decor.kind,
+      natural: DecorSystem.naturalSize(decor.kind, decor.floors),
+      traits: { color: traits.color, lit: traits.lit, lights: traits.lights, observerSide: traits.observerSide },
+      lightRigs: LightRigs.forKind(decor.kind).map(rig => ({ value: rig.id, label: this.naming.lightRig(rig) })),
+      seats: DecorBaseParameterSets.seatsFor(decor.kind)
+    }
+  }
+
+  /**
+   * Writes an edit of ONE base property of the selected object (see DecorBase.apply): `change` changes the view of the object
+   * at the playhead, and what that field means for the object is written — a place as a keyframe of its track when it moves,
+   * the lamp switch as a keyframe of its own at this instant (never while playing: scrubbing must not write one), and so on. The
+   * decor array is replaced by a new one, not mutated, for the same setDecor reference-equality reason as addDecor.
+   */
+  private commitDecorBase(change: (view: ParameterHolder) => void, key: string): void {
+    const decor = this.ufoElement.sighting.decor.find(candidate => candidate.id === this.currentDecorId)
+    if (!decor) return
+    if (key === "lit" && this.ufoElement.playbackState === "playing") return
+    const t = this.ufoElement.currentTime
+    const view = DecorBase.viewOf(decor, t)
+    change(view as unknown as ParameterHolder)
+    const sighting = this.ufoElement.sighting
+    sighting.decor = sighting.decor.map(candidate => candidate.id === decor.id ? DecorBase.apply(candidate, view, key, t) : candidate)
+    const edited = sighting.decor.find(candidate => candidate.id === decor.id)!
+    const option = this.decorSelect.options[this.decorSelect.selectedIndex]
+    if (key === "title" && option) option.textContent = this.decorLabel(edited)
+    this.syncDecorVisibility()
+    this.ufoElement.refresh()
+    // The lamps are built into the object's group, which the scene rebuilds when the array's own identity changes.
+    if (key === "lightRig") this.dispatchEvent(new CustomEvent("sightingchange"))
+  }
+
+  /**
+   * Keeps the fields honest as the playhead moves — needed the moment decor could move: an aircraft is somewhere different at
+   * every instant, and a form frozen on where it was at t=0 says the wrong thing for the whole rest of the recording. Not while
+   * playing: that is when nothing is being edited and the fields are not read.
+   */
+  private syncDecorBaseFromTimeline(): void {
+    if (this.ufoElement.playbackState === "playing" || !this.decorBaseShown) return
+    this.decorBaseForm.sync()
+    this.decorStateForm.sync()
   }
 
   /**
@@ -7607,57 +7455,23 @@ export class SightingEditorElement extends HTMLElement {
     this.showDecorParameters(this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId))
   }
 
-  /** Shows/hides/enables the kind-dependent decor rows (Windows, Observer location, Floors,
-   * Occupied floor) per hasWindows/isWindowOpenable/canHoldObserver — deliberately never touches
-   * any input's own .value/.checked, only .hidden/.disabled/.max, so it's safe to call after
-   * every keystroke from updateDecor/updateDecorWindows without the same bug lat/lng's own live
-   * resync once hit (overwriting a field the user is actively typing into on every input event —
-   * see this project's own memory notes). syncDecorFields (the fuller value-resync, only ever
-   * called on an actual selection change, never mid-typing) calls this too rather than
-   * duplicating the gating logic. */
+  /**
+   * Shows what applies to the selected object and draws the fields of its properties (see showDecorBase): with no object,
+   * the fieldset shows only the Add row below (see the template's comment on why that row is forced onto its own line) —
+   * the picker, the delete button and every property are hidden entirely rather than left visible but disabled, so a blank
+   * recording does not present a wall of inert fields with nothing to edit yet. Never touches a field's value: safe to
+   * call after every keystroke.
+   */
   private syncDecorVisibility(): void {
     const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
     const hasSelection = decor !== undefined
-    const kind = decor?.kind
-    // With no decor at all, the fieldset shows only the Add row below (see template.ts's own
-    // comment on why that row is forced onto its own line) — the picker/delete button and every
-    // core property row are hidden entirely rather than left visible-but-disabled, so a blank
-    // recording doesn't present a wall of inert fields with nothing to edit yet.
     this.setRowVisible(this.decorSelect, hasSelection)
     this.setRowVisible(this.deleteDecorButton, hasSelection)
-    this.setRowVisible(this.decorTitleInput, hasSelection)
-    this.setRowVisible(this.decorEastInput, hasSelection)
-    this.setRowVisible(this.decorNorthInput, hasSelection)
-    // Was the one placement field left out of this list, so an empty recording showed a lone
-    // "Altitude 0 m" for a decor object that didn't exist — visible in the form, and stated
-    // outright by the parameter summary, which is what turned it up.
-    this.setRowVisible(this.decorAltitudeInput, hasSelection)
-    this.setRowVisible(this.decorHeadingInput, hasSelection)
     // Size and model apply to every kind — there is no scenery whose size is not a fact about it.
-    this.setRowVisible(this.decorWidthInput, hasSelection)
-    this.setRowVisible(this.decorLengthInput, hasSelection)
-    this.setRowVisible(this.decorHeightInput, hasSelection)
-    // What can be set on it is what the object says (see DecorTraits): the colour only paints the
-    // built-in shape, a lamp switch needs something to switch, windows and floors belong to the shape.
-    const traits = decor ? DecorTraits.of(decor, this.shownDecorEntry?.id === decor.model?.id ? this.shownDecorEntry?.parameters : undefined) : undefined
-    this.setRowVisible(this.decorColorInput, traits?.color === true)
     this.setRowVisible(this.decorModelSelect, hasSelection)
     // The address of a model is given in the model window now (see ModelPicker); its fields only carry the state.
     this.decorModelAdvanced.hidden = true
-    // Lit is the legacy single switch (a streetlamp, a car's headlights). An aircraft's lamps are a
-    // rig of their own (see LightRig.ts), so the checkbox would sit there doing nothing at all —
-    // which is exactly how it was read.
-    this.setRowVisible(this.decorLitInput, traits?.lit === true)
-    this.setRowVisible(this.decorLightRigSelect, traits?.lights === true)
-    const showObserverSide = traits?.observerSide === true
-    this.setRowVisible(this.decorObserverSideSelect, showObserverSide)
-    // Which of the 8 DecorSide values are valid SEATS for this kind (a subset of applicableSides
-    // — see observerSidesFor's own doc comment: a vehicle's occupant sits at one of its 4 doors,
-    // never "at the windshield", even though the windshield itself is a valid WINDOW side above).
-    const seatSides = kind !== undefined ? observerSidesFor(kind) : []
-    for (const side of DECOR_SIDES) {
-      this.optionObserverSide[side].hidden = !seatSides.includes(side)
-    }
+    this.showDecorBase(decor)
     // The properties its kind publishes (floors, windows, a bridge's railing…) are drawn by the generic form.
     this.syncDecorParameterVisibility()
   }
@@ -7673,35 +7487,6 @@ export class SightingEditorElement extends HTMLElement {
    * keyframes the pose exactly as any other look would — turning to watch something IS part of what
    * the observer did, not a camera convenience layered on top.
    */
-  /** Writes where the object stands at the playhead into the four placement fields. Skips any the
-   * user is currently typing in, the same "don't fight active interaction" rule the rest of this
-   * toolbar follows. */
-  private showDecorPlacement(decor: DecorObject | undefined): void {
-    const placement = decor ? resolveDecorPlacementAt(decor, this.ufoElement.currentTime) : undefined
-    const values: [HTMLInputElement, number][] = [
-      [this.decorEastInput, placement?.eastM ?? 0],
-      [this.decorNorthInput, placement?.northM ?? 0],
-      [this.decorAltitudeInput, placement?.altitudeM ?? 0],
-      [this.decorHeadingInput, placement?.headingDeg ?? 0]
-    ]
-    for (const [input, value] of values) {
-      if (this.shadow.activeElement === input) continue
-      input.value = String(this.rounded(value))
-    }
-  }
-
-  /**
-   * Keeps those fields honest as the playhead moves — the same role, timing and playing-state
-   * bailout as syncDecorLitFromTimeline beside it.
-   *
-   * Needed the moment decor could move: an aircraft is somewhere different at every instant, and a
-   * form frozen on where it was at t=0 says the wrong thing for the whole rest of the recording.
-   */
-  private syncDecorPlacementFromTimeline(): void {
-    if (this.ufoElement.playbackState === "playing") return
-    this.showDecorPlacement(this.ufoElement.sighting.decor.find(object => object.id === this.currentDecorId))
-  }
-
   /**
    * Jumps to the next meteor and turns the observer to face it.
    *
@@ -8634,57 +8419,6 @@ export class SightingEditorElement extends HTMLElement {
     this.updateObserver()
   }
 
-  /** Offers the rigs that make sense on this object's kind, plus "none" — see LightRigs.forKind.
-   * Selects whichever rig the object's own lamps came from, matched by their ids, so reopening a
-   * saved recording shows what it actually carries rather than resetting the picker. */
-  private refreshDecorLightRigOptions(decor: DecorObject | undefined): void {
-    const rigs = decor ? LightRigs.forKind(decor.kind) : []
-    const none = document.createElement("option")
-    none.value = ""
-    none.textContent = this.messages.decorLightsNone
-    this.decorLightRigSelect.replaceChildren(
-      none,
-      ...rigs.map(rig => {
-        const option = document.createElement("option")
-        option.value = rig.id
-        option.textContent = this.naming.lightRig(rig)
-        return option
-      })
-    )
-    const carried = decor?.lights?.map(light => light.id).join() ?? ""
-    this.decorLightRigSelect.value = rigs.find(rig => rig.create().map(l => l.id).join() === carried)?.id ?? ""
-  }
-
-  /** Fits the chosen rig to the selected object, or strips its lamps for "none".
-   *
-   * Replaces the whole decor array rather than mutating in place: the lamps are built INTO the
-   * object's 3D group (see DecorSystem.addLights), so the scene has to rebuild it, and it only
-   * does that when the array's own identity changes (see SceneRenderer.setDecor). */
-  private updateDecorLightRig(): void {
-    const sighting = this.ufoElement.sighting
-    const decor = sighting.decor.find(object => object.id === this.currentDecorId)
-    if (!decor) return
-    const rig = LightRigs.byId(this.decorLightRigSelect.value)
-    sighting.decor = sighting.decor.map(object =>
-      object.id === decor.id ? { ...object, lights: rig ? rig.create() : undefined } : object
-    )
-    this.ufoElement.refresh()
-    this.dispatchEvent(new CustomEvent("sightingchange"))
-  }
-
-  /** Keeps the Lit checkbox honest as the playhead moves or a different keyframe region is
-   * scrubbed to — same role/timing and the same playing-state bailout as
-   * syncWeatherFromTimeline/syncObserverFromTimeline. Skips while focused, same "don't fight
-   * active interaction" reasoning (a checkbox doesn't have in-progress typed text to clobber, but
-   * an active toggle mid-click could otherwise flicker back to its pre-click state here). */
-  private syncDecorLitFromTimeline(): void {
-    if (this.ufoElement.playbackState === "playing") return
-    if (this.shadow.activeElement === this.decorLitInput) return
-    const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
-    if (!decor) return
-    this.decorLitInput.checked = resolveDecorLitAt(decor, this.ufoElement.currentTime)
-  }
-
   private updatePresetButtons(): void {
     for (const presetId of PRESET_IDS) {
       this.presetButtons[presetId]?.setAttribute(
@@ -8962,8 +8696,6 @@ export class SightingEditorElement extends HTMLElement {
     this.optionDecorVehicle.textContent = messages.decorVehicle
     this.optionDecorAircraft.textContent = messages.decorAircraft
     this.optionDecorEntity.textContent = messages.decorEntity
-    this.labelDecorLights.textContent = messages.decorLights
-    this.labelDecorAltitude.textContent = messages.decorAltitude
     this.showMeteorButton.title = messages.showMeteor
     this.showMeteorButton.setAttribute("aria-label", messages.showMeteor)
     this.showCometButton.title = messages.showComet
@@ -8983,12 +8715,6 @@ export class SightingEditorElement extends HTMLElement {
     this.redoButton.setAttribute("aria-label", messages.redo)
     this.deleteDecorButton.title = messages.deleteDecor
     this.deleteDecorButton.setAttribute("aria-label", messages.deleteDecor)
-    this.labelDecorTitle.textContent = messages.decorTitle
-    this.labelDecorEast.textContent = messages.decorEast
-    this.labelDecorNorth.textContent = messages.decorNorth
-    this.labelDecorHeading.textContent = messages.decorHeading
-    this.labelDecorColor.textContent = messages.decorColor
-    this.labelDecorLit.textContent = messages.decorLit
     this.labelDecorSightingUrl.textContent = messages.decorSightingUrl
     this.contextViewAccountButton.textContent = messages.viewAccount
     // The arrow is appended here, not part of the translated string — see SightingEditorMessages.
@@ -9008,9 +8734,6 @@ export class SightingEditorElement extends HTMLElement {
       button.title = text
       button.setAttribute("aria-label", text)
     }
-    this.labelDecorWidth.textContent = messages.decorWidth
-    this.labelDecorLength.textContent = messages.decorLength
-    this.labelDecorHeight.textContent = messages.decorHeight
     this.labelDecorModel.textContent = messages.decorModel
     this.labelDecorModelAdvanced.textContent = messages.decorModelAdvanced
     this.decorModelCatalogueNote.textContent = messages.decorModelFromCatalogue
@@ -9019,22 +8742,9 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorModelAuthor.textContent = messages.decorModelAuthor
     this.labelDecorModelLicense.textContent = messages.decorModelLicense
     this.labelDecorModelSource.textContent = messages.decorModelSource
-    this.labelDecorObserverSide.textContent = messages.decorObserverSide
     this.decorParameterForm.setLanguage(this.language)
-    this.optionObserverSideNone.textContent = messages.decorObserverSideNone
-    const decorSideMessages: Record<DecorSide, string> = {
-      front: messages.decorSideFront,
-      behind: messages.decorSideBehind,
-      left: messages.decorSideLeft,
-      right: messages.decorSideRight,
-      "front-left": messages.decorSideFrontLeft,
-      "front-right": messages.decorSideFrontRight,
-      "behind-left": messages.decorSideBehindLeft,
-      "behind-right": messages.decorSideBehindRight
-    }
-    for (const side of DECOR_SIDES) {
-      this.optionObserverSide[side].textContent = decorSideMessages[side]
-    }
+    this.decorBaseForm.setLanguage(this.language)
+    this.decorStateForm.setLanguage(this.language)
     this.refreshDecorList() // decor option labels embed decorKindSelect's own text, just updated above
     this.labelObserverId.textContent = messages.observerId
     this.labelObserverTitle.textContent = messages.observerTitle
@@ -9837,25 +9547,25 @@ export class SightingEditorElement extends HTMLElement {
    * else what it is drawn at; it turns about the vertical only, so a pitch or a roll is dropped. */
   private readonly decorFrame: FrameTarget = {
     bounds: () => this.decorCanvasBounds(),
-    reading: () => this.editableDecor() === undefined ? undefined : {
-      sizeM: {
-        widthM: this.decorSizeFieldM(this.decorWidthInput),
-        lengthM: this.decorSizeFieldM(this.decorLengthInput),
-        heightM: this.decorSizeFieldM(this.decorHeightInput)
-      },
-      attitude: { headingDeg: this.numberOrUndefined(this.decorHeadingInput.value) ?? 0, pitchDeg: 0, rollDeg: 0 }
-    },
-    resize: sizeM => {
-      this.decorWidthInput.value = String(this.roundedMeters(sizeM.widthM))
-      this.decorLengthInput.value = String(this.roundedMeters(sizeM.lengthM))
-      this.decorHeightInput.value = String(this.roundedMeters(sizeM.heightM))
-      this.updateDecor()
-    },
-    turnTo: attitude => {
-      this.decorHeadingInput.value = String(this.rounded(((attitude.headingDeg % 360) + 360) % 360))
-      this.updateDecor()
-    },
+    reading: () => this.decorReading(),
+    resize: sizeM => this.commitDecorBase(view => {
+      Object.assign(view, { sizeM: { widthM: this.roundedMeters(sizeM.widthM), lengthM: this.roundedMeters(sizeM.lengthM), heightM: this.roundedMeters(sizeM.heightM) } })
+    }, "sizeM.widthM"),
+    turnTo: attitude => this.commitDecorBase(view => {
+      view.headingDeg = this.rounded(((attitude.headingDeg % 360) + 360) % 360)
+    }, "headingDeg"),
     rotateDegPerPx: DECOR_ROTATE_DEG_PER_PX
+  }
+
+  /** The selected object as the frame reads it: the sizes it states, or else those it is drawn at (a size none states is a metre). */
+  private decorReading(): { sizeM: { widthM: number, lengthM: number, heightM: number }, attitude: { headingDeg: number, pitchDeg: number, rollDeg: number } } | undefined {
+    const decor = this.editableDecor()
+    if (decor === undefined) return undefined
+    const natural = DecorSystem.naturalSize(decor.kind, decor.floors)
+    return {
+      sizeM: { widthM: decor.sizeM?.widthM ?? natural.widthM ?? 1, lengthM: decor.sizeM?.lengthM ?? natural.lengthM ?? 1, heightM: decor.sizeM?.heightM ?? natural.heightM ?? 1 },
+      attitude: { headingDeg: DecorBase.viewOf(decor, this.ufoElement.currentTime).headingDeg, pitchDeg: 0, rollDeg: 0 }
+    }
   }
 
   /** The wheel over a body takes it nearer or further, a tenth a notch; elsewhere it does what it
@@ -9892,10 +9602,6 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** What a size field states, or else what the object is drawn at (its placeholder). */
-  private decorSizeFieldM(input: HTMLInputElement): number {
-    return this.positiveMeters(input.value) ?? this.positiveMeters(input.placeholder) ?? 1
-  }
-
   /**
    * Whether a press at this point takes the selected decor object, to carry it: on the object itself, or
    * anywhere in the frame drawn round it that no other object covers. The frame is what the author sees as "the
@@ -9940,14 +9646,15 @@ export class SightingEditorElement extends HTMLElement {
     if (this.beginFrameDrag(this.decorFrame, point)) return true
     if (!this.grabsDecor(event, point, decor)) return false
     const ndc = this.ndcOf(event)
+    const start = DecorBase.viewOf(decor, this.ufoElement.currentTime)
     const grabHeightM = ndc ? this.sceneElement.decorGrabHeightAt?.(decor.id, ndc.x, ndc.y) ?? 0 : 0
     const ground = ndc && this.sceneElement.decorGroundPointAt(decor.id, ndc.x, ndc.y, grabHeightM)
     if (!ndc || !ground) return false
     this.dragState = {
       kind: "decor-move", id: decor.id, startGround: ground, grabHeightM, axis,
-      startAltitudeM: Number(this.decorAltitudeInput.value) || 0, startNdcY: ndc.y,
+      startAltitudeM: start.altitudeM, startNdcY: ndc.y,
       metresPerNdcY: this.sceneElement.decorMetresPerNdcY?.(decor.id) ?? 0,
-      startEastM: Number(this.decorEastInput.value) || 0, startNorthM: Number(this.decorNorthInput.value) || 0
+      startEastM: start.eastM, startNorthM: start.northM
     }
     this.setCanvasCursor("move")
     this.startDragListening()
@@ -9962,10 +9669,11 @@ export class SightingEditorElement extends HTMLElement {
     const ground = this.sceneElement.decorGroundPointAt(drag.id, ndc.x, ndc.y, drag.grabHeightM)
     if (!ground && drag.axis !== "up") return
     // x is east and z is south: the ground moved by the pointer, from where it was grabbed.
-    if (ground && (drag.axis === "ground" || drag.axis === "east")) this.decorEastInput.value = String(this.roundedMeters(drag.startEastM + ground.x - drag.startGround.x))
-    if (ground && (drag.axis === "ground" || drag.axis === "north")) this.decorNorthInput.value = String(this.roundedMeters(drag.startNorthM - (ground.z - drag.startGround.z)))
-    if (drag.axis === "up") this.decorAltitudeInput.value = String(this.roundedMeters(drag.startAltitudeM + (ndc.y - drag.startNdcY) * drag.metresPerNdcY))
-    this.updateDecor()
+    this.commitDecorBase(view => {
+      if (ground && (drag.axis === "ground" || drag.axis === "east")) view.eastM = this.roundedMeters(drag.startEastM + ground.x - drag.startGround.x)
+      if (ground && (drag.axis === "ground" || drag.axis === "north")) view.northM = this.roundedMeters(drag.startNorthM - (ground.z - drag.startGround.z))
+      if (drag.axis === "up") view.altitudeM = this.roundedMeters(drag.startAltitudeM + (ndc.y - drag.startNdcY) * drag.metresPerNdcY)
+    }, "eastM")
   }
 
   private beginCameraDrag(startPointer: { x: number; y: number }, pressedDecorId?: string, pressedBodyId?: string): void {

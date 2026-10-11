@@ -212,7 +212,7 @@ describe("SightingSummary", () => {
       // The selection is not the picker: the editor's chips detail what it has open, and that
       // stays true of any caller that names one.
       const fields = summary.entriesFor(inAField(), 0, { decorId: "tractor" }).filter(entry => entry.group === "decor")
-      expect(fields.map(entry => entry.field)).toContain("decorEast")
+      expect(fields.map(entry => entry.field)).toContain("decorBase.eastM")
     })
   })
 

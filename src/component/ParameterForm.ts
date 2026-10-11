@@ -132,11 +132,16 @@ export class ParameterForm {
         input.classList.toggle("parameter-derived", stated === undefined)
       } else if (spec.type === "choice") {
         const select = field as HTMLSelectElement
-        if (select !== active) select.value = typeof stated === "string" ? stated : (spec.required ? select.options[0].value : "")
+        const choices = spec.optionsOf?.(element, context) ?? spec.choices
+        // The options follow the element where they depend on it: the seats a vehicle has are not those of a building.
+        if ([...select.options].filter(option => option.value !== "").map(option => option.value).join("\n") !== choices.map(choice => choice.value).join("\n")) {
+          select.replaceChildren(...(spec.required ? [] : [new Option("—", "")]), ...choices.map(choice => new Option(this.read(choice.label) ?? choice.value, choice.value)))
+        }
+        if (select !== active) select.value = typeof stated === "string" && choices.some(choice => choice.value === stated) ? stated : (spec.required ? select.options[0]?.value ?? "" : "")
         if (!spec.required) {
           const effective = spec.effective?.(element, context)
-          const choice = spec.choices.find(candidate => candidate.value === effective)
-          select.options[0].textContent = choice ? (this.read(choice.label) ?? choice.value) : "—"
+          const choice = choices.find(candidate => candidate.value === effective)
+          select.options[0].textContent = choice ? (this.read(choice.label) ?? choice.value) : (this.read(spec.empty) ?? "—")
         }
       } else if (spec.type === "boolean") {
         const input = field as HTMLInputElement
@@ -149,6 +154,7 @@ export class ParameterForm {
       } else if (spec.type === "said") {
         const input = field as HTMLInputElement
         if (input !== active) input.value = this.values?.said().read(Parameters.read(element, spec.key) as SaidText | undefined) ?? ""
+        this.markMissing(spec, input)
       } else {
         const input = field as HTMLInputElement
         if (input !== active) {
@@ -226,6 +232,7 @@ export class ParameterForm {
           if (!target || !values) return
           // Into this language's entry, the others kept: written from nothing, an edit took every other language away.
           this.write(spec, values.said().write(Parameters.read(target, spec.key) as SaidText | undefined, input.value, values.writingLanguage()))
+          this.markMissing(spec, input)
         })
       } else {
         input.type = "text"
@@ -255,6 +262,13 @@ export class ParameterForm {
     // The unit stands AFTER the field, never in the label before it.
     if (unit) label.append(` ${unit}`)
     return label
+  }
+
+  /** A name left out is flagged, not refused: nothing here stops it being saved blank, it is made visibly wrong so it is not by accident. */
+  private markMissing(spec: ParameterSpec, input: HTMLInputElement): void {
+    if (spec.type !== "said" || !spec.required) return
+    input.classList.toggle("invalid", input.value === "")
+    input.setAttribute("aria-invalid", String(input.value === ""))
   }
 
   /** A set's row: its name, and its ticks under it. */

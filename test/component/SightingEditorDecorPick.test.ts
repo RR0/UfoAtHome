@@ -344,7 +344,7 @@ describe("picking scenery on the picture", () => {
     pickedDecor = undefined
     const element = twoBuildings()
     ;[...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-decor")!.click()
-    const east = element.shadowRoot!.getElementById("decorEast") as HTMLInputElement
+    const east = element.shadowRoot!.getElementById("decorBase.eastM") as HTMLInputElement
     const before = east.value
     const canvas = nestedCanvas(element)
 
@@ -358,7 +358,7 @@ describe("picking scenery on the picture", () => {
   it("does not carry it when another object stands in front of that point, nor when Cmd is held", () => {
     const element = twoBuildings()
     ;[...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-decor")!.click()
-    const east = element.shadowRoot!.getElementById("decorEast") as HTMLInputElement
+    const east = element.shadowRoot!.getElementById("decorBase.eastM") as HTMLInputElement
     const before = east.value
     const canvas = nestedCanvas(element)
     const drag = (init: MouseEventInit) => {
@@ -380,8 +380,8 @@ describe("picking scenery on the picture", () => {
     pickedDecor = undefined
     const element = twoBuildings()
     ;[...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-decor")!.click()
-    const east = element.shadowRoot!.getElementById("decorEast") as HTMLInputElement
-    const north = element.shadowRoot!.getElementById("decorNorth") as HTMLInputElement
+    const east = element.shadowRoot!.getElementById("decorBase.eastM") as HTMLInputElement
+    const north = element.shadowRoot!.getElementById("decorBase.northM") as HTMLInputElement
     const canvas = nestedCanvas(element)
     const drag = (init: MouseEventInit) => {
       canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 320, clientY: 180, bubbles: true, composed: true, ...init }))

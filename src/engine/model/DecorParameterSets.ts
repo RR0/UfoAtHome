@@ -22,6 +22,11 @@ import type { SaidText } from "./SaidText.js"
  */
 export class DecorParameterSets {
 
+  /** What a side of an object is called, relative to its heading — used by windows and by the seat of an observer alike. */
+  static sideLabel(side: DecorSide): SaidText {
+    return DecorParameterSets.SIDE_LABELS[side]
+  }
+
   private static readonly SIDE_LABELS: Record<DecorSide, SaidText> = {
     front: { en: "Front", fr: "Avant", es: "Frente", it: "Fronte" },
     behind: { en: "Behind", fr: "Arrière", es: "Detrás", it: "Dietro" },
@@ -54,7 +59,8 @@ export class DecorParameterSets {
     if (!model && hasWindows(object.kind)) parameters.push(...DecorParameterSets.windows(object.kind))
     if (object.kind === "bridge") parameters.push(...DecorParameterSets.bridge())
     if (object.kind === "wire") parameters.push(...DecorParameterSets.wire())
-    if (published?.parameters) parameters.push(...published.parameters)
+    // What the model publishes is written under `modelParameters`, so that no key of its can be taken for one of the object's own.
+    if (published?.parameters) parameters.push(...published.parameters.map(spec => ({ ...spec, key: `modelParameters.${spec.key}` })))
     if (parameters.length === 0) return undefined
     return { kind: `decor-${object.kind}`, title: { en: "Properties", fr: "Propriétés", es: "Propiedades", it: "Proprietà" }, parameters }
   }

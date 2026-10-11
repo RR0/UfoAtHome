@@ -36,6 +36,18 @@ export type ModelParameters = Partial<Pick<DecorParameters, "color" | "lit" | "l
    * DecorParameterSets), and written onto the object at their `key`.
    */
   parameters?: ReadonlyArray<ParameterSpec>
+  /**
+   * How each of those settings reaches the model, by key: a colour is applied to the materials of the file whose names
+   * match (regular expressions). A colour for the whole of a model makes no sense — it carries its own, which is why the
+   * plain colour is offered for the built-in shapes only — but the part of it that is a costume can take one.
+   */
+  bindings?: Record<string, ModelBinding>
+}
+
+/** Where a published colour goes in the model's file. */
+export interface ModelBinding {
+  /** Regular expressions on the names of the file's materials: those that match are tinted. */
+  materials: string[]
 }
 
 export class DecorTraits {

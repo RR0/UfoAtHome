@@ -2323,7 +2323,7 @@ export class SceneRenderer {
    * rebuilding the decor for an unrelated edit (a heading, a colour, a size) does not show the
    * built-in shape again for as long as the file takes to come back. Valid only while the object
    * names the same model (see reuseLoadedDecorModel). */
-  private readonly loadedDecorModels = new Map<string, { ref: string, scene: Object3D, headingOffsetDeg?: number, depictedSizeM?: DecorModelEntry["sizeM"], credit: DecorModelCredit }>()
+  private readonly loadedDecorModels = new Map<string, { ref: string, scene: Object3D, headingOffsetDeg?: number, depictedSizeM?: DecorModelEntry["sizeM"], credit: DecorModelCredit, bindings?: NonNullable<DecorModelEntry["parameters"]>["bindings"] }>()
 
   /** Draws the object's model at once from what a previous build loaded, when it is still the
    * model the object names. The scene is cloned, not moved: the old group is disposed with the
@@ -2336,11 +2336,13 @@ export class SceneRenderer {
     return true
   }
 
-  private applyLoadedDecorModel(object: DecorObject, group: Object3D, loaded: { scene: Object3D, headingOffsetDeg?: number, depictedSizeM?: DecorModelEntry["sizeM"], credit: DecorModelCredit }): void {
+  private applyLoadedDecorModel(object: DecorObject, group: Object3D, loaded: { scene: Object3D, headingOffsetDeg?: number, depictedSizeM?: DecorModelEntry["sizeM"], credit: DecorModelCredit, bindings?: NonNullable<DecorModelEntry["parameters"]>["bindings"] }): void {
     const copy = loaded.scene.clone(true)
     copy.traverse(child => {
       if (child instanceof Mesh) child.userData.sharedModel = true
     })
+    // What the model publishes as settings (a costume colour) reaches its materials, on copies of them.
+    DecorSystem.tintModel(copy, object.modelParameters, loaded.bindings)
     DecorSystem.applyModel(group, object, copy, { headingOffsetDeg: loaded.headingOffsetDeg, depictedSizeM: loaded.depictedSizeM })
     this.decorModelCredits.set(object.id, loaded.credit)
   }
@@ -2378,7 +2380,7 @@ export class SceneRenderer {
       if (!standIn && object.kind !== "tree") Reflections.reflectOn(scene)
       // Only the catalogue can say what the real thing is; a bare url states a file and nothing
       // about what it depicts (see DecorModelEntry.sizeM and DecorSystem.applyModel).
-      const loaded = { ref: JSON.stringify(ref), scene, headingOffsetDeg: ref.headingOffsetDeg ?? entry?.headingOffsetDeg, depictedSizeM: entry?.sizeM, credit }
+      const loaded = { ref: JSON.stringify(ref), scene, headingOffsetDeg: ref.headingOffsetDeg ?? entry?.headingOffsetDeg, depictedSizeM: entry?.sizeM, credit, bindings: entry?.parameters?.bindings }
       if (!standIn) this.loadedDecorModels.set(object.id, loaded)
       this.applyLoadedDecorModel(object, group, loaded)
       this.render()

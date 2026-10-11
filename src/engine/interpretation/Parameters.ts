@@ -76,6 +76,10 @@ export interface ChoiceParameter extends ParameterBase {
   /** A choice that cannot be left unmade: there is no empty option. */
   required?: boolean
   choices: ReadonlyArray<{ value: string, label: SaidText }>
+  /** The choices when they depend on the element (the seats a vehicle has): replaces `choices`. */
+  optionsOf?: (element: ParameterHolder, context?: unknown) => ReadonlyArray<{ value: string, label: SaidText }>
+  /** What the empty option says when nothing is in force ("none", "Not present"); a dash when absent. */
+  empty?: SaidText
   /** What is in force when none is chosen, shown as the empty choice. */
   effective?: (element: ParameterHolder, context?: unknown) => string | undefined
 }
@@ -99,6 +103,8 @@ export interface TextParameter extends ParameterBase {
 export interface SaidParameter extends ParameterBase {
   type: "said"
   placeholder?: SaidText
+  /** Flagged when empty, not refused: nothing stops a name being left out, it is made visibly missing. */
+  required?: boolean
 }
 
 /**

@@ -290,7 +290,7 @@ describe("undo and redo", () => {
     await edited(element, () => addBuildings(element, 1))
     const key = (init: KeyboardEventInit, target: EventTarget = element) =>
       target.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, composed: true, ...init }))
-    const field = element.shadowRoot!.getElementById("decorTitle") as HTMLInputElement
+    const field = element.shadowRoot!.getElementById("decorBase.title") as HTMLInputElement
     key({ key: "z", ctrlKey: true }, field)
     expect(element.sightingData.decor ?? []).toHaveLength(1)
     key({ key: "z", ctrlKey: true })

@@ -429,12 +429,11 @@ describe("editing an object that is named in several languages", () => {
     addBuildings(element, 1)
     const json = element.sightingData
     element.sightingData = { ...json, decor: json.decor!.map(decor => ({ ...decor, title: { fr: "Arbre", en: "Tree", es: "Árbol" } })) }
-    const inside = element as unknown as { selectDecor(id: string): void, updateDecor(): void }
+    const inside = element as unknown as { selectDecor(id: string): void }
     inside.selectDecor(element.sightingData.decor![0].id)
-    const east = element.shadowRoot!.getElementById("decorEast") as HTMLInputElement
+    const east = element.shadowRoot!.getElementById("decorBase.eastM") as HTMLInputElement
     east.value = "12.5"
-
-    inside.updateDecor()
+    east.dispatchEvent(new Event("input", { bubbles: true }))
 
     const decor = element.sightingData.decor![0]
     expect(decor.eastM).toBe(12.5)

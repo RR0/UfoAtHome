@@ -166,20 +166,9 @@ export const html = `
     <label><span id="label-decor">Environment</span> <select id="decor"></select></label>
     <button id="look-at-decor" type="button" class="icon-btn" title="Look at it" aria-label="Look at it">🎯</button>
     <button id="delete-decor" type="button" class="icon-btn" title="Delete decor" aria-label="Delete decor">🗑</button>
-    <label><span id="label-decor-title">Name</span> <input id="decorTitle" type="text"/></label>
-    <label><span id="label-decor-east">Distance east</span> <input id="decorEast" type="number" min="-30000" max="30000" step="0.5" value="0"/> m</label>
-    <label><span id="label-decor-north">Distance north</span> <input id="decorNorth" type="number" min="-30000" max="30000" step="0.5" value="0"/> m</label>
-    <label><span id="label-decor-altitude">Altitude</span> <input id="decorAltitude" type="number" min="-1000" max="30000" step="1" value="0"/> m</label>
-    <label><span id="label-decor-heading">Heading</span> <input id="decorHeading" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
-    <label><span id="label-decor-color">Colour</span> <input id="decorColor" type="color" value="#808080"/></label>
-    <!-- Left EMPTY when the recording states no size, with the built-in shape's own measurement as
-         the placeholder: a real number typed into a field nobody measured would be a measurement
-         invented by the form, which is the one thing this project's data refuses to hold (see
-         DecorSize). Filling any one of the three states all three — the other two then take the
-         built-in shape's own value, which is what was being drawn anyway. -->
-    <label><span id="label-decor-width">Width</span> <input id="decorWidth" type="number" min="0.1" max="1000" step="0.1" autocomplete="off"/> m</label>
-    <label><span id="label-decor-length">Length</span> <input id="decorLength" type="number" min="0.1" max="1000" step="0.1" autocomplete="off"/> m</label>
-    <label><span id="label-decor-height">Height</span> <input id="decorHeight" type="number" min="0.1" max="1000" step="0.1" autocomplete="off"/> m</label>
+    <!-- The base properties — name, place, heading, colour, measures — are drawn from what a decor object says it has (see
+         DecorBaseParameterSets and ParameterForm). The model it is drawn as is chosen below, in a window of pictures. -->
+    <div id="decor-base" class="decor-parameters"></div>
     <label><span id="label-decor-model">3D model</span> <select id="decorModel"></select></label>
     <!-- Collapsed by default, on the user's own instruction: naming a file by hand is the rare
          case and would otherwise clutter every decor object with five fields it never uses. -->
@@ -192,29 +181,12 @@ export const html = `
       <label><span id="label-decor-model-source">Where it came from</span> <input id="decorModelSource" type="url" placeholder="https://…"/></label>
       <p id="decor-model-catalogue" class="decor-model-note" hidden></p>
     </details>
-    <label><span id="label-decor-lit">Lit</span> <input id="decorLit" type="checkbox"/></label>
-    <label><span id="label-decor-lights">Lights</span> <select id="decorLightRig"></select></label>
     <!-- The properties the kind of this object says it has beyond placement and size — floors, windows, a
          bridge's railing, a line's poles — drawn from what the kind publishes (see DecorParameterSets and
          ParameterForm), so that the editor knows no kind. -->
     <div id="decor-parameters" class="decor-parameters"></div>
-    <label><span id="label-decor-observer-side">Observer location</span>
-      <select id="decorObserverSide">
-        <option id="option-observer-side-none" value="">Not present</option>
-        <option id="option-observer-side-front" value="front">Front</option>
-        <option id="option-observer-side-behind" value="behind">Behind</option>
-        <option id="option-observer-side-left" value="left">Left</option>
-        <option id="option-observer-side-right" value="right">Right</option>
-        <!-- Vehicle only — the 4 seat/door positions replace front/behind/left/right above for
-             that kind (see observerSidesFor's own doc comment: you sit AT a door, never "at the
-             windshield"). Hidden by default, same technique as decorKind's own hidden "observer"
-             option — toggled per kind in syncDecorVisibility. -->
-        <option id="option-observer-side-front-left" value="front-left" hidden>Front-left</option>
-        <option id="option-observer-side-front-right" value="front-right" hidden>Front-right</option>
-        <option id="option-observer-side-behind-left" value="behind-left" hidden>Behind-left</option>
-        <option id="option-observer-side-behind-right" value="behind-right" hidden>Behind-right</option>
-      </select>
-    </label>
+    <!-- Lit, lamps, and where the observer sits: drawn the same way, after the properties of the kind. -->
+    <div id="decor-state" class="decor-parameters"></div>
     <!-- flex-basis:100% (see the CSS rule below) forces this row onto its own line, after
          whatever decor properties are showing above — the only thing shown at all when there's
          no decor yet (see the block above's own comment). -->

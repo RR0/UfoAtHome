@@ -468,6 +468,23 @@
       "file": "makehuman-people/farmer-40s.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "heightM": 1.74 },
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "costumeColor",
+            "fallback": "#c8c8c8",
+            "label": { "en": "Costume colour", "fr": "Couleur du costume", "es": "Color del traje", "it": "Colore del costume" },
+            "hint": {
+              "en": "The colour of the clothes, over the model's own: the figure keeps its skin, hair and shoes.",
+              "fr": "La couleur des vêtements, sur celle du modèle : la silhouette garde sa peau, ses cheveux et ses chaussures.",
+              "es": "El color de la ropa, sobre el del modelo: la figura conserva su piel, su pelo y sus zapatos.",
+              "it": "Il colore dei vestiti, sopra quello del modello: la figura mantiene pelle, capelli e scarpe."
+            }
+          }
+        ],
+        "bindings": { "costumeColor": { "materials": ["^Human\\.(fe)?male_[a-z]*(suit|coverall)"] } }
+      },
       "credit": {
         "title": "Man in his forties, denim shirt and jeans",
         "author": "MakeHuman community (MPFB), assembled by UFO@home",
@@ -482,6 +499,23 @@
       "file": "makehuman-people/man-overalls.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "heightM": 1.78 },
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "costumeColor",
+            "fallback": "#c8c8c8",
+            "label": { "en": "Costume colour", "fr": "Couleur du costume", "es": "Color del traje", "it": "Colore del costume" },
+            "hint": {
+              "en": "The colour of the clothes, over the model's own: the figure keeps its skin, hair and shoes.",
+              "fr": "La couleur des vêtements, sur celle du modèle : la silhouette garde sa peau, ses cheveux et ses chaussures.",
+              "es": "El color de la ropa, sobre el del modelo: la figura conserva su piel, su pelo y sus zapatos.",
+              "it": "Il colore dei vestiti, sopra quello del modello: la figura mantiene pelle, capelli e scarpe."
+            }
+          }
+        ],
+        "bindings": { "costumeColor": { "materials": ["^Human\\.(fe)?male_[a-z]*(suit|coverall)"] } }
+      },
       "credit": {
         "title": "Man in overalls",
         "author": "MakeHuman community (MPFB), assembled by UFO@home",
@@ -496,6 +530,23 @@
       "file": "makehuman-people/man-jacket.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "heightM": 1.8 },
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "costumeColor",
+            "fallback": "#c8c8c8",
+            "label": { "en": "Costume colour", "fr": "Couleur du costume", "es": "Color del traje", "it": "Colore del costume" },
+            "hint": {
+              "en": "The colour of the clothes, over the model's own: the figure keeps its skin, hair and shoes.",
+              "fr": "La couleur des vêtements, sur celle du modèle : la silhouette garde sa peau, ses cheveux et ses chaussures.",
+              "es": "El color de la ropa, sobre el del modelo: la figura conserva su piel, su pelo y sus zapatos.",
+              "it": "Il colore dei vestiti, sopra quello del modello: la figura mantiene pelle, capelli e scarpe."
+            }
+          }
+        ],
+        "bindings": { "costumeColor": { "materials": ["^Human\\.(fe)?male_[a-z]*(suit|coverall)"] } }
+      },
       "credit": {
         "title": "Man in a green jacket and jeans",
         "author": "MakeHuman community (MPFB), assembled by UFO@home",
@@ -510,6 +561,23 @@
       "file": "makehuman-people/old-man.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "heightM": 1.7 },
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "costumeColor",
+            "fallback": "#c8c8c8",
+            "label": { "en": "Costume colour", "fr": "Couleur du costume", "es": "Color del traje", "it": "Colore del costume" },
+            "hint": {
+              "en": "The colour of the clothes, over the model's own: the figure keeps its skin, hair and shoes.",
+              "fr": "La couleur des vêtements, sur celle du modèle : la silhouette garde sa peau, ses cheveux et ses chaussures.",
+              "es": "El color de la ropa, sobre el del modelo: la figura conserva su piel, su pelo y sus zapatos.",
+              "it": "Il colore dei vestiti, sopra quello del modello: la figura mantiene pelle, capelli e scarpe."
+            }
+          }
+        ],
+        "bindings": { "costumeColor": { "materials": ["^Human\\.(fe)?male_[a-z]*(suit|coverall)"] } }
+      },
       "credit": {
         "title": "Old man, striped shirt",
         "author": "MakeHuman community (MPFB), assembled by UFO@home",
@@ -524,6 +592,23 @@
       "file": "makehuman-people/woman.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "heightM": 1.65 },
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "costumeColor",
+            "fallback": "#c8c8c8",
+            "label": { "en": "Costume colour", "fr": "Couleur du costume", "es": "Color del traje", "it": "Colore del costume" },
+            "hint": {
+              "en": "The colour of the clothes, over the model's own: the figure keeps its skin, hair and shoes.",
+              "fr": "La couleur des vêtements, sur celle du modèle : la silhouette garde sa peau, ses cheveux et ses chaussures.",
+              "es": "El color de la ropa, sobre el del modelo: la figura conserva su piel, su pelo y sus zapatos.",
+              "it": "Il colore dei vestiti, sopra quello del modello: la figura mantiene pelle, capelli e scarpe."
+            }
+          }
+        ],
+        "bindings": { "costumeColor": { "materials": ["^Human\\.(fe)?male_[a-z]*(suit|coverall)"] } }
+      },
       "credit": {
         "title": "Woman, plain top and jeans",
         "author": "MakeHuman community (MPFB), assembled by UFO@home",
@@ -538,6 +623,23 @@
       "file": "makehuman-people/cussac-francois-13.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "heightM": 1.55 },
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "costumeColor",
+            "fallback": "#c8c8c8",
+            "label": { "en": "Costume colour", "fr": "Couleur du costume", "es": "Color del traje", "it": "Colore del costume" },
+            "hint": {
+              "en": "The colour of the clothes, over the model's own: the figure keeps its skin, hair and shoes.",
+              "fr": "La couleur des vêtements, sur celle du modèle : la silhouette garde sa peau, ses cheveux et ses chaussures.",
+              "es": "El color de la ropa, sobre el del modelo: la figura conserva su piel, su pelo y sus zapatos.",
+              "it": "Il colore dei vestiti, sopra quello del modello: la figura mantiene pelle, capelli e scarpe."
+            }
+          }
+        ],
+        "bindings": { "costumeColor": { "materials": ["^Human\\.(fe)?male_[a-z]*(suit|coverall)"] } }
+      },
       "credit": {
         "title": "François, 13 and a half, dark top and trousers (realistic, MakeHuman)",
         "author": "MakeHuman community (MPFB), assembled by UFO@home",
@@ -552,6 +654,23 @@
       "file": "makehuman-people/cussac-anne-marie-9.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "heightM": 1.3 },
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "costumeColor",
+            "fallback": "#c8c8c8",
+            "label": { "en": "Costume colour", "fr": "Couleur du costume", "es": "Color del traje", "it": "Colore del costume" },
+            "hint": {
+              "en": "The colour of the clothes, over the model's own: the figure keeps its skin, hair and shoes.",
+              "fr": "La couleur des vêtements, sur celle du modèle : la silhouette garde sa peau, ses cheveux et ses chaussures.",
+              "es": "El color de la ropa, sobre el del modelo: la figura conserva su piel, su pelo y sus zapatos.",
+              "it": "Il colore dei vestiti, sopra quello del modello: la figura mantiene pelle, capelli e scarpe."
+            }
+          }
+        ],
+        "bindings": { "costumeColor": { "materials": ["^Human\\.(fe)?male_[a-z]*(suit|coverall)"] } }
+      },
       "credit": {
         "title": "Anne-Marie, 9, dark jacket (realistic, MakeHuman)",
         "author": "MakeHuman community (MPFB), assembled by UFO@home",
@@ -580,6 +699,23 @@
       "file": "makehuman-people/valensole-being-pv-1965-07-02.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "heightM": 1.0 },
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "costumeColor",
+            "fallback": "#c8c8c8",
+            "label": { "en": "Costume colour", "fr": "Couleur du costume", "es": "Color del traje", "it": "Colore del costume" },
+            "hint": {
+              "en": "The colour of the clothes, over the model's own: the figure keeps its skin, hair and shoes.",
+              "fr": "La couleur des vêtements, sur celle du modèle : la silhouette garde sa peau, ses cheveux et ses chaussures.",
+              "es": "El color de la ropa, sobre el del modelo: la figura conserva su piel, su pelo y sus zapatos.",
+              "it": "Il colore dei vestiti, sopra quello del modello: la figura mantiene pelle, capelli e scarpe."
+            }
+          }
+        ],
+        "bindings": { "costumeColor": { "materials": ["^Human\\.(fe)?male_[a-z]*(suit|coverall)"] } }
+      },
       "credit": {
         "title": "Valensole man, a stand-in after the procès-verbal of 2 July 1965",
         "author": "MakeHuman community (MPFB), assembled by UFO@home",
@@ -594,6 +730,23 @@
       "file": "makehuman-people/valensole-being-pv-1965-08-18.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "heightM": 0.95 },
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "costumeColor",
+            "fallback": "#c8c8c8",
+            "label": { "en": "Costume colour", "fr": "Couleur du costume", "es": "Color del traje", "it": "Colore del costume" },
+            "hint": {
+              "en": "The colour of the clothes, over the model's own: the figure keeps its skin, hair and shoes.",
+              "fr": "La couleur des vêtements, sur celle du modèle : la silhouette garde sa peau, ses cheveux et ses chaussures.",
+              "es": "El color de la ropa, sobre el del modelo: la figura conserva su piel, su pelo y sus zapatos.",
+              "it": "Il colore dei vestiti, sopra quello del modello: la figura mantiene pelle, capelli e scarpe."
+            }
+          }
+        ],
+        "bindings": { "costumeColor": { "materials": ["^Human\\.(fe)?male_[a-z]*(suit|coverall)"] } }
+      },
       "credit": {
         "title": "Valensole being, a stand-in after the procès-verbal of 18 August 1965",
         "author": "MakeHuman community (MPFB), assembled by UFO@home",
@@ -608,6 +761,23 @@
       "file": "makehuman-people/cussac-being.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "heightM": 1.1 },
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "costumeColor",
+            "fallback": "#c8c8c8",
+            "label": { "en": "Costume colour", "fr": "Couleur du costume", "es": "Color del traje", "it": "Colore del costume" },
+            "hint": {
+              "en": "The colour of the clothes, over the model's own: the figure keeps its skin, hair and shoes.",
+              "fr": "La couleur des vêtements, sur celle du modèle : la silhouette garde sa peau, ses cheveux et ses chaussures.",
+              "es": "El color de la ropa, sobre el del modelo: la figura conserva su piel, su pelo y sus zapatos.",
+              "it": "Il colore dei vestiti, sopra quello del modello: la figura mantiene pelle, capelli e scarpe."
+            }
+          }
+        ],
+        "bindings": { "costumeColor": { "materials": ["^Human\\.(fe)?male_[a-z]*(suit|coverall)"] } }
+      },
       "credit": {
         "title": "Cussac being, a stand-in after the children's accounts of 29 August 1967",
         "author": "MakeHuman community (MPFB), assembled by UFO@home",
@@ -622,6 +792,23 @@
       "file": "makehuman-people/socorro-figure.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "heightM": 1.3 },
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "costumeColor",
+            "fallback": "#c8c8c8",
+            "label": { "en": "Costume colour", "fr": "Couleur du costume", "es": "Color del traje", "it": "Colore del costume" },
+            "hint": {
+              "en": "The colour of the clothes, over the model's own: the figure keeps its skin, hair and shoes.",
+              "fr": "La couleur des vêtements, sur celle du modèle : la silhouette garde sa peau, ses cheveux et ses chaussures.",
+              "es": "El color de la ropa, sobre el del modelo: la figura conserva su piel, su pelo y sus zapatos.",
+              "it": "Il colore dei vestiti, sopra quello del modello: la figura mantiene pelle, capelli e scarpe."
+            }
+          }
+        ],
+        "bindings": { "costumeColor": { "materials": ["^Human\\.(fe)?male_[a-z]*(suit|coverall)"] } }
+      },
       "credit": {
         "title": "Socorro figure, a stand-in after Lonnie Zamora's account: the Valensole man of 2 July 1965 in white cloth",
         "author": "MakeHuman community (MPFB), assembled by UFO@home",

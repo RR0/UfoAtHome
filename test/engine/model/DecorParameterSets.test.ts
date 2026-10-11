@@ -35,7 +35,7 @@ describe("DecorParameterSets", () => {
 
   test("what a model publishes is added to what its kind has", () => {
     const published = { parameters: [{ type: "number" as const, key: "mastM", label: "Mast", min: 1, max: 30, step: 1 }] }
-    expect(DecorParameterSets.of({ kind: "tree", model: { id: "catalogue-mast" } }, published)?.parameters.map(spec => spec.key)).toEqual(["mastM"])
+    expect(DecorParameterSets.of({ kind: "tree", model: { id: "catalogue-mast" } }, published)?.parameters.map(spec => spec.key)).toEqual(["modelParameters.mastM"])
     expect(keys("building", { model: { id: "catalogue-house" } })).toBeUndefined()
   })
 

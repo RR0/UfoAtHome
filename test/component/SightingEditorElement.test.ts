@@ -2876,7 +2876,7 @@ describe("SightingEditorElement toolbar groups", () => {
     expect(decorPanel.querySelector("#decor")).not.toBeNull()
     // What the kind of the selected object publishes (floors, windows…) is drawn into this host, once there is an object.
     expect(decorPanel.querySelector("#decor-parameters")).not.toBeNull()
-    expect(element.shadowRoot!.getElementById("group-location")!.querySelector("#decorEast")).toBeNull()
+    expect(element.shadowRoot!.getElementById("group-location")!.querySelector("#decorBase.eastM")).toBeNull()
     expect(element.shadowRoot!.getElementById("group-location")!.querySelector("#lat")).not.toBeNull()
   })
 
@@ -2932,15 +2932,15 @@ describe("SightingEditorElement parameter summary", () => {
     const element = mount()
     setInput(element.shadowRoot!, "elevation", "220")
     element.shadowRoot!.getElementById("add-decor-building")!.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    setInput(element.shadowRoot!, "decorAltitude", "12")
+    setInput(element.shadowRoot!, "decorBase.altitudeM", "12")
 
-    const decorNest = chips(element).find(c => c.dataset.field === "decorAltitude")!.closest(".param-nest")!
+    const decorNest = chips(element).find(c => c.dataset.field === "decorBase.altitudeM")!.closest(".param-nest")!
     expect(decorNest.querySelector(".param-nest-label")!.textContent)
       .toBe(element.shadowRoot!.getElementById("label-decor-group")!.textContent)
     // The sighting's own altitude is in the location's box, not the decor's, and neither one wears a prefix any more.
     expect(chips(element).find(c => c.dataset.field === "elevation")!.closest(".param-nest")).not.toBe(decorNest)
     expect(chips(element).find(c => c.dataset.field === "elevation")!.textContent).not.toContain("·")
-    expect(chips(element).find(c => c.dataset.field === "decorAltitude")!.textContent).not.toContain("·")
+    expect(chips(element).find(c => c.dataset.field === "decorBase.altitudeM")!.textContent).not.toContain("·")
   })
 
   it("boxes what is said about the observer under the observer", () => {
@@ -3563,14 +3563,13 @@ describe("SightingEditorElement decor group", () => {
       return (el.closest("label") ?? el).hidden
     }
     expect((shadow.getElementById("delete-decor") as HTMLButtonElement).disabled).toBe(true)
-    expect((shadow.getElementById("decorEast") as HTMLInputElement).disabled).toBe(true)
     expect(rowHidden("decor")).toBe(true)
     expect(rowHidden("delete-decor")).toBe(true)
-    expect(rowHidden("decorTitle")).toBe(true)
-    expect(rowHidden("decorEast")).toBe(true)
-    expect(rowHidden("decorNorth")).toBe(true)
-    expect(rowHidden("decorHeading")).toBe(true)
-    expect(rowHidden("decorLit")).toBe(true)
+    // The properties are drawn once there is an object to have them: until then their hosts are empty and hidden.
+    for (const host of ["decor-base", "decor-state", "decor-parameters"]) {
+      expect((shadow.getElementById(host) as HTMLElement).hidden, host).toBe(true)
+      expect((shadow.getElementById(host) as HTMLElement).children.length, host).toBe(0)
+    }
     // The Add row itself is the one thing that's never hidden — always reachable even with
     // nothing to edit yet.
     expect((shadow.getElementById("add-decor-building") as HTMLElement).closest(".decor-add-row")).not.toBeNull()
@@ -3587,8 +3586,8 @@ describe("SightingEditorElement decor group", () => {
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
     expect(rowHidden("decor")).toBe(false)
     expect(rowHidden("delete-decor")).toBe(false)
-    expect(rowHidden("decorTitle")).toBe(false)
-    expect(rowHidden("decorEast")).toBe(false)
+    expect(rowHidden("decorBase.title")).toBe(false)
+    expect(rowHidden("decorBase.eastM")).toBe(false)
   })
 
   it("shows what the built-in shape measures as a PLACEHOLDER, leaving the size unstated", () => {
@@ -3599,7 +3598,7 @@ describe("SightingEditorElement decor group", () => {
     ;(shadow.getElementById("decorKind") as HTMLSelectElement).value = "vehicle"
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
 
-    const length = shadow.getElementById("decorLength") as HTMLInputElement
+    const length = shadow.getElementById("decorBase.sizeM.lengthM") as HTMLInputElement
     expect(length.value).toBe("")
     expect(Number(length.placeholder)).toBeCloseTo(4.35, 2)
     expect(element.sightingData.decor![0].sizeM).toBeUndefined()
@@ -3611,7 +3610,7 @@ describe("SightingEditorElement decor group", () => {
     ;(shadow.getElementById("decorKind") as HTMLSelectElement).value = "vehicle"
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
 
-    const length = shadow.getElementById("decorLength") as HTMLInputElement
+    const length = shadow.getElementById("decorBase.sizeM.lengthM") as HTMLInputElement
     length.value = "5.44"
     length.dispatchEvent(new Event("input"))
 
@@ -3622,7 +3621,7 @@ describe("SightingEditorElement decor group", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
-    const height = shadow.getElementById("decorHeight") as HTMLInputElement
+    const height = shadow.getElementById("decorBase.sizeM.heightM") as HTMLInputElement
     height.value = "3"
     height.dispatchEvent(new Event("input"))
     expect(element.sightingData.decor![0].sizeM).toEqual({ widthM: undefined, lengthM: undefined, heightM: 3 })
@@ -3699,7 +3698,7 @@ describe("SightingEditorElement decor group", () => {
 
     const decorSelect = shadow.getElementById("decor") as HTMLSelectElement
     expect(decorSelect.options[1].value).toBe(decor[1].id)
-    expect((shadow.getElementById("decorEast") as HTMLInputElement).disabled).toBe(false)
+    expect((shadow.getElementById("decorBase.eastM") as HTMLInputElement).disabled).toBe(false)
   })
 
   it("fills the Name field with the same numbered label the dropdown shows, so an untouched decor object is never nameless", () => {
@@ -3716,7 +3715,7 @@ describe("SightingEditorElement decor group", () => {
     expect(decor.map(d => d.title)).toEqual(["Streetlight 1", "Streetlight 2"])
     const decorSelect = shadow.getElementById("decor") as HTMLSelectElement
     expect(decorSelect.options[1].textContent).toBe("Streetlight 2")
-    const titleInput = shadow.getElementById("decorTitle") as HTMLInputElement
+    const titleInput = shadow.getElementById("decorBase.title") as HTMLInputElement
     expect(titleInput.value).toBe("Streetlight 2") // the just-added, now-selected one
   })
 
@@ -3724,7 +3723,7 @@ describe("SightingEditorElement decor group", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
-    const titleInput = shadow.getElementById("decorTitle") as HTMLInputElement
+    const titleInput = shadow.getElementById("decorBase.title") as HTMLInputElement
     expect(titleInput.classList.contains("invalid")).toBe(false)
 
     titleInput.value = ""
@@ -3743,9 +3742,9 @@ describe("SightingEditorElement decor group", () => {
     const shadow = element.shadowRoot!
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
 
-    const eastInput = shadow.getElementById("decorEast") as HTMLInputElement
-    const northInput = shadow.getElementById("decorNorth") as HTMLInputElement
-    const headingInput = shadow.getElementById("decorHeading") as HTMLInputElement
+    const eastInput = shadow.getElementById("decorBase.eastM") as HTMLInputElement
+    const northInput = shadow.getElementById("decorBase.northM") as HTMLInputElement
+    const headingInput = shadow.getElementById("decorBase.headingDeg") as HTMLInputElement
 
     eastInput.value = "12.5"
     eastInput.dispatchEvent(new Event("input"))
@@ -3765,7 +3764,7 @@ describe("SightingEditorElement decor group", () => {
     durationInput.value = "10"
     durationInput.dispatchEvent(new Event("input"))
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
-    const litInput = shadow.getElementById("decorLit") as HTMLInputElement
+    const litInput = shadow.getElementById("decorState.lit") as HTMLInputElement
 
     litInput.checked = true
     litInput.dispatchEvent(new Event("input"))
@@ -3781,7 +3780,7 @@ describe("SightingEditorElement decor group", () => {
     durationInput.value = "10"
     durationInput.dispatchEvent(new Event("input"))
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
-    const litInput = shadow.getElementById("decorLit") as HTMLInputElement
+    const litInput = shadow.getElementById("decorState.lit") as HTMLInputElement
     litInput.checked = true
     litInput.dispatchEvent(new Event("input"))
 
@@ -3834,7 +3833,7 @@ describe("SightingEditorElement decor group", () => {
     const shadow = element.shadowRoot!
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
 
-    const titleInput = shadow.getElementById("decorTitle") as HTMLInputElement
+    const titleInput = shadow.getElementById("decorBase.title") as HTMLInputElement
     titleInput.value = "Streetlight on Elm St"
     titleInput.dispatchEvent(new Event("input"))
 
@@ -3937,9 +3936,9 @@ describe("SightingEditorElement decor group", () => {
     occupiedFloorInput.dispatchEvent(new Event("input"))
     expect(element.sightingData.decor![0].occupiedFloor).toBe(1)
 
-    const observerSideSelect = shadow.getElementById("decorObserverSide") as HTMLSelectElement
+    const observerSideSelect = shadow.getElementById("decorState.observerSide") as HTMLSelectElement
     observerSideSelect.value = "front"
-    observerSideSelect.dispatchEvent(new Event("change"))
+    observerSideSelect.dispatchEvent(new Event("input", { bubbles: true }))
 
     expect(occupiedFloorInput.closest("label")!.hidden).toBe(false)
     expect(element.sightingData.decor![0].observerSide).toBe("front")
@@ -3967,7 +3966,7 @@ describe("SightingEditorElement decor group", () => {
     decorSelect.value = vehicle.id
     decorSelect.dispatchEvent(new Event("change"))
 
-    const headingInput = shadow.getElementById("decorHeading") as HTMLInputElement
+    const headingInput = shadow.getElementById("decorBase.headingDeg") as HTMLInputElement
     headingInput.value = "15"
     headingInput.dispatchEvent(new Event("input"))
 
@@ -4030,7 +4029,7 @@ describe("SightingEditorElement decor group", () => {
     it("an edit of the object elsewhere (its heading) does not undo a property typed here, nor the other way round", () => {
       const { element, shadow, type } = added("building")
       type("floors", "4")
-      const heading = shadow.getElementById("decorHeading") as HTMLInputElement
+      const heading = shadow.getElementById("decorBase.headingDeg") as HTMLInputElement
       heading.value = "40"
       heading.dispatchEvent(new Event("input"))
       type("occupiedFloor", "2")
@@ -4038,12 +4037,22 @@ describe("SightingEditorElement decor group", () => {
       expect([decor.floors, decor.headingDeg, decor.occupiedFloor]).toEqual([4, 40, 2])
     })
 
+    it("a model that publishes a costume colour gets that field and not the single colour, which only a built-in shape has", async () => {
+      const { DecorParameterSets } = await import("../../src/engine/model/DecorParameterSets.js")
+      const { DecorTraits } = await import("../../src/engine/model/DecorTraits.js")
+      const published = { parameters: [{ type: "colour" as const, key: "costumeColor", label: "Costume colour" }], bindings: { costumeColor: { materials: ["suit"] } } }
+      const being = { kind: "entity" as const, model: { id: "makehuman-woman" } }
+      expect(DecorTraits.of(being, published).color).toBe(false)
+      expect(DecorParameterSets.of(being, published)?.parameters.map(spec => spec.key)).toEqual(["modelParameters.costumeColor"])
+      expect(DecorTraits.of({ kind: "building" }).color).toBe(true)
+    })
+
     it("a catalogue model's own parameters would be drawn the same way: the set takes them from the model", async () => {
       const { DecorParameterSets } = await import("../../src/engine/model/DecorParameterSets.js")
       const set = DecorParameterSets.of({ kind: "vehicle", model: { id: "catalogue-car" } }, {
         parameters: [{ type: "number", key: "doorsOpenDeg", label: "Doors", min: 0, max: 90, step: 1, unit: "°" }]
       })
-      expect(set?.parameters.map(spec => spec.key)).toEqual(["doorsOpenDeg"])
+      expect(set?.parameters.map(spec => spec.key)).toEqual(["modelParameters.doorsOpenDeg"])
     })
   })
 })
@@ -4215,7 +4224,7 @@ describe("SightingEditorElement decor click-to-select", () => {
 
     const shadow = element.shadowRoot!
     expect((shadow.getElementById("decor") as HTMLSelectElement).value).toBe("decor-2")
-    expect((shadow.getElementById("decorTitle") as HTMLInputElement).value).toBe("Chêne")
+    expect((shadow.getElementById("decorBase.title") as HTMLInputElement).value).toBe("Chêne")
   })
 
   it("turns the view when dragged from over a decor object, and does not select it", () => {
