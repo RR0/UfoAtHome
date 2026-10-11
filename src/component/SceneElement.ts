@@ -1,6 +1,7 @@
 import { RoadGrade } from "../engine/place/RoadGrade.js"
 import { VehicleAudio } from "../audio/VehicleAudio.js"
 import { VehicleHearing } from "../engine/place/VehicleHearing.js"
+import type { AircraftKind } from "../engine/traffic/AircraftModels.js"
 import { resolveCloudLayers } from "../engine/model/CloudLayer.js"
 import type { CloudRendering } from "../render3d/LayeredCloudSystem.js"
 import { cloudOffsetAt, cloudPrerollAt } from "../render3d/CloudMotion.js"
@@ -415,6 +416,10 @@ export class SceneElement extends HTMLElement {
   /** The sound of the aircraft of a record, once there are any: its code comes with them (see trafficRuntime). */
   private aircraftAudio?: InstanceType<TrafficRuntime["AircraftAudio"]>
   private readonly vehicleHearing = new VehicleHearing()
+  /** The aircraft the recording places in its decor, heard like those of a record — see DecorAircraftHearing. */
+  private decorAircraftHearing?: InstanceType<TrafficRuntime["DecorAircraftHearing"]>
+  /** What each catalogue model says of the noise it makes in flight, once the catalogue has been asked. */
+  private readonly decorModelSounds = new Map<string, AircraftKind | "silent" | undefined>()
 
   private thunderTimeoutId?: number
 
@@ -1905,12 +1910,7 @@ export class SceneElement extends HTMLElement {
    * there from the start; and which aircraft could be heard at all is sorted out, once.
    */
   private startAircraftSound(asked: NonNullable<SceneElement["traffic"]>, runtime: TrafficRuntime): void {
-    if (!this.aircraftAudio) {
-      this.aircraftAudio = new runtime.AircraftAudio()
-      this.aircraftAudio.setLevel(this.ufoElement.level)
-      if (this.interacted) this.aircraftAudio.resume()
-      this.aircraftAudio.setPaused(this.ufoElement.playbackState !== "playing")
-    }
+    this.aircraftAudio ??= this.newAircraftAudio(runtime)
     this.sortOutAudible(asked, runtime)
   }
 
@@ -1926,23 +1926,69 @@ export class SceneElement extends HTMLElement {
    * sound left it. Nothing is worked out for a scene with no aircraft, and a scene that had some and has none now is silenced.
    */
   private pushAircraftSound(sighting: Sighting, t: number): void {
+    this.startDecorAircraftSound(sighting)
     const audio = this.aircraftAudio
     if (!audio) return
     const runtime = SceneElement.trafficRuntime
-    const traffic = this.traffic
-    const set = traffic?.set
-    if (!runtime || !traffic || !set || !traffic.audible || traffic.startMs === undefined || !traffic.observer) {
+    if (!runtime) {
       audio.setVoices([])
       return
     }
     const pose = resolveObserverPoseAt(sighting, t)
-    const observer = { lat: traffic.observer.lat, lng: traffic.observer.lng, heightM: pose?.elevationM ?? 0 }
+    const weather = resolveActualWeatherAt(sighting, t)
+    const options = { ambientDbA: runtime.AmbientNoise.dbA(weather), referenceAmplitude: runtime.AmbientNoise.referenceAmplitude(weather) }
+    const voices = this.trafficVoices(t, pose, options, runtime)
+    // The aircraft the recording places itself are heard like those of a record, and by the same ear: together the loudest few.
+    const origin = sighting.event.place?.[0]
+    const here = { lat: pose?.lat ?? origin?.lat, lng: pose?.lng ?? origin?.lng }
+    if (here.lat !== undefined && here.lng !== undefined) {
+      this.decorAircraftHearing ??= new runtime.DecorAircraftHearing()
+      voices.push(...this.decorAircraftHearing.voices(sighting, t, { lat: here.lat, lng: here.lng, heightM: pose?.elevationM ?? 0 }, options,
+        decor => this.decorModelSounds.get(decor.model?.id ?? "")))
+      voices.sort((a, b) => b.levelDbA - a.levelDbA)
+      voices.length = Math.min(voices.length, 4)
+    }
+    audio.setVoices(voices, pose?.headingDeg ?? 0)
+  }
+
+  /** The aircraft of the record of air traffic that are heard at `t`, if there are any to be. */
+  private trafficVoices(t: number, pose: ReturnType<typeof resolveObserverPoseAt>, options: { ambientDbA: number, referenceAmplitude: number },
+    runtime: TrafficRuntime): ReturnType<TrafficRuntime["TrafficSound"]["voices"]> {
+    const traffic = this.traffic
+    const set = traffic?.set
+    if (!traffic || !set || !traffic.audible || traffic.startMs === undefined || !traffic.observer) return []
     // Heard against the weather the scene plays, and in proportion to it: an aircraft at the level of the wind is played as loud as the wind bed is.
     // Not only the aircraft that are in the record now: the sound of one that has left it is still arriving.
-    const weather = resolveActualWeatherAt(sighting, t)
-    const voices = runtime.TrafficSound.voices(traffic.audible, set.flights, traffic.descriptions ?? new Map(), TrafficIds.keyOf, observer, traffic.startMs + t,
-      { ambientDbA: runtime.AmbientNoise.dbA(weather), referenceAmplitude: runtime.AmbientNoise.referenceAmplitude(weather) })
-    audio.setVoices(voices, pose?.headingDeg ?? 0)
+    const observer = { lat: traffic.observer.lat, lng: traffic.observer.lng, heightM: pose?.elevationM ?? 0 }
+    return runtime.TrafficSound.voices(traffic.audible, set.flights, traffic.descriptions ?? new Map(), TrafficIds.keyOf, observer, traffic.startMs + t, options)
+  }
+
+  /**
+   * Makes the sound player for the aircraft a recording places in its decor, which no record of traffic brings: like a vehicle, one that
+   * flies is heard. The code of the sound comes with the first of them (see trafficRuntime), and what the catalogue says of the models is asked once each.
+   */
+  private startDecorAircraftSound(sighting: Sighting): void {
+    const flying = sighting.decor.filter(decor => decor.kind === "aircraft" && decor.track?.some(keyframe => (keyframe.altitudeM ?? 0) > 0))
+    if (flying.length === 0) return
+    for (const decor of flying) {
+      const id = decor.model?.id
+      if (!id || decor.model?.url !== undefined || this.decorModelSounds.has(id)) continue
+      this.decorModelSounds.set(id, undefined)
+      void this.sceneRenderer.entryOfDecorModel(id).then(entry => { this.decorModelSounds.set(id, entry?.parameters?.sound) })
+    }
+    if (this.aircraftAudio || SceneElement.trafficRuntime) {
+      if (!this.aircraftAudio && SceneElement.trafficRuntime) this.aircraftAudio = this.newAircraftAudio(SceneElement.trafficRuntime)
+      return
+    }
+    void SceneElement.loadTrafficRuntime().catch(() => undefined)
+  }
+
+  private newAircraftAudio(runtime: TrafficRuntime): InstanceType<TrafficRuntime["AircraftAudio"]> {
+    const audio = new runtime.AircraftAudio()
+    audio.setLevel(this.ufoElement.level)
+    if (this.interacted) audio.resume()
+    audio.setPaused(this.ufoElement.playbackState !== "playing")
+    return audio
   }
 
   /** Tells whoever listens that the traffic changed, and draws it. */

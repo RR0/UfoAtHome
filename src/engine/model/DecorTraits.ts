@@ -3,6 +3,7 @@ import { canHoldObserver, decorModelOf, hasWindows } from "./Decor.js"
 import type { ParameterSpec } from "../interpretation/Parameters.js"
 import { LightRigs } from "./LightRig.js"
 import type { LightRig } from "./LightRig.js"
+import type { AircraftKind } from "../traffic/AircraftModels.js"
 
 /**
  * What can be set on a decor object, as the object itself says it: the one answer to "which of the
@@ -43,6 +44,11 @@ export type ModelParameters = Partial<Pick<DecorParameters, "color" | "lit" | "l
    * set of the kind, which is right for a model whose file says nothing (one at an address).
    */
   lightRigs?: ReadonlyArray<string>
+  /**
+   * The noise the machine makes in flight, when it is not an airliner's (see DecorObject.aircraftSound): "silent" for a stand-in for something
+   * whose noise nobody reported. Only the model knows what it depicts.
+   */
+  sound?: AircraftKind | "silent"
   /**
    * How each of those settings reaches the model, by key (see ModelBinding): a colour tints some of its materials, a switch
    * shows or hides some of its parts. A colour for the whole of a model makes no sense — it carries its own, which is why

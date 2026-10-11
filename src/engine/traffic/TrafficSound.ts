@@ -34,6 +34,8 @@ export interface TrafficSoundOptions extends AircraftHearingOptions {
    * after it has left the record, since it left the aircraft long before.
    */
   only?: (id: string) => boolean
+  /** What sort of machine an id is, when something other than a record's description knows (a decor aircraft's own sound). */
+  kindOf?: (id: string) => AircraftKind | undefined
   /** The amplitude a sound at the ambient noise's own level is played at: see AmbientNoise.referenceAmplitude. */
   referenceAmplitude?: number
 }
@@ -94,7 +96,7 @@ export class TrafficSound {
     for (const id of candidates) {
       const flight = flights.get(id)
       if (!flight || options.only?.(id) === false) continue
-      const kind = AircraftModels.of(descriptions.get(key(flight))).kind
+      const kind = options.kindOf?.(id) ?? AircraftModels.of(descriptions.get(key(flight))).kind
       const noise = AircraftHearing.noiseOfKind(kind)
       const heard = AircraftHearing.heardAt(flight, observer, t, { ...options, noise })
       if (!heard?.audible) continue

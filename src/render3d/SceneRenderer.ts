@@ -2204,6 +2204,11 @@ export class SceneRenderer {
    * decorModelSources.ts), and a choice that only took effect on the next unrelated change would
    * read as no choice at all.
    */
+  entryOfDecorModel(id: string): Promise<DecorModelEntry | undefined> {
+    return this.decorModelProvider.entry(id).catch(() => undefined)
+  }
+
+  /** (see entryOfDecorModel) */
   setDecorModelProvider(provider: DecorModelProvider): void {
     this.decorModelProvider = provider
     const decor = this.decorObjects

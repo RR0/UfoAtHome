@@ -58,6 +58,7 @@ export class DecorParameterSets {
     if (!model && object.kind === "building") parameters.push(...DecorParameterSets.floors())
     if (!model && hasWindows(object.kind)) parameters.push(...DecorParameterSets.windows(object.kind))
     if (object.kind === "vehicle") parameters.push(...DecorParameterSets.engine())
+    if (object.kind === "aircraft") parameters.push(...DecorParameterSets.aircraftSound(published))
     if (object.kind === "bridge") parameters.push(...DecorParameterSets.bridge())
     if (object.kind === "wire") parameters.push(...DecorParameterSets.wire())
     // What the model publishes is written under `modelParameters`, so that no key of its can be taken for one of the object's own.
@@ -131,6 +132,43 @@ export class DecorParameterSets {
         visibleWhen: element => Parameters.read(element, "engine.kind") !== undefined || (element as { engine?: unknown }).engine !== undefined
       }
     ]
+  }
+
+  /**
+   * What an aircraft in flight sounds like (see DecorObject.aircraftSound). It is heard like the traffic of a record, from its distance, late by
+   * the time sound takes, and shifted as it comes and goes: the choice is the sort of noise it makes at the source.
+   */
+  private static aircraftSound(published?: ModelParameters): ParameterSpec[] {
+    const kind = (value: string, en: string, fr: string, es: string, it: string) => ({ value, label: { en, fr, es, it } })
+    const modelSays = published?.sound
+    return [{
+      type: "choice", key: "aircraftSound",
+      group: { en: "Sound", fr: "Bruit", es: "Sonido", it: "Suono" },
+      label: { en: "Noise in flight", fr: "Bruit en vol", es: "Ruido en vuelo", it: "Rumore in volo" },
+      hint: { en: "What it sounds like while it flies: nothing is heard of a machine that flies silent, and the stand-in of a phenomenon says so.",
+        fr: "Ce qu'on entend quand il vole : rien d'une machine qui vole en silence, et la maquette d'un phénomène le dit.",
+        es: "Cómo suena mientras vuela: nada se oye de una máquina que vuela en silencio, y la maqueta de un fenómeno lo dice.",
+        it: "Come suona mentre vola: nulla si sente di una macchina che vola in silenzio, e il modello di un fenomeno lo dice." },
+      empty: modelSays === "silent"
+        ? { en: "Silent (as the model)", fr: "Silencieux (comme le modèle)", es: "Silencioso (como el modelo)", it: "Silenzioso (come il modello)" }
+        : { en: "As the model", fr: "Selon le modèle", es: "Según el modelo", it: "Secondo il modello" },
+      choices: [
+        kind("airliner-narrow", "Narrow-body airliner", "Avion de ligne monocouloir", "Avión de pasillo único", "Aereo di linea a fusoliera stretta"),
+        kind("airliner-wide", "Wide-body airliner", "Avion de ligne gros-porteur", "Avión de fuselaje ancho", "Aereo di linea a fusoliera larga"),
+        kind("regional-jet", "Regional jet", "Jet régional", "Jet regional", "Jet regionale"),
+        kind("regional-turboprop", "Turboprop", "Turbopropulseur", "Turbohélice", "Turboelica"),
+        kind("business-jet", "Business jet", "Jet d'affaires", "Jet privado", "Jet privato"),
+        kind("light-piston", "Light piston aircraft", "Avion léger à pistons", "Avioneta de pistones", "Aereo leggero a pistoni"),
+        kind("helicopter-light", "Light helicopter", "Hélicoptère léger", "Helicóptero ligero", "Elicottero leggero"),
+        kind("helicopter-medium", "Medium helicopter", "Hélicoptère moyen", "Helicóptero medio", "Elicottero medio"),
+        kind("helicopter-heavy", "Heavy helicopter", "Hélicoptère lourd", "Helicóptero pesado", "Elicottero pesante"),
+        kind("military-jet", "Military jet", "Avion de combat", "Reactor militar", "Jet militare"),
+        kind("ultralight", "Ultralight", "ULM", "Ultraligero", "Ultraleggero"),
+        kind("unmanned", "Drone", "Drone", "Dron", "Drone"),
+        kind("glider", "Glider", "Planeur", "Planeador", "Aliante"),
+        kind("silent", "Silent", "Silencieux", "Silencioso", "Silenzioso")
+      ]
+    }]
   }
 
   /** How a bridge is built: the defaults are those of an ordinary French overpass (see BridgeStructure). */

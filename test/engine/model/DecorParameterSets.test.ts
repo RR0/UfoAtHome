@@ -30,6 +30,14 @@ describe("DecorParameterSets", () => {
     expect(noise.visibleWhen!({ engine: {} })).toBe(true)
   })
 
+  test("an aircraft says what it sounds like in flight, and silent is one of the answers", () => {
+    const set = DecorParameterSets.of({ kind: "aircraft" })!
+    expect(set.parameters.map(spec => spec.key)).toEqual(["aircraftSound"])
+    const sound = set.parameters[0] as unknown as { choices: { value: string }[] }
+    expect(sound.choices.map(choice => choice.value)).toContain("silent")
+    expect(sound.choices.map(choice => choice.value)).toContain("helicopter-light")
+  })
+
   test("a bridge and an overhead line have the settings their structure takes", () => {
     expect(keys("bridge")).toEqual(["bridge.spanM", "bridge.deckThicknessM", "bridge.railing.heightM", "bridge.railing.postSpacingM", "bridge.railing.rails"])
     expect(keys("wire")).toEqual(["wire.poles", "wire.diameterM", "wire.poleHeightM"])

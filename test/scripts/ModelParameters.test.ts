@@ -67,9 +67,21 @@ describe("the settings the catalogue's models publish", () => {
       return DecorParameterSets.of(object, byId.get(decorModelOf(object)!.id!)?.parameters)?.parameters.map(spec => spec.key)
     }
     expect(offered("tree")).toEqual(["modelParameters.foliageColor"])
-    expect(offered("aircraft")).toEqual(["modelParameters.gearUp"])
+    expect(offered("aircraft")).toEqual(["aircraftSound", "modelParameters.gearUp"])
     expect(offered("entity")).toEqual(["modelParameters.costumeColor"])
     expect(offered("observer")).toEqual(["modelParameters.costumeColor"])
+  })
+
+  test("the noise a model makes in flight is one a machine can make, and a stand-in for a phenomenon is silent", async () => {
+    const { AircraftHearing } = await import("../../src/engine/traffic/AircraftHearing.js")
+    const withSound = catalogue.filter(entry => entry.parameters?.sound)
+    expect(withSound.length).toBeGreaterThan(0)
+    for (const entry of withSound) {
+      const sound = entry.parameters!.sound!
+      if (sound !== "silent") expect(AircraftHearing.noiseOfKind(sound), `${entry.id}: ${sound}`).toBeDefined()
+    }
+    for (const entry of catalogue.filter(candidate => candidate.id.startsWith("ufoathome-") && candidate.kind === "aircraft")) expect(entry.parameters?.sound, entry.id).toBe("silent")
+    for (const id of ["amvlab-a350", "amvlab-a380", "amvlab-b787"]) expect(catalogue.find(entry => entry.id === id)!.parameters!.sound).toBe("airliner-wide")
   })
 
   test("the lamps a model offers are sets that exist and suit its kind: an airliner's are not a helicopter's", () => {

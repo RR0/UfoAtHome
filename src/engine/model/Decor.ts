@@ -1,4 +1,5 @@
 import type { DecorEngine } from "./Vehicle.js"
+import type { AircraftKind } from "../traffic/AircraftModels.js"
 import type { SaidText } from "./SaidText.js"
 
 /**
@@ -476,6 +477,10 @@ export interface DecorObject {
   /** A vehicle heard running — see DecorEngine: its engine turning with its own `track`, heard less
    * the further it is from the observer. Absent means silent (parked, or nobody said). */
   engine?: DecorEngine
+  /** An aircraft heard while it flies — what sort of noise it makes (see AircraftHearing.noiseOfKind), or "silent" for one that
+   * makes none (a glider's cousin, a stand-in for something nobody heard). Absent means what its model says, else an airliner's:
+   * like a vehicle's engine, an aircraft in flight is not silent unless someone said so. Ignored for every other kind. */
+  aircraftSound?: AircraftKind | "silent"
   /** Kind "bridge" only: how it is built, where that is known — see BridgeStructure. Absent means
    * the defaults, which are those of an ordinary French overpass. Ignored for every other kind. */
   bridge?: BridgeStructure
