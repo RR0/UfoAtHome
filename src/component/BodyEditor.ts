@@ -7,7 +7,10 @@ import type { SaidTexts } from "../engine/model/SaidText.js"
 import type { DecorModelEntry, DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import type { BodyReading } from "./SceneElement.js"
 import type { ModelPicker } from "./ModelPicker.js"
-import { NumberFields } from "./NumberFields.js"
+import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
+import { BodyKeyframes, BodyParameterSets } from "../engine/interpretation/BodyParameterSets.js"
+import type { BodyContext, BodyKeyframeContext, BodyKeyframeView } from "../engine/interpretation/BodyParameterSets.js"
+import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
 import type { BodyEditorMessages } from "./messages/BodyEditorMessages.js"
 import { bodyEditorMessages_en } from "./messages/BodyEditorMessages_en.js"
 import type { UfoLanguage } from "./messages/index.js"
@@ -61,19 +64,12 @@ export class BodyEditor {
   private shownEntry?: DecorModelEntry
   /** The body the fields were last filled for. */
   private syncedId?: string
-  /** What the appearance fields were last filled from, to tell an edit from what they could only
-   * show (see syncKeyframe). */
-  private shownAppearance?: { color: string, albedo: number, luminanceCdM2: number }
+  /** The properties a body has (its id, its name, the shapes it stands for, the part the observer drew) and its place, size,
+   * attitude and look at the playhead, both drawn by the generic form from what a body says it has (see BodyParameterSets). */
+  private bodyForm?: ParameterForm
+  private keyForm?: ParameterForm
 
-  /** A colour as a colour field can hold it: #rgb spelt out, anything else it cannot show left as
-   * a mid grey, which only stands in the swatch until the author picks a colour of their own. */
-  private static swatchOf(colour: string): string {
-    const short = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i.exec(colour)
-    if (short) return `#${short[1]}${short[1]}${short[2]}${short[2]}${short[3]}${short[3]}`.toLowerCase()
-    return /^#[0-9a-f]{6}$/i.test(colour) ? colour.toLowerCase() : "#c8c8c8"
-  }
-
-  constructor(private readonly container: HTMLElement, private readonly host: BodyEditorHost, language: string) {
+  constructor(private readonly container: HTMLElement, private readonly host: BodyEditorHost, private language: string) {
     this.render()
     void this.setLanguage(language)
   }
@@ -82,6 +78,7 @@ export class BodyEditor {
    * messages are fetched; English is shown meanwhile. */
   async setLanguage(language: string): Promise<void> {
     const token = ++this.languageToken
+    this.language = language
     const supported = (UFO_SUPPORTED_LANGUAGES as readonly string[]).includes(language) ? language as UfoLanguage : "en"
     const messages = supported === "en" ? bodyEditorMessages_en : await loadBodyEditorMessages(supported)
     // Superseded by a later choice made while this one was loading.
@@ -111,9 +108,7 @@ export class BodyEditor {
     this.element("body-none").hidden = bodies.length > 0
     this.element("body-fields").hidden = body === undefined
     if (!body) return
-    this.input("body-id").value = body.id
-    this.input("body-title").value = this.host.said().read(body.title) ?? ""
-    this.syncExplains(body)
+    this.bodyForm?.sync()
     void this.syncModelOptions(body)
     const model = body.model
     this.input("body-model-url").value = model.url ?? ""
@@ -126,7 +121,6 @@ export class BodyEditor {
     details.open = model.url !== undefined || (details.open && body.id === this.syncedId)
     this.syncedId = body.id
     this.element("body-model-incomplete").hidden = model.url === undefined || (model.credit?.title !== undefined && model.credit.license !== undefined)
-    this.input("body-outline-node").value = body.outlineNode ?? ""
     this.element("body-track").textContent = this.trackSummary(body)
     this.syncKeyframe()
   }
@@ -142,37 +136,26 @@ export class BodyEditor {
     this.element("body-key-legend").textContent = m.atPlayhead.replace("{t}", BodyEditor.seconds(t))
     const reading = this.host.readingOf(body, t)
     const here = body.track.find(key => key.t === t)
-    const base = BodyEditor.keyframeBefore(body, t)
     this.element("body-key-note").textContent = !reading ? m.notPlaced : here ? m.keyframeHere : m.keyframeAdded
     ;(this.element("body-key-delete") as HTMLButtonElement).disabled = here === undefined
-    const active = (this.container.getRootNode() as Document | ShadowRoot).activeElement
-    const mode = base?.eastM !== undefined && base.northM !== undefined ? "world" : "observer"
-    if (active !== this.select("body-key-mode")) this.select("body-key-mode").value = mode
-    const shown = this.select("body-key-mode").value
-    const onGround = base?.onGround === true
-    this.input("body-key-ground").checked = onGround
-    for (const id of ["body-key-azimuth", "body-key-elevation", "body-key-distance"]) this.input(id).closest("label")!.hidden = shown !== "observer"
-    for (const id of ["body-key-east", "body-key-north"]) this.input(id).closest("label")!.hidden = shown !== "world"
-    this.input("body-key-above").closest("label")!.hidden = shown !== "world" || onGround
-    // Only the built-in shapes are painted: a model keeps the materials of its file, so a colour
-    // picked for it would change nothing (see BodySystem.build).
-    const drawnFromModel = body.model.url !== undefined || !(BODY_PRIMITIVES as readonly string[]).includes(body.model.id ?? "")
-    this.input("body-key-colour").closest("label")!.hidden = drawnFromModel
-    if (!reading) return
-    const values: Record<string, number> = {
-      "body-key-azimuth": reading.azimuthDeg, "body-key-elevation": reading.altitudeDeg, "body-key-distance": reading.distanceM,
-      "body-key-east": reading.eastM, "body-key-north": reading.northM, "body-key-above": reading.aboveGroundM,
-      "body-key-width": reading.sizeM.widthM, "body-key-length": reading.sizeM.lengthM, "body-key-height": reading.sizeM.heightM,
-      "body-key-heading": reading.attitude.headingDeg, "body-key-pitch": reading.attitude.pitchDeg, "body-key-roll": reading.attitude.rollDeg,
-      "body-key-albedo": reading.appearance.albedo, "body-key-luminance": reading.appearance.luminanceCdM2
-    }
-    // A colour field can only hold #rrggbb; what a recording states ("#fff", "silver") is kept as
-    // it stands until the author picks another, and the swatch shows the nearest it can.
-    this.shownAppearance = reading.appearance
-    if (this.input("body-key-colour") !== active) this.input("body-key-colour").value = BodyEditor.swatchOf(reading.appearance.color)
-    for (const [id, value] of Object.entries(values)) {
-      if (this.input(id) !== active) this.input(id).value = String(Number(value.toFixed(2)))
-    }
+    this.element("body-key-parameters").hidden = !reading
+    if (reading) this.keyForm?.sync()
+  }
+
+  /** What the form of the instant needs that the body alone cannot say. */
+  private keyframeContext(): BodyKeyframeContext {
+    const model = this.current?.model
+    // Only the built-in shapes are painted: a model keeps the materials of its file, so a colour picked for it would change nothing.
+    return { drawnFromModel: model === undefined || model.url !== undefined || !(BODY_PRIMITIVES as readonly string[]).includes(model.id ?? "") }
+  }
+
+  /** The body at the playhead as the form of the instant shows it, or nothing where the scene does not place it. */
+  private keyframeView(): BodyKeyframeView | undefined {
+    const body = this.current
+    if (!body) return undefined
+    const t = this.host.currentTime()
+    const reading = this.host.readingOf(body, t)
+    return reading ? BodyKeyframes.viewOf(body, t, reading) : undefined
   }
 
   private render(): void {
@@ -190,9 +173,7 @@ export class BodyEditor {
       <div id="body-fields" class="body-fields">
         <button id="body-look" type="button" class="icon-btn" title="${m.lookAtBody}" aria-label="${m.lookAtBody}">🎯</button>
         <button id="body-delete" type="button" class="icon-btn" title="${m.deleteBody}" aria-label="${m.deleteBody}">🗑</button>
-        ${field("body-id", m.id)}
-        ${field("body-title", m.title)}
-        <fieldset class="body-explains"><legend>${m.explains}</legend><div id="body-explains"></div></fieldset>
+        <div id="body-parameters" class="body-parameters"></div>
         <label><span>${m.model}</span> <select id="body-model"></select></label>
         <details id="body-model-advanced" class="decor-model-advanced" hidden>
           <summary>${m.modelAdvanced}</summary>
@@ -204,28 +185,11 @@ export class BodyEditor {
           <p id="body-model-incomplete" class="body-intro" hidden>${m.modelIncomplete}</p>
           <p id="body-model-catalogue" class="body-intro" hidden>${m.modelFromCatalogue}</p>
         </details>
-        ${field("body-outline-node", m.outlineNode, "text", m.outlineNodeHint)}
         <p class="body-track"><span>${m.track}</span> <output id="body-track"></output></p>
         <fieldset class="body-key">
           <legend id="body-key-legend"></legend>
           <p id="body-key-note" class="body-intro"></p>
-          <label><span>${m.placement}</span> <select id="body-key-mode"><option value="observer">${m.fromObserver}</option><option value="world">${m.inWorld}</option></select></label>
-          ${field("body-key-azimuth", m.azimuth, "number", "", "°", 'min="0" max="360" step="0.01"')}
-          ${field("body-key-elevation", m.elevation, "number", "", "°", 'min="-90" max="90" step="0.01"')}
-          ${field("body-key-distance", m.distance, "number", "", "m", 'min="0.1" max="30000" step="0.1"')}
-          ${field("body-key-east", m.east, "number", "", "m", 'min="-30000" max="30000" step="0.1"')}
-          ${field("body-key-north", m.north, "number", "", "m", 'min="-30000" max="30000" step="0.1"')}
-          <label><input id="body-key-ground" type="checkbox"/> <span>${m.onGround}</span></label>
-          ${field("body-key-above", m.aboveGround, "number", "", "m", 'min="0" max="30000" step="0.1"')}
-          ${field("body-key-width", m.width, "number", "", "m", 'min="0.01" max="1000" step="0.01"')}
-          ${field("body-key-length", m.length, "number", "", "m", 'min="0.01" max="1000" step="0.01"')}
-          ${field("body-key-height", m.height, "number", "", "m", 'min="0.01" max="1000" step="0.01"')}
-          ${field("body-key-heading", m.heading, "number", "", "°", 'min="0" max="360" step="0.1"')}
-          ${field("body-key-pitch", m.pitch, "number", "", "°", 'min="-90" max="90" step="0.1"')}
-          ${field("body-key-roll", m.roll, "number", "", "°", 'min="-180" max="180" step="0.1"')}
-          <label><span>${m.colour}</span> <input id="body-key-colour" type="color"/></label>
-          ${field("body-key-albedo", m.albedo, "number", "0 – 1", "", 'min="0" max="1" step="0.01"')}
-          ${field("body-key-luminance", m.luminance, "number", "", "cd/m²", 'min="0" max="100000" step="0.1"')}
+          <div id="body-key-parameters" class="body-parameters"></div>
           <p class="body-intro">${m.appearanceNote}</p>
           <button id="body-key-delete" type="button">${m.deleteKeyframe}</button>
           <p class="body-intro">${m.pictureHint}</p>
@@ -243,7 +207,7 @@ export class BodyEditor {
       const body = this.current
       if (body) this.host.lookAt(body)
     })
-    for (const id of ["body-id", "body-title", "body-outline-node", "body-model-url", "body-model-title", "body-model-author", "body-model-license", "body-model-source"]) {
+    for (const id of ["body-model-url", "body-model-title", "body-model-author", "body-model-license", "body-model-source"]) {
       this.input(id).addEventListener("change", () => this.updateCurrent())
     }
     this.select("body-model").addEventListener("change", () => {
@@ -256,14 +220,6 @@ export class BodyEditor {
       // A catalogue model's address and credit are shown as soon as it is picked; a built-in shape has none.
       ;(this.element("body-model-advanced") as HTMLDetailsElement).open = id !== "" && !(BODY_PRIMITIVES as readonly string[]).includes(id)
     })
-    this.element("body-explains").addEventListener("change", () => this.updateCurrent())
-    // On every keystroke and every drag of the colour picker, not only when the field is left: a
-    // setting is judged by what it does to the picture, and that has to happen as it is made.
-    for (const id of BodyEditor.KEY_FIELDS) {
-      this.input(id).addEventListener("input", () => this.updateKeyframe())
-      this.input(id).addEventListener("change", () => this.updateKeyframe())
-    }
-    this.select("body-key-mode").addEventListener("change", () => this.updateKeyframe())
     this.element("body-key-delete").addEventListener("click", () => this.deleteKeyframe())
     // The drop-down gives way to a window of pictures, over the same options and the same "change".
     this.host.modelPicker().enhance(this.select("body-model"), async id => (BODY_PRIMITIVES as readonly string[]).includes(id)
@@ -289,26 +245,21 @@ export class BodyEditor {
         void this.syncModelOptions(this.current!)
       }
     })
-    NumberFields.fit(this.container)
+    // The properties of the body and of its instant: drawn from what a body says it has, and written as they are typed.
+    const values = { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() }
+    this.bodyForm = new ParameterForm(this.element("body-parameters"), this.language, "body.", values)
+    this.bodyForm.show(BodyParameterSets.BODY, new ParameterTarget(
+      () => this.current as unknown as ParameterHolder | undefined,
+      apply => this.editBody(apply),
+      (): BodyContext => ({ ids: this.bodies.map(body => body.id), shapes: this.host.shapes().map(shape => ({ value: shape.id, label: shape.label })) })
+    ), () => undefined)
+    this.keyForm = new ParameterForm(this.element("body-key-parameters"), this.language, "bodyKey.")
+    this.keyForm.show(BodyParameterSets.KEYFRAME, new ParameterTarget(
+      () => this.keyframeView() as unknown as ParameterHolder | undefined,
+      (apply, spec) => this.editView(apply, spec.key === "color" || spec.key === "albedo" || spec.key === "luminanceCdM2"),
+      () => this.keyframeContext()
+    ), () => undefined)
     this.sync()
-  }
-
-  private syncExplains(body: BodyJson): void {
-    const shapes = this.host.shapes()
-    const box = this.element("body-explains")
-    // A shape the body names that the recording no longer holds is still listed: dropping it
-    // silently would be an edit nobody made.
-    const ids = [...new Set([...shapes.map(shape => shape.id), ...(body.explains ?? [])])]
-    box.replaceChildren(...ids.map(id => {
-      const label = document.createElement("label")
-      const check = document.createElement("input")
-      check.type = "checkbox"
-      check.value = id
-      check.checked = body.explains?.includes(id) ?? false
-      label.append(check, " ", shapes.find(shape => shape.id === id)?.label ?? id)
-      return label
-    }))
-    if (ids.length === 0) box.textContent = this.messages.explainsNothing
   }
 
   private async syncModelOptions(body: BodyJson): Promise<void> {
@@ -364,24 +315,42 @@ export class BodyEditor {
     this.write({ ...interpretation, title })
   }
 
+  /** The model the picker and the address block state, written onto the body. */
   private updateCurrent(): void {
     const body = this.current
     if (!body) return
-    const typedId = this.input("body-id").value.trim()
-    // An id is what the shapes' confrontation and a case's interpretations name the body by: an
-    // empty one, or one another body already has, is refused and the field put back.
-    const id = typedId !== "" && !this.bodies.some(other => other !== body && other.id === typedId) ? typedId : body.id
-    const explains = [...this.element("body-explains").querySelectorAll<HTMLInputElement>("input:checked")].map(check => check.value)
-    const edited: BodyJson = {
-      ...body,
-      id,
-      title: this.host.said().write(body.title, this.input("body-title").value, this.host.writingLanguage()),
-      explains: explains.length > 0 ? explains : undefined,
-      model: this.statedModel(body.model),
-      outlineNode: this.stringOrUndefined(this.input("body-outline-node").value)
-    }
-    this.currentId = id
+    this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, model: this.statedModel(body.model) } : other) })
+  }
+
+  /**
+   * An edit of what the body is — its id, its name, the shapes it stands for, the part the observer drew — as a copy of
+   * it to change, since the interpretation is replaced at every edit. A body keeps the id the form was left with.
+   */
+  private editBody(apply: (draft: ParameterHolder) => void): void {
+    const body = this.current
+    if (!body) return
+    const edited = structuredClone(body)
+    apply(edited as unknown as ParameterHolder)
+    this.currentId = edited.id
     this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? edited : other) })
+  }
+
+  /**
+   * The edit of the body at the playhead, written as a keyframe there (see BodyKeyframes.keyframeOf): where it is, how big,
+   * how turned, and its look only when this edit is of the look. `apply` changes the view of the instant, which is what the
+   * form's fields, a drag on the picture and the handles all do.
+   */
+  private editView(apply: (view: ParameterHolder) => void, appearanceEdited = false): void {
+    const body = this.current
+    const view = this.keyframeView()
+    if (!body || !view) return
+    const t = this.host.currentTime()
+    apply(view as unknown as ParameterHolder)
+    const keyframe = BodyKeyframes.keyframeOf(view, t, body.track.find(key => key.t === t), appearanceEdited)
+    const track = [...body.track.filter(key => key.t !== t), keyframe].sort((a, b) => a.t - b.t)
+    this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, track } : other) })
+    this.element("body-track").textContent = this.trackSummary({ ...body, track })
+    this.syncKeyframe()
   }
 
   /**
@@ -445,21 +414,19 @@ export class BodyEditor {
 
   /** Gives the body on show this size at the playhead — what its handles on the picture do. */
   resize(sizeM: { widthM: number, lengthM: number, heightM: number }): void {
-    const set = (id: string, value: number) => { this.input(id).value = String(Number(Math.max(0.01, value).toFixed(2))) }
-    set("body-key-width", sizeM.widthM)
-    set("body-key-length", sizeM.lengthM)
-    set("body-key-height", sizeM.heightM)
-    this.updateKeyframe()
+    const held = (value: number) => Number(Math.max(0.01, value).toFixed(2))
+    this.editView(view => Object.assign(view, { widthM: held(sizeM.widthM), lengthM: held(sizeM.lengthM), heightM: held(sizeM.heightM) }))
   }
 
   /** Turns the body on show to this attitude at the playhead — what its rotation handle does. The
    * heading wraps round; pitch and roll are kept within a half-turn either way. */
   turnTo(attitude: { headingDeg: number, pitchDeg: number, rollDeg: number }): void {
     const half = (deg: number) => ((((deg + 180) % 360) + 360) % 360) - 180
-    this.input("body-key-heading").value = String(Number((((attitude.headingDeg % 360) + 360) % 360).toFixed(1)))
-    this.input("body-key-pitch").value = String(Number(Math.max(-90, Math.min(90, attitude.pitchDeg)).toFixed(1)))
-    this.input("body-key-roll").value = String(Number(half(attitude.rollDeg).toFixed(1)))
-    this.updateKeyframe()
+    this.editView(view => Object.assign(view, {
+      headingDeg: Number((((attitude.headingDeg % 360) + 360) % 360).toFixed(1)),
+      pitchDeg: Number(Math.max(-90, Math.min(90, attitude.pitchDeg)).toFixed(1)),
+      rollDeg: Number(half(attitude.rollDeg).toFixed(1))
+    }))
   }
 
   /** Puts a body on show in the fields, as a press on it in the picture does. */
@@ -477,38 +444,39 @@ export class BodyEditor {
 
   /**
    * Moves the body on show to a direction from the observer, at the playhead — what dragging it on
-   * the picture does, written through the same fields as typing (see updateKeyframe), which then
-   * show where it went. On the ground it slides over the relief: its distance becomes where the
-   * line of sight meets the ground, when it does. In the air it keeps its distance, and in the
-   * world's terms its level distance, the drag raising or lowering it over the ground.
+   * the picture does, written through the same view as typing (see editView), which the fields then
+   * show. On the ground it slides over the relief: its distance becomes where the line of sight meets
+   * the ground, when it does. In the air it keeps its distance, and in the world's terms its level
+   * distance, the drag raising or lowering it over the ground.
    */
   dragTo(azimuthDeg: number, altitudeDeg: number): void {
     const reading = this.readingNow()
     if (!reading) return
     const t = this.host.currentTime()
-    const onGround = this.input("body-key-ground").checked
-    const groundM = onGround ? this.host.groundAlong(azimuthDeg, altitudeDeg, t) : undefined
     const rad = Math.PI / 180
-    const set = (id: string, value: number) => { this.input(id).value = String(Number(value.toFixed(2))) }
-    if (this.select("body-key-mode").value === "world") {
-      // The eye, from the body and the line joining them.
-      const cosAlt = Math.cos(reading.altitudeDeg * rad)
-      const eyeEast = reading.eastM - Math.sin(reading.azimuthDeg * rad) * cosAlt * reading.distanceM
-      const eyeNorth = reading.northM - Math.cos(reading.azimuthDeg * rad) * cosAlt * reading.distanceM
-      const kept = Math.hypot(reading.eastM - eyeEast, reading.northM - eyeNorth)
-      const level = groundM !== undefined ? groundM * Math.cos(altitudeDeg * rad) : kept
-      set("body-key-east", eyeEast + Math.sin(azimuthDeg * rad) * level)
-      set("body-key-north", eyeNorth + Math.cos(azimuthDeg * rad) * level)
-      if (!onGround) {
-        const clamp = (deg: number) => Math.max(-89, Math.min(89, deg)) * rad
-        set("body-key-above", Math.max(0, reading.aboveGroundM + level * (Math.tan(clamp(altitudeDeg)) - Math.tan(clamp(reading.altitudeDeg)))))
+    const rounded = (value: number) => Number(value.toFixed(2))
+    this.editView(raw => {
+      const view = raw as unknown as BodyKeyframeView
+      const groundM = view.onGround ? this.host.groundAlong(azimuthDeg, altitudeDeg, t) : undefined
+      if (view.mode === "world") {
+        // The eye, from the body and the line joining them.
+        const cosAlt = Math.cos(reading.altitudeDeg * rad)
+        const eyeEast = reading.eastM - Math.sin(reading.azimuthDeg * rad) * cosAlt * reading.distanceM
+        const eyeNorth = reading.northM - Math.cos(reading.azimuthDeg * rad) * cosAlt * reading.distanceM
+        const kept = Math.hypot(reading.eastM - eyeEast, reading.northM - eyeNorth)
+        const level = groundM !== undefined ? groundM * Math.cos(altitudeDeg * rad) : kept
+        view.eastM = rounded(eyeEast + Math.sin(azimuthDeg * rad) * level)
+        view.northM = rounded(eyeNorth + Math.cos(azimuthDeg * rad) * level)
+        if (!view.onGround) {
+          const clamp = (deg: number) => Math.max(-89, Math.min(89, deg)) * rad
+          view.aboveGroundM = rounded(Math.max(0, reading.aboveGroundM + level * (Math.tan(clamp(altitudeDeg)) - Math.tan(clamp(reading.altitudeDeg)))))
+        }
+      } else {
+        view.azimuthDeg = rounded(((azimuthDeg % 360) + 360) % 360)
+        view.elevationDeg = rounded(Math.max(-90, Math.min(90, altitudeDeg)))
+        if (groundM !== undefined) view.distanceM = rounded(groundM)
       }
-    } else {
-      set("body-key-azimuth", ((azimuthDeg % 360) + 360) % 360)
-      set("body-key-elevation", Math.max(-90, Math.min(90, altitudeDeg)))
-      if (groundM !== undefined) set("body-key-distance", groundM)
-    }
-    this.updateKeyframe()
+    })
   }
 
   /** Takes the body on show nearer or further along its line of sight, by `factor` — what the wheel
@@ -516,62 +484,20 @@ export class BodyEditor {
   scaleDistance(factor: number): void {
     const reading = this.readingNow()
     if (!reading) return
-    const set = (id: string, value: number) => { this.input(id).value = String(Number(value.toFixed(2))) }
-    if (this.select("body-key-mode").value === "world") {
-      const rad = Math.PI / 180
-      const cosAlt = Math.cos(reading.altitudeDeg * rad)
-      const eyeEast = reading.eastM - Math.sin(reading.azimuthDeg * rad) * cosAlt * reading.distanceM
-      const eyeNorth = reading.northM - Math.cos(reading.azimuthDeg * rad) * cosAlt * reading.distanceM
-      set("body-key-east", eyeEast + (reading.eastM - eyeEast) * factor)
-      set("body-key-north", eyeNorth + (reading.northM - eyeNorth) * factor)
-    } else {
-      set("body-key-distance", Math.max(0.1, reading.distanceM * factor))
-    }
-    this.updateKeyframe()
-  }
-
-  /** The fields of an instant, written as a keyframe at the playhead: where it is, how big, how
-   * turned, and what it looks like. Nothing else — its flame and its movements hold from the
-   * keyframe before, and a movement is only read from keyframes that state it (see
-   * BodyKeyframe.motions), so an added keyframe moves the body and leaves those alone. Its
-   * appearance is written as it already was there, which changes nothing until a field is. One
-   * already at this instant keeps the rest of what it states. */
-  private updateKeyframe(): void {
-    const body = this.current
-    if (!body) return
-    const t = this.host.currentTime()
-    const number = (id: string) => {
-      const value = Number(this.input(id).value)
-      return Number.isFinite(value) ? value : 0
-    }
-    const onGround = this.input("body-key-ground").checked
-    const position: BodyKeyframe = this.select("body-key-mode").value === "world"
-      ? { t, eastM: number("body-key-east"), northM: number("body-key-north"), ...(onGround ? { onGround: true } : { altitudeAboveGroundM: number("body-key-above") }) }
-      : { t, azimuthDeg: number("body-key-azimuth"), altitudeDeg: number("body-key-elevation"), distanceM: Math.max(0.1, number("body-key-distance")), ...(onGround ? { onGround: true } : {}) }
-    const size = (id: string) => Math.max(0.01, number(id))
-    // Its look is written only when it is this instant's own: one the author has just changed, or
-    // one this keyframe already stated. A move must not fix a colour the body was only holding.
-    const stated = {
-      color: this.input("body-key-colour").value,
-      albedo: Math.max(0, Math.min(1, number("body-key-albedo"))),
-      luminanceCdM2: Math.max(0, number("body-key-luminance"))
-    }
-    const shown = this.shownAppearance
-    const changed = !shown || BodyEditor.swatchOf(shown.color) !== stated.color.toLowerCase()
-      || Math.abs(shown.albedo - stated.albedo) > 1e-6 || Math.abs(shown.luminanceCdM2 - stated.luminanceCdM2) > 1e-6
-    const here = body.track.find(key => key.t === t)?.appearance
-    const appearance = changed ? stated : here ?? undefined
-    const keyframe: BodyKeyframe = {
-      ...BodyEditor.withoutPlacement(body.track.find(key => key.t === t)),
-      ...position,
-      sizeM: { widthM: size("body-key-width"), lengthM: size("body-key-length"), heightM: size("body-key-height") },
-      attitude: { headingDeg: number("body-key-heading"), pitchDeg: number("body-key-pitch"), rollDeg: number("body-key-roll") },
-      ...(appearance ? { appearance } : {})
-    }
-    const track = [...body.track.filter(key => key.t !== t), keyframe].sort((a, b) => a.t - b.t)
-    this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, track } : other) })
-    this.element("body-track").textContent = this.trackSummary({ ...body, track })
-    this.syncKeyframe()
+    const rounded = (value: number) => Number(value.toFixed(2))
+    this.editView(raw => {
+      const view = raw as unknown as BodyKeyframeView
+      if (view.mode === "world") {
+        const rad = Math.PI / 180
+        const cosAlt = Math.cos(reading.altitudeDeg * rad)
+        const eyeEast = reading.eastM - Math.sin(reading.azimuthDeg * rad) * cosAlt * reading.distanceM
+        const eyeNorth = reading.northM - Math.cos(reading.azimuthDeg * rad) * cosAlt * reading.distanceM
+        view.eastM = rounded(eyeEast + (reading.eastM - eyeEast) * factor)
+        view.northM = rounded(eyeNorth + (reading.northM - eyeNorth) * factor)
+      } else {
+        view.distanceM = rounded(Math.max(0.1, reading.distanceM * factor))
+      }
+    })
   }
 
   private deleteKeyframe(): void {
@@ -581,23 +507,6 @@ export class BodyEditor {
     const track = body.track.filter(key => key.t !== t)
     if (track.length === body.track.length) return
     this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, track } : other) }, true)
-  }
-
-  private static readonly KEY_FIELDS = ["body-key-azimuth", "body-key-elevation", "body-key-distance", "body-key-east", "body-key-north",
-    "body-key-ground", "body-key-above", "body-key-width", "body-key-length", "body-key-height", "body-key-heading", "body-key-pitch", "body-key-roll",
-    "body-key-colour", "body-key-albedo", "body-key-luminance"]
-
-  /** A keyframe's statements other than where it is, how big and how turned. */
-  private static withoutPlacement(key: BodyKeyframe | undefined): Partial<BodyKeyframe> {
-    if (!key) return {}
-    const { eastM, northM, azimuthDeg, altitudeDeg, distanceM, onGround, altitudeAboveGroundM, sizeM, attitude, appearance, ...rest } = key
-    return rest
-  }
-
-  /** The keyframe in force at `t` — the last at or before it, else the first. */
-  private static keyframeBefore(body: BodyJson, t: number): BodyKeyframe | undefined {
-    const sorted = [...body.track].sort((a, b) => a.t - b.t)
-    return [...sorted].reverse().find(key => key.t <= t) ?? sorted[0]
   }
 
   private static seconds(ms: number): string {
@@ -656,7 +565,6 @@ export class BodyEditor {
     if (this.currentId !== undefined) select.value = this.currentId
     const body = this.current
     if (!body) return
-    this.input("body-id").value = body.id
     this.element("body-model-incomplete").hidden = body.model.url === undefined || body.model.credit !== undefined
     void this.syncModelOptions(body)
   }

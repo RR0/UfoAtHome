@@ -70,7 +70,7 @@ describe("LaunchEditor", () => {
 
   test("renaming a launch writes its title in the writing language and updates the list", () => {
     const { sighting } = build()
-    typed(container.querySelector("#launch-title")!, "Renamed")
+    typed(field("title"), "Renamed")
     expect(sighting.interpretation!.launches![0].title).toEqual({ en: "Renamed" })
     expect(container.querySelector<HTMLOptionElement>("#launch-select option")!.textContent).toBe("Renamed (a)")
   })

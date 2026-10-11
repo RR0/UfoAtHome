@@ -70,11 +70,9 @@ export class LaunchEditor {
     const launch = this.current
     this.element("launch-fields").hidden = launch === undefined
     if (!launch) return
-    const title = this.input("launch-title")
-    if (title !== (this.container.getRootNode() as Document | ShadowRoot).activeElement) title.value = this.host.said().read(launch.title) ?? ""
     this.element("launch-track").textContent = this.trackSummary(launch)
     const set = ParameterRegistry.of("launch")!
-    this.form ??= new ParameterForm(this.element("launch-parameters"), this.language)
+    this.form ??= new ParameterForm(this.element("launch-parameters"), this.language, "", { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() })
     this.form.show(set, launch as unknown as Record<string, unknown>, () => this.written())
   }
 
@@ -109,7 +107,6 @@ export class LaunchEditor {
       <label><span>${m.launch}</span> <select id="launch-select"></select></label>
       <button id="launch-delete" type="button" class="icon-btn" title="${m.deleteLaunch}" aria-label="${m.deleteLaunch}">🗑</button>
       <div id="launch-fields" class="launch-fields">
-        <label><span>${m.title}</span> <input id="launch-title" type="text" autocomplete="off"/></label>
         <p class="launch-track"><span>${m.track}</span> <output id="launch-track"></output></p>
         <div id="launch-parameters" class="launch-parameters"></div>
         <p class="launch-intro">${m.derivedNote}</p>
@@ -119,7 +116,6 @@ export class LaunchEditor {
       this.currentId = this.select("launch-select").value
       this.sync()
     })
-    this.input("launch-title").addEventListener("input", () => this.updateTitle())
     this.element("launch-delete").addEventListener("click", () => this.deleteCurrent())
   }
 
@@ -131,13 +127,6 @@ export class LaunchEditor {
     const select = this.select("launch-select")
     const option = [...select.options].find(candidate => candidate.value === launch.id)
     if (option) option.textContent = this.labelOf(launch)
-  }
-
-  private updateTitle(): void {
-    const launch = this.current
-    if (!launch) return
-    launch.title = this.host.said().write(launch.title, this.input("launch-title").value, this.host.writingLanguage())
-    this.written()
   }
 
   private deleteCurrent(): void {
@@ -181,9 +170,6 @@ export class LaunchEditor {
     return this.container.querySelector<HTMLElement>(`#${id}`)!
   }
 
-  private input(id: string): HTMLInputElement {
-    return this.element(id) as HTMLInputElement
-  }
 
   private select(id: string): HTMLSelectElement {
     return this.element(id) as HTMLSelectElement

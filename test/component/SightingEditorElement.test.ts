@@ -6639,12 +6639,12 @@ describe("SightingEditorElement bodies", () => {
     tab("shape-bodies", ".subgroup-tab").click()
     expect(scene.interpretation).toEqual(interpretation)
     // Its fields are a chunk of their own, fetched on this first opening.
-    await waitFor(() => shadow.getElementById("body-title") !== null)
+    await waitFor(() => shadow.getElementById("body.title") !== null)
     expect(scene.compareAccount).toBe(true)
     // An edit of a body is drawn at once.
-    const title = shadow.getElementById("body-title") as HTMLInputElement
+    const title = shadow.getElementById("body.title") as HTMLInputElement
     title.value = "The craft"
-    title.dispatchEvent(new Event("change"))
+    title.dispatchEvent(new Event("input", { bubbles: true }))
     expect((scene.interpretation as typeof interpretation).bodies[0]).toMatchObject({ title: "The craft" })
     tab("shape-shapes", ".subgroup-tab").click()
     expect(scene.interpretation).toBeUndefined()
@@ -6697,7 +6697,7 @@ describe("SightingEditorElement body handles", () => {
     const tab = (id: string, selector: string) => [...shadow.querySelectorAll<HTMLButtonElement>(selector)].find(t => t.getAttribute("aria-controls") === id)!
     if (shadow.getElementById("group-shape")!.hidden) tab("group-shape", ".group-tab").click()
     tab("shape-bodies", ".subgroup-tab").click()
-    await waitFor(() => shadow.getElementById("body-title") !== null)
+    await waitFor(() => shadow.getElementById("body.title") !== null)
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
     return { element, canvas }

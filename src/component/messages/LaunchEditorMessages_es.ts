@@ -5,7 +5,6 @@ export const launchEditorMessages_es: LaunchEditorMessages = {
   none: "Ningún lanzamiento en esta grabación",
   launch: "Lanzamiento",
   deleteLaunch: "Eliminar el lanzamiento",
-  title: "Nombre",
   track: "Camino",
   trackEmpty: "Sin camino: no se dibuja nada",
   trackSpan: "{n} puntos de {from} a {to}, hasta {top} km",

@@ -13,7 +13,7 @@ import type { SaidText } from "../model/SaidText.js"
  * The labels are `SaidText`, so a kind published from outside this package (another repository's
  * asset) speaks the languages it has, and a reader whose language it lacks reads what it does have.
  */
-export type ParameterSpec = NumberParameter | ChoiceParameter | TextParameter | BooleanParameter | ColourParameter
+export type ParameterSpec = NumberParameter | ChoiceParameter | TextParameter | SaidParameter | SetParameter | BooleanParameter | ColourParameter
 
 interface ParameterBase {
   /**
@@ -83,6 +83,33 @@ export interface ChoiceParameter extends ParameterBase {
 export interface TextParameter extends ParameterBase {
   type: "text"
   placeholder?: SaidText
+  /** Cannot be empty: emptying the field keeps what was there. */
+  required?: boolean
+  /**
+   * Whether a typed value may be kept: an identifier another element already has may not. A value refused is not
+   * written and the field is marked; leaving it puts the stated value back.
+   */
+  validate?: (value: string, element: ParameterHolder, context?: unknown) => boolean
+}
+
+/**
+ * Text an author writes in a language (see SaidText): shown as the reader's language has it, and written into
+ * that language's entry without touching the others.
+ */
+export interface SaidParameter extends ParameterBase {
+  type: "said"
+  placeholder?: SaidText
+}
+
+/**
+ * Some of a list that the element does not hold itself, ticked: the shapes a body stands for. A value the element
+ * states that the list no longer offers is still listed, since dropping it would be an edit nobody made.
+ */
+export interface SetParameter extends ParameterBase {
+  type: "set"
+  options: (element: ParameterHolder, context?: unknown) => ReadonlyArray<{ value: string, label: string }>
+  /** What stands where the list is empty. */
+  empty?: SaidText
 }
 
 export interface BooleanParameter extends ParameterBase {
@@ -91,6 +118,8 @@ export interface BooleanParameter extends ParameterBase {
 
 export interface ColourParameter extends ParameterBase {
   type: "colour"
+  /** The swatch a value the field cannot hold is shown as (a colour name, or no colour): a mid grey when absent. */
+  fallback?: string
 }
 
 /** An element as its JSON, which is all that the parameters read and write. */

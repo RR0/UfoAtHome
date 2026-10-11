@@ -54,12 +54,13 @@ class Fixture {
   }
 
   field(id: string): HTMLInputElement {
-    return this.container.querySelector<HTMLInputElement>("#" + id)!
+    return this.container.querySelector<HTMLInputElement>(`[id="${id}"]`)!
   }
 
   type(id: string, value: string): void {
     this.field(id).value = value
-    this.field(id).dispatchEvent(new Event("change"))
+    this.field(id).dispatchEvent(new Event("input", { bubbles: true }))
+    this.field(id).dispatchEvent(new Event("change", { bubbles: true }))
   }
 }
 
@@ -69,11 +70,11 @@ describe("The Bodies part of the editor", () => {
     await new Promise(resolve => setTimeout(resolve))
     expect(fixture.field("body-interpretation-title").value).toBe("A craft on its legs")
     expect([...fixture.container.querySelectorAll<HTMLOptionElement>("#body-select option")].map(option => option.value)).toEqual(["craft", "figure-1"])
-    expect(fixture.field("body-id").value).toBe("craft")
-    expect(fixture.field("body-title").value).toBe("The craft")
-    expect(fixture.field("body-outline-node").value).toBe("hull")
+    expect(fixture.field("body.id").value).toBe("craft")
+    expect(fixture.field("body.title").value).toBe("The craft")
+    expect(fixture.field("body.outlineNode").value).toBe("hull")
     expect(fixture.field("body-model").value).toBe("catalogue-craft")
-    const checked = [...fixture.container.querySelectorAll<HTMLInputElement>("#body-explains input")].filter(check => check.checked).map(check => check.value)
+    const checked = [...fixture.container.querySelectorAll<HTMLInputElement>('[data-key="explains"] input')].filter(check => check.checked).map(check => check.value)
     expect(checked).toEqual(["ufo-1"])
     expect(fixture.field("body-track").textContent).toBe("2 keyframes, from 0 s to 5 s")
   })
@@ -101,10 +102,10 @@ describe("The Bodies part of the editor", () => {
 
   it("refuses an id another body already has", () => {
     const fixture = new Fixture()
-    fixture.type("body-id", "figure-1")
+    fixture.type("body.id", "figure-1")
     expect(fixture.sighting.interpretation!.bodies.map(body => body.id)).toEqual(["craft", "figure-1"])
-    expect(fixture.field("body-id").value).toBe("craft")
-    fixture.type("body-id", "engin")
+    expect(fixture.field("body.id").value).toBe("craft")
+    fixture.type("body.id", "engin")
     expect(fixture.sighting.interpretation!.bodies.map(body => body.id)).toEqual(["engin", "figure-1"])
   })
 
@@ -112,7 +113,7 @@ describe("The Bodies part of the editor", () => {
     const fixture = new Fixture()
     fixture.container.querySelector<HTMLButtonElement>("#body-delete")!.click()
     expect(fixture.sighting.interpretation!.bodies.map(body => body.id)).toEqual(["figure-1"])
-    expect(fixture.field("body-id").value).toBe("figure-1")
+    expect(fixture.field("body.id").value).toBe("figure-1")
   })
 
   it("adds a body standing for the selected shape, creating the interpretation a recording lacks", () => {
@@ -122,7 +123,7 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.sighting.interpretation).toEqual({
       bodies: [{ id: "body-1", explains: ["flame"], model: { id: "ellipsoid" }, track: [{ t: 2000, azimuthDeg: 120, altitudeDeg: 5, distanceM: 100, sizeM: { widthM: 3, lengthM: 3, heightM: 1 } }] }]
     })
-    expect(fixture.field("body-id").value).toBe("body-1")
+    expect(fixture.field("body.id").value).toBe("body-1")
     fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
     expect(fixture.sighting.interpretation!.bodies.map(body => body.id)).toEqual(["body-1", "body-2"])
   })
@@ -172,11 +173,11 @@ describe("The Bodies part of the editor", () => {
     fixture.time = 2500
     fixture.editor.syncKeyframe()
     expect(fixture.container.querySelector("#body-key-legend")!.textContent).toBe("At 2.5 s")
-    expect((fixture.container.querySelector("#body-key-mode") as HTMLSelectElement).value).toBe("world")
-    expect(fixture.field("body-key-east").value).toBe("17.36")
-    expect(fixture.field("body-key-width").value).toBe("4")
-    expect(fixture.field("body-key-heading").value).toBe("30")
-    expect(fixture.field("body-key-azimuth").closest("label")!.hidden).toBe(true)
+    expect((fixture.field("bodyKey.mode") as unknown as HTMLSelectElement).value).toBe("world")
+    expect(fixture.field("bodyKey.eastM").value).toBe("17.36")
+    expect(fixture.field("bodyKey.widthM").value).toBe("4")
+    expect(fixture.field("bodyKey.headingDeg").value).toBe("30")
+    expect(fixture.field("bodyKey.azimuthDeg").closest("label")!.hidden).toBe(true)
     expect((fixture.container.querySelector("#body-key-delete") as HTMLButtonElement).disabled).toBe(true)
   })
 
@@ -185,14 +186,14 @@ describe("The Bodies part of the editor", () => {
     fixture.sighting.interpretation!.bodies[0].track[1] = { t: 5000, eastM: 0, northM: 90, motions: { legs: 1 }, appearance: { color: "#fff" } }
     fixture.time = 2500
     fixture.editor.sync()
-    fixture.type("body-key-north", "95")
+    fixture.type("bodyKey.northM", "95")
     const track = fixture.sighting.interpretation!.bodies[0].track
     expect(track.map(key => key.t)).toEqual([0, 2500, 5000])
     expect(track[1]).toEqual({ t: 2500, eastM: 17.36, northM: 95, altitudeAboveGroundM: 1.5, sizeM: { widthM: 4, lengthM: 5, heightM: 2 }, attitude: { headingDeg: 30, pitchDeg: 0, rollDeg: 0 } })
     // An existing keyframe keeps what it states besides its placement.
     fixture.time = 5000
     fixture.editor.syncKeyframe()
-    fixture.type("body-key-width", "6")
+    fixture.type("bodyKey.widthM", "6")
     expect(track.length).toBe(3)
     const last = fixture.sighting.interpretation!.bodies[0].track[2]
     expect(last).toMatchObject({ t: 5000, motions: { legs: 1 }, appearance: { color: "#fff" }, sizeM: { widthM: 6 } })
@@ -205,8 +206,8 @@ describe("The Bodies part of the editor", () => {
     fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
     fixture.time = 2000
     fixture.editor.syncKeyframe()
-    expect((fixture.container.querySelector("#body-key-mode") as HTMLSelectElement).value).toBe("observer")
-    fixture.type("body-key-distance", "250")
+    expect((fixture.field("bodyKey.mode") as unknown as HTMLSelectElement).value).toBe("observer")
+    fixture.type("bodyKey.distanceM", "250")
     expect(fixture.sighting.interpretation!.bodies[0].track[0]).toEqual({ t: 2000, azimuthDeg: 10, altitudeDeg: 2, distanceM: 250, sizeM: { widthM: 4, lengthM: 5, heightM: 2 }, attitude: { headingDeg: 30, pitchDeg: 0, rollDeg: 0 } })
   })
 
@@ -220,7 +221,7 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.field("body-model-license").value).toBe("CC0 1.0")
     expect((fixture.container.querySelector("#body-model-advanced") as HTMLDetailsElement).open).toBe(true)
     // An unrelated edit leaves it a catalogue model.
-    fixture.type("body-title", "The airliner")
+    fixture.type("body.title", "The airliner")
     expect(fixture.sighting.interpretation!.bodies[0].model).toEqual({ id: "catalogue-airliner" })
     // A changed field makes the address the recording's own.
     fixture.type("body-model-url", "airliner-copy.glb")
@@ -282,9 +283,9 @@ describe("The Bodies part of the editor", () => {
     const fixture = new Fixture()
     fixture.time = 0
     fixture.editor.syncKeyframe()
-    expect(fixture.field("body-key-colour").value).toBe("#c8c8c8")
-    fixture.type("body-key-colour", "#33aa77")
-    fixture.type("body-key-luminance", "12")
+    expect(fixture.field("bodyKey.color").value).toBe("#c8c8c8")
+    fixture.type("bodyKey.color", "#33aa77")
+    fixture.type("bodyKey.luminanceCdM2", "12")
     expect(fixture.sighting.interpretation!.bodies[0].track[0].appearance).toEqual({ color: "#33aa77", albedo: 0.5, luminanceCdM2: 12 })
   })
 })

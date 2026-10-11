@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test } from "vitest"
 import { ParameterForm, ParameterTarget } from "../../src/component/ParameterForm.js"
+import { SaidTexts } from "../../src/engine/model/SaidText.js"
 import { Parameters } from "../../src/engine/interpretation/Parameters.js"
 import type { ParameterSet } from "../../src/engine/interpretation/Parameters.js"
 
@@ -199,6 +200,80 @@ describe("ParameterForm", () => {
       form.show(building, {}, () => undefined)
       form.clear()
       expect(container.children).toHaveLength(0)
+    })
+  })
+
+  describe("what a body needs of it", () => {
+    const body: ParameterSet = {
+      kind: "body",
+      title: "Body",
+      parameters: [
+        { type: "text", key: "id", label: "ID", required: true, validate: (value, element, context) => !((context as { ids: string[] }).ids).some(id => id === value && id !== element.id) },
+        { type: "said", key: "title", label: "Name" },
+        { type: "set", key: "explains", label: "Shapes", empty: "No shape",
+          options: (element, context) => {
+            const shapes = (context as { shapes: string[] }).shapes
+            const named = ((element.explains as string[] | undefined) ?? []).filter(id => !shapes.includes(id))
+            return [...shapes, ...named].map(value => ({ value, label: value.toUpperCase() }))
+          } },
+        { type: "colour", key: "color", label: "Colour", fallback: "#c8c8c8" }
+      ]
+    }
+    const values = { said: () => new SaidTexts(["fr", "en"]), writingLanguage: () => "fr" }
+    const shown = (element: Record<string, unknown>) => {
+      new ParameterForm(container, "en", "b.", values).show(body, new ParameterTarget(() => element, apply => apply(element), () => ({ ids: ["a", "b"], shapes: ["s1", "s2"] })), () => undefined)
+      return element
+    }
+
+    test("a text refused is marked and not written, and leaving it puts the stated one back", () => {
+      const element = shown({ id: "a" })
+      const field = container.querySelector<HTMLInputElement>('[data-key="id"]')!
+      typed(field, "b")
+      expect(element.id).toBe("a")
+      expect(field.classList.contains("invalid")).toBe(true)
+      field.dispatchEvent(new Event("change", { bubbles: true }))
+      expect(field.value).toBe("a")
+      expect(field.classList.contains("invalid")).toBe(false)
+      typed(field, "c")
+      expect(element.id).toBe("c")
+      typed(field, "")
+      expect(element.id).toBe("c")
+    })
+
+    test("a text in a language is read as the reader has it and written into the writing language, the others kept", () => {
+      const element = shown({ id: "a", title: { en: "The craft", fr: "L'engin" } })
+      const field = container.querySelector<HTMLInputElement>('[data-key="title"]')!
+      expect(field.value).toBe("L'engin")
+      typed(field, "Le vaisseau")
+      expect(element.title).toEqual({ en: "The craft", fr: "Le vaisseau" })
+    })
+
+    test("a set ticks what the element states, lists what it names that the list no longer offers, and writes what is ticked", () => {
+      const element = shown({ id: "a", explains: ["s2", "gone"] })
+      const ticks = () => [...container.querySelectorAll<HTMLInputElement>('[data-key="explains"] input')]
+      expect(ticks().map(check => [check.value, check.checked])).toEqual([["s1", false], ["s2", true], ["gone", true]])
+      ticks()[0].checked = true
+      ticks()[0].dispatchEvent(new Event("input", { bubbles: true }))
+      expect(element.explains).toEqual(["s1", "s2", "gone"])
+      for (const check of ticks()) {
+        check.checked = false
+        check.dispatchEvent(new Event("input", { bubbles: true }))
+      }
+      expect(element.explains).toBeUndefined()
+    })
+
+    test("a set with nothing to offer says so", () => {
+      new ParameterForm(container, "en", "b.", values).show(body, new ParameterTarget(() => ({ id: "a" }), () => undefined, () => ({ ids: [], shapes: [] })), () => undefined)
+      expect(container.querySelector('[data-key="explains"]')!.textContent).toBe("No shape")
+    })
+
+    test("a colour the field cannot hold is shown as the fallback, and three digits are spelt out", () => {
+      const element = shown({ id: "a", color: "silver" })
+      const field = container.querySelector<HTMLInputElement>('[data-key="color"]')!
+      expect(field.value).toBe("#c8c8c8")
+      expect(ParameterForm.swatchOf("#abc", "#000000")).toBe("#aabbcc")
+      typed(field, "#33aa77")
+      expect(element.color).toBe("#33aa77")
     })
   })
 })

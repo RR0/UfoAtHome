@@ -51,8 +51,13 @@ export class ParameterForm {
   private changed: () => void = () => undefined
   private said: SaidTexts
 
-  /** `idPrefix` is put before each key to make the id of its field, so that something outside the form (a summary chip) can reach it. */
-  constructor(private readonly container: HTMLElement, language: string, private readonly idPrefix = "") {
+  /**
+   * `idPrefix` is put before each key to make the id of its field, so that something outside the form (a summary chip) can reach it.
+   * `values` is what a text an author writes in a language needs (see SaidParameter): how this reader reads one, and the language
+   * a typed text is written into.
+   */
+  constructor(private readonly container: HTMLElement, language: string, private readonly idPrefix = "",
+    private readonly values?: { said: () => SaidTexts, writingLanguage: () => string }) {
     this.said = new SaidTexts([language, "en"])
   }
 
@@ -113,7 +118,7 @@ export class ParameterForm {
     for (const spec of this.set.parameters) {
       const field = this.field(spec.key)
       if (!field) continue
-      const row = (field.closest("label") ?? field) as HTMLElement
+      const row = (field.closest("label, .parameter-row") ?? field) as HTMLElement
       row.hidden = spec.visibleWhen !== undefined && !spec.visibleWhen(element, context)
       const stated = Parameters.read(element, spec.key)
       if (spec.type === "number") {
@@ -136,14 +141,26 @@ export class ParameterForm {
       } else if (spec.type === "boolean") {
         const input = field as HTMLInputElement
         if (input !== active) input.checked = stated === true
+      } else if (spec.type === "colour") {
+        const input = field as HTMLInputElement
+        if (input !== active) input.value = ParameterForm.swatchOf(stated, spec.fallback ?? "#808080")
+      } else if (spec.type === "set") {
+        this.syncSet(spec, field, element, context)
+      } else if (spec.type === "said") {
+        const input = field as HTMLInputElement
+        if (input !== active) input.value = this.values?.said().read(Parameters.read(element, spec.key) as SaidText | undefined) ?? ""
       } else {
         const input = field as HTMLInputElement
-        if (input !== active) input.value = typeof stated === "string" ? stated : ""
+        if (input !== active) {
+          input.value = typeof stated === "string" ? stated : ""
+          input.classList.remove("invalid")
+          input.removeAttribute("aria-invalid")
+        }
       }
     }
     // A group with no field showing has no heading to show.
     for (const group of this.container.querySelectorAll<HTMLElement>("fieldset.parameter-group")) {
-      group.hidden = [...group.querySelectorAll<HTMLElement>("label")].every(label => label.hidden)
+      group.hidden = [...group.querySelectorAll<HTMLElement>("label, .parameter-row")].filter(row => row.parentElement === group).every(row => row.hidden)
     }
   }
 
@@ -162,6 +179,16 @@ export class ParameterForm {
       select.append(...spec.choices.map(choice => new Option(this.read(choice.label) ?? choice.value, choice.value)))
       select.addEventListener("input", () => this.write(spec, select.value === "" ? undefined : select.value))
       label.append(select)
+    } else if (spec.type === "set") {
+      // Ticks, as many as the list offers: a box of its own, since a label can hold one field.
+      const box = document.createElement("div")
+      this.identify(box, spec)
+      box.className = "parameter-set"
+      box.addEventListener("input", () => {
+        const checked = [...box.querySelectorAll<HTMLInputElement>("input:checked")].map(check => check.value)
+        this.write(spec, checked.length > 0 ? checked : undefined)
+      })
+      return this.setRow(spec, box)
     } else if (spec.type === "boolean") {
       const input = document.createElement("input")
       input.type = "checkbox"
@@ -190,16 +217,80 @@ export class ParameterForm {
       } else if (spec.type === "colour") {
         input.type = "color"
         input.addEventListener("input", () => this.write(spec, input.value))
+      } else if (spec.type === "said") {
+        input.type = "text"
+        input.placeholder = this.read(spec.placeholder) ?? ""
+        input.addEventListener("input", () => {
+          const target = this.target?.read()
+          const values = this.values
+          if (!target || !values) return
+          // Into this language's entry, the others kept: written from nothing, an edit took every other language away.
+          this.write(spec, values.said().write(Parameters.read(target, spec.key) as SaidText | undefined, input.value, values.writingLanguage()))
+        })
       } else {
         input.type = "text"
         input.placeholder = this.read(spec.placeholder) ?? ""
-        input.addEventListener("input", () => this.write(spec, input.value === "" ? undefined : input.value))
+        input.addEventListener("input", () => {
+          const typed = spec.required || spec.validate ? input.value.trim() : input.value
+          const element = this.target?.read()
+          const refused = element !== undefined && ((spec.required === true && typed === "") || (typed !== "" && spec.validate?.(typed, element, this.target!.context()) === false))
+          input.classList.toggle("invalid", refused)
+          if (refused) input.setAttribute("aria-invalid", "true")
+          else input.removeAttribute("aria-invalid")
+          if (refused) return
+          this.write(spec, typed === "" ? undefined : typed)
+        })
+        // Leaving a field whose value was refused puts the stated one back.
+        input.addEventListener("change", () => {
+          if (!input.classList.contains("invalid")) return
+          input.classList.remove("invalid")
+          input.removeAttribute("aria-invalid")
+          const element = this.target?.read()
+          const stated = element === undefined ? undefined : Parameters.read(element, spec.key)
+          input.value = typeof stated === "string" ? stated : ""
+        })
       }
       label.append(input)
     }
     // The unit stands AFTER the field, never in the label before it.
     if (unit) label.append(` ${unit}`)
     return label
+  }
+
+  /** A set's row: its name, and its ticks under it. */
+  private setRow(spec: ParameterSpec, box: HTMLElement): HTMLElement {
+    const row = document.createElement("div")
+    row.className = "parameter-row"
+    const hint = this.read(spec.hint)
+    if (hint) row.title = hint
+    const name = document.createElement("span")
+    name.textContent = this.read(spec.label) ?? spec.key
+    row.append(name, box)
+    return row
+  }
+
+  /** The ticks of a set: what the list offers now, with what the element states ticked. */
+  private syncSet(spec: ParameterSpec, field: HTMLElement, element: ParameterHolder, context: unknown): void {
+    if (spec.type !== "set") return
+    const stated = Parameters.read(element, spec.key)
+    const ticked = new Set(Array.isArray(stated) ? stated as string[] : [])
+    const options = spec.options(element, context)
+    if (options.length === 0) {
+      field.textContent = this.read(spec.empty) ?? ""
+      return
+    }
+    const same = [...field.querySelectorAll<HTMLInputElement>("input")].map(check => check.value).join("\n") === options.map(option => option.value).join("\n")
+    if (!same) {
+      field.replaceChildren(...options.map(option => {
+        const item = document.createElement("label")
+        const check = document.createElement("input")
+        check.type = "checkbox"
+        check.value = option.value
+        item.append(check, " ", option.label)
+        return item
+      }))
+    }
+    for (const check of field.querySelectorAll<HTMLInputElement>("input")) check.checked = ticked.has(check.value)
   }
 
   private identify(field: HTMLElement, spec: ParameterSpec): void {
@@ -235,6 +326,17 @@ export class ParameterForm {
   private static boundsOf(spec: NumberParameter, element: ParameterHolder, context?: unknown): { min: number, max: number } {
     const dynamic = spec.bounds?.(element, context)
     return { min: dynamic?.min ?? spec.min, max: dynamic?.max ?? spec.max }
+  }
+
+  /**
+   * A colour as a colour field can hold it: #rrggbb, with #rgb spelt out. What the field cannot show is left as its
+   * fallback grey, which only stands in the swatch until the author picks a colour of their own.
+   */
+  static swatchOf(colour: unknown, fallback: string): string {
+    if (typeof colour !== "string") return fallback
+    const short = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i.exec(colour)
+    if (short) return `#${short[1]}${short[1]}${short[2]}${short[2]}${short[3]}${short[3]}`.toLowerCase()
+    return /^#[0-9a-f]{6}$/i.test(colour) ? colour.toLowerCase() : fallback
   }
 
   /**

@@ -4,7 +4,6 @@ export interface LaunchEditorMessages {
   none: string
   launch: string
   deleteLaunch: string
-  title: string
   track: string
   trackEmpty: string
   /** {n} keyframes, {from} and {to} in seconds, {top} the highest point in kilometres. */

@@ -13,10 +13,6 @@ export interface BodyEditorMessages {
   /** A body added with no shape to stand for: where the observer is looking. */
   addBodyHintView: string
   lookAtBody: string
-  id: string
-  title: string
-  explains: string
-  explainsNothing: string
   model: string
   primitives: string
   catalogue: string
@@ -30,8 +26,6 @@ export interface BodyEditorMessages {
   modelIncomplete: string
   /** Under the address block, when it shows a catalogue model. */
   modelFromCatalogue: string
-  outlineNode: string
-  outlineNodeHint: string
   track: string
   trackEmpty: string
   /** {n} keyframes, {from} and {to} in seconds. */
@@ -42,25 +36,6 @@ export interface BodyEditorMessages {
   atPlayhead: string
   keyframeHere: string
   keyframeAdded: string
-  placement: string
-  fromObserver: string
-  inWorld: string
-  azimuth: string
-  elevation: string
-  distance: string
-  east: string
-  north: string
-  onGround: string
-  aboveGround: string
-  width: string
-  length: string
-  height: string
-  heading: string
-  pitch: string
-  roll: string
-  colour: string
-  albedo: string
-  luminance: string
   /** Under the appearance fields. */
   appearanceNote: string
   deleteKeyframe: string

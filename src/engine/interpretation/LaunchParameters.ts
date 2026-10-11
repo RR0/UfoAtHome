@@ -28,6 +28,7 @@ export class LaunchParameters {
     kind: "launch",
     title: { en: "Launch", fr: "Lancement", es: "Lanzamiento", it: "Lancio" },
     parameters: ([
+      { type: "said", key: "title", label: { en: "Name", fr: "Nom", es: "Nombre", it: "Nome" }, group: { en: "Vehicle", fr: "Lanceur", es: "Lanzador", it: "Lanciatore" } },
       {
         type: "text", key: "vehicle.name",
         label: { en: "Vehicle", fr: "Lanceur", es: "Lanzador", it: "Lanciatore" },
