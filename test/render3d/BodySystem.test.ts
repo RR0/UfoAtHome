@@ -96,4 +96,27 @@ describe("BodySystem veil", () => {
     expect(behind === undefined || behind.mesh.visible === false).toBe(true)
     expect(veil(500)!.mesh.visible).toBe(true)
   })
+
+  describe("maskedShare", () => {
+    const wallAt = (eastM: number) => {
+      const mesh = new Mesh(new BoxGeometry(60, 80, 4), new MeshBasicMaterial())
+      mesh.position.set(eastM, 20, -200)
+      const group = new Group()
+      group.add(mesh)
+      group.updateMatrixWorld(true)
+      return group
+    }
+    const shown = () => {
+      const system = new BodySystem(async () => undefined as never, () => undefined, () => 1e-5)
+      system.set([glowing(2e6)], { originX: 0, originZ: 0, originGroundY: 0, eye: new Vector3(0, 1.6, 0) })
+      return system
+    }
+
+    it("tells how much of a body a building hides: all of it in front, none beside, nothing for a body not on show", () => {
+      const system = shown()
+      expect(system.maskedShare("ball", wallAt(0))).toBe(1)
+      expect(system.maskedShare("ball", wallAt(500))).toBe(0)
+      expect(system.maskedShare("nobody", wallAt(0))).toBeUndefined()
+    })
+  })
 })

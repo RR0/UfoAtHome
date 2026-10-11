@@ -2235,6 +2235,12 @@ export class SceneRenderer {
     return { heightAt: (eastM, northM) => this.groundYUnder(x + eastM, z - northM) - originY }
   }
 
+  /** How much of the body `bodyId` the decor object `decorId` hides from the observer, 0 to 1; undefined if either is not on show. */
+  bodyMaskedByDecor(bodyId: string, decorId: string): number | undefined {
+    const group = this.decorGroups.get(decorId)
+    return group ? this.bodySystem.maskedShare(bodyId, group) : undefined
+  }
+
   /**
    * Stands the bodies of an interpretation in the scene — or none, which is the raw account. See
    * BodySystem. Called every tick after updateDecorAnchoring, whose origin it shares.

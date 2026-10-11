@@ -651,6 +651,10 @@ export interface SightingEditorMessages extends SightingLabels {
   masks: string
   /** The Masks flyout's own line when the recording has no shape yet, so it never opens as an empty bar. */
   masksNone: string
+  /** What the Masks flyout says of a body: whether this decor object stands in front of it, which the scene decides from where each stands. {share} is a percentage. */
+  masksBodyFully: string
+  masksBodyPartly: string
+  masksBodyNot: string
   /** The window that shows the 3D models as pictures to choose one: its title, its close button, and the tooltip of the button that opens it. */
   modelPickerTitle: string
   modelPickerClose: string

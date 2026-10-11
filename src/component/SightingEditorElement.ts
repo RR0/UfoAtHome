@@ -9073,7 +9073,8 @@ export class SightingEditorElement extends HTMLElement {
   private refreshContextMasksSubmenu(decor: DecorObject): void {
     this.contextMasksSubmenu.innerHTML = ""
     const sourceIds = [...this.ufoElement.sighting.timeline.sourceIds]
-    if (sourceIds.length === 0) {
+    const bodies = this.ufoElement.sighting.interpretation?.bodies ?? []
+    if (sourceIds.length === 0 && bodies.length === 0) {
       const none = document.createElement("span")
       none.className = "submenu-empty"
       none.textContent = this.messages.masksNone
@@ -9088,6 +9089,17 @@ export class SightingEditorElement extends HTMLElement {
       label.appendChild(checkbox)
       label.appendChild(document.createTextNode(this.shapeLabel(sourceId)))
       this.contextMasksSubmenu.appendChild(label)
+    }
+    // A body is placed in the scene, so whether this object stands in front of it is not a choice but a fact of where each stands: told, not ticked.
+    for (const body of bodies) {
+      const share = this.sceneElement.bodyMaskedBy(body.id, decor.id)
+      if (share === undefined) continue
+      const row = document.createElement("span")
+      row.className = "submenu-empty submenu-fact"
+      const name = this.said.read(body.title) ?? body.id
+      const m = this.messages
+      row.textContent = `${name} — ${share >= 0.995 ? m.masksBodyFully : share > 0.005 ? m.masksBodyPartly.replace("{share}", String(Math.round(share * 100))) : m.masksBodyNot}`
+      this.contextMasksSubmenu.appendChild(row)
     }
   }
 

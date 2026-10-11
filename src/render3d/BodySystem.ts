@@ -260,6 +260,17 @@ export class BodySystem {
   }
 
   /** A colour a light at `at` gives out, as it arrives at the eye through the air. */
+  /**
+   * How much of the body `id` the object `occluder` hides from the eye, 0 to 1: what the author needs to be told of a building that stands
+   * in front of a body (the scene decides it from where each stands, it is no choice), or undefined where the body is not on show.
+   */
+  maskedShare(id: string, occluder: Object3D): number | undefined {
+    const holder = this.built.get(id)?.holder
+    const eye = this.frame?.eye
+    if (!holder || !eye || !holder.visible) return undefined
+    return 1 - this.decorClearShare(holder, eye, [occluder])
+  }
+
   /** The share of a body that the eye sees past the decor's buildings and trees: its box, looked at as the lights of a model are. */
   private decorClearShare(holder: Group, eye: Vector3, decor: readonly Object3D[]): number {
     holder.updateMatrixWorld(true)

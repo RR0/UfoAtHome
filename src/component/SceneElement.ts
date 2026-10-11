@@ -2438,6 +2438,11 @@ export class SceneElement extends HTMLElement {
    * of where the observer started, and how high its base is over the ground there) — with its size
    * and attitude. What the editor's fields show at the playhead. Undefined when it is not placed.
    */
+  bodyMaskedBy(bodyId: string, decorId: string): number | undefined {
+    return this.sceneRenderer.bodyMaskedByDecor(bodyId, decorId)
+  }
+
+  /** (see bodyMaskedBy) */
   bodyReading(body: BodyJson, t: number): BodyReading | undefined {
     const ground = this.sceneRenderer.bodyGround
     const sighting = this.ufoElement.sighting

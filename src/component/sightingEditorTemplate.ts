@@ -1369,7 +1369,7 @@ select.weather-field:disabled {
   font: inherit;
 }
 .context-menu button:hover {
-  background: #eef;
+  background: light-dark(#eef, #3a3d46);
 }
 .context-menu button:disabled {
   cursor: default;
@@ -1382,7 +1382,7 @@ select.weather-field:disabled {
   width: 100%;
   margin: 0.3em 0;
   border: none;
-  border-top: 1px solid #eee;
+  border-top: 1px solid light-dark(#eee, #3a3c42);
 }
 .context-delete {
   color: #c33;
@@ -1405,7 +1405,7 @@ select.weather-field:disabled {
 }
 .submenu-trigger:hover > .submenu-label,
 .submenu-trigger:focus-within > .submenu-label {
-  background: #eef;
+  background: light-dark(#eef, #3a3d46);
 }
 .submenu {
   display: none;
@@ -1442,6 +1442,6 @@ select.weather-field:disabled {
   white-space: nowrap;
 }
 .submenu label:hover {
-  background: #eef;
+  background: light-dark(#eef, #3a3d46);
 }
 `
