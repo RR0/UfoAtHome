@@ -34,4 +34,24 @@ describe("BodySystem veil", () => {
     const none = veilAfter(0)
     expect(none === undefined || none.mesh.visible === false).toBe(true)
   })
+
+  /** The same body with a hill across the line of sight to the north, between 150 and 250 m from the eye, 300 m high. */
+  const withHill = (northM: number): Veil | undefined => {
+    const system = new BodySystem(async () => undefined as never, () => undefined, () => 1e-5)
+    const state = { ...glowing(2e6), northM }
+    // Scene z is south: the body stands at z = -northM.
+    system.set([state], { originX: 0, originZ: 0, originGroundY: 0, eye: new Vector3(0, 1.6, 0), groundYAt: (_x, z) => -z > 150 && -z < 250 ? 300 : 0 })
+    return (system as unknown as { glares: Map<string, Veil> }).glares.get("ball")
+  }
+
+  it("is hidden when the relief rises between the eye and the body, and shown over the relief when the body is in front of it", () => {
+    const behind = withHill(400)
+    expect(behind === undefined || behind.mesh.visible === false).toBe(true)
+    const inFront = withHill(100)!
+    expect(inFront.mesh.visible).toBe(true)
+  })
+
+  it("is drawn over the relief, the decor and the clouds, as it is in the eye", () => {
+    expect(veilAfter(2e6)!.mesh.renderOrder).toBeGreaterThan(6)
+  })
 })

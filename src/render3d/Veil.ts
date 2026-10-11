@@ -18,12 +18,17 @@ export class Veil {
   static readonly K = 10
   /** Where a veil stops being worth drawing: a thousandth of the eye's semi-saturation. */
   static readonly FAINTEST = 1e-3
+  /**
+   * Where a veil that is in the eye is drawn: over the relief (1), the decor (2), the clouds (5) and the rain (6), as it is over
+   * everything one sees. The default of 0 draws it under the relief, which cut the glare of a body off along the horizon.
+   */
+  static readonly OVER_EVERYTHING = 7
   /** Never wider than this, whatever the source: the law is measured out to about thirty degrees. */
   static readonly MAX_RADIUS_DEG = 30
 
   readonly mesh: Mesh<PlaneGeometry, ShaderMaterial>
 
-  constructor(name: string) {
+  constructor(name: string, renderOrder = 0) {
     this.mesh = new Mesh(new PlaneGeometry(2, 2), new ShaderMaterial({
       uniforms: {
         uColor: { value: new Color(0, 0, 0) },
@@ -40,6 +45,7 @@ export class Veil {
       fog: false
     }))
     this.mesh.name = name
+    this.mesh.renderOrder = renderOrder
     this.mesh.frustumCulled = false
     this.mesh.visible = false
   }

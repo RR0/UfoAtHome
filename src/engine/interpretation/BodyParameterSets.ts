@@ -206,7 +206,7 @@ export class BodyParameterSets {
         visibleWhen: (_view, context) => (context as BodyKeyframeContext | undefined)?.drawnFromModel !== true
       },
       BodyParameterSets.number("albedo", { en: "Albedo", fr: "Albédo", es: "Albedo", it: "Albedo" }, 0, 1, 0.01, undefined),
-      BodyParameterSets.number("luminanceCdM2", { en: "Light of its own", fr: "Lumière propre", es: "Luz propia", it: "Luce propria" }, 0, 100000, 0.1, "cd/m²")
+      BodyParameterSets.number("luminanceCdM2", { en: "Light of its own", fr: "Lumière propre", es: "Luz propia", it: "Luce propria" }, 0, 1e10, 0.1, "cd/m²")
     ] satisfies ParameterSpec[])
   }
 }

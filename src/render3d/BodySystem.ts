@@ -207,7 +207,8 @@ export class BodySystem {
       return
     }
     if (!veil) {
-      veil = new Veil(`body-veil:${state.id}`)
+      // In the eye, so over the relief and everything else drawn (see Veil.OVER_EVERYTHING).
+      veil = new Veil(`body-veil:${state.id}`, Veil.OVER_EVERYTHING)
       this.glares.set(state.id, veil)
       this.group.add(veil.mesh)
     }
@@ -218,7 +219,13 @@ export class BodySystem {
     const radiusM = Math.max(state.sizeM.widthM, state.sizeM.heightM) / 2
     const distanceM = Math.max(holder.position.distanceTo(eye), radiusM * 1.01)
     const angularRadius = Math.asin(radiusM / distanceM)
-    const solidAngle = 2 * Math.PI * (1 - Math.cos(angularRadius))
+    // A body behind the relief gives the eye no glare: it is not seen. One in front of it does, over the relief as over everything.
+    const clear = this.reliefClearShare(eye, holder.position, radiusM)
+    if (clear <= 0) {
+      veil.hide()
+      return
+    }
+    const solidAngle = 2 * Math.PI * (1 - Math.cos(angularRadius)) * clear
     // A model's own brightest glowing part says what colour the veil is; a primitive's own colour does.
     const hue = glowing?.find(glow => glow.share >= 1)?.hue ?? BodySystem.rgbOf(state.appearance.color)
     // From the luminance itself, as a star's illuminance and a model's own lights' are (see shineLights): never from the colour as shown. The
@@ -248,6 +255,33 @@ export class BodySystem {
   }
 
   /** A colour a light at `at` gives out, as it arrives at the eye through the air. */
+  /**
+   * The share of a body — its middle, its top and its bottom — that the eye sees over the ground: the line from the eye to each is
+   * followed, and one that the ground rises above anywhere on the way is hidden by it. Whether a body is in front of or behind the
+   * horizon is a matter of this, of how far it is along its direction against how far the relief is along the same one, and not of
+   * where it stands on the map.
+   */
+  private reliefClearShare(eye: Vector3, centre: Vector3, radiusM: number): number {
+    const groundYAt = this.frame?.groundYAt
+    if (!groundYAt) return 1
+    let clear = 0
+    const points = [centre, new Vector3(centre.x, centre.y + radiusM, centre.z), new Vector3(centre.x, centre.y - radiusM, centre.z)]
+    for (const point of points) {
+      const length = point.distanceTo(eye)
+      const steps = Math.max(8, Math.min(200, Math.ceil(length / 25)))
+      let hidden = false
+      // Not as far as the point itself: the ground it stands on (or its own hill) does not hide it.
+      for (let i = 1; i < steps && !hidden; i++) {
+        const f = i / steps
+        const x = eye.x + (point.x - eye.x) * f
+        const z = eye.z + (point.z - eye.z) * f
+        hidden = groundYAt(x, z) > eye.y + (point.y - eye.y) * f + 0.5
+      }
+      if (!hidden) clear++
+    }
+    return clear / points.length
+  }
+
   private throughAir(rgb: readonly [number, number, number], at: Vector3): [number, number, number] {
     const transmittance = this.frame?.transmittance?.(at.x, at.y, at.z) ?? [1, 1, 1]
     return [rgb[0] * transmittance[0], rgb[1] * transmittance[1], rgb[2] * transmittance[2]]
@@ -422,7 +456,7 @@ export class BodySystem {
         continue
       }
       if (!veil) {
-        veil = new Veil(`body-light:${state.id}:${glow.name}`)
+        veil = new Veil(`body-light:${state.id}:${glow.name}`, Veil.OVER_EVERYTHING)
         this.lightVeils.set(key, veil)
         this.group.add(veil.mesh)
       }
