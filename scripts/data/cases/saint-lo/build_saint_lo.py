@@ -15,7 +15,7 @@ import pathlib
 
 OUT = pathlib.Path("public/demo-data/observer-saint-lo.json")
 
-LAT, LNG = 49.1158, -1.0909          # Saint-Lô centre: the farm's own coordinates were not found
+LAT, LNG = 49.1043877, -1.0777321    # Musée du Bocage normand, given by the investigator
 DURATION_MS = 4000
 STEP_MS = 50
 SPIRAL_FROM_MS = 3000                  # the 720-degree turn is the last second
@@ -247,9 +247,9 @@ def build():
         "timeZone": "Europe/Paris",
         "durationSeconds": stated(4, "stated", "\"les 4 secondes de temps d'apparition\"; \"en moins de 5 secondes je dirais\""),
         "place": [stated({"lat": LAT, "lng": LNG, "name": "Parc du Musée du Bocage normand (ferme de Boisjugan), Saint-Lô, Manche, France"},
-                         "assumed",
-                         "he names the park and the museum (Boulevard de la Commune / des Combattants); the farm's own coordinates were not "
-                         "found, so the town centre is taken: a few hundred metres change nothing to the sky")],
+                         "derived",
+                         "the witness names the park of the Musée du Bocage normand; the coordinates of the museum "
+                         "are those given by J. Beau. Where in the park he stood is not known")],
         "observer": {"title": "Q. B."},
         "account": {
             "source": stated("questionnaire", "stated", "he answered in writing, on the mailing list, the 19 questions put to him"),

@@ -26,12 +26,12 @@
  "place": [
   {
    "value": {
-    "lat": 49.1158,
-    "lng": -1.0909,
+    "lat": 49.1043877,
+    "lng": -1.0777321,
     "name": "Parc du Musée du Bocage normand (ferme de Boisjugan), Saint-Lô, Manche, France"
    },
-   "basis": "assumed",
-   "rationale": "he names the park and the museum (Boulevard de la Commune / des Combattants); the farm's own coordinates were not found, so the town centre is taken: a few hundred metres change nothing to the sky"
+   "basis": "derived",
+   "rationale": "the witness names the park of the Musée du Bocage normand; the coordinates of the museum are those given by J. Beau. Where in the park he stood is not known"
   }
  ],
  "observer": {
@@ -71,8 +71,8 @@
    {
     "t": 0,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": {
       "value": 250,
@@ -90,8 +90,8 @@
    {
     "t": 100,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 261.44,
      "pitchDeg": 45.75,
@@ -101,8 +101,8 @@
    {
     "t": 200,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 288.72,
      "pitchDeg": 47.53,
@@ -112,8 +112,8 @@
    {
     "t": 300,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 321.28,
      "pitchDeg": 49.66,
@@ -123,8 +123,8 @@
    {
     "t": 400,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 348.56,
      "pitchDeg": 51.44,
@@ -134,8 +134,8 @@
    {
     "t": 500,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 0.0,
      "pitchDeg": 52.19,
@@ -145,8 +145,8 @@
    {
     "t": 600,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 0.0,
      "pitchDeg": 57.1,
@@ -156,8 +156,8 @@
    {
     "t": 700,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 0.0,
      "pitchDeg": 62.01,
@@ -167,8 +167,8 @@
    {
     "t": 800,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 0.0,
      "pitchDeg": 88.0,
@@ -178,8 +178,8 @@
    {
     "t": 900,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 7.73,
      "pitchDeg": 88.0,
@@ -189,8 +189,8 @@
    {
     "t": 1000,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 28.12,
      "pitchDeg": 88.0,
@@ -200,8 +200,8 @@
    {
     "t": 1100,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 56.95,
      "pitchDeg": 88.0,
@@ -211,8 +211,8 @@
    {
     "t": 1200,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 90.0,
      "pitchDeg": 88.0,
@@ -222,8 +222,8 @@
    {
     "t": 1300,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 123.05,
      "pitchDeg": 88.0,
@@ -233,8 +233,8 @@
    {
     "t": 1400,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 151.87,
      "pitchDeg": 88.0,
@@ -244,8 +244,8 @@
    {
     "t": 1500,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 172.27,
      "pitchDeg": 88.0,
@@ -255,8 +255,8 @@
    {
     "t": 1600,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 88.0,
@@ -266,8 +266,8 @@
    {
     "t": 1700,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 77.31,
@@ -277,8 +277,8 @@
    {
     "t": 1800,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 74.36,
@@ -288,8 +288,8 @@
    {
     "t": 1900,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 71.41,
@@ -299,8 +299,8 @@
    {
     "t": 2000,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 68.45,
@@ -310,8 +310,8 @@
    {
     "t": 2100,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 65.5,
@@ -321,8 +321,8 @@
    {
     "t": 2200,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 62.55,
@@ -332,8 +332,8 @@
    {
     "t": 2300,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 59.6,
@@ -343,8 +343,8 @@
    {
     "t": 2400,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 56.65,
@@ -354,8 +354,8 @@
    {
     "t": 2500,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 53.7,
@@ -365,8 +365,8 @@
    {
     "t": 2600,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 50.75,
@@ -376,8 +376,8 @@
    {
     "t": 2700,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 47.8,
@@ -387,8 +387,8 @@
    {
     "t": 2800,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 44.84,
@@ -398,8 +398,8 @@
    {
     "t": 2900,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 41.89,
@@ -409,8 +409,8 @@
    {
     "t": 3000,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 38.94,
@@ -420,8 +420,8 @@
    {
     "t": 3100,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 35.99,
@@ -431,8 +431,8 @@
    {
     "t": 3200,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 33.04,
@@ -442,8 +442,8 @@
    {
     "t": 3300,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 30.09,
@@ -453,8 +453,8 @@
    {
     "t": 3400,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 27.14,
@@ -464,8 +464,8 @@
    {
     "t": 3500,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 24.18,
@@ -475,8 +475,8 @@
    {
     "t": 3600,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 21.23,
@@ -486,8 +486,8 @@
    {
     "t": 3700,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 18.28,
@@ -497,8 +497,8 @@
    {
     "t": 3800,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 15.33,
@@ -508,8 +508,8 @@
    {
     "t": 3900,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 12.38,
@@ -519,8 +519,8 @@
    {
     "t": 4000,
     "pose": {
-     "lat": 49.1158,
-     "lng": -1.0909,
+     "lat": 49.1043877,
+     "lng": -1.0777321,
      "elevationM": 0,
      "headingDeg": 180.0,
      "pitchDeg": 9.43,
