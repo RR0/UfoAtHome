@@ -1,5 +1,6 @@
 import type { DecorKind, DecorObject } from "./Decor.js"
 import { canHoldObserver, decorModelOf, hasWindows } from "./Decor.js"
+import type { ParameterSpec } from "../interpretation/Parameters.js"
 import { LightRigs } from "./LightRig.js"
 
 /**
@@ -28,7 +29,14 @@ export interface DecorParameters {
  * `color`, one whose lamps must not be laid over it says `lights: false`. Stated in the catalogue,
  * beside the model's size and credit, so that a new model brings its own answer.
  */
-export type ModelParameters = Partial<Pick<DecorParameters, "color" | "lit" | "lights">>
+export type ModelParameters = Partial<Pick<DecorParameters, "color" | "lit" | "lights">> & {
+  /**
+   * Settings of its own, which no kind knows: a model that opens its doors says how far, one with a
+   * variable height of mast says its limits. Drawn by the editor like those of a kind (see
+   * DecorParameterSets), and written onto the object at their `key`.
+   */
+  parameters?: ReadonlyArray<ParameterSpec>
+}
 
 export class DecorTraits {
   /**

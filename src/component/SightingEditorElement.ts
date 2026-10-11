@@ -1,6 +1,9 @@
 import { setupCloudEditor } from "./CloudEditor.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
+import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
+import { DecorParameterSets } from "../engine/model/DecorParameterSets.js"
+import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import type { JsonPath } from "./JsonPaths.js"
 import { NumberFields } from "./NumberFields.js"
@@ -92,11 +95,8 @@ import {
   resolveDecorLitAt,
   DECOR_SIDES,
   DEFAULT_BUILDING_FLOORS,
-  FIXED_WINDOW_MIN_OPACITY_PERCENT,
   defaultWindows,
-  decorSidesFor,
   observerSidesFor,
-  isWindowOpenable,
   canHoldObserver,
   DEFAULT_DECOR_MODEL
 } from "../engine/model/Decor.js"
@@ -730,16 +730,12 @@ export class SightingEditorElement extends HTMLElement {
   private readonly decorModelAuthorInput: HTMLInputElement
   private readonly decorModelLicenseInput: HTMLInputElement
   private readonly decorModelSourceInput: HTMLInputElement
-  private readonly decorFloorsInput: HTMLInputElement
-  private readonly decorOccupiedFloorInput: HTMLInputElement
   private readonly decorObserverSideSelect: HTMLSelectElement
-  /** One 0-100 opacity number input per DecorSide (empty = no window at all on that side), keyed
-   * the same way as DecorObject.windows itself — see syncDecorFields/updateDecorWindows, which
-   * iterate DECOR_SIDES rather than one branch per side. Each input's own `min` is raised to
-   * FIXED_WINDOW_MIN_OPACITY_PERCENT per isWindowOpenable (e.g. a vehicle's front/behind windshield/
-   * rear window are fixed — see syncDecorVisibility). */
-  private readonly decorWindowInputs: Record<DecorSide, HTMLInputElement>
-  private readonly labelDecorSide: Record<DecorSide, HTMLElement>
+  /** The properties the selected object's kind publishes beyond placement and size — floors, windows, a bridge's railing —
+   * drawn by the generic form (see DecorParameterSets), and which set it was last drawn for. */
+  private readonly decorParameterForm: ParameterForm
+  private readonly decorParametersHost: HTMLElement
+  private decorParametersShownFor?: string
   private readonly optionObserverSide: Record<DecorSide, HTMLOptionElement>
   private readonly labelDecor: HTMLElement
   /** The Decor group's own handle in the tab strip — reuses the same "Decor" text as labelDecor
@@ -766,10 +762,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelDecorModelAuthor: HTMLElement
   private readonly labelDecorModelLicense: HTMLElement
   private readonly labelDecorModelSource: HTMLElement
-  private readonly labelDecorFloors: HTMLElement
-  private readonly labelDecorOccupiedFloor: HTMLElement
   private readonly labelDecorObserverSide: HTMLElement
-  private readonly labelDecorWindows: HTMLElement
   private readonly optionObserverSideNone: HTMLOptionElement
   private readonly optionDecorBuilding: HTMLElement
   private readonly optionDecorTree: HTMLElement
@@ -1454,29 +1447,9 @@ export class SightingEditorElement extends HTMLElement {
     this.decorModelAuthorInput = this.shadow.getElementById("decorModelAuthor") as HTMLInputElement
     this.decorModelLicenseInput = this.shadow.getElementById("decorModelLicense") as HTMLInputElement
     this.decorModelSourceInput = this.shadow.getElementById("decorModelSource") as HTMLInputElement
-    this.decorFloorsInput = this.shadow.getElementById("decorFloors") as HTMLInputElement
-    this.decorOccupiedFloorInput = this.shadow.getElementById("decorOccupiedFloor") as HTMLInputElement
     this.decorObserverSideSelect = this.shadow.getElementById("decorObserverSide") as HTMLSelectElement
-    this.decorWindowInputs = {
-      front: this.shadow.getElementById("decorWindowFront") as HTMLInputElement,
-      behind: this.shadow.getElementById("decorWindowBehind") as HTMLInputElement,
-      left: this.shadow.getElementById("decorWindowLeft") as HTMLInputElement,
-      right: this.shadow.getElementById("decorWindowRight") as HTMLInputElement,
-      "front-left": this.shadow.getElementById("decorWindowFrontLeft") as HTMLInputElement,
-      "front-right": this.shadow.getElementById("decorWindowFrontRight") as HTMLInputElement,
-      "behind-left": this.shadow.getElementById("decorWindowBehindLeft") as HTMLInputElement,
-      "behind-right": this.shadow.getElementById("decorWindowBehindRight") as HTMLInputElement
-    }
-    this.labelDecorSide = {
-      front: this.shadow.getElementById("label-decor-window-front")!,
-      behind: this.shadow.getElementById("label-decor-window-behind")!,
-      left: this.shadow.getElementById("label-decor-window-left")!,
-      right: this.shadow.getElementById("label-decor-window-right")!,
-      "front-left": this.shadow.getElementById("label-decor-window-front-left")!,
-      "front-right": this.shadow.getElementById("label-decor-window-front-right")!,
-      "behind-left": this.shadow.getElementById("label-decor-window-behind-left")!,
-      "behind-right": this.shadow.getElementById("label-decor-window-behind-right")!
-    }
+    this.decorParametersHost = this.shadow.getElementById("decor-parameters")!
+    this.decorParameterForm = new ParameterForm(this.decorParametersHost, "en", "decorParam.")
     this.optionObserverSide = {
       front: this.shadow.getElementById("option-observer-side-front") as HTMLOptionElement,
       behind: this.shadow.getElementById("option-observer-side-behind") as HTMLOptionElement,
@@ -1510,10 +1483,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorModelAuthor = this.shadow.getElementById("label-decor-model-author")!
     this.labelDecorModelLicense = this.shadow.getElementById("label-decor-model-license")!
     this.labelDecorModelSource = this.shadow.getElementById("label-decor-model-source")!
-    this.labelDecorFloors = this.shadow.getElementById("label-decor-floors")!
-    this.labelDecorOccupiedFloor = this.shadow.getElementById("label-decor-occupied-floor")!
     this.labelDecorObserverSide = this.shadow.getElementById("label-decor-observer-side")!
-    this.labelDecorWindows = this.shadow.getElementById("label-decor-windows")!
     this.optionDecorBuilding = this.shadow.getElementById("option-decor-building")!
     this.optionDecorTree = this.shadow.getElementById("option-decor-tree")!
     this.optionDecorShrub = this.shadow.getElementById("option-decor-shrub")!
@@ -1664,9 +1634,7 @@ export class SightingEditorElement extends HTMLElement {
       this.decorModelTitleInput,
       this.decorModelAuthorInput,
       this.decorModelLicenseInput,
-      this.decorModelSourceInput,
-      this.decorFloorsInput,
-      this.decorOccupiedFloorInput
+      this.decorModelSourceInput
     ]) {
       input.addEventListener("input", () => this.updateDecor())
     }
@@ -1680,9 +1648,6 @@ export class SightingEditorElement extends HTMLElement {
     this.milestoneSelect.addEventListener("change", () => this.selectMilestone(Number(this.milestoneSelect.value)))
     for (const input of [this.milestoneLabelInput, this.milestoneNoteInput]) {
       input.addEventListener("input", () => this.updateMilestone())
-    }
-    for (const side of DECOR_SIDES) {
-      this.decorWindowInputs[side].addEventListener("input", () => this.updateDecorWindows())
     }
     // Lit is keyframed over time (see Decor.ts's own resolveDecorLitAt/litKeyframes), unlike the
     // rest of a decor object's fields — a distinct write path (updateDecorLit) is what actually
@@ -7158,7 +7123,7 @@ export class SightingEditorElement extends HTMLElement {
         const t = this.ufoElement.currentTime
         const keyframe = { t, eastM, northM, altitudeM, headingDeg }
         const kept = track.filter(existing => existing.t !== t)
-        return { ...d, title: this.said.write(d.title, this.decorTitleInput.value, this.writingLanguage), color: this.statedDecorColor(d), track: [...kept, keyframe].sort((a, b) => a.t - b.t), sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), observerSide, sizeM: this.statedDecorSize(), model: this.statedDecorModel(), floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined, occupiedFloor: d.kind === "building" ? Number(this.decorOccupiedFloorInput.value) : undefined }
+        return { ...d, title: this.said.write(d.title, this.decorTitleInput.value, this.writingLanguage), color: this.statedDecorColor(d), track: [...kept, keyframe].sort((a, b) => a.t - b.t), sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), observerSide, sizeM: this.statedDecorSize(), model: this.statedDecorModel() }
       }
       return {
         ...d,
@@ -7172,13 +7137,7 @@ export class SightingEditorElement extends HTMLElement {
         sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value),
         observerSide,
         sizeM: this.statedDecorSize(),
-        model: this.statedDecorModel(),
-        floors: d.kind === "building" ? Number(this.decorFloorsInput.value) : undefined,
-        // Written whenever it's a building, not gated on observerSide too (unlike observerSide
-        // itself) — see syncDecorVisibility's own doc comment on why the field is shown that
-        // early: picking a floor is part of configuring the building, before or after a location
-        // is chosen, not locked behind having picked one first.
-        occupiedFloor: d.kind === "building" ? Number(this.decorOccupiedFloorInput.value) : undefined
+        model: this.statedDecorModel()
       }
     })
     this.decorSelect.options[this.decorSelect.selectedIndex]!.textContent = this.decorLabel(sighting.decor.find(d => d.id === this.currentDecorId)!)
@@ -7502,39 +7461,6 @@ export class SightingEditorElement extends HTMLElement {
     this.decorTitleInput.setAttribute("aria-invalid", String(missing))
   }
 
-  /** Writes the 4 per-side opacity inputs back onto the currently selected decor object's windows
-   * record — its own write path (not folded into updateDecor) for the same reason lit has its own
-   * updateDecorLit: a nested record, not a set of flat fields, and each side maps 1:1 to a
-   * DecorSide key rather than a named property. Not keyframed (unlike lit) — see
-   * DecorObject.windows's own doc comment on why. An empty input means no window at all on that
-   * side (omitted from the record — JSON.stringify already drops an explicit `undefined` value,
-   * so no extra filtering is needed here). A non-openable side's value is clamped up to
-   * FIXED_WINDOW_MIN_OPACITY_PERCENT regardless of what's typed — the input's own `min` attribute
-   * (set in syncDecorVisibility) already steers native spinner/slider interaction there, this is
-   * the belt-and-suspenders guarantee for direct typing/paste. */
-  private updateDecorWindows(): void {
-    if (this.currentDecorId === undefined) return
-    const sighting = this.ufoElement.sighting
-    sighting.decor = sighting.decor.map(d => {
-      if (d.id !== this.currentDecorId) return d
-      const windows: Partial<Record<DecorSide, number>> = {}
-      for (const side of DECOR_SIDES) {
-        const input = this.decorWindowInputs[side]
-        if (input.value === "") continue
-        const min = isWindowOpenable(d.kind, side) ? 0 : FIXED_WINDOW_MIN_OPACITY_PERCENT
-        const clamped = Math.max(min, Math.min(100, Number(input.value)))
-        windows[side] = clamped
-        // Reflects the clamp back into the field itself — leaving it showing whatever was typed
-        // (e.g. "50" on a fixed vehicle windshield) while the actual stored value silently became
-        // 90 read as a real bug during testing: the spinner's own up/down arrows then jumped
-        // around a value the field wasn't even displaying.
-        if (String(clamped) !== input.value) input.value = String(clamped)
-      }
-      return { ...d, windows }
-    })
-    this.ufoElement.refresh()
-  }
-
   /** Records the Lit checkbox at the current playhead as a litKeyframes entry — same "at the
    * current instant" idiom as applyWeatherAtPlayhead/updateObserver, and the same playing-state
    * bailout (merely scrubbing/playing must never itself write a keyframe). Replaces any existing
@@ -7595,8 +7521,6 @@ export class SightingEditorElement extends HTMLElement {
       this.decorModelAuthorInput,
       this.decorModelLicenseInput,
       this.decorModelSourceInput,
-      this.decorFloorsInput,
-      this.decorOccupiedFloorInput,
       this.decorObserverSideSelect,
       this.decorLightRigSelect,
       this.decorAltitudeInput,
@@ -7619,13 +7543,8 @@ export class SightingEditorElement extends HTMLElement {
     this.decorSightingUrlInput.value = decor?.sightingUrl ?? ""
     this.syncDecorSizeFields(decor)
     this.syncDecorModelFields(decor)
-    this.decorFloorsInput.value = String(decor?.floors ?? DEFAULT_BUILDING_FLOORS)
-    this.decorOccupiedFloorInput.value = String(decor?.occupiedFloor ?? 0)
     this.decorObserverSideSelect.value = decor?.observerSide ?? ""
-    for (const side of DECOR_SIDES) {
-      const opacity = decor?.windows?.[side]
-      this.decorWindowInputs[side].value = opacity === undefined ? "" : String(opacity)
-    }
+    this.showDecorParameters(decor)
     this.syncDecorVisibility()
     this.updateDecorTitleValidity()
   }
@@ -7638,6 +7557,54 @@ export class SightingEditorElement extends HTMLElement {
   private setRowVisible(field: HTMLElement, visible: boolean): void {
     const row = field.closest("label") ?? field
     ;(row as HTMLElement).hidden = !visible
+  }
+
+  /**
+   * Draws the properties the selected object's kind publishes (see DecorParameterSets), written back as they
+   * are typed. Drawn again only when what is on show is not what applies — another object, or the same one
+   * now drawn as a model, which has no windows of the built-in shape — and otherwise only re-read, so that a
+   * field being typed in is never drawn from under the caret.
+   *
+   * An edit replaces the object by an edited copy of itself in a new decor array, as every other decor edit
+   * does (see updateDecor), and reads the object again for each one: the form never holds a copy that
+   * another field has since changed.
+   */
+  private showDecorParameters(decor: DecorObject | undefined): void {
+    const set = decor ? DecorParameterSets.of(decor, this.shownDecorEntry?.id === decor.model?.id ? this.shownDecorEntry?.parameters : undefined) : undefined
+    if (!decor || !set) {
+      this.decorParametersShownFor = undefined
+      this.decorParameterForm.clear()
+      this.decorParametersHost.hidden = true
+      return
+    }
+    this.decorParametersHost.hidden = false
+    const signature = `${decor.id}|${set.kind}|${set.parameters.map(spec => spec.key).join(",")}`
+    if (signature === this.decorParametersShownFor) {
+      this.decorParameterForm.sync()
+      return
+    }
+    this.decorParametersShownFor = signature
+    const id = decor.id
+    const target = new ParameterTarget(
+      () => this.ufoElement.sighting.decor.find(candidate => candidate.id === id) as unknown as ParameterHolder | undefined,
+      apply => {
+        const sighting = this.ufoElement.sighting
+        sighting.decor = sighting.decor.map(candidate => {
+          if (candidate.id !== id) return candidate
+          const draft = structuredClone(candidate)
+          apply(draft as unknown as ParameterHolder)
+          return draft
+        })
+      })
+    this.decorParameterForm.show(set, target, () => {
+      this.syncDecorVisibility()
+      this.ufoElement.refresh()
+    })
+  }
+
+  /** Called wherever the kind-dependent rows are re-gated: what applies to the object may have changed. */
+  private syncDecorParameterVisibility(): void {
+    this.showDecorParameters(this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId))
   }
 
   /** Shows/hides/enables the kind-dependent decor rows (Windows, Observer location, Floors,
@@ -7682,24 +7649,6 @@ export class SightingEditorElement extends HTMLElement {
     // which is exactly how it was read.
     this.setRowVisible(this.decorLitInput, traits?.lit === true)
     this.setRowVisible(this.decorLightRigSelect, traits?.lights === true)
-    const showWindows = traits?.windows === true
-    this.setRowVisible(this.labelDecorWindows, showWindows)
-    // Which of the 8 DecorSide values actually apply to this kind — a building shows plain
-    // Left/Right, a vehicle shows its own 4 door corners instead (see decorSidesFor's own doc
-    // comment); every side outside that set stays hidden regardless of showWindows, even though
-    // its own input keeps getting value-synced elsewhere (syncDecorFields) so a stale value never
-    // lingers if the row becomes visible again for a differently-kinded decor object later.
-    const applicableSides = kind !== undefined ? decorSidesFor(kind) : []
-    for (const side of DECOR_SIDES) {
-      // Empty (no window at all) is always valid regardless of kind; only how far the opacity can
-      // go toward 0 (fully open) needs a per-side, per-kind gate (a vehicle's front/behind
-      // windshield/rear window are fixed — see isWindowOpenable's own doc comment) — raising the
-      // input's own `min` rather than disabling it outright, so a fixed side can still be set to
-      // "closed" (100) or left empty (no window), just never opened.
-      this.decorWindowInputs[side].disabled = !hasSelection
-      this.decorWindowInputs[side].min = String(kind !== undefined && isWindowOpenable(kind, side) ? 0 : FIXED_WINDOW_MIN_OPACITY_PERCENT)
-      this.setRowVisible(this.decorWindowInputs[side], showWindows && applicableSides.includes(side))
-    }
     const showObserverSide = traits?.observerSide === true
     this.setRowVisible(this.decorObserverSideSelect, showObserverSide)
     // Which of the 8 DecorSide values are valid SEATS for this kind (a subset of applicableSides
@@ -7709,15 +7658,8 @@ export class SightingEditorElement extends HTMLElement {
     for (const side of DECOR_SIDES) {
       this.optionObserverSide[side].hidden = !seatSides.includes(side)
     }
-    // Shown together, both as soon as the decor object is a building — occupiedFloor doesn't wait
-    // on observerSide being set first (a building's own floor count is part of specifying it, same
-    // as picking which floor the observer would be on if/when they're placed inside), even though
-    // DecorSystem only actually USES occupiedFloor once observerSide is also set (see its own doc
-    // comment) — pre-setting it here just means it's already right the moment a location IS set.
-    const showFloors = traits?.floors === true
-    this.setRowVisible(this.decorFloorsInput, showFloors)
-    this.setRowVisible(this.decorOccupiedFloorInput, showFloors)
-    this.decorOccupiedFloorInput.max = String(decor?.floors ?? DEFAULT_BUILDING_FLOORS)
+    // The properties its kind publishes (floors, windows, a bridge's railing…) are drawn by the generic form.
+    this.syncDecorParameterVisibility()
   }
 
   /**
@@ -9077,10 +9019,8 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDecorModelAuthor.textContent = messages.decorModelAuthor
     this.labelDecorModelLicense.textContent = messages.decorModelLicense
     this.labelDecorModelSource.textContent = messages.decorModelSource
-    this.labelDecorFloors.textContent = messages.decorFloors
-    this.labelDecorOccupiedFloor.textContent = messages.decorOccupiedFloor
     this.labelDecorObserverSide.textContent = messages.decorObserverSide
-    this.labelDecorWindows.textContent = messages.decorWindows
+    this.decorParameterForm.setLanguage(this.language)
     this.optionObserverSideNone.textContent = messages.decorObserverSideNone
     const decorSideMessages: Record<DecorSide, string> = {
       front: messages.decorSideFront,
@@ -9093,7 +9033,6 @@ export class SightingEditorElement extends HTMLElement {
       "behind-right": messages.decorSideBehindRight
     }
     for (const side of DECOR_SIDES) {
-      this.labelDecorSide[side].textContent = decorSideMessages[side]
       this.optionObserverSide[side].textContent = decorSideMessages[side]
     }
     this.refreshDecorList() // decor option labels embed decorKindSelect's own text, just updated above

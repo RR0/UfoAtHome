@@ -2874,7 +2874,8 @@ describe("SightingEditorElement toolbar groups", () => {
     const element = mount()
     const decorPanel = element.shadowRoot!.getElementById("group-decor")!
     expect(decorPanel.querySelector("#decor")).not.toBeNull()
-    expect(decorPanel.querySelector("#decorWindowFront")).not.toBeNull()
+    // What the kind of the selected object publishes (floors, windows…) is drawn into this host, once there is an object.
+    expect(decorPanel.querySelector("#decor-parameters")).not.toBeNull()
     expect(element.shadowRoot!.getElementById("group-location")!.querySelector("#decorEast")).toBeNull()
     expect(element.shadowRoot!.getElementById("group-location")!.querySelector("#lat")).not.toBeNull()
   })
@@ -3881,10 +3882,10 @@ describe("SightingEditorElement decor group", () => {
     kindSelect.value = "building"
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
 
-    const frontInput = shadow.getElementById("decorWindowFront") as HTMLInputElement
+    const frontInput = shadow.getElementById("decorParam.windows.front") as HTMLInputElement
     frontInput.value = "0"
     frontInput.dispatchEvent(new Event("input"))
-    const leftInput = shadow.getElementById("decorWindowLeft") as HTMLInputElement
+    const leftInput = shadow.getElementById("decorParam.windows.left") as HTMLInputElement
     leftInput.value = "80"
     leftInput.dispatchEvent(new Event("input"))
 
@@ -3898,17 +3899,17 @@ describe("SightingEditorElement decor group", () => {
     kindSelect.value = "vehicle"
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
 
-    expect((shadow.getElementById("decorWindowFront") as HTMLInputElement).min).toBe("90")
-    expect((shadow.getElementById("decorWindowBehind") as HTMLInputElement).min).toBe("90")
-    expect((shadow.getElementById("decorWindowFrontLeft") as HTMLInputElement).min).toBe("0")
-    expect((shadow.getElementById("decorWindowFrontRight") as HTMLInputElement).min).toBe("0")
-    expect((shadow.getElementById("decorWindowBehindLeft") as HTMLInputElement).min).toBe("0")
-    expect((shadow.getElementById("decorWindowBehindRight") as HTMLInputElement).min).toBe("0")
+    expect((shadow.getElementById("decorParam.windows.front") as HTMLInputElement).min).toBe("90")
+    expect((shadow.getElementById("decorParam.windows.behind") as HTMLInputElement).min).toBe("90")
+    expect((shadow.getElementById("decorParam.windows.front-left") as HTMLInputElement).min).toBe("0")
+    expect((shadow.getElementById("decorParam.windows.front-right") as HTMLInputElement).min).toBe("0")
+    expect((shadow.getElementById("decorParam.windows.behind-left") as HTMLInputElement).min).toBe("0")
+    expect((shadow.getElementById("decorParam.windows.behind-right") as HTMLInputElement).min).toBe("0")
 
-    const frontInput = shadow.getElementById("decorWindowFront") as HTMLInputElement
+    const frontInput = shadow.getElementById("decorParam.windows.front") as HTMLInputElement
     frontInput.value = "10"
     frontInput.dispatchEvent(new Event("input"))
-    const frontLeftInput = shadow.getElementById("decorWindowFrontLeft") as HTMLInputElement
+    const frontLeftInput = shadow.getElementById("decorParam.windows.front-left") as HTMLInputElement
     frontLeftInput.value = "10"
     frontLeftInput.dispatchEvent(new Event("input"))
 
@@ -3929,7 +3930,7 @@ describe("SightingEditorElement decor group", () => {
     kindSelect.value = "building"
     ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
 
-    const occupiedFloorInput = shadow.getElementById("decorOccupiedFloor") as HTMLInputElement
+    const occupiedFloorInput = shadow.getElementById("decorParam.occupiedFloor") as HTMLInputElement
     expect(occupiedFloorInput.closest("label")!.hidden).toBe(false)
 
     occupiedFloorInput.value = "1"
@@ -3973,6 +3974,77 @@ describe("SightingEditorElement decor group", () => {
     const updatedVehicle = element.sightingData.decor!.find(d => d.kind === "vehicle")!
     expect(updatedVehicle.floors).toBeUndefined()
     expect(updatedVehicle.occupiedFloor).toBeUndefined()
+  })
+
+  describe("the properties a kind publishes", () => {
+    const added = (kind: string) => {
+      const element = mount()
+      const shadow = element.shadowRoot!
+      ;(shadow.getElementById("decorKind") as HTMLSelectElement).value = kind
+      ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+      const field = (key: string) => shadow.getElementById(`decorParam.${key}`) as HTMLInputElement
+      const type = (key: string, value: string) => {
+        const input = field(key)
+        input.value = value
+        input.dispatchEvent(new Event("input", { bubbles: true }))
+      }
+      return { element, shadow, field, type }
+    }
+
+    it("draws the fields of a bridge, which the editor had no field for, and writes them where the renderer reads them", () => {
+      const { element, field, type } = added("bridge")
+      expect(field("bridge.railing.heightM")).not.toBeNull()
+      expect(field("bridge.railing.heightM").placeholder).toBe("1.05")
+      type("bridge.railing.heightM", "1.4")
+      type("bridge.spanM", "30")
+      expect(element.sightingData.decor![0].bridge).toEqual({ railing: { heightM: 1.4 }, spanM: 30 })
+      type("bridge.railing.heightM", "")
+      expect(element.sightingData.decor![0].bridge).toEqual({ spanM: 30 })
+    })
+
+    it("draws the poles of an overhead line as a choice, showing the default", () => {
+      const { element, shadow, field } = added("wire")
+      const poles = field("wire.poles") as unknown as HTMLSelectElement
+      expect(poles.options[0].textContent).toBe("Both")
+      poles.value = "none"
+      poles.dispatchEvent(new Event("input", { bubbles: true }))
+      expect(element.sightingData.decor![0].wire).toEqual({ poles: "none" })
+      expect(shadow.getElementById("decor-parameters")!.hidden).toBe(false)
+    })
+
+    it("draws nothing for a kind that publishes nothing, and no longer for a tree what only a building has", () => {
+      const { shadow } = added("tree")
+      expect(shadow.getElementById("decor-parameters")!.hidden).toBe(true)
+      expect(shadow.querySelector('[data-key="floors"]')).toBeNull()
+    })
+
+    it("holds the occupied floor to the floors the building has, which follow what is typed", () => {
+      const { element, field, type } = added("building")
+      expect(field("occupiedFloor").max).toBe("2")
+      type("floors", "5")
+      expect(field("occupiedFloor").max).toBe("5")
+      type("occupiedFloor", "9")
+      expect(element.sightingData.decor![0].occupiedFloor).toBe(5)
+    })
+
+    it("an edit of the object elsewhere (its heading) does not undo a property typed here, nor the other way round", () => {
+      const { element, shadow, type } = added("building")
+      type("floors", "4")
+      const heading = shadow.getElementById("decorHeading") as HTMLInputElement
+      heading.value = "40"
+      heading.dispatchEvent(new Event("input"))
+      type("occupiedFloor", "2")
+      const decor = element.sightingData.decor![0]
+      expect([decor.floors, decor.headingDeg, decor.occupiedFloor]).toEqual([4, 40, 2])
+    })
+
+    it("a catalogue model's own parameters would be drawn the same way: the set takes them from the model", async () => {
+      const { DecorParameterSets } = await import("../../src/engine/model/DecorParameterSets.js")
+      const set = DecorParameterSets.of({ kind: "vehicle", model: { id: "catalogue-car" } }, {
+        parameters: [{ type: "number", key: "doorsOpenDeg", label: "Doors", min: 0, max: 90, step: 1, unit: "°" }]
+      })
+      expect(set?.parameters.map(spec => spec.key)).toEqual(["doorsOpenDeg"])
+    })
   })
 })
 

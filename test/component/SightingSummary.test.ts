@@ -235,4 +235,36 @@ describe("SightingSummary", () => {
       expect(summary.entriesFor(reading(), 0).some(entry => entry.group === "phenomenon")).toBe(false)
     })
   })
+
+  describe("the properties a decor object's kind publishes", () => {
+    const withDecor = (decor: object): Sighting => {
+      const sighting = Sighting.create(undefined, [{ lat: 32.4, lng: -86.3 }])
+      sighting.decor = [{ id: "d1", kind: "building", eastM: 0, northM: 0, ...decor } as Sighting["decor"][number]]
+      return sighting
+    }
+    const entries = (sighting: Sighting) => summary.entriesFor(sighting, 0, { decorId: "d1" })
+
+    it("states what the object states, each as a chip that leads to its own field, with its unit", () => {
+      const sighting = withDecor({ floors: 3, windows: { front: 40 } })
+      expect(entries(sighting).find(entry => entry.field === "decorParam.floors")).toMatchObject({ label: "Floors", value: "3" })
+      expect(entries(sighting).find(entry => entry.field === "decorParam.windows.front")).toMatchObject({ label: "Windows Front", value: "40", unit: "%" })
+    })
+
+    it("says nothing of what is not stated, as before", () => {
+      expect(entries(withDecor({})).map(entry => entry.field).filter(field => field.startsWith("decorParam."))).toEqual([])
+    })
+
+    it("says what a bridge states, which the summary could not before, and names a choice by its label", () => {
+      const bridge = withDecor({ kind: "bridge", bridge: { railing: { heightM: 1.4 } } })
+      expect(entries(bridge).find(entry => entry.field === "decorParam.bridge.railing.heightM")).toMatchObject({ value: "1.4", unit: "m" })
+      const wire = withDecor({ kind: "wire", wire: { poles: "none" } })
+      expect(entries(wire).find(entry => entry.field === "decorParam.wire.poles")).toMatchObject({ label: "Poles", value: "None" })
+    })
+
+    it("reads a label in the language asked for", () => {
+      const french = new SightingSummary(sightingLabels_en, new SceneNaming(), new SaidTexts(["fr", "en"]))
+      const found = french.entriesFor(withDecor({ floors: 3 }), 0, { decorId: "d1" }).find(entry => entry.field === "decorParam.floors")
+      expect(found?.label).toBe("Étages")
+    })
+  })
 })

@@ -194,25 +194,10 @@ export const html = `
     </details>
     <label><span id="label-decor-lit">Lit</span> <input id="decorLit" type="checkbox"/></label>
     <label><span id="label-decor-lights">Lights</span> <select id="decorLightRig"></select></label>
-    <label><span id="label-decor-floors">Floors</span> <input id="decorFloors" type="number" min="0" max="20" step="1" value="2"/></label>
-    <span id="label-decor-windows">Windows</span>
-    <!-- autocomplete="off" on all 4: without it, browsers reliably re-suggest/autofill whatever
-         value was last typed into a field with this exact id from earlier in the same session
-         (e.g. "50", typed while testing a completely different decor object) — since
-         syncDecorFields already leaves an empty field for "no window recorded" (see its own doc
-         comment), an autofilled value here isn't a leftover the app itself wrote, but the field
-         visually shows one anyway, misleadingly reading as "windows default to 50%". -->
-    <label><span id="label-decor-window-front">Front</span> <input id="decorWindowFront" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-    <label><span id="label-decor-window-behind">Behind</span> <input id="decorWindowBehind" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-    <label><span id="label-decor-window-left">Left</span> <input id="decorWindowLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-    <label><span id="label-decor-window-right">Right</span> <input id="decorWindowRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-    <!-- Vehicle only (see DecorSide's own doc comment: a car's left/right side has 2 windows
-         each, front-door and rear-door, not 1) — shown instead of the plain Left/Right rows
-         above for that kind, hidden otherwise (see SightingEditorElement.syncDecorVisibility). -->
-    <label><span id="label-decor-window-front-left">Front-left</span> <input id="decorWindowFrontLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-    <label><span id="label-decor-window-front-right">Front-right</span> <input id="decorWindowFrontRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-    <label><span id="label-decor-window-behind-left">Behind-left</span> <input id="decorWindowBehindLeft" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
-    <label><span id="label-decor-window-behind-right">Behind-right</span> <input id="decorWindowBehindRight" type="number" min="0" max="100" step="5" placeholder="none" autocomplete="off"/> %</label>
+    <!-- The properties the kind of this object says it has beyond placement and size — floors, windows, a
+         bridge's railing, a line's poles — drawn from what the kind publishes (see DecorParameterSets and
+         ParameterForm), so that the editor knows no kind. -->
+    <div id="decor-parameters" class="decor-parameters"></div>
     <label><span id="label-decor-observer-side">Observer location</span>
       <select id="decorObserverSide">
         <option id="option-observer-side-none" value="">Not present</option>
@@ -230,7 +215,6 @@ export const html = `
         <option id="option-observer-side-behind-right" value="behind-right" hidden>Behind-right</option>
       </select>
     </label>
-    <label><span id="label-decor-occupied-floor">Occupied floor</span> <input id="decorOccupiedFloor" type="number" min="0" max="20" step="1" value="0"/></label>
     <!-- flex-basis:100% (see the CSS rule below) forces this row onto its own line, after
          whatever decor properties are showing above — the only thing shown at all when there's
          no decor yet (see the block above's own comment). -->
@@ -1162,6 +1146,27 @@ select.weather-field:disabled {
    else fits beside a 100%-wide item — which is what puts the Add controls below whatever decor
    properties are currently showing (see SightingEditorElement.syncDecorVisibility), rather than just
    trailing after them on whatever horizontal space happens to be left. */
+/* The properties a kind publishes (see DecorParameterSets, ParameterForm): groups side by side, their fields
+   wrapping inside, with room between a unit and the next field. */
+.decor-parameters {
+  flex-basis: 100%;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+}
+.decor-parameters[hidden], .decor-parameters .parameter-group[hidden] { display: none; }
+.decor-parameters .parameter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: center;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 0;
+}
+.decor-parameters input.parameter-derived::placeholder { opacity: 0.65; }
 .decor-add-row {
   display: flex;
   flex-basis: 100%;

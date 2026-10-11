@@ -2,6 +2,9 @@ import type { Sighting, SightingTime } from "../engine/model/Sighting.js"
 import { EdtfDateField, type TimeWords } from "./EdtfDateField.js"
 import { formatEdtfTime, resolveObserverPoseAt, resolveSoundAt, resolveWeatherAt, sightingDurationMs } from "../engine/model/Sighting.js"
 import type { DecorKind, DecorObject, DecorSide } from "../engine/model/Decor.js"
+import { DecorParameterSets } from "../engine/model/DecorParameterSets.js"
+import { Parameters } from "../engine/interpretation/Parameters.js"
+import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
 import { resolveDecorLitAt, resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { LIGHT_RIGS } from "../engine/model/LightRig.js"
 import type { PrecipitationType } from "../engine/model/Weather.js"
@@ -358,12 +361,13 @@ export class SightingSummary {
     const carried = selected.lights?.map(light => light.id).join() ?? ""
     const rig = carried === "" ? undefined : LIGHT_RIGS.find(candidate => candidate.create().map(light => light.id).join() === carried)
     this.push(entries, "decor", "decorLightRig", this.labels.decorLights, rig?.name)
-    this.push(entries, "decor", "decorFloors", this.labels.decorFloors, selected.floors)
-    this.push(entries, "decor", "decorOccupiedFloor", this.labels.decorOccupiedFloor, selected.occupiedFloor)
     this.push(entries, "decor", "decorObserverSide", this.labels.decorObserverSide, this.decorSideName(selected.observerSide))
-    for (const [side, opacity] of Object.entries(selected.windows ?? {})) {
-      this.push(entries, "decor", `decorWindow${this.capitalise(side)}`,
-        `${this.labels.decorWindows} ${this.decorSideName(side as DecorSide)}`, opacity, "%")
+    // What its kind publishes (floors, windows, a bridge's railing…), each stated value as a chip that leads to its own field.
+    for (const spec of DecorParameterSets.of(selected)?.parameters ?? []) {
+      const value = Parameters.read(selected as unknown as ParameterHolder, spec.key)
+      if (value === undefined || value === null) continue
+      const shown = spec.type === "choice" ? this.said.read(spec.choices.find(choice => choice.value === value)?.label) ?? String(value) : value
+      this.push(entries, "decor", `decorParam.${spec.key}`, this.said.read(spec.summary ?? spec.label) ?? spec.key, typeof shown === "boolean" ? (shown ? "✓" : "") : (shown as string | number), spec.type === "number" ? spec.unit : undefined)
     }
   }
 
@@ -516,9 +520,5 @@ export class SightingSummary {
       case "crackle": return this.labels.soundCrackle
       default: return this.labels.soundNone
     }
-  }
-
-  private capitalise(text: string): string {
-    return text.replace(/(^|-)([a-z])/g, (_, separator: string, letter: string) => (separator === "" ? letter.toUpperCase() : letter.toUpperCase()))
   }
 }

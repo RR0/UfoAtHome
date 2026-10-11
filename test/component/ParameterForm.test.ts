@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "vitest"
-import { ParameterForm } from "../../src/component/ParameterForm.js"
+import { ParameterForm, ParameterTarget } from "../../src/component/ParameterForm.js"
 import { Parameters } from "../../src/engine/interpretation/Parameters.js"
 import type { ParameterSet } from "../../src/engine/interpretation/Parameters.js"
 
@@ -129,5 +129,76 @@ describe("ParameterForm", () => {
     watts.value = "7"
     form.sync()
     expect(watts.value).toBe("7")
+  })
+
+  describe("what a decor object needs of it", () => {
+    const building: ParameterSet = {
+      kind: "building",
+      title: "Building",
+      parameters: [
+        { type: "number", key: "floors", label: "Floors", min: 0, max: 20, step: 1, effective: () => 2 },
+        { type: "number", key: "occupiedFloor", label: "Occupied", min: 0, max: 20, step: 1,
+          bounds: element => ({ max: (Parameters.read(element, "floors") as number | undefined) ?? 2 }) },
+        { type: "number", key: "windows.front", label: "Front", min: 90, max: 100, step: 5, unit: "%", group: "Windows" },
+        { type: "text", key: "note", label: "Note", group: "Windows", visibleWhen: element => Parameters.read(element, "floors") !== undefined }
+      ]
+    }
+
+    test("the fields carry an id of their own, so that something outside the form can reach one", () => {
+      const form = new ParameterForm(container, "en", "decorParam.")
+      form.show(building, {}, () => undefined)
+      expect(container.querySelector("#decorParam\\.windows\\.front")).not.toBeNull()
+    })
+
+    test("a bound that depends on the element follows it, and what is written is held to it", () => {
+      const element: Record<string, unknown> = {}
+      new ParameterForm(container, "en").show(building, element, () => undefined)
+      const occupied = container.querySelector<HTMLInputElement>('[data-key="occupiedFloor"]')!
+      expect(occupied.max).toBe("2")
+      typed(container.querySelector('[data-key="floors"]')!, "6")
+      expect(occupied.max).toBe("6")
+      typed(occupied, "9")
+      expect(element.occupiedFloor).toBe(6)
+    })
+
+    test("a value is written no lower than the field takes, whatever is on its way through the field", () => {
+      const element: Record<string, unknown> = {}
+      new ParameterForm(container, "en").show(building, element, () => undefined)
+      typed(container.querySelector('[data-key="windows.front"]')!, "5")
+      expect((element.windows as { front: number }).front).toBe(90)
+    })
+
+    test("a field that does not apply is not drawn, and its group goes when none of its fields applies", () => {
+      const element: Record<string, unknown> = {}
+      new ParameterForm(container, "en").show(building, element, () => undefined)
+      const note = container.querySelector('[data-key="note"]')!.closest("label")!
+      expect(note.hidden).toBe(true)
+      typed(container.querySelector('[data-key="floors"]')!, "3")
+      expect(note.hidden).toBe(false)
+    })
+
+    test("an element replaced at every edit is read again each time, and never written over from an earlier copy", () => {
+      let current: Record<string, unknown> = { id: "a", floors: 1 }
+      const target = new ParameterTarget(() => current, apply => {
+        const draft = structuredClone(current)
+        apply(draft)
+        current = draft
+      })
+      new ParameterForm(container, "en").show(building, target, () => undefined)
+      const before = current
+      // Something else edits the object meanwhile, as another field of the editor does.
+      current = { ...current, headingDeg: 40 }
+      typed(container.querySelector('[data-key="floors"]')!, "4")
+      expect(current).toEqual({ id: "a", floors: 4, headingDeg: 40 })
+      expect(current).not.toBe(before)
+      expect(before).toEqual({ id: "a", floors: 1 })
+    })
+
+    test("clear empties the form", () => {
+      const form = new ParameterForm(container, "en")
+      form.show(building, {}, () => undefined)
+      form.clear()
+      expect(container.children).toHaveLength(0)
+    })
   })
 })

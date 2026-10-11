@@ -226,19 +226,11 @@ export interface SightingLabels {
   decorModelAuthor: string
   decorModelLicense: string
   decorModelSource: string
-  /** Number of upper stories a building decor object has (see DecorObject.floors) — shown only
-   * for kind "building". */
-  decorFloors: string
-  /** Which floor of a building the recording observer is on (see DecorObject.occupiedFloor) —
-   * shown only for kind "building" once decorObserverSide is set. */
-  decorOccupiedFloor: string
   /** Which side of the selected decor object the recording observer is positioned at, if inside it
    * at all — the select field's own label (see DecorObject.observerSide). */
   decorObserverSide: string
   /** decorObserverSide's own "not inside this object" option — the field's default/empty value. */
   decorObserverSideNone: string
-  /** Heading above the 4 per-side window-opacity inputs (see DecorObject.windows). */
-  decorWindows: string
   /** Shared by the window-opacity input labels AND decorObserverSide's own non-empty options —
    * both are the same DecorSide concept (relative to the object's own heading, not a compass
    * direction), so one set of labels covers both. */

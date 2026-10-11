@@ -25,8 +25,12 @@ interface ParameterBase {
   label: SaidText
   /** A sentence on what it does, shown as the field's tooltip. */
   hint?: SaidText
+  /** What the summary strip calls it when it stands alone, where the label only makes sense under its group heading. */
+  summary?: SaidText
   /** The fields that go together are drawn together, under this heading. */
   group?: SaidText
+  /** Whether the field applies to the element as it stands now (a floor to occupy needs a building). Drawn only while it does. */
+  visibleWhen?: (element: ParameterHolder) => boolean
 }
 
 /**
@@ -47,6 +51,12 @@ export interface NumberParameter extends ParameterBase {
    * which sees through a value stated with its provenance.
    */
   effective?: (element: ParameterHolder) => number | undefined
+  /**
+   * Bounds that depend on the element: the floor the observer stands on goes up to the number of
+   * floors the building has. What it gives replaces `min` and `max`, which stay the widest the field
+   * can ever take.
+   */
+  bounds?: (element: ParameterHolder) => { min?: number, max?: number }
 }
 
 export interface ChoiceParameter extends ParameterBase {
