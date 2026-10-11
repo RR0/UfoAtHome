@@ -3842,12 +3842,12 @@ describe("SightingEditorElement decor group", () => {
     expect(decorSelect.options[0].textContent).toBe("Streetlight on Elm St")
   })
 
-  it("round-trips a observer's own sightingUrl via the Observer group's URL field", () => {
+  it("round-trips a observer's own sightingUrl via the generic properties form", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     ;(shadow.getElementById("add-decor-observer") as HTMLButtonElement).click()
 
-    const urlInput = shadow.getElementById("decorSightingUrl") as HTMLInputElement
+    const urlInput = shadow.getElementById("decorParam.sightingUrl") as HTMLInputElement
     urlInput.value = "https://example.org/observer-2/sighting.json"
     urlInput.dispatchEvent(new Event("input"))
 

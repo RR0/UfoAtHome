@@ -297,7 +297,6 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   deleteDecor: "Delete decor",
   undo: "Undo",
   redo: "Redo",
-  decorSightingUrl: "Their own recording URL",
   viewAccount: "View the account",
   noObserverRecording: "No recording URL set for this observer",
   masks: "Masks",

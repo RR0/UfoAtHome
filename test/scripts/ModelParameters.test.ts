@@ -69,7 +69,7 @@ describe("the settings the catalogue's models publish", () => {
     expect(offered("tree")).toEqual(["modelParameters.foliageColor"])
     expect(offered("aircraft")).toEqual(["aircraftSound", "modelParameters.gearUp"])
     expect(offered("entity")).toEqual(["modelParameters.costumeColor"])
-    expect(offered("observer")).toEqual(["modelParameters.costumeColor"])
+    expect(offered("observer")).toEqual(["sightingUrl", "modelParameters.costumeColor"])
   })
 
   test("the noise a model makes in flight is one a machine can make, and a stand-in for a phenomenon is silent", async () => {

@@ -698,7 +698,6 @@ export class SightingEditorElement extends HTMLElement {
    * selection, since the rigs that make sense on a tree are not the ones that make sense on an
    * aircraft. */
   private readonly lookAtDecorButton: HTMLButtonElement
-  private readonly decorSightingUrlInput: HTMLInputElement
   /** Which catalogue the 3D-model picker offers, and which the scene resolves a named model
    * through — chosen in Data sources like every other real-world source (see refreshSourceRows). */
   private decorModelProvider: DecorModelProvider = DECOR_MODEL_SOURCES[0].create()
@@ -737,7 +736,6 @@ export class SightingEditorElement extends HTMLElement {
    * (the object-picker's own label), just on a different element, so no separate message key is
    * needed. */
   private readonly labelDecorGroup: HTMLElement
-  private readonly labelDecorSightingUrl: HTMLElement
   private readonly labelMilestones: HTMLElement
   private readonly labelMilestoneLabel: HTMLElement
   private readonly labelMilestoneNote: HTMLElement
@@ -1369,7 +1367,6 @@ export class SightingEditorElement extends HTMLElement {
       this.referenceHeadingInput, this.referencePitchInput, this.referenceRollInput, this.referenceFovInput
     ]
     this.lookAtDecorButton = this.shadow.getElementById("look-at-decor") as HTMLButtonElement
-    this.decorSightingUrlInput = this.shadow.getElementById("decorSightingUrl") as HTMLInputElement
     this.milestoneSelect = this.shadow.getElementById("milestone") as HTMLSelectElement
     this.milestoneLabelInput = this.shadow.getElementById("milestoneLabel") as HTMLInputElement
     this.milestoneNoteInput = this.shadow.getElementById("milestoneNote") as HTMLInputElement
@@ -1427,7 +1424,6 @@ export class SightingEditorElement extends HTMLElement {
     this.decorStateForm = new ParameterForm(this.decorStateHost, "en", "decorState.", decorValues)
     this.labelDecor = this.shadow.getElementById("label-decor")!
     this.labelDecorGroup = this.shadow.getElementById("label-decor-group")!
-    this.labelDecorSightingUrl = this.shadow.getElementById("label-decor-sighting-url")!
     this.labelMilestones = this.shadow.getElementById("label-milestones")!
     this.labelMilestoneLabel = this.shadow.getElementById("label-milestone-label")!
     this.labelMilestoneNote = this.shadow.getElementById("label-milestone-note")!
@@ -1573,7 +1569,6 @@ export class SightingEditorElement extends HTMLElement {
     this.ufoElement.canvasElement.addEventListener("wheel", event => this.onReferenceWheel(event), { passive: false })
     this.ufoElement.canvasElement.addEventListener("wheel", event => this.onBodyWheel(event), { passive: false })
     for (const input of [
-      this.decorSightingUrlInput,
       this.decorModelUrlInput,
       this.decorModelTitleInput,
       this.decorModelAuthorInput,
@@ -7032,7 +7027,7 @@ export class SightingEditorElement extends HTMLElement {
     if (this.currentDecorId === undefined) return
     const sighting = this.ufoElement.sighting
     sighting.decor = sighting.decor.map(d => d.id !== this.currentDecorId ? d
-      : { ...d, ...extra, sightingUrl: this.stringOrUndefined(this.decorSightingUrlInput.value), model: this.statedDecorModel() })
+      : { ...d, ...extra, model: this.statedDecorModel() })
     this.syncDecorVisibility()
     this.ufoElement.refresh()
   }
@@ -7334,11 +7329,10 @@ export class SightingEditorElement extends HTMLElement {
     const decor = this.ufoElement.sighting.decor.find(d => d.id === this.currentDecorId)
     const hasSelection = decor !== undefined
     this.deleteDecorButton.disabled = !hasSelection
-    for (const input of [this.decorSelect, this.decorSightingUrlInput, this.decorModelSelect, this.decorModelUrlInput, this.decorModelTitleInput,
+    for (const input of [this.decorSelect, this.decorModelSelect, this.decorModelUrlInput, this.decorModelTitleInput,
       this.decorModelAuthorInput, this.decorModelLicenseInput, this.decorModelSourceInput, this.lookAtDecorButton]) {
       input.disabled = !hasSelection
     }
-    this.decorSightingUrlInput.value = decor?.sightingUrl ?? ""
     this.syncDecorModelFields(decor)
     this.syncDecorVisibility()
   }
@@ -8743,7 +8737,6 @@ export class SightingEditorElement extends HTMLElement {
     this.redoButton.setAttribute("aria-label", messages.redo)
     this.deleteDecorButton.title = messages.deleteDecor
     this.deleteDecorButton.setAttribute("aria-label", messages.deleteDecor)
-    this.labelDecorSightingUrl.textContent = messages.decorSightingUrl
     this.contextViewAccountButton.textContent = messages.viewAccount
     // The arrow is appended here, not part of the translated string — see SightingEditorMessages.
     // masks's own doc comment.

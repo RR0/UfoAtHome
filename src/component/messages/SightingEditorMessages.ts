@@ -639,7 +639,6 @@ export interface SightingEditorMessages extends SightingLabels {
   /** The two buttons that step back and forward through what was edited, and their keys' hint. */
   undo: string
   redo: string
-  decorSightingUrl: string
   /** Right-click menu item on a observer decor object that has a sightingUrl — loads that
    * recording (see SightingEditorElement.viewObserverAccount). */
   viewAccount: string

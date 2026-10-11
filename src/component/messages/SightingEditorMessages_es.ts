@@ -302,7 +302,6 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   deleteDecor: "Eliminar elemento del decorado",
   undo: "Deshacer",
   redo: "Rehacer",
-  decorSightingUrl: "URL de su propia grabación",
   viewAccount: "Ver el relato",
   noObserverRecording: "No hay URL de grabación para este observador",
   masks: "Oculta",

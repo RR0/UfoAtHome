@@ -302,7 +302,6 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   deleteDecor: "Elimina elemento della scenografia",
   undo: "Annulla",
   redo: "Ripristina",
-  decorSightingUrl: "URL della sua registrazione",
   viewAccount: "Vedi il resoconto",
   noObserverRecording: "Nessun URL di registrazione per questo osservatore",
   masks: "Nasconde",

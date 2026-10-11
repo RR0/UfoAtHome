@@ -30,6 +30,10 @@ describe("DecorParameterSets", () => {
     expect(noise.visibleWhen!({ engine: {} })).toBe(true)
   })
 
+  test("another observer says where their own recording is", () => {
+    expect(keys("observer")).toEqual(["sightingUrl"])
+  })
+
   test("an aircraft says what it sounds like in flight, and silent is one of the answers", () => {
     const set = DecorParameterSets.of({ kind: "aircraft" })!
     expect(set.parameters.map(spec => spec.key)).toEqual(["aircraftSound"])

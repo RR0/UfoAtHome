@@ -111,7 +111,6 @@ export const html = `
          tripod. Blank is the default (1, or 0 for a paralysed observer). -->
     <label><span id="label-sway">Sway</span> <input id="sway" type="number" min="0" max="3" step="0.1" placeholder="1"/></label>
     <button id="add-decor-observer" type="button">Add observer</button>
-    <label><span id="label-decor-sighting-url">Their own recording URL</span> <input id="decorSightingUrl" type="url" placeholder="https://…/sighting.json"/></label>
   </div>
 </section>
 <section class="group-panel" id="group-location" aria-labelledby="label-location-group" hidden>
@@ -659,7 +658,7 @@ button.preset[aria-pressed="true"] {
   cursor: pointer;
 }
 
-#decorModelUrl, #decorModelSource, #decorSightingUrl {
+#decorModelUrl, #decorModelSource {
   width: 16em;
 }
 /* Shared by Duration (no sane default — real playback pacing needs some notion of the

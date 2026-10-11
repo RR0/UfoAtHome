@@ -58,6 +58,7 @@ export class DecorParameterSets {
     if (!model && object.kind === "building") parameters.push(...DecorParameterSets.floors())
     if (!model && hasWindows(object.kind)) parameters.push(...DecorParameterSets.windows(object.kind))
     if (object.kind === "vehicle") parameters.push(...DecorParameterSets.engine())
+    if (object.kind === "observer") parameters.push(...DecorParameterSets.observerRecording())
     if (object.kind === "aircraft") parameters.push(...DecorParameterSets.aircraftSound(published))
     if (object.kind === "bridge") parameters.push(...DecorParameterSets.bridge())
     if (object.kind === "wire") parameters.push(...DecorParameterSets.wire())
@@ -132,6 +133,14 @@ export class DecorParameterSets {
         visibleWhen: element => Parameters.read(element, "engine.kind") !== undefined || (element as { engine?: unknown }).engine !== undefined
       }
     ]
+  }
+
+  /** Where another observer's own account is, for the scene's menu to open it (see DecorObject.sightingUrl). */
+  private static observerRecording(): ParameterSpec[] {
+    return [{
+      type: "text", key: "sightingUrl", placeholder: "https://…/sighting.json",
+      label: { en: "Their own recording URL", fr: "URL de son propre enregistrement", es: "URL de su propia grabación", it: "URL della sua registrazione" }
+    }]
   }
 
   /**
