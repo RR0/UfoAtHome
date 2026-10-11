@@ -40,6 +40,24 @@ export interface LaunchVehicle {
   name?: string
   /** "Starlink Group 10-49". */
   mission?: string
+  /**
+   * The engine whose exhaust it is. What the plume looks like follows from it: how much exhaust
+   * leaves each second (thrust over exhaust velocity), how fast it leaves, which sets how wide the
+   * collar round the stage spreads, and what the exhaust is made of, which sets how much of it
+   * turns into particles that scatter light. Any of the plume's own values (`plume`) still wins.
+   */
+  engine?: LaunchEngine
+}
+
+/** What fuel the engine burns, which decides what its exhaust leaves behind. */
+export type Propellant = "rp1-lox" | "methane-lox" | "hydrogen-lox" | "hypergolic" | "solid"
+
+export interface LaunchEngine {
+  /** Thrust in vacuum, kN: a Merlin Vacuum's 934, an RL10's 110, a solid booster's thousands. */
+  thrustKN?: number
+  /** Specific impulse in vacuum, seconds: 348 for a Merlin Vacuum, 465 for an RL10, 285 for a solid. */
+  specificImpulseS?: number
+  propellant?: Propellant
 }
 
 /** What the exhaust is made of and how it spreads. Each has a default (LaunchPlumeSighting) when absent. */
@@ -126,13 +144,49 @@ export class LaunchPlumeSighting {
     /** Water from burning RP-1 is about a third of the exhaust; a part of it freezes. Not measured: the one free number. */
     condensedShare: 0.1,
     particleRadiusUm: 0.5,
-    expansionKmPerS: 0.3,
+    expansionKmPerS: 0.15,
     initialRadiusKm: 0.5,
     lifetimeS: 420,
-    collarShare: 0.9,
-    collarExpansionKmPerS: 1,
-    collarLifetimeS: 6
+    collarShare: 0.85,
+    collarExpansionKmPerS: 2.5,
+    collarLifetimeS: 20
   } as const satisfies Required<LaunchPlumeJson>
+
+  /** What each propellant's exhaust turns into, per mass of exhaust: the share that ends up as particles that scatter light, and their radius. ASSUMED, not measured. */
+  static readonly PROPELLANTS: Record<Propellant, { condensedShare: number; particleRadiusUm: number }> = {
+    // Water is about a third of the exhaust of kerosene and oxygen, and a part of it freezes.
+    "rp1-lox": { condensedShare: 0.1, particleRadiusUm: 0.5 },
+    // Methane burns to more water and less carbon: a little more, and no soot.
+    "methane-lox": { condensedShare: 0.14, particleRadiusUm: 0.5 },
+    // Hydrogen and oxygen burn to water and nothing else, but the exhaust is mostly unburnt hydrogen.
+    "hydrogen-lox": { condensedShare: 0.2, particleRadiusUm: 0.5 },
+    // Nitrogen tetroxide and hydrazines: water, nitrogen and carbon dioxide, with a little soot.
+    hypergolic: { condensedShare: 0.1, particleRadiusUm: 0.4 },
+    // Aluminised solid propellant: a third of the exhaust is alumina, which is already solid and bright.
+    solid: { condensedShare: 0.33, particleRadiusUm: 0.8 }
+  }
+  /** Standard gravity, m/s2, with which a specific impulse is an exhaust velocity. */
+  private static readonly G0 = 9.80665
+  /** How fast the collar spreads, as a share of the exhaust velocity: 2.5 km/s for a Merlin Vacuum's 3.4. */
+  private static readonly COLLAR_SPREAD_OF_EXHAUST_VELOCITY = 0.735
+
+  /**
+   * The plume of a launch: the defaults of a Merlin Vacuum burning kerosene, then what the vehicle's
+   * engine says (the exhaust per second is its thrust over its exhaust velocity; the collar spreads
+   * as fast as the exhaust leaves; the propellant says what turns into particles), then what the
+   * plume itself states.
+   */
+  static plumeOf(launch: LaunchJson): Required<LaunchPlumeJson> {
+    const derived: LaunchPlumeJson = {}
+    const engine = launch.vehicle?.engine
+    if (engine) {
+      const exhaustVelocity = engine.specificImpulseS === undefined ? undefined : engine.specificImpulseS * LaunchPlumeSighting.G0
+      if (engine.thrustKN !== undefined && exhaustVelocity) derived.exhaustKgPerS = (engine.thrustKN * 1000) / exhaustVelocity
+      if (exhaustVelocity) derived.collarExpansionKmPerS = (exhaustVelocity / 1000) * LaunchPlumeSighting.COLLAR_SPREAD_OF_EXHAUST_VELOCITY
+      if (engine.propellant) Object.assign(derived, LaunchPlumeSighting.PROPELLANTS[engine.propellant])
+    }
+    return { ...LaunchPlumeSighting.DEFAULTS, ...derived, ...launch.plume }
+  }
 
   /** How often a puff is let go, seconds: closer than the plume has spread in that time, they overlap smoothly. */
   static readonly PUFF_EVERY_S = 0.5
@@ -159,7 +213,7 @@ export class LaunchPlumeSighting {
   static viewsAt(launches: readonly LaunchJson[], tMs: number, observer: GeoPoint, sun: readonly [number, number, number]): PlumePuffView[] {
     const views: PlumePuffView[] = []
     for (const launch of launches) {
-      const plume = { ...LaunchPlumeSighting.DEFAULTS, ...launch.plume }
+      const plume = LaunchPlumeSighting.plumeOf(launch)
       const first = launch.track[0]?.t ?? 0
       const last = launch.track[launch.track.length - 1]?.t ?? 0
       const from = launch.burnFromT ?? first

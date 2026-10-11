@@ -112,4 +112,36 @@ describe("LaunchPlumeSighting", () => {
     expect(old.length).toBeGreaterThan(0)
     expect(Math.max(...old.map(v => v.luminanceCdM2))).toBeLessThan(head / 10)
   })
+
+  describe("what the vehicle says of the plume", () => {
+    const withEngine = (engine: NonNullable<LaunchJson["vehicle"]>["engine"], plume?: LaunchJson["plume"]) => LaunchPlumeSighting.plumeOf(launch({ vehicle: { engine }, plume }))
+
+    test("a Merlin Vacuum's thrust and impulse are its 273 kg of exhaust a second, spreading at three quarters of the exhaust velocity", () => {
+      const plume = withEngine({ thrustKN: 934, specificImpulseS: 348, propellant: "rp1-lox" })
+      expect(plume.exhaustKgPerS).toBeCloseTo(273.6, 0)
+      expect(plume.collarExpansionKmPerS).toBeCloseTo(2.5, 1)
+    })
+
+    test("a small hydrogen engine spreads faster and leaves less exhaust than a kerosene one", () => {
+      const kerosene = withEngine({ thrustKN: 934, specificImpulseS: 348, propellant: "rp1-lox" })
+      const hydrogen = withEngine({ thrustKN: 110, specificImpulseS: 465, propellant: "hydrogen-lox" })
+      expect(hydrogen.exhaustKgPerS).toBeLessThan(kerosene.exhaustKgPerS / 5)
+      expect(hydrogen.collarExpansionKmPerS).toBeGreaterThan(kerosene.collarExpansionKmPerS)
+    })
+
+    test("a solid motor's exhaust is already particles: more of it scatters", () => {
+      expect(withEngine({ propellant: "solid" }).condensedShare).toBeGreaterThan(withEngine({ propellant: "rp1-lox" }).condensedShare * 2)
+    })
+
+    test("what the plume states beats what the engine implies", () => {
+      expect(withEngine({ thrustKN: 934, specificImpulseS: 348 }, { exhaustKgPerS: 50 }).exhaustKgPerS).toBe(50)
+    })
+
+    test("a stronger engine makes a brighter plume, and a different one a different collar", () => {
+      const observer = { lat: 0, lng: 94, heightM: 0 }
+      const brightest = (engine: NonNullable<LaunchJson["vehicle"]>["engine"]) =>
+        Math.max(...LaunchPlumeSighting.viewsAt([launch({ vehicle: { engine } })], 110000, observer, SUN).map(view => view.luminanceCdM2))
+      expect(brightest({ thrustKN: 3000, specificImpulseS: 348, propellant: "rp1-lox" })).toBeGreaterThan(brightest({ thrustKN: 300, specificImpulseS: 348, propellant: "rp1-lox" }))
+    })
+  })
 })

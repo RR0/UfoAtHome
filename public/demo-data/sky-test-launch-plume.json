@@ -300,7 +300,24 @@
         },
         "vehicle": {
           "name": "Falcon 9",
-          "mission": "Starlink Group 10-49"
+          "mission": "Starlink Group 10-49",
+          "engine": {
+            "thrustKN": {
+              "value": 934,
+              "basis": "stated",
+              "rationale": "SpaceX: a Merlin Vacuum's thrust in vacuum, 934 kN (the Falcon 9 second stage has one)."
+            },
+            "specificImpulseS": {
+              "value": 348,
+              "basis": "stated",
+              "rationale": "SpaceX: a Merlin Vacuum's specific impulse in vacuum, 348 s."
+            },
+            "propellant": {
+              "value": "rp1-lox",
+              "basis": "stated",
+              "rationale": "The Falcon 9 burns RP-1 kerosene and liquid oxygen."
+            }
+          }
         },
         "track": [
           {
