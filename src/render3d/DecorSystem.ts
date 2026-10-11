@@ -6,6 +6,7 @@ import { canHoldObserver, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, li
 import type { RgbColor } from "./skyColors.js"
 import { BridgeGeometry } from "./BridgeGeometry.js"
 import { WireGeometry } from "./WireGeometry.js"
+import { DryStoneWall } from "./DryStoneWall.js"
 
 const DEG_TO_RAD = Math.PI / 180
 
@@ -748,7 +749,7 @@ export class DecorSystem {
    * ground is what one sees in any field, while its downhill side floating is what one never sees —
    * at a wood's edge half a kilometre off, it was a band of sky under the whole edge.
    */
-  private static readonly GROWS_FROM_GROUND: ReadonlySet<DecorKind> = new Set(["tree", "shrub", "crop", "mound", "terrace"])
+  private static readonly GROWS_FROM_GROUND: ReadonlySet<DecorKind> = new Set(["tree", "shrub", "crop", "mound", "terrace", "wall"])
 
   static groundUnderFootprint(object: DecorObject, x: number, z: number, headingDeg: number | undefined,
     ground: (x: number, z: number) => number, altitudeM = 0): number {
@@ -997,6 +998,8 @@ export class DecorSystem {
             ? buildBridge(object)
           : object.kind === "wire"
             ? buildWire(object)
+          : object.kind === "wall"
+            ? DryStoneWall.build(object)
           : object.kind === "crop"
             ? buildCrop()
             : object.kind === "terrace"
@@ -1044,7 +1047,7 @@ export class DecorSystem {
   private static scaleFor(object: DecorObject): Vector3 {
     const size = object.sizeM
     // A bridge is built at its own size already: stretching it would turn its posts into planks.
-    if (!size || object.kind === "bridge" || object.kind === "wire" || object.kind === "terrace") return new Vector3(1, 1, 1)
+    if (!size || object.kind === "bridge" || object.kind === "wire" || object.kind === "terrace" || object.kind === "wall") return new Vector3(1, 1, 1)
     const natural = this.naturalSize(object.kind, object.floors)
     // Axis by axis, because a size is allowed to be partial: an axis nobody measured keeps the
     // built-in shape's own proportion rather than being invented to match the ones that were.
@@ -1070,7 +1073,7 @@ export class DecorSystem {
     if (kind === "bridge") return BridgeGeometry.NATURAL_SIZE
     if (kind === "wire") return WireGeometry.NATURAL_SIZE
     // Stated rather than measured: a terrace is laid on the ground at its own size (see fitTerrace).
-    if (kind === "terrace") return { widthM: 1, lengthM: 1, heightM: 1 }
+    if (kind === "terrace" || kind === "wall") return { widthM: 1, lengthM: 1, heightM: 1 }
     const key = `${kind}:${levels}`
     const cached = NATURAL_SIZES.get(key)
     if (cached) return cached

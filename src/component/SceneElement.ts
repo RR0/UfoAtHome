@@ -196,6 +196,7 @@ const DECOR_KIND_NAMES: Record<DecorKind, string> = {
   crop: "Crop row",
   terrace: "Terrace (restanque)",
   mound: "Stone heap",
+  wall: "Dry-stone wall",
   streetlight: "Streetlight",
   vehicle: "Vehicle",
   observer: "Observer",

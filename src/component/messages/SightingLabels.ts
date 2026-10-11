@@ -177,6 +177,8 @@ export interface SightingLabels {
   decorTerrace: string
   /** A heap of stones or earth — see DecorKind's own "mound". */
   decorMound: string
+  /** A low dry-stone wall — see DecorKind's own "wall". */
+  decorWall: string
   decorStreetlight: string
   decorVehicle: string
   decorObserver: string

@@ -36,6 +36,13 @@ export type DecorKind =
    * wall is as high as the ground falls away from it.
    */
   | "terrace"
+  /**
+   * A low wall of dry stone, the kind that edges a road or a meadow in the Massif Central: `sizeM.lengthM` is how far it
+   * runs, `widthM` how thick it is, `heightM` how high above the ground it stands, `headingDeg` the direction it runs in. Built at
+   * its own measurements and wrapped in stones (see DryStoneWall), where a "mound" stretched to the same size was a flat
+   * dome that read as a road. It is the thing a witness sits behind, or climbs onto to see over the hedge.
+   */
+  | "wall"
   | "building" | "tree" | "crop" | "mound" | "streetlight" | "vehicle" | "observer" | "aircraft"
   /** A low bush: the greasewood of a New Mexico wash, the scrub of a garrigue — a clump of rounded
    * crowns on the ground, with no trunk. */

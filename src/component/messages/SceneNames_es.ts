@@ -133,6 +133,7 @@ export const sceneNames_es: SceneNames = {
     crop: "Hilera de cultivo",
     terrace: "Bancal (terraza)",
     mound: "Montón de piedras",
+    wall: "Muro de piedra seca",
     streetlight: "Farola",
     vehicle: "Vehículo",
     observer: "Observador",

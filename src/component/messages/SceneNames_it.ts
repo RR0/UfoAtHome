@@ -130,6 +130,7 @@ export const sceneNames_it: SceneNames = {
     crop: "Filare di coltura",
     terrace: "Terrazzamento",
     mound: "Mucchio di pietre",
+    wall: "Muretto a secco",
     streetlight: "Lampione",
     vehicle: "Veicolo",
     observer: "Osservatore",
