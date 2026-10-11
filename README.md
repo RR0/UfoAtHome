@@ -102,6 +102,10 @@ npx tsx scripts/refresh-case-weather.ts   # every recording whose weather came f
 Only `weatherTrack` and `weatherSource` are rewritten, spliced into the file's text so the diff shows nothing
 else. Run `sync:cases` afterwards.
 
+## Adding a parameter to an element
+
+The editor does not know the fields of the things it edits: each kind of element says what it lets an author set, and a generic form (`src/component/ParameterForm.ts`) draws it. A kind publishes a `ParameterSet` (`src/engine/interpretation/Parameters.ts`): per parameter, a `key` into the element's JSON (dotted: `plume.collarShare`), a `label` and `hint` as a `SaidText` (one string per language, English as the fallback), a `type` (`number` with required `min`, `max` and `step`, `choice`, `text`, `boolean`, `colour`), its `unit`, and optionally `effective`, the value in force when the element states none (a default, or what other values imply), which the empty field shows greyed. The form follows the project's field rules: it writes on `input`, puts the unit after the field, and holds a number to its bounds. See `LaunchParameters.ts` for a whole kind, and `ParameterRegistry.publish` for an asset that brings its own. Adding a field to a kind is adding an entry to its description; adding a kind is a description and a part in the editor that shows it (see `LaunchEditor.ts`).
+
 ## Testing
 
 ```bash

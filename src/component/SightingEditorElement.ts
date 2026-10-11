@@ -1,5 +1,6 @@
 import { setupCloudEditor } from "./CloudEditor.js"
 import type { BodyEditor } from "./BodyEditor.js"
+import type { LaunchEditor } from "./LaunchEditor.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import type { JsonPath } from "./JsonPaths.js"
 import { NumberFields } from "./NumberFields.js"
@@ -473,6 +474,9 @@ export class SightingEditorElement extends HTMLElement {
   /** The Bodies part, loaded the first time it is opened — see loadBodyEditor. */
   private bodyEditor?: BodyEditor
   private bodyEditorLoading?: Promise<BodyEditor>
+  /** The Launches part, loaded the first time it is opened — see loadLaunchEditor. */
+  private launchEditor?: LaunchEditor
+  private launchEditorLoading?: Promise<LaunchEditor>
   /** The File group's text editor, loaded the first time the group is opened — see loadFileEditor. */
   private fileEditor?: SightingFileEditor
   private fileEditorLoading?: Promise<SightingFileEditor>
@@ -660,6 +664,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelCloudsGroup: HTMLElement
   private readonly labelShapesSubgroup: HTMLElement
   private readonly labelBodiesSubgroup: HTMLElement
+  private readonly labelLaunchesSubgroup: HTMLElement
   private readonly labelPrecipitationGroup: HTMLElement
   private readonly labelWindGroup: HTMLElement
   /** The handles of a group's own parts (the weather's clouds, precipitation and wind) — a strip
@@ -1328,6 +1333,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelCloudsGroup = this.shadow.getElementById("label-clouds-group")!
     this.labelShapesSubgroup = this.shadow.getElementById("label-shapes-subgroup")!
     this.labelBodiesSubgroup = this.shadow.getElementById("label-bodies-subgroup")!
+    this.labelLaunchesSubgroup = this.shadow.getElementById("label-launches-subgroup")!
     this.labelPrecipitationGroup = this.shadow.getElementById("label-precipitation-group")!
     this.labelWindGroup = this.shadow.getElementById("label-wind-group")!
     this.labelWeatherInferred = this.shadow.getElementById("label-weather-inferred")!
@@ -5489,6 +5495,8 @@ export class SightingEditorElement extends HTMLElement {
     }
     // The Bodies part of the group moves the bodies (see beginBodyDrag); the Shapes part the shapes.
     if (this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-bodies")?.hidden === false) return "body"
+    // The Launches part edits fields only: nothing on the picture is moved from there.
+    if (this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-launches")?.hidden === false) return "scene"
     if (this.isGroupIdOpen("group-shape")) return "shape"
     // The Environment group frames the object it has selected, as the Bodies part does a body.
     if (this.isGroupIdOpen("group-decor") && this.editableDecor() !== undefined) return "decor"
@@ -5536,7 +5544,25 @@ export class SightingEditorElement extends HTMLElement {
     if (this.sceneElement.interpretation !== interpretation) this.sceneElement.interpretation = interpretation
     // The selector says what is shown, and a reading has no shapes to choose between.
     this.accountViewSelect.value = interpretation !== undefined ? "bodies" : "shapes"
+    this.syncLaunchesTab()
     this.shadow.getElementById("account-view-row")!.hidden = this.isReading
+  }
+
+  /**
+   * The Launches part has a handle only while the recording has a launch: most recordings have none,
+   * and a part with nothing in it is clutter. When the last launch goes while the part is open, the
+   * Shapes part is opened instead, so that the editor is never left on a part with no handle.
+   */
+  private syncLaunchesTab(): void {
+    const tab = this.subgroupTabs.find(candidate => candidate.getAttribute("aria-controls") === "shape-launches")
+    if (!tab) return
+    const has = (this.ufoElement.sighting.interpretation?.launches?.length ?? 0) > 0
+    tab.hidden = !has
+    if (!has && tab.getAttribute("aria-expanded") === "true") {
+      const shapes = this.subgroupTabs.find(candidate => candidate.getAttribute("aria-controls") === "shape-shapes")
+      if (shapes) this.openSubgroup(shapes)
+    }
+    if (has && this.launchEditor && this.shadow.getElementById("shape-launches")?.hidden === false) this.launchEditor.refresh()
   }
 
   /**
@@ -5565,6 +5591,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     // The shapes it offers to stand for may have been renamed, added or deleted meanwhile.
     if (tab.getAttribute("aria-controls") === "shape-bodies") void this.loadBodyEditor().then(editor => editor.sync())
+    if (tab.getAttribute("aria-controls") === "shape-launches") void this.loadLaunchEditor().then(editor => editor.sync())
     // What the canvas edits follows the part (see canvasMode), and with it whether bodies are drawn.
     this.syncCanvasMode()
   }
@@ -6700,6 +6727,27 @@ export class SightingEditorElement extends HTMLElement {
       return this.bodyEditor
     })
     return this.bodyEditorLoading
+  }
+
+  /**
+   * The Launches part of the Phenomenon group, fetched and built the first time it is opened: a chunk
+   * of its own, since a recording has a launch only when somebody has put one in (see LaunchEditor).
+   */
+  private loadLaunchEditor(): Promise<LaunchEditor> {
+    this.launchEditorLoading ??= import("./LaunchEditor.js").then(({ LaunchEditor }) => {
+      this.launchEditor = new LaunchEditor(this.shadow.getElementById("launch-editor")!, {
+        sighting: () => this.ufoElement.sighting,
+        said: () => this.said,
+        writingLanguage: () => this.writingLanguage,
+        changed: () => {
+          this.ufoElement.refresh()
+          this.refreshParamSummary()
+          this.syncBodiesShown()
+        }
+      }, this.language)
+      return this.launchEditor
+    })
+    return this.launchEditorLoading
   }
 
   /** Turns the observer towards a body — see BodyEditorHost.lookAt, and lookAtDecor for the decor's. */
@@ -9061,6 +9109,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelShapeGroup.textContent = messages.shapeGroup
     this.labelShapesSubgroup.textContent = messages.shapesSubgroup
     this.labelBodiesSubgroup.textContent = messages.bodiesSubgroup
+    this.labelLaunchesSubgroup.textContent = messages.launchesSubgroup
     this.bodyEditor?.setLanguage(this.language)
     this.labelTemporalGroup.textContent = messages.temporalGroup
     this.labelFileGroup.textContent = messages.fileGroup

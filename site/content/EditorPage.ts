@@ -537,6 +537,7 @@ if (docs) {
         movement is stated in the file, and shown here. The picture draws the bodies, with the shapes
         beside them as outlines to read them against, whichever group is open, except in the Shapes
         part, where the shapes are drawn alone and in full.</p>
+      <p><strong>Launches</strong> has a handle only when the recording holds a rocket launch whose exhaust the interpretation says was seen, lit by a Sun the ground no longer sees (the “space jellyfish”). Its path comes from the file and is only shown; the fields set the engine (thrust, specific impulse, propellant) and the plume (how much exhaust scatters light, how fast it spreads, how long it lasts), and the collar, the wide short-lived shell round the stage, apart from the narrow trail. An empty field is greyed and shows the value in use — a default, or what the engine implies — and clearing a field goes back to it. The fields are not written into the editor: each kind of element says what it lets an author set, and the editor draws that.</p>
     </div>
     </div>
   </div>
@@ -1002,6 +1003,7 @@ if (docs) {
         affiché ici. L'image dessine les corps, avec les formes à côté en contours pour les
         confronter, quel que soit le groupe ouvert, sauf dans la partie Formes, où les formes sont
         dessinées seules et en entier.</p>
+      <p><strong>Lancements</strong> n'a une poignée que si l'enregistrement contient un lancement de fusée dont l'interprétation dit que l'échappement a été vu, éclairé par un Soleil que le sol ne voit plus (la « méduse spatiale »). Son chemin vient du fichier et n'est que montré ; les champs fixent le moteur (poussée, impulsion spécifique, ergols) et le panache (quelle part de l'échappement diffuse la lumière, à quelle vitesse il s'étale, combien de temps il dure), et la collerette, la coque large et brève autour de l'étage, à part de la traînée étroite. Un champ vide est grisé et montre la valeur utilisée — un défaut, ou ce que le moteur implique — et vider un champ y revient. Les champs ne sont pas écrits dans l'éditeur : chaque sorte d'élément dit ce qu'elle laisse régler, et l'éditeur le dessine.</p>
     </div>
     </div>
   </div>
@@ -1461,6 +1463,7 @@ if (docs) {
         movimiento de un cuerpo se indica en el archivo, y se muestra aquí. La imagen dibuja los
         cuerpos, con las formas a su lado como contornos para leerlos frente a ellas, sea cual sea el
         grupo abierto, salvo en la parte Formas, donde las formas se dibujan solas y enteras.</p>
+      <p><strong>Lanzamientos</strong> solo tiene una pestaña si la grabación contiene un lanzamiento de cohete cuyo escape la interpretación dice que se vio, iluminado por un Sol que el suelo ya no ve (la «medusa espacial»). Su camino viene del archivo y solo se muestra; los campos fijan el motor (empuje, impulso específico, propelentes) y la estela (qué parte del escape difunde la luz, con qué rapidez se extiende, cuánto dura), y el collar, la envoltura ancha y breve alrededor de la etapa, aparte de la estela estrecha. Un campo vacío aparece en gris y muestra el valor usado —un valor predeterminado, o lo que implica el motor— y vaciar un campo vuelve a él. Los campos no están escritos en el editor: cada tipo de elemento dice lo que permite ajustar, y el editor lo dibuja.</p>
     </div>
     </div>
   </div>
@@ -1923,6 +1926,7 @@ if (docs) {
         di un corpo è indicato nel file, e mostrato qui. L'immagine disegna i corpi, con le forme
         accanto come contorni con cui confrontarli, qualunque sia il gruppo aperto, tranne nella parte
         Forme, dove le forme sono disegnate da sole e per intero.</p>
+      <p><strong>Lanci</strong> ha una linguetta solo se la registrazione contiene un lancio di razzo il cui scarico l'interpretazione dice sia stato visto, illuminato da un Sole che il suolo non vede più (la «medusa spaziale»). Il suo percorso viene dal file ed è solo mostrato; i campi fissano il motore (spinta, impulso specifico, propellenti) e la scia (quanta parte dello scarico diffonde la luce, quanto in fretta si allarga, quanto dura), e il collare, il guscio largo e breve attorno allo stadio, a parte dalla scia stretta. Un campo vuoto è in grigio e mostra il valore usato — un predefinito, o ciò che implica il motore — e svuotare un campo vi ritorna. I campi non sono scritti nell'editor: ogni tipo di elemento dice cosa lascia regolare, e l'editor lo disegna.</p>
     </div>
     </div>
   </div>

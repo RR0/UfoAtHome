@@ -30,11 +30,11 @@ LIFTOFF_UTC = (2026, 8, 25, 9, 33, 0)  # 05:33 EDT
 UTC_OFFSET = -4
 OBSERVER = (40.7440, -74.0324)  # Hoboken, NJ
 OBSERVER_ELEVATION_M = 5
-# The recording starts six minutes after liftoff, when the second stage, climbing through 150 km, is high
-# enough for the Sun to reach its exhaust over the Atlantic, and lasts three minutes: until the stage is
-# over the Atlantic east of Virginia and its engine is about to stop.
-START_AFTER_LIFTOFF_S = 360
-DURATION_S = 180
+# The recording starts 6 min 20 s after liftoff: the second stage, climbing through 150 km, is high enough
+# for the Sun to reach its exhaust over the Atlantic and the light it grazes the air with has lost its red
+# (a few seconds earlier the plume is a dull glow on the horizon). It lasts until the engine is about to stop.
+START_AFTER_LIFTOFF_S = 380
+DURATION_S = 160
 
 # Seconds after liftoff, kilometres downrange, kilometres up: a typical Starlink ascent.
 ASCENT = [

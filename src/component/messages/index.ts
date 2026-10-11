@@ -5,6 +5,7 @@ import type { TagNames } from "./TagNames.js"
 import type { SceneNames } from "./SceneNames.js"
 import type { CloudEditorMessages } from "./CloudEditorMessages.js"
 import type { BodyEditorMessages } from "./BodyEditorMessages.js"
+import type { LaunchEditorMessages } from "./LaunchEditorMessages.js"
 import type { CaseEditorMessages } from "./CaseEditorMessages.js"
 
 export const UFO_SUPPORTED_LANGUAGES = ["en", "fr", "es", "it"] as const
@@ -66,6 +67,17 @@ const bodyEditorLoaders: Record<UfoLanguage, () => Promise<BodyEditorMessages>> 
   fr: () => import("./BodyEditorMessages_fr.js").then(m => m.bodyEditorMessages_fr),
   es: () => import("./BodyEditorMessages_es.js").then(m => m.bodyEditorMessages_es),
   it: () => import("./BodyEditorMessages_it.js").then(m => m.bodyEditorMessages_it)
+}
+
+const launchEditorLoaders: Record<UfoLanguage, () => Promise<LaunchEditorMessages>> = {
+  en: () => import("./LaunchEditorMessages_en.js").then(m => m.launchEditorMessages_en),
+  fr: () => import("./LaunchEditorMessages_fr.js").then(m => m.launchEditorMessages_fr),
+  es: () => import("./LaunchEditorMessages_es.js").then(m => m.launchEditorMessages_es),
+  it: () => import("./LaunchEditorMessages_it.js").then(m => m.launchEditorMessages_it)
+}
+
+export function loadLaunchEditorMessages(language: UfoLanguage): Promise<LaunchEditorMessages> {
+  return launchEditorLoaders[language]()
 }
 
 const caseEditorLoaders: Record<UfoLanguage, () => Promise<CaseEditorMessages>> = {

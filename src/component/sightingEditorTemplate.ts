@@ -500,6 +500,7 @@ export const html = `
   <div class="group-tabs" id="shape-tabs">
     <button class="subgroup-tab" type="button" aria-controls="shape-shapes" aria-expanded="true"><span id="label-shapes-subgroup">Shapes</span></button>
     <button class="subgroup-tab" type="button" aria-controls="shape-bodies" aria-expanded="false"><span id="label-bodies-subgroup">Bodies</span></button>
+    <button class="subgroup-tab" type="button" aria-controls="shape-launches" aria-expanded="false" hidden><span id="label-launches-subgroup">Launches</span></button>
   </div>
   <section class="subgroup-panel" id="shape-shapes" aria-labelledby="label-shapes-subgroup">
   <div class="toolbar">
@@ -563,6 +564,11 @@ export const html = `
   <section class="subgroup-panel" id="shape-bodies" aria-labelledby="label-bodies-subgroup" hidden>
     <div class="toolbar">
       <style>#body-editor { flex-basis: 100%; min-width: 0; } #body-editor .body-editor, #body-editor .body-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-fields { flex-basis: 100%; min-width: 0; } #body-editor .body-fields[hidden], #body-editor [hidden] { display: none !important; } #body-editor select { min-width: 0; width: 100%; } #body-editor .body-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #body-editor .body-explains { flex-basis: 100%; min-width: 0; box-sizing: border-box; margin: 0; } #body-editor #body-explains { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor #body-explains label { white-space: normal; } #body-editor .body-track { margin: 0; } #body-editor details { flex-basis: 100%; min-width: 0; } #body-editor details[open] { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor details > summary { flex-basis: 100%; } #body-editor input, #body-editor select { max-width: 100%; box-sizing: border-box; } #body-editor input[type="color"] { width: 3em; padding: 0; } #body-editor #body-id, #body-editor #body-outline-node { width: 10em; } #body-editor #body-title, #body-editor #body-interpretation-title { width: 18em; } #body-editor label { min-width: 0; max-width: 100%; }</style><div id="body-editor"></div>
+    </div>
+  </section>
+  <section class="subgroup-panel" id="shape-launches" aria-labelledby="label-launches-subgroup" hidden>
+    <div class="toolbar">
+      <style>#launch-editor { flex-basis: 100%; min-width: 0; } #launch-editor .launch-editor, #launch-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #launch-editor .launch-fields { flex-basis: 100%; min-width: 0; } #launch-editor [hidden] { display: none !important; } #launch-editor select { min-width: 0; width: 100%; } #launch-editor .launch-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #launch-editor .launch-track { flex-basis: 100%; margin: 0; } #launch-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } #launch-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } #launch-editor input, #launch-editor select { max-width: 100%; box-sizing: border-box; } #launch-editor input[type="text"] { width: 12em; } #launch-editor #launch-title { width: 18em; } #launch-editor label { min-width: 0; max-width: 100%; } #launch-editor input.parameter-derived::placeholder { opacity: .65; }</style><div id="launch-editor"></div>
     </div>
   </section>
 </section>

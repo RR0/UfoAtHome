@@ -112,6 +112,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   shapeGroup: "Fenomeno",
   shapesSubgroup: "Forme",
   bodiesSubgroup: "Corpi",
+  launchesSubgroup: "Lanci",
   soundGroup: "Suono",
   temporalGroup: "Momento",
   fileGroup: "File",

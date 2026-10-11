@@ -223,6 +223,7 @@ export interface SightingEditorMessages extends SightingLabels {
   /** The Phenomenon group's two parts: the shapes drawn, and the bodies they were (see BodyEditor). */
   shapesSubgroup: string
   bodiesSubgroup: string
+  launchesSubgroup: string
   /** Summary of the group holding what the sighting sounded like — see SoundTrack.ts. */
   soundGroup: string
   /**
