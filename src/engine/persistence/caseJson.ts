@@ -19,7 +19,7 @@ export interface CaseJson {
   title?: string
   /** What a link to this case says of it where it is shared as a card (see the Player's share card): a sentence or
    * two, translatable. Absent, the card says the date and what can be replayed, which is all a case file states. */
-  description?: SaidText
+  summary?: SaidText
   /** A picture standing for the case where it is only linked to — see SightingEvent.image. */
   image?: string
   /** When it happened, as RR0 writes a time ("1948-07-24 02:45", "1954"). */

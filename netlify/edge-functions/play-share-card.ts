@@ -88,7 +88,7 @@ export class PlayShareCard {
       || PlayShareCard.text(json.id) || PlayShareCard.text(fileName)
     return {
       title,
-      description: PlayShareCard.summary(json.description, language) ?? PlayShareCard.derived(json, language),
+      description: PlayShareCard.said(json.summary, language) ?? PlayShareCard.derived(json, url, language, title, isCase),
       image: PlayShareCard.imageOf(json.image, url)
     }
   }
@@ -135,11 +135,20 @@ export class PlayShareCard {
     return date + hour
   }
 
-  /** The date, the place when the recording names one, and what can be done with it. */
-  private static derived(json: Record<string, unknown>, language: string): string | undefined {
+  /**
+   * What a card says of an observation whose file gives no `summary`: who saw it, in which case and when.
+   *
+   * A recording does not name its case (a case names its accounts), so the case is read off the address when that has
+   * the shape of an RR0 dossier (`.../dossier/Cussac/sighting.json`), and left out otherwise. A case, or a recording
+   * with nobody to name, says its date and what can be done with it.
+   */
+  private static derived(json: Record<string, unknown>, url: string, language: string, title: string | undefined, isCase: boolean): string | undefined {
     const date = PlayShareCard.dateIn(language, json.time)
-    if (!date) return undefined
     const place = Array.isArray(json.place) ? PlayShareCard.text((json.place[0] as { name?: unknown } | undefined)?.name) : undefined
+    const dossier = isCase ? undefined : /\/dossier\/([^/]+)\//.exec(new URL(url).pathname)?.[1]
+    const where = [dossier && decodeURIComponent(dossier), date].filter(Boolean).join(", ")
+    if (!isCase && title && where) return `${title} — ${where}`
+    if (!date) return undefined
     return `${date}${place ? ` · ${place}` : ""}. ${PlayShareCard.REPLAY[language] ?? PlayShareCard.REPLAY.en}`
   }
 
@@ -158,8 +167,8 @@ export class PlayShareCard {
     return typeof value === "string" && value.trim() !== "" ? value.trim() : undefined
   }
 
-  /** The account's first paragraph, in the page's language, then English, then any; cut at a word. */
-  private static summary(description: unknown, language: string): string | undefined {
+  /** A said text in the page's language, then English, then any; its first paragraph, cut at a word. */
+  private static said(description: unknown, language: string): string | undefined {
     const said = typeof description === "object" && description !== null
       ? PlayShareCard.text((description as Record<string, unknown>)[language])
         ?? PlayShareCard.text((description as Record<string, unknown>).en)

@@ -28,10 +28,11 @@ describe("PlayShareCard", () => {
     expect(PlayShareCard.candidates("javascript:alert(1)//x", "https://ufoathome.org")).toEqual([])
   })
 
-  it("makes the card of an account from its observer, its first paragraph and its picture", () => {
+  it("makes the card of an account from its observer, its summary's first paragraph and its picture", () => {
     const card = PlayShareCard.cardOf({
       observer: { firstNames: ["Lonnie"], lastName: "Zamora" },
-      description: { en: "A police officer saw it.\n\nSecond paragraph.", fr: "Un policier l'a vu." },
+      description: "A long account that is not what a card says.",
+      summary: { en: "A police officer saw it.\n\nSecond paragraph.", fr: "Un policier l'a vu." },
       image: "photos/zamora.jpg"
     }, "https://ufoathome.org/demo-data/observer-zamora.json", "fr")
     expect(card).toEqual({
@@ -47,27 +48,35 @@ describe("PlayShareCard", () => {
     expect(card).toMatchObject({ title: "Socorro", image: "https://rr0.org/ufo/Socorro/portrait.jpg" })
   })
 
-  it("derives the description of what has none from its time and place, in the page's language", () => {
-    const recording = PlayShareCard.cardOf({ observer: { title: "X" }, time: { year: 2024, month: 8, day: 12, hour: 22, minute: 30 },
-      place: [{ name: "Grenoble, Isère, France" }] }, "https://a.org/x.json", "fr")
+  it("says of an account without summary who saw it, in which case and when", () => {
+    const time = { year: 2024, month: 8, day: 12, hour: 22, minute: 30 }
+    const named = PlayShareCard.cardOf({ observer: { title: "Anne Martin" }, time }, "https://rr0.org/science/crypto/ufo/enquete/dossier/Cussac/sighting.json", "fr")
+    expect(named.description).toBe("Anne Martin — Cussac, 12 août 2024, 22:30")
+    const alone = PlayShareCard.cardOf({ observer: { title: "Anne Martin" }, time }, "https://ufoathome.org/demo-data/observer-x.json", "en")
+    expect(alone.description).toBe("Anne Martin — August 12, 2024, 22:30")
+  })
+
+  it("says of an account without observer, or of a case, its date and what can be done with it", () => {
+    const recording = PlayShareCard.cardOf({ time: { year: 2024, month: 8, day: 12, hour: 22, minute: 30 }, place: [{ name: "Grenoble, Isère, France" }] }, "https://a.org/x/", "fr")
     expect(recording.description).toBe("12 août 2024, 22:30 · Grenoble, Isère, France. À rejouer sous le ciel réel de la date et du lieu qu'elle énonce.")
     const aCase = PlayShareCard.cardOf({ title: "Cussac", events: [], time: "1967-08-29 10:30" }, "https://a.org/case.json", "en")
     expect(aCase.description).toBe("August 29, 1967, 10:30. Replay it in the real sky of the date and place it states.")
   })
 
   it("derives only as much as the time states, and nothing without one", () => {
-    expect(PlayShareCard.cardOf({ id: "x", time: "1954" }, "https://a.org/x.json", "en").description).toMatch(/^1954\. /)
-    expect(PlayShareCard.cardOf({ id: "x", time: "1954-06" }, "https://a.org/x.json", "en").description).toMatch(/^June 1954\. /)
-    expect(PlayShareCard.cardOf({ id: "x", time: "~-3150" }, "https://a.org/x.json", "en").description).toBeUndefined()
+    expect(PlayShareCard.cardOf({ time: "1954", events: [] }, "https://a.org/x.json", "en").description).toMatch(/^1954\. /)
+    expect(PlayShareCard.cardOf({ time: "1954-06", events: [] }, "https://a.org/x.json", "en").description).toMatch(/^June 1954\. /)
+    expect(PlayShareCard.cardOf({ time: "~-3150", events: [] }, "https://a.org/x.json", "en").description).toBeUndefined()
     expect(PlayShareCard.cardOf({ id: "x" }, "https://a.org/x.json", "en").description).toBeUndefined()
   })
 
-  it("prefers the description the file states to the one it would derive", () => {
-    expect(PlayShareCard.cardOf({ id: "x", time: "1954", description: { en: "Said." } }, "https://a.org/x.json", "en").description).toBe("Said.")
+  it("prefers the summary the file states, on a case as on a recording", () => {
+    expect(PlayShareCard.cardOf({ id: "x", time: "1954", summary: { en: "Said." } }, "https://a.org/x.json", "en").description).toBe("Said.")
+    expect(PlayShareCard.cardOf({ title: "C", events: [], time: "1954", summary: "Dite." }, "https://a.org/case.json", "fr").description).toBe("Dite.")
   })
 
   it("refuses a picture that is not a web address, and cuts a long description at a word", () => {
-    const card = PlayShareCard.cardOf({ id: "x", description: "word ".repeat(100), image: "javascript:alert(1)" }, "https://a.org/x.json", "en")
+    const card = PlayShareCard.cardOf({ id: "x", summary: "word ".repeat(100), image: "javascript:alert(1)" }, "https://a.org/x.json", "en")
     expect(card.image).toBeUndefined()
     expect(card.description!.length).toBeLessThanOrEqual(PlayShareCard.MAX_DESCRIPTION + 1)
     expect(card.description!.endsWith("word…")).toBe(true)

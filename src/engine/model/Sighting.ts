@@ -210,6 +210,12 @@ export interface SightingEvent {
    */
   image?: string
   /**
+   * A sentence or two standing for the observation where it is only linked to: what a shared link to it says under its
+   * title (see the Player's share card). Translatable — see SaidText. Absent, the card says who saw it, in which
+   * case and when, as far as the file and its address tell.
+   */
+  summary?: SaidText
+  /**
     * Technical keywords, stored in ENGLISH and named for the reader by the components' own
     * messages — "landing" is displayed "atterrissage" to a French reader, and a tag no message
     * knows is displayed as it is stored (see SightingTags).
