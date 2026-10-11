@@ -29,6 +29,24 @@ describe("ModelPicker", () => {
     expect(container.querySelector(".model-picker-button")?.textContent).toContain("Car")
   })
 
+  it("does not draw its button again when the options are rebuilt as they were, which would shake what is round it", async () => {
+    const { select } = made()
+    await new Promise(resolve => setTimeout(resolve))
+    const button = container.querySelector(".model-picker-button")!
+    const name = button.querySelector("span")
+    // The owner rebuilds the very same options at every edit of what the picker belongs to.
+    const same = [...select.children].map(child => child.cloneNode(true))
+    select.replaceChildren(...same)
+    select.value = "car"
+    await new Promise(resolve => setTimeout(resolve))
+    expect(button.querySelector("span")).toBe(name)
+    // A different choice is drawn.
+    select.value = "van"
+    select.dispatchEvent(new Event("change"))
+    expect(button.querySelector("span")).not.toBe(name)
+    expect(button.textContent).toContain("Van")
+  })
+
   it("lists every option as a card, in its group, with the chosen one marked", () => {
     made()
     container.querySelector<HTMLButtonElement>(".model-picker-button")!.click()

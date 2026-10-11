@@ -195,6 +195,19 @@ describe("The Bodies part of the editor", () => {
     expect(select.value).toBe("5000")
   })
 
+  it("leaves the options of the model picker alone while a body is moved: they are rebuilt only when what they list changes", async () => {
+    const fixture = new Fixture()
+    await new Promise(resolve => setTimeout(resolve))
+    const select = fixture.container.querySelector<HTMLSelectElement>("#body-model")!
+    const first = select.firstElementChild
+    fixture.time = 2500
+    fixture.editor.syncKeyframe()
+    fixture.type("bodyKey.northM", "95")
+    fixture.type("bodyKey.northM", "96")
+    await new Promise(resolve => setTimeout(resolve))
+    expect(select.firstElementChild).toBe(first)
+  })
+
   it("steps to the keyframe before and after the playhead, from between two as from one, with the buttons and with Alt and the arrows", () => {
     const fixture = new Fixture()
     const previous = fixture.container.querySelector<HTMLButtonElement>("#body-key-previous")!

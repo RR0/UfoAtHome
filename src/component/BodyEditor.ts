@@ -283,20 +283,27 @@ export class BodyEditor {
     const entries = await this.host.modelProvider().entries().catch(() => [])
     if (token !== this.catalogueToken) return
     const m = this.messages
-    const primitives = document.createElement("optgroup")
-    primitives.label = m.primitives
-    primitives.append(...BODY_PRIMITIVES.map(id => new Option(m.primitive[id], id)))
-    const catalogue = document.createElement("optgroup")
-    catalogue.label = m.catalogue
-    catalogue.append(...entries.map(entry => new Option(entry.name, entry.id)))
     const select = this.select("body-model")
-    select.replaceChildren(primitives, catalogue)
-    // A model at an address is named below, in its own block: the picker says so rather than
-    // showing a blank that reads as "no model".
-    if (body.model.url !== undefined) select.prepend(new Option(m.modelAdvanced, ""))
     const id = body.model.url === undefined ? body.model.id : undefined
     // An id neither list knows is kept on show, as itself, rather than read as another choice.
-    if (id !== undefined && ![...select.options].some(option => option.value === id)) select.append(new Option(id, id))
+    const known = id === undefined || (BODY_PRIMITIVES as readonly string[]).includes(id) || entries.some(entry => entry.id === id)
+    // The options are replaced only when what they list has changed: the picker over them draws a picture for every change of them, and
+    // this runs at every movement of a body, which made it flicker, its picture gone and coming back.
+    const signature = [m.primitives, m.catalogue, entries.map(entry => `${entry.id}:${entry.name}`).join(), body.model.url !== undefined, known ? "" : id].join("|")
+    if (select.dataset.signature !== signature) {
+      select.dataset.signature = signature
+      const primitives = document.createElement("optgroup")
+      primitives.label = m.primitives
+      primitives.append(...BODY_PRIMITIVES.map(primitive => new Option(m.primitive[primitive], primitive)))
+      const catalogue = document.createElement("optgroup")
+      catalogue.label = m.catalogue
+      catalogue.append(...entries.map(entry => new Option(entry.name, entry.id)))
+      select.replaceChildren(primitives, catalogue)
+      // A model at an address is named below, in its own block: the picker says so rather than
+      // showing a blank that reads as "no model".
+      if (body.model.url !== undefined) select.prepend(new Option(m.modelAdvanced, ""))
+      if (!known) select.append(new Option(id, id))
+    }
     select.value = id ?? ""
     this.showCatalogueModel(body.model.url === undefined ? entries.find(entry => entry.id === body.model.id) : undefined)
   }

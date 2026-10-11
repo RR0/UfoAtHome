@@ -102,6 +102,7 @@ export class ModelPicker {
     select.after(button)
     select.hidden = true
     let showing = 0
+    let shown: string | undefined
     const show = (): void => {
       // Called again for every change of the options, and each call asks for a picture: only the
       // last one to ask is drawn, so the button never collects the pictures of the earlier calls.
@@ -109,6 +110,12 @@ export class ModelPicker {
       const chosen = select.selectedOptions[0]
       // A model at an address is no option of the list: it is named by what the author called it.
       const own = select.value === "" ? address?.current() : undefined
+      // Asked again for what is already on show (the options are rebuilt at every edit of what the picker belongs to): left as it is, since
+      // drawing it again empties the button until its picture comes back, which shakes whatever is round it.
+      // The options are in the key: what the empty choice stands for (a kind's default model) follows the list of its kind.
+      const key = JSON.stringify([select.value, chosen?.textContent, own?.url, own?.title, this.messages().choose, [...select.options].map(option => option.value).join()])
+      if (key === shown) { --showing; return }
+      shown = key
       button.replaceChildren()
       const name = document.createElement("span")
       name.textContent = `${own ? own.title || own.url : chosen?.textContent ?? ""} \u2026`
