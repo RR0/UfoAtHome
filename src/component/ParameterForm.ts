@@ -199,7 +199,7 @@ export class ParameterForm {
       const input = document.createElement("input")
       input.type = "checkbox"
       this.identify(input, spec)
-      input.addEventListener("input", () => this.write(spec, input.checked))
+      input.addEventListener("input", () => this.write(spec, input.checked ? true : (spec.required ? false : undefined)))
       label.prepend(input)
       label.append(" ")
     } else {

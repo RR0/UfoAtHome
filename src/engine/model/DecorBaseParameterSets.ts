@@ -58,7 +58,7 @@ export class DecorBaseParameterSets {
     title: { en: "State", fr: "État", es: "Estado", it: "Stato" },
     parameters: ([
       {
-        type: "boolean", key: "lit", label: { en: "Lit", fr: "Allumé", es: "Encendido", it: "Acceso" },
+        type: "boolean", key: "lit", required: true, label: { en: "Lit", fr: "Allumé", es: "Encendido", it: "Acceso" },
         visibleWhen: (_view, context) => (context as DecorBaseContext | undefined)?.traits.lit === true
       },
       {

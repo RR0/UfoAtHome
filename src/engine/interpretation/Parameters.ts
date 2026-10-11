@@ -120,6 +120,8 @@ export interface SetParameter extends ParameterBase {
 
 export interface BooleanParameter extends ParameterBase {
   type: "boolean"
+  /** Always states a value: unticked is `false`. Without it unticked states nothing, which is what a switch whose default is off should leave. */
+  required?: boolean
 }
 
 export interface ColourParameter extends ParameterBase {

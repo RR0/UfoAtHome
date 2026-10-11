@@ -100,6 +100,21 @@ describe("ParameterForm", () => {
     expect(element).toEqual({})
   })
 
+  test("unticking a switch states nothing, unless it always states a value", () => {
+    const set: ParameterSet = { kind: "s", title: "S", parameters: [
+      { type: "boolean", key: "off", label: "Off by default" }, { type: "boolean", key: "always", label: "Always", required: true }] }
+    const element: Record<string, unknown> = {}
+    new ParameterForm(container, "en").show(set, element, () => undefined)
+    for (const key of ["off", "always"]) {
+      const box = container.querySelector<HTMLInputElement>(`[data-key="${key}"]`)!
+      box.checked = true
+      box.dispatchEvent(new Event("input", { bubbles: true }))
+      box.checked = false
+      box.dispatchEvent(new Event("input", { bubbles: true }))
+    }
+    expect(element).toEqual({ always: false })
+  })
+
   test("a checkbox and a colour write what they hold", () => {
     const { element } = build()
     const check = container.querySelector<HTMLInputElement>('[data-key="light.dimmable"]')!

@@ -977,33 +977,46 @@ export class DecorSystem {
   }
 
   /**
-   * Tints the parts of a model its own file says take a colour (see ModelParameters.bindings): the materials whose names match
-   * the binding get the colour the object states for it (DecorObject.modelParameters). A material is copied before it is
-   * painted, since a model's materials are shared by every copy of it on the page, and the copy is freed with the object
-   * (see dispose). What is not bound keeps the model's own colours, which is what a model carries.
+   * Applies the settings a model publishes (see ModelParameters.bindings) to its parts, found by the names its own file
+   * gives them: a colour tints the materials that match, on copies of them since a model's materials are shared by every
+   * copy of it on the page (the copies are freed with the object: see dispose); a switch hides or shows the nodes that match,
+   * on the copy of the model, which is the object's own. What is not bound keeps the model's own colours and parts, which
+   * is what a model carries.
    */
-  static tintModel(model: Object3D, values: DecorObject["modelParameters"], bindings: ModelParameters["bindings"]): void {
+  static applyModelParameters(model: Object3D, values: DecorObject["modelParameters"], bindings: ModelParameters["bindings"]): void {
     if (!values || !bindings) return
     for (const [key, binding] of Object.entries(bindings)) {
       const value = values[key]
-      if (typeof value !== "string") continue
-      const patterns = binding.materials.map(source => new RegExp(source))
-      model.traverse(part => {
-        const mesh = part as Mesh
-        if (!mesh.isMesh) return
-        const owned: Material[] = (mesh.userData.tintedMaterials as Material[] | undefined) ?? []
-        const tinted = (material: Material): Material => {
-          const coloured = material as MeshLambertMaterial
-          if (!coloured.color || !patterns.some(pattern => pattern.test(material.name))) return material
-          const copy = material.clone() as MeshLambertMaterial
-          copy.color.set(value)
-          owned.push(copy)
-          return copy
-        }
-        mesh.material = Array.isArray(mesh.material) ? mesh.material.map(tinted) : tinted(mesh.material)
-        if (owned.length > 0) mesh.userData.tintedMaterials = owned
-      })
+      if ("materials" in binding) {
+        if (typeof value === "string") DecorSystem.tint(model, binding.materials, value)
+      } else if (typeof value === "boolean") {
+        const patterns = binding.nodes.map(source => new RegExp(source))
+        const hidden = value === (binding.hideWhen ?? true)
+        model.traverse(part => {
+          if (patterns.some(pattern => pattern.test(part.name))) part.visible = !hidden
+        })
+      }
     }
+  }
+
+  /** Gives the materials of a model whose names match a colour, each on a copy of its own. */
+  private static tint(model: Object3D, materials: string[], color: string): void {
+    const patterns = materials.map(source => new RegExp(source))
+    model.traverse(part => {
+      const mesh = part as Mesh
+      if (!mesh.isMesh) return
+      const owned: Material[] = (mesh.userData.tintedMaterials as Material[] | undefined) ?? []
+      const tinted = (material: Material): Material => {
+        const coloured = material as MeshLambertMaterial
+        if (!coloured.color || !patterns.some(pattern => pattern.test(material.name))) return material
+        const copy = material.clone() as MeshLambertMaterial
+        copy.color.set(color)
+        owned.push(copy)
+        return copy
+      }
+      mesh.material = Array.isArray(mesh.material) ? mesh.material.map(tinted) : tinted(mesh.material)
+      if (owned.length > 0) mesh.userData.tintedMaterials = owned
+    })
   }
 
   /** Repaints every part of a built body that is not a light — see DecorObject.color. */

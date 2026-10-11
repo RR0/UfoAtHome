@@ -433,7 +433,7 @@ describe("DecorSystem.fitTerrace", () => {
   })
 })
 
-describe("DecorSystem.tintModel: a setting a model publishes reaches its materials", () => {
+describe("DecorSystem.applyModelParameters: a setting a model publishes reaches its materials", () => {
   const costume = { costumeColor: { materials: ["^Human\\.(fe)?male_[a-z]*(suit|coverall)"] } }
   const being = () => {
     const skin = new MeshStandardMaterial({ name: "Human.body", color: new Color("#d8a888") })
@@ -447,7 +447,7 @@ describe("DecorSystem.tintModel: a setting a model publishes reaches its materia
 
   it("paints the materials the model binds the setting to, and only those, on copies of them", () => {
     const { model, skin, suit, shoes, parts } = being()
-    DecorSystem.tintModel(model, { costumeColor: "#00aa44" }, costume)
+    DecorSystem.applyModelParameters(model, { costumeColor: "#00aa44" }, costume)
     expect((parts[1].material as MeshStandardMaterial).color.getHexString()).toBe("00aa44")
     // The loaded file's own material is shared by every copy of the model: it keeps its colour.
     expect(suit.color.getHexString()).toBe("ffffff")
@@ -458,9 +458,9 @@ describe("DecorSystem.tintModel: a setting a model publishes reaches its materia
 
   it("does nothing when the object states no value for it, or the model binds none", () => {
     const { model, suit, parts } = being()
-    DecorSystem.tintModel(model, undefined, costume)
-    DecorSystem.tintModel(model, { costumeColor: "#00aa44" }, undefined)
-    DecorSystem.tintModel(model, { somethingElse: "#00aa44" }, costume)
+    DecorSystem.applyModelParameters(model, undefined, costume)
+    DecorSystem.applyModelParameters(model, { costumeColor: "#00aa44" }, undefined)
+    DecorSystem.applyModelParameters(model, { somethingElse: "#00aa44" }, costume)
     expect(parts[1].material).toBe(suit)
   })
 
@@ -469,12 +469,53 @@ describe("DecorSystem.tintModel: a setting a model publishes reaches its materia
     let freed = 0
     suit.dispose = () => { freed += 100 }
     skin.dispose = () => { freed += 1000 }
-    DecorSystem.tintModel(model, { costumeColor: "#00aa44" }, costume)
+    DecorSystem.applyModelParameters(model, { costumeColor: "#00aa44" }, costume)
     const copy = parts[1].material as MeshStandardMaterial
     copy.dispose = () => { freed += 1 }
     for (const part of parts) part.userData.sharedModel = true
     DecorSystem.dispose(model)
     expect(freed).toBe(1)
+  })
+})
+
+describe("DecorSystem.applyModelParameters: a switch a model publishes shows or hides its parts", () => {
+  const gear = { gearUp: { nodes: ["^Wheel\\d+$"] } }
+  const airliner = () => {
+    const model = new Group()
+    const fuselage = new Mesh(new BoxGeometry())
+    fuselage.name = "Airplane1"
+    const wheels = ["Wheel1", "Wheel2"].map(name => Object.assign(new Mesh(new BoxGeometry()), { name }))
+    model.add(fuselage, ...wheels)
+    return { model, fuselage, wheels }
+  }
+
+  it("hides the parts whose names match when the switch is on, and leaves the rest", () => {
+    const { model, fuselage, wheels } = airliner()
+    DecorSystem.applyModelParameters(model, { gearUp: true }, gear)
+    expect(wheels.map(wheel => wheel.visible)).toEqual([false, false])
+    expect(fuselage.visible).toBe(true)
+  })
+
+  it("shows them again when it is off, and does nothing when the object states no switch", () => {
+    const { model, wheels } = airliner()
+    wheels.forEach(wheel => { wheel.visible = false })
+    DecorSystem.applyModelParameters(model, { gearUp: false }, gear)
+    expect(wheels.map(wheel => wheel.visible)).toEqual([true, true])
+    wheels.forEach(wheel => { wheel.visible = false })
+    DecorSystem.applyModelParameters(model, {}, gear)
+    expect(wheels.map(wheel => wheel.visible)).toEqual([false, false])
+  })
+
+  it("can be a switch that hides when it is off", () => {
+    const { model, wheels } = airliner()
+    DecorSystem.applyModelParameters(model, { gearDown: false }, { gearDown: { nodes: ["^Wheel\\d+$"], hideWhen: false } })
+    expect(wheels.map(wheel => wheel.visible)).toEqual([false, false])
+  })
+
+  it("takes a colour setting only as a string and a switch only as a boolean", () => {
+    const { model, wheels } = airliner()
+    DecorSystem.applyModelParameters(model, { gearUp: "yes" as unknown as boolean }, gear)
+    expect(wheels.map(wheel => wheel.visible)).toEqual([true, true])
   })
 })
 

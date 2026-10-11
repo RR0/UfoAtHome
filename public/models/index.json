@@ -48,6 +48,23 @@
       "id": "jungle-jim-tree-large-a",
       "kind": "tree",
       "name": "Large broadleaf tree A (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jungle-jim-realistic-trees/large-a.glb",
       "sizeM": { "widthM": 9.8, "lengthM": 9.9, "heightM": 10.3 },
       "credit": {
@@ -61,6 +78,23 @@
       "id": "jungle-jim-tree-large-b",
       "kind": "tree",
       "name": "Large broadleaf tree B (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jungle-jim-realistic-trees/large-b.glb",
       "sizeM": { "widthM": 7, "lengthM": 6.6, "heightM": 8.1 },
       "credit": {
@@ -74,6 +108,23 @@
       "id": "jungle-jim-tree-large-c",
       "kind": "tree",
       "name": "Large broadleaf tree C (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jungle-jim-realistic-trees/large-c.glb",
       "sizeM": { "widthM": 10.8, "lengthM": 10.8, "heightM": 10.7 },
       "credit": {
@@ -87,6 +138,23 @@
       "id": "jungle-jim-tree-medium-a",
       "kind": "tree",
       "name": "Medium broadleaf tree A (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jungle-jim-realistic-trees/medium-a.glb",
       "sizeM": { "widthM": 5.7, "lengthM": 5.8, "heightM": 6.7 },
       "credit": {
@@ -100,6 +168,23 @@
       "id": "jungle-jim-tree-medium-b",
       "kind": "tree",
       "name": "Medium broadleaf tree B (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jungle-jim-realistic-trees/medium-b.glb",
       "sizeM": { "widthM": 4.2, "lengthM": 4.3, "heightM": 4.7 },
       "credit": {
@@ -113,6 +198,23 @@
       "id": "jungle-jim-tree-medium-c",
       "kind": "tree",
       "name": "Medium broadleaf tree C (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jungle-jim-realistic-trees/medium-c.glb",
       "sizeM": { "widthM": 4.4, "lengthM": 3.8, "heightM": 4.9 },
       "credit": {
@@ -126,6 +228,23 @@
       "id": "jungle-jim-tree-bush",
       "kind": "shrub",
       "name": "Bush (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jungle-jim-realistic-trees/bush.glb",
       "sizeM": { "widthM": 3.3, "lengthM": 3.2, "heightM": 2.1 },
       "credit": {
@@ -139,6 +258,23 @@
       "id": "jagobo-tree-maple-a",
       "kind": "tree",
       "name": "Maple A (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jagobo-mountain-trees/maple-a.glb",
       "sizeM": { "widthM": 8.3, "lengthM": 9.3, "heightM": 13 },
       "credit": {
@@ -152,6 +288,23 @@
       "id": "jagobo-tree-maple-b",
       "kind": "tree",
       "name": "Maple B (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jagobo-mountain-trees/maple-b.glb",
       "sizeM": { "widthM": 10.8, "lengthM": 11.3, "heightM": 17 },
       "credit": {
@@ -165,6 +318,23 @@
       "id": "jagobo-tree-aspen-a",
       "kind": "tree",
       "name": "Aspen A (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jagobo-mountain-trees/aspen-a.glb",
       "sizeM": { "widthM": 6.5, "lengthM": 7.3, "heightM": 9 },
       "credit": {
@@ -178,6 +348,23 @@
       "id": "jagobo-tree-aspen-b",
       "kind": "tree",
       "name": "Aspen B (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jagobo-mountain-trees/aspen-b.glb",
       "sizeM": { "widthM": 8.4, "lengthM": 8.4, "heightM": 12.9 },
       "credit": {
@@ -191,6 +378,23 @@
       "id": "jagobo-tree-pine-a",
       "kind": "tree",
       "name": "Pine A (conifer)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jagobo-mountain-trees/pine-a.glb",
       "sizeM": { "widthM": 11.3, "lengthM": 11.3, "heightM": 22 },
       "credit": {
@@ -204,6 +408,23 @@
       "id": "jagobo-tree-pine-b",
       "kind": "tree",
       "name": "Pine B (conifer)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jagobo-mountain-trees/pine-b.glb",
       "sizeM": { "widthM": 12.2, "lengthM": 12.4, "heightM": 20.8 },
       "credit": {
@@ -217,6 +438,23 @@
       "id": "jagobo-tree-juniper",
       "kind": "tree",
       "name": "Juniper (conifer)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "jagobo-mountain-trees/juniper.glb",
       "sizeM": { "widthM": 5.9, "lengthM": 4.6, "heightM": 7.5 },
       "credit": {
@@ -230,6 +468,23 @@
       "id": "nicholas-3d-tree-a",
       "kind": "tree",
       "name": "Tree A (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "nicholas-3d-low-poly-trees/a.glb",
       "sizeM": { "widthM": 3.1, "lengthM": 3.3, "heightM": 6.5 },
       "credit": {
@@ -243,6 +498,23 @@
       "id": "nicholas-3d-tree-b",
       "kind": "tree",
       "name": "Tree B (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "nicholas-3d-low-poly-trees/b.glb",
       "sizeM": { "widthM": 3.4, "lengthM": 3.2, "heightM": 7.1 },
       "credit": {
@@ -256,6 +528,23 @@
       "id": "nicholas-3d-tree-c",
       "kind": "tree",
       "name": "Tree C (realistic)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "foliageColor",
+            "fallback": "#4a7a3a",
+            "label": { "en": "Foliage colour", "fr": "Couleur du feuillage", "es": "Color del follaje", "it": "Colore del fogliame" },
+            "hint": {
+              "en": "The colour of the leaves, over the model's own: an autumn tree, a drought-yellowed one. The bark keeps its own.",
+              "fr": "La couleur des feuilles, sur celle du modèle : un arbre d'automne, un arbre jauni par la sécheresse. L'écorce garde la sienne.",
+              "es": "El color de las hojas, sobre el del modelo: un árbol de otoño, uno amarillento por la sequía. La corteza conserva el suyo.",
+              "it": "Il colore delle foglie, sopra quello del modello: un albero d'autunno, uno ingiallito dalla siccità. La corteccia mantiene il suo."
+            }
+          }
+        ],
+        "bindings": { "foliageColor": { "materials": ["^leaves$"] } }
+      },
       "file": "nicholas-3d-low-poly-trees/c.glb",
       "sizeM": { "widthM": 3.3, "lengthM": 3.4, "heightM": 7 },
       "credit": {
@@ -297,6 +586,22 @@
       "id": "poly-google-airliner",
       "kind": "aircraft",
       "name": "Airliner (generic, stylised)",
+      "parameters": {
+        "parameters": [
+          {
+            "type": "boolean",
+            "key": "gearUp",
+            "label": { "en": "Landing gear retracted", "fr": "Train d'atterrissage rentré", "es": "Tren de aterrizaje recogido", "it": "Carrello retratto" },
+            "hint": {
+              "en": "An aircraft in flight has its wheels up; the model is drawn with them down, as it was made.",
+              "fr": "Un avion en vol a ses roues rentrées ; le modèle est dessiné avec elles sorties, comme il a été fait.",
+              "es": "Una aeronave en vuelo tiene las ruedas recogidas; el modelo está dibujado con ellas fuera, como fue hecho.",
+              "it": "Un aereo in volo ha le ruote retratte; il modello è disegnato con esse fuori, come è stato fatto."
+            }
+          }
+        ],
+        "bindings": { "gearUp": { "nodes": ["^Wheel\\d+$"] } }
+      },
       "file": "poly-google/airplane.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "widthM": 35.8, "lengthM": 37.6, "heightM": 11.8 },

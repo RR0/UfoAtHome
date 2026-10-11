@@ -2341,8 +2341,8 @@ export class SceneRenderer {
     copy.traverse(child => {
       if (child instanceof Mesh) child.userData.sharedModel = true
     })
-    // What the model publishes as settings (a costume colour) reaches its materials, on copies of them.
-    DecorSystem.tintModel(copy, object.modelParameters, loaded.bindings)
+    // What the model publishes as settings (a costume colour, the landing gear) reaches its parts.
+    DecorSystem.applyModelParameters(copy, object.modelParameters, loaded.bindings)
     DecorSystem.applyModel(group, object, copy, { headingOffsetDeg: loaded.headingOffsetDeg, depictedSizeM: loaded.depictedSizeM })
     this.decorModelCredits.set(object.id, loaded.credit)
   }

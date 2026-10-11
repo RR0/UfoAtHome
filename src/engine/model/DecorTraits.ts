@@ -37,18 +37,25 @@ export type ModelParameters = Partial<Pick<DecorParameters, "color" | "lit" | "l
    */
   parameters?: ReadonlyArray<ParameterSpec>
   /**
-   * How each of those settings reaches the model, by key: a colour is applied to the materials of the file whose names
-   * match (regular expressions). A colour for the whole of a model makes no sense — it carries its own, which is why the
-   * plain colour is offered for the built-in shapes only — but the part of it that is a costume can take one.
+   * How each of those settings reaches the model, by key (see ModelBinding): a colour tints some of its materials, a switch
+   * shows or hides some of its parts. A colour for the whole of a model makes no sense — it carries its own, which is why
+   * the plain colour is offered for the built-in shapes only — but the part of it that is a costume, or the leaves of a
+   * tree, can take one; and the file says what its parts are called, which is what this is for.
    */
   bindings?: Record<string, ModelBinding>
 }
 
-/** Where a published colour goes in the model's file. */
-export interface ModelBinding {
-  /** Regular expressions on the names of the file's materials: those that match are tinted. */
-  materials: string[]
-}
+/**
+ * Where a published setting goes in the model's file: the parts of it, found by the names the file gives them (regular
+ * expressions).
+ *
+ * - `materials`: a colour setting. The materials whose names match are tinted, on copies of them.
+ * - `nodes`: a switch setting. The nodes whose names match are hidden when the switch equals `hideWhen` (true when
+ *   absent), and shown otherwise — an aircraft's landing gear, retracted.
+ */
+export type ModelBinding =
+  | { materials: string[] }
+  | { nodes: string[], hideWhen?: boolean }
 
 export class DecorTraits {
   /**
