@@ -45,19 +45,6 @@
       }
     },
     {
-      "id": "kenney-tree-broadleaf",
-      "kind": "tree",
-      "name": "Broadleaf tree (generic, stylised)",
-      "file": "kenney-city-kit-suburban/tree-broadleaf.glb",
-      "sizeM": { "widthM": 2.2, "lengthM": 2.5, "heightM": 8 },
-      "credit": {
-        "title": "City Kit (Suburban) 2.0 — large tree",
-        "author": "Kenney",
-        "license": "CC0 1.0",
-        "sourceUrl": "https://kenney.nl/assets/city-kit-suburban"
-      }
-    },
-    {
       "id": "jungle-jim-tree-large-a",
       "kind": "tree",
       "name": "Large broadleaf tree A (realistic)",

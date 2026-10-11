@@ -74,7 +74,7 @@ One or more stylised low-poly models for every decor kind:
 | --- | --- | --- |
 | vehicle | patrol car, saloon | Kenney, Car Kit 3.1 (CC0) |
 | building | detached house | Kenney, City Kit Suburban 2.0 (CC0) |
-| tree | broadleaf, conifer | Kenney, City Kit Suburban / Survival Kit (CC0) |
+| tree | realistic broadleaf trees, pines and a juniper (see "The trees" below) | Jungle Jim, Jagobo, Nicholas-3D (CC BY 4.0) |
 | streetlight | curved-arm street lamp | Kenney, City Kit Roads 2.0 (CC0) |
 | aircraft | narrow-body airliner | Poly by Google (CC BY 3.0) |
 | observer, entity | five realistic people in plain country clothes, drawn by default (an observer or an entity that names no model is one of them, picked by its id: never a built-in shape) | MakeHuman system assets (CC0), built by `scripts/people/build_people.py` |
