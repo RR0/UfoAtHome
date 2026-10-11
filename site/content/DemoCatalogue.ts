@@ -91,10 +91,10 @@ export class DemoCatalogue {
       section: "sightings",
       heading: { en: "Real sightings", fr: "Des observations réelles", es: "Avistamientos reales", it: "Avvistamenti reali" },
       intro: {
-        en: "Eleven documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Onze dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
-        es: "Once casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
-        it: "Undici casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
+        en: "Twelve documented cases, each replayed in the sky of its own reported date, time and place.",
+        fr: "Douze dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
+        es: "Doce casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
+        it: "Dodici casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
       },
       demos: [
         {
@@ -241,6 +241,18 @@ export class DemoCatalogue {
             fr: "Crépuscule dans le comté d'Orange, 19:45. Une boule jaune cerclée d'orange traverse le ciel sud en deux secondes et plonge derrière une lisière. Reconstituée à partir d'un seul post sur X et du croquis du témoin, chaque supposition marquée comme telle.",
             es: "Anochecer en el condado de Orange, 19:45. Un orbe amarillo con borde naranja cruza el cielo sur en dos segundos y cae tras una hilera de árboles. Reconstruido a partir de una sola publicación en X y del boceto del testigo, cada suposición marcada como tal.",
             it: "Crepuscolo nella contea di Orange, 19:45. Una sfera gialla bordata d'arancio attraversa il cielo a sud in due secondi e scende dietro una fila d'alberi. Ricostruita da un solo post su X e dallo schizzo del testimone, ogni supposizione segnata come tale."
+          }
+        },
+        {
+          id: "saint-lo",
+          src: "/demo-data/observer-saint-lo.json",
+          title: { en: "Saint-Lô, 2026", fr: "Saint-Lô, 2026", es: "Saint-Lô, 2026", it: "Saint-Lô, 2026" },
+          titleIsName: true,
+          blurb: {
+            en: "A moonless night in Normandy, about 2:30. A translucent white half-moon trailing filaments crosses the whole sky from north to south in four seconds and ends in a 720-degree spiral behind the trees. Built from the witness's written replies to an investigator's questions; his drawing is still to come.",
+            fr: "Une nuit sans Lune en Normandie, vers 2 h 30. Une demi-lune blanche translucide, traînant des filaments, traverse tout le ciel du nord au sud en quatre secondes et finit en spirale de 720° derrière les arbres. Reconstituée d'après les réponses écrites du témoin aux questions d'un enquêteur ; son dessin reste à venir.",
+            es: "Una noche sin Luna en Normandía, hacia las 2:30. Una media luna blanca translúcida, con filamentos tras de sí, cruza todo el cielo de norte a sur en cuatro segundos y termina en una espiral de 720° tras los árboles. Reconstruido a partir de las respuestas escritas del testigo a las preguntas de un investigador; su dibujo está por llegar.",
+            it: "Una notte senza Luna in Normandia, verso le 2:30. Una mezzaluna bianca traslucida, con filamenti al seguito, attraversa tutto il cielo da nord a sud in quattro secondi e finisce in una spirale di 720° dietro gli alberi. Ricostruita dalle risposte scritte del testimone alle domande di un investigatore; il suo disegno deve ancora arrivare."
           }
         }
       ]

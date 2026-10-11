@@ -1,0 +1,5599 @@
+{
+ "version": 1,
+ "id": "2026-08-11-SaintLo",
+ "tags": [
+  "aerial observation"
+ ],
+ "time": {
+  "year": 2026,
+  "month": 8,
+  "day": 11,
+  "hour": 2,
+  "minute": 30,
+  "raw": "2026-08-11T02:30~"
+ },
+ "utcOffsetHours": {
+  "value": 2,
+  "basis": "derived",
+  "rationale": "Central European Summer Time on 2026-08-11"
+ },
+ "timeZone": "Europe/Paris",
+ "durationSeconds": {
+  "value": 4,
+  "basis": "stated",
+  "rationale": "\"les 4 secondes de temps d'apparition\"; \"en moins de 5 secondes je dirais\""
+ },
+ "place": [
+  {
+   "value": {
+    "lat": 49.1158,
+    "lng": -1.0909,
+    "name": "Parc du Musée du Bocage normand (ferme de Boisjugan), Saint-Lô, Manche, France"
+   },
+   "basis": "assumed",
+   "rationale": "he names the park and the museum (Boulevard de la Commune / des Combattants); the farm's own coordinates were not found, so the town centre is taken: a few hundred metres change nothing to the sky"
+  }
+ ],
+ "observer": {
+  "title": "Q. B."
+ },
+ "account": {
+  "source": {
+   "value": "questionnaire",
+   "basis": "stated",
+   "rationale": "he answered in writing, on the mailing list, the 19 questions put to him"
+  },
+  "followedUp": {
+   "value": true,
+   "basis": "stated",
+   "rationale": "questions put by J. Beau and other list members; his drawing is still to come (promised for Wednesday)"
+  }
+ },
+ "sources": [
+  {
+   "title": "Re: [sceau_archives_ovni] Encore un.evenement",
+   "authors": [
+    "Q. B."
+   ],
+   "publication": {
+    "publisher": "Liste de diffusion SCEAU (sceau_archives_ovni@framalistes.org)",
+    "time": "2026-10-11"
+   }
+  }
+ ],
+ "description": {
+  "fr": "Nuit du 11 août 2026, entre 1 h et 3 h (« vers 2 h 30 »), veillée d'observation avec un ami dans le parc du Musée du Bocage normand, à Saint-Lô. Ciel complètement dégagé, pas de Lune, quelques étoiles filantes, des satellites et des avions avant et après, rien dans les minutes qui entourent.\n\nJe regardais vers l'ouest-sud-ouest quand mon regard a capté un mouvement dans ma vision périphérique, venant du nord. Je l'ai suivi des yeux : il passait au zénith, puis a continué jusqu'à l'horizon plein sud, derrière la cime des arbres du parc, en environ 4 secondes, sans aucun bruit. Il a parcouru tout le ciel, plutôt plus vite avant le zénith, puis à une vitesse plus constante, en vibrant légèrement parfois. À la fin, une sorte de virage en spirale de 720 degrés, qui se terminait vers le bas.\n\nUne « demi-lune » blanche, translucide, au bord avant net, une pièce et demie de 1 € à bout de bras, beaucoup plus petite que la Lune mais plus grosse qu'une étoile, un peu moins lumineuse que la Lune. Derrière, une queue diffuse faite de filaments sur toute la largeur de l'objet, blanc puis jaune très pâle, entourée d'une nappe jaunâtre qui suivait les filaments sans les toucher. J'ai cru voir une étoile à travers la queue. Pas de feux, pas de clignotement.\n\nMon ami, à 60 cm de moi, regardait la Voie lactée vers le nord-est : il n'a rien vu.",
+  "en": "Night of 11 August 2026, between 1 and 3 a.m. (\"about 2:30\"), an observing evening with a friend in the park of the Musée du Bocage normand, in Saint-Lô. Completely clear sky, no Moon, a few shooting stars, satellites and aircraft before and after, nothing in the minutes around it.\n\nI was looking west-south-west when my eye caught a movement in my peripheral vision, coming from the north. I followed it: it went through the zenith, then on to the southern horizon, behind the tops of the park's trees, in about 4 seconds, without any sound. It crossed the whole sky, rather faster before the zenith, then at a steadier speed, sometimes vibrating slightly. At the end, a kind of 720-degree spiral turn, ending downward.\n\nA white, translucent \"half-moon\" with a sharp front edge, one and a half 1 euro coins at arm's length, much smaller than the Moon but larger than a star, a little less bright than the Moon. Behind it, a diffuse tail of filaments across the whole width of the object, white then very pale yellow, surrounded by a yellowish veil that followed the filaments without touching them. I think I saw a star through the tail. No lights, no flashing.\n\nMy friend, 60 cm from me, was looking at the Milky Way to the north-east: he saw nothing."
+ },
+ "instrument": "eye",
+ "observerTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": {
+      "value": 250,
+      "basis": "derived",
+      "rationale": "\"je regardais légèrement sur la gauche (Ouest Ouest-Sud-Ouest)\""
+     },
+     "pitchDeg": {
+      "value": 45,
+      "basis": "assumed",
+      "rationale": "he does not say how high he looked before; his eye was caught by a movement in the periphery"
+     },
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 100,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 261.44,
+     "pitchDeg": 45.75,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 200,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 288.72,
+     "pitchDeg": 47.53,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 300,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 321.28,
+     "pitchDeg": 49.66,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 400,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 348.56,
+     "pitchDeg": 51.44,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 500,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 0.0,
+     "pitchDeg": 52.19,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 600,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 0.0,
+     "pitchDeg": 57.1,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 700,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 0.0,
+     "pitchDeg": 62.01,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 800,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 0.0,
+     "pitchDeg": 88.0,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 900,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 7.73,
+     "pitchDeg": 88.0,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 1000,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 28.12,
+     "pitchDeg": 88.0,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 1100,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 56.95,
+     "pitchDeg": 88.0,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 1200,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 90.0,
+     "pitchDeg": 88.0,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 1300,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 123.05,
+     "pitchDeg": 88.0,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 1400,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 151.87,
+     "pitchDeg": 88.0,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 1500,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 172.27,
+     "pitchDeg": 88.0,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 1600,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 88.0,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 1700,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 77.31,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 1800,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 74.36,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 1900,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 71.41,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 2000,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 68.45,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 2100,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 65.5,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 2200,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 62.55,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 2300,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 59.6,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 2400,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 56.65,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 2500,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 53.7,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 2600,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 50.75,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 2700,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 47.8,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 2800,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 44.84,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 2900,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 41.89,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 3000,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 38.94,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 3100,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 35.99,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 3200,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 33.04,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 3300,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 30.09,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 3400,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 27.14,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 3500,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 24.18,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 3600,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 21.23,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 3700,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 18.28,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 3800,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 15.33,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 3900,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 12.38,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 4000,
+    "pose": {
+     "lat": 49.1158,
+     "lng": -1.0909,
+     "elevationM": 0,
+     "headingDeg": 180.0,
+     "pitchDeg": 9.43,
+     "fovDeg": 60
+    }
+   }
+  ]
+ },
+ "timeline": {
+  "order": [
+   "head",
+   "tail",
+   "filament-1",
+   "filament-2",
+   "filament-3",
+   "filament-4",
+   "filament-5",
+   "aura"
+  ],
+  "groups": [
+   [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  ],
+  "keyframes": [
+   {
+    "t": 0,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "kind": "polygon",
+       "title": {
+        "fr": "demi-lune blanche, bord avant net",
+        "en": "white half-moon, sharp front edge"
+       },
+       "color": "#fffdf4",
+       "transparency": 0.2,
+       "brightness": 0.05,
+       "blur": 0.1,
+       "haloScale": 0.0,
+       "angular": {
+        "widthDeg": 1.5,
+        "heightDeg": 3.0
+       },
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 35.0
+       },
+       "angle": 2.6662,
+       "points": [
+        {
+         "x": 0.0,
+         "y": 1.0
+        },
+        {
+         "x": 0.259,
+         "y": 0.983
+        },
+        {
+         "x": 0.5,
+         "y": 0.933
+        },
+        {
+         "x": 0.707,
+         "y": 0.854
+        },
+        {
+         "x": 0.866,
+         "y": 0.75
+        },
+        {
+         "x": 0.966,
+         "y": 0.629
+        },
+        {
+         "x": 1.0,
+         "y": 0.5
+        },
+        {
+         "x": 0.966,
+         "y": 0.371
+        },
+        {
+         "x": 0.866,
+         "y": 0.25
+        },
+        {
+         "x": 0.707,
+         "y": 0.146
+        },
+        {
+         "x": 0.5,
+         "y": 0.067
+        },
+        {
+         "x": 0.259,
+         "y": 0.017
+        },
+        {
+         "x": 0.0,
+         "y": 0.0
+        }
+       ]
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "kind": "polygon",
+       "title": {
+        "fr": "queue qui s'estompe",
+        "en": "tail fading out"
+       },
+       "color": "#fff3d0",
+       "transparency": 0.75,
+       "brightness": 0,
+       "blur": 0.7,
+       "haloScale": 0.0,
+       "angular": {
+        "widthDeg": 5.0,
+        "heightDeg": 3.0
+       },
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 34.815
+       },
+       "angle": 2.6662,
+       "points": [
+        {
+         "x": 0,
+         "y": 0
+        },
+        {
+         "x": 1,
+         "y": 0
+        },
+        {
+         "x": 1,
+         "y": 1
+        },
+        {
+         "x": 0,
+         "y": 1
+        }
+       ]
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "kind": "polygon",
+       "title": {
+        "fr": "filament 1",
+        "en": "filament 1"
+       },
+       "color": "#fffaf0",
+       "transparency": 0.05,
+       "brightness": 0,
+       "blur": 0.1,
+       "haloScale": 0.0,
+       "angular": {
+        "widthDeg": 6.0,
+        "heightDeg": 0.45
+       },
+       "aim": {
+        "azimuthDeg": 0.224,
+        "altitudeDeg": 34.943
+       },
+       "angle": 2.6662,
+       "points": [
+        {
+         "x": 1,
+         "y": 0
+        },
+        {
+         "x": 1,
+         "y": 1
+        },
+        {
+         "x": 0,
+         "y": 0.5
+        }
+       ]
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "kind": "polygon",
+       "title": {
+        "fr": "filament 2",
+        "en": "filament 2"
+       },
+       "color": "#fffaf0",
+       "transparency": 0.05,
+       "brightness": 0,
+       "blur": 0.1,
+       "haloScale": 0.0,
+       "angular": {
+        "widthDeg": 4.5,
+        "heightDeg": 0.45
+       },
+       "aim": {
+        "azimuthDeg": 0.112,
+        "altitudeDeg": 34.907
+       },
+       "angle": 2.6662,
+       "points": [
+        {
+         "x": 1,
+         "y": 0
+        },
+        {
+         "x": 1,
+         "y": 1
+        },
+        {
+         "x": 0,
+         "y": 0.5
+        }
+       ]
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "kind": "polygon",
+       "title": {
+        "fr": "filament 3",
+        "en": "filament 3"
+       },
+       "color": "#fffaf0",
+       "transparency": 0.05,
+       "brightness": 0,
+       "blur": 0.1,
+       "haloScale": 0.0,
+       "angular": {
+        "widthDeg": 6.8,
+        "heightDeg": 0.45
+       },
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 34.764
+       },
+       "angle": 2.6662,
+       "points": [
+        {
+         "x": 1,
+         "y": 0
+        },
+        {
+         "x": 1,
+         "y": 1
+        },
+        {
+         "x": 0,
+         "y": 0.5
+        }
+       ]
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "kind": "polygon",
+       "title": {
+        "fr": "filament 4",
+        "en": "filament 4"
+       },
+       "color": "#fffaf0",
+       "transparency": 0.05,
+       "brightness": 0,
+       "blur": 0.1,
+       "haloScale": 0.0,
+       "angular": {
+        "widthDeg": 4.2,
+        "heightDeg": 0.45
+       },
+       "aim": {
+        "azimuthDeg": 359.888,
+        "altitudeDeg": 34.758
+       },
+       "angle": 2.6662,
+       "points": [
+        {
+         "x": 1,
+         "y": 0
+        },
+        {
+         "x": 1,
+         "y": 1
+        },
+        {
+         "x": 0,
+         "y": 0.5
+        }
+       ]
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "kind": "polygon",
+       "title": {
+        "fr": "filament 5",
+        "en": "filament 5"
+       },
+       "color": "#fffaf0",
+       "transparency": 0.05,
+       "brightness": 0,
+       "blur": 0.1,
+       "haloScale": 0.0,
+       "angular": {
+        "widthDeg": 5.6,
+        "heightDeg": 0.45
+       },
+       "aim": {
+        "azimuthDeg": 359.776,
+        "altitudeDeg": 34.64
+       },
+       "angle": 2.6662,
+       "points": [
+        {
+         "x": 1,
+         "y": 0
+        },
+        {
+         "x": 1,
+         "y": 1
+        },
+        {
+         "x": 0,
+         "y": 0.5
+        }
+       ]
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "kind": "oval",
+       "title": {
+        "fr": "nappe jaunâtre autour des filaments",
+        "en": "yellowish veil around the filaments"
+       },
+       "color": "#f2e08a",
+       "transparency": 0.95,
+       "brightness": 0,
+       "blur": 0.8,
+       "haloScale": 0.0,
+       "angular": {
+        "widthDeg": 7.5,
+        "heightDeg": 4.2
+       },
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 34.775
+       },
+       "angle": 2.6662
+      }
+     }
+    ]
+   },
+   {
+    "t": 100,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 39.911
+       },
+       "angle": 2.9345
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 39.274
+       },
+       "angle": 2.9345
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.417,
+        "altitudeDeg": 39.44
+       },
+       "angle": 2.9345
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.21,
+        "altitudeDeg": 39.454
+       },
+       "angle": 2.9345
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 39.101
+       },
+       "angle": 2.9345
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 359.79,
+        "altitudeDeg": 39.218
+       },
+       "angle": 2.9345
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 359.583,
+        "altitudeDeg": 38.95
+       },
+       "angle": 2.9345
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 39.139
+       },
+       "angle": 2.9345
+      }
+     }
+    ]
+   },
+   {
+    "t": 200,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 44.821
+       },
+       "angle": -2.7109
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 42.936
+       },
+       "angle": -2.7109
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.824,
+        "altitudeDeg": 42.907
+       },
+       "angle": -2.7109
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.417,
+        "altitudeDeg": 43.207
+       },
+       "angle": -2.7109
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 42.425
+       },
+       "angle": -2.7109
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 359.58,
+        "altitudeDeg": 43.035
+       },
+       "angle": -2.7109
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 359.168,
+        "altitudeDeg": 42.501
+       },
+       "angle": -2.7109
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 42.538
+       },
+       "angle": -2.7109
+      }
+     }
+    ]
+   },
+   {
+    "t": 300,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 49.732
+       },
+       "angle": -2.1193
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 46.818
+       },
+       "angle": -2.1193
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 1.423,
+        "altitudeDeg": 46.44
+       },
+       "angle": -2.1193
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.724,
+        "altitudeDeg": 47.075
+       },
+       "angle": -2.1193
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 46.017
+       },
+       "angle": -2.1193
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 359.269,
+        "altitudeDeg": 47.137
+       },
+       "angle": -2.1193
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 358.554,
+        "altitudeDeg": 46.466
+       },
+       "angle": -2.1193
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 46.195
+       },
+       "angle": -2.1193
+      }
+     }
+    ]
+   },
+   {
+    "t": 400,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 54.643
+       },
+       "angle": -1.7277
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 51.416
+       },
+       "angle": -1.7277
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 1.869,
+        "altitudeDeg": 50.906
+       },
+       "angle": -1.7277
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.951,
+        "altitudeDeg": 51.662
+       },
+       "angle": -1.7277
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 50.52
+       },
+       "angle": -1.7277
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 359.043,
+        "altitudeDeg": 51.81
+       },
+       "angle": -1.7277
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 358.113,
+        "altitudeDeg": 51.1
+       },
+       "angle": -1.7277
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 50.719
+       },
+       "angle": -1.7277
+      }
+     }
+    ]
+   },
+   {
+    "t": 500,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 59.554
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 56.334
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 2.132,
+        "altitudeDeg": 55.816
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 1.086,
+        "altitudeDeg": 56.578
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 55.434
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 358.91,
+        "altitudeDeg": 56.728
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 357.858,
+        "altitudeDeg": 56.016
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 55.634
+       },
+       "angle": -1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 600,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 64.464
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 61.244
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 2.449,
+        "altitudeDeg": 60.723
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 1.253,
+        "altitudeDeg": 61.488
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 60.344
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 358.741,
+        "altitudeDeg": 61.637
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 357.536,
+        "altitudeDeg": 60.922
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 60.545
+       },
+       "angle": -1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 700,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 69.375
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 66.155
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 2.903,
+        "altitudeDeg": 65.628
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 1.494,
+        "altitudeDeg": 66.397
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 65.255
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 358.497,
+        "altitudeDeg": 66.547
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 357.075,
+        "altitudeDeg": 65.828
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 65.455
+       },
+       "angle": -1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 800,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 74.286
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 71.258
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 3.482,
+        "altitudeDeg": 70.766
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 1.811,
+        "altitudeDeg": 71.479
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 70.432
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 358.174,
+        "altitudeDeg": 71.617
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 356.483,
+        "altitudeDeg": 70.949
+       },
+       "angle": -1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 70.615
+       },
+       "angle": -1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 900,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 79.196
+       },
+       "angle": -1.4359
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 76.05
+       },
+       "angle": -1.4359
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 4.693,
+        "altitudeDeg": 75.523
+       },
+       "angle": -1.4359
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 2.477,
+        "altitudeDeg": 76.277
+       },
+       "angle": -1.4359
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 75.188
+       },
+       "angle": -1.4359
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 357.496,
+        "altitudeDeg": 76.422
+       },
+       "angle": -1.4359
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 355.243,
+        "altitudeDeg": 75.716
+       },
+       "angle": -1.4359
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 75.379
+       },
+       "angle": -1.4359
+      }
+     }
+    ]
+   },
+   {
+    "t": 1000,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 84.107
+       },
+       "angle": -1.0802
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 360.0,
+        "altitudeDeg": 80.887
+       },
+       "angle": -1.0802
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 7.087,
+        "altitudeDeg": 80.319
+       },
+       "angle": -1.0802
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 3.857,
+        "altitudeDeg": 81.113
+       },
+       "angle": -1.0802
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 80.0
+       },
+       "angle": -1.0802
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 356.078,
+        "altitudeDeg": 81.263
+       },
+       "angle": -1.0802
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 352.765,
+        "altitudeDeg": 80.52
+       },
+       "angle": -1.0802
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 80.197
+       },
+       "angle": -1.0802
+      }
+     }
+    ]
+   },
+   {
+    "t": 1100,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 89.018
+       },
+       "angle": -0.5771
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 85.769
+       },
+       "angle": -0.5771
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 14.213,
+        "altitudeDeg": 85.118
+       },
+       "angle": -0.5771
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 8.56,
+        "altitudeDeg": 85.973
+       },
+       "angle": -0.5771
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 84.869
+       },
+       "angle": -0.5771
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 351.111,
+        "altitudeDeg": 86.123
+       },
+       "angle": -0.5771
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 345.189,
+        "altitudeDeg": 85.316
+       },
+       "angle": -0.5771
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 85.069
+       },
+       "angle": -0.5771
+      }
+     }
+    ]
+   },
+   {
+    "t": 1200,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 87.639
+       },
+       "angle": -0.0
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 89.111
+       },
+       "angle": -0.0
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 40.761,
+        "altitudeDeg": 88.163
+       },
+       "angle": -0.0
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 43.187,
+        "altitudeDeg": 89.124
+       },
+       "angle": -0.0
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 88.208
+       },
+       "angle": -0.0
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 309.165,
+        "altitudeDeg": 89.227
+       },
+       "angle": -0.0
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 314.789,
+        "altitudeDeg": 88.313
+       },
+       "angle": -0.0
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 0.0,
+        "altitudeDeg": 88.409
+       },
+       "angle": -0.0
+      }
+     }
+    ]
+   },
+   {
+    "t": 1300,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 84.687
+       },
+       "angle": 0.5771
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 87.932
+       },
+       "angle": 0.5771
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 142.55,
+        "altitudeDeg": 88.027
+       },
+       "angle": 0.5771
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 165.5,
+        "altitudeDeg": 87.605
+       },
+       "angle": 0.5771
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 88.835
+       },
+       "angle": 0.5771
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 193.648,
+        "altitudeDeg": 87.46
+       },
+       "angle": 0.5771
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 214.153,
+        "altitudeDeg": 87.865
+       },
+       "angle": 0.5771
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 88.634
+       },
+       "angle": 0.5771
+      }
+     }
+    ]
+   },
+   {
+    "t": 1400,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 81.736
+       },
+       "angle": 1.0802
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 84.965
+       },
+       "angle": 1.0802
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 165.18,
+        "altitudeDeg": 85.309
+       },
+       "angle": 1.0802
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.527,
+        "altitudeDeg": 84.681
+       },
+       "angle": 1.0802
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 85.866
+       },
+       "angle": 1.0802
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 186.295,
+        "altitudeDeg": 84.533
+       },
+       "angle": 1.0802
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 194.214,
+        "altitudeDeg": 85.117
+       },
+       "angle": 1.0802
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 85.666
+       },
+       "angle": 1.0802
+      }
+     }
+    ]
+   },
+   {
+    "t": 1500,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 78.785
+       },
+       "angle": 1.4359
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 81.98
+       },
+       "angle": 1.4359
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.952,
+        "altitudeDeg": 82.382
+       },
+       "angle": 1.4359
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.86,
+        "altitudeDeg": 81.71
+       },
+       "angle": 1.4359
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 82.875
+       },
+       "angle": 1.4359
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 184.067,
+        "altitudeDeg": 81.563
+       },
+       "angle": 1.4359
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 188.816,
+        "altitudeDeg": 82.187
+       },
+       "angle": 1.4359
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 82.676
+       },
+       "angle": 1.4359
+      }
+     }
+    ]
+   },
+   {
+    "t": 1600,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 75.833
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 78.976
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.535,
+        "altitudeDeg": 79.4
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.972,
+        "altitudeDeg": 78.716
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 79.86
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.988,
+        "altitudeDeg": 78.57
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 186.345,
+        "altitudeDeg": 79.205
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 79.663
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 1700,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 72.882
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 76.127
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.825,
+        "altitudeDeg": 76.576
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.543,
+        "altitudeDeg": 75.864
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 77.03
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.431,
+        "altitudeDeg": 75.714
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 185.1,
+        "altitudeDeg": 76.376
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 76.829
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 1800,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 69.931
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 73.175
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.738,
+        "altitudeDeg": 73.634
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.958,
+        "altitudeDeg": 72.915
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 74.079
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.025,
+        "altitudeDeg": 72.764
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 184.212,
+        "altitudeDeg": 73.434
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 73.878
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 1900,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 66.979
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 70.224
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.369,
+        "altitudeDeg": 70.69
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.249,
+        "altitudeDeg": 69.965
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 71.128
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.738,
+        "altitudeDeg": 69.815
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.595,
+        "altitudeDeg": 70.489
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 70.927
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 2000,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 64.028
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 67.273
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.831,
+        "altitudeDeg": 67.744
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.464,
+        "altitudeDeg": 67.015
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 68.176
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.527,
+        "altitudeDeg": 66.864
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.142,
+        "altitudeDeg": 67.543
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 67.975
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 2100,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 61.076
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 64.321
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.181,
+        "altitudeDeg": 64.796
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.628,
+        "altitudeDeg": 64.064
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 65.225
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.364,
+        "altitudeDeg": 63.914
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.798,
+        "altitudeDeg": 64.596
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 65.024
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 2200,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 58.125
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 61.37
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.456,
+        "altitudeDeg": 61.848
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.758,
+        "altitudeDeg": 61.114
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 62.273
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.236,
+        "altitudeDeg": 60.963
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.527,
+        "altitudeDeg": 61.647
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 62.072
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 2300,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 55.174
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 58.418
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.677,
+        "altitudeDeg": 58.899
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.863,
+        "altitudeDeg": 58.163
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 59.322
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.132,
+        "altitudeDeg": 58.013
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.31,
+        "altitudeDeg": 58.699
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 59.121
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 2400,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 52.222
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 55.467
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.857,
+        "altitudeDeg": 55.95
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.949,
+        "altitudeDeg": 55.212
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 56.371
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.047,
+        "altitudeDeg": 55.062
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.132,
+        "altitudeDeg": 55.75
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 56.17
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 2500,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 49.271
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 52.516
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.006,
+        "altitudeDeg": 53.001
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.02,
+        "altitudeDeg": 52.261
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 53.419
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.977,
+        "altitudeDeg": 52.111
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.985,
+        "altitudeDeg": 52.8
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 53.218
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 2600,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 46.319
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 49.564
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.131,
+        "altitudeDeg": 50.051
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.08,
+        "altitudeDeg": 49.31
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 50.468
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.917,
+        "altitudeDeg": 49.16
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.861,
+        "altitudeDeg": 49.85
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 50.267
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 2700,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 43.368
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 46.613
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.237,
+        "altitudeDeg": 47.101
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.131,
+        "altitudeDeg": 46.359
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 47.516
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.867,
+        "altitudeDeg": 46.209
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.756,
+        "altitudeDeg": 46.9
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 47.316
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 2800,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 40.417
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 43.661
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.328,
+        "altitudeDeg": 44.151
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.174,
+        "altitudeDeg": 43.408
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 44.565
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.824,
+        "altitudeDeg": 43.258
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.667,
+        "altitudeDeg": 43.95
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 44.364
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 2900,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 37.465
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 40.71
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.405,
+        "altitudeDeg": 41.201
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.212,
+        "altitudeDeg": 40.457
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 41.614
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.786,
+        "altitudeDeg": 40.307
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.59,
+        "altitudeDeg": 41.0
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 41.413
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 3000,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 34.514
+       },
+       "angle": 1.766
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.797,
+        "altitudeDeg": 37.694
+       },
+       "angle": 1.766
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.427,
+        "altitudeDeg": 38.421
+       },
+       "angle": 1.766
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.992,
+        "altitudeDeg": 37.567
+       },
+       "angle": 1.766
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.031,
+        "altitudeDeg": 38.579
+       },
+       "angle": 1.766
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.432,
+        "altitudeDeg": 37.179
+       },
+       "angle": 1.766
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.359,
+        "altitudeDeg": 37.736
+       },
+       "angle": 1.766
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.979,
+        "altitudeDeg": 38.382
+       },
+       "angle": 1.766
+      }
+     }
+    ]
+   },
+   {
+    "t": 3050,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.56,
+        "altitudeDeg": 34.156
+       },
+       "angle": 2.9186
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.415,
+        "altitudeDeg": 34.826
+       },
+       "angle": 2.9186
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.749,
+        "altitudeDeg": 36.095
+       },
+       "angle": 2.9186
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.977,
+        "altitudeDeg": 35.366
+       },
+       "angle": 2.9186
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 184.495,
+        "altitudeDeg": 34.991
+       },
+       "angle": 2.9186
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.075,
+        "altitudeDeg": 34.164
+       },
+       "angle": 2.9186
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 184.035,
+        "altitudeDeg": 33.708
+       },
+       "angle": 2.9186
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 184.254,
+        "altitudeDeg": 34.955
+       },
+       "angle": 2.9186
+      }
+     }
+    ]
+   },
+   {
+    "t": 3100,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.765,
+        "altitudeDeg": 34.084
+       },
+       "angle": 2.8858
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.579,
+        "altitudeDeg": 34.916
+       },
+       "angle": 2.8858
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.83,
+        "altitudeDeg": 36.201
+       },
+       "angle": 2.8858
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.105,
+        "altitudeDeg": 35.439
+       },
+       "angle": 2.8858
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.651,
+        "altitudeDeg": 35.126
+       },
+       "angle": 2.8858
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.28,
+        "altitudeDeg": 34.238
+       },
+       "angle": 2.8858
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.273,
+        "altitudeDeg": 33.822
+       },
+       "angle": 2.8858
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.412,
+        "altitudeDeg": 35.081
+       },
+       "angle": 2.8858
+      }
+     }
+    ]
+   },
+   {
+    "t": 3150,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.951,
+        "altitudeDeg": 33.056
+       },
+       "angle": 2.5285
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.073,
+        "altitudeDeg": 35.015
+       },
+       "angle": 2.5285
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.696,
+        "altitudeDeg": 36.278
+       },
+       "angle": 2.5285
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.391,
+        "altitudeDeg": 35.348
+       },
+       "angle": 2.5285
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.969,
+        "altitudeDeg": 35.546
+       },
+       "angle": 2.5285
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.111,
+        "altitudeDeg": 34.294
+       },
+       "angle": 2.5285
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.224,
+        "altitudeDeg": 34.219
+       },
+       "angle": 2.5285
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.769,
+        "altitudeDeg": 35.428
+       },
+       "angle": 2.5285
+      }
+     }
+    ]
+   },
+   {
+    "t": 3200,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.333,
+        "altitudeDeg": 30.533
+       },
+       "angle": 2.126
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.121,
+        "altitudeDeg": 33.383
+       },
+       "angle": 2.126
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.144,
+        "altitudeDeg": 34.389
+       },
+       "angle": 2.126
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.352,
+        "altitudeDeg": 33.448
+       },
+       "angle": 2.126
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.64,
+        "altitudeDeg": 34.173
+       },
+       "angle": 2.126
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.516,
+        "altitudeDeg": 32.746
+       },
+       "angle": 2.126
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.542,
+        "altitudeDeg": 33.066
+       },
+       "angle": 2.126
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.524,
+        "altitudeDeg": 33.998
+       },
+       "angle": 2.126
+      }
+     }
+    ]
+   },
+   {
+    "t": 3250,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.118,
+        "altitudeDeg": 26.856
+       },
+       "angle": 1.7059
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.315,
+        "altitudeDeg": 30.063
+       },
+       "angle": 1.7059
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 169.982,
+        "altitudeDeg": 30.622
+       },
+       "angle": 1.7059
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.622,
+        "altitudeDeg": 29.849
+       },
+       "angle": 1.7059
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.373,
+        "altitudeDeg": 30.958
+       },
+       "angle": 1.7059
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.968,
+        "altitudeDeg": 29.629
+       },
+       "angle": 1.7059
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.702,
+        "altitudeDeg": 30.284
+       },
+       "angle": 1.7059
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.36,
+        "altitudeDeg": 30.759
+       },
+       "angle": 1.7059
+      }
+     }
+    ]
+   },
+   {
+    "t": 3300,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.774,
+        "altitudeDeg": 22.979
+       },
+       "angle": 1.269
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.479,
+        "altitudeDeg": 25.957
+       },
+       "angle": 1.269
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 169.071,
+        "altitudeDeg": 25.978
+       },
+       "angle": 1.269
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 169.981,
+        "altitudeDeg": 25.512
+       },
+       "angle": 1.269
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.107,
+        "altitudeDeg": 26.784
+       },
+       "angle": 1.269
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.247,
+        "altitudeDeg": 25.804
+       },
+       "angle": 1.269
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.574,
+        "altitudeDeg": 26.663
+       },
+       "angle": 1.269
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.191,
+        "altitudeDeg": 26.6
+       },
+       "angle": 1.269
+      }
+     }
+    ]
+   },
+   {
+    "t": 3350,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.955,
+        "altitudeDeg": 19.949
+       },
+       "angle": 0.8052
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.446,
+        "altitudeDeg": 22.134
+       },
+       "angle": 0.8052
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.216,
+        "altitudeDeg": 21.605
+       },
+       "angle": 0.8052
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.22,
+        "altitudeDeg": 21.538
+       },
+       "angle": 0.8052
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.735,
+        "altitudeDeg": 22.734
+       },
+       "angle": 0.8052
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.185,
+        "altitudeDeg": 22.295
+       },
+       "angle": 0.8052
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.063,
+        "altitudeDeg": 23.196
+       },
+       "angle": 0.8052
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 170.894,
+        "altitudeDeg": 22.6
+       },
+       "angle": 0.8052
+      }
+     }
+    ]
+   },
+   {
+    "t": 3400,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.768,
+        "altitudeDeg": 18.467
+       },
+       "angle": 0.2839
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.487,
+        "altitudeDeg": 19.271
+       },
+       "angle": 0.2839
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.702,
+        "altitudeDeg": 18.257
+       },
+       "angle": 0.2839
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.597,
+        "altitudeDeg": 18.644
+       },
+       "angle": 0.2839
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.574,
+        "altitudeDeg": 19.483
+       },
+       "angle": 0.2839
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.039,
+        "altitudeDeg": 19.743
+       },
+       "angle": 0.2839
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.469,
+        "altitudeDeg": 20.482
+       },
+       "angle": 0.2839
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.777,
+        "altitudeDeg": 19.436
+       },
+       "angle": 0.2839
+      }
+     }
+    ]
+   },
+   {
+    "t": 3450,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.099,
+        "altitudeDeg": 18.609
+       },
+       "angle": -0.3972
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.003,
+        "altitudeDeg": 17.335
+       },
+       "angle": -0.3972
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.045,
+        "altitudeDeg": 16.069
+       },
+       "angle": -0.3972
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.494,
+        "altitudeDeg": 16.899
+       },
+       "angle": -0.3972
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.158,
+        "altitudeDeg": 16.976
+       },
+       "angle": -0.3972
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.124,
+        "altitudeDeg": 18.031
+       },
+       "angle": -0.3972
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.202,
+        "altitudeDeg": 18.287
+       },
+       "angle": -0.3972
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.345,
+        "altitudeDeg": 17.056
+       },
+       "angle": -0.3972
+      }
+     }
+    ]
+   },
+   {
+    "t": 3500,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 19.757
+       },
+       "angle": -1.5541
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.944,
+        "altitudeDeg": 16.541
+       },
+       "angle": -1.5541
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.171,
+        "altitudeDeg": 16.026
+       },
+       "angle": -1.5541
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.569,
+        "altitudeDeg": 16.777
+       },
+       "angle": -1.5541
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.929,
+        "altitudeDeg": 15.655
+       },
+       "angle": -1.5541
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.329,
+        "altitudeDeg": 16.944
+       },
+       "angle": -1.5541
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.701,
+        "altitudeDeg": 16.261
+       },
+       "angle": -1.5541
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.932,
+        "altitudeDeg": 15.852
+       },
+       "angle": -1.5541
+      }
+     }
+    ]
+   },
+   {
+    "t": 3550,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.119,
+        "altitudeDeg": 20.806
+       },
+       "angle": -2.8243
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.405,
+        "altitudeDeg": 19.779
+       },
+       "angle": -2.8243
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.33,
+        "altitudeDeg": 20.745
+       },
+       "angle": -2.8243
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.362,
+        "altitudeDeg": 20.426
+       },
+       "angle": -2.8243
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.308,
+        "altitudeDeg": 19.484
+       },
+       "angle": -2.8243
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.797,
+        "altitudeDeg": 19.342
+       },
+       "angle": -2.8243
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 182.292,
+        "altitudeDeg": 18.551
+       },
+       "angle": -2.8243
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 183.108,
+        "altitudeDeg": 19.549
+       },
+       "angle": -2.8243
+      }
+     }
+    ]
+   },
+   {
+    "t": 3600,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.974,
+        "altitudeDeg": 20.671
+       },
+       "angle": 2.7162
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.14,
+        "altitudeDeg": 22.039
+       },
+       "angle": 2.7162
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.1,
+        "altitudeDeg": 23.339
+       },
+       "angle": 2.7162
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.626,
+        "altitudeDeg": 22.482
+       },
+       "angle": 2.7162
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.031,
+        "altitudeDeg": 22.409
+       },
+       "angle": 2.7162
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.013,
+        "altitudeDeg": 21.327
+       },
+       "angle": 2.7162
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.964,
+        "altitudeDeg": 21.068
+       },
+       "angle": 2.7162
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.832,
+        "altitudeDeg": 22.327
+       },
+       "angle": 2.7162
+      }
+     }
+    ]
+   },
+   {
+    "t": 3650,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.747,
+        "altitudeDeg": 18.868
+       },
+       "angle": 2.1746
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.633,
+        "altitudeDeg": 21.585
+       },
+       "angle": 2.1746
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.851,
+        "altitudeDeg": 22.658
+       },
+       "angle": 2.1746
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.948,
+        "altitudeDeg": 21.704
+       },
+       "angle": 2.1746
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.169,
+        "altitudeDeg": 22.337
+       },
+       "angle": 2.1746
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.931,
+        "altitudeDeg": 20.921
+       },
+       "angle": 2.1746
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.881,
+        "altitudeDeg": 21.173
+       },
+       "angle": 2.1746
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.049,
+        "altitudeDeg": 22.17
+       },
+       "angle": 2.1746
+      }
+     }
+    ]
+   },
+   {
+    "t": 3700,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.602,
+        "altitudeDeg": 15.763
+       },
+       "angle": 1.6994
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.92,
+        "altitudeDeg": 18.982
+       },
+       "angle": 1.6994
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.718,
+        "altitudeDeg": 19.586
+       },
+       "angle": 1.6994
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.271,
+        "altitudeDeg": 18.789
+       },
+       "angle": 1.6994
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.01,
+        "altitudeDeg": 19.877
+       },
+       "angle": 1.6994
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.504,
+        "altitudeDeg": 18.527
+       },
+       "angle": 1.6994
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.204,
+        "altitudeDeg": 19.164
+       },
+       "angle": 1.6994
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.99,
+        "altitudeDeg": 19.678
+       },
+       "angle": 1.6994
+      }
+     }
+    ]
+   },
+   {
+    "t": 3750,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.065,
+        "altitudeDeg": 12.314
+       },
+       "angle": 1.2466
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.909,
+        "altitudeDeg": 15.341
+       },
+       "angle": 1.2466
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 171.584,
+        "altitudeDeg": 15.388
+       },
+       "angle": 1.2466
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.427,
+        "altitudeDeg": 14.9
+       },
+       "angle": 1.2466
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.582,
+        "altitudeDeg": 16.181
+       },
+       "angle": 1.2466
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.628,
+        "altitudeDeg": 15.175
+       },
+       "angle": 1.2466
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.954,
+        "altitudeDeg": 16.036
+       },
+       "angle": 1.2466
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.655,
+        "altitudeDeg": 15.994
+       },
+       "angle": 1.2466
+      }
+     }
+    ]
+   },
+   {
+    "t": 3800,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.902,
+        "altitudeDeg": 9.567
+       },
+       "angle": 0.7666
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.49,
+        "altitudeDeg": 11.759
+       },
+       "angle": 0.7666
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.309,
+        "altitudeDeg": 11.22
+       },
+       "angle": 0.7666
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 173.272,
+        "altitudeDeg": 11.155
+       },
+       "angle": 0.7666
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.814,
+        "altitudeDeg": 12.364
+       },
+       "angle": 0.7666
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.197,
+        "altitudeDeg": 11.927
+       },
+       "angle": 0.7666
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.081,
+        "altitudeDeg": 12.837
+       },
+       "angle": 0.7666
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 172.965,
+        "altitudeDeg": 12.23
+       },
+       "angle": 0.7666
+      }
+     }
+    ]
+   },
+   {
+    "t": 3850,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.423,
+        "altitudeDeg": 8.293
+       },
+       "angle": 0.3849
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.375,
+        "altitudeDeg": 9.478
+       },
+       "angle": 0.3849
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.478,
+        "altitudeDeg": 8.552
+       },
+       "angle": 0.3849
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.395,
+        "altitudeDeg": 8.834
+       },
+       "angle": 0.3849
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.527,
+        "altitudeDeg": 9.802
+       },
+       "angle": 0.3849
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.969,
+        "altitudeDeg": 9.888
+       },
+       "angle": 0.3849
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 175.525,
+        "altitudeDeg": 10.697
+       },
+       "angle": 0.3849
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 174.716,
+        "altitudeDeg": 9.73
+       },
+       "angle": 0.3849
+      }
+     }
+    ]
+   },
+   {
+    "t": 3900,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 7.951
+       },
+       "angle": 0.8621
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.849,
+        "altitudeDeg": 10.406
+       },
+       "angle": 0.8621
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 176.6,
+        "altitudeDeg": 9.997
+       },
+       "angle": 0.8621
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.558,
+        "altitudeDeg": 9.825
+       },
+       "angle": 0.8621
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.246,
+        "altitudeDeg": 11.087
+       },
+       "angle": 0.8621
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.576,
+        "altitudeDeg": 10.496
+       },
+       "angle": 0.8621
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.57,
+        "altitudeDeg": 11.419
+       },
+       "angle": 0.8621
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 177.38,
+        "altitudeDeg": 10.935
+       },
+       "angle": 0.8621
+      }
+     }
+    ]
+   },
+   {
+    "t": 3950,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 6.476
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 9.721
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.781,
+        "altitudeDeg": 10.22
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.392,
+        "altitudeDeg": 9.469
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 10.624
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.608,
+        "altitudeDeg": 9.319
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.218,
+        "altitudeDeg": 10.019
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 10.423
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 4000,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 5.0
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 8.245
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.786,
+        "altitudeDeg": 8.745
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.394,
+        "altitudeDeg": 7.994
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 9.148
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.605,
+        "altitudeDeg": 7.843
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.213,
+        "altitudeDeg": 8.544
+       },
+       "angle": 1.5708
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 8.947
+       },
+       "angle": 1.5708
+      }
+     }
+    ]
+   },
+   {
+    "t": 4200,
+    "shapes": [
+     {
+      "sourceId": "head",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 5.0
+       },
+       "angle": 1.5708,
+       "transparency": 1
+      }
+     },
+     {
+      "sourceId": "tail",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 8.245
+       },
+       "angle": 1.5708,
+       "transparency": 1
+      }
+     },
+     {
+      "sourceId": "filament-1",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 178.786,
+        "altitudeDeg": 8.745
+       },
+       "angle": 1.5708,
+       "transparency": 1
+      }
+     },
+     {
+      "sourceId": "filament-2",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 179.394,
+        "altitudeDeg": 7.994
+       },
+       "angle": 1.5708,
+       "transparency": 1
+      }
+     },
+     {
+      "sourceId": "filament-3",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 9.148
+       },
+       "angle": 1.5708,
+       "transparency": 1
+      }
+     },
+     {
+      "sourceId": "filament-4",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.605,
+        "altitudeDeg": 7.843
+       },
+       "angle": 1.5708,
+       "transparency": 1
+      }
+     },
+     {
+      "sourceId": "filament-5",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 181.213,
+        "altitudeDeg": 8.544
+       },
+       "angle": 1.5708,
+       "transparency": 1
+      }
+     },
+     {
+      "sourceId": "aura",
+      "shape": {
+       "aim": {
+        "azimuthDeg": 180.0,
+        "altitudeDeg": 8.947
+       },
+       "angle": 1.5708,
+       "transparency": 1
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "weatherTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "weather": {
+     "cloudLayers": [],
+     "cloudCover": 0,
+     "precipitationType": "none",
+     "precipitationIntensity": 0,
+     "storm": false
+    }
+   }
+  ]
+ },
+ "soundTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "sound": {
+     "kind": "none"
+    }
+   }
+  ]
+ },
+ "decor": [
+  {
+   "id": "tree-0",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbres du parc, côté sud",
+    "en": "park trees, south side"
+   },
+   "eastM": 35.0,
+   "northM": -60.6,
+   "sizeM": {
+    "heightM": 12.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-1",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbres du parc, côté sud",
+    "en": "park trees, south side"
+   },
+   "eastM": 32.1,
+   "northM": -68.9,
+   "sizeM": {
+    "heightM": 14.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-2",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbres du parc, côté sud",
+    "en": "park trees, south side"
+   },
+   "eastM": 28.0,
+   "northM": -77.1,
+   "sizeM": {
+    "heightM": 16.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-3",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbres du parc, côté sud",
+    "en": "park trees, south side"
+   },
+   "eastM": 18.1,
+   "northM": -67.6,
+   "sizeM": {
+    "heightM": 13.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-4",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbres du parc, côté sud",
+    "en": "park trees, south side"
+   },
+   "eastM": 13.2,
+   "northM": -74.8,
+   "sizeM": {
+    "heightM": 15.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-5",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbres du parc, côté sud",
+    "en": "park trees, south side"
+   },
+   "eastM": 7.1,
+   "northM": -81.7,
+   "sizeM": {
+    "heightM": 12.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-6",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbres du parc, côté sud",
+    "en": "park trees, south side"
+   },
+   "eastM": 0.0,
+   "northM": -70.0,
+   "sizeM": {
+    "heightM": 14.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-7",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbres du parc, côté sud",
+    "en": "park trees, south side"
+   },
+   "eastM": -6.6,
+   "northM": -75.7,
+   "sizeM": {
+    "heightM": 16.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-8",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbres du parc, côté sud",
+    "en": "park trees, south side"
+   },
+   "eastM": -14.2,
+   "northM": -80.8,
+   "sizeM": {
+    "heightM": 13.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-9",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbres du parc, côté sud",
+    "en": "park trees, south side"
+   },
+   "eastM": -18.1,
+   "northM": -67.6,
+   "sizeM": {
+    "heightM": 15.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-10",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbres du parc, côté sud",
+    "en": "park trees, south side"
+   },
+   "eastM": -26.0,
+   "northM": -71.4,
+   "sizeM": {
+    "heightM": 12.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-11",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbres du parc, côté sud",
+    "en": "park trees, south side"
+   },
+   "eastM": -34.7,
+   "northM": -74.3,
+   "sizeM": {
+    "heightM": 14.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-12",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbres du parc, côté sud",
+    "en": "park trees, south side"
+   },
+   "eastM": -35.0,
+   "northM": -60.6,
+   "sizeM": {
+    "heightM": 16.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  }
+ ],
+ "milestones": [
+  {
+   "t": 0,
+   "label": "A",
+   "note": {
+    "fr": "Un mouvement dans la vision périphérique, venant du nord",
+    "en": "A movement in the peripheral vision, coming from the north"
+   }
+  },
+  {
+   "t": 1120,
+   "label": "B",
+   "note": {
+    "fr": "Au zénith, il garde sa vitesse",
+    "en": "At the zenith, it holds its speed"
+   }
+  },
+  {
+   "t": 3000,
+   "label": "C",
+   "note": {
+    "fr": "Virage en spirale de 720°, vers le bas",
+    "en": "720-degree spiral turn, downward"
+   }
+  },
+  {
+   "t": 4000,
+   "label": "D",
+   "note": {
+    "fr": "Il passe derrière la cime des arbres, plein sud",
+    "en": "It goes behind the tree tops, due south"
+   }
+  }
+ ]
+}
