@@ -78,14 +78,22 @@ export class ElementList {
     this.select.id = options.ids.list
     this.select.addEventListener("change", () => options.onSelect(this.select.value))
     this.pickerRow.append(this.labelText, " ", this.select)
-    options.header.append(this.pickerRow)
+    // The picker takes what the buttons leave, and the buttons stand at its right, on its line: a picker as wide as its part pushed them
+    // under it, and left a row of buttons of their own that said nothing the picker did not.
+    const header = document.createElement("div")
+    header.className = "element-list-row"
+    header.style.cssText = "display: flex; align-items: flex-end; gap: .4em; flex: 1 1 100%; min-width: 0;"
+    this.pickerRow.style.cssText = "flex: 1 1 8em; min-width: 0; display: flex; flex-direction: column;"
+    this.select.style.cssText = "width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box;"
+    options.header.append(header)
+    header.append(this.pickerRow)
     const navigation = options.navigation
     if (navigation) {
       this.previousButton = this.iconButton(`${options.ids.list}-previous`, "▲")
       this.nextButton = this.iconButton(`${options.ids.list}-next`, "▼")
       this.previousButton.addEventListener("click", () => navigation.onStep(-1))
       this.nextButton.addEventListener("click", () => navigation.onStep(1))
-      options.header.append(this.previousButton, this.nextButton)
+      header.append(this.previousButton, this.nextButton)
       navigation.scope.addEventListener("keydown", event => {
         if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || (event.key !== "ArrowUp" && event.key !== "ArrowDown")) return
         // Only while this list is on show: the scope may hold the part of another.
@@ -100,23 +108,27 @@ export class ElementList {
       const button = this.iconButton(action.id, action.glyph)
       button.addEventListener("click", () => action.onClick())
       this.actionButtons.set(action.id, button)
-      options.header.append(button)
+      header.append(button)
     }
     this.removeButton = this.iconButton(options.ids.remove, "🗑")
     this.removeButton.addEventListener("click", () => options.onRemove())
-    options.header.append(this.removeButton)
 
-    const row = document.createElement("div")
-    row.className = options.rowClass ?? "decor-add-row"
     this.addButton = this.iconButton(options.ids.add, "+")
     this.addButton.addEventListener("click", () => options.onAdd(this.kindSelect?.value))
-    row.append(this.addButton)
     if (options.ids.kinds) {
+      // Adding something of a kind reads "+ Add" then the kind to add, on a row of its own where the author goes on to describe it.
+      header.append(this.removeButton)
+      const row = document.createElement("div")
+      row.className = options.rowClass ?? "decor-add-row"
+      row.style.cssText = "display: flex; align-items: center; gap: .4em;"
       this.kindSelect = document.createElement("select")
       this.kindSelect.id = options.ids.kinds
-      row.append(this.kindSelect)
+      row.append(this.addButton, this.kindSelect)
+      options.footer.append(row)
+    } else {
+      // Nothing to choose the kind of: the button stands with the others, at the right of the picker.
+      header.append(this.addButton, this.removeButton)
     }
-    options.footer.append(row)
   }
 
   private iconButton(id: string, glyph: string): HTMLButtonElement {
@@ -141,6 +153,11 @@ export class ElementList {
     this.labelText.textContent = labels.list
     this.noneLabel = labels.none ?? this.noneLabel
     this.addLabel = labels.add
+    // Said on the button where a kind is picked beside it: "+ Add" and the kind, and not a bare plus that leaves it to guess.
+    if (this.kindSelect) {
+      this.addButton.textContent = `+ ${labels.add}`
+      this.addButton.style.cssText = "width: auto; min-width: 0; white-space: nowrap; padding-left: .6em; padding-right: .6em;"
+    }
     if (this.options.optional) this.listed(this.items, this.select.value)
     for (const [button, text] of [[this.removeButton, labels.remove], [this.addButton, labels.add],
       ...[...this.actionButtons].map(([id, action]) => [action, labels.actions?.[id] ?? ""] as const)] as const) {

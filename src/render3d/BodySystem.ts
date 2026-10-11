@@ -165,7 +165,7 @@ export class BodySystem {
       if (material) BodySystem.paint(material, state, display)
       if (glowing) BodySystem.light(glowing, state, display)
       if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
-      this.shine(state, holder, glowing, frame.eye)
+      this.shine(state, holder, glowing, frame)
       this.shineLights(state, holder, glowing, frame)
       this.throwFlame(state, holder, seconds, display, frame.eye)
     }
@@ -196,7 +196,8 @@ export class BodySystem {
    * tells against the sky, out to the width that carries its whole light at the cap, where it is
    * all the eye has left — which is what a observer means by "we could not look at it".
    */
-  private shine(state: BodyState, holder: Group, glowing: Glow[] | undefined, eye: Vector3 | undefined): void {
+  private shine(state: BodyState, holder: Group, glowing: Glow[] | undefined, frame: BodyFrame): void {
+    const eye = frame.eye
     const luminanceCdM2 = state.appearance.luminanceCdM2
     let veil = this.glares.get(state.id)
     // Only a body that glows WHOLE throws a veil from its middle. A model whose windows alone are
@@ -216,11 +217,15 @@ export class BodySystem {
     // angle it fills, as an illuminance at the eye — held over the body's own disc, which is drawn
     // for itself at its luminance. It used to be a bloom whose width grew with how close to white
     // the body was, and in light that bloom was a white ball several times the body's size.
-    const radiusM = Math.max(state.sizeM.widthM, state.sizeM.heightM) / 2
+    // The size it has IN THE EYE: the area it shows, turned as it is and seen from where the eye is — not its width or its height, which left
+    // the glare as it was when the length of a long body was changed, or when it turned end-on or side-on.
+    const radiusM = this.apparentRadiusM(state, holder, eye)
     const distanceM = Math.max(holder.position.distanceTo(eye), radiusM * 1.01)
     const angularRadius = Math.asin(radiusM / distanceM)
     // A body behind the relief gives the eye no glare: it is not seen. One in front of it does, over the relief as over everything.
-    const clear = this.reliefClearShare(eye, holder.position, radiusM)
+    let clear = this.reliefClearShare(eye, holder.position, radiusM)
+    // Nor does one behind a building or a tree of the decor: the same lines, looked along through the decor's own meshes (see clearShare).
+    if (clear > 0 && frame.occluders && frame.occluders.length > 0) clear *= this.decorClearShare(holder, eye, frame.occluders)
     if (clear <= 0) {
       veil.hide()
       return
@@ -255,6 +260,30 @@ export class BodySystem {
   }
 
   /** A colour a light at `at` gives out, as it arrives at the eye through the air. */
+  /** The share of a body that the eye sees past the decor's buildings and trees: its box, looked at as the lights of a model are. */
+  private decorClearShare(holder: Group, eye: Vector3, decor: readonly Object3D[]): number {
+    holder.updateMatrixWorld(true)
+    const box = new Box3().setFromObject(holder)
+    const own: Mesh[] = []
+    holder.traverse(child => { if (child instanceof Mesh) own.push(child) })
+    const occluders = [...decor].map(object => ({ object, box: new Box3().setFromObject(object) }))
+    return this.clearShare(eye, box, box.getCenter(new Vector3()), own, occluders)
+  }
+
+  /**
+   * The radius of the disc that has the area the body shows to the eye, metres: an ellipsoid of semi-axes a, b, c seen along a direction whose
+   * components on them are (x, y, z) shows π·√((b·c·x)² + (a·c·y)² + (a·b·z)²). A model or a box is not an ellipsoid, and shows about as much.
+   */
+  private apparentRadiusM(state: BodyState, holder: Group, eye: Vector3): number {
+    const a = state.sizeM.widthM / 2, b = state.sizeM.heightM / 2, c = state.sizeM.lengthM / 2
+    const toEye = this.scratch.subVectors(eye, holder.position)
+    // In the body's own axes.
+    const local = toEye.length() > 0 ? toEye.applyQuaternion(holder.quaternion.clone().invert()).normalize() : toEye.set(0, 0, 1)
+    // The area over π, which is the square of the radius of the disc that has it.
+    const areaOverPi = Math.sqrt((b * c * local.x) ** 2 + (a * c * local.y) ** 2 + (a * b * local.z) ** 2)
+    return Math.max(Math.sqrt(areaOverPi), 1e-6)
+  }
+
   /**
    * The share of a body — its middle, its top and its bottom — that the eye sees over the ground: the line from the eye to each is
    * followed, and one that the ground rises above anywhere on the way is hidden by it. Whether a body is in front of or behind the
