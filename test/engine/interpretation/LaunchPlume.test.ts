@@ -99,4 +99,15 @@ describe("LaunchPlumeSighting", () => {
     const short = launch({ plume: { lifetimeS: 10 }, burnUntilT: 10000 })
     expect(LaunchPlumeSighting.viewsAt([short], 100000, { lat: 0, lng: 94, heightM: 0 }, SUN)).toEqual([])
   })
+
+  test("the collar is wide and gone within seconds, the trail narrow and lasting", () => {
+    const observer = { lat: 0, lng: 94, heightM: 0 }
+    const views = LaunchPlumeSighting.viewsAt([launch()], 110000, observer, SUN)
+    const widest = (min: number, max: number) => Math.max(...views.filter(v => v.ageS >= min && v.ageS <= max).map(v => v.radiusDeg))
+    // A few seconds old, the collar is far wider than the trail it leaves behind.
+    expect(widest(3, 5)).toBeGreaterThan(5 * Math.min(...views.filter(v => v.ageS >= 3 && v.ageS <= 5).map(v => v.radiusDeg)))
+    // Past its lifetime only the narrow trail is left, so nothing that old is as wide as the collar was.
+    expect(widest(30, 60)).toBeLessThan(widest(3, 5) * 4)
+    expect(views.some(v => v.ageS > 30)).toBe(true)
+  })
 })

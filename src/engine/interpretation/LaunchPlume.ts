@@ -55,6 +55,15 @@ export interface LaunchPlumeJson {
   initialRadiusKm?: number
   /** How long a puff lasts before the particles have gone, seconds. */
   lifetimeS?: number
+  /**
+   * The share of the particles that is the collar: exhaust just let go, which leaves the nozzle at
+   * its exhaust velocity (3.4 km/s for a Merlin Vacuum) and, with almost no air to stop it, spreads
+   * into a wide, short-lived shell round the stage, where the rest stays behind as the narrow trail.
+   */
+  collarShare?: number
+  /** How fast the collar's radius grows, km per second, and how long it lasts, seconds. */
+  collarExpansionKmPerS?: number
+  collarLifetimeS?: number
 }
 
 /** One puff of a plume as an observer sees it at one instant. */
@@ -117,9 +126,12 @@ export class LaunchPlumeSighting {
     /** Water from burning RP-1 is about a third of the exhaust; a part of it freezes. Not measured: the one free number. */
     condensedShare: 0.1,
     particleRadiusUm: 0.5,
-    expansionKmPerS: 0.5,
+    expansionKmPerS: 0.15,
     initialRadiusKm: 0.5,
-    lifetimeS: 420
+    lifetimeS: 420,
+    collarShare: 0.85,
+    collarExpansionKmPerS: 2.5,
+    collarLifetimeS: 20
   } as const satisfies Required<LaunchPlumeJson>
 
   /** How often a puff is let go, seconds: closer than the plume has spread in that time, they overlap smoothly. */
@@ -154,12 +166,17 @@ export class LaunchPlumeSighting {
       const until = Math.min(launch.burnUntilT ?? last, tMs)
       if (until <= from) continue
       const stepMs = Math.max(LaunchPlumeSighting.PUFF_EVERY_S * 1000, (until - from) / LaunchPlumeSighting.MAX_PUFFS)
-      const massPerPuffKg = plume.exhaustKgPerS * (stepMs / 1000) * plume.condensedShare
       // Extinction cross-section per kilogram of particles: two for the efficiency of a particle a
       // few wavelengths across, over the mass of a sphere of ice of that radius.
       const radiusM = plume.particleRadiusUm * 1e-6
       const areaPerKg = (3 * 2) / (4 * 917 * radiusM)
-      const crossSection = massPerPuffKg * areaPerKg
+      const massPerPuffKg = plume.exhaustKgPerS * (stepMs / 1000) * plume.condensedShare
+      // Two populations of the same exhaust: the narrow trail that lingers and the collar that
+      // spreads fast and is gone in seconds.
+      const populations = [
+        { share: 1 - plume.collarShare, expansionKmPerS: plume.expansionKmPerS, lifetimeS: plume.lifetimeS },
+        { share: plume.collarShare, expansionKmPerS: plume.collarExpansionKmPerS, lifetimeS: plume.collarLifetimeS }
+      ]
       for (let emitted = until; emitted >= from; emitted -= stepMs) {
         const ageS = (tMs - emitted) / 1000
         if (ageS > plume.lifetimeS) break
@@ -174,23 +191,26 @@ export class LaunchPlumeSighting {
         // not a string of beads.
         const before = ReentrySighting.leadAt({ id: launch.id, track: launch.track, fragments: [] }, Math.max(first, emitted - stepMs))
         const stretchKm = before ? LaunchPlumeSighting.distanceKm(at, before) : 0
-        const radiusKm = plume.initialRadiusKm + plume.expansionKmPerS * ageS + stretchKm / 2
-        // The column through the middle of a uniform sphere of particles, and what fraction of
-        // it is still there: the plume thins out for good over its lifetime.
-        const opticalDepth = (3 * crossSection) / (2 * Math.PI * (radiusKm * 1000) ** 2)
-        const remaining = Math.max(0, 1 - (ageS / plume.lifetimeS) ** 2)
         const phase = LaunchPlumeSighting.scatteringPhase(observer, at, sun)
-        const luminanceCdM2 = LaunchPlumeSighting.SUN_ILLUMINANCE_LUX * LaunchPlumeSighting.ALBEDO * phase * opticalDepth * remaining * light.lit
-        if (luminanceCdM2 <= 0) continue
-        views.push({
-          launchId: launch.id,
-          centre,
-          radiusDeg: Math.atan2(radiusKm, centre.distanceKm) / LaunchPlumeSighting.DEG,
-          luminanceCdM2,
-          sunTransmittance: light.transmittance,
-          lit: light.lit,
-          ageS
-        })
+        for (const population of populations) {
+          if (population.share <= 0 || ageS > population.lifetimeS) continue
+          const radiusKm = plume.initialRadiusKm + population.expansionKmPerS * ageS + stretchKm / 2
+          // The column through the middle of a uniform sphere of particles, and what fraction of
+          // it is still there: the plume thins out for good over its lifetime.
+          const opticalDepth = (3 * massPerPuffKg * population.share * areaPerKg) / (2 * Math.PI * (radiusKm * 1000) ** 2)
+          const remaining = Math.max(0, 1 - (ageS / population.lifetimeS) ** 2)
+          const luminanceCdM2 = LaunchPlumeSighting.SUN_ILLUMINANCE_LUX * LaunchPlumeSighting.ALBEDO * phase * opticalDepth * remaining * light.lit
+          if (luminanceCdM2 <= 0) continue
+          views.push({
+            launchId: launch.id,
+            centre,
+            radiusDeg: Math.atan2(radiusKm, centre.distanceKm) / LaunchPlumeSighting.DEG,
+            luminanceCdM2,
+            sunTransmittance: light.transmittance,
+            lit: light.lit,
+            ageS
+          })
+        }
       }
     }
     return views
