@@ -6559,26 +6559,26 @@ describe("integrated cloud weather editor", () => {
     }
     ufo.currentTime = 30000
     expect((shadow.getElementById("cloud-scope") as HTMLSelectElement).value).toBe("instant")
-    input("cloud-cover", "0")
+    input("cloudLayer.coverage", "0")
     expect(ufo.sighting.weatherTrack.getInterpolatedWeatherAt(30000)!.cloudLayers![0].coverage).toBe(0)
     expect(ufo.sighting.weatherTrack.getInterpolatedWeatherAt(120000)!.cloudLayers![0].coverage).toBe(0.55)
     expect(ufo.sighting.weatherTrack.getInterpolatedWeatherAt(30000)!.windSpeed).toBe(8.75)
     const scope = shadow.getElementById("cloud-scope") as HTMLSelectElement
     scope.value = "observation"
-    input("cloud-cover", "0")
+    input("cloudLayer.coverage", "0")
     ;(shadow.getElementById("cloud-instance-add") as HTMLButtonElement).click()
     const addedCloudId = (shadow.getElementById("cloud-instance") as HTMLSelectElement).value
-    input("instance-width", "2345")
+    input("cloudInstance.widthM", "2345")
     const restored = fromSightingJson(JSON.parse(JSON.stringify(element.sightingData)))
     for (const frame of restored.weatherTrack.allKeyframes) {
       expect(frame.weather.cloudLayers![0].coverage).toBe(0)
       expect(frame.weather.cloudLayers![0].instances!.find(instance => instance.id === addedCloudId)!.widthM).toBe(2345)
     }
     ufo.currentTime = 120000
-    expect((shadow.getElementById("cloud-cover") as HTMLInputElement).value).toBe("0")
+    expect((shadow.getElementById("cloudLayer.coverage") as HTMLInputElement).value).toBe("0")
     ;(shadow.getElementById("cloud-instance") as HTMLSelectElement).value = addedCloudId
     ;(shadow.getElementById("cloud-instance") as HTMLSelectElement).dispatchEvent(new Event("change", { bubbles: true }))
-    expect((shadow.getElementById("instance-width") as HTMLInputElement).value).toBe("2345")
+    expect((shadow.getElementById("cloudInstance.widthM") as HTMLInputElement).value).toBe("2345")
     const { cloudOffsetAt } = await import("../../src/render3d/CloudMotion.js")
     const { resolveObserverPoseAt, resolveWeatherAt } = await import("../../src/engine/model/Sighting.js")
     const pose = resolveObserverPoseAt(ufo.sighting, 120000)!

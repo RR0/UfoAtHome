@@ -14,7 +14,9 @@ describe("CloudEditorTemplate", () => {
   it("is written in English, the language every reader has until theirs arrives", () => {
     const root = built()
     expect(root.querySelector("#cloud-layer-add")!.textContent).toBe("Add layer")
-    expect((root.querySelector("#cloud-wind-speed") as HTMLInputElement).placeholder).toBe("General wind")
+    // The properties of a layer and of a cloud are not in the template: the generic form draws them (see CloudParameterSets).
+    expect(root.querySelector("#cloud-layer-parameters")).not.toBeNull()
+    expect(root.querySelector("#cloud-instance-parameters")).not.toBeNull()
   })
 
   /*
@@ -24,13 +26,11 @@ describe("CloudEditorTemplate", () => {
   it("takes the reader's language in place, keeping its controls", () => {
     const root = built()
     const button = root.querySelector("#cloud-layer-add")!
-    const input = root.querySelector("#cloud-base")!
+    const host = root.querySelector("#cloud-layer-parameters")!
     CloudEditorTemplate.localize(root, cloudEditorMessages_fr)
     expect(root.querySelector("#cloud-layer-add")).toBe(button)
-    expect(root.querySelector("#cloud-base")).toBe(input)
+    expect(root.querySelector("#cloud-layer-parameters")).toBe(host)
     expect(button.textContent).toBe("Ajouter une couche")
-    expect(input.closest("label")!.textContent).toBe("Base (m)")
-    expect((root.querySelector("#instance-darkness") as HTMLInputElement).placeholder).toBe("Obscurité de la couche")
   })
 
   it("has every text in every language", () => {

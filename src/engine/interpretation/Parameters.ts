@@ -30,7 +30,7 @@ interface ParameterBase {
   /** The fields that go together are drawn together, under this heading. */
   group?: SaidText
   /** Whether the field applies to the element as it stands now (a floor to occupy needs a building). Drawn only while it does. */
-  visibleWhen?: (element: ParameterHolder) => boolean
+  visibleWhen?: (element: ParameterHolder, context?: unknown) => boolean
 }
 
 /**
@@ -50,20 +50,34 @@ export interface NumberParameter extends ParameterBase {
    * what clearing the field goes back to. It reads the element's other values with `Parameters.read`,
    * which sees through a value stated with its provenance.
    */
-  effective?: (element: ParameterHolder) => number | undefined
+  effective?: (element: ParameterHolder, context?: unknown) => number | undefined
+  /**
+   * Shown instead of a value when the element states none and nothing is in force that a number can say: "General
+   * wind", for a layer's wind that inherits the weather's.
+   */
+  placeholder?: SaidText
+  /**
+   * What the field shows is the stored value times this: a coverage stored from 0 to 1 is typed in percent. `min`, `max`
+   * and `step` are in what is typed.
+   */
+  scale?: number
+  /** A value that cannot be absent: emptying the field leaves what was there, instead of stating nothing. */
+  required?: boolean
   /**
    * Bounds that depend on the element: the floor the observer stands on goes up to the number of
    * floors the building has. What it gives replaces `min` and `max`, which stay the widest the field
    * can ever take.
    */
-  bounds?: (element: ParameterHolder) => { min?: number, max?: number }
+  bounds?: (element: ParameterHolder, context?: unknown) => { min?: number, max?: number }
 }
 
 export interface ChoiceParameter extends ParameterBase {
   type: "choice"
+  /** A choice that cannot be left unmade: there is no empty option. */
+  required?: boolean
   choices: ReadonlyArray<{ value: string, label: SaidText }>
   /** What is in force when none is chosen, shown as the empty choice. */
-  effective?: (element: ParameterHolder) => string | undefined
+  effective?: (element: ParameterHolder, context?: unknown) => string | undefined
 }
 
 export interface TextParameter extends ParameterBase {

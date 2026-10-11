@@ -47,9 +47,9 @@ describe("LaunchEditor", () => {
 
   test("an empty field shows what the plume will use, which follows the engine", () => {
     build()
-    expect(field("plume.exhaustKgPerS").placeholder).toBe("273.7")
+    expect(field("plume.exhaustKgPerS").placeholder).toBe("273.68")
     typed(field("vehicle.engine.thrustKN"), "3000")
-    expect(field("plume.exhaustKgPerS").placeholder).toBe("879.1")
+    expect(field("plume.exhaustKgPerS").placeholder).toBe("879.07")
   })
 
   test("what is typed is written onto the launch, and the recording is told", () => {

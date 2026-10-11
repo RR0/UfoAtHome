@@ -11,19 +11,6 @@ export interface CloudEditorMessages {
   layer: string
   addLayer: string
   deleteLayer: string
-  cloudType: string
-  unknownType: string
-  base: string
-  thickness: string
-  coverage: string
-  cloudSize: string
-  density: string
-  darkness: string
-  crystalAlignment: string
-  layerWindDirection: string
-  layerWindSpeed: string
-  generalWind: string
-  patternSeed: string
   editHelp: string
   individualClouds: string
   individualCloud: string
@@ -31,15 +18,6 @@ export interface CloudEditorMessages {
   pointAtCloud: string
   deleteCloud: string
   manipulate: string
-  instanceEast: string
-  instanceNorth: string
-  instanceBase: string
-  instanceThickness: string
-  instanceWidth: string
-  instanceDepth: string
-  instanceRotation: string
-  instanceDensity: string
-  layerDarkness: string
   individualHelp: string
   /** The individual-cloud picker's empty choice. */
   none: string

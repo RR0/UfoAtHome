@@ -9,8 +9,10 @@ import type { CloudPoint } from "../render3d/CloudManipulation.js"
 import { CloudEditorTemplate, cloudEditorMessages_en } from "./cloudEditorTemplate.js"
 import { loadCloudEditorMessages } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
-import { NumberFields } from "./NumberFields.js"
-import { DEFAULT_ICE_CRYSTAL_ALIGNMENT } from "../engine/model/Weather.js"
+import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
+import { CloudParameterSets } from "../engine/model/CloudParameterSets.js"
+import type { CloudLayerContext } from "../engine/model/CloudParameterSets.js"
+import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
 
 /** Weather authoring shared with the editor's recording, projection and playback clock.
  *
@@ -19,24 +21,25 @@ import { DEFAULT_ICE_CRYSTAL_ALIGNMENT } from "../engine/model/Weather.js"
 export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, beforeEdit: (detachWeatherSource?: boolean) => void, pointAt: (headingDeg: number, pitchDeg: number) => void, language: UfoLanguage = "en") {
   let messages = cloudEditorMessages_en
   controls.innerHTML = CloudEditorTemplate.html(messages)
-  // Each field as wide as what it takes, and held to it as it is typed — see NumberFields.
-  NumberFields.fit(controls)
   const input = (id: string) => controls.querySelector<HTMLElement>("#" + id) as HTMLInputElement
-  const value = (id: string) => Number(input(id).value)
   const layerSelect = controls.querySelector<HTMLElement>("#cloud-layer") as HTMLSelectElement
   const instances = controls.querySelector<HTMLElement>("#cloud-instance") as HTMLSelectElement
   const status = controls.querySelector<HTMLElement>("#cloud-status")!
   const scope = () => input("cloud-scope").value as "observation" | "instant"
   const currentLayer = () => resolveCloudLayers(resolveWeatherAt(scene.ufoElement.sighting, scene.ufoElement.currentTime))[Number(layerSelect.value)]
-  const instanceFields = ["east", "north", "base", "thickness", "width", "depth", "rotation", "density", "darkness"]
+  // The properties of a layer and of an individual cloud are drawn by the generic form from what the kinds publish
+  // (see CloudParameterSets); what is edited here is the layer at the playhead, or the cloud picked in it.
+  const currentInstance = () => currentLayer()?.instances?.find(i => i.id === instances.value)
+  const layerHost = controls.querySelector<HTMLElement>("#cloud-layer-parameters")!
+  const instanceHost = controls.querySelector<HTMLElement>("#cloud-instance-parameters")!
+  const layerForm = new ParameterForm(layerHost, language, "cloudLayer.")
+  const instanceForm = new ParameterForm(instanceHost, language, "cloudInstance.")
   const syncInstance = () => {
-    const instance = currentLayer()?.instances?.find(i => i.id === instances.value)
-    for (const field of instanceFields) input(`instance-${field}`).disabled = !instance
+    const instance = currentInstance()
     ;(controls.querySelector<HTMLElement>("#cloud-instance-delete") as HTMLButtonElement).disabled = !instance
     ;(controls.querySelector("#cloud-instance-point") as HTMLButtonElement).disabled = !instance
-    if (!instance) return
-    const values = [instance.eastM, instance.northM, instance.baseM, instance.thicknessM, instance.widthM, instance.depthM, instance.rotationDeg, instance.density, instance.darkness]
-    instanceFields.forEach((field, i) => { input(`instance-${field}`).value = values[i] === undefined ? "" : String(Math.round(values[i]! * 100) / 100) })
+    instanceHost.hidden = !instance
+    if (instance) instanceForm.sync()
   }
   let lastTime = -1
   const sync = () => {
@@ -54,25 +57,9 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     const selectedIndex = layers.findIndex(layer => layer.id === selectedLayer)
     layerSelect.value = String(Math.max(0, selectedIndex))
     const layer = currentLayer()
-    for (const id of ["cloud-type", "cloud-base", "cloud-thickness", "cloud-cover", "cloud-size", "cloud-density", "cloud-darkness", "cloud-crystal-alignment", "cloud-wind-direction", "cloud-wind-speed", "cloud-seed", "cloud-layer-delete", "cloud-instance-add"]) {
-      (controls.querySelector("#" + id) as HTMLInputElement).disabled = !layer
-    }
-    input("cloud-crystal-alignment").closest("label")!.hidden = layer?.type !== "cirrus"
+    layerHost.hidden = !layer
     if (!layer) { instances.replaceChildren(new Option("—", "")); syncInstance(); return }
-    input("cloud-type").value = layer.type
-    for (const [id, v] of Object.entries({ base: layer.baseM, thickness: layer.thicknessM, cover: layer.coverage * 100, size: layer.sizeM, density: layer.density })) {
-      input(`cloud-${id}`).value = String(Math.round(v * 100) / 100)
-    }
-    // Two decimals, like every other field: an interpolated or looked-up shade (0.15163529774760875)
-    // is not something anyone typed, and the field is for typing.
-    input("cloud-darkness").value = String(Math.round((layer.darkness ?? resolveWeatherAt(scene.ufoElement.sighting, t).cloudDarkness) * 100) / 100)
-    const alignment = input("cloud-crystal-alignment")
-    alignment.value = String(Math.round((layer.iceCrystalAlignment ?? DEFAULT_ICE_CRYSTAL_ALIGNMENT) * 100) / 100)
-    // A tenth of a degree and a hundredth of a metre per second: what an interpolated keyframe
-    // holds (89.43046058333363) is not what anybody typed, and the field is for typing.
-    input("cloud-wind-direction").value = layer.windDirectionDeg === undefined ? "" : String(Math.round(layer.windDirectionDeg * 10) / 10)
-    input("cloud-wind-speed").value = layer.windSpeed === undefined ? "" : String(Math.round(layer.windSpeed * 100) / 100)
-    input("cloud-seed").value = layer.seed === undefined ? "" : String(layer.seed)
+    layerForm.sync()
     const selected = instances.value
     instances.replaceChildren(new Option(messages.none, ""), ...(layer.instances ?? []).map((i, index) => new Option(`${messages.cloud} ${index + 1}`, i.id)))
     instances.value = layer.instances?.some(i => i.id === selected) ? selected : ""
@@ -88,6 +75,29 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     status.textContent = scope() === "observation" ? messages.savedAcrossObservation
       : `${(time / 1000).toFixed(1)} s · ${messages.savedAtThisTime}`
   }
+  // What is written is the one property edited, applied to the layer as each weather keyframe holds it (or to the layer at the
+  // playhead alone): the form gives a copy to change, and editing a layer whole would carry the playhead's values to the other keyframes.
+  layerForm.show(CloudParameterSets.LAYER, new ParameterTarget(
+    () => currentLayer() as unknown as ParameterHolder | undefined,
+    (apply, spec) => edit(layer => {
+      const draft = structuredClone(layer)
+      apply(draft as unknown as ParameterHolder)
+      return draft
+    }, spec.key !== "iceCrystalAlignment"),
+    () => ({ generalDarkness: resolveWeatherAt(scene.ufoElement.sighting, scene.ufoElement.currentTime).cloudDarkness } satisfies CloudLayerContext)
+  ), () => undefined)
+  instanceForm.show(CloudParameterSets.INSTANCE, new ParameterTarget(
+    () => currentInstance() as unknown as ParameterHolder | undefined,
+    apply => {
+      const id = instances.value
+      edit(layer => ({ ...layer, instances: layer.instances?.map(i => {
+        if (i.id !== id) return i
+        const draft = structuredClone(i)
+        apply(draft as unknown as ParameterHolder)
+        return draft
+      }) }))
+    }
+  ), () => undefined)
   // Pause before any field is edited, so a user's values cannot be committed at a moving playhead.
   controls.addEventListener("focusin", () => scene.ufoElement.pause())
   layerSelect.addEventListener("change", () => { instances.value = ""; sync() })
@@ -169,21 +179,6 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
   canvas.addEventListener("pointercancel", finishDrag)
   canvas.addEventListener("lostpointercapture", finishDrag)
 
-  const layerFields: Record<string, keyof CloudLayer> = { "cloud-type": "type", "cloud-base": "baseM", "cloud-thickness": "thicknessM", "cloud-cover": "coverage", "cloud-size": "sizeM", "cloud-density": "density", "cloud-darkness": "darkness", "cloud-crystal-alignment": "iceCrystalAlignment" }
-  for (const [id, key] of Object.entries(layerFields)) {
-    const commit = () => {
-      if (input(id).value === "" || !input(id).validity.valid) return
-      const v = id === "cloud-type" ? input(id).value : value(id) / (id === "cloud-cover" ? 100 : 1)
-      edit(layer => ({ ...layer, [key]: v }), id !== "cloud-crystal-alignment")
-    }
-    input(id).addEventListener(id === "cloud-type" ? "change" : "input", commit)
-  }
-  for (const [id, key] of [["cloud-wind-direction", "windDirectionDeg"], ["cloud-wind-speed", "windSpeed"], ["cloud-seed", "seed"]] as const) {
-    input(id).addEventListener("input", () => {
-      if (!input(id).validity.valid) return
-      edit(layer => ({ ...layer, [key]: input(id).value === "" ? undefined : value(id) }))
-    })
-  }
   controls.querySelector<HTMLElement>("#cloud-instance-add")!.addEventListener("click", () => {
     const layer = currentLayer()
     if (!layer) return
@@ -233,13 +228,6 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
       sync()
     })
   }
-  const instanceProperties: (keyof CloudInstance)[] = ["eastM", "northM", "baseM", "thicknessM", "widthM", "depthM", "rotationDeg", "density", "darkness"]
-  instanceFields.forEach((field, index) => input(`instance-${field}`).addEventListener("input", () => {
-    const id = instances.value, control = input(`instance-${field}`)
-    if (!id || !control.validity.valid || (control.value === "" && field !== "darkness")) return
-    const key = instanceProperties[index], next = control.value === "" ? undefined : value(`instance-${field}`)
-    edit(layer => ({ ...layer, instances: layer.instances?.map(i => i.id !== id ? i : { ...i, [key]: next }) }))
-  }))
   return {
     sync,
     stopManipulation() { drag = undefined; manipulate.checked = false; canvas.style.touchAction = ""; canvas.style.cursor = "" },

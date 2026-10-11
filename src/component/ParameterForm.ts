@@ -15,7 +15,13 @@ import { NumberFields } from "./NumberFields.js"
  * written over from a copy taken earlier.
  */
 export class ParameterTarget {
-  constructor(readonly read: () => ParameterHolder | undefined, readonly edit: (apply: (draft: ParameterHolder) => void) => void) {
+  /**
+   * `edit` is told which parameter the edit is of, since where an edit goes can depend on it (a cloud's crystal
+   * alignment does not detach the weather from its records). `context` is what the element alone cannot say and
+   * the descriptions' `effective`, `bounds` and `visibleWhen` need: the general darkness a layer inherits.
+   */
+  constructor(readonly read: () => ParameterHolder | undefined, readonly edit: (apply: (draft: ParameterHolder) => void, spec: ParameterSpec) => void,
+    readonly context: () => unknown = () => undefined) {
   }
 
   /** An element edited where it stands. */
@@ -102,28 +108,31 @@ export class ParameterForm {
   sync(): void {
     const element = this.target?.read()
     if (!this.set || !element) return
+    const context = this.target!.context()
     const active = (this.container.getRootNode() as Document | ShadowRoot).activeElement
     for (const spec of this.set.parameters) {
       const field = this.field(spec.key)
       if (!field) continue
       const row = (field.closest("label") ?? field) as HTMLElement
-      row.hidden = spec.visibleWhen !== undefined && !spec.visibleWhen(element)
+      row.hidden = spec.visibleWhen !== undefined && !spec.visibleWhen(element, context)
       const stated = Parameters.read(element, spec.key)
       if (spec.type === "number") {
         const input = field as HTMLInputElement
-        if (input !== active) input.value = typeof stated === "number" ? String(stated) : ""
-        const bounds = ParameterForm.boundsOf(spec, element)
+        if (input !== active) input.value = typeof stated === "number" ? ParameterForm.shown(stated, spec) : ""
+        const bounds = ParameterForm.boundsOf(spec, element, context)
         input.min = String(bounds.min)
         input.max = String(bounds.max)
-        const effective = spec.effective?.(element)
-        input.placeholder = effective === undefined ? "" : ParameterForm.shown(effective, spec)
+        const effective = spec.effective?.(element, context)
+        input.placeholder = effective !== undefined ? ParameterForm.shown(effective, spec) : (this.read(spec.placeholder) ?? "")
         input.classList.toggle("parameter-derived", stated === undefined)
       } else if (spec.type === "choice") {
         const select = field as HTMLSelectElement
-        if (select !== active) select.value = typeof stated === "string" ? stated : ""
-        const effective = spec.effective?.(element)
-        const choice = spec.choices.find(candidate => candidate.value === effective)
-        select.options[0].textContent = choice ? (this.read(choice.label) ?? choice.value) : "—"
+        if (select !== active) select.value = typeof stated === "string" ? stated : (spec.required ? select.options[0].value : "")
+        if (!spec.required) {
+          const effective = spec.effective?.(element, context)
+          const choice = spec.choices.find(candidate => candidate.value === effective)
+          select.options[0].textContent = choice ? (this.read(choice.label) ?? choice.value) : "—"
+        }
       } else if (spec.type === "boolean") {
         const input = field as HTMLInputElement
         if (input !== active) input.checked = stated === true
@@ -149,7 +158,8 @@ export class ParameterForm {
     if (spec.type === "choice") {
       const select = document.createElement("select")
       this.identify(select, spec)
-      select.append(new Option("—", ""), ...spec.choices.map(choice => new Option(this.read(choice.label) ?? choice.value, choice.value)))
+      if (!spec.required) select.append(new Option("—", ""))
+      select.append(...spec.choices.map(choice => new Option(this.read(choice.label) ?? choice.value, choice.value)))
       select.addEventListener("input", () => this.write(spec, select.value === "" ? undefined : select.value))
       label.append(select)
     } else if (spec.type === "boolean") {
@@ -171,7 +181,8 @@ export class ParameterForm {
         unit = spec.unit
         input.addEventListener("input", () => {
           const typed = input.value.trim()
-          if (typed === "") return this.write(spec, undefined)
+          // A value that cannot be absent keeps what it had when the field is emptied on the way to another number.
+          if (typed === "") return spec.required ? undefined : this.write(spec, undefined)
           const value = Number(typed)
           // "-", "1." and the like are on their way to a number: nothing is written until one arrives.
           if (Number.isFinite(value)) this.write(spec, value)
@@ -206,11 +217,12 @@ export class ParameterForm {
     if (spec.type === "number" && typeof value === "number") {
       const element = target.read()
       if (element) {
-        const bounds = ParameterForm.boundsOf(spec, element)
-        written = Math.max(bounds.min, Math.min(bounds.max, value))
+        const bounds = ParameterForm.boundsOf(spec, element, target.context())
+        // What was typed is in the field's own unit: a coverage is typed in percent and stored from 0 to 1.
+        written = Math.max(bounds.min, Math.min(bounds.max, value)) / (spec.scale ?? 1)
       }
     }
-    target.edit(draft => Parameters.write(draft, spec.key, written))
+    target.edit(draft => Parameters.write(draft, spec.key, written), spec)
     this.changed()
     // What one value implies for another (a thrust for an exhaust flow) shows at once, in the fields left empty.
     this.sync()
@@ -220,15 +232,19 @@ export class ParameterForm {
     return this.said.read(text)
   }
 
-  private static boundsOf(spec: NumberParameter, element: ParameterHolder): { min: number, max: number } {
-    const dynamic = spec.bounds?.(element)
+  private static boundsOf(spec: NumberParameter, element: ParameterHolder, context?: unknown): { min: number, max: number } {
+    const dynamic = spec.bounds?.(element, context)
     return { min: dynamic?.min ?? spec.min, max: dynamic?.max ?? spec.max }
   }
 
-  /** A value as a placeholder shows it: no more digits than its step has decimals, and never a trailing zero. */
+  /**
+   * A value as a field shows it, in the unit it is typed in: no more digits than its step has decimals, and
+   * never fewer than two (a step is a notch of the arrow, not a precision), and never a trailing zero. An
+   * interpolated value (89.43046058333363) is not what anyone typed, and the field is for typing.
+   */
   private static shown(value: number, spec: NumberParameter): string {
-    const decimals = Math.max(0, Math.min(6, (String(spec.step).split(".")[1] ?? "").length))
-    return String(Number(value.toFixed(decimals)))
+    const decimals = Math.max(2, Math.min(6, (String(spec.step).split(".")[1] ?? "").length))
+    return String(Number((value * (spec.scale ?? 1)).toFixed(decimals)))
   }
 
   /** The choices of a field, for tests and for whatever needs them. */
