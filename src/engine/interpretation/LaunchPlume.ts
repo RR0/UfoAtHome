@@ -126,12 +126,12 @@ export class LaunchPlumeSighting {
     /** Water from burning RP-1 is about a third of the exhaust; a part of it freezes. Not measured: the one free number. */
     condensedShare: 0.1,
     particleRadiusUm: 0.5,
-    expansionKmPerS: 0.15,
+    expansionKmPerS: 0.3,
     initialRadiusKm: 0.5,
     lifetimeS: 420,
-    collarShare: 0.85,
-    collarExpansionKmPerS: 2.5,
-    collarLifetimeS: 20
+    collarShare: 0.9,
+    collarExpansionKmPerS: 1,
+    collarLifetimeS: 6
   } as const satisfies Required<LaunchPlumeJson>
 
   /** How often a puff is let go, seconds: closer than the plume has spread in that time, they overlap smoothly. */

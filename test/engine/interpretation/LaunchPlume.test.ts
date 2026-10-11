@@ -100,14 +100,16 @@ describe("LaunchPlumeSighting", () => {
     expect(LaunchPlumeSighting.viewsAt([short], 100000, { lat: 0, lng: 94, heightM: 0 }, SUN)).toEqual([])
   })
 
-  test("the collar is wide and gone within seconds, the trail narrow and lasting", () => {
+  test("the collar is wider than the trail it leaves, and gone within seconds while the trail lasts", () => {
     const observer = { lat: 0, lng: 94, heightM: 0 }
     const views = LaunchPlumeSighting.viewsAt([launch()], 110000, observer, SUN)
-    const widest = (min: number, max: number) => Math.max(...views.filter(v => v.ageS >= min && v.ageS <= max).map(v => v.radiusDeg))
-    // A few seconds old, the collar is far wider than the trail it leaves behind.
-    expect(widest(3, 5)).toBeGreaterThan(5 * Math.min(...views.filter(v => v.ageS >= 3 && v.ageS <= 5).map(v => v.radiusDeg)))
-    // Past its lifetime only the narrow trail is left, so nothing that old is as wide as the collar was.
-    expect(widest(30, 60)).toBeLessThan(widest(3, 5) * 4)
-    expect(views.some(v => v.ageS > 30)).toBe(true)
+    const young = views.filter(v => v.ageS >= 3 && v.ageS <= 5).map(v => v.radiusDeg)
+    // The same age, two populations: the collar's radius against the trail's.
+    expect(Math.max(...young)).toBeGreaterThan(1.5 * Math.min(...young))
+    // Nothing of the collar is left past its lifetime, and what is left is faint beside the head.
+    const head = Math.max(...views.filter(v => v.ageS < 1).map(v => v.luminanceCdM2))
+    const old = views.filter(v => v.ageS > 10)
+    expect(old.length).toBeGreaterThan(0)
+    expect(Math.max(...old.map(v => v.luminanceCdM2))).toBeLessThan(head / 10)
   })
 })
