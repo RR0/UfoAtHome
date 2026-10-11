@@ -2,6 +2,7 @@ import type { DecorKind, DecorObject } from "./Decor.js"
 import { canHoldObserver, decorModelOf, hasWindows } from "./Decor.js"
 import type { ParameterSpec } from "../interpretation/Parameters.js"
 import { LightRigs } from "./LightRig.js"
+import type { LightRig } from "./LightRig.js"
 
 /**
  * What can be set on a decor object, as the object itself says it: the one answer to "which of the
@@ -37,6 +38,12 @@ export type ModelParameters = Partial<Pick<DecorParameters, "color" | "lit" | "l
    */
   parameters?: ReadonlyArray<ParameterSpec>
   /**
+   * The ready-made sets of lamps (see LightRigs) that suit what the model depicts, by id. A kind says only "aircraft" or "vehicle":
+   * an airliner's lights are not a helicopter's, nor a saloon's an ambulance's, and only the model knows which it is. Absent means every
+   * set of the kind, which is right for a model whose file says nothing (one at an address).
+   */
+  lightRigs?: ReadonlyArray<string>
+  /**
    * How each of those settings reaches the model, by key (see ModelBinding): a colour tints some of its materials, a switch
    * shows or hides some of its parts. A colour for the whole of a model makes no sense — it carries its own, which is why
    * the plain colour is offered for the built-in shapes only — but the part of it that is a costume, or the leaves of a
@@ -68,11 +75,16 @@ export class DecorTraits {
     return {
       color: published?.color ?? !model,
       lit: published?.lit ?? DecorTraits.litByDefault(object.kind, model),
-      lights: (published?.lights ?? true) && LightRigs.forKind(object.kind).length > 0,
+      lights: (published?.lights ?? true) && DecorTraits.rigsFor(object.kind, published).length > 0,
       windows: !model && hasWindows(object.kind),
       floors: !model && object.kind === "building",
       observerSide: canHoldObserver(object.kind)
     }
+  }
+
+  /** The sets of lamps that suit an object of this kind drawn as this model. */
+  static rigsFor(kind: DecorKind, published?: ModelParameters): LightRig[] {
+    return LightRigs.forKind(kind).filter(rig => published?.lightRigs === undefined || published.lightRigs.includes(rig.id))
   }
 
   /** Whether the object is drawn as a loaded model rather than as its built-in shape. */

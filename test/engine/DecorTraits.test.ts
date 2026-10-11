@@ -53,3 +53,18 @@ describe("DecorTraits", () => {
     expect(DecorTraits.of({ kind: "aircraft" })).toMatchObject({ color: false, windows: false, lights: true })
   })
 })
+
+describe("DecorTraits.rigsFor", () => {
+  it("offers every set of the kind when the model says nothing, and only the ones that suit it when it does", () => {
+    expect(DecorTraits.rigsFor("aircraft").map(rig => rig.id)).toEqual(["airliner", "helicopter"])
+    expect(DecorTraits.rigsFor("aircraft", { lightRigs: ["airliner"] }).map(rig => rig.id)).toEqual(["airliner"])
+    expect(DecorTraits.rigsFor("vehicle", { lightRigs: ["car-headlights"] }).map(rig => rig.id)).toEqual(["car-headlights"])
+  })
+
+  it("offers no lamps at all for a model that publishes none, or none that suit", () => {
+    expect(DecorTraits.of({ kind: "aircraft", model: { id: "x" } }, { lightRigs: ["airliner"] }).lights).toBe(true)
+    expect(DecorTraits.of({ kind: "aircraft", model: { id: "x" } }, { lightRigs: ["car-headlights"] }).lights).toBe(false)
+    expect(DecorTraits.of({ kind: "aircraft", model: { id: "x" } }, { lights: false }).lights).toBe(false)
+  })
+})
+

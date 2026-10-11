@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { describe, expect, test } from "vitest"
+import { LIGHT_RIGS } from "../../src/engine/model/LightRig.js"
 import type { ModelParameters } from "../../src/engine/model/DecorTraits.js"
 
 interface IndexEntry { id: string, kind: string | string[], file: string, parameters?: ModelParameters }
@@ -70,4 +71,21 @@ describe("the settings the catalogue's models publish", () => {
     expect(offered("entity")).toEqual(["modelParameters.costumeColor"])
     expect(offered("observer")).toEqual(["modelParameters.costumeColor"])
   })
+
+  test("the lamps a model offers are sets that exist and suit its kind: an airliner's are not a helicopter's", () => {
+    const withRigs = catalogue.filter(entry => entry.parameters?.lightRigs)
+    expect(withRigs.length).toBeGreaterThan(0)
+    for (const entry of withRigs) {
+      const kinds = ([] as string[]).concat(entry.kind)
+      for (const id of entry.parameters!.lightRigs!) {
+        const rig = LIGHT_RIGS.find(candidate => candidate.id === id)
+        expect(rig, `${entry.id}: ${id} exists`).toBeDefined()
+        expect(kinds.some(kind => (rig!.kinds as string[]).includes(kind)), `${entry.id}: ${id} suits ${kinds}`).toBe(true)
+      }
+    }
+    const airliners = catalogue.filter(entry => /^(amvlab-|poly-google-airliner)/.test(entry.id))
+    for (const entry of airliners) expect(entry.parameters?.lightRigs, entry.id).toEqual(["airliner"])
+    expect(catalogue.find(entry => entry.id === "kenney-car-kit-sedan")!.parameters!.lightRigs).not.toContain("emergency-beacons")
+  })
 })
+

@@ -6,6 +6,7 @@
       "id": "kenney-car-kit-sedan",
       "kind": "vehicle",
       "name": "Saloon car (generic, stylised)",
+      "parameters": { "lightRigs": ["car-headlights", "car-hazards"] },
       "file": "kenney-car-kit/sedan.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "widthM": 1.8, "lengthM": 4.6, "heightM": 1.45 },
@@ -20,6 +21,7 @@
       "id": "kenney-car-kit-police",
       "kind": "vehicle",
       "name": "Patrol car (generic, stylised)",
+      "parameters": { "lightRigs": ["car-headlights", "car-hazards", "emergency-beacons"] },
       "file": "kenney-car-kit/police.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "widthM": 1.8, "lengthM": 4.6, "heightM": 1.45 },
@@ -572,6 +574,7 @@
       "id": "amvlab-a320",
       "kind": "aircraft",
       "name": "Airbus A320 (plain, no livery)",
+      "parameters": { "lightRigs": ["airliner"] },
       "file": "amvlab-aircraft/A320_nologo.glb",
       "headingOffsetDeg": -90,
       "sizeM": { "widthM": 34.1, "lengthM": 37.6, "heightM": 11.8 },
@@ -587,6 +590,7 @@
       "kind": "aircraft",
       "name": "Airliner (generic, stylised)",
       "parameters": {
+        "lightRigs": ["airliner"],
         "parameters": [
           {
             "type": "boolean",
@@ -617,6 +621,7 @@
       "kind": "aircraft",
       "name": "Socorro craft, after Lonnie Zamora's account (stand-in)",
       "parameters": {
+        "lights": false,
         "parameters": [
           {
             "type": "colour",
@@ -680,6 +685,7 @@
       "kind": "aircraft",
       "name": "Socorro craft with the inverted-V insignia Ray Stanford holds was the real one (stand-in)",
       "parameters": {
+        "lights": false,
         "parameters": [
           {
             "type": "colour",
@@ -743,6 +749,7 @@
       "kind": "aircraft",
       "name": "Valensole craft, after Maurice Masse's account (stand-in)",
       "parameters": {
+        "lights": false,
         "parameters": [
           {
             "type": "colour",
@@ -806,6 +813,7 @@
       "kind": "aircraft",
       "name": "Silly-le-Long phenomenon, after T1's account: a flat concrete-grey triangle with its lights (stand-in)",
       "parameters": {
+        "lights": false,
         "parameters": [
           {
             "type": "colour",
@@ -847,6 +855,7 @@
       "id": "ufoathome-braine-le-comte-craft",
       "kind": "aircraft",
       "name": "Braine-le-Comte phenomenon, after its three observers: a flat rounded boomerang (stand-in)",
+      "parameters": { "lights": false },
       "file": "ufoathome-braine-le-comte-craft/craft.gltf",
       "headingOffsetDeg": 0,
       "sizeM": { "widthM": 10.5, "lengthM": 5.36, "heightM": 1.3 },
@@ -861,6 +870,7 @@
       "id": "ufoathome-chiles-craft",
       "kind": "aircraft",
       "name": "Chiles-Whitted object as Clarence Chiles drew it: a tapered cigar with no porthole (stand-in)",
+      "parameters": { "lights": false },
       "file": "ufoathome-chiles-whitted-craft/chiles.gltf",
       "headingOffsetDeg": 0,
       "sizeM": { "widthM": 3.17, "lengthM": 30, "heightM": 3.17 },
@@ -875,6 +885,7 @@
       "id": "ufoathome-whitted-craft",
       "kind": "aircraft",
       "name": "Chiles-Whitted object as John Whitted drew it: a blunt cylinder with two rows of windows (stand-in)",
+      "parameters": { "lights": false },
       "file": "ufoathome-chiles-whitted-craft/whitted.gltf",
       "headingOffsetDeg": 0,
       "sizeM": { "widthM": 5.4, "lengthM": 30, "heightM": 5.43 },
@@ -889,6 +900,7 @@
       "id": "amvlab-b737",
       "kind": "aircraft",
       "name": "Boeing 737 (plain, no livery)",
+      "parameters": { "lightRigs": ["airliner"] },
       "file": "amvlab-aircraft/B737_nologo.glb",
       "headingOffsetDeg": -90,
       "sizeM": { "widthM": 35.8, "lengthM": 39.5, "heightM": 12.5 },
@@ -903,6 +915,7 @@
       "id": "amvlab-a350",
       "kind": "aircraft",
       "name": "Airbus A350 (plain, no livery)",
+      "parameters": { "lightRigs": ["airliner"] },
       "file": "amvlab-aircraft/A350_nologo.glb",
       "headingOffsetDeg": -90,
       "sizeM": { "widthM": 64.75, "lengthM": 66.8, "heightM": 17.05 },
@@ -917,6 +930,7 @@
       "id": "amvlab-a380",
       "kind": "aircraft",
       "name": "Airbus A380 (plain, no livery)",
+      "parameters": { "lightRigs": ["airliner"] },
       "file": "amvlab-aircraft/A380_nologo.glb",
       "headingOffsetDeg": -90,
       "sizeM": { "widthM": 79.75, "lengthM": 72.7, "heightM": 24.1 },
@@ -931,6 +945,7 @@
       "id": "amvlab-b787",
       "kind": "aircraft",
       "name": "Boeing 787 (plain, no livery)",
+      "parameters": { "lightRigs": ["airliner"] },
       "file": "amvlab-aircraft/B787_nologo.glb",
       "headingOffsetDeg": -90,
       "sizeM": { "widthM": 60.1, "lengthM": 62.8, "heightM": 17.0 },
@@ -1163,6 +1178,7 @@
       "kind": "aircraft",
       "name": "Trans-en-Provence craft, after Renato Nicolaï's account: two inverted bowls, a ledge, two feet (stand-in)",
       "parameters": {
+        "lights": false,
         "parameters": [
           {
             "type": "colour",
@@ -1329,6 +1345,7 @@
       "kind": "aircraft",
       "name": "McMinnville object as the 1950 prints show it: flat dark base, shouldered dome, small stub on top (stand-in)",
       "parameters": {
+        "lights": false,
         "parameters": [
           {
             "type": "colour",

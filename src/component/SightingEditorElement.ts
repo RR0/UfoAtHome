@@ -7395,7 +7395,7 @@ export class SightingEditorElement extends HTMLElement {
       kind: decor.kind,
       natural: DecorSystem.naturalSize(decor.kind, decor.floors),
       traits: { color: traits.color, lit: traits.lit, lights: traits.lights, observerSide: traits.observerSide },
-      lightRigs: LightRigs.forKind(decor.kind).map(rig => ({ value: rig.id, label: this.naming.lightRig(rig) })),
+      lightRigs: DecorTraits.rigsFor(decor.kind, this.publishedParametersOf(decor)).map(rig => ({ value: rig.id, label: this.naming.lightRig(rig) })),
       seats: DecorBaseParameterSets.seatsFor(decor.kind)
     }
   }
