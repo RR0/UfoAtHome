@@ -133,4 +133,17 @@ describe("LaunchEditor", () => {
     expect(add.disabled).toBe(true)
     expect(add.title).not.toBe("")
   })
+
+  test("the burn times are typed in seconds and written in milliseconds, and an empty one shows the end of the path", () => {
+    const { sighting } = build()
+    // The path of the fixture goes from 0 to 60 s: where the engine burns when the launch says nothing.
+    expect(field("burnFromT").placeholder).toBe("0")
+    expect(field("burnUntilT").placeholder).toBe("60")
+    typed(field("burnUntilT"), "45.5")
+    expect(sighting.interpretation!.launches![0].burnUntilT).toBe(45500)
+    typed(field("burnFromT"), "-3")
+    expect(sighting.interpretation!.launches![0].burnFromT).toBe(-3000)
+    typed(field("burnUntilT"), "")
+    expect(sighting.interpretation!.launches![0].burnUntilT).toBeUndefined()
+  })
 })

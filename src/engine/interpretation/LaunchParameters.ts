@@ -1,6 +1,7 @@
 import { LaunchPlumeSighting } from "./LaunchPlume.js"
 import type { LaunchJson, LaunchPlumeJson } from "./LaunchPlume.js"
 import { ParameterRegistry } from "./Parameters.js"
+import type { SaidText } from "../model/SaidText.js"
 import type { NumberParameter, ParameterHolder, ParameterSet, ParameterSpec } from "./Parameters.js"
 
 /**
@@ -22,6 +23,18 @@ export class LaunchParameters {
 
   private static plume(key: keyof LaunchPlumeJson, spec: Omit<NumberParameter, "type" | "key" | "effective">): NumberParameter {
     return { type: "number", key: `plume.${key}`, effective: LaunchParameters.plumeValue(key), ...spec }
+  }
+
+  /**
+   * A burn time: stored in milliseconds of the recording, typed in seconds. Where the launch states none the engine is taken to burn along
+   * the whole path, and the field shows that instant, greyed.
+   */
+  private static burn(key: "burnFromT" | "burnUntilT", spec: { label: SaidText, hint: SaidText, ends: (track: LaunchJson["track"]) => { t: number } | undefined }): NumberParameter {
+    return {
+      type: "number", key, min: -3600, max: 36000, step: 0.1, unit: "s", scale: 0.001, label: spec.label, hint: spec.hint,
+      group: { en: "Engine", fr: "Moteur", es: "Motor", it: "Motore" },
+      effective: element => spec.ends((element as unknown as LaunchJson).track ?? [])?.t
+    }
   }
 
   static readonly SET: ParameterSet = {
@@ -75,6 +88,22 @@ export class LaunchParameters {
         ],
         group: { en: "Engine", fr: "Moteur", es: "Motor", it: "Motore" }
       },
+      LaunchParameters.burn("burnFromT", {
+        label: { en: "Engine start", fr: "Allumage du moteur", es: "Encendido del motor", it: "Accensione del motore" },
+        hint: { en: "When the engine started, in seconds of the recording; it may be before it. Empty: the first point of the path.",
+          fr: "Quand le moteur s'est allumé, en secondes de l'enregistrement ; avant lui si besoin. Vide : le premier point du chemin.",
+          es: "Cuándo se encendió el motor, en segundos de la grabación; puede ser antes. Vacío: el primer punto de la trayectoria.",
+          it: "Quando si è acceso il motore, in secondi della registrazione; può essere prima. Vuoto: il primo punto del percorso." },
+        ends: track => track[0]
+      }),
+      LaunchParameters.burn("burnUntilT", {
+        label: { en: "Engine cut-off", fr: "Extinction du moteur", es: "Apagado del motor", it: "Spegnimento del motore" },
+        hint: { en: "When the engine stopped, in seconds of the recording. Empty: the last point of the path. Nothing is let go after it.",
+          fr: "Quand le moteur s'est éteint, en secondes de l'enregistrement. Vide : le dernier point du chemin. Rien n'est lâché après.",
+          es: "Cuándo se apagó el motor, en segundos de la grabación. Vacío: el último punto de la trayectoria. Nada se suelta después.",
+          it: "Quando si è spento il motore, in secondi della registrazione. Vuoto: l'ultimo punto del percorso. Dopo non si rilascia nulla." },
+        ends: track => track[track.length - 1]
+      }),
       LaunchParameters.plume("exhaustKgPerS", {
         min: 0.1, max: 100000, step: 0.1, unit: "kg/s",
         label: { en: "Exhaust flow", fr: "Débit d'échappement", es: "Caudal de escape", it: "Portata di scarico" },
