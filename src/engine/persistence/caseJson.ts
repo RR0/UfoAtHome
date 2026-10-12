@@ -32,6 +32,12 @@ export interface CaseJson {
 export interface CaseEventJson {
   type?: "event"
   eventType: string
+  /**
+   * What a reading names an account by (`interpretationOf`), local to the case: it has to be unique among the case's events
+   * and nowhere else, so that a reference can be read in the file that writes it. Only an event that is referred to needs one.
+   * A reference that no event of the case bears is read as the `id` of a recording the case lists (the older form).
+   */
+  id?: string
   url?: string
   time?: string
   title?: unknown
@@ -69,18 +75,57 @@ export class CaseFile {
       .map(event => new URL(event.url!, caseUrl).href)
   }
 
+  /**
+   * The ids one recording of a case goes by: its event's own `id` in the case, and the `id` its recording states (the older
+   * form of a reference). Whichever is absent is left out.
+   *
+   * @param recordingUrl The address the recording was read from, resolved, to tell which event lists it.
+   */
+  static accountIds(json: CaseJson, caseUrl: string, recordingUrl: string | undefined, recordingId: string | undefined): string[] {
+    const ids = (json.events ?? [])
+      .filter(event => event.eventType === CaseFile.SIGHTING_EVENT && event.id !== undefined && typeof event.url === "string"
+        && recordingUrl !== undefined && new URL(event.url, caseUrl).href === recordingUrl)
+      .map(event => event.id!)
+    if (recordingId !== undefined) ids.push(recordingId)
+    return ids
+  }
+
   /** The interpretations of one recording, in the order the case lists them: its events of type
-   * `sighting` that name it in `interpretationOf`, and (the older form) its events of type
+   * `sighting` that name it in `interpretationOf` (by any of its ids, see accountIds), and (the older form) its events of type
    * `interpretation` naming it in `sighting`. A recording with no id is named by none. */
-  static interpretationEvents(json: CaseJson, sightingId: string | undefined): InterpretationEventJson[] {
-    if (!sightingId) return []
+  static interpretationEvents(json: CaseJson, sightingIds: string | string[] | undefined): InterpretationEventJson[] {
+    const ids = [sightingIds].flat().filter((id): id is string => !!id)
+    if (ids.length === 0) return []
     return (json.events ?? [])
       .filter(event => {
-        if (event.eventType === CaseFile.INTERPRETATION_EVENT) return event.sighting === sightingId
+        if (event.eventType === CaseFile.INTERPRETATION_EVENT) return event.sighting !== undefined && ids.includes(event.sighting)
         if (event.eventType !== CaseFile.SIGHTING_EVENT || event.interpretationOf === undefined) return false
-        return [event.interpretationOf].flat().includes(sightingId)
+        return [event.interpretationOf].flat().some(id => ids.includes(id))
       })
       .map(event => event as unknown as InterpretationEventJson)
+  }
+
+  /**
+   * What a case says wrongly about its own references: the ids more than one event bears, and the `interpretationOf` that name
+   * nothing: neither an event's `id` nor, among `recordingIds` (those of the recordings read so far), a recording's.
+   */
+  static problems(json: CaseJson, recordingIds: string[]): { duplicateIds: string[], unresolved: { reading: string, reference: string }[] } {
+    const events = json.events ?? []
+    const seen = new Set<string>()
+    const duplicateIds = new Set<string>()
+    for (const event of events) {
+      if (event.id === undefined) continue
+      if (seen.has(event.id)) duplicateIds.add(event.id)
+      seen.add(event.id)
+    }
+    const unresolved: { reading: string, reference: string }[] = []
+    for (const event of events) {
+      if (event.eventType !== CaseFile.SIGHTING_EVENT || event.interpretationOf === undefined) continue
+      for (const reference of [event.interpretationOf].flat()) {
+        if (!seen.has(reference) && !recordingIds.includes(reference)) unresolved.push({ reading: event.url ?? "", reference })
+      }
+    }
+    return { duplicateIds: [...duplicateIds], unresolved }
   }
 
   /**

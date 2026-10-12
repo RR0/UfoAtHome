@@ -65,8 +65,8 @@ export type AgentRef = { people: string } | { org: string } | People
  *
  * An interpretation is another observation: the one that was, as whoever interprets holds it. So it
  * is an event of type `sighting` like the original, with a recording at its `url` (the same format,
- * its `interpretation` holding the bodies), marked by `interpretationOf` — the `id` of the sighting
- * (or the ids of the several) it interprets — and dated when the interpretation was elaborated
+ * its `interpretation` holding the bodies), marked by `interpretationOf` — the `id` of the case's event
+ * (or the ids of the several) it interprets (see CaseEventJson.id; the older form names the recording's own `id`) — and dated when the interpretation was elaborated
  * (`time`), by whom (`by`). A case lists the recordings that are observers' accounts by the events
  * with no `interpretationOf`, and those that are readings of them by the ones that have.
  *
@@ -76,7 +76,7 @@ export type AgentRef = { people: string } | { org: string } | People
 export interface InterpretationEventJson {
   type?: "event"
   eventType: "sighting" | "interpretation"
-  /** The `id` of the recording (or the ids of the recordings) this interprets — see Sighting.id. */
+  /** The `id` of the event of the case (or the ids of the events) this interprets — see CaseEventJson.id; the older form: of the recording, see Sighting.id. */
   interpretationOf?: string | string[]
   /** Older form: the `id` of the recording this interprets. */
   sighting?: string

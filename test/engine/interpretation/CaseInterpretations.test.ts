@@ -92,3 +92,31 @@ describe("The observer's own interpretation", () => {
     expect(toSightingJson(fromSightingJson(json)).interpretation).toEqual(interpretation)
   })
 })
+
+describe("A case's own ids", () => {
+  const caseUrl = "https://example.org/d/case.json"
+  const local = {
+    events: [
+      { eventType: "sighting", id: "trent", url: "one.json" },
+      { eventType: "sighting", interpretationOf: "trent", title: "A model", url: "reading.json" },
+      { eventType: "sighting", interpretationOf: ["x-1", "ghost"], title: "Another", url: "other.json" }
+    ]
+  }
+
+  it("names a recording by its event's id and by its own", () => {
+    expect(CaseFile.accountIds(local, caseUrl, "https://example.org/d/one.json", "x-1")).toEqual(["trent", "x-1"])
+    expect(CaseFile.accountIds(local, caseUrl, "https://example.org/d/two.json", undefined)).toEqual([])
+  })
+
+  it("finds the readings of a recording through any of its ids", () => {
+    const ids = CaseFile.accountIds(local, caseUrl, "https://example.org/d/one.json", "x-1")
+    expect(CaseFile.interpretationEvents(local, ids).map(event => event.title)).toEqual(["A model", "Another"])
+    expect(CaseFile.interpretationEvents(local, "trent")).toHaveLength(1)
+  })
+
+  it("says which references name nothing, and which ids are borne twice", () => {
+    expect(CaseFile.problems(local, ["x-1"])).toEqual({ duplicateIds: [], unresolved: [{ reading: "other.json", reference: "ghost" }] })
+    const twice = { events: [{ eventType: "sighting", id: "a", url: "a.json" }, { eventType: "sighting", id: "a", url: "b.json" }] }
+    expect(CaseFile.problems(twice, []).duplicateIds).toEqual(["a"])
+  })
+})

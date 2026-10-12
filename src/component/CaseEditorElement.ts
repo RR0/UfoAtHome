@@ -55,6 +55,7 @@ const TEMPLATE = `
   dialog input[type="text"], dialog input[type="date"], dialog input[type="url"], dialog select { flex: 1 1 auto; min-width: 0; }
   dialog .actions { display: flex; gap: .5em; margin-top: .6em; }
   #dialog-error { color: #c00; }
+  .recording-id-error { color: #c00; margin: .2em 0; font-size: .9em; }
 </style>
 <div id="case" class="case">
 <section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
@@ -68,8 +69,11 @@ const TEMPLATE = `
     <div class="field"><span id="label-case-time">When</span> <rr0-date-input id="case-date" name="case-time"></rr0-date-input></div>
   </div>
   <h3 id="recordings-heading">Observations</h3>
+  <p id="recording-id-error" class="recording-id-error" role="alert" hidden></p>
+  <p id="case-problems" class="recording-id-error" role="status" hidden></p>
   <div class="row recordings">
     <label><span id="label-recording">Recording</span> <select id="track"></select></label>
+    <label id="row-recording-id"><span id="label-recording-id">ID</span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
     <button id="add" type="button" class="icon-btn">+</button>
     <button id="delete" type="button" class="icon-btn">🗑</button>
   </div>
@@ -177,6 +181,10 @@ export class CaseEditorElement extends HTMLElement {
       const track = this.session?.tracks[Number((this.byId("track") as HTMLSelectElement).value)]
       if (track) void this.showTrack(track)
     })
+    const recordingId = this.input("recording-id")
+    recordingId.addEventListener("input", () => this.writeRecordingId())
+    // What was refused is not kept in the field: it goes back to the id the event has.
+    recordingId.addEventListener("blur", () => { this.showRecordingIdError(undefined); this.refreshRow() })
     this.byId("add").addEventListener("click", () => this.askAdd())
     this.byId("make-case").addEventListener("click", () => this.makeCase())
     this.byId("delete").addEventListener("click", () => this.askDelete())
@@ -320,6 +328,7 @@ export class CaseEditorElement extends HTMLElement {
     text("label-case-time", m.caseTime)
     text("recordings-heading", m.recordingsHeading)
     text("label-recording", m.recording)
+    text("label-recording-id", m.recordingId)
     text("make-case", m.addToCase)
     for (const id of ["dirty", "recording-dirty"]) {
       this.byId(id).title = m.unsavedChanges
@@ -503,7 +512,46 @@ export class CaseEditorElement extends HTMLElement {
     select.value = String(Math.max(0, this.current ? session.tracks.indexOf(this.current) : 0))
     // Any recording can leave the case, while the case keeps one.
     this.byId("delete").hidden = session.tracks.length <= 1
+    this.refreshRecordingId(session)
     this.refreshDirty()
+  }
+
+  /** The id of the recording on show: its event's, or, shown greyed, the one it would be given. A reading is not named, nothing reads it. */
+  private refreshRecordingId(session: CaseSession): void {
+    const track = this.current
+    const named = track !== undefined && track.kind === "observer"
+    this.byId("row-recording-id").hidden = !named
+    if (named) {
+      const input = this.input("recording-id")
+      if (this.shadow.activeElement !== input) input.value = track.event.id ?? ""
+      input.placeholder = session.proposedId(track)
+    }
+    const { duplicateIds, unresolved } = session.problems()
+    const messages = [
+      ...duplicateIds.map(id => this.messages.idDuplicated.replace("{id}", id)),
+      ...unresolved.map(({ reference }) => this.messages.readingUnresolved.replace("{id}", reference))
+    ]
+    const note = this.byId("case-problems")
+    note.hidden = messages.length === 0
+    note.textContent = messages.join(" ")
+  }
+
+  private showRecordingIdError(message: string | undefined): void {
+    const error = this.byId("recording-id-error")
+    error.textContent = message ?? ""
+    error.hidden = message === undefined
+  }
+
+  /** What is typed in the id field goes to the event when it is a good id, and what is wrong with it is said when it is not. */
+  private writeRecordingId(): void {
+    const session = this.session
+    const track = this.current
+    if (!session || !track) return
+    const refused = session.setId(track, this.input("recording-id").value.trim())
+    this.showRecordingIdError(refused === "ok" ? undefined : {
+      empty: this.messages.idNeeded, invalid: this.messages.idInvalid, taken: this.messages.idTaken
+    }[refused])
+    this.scheduleDirtyCheck()
   }
 
   // -- The dialog ----------------------------------------------------------------------------------

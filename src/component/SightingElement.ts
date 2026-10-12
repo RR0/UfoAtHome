@@ -537,9 +537,17 @@ export class SightingElement extends HTMLElement {
     this.setEntries(entries, caseSource)
   }
 
+  /** Says on the console what a case gets wrong about its own references, which would otherwise only show as a reading missing from the menu. */
+  private reportCaseProblems(json: CaseJson, entries: ObserverEntry[]): void {
+    const { duplicateIds, unresolved } = CaseFile.problems(json, entries.map(entry => this.plain(entry).id).filter((id): id is string => id !== undefined))
+    for (const id of duplicateIds) console.warn(`The case ${json.id ?? ""} gives the id "${id}" to more than one event: a reference to it is ambiguous.`)
+    for (const { reading, reference } of unresolved) console.warn(`The reading ${reading} of the case ${json.id ?? ""} is "interpretationOf" "${reference}", which no event of the case has as its id, nor any recording it lists.`)
+  }
+
   private setEntries(entries: ObserverEntry[], caseSource: { json: CaseJson, url: string } | undefined): void {
     this.entries = entries
     this.caseSource = caseSource
+    if (caseSource) this.reportCaseProblems(caseSource.json, entries)
 
     this.toolbarElement.hidden = entries.length === 0
     const showSelect = entries.length > 1
@@ -602,7 +610,7 @@ export class SightingElement extends HTMLElement {
     const entry = this.entries.find(e => e.src === this.currentSrc)
     const chosen = /^case-(\d+)$/.exec(this.interpretationSelect.value)
     if (!source || !entry || !chosen) return undefined
-    const event = CaseFile.interpretationEvents(source.json, this.plain(entry).id)[Number(chosen[1])]
+    const event = CaseFile.interpretationEvents(source.json, CaseFile.accountIds(source.json, source.url, entry.src, this.plain(entry).id))[Number(chosen[1])]
     return event?.url ? new URL(event.url, source.url).href : undefined
   }
 
@@ -796,7 +804,7 @@ export class SightingElement extends HTMLElement {
     offer(ACCOUNT_OPTION, this.messages.account, () => Promise.resolve(own))
     const source = this.caseSource
     if (source) {
-      CaseFile.interpretationEvents(source.json, this.plain(entry).id).forEach((event, index) => {
+      CaseFile.interpretationEvents(source.json, CaseFile.accountIds(source.json, source.url, entry.src, this.plain(entry).id)).forEach((event, index) => {
         const title = this.said.read(event.title) ?? `#${index + 1}`
         const by = (event.by ?? []).map(agent => this.agentName(agent)).filter(Boolean).join(", ")
         offer(`case-${index}`, by ? this.messages.interpretationBy.replace("{title}", title).replace("{by}", by) : title,

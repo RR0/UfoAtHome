@@ -70,16 +70,22 @@ export class CaseSession {
     const track = session.tracks[0]
     track.recording = recording
     track.base = { url: from }
+    track.event.id = session.proposedId(track)
     session.caseChanged = true
     return session
   }
 
-  /** The account a reading reads: the first recording it names that the case lists. */
+  /**
+   * The account a reading reads: the first observer's track it names, by the `id` of its event in the case or (the older form) by the `id`
+   * its recording states. None when it names nothing the case lists: that is a fault of the case (see problems), not a reason to read
+   * some other account.
+   */
   accountOf(track: CaseTrack): CaseTrack | undefined {
     if (track.kind !== "reading") return undefined
-    const ids = [track.event.interpretationOf].flat()
-    return this.tracks.find(other => other.kind === "observer" && other.recording?.id !== undefined && ids.includes(other.recording.id))
-      ?? this.tracks.find(other => other.kind === "observer")
+    const references = [track.event.interpretationOf].flat()
+    const observers = this.tracks.filter(other => other.kind === "observer")
+    return observers.find(other => other.event.id !== undefined && references.includes(other.event.id))
+      ?? observers.find(other => other.recording?.id !== undefined && references.includes(other.recording.id))
   }
 
   /** Remembers what a track's recording is now, as loaded or as edited. */
@@ -115,6 +121,74 @@ export class CaseSession {
     return track.recording !== undefined && (track.loaded === undefined || JSON.stringify(track.recording) !== track.loaded)
   }
 
+  /** What an event's id may be: letters, digits, hyphens and underscores, starting with a letter or a digit, so that it can be read anywhere. */
+  static readonly ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/
+
+  private eventIds(except?: CaseTrack): Set<string> {
+    return new Set((this.json.events ?? []).filter(event => event !== except?.event).map(event => event.id).filter((id): id is string => id !== undefined))
+  }
+
+  /**
+   * The id an event of the case would be given: the observer's family name as a slug (`trent`), else the title as the case words it, else
+   * `sighting-1`, `sighting-2`; suffixed (`trent-2`) when the case already has it.
+   */
+  proposedId(track: CaseTrack): string {
+    const slug = (text: string | undefined): string => (text ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+    const title = typeof track.event.title === "string" ? track.event.title : undefined
+    const base = slug(track.recording?.observer?.lastName) || slug(track.recording?.observer?.id) || slug(title)
+    const taken = this.eventIds(track)
+    if (base !== "") {
+      let id = base
+      for (let n = 2; taken.has(id); n++) id = `${base}-${n}`
+      return id
+    }
+    let n = 1
+    while (taken.has(`sighting-${n}`)) n++
+    return `sighting-${n}`
+  }
+
+  /** The id of an event, given the proposed one when it has none: what a reading that names it needs the case to say. */
+  ensureId(track: CaseTrack): string {
+    if (track.event.id === undefined) {
+      track.event.id = this.proposedId(track)
+      this.caseChanged = true
+    }
+    return track.event.id
+  }
+
+  /**
+   * Gives an event the id typed for it. Refused when empty while a reading names it, when it is not a plain id, or when another event of
+   * the case has it. A reading that named the event by its old id, or by the id its recording states, now names it by the new one.
+   */
+  setId(track: CaseTrack, id: string): "ok" | "empty" | "invalid" | "taken" {
+    const previous = track.event.id
+    const named = (reference: string): boolean => reference === previous || reference === track.recording?.id
+    const readers = (this.json.events ?? []).filter(event => event.eventType === CaseFile.SIGHTING_EVENT && event.interpretationOf !== undefined
+      && [event.interpretationOf].flat().some(reference => reference !== undefined && named(reference)))
+    if (id === "") {
+      if (previous === undefined) return "ok"
+      if (readers.length > 0) return "empty"
+      delete track.event.id
+      this.caseChanged = true
+      return "ok"
+    }
+    if (!CaseSession.ID_PATTERN.test(id)) return "invalid"
+    if (this.eventIds(track).has(id)) return "taken"
+    if (id === previous) return "ok"
+    for (const reader of readers) {
+      const references = [reader.interpretationOf!].flat().map(reference => named(reference) ? id : reference)
+      reader.interpretationOf = Array.isArray(reader.interpretationOf) ? references : references[0]
+    }
+    track.event.id = id
+    this.caseChanged = true
+    return "ok"
+  }
+
+  /** What the case gets wrong about its own references (see CaseFile.problems), over the recordings loaded so far. */
+  problems(): ReturnType<typeof CaseFile.problems> {
+    return CaseFile.problems(this.json, this.tracks.map(track => track.recording?.id).filter((id): id is string => id !== undefined))
+  }
+
   /**
    * Adds a reading of an account: an event of type `sighting` marked `interpretationOf`, and a recording
    * of its own that shares the account's whole scene (place, time, pose, instrument, weather, decor, pictures)
@@ -147,7 +221,7 @@ export class CaseSession {
     const event: CaseTrack["event"] = {
       type: "event",
       eventType: "sighting",
-      interpretationOf: base.id ?? stem,
+      interpretationOf: this.ensureId(account),
       time: when,
       ...(by !== undefined && by.length > 0 ? { by } : {}),
       ...(title !== undefined ? { title } : {}),
@@ -160,9 +234,9 @@ export class CaseSession {
     return track
   }
 
-  /** The ids a reading may name an account by: its recording's own, once loaded. */
+  /** The ids a reading may name an account by: its event's own, and its recording's once loaded (the older form). */
   private idsOf(account: CaseTrack): string[] {
-    return account.recording?.id !== undefined ? [account.recording.id] : []
+    return [account.event.id, account.recording?.id].filter((id): id is string => id !== undefined)
   }
 
   /** The readings that interpret an account. */
@@ -191,7 +265,7 @@ export class CaseSession {
     const event: CaseTrack["event"] = {
       type: "event",
       eventType: "sighting",
-      ...(reads ? { interpretationOf: reads.account.recording?.id ?? id } : {}),
+      ...(reads ? { interpretationOf: this.ensureId(reads.account) } : {}),
       ...(when !== undefined ? { time: when } : {}),
       ...(reads?.by && reads.by.length > 0 ? { by: reads.by } : {}),
       ...(title !== undefined ? { title } : {}),
@@ -201,6 +275,7 @@ export class CaseSession {
     this.caseChanged = true
     const track: CaseTrack = { event, url: new URL(event.url!, this.url).href, kind: reads ? "reading" : "observer", recording: stated }
     this.tracks.push(track)
+    if (!reads) event.id = this.proposedId(track)
     return track
   }
 

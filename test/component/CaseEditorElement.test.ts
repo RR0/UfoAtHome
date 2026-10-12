@@ -290,6 +290,24 @@ describe("CaseEditorElement", () => {
     expect(JSON.parse(written[1].content).description).toBe("Edited, not saved")
   })
 
+  it("shows an account's id, proposed greyed when it has none, and refuses what is wrong with the one typed", async () => {
+    const element = await open()
+    const { field } = parts(element)
+    const root = element.shadowRoot!
+    const id = field("recording-id")
+    expect(id.value).toBe("")
+    expect(id.placeholder).not.toBe("")
+    id.value = "has space"
+    id.dispatchEvent(new Event("input"))
+    expect(root.getElementById("recording-id-error")!.hidden).toBe(false)
+    expect(element.caseSession!.tracks[0].event.id).toBeUndefined()
+    id.value = "witness"
+    id.dispatchEvent(new Event("input"))
+    expect(root.getElementById("recording-id-error")!.hidden).toBe(true)
+    expect(element.caseSession!.tracks[0].event.id).toBe("witness")
+    expect(element.caseSession!.dirty).toBe(true)
+  })
+
   it("adds a reading through the one + button: naming the account it interprets, with a title and an author", async () => {
     const element = await open()
     const { select, add, remove, field } = parts(element)
@@ -303,7 +321,9 @@ describe("CaseEditorElement", () => {
     expect(element.sightingData.id).toBe("x-1-interpretation-2")
     expect(element.sightingData.interpretation?.title).toBe("A hubcap")
     const event = element.caseSession!.json.events!.at(-1)!
-    expect(event.interpretationOf).toBe("x-1")
+    // The reading names the account by its event's id in the case, which the case now bears.
+    expect(event.interpretationOf).toBe(element.caseSession!.tracks[0].event.id)
+    expect(event.interpretationOf).toBe("x")
     remove.click()
     expect([...select.options]).toHaveLength(3)
     await submit(element)

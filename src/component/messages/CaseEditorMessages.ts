@@ -23,6 +23,14 @@ export interface CaseEditorMessages {
   cancel: string
   caseHeading: string
   caseId: string
+  recordingId: string
+  idTaken: string
+  idInvalid: string
+  idNeeded: string
+  /** With `{id}`. */
+  idDuplicated: string
+  /** With `{id}`. */
+  readingUnresolved: string
   caseTitle: string
   caseTime: string
   recordingsHeading: string

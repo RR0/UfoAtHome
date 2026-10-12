@@ -33,7 +33,7 @@ describe("A case being edited", () => {
     const session = new CaseSession(caseJson(), url)
     session.keep(session.tracks[0], account, true)
     const added = session.addReading(session.tracks[0], "2026-10-04")
-    expect(added.event).toMatchObject({ eventType: "sighting", interpretationOf: "1950-05-11-TrentPaul", time: "2026-10-04", url: "interpretation-mcminnville-2.json" })
+    expect(added.event).toMatchObject({ eventType: "sighting", interpretationOf: "trentpaul", time: "2026-10-04", url: "interpretation-mcminnville-2.json" })
     expect(session.json.events).toContain(added.event)
     expect(added.recording).toMatchObject({ id: "1950-05-11-TrentPaul-interpretation-2", utcOffsetHours: -7, tags: ["interpretation"], interpretation: { bodies: [] } })
     // The whole scene comes along, so that the reading is not bodies over bare ground; the account's own words and observer do not.
@@ -125,5 +125,91 @@ describe("A case being edited", () => {
     expect(session.files(true).map(file => file.path)).toEqual(["case.json"])
     expect(session.files(true, true).map(file => file.path)).toEqual(["case.json", "observer-mcminnville.json", "interpretation-mcminnville-1.json"])
     expect(session.files(false, true).map(file => file.path)).toEqual(["case.json"])
+  })
+
+  describe("its ids", () => {
+    const withIds = (): CaseJson => ({
+      id: "McMinnville1950",
+      events: [
+        { type: "event", eventType: "sighting", id: "trent", title: "Paul Trent", url: "observer-mcminnville.json" },
+        { type: "event", eventType: "sighting", interpretationOf: "trent", time: "2013-04", title: "A model", url: "interpretation-mcminnville-1.json" }
+      ]
+    })
+
+    it("finds the account a reading reads by its event's id, and by its recording's id as the older form", () => {
+      const session = new CaseSession(withIds(), url)
+      expect(session.accountOf(session.tracks[1])).toBe(session.tracks[0])
+      const older = new CaseSession(caseJson(), url)
+      older.keep(older.tracks[0], account, true)
+      expect(older.accountOf(older.tracks[1])).toBe(older.tracks[0])
+    })
+
+    it("does not read some other account when a reading names none of the case's", () => {
+      const json = withIds()
+      json.events![1].interpretationOf = "nobody"
+      const session = new CaseSession(json, url)
+      expect(session.accountOf(session.tracks[1])).toBeUndefined()
+      expect(session.problems().unresolved).toEqual([{ reading: "interpretation-mcminnville-1.json", reference: "nobody" }])
+    })
+
+    it("proposes the observer's family name, then a number, and suffixes what is taken", () => {
+      const session = new CaseSession({ events: [
+        { eventType: "sighting", url: "a.json" }, { eventType: "sighting", url: "b.json" }, { eventType: "sighting", id: "trent", url: "c.json" }
+      ] }, url)
+      expect(session.proposedId(session.tracks[0])).toBe("sighting-1")
+      session.tracks[1].recording = { ...account, observer: { lastName: "Trent" } } as SightingRecordingJson
+      expect(session.proposedId(session.tracks[1])).toBe("trent-2")
+      session.tracks[0].recording = { ...account, observer: { lastName: "Zamora" } } as SightingRecordingJson
+      expect(session.proposedId(session.tracks[0])).toBe("zamora")
+    })
+
+    it("gives the account it is read by an id of its own when a reading is added, and names it by that", () => {
+      const session = new CaseSession(caseJson(), url)
+      session.keep(session.tracks[0], account, true)
+      const added = session.addReading(session.tracks[0], "2026-10-04")
+      expect(session.tracks[0].event.id).toBe("trentpaul")
+      expect(added.event.interpretationOf).toBe("trentpaul")
+      expect(session.readingsOf(session.tracks[0])).toHaveLength(2)
+    })
+
+    it("gives an account it adds an id, and a case made around a recording one too", () => {
+      const session = new CaseSession(withIds(), url)
+      const added = session.addObservation({ ...account, id: "1950-05-11-Other", observer: { lastName: "Trent" } } as SightingRecordingJson)
+      expect(added.event.id).toBe("trent-2")
+      const around = CaseSession.around(account, undefined, undefined, undefined, "https://example.org/edit/")
+      expect(around.tracks[0].event.id).toBe("trentpaul")
+    })
+
+    it("refuses an id that is empty while a reading names it, that is not plain, or that another event has", () => {
+      const session = new CaseSession(withIds(), url)
+      const added = session.addObservation({ ...account, id: "x", observer: { lastName: "Other" } } as SightingRecordingJson)
+      expect(session.setId(session.tracks[0], "")).toBe("empty")
+      expect(session.setId(session.tracks[0], "has space")).toBe("invalid")
+      expect(session.setId(added, "trent")).toBe("taken")
+      expect(session.setId(added, "other-2")).toBe("ok")
+    })
+
+    it("renames an id in every reading that named it, whichever form they used", () => {
+      const session = new CaseSession(caseJson(), url)
+      session.keep(session.tracks[0], account, true)
+      expect(session.setId(session.tracks[0], "trent")).toBe("ok")
+      expect(session.tracks[1].event.interpretationOf).toBe("trent")
+      session.tracks[1].event.interpretationOf = ["trent", "other"]
+      expect(session.setId(session.tracks[0], "paul")).toBe("ok")
+      expect(session.tracks[1].event.interpretationOf).toEqual(["paul", "other"])
+      expect(session.dirty).toBe(true)
+    })
+
+    it("reports an id two events bear", () => {
+      const json = withIds()
+      json.events!.push({ eventType: "sighting", id: "trent", url: "other.json" })
+      expect(new CaseSession(json, url).problems().duplicateIds).toEqual(["trent"])
+    })
+
+    it("does not touch a case it only opens", () => {
+      const session = new CaseSession(caseJson(), url)
+      expect(session.dirty).toBe(false)
+      expect(session.json.events![0]).not.toHaveProperty("id")
+    })
   })
 })
