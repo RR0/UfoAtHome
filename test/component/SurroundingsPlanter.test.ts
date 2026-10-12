@@ -68,6 +68,28 @@ describe("SurroundingsPlanter", () => {
     expect(editor.sources).toEqual([expect.objectContaining({ url: "https://survey.example/" })])
   })
 
+  it("calls what the survey names by its name, the parts of it after the first numbered, and a bridge by the road it carries and a line by its voltage", async () => {
+    const editor = new FakeEditor()
+    const hall = { eastM: 30, northM: -12, widthM: 14, lengthM: 8, heightM: 7.4, headingDeg: 40, name: "Mairie de Saint-Lô" }
+    const bridge = { eastM: -20, northM: 5, lengthM: 24, widthM: 9.4, heightM: 6.2, headingDeg: 80, name: "Rue de Carentan" }
+    const span = { eastM: 10, northM: 60, lengthM: 180, headingDeg: 95, heightM: 18.5, poleHeightM: 22, acrossM: [0], voltage: "90 kV" }
+    await editor.planter(new FakeSurvey(Scene.of([OAK], [hall, { ...hall, eastM: 50 }, HOUSE], [bridge], [span]))).survey(PLACE.lat, PLACE.lng)
+    expect(editor.decor.map(object => object.title)).toEqual([
+      "tree 1", "Mairie de Saint-Lô", "Mairie de Saint-Lô (2)", "building 1", "bridge (Rue de Carentan)", "wire (90 kV)"
+    ])
+  })
+
+  it("takes away what a survey brought when it is withdrawn, and nothing the author placed", async () => {
+    const editor = new FakeEditor()
+    editor.decor = [{ id: "decor-1", kind: "wall", title: "Wall 1", eastM: 3, northM: 4, headingDeg: 0, lit: false }]
+    const planter = editor.planter(new FakeSurvey(Scene.of([OAK, BEECH], [HOUSE])))
+    await planter.survey(PLACE.lat, PLACE.lng)
+    expect(editor.decor).toHaveLength(4)
+    planter.withdraw()
+    expect(editor.decor.map(object => object.id)).toEqual(["decor-1"])
+    expect(editor.text).toBe("")
+  })
+
   it("plants the bridges and the spans of electric line as the survey drew them, a line with its conductors and its poles", async () => {
     const editor = new FakeEditor()
     const bridge = { eastM: -20, northM: 5, lengthM: 24, widthM: 9.4, heightM: 6.2, headingDeg: 80 }

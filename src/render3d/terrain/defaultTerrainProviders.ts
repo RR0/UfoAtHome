@@ -5,6 +5,8 @@ import { AwsTerrariumElevationProvider } from "./providers/AwsTerrariumElevation
 import { EsriWorldImageryProvider } from "./providers/EsriWorldImageryProvider.js"
 import { OverpassRoadProvider } from "./providers/OverpassRoadProvider.js"
 import { ArchivedRoadProvider } from "./providers/ArchivedRoadProvider.js"
+import { IgnTopoRoadProvider } from "./providers/IgnTopoRoadProvider.js"
+import { RegionalRoadProvider } from "./providers/RegionalRoadProvider.js"
 
 export interface TerrainProviders {
   elevation: ElevationProvider
@@ -40,6 +42,8 @@ export function defaultImageryProvider(): ImageryProvider {
  * The roads half on its own: what UFO@home has already frozen for the cases it publishes, and a
  * live Overpass query for the ground it has not.
  *
+ * The live source is the IGN's map in France (it names its roads, and answers) and OpenStreetMap elsewhere (see RegionalRoadProvider).
+ *
  * In that order, and not the other way round. Overpass is free and donated, and a published player
  * cannot put a query in front of every reader of a case dossier — it answered 429 and 504 the first
  * time a page with several scenes asked. The archive serves the published cases without asking
@@ -47,5 +51,5 @@ export function defaultImageryProvider(): ImageryProvider {
  * square of ground nobody has published yet.
  */
 export function defaultRoadProvider(): RoadProvider {
-  return new ArchivedRoadProvider({ fallback: new OverpassRoadProvider() })
+  return new ArchivedRoadProvider({ fallback: new RegionalRoadProvider(new IgnTopoRoadProvider(), new OverpassRoadProvider()) })
 }

@@ -50,7 +50,10 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
 
   private buildings(grids: LidarGrids | undefined, vectors: PlaceVectors | undefined, centre: { lat: number, lng: number }, radius: number) {
     const drawn = vectors ? TopoBuildings.buildings(vectors.buildings, centre, radius) : []
-    if (drawn.length > 0 || grids === undefined) return drawn
-    return new BuildingFootprints(grids.heights, grids.building, grids.size, grids.size).buildings({ metresPerPixel: grids.metresPerPixel, radiusM: radius })
+    const found = drawn.length > 0 || grids === undefined
+      ? drawn
+      : new BuildingFootprints(grids.heights, grids.building, grids.size, grids.size).buildings({ metresPerPixel: grids.metresPerPixel, radiusM: radius })
+    // Named by the map either way: a roof the laser saw is the town hall all the same.
+    return vectors ? TopoBuildings.named(found, vectors.zones, centre) : found
   }
 }

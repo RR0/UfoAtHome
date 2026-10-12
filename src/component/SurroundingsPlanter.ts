@@ -91,6 +91,16 @@ export class SurroundingsPlanter {
     if (!enabled) this.cancel()
   }
 
+  /**
+   * Takes away what a survey brought, and says nothing more: choosing no survey at all means the scenery is the author's alone, so what came
+   * from one goes, and what the author placed stays. One step of the history, which puts it back.
+   */
+  withdraw(): void {
+    this.cancel()
+    this.withdrawPlanted()
+    this.say("")
+  }
+
   /** A recording was loaded, or replaced, and stands here: nothing is asked, and what it says about its scenery is its own. */
   placeLoaded(lat: number | undefined, lng: number | undefined): void {
     this.cancel()
@@ -168,10 +178,19 @@ export class SurroundingsPlanter {
     let bridges = kept.filter(object => object.kind === "bridge").length
     let wires = kept.filter(object => object.kind === "wire").length
     const planted: DecorObject[] = []
+    // What a survey names is called by its name (the town hall), the parts of it after the first numbered ("Mairie de Saint-Lô (2)"); what it does not is "Building 12".
+    const names = new Set(kept.map(object => typeof object.title === "string" ? object.title : ""))
+    const titled = (name: string | undefined, fallback: () => string): string => {
+      const wanted = name ?? fallback()
+      let title = wanted
+      for (let n = 2; names.has(title); n++) title = `${wanted} (${n})`
+      names.add(title)
+      return title
+    }
     if (!handTrees) {
       for (const tree of found.trees) {
         planted.push({
-          id: nextId(), kind: "tree", title: this.host.label("tree", ++trees), eastM: tree.eastM, northM: tree.northM, headingDeg: 0, lit: false,
+          id: nextId(), kind: "tree", title: titled(undefined, () => this.host.label("tree", ++trees)), eastM: tree.eastM, northM: tree.northM, headingDeg: 0, lit: false,
           sizeM: { widthM: tree.widthM, lengthM: tree.widthM, heightM: tree.heightM }, origin: provider.id
         })
       }
@@ -179,7 +198,7 @@ export class SurroundingsPlanter {
     if (!handBuildings) {
       for (const building of found.buildings) {
         planted.push({
-          id: nextId(), kind: "building", title: this.host.label("building", ++buildings), eastM: building.eastM, northM: building.northM,
+          id: nextId(), kind: "building", title: titled(building.name, () => this.host.label("building", ++buildings)), eastM: building.eastM, northM: building.northM,
           headingDeg: building.headingDeg, lit: false,
           sizeM: { widthM: building.widthM, lengthM: building.lengthM, heightM: building.heightM },
           floors: building.floors ?? Math.max(1, Math.round(building.heightM / SurroundingsPlanter.FLOOR_HEIGHT_M)), origin: provider.id
@@ -189,7 +208,7 @@ export class SurroundingsPlanter {
     if (!handBridges) {
       for (const bridge of found.bridges) {
         planted.push({
-          id: nextId(), kind: "bridge", title: this.host.label("bridge", ++bridges), eastM: bridge.eastM, northM: bridge.northM,
+          id: nextId(), kind: "bridge", title: titled(bridge.name ? `${this.host.label("bridge", 0).replace(/ 0$/, "")} (${bridge.name})` : undefined, () => this.host.label("bridge", ++bridges)), eastM: bridge.eastM, northM: bridge.northM,
           headingDeg: bridge.headingDeg, lit: false,
           sizeM: { lengthM: bridge.lengthM, widthM: bridge.widthM, heightM: bridge.heightM }, origin: provider.id
         })
@@ -198,7 +217,7 @@ export class SurroundingsPlanter {
     if (!handWires) {
       for (const line of found.lines) {
         planted.push({
-          id: nextId(), kind: "wire", title: this.host.label("wire", ++wires), eastM: line.eastM, northM: line.northM,
+          id: nextId(), kind: "wire", title: titled(`${this.host.label("wire", 0).replace(/ 0$/, "")} (${line.voltage})`, () => this.host.label("wire", ++wires)), eastM: line.eastM, northM: line.northM,
           headingDeg: line.headingDeg, lit: false,
           sizeM: { lengthM: line.lengthM, heightM: line.heightM },
           wire: { strands: line.acrossM.map(acrossM => ({ heightM: line.heightM, acrossM })), poles: "both", poleHeightM: line.poleHeightM },

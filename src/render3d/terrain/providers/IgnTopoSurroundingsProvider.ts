@@ -37,7 +37,7 @@ export class IgnTopoSurroundingsProvider implements SurroundingsProvider {
     const vectors = await this.platform.vectors(centre, radius, true)
     return {
       trees: [],
-      buildings: TopoBuildings.buildings(vectors.buildings, centre, radius),
+      buildings: TopoBuildings.named(TopoBuildings.buildings(vectors.buildings, centre, radius), vectors.zones, centre),
       bridges: OverheadStructures.bridges(vectors, centre, radius, undefined),
       lines: OverheadStructures.lines(vectors, centre, radius, undefined)
     }

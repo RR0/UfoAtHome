@@ -30,6 +30,8 @@ export interface SurveyedBuilding {
   headingDeg: number
   /** How many floors the survey says it has, where it says (a laser does not: the height gives about one in three metres). */
   floors?: number
+  /** What the survey calls it, where it is named ("Mairie de Saint-Lô"): most buildings are not. */
+  name?: string
 }
 
 /**
@@ -47,6 +49,8 @@ export interface SurveyedBridge {
   heightM: number
   /** Degrees clockwise from north of the direction it runs in, from 0 up to 180. */
   headingDeg: number
+  /** The name of the road it carries, where the survey has one ("Rue de Carentan"). */
+  name?: string
 }
 
 /**

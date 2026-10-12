@@ -1330,9 +1330,14 @@ export class SightingEditorElement extends HTMLElement {
       this.sceneryChoice = this.scenerySource.value
       this.writeSceneryChoice(this.sceneryChoice)
       this.surroundings.setEnabled(this.sceneryChoice !== SightingEditorElement.NO_SCENERY)
+      if (this.sceneryChoice === SightingEditorElement.NO_SCENERY) {
+        // None: the scenery is the author's alone, so what a survey brought goes (and comes back with Undo); what they placed stays.
+        this.surroundings.withdraw()
+        return
+      }
       // Another survey is another answer for the place the recording stands at: asked at once, and what the first brought is replaced.
       const standing = this.plantingCentre()
-      if (this.sceneryChoice !== SightingEditorElement.NO_SCENERY && standing) void this.surroundings.survey(standing.lat, standing.lng)
+      if (standing) void this.surroundings.survey(standing.lat, standing.lng)
     })
     void this.fillScenerySources()
     this.undoButton = this.shadow.getElementById("undo") as HTMLButtonElement

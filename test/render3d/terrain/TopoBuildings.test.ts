@@ -11,6 +11,25 @@ function polygon(properties: Record<string, unknown>, ...rings: [number, number]
   return { properties, geometry: { type: "MultiPolygon", coordinates: [rings.map(lonLat)] } }
 }
 
+describe("TopoBuildings names", () => {
+  const zone = (toponyme: string, ...ring: [number, number][]) => polygon({ toponyme }, ring)
+
+  it("gives a building the name of the zone it stands in, and leaves the others as they are", () => {
+    const houses = TopoBuildings.buildings([
+      polygon({ hauteur: 9 }, [[-10, 8], [10, 8], [10, 16], [-10, 16]]),
+      polygon({ hauteur: 6 }, [[40, 0], [50, 0], [50, 10], [40, 10]])
+    ], CENTRE, 100)
+    const named = TopoBuildings.named(houses, [zone("Mairie de Saint-Lô", [-20, 0], [20, 0], [20, 30], [-20, 30])], CENTRE)
+    expect(named.map(building => building.name)).toEqual(["Mairie de Saint-Lô", undefined])
+  })
+
+  it("does not name a building by a zone it only touches, nor by one with no name", () => {
+    const [house] = TopoBuildings.buildings([polygon({ hauteur: 9 }, [[-10, 8], [10, 8], [10, 16], [-10, 16]])], CENTRE, 100)
+    expect(TopoBuildings.named([house], [zone("Square", [30, 0], [40, 0], [40, 10], [30, 10])], CENTRE)[0].name).toBeUndefined()
+    expect(TopoBuildings.named([house], [polygon({}, [[-20, 0], [20, 0], [20, 30], [-20, 30]])], CENTRE)[0].name).toBeUndefined()
+  })
+})
+
 describe("TopoBuildings", () => {
   it("gives a rectangular outline its place, its sides, the way it faces and its height", () => {
     // 20 m wide east-west, 8 m deep, 12 m north of the centre.

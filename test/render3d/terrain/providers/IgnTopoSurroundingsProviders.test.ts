@@ -31,7 +31,7 @@ describe("IgnTopoSurroundingsProvider (the map alone)", () => {
     const asked = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => new URL(String(call[0])).searchParams.get("SERVICE"))
     expect(new Set(asked)).toEqual(new Set(["WFS"]))
     const layers = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => new URL(String(call[0])).searchParams.get("TYPENAMES")).sort()
-    expect(layers).toEqual(["BDTOPO_V3:batiment", "BDTOPO_V3:construction_lineaire", "BDTOPO_V3:ligne_electrique", "BDTOPO_V3:troncon_de_route"])
+    expect(layers).toEqual(["BDTOPO_V3:batiment", "BDTOPO_V3:construction_lineaire", "BDTOPO_V3:ligne_electrique", "BDTOPO_V3:troncon_de_route", "BDTOPO_V3:zone_d_activite_ou_d_interet"])
   })
 
   it("draws bridges and lines at their ordinary heights where no laser measured them", async () => {

@@ -399,6 +399,33 @@ describe("the scenery taken from a survey of the place", () => {
     }
   })
 
+  it("takes away what a survey brought when none is chosen, and Undo brings it back", async () => {
+    const KEY = "rr0-sighting-editor.surroundings"
+    localStorage.removeItem(KEY)
+    try {
+      const element = mount()
+      const shadow = element.shadowRoot!
+      const select = shadow.getElementById("scenery-source") as HTMLSelectElement
+      await waitFor(() => select.options.length > 1)
+      element.surroundingsProvider = surveyOf(FOUND)
+      shadow.getElementById("lat")!.dispatchEvent(new Event("pointerdown", { bubbles: true, composed: true }))
+      placeAt(element, "49.1049", "-1.0754")
+      await waitFor(() => (element.sightingData.decor ?? []).length === 3)
+      // The history takes what the form says once it has been quiet for a moment: the planting is a step of its own, and the withdrawal another.
+      await new Promise(resolve => setTimeout(resolve, 600))
+      select.value = "none"
+      select.dispatchEvent(new Event("change", { bubbles: true, composed: true }))
+      expect(element.sightingData.decor ?? []).toHaveLength(0)
+      expect(shadow.getElementById("scenery-status")!.textContent).toBe("")
+      const undo = shadow.getElementById("undo") as HTMLButtonElement
+      await waitFor(() => !undo.disabled)
+      undo.click()
+      expect(element.sightingData.decor ?? []).toHaveLength(3)
+    } finally {
+      localStorage.removeItem(KEY)
+    }
+  })
+
   it("says nothing and plants nothing where no survey covers the place", async () => {
     const element = mount()
     element.surroundingsProvider = { ...surveyOf(FOUND), covers: () => false, getSurroundings: async () => { throw new Error("must not be asked") } }

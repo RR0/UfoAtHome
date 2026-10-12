@@ -41,6 +41,38 @@ export class TopoBuildings {
     return found.slice(0, max)
   }
 
+  /**
+   * Gives the buildings the names of the zones they stand in: a building whose middle is inside the outline of a zone the map names ("Mairie de
+   * Saint-Lô", "Poste de Saint-Lô") takes its name. A zone of several buildings (a school, a hospital) names them all, which is what the map says:
+   * it names the place, not each building. A zone that is not drawn round buildings (a square, a car park) names the buildings standing in it
+   * all the same, so the zones are taken as they come from the map's own "activity or interest" layer, which is made of the places that are
+   * named for what stands there.
+   */
+  static named(buildings: SurveyedBuilding[], zones: VectorFeature[], centre: { lat: number, lng: number }): SurveyedBuilding[] {
+    const outlines = zones
+      .map(zone => ({ name: typeof zone.properties.toponyme === "string" ? zone.properties.toponyme : "", rings: TopoBuildings.rings(zone, centre) }))
+      .filter(zone => zone.name.length > 0 && zone.rings.length > 0)
+    if (outlines.length === 0) return buildings
+    return buildings.map(building => {
+      const zone = outlines.find(candidate => TopoBuildings.inside(building.eastM, building.northM, candidate.rings))
+      return zone ? { ...building, name: zone.name } : building
+    })
+  }
+
+  /** Whether a point is inside an outline (an odd number of edges crossed by a ray from it), a courtyard being a hole. */
+  private static inside(east: number, north: number, rings: { east: number, north: number }[][]): boolean {
+    let crossings = 0
+    for (const ring of rings) {
+      for (let i = 0; i + 1 < ring.length; i++) {
+        const a = ring[i]
+        const b = ring[i + 1]
+        if ((a.north <= north) === (b.north <= north)) continue
+        if (a.east + (north - a.north) / (b.north - a.north) * (b.east - a.east) > east) crossings++
+      }
+    }
+    return crossings % 2 === 1
+  }
+
   /** Every ring of the outline (an outer ring, and a ring for each courtyard), in metres east and north of the centre. */
   private static rings(feature: VectorFeature, centre: { lat: number, lng: number }): { east: number, north: number }[][] {
     const geometry = feature.geometry

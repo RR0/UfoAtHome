@@ -14,7 +14,7 @@ function line(properties: Record<string, unknown>, ...points: [number, number][]
 }
 
 function vectors(parts: Partial<PlaceVectors>): PlaceVectors {
-  return { bridges: [], elevatedRoads: [], lines: [], buildings: [], ...parts }
+  return { bridges: [], elevatedRoads: [], lines: [], buildings: [], zones: [], ...parts }
 }
 
 describe("OverheadStructures bridges", () => {
@@ -37,6 +37,14 @@ describe("OverheadStructures bridges", () => {
     // A road that is over the ground somewhere else is not this bridge's.
     const far = line({ nature: "Route à 1 chaussée", largeur_de_chaussee: 7 }, [-30, 80], [30, 80])
     expect(OverheadStructures.bridges(vectors({ bridges, elevatedRoads: [far] }), CENTRE, 100, undefined)[0].widthM).toBe(6)
+  })
+
+  it("names a bridge for the road it carries, when the map names it", () => {
+    const bridges = [line({ nature: "Pont" }, [-20, 0], [20, 0])]
+    const named = line({ nature: "Route à 1 chaussée", largeur_de_chaussee: 7, nom_voie_ban_gauche: "Rue de Carentan" }, [-30, 1], [30, 1])
+    expect(OverheadStructures.bridges(vectors({ bridges, elevatedRoads: [named] }), CENTRE, 100, undefined)[0].name).toBe("Rue de Carentan")
+    const bare = line({ nature: "Route à 1 chaussée", largeur_de_chaussee: 7 }, [-30, 1], [30, 1])
+    expect(OverheadStructures.bridges(vectors({ bridges, elevatedRoads: [bare] }), CENTRE, 100, undefined)[0].name).toBeUndefined()
   })
 
   it("leaves out what is too short or too far", () => {

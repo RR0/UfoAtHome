@@ -107,13 +107,24 @@ export class IgnGeoplatform {
     // This service gives the axes of EPSG:4326 as longitude then latitude, the other way round from its WMS.
     const box = [centre.lng - dLng, centre.lat - dLat, centre.lng + dLng, centre.lat + dLat].map(v => v.toFixed(6)).join(",")
     const within = `BBOX(geometrie,${box},'EPSG:4326')`
-    const [bridges, elevatedRoads, lines, buildings] = await Promise.all([
+    const [bridges, elevatedRoads, lines, buildings, zones] = await Promise.all([
       this.features("construction_lineaire", `${within} AND nature='Pont'`, "nature,geometrie"),
-      this.features("troncon_de_route", `${within} AND position_par_rapport_au_sol<>'0'`, "nature,largeur_de_chaussee,position_par_rapport_au_sol,geometrie"),
+      this.features("troncon_de_route", `${within} AND position_par_rapport_au_sol<>'0'`, "nature,largeur_de_chaussee,position_par_rapport_au_sol,nom_voie_ban_gauche,nom_voie_ban_droite,cpx_toponyme_route_nommee,geometrie"),
       this.features("ligne_electrique", within, "voltage,geometrie"),
-      withBuildings ? this.features("batiment", within, "hauteur,nombre_d_etages,geometrie", 400) : Promise.resolve([])
+      withBuildings ? this.features("batiment", within, "hauteur,nombre_d_etages,geometrie", 400) : Promise.resolve([]),
+      // The names of the zones (a town hall, a post office, a square): a few, and a building takes the name of the one it stands in.
+      withBuildings ? this.features("zone_d_activite_ou_d_interet", within, "toponyme,geometrie", 100).catch((): VectorFeature[] => []) : Promise.resolve([])
     ])
-    return { bridges, elevatedRoads, lines, buildings }
+    return { bridges, elevatedRoads, lines, buildings, zones }
+  }
+
+  /** The roads of the map in a box (west, south, east, north): every section a vehicle or a rider could use, with what the map says of each. */
+  async roads(box: { west: number, south: number, east: number, north: number }): Promise<VectorFeature[]> {
+    const within = `BBOX(geometrie,${[box.west, box.south, box.east, box.north].map(v => v.toFixed(6)).join(",")},'EPSG:4326')`
+    // Not the footpaths and the stairs (a town's outnumber its roads five to one), and not the tunnels, which are under the ground.
+    return this.features("troncon_de_route",
+      `${within} AND nature<>'Sentier' AND nature<>'Escalier' AND position_par_rapport_au_sol>='0'`,
+      "cleabs,nature,largeur_de_chaussee,nom_voie_ban_gauche,nom_voie_ban_droite,cpx_toponyme_route_nommee,geometrie", 3000)
   }
 
   private async raster(centre: { lat: number, lng: number }, radiusM: number, size: number, layer: string): Promise<GeoTiffRaster> {

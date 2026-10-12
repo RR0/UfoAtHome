@@ -14,6 +14,8 @@ export interface PlaceVectors {
   lines: VectorFeature[]
   /** The outlines of the buildings, with their height and floors, where they were asked for. */
   buildings: VectorFeature[]
+  /** The named zones (a town hall, a post office, a square), whose names the buildings inside them take, where they were asked for. */
+  zones: VectorFeature[]
 }
 
 /**
@@ -143,17 +145,18 @@ export class OverheadStructures {
         eastM: OverheadStructures.tenth(middle.east),
         northM: OverheadStructures.tenth(middle.north),
         lengthM: OverheadStructures.tenth(length),
-        widthM: OverheadStructures.deckWidth(middle, roads),
+        widthM: OverheadStructures.roadOf(middle, roads).width,
         heightM: OverheadStructures.tenth(OverheadStructures.deckHeight(from, to, grid)),
-        headingDeg: OverheadStructures.tenth(OverheadStructures.bearing(from, to) % 180)
+        headingDeg: OverheadStructures.tenth(OverheadStructures.bearing(from, to) % 180),
+        ...(OverheadStructures.roadOf(middle, roads).name ? { name: OverheadStructures.roadOf(middle, roads).name } : {})
       })
     }
     found.sort((a, b) => Math.hypot(a.eastM, a.northM) - Math.hypot(b.eastM, b.northM))
     return found
   }
 
-  /** The width of the deck: that of the road that crosses it, with its edges. */
-  private static deckWidth(middle: { east: number, north: number }, roads: { path: { east: number, north: number }[], properties: Record<string, unknown> }[]): number {
+  /** The road that crosses a bridge at its middle: the width of its deck (the road's, with its edges, or what a bridge of its kind is), and its name. */
+  private static roadOf(middle: { east: number, north: number }, roads: { path: { east: number, north: number }[], properties: Record<string, unknown> }[]): { width: number, name?: string } {
     let nearest: { distance: number, properties: Record<string, unknown> } | undefined
     for (const road of roads) {
       for (let i = 0; i + 1 < road.path.length; i++) {
@@ -161,10 +164,14 @@ export class OverheadStructures {
         if (nearest === undefined || distance < nearest.distance) nearest = { distance, properties: road.properties }
       }
     }
-    if (nearest === undefined || nearest.distance > OverheadStructures.ROAD_MATCH_M) return OverheadStructures.DEFAULT_DECK_M
+    if (nearest === undefined || nearest.distance > OverheadStructures.ROAD_MATCH_M) return { width: OverheadStructures.DEFAULT_DECK_M }
+    const named = [nearest.properties.nom_voie_ban_gauche, nearest.properties.nom_voie_ban_droite, nearest.properties.cpx_toponyme_route_nommee]
+      .find((name): name is string => typeof name === "string" && name.length > 0)
     const carriageway = Number(nearest.properties.largeur_de_chaussee)
-    if (Number.isFinite(carriageway) && carriageway > 0) return OverheadStructures.tenth(carriageway + OverheadStructures.DECK_MARGIN_M)
-    return nearest.properties.nature === "Sentier" ? OverheadStructures.FOOTBRIDGE_DECK_M : OverheadStructures.DEFAULT_DECK_M
+    const width = Number.isFinite(carriageway) && carriageway > 0
+      ? OverheadStructures.tenth(carriageway + OverheadStructures.DECK_MARGIN_M)
+      : (nearest.properties.nature === "Sentier" ? OverheadStructures.FOOTBRIDGE_DECK_M : OverheadStructures.DEFAULT_DECK_M)
+    return named ? { width, name: named } : { width }
   }
 
   /** The height of the deck: the middle value of what the laser measured on the structure along the middle of its length. */
