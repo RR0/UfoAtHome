@@ -1783,6 +1783,17 @@ export class SightingEditorElement extends HTMLElement {
     this.cloudEditor.stopManipulation()
     document.removeEventListener("click", this.handleOutsideContextMenuClick)
     this.endDrag()
+    // Moving the editor in the page disconnects it and connects it again within the same task: only an
+    // editor still out of the page after that has gone, and its text editor must stop (its linter keeps
+    // a timer that dispatches on the view, which fails once the window it measured against is closed).
+    queueMicrotask(() => { if (!this.isConnected) this.releaseFileEditor() })
+  }
+
+  /** Frees the File group's text editor of an editor that left the page; it is made again when it is needed. */
+  private releaseFileEditor(): void {
+    this.fileEditor?.destroy()
+    this.fileEditor = undefined
+    this.fileEditorLoading = undefined
   }
 
   /** Preview preferences stay outside the saved observation. */
