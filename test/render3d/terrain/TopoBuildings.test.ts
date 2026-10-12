@@ -62,6 +62,23 @@ describe("TopoBuildings", () => {
     expect(ring.every(part => !(Math.abs(part.eastM - 15) < 4 && Math.abs(part.northM - 15) < 4 && part.widthM > 8 && part.lengthM > 8))).toBe(true)
   })
 
+  it("cuts an L whose arms are turned off the axes into its two arms, square to their own sides, and not into strips", () => {
+    // Two arms 8 m deep, one 40 m long and one 55 m long, turned 12 degrees off east-west and north-south.
+    const turn = (east: number, north: number): [number, number] => {
+      const a = 12 * Math.PI / 180
+      return [east * Math.cos(a) - north * Math.sin(a), east * Math.sin(a) + north * Math.cos(a)]
+    }
+    const outline = [[0, 0], [40, 0], [40, 8], [8, 8], [8, 55], [0, 55]].map(([east, north]) => turn(east, north))
+    const parts = TopoBuildings.buildings([polygon({ hauteur: 7 }, outline)], CENTRE, 200)
+    expect(parts.length).toBeLessThanOrEqual(3)
+    const longest = [...parts].sort((a, b) => b.widthM - a.widthM)
+    expect(longest[0].widthM).toBeGreaterThan(50)
+    expect(Math.abs(longest[0].lengthM - 8)).toBeLessThan(1.5)
+    expect(longest[1].widthM).toBeGreaterThan(30)
+    // The depth of an arm runs across it, whichever way it is turned: the two arms face a quarter turn apart.
+    expect(Math.abs(((longest[0].headingDeg - longest[1].headingDeg + 180) % 180) - 90)).toBeLessThan(6)
+  })
+
   it("gives the floors the map says, and a height from them where it gives no height, and two floors where it says nothing", () => {
     const [stated] = TopoBuildings.buildings([polygon({ nombre_d_etages: 3 }, [[0, 0], [10, 0], [10, 10], [0, 10]])], CENTRE, 100)
     expect(stated.floors).toBe(3)

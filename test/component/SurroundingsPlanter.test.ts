@@ -43,7 +43,7 @@ class FakeEditor {
     return new SurroundingsPlanter(this.status, {
       decor: () => this.decor,
       setDecor: decor => { this.decor = decor },
-      label: (kind, number) => `${kind} ${number}`,
+      kindName: kind => kind,
       cite: source => { this.sources.push(source) }
     }, sightingEditorMessages_en, async () => survey, { debounceMs: 5 })
   }

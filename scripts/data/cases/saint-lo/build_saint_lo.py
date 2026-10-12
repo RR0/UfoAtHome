@@ -29,7 +29,7 @@ import math
 import pathlib
 
 OUT = pathlib.Path("public/demo-data/observer-saint-lo.json")
-TREES = pathlib.Path(__file__).with_name("trees.json")
+SURROUNDINGS = pathlib.Path(__file__).with_name("surroundings.json")
 
 LAT, LNG = 49.104890, -1.075382       # the exact spot where he stood, a Google Maps link he sent (2026-10-12)
 DURATION_MS = 5500
@@ -359,19 +359,43 @@ def observer_track():
     return {"keyframes": keys}
 
 
-def trees():
-    """The trees around him, as the IGN's LiDAR HD saw them (see fetch_trees.py): where each crown is, how
-    high and how wide, from the spot he sent a map link to. The tops of those to the south are his horizon
-    (\"ils dessinent l'horizon visible\"), and a big one 16 m to the north-north-east hides the sky up to
-    36 degrees for azimuths 5 to 40."""
-    found = json.loads(TREES.read_text())
-    return [{
-        "id": f"tree-{i}", "kind": "tree",
-        "title": tr("Arbre (relevé LiDAR de l'IGN)", "tree (IGN LiDAR survey)"),
-        "eastM": t["eastM"], "northM": t["northM"],
-        "sizeM": {"widthM": t["widthM"], "lengthM": t["widthM"], "heightM": t["heightM"]},
-        "occludesSourceIds": IDS,
-    } for i, t in enumerate(found)]
+# What the generic names the survey gives (in English: see scripts/fetch-surroundings.ts) are called in French.
+GENERIC_FR = {"Tree": "Arbre", "Building": "Bâtiment", "Bridge": "Pont", "Overhead line": "Ligne électrique"}
+
+
+def titled(title):
+    """A generic name ("Tree 12", "Bridge (Rue de Carentan)") in French and English; a name the survey gave ("Mairie de Saint-Lô") as it is."""
+    for english, french in GENERIC_FR.items():
+        if title == english or title.startswith(english + " "):
+            return tr(french + title[len(english):], title)
+    return title
+
+
+def surroundings():
+    """What stands round the spot he sent a map link to, as the IGN's surveys (LiDAR HD for the trees, BD TOPO for the buildings, the
+    bridges and the lines) saw it, frozen by scripts/fetch-surroundings.ts: where each is, how high and how wide. The tops of the trees
+    to the south are his horizon (\"ils dessinent l'horizon visible\"), and a big one 16 m to the north-north-east hides the sky up to 36
+    degrees for azimuths 5 to 40."""
+    found = json.loads(SURROUNDINGS.read_text())
+    out = []
+    for decor in found["decor"]:
+        decor = dict(decor)
+        decor["title"] = titled(decor["title"])
+        decor["occludesSourceIds"] = IDS
+        out.append(decor)
+    return out
+
+
+def surveys():
+    """The surveys the scenery was taken from, as sources: both services give the day they are asked and not the day they were flown or drawn."""
+    found = json.loads(SURROUNDINGS.read_text())
+    day = found["fetchedOn"]
+    return [
+        {"title": "LiDAR HD, canopy height model and classification (the trees, and the heights of what stands round the spot)",
+         "url": "https://geoservices.ign.fr/lidarhd", "publication": {"publisher": "IGN", "time": day}},
+        {"title": "BD TOPO (the buildings with their names and heights, the bridges and the lines round the spot)",
+         "url": "https://geoservices.ign.fr/bdtopo", "publication": {"publisher": "IGN", "time": day}},
+    ]
 
 
 def build():
@@ -401,9 +425,7 @@ def build():
              "publication": {"publisher": "Liste de diffusion SCEAU (sceau_archives_ovni@framalistes.org)", "time": "2026-10-12"}},
             {"title": "Re: [sceau_archives_ovni] Encore un.evenement (the exact spot, and what he meant by left and right)", "authors": ["Q. B."],
              "publication": {"publisher": "Liste de diffusion SCEAU (sceau_archives_ovni@framalistes.org)", "time": "2026-10-12"}},
-            {"title": "LiDAR HD, modèle numérique de hauteur (the trees around the spot)", "url": "https://geoservices.ign.fr/lidarhd",
-             "publication": {"publisher": "IGN", "time": "2026"}},
-        ],
+        ] + surveys(),
         "description": {
             "fr": (
                 "Nuit du 11 août 2026, entre 1 h et 3 h (« vers 2 h 30 »), veillée d'observation avec un ami dans le parc du "
@@ -460,7 +482,7 @@ def build():
         "weatherTrack": {"keyframes": [{"t": 0, "weather": {
             "cloudLayers": [], "cloudCover": 0, "precipitationType": "none", "precipitationIntensity": 0, "storm": False}}]},
         "soundTrack": {"keyframes": [{"t": 0, "sound": {"kind": "none"}}]},
-        "decor": trees(),
+        "decor": surroundings(),
         "milestones": [
             {"t": 0, "label": "A", "note": tr("Aperçu du coin de l'œil vers 20°, venant du nord : une petite lumière qui grossit",
                                                "Caught in the corner of the eye at about 20 degrees, from the north: a small light that grows")},

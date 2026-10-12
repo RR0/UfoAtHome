@@ -42,6 +42,8 @@ export class BuildingFootprints {
   private static readonly STEP_M = 0.9
   /** How much of its smallest rectangle a patch fills for it to be called a rectangle. */
   private static readonly RECTANGLE_FILL = 0.72
+  /** The least a building is deep, taking a patch apart: what is thinner is the edge of the patch, not a building. */
+  private static readonly MIN_DEPTH_M = 2.5
   /** A patch is taken apart into this many rectangles at most. */
   private static readonly MAX_PARTS = 24
   /** The most cells a patch is drawn on when it is taken apart: a whole town block is not worth more. */
@@ -119,7 +121,8 @@ export class BuildingFootprints {
    * does not depend on how the survey drew them, laser pixels or the outlines of a map (see TopoBuildings). `rectangleFill` is how much of its
    * smallest rectangle a patch must fill to be called a rectangle: a laser's pixels along a turned roof are staircases, which a map's outline is not.
    */
-  static ofPoints(xs: number[], ys: number[], hs: number[], res: number, minArea: number, rectangleFill = BuildingFootprints.RECTANGLE_FILL): SurveyedBuilding[] {
+  static ofPoints(xs: number[], ys: number[], hs: number[], res: number, minArea: number, rectangleFill = BuildingFootprints.RECTANGLE_FILL,
+    sides: { from: { east: number, north: number }, to: { east: number, north: number } }[] = []): SurveyedBuilding[] {
     const corners: [number, number][] = []
     for (let i = 0; i < xs.length; i++) {
       for (const [dx, dy] of [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]]) corners.push([xs[i] + dx * res, ys[i] + dy * res])
@@ -131,45 +134,93 @@ export class BuildingFootprints {
     if (area / rectangleArea >= rectangleFill || area < 4 * minArea) {
       return [BuildingFootprints.building(rectangle, angle, BuildingFootprints.roof(hs))]
     }
-    return BuildingFootprints.parts(xs, ys, hs, angle, rectangle, res, minArea)
+    // The directions the patch's own sides run in, the longest first: each arm of an L is square to its own, and none is to the whole patch's.
+    const hullSides = hull.map((from, i) => ({ from: { east: from[0], north: from[1] }, to: { east: hull[(i + 1) % hull.length][0], north: hull[(i + 1) % hull.length][1] } }))
+    const angles = BuildingFootprints.dominantAngles([...sides, ...hullSides])
+    return BuildingFootprints.parts(xs, ys, hs, angles.length > 0 ? angles : [angle], res, minArea)
   }
 
-  /** The largest rectangles in a patch, one after the other, drawn on a grid turned to lie along the patch. */
-  private static parts(xs: number[], ys: number[], hs: number[], angle: number, frame: Rectangle, res: number, minArea: number): SurveyedBuilding[] {
-    const cos = Math.cos(angle)
-    const sin = Math.sin(angle)
-    // Cells no finer than a pixel, and no more of them than a block is worth.
-    const cell = Math.max(res, Math.max(frame.maxU - frame.minU, frame.maxV - frame.minV) / BuildingFootprints.MAX_CELLS)
-    const columns = Math.max(1, Math.ceil((frame.maxU - frame.minU) / cell))
-    const rows = Math.max(1, Math.ceil((frame.maxV - frame.minV) / cell))
-    const filled = new Uint8Array(columns * rows)
-    const heightAt: number[][] = Array.from({ length: columns * rows }, () => [])
-    for (let i = 0; i < xs.length; i++) {
-      const u = xs[i] * cos + ys[i] * sin
-      const v = -xs[i] * sin + ys[i] * cos
-      const column = Math.min(columns - 1, Math.max(0, Math.floor((u - frame.minU) / cell)))
-      const row = Math.min(rows - 1, Math.max(0, Math.floor((v - frame.minV) / cell)))
-      filled[row * columns + column] = 1
-      heightAt[row * columns + column].push(hs[i])
+  /** The directions, modulo a right angle, that the sides of an outline mostly run in: the longest few, each the middle of the 3-degree bin that holds it. */
+  private static dominantAngles(sides: { from: { east: number, north: number }, to: { east: number, north: number } }[], keep = 3): number[] {
+    const bins = new Map<number, number>()
+    for (const side of sides) {
+      const length = Math.hypot(side.to.east - side.from.east, side.to.north - side.from.north)
+      if (length < 1e-6) continue
+      const angle = (Math.atan2(side.to.north - side.from.north, side.to.east - side.from.east) % (Math.PI / 2) + Math.PI / 2) % (Math.PI / 2)
+      const bin = Math.round(angle / (Math.PI / 60))
+      bins.set(bin, (bins.get(bin) ?? 0) + length)
     }
+    return [...bins.entries()].sort((a, b) => b[1] - a[1]).slice(0, keep).map(([bin]) => bin * Math.PI / 60)
+  }
+
+  /**
+   * The largest rectangles in a patch, one after the other: at each step the largest rectangle that any of the directions holds, then those
+   * cells are gone, until what is left is too small to be a building. Each is drawn on a grid turned to lie along its own direction.
+   */
+  private static parts(xs: number[], ys: number[], hs: number[], angles: number[], res: number, minArea: number): SurveyedBuilding[] {
+    let alive = xs.map((_, i) => i)
     const found: SurveyedBuilding[] = []
-    for (let part = 0; part < BuildingFootprints.MAX_PARTS; part++) {
-      const best = BuildingFootprints.largestRectangle(filled, columns, rows)
-      if (best === undefined || best.area * cell * cell < minArea) break
-      const roofs: number[] = []
-      for (let row = best.row; row < best.row + best.rows; row++) {
-        for (let column = best.column; column < best.column + best.columns; column++) {
-          roofs.push(...heightAt[row * columns + column])
-          filled[row * columns + column] = 0
-        }
+    for (let part = 0; part < BuildingFootprints.MAX_PARTS && alive.length > 0; part++) {
+      let best: { area: number, angle: number, rectangle: Rectangle, covered: Set<number> } | undefined
+      for (const angle of angles) {
+        const candidate = BuildingFootprints.largestIn(xs, ys, alive, angle, res)
+        if (candidate && (best === undefined || candidate.area > best.area)) best = candidate
       }
-      if (roofs.length === 0) continue
-      found.push(BuildingFootprints.building({
-        minU: frame.minU + best.column * cell, maxU: frame.minU + (best.column + best.columns) * cell,
-        minV: frame.minV + best.row * cell, maxV: frame.minV + (best.row + best.rows) * cell
-      }, angle, BuildingFootprints.roof(roofs)))
+      if (best === undefined || best.area < minArea) break
+      const covered = best.covered
+      const depth = Math.min(best.rectangle.maxU - best.rectangle.minU, best.rectangle.maxV - best.rectangle.minV)
+      // A strip of under a few metres is what a turned edge leaves of a patch, not a building: it goes with the rest, and is not drawn.
+      if (depth >= BuildingFootprints.MIN_DEPTH_M) found.push(BuildingFootprints.building(best.rectangle, best.angle, BuildingFootprints.roof([...covered].map(i => hs[i]))))
+      alive = alive.filter(i => !covered.has(i))
     }
     return found
+  }
+
+  /** The largest rectangle of the points left, drawn on a grid turned `angle` from east: its area, where it is in that frame, and which points it holds. */
+  private static largestIn(xs: number[], ys: number[], alive: number[], angle: number, res: number):
+    { area: number, angle: number, rectangle: Rectangle, covered: Set<number> } | undefined {
+    const cos = Math.cos(angle)
+    const sin = Math.sin(angle)
+    let minU = Infinity, maxU = -Infinity, minV = Infinity, maxV = -Infinity
+    const us: number[] = []
+    const vs: number[] = []
+    for (const i of alive) {
+      const u = xs[i] * cos + ys[i] * sin
+      const v = -xs[i] * sin + ys[i] * cos
+      us.push(u); vs.push(v)
+      minU = Math.min(minU, u); maxU = Math.max(maxU, u)
+      minV = Math.min(minV, v); maxV = Math.max(maxV, v)
+    }
+    // Cells of a pixel's diagonal and not a pixel: the points lie on a lattice, and a grid turned against it has cells between its points, which
+    // would be holes in a patch that has none. A square of side res * sqrt(2) holds a point of the lattice wherever it lies, which is the finest
+    // that does not tear the patch. And no more of them than a block is worth.
+    const cell = Math.max(res * Math.SQRT2, Math.max(maxU - minU, maxV - minV) / BuildingFootprints.MAX_CELLS)
+    const columns = Math.max(1, Math.ceil((maxU - minU) / cell + 1e-9))
+    const rows = Math.max(1, Math.ceil((maxV - minV) / cell + 1e-9))
+    const filled = new Uint8Array(columns * rows)
+    const where = alive.map((_, k) => {
+      const column = Math.min(columns - 1, Math.max(0, Math.floor((us[k] - minU) / cell)))
+      const row = Math.min(rows - 1, Math.max(0, Math.floor((vs[k] - minV) / cell)))
+      filled[row * columns + column] = 1
+      return row * columns + column
+    })
+    const best = BuildingFootprints.largestRectangle(filled, columns, rows)
+    if (best === undefined) return undefined
+    const covered = new Set<number>()
+    alive.forEach((index, k) => {
+      const column = where[k] % columns
+      const row = Math.floor(where[k] / columns)
+      if (column >= best.column && column < best.column + best.columns && row >= best.row && row < best.row + best.rows) covered.add(index)
+    })
+    return {
+      area: best.area * cell * cell,
+      angle,
+      covered,
+      rectangle: {
+        minU: minU + best.column * cell, maxU: minU + (best.column + best.columns) * cell,
+        minV: minV + best.row * cell, maxV: minV + (best.row + best.rows) * cell
+      }
+    }
   }
 
   /** The largest rectangle of filled cells in a grid, by the stack of the histogram of each row. */

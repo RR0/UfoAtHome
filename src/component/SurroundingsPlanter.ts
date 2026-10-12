@@ -1,6 +1,8 @@
 import type { DecorObject } from "../engine/model/Decor.js"
 import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import type { Surroundings, SurroundingsProvider } from "../render3d/terrain/SurroundingsProvider.js"
+import { SurveyedDecor } from "../render3d/terrain/SurveyedDecor.js"
+import type { SurveyedKind } from "../render3d/terrain/SurveyedDecor.js"
 import { SurroundingsUnavailableError } from "../render3d/terrain/SurroundingsProvider.js"
 import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
 
@@ -10,8 +12,8 @@ export interface SurroundingsPlanterHost {
   decor(): readonly DecorObject[]
   /** Puts this decor in place of the recording's: a new array, never the old one changed (see SceneRenderer.setDecor). */
   setDecor(decor: DecorObject[]): void
-  /** The name a decor object of this kind is given, by its number among the recording's: "Tree 12". */
-  label(kind: "tree" | "building" | "bridge" | "wire", number: number): string
+  /** What a kind of decor is called, in the language of the editor: "Tree", "Bridge", "Overhead line". */
+  kindName(kind: SurveyedKind): string
   /** Says where the scenery came from, among the recording's sources, if it does not already. */
   cite(source: RecordingSource): void
 }
@@ -53,8 +55,6 @@ export class SurroundingsPlanter {
   private static readonly METRES_PER_DEGREE = 111320
   private static readonly DEFAULT_RADIUS_M = 100
   private static readonly DEFAULT_DEBOUNCE_MS = 800
-  /** A building about three metres a floor, the common height of one. */
-  private static readonly FLOOR_HEIGHT_M = 3
 
   private messages: SightingEditorMessages
   private readonly debounceMs: number
@@ -161,72 +161,8 @@ export class SurroundingsPlanter {
 
   private plant(provider: SurroundingsProvider, found: Surroundings): void {
     const kept = this.withoutPlanted()
-    const handTrees = kept.some(object => object.kind === "tree")
-    const handBuildings = kept.some(object => object.kind === "building")
-    const handBridges = kept.some(object => object.kind === "bridge")
-    const handWires = kept.some(object => object.kind === "wire")
-    const taken = new Set(kept.map(object => object.id))
-    const nextId = (): string => {
-      let id: string
-      do id = `${provider.id}-${++this.serial}`; while (taken.has(id))
-      taken.add(id)
-      return id
-    }
-    this.serial = 0
-    let trees = kept.filter(object => object.kind === "tree").length
-    let buildings = kept.filter(object => object.kind === "building").length
-    let bridges = kept.filter(object => object.kind === "bridge").length
-    let wires = kept.filter(object => object.kind === "wire").length
-    const planted: DecorObject[] = []
-    // What a survey names is called by its name (the town hall), the parts of it after the first numbered ("Mairie de Saint-Lô (2)"); what it does not is "Building 12".
-    const names = new Set(kept.map(object => typeof object.title === "string" ? object.title : ""))
-    const titled = (name: string | undefined, fallback: () => string): string => {
-      const wanted = name ?? fallback()
-      let title = wanted
-      for (let n = 2; names.has(title); n++) title = `${wanted} (${n})`
-      names.add(title)
-      return title
-    }
-    if (!handTrees) {
-      for (const tree of found.trees) {
-        planted.push({
-          id: nextId(), kind: "tree", title: titled(undefined, () => this.host.label("tree", ++trees)), eastM: tree.eastM, northM: tree.northM, headingDeg: 0, lit: false,
-          sizeM: { widthM: tree.widthM, lengthM: tree.widthM, heightM: tree.heightM }, origin: provider.id
-        })
-      }
-    }
-    if (!handBuildings) {
-      for (const building of found.buildings) {
-        planted.push({
-          id: nextId(), kind: "building", title: titled(building.name, () => this.host.label("building", ++buildings)), eastM: building.eastM, northM: building.northM,
-          headingDeg: building.headingDeg, lit: false,
-          sizeM: { widthM: building.widthM, lengthM: building.lengthM, heightM: building.heightM },
-          floors: building.floors ?? Math.max(1, Math.round(building.heightM / SurroundingsPlanter.FLOOR_HEIGHT_M)), origin: provider.id
-        })
-      }
-    }
-    if (!handBridges) {
-      for (const bridge of found.bridges) {
-        planted.push({
-          id: nextId(), kind: "bridge", title: titled(bridge.name ? `${this.host.label("bridge", 0).replace(/ 0$/, "")} (${bridge.name})` : undefined, () => this.host.label("bridge", ++bridges)), eastM: bridge.eastM, northM: bridge.northM,
-          headingDeg: bridge.headingDeg, lit: false,
-          sizeM: { lengthM: bridge.lengthM, widthM: bridge.widthM, heightM: bridge.heightM }, origin: provider.id
-        })
-      }
-    }
-    if (!handWires) {
-      for (const line of found.lines) {
-        planted.push({
-          id: nextId(), kind: "wire", title: titled(`${this.host.label("wire", 0).replace(/ 0$/, "")} (${line.voltage})`, () => this.host.label("wire", ++wires)), eastM: line.eastM, northM: line.northM,
-          headingDeg: line.headingDeg, lit: false,
-          sizeM: { lengthM: line.lengthM, heightM: line.heightM },
-          wire: { strands: line.acrossM.map(acrossM => ({ heightM: line.heightM, acrossM })), poles: "both", poleHeightM: line.poleHeightM },
-          origin: provider.id
-        })
-      }
-    }
+    const { planted, handPlaced } = SurveyedDecor.of(provider.id, found, { kept, kindName: kind => this.host.kindName(kind) })
     const count = (kind: DecorObject["kind"]): number => planted.filter(object => object.kind === kind).length
-    const handPlaced = handTrees || handBuildings || handBridges || handWires
     if (planted.length > 0 || this.host.decor().length !== kept.length) this.host.setDecor([...kept, ...planted])
     if (planted.length === 0) {
       this.say(handPlaced ? this.messages.surveyKept : this.messages.surveyNone.replace("{radius}", String(this.radiusM)))
@@ -238,9 +174,6 @@ export class SurroundingsPlanter {
       .replace("{bridges}", String(count("bridge"))).replace("{lines}", String(count("wire"))).replace("{source}", provider.name)
     this.say(handPlaced ? `${done} ${this.messages.surveyKept}` : done)
   }
-
-  /** The counter of the ids of one planting, so that each planting numbers its objects from 1 and a replanted tree gets its old id back. */
-  private serial = 0
 
   private isSamePlace(place: { lat: number, lng: number }, lat: number, lng: number): boolean {
     const north = (place.lat - lat) * SurroundingsPlanter.METRES_PER_DEGREE

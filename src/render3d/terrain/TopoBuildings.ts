@@ -121,6 +121,8 @@ export class TopoBuildings {
       }
     }
     if (xs.length * res * res < minArea) return []
-    return BuildingFootprints.ofPoints(xs, ys, new Array(xs.length).fill(height), res, minArea, TopoBuildings.RECTANGLE_FILL)
+    // The outline's own sides tell which ways its arms run, which the cells alone do not.
+    const sides = rings.flatMap(ring => ring.slice(0, -1).map((from, i) => ({ from, to: ring[i + 1] })))
+    return BuildingFootprints.ofPoints(xs, ys, new Array(xs.length).fill(height), res, minArea, TopoBuildings.RECTANGLE_FILL, sides)
   }
 }

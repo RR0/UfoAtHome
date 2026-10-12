@@ -1316,7 +1316,7 @@ export class SightingEditorElement extends HTMLElement {
     this.surroundings = new SurroundingsPlanter(this.sceneryStatus, {
       decor: () => this.ufoElement.sighting.decor,
       setDecor: decor => this.setPlantedDecor(decor),
-      label: (kind, number) => `${this.decorList.kindLabel(kind)} ${number}`,
+      kindName: kind => this.decorList.kindLabel(kind),
       cite: source => this.citeSource(source)
     }, sightingEditorMessages_en,
     async (lat, lng) => this.surroundingsProvider

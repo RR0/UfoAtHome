@@ -32,6 +32,7 @@ import { readdir, readFile, mkdir, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 import { promisify } from "node:util"
 import { fileURLToPath } from "node:url"
+import { IgnTopoRoadProvider } from "../src/render3d/terrain/providers/IgnTopoRoadProvider.js"
 import { OverpassRoadProvider } from "../src/render3d/terrain/providers/OverpassRoadProvider.js"
 import type { RoadWay } from "../src/render3d/terrain/RoadProvider.js"
 
@@ -61,6 +62,8 @@ const run = promisify(execFile)
 class RoadArchiveBuilder {
   private readonly root = fileURLToPath(new URL("..", import.meta.url))
   private readonly provider = new OverpassRoadProvider({ fetchImpl: RoadArchiveBuilder.fetchOrCurl })
+  /** France is frozen from the IGN's map, which names its roads and answers, rather than from the donated Overpass (see RegionalRoadProvider). */
+  private readonly ign = new IgnTopoRoadProvider({ fetchImpl: RoadArchiveBuilder.fetchOrCurl })
   /** Said once, the first time the fallback is taken — see fetchOrCurl. */
   private static saidCurl = false
 
@@ -101,8 +104,9 @@ class RoadArchiveBuilder {
       }
       process.stdout.write(`${place.id}: ${acrossKm} km of ground (patch radius ${place.radiusM} m)… `)
       let ways: RoadWay[]
+      const inFrance = IgnTopoRoadProvider.covers(bounds)
       try {
-        ways = await this.waysFor(place.id, bounds)
+        ways = inFrance ? await this.ign.getRoads(bounds) : await this.waysFor(place.id, bounds)
       } catch (error) {
         // A refusal here is not a reason to lose the places already frozen: the index is written
         // with what did come back, and the run can be repeated for the rest.
@@ -112,8 +116,8 @@ class RoadArchiveBuilder {
       const file = `${place.id}.json`
       await writeFile(join(out, file), JSON.stringify({
         version: 1,
-        attribution: this.provider.attribution,
-        contemporary: this.provider.contemporary,
+        attribution: inFrance ? this.ign.attribution : this.provider.attribution,
+        contemporary: inFrance ? this.ign.contemporary : this.provider.contemporary,
         takenOn: new Date().toISOString().slice(0, 10),
         about: place.id,
         ways

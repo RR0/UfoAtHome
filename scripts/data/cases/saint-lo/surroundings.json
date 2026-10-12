@@ -1,0 +1,2523 @@
+{
+ "version": 1,
+ "provider": {
+  "id": "ign-lidar-topo",
+  "name": "IGN LiDAR HD + BD TOPO",
+  "attribution": "Canopy © IGN, LiDAR HD; buildings, bridges and lines © IGN, BD TOPO (Licence Ouverte 2.0), as surveyed on days the services do not give",
+  "creditUrl": "https://geoservices.ign.fr/lidarhd"
+ },
+ "centre": {
+  "lat": 49.10489,
+  "lng": -1.075382
+ },
+ "radiusM": 150,
+ "fetchedOn": "2026-10-12",
+ "decor": [
+  {
+   "id": "ign-lidar-topo-1",
+   "kind": "tree",
+   "title": "Tree 1",
+   "eastM": 8.8,
+   "northM": 15.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.4,
+    "lengthM": 12.4,
+    "heightM": 13.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-2",
+   "kind": "tree",
+   "title": "Tree 2",
+   "eastM": -52.7,
+   "northM": -55.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 14.8,
+    "heightM": 19.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-3",
+   "kind": "tree",
+   "title": "Tree 3",
+   "eastM": 11.3,
+   "northM": -46.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 12.7,
+    "heightM": 12.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-4",
+   "kind": "tree",
+   "title": "Tree 4",
+   "eastM": 45.3,
+   "northM": -36.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.5,
+    "lengthM": 13.5,
+    "heightM": 14.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-5",
+   "kind": "tree",
+   "title": "Tree 5",
+   "eastM": -53.7,
+   "northM": -44.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.6,
+    "lengthM": 13.6,
+    "heightM": 17.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-6",
+   "kind": "tree",
+   "title": "Tree 6",
+   "eastM": 19.3,
+   "northM": -44.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.9,
+    "lengthM": 13.9,
+    "heightM": 12.3
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-7",
+   "kind": "tree",
+   "title": "Tree 7",
+   "eastM": -17.7,
+   "northM": 84.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14,
+    "lengthM": 14,
+    "heightM": 19
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-8",
+   "kind": "tree",
+   "title": "Tree 8",
+   "eastM": 51.8,
+   "northM": -36.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 13,
+    "heightM": 14.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-9",
+   "kind": "tree",
+   "title": "Tree 9",
+   "eastM": 16.3,
+   "northM": 96.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.9,
+    "lengthM": 15.9,
+    "heightM": 20.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-10",
+   "kind": "tree",
+   "title": "Tree 10",
+   "eastM": -0.7,
+   "northM": -52.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.6,
+    "lengthM": 13.6,
+    "heightM": 11.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-11",
+   "kind": "tree",
+   "title": "Tree 11",
+   "eastM": 21.8,
+   "northM": 99.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.9,
+    "lengthM": 15.9,
+    "heightM": 21
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-12",
+   "kind": "tree",
+   "title": "Tree 12",
+   "eastM": 30.8,
+   "northM": -41.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.1,
+    "lengthM": 12.1,
+    "heightM": 11.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-13",
+   "kind": "tree",
+   "title": "Tree 13",
+   "eastM": 64.8,
+   "northM": -28.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.6,
+    "lengthM": 13.6,
+    "heightM": 15
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-14",
+   "kind": "tree",
+   "title": "Tree 14",
+   "eastM": 71.3,
+   "northM": -27.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.5,
+    "lengthM": 12.5,
+    "heightM": 16
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-15",
+   "kind": "tree",
+   "title": "Tree 15",
+   "eastM": 71.3,
+   "northM": -49.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 17.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-16",
+   "kind": "tree",
+   "title": "Tree 16",
+   "eastM": -6.7,
+   "northM": -58.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.7,
+    "lengthM": 13.7,
+    "heightM": 12.6
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-17",
+   "kind": "tree",
+   "title": "Tree 17",
+   "eastM": 73.8,
+   "northM": -59.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 19.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-18",
+   "kind": "tree",
+   "title": "Tree 18",
+   "eastM": -37.7,
+   "northM": 77.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 14.8,
+    "heightM": 16.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-19",
+   "kind": "tree",
+   "title": "Tree 19",
+   "eastM": -32.7,
+   "northM": 77.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.7,
+    "lengthM": 14.7,
+    "heightM": 16.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-20",
+   "kind": "tree",
+   "title": "Tree 20",
+   "eastM": 68.3,
+   "northM": -35.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 15.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-21",
+   "kind": "tree",
+   "title": "Tree 21",
+   "eastM": 29.3,
+   "northM": 96.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 15.6,
+    "heightM": 19.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-22",
+   "kind": "tree",
+   "title": "Tree 22",
+   "eastM": 59.3,
+   "northM": -34.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.2,
+    "lengthM": 13.2,
+    "heightM": 13.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-23",
+   "kind": "tree",
+   "title": "Tree 23",
+   "eastM": 0.8,
+   "northM": 89.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 16.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-24",
+   "kind": "tree",
+   "title": "Tree 24",
+   "eastM": 73.8,
+   "northM": -73.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 19.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-25",
+   "kind": "tree",
+   "title": "Tree 25",
+   "eastM": 5.3,
+   "northM": 88.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 16.3
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-26",
+   "kind": "tree",
+   "title": "Tree 26",
+   "eastM": 79.3,
+   "northM": -73.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.4,
+    "lengthM": 15.4,
+    "heightM": 19.3
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-27",
+   "kind": "tree",
+   "title": "Tree 27",
+   "eastM": 75.3,
+   "northM": -87.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.7,
+    "lengthM": 15.7,
+    "heightM": 20.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-28",
+   "kind": "tree",
+   "title": "Tree 28",
+   "eastM": -8.2,
+   "northM": -97.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 17.3
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-29",
+   "kind": "tree",
+   "title": "Tree 29",
+   "eastM": 3.8,
+   "northM": 93.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.9,
+    "lengthM": 15.9,
+    "heightM": 16.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-30",
+   "kind": "tree",
+   "title": "Tree 30",
+   "eastM": -6.2,
+   "northM": -90.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 12,
+    "heightM": 15.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-31",
+   "kind": "tree",
+   "title": "Tree 31",
+   "eastM": -6.2,
+   "northM": 86.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.7,
+    "lengthM": 11.7,
+    "heightM": 14.7
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-32",
+   "kind": "tree",
+   "title": "Tree 32",
+   "eastM": -6.7,
+   "northM": -65.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.6,
+    "lengthM": 13.6,
+    "heightM": 11.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-33",
+   "kind": "tree",
+   "title": "Tree 33",
+   "eastM": 35.8,
+   "northM": 96.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 16.6
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-34",
+   "kind": "tree",
+   "title": "Tree 34",
+   "eastM": 65.8,
+   "northM": -88.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15,
+    "lengthM": 15,
+    "heightM": 17.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-35",
+   "kind": "tree",
+   "title": "Tree 35",
+   "eastM": -47.7,
+   "northM": 80.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.8,
+    "lengthM": 15.8,
+    "heightM": 14.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-36",
+   "kind": "tree",
+   "title": "Tree 36",
+   "eastM": 74.8,
+   "northM": -8.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.9,
+    "lengthM": 12.9,
+    "heightM": 12.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-37",
+   "kind": "tree",
+   "title": "Tree 37",
+   "eastM": 81.3,
+   "northM": -81.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 17.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-38",
+   "kind": "tree",
+   "title": "Tree 38",
+   "eastM": 65.3,
+   "northM": -93.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.7,
+    "lengthM": 15.7,
+    "heightM": 17
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-39",
+   "kind": "tree",
+   "title": "Tree 39",
+   "eastM": -53.2,
+   "northM": 88.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15,
+    "lengthM": 15,
+    "heightM": 15.3
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-40",
+   "kind": "tree",
+   "title": "Tree 40",
+   "eastM": 37.8,
+   "northM": 104.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 14.1,
+    "heightM": 16.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-41",
+   "kind": "tree",
+   "title": "Tree 41",
+   "eastM": 13.8,
+   "northM": -109.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 13,
+    "heightM": 15.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-42",
+   "kind": "tree",
+   "title": "Tree 42",
+   "eastM": 2.3,
+   "northM": -112.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.2,
+    "lengthM": 14.2,
+    "heightM": 16.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-43",
+   "kind": "tree",
+   "title": "Tree 43",
+   "eastM": 78.8,
+   "northM": -38.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 13,
+    "heightM": 12.6
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-44",
+   "kind": "tree",
+   "title": "Tree 44",
+   "eastM": 1.3,
+   "northM": -115.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 16
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-45",
+   "kind": "tree",
+   "title": "Tree 45",
+   "eastM": 58.8,
+   "northM": 107.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14,
+    "lengthM": 14,
+    "heightM": 16.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-46",
+   "kind": "tree",
+   "title": "Tree 46",
+   "eastM": -56.2,
+   "northM": 91.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 14.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-47",
+   "kind": "tree",
+   "title": "Tree 47",
+   "eastM": -7.7,
+   "northM": -116.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.4,
+    "lengthM": 15.4,
+    "heightM": 15.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-48",
+   "kind": "tree",
+   "title": "Tree 48",
+   "eastM": -76.2,
+   "northM": 42.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.3,
+    "lengthM": 10.3,
+    "heightM": 12.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-49",
+   "kind": "tree",
+   "title": "Tree 49",
+   "eastM": 7.8,
+   "northM": -111.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 13.4,
+    "heightM": 14.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-50",
+   "kind": "tree",
+   "title": "Tree 50",
+   "eastM": 60.8,
+   "northM": -19.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.7,
+    "lengthM": 9.7,
+    "heightM": 9.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-51",
+   "kind": "tree",
+   "title": "Tree 51",
+   "eastM": -3.2,
+   "northM": -116.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 15.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-52",
+   "kind": "tree",
+   "title": "Tree 52",
+   "eastM": -75.2,
+   "northM": -26.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.2,
+    "lengthM": 10.2,
+    "heightM": 10.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-53",
+   "kind": "tree",
+   "title": "Tree 53",
+   "eastM": -6.7,
+   "northM": -75.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 13.4,
+    "heightM": 10.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-54",
+   "kind": "tree",
+   "title": "Tree 54",
+   "eastM": -69.7,
+   "northM": -6.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.1,
+    "lengthM": 11.1,
+    "heightM": 9.6
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-55",
+   "kind": "tree",
+   "title": "Tree 55",
+   "eastM": 93.8,
+   "northM": -77.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 13,
+    "heightM": 15.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-56",
+   "kind": "tree",
+   "title": "Tree 56",
+   "eastM": -65.2,
+   "northM": 81.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.8,
+    "lengthM": 9.8,
+    "heightM": 13.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-57",
+   "kind": "tree",
+   "title": "Tree 57",
+   "eastM": 33.8,
+   "northM": -102.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.3,
+    "lengthM": 13.3,
+    "heightM": 13.6
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-58",
+   "kind": "tree",
+   "title": "Tree 58",
+   "eastM": 67.3,
+   "northM": 102.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 15.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-59",
+   "kind": "tree",
+   "title": "Tree 59",
+   "eastM": 124.8,
+   "northM": -72.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.8,
+    "lengthM": 13.8,
+    "heightM": 17
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-60",
+   "kind": "tree",
+   "title": "Tree 60",
+   "eastM": 37.8,
+   "northM": -102.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 13,
+    "heightM": 12.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-61",
+   "kind": "tree",
+   "title": "Tree 61",
+   "eastM": -117.2,
+   "northM": 83.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.2,
+    "lengthM": 13.2,
+    "heightM": 16.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-62",
+   "kind": "tree",
+   "title": "Tree 62",
+   "eastM": -70.2,
+   "northM": -18.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.4,
+    "lengthM": 12.4,
+    "heightM": 9.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-63",
+   "kind": "tree",
+   "title": "Tree 63",
+   "eastM": 51.3,
+   "northM": 104.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.9,
+    "lengthM": 11.9,
+    "heightM": 13.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-64",
+   "kind": "tree",
+   "title": "Tree 64",
+   "eastM": -117.7,
+   "northM": 90.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.8,
+    "lengthM": 12.8,
+    "heightM": 16.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-65",
+   "kind": "tree",
+   "title": "Tree 65",
+   "eastM": 50.8,
+   "northM": -96.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.7,
+    "lengthM": 11.7,
+    "heightM": 12.3
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-66",
+   "kind": "tree",
+   "title": "Tree 66",
+   "eastM": 123.8,
+   "northM": -79.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 14.1,
+    "heightM": 16.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-67",
+   "kind": "tree",
+   "title": "Tree 67",
+   "eastM": -59.2,
+   "northM": 98.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.8,
+    "lengthM": 11.8,
+    "heightM": 12.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-68",
+   "kind": "tree",
+   "title": "Tree 68",
+   "eastM": 45.8,
+   "northM": -99.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.6,
+    "lengthM": 11.6,
+    "heightM": 12.3
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-69",
+   "kind": "tree",
+   "title": "Tree 69",
+   "eastM": 102.3,
+   "northM": -74.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.6,
+    "lengthM": 12.6,
+    "heightM": 13.6
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-70",
+   "kind": "tree",
+   "title": "Tree 70",
+   "eastM": -12.2,
+   "northM": -123.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.4,
+    "lengthM": 15.4,
+    "heightM": 13.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-71",
+   "kind": "tree",
+   "title": "Tree 71",
+   "eastM": -2.2,
+   "northM": -131.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.6,
+    "lengthM": 13.6,
+    "heightM": 14.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-72",
+   "kind": "tree",
+   "title": "Tree 72",
+   "eastM": 88.8,
+   "northM": -16.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.6,
+    "lengthM": 11.6,
+    "heightM": 10.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-73",
+   "kind": "tree",
+   "title": "Tree 73",
+   "eastM": 99.8,
+   "northM": 107.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.2,
+    "lengthM": 15.2,
+    "heightM": 15.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-74",
+   "kind": "tree",
+   "title": "Tree 74",
+   "eastM": -67.2,
+   "northM": -21.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.5,
+    "lengthM": 10.5,
+    "heightM": 8.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-75",
+   "kind": "tree",
+   "title": "Tree 75",
+   "eastM": -72.7,
+   "northM": 2.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.7,
+    "lengthM": 9.7,
+    "heightM": 8.3
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-76",
+   "kind": "tree",
+   "title": "Tree 76",
+   "eastM": -45.7,
+   "northM": 93.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.3,
+    "lengthM": 12.3,
+    "heightM": 11.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-77",
+   "kind": "tree",
+   "title": "Tree 77",
+   "eastM": -81.2,
+   "northM": 6.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.9,
+    "lengthM": 8.9,
+    "heightM": 8.7
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-78",
+   "kind": "tree",
+   "title": "Tree 78",
+   "eastM": 76.3,
+   "northM": 101.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 12.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-79",
+   "kind": "tree",
+   "title": "Tree 79",
+   "eastM": 97.3,
+   "northM": -42.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.7,
+    "lengthM": 10.7,
+    "heightM": 10.6
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-80",
+   "kind": "tree",
+   "title": "Tree 80",
+   "eastM": 82.3,
+   "northM": 104.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.2,
+    "lengthM": 14.2,
+    "heightM": 12.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-81",
+   "kind": "tree",
+   "title": "Tree 81",
+   "eastM": 127.3,
+   "northM": 28.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.2,
+    "lengthM": 10.2,
+    "heightM": 12.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-82",
+   "kind": "tree",
+   "title": "Tree 82",
+   "eastM": 90.8,
+   "northM": -29.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.6,
+    "lengthM": 12.6,
+    "heightM": 9.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-83",
+   "kind": "tree",
+   "title": "Tree 83",
+   "eastM": 79.3,
+   "northM": -28.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.5,
+    "lengthM": 13.5,
+    "heightM": 8.3
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-84",
+   "kind": "tree",
+   "title": "Tree 84",
+   "eastM": 87.8,
+   "northM": -41.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.6,
+    "lengthM": 11.6,
+    "heightM": 9.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-85",
+   "kind": "tree",
+   "title": "Tree 85",
+   "eastM": -99.7,
+   "northM": 104.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.3,
+    "lengthM": 10.3,
+    "heightM": 13
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-86",
+   "kind": "tree",
+   "title": "Tree 86",
+   "eastM": 76.8,
+   "northM": 109.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.9,
+    "lengthM": 12.9,
+    "heightM": 12
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-87",
+   "kind": "tree",
+   "title": "Tree 87",
+   "eastM": 84.3,
+   "northM": -32.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.4,
+    "lengthM": 15.4,
+    "heightM": 8.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-88",
+   "kind": "tree",
+   "title": "Tree 88",
+   "eastM": -115.2,
+   "northM": -46.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6,
+    "lengthM": 6,
+    "heightM": 11
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-89",
+   "kind": "tree",
+   "title": "Tree 89",
+   "eastM": -35.2,
+   "northM": -127.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.6,
+    "lengthM": 11.6,
+    "heightM": 11.3
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-90",
+   "kind": "tree",
+   "title": "Tree 90",
+   "eastM": 93.8,
+   "northM": -3.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 13,
+    "heightM": 8.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-91",
+   "kind": "tree",
+   "title": "Tree 91",
+   "eastM": 80.8,
+   "northM": 108.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.9,
+    "lengthM": 12.9,
+    "heightM": 11.3
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-92",
+   "kind": "tree",
+   "title": "Tree 92",
+   "eastM": 112.3,
+   "northM": 6.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.7,
+    "lengthM": 6.7,
+    "heightM": 9.6
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-93",
+   "kind": "tree",
+   "title": "Tree 93",
+   "eastM": -29.7,
+   "northM": -126.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.9,
+    "lengthM": 11.9,
+    "heightM": 10.7
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-94",
+   "kind": "tree",
+   "title": "Tree 94",
+   "eastM": 130.3,
+   "northM": -12.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.1,
+    "lengthM": 9.1,
+    "heightM": 10.7
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-95",
+   "kind": "tree",
+   "title": "Tree 95",
+   "eastM": -45.2,
+   "northM": -129.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.3,
+    "lengthM": 13.3,
+    "heightM": 11.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-96",
+   "kind": "tree",
+   "title": "Tree 96",
+   "eastM": -18.7,
+   "northM": -146.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 13,
+    "heightM": 11.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-97",
+   "kind": "tree",
+   "title": "Tree 97",
+   "eastM": -19.2,
+   "northM": -142.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.8,
+    "lengthM": 12.8,
+    "heightM": 11.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-98",
+   "kind": "tree",
+   "title": "Tree 98",
+   "eastM": -60.2,
+   "northM": -85.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.2,
+    "lengthM": 8.2,
+    "heightM": 8.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-99",
+   "kind": "tree",
+   "title": "Tree 99",
+   "eastM": -23.2,
+   "northM": -145.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 13,
+    "heightM": 11.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-100",
+   "kind": "tree",
+   "title": "Tree 100",
+   "eastM": -121.7,
+   "northM": -40.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.1,
+    "lengthM": 11.1,
+    "heightM": 10.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-101",
+   "kind": "tree",
+   "title": "Tree 101",
+   "eastM": 102.8,
+   "northM": -37.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.8,
+    "lengthM": 11.8,
+    "heightM": 8.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-102",
+   "kind": "tree",
+   "title": "Tree 102",
+   "eastM": -17.7,
+   "northM": -109.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.9,
+    "lengthM": 10.9,
+    "heightM": 8.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-103",
+   "kind": "tree",
+   "title": "Tree 103",
+   "eastM": -121.2,
+   "northM": -87.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.9,
+    "lengthM": 10.9,
+    "heightM": 11.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-104",
+   "kind": "tree",
+   "title": "Tree 104",
+   "eastM": -1.7,
+   "northM": -143.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 11.3,
+    "heightM": 11
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-105",
+   "kind": "tree",
+   "title": "Tree 105",
+   "eastM": 102.8,
+   "northM": 29.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.8,
+    "lengthM": 11.8,
+    "heightM": 8.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-106",
+   "kind": "tree",
+   "title": "Tree 106",
+   "eastM": -36.2,
+   "northM": -141.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.5,
+    "lengthM": 9.5,
+    "heightM": 11
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-107",
+   "kind": "tree",
+   "title": "Tree 107",
+   "eastM": -65.7,
+   "northM": 114.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.4,
+    "lengthM": 12.4,
+    "heightM": 10.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-108",
+   "kind": "tree",
+   "title": "Tree 108",
+   "eastM": -124.7,
+   "northM": -55.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.9,
+    "lengthM": 12.9,
+    "heightM": 10.3
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-109",
+   "kind": "tree",
+   "title": "Tree 109",
+   "eastM": 93.8,
+   "northM": 7.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.5,
+    "lengthM": 12.5,
+    "heightM": 7.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-110",
+   "kind": "tree",
+   "title": "Tree 110",
+   "eastM": -127.7,
+   "northM": -46.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.2,
+    "lengthM": 13.2,
+    "heightM": 10
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-111",
+   "kind": "tree",
+   "title": "Tree 111",
+   "eastM": -80.2,
+   "northM": -33.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.4,
+    "lengthM": 5.4,
+    "heightM": 6.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-112",
+   "kind": "tree",
+   "title": "Tree 112",
+   "eastM": -36.2,
+   "northM": -131.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.1,
+    "lengthM": 12.1,
+    "heightM": 9.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-113",
+   "kind": "tree",
+   "title": "Tree 113",
+   "eastM": 127.8,
+   "northM": 46.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.9,
+    "lengthM": 8.9,
+    "heightM": 9.6
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-114",
+   "kind": "tree",
+   "title": "Tree 114",
+   "eastM": -10.2,
+   "northM": -148.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.2,
+    "lengthM": 10.2,
+    "heightM": 10.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-115",
+   "kind": "tree",
+   "title": "Tree 115",
+   "eastM": -42.2,
+   "northM": -63.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 8.5,
+    "heightM": 5.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-116",
+   "kind": "tree",
+   "title": "Tree 116",
+   "eastM": -35.2,
+   "northM": -60.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 6.4,
+    "heightM": 5.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-117",
+   "kind": "tree",
+   "title": "Tree 117",
+   "eastM": -67.2,
+   "northM": -27.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.5,
+    "lengthM": 10.5,
+    "heightM": 5.6
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-118",
+   "kind": "tree",
+   "title": "Tree 118",
+   "eastM": -51.2,
+   "northM": -134.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14,
+    "lengthM": 14,
+    "heightM": 9.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-119",
+   "kind": "tree",
+   "title": "Tree 119",
+   "eastM": 43.8,
+   "northM": -113.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 5.7,
+    "heightM": 8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-120",
+   "kind": "tree",
+   "title": "Tree 120",
+   "eastM": 143.8,
+   "northM": -27.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 8.5,
+    "heightM": 9.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-121",
+   "kind": "tree",
+   "title": "Tree 121",
+   "eastM": 18.3,
+   "northM": -122.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.5,
+    "lengthM": 4.5,
+    "heightM": 8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-122",
+   "kind": "tree",
+   "title": "Tree 122",
+   "eastM": 85.8,
+   "northM": -23.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.8,
+    "lengthM": 12.8,
+    "heightM": 6.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-123",
+   "kind": "tree",
+   "title": "Tree 123",
+   "eastM": 124.8,
+   "northM": 14.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.4,
+    "lengthM": 7.4,
+    "heightM": 7.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-124",
+   "kind": "tree",
+   "title": "Tree 124",
+   "eastM": 44.3,
+   "northM": -117.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.5,
+    "lengthM": 5.5,
+    "heightM": 7.7
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-125",
+   "kind": "tree",
+   "title": "Tree 125",
+   "eastM": -25.7,
+   "northM": -131.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.5,
+    "lengthM": 11.5,
+    "heightM": 8.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-126",
+   "kind": "tree",
+   "title": "Tree 126",
+   "eastM": 88.8,
+   "northM": -9.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.5,
+    "lengthM": 13.5,
+    "heightM": 5.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-127",
+   "kind": "tree",
+   "title": "Tree 127",
+   "eastM": 111.8,
+   "northM": -36.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 10.6,
+    "heightM": 7.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-128",
+   "kind": "tree",
+   "title": "Tree 128",
+   "eastM": 115.8,
+   "northM": -41.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.2,
+    "lengthM": 10.2,
+    "heightM": 7.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-129",
+   "kind": "tree",
+   "title": "Tree 129",
+   "eastM": 120.3,
+   "northM": -39.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9,
+    "lengthM": 9,
+    "heightM": 7.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-130",
+   "kind": "tree",
+   "title": "Tree 130",
+   "eastM": -88.7,
+   "northM": 106.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 12.7,
+    "heightM": 8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-131",
+   "kind": "tree",
+   "title": "Tree 131",
+   "eastM": -74.2,
+   "northM": 120.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.1,
+    "lengthM": 11.1,
+    "heightM": 8.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-132",
+   "kind": "tree",
+   "title": "Tree 132",
+   "eastM": 96.3,
+   "northM": 70.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8,
+    "lengthM": 8,
+    "heightM": 7.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-133",
+   "kind": "tree",
+   "title": "Tree 133",
+   "eastM": -79.7,
+   "northM": 116.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11,
+    "lengthM": 11,
+    "heightM": 8.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-134",
+   "kind": "tree",
+   "title": "Tree 134",
+   "eastM": 116.8,
+   "northM": -56.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 7.8,
+    "heightM": 7.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-135",
+   "kind": "tree",
+   "title": "Tree 135",
+   "eastM": -141.2,
+   "northM": -31.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.8,
+    "lengthM": 8.8,
+    "heightM": 8.1
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-136",
+   "kind": "tree",
+   "title": "Tree 136",
+   "eastM": 131.3,
+   "northM": 19.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.2,
+    "lengthM": 11.2,
+    "heightM": 7.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-137",
+   "kind": "tree",
+   "title": "Tree 137",
+   "eastM": 102.3,
+   "northM": 13.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.1,
+    "lengthM": 12.1,
+    "heightM": 6
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-138",
+   "kind": "tree",
+   "title": "Tree 138",
+   "eastM": -9.2,
+   "northM": 119.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 6.4,
+    "heightM": 6.7
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-139",
+   "kind": "tree",
+   "title": "Tree 139",
+   "eastM": 105.3,
+   "northM": 76.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 3.1,
+    "lengthM": 3.1,
+    "heightM": 7
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-140",
+   "kind": "tree",
+   "title": "Tree 140",
+   "eastM": 112.3,
+   "northM": 32.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 12.7,
+    "heightM": 6.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-141",
+   "kind": "tree",
+   "title": "Tree 141",
+   "eastM": 1.3,
+   "northM": -149.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.9,
+    "lengthM": 8.9,
+    "heightM": 7.8
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-142",
+   "kind": "tree",
+   "title": "Tree 142",
+   "eastM": -7.2,
+   "northM": 149.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 2.9,
+    "lengthM": 2.9,
+    "heightM": 7.7
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-143",
+   "kind": "tree",
+   "title": "Tree 143",
+   "eastM": 33.3,
+   "northM": -119.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.1,
+    "lengthM": 6.1,
+    "heightM": 6.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-144",
+   "kind": "tree",
+   "title": "Tree 144",
+   "eastM": 136.3,
+   "northM": -41.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.7,
+    "lengthM": 9.7,
+    "heightM": 7.2
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-145",
+   "kind": "tree",
+   "title": "Tree 145",
+   "eastM": 84.3,
+   "northM": -103.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 9.2,
+    "heightM": 6.9
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-146",
+   "kind": "tree",
+   "title": "Tree 146",
+   "eastM": 104.8,
+   "northM": -33.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.4,
+    "lengthM": 11.4,
+    "heightM": 6
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-147",
+   "kind": "tree",
+   "title": "Tree 147",
+   "eastM": 97.8,
+   "northM": 14.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 12.7,
+    "heightM": 5.5
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-148",
+   "kind": "tree",
+   "title": "Tree 148",
+   "eastM": 21.8,
+   "northM": 116.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6,
+    "lengthM": 6,
+    "heightM": 6.3
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-149",
+   "kind": "tree",
+   "title": "Tree 149",
+   "eastM": 107.8,
+   "northM": -58.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 6.4,
+    "heightM": 6.4
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-150",
+   "kind": "tree",
+   "title": "Tree 150",
+   "eastM": 6.8,
+   "northM": -126.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.5,
+    "lengthM": 9.5,
+    "heightM": 6.6
+   },
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-151",
+   "kind": "building",
+   "title": "Building 1",
+   "eastM": -53.6,
+   "northM": -69.5,
+   "headingDeg": 153.4,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.7,
+    "lengthM": 3.8,
+    "heightM": 3.9
+   },
+   "floors": 1,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-152",
+   "kind": "building",
+   "title": "Building 2",
+   "eastM": -86.9,
+   "northM": -40,
+   "headingDeg": 165,
+   "lit": false,
+   "sizeM": {
+    "widthM": 31.1,
+    "lengthM": 7.8,
+    "heightM": 7.2
+   },
+   "floors": 2,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-153",
+   "kind": "building",
+   "title": "Building 3",
+   "eastM": -16.3,
+   "northM": 114.4,
+   "headingDeg": 3,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 4.2,
+    "heightM": 3.6
+   },
+   "floors": 1,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-154",
+   "kind": "building",
+   "title": "Building 4",
+   "eastM": -26.1,
+   "northM": 116.7,
+   "headingDeg": 93,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 4.2,
+    "heightM": 3.6
+   },
+   "floors": 1,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-155",
+   "kind": "building",
+   "title": "Building 5",
+   "eastM": -101.4,
+   "northM": -67.2,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 54.4,
+    "lengthM": 7.8,
+    "heightM": 7.2
+   },
+   "floors": 2,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-156",
+   "kind": "building",
+   "title": "Building 6",
+   "eastM": -20.7,
+   "northM": 119.9,
+   "headingDeg": 96,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17,
+    "lengthM": 5.7,
+    "heightM": 3.6
+   },
+   "floors": 1,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-157",
+   "kind": "building",
+   "title": "Building 7",
+   "eastM": -67.5,
+   "northM": -102,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 24,
+    "lengthM": 9,
+    "heightM": 6.7
+   },
+   "floors": 2,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-158",
+   "kind": "building",
+   "title": "Building 8",
+   "eastM": 14.8,
+   "northM": 121.9,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 3.5,
+    "heightM": 5.5
+   },
+   "floors": 2,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-159",
+   "kind": "building",
+   "title": "Building 9",
+   "eastM": -29.2,
+   "northM": 119.3,
+   "headingDeg": 93,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 2.8,
+    "heightM": 3.6
+   },
+   "floors": 1,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-160",
+   "kind": "building",
+   "title": "Building 10",
+   "eastM": 8.9,
+   "northM": 128.5,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 18.4,
+    "lengthM": 11.3,
+    "heightM": 5.5
+   },
+   "floors": 2,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-161",
+   "kind": "building",
+   "title": "Building 11",
+   "eastM": -42.3,
+   "northM": 124.1,
+   "headingDeg": 93,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 7.1,
+    "heightM": 5.8
+   },
+   "floors": 2,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-162",
+   "kind": "building",
+   "title": "Building 12",
+   "eastM": -48.8,
+   "northM": 122,
+   "headingDeg": 93,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 5.7,
+    "heightM": 5.8
+   },
+   "floors": 2,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-163",
+   "kind": "building",
+   "title": "Building 13",
+   "eastM": -93.7,
+   "northM": -95.2,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 3.5,
+    "heightM": 7.2
+   },
+   "floors": 2,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-164",
+   "kind": "building",
+   "title": "Building 14",
+   "eastM": -86.2,
+   "northM": -107.8,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5,
+    "lengthM": 4.5,
+    "heightM": 5.4
+   },
+   "floors": 1,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-165",
+   "kind": "building",
+   "title": "Building 15",
+   "eastM": 38.6,
+   "northM": 132.9,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 8.5,
+    "heightM": 4.3
+   },
+   "floors": 2,
+   "origin": "ign-lidar-topo"
+  },
+  {
+   "id": "ign-lidar-topo-166",
+   "kind": "building",
+   "title": "Building 16",
+   "eastM": 47.3,
+   "northM": 133.4,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 2.8,
+    "heightM": 4.3
+   },
+   "floors": 2,
+   "origin": "ign-lidar-topo"
+  }
+ ]
+}
