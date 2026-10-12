@@ -341,6 +341,7 @@ if (docs) {
         40–100 a minute, hazard flashers at 60–120. On a long exposure that rate is drawn: steady
         lamps leave lines, flashing ones leave dots at regular intervals, which is exactly how a
         photograph of an airliner is told from a photograph of something that does not blink.</p>
+      <p>The <strong>ready-made sets of lamps</strong> offered for an object are those that suit the model it is drawn as, and are scaled to the size of the machine: an airliner is not offered a helicopter's, a patrol car gets its emergency beacons. The model also says what noise an aircraft makes in flight (an A350 is heard as a wide-body, a stand-in for something whose noise nobody reported is silent) and gives a vehicle its engine.</p>
     </div>
 
     <div class="group-doc">
@@ -789,6 +790,7 @@ if (docs) {
         Sur une pose longue, cette cadence est dessinée : les lampes fixes laissent des traits, les
         clignotantes des points à intervalles réguliers — c'est exactement ce qui distingue la photo
         d'un avion de ligne de celle d'un objet qui ne clignote pas.</p>
+      <p>Les <strong>jeux de lampes prêts à l'emploi</strong> proposés pour un objet sont ceux qui conviennent au modèle dont il est dessiné, mis à l'échelle de la machine : on n'offre pas à un avion de ligne ceux d'un hélicoptère, une voiture de police reçoit ses gyrophares. Le modèle dit aussi quel bruit fait un aéronef en vol (un A350 s'entend comme un gros porteur, la doublure de quelque chose dont personne n'a rapporté le bruit est silencieuse) et donne son moteur à un véhicule.</p>
     </div>
 
     <div class="group-doc">
@@ -1257,6 +1259,7 @@ if (docs) {
         esa cadencia se dibuja: las lámparas fijas dejan líneas, las intermitentes dejan puntos a
         intervalos regulares, y así es exactamente como se distingue la fotografía de un avión de línea
         de la de algo que no parpadea.</p>
+      <p>Los <strong>juegos de luces ya preparados</strong> que se ofrecen para un objeto son los que convienen al modelo con que se dibuja, a la escala de la máquina: a un avión de línea no se le ofrecen los de un helicóptero, un coche de policía recibe sus balizas. El modelo dice también qué ruido hace una aeronave en vuelo (un A350 se oye como un gran avión, un sustituto de algo cuyo ruido nadie refirió es silencioso) y da su motor a un vehículo.</p>
     </div>
 
     <div class="group-doc">
@@ -1724,6 +1727,7 @@ if (docs) {
         frequenza viene disegnata: le lampade fisse lasciano linee, quelle lampeggianti punti a
         intervalli regolari, ed è esattamente così che la fotografia di un aereo di linea si distingue
         da quella di qualcosa che non lampeggia.</p>
+      <p>Le <strong>serie di luci già pronte</strong> offerte per un oggetto sono quelle che si addicono al modello con cui è disegnato, in scala con la macchina: a un aereo di linea non si offrono quelle di un elicottero, un'auto della polizia riceve i suoi lampeggianti. Il modello dice anche che rumore fa un aeromobile in volo (un A350 si sente come un grosso aereo, il sostituto di qualcosa il cui rumore nessuno ha riferito è silenzioso) e dà il suo motore a un veicolo.</p>
     </div>
 
     <div class="group-doc">
