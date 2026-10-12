@@ -2,6 +2,11 @@
 """Checks a UFO@home recording against sighting.schema.json.
 
 Usage: python3 validate.py recording.json [sighting.schema.json]
+       python3 validate.py case.json
+
+A case file (an object with "events" and no "timeline") is checked for its references instead: each
+"interpretationOf" has to name the "id" of an event of the case, or (the older form) the "id" of a
+recording the case lists and that sits beside it; and no two events may bear the same "id".
 
 Needs nothing but Python: it understands exactly the part of JSON Schema the published schema uses
 (type, enum, properties, additionalProperties, items, anyOf, $ref), so it runs in any assistant's
@@ -61,15 +66,49 @@ class Validator:
         return found
 
 
+def check_case(case, directory):
+    """What a case gets wrong about its own references; one line per problem."""
+    events = [e for e in case.get("events", []) if isinstance(e, dict)]
+    problems = []
+    seen = set()
+    for event in events:
+        ident = event.get("id")
+        if ident is None:
+            continue
+        if ident in seen:
+            problems.append(f"/events: the id {ident!r} is borne by more than one event")
+        seen.add(ident)
+    recording_ids = set()
+    for event in events:
+        url = event.get("url")
+        if event.get("eventType") == "sighting" and isinstance(url, str) and not url.startswith(("http:", "https:", "/")):
+            try:
+                with open(os.path.join(directory, url), encoding="utf-8") as f:
+                    recording_ids.add(json.load(f).get("id"))
+            except (OSError, ValueError):
+                pass
+    for index, event in enumerate(events):
+        references = event.get("interpretationOf")
+        if references is None:
+            continue
+        for reference in references if isinstance(references, list) else [references]:
+            if reference not in seen and reference not in recording_ids:
+                problems.append(f"/events/{index}/interpretationOf: {reference!r} is neither the id of an event of the case nor of a recording it lists")
+    return problems
+
+
 def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__)
-    schema_path = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(__file__), "..", "references", "sighting.schema.json")
-    with open(schema_path, encoding="utf-8") as f:
-        schema = json.load(f)
     with open(sys.argv[1], encoding="utf-8") as f:
         recording = json.load(f)
-    problems = Validator(schema).errors(recording, schema, "")
+    if isinstance(recording, dict) and "events" in recording and "timeline" not in recording:
+        problems = check_case(recording, os.path.dirname(os.path.abspath(sys.argv[1])))
+    else:
+        schema_path = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(__file__), "..", "references", "sighting.schema.json")
+        with open(schema_path, encoding="utf-8") as f:
+            schema = json.load(f)
+        problems = Validator(schema).errors(recording, schema, "")
     for problem in problems:
         print(problem)
     print(f"{len(problems)} problem(s)" if problems else "valid")

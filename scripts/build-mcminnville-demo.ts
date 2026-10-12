@@ -785,7 +785,7 @@ const readings = interpretations.map((reading, index) => {
   const event = {
     type: "event",
     eventType: "sighting",
-    interpretationOf: [observer.id, closeUp.id],
+    interpretationOf: ["trent", "trent-closeup"],
     ...(time ? { time } : {}),
     ...(by ? { by } : {}),
     title: readingTitle,
@@ -799,8 +799,8 @@ const caseJson = {
   title: "McMinnville",
   time: "1950-05-11 19:45",
   events: [
-    { type: "event", eventType: "sighting", time: "1950-05-11 19:45", title: "Paul Trent", url: "observer-mcminnville.json" },
-    { type: "event", eventType: "sighting", time: "1950-05-11 19:45", title: "Paul Trent, gros plan", url: "observer-mcminnville-closeup.json" },
+    { type: "event", eventType: "sighting", id: "trent", time: "1950-05-11 19:45", title: "Paul Trent", url: "observer-mcminnville.json" },
+    { type: "event", eventType: "sighting", id: "trent-closeup", time: "1950-05-11 19:45", title: "Paul Trent, gros plan", url: "observer-mcminnville-closeup.json" },
     ...readings.map(reading => reading.event)
   ]
 }
