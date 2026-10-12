@@ -355,7 +355,7 @@ if (excerpts.length > 0) {
       pose of the account it reads, so that a body placed from the observer, or in metres from where they stood,
       means the same in both; it draws no shape of its own (an empty <code>timeline</code>); and it holds the bodies in
       its own <code>interpretation</code>, described above. A body's <code>explains</code> names the shapes of the account.</p>
-    <pre data-json="none"><code>{
+    <pre data-json=""><code>{
   "version": 1,
   "id": "1950-05-11-TrentPaul-interpretation-2",
   "time": { "year": 1950, "month": 5, "day": 11, "hour": 19, "minute": 45 },
@@ -366,7 +366,15 @@ if (excerpts.length > 0) {
   "timeline": { "keyframes": [], "order": [], "groups": [] },
   "interpretation": {
     "title": "A model on a thread under the line",
-    "bodies": [{ "id": "model", "explains": ["ufo-1"], "model": { "id": "disc" }, "track": [ … ] }]
+    "bodies": [{
+      "id": "model",
+      "explains": ["ufo-1"],
+      "model": { "id": "disc" },
+      "track": [
+        { "t": 0, "eastM": -52, "northM": 118, "altitudeAboveGroundM": 7.5,
+          "sizeM": { "widthM": 0.3, "lengthM": 0.3, "heightM": 0.1 } }
+      ]
+    }]
   }
 }</code></pre>
     <p>The player lists the case's observers from the events with no <code>interpretationOf</code> and offers each
@@ -803,7 +811,7 @@ if (excerpts.length > 0) {
       l'endroit où il se tenait, veut dire la même chose dans les deux ; il ne dessine aucune forme (une
       <code>timeline</code> vide) ; et il porte les corps dans son propre <code>interpretation</code>, décrit plus haut.
       Les <code>explains</code> d'un corps désignent les formes du compte rendu.</p>
-    <pre data-json="none"><code>{
+    <pre data-json=""><code>{
   "version": 1,
   "id": "1950-05-11-TrentPaul-interpretation-2",
   "time": { "year": 1950, "month": 5, "day": 11, "hour": 19, "minute": 45 },
@@ -814,7 +822,15 @@ if (excerpts.length > 0) {
   "timeline": { "keyframes": [], "order": [], "groups": [] },
   "interpretation": {
     "title": "A model on a thread under the line",
-    "bodies": [{ "id": "model", "explains": ["ufo-1"], "model": { "id": "disc" }, "track": [ … ] }]
+    "bodies": [{
+      "id": "model",
+      "explains": ["ufo-1"],
+      "model": { "id": "disc" },
+      "track": [
+        { "t": 0, "eastM": -52, "northM": 118, "altitudeAboveGroundM": 7.5,
+          "sizeM": { "widthM": 0.3, "lengthM": 0.3, "heightM": 0.1 } }
+      ]
+    }]
   }
 }</code></pre>
     <p>Le lecteur liste les observateurs du dossier d'après les événements sans <code>interpretationOf</code> et propose
@@ -1245,7 +1261,7 @@ if (excerpts.length > 0) {
       del relato que lee, de modo que un cuerpo situado desde el observador, o en metros desde donde estaba, significa lo
       mismo en ambas; no dibuja ninguna forma (una <code>timeline</code> vacía); y guarda los cuerpos en su propia
       <code>interpretation</code>, descrita arriba. El <code>explains</code> de un cuerpo nombra las formas del relato.</p>
-    <pre data-json="none"><code>{
+    <pre data-json=""><code>{
   "version": 1,
   "id": "1950-05-11-TrentPaul-interpretation-2",
   "time": { "year": 1950, "month": 5, "day": 11, "hour": 19, "minute": 45 },
@@ -1256,7 +1272,15 @@ if (excerpts.length > 0) {
   "timeline": { "keyframes": [], "order": [], "groups": [] },
   "interpretation": {
     "title": "A model on a thread under the line",
-    "bodies": [{ "id": "model", "explains": ["ufo-1"], "model": { "id": "disc" }, "track": [ … ] }]
+    "bodies": [{
+      "id": "model",
+      "explains": ["ufo-1"],
+      "model": { "id": "disc" },
+      "track": [
+        { "t": 0, "eastM": -52, "northM": 118, "altitudeAboveGroundM": 7.5,
+          "sizeM": { "widthM": 0.3, "lengthM": 0.3, "heightM": 0.1 } }
+      ]
+    }]
   }
 }</code></pre>
     <p>El reproductor lista los observadores del caso a partir de los eventos sin <code>interpretationOf</code> y ofrece
@@ -1685,7 +1709,7 @@ if (excerpts.length > 0) {
       trovava, significa la stessa cosa in entrambe; non disegna alcuna forma (una <code>timeline</code> vuota); e tiene i
       corpi nella propria <code>interpretation</code>, descritta sopra. L'<code>explains</code> di un corpo designa le
       forme del resoconto.</p>
-    <pre data-json="none"><code>{
+    <pre data-json=""><code>{
   "version": 1,
   "id": "1950-05-11-TrentPaul-interpretation-2",
   "time": { "year": 1950, "month": 5, "day": 11, "hour": 19, "minute": 45 },
@@ -1696,7 +1720,15 @@ if (excerpts.length > 0) {
   "timeline": { "keyframes": [], "order": [], "groups": [] },
   "interpretation": {
     "title": "A model on a thread under the line",
-    "bodies": [{ "id": "model", "explains": ["ufo-1"], "model": { "id": "disc" }, "track": [ … ] }]
+    "bodies": [{
+      "id": "model",
+      "explains": ["ufo-1"],
+      "model": { "id": "disc" },
+      "track": [
+        { "t": 0, "eastM": -52, "northM": 118, "altitudeAboveGroundM": 7.5,
+          "sizeM": { "widthM": 0.3, "lengthM": 0.3, "heightM": 0.1 } }
+      ]
+    }]
   }
 }</code></pre>
     <p>Il lettore elenca gli osservatori del caso dagli eventi senza <code>interpretationOf</code> e propone ogni lettura

@@ -38,3 +38,28 @@ describe("sighting.schema.json", () => {
     })).toBe(true)
   })
 })
+
+/**
+ * The whole-recording examples of the format page (`<pre data-json="">`, which the page's code view checks against the
+ * format) have to be recordings: the page would otherwise teach a file the player rejects. Each language says the same
+ * thing in the same JSON, so the English section is enough.
+ */
+describe("the format page's examples", () => {
+  const source = import.meta.glob("../../site/content/DocsFormatPage.ts", { eager: true, query: "?raw", import: "default" }) as Record<string, string>
+  const page = Object.values(source)[0]
+  const english = page.slice(page.indexOf("private en()"), page.indexOf("private fr()"))
+  const unescape = (text: string): string => text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&")
+  const examples = [...english.matchAll(/<pre data-json=""><code>([\s\S]*?)<\/code><\/pre>/g)]
+    .map(match => unescape(match[1]))
+    // The one that is the page's own whole example is built from a file, not written here.
+    .filter(text => !text.includes("${"))
+
+  it("has some", () => {
+    expect(examples.length).toBeGreaterThan(1)
+  })
+
+  it.each(examples.map((text, index) => ({ index, text })))("accepts the example #$index as a recording", ({ text }) => {
+    const json = JSON.parse(text)
+    expect(validate(json), JSON.stringify(validate.errors?.slice(0, 3))).toBe(true)
+  })
+})
