@@ -152,6 +152,8 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
     "La meteorología no es un relato: es un hecho medible, registrado para la fecha, la hora y el lugar de la observación. Desmarca para indicar las condiciones que refirió el observador, que entonces prevalecen sobre el registro.",
   weatherLookingUp: "Buscando el registro…",
   weatherNeedsDateAndPlace: "Se necesitan una fecha completa y un lugar para buscar el registro",
+  weatherNeedsDate: "Se necesita una fecha completa (año, mes y día) para buscar los registros meteorológicos",
+  weatherNeedsPlace: "Se necesita un lugar con coordenadas para buscar los registros meteorológicos",
   weatherNoRecord: "Ningún registro para esta fecha y este lugar",
   weatherLookupFailed: "Registros meteorológicos inaccesibles por el momento",
   lightPollutionLookingUp: "Consultando el atlas…",

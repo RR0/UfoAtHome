@@ -285,6 +285,10 @@ export interface SightingEditorMessages extends SightingLabels {
   weatherLookingUp: string
   /** The sighting doesn't yet say where or exactly when — nothing to look up yet. */
   weatherNeedsDateAndPlace: string
+  /** Same, said when only the date is lacking: the one thing to fill in is named, not both. */
+  weatherNeedsDate: string
+  /** Same, said when only the place (its coordinates) is lacking. */
+  weatherNeedsPlace: string
   /** Asked, and no record covers that place and date (nothing exists before 1940). */
   weatherNoRecord: string
   /** The lookup itself couldn't be made (offline, HTTP error) — deliberately distinct from

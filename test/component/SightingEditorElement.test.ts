@@ -4876,7 +4876,8 @@ describe("SightingEditorElement inferred weather", () => {
     expect(checkbox.checked).toBe(false)
     expect(checkbox.title).toContain("full date and a place")
     expect(label.title).toContain("full date and a place")
-    expect(sourceText(element).textContent).toBe("")
+    // The reason is written beside the box, not only on its tooltip: a greyed box alone reads as broken.
+    expect(sourceText(element).textContent!.trim()).toContain("full date and a place")
     // No record was asked, so its picker would be crediting data nobody produced.
     expect(shadow.getElementById("weather-source-row")!.hidden).toBe(true)
 

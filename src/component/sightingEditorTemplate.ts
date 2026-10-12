@@ -558,6 +558,7 @@ export const css = `
   display: contents;
 }
 
+#shape-shapes .toolbar > [hidden] { display: none !important; }
 .toolbar {
   display: flex;
   align-items: center;

@@ -147,6 +147,8 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
     "Weather isn't an account: it's a measurable fact, on record for the observation's own date, time and place. Uncheck to state the conditions the observer reported, which then override the record.",
   weatherLookingUp: "Looking up the record…",
   weatherNeedsDateAndPlace: "A full date and a place are needed to look up the record",
+  weatherNeedsDate: "A full date (year, month and day) is needed to look up the weather records",
+  weatherNeedsPlace: "A place with coordinates is needed to look up the weather records",
   weatherNoRecord: "No record for this date and place",
   weatherLookupFailed: "Weather records temporarily unreachable",
   lightPollutionLookingUp: "Looking up the atlas…",

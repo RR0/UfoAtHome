@@ -152,6 +152,8 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
     "Il meteo non è un resoconto: è un fatto misurabile, rilevato per la data, l'ora e il luogo dell'osservazione. Deseleziona per indicare le condizioni riferite dall'osservatore, che allora prevalgono sul rilevamento.",
   weatherLookingUp: "Ricerca del rilevamento…",
   weatherNeedsDateAndPlace: "Servono una data completa e un luogo per cercare il rilevamento",
+  weatherNeedsDate: "Serve una data completa (anno, mese e giorno) per cercare i rilevamenti meteo",
+  weatherNeedsPlace: "Serve un luogo con coordinate per cercare i rilevamenti meteo",
   weatherNoRecord: "Nessun rilevamento per questa data e questo luogo",
   weatherLookupFailed: "Rilevamenti meteo momentaneamente irraggiungibili",
   lightPollutionLookingUp: "Consultazione dell'atlante…",

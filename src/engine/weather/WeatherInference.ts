@@ -142,6 +142,15 @@ export class WeatherInference {
     return this.questionOf(sighting) !== undefined
   }
 
+  /** What a lookup lacks, said apart so that a reader is told the one thing to fill in rather than both. */
+  missingOf(sighting: Sighting): { date: boolean; place: boolean } {
+    const time = sighting.event.time
+    return {
+      date: time?.year === undefined || time.month === undefined || time.day === undefined,
+      place: this.originOf(sighting) === undefined
+    }
+  }
+
   /** The place and instant a lookup would be about, or undefined when the sighting doesn't state
    * enough for there to be a question at all.
    *

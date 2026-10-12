@@ -152,6 +152,8 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
     "La météo n'est pas un compte rendu : c'est un fait mesurable, relevé pour la date, l'heure et le lieu de l'observation. Décochez pour saisir les conditions rapportées par l'observateur, qui priment alors sur le relevé.",
   weatherLookingUp: "Recherche du relevé…",
   weatherNeedsDateAndPlace: "Date complète et lieu requis pour retrouver le relevé",
+  weatherNeedsDate: "Une date complète (année, mois et jour) est requise pour retrouver les relevés météo",
+  weatherNeedsPlace: "Un lieu avec ses coordonnées est requis pour retrouver les relevés météo",
   weatherNoRecord: "Aucun relevé pour cette date et ce lieu",
   weatherLookupFailed: "Relevés météo momentanément inaccessibles",
   lightPollutionLookingUp: "Consultation de l'atlas…",

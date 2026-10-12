@@ -12,3 +12,11 @@ export const WEATHER_SOURCES: DataSource<WeatherProvider>[] = [
     create: () => new OpenMeteoWeatherProvider()
   }
 ]
+
+/**
+ * Whether a source is one a lookup of ours wrote, rather than a weather the report itself names (a station's).
+ * The provider answers a recent date from the forecast model and an older one from the reanalysis, under two ids,
+ * but only the reanalysis is a choice the author can make (WEATHER_SOURCES): the other is no less our lookup's.
+ */
+export const isRecordSource = (source: { id: string }): boolean =>
+  source.id === "open-meteo-forecast" || WEATHER_SOURCES.some(known => known.id === source.id)

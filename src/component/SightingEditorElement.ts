@@ -115,7 +115,7 @@ import { defaultWeatherProvider } from "../engine/weather/defaultWeatherProvider
 import type { WeatherProvider } from "../engine/weather/WeatherProvider.js"
 import { defaultPlaceProvider } from "../engine/place/defaultPlaceProvider.js"
 import { PLACE_SOURCES } from "../engine/place/placeSources.js"
-import { WEATHER_SOURCES } from "../engine/weather/weatherSources.js"
+import { isRecordSource, WEATHER_SOURCES } from "../engine/weather/weatherSources.js"
 import { AIRCRAFT_SOURCES } from "../engine/traffic/aircraftSources.js"
 import { SOUND_KINDS } from "../engine/model/Sound.js"
 import type { SightingSound, SoundKind } from "../engine/model/Sound.js"
@@ -1622,6 +1622,16 @@ export class SightingEditorElement extends HTMLElement {
     this.endDate = dateOf("obs-end-time")
     this.startDate.messages = this.messages
     this.endDate.messages = this.messages
+    // The picker says nothing through "datechange" while a segment is missing, so the weather has to hear of it here.
+    for (const type of ["input", "change"]) {
+      this.shadow.getElementById("obs-time-native")?.addEventListener(type, () => {
+        this.syncWeatherSourceState()
+        // Put back as it was, the field has nothing new to say, and the record forgotten meanwhile would never be asked again.
+        if (this.weatherFromRecords && this.ufoElement.sighting.weatherSource === undefined && this.weatherInference.canInfer(this.ufoElement.sighting) && !this.startDateHalfEntered()) {
+          this.scheduleWeatherLookup()
+        }
+      })
+    }
     this.startDate.addEventListener("datechange", event => {
       const { time } = (event as CustomEvent<{ time: SightingTime | undefined }>).detail
       this.editDate(() => { this.ufoElement.sighting.event.time = time })
@@ -4191,7 +4201,7 @@ export class SightingEditorElement extends HTMLElement {
     // the recording sets its time zone, its duration, its place, and each of these asked, and the reanalysis replaced it. Only when
     // the author ticks the box (`asked`).
     const source = this.ufoElement.sighting.weatherSource
-    if (!asked && source !== undefined && !WEATHER_SOURCES.some(known => known.id === source.id)) return
+    if (!asked && source !== undefined && !isRecordSource(source)) return
     clearTimeout(this.weatherLookupTimer)
     this.weatherLookupTimer = setTimeout(() => void this.inferWeather(), WEATHER_LOOKUP_DEBOUNCE_MS)
   }
@@ -4252,7 +4262,7 @@ export class SightingEditorElement extends HTMLElement {
     const source = this.ufoElement.sighting.weatherSource
     // Only for a track a lookup wrote: a weather the report itself gives (a station's, named and linked) is no lookup's to redo, and
     // was replaced by the reanalysis's the moment the clock changed length — loading the recording was enough.
-    if (!this.weatherFromRecords || source === undefined || !WEATHER_SOURCES.some(known => known.id === source.id)) return
+    if (!this.weatherFromRecords || source === undefined || !isRecordSource(source)) return
     const span = this.ufoElement.seekableDuration
     if (this.weatherTrackSpan === undefined || span === this.weatherTrackSpan) return
     // Claimed before the lookup runs, so a span that keeps changing (a recording in progress)
@@ -4292,7 +4302,18 @@ export class SightingEditorElement extends HTMLElement {
     // control is unavailable belongs ON that control, not in the space reserved for what a record
     // answered. The requirement itself is WeatherInference's own (canInfer), never re-decided here;
     // the box ticks itself again as soon as one can be asked, unless the observer has turned it off.
-    const canLookUp = this.weatherInference.canInfer(this.ufoElement.sighting)
+    const canLookUp = this.weatherInference.canInfer(this.ufoElement.sighting) && !this.startDateHalfEntered()
+    // The question having gone (the date or the place was taken away), the answer it got goes with it: a
+    // source left standing named a request for a date nobody states any more, was saved with the recording,
+    // and hid the reason the box is unavailable. The values stay, unlocked, as the observer's own start.
+    // Only a lookup's own source: a station the report names was never asked for (see scheduleWeatherLookup).
+    if (!canLookUp && source !== undefined && isRecordSource(source)) {
+      this.cancelWeatherLookup()
+      this.weatherLookupResult = undefined
+      this.ufoElement.sighting.weatherSource = undefined
+      this.syncWeatherSourceState()
+      return
+    }
     this.weatherInferredInput.disabled = !canLookUp
     this.weatherInferredInput.checked = canLookUp && this.weatherFromRecords
     const inferredTitle = canLookUp ? this.messages.weatherInferredTitle : this.messages.weatherNeedsDateAndPlace
@@ -4313,11 +4334,28 @@ export class SightingEditorElement extends HTMLElement {
       this.weatherSourceLink.textContent = this.observationInstantLabel()
       return
     }
-    const status = inferred ? this.weatherStatusMessage() : ""
+    const status = !canLookUp ? this.weatherUnavailableMessage() : inferred ? this.weatherStatusMessage() : ""
     this.weatherSourceText.textContent = status === "" ? "" : `${status} `
     // The picker names which record answered, or is being asked; with nothing asked and nothing
     // answered it would be a credit for data nobody produced.
-    this.weatherSourceRow.hidden = status === ""
+    this.weatherSourceRow.hidden = status === "" || !canLookUp
+  }
+
+  /** Whether the date's picker has a segment (day, month, year, hour) taken out and not yet put back. The field writes nothing
+   * for that, deliberately (see EdtfDateField.writeFromPicker: an empty text would erase the date between a day and its hour), so
+   * the recording still states the last whole date; but a lookup must not be asked about a date the reader can see is not whole. */
+  private startDateHalfEntered(): boolean {
+    const picker = this.shadow.getElementById("obs-time-native") as HTMLInputElement | null
+    return picker?.validity.badInput === true
+  }
+
+  /** Why the records cannot be asked at all, on the line beside the greyed box: a tooltip alone left the
+   * box looking merely broken. Names what is lacking, the date, the place, or both. */
+  private weatherUnavailableMessage(): string {
+    const missing = this.weatherInference.missingOf(this.ufoElement.sighting)
+    if (this.startDateHalfEntered()) missing.date = true
+    if (missing.date && missing.place) return this.messages.weatherNeedsDateAndPlace
+    return missing.date ? this.messages.weatherNeedsDate : this.messages.weatherNeedsPlace
   }
 
   /** What the record had to say, for the line next to the picker — empty when nothing was asked.
@@ -5860,6 +5898,17 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshParamSummary()
   }
 
+  /** Until a shape has been added there is nothing for these fields to describe: only the "add shape"
+   * button stands, the rest (name, appearance, size, record) appears with the first shape. */
+  private updateShapeToolbarVisibility(): void {
+    const none = this.ufoElement.sighting.timeline.sourceIds.length === 0
+    const toolbar = this.shadow.querySelector("#shape-shapes .toolbar")
+    if (!toolbar) return
+    for (const child of Array.from(toolbar.children)) {
+      if (child.id !== "add-shape") (child as HTMLElement).hidden = none
+    }
+  }
+
   /** When more than one shape is selected, the appearance fields (Name/Color/Transparency/Halo/
    * source dropdown/preset buttons) only make sense for a single shape — rather than showing one
    * arbitrary member's values as if they applied to the whole selection, they're disabled with a
@@ -5867,6 +5916,7 @@ export class SightingEditorElement extends HTMLElement {
    * uses. syncAppearanceFromTimeline() itself early-returns in this state instead of writing
    * possibly-misleading values into disabled fields. */
   private updateAppearanceFieldsDisabledState(): void {
+    this.updateShapeToolbarVisibility()
     const multiple = this.selectedSourceIds.size > 1
     const title = multiple ? this.messages.multipleShapesSelected : ""
     for (const input of [
@@ -6629,7 +6679,11 @@ export class SightingEditorElement extends HTMLElement {
       shapes.map(state => {
         const aim = SightingShapes.aimOf(sighting, t, state.shape.bounds)
         const angular = projection.ofBounds(state.shape.bounds)
-        return { ...state, shape: aim ? { ...state.shape, aim, angular } : { ...state.shape, angular } }
+        // No direction to state (the pose has no heading yet) means no direction at all: keeping the
+        // one the shape carried would stand it in the scene where it WAS while its box, handles
+        // and every later read follow the pointer.
+        const { aim: _stale, ...rest } = state.shape
+        return { ...state, shape: aim ? { ...rest, aim, angular } : { ...rest, angular } }
       })
     )
   }
@@ -6650,7 +6704,7 @@ export class SightingEditorElement extends HTMLElement {
    * disabled then (see updateAppearanceFieldsDisabledState), showing blank because
    * there's no single value to display, not because anything's actually missing. */
   private updateShapeTitleValidity(): void {
-    const missing = this.selectedSourceIds.size === 1 && this.shapeTitleInput.value === ""
+    const missing = this.selectedSourceIds.size === 1 && this.ufoElement.sighting.timeline.sourceIds.length > 0 && this.shapeTitleInput.value === ""
     this.shapeTitleInput.classList.toggle("invalid", missing)
     this.shapeTitleInput.setAttribute("aria-invalid", String(missing))
   }
