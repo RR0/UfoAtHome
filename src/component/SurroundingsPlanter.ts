@@ -82,17 +82,13 @@ export class SurroundingsPlanter {
   }
 
   /**
-   * The author turns the asking on or off. Turned off, a place that is given is not asked about, and what was planted stays where it
-   * is. Turned on, the place the recording stands at now is asked about at once, since that is what turning it on is for.
+   * The author turns the asking on or off (choosing a survey, or none). Turned off, a place that is given is not asked about, and what was
+   * planted stays where it is. Turned on again, nothing is asked until a place is given or `survey` is called.
    */
-  setEnabled(enabled: boolean, lat?: number, lng?: number): void {
+  setEnabled(enabled: boolean): void {
     if (enabled === this.enabled) return
     this.enabled = enabled
-    if (!enabled) {
-      this.cancel()
-      return
-    }
-    if (lat !== undefined && lng !== undefined) void this.survey(lat, lng)
+    if (!enabled) this.cancel()
   }
 
   /** A recording was loaded, or replaced, and stands here: nothing is asked, and what it says about its scenery is its own. */
@@ -186,7 +182,7 @@ export class SurroundingsPlanter {
           id: nextId(), kind: "building", title: this.host.label("building", ++buildings), eastM: building.eastM, northM: building.northM,
           headingDeg: building.headingDeg, lit: false,
           sizeM: { widthM: building.widthM, lengthM: building.lengthM, heightM: building.heightM },
-          floors: Math.max(1, Math.round(building.heightM / SurroundingsPlanter.FLOOR_HEIGHT_M)), origin: provider.id
+          floors: building.floors ?? Math.max(1, Math.round(building.heightM / SurroundingsPlanter.FLOOR_HEIGHT_M)), origin: provider.id
         })
       }
     }

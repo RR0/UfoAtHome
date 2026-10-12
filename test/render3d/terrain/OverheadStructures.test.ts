@@ -14,7 +14,7 @@ function line(properties: Record<string, unknown>, ...points: [number, number][]
 }
 
 function vectors(parts: Partial<PlaceVectors>): PlaceVectors {
-  return { bridges: [], elevatedRoads: [], lines: [], ...parts }
+  return { bridges: [], elevatedRoads: [], lines: [], buildings: [], ...parts }
 }
 
 describe("OverheadStructures bridges", () => {

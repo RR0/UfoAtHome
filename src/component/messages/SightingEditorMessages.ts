@@ -672,9 +672,10 @@ export interface SightingEditorMessages extends SightingLabels {
   addObserver: string
   /** What the Environment group says of the scenery it took from a survey by itself (see SurroundingsPlanter): `{trees}`, `{buildings}`, `{bridges}`, `{lines}`, `{source}`, `{radius}`. */
   surveyLabel: string
-  /** The checkbox that turns the asking on or off, and what it says it does (and to whom the place is sent). */
-  surveyAuto: string
-  surveyAutoTitle: string
+  /** The choice of the survey the scenery is taken from: its label, its tooltip (which says to whom the place is sent), and "none". */
+  surveySource: string
+  surveySourceTitle: string
+  surveySourceNone: string
   surveyBusy: string
   surveyDone: string
   surveyNone: string

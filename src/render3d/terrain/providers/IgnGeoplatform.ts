@@ -1,0 +1,157 @@
+import { SurroundingsUnavailableError } from "../SurroundingsProvider.js"
+import { HeightGrid } from "../OverheadStructures.js"
+import type { PlaceVectors, VectorFeature } from "../OverheadStructures.js"
+import { GeoTiffRaster } from "../GeoTiffRaster.js"
+
+export interface IgnGeoplatformOptions {
+  fetchImpl?: typeof fetch
+  /** Mainly for tests, and for pointing at a mirror. */
+  wmsEndpoint?: string
+  wfsEndpoint?: string
+}
+
+/** What the laser saw round a place, as grids of 0.5 m pixels, row after row from the north-west. */
+export interface LidarGrids {
+  size: number
+  metresPerPixel: number
+  /** The height of whatever stands above the ground, metres. */
+  heights: Float32Array
+  /** Non-zero where the pixel is a plant. */
+  vegetation: Uint8Array
+  /** Non-zero where the pixel is a roof. */
+  building: Uint8Array
+  /** The heights as a lookup of structures: what is neither a plant nor a roof. */
+  structures: HeightGrid
+}
+
+/**
+ * The IGN's Géoplateforme, which the surveys of France come from: its WMS gives the laser's height model and classification as pictures, its
+ * WFS the vectors of the map (BD TOPO). Both answer browsers from anywhere (`Access-Control-Allow-Origin: *`).
+ *
+ * One place for what the three surveys built on it share (the laser alone, the map alone, both together): how a square of ground is asked
+ * for, in which axis order, and how a failure is told from nothing. A survey is then only what it makes of the answers.
+ */
+export class IgnGeoplatform {
+  /** Metropolitan France and Corsica, as a box: a place outside it is not worth a request. */
+  static covers(lat: number, lng: number): boolean {
+    return lat >= 41.2 && lat <= 51.3 && lng >= -5.4 && lng <= 9.8
+  }
+
+  private static readonly WMS = "https://data.geopf.fr/wms-r/wms"
+  private static readonly WFS = "https://data.geopf.fr/wfs/ows"
+  private static readonly HEIGHT_LAYER = "IGNF_LIDAR-HD_MNH_ELEVATION.ELEVATIONGRIDCOVERAGE.LAMB93"
+  private static readonly CLASS_LAYER = "IGNF_LIDAR-HD_CLASS"
+  private static readonly METRES_PER_PIXEL = 0.5
+  /** More than this and the two answers are 1.4 MB each: the ground is asked for in a square this big at most. */
+  static readonly MAX_RADIUS_M = 150
+  /** What the height model says where the laser has not flown. */
+  private static readonly NO_DATA = -9999
+  private static readonly METRES_PER_DEGREE = 111320
+
+  private readonly fetchImpl: typeof fetch
+  private readonly wms: string
+  private readonly wfs: string
+
+  constructor(options: IgnGeoplatformOptions = {}) {
+    // Bound, as AwsTerrariumElevationProvider's is: an unbound fetch loses the `this` it needs once called as a field.
+    this.fetchImpl = options.fetchImpl ?? fetch.bind(globalThis)
+    this.wms = options.wmsEndpoint ?? IgnGeoplatform.WMS
+    this.wfs = options.wfsEndpoint ?? IgnGeoplatform.WFS
+  }
+
+  /** The radius asked for, held to what the service is asked for. */
+  static radius(radiusM: number): number {
+    return Math.min(radiusM, IgnGeoplatform.MAX_RADIUS_M)
+  }
+
+  /**
+   * The laser's grids for the square round a place. Two layers are needed, both: the height model alone gives 291 m at the Eiffel Tower
+   * and 21 m for an oak, and only the classification (a picture of what each laser point was taken to be) tells a tree from a roof. Its greens
+   * are the plants, and its dark red the buildings.
+   *
+   * A place the scan does not cover answers with a height of -9999 everywhere, which is how "no coverage" is told from "no tree".
+   */
+  async lidar(centre: { lat: number, lng: number }, radiusM: number): Promise<LidarGrids> {
+    const radius = IgnGeoplatform.radius(radiusM)
+    const size = Math.ceil(2 * radius / IgnGeoplatform.METRES_PER_PIXEL)
+    const [heights, classes] = await Promise.all([
+      this.raster(centre, radius, size, IgnGeoplatform.HEIGHT_LAYER),
+      this.raster(centre, radius, size, IgnGeoplatform.CLASS_LAYER)
+    ])
+    if (heights.samples !== 1 || classes.samples < 3) throw new SurroundingsUnavailableError("unreachable", "The survey answered in a layout this does not read")
+    const grid = heights.values as Float32Array
+    if (grid.every(v => v === IgnGeoplatform.NO_DATA)) throw new SurroundingsUnavailableError("no-coverage", "No LiDAR HD survey here yet")
+    const vegetation = new Uint8Array(size * size)
+    const building = new Uint8Array(size * size)
+    for (let i = 0; i < size * size; i++) {
+      const r = classes.values[i * classes.samples]
+      const g = classes.values[i * classes.samples + 1]
+      const b = classes.values[i * classes.samples + 2]
+      vegetation[i] = g > r && g > b ? 1 : 0
+      // The dark red of the classification's own key for buildings.
+      building[i] = r > 120 && g < 90 && b < 90 ? 1 : 0
+    }
+    const metresPerPixel = 2 * radius / size
+    return { size, metresPerPixel, heights: grid, vegetation, building, structures: new HeightGrid(grid, vegetation, building, size, metresPerPixel) }
+  }
+
+  /**
+   * What the map draws round a place: the bridges, the road sections that are over the ground (which carry the width of a bridge's road), the
+   * overhead electric lines and, where asked, the outlines of the buildings. Small filtered questions, each a few hundred bytes (a town's
+   * buildings a few tens of kilobytes).
+   */
+  async vectors(centre: { lat: number, lng: number }, radiusM: number, withBuildings: boolean): Promise<PlaceVectors> {
+    const radius = IgnGeoplatform.radius(radiusM)
+    const dLat = radius / IgnGeoplatform.METRES_PER_DEGREE
+    const dLng = radius / (IgnGeoplatform.METRES_PER_DEGREE * Math.cos(centre.lat * Math.PI / 180))
+    // This service gives the axes of EPSG:4326 as longitude then latitude, the other way round from its WMS.
+    const box = [centre.lng - dLng, centre.lat - dLat, centre.lng + dLng, centre.lat + dLat].map(v => v.toFixed(6)).join(",")
+    const within = `BBOX(geometrie,${box},'EPSG:4326')`
+    const [bridges, elevatedRoads, lines, buildings] = await Promise.all([
+      this.features("construction_lineaire", `${within} AND nature='Pont'`, "nature,geometrie"),
+      this.features("troncon_de_route", `${within} AND position_par_rapport_au_sol<>'0'`, "nature,largeur_de_chaussee,position_par_rapport_au_sol,geometrie"),
+      this.features("ligne_electrique", within, "voltage,geometrie"),
+      withBuildings ? this.features("batiment", within, "hauteur,nombre_d_etages,geometrie", 400) : Promise.resolve([])
+    ])
+    return { bridges, elevatedRoads, lines, buildings }
+  }
+
+  private async raster(centre: { lat: number, lng: number }, radiusM: number, size: number, layer: string): Promise<GeoTiffRaster> {
+    const dLat = radiusM / IgnGeoplatform.METRES_PER_DEGREE
+    const dLng = radiusM / (IgnGeoplatform.METRES_PER_DEGREE * Math.cos(centre.lat * Math.PI / 180))
+    const query = new URLSearchParams({
+      SERVICE: "WMS", VERSION: "1.3.0", REQUEST: "GetMap", LAYERS: layer, STYLES: "", CRS: "EPSG:4326",
+      // WMS 1.3.0 gives the axes of EPSG:4326 in its own order: latitude first.
+      BBOX: [centre.lat - dLat, centre.lng - dLng, centre.lat + dLat, centre.lng + dLng].map(v => v.toFixed(6)).join(","),
+      WIDTH: String(size), HEIGHT: String(size), FORMAT: "image/geotiff"
+    })
+    let response: Response
+    try {
+      response = await this.fetchImpl(`${this.wms}?${query}`)
+    } catch (error) {
+      throw new SurroundingsUnavailableError("unreachable", error instanceof Error ? error.message : String(error))
+    }
+    if (!response.ok) throw new SurroundingsUnavailableError("unreachable", `The survey answered ${response.status}`)
+    try {
+      return GeoTiffRaster.parse(await response.arrayBuffer())
+    } catch (error) {
+      throw new SurroundingsUnavailableError("unreachable", error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  private async features(layer: string, filter: string, properties: string, count = 200): Promise<VectorFeature[]> {
+    const query = new URLSearchParams({
+      SERVICE: "WFS", VERSION: "2.0.0", REQUEST: "GetFeature", TYPENAMES: `BDTOPO_V3:${layer}`, SRSNAME: "EPSG:4326",
+      OUTPUTFORMAT: "application/json", COUNT: String(count), CQL_FILTER: filter, PROPERTYNAME: properties
+    })
+    let response: Response
+    try {
+      response = await this.fetchImpl(`${this.wfs}?${query}`)
+    } catch (error) {
+      throw new SurroundingsUnavailableError("unreachable", error instanceof Error ? error.message : String(error))
+    }
+    if (!response.ok) throw new SurroundingsUnavailableError("unreachable", `The map answered ${response.status}`)
+    const body = await response.json() as { features?: VectorFeature[] }
+    return body.features ?? []
+  }
+}

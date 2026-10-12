@@ -367,26 +367,33 @@ describe("the scenery taken from a survey of the place", () => {
     expect(element.sightingData.decor ?? []).toHaveLength(0)
   })
 
-  it("is behind a box, on by default, that the browser remembers when it is turned off, and turned on again it asks for the place the recording stands at", async () => {
+  it("offers the surveys of the registry, and none, takes the first by default, and remembers what the author chose: none asks nothing, another asks at once for the place", async () => {
     const KEY = "rr0-sighting-editor.surroundings"
     localStorage.removeItem(KEY)
     try {
       const element = mount()
-      const box = element.shadowRoot!.getElementById("scenery-auto") as HTMLInputElement
-      expect(box.checked).toBe(true)
-      box.checked = false
-      box.dispatchEvent(new Event("change", { bubbles: true, composed: true }))
-      expect(localStorage.getItem(KEY)).toBe("off")
+      const select = element.shadowRoot!.getElementById("scenery-source") as HTMLSelectElement
+      // The registry is loaded in the background: the choice is there a moment after the editor.
+      await waitFor(() => select.options.length > 1)
+      expect([...select.options].map(option => option.value)).toEqual(["none", "ign-lidar-topo", "ign-lidar-hd", "ign-bd-topo"])
+      expect([...select.options].map(option => option.textContent)).toEqual(["None (all by hand)", "IGN LiDAR HD + BD TOPO", "IGN LiDAR HD", "IGN BD TOPO"])
+      expect(select.value).toBe("ign-lidar-topo")
+      select.value = "none"
+      select.dispatchEvent(new Event("change", { bubbles: true, composed: true }))
+      expect(localStorage.getItem(KEY)).toBe("none")
       element.surroundingsProvider = surveyOf(FOUND)
       placeAt(element, "49.1049", "-1.0754")
       await new Promise(resolve => setTimeout(resolve, 1200))
       expect(element.sightingData.decor ?? []).toHaveLength(0)
-      // A page opened later finds it off.
-      expect((mount().shadowRoot!.getElementById("scenery-auto") as HTMLInputElement).checked).toBe(false)
-      box.checked = true
-      box.dispatchEvent(new Event("change", { bubbles: true, composed: true }))
+      // A page opened later finds it as it was left.
+      const later = mount().shadowRoot!.getElementById("scenery-source") as HTMLSelectElement
+      await waitFor(() => later.options.length > 1)
+      expect(later.value).toBe("none")
+      // Another survey than none is asked at once for the place the recording stands at.
+      select.value = "ign-bd-topo"
+      select.dispatchEvent(new Event("change", { bubbles: true, composed: true }))
       await waitFor(() => (element.sightingData.decor ?? []).length === 3)
-      expect(localStorage.getItem(KEY)).toBeNull()
+      expect(localStorage.getItem(KEY)).toBe("ign-bd-topo")
     } finally {
       localStorage.removeItem(KEY)
     }

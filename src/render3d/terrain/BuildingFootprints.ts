@@ -103,27 +103,39 @@ export class BuildingFootprints {
     const xs: number[] = []
     const ys: number[] = []
     const hs: number[] = []
-    const corners: [number, number][] = []
     for (const at of patch) {
       const x = at % this.width
       const y = Math.floor(at / this.width)
       xs.push((x + 0.5 - centreX) * res)
       ys.push((centreY - y - 0.5) * res)
       hs.push(this.heights[at])
-      for (const [cx, cy] of [[x, y], [x + 1, y], [x, y + 1], [x + 1, y + 1]]) corners.push([(cx - centreX) * res, (centreY - cy) * res])
+    }
+    return BuildingFootprints.ofPoints(xs, ys, hs, res, minArea)
+  }
+
+  /**
+   * The buildings in a patch of roof given as points `res` metres apart (each one the middle of a cell of that side), with the height
+   * of the roof at each: one rectangle if the patch is one, else the rectangles it is made of. The part of a survey of buildings that
+   * does not depend on how the survey drew them, laser pixels or the outlines of a map (see TopoBuildings). `rectangleFill` is how much of its
+   * smallest rectangle a patch must fill to be called a rectangle: a laser's pixels along a turned roof are staircases, which a map's outline is not.
+   */
+  static ofPoints(xs: number[], ys: number[], hs: number[], res: number, minArea: number, rectangleFill = BuildingFootprints.RECTANGLE_FILL): SurveyedBuilding[] {
+    const corners: [number, number][] = []
+    for (let i = 0; i < xs.length; i++) {
+      for (const [dx, dy] of [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]]) corners.push([xs[i] + dx * res, ys[i] + dy * res])
     }
     const hull = BuildingFootprints.hull(corners)
     const { angle, rectangle } = BuildingFootprints.smallestRectangle(hull)
-    const area = patch.length * res * res
+    const area = xs.length * res * res
     const rectangleArea = (rectangle.maxU - rectangle.minU) * (rectangle.maxV - rectangle.minV)
-    if (area / rectangleArea >= BuildingFootprints.RECTANGLE_FILL || area < 4 * minArea) {
+    if (area / rectangleArea >= rectangleFill || area < 4 * minArea) {
       return [BuildingFootprints.building(rectangle, angle, BuildingFootprints.roof(hs))]
     }
-    return this.parts(xs, ys, hs, angle, rectangle, res, minArea)
+    return BuildingFootprints.parts(xs, ys, hs, angle, rectangle, res, minArea)
   }
 
   /** The largest rectangles in a patch, one after the other, drawn on a grid turned to lie along the patch. */
-  private parts(xs: number[], ys: number[], hs: number[], angle: number, frame: Rectangle, res: number, minArea: number): SurveyedBuilding[] {
+  private static parts(xs: number[], ys: number[], hs: number[], angle: number, frame: Rectangle, res: number, minArea: number): SurveyedBuilding[] {
     const cos = Math.cos(angle)
     const sin = Math.sin(angle)
     // Cells no finer than a pixel, and no more of them than a block is worth.

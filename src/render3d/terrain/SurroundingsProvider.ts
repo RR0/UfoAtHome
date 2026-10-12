@@ -28,6 +28,8 @@ export interface SurveyedBuilding {
   heightM: number
   /** Degrees clockwise from north of the shorter side, which is what `DecorObject.headingDeg` says for a building. */
   headingDeg: number
+  /** How many floors the survey says it has, where it says (a laser does not: the height gives about one in three metres). */
+  floors?: number
 }
 
 /**

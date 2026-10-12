@@ -381,6 +381,56 @@ describe("crop terrain anchoring", () => {
   })
 })
 
+describe("a building and an overhead line on a slope", () => {
+  /** A hillside rising 10% to the east. */
+  const eastSlope = (x: number) => 0.1 * x
+
+  it("stands a building on the LOWEST ground under it, in the slope and not in the air over it", () => {
+    const house = building({ eastM: 0, northM: 0, sizeM: { widthM: 30, lengthM: 10, heightM: 7 } })
+    // Thirty metres wide across a slope of 10%: three metres from one side to the other, and the base on the low one.
+    expect(DecorSystem.groundUnderFootprint(house, 0, 0, 0, eastSlope)).toBeCloseTo(-1.5, 1)
+  })
+
+  const span = (overrides: Partial<DecorObject> = {}): DecorObject =>
+    ({ id: "decor-2", kind: "wire", eastM: 0, northM: 0, headingDeg: 0, sizeM: { lengthM: 100, heightM: 8 }, wire: { poles: "both", poleHeightM: 10, strands: [{ heightM: 8 }] }, ...overrides })
+
+  it("reads the ground under both ends of a span, and how much higher the end its heading points to is", () => {
+    // Rising to the north (-z): heading north, the far end is the high one.
+    const ends = DecorSystem.wireGround(span(), 0, 0, 0, (_x, z) => -0.1 * z)
+    expect(ends.startY).toBeCloseTo(-5, 3)
+    expect(ends.dropM).toBeCloseTo(10, 3)
+    // Heading south, the same hill falls away from the start.
+    expect(DecorSystem.wireGround(span(), 0, 0, 180, (_x, z) => -0.1 * z).dropM).toBeCloseTo(-10, 3)
+  })
+
+  it("shears the span so that each pole stands on its own ground and the conductors run from one top to the other, and again without adding up", () => {
+    const group = DecorSystem.build(span(), false)
+    const tops = () => {
+      const box = new Box3().setFromObject(group)
+      return box.max.y
+    }
+    const highestAt = (z: number) => {
+      let best = -Infinity
+      group.traverse(child => {
+        const mesh = child as Mesh
+        if (!mesh.isMesh) return
+        const position = mesh.geometry.getAttribute("position")
+        for (let i = 0; i < position.count; i++) if (Math.abs(position.getZ(i) - z) < 0.5) best = Math.max(best, position.getY(i))
+      })
+      return best
+    }
+    expect(tops()).toBeCloseTo(10, 3)
+    DecorSystem.shearWire(group, 100, 10)
+    // The pole at the end the heading points to (-z) is lifted by the drop, the one at the start is not.
+    // (a pole is 26 cm across: its far side is a hair further along the span than its axis)
+    expect(highestAt(-50)).toBeCloseTo(20, 1)
+    expect(highestAt(50)).toBeCloseTo(10, 1)
+    DecorSystem.shearWire(group, 100, 4)
+    expect(highestAt(-50)).toBeCloseTo(14, 1)
+    expect(highestAt(50)).toBeCloseTo(10, 1)
+  })
+})
+
 describe("decor terrain anchoring", () => {
   it("finds an uphill ridge inside a moving vehicle footprint, between its centre and corners", () => {
     const car = vehicle({ eastM: 0, northM: 0, headingDeg: 0, sizeM: { widthM: 2.02, lengthM: 5.44, heightM: 1.42 } })

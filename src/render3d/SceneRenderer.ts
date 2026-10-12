@@ -2548,7 +2548,14 @@ export class SceneRenderer {
         + `${(z - (terrain?.position.z ?? 0)).toFixed(3)}:${(terrain?.position.y ?? 0).toFixed(3)}:`
         + `${placement.headingDeg}:${placement.altitudeM}:${terraceStamp}`
       if (group.userData.footprintKey !== footprintKey) {
-        group.userData.footprintGroundY = this.groundUnderFootprint(object, x, z, placement.headingDeg, placement.altitudeM)
+        if (object.kind === "wire") {
+          // A span stands on the ground at each of its two poles, not on the highest of the ground along it (see DecorSystem.wireGround).
+          const ends = DecorSystem.wireGround(object, x, z, placement.headingDeg, (px, pz) => this.groundYUnder(px, pz))
+          group.userData.footprintGroundY = ends.startY
+          DecorSystem.shearWire(group, DecorSystem.sizeOf(object).lengthM, ends.dropM)
+        } else {
+          group.userData.footprintGroundY = this.groundUnderFootprint(object, x, z, placement.headingDeg, placement.altitudeM)
+        }
         group.userData.footprintKey = footprintKey
       }
       group.position.set(x, group.userData.footprintGroundY + placement.altitudeM, z)

@@ -695,8 +695,11 @@ export class SightingEditorElement extends HTMLElement {
   /** The survey the scenery is taken from, when one is chosen for it; else the one that covers the place (see surroundingsSources). Mainly for tests. */
   surroundingsProvider?: SurroundingsProvider
   private readonly sceneryStatus: HTMLElement
-  private readonly sceneryAuto: HTMLInputElement
-  private readonly labelSceneryAuto: HTMLElement
+  /** Which survey the scenery is taken from: one of the registry's (see SURROUNDINGS_SOURCES), or none. */
+  private readonly scenerySource: HTMLSelectElement
+  private readonly labelScenerySource: HTMLElement
+  /** The id of the survey the author chose, "none" for none; undefined while they have not chosen, which is the registry's first. */
+  private sceneryChoice?: string
   /** Which set of lamps the selected decor object carries — see LightRig.ts. Rebuilt for each
    * selection, since the rigs that make sense on a tree are not the ones that make sense on an
    * aircraft. */
@@ -1308,8 +1311,8 @@ export class SightingEditorElement extends HTMLElement {
     this.decorList.setLabels({ list: "Environment", remove: "Delete decor", add: "Add", actions: { "look-at-decor": "Look at it" } })
     this.addDecorObserverButton = this.shadow.getElementById("add-decor-observer") as HTMLButtonElement
     this.sceneryStatus = this.shadow.getElementById("scenery-status")!
-    this.sceneryAuto = this.shadow.getElementById("scenery-auto") as HTMLInputElement
-    this.labelSceneryAuto = this.shadow.getElementById("label-scenery-auto")!
+    this.scenerySource = this.shadow.getElementById("scenery-source") as HTMLSelectElement
+    this.labelScenerySource = this.shadow.getElementById("label-scenery-source")!
     this.surroundings = new SurroundingsPlanter(this.sceneryStatus, {
       decor: () => this.ufoElement.sighting.decor,
       setDecor: decor => this.setPlantedDecor(decor),
@@ -1318,15 +1321,20 @@ export class SightingEditorElement extends HTMLElement {
     }, sightingEditorMessages_en,
     async (lat, lng) => this.surroundingsProvider
       ? (this.surroundingsProvider.covers(lat, lng) ? this.surroundingsProvider : undefined)
-      : (await import("../render3d/terrain/surroundingsSources.js")).defaultSurroundingsProvider(lat, lng))
-    // On unless the author turned it off, which the browser remembers: asking sends the place to a service, and that is the author's to allow.
-    this.sceneryAuto.checked = this.readSceneryPreference()
-    this.surroundings.setEnabled(this.sceneryAuto.checked)
-    this.sceneryAuto.addEventListener("change", () => {
-      this.writeSceneryPreference(this.sceneryAuto.checked)
+      : (await import("../render3d/terrain/surroundingsSources.js")).SurroundingsSources.providerFor(this.sceneryChoice, lat, lng))
+    // The first survey of the registry unless the author chose another, or none, which the browser remembers: asking sends the place to a
+    // service, and that is the author's to allow.
+    this.sceneryChoice = this.readSceneryChoice()
+    this.surroundings.setEnabled(this.sceneryChoice !== SightingEditorElement.NO_SCENERY)
+    this.scenerySource.addEventListener("change", () => {
+      this.sceneryChoice = this.scenerySource.value
+      this.writeSceneryChoice(this.sceneryChoice)
+      this.surroundings.setEnabled(this.sceneryChoice !== SightingEditorElement.NO_SCENERY)
+      // Another survey is another answer for the place the recording stands at: asked at once, and what the first brought is replaced.
       const standing = this.plantingCentre()
-      this.surroundings.setEnabled(this.sceneryAuto.checked, standing?.lat, standing?.lng)
+      if (this.sceneryChoice !== SightingEditorElement.NO_SCENERY && standing) void this.surroundings.survey(standing.lat, standing.lng)
     })
+    void this.fillScenerySources()
     this.undoButton = this.shadow.getElementById("undo") as HTMLButtonElement
     this.redoButton = this.shadow.getElementById("redo") as HTMLButtonElement
     this.referenceSelect = this.shadow.getElementById("reference") as HTMLSelectElement
@@ -2194,8 +2202,10 @@ export class SightingEditorElement extends HTMLElement {
   /** And the workspace it named, the same way. */
   private static readonly NARRATIVE_SCOPE_STORAGE = "rr0-sighting-editor.narrative-workspace"
 
-  /** Where the browser remembers that the author turned the taking of the scenery from a survey off (see readSceneryPreference). */
+  /** Where the browser remembers which survey the author takes the scenery from, or that they take none (see readSceneryChoice). */
   private static readonly SCENERY_STORAGE = "rr0-sighting-editor.surroundings"
+  /** What the choice says for "no survey": the scenery is the author's alone. */
+  private static readonly NO_SCENERY = "none"
 
   /** Built once, up front: constructing one is free (its SDK and its client load on the first ask,
    * not here), and the panel has to know before any draft whether this reader needs a key at all —
@@ -6925,22 +6935,44 @@ export class SightingEditorElement extends HTMLElement {
     if (kind !== "building") void this.adoptDefaultModel(decor.id, kind)
   }
 
-  /** Whether the author left the taking of the scenery from a survey on, which is the default: the browser only remembers an off. */
-  private readSceneryPreference(): boolean {
+  /** The survey the author chose, or "none"; undefined when they have chosen nothing, which is the first of the registry. */
+  private readSceneryChoice(): string | undefined {
     try {
-      return localStorage.getItem(SightingEditorElement.SCENERY_STORAGE) !== "off"
+      return localStorage.getItem(SightingEditorElement.SCENERY_STORAGE) ?? undefined
     } catch {
-      return true
+      return undefined
     }
   }
 
-  private writeSceneryPreference(on: boolean): void {
+  private writeSceneryChoice(choice: string): void {
     try {
-      if (on) localStorage.removeItem(SightingEditorElement.SCENERY_STORAGE)
-      else localStorage.setItem(SightingEditorElement.SCENERY_STORAGE, "off")
+      localStorage.setItem(SightingEditorElement.SCENERY_STORAGE, choice)
     } catch {
       // No storage (a private window, blocked site data): the choice holds for this page and is not remembered.
     }
+  }
+
+  /**
+   * Offers what the registry has to choose among, once it is loaded (a chunk of its own, started with the editor and not waited for): "None",
+   * which leaves the scenery to the author, and each survey by its name, the credit it requires as the tooltip of its option. A survey added to the
+   * registry is offered here without anything else being touched.
+   */
+  private async fillScenerySources(): Promise<void> {
+    const { SURROUNDINGS_SOURCES, SurroundingsSources } = await import("../render3d/terrain/surroundingsSources.js")
+    const none = document.createElement("option")
+    none.value = SightingEditorElement.NO_SCENERY
+    none.id = "option-scenery-none"
+    none.textContent = this.messages.surveySourceNone
+    const options = SURROUNDINGS_SOURCES.map(source => {
+      const option = document.createElement("option")
+      option.value = source.id
+      option.textContent = source.name
+      option.title = source.credit
+      return option
+    })
+    this.scenerySource.replaceChildren(none, ...options)
+    this.scenerySource.value = this.sceneryChoice === SightingEditorElement.NO_SCENERY ? SightingEditorElement.NO_SCENERY
+      : (SurroundingsSources.byId(this.sceneryChoice)?.id ?? SurroundingsSources.DEFAULT_ID)
   }
 
   /**
@@ -8708,8 +8740,10 @@ export class SightingEditorElement extends HTMLElement {
     this.labelContextMasks.textContent = `${messages.masks} ▸`
     this.addDecorObserverButton.textContent = messages.addObserver
     this.surroundings.setMessages(messages)
-    this.labelSceneryAuto.textContent = messages.surveyAuto
-    this.sceneryAuto.title = messages.surveyAutoTitle
+    this.labelScenerySource.textContent = messages.surveySource
+    this.scenerySource.title = messages.surveySourceTitle
+    const noScenery = this.shadow.getElementById("option-scenery-none")
+    if (noScenery) noScenery.textContent = messages.surveySourceNone
     this.sceneryStatus.setAttribute("aria-label", messages.surveyLabel)
     this.labelMilestones.textContent = messages.milestones
     this.labelMilestoneLabel.textContent = messages.milestoneLabel

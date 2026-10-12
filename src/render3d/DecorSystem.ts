@@ -751,8 +751,12 @@ export class DecorSystem {
    * highest point; a bush or a mound grows out of the slope, and its uphill side going into the
    * ground is what one sees in any field, while its downhill side floating is what one never sees —
    * at a wood's edge half a kilometre off, it was a band of sky under the whole edge.
+   *
+   * A building too, for the same reason and one more: it is built INTO the slope, its uphill side in the ground and never its downhill
+   * side in the air, and the scene's relief is far smoother than the ground (cells of tens of metres), so a building of tens of metres
+   * stood on the highest point of its footprint hung over the whole downhill half of it, by a metre or more.
    */
-  private static readonly GROWS_FROM_GROUND: ReadonlySet<DecorKind> = new Set(["tree", "shrub", "crop", "mound", "terrace", "wall"])
+  private static readonly GROWS_FROM_GROUND: ReadonlySet<DecorKind> = new Set(["tree", "shrub", "crop", "mound", "terrace", "wall", "building"])
 
   static groundUnderFootprint(object: DecorObject, x: number, z: number, headingDeg: number | undefined,
     ground: (x: number, z: number) => number, altitudeM = 0): number {
@@ -773,6 +777,47 @@ export class DecorSystem {
       }
     }
     return Number.isFinite(highest) ? highest : ground(x, z)
+  }
+
+  /**
+   * Where the two ends of an overhead line stand: the ground under the end its heading points away from (where the line is laid) and how much
+   * higher or lower the ground is under the end it points to.
+   *
+   * A span stands on the ground at BOTH its poles. Laid on the highest ground along its whole length, as a car is, a span of four hundred metres
+   * on a hillside had every pole but one in the air, by as much as the hill falls. The line is then sheared to meet the ground at its two ends
+   * (see shearWire), so each pole stands on its own ground and the conductors run from one top to the other.
+   */
+  static wireGround(object: DecorObject, x: number, z: number, headingDeg: number | undefined,
+    ground: (x: number, z: number) => number): { startY: number, dropM: number } {
+    const half = DecorSystem.sizeOf(object).lengthM / 2
+    const heading = (headingDeg ?? 0) * Math.PI / 180
+    // Along the heading, as groundUnderFootprint reads it: the end the heading points to is at +half.
+    const end = ground(x + Math.sin(heading) * half, z - Math.cos(heading) * half)
+    const start = ground(x - Math.sin(heading) * half, z + Math.cos(heading) * half)
+    return { startY: start, dropM: end - start }
+  }
+
+  /**
+   * Raises the end of an overhead line that its heading points to by `dropM`, the line rising linearly from its start: the strands slope, and each
+   * pole, which is a vertical thing at one end, is lifted whole. Done on the geometry as it was built, remembered, so doing it again
+   * (the ground changed under the line, or the observer moved the patch) replaces the shear and never adds to it.
+   */
+  static shearWire(group: Group, lengthM: number, dropM: number): void {
+    if (lengthM <= 0) return
+    group.traverse(child => {
+      const mesh = child as Mesh
+      if (!mesh.isMesh) return
+      const positions = mesh.geometry.getAttribute("position")
+      const rest = (mesh.userData.wireRest ??= Float32Array.from(positions.array as ArrayLike<number>)) as Float32Array
+      for (let i = 0; i < positions.count; i++) {
+        // The end the heading points to is at -Z in the object's own frame, whatever its heading.
+        const towardsEnd = 0.5 - rest[i * 3 + 2] / lengthM
+        positions.setY(i, rest[i * 3 + 1] + dropM * towardsEnd)
+      }
+      positions.needsUpdate = true
+      mesh.geometry.computeBoundingSphere()
+      mesh.geometry.computeBoundingBox()
+    })
   }
 
   /** Where the camera should sit/face to render "from inside" `object`, at the side its

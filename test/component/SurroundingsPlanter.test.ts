@@ -94,7 +94,7 @@ describe("SurroundingsPlanter", () => {
     expect(editor.decor.map(object => object.kind)).toEqual(["bridge", "wire", "tree"])
   })
 
-  it("can be turned off, then asks nothing of a place that is given, and asks at once for the place it stands at when turned on again", async () => {
+  it("can be turned off, then asks nothing of a place that is given, and is asked for a place again when turned on", async () => {
     const editor = new FakeEditor()
     const survey = new FakeSurvey(Scene.of([OAK]))
     const planter = editor.planter(survey)
@@ -103,8 +103,11 @@ describe("SurroundingsPlanter", () => {
     await new Promise(resolve => setTimeout(resolve, 40))
     expect(survey.asked).toEqual([])
     expect(editor.decor).toEqual([])
-    planter.setEnabled(true, PLACE.lat, PLACE.lng)
+    planter.setEnabled(true)
+    // Turned on, nothing is asked until a place is given: another survey is chosen by asking for the place it stands at.
     await new Promise(resolve => setTimeout(resolve, 20))
+    expect(survey.asked).toEqual([])
+    await planter.survey(PLACE.lat, PLACE.lng)
     expect(survey.asked).toHaveLength(1)
     expect(editor.decor).toHaveLength(1)
     // Turned off again, what it planted stays.

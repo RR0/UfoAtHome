@@ -12,6 +12,8 @@ export interface PlaceVectors {
   /** The road sections that are not on the ground: the width of the road on a bridge is theirs. */
   elevatedRoads: VectorFeature[]
   lines: VectorFeature[]
+  /** The outlines of the buildings, with their height and floors, where they were asked for. */
+  buildings: VectorFeature[]
 }
 
 /**
