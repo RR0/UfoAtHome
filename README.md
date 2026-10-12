@@ -45,7 +45,7 @@ browser.
 | `src/assets/` | The star catalogue tiers (generated) and sounds. The other catalogues are generated modules in `src/engine/astronomy/`. |
 | `src/generated/` | Derived from the TypeScript by `npm run build:schema`; gitignored, never edited. |
 | `public/demo-data/` | The published recordings (`observer-*.json`, `case-*.json`) and the examples the docs quote. |
-| `public/models/`, `public/roads/`, `public/tle/` | Archived glTF models, road networks and orbital elements, served next to the bundles (see [`public/models/README.md`](public/models/README.md)). |
+| `public/models/`, `public/roads/`, `public/tle/`, `public/reentries/`, `public/fireballs/`, `public/light-pollution/`, `public/aircraft/` | Archived glTF models, road networks, orbital elements, re-entries, recorded fireballs, night-sky brightness tiles and a slice of air traffic, served next to the bundles (see [`public/models/README.md`](public/models/README.md)). |
 | `site/` | The ufoathome.org generator (see [The site](#the-site)). |
 | `scripts/` | One-off data builds, case maintenance, GPU checks and performance harnesses. |
 | `test/` | Vitest suites mirroring `src/` (`engine`, `render`, `render3d`, `component`, `site`). |
@@ -69,18 +69,36 @@ Each script's header comment says what it takes, what it deliberately leaves out
 | `npm run build:satellites` | [CelesTrak SATCAT](https://celestrak.org/pub/satcat.csv) (network) | cached as `scripts/data/satcat.csv` | `src/engine/astronomy/satelliteCatalog.ts` |
 | `npm run build:tle` | [Laurent Chabin's TLE archive](https://ufowaves.org/gp/my_tles/) | a local copy in `scripts/data/tle/<year>/`, plus `qs.mag` and Stellarium's `satellites.json` | `public/tle/` |
 | `npm run build:roads` | OpenStreetMap via Overpass (network) | one query per recording, cached in `scripts/data/roads/` | `public/roads/` |
+| `npm run build:reentries [cords.csv] [satcat.csv]` | [CORDS](https://aerospace.org/reentries) (The Aerospace Corporation) and the SATCAT's decay days (CC BY 4.0) | CORDS' CSV export, archived by hand (the site is behind Cloudflare) in `scripts/data/reentries/`, and `scripts/data/satcat.csv` | `public/reentries/` (an index, one file per year) |
+| `npm run build:fireballs [traj_summary_all.txt]` | [Global Meteor Network](https://globalmeteornetwork.org/data/) trajectory summary (CC BY 4.0), the fireballs of absolute magnitude -3 or brighter | `scripts/data/gmn/traj_summary_all.txt` | `public/fireballs/` (an index, one file per month). FRIPON's detections are archived beside it but never published: its site asks to be contacted first |
+| `npm run build:light-pollution <World_Atlas_2015.tif>` | [World Atlas of the artificial night sky brightness](https://doi.org/10.1126/sciadv.1600377) (Falchi et al. 2016, CC BY-NC 4.0: its use on a public site is still to be settled) | the 3 GB GeoTIFF, from [GFZ](https://doi.org/10.5880/GFZ.1.4.2016.001) | `public/light-pollution/` (small tiles and an index) |
+| `npm run fetch:aircraft [--build] YYYY-MM-DD...` then `npm run build:aircraft` | [ADSB.lol open historical data](https://www.adsb.lol/docs/open-data/historical/) (ODbL), 3 to 4 GB a day | the release parts, fetched into `scripts/data/adsb/` (resumable) | `scripts/data/adsb/out/`, an archive indexed by day, hour and 1° tile, to host as static files |
+| `npm run build:aircraft-demo <archive> <out> <day> <hour> <lat> <lng>` | the archive above | one UTC hour of one day, the tiles within 150 km of a place | `public/aircraft/`, which a demo reads beside the page without the archive being hosted |
 | `npm run build:sky-reference` | Monte Carlo (a few minutes) | none | `test/engine/atmosphere/sky-reference.json` |
 | `npm run build:schema` | the recording's TypeScript types | none | `src/generated/sightingSchema.json` (run automatically before `dev`, tests and builds) |
 
-`build:novae` and `build:tle` run on plain `node` (it strips the types), the others on `tsx`.
+`build:novae`, `build:tle` and `build:aircraft` run on plain `node` (it strips the types), the others on `tsx`.
 `build:tle` calls `unzip` and `build:roads` calls `curl`: on Windows, run those two from Git Bash or WSL.
 
-The stand-in 3D models of the Socorro, Valensole and Chiles-Whitted crafts are also built from the accounts,
-by scripts with no npm alias:
+The stand-in 3D models of the crafts of Socorro, Valensole, Chiles-Whitted, McMinnville, Braine-le-Comte,
+Silly-le-Long and Trans-en-Provence are also built from the accounts, by scripts with no npm alias
+(`scripts/build-<case>-craft.ts`), each saying in its header which of its details are assumed:
 
 ```bash
 npx tsx scripts/build-socorro-craft.ts
 ```
+
+The realistic people of the catalogue (and the beings of Valensole and Cussac, derived from them) are built in
+Blender with MPFB from the MakeHuman system assets (CC0): see [`scripts/people/README.md`](scripts/people/README.md).
+Like every model, their output is committed.
+
+### Share cards
+
+The picture a shared link to a recording shows is a real frame of the simulation, photographed by a script that needs
+Chrome (so outside the sandbox, with Playwright) and is not part of the site build. A recording says which second it is
+taken at with `summaryTime`; `--sheet` writes a few instants to choose from, and `--link` writes the `image` fields from
+the photographs already taken. The header of [`scripts/share-cards/ShareCards.ts`](scripts/share-cards/ShareCards.ts) has
+the command lines. A case needs no card: the edge function takes the picture of its first account.
 
 ### Case recordings
 
@@ -91,6 +109,10 @@ address. Keep both copies identical with:
 npm run sync:cases              # copy into ../rr0.org's case dossiers, reporting what changed
 npm run sync:cases -- --check   # change nothing, fail if anything drifted
 ```
+
+A case's readings name the account they read by the `id` of its event in the case (see the format page); after editing a
+`case-*.json` by hand, `python3 site/skill/validate.py public/demo-data/case-x.json` says whether every reference still
+names an event.
 
 A recording keeps the weather record's answer rather than a link to it. To ask again:
 
