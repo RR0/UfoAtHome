@@ -29,6 +29,7 @@ import math
 import pathlib
 
 OUT = pathlib.Path("public/demo-data/observer-saint-lo.json")
+TREES = pathlib.Path(__file__).with_name("trees.json")
 
 LAT, LNG = 49.104890, -1.075382       # the exact spot where he stood, a Google Maps link he sent (2026-10-12)
 DURATION_MS = 5500
@@ -359,20 +360,18 @@ def observer_track():
 
 
 def trees():
-    """The tree tops make the horizon to the south: \"les arbres sont à 20/100 mètres de distance, selon leur
-    taille, ils dessinent l'horizon visible\". He will give a GPS point and photos."""
-    out = []
-    for i, az in enumerate(range(140, 221, 5)):
-        r = 55.0 + ((i * 5) % 4) * 9
-        h = 12.0 + ((i * 7) % 5)
-        out.append({
-            "id": f"tree-{i}", "kind": "tree",
-            "title": tr("Arbres du parc, côté sud", "park trees, south side"),
-            "eastM": round(r * math.sin(math.radians(az)), 1), "northM": round(r * math.cos(math.radians(az)), 1),
-            "sizeM": {"heightM": h},
-            "occludesSourceIds": IDS,
-        })
-    return out
+    """The trees around him, as the IGN's LiDAR HD saw them (see fetch_trees.py): where each crown is, how
+    high and how wide, from the spot he sent a map link to. The tops of those to the south are his horizon
+    (\"ils dessinent l'horizon visible\"), and a big one 16 m to the north-north-east hides the sky up to
+    36 degrees for azimuths 5 to 40."""
+    found = json.loads(TREES.read_text())
+    return [{
+        "id": f"tree-{i}", "kind": "tree",
+        "title": tr("Arbre (relevé LiDAR de l'IGN)", "tree (IGN LiDAR survey)"),
+        "eastM": t["eastM"], "northM": t["northM"],
+        "sizeM": {"widthM": t["widthM"], "lengthM": t["widthM"], "heightM": t["heightM"]},
+        "occludesSourceIds": IDS,
+    } for i, t in enumerate(found)]
 
 
 def build():
@@ -402,6 +401,8 @@ def build():
              "publication": {"publisher": "Liste de diffusion SCEAU (sceau_archives_ovni@framalistes.org)", "time": "2026-10-12"}},
             {"title": "Re: [sceau_archives_ovni] Encore un.evenement (the exact spot, and what he meant by left and right)", "authors": ["Q. B."],
              "publication": {"publisher": "Liste de diffusion SCEAU (sceau_archives_ovni@framalistes.org)", "time": "2026-10-12"}},
+            {"title": "LiDAR HD, modèle numérique de hauteur (the trees around the spot)", "url": "https://geoservices.ign.fr/lidarhd",
+             "publication": {"publisher": "IGN", "time": "2026"}},
         ],
         "description": {
             "fr": (

@@ -79,6 +79,14 @@
     "publisher": "Liste de diffusion SCEAU (sceau_archives_ovni@framalistes.org)",
     "time": "2026-10-12"
    }
+  },
+  {
+   "title": "LiDAR HD, modèle numérique de hauteur (the trees around the spot)",
+   "url": "https://geoservices.ign.fr/lidarhd",
+   "publication": {
+    "publisher": "IGN",
+    "time": "2026"
+   }
   }
  ],
  "description": {
@@ -27546,13 +27554,15 @@
    "id": "tree-0",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": 35.4,
-   "northM": -42.1,
+   "eastM": 8.5,
+   "northM": 15.5,
    "sizeM": {
-    "heightM": 12.0
+    "widthM": 12.5,
+    "lengthM": 12.5,
+    "heightM": 13.8
    },
    "occludesSourceIds": [
     "head",
@@ -27569,13 +27579,15 @@
    "id": "tree-1",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": 36.7,
-   "northM": -52.4,
+   "eastM": -53.0,
+   "northM": -55.5,
    "sizeM": {
-    "heightM": 14.0
+    "widthM": 15.1,
+    "lengthM": 15.1,
+    "heightM": 19.9
    },
    "occludesSourceIds": [
     "head",
@@ -27592,13 +27604,15 @@
    "id": "tree-2",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": 36.5,
-   "northM": -63.2,
+   "eastM": 11.0,
+   "northM": -46.5,
    "sizeM": {
-    "heightM": 16.0
+    "widthM": 12.7,
+    "lengthM": 12.7,
+    "heightM": 12.8
    },
    "occludesSourceIds": [
     "head",
@@ -27615,13 +27629,15 @@
    "id": "tree-3",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": 34.7,
-   "northM": -74.3,
+   "eastM": 45.0,
+   "northM": -36.0,
    "sizeM": {
-    "heightM": 13.0
+    "widthM": 13.5,
+    "lengthM": 13.5,
+    "heightM": 14.9
    },
    "occludesSourceIds": [
     "head",
@@ -27638,13 +27654,15 @@
    "id": "tree-4",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": 18.8,
-   "northM": -51.7,
+   "eastM": -54.0,
+   "northM": -44.0,
    "sizeM": {
-    "heightM": 15.0
+    "widthM": 13.7,
+    "lengthM": 13.7,
+    "heightM": 17.4
    },
    "occludesSourceIds": [
     "head",
@@ -27661,13 +27679,15 @@
    "id": "tree-5",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": 16.6,
-   "northM": -61.8,
+   "eastM": 19.0,
+   "northM": -44.0,
    "sizeM": {
-    "heightM": 12.0
+    "widthM": 14.0,
+    "lengthM": 14.0,
+    "heightM": 12.3
    },
    "occludesSourceIds": [
     "head",
@@ -27684,13 +27704,15 @@
    "id": "tree-6",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": 12.7,
-   "northM": -71.9,
+   "eastM": 51.5,
+   "northM": -36.0,
    "sizeM": {
-    "heightM": 14.0
+    "widthM": 13.1,
+    "lengthM": 13.1,
+    "heightM": 14.2
    },
    "occludesSourceIds": [
     "head",
@@ -27707,13 +27729,15 @@
    "id": "tree-7",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": 7.1,
-   "northM": -81.7,
+   "eastM": -18.0,
+   "northM": 85.0,
    "sizeM": {
-    "heightM": 16.0
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 19.0
    },
    "occludesSourceIds": [
     "head",
@@ -27730,13 +27754,15 @@
    "id": "tree-8",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": 0.0,
-   "northM": -55.0,
+   "eastM": -1.0,
+   "northM": -52.0,
    "sizeM": {
-    "heightM": 13.0
+    "widthM": 13.8,
+    "lengthM": 13.8,
+    "heightM": 11.9
    },
    "occludesSourceIds": [
     "head",
@@ -27753,13 +27779,15 @@
    "id": "tree-9",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": -5.6,
-   "northM": -63.8,
+   "eastM": 16.0,
+   "northM": 96.5,
    "sizeM": {
-    "heightM": 15.0
+    "widthM": 15.9,
+    "lengthM": 15.9,
+    "heightM": 20.8
    },
    "occludesSourceIds": [
     "head",
@@ -27776,13 +27804,15 @@
    "id": "tree-10",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": -12.7,
-   "northM": -71.9,
+   "eastM": 30.5,
+   "northM": -41.0,
    "sizeM": {
-    "heightM": 12.0
+    "widthM": 12.4,
+    "lengthM": 12.4,
+    "heightM": 11.4
    },
    "occludesSourceIds": [
     "head",
@@ -27799,13 +27829,15 @@
    "id": "tree-11",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": -21.2,
-   "northM": -79.2,
+   "eastM": 21.5,
+   "northM": 99.5,
    "sizeM": {
-    "heightM": 14.0
+    "widthM": 15.9,
+    "lengthM": 15.9,
+    "heightM": 21.0
    },
    "occludesSourceIds": [
     "head",
@@ -27822,13 +27854,15 @@
    "id": "tree-12",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": -18.8,
-   "northM": -51.7,
+   "eastM": 64.5,
+   "northM": -28.0,
    "sizeM": {
-    "heightM": 16.0
+    "widthM": 13.7,
+    "lengthM": 13.7,
+    "heightM": 15.0
    },
    "occludesSourceIds": [
     "head",
@@ -27845,13 +27879,15 @@
    "id": "tree-13",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": -27.0,
-   "northM": -58.0,
+   "eastM": 71.0,
+   "northM": -27.5,
    "sizeM": {
-    "heightM": 13.0
+    "widthM": 12.5,
+    "lengthM": 12.5,
+    "heightM": 16.0
    },
    "occludesSourceIds": [
     "head",
@@ -27868,13 +27904,15 @@
    "id": "tree-14",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": -36.5,
-   "northM": -63.2,
+   "eastM": 71.0,
+   "northM": -49.0,
    "sizeM": {
-    "heightM": 15.0
+    "widthM": 15.0,
+    "lengthM": 15.0,
+    "heightM": 17.8
    },
    "occludesSourceIds": [
     "head",
@@ -27891,13 +27929,15 @@
    "id": "tree-15",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": -47.0,
-   "northM": -67.2,
+   "eastM": 73.5,
+   "northM": -59.0,
    "sizeM": {
-    "heightM": 12.0
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 19.2
    },
    "occludesSourceIds": [
     "head",
@@ -27914,13 +27954,3090 @@
    "id": "tree-16",
    "kind": "tree",
    "title": {
-    "fr": "Arbres du parc, côté sud",
-    "en": "park trees, south side"
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
    },
-   "eastM": -35.4,
-   "northM": -42.1,
+   "eastM": -7.0,
+   "northM": -58.5,
    "sizeM": {
-    "heightM": 14.0
+    "widthM": 13.8,
+    "lengthM": 13.8,
+    "heightM": 12.6
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-17",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 68.0,
+   "northM": -35.0,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 15.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-18",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -38.0,
+   "northM": 78.0,
+   "sizeM": {
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 16.9
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-19",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -33.0,
+   "northM": 78.0,
+   "sizeM": {
+    "widthM": 14.7,
+    "lengthM": 14.7,
+    "heightM": 16.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-20",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 29.0,
+   "northM": 97.0,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 15.6,
+    "heightM": 19.2
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-21",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 59.0,
+   "northM": -34.0,
+   "sizeM": {
+    "widthM": 13.3,
+    "lengthM": 13.3,
+    "heightM": 13.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-22",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 73.5,
+   "northM": -73.0,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 19.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-23",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 0.5,
+   "northM": 90.0,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 16.8
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-24",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 5.0,
+   "northM": 88.5,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 16.3
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-25",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 79.0,
+   "northM": -73.0,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 19.3
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-26",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 75.0,
+   "northM": -87.5,
+   "sizeM": {
+    "widthM": 15.7,
+    "lengthM": 15.7,
+    "heightM": 20.2
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-27",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -8.5,
+   "northM": -97.5,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 17.3
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-28",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 3.5,
+   "northM": 93.5,
+   "sizeM": {
+    "widthM": 15.9,
+    "lengthM": 15.9,
+    "heightM": 16.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-29",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -6.5,
+   "northM": -90.5,
+   "sizeM": {
+    "widthM": 12.1,
+    "lengthM": 12.1,
+    "heightM": 15.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-30",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -6.5,
+   "northM": 86.5,
+   "sizeM": {
+    "widthM": 12.0,
+    "lengthM": 12.0,
+    "heightM": 14.7
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-31",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -7.0,
+   "northM": -65.0,
+   "sizeM": {
+    "widthM": 13.7,
+    "lengthM": 13.7,
+    "heightM": 11.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-32",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 35.5,
+   "northM": 97.0,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 16.6
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-33",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 65.5,
+   "northM": -88.5,
+   "sizeM": {
+    "widthM": 15.2,
+    "lengthM": 15.2,
+    "heightM": 17.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-34",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 74.5,
+   "northM": -8.5,
+   "sizeM": {
+    "widthM": 12.9,
+    "lengthM": 12.9,
+    "heightM": 12.2
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-35",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -48.0,
+   "northM": 81.0,
+   "sizeM": {
+    "widthM": 15.8,
+    "lengthM": 15.8,
+    "heightM": 14.9
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-36",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 81.0,
+   "northM": -81.0,
+   "sizeM": {
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 17.2
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-37",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 65.0,
+   "northM": -93.0,
+   "sizeM": {
+    "widthM": 15.7,
+    "lengthM": 15.7,
+    "heightM": 17.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-38",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -53.5,
+   "northM": 88.5,
+   "sizeM": {
+    "widthM": 15.0,
+    "lengthM": 15.0,
+    "heightM": 15.3
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-39",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 37.5,
+   "northM": 105.0,
+   "sizeM": {
+    "widthM": 14.4,
+    "lengthM": 14.4,
+    "heightM": 16.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-40",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 2.0,
+   "northM": -112.5,
+   "sizeM": {
+    "widthM": 14.2,
+    "lengthM": 14.2,
+    "heightM": 16.2
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-41",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 13.5,
+   "northM": -109.5,
+   "sizeM": {
+    "widthM": 13.0,
+    "lengthM": 13.0,
+    "heightM": 15.9
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-42",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 78.5,
+   "northM": -38.5,
+   "sizeM": {
+    "widthM": 13.0,
+    "lengthM": 13.0,
+    "heightM": 12.6
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-43",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 1.0,
+   "northM": -115.5,
+   "sizeM": {
+    "widthM": 14.4,
+    "lengthM": 14.4,
+    "heightM": 16.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-44",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 58.5,
+   "northM": 107.5,
+   "sizeM": {
+    "widthM": 14.2,
+    "lengthM": 14.2,
+    "heightM": 16.8
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-45",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -8.0,
+   "northM": -116.0,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 15.9
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-46",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -56.5,
+   "northM": 92.0,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 14.8
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-47",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -76.5,
+   "northM": 42.5,
+   "sizeM": {
+    "widthM": 10.5,
+    "lengthM": 10.5,
+    "heightM": 12.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-48",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 60.5,
+   "northM": -19.0,
+   "sizeM": {
+    "widthM": 10.2,
+    "lengthM": 10.2,
+    "heightM": 9.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-49",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 7.5,
+   "northM": -111.5,
+   "sizeM": {
+    "widthM": 13.5,
+    "lengthM": 13.5,
+    "heightM": 14.8
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-50",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -78.0,
+   "northM": -37.0,
+   "sizeM": {
+    "widthM": 11.9,
+    "lengthM": 11.9,
+    "heightM": 11.7
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-51",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -7.0,
+   "northM": -75.5,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 13.4,
+    "heightM": 10.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-52",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -3.5,
+   "northM": -116.5,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 15.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-53",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -75.5,
+   "northM": -26.0,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 10.6,
+    "heightM": 10.8
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-54",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -70.0,
+   "northM": -6.0,
+   "sizeM": {
+    "widthM": 11.1,
+    "lengthM": 11.1,
+    "heightM": 9.6
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-55",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 93.5,
+   "northM": -77.0,
+   "sizeM": {
+    "widthM": 13.1,
+    "lengthM": 13.1,
+    "heightM": 15.2
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-56",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -81.0,
+   "northM": -37.5,
+   "sizeM": {
+    "widthM": 13.3,
+    "lengthM": 13.3,
+    "heightM": 11.6
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-57",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 33.5,
+   "northM": -102.5,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 13.4,
+    "heightM": 13.6
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-58",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -65.5,
+   "northM": 81.5,
+   "sizeM": {
+    "widthM": 10.0,
+    "lengthM": 10.0,
+    "heightM": 13.2
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-59",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 67.0,
+   "northM": 102.5,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 15.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-60",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 37.5,
+   "northM": -102.5,
+   "sizeM": {
+    "widthM": 13.1,
+    "lengthM": 13.1,
+    "heightM": 12.9
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-61",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -70.5,
+   "northM": -18.5,
+   "sizeM": {
+    "widthM": 12.5,
+    "lengthM": 12.5,
+    "heightM": 9.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-62",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 51.0,
+   "northM": 104.5,
+   "sizeM": {
+    "widthM": 12.2,
+    "lengthM": 12.2,
+    "heightM": 13.2
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-63",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 50.5,
+   "northM": -96.0,
+   "sizeM": {
+    "widthM": 11.8,
+    "lengthM": 11.8,
+    "heightM": 12.3
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-64",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -94.0,
+   "northM": -41.5,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 13.4,
+    "heightM": 11.7
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-65",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 45.5,
+   "northM": -99.0,
+   "sizeM": {
+    "widthM": 11.8,
+    "lengthM": 11.8,
+    "heightM": 12.3
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-66",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -59.5,
+   "northM": 99.0,
+   "sizeM": {
+    "widthM": 12.0,
+    "lengthM": 12.0,
+    "heightM": 12.9
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-67",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -12.5,
+   "northM": -123.0,
+   "sizeM": {
+    "widthM": 15.4,
+    "lengthM": 15.4,
+    "heightM": 13.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-68",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 102.0,
+   "northM": -74.0,
+   "sizeM": {
+    "widthM": 12.8,
+    "lengthM": 12.8,
+    "heightM": 13.6
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-69",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 88.5,
+   "northM": -16.5,
+   "sizeM": {
+    "widthM": 11.6,
+    "lengthM": 11.6,
+    "heightM": 10.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-70",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -102.5,
+   "northM": -43.5,
+   "sizeM": {
+    "widthM": 13.3,
+    "lengthM": 13.3,
+    "heightM": 12.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-71",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -67.5,
+   "northM": -21.0,
+   "sizeM": {
+    "widthM": 10.7,
+    "lengthM": 10.7,
+    "heightM": 8.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-72",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -73.0,
+   "northM": 3.0,
+   "sizeM": {
+    "widthM": 10.0,
+    "lengthM": 10.0,
+    "heightM": 8.3
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-73",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -46.0,
+   "northM": 93.5,
+   "sizeM": {
+    "widthM": 12.6,
+    "lengthM": 12.6,
+    "heightM": 11.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-74",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -81.5,
+   "northM": 7.0,
+   "sizeM": {
+    "widthM": 9.1,
+    "lengthM": 9.1,
+    "heightM": 8.7
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-75",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 76.0,
+   "northM": 102.0,
+   "sizeM": {
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 12.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-76",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 97.0,
+   "northM": -42.5,
+   "sizeM": {
+    "widthM": 10.8,
+    "lengthM": 10.8,
+    "heightM": 10.6
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-77",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 90.5,
+   "northM": -29.0,
+   "sizeM": {
+    "widthM": 12.6,
+    "lengthM": 12.6,
+    "heightM": 9.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-78",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 87.5,
+   "northM": -41.5,
+   "sizeM": {
+    "widthM": 11.6,
+    "lengthM": 11.6,
+    "heightM": 9.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-79",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 79.0,
+   "northM": -28.0,
+   "sizeM": {
+    "widthM": 13.9,
+    "lengthM": 13.9,
+    "heightM": 8.3
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-80",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 84.0,
+   "northM": -32.5,
+   "sizeM": {
+    "widthM": 15.4,
+    "lengthM": 15.4,
+    "heightM": 8.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-81",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -115.5,
+   "northM": -46.0,
+   "sizeM": {
+    "widthM": 10.1,
+    "lengthM": 10.1,
+    "heightM": 11.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-82",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -62.5,
+   "northM": -101.5,
+   "sizeM": {
+    "widthM": 13.6,
+    "lengthM": 13.6,
+    "heightM": 10.6
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-83",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -69.5,
+   "northM": -102.0,
+   "sizeM": {
+    "widthM": 13.1,
+    "lengthM": 13.1,
+    "heightM": 10.7
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-84",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 93.5,
+   "northM": -3.0,
+   "sizeM": {
+    "widthM": 13.0,
+    "lengthM": 13.0,
+    "heightM": 8.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-85",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 112.0,
+   "northM": 7.0,
+   "sizeM": {
+    "widthM": 6.9,
+    "lengthM": 6.9,
+    "heightM": 9.6
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-86",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -101.5,
+   "northM": -77.5,
+   "sizeM": {
+    "widthM": 11.7,
+    "lengthM": 11.7,
+    "heightM": 10.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-87",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -60.5,
+   "northM": -85.5,
+   "sizeM": {
+    "widthM": 8.3,
+    "lengthM": 8.3,
+    "heightM": 8.8
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-88",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 102.5,
+   "northM": -37.5,
+   "sizeM": {
+    "widthM": 11.9,
+    "lengthM": 11.9,
+    "heightM": 8.9
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-89",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -122.0,
+   "northM": -40.0,
+   "sizeM": {
+    "widthM": 11.4,
+    "lengthM": 11.4,
+    "heightM": 10.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-90",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -18.0,
+   "northM": -109.5,
+   "sizeM": {
+    "widthM": 11.0,
+    "lengthM": 11.0,
+    "heightM": 8.9
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-91",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 102.5,
+   "northM": 30.0,
+   "sizeM": {
+    "widthM": 12.0,
+    "lengthM": 12.0,
+    "heightM": 8.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-92",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 93.5,
+   "northM": 8.0,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 12.7,
+    "heightM": 7.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-93",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 17.5,
+   "northM": -121.5,
+   "sizeM": {
+    "widthM": 5.5,
+    "lengthM": 5.5,
+    "heightM": 8.8
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-94",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -95.5,
+   "northM": -86.0,
+   "sizeM": {
+    "widthM": 11.9,
+    "lengthM": 11.9,
+    "heightM": 8.9
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-95",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -42.5,
+   "northM": -63.5,
+   "sizeM": {
+    "widthM": 8.8,
+    "lengthM": 8.8,
+    "heightM": 5.9
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-96",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -35.5,
+   "northM": -60.0,
+   "sizeM": {
+    "widthM": 7.0,
+    "lengthM": 7.0,
+    "heightM": 5.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-97",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -104.5,
+   "northM": -63.5,
+   "sizeM": {
+    "widthM": 11.4,
+    "lengthM": 11.4,
+    "heightM": 8.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-98",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -67.5,
+   "northM": -27.0,
+   "sizeM": {
+    "widthM": 10.9,
+    "lengthM": 10.9,
+    "heightM": 5.6
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-99",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -106.0,
+   "northM": -58.0,
+   "sizeM": {
+    "widthM": 11.5,
+    "lengthM": 11.5,
+    "heightM": 8.2
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-100",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -107.0,
+   "northM": -52.5,
+   "sizeM": {
+    "widthM": 12.8,
+    "lengthM": 12.8,
+    "heightM": 8.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-101",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -104.0,
+   "northM": -66.5,
+   "sizeM": {
+    "widthM": 11.5,
+    "lengthM": 11.5,
+    "heightM": 8.3
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-102",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -103.0,
+   "northM": -70.0,
+   "sizeM": {
+    "widthM": 11.7,
+    "lengthM": 11.7,
+    "heightM": 8.3
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-103",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 10.0,
+   "northM": 127.5,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 8.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-104",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 43.5,
+   "northM": -113.0,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 5.7,
+    "heightM": 8.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-105",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -102.5,
+   "northM": -73.0,
+   "sizeM": {
+    "widthM": 12.0,
+    "lengthM": 12.0,
+    "heightM": 8.2
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-106",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 85.5,
+   "northM": -23.5,
+   "sizeM": {
+    "widthM": 13.0,
+    "lengthM": 13.0,
+    "heightM": 6.2
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-107",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -19.5,
+   "northM": 118.0,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 11.3,
+    "heightM": 7.7
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-108",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -28.0,
+   "northM": 118.5,
+   "sizeM": {
+    "widthM": 10.4,
+    "lengthM": 10.4,
+    "heightM": 7.8
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-109",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 5.0,
+   "northM": 128.0,
+   "sizeM": {
+    "widthM": 13.8,
+    "lengthM": 13.8,
+    "heightM": 8.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-110",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -24.5,
+   "northM": 118.0,
+   "sizeM": {
+    "widthM": 12.2,
+    "lengthM": 12.2,
+    "heightM": 7.7
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-111",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -44.5,
+   "northM": 121.0,
+   "sizeM": {
+    "widthM": 11.7,
+    "lengthM": 11.7,
+    "heightM": 8.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-112",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 124.5,
+   "northM": 14.5,
+   "sizeM": {
+    "widthM": 7.6,
+    "lengthM": 7.6,
+    "heightM": 7.8
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-113",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 44.0,
+   "northM": -117.0,
+   "sizeM": {
+    "widthM": 5.6,
+    "lengthM": 5.6,
+    "heightM": 7.7
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-114",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 88.5,
+   "northM": -9.5,
+   "sizeM": {
+    "widthM": 13.7,
+    "lengthM": 13.7,
+    "heightM": 5.9
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-115",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 115.5,
+   "northM": -41.5,
+   "sizeM": {
+    "widthM": 10.3,
+    "lengthM": 10.3,
+    "heightM": 7.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-116",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 111.5,
+   "northM": -36.0,
+   "sizeM": {
+    "widthM": 11.0,
+    "lengthM": 11.0,
+    "heightM": 7.2
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-117",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 120.0,
+   "northM": -39.0,
+   "sizeM": {
+    "widthM": 9.3,
+    "lengthM": 9.3,
+    "heightM": 7.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-118",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -41.0,
+   "northM": 121.0,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 10.6,
+    "heightM": 7.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-119",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 96.0,
+   "northM": 70.5,
+   "sizeM": {
+    "widthM": 8.2,
+    "lengthM": 8.2,
+    "heightM": 7.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-120",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 116.5,
+   "northM": -56.5,
+   "sizeM": {
+    "widthM": 7.9,
+    "lengthM": 7.9,
+    "heightM": 7.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-121",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -56.0,
+   "northM": -70.0,
+   "sizeM": {
+    "widthM": 6.8,
+    "lengthM": 6.8,
+    "heightM": 5.6
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-122",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 102.0,
+   "northM": 14.0,
+   "sizeM": {
+    "widthM": 12.1,
+    "lengthM": 12.1,
+    "heightM": 6.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-123",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -9.5,
+   "northM": 120.0,
+   "sizeM": {
+    "widthM": 6.8,
+    "lengthM": 6.8,
+    "heightM": 6.7
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-124",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 112.0,
+   "northM": 33.0,
+   "sizeM": {
+    "widthM": 12.9,
+    "lengthM": 12.9,
+    "heightM": 6.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-125",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -80.5,
+   "northM": -101.0,
+   "sizeM": {
+    "widthM": 10.0,
+    "lengthM": 10.0,
+    "heightM": 6.9
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-126",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 104.5,
+   "northM": -33.0,
+   "sizeM": {
+    "widthM": 11.7,
+    "lengthM": 11.7,
+    "heightM": 6.0
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-127",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 33.0,
+   "northM": -119.0,
+   "sizeM": {
+    "widthM": 6.1,
+    "lengthM": 6.1,
+    "heightM": 6.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-128",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 97.5,
+   "northM": 15.0,
+   "sizeM": {
+    "widthM": 12.9,
+    "lengthM": 12.9,
+    "heightM": 5.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-129",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 21.5,
+   "northM": 117.0,
+   "sizeM": {
+    "widthM": 7.6,
+    "lengthM": 7.6,
+    "heightM": 6.3
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-130",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 6.5,
+   "northM": -126.5,
+   "sizeM": {
+    "widthM": 10.0,
+    "lengthM": 10.0,
+    "heightM": 6.6
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-131",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 107.5,
+   "northM": -58.0,
+   "sizeM": {
+    "widthM": 6.6,
+    "lengthM": 6.6,
+    "heightM": 6.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-132",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 98.5,
+   "northM": 19.5,
+   "sizeM": {
+    "widthM": 12.1,
+    "lengthM": 12.1,
+    "heightM": 5.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-133",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 120.0,
+   "northM": 45.0,
+   "sizeM": {
+    "widthM": 12.3,
+    "lengthM": 12.3,
+    "heightM": 6.5
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-134",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 89.0,
+   "northM": 64.0,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 4.9,
+    "heightM": 5.7
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-135",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -47.5,
+   "northM": 116.5,
+   "sizeM": {
+    "widthM": 10.2,
+    "lengthM": 10.2,
+    "heightM": 6.2
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-136",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": -20.5,
+   "northM": 127.5,
+   "sizeM": {
+    "widthM": 9.5,
+    "lengthM": 9.5,
+    "heightM": 6.3
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-137",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 104.0,
+   "northM": 21.5,
+   "sizeM": {
+    "widthM": 12.6,
+    "lengthM": 12.6,
+    "heightM": 5.4
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-138",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 71.5,
+   "northM": -104.5,
+   "sizeM": {
+    "widthM": 8.9,
+    "lengthM": 8.9,
+    "heightM": 6.1
+   },
+   "occludesSourceIds": [
+    "head",
+    "tail",
+    "filament-1",
+    "filament-2",
+    "filament-3",
+    "filament-4",
+    "filament-5",
+    "aura"
+   ]
+  },
+  {
+   "id": "tree-139",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre (relevé LiDAR de l'IGN)",
+    "en": "tree (IGN LiDAR survey)"
+   },
+   "eastM": 114.5,
+   "northM": 43.0,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 11.3,
+    "heightM": 5.9
    },
    "occludesSourceIds": [
     "head",
