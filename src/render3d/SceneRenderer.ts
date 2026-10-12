@@ -143,6 +143,7 @@ import { SolarEclipse, type SolarEclipseView } from "../engine/astronomy/SolarEc
 import { EclipsedSun, SolarCorona } from "./EclipsedSun.js"
 import { ForwardDiffraction } from "../engine/atmosphere/ForwardDiffraction.js"
 import { AircraftLighting } from "../engine/traffic/AircraftLighting.js"
+import { Daylight } from "../engine/astronomy/Daylight.js"
 import { TrafficIds } from "../engine/traffic/TrafficIds.js"
 import { AtmosphereProfile } from "../engine/atmosphere/AtmosphereProfile.js"
 import { SourceDiffraction } from "./SourceDiffraction.js"
@@ -3381,6 +3382,18 @@ export class SceneRenderer {
     const body = useSun ? astronomy.sun : astronomy.moon
     const beam: [number, number, number] = [0, 0, 0]
     const level = Math.max(0, Math.sin(Math.max(body.altitudeDeg, 0) * DEG_TO_RAD))
+    // What lights the ground and what stands on it is the body whose disc is above the horizon of the place (see Daylight): the Sun with its
+    // disc under it lights nothing, however near, and the Moon, if it is up, is what is left. The scene used to light the ground with the Sun down
+    // to four degrees under, which is where it stopped being drawn and not where it stops lighting: walls turned to it glowed a deep orange in
+    // a dusk that was already dark, with a thread of the same colour at the foot of every wall and trunk the relief's shadow did not quite reach.
+    const heightM = this.siteElevationM + this.observerElevationM
+    let lighting = body
+    let reaching = useSun || useMoon ? Daylight.directFraction(body.altitudeDeg, heightM) : 0
+    if (useSun && reaching <= 0 && astronomy.moon.altitudeDeg >= CELESTIAL_LIGHT_MIN_ALTITUDE_DEG) {
+      lighting = astronomy.moon
+      reaching = Daylight.directFraction(lighting.altitudeDeg, heightM)
+    }
+    const lightingLevel = Math.max(0, Math.sin(Math.max(lighting.altitudeDeg, 0) * DEG_TO_RAD))
     // What the clouds take out of the beam they send down again, scattered: the two-stream answer
     // for a deck of that optical depth, whose total transmission is 1 / (1 + ¾(1 − g)τ) with the
     // droplets' forward asymmetry g = 0.85, less the beam that went straight through.
@@ -3390,14 +3403,21 @@ export class SceneRenderer {
     const diffuse: [number, number, number] = [0, 0, 0]
     if (useSun || useMoon) {
       const illuminance = ForwardDiffraction.illuminanceOf(body.magnitude) * scale
-      const through = this.air.transmittanceFromSpace(this.siteElevationM + this.observerElevationM, body.altitudeDeg)
+      const through = this.air.transmittanceFromSpace(heightM, body.altitudeDeg)
       for (let c = 0; c < 3; c++) {
-        beam[c] = illuminance * through[c] * direct
         diffuse[c] = illuminance * through[c] * scattered * level
         this.cloudBeam[c] = illuminance * through[c]
       }
       const { x, y, z } = horizontalToCartesian(body.altitudeDeg, body.azimuthDeg, 1)
       this.cloudBeamDirection.set(x, y, z)
+      // What reaches the ground is the beam of whichever of the two still has its disc above the horizon, by the share that is. The clouds above
+      // keep the Sun's own light, as above: theirs is far higher, and lit long after the ground's dusk.
+      if (reaching > 0) {
+        const lightIlluminance = ForwardDiffraction.illuminanceOf(lighting.magnitude) * scale
+        const lightThrough = lighting === body ? through : this.air.transmittanceFromSpace(heightM, lighting.altitudeDeg)
+        const lightDirect = lighting === body ? direct : this.cloudTransmission(lighting)
+        for (let c = 0; c < 3; c++) beam[c] = lightIlluminance * lightThrough[c] * lightDirect * reaching
+      }
     } else this.cloudBeam.fill(0)
     const around = this.surroundings
     if (around) {
@@ -3415,15 +3435,15 @@ export class SceneRenderer {
       // A level ground of the sky's own albedo, lit by the sky and the beam, lights what faces down.
       const albedo = AtmosphereTables.GROUND_ALBEDO
       this.skyLight.groundColor.setRGB(
-        albedo * (irradiance[0] + beam[0] * level), albedo * (irradiance[1] + beam[1] * level), albedo * (irradiance[2] + beam[2] * level))
+        albedo * (irradiance[0] + beam[0] * lightingLevel), albedo * (irradiance[1] + beam[1] * lightingLevel), albedo * (irradiance[2] + beam[2] * lightingLevel))
     }
     this.skyLight.intensity = 1
-    this.sceneSunBeam = useSun ? [beam[0], beam[1], beam[2]] : [0, 0, 0]
-    if (!useSun && !useMoon) {
+    this.sceneSunBeam = lighting === astronomy.sun ? [beam[0], beam[1], beam[2]] : [0, 0, 0]
+    if ((!useSun && !useMoon) || reaching <= 0) {
       this.celestialLight.intensity = 0
       return
     }
-    const { x, y, z } = horizontalToCartesian(body.altitudeDeg, body.azimuthDeg, 1)
+    const { x, y, z } = horizontalToCartesian(lighting.altitudeDeg, lighting.azimuthDeg, 1)
     this.lightDirection.set(x, y, z)
     // The push along the normal is what keeps relief from shadowing itself, and it moves where a surface is
     // tested UP, by SHADOW_NORMAL_BIAS_M: which under a low sun is a long way TOWARDS the light along the
