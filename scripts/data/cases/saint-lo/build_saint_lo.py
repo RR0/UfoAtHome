@@ -1,10 +1,22 @@
 #!/usr/bin/env python3
-"""Saint-Lô, 11 August 2026, about 02:30: a translucent white half-moon with trailing filaments
-crossing the whole sky from the north, over the zenith, to the south in about 4 s, ending in a
-720-degree spiral behind the trees.
+"""Saint-Lô, 11 August 2026, about 02:30: a translucent white "half-moon" (a flying wing) crossing the
+whole sky from the north, over the zenith, to the south, then a clockwise spiral just above the tree
+tops.
 
-Source: the witness's replies (2026-10-11) on the SCEAU mailing list, answering Jerome Beau's
-questions (thread "Encore un.evenement"). Everything here is his account, nothing is measured.
+Source: the witness's written replies on the SCEAU mailing list (2026-10-11 and 2026-10-12), answering
+Jerome Beau's questions (thread "Encore un.evenement"). Everything here is his account, nothing is
+measured. Version 2 follows the corrections he sent after seeing version 1:
+
+- first seen at about 20 degrees, near the zenith half a second later; 5 to 6 s from horizon to horizon
+  at the very most; very fast up to the zenith, much slower afterwards;
+- small at first (a shooting star), biggest at the zenith (a coin and a half at arm's length), small
+  again towards the horizon;
+- wide and short: the rear part is a fifth of the width; a thin flying wing, convex edge in front;
+- not a straight line after the zenith: a first turn to the left (about 15 degrees) ending as it leaves
+  the zenith, a second, long one to the right (about 25) with the wing banking, a last one to the left;
+- a slight sail-like vibration from the second turn on (stars seen through it then);
+- near the horizon the wing is edge-on, a horizontal line of light, then a clockwise spiral, a bit
+  bigger than the full Moon, ending head down behind the tree tops.
 
 Writes public/demo-data/observer-saint-lo.json. Run from the repository root:
     python3 scripts/data/cases/saint-lo/build_saint_lo.py
@@ -16,12 +28,22 @@ import pathlib
 OUT = pathlib.Path("public/demo-data/observer-saint-lo.json")
 
 LAT, LNG = 49.1043877, -1.0777321    # Musée du Bocage normand, given by the investigator
-DURATION_MS = 4000
-STEP_MS = 50
-SPIRAL_STEP_MS = 25                    # two turns in a second: 18 degrees a step, so the player's straight lines stay round
-SPIRAL_FROM_MS = 3000                  # the 720-degree turn is the last second
+DURATION_MS = 5000
+STEP_MS = 25
 EYE_LAG_S = 0.15
-HEAD_DEPTH, ACROSS = 1.5, 3.0          # degrees: along the motion, across it ("1.5 one-euro coins")
+SPIRAL_FROM_MS = 4300
+ZENITH_MS = 500                        # "le temps que je réagisse (~500 ms) il était quasiment au zénith"
+START_ALT = 20.0                       # "mes yeux l'ont perçu aux alentours des 20 degrés"
+UP_SPEED = 134.0                       # degrees per second up to the zenith: 67 degrees in 0.5 s
+SPIRAL_ALT = 15.0                      # the spiral starts "juste au-dessus de l'horizon" (the tree tops)
+HEAD_DEPTH, ACROSS = 1.5, 3.0          # degrees at the zenith: along the motion, across it
+VIBRATION_FROM_MS = 1300
+VIBRATION_HZ = 5.0
+
+# Turns, as (from ms, to ms, degrees, +1 left / -1 right as seen on the sky).
+TURN_1 = (700, 1300, 15.0, +1)
+TURN_2 = (1300, 3000, 25.0, -1)
+TURN_3_FROM, TURN_3_TO = 3200, 4300
 
 
 def stated(value, basis, rationale):
@@ -32,18 +54,12 @@ def tr(fr, en):
     return {"fr": fr, "en": en}
 
 
-# --- the path, a great circle through the zenith (north -> overhead -> south) ----------------
-def path(t_ms):
-    """Direction (azimuth, altitude) of the phenomenon's centre, without the spiral."""
-    u = t_ms / DURATION_MS
-    ZENITH_AT = 0.28                      # "more speed before the zenith, then rather constant"
-    if u <= ZENITH_AT:
-        k = u / ZENITH_AT
-        return 0.0, 35.0 + 55.0 * k
-    k = (u - ZENITH_AT) / (1 - ZENITH_AT)
-    return 180.0, 90.0 - 85.0 * k       # ends at 5 degrees, in the tree tops
+def smooth(x):
+    x = max(0.0, min(1.0, x))
+    return x * x * (3 - 2 * x)
 
 
+# --- vectors on the sky, (east, north, up) -----------------------------------------------------
 def unit(az, alt):
     a, h = math.radians(az), math.radians(alt)
     return (math.cos(h) * math.sin(a), math.cos(h) * math.cos(a), math.sin(h))
@@ -51,6 +67,102 @@ def unit(az, alt):
 
 def dot(a, b):
     return sum(x * y for x, y in zip(a, b))
+
+
+def cross(a, b):
+    return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+
+
+def add(*vs):
+    return tuple(sum(c) for c in zip(*vs))
+
+
+def scale(v, k):
+    return tuple(c * k for c in v)
+
+
+def to_azalt(v):
+    return math.degrees(math.atan2(v[0], v[1])) % 360.0, math.degrees(math.asin(max(-1.0, min(1.0, v[2]))))
+
+
+# --- the path of the wing: a flight on the sphere of the sky, with turns -------------------------
+def fly(down_speed, turn_3_deg, until_ms=DURATION_MS, dt_ms=5):
+    """Directions (az, alt) of the wing every `dt_ms`, from the first sight to `until_ms`."""
+    p = unit(0.0, START_ALT)
+    h = math.radians(START_ALT)
+    t = (0.0, -math.sin(h), math.cos(h))     # towards the zenith
+    turns = [TURN_1, TURN_2, (TURN_3_FROM, TURN_3_TO, turn_3_deg, +1)]
+    out = []
+    for ms in range(0, until_ms + 1, dt_ms):
+        out.append(to_azalt(p))
+        # speed: very fast to the zenith, then much slower
+        blend = smooth((ms - ZENITH_MS) / 300.0)
+        v = UP_SPEED + (down_speed - UP_SPEED) * blend
+        if ms >= SPIRAL_FROM_MS:
+            v = down_speed * 0.7
+        for start, end, deg, sign in turns:
+            d_angle = math.radians(deg) * sign * (smooth((ms + dt_ms - start) / (end - start)) - smooth((ms - start) / (end - start)))
+            if d_angle:
+                t = add(scale(t, math.cos(d_angle)), scale(cross(t, p), math.sin(d_angle)))   # to the left of the motion
+        d = math.radians(v * dt_ms / 1000.0)
+        p, t = (add(scale(p, math.cos(d)), scale(t, math.sin(d))), add(scale(t, math.cos(d)), scale(p, -math.sin(d))))
+    return out
+
+
+def solve_path():
+    """The two numbers the account leaves open: how slow it went after the zenith, and how far the last
+    turn went. Taken so that it is at the tree tops (SPIRAL_ALT) at the start of the spiral, and due south."""
+    best = None
+    for turn_3 in range(0, 91, 2):
+        lo, hi = 5.0, 80.0
+        for _ in range(24):
+            mid = (lo + hi) / 2
+            alt = fly(mid, turn_3, SPIRAL_FROM_MS, 10)[-1][1]
+            lo, hi = (mid, hi) if alt > SPIRAL_ALT else (lo, mid)
+        az, alt = fly((lo + hi) / 2, turn_3, SPIRAL_FROM_MS, 10)[-1]
+        error = abs((az - 180 + 180) % 360 - 180)
+        if best is None or error < best[0]:
+            best = (error, (lo + hi) / 2, turn_3)
+    return best[1], best[2]
+
+
+DOWN_SPEED, TURN_3_DEG = solve_path()
+PATH = fly(DOWN_SPEED, TURN_3_DEG)
+
+
+def path(t_ms):
+    i = max(0, min(len(PATH) - 1, int(round(t_ms / 5))))
+    return PATH[i]
+
+
+# --- the eye -----------------------------------------------------------------------------------
+def _follow_series():
+    """Heading and pitch of an eye that follows the wing with a short lag; over the zenith the head goes
+    back and the body turns, so the heading is spread over the time the wing is above 78 degrees."""
+    times = list(range(0, DURATION_MS + 1, STEP_MS))
+    raw = [path(max(0, t - EYE_LAG_S * 1000)) for t in times]
+    over = [i for i, (_a, alt) in enumerate(raw) if alt > 78.0]
+    heading = [a for a, _alt in raw]
+    if over:
+        first, last = max(0, over[0] - 1), min(len(times) - 1, over[-1] + 1)
+        h0, h1 = heading[first], heading[last]
+        delta = (h1 - h0 + 180) % 360 - 180
+        for i in range(first, last + 1):
+            heading[i] = (h0 + delta * smooth((i - first) / (last - first))) % 360
+    return {t: (heading[i], min(raw[i][1], 88.0)) for i, t in enumerate(times)}
+
+
+FOLLOW = _follow_series()
+
+
+def eye(t_ms):
+    """At first west-south-west (his own words), then swung to the thing as he reacts."""
+    t = int(round(t_ms / STEP_MS)) * STEP_MS
+    follow = FOLLOW[min(t, DURATION_MS)]
+    k = smooth((t_ms - 100) / 600.0)
+    a0, p0 = 250.0, 45.0
+    d = (follow[0] - a0 + 180) % 360 - 180
+    return (a0 + d * k) % 360, p0 + (follow[1] - p0) * k
 
 
 def basis_of(heading, pitch):
@@ -72,66 +184,70 @@ def from_screen(sx, sy, pose):
     f, r, u = basis_of(*pose)
     v = [f[i] + sx * r[i] + sy * u[i] for i in range(3)]
     n = math.sqrt(sum(c * c for c in v))
-    v = [c / n for c in v]
-    return (math.degrees(math.atan2(v[0], v[1])) % 360.0, math.degrees(math.asin(v[2])))
-
-
-# --- the eye: where he looks over time -------------------------------------------------------
-def eye(t_ms):
-    """Heading/pitch: first west-south-west, then swung to the thing, then following it."""
-    if t_ms < 500:
-        k = t_ms / 500
-        k = k * k * (3 - 2 * k)
-        a0, p0 = 250.0, 45.0
-        a1, p1 = eye_follow(500)
-        d = (a1 - a0 + 180) % 360 - 180
-        return (a0 + d * k) % 360, p0 + (p1 - p0) * k
-    return eye_follow(t_ms)
-
-
-def eye_follow(t_ms):
-    az, alt = path(max(0, t_ms - EYE_LAG_S * 1000))
-    # Over the top the head goes back and the body turns half a circle: spread the turn.
-    u = t_ms / DURATION_MS
-    if u < 0.20:
-        return 0.0, min(alt, 88.0)
-    if u > 0.40:
-        return 180.0, min(alt, 88.0)
-    k = (u - 0.20) / 0.20
-    k = k * k * (3 - 2 * k)
-    return 180.0 * k, 88.0
-
-
-# --- the phenomenon at a moment ---------------------------------------------------------------
-def head_direction(t_ms, pose):
-    """Direction of the head, with the spiral of the last second laid on the path (on screen)."""
-    az, alt = path(t_ms)
-    if t_ms < SPIRAL_FROM_MS:
-        return az, alt
-    k = (t_ms - SPIRAL_FROM_MS) / (DURATION_MS - SPIRAL_FROM_MS)
-    sx, sy = to_screen(az, alt, pose)
-    radius = math.tan(math.radians(4.5)) * math.sin(math.pi * min(1.0, k * 1.15)) ** 0.5
-    phase = 2 * math.pi * 2 * k          # two turns = 720 degrees
-    sx += radius * (math.cos(phase) - 1)
-    sy += radius * math.sin(phase)
-    return from_screen(sx, sy, pose)
+    return to_azalt([c / n for c in v])
 
 
 def deg_tan(d):
     return math.tan(math.radians(d))
 
 
+# --- the wing at a moment ----------------------------------------------------------------------
+def size_factor(alt):
+    """It looked small as a shooting star, grew to its full width at the zenith and shrank towards the
+    horizon: the apparent size of something flying at a constant height, which is sin(altitude)."""
+    return max(0.1, math.sin(math.radians(max(alt, 1.0))))
+
+
+def roll_deg(t_ms):
+    """How the wing was banked, which is what makes it look wide or thin."""
+    if t_ms < TURN_1[0]:
+        return 0.0
+    if t_ms < TURN_2[0]:
+        return 20.0 * math.sin(math.pi * smooth((t_ms - TURN_1[0]) / (TURN_1[1] - TURN_1[0])))
+    if t_ms < TURN_3_FROM:
+        return 20.0 * smooth((t_ms - TURN_2[0]) / 400.0)       # "environ 20 degrés sur la droite"
+    if t_ms < SPIRAL_FROM_MS:
+        return 20.0 + 70.0 * smooth((t_ms - TURN_3_FROM) / (SPIRAL_FROM_MS - TURN_3_FROM))   # edge-on: "une ligne lumineuse"
+    k = (t_ms - SPIRAL_FROM_MS) / (DURATION_MS - SPIRAL_FROM_MS)
+    return 90.0 + 450.0 * k                                      # barrel roll, ending head down
+
+
+def spiral_offset(t_ms):
+    """Screen offset of the spiral at a moment, clockwise, two turns, a little more than the full Moon across."""
+    k = (t_ms - SPIRAL_FROM_MS) / (DURATION_MS - SPIRAL_FROM_MS)
+    k = max(0.0, k)
+    radius = deg_tan(0.35) * smooth(k * 4)
+    phase = -2 * math.pi * 2 * k
+    return radius * (math.cos(phase) - 1), radius * math.sin(phase)
+
+
 def frame(t_ms):
     pose = eye(t_ms)
-    h_az, h_alt = head_direction(t_ms, pose)
-    sh = to_screen(h_az, h_alt, pose)
-    a_az, a_alt = head_direction(max(0, t_ms - STEP_MS), pose)
-    b_az, b_alt = head_direction(min(DURATION_MS, t_ms + STEP_MS), pose)
-    sa, sb = to_screen(a_az, a_alt, pose), to_screen(b_az, b_alt, pose)
-    mx, my = sb[0] - sa[0], sb[1] - sa[1]
+    az, alt = path(t_ms)
+    sx, sy = to_screen(az, alt, pose)
+    # the direction of the flight on the screen, from the path itself (not from its flutter)
+    a0 = to_screen(*path(max(0, t_ms - 40)), pose)
+    a1 = to_screen(*path(min(DURATION_MS, t_ms + 40)), pose)
+    mx, my = a1[0] - a0[0], a1[1] - a0[1]
     n = math.hypot(mx, my) or 1.0
     mx, my = mx / n, my / n
-    return pose, sh, (mx, my)
+    f = size_factor(alt)
+    if VIBRATION_FROM_MS <= t_ms < SPIRAL_FROM_MS:
+        ramp = smooth((t_ms - VIBRATION_FROM_MS) / 300.0)
+        sideways = 0.35 * max(f, 0.4) * ramp * math.sin(2 * math.pi * VIBRATION_HZ * t_ms / 1000.0)
+        sx += deg_tan(sideways) * (-my)
+        sy += deg_tan(sideways) * mx
+    if t_ms >= SPIRAL_FROM_MS:
+        ox, oy = spiral_offset(t_ms)
+        sx, sy = sx + ox, sy + oy
+        # in the spiral the wing follows its own circle
+        bx0, by0 = to_screen(*path(t_ms), pose)
+        bx1, by1 = to_screen(*path(min(DURATION_MS, t_ms + 20)), pose)
+        ox1, oy1 = spiral_offset(min(DURATION_MS, t_ms + 20))
+        mx, my = (bx1 + ox1) - (bx0 + ox), (by1 + oy1) - (by0 + oy)
+        n = math.hypot(mx, my) or 1.0
+        mx, my = mx / n, my / n
+    return pose, (sx, sy), (mx, my), f
 
 
 def place(sh, motion, behind, lateral, pose):
@@ -142,38 +258,48 @@ def place(sh, motion, behind, lateral, pose):
     return from_screen(sx, sy, pose)
 
 
-# --- the shapes -------------------------------------------------------------------------------
+# --- the shapes --------------------------------------------------------------------------------
 # A polygon's points are fractions of its box (0 to 1): the loader stretches them to the box it computes.
 HALF_DISC = [{"x": round(math.cos(math.radians(a)), 3), "y": round(0.5 - 0.5 * math.sin(math.radians(a)), 3)}
              for a in range(-90, 91, 15)]
 RECT = [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 1, "y": 1}, {"x": 0, "y": 1}]
 SPIKE = [{"x": 1, "y": 0}, {"x": 1, "y": 1}, {"x": 0, "y": 0.5}]
 
-FILAMENTS = [(-1.2, 6.0), (-0.6, 4.5), (0.0, 6.8), (0.6, 4.2), (1.2, 5.6)]
+# The rear part is a fifth of the width ("1 pour 5") and the whole thing about half as long as wide.
+TAIL_DEPTH = 0.6
+FILAMENTS = [(-1.2, 0.9), (-0.6, 0.6), (0.0, 1.0), (0.6, 0.6), (1.2, 0.8)]
 
+# id, kind, points, along (deg at the zenith), across, behind, lateral, color, transparency, brightness, blur, title
 SHAPES = [
-    # id, kind, points, along, across, behind-of-head-centre, lateral, color, transp, bright, blur, halo, title
-    ("head", "polygon", HALF_DISC, HEAD_DEPTH, ACROSS, 0.0, 0.0, "#fffdf4", 0.2, 0.05, 0.1, 0.0,
+    ("head", "polygon", HALF_DISC, HEAD_DEPTH, ACROSS, 0.0, 0.0, "#fffdf4", 0.2, 0.05, 0.1,
      tr("demi-lune blanche, bord avant net", "white half-moon, sharp front edge")),
-    ("tail", "polygon", RECT, 5.0, ACROSS, HEAD_DEPTH / 2 + 2.5, 0.0, "#fff3d0", 0.75, 0, 0.7, 0.0,
-     tr("queue qui s'estompe", "tail fading out")),
+    ("tail", "polygon", RECT, TAIL_DEPTH, ACROSS, HEAD_DEPTH / 2 + TAIL_DEPTH / 2, 0.0, "#fff3d0", 0.75, 0, 0.7,
+     tr("arrière qui s'estompe", "rear fading out")),
 ] + [
-    (f"filament-{i + 1}", "polygon", SPIKE, length, 0.45, HEAD_DEPTH / 2 + length / 2, lat, "#fffaf0", 0.05, 0, 0.1, 0.0,
+    (f"filament-{i + 1}", "polygon", SPIKE, length, 0.45, HEAD_DEPTH / 2 + length / 2, lat, "#fffaf0", 0.05, 0, 0.1,
      tr(f"filament {i + 1}", f"filament {i + 1}"))
     for i, (lat, length) in enumerate(FILAMENTS)
 ] + [
-    ("aura", "oval", None, 7.5, 4.2, HEAD_DEPTH / 2 + 3.2, 0.0, "#f2e08a", 0.95, 0, 0.8, 0.0,
-     tr("nappe jaunâtre autour des filaments", "yellowish veil around the filaments")),
+    ("aura", "oval", None, 1.8, 4.0, HEAD_DEPTH / 2 + 0.9, 0.0, "#f2e08a", 0.95, 0, 0.8,
+     tr("nappe jaunâtre autour de l'arrière", "yellowish veil around the rear")),
 ]
 IDS = [s[0] for s in SHAPES]
 
 
-def shape_full(spec, aim, angle):
-    sid, kind, pts, along, across, _b, _l, color, transp, bright, blur, halo, title = spec
+def dims(spec, f, c):
+    """Angular width and height of a shape at a moment: scaled by the distance (f) and by how the wing is
+    banked (c, which thins its span but not the thickness of a filament)."""
+    along, across = spec[3], spec[4]
+    thin = spec[0].startswith("filament")
+    return max(0.03, along * f), max(0.03, across * f * (1.0 if thin else c))
+
+
+def shape_full(spec, aim, angle, size):
+    sid, kind, pts, _al, _ac, _b, _l, color, transp, bright, blur, title = spec
     body = {
         "kind": kind, "title": title,
-        "color": color, "transparency": transp, "brightness": bright, "blur": blur, "haloScale": halo,
-        "angular": {"widthDeg": along, "heightDeg": across},
+        "color": color, "transparency": transp, "brightness": bright, "blur": blur, "haloScale": 0,
+        "angular": {"widthDeg": round(size[0], 3), "heightDeg": round(size[1], 3)},
         "aim": {"azimuthDeg": round(aim[0], 3), "altitudeDeg": round(aim[1], 3)},
         "angle": round(angle, 4),
     }
@@ -182,25 +308,28 @@ def shape_full(spec, aim, angle):
     return {"sourceId": sid, "shape": body}
 
 
-def shape_move(spec, aim, angle):
-    return {"sourceId": spec[0], "shape": {"aim": {"azimuthDeg": round(aim[0], 3), "altitudeDeg": round(aim[1], 3)},
-                                           "angle": round(angle, 4)}}
+def shape_move(spec, aim, angle, size):
+    return {"sourceId": spec[0], "shape": {
+        "angular": {"widthDeg": round(size[0], 3), "heightDeg": round(size[1], 3)},
+        "aim": {"azimuthDeg": round(aim[0], 3), "altitudeDeg": round(aim[1], 3)},
+        "angle": round(angle, 4)}}
 
 
 def keyframes():
     out = []
     previous = None
-    for t in list(range(0, SPIRAL_FROM_MS, 100)) + list(range(SPIRAL_FROM_MS, DURATION_MS + 1, SPIRAL_STEP_MS)):
-        pose, sh, motion = frame(t)
+    for t in range(0, DURATION_MS + 1, STEP_MS):
+        pose, sh, motion, f = frame(t)
         angle = math.atan2(-motion[1], motion[0])
         if previous is not None:
             # The player interpolates the angle linearly: a jump of 2 pi would turn the shape the long way round.
             angle += 2 * math.pi * round((previous - angle) / (2 * math.pi))
         previous = angle
+        c = max(0.08, abs(math.cos(math.radians(roll_deg(t)))))
         shapes = []
         for spec in SHAPES:
-            aim = place(sh, motion, spec[5], spec[6], pose)
-            shapes.append((shape_full if t == 0 else shape_move)(spec, aim, angle))
+            aim = place(sh, motion, spec[5] * f, spec[6] * f * c, pose)
+            shapes.append((shape_full if t == 0 else shape_move)(spec, aim, angle, dims(spec, f, c)))
         out.append({"t": t, "shapes": shapes})
     last = out[-1]["shapes"]
     out.append({"t": DURATION_MS + 200,
@@ -212,7 +341,7 @@ def keyframes():
 
 def observer_track():
     keys = []
-    for t in list(range(0, 1000, 100)) + list(range(1000, DURATION_MS + 1, 100)):
+    for t in range(0, DURATION_MS + 1, STEP_MS * 2):
         heading, pitch = eye(t)
         keys.append({"t": t, "pose": {"lat": LAT, "lng": LNG, "elevationM": 0,
                                       "headingDeg": round(heading, 2), "pitchDeg": round(pitch, 2), "fovDeg": 60}})
@@ -224,10 +353,11 @@ def observer_track():
 
 
 def trees():
-    """A tree line to the south: \"derrière la cime des arbres bordant le Parc de ce côté\"."""
+    """The tree tops make the horizon to the south: \"les arbres sont à 20/100 mètres de distance, selon leur
+    taille, ils dessinent l'horizon visible\". He will give a GPS point and photos."""
     out = []
-    for i, az in enumerate(range(150, 211, 5)):
-        r = 70.0 + (i % 3) * 6
+    for i, az in enumerate(range(140, 221, 5)):
+        r = 55.0 + ((i * 5) % 4) * 9
         h = 12.0 + ((i * 7) % 5)
         out.append({
             "id": f"tree-{i}", "kind": "tree",
@@ -247,36 +377,42 @@ def build():
         "time": {"year": 2026, "month": 8, "day": 11, "hour": 2, "minute": 30, "raw": "2026-08-11T02:30~"},
         "utcOffsetHours": stated(2, "derived", "Central European Summer Time on 2026-08-11"),
         "timeZone": "Europe/Paris",
-        "durationSeconds": stated(4, "stated", "\"les 4 secondes de temps d'apparition\"; \"en moins de 5 secondes je dirais\""),
+        "durationSeconds": stated(5, "derived",
+            "\"5/6 secondes d'un horizon à l'autre, mais c'est le grand maximum\" (he first said 4 s); the recording starts when he first sees it, at 20 degrees"),
         "place": [stated({"lat": LAT, "lng": LNG, "name": "Parc du Musée du Bocage normand (ferme de Boisjugan), Saint-Lô, Manche, France"},
                          "derived",
                          "the witness names the park of the Musée du Bocage normand; the coordinates of the museum "
                          "are those given by J. Beau. Where in the park he stood is not known")],
         "observer": {"title": "Q. B."},
         "account": {
-            "source": stated("questionnaire", "stated", "he answered in writing, on the mailing list, the 19 questions put to him"),
-            "followedUp": stated(True, "stated", "questions put by J. Beau and other list members; his drawing is still to come (promised for Wednesday)"),
+            "source": stated("questionnaire", "stated", "he answered in writing, on the mailing list, the questions put to him"),
+            "followedUp": stated(True, "stated", "questions put by J. Beau and other list members; he corrected a first version of this recording on 2026-10-12; his drawing is still to come"),
         },
-        "sources": [{
-            "title": "Re: [sceau_archives_ovni] Encore un.evenement",
-            "authors": ["Q. B."],
-            "publication": {"publisher": "Liste de diffusion SCEAU (sceau_archives_ovni@framalistes.org)", "time": "2026-10-11"},
-        }],
+        "sources": [
+            {"title": "Re: [sceau_archives_ovni] Encore un.evenement", "authors": ["Q. B."],
+             "publication": {"publisher": "Liste de diffusion SCEAU (sceau_archives_ovni@framalistes.org)", "time": "2026-10-11"}},
+            {"title": "Re: [sceau_archives_ovni] Encore un.evenement (corrections to the first version)", "authors": ["Q. B."],
+             "publication": {"publisher": "Liste de diffusion SCEAU (sceau_archives_ovni@framalistes.org)", "time": "2026-10-12"}},
+        ],
         "description": {
             "fr": (
                 "Nuit du 11 août 2026, entre 1 h et 3 h (« vers 2 h 30 »), veillée d'observation avec un ami dans le parc du "
                 "Musée du Bocage normand, à Saint-Lô. Ciel complètement dégagé, pas de Lune, quelques étoiles filantes, des "
                 "satellites et des avions avant et après, rien dans les minutes qui entourent.\n\n"
                 "Je regardais vers l'ouest-sud-ouest quand mon regard a capté un mouvement dans ma vision périphérique, venant "
-                "du nord. Je l'ai suivi des yeux : il passait au zénith, puis a continué jusqu'à l'horizon plein sud, derrière "
-                "la cime des arbres du parc, en environ 4 secondes, sans aucun bruit. Il a parcouru tout le ciel, plutôt plus "
-                "vite avant le zénith, puis à une vitesse plus constante, en vibrant légèrement parfois. À la fin, une sorte de "
-                "virage en spirale de 720 degrés, qui se terminait vers le bas.\n\n"
-                "Une « demi-lune » blanche, translucide, au bord avant net, une pièce et demie de 1 € à bout de bras, beaucoup "
-                "plus petite que la Lune mais plus grosse qu'une étoile, un peu moins lumineuse que la Lune. Derrière, une "
-                "queue diffuse faite de filaments sur toute la largeur de l'objet, blanc puis jaune très pâle, entourée d'une "
-                "nappe jaunâtre qui suivait les filaments sans les toucher. J'ai cru voir une étoile à travers la queue. Pas "
-                "de feux, pas de clignotement.\n\n"
+                "du nord. Je l'ai perçu vers 20° au-dessus de l'horizon, une petite lumière, comme une étoile filante qui "
+                "grossissait ; le temps de réagir (environ 500 ms), elle était quasiment au zénith, avec sa forme large. Ensuite "
+                "la trajectoire est devenue très erratique : un premier virage à gauche d'environ 15°, qui finit en sortant du "
+                "zénith, puis un long virage à droite d'environ 25°, l'engin se cambrant dans le virage, puis un dernier grand "
+                "virage à gauche, moins visible car aligné avec ma vue. Il descendait par ces virages en 3D. Dans le second, il "
+                "s'est mis à vibrer légèrement, comme une voile dans le vent, et j'ai vu des étoiles au travers. Près de "
+                "l'horizon, ce n'était plus qu'une ligne lumineuse horizontale ; il a alors amorcé une spirale dans le sens "
+                "horaire, d'un rayon un peu plus grand que la pleine Lune, et est passé derrière la cime des arbres, la tête à "
+                "l'envers, en tonneau. De l'horizon nord à l'horizon sud, 5 à 6 secondes au plus, sans aucun bruit.\n\n"
+                "Une « demi-lune » blanche, translucide, au bord avant bombé et net, une aile volante assez fine : une pièce et "
+                "demie de 1 € à bout de bras au plus près, beaucoup plus petite que la Lune, un peu moins lumineuse qu'elle. Large "
+                "(20 à 30 m, estimait-il) mais courte (10 à 15 m) : la partie arrière ne fait qu'un cinquième de la largeur, "
+                "diffuse, blanc puis jaune très pâle, entourée d'une nappe jaunâtre. Pas de feux, pas de clignotement.\n\n"
                 "Mon ami, à 60 cm de moi, regardait la Voie lactée vers le nord-est : il n'a rien vu."
             ),
             "en": (
@@ -284,15 +420,19 @@ def build():
                 "park of the Musée du Bocage normand, in Saint-Lô. Completely clear sky, no Moon, a few shooting stars, "
                 "satellites and aircraft before and after, nothing in the minutes around it.\n\n"
                 "I was looking west-south-west when my eye caught a movement in my peripheral vision, coming from the north. "
-                "I followed it: it went through the zenith, then on to the southern horizon, behind the tops of the park's "
-                "trees, in about 4 seconds, without any sound. It crossed the whole sky, rather faster before the zenith, then "
-                "at a steadier speed, sometimes vibrating slightly. At the end, a kind of 720-degree spiral turn, ending "
-                "downward.\n\n"
-                "A white, translucent \"half-moon\" with a sharp front edge, one and a half 1 euro coins at arm's length, much "
-                "smaller than the Moon but larger than a star, a little less bright than the Moon. Behind it, a diffuse tail "
-                "of filaments across the whole width of the object, white then very pale yellow, surrounded by a yellowish veil "
-                "that followed the filaments without touching them. I think I saw a star through the tail. No lights, no "
-                "flashing.\n\n"
+                "I first saw it at about 20 degrees above the horizon, a small light like a shooting star that grew; by the "
+                "time I reacted (about 500 ms) it was almost at the zenith, with its wide shape. Then the trajectory became "
+                "very erratic: a first turn to the left of about 15 degrees, ending as it left the zenith, then a long turn "
+                "to the right of about 25 degrees, the craft arching into the turn, then a last big turn to the left, less "
+                "visible as it lined up with my view. It came down through these turns, in 3D. In the second one it started "
+                "to vibrate slightly, like a sail in the wind, and I saw stars through it. Near the horizon it was no more "
+                "than a horizontal line of light; it then began a clockwise spiral, a little wider than the full Moon, and "
+                "went behind the tops of the trees upside down, rolling. From the northern to the southern horizon, 5 to 6 "
+                "seconds at the very most, without any sound.\n\n"
+                "A white, translucent \"half-moon\" with a convex, sharp front edge, a rather thin flying wing: one and a "
+                "half 1 euro coins at arm's length at its closest, much smaller than the Moon, a little less bright than it. "
+                "Wide (20 to 30 m, he estimated) but short (10 to 15 m): the rear part is only a fifth of the width, diffuse, "
+                "white then very pale yellow, surrounded by a yellowish veil. No lights, no flashing.\n\n"
                 "My friend, 60 cm from me, was looking at the Milky Way to the north-east: he saw nothing."
             ),
         },
@@ -308,15 +448,19 @@ def build():
         "soundTrack": {"keyframes": [{"t": 0, "sound": {"kind": "none"}}]},
         "decor": trees(),
         "milestones": [
-            {"t": 0, "label": "A", "note": tr("Un mouvement dans la vision périphérique, venant du nord",
-                                               "A movement in the peripheral vision, coming from the north")},
-            {"t": int(DURATION_MS * 0.28), "label": "B", "note": tr("Au zénith, il garde sa vitesse", "At the zenith, it holds its speed")},
-            {"t": SPIRAL_FROM_MS, "label": "C", "note": tr("Virage en spirale de 720°, vers le bas", "720-degree spiral turn, downward")},
-            {"t": DURATION_MS, "label": "D", "note": tr("Il passe derrière la cime des arbres, plein sud", "It goes behind the tree tops, due south")},
+            {"t": 0, "label": "A", "note": tr("Perçu vers 20°, venant du nord : une petite lumière qui grossit",
+                                               "First seen at about 20 degrees, from the north: a small light that grows")},
+            {"t": ZENITH_MS, "label": "B", "note": tr("Quasiment au zénith, avec sa forme large", "Almost at the zenith, with its wide shape")},
+            {"t": TURN_1[1], "label": "C", "note": tr("Premier virage à gauche (15°), il sort du zénith", "First turn to the left (15 degrees), it leaves the zenith")},
+            {"t": TURN_2[1], "label": "D", "note": tr("Long virage à droite (25°), il vibre, des étoiles au travers", "Long turn to the right (25 degrees), it vibrates, stars seen through it")},
+            {"t": SPIRAL_FROM_MS, "label": "E", "note": tr("Une ligne lumineuse, puis la spirale horaire", "A line of light, then the clockwise spiral")},
+            {"t": DURATION_MS, "label": "F", "note": tr("Derrière la cime des arbres, la tête à l'envers", "Behind the tree tops, upside down")},
         ],
     }
 
 
 if __name__ == "__main__":
     OUT.write_text(json.dumps(build(), ensure_ascii=False, indent=1) + "\n")
-    print("wrote", OUT, OUT.stat().st_size, "bytes")
+    az_end, alt_end = path(SPIRAL_FROM_MS)
+    print(f"wrote {OUT} {OUT.stat().st_size} bytes; slow speed {DOWN_SPEED:.1f} deg/s, last turn {TURN_3_DEG} deg, "
+          f"spiral starts at az {az_end:.0f} alt {alt_end:.0f}; t={ZENITH_MS}: alt {path(ZENITH_MS)[1]:.0f}")
