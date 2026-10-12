@@ -92,11 +92,30 @@ not wrap plumbing (\`version\`, \`id\`, \`sourceId\`).
    before or went behind, the vehicle they were in, the other people present. The weather they
    described, and the record it can be checked against (the ERA5 reanalysis, for instance
    https://archive-api.open-meteo.com/v1/archive with hourly cloud cover, precipitation and wind,
-   named in \`weatherSource\`). Sound, if they said anything about it.
-6. **Write the file**, then **validate it**: \`python3 scripts/validate.py recording.json\` must say
+   named in \`weatherSource\`; the last five days are not in ERA5 yet, and https://historical-forecast-api.open-meteo.com/v1/forecast answers for them). Sound, if they said anything about it.
+6. **Say what it was, and who said it.** What the observer themselves concluded (a craft standing on
+   its legs, a being of a certain height) goes in \`interpretation\`, as bodies in metres tested
+   against the angles. Someone else's reading, an investigator's or yours, is not part of the account:
+   it is another recording of the case, listed in its \`case.json\` as an event of type
+   \`sighting\` marked \`interpretationOf\`. A natural cause the account suggests is stated there too
+   (\`interpretation.launches\` for a rocket's exhaust in the twilight, \`reentries\` for a satellite
+   or stage breaking up), never drawn into the shapes. Do not write what the player works out from
+   the date and the place: the sky, the planets, the Moon, eclipses, satellites, the relief
+   (https://ufoathome.org/docs/sources/ lists them).
+7. **One recording per observer.** When several people saw it, write a recording for each and a case
+   file that names them (https://ufoathome.org/docs/format/#several-observers-the-case). People,
+   vehicles, trees and buildings come from the catalogue
+   https://ufoathome.org/models/index.json , by \`model.id\`: never invent a model, and never leave a
+   person to the built-in shape. A model publishes its own settings (a costume colour, a hull
+   colour, retracted landing gear) under \`modelParameters\`: state one only when the account does.
+8. **Say what the file is about.** \`summary\` (a sentence or two, in the account's language) and
+   \`image\` (the observer's own drawing or a photograph of the place, when the documents hold
+   one) are what a shared link shows; the case file takes the same two. Without them the link shows
+   the logo and who saw it.
+9. **Write the file**, then **validate it**: \`python3 scripts/validate.py recording.json\` must say
    \`valid\`. It catches misspelt keys and words a closed list does not have; it cannot catch a
    wrong direction.
-7. **Hand over** the file with a short report: the values you derived and how, the list of assumed
+10. **Hand over** the file with a short report: the values you derived and how, the list of assumed
    values, the contradictions, and the questions to put back to the observer or the investigator.
    Tell the user to play it at https://ufoathome.org/play/ ("From your computer", choosing the
    photos it names along with it) and to check that the phenomenon sits where the drawings put it;

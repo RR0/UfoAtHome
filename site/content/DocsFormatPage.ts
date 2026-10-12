@@ -164,6 +164,7 @@ if (excerpts.length > 0) {
       <tr><td><code>id</code></td><td>The case's own identifier. On rr0.org it is the dossier's directory and may be left out; a case file standing alone states it</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>The case's name, and when it happened as RR0 writes a time (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). The player names a case it opens by its title</td></tr>
       <tr><td><code>events</code></td><td>The case's chronology. Only the <code>sighting</code> ones are replayed, each by its <code>url</code>, read relative to the case file's own address (so the same case works from its dossier's page and from anywhere else); the ones marked <code>interpretationOf</code> are readings of one of them (see below); the others (an article, a film, a confession) are RR0's</td></tr>
+      <tr><td><code>image</code>, <code>summary</code></td><td>What a shared link to the case shows, as for a recording (see <a href="/docs/share/">Sharing</a>): a picture, and a sentence or two, one string or one per language</td></tr>
     </table>
     </div>
     <p>Give it to <code>&lt;rr0-sighting src&gt;</code> or to the player, and each observer can be
@@ -605,6 +606,7 @@ if (excerpts.length > 0) {
       <tr><td><code>id</code></td><td>L'identifiant du dossier lui-même. Sur rr0.org c'est le répertoire du dossier, et il peut être omis ; un fichier de cas isolé l'énonce</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>Le nom du cas, et sa date comme RR0 l'écrit (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). Le lecteur nomme un cas qu'il ouvre par son titre</td></tr>
       <tr><td><code>events</code></td><td>La chronologie du cas. Seuls les <code>sighting</code> sont rejoués, chacun par son <code>url</code>, lue relativement à l'adresse du fichier de cas (si bien que le même cas marche depuis la page de son dossier comme depuis n'importe où) ; ceux marqués <code>interpretationOf</code> sont des lectures de l'un d'eux (voir plus bas) ; les autres (un article, un film, un aveu) sont ceux de RR0</td></tr>
+      <tr><td><code>image</code>, <code>summary</code></td><td>Ce que montre un lien partagé vers le dossier, comme pour un enregistrement (voir <a href="/docs/share/">Partager</a>) : une image, et une phrase ou deux, une chaîne ou une par langue</td></tr>
     </table>
     </div>
     <p>Donnez-le à <code>&lt;rr0-sighting src&gt;</code> ou au lecteur, et chaque observateur se choisit
@@ -1053,6 +1055,7 @@ if (excerpts.length > 0) {
       <tr><td><code>id</code></td><td>El identificador propio del caso. En rr0.org es el directorio del expediente y puede omitirse; un archivo de caso independiente lo indica</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>El nombre del caso, y cuándo ocurrió tal como RR0 escribe una hora (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). El reproductor nombra un caso que abre por su título</td></tr>
       <tr><td><code>events</code></td><td>La cronología del caso. Solo se reproducen los <code>sighting</code>, cada uno por su <code>url</code>, leída respecto a la dirección del propio archivo de caso (de modo que el mismo caso funciona desde la página de su expediente y desde cualquier otro lugar); los marcados con <code>interpretationOf</code> son lecturas de uno de ellos (véase abajo); los demás (un artículo, una película, una confesión) son de RR0</td></tr>
+      <tr><td><code>image</code>, <code>summary</code></td><td>Lo que muestra un enlace compartido al caso, como para una grabación (véase <a href="/docs/share/">Compartir</a>): una imagen, y una o dos frases, una cadena o una por idioma</td></tr>
     </table>
     </div>
     <p>Dáselo a <code>&lt;rr0-sighting src&gt;</code> o al reproductor, y cada observador podrá
@@ -1491,6 +1494,7 @@ if (excerpts.length > 0) {
       <tr><td><code>id</code></td><td>L'identificativo proprio del caso. Su rr0.org è la directory del fascicolo e può essere omesso; un file di caso a sé stante lo indica</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>Il nome del caso, e quando è avvenuto come RR0 scrive un'ora (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). Il lettore designa un caso che apre con il suo titolo</td></tr>
       <tr><td><code>events</code></td><td>La cronologia del caso. Vengono riprodotti solo i <code>sighting</code>, ciascuno tramite il suo <code>url</code>, letto rispetto all'indirizzo del file di caso stesso (così lo stesso caso funziona dalla pagina del suo fascicolo e da qualsiasi altro luogo); quelli contrassegnati da <code>interpretationOf</code> sono letture di uno di essi (vedi sotto); gli altri (un articolo, un filmato, una confessione) sono di RR0</td></tr>
+      <tr><td><code>image</code>, <code>summary</code></td><td>Ciò che mostra un link condiviso al caso, come per una registrazione (vedi <a href="/docs/share/">Condividere</a>): un'immagine, e una o due frasi, una stringa o una per lingua</td></tr>
     </table>
     </div>
     <p>Dallo a <code>&lt;rr0-sighting src&gt;</code> o al lettore, e ogni osservatore potrà essere
