@@ -2,6 +2,7 @@ import { describe, expect, it, beforeAll, vi } from "vitest"
 import { register, ELEMENT_NAME } from "../../src/component/SightingEditorElement.js"
 import type { SightingEditorElement } from "../../src/component/SightingEditorElement.js"
 import type { WeatherProvider } from "../../src/engine/weather/WeatherProvider.js"
+import type { Surroundings, SurroundingsProvider } from "../../src/render3d/terrain/SurroundingsProvider.js"
 
 register()
 
@@ -311,5 +312,66 @@ describe("undo and redo", () => {
     ;(element.shadowRoot!.getElementById("import-url-button") as HTMLButtonElement).click()
     await waitFor(() => (element.sightingData.decor ?? []).length === 0)
     expect(undo.disabled).toBe(true)
+  })
+})
+
+describe("the scenery taken from a survey of the place", () => {
+  /** A survey that has found this, wherever it is asked. */
+  function surveyOf(found: Surroundings): SurroundingsProvider {
+    return {
+      id: "test-lidar", name: "Test LiDAR", attribution: "© test", creditUrl: "https://survey.test/", contemporary: true,
+      covers: () => true, getSurroundings: async () => found
+    }
+  }
+
+  function placeAt(element: SightingEditorElement, lat: string, lng: string): void {
+    for (const [id, value] of [["lat", lat], ["lng", lng]]) {
+      const input = element.shadowRoot!.getElementById(id) as HTMLInputElement
+      input.value = value
+      input.dispatchEvent(new Event("input", { bubbles: true, composed: true }))
+    }
+  }
+
+  const FOUND: Surroundings = {
+    trees: [{ eastM: 8.5, northM: 15.5, heightM: 13.8, widthM: 12.5 }, { eastM: -53, northM: -55.5, heightM: 19.9, widthM: 15.1 }],
+    buildings: [{ eastM: 30, northM: -12, widthM: 14, lengthM: 8, heightM: 7.4, headingDeg: 40 }]
+  }
+
+  it("puts the trees and buildings of the place into the scenery when the author gives the recording a place, without being asked, and undo takes them away", async () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    element.surroundingsProvider = surveyOf(FOUND)
+    // The author's hand is on the field: the history is armed, as it is by any pointer or key that edits the form.
+    shadow.getElementById("lat")!.dispatchEvent(new Event("pointerdown", { bubbles: true, composed: true }))
+    placeAt(element, "49.1049", "-1.0754")
+    await waitFor(() => (element.sightingData.decor ?? []).length === 3)
+    const decor = element.sightingData.decor!
+    expect(decor.map(object => object.kind)).toEqual(["tree", "tree", "building"])
+    expect(decor.every(object => object.origin === "test-lidar")).toBe(true)
+    expect(decor[0].sizeM).toEqual({ widthM: 12.5, lengthM: 12.5, heightM: 13.8 })
+    expect(shadow.getElementById("scenery-status")!.textContent).toContain("trees 2, buildings 1")
+    expect(element.sightingData.sources?.some(source => source.url === "https://survey.test/")).toBe(true)
+    const undo = shadow.getElementById("undo") as HTMLButtonElement
+    await waitFor(() => !undo.disabled)
+    undo.click()
+    expect(element.sightingData.decor ?? []).toHaveLength(0)
+  })
+
+  it("leaves a place alone that is not an author's doing: no survey is asked for a recording that is loaded", async () => {
+    const element = mount()
+    element.surroundingsProvider = surveyOf(FOUND)
+    // A recording is loaded where it stands: its own scenery, whatever it is, is its own.
+    element.sightingData = { ...element.sightingData, place: [{ lat: 49.1049, lng: -1.0754 }] }
+    await new Promise(resolve => setTimeout(resolve, 1200))
+    expect(element.sightingData.decor ?? []).toHaveLength(0)
+  })
+
+  it("says nothing and plants nothing where no survey covers the place", async () => {
+    const element = mount()
+    element.surroundingsProvider = { ...surveyOf(FOUND), covers: () => false, getSurroundings: async () => { throw new Error("must not be asked") } }
+    placeAt(element, "40.4", "-3.7")
+    await new Promise(resolve => setTimeout(resolve, 1200))
+    expect(element.sightingData.decor ?? []).toHaveLength(0)
+    expect(element.shadowRoot!.getElementById("scenery-status")!.textContent).toBe("")
   })
 })

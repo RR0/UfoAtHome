@@ -670,6 +670,13 @@ export interface SightingEditorMessages extends SightingLabels {
    * SightingEditorElement's addDecorObserverButton) — distinct from decorObserver, that dropdown
    * option's own (now-hidden) label. */
   addObserver: string
+  /** What the Environment group says of the scenery it took from a survey by itself (see SurroundingsPlanter): `{trees}`, `{buildings}`, `{source}`, `{radius}`. */
+  surveyLabel: string
+  surveyBusy: string
+  surveyDone: string
+  surveyNone: string
+  surveyKept: string
+  surveyUnreachable: string
   /** The account the recording is drafted from — the label above the textarea a reader pastes a
    * account into. Names the reader's gesture and not the machinery: what happens is that a
    * recording gets drafted from an account, and which service reads it is said by the credit

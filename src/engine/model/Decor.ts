@@ -520,6 +520,17 @@ export interface DecorObject {
   /** The real 3D model that stands in for the primitive, if one does — see DecorModelRef. Absent
    * means the built-in primitive, which is also what a failed or unreachable model falls back to. */
   model?: DecorModelRef
+  /**
+   * The survey this object was taken from, by the id of its provider ("ign-lidar-hd"), when the author did not place it
+   * by hand: the trees the editor plants from a canopy survey (see CanopyProvider). Absent is the usual case, an object the
+   * author placed or measured.
+   *
+   * It says two things nothing else does. Where the object came from, which is a statement about how far to trust it: a
+   * survey is of the day it was flown, and a recording is of some other. And which objects a new planting replaces, since
+   * planting again where the same survey has already planted must not double them, and must never touch what the author
+   * placed. Editing one by hand does not remove the mark: the object is still the survey's, moved.
+   */
+  origin?: string
 }
 
 /**

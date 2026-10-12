@@ -1,6 +1,8 @@
 import { setupCloudEditor } from "./CloudEditor.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
+import { SurroundingsPlanter } from "./SurroundingsPlanter.js"
+import type { SurroundingsProvider } from "../render3d/terrain/SurroundingsProvider.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
 import { DecorParameterSets } from "../engine/model/DecorParameterSets.js"
 import { DecorBase } from "../engine/model/DecorBase.js"
@@ -84,6 +86,7 @@ import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
 import type { Account } from "../engine/model/Account.js"
 import type { DecorObject } from "../engine/model/Decor.js"
+import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import { sortedMilestones } from "../engine/model/Milestone.js"
 import { DEFAULT_REFERENCE_FOV_DEG, DEFAULT_REFERENCE_OPACITY, REFERENCE_INLINE_WARNING_BYTES } from "../engine/model/Reference.js"
 import type { PictureLandmark, ReferenceKind, SceneReference } from "../engine/model/Reference.js"
@@ -687,6 +690,11 @@ export class SightingEditorElement extends HTMLElement {
   /** The picker of the decor objects, what acts on the selected one, and the adding of another (see ElementList). */
   private readonly decorList: ElementList
   private readonly addDecorObserverButton: HTMLButtonElement
+  /** The trees and buildings taken, by itself, from a survey of the place the author gives (see SurroundingsPlanter), whose code is loaded when first needed. */
+  private readonly surroundings: SurroundingsPlanter
+  /** The survey the scenery is taken from, when one is chosen for it; else the one that covers the place (see surroundingsSources). Mainly for tests. */
+  surroundingsProvider?: SurroundingsProvider
+  private readonly sceneryStatus: HTMLElement
   /** Which set of lamps the selected decor object carries — see LightRig.ts. Rebuilt for each
    * selection, since the rigs that make sense on a tree are not the ones that make sense on an
    * aircraft. */
@@ -1297,6 +1305,16 @@ export class SightingEditorElement extends HTMLElement {
     ])
     this.decorList.setLabels({ list: "Environment", remove: "Delete decor", add: "Add", actions: { "look-at-decor": "Look at it" } })
     this.addDecorObserverButton = this.shadow.getElementById("add-decor-observer") as HTMLButtonElement
+    this.sceneryStatus = this.shadow.getElementById("scenery-status")!
+    this.surroundings = new SurroundingsPlanter(this.sceneryStatus, {
+      decor: () => this.ufoElement.sighting.decor,
+      setDecor: decor => this.setPlantedDecor(decor),
+      label: (kind, number) => `${this.decorList.kindLabel(kind)} ${number}`,
+      cite: source => this.citeSource(source)
+    }, sightingEditorMessages_en,
+    async (lat, lng) => this.surroundingsProvider
+      ? (this.surroundingsProvider.covers(lat, lng) ? this.surroundingsProvider : undefined)
+      : (await import("../render3d/terrain/surroundingsSources.js")).defaultSurroundingsProvider(lat, lng))
     this.undoButton = this.shadow.getElementById("undo") as HTMLButtonElement
     this.redoButton = this.shadow.getElementById("redo") as HTMLButtonElement
     this.referenceSelect = this.shadow.getElementById("reference") as HTMLSelectElement
@@ -1852,6 +1870,9 @@ export class SightingEditorElement extends HTMLElement {
     this.syncUtcOffsetField()
     this.syncPlaceNameField()
     this.syncGroundElevationField()
+    // A recording that is loaded stands where it stands, and its scenery is its own: nothing is asked of the survey.
+    const standing = this.plantingCentre()
+    this.surroundings.placeLoaded(standing?.lat, standing?.lng)
     this.syncWeatherOwnership()
     // Weather itself is resynced by onSelectionOrTimeChanged() above (syncWeatherFromTimeline) —
     // and SceneElement's own updateAstronomy() (driven by the sightingData assignment above,
@@ -2896,6 +2917,8 @@ export class SightingEditorElement extends HTMLElement {
 
     const name = this.stringOrUndefined(this.placeNameInput.value.trim())
     event.place = lat !== undefined && lng !== undefined ? [{ lat, lng, name }] : undefined
+    // Where the author puts the observer is a question to the survey of the place: what stands round it (see SurroundingsPlanter).
+    this.surroundings.placeChanged(lat, lng)
 
     const instrument = this.ufoElement.sighting.instrument
     // A focal length is only ever another way of writing the field, which is what the pose keeps
@@ -6888,6 +6911,36 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
+   * Where the trees of the area are looked for: where the observer stood at the start, which is what decor is measured
+   * from (see DecorObject.eastM), or else the recording's own place. None while the recording has neither.
+   */
+  private plantingCentre(): { lat: number, lng: number } | undefined {
+    const sighting = this.ufoElement.sighting
+    const pose = sighting.observerTrack.getInterpolatedPoseAt(0)
+    const place = sighting.event.place?.[0]
+    const lat = pose?.lat ?? place?.lat
+    const lng = pose?.lng ?? place?.lng
+    return typeof lat === "number" && typeof lng === "number" ? { lat, lng } : undefined
+  }
+
+  /** Puts the decor the planting made in place of the recording's, as every other edit of the decor does: a new array. */
+  private setPlantedDecor(decor: DecorObject[]): void {
+    this.ufoElement.sighting.decor = decor
+    if (!decor.some(object => object.id === this.currentDecorId)) this.currentDecorId = decor[0]?.id
+    this.refreshDecorList()
+    this.ufoElement.refresh()
+    // The planting answers after the click that asked for it: it is written into the history here, as the form's edits are.
+    this.scheduleHistoryRecord()
+  }
+
+  /** Says where something the recording was made from came from, once. */
+  private citeSource(source: RecordingSource): void {
+    const sighting = this.ufoElement.sighting
+    if ((sighting.sources ?? []).some(existing => existing.url === source.url)) return
+    sighting.sources = [...(sighting.sources ?? []), source]
+  }
+
+  /**
    * Whatever is added to the scene starts as the catalogue's first model for its kind (a person, an
    * airliner, a car, a tree, a street lamp) at that model's own size, rather than as the built-in
    * marker; the picker beside it then offers the others of the kind. A building is left to its
@@ -8621,6 +8674,8 @@ export class SightingEditorElement extends HTMLElement {
     // masks's own doc comment.
     this.labelContextMasks.textContent = `${messages.masks} ▸`
     this.addDecorObserverButton.textContent = messages.addObserver
+    this.surroundings.setMessages(messages)
+    this.sceneryStatus.setAttribute("aria-label", messages.surveyLabel)
     this.labelMilestones.textContent = messages.milestones
     this.labelMilestoneLabel.textContent = messages.milestoneLabel
     this.labelMilestoneNote.textContent = messages.milestoneNote

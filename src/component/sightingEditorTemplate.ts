@@ -177,6 +177,12 @@ export const html = `
          whatever decor properties are showing above — the only thing shown at all when there's
          no decor yet (see the block above's own comment). -->
     <div id="decor-list-footer" class="decor-list-part"></div>
+    <!-- What the editor says of the scenery it took, by itself, from a survey of the place (see SurroundingsPlanter): how many trees and
+         buildings, or that the survey could not be reached. Empty where no survey covers the place, which is most of the world. It sits
+         on a line of its own, below what the list of the decor draws, and is read out by whoever listens to the page. -->
+    <div id="scenery" class="decor-scenery">
+      <span id="scenery-status" role="status" aria-live="polite"></span>
+    </div>
   </div>
 </section>
 <section class="group-panel" id="group-temporal" aria-labelledby="label-temporal-group" hidden>
@@ -556,6 +562,14 @@ export const css = `
 }
 .decor-list-part {
   display: contents;
+}
+/* What the scenery taken from a survey says of itself: quiet, on a line of its own below the decor. */
+.decor-scenery {
+  flex-basis: 100%;
+}
+.decor-scenery > span {
+  font-size: 0.9em;
+  opacity: 0.8;
 }
 
 #shape-shapes .toolbar > [hidden] { display: none !important; }
