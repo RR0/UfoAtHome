@@ -695,6 +695,8 @@ export class SightingEditorElement extends HTMLElement {
   /** The survey the scenery is taken from, when one is chosen for it; else the one that covers the place (see surroundingsSources). Mainly for tests. */
   surroundingsProvider?: SurroundingsProvider
   private readonly sceneryStatus: HTMLElement
+  private readonly sceneryAuto: HTMLInputElement
+  private readonly labelSceneryAuto: HTMLElement
   /** Which set of lamps the selected decor object carries — see LightRig.ts. Rebuilt for each
    * selection, since the rigs that make sense on a tree are not the ones that make sense on an
    * aircraft. */
@@ -1306,6 +1308,8 @@ export class SightingEditorElement extends HTMLElement {
     this.decorList.setLabels({ list: "Environment", remove: "Delete decor", add: "Add", actions: { "look-at-decor": "Look at it" } })
     this.addDecorObserverButton = this.shadow.getElementById("add-decor-observer") as HTMLButtonElement
     this.sceneryStatus = this.shadow.getElementById("scenery-status")!
+    this.sceneryAuto = this.shadow.getElementById("scenery-auto") as HTMLInputElement
+    this.labelSceneryAuto = this.shadow.getElementById("label-scenery-auto")!
     this.surroundings = new SurroundingsPlanter(this.sceneryStatus, {
       decor: () => this.ufoElement.sighting.decor,
       setDecor: decor => this.setPlantedDecor(decor),
@@ -1315,6 +1319,14 @@ export class SightingEditorElement extends HTMLElement {
     async (lat, lng) => this.surroundingsProvider
       ? (this.surroundingsProvider.covers(lat, lng) ? this.surroundingsProvider : undefined)
       : (await import("../render3d/terrain/surroundingsSources.js")).defaultSurroundingsProvider(lat, lng))
+    // On unless the author turned it off, which the browser remembers: asking sends the place to a service, and that is the author's to allow.
+    this.sceneryAuto.checked = this.readSceneryPreference()
+    this.surroundings.setEnabled(this.sceneryAuto.checked)
+    this.sceneryAuto.addEventListener("change", () => {
+      this.writeSceneryPreference(this.sceneryAuto.checked)
+      const standing = this.plantingCentre()
+      this.surroundings.setEnabled(this.sceneryAuto.checked, standing?.lat, standing?.lng)
+    })
     this.undoButton = this.shadow.getElementById("undo") as HTMLButtonElement
     this.redoButton = this.shadow.getElementById("redo") as HTMLButtonElement
     this.referenceSelect = this.shadow.getElementById("reference") as HTMLSelectElement
@@ -2181,6 +2193,9 @@ export class SightingEditorElement extends HTMLElement {
 
   /** And the workspace it named, the same way. */
   private static readonly NARRATIVE_SCOPE_STORAGE = "rr0-sighting-editor.narrative-workspace"
+
+  /** Where the browser remembers that the author turned the taking of the scenery from a survey off (see readSceneryPreference). */
+  private static readonly SCENERY_STORAGE = "rr0-sighting-editor.surroundings"
 
   /** Built once, up front: constructing one is free (its SDK and its client load on the first ask,
    * not here), and the panel has to know before any draft whether this reader needs a key at all —
@@ -6910,6 +6925,24 @@ export class SightingEditorElement extends HTMLElement {
     if (kind !== "building") void this.adoptDefaultModel(decor.id, kind)
   }
 
+  /** Whether the author left the taking of the scenery from a survey on, which is the default: the browser only remembers an off. */
+  private readSceneryPreference(): boolean {
+    try {
+      return localStorage.getItem(SightingEditorElement.SCENERY_STORAGE) !== "off"
+    } catch {
+      return true
+    }
+  }
+
+  private writeSceneryPreference(on: boolean): void {
+    try {
+      if (on) localStorage.removeItem(SightingEditorElement.SCENERY_STORAGE)
+      else localStorage.setItem(SightingEditorElement.SCENERY_STORAGE, "off")
+    } catch {
+      // No storage (a private window, blocked site data): the choice holds for this page and is not remembered.
+    }
+  }
+
   /**
    * Where the trees of the area are looked for: where the observer stood at the start, which is what decor is measured
    * from (see DecorObject.eastM), or else the recording's own place. None while the recording has neither.
@@ -8675,6 +8708,8 @@ export class SightingEditorElement extends HTMLElement {
     this.labelContextMasks.textContent = `${messages.masks} ▸`
     this.addDecorObserverButton.textContent = messages.addObserver
     this.surroundings.setMessages(messages)
+    this.labelSceneryAuto.textContent = messages.surveyAuto
+    this.sceneryAuto.title = messages.surveyAutoTitle
     this.sceneryStatus.setAttribute("aria-label", messages.surveyLabel)
     this.labelMilestones.textContent = messages.milestones
     this.labelMilestoneLabel.textContent = messages.milestoneLabel

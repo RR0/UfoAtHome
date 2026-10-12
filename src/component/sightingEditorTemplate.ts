@@ -177,10 +177,12 @@ export const html = `
          whatever decor properties are showing above — the only thing shown at all when there's
          no decor yet (see the block above's own comment). -->
     <div id="decor-list-footer" class="decor-list-part"></div>
-    <!-- What the editor says of the scenery it took, by itself, from a survey of the place (see SurroundingsPlanter): how many trees and
-         buildings, or that the survey could not be reached. Empty where no survey covers the place, which is most of the world. It sits
+    <!-- The scenery the editor takes, by itself, from a survey of the place (see SurroundingsPlanter): a box that turns it off (on by default,
+         and kept by the browser, since it sends the place to a service), and what it says of what it took: how many trees, buildings, bridges
+         and lines, or that the survey could not be reached. Empty where no survey covers the place, which is most of the world. It sits
          on a line of its own, below what the list of the decor draws, and is read out by whoever listens to the page. -->
     <div id="scenery" class="decor-scenery">
+      <label><input type="checkbox" id="scenery-auto" checked/> <span id="label-scenery-auto">Take the surroundings of the place from a survey</span></label>
       <span id="scenery-status" role="status" aria-live="polite"></span>
     </div>
   </div>
@@ -567,7 +569,13 @@ export const css = `
 .decor-scenery {
   flex-basis: 100%;
 }
-.decor-scenery > span {
+.decor-scenery {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+#scenery-status {
   font-size: 0.9em;
   opacity: 0.8;
 }

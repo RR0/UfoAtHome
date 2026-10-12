@@ -3,6 +3,7 @@ import { register, ELEMENT_NAME } from "../../src/component/SightingEditorElemen
 import type { SightingEditorElement } from "../../src/component/SightingEditorElement.js"
 import type { WeatherProvider } from "../../src/engine/weather/WeatherProvider.js"
 import type { Surroundings, SurroundingsProvider } from "../../src/render3d/terrain/SurroundingsProvider.js"
+import { Scene } from "../render3d/terrain/Scene.js"
 
 register()
 
@@ -332,10 +333,10 @@ describe("the scenery taken from a survey of the place", () => {
     }
   }
 
-  const FOUND: Surroundings = {
-    trees: [{ eastM: 8.5, northM: 15.5, heightM: 13.8, widthM: 12.5 }, { eastM: -53, northM: -55.5, heightM: 19.9, widthM: 15.1 }],
-    buildings: [{ eastM: 30, northM: -12, widthM: 14, lengthM: 8, heightM: 7.4, headingDeg: 40 }]
-  }
+  const FOUND: Surroundings = Scene.of(
+    [{ eastM: 8.5, northM: 15.5, heightM: 13.8, widthM: 12.5 }, { eastM: -53, northM: -55.5, heightM: 19.9, widthM: 15.1 }],
+    [{ eastM: 30, northM: -12, widthM: 14, lengthM: 8, heightM: 7.4, headingDeg: 40 }]
+  )
 
   it("puts the trees and buildings of the place into the scenery when the author gives the recording a place, without being asked, and undo takes them away", async () => {
     const element = mount()
@@ -364,6 +365,31 @@ describe("the scenery taken from a survey of the place", () => {
     element.sightingData = { ...element.sightingData, place: [{ lat: 49.1049, lng: -1.0754 }] }
     await new Promise(resolve => setTimeout(resolve, 1200))
     expect(element.sightingData.decor ?? []).toHaveLength(0)
+  })
+
+  it("is behind a box, on by default, that the browser remembers when it is turned off, and turned on again it asks for the place the recording stands at", async () => {
+    const KEY = "rr0-sighting-editor.surroundings"
+    localStorage.removeItem(KEY)
+    try {
+      const element = mount()
+      const box = element.shadowRoot!.getElementById("scenery-auto") as HTMLInputElement
+      expect(box.checked).toBe(true)
+      box.checked = false
+      box.dispatchEvent(new Event("change", { bubbles: true, composed: true }))
+      expect(localStorage.getItem(KEY)).toBe("off")
+      element.surroundingsProvider = surveyOf(FOUND)
+      placeAt(element, "49.1049", "-1.0754")
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      expect(element.sightingData.decor ?? []).toHaveLength(0)
+      // A page opened later finds it off.
+      expect((mount().shadowRoot!.getElementById("scenery-auto") as HTMLInputElement).checked).toBe(false)
+      box.checked = true
+      box.dispatchEvent(new Event("change", { bubbles: true, composed: true }))
+      await waitFor(() => (element.sightingData.decor ?? []).length === 3)
+      expect(localStorage.getItem(KEY)).toBeNull()
+    } finally {
+      localStorage.removeItem(KEY)
+    }
   })
 
   it("says nothing and plants nothing where no survey covers the place", async () => {

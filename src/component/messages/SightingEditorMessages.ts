@@ -670,8 +670,11 @@ export interface SightingEditorMessages extends SightingLabels {
    * SightingEditorElement's addDecorObserverButton) — distinct from decorObserver, that dropdown
    * option's own (now-hidden) label. */
   addObserver: string
-  /** What the Environment group says of the scenery it took from a survey by itself (see SurroundingsPlanter): `{trees}`, `{buildings}`, `{source}`, `{radius}`. */
+  /** What the Environment group says of the scenery it took from a survey by itself (see SurroundingsPlanter): `{trees}`, `{buildings}`, `{bridges}`, `{lines}`, `{source}`, `{radius}`. */
   surveyLabel: string
+  /** The checkbox that turns the asking on or off, and what it says it does (and to whom the place is sent). */
+  surveyAuto: string
+  surveyAutoTitle: string
   surveyBusy: string
   surveyDone: string
   surveyNone: string

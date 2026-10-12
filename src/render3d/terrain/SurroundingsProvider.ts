@@ -30,10 +30,49 @@ export interface SurveyedBuilding {
   headingDeg: number
 }
 
+/**
+ * One road or rail bridge, as a survey drew its centre line: where its middle is, how long it runs, how wide the deck is and how high
+ * the road lies above the ground under it (see DecorObject's "bridge" kind).
+ */
+export interface SurveyedBridge {
+  eastM: number
+  northM: number
+  /** Along the road, from one end of the structure to the other. */
+  lengthM: number
+  /** Across it, the carriageway and its edges. */
+  widthM: number
+  /** The road surface above the ground under it. */
+  heightM: number
+  /** Degrees clockwise from north of the direction it runs in, from 0 up to 180. */
+  headingDeg: number
+}
+
+/**
+ * One span of an overhead electric line, between two of its supports: where its middle is, how long it runs, the direction it runs in,
+ * and how high its conductors and its poles stand (see DecorObject's "wire" kind).
+ */
+export interface SurveyedLine {
+  eastM: number
+  northM: number
+  lengthM: number
+  /** Degrees clockwise from north, from 0 up to 360: the line has a direction here, the way the survey drew it. */
+  headingDeg: number
+  /** The lowest conductor above the ground. */
+  heightM: number
+  /** The top of the supports. */
+  poleHeightM: number
+  /** How far each conductor hangs to the right of the line's heading, metres: one entry per conductor. */
+  acrossM: number[]
+  /** What the survey says of the line, in its own words ("90 kV"). */
+  voltage: string
+}
+
 /** What a survey found around a place. */
 export interface Surroundings {
   trees: SurveyedTree[]
   buildings: SurveyedBuilding[]
+  bridges: SurveyedBridge[]
+  lines: SurveyedLine[]
 }
 
 /**
@@ -52,7 +91,7 @@ export class SurroundingsUnavailableError extends Error {
 }
 
 /**
- * Where the trees and the buildings around a place come from.
+ * Where the trees, the buildings, the bridges and the electric lines around a place come from.
  *
  * The same seam as RoadProvider, for the same reason: this project takes the ground from surveys it did not make, and the
  * one place that chooses which survey is the registry (see SURROUNDINGS_SOURCES). A laser scan is of one day, and the day
@@ -77,6 +116,6 @@ export interface SurroundingsProvider {
   readonly contemporary: boolean
   /** Cheap and offline: whether the survey could cover this place. The answer to "is it worth asking". */
   covers(lat: number, lng: number): boolean
-  /** The trees and buildings within `radiusM` of the centre, the most prominent first. */
+  /** What stands within `radiusM` of the centre, the most prominent first. A part the survey could not give (its vectors being out of reach, say) is an empty list. */
   getSurroundings(centre: { lat: number, lng: number }, radiusM: number): Promise<Surroundings>
 }

@@ -11,7 +11,7 @@ export interface SurroundingsPlanterHost {
   /** Puts this decor in place of the recording's: a new array, never the old one changed (see SceneRenderer.setDecor). */
   setDecor(decor: DecorObject[]): void
   /** The name a decor object of this kind is given, by its number among the recording's: "Tree 12". */
-  label(kind: "tree" | "building", number: number): string
+  label(kind: "tree" | "building" | "bridge" | "wire", number: number): string
   /** Says where the scenery came from, among the recording's sources, if it does not already. */
   cite(source: RecordingSource): void
 }
@@ -27,12 +27,12 @@ export interface SurroundingsPlanterOptions {
 }
 
 /**
- * Puts the trees and the buildings of a place into the decor, by itself, when an author gives the recording a place.
+ * Puts the trees, the buildings, the bridges and the electric lines of a place into the decor, by itself, when an author gives the recording a place.
  *
  * Not on a button: the scenery round a place is a fact about the place, the author's own words about it are the recording,
  * and asking for the one every time the other is said is a chore nobody should have. So when the place is set or moved, the
- * survey that covers it (see SurroundingsProvider) is asked for what stands within a hundred metres, and each tree and each
- * building goes into the decor at its measured place, height and width.
+ * survey that covers it (see SurroundingsProvider) is asked for what stands within a hundred metres, and each tree, building, bridge
+ * and span of electric line goes into the decor at its measured place, height and width.
  *
  * What it takes care not to do is as much of the design as what it does:
  *
@@ -41,8 +41,8 @@ export interface SurroundingsPlanterOptions {
  *   that moving it by a few metres afterwards is not taken for another place).
  * - It never touches what the author placed. What it plants carries the id of its survey (see DecorObject.origin), which is
  *   how a new place replaces the scenery of the old one and not the author's, and how an author who has placed trees of
- *   their own is left with exactly those: trees are not planted where the author already put some, nor buildings where the
- *   author already put some.
+ *   their own is left with exactly those: of each kind (trees, buildings, bridges, lines) nothing is planted where the author
+ *   already put some.
  * - It says the scenery is of the day of the survey. A recording is of some other day, and what it plants is a suggestion.
  * - It says nothing where there is no survey: most places in the world have none, and a recording without one is exactly
  *   what a recording was before this existed.
@@ -59,6 +59,8 @@ export class SurroundingsPlanter {
   private messages: SightingEditorMessages
   private readonly debounceMs: number
   private readonly radiusM: number
+  /** Whether a place the author gives is asked about at all: the author's choice, kept by the editor (see setEnabled). */
+  private enabled = true
   private surveyedFor?: { lat: number, lng: number }
   private timer?: ReturnType<typeof setTimeout>
   private token = 0
@@ -79,6 +81,20 @@ export class SurroundingsPlanter {
     this.messages = messages
   }
 
+  /**
+   * The author turns the asking on or off. Turned off, a place that is given is not asked about, and what was planted stays where it
+   * is. Turned on, the place the recording stands at now is asked about at once, since that is what turning it on is for.
+   */
+  setEnabled(enabled: boolean, lat?: number, lng?: number): void {
+    if (enabled === this.enabled) return
+    this.enabled = enabled
+    if (!enabled) {
+      this.cancel()
+      return
+    }
+    if (lat !== undefined && lng !== undefined) void this.survey(lat, lng)
+  }
+
   /** A recording was loaded, or replaced, and stands here: nothing is asked, and what it says about its scenery is its own. */
   placeLoaded(lat: number | undefined, lng: number | undefined): void {
     this.cancel()
@@ -88,7 +104,7 @@ export class SurroundingsPlanter {
 
   /** The author set the place, or moved it: asked about once it has stayed where it is for a moment, and not at all if it is still the same place. */
   placeChanged(lat: number | undefined, lng: number | undefined): void {
-    if (lat === undefined || lng === undefined) return
+    if (!this.enabled || lat === undefined || lng === undefined) return
     if (this.surveyedFor && this.isSamePlace(this.surveyedFor, lat, lng)) return
     clearTimeout(this.timer)
     this.timer = setTimeout(() => void this.survey(lat, lng), this.debounceMs)
@@ -141,6 +157,8 @@ export class SurroundingsPlanter {
     const kept = this.withoutPlanted()
     const handTrees = kept.some(object => object.kind === "tree")
     const handBuildings = kept.some(object => object.kind === "building")
+    const handBridges = kept.some(object => object.kind === "bridge")
+    const handWires = kept.some(object => object.kind === "wire")
     const taken = new Set(kept.map(object => object.id))
     const nextId = (): string => {
       let id: string
@@ -151,6 +169,8 @@ export class SurroundingsPlanter {
     this.serial = 0
     let trees = kept.filter(object => object.kind === "tree").length
     let buildings = kept.filter(object => object.kind === "building").length
+    let bridges = kept.filter(object => object.kind === "bridge").length
+    let wires = kept.filter(object => object.kind === "wire").length
     const planted: DecorObject[] = []
     if (!handTrees) {
       for (const tree of found.trees) {
@@ -170,17 +190,38 @@ export class SurroundingsPlanter {
         })
       }
     }
-    const placedTrees = planted.filter(object => object.kind === "tree").length
-    const placedBuildings = planted.length - placedTrees
+    if (!handBridges) {
+      for (const bridge of found.bridges) {
+        planted.push({
+          id: nextId(), kind: "bridge", title: this.host.label("bridge", ++bridges), eastM: bridge.eastM, northM: bridge.northM,
+          headingDeg: bridge.headingDeg, lit: false,
+          sizeM: { lengthM: bridge.lengthM, widthM: bridge.widthM, heightM: bridge.heightM }, origin: provider.id
+        })
+      }
+    }
+    if (!handWires) {
+      for (const line of found.lines) {
+        planted.push({
+          id: nextId(), kind: "wire", title: this.host.label("wire", ++wires), eastM: line.eastM, northM: line.northM,
+          headingDeg: line.headingDeg, lit: false,
+          sizeM: { lengthM: line.lengthM, heightM: line.heightM },
+          wire: { strands: line.acrossM.map(acrossM => ({ heightM: line.heightM, acrossM })), poles: "both", poleHeightM: line.poleHeightM },
+          origin: provider.id
+        })
+      }
+    }
+    const count = (kind: DecorObject["kind"]): number => planted.filter(object => object.kind === kind).length
+    const handPlaced = handTrees || handBuildings || handBridges || handWires
     if (planted.length > 0 || this.host.decor().length !== kept.length) this.host.setDecor([...kept, ...planted])
     if (planted.length === 0) {
-      this.say(handTrees || handBuildings ? this.messages.surveyKept : this.messages.surveyNone.replace("{radius}", String(this.radiusM)))
+      this.say(handPlaced ? this.messages.surveyKept : this.messages.surveyNone.replace("{radius}", String(this.radiusM)))
       return
     }
-    this.host.cite({ title: `${provider.name}, canopy and building survey`, url: provider.creditUrl, publication: { publisher: provider.name } })
+    this.host.cite({ title: `${provider.name}, survey of the surroundings`, url: provider.creditUrl, publication: { publisher: provider.name } })
     const done = this.messages.surveyDone
-      .replace("{trees}", String(placedTrees)).replace("{buildings}", String(placedBuildings)).replace("{source}", provider.name)
-    this.say(handTrees || handBuildings ? `${done} ${this.messages.surveyKept}` : done)
+      .replace("{trees}", String(count("tree"))).replace("{buildings}", String(count("building")))
+      .replace("{bridges}", String(count("bridge"))).replace("{lines}", String(count("wire"))).replace("{source}", provider.name)
+    this.say(handPlaced ? `${done} ${this.messages.surveyKept}` : done)
   }
 
   /** The counter of the ids of one planting, so that each planting numbers its objects from 1 and a replanted tree gets its old id back. */

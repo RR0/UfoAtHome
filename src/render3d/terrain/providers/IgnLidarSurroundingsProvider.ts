@@ -2,12 +2,16 @@ import { SurroundingsUnavailableError } from "../SurroundingsProvider.js"
 import type { SurroundingsProvider, Surroundings } from "../SurroundingsProvider.js"
 import { BuildingFootprints } from "../BuildingFootprints.js"
 import { CanopyCrowns } from "../CanopyCrowns.js"
+import { HeightGrid, OverheadStructures } from "../OverheadStructures.js"
+import type { PlaceVectors, VectorFeature } from "../OverheadStructures.js"
 import { GeoTiffRaster } from "../GeoTiffRaster.js"
 
 export interface IgnLidarSurroundingsProviderOptions {
   fetchImpl?: typeof fetch
   /** Mainly for tests, and for pointing at a mirror. */
   endpoint?: string
+  /** Where the vectors of the map (bridges, electric lines) are asked. */
+  vectorEndpoint?: string
 }
 
 /**
@@ -34,6 +38,7 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
   readonly contemporary = true
 
   private static readonly ENDPOINT = "https://data.geopf.fr/wms-r/wms"
+  private static readonly VECTOR_ENDPOINT = "https://data.geopf.fr/wfs/ows"
   private static readonly HEIGHT_LAYER = "IGNF_LIDAR-HD_MNH_ELEVATION.ELEVATIONGRIDCOVERAGE.LAMB93"
   private static readonly CLASS_LAYER = "IGNF_LIDAR-HD_CLASS"
   private static readonly METRES_PER_PIXEL = 0.5
@@ -44,11 +49,13 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
 
   private readonly fetchImpl: typeof fetch
   private readonly endpoint: string
+  private readonly vectorEndpoint: string
 
   constructor(options: IgnLidarSurroundingsProviderOptions = {}) {
     // Bound, as AwsTerrariumElevationProvider's is: an unbound fetch loses the `this` it needs once called as a field.
     this.fetchImpl = options.fetchImpl ?? fetch.bind(globalThis)
     this.endpoint = options.endpoint ?? IgnLidarSurroundingsProvider.ENDPOINT
+    this.vectorEndpoint = options.vectorEndpoint ?? IgnLidarSurroundingsProvider.VECTOR_ENDPOINT
   }
 
   /** Metropolitan France and Corsica, as a box: a place outside it is not worth a request. */
@@ -60,9 +67,11 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
     if (!this.covers(centre.lat, centre.lng)) throw new SurroundingsUnavailableError("no-coverage", "The LiDAR HD survey covers France only")
     const radius = Math.min(radiusM, IgnLidarSurroundingsProvider.MAX_RADIUS_M)
     const size = Math.ceil(2 * radius / IgnLidarSurroundingsProvider.METRES_PER_PIXEL)
-    const [heights, classes] = await Promise.all([
+    const [heights, classes, vectors] = await Promise.all([
       this.raster(centre, radius, size, IgnLidarSurroundingsProvider.HEIGHT_LAYER, "image/geotiff"),
-      this.raster(centre, radius, size, IgnLidarSurroundingsProvider.CLASS_LAYER, "image/geotiff")
+      this.raster(centre, radius, size, IgnLidarSurroundingsProvider.CLASS_LAYER, "image/geotiff"),
+      // The map's vectors are a bonus: without them the trees and the buildings still come, and the bridges and the lines do not.
+      this.vectors(centre, radius).catch((): PlaceVectors => ({ bridges: [], elevatedRoads: [], lines: [] }))
     ])
     if (heights.samples !== 1 || classes.samples < 3) throw new SurroundingsUnavailableError("unreachable", "The survey answered in a layout this does not read")
     if ((heights.values as Float32Array).every(v => v === IgnLidarSurroundingsProvider.NO_DATA)) {
@@ -80,10 +89,41 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
     }
     const metresPerPixel = 2 * radius / size
     const grid = heights.values as Float32Array
+    const heightGrid = new HeightGrid(grid, vegetation, building, size, metresPerPixel)
     return {
       trees: new CanopyCrowns(grid, vegetation, size, size).trees({ metresPerPixel, radiusM: radius }),
-      buildings: new BuildingFootprints(grid, building, size, size).buildings({ metresPerPixel, radiusM: radius })
+      buildings: new BuildingFootprints(grid, building, size, size).buildings({ metresPerPixel, radiusM: radius }),
+      bridges: OverheadStructures.bridges(vectors, centre, radius, heightGrid),
+      lines: OverheadStructures.lines(vectors, centre, radius, heightGrid)
     }
+  }
+
+  /**
+   * What the map of the IGN (BD TOPO) draws round a place: the bridges, the road sections that are over the ground (which carry the
+   * width of a bridge's road), and the overhead electric lines. Three small filtered questions, each a few hundred bytes.
+   */
+  private async vectors(centre: { lat: number, lng: number }, radiusM: number): Promise<PlaceVectors> {
+    const dLat = radiusM / IgnLidarSurroundingsProvider.METRES_PER_DEGREE
+    const dLng = radiusM / (IgnLidarSurroundingsProvider.METRES_PER_DEGREE * Math.cos(centre.lat * Math.PI / 180))
+    // This service gives the axes of EPSG:4326 as longitude then latitude, the other way round from its WMS.
+    const box = [centre.lng - dLng, centre.lat - dLat, centre.lng + dLng, centre.lat + dLat].map(v => v.toFixed(6)).join(",")
+    const [bridges, elevatedRoads, lines] = await Promise.all([
+      this.features("construction_lineaire", `BBOX(geometrie,${box},'EPSG:4326') AND nature='Pont'`, "nature,geometrie"),
+      this.features("troncon_de_route", `BBOX(geometrie,${box},'EPSG:4326') AND position_par_rapport_au_sol<>'0'`, "nature,largeur_de_chaussee,position_par_rapport_au_sol,geometrie"),
+      this.features("ligne_electrique", `BBOX(geometrie,${box},'EPSG:4326')`, "voltage,geometrie")
+    ])
+    return { bridges, elevatedRoads, lines }
+  }
+
+  private async features(layer: string, filter: string, properties: string): Promise<VectorFeature[]> {
+    const query = new URLSearchParams({
+      SERVICE: "WFS", VERSION: "2.0.0", REQUEST: "GetFeature", TYPENAMES: `BDTOPO_V3:${layer}`, SRSNAME: "EPSG:4326",
+      OUTPUTFORMAT: "application/json", COUNT: "200", CQL_FILTER: filter, PROPERTYNAME: properties
+    })
+    const response = await this.fetchImpl(`${this.vectorEndpoint}?${query}`)
+    if (!response.ok) throw new SurroundingsUnavailableError("unreachable", `The map answered ${response.status}`)
+    const body = await response.json() as { features?: VectorFeature[] }
+    return body.features ?? []
   }
 
   private async raster(centre: { lat: number, lng: number }, radiusM: number, size: number, layer: string, format: string): Promise<GeoTiffRaster> {
