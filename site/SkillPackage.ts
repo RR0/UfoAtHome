@@ -97,7 +97,8 @@ not wrap plumbing (\`version\`, \`id\`, \`sourceId\`).
    its legs, a being of a certain height) goes in \`interpretation\`, as bodies in metres tested
    against the angles. Someone else's reading, an investigator's or yours, is not part of the account:
    it is another recording of the case, listed in its \`case.json\` as an event of type
-   \`sighting\` marked \`interpretationOf\`. A natural cause the account suggests is stated there too
+   \`sighting\` marked \`interpretationOf\`, which names the account's event by its \`id\` in the case
+   (give that event an \`id\`, \`"trent"\`: it is local to the case, not the recording's own). A natural cause the account suggests is stated there too
    (\`interpretation.launches\` for a rocket's exhaust in the twilight, \`reentries\` for a satellite
    or stage breaking up), never drawn into the shapes. Do not write what the player works out from
    the date and the place: the sky, the planets, the Moon, eclipses, satellites, the relief
@@ -113,7 +114,8 @@ not wrap plumbing (\`version\`, \`id\`, \`sourceId\`).
    one) are what a shared link shows; the case file takes the same two. Without them the link shows
    the logo and who saw it.
 9. **Write the file**, then **validate it**: \`python3 scripts/validate.py recording.json\` must say
-   \`valid\`. It catches misspelt keys and words a closed list does not have; it cannot catch a
+   \`valid\`, and so must \`case.json\` (it checks that every \`interpretationOf\` names an event of the
+   case, and that no \`id\` is borne twice). It catches misspelt keys and words a closed list does not have; it cannot catch a
    wrong direction.
 10. **Hand over** the file with a short report: the values you derived and how, the list of assumed
    values, the contradictions, and the questions to put back to the observer or the investigator.

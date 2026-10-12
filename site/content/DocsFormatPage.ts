@@ -123,7 +123,7 @@ if (excerpts.length > 0) {
     <table>
       <tr><th>Field</th><th>Meaning</th></tr>
       <tr><td><code>version</code></td><td>Always <code>1</code></td></tr>
-      <tr><td><code>id</code></td><td>Which account this is, unique across every recording anywhere: the day, then who saw it (<code>"1964-04-24-ZamoraLonnie"</code>), or where for an anonymous observer (<code>"1964-04-24-Socorro"</code>). What a case names it by</td></tr>
+      <tr><td><code>id</code></td><td>Which account this is, unique across every recording anywhere: the day, then who saw it (<code>"1964-04-24-ZamoraLonnie"</code>), or where for an anonymous observer (<code>"1964-04-24-Socorro"</code>). What a case names it by is not this id but its event's own (see below).</td></tr>
       <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, every part optional — that is how the format states “1954” or “around 05:00”. <code>raw</code> is the date as written in <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, and it is what the date means: <code>"1948-07-24T02:45~"</code> (approximate), <code>"2025-06?"</code> (uncertain), <code>"1965-07-01%"</code> (both), <code>"19XX"</code> (a masked year), or <code>"05:00"</code> alone for a time of day remembered without its date. The numbers are kept in step with it for what computes (the sky, the clock). It is a subset of EDTF (level 0, these qualifiers on the whole date, masked years); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> is RR0's full EDTF model, into which UFO@home's own tooling converts a recording's dates <code>season</code> (<code>spring</code>, <code>summer</code>, <code>autumn</code> or <code>winter</code>) states a date known only as “in the spring of 2022” (EDTF <code>2022-21</code>), where <code>month</code> and <code>day</code> are left out.</td></tr>
       <tr><td><code>durationSeconds</code></td><td>An alternative to <code>endTime</code>, and it wins if both are given</td></tr>
       <tr><td><code>durationText</code></td><td>The length as it was stated when it was not exact: an ISO 8601 duration with a doubt (<code>PT10M~</code>) or a range (<code>PT5M/PT10M</code>). <code>durationSeconds</code> is then the one length played at, chosen from it</td></tr>
@@ -163,7 +163,7 @@ if (excerpts.length > 0) {
       <tr><th>Field</th><th>Meaning</th></tr>
       <tr><td><code>id</code></td><td>The case's own identifier. On rr0.org it is the dossier's directory and may be left out; a case file standing alone states it</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>The case's name, and when it happened as RR0 writes a time (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). The player names a case it opens by its title</td></tr>
-      <tr><td><code>events</code></td><td>The case's chronology. Only the <code>sighting</code> ones are replayed, each by its <code>url</code>, read relative to the case file's own address (so the same case works from its dossier's page and from anywhere else); the ones marked <code>interpretationOf</code> are readings of one of them (see below); the others (an article, a film, a confession) are RR0's</td></tr>
+      <tr><td><code>events</code></td><td>The case's chronology. Only the <code>sighting</code> ones are replayed, each by its <code>url</code>, read relative to the case file's own address (so the same case works from its dossier's page and from anywhere else); the ones marked <code>interpretationOf</code> are readings of one of them (see below); the others (an article, a film, a confession) are RR0's An event bears an <code>id</code> when a reading names it, and only then: it belongs to the case, so it has to be unique among the case's events and nowhere else, and a reference is read in the file that writes it. An <code>interpretationOf</code> that no event bears is read, as it used to be, as the <code>id</code> a recording the case lists states; one that matches neither is a fault of the case, which the player reports on its console, the editor above its recordings, and the skill's <code>validate.py</code> when it is given the case file.</td></tr>
       <tr><td><code>image</code>, <code>summary</code></td><td>What a shared link to the case shows, as for a recording (see <a href="/docs/share/">Sharing</a>): a picture, and a sentence or two, one string or one per language</td></tr>
     </table>
     </div>
@@ -332,9 +332,9 @@ if (excerpts.length > 0) {
     <pre data-json="none"><code>{
   "id": "McMinnville1950",
   "events": [
-    { "type": "event", "eventType": "sighting", "title": "Paul Trent", "url": "observer-mcminnville.json" },
+    { "type": "event", "eventType": "sighting", "id": "trent", "title": "Paul Trent", "url": "observer-mcminnville.json" },
     { "type": "event", "eventType": "sighting",
-      "interpretationOf": "1950-05-11-TrentPaul",
+      "interpretationOf": "trent",
       "time": "2013-06",
       "by": [{ "people": "CousynAntoine" }, { "people": "LouangeFrancois" }],
       "title": "A model on a thread under the line",
@@ -344,7 +344,7 @@ if (excerpts.length > 0) {
     <div class="table-scroll">
     <table>
       <tr><th>Field</th><th>Meaning</th></tr>
-      <tr><td><code>interpretationOf</code></td><td>The <code>id</code> of the sighting it is a reading of, or a list of ids when one reading serves several accounts (the photographs and a close-up of them). What tells it from an account: the events <em>without</em> it are the case's observers</td></tr>
+      <tr><td><code>interpretationOf</code></td><td>The <code>id</code> of the case's event it is a reading of (<code>"trent"</code>), or a list of ids when one reading serves several accounts (the photographs and a close-up of them). What tells it from an account: the events <em>without</em> it are the case's observers</td></tr>
       <tr><td><code>time</code></td><td>When the interpretation was elaborated, as RR0 writes a time (<code>"2013-06"</code>): not when the sighting happened</td></tr>
       <tr><td><code>by</code></td><td>Who claims it: <code>{ "people": id }</code> or <code>{ "org": id }</code>, which name an entry that lives elsewhere (on RR0, a people or an org directory), or a person described in value. Absent for a comparison nobody claims</td></tr>
       <tr><td><code>title</code></td><td>What the reading is called in the player's menu and the editor's picker: a few words, one string or one per language</td></tr>
@@ -565,7 +565,7 @@ if (excerpts.length > 0) {
     <table>
       <tr><th>Champ</th><th>Sens</th></tr>
       <tr><td><code>version</code></td><td>Toujours <code>1</code></td></tr>
-      <tr><td><code>id</code></td><td>Quel compte rendu c'est, unique parmi tous les enregistrements : le jour, puis qui l'a vu (<code>"1964-04-24-ZamoraLonnie"</code>), ou le lieu pour un observateur anonyme (<code>"1964-04-24-Socorro"</code>). Ce par quoi un dossier le désigne</td></tr>
+      <tr><td><code>id</code></td><td>Quel compte rendu c'est, unique parmi tous les enregistrements : le jour, puis qui l'a vu (<code>"1964-04-24-ZamoraLonnie"</code>), ou le lieu pour un observateur anonyme (<code>"1964-04-24-Socorro"</code>). Ce par quoi un dossier le désigne n'est pas cet id mais celui de son événement (voir plus bas).</td></tr>
       <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, chaque partie facultative — c'est ainsi que le format énonce « 1954 » ou « vers 05:00 ». <code>raw</code> est la date telle qu'écrite en <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, et c'est elle qui fait foi : <code>"1948-07-24T02:45~"</code> (approximative), <code>"2025-06?"</code> (incertaine), <code>"1965-07-01%"</code> (les deux), <code>"19XX"</code> (une année masquée), ou <code>"05:00"</code> seul pour une heure dont on a oublié la date. Les nombres sont tenus en accord avec elle pour ce qui calcule (le ciel, l'horloge). C'est un sous-ensemble d'EDTF (niveau 0, ces qualificatifs sur la date entière, années masquées) ; <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> est le modèle EDTF complet de RR0, dans lequel l'outillage d'UFO@home convertit les dates d'un enregistrement <code>season</code> (<code>spring</code>, <code>summer</code>, <code>autumn</code> ou <code>winter</code>) dit une date connue seulement comme « au printemps 2022 » (EDTF <code>2022-21</code>), où <code>month</code> et <code>day</code> sont omis.</td></tr>
       <tr><td><code>durationSeconds</code></td><td>Une alternative à <code>endTime</code>, et c'est elle qui l'emporte si les deux sont là</td></tr>
       <tr><td><code>durationText</code></td><td>La durée telle qu'elle a été énoncée quand elle n'était pas exacte : une durée ISO 8601 avec un doute (<code>PT10M~</code>) ou une plage (<code>PT5M/PT10M</code>). <code>durationSeconds</code> est alors l'unique durée à laquelle on joue, choisie à partir d'elle</td></tr>
@@ -605,7 +605,7 @@ if (excerpts.length > 0) {
       <tr><th>Champ</th><th>Sens</th></tr>
       <tr><td><code>id</code></td><td>L'identifiant du dossier lui-même. Sur rr0.org c'est le répertoire du dossier, et il peut être omis ; un fichier de cas isolé l'énonce</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>Le nom du cas, et sa date comme RR0 l'écrit (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). Le lecteur nomme un cas qu'il ouvre par son titre</td></tr>
-      <tr><td><code>events</code></td><td>La chronologie du cas. Seuls les <code>sighting</code> sont rejoués, chacun par son <code>url</code>, lue relativement à l'adresse du fichier de cas (si bien que le même cas marche depuis la page de son dossier comme depuis n'importe où) ; ceux marqués <code>interpretationOf</code> sont des lectures de l'un d'eux (voir plus bas) ; les autres (un article, un film, un aveu) sont ceux de RR0</td></tr>
+      <tr><td><code>events</code></td><td>La chronologie du cas. Seuls les <code>sighting</code> sont rejoués, chacun par son <code>url</code>, lue relativement à l'adresse du fichier de cas (si bien que le même cas marche depuis la page de son dossier comme depuis n'importe où) ; ceux marqués <code>interpretationOf</code> sont des lectures de l'un d'eux (voir plus bas) ; les autres (un article, un film, un aveu) sont ceux de RR0 Un événement porte un <code>id</code> quand une lecture le désigne, et seulement alors : il appartient au dossier, donc il doit être unique parmi les événements du dossier et nulle part ailleurs, et une référence se lit dans le fichier qui l'écrit. Un <code>interpretationOf</code> qu'aucun événement ne porte est lu, comme avant, comme l'<code>id</code> que déclare un enregistrement que le dossier liste ; celui qui ne correspond à aucun des deux est une faute du dossier, que le lecteur signale sur sa console, l'éditeur au-dessus de ses enregistrements, et le <code>validate.py</code> du skill quand on lui donne le fichier du dossier.</td></tr>
       <tr><td><code>image</code>, <code>summary</code></td><td>Ce que montre un lien partagé vers le dossier, comme pour un enregistrement (voir <a href="/docs/share/">Partager</a>) : une image, et une phrase ou deux, une chaîne ou une par langue</td></tr>
     </table>
     </div>
@@ -779,9 +779,9 @@ if (excerpts.length > 0) {
     <pre data-json="none"><code>{
   "id": "McMinnville1950",
   "events": [
-    { "type": "event", "eventType": "sighting", "title": "Paul Trent", "url": "observer-mcminnville.json" },
+    { "type": "event", "eventType": "sighting", "id": "trent", "title": "Paul Trent", "url": "observer-mcminnville.json" },
     { "type": "event", "eventType": "sighting",
-      "interpretationOf": "1950-05-11-TrentPaul",
+      "interpretationOf": "trent",
       "time": "2013-06",
       "by": [{ "people": "CousynAntoine" }, { "people": "LouangeFrancois" }],
       "title": "A model on a thread under the line",
@@ -791,7 +791,7 @@ if (excerpts.length > 0) {
     <div class="table-scroll">
     <table>
       <tr><th>Champ</th><th>Sens</th></tr>
-      <tr><td><code>interpretationOf</code></td><td>L'<code>id</code> de l'observation dont c'est une lecture, ou une liste d'ids quand une lecture sert plusieurs comptes rendus (les photographies et un gros plan). Ce qui la distingue d'un compte rendu : les événements <em>sans</em> ce champ sont les observateurs du dossier</td></tr>
+      <tr><td><code>interpretationOf</code></td><td>L'<code>id</code> de l'événement du dossier dont c'est une lecture (<code>"trent"</code>), ou une liste d'ids quand une lecture sert plusieurs comptes rendus (les photographies et un gros plan). Ce qui la distingue d'un compte rendu : les événements <em>sans</em> ce champ sont les observateurs du dossier</td></tr>
       <tr><td><code>time</code></td><td>Quand l'interprétation a été élaborée, comme RR0 écrit un temps (<code>"2013-06"</code>) : pas quand l'observation a eu lieu</td></tr>
       <tr><td><code>by</code></td><td>Qui l'avance : <code>{ "people": id }</code> ou <code>{ "org": id }</code>, qui désignent une entrée qui vit ailleurs (sur RR0, un répertoire de personnes ou d'organisations), ou une personne décrite en valeur. Absent pour une comparaison que personne n'avance</td></tr>
       <tr><td><code>title</code></td><td>Comment la lecture s'appelle dans le menu du lecteur et le sélecteur de l'éditeur : quelques mots, une chaîne ou une par langue</td></tr>
@@ -1014,7 +1014,7 @@ if (excerpts.length > 0) {
     <table>
       <tr><th>Campo</th><th>Significado</th></tr>
       <tr><td><code>version</code></td><td>Siempre <code>1</code></td></tr>
-      <tr><td><code>id</code></td><td>Qué relato es este, único entre todas las grabaciones de cualquier parte: el día, y luego quién lo vio (<code>"1964-04-24-ZamoraLonnie"</code>), o dónde para un observador anónimo (<code>"1964-04-24-Socorro"</code>). Aquello por lo que un caso lo nombra</td></tr>
+      <tr><td><code>id</code></td><td>Qué relato es este, único entre todas las grabaciones de cualquier parte: el día, y luego quién lo vio (<code>"1964-04-24-ZamoraLonnie"</code>), o dónde para un observador anónimo (<code>"1964-04-24-Socorro"</code>). Aquello por lo que un caso lo nombra no es este id sino el de su evento (véase más abajo).</td></tr>
       <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, cada parte opcional — así es como el formato expresa “1954” o “hacia las 05:00”. <code>raw</code> es la fecha tal como se escribe en <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, y es lo que la fecha significa: <code>"1948-07-24T02:45~"</code> (aproximada), <code>"2025-06?"</code> (incierta), <code>"1965-07-01%"</code> (ambas cosas), <code>"19XX"</code> (un año enmascarado), o <code>"05:00"</code> solo, para una hora del día recordada sin su fecha. Los números se mantienen de acuerdo con ella para lo que se calcula (el cielo, el reloj). Es un subconjunto de EDTF (nivel 0, estos calificadores sobre la fecha entera, años enmascarados); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> es el modelo EDTF completo de RR0, al que las herramientas propias de UFO@home convierten las fechas de una grabación <code>season</code> (<code>spring</code>, <code>summer</code>, <code>autumn</code> o <code>winter</code>) dice una fecha conocida solo como «en primavera de 2022» (EDTF <code>2022-21</code>), donde se omiten <code>month</code> y <code>day</code>.</td></tr>
       <tr><td><code>durationSeconds</code></td><td>Una alternativa a <code>endTime</code>, y prevalece si se dan las dos</td></tr>
       <tr><td><code>durationText</code></td><td>La duración tal como se enunció cuando no era exacta: una duración ISO 8601 con una duda (<code>PT10M~</code>) o un rango (<code>PT5M/PT10M</code>). <code>durationSeconds</code> es entonces la única duración a la que se reproduce, elegida a partir de ella</td></tr>
@@ -1054,7 +1054,7 @@ if (excerpts.length > 0) {
       <tr><th>Campo</th><th>Significado</th></tr>
       <tr><td><code>id</code></td><td>El identificador propio del caso. En rr0.org es el directorio del expediente y puede omitirse; un archivo de caso independiente lo indica</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>El nombre del caso, y cuándo ocurrió tal como RR0 escribe una hora (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). El reproductor nombra un caso que abre por su título</td></tr>
-      <tr><td><code>events</code></td><td>La cronología del caso. Solo se reproducen los <code>sighting</code>, cada uno por su <code>url</code>, leída respecto a la dirección del propio archivo de caso (de modo que el mismo caso funciona desde la página de su expediente y desde cualquier otro lugar); los marcados con <code>interpretationOf</code> son lecturas de uno de ellos (véase abajo); los demás (un artículo, una película, una confesión) son de RR0</td></tr>
+      <tr><td><code>events</code></td><td>La cronología del caso. Solo se reproducen los <code>sighting</code>, cada uno por su <code>url</code>, leída respecto a la dirección del propio archivo de caso (de modo que el mismo caso funciona desde la página de su expediente y desde cualquier otro lugar); los marcados con <code>interpretationOf</code> son lecturas de uno de ellos (véase abajo); los demás (un artículo, una película, una confesión) son de RR0 Un evento lleva un <code>id</code> cuando una lectura lo designa, y solo entonces: pertenece al caso, así que debe ser único entre los eventos del caso y en ninguna otra parte, y una referencia se lee en el archivo que la escribe. Un <code>interpretationOf</code> que ningún evento lleva se lee, como antes, como el <code>id</code> que declara una grabación que el caso enumera; el que no corresponde a ninguno de los dos es un fallo del caso, que el reproductor señala en su consola, el editor sobre sus grabaciones, y el <code>validate.py</code> del skill cuando se le da el archivo del caso.</td></tr>
       <tr><td><code>image</code>, <code>summary</code></td><td>Lo que muestra un enlace compartido al caso, como para una grabación (véase <a href="/docs/share/">Compartir</a>): una imagen, y una o dos frases, una cadena o una por idioma</td></tr>
     </table>
     </div>
@@ -1222,9 +1222,9 @@ if (excerpts.length > 0) {
     <pre data-json="none"><code>{
   "id": "McMinnville1950",
   "events": [
-    { "type": "event", "eventType": "sighting", "title": "Paul Trent", "url": "observer-mcminnville.json" },
+    { "type": "event", "eventType": "sighting", "id": "trent", "title": "Paul Trent", "url": "observer-mcminnville.json" },
     { "type": "event", "eventType": "sighting",
-      "interpretationOf": "1950-05-11-TrentPaul",
+      "interpretationOf": "trent",
       "time": "2013-06",
       "by": [{ "people": "CousynAntoine" }, { "people": "LouangeFrancois" }],
       "title": "A model on a thread under the line",
@@ -1234,7 +1234,7 @@ if (excerpts.length > 0) {
     <div class="table-scroll">
     <table>
       <tr><th>Campo</th><th>Significado</th></tr>
-      <tr><td><code>interpretationOf</code></td><td>El <code>id</code> de la observación de la que es lectura, o una lista de ids cuando una lectura sirve a varios relatos (las fotografías y un primer plano). Lo que la distingue de un relato: los eventos <em>sin</em> este campo son los observadores del caso</td></tr>
+      <tr><td><code>interpretationOf</code></td><td>El <code>id</code> del evento del caso del que es lectura (<code>"trent"</code>), o una lista de ids cuando una lectura sirve a varios relatos (las fotografías y un primer plano). Lo que la distingue de un relato: los eventos <em>sin</em> este campo son los observadores del caso</td></tr>
       <tr><td><code>time</code></td><td>Cuándo se elaboró la interpretación, como RR0 escribe un tiempo (<code>"2013-06"</code>): no cuándo ocurrió la observación</td></tr>
       <tr><td><code>by</code></td><td>Quién la sostiene: <code>{ "people": id }</code> o <code>{ "org": id }</code>, que nombran una entrada que vive en otro sitio (en RR0, un directorio de personas u organizaciones), o una persona descrita en el valor. Ausente en una comparación que nadie sostiene</td></tr>
       <tr><td><code>title</code></td><td>Cómo se llama la lectura en el menú del reproductor y el selector del editor: unas palabras, una cadena o una por idioma</td></tr>
@@ -1453,7 +1453,7 @@ if (excerpts.length > 0) {
     <table>
       <tr><th>Campo</th><th>Significato</th></tr>
       <tr><td><code>version</code></td><td>Sempre <code>1</code></td></tr>
-      <tr><td><code>id</code></td><td>Quale resoconto è, unico fra tutte le registrazioni ovunque: il giorno, poi chi l'ha visto (<code>"1964-04-24-ZamoraLonnie"</code>), o il luogo per un osservatore anonimo (<code>"1964-04-24-Socorro"</code>). Ciò con cui un caso lo designa</td></tr>
+      <tr><td><code>id</code></td><td>Quale resoconto è, unico fra tutte le registrazioni ovunque: il giorno, poi chi l'ha visto (<code>"1964-04-24-ZamoraLonnie"</code>), o il luogo per un osservatore anonimo (<code>"1964-04-24-Socorro"</code>). Ciò con cui un caso lo designa non è questo id ma quello del suo evento (vedi più sotto).</td></tr>
       <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, ogni parte facoltativa — è così che il formato esprime “1954” o “verso le 05:00”. <code>raw</code> è la data come scritta in <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, ed è ciò che la data significa: <code>"1948-07-24T02:45~"</code> (approssimativa), <code>"2025-06?"</code> (incerta), <code>"1965-07-01%"</code> (entrambe le cose), <code>"19XX"</code> (un anno mascherato), oppure <code>"05:00"</code> da solo per un'ora del giorno ricordata senza la sua data. I numeri sono tenuti in accordo con essa per ciò che si calcola (il cielo, l'orologio). È un sottoinsieme di EDTF (livello 0, questi qualificatori sull'intera data, anni mascherati); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> è il modello EDTF completo di RR0, in cui gli strumenti propri di UFO@home convertono le date di una registrazione <code>season</code> (<code>spring</code>, <code>summer</code>, <code>autumn</code> o <code>winter</code>) dice una data nota solo come «in primavera del 2022» (EDTF <code>2022-21</code>), dove <code>month</code> e <code>day</code> sono omessi.</td></tr>
       <tr><td><code>durationSeconds</code></td><td>Un'alternativa a <code>endTime</code>, e prevale se sono date entrambe</td></tr>
       <tr><td><code>durationText</code></td><td>La durata come è stata enunciata quando non era esatta: una durata ISO 8601 con un dubbio (<code>PT10M~</code>) o un intervallo (<code>PT5M/PT10M</code>). <code>durationSeconds</code> è allora l'unica durata a cui si riproduce, scelta a partire da essa</td></tr>
@@ -1493,7 +1493,7 @@ if (excerpts.length > 0) {
       <tr><th>Campo</th><th>Significato</th></tr>
       <tr><td><code>id</code></td><td>L'identificativo proprio del caso. Su rr0.org è la directory del fascicolo e può essere omesso; un file di caso a sé stante lo indica</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>Il nome del caso, e quando è avvenuto come RR0 scrive un'ora (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). Il lettore designa un caso che apre con il suo titolo</td></tr>
-      <tr><td><code>events</code></td><td>La cronologia del caso. Vengono riprodotti solo i <code>sighting</code>, ciascuno tramite il suo <code>url</code>, letto rispetto all'indirizzo del file di caso stesso (così lo stesso caso funziona dalla pagina del suo fascicolo e da qualsiasi altro luogo); quelli contrassegnati da <code>interpretationOf</code> sono letture di uno di essi (vedi sotto); gli altri (un articolo, un filmato, una confessione) sono di RR0</td></tr>
+      <tr><td><code>events</code></td><td>La cronologia del caso. Vengono riprodotti solo i <code>sighting</code>, ciascuno tramite il suo <code>url</code>, letto rispetto all'indirizzo del file di caso stesso (così lo stesso caso funziona dalla pagina del suo fascicolo e da qualsiasi altro luogo); quelli contrassegnati da <code>interpretationOf</code> sono letture di uno di essi (vedi sotto); gli altri (un articolo, un filmato, una confessione) sono di RR0 Un evento porta un <code>id</code> quando una lettura lo designa, e solo allora: appartiene al caso, quindi deve essere unico fra gli eventi del caso e in nessun altro posto, e un riferimento si legge nel file che lo scrive. Un <code>interpretationOf</code> che nessun evento porta è letto, come prima, come l'<code>id</code> che dichiara una registrazione che il caso elenca; quello che non corrisponde a nessuno dei due è un difetto del caso, che il lettore segnala sulla sua console, l'editor sopra le sue registrazioni, e il <code>validate.py</code> dello skill quando gli si dà il file del caso.</td></tr>
       <tr><td><code>image</code>, <code>summary</code></td><td>Ciò che mostra un link condiviso al caso, come per una registrazione (vedi <a href="/docs/share/">Condividere</a>): un'immagine, e una o due frasi, una stringa o una per lingua</td></tr>
     </table>
     </div>
@@ -1661,9 +1661,9 @@ if (excerpts.length > 0) {
     <pre data-json="none"><code>{
   "id": "McMinnville1950",
   "events": [
-    { "type": "event", "eventType": "sighting", "title": "Paul Trent", "url": "observer-mcminnville.json" },
+    { "type": "event", "eventType": "sighting", "id": "trent", "title": "Paul Trent", "url": "observer-mcminnville.json" },
     { "type": "event", "eventType": "sighting",
-      "interpretationOf": "1950-05-11-TrentPaul",
+      "interpretationOf": "trent",
       "time": "2013-06",
       "by": [{ "people": "CousynAntoine" }, { "people": "LouangeFrancois" }],
       "title": "A model on a thread under the line",
@@ -1673,7 +1673,7 @@ if (excerpts.length > 0) {
     <div class="table-scroll">
     <table>
       <tr><th>Campo</th><th>Significato</th></tr>
-      <tr><td><code>interpretationOf</code></td><td>L'<code>id</code> dell'osservazione di cui è una lettura, o un elenco di id quando una lettura serve più resoconti (le fotografie e un primo piano). Ciò che la distingue da un resoconto: gli eventi <em>senza</em> questo campo sono gli osservatori del caso</td></tr>
+      <tr><td><code>interpretationOf</code></td><td>L'<code>id</code> dell'evento del caso di cui è una lettura (<code>"trent"</code>), o un elenco di id quando una lettura serve più resoconti (le fotografie e un primo piano). Ciò che la distingue da un resoconto: gli eventi <em>senza</em> questo campo sono gli osservatori del caso</td></tr>
       <tr><td><code>time</code></td><td>Quando l'interpretazione è stata elaborata, come RR0 scrive un tempo (<code>"2013-06"</code>): non quando l'osservazione è avvenuta</td></tr>
       <tr><td><code>by</code></td><td>Chi la sostiene: <code>{ "people": id }</code> o <code>{ "org": id }</code>, che designano una voce che vive altrove (su RR0, una directory di persone o di organizzazioni), o una persona descritta nel valore. Assente per un confronto che nessuno sostiene</td></tr>
       <tr><td><code>title</code></td><td>Come si chiama la lettura nel menu del lettore e nel selettore dell'editor: poche parole, una stringa o una per lingua</td></tr>
