@@ -698,6 +698,8 @@ export class SightingEditorElement extends HTMLElement {
   /** Which survey the scenery is taken from: one of the registry's (see SURROUNDINGS_SOURCES), or none. */
   private readonly scenerySource: HTMLSelectElement
   private readonly labelScenerySource: HTMLElement
+  private readonly sceneryRadius: HTMLInputElement
+  private readonly labelSceneryRadius: HTMLElement
   /** The id of the survey the author chose, "none" for none; undefined while they have not chosen, which is the registry's first. */
   private sceneryChoice?: string
   /** Which set of lamps the selected decor object carries — see LightRig.ts. Rebuilt for each
@@ -1313,6 +1315,9 @@ export class SightingEditorElement extends HTMLElement {
     this.sceneryStatus = this.shadow.getElementById("scenery-status")!
     this.scenerySource = this.shadow.getElementById("scenery-source") as HTMLSelectElement
     this.labelScenerySource = this.shadow.getElementById("label-scenery-source")!
+    this.sceneryRadius = this.shadow.getElementById("scenery-radius") as HTMLInputElement
+    this.labelSceneryRadius = this.shadow.getElementById("label-scenery-radius")!
+    this.sceneryRadius.value = this.readSceneryRadius()
     this.surroundings = new SurroundingsPlanter(this.sceneryStatus, {
       decor: () => this.ufoElement.sighting.decor,
       setDecor: decor => this.setPlantedDecor(decor),
@@ -1321,7 +1326,8 @@ export class SightingEditorElement extends HTMLElement {
     }, sightingEditorMessages_en,
     async (lat, lng) => this.surroundingsProvider
       ? (this.surroundingsProvider.covers(lat, lng) ? this.surroundingsProvider : undefined)
-      : (await import("../render3d/terrain/surroundingsSources.js")).SurroundingsSources.providerFor(this.sceneryChoice, lat, lng))
+      : (await import("../render3d/terrain/surroundingsSources.js")).SurroundingsSources.providerFor(this.sceneryChoice, lat, lng),
+    { radiusM: Number(this.sceneryRadius.value) })
     // The first survey of the registry unless the author chose another, or none, which the browser remembers: asking sends the place to a
     // service, and that is the author's to allow.
     this.sceneryChoice = this.readSceneryChoice()
@@ -1338,6 +1344,13 @@ export class SightingEditorElement extends HTMLElement {
       // Another survey is another answer for the place the recording stands at: asked at once, and what the first brought is replaced.
       const standing = this.plantingCentre()
       if (standing) void this.surroundings.survey(standing.lat, standing.lng)
+    })
+    this.sceneryRadius.addEventListener("input", () => {
+      const radius = Number(this.sceneryRadius.value)
+      if (!Number.isFinite(radius) || radius < 20) return
+      this.writeSceneryRadius(this.sceneryRadius.value)
+      const standing = this.plantingCentre()
+      this.surroundings.radiusChanged(radius, standing?.lat, standing?.lng)
     })
     void this.fillScenerySources()
     this.undoButton = this.shadow.getElementById("undo") as HTMLButtonElement
@@ -2209,6 +2222,8 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Where the browser remembers which survey the author takes the scenery from, or that they take none (see readSceneryChoice). */
   private static readonly SCENERY_STORAGE = "rr0-sighting-editor.surroundings"
+  /** And how far round the observer it is asked, in metres. */
+  private static readonly SCENERY_RADIUS_STORAGE = "rr0-sighting-editor.surroundings-radius"
   /** What the choice says for "no survey": the scenery is the author's alone. */
   private static readonly NO_SCENERY = "none"
 
@@ -6949,6 +6964,25 @@ export class SightingEditorElement extends HTMLElement {
     }
   }
 
+  /** The radius the browser remembers, in metres as the field says it: the default where it remembers none. */
+  private readSceneryRadius(): string {
+    try {
+      const stored = Number(localStorage.getItem(SightingEditorElement.SCENERY_RADIUS_STORAGE))
+      if (Number.isFinite(stored) && stored >= 20 && stored <= 3000) return String(stored)
+    } catch {
+      // No storage: the default.
+    }
+    return "100"
+  }
+
+  private writeSceneryRadius(radius: string): void {
+    try {
+      localStorage.setItem(SightingEditorElement.SCENERY_RADIUS_STORAGE, radius)
+    } catch {
+      // No storage: the radius holds for this page.
+    }
+  }
+
   private writeSceneryChoice(choice: string): void {
     try {
       localStorage.setItem(SightingEditorElement.SCENERY_STORAGE, choice)
@@ -8748,6 +8782,8 @@ export class SightingEditorElement extends HTMLElement {
     this.addDecorObserverButton.textContent = messages.addObserver
     this.surroundings.setMessages(messages)
     this.labelScenerySource.textContent = messages.surveySource
+    this.labelSceneryRadius.textContent = messages.surveyRadius
+    this.sceneryRadius.title = messages.surveyRadiusTitle
     this.scenerySource.title = messages.surveySourceTitle
     const noScenery = this.shadow.getElementById("option-scenery-none")
     if (noScenery) noScenery.textContent = messages.surveySourceNone

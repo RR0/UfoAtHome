@@ -37,11 +37,12 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
     if (!this.covers(centre.lat, centre.lng)) throw new SurroundingsUnavailableError("no-coverage", "The IGN's surveys cover France only")
     const radius = IgnGeoplatform.radius(radiusM)
     const [laser, map] = await Promise.allSettled([this.platform.lidar(centre, radius), this.platform.vectors(centre, radius, true)])
+    const laserRadius = IgnGeoplatform.lidarRadius(radius)
     if (laser.status === "rejected" && map.status === "rejected") throw laser.reason
     const grids = laser.status === "fulfilled" ? laser.value : undefined
     const vectors = map.status === "fulfilled" ? map.value : undefined
     return {
-      trees: grids ? new CanopyCrowns(grids.heights, grids.vegetation, grids.size, grids.size).trees({ metresPerPixel: grids.metresPerPixel, radiusM: radius }) : [],
+      trees: grids ? new CanopyCrowns(grids.heights, grids.vegetation, grids.size, grids.size).trees({ metresPerPixel: grids.metresPerPixel, radiusM: laserRadius }) : [],
       buildings: this.buildings(grids, vectors, centre, radius),
       bridges: vectors ? OverheadStructures.bridges(vectors, centre, radius, grids?.structures) : [],
       lines: vectors ? OverheadStructures.lines(vectors, centre, radius, grids?.structures) : []
@@ -52,7 +53,7 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
     const drawn = vectors ? TopoBuildings.buildings(vectors.buildings, centre, radius) : []
     const found = drawn.length > 0 || grids === undefined
       ? drawn
-      : new BuildingFootprints(grids.heights, grids.building, grids.size, grids.size).buildings({ metresPerPixel: grids.metresPerPixel, radiusM: radius })
+      : new BuildingFootprints(grids.heights, grids.building, grids.size, grids.size).buildings({ metresPerPixel: grids.metresPerPixel, radiusM: IgnGeoplatform.lidarRadius(radius), maxBuildings: 300 })
     // Named by the map either way: a roof the laser saw is the town hall all the same.
     return vectors ? TopoBuildings.named(found, vectors.zones, centre) : found
   }

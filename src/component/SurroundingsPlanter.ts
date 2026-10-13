@@ -58,7 +58,7 @@ export class SurroundingsPlanter {
 
   private messages: SightingEditorMessages
   private readonly debounceMs: number
-  private readonly radiusM: number
+  private radiusM: number
   /** Whether a place the author gives is asked about at all: the author's choice, kept by the editor (see setEnabled). */
   private enabled = true
   private surveyedFor?: { lat: number, lng: number }
@@ -106,6 +106,18 @@ export class SurroundingsPlanter {
     this.cancel()
     this.surveyedFor = lat !== undefined && lng !== undefined ? { lat, lng } : undefined
     this.say("")
+  }
+
+  /**
+   * The author widened or narrowed what is asked about: the survey is asked again for the same place, once the number has stayed where it is for a moment
+   * (typing "1500" is a radius of 1, of 15 and of 150 on the way). Nothing is asked while no survey is chosen.
+   */
+  radiusChanged(radiusM: number, lat: number | undefined, lng: number | undefined): void {
+    if (radiusM === this.radiusM) return
+    this.radiusM = radiusM
+    if (!this.enabled || lat === undefined || lng === undefined) return
+    clearTimeout(this.timer)
+    this.timer = setTimeout(() => void this.survey(lat, lng), this.debounceMs)
   }
 
   /** The author set the place, or moved it: asked about once it has stayed where it is for a moment, and not at all if it is still the same place. */

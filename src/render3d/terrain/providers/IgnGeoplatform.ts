@@ -42,8 +42,11 @@ export class IgnGeoplatform {
   private static readonly HEIGHT_LAYER = "IGNF_LIDAR-HD_MNH_ELEVATION.ELEVATIONGRIDCOVERAGE.LAMB93"
   private static readonly CLASS_LAYER = "IGNF_LIDAR-HD_CLASS"
   private static readonly METRES_PER_PIXEL = 0.5
-  /** More than this and the two answers are 1.4 MB each: the ground is asked for in a square this big at most. */
-  static readonly MAX_RADIUS_M = 150
+  /** The map is asked in small filtered questions, so a far horizon costs a few more kilobytes: three kilometres at most. */
+  static readonly MAX_RADIUS_M = 3000
+  /** The laser's grids are 1.4 MB each at half a metre over 150 m; farther, the same number of pixels spreads over more ground, up to this. */
+  static readonly MAX_LIDAR_RADIUS_M = 600
+  private static readonly FINE_LIDAR_RADIUS_M = 150
   /** What the height model says where the laser has not flown. */
   private static readonly NO_DATA = -9999
   private static readonly METRES_PER_DEGREE = 111320
@@ -59,9 +62,14 @@ export class IgnGeoplatform {
     this.wfs = options.wfsEndpoint ?? IgnGeoplatform.WFS
   }
 
-  /** The radius asked for, held to what the service is asked for. */
+  /** The radius asked for, held to what the map is asked for. */
   static radius(radiusM: number): number {
     return Math.min(radiusM, IgnGeoplatform.MAX_RADIUS_M)
+  }
+
+  /** The radius the laser is asked for: farther than this, a far building comes from the map, and the laser keeps its resolution for what is near. */
+  static lidarRadius(radiusM: number): number {
+    return Math.min(radiusM, IgnGeoplatform.MAX_LIDAR_RADIUS_M)
   }
 
   /**
@@ -72,8 +80,9 @@ export class IgnGeoplatform {
    * A place the scan does not cover answers with a height of -9999 everywhere, which is how "no coverage" is told from "no tree".
    */
   async lidar(centre: { lat: number, lng: number }, radiusM: number): Promise<LidarGrids> {
-    const radius = IgnGeoplatform.radius(radiusM)
-    const size = Math.ceil(2 * radius / IgnGeoplatform.METRES_PER_PIXEL)
+    const radius = IgnGeoplatform.lidarRadius(radiusM)
+    // Half a metre a pixel up to 150 m, then the same 600 pixels over a wider square.
+    const size = Math.ceil(2 * Math.min(radius, IgnGeoplatform.FINE_LIDAR_RADIUS_M) / IgnGeoplatform.METRES_PER_PIXEL)
     const [heights, classes] = await Promise.all([
       this.raster(centre, radius, size, IgnGeoplatform.HEIGHT_LAYER),
       this.raster(centre, radius, size, IgnGeoplatform.CLASS_LAYER)
@@ -111,7 +120,7 @@ export class IgnGeoplatform {
       this.features("construction_lineaire", `${within} AND nature='Pont'`, "nature,geometrie"),
       this.features("troncon_de_route", `${within} AND position_par_rapport_au_sol<>'0'`, "nature,largeur_de_chaussee,position_par_rapport_au_sol,nom_voie_ban_gauche,nom_voie_ban_droite,cpx_toponyme_route_nommee,geometrie"),
       this.features("ligne_electrique", within, "voltage,geometrie"),
-      withBuildings ? this.features("batiment", within, "hauteur,nombre_d_etages,geometrie", 400) : Promise.resolve([]),
+      withBuildings ? this.features("batiment", within, "hauteur,nombre_d_etages,geometrie", 2000) : Promise.resolve([]),
       // The names of the zones (a town hall, a post office, a square): a few, and a building takes the name of the one it stands in.
       withBuildings ? this.features("zone_d_activite_ou_d_interet", within, "toponyme,geometrie", 100).catch((): VectorFeature[] => []) : Promise.resolve([])
     ])

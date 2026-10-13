@@ -319,6 +319,8 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   addObserver: "Ajouter un observateur",
   surveyLabel: "Décor tiré d'un relevé",
   surveySource: "Décor tiré de",
+  surveyRadius: "Rayon",
+  surveyRadiusTitle: "Jusqu'où autour de l'observateur le relevé est interrogé, en mètres. Un rayon plus large ramène des bâtiments, ponts et lignes plus éloignés ; les arbres du laser restent dans 600 m, et les plus lointains sont plus grossiers.",
   surveySourceTitle: "Le relevé d'où sont tirés, tout seuls, les arbres, bâtiments, ponts et lignes aériennes autour du lieu quand vous donnez un lieu à l'enregistrement : ils sont mis dans la liste, à leur place, leur hauteur et leur largeur mesurées. Les coordonnées du lieu sont envoyées à ce service. Aucun laisse le décor à vous seul. Ce que vous avez placé vous-même n'est jamais touché.",
   surveySourceNone: "Aucun (tout à la main)",
   surveyBusy: "Recherche du décor autour de l'observateur…",

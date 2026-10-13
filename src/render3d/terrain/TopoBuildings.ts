@@ -22,7 +22,7 @@ export class TopoBuildings {
   /** An outline drawn by a surveyor is a rectangle when it nearly fills its own: a courtyard of a seventh of the area is not one. */
   private static readonly RECTANGLE_FILL = 0.9
 
-  static buildings(features: VectorFeature[], centre: { lat: number, lng: number }, radiusM: number, minAreaM2 = 12, max = 60): SurveyedBuilding[] {
+  static buildings(features: VectorFeature[], centre: { lat: number, lng: number }, radiusM: number, minAreaM2 = 12, max = 300): SurveyedBuilding[] {
     const found: SurveyedBuilding[] = []
     for (const feature of features) {
       const rings = TopoBuildings.rings(feature, centre)

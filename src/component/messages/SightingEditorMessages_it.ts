@@ -319,6 +319,8 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   addObserver: "Aggiungi osservatore",
   surveyLabel: "Scenografia ricavata da un rilievo",
   surveySource: "Scenografia da",
+  surveyRadius: "Raggio",
+  surveyRadiusTitle: "Fino a dove intorno all'osservatore si interroga il rilievo, in metri. Un raggio più ampio porta edifici, ponti e linee più lontani; gli alberi del laser restano entro 600 m, e i più lontani sono più grossolani.",
   surveySourceTitle: "Il rilievo da cui sono ricavati, da soli, gli alberi, gli edifici, i ponti e le linee aeree attorno al luogo quando date un luogo alla registrazione: sono messi nell'elenco, al loro posto, con altezza e larghezza misurate. Le coordinate del luogo sono inviate a quel servizio. Nessuno lascia la scenografia a voi soli. Ciò che avete collocato voi non viene mai toccato.",
   surveySourceNone: "Nessuno (tutto a mano)",
   surveyBusy: "Ricerca della scenografia attorno all'osservatore…",

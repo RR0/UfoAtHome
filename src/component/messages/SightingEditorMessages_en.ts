@@ -314,6 +314,8 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   addObserver: "Add observer",
   surveyLabel: "Scenery taken from a survey",
   surveySource: "Scenery from",
+  surveyRadius: "Radius",
+  surveyRadiusTitle: "How far round the observer the survey is asked for scenery, in metres. A wider radius brings farther buildings, bridges and lines; the trees of the laser stay within 600 m, and the farther ones are coarser.",
   surveySourceTitle: "Which survey the trees, buildings, bridges and overhead lines round the place are taken from, by itself, when you give the recording a place: they are put in the list, at their measured place, height and width. The coordinates of the place are sent to that service. None leaves the scenery to you. What you placed yourself is never touched.",
   surveySourceNone: "None (all by hand)",
   surveyBusy: "Looking up the scenery round the observer…",

@@ -319,6 +319,8 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   addObserver: "Añadir observador",
   surveyLabel: "Decorado tomado de un levantamiento",
   surveySource: "Decorado tomado de",
+  surveyRadius: "Radio",
+  surveyRadiusTitle: "Hasta dónde alrededor del observador se consulta el levantamiento, en metros. Un radio mayor trae edificios, puentes y líneas más lejanos; los árboles del láser se quedan dentro de 600 m, y los más lejanos son más toscos.",
   surveySourceTitle: "El levantamiento del que se toman, por sí solos, los árboles, edificios, puentes y líneas aéreas alrededor del lugar cuando das un lugar al registro: se ponen en la lista, en su lugar, altura y anchura medidos. Las coordenadas del lugar se envían a ese servicio. Ninguno deja el decorado a tu cargo. Lo que colocaste tú nunca se toca.",
   surveySourceNone: "Ninguno (todo a mano)",
   surveyBusy: "Buscando el decorado alrededor del observador…",

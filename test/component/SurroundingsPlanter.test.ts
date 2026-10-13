@@ -244,4 +244,21 @@ describe("SurroundingsPlanter", () => {
     await first
     expect(slowEditor.decor).toHaveLength(2)
   })
+
+  it("asks again for the same place with the new radius once it has stayed, and not when it is the same or when nothing is chosen", async () => {
+    const editor = new FakeEditor()
+    const survey = new FakeSurvey(Scene.of([OAK]))
+    const planter = editor.planter(survey)
+    await planter.survey(PLACE.lat, PLACE.lng)
+    expect(survey.asked.map(ask => ask.radiusM)).toEqual([100])
+    planter.radiusChanged(100, PLACE.lat, PLACE.lng)
+    planter.radiusChanged(1, PLACE.lat, PLACE.lng)
+    planter.radiusChanged(1500, PLACE.lat, PLACE.lng)
+    await new Promise(resolve => setTimeout(resolve, 40))
+    expect(survey.asked.map(ask => ask.radiusM)).toEqual([100, 1500])
+    planter.setEnabled(false)
+    planter.radiusChanged(800, PLACE.lat, PLACE.lng)
+    await new Promise(resolve => setTimeout(resolve, 40))
+    expect(survey.asked).toHaveLength(2)
+  })
 })

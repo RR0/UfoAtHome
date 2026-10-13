@@ -34,11 +34,11 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
 
   async getSurroundings(centre: { lat: number, lng: number }, radiusM: number): Promise<Surroundings> {
     if (!this.covers(centre.lat, centre.lng)) throw new SurroundingsUnavailableError("no-coverage", "The LiDAR HD survey covers France only")
-    const radius = IgnGeoplatform.radius(radiusM)
+    const radius = IgnGeoplatform.lidarRadius(radiusM)
     const grids = await this.platform.lidar(centre, radius)
     return {
       trees: new CanopyCrowns(grids.heights, grids.vegetation, grids.size, grids.size).trees({ metresPerPixel: grids.metresPerPixel, radiusM: radius }),
-      buildings: new BuildingFootprints(grids.heights, grids.building, grids.size, grids.size).buildings({ metresPerPixel: grids.metresPerPixel, radiusM: radius }),
+      buildings: new BuildingFootprints(grids.heights, grids.building, grids.size, grids.size).buildings({ metresPerPixel: grids.metresPerPixel, radiusM: radius, maxBuildings: 300 }),
       bridges: [],
       lines: []
     }

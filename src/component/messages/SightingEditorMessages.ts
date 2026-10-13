@@ -674,6 +674,9 @@ export interface SightingEditorMessages extends SightingLabels {
   surveyLabel: string
   /** The choice of the survey the scenery is taken from: its label, its tooltip (which says to whom the place is sent), and "none". */
   surveySource: string
+  /** The distance round the observer the survey is asked about: the label of a field in metres. */
+  surveyRadius: string
+  surveyRadiusTitle: string
   surveySourceTitle: string
   surveySourceNone: string
   surveyBusy: string

@@ -183,6 +183,7 @@ export const html = `
          on a line of its own, below what the list of the decor draws, and is read out by whoever listens to the page. -->
     <div id="scenery" class="decor-scenery">
       <label><span id="label-scenery-source">Scenery survey</span> <select id="scenery-source"><option value="none" id="option-scenery-none">None (all by hand)</option></select></label>
+      <label><span id="label-scenery-radius">Radius</span> <input type="number" id="scenery-radius" min="20" max="3000" step="10" value="100"/> m</label>
       <span id="scenery-status" role="status" aria-live="polite"></span>
     </div>
   </div>
