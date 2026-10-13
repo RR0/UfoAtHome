@@ -51,9 +51,60 @@ VIBRATION_HZ = 5.0
 # Turns, as (from ms, to ms, degrees, +1 left / -1 right as seen on the sky).
 # He gave them "par rapport à l'engin" (he is a drone pilot): the craft's left is, on the sky seen from below, to the right.
 FROM_THE_CRAFT = -1
+FROM_THE_CRAFT_DEFAULT = -1
 TURN_1 = (1700, 2300, 15.0, +FROM_THE_CRAFT)
 TURN_2 = (2300, 4000, 25.0, -FROM_THE_CRAFT)
 TURN_3_FROM, TURN_3_TO = 4200, 4800
+SPIRAL_SIGN = 1                        # +1 clockwise on the sky as he says; -1 the other way
+SPIRAL_TURNS = 2
+SPIRAL_RADIUS_DEG = 0.35
+VIBRATION_AMP_DEG = 0.35
+GAZE_AZ, GAZE_PITCH = 250.0, 45.0      # where he looked before it caught his eye: "légèrement sur la gauche (Ouest Ouest-Sud-Ouest)"
+REACTION_MS = 500
+BANK_DEG = 20.0
+TURN_3_DEG_FIXED = None                # None: solved, so that it ends due south
+
+# --- what a live session may change (see scripts/call-live-server.mjs) -----------------------------
+# A JSON object in LIVE_PARAMS overrides what he has said, one value at a time, so that the recording can be redrawn while he talks. None of it is in the
+# published recording unless it is written there.
+_P = json.loads(os.environ.get("LIVE_PARAMS", "{}"))
+if _P:
+    START_ALT = float(_P.get("startAlt", START_ALT))
+    START_AZ = float(_P.get("startAz", START_AZ))
+    DURATION_MS = int(_P.get("durationMs", DURATION_MS))
+    ZENITH_MS = int(_P.get("zenithMs", ZENITH_MS))
+    UP_SPEED = float(_P.get("upSpeed", UP_SPEED))
+    HEAD_DEPTH = float(_P.get("wingDepthDeg", HEAD_DEPTH))
+    ACROSS = float(_P.get("wingWidthDeg", ACROSS))
+    VIBRATION_FROM_MS = int(_P.get("vibrationFromMs", VIBRATION_FROM_MS))
+    VIBRATION_HZ = float(_P.get("vibrationHz", VIBRATION_HZ))
+    VIBRATION_AMP_DEG = float(_P.get("vibrationAmpDeg", VIBRATION_AMP_DEG))
+    SPIRAL_FROM_MS = int(_P.get("spiralFromMs", SPIRAL_FROM_MS))
+    SPIRAL_SIGN = 1 if _P.get("spiralSense", "cw") == "cw" else -1
+    SPIRAL_TURNS = float(_P.get("spiralTurns", SPIRAL_TURNS))
+    SPIRAL_RADIUS_DEG = float(_P.get("spiralRadiusDeg", SPIRAL_RADIUS_DEG))
+    GAZE_AZ = float(_P.get("gazeAz", GAZE_AZ))
+    GAZE_PITCH = float(_P.get("gazePitch", GAZE_PITCH))
+    REACTION_MS = int(_P.get("reactionMs", REACTION_MS))
+    BANK_DEG = float(_P.get("bankDeg", BANK_DEG))
+    FROM_THE_CRAFT = -1 if _P.get("turnsFrame", "craft") == "craft" else 1
+
+    def _turn(key, default):
+        t = _P.get(key)
+        sign = (+FROM_THE_CRAFT) if (t or {}).get("side", "left" if default[3] == +FROM_THE_CRAFT_DEFAULT else "right") == "left" else (-FROM_THE_CRAFT)
+        if not t:
+            return (default[0], default[1], default[2], sign)
+        return (int(t.get("fromMs", default[0])), int(t.get("toMs", default[1])), float(t.get("deg", default[2])), sign)
+
+    TURN_1 = _turn("turn1", TURN_1)
+    TURN_2 = _turn("turn2", TURN_2)
+    TURN_3_FROM = int((_P.get("turn3") or {}).get("fromMs", TURN_3_FROM))
+    TURN_3_TO = int((_P.get("turn3") or {}).get("toMs", TURN_3_TO))
+    if (_P.get("turn3") or {}).get("deg") is not None:
+        TURN_3_DEG_FIXED = float(_P["turn3"]["deg"])
+    TURN_3_SIDE = (_P.get("turn3") or {}).get("side", "left")
+else:
+    TURN_3_SIDE = "left"
 
 
 def stated(value, basis, rationale):
@@ -102,7 +153,7 @@ def fly(down_speed, turn_3_deg, until_ms=DURATION_MS, dt_ms=5):
     h = math.radians(START_ALT)
     a = math.radians(START_AZ)
     t = (-math.sin(h) * math.sin(a), -math.sin(h) * math.cos(a), math.cos(h))     # towards the zenith, along the meridian of the start
-    turns = [TURN_1, TURN_2, (TURN_3_FROM, TURN_3_TO, turn_3_deg, +FROM_THE_CRAFT)]
+    turns = [TURN_1, TURN_2, (TURN_3_FROM, TURN_3_TO, turn_3_deg, (+FROM_THE_CRAFT) if TURN_3_SIDE == "left" else (-FROM_THE_CRAFT))]
     out = []
     for ms in range(0, until_ms + 1, dt_ms):
         out.append(to_azalt(p))
@@ -124,9 +175,11 @@ def solve_path():
     """The two numbers the account leaves open: how slow it went after the zenith, and how far the last
     turn went. Taken so that it is at the tree tops (SPIRAL_ALT) at the start of the spiral, and due south."""
     best = None
-    for turn_3 in range(0, 91, 2):
+    # Redrawn live while he talks, the search is coarser (a few tenths of a degree a second and six degrees of turn): the published recording keeps the fine one.
+    step, iterations = (6, 16) if _P else (2, 24)
+    for turn_3 in ([TURN_3_DEG_FIXED] if TURN_3_DEG_FIXED is not None else range(0, 91, step)):
         lo, hi = 5.0, 80.0
-        for _ in range(24):
+        for _ in range(iterations):
             mid = (lo + hi) / 2
             alt = fly(mid, turn_3, SPIRAL_FROM_MS, 10)[-1][1]
             lo, hi = (mid, hi) if alt > SPIRAL_ALT else (lo, mid)
@@ -170,8 +223,8 @@ def eye(t_ms):
     """At first west-south-west (his own words), then, after his 500 ms of reaction, swung to the thing."""
     t = int(round(t_ms / STEP_MS)) * STEP_MS
     follow = FOLLOW[min(t, DURATION_MS)]
-    k = smooth((t_ms - 500) / 900.0)          # his reaction time, then the eyes catch up with it
-    a0, p0 = 250.0, 45.0
+    k = smooth((t_ms - REACTION_MS) / 900.0)          # his reaction time, then the eyes catch up with it
+    a0, p0 = GAZE_AZ, GAZE_PITCH
     d = (follow[0] - a0 + 180) % 360 - 180
     return (a0 + d * k) % 360, p0 + (follow[1] - p0) * k
 
@@ -215,21 +268,21 @@ def roll_deg(t_ms):
     if t_ms < TURN_1[0]:
         return 0.0
     if t_ms < TURN_2[0]:
-        return 20.0 * math.sin(math.pi * smooth((t_ms - TURN_1[0]) / (TURN_1[1] - TURN_1[0])))
+        return BANK_DEG * math.sin(math.pi * smooth((t_ms - TURN_1[0]) / (TURN_1[1] - TURN_1[0])))
     if t_ms < TURN_3_FROM:
-        return 20.0 * smooth((t_ms - TURN_2[0]) / 400.0)       # "environ 20 degrés sur la droite"
+        return BANK_DEG * smooth((t_ms - TURN_2[0]) / 400.0)       # "environ 20 degrés sur la droite"
     if t_ms < SPIRAL_FROM_MS:
-        return 20.0 + 70.0 * smooth((t_ms - TURN_3_FROM) / (SPIRAL_FROM_MS - TURN_3_FROM))   # edge-on: "une ligne lumineuse"
+        return BANK_DEG + (90.0 - BANK_DEG) * smooth((t_ms - TURN_3_FROM) / (SPIRAL_FROM_MS - TURN_3_FROM))   # edge-on: "une ligne lumineuse"
     k = (t_ms - SPIRAL_FROM_MS) / (DURATION_MS - SPIRAL_FROM_MS)
-    return 90.0 + 450.0 * k                                      # barrel roll, ending head down
+    return 90.0 + SPIRAL_SIGN * 450.0 * k                        # barrel roll, ending head down
 
 
 def spiral_offset(t_ms):
     """Screen offset of the spiral at a moment, clockwise, two turns, a little more than the full Moon across."""
     k = (t_ms - SPIRAL_FROM_MS) / (DURATION_MS - SPIRAL_FROM_MS)
     k = max(0.0, k)
-    radius = deg_tan(0.35) * smooth(k * 4)
-    phase = -2 * math.pi * 2 * k
+    radius = deg_tan(SPIRAL_RADIUS_DEG) * smooth(k * 4)
+    phase = -SPIRAL_SIGN * 2 * math.pi * SPIRAL_TURNS * k
     return radius * (math.cos(phase) - 1), radius * math.sin(phase)
 
 
@@ -246,7 +299,7 @@ def frame(t_ms):
     f = size_factor(alt)
     if VIBRATION_FROM_MS <= t_ms < SPIRAL_FROM_MS:
         ramp = smooth((t_ms - VIBRATION_FROM_MS) / 300.0)
-        sideways = 0.35 * max(f, 0.4) * ramp * math.sin(2 * math.pi * VIBRATION_HZ * t_ms / 1000.0)
+        sideways = VIBRATION_AMP_DEG * max(f, 0.4) * ramp * math.sin(2 * math.pi * VIBRATION_HZ * t_ms / 1000.0)
         sx += deg_tan(sideways) * (-my)
         sy += deg_tan(sideways) * mx
     if t_ms >= SPIRAL_FROM_MS:
