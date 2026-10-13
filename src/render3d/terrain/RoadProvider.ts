@@ -16,6 +16,11 @@ export interface RoadWay {
   surface: RoadSurface
   /** Metres, carriageway only — see RoadProvider for where a missing width comes from. */
   widthM: number
+  /**
+   * Whether the way is a street of a built-up area, where the map says so: a street has pavements, a country road does not. Absent is "not
+   * known", which draws none (a map that does not say is not a map that says there are none, but a pavement drawn along a field is worse).
+   */
+  urban?: boolean
   /** West to east, north to south, in no particular order: a road has no direction here. */
   points: { lat: number; lng: number }[]
 }

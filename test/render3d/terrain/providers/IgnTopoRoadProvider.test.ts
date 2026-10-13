@@ -46,6 +46,18 @@ describe("IgnTopoRoadProvider", () => {
     expect(ways[3]).toMatchObject({ surface: "paved", widthM: 5 })
   })
 
+  it("says a street is urban where the map does, and nothing where it does not", async () => {
+    const provider = new IgnTopoRoadProvider({
+      fetchImpl: answering([
+        road({ cleabs: "A", nature: "Route à 1 chaussée", urbain: true }, [-1.09, 49.115], [-1.089, 49.115]),
+        road({ cleabs: "B", nature: "Route à 1 chaussée", urbain: false }, [-1.09, 49.116], [-1.089, 49.116])
+      ])
+    })
+    const [urban, country] = await provider.getRoads(SAINT_LO)
+    expect(urban.urban).toBe(true)
+    expect(country.urban).toBeUndefined()
+  })
+
   it("says plainly that its roads are today's", () => {
     const provider = new IgnTopoRoadProvider()
     expect(provider.contemporary).toBe(true)

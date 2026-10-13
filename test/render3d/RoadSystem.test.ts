@@ -112,3 +112,57 @@ describe("RoadSystem", () => {
     expect(meshes(system)).toHaveLength(0)
   })
 })
+
+describe("RoadSystem pavements", () => {
+  const sidewalks = (system: RoadSystem): Mesh<BufferGeometry> | undefined => meshes(system).find(mesh => mesh.name === "roads sidewalks")
+  const urban = (way: RoadWay): RoadWay => ({ ...way, urban: true })
+  const vertices = (mesh: Mesh<BufferGeometry>): number[][] => {
+    const at = mesh.geometry.getAttribute("position")
+    return Array.from({ length: at.count }, (_, i) => [at.getX(i), at.getY(i), at.getZ(i)])
+  }
+
+  it("draws none for a road the map does not say is urban", () => {
+    const system = new RoadSystem()
+    system.set([straight("a", "paved", 7, 200)], LAT, LNG, () => 0, false)
+    expect(sidewalks(system)).toBeUndefined()
+  })
+
+  it("draws a strip along each side of an urban street, a kerb above the carriageway, past its edge", () => {
+    const system = new RoadSystem()
+    system.set([urban(straight("a", "paved", 6, 200))], LAT, LNG, () => 0, false)
+    const mesh = sidewalks(system)!
+    const points = vertices(mesh)
+    // The carriageway is 3 m either side of its axis (z = 0); a strip lies between 3 and 4.8 m out, on both sides.
+    const outside = points.map(point => Math.abs(point[2]))
+    expect(Math.min(...outside)).toBeCloseTo(3, 1)
+    expect(Math.max(...outside)).toBeCloseTo(4.8, 1)
+    expect(points.some(point => point[2] > 0)).toBe(true)
+    expect(points.some(point => point[2] < 0)).toBe(true)
+    expect(points[0][1]).toBeCloseTo(RoadSystem.LIFT_M + RoadSystem.SIDEWALK_KERB_M, 5)
+  })
+
+  it("draws none for a lane or a track, or a street that is not paved", () => {
+    const system = new RoadSystem()
+    system.set([urban(straight("lane", "paved", 2.5, 200)), urban(straight("track", "gravel", 6, 200))], LAT, LNG, () => 0, false)
+    expect(sidewalks(system)).toBeUndefined()
+  })
+
+  it("leaves a gap where a side street opens, instead of a pavement across it", () => {
+    const along = urban(straight("main", "paved", 6, 200))
+    const side: RoadWay = {
+      id: "side", surface: "paved", widthM: 6, urban: true,
+      points: [{ lat: LAT - 0.0006, lng: LNG + 100 / 92000 }, { lat: LAT + 0.0006, lng: LNG + 100 / 92000 }]
+    }
+    const system = new RoadSystem()
+    system.set([along, side], LAT, LNG, () => 0, false)
+    const mesh = sidewalks(system)!
+    const points = vertices(mesh)
+    const drawn = new Set(Array.from(mesh.geometry.getIndex()!.array))
+    // No quad of any pavement touches the middle of the side street's mouth (on the main street, within 2.5 m of it along it, off its axis)...
+    const inTheMouth = [...drawn].filter(i => Math.abs(points[i][0] - 100) < 2.5 && Math.abs(points[i][2]) < 5)
+    expect(inTheMouth).toEqual([])
+    // ...and the main street's pavement is there on both sides of the gap.
+    expect([...drawn].some(i => points[i][0] < 90 && Math.abs(points[i][2]) < 5)).toBe(true)
+    expect([...drawn].some(i => points[i][0] > 110 && Math.abs(points[i][2]) < 5)).toBe(true)
+  })
+})

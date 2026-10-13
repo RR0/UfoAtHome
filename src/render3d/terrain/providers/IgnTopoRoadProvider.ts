@@ -62,6 +62,7 @@ export class IgnTopoRoadProvider implements RoadProvider {
       ...(name ? { name } : {}),
       surface: kind.surface,
       widthM: Number.isFinite(stated) && stated > 0 ? stated : kind.widthM,
+      ...(feature.properties.urbain === true ? { urban: true } : {}),
       points
     }]
   }

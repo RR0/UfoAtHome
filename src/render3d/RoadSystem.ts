@@ -32,6 +32,15 @@ export class RoadSystem {
   /** Lifted this far off the ground so the carriageway wins the depth test against the very
    * surface it is laid on, without standing visibly above it. */
   static readonly LIFT_M = 0.06
+  /**
+   * The pavements of a street: a strip this wide along each side of the carriageway, raised by a kerb. Drawn for the streets the map says are
+   * urban, and where a way is not a side street's mouth (see crossesAnother).
+   */
+  static readonly SIDEWALK_WIDTH_M = 1.8
+  static readonly SIDEWALK_KERB_M = 0.12
+  /** Streets narrower than this have no room for one (a lane, a cycle path), and a carriageway wider than the usual is a road with no pavements of its own. */
+  private static readonly SIDEWALK_MIN_ROAD_M = 3.5
+  private static readonly SIDEWALK_ALBEDO: [number, number, number] = [0.3, 0.29, 0.27]
   /** What a contemporary road is drawn at, against a stated one's full presence — see the class
    * doc comment. Enough to place oneself by, not enough to be mistaken for what was there. */
   static readonly CONTEMPORARY_OPACITY = 0.45
@@ -85,6 +94,52 @@ export class RoadSystem {
       const mesh = this.meshOf(surface, batch, contemporary)
       if (mesh) this.surveyed.add(mesh)
     }
+    const pavements = this.sidewalks(ways, originLat, originLng, groundYAt)
+    if (pavements.indices.length > 0) {
+      const mesh = this.meshOf("paved", pavements, contemporary, RoadSystem.SIDEWALK_ALBEDO)
+      if (mesh) {
+        mesh.name = "roads sidewalks"
+        this.surveyed.add(mesh)
+      }
+    }
+  }
+
+  /**
+   * A pavement along each side of every urban street: its rungs are those of the street, offset past the carriageway's edge, and a rung that
+   * falls on another street's carriageway is left out, which leaves the gap a side street's mouth has between two pavements.
+   */
+  private sidewalks(ways: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt): { positions: number[]; indices: number[] } {
+    const batch = { positions: [] as number[], indices: [] as number[] }
+    const paths = ways.map(way => way.points.map(point => geoToLocalMeters(point.lat, point.lng, originLat, originLng)))
+    ways.forEach((way, at) => {
+      if (!way.urban || way.surface !== "paved" || way.widthM < RoadSystem.SIDEWALK_MIN_ROAD_M) return
+      const offset = way.widthM / 2 + RoadSystem.SIDEWALK_WIDTH_M / 2
+      for (const side of [1, -1]) {
+        this.appendPath(paths[at], RoadSystem.SIDEWALK_WIDTH_M, groundYAt, batch, {
+          offsetM: offset * side,
+          liftM: RoadSystem.LIFT_M + RoadSystem.SIDEWALK_KERB_M,
+          skip: (x, z) => RoadSystem.crossesAnother(x, z, at, ways, paths)
+        })
+      }
+    })
+    return batch
+  }
+
+  /** Whether a point lies on the carriageway of a street other than the one it belongs to. */
+  private static crossesAnother(x: number, z: number, own: number, ways: RoadWay[], paths: { x: number; z: number }[][]): boolean {
+    for (let w = 0; w < paths.length; w++) {
+      if (w === own) continue
+      const reach = ways[w].widthM / 2 + 0.3
+      const path = paths[w]
+      for (let i = 1; i < path.length; i++) {
+        const dx = path[i].x - path[i - 1].x
+        const dz = path[i].z - path[i - 1].z
+        const length2 = dx * dx + dz * dz
+        const t = length2 === 0 ? 0 : Math.max(0, Math.min(1, ((x - path[i - 1].x) * dx + (z - path[i - 1].z) * dz) / length2))
+        if (Math.hypot(x - (path[i - 1].x + dx * t), z - (path[i - 1].z + dz * t)) < reach) return true
+      }
+    }
+    return false
   }
 
   /**
@@ -143,11 +198,17 @@ export class RoadSystem {
   }
 
   /** One centre line, already in the patch's own metres, as a strip of quads — see appendRibbon. */
-  private appendPath(points: { x: number; z: number }[], widthM: number, groundYAt: GroundYAt, batch: { positions: number[]; indices: number[] }): void {
+  private appendPath(
+    points: { x: number; z: number }[], widthM: number, groundYAt: GroundYAt, batch: { positions: number[]; indices: number[] },
+    strip: { offsetM?: number, liftM?: number, skip?: (x: number, z: number) => boolean } = {}
+  ): void {
     const centre = this.resample(points)
     if (centre.length < 2) return
     const half = Math.max(0.5, widthM / 2)
+    const lift = strip.liftM ?? RoadSystem.LIFT_M
+    const offset = strip.offsetM ?? 0
     const base = batch.positions.length / 3
+    const kept: boolean[] = []
     for (let i = 0; i < centre.length; i++) {
       const before = centre[Math.max(0, i - 1)]
       const after = centre[Math.min(centre.length - 1, i + 1)]
@@ -158,27 +219,31 @@ export class RoadSystem {
       // Left of the direction of travel, on the ground plane.
       const nx = -dz * half
       const nz = dx * half
-      const left = { x: centre[i].x + nx, z: centre[i].z + nz }
-      const right = { x: centre[i].x - nx, z: centre[i].z - nz }
+      // The strip's own middle, a lateral offset to the left of the direction of travel.
+      const middle = { x: centre[i].x + (-dz) * offset, z: centre[i].z + dx * offset }
+      const left = { x: middle.x + nx, z: middle.z + nz }
+      const right = { x: middle.x - nx, z: middle.z - nz }
+      kept.push(!strip.skip?.(middle.x, middle.z))
       batch.positions.push(
-        left.x, groundYAt(left.x, left.z) + RoadSystem.LIFT_M, left.z,
-        right.x, groundYAt(right.x, right.z) + RoadSystem.LIFT_M, right.z
+        left.x, groundYAt(left.x, left.z) + lift, left.z,
+        right.x, groundYAt(right.x, right.z) + lift, right.z
       )
     }
     for (let i = 0; i < centre.length - 1; i++) {
+      if (!kept[i] || !kept[i + 1]) continue
       const a = base + i * 2
       batch.indices.push(a, a + 2, a + 1, a + 1, a + 2, a + 3)
     }
   }
 
   /** All the roads of one surface as a single mesh — see set. */
-  private meshOf(surface: RoadSurface, batch: { positions: number[]; indices: number[] }, contemporary: boolean): Mesh | undefined {
+  private meshOf(surface: RoadSurface, batch: { positions: number[]; indices: number[] }, contemporary: boolean, albedoOf?: [number, number, number]): Mesh | undefined {
     if (batch.indices.length === 0) return undefined
     const geometry = new BufferGeometry()
     geometry.setAttribute("position", new BufferAttribute(new Float32Array(batch.positions), 3))
     geometry.setIndex(new BufferAttribute(new Uint32Array(batch.indices), 1))
     geometry.computeVertexNormals()
-    const albedo = RoadSystem.ALBEDO[surface]
+    const albedo = albedoOf ?? RoadSystem.ALBEDO[surface]
     const material = new MeshLambertMaterial({
       color: new Color(albedo[0], albedo[1], albedo[2]),
       transparent: contemporary,
