@@ -26,9 +26,13 @@ Writes public/demo-data/observer-saint-lo.json. Run from the repository root:
 """
 import json
 import math
+import os
 import pathlib
 
-OUT = pathlib.Path("public/demo-data/observer-saint-lo.json")
+# A variant for trying another start without touching the published file: START_AZ=300 OUT_NAME=observer-saint-lo-wnw.json (see the call sheet of 2026-10-13,
+# where he says it came from the west-north-west rather than the north).
+START_AZ = float(os.environ.get("START_AZ", "0"))
+OUT = pathlib.Path("public/demo-data") / os.environ.get("OUT_NAME", "observer-saint-lo.json")
 SURROUNDINGS = pathlib.Path(__file__).with_name("surroundings.json")
 
 LAT, LNG = 49.104890, -1.075382       # the exact spot where he stood, a Google Maps link he sent (2026-10-12)
@@ -94,9 +98,10 @@ def to_azalt(v):
 # --- the path of the wing: a flight on the sphere of the sky, with turns -------------------------
 def fly(down_speed, turn_3_deg, until_ms=DURATION_MS, dt_ms=5):
     """Directions (az, alt) of the wing every `dt_ms`, from the first sight to `until_ms`."""
-    p = unit(0.0, START_ALT)
+    p = unit(START_AZ, START_ALT)
     h = math.radians(START_ALT)
-    t = (0.0, -math.sin(h), math.cos(h))     # towards the zenith
+    a = math.radians(START_AZ)
+    t = (-math.sin(h) * math.sin(a), -math.sin(h) * math.cos(a), math.cos(h))     # towards the zenith, along the meridian of the start
     turns = [TURN_1, TURN_2, (TURN_3_FROM, TURN_3_TO, turn_3_deg, +FROM_THE_CRAFT)]
     out = []
     for ms in range(0, until_ms + 1, dt_ms):
