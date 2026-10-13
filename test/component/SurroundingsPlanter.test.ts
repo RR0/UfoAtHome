@@ -308,4 +308,11 @@ describe("SurroundingsPlanter", () => {
     await second
     expect(rushed.busy.at(-1)).toBe("")
   })
+
+  it("plants a building with the facade the survey gave it", async () => {
+    const editor = new FakeEditor()
+    const survey = new FakeSurvey({ trees: [], buildings: [{ ...HOUSE, facade: { color: "#a65f48" } }], bridges: [], lines: [] })
+    await editor.planter(survey).survey(PLACE.lat, PLACE.lng)
+    expect(editor.decor[0].facade).toEqual({ color: "#a65f48" })
+  })
 })

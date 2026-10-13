@@ -138,7 +138,7 @@ export class IgnGeoplatform {
       this.features("construction_lineaire", `${within} AND nature='Pont'`, "nature,geometrie"),
       this.features("troncon_de_route", `${within} AND position_par_rapport_au_sol<>'0'`, "nature,largeur_de_chaussee,position_par_rapport_au_sol,nom_voie_ban_gauche,nom_voie_ban_droite,cpx_toponyme_route_nommee,geometrie"),
       this.features("ligne_electrique", within, "voltage,geometrie"),
-      withBuildings ? this.features("batiment", within, "hauteur,nombre_d_etages,geometrie", 2000) : Promise.resolve([]),
+      withBuildings ? this.features("batiment", within, "hauteur,nombre_d_etages,materiaux_des_murs,materiaux_de_la_toiture,geometrie", 2000) : Promise.resolve([]),
       // The names of the zones (a town hall, a post office, a square): a few, and a building takes the name of the one it stands in.
       withBuildings ? this.features("zone_d_activite_ou_d_interet", within, "toponyme,geometrie", 100).catch((): VectorFeature[] => []) : Promise.resolve([])
     ])

@@ -4,6 +4,7 @@ import { BuildingFootprints } from "../BuildingFootprints.js"
 import { CanopyCrowns } from "../CanopyCrowns.js"
 import { OverheadStructures } from "../OverheadStructures.js"
 import type { PlaceVectors } from "../OverheadStructures.js"
+import { BuildingMaterials } from "../BuildingMaterials.js"
 import { RoofShapes } from "../RoofShapes.js"
 import type { RoofPhoto } from "../RoofShapes.js"
 import { TopoBuildings } from "../TopoBuildings.js"
@@ -58,7 +59,7 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
 
   /** The roofs the laser and the photograph show: the laser only where it flew, which for a building farther than it was asked is nowhere. */
   private roofed(buildings: SurveyedBuilding[], grids: LidarGrids | undefined, photo: RoofPhoto | undefined): SurveyedBuilding[] {
-    return RoofShapes.fit(buildings, grids, photo)
+    return BuildingMaterials.fit(RoofShapes.fit(buildings, grids, photo))
   }
 
   private buildings(grids: LidarGrids | undefined, vectors: PlaceVectors | undefined, centre: { lat: number, lng: number }, radius: number) {

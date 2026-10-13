@@ -73,7 +73,7 @@ export class SurveyedDecor {
           headingDeg: building.headingDeg, lit: false,
           sizeM: { widthM: building.widthM, lengthM: building.lengthM, heightM: building.heightM },
           floors: building.floors ?? Math.max(1, Math.round((building.heightM - (building.roof?.riseM ?? 0)) / SurveyedDecor.FLOOR_HEIGHT_M)),
-          ...(building.roof ? { roof: building.roof } : {}), origin: providerId
+          ...(building.roof ? { roof: building.roof } : {}), ...(building.facade ? { facade: building.facade } : {}), origin: providerId
         })
       }
     }

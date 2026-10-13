@@ -1,4 +1,5 @@
 import type { DecorRoof } from "../../engine/model/Decor.js"
+import { BuildingMaterials } from "./BuildingMaterials.js"
 import type { SurveyedBuilding } from "./SurroundingsProvider.js"
 
 /** What the laser measured round a place: heights above the ground, and which pixels are plants. Row after row from the north-west. */
@@ -59,10 +60,11 @@ export class RoofShapes {
 
   /** The buildings as they are, each with the roof the surveys say, where they say one. */
   static fit(buildings: SurveyedBuilding[], laser: RoofHeights | undefined, photo: RoofPhoto | undefined): SurveyedBuilding[] {
-    if (!laser && !photo) return buildings
+    if (!laser && !photo && !buildings.some(building => building.roofMaterial)) return buildings
     return buildings.map(building => {
       const shape = laser ? RoofShapes.shapeOf(building, laser) : undefined
-      const color = photo ? RoofShapes.colorOf(building, photo) : undefined
+      // The photograph where there is one, else the material the map states.
+      const color = (photo ? RoofShapes.colorOf(building, photo) : undefined) ?? BuildingMaterials.roofColor(building.roofMaterial)
       if (!shape && !color) return building
       const roof: DecorRoof = { shape: shape?.shape ?? "flat", ...(shape?.ridge === "depth" ? { ridge: "depth" as const } : {}), riseM: shape?.riseM ?? 0, ...(color ? { color } : {}) }
       // The height to the ridge: what the laser saw, where the roof is pitched, since the outline's own height is for a box.

@@ -1,4 +1,4 @@
-import type { DecorRoof } from "../../engine/model/Decor.js"
+import type { DecorFacade, DecorRoof } from "../../engine/model/Decor.js"
 
 /** One tree, as a survey of the canopy saw it, in metres from the place asked about. */
 export interface SurveyedTree {
@@ -39,7 +39,16 @@ export interface SurveyedBuilding {
    * ridge, and the walls are `riseM` lower.
    */
   roof?: DecorRoof
+  /** What the walls look like (see Facades): their colour, from the material the survey states or from a typical one. */
+  facade?: DecorFacade
+  /** The material of the walls as the survey states it, where it does (see BuildingMaterials). */
+  wallMaterial?: BuildingMaterial
+  /** The material of the roof as the survey states it, where it does. */
+  roofMaterial?: BuildingMaterial
 }
+
+/** What the walls and the roofs of the buildings of a survey are made of, in the words this project draws them with. */
+export type BuildingMaterial = "stone" | "meuliere" | "concrete" | "brick" | "block" | "wood" | "tile" | "slate" | "zinc" | "other"
 
 /**
  * One road or rail bridge, as a survey drew its centre line: where its middle is, how long it runs, how wide the deck is and how high

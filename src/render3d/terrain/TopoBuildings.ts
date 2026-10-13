@@ -1,3 +1,4 @@
+import { BuildingMaterials } from "./BuildingMaterials.js"
 import { BuildingFootprints } from "./BuildingFootprints.js"
 import type { VectorFeature } from "./OverheadStructures.js"
 import type { SurveyedBuilding } from "./SurroundingsProvider.js"
@@ -34,7 +35,9 @@ export class TopoBuildings {
         : (Number.isFinite(floors) && floors > 0 ? floors * TopoBuildings.FLOOR_HEIGHT_M : TopoBuildings.DEFAULT_HEIGHT_M)
       for (const building of TopoBuildings.rectanglesOf(rings, height, minAreaM2)) {
         if (Math.hypot(building.eastM, building.northM) > radiusM) continue
-        found.push(Number.isFinite(floors) && floors > 0 ? { ...building, floors } : building)
+        const wallMaterial = BuildingMaterials.of(feature.properties.materiaux_des_murs, "wall")
+        const roofMaterial = BuildingMaterials.of(feature.properties.materiaux_de_la_toiture, "roof")
+        found.push({ ...building, ...(Number.isFinite(floors) && floors > 0 ? { floors } : {}), ...(wallMaterial ? { wallMaterial } : {}), ...(roofMaterial ? { roofMaterial } : {}) })
       }
     }
     found.sort((a, b) => Math.hypot(a.eastM, a.northM) - Math.hypot(b.eastM, b.northM))

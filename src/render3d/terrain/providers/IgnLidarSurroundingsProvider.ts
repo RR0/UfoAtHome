@@ -2,6 +2,7 @@ import type { Surroundings, SurroundingsProvider } from "../SurroundingsProvider
 import { SurroundingsUnavailableError } from "../SurroundingsProvider.js"
 import { BuildingFootprints } from "../BuildingFootprints.js"
 import { CanopyCrowns } from "../CanopyCrowns.js"
+import { BuildingMaterials } from "../BuildingMaterials.js"
 import { RoofShapes } from "../RoofShapes.js"
 import { OsmStreetLamps } from "./OsmStreetLamps.js"
 import { IgnGeoplatform } from "./IgnGeoplatform.js"
@@ -43,9 +44,9 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
     const [grids, photo, lamps] = await Promise.all([this.platform.lidar(centre, radius), this.platform.photo(centre, radius).catch(() => undefined), this.lamps?.near(centre, radiusM)])
     return {
       trees: new CanopyCrowns(grids.heights, grids.vegetation, grids.size, grids.size).trees({ metresPerPixel: grids.metresPerPixel, radiusM: radius }),
-      buildings: RoofShapes.fit(
+      buildings: BuildingMaterials.fit(RoofShapes.fit(
         new BuildingFootprints(grids.heights, grids.building, grids.size, grids.size).buildings({ metresPerPixel: grids.metresPerPixel, radiusM: radius, maxBuildings: 300 }),
-        grids, photo),
+        grids, photo)),
       bridges: [],
       lines: [],
       ...(lamps ? { lamps } : {})

@@ -636,3 +636,26 @@ describe("DecorSystem building roofs", () => {
     expect(roofOf(group)!.position.y).toBeGreaterThanOrEqual(3)
   })
 })
+
+describe("DecorSystem building facades", () => {
+  const sized = { widthM: 12, lengthM: 8, heightM: 11 }
+
+  it("draws the walls at the stated size, unstretched, with the colour of the facade over a picture of windows", () => {
+    const group = DecorSystem.build(building({ sizeM: sized, facade: { color: "#a65f48" }, roof: { shape: "gable", riseM: 3 } }), false)
+    const body = DecorSystem.bodyOf(group)
+    expect(body.scale.toArray()).toEqual([1, 1, 1])
+    const walls = new Box3().setFromObject(body)
+    expect(walls.max.y).toBeCloseTo(8)
+    expect(walls.max.x - walls.min.x).toBeCloseTo(12)
+    const wall = body.children[0] as Mesh
+    expect(wall.material).toBeInstanceOf(MeshLambertMaterial)
+    expect((wall.material as MeshLambertMaterial).map).not.toBeNull()
+    expect((wall.material as MeshLambertMaterial).color.getHexString()).toBe(new Color("#a65f48").getHexString())
+  })
+
+  it("keeps the box for a building with no facade, with no stated size, or with an observer inside", () => {
+    expect((DecorSystem.bodyOf(DecorSystem.build(building({ sizeM: sized }), false)).children[0] as Mesh).geometry).toBeInstanceOf(BoxGeometry)
+    expect((DecorSystem.bodyOf(DecorSystem.build(building({ facade: { color: "#ffffff" } }), false)).children[0] as Mesh).geometry).toBeInstanceOf(BoxGeometry)
+    expect((DecorSystem.bodyOf(DecorSystem.build(building({ sizeM: sized, facade: { color: "#ffffff" }, observerSide: "front" }), false)).children[0] as Mesh).geometry).toBeInstanceOf(BoxGeometry)
+  })
+})

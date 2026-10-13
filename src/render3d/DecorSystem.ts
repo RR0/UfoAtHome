@@ -9,6 +9,8 @@ import { canHoldObserver, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, li
 import type { RgbColor } from "./skyColors.js"
 import { BridgeGeometry } from "./BridgeGeometry.js"
 import { RoofGeometry } from "./RoofGeometry.js"
+import { FacadeGeometry } from "./FacadeGeometry.js"
+import { FacadeTexture } from "./FacadeTexture.js"
 import { WireGeometry } from "./WireGeometry.js"
 import { DryStoneWall } from "./DryStoneWall.js"
 
@@ -1106,9 +1108,31 @@ export class DecorSystem {
 
   static readonly ROOF_NAME = "decor-roof"
 
+  /** Whether the walls of this building are drawn from its facade (see DecorFacade) at the size it states, never stretched: a stated size, no observer inside. */
+  private static hasFacade(object: DecorObject): boolean {
+    return object.kind === "building" && object.facade !== undefined && !object.observerSide
+      && object.sizeM?.widthM !== undefined && object.sizeM.lengthM !== undefined && object.sizeM.heightM !== undefined
+  }
+
+  /** The walls of a building with a facade: one mesh at its real size, whose colour is the wall's and whose picture is the windows and the door. */
+  private static buildFacade(object: DecorObject): Group {
+    const group = new Group()
+    const size = DecorSystem.sizeOf(object)
+    const facade = object.facade!
+    const geometry = FacadeGeometry.build(size.widthM, size.lengthM, DecorSystem.wallHeightOf(object, size.heightM), facade.openings !== false)
+    const material = new MeshLambertMaterial({ color: new Color(facade.color), map: FacadeTexture.texture() })
+    const mesh = new Mesh(geometry, material)
+    mesh.castShadow = true
+    mesh.receiveShadow = true
+    group.add(mesh)
+    return group
+  }
+
   static build(object: DecorObject, lit: boolean): Group {
     const body =
-      object.kind === "building"
+      DecorSystem.hasFacade(object)
+        ? DecorSystem.buildFacade(object)
+        : object.kind === "building"
         ? buildBuilding(object.floors ?? DEFAULT_BUILDING_FLOORS, object.windows, object.observerSide, object.occupiedFloor, object.observerFacing)
         : object.kind === "tree"
           ? buildTree()
@@ -1170,7 +1194,7 @@ export class DecorSystem {
   private static scaleFor(object: DecorObject): Vector3 {
     const size = object.sizeM
     // A bridge is built at its own size already: stretching it would turn its posts into planks.
-    if (!size || object.kind === "bridge" || object.kind === "wire" || object.kind === "terrace" || object.kind === "wall") return new Vector3(1, 1, 1)
+    if (!size || DecorSystem.hasFacade(object) || object.kind === "bridge" || object.kind === "wire" || object.kind === "terrace" || object.kind === "wall") return new Vector3(1, 1, 1)
     const natural = this.naturalSize(object.kind, object.floors)
     // Axis by axis, because a size is allowed to be partial: an axis nobody measured keeps the
     // built-in shape's own proportion rather than being invented to match the ones that were.

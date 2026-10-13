@@ -387,6 +387,14 @@ export interface DecorRoof {
   color?: string
 }
 
+/** What the walls of a building look like: their colour, and whether windows and a door are drawn on them. */
+export interface DecorFacade {
+  /** The colour of the wall, "#rrggbb": plaster, stone, brick. The roof has its own (see DecorRoof). */
+  color: string
+  /** Windows on every floor and a door on the ground floor of one side. Absent is true: a wall without them is a wall nobody lived behind. */
+  openings?: boolean
+}
+
 export interface DecorObject {
   id: string
   kind: DecorKind
@@ -493,6 +501,8 @@ export interface DecorObject {
    * makes none (a glider's cousin, a stand-in for something nobody heard). Absent means what its model says, else an airliner's:
    * like a vehicle's engine, an aircraft in flight is not silent unless someone said so. Ignored for every other kind. */
   aircraftSound?: AircraftKind | "silent"
+  /** Kind "building" only: the colour of its walls, and the windows and door drawn on them. Absent is the grey box a building was before this existed. */
+  facade?: DecorFacade
   /** Kind "building" only: the shape and colour of its roof. Absent is a flat roof the colour of the walls, which is what a building was before this existed. */
   roof?: DecorRoof
   /** Kind "bridge" only: how it is built, where that is known — see BridgeStructure. Absent means

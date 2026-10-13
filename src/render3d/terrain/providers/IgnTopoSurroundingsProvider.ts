@@ -1,6 +1,7 @@
 import type { Surroundings, SurroundingsProvider } from "../SurroundingsProvider.js"
 import { SurroundingsUnavailableError } from "../SurroundingsProvider.js"
 import { OverheadStructures } from "../OverheadStructures.js"
+import { BuildingMaterials } from "../BuildingMaterials.js"
 import { RoofShapes } from "../RoofShapes.js"
 import { TopoBuildings } from "../TopoBuildings.js"
 import { OsmStreetLamps } from "./OsmStreetLamps.js"
@@ -42,7 +43,7 @@ export class IgnTopoSurroundingsProvider implements SurroundingsProvider {
     const [vectors, photo, lamps] = await Promise.all([this.platform.vectors(centre, radius, true), this.platform.photo(centre, radius).catch(() => undefined), this.lamps?.near(centre, radiusM)])
     return {
       trees: [],
-      buildings: RoofShapes.fit(TopoBuildings.named(TopoBuildings.buildings(vectors.buildings, centre, radius), vectors.zones, centre), undefined, photo),
+      buildings: BuildingMaterials.fit(RoofShapes.fit(TopoBuildings.named(TopoBuildings.buildings(vectors.buildings, centre, radius), vectors.zones, centre), undefined, photo)),
       bridges: OverheadStructures.bridges(vectors, centre, radius, undefined),
       lines: OverheadStructures.lines(vectors, centre, radius, undefined),
       ...(lamps ? { lamps } : {})

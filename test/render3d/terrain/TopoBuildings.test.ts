@@ -97,4 +97,14 @@ describe("TopoBuildings", () => {
     ], CENTRE, 100)
     expect(found.map(building => Math.round(building.eastM))).toEqual([25, 65])
   })
+
+  it("reads the materials of the walls and of the roof from the map's codes, and says nothing where it states none", () => {
+    const [stated, bare] = TopoBuildings.buildings([
+      polygon({ hauteur: 7, materiaux_des_murs: "34", materiaux_de_la_toiture: "20" }, [[-8, 5], [0, 5], [0, 15], [-8, 15]]),
+      polygon({ hauteur: 7, materiaux_des_murs: "00", materiaux_de_la_toiture: "" }, [[10, 5], [18, 5], [18, 15], [10, 15]])
+    ], CENTRE, 100).sort((a, b) => a.eastM - b.eastM)
+    expect(stated).toMatchObject({ wallMaterial: "brick", roofMaterial: "slate" })
+    expect(bare.wallMaterial).toBeUndefined()
+    expect(bare.roofMaterial).toBeUndefined()
+  })
 })
