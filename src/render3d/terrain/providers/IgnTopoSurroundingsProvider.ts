@@ -1,6 +1,7 @@
 import type { Surroundings, SurroundingsProvider } from "../SurroundingsProvider.js"
 import { SurroundingsUnavailableError } from "../SurroundingsProvider.js"
 import { OverheadStructures } from "../OverheadStructures.js"
+import { RoofShapes } from "../RoofShapes.js"
 import { TopoBuildings } from "../TopoBuildings.js"
 import { IgnGeoplatform } from "./IgnGeoplatform.js"
 import type { IgnGeoplatformOptions } from "./IgnGeoplatform.js"
@@ -34,10 +35,10 @@ export class IgnTopoSurroundingsProvider implements SurroundingsProvider {
   async getSurroundings(centre: { lat: number, lng: number }, radiusM: number): Promise<Surroundings> {
     if (!this.covers(centre.lat, centre.lng)) throw new SurroundingsUnavailableError("no-coverage", "BD TOPO covers France only")
     const radius = IgnGeoplatform.radius(radiusM)
-    const vectors = await this.platform.vectors(centre, radius, true)
+    const [vectors, photo] = await Promise.all([this.platform.vectors(centre, radius, true), this.platform.photo(centre, radius).catch(() => undefined)])
     return {
       trees: [],
-      buildings: TopoBuildings.named(TopoBuildings.buildings(vectors.buildings, centre, radius), vectors.zones, centre),
+      buildings: RoofShapes.fit(TopoBuildings.named(TopoBuildings.buildings(vectors.buildings, centre, radius), vectors.zones, centre), undefined, photo),
       bridges: OverheadStructures.bridges(vectors, centre, radius, undefined),
       lines: OverheadStructures.lines(vectors, centre, radius, undefined)
     }

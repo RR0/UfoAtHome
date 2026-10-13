@@ -8,6 +8,7 @@ import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, Measured
 import { canHoldObserver, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
 import { BridgeGeometry } from "./BridgeGeometry.js"
+import { RoofGeometry } from "./RoofGeometry.js"
 import { WireGeometry } from "./WireGeometry.js"
 import { DryStoneWall } from "./DryStoneWall.js"
 
@@ -1077,6 +1078,34 @@ export class DecorSystem {
     })
   }
 
+  /** The roof stands on the walls at their stated height, at its own size, and keeps its own colour (see DecorRoof). */
+  private static addRoof(group: Group, object: DecorObject): void {
+    const roof = object.roof!
+    const size = DecorSystem.sizeOf(object)
+    const walls = DecorSystem.wallHeightOf(object, size.heightM)
+    const rgb = DecorSystem.roofColor(roof.color)
+    const mesh = addPart(group, RoofGeometry.build(roof, size.widthM, size.lengthM), rgb, walls)
+    // Seen from below too: the pitched sides are single faces, and a roof is the one part of a building a low observer looks up at.
+    ;(mesh.material as MeshLambertMaterial).side = DoubleSide
+    mesh.name = DecorSystem.ROOF_NAME
+  }
+
+  /** The walls' height: the stated one less the rise of the roof, never under one storey. */
+  private static wallHeightOf(object: DecorObject, heightM: number): number {
+    return Math.max(BUILDING_FLOOR_HEIGHT, heightM - (object.roof?.riseM ?? 0))
+  }
+
+  /** A roof's own colour as the linear-ish triple a part is built from, tile red by default: a roof nobody measured is not the colour of its walls. */
+  private static roofColor(color: string | undefined): RgbColor {
+    const hex = /^#([0-9a-f]{6})$/i.exec(color ?? "")?.[1]
+    if (!hex) return [0.45, 0.25, 0.2]
+    // Read as the sRGB it is written in: a part's colour is in the renderer's own (linear) space.
+    const linear = new Color(`#${hex}`)
+    return [linear.r, linear.g, linear.b]
+  }
+
+  static readonly ROOF_NAME = "decor-roof"
+
   static build(object: DecorObject, lit: boolean): Group {
     const body =
       object.kind === "building"
@@ -1114,6 +1143,7 @@ export class DecorSystem {
     if (object.color) this.paint(body, object.color)
     const scale = this.scaleFor(object)
     const group = new Group()
+    if (object.kind === "building" && object.roof) this.addRoof(group, object)
     body.name = DecorSystem.BODY_NAME
     // The body is scaled inside a group that ISN'T, so a lamp added below keeps both its real size
     // and its real offset (see addLights): DecorLight.offsetM is already in meters on the real
@@ -1146,7 +1176,7 @@ export class DecorSystem {
     // built-in shape's own proportion rather than being invented to match the ones that were.
     return new Vector3(
       size.widthM === undefined ? 1 : ratio(size.widthM, natural.widthM),
-      size.heightM === undefined ? 1 : ratio(size.heightM, natural.heightM),
+      size.heightM === undefined ? 1 : ratio(object.kind === "building" ? this.wallHeightOf(object, size.heightM) : size.heightM, natural.heightM),
       size.lengthM === undefined ? 1 : ratio(size.lengthM, natural.lengthM)
     )
   }

@@ -2,6 +2,7 @@ import { SurroundingsUnavailableError } from "../SurroundingsProvider.js"
 import { HeightGrid } from "../OverheadStructures.js"
 import type { PlaceVectors, VectorFeature } from "../OverheadStructures.js"
 import { GeoTiffRaster } from "../GeoTiffRaster.js"
+import type { RoofPhoto } from "../RoofShapes.js"
 
 export interface IgnGeoplatformOptions {
   fetchImpl?: typeof fetch
@@ -41,6 +42,9 @@ export class IgnGeoplatform {
   private static readonly WFS = "https://data.geopf.fr/wfs/ows"
   private static readonly HEIGHT_LAYER = "IGNF_LIDAR-HD_MNH_ELEVATION.ELEVATIONGRIDCOVERAGE.LAMB93"
   private static readonly CLASS_LAYER = "IGNF_LIDAR-HD_CLASS"
+  private static readonly PHOTO_LAYER = "ORTHOIMAGERY.ORTHOPHOTOS"
+  /** The photograph is asked for at half a metre a pixel, and no more than this many pixels on a side: a roof is wide, and a far one need not be sharp. */
+  private static readonly MAX_PHOTO_PIXELS = 1000
   private static readonly METRES_PER_PIXEL = 0.5
   /** The map is asked in small filtered questions, so a far horizon costs a few more kilobytes: three kilometres at most. */
   static readonly MAX_RADIUS_M = 3000
@@ -104,6 +108,18 @@ export class IgnGeoplatform {
     }
     const metresPerPixel = 2 * radius / size
     return { size, metresPerPixel, heights: grid, vegetation, building, structures: new HeightGrid(grid, vegetation, building, size, metresPerPixel) }
+  }
+
+  /**
+   * The aerial photograph of the square round a place, for the colour of roofs (see RoofShapes). A failure is not the end of a survey: the roofs
+   * are the colour of the walls then, as they were.
+   */
+  async photo(centre: { lat: number, lng: number }, radiusM: number): Promise<RoofPhoto> {
+    const radius = IgnGeoplatform.radius(radiusM)
+    const size = Math.min(IgnGeoplatform.MAX_PHOTO_PIXELS, Math.ceil(2 * radius / IgnGeoplatform.METRES_PER_PIXEL))
+    const raster = await this.raster(centre, radius, size, IgnGeoplatform.PHOTO_LAYER)
+    if (raster.samples < 3) throw new SurroundingsUnavailableError("unreachable", "The photograph came in a layout this does not read")
+    return { size, metresPerPixel: 2 * radius / size, samples: raster.samples, values: raster.values }
   }
 
   /**

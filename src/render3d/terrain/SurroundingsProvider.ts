@@ -1,3 +1,5 @@
+import type { DecorRoof } from "../../engine/model/Decor.js"
+
 /** One tree, as a survey of the canopy saw it, in metres from the place asked about. */
 export interface SurveyedTree {
   /** Metres east of the centre asked about, west being negative. */
@@ -32,6 +34,11 @@ export interface SurveyedBuilding {
   floors?: number
   /** What the survey calls it, where it is named ("Mairie de Saint-Lô"): most buildings are not. */
   name?: string
+  /**
+   * The shape and colour of its roof, where the laser and the aerial photograph could say (see RoofShapes). When it is set `heightM` is to the
+   * ridge, and the walls are `riseM` lower.
+   */
+  roof?: DecorRoof
 }
 
 /**

@@ -29,9 +29,23 @@ describe("IgnTopoSurroundingsProvider (the map alone)", () => {
     const fetchImpl = new Survey(40).fetch()
     await new IgnTopoSurroundingsProvider({ fetchImpl }).getSurroundings(SAINT_LO, 40)
     const asked = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => new URL(String(call[0])).searchParams.get("SERVICE"))
-    expect(new Set(asked)).toEqual(new Set(["WFS"]))
-    const layers = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => new URL(String(call[0])).searchParams.get("TYPENAMES")).sort()
+    // The map, and the aerial photograph for the colour of the roofs: never the laser.
+    expect(new Set(asked)).toEqual(new Set(["WFS", "WMS"]))
+    const photographed = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => new URL(String(call[0])).searchParams.get("LAYERS")).filter(Boolean)
+    expect(photographed).toEqual(["ORTHOIMAGERY.ORTHOPHOTOS"])
+    const layers = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => new URL(String(call[0])).searchParams.get("TYPENAMES")).filter(Boolean).sort()
     expect(layers).toEqual(["BDTOPO_V3:batiment", "BDTOPO_V3:construction_lineaire", "BDTOPO_V3:ligne_electrique", "BDTOPO_V3:troncon_de_route", "BDTOPO_V3:zone_d_activite_ou_d_interet"])
+  })
+
+  it("colours each roof from the aerial photograph, and leaves the buildings as they were when it does not answer", async () => {
+    const survey = new Survey(40)
+    survey.vectors = { batiment: TWO_HOUSES }
+    const [house] = (await new IgnTopoSurroundingsProvider({ fetchImpl: survey.fetch() }).getSurroundings(SAINT_LO, 40)).buildings
+    expect(house.roof).toEqual({ shape: "flat", riseM: 0, color: "#717684" })
+    survey.photoDown = true
+    const [bare] = (await new IgnTopoSurroundingsProvider({ fetchImpl: survey.fetch() }).getSurroundings(SAINT_LO, 40)).buildings
+    expect(bare.roof).toBeUndefined()
+    expect(bare.heightM).toBeGreaterThan(0)
   })
 
   it("draws bridges and lines at their ordinary heights where no laser measured them", async () => {

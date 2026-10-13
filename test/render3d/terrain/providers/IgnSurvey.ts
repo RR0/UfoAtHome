@@ -16,6 +16,10 @@ export class Survey {
   vectors: Vectors = {}
   /** The map does not answer. */
   mapDown = false
+  /** The aerial photograph does not answer. */
+  photoDown = false
+  /** What the aerial photograph shows everywhere: a roof of slate. */
+  photo = [96, 100, 112, 255]
 
   constructor(readonly size: number, fill = 0) {
     this.heights = new Array(size * size).fill(fill)
@@ -43,6 +47,12 @@ export class Survey {
         return { ok: true, status: 200, json: async () => ({ features: this.vectors[layer] ?? [] }) } as Response
       }
       const layer = parameters.get("LAYERS") ?? ""
+      if (layer.includes("ORTHO")) {
+        // A photograph comes in the size it is asked for, unlike the laser squares of this survey, which are the size it was made with.
+        const asked = Number(parameters.get("WIDTH"))
+        if (this.photoDown) return { ok: false, status: 503, arrayBuffer: async () => new ArrayBuffer(0) } as Response
+        return { ok: true, status: 200, arrayBuffer: async () => TiffFixture.bytes(asked, asked, 4, new Array(asked * asked).fill(0).flatMap(() => this.photo)) } as Response
+      }
       const body = layer.includes("CLASS") ? TiffFixture.bytes(this.size, this.size, 4, this.pictures) : TiffFixture.floats(this.size, this.size, this.heights)
       return { ok: true, status: 200, arrayBuffer: async () => body } as Response
     }) as unknown as typeof fetch

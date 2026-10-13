@@ -2,6 +2,7 @@ import type { Surroundings, SurroundingsProvider } from "../SurroundingsProvider
 import { SurroundingsUnavailableError } from "../SurroundingsProvider.js"
 import { BuildingFootprints } from "../BuildingFootprints.js"
 import { CanopyCrowns } from "../CanopyCrowns.js"
+import { RoofShapes } from "../RoofShapes.js"
 import { IgnGeoplatform } from "./IgnGeoplatform.js"
 import type { IgnGeoplatformOptions } from "./IgnGeoplatform.js"
 
@@ -35,10 +36,12 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
   async getSurroundings(centre: { lat: number, lng: number }, radiusM: number): Promise<Surroundings> {
     if (!this.covers(centre.lat, centre.lng)) throw new SurroundingsUnavailableError("no-coverage", "The LiDAR HD survey covers France only")
     const radius = IgnGeoplatform.lidarRadius(radiusM)
-    const grids = await this.platform.lidar(centre, radius)
+    const [grids, photo] = await Promise.all([this.platform.lidar(centre, radius), this.platform.photo(centre, radius).catch(() => undefined)])
     return {
       trees: new CanopyCrowns(grids.heights, grids.vegetation, grids.size, grids.size).trees({ metresPerPixel: grids.metresPerPixel, radiusM: radius }),
-      buildings: new BuildingFootprints(grids.heights, grids.building, grids.size, grids.size).buildings({ metresPerPixel: grids.metresPerPixel, radiusM: radius, maxBuildings: 300 }),
+      buildings: RoofShapes.fit(
+        new BuildingFootprints(grids.heights, grids.building, grids.size, grids.size).buildings({ metresPerPixel: grids.metresPerPixel, radiusM: radius, maxBuildings: 300 }),
+        grids, photo),
       bridges: [],
       lines: []
     }

@@ -1,6 +1,6 @@
 import { LightRigs } from "../../src/engine/model/LightRig.js"
 import { describe, expect, it } from "vitest"
-import { AdditiveBlending, Box3, BoxGeometry, Color, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, Vector3, type Object3D } from "three"
+import { AdditiveBlending, Box3, BoxGeometry, Color, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshStandardMaterial, Vector3, type Object3D } from "three"
 import { DecorSystem } from "../../src/render3d/DecorSystem.js"
 import type { DecorObject } from "../../src/engine/model/Decor.js"
 
@@ -604,3 +604,35 @@ describe("DecorSystem.applyModelParameters: a switch a model publishes shows or 
   })
 })
 
+
+describe("DecorSystem building roofs", () => {
+  const roofOf = (group: Object3D): Mesh | undefined => group.getObjectByName(DecorSystem.ROOF_NAME) as Mesh | undefined
+  const sized = { widthM: 12, lengthM: 8, heightM: 11 }
+
+  it("adds no roof to a building that states none: a box, as it was", () => {
+    expect(roofOf(DecorSystem.build(building({ sizeM: sized }), false))).toBeUndefined()
+  })
+
+  it("stands a pitched roof on walls that are the stated height less its rise, up to the ridge", () => {
+    const group = DecorSystem.build(building({ sizeM: sized, roof: { shape: "gable", riseM: 3, color: "#808080" } }), false)
+    const roof = roofOf(group)!
+    expect(roof.position.y).toBeCloseTo(8)
+    const walls = new Box3().setFromObject(DecorSystem.bodyOf(group))
+    expect(walls.max.y).toBeCloseTo(8)
+    const whole = new Box3().setFromObject(group)
+    expect(whole.max.y).toBeCloseTo(11)
+  })
+
+  it("gives the roof its own colour, read as the sRGB it is written in, and leaves the walls theirs", () => {
+    const group = DecorSystem.build(building({ sizeM: sized, roof: { shape: "flat", riseM: 0, color: "#ff0000" } }), false)
+    const roof = roofOf(group)!
+    expect(new Color().copy((roof.material as MeshLambertMaterial).color).getHexString()).toBe("ff0000")
+    const wall = DecorSystem.bodyOf(group).children[0] as Mesh
+    expect((wall.material as MeshLambertMaterial).color.getHexString()).not.toBe("ff0000")
+  })
+
+  it("never lets the walls fall under one storey, whatever rise it is told", () => {
+    const group = DecorSystem.build(building({ sizeM: { widthM: 6, lengthM: 6, heightM: 4 }, roof: { shape: "gable", riseM: 3.9 } }), false)
+    expect(roofOf(group)!.position.y).toBeGreaterThanOrEqual(3)
+  })
+})

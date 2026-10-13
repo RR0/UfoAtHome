@@ -71,7 +71,8 @@ export class SurveyedDecor {
           id: nextId(), kind: "building", title: titled("building", building.name), eastM: building.eastM, northM: building.northM,
           headingDeg: building.headingDeg, lit: false,
           sizeM: { widthM: building.widthM, lengthM: building.lengthM, heightM: building.heightM },
-          floors: building.floors ?? Math.max(1, Math.round(building.heightM / SurveyedDecor.FLOOR_HEIGHT_M)), origin: providerId
+          floors: building.floors ?? Math.max(1, Math.round((building.heightM - (building.roof?.riseM ?? 0)) / SurveyedDecor.FLOOR_HEIGHT_M)),
+          ...(building.roof ? { roof: building.roof } : {}), origin: providerId
         })
       }
     }

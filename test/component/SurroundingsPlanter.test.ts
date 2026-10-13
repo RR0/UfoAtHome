@@ -261,4 +261,15 @@ describe("SurroundingsPlanter", () => {
     await new Promise(resolve => setTimeout(resolve, 40))
     expect(survey.asked).toHaveLength(2)
   })
+
+  it("plants a building with the roof the survey read, and counts its floors from the walls under it", async () => {
+    const editor = new FakeEditor()
+    const roofed = { ...HOUSE, heightM: 10, roof: { shape: "gable" as const, riseM: 3, color: "#717684" } }
+    const survey = new FakeSurvey({ trees: [], buildings: [roofed], bridges: [], lines: [] })
+    await editor.planter(survey).survey(PLACE.lat, PLACE.lng)
+    const [house] = editor.decor
+    expect(house.roof).toEqual(roofed.roof)
+    expect(house.sizeM?.heightM).toBe(10)
+    expect(house.floors).toBe(2)
+  })
 })

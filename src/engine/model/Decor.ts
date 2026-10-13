@@ -375,6 +375,18 @@ export interface DecorLight {
   pattern: LightPattern
 }
 
+/** What a building's roof is: the plain box a building is drawn as has a flat one. */
+export interface DecorRoof {
+  /** "flat" is the box; "gable" rises to a ridge along the building's longer side; "hip" slopes down on all four. */
+  shape: "flat" | "gable" | "hip"
+  /** Which side of the building a gable's ridge runs along: "width" (the longer side, the default) or "depth". Ignored for the other shapes. */
+  ridge?: "width" | "depth"
+  /** How far the ridge stands above the eaves, metres. `sizeM.heightM` is the height to the ridge, so the walls are that less. Zero for a flat roof. */
+  riseM: number
+  /** The colour of the roof seen from above, "#rrggbb", where it was measured (see RoofShapes): the walls keep their own. */
+  color?: string
+}
+
 export interface DecorObject {
   id: string
   kind: DecorKind
@@ -481,6 +493,8 @@ export interface DecorObject {
    * makes none (a glider's cousin, a stand-in for something nobody heard). Absent means what its model says, else an airliner's:
    * like a vehicle's engine, an aircraft in flight is not silent unless someone said so. Ignored for every other kind. */
   aircraftSound?: AircraftKind | "silent"
+  /** Kind "building" only: the shape and colour of its roof. Absent is a flat roof the colour of the walls, which is what a building was before this existed. */
+  roof?: DecorRoof
   /** Kind "bridge" only: how it is built, where that is known — see BridgeStructure. Absent means
    * the defaults, which are those of an ordinary French overpass. Ignored for every other kind. */
   bridge?: BridgeStructure

@@ -8,7 +8,7 @@ describe("IgnLidarSurroundingsProvider (the laser alone)", () => {
   it("asks for the height model and the classification of the same square, latitude first", async () => {
     const fetchImpl = new Survey(40).fetch()
     await new IgnLidarSurroundingsProvider({ fetchImpl }).getSurroundings(SAINT_LO, 10)
-    const urls = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => new URL(String(call[0]))).filter(url => url.searchParams.get("SERVICE") === "WMS")
+    const urls = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => new URL(String(call[0]))).filter(url => url.searchParams.get("SERVICE") === "WMS" && url.searchParams.get("LAYERS")!.includes("LIDAR"))
     expect(urls.map(url => url.searchParams.get("LAYERS")).sort()).toEqual(["IGNF_LIDAR-HD_CLASS", "IGNF_LIDAR-HD_MNH_ELEVATION.ELEVATIONGRIDCOVERAGE.LAMB93"])
     expect(urls[0].searchParams.get("BBOX")).toBe(urls[1].searchParams.get("BBOX"))
     const [south, west, north, east] = urls[0].searchParams.get("BBOX")!.split(",").map(Number)
