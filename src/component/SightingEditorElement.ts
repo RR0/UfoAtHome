@@ -1326,7 +1326,10 @@ export class SightingEditorElement extends HTMLElement {
       setDecor: decor => this.setPlantedDecor(decor),
       kindName: kind => this.decorList.kindLabel(kind),
       cite: source => this.citeSource(source),
-      busy: (on, label) => this.sceneElement.setBusy(on, label)
+      busy: (on, label) => this.sceneElement.setBusy(on, label),
+      track: () => this.ufoElement.sighting.observerTrack.toJSON().keyframes
+        .map(keyframe => ({ lat: keyframe.pose.lat, lng: keyframe.pose.lng }))
+        .filter((point): point is { lat: number, lng: number } => typeof point.lat === "number" && typeof point.lng === "number")
     }, sightingEditorMessages_en,
     async (lat, lng) => this.surroundingsProvider
       ? (this.surroundingsProvider.covers(lat, lng) ? this.surroundingsProvider : undefined)

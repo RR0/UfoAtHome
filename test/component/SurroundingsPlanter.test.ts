@@ -41,8 +41,12 @@ class FakeEditor {
   /** What the reader was told about waiting, in order: the label while it waits, empty when it is over. */
   readonly busy: string[] = []
 
+  /** Where the observer goes after the place he starts from, if he moves. */
+  path: { lat: number, lng: number }[] = []
+
   planter(survey: SurroundingsProvider | undefined): SurroundingsPlanter {
     return new SurroundingsPlanter(this.status, {
+      track: () => this.path,
       decor: () => this.decor,
       setDecor: decor => { this.decor = decor },
       kindName: kind => kind,
@@ -327,5 +331,19 @@ describe("SurroundingsPlanter", () => {
     expect(dated).toEqual({ tree: "2022-10-07", building: "2026-05-23", streetlight: "2026-10-13" })
     expect(editor.status.textContent).toContain(`${sightingEditorMessages_en.surveyLaserLabel} 2022-10-07`)
     expect(editor.status.textContent).toContain(`${sightingEditorMessages_en.surveyPhotoLabel} 2026-05-23`)
+  })
+
+  it("asks round each place the observer goes through and not only the one he sets off from, and once for one who stays", async () => {
+    const editor = new FakeEditor()
+    const survey = new FakeSurvey(Scene.of([OAK]))
+    editor.path = [{ lat: PLACE.lat, lng: PLACE.lng }, { lat: PLACE.lat + 0.01, lng: PLACE.lng }]
+    await editor.planter(survey).survey(PLACE.lat, PLACE.lng)
+    expect(survey.asked.length).toBeGreaterThan(1)
+    expect(Math.max(...survey.asked.map(ask => ask.centre.lat))).toBeCloseTo(PLACE.lat + 0.01)
+    const still = new FakeEditor()
+    const staying = new FakeSurvey(Scene.of([OAK]))
+    still.path = [{ lat: PLACE.lat, lng: PLACE.lng }, { lat: PLACE.lat, lng: PLACE.lng }]
+    await still.planter(staying).survey(PLACE.lat, PLACE.lng)
+    expect(staying.asked).toHaveLength(1)
   })
 })

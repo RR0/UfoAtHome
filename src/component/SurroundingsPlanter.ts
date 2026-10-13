@@ -1,6 +1,7 @@
 import type { DecorObject } from "../engine/model/Decor.js"
 import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import type { Surroundings, SurroundingsProvider } from "../render3d/terrain/SurroundingsProvider.js"
+import { SurroundingsCorridor } from "../render3d/terrain/SurroundingsCorridor.js"
 import { SurveyedDecor } from "../render3d/terrain/SurveyedDecor.js"
 import type { SurveyedKind } from "../render3d/terrain/SurveyedDecor.js"
 import { SurroundingsUnavailableError } from "../render3d/terrain/SurroundingsProvider.js"
@@ -14,6 +15,8 @@ export interface SurroundingsPlanterHost {
   setDecor(decor: DecorObject[]): void
   /** What a kind of decor is called, in the language of the editor: "Tree", "Bridge", "Overhead line". */
   kindName(kind: SurveyedKind): string
+  /** The places the observer goes through, in order, if they move: the survey is asked round each of them, and not only round where they set off. */
+  track?(): readonly { lat: number, lng: number }[]
   /** Tells the reader the scenery is being looked up (true, with what to say) or is not any more (false): a spinner over the picture. */
   busy(on: boolean, label: string): void
   /** Says where the scenery came from, among the recording's sources, if it does not already. */
@@ -57,6 +60,8 @@ export class SurroundingsPlanter {
   private static readonly METRES_PER_DEGREE = 111320
   private static readonly DEFAULT_RADIUS_M = 100
   private static readonly DEFAULT_DEBOUNCE_MS = 800
+  /** The trees kept of each place along a path: a long path is many places, and a scene of thousands of trees is not drawn at the pace of a recording. */
+  private static readonly TREES_PER_STOP = 80
 
   private messages: SightingEditorMessages
   private readonly debounceMs: number
@@ -145,7 +150,10 @@ export class SurroundingsPlanter {
         return
       }
       this.say(this.messages.surveyBusy)
-      const found = await provider.getSurroundings({ lat, lng }, this.radiusM)
+      const stops = SurroundingsCorridor.stops([{ lat, lng }, ...(this.host.track?.() ?? [])], this.radiusM)
+      const found = stops.length > 1
+        ? await SurroundingsCorridor.fetch(provider, stops, this.radiusM, { treesPerStop: SurroundingsPlanter.TREES_PER_STOP })
+        : await provider.getSurroundings({ lat, lng }, this.radiusM)
       if (token !== this.token) return
       this.plant(provider, found)
     } catch (error) {
