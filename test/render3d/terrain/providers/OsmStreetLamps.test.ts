@@ -52,4 +52,16 @@ describe("OsmStreetLamps", () => {
     expect(lamps.map(lamp => lamp.northM)).toEqual([-4, 4, -4])
     expect(OsmStreetLamps.lampsFrom({ elements: [] }, SAINT_LO, 200)).toEqual([])
   })
+
+  it("does not hold a survey up for an instance that does not answer: it goes on without the lamps after a few seconds", async () => {
+    vi.useFakeTimers()
+    try {
+      const hung = vi.fn(() => new Promise<Response>(() => {})) as unknown as typeof fetch
+      const lamps = new OsmStreetLamps({ fetchImpl: hung, endpoints: ["https://overpass.test/api"] }).near(SAINT_LO, 100)
+      await vi.advanceTimersByTimeAsync(OsmStreetLamps.PATIENCE_MS + 10)
+      expect(await lamps).toEqual([])
+    } finally {
+      vi.useRealTimers()
+    }
+  })
 })

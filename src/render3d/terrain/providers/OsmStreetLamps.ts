@@ -25,6 +25,8 @@ export class OsmStreetLamps {
   private static readonly KERB_OFFSET_M = 1
   /** What the width of a road is taken to be when the map gives none (see OverpassRoadProvider for the classes). */
   private static readonly DEFAULT_WIDTH_M = 5.5
+  /** How long a survey waits for the lamps before it goes on without them. */
+  static readonly PATIENCE_MS = 15000
   /** More than this and a scene is a forest of lamps: the nearest are kept. */
   private static readonly MAX = 150
 
@@ -38,10 +40,16 @@ export class OsmStreetLamps {
     const dLat = radiusM / OsmStreetLamps.METRES_PER_DEGREE
     const dLng = radiusM / (OsmStreetLamps.METRES_PER_DEGREE * Math.cos(centre.lat * Math.PI / 180))
     const box = [centre.lat - dLat, centre.lng - dLng, centre.lat + dLat, centre.lng + dLng].map(v => v.toFixed(6)).join(",")
+    // The lamps never hold up the rest of a survey: an instance that does not answer is waited for a few seconds, not until its own timeout.
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const patience = new Promise<undefined>(resolve => { timer = setTimeout(() => resolve(undefined), OsmStreetLamps.PATIENCE_MS) })
     try {
-      return OsmStreetLamps.lampsFrom(await this.client.query(`[out:json][timeout:25];(node["highway"="street_lamp"](${box});way["highway"]["lit"="yes"](${box}););out geom;`), centre, radiusM)
+      const answer = await Promise.race([this.client.query(`[out:json][timeout:25];(node["highway"="street_lamp"](${box});way["highway"]["lit"="yes"](${box}););out geom;`), patience])
+      return answer ? OsmStreetLamps.lampsFrom(answer, centre, radiusM) : []
     } catch {
       return []
+    } finally {
+      clearTimeout(timer)
     }
   }
 
