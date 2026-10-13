@@ -191,7 +191,16 @@ export class SurroundingsPlanter {
     const done = this.messages.surveyDone
       .replace("{trees}", String(count("tree"))).replace("{buildings}", String(count("building")))
       .replace("{bridges}", String(count("bridge"))).replace("{lines}", String(count("wire"))).replace("{source}", provider.name)
-    this.say(handPlaced ? `${done} ${this.messages.surveyKept}` : done)
+    const dated = this.datesText(found.dates)
+    this.say([done, dated, handPlaced ? this.messages.surveyKept : ""].filter(part => part !== "").join(" "))
+  }
+
+  /** What was surveyed and when, as one sentence ("Surveyed: laser 2022-10-07, aerial photo 2026-05-23."): nothing when no service said a day. */
+  private datesText(dates: Surroundings["dates"]): string {
+    if (!dates) return ""
+    const parts = ([["laser", this.messages.surveyLaserLabel], ["photo", this.messages.surveyPhotoLabel], ["map", this.messages.surveyMapLabel], ["lamps", this.messages.surveyLampsLabel]] as const)
+      .filter(([key]) => dates[key] !== undefined).map(([key, label]) => `${label} ${dates[key]}`)
+    return parts.length > 0 ? this.messages.surveyDated.replace("{dates}", parts.join(", ")) : ""
   }
 
   private isSamePlace(place: { lat: number, lng: number }, lat: number, lng: number): boolean {

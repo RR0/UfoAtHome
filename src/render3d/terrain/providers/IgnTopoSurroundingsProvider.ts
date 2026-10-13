@@ -40,13 +40,14 @@ export class IgnTopoSurroundingsProvider implements SurroundingsProvider {
   async getSurroundings(centre: { lat: number, lng: number }, radiusM: number): Promise<Surroundings> {
     if (!this.covers(centre.lat, centre.lng)) throw new SurroundingsUnavailableError("no-coverage", "BD TOPO covers France only")
     const radius = IgnGeoplatform.radius(radiusM)
-    const [vectors, photo, lamps] = await Promise.all([this.platform.vectors(centre, radius, true), this.platform.photo(centre, radius).catch(() => undefined), this.lamps?.near(centre, radiusM)])
+    const [vectors, photo, lamps, flown] = await Promise.all([this.platform.vectors(centre, radius, true), this.platform.photo(centre, radius).catch(() => undefined), this.lamps?.near(centre, radiusM), this.platform.photoDate(centre)])
     return {
       trees: [],
       buildings: BuildingMaterials.fit(RoofShapes.fit(TopoBuildings.named(TopoBuildings.buildings(vectors.buildings, centre, radius), vectors.zones, centre), undefined, photo)),
       bridges: OverheadStructures.bridges(vectors, centre, radius, undefined),
       lines: OverheadStructures.lines(vectors, centre, radius, undefined),
-      ...(lamps ? { lamps } : {})
+      ...(lamps ? { lamps } : {}),
+      dates: { ...(vectors.mapDate ? { map: vectors.mapDate } : {}), ...(photo && flown ? { photo: flown } : {}), ...(lamps?.length ? { lamps: OsmStreetLamps.today() } : {}) }
     }
   }
 }

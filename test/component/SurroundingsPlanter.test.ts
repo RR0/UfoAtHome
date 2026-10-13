@@ -315,4 +315,17 @@ describe("SurroundingsPlanter", () => {
     await editor.planter(survey).survey(PLACE.lat, PLACE.lng)
     expect(editor.decor[0].facade).toEqual({ color: "#a65f48" })
   })
+
+  it("dates what it plants by the surveys it was drawn from, the newest of them, and says the days", async () => {
+    const editor = new FakeEditor()
+    const survey = new FakeSurvey({
+      trees: [OAK], buildings: [{ ...HOUSE, roof: { shape: "flat", riseM: 0, color: "#717684" } }], bridges: [], lines: [], lamps: [{ eastM: 1, northM: 2 }],
+      dates: { laser: "2022-10-07", photo: "2026-05-23", map: "2026-01-15", lamps: "2026-10-13" }
+    })
+    await editor.planter(survey).survey(PLACE.lat, PLACE.lng)
+    const dated = Object.fromEntries(editor.decor.map(object => [object.kind, object.surveyedOn]))
+    expect(dated).toEqual({ tree: "2022-10-07", building: "2026-05-23", streetlight: "2026-10-13" })
+    expect(editor.status.textContent).toContain(`${sightingEditorMessages_en.surveyLaserLabel} 2022-10-07`)
+    expect(editor.status.textContent).toContain(`${sightingEditorMessages_en.surveyPhotoLabel} 2026-05-23`)
+  })
 })

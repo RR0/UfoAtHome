@@ -111,6 +111,39 @@ export class IgnGeoplatform {
   }
 
   /**
+   * The last day the laser flew over a place, from the service's own metadata (the mission that covers it): undefined where it does not say.
+   * Never a reason to fail a survey.
+   */
+  async laserDate(centre: { lat: number, lng: number }): Promise<string | undefined> {
+    return IgnGeoplatform.latest(await this.dated("IGNF_LIDAR-HD_METADONNEE:metadata", "geom", "date_fin_acquisition", centre))
+  }
+
+  /**
+   * The latest flight of the aerial photograph over a place: the mosaic of flights is asked, and its latest date taken, which is the
+   * safe one to be warned by (a flight of a neighbouring department that overlaps the place may be the one on the picture).
+   */
+  async photoDate(centre: { lat: number, lng: number }): Promise<string | undefined> {
+    return IgnGeoplatform.latest(await this.dated("ORTHOIMAGERY.ORTHOPHOTOS.GRAPHE-MOSAIQUAGE:graphe_bdortho", "geom", "date_vol", centre))
+  }
+
+  /** The latest of the dates a service writes ("2022-10-07Z"), as YYYY-MM-DD. */
+  static latest(dates: unknown[]): string | undefined {
+    const days = dates.map(date => /^\d{4}-\d{2}-\d{2}/.exec(String(date ?? ""))?.[0]).filter((day): day is string => day !== undefined).sort()
+    return days.at(-1)
+  }
+
+  /** One date property of the features of a layer that cover a point, or nothing when the service cannot say. */
+  private async dated(layer: string, geometry: string, property: string, centre: { lat: number, lng: number }): Promise<unknown[]> {
+    const epsilon = 0.0001
+    const box = [centre.lng - epsilon, centre.lat - epsilon, centre.lng + epsilon, centre.lat + epsilon].map(v => v.toFixed(6)).join(",")
+    try {
+      return (await this.features(layer, `BBOX(${geometry},${box},'EPSG:4326')`, property, 20)).map(feature => feature.properties[property])
+    } catch {
+      return []
+    }
+  }
+
+  /**
    * The aerial photograph of the square round a place, for the colour of roofs (see RoofShapes). A failure is not the end of a survey: the roofs
    * are the colour of the walls then, as they were.
    */
@@ -138,11 +171,11 @@ export class IgnGeoplatform {
       this.features("construction_lineaire", `${within} AND nature='Pont'`, "nature,geometrie"),
       this.features("troncon_de_route", `${within} AND position_par_rapport_au_sol<>'0'`, "nature,largeur_de_chaussee,position_par_rapport_au_sol,nom_voie_ban_gauche,nom_voie_ban_droite,cpx_toponyme_route_nommee,geometrie"),
       this.features("ligne_electrique", within, "voltage,geometrie"),
-      withBuildings ? this.features("batiment", within, "hauteur,nombre_d_etages,materiaux_des_murs,materiaux_de_la_toiture,geometrie", 2000) : Promise.resolve([]),
+      withBuildings ? this.features("batiment", within, "hauteur,nombre_d_etages,materiaux_des_murs,materiaux_de_la_toiture,date_modification,geometrie", 2000) : Promise.resolve([]),
       // The names of the zones (a town hall, a post office, a square): a few, and a building takes the name of the one it stands in.
       withBuildings ? this.features("zone_d_activite_ou_d_interet", within, "toponyme,geometrie", 100).catch((): VectorFeature[] => []) : Promise.resolve([])
     ])
-    return { bridges, elevatedRoads, lines, buildings, zones }
+    return { bridges, elevatedRoads, lines, buildings, zones, mapDate: IgnGeoplatform.latest(buildings.map(building => building.properties.date_modification)) }
   }
 
   /** The roads of the map in a box (west, south, east, north): every section a vehicle or a rider could use, with what the map says of each. */
@@ -179,7 +212,7 @@ export class IgnGeoplatform {
 
   private async features(layer: string, filter: string, properties: string, count = 200): Promise<VectorFeature[]> {
     const query = new URLSearchParams({
-      SERVICE: "WFS", VERSION: "2.0.0", REQUEST: "GetFeature", TYPENAMES: `BDTOPO_V3:${layer}`, SRSNAME: "EPSG:4326",
+      SERVICE: "WFS", VERSION: "2.0.0", REQUEST: "GetFeature", TYPENAMES: layer.includes(":") ? layer : `BDTOPO_V3:${layer}`, SRSNAME: "EPSG:4326",
       OUTPUTFORMAT: "application/json", COUNT: String(count), CQL_FILTER: filter, PROPERTYNAME: properties
     })
     let response: Response

@@ -36,6 +36,11 @@ export class OsmStreetLamps {
     this.client = new OverpassClient(options)
   }
 
+  /** The day the volunteers' map was asked, which is the day it is as of. */
+  static today(): string {
+    return new Date().toISOString().slice(0, 10)
+  }
+
   async near(centre: { lat: number, lng: number }, radiusM: number): Promise<SurveyedLamp[]> {
     const dLat = radiusM / OsmStreetLamps.METRES_PER_DEGREE
     const dLng = radiusM / (OsmStreetLamps.METRES_PER_DEGREE * Math.cos(centre.lat * Math.PI / 180))

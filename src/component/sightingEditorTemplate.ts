@@ -185,6 +185,7 @@ export const html = `
       <label><span id="label-scenery-source">Scenery survey</span> <select id="scenery-source"><option value="none" id="option-scenery-none">None (all by hand)</option></select></label>
       <label><span id="label-scenery-radius">Radius</span> <input type="number" id="scenery-radius" min="20" max="3000" step="10" value="100"/> m</label>
       <span id="scenery-status" role="status" aria-live="polite"></span>
+      <span id="scenery-warning" class="scenery-warning" role="alert" hidden></span>
     </div>
   </div>
 </section>
@@ -575,6 +576,18 @@ export const css = `
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5em;
+}
+.scenery-warning {
+  flex-basis: 100%;
+  font-size: 0.9em;
+  color: #9a5b00;
+  font-weight: bold;
+}
+@media (prefers-color-scheme: dark) {
+  .scenery-warning { color: #f0b04a; }
+}
+.scenery-warning[hidden] {
+  display: none;
 }
 #scenery-status {
   font-size: 0.9em;

@@ -16,6 +16,8 @@ export interface PlaceVectors {
   buildings: VectorFeature[]
   /** The named zones (a town hall, a post office, a square), whose names the buildings inside them take, where they were asked for. */
   zones: VectorFeature[]
+  /** The latest edition of the buildings the map holds here, as YYYY-MM-DD, where they carry one. */
+  mapDate?: string
 }
 
 /**

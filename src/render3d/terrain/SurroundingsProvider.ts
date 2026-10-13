@@ -97,8 +97,22 @@ export interface SurveyedLamp {
   heightM?: number
 }
 
+/** The days of the surveys an answer was drawn from, as YYYY-MM-DD, where the services say them. */
+export interface SurveyDates {
+  /** The last day of the laser flight. */
+  laser?: string
+  /** The latest flight of the aerial photograph over the place. */
+  photo?: string
+  /** The latest edition of the map's buildings. */
+  map?: string
+  /** What the volunteers' map says is of its own day: the day it was asked. */
+  lamps?: string
+}
+
 /** What a survey found around a place. */
 export interface Surroundings {
+  /** When what was found was surveyed: see SurveyDates. */
+  dates?: SurveyDates
   trees: SurveyedTree[]
   buildings: SurveyedBuilding[]
   bridges: SurveyedBridge[]

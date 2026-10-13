@@ -7,7 +7,7 @@ export const GROUND = [207, 150, 70, 255]
 export const ROOF = [180, 20, 20, 255]
 
 /** The vectors of the map a place has, by layer, as a WFS answers in GeoJSON. */
-export type Vectors = Partial<Record<"construction_lineaire" | "troncon_de_route" | "ligne_electrique" | "batiment", unknown[]>>
+export type Vectors = Partial<Record<"construction_lineaire" | "troncon_de_route" | "ligne_electrique" | "batiment" | "IGNF_LIDAR-HD_METADONNEE:metadata" | "ORTHOIMAGERY.ORTHOPHOTOS.GRAPHE-MOSAIQUAGE:graphe_bdortho", unknown[]>>
 
 /** What the service answers for a square of `size` pixels: heights, the picture of what each pixel is, and the vectors of the map. */
 export class Survey {

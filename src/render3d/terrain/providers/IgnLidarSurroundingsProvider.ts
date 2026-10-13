@@ -41,7 +41,7 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
   async getSurroundings(centre: { lat: number, lng: number }, radiusM: number): Promise<Surroundings> {
     if (!this.covers(centre.lat, centre.lng)) throw new SurroundingsUnavailableError("no-coverage", "The LiDAR HD survey covers France only")
     const radius = IgnGeoplatform.lidarRadius(radiusM)
-    const [grids, photo, lamps] = await Promise.all([this.platform.lidar(centre, radius), this.platform.photo(centre, radius).catch(() => undefined), this.lamps?.near(centre, radiusM)])
+    const [grids, photo, lamps, laser, flown] = await Promise.all([this.platform.lidar(centre, radius), this.platform.photo(centre, radius).catch(() => undefined), this.lamps?.near(centre, radiusM), this.platform.laserDate(centre), this.platform.photoDate(centre)])
     return {
       trees: new CanopyCrowns(grids.heights, grids.vegetation, grids.size, grids.size).trees({ metresPerPixel: grids.metresPerPixel, radiusM: radius }),
       buildings: BuildingMaterials.fit(RoofShapes.fit(
@@ -49,7 +49,8 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
         grids, photo)),
       bridges: [],
       lines: [],
-      ...(lamps ? { lamps } : {})
+      ...(lamps ? { lamps } : {}),
+      dates: { ...(laser ? { laser } : {}), ...(photo && flown ? { photo: flown } : {}), ...(lamps?.length ? { lamps: OsmStreetLamps.today() } : {}) }
     }
   }
 }

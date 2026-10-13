@@ -501,6 +501,11 @@ export interface DecorObject {
    * makes none (a glider's cousin, a stand-in for something nobody heard). Absent means what its model says, else an airliner's:
    * like a vehicle's engine, an aircraft in flight is not silent unless someone said so. Ignored for every other kind. */
   aircraftSound?: AircraftKind | "silent"
+  /**
+   * The day (YYYY-MM-DD) of the survey this object was taken from, where it comes from one (see `origin`): the latest of the days of everything it was drawn
+   * from (the laser flight, the aerial photograph, the map's edition). A scenery later than the observation it stands in is not the observation's, and is warned of.
+   */
+  surveyedOn?: string
   /** Kind "building" only: the colour of its walls, and the windows and door drawn on them. Absent is the grey box a building was before this existed. */
   facade?: DecorFacade
   /** Kind "building" only: the shape and colour of its roof. Absent is a flat roof the colour of the walls, which is what a building was before this existed. */

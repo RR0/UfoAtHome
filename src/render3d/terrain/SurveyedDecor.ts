@@ -57,12 +57,19 @@ export class SurveyedDecor {
       names.add(title)
       return title
     }
+    // Each kind is as old as the newest of what it was drawn from: a tree is the laser's, a building the map's outline under the laser's roof and
+    // the photograph's colour, a bridge or a line the map's with the laser's height, a lamp the volunteers' map's.
+    const dates = found.dates ?? {}
+    const newest = (...days: (string | undefined)[]): { surveyedOn?: string } => {
+      const latest = days.filter((day): day is string => day !== undefined).sort().at(-1)
+      return latest ? { surveyedOn: latest } : {}
+    }
     const planted: DecorObject[] = []
     if (!hand.tree) {
       for (const tree of found.trees) {
         planted.push({
           id: nextId(), kind: "tree", title: titled("tree", undefined), eastM: tree.eastM, northM: tree.northM, headingDeg: 0, lit: false,
-          sizeM: { widthM: tree.widthM, lengthM: tree.widthM, heightM: tree.heightM }, origin: providerId
+          sizeM: { widthM: tree.widthM, lengthM: tree.widthM, heightM: tree.heightM }, origin: providerId, ...newest(dates.laser)
         })
       }
     }
@@ -73,7 +80,7 @@ export class SurveyedDecor {
           headingDeg: building.headingDeg, lit: false,
           sizeM: { widthM: building.widthM, lengthM: building.lengthM, heightM: building.heightM },
           floors: building.floors ?? Math.max(1, Math.round((building.heightM - (building.roof?.riseM ?? 0)) / SurveyedDecor.FLOOR_HEIGHT_M)),
-          ...(building.roof ? { roof: building.roof } : {}), ...(building.facade ? { facade: building.facade } : {}), origin: providerId
+          ...(building.roof ? { roof: building.roof } : {}), ...(building.facade ? { facade: building.facade } : {}), origin: providerId, ...newest(dates.map, dates.laser, building.roof?.color ? dates.photo : undefined)
         })
       }
     }
@@ -82,7 +89,7 @@ export class SurveyedDecor {
         planted.push({
           id: nextId(), kind: "bridge", title: titled("bridge", bridge.name ? `${options.kindName("bridge")} (${bridge.name})` : undefined),
           eastM: bridge.eastM, northM: bridge.northM, headingDeg: bridge.headingDeg, lit: false,
-          sizeM: { lengthM: bridge.lengthM, widthM: bridge.widthM, heightM: bridge.heightM }, origin: providerId
+          sizeM: { lengthM: bridge.lengthM, widthM: bridge.widthM, heightM: bridge.heightM }, origin: providerId, ...newest(dates.map, dates.laser)
         })
       }
     }
@@ -93,7 +100,7 @@ export class SurveyedDecor {
           headingDeg: line.headingDeg, lit: false,
           sizeM: { lengthM: line.lengthM, heightM: line.heightM },
           wire: { strands: line.acrossM.map(acrossM => ({ heightM: line.heightM, acrossM })), poles: "both", poleHeightM: line.poleHeightM },
-          origin: providerId
+          origin: providerId, ...newest(dates.map, dates.laser)
         })
       }
     }
@@ -102,7 +109,7 @@ export class SurveyedDecor {
         // No `lit`: a public lamp is lit by the dark, not by the author (see SceneRenderer's photocell).
         planted.push({
           id: nextId(), kind: "streetlight", title: titled("streetlight", undefined), eastM: lamp.eastM, northM: lamp.northM, headingDeg: 0,
-          ...(lamp.heightM ? { sizeM: { heightM: lamp.heightM } } : {}), origin: providerId
+          ...(lamp.heightM ? { sizeM: { heightM: lamp.heightM } } : {}), origin: providerId, ...newest(dates.lamps)
         })
       }
     }

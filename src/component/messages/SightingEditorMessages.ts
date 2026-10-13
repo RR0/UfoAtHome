@@ -674,6 +674,14 @@ export interface SightingEditorMessages extends SightingLabels {
   surveyLabel: string
   /** The choice of the survey the scenery is taken from: its label, its tooltip (which says to whom the place is sent), and "none". */
   surveySource: string
+  /** What the scenery of a survey is dated: "Surveyed: laser 2022-10-07, photo 2026-05-23." */
+  surveyDated: string
+  surveyLaserLabel: string
+  surveyPhotoLabel: string
+  surveyMapLabel: string
+  surveyLampsLabel: string
+  /** The warning when the scenery is later than the observation: {survey} and {observation} are dates. */
+  surveyWarning: string
   /** The distance round the observer the survey is asked about: the label of a field in metres. */
   surveyRadius: string
   surveyRadiusTitle: string

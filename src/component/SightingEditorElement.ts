@@ -2,6 +2,7 @@ import { setupCloudEditor } from "./CloudEditor.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
 import { SurroundingsPlanter } from "./SurroundingsPlanter.js"
+import { SceneryDates } from "./SceneryDates.js"
 import type { SurroundingsProvider } from "../render3d/terrain/SurroundingsProvider.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
 import { DecorParameterSets } from "../engine/model/DecorParameterSets.js"
@@ -698,6 +699,7 @@ export class SightingEditorElement extends HTMLElement {
   /** Which survey the scenery is taken from: one of the registry's (see SURROUNDINGS_SOURCES), or none. */
   private readonly scenerySource: HTMLSelectElement
   private readonly labelScenerySource: HTMLElement
+  private readonly sceneryWarning: HTMLElement
   private readonly sceneryRadius: HTMLInputElement
   private readonly labelSceneryRadius: HTMLElement
   /** The id of the survey the author chose, "none" for none; undefined while they have not chosen, which is the registry's first. */
@@ -1313,6 +1315,7 @@ export class SightingEditorElement extends HTMLElement {
     this.decorList.setLabels({ list: "Environment", remove: "Delete decor", add: "Add", actions: { "look-at-decor": "Look at it" } })
     this.addDecorObserverButton = this.shadow.getElementById("add-decor-observer") as HTMLButtonElement
     this.sceneryStatus = this.shadow.getElementById("scenery-status")!
+    this.sceneryWarning = this.shadow.getElementById("scenery-warning")!
     this.scenerySource = this.shadow.getElementById("scenery-source") as HTMLSelectElement
     this.labelScenerySource = this.shadow.getElementById("label-scenery-source")!
     this.sceneryRadius = this.shadow.getElementById("scenery-radius") as HTMLInputElement
@@ -3054,6 +3057,7 @@ export class SightingEditorElement extends HTMLElement {
     // A zone's offset depends on the date it is asked about — see applyTimeZoneOffset.
     if (this.ufoElement.sighting.event.timeZone) this.applyTimeZoneOffset()
     this.ufoElement.refresh() // see updateObserver()'s comment — this is what surfaces the edit as a timeupdate
+    this.refreshSceneryWarning()
     this.syncDurationField()
     this.scheduleWeatherLookup()
     // The year decides whether the atlas's sky is the observation's at all.
@@ -7040,6 +7044,17 @@ export class SightingEditorElement extends HTMLElement {
     this.scheduleHistoryRecord()
   }
 
+  /**
+   * Warns when the scenery taken from surveys is later than the observation, and says by how much: the survey's day is on each object (see
+   * DecorObject.surveyedOn), the observation's in the recording, and either can change after the planting (the date edited, a recording loaded).
+   */
+  private refreshSceneryWarning(): void {
+    const sighting = this.ufoElement?.sighting
+    const late = sighting ? SceneryDates.anachronism(sighting.decor, sighting.event.time) : undefined
+    this.sceneryWarning.hidden = late === undefined
+    this.sceneryWarning.textContent = late ? this.messages.surveyWarning.replace("{survey}", late.survey).replace("{observation}", late.observation) : ""
+  }
+
   /** Says where something the recording was made from came from, once. */
   private citeSource(source: RecordingSource): void {
     const sighting = this.ufoElement.sighting
@@ -7383,6 +7398,7 @@ export class SightingEditorElement extends HTMLElement {
     this.decorList.setItems(this.ufoElement.sighting.decor.map(object => ({ id: object.id, label: this.decorLabel(object) })), this.currentDecorId)
     this.syncDecorFields()
     this.syncCanvasMode()
+    this.refreshSceneryWarning()
   }
 
   private syncDecorFields(): void {
@@ -8789,6 +8805,7 @@ export class SightingEditorElement extends HTMLElement {
     const noScenery = this.shadow.getElementById("option-scenery-none")
     if (noScenery) noScenery.textContent = messages.surveySourceNone
     this.sceneryStatus.setAttribute("aria-label", messages.surveyLabel)
+    this.refreshSceneryWarning()
     this.labelMilestones.textContent = messages.milestones
     this.labelMilestoneLabel.textContent = messages.milestoneLabel
     this.labelMilestoneNote.textContent = messages.milestoneNote

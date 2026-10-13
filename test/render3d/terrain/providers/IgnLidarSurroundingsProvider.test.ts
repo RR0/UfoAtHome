@@ -36,7 +36,7 @@ describe("IgnLidarSurroundingsProvider (the laser alone)", () => {
   it("tells a place the survey does not cover from a place with no tree", async () => {
     await expect(new IgnLidarSurroundingsProvider({ fetchImpl: new Survey(40, -9999).fetch() }).getSurroundings(SAINT_LO, 10))
       .rejects.toMatchObject({ reason: "no-coverage" })
-    await expect(new IgnLidarSurroundingsProvider({ fetchImpl: new Survey(40, 0).fetch() }).getSurroundings(SAINT_LO, 10)).resolves.toEqual(Scene.of([], []))
+    await expect(new IgnLidarSurroundingsProvider({ fetchImpl: new Survey(40, 0).fetch() }).getSurroundings(SAINT_LO, 10)).resolves.toMatchObject(Scene.of([], []))
   })
 
   it("does not ask for what it cannot cover", async () => {

@@ -34,7 +34,8 @@ describe("IgnTopoSurroundingsProvider (the map alone)", () => {
     const photographed = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => new URL(String(call[0])).searchParams.get("LAYERS")).filter(Boolean)
     expect(photographed).toEqual(["ORTHOIMAGERY.ORTHOPHOTOS"])
     const layers = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => new URL(String(call[0])).searchParams.get("TYPENAMES")).filter(Boolean).sort()
-    expect(layers).toEqual(["BDTOPO_V3:batiment", "BDTOPO_V3:construction_lineaire", "BDTOPO_V3:ligne_electrique", "BDTOPO_V3:troncon_de_route", "BDTOPO_V3:zone_d_activite_ou_d_interet"])
+    expect(layers).toEqual(["BDTOPO_V3:batiment", "BDTOPO_V3:construction_lineaire", "BDTOPO_V3:ligne_electrique", "BDTOPO_V3:troncon_de_route", "BDTOPO_V3:zone_d_activite_ou_d_interet",
+      "ORTHOIMAGERY.ORTHOPHOTOS.GRAPHE-MOSAIQUAGE:graphe_bdortho"])
   })
 
   it("colours each roof from the aerial photograph, and leaves the buildings as they were when it does not answer", async () => {
@@ -59,6 +60,16 @@ describe("IgnTopoSurroundingsProvider (the map alone)", () => {
     expect(found.lines[0].poleHeightM).toBe(22)
   })
 
+  it("says the day of what it drew: the map's latest edition, and the aerial photograph's latest flight", async () => {
+    const survey = new Survey(40)
+    survey.vectors = {
+      batiment: [{ ...TWO_HOUSES[0] as object, properties: { hauteur: 7, date_modification: "2025-08-18T12:54:40.821Z" } }, { ...TWO_HOUSES[1] as object, properties: { hauteur: 7, date_modification: "2026-01-15T21:44:40.170Z" } }],
+      "ORTHOIMAGERY.ORTHOPHOTOS.GRAPHE-MOSAIQUAGE:graphe_bdortho": [{ type: "Feature", properties: { date_vol: "2025-04-30Z" } }, { type: "Feature", properties: { date_vol: "2026-05-23Z" } }]
+    }
+    const found = await new IgnTopoSurroundingsProvider({ fetchImpl: survey.fetch() }).getSurroundings(SAINT_LO, 40)
+    expect(found.dates).toEqual({ map: "2026-01-15", photo: "2026-05-23" })
+  })
+
   it("fails as unreachable when the map does", async () => {
     const survey = new Survey(40)
     survey.mapDown = true
@@ -67,6 +78,15 @@ describe("IgnTopoSurroundingsProvider (the map alone)", () => {
 })
 
 describe("IgnLidarTopoSurroundingsProvider (both)", () => {
+  it("adds the day of the laser's flight to the days of the map and the photograph", async () => {
+    const survey = new Survey(100)
+    survey.vectors = {
+      "IGNF_LIDAR-HD_METADONNEE:metadata": [{ type: "Feature", properties: { date_fin_acquisition: "2022-10-07Z" } }]
+    }
+    const found = await new IgnLidarTopoSurroundingsProvider({ fetchImpl: survey.fetch() }).getSurroundings(SAINT_LO, 40)
+    expect(found.dates).toEqual({ laser: "2022-10-07" })
+  })
+
   it("takes the trees from the laser, the buildings from the map, and says which it is", async () => {
     // A tree 8 m east of the middle in the laser, and a roof 8 m west that the laser sees but the map draws its own way.
     const survey = new Survey(100).block(66, 46, 8, 12, GREEN).block(18, 40, 16, 12, ROOF)
