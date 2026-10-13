@@ -44,9 +44,12 @@ export class IgnGeoplatform {
   private static readonly METRES_PER_PIXEL = 0.5
   /** The map is asked in small filtered questions, so a far horizon costs a few more kilobytes: three kilometres at most. */
   static readonly MAX_RADIUS_M = 3000
-  /** The laser's grids are 1.4 MB each at half a metre over 150 m; farther, the same number of pixels spreads over more ground, up to this. */
-  static readonly MAX_LIDAR_RADIUS_M = 600
-  private static readonly FINE_LIDAR_RADIUS_M = 150
+  /**
+   * The laser's grids are 1.4 MB each at half a metre over 150 m, and that is as far as they are asked for. Spreading the same pixels over a
+   * wider square was tried and is wrong: at two thirds of a metre the classification's colours blend at the edge of a roof, and a corner of a
+   * building 17 m high and 4 m wide became a tree, twice as many trees within 100 m as at half a metre. What lies farther comes from the map.
+   */
+  static readonly MAX_LIDAR_RADIUS_M = 150
   /** What the height model says where the laser has not flown. */
   private static readonly NO_DATA = -9999
   private static readonly METRES_PER_DEGREE = 111320
@@ -81,8 +84,7 @@ export class IgnGeoplatform {
    */
   async lidar(centre: { lat: number, lng: number }, radiusM: number): Promise<LidarGrids> {
     const radius = IgnGeoplatform.lidarRadius(radiusM)
-    // Half a metre a pixel up to 150 m, then the same 600 pixels over a wider square.
-    const size = Math.ceil(2 * Math.min(radius, IgnGeoplatform.FINE_LIDAR_RADIUS_M) / IgnGeoplatform.METRES_PER_PIXEL)
+    const size = Math.ceil(2 * radius / IgnGeoplatform.METRES_PER_PIXEL)
     const [heights, classes] = await Promise.all([
       this.raster(centre, radius, size, IgnGeoplatform.HEIGHT_LAYER),
       this.raster(centre, radius, size, IgnGeoplatform.CLASS_LAYER)
