@@ -1,0 +1,170 @@
+{
+ "version": 1,
+ "provider": {
+  "id": "ign-lidar-topo",
+  "name": "IGN LiDAR HD + BD TOPO",
+  "attribution": "Canopy © IGN, LiDAR HD; buildings, bridges and lines © IGN, BD TOPO (Licence Ouverte 2.0), as surveyed on days the services do not give",
+  "creditUrl": "https://geoservices.ign.fr/lidarhd"
+ },
+ "centre": {
+  "lat": 49.0789012,
+  "lng": 2.3274002
+ },
+ "radiusM": 400,
+ "fetchedOn": "2026-10-13",
+ "dates": {
+  "laser": "2022-02-12",
+  "photo": "2024-08-27",
+  "map": "2026-03-11"
+ },
+ "decor": [
+  {
+   "id": "ign-lidar-topo-1",
+   "kind": "tree",
+   "title": "Tree 1",
+   "eastM": 8.8,
+   "northM": -98.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.6,
+    "lengthM": 8.6,
+    "heightM": 11.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-02-12"
+  },
+  {
+   "id": "ign-lidar-topo-2",
+   "kind": "building",
+   "title": "ZI des Soixante Dix Arpents",
+   "eastM": 33.2,
+   "northM": -331.1,
+   "headingDeg": 162,
+   "lit": false,
+   "sizeM": {
+    "widthM": 89.1,
+    "lengthM": 7.1,
+    "heightM": 9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7d7c83"
+   },
+   "facade": {
+    "color": "#d9d0bd"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-03-11"
+  },
+  {
+   "id": "ign-lidar-topo-3",
+   "kind": "building",
+   "title": "ZI des Soixante Dix Arpents (2)",
+   "eastM": 89.4,
+   "northM": -320.8,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 2.8,
+    "heightM": 9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#838792"
+   },
+   "facade": {
+    "color": "#c3bbaa"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-03-11"
+  },
+  {
+   "id": "ign-lidar-topo-4",
+   "kind": "building",
+   "title": "ZI des Soixante Dix Arpents (3)",
+   "eastM": 95.4,
+   "northM": -323.5,
+   "headingDeg": 72,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17,
+    "lengthM": 7.1,
+    "heightM": 9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#636470"
+   },
+   "facade": {
+    "color": "#ded4c1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-03-11"
+  },
+  {
+   "id": "ign-lidar-topo-5",
+   "kind": "building",
+   "title": "ZI des Soixante Dix Arpents (4)",
+   "eastM": 101.3,
+   "northM": -325.5,
+   "headingDeg": 72,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 2.8,
+    "heightM": 9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#dbdbd9"
+   },
+   "facade": {
+    "color": "#dad1be"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-03-11"
+  },
+  {
+   "id": "ign-lidar-topo-6",
+   "kind": "bridge",
+   "title": "Bridge 1",
+   "eastM": 202.9,
+   "northM": -158.7,
+   "headingDeg": 43.6,
+   "lit": false,
+   "sizeM": {
+    "lengthM": 25.9,
+    "widthM": 6,
+    "heightM": 4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-03-11"
+  },
+  {
+   "id": "ign-lidar-topo-7",
+   "kind": "bridge",
+   "title": "Bridge 2",
+   "eastM": 332.7,
+   "northM": -147,
+   "headingDeg": 95.8,
+   "lit": false,
+   "sizeM": {
+    "lengthM": 44.9,
+    "widthM": 6.4,
+    "heightM": 4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-03-11"
+  }
+ ]
+}
