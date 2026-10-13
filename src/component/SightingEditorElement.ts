@@ -1322,7 +1322,8 @@ export class SightingEditorElement extends HTMLElement {
       decor: () => this.ufoElement.sighting.decor,
       setDecor: decor => this.setPlantedDecor(decor),
       kindName: kind => this.decorList.kindLabel(kind),
-      cite: source => this.citeSource(source)
+      cite: source => this.citeSource(source),
+      busy: (on, label) => this.sceneElement.setBusy(on, label)
     }, sightingEditorMessages_en,
     async (lat, lng) => this.surroundingsProvider
       ? (this.surroundingsProvider.covers(lat, lng) ? this.surroundingsProvider : undefined)

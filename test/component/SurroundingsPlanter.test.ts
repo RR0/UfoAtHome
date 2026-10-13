@@ -38,13 +38,16 @@ class FakeEditor {
   decor: DecorObject[] = []
   sources: RecordingSource[] = []
   readonly status = document.createElement("span")
+  /** What the reader was told about waiting, in order: the label while it waits, empty when it is over. */
+  readonly busy: string[] = []
 
   planter(survey: SurroundingsProvider | undefined): SurroundingsPlanter {
     return new SurroundingsPlanter(this.status, {
       decor: () => this.decor,
       setDecor: decor => { this.decor = decor },
       kindName: kind => kind,
-      cite: source => { this.sources.push(source) }
+      cite: source => { this.sources.push(source) },
+      busy: (_on, label) => { this.busy.push(label) }
     }, sightingEditorMessages_en, async () => survey, { debounceMs: 5 })
   }
 
@@ -285,5 +288,24 @@ describe("SurroundingsPlanter", () => {
     own.decor = [{ id: "mine", kind: "streetlight", eastM: 0, northM: 0 }]
     await own.planter(survey).survey(PLACE.lat, PLACE.lng)
     expect(own.decor).toHaveLength(1)
+  })
+
+  it("tells the reader it is waiting while the survey is asked, and that it is over when it answers, fails, or is dropped for a newer question", async () => {
+    const editor = new FakeEditor()
+    await editor.planter(new FakeSurvey(Scene.of([OAK]))).survey(PLACE.lat, PLACE.lng)
+    expect(editor.busy).toEqual([sightingEditorMessages_en.surveyBusy, ""])
+    const failing = new FakeEditor()
+    await failing.planter(new FakeSurvey(new SurroundingsUnavailableError("unreachable", "down"))).survey(PLACE.lat, PLACE.lng)
+    expect(failing.busy.at(-1)).toBe("")
+    // Two questions in a row: the first one finishing late does not end the wait of the second.
+    const rushed = new FakeEditor()
+    const slow = new FakeSurvey(Scene.of([OAK]))
+    const planter = rushed.planter(slow)
+    const first = planter.survey(PLACE.lat, PLACE.lng)
+    const second = planter.survey(PLACE.lat + 0.01, PLACE.lng)
+    await first
+    expect(rushed.busy.filter(label => label === "").length).toBeLessThanOrEqual(1)
+    await second
+    expect(rushed.busy.at(-1)).toBe("")
   })
 })

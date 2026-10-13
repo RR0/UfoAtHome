@@ -13,6 +13,12 @@ export const html = `
       <div class="scene-loader-spinner"></div>
     </div>
   </div>
+  <!-- Over the picture while the scenery of the place is being looked up (see SceneElement.setBusy): a spinner and what is being waited for,
+       on a light veil, never in the way of the controls (pointer-events: none). -->
+  <div id="scene-busy" class="scene-busy" role="progressbar" hidden>
+    <div class="scene-loader-spinner scene-busy-spinner"></div>
+    <p id="scene-busy-note" class="scene-loader-note"></p>
+  </div>
   <div id="ufo-slot"></div>
   <div id="hover-tooltip" class="hover-tooltip" hidden></div>
   <button id="credits-button" class="credits-btn" type="button" popovertarget="credits-panel" aria-label="Credits" title="Credits">©</button>
@@ -167,6 +173,30 @@ export const css = `
 }
 .scene-loader[hidden] {
   display: none;
+}
+/* The scenery being looked up: the same spinner as the first frame's, on a veil, whatever the picture's size (the loader's notes
+   give way to a spinner on a small one; this one always has both). The scene is still there under it, and can be looked at. */
+.scene-busy {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  background: rgba(0, 0, 0, 0.35);
+  animation: scene-loader-appear 0.2s ease-out 0.15s both;
+  pointer-events: none;
+  z-index: 2;
+}
+.scene-busy[hidden] {
+  display: none;
+}
+.scene-busy .scene-busy-spinner {
+  display: block;
+}
+.scene-busy .scene-loader-note {
+  display: block;
 }
 /* What the waiting picture is NOT (a video), and under it what it IS (a simulation). Said only while it
    waits, and only where there is room for a sentence: a catalogue card's picture is too small for one

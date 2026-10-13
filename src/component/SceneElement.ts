@@ -301,6 +301,8 @@ export class SceneElement extends HTMLElement {
   private readonly stageElement: HTMLElement
   private readonly frameElement: HTMLElement
   private readonly sceneCanvas: HTMLCanvasElement
+  private readonly busyElement: HTMLElement
+  private readonly busyNote: HTMLElement
   /** The sentence under the loader's spinner — English until the reader's names arrive. */
   private readonly loaderNote: HTMLElement
   /** The one above the spinner: what the picture is not. */
@@ -572,6 +574,17 @@ export class SceneElement extends HTMLElement {
    * (an inline block each) so that a narrow picture wraps between them, and the sentence is read out
    * once, as a label, rather than letter by letter.
    */
+  /**
+   * Puts a spinner over the picture while something it is made of is being fetched (the scenery of a place: a few seconds), and says what. Not the
+   * loader of the first frame, which holds the picture and the clock back: this one only tells the reader that what they see is not final yet.
+   */
+  setBusy(busy: boolean, label = ""): void {
+    this.busyElement.hidden = !busy
+    this.busyNote.textContent = busy ? label : ""
+    this.busyElement.setAttribute("aria-label", label)
+    this.busyElement.setAttribute("aria-busy", String(busy))
+  }
+
   private renderLoaderText(notAVideo: string, simulation: string): void {
     let index = 0
     const fill = (element: HTMLElement, text: string): void => {
@@ -739,6 +752,8 @@ export class SceneElement extends HTMLElement {
     this.loaderNote = this.shadow.getElementById("scene-loader-note")!
     this.loaderNotVideo = this.shadow.getElementById("scene-loader-not-video")!
     this.renderLoaderText("This is not a video", "It is a real-time simulation.")
+    this.busyElement = this.shadow.getElementById("scene-busy")!
+    this.busyNote = this.shadow.getElementById("scene-busy-note")!
     this.sceneRenderer.onFirstFrameHold = holding => {
       loader.hidden = !holding
       // The sentence saying what this is not (a video) has the picture to itself while it waits: the

@@ -1116,3 +1116,18 @@ describe("SceneElement air traffic", () => {
     element.remove()
   })
 })
+
+describe("the scenery spinner", () => {
+  it("shows a spinner and what is being waited for over the picture, and takes it away", () => {
+    const element = mount()
+    const busy = element.shadowRoot!.getElementById("scene-busy")!
+    expect(busy.hidden).toBe(true)
+    element.setBusy(true, "Looking up the scenery")
+    expect(busy.hidden).toBe(false)
+    expect(busy.getAttribute("aria-busy")).toBe("true")
+    expect(element.shadowRoot!.getElementById("scene-busy-note")!.textContent).toBe("Looking up the scenery")
+    element.setBusy(false)
+    expect(busy.hidden).toBe(true)
+    expect(element.shadowRoot!.getElementById("scene-busy-note")!.textContent).toBe("")
+  })
+})

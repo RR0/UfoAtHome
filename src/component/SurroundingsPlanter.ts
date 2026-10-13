@@ -14,6 +14,8 @@ export interface SurroundingsPlanterHost {
   setDecor(decor: DecorObject[]): void
   /** What a kind of decor is called, in the language of the editor: "Tree", "Bridge", "Overhead line". */
   kindName(kind: SurveyedKind): string
+  /** Tells the reader the scenery is being looked up (true, with what to say) or is not any more (false): a spinner over the picture. */
+  busy(on: boolean, label: string): void
   /** Says where the scenery came from, among the recording's sources, if it does not already. */
   cite(source: RecordingSource): void
 }
@@ -132,6 +134,7 @@ export class SurroundingsPlanter {
   async survey(lat: number, lng: number): Promise<void> {
     const token = ++this.token
     this.surveyedFor = { lat, lng }
+    this.host.busy(true, this.messages.surveyBusy)
     try {
       const provider = await this.loadProvider(lat, lng)
       if (token !== this.token) return
@@ -153,6 +156,9 @@ export class SurroundingsPlanter {
       } else {
         this.say(this.messages.surveyUnreachable)
       }
+    } finally {
+      // Only the latest question ends the wait: an older one dropped for a newer one leaves the newer one's spinner on.
+      if (token === this.token) this.host.busy(false, "")
     }
   }
 
@@ -160,6 +166,7 @@ export class SurroundingsPlanter {
     clearTimeout(this.timer)
     this.timer = undefined
     this.token++
+    this.host.busy(false, "")
   }
 
   /** The recording's decor without anything a survey put there: what the author placed. */
