@@ -4,7 +4,8 @@ import { WindowLighting } from "../../src/render3d/WindowLighting.js"
 describe("WindowLighting", () => {
   it("lights most windows in the evening, few at three in the morning, more as the town gets up", () => {
     expect(WindowLighting.shareAt(21)).toBeGreaterThan(0.4)
-    expect(WindowLighting.shareAt(3)).toBeLessThan(0.08)
+    expect(WindowLighting.shareAt(3)).toBeLessThan(0.02)
+    expect(WindowLighting.shareAt(4)).toBeLessThanOrEqual(0.015)
     expect(WindowLighting.shareAt(21)).toBeGreaterThan(WindowLighting.shareAt(0))
     expect(WindowLighting.shareAt(0)).toBeGreaterThan(WindowLighting.shareAt(3))
     expect(WindowLighting.shareAt(6.5)).toBeGreaterThan(WindowLighting.shareAt(4))
