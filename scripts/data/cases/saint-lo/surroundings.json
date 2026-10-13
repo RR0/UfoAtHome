@@ -10,8 +10,13 @@
   "lat": 49.10489,
   "lng": -1.075382
  },
- "radiusM": 150,
- "fetchedOn": "2026-10-12",
+ "radiusM": 400,
+ "fetchedOn": "2026-10-13",
+ "dates": {
+  "laser": "2022-10-07",
+  "photo": "2026-05-23",
+  "map": "2026-03-20"
+ },
  "decor": [
   {
    "id": "ign-lidar-topo-1",
@@ -26,7 +31,8 @@
     "lengthM": 12.4,
     "heightM": 13.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-2",
@@ -41,7 +47,8 @@
     "lengthM": 14.8,
     "heightM": 19.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-3",
@@ -56,7 +63,8 @@
     "lengthM": 12.7,
     "heightM": 12.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-4",
@@ -71,7 +79,8 @@
     "lengthM": 13.5,
     "heightM": 14.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-5",
@@ -86,7 +95,8 @@
     "lengthM": 13.6,
     "heightM": 17.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-6",
@@ -101,7 +111,8 @@
     "lengthM": 13.9,
     "heightM": 12.3
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-7",
@@ -116,7 +127,8 @@
     "lengthM": 14,
     "heightM": 19
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-8",
@@ -131,7 +143,8 @@
     "lengthM": 13,
     "heightM": 14.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-9",
@@ -146,7 +159,8 @@
     "lengthM": 15.9,
     "heightM": 20.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-10",
@@ -161,7 +175,8 @@
     "lengthM": 13.6,
     "heightM": 11.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-11",
@@ -176,7 +191,8 @@
     "lengthM": 15.9,
     "heightM": 21
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-12",
@@ -191,7 +207,8 @@
     "lengthM": 12.1,
     "heightM": 11.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-13",
@@ -206,7 +223,8 @@
     "lengthM": 13.6,
     "heightM": 15
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-14",
@@ -221,7 +239,8 @@
     "lengthM": 12.5,
     "heightM": 16
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-15",
@@ -236,7 +255,8 @@
     "lengthM": 14.9,
     "heightM": 17.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-16",
@@ -251,7 +271,8 @@
     "lengthM": 13.7,
     "heightM": 12.6
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-17",
@@ -266,7 +287,8 @@
     "lengthM": 14.9,
     "heightM": 19.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-18",
@@ -281,7 +303,8 @@
     "lengthM": 14.8,
     "heightM": 16.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-19",
@@ -296,7 +319,8 @@
     "lengthM": 14.7,
     "heightM": 16.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-20",
@@ -311,7 +335,8 @@
     "lengthM": 14.6,
     "heightM": 15.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-21",
@@ -326,7 +351,8 @@
     "lengthM": 15.6,
     "heightM": 19.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-22",
@@ -341,7 +367,8 @@
     "lengthM": 13.2,
     "heightM": 13.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-23",
@@ -356,7 +383,8 @@
     "lengthM": 14.3,
     "heightM": 16.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-24",
@@ -371,7 +399,8 @@
     "lengthM": 14.6,
     "heightM": 19.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-25",
@@ -386,7 +415,8 @@
     "lengthM": 14.3,
     "heightM": 16.3
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-26",
@@ -401,7 +431,8 @@
     "lengthM": 15.4,
     "heightM": 19.3
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-27",
@@ -416,7 +447,8 @@
     "lengthM": 15.7,
     "heightM": 20.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-28",
@@ -431,7 +463,8 @@
     "lengthM": 14.6,
     "heightM": 17.3
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-29",
@@ -446,7 +479,8 @@
     "lengthM": 15.9,
     "heightM": 16.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-30",
@@ -461,7 +495,8 @@
     "lengthM": 12,
     "heightM": 15.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-31",
@@ -476,7 +511,8 @@
     "lengthM": 11.7,
     "heightM": 14.7
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-32",
@@ -491,7 +527,8 @@
     "lengthM": 13.6,
     "heightM": 11.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-33",
@@ -506,7 +543,8 @@
     "lengthM": 14.3,
     "heightM": 16.6
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-34",
@@ -521,7 +559,8 @@
     "lengthM": 15,
     "heightM": 17.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-35",
@@ -536,7 +575,8 @@
     "lengthM": 15.8,
     "heightM": 14.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-36",
@@ -551,7 +591,8 @@
     "lengthM": 12.9,
     "heightM": 12.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-37",
@@ -566,7 +607,8 @@
     "lengthM": 14.9,
     "heightM": 17.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-38",
@@ -581,7 +623,8 @@
     "lengthM": 15.7,
     "heightM": 17
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-39",
@@ -596,7 +639,8 @@
     "lengthM": 15,
     "heightM": 15.3
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-40",
@@ -611,7 +655,8 @@
     "lengthM": 14.1,
     "heightM": 16.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-41",
@@ -626,7 +671,8 @@
     "lengthM": 13,
     "heightM": 15.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-42",
@@ -641,7 +687,8 @@
     "lengthM": 14.2,
     "heightM": 16.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-43",
@@ -656,7 +703,8 @@
     "lengthM": 13,
     "heightM": 12.6
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-44",
@@ -671,7 +719,8 @@
     "lengthM": 14.3,
     "heightM": 16
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-45",
@@ -686,7 +735,8 @@
     "lengthM": 14,
     "heightM": 16.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-46",
@@ -701,7 +751,8 @@
     "lengthM": 14.6,
     "heightM": 14.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-47",
@@ -716,7 +767,8 @@
     "lengthM": 15.4,
     "heightM": 15.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-48",
@@ -731,7 +783,8 @@
     "lengthM": 10.3,
     "heightM": 12.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-49",
@@ -746,7 +799,8 @@
     "lengthM": 13.4,
     "heightM": 14.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-50",
@@ -761,7 +815,8 @@
     "lengthM": 9.7,
     "heightM": 9.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-51",
@@ -776,7 +831,8 @@
     "lengthM": 15.5,
     "heightM": 15.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-52",
@@ -791,7 +847,8 @@
     "lengthM": 10.2,
     "heightM": 10.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-53",
@@ -806,7 +863,8 @@
     "lengthM": 13.4,
     "heightM": 10.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-54",
@@ -821,7 +879,8 @@
     "lengthM": 11.1,
     "heightM": 9.6
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-55",
@@ -836,7 +895,8 @@
     "lengthM": 13,
     "heightM": 15.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-56",
@@ -851,7 +911,8 @@
     "lengthM": 9.8,
     "heightM": 13.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-57",
@@ -866,7 +927,8 @@
     "lengthM": 13.3,
     "heightM": 13.6
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-58",
@@ -881,7 +943,8 @@
     "lengthM": 15.5,
     "heightM": 15.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-59",
@@ -896,7 +959,8 @@
     "lengthM": 13.8,
     "heightM": 17
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-60",
@@ -911,7 +975,8 @@
     "lengthM": 13,
     "heightM": 12.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-61",
@@ -926,7 +991,8 @@
     "lengthM": 13.2,
     "heightM": 16.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-62",
@@ -941,7 +1007,8 @@
     "lengthM": 12.4,
     "heightM": 9.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-63",
@@ -956,7 +1023,8 @@
     "lengthM": 11.9,
     "heightM": 13.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-64",
@@ -971,7 +1039,8 @@
     "lengthM": 12.8,
     "heightM": 16.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-65",
@@ -986,7 +1055,8 @@
     "lengthM": 11.7,
     "heightM": 12.3
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-66",
@@ -1001,7 +1071,8 @@
     "lengthM": 14.1,
     "heightM": 16.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-67",
@@ -1016,7 +1087,8 @@
     "lengthM": 11.8,
     "heightM": 12.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-68",
@@ -1031,7 +1103,8 @@
     "lengthM": 11.6,
     "heightM": 12.3
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-69",
@@ -1046,7 +1119,8 @@
     "lengthM": 12.6,
     "heightM": 13.6
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-70",
@@ -1061,7 +1135,8 @@
     "lengthM": 15.4,
     "heightM": 13.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-71",
@@ -1076,7 +1151,8 @@
     "lengthM": 13.6,
     "heightM": 14.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-72",
@@ -1091,7 +1167,8 @@
     "lengthM": 11.6,
     "heightM": 10.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-73",
@@ -1106,7 +1183,8 @@
     "lengthM": 15.2,
     "heightM": 15.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-74",
@@ -1121,7 +1199,8 @@
     "lengthM": 10.5,
     "heightM": 8.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-75",
@@ -1136,7 +1215,8 @@
     "lengthM": 9.7,
     "heightM": 8.3
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-76",
@@ -1151,7 +1231,8 @@
     "lengthM": 12.3,
     "heightM": 11.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-77",
@@ -1166,7 +1247,8 @@
     "lengthM": 8.9,
     "heightM": 8.7
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-78",
@@ -1181,7 +1263,8 @@
     "lengthM": 14.9,
     "heightM": 12.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-79",
@@ -1196,7 +1279,8 @@
     "lengthM": 10.7,
     "heightM": 10.6
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-80",
@@ -1211,7 +1295,8 @@
     "lengthM": 14.2,
     "heightM": 12.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-81",
@@ -1226,7 +1311,8 @@
     "lengthM": 10.2,
     "heightM": 12.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-82",
@@ -1241,7 +1327,8 @@
     "lengthM": 12.6,
     "heightM": 9.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-83",
@@ -1256,7 +1343,8 @@
     "lengthM": 13.5,
     "heightM": 8.3
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-84",
@@ -1271,7 +1359,8 @@
     "lengthM": 11.6,
     "heightM": 9.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-85",
@@ -1286,7 +1375,8 @@
     "lengthM": 10.3,
     "heightM": 13
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-86",
@@ -1301,7 +1391,8 @@
     "lengthM": 12.9,
     "heightM": 12
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-87",
@@ -1316,7 +1407,8 @@
     "lengthM": 15.4,
     "heightM": 8.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-88",
@@ -1331,7 +1423,8 @@
     "lengthM": 6,
     "heightM": 11
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-89",
@@ -1346,7 +1439,8 @@
     "lengthM": 11.6,
     "heightM": 11.3
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-90",
@@ -1361,7 +1455,8 @@
     "lengthM": 13,
     "heightM": 8.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-91",
@@ -1376,7 +1471,8 @@
     "lengthM": 12.9,
     "heightM": 11.3
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-92",
@@ -1391,7 +1487,8 @@
     "lengthM": 6.7,
     "heightM": 9.6
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-93",
@@ -1406,7 +1503,8 @@
     "lengthM": 11.9,
     "heightM": 10.7
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-94",
@@ -1421,7 +1519,8 @@
     "lengthM": 9.1,
     "heightM": 10.7
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-95",
@@ -1436,7 +1535,8 @@
     "lengthM": 13.3,
     "heightM": 11.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-96",
@@ -1451,7 +1551,8 @@
     "lengthM": 13,
     "heightM": 11.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-97",
@@ -1466,7 +1567,8 @@
     "lengthM": 12.8,
     "heightM": 11.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-98",
@@ -1481,7 +1583,8 @@
     "lengthM": 8.2,
     "heightM": 8.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-99",
@@ -1496,7 +1599,8 @@
     "lengthM": 13,
     "heightM": 11.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-100",
@@ -1511,7 +1615,8 @@
     "lengthM": 11.1,
     "heightM": 10.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-101",
@@ -1526,7 +1631,8 @@
     "lengthM": 11.8,
     "heightM": 8.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-102",
@@ -1541,7 +1647,8 @@
     "lengthM": 10.9,
     "heightM": 8.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-103",
@@ -1556,7 +1663,8 @@
     "lengthM": 10.9,
     "heightM": 11.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-104",
@@ -1571,7 +1679,8 @@
     "lengthM": 11.3,
     "heightM": 11
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-105",
@@ -1586,7 +1695,8 @@
     "lengthM": 11.8,
     "heightM": 8.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-106",
@@ -1601,7 +1711,8 @@
     "lengthM": 9.5,
     "heightM": 11
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-107",
@@ -1616,7 +1727,8 @@
     "lengthM": 12.4,
     "heightM": 10.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-108",
@@ -1631,7 +1743,8 @@
     "lengthM": 12.9,
     "heightM": 10.3
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-109",
@@ -1646,7 +1759,8 @@
     "lengthM": 12.5,
     "heightM": 7.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-110",
@@ -1661,7 +1775,8 @@
     "lengthM": 13.2,
     "heightM": 10
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-111",
@@ -1676,7 +1791,8 @@
     "lengthM": 5.4,
     "heightM": 6.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-112",
@@ -1691,7 +1807,8 @@
     "lengthM": 12.1,
     "heightM": 9.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-113",
@@ -1706,7 +1823,8 @@
     "lengthM": 8.9,
     "heightM": 9.6
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-114",
@@ -1721,7 +1839,8 @@
     "lengthM": 10.2,
     "heightM": 10.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-115",
@@ -1736,7 +1855,8 @@
     "lengthM": 8.5,
     "heightM": 5.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-116",
@@ -1751,7 +1871,8 @@
     "lengthM": 6.4,
     "heightM": 5.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-117",
@@ -1766,7 +1887,8 @@
     "lengthM": 10.5,
     "heightM": 5.6
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-118",
@@ -1781,7 +1903,8 @@
     "lengthM": 14,
     "heightM": 9.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-119",
@@ -1796,7 +1919,8 @@
     "lengthM": 5.7,
     "heightM": 8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-120",
@@ -1811,7 +1935,8 @@
     "lengthM": 8.5,
     "heightM": 9.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-121",
@@ -1826,7 +1951,8 @@
     "lengthM": 4.5,
     "heightM": 8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-122",
@@ -1841,7 +1967,8 @@
     "lengthM": 12.8,
     "heightM": 6.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-123",
@@ -1856,7 +1983,8 @@
     "lengthM": 7.4,
     "heightM": 7.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-124",
@@ -1871,7 +1999,8 @@
     "lengthM": 5.5,
     "heightM": 7.7
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-125",
@@ -1886,7 +2015,8 @@
     "lengthM": 11.5,
     "heightM": 8.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-126",
@@ -1901,7 +2031,8 @@
     "lengthM": 13.5,
     "heightM": 5.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-127",
@@ -1916,7 +2047,8 @@
     "lengthM": 10.6,
     "heightM": 7.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-128",
@@ -1931,7 +2063,8 @@
     "lengthM": 10.2,
     "heightM": 7.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-129",
@@ -1946,7 +2079,8 @@
     "lengthM": 9,
     "heightM": 7.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-130",
@@ -1961,7 +2095,8 @@
     "lengthM": 12.7,
     "heightM": 8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-131",
@@ -1976,7 +2111,8 @@
     "lengthM": 11.1,
     "heightM": 8.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-132",
@@ -1991,7 +2127,8 @@
     "lengthM": 8,
     "heightM": 7.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-133",
@@ -2006,7 +2143,8 @@
     "lengthM": 11,
     "heightM": 8.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-134",
@@ -2021,7 +2159,8 @@
     "lengthM": 7.8,
     "heightM": 7.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-135",
@@ -2036,7 +2175,8 @@
     "lengthM": 8.8,
     "heightM": 8.1
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-136",
@@ -2051,7 +2191,8 @@
     "lengthM": 11.2,
     "heightM": 7.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-137",
@@ -2066,7 +2207,8 @@
     "lengthM": 12.1,
     "heightM": 6
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-138",
@@ -2081,7 +2223,8 @@
     "lengthM": 6.4,
     "heightM": 6.7
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-139",
@@ -2096,7 +2239,8 @@
     "lengthM": 3.1,
     "heightM": 7
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-140",
@@ -2111,7 +2255,8 @@
     "lengthM": 12.7,
     "heightM": 6.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-141",
@@ -2126,7 +2271,8 @@
     "lengthM": 8.9,
     "heightM": 7.8
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-142",
@@ -2141,7 +2287,8 @@
     "lengthM": 2.9,
     "heightM": 7.7
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-143",
@@ -2156,7 +2303,8 @@
     "lengthM": 6.1,
     "heightM": 6.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-144",
@@ -2171,7 +2319,8 @@
     "lengthM": 9.7,
     "heightM": 7.2
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-145",
@@ -2186,7 +2335,8 @@
     "lengthM": 9.2,
     "heightM": 6.9
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-146",
@@ -2201,7 +2351,8 @@
     "lengthM": 11.4,
     "heightM": 6
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-147",
@@ -2216,7 +2367,8 @@
     "lengthM": 12.7,
     "heightM": 5.5
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-148",
@@ -2231,7 +2383,8 @@
     "lengthM": 6,
     "heightM": 6.3
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-149",
@@ -2246,7 +2399,8 @@
     "lengthM": 6.4,
     "heightM": 6.4
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-150",
@@ -2261,7 +2415,8 @@
     "lengthM": 9.5,
     "heightM": 6.6
    },
-   "origin": "ign-lidar-topo"
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2022-10-07"
   },
   {
    "id": "ign-lidar-topo-151",
@@ -2277,7 +2432,16 @@
     "heightM": 3.9
    },
    "floors": 1,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#6b6874"
+   },
+   "facade": {
+    "color": "#d6cdbb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-152",
@@ -2290,10 +2454,19 @@
    "sizeM": {
     "widthM": 31.1,
     "lengthM": 7.8,
-    "heightM": 7.2
+    "heightM": 11.2818603515625
    },
-   "floors": 2,
-   "origin": "ign-lidar-topo"
+   "floors": 3,
+   "roof": {
+    "shape": "gable",
+    "riseM": 3.3971710205078125,
+    "color": "#6d7078"
+   },
+   "facade": {
+    "color": "#d0c7b6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-153",
@@ -2309,7 +2482,16 @@
     "heightM": 3.6
    },
    "floors": 1,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a3a6b1"
+   },
+   "facade": {
+    "color": "#e5dac4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-154",
@@ -2325,7 +2507,16 @@
     "heightM": 3.6
    },
    "floors": 1,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a4a2ad"
+   },
+   "facade": {
+    "color": "#bbb2a0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-155",
@@ -2341,7 +2532,16 @@
     "heightM": 7.2
    },
    "floors": 2,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#777178"
+   },
+   "facade": {
+    "color": "#d6cdbb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-156",
@@ -2354,10 +2554,20 @@
    "sizeM": {
     "widthM": 17,
     "lengthM": 5.7,
-    "heightM": 3.6
+    "heightM": 7.165748596191406
    },
    "floors": 1,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "gable",
+    "ridge": "depth",
+    "riseM": 2.950286865234375,
+    "color": "#77748a"
+   },
+   "facade": {
+    "color": "#e2d7c1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-157",
@@ -2373,7 +2583,16 @@
     "heightM": 6.7
    },
    "floors": 2,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8e898f"
+   },
+   "facade": {
+    "color": "#d3cab8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-158",
@@ -2389,7 +2608,16 @@
     "heightM": 5.5
    },
    "floors": 2,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#989696"
+   },
+   "facade": {
+    "color": "#a96149"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-159",
@@ -2405,7 +2633,16 @@
     "heightM": 3.6
    },
    "floors": 1,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#554f61"
+   },
+   "facade": {
+    "color": "#e1d6c0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-160",
@@ -2418,10 +2655,19 @@
    "sizeM": {
     "widthM": 18.4,
     "lengthM": 11.3,
-    "heightM": 5.5
+    "heightM": 7.8174896240234375
    },
    "floors": 2,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "gable",
+    "riseM": 1.4046707153320312,
+    "color": "#afb9c4"
+   },
+   "facade": {
+    "color": "#9e5a44"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-161",
@@ -2437,7 +2683,16 @@
     "heightM": 5.8
    },
    "floors": 2,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#767c87"
+   },
+   "facade": {
+    "color": "#d1c7b3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-162",
@@ -2453,7 +2708,16 @@
     "heightM": 5.8
    },
    "floors": 2,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#636076"
+   },
+   "facade": {
+    "color": "#c5bca9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-163",
@@ -2469,7 +2733,16 @@
     "heightM": 7.2
    },
    "floors": 2,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7b757d"
+   },
+   "facade": {
+    "color": "#c6bdac"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-164",
@@ -2482,10 +2755,20 @@
    "sizeM": {
     "widthM": 5,
     "lengthM": 4.5,
-    "heightM": 5.4
+    "heightM": 5.9971160888671875
    },
    "floors": 1,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "gable",
+    "ridge": "depth",
+    "riseM": 1.7828445434570312,
+    "color": "#6d6367"
+   },
+   "facade": {
+    "color": "#e4d9c3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-165",
@@ -2501,7 +2784,16 @@
     "heightM": 4.3
    },
    "floors": 2,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#615d6f"
+   },
+   "facade": {
+    "color": "#a15c46"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   },
   {
    "id": "ign-lidar-topo-166",
@@ -2517,7 +2809,5617 @@
     "heightM": 4.3
    },
    "floors": 2,
-   "origin": "ign-lidar-topo"
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#787a81"
+   },
+   "facade": {
+    "color": "#975642"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-167",
+   "kind": "building",
+   "title": "Building 17",
+   "eastM": -86.6,
+   "northM": 126.3,
+   "headingDeg": 147,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 4.2,
+    "heightM": 3.9
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8e8b98"
+   },
+   "facade": {
+    "color": "#d5cab6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-168",
+   "kind": "building",
+   "title": "Building 18",
+   "eastM": 72.1,
+   "northM": 136.3,
+   "headingDeg": 165,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17,
+    "lengthM": 7.1,
+    "heightM": 3.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#858996"
+   },
+   "facade": {
+    "color": "#876343"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-169",
+   "kind": "building",
+   "title": "Building 19",
+   "eastM": -77.5,
+   "northM": -137.4,
+   "headingDeg": 71.6,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.2,
+    "lengthM": 5.4,
+    "heightM": 3.4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#605b59"
+   },
+   "facade": {
+    "color": "#a49a89"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-170",
+   "kind": "building",
+   "title": "Building 20",
+   "eastM": -92.7,
+   "northM": 131.6,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 10.6,
+    "heightM": 3.9
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#747884"
+   },
+   "facade": {
+    "color": "#beb5a2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-171",
+   "kind": "building",
+   "title": "Building 21",
+   "eastM": 94.5,
+   "northM": 132.4,
+   "headingDeg": 147,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 4.2,
+    "heightM": 5.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#74717c"
+   },
+   "facade": {
+    "color": "#c8beab"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-172",
+   "kind": "building",
+   "title": "Building 22",
+   "eastM": -14.1,
+   "northM": 163.5,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 7.1,
+    "heightM": 4.6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#979ca4"
+   },
+   "facade": {
+    "color": "#e9ddc7"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-173",
+   "kind": "building",
+   "title": "Centre Aquatique du Pays Saint-Lois",
+   "eastM": 162.9,
+   "northM": 25.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 4.2,
+    "heightM": 8.1
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#fbfdfd"
+   },
+   "facade": {
+    "color": "#bbb3a3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-174",
+   "kind": "building",
+   "title": "Centre Aquatique du Pays Saint-Lois (2)",
+   "eastM": 165.3,
+   "northM": 12.7,
+   "headingDeg": 51,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 3.5,
+    "heightM": 8.1
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#edf5f7"
+   },
+   "facade": {
+    "color": "#dbd2bf"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-175",
+   "kind": "building",
+   "title": "Centre Aquatique du Pays Saint-Lois (3)",
+   "eastM": 167.1,
+   "northM": -24.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 4.2,
+    "heightM": 3
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ebeaf0"
+   },
+   "facade": {
+    "color": "#beb6a6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-176",
+   "kind": "building",
+   "title": "Building 23",
+   "eastM": 100.4,
+   "northM": 136.3,
+   "headingDeg": 147,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 8.5,
+    "heightM": 5.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#766d75"
+   },
+   "facade": {
+    "color": "#cdc4b0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-177",
+   "kind": "building",
+   "title": "Building 24",
+   "eastM": 9.1,
+   "northM": 170.1,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 7.8,
+    "heightM": 5.4
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a8a9af"
+   },
+   "facade": {
+    "color": "#c8beab"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-178",
+   "kind": "building",
+   "title": "Centre Aquatique du Pays Saint-Lois (4)",
+   "eastM": 165.6,
+   "northM": 42.1,
+   "headingDeg": 141,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 4.9,
+    "heightM": 8.1
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ffffff"
+   },
+   "facade": {
+    "color": "#d3cab8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-179",
+   "kind": "building",
+   "title": "Centre Aquatique du Pays Saint-Lois (5)",
+   "eastM": 169,
+   "northM": 33.5,
+   "headingDeg": 141,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 12.7,
+    "heightM": 8.1
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ffffff"
+   },
+   "facade": {
+    "color": "#e2d8c5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-180",
+   "kind": "building",
+   "title": "Building 25",
+   "eastM": -44.8,
+   "northM": 167,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 9.9,
+    "heightM": 6.2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8c909c"
+   },
+   "facade": {
+    "color": "#ddd2bd"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-181",
+   "kind": "building",
+   "title": "Building 26",
+   "eastM": -53.2,
+   "northM": 166.3,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 4.9,
+    "heightM": 6.2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#adb9bc"
+   },
+   "facade": {
+    "color": "#b9b09f"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-182",
+   "kind": "building",
+   "title": "Centre Aquatique du Pays Saint-Lois (6)",
+   "eastM": 178.9,
+   "northM": -6.3,
+   "headingDeg": 51,
+   "lit": false,
+   "sizeM": {
+    "widthM": 38.9,
+    "lengthM": 6.4,
+    "heightM": 8.1
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#f4f5f7"
+   },
+   "facade": {
+    "color": "#e0d6c3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-183",
+   "kind": "building",
+   "title": "Building 27",
+   "eastM": -106,
+   "northM": -144.5,
+   "headingDeg": 72.2,
+   "lit": false,
+   "sizeM": {
+    "widthM": 50.2,
+    "lengthM": 10,
+    "heightM": 6.3
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#77747d"
+   },
+   "facade": {
+    "color": "#dfd5c2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-184",
+   "kind": "building",
+   "title": "Building 28",
+   "eastM": -106.3,
+   "northM": 152.2,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 9.9,
+    "heightM": 4.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#848995"
+   },
+   "facade": {
+    "color": "#dbd1bc"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-185",
+   "kind": "building",
+   "title": "Building 29",
+   "eastM": 128.3,
+   "northM": 134.8,
+   "headingDeg": 147,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 3.5,
+    "heightM": 2.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#88878b"
+   },
+   "facade": {
+    "color": "#9b5943"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-186",
+   "kind": "building",
+   "title": "Building 30",
+   "eastM": 124.1,
+   "northM": 138.9,
+   "headingDeg": 150,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 7.8,
+    "heightM": 7.810615539550781
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "gable",
+    "ridge": "depth",
+    "riseM": 4.376228332519531,
+    "color": "#7f8291"
+   },
+   "facade": {
+    "color": "#965641"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-187",
+   "kind": "building",
+   "title": "Building 31",
+   "eastM": -103.3,
+   "northM": 159.2,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 2.8,
+    "heightM": 4.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#878896"
+   },
+   "facade": {
+    "color": "#b9b09e"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-188",
+   "kind": "building",
+   "title": "Building 32",
+   "eastM": 64.8,
+   "northM": 181.1,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 18.4,
+    "lengthM": 7.8,
+    "heightM": 4.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#949da5"
+   },
+   "facade": {
+    "color": "#a3947a"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-189",
+   "kind": "building",
+   "title": "Building 33",
+   "eastM": -5.8,
+   "northM": 193.4,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.1,
+    "lengthM": 7.8,
+    "heightM": 5
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9296a6"
+   },
+   "facade": {
+    "color": "#945440"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-190",
+   "kind": "building",
+   "title": "Golf Compact de Saint-Lô",
+   "eastM": -189.1,
+   "northM": -44.4,
+   "headingDeg": 24.4,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.8,
+    "lengthM": 5.1,
+    "heightM": 2.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#f1f2f3"
+   },
+   "facade": {
+    "color": "#e8deca"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-191",
+   "kind": "building",
+   "title": "Centre Aquatique du Pays Saint-Lois (7)",
+   "eastM": 194.2,
+   "northM": -23,
+   "headingDeg": 51,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 3.5,
+    "heightM": 8.1
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#f4f5f7"
+   },
+   "facade": {
+    "color": "#dbd2bf"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-192",
+   "kind": "building",
+   "title": "Centre Aquatique du Pays Saint-Lois (8)",
+   "eastM": 196.1,
+   "northM": 6.7,
+   "headingDeg": 51,
+   "lit": false,
+   "sizeM": {
+    "widthM": 62.9,
+    "lengthM": 36.8,
+    "heightM": 8.1
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9f9fa4"
+   },
+   "facade": {
+    "color": "#eae0cc"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-193",
+   "kind": "building",
+   "title": "Building 34",
+   "eastM": -62.5,
+   "northM": 187.1,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 7.8,
+    "heightM": 4.9
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#888b99"
+   },
+   "facade": {
+    "color": "#b8af9d"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-194",
+   "kind": "building",
+   "title": "Building 35",
+   "eastM": -69.2,
+   "northM": 185.7,
+   "headingDeg": 144,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 4.2,
+    "heightM": 4.9
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7b788b"
+   },
+   "facade": {
+    "color": "#c8beab"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-195",
+   "kind": "building",
+   "title": "Building 36",
+   "eastM": 96.4,
+   "northM": 178.7,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 4.2,
+    "heightM": 5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#858788"
+   },
+   "facade": {
+    "color": "#c5bba8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-196",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf",
+   "eastM": -167.7,
+   "northM": -115.2,
+   "headingDeg": 165.1,
+   "lit": false,
+   "sizeM": {
+    "widthM": 31.1,
+    "lengthM": 17.5,
+    "heightM": 7.7
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7f7e89"
+   },
+   "facade": {
+    "color": "#e2d8c5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-197",
+   "kind": "building",
+   "title": "Building 37",
+   "eastM": 92.1,
+   "northM": 183.5,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.1,
+    "heightM": 5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#838795"
+   },
+   "facade": {
+    "color": "#d4c9b5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-198",
+   "kind": "building",
+   "title": "Building 38",
+   "eastM": -118.6,
+   "northM": 169.9,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 16.3,
+    "lengthM": 8.5,
+    "heightM": 5.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#818795"
+   },
+   "facade": {
+    "color": "#bdb4a2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-199",
+   "kind": "building",
+   "title": "Centre Aquatique du Pays Saint-Lois (9)",
+   "eastM": 208.9,
+   "northM": -28.3,
+   "headingDeg": 15,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 4.2,
+    "heightM": 8.1
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#fefdf9"
+   },
+   "facade": {
+    "color": "#e5dcc8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-200",
+   "kind": "building",
+   "title": "Building 39",
+   "eastM": -40.3,
+   "northM": 207.3,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 8.5,
+    "heightM": 4.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#828492"
+   },
+   "facade": {
+    "color": "#b1654d"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-201",
+   "kind": "building",
+   "title": "Golf Compact de Saint-Lô (2)",
+   "eastM": -191.1,
+   "northM": -92.4,
+   "headingDeg": 165,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 5.7,
+    "heightM": 2.6
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#352e42"
+   },
+   "facade": {
+    "color": "#d6cdbb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-202",
+   "kind": "building",
+   "title": "Building 40",
+   "eastM": -5.6,
+   "northM": 212.2,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 7.8,
+    "heightM": 5.1
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#989da5"
+   },
+   "facade": {
+    "color": "#c1bfb8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-203",
+   "kind": "building",
+   "title": "Building 41",
+   "eastM": 58.2,
+   "northM": 204.9,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 2.8,
+    "heightM": 4.1
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#bdbfc4"
+   },
+   "facade": {
+    "color": "#cfc5b1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-204",
+   "kind": "building",
+   "title": "Building 42",
+   "eastM": 0.2,
+   "northM": 213.3,
+   "headingDeg": 81,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 3.5,
+    "heightM": 5.1
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#bdbac3"
+   },
+   "facade": {
+    "color": "#a7a59f"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-205",
+   "kind": "building",
+   "title": "Building 43",
+   "eastM": 63.2,
+   "northM": 203.9,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 4.9,
+    "heightM": 4.1
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9ea6a6"
+   },
+   "facade": {
+    "color": "#d7cdb8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-206",
+   "kind": "building",
+   "title": "Building 44",
+   "eastM": -124.8,
+   "northM": 177.9,
+   "headingDeg": 145.3,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.7,
+    "lengthM": 4.4,
+    "heightM": 5.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7c818c"
+   },
+   "facade": {
+    "color": "#c5bdac"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-207",
+   "kind": "building",
+   "title": "Centre Aquatique du Pays Saint-Lois (10)",
+   "eastM": 216.7,
+   "northM": -23.9,
+   "headingDeg": 141,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 10.6,
+    "heightM": 8.1
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ffffff"
+   },
+   "facade": {
+    "color": "#d8cfbc"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-208",
+   "kind": "building",
+   "title": "Building 45",
+   "eastM": -38.8,
+   "northM": 215.2,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 5.7,
+    "heightM": 4.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#818791"
+   },
+   "facade": {
+    "color": "#b4674e"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-209",
+   "kind": "building",
+   "title": "Building 46",
+   "eastM": 64.8,
+   "northM": 209.7,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 20.5,
+    "lengthM": 4.2,
+    "heightM": 4.1
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#929099"
+   },
+   "facade": {
+    "color": "#d8cdb8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-210",
+   "kind": "building",
+   "title": "Building 47",
+   "eastM": -80,
+   "northM": 205.1,
+   "headingDeg": 144,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 7.8,
+    "heightM": 4.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#888796"
+   },
+   "facade": {
+    "color": "#e2d7c2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-211",
+   "kind": "building",
+   "title": "Building 48",
+   "eastM": 60.1,
+   "northM": 212.6,
+   "headingDeg": 174,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 3.5,
+    "heightM": 4.1
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#534967"
+   },
+   "facade": {
+    "color": "#d6cbb7"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-212",
+   "kind": "building",
+   "title": "Building 49",
+   "eastM": -51.8,
+   "northM": 218.2,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 5.7,
+    "heightM": 5.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#605b6a"
+   },
+   "facade": {
+    "color": "#a15c46"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-213",
+   "kind": "building",
+   "title": "Centre Aquatique du Pays Saint-Lois (11)",
+   "eastM": 225.3,
+   "northM": -11.9,
+   "headingDeg": 141,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 2.8,
+    "heightM": 8.1
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a09c9d"
+   },
+   "facade": {
+    "color": "#c7bfae"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-214",
+   "kind": "building",
+   "title": "Centre Aquatique du Pays Saint-Lois (12)",
+   "eastM": 224.1,
+   "northM": -29,
+   "headingDeg": 15,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 3.5,
+    "heightM": 8.1
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ffffff"
+   },
+   "facade": {
+    "color": "#c0b8a8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-215",
+   "kind": "building",
+   "title": "Building 50",
+   "eastM": -46.7,
+   "northM": 224.7,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 5.7,
+    "heightM": 5.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#898f9c"
+   },
+   "facade": {
+    "color": "#ac624a"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-216",
+   "kind": "building",
+   "title": "Building 51",
+   "eastM": -128.4,
+   "northM": 195.3,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#acb2b8"
+   },
+   "facade": {
+    "color": "#e0d5bf"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-217",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (2)",
+   "eastM": -161.6,
+   "northM": -170,
+   "headingDeg": 60,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17,
+    "lengthM": 10.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7f7d8b"
+   },
+   "facade": {
+    "color": "#dfd5c2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-218",
+   "kind": "building",
+   "title": "Building 52",
+   "eastM": 54.2,
+   "northM": 230.1,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 9.2,
+    "heightM": 5.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#828796"
+   },
+   "facade": {
+    "color": "#a2a09b"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-219",
+   "kind": "building",
+   "title": "Building 53",
+   "eastM": -124.3,
+   "northM": 201.3,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 9.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#888e9b"
+   },
+   "facade": {
+    "color": "#bfb6a4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-220",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (3)",
+   "eastM": -100.5,
+   "northM": -215.1,
+   "headingDeg": 51,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 3.5,
+    "heightM": 5.2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#f4f3f1"
+   },
+   "facade": {
+    "color": "#bcb4a4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-221",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (4)",
+   "eastM": -119.8,
+   "northM": -206.1,
+   "headingDeg": 150,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 2.8,
+    "heightM": 5.2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ffffff"
+   },
+   "facade": {
+    "color": "#e4dac7"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-222",
+   "kind": "building",
+   "title": "Building 54",
+   "eastM": -16.8,
+   "northM": 238.3,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 4.2,
+    "heightM": 5.7
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8f9599"
+   },
+   "facade": {
+    "color": "#705238"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-223",
+   "kind": "building",
+   "title": "Building 55",
+   "eastM": -50.2,
+   "northM": 234.4,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 8.5,
+    "heightM": 5.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#bcc5d1"
+   },
+   "facade": {
+    "color": "#ac634b"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-224",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (5)",
+   "eastM": -110.9,
+   "northM": -215.2,
+   "headingDeg": 60,
+   "lit": false,
+   "sizeM": {
+    "widthM": 21.2,
+    "lengthM": 13.4,
+    "heightM": 5.2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ffffff"
+   },
+   "facade": {
+    "color": "#d7cebb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-225",
+   "kind": "building",
+   "title": "Building 56",
+   "eastM": -86.4,
+   "northM": 226.6,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 7.8,
+    "heightM": 5.9
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#757283"
+   },
+   "facade": {
+    "color": "#dfd5bf"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-226",
+   "kind": "building",
+   "title": "Building 57",
+   "eastM": -16,
+   "northM": 244.3,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 7.1,
+    "heightM": 5.7
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9299a6"
+   },
+   "facade": {
+    "color": "#78583b"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-227",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (6)",
+   "eastM": -126.3,
+   "northM": -211.8,
+   "headingDeg": 150,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 8.5,
+    "heightM": 5.2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ffffff"
+   },
+   "facade": {
+    "color": "#d8cfbd"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-228",
+   "kind": "building",
+   "title": "Building 58",
+   "eastM": 134.1,
+   "northM": 213,
+   "headingDeg": 39,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 7.8,
+    "heightM": 6.1
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8e8f98"
+   },
+   "facade": {
+    "color": "#bfb5a3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-229",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (7)",
+   "eastM": -82.7,
+   "northM": -238.2,
+   "headingDeg": 105,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17,
+    "lengthM": 17,
+    "heightM": 7.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#88858f"
+   },
+   "facade": {
+    "color": "#e2d8c5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-230",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (8)",
+   "eastM": -115.9,
+   "northM": -227.6,
+   "headingDeg": 51,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 6.4,
+    "heightM": 5.2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ffffff"
+   },
+   "facade": {
+    "color": "#ddd3c1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-231",
+   "kind": "building",
+   "title": "Building 59",
+   "eastM": -58.7,
+   "northM": 251.7,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 3.5,
+    "heightM": 5.1
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#99989d"
+   },
+   "facade": {
+    "color": "#a8a6a0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-232",
+   "kind": "building",
+   "title": "Building 60",
+   "eastM": 47.9,
+   "northM": 255.2,
+   "headingDeg": 3,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 7.1,
+    "heightM": 3.9
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9ea6ab"
+   },
+   "facade": {
+    "color": "#d1c6b2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-233",
+   "kind": "building",
+   "title": "Building 61",
+   "eastM": -5.7,
+   "northM": -259.6,
+   "headingDeg": 159,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.8,
+    "lengthM": 4.2,
+    "heightM": 5.7
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9796a0"
+   },
+   "facade": {
+    "color": "#d4cbb9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-234",
+   "kind": "building",
+   "title": "Building 62",
+   "eastM": -142,
+   "northM": 217.8,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 7.8,
+    "heightM": 5.9
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7d818f"
+   },
+   "facade": {
+    "color": "#856242"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-235",
+   "kind": "building",
+   "title": "Building 63",
+   "eastM": -100,
+   "northM": 241.8,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 7.8,
+    "heightM": 5.3
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#747483"
+   },
+   "facade": {
+    "color": "#e3d8c2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-236",
+   "kind": "building",
+   "title": "Building 64",
+   "eastM": -21.5,
+   "northM": 261.9,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 6.4,
+    "heightM": 5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9698a8"
+   },
+   "facade": {
+    "color": "#b4b2ac"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-237",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (9)",
+   "eastM": -86.4,
+   "northM": -248.5,
+   "headingDeg": 105,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 3.5,
+    "heightM": 7.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#cccccb"
+   },
+   "facade": {
+    "color": "#e8deca"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-238",
+   "kind": "building",
+   "title": "Building 65",
+   "eastM": 114.3,
+   "northM": 237.3,
+   "headingDeg": 63,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 7.1,
+    "heightM": 5.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#767583"
+   },
+   "facade": {
+    "color": "#d2c8b4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-239",
+   "kind": "building",
+   "title": "Building 66",
+   "eastM": -145.9,
+   "northM": 223.5,
+   "headingDeg": 146.3,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.2,
+    "lengthM": 4,
+    "heightM": 3.1
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#6d6a76"
+   },
+   "facade": {
+    "color": "#bdb5a5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-240",
+   "kind": "building",
+   "title": "Building 67",
+   "eastM": -63.9,
+   "northM": 259.2,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 7.8,
+    "heightM": 5.1
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#858a92"
+   },
+   "facade": {
+    "color": "#b3b1ab"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-241",
+   "kind": "building",
+   "title": "Building 68",
+   "eastM": 113.9,
+   "northM": 245.6,
+   "headingDeg": 156,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 4.2,
+    "heightM": 5.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#76777e"
+   },
+   "facade": {
+    "color": "#d4c9b5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-242",
+   "kind": "building",
+   "title": "Building 69",
+   "eastM": -165.6,
+   "northM": 215.1,
+   "headingDeg": 144.5,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.3,
+    "lengthM": 4.5,
+    "heightM": 2.1
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#c5c9cf"
+   },
+   "facade": {
+    "color": "#c0b8a8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-243",
+   "kind": "building",
+   "title": "Building 70",
+   "eastM": 65.5,
+   "northM": -263.7,
+   "headingDeg": 138,
+   "lit": false,
+   "sizeM": {
+    "widthM": 21.2,
+    "lengthM": 10.6,
+    "heightM": 5.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b0b6b9"
+   },
+   "facade": {
+    "color": "#e1d7c4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-244",
+   "kind": "building",
+   "title": "Building 71",
+   "eastM": -167.1,
+   "northM": 218.2,
+   "headingDeg": 146.3,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.3,
+    "lengthM": 3.5,
+    "heightM": 3
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8c909b"
+   },
+   "facade": {
+    "color": "#d5ccb9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-245",
+   "kind": "building",
+   "title": "Building 72",
+   "eastM": 32.1,
+   "northM": 273.9,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 6.4,
+    "heightM": 4.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a09e9e"
+   },
+   "facade": {
+    "color": "#ddd2bd"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-246",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (10)",
+   "eastM": -252.4,
+   "northM": -115.8,
+   "headingDeg": 157,
+   "lit": false,
+   "sizeM": {
+    "widthM": 25.9,
+    "lengthM": 18.8,
+    "heightM": 4.1
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7a727b"
+   },
+   "facade": {
+    "color": "#c6bdac"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-247",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (11)",
+   "eastM": -198.2,
+   "northM": -196,
+   "headingDeg": 54,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.1,
+    "lengthM": 3.5,
+    "heightM": 7.3
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#d1dee0"
+   },
+   "facade": {
+    "color": "#d3cab8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-248",
+   "kind": "building",
+   "title": "Building 73",
+   "eastM": -151.1,
+   "northM": 234.6,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 9.2,
+    "heightM": 4.3
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8a8e97"
+   },
+   "facade": {
+    "color": "#dacfba"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-249",
+   "kind": "building",
+   "title": "Building 74",
+   "eastM": 57.8,
+   "northM": -274.2,
+   "headingDeg": 48,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 4.2,
+    "heightM": 5.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#c9c6cb"
+   },
+   "facade": {
+    "color": "#d3cab8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-250",
+   "kind": "building",
+   "title": "Building 75",
+   "eastM": -113.7,
+   "northM": 257.1,
+   "headingDeg": 150,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 7.8,
+    "heightM": 6.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9d9ca9"
+   },
+   "facade": {
+    "color": "#dacfba"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-251",
+   "kind": "building",
+   "title": "Building 76",
+   "eastM": 31.3,
+   "northM": 279.8,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 5.7,
+    "heightM": 4.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8a838c"
+   },
+   "facade": {
+    "color": "#e8ddc6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-252",
+   "kind": "building",
+   "title": "Building 77",
+   "eastM": 63.3,
+   "northM": -276.1,
+   "headingDeg": 138,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 4.9,
+    "heightM": 5.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#cbcccf"
+   },
+   "facade": {
+    "color": "#ebe1cd"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-253",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (12)",
+   "eastM": -241.7,
+   "northM": -150.8,
+   "headingDeg": 57.7,
+   "lit": false,
+   "sizeM": {
+    "widthM": 30.3,
+    "lengthM": 26.7,
+    "heightM": 4.1
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#bdb9b5"
+   },
+   "facade": {
+    "color": "#c8c0af"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-254",
+   "kind": "building",
+   "title": "Building 78",
+   "eastM": 102.7,
+   "northM": 267.5,
+   "headingDeg": 48,
+   "lit": false,
+   "sizeM": {
+    "widthM": 20.5,
+    "lengthM": 7.8,
+    "heightM": 3.9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#716f7a"
+   },
+   "facade": {
+    "color": "#b8af9d"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-255",
+   "kind": "building",
+   "title": "Building 79",
+   "eastM": -65.5,
+   "northM": 279.4,
+   "headingDeg": 81,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 8.5,
+    "heightM": 6.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#848a94"
+   },
+   "facade": {
+    "color": "#d8ceb9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-256",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (13)",
+   "eastM": -143.4,
+   "northM": -251.1,
+   "headingDeg": 51,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 2.8,
+    "heightM": 6.4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#958f8f"
+   },
+   "facade": {
+    "color": "#cfc6b5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-257",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (14)",
+   "eastM": -286.8,
+   "northM": -43.7,
+   "headingDeg": 161.2,
+   "lit": false,
+   "sizeM": {
+    "widthM": 41.5,
+    "lengthM": 19.3,
+    "heightM": 7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#acb6bf"
+   },
+   "facade": {
+    "color": "#d7cebb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-258",
+   "kind": "building",
+   "title": "Building 80",
+   "eastM": 290,
+   "northM": -11.8,
+   "headingDeg": 42,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 2.8,
+    "heightM": 7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9fa2aa"
+   },
+   "facade": {
+    "color": "#d4cbb9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-259",
+   "kind": "building",
+   "title": "Building 81",
+   "eastM": 110.5,
+   "northM": 270,
+   "headingDeg": 138,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 6.4,
+    "heightM": 3.9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8e92a0"
+   },
+   "facade": {
+    "color": "#cac1ad"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-260",
+   "kind": "building",
+   "title": "Building 82",
+   "eastM": 195.1,
+   "northM": 218.6,
+   "headingDeg": 117,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 2.8,
+    "heightM": 5.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#899198"
+   },
+   "facade": {
+    "color": "#9f5b45"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-261",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (15)",
+   "eastM": -150.1,
+   "northM": -252.4,
+   "headingDeg": 51,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 9.2,
+    "heightM": 6.4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8e8b8f"
+   },
+   "facade": {
+    "color": "#e7ddc9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-262",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (16)",
+   "eastM": -209,
+   "northM": -206.5,
+   "headingDeg": 144,
+   "lit": false,
+   "sizeM": {
+    "widthM": 26.2,
+    "lengthM": 23.3,
+    "heightM": 7.3
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#dadbd9"
+   },
+   "facade": {
+    "color": "#ccc3b2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-263",
+   "kind": "building",
+   "title": "Building 83",
+   "eastM": -32.7,
+   "northM": 293.8,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 8.5,
+    "heightM": 6.1
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a8adb3"
+   },
+   "facade": {
+    "color": "#e0d5c0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-264",
+   "kind": "building",
+   "title": "Building 84",
+   "eastM": -69.8,
+   "northM": 288.9,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 5.7,
+    "heightM": 6.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7e8192"
+   },
+   "facade": {
+    "color": "#cec4b0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-265",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (17)",
+   "eastM": -183.4,
+   "northM": -233.9,
+   "headingDeg": 51,
+   "lit": false,
+   "sizeM": {
+    "widthM": 31.1,
+    "lengthM": 14.8,
+    "heightM": 4.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#969699"
+   },
+   "facade": {
+    "color": "#c8c0af"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-266",
+   "kind": "building",
+   "title": "Building 85",
+   "eastM": 202.3,
+   "northM": 221.3,
+   "headingDeg": 120,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 7.8,
+    "heightM": 5.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#979b9f"
+   },
+   "facade": {
+    "color": "#ac634b"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-267",
+   "kind": "building",
+   "title": "Building 86",
+   "eastM": -125.1,
+   "northM": 273,
+   "headingDeg": 54,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 7.8,
+    "heightM": 5.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#858a95"
+   },
+   "facade": {
+    "color": "#bab19f"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-268",
+   "kind": "building",
+   "title": "Building 87",
+   "eastM": 300.8,
+   "northM": -6.3,
+   "headingDeg": 132,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.8,
+    "lengthM": 15.6,
+    "heightM": 7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#95959b"
+   },
+   "facade": {
+    "color": "#ece2ce"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-269",
+   "kind": "building",
+   "title": "Building 88",
+   "eastM": 35.5,
+   "northM": 300,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 7.8,
+    "heightM": 3.9
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#888e95"
+   },
+   "facade": {
+    "color": "#955541"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-270",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie",
+   "eastM": 248.4,
+   "northM": -183.1,
+   "headingDeg": 133.4,
+   "lit": false,
+   "sizeM": {
+    "widthM": 27.3,
+    "lengthM": 13.3,
+    "heightM": 4.6
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#d7dee4"
+   },
+   "facade": {
+    "color": "#e1d7c4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-271",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (2)",
+   "eastM": 225.9,
+   "northM": -210.3,
+   "headingDeg": 48,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 7.1,
+    "heightM": 6.4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#87838e"
+   },
+   "facade": {
+    "color": "#e4dac6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-272",
+   "kind": "building",
+   "title": "Building 89",
+   "eastM": 16.6,
+   "northM": -309,
+   "headingDeg": 135,
+   "lit": false,
+   "sizeM": {
+    "widthM": 21.2,
+    "lengthM": 20.9,
+    "heightM": 5.9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#747a8f"
+   },
+   "facade": {
+    "color": "#bcb4a4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-273",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (3)",
+   "eastM": 180.4,
+   "northM": -252.6,
+   "headingDeg": 138,
+   "lit": false,
+   "sizeM": {
+    "widthM": 33.9,
+    "lengthM": 14.8,
+    "heightM": 5.5
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7f8a98"
+   },
+   "facade": {
+    "color": "#c6bdac"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-274",
+   "kind": "building",
+   "title": "Building 90",
+   "eastM": 311.6,
+   "northM": 1.9,
+   "headingDeg": 27,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 6.4,
+    "heightM": 7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#82818c"
+   },
+   "facade": {
+    "color": "#cac2b0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-275",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (4)",
+   "eastM": 218.7,
+   "northM": -223,
+   "headingDeg": 48,
+   "lit": false,
+   "sizeM": {
+    "widthM": 24,
+    "lengthM": 20.5,
+    "heightM": 6.4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7c8494"
+   },
+   "facade": {
+    "color": "#d5ccba"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-276",
+   "kind": "building",
+   "title": "Building 91",
+   "eastM": -176.2,
+   "northM": 257.9,
+   "headingDeg": 54,
+   "lit": false,
+   "sizeM": {
+    "widthM": 20.5,
+    "lengthM": 6.4,
+    "heightM": 2.7
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8a8a99"
+   },
+   "facade": {
+    "color": "#dfd4bf"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-277",
+   "kind": "building",
+   "title": "Building 92",
+   "eastM": 296.2,
+   "northM": 102.5,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 2.8,
+    "heightM": 8.3
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#493f54"
+   },
+   "facade": {
+    "color": "#bdb29f"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-278",
+   "kind": "building",
+   "title": "Building 93",
+   "eastM": 314.1,
+   "northM": -6.9,
+   "headingDeg": 117,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.8,
+    "lengthM": 4.9,
+    "heightM": 7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8b8b90"
+   },
+   "facade": {
+    "color": "#d4cbb9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-279",
+   "kind": "building",
+   "title": "Building 94",
+   "eastM": 157.9,
+   "northM": 272.8,
+   "headingDeg": 93,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 4.9,
+    "heightM": 4
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8e96a3"
+   },
+   "facade": {
+    "color": "#b7694f"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-280",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (18)",
+   "eastM": -146.6,
+   "northM": -279.2,
+   "headingDeg": 150,
+   "lit": false,
+   "sizeM": {
+    "widthM": 41,
+    "lengthM": 9.2,
+    "heightM": 5.9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#adbac4"
+   },
+   "facade": {
+    "color": "#e3d9c6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-281",
+   "kind": "building",
+   "title": "Building 95",
+   "eastM": 301.5,
+   "northM": 101.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 7.1,
+    "heightM": 8.3
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7b7881"
+   },
+   "facade": {
+    "color": "#cabea9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-282",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (5)",
+   "eastM": 277.1,
+   "northM": -156.3,
+   "headingDeg": 45,
+   "lit": false,
+   "sizeM": {
+    "widthM": 18.4,
+    "lengthM": 16.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#c4c0bf"
+   },
+   "facade": {
+    "color": "#c8c0af"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-283",
+   "kind": "building",
+   "title": "Building 96",
+   "eastM": -36.7,
+   "northM": 316.1,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 6.4,
+    "heightM": 6.3
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9fa5af"
+   },
+   "facade": {
+    "color": "#bcbab4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-284",
+   "kind": "building",
+   "title": "Building 97",
+   "eastM": -318.4,
+   "northM": -0.1,
+   "headingDeg": 129,
+   "lit": false,
+   "sizeM": {
+    "widthM": 51.6,
+    "lengthM": 17,
+    "heightM": 5.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#747582"
+   },
+   "facade": {
+    "color": "#cfc6b4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-285",
+   "kind": "building",
+   "title": "Building 98",
+   "eastM": -71.6,
+   "northM": 311.3,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 7.1,
+    "heightM": 4.3
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9999a9"
+   },
+   "facade": {
+    "color": "#dcd1bc"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-286",
+   "kind": "building",
+   "title": "Building 99",
+   "eastM": 164.6,
+   "northM": 275,
+   "headingDeg": 93,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.8,
+    "lengthM": 8.5,
+    "heightM": 4
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a6b0b9"
+   },
+   "facade": {
+    "color": "#995842"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-287",
+   "kind": "building",
+   "title": "Building 100",
+   "eastM": 171.5,
+   "northM": 272.1,
+   "headingDeg": 93,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 5.7,
+    "heightM": 4
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b5c0ca"
+   },
+   "facade": {
+    "color": "#9f5b45"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-288",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (6)",
+   "eastM": 181.8,
+   "northM": -269,
+   "headingDeg": 135,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 11.3,
+    "heightM": 5.5
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#959ea6"
+   },
+   "facade": {
+    "color": "#ccc4b2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-289",
+   "kind": "building",
+   "title": "Building 101",
+   "eastM": 214.4,
+   "northM": 244.1,
+   "headingDeg": 177,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 7.8,
+    "heightM": 4.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#716f7e"
+   },
+   "facade": {
+    "color": "#d9ceba"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-290",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (7)",
+   "eastM": 162.5,
+   "northM": -284.4,
+   "headingDeg": 137,
+   "lit": false,
+   "sizeM": {
+    "widthM": 36.4,
+    "lengthM": 30.6,
+    "heightM": 6.4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#929299"
+   },
+   "facade": {
+    "color": "#e8decb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-291",
+   "kind": "building",
+   "title": "Building 102",
+   "eastM": 24.3,
+   "northM": 328.1,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 7.1,
+    "heightM": 4.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8a8c9b"
+   },
+   "facade": {
+    "color": "#c4bba8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-292",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (8)",
+   "eastM": 254.2,
+   "northM": -211.1,
+   "headingDeg": 159,
+   "lit": false,
+   "sizeM": {
+    "widthM": 30.4,
+    "lengthM": 7.1,
+    "heightM": 6.6
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b7bdc2"
+   },
+   "facade": {
+    "color": "#dbd2bf"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-293",
+   "kind": "building",
+   "title": "Building 103",
+   "eastM": -330.1,
+   "northM": 37.7,
+   "headingDeg": 39,
+   "lit": false,
+   "sizeM": {
+    "widthM": 48.8,
+    "lengthM": 6.4,
+    "heightM": 5.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7c7e8e"
+   },
+   "facade": {
+    "color": "#d7cebc"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-294",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (9)",
+   "eastM": 121.8,
+   "northM": -309.2,
+   "headingDeg": 135,
+   "lit": false,
+   "sizeM": {
+    "widthM": 34.6,
+    "lengthM": 3.5,
+    "heightM": 6.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#85828c"
+   },
+   "facade": {
+    "color": "#ccc3b2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-295",
+   "kind": "building",
+   "title": "Building 104",
+   "eastM": -186.9,
+   "northM": 275.2,
+   "headingDeg": 146.3,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.7,
+    "lengthM": 3.6,
+    "heightM": 2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a8a8b0"
+   },
+   "facade": {
+    "color": "#bdb5a5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-296",
+   "kind": "building",
+   "title": "Building 105",
+   "eastM": -183.6,
+   "northM": 277.7,
+   "headingDeg": 147,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 3.5,
+    "heightM": 5.7
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#605a69"
+   },
+   "facade": {
+    "color": "#c4c2bb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-297",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (10)",
+   "eastM": 247.2,
+   "northM": -224.4,
+   "headingDeg": 69,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 7.8,
+    "heightM": 6.6
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9f9c9f"
+   },
+   "facade": {
+    "color": "#cac2b0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-298",
+   "kind": "building",
+   "title": "Building 106",
+   "eastM": 325.9,
+   "northM": 74.1,
+   "headingDeg": 177,
+   "lit": false,
+   "sizeM": {
+    "widthM": 33.2,
+    "lengthM": 6.4,
+    "heightM": 8.2
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#926869"
+   },
+   "facade": {
+    "color": "#e4dbc7"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-299",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (11)",
+   "eastM": 149.1,
+   "northM": -299.2,
+   "headingDeg": 48,
+   "lit": false,
+   "sizeM": {
+    "widthM": 20.5,
+    "lengthM": 4.9,
+    "heightM": 3
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#838b96"
+   },
+   "facade": {
+    "color": "#c7bfae"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-300",
+   "kind": "building",
+   "title": "Building 107",
+   "eastM": -179.3,
+   "northM": 282.2,
+   "headingDeg": 147,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 6.4,
+    "heightM": 5.7
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#888794"
+   },
+   "facade": {
+    "color": "#bab8b2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-301",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (12)",
+   "eastM": 313.1,
+   "northM": -119.7,
+   "headingDeg": 134.2,
+   "lit": false,
+   "sizeM": {
+    "widthM": 56.3,
+    "lengthM": 17,
+    "heightM": 5.3
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#959499"
+   },
+   "facade": {
+    "color": "#d7cebb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-302",
+   "kind": "building",
+   "title": "Building 108",
+   "eastM": -335.3,
+   "northM": -21.4,
+   "headingDeg": 39,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 2.8,
+    "heightM": 5.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#eeeee8"
+   },
+   "facade": {
+    "color": "#e0d6c3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-303",
+   "kind": "building",
+   "title": "Building 109",
+   "eastM": -334.5,
+   "northM": 33.4,
+   "headingDeg": 39,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 5.7,
+    "heightM": 5.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9d9ca0"
+   },
+   "facade": {
+    "color": "#bab3a3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-304",
+   "kind": "building",
+   "title": "Building 110",
+   "eastM": 74.8,
+   "northM": 328.8,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 2.8,
+    "heightM": 4.4
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#645d68"
+   },
+   "facade": {
+    "color": "#866343"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-305",
+   "kind": "building",
+   "title": "Zac du Bois Ardent",
+   "eastM": -251.2,
+   "northM": -227.1,
+   "headingDeg": 51,
+   "lit": false,
+   "sizeM": {
+    "widthM": 30.4,
+    "lengthM": 6.4,
+    "heightM": 3.9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#919099"
+   },
+   "facade": {
+    "color": "#bdb5a5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-306",
+   "kind": "building",
+   "title": "Building 111",
+   "eastM": -45.6,
+   "northM": 337.2,
+   "headingDeg": 135,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.9,
+    "lengthM": 9.2,
+    "heightM": 4.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9c9fa4"
+   },
+   "facade": {
+    "color": "#beb5a3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-307",
+   "kind": "building",
+   "title": "Building 112",
+   "eastM": 78.2,
+   "northM": 331.3,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 4.9,
+    "heightM": 4.4
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#78757f"
+   },
+   "facade": {
+    "color": "#846142"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-308",
+   "kind": "building",
+   "title": "Building 113",
+   "eastM": -189.6,
+   "northM": 283.1,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 9.2,
+    "heightM": 5.7
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#898e9c"
+   },
+   "facade": {
+    "color": "#a19f9a"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-309",
+   "kind": "building",
+   "title": "Building 114",
+   "eastM": 70.4,
+   "northM": 334.7,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 8.5,
+    "heightM": 4.4
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7d788a"
+   },
+   "facade": {
+    "color": "#826041"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-310",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (19)",
+   "eastM": -72,
+   "northM": -334.5,
+   "headingDeg": 30,
+   "lit": false,
+   "sizeM": {
+    "widthM": 39.6,
+    "lengthM": 12.7,
+    "heightM": 7.6
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#928f91"
+   },
+   "facade": {
+    "color": "#beb6a6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-311",
+   "kind": "building",
+   "title": "Building 115",
+   "eastM": 106.4,
+   "northM": 328,
+   "headingDeg": 33,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 7.8,
+    "heightM": 5.9
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#767683"
+   },
+   "facade": {
+    "color": "#b4674e"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-312",
+   "kind": "building",
+   "title": "Zac du Bois Ardent (2)",
+   "eastM": -297,
+   "northM": -176.8,
+   "headingDeg": 177,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 3.5,
+    "heightM": 5.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b1b6be"
+   },
+   "facade": {
+    "color": "#e4dbc7"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-313",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (20)",
+   "eastM": -87.8,
+   "northM": -334.4,
+   "headingDeg": 36,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 2.8,
+    "heightM": 7.6
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8e8283"
+   },
+   "facade": {
+    "color": "#c7bead"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-314",
+   "kind": "building",
+   "title": "Zac du Bois Ardent (3)",
+   "eastM": -259.4,
+   "northM": -228.7,
+   "headingDeg": 48,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 8.5,
+    "heightM": 3.9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#919297"
+   },
+   "facade": {
+    "color": "#e7ddca"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-315",
+   "kind": "building",
+   "title": "Building 116",
+   "eastM": -314.3,
+   "northM": -145.2,
+   "headingDeg": 141,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 7.1,
+    "heightM": 4.6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7b757f"
+   },
+   "facade": {
+    "color": "#cec4b0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-316",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (13)",
+   "eastM": 205.5,
+   "northM": -278.9,
+   "headingDeg": 135,
+   "lit": false,
+   "sizeM": {
+    "widthM": 35.7,
+    "lengthM": 23.7,
+    "heightM": 4.9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#99989c"
+   },
+   "facade": {
+    "color": "#dfd6c3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-317",
+   "kind": "building",
+   "title": "Building 117",
+   "eastM": 116.9,
+   "northM": 326.4,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 4.9,
+    "heightM": 5.9
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#979697"
+   },
+   "facade": {
+    "color": "#ac624a"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-318",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (21)",
+   "eastM": -52,
+   "northM": -342.9,
+   "headingDeg": 126,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 3.5,
+    "heightM": 7.6
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8f929b"
+   },
+   "facade": {
+    "color": "#e4dbc7"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-319",
+   "kind": "building",
+   "title": "Building 118",
+   "eastM": -326.3,
+   "northM": -121.7,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 6.4,
+    "heightM": 4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#727281"
+   },
+   "facade": {
+    "color": "#dcd2bd"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-320",
+   "kind": "building",
+   "title": "Building 119",
+   "eastM": -332.2,
+   "northM": -105.6,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.1,
+    "heightM": 5.3
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#757685"
+   },
+   "facade": {
+    "color": "#ddd2bd"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-321",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (14)",
+   "eastM": 259.3,
+   "northM": -235.8,
+   "headingDeg": 159,
+   "lit": false,
+   "sizeM": {
+    "widthM": 31.1,
+    "lengthM": 15.6,
+    "heightM": 7.6
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#979497"
+   },
+   "facade": {
+    "color": "#d1c8b6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-322",
+   "kind": "building",
+   "title": "Parc d'Activités du Golf (22)",
+   "eastM": -54.9,
+   "northM": -346.7,
+   "headingDeg": 144.9,
+   "lit": false,
+   "sizeM": {
+    "widthM": 18.5,
+    "lengthM": 4.4,
+    "heightM": 7.5
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8f9091"
+   },
+   "facade": {
+    "color": "#d0c7b6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-323",
+   "kind": "building",
+   "title": "Building 120",
+   "eastM": 348,
+   "northM": 52.3,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 6.4,
+    "heightM": 5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#60545c"
+   },
+   "facade": {
+    "color": "#cec5b4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-324",
+   "kind": "building",
+   "title": "Building 121",
+   "eastM": 228.4,
+   "northM": 268.8,
+   "headingDeg": 102,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 3.5,
+    "heightM": 6.6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7f7d89"
+   },
+   "facade": {
+    "color": "#acaaa4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-325",
+   "kind": "building",
+   "title": "Building 122",
+   "eastM": 2.3,
+   "northM": 352.9,
+   "headingDeg": 75,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 8.5,
+    "heightM": 5.1
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#999da4"
+   },
+   "facade": {
+    "color": "#c6c4bd"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-326",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (15)",
+   "eastM": 142.5,
+   "northM": -323.5,
+   "headingDeg": 45,
+   "lit": false,
+   "sizeM": {
+    "widthM": 46,
+    "lengthM": 36.8,
+    "heightM": 6.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#817c85"
+   },
+   "facade": {
+    "color": "#cac1b0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-327",
+   "kind": "building",
+   "title": "Building 123",
+   "eastM": -343.7,
+   "northM": -87.2,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.8,
+    "heightM": 4.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#848289"
+   },
+   "facade": {
+    "color": "#bcb3a1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-328",
+   "kind": "building",
+   "title": "Zac du Bois Ardent (4)",
+   "eastM": -308,
+   "northM": -177.4,
+   "headingDeg": 177,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 3.5,
+    "heightM": 5.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a6afbd"
+   },
+   "facade": {
+    "color": "#c4bcab"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-329",
+   "kind": "building",
+   "title": "Zac du Bois Ardent (5)",
+   "eastM": -302,
+   "northM": -189.9,
+   "headingDeg": 87,
+   "lit": false,
+   "sizeM": {
+    "widthM": 22.6,
+    "lengthM": 15.6,
+    "heightM": 5.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#aabac4"
+   },
+   "facade": {
+    "color": "#e7deca"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-330",
+   "kind": "building",
+   "title": "Building 124",
+   "eastM": 228.7,
+   "northM": 275,
+   "headingDeg": 99.5,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10,
+    "lengthM": 6.1,
+    "heightM": 3.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#abb6bd"
+   },
+   "facade": {
+    "color": "#bab2a2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-331",
+   "kind": "building",
+   "title": "Building 125",
+   "eastM": 346.3,
+   "northM": 89.8,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.5,
+    "lengthM": 6.5,
+    "heightM": 9
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#414047"
+   },
+   "facade": {
+    "color": "#c0b7a7"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-332",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (16)",
+   "eastM": 319.8,
+   "northM": -160.8,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 16.5,
+    "lengthM": 15.5,
+    "heightM": 3.6
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#918f95"
+   },
+   "facade": {
+    "color": "#cbc3b1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-333",
+   "kind": "building",
+   "title": "Building 126",
+   "eastM": 235.1,
+   "northM": 271,
+   "headingDeg": 102,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 9.2,
+    "heightM": 6.6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#979ca4"
+   },
+   "facade": {
+    "color": "#c4c2bc"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-334",
+   "kind": "building",
+   "title": "Building 127",
+   "eastM": -201.1,
+   "northM": 297.2,
+   "headingDeg": 105,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 2.8,
+    "heightM": 4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#82888f"
+   },
+   "facade": {
+    "color": "#975641"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-335",
+   "kind": "building",
+   "title": "Building 128",
+   "eastM": 241,
+   "northM": 266.5,
+   "headingDeg": 102,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 4.2,
+    "heightM": 6.6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#817c8f"
+   },
+   "facade": {
+    "color": "#b9b7b1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-336",
+   "kind": "building",
+   "title": "Building 129",
+   "eastM": 26.4,
+   "northM": 359.9,
+   "headingDeg": 69,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 8.5,
+    "heightM": 5.3
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#838792"
+   },
+   "facade": {
+    "color": "#dad0bb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-337",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (17)",
+   "eastM": 311.5,
+   "northM": -182.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 18,
+    "lengthM": 11,
+    "heightM": 4.2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8e858a"
+   },
+   "facade": {
+    "color": "#d2c9b7"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-338",
+   "kind": "building",
+   "title": "Building 130",
+   "eastM": -354.6,
+   "northM": -74.2,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.8,
+    "heightM": 4
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8a8890"
+   },
+   "facade": {
+    "color": "#dcd2bc"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-339",
+   "kind": "building",
+   "title": "Building 131",
+   "eastM": -208.6,
+   "northM": 299.5,
+   "headingDeg": 15,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 8.5,
+    "heightM": 4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7b7b8b"
+   },
+   "facade": {
+    "color": "#aa614a"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-340",
+   "kind": "building",
+   "title": "Zac du Bois Ardent (6)",
+   "eastM": -262.4,
+   "northM": -254.1,
+   "headingDeg": 51,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 5.7,
+    "heightM": 4.4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ffffff"
+   },
+   "facade": {
+    "color": "#cdc4b3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-341",
+   "kind": "building",
+   "title": "Building 132",
+   "eastM": 242.6,
+   "northM": 273.7,
+   "headingDeg": 101.3,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.4,
+    "lengthM": 4.6,
+    "heightM": 3.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#abacb6"
+   },
+   "facade": {
+    "color": "#c2b9a9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-342",
+   "kind": "building",
+   "title": "Building 133",
+   "eastM": 191.8,
+   "northM": 311.5,
+   "headingDeg": 6,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 4.2,
+    "heightM": 5.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7a7585"
+   },
+   "facade": {
+    "color": "#dfd5c1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-343",
+   "kind": "building",
+   "title": "Zac du Bois Ardent (7)",
+   "eastM": -306.2,
+   "northM": -203.8,
+   "headingDeg": 177,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 4.9,
+    "heightM": 5.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#adbeca"
+   },
+   "facade": {
+    "color": "#bbb3a3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-344",
+   "kind": "building",
+   "title": "Building 134",
+   "eastM": -335.2,
+   "northM": -152.4,
+   "headingDeg": 147,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 7.8,
+    "heightM": 5.6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#564e67"
+   },
+   "facade": {
+    "color": "#e4d9c3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-345",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (18)",
+   "eastM": 70.3,
+   "northM": -361.9,
+   "headingDeg": 33,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 5.7,
+    "heightM": 6.5
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a4acb6"
+   },
+   "facade": {
+    "color": "#c9c1af"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-346",
+   "kind": "building",
+   "title": "Building 135",
+   "eastM": -363.8,
+   "northM": -62.7,
+   "headingDeg": 54,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.8,
+    "heightM": 4.3
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7d818e"
+   },
+   "facade": {
+    "color": "#cac0ad"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-347",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (19)",
+   "eastM": 332.8,
+   "northM": -160.6,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 16.5,
+    "lengthM": 10.5,
+    "heightM": 4.1
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#979298"
+   },
+   "facade": {
+    "color": "#bdb5a5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-348",
+   "kind": "building",
+   "title": "Building 136",
+   "eastM": 64.7,
+   "northM": 364.3,
+   "headingDeg": 15,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 2.8,
+    "heightM": 4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b3b9bd"
+   },
+   "facade": {
+    "color": "#bfb6a4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-349",
+   "kind": "building",
+   "title": "Building 137",
+   "eastM": 80.8,
+   "northM": 361.1,
+   "headingDeg": 105,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 7.1,
+    "heightM": 4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a4a4ab"
+   },
+   "facade": {
+    "color": "#c6bca9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-350",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (20)",
+   "eastM": 348.6,
+   "northM": -126.8,
+   "headingDeg": 45,
+   "lit": false,
+   "sizeM": {
+    "widthM": 20.9,
+    "lengthM": 17,
+    "heightM": 6.9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a8a4a6"
+   },
+   "facade": {
+    "color": "#d7cebb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-351",
+   "kind": "building",
+   "title": "Building 138",
+   "eastM": -115.8,
+   "northM": 352.5,
+   "headingDeg": 144,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 8.5,
+    "heightM": 4.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a3a2a0"
+   },
+   "facade": {
+    "color": "#b6684f"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-352",
+   "kind": "building",
+   "title": "Building 139",
+   "eastM": -94.9,
+   "northM": 359.5,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 7.1,
+    "heightM": 5.9
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a8acb3"
+   },
+   "facade": {
+    "color": "#cec4b1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-353",
+   "kind": "building",
+   "title": "Building 140",
+   "eastM": -370.2,
+   "northM": 41,
+   "headingDeg": 129,
+   "lit": false,
+   "sizeM": {
+    "widthM": 51.6,
+    "lengthM": 17.7,
+    "heightM": 5.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7b7e88"
+   },
+   "facade": {
+    "color": "#e8deca"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-354",
+   "kind": "building",
+   "title": "Building 141",
+   "eastM": 70.1,
+   "northM": 367.7,
+   "headingDeg": 18,
+   "lit": false,
+   "sizeM": {
+    "widthM": 16.3,
+    "lengthM": 7.1,
+    "heightM": 4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#90929f"
+   },
+   "facade": {
+    "color": "#cac0ad"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-355",
+   "kind": "building",
+   "title": "Building 142",
+   "eastM": -371.5,
+   "northM": -46.5,
+   "headingDeg": 54,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.8,
+    "heightM": 4.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#817e85"
+   },
+   "facade": {
+    "color": "#e9dec7"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-356",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (21)",
+   "eastM": 169.8,
+   "northM": -333.7,
+   "headingDeg": 135,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 7.1,
+    "heightM": 6.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#969195"
+   },
+   "facade": {
+    "color": "#c4bcab"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-357",
+   "kind": "building",
+   "title": "Building 143",
+   "eastM": -107.9,
+   "northM": 359.1,
+   "headingDeg": 81,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 5.7,
+    "heightM": 4.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9192a2"
+   },
+   "facade": {
+    "color": "#b86950"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-358",
+   "kind": "building",
+   "title": "Building 144",
+   "eastM": 189.7,
+   "northM": 323.7,
+   "headingDeg": 54,
+   "lit": false,
+   "sizeM": {
+    "widthM": 21.2,
+    "lengthM": 7.8,
+    "heightM": 5.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#818492"
+   },
+   "facade": {
+    "color": "#c0b7a6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-359",
+   "kind": "building",
+   "title": "Building 145",
+   "eastM": -141.2,
+   "northM": 348,
+   "headingDeg": 45,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 2.8,
+    "heightM": 4.6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b3b6b8"
+   },
+   "facade": {
+    "color": "#aeaca6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-360",
+   "kind": "building",
+   "title": "Zac du Bois Ardent (8)",
+   "eastM": -316.5,
+   "northM": -202.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 9.9,
+    "heightM": 5.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b0bfc9"
+   },
+   "facade": {
+    "color": "#dbd2bf"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-361",
+   "kind": "building",
+   "title": "Building 146",
+   "eastM": -148.1,
+   "northM": 345.4,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.8,
+    "heightM": 4.6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8e8f99"
+   },
+   "facade": {
+    "color": "#bebcb5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-362",
+   "kind": "building",
+   "title": "Building 147",
+   "eastM": -342.5,
+   "northM": -154.8,
+   "headingDeg": 54,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 2.8,
+    "heightM": 5.6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#4d4659"
+   },
+   "facade": {
+    "color": "#c1b8a5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-363",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (22)",
+   "eastM": 314.7,
+   "northM": -206.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 31.8,
+    "lengthM": 10.6,
+    "heightM": 4.2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#999899"
+   },
+   "facade": {
+    "color": "#c3baaa"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-364",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (23)",
+   "eastM": 369.1,
+   "northM": -84.5,
+   "headingDeg": 133.4,
+   "lit": false,
+   "sizeM": {
+    "widthM": 54,
+    "lengthM": 40.3,
+    "heightM": 6.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a8b2b9"
+   },
+   "facade": {
+    "color": "#e5dbc8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-365",
+   "kind": "building",
+   "title": "Building 148",
+   "eastM": -357.7,
+   "northM": -125.9,
+   "headingDeg": 42,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 7.8,
+    "heightM": 2.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8b8992"
+   },
+   "facade": {
+    "color": "#ddd2bd"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-366",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (24)",
+   "eastM": 92.9,
+   "northM": -369.8,
+   "headingDeg": 33,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 12,
+    "heightM": 6.5
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#bac0cb"
+   },
+   "facade": {
+    "color": "#bdb5a5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-367",
+   "kind": "building",
+   "title": "Building 149",
+   "eastM": -364.7,
+   "northM": -111.4,
+   "headingDeg": 54,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 5.7,
+    "heightM": 4
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9b99a2"
+   },
+   "facade": {
+    "color": "#d4c9b5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-368",
+   "kind": "building",
+   "title": "Building 150",
+   "eastM": 65.6,
+   "northM": 375.8,
+   "headingDeg": 15,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 5.7,
+    "heightM": 4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8a8ba0"
+   },
+   "facade": {
+    "color": "#cac0ad"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-369",
+   "kind": "building",
+   "title": "Zac du Bois Ardent (9)",
+   "eastM": -324.3,
+   "northM": -201.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 2.8,
+    "heightM": 5.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#abb7c2"
+   },
+   "facade": {
+    "color": "#c9c0af"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-370",
+   "kind": "building",
+   "title": "Zac du Bois Ardent (10)",
+   "eastM": -329.4,
+   "northM": -193.1,
+   "headingDeg": 87,
+   "lit": false,
+   "sizeM": {
+    "widthM": 21.9,
+    "lengthM": 7.1,
+    "heightM": 5.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#afb7bf"
+   },
+   "facade": {
+    "color": "#e1d8c5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-371",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (25)",
+   "eastM": 73.5,
+   "northM": -375.7,
+   "headingDeg": 123,
+   "lit": false,
+   "sizeM": {
+    "widthM": 38.9,
+    "lengthM": 13.4,
+    "heightM": 6.5
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#99a3b2"
+   },
+   "facade": {
+    "color": "#beb6a6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-372",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (26)",
+   "eastM": 85.4,
+   "northM": -375.5,
+   "headingDeg": 123,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 6.4,
+    "heightM": 6.5
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b2bcc3"
+   },
+   "facade": {
+    "color": "#d8cfbd"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-373",
+   "kind": "building",
+   "title": "Building 151",
+   "eastM": -385.6,
+   "northM": -26.2,
+   "headingDeg": 54,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.8,
+    "heightM": 4.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#878791"
+   },
+   "facade": {
+    "color": "#e4d9c3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-374",
+   "kind": "building",
+   "title": "Building 152",
+   "eastM": -371.3,
+   "northM": -109.5,
+   "headingDeg": 54,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 2.8,
+    "heightM": 4
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a09ca3"
+   },
+   "facade": {
+    "color": "#dcd1bc"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-375",
+   "kind": "building",
+   "title": "Building 153",
+   "eastM": -172.7,
+   "northM": 348.3,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 11.3,
+    "heightM": 2.4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#777f8c"
+   },
+   "facade": {
+    "color": "#e1d7c4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-376",
+   "kind": "building",
+   "title": "Building 154",
+   "eastM": -351.8,
+   "northM": -165.6,
+   "headingDeg": 153,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 7.1,
+    "heightM": 6.1
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8c9197"
+   },
+   "facade": {
+    "color": "#a8a6a1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-377",
+   "kind": "building",
+   "title": "Zac du Bois Ardent (11)",
+   "eastM": -330.3,
+   "northM": -205.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 2.8,
+    "heightM": 5.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a8acb5"
+   },
+   "facade": {
+    "color": "#ebe1cd"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-378",
+   "kind": "building",
+   "title": "Building 155",
+   "eastM": -379.6,
+   "northM": -89.7,
+   "headingDeg": 54,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 7.8,
+    "heightM": 4.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#918c95"
+   },
+   "facade": {
+    "color": "#cbc2ae"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-379",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (27)",
+   "eastM": 342.3,
+   "northM": -187.4,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 21,
+    "lengthM": 16.5,
+    "heightM": 4.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9f9d9f"
+   },
+   "facade": {
+    "color": "#e3d9c6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-380",
+   "kind": "building",
+   "title": "Building 156",
+   "eastM": -384.4,
+   "northM": -69.5,
+   "headingDeg": 57,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.8,
+    "heightM": 4.4
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#85828e"
+   },
+   "facade": {
+    "color": "#d8ceb9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-381",
+   "kind": "building",
+   "title": "Esix Normandie Saint-Lô",
+   "eastM": -199.1,
+   "northM": -336.4,
+   "headingDeg": 24,
+   "lit": false,
+   "sizeM": {
+    "widthM": 65.1,
+    "lengthM": 31.1,
+    "heightM": 7.5
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#87888f"
+   },
+   "facade": {
+    "color": "#dad1be"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-382",
+   "kind": "building",
+   "title": "Building 157",
+   "eastM": 181.4,
+   "northM": 346.7,
+   "headingDeg": 6,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 10.6,
+    "heightM": 3.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#6f6d7e"
+   },
+   "facade": {
+    "color": "#ded3be"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-383",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (28)",
+   "eastM": 364.9,
+   "northM": -142.8,
+   "headingDeg": 45,
+   "lit": false,
+   "sizeM": {
+    "widthM": 25.8,
+    "lengthM": 17,
+    "heightM": 6.2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9d9d9f"
+   },
+   "facade": {
+    "color": "#d1c8b6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-384",
+   "kind": "building",
+   "title": "Building 158",
+   "eastM": -391.7,
+   "northM": -17.6,
+   "headingDeg": 54,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.8,
+    "heightM": 4.7
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8f8e96"
+   },
+   "facade": {
+    "color": "#c8bfab"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-385",
+   "kind": "building",
+   "title": "Building 159",
+   "eastM": -180.3,
+   "northM": 348.5,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 3.5,
+    "heightM": 2.4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8f8a97"
+   },
+   "facade": {
+    "color": "#d0c8b6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-386",
+   "kind": "building",
+   "title": "Zone d'Activités de la Chevalerie (29)",
+   "eastM": 327.4,
+   "northM": -216.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 6.4,
+    "heightM": 4.2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8b878f"
+   },
+   "facade": {
+    "color": "#c9c1b0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-387",
+   "kind": "building",
+   "title": "Building 160",
+   "eastM": -57.9,
+   "northM": 391.5,
+   "headingDeg": 169.4,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.8,
+    "lengthM": 8.7,
+    "heightM": 4.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#979ea9"
+   },
+   "facade": {
+    "color": "#e0d5bf"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-388",
+   "kind": "building",
+   "title": "Building 161",
+   "eastM": -73.3,
+   "northM": 390.2,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 8.5,
+    "heightM": 4.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7f8994"
+   },
+   "facade": {
+    "color": "#d1c7b3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-389",
+   "kind": "building",
+   "title": "Building 162",
+   "eastM": -93.3,
+   "northM": 386.7,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.1,
+    "lengthM": 7.1,
+    "heightM": 4.9
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#858991"
+   },
+   "facade": {
+    "color": "#725438"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
+  },
+  {
+   "id": "ign-lidar-topo-390",
+   "kind": "building",
+   "title": "Building 163",
+   "eastM": -398.1,
+   "northM": -17.8,
+   "headingDeg": 54,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 2.8,
+    "heightM": 4.7
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#929297"
+   },
+   "facade": {
+    "color": "#bbb2a0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2026-05-23"
   }
  ]
 }

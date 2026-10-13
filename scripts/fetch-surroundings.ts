@@ -5,7 +5,9 @@
  *
  *   node --import tsx scripts/fetch-surroundings.ts <out.json> <lat> <lng> [radiusM]
  *
- * The result is the survey of the day it is run (the services do not say the day they were flown): a recording that carries it says so in its
+ * No street lamps are asked for: whether a town's lamps are lit at the hour of a recording is the recording's to say, and a frozen scene should not light a night it cannot vouch for.
+ *
+ * The result is the survey of the day it is run, with the days the services say they were flown or drawn (`dates`): a recording that carries it says so in its
  * sources, and the scenery stays what it was when frozen, so that a recording does not change under its readers when the IGN's data does.
  *
  * Names of the generic objects are in English ("Tree 3", "Bridge (Rue de Carentan)"); what the survey names is as it names it. A recording's
@@ -22,11 +24,11 @@ import type { SurveyedKind } from "../src/render3d/terrain/SurveyedDecor.js"
 const run = promisify(execFile)
 
 class SurroundingsFetch {
-  private static readonly KIND_NAMES: Record<SurveyedKind, string> = { tree: "Tree", building: "Building", bridge: "Bridge", wire: "Overhead line" }
+  private static readonly KIND_NAMES: Record<SurveyedKind, string> = { tree: "Tree", building: "Building", bridge: "Bridge", wire: "Overhead line", streetlight: "Streetlight" }
 
   /** `curl`, because node's own fetch does not authenticate to a proxy declared only in the environment (see build-road-archive.ts). */
   private static readonly curlFetch = async (input: RequestInfo | URL): Promise<Response> => {
-    const { stdout } = await run("curl", ["-s", "--fail", "--retry", "3", "-m", "120", String(input)], { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 })
+    const { stdout } = await run("curl", ["-s", "--fail", "--retry", "3", "-m", "120", "-A", "UfoAtHome-build", String(input)], { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 })
     return {
       ok: true,
       status: 200,
@@ -50,6 +52,8 @@ class SurroundingsFetch {
       centre,
       radiusM,
       fetchedOn: new Date().toISOString().slice(0, 10),
+      // The days the services give for what they drew from (see SurveyDates): the laser flight, the photograph, the map.
+      dates: found.dates,
       decor: planted
     }, null, 1) + "\n", "utf8")
     const count = (kind: string): number => planted.filter(object => object.kind === kind).length

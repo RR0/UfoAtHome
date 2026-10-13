@@ -387,14 +387,20 @@ def surroundings():
 
 
 def surveys():
-    """The surveys the scenery was taken from, as sources: both services give the day they are asked and not the day they were flown or drawn."""
+    """The surveys the scenery was taken from, as sources, each with the day the service says it was flown or drawn (the laser's flight, the
+    aerial photograph's, the map's last edition): the scenery is of those days, which are after the night he describes, and says so."""
     found = json.loads(SURROUNDINGS.read_text())
-    day = found["fetchedOn"]
+    dates = found.get("dates", {})
+    fetched = found["fetchedOn"]
     return [
-        {"title": "LiDAR HD, canopy height model and classification (the trees, and the heights of what stands round the spot)",
-         "url": "https://geoservices.ign.fr/lidarhd", "publication": {"publisher": "IGN", "time": day}},
-        {"title": "BD TOPO (the buildings with their names and heights, the bridges and the lines round the spot)",
-         "url": "https://geoservices.ign.fr/bdtopo", "publication": {"publisher": "IGN", "time": day}},
+        {"title": "LiDAR HD, canopy height model and classification (the trees, the heights and the roofs of what stands round the spot), flown "
+                  + dates.get("laser", "on a day the service does not give"),
+         "url": "https://geoservices.ign.fr/lidarhd", "publication": {"publisher": "IGN", "time": dates.get("laser", fetched)}},
+        {"title": "BD TOPO (the buildings with their names, heights and materials, the bridges and the lines round the spot), edited "
+                  + dates.get("map", "on a day the service does not give"),
+         "url": "https://geoservices.ign.fr/bdtopo", "publication": {"publisher": "IGN", "time": dates.get("map", fetched)}},
+        {"title": "Aerial photograph of the IGN (the colour of the roofs), flown " + dates.get("photo", "on a day the service does not give"),
+         "url": "https://geoservices.ign.fr/bdortho", "publication": {"publisher": "IGN", "time": dates.get("photo", fetched)}},
     ]
 
 
