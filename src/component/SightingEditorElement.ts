@@ -6964,6 +6964,8 @@ export class SightingEditorElement extends HTMLElement {
    */
   private async fillScenerySources(): Promise<void> {
     const { SURROUNDINGS_SOURCES, SurroundingsSources } = await import("../render3d/terrain/surroundingsSources.js")
+    // The editor can be gone (a test torn down, a page left) while the chunk loads: there is nothing to fill, and no document to make options with.
+    if (!this.isConnected) return
     const none = document.createElement("option")
     none.value = SightingEditorElement.NO_SCENERY
     none.id = "option-scenery-none"
