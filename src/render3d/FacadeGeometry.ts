@@ -9,7 +9,13 @@ import { FacadeTexture } from "./FacadeTexture.js"
  * Built at the size it is drawn at and never stretched afterwards (a stretched window is a different window), the way a roof is.
  */
 export class FacadeGeometry {
-  static build(widthM: number, lengthM: number, heightM: number, openings = true): BufferGeometry {
+  /** A number from 0 up to 1 that is the same for the same two, and unlike the one beside it: which windows are lit does not change between two looks. */
+  private static hash(seed: number, index: number): number {
+    const value = Math.sin(seed * 12.9898 + index * 78.233) * 43758.5453
+    return value - Math.floor(value)
+  }
+
+  static build(widthM: number, lengthM: number, heightM: number, openings = true, lit: { share: number, seed: number } = { share: 0, seed: 0 }): BufferGeometry {
     const positions: number[] = []
     const uvs: number[] = []
     const halfWidth = widthM / 2
@@ -22,9 +28,10 @@ export class FacadeGeometry {
       const bay = length / bays
       for (let level = 0; level < levels; level++) {
         for (let at = 0; at < bays; at++) {
+          const glows = FacadeGeometry.hash(lit.seed, positions.length) < lit.share
           const tile = !openings ? FacadeTexture.PLAIN
-            : level > 0 ? FacadeTexture.UPPER
-              : front && at === Math.floor((bays - 1) / 2) ? FacadeTexture.GROUND_DOOR : FacadeTexture.GROUND_WINDOW
+            : level > 0 ? (glows ? FacadeTexture.UPPER_LIT : FacadeTexture.UPPER)
+              : front && at === Math.floor((bays - 1) / 2) ? FacadeTexture.GROUND_DOOR : (glows ? FacadeTexture.GROUND_WINDOW_LIT : FacadeTexture.GROUND_WINDOW)
           const x0 = start[0] + direction[0] * bay * at
           const z0 = start[1] + direction[1] * bay * at
           const x1 = x0 + direction[0] * bay

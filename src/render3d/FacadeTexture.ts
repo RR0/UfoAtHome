@@ -14,7 +14,10 @@ export class FacadeTexture {
   static readonly GROUND_WINDOW = 1
   static readonly GROUND_DOOR = 2
   static readonly PLAIN = 3
-  static readonly TILES = 4
+  /** The same bays as UPPER and GROUND_WINDOW to the eye, whose glass the emissive picture lights (see emissive): the windows that are lit at night. */
+  static readonly UPPER_LIT = 4
+  static readonly GROUND_WINDOW_LIT = 5
+  static readonly TILES = 6
 
   /** One bay: a window every three metres, which is what a street of houses has. */
   static readonly BAY_M = 3
@@ -22,6 +25,7 @@ export class FacadeTexture {
 
   private static readonly PIXELS = 96
   private static shared?: DataTexture
+  private static sharedEmissive?: DataTexture
 
   /** The one texture of the page, made the first time it is asked for. */
   static texture(): DataTexture {
@@ -37,6 +41,45 @@ export class FacadeTexture {
       FacadeTexture.shared = texture
     }
     return FacadeTexture.shared
+  }
+
+  /**
+   * What glows: the glass of the lit variants, a warm white, and nothing else (black). Multiplied by a material's emissive colour and intensity, so a
+   * scene turns every lit window of every building on at once by raising one number (see DecorSystem.setWindowGlow).
+   */
+  static emissive(): DataTexture {
+    if (!FacadeTexture.sharedEmissive) {
+      const texture = new DataTexture(FacadeTexture.glow(), FacadeTexture.PIXELS * FacadeTexture.TILES, FacadeTexture.PIXELS, RGBAFormat, UnsignedByteType)
+      texture.colorSpace = SRGBColorSpace
+      texture.wrapS = ClampToEdgeWrapping
+      texture.wrapT = ClampToEdgeWrapping
+      texture.magFilter = LinearFilter
+      texture.minFilter = LinearMipmapLinearFilter
+      texture.generateMipmaps = true
+      texture.needsUpdate = true
+      FacadeTexture.sharedEmissive = texture
+    }
+    return FacadeTexture.sharedEmissive
+  }
+
+  /** The glow as bytes: black, with the glass of each lit tile. Exposed for tests. */
+  static glow(): Uint8Array {
+    const size = FacadeTexture.PIXELS
+    const width = size * FacadeTexture.TILES
+    const data = new Uint8Array(width * size * 4)
+    for (let i = 3; i < data.length; i += 4) data[i] = 255
+    const metre = size / FacadeTexture.BAY_M
+    for (const tile of [FacadeTexture.UPPER_LIT, FacadeTexture.GROUND_WINDOW_LIT]) {
+      for (let y = Math.round(0.9 * metre); y < Math.round(2.3 * metre); y++) {
+        for (let x = Math.round(0.9 * metre); x < Math.round(2.1 * metre); x++) {
+          // The mullion stays dark: a lit window is two panes.
+          if (Math.abs(x - 1.5 * metre) < 0.03 * metre) continue
+          const at = (y * width + tile * size + x) * 4
+          data[at] = 255; data[at + 1] = 205; data[at + 2] = 135
+        }
+      }
+    }
+    return data
   }
 
   /** The picture as bytes, row after row from the bottom (so that the bottom of a tile is the floor). Exposed for tests. */
@@ -67,6 +110,12 @@ export class FacadeTexture {
     // A door a metre wide and two ten high, in a frame, in a dark paint.
     fill(FacadeTexture.GROUND_DOOR, 1 - 0.06, 0, 2 + 0.06, 2.1 + 0.06, FRAME)
     fill(FacadeTexture.GROUND_DOOR, 1, 0, 2, 2.1, [58, 62, 56])
+    // The lit variants look the same by day as the windows they are the lit version of.
+    for (let y = 0; y < size; y++) {
+      for (const [from, to] of [[FacadeTexture.UPPER, FacadeTexture.UPPER_LIT], [FacadeTexture.GROUND_WINDOW, FacadeTexture.GROUND_WINDOW_LIT]]) {
+        data.copyWithin((y * width + to * size) * 4, (y * width + from * size) * 4, (y * width + (from + 1) * size) * 4)
+      }
+    }
     return data
   }
 }

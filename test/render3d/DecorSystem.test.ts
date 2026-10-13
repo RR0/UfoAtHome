@@ -667,4 +667,18 @@ describe("DecorSystem building facades", () => {
     const flat = DecorSystem.build(building({ sizeM: sized, roof: { color: "#336699" } }), false)
     expect(flat.getObjectByName(DecorSystem.ROOF_NAME)!.position.y).toBeCloseTo(11)
   })
+
+  it("raises and lowers the glow of the lit windows of every facade under it, and of nothing else", () => {
+    const withFacade = DecorSystem.build(building({ sizeM: sized, facade: { color: "#ffffff" } }), false)
+    const box = DecorSystem.build(building({ sizeM: sized }), false)
+    const wall = (group: Group): MeshLambertMaterial => (DecorSystem.bodyOf(group).children[0] as Mesh).material as MeshLambertMaterial
+    expect(wall(withFacade).emissiveIntensity).toBe(0)
+    const untouched = wall(box).emissiveIntensity
+    DecorSystem.setWindowGlow(withFacade, 1)
+    DecorSystem.setWindowGlow(box, 0.5)
+    expect(wall(withFacade).emissiveIntensity).toBe(1)
+    expect(wall(box).emissiveIntensity).toBe(untouched)
+    DecorSystem.setWindowGlow(withFacade, 0)
+    expect(wall(withFacade).emissiveIntensity).toBe(0)
+  })
 })

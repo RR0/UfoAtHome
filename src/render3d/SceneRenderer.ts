@@ -321,6 +321,9 @@ const CELESTIAL_LIGHT_MIN_ALTITUDE_DEG = BODY_HIDE_BELOW_DEG
  * their distance is all a lamp is. Only the nearest two cast a shadow, which is a cube of renders each.
  */
 const STREETLIGHT_REAL_LIGHTS = 8
+/** The Sun's altitude at which the lit windows begin to show, and the one at which they are fully on: dusk, and the end of twilight. */
+const WINDOW_GLOW_START_DEG = -1
+const WINDOW_GLOW_FULL_DEG = -9
 const STREETLIGHT_SHADOWING_LIGHTS = 2
 /** The sun's altitude below which a public lamp's photocell has switched it on. */
 const PHOTOCELL_SUN_ALTITUDE_DEG = -0.5
@@ -2099,6 +2102,7 @@ export class SceneRenderer {
       const group = DecorSystem.build(object, object.lit ?? false)
       this.scene.add(group)
       this.decorGroups.set(object.id, group)
+      DecorSystem.setWindowGlow(group, this.windowGlow)
       // Built regardless of the object's own *initial* lit state (unlike before this session) —
       // lit can now change mid-recording (see Decor.ts's own resolveDecorLitAt), so a streetlight
       // that starts off but switches on later still needs a real light waiting to be revealed,
@@ -2939,6 +2943,15 @@ export class SceneRenderer {
     this.streetlightLights.set(id, light)
   }
 
+  /** How lit the windows of the buildings are: none by day, all of the lit ones once the Sun is well down, and a ramp between. */
+  private applyWindowGlow(): void {
+    const sun = this.lastAstronomy?.sun.altitudeDeg
+    this.windowGlow = sun === undefined ? 0 : Math.max(0, Math.min(1, (WINDOW_GLOW_START_DEG - sun) / (WINDOW_GLOW_START_DEG - WINDOW_GLOW_FULL_DEG)))
+    for (const group of this.decorGroups.values()) DecorSystem.setWindowGlow(group, this.windowGlow)
+  }
+
+  private windowGlow = 0
+
   setAstronomy(astronomy: SceneAstronomy): void {
     // A jump — another scene, a seek — makes what was measured round the observer someone else's.
     if (!this.lastAstronomy || Math.abs(this.lastAstronomy.sun.altitudeDeg - astronomy.sun.altitudeDeg) > 2) {
@@ -2946,6 +2959,7 @@ export class SceneRenderer {
       this.scatteredSky?.resetSurroundings()
     }
     this.lastAstronomy = astronomy
+    this.applyWindowGlow()
     this.scatteredSky?.update(this.scatteredSkyState(astronomy))
     if (this.skyHoldUntilMs === undefined) this.startHold()
     this.pumpScatteredSky()

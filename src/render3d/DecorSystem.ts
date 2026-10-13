@@ -26,6 +26,8 @@ const DEG_TO_RAD = Math.PI / 180
  * PointLight at, without hardcoding which child index that is. */
 interface DecorMeshUserData {
   emissive: boolean
+  /** Set on the walls of a facade, whose lit windows glow at night: see DecorSystem.setWindowGlow. */
+  windowGlow?: boolean
   /** Set on a lamp built from DecorObject.lights — see DecorSystem.addLights. Lets setLights find
    * its own mesh again per tick, and keeps setLit (which re-tints every OTHER emissive part as one)
    * from repainting a navigation light the colour of a headlight. */
@@ -1121,13 +1123,34 @@ export class DecorSystem {
     const group = new Group()
     const size = DecorSystem.sizeOf(object)
     const facade = object.facade!
-    const geometry = FacadeGeometry.build(size.widthM, size.lengthM, DecorSystem.wallHeightOf(object, size.heightM), !facade.plain)
-    const material = new MeshLambertMaterial({ color: new Color(facade.color ?? DecorSystem.PLASTER), map: FacadeTexture.texture() })
+    // About one window in six is lit when it is dark, the same ones every time: from where the building stands.
+    const geometry = FacadeGeometry.build(size.widthM, size.lengthM, DecorSystem.wallHeightOf(object, size.heightM), !facade.plain,
+      { share: DecorSystem.LIT_WINDOW_SHARE, seed: object.eastM * 7.31 + object.northM * 3.17 })
+    const material = new MeshLambertMaterial({
+      color: new Color(facade.color ?? DecorSystem.PLASTER), map: FacadeTexture.texture(),
+      // Off by day: the glow is raised by the night (see setWindowGlow).
+      emissiveMap: FacadeTexture.emissive(), emissive: new Color(1, 1, 1), emissiveIntensity: 0
+    })
     const mesh = new Mesh(geometry, material)
     mesh.castShadow = true
     mesh.receiveShadow = true
+    mesh.userData = { emissive: false, windowGlow: true } satisfies DecorMeshUserData
     group.add(mesh)
     return group
+  }
+
+  /** The share of windows that are lit at night. */
+  static readonly LIT_WINDOW_SHARE = 0.16
+
+  /**
+   * Lights the lit windows of every facade under `root` to `intensity` (0: day, 1: night), by the one number of their shared emissive picture. Buildings
+   * that are not drawn from a facade have no lit windows, and nothing is done for them.
+   */
+  static setWindowGlow(root: Object3D, intensity: number): void {
+    root.traverse(part => {
+      const mesh = part as Mesh
+      if (mesh.isMesh && (mesh.userData as DecorMeshUserData).windowGlow) (mesh.material as MeshLambertMaterial).emissiveIntensity = intensity
+    })
   }
 
   static build(object: DecorObject, lit: boolean): Group {
