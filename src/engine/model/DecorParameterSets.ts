@@ -55,7 +55,7 @@ export class DecorParameterSets {
   static of(object: Pick<DecorObject, "kind" | "model" | "observerSide">, published?: ModelParameters): ParameterSet | undefined {
     const parameters: ParameterSpec[] = []
     const model = DecorTraits.drawnAsModel(object)
-    if (!model && object.kind === "building") parameters.push(...DecorParameterSets.floors())
+    if (!model && object.kind === "building") parameters.push(...DecorParameterSets.floors(), ...DecorParameterSets.walls(), ...DecorParameterSets.roof())
     if (!model && hasWindows(object.kind)) parameters.push(...DecorParameterSets.windows(object.kind))
     if (object.kind === "vehicle") parameters.push(...DecorParameterSets.engine())
     if (object.kind === "observer") parameters.push(...DecorParameterSets.observerRecording())
@@ -85,6 +85,67 @@ export class DecorParameterSets {
         hint: { en: "The floor the observer is on, from 0 (ground floor).", fr: "L'étage où se tient l'observateur, à partir de 0 (rez-de-chaussée).",
           es: "La planta donde está el observador, desde 0 (planta baja).", it: "Il piano dove si trova l'osservatore, da 0 (pianterreno)." },
         group: DecorParameterSets.BUILDING
+      }
+    ]
+  }
+
+  /** The walls of a building: their colour, and whether windows and a door are drawn on them. Drawn only where all three sizes are stated (see DecorFacade). */
+  private static walls(): ParameterSpec[] {
+    const group: SaidText = { en: "Walls", fr: "Murs", es: "Muros", it: "Muri" }
+    return [
+      {
+        type: "colour", key: "facade.color", group, fallback: "#d3cab8",
+        label: { en: "Wall colour", fr: "Couleur des murs", es: "Color de los muros", it: "Colore dei muri" },
+        hint: { en: "The colour of the walls, which draws them with windows and a door (where the width, the length and the height of the building are all stated). Empty: the walls of the plain box.",
+          fr: "La couleur des murs, qui les fait dessiner avec fenêtres et porte (là où la largeur, la longueur et la hauteur du bâtiment sont toutes énoncées). Vide : les murs de la simple boîte.",
+          es: "El color de los muros, que los hace dibujar con ventanas y puerta (donde el ancho, el largo y el alto del edificio están todos enunciados). Vacío: los muros de la caja lisa.",
+          it: "Il colore dei muri, che li fa disegnare con finestre e porta (dove larghezza, lunghezza e altezza dell'edificio sono tutte enunciate). Vuoto: i muri della semplice scatola." }
+      },
+      {
+        type: "boolean", key: "facade.plain", group,
+        label: { en: "Plain walls", fr: "Murs nus", es: "Muros lisos", it: "Muri lisci" },
+        hint: { en: "No windows and no door on the walls.", fr: "Ni fenêtres ni porte sur les murs.", es: "Ni ventanas ni puerta en los muros.", it: "Né finestre né porta sui muri." },
+        visibleWhen: element => (element as { facade?: unknown }).facade !== undefined
+      }
+    ]
+  }
+
+  /** The roof of a building: its shape, how far it rises, which way its ridge runs, its colour. */
+  private static roof(): ParameterSpec[] {
+    const group: SaidText = { en: "Roof", fr: "Toit", es: "Tejado", it: "Tetto" }
+    const pitched = (element: ParameterHolder): boolean => ["gable", "hip"].includes(String(Parameters.read(element, "roof.shape")))
+    return [
+      {
+        type: "choice", key: "roof.shape", group,
+        label: { en: "Roof", fr: "Toit", es: "Tejado", it: "Tetto" },
+        empty: { en: "Flat", fr: "Plat", es: "Plano", it: "Piano" },
+        hint: { en: "Flat (the box), two slopes to a ridge, or four slopes.", fr: "Plat (la boîte), deux pentes jusqu'à un faîte, ou quatre pentes.", es: "Plano (la caja), dos vertientes hasta una cumbrera, o cuatro vertientes.", it: "Piano (la scatola), due falde fino a un colmo, o quattro falde." },
+        choices: [
+          { value: "flat", label: { en: "Flat", fr: "Plat", es: "Plano", it: "Piano" } },
+          { value: "gable", label: { en: "Two slopes", fr: "Deux pentes", es: "Dos vertientes", it: "Due falde" } },
+          { value: "hip", label: { en: "Four slopes", fr: "Quatre pentes", es: "Cuatro vertientes", it: "Quattro falde" } }
+        ]
+      },
+      {
+        type: "number", key: "roof.riseM", min: 0, max: 15, step: 0.1, unit: "m", group, effective: () => 3,
+        label: { en: "Rise", fr: "Hauteur du toit", es: "Altura del tejado", it: "Altezza del tetto" },
+        hint: { en: "How far the ridge stands above the eaves: the walls are the building's height less this.", fr: "De combien le faîte dépasse l'égout : les murs font la hauteur du bâtiment moins cela.",
+          es: "Cuánto sube la cumbrera sobre el alero: los muros miden la altura del edificio menos esto.", it: "Quanto il colmo sta sopra la gronda: i muri sono l'altezza dell'edificio meno questo." },
+        visibleWhen: pitched
+      },
+      {
+        type: "choice", key: "roof.ridge", group, required: false,
+        label: { en: "Ridge along", fr: "Faîte le long de", es: "Cumbrera a lo largo de", it: "Colmo lungo" },
+        empty: { en: "The width", fr: "La largeur", es: "El ancho", it: "La larghezza" },
+        choices: [
+          { value: "width", label: { en: "The width", fr: "La largeur", es: "El ancho", it: "La larghezza" } },
+          { value: "depth", label: { en: "The depth", fr: "La profondeur", es: "El largo", it: "La profondità" } }
+        ],
+        visibleWhen: element => Parameters.read(element, "roof.shape") === "gable"
+      },
+      {
+        type: "colour", key: "roof.color", group, fallback: "#7a5a4a",
+        label: { en: "Roof colour", fr: "Couleur du toit", es: "Color del tejado", it: "Colore del tetto" }
       }
     ]
   }

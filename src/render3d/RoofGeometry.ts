@@ -19,7 +19,17 @@ export class RoofGeometry {
   /** A hip roof's ridge is never shorter than this, so that its two end slopes are not degenerate. */
   private static readonly MIN_RIDGE_M = 0.1
 
-  static build(roof: DecorRoof, widthM: number, lengthM: number): BufferGeometry {
+  /** A pitched roof that states no rise rises this much: an ordinary pitch over an ordinary span. */
+  static readonly DEFAULT_RISE_M = 3
+
+  /** What a roof states with every default filled in: its shape, how far it rises, and which side its ridge runs along. */
+  static normalised(roof: DecorRoof): { shape: "flat" | "gable" | "hip", riseM: number, ridge: "width" | "depth", color?: string } {
+    const shape = roof.shape ?? "flat"
+    return { shape, riseM: shape === "flat" ? 0 : Math.max(0, roof.riseM ?? RoofGeometry.DEFAULT_RISE_M), ridge: roof.ridge ?? "width", ...(roof.color ? { color: roof.color } : {}) }
+  }
+
+  static build(stated: DecorRoof, widthM: number, lengthM: number): BufferGeometry {
+    const roof = RoofGeometry.normalised(stated)
     // A ridge along the depth is the same roof turned a quarter, built on the building with its two sides swapped.
     const turned = roof.shape === "gable" && roof.ridge === "depth"
     const halfWidth = (turned ? lengthM : widthM) / 2 + RoofGeometry.OVERHANG_M

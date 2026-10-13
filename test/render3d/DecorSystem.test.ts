@@ -658,4 +658,13 @@ describe("DecorSystem building facades", () => {
     expect((DecorSystem.bodyOf(DecorSystem.build(building({ facade: { color: "#ffffff" } }), false)).children[0] as Mesh).geometry).toBeInstanceOf(BoxGeometry)
     expect((DecorSystem.bodyOf(DecorSystem.build(building({ sizeM: sized, facade: { color: "#ffffff" }, observerSide: "front" }), false)).children[0] as Mesh).geometry).toBeInstanceOf(BoxGeometry)
   })
+
+  it("fills in what a roof edited by hand leaves unsaid: flat without a shape, three metres of rise for a pitched one, the plaster for a wall without a colour", () => {
+    const group = DecorSystem.build(building({ sizeM: sized, facade: { plain: true }, roof: { shape: "hip" } }), false)
+    const roof = group.getObjectByName(DecorSystem.ROOF_NAME)!
+    expect(roof.position.y).toBeCloseTo(8)
+    expect(new Box3().setFromObject(group).max.y).toBeCloseTo(11)
+    const flat = DecorSystem.build(building({ sizeM: sized, roof: { color: "#336699" } }), false)
+    expect(flat.getObjectByName(DecorSystem.ROOF_NAME)!.position.y).toBeCloseTo(11)
+  })
 })

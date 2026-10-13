@@ -33,9 +33,9 @@ describe("BuildingMaterials", () => {
     const [next] = BuildingMaterials.fit([{ ...HOUSE, eastM: 30 }])
     const red = (hex: string): number => parseInt(hex.slice(1, 3), 16)
     const blue = (hex: string): number => parseInt(hex.slice(5, 7), 16)
-    expect(red(brick.facade!.color)).toBeGreaterThan(blue(brick.facade!.color) + 40)
-    expect(Math.abs(red(plain.facade!.color) - blue(plain.facade!.color))).toBeLessThan(40)
-    expect(next.facade!.color).not.toBe(plain.facade!.color)
+    expect(red(brick.facade!.color!)).toBeGreaterThan(blue(brick.facade!.color!) + 40)
+    expect(Math.abs(red(plain.facade!.color!) - blue(plain.facade!.color!))).toBeLessThan(40)
+    expect(next.facade!.color!).not.toBe(plain.facade!.color!)
     expect(BuildingMaterials.fit([HOUSE])[0].facade).toEqual(plain.facade)
   })
 

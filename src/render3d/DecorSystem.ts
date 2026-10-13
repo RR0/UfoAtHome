@@ -1082,7 +1082,7 @@ export class DecorSystem {
 
   /** The roof stands on the walls at their stated height, at its own size, and keeps its own colour (see DecorRoof). */
   private static addRoof(group: Group, object: DecorObject): void {
-    const roof = object.roof!
+    const roof = RoofGeometry.normalised(object.roof!)
     const size = DecorSystem.sizeOf(object)
     const walls = DecorSystem.wallHeightOf(object, size.heightM)
     const rgb = DecorSystem.roofColor(roof.color)
@@ -1094,7 +1094,7 @@ export class DecorSystem {
 
   /** The walls' height: the stated one less the rise of the roof, never under one storey. */
   private static wallHeightOf(object: DecorObject, heightM: number): number {
-    return Math.max(BUILDING_FLOOR_HEIGHT, heightM - (object.roof?.riseM ?? 0))
+    return Math.max(BUILDING_FLOOR_HEIGHT, heightM - (object.roof ? RoofGeometry.normalised(object.roof).riseM : 0))
   }
 
   /** A roof's own colour as the linear-ish triple a part is built from, tile red by default: a roof nobody measured is not the colour of its walls. */
@@ -1107,6 +1107,8 @@ export class DecorSystem {
   }
 
   static readonly ROOF_NAME = "decor-roof"
+  /** The wall of a facade that states no colour. */
+  private static readonly PLASTER = "#d3cab8"
 
   /** Whether the walls of this building are drawn from its facade (see DecorFacade) at the size it states, never stretched: a stated size, no observer inside. */
   private static hasFacade(object: DecorObject): boolean {
@@ -1119,8 +1121,8 @@ export class DecorSystem {
     const group = new Group()
     const size = DecorSystem.sizeOf(object)
     const facade = object.facade!
-    const geometry = FacadeGeometry.build(size.widthM, size.lengthM, DecorSystem.wallHeightOf(object, size.heightM), facade.openings !== false)
-    const material = new MeshLambertMaterial({ color: new Color(facade.color), map: FacadeTexture.texture() })
+    const geometry = FacadeGeometry.build(size.widthM, size.lengthM, DecorSystem.wallHeightOf(object, size.heightM), !facade.plain)
+    const material = new MeshLambertMaterial({ color: new Color(facade.color ?? DecorSystem.PLASTER), map: FacadeTexture.texture() })
     const mesh = new Mesh(geometry, material)
     mesh.castShadow = true
     mesh.receiveShadow = true

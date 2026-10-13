@@ -377,22 +377,22 @@ export interface DecorLight {
 
 /** What a building's roof is: the plain box a building is drawn as has a flat one. */
 export interface DecorRoof {
-  /** "flat" is the box; "gable" rises to a ridge along the building's longer side; "hip" slopes down on all four. */
-  shape: "flat" | "gable" | "hip"
+  /** "flat" is the box; "gable" rises to a ridge along the building's longer side; "hip" slopes down on all four. Absent is flat. */
+  shape?: "flat" | "gable" | "hip"
   /** Which side of the building a gable's ridge runs along: "width" (the longer side, the default) or "depth". Ignored for the other shapes. */
   ridge?: "width" | "depth"
-  /** How far the ridge stands above the eaves, metres. `sizeM.heightM` is the height to the ridge, so the walls are that less. Zero for a flat roof. */
-  riseM: number
+  /** How far the ridge stands above the eaves, metres. `sizeM.heightM` is the height to the ridge, so the walls are that less. Zero for a flat roof; a pitched roof that states none rises 3 m. */
+  riseM?: number
   /** The colour of the roof seen from above, "#rrggbb", where it was measured (see RoofShapes): the walls keep their own. */
   color?: string
 }
 
 /** What the walls of a building look like: their colour, and whether windows and a door are drawn on them. */
 export interface DecorFacade {
-  /** The colour of the wall, "#rrggbb": plaster, stone, brick. The roof has its own (see DecorRoof). */
-  color: string
-  /** Windows on every floor and a door on the ground floor of one side. Absent is true: a wall without them is a wall nobody lived behind. */
-  openings?: boolean
+  /** The colour of the wall, "#rrggbb": plaster, stone, brick. The roof has its own (see DecorRoof). Absent is a pale plaster. */
+  color?: string
+  /** A plain wall, with no windows and no door. Absent is false: a wall nobody lived behind is the unusual one. */
+  plain?: boolean
 }
 
 export interface DecorObject {

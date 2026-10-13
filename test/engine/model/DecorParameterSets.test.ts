@@ -8,8 +8,24 @@ import type { NumberParameter } from "../../../src/engine/interpretation/Paramet
 const keys = (kind: DecorKind, extra: object = {}) => DecorParameterSets.of({ kind, ...extra })?.parameters.map(spec => spec.key)
 
 describe("DecorParameterSets", () => {
-  test("a building has floors, the floor occupied, and a window on each of its four sides", () => {
-    expect(keys("building")).toEqual(["floors", "occupiedFloor", "windows.front", "windows.behind", "windows.left", "windows.right"])
+  test("a building has floors, the floor occupied, its walls, its roof, and a window on each of its four sides", () => {
+    expect(keys("building")).toEqual(["floors", "occupiedFloor", "facade.color", "facade.plain", "roof.shape", "roof.riseM", "roof.ridge", "roof.color",
+      "windows.front", "windows.behind", "windows.left", "windows.right"])
+  })
+
+  test("the rise of a roof is asked of a pitched one only, and the side of its ridge of a gable only", () => {
+    const set = DecorParameterSets.of({ kind: "building" })!
+    const shown = (key: string, element: object): boolean => set.parameters.find(spec => spec.key === key)!.visibleWhen?.(element as never) ?? true
+    expect(shown("roof.riseM", {})).toBe(false)
+    expect(shown("roof.riseM", { roof: { shape: "hip" } })).toBe(true)
+    expect(shown("roof.ridge", { roof: { shape: "hip" } })).toBe(false)
+    expect(shown("roof.ridge", { roof: { shape: "gable" } })).toBe(true)
+    expect(shown("facade.plain", {})).toBe(false)
+    expect(shown("facade.plain", { facade: { color: "#ffffff" } })).toBe(true)
+  })
+
+  test("a building drawn as a model has neither the walls nor the roof of the built-in shape", () => {
+    expect(DecorParameterSets.of({ kind: "building", model: { id: "house" } })).toBeUndefined()
   })
 
   test("a vehicle has windows on its six openings, and the windscreen and rear window never open", () => {
