@@ -48,6 +48,10 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
     if (laser.status === "rejected" && map.status === "rejected") throw laser.reason
     const grids = laser.status === "fulfilled" ? laser.value : undefined
     const vectors = map.status === "fulfilled" ? map.value : undefined
+    // The laser says it has not flown here and the map has drawn nothing: the place is outside what the IGN surveys (a corner of the box that says France holds
+    // a part of Belgium), and that is said as it is, which lets another survey answer.
+    const nothingDrawn = vectors !== undefined && vectors.buildings.length === 0 && vectors.bridges.length === 0 && vectors.lines.length === 0
+    if (laser.status === "rejected" && laser.reason instanceof SurroundingsUnavailableError && laser.reason.reason === "no-coverage" && nothingDrawn) throw laser.reason
     return {
       trees: grids ? new CanopyCrowns(grids.heights, grids.vegetation, grids.size, grids.size).trees({ metresPerPixel: grids.metresPerPixel, radiusM: laserRadius }) : [],
       buildings: this.roofed(this.buildings(grids, vectors, centre, radius), grids, photo.status === "fulfilled" ? photo.value : undefined),

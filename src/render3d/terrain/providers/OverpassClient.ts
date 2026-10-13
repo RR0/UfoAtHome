@@ -7,7 +7,11 @@ export interface OverpassResponse {
     lat?: number
     lon?: number
     geometry?: { lat: number; lon: number }[]
+    /** The parts of a relation (a building with a courtyard is one), with the outline of each where the query asked for it. */
+    members?: { type?: string, ref?: number, role?: string, geometry?: { lat: number; lon: number }[] }[]
   }[]
+  /** What the answer is of: the day of the OpenStreetMap data behind it. */
+  osm3s?: { timestamp_osm_base?: string }
 }
 
 export interface OverpassClientOptions {

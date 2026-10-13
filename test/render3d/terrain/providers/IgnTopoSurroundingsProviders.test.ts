@@ -138,4 +138,13 @@ describe("IgnLidarTopoSurroundingsProvider (both)", () => {
     both.mapDown = true
     await expect(new IgnLidarTopoSurroundingsProvider({ fetchImpl: both.fetch() }).getSurroundings(SAINT_LO, 25)).rejects.toMatchObject({ reason: "no-coverage" })
   })
+
+  it("says the place is not covered when the laser has not flown there and the map has drawn nothing, and not when the map has", async () => {
+    const outside = new Survey(40, -9999)
+    await expect(new IgnLidarTopoSurroundingsProvider({ fetchImpl: outside.fetch() }).getSurroundings(SAINT_LO, 40)).rejects.toMatchObject({ reason: "no-coverage" })
+    const drawn = new Survey(40, -9999)
+    drawn.vectors = { batiment: TWO_HOUSES }
+    const found = await new IgnLidarTopoSurroundingsProvider({ fetchImpl: drawn.fetch() }).getSurroundings(SAINT_LO, 40)
+    expect(found.buildings.length).toBeGreaterThan(0)
+  })
 })

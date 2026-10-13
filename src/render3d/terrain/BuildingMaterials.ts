@@ -47,6 +47,8 @@ export class BuildingMaterials {
   /** Each building with its facade: the colour of its walls' material, or a plaster, a little different from one place to the next. */
   static fit(buildings: SurveyedBuilding[]): SurveyedBuilding[] {
     return buildings.map(building => {
+      // A facade a survey already gave (a colour somebody wrote down) is not repainted from a typical one.
+      if (building.facade) return building
       const facade: DecorFacade = { color: BuildingMaterials.wallColor(building) }
       return { ...building, facade }
     })
