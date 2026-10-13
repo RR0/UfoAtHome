@@ -104,7 +104,7 @@ function hexToRgb(hex: string): RgbColor {
   return [((value >> 16) & 0xff) / 255, ((value >> 8) & 0xff) / 255, (value & 0xff) / 255]
 }
 
-const UNLIT_LAMP_COLOR: RgbColor = [0.32, 0.32, 0.3]
+const UNLIT_LAMP_COLOR: RgbColor = [0.62, 0.62, 0.6]
 const LIT_LAMP_COLOR: RgbColor = [1, 0.85, 0.5]
 const UNLIT_HEADLIGHT_COLOR: RgbColor = [0.25, 0.25, 0.25]
 const LIT_HEADLIGHT_COLOR: RgbColor = [1, 0.97, 0.85]

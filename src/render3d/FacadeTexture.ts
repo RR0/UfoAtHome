@@ -44,7 +44,7 @@ export class FacadeTexture {
   }
 
   /**
-   * What glows: the glass of the lit variants, a warm white, and nothing else (black). Multiplied by a material's emissive colour and intensity, so a
+   * What glows: the glass of the lit variants, a warm white, and nothing else (black). The picture is read as sRGB, so a warm white is nearly white in it: a picture of the orange a lit window is called would be read as a deeper orange still, and look like a brown wall. Multiplied by a material's emissive colour and intensity, so a
    * scene turns every lit window of every building on at once by raising one number (see DecorSystem.setWindowGlow).
    */
   static emissive(): DataTexture {
@@ -75,7 +75,7 @@ export class FacadeTexture {
           // The mullion stays dark: a lit window is two panes.
           if (Math.abs(x - 1.5 * metre) < 0.03 * metre) continue
           const at = (y * width + tile * size + x) * 4
-          data[at] = 255; data[at + 1] = 205; data[at + 2] = 135
+          data[at] = 255; data[at + 1] = 240; data[at + 2] = 190
         }
       }
     }
