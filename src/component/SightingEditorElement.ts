@@ -1980,7 +1980,9 @@ export class SightingEditorElement extends HTMLElement {
    */
   private readonly armHistory = (): void => {
     this.historySnapshot ??= this.fileText()
-    if (this.fileEditor === undefined) void this.loadFileEditor().then(() => this.syncHistoryButtons(), () => undefined)
+    // A change made while the text editor is still loading was due to be written when the quiet moment ended (see recordHistory), which found no editor and
+    // gave up: it is written now, which is what made undo come late or never on a slow machine.
+    if (this.fileEditor === undefined) void this.loadFileEditor().then(() => { this.recordHistory(); this.syncHistoryButtons() }, () => undefined)
   }
 
   private readonly scheduleHistoryRecord = (): void => {
