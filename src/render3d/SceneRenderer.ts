@@ -315,6 +315,15 @@ export interface DecorSunlight {
 
 const CELESTIAL_LIGHT_MIN_ALTITUDE_DEG = BODY_HIDE_BELOW_DEG
 /** A streetlight's lamp, candela below it: a 10 000 lumen road lamp throws about this much down. */
+/**
+ * How many streetlights get a real light: every one of them is a point light for every pixel of everything the scene draws, and a town surveyed
+ * brings a hundred and fifty. The nearest few light the ground and walls round the observer, the rest are the glowing heads they are, which at
+ * their distance is all a lamp is. Only the nearest two cast a shadow, which is a cube of renders each.
+ */
+const STREETLIGHT_REAL_LIGHTS = 8
+const STREETLIGHT_SHADOWING_LIGHTS = 2
+/** The sun's altitude below which a public lamp's photocell has switched it on. */
+const PHOTOCELL_SUN_ALTITUDE_DEG = -0.5
 const STREETLIGHT_CANDELA = 1500
 /** Where a streetlight's light is let go of: under a hundredth of a lux, well under a full Moon's. */
 const STREETLIGHT_LIGHT_DISTANCE = 400
@@ -2084,6 +2093,8 @@ export class SceneRenderer {
     }
     this.decorGroups.clear()
     this.streetlightLights.clear()
+    const lighted = decor.filter(object => object.kind === "streetlight")
+      .sort((a, b) => Math.hypot(a.eastM, a.northM) - Math.hypot(b.eastM, b.northM)).slice(0, STREETLIGHT_REAL_LIGHTS)
     for (const object of decor) {
       const group = DecorSystem.build(object, object.lit ?? false)
       this.scene.add(group)
@@ -2092,7 +2103,7 @@ export class SceneRenderer {
       // lit can now change mid-recording (see Decor.ts's own resolveDecorLitAt), so a streetlight
       // that starts off but switches on later still needs a real light waiting to be revealed,
       // not one that was never created at all. updateDecorLitState toggles light.visible per tick.
-      if (object.kind === "streetlight") this.addStreetlightLight(object.id, group)
+      if (object.kind === "streetlight" && lighted.includes(object)) this.addStreetlightLight(object.id, group, lighted.indexOf(object) < STREETLIGHT_SHADOWING_LIGHTS)
       // Fired and forgotten on purpose: the primitive is already in the scene and is a complete,
       // correct answer on its own, so a model that takes a second to arrive (or never arrives)
       // costs the viewer nothing but detail. See loadDecorModel.
@@ -2895,7 +2906,9 @@ export class SceneRenderer {
       if (object.kind !== "streetlight" && object.kind !== "vehicle") continue
       const group = this.decorGroups.get(object.id)
       if (!group) continue
-      const lit = resolveDecorLitAt(object, t)
+      // A public lamp a survey brought is switched by its photocell, which the dark is: nobody wrote when it is on. One the author set or keyed is theirs.
+      const photocell = object.kind === "streetlight" && object.origin !== undefined && object.lit === undefined && !object.litKeyframes?.length && this.lastAstronomy
+      const lit = photocell ? this.lastAstronomy!.sun.altitudeDeg < PHOTOCELL_SUN_ALTITUDE_DEG : resolveDecorLitAt(object, t)
       DecorSystem.setLit(group, object.kind, lit, this.relativeScale)
       const light = this.streetlightLights.get(object.id)
       if (light) light.visible = lit
@@ -2909,7 +2922,7 @@ export class SceneRenderer {
    * away from their t=0 reference position). local position, not world: `light.position` is
    * interpreted relative to whichever object it's added to, so copying the lamp mesh's own
    * (already-local) position is correct without any conversion. */
-  private addStreetlightLight(id: string, group: Group): void {
+  private addStreetlightLight(id: string, group: Group, shadows: boolean): void {
     // The lamp head sits inside the body group the stated size scales (see DecorSystem.BODY_NAME),
     // one level below where this used to look — and its position is in that group's own scaled
     // space, so a streetlight stated taller than the primitive puts its real light at the top of
@@ -2919,7 +2932,7 @@ export class SceneRenderer {
     if (!lampHead) return
     const light = new PointLight(0xffcc66, STREETLIGHT_CANDELA * this.relativeScale, STREETLIGHT_LIGHT_DISTANCE)
     light.position.copy(lampHead.position).multiply(body.scale)
-    light.castShadow = true
+    light.castShadow = shadows
     light.shadow.mapSize.set(512, 512)
     light.shadow.bias = -0.002
     group.add(light)

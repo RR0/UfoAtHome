@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import { OverpassRoadProvider } from "../../../../src/render3d/terrain/providers/OverpassRoadProvider.js"
+import { OverpassClient } from "../../../../src/render3d/terrain/providers/OverpassClient.js"
 
 const BOUNDS = { north: 34.059, south: 34.043, east: -106.882, west: -106.902 }
 /** One instance, so a test is not at the mercy of which of several answered. */
@@ -93,7 +94,7 @@ describe("OverpassRoadProvider politeness", () => {
           : ({ ok: true, status: 200, json: async () => ({ elements: [way(1, { highway: "residential" })] }) } as Response)
       }) as unknown as typeof fetch
       const roads = new OverpassRoadProvider({ fetchImpl, endpoints: [ENDPOINT] }).getRoads(BOUNDS)
-      await vi.advanceTimersByTimeAsync(OverpassRoadProvider["RETRY_MS"] + 100)
+      await vi.advanceTimersByTimeAsync(OverpassClient["RETRY_MS"] + 100)
       expect(await roads).toHaveLength(1)
       expect(call).toBe(2)
     } finally {
@@ -107,7 +108,7 @@ describe("OverpassRoadProvider politeness", () => {
       const fetchImpl = vi.fn(async () => ({ ok: false, status: 429, json: async () => ({}) }) as Response) as unknown as typeof fetch
       const roads = new OverpassRoadProvider({ fetchImpl, endpoints: [ENDPOINT] }).getRoads(BOUNDS)
       const caught = roads.catch(error => String(error))
-      await vi.advanceTimersByTimeAsync(OverpassRoadProvider["RETRY_MS"] * 3)
+      await vi.advanceTimersByTimeAsync(OverpassClient["RETRY_MS"] * 3)
       expect(await caught).toContain("429")
       expect((fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(2)
     } finally {

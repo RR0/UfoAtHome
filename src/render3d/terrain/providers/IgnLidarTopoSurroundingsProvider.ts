@@ -7,6 +7,7 @@ import type { PlaceVectors } from "../OverheadStructures.js"
 import { RoofShapes } from "../RoofShapes.js"
 import type { RoofPhoto } from "../RoofShapes.js"
 import { TopoBuildings } from "../TopoBuildings.js"
+import { OsmStreetLamps } from "./OsmStreetLamps.js"
 import { IgnGeoplatform } from "./IgnGeoplatform.js"
 import type { IgnGeoplatformOptions, LidarGrids } from "./IgnGeoplatform.js"
 
@@ -26,9 +27,12 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
   readonly contemporary = true
 
   private readonly platform: IgnGeoplatform
+  /** Where the public lamps come from, when asked for: the registry gives it, a test that fakes only the IGN does not. */
+  private readonly lamps?: OsmStreetLamps
 
-  constructor(options: IgnGeoplatformOptions = {}) {
+  constructor(options: IgnGeoplatformOptions = {}, lamps?: OsmStreetLamps) {
     this.platform = new IgnGeoplatform(options)
+    this.lamps = lamps
   }
 
   covers(lat: number, lng: number): boolean {
@@ -38,7 +42,7 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
   async getSurroundings(centre: { lat: number, lng: number }, radiusM: number): Promise<Surroundings> {
     if (!this.covers(centre.lat, centre.lng)) throw new SurroundingsUnavailableError("no-coverage", "The IGN's surveys cover France only")
     const radius = IgnGeoplatform.radius(radiusM)
-    const [laser, map, photo] = await Promise.allSettled([this.platform.lidar(centre, radius), this.platform.vectors(centre, radius, true), this.platform.photo(centre, radius)])
+    const [laser, map, photo, lamps] = await Promise.allSettled([this.platform.lidar(centre, radius), this.platform.vectors(centre, radius, true), this.platform.photo(centre, radius), this.lamps?.near(centre, radiusM) ?? Promise.resolve(undefined)])
     const laserRadius = IgnGeoplatform.lidarRadius(radius)
     if (laser.status === "rejected" && map.status === "rejected") throw laser.reason
     const grids = laser.status === "fulfilled" ? laser.value : undefined
@@ -47,7 +51,8 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
       trees: grids ? new CanopyCrowns(grids.heights, grids.vegetation, grids.size, grids.size).trees({ metresPerPixel: grids.metresPerPixel, radiusM: laserRadius }) : [],
       buildings: this.roofed(this.buildings(grids, vectors, centre, radius), grids, photo.status === "fulfilled" ? photo.value : undefined),
       bridges: vectors ? OverheadStructures.bridges(vectors, centre, radius, grids?.structures) : [],
-      lines: vectors ? OverheadStructures.lines(vectors, centre, radius, grids?.structures) : []
+      lines: vectors ? OverheadStructures.lines(vectors, centre, radius, grids?.structures) : [],
+      ...(lamps.status === "fulfilled" && lamps.value ? { lamps: lamps.value } : {})
     }
   }
 

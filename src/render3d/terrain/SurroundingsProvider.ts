@@ -80,12 +80,22 @@ export interface SurveyedLine {
   voltage: string
 }
 
+/** One public street lamp, as a map has it, in metres from the place asked about. */
+export interface SurveyedLamp {
+  eastM: number
+  northM: number
+  /** The height of the light above the ground, where the map says (a lamp column is five to eight metres, a lamp on a wall lower). */
+  heightM?: number
+}
+
 /** What a survey found around a place. */
 export interface Surroundings {
   trees: SurveyedTree[]
   buildings: SurveyedBuilding[]
   bridges: SurveyedBridge[]
   lines: SurveyedLine[]
+  /** The public lamps: the light of a town at night, not a thing a laser or a footprint draws. A survey without them gives none. */
+  lamps?: SurveyedLamp[]
 }
 
 /**

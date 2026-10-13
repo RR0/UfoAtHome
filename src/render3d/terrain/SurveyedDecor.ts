@@ -2,7 +2,7 @@ import type { DecorObject } from "../../engine/model/Decor.js"
 import type { Surroundings } from "./SurroundingsProvider.js"
 
 /** The kinds of decor a survey brings. */
-export type SurveyedKind = "tree" | "building" | "bridge" | "wire"
+export type SurveyedKind = "tree" | "building" | "bridge" | "wire" | "streetlight"
 
 export interface SurveyedDecorOptions {
   /** What the recording already has that no survey brought: what the author placed. Nothing of a kind is brought where it holds one of that kind. */
@@ -32,7 +32,7 @@ export class SurveyedDecor {
   static of(providerId: string, found: Surroundings, options: SurveyedDecorOptions): SurveyedDecorResult {
     const { kept } = options
     const has = (kind: SurveyedKind): boolean => kept.some(object => object.kind === kind)
-    const hand = { tree: has("tree"), building: has("building"), bridge: has("bridge"), wire: has("wire") }
+    const hand = { tree: has("tree"), building: has("building"), bridge: has("bridge"), wire: has("wire"), streetlight: has("streetlight") }
     const taken = new Set(kept.map(object => object.id))
     let serial = 0
     const nextId = (): string => {
@@ -45,7 +45,8 @@ export class SurveyedDecor {
       tree: kept.filter(object => object.kind === "tree").length,
       building: kept.filter(object => object.kind === "building").length,
       bridge: kept.filter(object => object.kind === "bridge").length,
-      wire: kept.filter(object => object.kind === "wire").length
+      wire: kept.filter(object => object.kind === "wire").length,
+      streetlight: kept.filter(object => object.kind === "streetlight").length
     }
     // What a survey names is called by its name (the town hall), the parts of it after the first numbered ("Mairie de Saint-Lô (2)"); what it does not is "Building 12".
     const names = new Set(kept.map(object => typeof object.title === "string" ? object.title : ""))
@@ -96,6 +97,15 @@ export class SurveyedDecor {
         })
       }
     }
-    return { planted, handPlaced: hand.tree || hand.building || hand.bridge || hand.wire }
+    if (!hand.streetlight) {
+      for (const lamp of found.lamps ?? []) {
+        // No `lit`: a public lamp is lit by the dark, not by the author (see SceneRenderer's photocell).
+        planted.push({
+          id: nextId(), kind: "streetlight", title: titled("streetlight", undefined), eastM: lamp.eastM, northM: lamp.northM, headingDeg: 0,
+          ...(lamp.heightM ? { sizeM: { heightM: lamp.heightM } } : {}), origin: providerId
+        })
+      }
+    }
+    return { planted, handPlaced: hand.tree || hand.building || hand.bridge || hand.wire || hand.streetlight }
   }
 }

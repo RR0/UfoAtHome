@@ -272,4 +272,18 @@ describe("SurroundingsPlanter", () => {
     expect(house.sizeM?.heightM).toBe(10)
     expect(house.floors).toBe(2)
   })
+
+  it("plants the public lamps of the survey as streetlights, left to their photocell, and none where the author placed one", async () => {
+    const editor = new FakeEditor()
+    const survey = new FakeSurvey({ trees: [], buildings: [], bridges: [], lines: [], lamps: [{ eastM: 5, northM: 6 }, { eastM: -4, northM: 2, heightM: 8 }] })
+    await editor.planter(survey).survey(PLACE.lat, PLACE.lng)
+    expect(editor.decor.map(object => object.kind)).toEqual(["streetlight", "streetlight"])
+    expect(editor.decor[0].lit).toBeUndefined()
+    expect(editor.decor[1].sizeM).toEqual({ heightM: 8 })
+    expect(editor.decor[0].origin).toBe("fake-lidar")
+    const own = new FakeEditor()
+    own.decor = [{ id: "mine", kind: "streetlight", eastM: 0, northM: 0 }]
+    await own.planter(survey).survey(PLACE.lat, PLACE.lng)
+    expect(own.decor).toHaveLength(1)
+  })
 })

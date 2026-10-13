@@ -3,6 +3,7 @@ import { SurroundingsUnavailableError } from "../SurroundingsProvider.js"
 import { BuildingFootprints } from "../BuildingFootprints.js"
 import { CanopyCrowns } from "../CanopyCrowns.js"
 import { RoofShapes } from "../RoofShapes.js"
+import { OsmStreetLamps } from "./OsmStreetLamps.js"
 import { IgnGeoplatform } from "./IgnGeoplatform.js"
 import type { IgnGeoplatformOptions } from "./IgnGeoplatform.js"
 
@@ -24,9 +25,12 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
   readonly contemporary = true
 
   private readonly platform: IgnGeoplatform
+  /** Where the public lamps come from, when asked for: the registry gives it, a test that fakes only the IGN does not. */
+  private readonly lamps?: OsmStreetLamps
 
-  constructor(options: IgnGeoplatformOptions = {}) {
+  constructor(options: IgnGeoplatformOptions = {}, lamps?: OsmStreetLamps) {
     this.platform = new IgnGeoplatform(options)
+    this.lamps = lamps
   }
 
   covers(lat: number, lng: number): boolean {
@@ -36,14 +40,15 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
   async getSurroundings(centre: { lat: number, lng: number }, radiusM: number): Promise<Surroundings> {
     if (!this.covers(centre.lat, centre.lng)) throw new SurroundingsUnavailableError("no-coverage", "The LiDAR HD survey covers France only")
     const radius = IgnGeoplatform.lidarRadius(radiusM)
-    const [grids, photo] = await Promise.all([this.platform.lidar(centre, radius), this.platform.photo(centre, radius).catch(() => undefined)])
+    const [grids, photo, lamps] = await Promise.all([this.platform.lidar(centre, radius), this.platform.photo(centre, radius).catch(() => undefined), this.lamps?.near(centre, radiusM)])
     return {
       trees: new CanopyCrowns(grids.heights, grids.vegetation, grids.size, grids.size).trees({ metresPerPixel: grids.metresPerPixel, radiusM: radius }),
       buildings: RoofShapes.fit(
         new BuildingFootprints(grids.heights, grids.building, grids.size, grids.size).buildings({ metresPerPixel: grids.metresPerPixel, radiusM: radius, maxBuildings: 300 }),
         grids, photo),
       bridges: [],
-      lines: []
+      lines: [],
+      ...(lamps ? { lamps } : {})
     }
   }
 }

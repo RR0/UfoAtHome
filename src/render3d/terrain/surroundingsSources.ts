@@ -3,6 +3,7 @@ import type { SurroundingsProvider } from "./SurroundingsProvider.js"
 import { IgnLidarSurroundingsProvider } from "./providers/IgnLidarSurroundingsProvider.js"
 import { IgnLidarTopoSurroundingsProvider } from "./providers/IgnLidarTopoSurroundingsProvider.js"
 import { IgnTopoSurroundingsProvider } from "./providers/IgnTopoSurroundingsProvider.js"
+import { OsmStreetLamps } from "./providers/OsmStreetLamps.js"
 
 /**
  * Every survey of the surroundings the trees, buildings, bridges and lines of a place can be taken from, which the author
@@ -14,23 +15,23 @@ export const SURROUNDINGS_SOURCES: DataSource<SurroundingsProvider>[] = [
   {
     id: "ign-lidar-topo",
     name: "IGN LiDAR HD + BD TOPO",
-    credit: "© IGN, LiDAR HD and BD TOPO, Licence Ouverte 2.0",
+    credit: "© IGN, LiDAR HD and BD TOPO, Licence Ouverte 2.0; street lamps © OpenStreetMap contributors",
     creditUrl: "https://geoservices.ign.fr/lidarhd",
-    create: () => new IgnLidarTopoSurroundingsProvider()
+    create: () => new IgnLidarTopoSurroundingsProvider({}, new OsmStreetLamps())
   },
   {
     id: "ign-lidar-hd",
     name: "IGN LiDAR HD",
-    credit: "© IGN, LiDAR HD, Licence Ouverte 2.0",
+    credit: "© IGN, LiDAR HD, Licence Ouverte 2.0; street lamps © OpenStreetMap contributors",
     creditUrl: "https://geoservices.ign.fr/lidarhd",
-    create: () => new IgnLidarSurroundingsProvider()
+    create: () => new IgnLidarSurroundingsProvider({}, new OsmStreetLamps())
   },
   {
     id: "ign-bd-topo",
     name: "IGN BD TOPO",
-    credit: "© IGN, BD TOPO, Licence Ouverte 2.0",
+    credit: "© IGN, BD TOPO, Licence Ouverte 2.0; street lamps © OpenStreetMap contributors",
     creditUrl: "https://geoservices.ign.fr/bdtopo",
-    create: () => new IgnTopoSurroundingsProvider()
+    create: () => new IgnTopoSurroundingsProvider({}, new OsmStreetLamps())
   }
 ]
 
