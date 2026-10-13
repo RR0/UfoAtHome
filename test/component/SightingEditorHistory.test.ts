@@ -376,7 +376,7 @@ describe("the scenery taken from a survey of the place", () => {
       // The registry is loaded in the background: the choice is there a moment after the editor.
       await waitFor(() => select.options.length > 1)
       expect([...select.options].map(option => option.value)).toEqual(["none", "ign-lidar-topo", "ign-lidar-hd", "ign-bd-topo", "osm-buildings"])
-      expect([...select.options].map(option => option.textContent)).toEqual(["None (all by hand)", "IGN LiDAR HD + BD TOPO", "IGN LiDAR HD", "IGN BD TOPO"])
+      expect([...select.options].map(option => option.textContent)).toEqual(["None (all by hand)", "IGN LiDAR HD + BD TOPO", "IGN LiDAR HD", "IGN BD TOPO", "OpenStreetMap buildings"])
       expect(select.value).toBe("ign-lidar-topo")
       select.value = "none"
       select.dispatchEvent(new Event("change", { bubbles: true, composed: true }))
