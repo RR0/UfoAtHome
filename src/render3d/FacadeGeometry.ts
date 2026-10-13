@@ -6,6 +6,10 @@ import { FacadeTexture } from "./FacadeTexture.js"
  * mapped to a variant of the facade picture (see FacadeTexture), so that a house of any size has windows the size of windows. A door is on the
  * ground floor of the front face, in the middle bay; the other faces have windows only. The top is plain: the roof covers it, or it is the flat roof.
  *
+ * Each window has a rank, from 0 up to 1, the same every time for the same building: at night it is lit when the share of the windows that are lit
+ * exceeds its rank, so that the ones lit at midnight are still lit at nine in the evening, and a building does not change its mind (a door or a plain
+ * wall has a rank of 2, which no share reaches).
+ *
  * Built at the size it is drawn at and never stretched afterwards (a stretched window is a different window), the way a roof is.
  */
 export class FacadeGeometry {
@@ -15,9 +19,10 @@ export class FacadeGeometry {
     return value - Math.floor(value)
   }
 
-  static build(widthM: number, lengthM: number, heightM: number, openings = true, lit: { share: number, seed: number } = { share: 0, seed: 0 }): BufferGeometry {
+  static build(widthM: number, lengthM: number, heightM: number, openings = true, seed = 0): BufferGeometry {
     const positions: number[] = []
     const uvs: number[] = []
+    const ranks: number[] = []
     const halfWidth = widthM / 2
     const halfLength = lengthM / 2
     const levels = Math.max(1, Math.round(heightM / FacadeTexture.FLOOR_M))
@@ -28,10 +33,12 @@ export class FacadeGeometry {
       const bay = length / bays
       for (let level = 0; level < levels; level++) {
         for (let at = 0; at < bays; at++) {
-          const glows = FacadeGeometry.hash(lit.seed, positions.length) < lit.share
           const tile = !openings ? FacadeTexture.PLAIN
-            : level > 0 ? (glows ? FacadeTexture.UPPER_LIT : FacadeTexture.UPPER)
-              : front && at === Math.floor((bays - 1) / 2) ? FacadeTexture.GROUND_DOOR : (glows ? FacadeTexture.GROUND_WINDOW_LIT : FacadeTexture.GROUND_WINDOW)
+            : level > 0 ? FacadeTexture.UPPER
+              : front && at === Math.floor((bays - 1) / 2) ? FacadeTexture.GROUND_DOOR : FacadeTexture.GROUND_WINDOW
+          // The window is lit when the share of the lit ones reaches its rank (see DecorSystem): a door, a plain wall are never.
+          const rank = tile === FacadeTexture.UPPER || tile === FacadeTexture.GROUND_WINDOW ? FacadeGeometry.hash(seed, positions.length) : 2
+          for (let corner = 0; corner < 6; corner++) ranks.push(rank)
           const x0 = start[0] + direction[0] * bay * at
           const z0 = start[1] + direction[1] * bay * at
           const x1 = x0 + direction[0] * bay
@@ -54,10 +61,11 @@ export class FacadeGeometry {
     const plain = FacadeTexture.PLAIN / FacadeTexture.TILES + 0.01
     positions.push(-halfWidth, heightM, -halfLength, -halfWidth, heightM, halfLength, halfWidth, heightM, halfLength,
       -halfWidth, heightM, -halfLength, halfWidth, heightM, halfLength, halfWidth, heightM, -halfLength)
-    for (let i = 0; i < 6; i++) uvs.push(plain, 0.5)
+    for (let i = 0; i < 6; i++) { uvs.push(plain, 0.5); ranks.push(2) }
     const geometry = new BufferGeometry()
     geometry.setAttribute("position", new Float32BufferAttribute(positions, 3))
     geometry.setAttribute("uv", new Float32BufferAttribute(uvs, 2))
+    geometry.setAttribute("litRank", new Float32BufferAttribute(ranks, 1))
     geometry.computeVertexNormals()
     return geometry
   }

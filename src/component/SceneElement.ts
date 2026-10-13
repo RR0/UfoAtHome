@@ -1658,6 +1658,8 @@ export class SceneElement extends HTMLElement {
       // The same date and place again, and deliberately not folded into `stars`: the Milky Way and
       // the zodiacal light need no catalog to arrive first (see SceneAstronomy.frame).
       frame: { date, observer },
+      // The clock, not the Sun: the offset the recording states (summer time included), else the place's own meridian.
+      localHour: (((date.getUTCHours() + date.getUTCMinutes() / 60 + (sighting.event.utcOffsetHours ?? Math.round(lng / 15))) % 24) + 24) % 24,
       eclipse
     })
     // The player's own map borrows a daytime photograph of this ground whatever hour the account is

@@ -668,17 +668,21 @@ describe("DecorSystem building facades", () => {
     expect(flat.getObjectByName(DecorSystem.ROOF_NAME)!.position.y).toBeCloseTo(11)
   })
 
-  it("raises and lowers the glow of the lit windows of every facade under it, and of nothing else", () => {
-    const withFacade = DecorSystem.build(building({ sizeM: sized, facade: { color: "#ffffff" } }), false)
-    const box = DecorSystem.build(building({ sizeM: sized }), false)
-    const wall = (group: Group): MeshLambertMaterial => (DecorSystem.bodyOf(group).children[0] as Mesh).material as MeshLambertMaterial
-    expect(wall(withFacade).emissiveIntensity).toBe(0)
-    const untouched = wall(box).emissiveIntensity
-    DecorSystem.setWindowGlow(withFacade, 1)
-    DecorSystem.setWindowGlow(box, 0.5)
-    expect(wall(withFacade).emissiveIntensity).toBe(1)
-    expect(wall(box).emissiveIntensity).toBe(untouched)
-    DecorSystem.setWindowGlow(withFacade, 0)
-    expect(wall(withFacade).emissiveIntensity).toBe(0)
+  it("holds one share of lit windows for every facade, kept between nothing and all", () => {
+    DecorSystem.setLitWindowShare(0.4)
+    const first = DecorSystem.build(building({ sizeM: sized, facade: { color: "#ffffff" } }), false)
+    const second = DecorSystem.build(building({ sizeM: sized, facade: { color: "#808080" } }), false)
+    const material = (group: Group): MeshLambertMaterial => (DecorSystem.bodyOf(group).children[0] as Mesh).material as MeshLambertMaterial
+    // The two walls are read by the same program, which is what lets one number light every window of the town.
+    expect(material(first).customProgramCacheKey()).toBe(material(second).customProgramCacheKey())
+    const shader = { uniforms: {} as Record<string, { value: number }>, vertexShader: "#include <begin_vertex>", fragmentShader: "#include <emissivemap_fragment>" }
+    material(first).onBeforeCompile(shader as never, undefined as never)
+    expect(shader.uniforms.uLitShare.value).toBe(0.4)
+    DecorSystem.setLitWindowShare(7)
+    expect(shader.uniforms.uLitShare.value).toBe(1)
+    DecorSystem.setLitWindowShare(-1)
+    expect(shader.uniforms.uLitShare.value).toBe(0)
+    expect(shader.fragmentShader).toContain("step(vLitRank, uLitShare)")
+    expect(shader.vertexShader).toContain("vLitRank = litRank")
   })
 })

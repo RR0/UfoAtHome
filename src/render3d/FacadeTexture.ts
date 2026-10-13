@@ -14,10 +14,7 @@ export class FacadeTexture {
   static readonly GROUND_WINDOW = 1
   static readonly GROUND_DOOR = 2
   static readonly PLAIN = 3
-  /** The same bays as UPPER and GROUND_WINDOW to the eye, whose glass the emissive picture lights (see emissive): the windows that are lit at night. */
-  static readonly UPPER_LIT = 4
-  static readonly GROUND_WINDOW_LIT = 5
-  static readonly TILES = 6
+  static readonly TILES = 4
 
   /** One bay: a window every three metres, which is what a street of houses has. */
   static readonly BAY_M = 3
@@ -62,14 +59,14 @@ export class FacadeTexture {
     return FacadeTexture.sharedEmissive
   }
 
-  /** The glow as bytes: black, with the glass of each lit tile. Exposed for tests. */
+  /** The glow as bytes: black, with the glass of each window tile (which of them glow is decided by the facade's own ranks: see FacadeGeometry). Exposed for tests. */
   static glow(): Uint8Array {
     const size = FacadeTexture.PIXELS
     const width = size * FacadeTexture.TILES
     const data = new Uint8Array(width * size * 4)
     for (let i = 3; i < data.length; i += 4) data[i] = 255
     const metre = size / FacadeTexture.BAY_M
-    for (const tile of [FacadeTexture.UPPER_LIT, FacadeTexture.GROUND_WINDOW_LIT]) {
+    for (const tile of [FacadeTexture.UPPER, FacadeTexture.GROUND_WINDOW]) {
       for (let y = Math.round(0.9 * metre); y < Math.round(2.3 * metre); y++) {
         for (let x = Math.round(0.9 * metre); x < Math.round(2.1 * metre); x++) {
           // The mullion stays dark: a lit window is two panes.
@@ -110,12 +107,6 @@ export class FacadeTexture {
     // A door a metre wide and two ten high, in a frame, in a dark paint.
     fill(FacadeTexture.GROUND_DOOR, 1 - 0.06, 0, 2 + 0.06, 2.1 + 0.06, FRAME)
     fill(FacadeTexture.GROUND_DOOR, 1, 0, 2, 2.1, [58, 62, 56])
-    // The lit variants look the same by day as the windows they are the lit version of.
-    for (let y = 0; y < size; y++) {
-      for (const [from, to] of [[FacadeTexture.UPPER, FacadeTexture.UPPER_LIT], [FacadeTexture.GROUND_WINDOW, FacadeTexture.GROUND_WINDOW_LIT]]) {
-        data.copyWithin((y * width + to * size) * 4, (y * width + from * size) * 4, (y * width + (from + 1) * size) * 4)
-      }
-    }
     return data
   }
 }

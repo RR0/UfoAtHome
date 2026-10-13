@@ -51,28 +51,40 @@ describe("FacadeGeometry", () => {
   })
 })
 
-describe("FacadeGeometry lit windows", () => {
-  const tiles = (share: number, seed = 1): number[] => {
-    const uv = FacadeGeometry.build(12, 9, 9, true, { share, seed }).getAttribute("uv")
-    return Array.from({ length: uv.count }, (_, i) => Math.floor(uv.getX(i) * FacadeTexture.TILES))
+describe("FacadeGeometry window ranks", () => {
+  const ranks = (seed = 1): { rank: number[], tile: number[] } => {
+    const geometry = FacadeGeometry.build(12, 9, 9, true, seed)
+    const rank = geometry.getAttribute("litRank")
+    const uv = geometry.getAttribute("uv")
+    return { rank: Array.from({ length: rank.count }, (_, i) => rank.getX(i)), tile: Array.from({ length: uv.count }, (_, i) => Math.floor(uv.getX(i) * FacadeTexture.TILES)) }
   }
 
-  it("lights none by default or with a share of none, and every window with a share of all but never the door", () => {
-    expect(tiles(0).some(tile => tile === FacadeTexture.UPPER_LIT || tile === FacadeTexture.GROUND_WINDOW_LIT)).toBe(false)
-    const all = tiles(1.01)
-    expect(all.some(tile => tile === FacadeTexture.UPPER)).toBe(false)
-    expect(all.some(tile => tile === FacadeTexture.UPPER_LIT)).toBe(true)
-    expect(all.some(tile => tile === FacadeTexture.GROUND_DOOR)).toBe(true)
+  it("ranks every window under one, and never a door or the top, which no share of lit windows reaches", () => {
+    const { rank, tile } = ranks()
+    rank.forEach((value, i) => {
+      const isWindow = tile[i] === FacadeTexture.UPPER || tile[i] === FacadeTexture.GROUND_WINDOW
+      if (isWindow) expect(value).toBeLessThan(1)
+      else expect(value).toBeGreaterThan(1)
+    })
   })
 
-  it("lights about the share it is asked to, the same ones every time, and not the same ones for another building", () => {
-    const lit = (list: number[]): number => list.filter(tile => tile === FacadeTexture.UPPER_LIT || tile === FacadeTexture.GROUND_WINDOW_LIT).length
-    const windows = (list: number[]): number => list.filter(tile => tile !== FacadeTexture.GROUND_DOOR && tile !== FacadeTexture.PLAIN).length
-    const list = tiles(0.3)
-    expect(lit(list) / windows(list)).toBeGreaterThan(0.15)
-    expect(lit(list) / windows(list)).toBeLessThan(0.45)
-    expect(tiles(0.3)).toEqual(list)
-    expect(tiles(0.3, 99)).not.toEqual(list)
+  it("gives the six vertices of a bay the same rank, and the bays of a building different ones, the same every time and not the same for another building", () => {
+    const first = ranks()
+    for (let i = 0; i < first.rank.length - 6; i += 6) if (first.tile[i] === FacadeTexture.UPPER) for (let k = 1; k < 6; k++) expect(first.rank[i + k]).toBe(first.rank[i])
+    const windows = first.rank.filter((_, i) => first.tile[i] === FacadeTexture.UPPER)
+    expect(new Set(windows).size).toBeGreaterThan(5)
+    expect(ranks()).toEqual(first)
+    expect(ranks(99).rank).not.toEqual(first.rank)
+  })
+
+  it("lights about the share it is asked to, taken as the windows ranked under it", () => {
+    const { rank, tile } = ranks(7)
+    const windows = rank.filter((_, i) => tile[i] === FacadeTexture.UPPER || tile[i] === FacadeTexture.GROUND_WINDOW)
+    const share = (limit: number): number => windows.filter(value => value < limit).length / windows.length
+    expect(share(0.3)).toBeGreaterThan(0.12)
+    expect(share(0.3)).toBeLessThan(0.5)
+    // A window lit at a small share is still lit at a bigger one.
+    expect(windows.filter(value => value < 0.1).every(value => value < 0.5)).toBe(true)
   })
 })
 
@@ -88,16 +100,13 @@ describe("FacadeTexture", () => {
     expect(at(FacadeTexture.GROUND_WINDOW, 1.2, 1.5)).toBeLessThan(80)
     expect(at(FacadeTexture.PLAIN, 1.5, 1.5)).toBe(255)
     expect(FacadeTexture.texture()).toBe(FacadeTexture.texture())
-    // The lit variants look like the windows by day, and glow where the glass is, only there.
-    for (const [lit, unlit] of [[FacadeTexture.UPPER_LIT, FacadeTexture.UPPER], [FacadeTexture.GROUND_WINDOW_LIT, FacadeTexture.GROUND_WINDOW]]) {
-      expect(at(lit, 1.2, 1.5)).toBe(at(unlit, 1.2, 1.5))
-      expect(at(lit, 0.3, 1.5)).toBe(255)
-    }
+    // The glass of a window glows where it is glass, and nowhere else.
     const glow = FacadeTexture.glow()
     const glows = (tile: number, x: number, y: number): number => glow[((Math.round(y * size / 3)) * width + tile * size + Math.round(x * size / 3)) * 4]
-    expect(glows(FacadeTexture.UPPER_LIT, 1.2, 1.5)).toBe(255)
-    expect(glows(FacadeTexture.UPPER_LIT, 0.3, 1.5)).toBe(0)
-    expect(glows(FacadeTexture.UPPER, 1.2, 1.5)).toBe(0)
+    expect(glows(FacadeTexture.UPPER, 1.2, 1.5)).toBe(255)
+    expect(glows(FacadeTexture.GROUND_WINDOW, 1.2, 1.5)).toBe(255)
+    expect(glows(FacadeTexture.UPPER, 0.3, 1.5)).toBe(0)
+    expect(glows(FacadeTexture.UPPER, 1.5, 1.5)).toBe(0)
     expect(glows(FacadeTexture.GROUND_DOOR, 1.5, 1)).toBe(0)
   })
 })
