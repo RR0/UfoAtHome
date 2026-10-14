@@ -4174,6 +4174,24 @@ export class SceneRenderer {
   }
 
   /**
+   * The decor the eye is inside of — a flight deck, say — which has no business in the photograph of the eye's surroundings: the six
+   * views of a probe at the eye would each be filled with its own panels, and a model of several hundred thousand triangles drawn six
+   * times over was the whole of the cost of a frame (5 per second against over a hundred without). What is mirrored on the glass of
+   * a place the observer stands in is what is outside it. Not the objects the observer is declared to inhabit (observerSide of a
+   * building or a vehicle): their room is drawn small and is what the glass there is meant to mirror.
+   */
+  private decorAroundTheEye(): Object3D[] {
+    const inside: Object3D[] = []
+    const box = new Box3()
+    for (const object of this.decorObjects) {
+      if (object.observerSide !== undefined && canHoldObserver(object.kind)) continue
+      const group = this.decorGroups.get(object.id)
+      if (group && box.setFromObject(group).containsPoint(this.camera.position)) inside.push(group)
+    }
+    return inside
+  }
+
+  /**
    * Photographs the one reflection probe that is most out of date, if any is — see Reflections —
    * and, while others are still waiting their turn on a scene that has stopped changing, asks for
    * the frames that give it to them. A still scene whose probes have all seen it asks for nothing.
@@ -4190,7 +4208,8 @@ export class SceneRenderer {
     // adapted the eye to three candela, three hundred times the night it was.
     const eyeHidden: Object3D[] = [...this.starTiers.map(tier => tier.points),
       ...[...this.bodyMeshes.values()].filter(mesh => mesh instanceof Points),
-      ...[this.rainSystem?.points, this.precipitationPoints, this.rainSplashSystem?.points].filter((object): object is Points => object !== undefined)]
+      ...[this.rainSystem?.points, this.precipitationPoints, this.rainSplashSystem?.points].filter((object): object is Points => object !== undefined),
+      ...this.decorAroundTheEye()]
     const scale = this.relativeScale
     const version = this.sceneVersion
     // Behind the loader nothing is on screen to spare the GPU for: the eye's probe is taken as soon

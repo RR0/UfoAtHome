@@ -13,6 +13,7 @@ Run from the repository root (needs only the standard library):
     python3 scripts/extract-a320-cockpit.py ~/Downloads/a320_cockpit_2 public/models/davidmarton-a320-cockpit/cockpit.glb
 """
 import json
+import math
 import struct
 import sys
 import pathlib
@@ -28,6 +29,11 @@ EYE = (-0.13, 0.23, 0.76)
 # than the box and stay.
 HEADSET_BOX = ((-0.34, 0.06, 0.55), (-0.17, 0.27, 0.70))
 HEADSET_MESHES = ("Object_55", "Object_56")
+# A piece smaller than this (its box's diagonal, in metres) is dropped: the switches, screws and printed legends of the panels, which
+# are most of the model's triangles and which nothing at the distance of a pilot's eye resolves (see MIN_PIECE_M in the README).
+MIN_PIECE_M = 0.0
+# Metres on a side of the cells the meshes are cut into, so that the renderer can leave out the ones outside the view.
+CELL_M = 0.4
 
 
 def mm(a, b):
@@ -60,8 +66,9 @@ def read_indices(gltf, binary, accessor_index):
     return list(struct.unpack_from("<" + code * a["count"], binary, start))
 
 
-def without_headsets(gltf, binary, world, primitive):
-    """The triangle indices of a primitive, minus the pieces that lie wholly inside a headset box."""
+def without_headsets(gltf, binary, world, primitive, headsets=True):
+    """The triangle indices of a primitive, minus the pieces that lie wholly inside a headset box (when it may hold a headset) and the
+    ones smaller than MIN_PIECE_M."""
     positions = read_vertices(gltf, binary, primitive["attributes"]["POSITION"])
     indices = read_indices(gltf, binary, primitive["indices"])
     # The mesh is cut along its texture seams, so one surface is many "pieces": vertices at the same place are welded first
@@ -88,6 +95,11 @@ def without_headsets(gltf, binary, world, primitive):
         high[root] = [max(a, b) for a, b in zip(high.get(root, w), w)]
 
     def inside(root):
+        diagonal = sum((high[root][k] - low[root][k]) ** 2 for k in range(3)) ** 0.5
+        if diagonal * SCALE < MIN_PIECE_M:
+            return True
+        if not headsets:
+            return False
         for sign in (1, -1):
             lo = [HEADSET_BOX[0][0] * sign if sign < 0 else HEADSET_BOX[0][0], HEADSET_BOX[0][1], HEADSET_BOX[0][2]]
             hi = [HEADSET_BOX[1][0], HEADSET_BOX[1][1], HEADSET_BOX[1][2]]
@@ -102,7 +114,9 @@ def without_headsets(gltf, binary, world, primitive):
     return kept, len(dropped)
 
 
-def main(source_dir, target):
+def main(source_dir, target, min_piece_m=0.0):
+    global MIN_PIECE_M
+    MIN_PIECE_M = min_piece_m
     src = pathlib.Path(source_dir).expanduser()
     gltf = json.loads((src / "scene.gltf").read_text())
     binary = (src / "scene.bin").read_bytes()
@@ -192,23 +206,58 @@ def main(source_dir, target):
         return material_map[index]
 
     pieces = 0
+    cells = 0
     for world, primitive, name in kept:
-        p = {"attributes": {name_: add_accessor(i) for name_, i in primitive["attributes"].items()}, "mode": primitive.get("mode", 4)}
-        if name in HEADSET_MESHES:
-            indices, dropped = without_headsets(gltf, binary, world, primitive)
+        if name in HEADSET_MESHES or MIN_PIECE_M > 0:
+            indices, dropped = without_headsets(gltf, binary, world, primitive, name in HEADSET_MESHES)
             pieces += dropped
-            out_json["accessors"].append({"bufferView": add_view(struct.pack("<" + "I" * len(indices), *indices), 34963),
-                                          "componentType": 5125, "count": len(indices), "type": "SCALAR"})
-            p["indices"] = len(out_json["accessors"]) - 1
-        elif "indices" in primitive:
-            p["indices"] = add_accessor(primitive["indices"])
-        if "material" in primitive:
-            p["material"] = add_material(primitive["material"])
-        out_json["meshes"].append({"primitives": [p]})
-        # The world matrix of the original (its own scale 0.01 x 24.24 and its axis swaps) times the real-size factor, column-major
-        matrix = [[world[r][c] * SCALE if r < 3 else world[r][c] for c in range(4)] for r in range(4)]
-        out_json["nodes"].append({"mesh": len(out_json["meshes"]) - 1, "matrix": [matrix[r][c] for c in range(4) for r in range(4)]})
-        out_json["scenes"][0]["nodes"].append(len(out_json["nodes"]) - 1)
+        else:
+            indices = read_indices(gltf, binary, primitive["indices"])
+        # The primitive is cut into cells of CELL_M on a side (by the centre of each triangle, in the real-size frame) and each cell
+        # is its own mesh, with only the vertices it uses: the renderer draws only the cells in the view, where the original merged
+        # meshes (65 532 vertices each, spread over the whole flight deck) were always drawn whole.
+        positions = read_vertices(gltf, binary, primitive["attributes"]["POSITION"])
+        groups = {}
+        for t in range(0, len(indices), 3):
+            corners = [[sum(world[r][c] * x for c, x in enumerate((*positions[indices[t + k]], 1))) * SCALE for r in range(3)] for k in range(3)]
+            key = tuple(int(math.floor(sum(corner[axis] for corner in corners) / 3 / CELL_M)) for axis in range(3))
+            groups.setdefault(key, []).extend(indices[t:t + 3])
+        attributes = {}
+        for attribute, accessor_index in primitive["attributes"].items():
+            a = gltf["accessors"][accessor_index]
+            view = gltf["bufferViews"][a["bufferView"]]
+            width = {5120: 1, 5121: 1, 5122: 2, 5123: 2, 5125: 4, 5126: 4}[a["componentType"]] * {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}[a["type"]]
+            stride = view.get("byteStride", width)
+            start = view.get("byteOffset", 0) + a.get("byteOffset", 0)
+            attributes[attribute] = (a, width, stride, start)
+        for group in groups.values():
+            order = {}
+            for i in group:
+                order.setdefault(i, len(order))
+            mesh_attributes = {}
+            for attribute, (a, width, stride, start) in attributes.items():
+                data = b"".join(binary[start + v * stride:start + v * stride + width] for v in order)
+                accessor = {"bufferView": add_view(data, 34962), "componentType": a["componentType"], "count": len(order), "type": a["type"]}
+                if attribute == "POSITION":
+                    values = [struct.unpack_from("<3f", data, 12 * i) for i in range(len(order))]
+                    accessor["min"] = [min(v[k] for v in values) for k in range(3)]
+                    accessor["max"] = [max(v[k] for v in values) for k in range(3)]
+                if a.get("normalized"):
+                    accessor["normalized"] = True
+                out_json["accessors"].append(accessor)
+                mesh_attributes[attribute] = len(out_json["accessors"]) - 1
+            remapped = [order[i] for i in group]
+            out_json["accessors"].append({"bufferView": add_view(struct.pack("<" + "I" * len(remapped), *remapped), 34963),
+                                          "componentType": 5125, "count": len(remapped), "type": "SCALAR"})
+            p = {"attributes": mesh_attributes, "indices": len(out_json["accessors"]) - 1, "mode": primitive.get("mode", 4)}
+            if "material" in primitive:
+                p["material"] = add_material(primitive["material"])
+            out_json["meshes"].append({"primitives": [p]})
+            # The world matrix of the original (its own scale 0.01 x 24.24 and its axis swaps) times the real-size factor, column-major
+            matrix = [[world[r][c] * SCALE if r < 3 else world[r][c] for c in range(4)] for r in range(4)]
+            out_json["nodes"].append({"mesh": len(out_json["meshes"]) - 1, "matrix": [matrix[r][c] for c in range(4) for r in range(4)]})
+            out_json["scenes"][0]["nodes"].append(len(out_json["nodes"]) - 1)
+            cells += 1
 
     while len(out_bin) % 4:
         out_bin.append(0)
@@ -221,8 +270,8 @@ def main(source_dir, target):
     path = pathlib.Path(target)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(glb)
-    print(f"{len(kept)} primitives, {pieces} headset pieces dropped, {len(glb) / 1e6:.1f} MB, eye at {[round(v * SCALE, 3) for v in EYE]} m in the model's frame")
+    print(f"{len(kept)} primitives in {cells} cells, {pieces} pieces dropped, {len(glb) / 1e6:.1f} MB, eye at {[round(v * SCALE, 3) for v in EYE]} m in the model's frame")
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1], sys.argv[2], float(sys.argv[3]) if len(sys.argv) > 3 else 0.0)

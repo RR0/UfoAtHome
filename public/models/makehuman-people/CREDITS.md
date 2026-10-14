@@ -61,3 +61,10 @@ faces are masked there, so nothing here is a likeness): a boy of 13 and a half (
 whose texture is replaced by one colour with a little grain, no logo or pattern). Assumed: their height,
 build, hair and the colour of their clothes. François wore glasses; the CC0 system assets have none, so
 the model has none.
+
+## duboc-seated.glb
+
+Captain Jean-Charles Duboc seated at the left seat of an A320 flight deck, built by `scripts/people/build_pilot.py` from the MakeHuman system
+assets (CC0 1.0, https://www.makehumancommunity.org/) with MPFB, like the other people here, after his portrait on rr0.org: stout, balding,
+bearded, glasses, headset, a white shirt with the four stripes of a captain and a black tie. The beard, glasses, headset, epaulettes and tie
+are made by the script itself (CC0 1.0, UFO@home). His height, trousers and shoes are assumed. See `scripts/people/README.md`.

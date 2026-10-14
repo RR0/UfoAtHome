@@ -45,9 +45,19 @@ STEP_MS = 1000
 # the fuselage 2.3 m under it; the eye of an A320 pilot is about 4.5 m behind the nose, 0.5 m left of the axis and 0.7 m above it (a
 # published dimension, not measured on the model), hence 1.6 m under the centre.
 EYE_FORWARD_M, EYE_LEFT_M, EYE_BELOW_CENTRE_M = 18.85 - 4.5, 0.5, 1.6
-# And in the flight deck model, where the captain's eye is (measured by looking out of it from the left seat): 0.484 m BEHIND the
-# centre of its box (the nose is towards -z), 0.557 m left of it and 0.266 m above it.
-COCKPIT_FORWARD_M, COCKPIT_LEFT_M, COCKPIT_BELOW_M = -0.134, 0.557, -0.266
+# And in the flight deck model, where the captain's eye is: 0.557 m left of the centre of its box and 0.266 m above it (found by looking
+# out of it from the left seat); and 0.174 m AHEAD of it (the nose is towards -z), which is 0.25 m in front of the front of the seat's
+# headrest, as a seated pilot's eye is (found by sitting the MakeHuman captain in the seat, see scripts/people/build_pilot.py).
+COCKPIT_FORWARD_M, COCKPIT_LEFT_M, COCKPIT_BELOW_M = 0.174, 0.557, -0.266
+# The two seats are 1.074 m apart (the flight deck is symmetrical about x = 0.02 in the model, the captain's eye at -0.537): the
+# co-pilot's eye is that much to the right of the captain's, and 0.517 right of the middle of the box.
+SEAT_SPACING_M = 1.074
+COCKPIT_RIGHT_SEAT_LEFT_M = -0.517
+# The captain seated, as scripts/people/build_pilot.py makes him (MakeHuman): his eyes are 0.093 m behind the centre of his box, at its
+# middle across, and 1.393 m above his feet, which are where the entity decor rests its model. Placed by rays against the flight deck model:
+# 10.5 cm further forward than his eyes (so that his back touches the backrest: 0.7 cm from it at the middle of the back, 4.6 cm between the
+# shoulder blades because the backrest leans) and 3 cm lower (1.3 cm into the cushion, 11 cm under the ceiling).
+PILOT_FORWARD_M, PILOT_LEFT_M, PILOT_BELOW_M = -0.012, 0.0, -1.423
 
 
 def stated(value, basis, rationale):
@@ -141,8 +151,13 @@ def airliner(total_s, seat="left"):
                  "amvlab-a320", {"widthM": 34.1, "lengthM": 37.6, "heightM": 11.8}, EYE_FORWARD_M, side * EYE_LEFT_M, EYE_BELOW_CENTRE_M,
                  {"observerSide": "front-" + seat, "aircraftSound": "airliner-narrow"}),
         airframe(total_s, "af3532-cockpit", tr("Poste de pilotage de l'A320 (siège gauche : le commandant)", "A320 flight deck (left seat: the captain)"),
-                 "davidmarton-a320-cockpit", {"widthM": 3.257, "lengthM": 2.591, "heightM": 2.127}, COCKPIT_FORWARD_M, side * COCKPIT_LEFT_M, COCKPIT_BELOW_M, {}),
-    ]
+                 "davidmarton-a320-cockpit", {"widthM": 3.257, "lengthM": 2.591, "heightM": 2.127}, COCKPIT_FORWARD_M,
+                 COCKPIT_LEFT_M if seat == "left" else COCKPIT_RIGHT_SEAT_LEFT_M, COCKPIT_BELOW_M, {}),
+    ] + ([] if seat == "left" else [
+        # Seen from the right seat, the captain sits a metre to the left, on the line of sight to the left window
+        {**airframe(total_s, "af3532-captain", tr("Le commandant Duboc, au siège gauche", "Captain Duboc, at the left seat"),
+                    "ufoathome-duboc-seated", {"heightM": 1.541}, PILOT_FORWARD_M, PILOT_LEFT_M - SEAT_SPACING_M, PILOT_BELOW_M, {}),
+         "kind": "entity"}])
 
 
 def air(t_ms, wind_kt):

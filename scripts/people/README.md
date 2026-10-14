@@ -75,3 +75,35 @@ about any witness.
 `derive_socorro_figure.py` is the exception that runs without Blender: the Socorro figure (two figures "in white
 coveralls") is the man of 2 July 1965 with his suit's texture replaced by off-white cloth, written into the .glb
 directly. Run it with `python3 scripts/people/derive_socorro_figure.py` (ImageMagick for the cloth).
+
+## The captain of flight AF 3532
+
+`build_pilot.py` builds `makehuman-people/duboc-seated.glb`, Captain Jean-Charles Duboc seated at the left seat of an A320 flight deck, after the
+portrait on his rr0.org page (stout, balding, a pepper-and-salt beard, glasses, a white shirt with four-stripe epaulettes and a black tie, a headset).
+It uses the helpers of `build_people.py` (which only runs as a script) and the same setup as above, plus:
+
+- `clothes/male_pilotshirt01/` in the system assets: `male_casualsuit01` copied under that name (files renamed, `casualsuit01` replaced by
+  `pilotshirt01` inside the `.mhclo` and `.mhmat`), its diffuse texture's shirt islands painted plain white and its jeans island plain navy:
+
+  ```
+  magick male_pilotshirt01_diffuse.png \
+    \( -size 730x1408 xc:'#e8e8e4' -attenuate 0.15 +noise Gaussian -blur 0x0.8 \) -geometry +0+640 -composite \
+    \( -size 420x550 xc:'#e8e8e4' -attenuate 0.15 +noise Gaussian -blur 0x0.8 \) -geometry +1480+430 -composite \
+    \( -size 160x370 xc:'#e8e8e4' \) -geometry +1470+1070 -composite \
+    \( -size 420x568 xc:'#e8e8e4' -attenuate 0.15 +noise Gaussian -blur 0x0.8 \) -geometry +1480+1480 -composite \
+    \( -size 718x2048 xc:'#171f33' -attenuate 0.2 +noise Gaussian -blur 0x0.8 \) -geometry +742+0 -composite \
+    -depth 8 -alpha off male_pilotshirt01_diffuse.png
+  ```
+
+- What the CC0 assets lack is made on the baked mesh: the beard is a shell of the lower face's own faces pushed out a few millimetres, the hair is
+  `short01` with its crown cut away and its colour made grey, the glasses, the headset, the epaulettes and the tie are small solids placed from the
+  head's and the shoulders' own measures.
+- He is posed seated (hips and knees at a right angle, forearms forward) by turning the rig's bones about world axes, then baked like the others.
+
+```
+MH_ASSETS=/path/to/makehuman_system_assets_cc0 BLENDER_USER_RESOURCES=/path/to/scratch/res \
+  /Applications/Blender.app/Contents/MacOS/Blender -b --python scripts/people/build_pilot.py -- <output dir>
+```
+
+It prints where his eyes are from the middle of the file's box (see `scripts/data/cases/duboc/build_duboc.py`, which places him on the seat).
+His height (1.78 m), his trousers and his shoes are ASSUMED: the portrait shows none of them.

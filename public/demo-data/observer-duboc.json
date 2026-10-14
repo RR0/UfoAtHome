@@ -3244,8 +3244,8 @@
     "fr": "Poste de pilotage de l'A320 (siège gauche : le commandant)",
     "en": "A320 flight deck (left seat: the captain)"
    },
-   "eastM": 0.43,
-   "northM": 0.38,
+   "eastM": 0.57,
+   "northM": 0.11,
    "headingDeg": 332.0,
    "sizeM": {
     "widthM": 3.257,
@@ -3258,176 +3258,176 @@
    "track": [
     {
      "t": 0,
-     "eastM": 0.43,
-     "northM": 0.38,
+     "eastM": 0.57,
+     "northM": 0.11,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 5000,
-     "eastM": -422.13,
-     "northM": 795.32,
+     "eastM": -421.99,
+     "northM": 795.04,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 10000,
-     "eastM": -844.58,
-     "northM": 1590.14,
+     "eastM": -844.43,
+     "northM": 1589.87,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 15000,
-     "eastM": -1266.97,
-     "northM": 2385.08,
+     "eastM": -1266.83,
+     "northM": 2384.8,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 20000,
-     "eastM": -1689.17,
-     "northM": 3180.01,
+     "eastM": -1689.03,
+     "northM": 3179.74,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 25000,
-     "eastM": -2111.33,
-     "northM": 3974.84,
+     "eastM": -2111.19,
+     "northM": 3974.57,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 30000,
-     "eastM": -2533.29,
-     "northM": 4769.77,
+     "eastM": -2533.15,
+     "northM": 4769.5,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 35000,
-     "eastM": -2955.21,
-     "northM": 5564.71,
+     "eastM": -2955.06,
+     "northM": 5564.44,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 40000,
-     "eastM": -3376.93,
-     "northM": 6359.53,
+     "eastM": -3376.78,
+     "northM": 6359.26,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 45000,
-     "eastM": -3798.6,
-     "northM": 7154.47,
+     "eastM": -3798.46,
+     "northM": 7154.2,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 50000,
-     "eastM": -4220.08,
-     "northM": 7949.41,
+     "eastM": -4219.94,
+     "northM": 7949.14,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 55000,
-     "eastM": -4641.44,
-     "northM": 8744.23,
+     "eastM": -4641.3,
+     "northM": 8743.96,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 60000,
-     "eastM": -5062.76,
-     "northM": 9539.17,
+     "eastM": -5062.61,
+     "northM": 9538.9,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 65000,
-     "eastM": -5483.87,
-     "northM": 10334.1,
+     "eastM": -5483.73,
+     "northM": 10333.83,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 70000,
-     "eastM": -5904.95,
-     "northM": 11128.93,
+     "eastM": -5904.8,
+     "northM": 11128.66,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 75000,
-     "eastM": -6325.83,
-     "northM": 11923.87,
+     "eastM": -6325.68,
+     "northM": 11923.59,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 80000,
-     "eastM": -6746.66,
-     "northM": 12718.8,
+     "eastM": -6746.51,
+     "northM": 12718.53,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 85000,
-     "eastM": -7167.29,
-     "northM": 13513.63,
+     "eastM": -7167.15,
+     "northM": 13513.35,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 90000,
-     "eastM": -7587.81,
-     "northM": 14308.56,
+     "eastM": -7587.67,
+     "northM": 14308.29,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 95000,
-     "eastM": -8008.28,
-     "northM": 15103.5,
+     "eastM": -8008.14,
+     "northM": 15103.23,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 100000,
-     "eastM": -8428.56,
-     "northM": 15898.32,
+     "eastM": -8428.41,
+     "northM": 15898.05,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 105000,
-     "eastM": -8848.79,
-     "northM": 16693.26,
+     "eastM": -8848.64,
+     "northM": 16692.99,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 110000,
-     "eastM": -9268.82,
-     "northM": 17488.2,
+     "eastM": -9268.68,
+     "northM": 17487.92,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 115000,
-     "eastM": -9688.81,
-     "northM": 18283.02,
+     "eastM": -9688.66,
+     "northM": 18282.75,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     },
     {
      "t": 120000,
-     "eastM": -10108.6,
-     "northM": 19077.96,
+     "eastM": -10108.46,
+     "northM": 19077.68,
      "altitudeM": 11701.33,
      "headingDeg": 332.0
     }
