@@ -82,7 +82,7 @@
    {
     "t": 0,
     "pose": {
-     "lat": 48.759167,
+     "lat": 48.759312,
      "lng": 3.084231,
      "elevationM": 11700.0,
      "headingDeg": 272.0,
@@ -93,8 +93,8 @@
    {
     "t": 2000,
     "pose": {
-     "lat": 48.762028,
-     "lng": 3.081924,
+     "lat": 48.762168,
+     "lng": 3.081928,
      "elevationM": 11700.0,
      "headingDeg": 271.58,
      "pitchDeg": -3.19,
@@ -104,8 +104,8 @@
    {
     "t": 4000,
     "pose": {
-     "lat": 48.764889,
-     "lng": 3.079616,
+     "lat": 48.765025,
+     "lng": 3.079624,
      "elevationM": 11700.0,
      "headingDeg": 270.74,
      "pitchDeg": -3.22,
@@ -115,8 +115,8 @@
    {
     "t": 6000,
     "pose": {
-     "lat": 48.76775,
-     "lng": 3.077308,
+     "lat": 48.767881,
+     "lng": 3.07732,
      "elevationM": 11700.0,
      "headingDeg": 269.89,
      "pitchDeg": -3.24,
@@ -126,8 +126,8 @@
    {
     "t": 8000,
     "pose": {
-     "lat": 48.770612,
-     "lng": 3.075001,
+     "lat": 48.770737,
+     "lng": 3.075016,
      "elevationM": 11700.0,
      "headingDeg": 269.02,
      "pitchDeg": -3.27,
@@ -137,8 +137,8 @@
    {
     "t": 10000,
     "pose": {
-     "lat": 48.773473,
-     "lng": 3.072693,
+     "lat": 48.773593,
+     "lng": 3.072713,
      "elevationM": 11700.0,
      "headingDeg": 268.14,
      "pitchDeg": -3.29,
@@ -148,8 +148,8 @@
    {
     "t": 12000,
     "pose": {
-     "lat": 48.776334,
-     "lng": 3.070385,
+     "lat": 48.77645,
+     "lng": 3.070409,
      "elevationM": 11700.0,
      "headingDeg": 267.24,
      "pitchDeg": -3.32,
@@ -159,8 +159,8 @@
    {
     "t": 14000,
     "pose": {
-     "lat": 48.779195,
-     "lng": 3.068077,
+     "lat": 48.779306,
+     "lng": 3.068105,
      "elevationM": 11700.0,
      "headingDeg": 266.34,
      "pitchDeg": -3.34,
@@ -170,8 +170,8 @@
    {
     "t": 16000,
     "pose": {
-     "lat": 48.782056,
-     "lng": 3.06577,
+     "lat": 48.782162,
+     "lng": 3.065801,
      "elevationM": 11700.0,
      "headingDeg": 265.41,
      "pitchDeg": -3.37,
@@ -181,8 +181,8 @@
    {
     "t": 18000,
     "pose": {
-     "lat": 48.784917,
-     "lng": 3.063462,
+     "lat": 48.785018,
+     "lng": 3.063497,
      "elevationM": 11700.0,
      "headingDeg": 264.48,
      "pitchDeg": -3.39,
@@ -192,8 +192,8 @@
    {
     "t": 20000,
     "pose": {
-     "lat": 48.787778,
-     "lng": 3.061154,
+     "lat": 48.787875,
+     "lng": 3.061194,
      "elevationM": 11700.0,
      "headingDeg": 263.53,
      "pitchDeg": -3.41,
@@ -203,8 +203,8 @@
    {
     "t": 22000,
     "pose": {
-     "lat": 48.790639,
-     "lng": 3.058847,
+     "lat": 48.790731,
+     "lng": 3.05889,
      "elevationM": 11700.0,
      "headingDeg": 262.57,
      "pitchDeg": -3.44,
@@ -214,8 +214,8 @@
    {
     "t": 24000,
     "pose": {
-     "lat": 48.7935,
-     "lng": 3.056539,
+     "lat": 48.793587,
+     "lng": 3.056586,
      "elevationM": 11700.0,
      "headingDeg": 261.6,
      "pitchDeg": -3.46,
@@ -225,8 +225,8 @@
    {
     "t": 26000,
     "pose": {
-     "lat": 48.796361,
-     "lng": 3.054231,
+     "lat": 48.796444,
+     "lng": 3.054282,
      "elevationM": 11700.0,
      "headingDeg": 260.61,
      "pitchDeg": -3.48,
@@ -236,8 +236,8 @@
    {
     "t": 28000,
     "pose": {
-     "lat": 48.799222,
-     "lng": 3.051923,
+     "lat": 48.7993,
+     "lng": 3.051979,
      "elevationM": 11700.0,
      "headingDeg": 259.62,
      "pitchDeg": -3.5,
@@ -247,8 +247,8 @@
    {
     "t": 30000,
     "pose": {
-     "lat": 48.802084,
-     "lng": 3.049616,
+     "lat": 48.802156,
+     "lng": 3.049675,
      "elevationM": 11700.0,
      "headingDeg": 258.61,
      "pitchDeg": -3.52,
@@ -258,8 +258,8 @@
    {
     "t": 32000,
     "pose": {
-     "lat": 48.804945,
-     "lng": 3.047308,
+     "lat": 48.805012,
+     "lng": 3.047371,
      "elevationM": 11700.0,
      "headingDeg": 257.59,
      "pitchDeg": -3.53,
@@ -269,8 +269,8 @@
    {
     "t": 34000,
     "pose": {
-     "lat": 48.807806,
-     "lng": 3.045,
+     "lat": 48.807869,
+     "lng": 3.045067,
      "elevationM": 11700.0,
      "headingDeg": 256.56,
      "pitchDeg": -3.55,
@@ -280,8 +280,8 @@
    {
     "t": 36000,
     "pose": {
-     "lat": 48.810667,
-     "lng": 3.042693,
+     "lat": 48.810725,
+     "lng": 3.042763,
      "elevationM": 11700.0,
      "headingDeg": 255.53,
      "pitchDeg": -3.57,
@@ -291,8 +291,8 @@
    {
     "t": 38000,
     "pose": {
-     "lat": 48.813528,
-     "lng": 3.040385,
+     "lat": 48.813581,
+     "lng": 3.04046,
      "elevationM": 11700.0,
      "headingDeg": 254.48,
      "pitchDeg": -3.58,
@@ -302,8 +302,8 @@
    {
     "t": 40000,
     "pose": {
-     "lat": 48.816389,
-     "lng": 3.038077,
+     "lat": 48.816437,
+     "lng": 3.038156,
      "elevationM": 11700.0,
      "headingDeg": 253.42,
      "pitchDeg": -3.6,
@@ -313,8 +313,8 @@
    {
     "t": 42000,
     "pose": {
-     "lat": 48.81925,
-     "lng": 3.035769,
+     "lat": 48.819294,
+     "lng": 3.035852,
      "elevationM": 11700.0,
      "headingDeg": 252.36,
      "pitchDeg": -3.61,
@@ -324,8 +324,8 @@
    {
     "t": 44000,
     "pose": {
-     "lat": 48.822111,
-     "lng": 3.033462,
+     "lat": 48.82215,
+     "lng": 3.033548,
      "elevationM": 11700.0,
      "headingDeg": 251.29,
      "pitchDeg": -3.62,
@@ -335,8 +335,8 @@
    {
     "t": 46000,
     "pose": {
-     "lat": 48.824972,
-     "lng": 3.031154,
+     "lat": 48.825006,
+     "lng": 3.031245,
      "elevationM": 11700.0,
      "headingDeg": 250.21,
      "pitchDeg": -3.63,
@@ -346,8 +346,8 @@
    {
     "t": 48000,
     "pose": {
-     "lat": 48.827833,
-     "lng": 3.028846,
+     "lat": 48.827862,
+     "lng": 3.028941,
      "elevationM": 11700.0,
      "headingDeg": 249.13,
      "pitchDeg": -3.64,
@@ -357,8 +357,8 @@
    {
     "t": 50000,
     "pose": {
-     "lat": 48.830695,
-     "lng": 3.026539,
+     "lat": 48.830719,
+     "lng": 3.026637,
      "elevationM": 11700.0,
      "headingDeg": 248.04,
      "pitchDeg": -3.65,
@@ -368,8 +368,8 @@
    {
     "t": 52000,
     "pose": {
-     "lat": 48.833556,
-     "lng": 3.024231,
+     "lat": 48.833575,
+     "lng": 3.024333,
      "elevationM": 11700.0,
      "headingDeg": 246.95,
      "pitchDeg": -3.66,
@@ -379,8 +379,8 @@
    {
     "t": 54000,
     "pose": {
-     "lat": 48.836417,
-     "lng": 3.021923,
+     "lat": 48.836431,
+     "lng": 3.02203,
      "elevationM": 11700.0,
      "headingDeg": 245.85,
      "pitchDeg": -3.66,
@@ -390,8 +390,8 @@
    {
     "t": 56000,
     "pose": {
-     "lat": 48.839278,
-     "lng": 3.019615,
+     "lat": 48.839287,
+     "lng": 3.019726,
      "elevationM": 11700.0,
      "headingDeg": 244.75,
      "pitchDeg": -3.67,
@@ -401,8 +401,8 @@
    {
     "t": 58000,
     "pose": {
-     "lat": 48.842139,
-     "lng": 3.017308,
+     "lat": 48.842144,
+     "lng": 3.017422,
      "elevationM": 11700.0,
      "headingDeg": 243.65,
      "pitchDeg": -3.67,
@@ -413,7 +413,7 @@
     "t": 60000,
     "pose": {
      "lat": 48.845,
-     "lng": 3.015,
+     "lng": 3.015118,
      "elevationM": 11700.0,
      "headingDeg": 242.55,
      "pitchDeg": -3.67,
@@ -423,8 +423,8 @@
    {
     "t": 62000,
     "pose": {
-     "lat": 48.847861,
-     "lng": 3.012692,
+     "lat": 48.847856,
+     "lng": 3.012814,
      "elevationM": 11700.0,
      "headingDeg": 241.45,
      "pitchDeg": -3.67,
@@ -434,8 +434,8 @@
    {
     "t": 64000,
     "pose": {
-     "lat": 48.850722,
-     "lng": 3.010385,
+     "lat": 48.850713,
+     "lng": 3.010511,
      "elevationM": 11700.0,
      "headingDeg": 240.35,
      "pitchDeg": -3.67,
@@ -445,8 +445,8 @@
    {
     "t": 66000,
     "pose": {
-     "lat": 48.853583,
-     "lng": 3.008077,
+     "lat": 48.853569,
+     "lng": 3.008207,
      "elevationM": 11700.0,
      "headingDeg": 239.25,
      "pitchDeg": -3.67,
@@ -456,8 +456,8 @@
    {
     "t": 68000,
     "pose": {
-     "lat": 48.856444,
-     "lng": 3.005769,
+     "lat": 48.856425,
+     "lng": 3.005903,
      "elevationM": 11700.0,
      "headingDeg": 238.15,
      "pitchDeg": -3.66,
@@ -467,8 +467,8 @@
    {
     "t": 70000,
     "pose": {
-     "lat": 48.859305,
-     "lng": 3.003461,
+     "lat": 48.859281,
+     "lng": 3.003599,
      "elevationM": 11700.0,
      "headingDeg": 237.05,
      "pitchDeg": -3.66,
@@ -478,8 +478,8 @@
    {
     "t": 72000,
     "pose": {
-     "lat": 48.862167,
-     "lng": 3.001154,
+     "lat": 48.862138,
+     "lng": 3.001296,
      "elevationM": 11700.0,
      "headingDeg": 235.96,
      "pitchDeg": -3.65,
@@ -489,8 +489,8 @@
    {
     "t": 74000,
     "pose": {
-     "lat": 48.865028,
-     "lng": 2.998846,
+     "lat": 48.864994,
+     "lng": 2.998992,
      "elevationM": 11700.0,
      "headingDeg": 234.87,
      "pitchDeg": -3.64,
@@ -500,8 +500,8 @@
    {
     "t": 76000,
     "pose": {
-     "lat": 48.867889,
-     "lng": 2.996538,
+     "lat": 48.86785,
+     "lng": 2.996688,
      "elevationM": 11700.0,
      "headingDeg": 233.79,
      "pitchDeg": -3.63,
@@ -511,8 +511,8 @@
    {
     "t": 78000,
     "pose": {
-     "lat": 48.87075,
-     "lng": 2.994231,
+     "lat": 48.870706,
+     "lng": 2.994384,
      "elevationM": 11700.0,
      "headingDeg": 232.71,
      "pitchDeg": -3.62,
@@ -522,8 +522,8 @@
    {
     "t": 80000,
     "pose": {
-     "lat": 48.873611,
-     "lng": 2.991923,
+     "lat": 48.873563,
+     "lng": 2.99208,
      "elevationM": 11700.0,
      "headingDeg": 231.64,
      "pitchDeg": -3.61,
@@ -533,8 +533,8 @@
    {
     "t": 82000,
     "pose": {
-     "lat": 48.876472,
-     "lng": 2.989615,
+     "lat": 48.876419,
+     "lng": 2.989777,
      "elevationM": 11700.0,
      "headingDeg": 230.58,
      "pitchDeg": -3.6,
@@ -544,8 +544,8 @@
    {
     "t": 84000,
     "pose": {
-     "lat": 48.879333,
-     "lng": 2.987307,
+     "lat": 48.879275,
+     "lng": 2.987473,
      "elevationM": 11700.0,
      "headingDeg": 229.52,
      "pitchDeg": -3.58,
@@ -555,8 +555,8 @@
    {
     "t": 86000,
     "pose": {
-     "lat": 48.882194,
-     "lng": 2.985,
+     "lat": 48.882131,
+     "lng": 2.985169,
      "elevationM": 11700.0,
      "headingDeg": 228.47,
      "pitchDeg": -3.57,
@@ -566,8 +566,8 @@
    {
     "t": 88000,
     "pose": {
-     "lat": 48.885055,
-     "lng": 2.982692,
+     "lat": 48.884988,
+     "lng": 2.982865,
      "elevationM": 11700.0,
      "headingDeg": 227.44,
      "pitchDeg": -3.55,
@@ -577,8 +577,8 @@
    {
     "t": 90000,
     "pose": {
-     "lat": 48.887916,
-     "lng": 2.980384,
+     "lat": 48.887844,
+     "lng": 2.980562,
      "elevationM": 11700.0,
      "headingDeg": 226.41,
      "pitchDeg": -3.53,
@@ -588,8 +588,8 @@
    {
     "t": 92000,
     "pose": {
-     "lat": 48.890778,
-     "lng": 2.978077,
+     "lat": 48.8907,
+     "lng": 2.978258,
      "elevationM": 11700.0,
      "headingDeg": 225.39,
      "pitchDeg": -3.52,
@@ -599,8 +599,8 @@
    {
     "t": 94000,
     "pose": {
-     "lat": 48.893639,
-     "lng": 2.975769,
+     "lat": 48.893556,
+     "lng": 2.975954,
      "elevationM": 11700.0,
      "headingDeg": 224.38,
      "pitchDeg": -3.5,
@@ -610,8 +610,8 @@
    {
     "t": 96000,
     "pose": {
-     "lat": 48.8965,
-     "lng": 2.973461,
+     "lat": 48.896413,
+     "lng": 2.97365,
      "elevationM": 11700.0,
      "headingDeg": 223.39,
      "pitchDeg": -3.48,
@@ -621,8 +621,8 @@
    {
     "t": 98000,
     "pose": {
-     "lat": 48.899361,
-     "lng": 2.971153,
+     "lat": 48.899269,
+     "lng": 2.971346,
      "elevationM": 11700.0,
      "headingDeg": 222.4,
      "pitchDeg": -3.46,
@@ -632,8 +632,8 @@
    {
     "t": 100000,
     "pose": {
-     "lat": 48.902222,
-     "lng": 2.968846,
+     "lat": 48.902125,
+     "lng": 2.969043,
      "elevationM": 11700.0,
      "headingDeg": 221.43,
      "pitchDeg": -3.44,
@@ -643,8 +643,8 @@
    {
     "t": 102000,
     "pose": {
-     "lat": 48.905083,
-     "lng": 2.966538,
+     "lat": 48.904982,
+     "lng": 2.966739,
      "elevationM": 11700.0,
      "headingDeg": 220.47,
      "pitchDeg": -3.41,
@@ -654,8 +654,8 @@
    {
     "t": 104000,
     "pose": {
-     "lat": 48.907944,
-     "lng": 2.96423,
+     "lat": 48.907838,
+     "lng": 2.964435,
      "elevationM": 11700.0,
      "headingDeg": 219.52,
      "pitchDeg": -3.39,
@@ -665,8 +665,8 @@
    {
     "t": 106000,
     "pose": {
-     "lat": 48.910805,
-     "lng": 2.961923,
+     "lat": 48.910694,
+     "lng": 2.962131,
      "elevationM": 11700.0,
      "headingDeg": 218.59,
      "pitchDeg": -3.37,
@@ -676,8 +676,8 @@
    {
     "t": 108000,
     "pose": {
-     "lat": 48.913666,
-     "lng": 2.959615,
+     "lat": 48.91355,
+     "lng": 2.959828,
      "elevationM": 11700.0,
      "headingDeg": 217.66,
      "pitchDeg": -3.34,
@@ -687,8 +687,8 @@
    {
     "t": 110000,
     "pose": {
-     "lat": 48.916527,
-     "lng": 2.957307,
+     "lat": 48.916407,
+     "lng": 2.957524,
      "elevationM": 11700.0,
      "headingDeg": 216.76,
      "pitchDeg": -3.32,
@@ -698,8 +698,8 @@
    {
     "t": 112000,
     "pose": {
-     "lat": 48.919388,
-     "lng": 2.954999,
+     "lat": 48.919263,
+     "lng": 2.95522,
      "elevationM": 11700.0,
      "headingDeg": 215.86,
      "pitchDeg": -3.29,
@@ -709,8 +709,8 @@
    {
     "t": 114000,
     "pose": {
-     "lat": 48.92225,
-     "lng": 2.952692,
+     "lat": 48.922119,
+     "lng": 2.952916,
      "elevationM": 11700.0,
      "headingDeg": 214.98,
      "pitchDeg": -3.27,
@@ -720,8 +720,8 @@
    {
     "t": 116000,
     "pose": {
-     "lat": 48.925111,
-     "lng": 2.950384,
+     "lat": 48.924975,
+     "lng": 2.950613,
      "elevationM": 11700.0,
      "headingDeg": 214.11,
      "pitchDeg": -3.24,
@@ -731,8 +731,8 @@
    {
     "t": 118000,
     "pose": {
-     "lat": 48.927972,
-     "lng": 2.948076,
+     "lat": 48.927832,
+     "lng": 2.948309,
      "elevationM": 11700.0,
      "headingDeg": 213.26,
      "pitchDeg": -3.22,
@@ -742,8 +742,8 @@
    {
     "t": 120000,
     "pose": {
-     "lat": 48.930833,
-     "lng": 2.945769,
+     "lat": 48.930688,
+     "lng": 2.946005,
      "elevationM": 11700.0,
      "headingDeg": 212.42,
      "pitchDeg": -3.19,
@@ -3038,7 +3038,206 @@
    }
   ]
  },
- "decor": [],
+ "decor": [
+  {
+   "id": "af3532",
+   "kind": "aircraft",
+   "title": {
+    "fr": "Airbus A320-111 F-GFKG, vol AF 3532 (le siège gauche du poste de pilotage)",
+    "en": "Airbus A320-111 F-GFKG, flight AF 3532 (the left seat of the flight deck)"
+   },
+   "eastM": 7.18,
+   "northM": -12.44,
+   "headingDeg": 332.0,
+   "sizeM": {
+    "widthM": 34.1,
+    "lengthM": 37.6,
+    "heightM": 11.8
+   },
+   "model": {
+    "id": "amvlab-a320"
+   },
+   "observerSide": "front-left",
+   "aircraftSound": "airliner-narrow",
+   "track": [
+    {
+     "t": 0,
+     "eastM": 7.18,
+     "northM": -12.44,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 5000,
+     "eastM": -415.38,
+     "northM": 782.5,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 10000,
+     "eastM": -837.83,
+     "northM": 1577.33,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 15000,
+     "eastM": -1260.22,
+     "northM": 2372.26,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 20000,
+     "eastM": -1682.43,
+     "northM": 3167.2,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 25000,
+     "eastM": -2104.58,
+     "northM": 3962.02,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 30000,
+     "eastM": -2526.54,
+     "northM": 4756.96,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 35000,
+     "eastM": -2948.46,
+     "northM": 5551.89,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 40000,
+     "eastM": -3370.18,
+     "northM": 6346.72,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 45000,
+     "eastM": -3791.85,
+     "northM": 7141.66,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 50000,
+     "eastM": -4213.33,
+     "northM": 7936.59,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 55000,
+     "eastM": -4634.69,
+     "northM": 8731.42,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 60000,
+     "eastM": -5056.01,
+     "northM": 9526.35,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 65000,
+     "eastM": -5477.13,
+     "northM": 10321.29,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 70000,
+     "eastM": -5898.2,
+     "northM": 11116.11,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 75000,
+     "eastM": -6319.08,
+     "northM": 11911.05,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 80000,
+     "eastM": -6739.91,
+     "northM": 12705.99,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 85000,
+     "eastM": -7160.54,
+     "northM": 13500.81,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 90000,
+     "eastM": -7581.06,
+     "northM": 14295.75,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 95000,
+     "eastM": -8001.53,
+     "northM": 15090.68,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 100000,
+     "eastM": -8421.81,
+     "northM": 15885.51,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 105000,
+     "eastM": -8842.04,
+     "northM": 16680.44,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 110000,
+     "eastM": -9262.07,
+     "northM": 17475.38,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 115000,
+     "eastM": -9682.06,
+     "northM": 18270.2,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 120000,
+     "eastM": -10101.85,
+     "northM": 19065.14,
+     "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    }
+   ]
+  }
+ ],
  "milestones": [
   {
    "t": 0,

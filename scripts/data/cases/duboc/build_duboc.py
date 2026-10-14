@@ -40,6 +40,12 @@ PLANE_M, OBJECT_M = 11700.0, 10500.0
 SIZE_DEG = 1.24                                      # 1999 interview: 1000 m at 46 km, "the width of his thumb"; the report (200-300 m) and the SEPRA (half the Moon, 0.26) give far less
 STEP_MS = 1000
 
+# The A320 round the observer. The model (amvlab-a320, 37.6 m long) is drawn about the centre of its bounding box and placed so that the
+# left seat of the flight deck is where the eye is. Measured on the glTF's vertices: the nose is 18.85 m from that centre, the axis of
+# the fuselage 2.3 m under it; the eye of an A320 pilot is about 4.5 m behind the nose, 0.5 m left of the axis and 0.7 m above it (a
+# published dimension, not measured on the model), hence 1.6 m under the centre.
+EYE_FORWARD_M, EYE_LEFT_M, EYE_BELOW_CENTRE_M = 18.85 - 4.5, 0.5, 1.6
+
 
 def stated(value, basis, rationale):
     return {"value": value, "basis": basis, "rationale": rationale}
@@ -54,9 +60,14 @@ def enu(az_deg, dist):
     return (dist * math.sin(a), dist * math.cos(a))
 
 
-def geo(east, north):
-    """Latitude and longitude of a point (east, north) metres from the middle of the track."""
-    return (LAT_MID + north / 111132.0, LNG_MID + east / (111320.0 * math.cos(math.radians(LAT_MID))))
+def geo(east, north, total_s=120.0):
+    """Latitude and longitude of a point (east, north) metres from the middle of the track, in the engine's own flat projection
+    (src/render3d/terrain/GeoProjection.ts: 111 320 m a degree of latitude, longitude shrunk by the cosine of the ORIGIN's latitude),
+    whose origin is the first pose of the recording: the airliner decor is placed against the same origin, to the metre."""
+    e0, n0 = enu(HEADING, -SPEED * total_s / 2)
+    lat0 = LAT_MID + n0 / 111320.0
+    lng0 = LNG_MID + e0 / (111320.0 * math.cos(math.radians(LAT_MID)))
+    return (lat0 + (north - n0) / 111320.0, lng0 + (east - e0) / (111320.0 * math.cos(math.radians(lat0))))
 
 
 def plane_at(t_s, total_s):
@@ -81,11 +92,40 @@ def track(total_s, aim_at, lag_s):
     for ms in range(0, int(total_s * 1000) + 1, 2000):
         t = ms / 1000.0
         e, n = plane_at(t, total_s)
-        lat, lng = geo(e, n)
+        lat, lng = geo(e, n, total_s)
         az, alt = aim_at(max(0.0, t - lag_s))
         keys.append({"t": ms, "pose": {"lat": round(lat, 6), "lng": round(lng, 6), "elevationM": PLANE_M,
                                        "headingDeg": round(az, 2), "pitchDeg": round(alt, 2), "fovDeg": 60}})
     return {"keyframes": keys}
+
+
+def airliner(total_s):
+    """The airliner as decor: its track is the observer's own, shifted back by the seat's offset in the airframe, so that the
+    left seat of the flight deck is exactly where the eye is, at every moment. A decor's altitude is counted from the ground (the
+    schema says from the observer's elevation, the renderer does not), and the eye of a recording is 1.6 m above its elevation."""
+    h = math.radians(HEADING)
+    forward = (math.sin(h), math.cos(h))
+    left = (-math.cos(h), math.sin(h))
+    # Where the centre of the airframe is, from the eye: behind it by the seat's distance from the middle, and to the right of it
+    centre_e = -forward[0] * EYE_FORWARD_M - left[0] * EYE_LEFT_M
+    centre_n = -forward[1] * EYE_FORWARD_M - left[1] * EYE_LEFT_M
+    ref_lat, ref_lng = (round(v, 6) for v in geo(*plane_at(0.0, total_s), total_s))
+    track = []
+    for ms in range(0, int(total_s * 1000) + 1, 5000):
+        lat, lng = (round(v, 6) for v in geo(*plane_at(ms / 1000.0, total_s), total_s))
+        # The engine (SceneRenderer.updateDecorAnchoring) places a decor object at its own position plus where the first pose lies as
+        # seen from the CURRENT one, with the longitude scaled by the cosine of the current latitude: 8 m of lateral drift after ten
+        # kilometres if the track is simply the distance flown, which puts the eye outside a hull 3.95 m wide.
+        track.append({"t": ms,
+                      "eastM": round((lng - ref_lng) * 111320.0 * math.cos(math.radians(lat)) + centre_e, 2),
+                      "northM": round((lat - ref_lat) * 111320.0 + centre_n, 2),
+                      "altitudeM": PLANE_M + 1.6 + EYE_BELOW_CENTRE_M, "headingDeg": HEADING})
+    first = track[0]
+    return [{"id": "af3532", "kind": "aircraft",
+             "title": tr("Airbus A320-111 F-GFKG, vol AF 3532 (le siège gauche du poste de pilotage)", "Airbus A320-111 F-GFKG, flight AF 3532 (the left seat of the flight deck)"),
+             "eastM": first["eastM"], "northM": first["northM"], "headingDeg": HEADING,
+             "sizeM": {"widthM": 34.1, "lengthM": 37.6, "heightM": 11.8}, "model": {"id": "amvlab-a320"},
+             "observerSide": "front-left", "aircraftSound": "airliner-narrow", "track": track}]
 
 
 def air(t_ms, wind_kt):
@@ -208,7 +248,7 @@ def commander_recording():
         "timeline": {"order": ["disc"], "groups": [["disc"]], "keyframes": frames},
         "weatherTrack": weather(total, 101),
         "soundTrack": {"keyframes": [{"t": 0, "sound": {"kind": "none"}}]},
-        "decor": [],
+        "decor": airliner(total),
         "milestones": [
             {"t": 0, "label": "A", "note": tr("Il le voit le dernier, vers 10 h, et le prend pour un avion en virage à 45°", "He sees it last, at about 10 o'clock, and takes it for an aircraft banking 45 degrees")},
             {"t": 60000, "label": "B", "note": tr("Au travers de l'aile, un disque brun-rouge sans détails, vu sous plusieurs angles", "Abeam, a red-brown disc with no detail, seen from several angles")},
@@ -297,7 +337,7 @@ def copilot_recording():
         "timeline": {"order": [lens, arrow], "groups": [[lens, arrow]], "keyframes": frames},
         "weatherTrack": weather(total, 120),
         "soundTrack": {"keyframes": [{"t": 0, "sound": {"kind": "none"}}]},
-        "decor": [],
+        "decor": airliner(total),
         "milestones": [
             {"t": 0, "label": "A", "note": tr("Elle le voit vers 10 h et le prend pour un ballon-sonde", "She sees it at about 10 o'clock and takes it for a weather balloon")},
             {"t": 90000, "label": "B", "note": tr("Il reste à 9 h, à la vitesse de l'avion ; la lentille se floute, devient un chevron", "It stays at 9 o'clock, at the airliner's speed; the lens blurs and becomes a chevron")},

@@ -487,6 +487,9 @@ export interface DecorObject {
    * repainting the car would otherwise put out its headlights.
    */
   color?: string
+  /** Which seat the observer is in, when inside this object (see canHoldObserver for the kinds the renderer carries the eye into).
+   * On an aircraft it only says the observer is ABOARD: the renderer does not move the eye, the recording places the airliner (its
+   * track) so that the seat is where the eye is, and the hull is then drawn on its outer faces only so as not to close the view. */
   observerSide?: DecorSide
   /** Which window the observer looks through, when it is not the one at their own seat: a driver sits
    * at "front-left" and looks through the windshield ("front"). Absent means the window of the seat
