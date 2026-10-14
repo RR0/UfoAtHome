@@ -4,6 +4,8 @@ import { observerSidesFor } from "./Decor.js"
 import type { DecorBaseContext } from "./DecorBase.js"
 import { DecorParameterSets } from "./DecorParameterSets.js"
 import type { SaidText } from "./SaidText.js"
+import { Headlights } from "./Headlights.js"
+import type { HeadlightMode } from "./Headlights.js"
 
 /**
  * The properties every decor object has, said as descriptions the editor draws (see ParameterSet): its name, where it
@@ -60,14 +62,29 @@ export class DecorBaseParameterSets {
     ] satisfies ParameterSpec[])
   }
 
+  /** What each setting of a vehicle's lights is called, by the reader's language. */
+  static readonly HEADLIGHT_LABELS: Readonly<Record<HeadlightMode, SaidText>> = {
+    off: { en: "Off", fr: "Éteints", es: "Apagados", it: "Spenti" },
+    position: { en: "Position lights", fr: "Feux de position", es: "Luces de posición", it: "Luci di posizione" },
+    dipped: { en: "Dipped beam", fr: "Feux de croisement", es: "Luces de cruce", it: "Anabbaglianti" },
+    main: { en: "Main beam", fr: "Feux de route", es: "Luces de carretera", it: "Abbaglianti" },
+    fog: { en: "Fog lamps", fr: "Antibrouillards", es: "Faros antiniebla", it: "Fendinebbia" }
+  }
+
   /** Lit, lamps, and where the observer sits. */
   static readonly STATE: ParameterSet = {
     kind: "decor-state",
     title: { en: "State", fr: "État", es: "Estado", it: "Stato" },
     parameters: ([
       {
+        // A vehicle's lights are a setting, not a switch (see HeadlightMode): the switch is for what has none, a street lamp.
         type: "boolean", key: "lit", required: true, label: { en: "Lit", fr: "Allumé", es: "Encendido", it: "Acceso" },
-        visibleWhen: (_view, context) => (context as DecorBaseContext | undefined)?.traits.lit === true
+        visibleWhen: (_view, context) => (context as DecorBaseContext | undefined)?.traits.lit === true && (context as DecorBaseContext | undefined)?.traits.headlights !== true
+      },
+      {
+        type: "choice", key: "headlights", required: true, label: { en: "Headlights", fr: "Phares", es: "Faros", it: "Fari" },
+        choices: Headlights.MODES.map(mode => ({ value: mode, label: DecorBaseParameterSets.HEADLIGHT_LABELS[mode] })),
+        visibleWhen: (_view, context) => (context as DecorBaseContext | undefined)?.traits.headlights === true
       },
       {
         // The rigs that make sense on this object's kind, plus none; the one its own lamps came from is selected.

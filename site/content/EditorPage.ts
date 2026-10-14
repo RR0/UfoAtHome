@@ -350,6 +350,7 @@ if (docs) {
         lamps leave lines, flashing ones leave dots at regular intervals, which is exactly how a
         photograph of an airliner is told from a photograph of something that does not blink.</p>
       <p>The <strong>ready-made sets of lamps</strong> offered for an object are those that suit the model it is drawn as, and are scaled to the size of the machine: an airliner is not offered a helicopter's, a patrol car gets its emergency beacons. The model also says what noise an aircraft makes in flight (an A350 is heard as a wide-body, a stand-in for something whose noise nobody reported is silent) and gives a vehicle its engine.</p>
+      <p>A <strong>vehicle's lights</strong> are a setting and not a switch, because not everybody puts them on, nor as they should: <strong>off</strong>, <strong>position lights</strong> (which show the vehicle and light nothing), <strong>dipped beam</strong>, <strong>main beam</strong> (far, narrow, dazzling) or <strong>fog lamps</strong> (low and wide). Choose it in the object's <em>State</em> group at the instant you want it to change: it is written as a keyframe, as the lamp switch is, and holds until the next. A beam really lights the road, the verges, the trees and the walls in front of the vehicle. The vehicle the observer rides (the recording's <code>vehicle</code>) puts its dipped beam on by itself from the dusk on unless the file says otherwise.</p>
     </div>
 
     <div class="group-doc">
@@ -807,6 +808,7 @@ if (docs) {
         clignotantes des points à intervalles réguliers — c'est exactement ce qui distingue la photo
         d'un avion de ligne de celle d'un objet qui ne clignote pas.</p>
       <p>Les <strong>jeux de lampes prêts à l'emploi</strong> proposés pour un objet sont ceux qui conviennent au modèle dont il est dessiné, mis à l'échelle de la machine : on n'offre pas à un avion de ligne ceux d'un hélicoptère, une voiture de police reçoit ses gyrophares. Le modèle dit aussi quel bruit fait un aéronef en vol (un A350 s'entend comme un gros porteur, la doublure de quelque chose dont personne n'a rapporté le bruit est silencieuse) et donne son moteur à un véhicule.</p>
+      <p>Les <strong>feux d'un véhicule</strong> sont un réglage et non un interrupteur, car tout le monde ne les met pas, ni comme il faut : <strong>éteints</strong>, <strong>feux de position</strong> (qui montrent le véhicule et n'éclairent rien), <strong>feux de croisement</strong>, <strong>feux de route</strong> (loin, étroits, éblouissants) ou <strong>antibrouillards</strong> (bas et larges). On le choisit dans le groupe <em>État</em> de l'objet, à l'instant où l'on veut qu'il change : c'est écrit comme une image clé, comme l'interrupteur des lampes, et cela tient jusqu'à la suivante. Un faisceau éclaire vraiment la route, les bas-côtés, les arbres et les murs devant le véhicule. Le véhicule où roule l'observateur (le <code>vehicle</code> de l'enregistrement) met ses feux de croisement tout seul à partir du crépuscule, sauf si le fichier dit autre chose.</p>
     </div>
 
     <div class="group-doc">
@@ -1284,6 +1286,7 @@ if (docs) {
         intervalos regulares, y así es exactamente como se distingue la fotografía de un avión de línea
         de la de algo que no parpadea.</p>
       <p>Los <strong>juegos de luces ya preparados</strong> que se ofrecen para un objeto son los que convienen al modelo con que se dibuja, a la escala de la máquina: a un avión de línea no se le ofrecen los de un helicóptero, un coche de policía recibe sus balizas. El modelo dice también qué ruido hace una aeronave en vuelo (un A350 se oye como un gran avión, un sustituto de algo cuyo ruido nadie refirió es silencioso) y da su motor a un vehículo.</p>
+      <p>Las <strong>luces de un vehículo</strong> son un ajuste y no un interruptor, porque no todo el mundo las enciende, ni como debe: <strong>apagadas</strong>, <strong>luces de posición</strong> (que muestran el vehículo y no iluminan nada), <strong>luces de cruce</strong>, <strong>luces de carretera</strong> (lejos, estrechas, deslumbrantes) o <strong>faros antiniebla</strong> (bajos y anchos). Se elige en el grupo <em>Estado</em> del objeto, en el instante en que se quiere que cambie: se escribe como un fotograma clave, como el interruptor de las lámparas, y vale hasta el siguiente. Un haz ilumina de verdad la carretera, los arcenes, los árboles y las paredes delante del vehículo. El vehículo en el que va el observador (el <code>vehicle</code> de la grabación) enciende solo las luces de cruce desde el crepúsculo, salvo que el archivo diga otra cosa.</p>
     </div>
 
     <div class="group-doc">
@@ -1760,6 +1763,7 @@ if (docs) {
         intervalli regolari, ed è esattamente così che la fotografia di un aereo di linea si distingue
         da quella di qualcosa che non lampeggia.</p>
       <p>Le <strong>serie di luci già pronte</strong> offerte per un oggetto sono quelle che si addicono al modello con cui è disegnato, in scala con la macchina: a un aereo di linea non si offrono quelle di un elicottero, un'auto della polizia riceve i suoi lampeggianti. Il modello dice anche che rumore fa un aeromobile in volo (un A350 si sente come un grosso aereo, il sostituto di qualcosa il cui rumore nessuno ha riferito è silenzioso) e dà il suo motore a un veicolo.</p>
+      <p>Le <strong>luci di un veicolo</strong> sono una regolazione e non un interruttore, perché non tutti le accendono, né come si dovrebbe: <strong>spente</strong>, <strong>luci di posizione</strong> (che mostrano il veicolo e non illuminano nulla), <strong>anabbaglianti</strong>, <strong>abbaglianti</strong> (lontani, stretti, accecanti) o <strong>fendinebbia</strong> (bassi e larghi). Si sceglie nel gruppo <em>Stato</em> dell'oggetto, nell'istante in cui si vuole che cambi: è scritto come un fotogramma chiave, come l'interruttore delle lampade, e vale fino al successivo. Un fascio illumina davvero la strada, i bordi, gli alberi e i muri davanti al veicolo. Il veicolo su cui viaggia l'osservatore (il <code>vehicle</code> della registrazione) accende da solo gli anabbaglianti dal crepuscolo, salvo che il file dica altro.</p>
     </div>
 
     <div class="group-doc">

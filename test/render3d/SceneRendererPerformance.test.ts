@@ -267,6 +267,114 @@ describe("scene playback resource reuse", () => {
   })
 })
 
+describe("the beams of the vehicles", () => {
+  function withBeams() {
+    const r = renderer()
+    r.headlightBeams = new Map()
+    r.scatteredSky = { relativeScale: 1 }
+    r.camera.position.y = 1.6
+    return r
+  }
+  const at = (r: ReturnType<typeof renderer>) => r.headlightBeams.get("observer")
+
+  it("gives the observer's own vehicle a beam ahead of the eye, under it, facing the way it goes", () => {
+    const r = withBeams()
+    r.setObserverHeadlights({ setting: "dipped", headingDeg: 90 })
+    const beam = at(r)!
+    expect(beam.intensity).toBeGreaterThan(0)
+    // East is +x, and the lamps are ahead of the eye and well under it.
+    expect(beam.position.x).toBeGreaterThan(2)
+    expect(Math.abs(beam.position.z)).toBeLessThan(0.01)
+    expect(beam.position.y).toBeLessThan(1.6 - 0.5)
+    expect(beam.target.position.x).toBeGreaterThan(beam.position.x + 40)
+    // Aimed a little under the horizontal, which is what a dipped beam is.
+    expect(beam.target.position.y).toBeLessThan(beam.position.y)
+  })
+
+  it("aims north to -z and south to +z, the scene's own convention", () => {
+    const r = withBeams()
+    r.setObserverHeadlights({ setting: "main", headingDeg: 0 })
+    expect(at(r)!.target.position.z).toBeLessThan(-40)
+    r.setObserverHeadlights({ setting: "main", headingDeg: 180 })
+    expect(at(r)!.target.position.z).toBeGreaterThan(40)
+  })
+
+  it("keeps the beam in the scene when the lights are off, with no intensity: the scene's count of lights does not change", () => {
+    const r = withBeams()
+    r.setObserverHeadlights({ setting: "dipped", headingDeg: 0 })
+    const beam = at(r)!
+    r.setObserverHeadlights({ setting: "off", headingDeg: 0 })
+    expect(at(r)).toBe(beam)
+    expect(beam.intensity).toBe(0)
+    r.setObserverHeadlights({ setting: "position", headingDeg: 0 })
+    expect(beam.intensity).toBe(0)
+    r.setObserverHeadlights({ setting: "main", headingDeg: 0 })
+    expect(beam.intensity).toBeGreaterThan(0)
+  })
+
+  it("is stronger and narrower on the main beam than on the dipped one, and follows the scene's relative scale", () => {
+    const r = withBeams()
+    r.setObserverHeadlights({ setting: "dipped", headingDeg: 0 })
+    const dipped = { intensity: at(r)!.intensity, angle: at(r)!.angle }
+    r.setObserverHeadlights({ setting: "main", headingDeg: 0 })
+    expect(at(r)!.intensity).toBeGreaterThan(dipped.intensity)
+    expect(at(r)!.angle).toBeLessThan(dipped.angle)
+    const before = at(r)!.intensity
+    r.scatteredSky = { relativeScale: 0.5 }
+    r.setObserverHeadlights({ setting: "main", headingDeg: 0 })
+    expect(at(r)!.intensity).toBeCloseTo(before / 2, 3)
+  })
+
+  it("puts the lights on at the dusk by itself, and not by day, for a vehicle that is not told (auto)", () => {
+    const r = withBeams()
+    r.lastAstronomy = { sun: { altitudeDeg: 20 } }
+    r.setObserverHeadlights({ setting: "auto", headingDeg: 0 })
+    expect(at(r)!.intensity).toBe(0)
+    r.lastAstronomy = { sun: { altitudeDeg: -12 } }
+    r.setObserverHeadlights({ setting: "auto", headingDeg: 0 })
+    expect(at(r)!.intensity).toBeGreaterThan(0)
+    // Told, it does what it is told: lights out in the dark.
+    r.setObserverHeadlights({ setting: "off", headingDeg: 0 })
+    expect(at(r)!.intensity).toBe(0)
+  })
+
+  it("has no beam for a recording with no vehicle, and takes it down when the vehicle goes", () => {
+    const r = withBeams()
+    r.setObserverHeadlights(undefined)
+    expect(at(r)).toBeUndefined()
+    r.setObserverHeadlights({ setting: "dipped", headingDeg: 0 })
+    expect(at(r)).toBeDefined()
+    r.setObserverHeadlights(undefined)
+    expect(at(r)).toBeUndefined()
+  })
+
+  it("puts a decor vehicle's beam at the front of the vehicle, facing the way it faces", () => {
+    const r = withBeams()
+    const car = { id: "car", kind: "vehicle" as const, eastM: 10, northM: 5, headingDeg: 90 }
+    const group = new Group()
+    group.position.set(10, 0, -5)
+    // Heading 90 is east: the front of the model is -Z, turned a quarter turn to +X.
+    group.rotation.y = -Math.PI / 2
+    r.addHeadlightBeam("car")
+    r.aimDecorBeam(car, group, "main")
+    const beam = r.headlightBeams.get("car")!
+    expect(beam.position.x).toBeGreaterThan(10 + 1.5)
+    expect(beam.position.z).toBeCloseTo(-5, 3)
+    expect(beam.position.y).toBeGreaterThan(0.5)
+    expect(beam.position.y).toBeLessThan(1)
+    expect(beam.target.position.x).toBeGreaterThan(beam.position.x + 40)
+    expect(beam.intensity).toBeGreaterThan(0)
+    r.aimDecorBeam(car, group, "position")
+    expect(beam.intensity).toBe(0)
+  })
+
+  it("gives only the first few vehicles a real beam", () => {
+    const r = withBeams()
+    for (const id of ["a", "b", "c", "d", "e", "f"]) r.addHeadlightBeam(id)
+    expect(r.headlightBeams.size).toBe(4)
+  })
+})
+
 // An editor opened on an empty observation redrew its whole picture sixty to a hundred and twenty times a
 // second for as long as it was open, of a Sun's flare that was under the horizon and out of the picture.
 describe("what keeps the animation loop running", () => {

@@ -7461,7 +7461,7 @@ export class SightingEditorElement extends HTMLElement {
     return {
       kind: decor.kind,
       natural: DecorSystem.naturalSize(decor.kind, decor.floors),
-      traits: { color: traits.color, lit: traits.lit, lights: traits.lights, observerSide: traits.observerSide },
+      traits: { color: traits.color, lit: traits.lit, headlights: traits.headlights, lights: traits.lights, observerSide: traits.observerSide },
       lightRigs: DecorTraits.rigsFor(decor.kind, this.publishedParametersOf(decor)).map(rig => ({ value: rig.id, label: this.naming.lightRig(rig) })),
       seats: DecorBaseParameterSets.seatsFor(decor.kind),
       models: (this.decorModelEntries?.kind === decor.kind ? this.decorModelEntries.entries : []).map(entry => ({ value: entry.id, label: entry.name })),
@@ -7478,7 +7478,7 @@ export class SightingEditorElement extends HTMLElement {
   private commitDecorBase(change: (view: ParameterHolder) => void, key: string): void {
     const decor = this.ufoElement.sighting.decor.find(candidate => candidate.id === this.currentDecorId)
     if (!decor) return
-    if (key === "lit" && this.ufoElement.playbackState === "playing") return
+    if ((key === "lit" || key === "headlights") && this.ufoElement.playbackState === "playing") return
     const t = this.ufoElement.currentTime
     const view = DecorBase.viewOf(decor, t)
     change(view as unknown as ParameterHolder)

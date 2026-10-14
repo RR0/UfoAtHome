@@ -3,6 +3,8 @@
  * gears are spaced. "generic" is what a recording says when it knows there was a vehicle and not
  * which: an ordinary petrol car.
  */
+import type { HeadlightMode } from "./Headlights.js"
+
 export type VehicleKind = "car" | "van" | "truck" | "motorcycle" | "generic"
 
 /**
@@ -20,6 +22,13 @@ export interface ObserverVehicle {
   windowsOpen?: boolean
   /** How loud it was, against an ordinary one of its kind: 1 by default, 1.5 for "very noisy". */
   noise?: number
+  /**
+   * How its lights are set (see HeadlightMode), or "auto": the dipped beam from the dusk on and nothing by day, which is what a driver does. Absent
+   * means "auto". A van can be driven in the dark with its lights out, or with the position lights only; the recording says so.
+   */
+  headlights?: HeadlightMode | "auto"
+  /** Sorted by t. When the setting changes during the recording; absent means `headlights` holds throughout. */
+  headlightKeyframes?: { t: number, mode: HeadlightMode | "auto" }[]
 }
 
 /** A decor vehicle heard running — see DecorObject.engine. Present means the engine runs. */

@@ -5,8 +5,15 @@ import { DecorTraits } from "../../src/engine/model/DecorTraits.js"
 describe("DecorTraits", () => {
   it("offers a person nothing to switch, light or paint once it is a model", () => {
     expect(DecorTraits.of({ kind: "entity", model: { id: "makehuman-woman" } })).toEqual({
-      color: false, lit: false, lights: false, windows: false, floors: false, observerSide: false
+      color: false, lit: false, headlights: false, lights: false, windows: false, floors: false, observerSide: false
     })
+  })
+
+  it("offers a vehicle the setting of its lights, drawn as a model or not, and nothing else the setting of its lights", () => {
+    expect(DecorTraits.of({ kind: "vehicle" }).headlights).toBe(true)
+    expect(DecorTraits.of({ kind: "vehicle", model: { id: "kenney-car-kit-sedan" } }).headlights).toBe(true)
+    expect(DecorTraits.of({ kind: "streetlight" }).headlights).toBe(false)
+    expect(DecorTraits.of({ kind: "aircraft" }).headlights).toBe(false)
   })
 
   it("offers a built-in shape its colour", () => {

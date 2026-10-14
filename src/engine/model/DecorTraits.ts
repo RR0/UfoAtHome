@@ -15,6 +15,8 @@ export interface DecorParameters {
   color: boolean
   /** The single lit/unlit switch (a lamp head, a car's headlights). */
   lit: boolean
+  /** The setting of a vehicle's lights (see HeadlightMode): a beam lights the ground whatever the vehicle is drawn as. */
+  headlights: boolean
   /** A rig of individual lamps, which are laid on the object wherever it is drawn as. */
   lights: boolean
   /** Windows with their own opacity, of the built-in shape. */
@@ -81,6 +83,7 @@ export class DecorTraits {
     return {
       color: published?.color ?? !model,
       lit: published?.lit ?? DecorTraits.litByDefault(object.kind, model),
+      headlights: object.kind === "vehicle",
       lights: (published?.lights ?? true) && DecorTraits.rigsFor(object.kind, published).length > 0,
       windows: !model && hasWindows(object.kind),
       floors: !model && object.kind === "building",

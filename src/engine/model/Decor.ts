@@ -24,6 +24,8 @@ import type { SaidText } from "./SaidText.js"
  * its own kind because it is exactly the sort of thing a observer hides behind — Masse's own was two
  * metres high and is what kept the craft out of sight until he walked round it.
  */
+import { Headlights } from "./Headlights.js"
+import type { HeadlightKeyframe, HeadlightMode } from "./Headlights.js"
 export type DecorKind =
   /**
    * A terrace: one step of a hillside the people there cut into levels, each held by a dry-stone
@@ -422,6 +424,13 @@ export interface DecorObject {
    * sorted-insert/binary-search machinery): a single boolean that changes a handful of times at
    * most doesn't need that, and DecorObject already isn't a class of its own to hang methods off. */
   litKeyframes?: DecorLitKeyframe[]
+  /**
+   * For a vehicle: how its lights are set (see HeadlightMode). Absent means what `lit` says: lit is the dipped beam, unlit is off. Not every driver puts
+   * the lights on, nor as they should: position lights only, a main beam on a road that has oncoming traffic.
+   */
+  headlights?: HeadlightMode
+  /** Sorted by t. When the setting changes during the recording; absent means `headlights` (or `lit`) holds throughout. */
+  headlightKeyframes?: HeadlightKeyframe[]
   /** The object's individual lamps, each with its own place on the body and its own rhythm — see
    * DecorLight, and LIGHT_RIGS for the ready-made sets. Absent means none.
    *
@@ -623,6 +632,16 @@ export interface DecorPlacementKeyframe {
  * doesn't warrant a dedicated Track class (see litKeyframes' own doc comment). Falls back to the
  * object's own static `lit` field whenever there are no keyframes yet — a freshly added decor
  * object, or one loaded from before this feature existed. */
+/**
+ * How the lights of a vehicle are set at time t (see HeadlightMode): its own setting, with the keyframes' hold-last semantics as resolveDecorLitAt has,
+ * or, where it states none, what its `lit` switch says (lit is the dipped beam, as a car's headlights have always meant here).
+ */
+export function resolveDecorHeadlightsAt(decor: DecorObject, t: number): HeadlightMode {
+  const stated = Headlights.at(decor.headlights, decor.headlightKeyframes, t)
+  if (stated !== undefined) return stated
+  return resolveDecorLitAt(decor, t) ? "dipped" : "off"
+}
+
 export function resolveDecorLitAt(decor: DecorObject, t: number): boolean {
   const keyframes = decor.litKeyframes
   if (!keyframes || keyframes.length === 0) return decor.lit ?? false

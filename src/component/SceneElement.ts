@@ -146,7 +146,9 @@ const STAR_TOOLTIP = "{name} — mag {mag}, {alt}° above the horizon"
  * raising its orbit from one on station. */
 const SATELLITE_TOOLTIP = "{name} — satellite, mag {mag}, {height} km up"
 
-/** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */
+/** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */import { Headlights } from "../engine/model/Headlights.js"
+import type { HeadlightMode } from "../engine/model/Headlights.js"
+
 export const SATELLITES_CHANGE_EVENT = "satellites-change"
 /** Fired by a scene when the fireballs on record for its recording have arrived — see fireballState. */
 export const FIREBALLS_CHANGE_EVENT = "fireballs-change"
@@ -834,6 +836,33 @@ export class SceneElement extends HTMLElement {
   /** The names of the investigator's lines in this reader's language, held until the traces or the
    * language change so that the renderer is handed the same map every tick. */
   private traceLabelsFor?: { traces: unknown; language: string; labels: ReadonlyMap<string, string> }
+
+  /**
+   * How the lights of the vehicle the observer rides are set at t, and which way it goes: nothing for a recording that has no vehicle (then the observer
+   * has no beam), "auto" for one that says nothing of its lights (see ObserverVehicle.headlights).
+   */
+  private observerHeadlightsAt(sighting: Sighting, t: number): { setting: HeadlightMode | "auto", headingDeg: number } | undefined {
+    const vehicle = sighting.vehicle
+    if (!vehicle) return undefined
+    const setting = Headlights.at<HeadlightMode | "auto">(vehicle.headlights ?? "auto", vehicle.headlightKeyframes, t) ?? "auto"
+    return { setting, headingDeg: this.travelHeadingAt(sighting, t) }
+  }
+
+  /** The way the observer is going at t, degrees clockwise from north: that of his move over the next moments, or the one he faces where he does not move. */
+  private travelHeadingAt(sighting: Sighting, t: number): number {
+    const here = resolveObserverPoseAt(sighting, t)
+    if (!here) return 0
+    for (const step of [400, -400]) {
+      const there = resolveObserverPoseAt(sighting, t + step)
+      if (!there || here.lat === undefined || here.lng === undefined || there.lat === undefined || there.lng === undefined) break
+      const move = geoToLocalMeters(there.lat, there.lng, here.lat, here.lng)
+      if (Math.hypot(move.x, move.z) < 0.8) continue
+      // Along the way he goes: ahead in time, or back from where he came.
+      const degrees = Math.atan2(move.x, -move.z) * 180 / Math.PI + (step < 0 ? 180 : 0)
+      return (degrees + 360) % 360
+    }
+    return here.headingDeg ?? 0
+  }
 
   /** The places of a recording's track, for the ground to know which way the observer goes: nothing for an observer who stands still. Kept while the track is. */
   private routeCache?: { track: unknown, count: number, route: { lat: number; lng: number }[] | undefined }
@@ -1548,6 +1577,7 @@ export class SceneElement extends HTMLElement {
     // play was pressed. The decor is re-anchored by the renderer itself at that moment (see
     // SceneRenderer.setTerrainOrigin); the bodies are this element's, so this is where it happens.
     this.sceneRenderer.setObserverRoute(this.routeOf(sighting.observerTrack))
+    this.sceneRenderer.setObserverHeadlights(this.observerHeadlightsAt(sighting, t))
     this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng, () => {
       this.placeBodiesAt(this.lastTimeMs, true)
       this.sceneRenderer.render()

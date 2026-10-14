@@ -1,5 +1,6 @@
 import type { DecorKind, DecorObject, DecorSide, DecorSize } from "./Decor.js"
-import { canHoldObserver, resolveDecorLitAt, resolveDecorPlacementAt } from "./Decor.js"
+import { canHoldObserver, resolveDecorHeadlightsAt, resolveDecorLitAt, resolveDecorPlacementAt } from "./Decor.js"
+import type { HeadlightMode } from "./Headlights.js"
 import { LightRigs } from "./LightRig.js"
 import type { SaidText } from "./SaidText.js"
 
@@ -9,7 +10,7 @@ export interface DecorBaseContext {
   /** What the built-in shape measures: shown, greyed, where a size is not stated. */
   natural?: DecorSize
   /** Which of the fields mean anything for this object as it is drawn (see DecorTraits). */
-  traits: { color: boolean, lit: boolean, lights: boolean, observerSide: boolean }
+  traits: { color: boolean, lit: boolean, headlights: boolean, lights: boolean, observerSide: boolean }
   /** The rigs of lamps that suit this kind, by the name the reader's language gives them. */
   lightRigs: ReadonlyArray<{ value: string, label: string }>
   /** The seats an observer can have in this kind of object. */
@@ -40,6 +41,8 @@ export interface DecorBaseView {
   color?: string
   sizeM?: { widthM?: number, lengthM?: number, heightM?: number }
   lit: boolean
+  /** How a vehicle's lights are set then (see HeadlightMode): never empty, what its `lit` switch says being the dipped beam or nothing. */
+  headlights: HeadlightMode
   /** The id of the rig the object's lamps came from, or "" for none. */
   lightRig: string
   observerSide?: string
@@ -68,6 +71,7 @@ export class DecorBase {
       color: decor.color,
       sizeM: decor.sizeM ? { ...decor.sizeM } : undefined,
       lit: resolveDecorLitAt(decor, t),
+      headlights: resolveDecorHeadlightsAt(decor, t),
       lightRig: DecorBase.rigOf(decor),
       observerSide: decor.observerSide,
       model: decor.model ? { ...decor.model } : undefined
@@ -101,6 +105,10 @@ export class DecorBase {
       case "lit": {
         const litKeyframes = [...(decor.litKeyframes ?? []).filter(keyframe => keyframe.t !== t), { t, lit: view.lit }].sort((a, b) => a.t - b.t)
         return { ...decor, litKeyframes }
+      }
+      case "headlights": {
+        const headlightKeyframes = [...(decor.headlightKeyframes ?? []).filter(keyframe => keyframe.t !== t), { t, mode: view.headlights }].sort((a, b) => a.t - b.t)
+        return { ...decor, headlightKeyframes }
       }
       case "lightRig": {
         const rig = LightRigs.byId(view.lightRig === "" ? undefined : view.lightRig)

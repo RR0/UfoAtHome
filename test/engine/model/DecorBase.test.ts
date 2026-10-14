@@ -131,7 +131,7 @@ describe("DecorBase model", () => {
 
 describe("DecorBaseParameterSets", () => {
   const context = (traits: Partial<DecorBaseContext["traits"]> = {}): DecorBaseContext => ({
-    kind: "building", natural: { widthM: 6, lengthM: 7, heightM: 9 }, traits: { color: true, lit: false, lights: false, observerSide: true, ...traits },
+    kind: "building", natural: { widthM: 6, lengthM: 7, heightM: 9 }, traits: { color: true, lit: false, headlights: false, lights: false, observerSide: true, ...traits },
     lightRigs: [], seats: DecorBaseParameterSets.seatsFor("building"), models: []
   })
   const spec = (key: string) => [...DecorBaseParameterSets.BASE.parameters, ...DecorBaseParameterSets.STATE.parameters].find(candidate => candidate.key === key)!
@@ -157,5 +157,59 @@ describe("DecorBaseParameterSets", () => {
     for (const set of [DecorBaseParameterSets.BASE, DecorBaseParameterSets.STATE]) {
       for (const parameter of set.parameters) expect(Object.keys(parameter.label as object).sort(), parameter.key).toEqual(["en", "es", "fr", "it"])
     }
+  })
+})
+
+describe("the headlights of a vehicle in the editor", () => {
+  const car = (overrides: Partial<DecorObject> = {}): DecorObject => ({ id: "car", kind: "vehicle", eastM: 0, northM: 0, ...overrides })
+  const context = (traits: Partial<DecorBaseContext["traits"]> = {}): DecorBaseContext => ({
+    kind: "vehicle", traits: { color: true, lit: true, headlights: true, lights: false, observerSide: true, ...traits }, lightRigs: [], seats: [], models: []
+  })
+  const spec = (key: string) => DecorBaseParameterSets.STATE.parameters.find(candidate => candidate.key === key)!
+
+  test("shows the setting at the playhead, whatever the object was written with", () => {
+    expect(DecorBase.viewOf(car(), 0).headlights).toBe("off")
+    expect(DecorBase.viewOf(car({ lit: true }), 0).headlights).toBe("dipped")
+    expect(DecorBase.viewOf(car({ headlights: "main" }), 0).headlights).toBe("main")
+    const keyed = car({ headlightKeyframes: [{ t: 0, mode: "dipped" }, { t: 5000, mode: "position" }] })
+    expect(DecorBase.viewOf(keyed, 2000).headlights).toBe("dipped")
+    expect(DecorBase.viewOf(keyed, 6000).headlights).toBe("position")
+  })
+
+  test("writes a change as a keyframe of its own at the playhead, and no other field", () => {
+    const decor = car({ lit: true })
+    const view = DecorBase.viewOf(decor, 3000)
+    view.headlights = "main"
+    const edited = DecorBase.apply(decor, view, "headlights", 3000)
+    expect(edited.headlightKeyframes).toEqual([{ t: 3000, mode: "main" }])
+    expect(edited.lit).toBe(true)
+    expect(edited.litKeyframes).toBeUndefined()
+    // Another change at the same instant replaces it, and a later one is added in order.
+    const again = DecorBase.viewOf(edited, 3000)
+    again.headlights = "fog"
+    const replaced = DecorBase.apply(edited, again, "headlights", 3000)
+    expect(replaced.headlightKeyframes).toEqual([{ t: 3000, mode: "fog" }])
+    const later = DecorBase.viewOf(replaced, 9000)
+    later.headlights = "off"
+    expect(DecorBase.apply(replaced, later, "headlights", 9000).headlightKeyframes).toEqual([{ t: 3000, mode: "fog" }, { t: 9000, mode: "off" }])
+  })
+
+  test("offers the five settings, to a vehicle and to no other kind, in place of the lit switch", () => {
+    const headlights = spec("headlights") as unknown as { visibleWhen: (view: unknown, context: unknown) => boolean, choices: { value: string }[] }
+    expect(headlights.choices.map(choice => choice.value)).toEqual(["off", "position", "dipped", "main", "fog"])
+    expect(headlights.visibleWhen({}, context())).toBe(true)
+    expect(headlights.visibleWhen({}, context({ headlights: false }))).toBe(false)
+    const lit = spec("lit") as unknown as { visibleWhen: (view: unknown, context: unknown) => boolean }
+    expect(lit.visibleWhen({}, context())).toBe(false)
+    expect(lit.visibleWhen({}, { ...context({ headlights: false }), kind: "streetlight" })).toBe(true)
+  })
+
+  test("says what each setting is called in the four languages", () => {
+    for (const mode of ["off", "position", "dipped", "main", "fog"] as const) {
+      const label = DecorBaseParameterSets.HEADLIGHT_LABELS[mode] as unknown as Record<string, string>
+      for (const language of ["en", "fr", "es", "it"] as const) expect(label[language]).toBeTruthy()
+    }
+    expect((DecorBaseParameterSets.HEADLIGHT_LABELS.dipped as unknown as Record<string, string>).fr).toBe("Feux de croisement")
+    expect((DecorBaseParameterSets.HEADLIGHT_LABELS.main as unknown as Record<string, string>).fr).toBe("Feux de route")
   })
 })
