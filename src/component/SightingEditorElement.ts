@@ -1885,6 +1885,9 @@ export class SightingEditorElement extends HTMLElement {
     this.endDrag() // an in-progress drag references the OLD timeline's shape — don't let it
     // keep writing into the newly-loaded one
     this.ufoElement.sightingData = json
+    // The scene takes the shape of the picture the recording was made in, as the shapes' own canvas just did: through the player alone it never heard
+    // of the format, and a Roamer's frame was drawn over a sixteen-by-nine sky, every handle and every pick standing off by the difference.
+    this.sceneElement.applyFrameFormat()
     this.cloudEditor.reset()
     this.bodyEditor?.sync()
     this.syncBodiesShown()

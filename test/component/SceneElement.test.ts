@@ -895,6 +895,17 @@ describe("SceneElement air traffic", () => {
     return tooltip.hidden ? undefined : tooltip.textContent!
   }
 
+  it("repaints what the player laid over the picture from a body once an edited interpretation has moved it", () => {
+    const { element } = mountAt(AT, stubSource(overhead).source)
+    const repaint = vi.spyOn(element.ufoElement, "repaintChrome")
+    element.interpretation = { title: "Edited", bodies: [] } as never
+    expect(repaint).toHaveBeenCalled()
+    repaint.mockClear()
+    element.compareAccount = true
+    expect(repaint).toHaveBeenCalled()
+    element.remove()
+  })
+
   it("gives a decor object's size and distance only while Alt is held, and measures them only then", () => {
     const { element } = mountAt(AT, stubSource(overhead).source)
     const detail = vi.fn(() => "Tree 1 — 2 × 2 × 11.8 m, 540 m away")

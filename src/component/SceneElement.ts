@@ -2459,6 +2459,8 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.playerTitle = interpretation?.title
     this.syncAccountHidden()
     this.updateAstronomy(this.lastTimeMs)
+    // The bodies have just stood where this interpretation puts them; what the player laid over the picture from them was measured before (see handleTimeUpdate).
+    this.ufoElement.repaintChrome()
   }
 
   /**
@@ -2494,6 +2496,7 @@ export class SceneElement extends HTMLElement {
     this.comparing = comparing
     this.syncAccountHidden()
     this.updateAstronomy(this.lastTimeMs)
+    this.ufoElement.repaintChrome()
   }
 
   /** What the bodies of the interpretation on show look like from the observer's eye, against what

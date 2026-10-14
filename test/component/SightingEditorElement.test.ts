@@ -5286,6 +5286,23 @@ describe("SightingEditorElement stated blur", () => {
     expect(metres(heavy)).toBeLessThan(metres(slight))
   })
 
+  // The handles, the picks and the frame of a body are measured on the shapes' canvas and mean a place of the sky: the scene has to stand where that canvas
+  // does, or everything the pointer says is off by the difference (a Roamer's frame drawn over a sixteen-by-nine sky).
+  it("gives the scene the format of the picture a loaded recording was made in, as it gives it to the shapes' canvas", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      instrument: "roamer-1-120",
+      timeline: { keyframes: [{ t: 0, shapes: [] }] },
+      durationSeconds: 10
+    }
+    const scene = element.shadowRoot!.querySelector("rr0-scene") as HTMLElement
+    const aspectOf = (host: Element | ShadowRoot) => (host.querySelector(".frame") as HTMLElement).style.getPropertyValue("--frame-aspect")
+    const sceneAspect = aspectOf(scene.shadowRoot!)
+    expect(sceneAspect).not.toBe("")
+    expect(sceneAspect).toBe(aspectOf(nestedUfo(element).shadowRoot!))
+  })
+
   // An eye has no film for a circle of confusion to land on, and a lens focused at a stated
   // distance blurs on both sides of it — two answers, so it gives none.
   it("says why it cannot bound anything, rather than saying nothing", () => {
