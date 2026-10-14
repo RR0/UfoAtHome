@@ -1,3 +1,9 @@
+/**
+ * The project's logo (a flying saucer holding a play button), 96 pixels, as a data URI: what the loader shows while the first frame waits for its sky must
+ * not itself wait for a request, or be missing from a page that embeds the scene from another site. Seven hundred bytes.
+ */
+const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAMAAADVRocKAAAARVBMVEX9sST/uyTfoCjNlSikfCqRcCx8Yy21hipTSi4TITEMHTEuMzBqWC3/wSRUX207SFj8/PyaoakmNUd5gYxBPy90fIfMz9RsB4kZAAACEUlEQVRo3u2XyXbDIAxFLeapjts6/f9PrQA3JymT25Cd3iY5xtYVIB6wLCQSiUQikUgk0nzBoVdFZ1xIpaTQbJnPACaNdYeskWwuAhaZoltnUemfnNkL4N49KEI8n0YAEXMvEWISAWQZPw2Xk1MIoF1dSNAzCMy6JsGyCR0wrkMwT3cBeDt+FH8aEHoA68LbM8HRHXQ3f0RE3/jXOOFX+s4djrKpIbzS7K+MmLrxlWCNR8mczjMw92Ar4dZLDXG4kzXinAECcOUPL3jMdN2294/GQGVG4EMHxORNJXoCfG6oT1trvDGM7iIA9N6aTOuuEbB9ra6FyCYr2gjge+fjA4CIi2uujYRoOBSw0A5/D0hT0X4PW0xtuotNpQPYtkt/fdtyM0LP6ZvOI2DtvoxtJWHvx38AxIkevLwXQ2TOA66DziYfLwC4r5wbIlwJo1ys8+VOBMy7/sxdjwIap49lVC3UePZp1mmyit4SuGUf11pjoTHVRVzXUaXFVt87kuEBsWZ055Q+2sXA76LbZYsvKR1ubvJqbKd5swl+GPI31p6L/sNYuDTe3jo+GBdr1J+P9PGawbRUw9VhleD/3ffT9uZ7DhtX1JNHL2CmNRXxYZhwSwBd3aJTyU85/GKOwhxBf5RnVk+75OSiuu+Ax4PQ3Jsg1hTeMUMwJgQp+PKCe2a+JuefFwQnkUgkEolEIpFerW8TL0hlNl2QVAAAAABJRU5ErkJggg=="
+
 export const html = `
 <div class="stage" id="stage">
   <div class="frame" id="frame">
@@ -9,6 +15,7 @@ export const html = `
          hold on the first frame. -->
     <div id="scene-loader" class="scene-loader" role="progressbar" hidden>
       <p id="scene-loader-not-video" class="scene-loader-note scene-loader-not-video"></p>
+      <img class="scene-loader-logo" src="${LOGO}" width="64" height="64" alt="UFO@home">
       <p id="scene-loader-note" class="scene-loader-note scene-loader-is-simulation"></p>
       <div class="scene-loader-spinner"></div>
     </div>
@@ -167,9 +174,18 @@ export const css = `
   align-items: center;
   justify-content: center;
   gap: 0.5em;
+  /* Black, whole: what waits is not the scene half drawn behind a veil, but the logo and what it is. */
+  background: #000;
   animation: scene-loader-appear 0.2s ease-out 0.25s both;
   pointer-events: none;
   z-index: 1;
+}
+.scene-loader-logo {
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 0.6em 0;
+  border-radius: 14px;
 }
 .scene-loader[hidden] {
   display: none;
@@ -241,6 +257,12 @@ export const css = `
   animation: scene-loader-spin 0.9s linear infinite;
 }
 @container (max-width: 360px) {
+  .scene-loader-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 9px;
+    margin-bottom: 0.4em;
+  }
   .scene-loader-note {
     display: none;
   }

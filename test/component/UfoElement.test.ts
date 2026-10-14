@@ -1,6 +1,7 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
 import { registerUfo, UFO_ELEMENT_NAME } from "../../src/component/UfoElement.js"
 import type { UfoElement } from "../../src/component/UfoElement.js"
+import { css as ufoCss } from "../../src/component/ufoTemplate.js"
 import { ApparentSize } from "../../src/engine/shape/ApparentSize.js"
 import { ImageProjection } from "../../src/engine/instrument/ImageProjection.js"
 import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
@@ -1994,5 +1995,17 @@ describe("the account's named moments", () => {
 
     element.removeAttribute("hide-milestones")
     expect(parts(element).marks.hidden).toBe(false)
+  })
+})
+
+describe("the title laid over the picture", () => {
+  const css = ufoCss
+
+  it("never takes the pointer, whatever the rule that gives the controls theirs while the stage is hovered says: it lies over the observer's map", () => {
+    // The controls of the picture are given the pointer while the stage is hovered, with a rule more specific than the title's own: the title, which spans the
+    // top of the picture, took the pointer from the map's corner, and the zoom buttons that show while the map is hovered went before the pointer reached them.
+    const rule = /\.player-title \{[^}]*\}/.exec(css)![0]
+    expect(rule).toMatch(/pointer-events:\s*none\s*!important/)
+    expect(css).toMatch(/\.stage:hover \.auto-hide[^{]*\{[^}]*pointer-events:\s*auto/)
   })
 })

@@ -651,7 +651,10 @@ canvas[data-cursor="rotate"] {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  pointer-events: none;
+  /* A label never takes the pointer, whatever else says so: it spans the whole width of the top, over the corner of the observer's map, and the rule that
+     gives the controls over the picture their pointer while it is hovered (.stage:hover .auto-hide, more specific than this) gave it too. The pointer that went
+     under the title left the map, and its zoom buttons went with it, before it could reach them. */
+  pointer-events: none !important;
   z-index: 2;
 }
 .player-title[hidden] {

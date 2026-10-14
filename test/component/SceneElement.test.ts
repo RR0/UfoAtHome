@@ -344,6 +344,30 @@ describe("the clouds of a record along the day", () => {
   })
 })
 
+describe("the loader of a scene", () => {
+  it("shows the project's logo while the first frame waits, over a black that is whole", () => {
+    const element = mount()
+    const root = element.shadowRoot!
+    const loader = root.getElementById("scene-loader")!
+    const logo = loader.querySelector("img.scene-loader-logo") as HTMLImageElement
+    expect(logo).not.toBeNull()
+    expect(logo.alt).toBe("UFO@home")
+    // A data URI: what waits must not itself wait for a request, nor be missing from a page that embeds the scene from another site.
+    expect(logo.src.startsWith("data:image/png;base64,")).toBe(true)
+    expect(logo.src.length).toBeLessThan(3000)
+    const css = root.querySelector("style")!.textContent!
+    const rule = /\.scene-loader \{[^}]*\}/.exec(css)![0]
+    expect(rule).toMatch(/background:\s*#000\b/)
+  })
+
+  it("puts \"this is not a video\" above the logo, and the other sentence under it", () => {
+    const loader = mount().shadowRoot!.getElementById("scene-loader")!
+    const order = [...loader.children].map(child => child.id || child.tagName)
+    expect(order.indexOf("scene-loader-not-video")).toBeLessThan(order.indexOf("IMG"))
+    expect(order.indexOf("IMG")).toBeLessThan(order.indexOf("scene-loader-note"))
+  })
+})
+
 describe("a scene out of sight", () => {
   let notify: (visible: boolean) => void
   const original = globalThis.IntersectionObserver
