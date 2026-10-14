@@ -40,19 +40,22 @@ PLANE_M, OBJECT_M = 11700.0, 10500.0
 SIZE_DEG = 1.24                                      # 1999 interview: 1000 m at 46 km, "the width of his thumb"; the report (200-300 m) and the SEPRA (half the Moon, 0.26) give far less
 STEP_MS = 1000
 
-# In the flight deck model, where the captain's eye is: 0.557 m left of the centre of its box and 0.266 m above it (found by looking
-# out of it from the left seat); and 0.174 m AHEAD of it (the nose is towards -z), which is 0.25 m in front of the front of the seat's
+# In the flight deck model, where the captain's eye is: 0.557 m left of the centre of its box and 0.146 m above it, 0.83 m above the model's
+# origin, 0.79 m above the cushion of the seat: the height from which the sky ahead is seen up to 18 degrees above the horizon through the
+# windscreen (rays from the eye against the model; at 0.95 the frame above cut the view at the horizon itself, at 0.80 it is 22 degrees); and 0.174 m AHEAD of it (the nose is towards -z), which is 0.25 m in front of the front of the seat's
 # headrest, as a seated pilot's eye is (found by sitting the MakeHuman captain in the seat, see scripts/people/build_pilot.py).
-COCKPIT_FORWARD_M, COCKPIT_LEFT_M, COCKPIT_BELOW_M = 0.174, 0.557, -0.266
+COCKPIT_FORWARD_M, COCKPIT_LEFT_M, COCKPIT_BELOW_M = 0.174, 0.557, -0.146
 # The two seats are 1.074 m apart (the flight deck is symmetrical about x = 0.02 in the model, the captain's eye at -0.537): the
 # co-pilot's eye is that much to the right of the captain's, and 0.517 right of the middle of the box.
 SEAT_SPACING_M = 1.074
 COCKPIT_RIGHT_SEAT_LEFT_M = -0.517
-# The captain seated, as scripts/people/build_pilot.py makes him (MakeHuman): his eyes are 0.093 m behind the centre of his box, at its
-# middle across, and 1.393 m above his feet, which are where the entity decor rests its model. Placed by rays against the flight deck model:
-# 10.5 cm further forward than his eyes (so that his back touches the backrest: 0.7 cm from it at the middle of the back, 4.6 cm between the
-# shoulder blades because the backrest leans) and 3 cm lower (1.3 cm into the cushion, 11 cm under the ceiling).
-PILOT_FORWARD_M, PILOT_LEFT_M, PILOT_BELOW_M = -0.012, 0.0, -1.423
+# The captain seated, as scripts/people/build_pilot.py makes him (MakeHuman), slumped and reclined 24 degrees, his legs forward to the pedals:
+# his eyes are 0.414 m behind the centre of his box, 0.053 m to the left of its middle, and 1.168 m above his feet, which are where the entity
+# decor rests its model. Placed by rays against the flight deck model (scripts/people/README.md): the feet 4 cm above the floor, the
+# buttocks on the cushion (0.1 cm), the back against the backrest at the middle of the spine (0.5 cm; the pelvis is 6 cm off it, as a slouching
+# man's is), his eyes 0.83 m high as the observer's. The observer's eye is 0.234 m behind the centre of his box (the centre is 2.246 in the
+# flight deck model's z, the eye 2.48), the co-pilot's 1.021 m to the right of it.
+PILOT_FORWARD_M, PILOT_LEFT_M, PILOT_BELOW_M = -0.234, 0.053, -1.168
 
 
 def stated(value, basis, rationale):
@@ -140,7 +143,7 @@ def airliner(total_s, seat="left"):
     seen from the right seat, the captain seated at the left one, on the line of sight to the left window. No airframe: the A320 of the
     catalogue, kept for its wings, had a surface that came across the view of the flight deck, and its wings are behind the pilots anyway."""
     cockpit_title = (tr("Poste de pilotage de l'A320 (siège gauche : le commandant)", "A320 flight deck (left seat: the captain)") if seat == "left"
-                     else tr("Poste de pilotage de l'A320 (siège droit : la copilote)", "A320 flight deck (right seat: the co-pilot)"))
+                     else tr("Poste de pilotage de l'A320 (siège droit : Valérie Chauffour)", "A320 flight deck (right seat: Valérie Chauffour, the co-pilot)"))
     return [
         airframe(total_s, "af3532-cockpit", cockpit_title,
                  "davidmarton-a320-cockpit", {"widthM": 3.257, "lengthM": 2.591, "heightM": 2.127}, COCKPIT_FORWARD_M,
@@ -148,7 +151,7 @@ def airliner(total_s, seat="left"):
     ] + ([] if seat == "left" else [
         # An observer (a companion who was there), not an entity: an entity is a being seen, and the engine would class the case "with occupants"
         {**airframe(total_s, "af3532-captain", tr("Le commandant Duboc, au siège gauche", "Captain Duboc, at the left seat"),
-                    "ufoathome-duboc-seated", {"heightM": 1.541}, PILOT_FORWARD_M, PILOT_LEFT_M - SEAT_SPACING_M, PILOT_BELOW_M, {}),
+                    "ufoathome-duboc-seated", {"heightM": 1.31}, PILOT_FORWARD_M, PILOT_LEFT_M - SEAT_SPACING_M, PILOT_BELOW_M, {}),
          "kind": "observer"}])
 
 
@@ -319,27 +322,27 @@ def copilot_recording():
     frames.append({"t": int(total * 1000) + 1500, "shapes": fade})
     return {
         "version": 1,
-        "id": "1994-01-28-DubocCopilote",
+        "id": "1994-01-28-ChauffourValerie",
         "tags": ["aerial observation", "airline pilot", "radar"],
         "time": {"year": 1994, "month": 1, "day": 28, "hour": 13, "minute": 14, "raw": "1994-01-28T13:14"},
         "utcOffsetHours": stated(0, "stated", "the report gives 13:14 GMT"),
         "durationSeconds": stated(total, "stated", "\"2 à 5 mn\" in her report"),
         "place": [stated({"lat": round(LAT_MID, 6), "lng": round(LNG_MID, 6), "name": "Near Coulommiers, Seine-et-Marne, France (airway between the VORs BRY and CLM)"},
                          "stated", "\"48°50'7 N / 003°00'9 E\" in her report, read as degrees and decimal minutes")],
-        "observer": {"id": "DubocCopilote", "title": "La copilote"},
+        "observer": {"id": "ChauffourValerie", "title": "Valérie Chauffour"},
         "account": {
             "observerOccupation": tr("copilote, Air France", "co-pilot, Air France"),
             "source": "interview",
             "followedUp": True,
         },
         "sources": [
-            {"type": "article", "title": "Rapport de la copilote pour Dominique Weinstein, copie au SEPRA", "authors": ["La copilote"],
+            {"type": "article", "title": "Rapport de la copilote pour Dominique Weinstein, copie au SEPRA", "authors": ["Valérie Chauffour"],
              "url": "https://rr0.org/science/crypto/ufo/enquete/dossier/Duboc/index.html",
              "publication": {"publisher": "Velasco 2004"}},
         ],
         "description": {
             "fr": (
-                "Même vol, même minute, vu du siège de droite. La copilote prend d'abord l'objet pour un ballon-sonde, comme le steward. "
+                "Même vol, même minute, vu du siège de droite, par la copilote Valérie Chauffour. Elle prend d'abord l'objet pour un ballon-sonde, comme le steward. "
                 "Pour elle il ne reste pas en arrière : elle le voit constamment vers 9 h, à gauche, et se déplaçant à la vitesse de "
                 "l'avion, sur une trajectoire rectiligne parallèle à la sienne, pendant 2 à 5 minutes. Sa forme change : une lentille "
                 "à contour net, qui se floute, devient une forme de « chevron » (géométrie variable, disque évoluant dans les trois "
@@ -348,7 +351,7 @@ def copilot_recording():
                 "Ni taille angulaire ni distance chiffrée dans son rapport (« grande taille », 25 à 50 miles nautiques) : la taille est "
                 "celle de l'interview du commandant (empruntée), et le moment où l'objet quitte le 10 h pour le 9 h est choisi."),
             "en": (
-                "Same flight, same minute, seen from the right-hand seat. The co-pilot first takes the object for a weather balloon, "
+                "Same flight, same minute, seen from the right-hand seat by the co-pilot, Valérie Chauffour. She first takes the object for a weather balloon, "
                 "like the steward. For her it does not fall behind: she sees it constantly at about 9 o'clock, to the left, moving at the "
                 "airliner's speed on a straight path parallel to its own, for 2 to 5 minutes. Its shape changes: a lens with a sharp "
                 "outline that blurs becomes a \"chevron\" (variable geometry, a disc evolving in all three dimensions), then the outline "

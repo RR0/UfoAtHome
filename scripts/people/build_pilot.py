@@ -44,7 +44,7 @@ _thing_of = people.thing_of
 people.thing_of = lambda obj: "clothes" if "shirt" in obj.name.lower() else _thing_of(obj)
 
 PILOT = dict(id="duboc-seated", name="Captain Duboc, seated (after his portrait)", gender=1.0, age=0.638, weight=0.92, muscle=0.4,
-             heightM=1.78, skin="middleage_caucasian_male", clothes=["male_pilotshirt01"], shoes="shoes03", hair="short01",
+             heightM=1.70, skin="middleage_caucasian_male", clothes=["male_pilotshirt01"], shoes="shoes03", hair="short01",
              eyebrows="eyebrow002", eyelashes=None)
 GREY_HAIR = (0.52, 0.50, 0.49)
 BEARD = (0.30, 0.29, 0.28)
@@ -52,7 +52,20 @@ NAVY_JACKET = (0.05, 0.07, 0.15)
 GOLD = (0.72, 0.58, 0.14)
 BLACK = (0.03, 0.03, 0.035)
 # Flexion of the joints, in degrees: the hips and the knees at a right angle, the forearms forward on the thighs and the controls.
-HIP_DEG, KNEE_DEG, ARM_FORWARD_DEG, FOREARM_DEG = 88, 92, 14, 38
+HIP_DEG, KNEE_DEG = 95, 62     # the legs go forward to the pedals: the knees a little above the hips, the shins slanting, feet on the floor of the flight deck
+# He is not sitting bolt upright: the upper body leans back against the backrest, and a captain after hours of flight slumps a little
+LEAN_BACK_DEG = 24
+# ... and his head is brought back upright by the neck, so that he looks straight ahead
+NECK_FORWARD_DEG, HEAD_FORWARD_DEG = 14, 10
+# Where his hands are, from his eyes, in metres of a figure that stands 1.78 m (x to his left, y up, z forward): read in the flight deck model
+# (scripts/extract-a320-cockpit.py's file, clicked from above): the grip of the captain's sidestick is 0.33 m to the left of his eye axis, 0.64 m
+# under his eyes (0.28 above the floor of the flight deck, his eyes at 0.83: the height from which the sky ahead is seen up to 18 degrees, as through
+# an A320's windscreen) and 0.47 m ahead; the left thrust lever of the pedestal 0.44 m to the right, 0.67 m under and 0.38 m ahead. The wrist is a little
+# behind and above the grip.
+LEFT_HAND_FROM_EYE = (0.328, -0.550, 0.466)
+RIGHT_HAND_FROM_EYE = (-0.444, -0.670, 0.381)
+WRIST_BEHIND_GRIP = (0.0, 0.0, -0.065)         # the wrist is this far from the grip, along (left, up, forward), when the hand holds it
+ELBOW_POLE = (0.55, -0.45, -0.7)                # where the elbow points, along (outward, up, forward): out, down and back
 
 
 def world_rotate(pose_bone, axis, degrees):
@@ -63,19 +76,58 @@ def world_rotate(pose_bone, axis, degrees):
     bpy.context.view_layer.update()
 
 
-def sit(rig):
+def aim(rig, pose_bone, point):
+    """Turns a pose bone, about its head, so that it points at `point` (armature space)."""
+    head = pose_bone.head.copy()
+    current = (pose_bone.tail - pose_bone.head).normalized()
+    wanted = (point - head).normalized()
+    rotation = Matrix.Translation(head) @ current.rotation_difference(wanted).to_matrix().to_4x4() @ Matrix.Translation(-head)
+    pose_bone.matrix = rotation @ pose_bone.matrix
+    bpy.context.view_layer.update()
+
+
+def reach(rig, side, wrist_at, outward):
+    """Two-bone inverse kinematics of an arm: the upper arm and the forearm are turned so that the wrist is at `wrist_at`, the elbow on the
+    side the pole `outward` (a vector) points to."""
+    upper = rig.pose.bones["upperarm01." + side]
+    fore = rig.pose.bones["lowerarm01." + side]
+    wrist = rig.pose.bones["wrist." + side]
+    shoulder = upper.head.copy()
+    a = (fore.head - upper.head).length
+    b = (wrist.head - fore.head).length
+    to_target = wrist_at - shoulder
+    d = min(to_target.length, a + b - 1e-4)
+    axis = to_target.normalized()
+    x = (a * a - b * b + d * d) / (2 * d)
+    h = math.sqrt(max(a * a - x * x, 0.0))
+    pole = outward - axis * outward.dot(axis)
+    elbow = shoulder + axis * x + pole.normalized() * h
+    aim(rig, upper, elbow)
+    aim(rig, rig.pose.bones["lowerarm01." + side], wrist_at)
+    return a, b, (rig.pose.bones["wrist." + side].head - wrist_at).length
+
+
+def sit(rig, scale):
     """Seated: the character faces -Y in Blender, so a leg that points down (-Z) is swung forward by a turn about X of -HIP_DEG, and
-    the shin, then, brought back down by KNEE_DEG the other way."""
+    the shin, then, brought back down by KNEE_DEG the other way. The hands are put on the sidestick and the thrust lever."""
     bpy.context.view_layer.objects.active = rig
     bpy.ops.object.mode_set(mode="POSE")
-    names = [b.name for b in rig.pose.bones]
-    print("BONES", names)
+    print("BONES", [b.name for b in rig.pose.bones][:8], "rig matrix", [tuple(round(v, 3) for v in row) for row in rig.matrix_world])
     for side, sign in (("L", 1), ("R", -1)):
-        world_rotate(rig.pose.bones["upperarm01." + side], "Y", sign * math.degrees(people.ARM_DROP_RAD))
-        world_rotate(rig.pose.bones["upperarm01." + side], "X", -ARM_FORWARD_DEG)
-        world_rotate(rig.pose.bones["lowerarm01." + side], "X", -FOREARM_DEG)
         world_rotate(rig.pose.bones["upperleg01." + side], "X", -HIP_DEG)
         world_rotate(rig.pose.bones["lowerleg01." + side], "X", KNEE_DEG)
+    world_rotate(rig.pose.bones["spine05"], "X", -LEAN_BACK_DEG)
+    world_rotate(rig.pose.bones["neck01"], "X", NECK_FORWARD_DEG)
+    world_rotate(rig.pose.bones["head"], "X", HEAD_FORWARD_DEG)
+    eyes = (rig.pose.bones["eye.L"].head + rig.pose.bones["eye.R"].head) / 2
+    # his left is +X in Blender (he faces -Y), forward is -Y, up is +Z; the table above is in the metres of a 1.78 m figure
+    def from_eye(offset, extra):
+        left, up, forward = (offset[k] + extra[k] for k in range(3))
+        return eyes + Vector((left, -forward, up)) / scale
+    for side, hand, outward in (("L", LEFT_HAND_FROM_EYE, Vector((1, 0.45, -0.7))), ("R", RIGHT_HAND_FROM_EYE, Vector((-1, 0.45, -0.7)))):
+        # the wrist is behind the grip: the grip is where the hand is, the wrist 6.5 cm back along the line from the elbow's side
+        wrist_at = from_eye(hand, (0.0, 0.03, 0.065 * 0.0 - 0.065))
+        print("REACH", side, [round(v, 3) for v in reach(rig, side, wrist_at, outward)])
     bpy.ops.object.mode_set(mode="OBJECT")
 
 
@@ -186,7 +238,7 @@ def main():
     standing = max(v.co.z for v in rest.vertices) - min(v.co.z for v in rest.vertices)
     bpy.data.meshes.remove(rest)
     people_height = standing
-    sit(rig)
+    sit(rig, PILOT["heightM"] / standing)
     people.make_opaque()
     recolour_hair()
     people.shrink_textures()
