@@ -1,5 +1,5 @@
 import type { GeoBounds } from "../GeoBounds.js"
-import type { RoadProvider, RoadSurface, RoadWay } from "../RoadProvider.js"
+import type { RoadKind, RoadProvider, RoadSurface, RoadWay } from "../RoadProvider.js"
 import { IgnGeoplatform } from "./IgnGeoplatform.js"
 import type { IgnGeoplatformOptions } from "./IgnGeoplatform.js"
 import type { VectorFeature } from "../OverheadStructures.js"
@@ -32,6 +32,14 @@ export class IgnTopoRoadProvider implements RoadProvider {
     "Piste cyclable": { surface: "paved", widthM: 2.5 }
   }
   private static readonly DEFAULT = { surface: "paved" as RoadSurface, widthM: 5 }
+  /** What the map's nature of a road means for its paint. */
+  private static readonly KINDS: Readonly<Record<string, RoadKind>> = {
+    "Type autoroutier": "motorway", "Route à 2 chaussées": "dual", "Route à 1 chaussée": "road", "Rond-point": "roundabout", "Bretelle": "slip"
+  }
+  /** Which way the traffic goes, as the map says it against the order its points are drawn in. */
+  private static readonly DIRECTIONS: Readonly<Record<string, "both" | "forward" | "backward">> = {
+    "Double sens": "both", "Sens direct": "forward", "Sens inverse": "backward"
+  }
 
   private readonly platform: IgnGeoplatform
 
@@ -55,6 +63,10 @@ export class IgnTopoRoadProvider implements RoadProvider {
     const nature = String(feature.properties.nature ?? "")
     const kind = IgnTopoRoadProvider.BY_NATURE[nature] ?? IgnTopoRoadProvider.DEFAULT
     const stated = Number(feature.properties.largeur_de_chaussee)
+    const lanes = Number(feature.properties.nombre_de_voies)
+    const speed = Number(feature.properties.vitesse_moyenne_vl)
+    const direction = IgnTopoRoadProvider.DIRECTIONS[String(feature.properties.sens_de_circulation ?? "")]
+    const roadKind = IgnTopoRoadProvider.KINDS[nature]
     const name = [feature.properties.cpx_toponyme_route_nommee, feature.properties.nom_voie_ban_gauche, feature.properties.nom_voie_ban_droite]
       .find((candidate): candidate is string => typeof candidate === "string" && candidate.length > 0)
     return [{
@@ -63,6 +75,10 @@ export class IgnTopoRoadProvider implements RoadProvider {
       surface: kind.surface,
       widthM: Number.isFinite(stated) && stated > 0 ? stated : kind.widthM,
       ...(feature.properties.urbain === true ? { urban: true } : {}),
+      ...(roadKind ? { kind: roadKind } : {}),
+      ...(Number.isInteger(lanes) && lanes > 0 ? { lanes } : {}),
+      ...(direction ? { direction } : {}),
+      ...(Number.isFinite(speed) && speed > 0 ? { speedKmh: speed } : {}),
       points
     }]
   }

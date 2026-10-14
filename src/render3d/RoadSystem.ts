@@ -43,6 +43,8 @@ export class RoadSystem {
   static readonly RENDER_ORDER = 1.05
   /** The paint is drawn over the carriageway it is on (see RoadMarkings). */
   static readonly MARKINGS_RENDER_ORDER = 1.06
+  /** The albedo of the barrier between two carriageways: galvanised steel, or concrete, weathered. */
+  private static readonly BARRIER_ALBEDO: [number, number, number] = [0.32, 0.33, 0.34]
   /** The albedo of a road paint: white, weathered. */
   private static readonly MARKINGS_ALBEDO: [number, number, number] = [0.55, 0.55, 0.5]
   /** How much the grain of the surface varies its colour, by surface: asphalt is mottled, gravel and dirt more so. */
@@ -143,22 +145,35 @@ export class RoadSystem {
    * the paint of the roads of the patch before is not laid on this one if it comes late (see markingsToken).
    */
   private paint(ways: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt, contemporary: boolean): void {
-    if (!ways.some(way => way.surface === "paved" && way.widthM >= 5.5)) return
+    if (!ways.some(way => way.surface === "paved" && way.widthM >= 5.5 && way.kind !== "roundabout")) return
     const token = this.markingsToken
     void (RoadSystem.markingsModule ??= import("./RoadMarkings.js")).then(({ RoadMarkings }) => {
       if (token !== this.markingsToken) return
       const batch = { positions: [] as number[], indices: [] as number[] }
       const laid = RoadMarkings.lay(ways, originLat, originLng, (points, widthM, options) =>
         this.appendPath(points, widthM, groundYAt, batch, { offsetM: options.offsetM, liftM: RoadSystem.LIFT_M + options.liftM, minHalfM: options.minHalfM }))
-      if (laid === 0 || batch.indices.length === 0) return
-      const mesh = this.meshOf("paved", batch, contemporary, RoadSystem.MARKINGS_ALBEDO, false)
-      if (!mesh) return
-      mesh.name = "roads markings"
-      mesh.renderOrder = RoadSystem.MARKINGS_RENDER_ORDER
-      // Over the carriageway it is on, which is already over the ground.
-      mesh.material.polygonOffsetFactor = -4
-      mesh.material.polygonOffsetUnits = -4
-      this.surveyed.add(mesh)
+      if (laid > 0 && batch.indices.length > 0) {
+        const mesh = this.meshOf("paved", batch, contemporary, RoadSystem.MARKINGS_ALBEDO, false)
+        if (mesh) {
+          mesh.name = "roads markings"
+          mesh.renderOrder = RoadSystem.MARKINGS_RENDER_ORDER
+          // Over the carriageway it is on, which is already over the ground.
+          mesh.material.polygonOffsetFactor = -4
+          mesh.material.polygonOffsetUnits = -4
+          this.surveyed.add(mesh)
+        }
+      }
+      // The barrier between two carriageways of a motorway: it keeps the light off the other lane as it keeps the traffic.
+      const barrier = RoadMarkings.barrierGeometry(RoadMarkings.barriers(ways, originLat, originLng), groundYAt)
+      if (barrier.indices.length > 0) {
+        const mesh = this.meshOf("paved", barrier, contemporary, RoadSystem.BARRIER_ALBEDO, false)
+        if (mesh) {
+          mesh.name = "roads barriers"
+          mesh.material.polygonOffset = false
+          mesh.castShadow = true
+          this.surveyed.add(mesh)
+        }
+      }
       this.onMarkings?.()
     })
   }

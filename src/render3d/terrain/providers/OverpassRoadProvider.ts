@@ -1,7 +1,7 @@
 import type { GeoBounds } from "../GeoBounds.js"
 import { OverpassClient } from "./OverpassClient.js"
 import type { OverpassResponse } from "./OverpassClient.js"
-import type { RoadProvider, RoadSurface, RoadWay } from "../RoadProvider.js"
+import type { RoadKind, RoadProvider, RoadSurface, RoadWay } from "../RoadProvider.js"
 
 export interface OverpassRoadProviderOptions {
   fetchImpl?: typeof fetch
@@ -71,10 +71,36 @@ export class OverpassRoadProvider implements RoadProvider {
         name: tags.name,
         surface: OverpassRoadProvider.surfaceOf(tags),
         widthM: OverpassRoadProvider.widthOf(tags),
+        ...OverpassRoadProvider.paintOf(tags),
         points: geometry.map(point => ({ lat: point.lat, lng: point.lon }))
       })
     }
     return ways
+  }
+
+  /**
+   * What OSM says of how the road is used, for its paint (see RoadMarkings): the kind from the class of the road and the roundabout tag, the lanes, the
+   * direction (a motorway is one-way where it does not say), the speed. Only what is said: a way with none of it is painted as any wide road.
+   */
+  private static paintOf(tags: Record<string, string>): Pick<RoadWay, "kind" | "lanes" | "direction" | "speedKmh"> {
+    const highway = tags.highway ?? ""
+    const roundabout = tags.junction === "roundabout" || tags.junction === "circular"
+    const oneWayTag = tags.oneway
+    const oneWay = oneWayTag === "yes" || oneWayTag === "1" || oneWayTag === "true" || (oneWayTag === undefined && (highway === "motorway" || roundabout))
+    const backward = oneWayTag === "-1" || oneWayTag === "reverse"
+    const lanes = Number.parseInt(tags.lanes ?? "", 10)
+    const speed = Number.parseInt(tags.maxspeed ?? "", 10)
+    const kind: RoadKind | undefined = roundabout ? "roundabout"
+      : highway === "motorway" ? "motorway"
+        : highway.endsWith("_link") ? "slip"
+          : (highway === "trunk" || highway === "primary") && (oneWay || backward) ? "dual"
+            : highway ? "road" : undefined
+    return {
+      ...(kind ? { kind } : {}),
+      ...(Number.isFinite(lanes) && lanes > 0 ? { lanes } : {}),
+      ...(oneWayTag !== undefined || highway === "motorway" || roundabout ? { direction: backward ? "backward" as const : oneWay ? "forward" as const : "both" as const } : {}),
+      ...(Number.isFinite(speed) && speed > 0 ? { speedKmh: speed } : {})
+    }
   }
 
   /** What OSM says, where it says anything; what the class implies otherwise — see WIDTH_M. */

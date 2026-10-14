@@ -14,6 +14,40 @@ function answering(features: unknown[]): typeof fetch {
   return vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ features }) }) as Response) as unknown as typeof fetch
 }
 
+describe("IgnTopoRoadProvider and the use of a road", () => {
+  it("reads the kind, the lanes, the direction and the speed the map gives a section", async () => {
+    const provider = new IgnTopoRoadProvider({
+      fetchImpl: answering([
+        road({ cleabs: "A", nature: "Type autoroutier", nombre_de_voies: 2, sens_de_circulation: "Sens direct", largeur_de_chaussee: 10, vitesse_moyenne_vl: 90 }, [-1.09, 49.115], [-1.089, 49.115]),
+        road({ cleabs: "B", nature: "Route à 2 chaussées", nombre_de_voies: 2, sens_de_circulation: "Sens inverse", largeur_de_chaussee: 10, vitesse_moyenne_vl: 50 }, [-1.09, 49.116], [-1.089, 49.116]),
+        road({ cleabs: "C", nature: "Route à 1 chaussée", nombre_de_voies: 2, sens_de_circulation: "Double sens", largeur_de_chaussee: 7, vitesse_moyenne_vl: 0 }, [-1.09, 49.117], [-1.089, 49.117]),
+        road({ cleabs: "D", nature: "Rond-point", nombre_de_voies: 1, sens_de_circulation: "Sens direct" }, [-1.09, 49.1175], [-1.089, 49.1175]),
+        road({ cleabs: "E", nature: "Bretelle" }, [-1.09, 49.118], [-1.089, 49.118]),
+        road({ cleabs: "F", nature: "Chemin", sens_de_circulation: "Double sens" }, [-1.09, 49.1181], [-1.089, 49.1181])
+      ])
+    })
+    const [motorway, dual, ordinary, roundabout, slip, track] = await provider.getRoads(SAINT_LO)
+    expect(motorway).toMatchObject({ kind: "motorway", lanes: 2, direction: "forward", speedKmh: 90 })
+    expect(dual).toMatchObject({ kind: "dual", lanes: 2, direction: "backward", speedKmh: 50 })
+    // A speed of nought is "not said".
+    expect(ordinary).toMatchObject({ kind: "road", lanes: 2, direction: "both" })
+    expect(ordinary.speedKmh).toBeUndefined()
+    expect(roundabout).toMatchObject({ kind: "roundabout", lanes: 1, direction: "forward" })
+    expect(slip.kind).toBe("slip")
+    expect(slip.lanes).toBeUndefined()
+    expect(track.kind).toBeUndefined()
+    expect(track.direction).toBe("both")
+  })
+
+  it("asks the map for the lanes, the direction and the speed with the roads", async () => {
+    const fetchImpl = answering([])
+    await new IgnTopoRoadProvider({ fetchImpl }).getRoads(SAINT_LO)
+    const url = new URL(String((fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0]))
+    const properties = url.searchParams.get("PROPERTYNAME")!
+    for (const name of ["nombre_de_voies", "sens_de_circulation", "vitesse_moyenne_vl"]) expect(properties).toContain(name)
+  })
+})
+
 describe("IgnTopoRoadProvider", () => {
   it("asks the map for the roads of the box, longitude first, without the footpaths, the stairs and the tunnels", async () => {
     const fetchImpl = answering([])

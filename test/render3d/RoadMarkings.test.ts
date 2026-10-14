@@ -86,6 +86,118 @@ describe("RoadMarkings", () => {
   })
 })
 
+describe("RoadMarkings.plan: the paint by what the road is", () => {
+  const base = { surface: "paved" as const, kind: "road" as const }
+  const offsets = (lines: { offsetM: number }[]) => lines.map(line => Number(line.offsetM.toFixed(2))).sort((a, b) => a - b)
+
+  it("paints a way that says nothing of its use as any wide road: edges whole, the middle dashed", () => {
+    const lines = RoadMarkings.plan({ surface: "paved", widthM: 7 })
+    expect(lines.map(line => line.pattern).sort()).toEqual(["dashed", "solid", "solid"])
+    expect(offsets(lines)).toEqual([-3.1, 0, 3.1])
+    expect(RoadMarkings.plan({ surface: "paved", widthM: 12 }).filter(line => line.pattern === "dashed").map(line => line.offsetM).sort((a, b) => a - b)).toEqual([-3, 3])
+  })
+
+  it("paints nothing on a track, a lane too narrow for two ways, or a roundabout", () => {
+    expect(RoadMarkings.plan({ ...base, surface: "gravel", widthM: 8 })).toEqual([])
+    expect(RoadMarkings.plan({ ...base, widthM: 4.5, lanes: 2, direction: "both" })).toEqual([])
+    expect(RoadMarkings.plan({ surface: "paved", widthM: 7, kind: "roundabout", lanes: 2, direction: "forward" })).toEqual([])
+  })
+
+  it("paints a carriageway of a motorway: its two edges whole, a shoulder's line where the lanes end, a dashed line between the lanes", () => {
+    // Ten metres, two lanes of three and a half: seven of lanes, three of shoulder. Going with its points, its left is the left of the points.
+    const lines = RoadMarkings.plan({ surface: "paved", widthM: 10, kind: "motorway", lanes: 2, direction: "forward", speedKmh: 90 })
+    const whole = lines.filter(line => line.pattern === "solid").map(line => Number(line.offsetM.toFixed(2))).sort((a, b) => a - b)
+    // The median's edge 0.4 m in from the left edge; the shoulder's line 7 m from the left edge; the lane between at 3.5 m.
+    expect(whole).toEqual([-2, 4.6])
+    expect(lines.filter(line => line.pattern === "dashed").map(line => line.offsetM)).toEqual([1.5])
+  })
+
+  it("mirrors a carriageway that goes against the order of its points: its left is their right", () => {
+    const forward = RoadMarkings.plan({ surface: "paved", widthM: 10, kind: "motorway", lanes: 2, direction: "forward" })
+    const backward = RoadMarkings.plan({ surface: "paved", widthM: 10, kind: "motorway", lanes: 2, direction: "backward" })
+    expect(offsets(backward)).toEqual(offsets(forward).map(offset => -offset).sort((a, b) => a - b))
+  })
+
+  it("gives a motorway of three lanes two dashed lines, and has no shoulder line where the carriageway is all lanes", () => {
+    const lines = RoadMarkings.plan({ surface: "paved", widthM: 10.5, kind: "motorway", lanes: 3, direction: "forward" })
+    expect(lines.filter(line => line.pattern === "dashed")).toHaveLength(2)
+    // Three lanes of three and a half fill it: the right line is the edge's own.
+    const right = lines.filter(line => line.pattern === "solid").map(line => line.offsetM).sort((a, b) => a - b)
+    expect(right[0]).toBeCloseTo(-(10.5 / 2 - 0.4), 6)
+  })
+
+  it("paints a two-way road of two lanes with its middle dashed and whole in the bends, its edges whole from seven metres or 80 km/h and in short dashes below", () => {
+    const wide = RoadMarkings.plan({ ...base, widthM: 7, lanes: 2, direction: "both", speedKmh: 40 })
+    expect(wide.find(line => line.offsetM === 0)).toMatchObject({ pattern: "dashed", solidInBends: true })
+    expect(wide.filter(line => line.pattern === "solid" || line.pattern === "rive").every(line => line.pattern === "solid")).toBe(true)
+    const narrow = RoadMarkings.plan({ ...base, widthM: 6, lanes: 2, direction: "both", speedKmh: 40 })
+    expect(narrow.filter(line => line.offsetM !== 0).every(line => line.pattern === "rive")).toBe(true)
+    const fast = RoadMarkings.plan({ ...base, widthM: 6, lanes: 2, direction: "both", speedKmh: 90 })
+    expect(fast.filter(line => line.offsetM !== 0).every(line => line.pattern === "solid")).toBe(true)
+  })
+
+  it("paints a double whole line down the middle of a two-way road of four lanes, and its lanes dashed", () => {
+    const lines = RoadMarkings.plan({ ...base, widthM: 14, lanes: 4, direction: "both", speedKmh: 70 })
+    expect(lines.filter(line => Math.abs(line.offsetM) < 0.2).map(line => line.pattern)).toEqual(["solid", "solid"])
+    expect(lines.filter(line => line.pattern === "dashed").length).toBeGreaterThanOrEqual(2)
+  })
+
+  it("paints a two-way road of one lane not at all, and a one-way street with edges only", () => {
+    expect(RoadMarkings.plan({ ...base, widthM: 6, lanes: 1, direction: "both" })).toEqual([])
+    const oneWay = RoadMarkings.plan({ ...base, widthM: 6, lanes: 1, direction: "forward", speedKmh: 30 })
+    expect(oneWay.filter(line => line.pattern === "dashed")).toEqual([])
+    expect(oneWay).toHaveLength(2)
+  })
+})
+
+describe("RoadMarkings.byBends", () => {
+  it("keeps a straight in one run and marks the tight bend of a way as another", () => {
+    const straight = Array.from({ length: 9 }, (_, i) => ({ x: i * 40, z: 0 }))
+    expect(RoadMarkings.byBends(straight)).toEqual([{ path: straight, bend: false }])
+    // A way that turns a quarter in thirty metres has a radius of a few tens of metres.
+    const bent = [{ x: 0, z: 0 }, { x: 400, z: 0 }, { x: 430, z: 20 }, { x: 440, z: 60 }, { x: 440, z: 560 }]
+    const runs = RoadMarkings.byBends(bent)
+    expect(runs.some(run => run.bend)).toBe(true)
+    expect(runs.some(run => !run.bend)).toBe(true)
+  })
+})
+
+describe("RoadMarkings.barriers: the median between two carriageways", () => {
+  const way = (id: string, direction: "forward" | "backward", northM: number, kind: RoadWay["kind"] = "motorway"): RoadWay => ({
+    id, surface: "paved", widthM: 10, kind, lanes: 2, direction,
+    points: [{ lat: LAT + northM / 111320, lng: LNG - 100 / 72850 }, { lat: LAT + northM / 111320, lng: LNG + 100 / 72850 }]
+  })
+  // Two carriageways of a motorway: one goes east (forward along its points), the other west (backward along its points, which run east).
+  const pair = (gapM: number) => [way("a", "forward", 0), way("b", "backward", gapM)]
+
+  it("runs a barrier midway between two carriageways that go opposite ways, drawn once", () => {
+    const paths = RoadMarkings.barriers(pair(20), LAT, LNG)
+    expect(paths).toHaveLength(1)
+    // Z is the negated north: the middle of two carriageways 20 m apart is 10 m north of the first.
+    for (const point of paths[0]) expect(point.z).toBeCloseTo(-10, 1)
+    expect(Math.abs(paths[0].at(-1)!.x - paths[0][0].x)).toBeGreaterThan(100)
+  })
+
+  it("makes none between two carriageways that go the same way, or that stand too far apart or too close", () => {
+    expect(RoadMarkings.barriers([way("a", "forward", 0), way("b", "forward", 20)], LAT, LNG)).toEqual([])
+    expect(RoadMarkings.barriers(pair(80), LAT, LNG)).toEqual([])
+    expect(RoadMarkings.barriers(pair(3), LAT, LNG)).toEqual([])
+  })
+
+  it("makes none for roads that are not of two carriageways", () => {
+    expect(RoadMarkings.barriers([way("a", "forward", 0, "road"), way("b", "backward", 20, "road")], LAT, LNG)).toEqual([])
+  })
+
+  it("builds a prism along each path: four points a ring, three faces between rings", () => {
+    const geometry = RoadMarkings.barrierGeometry([[{ x: 0, z: 0 }, { x: 10, z: 0 }, { x: 20, z: 0 }]], () => 5)
+    expect(geometry.positions.length / 3).toBe(12)
+    expect(geometry.indices.length / 3).toBe(2 * 3 * 2)
+    const heights = geometry.positions.filter((_, i) => i % 3 === 1)
+    expect(Math.min(...heights)).toBe(5)
+    expect(Math.max(...heights)).toBeCloseTo(5 + RoadMarkings.BARRIER_HEIGHT_M, 6)
+  })
+})
+
 describe("RoadSystem and the paint of its roads", () => {
   const groups = (system: RoadSystem) => (system.group.children.find(child => child.name === "roads surveyed")?.children ?? []) as Mesh<BufferGeometry>[]
   const names = (system: RoadSystem) => groups(system).map(mesh => mesh.name)

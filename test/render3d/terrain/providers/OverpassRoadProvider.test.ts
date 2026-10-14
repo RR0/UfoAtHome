@@ -45,6 +45,34 @@ describe("OverpassRoadProvider", () => {
     expect((await provider.getRoads(BOUNDS)).map(road => road.widthM)).toEqual([6.5, 14, 5.5])
   })
 
+  it("reads how a road is used, for its paint: its kind, lanes, direction and speed, only where OSM says", async () => {
+    const provider = new OverpassRoadProvider({
+      endpoints: [ENDPOINT],
+      fetchImpl: answering({ elements: [
+        way(1, { highway: "motorway", lanes: "3", maxspeed: "130" }),
+        way(2, { highway: "motorway", oneway: "-1", lanes: "2" }),
+        way(3, { highway: "primary", lanes: "2", oneway: "no", maxspeed: "80" }),
+        way(4, { highway: "trunk", lanes: "2", oneway: "yes" }),
+        way(5, { highway: "residential", junction: "roundabout" }),
+        way(6, { highway: "motorway_link" }),
+        way(7, { highway: "residential" })
+      ] })
+    })
+    const roads = await provider.getRoads(BOUNDS)
+    // A motorway is one-way where it does not say, and one-way against the points where it says -1.
+    expect(roads[0]).toMatchObject({ kind: "motorway", lanes: 3, direction: "forward", speedKmh: 130 })
+    expect(roads[1]).toMatchObject({ kind: "motorway", lanes: 2, direction: "backward" })
+    expect(roads[2]).toMatchObject({ kind: "road", lanes: 2, direction: "both", speedKmh: 80 })
+    expect(roads[3]).toMatchObject({ kind: "dual", lanes: 2, direction: "forward" })
+    expect(roads[4]).toMatchObject({ kind: "roundabout", direction: "forward" })
+    expect(roads[5].kind).toBe("slip")
+    // A street that says nothing of its use has a kind and no more: it is painted as any wide road.
+    expect(roads[6]).toMatchObject({ kind: "road" })
+    expect(roads[6].lanes).toBeUndefined()
+    expect(roads[6].direction).toBeUndefined()
+    expect(roads[6].speedKmh).toBeUndefined()
+  })
+
   it("reads a track as unsealed even when nothing says so — which is the road Zamora turned onto", async () => {
     const provider = new OverpassRoadProvider({
       endpoints: [ENDPOINT],

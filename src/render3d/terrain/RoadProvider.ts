@@ -21,9 +21,26 @@ export interface RoadWay {
    * known", which draws none (a map that does not say is not a map that says there are none, but a pavement drawn along a field is worse).
    */
   urban?: boolean
-  /** West to east, north to south, in no particular order: a road has no direction here. */
+  /**
+   * What kind of road it is, where the survey says (see RoadMarkings): a carriageway of a motorway or of a road with two, a road, a roundabout, a slip road.
+   * Absent is not known, which draws the paint of any wide road.
+   */
+  kind?: RoadKind
+  /** How many lanes it has, where the survey says: of the carriageway for a one-way way, of the road for a two-way one. */
+  lanes?: number
+  /**
+   * Which way the traffic goes along it, where the survey says: "both" for a two-way road, "forward" for one-way with the order of `points`, "backward" against it.
+   * Absent is not known, and a way with no direction is drawn the same either way.
+   */
+  direction?: "both" | "forward" | "backward"
+  /** The usual speed of the traffic on it, km/h, where the survey says. */
+  speedKmh?: number
+  /** In the order the survey drew it, which is the way of travel for a way that says "forward" and the opposite for "backward". */
   points: { lat: number; lng: number }[]
 }
+
+/** The kinds of road the paint tells apart. */
+export type RoadKind = "motorway" | "dual" | "road" | "roundabout" | "slip"
 
 /**
  * Where the roads under a scene come from.

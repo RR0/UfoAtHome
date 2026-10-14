@@ -200,7 +200,7 @@ export class IgnGeoplatform {
     // Not the footpaths and the stairs (a town's outnumber its roads five to one), and not the tunnels, which are under the ground.
     return this.features("troncon_de_route",
       `${within} AND nature<>'Sentier' AND nature<>'Escalier' AND position_par_rapport_au_sol>='0'`,
-      "cleabs,nature,largeur_de_chaussee,urbain,nom_voie_ban_gauche,nom_voie_ban_droite,cpx_toponyme_route_nommee,geometrie", 3000)
+      "cleabs,nature,largeur_de_chaussee,nombre_de_voies,sens_de_circulation,vitesse_moyenne_vl,urbain,nom_voie_ban_gauche,nom_voie_ban_droite,cpx_toponyme_route_nommee,geometrie", 3000)
   }
 
   private async raster(centre: { lat: number, lng: number }, radiusM: number, size: number, layer: string): Promise<GeoTiffRaster> {
