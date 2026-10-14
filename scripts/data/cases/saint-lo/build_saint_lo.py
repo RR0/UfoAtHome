@@ -29,37 +29,43 @@ import math
 import os
 import pathlib
 
-# A variant for trying another start without touching the published file: START_AZ=300 OUT_NAME=observer-saint-lo-wnw.json (see the call sheet of 2026-10-13,
-# where he says it came from the west-north-west rather than the north).
-START_AZ = float(os.environ.get("START_AZ", "0"))
+# A variant for trying another start without touching the published file: START_AZ=300 OUT_NAME=observer-saint-lo-wnw.json (the call sheet of 2026-10-13 had
+# west-north-west; in the call itself he said north-north-east, about 25 degrees east of north, and will check with a compass: see ZENITH_MS below).
+START_AZ = float(os.environ.get("START_AZ", "25"))
 OUT = pathlib.Path("public/demo-data") / os.environ.get("OUT_NAME", "observer-saint-lo.json")
 SURROUNDINGS = pathlib.Path(__file__).with_name("surroundings.json")
 
 LAT, LNG = 49.104890, -1.075382       # the exact spot where he stood, a Google Maps link he sent (2026-10-12)
-DURATION_MS = 5500
+DURATION_MS = 5000                     # call of 2026-10-13: "4 secondes à partir du zénith [...] 4,5, 5 secondes maximum"
 STEP_MS = 25
 EYE_LAG_S = 0.15
-SPIRAL_FROM_MS = 4800
-ZENITH_MS = 1500                       # 4 s seen from the zenith to the south, "on peut ajouter une à 2 secondes" before, 6 s at most
-START_ALT = 20.0                       # "mes yeux l'ont perçu aux alentours des 20 degrés"
-UP_SPEED = 45.0                        # degrees per second up to the zenith: 67 degrees in 1.5 s
+SPIRAL_FROM_MS = 4300
+ZENITH_MS = 500                        # call of 2026-10-13: first caught in the periphery, "dans les 500 millisecondes" he is at the zenith circle, when his eyes get there
+START_ALT = 30.0                       # call: "20-30 degrés", "trois points max" (a fist at arm's length is 10 degrees)
+UP_SPEED = 120.0                       # degrees per second up to the zenith: 60 degrees in 0.5 s
 SPIRAL_ALT = 15.0                      # the spiral starts "juste au-dessus de l'horizon" (the tree tops)
 HEAD_DEPTH, ACROSS = 1.5, 3.0          # degrees at the zenith: along the motion, across it
 VIBRATION_FROM_MS = 2300
-VIBRATION_HZ = 5.0
+VIBRATION_HZ = 10.0                    # call: "au moins une dizaine de fois" a second
+VIBRATION_LASTS_MS = 1200              # call: about a second, strong at the start, gradually less visible
 
 # Turns, as (from ms, to ms, degrees, +1 left / -1 right as seen on the sky).
 # He gave them "par rapport à l'engin" (he is a drone pilot): the craft's left is, on the sky seen from below, to the right.
 FROM_THE_CRAFT = -1
 FROM_THE_CRAFT_DEFAULT = -1
-TURN_1 = (1700, 2300, 15.0, +FROM_THE_CRAFT)
-TURN_2 = (2300, 4000, 25.0, -FROM_THE_CRAFT)
-TURN_3_FROM, TURN_3_TO = 4200, 4800
+# Call of 2026-10-13: the first, to the left, starts about 500 ms after the zenith and takes about a second; the second, to the right (25), follows after a
+# short straight line; the last, to the left, is "5 degrees, 5-10 max".
+TURN_1 = (1000, 2000, 15.0, +FROM_THE_CRAFT)
+TURN_2 = (2300, 3700, 25.0, -FROM_THE_CRAFT)
+TURN_3_FROM, TURN_3_TO = 3900, 4300
+TURN_3_MIN, TURN_3_MAX = 5, 10
 SPIRAL_SIGN = 1                        # +1 clockwise on the sky as he says; -1 the other way
-SPIRAL_TURNS = 2
-SPIRAL_RADIUS_DEG = 0.35
+SPIRAL_TURNS = 0.94                    # call: a roll of "340 degrés, et les 20 degrés qui manquent, je ne les ai pas vus" (behind the trees)
+SPIRAL_ROLL_DEG = 340.0
+SPIRAL_RADIUS_DEG = 2.2                # call: "4-5 degrés max" across, 100 m across for 50 m of radius: a very wide spiral that then narrows
+SPIRAL_SHRINK = 0.5
 VIBRATION_AMP_DEG = 0.35
-GAZE_AZ, GAZE_PITCH = 250.0, 45.0      # where he looked before it caught his eye: "légèrement sur la gauche (Ouest Ouest-Sud-Ouest)"
+GAZE_AZ, GAZE_PITCH = 110.0, 10.0      # call: he looked "est, un peu sud-est, mais légèrement", at the horizon (his friend, west)
 REACTION_MS = 500
 BANK_DEG = 20.0
 TURN_3_DEG_FIXED = None                # None: solved, so that it ends due south
@@ -83,6 +89,7 @@ if _P:
     SPIRAL_SIGN = 1 if _P.get("spiralSense", "cw") == "cw" else -1
     SPIRAL_TURNS = float(_P.get("spiralTurns", SPIRAL_TURNS))
     SPIRAL_RADIUS_DEG = float(_P.get("spiralRadiusDeg", SPIRAL_RADIUS_DEG))
+    SPIRAL_ROLL_DEG = float(_P.get("spiralRollDeg", SPIRAL_ROLL_DEG))
     GAZE_AZ = float(_P.get("gazeAz", GAZE_AZ))
     GAZE_PITCH = float(_P.get("gazePitch", GAZE_PITCH))
     REACTION_MS = int(_P.get("reactionMs", REACTION_MS))
@@ -176,8 +183,8 @@ def solve_path():
     turn went. Taken so that it is at the tree tops (SPIRAL_ALT) at the start of the spiral, and due south."""
     best = None
     # Redrawn live while he talks, the search is coarser (a few tenths of a degree a second and six degrees of turn): the published recording keeps the fine one.
-    step, iterations = (6, 16) if _P else (2, 24)
-    for turn_3 in ([TURN_3_DEG_FIXED] if TURN_3_DEG_FIXED is not None else range(0, 91, step)):
+    step, iterations = (5, 16) if _P else (1, 24)
+    for turn_3 in ([TURN_3_DEG_FIXED] if TURN_3_DEG_FIXED is not None else range(TURN_3_MIN, TURN_3_MAX + 1, step)):
         lo, hi = 5.0, 80.0
         for _ in range(iterations):
             mid = (lo + hi) / 2
@@ -274,14 +281,14 @@ def roll_deg(t_ms):
     if t_ms < SPIRAL_FROM_MS:
         return BANK_DEG + (90.0 - BANK_DEG) * smooth((t_ms - TURN_3_FROM) / (SPIRAL_FROM_MS - TURN_3_FROM))   # edge-on: "une ligne lumineuse"
     k = (t_ms - SPIRAL_FROM_MS) / (DURATION_MS - SPIRAL_FROM_MS)
-    return 90.0 + SPIRAL_SIGN * 450.0 * k                        # barrel roll, ending head down
+    return 90.0 + SPIRAL_SIGN * SPIRAL_ROLL_DEG * k              # barrel roll: 340 degrees, the last 20 are behind the trees
 
 
 def spiral_offset(t_ms):
-    """Screen offset of the spiral at a moment, clockwise, two turns, a little more than the full Moon across."""
+    """Screen offset of the spiral at a moment, clockwise, a bit less than one turn, 4 to 5 degrees across at first, then narrowing."""
     k = (t_ms - SPIRAL_FROM_MS) / (DURATION_MS - SPIRAL_FROM_MS)
     k = max(0.0, k)
-    radius = deg_tan(SPIRAL_RADIUS_DEG) * smooth(k * 4)
+    radius = deg_tan(SPIRAL_RADIUS_DEG) * smooth(k * 4) * (1.0 - SPIRAL_SHRINK * smooth(k))      # "large puis se rétrécit"
     phase = -SPIRAL_SIGN * 2 * math.pi * SPIRAL_TURNS * k
     return radius * (math.cos(phase) - 1), radius * math.sin(phase)
 
@@ -298,7 +305,7 @@ def frame(t_ms):
     mx, my = mx / n, my / n
     f = size_factor(alt)
     if VIBRATION_FROM_MS <= t_ms < SPIRAL_FROM_MS:
-        ramp = smooth((t_ms - VIBRATION_FROM_MS) / 300.0)
+        ramp = smooth((t_ms - VIBRATION_FROM_MS) / 300.0) * max(0.0, 1.0 - (t_ms - VIBRATION_FROM_MS) / VIBRATION_LASTS_MS)
         sideways = VIBRATION_AMP_DEG * max(f, 0.4) * ramp * math.sin(2 * math.pi * VIBRATION_HZ * t_ms / 1000.0)
         sx += deg_tan(sideways) * (-my)
         sy += deg_tan(sideways) * mx
@@ -410,10 +417,10 @@ def observer_track():
         heading, pitch = eye(t)
         keys.append({"t": t, "pose": {"lat": LAT, "lng": LNG, "elevationM": 0,
                                       "headingDeg": round(heading, 2), "pitchDeg": round(pitch, 2), "fovDeg": 60}})
-    keys[0]["pose"]["headingDeg"] = stated(250, "derived",
-        "\"je regardais légèrement sur la gauche (Ouest Ouest-Sud-Ouest)\"")
-    keys[0]["pose"]["pitchDeg"] = stated(45, "assumed",
-        "he does not say how high he looked before; his eye was caught by a movement in the periphery")
+    keys[0]["pose"]["headingDeg"] = stated(GAZE_AZ, "stated",
+        "call of 2026-10-13: \"je regardais [...] est, sud-est, mais légèrement\" (the written reply said west-south-west; his friend was the one looking west)")
+    keys[0]["pose"]["pitchDeg"] = stated(GAZE_PITCH, "stated",
+        "call of 2026-10-13: he looked at the horizon, \"10 degrés\"; it was the movement that took his eyes up")
     return {"keyframes": keys}
 
 
@@ -467,12 +474,12 @@ def build():
         "version": 1,
         "id": "2026-08-11-SaintLo",
         "tags": ["aerial observation"],
+        "summaryTime": 1.5,                  # the card of a shared link: the wing wide, banked, and followed by the eye (the first moment is a small light off to the side)
         "time": {"year": 2026, "month": 8, "day": 11, "hour": 2, "minute": 30, "raw": "2026-08-11T02:30~"},
         "utcOffsetHours": stated(2, "derived", "Central European Summer Time on 2026-08-11"),
         "timeZone": "Europe/Paris",
-        "durationSeconds": stated(5.5, "derived",
-            "\"le phénomène a duré maximum 6 secondes. J'estime l'avoir observé directement pendant 4 secondes, on peut ajouter une à 2 secondes pour l'entrée dans mon champ de vision\": "
-            "4 s from the zenith to the southern horizon plus about 1.5 s before, in the corner of his eye"),
+        "durationSeconds": stated(DURATION_MS / 1000, "stated",
+            "call of 2026-10-13: \"4 secondes à partir du zénith\" (his written reply: 6 s at most), \"4,5, 5 secondes maximum\" in all, the first half second in the corner of his eye"),
         "place": [stated({"lat": LAT, "lng": LNG, "name": "Parc du Musée du Bocage normand (ferme de Boisjugan), Saint-Lô, Manche, France"},
                          "stated",
                          "the exact spot he stood on, from the Google Maps link he sent on 2026-10-12 "
@@ -480,7 +487,7 @@ def build():
         "observer": {"title": "Q. B."},
         "account": {
             "source": stated("questionnaire", "stated", "he answered in writing, on the mailing list, the questions put to him"),
-            "followedUp": stated(True, "stated", "questions put by J. Beau and other list members; he corrected the first two versions of this recording on 2026-10-12; his drawing is still to come"),
+            "followedUp": stated(True, "stated", "questions put by J. Beau and other list members; he corrected the first two versions of this recording on 2026-10-12, then went through the values in a video call on 2026-10-13; his drawing and photographs are still to come"),
         },
         "sources": [
             {"title": "Re: [sceau_archives_ovni] Encore un.evenement", "authors": ["Q. B."],
@@ -489,14 +496,16 @@ def build():
              "publication": {"publisher": "Liste de diffusion SCEAU (sceau_archives_ovni@framalistes.org)", "time": "2026-10-12"}},
             {"title": "Re: [sceau_archives_ovni] Encore un.evenement (the exact spot, and what he meant by left and right)", "authors": ["Q. B."],
              "publication": {"publisher": "Liste de diffusion SCEAU (sceau_archives_ovni@framalistes.org)", "time": "2026-10-12"}},
+            {"title": "Visioconférence de l'enquêteur avec Q. B.", "authors": ["Q. B."],
+             "publication": {"publisher": "Appel vidéo", "time": "2026-10-13"}},
         ] + surveys(),
         "description": {
             "fr": (
                 "Nuit du 11 août 2026, entre 1 h et 3 h (« vers 2 h 30 »), veillée d'observation avec un ami dans le parc du "
                 "Musée du Bocage normand, à Saint-Lô. Ciel complètement dégagé, pas de Lune, quelques étoiles filantes, des "
                 "satellites et des avions avant et après, rien dans les minutes qui entourent.\n\n"
-                "Je regardais vers l'ouest-sud-ouest quand mon regard a capté un mouvement dans ma vision périphérique, venant "
-                "du nord. Je l'ai aperçu vers 20° au-dessus de l'horizon, une petite lumière, comme une étoile filante qui "
+                "Je regardais vers l'est, un peu sud-est, à l'horizon, quand mon regard a capté un mouvement dans ma vision périphérique, venant "
+                "du nord-nord-est (environ 25° à l'est du nord). Je l'ai aperçu vers 20 à 30° au-dessus de l'horizon, une petite lumière, comme une étoile filante qui "
                 "grossissait ; le temps de bouger les yeux (environ 500 ms, mon temps de réaction), elle était déjà au zénith, "
                 "avec sa forme large. Ensuite la trajectoire est devenue très erratique : un premier virage à gauche d'environ "
                 "15°, qui finit en sortant du zénith, puis un long virage à droite d'environ 25°, l'engin se cambrant dans le "
@@ -504,9 +513,9 @@ def build():
                 "ceux de l'engin, pas les miens). Il perdait de l'altitude par ces virages en 3D. Dans le second, il "
                 "s'est mis à vibrer légèrement, comme une voile dans le vent, et j'ai vu des étoiles au travers. Près de "
                 "l'horizon, ce n'était plus qu'une ligne lumineuse horizontale ; il a alors amorcé une spirale dans le sens "
-                "horaire, d'un rayon un peu plus grand que la pleine Lune, et est passé derrière la cime des arbres, la tête à "
-                "l'envers, en tonneau. Le phénomène a duré 6 secondes au plus : environ 4 vues directement, du zénith à "
-                "l'horizon sud, plus 1 à 2 pour son entrée dans mon champ de vision, sans aucun bruit.\n\n"
+                "horaire, large (4 à 5° de diamètre) puis se resserrant : un tonneau de presque 340°, dont je n'ai pas vu les 20° "
+                "manquants, derrière la cime des arbres. Le phénomène a duré 5 secondes au plus : 4 vues directement, du zénith à "
+                "l'horizon sud, plus une demi-seconde à une seconde pour son entrée dans mon champ de vision, sans aucun bruit.\n\n"
                 "Une « demi-lune » blanche, translucide, au bord avant bombé et net, une aile volante assez fine : une pièce et "
                 "demie de 1 € à bout de bras au plus près, beaucoup plus petite que la Lune, un peu moins lumineuse qu'elle. Large "
                 "(20 à 30 m, estimait-il) mais courte (10 à 15 m) : la partie arrière ne fait qu'un cinquième de la largeur, "
@@ -517,17 +526,17 @@ def build():
                 "Night of 11 August 2026, between 1 and 3 a.m. (\"about 2:30\"), an observing evening with a friend in the "
                 "park of the Musée du Bocage normand, in Saint-Lô. Completely clear sky, no Moon, a few shooting stars, "
                 "satellites and aircraft before and after, nothing in the minutes around it.\n\n"
-                "I was looking west-south-west when my eye caught a movement in my peripheral vision, coming from the north. "
-                "I first caught it at about 20 degrees above the horizon, a small light like a shooting star that grew; by "
+                "I was looking east, a little south-east, at the horizon, when my eye caught a movement in my peripheral vision, coming from the north-north-east "
+                "(about 25 degrees east of north). I first caught it at about 20 to 30 degrees above the horizon, a small light like a shooting star that grew; by "
                 "the time my eyes moved (about 500 ms, my reaction time) it was already at the zenith, with its wide shape. "
                 "Then the trajectory became very erratic: a first turn to the left of about 15 degrees, ending as it left the "
                 "zenith, then a long turn to the right of about 25 degrees, the craft arching into the turn, then a last big "
                 "turn to the left, less visible as it lined up with my view (left and right being the craft's, not mine). It "
                 "lost height through these turns, in 3D. In the second one it started "
                 "to vibrate slightly, like a sail in the wind, and I saw stars through it. Near the horizon it was no more "
-                "than a horizontal line of light; it then began a clockwise spiral, a little wider than the full Moon, and "
-                "went behind the tops of the trees upside down, rolling. The phenomenon lasted 6 seconds at the very most: "
-                "about 4 seen directly, from the zenith to the southern horizon, plus 1 to 2 for it entering my field of view, "
+                "than a horizontal line of light; it then began a clockwise spiral, wide (4 to 5 degrees across) and then narrowing: a roll of nearly 340 degrees, the last 20 of which I did not see, "
+                "behind the tops of the trees. The phenomenon lasted 5 seconds at the very most: "
+                "4 seen directly, from the zenith to the southern horizon, plus half a second to a second for it entering my field of view, "
                 "without any sound.\n\n"
                 "A white, translucent \"half-moon\" with a convex, sharp front edge, a rather thin flying wing: one and a "
                 "half 1 euro coins at arm's length at its closest, much smaller than the Moon, a little less bright than it. "
@@ -548,13 +557,13 @@ def build():
         "soundTrack": {"keyframes": [{"t": 0, "sound": {"kind": "none"}}]},
         "decor": surroundings(),
         "milestones": [
-            {"t": 0, "label": "A", "note": tr("Aperçu du coin de l'œil vers 20°, venant du nord : une petite lumière qui grossit",
-                                               "Caught in the corner of the eye at about 20 degrees, from the north: a small light that grows")},
+            {"t": 0, "label": "A", "note": tr("Aperçu du coin de l'œil vers 20-30°, venant du nord-nord-est : une petite lumière qui grossit",
+                                               "Caught in the corner of the eye at about 20-30 degrees, from the north-north-east: a small light that grows")},
             {"t": ZENITH_MS, "label": "B", "note": tr("Il est au zénith quand il le fixe, avec sa forme large", "At the zenith when he fixes it, with its wide shape")},
-            {"t": TURN_1[1], "label": "C", "note": tr("Premier virage à gauche de l'engin (15°), il sort du zénith", "First turn to the craft's left (15 degrees), it leaves the zenith")},
+            {"t": TURN_1[1], "label": "C", "note": tr("Premier virage à gauche de l'engin (15°, environ 1 s), il sort du zénith", "First turn to the craft's left (15 degrees, about 1 s), it leaves the zenith")},
             {"t": TURN_2[1], "label": "D", "note": tr("Long virage à droite de l'engin (25°), il vibre, des étoiles au travers", "Long turn to the craft's right (25 degrees), it vibrates, stars seen through it")},
-            {"t": SPIRAL_FROM_MS, "label": "E", "note": tr("Une ligne lumineuse, puis la spirale horaire", "A line of light, then the clockwise spiral")},
-            {"t": DURATION_MS, "label": "F", "note": tr("Derrière la cime des arbres, la tête à l'envers", "Behind the tree tops, upside down")},
+            {"t": SPIRAL_FROM_MS, "label": "E", "note": tr("Dernier virage à gauche (5-10°), une ligne lumineuse, puis la spirale horaire", "Last turn to the left (5-10 degrees), a line of light, then the clockwise spiral")},
+            {"t": DURATION_MS, "label": "F", "note": tr("Tonneau de 340° : derrière la cime des arbres, presque à l'endroit", "Barrel roll of 340 degrees: behind the tree tops, almost upright again")},
         ],
     }
 
