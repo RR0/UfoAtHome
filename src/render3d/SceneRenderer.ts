@@ -5224,9 +5224,9 @@ export class SceneRenderer {
    * Finds which of the interpretation's bodies (a craft, a being, a person) is under the pointer,
    * by its `id` — the nearest within a small angle of it, or nothing.
    *
-   * An angular nearest, as for a star, rather than a raycast on the mesh: a figure a hundred metres
-   * off is a few pixels, impossible to point at exactly. And hidden by the decor in front of it, as
-   * it is hidden in the picture: a being behind a hedge is not what the pointer is over.
+   * An angular nearest for what is a few pixels across, as for a star, rather than a raycast on the mesh: a figure a hundred metres
+   * off is impossible to point at exactly. What is wider than the pointer's reach is pointed at on its own mesh, through its empty
+   * parts. And hidden by the decor in front of it, as it is hidden in the picture: a being behind a hedge is not what the pointer is over.
    */
   pickInterpretationBodyAt(ndcX: number, ndcY: number): string | undefined {
     const holders = this.bodySystem.group.children.filter(holder => holder.visible && holder.name.startsWith("body:"))
@@ -5254,9 +5254,15 @@ export class SceneRenderer {
       // Hidden: something of the decor is nearer along this very ray than the body's near side.
       if (blocker !== undefined && blocker < distanceM - radiusM) continue
       const angle = Math.acos(Math.min(1, toBody.normalize().dot(aim)))
-      const reach = Math.max(fieldRad, Math.atan(radiusM / distanceM))
-      if (angle <= reach && reach < bestReach) {
-        bestReach = reach
+      const size = Math.atan(radiusM / distanceM)
+      // A body wider on the picture than the pointer's reach is pointed at where it IS: its box and the circle round it cover the empty
+      // sky beside a triangle, which hid an aircraft standing behind it. A smaller one is a few pixels, and is found by nearness.
+      if (size > fieldRad) {
+        const hit = this.raycaster.intersectObject(holder, true)[0]
+        if (!hit || (blocker !== undefined && blocker < hit.distance)) continue
+      } else if (angle > fieldRad) continue
+      if (size < bestReach) {
+        bestReach = size
         best = holder.name.slice("body:".length)
       }
     }
