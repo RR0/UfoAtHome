@@ -22,9 +22,14 @@ import { fractionWithinBounds } from "./TileMath.js"
  *
  * Going finer is worth doing where a finer SOURCE exists (USGS 3DEP publishes 1 m for the United
  * States), not by interpolating this one more densely.
+ *
+ * Which is how it is done: this is only what the mesh ASKS FOR. A source that holds a finer ground (the IGN's laser, a metre to the pixel, in France)
+ * answers with a finer grid, and the mesh is as fine as the grid it gets, whatever its size (square, with an odd number of vertices a side).
+ * A road on an embankment is thirty metres across, and a vertex every 28 m put the observer's road 2 m under its real height on average, buckling along it.
  */
 const TERRAIN_SEGMENTS = 64
-const GRID_SIZE = TERRAIN_SEGMENTS + 1 // 65 — odd, so the center vertex lands exactly on the observer
+/** What the mesh asks its source for: odd, so the center vertex lands exactly on the observer. A source with a finer ground answers with a finer grid (see below). */
+const ASKED_GRID_SIZE = TERRAIN_SEGMENTS + 1 // 65
 /**
  * The most texels the ground photograph may hold on a side — a ceiling, not an order: the provider
  * gives what its tiles really carry and no more (see fetchImageryRaster).
@@ -98,32 +103,38 @@ export async function buildTerrainMesh(
   const fadeEndM = radiusM
   const fullOpacityM = radiusM * FULL_OPACITY_FRACTION
   const bounds = boundsAroundObserver(observerLat, observerLng, fadeEndM)
-  const resolution = { width: GRID_SIZE, height: GRID_SIZE }
+  const resolution = { width: ASKED_GRID_SIZE, height: ASKED_GRID_SIZE }
   const [elevationGrid, imageryTexture] = await Promise.all([
     providers.elevation.getElevationGrid(bounds, resolution),
     providers.imagery.getImageryTexture(bounds, { width: IMAGERY_RESOLUTION, height: IMAGERY_RESOLUTION })
   ])
 
-  const centerIndex = Math.floor(GRID_SIZE / 2)
-  const observerElevation = elevationGrid.heights[centerIndex * GRID_SIZE + centerIndex]
+  // The grid the source answered with, which is the one it asked for unless the source holds a finer ground.
+  if (elevationGrid.width !== elevationGrid.height || elevationGrid.width < 3 || elevationGrid.heights.length !== elevationGrid.width * elevationGrid.height) {
+    throw new Error("The ground came as a grid that is not square")
+  }
+  const gridSize = elevationGrid.width
+  const segments = gridSize - 1
+  const centerIndex = Math.floor(gridSize / 2)
+  const observerElevation = elevationGrid.heights[centerIndex * gridSize + centerIndex]
 
-  const positions = new Float32Array(GRID_SIZE * GRID_SIZE * 3)
-  const uvs = new Float32Array(GRID_SIZE * GRID_SIZE * 2)
-  const colors = new Float32Array(GRID_SIZE * GRID_SIZE * 4)
+  const positions = new Float32Array(gridSize * gridSize * 3)
+  const uvs = new Float32Array(gridSize * gridSize * 2)
+  const colors = new Float32Array(gridSize * gridSize * 4)
 
-  for (let row = 0; row < GRID_SIZE; row++) {
-    const tRow = row / (GRID_SIZE - 1) // 0 = north edge, 1 = south edge
+  for (let row = 0; row < gridSize; row++) {
+    const tRow = row / (gridSize - 1) // 0 = north edge, 1 = south edge
     const lat = bounds.north + (bounds.south - bounds.north) * tRow
-    for (let col = 0; col < GRID_SIZE; col++) {
-      const tCol = col / (GRID_SIZE - 1) // 0 = west edge, 1 = east edge
+    for (let col = 0; col < gridSize; col++) {
+      const tCol = col / (gridSize - 1) // 0 = west edge, 1 = east edge
       const lng = bounds.west + (bounds.east - bounds.west) * tCol
       const { x, z } = geoToLocalMeters(lat, lng, observerLat, observerLng)
-      const elevation = elevationGrid.heights[row * GRID_SIZE + col]
+      const elevation = elevationGrid.heights[row * gridSize + col]
       const distance = Math.max(Math.abs(x), Math.abs(z))
       const alpha = 1 - clamp((distance - fullOpacityM) / (fadeEndM - fullOpacityM), 0, 1)
       const y = TERRAIN_BASE_Y + TERRAIN_Y_OFFSET + (elevation - observerElevation)
 
-      const i = row * GRID_SIZE + col
+      const i = row * gridSize + col
       positions[i * 3] = x
       positions[i * 3 + 1] = y
       positions[i * 3 + 2] = z
@@ -151,13 +162,14 @@ export async function buildTerrainMesh(
     }
   }
 
-  const indices = new Uint16Array(TERRAIN_SEGMENTS * TERRAIN_SEGMENTS * 6)
+  // Sixteen bits reach 65535 vertices, which a grid of 257 a side passes.
+  const indices = gridSize * gridSize > 65535 ? new Uint32Array(segments * segments * 6) : new Uint16Array(segments * segments * 6)
   let idx = 0
-  for (let row = 0; row < TERRAIN_SEGMENTS; row++) {
-    for (let col = 0; col < TERRAIN_SEGMENTS; col++) {
-      const a = row * GRID_SIZE + col
+  for (let row = 0; row < segments; row++) {
+    for (let col = 0; col < segments; col++) {
+      const a = row * gridSize + col
       const b = a + 1
-      const c = a + GRID_SIZE
+      const c = a + gridSize
       const d = c + 1
       indices[idx++] = a
       indices[idx++] = c

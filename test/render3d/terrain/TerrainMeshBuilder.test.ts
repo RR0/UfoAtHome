@@ -101,3 +101,51 @@ describe("buildTerrainMesh", () => {
     expect(attribution).toBe("test imagery")
   })
 })
+
+describe("buildTerrainMesh and a source with a finer ground", () => {
+  /** A source that answers with the grid it prefers, whatever size it was asked for: a slope rising 1 m for every vertex, east. */
+  class FinerElevation implements ElevationProvider {
+    asked?: { width: number, height: number }
+
+    constructor(private readonly side: number) {}
+
+    async getElevationGrid(bounds: GeoBounds, resolution: { width: number; height: number }): Promise<ElevationGrid> {
+      this.asked = resolution
+      const heights = new Float32Array(this.side * this.side)
+      for (let row = 0; row < this.side; row++) for (let col = 0; col < this.side; col++) heights[row * this.side + col] = PLATEAU_M + col
+      return { heights, width: this.side, height: this.side, bounds }
+    }
+  }
+
+  it("asks for the mesh it always did, and is as fine as the grid it is given", async () => {
+    const source = new FinerElevation(129)
+    const { mesh } = await buildTerrainMesh(OBSERVER_LAT, OBSERVER_LNG, { elevation: source, imagery: new BlankImagery() })
+    expect(source.asked).toEqual({ width: 65, height: 65 })
+    expect(mesh.geometry.getAttribute("position").count).toBe(129 * 129)
+    expect(mesh.geometry.getIndex()!.count).toBe(128 * 128 * 6)
+  })
+
+  it("keeps the centre vertex on the observer whatever the size of the grid", async () => {
+    const { mesh } = await buildTerrainMesh(OBSERVER_LAT, OBSERVER_LNG, { elevation: new FinerElevation(129), imagery: new BlankImagery() })
+    const position = mesh.geometry.getAttribute("position")
+    const centre = 64 * 129 + 64
+    expect(position.getX(centre)).toBeCloseTo(0, 3)
+    expect(position.getZ(centre)).toBeCloseTo(0, 3)
+    // The ground is taken relative to the observer's: its centre vertex is at the base, the slope rising to the east.
+    expect(position.getY(centre)).toBeCloseTo(0.01, 3)
+    expect(position.getY(centre + 10)).toBeCloseTo(0.01 + 10, 3)
+  })
+
+  it("indexes a grid of more than 65535 vertices with 32 bits, which sixteen cannot reach", async () => {
+    const { mesh } = await buildTerrainMesh(OBSERVER_LAT, OBSERVER_LNG, { elevation: new FinerElevation(257), imagery: new BlankImagery() })
+    const index = mesh.geometry.getIndex()!
+    expect(index.array).toBeInstanceOf(Uint32Array)
+    // The last triangle reaches the last vertex of the grid.
+    expect(Math.max(...Array.from(index.array.slice(-6)))).toBe(257 * 257 - 1)
+  })
+
+  it("refuses a grid that is not square rather than draw it skewed", async () => {
+    const lopsided: ElevationProvider = { getElevationGrid: async (bounds) => ({ heights: new Float32Array(65 * 33), width: 65, height: 33, bounds }) }
+    await expect(buildTerrainMesh(OBSERVER_LAT, OBSERVER_LNG, { elevation: lopsided, imagery: new BlankImagery() })).rejects.toThrow(/square/)
+  })
+})

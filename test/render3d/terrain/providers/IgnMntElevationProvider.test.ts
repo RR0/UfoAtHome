@@ -35,8 +35,8 @@ describe("IgnMntElevationProvider", () => {
     const grid = await new IgnMntElevationProvider({ fetchImpl }).getElevationGrid(SAINT_LO, { width: 5, height: 5 })
     expect(grid.width).toBe(5)
     expect(grid.height).toBe(5)
-    // The west edge of the grid is the edge of the first pixel, half a pixel from its centre: the value there cannot be extrapolated, so it is the first pixel's.
-    expect(grid.heights[0]).toBeCloseTo(100, 3)
+    // The picture reaches past the square by the window of a vertex, so the west edge of the grid stands inside it, at a column further than the first.
+    expect(grid.heights[0]).toBeGreaterThan(100)
     // Heights grow from west to east and do not change from north to south.
     expect(grid.heights[4]).toBeGreaterThan(grid.heights[0])
     expect(grid.heights[4 * 5]).toBeCloseTo(grid.heights[0], 3)
@@ -49,9 +49,16 @@ describe("IgnMntElevationProvider", () => {
     await new IgnMntElevationProvider({ fetchImpl }).getElevationGrid(wide, { width: 65, height: 65 })
     const query = new URL(urls[0]).searchParams
     expect(query.get("LAYERS")).toBe(LASER)
-    expect(query.get("BBOX")).toBe("49.096800,-1.088400,49.113400,-1.062300")
-    // 1850 m at 4 m: 463 pixels, and not a picture a hundred times larger than the mesh it is read into.
-    expect(Number(query.get("HEIGHT"))).toBe(Math.ceil(1847.7 / 4))
+    const [south, west, north, east] = (query.get("BBOX") ?? "").split(",").map(Number)
+    // The square, and a margin round it of the width of a cell of the mesh (28 m, the window a vertex is averaged over): never less than the square.
+    expect(south).toBeLessThan(49.0968)
+    expect(south).toBeGreaterThan(49.0968 - 0.0005)
+    expect(north).toBeGreaterThan(49.1134)
+    expect(west).toBeLessThan(-1.0884)
+    expect(east).toBeGreaterThan(-1.0623)
+    // About 1900 m at four metres a pixel, and not a picture a hundred times larger than the mesh it is read into.
+    expect(Number(query.get("HEIGHT"))).toBeGreaterThan(440)
+    expect(Number(query.get("HEIGHT"))).toBeLessThan(500)
     expect(Number(query.get("WIDTH"))).toBeLessThanOrEqual(700)
   })
 
@@ -97,6 +104,91 @@ describe("IgnMntElevationProvider", () => {
   it("says it cannot answer when the service does not", async () => {
     const { fetchImpl } = serving({ [LASER]: () => 503, [OLDER]: () => 503 })
     await expect(new IgnMntElevationProvider({ fetchImpl }).getElevationGrid(SAINT_LO, { width: 3, height: 3 })).rejects.toThrow(/503/)
+  })
+})
+
+describe("IgnMntElevationProvider and the size of the grid", () => {
+  const MESH = { south: 49.0968, north: 49.1134, west: -1.0884, east: -1.0623 }
+
+  it("answers a mesh with a vertex about every seven metres, the odd count the scene needs", async () => {
+    const { fetchImpl } = serving({ [LASER]: slope })
+    const grid = await new IgnMntElevationProvider({ fetchImpl }).getElevationGrid(MESH, { width: 65, height: 65 })
+    // 1.85 km by 1.9 km at seven metres is more than 256 segments: the most, 257 vertices.
+    expect(grid.width).toBe(257)
+    expect(grid.height).toBe(257)
+    expect(grid.heights.length).toBe(257 * 257)
+  })
+
+  it("is no finer than the square needs, and never coarser than asked", async () => {
+    const { fetchImpl } = serving({ [LASER]: slope })
+    const small = { south: 49.1, north: 49.1009, west: -1.08, east: -1.0788 } // ~100 m
+    const grid = await new IgnMntElevationProvider({ fetchImpl }).getElevationGrid(small, { width: 65, height: 65 })
+    expect(grid.width).toBe(65)
+  })
+
+  it("answers a point or two as asked, with no finer grid than it was asked for", async () => {
+    const { fetchImpl } = serving({ [LASER]: slope })
+    const grid = await new IgnMntElevationProvider({ fetchImpl }).getElevationGrid(MESH, { width: 2, height: 2 })
+    expect(grid.width).toBe(2)
+  })
+})
+
+describe("IgnMntElevationProvider and the bridges", () => {
+  const CLASS = "IGNF_LIDAR-HD_CLASS"
+  const SURFACE = "IGNF_LIDAR-HD_MNS_ELEVATION.ELEVATIONGRIDCOVERAGE.LAMB93"
+  const GROUND = 100
+  const DECK = 108
+
+  /** A service with a flat ground, a surface of the deck's height, and a classification that says "deck" in a band across the picture. */
+  function serveWithDeck(withClasses = true): { fetchImpl: typeof fetch, urls: string[] } {
+    const urls: string[] = []
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      urls.push(String(input))
+      const query = new URL(String(input)).searchParams
+      const layer = query.get("LAYERS")
+      const width = Number(query.get("WIDTH"))
+      const height = Number(query.get("HEIGHT"))
+      const body = (buffer: ArrayBuffer) => ({ ok: true, status: 200, arrayBuffer: async () => buffer }) as Response
+      const band = (x: number) => Math.abs(x - width / 2) < width / 10
+      if (layer === LASER) return body(TiffFixture.floats(width, height, Array.from({ length: width * height }, () => GROUND)))
+      if (layer === SURFACE) return body(TiffFixture.floats(width, height, Array.from({ length: width * height }, () => DECK)))
+      if (layer === CLASS && withClasses) {
+        const values: number[] = []
+        for (let i = 0; i < width * height; i++) values.push(...(band(i % width) ? [240, 240, 0, 255] : [207, 150, 70, 255]))
+        return body(TiffFixture.bytes(width, height, 4, values))
+      }
+      return { ok: false, status: 404 } as Response
+    }) as unknown as typeof fetch
+    return { fetchImpl, urls }
+  }
+
+  it("raises the ground to the deck where the laser saw one, and nowhere else", async () => {
+    const { fetchImpl } = serveWithDeck()
+    // Narrow vertices, the window one pixel: the deck's own height, and the bare earth either side of it.
+    const grid = await new IgnMntElevationProvider({ fetchImpl, maxWindowM: 0 }).getElevationGrid(SAINT_LO, { width: 101, height: 3 })
+    expect(grid.heights[50]).toBeCloseTo(DECK, 3)
+    expect(grid.heights[0]).toBeCloseTo(GROUND, 3)
+    expect(grid.heights[100]).toBeCloseTo(GROUND, 3)
+  })
+
+  it("keeps the bare earth when the classification cannot be had, and asks for the surface only when there is a deck", async () => {
+    const { fetchImpl, urls } = serveWithDeck(false)
+    const grid = await new IgnMntElevationProvider({ fetchImpl }).getElevationGrid(SAINT_LO, { width: 5, height: 5 })
+    expect(Math.max(...grid.heights)).toBeCloseTo(GROUND, 3)
+    expect(urls.some(url => url.includes("MNS"))).toBe(false)
+  })
+})
+
+describe("IgnMntElevationProvider and the vertices of a mesh", () => {
+  it("does not let a narrow feature through or not by where the grid falls: a ridge a pixel wide is averaged over the cell", async () => {
+    // A one-pixel-wide ridge, 10 m high, in every fourth column: a vertex at it alone reads 110, one between reads 100.
+    const ridge = (width: number, height: number): number[] => Array.from({ length: width * height }, (_, i) => (i % width) % 4 === 0 ? 110 : 100)
+    const { fetchImpl } = serving({ [LASER]: ridge })
+    const point = await new IgnMntElevationProvider({ fetchImpl, maxWindowM: 0 }).getElevationGrid(SAINT_LO, { width: 9, height: 3 })
+    const smooth = await new IgnMntElevationProvider({ fetchImpl }).getElevationGrid(SAINT_LO, { width: 9, height: 3 })
+    const spread = (heights: Float32Array) => Math.max(...heights) - Math.min(...heights)
+    expect(spread(point.heights)).toBeGreaterThan(5)
+    expect(spread(smooth.heights)).toBeLessThan(spread(point.heights) / 2)
   })
 })
 
