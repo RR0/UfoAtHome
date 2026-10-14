@@ -35,6 +35,13 @@ export class RoadSystem {
    * surface it is laid on, without standing visibly above it. */
   static readonly LIFT_M = 0.06
   /**
+   * Drawn right AFTER the ground: just over the patch's own order (see SceneRenderer.TERRAIN_RENDER_ORDER, 1) and under the clouds and the compass. A surveyed
+   * road is faint (it is a survey of today), so it is blended with whatever is already in the picture where it lies. Drawn first, as it was with no order at
+   * all, that was the sky behind the ground (bright below the horizon at night), and the ground, a little farther in depth than the ribbon, never covered it
+   * again: the road came out as a glow, brightest where the sky is, hidden in patches where the ground stood over it.
+   */
+  static readonly RENDER_ORDER = 1.05
+  /**
    * The pavements of a street: a strip this wide along each side of the carriageway, raised by a kerb. Drawn for the streets the map says are
    * urban, and where a way is not a side street's mouth (see crossesAnother).
    */
@@ -287,6 +294,7 @@ export class RoadSystem {
     })
     const mesh = new Mesh(geometry, material)
     mesh.name = `roads ${surface}`
+    mesh.renderOrder = RoadSystem.RENDER_ORDER
     mesh.receiveShadow = true
     // A road casts nothing: it IS the ground there, and a shadow map that had it as an occluder
     // would shade the ground with the carriageway's own six centimetres.

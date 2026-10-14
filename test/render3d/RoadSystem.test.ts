@@ -70,6 +70,18 @@ describe("RoadSystem", () => {
     expect(worst).toBeLessThan(0.0)
   })
 
+  it("is drawn right after the ground, so a faint ribbon blends with the ground and not with the sky behind it", () => {
+    // Drawn first, a surveyed road (45% opaque) was blended with the bright sky below the night's horizon, and the ground, a little farther in depth, never
+    // covered it: the road came out as a glow over the ground.
+    const system = new RoadSystem()
+    system.set([straight("a", "paved", 7, 200)], LAT, LNG, () => 0, true)
+    const ribbon = meshes(system)[0]
+    expect(ribbon.renderOrder).toBe(RoadSystem.RENDER_ORDER)
+    // The ground's own order is 1 (SceneRenderer.TERRAIN_RENDER_ORDER), and the clouds' is between it and the compass's, 10.
+    expect(RoadSystem.RENDER_ORDER).toBeGreaterThan(1)
+    expect(RoadSystem.RENDER_ORDER).toBeLessThan(2)
+  })
+
   it("puts a rung at least every STEP_M along a way, however few points the survey gave it", () => {
     const system = new RoadSystem()
     system.set([straight("a", "paved", 7, 200)], LAT, LNG, () => 0, false)
