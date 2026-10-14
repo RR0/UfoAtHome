@@ -1,0 +1,27 @@
+{
+ "id": "Duboc1994",
+ "title": "Duboc",
+ "summary": {
+  "en": "28 January 1994, about 13:14 GMT. At 11,700 m near Coulommiers, the crew of Air France flight AF 3532 sees a dark red-brown disc below and to the left, left behind in two minutes, which turns transparent and vanishes. Replay the captain's account and the co-pilot's.",
+  "fr": "28 janvier 1994, vers 13 h 14 GMT. À 11 700 m près de Coulommiers, l'équipage du vol Air France AF 3532 voit un disque brun-rouge sombre en dessous et à gauche, laissé derrière en deux minutes, qui devient transparent et disparaît. Rejouez le récit du commandant et celui de la copilote.",
+  "es": "28 de enero de 1994, hacia las 13:14 GMT. A 11.700 m cerca de Coulommiers, la tripulación del vuelo Air France AF 3532 ve un disco pardo rojizo oscuro por debajo y a la izquierda, que queda atrás en dos minutos, se vuelve transparente y desaparece. Reproduce el relato del comandante y el de la copiloto.",
+  "it": "28 gennaio 1994, verso le 13:14 GMT. A 11.700 m vicino a Coulommiers, l'equipaggio del volo Air France AF 3532 vede un disco bruno-rosso scuro sotto e a sinistra, lasciato indietro in due minuti, che diventa trasparente e scompare. Riproduci il racconto del comandante e quello della copilota."
+ },
+ "time": "1994-01-28 13:14",
+ "events": [
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "time": "1994-01-28 13:14",
+   "title": "Jean-Charles Duboc",
+   "url": "observer-duboc.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "time": "1994-01-28 13:14",
+   "title": "La copilote",
+   "url": "observer-duboc-copilot.json"
+  }
+ ]
+}

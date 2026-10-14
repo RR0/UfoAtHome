@@ -254,6 +254,20 @@ export class DemoCatalogue {
             es: "Una noche sin Luna en Normandía, hacia las 2:30. Una media luna blanca translúcida, con filamentos tras de sí, cruza todo el cielo de norte a sur en cuatro segundos y termina en una espiral de 720° tras los árboles. Reconstruido a partir de las respuestas escritas del testigo a las preguntas de un investigador; su dibujo está por llegar.",
             it: "Una notte senza Luna in Normandia, verso le 2:30. Una mezzaluna bianca traslucida, con filamenti al seguito, attraversa tutto il cielo da nord a sud in quattro secondi e finisce in una spirale di 720° dietro gli alberi. Ricostruita dalle risposte scritte del testimone alle domande di un investigatore; il suo disegno deve ancora arrivare."
           }
+        },
+        {
+          id: "duboc",
+          src: "/demo-data/observer-duboc.json",
+          // The case, for the player: the captain's account and the co-pilot's, of the same two minutes.
+          playSrc: "/demo-data/case-duboc.json",
+          title: { en: "Duboc, 1994", fr: "Duboc, 1994", es: "Duboc, 1994", it: "Duboc, 1994" },
+          titleIsName: true,
+          blurb: {
+            en: "An Air France A320 at 11,700 m near Coulommiers, 13:14, above a deck of altocumulus. A dark red-brown disc sits motionless below and to the left, is left behind in two minutes, then turns transparent and vanishes. Open it full size to switch to the co-pilot, who saw it keep up with the airliner and change shape.",
+            fr: "Un A320 d'Air France à 11 700 m près de Coulommiers, 13 h 14, au-dessus d'une couche d'altocumulus. Un disque brun-rouge sombre reste immobile en dessous et à gauche, est laissé derrière en deux minutes, puis devient transparent et disparaît. Ouvrez-le en grand pour passer à la copilote, qui l'a vu suivre l'avion et changer de forme.",
+            es: "Un A320 de Air France a 11.700 m cerca de Coulommiers, 13:14, sobre una capa de altocúmulos. Un disco pardo rojizo oscuro permanece inmóvil por debajo y a la izquierda, queda atrás en dos minutos, luego se vuelve transparente y desaparece. Ábrelo a tamaño completo para pasar a la copiloto, que lo vio seguir al avión y cambiar de forma.",
+            it: "Un A320 Air France a 11.700 m vicino a Coulommiers, 13:14, sopra uno strato di altocumuli. Un disco bruno-rosso scuro resta immobile sotto e a sinistra, viene lasciato indietro in due minuti, poi diventa trasparente e scompare. Aprilo a schermo intero per passare alla copilota, che lo vide tenere il passo dell'aereo e cambiare forma."
+          }
         }
       ]
     },

@@ -1,0 +1,313 @@
+#!/usr/bin/env python3
+"""Flight AF 3532 (Airbus A320 F-GFKG, Nice to London), 28 January 1994, about 13:14 GMT, near Coulommiers:
+a dark red-brown disc, motionless below the airliner, seen to the left by the commander and the co-pilot,
+that "dematerialises" once left behind.
+
+Sources (all on rr0.org, dossier science/crypto/ufo/enquete/dossier/Duboc): the two reports the crew wrote for
+Dominique Weinstein (copy to the SEPRA, in Velasco 2004), the UFOCom interview of 1999-11-22 and the SEPRA's
+analysis. Nothing here is measured: it is what the two pilots said, placed on the sky of that day.
+
+What the two accounts give, and what is borrowed:
+
+- The commander (report): flight level 390 (11 700 m), heading 332, ground speed 350 kt (180 m/s), between the
+  VORs BRY and CLM; object to the left at "10 h - 10 h 30" at the start, "8 h - 7 h 30" at the end, apparently
+  motionless, dark red, 200 to 300 m, 25 NM away, 10 500 m high, "1 or 2 minutes"; it becomes transparent and
+  vanishes once behind, without moving.
+- The co-pilot (report): the same flight; object at 10 h, "a variable-geometry" disc / arrow with a sharp then
+  blurred then sharp outline, dark brown, "large", a straight trajectory parallel to the airliner then "a sort of
+  turn" just before disappearing, "2 to 5 minutes"; in the interview she saw it always about at 9 h.
+- Clock positions are read as the SEPRA read them: 10 h is 30 degrees ahead of the left beam (so 60 degrees left of the
+  nose), 8 h is 30 degrees behind it (120 degrees left of the nose). A motionless object seen from 60 to 120 degrees
+  for the 11 nautical miles the airliner flew gives an equilateral triangle: it is at 10 NM abeam, not 25 (the SEPRA's
+  own remark). The recording keeps the angles he gave and borrows that distance only to turn them into a position.
+  Its altitude angle follows from his own 10 500 m against the 11 700 m of the airliner.
+- The angular size is the one in the SEPRA's analysis, half the Moon (15 arcminutes). His 1999 comparison, a thumb at
+  arm's length for 1000 m at 46 km, is not the same size and is in the description, not in the shapes.
+
+Writes public/demo-data/observer-duboc.json and observer-duboc-copilot.json. Run from the repository root:
+    python3 scripts/data/cases/duboc/build_duboc.py
+"""
+import json
+import math
+import pathlib
+
+OUT = pathlib.Path("public/demo-data")
+
+LAT_MID, LNG_MID = 48 + 50.7 / 60, 3 + 0.9 / 60      # "48°50'7 N / 003°00'9 E" in the report: degrees and decimal minutes
+HEADING = 332.0
+SPEED = 350 * 1852 / 3600                            # 350 kt, "VS" of the report: about 180 m/s
+PLANE_M, OBJECT_M = 11700.0, 10500.0
+SIZE_DEG = 0.26                                      # half the Moon (SEPRA)
+STEP_MS = 1000
+
+
+def stated(value, basis, rationale):
+    return {"value": value, "basis": basis, "rationale": rationale}
+
+
+def tr(fr, en):
+    return {"fr": fr, "en": en}
+
+
+def enu(az_deg, dist):
+    a = math.radians(az_deg)
+    return (dist * math.sin(a), dist * math.cos(a))
+
+
+def geo(east, north):
+    """Latitude and longitude of a point (east, north) metres from the middle of the track."""
+    return (LAT_MID + north / 111132.0, LNG_MID + east / (111320.0 * math.cos(math.radians(LAT_MID))))
+
+
+def plane_at(t_s, total_s):
+    e, n = enu(HEADING, SPEED * (t_s - total_s / 2))
+    return e, n
+
+
+def aim_of(target, plane):
+    de, dn = target[0] - plane[0], target[1] - plane[1]
+    horizontal = math.hypot(de, dn)
+    return math.degrees(math.atan2(de, dn)) % 360.0, math.degrees(math.atan2(OBJECT_M - PLANE_M, horizontal))
+
+
+def smooth(x):
+    x = max(0.0, min(1.0, x))
+    return x * x * (3 - 2 * x)
+
+
+def track(total_s, aim_at, lag_s):
+    """The airliner moves; the eye follows the object with a lag; the field is the usual 60 degrees."""
+    keys = []
+    for ms in range(0, int(total_s * 1000) + 1, 2000):
+        t = ms / 1000.0
+        e, n = plane_at(t, total_s)
+        lat, lng = geo(e, n)
+        az, alt = aim_at(max(0.0, t - lag_s))
+        keys.append({"t": ms, "pose": {"lat": round(lat, 6), "lng": round(lng, 6), "elevationM": PLANE_M,
+                                       "headingDeg": round(az, 2), "pitchDeg": round(alt, 2), "fovDeg": 60}})
+    return {"keyframes": keys}
+
+
+def air(t_ms, wind_kt):
+    return {"cloudLayers": [{"id": "altocumulus", "type": "unknown", "baseM": 9800, "thicknessM": 500, "coverage": 0.85,
+                             "sizeM": 3000, "density": 1}],
+            "cloudCover": 0.85, "lowerCloudCover": 0.85, "highCloudCover": 0, "cloudDarkness": 0.1,
+            "relativeHumidity": 0.5, "precipitationType": "none", "precipitationIntensity": 0, "storm": False,
+            "windDirectionDeg": (311 + 180) % 360, "windSpeed": round(wind_kt * 1852 / 3600, 1)}
+
+
+def weather(total_s, wind_kt):
+    return {"keyframes": [{"t": 0, "weather": air(0, wind_kt)}, {"t": int(total_s * 1000), "weather": air(0, wind_kt)}]}
+
+
+def shape_full(sid, kind, title, color, transparency, blur, size, aim, angle=0.0, points=None):
+    body = {"kind": kind, "title": title, "color": color, "transparency": transparency, "brightness": 0, "blur": blur,
+            "haloScale": 0, "angular": {"widthDeg": round(size[0], 3), "heightDeg": round(size[1], 3)},
+            "aim": {"azimuthDeg": round(aim[0], 3), "altitudeDeg": round(aim[1], 3)}, "angle": angle}
+    if points:
+        body["points"] = points
+    return {"sourceId": sid, "shape": body}
+
+
+def shape_move(sid, size, aim, extra=None):
+    body = {"angular": {"widthDeg": round(size[0], 3), "heightDeg": round(size[1], 3)},
+            "aim": {"azimuthDeg": round(aim[0], 3), "altitudeDeg": round(aim[1], 3)}}
+    body.update(extra or {})
+    return {"sourceId": sid, "shape": body}
+
+
+# --- the commander ------------------------------------------------------------------------------
+def commander():
+    total = 120.0                                    # "1 ou 2 mn" in the report: the two minutes, the 11 NM of the SEPRA
+    lateral = SPEED * total * math.tan(math.radians(60)) / 2
+    left = HEADING - 90.0
+    target = enu(left, lateral)                      # motionless, abeam at 10 NM when the airliner is in the middle of the track
+
+    def aim_at(t):
+        return aim_of(target, plane_at(t, total))
+
+    frames = []
+    for ms in range(0, int(total * 1000) + 1, STEP_MS):
+        t = ms / 1000.0
+        aim = aim_at(t)
+        # a disc seen "under several angles": its thickness is not the same every second
+        height = SIZE_DEG * (0.16 + 0.12 * math.sin(math.pi * t / 40.0) ** 2)
+        size = (SIZE_DEG, height)
+        sid = "disc"
+        frames.append({"t": ms, "shapes": [(shape_full(sid, "oval", tr("disque brun-rouge, bords légèrement flous", "red-brown disc, slightly blurred edges"),
+                                                       "#4a1710", 0, 0.15, size, aim) if ms == 0 else shape_move(sid, size, aim))]})
+    # "je le vois soudain devenir transparent et disparaître sans bouger"
+    last = frames[-1]["shapes"][0]
+    fade = json.loads(json.dumps(last))
+    fade["shape"]["transparency"] = 1
+    frames.append({"t": int(total * 1000) + 1500, "shapes": [fade]})
+    return total, frames, aim_at
+
+
+def commander_recording():
+    total, frames, aim_at = commander()
+    start = aim_at(0)
+    end = aim_at(total)
+    return {
+        "version": 1,
+        "id": "1994-01-28-DubocJeanCharles",
+        "tags": ["aerial observation", "airline pilot", "radar"],
+        "time": {"year": 1994, "month": 1, "day": 28, "hour": 13, "minute": 14, "raw": "1994-01-28T13:14"},
+        "utcOffsetHours": stated(0, "stated", "the report gives 13:14 GMT (Nice 12:06 GMT, London 14:01 GMT)"),
+        "durationSeconds": stated(total, "stated", "\"1 ou 2 mn\" in the report he wrote for Weinstein; the SEPRA's calculations use two minutes (11 nautical miles at 330 kt)"),
+        "place": [stated({"lat": round(LAT_MID, 6), "lng": round(LNG_MID, 6), "name": "Near Coulommiers, Seine-et-Marne, France (airway between the VORs BRY and CLM)"},
+                         "stated", "\"48°50'7 N / 003°00'9 E\" in both reports, read as degrees and decimal minutes (48.845 N, 3.015 E): where the airliner was")],
+        "observer": {"id": "DubocJeanCharles", "title": "Jean-Charles Duboc"},
+        "account": {
+            "observerOccupation": tr("commandant de bord, Air France", "captain, Air France"),
+            "source": "interview",
+            "followedUp": True,
+        },
+        "sources": [
+            {"type": "article", "title": "Rapport du pilote Duboc pour Dominique Weinstein, copie au SEPRA", "authors": ["Jean-Charles Duboc"],
+             "url": "https://rr0.org/science/crypto/ufo/enquete/dossier/Duboc/index.html",
+             "publication": {"publisher": "Velasco 2004"}},
+            {"type": "article", "title": "VOL AF-3532 : Interview avec le commandant de bord Jean-Charles Duboc", "authors": ["Thierry Wathelet"],
+             "url": "https://www.finart.be/ufocomhq/interview_duboc.htm",
+             "publication": {"publisher": "UFOCom", "time": "1999-11-22"}},
+        ],
+        "description": {
+            "fr": (
+                "Vendredi 28 janvier 1994, vers 13 h 14 GMT. L'Airbus A320 d'Air France, vol AF 3532 de Nice à Londres, croise "
+                "à 11 700 m (FL390) au cap 332 entre les balises BRY et CLM, près de Coulommiers, pilote automatique engagé. "
+                "Excellente visibilité au-dessus d'une couche d'altocumulus à 10 000 m, -59 °C. Un steward, dans le poste, voit le premier "
+                "un objet et s'exclame : « Un ballon-sonde ! » La copilote le prend d'abord pour cela aussi. Le commandant est le "
+                "troisième et le dernier à le voir : il croit à un avion en virage à 45° d'inclinaison, avant qu'il n'ait les ailes à l'horizontale.\n\n"
+                "Il est alors vers 10 h (à 30° devant la gauche de l'avion). Puis, comme l'avion poursuit sa route, l'objet reste en place et "
+                "est dépassé : un disque d'un rouge brunâtre, aux bords légèrement flous, sans détails apparents, ni aile, ni gouverne, ni "
+                "moteur, vu sous plusieurs angles pendant une à deux minutes, d'une taille que la copilote et lui estiment « immense » "
+                "(200 à 300 m dans le rapport, 1000 m sur 100 d'épaisseur, de la largeur de son pouce à bout de bras, dans l'interview de 1999), "
+                "à 25 miles nautiques (46 km), vers 10 500 m. Lorsqu'il le laisse sur l'arrière gauche, vers 8 h, il le voit soudain devenir "
+                "transparent et disparaître, sans bouger.\n\n"
+                "Ici la taille est celle de l'analyse du SEPRA (la moitié de la Lune, 15 minutes d'arc). Les relèvements, 10 h puis 8 h, "
+                "pour les 11 miles nautiques parcourus, donnent un triangle équilatéral : l'objet immobile serait à 10 miles nautiques de "
+                "la route, non 25. L'enregistrement garde les angles du pilote et emprunte cette distance seulement pour les situer."),
+            "en": (
+                "Friday 28 January 1994, about 13:14 GMT. The Air France Airbus A320, flight AF 3532 from Nice to London, cruises at "
+                "11,700 m (FL390) on heading 332 between the beacons BRY and CLM, near Coulommiers, autopilot engaged. Excellent visibility "
+                "above an altocumulus layer at 10,000 m, -59 C. A steward in the cockpit is the first to see an object and exclaims: \"A "
+                "weather balloon!\" The co-pilot first takes it for one too. The captain is the third and last to see it: he takes it for "
+                "an aircraft in a 45-degree bank, before its wings level.\n\n"
+                "It is then at about 10 o'clock (30 degrees ahead of the left beam). As the airliner keeps its course the object stays "
+                "where it is and is overtaken: a reddish-brown disc with slightly blurred edges, no visible detail, no wing, no control "
+                "surface, no engine, seen from several angles for one to two minutes, of a size both he and the co-pilot call \"immense\" "
+                "(200 to 300 m in the report, 1000 m by 100 thick, the width of his thumb at arm's length, in the 1999 interview), 25 "
+                "nautical miles (46 km) away, at about 10,500 m. When he leaves it behind on the left, at about 8 o'clock, he sees it "
+                "suddenly turn transparent and vanish, without moving.\n\n"
+                "The size here is the one in the SEPRA's analysis (half the Moon, 15 arcminutes). The bearings, 10 o'clock then 8, over "
+                "the 11 nautical miles flown make an equilateral triangle: a motionless object would be 10 nautical miles off the track, not "
+                "25. The recording keeps the pilot's angles and borrows that distance only to place them."),
+        },
+        "instrument": "eye",
+        "observerTrack": track(total, aim_at, 1.0),
+        "timeline": {"order": ["disc"], "groups": [["disc"]], "keyframes": frames},
+        "weatherTrack": weather(total, 101),
+        "soundTrack": {"keyframes": [{"t": 0, "sound": {"kind": "none"}}]},
+        "decor": [],
+        "milestones": [
+            {"t": 0, "label": "A", "note": tr("Il le voit le dernier, vers 10 h, et le prend pour un avion en virage à 45°", "He sees it last, at about 10 o'clock, and takes it for an aircraft banking 45 degrees")},
+            {"t": 60000, "label": "B", "note": tr("Au travers de l'aile, un disque brun-rouge sans détails, vu sous plusieurs angles", "Abeam, a red-brown disc with no detail, seen from several angles")},
+            {"t": int(total * 1000), "label": "C", "note": tr("Sur l'arrière gauche (8 h), il devient transparent et disparaît sans bouger", "Behind on the left (8 o'clock), it turns transparent and vanishes without moving")},
+        ],
+        "_aim": {"start": start, "end": end},
+    }
+
+
+# --- the co-pilot ------------------------------------------------------------------------------
+CHEVRON = [{"x": 0, "y": 0}, {"x": 1, "y": 0.5}, {"x": 0, "y": 1}, {"x": 0.3, "y": 0.5}]
+
+
+def copilot_recording():
+    total = 180.0                                    # "2 à 5 mn" in her report: in the middle
+    # She saw it "toujours à peu près à la même position à gauche": from 10 h to 9 h, then it keeps up with the airliner.
+    def rel(t):
+        return -60.0 - 30.0 * smooth(t / 30.0) + (9.0 * math.sin(math.pi * (t - total + 12.0) / 12.0) ** 2 if t > total - 12.0 else 0.0)
+
+    def aim_at(t):
+        return ((HEADING + rel(t)) % 360.0, math.degrees(math.atan2(OBJECT_M - PLANE_M, 46000.0)))
+
+    lens, arrow = "lens", "chevron"
+    frames = []
+    for ms in range(0, int(total * 1000) + 1, STEP_MS):
+        t = ms / 1000.0
+        aim = aim_at(t)
+        u = smooth((t - 60.0) / 20.0) - smooth((t - 130.0) / 20.0)   # 0 to 1: how much of a chevron
+        blur = 0.08 + 0.4 * math.sin(math.pi * min(1.0, max(0.0, (t - 30.0) / 110.0))) ** 2   # sharp, then blurred, then sharp again
+        lens_size = (SIZE_DEG, SIZE_DEG * 0.2)
+        arrow_size = (SIZE_DEG * 1.1, SIZE_DEG * 0.45)
+        if ms == 0:
+            shapes = [shape_full(lens, "oval", tr("lentille brune", "brown lens"), "#35231a", 0, blur, lens_size, aim),
+                      shape_full(arrow, "polygon", tr("chevron", "chevron"), "#35231a", 1, blur, arrow_size, aim, points=CHEVRON)]
+        else:
+            shapes = [shape_move(lens, lens_size, aim, {"transparency": round(u, 3), "blur": round(blur, 3)}),
+                      shape_move(arrow, arrow_size, aim, {"transparency": round(1 - u, 3), "blur": round(blur, 3)})]
+        frames.append({"t": ms, "shapes": shapes})
+    fade = []
+    for s in frames[-1]["shapes"]:
+        f = json.loads(json.dumps(s))
+        f["shape"]["transparency"] = 1
+        fade.append(f)
+    frames.append({"t": int(total * 1000) + 1500, "shapes": fade})
+    return {
+        "version": 1,
+        "id": "1994-01-28-DubocCopilote",
+        "tags": ["aerial observation", "airline pilot", "radar"],
+        "time": {"year": 1994, "month": 1, "day": 28, "hour": 13, "minute": 14, "raw": "1994-01-28T13:14"},
+        "utcOffsetHours": stated(0, "stated", "the report gives 13:14 GMT"),
+        "durationSeconds": stated(total, "stated", "\"2 à 5 mn\" in her report"),
+        "place": [stated({"lat": round(LAT_MID, 6), "lng": round(LNG_MID, 6), "name": "Near Coulommiers, Seine-et-Marne, France (airway between the VORs BRY and CLM)"},
+                         "stated", "\"48°50'7 N / 003°00'9 E\" in her report, read as degrees and decimal minutes")],
+        "observer": {"id": "DubocCopilote", "title": "La copilote"},
+        "account": {
+            "observerOccupation": tr("copilote, Air France", "co-pilot, Air France"),
+            "source": "interview",
+            "followedUp": True,
+        },
+        "sources": [
+            {"type": "article", "title": "Rapport de la copilote pour Dominique Weinstein, copie au SEPRA", "authors": ["La copilote"],
+             "url": "https://rr0.org/science/crypto/ufo/enquete/dossier/Duboc/index.html",
+             "publication": {"publisher": "Velasco 2004"}},
+        ],
+        "description": {
+            "fr": (
+                "Même vol, même minute, vu du siège de droite. La copilote prend d'abord l'objet pour un ballon-sonde, comme le steward. "
+                "Pour elle il ne reste pas en arrière : elle le voit constamment vers 9 h, à gauche, et se déplaçant à la vitesse de "
+                "l'avion, sur une trajectoire rectiligne parallèle à la sienne, pendant 2 à 5 minutes. Sa forme change : une lentille "
+                "à contour net, qui se floute, devient une forme de « chevron » (géométrie variable, disque évoluant dans les trois "
+                "dimensions), puis le contour redevient net à la fin ; sombre, brun, de grande taille. Juste avant la disparition, "
+                "« une sorte de virage ».\n\n"
+                "Ni taille angulaire ni distance chiffrée dans son rapport (« grande taille », 25 à 50 miles nautiques) : la taille est "
+                "celle de la lecture du SEPRA pour le commandant (empruntée), et le moment où l'objet quitte le 10 h pour le 9 h est choisi."),
+            "en": (
+                "Same flight, same minute, seen from the right-hand seat. The co-pilot first takes the object for a weather balloon, "
+                "like the steward. For her it does not fall behind: she sees it constantly at about 9 o'clock, to the left, moving at the "
+                "airliner's speed on a straight path parallel to its own, for 2 to 5 minutes. Its shape changes: a lens with a sharp "
+                "outline that blurs becomes a \"chevron\" (variable geometry, a disc evolving in all three dimensions), then the outline "
+                "is sharp again at the end; dark, brown, large. Just before it disappears, \"a sort of turn\".\n\n"
+                "No angular size and no figure for the distance in her report (\"large\", 25 to 50 nautical miles): the size is the one "
+                "the SEPRA's reading gives for the captain (borrowed), and when the object moves from 10 o'clock to 9 is chosen."),
+        },
+        "instrument": "eye",
+        "observerTrack": track(total, aim_at, 1.0),
+        "timeline": {"order": [lens, arrow], "groups": [[lens, arrow]], "keyframes": frames},
+        "weatherTrack": weather(total, 120),
+        "soundTrack": {"keyframes": [{"t": 0, "sound": {"kind": "none"}}]},
+        "decor": [],
+        "milestones": [
+            {"t": 0, "label": "A", "note": tr("Elle le voit vers 10 h et le prend pour un ballon-sonde", "She sees it at about 10 o'clock and takes it for a weather balloon")},
+            {"t": 90000, "label": "B", "note": tr("Il reste à 9 h, à la vitesse de l'avion ; la lentille se floute, devient un chevron", "It stays at 9 o'clock, at the airliner's speed; the lens blurs and becomes a chevron")},
+            {"t": int(total * 1000), "label": "C", "note": tr("Une sorte de virage, puis il disparaît", "A sort of turn, then it vanishes")},
+        ],
+    }
+
+
+if __name__ == "__main__":
+    for name, rec in (("observer-duboc.json", commander_recording()), ("observer-duboc-copilot.json", copilot_recording())):
+        aim = rec.pop("_aim", None)
+        (OUT / name).write_text(json.dumps(rec, ensure_ascii=False, indent=1) + "\n")
+        print(f"wrote {name} {(OUT / name).stat().st_size} bytes", aim or "")
