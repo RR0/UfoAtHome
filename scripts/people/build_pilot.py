@@ -1,6 +1,6 @@
 """
 Builds the captain of flight AF 3532, Jean-Charles Duboc, seated at the left seat of an A320 flight deck, as one GLB
-(public/models/makehuman-people/duboc-seated.glb), from MPFB and the MakeHuman system assets (CC0), like the other people of
+(public/models/makehuman-people/duboc-slumped.glb), from MPFB and the MakeHuman system assets (CC0), like the other people of
 build_people.py, whose helpers it uses.
 
 What the portrait of his page on rr0.org (people/d/DubocJeanCharles/portrait.gif, taken in a cockpit) shows, and what is
@@ -23,6 +23,9 @@ where MH_ASSETS also holds `clothes/male_pilotshirt01/`: the stock `male_casuals
 name replaced inside the .mhclo and .mhmat), whose diffuse texture has its shirt islands painted plain white (#e8e8e4) and its jeans island
 plain navy (#171f33), with a little grain (see README.md beside this file).
 
+The file is served with a week of cache (site/build.ts: a model is content-addressed by its name), so a pose or a size that changes needs a NEW file name
+(this one was `duboc-seated.glb` in 0.115.0, upright; it is `duboc-slumped.glb` since 0.115.1), never the same name with other contents.
+
 The GLB is in metres, seated, facing +Z (headingOffsetDeg 180 in the catalogue, like the other people), feet on y = 0, geometry baked at
 the pose (no skeleton). It prints where his eyes are, from the middle of its box, to place the figure on a seat.
 """
@@ -43,7 +46,7 @@ _thing_of = people.thing_of
 # build_people names what it drew "suit"; this garment is a shirt
 people.thing_of = lambda obj: "clothes" if "shirt" in obj.name.lower() else _thing_of(obj)
 
-PILOT = dict(id="duboc-seated", name="Captain Duboc, seated (after his portrait)", gender=1.0, age=0.638, weight=0.92, muscle=0.4,
+PILOT = dict(id="duboc-slumped", name="Captain Duboc, seated (after his portrait)", gender=1.0, age=0.638, weight=0.92, muscle=0.4,
              heightM=1.70, skin="middleage_caucasian_male", clothes=["male_pilotshirt01"], shoes="shoes03", hair="short01",
              eyebrows="eyebrow002", eyelashes=None)
 GREY_HAIR = (0.52, 0.50, 0.49)

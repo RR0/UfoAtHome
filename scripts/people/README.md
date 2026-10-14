@@ -78,7 +78,7 @@ directly. Run it with `python3 scripts/people/derive_socorro_figure.py` (ImageMa
 
 ## The captain of flight AF 3532
 
-`build_pilot.py` builds `makehuman-people/duboc-seated.glb`, Captain Jean-Charles Duboc seated at the left seat of an A320 flight deck, after the
+`build_pilot.py` builds `makehuman-people/duboc-slumped.glb`, Captain Jean-Charles Duboc seated at the left seat of an A320 flight deck, after the
 portrait on his rr0.org page (stout, balding, a pepper-and-salt beard, glasses, a white shirt with four-stripe epaulettes and a black tie, a headset).
 It uses the helpers of `build_people.py` (which only runs as a script) and the same setup as above, plus:
 

@@ -603,7 +603,7 @@
       "id": "ufoathome-duboc-seated",
       "kind": "entity",
       "name": "Captain Jean-Charles Duboc, seated at the left seat of a flight deck (realistic, MakeHuman)",
-      "file": "makehuman-people/duboc-seated.glb",
+      "file": "makehuman-people/duboc-slumped.glb",
       "headingOffsetDeg": 180,
       "sizeM": { "widthM": 0.809, "lengthM": 1.239, "heightM": 1.31 },
       "credit": {

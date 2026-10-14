@@ -62,7 +62,7 @@ whose texture is replaced by one colour with a little grain, no logo or pattern)
 build, hair and the colour of their clothes. François wore glasses; the CC0 system assets have none, so
 the model has none.
 
-## duboc-seated.glb
+## duboc-slumped.glb
 
 Captain Jean-Charles Duboc seated at the left seat of an A320 flight deck, built by `scripts/people/build_pilot.py` from the MakeHuman system
 assets (CC0 1.0, https://www.makehumancommunity.org/) with MPFB, like the other people here, after his portrait on rr0.org: stout, balding,
