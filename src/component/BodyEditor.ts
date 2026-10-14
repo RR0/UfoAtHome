@@ -195,10 +195,10 @@ export class BodyEditor {
           <p id="body-model-incomplete" class="body-intro" hidden>${m.modelIncomplete}</p>
           <p id="body-model-catalogue" class="body-intro" hidden>${m.modelFromCatalogue}</p>
         </details>
+        <div id="body-keys" class="body-keys"></div>
         <fieldset class="body-key">
           <legend id="body-key-legend"></legend>
           <p id="body-key-note" class="body-intro"></p>
-          <div id="body-keys" class="body-keys"></div>
           <div id="body-key-parameters" class="body-parameters"></div>
           <p class="body-intro">${m.appearanceNote}</p>
           <p class="body-intro">${m.pictureHint}</p>

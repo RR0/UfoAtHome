@@ -66,6 +66,13 @@ class Fixture {
 }
 
 describe("The Bodies part of the editor", () => {
+  it("keeps the keyframe picker outside the fieldset of the instant it chooses, which it opens", () => {
+    const fixture = new Fixture()
+    const picker = fixture.container.querySelector("#body-key")!
+    expect(picker.closest("fieldset")).toBeNull()
+    expect(fixture.container.querySelector("fieldset.body-key")).not.toBeNull()
+  })
+
   it("shows what a loaded recording states of its bodies", async () => {
     const fixture = new Fixture()
     await new Promise(resolve => setTimeout(resolve))
