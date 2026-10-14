@@ -36,6 +36,9 @@ class ShareCards {
   /** A frame needs the scene to be whole (the loader gone) and a moment for the last textures to be drawn. */
   static readonly SETTLE_MS = 2000
   static readonly TIMEOUT_MS = 120_000
+  /** What a JPEG of the card's size weighs under which it holds nothing but black (a real night scene weighs more), and how many more looks it is given. */
+  static readonly BLACK_FRAME_BYTES = 8 * 1024
+  static readonly BLACK_FRAME_RETRIES = 15
 
   private readonly root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..")
   private readonly demoData = path.join(this.root, "public", "demo-data")
@@ -126,7 +129,14 @@ class ShareCards {
         const box = (window as any).__stage.scene.shadowRoot.getElementById("frame").getBoundingClientRect()
         return { x: box.x, y: box.y, width: box.width, height: box.height }
       })
-      await page.screenshot({ path: file, type: "jpeg", quality: 85, clip: frame })
+      // A scene whose ground and scenery are asked for over the network is still black once its loader has gone for a first time (the loader is not
+      // shown before it starts waiting, and a hidden one says nothing): looked at again until there is a picture, a black frame being a few kilobytes.
+      let shot = await page.screenshot({ type: "jpeg", quality: 85, clip: frame })
+      for (let attempt = 0; shot.length < ShareCards.BLACK_FRAME_BYTES && attempt < ShareCards.BLACK_FRAME_RETRIES; attempt++) {
+        await page.waitForTimeout(ShareCards.SETTLE_MS)
+        shot = await page.screenshot({ type: "jpeg", quality: 85, clip: frame })
+      }
+      writeFileSync(file, shot)
     } finally {
       await page.close()
     }
