@@ -759,19 +759,23 @@ export class DecorSystem {
    * side in the air, and the scene's relief is far smoother than the ground (cells of tens of metres), so a building of tens of metres
    * stood on the highest point of its footprint hung over the whole downhill half of it, by a metre or more.
    */
-  private static readonly GROWS_FROM_GROUND: ReadonlySet<DecorKind> = new Set(["tree", "shrub", "crop", "mound", "terrace", "wall", "building"])
+  private static readonly GROWS_FROM_GROUND: ReadonlySet<DecorKind> = new Set(["tree", "shrub", "crop", "mound", "terrace", "wall", "building", "bridge"])
 
   static groundUnderFootprint(object: DecorObject, x: number, z: number, headingDeg: number | undefined,
     ground: (x: number, z: number) => number, altitudeM = 0): number {
     const size = DecorSystem.sizeOf(object)
     if (altitudeM > size.heightM) return ground(x, z)
     const heading = (headingDeg ?? 0) * Math.PI / 180
-    const lengthSamples = Math.min(21, Math.max(2, Math.ceil(size.lengthM / 0.75) + 1))
+    // A bridge stands on the ground UNDER ITS SPAN, the road it crosses: its deck is `heightM` above it, and its two ends come down to that same level
+    // (see BridgeGeometry). Read over the whole length, which takes in the embankments the road climbs, and on the highest ground as for a car, it put the
+    // deck `heightM` above the top of the banks: raised over the hills it was meant to join (the RD548 over the RN2 at Silly-le-Long).
+    const lengthM = object.kind === "bridge" ? Math.min(size.lengthM, object.bridge?.spanM ?? size.lengthM) : size.lengthM
+    const lengthSamples = Math.min(21, Math.max(2, Math.ceil(lengthM / 0.75) + 1))
     const widthSamples = Math.min(21, Math.max(2, Math.ceil(size.widthM / 0.75) + 1))
     const grows = DecorSystem.GROWS_FROM_GROUND.has(object.kind)
     let highest = grows ? Infinity : -Infinity
     for (let alongIndex = 0; alongIndex < lengthSamples; alongIndex++) {
-      const along = (alongIndex / (lengthSamples - 1) - 0.5) * size.lengthM
+      const along = (alongIndex / (lengthSamples - 1) - 0.5) * lengthM
       for (let acrossIndex = 0; acrossIndex < widthSamples; acrossIndex++) {
         const across = (acrossIndex / (widthSamples - 1) - 0.5) * size.widthM
         const px = x + Math.sin(heading) * along + Math.cos(heading) * across

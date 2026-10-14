@@ -391,6 +391,17 @@ describe("a building and an overhead line on a slope", () => {
     expect(DecorSystem.groundUnderFootprint(house, 0, 0, 0, eastSlope)).toBeCloseTo(-1.5, 1)
   })
 
+  it("stands a bridge on the ground under its SPAN, not on the banks the road climbs to reach it", () => {
+    // The road it crosses lies in a cutting: ground at 0 under the span (the middle twenty metres), and the banks, at 7 m, either side of it. The deck
+    // is `heightM` over what is under it, and the ends of the bridge come down to the same level: on the highest ground it went 6.5 m over the hills.
+    const cutting = (_x: number, z: number) => Math.abs(z) <= 10 ? 0 : 7
+    const bridge = { id: "pont", kind: "bridge", eastM: 0, northM: 0, headingDeg: 0, sizeM: { widthM: 9, lengthM: 240, heightM: 6.5 }, bridge: { spanM: 20 } } as DecorObject
+    expect(DecorSystem.groundUnderFootprint(bridge, 0, 0, 0, cutting)).toBe(0)
+    // Without a span stated the whole length is the span, and it stands on the lowest ground under it: the valley it crosses.
+    const whole = { ...bridge, bridge: undefined } as DecorObject
+    expect(DecorSystem.groundUnderFootprint(whole, 0, 0, 0, cutting)).toBe(0)
+  })
+
   const span = (overrides: Partial<DecorObject> = {}): DecorObject =>
     ({ id: "decor-2", kind: "wire", eastM: 0, northM: 0, headingDeg: 0, sizeM: { lengthM: 100, heightM: 8 }, wire: { poles: "both", poleHeightM: 10, strands: [{ heightM: 8 }] }, ...overrides })
 
