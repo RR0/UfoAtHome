@@ -2,6 +2,8 @@ import type { ElevationProvider } from "./ElevationProvider.js"
 import type { ImageryProvider } from "./ImageryProvider.js"
 import type { RoadProvider } from "./RoadProvider.js"
 import { AwsTerrariumElevationProvider } from "./providers/AwsTerrariumElevationProvider.js"
+import { IgnMntElevationProvider } from "./providers/IgnMntElevationProvider.js"
+import { FirstElevationThatAnswers } from "./FirstElevationThatAnswers.js"
 import { EsriWorldImageryProvider } from "./providers/EsriWorldImageryProvider.js"
 import { OverpassRoadProvider } from "./providers/OverpassRoadProvider.js"
 import { ArchivedRoadProvider } from "./providers/ArchivedRoadProvider.js"
@@ -23,7 +25,17 @@ export interface TerrainProviders {
  * reference a concrete provider class.
  */
 export function defaultTerrainProviders(): TerrainProviders {
-  return { elevation: new AwsTerrariumElevationProvider(), imagery: defaultImageryProvider(), roads: defaultRoadProvider() }
+  return { elevation: defaultElevationProvider(), imagery: defaultImageryProvider(), roads: defaultRoadProvider() }
+}
+
+/**
+ * The relief half on its own: the IGN's bare-earth model in France (the laser's, then the older survey's), the worldwide one wherever the IGN does not answer.
+ *
+ * In that order because the worldwide relief is a model of the SURFACE at fifteen metres to the pixel, off by a metre or two near an observer and by
+ * five to twenty where there is forest or a road on an embankment (measured against the laser at Saint-Lô, Maffliers and Silly-le-Long).
+ */
+export function defaultElevationProvider(): ElevationProvider {
+  return new FirstElevationThatAnswers(new IgnMntElevationProvider(), new AwsTerrariumElevationProvider())
 }
 
 /**

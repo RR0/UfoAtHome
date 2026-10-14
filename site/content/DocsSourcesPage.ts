@@ -450,9 +450,36 @@ export class DocsSourcesPage extends DocsSection {
       heading: { en: "The ground", fr: "Le sol", es: "El suelo", it: "Il suolo" },
       rows: [
         {
+          name: "IGN LiDAR HD (bare-earth model, MNT) and RGE ALTI", url: "https://geoservices.ign.fr/lidarhd",
+          provides: {
+            en: "The relief round the observer in France, as the laser measured the bare earth, a point every metre: trees and roofs taken out.",
+            fr: "Le relief autour de l'observateur en France, tel que le laser a mesuré la terre nue, un point par mètre : arbres et toits retirés.",
+            es: "El relieve alrededor del observador en Francia, tal como el láser midió la tierra desnuda, un punto por metro: sin árboles ni tejados.",
+            it: "Il rilievo intorno all'osservatore in Francia, come il laser ha misurato la terra nuda, un punto al metro: senza alberi né tetti."
+          },
+          when: {
+            en: "Fetched with the relief, one picture of the square at four metres to the pixel (under a megabyte), first from the laser and, where it has not flown yet, from the RGE ALTI, the older metre-grid model that covers the whole country.",
+            fr: "Chargé avec le relief, une image du carré à quatre mètres le pixel (moins d'un mégaoctet), d'abord du laser puis, là où il n'a pas encore volé, du RGE ALTI, l'ancien modèle au mètre qui couvre tout le pays.",
+            es: "Descargado con el relieve, una imagen del cuadrado a cuatro metros por píxel (menos de un megabyte), primero del láser y, donde aún no ha volado, del RGE ALTI, el modelo anterior de un metro que cubre todo el país.",
+            it: "Scaricato con il rilievo, un'immagine del quadrato a quattro metri per pixel (meno di un megabyte), prima dal laser e, dove non ha ancora volato, dal RGE ALTI, il modello precedente al metro che copre tutto il paese."
+          },
+          hosting: {
+            en: "© IGN, Licence Ouverte 2.0, served by the Géoplateforme's WMS, which answers browsers from anywhere. Outside France, or when the service does not answer within twelve seconds, the worldwide relief below is used.",
+            fr: "© IGN, Licence Ouverte 2.0, servi par le WMS de la Géoplateforme, qui répond aux navigateurs de partout. Hors de France, ou quand le service ne répond pas en douze secondes, le relief mondial ci-dessous est utilisé.",
+            es: "© IGN, Licence Ouverte 2.0, servido por el WMS de la Géoplateforme, que responde a los navegadores desde cualquier sitio. Fuera de Francia, o cuando el servicio no responde en doce segundos, se usa el relieve mundial de abajo.",
+            it: "© IGN, Licence Ouverte 2.0, servito dal WMS della Géoplateforme, che risponde ai browser da qualsiasi luogo. Fuori dalla Francia, o quando il servizio non risponde entro dodici secondi, si usa il rilievo mondiale qui sotto."
+          },
+          choices: {
+            en: "The worldwide relief is a model of the surface at fifteen metres to the pixel: measured against the laser, it is a metre or two off near the observer, and five to twenty metres off under forest or beside a road on an embankment, which sinks or lifts every building stood on it. The grid is never mixed from two surveys vertex by vertex, which would draw their seam as a cliff.",
+            fr: "Le relief mondial est un modèle de la surface à quinze mètres le pixel : mesuré contre le laser, il s'écarte d'un mètre ou deux près de l'observateur, et de cinq à vingt mètres sous la forêt ou près d'une route en remblai, ce qui enfonce ou soulève tout bâtiment posé dessus. La grille n'est jamais mêlée de deux relevés sommet par sommet, ce qui dessinerait leur raccord en falaise.",
+            es: "El relieve mundial es un modelo de la superficie a quince metros por píxel: medido contra el láser, se desvía uno o dos metros cerca del observador, y de cinco a veinte bajo el bosque o junto a una carretera en terraplén, lo que hunde o eleva todo edificio colocado encima. La malla nunca se mezcla de dos levantamientos vértice a vértice, lo que dibujaría su empalme como un acantilado.",
+            it: "Il rilievo mondiale è un modello della superficie a quindici metri per pixel: misurato contro il laser, si scosta di uno o due metri vicino all'osservatore, e da cinque a venti metri sotto il bosco o accanto a una strada in rilevato, il che affonda o solleva ogni edificio posato sopra. La griglia non è mai mescolata da due rilievi vertice per vertice, il che disegnerebbe il loro raccordo come una scogliera."
+          }
+        },
+        {
           name: "AWS Terrain Tiles (SRTM, ETOPO1)", url: "https://registry.opendata.aws/terrain-tiles/",
           provides: { en: "Relief around the observer.", fr: "Le relief autour de l'observateur.", es: "El relieve alrededor del observador.", it: "Il rilievo intorno all'osservatore." },
-          when: { en: "Fetched when a scene has a real place.", fr: "Chargé quand une scène a un lieu réel.", es: "Descargado cuando una escena tiene un lugar real.", it: "Scaricato quando una scena ha un luogo reale." },
+          when: { en: "Fetched when a scene has a real place, outside France or wherever the IGN's relief above does not answer.", fr: "Chargé quand une scène a un lieu réel, hors de France ou partout où le relief de l'IGN ci-dessus ne répond pas.", es: "Descargado cuando una escena tiene un lugar real, fuera de Francia o donde el relieve del IGN de arriba no responde.", it: "Scaricato quando una scena ha un luogo reale, fuori dalla Francia o dove il rilievo dell'IGN qui sopra non risponde." },
           hosting: { en: "Amazon S3, keyless. © AWS Open Data.", fr: "Amazon S3, sans clé. © AWS Open Data.", es: "Amazon S3, sin clave. © AWS Open Data.", it: "Amazon S3, senza chiave. © AWS Open Data." },
           choices: { en: "No key and no rate limit, which an embeddable component needs. The relief model is too coarse for trees and buildings: a picture of the place lined up in the scene is the way to state those.", fr: "Ni clé ni limite de débit, ce qu'exige un composant intégrable. Le modèle de relief est trop grossier pour les arbres et bâtiments : une photo des lieux recalée dans la scène est le moyen de les énoncer.", es: "Sin clave y sin límite de peticiones, lo que necesita un componente integrable. El modelo de relieve es demasiado grueso para árboles y edificios: una foto del lugar alineada en la escena es la forma de declararlos.", it: "Nessuna chiave e nessun limite di richieste, cosa di cui ha bisogno un componente incorporabile. Il modello del rilievo è troppo grossolano per alberi ed edifici: una foto del luogo allineata nella scena è il modo di dichiararli." }
         },

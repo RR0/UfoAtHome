@@ -2,11 +2,19 @@ import type { DataSource } from "../../engine/source/DataSource.js"
 import type { ElevationProvider } from "./ElevationProvider.js"
 import type { ImageryProvider } from "./ImageryProvider.js"
 import { AwsTerrariumElevationProvider } from "./providers/AwsTerrariumElevationProvider.js"
+import { defaultElevationProvider } from "./defaultTerrainProviders.js"
 import { EsriWorldImageryProvider } from "./providers/EsriWorldImageryProvider.js"
 import { EoxSentinel2ImageryProvider } from "./providers/EoxSentinel2ImageryProvider.js"
 
 /** Every source of ground relief the scene can be built from. */
 export const ELEVATION_SOURCES: DataSource<ElevationProvider>[] = [
+  {
+    id: "ign-mnt",
+    name: "IGN LiDAR HD / RGE ALTI",
+    credit: "Relief © IGN, LiDAR HD and RGE ALTI (Licence Ouverte 2.0) in France; © AWS Open Data (SRTM, ETOPO1) elsewhere",
+    creditUrl: "https://geoservices.ign.fr/lidarhd",
+    create: () => defaultElevationProvider()
+  },
   {
     id: "aws-terrarium",
     name: "AWS Terrain Tiles",
