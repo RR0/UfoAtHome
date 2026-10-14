@@ -2638,7 +2638,6 @@ export class SceneRenderer {
     this.bodyOrigin = { x: offset.x + shift.x, z: offset.z + shift.z }
     const cabin = this.cabinDecor()
     this.fitShadowToCabin(cabin.length > 0)
-    this.keepCabinShadowFresh()
     this.dimCabinSky(cabin)
     this.placeShadowFrustum()
     this.placeTerraces(t, offset, shift)
@@ -3783,15 +3782,12 @@ export class SceneRenderer {
     this.cabinShadow = inside
     const shadow = this.celestialLight.shadow
     if (!inside) {
-      this.renderer.shadowMap.autoUpdate = true
       this.shadowHalfExtentM = -1          // not the size it was: fitShadowToBodies sets it again
       this.fitShadowToBodies()
       return
     }
-    // A cabin is rigid with the eye: what it shadows does not change from one frame to the next, only with the Sun (see keepCabinShadowFresh)
-    this.renderer.shadowMap.autoUpdate = false
-    this.renderer.shadowMap.needsUpdate = true
-    this.cabinShadowLight.set(0, 0, 0)
+    // Drawn every frame like any other. A cabin is rigid with the eye, so its shadows could be drawn less often, and were (once a second, or when the Sun
+    // moved): it saved seven frames a second of fifty, and each redraw was seen as a change of the light, on the back of the man in the seat
     const camera = shadow.camera
     const half = SHADOW_CABIN_HALF_EXTENT_M
     camera.left = -half
@@ -3831,22 +3827,6 @@ export class SceneRenderer {
   }
 
   private cabinShadow = false
-  private cabinShadowDrawnAtMs = 0
-  private readonly cabinShadowLight = new Vector3()
-
-  /**
-   * In a cabin the shadow map is drawn when the Sun has moved by more than a twentieth of a degree, and at least once a second (an object that
-   * arrives, a pose that changes), instead of every frame: with the flight deck's six hundred meshes it was half of a frame's cost.
-   */
-  private keepCabinShadowFresh(): void {
-    if (!this.cabinShadow) return
-    const now = performance.now()
-    const moved = this.cabinShadowLight.angleTo(this.lightDirection) > 0.05 * DEG_TO_RAD
-    if (!moved && now - this.cabinShadowDrawnAtMs < 1000) return
-    this.cabinShadowLight.copy(this.lightDirection)
-    this.cabinShadowDrawnAtMs = now
-    this.renderer.shadowMap.needsUpdate = true
-  }
 
   /**
    * Widens the sun's shadow box to take in the bodies standing further out than the decor does,
