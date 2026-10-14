@@ -1958,7 +1958,7 @@ export class SceneRenderer {
     // patch's position over to the road group.
     this.roadSystem.group.position.copy(patch.position)
     this.roadSystem.setGroundSpacing(this.patchSpacingM(patch))
-    this.roadSystem.set(ways, lat, lng, (x, z) => this.groundYOfPatch(patch, x, z), contemporary)
+    this.roadSystem.set(ways, lat, lng, (x, z) => this.groundYOfPatch(patch, x, z), contemporary, this.terrainRadius)
     this.roadAttribution = ways.length > 0 ? this.terrainProviders.roads?.attribution : undefined
     this.compileNextFrameOffThread()
     this.render()

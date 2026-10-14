@@ -62,7 +62,9 @@ export class HeadlightSystem {
     const air: Mesh<BufferGeometry, ShaderMaterial>[] = []
     for (let lamp = 0; lamp < HeadlightSystem.LAMPS; lamp++) {
       const light = new SpotLight(0xffffff, 0, HeadlightSystem.DISTANCE_M, Math.PI / 8, 0.5, 2)
-      light.castShadow = false
+      // The observer's lamps cast a shadow for as long as they are in the scene: a light that begins to cast one is a new program for every material of the
+      // scene, compiled in the middle of a frame (hundreds of milliseconds on a fast card, seconds on a slow one). Off, they stop being drawn into the map instead.
+      light.castShadow = id === "observer"
       light.shadow.mapSize.set(HeadlightSystem.SHADOW_MAP_PX, HeadlightSystem.SHADOW_MAP_PX)
       light.shadow.camera.near = 0.4
       light.shadow.camera.far = 110
@@ -139,7 +141,7 @@ export class HeadlightSystem {
         light.intensity = 0
         beams.air[index].visible = false
         // Not drawn into a shadow map for nothing: the lamp is off.
-        if (light.castShadow) light.castShadow = false
+        light.shadow.autoUpdate = false
         return
       }
       const side = index === 0 ? -1 : 1
@@ -149,7 +151,13 @@ export class HeadlightSystem {
       light.intensity = candela
       light.angle = beam.halfAngleDeg * Math.PI / 180
       light.penumbra = beam.penumbra
-      if (light.castShadow !== casts) light.castShadow = casts
+      if (casts) {
+        // Drawn again from the first frame it lights, from where it stands now.
+        if (!light.shadow.autoUpdate) light.shadow.needsUpdate = true
+        light.shadow.autoUpdate = true
+      } else {
+        light.shadow.autoUpdate = false
+      }
       light.position.copy(origin).addScaledVector(right, side * halfTrackM)
       // Turned in by the lamps' own aim: the two axes cross far ahead of the vehicle.
       const aim = forward.clone().addScaledVector(right, -side * Math.tan(Headlights.TOE_IN_DEG * Math.PI / 180)).normalize()

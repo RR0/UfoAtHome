@@ -111,7 +111,9 @@ export class RoadSystem {
     this.stepM = Number.isFinite(spacingM) && spacingM > 0 ? Math.min(RoadSystem.STEP_M, Math.max(1.5, spacingM / 2)) : RoadSystem.STEP_M
   }
 
-  set(ways: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt, contemporary: boolean): void {
+  set(allWays: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt, contemporary: boolean, radiusM = Infinity): void {
+    // Only what the patch can show: an archive holds the roads of the whole of a drive, and a town's worth of pavements is paid for by every one of them.
+    const ways = RoadSystem.within(allWays, originLat, originLng, radiusM)
     RoadSystem.empty(this.surveyed)
     this.markingsToken++
     this.anchorGrain(originLat, originLng)
@@ -194,12 +196,33 @@ export class RoadSystem {
   }
 
   /**
+   * ONLY the roads that come within `radiusM` (and a margin) of the patch's origin: a road with a point, or the middle of a segment, that near. All of them
+   * for an unbounded radius.
+   */
+  private static within(ways: RoadWay[], originLat: number, originLng: number, radiusM: number): RoadWay[] {
+    if (!Number.isFinite(radiusM)) return ways
+    const reach = radiusM * 1.1 + 100
+    return ways.filter(way => {
+      let previous: { x: number, z: number } | undefined
+      for (const point of way.points) {
+        const here = geoToLocalMeters(point.lat, point.lng, originLat, originLng)
+        if (Math.hypot(here.x, here.z) <= reach) return true
+        if (previous && Math.hypot((here.x + previous.x) / 2, (here.z + previous.z) / 2) <= reach) return true
+        previous = here
+      }
+      return false
+    })
+  }
+
+  /**
    * A pavement along each side of every urban street: its rungs are those of the street, offset past the carriageway's edge, and a rung that
    * falls on another street's carriageway is left out, which leaves the gap a side street's mouth has between two pavements.
    */
   private sidewalks(ways: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt): { positions: number[]; indices: number[] } {
     const batch = { positions: [] as number[], indices: [] as number[] }
     const paths = ways.map(way => way.points.map(point => geoToLocalMeters(point.lat, point.lng, originLat, originLng)))
+    // Where the carriageways are, by cell of ground: asking every segment of every road for every rung of every pavement took three seconds for a town.
+    const grid = new SegmentGrid(ways, paths)
     ways.forEach((way, at) => {
       if (!way.urban || way.surface !== "paved" || way.widthM < RoadSystem.SIDEWALK_MIN_ROAD_M) return
       const offset = way.widthM / 2 + RoadSystem.SIDEWALK_WIDTH_M / 2
@@ -207,28 +230,11 @@ export class RoadSystem {
         this.appendPath(paths[at], RoadSystem.SIDEWALK_WIDTH_M, groundYAt, batch, {
           offsetM: offset * side,
           liftM: RoadSystem.LIFT_M + RoadSystem.SIDEWALK_KERB_M,
-          skip: (x, z) => RoadSystem.crossesAnother(x, z, at, ways, paths)
+          skip: (x, z) => grid.onAnotherCarriageway(x, z, at)
         })
       }
     })
     return batch
-  }
-
-  /** Whether a point lies on the carriageway of a street other than the one it belongs to. */
-  private static crossesAnother(x: number, z: number, own: number, ways: RoadWay[], paths: { x: number; z: number }[][]): boolean {
-    for (let w = 0; w < paths.length; w++) {
-      if (w === own) continue
-      const reach = ways[w].widthM / 2 + 0.3
-      const path = paths[w]
-      for (let i = 1; i < path.length; i++) {
-        const dx = path[i].x - path[i - 1].x
-        const dz = path[i].z - path[i - 1].z
-        const length2 = dx * dx + dz * dz
-        const t = length2 === 0 ? 0 : Math.max(0, Math.min(1, ((x - path[i - 1].x) * dx + (z - path[i - 1].z) * dz) / length2))
-        if (Math.hypot(x - (path[i - 1].x + dx * t), z - (path[i - 1].z + dz * t)) < reach) return true
-      }
-    }
-    return false
   }
 
   /**
@@ -438,5 +444,56 @@ float roadNoise(vec2 p) {
     const last = points[points.length - 1]
     if (last) out.push({ x: last.x, z: last.z })
     return out
+  }
+}
+
+/**
+ * The carriageways of a set of roads, cut into segments and filed by the cell of ground they pass through (each, with the margin of its road's width, in every
+ * cell it touches): whether a point is on a carriageway is then asked of the few segments of its own cell and not of all of them.
+ */
+class SegmentGrid {
+  /** Wider than the widest carriageway's half, so that a segment need only be filed under the cells it, and its margin, touch. */
+  private static readonly CELL_M = 40
+  private readonly cells = new Map<number, { way: number, ax: number, az: number, dx: number, dz: number, length2: number, reach: number }[]>()
+
+  constructor(ways: RoadWay[], paths: { x: number, z: number }[][]) {
+    paths.forEach((path, way) => {
+      const reach = ways[way].widthM / 2 + 0.3
+      for (let i = 1; i < path.length; i++) {
+        const ax = path[i - 1].x
+        const az = path[i - 1].z
+        const dx = path[i].x - ax
+        const dz = path[i].z - az
+        const segment = { way, ax, az, dx, dz, length2: dx * dx + dz * dz, reach }
+        const x0 = Math.floor((Math.min(ax, path[i].x) - reach) / SegmentGrid.CELL_M)
+        const x1 = Math.floor((Math.max(ax, path[i].x) + reach) / SegmentGrid.CELL_M)
+        const z0 = Math.floor((Math.min(az, path[i].z) - reach) / SegmentGrid.CELL_M)
+        const z1 = Math.floor((Math.max(az, path[i].z) + reach) / SegmentGrid.CELL_M)
+        for (let cx = x0; cx <= x1; cx++) {
+          for (let cz = z0; cz <= z1; cz++) {
+            const key = SegmentGrid.key(cx, cz)
+            const list = this.cells.get(key)
+            if (list) list.push(segment)
+            else this.cells.set(key, [segment])
+          }
+        }
+      }
+    })
+  }
+
+  private static key(cx: number, cz: number): number {
+    return (cx + 50_000) * 100_003 + (cz + 50_000)
+  }
+
+  /** Whether a point lies on the carriageway of a street other than `own`. */
+  onAnotherCarriageway(x: number, z: number, own: number): boolean {
+    const list = this.cells.get(SegmentGrid.key(Math.floor(x / SegmentGrid.CELL_M), Math.floor(z / SegmentGrid.CELL_M)))
+    if (!list) return false
+    for (const segment of list) {
+      if (segment.way === own) continue
+      const t = segment.length2 === 0 ? 0 : Math.max(0, Math.min(1, ((x - segment.ax) * segment.dx + (z - segment.az) * segment.dz) / segment.length2))
+      if (Math.hypot(x - (segment.ax + segment.dx * t), z - (segment.az + segment.dz * t)) < segment.reach) return true
+    }
+    return false
   }
 }

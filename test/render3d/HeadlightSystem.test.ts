@@ -17,29 +17,47 @@ describe("HeadlightSystem", () => {
     expect(beams.has("e")).toBe(false)
   })
 
-  it("makes the lights of the observer's own lamps cast a shadow, and no other's: a bank keeps the light from what is behind it", () => {
+  it("makes the observer's own lamps cast a shadow, and no other's: a bank keeps the light from what is behind it", () => {
     const beams = system()
     beams.add("observer")
     beams.add("car")
     beams.aim("observer", "dipped", new Vector3(0, 0.7, 0), north, 0.65, 1, 0)
     beams.aim("car", "dipped", new Vector3(30, 0.7, 0), north, 0.7, 1, 0)
-    for (const light of beams.lamps("observer")) expect(light.castShadow).toBe(true)
+    for (const light of beams.lamps("observer")) {
+      expect(light.castShadow).toBe(true)
+      expect(light.shadow.autoUpdate).toBe(true)
+    }
     for (const light of beams.lamps("car")) expect(light.castShadow).toBe(false)
   })
 
-  it("stops drawing a shadow for lamps that are off, so that nothing is rendered for them", () => {
+  it("never changes whether a lamp casts a shadow once it is made: that is a new program for every material, compiled in the middle of a frame", () => {
+    const beams = system()
+    beams.add("observer")
+    const flags = () => beams.lamps("observer").map(light => light.castShadow)
+    const made = flags()
+    for (const mode of ["main", "off", "position", "dipped", "fog", "off"] as const) {
+      beams.aim("observer", mode, new Vector3(0, 0.7, 0), north, 0.65, 1, 0)
+      expect(flags()).toEqual(made)
+    }
+  })
+
+  it("stops drawing the shadow map of lamps that are off, so that nothing is rendered for them, and draws it again as they light", () => {
     const beams = system()
     beams.add("observer")
     beams.aim("observer", "main", new Vector3(0, 0.7, 0), north, 0.65, 1, 0)
-    expect(beams.lamps("observer")[0].castShadow).toBe(true)
+    expect(beams.lamps("observer")[0].shadow.autoUpdate).toBe(true)
     beams.aim("observer", "off", new Vector3(0, 0.7, 0), north, 0.65, 1, 0)
     for (const light of beams.lamps("observer")) {
-      expect(light.castShadow).toBe(false)
+      expect(light.shadow.autoUpdate).toBe(false)
       expect(light.intensity).toBe(0)
     }
     // The position lights light nothing either.
     beams.aim("observer", "position", new Vector3(0, 0.7, 0), north, 0.65, 1, 0)
     expect(beams.lamps("observer")[0].intensity).toBe(0)
+    expect(beams.lamps("observer")[0].shadow.autoUpdate).toBe(false)
+    beams.aim("observer", "dipped", new Vector3(0, 0.7, 0), north, 0.65, 1, 0)
+    expect(beams.lamps("observer")[0].shadow.autoUpdate).toBe(true)
+    expect(beams.lamps("observer")[0].shadow.needsUpdate).toBe(true)
   })
 
   it("shows the light in the air in proportion to what the air scatters: faint in clear air, strong in a fog, none off", () => {

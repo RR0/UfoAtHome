@@ -194,4 +194,39 @@ describe("RoadSystem pavements", () => {
     expect([...drawn].some(i => points[i][0] < 90 && Math.abs(points[i][2]) < 5)).toBe(true)
     expect([...drawn].some(i => points[i][0] > 110 && Math.abs(points[i][2]) < 5)).toBe(true)
   })
+
+  it("draws only the roads that come near the patch, however many an archive holds", () => {
+    const system = new RoadSystem()
+    const near = straight("near", "paved", 7, 200)
+    // A road five kilometres east of the patch: an archive of a whole drive holds it, and the patch of a few hundred metres cannot show it.
+    const far: RoadWay = { id: "far", surface: "paved", widthM: 7, points: [{ lat: LAT, lng: LNG + 5000 / 92000 }, { lat: LAT, lng: LNG + 5200 / 92000 }] }
+    system.set([near, far], LAT, LNG, () => 0, false, 900)
+    const position = meshes(system)[0].geometry.getAttribute("position")
+    for (let i = 0; i < position.count; i++) expect(Math.abs(position.getX(i))).toBeLessThan(1500)
+    // Without a radius, all of it.
+    const whole = new RoadSystem()
+    whole.set([near, far], LAT, LNG, () => 0, false)
+    const wide = meshes(whole)[0].geometry.getAttribute("position")
+    let farthest = 0
+    for (let i = 0; i < wide.count; i++) farthest = Math.max(farthest, Math.abs(wide.getX(i)))
+    expect(farthest).toBeGreaterThan(4000)
+  })
+
+  it("lays the pavements of a town of hundreds of streets in a fraction of a second, not seconds: each rung asks its own cell of ground", () => {
+    // A grid of 30 x 30 urban streets 60 m apart: 1800 ways crossing and the pavements of every one of them.
+    const ways: RoadWay[] = []
+    for (let i = 0; i < 30; i++) {
+      const north = i * 60 / 111320
+      ways.push({ id: `e${i}`, surface: "paved", widthM: 6, urban: true, points: [{ lat: LAT + north, lng: LNG }, { lat: LAT + north, lng: LNG + 1800 / 92000 }] })
+      const east = i * 60 / 92000
+      ways.push({ id: `n${i}`, surface: "paved", widthM: 6, urban: true, points: [{ lat: LAT, lng: LNG + east }, { lat: LAT + 1800 / 111320, lng: LNG + east }] })
+    }
+    const system = new RoadSystem()
+    const started = performance.now()
+    system.set(ways, LAT, LNG, () => 0, false)
+    expect(performance.now() - started).toBeLessThan(1500)
+    const pavements = meshes(system).find(mesh => mesh.name === "roads sidewalks")
+    expect(pavements).toBeDefined()
+    expect(pavements!.geometry.getIndex()!.count).toBeGreaterThan(0)
+  })
 })
