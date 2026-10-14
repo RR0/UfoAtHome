@@ -1,5 +1,5 @@
 // Named imports only — see SceneRenderer.ts's own top-of-file comment on why (tree-shaking).
-import { BufferAttribute, BufferGeometry, Color, Group, Mesh, MeshLambertMaterial } from "three"
+import { BufferAttribute, BufferGeometry, Color, Group, Mesh, MeshLambertMaterial, Vector2 } from "three"
 import type { RoadSurface, RoadWay } from "./terrain/RoadProvider.js"
 import type { StatedRoad } from "../engine/model/Road.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
@@ -41,6 +41,12 @@ export class RoadSystem {
    * again: the road came out as a glow, brightest where the sky is, hidden in patches where the ground stood over it.
    */
   static readonly RENDER_ORDER = 1.05
+  /** The paint is drawn over the carriageway it is on (see RoadMarkings). */
+  static readonly MARKINGS_RENDER_ORDER = 1.06
+  /** The albedo of a road paint: white, weathered. */
+  private static readonly MARKINGS_ALBEDO: [number, number, number] = [0.55, 0.55, 0.5]
+  /** How much the grain of the surface varies its colour, by surface: asphalt is mottled, gravel and dirt more so. */
+  private static readonly GRAIN_CONTRAST: Record<RoadSurface, number> = { paved: 0.8, gravel: 1.1, dirt: 1.1 }
   /**
    * The pavements of a street: a strip this wide along each side of the carriageway, raised by a kerb. Drawn for the streets the map says are
    * urban, and where a way is not a side street's mouth (see crossesAnother).
@@ -62,6 +68,13 @@ export class RoadSystem {
     gravel: [0.42, 0.38, 0.31],
     dirt: [0.34, 0.28, 0.21]
   }
+
+  /** Where the patch's own origin stands from one fixed point of the recording, so the grain of a road is the same from one patch to the next (see GrassDetail). */
+  private readonly grainOrigin = new Vector2()
+  private grainReference?: { lat: number, lng: number }
+  /** A paint being laid is dropped if another set of roads came since: it was for the patch before. */
+  private markingsToken = 0
+  private static markingsModule?: Promise<typeof import("./RoadMarkings.js")>
 
   readonly group = new Group()
   /** What a survey of today reports, drawn faint, and what the case file states, drawn whole. Two
@@ -98,6 +111,8 @@ export class RoadSystem {
 
   set(ways: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt, contemporary: boolean): void {
     RoadSystem.empty(this.surveyed)
+    this.markingsToken++
+    this.anchorGrain(originLat, originLng)
     // One mesh per SURFACE, not per way. A town's network is five hundred ways — around Socorro it
     // is 490 — and five hundred draw calls to put down what is, visually, three materials would
     // cost more than everything else in the frame put together. They share a material anyway, so
@@ -114,12 +129,53 @@ export class RoadSystem {
     }
     const pavements = this.sidewalks(ways, originLat, originLng, groundYAt)
     if (pavements.indices.length > 0) {
-      const mesh = this.meshOf("paved", pavements, contemporary, RoadSystem.SIDEWALK_ALBEDO)
+      const mesh = this.meshOf("paved", pavements, contemporary, RoadSystem.SIDEWALK_ALBEDO, false)
       if (mesh) {
         mesh.name = "roads sidewalks"
         this.surveyed.add(mesh)
       }
     }
+    this.paint(ways, originLat, originLng, groundYAt, contemporary)
+  }
+
+  /**
+   * Lays the paint of the roads, the first time a scene has any road wide enough to carry it: the code that draws it is fetched then and not before, and
+   * the paint of the roads of the patch before is not laid on this one if it comes late (see markingsToken).
+   */
+  private paint(ways: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt, contemporary: boolean): void {
+    if (!ways.some(way => way.surface === "paved" && way.widthM >= 5.5)) return
+    const token = this.markingsToken
+    void (RoadSystem.markingsModule ??= import("./RoadMarkings.js")).then(({ RoadMarkings }) => {
+      if (token !== this.markingsToken) return
+      const batch = { positions: [] as number[], indices: [] as number[] }
+      const laid = RoadMarkings.lay(ways, originLat, originLng, (points, widthM, options) =>
+        this.appendPath(points, widthM, groundYAt, batch, { offsetM: options.offsetM, liftM: RoadSystem.LIFT_M + options.liftM, minHalfM: options.minHalfM }))
+      if (laid === 0 || batch.indices.length === 0) return
+      const mesh = this.meshOf("paved", batch, contemporary, RoadSystem.MARKINGS_ALBEDO, false)
+      if (!mesh) return
+      mesh.name = "roads markings"
+      mesh.renderOrder = RoadSystem.MARKINGS_RENDER_ORDER
+      // Over the carriageway it is on, which is already over the ground.
+      mesh.material.polygonOffsetFactor = -4
+      mesh.material.polygonOffsetUnits = -4
+      this.surveyed.add(mesh)
+      this.onMarkings?.()
+    })
+  }
+
+  /** Called when the paint of a set of roads arrives, a moment after the roads: the scene draws again. */
+  onMarkings?: () => void
+
+  /** Keeps the grain of the surfaces where it was from one patch to the next: the fixed point is the first patch's, and another place entirely starts over. */
+  private anchorGrain(originLat: number, originLng: number): void {
+    if (this.grainReference) {
+      const from = geoToLocalMeters(this.grainReference.lat, this.grainReference.lng, originLat, originLng)
+      if (Math.hypot(from.x, from.z) > 20000) this.grainReference = undefined
+    }
+    this.grainReference ??= { lat: originLat, lng: originLng }
+    const reference = geoToLocalMeters(this.grainReference.lat, this.grainReference.lng, originLat, originLng)
+    // A point of this patch's own metres, in the fixed point's: the patch's origin is where the fixed point is, seen from it, the other way.
+    this.grainOrigin.set(-reference.x, -reference.z)
   }
 
   /**
@@ -187,6 +243,7 @@ export class RoadSystem {
    * What the case file states is not touched: it does not depend on anybody answering. */
   clear(): void {
     RoadSystem.empty(this.surveyed)
+    this.markingsToken++
   }
 
   private static empty(group: Group): void {
@@ -218,11 +275,11 @@ export class RoadSystem {
   /** One centre line, already in the patch's own metres, as a strip of quads — see appendRibbon. */
   private appendPath(
     points: { x: number; z: number }[], widthM: number, groundYAt: GroundYAt, batch: { positions: number[]; indices: number[] },
-    strip: { offsetM?: number, liftM?: number, skip?: (x: number, z: number) => boolean } = {}
+    strip: { offsetM?: number, liftM?: number, minHalfM?: number, skip?: (x: number, z: number) => boolean } = {}
   ): void {
     const centre = this.resample(points)
     if (centre.length < 2) return
-    const half = Math.max(0.5, widthM / 2)
+    const half = Math.max(strip.minHalfM ?? 0.5, widthM / 2)
     const lift = strip.liftM ?? RoadSystem.LIFT_M
     const offset = strip.offsetM ?? 0
     const base = batch.positions.length / 3
@@ -273,7 +330,7 @@ export class RoadSystem {
   }
 
   /** All the roads of one surface as a single mesh — see set. */
-  private meshOf(surface: RoadSurface, batch: { positions: number[]; indices: number[] }, contemporary: boolean, albedoOf?: [number, number, number]): Mesh | undefined {
+  private meshOf(surface: RoadSurface, batch: { positions: number[]; indices: number[] }, contemporary: boolean, albedoOf?: [number, number, number], grained = true): Mesh<BufferGeometry, MeshLambertMaterial> | undefined {
     if (batch.indices.length === 0) return undefined
     const geometry = new BufferGeometry()
     geometry.setAttribute("position", new BufferAttribute(new Float32Array(batch.positions), 3))
@@ -292,6 +349,7 @@ export class RoadSystem {
       polygonOffsetFactor: -2,
       polygonOffsetUnits: -2
     })
+    if (grained) this.addGrain(material, RoadSystem.GRAIN_CONTRAST[surface])
     const mesh = new Mesh(geometry, material)
     mesh.name = `roads ${surface}`
     mesh.renderOrder = RoadSystem.RENDER_ORDER
@@ -300,6 +358,49 @@ export class RoadSystem {
     // would shade the ground with the carriageway's own six centimetres.
     mesh.castShadow = false
     return mesh
+  }
+
+  /**
+   * The grain of a surface: asphalt is mottled, patched and gritty, and a lit road that is one flat colour reads as a picture lying on the ground. Read in the
+   * surface's own metres (see GrassDetail on why not the world's), so that it goes by under a moving observer as a road does, and fading with the distance, as
+   * each scale of it is let go of before it is finer than a pixel.
+   */
+  private addGrain(material: MeshLambertMaterial, contrast: number): void {
+    const origin = this.grainOrigin
+    material.onBeforeCompile = shader => {
+      shader.uniforms.uRoadOrigin = { value: origin }
+      shader.uniforms.uRoadContrast = { value: contrast }
+      shader.vertexShader = shader.vertexShader
+        .replace("#include <common>", "#include <common>\nvarying vec2 vRoadXZ;\nuniform vec2 uRoadOrigin;")
+        .replace("#include <begin_vertex>", "#include <begin_vertex>\nvRoadXZ = position.xz + uRoadOrigin;")
+      shader.fragmentShader = shader.fragmentShader
+        .replace("#include <common>", `#include <common>
+varying vec2 vRoadXZ;
+uniform float uRoadContrast;
+float roadHash(vec2 p) {
+  p = fract(p * vec2(123.34, 456.21));
+  p += dot(p, p + 45.32);
+  return fract(p.x * p.y);
+}
+float roadNoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(roadHash(i), roadHash(i + vec2(1.0, 0.0)), f.x), mix(roadHash(i + vec2(0.0, 1.0)), roadHash(i + vec2(1.0, 1.0)), f.x), f.y);
+}`)
+        .replace("#include <map_fragment>", `#include <map_fragment>
+{
+  float eye = length(vViewPosition);
+  // Repairs and wear in patches a few metres across, then the aggregate, then the grit under the wheels.
+  float grain = (roadNoise(vRoadXZ * 0.45) - 0.5) * 0.55 * (1.0 - smoothstep(80.0, 260.0, eye))
+    + (roadNoise(vRoadXZ * 3.1) - 0.5) * 0.5 * (1.0 - smoothstep(30.0, 110.0, eye))
+    + (roadNoise(vRoadXZ * 13.0) - 0.5) * 0.7 * (1.0 - smoothstep(9.0, 40.0, eye))
+    + (roadNoise(vRoadXZ * 47.0) - 0.5) * 0.7 * (1.0 - smoothstep(2.5, 12.0, eye));
+  diffuseColor.rgb *= 1.0 + grain * uRoadContrast;
+}`)
+    }
+    // A different program from every other Lambert material, which three tells apart by this key.
+    material.customProgramCacheKey = () => "rr0-road-grain"
   }
 
   /**

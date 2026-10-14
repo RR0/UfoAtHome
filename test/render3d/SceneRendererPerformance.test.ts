@@ -3,6 +3,7 @@ import { BoxGeometry, BufferGeometry, DirectionalLight, Float32BufferAttribute, 
 import { SceneRenderer } from "../../src/render3d/SceneRenderer.js"
 import { DecorSystem } from "../../src/render3d/DecorSystem.js"
 import { RoadSystem } from "../../src/render3d/RoadSystem.js"
+import { HeadlightSystem } from "../../src/render3d/HeadlightSystem.js"
 import { AerialPerspective } from "../../src/engine/atmosphere/AerialPerspective.js"
 
 // Exercise the CPU scene updates without constructing a WebGL context.
@@ -270,13 +271,15 @@ describe("scene playback resource reuse", () => {
 describe("the beams of the vehicles", () => {
   function withBeams() {
     const r = renderer()
-    r.headlightBeams = new Map()
+    r.headlightSystem = new HeadlightSystem(r.scene)
+    r.air = { transmittance: () => [1, 1, 1] }
+    r.siteElevationM = 0
     r.scatteredSky = { relativeScale: 1 }
     r.camera.position.y = 1.6
     return r
   }
-  const at = (r: ReturnType<typeof renderer>) => r.headlightBeams.get("observer")?.[0]
-  const lamps = (r: ReturnType<typeof renderer>) => r.headlightBeams.get("observer")!
+  const at = (r: ReturnType<typeof renderer>) => r.headlightSystem.lamps("observer")[0]
+  const lamps = (r: ReturnType<typeof renderer>) => r.headlightSystem.lamps("observer")
 
   it("gives the observer's own vehicle a beam ahead of the eye, under it, facing the way it goes", () => {
     const r = withBeams()
@@ -379,9 +382,9 @@ describe("the beams of the vehicles", () => {
     group.position.set(10, 0, -5)
     // Heading 90 is east: the front of the model is -Z, turned a quarter turn to +X.
     group.rotation.y = -Math.PI / 2
-    r.addHeadlightBeam("car")
+    r.headlightSystem.add("car")
     r.aimDecorBeam(car, group, "main")
-    const [first, second] = r.headlightBeams.get("car")!
+    const [first, second] = r.headlightSystem.lamps("car")
     const beam = first
     expect(beam.position.x).toBeGreaterThan(10 + 1.5)
     // The two lamps are either side of the vehicle's axis, which runs east to west through z = -5.
@@ -396,10 +399,31 @@ describe("the beams of the vehicles", () => {
     expect(second.intensity).toBe(0)
   })
 
+  it("brings the code of the beams in only for a scene that has a vehicle: none for an observer on foot", async () => {
+    const r = renderer()
+    r.air = { transmittance: () => [1, 1, 1] }
+    r.siteElevationM = 0
+    r.scatteredSky = { relativeScale: 1 }
+    r.compileNextFrameOffThread = () => undefined
+    r.render = () => undefined
+    r.decorObjects = []
+    r.setObserverHeadlights(undefined)
+    expect(r.headlightLoading).toBeUndefined()
+    expect(r.headlightSystem).toBeUndefined()
+    // A vehicle of the observer's: now it loads, once, and the beam is there when it has.
+    r.setObserverHeadlights({ setting: "dipped", headingDeg: 0 })
+    expect(r.headlightLoading).toBeDefined()
+    await r.headlightLoading
+    expect(r.headlightSystem).toBeInstanceOf(HeadlightSystem)
+    expect(r.headlightSystem.has("observer")).toBe(true)
+    r.setObserverHeadlights({ setting: "dipped", headingDeg: 90 })
+    expect(r.headlightSystem.size).toBe(1)
+  })
+
   it("gives only the first few vehicles a real beam", () => {
     const r = withBeams()
-    for (const id of ["a", "b", "c", "d", "e", "f"]) r.addHeadlightBeam(id)
-    expect(r.headlightBeams.size).toBe(4)
+    for (const id of ["a", "b", "c", "d", "e", "f"]) r.headlightSystem.add(id)
+    expect(r.headlightSystem.size).toBe(4)
   })
 })
 
