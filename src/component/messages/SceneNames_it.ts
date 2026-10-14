@@ -143,6 +143,7 @@ export const sceneNames_it: SceneNames = {
   towards: point => `verso ${point}`,
   starTooltip: "{name} — mag {mag}, {alt}° sopra l'orizzonte",
   starTooltipBelow: "{name} — mag {mag}, {alt}° sotto l'orizzontale",
+  decorTooltip: "{name} — {size}, a {distance}",
   satelliteTooltip: "{name} — satellite, mag {mag}, a {height} km di quota",
   trafficTooltip: {
     unnamed: "Aeromobile {hex}",

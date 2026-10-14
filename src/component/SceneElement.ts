@@ -93,6 +93,7 @@ import type { UpperAirProvider, UpperAirSample, UpperAirSource } from "../engine
 import { TrafficIds } from "../engine/traffic/TrafficIds.js"
 import type { TrafficDecorSet } from "../engine/traffic/TrafficDecor.js"
 import type { DecorObject } from "../engine/model/Decor.js"
+import { DecorSystem } from "../render3d/DecorSystem.js"
 import { resolveDecorSeatAt } from "../engine/model/Decor.js"
 import type { DataSource } from "../engine/source/DataSource.js"
 import { FireballArchive } from "../engine/astronomy/FireballArchive.js"
@@ -144,6 +145,9 @@ const STAR_TOOLTIP = "{name} — mag {mag}, {alt}° above the horizon"
 /** A satellite under the pointer: its catalogue name, how bright, how high. The height in
  * kilometres, not the altitude in degrees, because the height is what tells a Starlink still
  * raising its orbit from one on station. */
+const DECOR_TOOLTIP = "{name} — {size}, {distance} away"
+
+/** Hover tooltip of a satellite: see SATELLITE_TOOLTIP's doc. */
 const SATELLITE_TOOLTIP = "{name} — satellite, mag {mag}, {height} km up"
 
 /** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */import { Headlights } from "../engine/model/Headlights.js"
@@ -282,6 +286,8 @@ export interface ScenePick {
   /** The sky body's key, the interpretation body's id or the decor object's id, when it has one. */
   id?: string
   name: string
+  /** What the hover tooltip says in addition to the name while Alt is held: a decor object's size and distance. Asked for only then: measuring costs, and most hovers do not want it. */
+  detail?: () => string
 }
 
 export class SceneElement extends HTMLElement {
@@ -459,7 +465,7 @@ export class SceneElement extends HTMLElement {
     const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1
     const ndcY = -(((event.clientY - rect.top) / rect.height) * 2 - 1)
     const pick = this.pickAt(ndcX, ndcY)
-    if (pick) this.showHoverTooltip(event, pick.name)
+    if (pick) this.showHoverTooltip(event, event.altKey && pick.detail ? pick.detail() : pick.name)
     else this.hoverTooltip.hidden = true
   }
 
@@ -487,7 +493,10 @@ export class SceneElement extends HTMLElement {
     if (standing !== undefined && standingName) return { kind: "body", id: standing, name: standingName }
     const decorId = this.pickDecorAt(ndcX, ndcY)
     const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
-    if (decor) return { kind: "decor", id: decor.id, name: this.said.read(decor.title) || naming.decorKind(decor.kind, DECOR_KIND_NAMES[decor.kind]) }
+    if (decor) {
+      const name = this.said.read(decor.title) || naming.decorKind(decor.kind, DECOR_KIND_NAMES[decor.kind])
+      return { kind: "decor", id: decor.id, name, detail: () => this.decorTooltip(decor, name) }
+    }
     // Last of the four, and deliberately: a shape is painted over everything, a planet is a better
     // answer than the star behind it, and a building stands between the observer and the whole sky.
     // A star is what is left when nothing nearer is under the pointer.
@@ -528,6 +537,17 @@ export class SceneElement extends HTMLElement {
       }
     }
     return undefined
+  }
+
+  /** The name of a decor object with what it measures and how far it stands from the eye: "Tree 19 — 2 × 2 × 11.8 m, 540 m away". */
+  private decorTooltip(decor: DecorObject, name: string): string {
+    const metres = (value: number) => value.toLocaleString(undefined, { maximumFractionDigits: value < 10 ? 1 : 0 })
+    const size = DecorSystem.sizeOf(decor)
+    const distance = this.sceneRenderer.decorDistanceM(decor.id)
+    const far = distance === undefined ? "" : distance >= 1000 ? `${(distance / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })} km` : `${metres(distance)} m`
+    const template = this.naming.names?.decorTooltip ?? DECOR_TOOLTIP
+    const text = template.replace("{name}", name).replace("{size}", `${metres(size.widthM)} × ${metres(size.lengthM)} × ${metres(size.heightM)} m`)
+    return text.replace("{distance}", far)
   }
 
   /** What to call the thing under the pointer. The comets are not in BODY_NAMES because there are

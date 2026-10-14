@@ -80,6 +80,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     pickDecorAt(): undefined {
       return undefined
     }
+    decorDistanceM() {
+      return undefined
+    }
     decorScreenBox(): undefined {
       return undefined
     }

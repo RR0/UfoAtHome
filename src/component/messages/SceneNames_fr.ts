@@ -150,6 +150,7 @@ export const sceneNames_fr: SceneNames = {
   towards: point => /^[EO]/.test(point) ? `à l'${point}` : `au ${point}`,
   starTooltip: "{name} — mag {mag}, {alt}° au-dessus de l'horizon",
   starTooltipBelow: "{name} — mag {mag}, {alt}° sous l'horizontale",
+  decorTooltip: "{name} — {size}, à {distance}",
   satelliteTooltip: "{name} — satellite, mag {mag}, à {height} km d'altitude",
   trafficTooltip: {
     unnamed: "Aéronef {hex}",

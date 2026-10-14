@@ -885,15 +885,26 @@ describe("SceneElement air traffic", () => {
   })
 
   /** Hovers the canvas, as the reader's pointer does, and returns what the tooltip says. */
-  const hover = (element: SceneElement): string | undefined => {
+  const hover = (element: SceneElement, altKey = false): string | undefined => {
     const canvas = element.ufoElement.canvasElement
     canvas.getBoundingClientRect = () =>
       ({ left: 0, top: 0, width: canvas.width, height: canvas.height, right: canvas.width, bottom: canvas.height, x: 0, y: 0, toJSON: () => "" }) as DOMRect
     // Away from the recording's own shape, which is painted over everything and would answer for it.
-    canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: 200, clientY: 100, bubbles: true, composed: true }))
+    canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: 200, clientY: 100, altKey, bubbles: true, composed: true }))
     const tooltip = element.shadowRoot!.getElementById("hover-tooltip")!
     return tooltip.hidden ? undefined : tooltip.textContent!
   }
+
+  it("gives a decor object's size and distance only while Alt is held, and measures them only then", () => {
+    const { element } = mountAt(AT, stubSource(overhead).source)
+    const detail = vi.fn(() => "Tree 1 — 2 × 2 × 11.8 m, 540 m away")
+    vi.spyOn(element, "pickAt").mockReturnValue({ kind: "decor", id: "t1", name: "Tree 1", detail })
+    expect(hover(element)).toBe("Tree 1")
+    expect(detail).not.toHaveBeenCalled()
+    expect(hover(element, true)).toBe("Tree 1 — 2 × 2 × 11.8 m, 540 m away")
+    expect(detail).toHaveBeenCalledTimes(1)
+    element.remove()
+  })
 
   it("tells who an aircraft pointed at is, how it flies, where it is and how it sounds", async () => {
     const described = stubSource(overhead)

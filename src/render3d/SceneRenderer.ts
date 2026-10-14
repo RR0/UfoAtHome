@@ -5389,6 +5389,12 @@ export class SceneRenderer {
     return hit ? { x: hit.x, z: hit.z } : undefined
   }
 
+  /** How far a decor object stands from the eye on the ground, metres, or undefined when it is not in the scene. */
+  decorDistanceM(id: string): number | undefined {
+    const group = this.decorGroups.get(id)
+    return group ? Math.hypot(group.position.x - this.camera.position.x, group.position.z - this.camera.position.z) : undefined
+  }
+
   /** How many metres one unit of normalised picture height spans at the distance of a decor object: what
    * turns a vertical drag of the pointer into a rise or a fall of that object. */
   decorMetresPerNdcY(id: string): number {

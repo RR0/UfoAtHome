@@ -74,6 +74,8 @@ export interface SceneNames {
   readonly starTooltip: string
   /** The same for a star standing below the horizontal. */
   readonly starTooltipBelow: string
+  /** A decor object's hover tooltip: {name}, {size} (width × length × height, metres) and {distance} from the eye. */
+  readonly decorTooltip: string
   /** A satellite's hover tooltip: {name}, {mag}, {height}. */
   readonly satelliteTooltip: string
   /** What is said of an aircraft pointed at: see TrafficTooltip. */

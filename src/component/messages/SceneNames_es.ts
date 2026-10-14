@@ -146,6 +146,7 @@ export const sceneNames_es: SceneNames = {
   towards: point => `al ${point}`,
   starTooltip: "{name} — mag {mag}, {alt}° sobre el horizonte",
   starTooltipBelow: "{name} — mag {mag}, {alt}° bajo la horizontal",
+  decorTooltip: "{name} — {size}, a {distance}",
   satelliteTooltip: "{name} — satélite, mag {mag}, a {height} km de altitud",
   trafficTooltip: {
     unnamed: "Aeronave {hex}",

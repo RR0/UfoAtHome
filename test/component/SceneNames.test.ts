@@ -65,6 +65,7 @@ describe("SceneNames", () => {
           expect(template).toContain("{alt}")
         }
         expect(names.satelliteTooltip).toContain("{height}")
+        for (const placeholder of ["{name}", "{size}", "{distance}"]) expect(names.decorTooltip).toContain(placeholder)
       })
     })
   }

@@ -87,6 +87,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return pickedDecor
     }
     /** The object's frame: the middle of the picture, half of it across and up. */
+    decorDistanceM() {
+      return undefined
+    }
     decorScreenBox() {
       return { minX: -0.5, minY: -0.5, maxX: 0.5, maxY: 0.5 }
     }

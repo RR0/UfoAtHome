@@ -561,7 +561,9 @@ if (docs) {
       how high it stood — “Venus, mag −4, 8° above the horizon” answers a report of a bright light
       near the horizon on its own, where a bare name would not. The Sun, the Moon, the planets and
       any comet up that night answer the same way, and so does everything in the environment: a
-      building, a tree, another observer.</p>
+      building, a tree, another observer. With <kbd>Alt</kbd> held, an object of the environment also
+      says its size and how far it stands from the eye (“Tree 19 — 2 × 2 × 11.8 m, 540 m away”):
+      the measure is taken only then.</p>
     <p>What the ground hides does not answer. A star behind a hill is as unseeable as one below the
       horizon, so neither is offered — a reconstruction is not a list of what is in the sky, it is
       what could have been seen from where the observer stood.</p>
@@ -1038,7 +1040,9 @@ if (docs) {
       sa hauteur — « Vénus, mag −4, 8° au-dessus de l'horizon » répond à lui seul à un signalement
       de lumière vive près de l'horizon, là où un nom seul ne répondrait pas. Le Soleil, la Lune, les
       planètes et toute comète levée cette nuit-là répondent de même, et tout l'environnement
-      aussi : un bâtiment, un arbre, un autre observateur.</p>
+      aussi : un bâtiment, un arbre, un autre observateur. Avec <kbd>Alt</kbd> enfoncée, un objet de
+      l'environnement dit aussi sa taille et sa distance à l'œil (« Arbre 19 — 2 × 2 × 11,8 m, à 540 m ») :
+      la mesure n'est prise qu'alors.</p>
     <p>Ce que le sol cache ne répond pas. Une étoile derrière une colline est aussi invisible qu'une
       étoile sous l'horizon : ni l'une ni l'autre n'est proposée — une reconstitution n'est pas la
       liste de ce qu'il y a dans le ciel, c'est ce qui pouvait être vu d'où se tenait l'observateur.</p>
