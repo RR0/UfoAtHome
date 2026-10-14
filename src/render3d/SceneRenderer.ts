@@ -2684,7 +2684,11 @@ export class SceneRenderer {
         }
         group.userData.footprintKey = footprintKey
       }
-      group.position.set(x, group.userData.footprintGroundY + placement.altitudeM, z)
+      // What is in the cabin the eye is in stands on the SAME ground as the eye (see poseCameraY), not on the ground under its own footprint: for objects a
+      // metre apart, forty metres a second over a hilly country, those are two heights that differ by a few centimetres and by the second: the man in the
+      // seat moved up and down on it.
+      const groundY = this.cabinMates.has(group) ? this.groundYUnder(0, 0) : group.userData.footprintGroundY
+      group.position.set(x, groundY + placement.altitudeM, z)
       if (object.kind === "crop") {
         const distance = Math.hypot(x, z)
         group.visible = distance <= CROP_VISIBLE_DISTANCE_M
@@ -4252,14 +4256,24 @@ export class SceneRenderer {
    */
   private cabinDecor(): Object3D[] {
     const inside: Object3D[] = []
+    const near: Object3D[] = []
     const box = new Box3()
     for (const object of this.decorObjects) {
       if (object.observerSide !== undefined && canHoldObserver(object.kind)) continue
       const group = this.decorGroups.get(object.id)
-      if (group && box.setFromObject(group).containsPoint(this.camera.position)) inside.push(group)
+      if (!group) continue
+      box.setFromObject(group)
+      if (box.containsPoint(this.camera.position)) inside.push(group)
+      else if (box.distanceToPoint(this.camera.position) < SceneRenderer.CABIN_MATE_RANGE_M) near.push(group)
     }
+    // Those who share the cabin without the eye being inside THEIR box (the man in the other seat): what stands within a few metres of the eye of a cabin
+    this.cabinMates = new Set(inside.length > 0 ? [...inside, ...near] : [])
     return inside
   }
+
+  /** How near the eye, in metres, what is in the same cabin without containing the eye stands (the other seat, the man in it). */
+  private static readonly CABIN_MATE_RANGE_M = 4
+  private cabinMates = new Set<Object3D>()
 
   /**
    * Photographs the one reflection probe that is most out of date, if any is — see Reflections —
