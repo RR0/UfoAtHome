@@ -18,7 +18,7 @@ export interface HeadlightKeyframe {
   mode: HeadlightMode
 }
 
-/** What a beam is, as the scene draws it: both lamps together, as the regulations state a beam's intensity. */
+/** What a beam is, as the scene draws it: the intensity is of both lamps together, as the regulations state it, shared between the two lamps. */
 export interface HeadlightBeam {
   /** The intensity along the axis of the beam, candela (both lamps together). */
   candela: number
@@ -42,6 +42,9 @@ export class Headlights {
    * between the settings are the real ones; when the adaptation takes the lit ground into account, this goes to 1.
    */
   static readonly DISPLAY_GAIN = 0.006
+
+  /** How far each lamp's axis is turned in towards the other, degrees: the two beams cross far ahead of the vehicle. */
+  static readonly TOE_IN_DEG = 0.6
 
   /** The Sun's altitude under which the lights of an observer's vehicle are on when the recording says nothing: the dusk, when a driver puts them on. */
   static readonly AUTO_BELOW_SUN_DEG = -1

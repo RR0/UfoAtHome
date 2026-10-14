@@ -275,7 +275,8 @@ describe("the beams of the vehicles", () => {
     r.camera.position.y = 1.6
     return r
   }
-  const at = (r: ReturnType<typeof renderer>) => r.headlightBeams.get("observer")
+  const at = (r: ReturnType<typeof renderer>) => r.headlightBeams.get("observer")?.[0]
+  const lamps = (r: ReturnType<typeof renderer>) => r.headlightBeams.get("observer")!
 
   it("gives the observer's own vehicle a beam ahead of the eye, under it, facing the way it goes", () => {
     const r = withBeams()
@@ -284,7 +285,11 @@ describe("the beams of the vehicles", () => {
     expect(beam.intensity).toBeGreaterThan(0)
     // East is +x, and the lamps are ahead of the eye and well under it.
     expect(beam.position.x).toBeGreaterThan(2)
-    expect(Math.abs(beam.position.z)).toBeLessThan(0.01)
+    // Two lamps, one either side of the middle of the front: east is +x, so they are north and south of the line the vehicle goes along.
+    const [left, right] = lamps(r)
+    expect(left.position.x).toBeCloseTo(right.position.x, 3)
+    expect(Math.abs(left.position.z - right.position.z)).toBeGreaterThan(1)
+    expect(left.position.z + right.position.z).toBeCloseTo(0, 3)
     expect(beam.position.y).toBeLessThan(1.6 - 0.5)
     expect(beam.target.position.x).toBeGreaterThan(beam.position.x + 40)
     // Aimed a little under the horizontal, which is what a dipped beam is.
@@ -297,6 +302,25 @@ describe("the beams of the vehicles", () => {
     expect(at(r)!.target.position.z).toBeLessThan(-40)
     r.setObserverHeadlights({ setting: "main", headingDeg: 180 })
     expect(at(r)!.target.position.z).toBeGreaterThan(40)
+  })
+
+  it("gives the vehicle two beams, one to each lamp, that share the intensity of the setting and cross far ahead", () => {
+    const r = withBeams()
+    r.setObserverHeadlights({ setting: "dipped", headingDeg: 0 })
+    const [one, other] = lamps(r)
+    expect(lamps(r)).toHaveLength(2)
+    expect(one.intensity).toBeCloseTo(other.intensity, 6)
+    // Facing north (-z), the lamps are to the west and the east of the middle, a vehicle's width apart or so.
+    expect(Math.abs(one.position.x - other.position.x)).toBeGreaterThan(1)
+    expect(Math.abs(one.position.x + other.position.x)).toBeLessThan(0.01)
+    // Each is turned a little towards the other: the lamp on the west aims a little east.
+    const west = one.position.x < other.position.x ? one : other
+    const east = west === one ? other : one
+    expect(west.target.position.x - west.position.x).toBeGreaterThan(0)
+    expect(east.target.position.x - east.position.x).toBeLessThan(0)
+    // The two share what one setting gives: together, the intensity of the beam.
+    r.setObserverHeadlights({ setting: "main", headingDeg: 0 })
+    expect(lamps(r)[0].intensity + lamps(r)[1].intensity).toBeCloseTo(120_000 * 0.006 * 1, 3)
   })
 
   it("keeps the beam in the scene when the lights are off, with no intensity: the scene's count of lights does not change", () => {
@@ -357,15 +381,19 @@ describe("the beams of the vehicles", () => {
     group.rotation.y = -Math.PI / 2
     r.addHeadlightBeam("car")
     r.aimDecorBeam(car, group, "main")
-    const beam = r.headlightBeams.get("car")!
+    const [first, second] = r.headlightBeams.get("car")!
+    const beam = first
     expect(beam.position.x).toBeGreaterThan(10 + 1.5)
-    expect(beam.position.z).toBeCloseTo(-5, 3)
+    // The two lamps are either side of the vehicle's axis, which runs east to west through z = -5.
+    expect((first.position.z + second.position.z) / 2).toBeCloseTo(-5, 3)
+    expect(Math.abs(first.position.z - second.position.z)).toBeGreaterThan(1)
     expect(beam.position.y).toBeGreaterThan(0.5)
     expect(beam.position.y).toBeLessThan(1)
     expect(beam.target.position.x).toBeGreaterThan(beam.position.x + 40)
     expect(beam.intensity).toBeGreaterThan(0)
     r.aimDecorBeam(car, group, "position")
-    expect(beam.intensity).toBe(0)
+    expect(first.intensity).toBe(0)
+    expect(second.intensity).toBe(0)
   })
 
   it("gives only the first few vehicles a real beam", () => {

@@ -335,11 +335,16 @@ const STREETLIGHT_CANDELA = 1500
  * since a different count recompiles every material of the scene.
  */
 const HEADLIGHT_REAL_BEAMS = 4
+/** A vehicle has two lamps, so two lights of the scene. */
+const HEADLIGHT_LAMPS = 2
 /** How far a beam is followed: the intensity falls as the square of the distance, and past this a main beam leaves less than a Moon's light. */
 const HEADLIGHT_BEAM_DISTANCE_M = 500
-/** Where the lamps are on a vehicle: how high over the road, and how far back from the front, metres. */
+/** Where the lamps are on a vehicle: how high over the road, how far back from the front, and how far from the middle, metres (the last as a share of the width for a decor vehicle). */
 const HEADLIGHT_HEIGHT_M = 0.7
 const HEADLIGHT_SETBACK_M = 0.3
+const HEADLIGHT_HALF_TRACK_SHARE = 0.32
+/** The observer's own vehicle, a van: its lamps are this far either side of the middle. */
+const OBSERVER_HEADLIGHT_HALF_TRACK_M = 0.65
 /** The observer's own vehicle: the eye is in the cab, and the lamps are this far ahead of it and this far under it. */
 const OBSERVER_HEADLIGHT_AHEAD_M = 2.4
 const OBSERVER_HEADLIGHT_BELOW_EYE_M = 0.9
@@ -1126,7 +1131,7 @@ export class SceneRenderer {
    * visual emissive color, same as before. */
   private readonly streetlightLights = new Map<string, PointLight>()
   /** The beam of each vehicle that has lights, by decor id, and "observer" for the observer's own: see HEADLIGHT_REAL_BEAMS. */
-  private readonly headlightBeams = new Map<string, SpotLight>()
+  private readonly headlightBeams = new Map<string, SpotLight[]>()
   /** How each decor vehicle's lights are set, as the last tick resolved them (see aimBeams). */
   private readonly headlightSettings = new Map<string, HeadlightMode>()
   /** How the observer's own vehicle's lights are set, and which way it is going: from the recording (see setObserverHeadlights). */
@@ -3010,54 +3015,75 @@ export class SceneRenderer {
     this.aimObserverBeam()
   }
 
-  /** Adds the beam of a vehicle, if the scene still has one to give: off until it is aimed (see aimDecorBeam). */
+  /** Adds the beams of a vehicle, one for each lamp, if the scene still has any to give: off until they are aimed (see aimDecorBeam). */
   private addHeadlightBeam(id: string): void {
     if (this.headlightBeams.has(id) || this.headlightBeams.size >= HEADLIGHT_REAL_BEAMS) return
-    const light = new SpotLight(0xffffff, 0, HEADLIGHT_BEAM_DISTANCE_M, Math.PI / 8, 0.5, 2)
-    light.castShadow = false
-    this.scene.add(light)
-    this.scene.add(light.target)
-    this.headlightBeams.set(id, light)
+    const lamps: SpotLight[] = []
+    for (let lamp = 0; lamp < HEADLIGHT_LAMPS; lamp++) {
+      const light = new SpotLight(0xffffff, 0, HEADLIGHT_BEAM_DISTANCE_M, Math.PI / 8, 0.5, 2)
+      light.castShadow = false
+      this.scene.add(light)
+      this.scene.add(light.target)
+      lamps.push(light)
+    }
+    this.headlightBeams.set(id, lamps)
+  }
+
+  /** Takes the beams of a vehicle down. */
+  private removeHeadlightBeam(id: string): void {
+    for (const light of this.headlightBeams.get(id) ?? []) {
+      light.removeFromParent()
+      light.target.removeFromParent()
+      light.dispose()
+    }
+    this.headlightBeams.delete(id)
   }
 
   /** Takes the beams down: all of them, or the decor's and not the observer's. */
   private clearHeadlightBeams(observerToo: boolean): void {
-    for (const [id, light] of [...this.headlightBeams]) {
+    for (const id of [...this.headlightBeams.keys()]) {
       if (id === "observer" && !observerToo) continue
-      light.removeFromParent()
-      light.target.removeFromParent()
-      light.dispose()
-      this.headlightBeams.delete(id)
+      this.removeHeadlightBeam(id)
     }
   }
 
   /**
-   * Sets the beam of one vehicle: its setting (see HeadlightMode) says how strong, how wide and how low, and where it stands and faces says where.
-   * Off, and the position lights, which light nothing, are a beam of no intensity: it stays in the scene (the count of lights does not change) and gives nothing.
+   * Sets the beams of one vehicle: its setting (see HeadlightMode) says how strong, how wide and how low, and where it stands and faces says where. There is a
+   * beam to each lamp, the two either side of the middle of the front and a little turned in, and the intensity of the setting (that of both lamps together,
+   * as the regulations give it) is shared between them: two pools on the road in front of the vehicle that become one farther on.
+   * Off, and the position lights, which light nothing, are beams of no intensity: they stay in the scene (the count of lights does not change) and give nothing.
    *
-   * @param origin Where the lamps are, in the scene's own metres.
+   * @param origin Where the middle of the front of the lamps is, in the scene's own metres.
    * @param forward The way the vehicle faces on the ground (unit, horizontal).
+   * @param halfTrackM How far each lamp is from the middle, metres.
    */
-  private aimBeam(id: string, mode: HeadlightMode, origin: Vector3, forward: Vector3): void {
-    const light = this.headlightBeams.get(id)
-    if (!light) return
+  private aimBeam(id: string, mode: HeadlightMode, origin: Vector3, forward: Vector3, halfTrackM: number): void {
+    const lamps = this.headlightBeams.get(id)
+    if (!lamps) return
     const beam = Headlights.BEAMS[mode]
-    if (!beam) {
-      light.intensity = 0
-      return
-    }
-    const pitch = beam.pitchDeg * Math.PI / 180
-    light.color.set(beam.color)
-    light.intensity = beam.candela * Headlights.DISPLAY_GAIN * this.relativeScale
-    light.angle = beam.halfAngleDeg * Math.PI / 180
-    light.penumbra = beam.penumbra
-    light.position.copy(origin)
-    light.target.position.set(
-      origin.x + forward.x * Math.cos(pitch) * 50,
-      origin.y - Math.sin(pitch) * 50,
-      origin.z + forward.z * Math.cos(pitch) * 50
-    )
-    light.target.updateMatrixWorld()
+    // To the right of the way it faces, on the ground.
+    const right = new Vector3(-forward.z, 0, forward.x)
+    lamps.forEach((light, index) => {
+      if (!beam) {
+        light.intensity = 0
+        return
+      }
+      const side = index === 0 ? -1 : 1
+      const pitch = beam.pitchDeg * Math.PI / 180
+      light.color.set(beam.color)
+      light.intensity = beam.candela * Headlights.DISPLAY_GAIN * this.relativeScale / lamps.length
+      light.angle = beam.halfAngleDeg * Math.PI / 180
+      light.penumbra = beam.penumbra
+      light.position.copy(origin).addScaledVector(right, side * halfTrackM)
+      // Turned in by the lamps' own aim, a degree: the two axes cross far ahead of the vehicle.
+      const aim = forward.clone().addScaledVector(right, -side * Math.tan(Headlights.TOE_IN_DEG * Math.PI / 180)).normalize()
+      light.target.position.set(
+        light.position.x + aim.x * Math.cos(pitch) * 50,
+        light.position.y - Math.sin(pitch) * 50,
+        light.position.z + aim.z * Math.cos(pitch) * 50
+      )
+      light.target.updateMatrixWorld()
+    })
   }
 
   /** A decor vehicle's beam, from where its group stands and which way its front (towards -Z, see buildVehicle) points. */
@@ -3071,7 +3097,8 @@ export class SceneRenderer {
     const lengthM = DecorSystem.sizeOf(object).lengthM
     const origin = group.getWorldPosition(new Vector3()).addScaledVector(forward, lengthM / 2 - HEADLIGHT_SETBACK_M)
     origin.y += HEADLIGHT_HEIGHT_M
-    this.aimBeam(object.id, mode, origin, forward)
+    const widthM = DecorSystem.sizeOf(object).widthM
+    this.aimBeam(object.id, mode, origin, forward, widthM * HEADLIGHT_HALF_TRACK_SHARE)
   }
 
   /**
@@ -3080,18 +3107,9 @@ export class SceneRenderer {
    */
   setObserverHeadlights(headlights: { setting: HeadlightMode | "auto", headingDeg: number } | undefined): void {
     this.observerHeadlights = headlights
-    if (!headlights) this.clearObserverBeam()
+    if (!headlights) this.removeHeadlightBeam("observer")
     else this.addHeadlightBeam("observer")
     this.aimObserverBeam()
-  }
-
-  private clearObserverBeam(): void {
-    const light = this.headlightBeams.get("observer")
-    if (!light) return
-    light.removeFromParent()
-    light.target.removeFromParent()
-    light.dispose()
-    this.headlightBeams.delete("observer")
   }
 
   private aimObserverBeam(): void {
@@ -3102,7 +3120,7 @@ export class SceneRenderer {
     const forward = new Vector3(Math.sin(heading), 0, -Math.cos(heading))
     // The scene keeps the eye on the vertical through its own origin and moves the world round it: the lamps are ahead of it and under it.
     const origin = new Vector3(forward.x * OBSERVER_HEADLIGHT_AHEAD_M, this.camera.position.y - OBSERVER_HEADLIGHT_BELOW_EYE_M, forward.z * OBSERVER_HEADLIGHT_AHEAD_M)
-    this.aimBeam("observer", mode, origin, forward)
+    this.aimBeam("observer", mode, origin, forward, OBSERVER_HEADLIGHT_HALF_TRACK_M)
   }
 
   /** Places a real PointLight at a lit streetlight's own lamp-head position, as a CHILD of the
