@@ -40,12 +40,7 @@ PLANE_M, OBJECT_M = 11700.0, 10500.0
 SIZE_DEG = 1.24                                      # 1999 interview: 1000 m at 46 km, "the width of his thumb"; the report (200-300 m) and the SEPRA (half the Moon, 0.26) give far less
 STEP_MS = 1000
 
-# The A320 round the observer. The model (amvlab-a320, 37.6 m long) is drawn about the centre of its bounding box and placed so that the
-# left seat of the flight deck is where the eye is. Measured on the glTF's vertices: the nose is 18.85 m from that centre, the axis of
-# the fuselage 2.3 m under it; the eye of an A320 pilot is about 4.5 m behind the nose, 0.5 m left of the axis and 0.7 m above it (a
-# published dimension, not measured on the model), hence 1.6 m under the centre.
-EYE_FORWARD_M, EYE_LEFT_M, EYE_BELOW_CENTRE_M = 18.85 - 4.5, 0.5, 1.6
-# And in the flight deck model, where the captain's eye is: 0.557 m left of the centre of its box and 0.266 m above it (found by looking
+# In the flight deck model, where the captain's eye is: 0.557 m left of the centre of its box and 0.266 m above it (found by looking
 # out of it from the left seat); and 0.174 m AHEAD of it (the nose is towards -z), which is 0.25 m in front of the front of the seat's
 # headrest, as a seated pilot's eye is (found by sitting the MakeHuman captain in the seat, see scripts/people/build_pilot.py).
 COCKPIT_FORWARD_M, COCKPIT_LEFT_M, COCKPIT_BELOW_M = 0.174, 0.557, -0.266
@@ -129,7 +124,7 @@ def airframe(total_s, ident, title, model, size, forward_m, left_m, below_m, ext
         lat, lng = (round(v, 6) for v in geo(*plane_at(ms / 1000.0, total_s), total_s))
         # The engine (SceneRenderer.updateDecorAnchoring) places a decor object at its own position plus where the first pose lies as
         # seen from the CURRENT one, with the longitude scaled by the cosine of the current latitude: 8 m of lateral drift after ten
-        # kilometres if the track is simply the distance flown, which puts the eye outside a hull 3.95 m wide.
+        # kilometres if the track is simply the distance flown, which puts the eye 8 m off after ten kilometres, outside a flight deck 3.3 m wide.
         track.append({"t": ms,
                       "eastM": round((lng - ref_lng) * 111320.0 * math.cos(math.radians(lat)) + centre_e, 2),
                       "northM": round((lat - ref_lat) * 111320.0 + centre_n, 2),
@@ -141,23 +136,20 @@ def airframe(total_s, ident, title, model, size, forward_m, left_m, below_m, ext
 
 
 def airliner(total_s, seat="left"):
-    """The airliner round the observer: its hull and wings (the A320 of the catalogue, drawn on its outer faces only, so that the wings and
-    the engine show from the flight deck and the fuselage does not close the view) and, in it, the flight deck cut from davidmarton1987's
-    model (panels, seats, windscreen and side window openings, scaled to the real size: scripts/extract-a320-cockpit.py). The captain sits
-    on the left, the co-pilot on the right: the eye is on the other side of the middle of the flight deck."""
-    side = 1 if seat == "left" else -1
+    """The flight deck round the observer (the model cut from davidmarton1987's, scaled to the real size: scripts/extract-a320-cockpit.py), and,
+    seen from the right seat, the captain seated at the left one, on the line of sight to the left window. No airframe: the A320 of the
+    catalogue, kept for its wings, had a surface that came across the view of the flight deck, and its wings are behind the pilots anyway."""
+    cockpit_title = (tr("Poste de pilotage de l'A320 (siège gauche : le commandant)", "A320 flight deck (left seat: the captain)") if seat == "left"
+                     else tr("Poste de pilotage de l'A320 (siège droit : la copilote)", "A320 flight deck (right seat: the co-pilot)"))
     return [
-        airframe(total_s, "af3532", tr("Airbus A320-111 F-GFKG, vol AF 3532 (cellule, vue de l'intérieur)", "Airbus A320-111 F-GFKG, flight AF 3532 (airframe, seen from inside)"),
-                 "amvlab-a320", {"widthM": 34.1, "lengthM": 37.6, "heightM": 11.8}, EYE_FORWARD_M, side * EYE_LEFT_M, EYE_BELOW_CENTRE_M,
-                 {"observerSide": "front-" + seat, "aircraftSound": "airliner-narrow"}),
-        airframe(total_s, "af3532-cockpit", tr("Poste de pilotage de l'A320 (siège gauche : le commandant)", "A320 flight deck (left seat: the captain)"),
+        airframe(total_s, "af3532-cockpit", cockpit_title,
                  "davidmarton-a320-cockpit", {"widthM": 3.257, "lengthM": 2.591, "heightM": 2.127}, COCKPIT_FORWARD_M,
-                 COCKPIT_LEFT_M if seat == "left" else COCKPIT_RIGHT_SEAT_LEFT_M, COCKPIT_BELOW_M, {}),
+                 COCKPIT_LEFT_M if seat == "left" else COCKPIT_RIGHT_SEAT_LEFT_M, COCKPIT_BELOW_M, {"aircraftSound": "airliner-narrow"}),
     ] + ([] if seat == "left" else [
-        # Seen from the right seat, the captain sits a metre to the left, on the line of sight to the left window
+        # An observer (a companion who was there), not an entity: an entity is a being seen, and the engine would class the case "with occupants"
         {**airframe(total_s, "af3532-captain", tr("Le commandant Duboc, au siège gauche", "Captain Duboc, at the left seat"),
                     "ufoathome-duboc-seated", {"heightM": 1.541}, PILOT_FORWARD_M, PILOT_LEFT_M - SEAT_SPACING_M, PILOT_BELOW_M, {}),
-         "kind": "entity"}])
+         "kind": "observer"}])
 
 
 def air(t_ms, wind_kt):

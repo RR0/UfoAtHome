@@ -1,5 +1,5 @@
 import { GrassDetail } from "./terrain/GrassDetail.js"
-import { AdditiveBlending, BackSide, Box3, DoubleSide, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, FrontSide, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
+import { AdditiveBlending, BackSide, Box3, DoubleSide, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
 import type { Material, Object3D } from "three"
 import type { ModelParameters } from "../engine/model/DecorTraits.js"
 import { DecorBase } from "../engine/model/DecorBase.js"
@@ -1346,19 +1346,10 @@ export class DecorSystem {
     // in the scene that threw no shadow: the primitives set both in addPart, the terrain receives,
     // and a car standing in a low sun with nothing on the ground beside it is exactly the tell that
     // it was pasted on rather than lit.
-    // An airliner the observer is aboard (observerSide on an aircraft): its hull is a closed, double-sided surface, so from the flight deck
-    // the camera would see the inside of the fuselage and nothing of the sky. Drawn on its front faces only, the hull is not there from
-    // inside and the wings and engines seen from above still are, which is what a pilot sees through the side window. Each mesh gets
-    // its own material, so that the same model seen from outside elsewhere keeps its double-sided one.
-    const aboard = object.kind === "aircraft" && object.observerSide !== undefined
     model.traverse(child => {
       if (!(child instanceof Mesh)) return
       child.castShadow = true
       child.receiveShadow = true
-      if (aboard && !Array.isArray(child.material)) {
-        child.material = child.material.clone()
-        child.material.side = FrontSide
-      }
     })
     holder.add(model)
     if (object.kind === "tree") holder.add(DecorSystem.trunkShadow(natural.heightM * scale))
