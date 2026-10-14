@@ -427,6 +427,41 @@ describe("the beams of the vehicles", () => {
   })
 })
 
+describe("the patch of real ground for scenery out of the observer's reach", () => {
+  const object = (kind: string, eastM: number, northM: number, sizeM?: { widthM: number, lengthM: number, heightM: number }, extra: Record<string, unknown> = {}) =>
+    ({ id: `${kind}-${eastM}`, kind, eastM, northM, sizeM, ...extra }) as never
+  const reach = (decor: unknown[], route?: { lat: number, lng: number }[]) => SceneRenderer.terrainReachFor(decor as never, route)
+  const metresPerDegree = 111320
+
+  it("makes none for scenery that is all near: the ground of the observer's reach is wide enough", () => {
+    expect(reach([object("building", 300, 100), object("tree", -400, 200)])).toBe(0)
+    expect(reach([])).toBe(0)
+  })
+
+  it("widens it, for a still observer, to hold the farthest thing that stands on the ground, whole and not in the fade of its rim", () => {
+    // Silos 1.2 km off: whole ground out to 1.2 km means a patch where the first 700/900 of it reaches there, 1.6 km or so.
+    const radius = reach([object("building", 1122, -476, { widthM: 29, lengthM: 28, heightM: 27 }), object("building", 40, 40)])
+    expect(radius).toBeGreaterThan(1500)
+    expect(radius).toBeLessThanOrEqual(1700)
+  })
+
+  it("keeps it at three kilometres at most", () => {
+    expect(reach([object("building", 9000, 0)])).toBe(3000)
+  })
+
+  it("leaves out what flies, what moves and the observer's own place: they do not stand on it", () => {
+    expect(reach([object("aircraft", 4000, 0), object("vehicle", 3000, 0, undefined, { track: [{ t: 0 }] }), object("observer", 2000, 0)])).toBe(0)
+  })
+
+  it("makes none for an observer who goes somewhere: the patches of a drive follow it, and what is out of reach now is within it later", () => {
+    const drive = [{ lat: 49.1, lng: 2.75 }, { lat: 49.1 + 800 / metresPerDegree, lng: 2.75 }]
+    expect(reach([object("building", 1200, 0)], drive)).toBe(0)
+    // A few steps and a turn of the head: the same observer.
+    const still = [{ lat: 49.1, lng: 2.75 }, { lat: 49.1 + 5 / metresPerDegree, lng: 2.75 }]
+    expect(reach([object("building", 1200, 0)], still)).toBeGreaterThan(1500)
+  })
+})
+
 // An editor opened on an empty observation redrew its whole picture sixty to a hundred and twenty times a
 // second for as long as it was open, of a Sun's flare that was under the horizon and out of the picture.
 describe("what keeps the animation loop running", () => {

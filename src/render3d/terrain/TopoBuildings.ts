@@ -13,6 +13,8 @@ import type { SurveyedBuilding } from "./SurroundingsProvider.js"
  */
 export class TopoBuildings {
   private static readonly METRES_PER_DEGREE = 111320
+  /** What the map's nature of a building is called in the scene, where that is a thing seen on the horizon (the others are "Building n"). */
+  private static readonly NAMED_NATURES: Readonly<Record<string, string>> = { "Silo": "Silo" }
   /** A building with no height and no floors on the map: two floors, which is what the houses of a town are. */
   private static readonly DEFAULT_HEIGHT_M = 6
   private static readonly FLOOR_HEIGHT_M = 3
@@ -37,11 +39,22 @@ export class TopoBuildings {
         if (Math.hypot(building.eastM, building.northM) > radiusM) continue
         const wallMaterial = BuildingMaterials.of(feature.properties.materiaux_des_murs, "wall")
         const roofMaterial = BuildingMaterials.of(feature.properties.materiaux_de_la_toiture, "roof")
-        found.push({ ...building, ...(Number.isFinite(floors) && floors > 0 ? { floors } : {}), ...(wallMaterial ? { wallMaterial } : {}), ...(roofMaterial ? { roofMaterial } : {}) })
+        // The few natures a map gives that a reader knows a building by from a distance: a silo is not "Building 147".
+        const named = TopoBuildings.NAMED_NATURES[String(feature.properties.nature ?? "")]
+        found.push({ ...building, ...(named ? { name: named } : {}), ...(Number.isFinite(floors) && floors > 0 ? { floors } : {}), ...(wallMaterial ? { wallMaterial } : {}), ...(roofMaterial ? { roofMaterial } : {}) })
       }
     }
-    found.sort((a, b) => Math.hypot(a.eastM, a.northM) - Math.hypot(b.eastM, b.northM))
-    return found.slice(0, max)
+    const distanceOf = (building: SurveyedBuilding): number => Math.hypot(building.eastM, building.northM)
+    if (found.length > max) {
+      // Over the most a scene can carry, the ones kept are those that show most from the place, and not the nearest: a town's houses, hundreds of them, kept
+      // the silos of the edge of it off the scene (at 1.3 km, 27 m high and thirty across, they are what stands on the horizon). Apparent size: the height
+      // and the width of the building, over how far it is, which is how big it looks; nothing nearer than fifty metres looks bigger for being nearer.
+      const apparent = (building: SurveyedBuilding): number => (building.heightM + 6) * Math.sqrt(building.widthM * building.lengthM) / Math.max(distanceOf(building), 50)
+      found.sort((a, b) => apparent(b) - apparent(a))
+      found.length = max
+    }
+    found.sort((a, b) => distanceOf(a) - distanceOf(b))
+    return found
   }
 
   /**

@@ -98,6 +98,35 @@ describe("TopoBuildings", () => {
     expect(found.map(building => Math.round(building.eastM))).toEqual([25, 65])
   })
 
+  it("keeps, over the most it is asked for, what shows most from the place, and not what is nearest: a silo on the horizon over a house at its door", () => {
+    const houses = [0, 1, 2, 3, 4].map(i => polygon({ hauteur: 6 }, [[400 + i * 20, 0], [408 + i * 20, 0], [408 + i * 20, 8], [400 + i * 20, 8]]))
+    // Thirty metres across and twenty-seven high, a kilometre off: bigger in the sky than any of the houses at four hundred.
+    const silo = polygon({ hauteur: 27 }, [[1000, 0], [1030, 0], [1030, 30], [1000, 30]])
+    const found = TopoBuildings.buildings([...houses, silo], CENTRE, 2000, 12, 3)
+    expect(found).toHaveLength(3)
+    expect(found.some(building => building.heightM === 27)).toBe(true)
+    // And they come nearest first all the same.
+    const distances = found.map(building => Math.hypot(building.eastM, building.northM))
+    expect(distances).toEqual([...distances].sort((a, b) => a - b))
+  })
+
+  it("names a silo as the map says it, and leaves the other buildings with no name of their own", () => {
+    const [silo, shed] = TopoBuildings.buildings([
+      polygon({ hauteur: 27, nature: "Silo" }, [[40, 0], [60, 0], [60, 20], [40, 20]]),
+      polygon({ hauteur: 5, nature: "Industriel, agricole ou commercial" }, [[10, 0], [20, 0], [20, 10], [10, 10]])
+    ], CENTRE, 100).sort((a, b) => b.heightM - a.heightM)
+    expect(silo.name).toBe("Silo")
+    expect(shed.name).toBeUndefined()
+  })
+
+  it("keeps everything while there are no more than it is asked for, the nearest first", () => {
+    const found = TopoBuildings.buildings([
+      polygon({ hauteur: 6 }, [[500, 0], [510, 0], [510, 10], [500, 10]]),
+      polygon({ hauteur: 6 }, [[100, 0], [110, 0], [110, 10], [100, 10]])
+    ], CENTRE, 2000, 12, 300)
+    expect(found.map(building => Math.round(building.eastM))).toEqual([105, 505])
+  })
+
   it("reads the materials of the walls and of the roof from the map's codes, and says nothing where it states none", () => {
     const [stated, bare] = TopoBuildings.buildings([
       polygon({ hauteur: 7, materiaux_des_murs: "34", materiaux_de_la_toiture: "20" }, [[-8, 5], [0, 5], [0, 15], [-8, 15]]),

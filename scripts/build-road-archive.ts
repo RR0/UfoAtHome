@@ -148,6 +148,7 @@ class RoadArchiveBuilder {
       const recording = JSON.parse(await readFile(join(dir, name), "utf8")) as {
         id?: string
         place?: { lat?: number; lng?: number }[]
+        decor?: { kind?: string, eastM?: number, northM?: number, track?: unknown, sizeM?: { widthM?: number, lengthM?: number } }[]
         observerTrack?: { keyframes?: { pose?: { lat?: number; lng?: number; elevationM?: number } }[] }
       }
       const poses = (recording.observerTrack?.keyframes ?? [])
@@ -161,7 +162,7 @@ class RoadArchiveBuilder {
       // horizon from up there, held between the eye-level square and what a clear day shows.
       const elevationM = Math.max(0, ...poses.map(pose => pose.elevationM ?? 0))
       const horizonM = Math.sqrt(2 * EARTH_RADIUS_M * elevationM)
-      const radiusM = Math.round(MARGIN * Math.max(GROUND_RADIUS_M, Math.min(horizonM, MAX_GROUND_VISIBILITY_M)))
+      const radiusM = Math.round(MARGIN * Math.max(GROUND_RADIUS_M, Math.min(horizonM, MAX_GROUND_VISIBILITY_M), this.sceneryReachM(recording.decor, poses)))
       const lats = poses.map(pose => pose.lat)
       const lngs = poses.map(pose => pose.lng)
       const midLat = (Math.min(...lats) + Math.max(...lats)) / 2
@@ -179,6 +180,24 @@ class RoadArchiveBuilder {
       })
     }
     return places
+  }
+
+  /**
+   * How wide the patch of ground is for the scenery of a still observer (SceneRenderer.terrainReachFor's own rule): the farthest of what stands on the ground,
+   * out to where the patch starts to fade, at most 3 km; nothing for an observer who goes somewhere.
+   */
+  private sceneryReachM(decor: { kind?: string, eastM?: number, northM?: number, track?: unknown, sizeM?: { widthM?: number, lengthM?: number } }[] | undefined, poses: { lat: number, lng: number }[]): number {
+    const spanM = Math.max(...poses.map(pose => Math.hypot((pose.lat - poses[0].lat) * METRES_PER_DEGREE, (pose.lng - poses[0].lng) * METRES_PER_DEGREE * Math.cos(poses[0].lat * Math.PI / 180))))
+    if (poses.length > 1 && spanM > 60) return 0
+    let reach = 0
+    for (const object of decor ?? []) {
+      if (object.kind === "aircraft" || object.kind === "observer" || object.track) continue
+      const half = Math.max(object.sizeM?.widthM ?? 0, object.sizeM?.lengthM ?? 0) / 2
+      reach = Math.max(reach, Math.hypot(object.eastM ?? 0, object.northM ?? 0) + half)
+    }
+    const wholeShare = 700 / 900
+    const needed = Math.ceil(reach / wholeShare / 100) * 100
+    return needed > GROUND_RADIUS_M * wholeShare ? Math.min(needed, 3000) : 0
   }
 
   /**

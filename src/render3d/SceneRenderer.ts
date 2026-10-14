@@ -1648,7 +1648,40 @@ export class SceneRenderer {
   /** Tells the ground which way the observer goes, for the next patch built: the one on screen is not rebuilt for it. */
   setObserverRoute(route: readonly { lat: number; lng: number }[] | undefined): void {
     this.observerRoute = route
+    this.decorTerrainRadiusM = SceneRenderer.terrainReachFor(this.decorObjects, route)
   }
+
+  /** The radius the patch of real ground is built for where the scenery goes farther than the observer's reach, 0 where it does not: see terrainReachFor. */
+  private decorTerrainRadiusM = 0
+
+  /**
+   * How wide the patch of real ground has to be for the scenery of a still observer to stand on it: the farthest of the objects that stand on the ground, and the
+   * ground round it, out to where the patch begins to fade (see TerrainMeshBuilder), and at most 3 km. Nothing for an observer who goes somewhere (a drive's patches
+   * follow it, and what is out of reach now is within reach later), for scenery that is all near, and for what flies.
+   */
+  static terrainReachFor(decor: readonly DecorObject[], route: readonly { lat: number; lng: number }[] | undefined): number {
+    if (route && route.length >= 2) {
+      const first = route[0]
+      for (const place of route) {
+        const move = geoToLocalMeters(place.lat, place.lng, first.lat, first.lng)
+        if (Math.hypot(move.x, move.z) > SceneRenderer.STILL_OBSERVER_M) return 0
+      }
+    }
+    let reach = 0
+    for (const object of decor) {
+      if (object.kind === "aircraft" || object.kind === "observer" || object.track) continue
+      const half = Math.max(object.sizeM?.widthM ?? 0, object.sizeM?.lengthM ?? 0) / 2
+      reach = Math.max(reach, Math.hypot(object.eastM, object.northM) + half)
+    }
+    // The patch is whole to 700 of its 900 and fades to nothing at the rim: what must stand on whole ground is inside the first.
+    const needed = Math.ceil(reach / SceneRenderer.PATCH_WHOLE_SHARE / 100) * 100
+    return needed > GROUND_RADIUS * SceneRenderer.PATCH_WHOLE_SHARE ? Math.min(needed, SceneRenderer.MAX_DECOR_TERRAIN_M) : 0
+  }
+
+  /** A route that stays within this of its start is a still observer's (a stance, a turn of the head, a few steps). */
+  private static readonly STILL_OBSERVER_M = 60
+  private static readonly PATCH_WHOLE_SHARE = 700 / 900
+  private static readonly MAX_DECOR_TERRAIN_M = 3000
 
   /**
    * Offsets the patch on screen, and the one fading out under it, by the distance between each one's own origin and where the observer is now.
@@ -1673,7 +1706,9 @@ export class SceneRenderer {
     // hundred metres out and leaving the rest of the visible ground a flat haze — the providers
     // pick a coarser zoom for the wider span on their own (see TileMath.chooseZoomForTileEdge),
     // which is exactly right: from up there you see more ground, in less detail.
-    const radiusM = this.groundRadius
+    // The ground disc, the sky and the haze keep the radius of the observer's reach; the patch of real ground may be wider where a still observer has scenery out
+    // beyond it (see terrainReachFor), so that what stands there stands on the relief and not on the flat disc.
+    const radiusM = Math.max(this.groundRadius, this.decorTerrainRadiusM)
     if (this.terrainOrigin && Math.abs(this.terrainRadius - radiusM) < radiusM * 0.1) {
       const { x, z } = geoToLocalMeters(lat, lng, this.terrainOrigin.lat, this.terrainOrigin.lng)
       // Scaled to the patch itself: 150 m matters for a 900 m patch and is meaningless for a 30 km one.
@@ -2152,6 +2187,7 @@ export class SceneRenderer {
   setDecor(decor: DecorObject[]): void {
     if (this.decorObjects === decor) return
     this.decorObjects = decor
+    this.decorTerrainRadiusM = SceneRenderer.terrainReachFor(decor, this.observerRoute)
     this.decorModelToken++
     this.decorModelCredits.clear()
     this.pendingTrafficModels.clear()

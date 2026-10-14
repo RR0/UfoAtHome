@@ -10,6 +10,7 @@ import pathlib
 GENERIC = {
     "Tree": {"fr": "Arbre", "en": "Tree", "es": "Árbol", "it": "Albero"},
     "Building": {"fr": "Bâtiment", "en": "Building", "es": "Edificio", "it": "Edificio"},
+    "Silo": {"fr": "Silo", "en": "Silo", "es": "Silo", "it": "Silo"},
     "Bridge": {"fr": "Pont", "en": "Bridge", "es": "Puente", "it": "Ponte"},
     "Overhead line": {"fr": "Ligne électrique", "en": "Overhead line", "es": "Línea eléctrica", "it": "Linea elettrica"},
 }

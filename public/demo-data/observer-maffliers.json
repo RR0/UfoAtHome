@@ -68,11 +68,11 @@
       }
     },
     {
-      "title": "BD TOPO (the buildings with their heights and materials, the bridges and the lines round the spot), edited 2026-03-11",
+      "title": "BD TOPO (the buildings with their heights and materials, the bridges and the lines round the spot), edited 2026-03-26",
       "url": "https://geoservices.ign.fr/bdtopo",
       "publication": {
         "publisher": "IGN",
-        "time": "2026-03-11"
+        "time": "2026-03-26"
       }
     },
     {
@@ -11340,13 +11340,13 @@
       "roof": {
         "shape": "flat",
         "riseM": 0,
-        "color": "#7d7c83"
+        "color": "#767577"
       },
       "facade": {
         "color": "#d9d0bd"
       },
       "origin": "ign-lidar-topo",
-      "surveyedOn": "2026-03-11"
+      "surveyedOn": "2026-03-26"
     },
     {
       "id": "ign-lidar-topo-3",
@@ -11365,13 +11365,13 @@
       "roof": {
         "shape": "flat",
         "riseM": 0,
-        "color": "#838792"
+        "color": "#787d81"
       },
       "facade": {
         "color": "#c3bbaa"
       },
       "origin": "ign-lidar-topo",
-      "surveyedOn": "2026-03-11"
+      "surveyedOn": "2026-03-26"
     },
     {
       "id": "ign-lidar-topo-4",
@@ -11390,13 +11390,13 @@
       "roof": {
         "shape": "flat",
         "riseM": 0,
-        "color": "#636470"
+        "color": "#949899"
       },
       "facade": {
         "color": "#ded4c1"
       },
       "origin": "ign-lidar-topo",
-      "surveyedOn": "2026-03-11"
+      "surveyedOn": "2026-03-26"
     },
     {
       "id": "ign-lidar-topo-5",
@@ -11415,16 +11415,8406 @@
       "roof": {
         "shape": "flat",
         "riseM": 0,
-        "color": "#dbdbd9"
+        "color": "#bec2c3"
       },
       "facade": {
         "color": "#dad1be"
       },
       "origin": "ign-lidar-topo",
-      "surveyedOn": "2026-03-11"
+      "surveyedOn": "2026-03-26"
     },
     {
       "id": "ign-lidar-topo-6",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (5)",
+      "eastM": 62.8,
+      "northM": -410.7,
+      "headingDeg": 72,
+      "lit": false,
+      "sizeM": {
+        "widthM": 162.6,
+        "lengthM": 101.8,
+        "heightM": 9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#d7cebc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-7",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (6)",
+      "eastM": -38.5,
+      "northM": -430.4,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 13.4,
+        "lengthM": 7.8,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#fffdf9"
+      },
+      "facade": {
+        "color": "#ebe1cd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-8",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (7)",
+      "eastM": 165.9,
+      "northM": -432.4,
+      "headingDeg": 163.3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 21.8,
+        "lengthM": 16,
+        "heightM": 5.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#928f92"
+      },
+      "facade": {
+        "color": "#cbc3b1"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-9",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (8)",
+      "eastM": -35.5,
+      "northM": -469.5,
+      "headingDeg": 75.6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 34.6,
+        "lengthM": 29.3,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#d2c9b7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-10",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 1",
+        "en": "Building 1",
+        "es": "Edificio 1",
+        "it": "Edificio 1"
+      },
+      "eastM": -235.7,
+      "northM": -423.1,
+      "headingDeg": 75.3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 16.3,
+        "lengthM": 5,
+        "heightM": 4.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#847e7b"
+      },
+      "facade": {
+        "color": "#c3bbaa"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-11",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 2",
+        "en": "Building 2",
+        "es": "Edificio 2",
+        "it": "Edificio 2"
+      },
+      "eastM": -228.6,
+      "northM": -433.8,
+      "headingDeg": 162,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.1,
+        "lengthM": 7.1,
+        "heightM": 7.6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9f9495"
+      },
+      "facade": {
+        "color": "#c5b394"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-12",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (9)",
+      "eastM": -134.1,
+      "northM": -475.1,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 15.6,
+        "lengthM": 6.4,
+        "heightM": 9.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#696e72"
+      },
+      "facade": {
+        "color": "#c3bbaa"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-13",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (10)",
+      "eastM": 117.9,
+      "northM": -484.2,
+      "headingDeg": 162,
+      "lit": false,
+      "sizeM": {
+        "widthM": 42.4,
+        "lengthM": 11.3,
+        "heightM": 9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#fafdff"
+      },
+      "facade": {
+        "color": "#c9c0af"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-14",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 3",
+        "en": "Building 3",
+        "es": "Edificio 3",
+        "it": "Edificio 3"
+      },
+      "eastM": -245,
+      "northM": -437.7,
+      "headingDeg": 156,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.7,
+        "lengthM": 6.4,
+        "heightM": 4.8
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#72716f"
+      },
+      "facade": {
+        "color": "#955541"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-15",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (11)",
+      "eastM": 177.8,
+      "northM": -470.5,
+      "headingDeg": 75,
+      "lit": false,
+      "sizeM": {
+        "widthM": 34.6,
+        "lengthM": 19.8,
+        "heightM": 6.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9e9b9d"
+      },
+      "facade": {
+        "color": "#dad1be"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-16",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (12)",
+      "eastM": 71.5,
+      "northM": -499.3,
+      "headingDeg": 162,
+      "lit": false,
+      "sizeM": {
+        "widthM": 43.8,
+        "lengthM": 11.3,
+        "heightM": 9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#aaa9b2"
+      },
+      "facade": {
+        "color": "#dfd6c3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-17",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 4",
+        "en": "Building 4",
+        "es": "Edificio 4",
+        "it": "Edificio 4"
+      },
+      "eastM": -223.6,
+      "northM": -454.2,
+      "headingDeg": 75,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.2,
+        "lengthM": 7.8,
+        "heightM": 5.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#706e6b"
+      },
+      "facade": {
+        "color": "#beb6a5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-18",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (13)",
+      "eastM": 79.7,
+      "northM": -504.1,
+      "headingDeg": 162,
+      "lit": false,
+      "sizeM": {
+        "widthM": 32.5,
+        "lengthM": 2.8,
+        "heightM": 9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#84848e"
+      },
+      "facade": {
+        "color": "#c8c0af"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-19",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (14)",
+      "eastM": -88.9,
+      "northM": -503.3,
+      "headingDeg": 75.5,
+      "lit": false,
+      "sizeM": {
+        "widthM": 133.4,
+        "lengthM": 30.5,
+        "heightM": 11.6
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#fbfbff"
+      },
+      "facade": {
+        "color": "#e3d9c6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-20",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 5",
+        "en": "Building 5",
+        "es": "Edificio 5",
+        "it": "Edificio 5"
+      },
+      "eastM": -269.6,
+      "northM": -435.2,
+      "headingDeg": 66,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.8,
+        "lengthM": 7.1,
+        "heightM": 5.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#988b8e"
+      },
+      "facade": {
+        "color": "#c5bcaa"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-21",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (15)",
+      "eastM": -146.7,
+      "northM": -493.5,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 49.5,
+        "lengthM": 22.6,
+        "heightM": 9.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9999a2"
+      },
+      "facade": {
+        "color": "#cdc4b3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-22",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 6",
+        "en": "Building 6",
+        "es": "Edificio 6",
+        "it": "Edificio 6"
+      },
+      "eastM": -235.3,
+      "northM": -460.6,
+      "headingDeg": 156,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.1,
+        "lengthM": 6.4,
+        "heightM": 6.3
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#878381"
+      },
+      "facade": {
+        "color": "#a3947a"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-23",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (16)",
+      "eastM": 196.1,
+      "northM": -483.3,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 8.5,
+        "lengthM": 8.5,
+        "heightM": 8
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a6a6a3"
+      },
+      "facade": {
+        "color": "#e2d8c5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-24",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 7",
+        "en": "Building 7",
+        "es": "Edificio 7",
+        "it": "Edificio 7"
+      },
+      "eastM": -454.5,
+      "northM": 260.1,
+      "headingDeg": 87,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.6,
+        "lengthM": 9.9,
+        "heightM": 2.2
+      },
+      "floors": 1,
+      "facade": {
+        "color": "#d0c7b6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-25",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (17)",
+      "eastM": -142.4,
+      "northM": -508.1,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 17.7,
+        "lengthM": 7.8,
+        "heightM": 9.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#afb1b5"
+      },
+      "facade": {
+        "color": "#d5ccb9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-26",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 8",
+        "en": "Building 8",
+        "es": "Edificio 8",
+        "it": "Edificio 8"
+      },
+      "eastM": -291.4,
+      "northM": -440.1,
+      "headingDeg": 156,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 8.5,
+        "heightM": 3.9
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b0b0aa"
+      },
+      "facade": {
+        "color": "#ab624a"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-27",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 9",
+        "en": "Building 9",
+        "es": "Edificio 9",
+        "it": "Edificio 9"
+      },
+      "eastM": -277,
+      "northM": -450,
+      "headingDeg": 153,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 9.2,
+        "heightM": 3.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#94827c"
+      },
+      "facade": {
+        "color": "#cfc5b3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-28",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 10",
+        "en": "Building 10",
+        "es": "Edificio 10",
+        "it": "Edificio 10"
+      },
+      "eastM": -505,
+      "northM": 164.1,
+      "headingDeg": 57,
+      "lit": false,
+      "sizeM": {
+        "widthM": 17,
+        "lengthM": 7.8,
+        "heightM": 5.6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a4978f"
+      },
+      "facade": {
+        "color": "#c6bdab"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-29",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 11",
+        "en": "Building 11",
+        "es": "Edificio 11",
+        "it": "Edificio 11"
+      },
+      "eastM": -261,
+      "northM": -464.1,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 4.9,
+        "heightM": 5.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#927f81"
+      },
+      "facade": {
+        "color": "#965641"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-30",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 12",
+        "en": "Building 12",
+        "es": "Edificio 12",
+        "it": "Edificio 12"
+      },
+      "eastM": -422.7,
+      "northM": -326.3,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.1,
+        "lengthM": 7.8,
+        "heightM": 4.1
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#71716d"
+      },
+      "facade": {
+        "color": "#e4dbc7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-31",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 13",
+        "en": "Building 13",
+        "es": "Edificio 13",
+        "it": "Edificio 13"
+      },
+      "eastM": -318.6,
+      "northM": -437.3,
+      "headingDeg": 162,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 5.7,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#646569"
+      },
+      "facade": {
+        "color": "#cac1b0"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-32",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 14",
+        "en": "Building 14",
+        "es": "Edificio 14",
+        "it": "Edificio 14"
+      },
+      "eastM": -521.9,
+      "northM": 145.7,
+      "headingDeg": 51,
+      "lit": false,
+      "sizeM": {
+        "widthM": 8.5,
+        "lengthM": 7.8,
+        "heightM": 5.9
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a59690"
+      },
+      "facade": {
+        "color": "#b2b0aa"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-33",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 15",
+        "en": "Building 15",
+        "es": "Edificio 15",
+        "it": "Edificio 15"
+      },
+      "eastM": -262.1,
+      "northM": -475.7,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 13.4,
+        "lengthM": 6.4,
+        "heightM": 4.6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bd9d9e"
+      },
+      "facade": {
+        "color": "#b1654d"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-34",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 16",
+        "en": "Building 16",
+        "es": "Edificio 16",
+        "it": "Edificio 16"
+      },
+      "eastM": -291,
+      "northM": -460.5,
+      "headingDeg": 153,
+      "lit": false,
+      "sizeM": {
+        "widthM": 13.4,
+        "lengthM": 6.4,
+        "heightM": 3.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ada0a3"
+      },
+      "facade": {
+        "color": "#e3d8c2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-35",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 17",
+        "en": "Building 17",
+        "es": "Edificio 17",
+        "it": "Edificio 17"
+      },
+      "eastM": -478.7,
+      "northM": 263,
+      "headingDeg": 177,
+      "lit": false,
+      "sizeM": {
+        "widthM": 38.2,
+        "lengthM": 19.1,
+        "heightM": 2.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6f6a67"
+      },
+      "facade": {
+        "color": "#e4dac7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-36",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 18",
+        "en": "Building 18",
+        "es": "Edificio 18",
+        "it": "Edificio 18"
+      },
+      "eastM": -414.3,
+      "northM": -357,
+      "headingDeg": 66,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 7.8,
+        "heightM": 5.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#7f7c84"
+      },
+      "facade": {
+        "color": "#a89e8d"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-37",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 19",
+        "en": "Building 19",
+        "es": "Edificio 19",
+        "it": "Edificio 19"
+      },
+      "eastM": -518.5,
+      "northM": 183,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 8.5,
+        "lengthM": 8.5,
+        "heightM": 6.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b6a49b"
+      },
+      "facade": {
+        "color": "#b3a996"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-38",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 20",
+        "en": "Building 20",
+        "es": "Edificio 20",
+        "it": "Edificio 20"
+      },
+      "eastM": -474.9,
+      "northM": 279.2,
+      "headingDeg": 177,
+      "lit": false,
+      "sizeM": {
+        "widthM": 48.8,
+        "lengthM": 8.5,
+        "heightM": 2.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#72726b"
+      },
+      "facade": {
+        "color": "#cfc6b5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-39",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 21",
+        "en": "Building 21",
+        "es": "Edificio 21",
+        "it": "Edificio 21"
+      },
+      "eastM": -306.3,
+      "northM": -460.2,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.8,
+        "lengthM": 7.8,
+        "heightM": 4.1
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#948b89"
+      },
+      "facade": {
+        "color": "#cac0ad"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-40",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 22",
+        "en": "Building 22",
+        "es": "Edificio 22",
+        "it": "Edificio 22"
+      },
+      "eastM": -244,
+      "northM": -496.3,
+      "headingDeg": 156,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 7.1,
+        "heightM": 4.1
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9b8e88"
+      },
+      "facade": {
+        "color": "#d8cfbd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-41",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 23",
+        "en": "Building 23",
+        "es": "Edificio 23",
+        "it": "Edificio 23"
+      },
+      "eastM": -446.8,
+      "northM": -327.1,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.1,
+        "lengthM": 7.1,
+        "heightM": 4.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a29992"
+      },
+      "facade": {
+        "color": "#c0beb8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-42",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (18)",
+      "eastM": -16.9,
+      "northM": -553.8,
+      "headingDeg": 78,
+      "lit": false,
+      "sizeM": {
+        "widthM": 17.7,
+        "lengthM": 5.7,
+        "heightM": 3.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e1dfd7"
+      },
+      "facade": {
+        "color": "#c3baaa"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-43",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (19)",
+      "eastM": -7.3,
+      "northM": -554.7,
+      "headingDeg": 78,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12,
+        "lengthM": 6.4,
+        "heightM": 3.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c9c6c3"
+      },
+      "facade": {
+        "color": "#beb6a6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-44",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 24",
+        "en": "Building 24",
+        "es": "Edificio 24",
+        "it": "Edificio 24"
+      },
+      "eastM": -440,
+      "northM": -339.5,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.6,
+        "lengthM": 7.8,
+        "heightM": 4.7
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#77756f"
+      },
+      "facade": {
+        "color": "#a7a5a0"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-45",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 25",
+        "en": "Building 25",
+        "es": "Edificio 25",
+        "it": "Edificio 25"
+      },
+      "eastM": -425.8,
+      "northM": -361,
+      "headingDeg": 66,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.1,
+        "lengthM": 7.1,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#989799"
+      },
+      "facade": {
+        "color": "#d1c8b5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-46",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 26",
+        "en": "Building 26",
+        "es": "Edificio 26",
+        "it": "Edificio 26"
+      },
+      "eastM": -546.3,
+      "northM": 129.2,
+      "headingDeg": 141,
+      "lit": false,
+      "sizeM": {
+        "widthM": 19.1,
+        "lengthM": 7.8,
+        "heightM": 4.9
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#99908f"
+      },
+      "facade": {
+        "color": "#b4b2ac"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-47",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 27",
+        "en": "Building 27",
+        "es": "Edificio 27",
+        "it": "Edificio 27"
+      },
+      "eastM": -535.6,
+      "northM": 174.3,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.6,
+        "lengthM": 7.8,
+        "heightM": 5.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9d978e"
+      },
+      "facade": {
+        "color": "#c0beb7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-48",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 28",
+        "en": "Building 28",
+        "es": "Edificio 28",
+        "it": "Edificio 28"
+      },
+      "eastM": -406.2,
+      "northM": -400.6,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.2,
+        "lengthM": 7.8,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b3a29b"
+      },
+      "facade": {
+        "color": "#b0a084"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-49",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 29",
+        "en": "Building 29",
+        "es": "Edificio 29",
+        "it": "Edificio 29"
+      },
+      "eastM": -339.1,
+      "northM": -459.4,
+      "headingDeg": 64.4,
+      "lit": false,
+      "sizeM": {
+        "widthM": 23.7,
+        "lengthM": 13.5,
+        "heightM": 6.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a68f87"
+      },
+      "facade": {
+        "color": "#e3d9c6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-50",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 30",
+        "en": "Building 30",
+        "es": "Edificio 30",
+        "it": "Edificio 30"
+      },
+      "eastM": -551.3,
+      "northM": 162.9,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12,
+        "lengthM": 9.2,
+        "heightM": 7.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#adaca0"
+      },
+      "facade": {
+        "color": "#c2b9a6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-51",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (20)",
+      "eastM": 51.3,
+      "northM": -572.7,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 19.1,
+        "lengthM": 9.9,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ada9a5"
+      },
+      "facade": {
+        "color": "#ebe1cd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-52",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (21)",
+      "eastM": 25.5,
+      "northM": -575.5,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 16.3,
+        "lengthM": 9.2,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#908e8f"
+      },
+      "facade": {
+        "color": "#d6cdbb"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-53",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 31",
+        "en": "Building 31",
+        "es": "Edificio 31",
+        "it": "Edificio 31"
+      },
+      "eastM": -392,
+      "northM": -423.8,
+      "headingDeg": 153,
+      "lit": false,
+      "sizeM": {
+        "widthM": 28.3,
+        "lengthM": 6.4,
+        "heightM": 4.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#887b7c"
+      },
+      "facade": {
+        "color": "#e5dbc7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-54",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 32",
+        "en": "Building 32",
+        "es": "Edificio 32",
+        "it": "Edificio 32"
+      },
+      "eastM": -565.9,
+      "northM": 115.4,
+      "headingDeg": 147,
+      "lit": false,
+      "sizeM": {
+        "widthM": 15.6,
+        "lengthM": 7.1,
+        "heightM": 5.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#92928e"
+      },
+      "facade": {
+        "color": "#bdbbb5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-55",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 33",
+        "en": "Building 33",
+        "es": "Edificio 33",
+        "it": "Edificio 33"
+      },
+      "eastM": -398.7,
+      "northM": -418,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 6.4,
+        "heightM": 5.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9e9191"
+      },
+      "facade": {
+        "color": "#9f5b45"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-56",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 34",
+        "en": "Building 34",
+        "es": "Edificio 34",
+        "it": "Edificio 34"
+      },
+      "eastM": -288.2,
+      "northM": -501,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 17.7,
+        "lengthM": 2.8,
+        "heightM": 6.7
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#7d7774"
+      },
+      "facade": {
+        "color": "#d9d0bd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-57",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 35",
+        "en": "Building 35",
+        "es": "Edificio 35",
+        "it": "Edificio 35"
+      },
+      "eastM": -308.7,
+      "northM": -496,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 20.5,
+        "lengthM": 11.3,
+        "heightM": 6.7
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8f888b"
+      },
+      "facade": {
+        "color": "#d9d0bd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-58",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 36",
+        "en": "Building 36",
+        "es": "Edificio 36",
+        "it": "Edificio 36"
+      },
+      "eastM": -583.7,
+      "northM": 42.8,
+      "headingDeg": 81,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 9.9,
+        "heightM": 7.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#757270"
+      },
+      "facade": {
+        "color": "#b1664d"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-59",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 37",
+        "en": "Building 37",
+        "es": "Edificio 37",
+        "it": "Edificio 37"
+      },
+      "eastM": -377.7,
+      "northM": -448.9,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.8,
+        "lengthM": 7.8,
+        "heightM": 8.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ad9e9d"
+      },
+      "facade": {
+        "color": "#b0a084"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-60",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 38",
+        "en": "Building 38",
+        "es": "Edificio 38",
+        "it": "Edificio 38"
+      },
+      "eastM": -568.2,
+      "northM": 149.8,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 7.1,
+        "heightM": 6.6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9c968f"
+      },
+      "facade": {
+        "color": "#bab2a2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-61",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 39",
+        "en": "Building 39",
+        "es": "Edificio 39",
+        "it": "Edificio 39"
+      },
+      "eastM": -336.7,
+      "northM": -481.8,
+      "headingDeg": 66,
+      "lit": false,
+      "sizeM": {
+        "widthM": 8.5,
+        "lengthM": 7.8,
+        "heightM": 5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#97928a"
+      },
+      "facade": {
+        "color": "#ac634b"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-62",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 40",
+        "en": "Building 40",
+        "es": "Edificio 40",
+        "it": "Edificio 40"
+      },
+      "eastM": -396.7,
+      "northM": -436.8,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 6.4,
+        "heightM": 5.9
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ac9c9b"
+      },
+      "facade": {
+        "color": "#935440"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-63",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 41",
+        "en": "Building 41",
+        "es": "Edificio 41",
+        "it": "Edificio 41"
+      },
+      "eastM": -592.2,
+      "northM": 18.9,
+      "headingDeg": 66,
+      "lit": false,
+      "sizeM": {
+        "widthM": 21.9,
+        "lengthM": 9.2,
+        "heightM": 6.1
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a3988e"
+      },
+      "facade": {
+        "color": "#c6beac"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-64",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 42",
+        "en": "Building 42",
+        "es": "Edificio 42",
+        "it": "Edificio 42"
+      },
+      "eastM": -584.3,
+      "northM": 100.6,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 7.1,
+        "heightM": 6.8
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bdb5ac"
+      },
+      "facade": {
+        "color": "#c3c1bb"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-65",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (22)",
+      "eastM": 59.2,
+      "northM": -592.4,
+      "headingDeg": 153,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.2,
+        "lengthM": 6.4,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e7e1de"
+      },
+      "facade": {
+        "color": "#e4dac7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-66",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (23)",
+      "eastM": 5.7,
+      "northM": -599.7,
+      "headingDeg": 153.4,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.5,
+        "lengthM": 5.6,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#f7ebe3"
+      },
+      "facade": {
+        "color": "#c1b9a8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-67",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 43",
+        "en": "Building 43",
+        "es": "Edificio 43",
+        "it": "Edificio 43"
+      },
+      "eastM": -583.3,
+      "northM": 139.5,
+      "headingDeg": 141,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.1,
+        "lengthM": 8.5,
+        "heightM": 4.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a2a29c"
+      },
+      "facade": {
+        "color": "#ddd3bf"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-68",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 44",
+        "en": "Building 44",
+        "es": "Edificio 44",
+        "it": "Edificio 44"
+      },
+      "eastM": -380.4,
+      "northM": -466.2,
+      "headingDeg": 63.4,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.1,
+        "lengthM": 12.1,
+        "heightM": 8.7
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b8ab9e"
+      },
+      "facade": {
+        "color": "#d9cfbd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-69",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 45",
+        "en": "Building 45",
+        "es": "Edificio 45",
+        "it": "Edificio 45"
+      },
+      "eastM": -363.7,
+      "northM": -479.6,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.6,
+        "lengthM": 6.4,
+        "heightM": 5.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#929290"
+      },
+      "facade": {
+        "color": "#c8beab"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-70",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 46",
+        "en": "Building 46",
+        "es": "Edificio 46",
+        "it": "Edificio 46"
+      },
+      "eastM": -603.3,
+      "northM": 85.9,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.8,
+        "lengthM": 9.2,
+        "heightM": 6.1
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b7a69d"
+      },
+      "facade": {
+        "color": "#e3d8c2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-71",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 47",
+        "en": "Building 47",
+        "es": "Edificio 47",
+        "it": "Edificio 47"
+      },
+      "eastM": -611.1,
+      "northM": 1.8,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 15.6,
+        "lengthM": 7.1,
+        "heightM": 8.9
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8a8587"
+      },
+      "facade": {
+        "color": "#b2b0aa"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-72",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 48",
+        "en": "Building 48",
+        "es": "Edificio 48",
+        "it": "Edificio 48"
+      },
+      "eastM": -598.4,
+      "northM": 129.3,
+      "headingDeg": 141,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 7.8,
+        "heightM": 7.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bfb7aa"
+      },
+      "facade": {
+        "color": "#b2b0aa"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-73",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (24)",
+      "eastM": 90,
+      "northM": -605.6,
+      "headingDeg": 62.4,
+      "lit": false,
+      "sizeM": {
+        "widthM": 27.4,
+        "lengthM": 10.9,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#f4ebe6"
+      },
+      "facade": {
+        "color": "#bab2a2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-74",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 49",
+        "en": "Building 49",
+        "es": "Edificio 49",
+        "it": "Edificio 49"
+      },
+      "eastM": -315.3,
+      "northM": -525.8,
+      "headingDeg": 156,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.6,
+        "lengthM": 9.9,
+        "heightM": 4.3
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#67656b"
+      },
+      "facade": {
+        "color": "#c8beab"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-75",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (25)",
+      "eastM": 313,
+      "northM": -530.6,
+      "headingDeg": 72,
+      "lit": false,
+      "sizeM": {
+        "widthM": 83.4,
+        "lengthM": 21.9,
+        "heightM": 6.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b7b5b6"
+      },
+      "facade": {
+        "color": "#ded5c2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-76",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 50",
+        "en": "Building 50",
+        "es": "Edificio 50",
+        "it": "Edificio 50"
+      },
+      "eastM": -616.9,
+      "northM": 16.3,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 8.5,
+        "heightM": 8.9
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9b8c87"
+      },
+      "facade": {
+        "color": "#a09e99"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-77",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (26)",
+      "eastM": -150.1,
+      "northM": -604.4,
+      "headingDeg": 164.9,
+      "lit": false,
+      "sizeM": {
+        "widthM": 50,
+        "lengthM": 21.4,
+        "heightM": 8.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#f3f2ec"
+      },
+      "facade": {
+        "color": "#beb6a6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-78",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 51",
+        "en": "Building 51",
+        "es": "Edificio 51",
+        "it": "Edificio 51"
+      },
+      "eastM": -618.9,
+      "northM": 73.8,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.8,
+        "lengthM": 7.1,
+        "heightM": 6.1
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b0aba0"
+      },
+      "facade": {
+        "color": "#d3c9b4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-79",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 52",
+        "en": "Building 52",
+        "es": "Edificio 52",
+        "it": "Edificio 52"
+      },
+      "eastM": -620.3,
+      "northM": 110.1,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12,
+        "lengthM": 8.5,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a5a39f"
+      },
+      "facade": {
+        "color": "#c9bfac"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-80",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 53",
+        "en": "Building 53",
+        "es": "Edificio 53",
+        "it": "Edificio 53"
+      },
+      "eastM": -630.3,
+      "northM": -9.3,
+      "headingDeg": 153,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12,
+        "lengthM": 9.2,
+        "heightM": 9.8
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9b8f8c"
+      },
+      "facade": {
+        "color": "#b0654c"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-81",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 54",
+        "en": "Building 54",
+        "es": "Edificio 54",
+        "it": "Edificio 54"
+      },
+      "eastM": -632.9,
+      "northM": 0.3,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 7.8,
+        "heightM": 10.3
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#7a7071"
+      },
+      "facade": {
+        "color": "#a25d46"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-82",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (27)",
+      "eastM": 228.5,
+      "northM": -593.7,
+      "headingDeg": 71,
+      "lit": false,
+      "sizeM": {
+        "widthM": 115.1,
+        "lengthM": 41.4,
+        "heightM": 8.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bfbcbc"
+      },
+      "facade": {
+        "color": "#c3bbaa"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-83",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 55",
+        "en": "Building 55",
+        "es": "Edificio 55",
+        "it": "Edificio 55"
+      },
+      "eastM": -634,
+      "northM": 60.9,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.2,
+        "lengthM": 7.1,
+        "heightM": 6.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c0b7ad"
+      },
+      "facade": {
+        "color": "#c4bba9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-84",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 56",
+        "en": "Building 56",
+        "es": "Edificio 56",
+        "it": "Edificio 56"
+      },
+      "eastM": -634.1,
+      "northM": 98.5,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 7.8,
+        "heightM": 5.8
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a8a29c"
+      },
+      "facade": {
+        "color": "#a7a59f"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-85",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 57",
+        "en": "Building 57",
+        "es": "Edificio 57",
+        "it": "Edificio 57"
+      },
+      "eastM": -646.3,
+      "northM": 82.2,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 7.1,
+        "heightM": 6.1
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8c8888"
+      },
+      "facade": {
+        "color": "#beb5a4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-86",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 58",
+        "en": "Building 58",
+        "es": "Edificio 58",
+        "it": "Edificio 58"
+      },
+      "eastM": -319.8,
+      "northM": -570,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 13.4,
+        "lengthM": 9.9,
+        "heightM": 5.6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#958b8b"
+      },
+      "facade": {
+        "color": "#bfad8f"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-87",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 59",
+        "en": "Building 59",
+        "es": "Edificio 59",
+        "it": "Edificio 59"
+      },
+      "eastM": -652.6,
+      "northM": -57.5,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 48.8,
+        "lengthM": 6.4,
+        "heightM": 3.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#95888e"
+      },
+      "facade": {
+        "color": "#dad1be"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-88",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 60",
+        "en": "Building 60",
+        "es": "Edificio 60",
+        "it": "Edificio 60"
+      },
+      "eastM": -643.6,
+      "northM": 125.9,
+      "headingDeg": 52.6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 22.1,
+        "lengthM": 11.6,
+        "heightM": 7.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9e9492"
+      },
+      "facade": {
+        "color": "#e3dac6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-89",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 61",
+        "en": "Building 61",
+        "es": "Edificio 61",
+        "it": "Edificio 61"
+      },
+      "eastM": -646.6,
+      "northM": -109.8,
+      "headingDeg": 149,
+      "lit": false,
+      "sizeM": {
+        "widthM": 32.6,
+        "lengthM": 15.5,
+        "heightM": 6.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ccb8b5"
+      },
+      "facade": {
+        "color": "#e6dcc8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-90",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (28)",
+      "eastM": 118.5,
+      "northM": -645.3,
+      "headingDeg": 60.5,
+      "lit": false,
+      "sizeM": {
+        "widthM": 21.5,
+        "lengthM": 16.2,
+        "heightM": 5.6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#f7eef1"
+      },
+      "facade": {
+        "color": "#bbb3a3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-91",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 62",
+        "en": "Building 62",
+        "es": "Edificio 62",
+        "it": "Edificio 62"
+      },
+      "eastM": -652,
+      "northM": -79.8,
+      "headingDeg": 147,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.8,
+        "lengthM": 9.9,
+        "heightM": 3.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8e8382"
+      },
+      "facade": {
+        "color": "#bab2a2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-92",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 63",
+        "en": "Building 63",
+        "es": "Edificio 63",
+        "it": "Edificio 63"
+      },
+      "eastM": -652.7,
+      "northM": -102.9,
+      "headingDeg": 147,
+      "lit": false,
+      "sizeM": {
+        "widthM": 29,
+        "lengthM": 2.8,
+        "heightM": 6.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c2b0ac"
+      },
+      "facade": {
+        "color": "#d6cdbb"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-93",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 64",
+        "en": "Building 64",
+        "es": "Edificio 64",
+        "it": "Edificio 64"
+      },
+      "eastM": -305.2,
+      "northM": -586.8,
+      "headingDeg": 162,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.2,
+        "lengthM": 7.1,
+        "heightM": 7.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#83827d"
+      },
+      "facade": {
+        "color": "#b86a50"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-94",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 65",
+        "en": "Building 65",
+        "es": "Edificio 65",
+        "it": "Edificio 65"
+      },
+      "eastM": -248.2,
+      "northM": -615.9,
+      "headingDeg": 73.3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.4,
+        "lengthM": 10.2,
+        "heightM": 3.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c6a395"
+      },
+      "facade": {
+        "color": "#bdb5a5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-95",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 66",
+        "en": "Building 66",
+        "es": "Edificio 66",
+        "it": "Edificio 66"
+      },
+      "eastM": -647.8,
+      "northM": -154.9,
+      "headingDeg": 59.9,
+      "lit": false,
+      "sizeM": {
+        "widthM": 34.8,
+        "lengthM": 16.8,
+        "heightM": 5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a0a8ac"
+      },
+      "facade": {
+        "color": "#ded5c2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-96",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 67",
+        "en": "Building 67",
+        "es": "Edificio 67",
+        "it": "Edificio 67"
+      },
+      "eastM": -296.9,
+      "northM": -601,
+      "headingDeg": 72,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.8,
+        "lengthM": 8.5,
+        "heightM": 7
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#847d7d"
+      },
+      "facade": {
+        "color": "#d9cfbc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-97",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 68",
+        "en": "Building 68",
+        "es": "Edificio 68",
+        "it": "Edificio 68"
+      },
+      "eastM": -676.4,
+      "northM": -53.5,
+      "headingDeg": 150,
+      "lit": false,
+      "sizeM": {
+        "widthM": 31.1,
+        "lengthM": 7.1,
+        "heightM": 3.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a48f89"
+      },
+      "facade": {
+        "color": "#c7bead"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-98",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (29)",
+      "eastM": 328.2,
+      "northM": -594,
+      "headingDeg": 15,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.7,
+        "lengthM": 4.2,
+        "heightM": 9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#887f7f"
+      },
+      "facade": {
+        "color": "#bbb3a3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-99",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 69",
+        "en": "Building 69",
+        "es": "Edificio 69",
+        "it": "Edificio 69"
+      },
+      "eastM": -678.4,
+      "northM": 63.4,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 15.6,
+        "lengthM": 6.4,
+        "heightM": 6.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#988987"
+      },
+      "facade": {
+        "color": "#c3b8a4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-100",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 70",
+        "en": "Building 70",
+        "es": "Edificio 70",
+        "it": "Edificio 70"
+      },
+      "eastM": -677.1,
+      "northM": 84.2,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 33.2,
+        "lengthM": 5.7,
+        "heightM": 4.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8f8581"
+      },
+      "facade": {
+        "color": "#d3cab8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-101",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 71",
+        "en": "Building 71",
+        "es": "Edificio 71",
+        "it": "Edificio 71"
+      },
+      "eastM": -647.7,
+      "northM": 215.5,
+      "headingDeg": 57,
+      "lit": false,
+      "sizeM": {
+        "widthM": 19.8,
+        "lengthM": 7.1,
+        "heightM": 5.3
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#5c5a59"
+      },
+      "facade": {
+        "color": "#a55e47"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-102",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 72",
+        "en": "Building 72",
+        "es": "Edificio 72",
+        "it": "Edificio 72"
+      },
+      "eastM": -669.4,
+      "northM": 144.8,
+      "headingDeg": 153,
+      "lit": false,
+      "sizeM": {
+        "widthM": 13.4,
+        "lengthM": 8.5,
+        "heightM": 5.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b2a999"
+      },
+      "facade": {
+        "color": "#c5c3bd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-103",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (30)",
+      "eastM": 95.6,
+      "northM": -680.2,
+      "headingDeg": 150.9,
+      "lit": false,
+      "sizeM": {
+        "widthM": 93.4,
+        "lengthM": 18.4,
+        "heightM": 6.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#dfccc0"
+      },
+      "facade": {
+        "color": "#e2d9c5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-104",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 73",
+        "en": "Building 73",
+        "es": "Edificio 73",
+        "it": "Edificio 73"
+      },
+      "eastM": -682.7,
+      "northM": -79.1,
+      "headingDeg": 57,
+      "lit": false,
+      "sizeM": {
+        "widthM": 43.1,
+        "lengthM": 7.1,
+        "heightM": 3.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#af9492"
+      },
+      "facade": {
+        "color": "#e8dfcb"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-105",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 74",
+        "en": "Building 74",
+        "es": "Edificio 74",
+        "it": "Edificio 74"
+      },
+      "eastM": -688.1,
+      "northM": -32.9,
+      "headingDeg": 150,
+      "lit": false,
+      "sizeM": {
+        "widthM": 30.4,
+        "lengthM": 4.9,
+        "heightM": 4
+      },
+      "floors": 1,
+      "facade": {
+        "color": "#d4cbb9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-106",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (31)",
+      "eastM": 313.9,
+      "northM": -616.1,
+      "headingDeg": 105,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.8,
+        "lengthM": 4.9,
+        "heightM": 9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#beb1af"
+      },
+      "facade": {
+        "color": "#d8cfbc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-107",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 75",
+        "en": "Building 75",
+        "es": "Edificio 75",
+        "it": "Edificio 75"
+      },
+      "eastM": -685,
+      "northM": -96,
+      "headingDeg": 59,
+      "lit": false,
+      "sizeM": {
+        "widthM": 26.1,
+        "lengthM": 15.4,
+        "heightM": 4.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c6a0a5"
+      },
+      "facade": {
+        "color": "#d4cbb9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-108",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 76",
+        "en": "Building 76",
+        "es": "Edificio 76",
+        "it": "Edificio 76"
+      },
+      "eastM": -252.3,
+      "northM": -645.6,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.2,
+        "lengthM": 8.5,
+        "heightM": 6.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a0583f"
+      },
+      "facade": {
+        "color": "#975641"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-109",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 77",
+        "en": "Building 77",
+        "es": "Edificio 77",
+        "it": "Edificio 77"
+      },
+      "eastM": -290,
+      "northM": -630.4,
+      "headingDeg": 161.6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.2,
+        "lengthM": 6.6,
+        "heightM": 7.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#978c8e"
+      },
+      "facade": {
+        "color": "#e3d9c6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-110",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (32)",
+      "eastM": 246.7,
+      "northM": -649.9,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 27.6,
+        "lengthM": 3.5,
+        "heightM": 4.6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c7bebe"
+      },
+      "facade": {
+        "color": "#d3cab8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-111",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 78",
+        "en": "Building 78",
+        "es": "Edificio 78",
+        "it": "Edificio 78"
+      },
+      "eastM": -691.5,
+      "northM": 82.8,
+      "headingDeg": 150,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.2,
+        "lengthM": 7.8,
+        "heightM": 7.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#716f70"
+      },
+      "facade": {
+        "color": "#beb29f"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-112",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 79",
+        "en": "Building 79",
+        "es": "Edificio 79",
+        "it": "Edificio 79"
+      },
+      "eastM": -639.5,
+      "northM": 292.4,
+      "headingDeg": 153,
+      "lit": false,
+      "sizeM": {
+        "widthM": 36.8,
+        "lengthM": 15.6,
+        "heightM": 5.6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6e6d69"
+      },
+      "facade": {
+        "color": "#d7cebc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-113",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 80",
+        "en": "Building 80",
+        "es": "Edificio 80",
+        "it": "Edificio 80"
+      },
+      "eastM": -700.5,
+      "northM": 99.6,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 30.4,
+        "lengthM": 8.5,
+        "heightM": 7.6
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#777172"
+      },
+      "facade": {
+        "color": "#e4dac6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-114",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 81",
+        "en": "Building 81",
+        "es": "Edificio 81",
+        "it": "Edificio 81"
+      },
+      "eastM": -717.1,
+      "northM": 34.7,
+      "headingDeg": 162,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 8.5,
+        "heightM": 9.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#877a77"
+      },
+      "facade": {
+        "color": "#c6bca9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-115",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (33)",
+      "eastM": 315.3,
+      "northM": -645,
+      "headingDeg": 105,
+      "lit": false,
+      "sizeM": {
+        "widthM": 100.4,
+        "lengthM": 12.7,
+        "heightM": 9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9d8789"
+      },
+      "facade": {
+        "color": "#e3d9c6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-116",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 82",
+        "en": "Building 82",
+        "es": "Edificio 82",
+        "it": "Edificio 82"
+      },
+      "eastM": -245.7,
+      "northM": -675.5,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 20.5,
+        "lengthM": 8.5,
+        "heightM": 6.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#7d7c78"
+      },
+      "facade": {
+        "color": "#e1d6c0"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-117",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 83",
+        "en": "Building 83",
+        "es": "Edificio 83",
+        "it": "Edificio 83"
+      },
+      "eastM": -712,
+      "northM": 124.8,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 24,
+        "lengthM": 6.4,
+        "heightM": 7.7
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#858487"
+      },
+      "facade": {
+        "color": "#e6dcc9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-118",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 84",
+        "en": "Building 84",
+        "es": "Edificio 84",
+        "it": "Edificio 84"
+      },
+      "eastM": -673.1,
+      "northM": 271.7,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 18.4,
+        "lengthM": 7.8,
+        "heightM": 3.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#7f7b70"
+      },
+      "facade": {
+        "color": "#965641"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-119",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (34)",
+      "eastM": 78.9,
+      "northM": -722.2,
+      "headingDeg": 60.9,
+      "lit": false,
+      "sizeM": {
+        "widthM": 19,
+        "lengthM": 18,
+        "heightM": 6.9
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#f1eceb"
+      },
+      "facade": {
+        "color": "#ded5c2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-120",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 85",
+        "en": "Building 85",
+        "es": "Edificio 85",
+        "it": "Edificio 85"
+      },
+      "eastM": -734.3,
+      "northM": 28.3,
+      "headingDeg": 162.9,
+      "lit": false,
+      "sizeM": {
+        "widthM": 21.2,
+        "lengthM": 8.6,
+        "heightM": 4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#97918e"
+      },
+      "facade": {
+        "color": "#965641"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-121",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 86",
+        "en": "Building 86",
+        "es": "Edificio 86",
+        "it": "Edificio 86"
+      },
+      "eastM": -732.1,
+      "northM": -68.1,
+      "headingDeg": 62,
+      "lit": false,
+      "sizeM": {
+        "widthM": 60.7,
+        "lengthM": 20,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b2bec0"
+      },
+      "facade": {
+        "color": "#bbb3a3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-122",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (35)",
+      "eastM": 292.6,
+      "northM": -686.1,
+      "headingDeg": 15,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 9.2,
+        "heightM": 9
+      },
+      "floors": 1,
+      "facade": {
+        "color": "#d9cfbd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-123",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 87",
+        "en": "Building 87",
+        "es": "Edificio 87",
+        "it": "Edificio 87"
+      },
+      "eastM": -682.9,
+      "northM": 302.9,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 29,
+        "lengthM": 7.8,
+        "heightM": 4.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#5a5764"
+      },
+      "facade": {
+        "color": "#945440"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-124",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (36)",
+      "eastM": 55.8,
+      "northM": -757.7,
+      "headingDeg": 150,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.8,
+        "lengthM": 12.7,
+        "heightM": 6.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#7e828b"
+      },
+      "facade": {
+        "color": "#e1d8c4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-125",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (37)",
+      "eastM": 131.4,
+      "northM": -749.8,
+      "headingDeg": 150.9,
+      "lit": false,
+      "sizeM": {
+        "widthM": 97,
+        "lengthM": 17.9,
+        "heightM": 6.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#d4cdca"
+      },
+      "facade": {
+        "color": "#d7cebb"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-126",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 88",
+        "en": "Building 88",
+        "es": "Edificio 88",
+        "it": "Edificio 88"
+      },
+      "eastM": -299.3,
+      "northM": -704.7,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12,
+        "lengthM": 10.6,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#7b7b7b"
+      },
+      "facade": {
+        "color": "#e6dcc8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-127",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (38)",
+      "eastM": 206.8,
+      "northM": -744.1,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.6,
+        "lengthM": 9.9,
+        "heightM": 8
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a0a0a0"
+      },
+      "facade": {
+        "color": "#bcb4a4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-128",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (39)",
+      "eastM": 180.3,
+      "northM": -755.1,
+      "headingDeg": 153,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.8,
+        "lengthM": 8.5,
+        "heightM": 4.6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b8b8b5"
+      },
+      "facade": {
+        "color": "#ccc4b2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-129",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 89",
+        "en": "Building 89",
+        "es": "Edificio 89",
+        "it": "Edificio 89"
+      },
+      "eastM": -368.3,
+      "northM": -693.1,
+      "headingDeg": 169.7,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.6,
+        "lengthM": 9.5,
+        "heightM": 5.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#817c77"
+      },
+      "facade": {
+        "color": "#b4b2ac"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-130",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 90",
+        "en": "Building 90",
+        "es": "Edificio 90",
+        "it": "Edificio 90"
+      },
+      "eastM": -272.2,
+      "northM": -743.3,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.7,
+        "lengthM": 7.8,
+        "heightM": 7.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b1a5a2"
+      },
+      "facade": {
+        "color": "#a99a7f"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-131",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (40)",
+      "eastM": 194.8,
+      "northM": -768.9,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 16.3,
+        "lengthM": 3.5,
+        "heightM": 10.8
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#cbc6c4"
+      },
+      "facade": {
+        "color": "#ded5c2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-132",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (41)",
+      "eastM": 155.5,
+      "northM": -778.6,
+      "headingDeg": 150,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12,
+        "lengthM": 4.9,
+        "heightM": 10.8
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#978284"
+      },
+      "facade": {
+        "color": "#c8bfae"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-133",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (42)",
+      "eastM": 221,
+      "northM": -767.4,
+      "headingDeg": 60.9,
+      "lit": false,
+      "sizeM": {
+        "widthM": 37,
+        "lengthM": 12.9,
+        "heightM": 7
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e1e0dd"
+      },
+      "facade": {
+        "color": "#bdb5a5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-134",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 91",
+        "en": "Building 91",
+        "es": "Edificio 91",
+        "it": "Edificio 91"
+      },
+      "eastM": -795.5,
+      "northM": 105.7,
+      "headingDeg": 150,
+      "lit": false,
+      "sizeM": {
+        "widthM": 27.6,
+        "lengthM": 10.6,
+        "heightM": 4.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8f9095"
+      },
+      "facade": {
+        "color": "#d3cab8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-135",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 92",
+        "en": "Building 92",
+        "es": "Edificio 92",
+        "it": "Edificio 92"
+      },
+      "eastM": -802.7,
+      "northM": 42.6,
+      "headingDeg": 162,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.6,
+        "lengthM": 9.2,
+        "heightM": 6.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#cabfb7"
+      },
+      "facade": {
+        "color": "#c4c2bb"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-136",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (43)",
+      "eastM": -190.3,
+      "northM": -782.2,
+      "headingDeg": 60.3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 40.4,
+        "lengthM": 25.2,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#d6d3d2"
+      },
+      "facade": {
+        "color": "#bcb4a4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-137",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (44)",
+      "eastM": 152.8,
+      "northM": -792,
+      "headingDeg": 150,
+      "lit": false,
+      "sizeM": {
+        "widthM": 91.9,
+        "lengthM": 15.6,
+        "heightM": 10.8
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#cab3b1"
+      },
+      "facade": {
+        "color": "#d0c7b5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-138",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 93",
+        "en": "Building 93",
+        "es": "Edificio 93",
+        "it": "Edificio 93"
+      },
+      "eastM": -806.1,
+      "northM": 122.2,
+      "headingDeg": 150.8,
+      "lit": false,
+      "sizeM": {
+        "widthM": 23.2,
+        "lengthM": 17.2,
+        "heightM": 3.7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#979c9d"
+      },
+      "facade": {
+        "color": "#cac1b0"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-139",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 94",
+        "en": "Building 94",
+        "es": "Edificio 94",
+        "it": "Edificio 94"
+      },
+      "eastM": -319.4,
+      "northM": -758.3,
+      "headingDeg": 170.5,
+      "lit": false,
+      "sizeM": {
+        "widthM": 13.7,
+        "lengthM": 9.6,
+        "heightM": 4.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#82757e"
+      },
+      "facade": {
+        "color": "#955541"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-140",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 95",
+        "en": "Building 95",
+        "es": "Edificio 95",
+        "it": "Edificio 95"
+      },
+      "eastM": -812.6,
+      "northM": 137.2,
+      "headingDeg": 150.9,
+      "lit": false,
+      "sizeM": {
+        "widthM": 30.8,
+        "lengthM": 16.7,
+        "heightM": 3.7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#95979e"
+      },
+      "facade": {
+        "color": "#c4bcab"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-141",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 96",
+        "en": "Building 96",
+        "es": "Edificio 96",
+        "it": "Edificio 96"
+      },
+      "eastM": -270.6,
+      "northM": -784.9,
+      "headingDeg": 84,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.6,
+        "lengthM": 9.9,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#757574"
+      },
+      "facade": {
+        "color": "#ded3be"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-142",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 97",
+        "en": "Building 97",
+        "es": "Edificio 97",
+        "it": "Edificio 97"
+      },
+      "eastM": -824.8,
+      "northM": 163.5,
+      "headingDeg": 150,
+      "lit": false,
+      "sizeM": {
+        "widthM": 26.2,
+        "lengthM": 7.8,
+        "heightM": 6.7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#83858e"
+      },
+      "facade": {
+        "color": "#c0b8a8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-143",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 98",
+        "en": "Building 98",
+        "es": "Edificio 98",
+        "it": "Edificio 98"
+      },
+      "eastM": -374.6,
+      "northM": -760.5,
+      "headingDeg": 80.5,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 8.9,
+        "heightM": 8.8
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9d989c"
+      },
+      "facade": {
+        "color": "#ac624a"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-144",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 99",
+        "en": "Building 99",
+        "es": "Edificio 99",
+        "it": "Edificio 99"
+      },
+      "eastM": -860.6,
+      "northM": 94,
+      "headingDeg": 57,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.1,
+        "lengthM": 8.5,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#656464"
+      },
+      "facade": {
+        "color": "#e8ddc7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-145",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 100",
+        "en": "Building 100",
+        "es": "Edificio 100",
+        "it": "Edificio 100"
+      },
+      "eastM": -251.5,
+      "northM": -833.6,
+      "headingDeg": 114,
+      "lit": false,
+      "sizeM": {
+        "widthM": 50.9,
+        "lengthM": 14.1,
+        "heightM": 14.5
+      },
+      "floors": 5,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#baa6a6"
+      },
+      "facade": {
+        "color": "#dfd5c2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-146",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 101",
+        "en": "Building 101",
+        "es": "Edificio 101",
+        "it": "Edificio 101"
+      },
+      "eastM": -364.6,
+      "northM": -792.1,
+      "headingDeg": 174.3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 13.5,
+        "lengthM": 9.6,
+        "heightM": 7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#92878c"
+      },
+      "facade": {
+        "color": "#b7af9d"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-147",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 102",
+        "en": "Building 102",
+        "es": "Edificio 102",
+        "it": "Edificio 102"
+      },
+      "eastM": -240.5,
+      "northM": -840,
+      "headingDeg": 114,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 11.3,
+        "heightM": 14.5
+      },
+      "floors": 5,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a99298"
+      },
+      "facade": {
+        "color": "#d4cbb9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-148",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 103",
+        "en": "Building 103",
+        "es": "Edificio 103",
+        "it": "Edificio 103"
+      },
+      "eastM": -303.7,
+      "northM": -835.1,
+      "headingDeg": 174,
+      "lit": false,
+      "sizeM": {
+        "widthM": 24,
+        "lengthM": 7.1,
+        "heightM": 6.1
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#908588"
+      },
+      "facade": {
+        "color": "#d7cebc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-149",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 104",
+        "en": "Building 104",
+        "es": "Edificio 104",
+        "it": "Edificio 104"
+      },
+      "eastM": -217.5,
+      "northM": -864.8,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 55.2,
+        "lengthM": 12.7,
+        "heightM": 14.5
+      },
+      "floors": 5,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c2afb0"
+      },
+      "facade": {
+        "color": "#ece2ce"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-150",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 105",
+        "en": "Building 105",
+        "es": "Edificio 105",
+        "it": "Edificio 105"
+      },
+      "eastM": -862.1,
+      "northM": 268.1,
+      "headingDeg": 51,
+      "lit": false,
+      "sizeM": {
+        "widthM": 22.6,
+        "lengthM": 4.2,
+        "heightM": 8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8f9096"
+      },
+      "facade": {
+        "color": "#beb6a6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-151",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 106",
+        "en": "Building 106",
+        "es": "Edificio 106",
+        "it": "Edificio 106"
+      },
+      "eastM": -877.2,
+      "northM": 248.6,
+      "headingDeg": 141,
+      "lit": false,
+      "sizeM": {
+        "widthM": 43.8,
+        "lengthM": 31.1,
+        "heightM": 8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#929197"
+      },
+      "facade": {
+        "color": "#e3d9c6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-152",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 107",
+        "en": "Building 107",
+        "es": "Edificio 107",
+        "it": "Edificio 107"
+      },
+      "eastM": -219,
+      "northM": -897.6,
+      "headingDeg": 6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 36.8,
+        "lengthM": 11.3,
+        "heightM": 14.5
+      },
+      "floors": 5,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c5abaa"
+      },
+      "facade": {
+        "color": "#e0d7c4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-153",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 108",
+        "en": "Building 108",
+        "es": "Edificio 108",
+        "it": "Edificio 108"
+      },
+      "eastM": -197.8,
+      "northM": -906.3,
+      "headingDeg": 114,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.7,
+        "lengthM": 5.7,
+        "heightM": 14.5
+      },
+      "floors": 5,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bdaaa6"
+      },
+      "facade": {
+        "color": "#e3dac6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-154",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 109",
+        "en": "Building 109",
+        "es": "Edificio 109",
+        "it": "Edificio 109"
+      },
+      "eastM": -927.9,
+      "northM": 8.5,
+      "headingDeg": 72,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 10.6,
+        "heightM": 8.8
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#7a7a7e"
+      },
+      "facade": {
+        "color": "#dcd1bc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-155",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 110",
+        "en": "Building 110",
+        "es": "Edificio 110",
+        "it": "Edificio 110"
+      },
+      "eastM": -900.9,
+      "northM": 238.5,
+      "headingDeg": 51,
+      "lit": false,
+      "sizeM": {
+        "widthM": 17,
+        "lengthM": 5.7,
+        "heightM": 8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8a8a90"
+      },
+      "facade": {
+        "color": "#eae0cc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-156",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 111",
+        "en": "Building 111",
+        "es": "Edificio 111",
+        "it": "Edificio 111"
+      },
+      "eastM": -363,
+      "northM": -860.1,
+      "headingDeg": 177,
+      "lit": false,
+      "sizeM": {
+        "widthM": 31.1,
+        "lengthM": 8.5,
+        "heightM": 4.9
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#999594"
+      },
+      "facade": {
+        "color": "#e9dfcb"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-157",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 112",
+        "en": "Building 112",
+        "es": "Edificio 112",
+        "it": "Edificio 112"
+      },
+      "eastM": -209,
+      "northM": -910,
+      "headingDeg": 6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.1,
+        "lengthM": 11.3,
+        "heightM": 14.5
+      },
+      "floors": 5,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e6d6d1"
+      },
+      "facade": {
+        "color": "#d3cab8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-158",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 113",
+        "en": "Building 113",
+        "es": "Edificio 113",
+        "it": "Edificio 113"
+      },
+      "eastM": -179.6,
+      "northM": -926.2,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 46.7,
+        "lengthM": 14.1,
+        "heightM": 14.5
+      },
+      "floors": 5,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c3b7b8"
+      },
+      "facade": {
+        "color": "#ece2ce"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-159",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 114",
+        "en": "Building 114",
+        "es": "Edificio 114",
+        "it": "Edificio 114"
+      },
+      "eastM": -166.7,
+      "northM": -948.5,
+      "headingDeg": 150,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 5.7,
+        "heightM": 14.5
+      },
+      "floors": 5,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ad9899"
+      },
+      "facade": {
+        "color": "#cec5b3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-160",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 115",
+        "en": "Building 115",
+        "es": "Edificio 115",
+        "it": "Edificio 115"
+      },
+      "eastM": -897.7,
+      "northM": 364.9,
+      "headingDeg": 57,
+      "lit": false,
+      "sizeM": {
+        "widthM": 43.8,
+        "lengthM": 18.4,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#baa89d"
+      },
+      "facade": {
+        "color": "#dcd3c0"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-161",
+      "kind": "building",
+      "title": "École Primaire Jules Ferry",
+      "eastM": -477.5,
+      "northM": -846.5,
+      "headingDeg": 177,
+      "lit": false,
+      "sizeM": {
+        "widthM": 19.1,
+        "lengthM": 19.1,
+        "heightM": 3.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#999498"
+      },
+      "facade": {
+        "color": "#eae0cc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-162",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 116",
+        "en": "Building 116",
+        "es": "Edificio 116",
+        "it": "Edificio 116"
+      },
+      "eastM": -165.6,
+      "northM": -959,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.7,
+        "lengthM": 8.5,
+        "heightM": 14.5
+      },
+      "floors": 5,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a69995"
+      },
+      "facade": {
+        "color": "#d7cebc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-163",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 117",
+        "en": "Building 117",
+        "es": "Edificio 117",
+        "it": "Edificio 117"
+      },
+      "eastM": -929.9,
+      "northM": 340.4,
+      "headingDeg": 54,
+      "lit": false,
+      "sizeM": {
+        "widthM": 45.3,
+        "lengthM": 16.3,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#aca29c"
+      },
+      "facade": {
+        "color": "#d1c8b7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-164",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 118",
+        "en": "Building 118",
+        "es": "Edificio 118",
+        "it": "Edificio 118"
+      },
+      "eastM": -159.6,
+      "northM": -977.7,
+      "headingDeg": 168,
+      "lit": false,
+      "sizeM": {
+        "widthM": 23.3,
+        "lengthM": 7.1,
+        "heightM": 7.3
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#af9c9f"
+      },
+      "facade": {
+        "color": "#c9c0af"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-165",
+      "kind": "building",
+      "title": "École Primaire Jules Ferry (2)",
+      "eastM": -522.9,
+      "northM": -845,
+      "headingDeg": 105,
+      "lit": false,
+      "sizeM": {
+        "widthM": 47.4,
+        "lengthM": 13.4,
+        "heightM": 3.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8f9197"
+      },
+      "facade": {
+        "color": "#d5ccba"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-166",
+      "kind": "building",
+      "title": "École Primaire Jules Ferry (3)",
+      "eastM": -491.4,
+      "northM": -873.5,
+      "headingDeg": 174,
+      "lit": false,
+      "sizeM": {
+        "widthM": 18.4,
+        "lengthM": 12.7,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#afacb2"
+      },
+      "facade": {
+        "color": "#d8cebc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-167",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 119",
+        "en": "Building 119",
+        "es": "Edificio 119",
+        "it": "Edificio 119"
+      },
+      "eastM": -915.1,
+      "northM": 421.1,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 26.2,
+        "lengthM": 7.1,
+        "heightM": 5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#eae7e8"
+      },
+      "facade": {
+        "color": "#dad0be"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-168",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (45)",
+      "eastM": 38.8,
+      "northM": -1015.4,
+      "headingDeg": 42,
+      "lit": false,
+      "sizeM": {
+        "widthM": 51.6,
+        "lengthM": 17.7,
+        "heightM": 2.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c5c2bf"
+      },
+      "facade": {
+        "color": "#e4dac7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-169",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 120",
+        "en": "Building 120",
+        "es": "Edificio 120",
+        "it": "Edificio 120"
+      },
+      "eastM": -930.8,
+      "northM": 417.7,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 27.6,
+        "lengthM": 7.1,
+        "heightM": 5.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bdbcb9"
+      },
+      "facade": {
+        "color": "#c9c1b0"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-170",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 121",
+        "en": "Building 121",
+        "es": "Edificio 121",
+        "it": "Edificio 121"
+      },
+      "eastM": -584,
+      "northM": -849,
+      "headingDeg": 93,
+      "lit": false,
+      "sizeM": {
+        "widthM": 24.7,
+        "lengthM": 9.9,
+        "heightM": 4
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#98979b"
+      },
+      "facade": {
+        "color": "#ded4c0"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-171",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (46)",
+      "eastM": 92.7,
+      "northM": -1036.3,
+      "headingDeg": 42,
+      "lit": false,
+      "sizeM": {
+        "widthM": 19.8,
+        "lengthM": 8.5,
+        "heightM": 5.9
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9d9ea0"
+      },
+      "facade": {
+        "color": "#d5ccba"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-172",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (47)",
+      "eastM": -66.9,
+      "northM": -1040.8,
+      "headingDeg": 57,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.1,
+        "lengthM": 5.7,
+        "heightM": 16.1
+      },
+      "floors": 5,
+      "facade": {
+        "color": "#dad0be"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-173",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (48)",
+      "eastM": 28.2,
+      "northM": -1046.9,
+      "headingDeg": 42.1,
+      "lit": false,
+      "sizeM": {
+        "widthM": 26.5,
+        "lengthM": 11.7,
+        "heightM": 3.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b5a4a4"
+      },
+      "facade": {
+        "color": "#c7bead"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-174",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 122",
+        "en": "Building 122",
+        "es": "Edificio 122",
+        "it": "Edificio 122"
+      },
+      "eastM": -388.8,
+      "northM": -974.4,
+      "headingDeg": 123,
+      "lit": false,
+      "sizeM": {
+        "widthM": 19.1,
+        "lengthM": 9.9,
+        "heightM": 5.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a9a8a4"
+      },
+      "facade": {
+        "color": "#c3bbaa"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-175",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 123",
+        "en": "Building 123",
+        "es": "Edificio 123",
+        "it": "Edificio 123"
+      },
+      "eastM": -409.6,
+      "northM": -977.8,
+      "headingDeg": 33,
+      "lit": false,
+      "sizeM": {
+        "widthM": 39.6,
+        "lengthM": 9.2,
+        "heightM": 5.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a9a4a4"
+      },
+      "facade": {
+        "color": "#ece2ce"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-176",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (49)",
+      "eastM": 59.9,
+      "northM": -1060.5,
+      "headingDeg": 131.3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 31.4,
+        "lengthM": 21.6,
+        "heightM": 5.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c9aaac"
+      },
+      "facade": {
+        "color": "#d2c9b7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-177",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (50)",
+      "eastM": -39.7,
+      "northM": -1064.9,
+      "headingDeg": 61.7,
+      "lit": false,
+      "sizeM": {
+        "widthM": 30.5,
+        "lengthM": 10.6,
+        "heightM": 4.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#98999d"
+      },
+      "facade": {
+        "color": "#e0d6c3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-178",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 124",
+        "en": "Building 124",
+        "es": "Edificio 124",
+        "it": "Edificio 124"
+      },
+      "eastM": -655.2,
+      "northM": -843.9,
+      "headingDeg": 171,
+      "lit": false,
+      "sizeM": {
+        "widthM": 24.7,
+        "lengthM": 7.8,
+        "heightM": 6.4
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#898588"
+      },
+      "facade": {
+        "color": "#9c5944"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-179",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (51)",
+      "eastM": 49.6,
+      "northM": -1083.2,
+      "headingDeg": 129.8,
+      "lit": false,
+      "sizeM": {
+        "widthM": 18,
+        "lengthM": 16.8,
+        "heightM": 7.1
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ab979c"
+      },
+      "facade": {
+        "color": "#ddd4c1"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-180",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 125",
+        "en": "Building 125",
+        "es": "Edificio 125",
+        "it": "Edificio 125"
+      },
+      "eastM": -450.7,
+      "northM": -993.7,
+      "headingDeg": 123,
+      "lit": false,
+      "sizeM": {
+        "widthM": 65.1,
+        "lengthM": 7.8,
+        "heightM": 5.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b8b3b0"
+      },
+      "facade": {
+        "color": "#dfd6c3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-181",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 126",
+        "en": "Building 126",
+        "es": "Edificio 126",
+        "it": "Edificio 126"
+      },
+      "eastM": -440.4,
+      "northM": -1009.5,
+      "headingDeg": 124.5,
+      "lit": false,
+      "sizeM": {
+        "widthM": 44,
+        "lengthM": 28.2,
+        "heightM": 5.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a09ea8"
+      },
+      "facade": {
+        "color": "#e6ddc9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-182",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (52)",
+      "eastM": 29.1,
+      "northM": -1101,
+      "headingDeg": 59.5,
+      "lit": false,
+      "sizeM": {
+        "widthM": 30.7,
+        "lengthM": 20.1,
+        "heightM": 6.7
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#96949f"
+      },
+      "facade": {
+        "color": "#d3cab8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-183",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 127",
+        "en": "Building 127",
+        "es": "Edificio 127",
+        "it": "Edificio 127"
+      },
+      "eastM": -926.5,
+      "northM": 607.6,
+      "headingDeg": 147,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.7,
+        "lengthM": 9.2,
+        "heightM": 9.3
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c6b9ad"
+      },
+      "facade": {
+        "color": "#c2baa9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-184",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 128",
+        "en": "Building 128",
+        "es": "Edificio 128",
+        "it": "Edificio 128"
+      },
+      "eastM": -490.7,
+      "northM": -1005.2,
+      "headingDeg": 126,
+      "lit": false,
+      "sizeM": {
+        "widthM": 33.9,
+        "lengthM": 8.5,
+        "heightM": 12.9
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b8b2b0"
+      },
+      "facade": {
+        "color": "#d4c9b5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-185",
+      "kind": "building",
+      "title": "ZI des Soixante Dix Arpents (53)",
+      "eastM": 2.1,
+      "northM": -1124.8,
+      "headingDeg": 57,
+      "lit": false,
+      "sizeM": {
+        "widthM": 38.9,
+        "lengthM": 9.9,
+        "heightM": 7.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8f9598"
+      },
+      "facade": {
+        "color": "#e7ddca"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-186",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 129",
+        "en": "Building 129",
+        "es": "Edificio 129",
+        "it": "Edificio 129"
+      },
+      "eastM": -514.3,
+      "northM": -1014.8,
+      "headingDeg": 36,
+      "lit": false,
+      "sizeM": {
+        "widthM": 17,
+        "lengthM": 9.2,
+        "heightM": 13.6
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b8b3b0"
+      },
+      "facade": {
+        "color": "#e1d6c1"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-187",
+      "kind": "building",
+      "title": "Cosec de Montsoult",
+      "eastM": -191.2,
+      "northM": -1138.8,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 36.1,
+        "lengthM": 18.4,
+        "heightM": 10.4
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#fafeff"
+      },
+      "facade": {
+        "color": "#cdc4b3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-188",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 130",
+        "en": "Building 130",
+        "es": "Edificio 130",
+        "it": "Edificio 130"
+      },
+      "eastM": -537.3,
+      "northM": -1025.3,
+      "headingDeg": 126,
+      "lit": false,
+      "sizeM": {
+        "widthM": 31.1,
+        "lengthM": 8.5,
+        "heightM": 13.4
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#beb6b1"
+      },
+      "facade": {
+        "color": "#b7b5af"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-189",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 131",
+        "en": "Building 131",
+        "es": "Edificio 131",
+        "it": "Edificio 131"
+      },
+      "eastM": 85.9,
+      "northM": -1166.9,
+      "headingDeg": 151.7,
+      "lit": false,
+      "sizeM": {
+        "widthM": 33.4,
+        "lengthM": 10.5,
+        "heightM": 9.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#ded4c2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-190",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 132",
+        "en": "Building 132",
+        "es": "Edificio 132",
+        "it": "Edificio 132"
+      },
+      "eastM": -491.6,
+      "northM": -1062,
+      "headingDeg": 36,
+      "lit": false,
+      "sizeM": {
+        "widthM": 60.1,
+        "lengthM": 7.8,
+        "heightM": 13.2
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#adaba9"
+      },
+      "facade": {
+        "color": "#c1b7a5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-191",
+      "kind": "building",
+      "title": "Cosec de Montsoult (2)",
+      "eastM": -150.5,
+      "northM": -1161.6,
+      "headingDeg": 66,
+      "lit": false,
+      "sizeM": {
+        "widthM": 38.9,
+        "lengthM": 26.2,
+        "heightM": 4.8
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#88888f"
+      },
+      "facade": {
+        "color": "#c0b8a7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-192",
+      "kind": "building",
+      "title": "Cosec de Montsoult (3)",
+      "eastM": -177.5,
+      "northM": -1162,
+      "headingDeg": 54,
+      "lit": false,
+      "sizeM": {
+        "widthM": 22.6,
+        "lengthM": 19.1,
+        "heightM": 6.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8f8f99"
+      },
+      "facade": {
+        "color": "#cdc4b3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-193",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 133",
+        "en": "Building 133",
+        "es": "Edificio 133",
+        "it": "Edificio 133"
+      },
+      "eastM": -1165.3,
+      "northM": -186.1,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 21.9,
+        "lengthM": 12.7,
+        "heightM": 7.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9c9799"
+      },
+      "facade": {
+        "color": "#e0d6c3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-194",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 134",
+        "en": "Building 134",
+        "es": "Edificio 134",
+        "it": "Edificio 134"
+      },
+      "eastM": 60.3,
+      "northM": -1180.7,
+      "headingDeg": 151.7,
+      "lit": false,
+      "sizeM": {
+        "widthM": 26.7,
+        "lengthM": 10.5,
+        "heightM": 5.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#c1b9a8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-195",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 135",
+        "en": "Building 135",
+        "es": "Edificio 135",
+        "it": "Edificio 135"
+      },
+      "eastM": -531.2,
+      "northM": -1061.2,
+      "headingDeg": 126,
+      "lit": false,
+      "sizeM": {
+        "widthM": 31.8,
+        "lengthM": 9.2,
+        "heightM": 13.2
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b0aca4"
+      },
+      "facade": {
+        "color": "#ccc2af"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-196",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 136",
+        "en": "Building 136",
+        "es": "Edificio 136",
+        "it": "Edificio 136"
+      },
+      "eastM": -469.9,
+      "northM": -1093,
+      "headingDeg": 126,
+      "lit": false,
+      "sizeM": {
+        "widthM": 19.8,
+        "lengthM": 9.9,
+        "heightM": 13.2
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#beb6af"
+      },
+      "facade": {
+        "color": "#ded3be"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-197",
+      "kind": "building",
+      "title": "Cosec de Montsoult (4)",
+      "eastM": -165.5,
+      "northM": -1182.9,
+      "headingDeg": 66,
+      "lit": false,
+      "sizeM": {
+        "widthM": 22.6,
+        "lengthM": 17,
+        "heightM": 5.6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9e9e9f"
+      },
+      "facade": {
+        "color": "#e2d8c5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-198",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 137",
+        "en": "Building 137",
+        "es": "Edificio 137",
+        "it": "Edificio 137"
+      },
+      "eastM": 51.8,
+      "northM": -1204.3,
+      "headingDeg": 62.1,
+      "lit": false,
+      "sizeM": {
+        "widthM": 43.9,
+        "lengthM": 11.6,
+        "heightM": 5.3
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#fefeff"
+      },
+      "facade": {
+        "color": "#d0c7b6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-199",
+      "kind": "building",
+      "title": "Collège Marcel Pagnol",
+      "eastM": -195.3,
+      "northM": -1195.2,
+      "headingDeg": 144.2,
+      "lit": false,
+      "sizeM": {
+        "widthM": 22.1,
+        "lengthM": 10.4,
+        "heightM": 6.3
+      },
+      "floors": 2,
+      "facade": {
+        "color": "#bfb7a6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-200",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 138",
+        "en": "Building 138",
+        "es": "Edificio 138",
+        "it": "Edificio 138"
+      },
+      "eastM": 818,
+      "northM": -894.1,
+      "headingDeg": 39.6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 51,
+        "lengthM": 20.5,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#dae4e6"
+      },
+      "facade": {
+        "color": "#d9cfbd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-201",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 139",
+        "en": "Building 139",
+        "es": "Edificio 139",
+        "it": "Edificio 139"
+      },
+      "eastM": 854.6,
+      "northM": -860.7,
+      "headingDeg": 39.3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 51.3,
+        "lengthM": 10.6,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e1e4e6"
+      },
+      "facade": {
+        "color": "#d4cbb9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-202",
+      "kind": "building",
+      "title": "Collège Marcel Pagnol (2)",
+      "eastM": -238.5,
+      "northM": -1189.6,
+      "headingDeg": 54,
+      "lit": false,
+      "sizeM": {
+        "widthM": 24,
+        "lengthM": 12,
+        "heightM": 8.4
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#878a96"
+      },
+      "facade": {
+        "color": "#cdc4b3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-203",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 140",
+        "en": "Building 140",
+        "es": "Edificio 140",
+        "it": "Edificio 140"
+      },
+      "eastM": 808.6,
+      "northM": -904.9,
+      "headingDeg": 39,
+      "lit": false,
+      "sizeM": {
+        "widthM": 49.5,
+        "lengthM": 8.5,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#d8e4e8"
+      },
+      "facade": {
+        "color": "#e9dfcb"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-204",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 141",
+        "en": "Building 141",
+        "es": "Edificio 141",
+        "it": "Edificio 141"
+      },
+      "eastM": 848.6,
+      "northM": -868,
+      "headingDeg": 39,
+      "lit": false,
+      "sizeM": {
+        "widthM": 50.9,
+        "lengthM": 9.2,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e0e8e8"
+      },
+      "facade": {
+        "color": "#dad1be"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-205",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 142",
+        "en": "Building 142",
+        "es": "Edificio 142",
+        "it": "Edificio 142"
+      },
+      "eastM": 842.4,
+      "northM": -875.7,
+      "headingDeg": 38.7,
+      "lit": false,
+      "sizeM": {
+        "widthM": 51.2,
+        "lengthM": 10.5,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#dae7eb"
+      },
+      "facade": {
+        "color": "#c3bbaa"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-206",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 143",
+        "en": "Building 143",
+        "es": "Edificio 143",
+        "it": "Edificio 143"
+      },
+      "eastM": 803.1,
+      "northM": -912.2,
+      "headingDeg": 39,
+      "lit": false,
+      "sizeM": {
+        "widthM": 50.2,
+        "lengthM": 9.9,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#cfd9e0"
+      },
+      "facade": {
+        "color": "#d4cbb9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-207",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 144",
+        "en": "Building 144",
+        "es": "Edificio 144",
+        "it": "Edificio 144"
+      },
+      "eastM": 836.6,
+      "northM": -882.9,
+      "headingDeg": 39,
+      "lit": false,
+      "sizeM": {
+        "widthM": 50.2,
+        "lengthM": 8.5,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#d8e1e6"
+      },
+      "facade": {
+        "color": "#e7ddc9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-208",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 145",
+        "en": "Building 145",
+        "es": "Edificio 145",
+        "it": "Edificio 145"
+      },
+      "eastM": -564.3,
+      "northM": -1078.7,
+      "headingDeg": 81,
+      "lit": false,
+      "sizeM": {
+        "widthM": 55.9,
+        "lengthM": 7.8,
+        "heightM": 5.8
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c4c2b6"
+      },
+      "facade": {
+        "color": "#bebcb6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-209",
+      "kind": "building",
+      "title": {
+        "fr": "Silo",
+        "en": "Silo",
+        "es": "Silo",
+        "it": "Silo"
+      },
+      "eastM": 1122.1,
+      "northM": -476,
+      "headingDeg": 157.6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 90.9,
+        "lengthM": 23.4,
+        "heightM": 19.4
+      },
+      "floors": 6,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b7aca0"
+      },
+      "facade": {
+        "color": "#cbc2b1"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-210",
+      "kind": "building",
+      "title": "Collège Marcel Pagnol (3)",
+      "eastM": -276.8,
+      "northM": -1193.4,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 21.9,
+        "lengthM": 19.1,
+        "heightM": 8.4
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#91919b"
+      },
+      "facade": {
+        "color": "#dbd1bf"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-211",
+      "kind": "building",
+      "title": "Collège Marcel Pagnol (4)",
+      "eastM": -247.2,
+      "northM": -1201.6,
+      "headingDeg": 54,
+      "lit": false,
+      "sizeM": {
+        "widthM": 53,
+        "lengthM": 16.3,
+        "heightM": 8.4
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#92929b"
+      },
+      "facade": {
+        "color": "#c1b8a8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-212",
+      "kind": "building",
+      "title": {
+        "fr": "Silo (2)",
+        "en": "Silo (2)",
+        "es": "Silo (2)",
+        "it": "Silo (2)"
+      },
+      "eastM": 1109,
+      "northM": -528.7,
+      "headingDeg": 90,
+      "lit": false,
+      "sizeM": {
+        "widthM": 29,
+        "lengthM": 28.3,
+        "heightM": 26.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#cfc7c3"
+      },
+      "facade": {
+        "color": "#e6dcc8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-213",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 146",
+        "en": "Building 146",
+        "es": "Edificio 146",
+        "it": "Edificio 146"
+      },
+      "eastM": -755,
+      "northM": -971.6,
+      "headingDeg": 167.9,
+      "lit": false,
+      "sizeM": {
+        "widthM": 13,
+        "lengthM": 10.9,
+        "heightM": 9.8
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#717177"
+      },
+      "facade": {
+        "color": "#dbd1bf"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-214",
+      "kind": "building",
+      "title": "École Primaire le Cèdre",
+      "eastM": -1218,
+      "northM": -183.9,
+      "headingDeg": 36,
+      "lit": false,
+      "sizeM": {
+        "widthM": 33.2,
+        "lengthM": 12.7,
+        "heightM": 5.3
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9998a5"
+      },
+      "facade": {
+        "color": "#ebe1cd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-215",
+      "kind": "building",
+      "title": {
+        "fr": "Silo (3)",
+        "en": "Silo (3)",
+        "es": "Silo (3)",
+        "it": "Silo (3)"
+      },
+      "eastM": 1124.9,
+      "northM": -523.1,
+      "headingDeg": 90,
+      "lit": false,
+      "sizeM": {
+        "widthM": 17.7,
+        "lengthM": 3.5,
+        "heightM": 26.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b09596"
+      },
+      "facade": {
+        "color": "#bdb5a5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-216",
+      "kind": "building",
+      "title": {
+        "fr": "Silo (4)",
+        "en": "Silo (4)",
+        "es": "Silo (4)",
+        "it": "Silo (4)"
+      },
+      "eastM": 1134.9,
+      "northM": -529,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12,
+        "lengthM": 7.1,
+        "heightM": 14.5
+      },
+      "floors": 5,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9d9da0"
+      },
+      "facade": {
+        "color": "#e1d7c4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-217",
+      "kind": "building",
+      "title": {
+        "fr": "Silo (5)",
+        "en": "Silo (5)",
+        "es": "Silo (5)",
+        "it": "Silo (5)"
+      },
+      "eastM": 1169.1,
+      "northM": -450.2,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 16.3,
+        "lengthM": 5.7,
+        "heightM": 15.3
+      },
+      "floors": 5,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#676d72"
+      },
+      "facade": {
+        "color": "#c2baa9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-218",
+      "kind": "building",
+      "title": "Lycée Professionnel Jean Mermoz",
+      "eastM": -353.7,
+      "northM": -1209.4,
+      "headingDeg": 54.5,
+      "lit": false,
+      "sizeM": {
+        "widthM": 27.6,
+        "lengthM": 10.3,
+        "heightM": 7.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b5ada9"
+      },
+      "facade": {
+        "color": "#cac1b0"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-219",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 147",
+        "en": "Building 147",
+        "es": "Edificio 147",
+        "it": "Edificio 147"
+      },
+      "eastM": 1197,
+      "northM": -396,
+      "headingDeg": 90,
+      "lit": false,
+      "sizeM": {
+        "widthM": 30.5,
+        "lengthM": 12,
+        "heightM": 7.6
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6a6e7a"
+      },
+      "facade": {
+        "color": "#bfb7a6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-220",
+      "kind": "building",
+      "title": {
+        "fr": "Silo (6)",
+        "en": "Silo (6)",
+        "es": "Silo (6)",
+        "it": "Silo (6)"
+      },
+      "eastM": 1122.6,
+      "northM": -576.8,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 53.7,
+        "lengthM": 16.3,
+        "heightM": 20.9
+      },
+      "floors": 7,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#97888b"
+      },
+      "facade": {
+        "color": "#e3dac6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-221",
+      "kind": "building",
+      "title": {
+        "fr": "Silo (7)",
+        "en": "Silo (7)",
+        "es": "Silo (7)",
+        "it": "Silo (7)"
+      },
+      "eastM": 1123.8,
+      "northM": -587,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 50.9,
+        "lengthM": 4.9,
+        "heightM": 20.8
+      },
+      "floors": 7,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bfb2b0"
+      },
+      "facade": {
+        "color": "#e4dac7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-222",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 148",
+        "en": "Building 148",
+        "es": "Edificio 148",
+        "it": "Edificio 148"
+      },
+      "eastM": 1095,
+      "northM": -639.5,
+      "headingDeg": 3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 84.1,
+        "lengthM": 15.6,
+        "heightM": 7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#d3aca8"
+      },
+      "facade": {
+        "color": "#d9d0bd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-223",
+      "kind": "building",
+      "title": "Lycée Professionnel Jean Mermoz (2)",
+      "eastM": -321.8,
+      "northM": -1231.4,
+      "headingDeg": 54,
+      "lit": false,
+      "sizeM": {
+        "widthM": 38.9,
+        "lengthM": 9.2,
+        "heightM": 8.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#959798"
+      },
+      "facade": {
+        "color": "#c1b8a7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-224",
+      "kind": "building",
+      "title": {
+        "fr": "Silo (8)",
+        "en": "Silo (8)",
+        "es": "Silo (8)",
+        "it": "Silo (8)"
+      },
+      "eastM": 1151.3,
+      "northM": -553.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.5,
+        "lengthM": 9.5,
+        "heightM": 21.1
+      },
+      "floors": 7,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b3b3b3"
+      },
+      "facade": {
+        "color": "#c1b8a8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-225",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 149",
+        "en": "Building 149",
+        "es": "Edificio 149",
+        "it": "Edificio 149"
+      },
+      "eastM": 1223.6,
+      "northM": -419,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 19.1,
+        "lengthM": 14.8,
+        "heightM": 6.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#dbccc3"
+      },
+      "facade": {
+        "color": "#c2baa9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-226",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 150",
+        "en": "Building 150",
+        "es": "Edificio 150",
+        "it": "Edificio 150"
+      },
+      "eastM": 978.7,
+      "northM": -847.1,
+      "headingDeg": 128,
+      "lit": false,
+      "sizeM": {
+        "widthM": 37,
+        "lengthM": 31.3,
+        "heightM": 6.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a4767c"
+      },
+      "facade": {
+        "color": "#bcb4a4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-227",
+      "kind": "building",
+      "title": {
+        "fr": "Silo (9)",
+        "en": "Silo (9)",
+        "es": "Silo (9)",
+        "it": "Silo (9)"
+      },
+      "eastM": 1159.5,
+      "northM": -577.7,
+      "headingDeg": 3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 19.8,
+        "lengthM": 8.5,
+        "heightM": 20.9
+      },
+      "floors": 7,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a59496"
+      },
+      "facade": {
+        "color": "#bbb3a3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-228",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 151",
+        "en": "Building 151",
+        "es": "Edificio 151",
+        "it": "Edificio 151"
+      },
+      "eastM": 1236,
+      "northM": -396.8,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 66.5,
+        "lengthM": 29.7,
+        "heightM": 6.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#d4c5ba"
+      },
+      "facade": {
+        "color": "#e7ddc9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-229",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 152",
+        "en": "Building 152",
+        "es": "Edificio 152",
+        "it": "Edificio 152"
+      },
+      "eastM": 1196,
+      "northM": -515.9,
+      "headingDeg": 1.6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 30.4,
+        "lengthM": 14.5,
+        "heightM": 4.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#d0bab5"
+      },
+      "facade": {
+        "color": "#c7bfae"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-230",
+      "kind": "building",
+      "title": "Lycée Professionnel Jean Mermoz (3)",
+      "eastM": -370.4,
+      "northM": -1256.5,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 36.8,
+        "lengthM": 34.6,
+        "heightM": 5.1
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bca49e"
+      },
+      "facade": {
+        "color": "#e7ddc9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-231",
+      "kind": "building",
+      "title": "Lycée Professionnel Jean Mermoz (4)",
+      "eastM": -325.2,
+      "northM": -1271.2,
+      "headingDeg": 145,
+      "lit": false,
+      "sizeM": {
+        "widthM": 41.3,
+        "lengthM": 19.6,
+        "heightM": 11.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#aca69f"
+      },
+      "facade": {
+        "color": "#d7cebb"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-232",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 153",
+        "en": "Building 153",
+        "es": "Edificio 153",
+        "it": "Edificio 153"
+      },
+      "eastM": -62.7,
+      "northM": -1312.8,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 99,
+        "lengthM": 89.1,
+        "heightM": 5.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8e8c95"
+      },
+      "facade": {
+        "color": "#c1b8a8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-233",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 154",
+        "en": "Building 154",
+        "es": "Edificio 154",
+        "it": "Edificio 154"
+      },
+      "eastM": 702.1,
+      "northM": -1117.4,
+      "headingDeg": 39,
+      "lit": false,
+      "sizeM": {
+        "widthM": 25.5,
+        "lengthM": 19.8,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#f1ede4"
+      },
+      "facade": {
+        "color": "#d8cfbc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-234",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 155",
+        "en": "Building 155",
+        "es": "Edificio 155",
+        "it": "Edificio 155"
+      },
+      "eastM": 773.3,
+      "northM": -1086.6,
+      "headingDeg": 39,
+      "lit": false,
+      "sizeM": {
+        "widthM": 52.3,
+        "lengthM": 7.1,
+        "heightM": 5.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bec3c6"
+      },
+      "facade": {
+        "color": "#d2c9b7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-235",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 156",
+        "en": "Building 156",
+        "es": "Edificio 156",
+        "it": "Edificio 156"
+      },
+      "eastM": 766.1,
+      "northM": -1095.1,
+      "headingDeg": 39,
+      "lit": false,
+      "sizeM": {
+        "widthM": 53,
+        "lengthM": 6.4,
+        "heightM": 6.8
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#5a5e61"
+      },
+      "facade": {
+        "color": "#e6ddc9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-236",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 157",
+        "en": "Building 157",
+        "es": "Edificio 157",
+        "it": "Edificio 157"
+      },
+      "eastM": -1258.2,
+      "northM": -459.2,
+      "headingDeg": 83.7,
+      "lit": false,
+      "sizeM": {
+        "widthM": 17.4,
+        "lengthM": 12.8,
+        "heightM": 12.2
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#706f70"
+      },
+      "facade": {
+        "color": "#d1c8b7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-237",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 158",
+        "en": "Building 158",
+        "es": "Edificio 158",
+        "it": "Edificio 158"
+      },
+      "eastM": -111.2,
+      "northM": -1339.1,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 67.9,
+        "lengthM": 21.2,
+        "heightM": 5.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9f9fa8"
+      },
+      "facade": {
+        "color": "#bdb5a5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-238",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 159",
+        "en": "Building 159",
+        "es": "Edificio 159",
+        "it": "Edificio 159"
+      },
+      "eastM": 1261.9,
+      "northM": -467.4,
+      "headingDeg": 37.7,
+      "lit": false,
+      "sizeM": {
+        "widthM": 29.6,
+        "lengthM": 20.3,
+        "heightM": 4.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#dfd7d9"
+      },
+      "facade": {
+        "color": "#bcb4a4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-239",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 160",
+        "en": "Building 160",
+        "es": "Edificio 160",
+        "it": "Edificio 160"
+      },
+      "eastM": 1021.5,
+      "northM": -876.6,
+      "headingDeg": 90,
+      "lit": false,
+      "sizeM": {
+        "widthM": 44,
+        "lengthM": 10,
+        "heightM": 6.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9b8c88"
+      },
+      "facade": {
+        "color": "#c4bcab"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-240",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 161",
+        "en": "Building 161",
+        "es": "Edificio 161",
+        "it": "Edificio 161"
+      },
+      "eastM": 1185.6,
+      "northM": -639.9,
+      "headingDeg": 1.8,
+      "lit": false,
+      "sizeM": {
+        "widthM": 74.3,
+        "lengthM": 16.7,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#caa5a4"
+      },
+      "facade": {
+        "color": "#d4cbb9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-241",
+      "kind": "building",
+      "title": "Lycée Professionnel Jean Mermoz (5)",
+      "eastM": -359.6,
+      "northM": -1303,
+      "headingDeg": 145,
+      "lit": false,
+      "sizeM": {
+        "widthM": 30.4,
+        "lengthM": 19.9,
+        "heightM": 8.1
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#959898"
+      },
+      "facade": {
+        "color": "#dad1be"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-242",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 162",
+        "en": "Building 162",
+        "es": "Edificio 162",
+        "it": "Edificio 162"
+      },
+      "eastM": -126.3,
+      "northM": -1346,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 67.9,
+        "lengthM": 9.9,
+        "heightM": 8.3
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#dedade"
+      },
+      "facade": {
+        "color": "#d8cebc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-243",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 163",
+        "en": "Building 163",
+        "es": "Edificio 163",
+        "it": "Edificio 163"
+      },
+      "eastM": 1249.8,
+      "northM": -526.8,
+      "headingDeg": 36,
+      "lit": false,
+      "sizeM": {
+        "widthM": 28.3,
+        "lengthM": 15.6,
+        "heightM": 4.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#76757b"
+      },
+      "facade": {
+        "color": "#d5ccba"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-244",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 164",
+        "en": "Building 164",
+        "es": "Edificio 164",
+        "it": "Edificio 164"
+      },
+      "eastM": -145.7,
+      "northM": -1363.6,
+      "headingDeg": 153,
+      "lit": false,
+      "sizeM": {
+        "widthM": 21.9,
+        "lengthM": 19.1,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#bdb5a5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-245",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 165",
+        "en": "Building 165",
+        "es": "Edificio 165",
+        "it": "Edificio 165"
+      },
+      "eastM": -1360.7,
+      "northM": -194.4,
+      "headingDeg": 132,
+      "lit": false,
+      "sizeM": {
+        "widthM": 67.9,
+        "lengthM": 5.7,
+        "heightM": 12.9
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#7e7472"
+      },
+      "facade": {
+        "color": "#d8cfbc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-246",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 166",
+        "en": "Building 166",
+        "es": "Edificio 166",
+        "it": "Edificio 166"
+      },
+      "eastM": -393,
+      "northM": -1318.7,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 27.6,
+        "lengthM": 12,
+        "heightM": 9.4
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c4c9c9"
+      },
+      "facade": {
+        "color": "#cec5b4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-247",
+      "kind": "building",
+      "title": "EHPAD les Charmilles",
+      "eastM": -1157.9,
+      "northM": -756.6,
+      "headingDeg": 30,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.1,
+        "lengthM": 12.7,
+        "heightM": 11.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8f9096"
+      },
+      "facade": {
+        "color": "#d8cebc"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-248",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 167",
+        "en": "Building 167",
+        "es": "Edificio 167",
+        "it": "Edificio 167"
+      },
+      "eastM": 1284.1,
+      "northM": -533.7,
+      "headingDeg": 129,
+      "lit": false,
+      "sizeM": {
+        "widthM": 35.4,
+        "lengthM": 35.4,
+        "heightM": 4.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#7b7b81"
+      },
+      "facade": {
+        "color": "#dbd1bf"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-249",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 168",
+        "en": "Building 168",
+        "es": "Edificio 168",
+        "it": "Edificio 168"
+      },
+      "eastM": -1390.8,
+      "northM": 79,
+      "headingDeg": 117,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.8,
+        "lengthM": 10.6,
+        "heightM": 11.1
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#727275"
+      },
+      "facade": {
+        "color": "#b6684f"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-250",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 169",
+        "en": "Building 169",
+        "es": "Edificio 169",
+        "it": "Edificio 169"
+      },
+      "eastM": 812.4,
+      "northM": -1132.3,
+      "headingDeg": 39,
+      "lit": false,
+      "sizeM": {
+        "widthM": 52.3,
+        "lengthM": 7.8,
+        "heightM": 4.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#67645d"
+      },
+      "facade": {
+        "color": "#bfb7a7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-251",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 170",
+        "en": "Building 170",
+        "es": "Edificio 170",
+        "it": "Edificio 170"
+      },
+      "eastM": -375.8,
+      "northM": -1342.4,
+      "headingDeg": 150,
+      "lit": false,
+      "sizeM": {
+        "widthM": 27.6,
+        "lengthM": 12.7,
+        "heightM": 11.9
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ccd1d3"
+      },
+      "facade": {
+        "color": "#cbc3b1"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-252",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 171",
+        "en": "Building 171",
+        "es": "Edificio 171",
+        "it": "Edificio 171"
+      },
+      "eastM": 1312.1,
+      "northM": -475.9,
+      "headingDeg": 126,
+      "lit": false,
+      "sizeM": {
+        "widthM": 66.5,
+        "lengthM": 60.8,
+        "heightM": 4.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ebe5e3"
+      },
+      "facade": {
+        "color": "#cdc4b3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-253",
+      "kind": "building",
+      "title": "EHPAD les Charmilles (2)",
+      "eastM": -1176.9,
+      "northM": -774.8,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 44.5,
+        "lengthM": 9.2,
+        "heightM": 11.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8e8e91"
+      },
+      "facade": {
+        "color": "#d9d0bd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-254",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet",
+      "eastM": 37.4,
+      "northM": -1409.7,
+      "headingDeg": 3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 66.5,
+        "lengthM": 8.5,
+        "heightM": 10.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8b8a97"
+      },
+      "facade": {
+        "color": "#c2baa9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-255",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 172",
+        "en": "Building 172",
+        "es": "Edificio 172",
+        "it": "Edificio 172"
+      },
+      "eastM": -1393.1,
+      "northM": -288.1,
+      "headingDeg": 66,
+      "lit": false,
+      "sizeM": {
+        "widthM": 39.6,
+        "lengthM": 6.4,
+        "heightM": 8.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bcafb1"
+      },
+      "facade": {
+        "color": "#e6dcc8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-256",
+      "kind": "building",
+      "title": "EHPAD les Charmilles (3)",
+      "eastM": -1202.5,
+      "northM": -769.3,
+      "headingDeg": 117,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.1,
+        "lengthM": 12,
+        "heightM": 11.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#949096"
+      },
+      "facade": {
+        "color": "#bab2a2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-257",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 173",
+        "en": "Building 173",
+        "es": "Edificio 173",
+        "it": "Edificio 173"
+      },
+      "eastM": -1357.1,
+      "northM": -447.8,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 38.9,
+        "lengthM": 12.7,
+        "heightM": 7.1
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8e7b7a"
+      },
+      "facade": {
+        "color": "#d6cdbb"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-258",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 174",
+        "en": "Building 174",
+        "es": "Edificio 174",
+        "it": "Edificio 174"
+      },
+      "eastM": 1349.4,
+      "northM": -484.7,
+      "headingDeg": 126,
+      "lit": false,
+      "sizeM": {
+        "widthM": 42.4,
+        "lengthM": 9.9,
+        "heightM": 4.5
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#d9d4d3"
+      },
+      "facade": {
+        "color": "#dad1be"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-259",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 175",
+        "en": "Building 175",
+        "es": "Edificio 175",
+        "it": "Edificio 175"
+      },
+      "eastM": -1413.3,
+      "northM": -244.7,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 31.1,
+        "lengthM": 14.1,
+        "heightM": 12.9
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a09598"
+      },
+      "facade": {
+        "color": "#ebe1cd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-260",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (2)",
+      "eastM": -160.4,
+      "northM": -1439.9,
+      "headingDeg": 96,
+      "lit": false,
+      "sizeM": {
+        "widthM": 69.3,
+        "lengthM": 16.3,
+        "heightM": 7.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#f8f9f8"
+      },
+      "facade": {
+        "color": "#dbd2bf"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-261",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (3)",
+      "eastM": -37.4,
+      "northM": -1455.3,
+      "headingDeg": 3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 226.3,
+        "lengthM": 90.5,
+        "heightM": 10.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#74747f"
+      },
+      "facade": {
+        "color": "#beb6a6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-262",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 176",
+        "en": "Building 176",
+        "es": "Edificio 176",
+        "it": "Edificio 176"
+      },
+      "eastM": -1458.9,
+      "northM": 51.7,
+      "headingDeg": 111,
+      "lit": false,
+      "sizeM": {
+        "widthM": 22.6,
+        "lengthM": 10.6,
+        "heightM": 13.3
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#f0f0ec"
+      },
+      "facade": {
+        "color": "#cac2b0"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-263",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 177",
+        "en": "Building 177",
+        "es": "Edificio 177",
+        "it": "Edificio 177"
+      },
+      "eastM": -1398.7,
+      "northM": -422.5,
+      "headingDeg": 72,
+      "lit": false,
+      "sizeM": {
+        "widthM": 41,
+        "lengthM": 7.1,
+        "heightM": 8.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8e7f81"
+      },
+      "facade": {
+        "color": "#d2c9b7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-264",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (4)",
+      "eastM": -181,
+      "northM": -1464.1,
+      "headingDeg": 3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 19.1,
+        "lengthM": 19.1,
+        "heightM": 7.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e5e3e6"
+      },
+      "facade": {
+        "color": "#dfd5c2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-265",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (5)",
+      "eastM": -300.7,
+      "northM": -1445.3,
+      "headingDeg": 141,
+      "lit": false,
+      "sizeM": {
+        "widthM": 38.2,
+        "lengthM": 19.1,
+        "heightM": 6.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bdc2c5"
+      },
+      "facade": {
+        "color": "#ebe1cd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-266",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 178",
+        "en": "Building 178",
+        "es": "Edificio 178",
+        "it": "Edificio 178"
+      },
+      "eastM": -1489.9,
+      "northM": -91.2,
+      "headingDeg": 48,
+      "lit": false,
+      "sizeM": {
+        "widthM": 28.3,
+        "lengthM": 7.8,
+        "heightM": 9
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a29d9f"
+      },
+      "facade": {
+        "color": "#c2b9a9"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-267",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (6)",
+      "eastM": -185.7,
+      "northM": -1486,
+      "headingDeg": 2.3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 27.7,
+        "lengthM": 13.6,
+        "heightM": 5.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a2a09c"
+      },
+      "facade": {
+        "color": "#cdc4b3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-268",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (7)",
+      "eastM": 89,
+      "northM": -1497.2,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 31.1,
+        "lengthM": 18.4,
+        "heightM": 10.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#71707e"
+      },
+      "facade": {
+        "color": "#bbb3a3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-269",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 179",
+        "en": "Building 179",
+        "es": "Edificio 179",
+        "it": "Edificio 179"
+      },
+      "eastM": -1180.2,
+      "northM": -930.9,
+      "headingDeg": 168,
+      "lit": false,
+      "sizeM": {
+        "widthM": 26.2,
+        "lengthM": 9.2,
+        "heightM": 8.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#928c8c"
+      },
+      "facade": {
+        "color": "#e3d9c6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-270",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (8)",
+      "eastM": -85,
+      "northM": -1501.7,
+      "headingDeg": 3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 145.7,
+        "lengthM": 7.1,
+        "heightM": 10.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#fdfaf8"
+      },
+      "facade": {
+        "color": "#c5bcac"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-271",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 180",
+        "en": "Building 180",
+        "es": "Edificio 180",
+        "it": "Edificio 180"
+      },
+      "eastM": -1469.5,
+      "northM": -364.6,
+      "headingDeg": 60,
+      "lit": false,
+      "sizeM": {
+        "widthM": 26.9,
+        "lengthM": 9.2,
+        "heightM": 8.9
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#988281"
+      },
+      "facade": {
+        "color": "#bfb7a7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-272",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (9)",
+      "eastM": -89.9,
+      "northM": -1512.8,
+      "headingDeg": 90,
+      "lit": false,
+      "sizeM": {
+        "widthM": 15.6,
+        "lengthM": 15.6,
+        "heightM": 10.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b9b3b3"
+      },
+      "facade": {
+        "color": "#d3cab8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-273",
+      "kind": "building",
+      "title": "Église Notre-Dame des Champs",
+      "eastM": -1507.8,
+      "northM": -152.3,
+      "headingDeg": 135,
+      "lit": false,
+      "sizeM": {
+        "widthM": 30.4,
+        "lengthM": 9.2,
+        "heightM": 17.5
+      },
+      "floors": 6,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#5b5967"
+      },
+      "facade": {
+        "color": "#ccc3b2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-274",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 181",
+        "en": "Building 181",
+        "es": "Edificio 181",
+        "it": "Edificio 181"
+      },
+      "eastM": -1515.3,
+      "northM": -108.6,
+      "headingDeg": 129,
+      "lit": false,
+      "sizeM": {
+        "widthM": 23.3,
+        "lengthM": 7.1,
+        "heightM": 11.7
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a29fa6"
+      },
+      "facade": {
+        "color": "#ccc3b2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-275",
+      "kind": "building",
+      "title": "École Primaire Alphonse Daudet",
+      "eastM": -1310.7,
+      "northM": -782.5,
+      "headingDeg": 75,
+      "lit": false,
+      "sizeM": {
+        "widthM": 43.8,
+        "lengthM": 7.8,
+        "heightM": 11.6
+      },
+      "floors": 4,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9d9c9e"
+      },
+      "facade": {
+        "color": "#ddd3c0"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-276",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (10)",
+      "eastM": 23.9,
+      "northM": -1526.9,
+      "headingDeg": 90,
+      "lit": false,
+      "sizeM": {
+        "widthM": 41,
+        "lengthM": 5.7,
+        "heightM": 10.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b7b7ba"
+      },
+      "facade": {
+        "color": "#cfc6b4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-277",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 182",
+        "en": "Building 182",
+        "es": "Edificio 182",
+        "it": "Edificio 182"
+      },
+      "eastM": -1479.8,
+      "northM": -396.4,
+      "headingDeg": 138,
+      "lit": false,
+      "sizeM": {
+        "widthM": 58,
+        "lengthM": 5.7,
+        "heightM": 8.9
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#727070"
+      },
+      "facade": {
+        "color": "#bdb5a5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-278",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (11)",
+      "eastM": -310.8,
+      "northM": -1501.8,
+      "headingDeg": 57,
+      "lit": false,
+      "sizeM": {
+        "widthM": 49.5,
+        "lengthM": 22.6,
+        "heightM": 6.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bab6ba"
+      },
+      "facade": {
+        "color": "#c9c0af"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-279",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 183",
+        "en": "Building 183",
+        "es": "Edificio 183",
+        "it": "Edificio 183"
+      },
+      "eastM": 855.9,
+      "northM": -1273.8,
+      "headingDeg": 39,
+      "lit": false,
+      "sizeM": {
+        "widthM": 52.3,
+        "lengthM": 10.6,
+        "heightM": 5.3
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#987277"
+      },
+      "facade": {
+        "color": "#d6cdba"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-280",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 184",
+        "en": "Building 184",
+        "es": "Edificio 184",
+        "it": "Edificio 184"
+      },
+      "eastM": 844.6,
+      "northM": -1291.3,
+      "headingDeg": 39,
+      "lit": false,
+      "sizeM": {
+        "widthM": 48.1,
+        "lengthM": 19.1,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#d0aaaf"
+      },
+      "facade": {
+        "color": "#dfd5c2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-281",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (12)",
+      "eastM": 115.4,
+      "northM": -1541.9,
+      "headingDeg": 93,
+      "lit": false,
+      "sizeM": {
+        "widthM": 26.9,
+        "lengthM": 9.9,
+        "heightM": 10.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#979799"
+      },
+      "facade": {
+        "color": "#ece2ce"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-282",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 185",
+        "en": "Building 185",
+        "es": "Edificio 185",
+        "it": "Edificio 185"
+      },
+      "eastM": -1504.1,
+      "northM": -370.7,
+      "headingDeg": 153,
+      "lit": false,
+      "sizeM": {
+        "widthM": 31.8,
+        "lengthM": 8.5,
+        "heightM": 8.9
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#77686d"
+      },
+      "facade": {
+        "color": "#ece2ce"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-283",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 186",
+        "en": "Building 186",
+        "es": "Edificio 186",
+        "it": "Edificio 186"
+      },
+      "eastM": 813.2,
+      "northM": -1327.6,
+      "headingDeg": 127.5,
+      "lit": false,
+      "sizeM": {
+        "widthM": 58.4,
+        "lengthM": 55.3,
+        "heightM": 2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#dfdddd"
+      },
+      "facade": {
+        "color": "#bdb5a5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-284",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (13)",
+      "eastM": 67.8,
+      "northM": -1555.9,
+      "headingDeg": 90,
+      "lit": false,
+      "sizeM": {
+        "widthM": 99,
+        "lengthM": 82,
+        "heightM": 10.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#cfcfd3"
+      },
+      "facade": {
+        "color": "#ccc3b2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-285",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 187",
+        "en": "Building 187",
+        "es": "Edificio 187",
+        "it": "Edificio 187"
+      },
+      "eastM": -1515.4,
+      "northM": -398.3,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 50.2,
+        "lengthM": 7.8,
+        "heightM": 8.9
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8e7d83"
+      },
+      "facade": {
+        "color": "#e0d7c4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-286",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (14)",
+      "eastM": -15.2,
+      "northM": -1572.6,
+      "headingDeg": 3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 82,
+        "lengthM": 39.6,
+        "heightM": 10.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#fafafa"
+      },
+      "facade": {
+        "color": "#ebe1cd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-287",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 188",
+        "en": "Building 188",
+        "es": "Edificio 188",
+        "it": "Edificio 188"
+      },
+      "eastM": -1518.1,
+      "northM": -420.4,
+      "headingDeg": 63,
+      "lit": false,
+      "sizeM": {
+        "widthM": 87,
+        "lengthM": 14.8,
+        "heightM": 4.6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8c878c"
+      },
+      "facade": {
+        "color": "#ded5c2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-288",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 189",
+        "en": "Building 189",
+        "es": "Edificio 189",
+        "it": "Edificio 189"
+      },
+      "eastM": -363.4,
+      "northM": -1550.7,
+      "headingDeg": 15,
+      "lit": false,
+      "sizeM": {
+        "widthM": 49.5,
+        "lengthM": 13.4,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#999fad"
+      },
+      "facade": {
+        "color": "#c4bcab"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-289",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (15)",
+      "eastM": 118.5,
+      "northM": -1589.5,
+      "headingDeg": 93,
+      "lit": false,
+      "sizeM": {
+        "widthM": 67.9,
+        "lengthM": 17,
+        "heightM": 10.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#f9f8f2"
+      },
+      "facade": {
+        "color": "#e1d7c4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-290",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (16)",
+      "eastM": -47.5,
+      "northM": -1597.8,
+      "headingDeg": 3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 21.2,
+        "lengthM": 14.1,
+        "heightM": 10.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#adabad"
+      },
+      "facade": {
+        "color": "#cec5b3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-291",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 190",
+        "en": "Building 190",
+        "es": "Edificio 190",
+        "it": "Edificio 190"
+      },
+      "eastM": 804.4,
+      "northM": -1384.1,
+      "headingDeg": 38.4,
+      "lit": false,
+      "sizeM": {
+        "widthM": 110.5,
+        "lengthM": 35.8,
+        "heightM": 6.6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a6a8a6"
+      },
+      "facade": {
+        "color": "#d9d0bd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-292",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 191",
+        "en": "Building 191",
+        "es": "Edificio 191",
+        "it": "Edificio 191"
+      },
+      "eastM": -305.1,
+      "northM": -1575.9,
+      "headingDeg": 12,
+      "lit": false,
+      "sizeM": {
+        "widthM": 39.6,
+        "lengthM": 13.4,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#aaa9b5"
+      },
+      "facade": {
+        "color": "#ebe1cd"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-293",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (17)",
+      "eastM": 86.1,
+      "northM": -1611.3,
+      "headingDeg": 6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 45.3,
+        "lengthM": 8.5,
+        "heightM": 10.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#fffff7"
+      },
+      "facade": {
+        "color": "#bcb4a4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-294",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (18)",
+      "eastM": 55.8,
+      "northM": -1613.3,
+      "headingDeg": 12,
+      "lit": false,
+      "sizeM": {
+        "widthM": 48.8,
+        "lengthM": 4.9,
+        "heightM": 17.6
+      },
+      "floors": 6,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#fdfdf9"
+      },
+      "facade": {
+        "color": "#e1d8c5"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-295",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 192",
+        "en": "Building 192",
+        "es": "Edificio 192",
+        "it": "Edificio 192"
+      },
+      "eastM": 1609.7,
+      "northM": -129.5,
+      "headingDeg": 128.7,
+      "lit": false,
+      "sizeM": {
+        "widthM": 43,
+        "lengthM": 23,
+        "heightM": 6.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e8eaeb"
+      },
+      "facade": {
+        "color": "#c1b8a8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-296",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (19)",
+      "eastM": 16.2,
+      "northM": -1644.3,
+      "headingDeg": 96,
+      "lit": false,
+      "sizeM": {
+        "widthM": 62.2,
+        "lengthM": 22.6,
+        "heightM": 9.8
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#aaa9b0"
+      },
+      "facade": {
+        "color": "#cfc6b4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-297",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (20)",
+      "eastM": 75.4,
+      "northM": -1645.6,
+      "headingDeg": 6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 94,
+        "lengthM": 50.9,
+        "heightM": 17.6
+      },
+      "floors": 6,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9f9ea6"
+      },
+      "facade": {
+        "color": "#ded4c1"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-298",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 193",
+        "en": "Building 193",
+        "es": "Edificio 193",
+        "it": "Edificio 193"
+      },
+      "eastM": 1649.8,
+      "northM": -54,
+      "headingDeg": 24.6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 73.4,
+        "lengthM": 33.3,
+        "heightM": 5.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bdc4c7"
+      },
+      "facade": {
+        "color": "#d3cab8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-299",
+      "kind": "building",
+      "title": {
+        "fr": "Bâtiment 194",
+        "en": "Building 194",
+        "es": "Edificio 194",
+        "it": "Edificio 194"
+      },
+      "eastM": -1322.6,
+      "northM": -1004.5,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 43.8,
+        "lengthM": 10.6,
+        "heightM": 8.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#82828a"
+      },
+      "facade": {
+        "color": "#cec5b4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-300",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (21)",
+      "eastM": -5.3,
+      "northM": -1666.6,
+      "headingDeg": 3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 15.6,
+        "lengthM": 15.6,
+        "heightM": 9.8
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#aaa8aa"
+      },
+      "facade": {
+        "color": "#bcb4a4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-301",
+      "kind": "building",
+      "title": "Zone Industrielle du Pont de Baillet (22)",
+      "eastM": 37,
+      "northM": -1672.5,
+      "headingDeg": 6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 23.3,
+        "lengthM": 10.6,
+        "heightM": 17.6
+      },
+      "floors": 6,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b8b8b9"
+      },
+      "facade": {
+        "color": "#c1b8a8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-302",
       "kind": "bridge",
       "title": {
         "fr": "Pont 1",
@@ -11442,10 +19832,10 @@
         "heightM": 4
       },
       "origin": "ign-lidar-topo",
-      "surveyedOn": "2026-03-11"
+      "surveyedOn": "2026-03-26"
     },
     {
-      "id": "ign-lidar-topo-7",
+      "id": "ign-lidar-topo-303",
       "kind": "bridge",
       "title": {
         "fr": "Pont 2",
@@ -11463,7 +19853,217 @@
         "heightM": 4
       },
       "origin": "ign-lidar-topo",
-      "surveyedOn": "2026-03-11"
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-304",
+      "kind": "bridge",
+      "title": {
+        "fr": "Pont 3",
+        "en": "Bridge 3",
+        "es": "Puente 3",
+        "it": "Ponte 3"
+      },
+      "eastM": 314.6,
+      "northM": -945.1,
+      "headingDeg": 54.6,
+      "lit": false,
+      "sizeM": {
+        "lengthM": 97.2,
+        "widthM": 6,
+        "heightM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-305",
+      "kind": "bridge",
+      "title": {
+        "fr": "Pont 4",
+        "en": "Bridge 4",
+        "es": "Puente 4",
+        "it": "Ponte 4"
+      },
+      "eastM": -719.7,
+      "northM": 800.5,
+      "headingDeg": 34,
+      "lit": false,
+      "sizeM": {
+        "lengthM": 157.4,
+        "widthM": 6,
+        "heightM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-306",
+      "kind": "bridge",
+      "title": {
+        "fr": "Pont 5",
+        "en": "Bridge 5",
+        "es": "Puente 5",
+        "it": "Ponte 5"
+      },
+      "eastM": -321.1,
+      "northM": 1080,
+      "headingDeg": 142.4,
+      "lit": false,
+      "sizeM": {
+        "lengthM": 32.8,
+        "widthM": 6,
+        "heightM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-307",
+      "kind": "bridge",
+      "title": {
+        "fr": "Pont (Route de Paris à Calais)",
+        "en": "Bridge (Route de Paris à Calais)",
+        "es": "Puente (Route de Paris à Calais)",
+        "it": "Ponte (Route de Paris à Calais)"
+      },
+      "eastM": -38.8,
+      "northM": -1127.3,
+      "headingDeg": 151,
+      "lit": false,
+      "sizeM": {
+        "lengthM": 23.2,
+        "widthM": 16.4,
+        "heightM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-308",
+      "kind": "bridge",
+      "title": {
+        "fr": "Pont (Route de Paris à Calais) (2)",
+        "en": "Bridge (Route de Paris à Calais) (2)",
+        "es": "Puente (Route de Paris à Calais) (2)",
+        "it": "Ponte (Route de Paris à Calais) (2)"
+      },
+      "eastM": -12.3,
+      "northM": -1174.4,
+      "headingDeg": 151.4,
+      "lit": false,
+      "sizeM": {
+        "lengthM": 25.6,
+        "widthM": 9.4,
+        "heightM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-309",
+      "kind": "bridge",
+      "title": {
+        "fr": "Pont (Route de Paris à Calais) (3)",
+        "en": "Bridge (Route de Paris à Calais) (3)",
+        "es": "Puente (Route de Paris à Calais) (3)",
+        "it": "Ponte (Route de Paris à Calais) (3)"
+      },
+      "eastM": 16.8,
+      "northM": -1226,
+      "headingDeg": 151.4,
+      "lit": false,
+      "sizeM": {
+        "lengthM": 20.5,
+        "widthM": 9.4,
+        "heightM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-310",
+      "kind": "bridge",
+      "title": {
+        "fr": "Pont 6",
+        "en": "Bridge 6",
+        "es": "Puente 6",
+        "it": "Ponte 6"
+      },
+      "eastM": 252.9,
+      "northM": -1346.5,
+      "headingDeg": 82.2,
+      "lit": false,
+      "sizeM": {
+        "lengthM": 38.6,
+        "widthM": 7.4,
+        "heightM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-311",
+      "kind": "bridge",
+      "title": {
+        "fr": "Pont 7",
+        "en": "Bridge 7",
+        "es": "Puente 7",
+        "it": "Ponte 7"
+      },
+      "eastM": 327.6,
+      "northM": -1350.2,
+      "headingDeg": 106.9,
+      "lit": false,
+      "sizeM": {
+        "lengthM": 11.4,
+        "widthM": 7.4,
+        "heightM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-312",
+      "kind": "bridge",
+      "title": {
+        "fr": "Pont (l'Européenne)",
+        "en": "Bridge (l'Européenne)",
+        "es": "Puente (l'Européenne)",
+        "it": "Ponte (l'Européenne)"
+      },
+      "eastM": 290,
+      "northM": -1451.8,
+      "headingDeg": 29.2,
+      "lit": false,
+      "sizeM": {
+        "lengthM": 63,
+        "widthM": 12.9,
+        "heightM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
+    },
+    {
+      "id": "ign-lidar-topo-313",
+      "kind": "bridge",
+      "title": {
+        "fr": "Pont 8",
+        "en": "Bridge 8",
+        "es": "Puente 8",
+        "it": "Ponte 8"
+      },
+      "eastM": -778,
+      "northM": 1525.9,
+      "headingDeg": 159.9,
+      "lit": false,
+      "sizeM": {
+        "lengthM": 33.6,
+        "widthM": 6,
+        "heightM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-26"
     }
   ],
   "instrument": "eye",
