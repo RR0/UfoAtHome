@@ -78,7 +78,7 @@ directly. Run it with `python3 scripts/people/derive_socorro_figure.py` (ImageMa
 
 ## The captain of flight AF 3532
 
-`build_pilot.py` builds `makehuman-people/duboc-slumped.glb`, Captain Jean-Charles Duboc seated at the left seat of an A320 flight deck, after the
+`build_pilot.py` builds `makehuman-people/duboc-slumped-headset.glb`, Captain Jean-Charles Duboc seated at the left seat of an A320 flight deck, after the
 portrait on his rr0.org page (stout, balding, a pepper-and-salt beard, glasses, a white shirt with four-stripe epaulettes and a black tie, a headset).
 It uses the helpers of `build_people.py` (which only runs as a script) and the same setup as above, plus:
 
@@ -96,8 +96,9 @@ It uses the helpers of `build_people.py` (which only runs as a script) and the s
   ```
 
 - What the CC0 assets lack is made on the baked mesh: the beard is a shell of the lower face's own faces pushed out a few millimetres, the hair is
-  `short01` with its crown cut away and its colour made grey, the glasses, the headset, the epaulettes and the tie are small solids placed from the
-  head's and the shoulders' own measures.
+  `short01` with its crown cut away and its colour made grey, the glasses, the epaulettes and the tie are small solids placed from the head's and the
+  shoulders' own measures. The headset is the original one of the A320 flight deck model (CC BY 4.0, davidmarton1987), cut out by `extract_headset.py` and put
+  on his head (set `COCKPIT_SRC` to the downloaded model's folder; without it a stylised one is made).
 - He is posed seated (hips and knees at a right angle, forearms forward) by turning the rig's bones about world axes, then baked like the others.
 
 ```

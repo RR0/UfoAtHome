@@ -239,6 +239,10 @@ const SHADOW_HALF_EXTENT_M = 120
 const SHADOW_MAX_HALF_EXTENT_M = 700
 /** How far a surface is pushed towards the light before it is tested against the shadow map. */
 const SHADOW_BIAS_M = 0.03
+/** The sun's shadow box in a cabin: half its side, half the depth it covers, and its bias (see fitShadowToCabin). */
+const SHADOW_CABIN_HALF_EXTENT_M = 3.5
+const SHADOW_CABIN_DEPTH_HALF_RANGE_M = 20
+const SHADOW_CABIN_BIAS_M = 0.004
 /** And how far along its own normal, which is what keeps grazing relief from shadowing itself. */
 const SHADOW_NORMAL_BIAS_M = 0.04
 /** The sine of the Sun's elevation (15 degrees) from which that bias is applied whole, and under which it is scaled down with it. */
@@ -2632,6 +2636,10 @@ export class SceneRenderer {
       this.camera.rotation.set(this.indoorLookPitchDeg * DEG_TO_RAD, -(view.headingDeg + this.indoorLookYawDeg) * DEG_TO_RAD, 0, "YXZ")
     }
     this.bodyOrigin = { x: offset.x + shift.x, z: offset.z + shift.z }
+    const cabin = this.cabinDecor()
+    this.fitShadowToCabin(cabin.length > 0)
+    this.keepCabinShadowFresh()
+    this.dimCabinSky(cabin)
     this.placeShadowFrustum()
     this.placeTerraces(t, offset, shift)
     // What the ground under a footprint was read against: a terrace moved, resized or re-levelled
@@ -3750,15 +3758,94 @@ export class SceneRenderer {
     if (right.lengthSq() < 1e-8) right.set(1, 0, 0)
     right.normalize()
     const up = this.shadowAxisY.crossVectors(direction, right).normalize()
-    const world = this.shadowWorld.set(this.bodyOrigin.x, 0, this.bodyOrigin.z)
+    const world = this.shadowWorld.set(this.bodyOrigin.x, this.cabinShadow ? this.camera.position.y : 0, this.bodyOrigin.z)
     const along = (axis: Vector3) => {
       const units = world.dot(axis) / texel
       return (units - Math.round(units)) * texel
     }
-    const centre = this.celestialLightTarget.position.set(0, 0, 0)
+    const centre = this.celestialLightTarget.position.set(0, this.cabinShadow ? this.camera.position.y : 0, 0)
       .addScaledVector(right, along(right)).addScaledVector(up, along(up))
     this.celestialLightTarget.updateMatrixWorld()
     this.celestialLight.position.copy(centre).addScaledVector(direction, this.shadowLightDistanceM)
+  }
+
+  /**
+   * The sun's shadow box, tightened round the eye while the observer is inside a decor object (a flight deck), and given back to the bodies'
+   * sizing when they come out.
+   *
+   * The box is sized for the decor's couple of hundred metres and sits at the ground (y = 0), which is wrong twice for a cabin: a flight deck
+   * at 11 700 m is outside it altogether (it had no shadow whatever: the back of the captain was lit through his seat), and with a texel of
+   * a fifth of a metre the shadow of a seat back, a few centimetres thick, could not have been drawn in any case. In a cabin the box is a few
+   * metres on a side, centred on the eye, in a 2048 map (a few millimetres a texel), with a bias to match.
+   */
+  private fitShadowToCabin(inside: boolean): void {
+    if (inside === this.cabinShadow) return
+    this.cabinShadow = inside
+    const shadow = this.celestialLight.shadow
+    if (!inside) {
+      this.renderer.shadowMap.autoUpdate = true
+      this.shadowHalfExtentM = -1          // not the size it was: fitShadowToBodies sets it again
+      this.fitShadowToBodies()
+      return
+    }
+    // A cabin is rigid with the eye: what it shadows does not change from one frame to the next, only with the Sun (see keepCabinShadowFresh)
+    this.renderer.shadowMap.autoUpdate = false
+    this.renderer.shadowMap.needsUpdate = true
+    this.cabinShadowLight.set(0, 0, 0)
+    const camera = shadow.camera
+    const half = SHADOW_CABIN_HALF_EXTENT_M
+    camera.left = -half
+    camera.right = half
+    camera.top = half
+    camera.bottom = -half
+    this.shadowHalfExtentM = half
+    this.shadowLightDistanceM = SHADOW_CABIN_DEPTH_HALF_RANGE_M + 5
+    camera.near = this.shadowLightDistanceM - SHADOW_CABIN_DEPTH_HALF_RANGE_M
+    camera.far = this.shadowLightDistanceM + SHADOW_CABIN_DEPTH_HALF_RANGE_M
+    camera.updateProjectionMatrix()
+    shadow.bias = -SHADOW_CABIN_BIAS_M / (2 * SHADOW_CABIN_DEPTH_HALF_RANGE_M)
+    if (shadow.mapSize.x !== 2048) {
+      shadow.mapSize.set(2048, 2048)
+      shadow.map?.dispose()
+      shadow.map = null
+    }
+  }
+
+  /** What share of the sky's light (the environment map the glossy materials take, see Reflections) reaches the inside of a cabin: the windows' share. */
+  private static readonly CABIN_SKY_SHARE = 0.3
+
+  /**
+   * Dims the sky's light on the materials of the decor the eye is inside of. The environment map of a material is the whole sky seen from the eye,
+   * with nothing in front of it: a flight deck lit so was lit from behind, through its own seat backs, as if it had no roof and no walls.
+   */
+  private dimCabinSky(cabin: readonly Object3D[]): void {
+    for (const group of cabin) {
+      group.traverse(child => {
+        const material = (child as { material?: Material | Material[] }).material
+        for (const each of Array.isArray(material) ? material : material ? [material] : []) {
+          const lit = each as MeshStandardMaterial
+          if (lit.isMeshStandardMaterial && lit.envMapIntensity !== SceneRenderer.CABIN_SKY_SHARE) lit.envMapIntensity = SceneRenderer.CABIN_SKY_SHARE
+        }
+      })
+    }
+  }
+
+  private cabinShadow = false
+  private cabinShadowDrawnAtMs = 0
+  private readonly cabinShadowLight = new Vector3()
+
+  /**
+   * In a cabin the shadow map is drawn when the Sun has moved by more than a twentieth of a degree, and at least once a second (an object that
+   * arrives, a pose that changes), instead of every frame: with the flight deck's six hundred meshes it was half of a frame's cost.
+   */
+  private keepCabinShadowFresh(): void {
+    if (!this.cabinShadow) return
+    const now = performance.now()
+    const moved = this.cabinShadowLight.angleTo(this.lightDirection) > 0.05 * DEG_TO_RAD
+    if (!moved && now - this.cabinShadowDrawnAtMs < 1000) return
+    this.cabinShadowLight.copy(this.lightDirection)
+    this.cabinShadowDrawnAtMs = now
+    this.renderer.shadowMap.needsUpdate = true
   }
 
   /**
@@ -3770,6 +3857,7 @@ export class SceneRenderer {
    * bias stays the same few centimetres (see SHADOW_BIAS_M).
    */
   private fitShadowToBodies(): void {
+    if (this.cabinShadow) return          // the box is the cabin's while the eye is in one (see fitShadowToCabin)
     const reach = this.bodySystem.reachFrom(this.camera.position)
     const half = Math.min(SHADOW_MAX_HALF_EXTENT_M, Math.max(SHADOW_HALF_EXTENT_M, Math.ceil((reach * 1.25) / 20) * 20))
     if (half === this.shadowHalfExtentM) return
@@ -4174,13 +4262,15 @@ export class SceneRenderer {
   }
 
   /**
-   * The decor the eye is inside of — a flight deck, say — which has no business in the photograph of the eye's surroundings: the six
-   * views of a probe at the eye would each be filled with its own panels, and a model of several hundred thousand triangles drawn six
-   * times over was the whole of the cost of a frame (5 per second against over a hundred without). What is mirrored on the glass of
-   * a place the observer stands in is what is outside it. Not the objects the observer is declared to inhabit (observerSide of a
-   * building or a vehicle): their room is drawn small and is what the glass there is meant to mirror.
+   * The decor the eye is inside of (a flight deck, say, whose box contains the eye), except what the observer is declared to inhabit (observerSide
+   * of a building or a vehicle): see fitShadowToCabin.
+   *
+   * It is kept OUT of the photograph of the eye's surroundings, which lights every glossy thing in the scene (Reflections): a flight deck photographed
+   * from its own seat is lit by its own photograph, which is lit by the one before, and the light of the whole thing pulsed with every new photograph;
+   * and six views of it were the whole of a frame's cost before it was cut in cells. What lights it instead is the sky, dimmed to what reaches
+   * the inside of a cabin (see dimCabinSky): the windows, not the whole of the sky.
    */
-  private decorAroundTheEye(): Object3D[] {
+  private cabinDecor(): Object3D[] {
     const inside: Object3D[] = []
     const box = new Box3()
     for (const object of this.decorObjects) {
@@ -4209,7 +4299,7 @@ export class SceneRenderer {
     const eyeHidden: Object3D[] = [...this.starTiers.map(tier => tier.points),
       ...[...this.bodyMeshes.values()].filter(mesh => mesh instanceof Points),
       ...[this.rainSystem?.points, this.precipitationPoints, this.rainSplashSystem?.points].filter((object): object is Points => object !== undefined),
-      ...this.decorAroundTheEye()]
+      ...this.cabinDecor()]
     const scale = this.relativeScale
     const version = this.sceneVersion
     // Behind the loader nothing is on screen to spare the GPU for: the eye's probe is taken as soon

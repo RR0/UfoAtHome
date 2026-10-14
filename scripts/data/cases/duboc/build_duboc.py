@@ -151,7 +151,7 @@ def airliner(total_s, seat="left"):
     ] + ([] if seat == "left" else [
         # An observer (a companion who was there), not an entity: an entity is a being seen, and the engine would class the case "with occupants"
         {**airframe(total_s, "af3532-captain", tr("Le commandant Duboc, au siège gauche", "Captain Duboc, at the left seat"),
-                    "ufoathome-duboc-seated", {"heightM": 1.31}, PILOT_FORWARD_M, PILOT_LEFT_M - SEAT_SPACING_M, PILOT_BELOW_M, {}),
+                    "ufoathome-duboc-seated", {"heightM": 1.292}, PILOT_FORWARD_M, PILOT_LEFT_M - SEAT_SPACING_M, PILOT_BELOW_M, {}),
          "kind": "observer"}])
 
 

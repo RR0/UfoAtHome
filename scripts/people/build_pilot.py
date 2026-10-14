@@ -1,6 +1,6 @@
 """
 Builds the captain of flight AF 3532, Jean-Charles Duboc, seated at the left seat of an A320 flight deck, as one GLB
-(public/models/makehuman-people/duboc-slumped.glb), from MPFB and the MakeHuman system assets (CC0), like the other people of
+(public/models/makehuman-people/duboc-slumped-headset.glb), from MPFB and the MakeHuman system assets (CC0), like the other people of
 build_people.py, whose helpers it uses.
 
 What the portrait of his page on rr0.org (people/d/DubocJeanCharles/portrait.gif, taken in a cockpit) shows, and what is
@@ -24,7 +24,7 @@ name replaced inside the .mhclo and .mhmat), whose diffuse texture has its shirt
 plain navy (#171f33), with a little grain (see README.md beside this file).
 
 The file is served with a week of cache (site/build.ts: a model is content-addressed by its name), so a pose or a size that changes needs a NEW file name
-(this one was `duboc-seated.glb` in 0.115.0, upright; it is `duboc-slumped.glb` since 0.115.1), never the same name with other contents.
+(`duboc-seated.glb` in 0.115.0, upright; `duboc-slumped.glb` in 0.115.1, with a stylised headset; this one has the original headset), never the same name with other contents.
 
 The GLB is in metres, seated, facing +Z (headingOffsetDeg 180 in the catalogue, like the other people), feet on y = 0, geometry baked at
 the pose (no skeleton). It prints where his eyes are, from the middle of its box, to place the figure on a seat.
@@ -41,14 +41,20 @@ from mathutils import Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_people as people  # noqa: E402  (its main() only runs as a script)
+import extract_headset as headset  # noqa: E402
 
 _thing_of = people.thing_of
 # build_people names what it drew "suit"; this garment is a shirt
 people.thing_of = lambda obj: "clothes" if "shirt" in obj.name.lower() else _thing_of(obj)
 
-PILOT = dict(id="duboc-slumped", name="Captain Duboc, seated (after his portrait)", gender=1.0, age=0.638, weight=0.92, muscle=0.4,
+PILOT = dict(id="duboc-slumped-headset", name="Captain Duboc, seated (after his portrait)", gender=1.0, age=0.638, weight=0.92, muscle=0.4,
              heightM=1.70, skin="middleage_caucasian_male", clothes=["male_pilotshirt01"], shoes="shoes03", hair="short01",
              eyebrows="eyebrow002", eyelashes=None)
+# How far along (towards the back, in metres of a 1.74 m figure) the headset is moved from the middle of the ears: to be found by looking
+HEADSET_DEPTH_SHIFT = 0.0
+# The cups stand this far off the head on each side, and the whole headset is this high above the top of the head (metres of a 1.74 m figure): found
+# by looking, it had sunk into the head and sat low on the ears
+HEADSET_STANDOFF, HEADSET_RAISE = 0.026, 0.016
 GREY_HAIR = (0.52, 0.50, 0.49)
 BEARD = (0.30, 0.29, 0.28)
 NAVY_JACKET = (0.05, 0.07, 0.15)
@@ -307,25 +313,68 @@ def main():
     bm.to_mesh(mesh)
     bm.free()
     extras.append(new_object("glasses", mesh, solid_material("glasses", BLACK, 0.4), collection))
-    # headset
-    bm = bmesh.new()
+    # headset: the original one of the flight deck model (extract_headset.py), put on his head, when its source is given; else a stylised one
+    unit = standing / 1.74
     ear_y = eyes_at[0].y + 0.085 * unit
-    for side in (-1, 1):
-        cup = bmesh.ops.create_cone(bm, cap_ends=True, segments=16, radius1=0.048, radius2=0.048, depth=0.034)
-        for v in cup["verts"]:
-            v.co = Vector((side * (half + 0.026) + v.co.z, ear_y + v.co.y, eye_z - 0.02 + v.co.x))   # axis along X
-    previous = None
-    for k in range(0, 13):
-        angle = math.pi * k / 12
-        point = Vector((-math.cos(angle) * (half + 0.026), ear_y, eye_z - 0.02 + math.sin(angle) * (top + 0.016 - (eye_z - 0.02))))
-        if previous is not None:
-            segment_geometry(bm, previous, point, (0.012, 0.012))
-        previous = point
-    segment_geometry(bm, (-(half + 0.04), ear_y, eye_z - 0.03), (-0.022, front_y + 0.02, eye_z - 0.1 * head - 0.03), (0.004, 0.004))
-    mesh = bpy.data.meshes.new("headset")
-    bm.to_mesh(mesh)
-    bm.free()
-    extras.append(new_object("headset", mesh, solid_material("headset", BLACK, 0.6), collection))
+    if os.environ.get("COCKPIT_SRC"):
+        pieces = headset.headset_object(os.environ["COCKPIT_SRC"])
+        for obj in pieces:
+            bpy.context.collection.objects.link(obj) if obj.name not in bpy.context.collection.objects else None
+            # as it hangs, its cups are along Blender's Y: turned a quarter turn so that they are along X, the ears' axis
+            obj.data.transform(Matrix.Rotation(math.pi / 2, 4, "Z"))
+        # It hangs askew on its hook: the line through the middles of its two cups is not quite the ears' axis. Measured on the cups (the lowest
+        # tenth of a metre of the headset, each side of its middle), and turned about the vertical so that this line is along X.
+        every = [v.co for o in pieces for v in o.data.vertices]
+        floor = min(p.z for p in every)
+        cup_points = [p for p in every if p.z < floor + 0.10]
+        middle = sum(p.x for p in cup_points) / len(cup_points)
+        left_cup = [p for p in cup_points if p.x < middle]
+        right_cup = [p for p in cup_points if p.x >= middle]
+        centre_left = sum(left_cup, Vector()) / len(left_cup)
+        centre_right = sum(right_cup, Vector()) / len(right_cup)
+        yaw = math.atan2(centre_right.y - centre_left.y, centre_right.x - centre_left.x)
+        print("HEADSET askew by", round(math.degrees(yaw), 1), "degrees; cups", [round(v, 3) for v in centre_left], [round(v, 3) for v in centre_right])
+        for obj in pieces:
+            obj.data.transform(Matrix.Rotation(-yaw, 4, "Z"))
+        pts = [v.co for o in pieces for v in o.data.vertices]
+        low_h = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
+        high_h = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
+        scale_h = min(max((2 * (half + HEADSET_STANDOFF * unit)) / (high_h.x - low_h.x), 0.9), 1.25)
+        # where his ears really are: the points of the head that stick out the most to the sides
+        ears = [p for p in head_pts if abs(p.x) > half * 0.96]
+        ear_z = sum(p.z for p in ears) / len(ears)
+        ear_at_y = sum(p.y for p in ears) / len(ears)
+        # the cups' middle is half a cup (0.05 m) above the lowest point of the headset; the band's top is where it is
+        cup_z = low_h.z + 0.05 * scale_h
+        squash = min(max(((top + 0.006 * unit) - ear_z) / (high_h.z * scale_h - cup_z), 0.7), 1.1)
+        for obj in pieces:
+            obj.data.transform(Matrix.Scale(scale_h, 4))
+            obj.data.transform(Matrix.Translation((0, 0, -cup_z)))
+            obj.data.transform(Matrix.Scale(squash, 4, Vector((0, 0, 1))))
+        low_h, high_h = low_h * scale_h, high_h * scale_h
+        shift = Vector((-(low_h.x + high_h.x) / 2, ear_at_y - (low_h.y + high_h.y) / 2 + HEADSET_DEPTH_SHIFT * unit, ear_z))
+        for obj in pieces:
+            obj.data.transform(Matrix.Translation(shift))
+            extras.append(obj)
+        print("EARS", dict(ear_z=round(ear_z, 3), ear_y=round(ear_at_y, 3), top=round(top, 3), squash=round(squash, 3)))
+        print("HEADSET scale", round(scale_h, 3))
+    else:
+        bm = bmesh.new()
+        for side in (-1, 1):
+            cup = bmesh.ops.create_cone(bm, cap_ends=True, segments=16, radius1=0.048, radius2=0.048, depth=0.034)
+            for v in cup["verts"]:
+                v.co = Vector((side * (half + 0.026) + v.co.z, ear_y + v.co.y, eye_z - 0.02 + v.co.x))   # axis along X
+        previous = None
+        for k in range(0, 13):
+            angle = math.pi * k / 12
+            point = Vector((-math.cos(angle) * (half + 0.026), ear_y, eye_z - 0.02 + math.sin(angle) * (top + 0.016 - (eye_z - 0.02))))
+            if previous is not None:
+                segment_geometry(bm, previous, point, (0.012, 0.012))
+            previous = point
+        mesh = bpy.data.meshes.new("headset")
+        bm.to_mesh(mesh)
+        bm.free()
+        extras.append(new_object("headset", mesh, solid_material("headset", BLACK, 0.6), collection))
     # epaulettes with their four stripes, on the shoulders: at the head of each upper arm's bone, on top of the shoulder
     bm_base, bm_gold = bmesh.new(), bmesh.new()
     for side in ("L", "R"):

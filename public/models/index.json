@@ -603,13 +603,13 @@
       "id": "ufoathome-duboc-seated",
       "kind": "entity",
       "name": "Captain Jean-Charles Duboc, seated at the left seat of a flight deck (realistic, MakeHuman)",
-      "file": "makehuman-people/duboc-slumped.glb",
+      "file": "makehuman-people/duboc-slumped-headset.glb",
       "headingOffsetDeg": 180,
-      "sizeM": { "widthM": 0.809, "lengthM": 1.239, "heightM": 1.31 },
+      "sizeM": { "widthM": 0.809, "lengthM": 1.239, "heightM": 1.292 },
       "credit": {
-        "title": "Captain Duboc, seated: stout, balding, bearded, glasses, headset, white shirt with four stripes, after his portrait on rr0.org",
-        "author": "MakeHuman community (MPFB), assembled by UFO@home",
-        "license": "CC0 1.0",
+        "title": "Captain Duboc, slumped in his seat: stout, balding, bearded, glasses, white shirt with four stripes, after his portrait on rr0.org; the headset is the one of \"A320 Cockpit 2\" by davidmarton1987 (CC BY 4.0)",
+        "author": "MakeHuman community (MPFB), assembled by UFO@home; headset by davidmarton1987",
+        "license": "CC0 1.0 (the figure), CC BY 4.0 (the headset)",
         "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/people/build_pilot.py"
       }
     },
