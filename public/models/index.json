@@ -586,6 +586,20 @@
       }
     },
     {
+      "id": "davidmarton-a320-cockpit",
+      "kind": "aircraft",
+      "name": "Airbus A320 flight deck (interior only)",
+      "file": "davidmarton-a320-cockpit/cockpit.glb",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 3.257, "lengthM": 2.591, "heightM": 2.127 },
+      "credit": {
+        "title": "A320 Cockpit 2 (the flight deck only, scaled to the real size)",
+        "author": "davidmarton1987",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/a320-cockpit-2-5fb0c671a91042c1a9d8f2cf3e2df021"
+      }
+    },
+    {
       "id": "poly-google-airliner",
       "kind": "aircraft",
       "name": "Airliner (generic, stylised)",

@@ -3043,8 +3043,8 @@
    "id": "af3532",
    "kind": "aircraft",
    "title": {
-    "fr": "Airbus A320-111 F-GFKG, vol AF 3532 (le siège gauche du poste de pilotage)",
-    "en": "Airbus A320-111 F-GFKG, flight AF 3532 (the left seat of the flight deck)"
+    "fr": "Airbus A320-111 F-GFKG, vol AF 3532 (cellule, vue de l'intérieur)",
+    "en": "Airbus A320-111 F-GFKG, flight AF 3532 (airframe, seen from inside)"
    },
    "eastM": 7.18,
    "northM": -12.44,
@@ -3057,8 +3057,6 @@
    "model": {
     "id": "amvlab-a320"
    },
-   "observerSide": "front-left",
-   "aircraftSound": "airliner-narrow",
    "track": [
     {
      "t": 0,
@@ -3233,6 +3231,204 @@
      "eastM": -10101.85,
      "northM": 19065.14,
      "altitudeM": 11703.2,
+     "headingDeg": 332.0
+    }
+   ],
+   "observerSide": "front-left",
+   "aircraftSound": "airliner-narrow"
+  },
+  {
+   "id": "af3532-cockpit",
+   "kind": "aircraft",
+   "title": {
+    "fr": "Poste de pilotage de l'A320 (siège gauche : le commandant)",
+    "en": "A320 flight deck (left seat: the captain)"
+   },
+   "eastM": 0.43,
+   "northM": 0.38,
+   "headingDeg": 332.0,
+   "sizeM": {
+    "widthM": 3.257,
+    "lengthM": 2.591,
+    "heightM": 2.127
+   },
+   "model": {
+    "id": "davidmarton-a320-cockpit"
+   },
+   "track": [
+    {
+     "t": 0,
+     "eastM": 0.43,
+     "northM": 0.38,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 5000,
+     "eastM": -422.13,
+     "northM": 795.32,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 10000,
+     "eastM": -844.58,
+     "northM": 1590.14,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 15000,
+     "eastM": -1266.97,
+     "northM": 2385.08,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 20000,
+     "eastM": -1689.17,
+     "northM": 3180.01,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 25000,
+     "eastM": -2111.33,
+     "northM": 3974.84,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 30000,
+     "eastM": -2533.29,
+     "northM": 4769.77,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 35000,
+     "eastM": -2955.21,
+     "northM": 5564.71,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 40000,
+     "eastM": -3376.93,
+     "northM": 6359.53,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 45000,
+     "eastM": -3798.6,
+     "northM": 7154.47,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 50000,
+     "eastM": -4220.08,
+     "northM": 7949.41,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 55000,
+     "eastM": -4641.44,
+     "northM": 8744.23,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 60000,
+     "eastM": -5062.76,
+     "northM": 9539.17,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 65000,
+     "eastM": -5483.87,
+     "northM": 10334.1,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 70000,
+     "eastM": -5904.95,
+     "northM": 11128.93,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 75000,
+     "eastM": -6325.83,
+     "northM": 11923.87,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 80000,
+     "eastM": -6746.66,
+     "northM": 12718.8,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 85000,
+     "eastM": -7167.29,
+     "northM": 13513.63,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 90000,
+     "eastM": -7587.81,
+     "northM": 14308.56,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 95000,
+     "eastM": -8008.28,
+     "northM": 15103.5,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 100000,
+     "eastM": -8428.56,
+     "northM": 15898.32,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 105000,
+     "eastM": -8848.79,
+     "northM": 16693.26,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 110000,
+     "eastM": -9268.82,
+     "northM": 17488.2,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 115000,
+     "eastM": -9688.81,
+     "northM": 18283.02,
+     "altitudeM": 11701.33,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 120000,
+     "eastM": -10108.6,
+     "northM": 19077.96,
+     "altitudeM": 11701.33,
      "headingDeg": 332.0
     }
    ]

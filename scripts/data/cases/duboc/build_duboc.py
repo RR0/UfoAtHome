@@ -45,6 +45,9 @@ STEP_MS = 1000
 # the fuselage 2.3 m under it; the eye of an A320 pilot is about 4.5 m behind the nose, 0.5 m left of the axis and 0.7 m above it (a
 # published dimension, not measured on the model), hence 1.6 m under the centre.
 EYE_FORWARD_M, EYE_LEFT_M, EYE_BELOW_CENTRE_M = 18.85 - 4.5, 0.5, 1.6
+# And in the flight deck model, where the captain's eye is (measured by looking out of it from the left seat): 0.484 m BEHIND the
+# centre of its box (the nose is towards -z), 0.557 m left of it and 0.266 m above it.
+COCKPIT_FORWARD_M, COCKPIT_LEFT_M, COCKPIT_BELOW_M = -0.134, 0.557, -0.266
 
 
 def stated(value, basis, rationale):
@@ -99,16 +102,17 @@ def track(total_s, aim_at, lag_s):
     return {"keyframes": keys}
 
 
-def airliner(total_s):
-    """The airliner as decor: its track is the observer's own, shifted back by the seat's offset in the airframe, so that the
-    left seat of the flight deck is exactly where the eye is, at every moment. A decor's altitude is counted from the ground (the
-    schema says from the observer's elevation, the renderer does not), and the eye of a recording is 1.6 m above its elevation."""
+def airframe(total_s, ident, title, model, size, forward_m, left_m, below_m, extra):
+    """A decor object whose track is the observer's own, shifted back by where the eye is in this object (forward_m ahead of its centre,
+    left_m to the left of it, below_m under it), so that the eye is exactly where it should be in it, at every moment. A decor's
+    altitude is counted from the ground (the schema says from the observer's elevation, the renderer does not), and the eye of a
+    recording is 1.6 m above its elevation."""
     h = math.radians(HEADING)
     forward = (math.sin(h), math.cos(h))
     left = (-math.cos(h), math.sin(h))
-    # Where the centre of the airframe is, from the eye: behind it by the seat's distance from the middle, and to the right of it
-    centre_e = -forward[0] * EYE_FORWARD_M - left[0] * EYE_LEFT_M
-    centre_n = -forward[1] * EYE_FORWARD_M - left[1] * EYE_LEFT_M
+    # Where the centre is, from the eye: behind it by the eye's distance from the middle, and to the right of it
+    centre_e = -forward[0] * forward_m - left[0] * left_m
+    centre_n = -forward[1] * forward_m - left[1] * left_m
     ref_lat, ref_lng = (round(v, 6) for v in geo(*plane_at(0.0, total_s), total_s))
     track = []
     for ms in range(0, int(total_s * 1000) + 1, 5000):
@@ -119,13 +123,26 @@ def airliner(total_s):
         track.append({"t": ms,
                       "eastM": round((lng - ref_lng) * 111320.0 * math.cos(math.radians(lat)) + centre_e, 2),
                       "northM": round((lat - ref_lat) * 111320.0 + centre_n, 2),
-                      "altitudeM": PLANE_M + 1.6 + EYE_BELOW_CENTRE_M, "headingDeg": HEADING})
+                      "altitudeM": round(PLANE_M + 1.6 + below_m, 2), "headingDeg": HEADING})
     first = track[0]
-    return [{"id": "af3532", "kind": "aircraft",
-             "title": tr("Airbus A320-111 F-GFKG, vol AF 3532 (le siège gauche du poste de pilotage)", "Airbus A320-111 F-GFKG, flight AF 3532 (the left seat of the flight deck)"),
-             "eastM": first["eastM"], "northM": first["northM"], "headingDeg": HEADING,
-             "sizeM": {"widthM": 34.1, "lengthM": 37.6, "heightM": 11.8}, "model": {"id": "amvlab-a320"},
-             "observerSide": "front-left", "aircraftSound": "airliner-narrow", "track": track}]
+    return {"id": ident, "kind": "aircraft", "title": title,
+            "eastM": first["eastM"], "northM": first["northM"], "headingDeg": HEADING,
+            "sizeM": size, "model": {"id": model}, "track": track, **extra}
+
+
+def airliner(total_s, seat="left"):
+    """The airliner round the observer: its hull and wings (the A320 of the catalogue, drawn on its outer faces only, so that the wings and
+    the engine show from the flight deck and the fuselage does not close the view) and, in it, the flight deck cut from davidmarton1987's
+    model (panels, seats, windscreen and side window openings, scaled to the real size: scripts/extract-a320-cockpit.py). The captain sits
+    on the left, the co-pilot on the right: the eye is on the other side of the middle of the flight deck."""
+    side = 1 if seat == "left" else -1
+    return [
+        airframe(total_s, "af3532", tr("Airbus A320-111 F-GFKG, vol AF 3532 (cellule, vue de l'intérieur)", "Airbus A320-111 F-GFKG, flight AF 3532 (airframe, seen from inside)"),
+                 "amvlab-a320", {"widthM": 34.1, "lengthM": 37.6, "heightM": 11.8}, EYE_FORWARD_M, side * EYE_LEFT_M, EYE_BELOW_CENTRE_M,
+                 {"observerSide": "front-" + seat, "aircraftSound": "airliner-narrow"}),
+        airframe(total_s, "af3532-cockpit", tr("Poste de pilotage de l'A320 (siège gauche : le commandant)", "A320 flight deck (left seat: the captain)"),
+                 "davidmarton-a320-cockpit", {"widthM": 3.257, "lengthM": 2.591, "heightM": 2.127}, COCKPIT_FORWARD_M, side * COCKPIT_LEFT_M, COCKPIT_BELOW_M, {}),
+    ]
 
 
 def air(t_ms, wind_kt):
@@ -337,7 +354,7 @@ def copilot_recording():
         "timeline": {"order": [lens, arrow], "groups": [[lens, arrow]], "keyframes": frames},
         "weatherTrack": weather(total, 120),
         "soundTrack": {"keyframes": [{"t": 0, "sound": {"kind": "none"}}]},
-        "decor": airliner(total),
+        "decor": airliner(total, "right"),
         "milestones": [
             {"t": 0, "label": "A", "note": tr("Elle le voit vers 10 h et le prend pour un ballon-sonde", "She sees it at about 10 o'clock and takes it for a weather balloon")},
             {"t": 90000, "label": "B", "note": tr("Il reste à 9 h, à la vitesse de l'avion ; la lentille se floute, devient un chevron", "It stays at 9 o'clock, at the airliner's speed; the lens blurs and becomes a chevron")},
