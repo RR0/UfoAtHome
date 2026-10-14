@@ -347,7 +347,7 @@ if (asked) {
 
 <section class="band">
   <div class="wrap">
-    <div class="stage" id="player-stage-box" hidden>
+    <div class="stage stage-padded" id="player-stage-box" hidden>
       <rr0-sighting id="player-stage"></rr0-sighting>
       <div class="stage-caption">
         <div class="player-description" id="player-description" hidden></div>
@@ -390,7 +390,7 @@ ${this.form("en")}
 
 <section class="band">
   <div class="wrap">
-    <div class="stage" id="player-stage-box" hidden>
+    <div class="stage stage-padded" id="player-stage-box" hidden>
       <rr0-sighting id="player-stage"></rr0-sighting>
       <div class="stage-caption">
         <div class="player-description" id="player-description" hidden></div>
@@ -433,7 +433,7 @@ ${this.form("fr")}
 
 <section class="band">
   <div class="wrap">
-    <div class="stage" id="player-stage-box" hidden>
+    <div class="stage stage-padded" id="player-stage-box" hidden>
       <rr0-sighting id="player-stage"></rr0-sighting>
       <div class="stage-caption">
         <div class="player-description" id="player-description" hidden></div>
@@ -476,7 +476,7 @@ ${this.form("es")}
 
 <section class="band">
   <div class="wrap">
-    <div class="stage" id="player-stage-box" hidden>
+    <div class="stage stage-padded" id="player-stage-box" hidden>
       <rr0-sighting id="player-stage"></rr0-sighting>
       <div class="stage-caption">
         <div class="player-description" id="player-description" hidden></div>

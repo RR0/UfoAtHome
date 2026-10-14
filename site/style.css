@@ -238,6 +238,8 @@ section.band:first-of-type { border-top: 0; }
 .stage-padded .stage-caption, .carousel .stage-caption {
   padding: 0.2rem 0 0; border-top: 0; background: none;
 }
+/* A caption whose only content is hidden (the player's description, until a recording has one) is no strip of empty space under the player. */
+.stage-caption:has(> .player-description[hidden]:only-child) { display: none; }
 /* The player's own recording, in its own words: body text, not a caption's small grey. */
 /* As wide as the player above it (no measure cap: it sat in a column half the page wide), capped at about ten lines: a long testimony scrolls inside its own box rather than pushing the
    way into the editor, and the rest of the page, out of reach. */
