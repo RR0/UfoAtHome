@@ -3,7 +3,11 @@
  * radius of the place, turns each tree, building, bridge and span of line into the decor object the editor would have taken from the same survey
  * (see SurveyedDecor), and writes them with where they came from.
  *
- *   node --import tsx scripts/fetch-surroundings.ts <out.json> <lat> <lng> [radiusM] [--along <recording.json>]
+ *   node --import tsx scripts/fetch-surroundings.ts <out.json> <lat> <lng> [radiusM] [--along <recording.json>] [--wood <azimuthDeg>,<distanceM>]...
+ *
+ * The laser's trees are asked for within 150 m of a place only (a square of half a kilometre holds thousands, and a scene draws a few hundred). A wood
+ * further than that, the one an account stands before, is asked for with `--wood`: one more window of laser, centred that far from the place towards that
+ * azimuth, its trees added (the nearest to the window's centre, as everywhere), what two windows both saw counted once.
  *
  * With `--along`, the radius applies at every place the recording's observer goes through (see SurroundingsCorridor), not only where it starts:
  * a witness driving three kilometres sees the buildings of the whole three, and the scenery is asked for as many as the path is long. Objects are in
@@ -21,6 +25,7 @@ import { execFile } from "node:child_process"
 import { mkdir, writeFile } from "node:fs/promises"
 import { dirname } from "node:path"
 import { promisify } from "node:util"
+import { IgnLidarSurroundingsProvider } from "../src/render3d/terrain/providers/IgnLidarSurroundingsProvider.js"
 import { IgnLidarTopoSurroundingsProvider } from "../src/render3d/terrain/providers/IgnLidarTopoSurroundingsProvider.js"
 import { readFile } from "node:fs/promises"
 import { SurroundingsCorridor } from "../src/render3d/terrain/SurroundingsCorridor.js"
@@ -43,10 +48,41 @@ class SurroundingsFetch {
     } as Response
   }
 
+  private static readonly METRES_PER_DEGREE = 111320
+  private static readonly SAME_TREE_M = 1.5
+
+  /** The trees of laser windows `distance` metres from the place towards `azimuth`, in metres from the place, added to what is planted. */
+  private async addWoods(planted: { id: string, kind: string, eastM: number, northM: number }[], centre: { lat: number, lng: number }, woods: number[][]): Promise<void> {
+    const lidar = new IgnLidarSurroundingsProvider({ fetchImpl: SurroundingsFetch.curlFetch })
+    const seen = new Set(planted.filter(object => object.kind === "tree").map(tree => `${Math.round(tree.eastM / SurroundingsFetch.SAME_TREE_M)},${Math.round(tree.northM / SurroundingsFetch.SAME_TREE_M)}`))
+    for (const [azimuth, distance] of woods) {
+      const east = distance * Math.sin(azimuth * Math.PI / 180)
+      const north = distance * Math.cos(azimuth * Math.PI / 180)
+      const window = { lat: centre.lat + north / SurroundingsFetch.METRES_PER_DEGREE, lng: centre.lng + east / (SurroundingsFetch.METRES_PER_DEGREE * Math.cos(centre.lat * Math.PI / 180)) }
+      const found = await lidar.getSurroundings(window, 150)
+      const trees = SurveyedDecor.of(lidar.id, found, { kept: [], kindName: () => "Tree" }).planted.filter(object => object.kind === "tree")
+      let added = 0
+      for (const tree of trees) {
+        tree.eastM = Math.round((tree.eastM + east) * 10) / 10
+        tree.northM = Math.round((tree.northM + north) * 10) / 10
+        const key = `${Math.round(tree.eastM / SurroundingsFetch.SAME_TREE_M)},${Math.round(tree.northM / SurroundingsFetch.SAME_TREE_M)}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        tree.id = `${lidar.id}-wood-${planted.length}`
+        planted.push(tree)
+        added++
+      }
+      console.log(`wood at ${azimuth} deg, ${distance} m: ${added} trees`)
+    }
+  }
+
   async main(args: string[]): Promise<void> {
     const along = args.indexOf("--along")
     const recording = along >= 0 ? args[along + 1] : undefined
-    const [out, lat, lng, radius] = along >= 0 ? args.filter((_, i) => i !== along && i !== along + 1) : args
+    const woods = args.flatMap((arg, i) => arg === "--wood" ? [args[i + 1].split(",").map(Number)] : [])
+    const rest = args.filter((arg, i) => arg !== "--wood" && args[i - 1] !== "--wood")
+    const alongAt = rest.indexOf("--along")
+    const [out, lat, lng, radius] = alongAt >= 0 ? rest.filter((_, i) => i !== alongAt && i !== alongAt + 1) : rest
     if (!out || !lat || !lng) throw new Error("usage: fetch-surroundings.ts <out.json> <lat> <lng> [radiusM] [--along <recording.json>]")
     const centre = { lat: Number(lat), lng: Number(lng) }
     const radiusM = radius ? Number(radius) : 100
@@ -62,6 +98,7 @@ class SurroundingsFetch {
       found = await provider.getSurroundings(centre, radiusM)
     }
     const { planted } = SurveyedDecor.of(provider.id, found, { kept: [], kindName: kind => SurroundingsFetch.KIND_NAMES[kind] })
+    if (woods.length > 0) await this.addWoods(planted, centre, woods)
     await mkdir(dirname(out), { recursive: true })
     await writeFile(out, JSON.stringify({
       version: 1,
