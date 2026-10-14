@@ -178,6 +178,22 @@ export class IgnGeoplatform {
     return { bridges, elevatedRoads, lines, buildings, zones, mapDate: IgnGeoplatform.latest(buildings.map(building => building.properties.date_modification)) }
   }
 
+  /**
+   * The road sections of the map that are carried over the ground in a box (a bridge, a viaduct, a ramp over something), as lists of places. The map gives each
+   * section its position against the ground, and above it is what a deck is: which of the two roads of a crossing is the one on it.
+   */
+  async elevatedRoadLines(box: { west: number, south: number, east: number, north: number }): Promise<{ lat: number, lng: number }[][]> {
+    const within = `BBOX(geometrie,${[box.west, box.south, box.east, box.north].map(v => v.toFixed(6)).join(",")},'EPSG:4326')`
+    const sections = await this.features("troncon_de_route", `${within} AND position_par_rapport_au_sol>'0'`, "geometrie", 300)
+    const lines: { lat: number, lng: number }[][] = []
+    for (const section of sections) {
+      const { type, coordinates } = section.geometry
+      const parts = type === "LineString" ? [coordinates as number[][]] : type === "MultiLineString" ? coordinates as number[][][] : []
+      for (const part of parts) lines.push(part.map(vertex => ({ lat: vertex[1], lng: vertex[0] })))
+    }
+    return lines
+  }
+
   /** The roads of the map in a box (west, south, east, north): every section a vehicle or a rider could use, with what the map says of each. */
   async roads(box: { west: number, south: number, east: number, north: number }): Promise<VectorFeature[]> {
     const within = `BBOX(geometrie,${[box.west, box.south, box.east, box.north].map(v => v.toFixed(6)).join(",")},'EPSG:4326')`

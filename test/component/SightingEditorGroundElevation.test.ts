@@ -55,6 +55,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setCloudOffset(): void {}
     setGait(): void {}
     setTerrainOrigin(): void {}
+    setObserverRoute(): void {}
     setStatedRoads(): void {}
     setTraces(): void {}
     setTracesShown(): void {}

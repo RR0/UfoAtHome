@@ -1,13 +1,16 @@
 import type { GeoBounds } from "../GeoBounds.js"
-import type { ElevationGrid, ElevationProvider } from "../ElevationProvider.js"
+import type { ElevationGrid, ElevationHints, ElevationProvider } from "../ElevationProvider.js"
 import { GeoTiffRaster } from "../GeoTiffRaster.js"
 import { geoToLocalMeters } from "../GeoProjection.js"
 import { IgnGeoplatform } from "./IgnGeoplatform.js"
+import { RouteFollowing } from "../RouteFollowing.js"
+import type { GeoPoint } from "../RouteFollowing.js"
 
 export interface IgnMntElevationProviderOptions {
   fetchImpl?: typeof fetch
   /** Mainly for tests, and for pointing at a mirror. */
   wmsEndpoint?: string
+  wfsEndpoint?: string
   /** How long the service is waited for, ms: a slow answer is worth less than the worldwide relief that is there already. */
   timeoutMs?: number
   /** The widest window a vertex is averaged over, metres (see sample). 0 reads the picture at the vertex alone, which is what aliases. */
@@ -56,6 +59,7 @@ export class IgnMntElevationProvider implements ElevationProvider {
   private readonly wms: string
   private readonly timeoutMs: number
   private readonly maxWindowM: number
+  private readonly geoplatform: IgnGeoplatform
 
   constructor(options: IgnMntElevationProviderOptions = {}) {
     // Bound, as AwsTerrariumElevationProvider's is: an unbound fetch loses the `this` it needs once called as a field.
@@ -63,9 +67,10 @@ export class IgnMntElevationProvider implements ElevationProvider {
     this.wms = options.wmsEndpoint ?? IgnMntElevationProvider.WMS
     this.timeoutMs = options.timeoutMs ?? IgnMntElevationProvider.DEFAULT_TIMEOUT_MS
     this.maxWindowM = options.maxWindowM ?? IgnMntElevationProvider.MAX_WINDOW_M
+    this.geoplatform = new IgnGeoplatform({ fetchImpl: this.fetchImpl, wmsEndpoint: this.wms, wfsEndpoint: options.wfsEndpoint })
   }
 
-  async getElevationGrid(bounds: GeoBounds, resolution: { width: number, height: number }): Promise<ElevationGrid> {
+  async getElevationGrid(bounds: GeoBounds, resolution: { width: number, height: number }, hints?: ElevationHints): Promise<ElevationGrid> {
     const centre = { lat: (bounds.south + bounds.north) / 2, lng: (bounds.west + bounds.east) / 2 }
     if (!IgnGeoplatform.covers(centre.lat, centre.lng)) throw new Error("The IGN's relief covers France only")
     const widthM = Math.abs(geoToLocalMeters(centre.lat, bounds.east, centre.lat, bounds.west).x)
@@ -87,7 +92,7 @@ export class IgnMntElevationProvider implements ElevationProvider {
     for (const layer of IgnMntElevationProvider.LAYERS) {
       try {
         const raster = await this.heights(fetched, size, layer)
-        if (layer === IgnMntElevationProvider.LAYERS[0]) await this.layBridgeDecks(raster, fetched, size)
+        if (layer === IgnMntElevationProvider.LAYERS[0]) await this.layBridgeDecks(raster, fetched, size, hints?.route)
         const heights = this.sample(raster, resolution, bounds, fetched, metresPerPixel, spacingM)
         if (heights) return { heights, width: resolution.width, height: resolution.height, bounds }
         failure = new Error(`${layer} does not cover this place`)
@@ -134,25 +139,35 @@ export class IgnMntElevationProvider implements ElevationProvider {
   }
 
   /**
-   * Puts the deck of a bridge where the ground is.
+   * Puts the deck of a bridge where the ground is, for the observer who drives on it.
    *
    * The laser takes a bridge out of the bare-earth model: under a road that crosses another it is the other road, or the ditch, that the model holds, eight
    * metres under the one the observer drives on. A scene on that ground has the observer dive into a trench at every overpass, and what the road
    * is drawn on, and the vehicles on it, with him. The laser's own classification says where it saw a deck (it is yellow in the picture of it), and the surface
-   * model holds the deck's height there: the ground is raised to it, over the width of the deck and no further. A viaduct over a wide valley then leaves a
-   * dam a deck wide across it, which the mesh, a vertex every 28 m, could not have drawn as a valley either.
+   * model holds the deck's height there: the ground is raised to it, over the width of the deck and no further.
    *
-   * Never a reason to fail: without the classification, or the surface, the ground stays the bare earth's.
+   * But only for the deck of a road the observer's route goes along. At a crossing the deck is over the other road, and the observer who drives that other one
+   * goes UNDER it: raised there, the ground would climb six metres under the bridge and drop again, a roller coaster. Which of the two he drives is not in
+   * the heights, and is in his route and in the map, which says of each road section whether it is carried over the ground. Without a route (an observer who
+   * stands still) no deck is laid, and the ground is the bare earth's. A viaduct over a wide valley leaves a dam a deck wide across it, which the mesh could
+   * not have drawn as a valley either.
+   *
+   * Never a reason to fail: without the map, the classification or the surface, the ground stays the bare earth's.
    */
-  private async layBridgeDecks(ground: GeoTiffRaster, bounds: GeoBounds, size: { width: number, height: number }): Promise<void> {
+  private async layBridgeDecks(ground: GeoTiffRaster, bounds: GeoBounds, size: { width: number, height: number }, route?: readonly GeoPoint[]): Promise<void> {
+    if (!route || route.length < 2) return
     if (!(ground.values instanceof Float32Array) || !ground.values.some(height => height > IgnMntElevationProvider.NO_DATA_BELOW)) return
     try {
+      const carrying = (await this.geoplatform.elevatedRoadLines({ west: bounds.west, south: bounds.south, east: bounds.east, north: bounds.north }))
+        .filter(line => RouteFollowing.follows(route, line))
+      if (carrying.length === 0) return
       const classes = await this.raster(bounds, size, IgnMntElevationProvider.CLASS_LAYER)
       if (classes.samples < 3 || classes.width !== ground.width || classes.height !== ground.height) return
       const colour = (i: number, [r, g, b]: number[]): boolean =>
         classes.values[i * classes.samples] === r && classes.values[i * classes.samples + 1] === g && classes.values[i * classes.samples + 2] === b
       const width = ground.width
-      const deck = new Uint8Array(width * ground.height)
+      const height = ground.height
+      const deck = new Uint8Array(width * height)
       let found = false
       for (let i = 0; i < deck.length; i++) {
         if (colour(i, IgnMntElevationProvider.DECK)) { deck[i] = 1; found = true }
@@ -169,23 +184,86 @@ export class IgnMntElevationProvider implements ElevationProvider {
           for (let dx = -reach; dx <= reach; dx++) {
             const nx = x + dx
             const ny = y + dy
-            if (nx < 0 || ny < 0 || nx >= width || ny >= ground.height) continue
+            if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue
             const j = ny * width + nx
             if (deck[j] === 0 && colour(j, IgnMntElevationProvider.NO_CLASS)) ends.push(j)
           }
         }
       }
       for (const j of ends) deck[j] = 1
+      // The decks that carry the road the observer is on: those a section of it, carried over the ground, passes over.
+      const onRoute = this.paint(carrying, bounds, width, height)
+      const laid = this.touching(deck, onRoute, width, height)
+      if (laid.every(flag => flag === 0)) return
       const surface = await this.heights(bounds, size, IgnMntElevationProvider.SURFACE_LAYER)
-      if (surface.width !== ground.width || surface.height !== ground.height) return
-      for (let i = 0; i < deck.length; i++) {
-        if (deck[i] === 0) continue
+      if (surface.width !== width || surface.height !== height) return
+      for (let i = 0; i < laid.length; i++) {
+        if (laid[i] === 0) continue
         const top = surface.values[i]
         if (Number.isFinite(top) && top > IgnMntElevationProvider.NO_DATA_BELOW && top > ground.values[i]) ground.values[i] = top
       }
     } catch {
       // The bare earth is still a ground.
     }
+  }
+
+  /** The pixels the lines pass through, and their neighbours: lines drawn on the picture. */
+  private paint(lines: readonly (readonly GeoPoint[])[], bounds: GeoBounds, width: number, height: number): Uint8Array {
+    const painted = new Uint8Array(width * height)
+    const toX = (lng: number): number => (lng - bounds.west) / (bounds.east - bounds.west) * width
+    const toY = (lat: number): number => (bounds.north - lat) / (bounds.north - bounds.south) * height
+    for (const line of lines) {
+      for (let i = 0; i < line.length - 1; i++) {
+        const x0 = toX(line[i].lng)
+        const y0 = toY(line[i].lat)
+        const x1 = toX(line[i + 1].lng)
+        const y1 = toY(line[i + 1].lat)
+        const steps = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) * 2))
+        for (let s = 0; s <= steps; s++) {
+          const cx = Math.floor(x0 + (x1 - x0) * s / steps)
+          const cy = Math.floor(y0 + (y1 - y0) * s / steps)
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              const x = cx + dx
+              const y = cy + dy
+              if (x >= 0 && y >= 0 && x < width && y < height) painted[y * width + x] = 1
+            }
+          }
+        }
+      }
+    }
+    return painted
+  }
+
+  /** The pixels of `mask` that belong to a whole piece (touching, corner to corner too) of it that `marks` touches somewhere. */
+  private touching(mask: Uint8Array, marks: Uint8Array, width: number, height: number): Uint8Array {
+    const kept = new Uint8Array(mask.length)
+    const seen = new Uint8Array(mask.length)
+    for (let start = 0; start < mask.length; start++) {
+      if (mask[start] === 0 || seen[start] === 1) continue
+      const piece: number[] = []
+      const stack = [start]
+      seen[start] = 1
+      let touched = false
+      while (stack.length > 0) {
+        const at = stack.pop() as number
+        piece.push(at)
+        if (marks[at] === 1) touched = true
+        const x = at % width
+        const y = (at - x) / width
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            const nx = x + dx
+            const ny = y + dy
+            if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue
+            const next = ny * width + nx
+            if (mask[next] === 1 && seen[next] === 0) { seen[next] = 1; stack.push(next) }
+          }
+        }
+      }
+      if (touched) for (const at of piece) kept[at] = 1
+    }
+    return kept
   }
 
   /**

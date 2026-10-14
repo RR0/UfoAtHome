@@ -1,7 +1,7 @@
 // Named imports only — see SceneRenderer.ts's own top-of-file comment on why (tree-shaking).
 import { GrassDetail } from "./GrassDetail.js"
 import { BufferAttribute, BufferGeometry, CanvasTexture, Color, Mesh, MeshLambertMaterial, SRGBColorSpace } from "three"
-import type { ElevationProvider } from "./ElevationProvider.js"
+import type { ElevationHints, ElevationProvider } from "./ElevationProvider.js"
 import type { ImageryProvider } from "./ImageryProvider.js"
 import type { GeoBounds } from "./GeoBounds.js"
 import { geoToLocalMeters, localMetersToGeo } from "./GeoProjection.js"
@@ -98,14 +98,15 @@ export async function buildTerrainMesh(
   observerLat: number,
   observerLng: number,
   providers: { elevation: ElevationProvider; imagery: ImageryProvider },
-  radiusM: number = DEFAULT_RADIUS_M
+  radiusM: number = DEFAULT_RADIUS_M,
+  hints?: ElevationHints
 ): Promise<TerrainBuildResult> {
   const fadeEndM = radiusM
   const fullOpacityM = radiusM * FULL_OPACITY_FRACTION
   const bounds = boundsAroundObserver(observerLat, observerLng, fadeEndM)
   const resolution = { width: ASKED_GRID_SIZE, height: ASKED_GRID_SIZE }
   const [elevationGrid, imageryTexture] = await Promise.all([
-    providers.elevation.getElevationGrid(bounds, resolution),
+    providers.elevation.getElevationGrid(bounds, resolution, hints),
     providers.imagery.getImageryTexture(bounds, { width: IMAGERY_RESOLUTION, height: IMAGERY_RESOLUTION })
   ])
 

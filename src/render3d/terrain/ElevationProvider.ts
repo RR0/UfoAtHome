@@ -15,7 +15,20 @@ export interface ElevationGrid {
  * (including a paid/keyed one) never touches mesh-building or SceneRenderer code.
  */
 export interface ElevationProvider {
-  getElevationGrid(bounds: GeoBounds, resolution: { width: number; height: number }): Promise<ElevationGrid>
+  /**
+   * `resolution` is what the mesh asks for, as the least it will take: a source with a finer ground may answer with a finer grid (see
+   * TerrainMeshBuilder), so the grid's own width and height are what count, never the ones asked.
+   */
+  getElevationGrid(bounds: GeoBounds, resolution: { width: number; height: number }, hints?: ElevationHints): Promise<ElevationGrid>
+}
+
+/** What the scene can tell a source about who is going to stand on the ground it answers with. A source may ignore all of it. */
+export interface ElevationHints {
+  /**
+   * The way the observer goes, as the recording's track gives it: a bridge is the ground of whoever drives ON it, and not of whoever drives
+   * UNDER it, which no height field can say by itself. Where the track follows a road that is carried over the ground, the deck is the ground there.
+   */
+  route?: readonly { lat: number, lng: number }[]
 }
 
 /** The ground's height above sea level at one point, read off whichever provider is live — what

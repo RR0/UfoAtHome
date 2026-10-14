@@ -1,5 +1,5 @@
 import type { GeoBounds } from "./GeoBounds.js"
-import type { ElevationGrid, ElevationProvider } from "./ElevationProvider.js"
+import type { ElevationGrid, ElevationHints, ElevationProvider } from "./ElevationProvider.js"
 
 /**
  * The ground from the first source that has an answer for the place: the IGN's relief in France, the worldwide one anywhere else, and wherever the
@@ -13,11 +13,11 @@ export class FirstElevationThatAnswers implements ElevationProvider {
     this.providers = providers
   }
 
-  async getElevationGrid(bounds: GeoBounds, resolution: { width: number, height: number }): Promise<ElevationGrid> {
+  async getElevationGrid(bounds: GeoBounds, resolution: { width: number, height: number }, hints?: ElevationHints): Promise<ElevationGrid> {
     let failure: unknown = new Error("No source of relief to ask")
     for (const provider of this.providers) {
       try {
-        return await provider.getElevationGrid(bounds, resolution)
+        return await provider.getElevationGrid(bounds, resolution, hints)
       } catch (error) {
         failure = error
       }

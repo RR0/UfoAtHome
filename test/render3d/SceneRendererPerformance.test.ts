@@ -217,6 +217,7 @@ describe("scene playback resource reuse", () => {
     geometry.setAttribute("position", new Float32BufferAttribute([-100, 0, -100, 100, 20, -100, -100, 0, 100, 100, 20, 100], 3))
     r.terrainMesh = new Mesh(geometry)
     r.terrainOrigin = { lat: 43, lng: 6 }
+    r.terrainMeshOrigin = { lat: 43, lng: 6 }
     const object = { id: "crop", kind: "crop" as const, eastM: 10, northM: 20 }
     r.decorObjects = [object]
     const group = DecorSystem.build(object, false)
@@ -238,6 +239,31 @@ describe("scene playback resource reuse", () => {
     fit.mockRestore()
     DecorSystem.dispose(group)
     geometry.dispose()
+  })
+
+  // A patch is asked for a hundred and fifty metres on, and lands a second or two later. In that second the ground on screen is still the old
+  // patch: it stood where its own origin puts it, and was placed by the origin of the patch to come, which sent the whole ground a hundred and fifty metres
+  // away at every request (and back, when the new one landed). The patch fading out under the new one went on standing where it was when it was replaced.
+  it("places each patch by its own origin: the one on screen while the next is asked for, and the one fading out", () => {
+    const r = renderer()
+    const shown = new Mesh(new BufferGeometry())
+    const fading = new Mesh(new BufferGeometry())
+    r.terrainMesh = shown
+    r.terrainMeshOrigin = { lat: 49.1, lng: 2.75 }
+    // Asked for, not here yet: it must not move the patch that is.
+    r.terrainOrigin = { lat: 49.1013, lng: 2.7518 }
+    r.fadingTerrain = { mesh: fading, origin: { lat: 49.0987, lng: 2.7482 }, frameId: 0 }
+    r.placeTerrain(49.1004, 2.7508, 0, 0)
+    const metresPerDegree = 111320
+    expect(shown.position.z).toBeCloseTo(-(49.1 - 49.1004) * metresPerDegree, 1)
+    expect(shown.position.x).toBeCloseTo((2.75 - 2.7508) * metresPerDegree * Math.cos(49.1004 * Math.PI / 180), 1)
+    // The fading one, a patch behind, stands further behind the observer than the one on screen, by the distance between their two origins.
+    expect(fading.position.z - shown.position.z).toBeCloseTo(-(49.0987 - 49.1) * metresPerDegree, 1)
+    expect(fading.position.x).toBeLessThan(shown.position.x)
+    // And as the observer drives on, both move with him.
+    const before = shown.position.z
+    r.placeTerrain(49.1010, 2.7508, 0, 0)
+    expect(shown.position.z - before).toBeCloseTo(0.0006 * metresPerDegree, 1)
   })
 })
 

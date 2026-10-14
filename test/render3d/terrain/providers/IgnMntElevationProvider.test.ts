@@ -138,13 +138,30 @@ describe("IgnMntElevationProvider and the bridges", () => {
   const SURFACE = "IGNF_LIDAR-HD_MNS_ELEVATION.ELEVATIONGRIDCOVERAGE.LAMB93"
   const GROUND = 100
   const DECK = 108
+  /** The square the tests ask for: a hundred metres or so wide, with a deck across the middle of it. */
+  const SQUARE = { south: 49.1, north: 49.1009, west: 2.75, east: 2.7512 }
+  const MIDDLE = { lat: (SQUARE.south + SQUARE.north) / 2, lng: (SQUARE.west + SQUARE.east) / 2 }
+  const METRES_PER_DEGREE = 111320
+  const at = (eastM: number, northM: number) => ({ lat: MIDDLE.lat + northM / METRES_PER_DEGREE, lng: MIDDLE.lng + eastM / (METRES_PER_DEGREE * Math.cos(MIDDLE.lat * Math.PI / 180)) })
+  /** A road section carried over the ground, east to west across the middle: the road ON the deck. */
+  const CARRIED = [at(-150, 0), at(150, 0)]
+  /** The road the deck crosses, north to south: the road UNDER it. */
+  const BENEATH = [at(0, -150), at(0, 150)]
 
-  /** A service with a flat ground, a surface of the deck's height, and a classification that says "deck" in a band across the picture. */
-  function serveWithDeck(withClasses = true): { fetchImpl: typeof fetch, urls: string[] } {
+  /**
+   * A service with a flat ground, a surface of the deck's height, a classification that says "deck" in a band across the picture, and a map that says one
+   * road section is carried over the ground.
+   */
+  function serveWithDeck(options: { withClasses?: boolean, carried?: { lat: number, lng: number }[][] } = {}): { fetchImpl: typeof fetch, urls: string[] } {
     const urls: string[] = []
     const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
       urls.push(String(input))
-      const query = new URL(String(input)).searchParams
+      const url = new URL(String(input))
+      if (url.pathname.includes("wfs")) {
+        const features = (options.carried ?? [CARRIED]).map(line => ({ geometry: { type: "LineString", coordinates: line.map(p => [p.lng, p.lat]) }, properties: {} }))
+        return { ok: true, status: 200, json: async () => ({ features }) } as Response
+      }
+      const query = url.searchParams
       const layer = query.get("LAYERS")
       const width = Number(query.get("WIDTH"))
       const height = Number(query.get("HEIGHT"))
@@ -152,7 +169,7 @@ describe("IgnMntElevationProvider and the bridges", () => {
       const band = (x: number) => Math.abs(x - width / 2) < width / 10
       if (layer === LASER) return body(TiffFixture.floats(width, height, Array.from({ length: width * height }, () => GROUND)))
       if (layer === SURFACE) return body(TiffFixture.floats(width, height, Array.from({ length: width * height }, () => DECK)))
-      if (layer === CLASS && withClasses) {
+      if (layer === CLASS && (options.withClasses ?? true)) {
         const values: number[] = []
         for (let i = 0; i < width * height; i++) values.push(...(band(i % width) ? [240, 240, 0, 255] : [207, 150, 70, 255]))
         return body(TiffFixture.bytes(width, height, 4, values))
@@ -162,20 +179,45 @@ describe("IgnMntElevationProvider and the bridges", () => {
     return { fetchImpl, urls }
   }
 
-  it("raises the ground to the deck where the laser saw one, and nowhere else", async () => {
-    const { fetchImpl } = serveWithDeck()
-    // Narrow vertices, the window one pixel: the deck's own height, and the bare earth either side of it.
-    const grid = await new IgnMntElevationProvider({ fetchImpl, maxWindowM: 0 }).getElevationGrid(SAINT_LO, { width: 101, height: 3 })
+  /** The grid asked for with no averaging, so a vertex is the picture's own value there. */
+  const gridOf = (fetchImpl: typeof fetch, route?: { lat: number, lng: number }[]) =>
+    new IgnMntElevationProvider({ fetchImpl, maxWindowM: 0 }).getElevationGrid(SQUARE, { width: 101, height: 3 }, route ? { route } : undefined)
+
+  it("raises the ground to the deck for an observer who drives on it, and nowhere else", async () => {
+    // The route goes east to west along the carried road, which is what the deck is: the deck is the ground.
+    const grid = await gridOf(serveWithDeck().fetchImpl, [at(-100, 1), at(100, 1)])
     expect(grid.heights[50]).toBeCloseTo(DECK, 3)
     expect(grid.heights[0]).toBeCloseTo(GROUND, 3)
     expect(grid.heights[100]).toBeCloseTo(GROUND, 3)
   })
 
+  it("leaves the bare earth for an observer who drives under it: across the carried road, the deck is a roof", async () => {
+    const { fetchImpl, urls } = serveWithDeck()
+    const grid = await gridOf(fetchImpl, BENEATH)
+    expect(Math.max(...grid.heights)).toBeCloseTo(GROUND, 3)
+    // Nothing more was asked than the map: neither the classification nor the surface, for a deck that is not laid.
+    expect(urls.some(url => url.includes("CLASS") || url.includes("MNS"))).toBe(false)
+  })
+
+  it("lays no deck for an observer with no route: he stands where he is, and the bare earth is the ground", async () => {
+    const { fetchImpl, urls } = serveWithDeck()
+    const grid = await gridOf(fetchImpl)
+    expect(Math.max(...grid.heights)).toBeCloseTo(GROUND, 3)
+    expect(urls.some(url => url.includes("wfs"))).toBe(false)
+  })
+
   it("keeps the bare earth when the classification cannot be had, and asks for the surface only when there is a deck", async () => {
-    const { fetchImpl, urls } = serveWithDeck(false)
-    const grid = await new IgnMntElevationProvider({ fetchImpl }).getElevationGrid(SAINT_LO, { width: 5, height: 5 })
+    const { fetchImpl, urls } = serveWithDeck({ withClasses: false })
+    const grid = await gridOf(fetchImpl, [at(-100, 1), at(100, 1)])
     expect(Math.max(...grid.heights)).toBeCloseTo(GROUND, 3)
     expect(urls.some(url => url.includes("MNS"))).toBe(false)
+  })
+
+  it("keeps the bare earth when the map does not answer", async () => {
+    const { fetchImpl } = serveWithDeck()
+    const failing = vi.fn(async (input: RequestInfo | URL) => String(input).includes("wfs") ? ({ ok: false, status: 503 }) as Response : fetchImpl(input)) as unknown as typeof fetch
+    const grid = await gridOf(failing, [at(-100, 1), at(100, 1)])
+    expect(Math.max(...grid.heights)).toBeCloseTo(GROUND, 3)
   })
 })
 

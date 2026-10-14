@@ -989,7 +989,14 @@ export class SceneRenderer {
    * replaces). Undefined until a real observer location resolves and the async build finishes. */
   private terrainMesh?: Mesh
   private terrainProviders: TerrainProviders
+  /** Where the patch last ASKED FOR is centred: what decides whether the observer has driven far enough for another (see setTerrainOrigin). Not where the patch on screen is. */
   private terrainOrigin?: { lat: number; lng: number }
+  /**
+   * Where the patch ON SCREEN is centred, which is what places it: a patch is offset by the distance between its own origin and the observer, and
+   * `terrainOrigin` is already the next one's from the moment it is asked for, a second or two before it arrives. Placing the patch standing by the origin
+   * of the patch coming made the whole ground jump a hundred and fifty metres at every request (and back, when the new one landed and was placed right).
+   */
+  private terrainMeshOrigin?: { lat: number; lng: number }
   private terrainBuildToken = 0
   private terrainAttribution?: string
   /** The roads laid on the patch, and the credit their survey requires — see RoadSystem. */
@@ -1547,11 +1554,7 @@ export class SceneRenderer {
     // (see updateDecorAnchoring) — otherwise it travels with the observer while the scenery standing
     // on it does not, and a walk of eighty metres sank Masse's own clapier four metres into ground
     // that had quietly slid out from under it.
-    if (this.terrainMesh && this.terrainOrigin && pose.lat !== undefined && pose.lng !== undefined) {
-      const drift = geoToLocalMeters(this.terrainOrigin.lat, this.terrainOrigin.lng, pose.lat, pose.lng)
-      this.terrainMesh.position.x = drift.x
-      this.terrainMesh.position.z = drift.z
-    }
+    if (pose.lat !== undefined && pose.lng !== undefined) this.placeTerrain(pose.lat, pose.lng, 0, 0)
     // And the eye stands on it: 1.6 m above whatever soil is under it, not 1.6 m above a fixed
     // plane. The observer climbs what the ground climbs, which is a metre over Masse's own approach
     // and eleven hundred over Zamora's drive, and is nothing at all wherever the ground is level —
@@ -1604,6 +1607,7 @@ export class SceneRenderer {
     this.disposeMesh(this.terrainMesh)
     this.terrainMesh = undefined
     this.terrainOrigin = undefined
+    this.terrainMeshOrigin = undefined
     this.terrainAttribution = undefined
     this.roadSystem.clear()
     this.roadAttribution = undefined
@@ -1612,6 +1616,29 @@ export class SceneRenderer {
     this.applyGroundDepthWrite()
     // Any build still in flight is about the old source now.
     this.terrainBuildToken++
+  }
+
+  /** The way the observer goes, as the recording's track gives it: what a bridge is to the ground depends on it (see ElevationHints). */
+  private observerRoute?: readonly { lat: number; lng: number }[]
+
+  /** Tells the ground which way the observer goes, for the next patch built: the one on screen is not rebuilt for it. */
+  setObserverRoute(route: readonly { lat: number; lng: number }[] | undefined): void {
+    this.observerRoute = route
+  }
+
+  /**
+   * Offsets the patch on screen, and the one fading out under it, by the distance between each one's own origin and where the observer is now.
+   * Each by ITS OWN origin: the fading patch is still the ground of the place it was built for, and a patch left where it stood when it was
+   * replaced travelled with the car for the second it took to fade.
+   */
+  private placeTerrain(lat: number, lng: number, eastGaitM: number, northGaitM: number): void {
+    const place = (mesh: Mesh, origin: { lat: number, lng: number }) => {
+      const drift = geoToLocalMeters(origin.lat, origin.lng, lat, lng)
+      mesh.position.x = drift.x - eastGaitM
+      mesh.position.z = drift.z + northGaitM
+    }
+    if (this.terrainMesh && this.terrainMeshOrigin) place(this.terrainMesh, this.terrainMeshOrigin)
+    if (this.fadingTerrain) place(this.fadingTerrain.mesh, this.fadingTerrain.origin)
   }
 
   setTerrainOrigin(lat?: number, lng?: number, onSettled?: () => void): void {
@@ -1628,20 +1655,25 @@ export class SceneRenderer {
       // Scaled to the patch itself: 150 m matters for a 900 m patch and is meaningless for a 30 km one.
       if (Math.sqrt(x * x + z * z) < TERRAIN_REBUILD_DISTANCE_M * (radiusM / GROUND_RADIUS)) return
     }
-    const previousOrigin = this.terrainOrigin
     const previousRadius = this.terrainRadius
+    // The patch on screen, and where it is centred: what a patch coming is anchored to when it lands, which is not the last ASKED FOR (a second one
+    // can be asked for before the first lands).
+    const shownOrigin = this.terrainMeshOrigin
+    const drifted = shownOrigin !== undefined && Math.hypot(geoToLocalMeters(lat, lng, shownOrigin.lat, shownOrigin.lng).x, geoToLocalMeters(lat, lng, shownOrigin.lat, shownOrigin.lng).z) <= previousRadius
     // Whatever roads are standing belong to the patch about to be replaced, and if this build is
     // for somewhere else they are another county's network. Taken down now rather than when the
     // new ones arrive: Overpass answers in tens of seconds, and a reader should not spend those
-    // looking at the streets of the last recording they opened.
-    if (!previousOrigin || previousOrigin.lat !== lat || previousOrigin.lng !== lng) {
+    // looking at the streets of the last recording they opened. But not for a drive on: the roads
+    // of the patch the observer is leaving are the roads under him still, and they are laid again on the next patch at once
+    // (see buildRoads) instead of vanishing, for the time the next ones take, at every hundred and fifty metres.
+    if (!drifted) {
       this.roadSystem.clear()
       this.roadAttribution = undefined
     }
     this.terrainOrigin = { lat, lng }
     this.terrainRadius = radiusM
     const token = ++this.terrainBuildToken
-    this.awaitArrival(buildTerrainMesh(lat, lng, this.terrainProviders, radiusM), SceneRenderer.TERRAIN_PATIENCE_MS)
+    this.awaitArrival(buildTerrainMesh(lat, lng, this.terrainProviders, radiusM, { route: this.observerRoute }), SceneRenderer.TERRAIN_PATIENCE_MS)
       .then(({ mesh, attribution, originElevationM }) => {
         if (token !== this.terrainBuildToken) return // superseded by a newer call while this was in flight
         this.setSiteElevation(originElevationM ?? 0)
@@ -1659,12 +1691,13 @@ export class SceneRenderer {
         // is clamped to.
         this.anchorGrassTo(mesh, lat, lng)
         const outgoing = this.terrainMesh
-        const centre = previousOrigin ? geoToLocalMeters(lat, lng, previousOrigin.lat, previousOrigin.lng) : undefined
+        const outgoingOrigin = this.terrainMeshOrigin
+        const centre = outgoingOrigin ? geoToLocalMeters(lat, lng, outgoingOrigin.lat, outgoingOrigin.lng) : undefined
         if (outgoing && centre && Math.hypot(centre.x, centre.z) <= previousRadius) {
           mesh.position.y = outgoing.position.y + this.groundYOfPatch(outgoing, centre.x, centre.z)
         }
         // Not taken down at once when the observer has only moved on: see crossfadeTerrain.
-        if (outgoing && centre && Math.hypot(centre.x, centre.z) <= previousRadius) this.crossfadeTerrain(mesh, outgoing)
+        if (outgoing && outgoingOrigin && centre && Math.hypot(centre.x, centre.z) <= previousRadius) this.crossfadeTerrain(mesh, outgoing, outgoingOrigin)
         else this.disposeMesh(this.terrainMesh)
         // Higher than groundMesh's default (0), lower than the compass labels' (see
         // COMPASS_RENDER_ORDER) — draws after the flat disc it is laid over, and still under the
@@ -1677,6 +1710,7 @@ export class SceneRenderer {
         // don't depend on this async fetch resolving) light it correctly the instant it's added,
         // day or night, with no risk of a stale/wrong color needing a later re-tint.
         this.terrainMesh = mesh
+        this.terrainMeshOrigin = { lat, lng }
         // The relief's own material is new to this context: compiled off the thread, see render().
         this.compileNextFrameOffThread()
         this.terrainAttribution = attribution
@@ -1724,7 +1758,7 @@ export class SceneRenderer {
   /** How long a new patch of ground takes to replace the one the observer drove out of. */
   private static readonly TERRAIN_CROSSFADE_MS = 1200
   /** The patch being faded out, if one is. */
-  private fadingTerrain?: { mesh: Mesh, frameId: number }
+  private fadingTerrain?: { mesh: Mesh, origin: { lat: number, lng: number }, frameId: number }
 
   /**
    * Brings a new patch in over the one it replaces, instead of swapping them in one frame.
@@ -1738,7 +1772,7 @@ export class SceneRenderer {
    * The new patch is drawn over the old, pulled forward in depth so the two near-coincident
    * surfaces do not fight, and faded in; the old one goes once it is covered.
    */
-  private crossfadeTerrain(incoming: Mesh, outgoing: Mesh): void {
+  private crossfadeTerrain(incoming: Mesh, outgoing: Mesh, outgoingOrigin: { lat: number, lng: number }): void {
     // A fade still running is overtaken: its outgoing patch goes now.
     this.stopTerrainFade()
     const material = incoming.material as MeshLambertMaterial
@@ -1761,7 +1795,7 @@ export class SceneRenderer {
       this.fadingTerrain = undefined
       this.render()
     }
-    this.fadingTerrain = { mesh: outgoing, frameId: requestAnimationFrame(step) }
+    this.fadingTerrain = { mesh: outgoing, origin: outgoingOrigin, frameId: requestAnimationFrame(step) }
   }
 
   /** Ends a fade at once, the patch it was fading out gone. */
@@ -1808,6 +1842,11 @@ export class SceneRenderer {
       this.drapeRoads(held.ways, lat, lng, provider.contemporary)
       return
     }
+    // The roads of the ground the observer has driven on from are still the roads round him: laid on this patch now, in its frame, until the ones for
+    // this place come (Overpass takes tens of seconds). Nothing in hand (another recording, or the first patch) and there is nothing to lay.
+    if (held && Math.hypot(geoToLocalMeters(lat, lng, held.lat, held.lng).x, geoToLocalMeters(lat, lng, held.lat, held.lng).z) <= held.radiusM) {
+      this.drapeRoads(held.ways, lat, lng, provider.contemporary)
+    }
     this.awaitArrival(provider.getRoads(boundsAroundObserver(lat, lng, radiusM)), SceneRenderer.ROADS_PATIENCE_MS)
       .then(ways => {
         // Against the PLACE, not against the build token. A patch is rebuilt for reasons that have
@@ -1843,6 +1882,7 @@ export class SceneRenderer {
     const patch = this.terrainMesh
     if (!patch) return
     this.roadSystem.group.position.copy(patch.position)
+    this.roadSystem.setGroundSpacing(this.patchSpacingM(patch))
     this.roadSystem.setStated(this.statedRoads, (x, z) => this.groundYOfPatch(patch, x, z))
   }
 
@@ -1881,7 +1921,7 @@ export class SceneRenderer {
   private drapeTraces(): void {
     const system = this.traceSystem
     const patch = this.terrainMesh
-    const origin = this.terrainOrigin
+    const origin = this.terrainMeshOrigin
     if (!system || !patch || !origin) return
     system.group.position.copy(patch.position)
     system.set(this.tracesShown ? this.traces : [], this.traceLabels, origin.lat, origin.lng, this.siteElevationM, (x, z) => this.groundYOfPatch(patch, x, z))
@@ -1893,6 +1933,7 @@ export class SceneRenderer {
     // In the PATCH's own frame, not the world's: see the doc comment on the line that carries the
     // patch's position over to the road group.
     this.roadSystem.group.position.copy(patch.position)
+    this.roadSystem.setGroundSpacing(this.patchSpacingM(patch))
     this.roadSystem.set(ways, lat, lng, (x, z) => this.groundYOfPatch(patch, x, z), contemporary)
     this.roadAttribution = ways.length > 0 ? this.terrainProviders.roads?.attribution : undefined
     this.compileNextFrameOffThread()
@@ -2473,10 +2514,8 @@ export class SceneRenderer {
     const inhabited = this.decorObjects.find(object => object.observerSide !== undefined && canHoldObserver(object.kind))
     // Terrain and scenery share the eye's horizontal displacement. Otherwise every footstep
     // slides the plants over the height field and needlessly deforms the entire crop geometry.
-    if (this.terrainMesh && this.terrainOrigin && currentPose?.lat !== undefined && currentPose.lng !== undefined) {
-      const drift = geoToLocalMeters(this.terrainOrigin.lat, this.terrainOrigin.lng, currentPose.lat, currentPose.lng)
-      this.terrainMesh.position.x = drift.x - (inhabited ? 0 : this.gaitOffset.eastM)
-      this.terrainMesh.position.z = drift.z + (inhabited ? 0 : this.gaitOffset.northM)
+    if (this.terrainMesh && currentPose?.lat !== undefined && currentPose.lng !== undefined) {
+      this.placeTerrain(currentPose.lat, currentPose.lng, inhabited ? 0 : this.gaitOffset.eastM, inhabited ? 0 : this.gaitOffset.northM)
       // A carriageway is part of the ground it is laid on, so it rides with the patch rather than
       // being rebuilt: the ribbons are built in the patch's OWN frame (see drapeRoads), which is
       // what makes carrying its position over enough. Without this, a observer who walks eleven
@@ -2706,6 +2745,12 @@ export class SceneRenderer {
     // The patch stands where its own origin really is relative to the observer (see setObserverPose),
     // so a world position has to be brought into the patch's own frame before its grid can be read.
     return mesh.position.y + this.groundYOfPatch(mesh, x - mesh.position.x, z - mesh.position.z)
+  }
+
+  /** How far apart the vertices of a patch stand, metres: what a ribbon laid on it has to be finer than. */
+  private patchSpacingM(patch: Mesh): number {
+    const position = patch.geometry.getAttribute("position")
+    return position && position.count >= 2 ? Math.abs(position.getX(1) - position.getX(0)) : Infinity
   }
 
   /** The relief a given patch carries at a point of its OWN frame, before whatever height that patch

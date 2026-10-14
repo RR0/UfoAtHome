@@ -835,6 +835,18 @@ export class SceneElement extends HTMLElement {
    * language change so that the renderer is handed the same map every tick. */
   private traceLabelsFor?: { traces: unknown; language: string; labels: ReadonlyMap<string, string> }
 
+  /** The places of a recording's track, for the ground to know which way the observer goes: nothing for an observer who stands still. Kept while the track is. */
+  private routeCache?: { track: unknown, count: number, route: { lat: number; lng: number }[] | undefined }
+
+  private routeOf(track: { allKeyframes: ReadonlyArray<{ pose: { lat?: number; lng?: number } }> }): { lat: number; lng: number }[] | undefined {
+    const frames = track.allKeyframes
+    if (this.routeCache?.track === track && this.routeCache.count === frames.length) return this.routeCache.route
+    const places = frames.flatMap(frame => frame.pose.lat !== undefined && frame.pose.lng !== undefined ? [{ lat: frame.pose.lat, lng: frame.pose.lng }] : [])
+    const route = places.length >= 2 ? places : undefined
+    this.routeCache = { track, count: frames.length, route }
+    return route
+  }
+
   private traceLabels(traces: InvestigatorTrace[]): ReadonlyMap<string, string> {
     const language = HostLocale.preferencesFor(this).join()
     if (this.traceLabelsFor?.traces !== traces || this.traceLabelsFor.language !== language) {
@@ -1535,6 +1547,7 @@ export class SceneElement extends HTMLElement {
     // opened hanging two and a half metres over its field after Wilcox, and came down only when
     // play was pressed. The decor is re-anchored by the renderer itself at that moment (see
     // SceneRenderer.setTerrainOrigin); the bodies are this element's, so this is where it happens.
+    this.sceneRenderer.setObserverRoute(this.routeOf(sighting.observerTrack))
     this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng, () => {
       this.placeBodiesAt(this.lastTimeMs, true)
       this.sceneRenderer.render()

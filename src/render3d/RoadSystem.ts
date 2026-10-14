@@ -29,6 +29,8 @@ export class RoadSystem {
   /** How far apart a ribbon's rungs are, metres: close enough to follow a wash or a bank, far
    * enough that a kilometre of road is a few hundred vertices rather than a few thousand. */
   static readonly STEP_M = 8
+  /** How far apart the rungs of a ribbon are NOW: STEP_M, or half the cell of a finer mesh (see setGroundSpacing). */
+  private stepM = RoadSystem.STEP_M
   /** Lifted this far off the ground so the carriageway wins the depth test against the very
    * surface it is laid on, without standing visibly above it. */
   static readonly LIFT_M = 0.06
@@ -78,6 +80,15 @@ export class RoadSystem {
    * whole network hanging at the heights of the patch before. Deciding not to fetch is the
    * caller's business (see SceneRenderer.buildRoads); deciding not to drape is nobody's.
    */
+  /**
+   * Tells the ribbons how far apart the vertices of the ground they are laid on stand. A ribbon is flat between two rungs and the ground is not: with
+   * rungs eight metres apart on a mesh with a vertex every seven, the ribbon dipped under the triangles between them and came out above them
+   * elsewhere, and the carriageway was drawn as dark polygons lying on the ground, and half sunk in it. Two rungs to a cell keeps the two within the lift.
+   */
+  setGroundSpacing(spacingM: number): void {
+    this.stepM = Number.isFinite(spacingM) && spacingM > 0 ? Math.min(RoadSystem.STEP_M, Math.max(1.5, spacingM / 2)) : RoadSystem.STEP_M
+  }
+
   set(ways: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt, contemporary: boolean): void {
     RoadSystem.empty(this.surveyed)
     // One mesh per SURFACE, not per way. A town's network is five hundred ways — around Socorro it
@@ -209,6 +220,8 @@ export class RoadSystem {
     const offset = strip.offsetM ?? 0
     const base = batch.positions.length / 3
     const kept: boolean[] = []
+    // Where each rung's three points stand on the ground plane: the left edge, the middle, the right edge.
+    const rungs: { x: number; z: number }[][] = []
     for (let i = 0; i < centre.length; i++) {
       const before = centre[Math.max(0, i - 1)]
       const after = centre[Math.min(centre.length - 1, i + 1)]
@@ -221,18 +234,34 @@ export class RoadSystem {
       const nz = dx * half
       // The strip's own middle, a lateral offset to the left of the direction of travel.
       const middle = { x: centre[i].x + (-dz) * offset, z: centre[i].z + dx * offset }
-      const left = { x: middle.x + nx, z: middle.z + nz }
-      const right = { x: middle.x - nx, z: middle.z - nz }
       kept.push(!strip.skip?.(middle.x, middle.z))
-      batch.positions.push(
-        left.x, groundYAt(left.x, left.z) + lift, left.z,
-        right.x, groundYAt(right.x, right.z) + lift, right.z
-      )
+      rungs.push([{ x: middle.x + nx, z: middle.z + nz }, middle, { x: middle.x - nx, z: middle.z - nz }])
+    }
+    // A ribbon is flat between two points and the ground is not, and a road on an embankment is crowned: its middle stands higher than its edges. A
+    // rung of two points laid a flat ribbon under the crown, and the ground showed through it in patches, which read as dark polygons lying on the road. So
+    // three points a rung, and where the ground half-way to the next rung stands above the ribbon there, both ends are raised by the difference (never
+    // on a slope that is a plane: the ribbon is exact there, and raised it would float).
+    const heights = rungs.map(rung => rung.map(point => groundYAt(point.x, point.z)))
+    for (let i = 0; i < rungs.length - 1; i++) {
+      for (let k = 0; k < 3; k++) {
+        const from = rungs[i][k]
+        const to = rungs[i + 1][k]
+        const deficit = groundYAt((from.x + to.x) / 2, (from.z + to.z) / 2) - (heights[i][k] + heights[i + 1][k]) / 2
+        if (deficit > 0) {
+          heights[i][k] += deficit
+          heights[i + 1][k] += deficit
+        }
+      }
+    }
+    for (let i = 0; i < rungs.length; i++) {
+      for (let k = 0; k < 3; k++) batch.positions.push(rungs[i][k].x, heights[i][k] + lift, rungs[i][k].z)
     }
     for (let i = 0; i < centre.length - 1; i++) {
       if (!kept[i] || !kept[i + 1]) continue
-      const a = base + i * 2
-      batch.indices.push(a, a + 2, a + 1, a + 1, a + 2, a + 3)
+      const a = base + i * 3
+      // Left to middle, then middle to right: each a pair of triangles between this rung and the next.
+      batch.indices.push(a, a + 3, a + 1, a + 1, a + 3, a + 4)
+      batch.indices.push(a + 1, a + 4, a + 2, a + 2, a + 4, a + 5)
     }
   }
 
@@ -276,7 +305,7 @@ export class RoadSystem {
       const from = points[i]
       const to = points[i + 1]
       const length = Math.hypot(to.x - from.x, to.z - from.z)
-      const steps = Math.max(1, Math.ceil(length / RoadSystem.STEP_M))
+      const steps = Math.max(1, Math.ceil(length / this.stepM))
       for (let s = 0; s < steps; s++) {
         const t = s / steps
         out.push({ x: from.x + (to.x - from.x) * t, z: from.z + (to.z - from.z) * t })
