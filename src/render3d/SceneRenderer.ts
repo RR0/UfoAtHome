@@ -2636,7 +2636,7 @@ export class SceneRenderer {
       this.camera.rotation.set(this.indoorLookPitchDeg * DEG_TO_RAD, -(view.headingDeg + this.indoorLookYawDeg) * DEG_TO_RAD, 0, "YXZ")
     }
     this.bodyOrigin = { x: offset.x + shift.x, z: offset.z + shift.z }
-    const cabin = this.cabinDecor()
+    const cabin = this.findCabin(t, offset, shift)
     this.fitShadowToCabin(cabin.length > 0)
     this.dimCabinSky(cabin)
     this.placeShadowFrustum()
@@ -4256,15 +4256,33 @@ export class SceneRenderer {
    * the inside of a cabin (see dimCabinSky): the windows, not the whole of the sky.
    */
   private cabinDecor(): Object3D[] {
+    return this.cabinGroups
+  }
+
+  private cabinGroups: Object3D[] = []
+
+  /**
+   * The aircraft the eye is inside of (a flight deck), found on where each one IS at the instant being drawn: its placement, resolved now, against the eye, and not
+   * on the bounds the last frame left. Those are where the object was, which after a jump in the timeline, or an aperçu drawn at another moment, is far from
+   * the eye: the cabin was left and entered again at every one, its shadow box and its map resized each time, the light pulsing.
+   * A terrace or a wall whose box holds the eye is only where the observer stands. (What the observer is declared to inhabit, a room or a car, has its own
+   * drawing: see observerSide.)
+   */
+  private findCabin(t: number, offset: { x: number, z: number }, shift: { x: number, z: number }): Object3D[] {
     const inside: Object3D[] = []
-    const box = new Box3()
     for (const object of this.decorObjects) {
-      // An aircraft whose box holds the eye is a cabin; a terrace or a wall that does is only where the observer stands. (What the observer is declared to
-      // inhabit, a room or a car, has its own drawing: see observerSide.)
       if (object.kind !== "aircraft" || (object.observerSide !== undefined && canHoldObserver(object.kind))) continue
       const group = this.decorGroups.get(object.id)
-      if (group && box.setFromObject(group).containsPoint(this.camera.position)) inside.push(group)
+      if (!group) continue
+      const placement = resolveDecorPlacementAt(object, t)
+      const x = placement.eastM + offset.x + shift.x
+      const z = -placement.northM + offset.z + shift.z
+      const size = DecorSystem.sizeOf(object)
+      const reachM = Math.max(size.widthM, size.lengthM) / 2
+      // Within the airframe's half length of the eye, across and along, and at its height (the eye is 1.6 m above the pose's elevation)
+      if (Math.hypot(x, z) < reachM && Math.abs(placement.altitudeM - this.poseElevationM - 1.6) < reachM) inside.push(group)
     }
+    this.cabinGroups = inside
     return inside
   }
 
