@@ -1215,6 +1215,9 @@ select.weather-field:disabled {
   border-radius: 12px;
   padding: 0.25em 0.5em;
   max-width: 100%;
+  /* A flex item is never narrower than its content unless it says so: a nest holding a chip that
+     stays on one line (a long place name) was as wide as that line, past the edge of a phone. */
+  min-width: 0;
 }
 /* Hovering anywhere in the box, its name or a member's gap included, lights the whole frame and
    its name, so the group reads as one thing before one of its chips is picked. */

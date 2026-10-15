@@ -126,6 +126,9 @@ export const css = `
   display: flex;
   align-items: center;
   gap: 0.5em;
+  /* On a phone the account's choice of observer, the interpretation and the buttons do not fit on
+     one line: the ones that do not go to the next, rather than the first being squeezed to nothing. */
+  flex-wrap: wrap;
   margin-bottom: 0.5em;
   /* Room for what a button draws OUTSIDE itself — the 2px outline of a pressed toggle, a focus
      ring. Flush against its host, that ring was cut off by any page that clips this element:
@@ -133,10 +136,9 @@ export const css = `
   padding: 3px 3px 0;
 }
 .account {
+  /* Shrinks to what the buttons leave and then wraps, the choice of observer under its words: it was
+     kept on one line and clipped to "Com…", with the choice itself out of reach, on a phone. */
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .account select {
   max-width: 12em;
@@ -151,6 +153,12 @@ export const css = `
   align-items: center;
   gap: 0.4em;
   white-space: nowrap;
+}
+/* An author rule for display beats the hidden attribute: without this the label stayed laid out,
+   192px of "Interpretation" and an empty-looking choice, on a recording that has no interpretation
+   to choose, and on a phone squeezed the account's own choice of observer down to "Com…". */
+.interpretation-choice[hidden] {
+  display: none;
 }
 .interpretation-choice select {
   flex: 1 1 0;
@@ -289,6 +297,9 @@ export const css = `
   border-radius: 12px;
   padding: 0.25em 0.5em;
   max-width: 100%;
+  /* A flex item is never narrower than its content unless it says so: a nest holding a chip that
+     stays on one line (a long place name) was as wide as that line, past the edge of a phone. */
+  min-width: 0;
 }
 ${SummaryDescription.CSS}
 .param-nest-label {
@@ -306,6 +317,11 @@ ${SummaryDescription.CSS}
   border-radius: 999px;
   padding: 0.1em 0.6em;
   white-space: nowrap;
+  /* One line, as a chip is, but a long value gives up its tail rather than the width of the page. */
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .param-label-label {
   color: color-mix(in srgb, currentColor 78%, transparent);
