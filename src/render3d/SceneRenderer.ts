@@ -3786,8 +3786,7 @@ export class SceneRenderer {
     this.cabinShadow = inside
     const shadow = this.celestialLight.shadow
     if (!inside) {
-      this.shadowHalfExtentM = -1          // not the size it was: fitShadowToBodies sets it again
-      this.fitShadowToBodies()
+      this.shadowHalfExtentM = -1          // not the size it was: the next fitShadowToBodies (every tick) sets the box, the map and the bias again
       return
     }
     // Drawn every frame like any other. A cabin is rigid with the eye, so its shadows could be drawn less often, and were (once a second, or when the Sun
@@ -4259,10 +4258,16 @@ export class SceneRenderer {
     const near: Object3D[] = []
     const box = new Box3()
     for (const object of this.decorObjects) {
+      // An aircraft whose box holds the eye is a cabin; a terrace or a wall that does is only where the observer stands. The man in the seat and the like
+      // (anything within a few metres) share it. (What the observer is declared to inhabit, a room or a car, has its own drawing: see observerSide.)
       if (object.observerSide !== undefined && canHoldObserver(object.kind)) continue
       const group = this.decorGroups.get(object.id)
       if (!group) continue
       box.setFromObject(group)
+      if (object.kind !== "aircraft") {
+        if (box.distanceToPoint(this.camera.position) < SceneRenderer.CABIN_MATE_RANGE_M) near.push(group)
+        continue
+      }
       if (box.containsPoint(this.camera.position)) inside.push(group)
       else if (box.distanceToPoint(this.camera.position) < SceneRenderer.CABIN_MATE_RANGE_M) near.push(group)
     }

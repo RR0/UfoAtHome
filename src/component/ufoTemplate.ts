@@ -293,6 +293,9 @@ canvas[data-cursor="rotate"] {
   display: flex;
   flex-direction: column;
   pointer-events: none;
+  /* Over the scene's loader (z-index 1 in sceneTemplate: this overlay takes part in that stack, a shadow root making none): the black screen of
+     the first frame is not for covering the way to play, to pause or to move the timeline. */
+  z-index: 4;
 }
 .toolbar {
   pointer-events: auto;
