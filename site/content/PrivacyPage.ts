@@ -201,21 +201,22 @@ export class PrivacyPage implements SitePage {
     <h2>Nothing is written to a server</h2>
     <p>UFO@home only reads: what you type, the weather, the ground and the imagery around the observer. It never sends a
       recording, a name or a draft to a server of ours, and has no account that could hold one. The only outputs are the ones
-      you start yourself: <strong>Save</strong> exports the sighting file, which you can then replay or publish on the site of your
+      you start yourself: <strong>Save</strong> exports the sighting file to your device, which you can then replay or publish on the site of your
       choice, public or internal.</p>
 
-    <h2>Publishing, and responsibility</h2>
-    <p>Whoever publishes a recording is responsible for what it contains, as for any text or photograph. The tool cannot take
-      that place: removing a surname field from the editor would never stop anyone from writing that name in an identifier or a
+    <h2>Publishing is the publisher's responsibility</h2>
+    <p>UFO@home is only a tool. You can play a simulation just for yourself, or choose to share it. Whoever publishes a
+      recording is responsible for what it contains, as for any publication: text, photograph, video. The tool cannot take that
+      place: removing a surname field from the editor would never stop anyone from writing that name in an identifier or a
       description. Before publishing an account about someone else, make sure they know and agree, or use initials and an
-      approximate place: a precise place and date can identify a person even without a name. The
-      <a href="/docs/create/">documentation</a> says so where the format is explained.</p>
+      approximate place: a precise place and date can identify a person even without a name.</p>
 
-    <h2>AI is a choice, not part of the tool</h2>
-    <p>UFO@home is not an AI tool. It reads a JSON file, whether it was written by hand, produced with the editor, or by an AI
-      that turned a description into one. Using an AI to go faster is the user's choice, and so is the responsibility for what is
-      sent to it and for checking what comes back. In the editor, drafting sends the description you wrote to the model you chose,
-      with your key, only when you ask.</p>
+    <h2>No AI is used while an observation plays</h2>
+    <p>UFO@home reads a JSON file, however it was made: by hand, with the editor, or with an AI that turned a description into
+      one. AI is only an <em>option</em> for those who want to produce a recording faster, never an obligation. The different
+      ways to create a recording are on <a href="/docs/create/">Create an observation</a>. If you use it, the editor sends the
+      description you wrote to the model you chose, with your key, only when you ask; what you send, and checking what comes
+      back, is your responsibility.</p>
 
     <h2>The demos on this site</h2>
     <p>RR0 publishes the demos here. An observer is named in them only because they agreed to it with us, or because they published their own account themselves, in an interview for instance; otherwise initials stand for the name. If you are an observer they replay and want a correction, a less precise place or a
@@ -282,21 +283,24 @@ export class PrivacyPage implements SitePage {
     <h2>Rien n'est écrit sur un serveur</h2>
     <p>UFO@home ne fait que lire : ce que vous saisissez, la météo, le sol et l'imagerie autour de l'observateur. Il n'envoie jamais
       un enregistrement, un nom ou un brouillon à un serveur de notre côté, et n'a aucun compte qui pourrait en conserver. Les seules
-      sorties sont celles que vous déclenchez vous-même : <strong>Enregistrer</strong> exporte le fichier d'observation, que vous
+      sorties sont celles que vous déclenchez vous-même : <strong>Enregistrer</strong> exporte le fichier d'observation sur votre appareil, que vous
       pouvez ensuite rejouer ou publier sur le site de votre choix, public ou interne.</p>
 
-    <h2>Publier, et la responsabilité</h2>
-    <p>Qui publie un enregistrement est responsable de ce qu'il contient, comme pour tout texte ou toute photographie. L'outil ne
+    <h2>Publier est la responsabilité de l'éditeur</h2>
+    <p>UFO@home n'est qu'un outil. Vous pouvez jouer une simulation juste pour vous, ou choisir de la diffuser. Celui qui publie
+      un enregistrement (l'éditeur) répond de ce qu'il contient, comme pour toute publication : texte, photo, vidéo. L'outil ne
       peut pas s'y substituer : retirer un champ « nom de famille » de l'éditeur n'empêcherait jamais personne d'écrire ce nom dans
       un identifiant ou une description. Avant de publier le compte rendu de quelqu'un d'autre, assurez-vous qu'il le sait et
       l'accepte, ou utilisez des initiales et un lieu approximatif : un lieu et une date précis peuvent identifier une personne même
-      sans nom. La <a href="/docs/create/">documentation</a> le rappelle là où le format est expliqué.</p>
+      sans nom.</p>
 
-    <h2>L'IA est un choix, pas une partie de l'outil</h2>
-    <p>UFO@home n'est pas un outil d'IA. Il lit un fichier JSON, qu'il ait été écrit à la main, produit avec l'éditeur, ou par une IA
-      qui a transformé une description en fichier. Utiliser une IA pour aller plus vite est le choix de l'utilisateur, et c'est aussi à lui
-      de répondre de ce qui lui est envoyé et de vérifier ce qui en revient. Dans l'éditeur, la rédaction envoie la description que vous
-      avez écrite au modèle que vous avez choisi, avec votre clé, seulement quand vous le demandez.</p>
+    <h2>Aucune IA n'intervient quand une observation se joue</h2>
+    <p>UFO@home lit un fichier JSON, quelle que soit la façon dont il a été fait : à la main, avec l'éditeur, ou avec une IA qui a
+      transformé une description en fichier. L'IA n'est qu'une <em>option</em> pour qui veut produire un enregistrement plus vite,
+      jamais une obligation. Les différentes façons de créer un enregistrement sont expliquées sur
+      <a href="/docs/create/">Créer une observation</a>. Si vous y recourez, l'éditeur envoie la description que vous avez écrite au
+      modèle que vous avez choisi, avec votre clé, seulement quand vous le demandez ; ce que vous envoyez, et la vérification de ce
+      qui en revient, relèvent de votre responsabilité.</p>
 
     <h2>Les démos de ce site</h2>
     <p>RR0 publie les démos d'ici. Un observateur n'y est nommé que parce qu'il y a consenti auprès de nous, ou parce qu'il a publié lui-même son témoignage, dans une interview par exemple ; sinon des initiales tiennent lieu de nom. Si vous êtes un observateur dont l'une d'elles rejoue le compte rendu et souhaitez une correction,
@@ -362,21 +366,22 @@ export class PrivacyPage implements SitePage {
     <h2>No se escribe nada en un servidor</h2>
     <p>UFO@home solo lee: lo que escribes, el tiempo, el suelo y las imágenes alrededor del observador. Nunca envía una
       grabación, un nombre o un borrador a un servidor nuestro, y no tiene ninguna cuenta que pudiera guardarlos. Las únicas
-      salidas son las que inicias tú mismo: <strong>Guardar</strong> exporta el archivo de la observación, que luego puedes
+      salidas son las que inicias tú mismo: <strong>Guardar</strong> exporta el archivo de la observación a tu dispositivo, que luego puedes
       reproducir o publicar en el sitio que elijas, público o interno.</p>
 
-    <h2>Publicar, y la responsabilidad</h2>
-    <p>Quien publica una grabación es responsable de lo que contiene, como con cualquier texto o fotografía. La herramienta no
+    <h2>Publicar es responsabilidad de quien publica</h2>
+    <p>UFO@home es solo una herramienta. Puedes reproducir una simulación solo para ti, o elegir difundirla. Quien publica una
+      grabación (el editor) responde de lo que contiene, como en cualquier publicación: texto, fotografía, vídeo. La herramienta no
       puede ocupar ese lugar: quitar un campo «apellido» del editor nunca impediría que alguien escriba ese nombre en un
       identificador o una descripción. Antes de publicar el relato de otra persona, asegúrate de que lo sabe y lo acepta, o usa
-      iniciales y un lugar aproximado: un lugar y una fecha precisos pueden identificar a una persona incluso sin nombre. La
-      <a href="/docs/create/">documentación</a> lo recuerda donde se explica el formato.</p>
+      iniciales y un lugar aproximado: un lugar y una fecha precisos pueden identificar a una persona incluso sin nombre.</p>
 
-    <h2>La IA es una elección, no parte de la herramienta</h2>
-    <p>UFO@home no es una herramienta de IA. Lee un archivo JSON, ya lo haya escrito alguien a mano, producido el editor, o una IA
-      que convirtió una descripción en uno. Usar una IA para ir más rápido es decisión del usuario, y también lo es responder de lo
-      que se le envía y comprobar lo que devuelve. En el editor, la redacción envía la descripción que escribiste al modelo que
-      elegiste, con tu clave, solo cuando lo pides.</p>
+    <h2>Ninguna IA interviene mientras se reproduce una observación</h2>
+    <p>UFO@home lee un archivo JSON, sea cual sea la forma en que se hizo: a mano, con el editor, o con una IA que convirtió una
+      descripción en uno. La IA es solo una <em>opción</em> para quien quiere producir una grabación más rápido, nunca una
+      obligación. Las distintas formas de crear una grabación se explican en
+      <a href="/docs/create/">Crear una observación</a>. Si recurres a ella, el editor envía la descripción que escribiste al modelo que
+      elegiste, con tu clave, solo cuando lo pides; lo que envías, y la comprobación de lo que vuelve, son responsabilidad tuya.</p>
 
     <h2>Las demos de este sitio</h2>
     <p>RR0 publica las demos de aquí. Un observador solo aparece nombrado en ellas porque lo consintió ante nosotros, o porque él mismo publicó su testimonio, en una entrevista por ejemplo; si no, unas iniciales ocupan el lugar del nombre. Si eres un observador cuyo relato reproduce una de ellas y quieres una corrección, un lugar
@@ -442,21 +447,23 @@ export class PrivacyPage implements SitePage {
     <h2>Non viene scritto nulla su un server</h2>
     <p>UFO@home si limita a leggere: ciò che scrivi, il meteo, il suolo e le immagini intorno all'osservatore. Non invia mai una
       registrazione, un nome o una bozza a un nostro server, e non ha alcun account che possa conservarli. Le uniche uscite sono
-      quelle che avvii tu: <strong>Salva</strong> esporta il file dell'osservazione, che puoi poi riprodurre o pubblicare sul sito
+      quelle che avvii tu: <strong>Salva</strong> esporta il file dell'osservazione sul tuo dispositivo, che puoi poi riprodurre o pubblicare sul sito
       che preferisci, pubblico o interno.</p>
 
-    <h2>Pubblicare, e la responsabilità</h2>
-    <p>Chi pubblica una registrazione è responsabile di ciò che contiene, come per qualsiasi testo o fotografia. Lo strumento non
-      può prenderne il posto: togliere un campo «cognome» dall'editor non impedirebbe mai a qualcuno di scrivere quel nome in un
-      identificativo o in una descrizione. Prima di pubblicare il resoconto di un'altra persona, assicurati che lo sappia e lo
-      accetti, oppure usa le iniziali e un luogo approssimativo: un luogo e una data precisi possono identificare una persona anche
-      senza nome. La <a href="/docs/create/">documentazione</a> lo ricorda dove spiega il formato.</p>
+    <h2>Pubblicare è responsabilità di chi pubblica</h2>
+    <p>UFO@home è solo uno strumento. Puoi riprodurre una simulazione solo per te, o scegliere di diffonderla. Chi pubblica una
+      registrazione (l'editore) risponde di ciò che contiene, come per qualsiasi pubblicazione: testo, fotografia, video. Lo
+      strumento non può prenderne il posto: togliere un campo «cognome» dall'editor non impedirebbe mai a qualcuno di scrivere quel
+      nome in un identificativo o in una descrizione. Prima di pubblicare il resoconto di un'altra persona, assicurati che lo sappia
+      e lo accetti, oppure usa le iniziali e un luogo approssimativo: un luogo e una data precisi possono identificare una persona
+      anche senza nome.</p>
 
-    <h2>L'IA è una scelta, non parte dello strumento</h2>
-    <p>UFO@home non è uno strumento di IA. Legge un file JSON, scritto a mano, prodotto con l'editor, o da un'IA che ha trasformato
-      una descrizione in uno. Usare un'IA per fare più in fretta è una scelta dell'utente, e sua è anche la responsabilità di ciò che
-      le viene inviato e della verifica di ciò che ne torna. Nell'editor, la redazione invia la descrizione che hai scritto al modello
-      che hai scelto, con la tua chiave, solo quando lo chiedi.</p>
+    <h2>Nessuna IA interviene mentre un'osservazione viene riprodotta</h2>
+    <p>UFO@home legge un file JSON, comunque sia stato fatto: a mano, con l'editor, o con un'IA che ha trasformato una descrizione
+      in uno. L'IA è solo un'<em>opzione</em> per chi vuole produrre una registrazione più in fretta, mai un obbligo. I diversi modi
+      di creare una registrazione sono spiegati in <a href="/docs/create/">Creare un'osservazione</a>. Se vi ricorri, l'editor invia
+      la descrizione che hai scritto al modello che hai scelto, con la tua chiave, solo quando lo chiedi; ciò che invii, e la verifica
+      di ciò che ne torna, sono responsabilità tua.</p>
 
     <h2>Le demo di questo sito</h2>
     <p>RR0 pubblica le demo qui presenti. Un osservatore vi è nominato solo perché ha acconsentito presso di noi, o perché ha pubblicato egli stesso la propria testimonianza, in un'intervista ad esempio; altrimenti le iniziali tengono il posto del nome. Se sei un osservatore il cui resoconto è riprodotto da una di esse e vuoi una correzione,
