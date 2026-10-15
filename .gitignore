@@ -30,3 +30,6 @@ src/generated/
 
 # scripts/perf output
 perf-out/
+
+# Working notes from calls with observers: they hold personal details and are never published.
+call-*.md
