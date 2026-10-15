@@ -1161,6 +1161,7 @@ select.weather-field:disabled {
 #observer-identity-hint {
   flex-basis: 100%;
   margin: 0;
+  font-size: 0.8em;
 }
 .file-ask {
   max-width: min(34em, calc(100vw - 2em));
