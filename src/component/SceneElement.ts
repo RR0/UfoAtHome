@@ -324,6 +324,8 @@ export class SceneElement extends HTMLElement {
   readonly ufoElement: UfoElement
   private readonly sceneRenderer: SceneRenderer
   private readonly hoverTooltip: HTMLElement
+  /** Whether the loader's black screen is up: what is under it is not to be looked at, named or captioned yet. */
+  private holding = false
   private resizeObserver?: ResizeObserver
   /** One accumulating estimate per shape — see sizeRangeOf. Keyed by sourceId, and dropped whole
    * whenever a different recording is loaded (see sizeEstimatesFor). */
@@ -453,6 +455,10 @@ export class SceneElement extends HTMLElement {
    * steps aside (hides its own tooltip) rather than duplicating that lookup. */
   private readonly handlePointerMove = (event: PointerEvent) => {
     this.sceneRenderer.setCompassHovered(true)
+    if (this.holding) {
+      this.hoverTooltip.hidden = true
+      return
+    }
     const canvas = this.ufoElement.canvasElement
     const rect = canvas.getBoundingClientRect()
     if (rect.width === 0 || rect.height === 0) return
@@ -778,6 +784,9 @@ export class SceneElement extends HTMLElement {
     this.busyNote = this.shadow.getElementById("scene-busy-note")!
     this.sceneRenderer.onFirstFrameHold = holding => {
       loader.hidden = !holding
+      this.holding = holding
+      // Nothing of the scene under the black screen is named: not an object's tooltip, not the account's first moment
+      if (holding) this.hoverTooltip.hidden = true
       // The sentence saying what this is not (a video) has the picture to itself while it waits: the
       // account's first moment would be printed over it, both centred, and neither could be read.
       this.ufoElement.captionHeld = holding

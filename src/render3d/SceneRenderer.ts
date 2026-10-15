@@ -2684,10 +2684,12 @@ export class SceneRenderer {
         }
         group.userData.footprintKey = footprintKey
       }
-      // What is in the cabin the eye is in stands on the SAME ground as the eye (see poseCameraY), not on the ground under its own footprint: for objects a
+      // What is in the cabin the eye is in stands on the SAME ground as the eye (poseCameraY less the eye's own height, whatever the order the tick read
+      // the terrain and set the pose in: a ground read here again could be a tick off the camera's), not on the ground under its own footprint: for objects a
       // metre apart, forty metres a second over a hilly country, those are two heights that differ by a few centimetres and by the second: the man in the
       // seat moved up and down on it.
-      const groundY = this.cabinMates.has(group) ? this.groundYUnder(0, 0) : group.userData.footprintGroundY
+      const sharesTheEye = placement.altitudeM > SceneRenderer.AIRBORNE_M && Math.hypot(x, z) < SceneRenderer.CABIN_MATE_RANGE_M
+      const groundY = sharesTheEye ? this.poseCameraY - 1.6 - this.poseElevationM : group.userData.footprintGroundY
       group.position.set(x, groundY + placement.altitudeM, z)
       if (object.kind === "crop") {
         const distance = Math.hypot(x, z)
@@ -4255,30 +4257,25 @@ export class SceneRenderer {
    */
   private cabinDecor(): Object3D[] {
     const inside: Object3D[] = []
-    const near: Object3D[] = []
     const box = new Box3()
     for (const object of this.decorObjects) {
-      // An aircraft whose box holds the eye is a cabin; a terrace or a wall that does is only where the observer stands. The man in the seat and the like
-      // (anything within a few metres) share it. (What the observer is declared to inhabit, a room or a car, has its own drawing: see observerSide.)
-      if (object.observerSide !== undefined && canHoldObserver(object.kind)) continue
+      // An aircraft whose box holds the eye is a cabin; a terrace or a wall that does is only where the observer stands. (What the observer is declared to
+      // inhabit, a room or a car, has its own drawing: see observerSide.)
+      if (object.kind !== "aircraft" || (object.observerSide !== undefined && canHoldObserver(object.kind))) continue
       const group = this.decorGroups.get(object.id)
-      if (!group) continue
-      box.setFromObject(group)
-      if (object.kind !== "aircraft") {
-        if (box.distanceToPoint(this.camera.position) < SceneRenderer.CABIN_MATE_RANGE_M) near.push(group)
-        continue
-      }
-      if (box.containsPoint(this.camera.position)) inside.push(group)
-      else if (box.distanceToPoint(this.camera.position) < SceneRenderer.CABIN_MATE_RANGE_M) near.push(group)
+      if (group && box.setFromObject(group).containsPoint(this.camera.position)) inside.push(group)
     }
-    // Those who share the cabin without the eye being inside THEIR box (the man in the other seat): what stands within a few metres of the eye of a cabin
-    this.cabinMates = new Set(inside.length > 0 ? [...inside, ...near] : [])
     return inside
   }
 
-  /** How near the eye, in metres, what is in the same cabin without containing the eye stands (the other seat, the man in it). */
+  /**
+   * How near the eye, in metres, an object in the air stands as one that shares the eye's flight: the flight deck it is in and the man in the other seat (see
+   * updateDecorAnchoring: they stand on the ground the eye stands on, not on one they read for themselves). Decided from where the object IS (its placement,
+   * resolved at this very instant), never from the bounds the last frame left: after a jump in the timeline those are where the object was.
+   */
   private static readonly CABIN_MATE_RANGE_M = 4
-  private cabinMates = new Set<Object3D>()
+  /** Above this height an object is in the air, in metres. */
+  private static readonly AIRBORNE_M = 100
 
   /**
    * Photographs the one reflection probe that is most out of date, if any is — see Reflections —
