@@ -165,7 +165,7 @@ export class PrivacyPage implements SitePage {
     <ul>
       <li>No account, no cookie, no advertising, no analytics, and no tracker of ours.</li>
       <li>The camera, the microphone and your position are never asked for.</li>
-      <li>What you author stays in your browser until you save it as a file yourself.</li>
+      <li>Nothing is ever written to a server: the tool only reads. The only output is the file you choose to export.</li>
       <li>To draw the sky, the weather and the ground, your browser contacts the services listed below. They receive your IP address, as any site you visit does, along with what they are asked about.</li>
     </ul>
 
@@ -177,9 +177,11 @@ export class PrivacyPage implements SitePage {
     <h2>What stays on your device</h2>
     <p>The editor uses your browser's local storage for preferences only: the scenery and radius you
       chose, the model you picked. They never leave your device and need no consent.</p>
-    <p>A <strong>key for drafting with Claude</strong> is kept there only if you tick the box offering to
-      remember it, which is never ticked for you. Unticking it forgets the key at once. Be aware that
-      a page that embeds the editor runs it in its own origin: on somebody else's site, anything else
+    <p>A <strong>key for drafting with Claude</strong> (or another model, later) is asked for only if you choose to have an AI
+      draft your recording from a description. It is optional: you can write the file by hand, or fill in the editor,
+      and never meet it. It is kept in your browser only, never on a server (there is none of ours that stores anything),
+      and only if you tick the box offering to remember it; otherwise you enter it each time. Unticking it forgets it at once.
+      Be aware that a page that embeds the editor runs it in its own origin: on somebody else's site, anything else
       running on that site could read a remembered key. Leave the box unticked there.</p>
     <p>The site can also keep a copy of its pages on your device so that it works without a network.
       That copy is a cache of this site's own files and holds nothing about you.</p>
@@ -196,20 +198,28 @@ export class PrivacyPage implements SitePage {
       To avoid all of them, host the components yourself and point the providers at your own server
       (see the <a href="/faq/">FAQ</a>).</p>
 
-    <h2>The people whose accounts are replayed</h2>
-    <p>A recording is an observer's account, and an account is personal data. The demos published here
-      follow these rules:</p>
-    <ul>
-      <li>An observer is named only when the case file they come from already names them, or when they
-        agreed to it. Otherwise initials stand for the name.</li>
-      <li>Initials are not anonymity: a precise place and date can identify somebody to those who
-        know them. For a living observer who asked for it, the place is made approximate or removed.</li>
-      <li>An observer can ask at any time to have their recording corrected, made less precise,
-        or withdrawn, at <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>. It is done
-        in the next release, and the previous files are replaced, not kept.</li>
-    </ul>
-    <p>If you write a recording about someone else, the same rules are yours to follow, and the
+    <h2>Nothing is written to a server</h2>
+    <p>UFO@home only reads: what you type, the weather, the ground and the imagery around the observer. It never sends a
+      recording, a name or a draft to a server of ours, and has no account that could hold one. The only outputs are the ones
+      you start yourself: <strong>Save</strong> exports the sighting file, which you can then replay or publish on the site of your
+      choice, public or internal.</p>
+
+    <h2>Publishing, and responsibility</h2>
+    <p>Whoever publishes a recording is responsible for what it contains, as for any text or photograph. The tool cannot take
+      that place: removing a surname field from the editor would never stop anyone from writing that name in an identifier or a
+      description. Before publishing an account about someone else, make sure they know and agree, or use initials and an
+      approximate place: a precise place and date can identify a person even without a name. The
       <a href="/docs/create/">documentation</a> says so where the format is explained.</p>
+
+    <h2>AI is a choice, not part of the tool</h2>
+    <p>UFO@home is not an AI tool. It reads a JSON file, whether it was written by hand, produced with the editor, or by an AI
+      that turned a description into one. Using an AI to go faster is the user's choice, and so is the responsibility for what is
+      sent to it and for checking what comes back. In the editor, drafting sends the description you wrote to the model you chose,
+      with your key, only when you ask.</p>
+
+    <h2>The demos on this site</h2>
+    <p>RR0 publishes the demos here. If you are an observer they replay and want a correction, a less precise place or a
+      withdrawal, write to <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>.</p>
 
     <h2>Your rights</h2>
     <p>You may ask for access to, correction of, or erasure of what concerns you, and object to its
@@ -235,7 +245,7 @@ export class PrivacyPage implements SitePage {
     <ul>
       <li>Pas de compte, pas de cookie, pas de publicité, pas de mesure d'audience, aucun traceur de notre part.</li>
       <li>La caméra, le micro et votre position ne sont jamais demandés.</li>
-      <li>Ce que vous rédigez reste dans votre navigateur jusqu'à ce que vous l'enregistriez vous-même dans un fichier.</li>
+      <li>Rien n'est jamais écrit sur un serveur : l'outil ne fait que lire. La seule sortie est le fichier que vous choisissez d'exporter.</li>
       <li>Pour dessiner le ciel, la météo et le sol, votre navigateur contacte les services listés plus bas. Ils reçoivent votre adresse IP, comme tout site que vous visitez, avec ce qu'on leur demande.</li>
     </ul>
 
@@ -247,10 +257,13 @@ export class PrivacyPage implements SitePage {
     <h2>Ce qui reste sur votre appareil</h2>
     <p>L'éditeur utilise le stockage local de votre navigateur pour les préférences seulement : le décor
       et le rayon choisis, le modèle retenu. Elles ne quittent jamais votre appareil et ne demandent aucun consentement.</p>
-    <p>Une <strong>clé pour rédiger avec Claude</strong> n'y est gardée que si vous cochez la case qui propose de
-      la mémoriser, et elle n'est jamais cochée pour vous. La décocher oublie la clé aussitôt. Sachez
-      qu'une page qui intègre l'éditeur l'exécute dans sa propre origine : sur le site de quelqu'un d'autre,
-      tout ce qui s'exécute sur ce site pourrait lire une clé mémorisée. Laissez la case décochée dans ce cas.</p>
+    <p>Une <strong>clé pour rédiger avec Claude</strong> (ou un autre modèle, plus tard) n'est demandée que si vous choisissez de
+      faire rédiger votre enregistrement par une IA à partir d'une description. C'est facultatif : vous pouvez écrire le fichier
+      à la main, ou remplir l'éditeur, sans jamais la rencontrer. Elle reste dans votre navigateur uniquement, jamais sur un serveur
+      (nous n'en avons aucun qui conserve quoi que ce soit), et seulement si vous cochez la case qui propose de la mémoriser ;
+      sinon vous la saisissez à chaque fois. La décocher l'oublie aussitôt. Sachez qu'une page qui intègre l'éditeur l'exécute dans sa
+      propre origine : sur le site de quelqu'un d'autre, tout ce qui s'exécute sur ce site pourrait lire une clé mémorisée.
+      Laissez la case décochée dans ce cas.</p>
     <p>Le site peut aussi garder une copie de ses pages sur votre appareil pour fonctionner sans réseau.
       Cette copie est un cache des fichiers du site et ne contient rien sur vous.</p>
 
@@ -266,20 +279,28 @@ export class PrivacyPage implements SitePage {
       Pour tous les éviter, hébergez les composants vous-même et pointez les fournisseurs vers votre serveur
       (voir la <a href="/faq/">FAQ</a>).</p>
 
-    <h2>Les personnes dont on rejoue les comptes rendus</h2>
-    <p>Un enregistrement est le compte rendu d'un observateur, et un compte rendu est une donnée personnelle.
-      Les démos publiées ici suivent ces règles :</p>
-    <ul>
-      <li>Un observateur n'est nommé que si le dossier d'où il vient le nomme déjà, ou s'il y a consenti.
-        Sinon, des initiales tiennent lieu de nom.</li>
-      <li>Des initiales ne sont pas de l'anonymat : un lieu et une date précis peuvent identifier quelqu'un
-        pour ceux qui le connaissent. Pour un observateur vivant qui le demande, le lieu est rendu approximatif ou retiré.</li>
-      <li>Un observateur peut demander à tout moment que son enregistrement soit corrigé, rendu moins précis
-        ou retiré, à <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>. C'est fait à la
-        version suivante, et les fichiers précédents sont remplacés, pas conservés.</li>
-    </ul>
-    <p>Si vous écrivez un enregistrement sur quelqu'un d'autre, les mêmes règles vous incombent, et la
-      <a href="/docs/create/">documentation</a> le rappelle là où le format est expliqué.</p>
+    <h2>Rien n'est écrit sur un serveur</h2>
+    <p>UFO@home ne fait que lire : ce que vous saisissez, la météo, le sol et l'imagerie autour de l'observateur. Il n'envoie jamais
+      un enregistrement, un nom ou un brouillon à un serveur de notre côté, et n'a aucun compte qui pourrait en conserver. Les seules
+      sorties sont celles que vous déclenchez vous-même : <strong>Enregistrer</strong> exporte le fichier d'observation, que vous
+      pouvez ensuite rejouer ou publier sur le site de votre choix, public ou interne.</p>
+
+    <h2>Publier, et la responsabilité</h2>
+    <p>Qui publie un enregistrement est responsable de ce qu'il contient, comme pour tout texte ou toute photographie. L'outil ne
+      peut pas s'y substituer : retirer un champ « nom de famille » de l'éditeur n'empêcherait jamais personne d'écrire ce nom dans
+      un identifiant ou une description. Avant de publier le compte rendu de quelqu'un d'autre, assurez-vous qu'il le sait et
+      l'accepte, ou utilisez des initiales et un lieu approximatif : un lieu et une date précis peuvent identifier une personne même
+      sans nom. La <a href="/docs/create/">documentation</a> le rappelle là où le format est expliqué.</p>
+
+    <h2>L'IA est un choix, pas une partie de l'outil</h2>
+    <p>UFO@home n'est pas un outil d'IA. Il lit un fichier JSON, qu'il ait été écrit à la main, produit avec l'éditeur, ou par une IA
+      qui a transformé une description en fichier. Utiliser une IA pour aller plus vite est le choix de l'utilisateur, et c'est aussi à lui
+      de répondre de ce qui lui est envoyé et de vérifier ce qui en revient. Dans l'éditeur, la rédaction envoie la description que vous
+      avez écrite au modèle que vous avez choisi, avec votre clé, seulement quand vous le demandez.</p>
+
+    <h2>Les démos de ce site</h2>
+    <p>RR0 publie les démos d'ici. Si vous êtes un observateur dont l'une d'elles rejoue le compte rendu et souhaitez une correction,
+      un lieu moins précis ou un retrait, écrivez à <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>.</p>
 
     <h2>Vos droits</h2>
     <p>Vous pouvez demander l'accès à ce qui vous concerne, sa rectification ou son effacement, et vous opposer
@@ -305,7 +326,7 @@ export class PrivacyPage implements SitePage {
     <ul>
       <li>Sin cuenta, sin cookies, sin publicidad, sin analítica y sin ningún rastreador nuestro.</li>
       <li>Nunca se pide la cámara, el micrófono ni tu posición.</li>
-      <li>Lo que redactas permanece en tu navegador hasta que lo guardes tú mismo en un archivo.</li>
+      <li>Nunca se escribe nada en un servidor: la herramienta solo lee. La única salida es el archivo que eliges exportar.</li>
       <li>Para dibujar el cielo, el tiempo y el suelo, tu navegador contacta con los servicios que se enumeran más abajo. Reciben tu dirección IP, como cualquier sitio que visitas, junto con lo que se les pide.</li>
     </ul>
 
@@ -317,10 +338,12 @@ export class PrivacyPage implements SitePage {
     <h2>Lo que queda en tu dispositivo</h2>
     <p>El editor usa el almacenamiento local de tu navegador solo para preferencias: el entorno y el radio
       elegidos, el modelo escogido. Nunca salen de tu dispositivo y no requieren consentimiento.</p>
-    <p>Una <strong>clave para redactar con Claude</strong> solo se guarda ahí si marcas la casilla que ofrece
-      recordarla, y nunca se marca por ti. Desmarcarla olvida la clave al instante. Ten en cuenta que una
-      página que incorpora el editor lo ejecuta en su propio origen: en el sitio de otra persona, cualquier
-      cosa que se ejecute en ese sitio podría leer una clave recordada. Deja la casilla desmarcada en ese caso.</p>
+    <p>Una <strong>clave para redactar con Claude</strong> (u otro modelo, más adelante) solo se pide si decides que una IA
+      redacte tu grabación a partir de una descripción. Es opcional: puedes escribir el archivo a mano, o rellenar el editor,
+      sin encontrarla nunca. Se guarda únicamente en tu navegador, nunca en un servidor (no tenemos ninguno que conserve nada),
+      y solo si marcas la casilla que ofrece recordarla; si no, la introduces cada vez. Desmarcarla la olvida al instante.
+      Ten en cuenta que una página que incorpora el editor lo ejecuta en su propio origen: en el sitio de otra persona,
+      cualquier cosa que se ejecute en ese sitio podría leer una clave recordada. Deja la casilla desmarcada en ese caso.</p>
     <p>El sitio también puede guardar una copia de sus páginas en tu dispositivo para funcionar sin red.
       Esa copia es una caché de los archivos del propio sitio y no contiene nada sobre ti.</p>
 
@@ -336,20 +359,28 @@ export class PrivacyPage implements SitePage {
       Para evitarlos todos, aloja los componentes tú mismo y apunta los proveedores a tu propio servidor
       (véanse las <a href="/faq/">preguntas frecuentes</a>).</p>
 
-    <h2>Las personas cuyos relatos se reproducen</h2>
-    <p>Una grabación es el relato de un observador, y un relato es un dato personal. Las demos publicadas
-      aquí siguen estas reglas:</p>
-    <ul>
-      <li>Un observador solo se nombra si el expediente del que procede ya lo nombra, o si lo consintió.
-        En caso contrario, unas iniciales ocupan el lugar del nombre.</li>
-      <li>Las iniciales no son anonimato: un lugar y una fecha precisos pueden identificar a alguien ante
-        quienes lo conocen. Si un observador vivo lo pide, el lugar se hace aproximado o se retira.</li>
-      <li>Un observador puede pedir en cualquier momento que su grabación se corrija, se haga menos precisa
-        o se retire, en <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>. Se hace en la
-        versión siguiente, y los archivos anteriores se sustituyen, no se conservan.</li>
-    </ul>
-    <p>Si escribes una grabación sobre otra persona, las mismas reglas te corresponden a ti, y la
+    <h2>No se escribe nada en un servidor</h2>
+    <p>UFO@home solo lee: lo que escribes, el tiempo, el suelo y las imágenes alrededor del observador. Nunca envía una
+      grabación, un nombre o un borrador a un servidor nuestro, y no tiene ninguna cuenta que pudiera guardarlos. Las únicas
+      salidas son las que inicias tú mismo: <strong>Guardar</strong> exporta el archivo de la observación, que luego puedes
+      reproducir o publicar en el sitio que elijas, público o interno.</p>
+
+    <h2>Publicar, y la responsabilidad</h2>
+    <p>Quien publica una grabación es responsable de lo que contiene, como con cualquier texto o fotografía. La herramienta no
+      puede ocupar ese lugar: quitar un campo «apellido» del editor nunca impediría que alguien escriba ese nombre en un
+      identificador o una descripción. Antes de publicar el relato de otra persona, asegúrate de que lo sabe y lo acepta, o usa
+      iniciales y un lugar aproximado: un lugar y una fecha precisos pueden identificar a una persona incluso sin nombre. La
       <a href="/docs/create/">documentación</a> lo recuerda donde se explica el formato.</p>
+
+    <h2>La IA es una elección, no parte de la herramienta</h2>
+    <p>UFO@home no es una herramienta de IA. Lee un archivo JSON, ya lo haya escrito alguien a mano, producido el editor, o una IA
+      que convirtió una descripción en uno. Usar una IA para ir más rápido es decisión del usuario, y también lo es responder de lo
+      que se le envía y comprobar lo que devuelve. En el editor, la redacción envía la descripción que escribiste al modelo que
+      elegiste, con tu clave, solo cuando lo pides.</p>
+
+    <h2>Las demos de este sitio</h2>
+    <p>RR0 publica las demos de aquí. Si eres un observador cuyo relato reproduce una de ellas y quieres una corrección, un lugar
+      menos preciso o una retirada, escribe a <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>.</p>
 
     <h2>Tus derechos</h2>
     <p>Puedes pedir el acceso a lo que te concierne, su rectificación o su supresión, y oponerte a su uso,
@@ -375,7 +406,7 @@ export class PrivacyPage implements SitePage {
     <ul>
       <li>Nessun account, nessun cookie, nessuna pubblicità, nessuna analisi di audience e nessun nostro tracciante.</li>
       <li>La fotocamera, il microfono e la tua posizione non vengono mai richiesti.</li>
-      <li>Ciò che scrivi resta nel tuo browser finché non lo salvi tu stesso in un file.</li>
+      <li>Non viene mai scritto nulla su un server: lo strumento si limita a leggere. L'unica uscita è il file che scegli di esportare.</li>
       <li>Per disegnare il cielo, il meteo e il suolo, il tuo browser contatta i servizi elencati qui sotto. Ricevono il tuo indirizzo IP, come ogni sito che visiti, insieme a ciò che viene loro chiesto.</li>
     </ul>
 
@@ -387,10 +418,12 @@ export class PrivacyPage implements SitePage {
     <h2>Che cosa resta sul tuo dispositivo</h2>
     <p>L'editor usa l'archiviazione locale del tuo browser solo per le preferenze: l'ambiente e il raggio
       scelti, il modello selezionato. Non lasciano mai il tuo dispositivo e non richiedono consenso.</p>
-    <p>Una <strong>chiave per redigere con Claude</strong> vi è conservata solo se spunti la casella che
-      propone di ricordarla, e non è mai spuntata al posto tuo. Deselezionarla fa dimenticare subito la
-      chiave. Tieni presente che una pagina che incorpora l'editor lo esegue nella propria origine: sul sito
-      di qualcun altro, tutto ciò che vi gira potrebbe leggere una chiave ricordata. In quel caso lascia la casella deselezionata.</p>
+    <p>Una <strong>chiave per redigere con Claude</strong> (o con un altro modello, in futuro) viene richiesta solo se scegli di far
+      redigere la tua registrazione a un'IA a partire da una descrizione. È facoltativa: puoi scrivere il file a mano, o compilare
+      l'editor, senza incontrarla mai. Resta solo nel tuo browser, mai su un server (non ne abbiamo nessuno che conservi qualcosa),
+      e solo se spunti la casella che propone di ricordarla; altrimenti la inserisci ogni volta. Deselezionarla la fa dimenticare subito.
+      Tieni presente che una pagina che incorpora l'editor lo esegue nella propria origine: sul sito di qualcun altro, tutto ciò che
+      vi gira potrebbe leggere una chiave ricordata. In quel caso lascia la casella deselezionata.</p>
     <p>Il sito può anche conservare una copia delle sue pagine sul tuo dispositivo per funzionare senza rete.
       Quella copia è una cache dei file del sito stesso e non contiene nulla su di te.</p>
 
@@ -406,20 +439,28 @@ export class PrivacyPage implements SitePage {
       Per evitarli tutti, ospita i componenti da te e indirizza i fornitori al tuo server
       (vedi le <a href="/faq/">domande frequenti</a>).</p>
 
-    <h2>Le persone i cui resoconti vengono riprodotti</h2>
-    <p>Una registrazione è il resoconto di un osservatore, e un resoconto è un dato personale. Le demo
-      pubblicate qui seguono queste regole:</p>
-    <ul>
-      <li>Un osservatore è nominato solo se il fascicolo da cui proviene lo nomina già, o se vi ha acconsentito.
-        Altrimenti, le iniziali tengono il posto del nome.</li>
-      <li>Le iniziali non sono anonimato: un luogo e una data precisi possono identificare qualcuno agli occhi
-        di chi lo conosce. Per un osservatore vivente che lo chieda, il luogo viene reso approssimativo o rimosso.</li>
-      <li>Un osservatore può chiedere in qualsiasi momento che la sua registrazione sia corretta, resa meno
-        precisa o ritirata, a <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>. Avviene alla
-        versione successiva, e i file precedenti sono sostituiti, non conservati.</li>
-    </ul>
-    <p>Se scrivi una registrazione su qualcun altro, le stesse regole spettano a te, e la
-      <a href="/docs/create/">documentazione</a> lo ricorda dove spiega il formato.</p>
+    <h2>Non viene scritto nulla su un server</h2>
+    <p>UFO@home si limita a leggere: ciò che scrivi, il meteo, il suolo e le immagini intorno all'osservatore. Non invia mai una
+      registrazione, un nome o una bozza a un nostro server, e non ha alcun account che possa conservarli. Le uniche uscite sono
+      quelle che avvii tu: <strong>Salva</strong> esporta il file dell'osservazione, che puoi poi riprodurre o pubblicare sul sito
+      che preferisci, pubblico o interno.</p>
+
+    <h2>Pubblicare, e la responsabilità</h2>
+    <p>Chi pubblica una registrazione è responsabile di ciò che contiene, come per qualsiasi testo o fotografia. Lo strumento non
+      può prenderne il posto: togliere un campo «cognome» dall'editor non impedirebbe mai a qualcuno di scrivere quel nome in un
+      identificativo o in una descrizione. Prima di pubblicare il resoconto di un'altra persona, assicurati che lo sappia e lo
+      accetti, oppure usa le iniziali e un luogo approssimativo: un luogo e una data precisi possono identificare una persona anche
+      senza nome. La <a href="/docs/create/">documentazione</a> lo ricorda dove spiega il formato.</p>
+
+    <h2>L'IA è una scelta, non parte dello strumento</h2>
+    <p>UFO@home non è uno strumento di IA. Legge un file JSON, scritto a mano, prodotto con l'editor, o da un'IA che ha trasformato
+      una descrizione in uno. Usare un'IA per fare più in fretta è una scelta dell'utente, e sua è anche la responsabilità di ciò che
+      le viene inviato e della verifica di ciò che ne torna. Nell'editor, la redazione invia la descrizione che hai scritto al modello
+      che hai scelto, con la tua chiave, solo quando lo chiedi.</p>
+
+    <h2>Le demo di questo sito</h2>
+    <p>RR0 pubblica le demo qui presenti. Se sei un osservatore il cui resoconto è riprodotto da una di esse e vuoi una correzione,
+      un luogo meno preciso o un ritiro, scrivi a <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>.</p>
 
     <h2>I tuoi diritti</h2>
     <p>Puoi chiedere l'accesso a ciò che ti riguarda, la sua rettifica o la sua cancellazione, e opporti al suo
