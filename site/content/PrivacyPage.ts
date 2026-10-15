@@ -17,6 +17,7 @@ export class PrivacyPage implements SitePage {
 
   readonly meta: PageMeta = {
     slug: "privacy",
+    asideFromNav: true,
     navLabel: { en: "Privacy", fr: "Confidentialité", es: "Privacidad", it: "Privacy" },
     title: { en: "Privacy", fr: "Confidentialité", es: "Privacidad", it: "Privacy" },
     description: {
