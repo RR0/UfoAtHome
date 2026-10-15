@@ -139,6 +139,19 @@ export interface SightingEditorMessages extends SightingLabels {
    * it is also what one does to a recording.
    */
   export: string
+  /** What the editor says before a recording that names or locates a person leaves the author's hands (see IdentityGuard). `{value}` is what was found. */
+  identityHint: string
+  identityAsk: string
+  identityLastName: string
+  identityFirstNames: string
+  identityNameInId: string
+  identityNameInText: string
+  identityAddress: string
+  identityEmail: string
+  identityPhone: string
+  identityInitials: string
+  identityKeep: string
+  identityBack: string
   /** The case being edited: the picker of its recordings (accounts and readings), and its buttons. */
   /** The case with what was changed, as a zip. */
   importFile: string

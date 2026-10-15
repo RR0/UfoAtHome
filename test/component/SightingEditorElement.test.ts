@@ -2483,6 +2483,84 @@ describe("SightingEditorElement export button", () => {
   })
 })
 
+describe("SightingEditorElement export of a recording that names somebody", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    vi.unstubAllGlobals()
+  })
+
+  function mountAndWatchDownloads() {
+    const element = mount()
+    vi.stubGlobal("URL", { ...URL, createObjectURL: vi.fn().mockReturnValue("blob:fake-url"), revokeObjectURL: vi.fn() })
+    const downloads: string[] = []
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
+      downloads.push(this.download)
+    })
+    return { element, downloads, clickSpy }
+  }
+
+  const shadowOf = (element: HTMLElement) => element.shadowRoot!
+  const button = (element: HTMLElement, id: string) => shadowOf(element).getElementById(id) as HTMLButtonElement
+  const named = { version: 1, observer: { lastName: "Zamora", firstNames: ["Lonnie"] }, timeline: { keyframes: [{ t: 0, shapes: [] }] } } as const
+
+  it("asks before saving a name the author just typed, and saves nothing until told to", () => {
+    const { element, downloads, clickSpy } = mountAndWatchDownloads()
+    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }] } }
+    const lastName = shadowOf(element).getElementById("observerLastName") as HTMLInputElement
+    lastName.value = "Zamora"
+    lastName.dispatchEvent(new Event("input"))
+
+    button(element, "export").click()
+    expect(downloads).toEqual([])
+    expect(shadowOf(element).getElementById("identity-ask-found")!.textContent).toContain("Zamora")
+
+    button(element, "identity-ask-keep").click()
+    expect(downloads).toHaveLength(1)
+    clickSpy.mockRestore()
+  })
+
+  it("saves nothing when the author goes back", () => {
+    const { element, downloads, clickSpy } = mountAndWatchDownloads()
+    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }] } }
+    const lastName = shadowOf(element).getElementById("observerLastName") as HTMLInputElement
+    lastName.value = "Zamora"
+    lastName.dispatchEvent(new Event("input"))
+    button(element, "export").click()
+    button(element, "identity-ask-back").click()
+    expect(downloads).toEqual([])
+    clickSpy.mockRestore()
+  })
+
+  it("does not ask about a name the recording already stated when it was opened", () => {
+    const { element, downloads, clickSpy } = mountAndWatchDownloads()
+    element.sightingData = JSON.parse(JSON.stringify(named))
+    button(element, "export").click()
+    expect(downloads).toHaveLength(1)
+    clickSpy.mockRestore()
+  })
+
+  it("writes the names as initials without saving, and then saves without asking", () => {
+    const { element, downloads, clickSpy } = mountAndWatchDownloads()
+    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }] } }
+    const input = (id: string) => shadowOf(element).getElementById(id) as HTMLInputElement
+    input("sightingId").value = "1964-04-24-ZamoraLonnie"
+    input("observerLastName").value = "Zamora"
+    input("observerFirstNames").value = "Lonnie"
+    for (const id of ["sightingId", "observerLastName", "observerFirstNames"]) input(id).dispatchEvent(new Event("input"))
+
+    button(element, "export").click()
+    button(element, "identity-ask-initials").click()
+    expect(downloads).toEqual([])
+    expect(input("observerLastName").value).toBe("Z.")
+    expect(input("observerFirstNames").value).toBe("L.")
+    expect(input("sightingId").value).toBe("1964-04-24-ZL")
+
+    button(element, "export").click()
+    expect(downloads).toHaveLength(1)
+    clickSpy.mockRestore()
+  })
+})
+
 describe("SightingEditorElement import controls", () => {
   afterEach(() => {
     document.body.innerHTML = ""

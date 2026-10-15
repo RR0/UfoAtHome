@@ -76,6 +76,7 @@ import type { CometAppearance } from "../engine/astronomy/Comets.js"
 import { SkyGlowVisibility } from "../engine/astronomy/SkyGlowVisibility.js"
 import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
+import { IdentityGuard, type IdentityFinding } from "../engine/persistence/IdentityGuard.js"
 import type { Appearance, PolygonShape, Shape, ShapeBounds, ShapePresetId } from "../engine/shape/Shape.js"
 import type { ShapeState } from "../engine/model/Keyframe.js"
 import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE, MIN_POLYGON_VERTICES } from "../engine/shape/ShapeHandles.js"
@@ -490,6 +491,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly fileEditorHost: HTMLElement
   private readonly fileNote: HTMLElement
   private readonly fileAsk: HTMLDialogElement
+  private readonly identityAsk: HTMLDialogElement
   /** Waiting to put the form's changes into the text, and the text's into the form — see syncFileEditor. */
   private fileSyncTimer?: ReturnType<typeof setTimeout>
   private fileApplyTimer?: ReturnType<typeof setTimeout>
@@ -1262,6 +1264,16 @@ export class SightingEditorElement extends HTMLElement {
     this.fileEditorHost = this.shadow.getElementById("file-editor")!
     this.fileNote = this.shadow.getElementById("file-note")!
     this.fileAsk = this.shadow.getElementById("file-ask") as HTMLDialogElement
+    this.identityAsk = this.shadow.getElementById("identity-ask") as HTMLDialogElement
+    this.shadow.getElementById("identity-ask-keep")!.addEventListener("click", () => {
+      this.closeIdentityAsk()
+      this.downloadJson()
+    })
+    this.shadow.getElementById("identity-ask-back")!.addEventListener("click", () => this.closeIdentityAsk())
+    this.shadow.getElementById("identity-ask-initials")!.addEventListener("click", () => {
+      this.closeIdentityAsk()
+      this.writeNamesAsInitials()
+    })
     // Escape answers it, and answers with the safe one: what was read goes back.
     this.fileAsk.addEventListener("cancel", event => {
       event.preventDefault()
@@ -2078,6 +2090,73 @@ export class SightingEditorElement extends HTMLElement {
    * Blob-and-anchor download, no server round-trip needed. Named from the observer reference
    * when known (e.g. "chiles-sighting.json"), falling back to a generic name otherwise. */
   private exportJson(): void {
+    const findings = IdentityGuard.inspect(this.sightingData, this.loadedJson())
+    if (findings.length === 0) {
+      this.downloadJson()
+      return
+    }
+    this.askAboutIdentity(findings)
+  }
+
+  /** The recording as it was opened or last exported: what its author has already stood behind. */
+  private loadedJson(): SightingRecordingJson | undefined {
+    try {
+      return this.baseline ? JSON.parse(this.baseline) as SightingRecordingJson : undefined
+    } catch {
+      return undefined
+    }
+  }
+
+  /**
+   * The recording names or locates somebody, and says so before it leaves: what was found, and three answers. Nothing is decided
+   * for the author (the person may well have agreed, or published their own account): they are made to see it, once, at the one
+   * moment the file leaves. Not a native dialog, for the reason `askAboutWeather` gives.
+   */
+  private askAboutIdentity(findings: IdentityFinding[]): void {
+    const labels: Record<IdentityFinding["kind"], string> = {
+      lastName: this.messages.identityLastName, firstNames: this.messages.identityFirstNames,
+      nameInId: this.messages.identityNameInId, nameInText: this.messages.identityNameInText,
+      address: this.messages.identityAddress, email: this.messages.identityEmail, phone: this.messages.identityPhone
+    }
+    this.shadow.getElementById("identity-ask-text")!.textContent = this.messages.identityAsk
+    const list = this.shadow.getElementById("identity-ask-found")!
+    list.replaceChildren(...findings.map(finding => {
+      const item = document.createElement("li")
+      item.textContent = labels[finding.kind].replaceAll("{value}", finding.found)
+      return item
+    }))
+    // Initials can stand for a name; nobody's address or telephone number has any.
+    const named = findings.some(finding => ["lastName", "firstNames", "nameInId", "nameInText"].includes(finding.kind))
+    ;(this.shadow.getElementById("identity-ask-initials") as HTMLButtonElement).hidden = !named
+    if (typeof this.identityAsk.showModal === "function") this.identityAsk.showModal()
+    else this.identityAsk.setAttribute("open", "")
+  }
+
+  private closeIdentityAsk(): void {
+    if (typeof this.identityAsk.close === "function") this.identityAsk.close()
+    else this.identityAsk.removeAttribute("open")
+  }
+
+  /**
+   * The names in the observer fields, in the identifiers and in the account being written, are written as initials. The file is NOT
+   * saved by this: the author sees what became of it, and saves when it is as they mean it (and is asked again only about what is left,
+   * an address say, which has no initials).
+   */
+  private writeNamesAsInitials(): void {
+    const names = IdentityGuard.namesOf(this.sightingData)
+    this.observerLastNameInput.value = IdentityGuard.withInitials(this.observerLastNameInput.value, names)
+    this.observerFirstNamesInput.value = this.observerFirstNamesInput.value.split(",")
+      .map(name => IdentityGuard.withInitials(name.trim(), names)).join(", ")
+    this.observerIdInput.value = IdentityGuard.withInitials(this.observerIdInput.value, names, true)
+    this.sightingIdInput.value = IdentityGuard.withInitials(this.sightingIdInput.value, names, true)
+    this.descriptionInput.value = IdentityGuard.withInitials(this.descriptionInput.value, names)
+    this.touch()
+    this.updateObserverMetadata()
+    this.descriptionInput.dispatchEvent(new Event("input"))
+  }
+
+  /** Downloads the recording as a file, once its author has seen what it states. */
+  private downloadJson(): void {
     const json = this.sightingData
     const fileName = `${json.observer?.id ?? "sighting"}-sighting.json`
     const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" })
@@ -8716,6 +8795,10 @@ export class SightingEditorElement extends HTMLElement {
     this.contextSendToBackButton.textContent = messages.sendToBack
     this.contextDeleteButton.textContent = messages.contextMenuDelete
     this.exportButton.textContent = messages.export
+    this.shadow.getElementById("observer-identity-hint")!.textContent = messages.identityHint
+    this.shadow.getElementById("identity-ask-initials")!.textContent = messages.identityInitials
+    this.shadow.getElementById("identity-ask-keep")!.textContent = messages.identityKeep
+    this.shadow.getElementById("identity-ask-back")!.textContent = messages.identityBack
     this.labelImportFile.textContent = messages.importFile
     this.labelImportUrl.textContent = messages.importUrl
     this.importUrlInput.placeholder = messages.importUrlPlaceholder

@@ -70,6 +70,7 @@ export const html = `
          Poher's credibility criteria read these and a recording could state none of them. How MANY
          people saw the thing is not here on purpose: a recording is one person's account, and the
          count belongs to the case that gathers them. Blank means unknown. -->
+    <p id="observer-identity-hint" class="file-note"></p>
     <label><span id="label-observer-age">Age then</span> <input id="observerAge" type="number" min="0" max="120" step="1" size="4" placeholder="years"/></label>
     <label><span id="label-observer-occupation">Occupation</span> <input id="observerOccupation" type="text" placeholder="baker, airline pilot…"/></label>
     <label><span id="label-account-source">Account obtained</span> <select id="accountSource">
@@ -251,6 +252,16 @@ export const html = `
     <div class="file-ask-buttons">
       <button id="file-ask-stop" type="button"></button>
       <button id="file-ask-keep" type="button"></button>
+    </div>
+  </dialog>
+  <!-- Asked at Save, the one way a recording leaves the editor, when it names or locates a person (see IdentityGuard). -->
+  <dialog id="identity-ask" class="file-ask" aria-labelledby="identity-ask-text">
+    <p id="identity-ask-text"></p>
+    <ul id="identity-ask-found"></ul>
+    <div class="file-ask-buttons">
+      <button id="identity-ask-initials" type="button"></button>
+      <button id="identity-ask-keep" type="button"></button>
+      <button id="identity-ask-back" type="button"></button>
     </div>
   </dialog>
   <div id="file-editor" class="file-editor"></div>
@@ -1147,6 +1158,10 @@ select.weather-field:disabled {
   margin: 0.5em 0;
   opacity: 0.8;
 }
+#observer-identity-hint {
+  flex-basis: 100%;
+  margin: 0;
+}
 .file-ask {
   max-width: min(34em, calc(100vw - 2em));
   padding: 1em 1.2em;
@@ -1162,6 +1177,10 @@ select.weather-field:disabled {
 .file-ask p {
   margin: 0 0 1em;
   line-height: 1.4;
+}
+.file-ask ul {
+  margin: 0 0 1em;
+  padding-left: 1.2em;
 }
 .file-ask-buttons {
   display: flex;

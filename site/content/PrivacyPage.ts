@@ -209,7 +209,7 @@ export class PrivacyPage implements SitePage {
       recording is responsible for what it contains, as for any publication: text, photograph, video. The tool cannot take that
       place: removing a surname field from the editor would never stop anyone from writing that name in an identifier or a
       description. Before publishing an account about someone else, make sure they know and agree, or use initials and an
-      approximate place: a precise place and date can identify a person even without a name.</p>
+      approximate place: a precise place and date can identify a person even without a name. To help, the editor shows what a recording names or locates (a name, an address, an e-mail address, a telephone number) when you save it, and offers to write names as initials; it decides nothing for you.</p>
 
     <h2>No AI is used while an observation plays</h2>
     <p>UFO@home reads a JSON file, however it was made: by hand, with the editor, or with an AI that turned a description into
@@ -292,7 +292,7 @@ export class PrivacyPage implements SitePage {
       peut pas s'y substituer : retirer un champ « nom de famille » de l'éditeur n'empêcherait jamais personne d'écrire ce nom dans
       un identifiant ou une description. Avant de publier le compte rendu de quelqu'un d'autre, assurez-vous qu'il le sait et
       l'accepte, ou utilisez des initiales et un lieu approximatif : un lieu et une date précis peuvent identifier une personne même
-      sans nom.</p>
+      sans nom. Pour vous aider, l'éditeur montre ce qu'un enregistrement nomme ou situe (un nom, une adresse, une adresse électronique, un numéro de téléphone) quand vous le sauvez, et propose d'écrire les noms en initiales ; il ne décide rien à votre place.</p>
 
     <h2>Aucune IA n'intervient quand une observation se joue</h2>
     <p>UFO@home lit un fichier JSON, quelle que soit la façon dont il a été fait : à la main, avec l'éditeur, ou avec une IA qui a
@@ -374,7 +374,7 @@ export class PrivacyPage implements SitePage {
       grabación (el editor) responde de lo que contiene, como en cualquier publicación: texto, fotografía, vídeo. La herramienta no
       puede ocupar ese lugar: quitar un campo «apellido» del editor nunca impediría que alguien escriba ese nombre en un
       identificador o una descripción. Antes de publicar el relato de otra persona, asegúrate de que lo sabe y lo acepta, o usa
-      iniciales y un lugar aproximado: un lugar y una fecha precisos pueden identificar a una persona incluso sin nombre.</p>
+      iniciales y un lugar aproximado: un lugar y una fecha precisos pueden identificar a una persona incluso sin nombre. Para ayudarte, el editor muestra lo que una grabación nombra o sitúa (un nombre, una dirección, un correo electrónico, un número de teléfono) cuando la guardas, y propone escribir los nombres como iniciales; no decide nada por ti.</p>
 
     <h2>Ninguna IA interviene mientras se reproduce una observación</h2>
     <p>UFO@home lee un archivo JSON, sea cual sea la forma en que se hizo: a mano, con el editor, o con una IA que convirtió una
@@ -456,7 +456,7 @@ export class PrivacyPage implements SitePage {
       strumento non può prenderne il posto: togliere un campo «cognome» dall'editor non impedirebbe mai a qualcuno di scrivere quel
       nome in un identificativo o in una descrizione. Prima di pubblicare il resoconto di un'altra persona, assicurati che lo sappia
       e lo accetti, oppure usa le iniziali e un luogo approssimativo: un luogo e una data precisi possono identificare una persona
-      anche senza nome.</p>
+      anche senza nome. Per aiutarti, l'editor mostra ciò che una registrazione nomina o colloca (un nome, un indirizzo, un indirizzo e-mail, un numero di telefono) quando la salvi, e propone di scrivere i nomi come iniziali; non decide nulla al posto tuo.</p>
 
     <h2>Nessuna IA interviene mentre un'osservazione viene riprodotta</h2>
     <p>UFO@home legge un file JSON, comunque sia stato fatto: a mano, con l'editor, o con un'IA che ha trasformato una descrizione
