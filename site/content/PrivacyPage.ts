@@ -112,10 +112,10 @@ export class PrivacyPage implements SitePage {
       name: "Anthropic (Claude)", host: "api.anthropic.com",
       where: { en: "United States", fr: "États-Unis", es: "Estados Unidos", it: "Stati Uniti" },
       why: {
-        en: "Only when you ask the editor to draft a recording: the text you wrote, with your own key.",
-        fr: "Seulement quand vous demandez à l'éditeur de rédiger un enregistrement : le texte que vous avez écrit, avec votre propre clé.",
-        es: "Solo cuando pides al editor que redacte una grabación: el texto que escribiste, con tu propia clave.",
-        it: "Solo quando chiedi all'editor di redigere una registrazione: il testo che hai scritto, con la tua chiave."
+        en: "Only when you ask the editor to draft a recording with an AI: the text you wrote, with your own key.",
+        fr: "Seulement quand vous demandez à l'éditeur de rédiger un enregistrement via IA : le texte que vous avez écrit, avec votre propre clé.",
+        es: "Solo cuando pides al editor que redacte una grabación con IA: el texto que escribiste, con tu propia clave.",
+        it: "Solo quando chiedi all'editor di redigere una registrazione con l'IA: il testo che hai scritto, con la tua chiave."
       }
     }
   ]
@@ -177,8 +177,7 @@ export class PrivacyPage implements SitePage {
     <h2>What stays on your device</h2>
     <p>The editor uses your browser's local storage for preferences only: the scenery and radius you
       chose, the model you picked. They never leave your device and need no consent.</p>
-    <p>A <strong>key for drafting with Claude</strong> (or another model, later) is asked for only if you choose to have an AI
-      draft your recording from a description. It is optional: you can write the file by hand, or fill in the editor,
+    <p>If you choose to have an AI draft your recording from a description, you are asked for a key (for Claude, or for another model later). It is optional: you can write the file by hand, or fill in the editor,
       and never meet it. It is kept in your browser only, never on a server (there is none of ours that stores anything),
       and only if you tick the box offering to remember it; otherwise you enter it each time. Unticking it forgets it at once.
       Be aware that a page that embeds the editor runs it in its own origin: on somebody else's site, anything else
@@ -194,7 +193,7 @@ export class PrivacyPage implements SitePage {
       this site's address (without the page path) as the referrer.</p>
     ${this.table("en", ["Service", "Where", "What for"])}
     <p>Several of these are outside the European Union. Their own policies apply to what they receive.
-      Every source is described, with its licence, on <a href="/docs/sources/">Sources and choices</a>.
+      What each one provides, and under which licence, is on <a href="/docs/sources/">Sources and choices</a>; this table only says who receives your request.
       To avoid all of them, host the components yourself and point the providers at your own server
       (see the <a href="/faq/">FAQ</a>).</p>
 
@@ -204,7 +203,7 @@ export class PrivacyPage implements SitePage {
       you start yourself: <strong>Save</strong> exports the sighting file to your device, which you can then replay or publish on the site of your
       choice, public or internal.</p>
 
-    <h2>Publishing is the publisher's responsibility</h2>
+    <h2>Publishing is the user's responsibility</h2>
     <p>UFO@home is only a tool. You can play a simulation just for yourself, or choose to share it. Whoever publishes a
       recording is responsible for what it contains, as for any publication: text, photograph, video. The tool cannot take that
       place: removing a surname field from the editor would never stop anyone from writing that name in an identifier or a
@@ -258,8 +257,7 @@ export class PrivacyPage implements SitePage {
     <h2>Ce qui reste sur votre appareil</h2>
     <p>L'éditeur utilise le stockage local de votre navigateur pour les préférences seulement : le décor
       et le rayon choisis, le modèle retenu. Elles ne quittent jamais votre appareil et ne demandent aucun consentement.</p>
-    <p>Une <strong>clé pour rédiger avec Claude</strong> (ou un autre modèle, plus tard) n'est demandée que si vous choisissez de
-      faire rédiger votre enregistrement par une IA à partir d'une description. C'est facultatif : vous pouvez écrire le fichier
+    <p>Si vous choisissez de faire rédiger votre enregistrement par une IA à partir d'une description, une clé vous est demandée (pour Claude, ou pour un autre modèle plus tard). C'est facultatif : vous pouvez écrire le fichier
       à la main, ou remplir l'éditeur, sans jamais la rencontrer. Elle reste dans votre navigateur uniquement, jamais sur un serveur
       (nous n'en avons aucun qui conserve quoi que ce soit), et seulement si vous cochez la case qui propose de la mémoriser ;
       sinon vous la saisissez à chaque fois. La décocher l'oublie aussitôt. Sachez qu'une page qui intègre l'éditeur l'exécute dans sa
@@ -276,7 +274,7 @@ export class PrivacyPage implements SitePage {
       du site (sans le chemin de la page).</p>
     ${this.table("fr", ["Service", "Où", "À quoi ça sert"])}
     <p>Plusieurs se trouvent hors de l'Union européenne. Leurs propres politiques s'appliquent à ce qu'ils reçoivent.
-      Chaque source est décrite, avec sa licence, sur <a href="/docs/sources/">Sources et choix</a>.
+      Ce que chacune fournit, et sous quelle licence, est sur <a href="/docs/sources/">Sources et choix</a> ; ce tableau dit seulement qui reçoit votre requête.
       Pour tous les éviter, hébergez les composants vous-même et pointez les fournisseurs vers votre serveur
       (voir la <a href="/faq/">FAQ</a>).</p>
 
@@ -286,9 +284,9 @@ export class PrivacyPage implements SitePage {
       sorties sont celles que vous déclenchez vous-même : <strong>Enregistrer</strong> exporte le fichier d'observation sur votre appareil, que vous
       pouvez ensuite rejouer ou publier sur le site de votre choix, public ou interne.</p>
 
-    <h2>Publier est la responsabilité de l'éditeur</h2>
+    <h2>Publier est la responsabilité de l'utilisateur</h2>
     <p>UFO@home n'est qu'un outil. Vous pouvez jouer une simulation juste pour vous, ou choisir de la diffuser. Celui qui publie
-      un enregistrement (l'éditeur) répond de ce qu'il contient, comme pour toute publication : texte, photo, vidéo. L'outil ne
+      un enregistrement répond de ce qu'il contient, comme pour toute publication : texte, photo, vidéo. L'outil ne
       peut pas s'y substituer : retirer un champ « nom de famille » de l'éditeur n'empêcherait jamais personne d'écrire ce nom dans
       un identifiant ou une description. Avant de publier le compte rendu de quelqu'un d'autre, assurez-vous qu'il le sait et
       l'accepte, ou utilisez des initiales et un lieu approximatif : un lieu et une date précis peuvent identifier une personne même
@@ -342,8 +340,7 @@ export class PrivacyPage implements SitePage {
     <h2>Lo que queda en tu dispositivo</h2>
     <p>El editor usa el almacenamiento local de tu navegador solo para preferencias: el entorno y el radio
       elegidos, el modelo escogido. Nunca salen de tu dispositivo y no requieren consentimiento.</p>
-    <p>Una <strong>clave para redactar con Claude</strong> (u otro modelo, más adelante) solo se pide si decides que una IA
-      redacte tu grabación a partir de una descripción. Es opcional: puedes escribir el archivo a mano, o rellenar el editor,
+    <p>Si decides que una IA redacte tu grabación a partir de una descripción, se te pide una clave (para Claude, o para otro modelo más adelante). Es opcional: puedes escribir el archivo a mano, o rellenar el editor,
       sin encontrarla nunca. Se guarda únicamente en tu navegador, nunca en un servidor (no tenemos ninguno que conserve nada),
       y solo si marcas la casilla que ofrece recordarla; si no, la introduces cada vez. Desmarcarla la olvida al instante.
       Ten en cuenta que una página que incorpora el editor lo ejecuta en su propio origen: en el sitio de otra persona,
@@ -359,7 +356,7 @@ export class PrivacyPage implements SitePage {
       (sin la ruta de la página).</p>
     ${this.table("es", ["Servicio", "Dónde", "Para qué"])}
     <p>Varios están fuera de la Unión Europea. Sus propias políticas se aplican a lo que reciben.
-      Cada fuente se describe, con su licencia, en <a href="/docs/sources/">Fuentes y decisiones</a>.
+      Lo que aporta cada una, y con qué licencia, está en <a href="/docs/sources/">Fuentes y decisiones</a>; esta tabla solo dice quién recibe tu petición.
       Para evitarlos todos, aloja los componentes tú mismo y apunta los proveedores a tu propio servidor
       (véanse las <a href="/faq/">preguntas frecuentes</a>).</p>
 
@@ -369,9 +366,9 @@ export class PrivacyPage implements SitePage {
       salidas son las que inicias tú mismo: <strong>Guardar</strong> exporta el archivo de la observación a tu dispositivo, que luego puedes
       reproducir o publicar en el sitio que elijas, público o interno.</p>
 
-    <h2>Publicar es responsabilidad de quien publica</h2>
+    <h2>Publicar es responsabilidad del usuario</h2>
     <p>UFO@home es solo una herramienta. Puedes reproducir una simulación solo para ti, o elegir difundirla. Quien publica una
-      grabación (el editor) responde de lo que contiene, como en cualquier publicación: texto, fotografía, vídeo. La herramienta no
+      grabación responde de lo que contiene, como en cualquier publicación: texto, fotografía, vídeo. La herramienta no
       puede ocupar ese lugar: quitar un campo «apellido» del editor nunca impediría que alguien escriba ese nombre en un
       identificador o una descripción. Antes de publicar el relato de otra persona, asegúrate de que lo sabe y lo acepta, o usa
       iniciales y un lugar aproximado: un lugar y una fecha precisos pueden identificar a una persona incluso sin nombre. Para ayudarte, el editor muestra lo que una grabación nombra o sitúa (un nombre, una dirección, un correo electrónico, un número de teléfono) cuando la guardas, y propone escribir los nombres como iniciales; no decide nada por ti.</p>
@@ -423,8 +420,7 @@ export class PrivacyPage implements SitePage {
     <h2>Che cosa resta sul tuo dispositivo</h2>
     <p>L'editor usa l'archiviazione locale del tuo browser solo per le preferenze: l'ambiente e il raggio
       scelti, il modello selezionato. Non lasciano mai il tuo dispositivo e non richiedono consenso.</p>
-    <p>Una <strong>chiave per redigere con Claude</strong> (o con un altro modello, in futuro) viene richiesta solo se scegli di far
-      redigere la tua registrazione a un'IA a partire da una descrizione. È facoltativa: puoi scrivere il file a mano, o compilare
+    <p>Se scegli di far redigere la tua registrazione a un'IA a partire da una descrizione, ti viene chiesta una chiave (per Claude, o per un altro modello in futuro). È facoltativa: puoi scrivere il file a mano, o compilare
       l'editor, senza incontrarla mai. Resta solo nel tuo browser, mai su un server (non ne abbiamo nessuno che conservi qualcosa),
       e solo se spunti la casella che propone di ricordarla; altrimenti la inserisci ogni volta. Deselezionarla la fa dimenticare subito.
       Tieni presente che una pagina che incorpora l'editor lo esegue nella propria origine: sul sito di qualcun altro, tutto ciò che
@@ -440,7 +436,7 @@ export class PrivacyPage implements SitePage {
       sito (senza il percorso della pagina).</p>
     ${this.table("it", ["Servizio", "Dove", "A che cosa serve"])}
     <p>Diversi si trovano fuori dall'Unione europea. Si applicano le loro politiche a ciò che ricevono.
-      Ogni fonte è descritta, con la sua licenza, in <a href="/docs/sources/">Fonti e scelte</a>.
+      Che cosa fornisce ciascuna, e con quale licenza, è in <a href="/docs/sources/">Fonti e scelte</a>; questa tabella dice solo chi riceve la tua richiesta.
       Per evitarli tutti, ospita i componenti da te e indirizza i fornitori al tuo server
       (vedi le <a href="/faq/">domande frequenti</a>).</p>
 
@@ -450,9 +446,9 @@ export class PrivacyPage implements SitePage {
       quelle che avvii tu: <strong>Salva</strong> esporta il file dell'osservazione sul tuo dispositivo, che puoi poi riprodurre o pubblicare sul sito
       che preferisci, pubblico o interno.</p>
 
-    <h2>Pubblicare è responsabilità di chi pubblica</h2>
+    <h2>Pubblicare è responsabilità dell'utente</h2>
     <p>UFO@home è solo uno strumento. Puoi riprodurre una simulazione solo per te, o scegliere di diffonderla. Chi pubblica una
-      registrazione (l'editore) risponde di ciò che contiene, come per qualsiasi pubblicazione: testo, fotografia, video. Lo
+      registrazione risponde di ciò che contiene, come per qualsiasi pubblicazione: testo, fotografia, video. Lo
       strumento non può prenderne il posto: togliere un campo «cognome» dall'editor non impedirebbe mai a qualcuno di scrivere quel
       nome in un identificativo o in una descrizione. Prima di pubblicare il resoconto di un'altra persona, assicurati che lo sappia
       e lo accetti, oppure usa le iniziali e un luogo approssimativo: un luogo e una data precisi possono identificare una persona
