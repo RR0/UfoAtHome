@@ -138,7 +138,7 @@ def airframe(total_s, ident, title, model, size, forward_m, left_m, below_m, ext
             "sizeM": size, "model": {"id": model}, "track": track, **extra}
 
 
-def airliner(total_s, seat="left"):
+def airliner(total_s, seat="left", seen=("disc",)):
     """The flight deck round the observer (the model cut from davidmarton1987's, scaled to the real size: scripts/extract-a320-cockpit.py), and,
     seen from the right seat, the captain seated at the left one, on the line of sight to the left window. No airframe: the A320 of the
     catalogue, kept for its wings, had a surface that came across the view of the flight deck, and its wings are behind the pilots anyway."""
@@ -149,11 +149,11 @@ def airliner(total_s, seat="left"):
                  "davidmarton-a320-cockpit", {"widthM": 3.257, "lengthM": 2.591, "heightM": 2.127}, COCKPIT_FORWARD_M,
                  COCKPIT_LEFT_M if seat == "left" else COCKPIT_RIGHT_SEAT_LEFT_M, COCKPIT_BELOW_M,
                  # The disc was seen through the windows: the frame, the pillars and the captain are in front of it
-                 {"aircraftSound": "airliner-narrow", "occludesSourceIds": ["disc"]}),
+                 {"aircraftSound": "airliner-narrow", "occludesSourceIds": list(seen)}),
     ] + ([] if seat == "left" else [
         # An observer (a companion who was there), not an entity: an entity is a being seen, and the engine would class the case "with occupants"
         {**airframe(total_s, "af3532-captain", tr("Le commandant Duboc, au siège gauche", "Captain Duboc, at the left seat"),
-                    "ufoathome-duboc-seated", {"heightM": 1.292}, PILOT_FORWARD_M, PILOT_LEFT_M - SEAT_SPACING_M, PILOT_BELOW_M, {"occludesSourceIds": ["disc"]}),
+                    "ufoathome-duboc-seated", {"heightM": 1.292}, PILOT_FORWARD_M, PILOT_LEFT_M - SEAT_SPACING_M, PILOT_BELOW_M, {"occludesSourceIds": list(seen)}),
          "kind": "observer"}])
 
 
@@ -366,7 +366,7 @@ def copilot_recording():
         "timeline": {"order": [lens, arrow], "groups": [[lens, arrow]], "keyframes": frames},
         "weatherTrack": weather(total, 120),
         "soundTrack": {"keyframes": [{"t": 0, "sound": {"kind": "none"}}]},
-        "decor": airliner(total, "right"),
+        "decor": airliner(total, "right", ("lens", "chevron")),
         "milestones": [
             {"t": 0, "label": "A", "note": tr("Elle le voit vers 10 h et le prend pour un ballon-sonde", "She sees it at about 10 o'clock and takes it for a weather balloon")},
             {"t": 90000, "label": "B", "note": tr("Il reste à 9 h, à la vitesse de l'avion ; la lentille se floute, devient un chevron", "It stays at 9 o'clock, at the airliner's speed; the lens blurs and becomes a chevron")},
