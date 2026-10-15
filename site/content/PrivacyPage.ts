@@ -218,7 +218,7 @@ export class PrivacyPage implements SitePage {
       with your key, only when you ask.</p>
 
     <h2>The demos on this site</h2>
-    <p>RR0 publishes the demos here. If you are an observer they replay and want a correction, a less precise place or a
+    <p>RR0 publishes the demos here. An observer is named in them only because they agreed to it with us, or because they published their own account themselves, in an interview for instance; otherwise initials stand for the name. If you are an observer they replay and want a correction, a less precise place or a
       withdrawal, write to <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>.</p>
 
     <h2>Your rights</h2>
@@ -299,7 +299,7 @@ export class PrivacyPage implements SitePage {
       avez écrite au modèle que vous avez choisi, avec votre clé, seulement quand vous le demandez.</p>
 
     <h2>Les démos de ce site</h2>
-    <p>RR0 publie les démos d'ici. Si vous êtes un observateur dont l'une d'elles rejoue le compte rendu et souhaitez une correction,
+    <p>RR0 publie les démos d'ici. Un observateur n'y est nommé que parce qu'il y a consenti auprès de nous, ou parce qu'il a publié lui-même son témoignage, dans une interview par exemple ; sinon des initiales tiennent lieu de nom. Si vous êtes un observateur dont l'une d'elles rejoue le compte rendu et souhaitez une correction,
       un lieu moins précis ou un retrait, écrivez à <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>.</p>
 
     <h2>Vos droits</h2>
@@ -379,7 +379,7 @@ export class PrivacyPage implements SitePage {
       elegiste, con tu clave, solo cuando lo pides.</p>
 
     <h2>Las demos de este sitio</h2>
-    <p>RR0 publica las demos de aquí. Si eres un observador cuyo relato reproduce una de ellas y quieres una corrección, un lugar
+    <p>RR0 publica las demos de aquí. Un observador solo aparece nombrado en ellas porque lo consintió ante nosotros, o porque él mismo publicó su testimonio, en una entrevista por ejemplo; si no, unas iniciales ocupan el lugar del nombre. Si eres un observador cuyo relato reproduce una de ellas y quieres una corrección, un lugar
       menos preciso o una retirada, escribe a <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>.</p>
 
     <h2>Tus derechos</h2>
@@ -459,7 +459,7 @@ export class PrivacyPage implements SitePage {
       che hai scelto, con la tua chiave, solo quando lo chiedi.</p>
 
     <h2>Le demo di questo sito</h2>
-    <p>RR0 pubblica le demo qui presenti. Se sei un osservatore il cui resoconto è riprodotto da una di esse e vuoi una correzione,
+    <p>RR0 pubblica le demo qui presenti. Un osservatore vi è nominato solo perché ha acconsentito presso di noi, o perché ha pubblicato egli stesso la propria testimonianza, in un'intervista ad esempio; altrimenti le iniziali tengono il posto del nome. Se sei un osservatore il cui resoconto è riprodotto da una di esse e vuoi una correzione,
       un luogo meno preciso o un ritiro, scrivi a <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>.</p>
 
     <h2>I tuoi diritti</h2>
