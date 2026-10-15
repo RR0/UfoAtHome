@@ -4702,6 +4702,14 @@ export class SceneRenderer {
   /** Writes nothing but depth — see renderPhenomenaPass. */
   private readonly decorDepthMaterial = new MeshBasicMaterial({ colorWrite: false })
 
+  /** Whether a surface hides what is behind it: it writes depth, and is not a glow added on top. Anything that
+   * is not a mesh (a sprite, say) is taken as solid, as a crossing always was. */
+  private static isSolidSurface(object: Object3D): boolean {
+    if (!(object instanceof Mesh)) return true
+    const material = Array.isArray(object.material) ? object.material[0] : object.material
+    return material.depthWrite !== false && material.blending !== AdditiveBlending
+  }
+
   /** Puts a decor object's SOLID parts on the layer the phenomena are depth-tested against — its
    * body, its walls, its window panes, a real model's hull — and keeps its light off it: a lamp's
    * glow is drawn without depth and added, and a glow that hid a phenomenon would be the one thing
@@ -4710,8 +4718,7 @@ export class SceneRenderer {
   private static markDecorDepth(group: Object3D, occludes: boolean): void {
     group.traverse(object => {
       if (!(object instanceof Mesh)) return
-      const material = Array.isArray(object.material) ? object.material[0] : object.material
-      const solid = occludes && material.depthWrite !== false && material.blending !== AdditiveBlending
+      const solid = occludes && SceneRenderer.isSolidSurface(object)
       if (solid) object.layers.enable(DECOR_DEPTH_LAYER)
       else object.layers.disable(DECOR_DEPTH_LAYER)
     })
@@ -5273,7 +5280,10 @@ export class SceneRenderer {
       if (object.kind === "crop") continue
       const group = this.decorGroups.get(object.id)
       if (!group) continue
-      const hit = this.ufoOcclusionRaycaster.intersectObject(group, true)[0]
+      // Only what hides a phenomenon in the picture too (see markDecorDepth): a cockpit's window panes are the
+      // nearest thing on every ray through them, and counting them put a phenomenon seen THROUGH the glass in
+      // front of the pillar beside it.
+      const hit = this.ufoOcclusionRaycaster.intersectObject(group, true).find(candidate => SceneRenderer.isSolidSurface(candidate.object))
       if (!hit) continue
       if (object.occludesSourceIds?.includes(sourceId)) {
         behindM = behindM === undefined ? hit.distance : Math.max(behindM, hit.distance)
