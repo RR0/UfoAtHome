@@ -2134,6 +2134,11 @@ export class UfoElement extends HTMLElement {
     this.stageElement.classList.toggle("caption-held", held)
   }
 
+  /** Holds the controls back for as long as the loader is up (see SceneElement): they come with the first frame. */
+  set controlsHeld(held: boolean) {
+    this.stageElement.classList.toggle("controls-held", held)
+  }
+
   /** How long the controls stay after the last touch, while playing, on a screen with no hover. */
   private static readonly CONTROLS_IDLE_MS = 3000
 

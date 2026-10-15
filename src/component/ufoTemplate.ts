@@ -589,6 +589,14 @@ canvas[data-cursor="rotate"] {
 .stage.caption-held .milestone-caption {
   visibility: hidden;
 }
+/* The same hold takes the controls too: behind the loader there is nothing to play, pause or seek (the
+   clock is held), and on a phone, where they are always shown, they covered its "this is a
+   simulation". They come with the first frame. visibility, not display: the fit that folds the buttons
+   measures them. */
+.stage.controls-held .toolbar,
+.stage.controls-held .corner-buttons {
+  visibility: hidden;
+}
 .milestone-caption b {
   font-weight: 700;
 }
