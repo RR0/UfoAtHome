@@ -22,6 +22,8 @@ import struct
 # the neck's stub, inside the head: how far up it goes above the cut, and how much narrower than the neck it is
 STUB_M = 0.03
 STUB_SCALE = 0.93
+# the head and the neck lie within this distance of the axis, the shoulders and the arms beyond
+HEAD_RADIUS_M = 0.14
 
 
 def read_glb(path):
@@ -87,6 +89,7 @@ def main():
     parser.add_argument("--skin", required=True, help="the mesh name (without \"Human.\") of the skin, which is cut at the neck")
     parser.add_argument("--head-meshes", required=True, help="meshes that go whole with the head (hair, eyebrows, glasses...), by node name, comma separated")
     parser.add_argument("--between", required=True, help="two heights, in the mesh's own units, between which the neck is narrowest")
+    parser.add_argument("--cut", type=float, help="cut at this height instead (a head bowed over its chest has a jaw that goes lower than the narrowest part of its neck)")
     args = parser.parse_args()
     gltf, blob = read_glb(args.source)
     head_names = set(args.head_meshes.split(","))
@@ -103,8 +106,8 @@ def main():
     # read where the triangles cross the plane rather than from the vertices near it, of which there are too few to give a middle
     idx = accessor(gltf, blob, skin["indices"])
     best = None
-    for k in range(60):
-        y = low + (high - low) * k / 59
+    heights = [args.cut] if args.cut is not None else [low + (high - low) * k / 59 for k in range(60)]
+    for y in heights:
         points = []
         for t in range(0, len(idx), 3):
             tri = [positions[idx[t + i]] for i in range(3)]
@@ -118,7 +121,7 @@ def main():
         mx = sorted(p[0] for p in points)[len(points) // 2]
         mz = sorted(p[1] for p in points)[len(points) // 2]
         near = [p for p in points if math.hypot(p[0] - mx, p[1] - mz) < 0.1]
-        if len(near) != len(points) or len(near) < 40:
+        if (len(near) != len(points) and args.cut is None) or len(near) < 40:
             continue
         cx = sum(p[0] for p in near) / len(near)
         cz = sum(p[1] for p in near) / len(near)
@@ -191,7 +194,11 @@ def main():
                 # cut cleanly at the plane, so that the two halves share one ring of vertices; and a stub of the neck, a little narrower, goes up inside the head
                 # (which has the neck's sleeve down to the cut), so that no hole opens behind the neck when the head turns.
                 attrs = {name_: accessor(gltf, blob, index) for name_, index in primitive["attributes"].items()}
-                below, above = clip_triangles(attrs, tris, cut)
+                # only what is round the neck's axis is cut: a shoulder that rises above the plane stays with the body
+                round_axis = [t for t in tris if all(math.hypot(pos[v][0] - pivot[0], pos[v][2] - pivot[2]) < HEAD_RADIUS_M for v in t)]
+                far = [t for t in tris if t not in set(round_axis)]
+                below, above = clip_triangles(attrs, round_axis, cut)
+                below = below + far
                 stub_top = cut + STUB_M
                 inside, _ = clip_triangles(attrs, above, stub_top)
                 stub_first = len(attrs["POSITION"])
