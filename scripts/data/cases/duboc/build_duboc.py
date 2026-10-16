@@ -40,10 +40,8 @@ PLANE_M, OBJECT_M = 11700.0, 10500.0
 DISC_M, DISC_THICKNESS_M = 1000.0, 100.0              # "1000 m de diamètre pour une épaisseur de 100 m" (interview of 1999)
 BROWN_RED = "#a8421f"                               # "brun-rouge", "rouge brunâtre": a dark red-brown in the daylight reads as a black blot, so a rust red
 SIZE_DEG = 2.0                                       # 1999 interview: "the width of his thumb" at arm's length, about 2 degrees (1000 m at 46 km would be 1.24); the report (200-300 m) and the SEPRA (half the Moon, 0.26) give far less
-# Hers: no angle in her report, only "large" at 25 to 50 NM; but she (and the steward) first took it for a weather balloon, which is not what one
-# takes a thumb-wide disc for: a small, round-looking thing, about the size of the Moon (0.5 degrees), which then turns into a lens and a chevron.
-# An assumption, not a figure of hers.
-COPILOT_SIZE_DEG = 0.6
+# Hers: no angle in her report, but a distance (25 to 50 NM) and "large": the 1000 m of the captain's interview at her 25 NM (46 km), not his thumb
+COPILOT_SIZE_DEG = 1.24
 STEP_MS = 1000
 
 # In the flight deck model, where the captain's eye is: 0.557 m left of the centre of its box and 0.146 m above it, 0.83 m above the model's
@@ -316,7 +314,7 @@ def copilot_recording():
         aim = aim_at(t)
         u = smooth((t - 65.0) / 10.0) - smooth((t - 125.0) / 10.0)   # 0 to 1: how much of a chevron
         blur = 0.12 + 0.12 * math.sin(math.pi * min(1.0, max(0.0, (t - 30.0) / 110.0))) ** 2   # sharp, then blurred, then sharp again
-        lens_size = (COPILOT_SIZE_DEG, COPILOT_SIZE_DEG * (0.35 + 0.6 * (1.0 - smooth((t - 10.0) / 30.0))))   # round, as a balloon is, then a lens
+        lens_size = (COPILOT_SIZE_DEG, COPILOT_SIZE_DEG * 0.35)
         arrow_size = (COPILOT_SIZE_DEG * 1.1, COPILOT_SIZE_DEG * 0.75)
         if ms == 0:
             shapes = [shape_full(lens, "oval", tr("lentille brune", "brown lens"), BROWN_RED, 0, blur, lens_size, aim),
@@ -360,15 +358,15 @@ def copilot_recording():
                 "dimensions), puis le contour redevient net à la fin ; sombre, brun, de grande taille. Juste avant la disparition, "
                 "« une sorte de virage ».\n\n"
                 "Ni taille angulaire ni distance chiffrée dans son rapport (« grande taille », 25 à 50 miles nautiques) : la taille est "
-                "supposée : celle de la Lune environ, puisqu'elle prend d'abord l'objet pour un ballon-sonde, rond au début, et le moment où l'objet quitte le 10 h pour le 9 h est choisi."),
+                "celle de l'interview du commandant, 1000 m à ses 25 miles nautiques à elle (empruntée), et le moment où l'objet quitte le 10 h pour le 9 h est choisi."),
             "en": (
                 "Same flight, same minute, seen from the right-hand seat by the co-pilot, Valérie Chauffour. She first takes the object for a weather balloon, "
                 "like the steward. For her it does not fall behind: she sees it constantly at about 9 o'clock, to the left, moving at the "
                 "airliner's speed on a straight path parallel to its own, for 2 to 5 minutes. Its shape changes: a lens with a sharp "
                 "outline that blurs becomes a \"chevron\" (variable geometry, a disc evolving in all three dimensions), then the outline "
                 "is sharp again at the end; dark, brown, large. Just before it disappears, \"a sort of turn\".\n\n"
-                "No angular size and no figure for the distance in her report (\"large\", 25 to 50 nautical miles): the size is "
-                "assumed: about that of the Moon, since she first takes the object for a weather balloon, round at first, and when the object moves from 10 o'clock to 9 is chosen."),
+                "No angular size and no figure for the distance in her report (\"large\", 25 to 50 nautical miles): the size is the one "
+                "the captain's 1999 interview gives, 1000 m at her 25 nautical miles (borrowed), and when the object moves from 10 o'clock to 9 is chosen."),
         },
         "instrument": "eye",
         "observerTrack": track(total, aim_at, 1.0),
