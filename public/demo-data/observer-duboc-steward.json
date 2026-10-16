@@ -59,8 +59,8 @@
   }
  ],
  "description": {
-  "fr": "Le chef steward, dans le poste de pilotage, debout derrière le commandant Duboc (peut-être à la place du siège observateur, mais rien ne dit qu'il était assis), est le premier à voir l'objet et à s'exclamer : « Un ballon-sonde ! » On ne sait de lui que cela, par le récit des deux pilotes : aucun relèvement, aucune taille, aucune forme qui soit de lui. Pour que sa vue puisse être jouée, l'objet est placé comme le commandant le voit (même relèvement, même forme) : il est à moins d'un mètre de lui, ce qui ne change rien à une direction à 46 km. Pour voir par la vitre de gauche, que le siège du commandant lui cache de derrière, il se penche entre les sièges.",
-  "en": "The chief steward, in the cockpit, standing behind Captain Duboc (perhaps where the observer's seat is, but nothing says he was seated), is the first to see the object and to exclaim: \"A weather balloon!\" That is all that is known of him, through the two pilots' accounts: no bearing, no size, no shape that is his. So that his view can be played, the object is placed as the captain sees it (same bearing, same shape): he is less than a metre from him, which changes nothing about a direction at 46 km. To see through the left window, which the captain's seat hides from behind, he leans forward between the seats."
+  "fr": "Le chef steward, dans le poste de pilotage, en uniforme, derrière le commandant Duboc (peut-être à la place du siège observateur, mais rien ne dit qu'il était assis), est le premier à voir l'objet et à s'exclamer : « Un ballon-sonde ! » On ne sait de lui que cela, par le récit des deux pilotes : aucun relèvement, aucune taille, aucune forme qui soit de lui. Pour que sa vue puisse être jouée, l'objet est placé comme le commandant le voit (même relèvement, même forme) : il est à moins d'un mètre de lui, ce qui ne change rien à une direction à 46 km. Il se tient adossé à la cloison du fond, là où le siège observateur est replié, et voit le commandant de dos, la vitre de gauche au-delà de son épaule.",
+  "en": "The chief steward, in the cockpit, standing behind Captain Duboc (perhaps where the observer's seat is, but nothing says he was seated), is the first to see the object and to exclaim: \"A weather balloon!\" That is all that is known of him, through the two pilots' accounts: no bearing, no size, no shape that is his. So that his view can be played, the object is placed as the captain sees it (same bearing, same shape): he is less than a metre from him, which changes nothing about a direction at 46 km. He stands with his back to the rear bulkhead, where the observer's seat is folded away, and sees the captain from behind, the left window beyond his shoulder."
  },
  "instrument": "eye",
  "observerTrack": {
@@ -3029,11 +3029,11 @@
    "id": "af3532-cockpit",
    "kind": "aircraft",
    "title": {
-    "fr": "Poste de pilotage de l'A320 (penché entre les sièges : le chef steward)",
-    "en": "A320 flight deck (leaning between the seats: the chief steward)"
+    "fr": "Poste de pilotage de l'A320 (adossé à la cloison du fond : le chef steward)",
+    "en": "A320 flight deck (back to the rear bulkhead: the chief steward)"
    },
-   "eastM": 0.29,
-   "northM": -0.08,
+   "eastM": 0.09,
+   "northM": 0.52,
    "headingDeg": 332.0,
    "sizeM": {
     "widthM": 3.257,
@@ -3046,177 +3046,177 @@
    "track": [
     {
      "t": 0,
-     "eastM": 0.29,
-     "northM": -0.08,
-     "altitudeM": 11701.3,
+     "eastM": 0.09,
+     "northM": 0.52,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 5000,
-     "eastM": -422.27,
-     "northM": 794.86,
-     "altitudeM": 11701.3,
+     "eastM": -422.48,
+     "northM": 795.45,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 10000,
-     "eastM": -844.72,
-     "northM": 1589.68,
-     "altitudeM": 11701.3,
+     "eastM": -844.92,
+     "northM": 1590.28,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 15000,
-     "eastM": -1267.11,
-     "northM": 2384.62,
-     "altitudeM": 11701.3,
+     "eastM": -1267.31,
+     "northM": 2385.21,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 20000,
-     "eastM": -1689.31,
-     "northM": 3179.56,
-     "altitudeM": 11701.3,
+     "eastM": -1689.52,
+     "northM": 3180.15,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 25000,
-     "eastM": -2111.47,
-     "northM": 3974.38,
-     "altitudeM": 11701.3,
+     "eastM": -2111.67,
+     "northM": 3974.98,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 30000,
-     "eastM": -2533.43,
-     "northM": 4769.32,
-     "altitudeM": 11701.3,
+     "eastM": -2533.63,
+     "northM": 4769.91,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 35000,
-     "eastM": -2955.35,
-     "northM": 5564.25,
-     "altitudeM": 11701.3,
+     "eastM": -2955.55,
+     "northM": 5564.85,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 40000,
-     "eastM": -3377.07,
-     "northM": 6359.08,
-     "altitudeM": 11701.3,
+     "eastM": -3377.27,
+     "northM": 6359.67,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 45000,
-     "eastM": -3798.74,
-     "northM": 7154.01,
-     "altitudeM": 11701.3,
+     "eastM": -3798.94,
+     "northM": 7154.61,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 50000,
-     "eastM": -4220.22,
-     "northM": 7948.95,
-     "altitudeM": 11701.3,
+     "eastM": -4220.42,
+     "northM": 7949.54,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 55000,
-     "eastM": -4641.58,
-     "northM": 8743.78,
-     "altitudeM": 11701.3,
+     "eastM": -4641.78,
+     "northM": 8744.37,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 60000,
-     "eastM": -5062.89,
-     "northM": 9538.71,
-     "altitudeM": 11701.3,
+     "eastM": -5063.1,
+     "northM": 9539.31,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 65000,
-     "eastM": -5484.01,
-     "northM": 10333.65,
-     "altitudeM": 11701.3,
+     "eastM": -5484.22,
+     "northM": 10334.24,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 70000,
-     "eastM": -5905.09,
-     "northM": 11128.47,
-     "altitudeM": 11701.3,
+     "eastM": -5905.29,
+     "northM": 11129.07,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 75000,
-     "eastM": -6325.96,
-     "northM": 11923.41,
-     "altitudeM": 11701.3,
+     "eastM": -6326.17,
+     "northM": 11924.0,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 80000,
-     "eastM": -6746.8,
-     "northM": 12718.34,
-     "altitudeM": 11701.3,
+     "eastM": -6747.0,
+     "northM": 12718.94,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 85000,
-     "eastM": -7167.43,
-     "northM": 13513.17,
-     "altitudeM": 11701.3,
+     "eastM": -7167.64,
+     "northM": 13513.76,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 90000,
-     "eastM": -7587.95,
-     "northM": 14308.11,
-     "altitudeM": 11701.3,
+     "eastM": -7588.15,
+     "northM": 14308.7,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 95000,
-     "eastM": -8008.42,
-     "northM": 15103.04,
-     "altitudeM": 11701.3,
+     "eastM": -8008.62,
+     "northM": 15103.64,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 100000,
-     "eastM": -8428.7,
-     "northM": 15897.87,
-     "altitudeM": 11701.3,
+     "eastM": -8428.9,
+     "northM": 15898.46,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 105000,
-     "eastM": -8848.92,
-     "northM": 16692.8,
-     "altitudeM": 11701.3,
+     "eastM": -8849.13,
+     "northM": 16693.4,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 110000,
-     "eastM": -9268.96,
-     "northM": 17487.74,
-     "altitudeM": 11701.3,
+     "eastM": -9269.16,
+     "northM": 17488.33,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 115000,
-     "eastM": -9688.95,
-     "northM": 18282.56,
-     "altitudeM": 11701.3,
+     "eastM": -9689.15,
+     "northM": 18283.16,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 120000,
-     "eastM": -10108.74,
-     "northM": 19077.5,
-     "altitudeM": 11701.3,
+     "eastM": -10108.94,
+     "northM": 19078.09,
+     "altitudeM": 11701.28,
      "headingDeg": 332.0
     }
    ],
@@ -3232,8 +3232,8 @@
     "fr": "Le commandant Duboc, au siège gauche",
     "en": "Captain Duboc, at the left seat"
    },
-   "eastM": -0.35,
-   "northM": 0.05,
+   "eastM": -0.55,
+   "northM": 0.64,
    "headingDeg": 332.0,
    "sizeM": {
     "heightM": 1.292
@@ -3244,177 +3244,177 @@
    "track": [
     {
      "t": 0,
-     "eastM": -0.35,
-     "northM": 0.05,
-     "altitudeM": 11700.28,
+     "eastM": -0.55,
+     "northM": 0.64,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 5000,
-     "eastM": -422.91,
-     "northM": 794.98,
-     "altitudeM": 11700.28,
+     "eastM": -423.11,
+     "northM": 795.58,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 10000,
-     "eastM": -845.35,
-     "northM": 1589.81,
-     "altitudeM": 11700.28,
+     "eastM": -845.55,
+     "northM": 1590.4,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 15000,
-     "eastM": -1267.75,
-     "northM": 2384.74,
-     "altitudeM": 11700.28,
+     "eastM": -1267.95,
+     "northM": 2385.34,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 20000,
-     "eastM": -1689.95,
-     "northM": 3179.68,
-     "altitudeM": 11700.28,
+     "eastM": -1690.15,
+     "northM": 3180.27,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 25000,
-     "eastM": -2112.11,
-     "northM": 3974.5,
-     "altitudeM": 11700.28,
+     "eastM": -2112.31,
+     "northM": 3975.1,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 30000,
-     "eastM": -2534.07,
-     "northM": 4769.44,
-     "altitudeM": 11700.28,
+     "eastM": -2534.27,
+     "northM": 4770.04,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 35000,
-     "eastM": -2955.98,
-     "northM": 5564.38,
-     "altitudeM": 11700.28,
+     "eastM": -2956.18,
+     "northM": 5564.97,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 40000,
-     "eastM": -3377.7,
-     "northM": 6359.2,
-     "altitudeM": 11700.28,
+     "eastM": -3377.91,
+     "northM": 6359.8,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 45000,
-     "eastM": -3799.38,
-     "northM": 7154.14,
-     "altitudeM": 11700.28,
+     "eastM": -3799.58,
+     "northM": 7154.73,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 50000,
-     "eastM": -4220.86,
-     "northM": 7949.07,
-     "altitudeM": 11700.28,
+     "eastM": -4221.06,
+     "northM": 7949.67,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 55000,
-     "eastM": -4642.22,
-     "northM": 8743.9,
-     "altitudeM": 11700.28,
+     "eastM": -4642.42,
+     "northM": 8744.49,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 60000,
-     "eastM": -5063.53,
-     "northM": 9538.83,
-     "altitudeM": 11700.28,
+     "eastM": -5063.73,
+     "northM": 9539.43,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 65000,
-     "eastM": -5484.65,
-     "northM": 10333.77,
-     "altitudeM": 11700.28,
+     "eastM": -5484.85,
+     "northM": 10334.37,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 70000,
-     "eastM": -5905.72,
-     "northM": 11128.6,
-     "altitudeM": 11700.28,
+     "eastM": -5905.92,
+     "northM": 11129.19,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 75000,
-     "eastM": -6326.6,
-     "northM": 11923.53,
-     "altitudeM": 11700.28,
+     "eastM": -6326.8,
+     "northM": 11924.13,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 80000,
-     "eastM": -6747.43,
-     "northM": 12718.47,
-     "altitudeM": 11700.28,
+     "eastM": -6747.63,
+     "northM": 12719.06,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 85000,
-     "eastM": -7168.07,
-     "northM": 13513.29,
-     "altitudeM": 11700.28,
+     "eastM": -7168.27,
+     "northM": 13513.89,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 90000,
-     "eastM": -7588.59,
-     "northM": 14308.23,
-     "altitudeM": 11700.28,
+     "eastM": -7588.79,
+     "northM": 14308.82,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 95000,
-     "eastM": -8009.06,
-     "northM": 15103.17,
-     "altitudeM": 11700.28,
+     "eastM": -8009.26,
+     "northM": 15103.76,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 100000,
-     "eastM": -8429.33,
-     "northM": 15897.99,
-     "altitudeM": 11700.28,
+     "eastM": -8429.54,
+     "northM": 15898.58,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 105000,
-     "eastM": -8849.56,
-     "northM": 16692.93,
-     "altitudeM": 11700.28,
+     "eastM": -8849.76,
+     "northM": 16693.52,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 110000,
-     "eastM": -9269.6,
-     "northM": 17487.86,
-     "altitudeM": 11700.28,
+     "eastM": -9269.8,
+     "northM": 17488.46,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 115000,
-     "eastM": -9689.58,
-     "northM": 18282.69,
-     "altitudeM": 11700.28,
+     "eastM": -9689.79,
+     "northM": 18283.28,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 120000,
-     "eastM": -10109.38,
-     "northM": 19077.62,
-     "altitudeM": 11700.28,
+     "eastM": -10109.58,
+     "northM": 19078.22,
+     "altitudeM": 11700.26,
      "headingDeg": 332.0
     }
    ],

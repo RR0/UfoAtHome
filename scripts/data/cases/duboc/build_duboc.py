@@ -156,11 +156,15 @@ def airframe(total_s, ident, title, model, size, forward_m, left_m, below_m, ext
 # of two of these points.
 COCKPIT_AT = (0.02, 0.684, 2.654)
 CAPTAIN_AT = (-0.484, -0.338, 2.246)
-STEWARD_AT = (-0.537, -0.378, 3.05)                   # standing behind the captain, 0.57 m behind his eyes
+STEWARD_AT = (-0.3, -0.378, 3.12)                     # standing against the rear bulkhead, behind the captain's right shoulder, 0.64 m behind his eyes
 EYE_CAPTAIN, EYE_COPILOT = (-0.537, 0.83, 2.48), (0.537, 0.83, 2.48)
-# The chief steward, to see through the left window past the captain's seat (which the model has, and which hides it from behind, from where he
-# stands), leans forward between the seats, his head level with and beside the captain's right shoulder: his eyes 0.34 m to the right of Duboc's.
-EYE_STEWARD = (-0.2, 0.98, 2.45)
+# The chief steward, standing against the rear bulkhead (where the observer's seat is folded away) behind the captain's right shoulder, stooping
+# a little under the overhead panel: he sees the captain from behind, and the left window past his shoulder.
+EYE_STEWARD = (-0.3, 1.0, 3.07)
+# He cannot stand straight under the ceiling of the rear of the flight deck (1.7 m above the floor there): a man of 1.62 m, in an Air France uniform
+# (navy), his back to the rear bulkhead where the observer's seat is folded away.
+STEWARD_HEIGHT_M = 1.62
+STEWARD_UNIFORM = {"costumeColor": "#1c2b5e"}
 EYES = {"left": EYE_CAPTAIN, "right": EYE_COPILOT, "steward": EYE_STEWARD}
 
 
@@ -178,7 +182,7 @@ def airliner(total_s, seat="left", seen=("disc",)):
     eye = EYES[seat]
     cockpit_title = {"left": tr("Poste de pilotage de l'A320 (siège gauche : le commandant)", "A320 flight deck (left seat: the captain)"),
                      "right": tr("Poste de pilotage de l'A320 (siège droit : Valérie Chauffour)", "A320 flight deck (right seat: Valérie Chauffour, the co-pilot)"),
-                     "steward": tr("Poste de pilotage de l'A320 (penché entre les sièges : le chef steward)", "A320 flight deck (leaning between the seats: the chief steward)")}[seat]
+                     "steward": tr("Poste de pilotage de l'A320 (adossé à la cloison du fond : le chef steward)", "A320 flight deck (back to the rear bulkhead: the chief steward)")}[seat]
     objects = [airframe(total_s, "af3532-cockpit", cockpit_title,
                         "davidmarton-a320-cockpit", {"widthM": 3.257, "lengthM": 2.591, "heightM": 2.127}, *around(eye, COCKPIT_AT),
                         # The disc was seen through the windows: the frame, the pillars and the captain are in front of it
@@ -188,8 +192,8 @@ def airliner(total_s, seat="left", seen=("disc",)):
         objects.append({**airframe(total_s, "af3532-captain", tr("Le commandant Duboc, au siège gauche", "Captain Duboc, at the left seat"),
                                    "ufoathome-duboc-seated", {"heightM": 1.292}, *around(eye, CAPTAIN_AT), {"occludesSourceIds": list(seen)}), "kind": "observer"})
     if seat != "steward":
-        objects.append({**airframe(total_s, "af3532-chief-steward", tr("Le chef steward, debout derrière le commandant", "The chief steward, standing behind the captain"),
-                                   "makehuman-man-jacket", {"heightM": 1.8}, *around(eye, STEWARD_AT), {}), "kind": "observer"})
+        objects.append({**airframe(total_s, "af3532-chief-steward", tr("Le chef steward, en uniforme, adossé à la cloison du fond derrière le commandant", "The chief steward, in uniform, his back to the rear bulkhead behind the captain"),
+                                   "makehuman-man-jacket", {"heightM": STEWARD_HEIGHT_M}, *around(eye, STEWARD_AT), {"modelParameters": STEWARD_UNIFORM}), "kind": "observer"})
     return objects
 
 
@@ -595,16 +599,16 @@ def steward_recording():
     rec["sources"] = [{"type": "article", "title": "Rapport du pilote Duboc pour Dominique Weinstein, copie au SEPRA", "authors": ["Jean-Charles Duboc"],
                        "url": "https://rr0.org/science/crypto/ufo/enquete/dossier/Duboc/index.html", "publication": {"publisher": "Velasco 2004"}}]
     rec["description"] = {
-        "fr": ("Le chef steward, dans le poste de pilotage, debout derrière le commandant Duboc (peut-être à la place du siège observateur, mais rien ne dit "
+        "fr": ("Le chef steward, dans le poste de pilotage, en uniforme, derrière le commandant Duboc (peut-être à la place du siège observateur, mais rien ne dit "
                "qu'il était assis), est le premier à voir l'objet et à s'exclamer : « Un ballon-sonde ! » On ne sait de lui que cela, par le "
                "récit des deux pilotes : aucun relèvement, aucune taille, aucune forme qui soit de lui. Pour que sa vue puisse être jouée, "
                "l'objet est placé comme le commandant le voit (même relèvement, même forme) : il est à moins d'un mètre de lui, ce qui ne change "
-               "rien à une direction à 46 km. Pour voir par la vitre de gauche, que le siège du commandant lui cache de derrière, il se penche entre les sièges."),
+               "rien à une direction à 46 km. Il se tient adossé à la cloison du fond, là où le siège observateur est replié, et voit le commandant de dos, la vitre de gauche au-delà de son épaule."),
         "en": ("The chief steward, in the cockpit, standing behind Captain Duboc (perhaps where the observer's seat is, but nothing says he was "
                "seated), is the first to see the object and to exclaim: \"A weather balloon!\" That is all that is known of him, through the two "
                "pilots' accounts: no bearing, no size, no shape that is his. So that his view can be played, the object is placed as the captain "
                "sees it (same bearing, same shape): he is less than a metre from him, which changes nothing about a direction at 46 km. "
-               "To see through the left window, which the captain's seat hides from behind, he leans forward between the seats.")}
+               "He stands with his back to the rear bulkhead, where the observer's seat is folded away, and sees the captain from behind, the left window beyond his shoulder.")}
     rec["milestones"] = [
         {"t": 0, "label": "A", "note": tr("Il le voit le premier, vers 10 h : « Un ballon-sonde ! »", "He sees it first, at about 10 o'clock: \"A weather balloon!\"")},
         {"t": int(total * 1000), "label": "C", "note": tr("Sur l'arrière gauche (8 h), il devient transparent et disparaît", "Behind on the left (8 o'clock), it turns transparent and vanishes")}]
