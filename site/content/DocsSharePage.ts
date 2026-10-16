@@ -252,6 +252,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <tr><td>Open map</td><td><code>map=1</code></td><td><code>show-observer-map</code></td></tr>
       <tr><td>Show moments</td><td><code>moments=0</code> hides them</td><td><code>hide-milestones</code> when off</td></tr>
       <tr><td>Compare account</td><td><code>compare=1</code></td><td><code>compare-account</code></td></tr>
+      <tr><td>Open a case on one of its recordings</td><td><code>observer=ObserverId</code> (or a file name, or its number in the list)</td><td><code>observer="ObserverId"</code></td></tr>
       </table></div>
     <p class="small">The summary chips are the strip of what the recording states, under the picture: the date said in words with its weekday, the position, the observer, the weather, and a <q>Description</q> chip showing the first words of the account, which opens the whole text in place of the chips (a cross puts them back). The player's own page shows them unless <code>labels=0</code>; the element itself shows them only with <code>show-labels</code>. The Editor takes no option, only the recording.</p>
   </div>
@@ -365,6 +366,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <tr><td>Ouvrir la carte</td><td><code>map=1</code></td><td><code>show-observer-map</code></td></tr>
       <tr><td>Afficher les moments</td><td><code>moments=0</code> les masque</td><td><code>hide-milestones</code> quand décoché</td></tr>
       <tr><td>Comparer au compte rendu</td><td><code>compare=1</code></td><td><code>compare-account</code></td></tr>
+      <tr><td>Ouvrir un dossier sur l'un de ses enregistrements</td><td><code>observer=IdObservateur</code> (ou un nom de fichier, ou son rang dans la liste)</td><td><code>observer="IdObservateur"</code></td></tr>
       </table></div>
     <p class="small">Les chips de résumé sont le bandeau de ce que l'enregistrement énonce, sous l'image : la date dite en toutes lettres avec son jour de la semaine, la position, l'observateur, la météo, et un chip <q>Description</q> qui montre les premiers mots du récit et ouvre le texte entier à la place des chips (une croix les rend). La page du lecteur les affiche sauf avec <code>labels=0</code> ; l'élément lui-même ne les affiche qu'avec <code>show-labels</code>. L'éditeur ne prend aucune option, seulement l'enregistrement.</p>
   </div>
@@ -480,6 +482,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <tr><td>Abrir el mapa</td><td><code>map=1</code></td><td><code>show-observer-map</code></td></tr>
       <tr><td>Mostrar los momentos</td><td><code>moments=0</code> los oculta</td><td><code>hide-milestones</code> si se desmarca</td></tr>
       <tr><td>Comparar con el relato</td><td><code>compare=1</code></td><td><code>compare-account</code></td></tr>
+      <tr><td>Abrir un caso en una de sus grabaciones</td><td><code>observer=IdObservador</code> (o un nombre de archivo, o su número en la lista)</td><td><code>observer="IdObservador"</code></td></tr>
       </table></div>
     <p class="small">Los chips del resumen son la franja de lo que la grabación enuncia, bajo la imagen: la fecha dicha con palabras y su día de la semana, la posición, el observador, el tiempo, y un chip <q>Descripción</q> que muestra las primeras palabras del relato y abre el texto entero en lugar de los chips (una cruz los devuelve). La página del reproductor los muestra salvo con <code>labels=0</code>; el elemento solo los muestra con <code>show-labels</code>. El editor no admite ninguna opción, solo la grabación.</p>
   </div>
@@ -595,6 +598,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <tr><td>Apri la mappa</td><td><code>map=1</code></td><td><code>show-observer-map</code></td></tr>
       <tr><td>Mostra i momenti</td><td><code>moments=0</code> li nasconde</td><td><code>hide-milestones</code> se deselezionato</td></tr>
       <tr><td>Confronta col resoconto</td><td><code>compare=1</code></td><td><code>compare-account</code></td></tr>
+      <tr><td>Aprire un caso su una delle sue registrazioni</td><td><code>observer=IdOsservatore</code> (o un nome di file, o la sua posizione nell'elenco)</td><td><code>observer="IdOsservatore"</code></td></tr>
       </table></div>
     <p class="small">I chip del riepilogo sono la striscia di ciò che la registrazione enuncia, sotto l'immagine: la data detta a parole con il suo giorno della settimana, la posizione, l'osservatore, il meteo, e un chip <q>Descrizione</q> che mostra le prime parole del resoconto e apre il testo intero al posto dei chip (una croce li riporta). La pagina del lettore li mostra salvo con <code>labels=0</code>; l'elemento stesso li mostra solo con <code>show-labels</code>. L'editor non accetta opzioni, solo la registrazione.</p>
   </div>

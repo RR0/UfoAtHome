@@ -39,6 +39,11 @@ export interface SightingMessages extends SightingLabels {
   /** The share dialog's option to open the link at the position on show, its value in seconds. */
   /** The share dialog's option giving the link, beside Embed. */
   shareLink: string
+  /** The share dialog's choice of what is shared when the recording is one of a case's: the whole case, or one of its recordings. */
+  shareScope: string
+  shareScopeCase: string
+  /** The recording the shared case opens on first. */
+  shareOpensOn: string
   shareStartAt: string
   /** The share dialog's options on how the shared replay opens: the chips, the observer map, the named moments, the comparison. */
   shareOptionLabels: string

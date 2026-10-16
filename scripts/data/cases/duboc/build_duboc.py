@@ -37,6 +37,7 @@ LAT_MID, LNG_MID = 48 + 50.7 / 60, 3 + 0.9 / 60      # "48°50'7 N / 003°00'9 E
 HEADING = 332.0
 SPEED = 350 * 1852 / 3600                            # 350 kt, "VS" of the report: about 180 m/s
 PLANE_M, OBJECT_M = 11700.0, 10500.0
+BROWN_RED = "#a8421f"                               # "brun-rouge", "rouge brunâtre": a dark red-brown in the daylight reads as a black blot, so a rust red
 SIZE_DEG = 1.24                                      # 1999 interview: 1000 m at 46 km, "the width of his thumb"; the report (200-300 m) and the SEPRA (half the Moon, 0.26) give far less
 STEP_MS = 1000
 
@@ -200,11 +201,11 @@ def commander():
         t = ms / 1000.0
         aim = aim_at(t)
         # a disc seen "under several angles": its thickness is not the same every second
-        height = SIZE_DEG * (0.16 + 0.12 * math.sin(math.pi * t / 40.0) ** 2)
+        height = SIZE_DEG * (0.3 + 0.3 * math.sin(math.pi * t / 40.0) ** 2)
         size = (SIZE_DEG, height)
         sid = "disc"
         frames.append({"t": ms, "shapes": [(shape_full(sid, "oval", tr("disque brun-rouge, bords légèrement flous", "red-brown disc, slightly blurred edges"),
-                                                       "#4a1710", 0, 0.15, size, aim) if ms == 0 else shape_move(sid, size, aim))]})
+                                                       BROWN_RED, 0, 0.05, size, aim) if ms == 0 else shape_move(sid, size, aim))]})
     # "je le vois soudain devenir transparent et disparaître sans bouger"
     last = frames[-1]["shapes"][0]
     fade = json.loads(json.dumps(last))
@@ -305,13 +306,13 @@ def copilot_recording():
     for ms in range(0, int(total * 1000) + 1, STEP_MS):
         t = ms / 1000.0
         aim = aim_at(t)
-        u = smooth((t - 60.0) / 20.0) - smooth((t - 130.0) / 20.0)   # 0 to 1: how much of a chevron
-        blur = 0.08 + 0.4 * math.sin(math.pi * min(1.0, max(0.0, (t - 30.0) / 110.0))) ** 2   # sharp, then blurred, then sharp again
-        lens_size = (SIZE_DEG, SIZE_DEG * 0.2)
-        arrow_size = (SIZE_DEG * 1.1, SIZE_DEG * 0.45)
+        u = smooth((t - 65.0) / 10.0) - smooth((t - 125.0) / 10.0)   # 0 to 1: how much of a chevron
+        blur = 0.04 + 0.1 * math.sin(math.pi * min(1.0, max(0.0, (t - 30.0) / 110.0))) ** 2   # sharp, then blurred, then sharp again
+        lens_size = (SIZE_DEG, SIZE_DEG * 0.35)
+        arrow_size = (SIZE_DEG * 1.1, SIZE_DEG * 0.75)
         if ms == 0:
-            shapes = [shape_full(lens, "oval", tr("lentille brune", "brown lens"), "#35231a", 0, blur, lens_size, aim),
-                      shape_full(arrow, "polygon", tr("chevron", "chevron"), "#35231a", 1, blur, arrow_size, aim, points=CHEVRON)]
+            shapes = [shape_full(lens, "oval", tr("lentille brune", "brown lens"), BROWN_RED, 0, blur, lens_size, aim),
+                      shape_full(arrow, "polygon", tr("chevron", "chevron"), BROWN_RED, 1, blur, arrow_size, aim, points=CHEVRON)]
         else:
             shapes = [shape_move(lens, lens_size, aim, {"transparency": round(u, 3), "blur": round(blur, 3)}),
                       shape_move(arrow, arrow_size, aim, {"transparency": round(1 - u, 3), "blur": round(blur, 3)})]

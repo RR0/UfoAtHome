@@ -63,6 +63,11 @@ export const html = `
         <span id="share-embed-label">Embed</span>
       </button>
     </div>
+    <!-- Only for a recording that is one of a case's: share the case (opening on one of its recordings) or one recording. -->
+    <div id="share-scope-row" class="share-scope" hidden>
+      <label><span id="share-scope-label">Share</span> <select id="share-scope"></select></label>
+      <label id="share-opens-row"><span id="share-opens-label">Opens on</span> <select id="share-opens"></select></label>
+    </div>
     <!-- What the link and the embed open: the replay, or the editor on the same recording. -->
     <div class="share-kind">
       <label><input type="radio" name="embed-kind" id="embed-kind-replay" value="replay" checked/> <span id="label-embed-replay">Player</span></label>
@@ -617,6 +622,21 @@ ${SummaryDescription.CSS}
 .share-option[aria-pressed="true"] .share-option-icon {
   background: var(--pop-on);
   border-color: var(--pop-on-border);
+}
+.share-scope {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5em 1.5em;
+  margin-bottom: 0.7em;
+  font-size: 0.9em;
+}
+.share-scope[hidden], .share-scope label[hidden] {
+  display: none;
+}
+.share-scope select {
+  font: inherit;
+  max-width: 14em;
 }
 .share-kind {
   display: flex;

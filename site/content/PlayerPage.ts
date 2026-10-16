@@ -189,6 +189,9 @@ if (shared.get("labels") !== "0") stage.setAttribute("show-labels", "")
 if (shared.get("map") === "1") stage.setAttribute("show-observer-map", "")
 if (shared.get("moments") === "0") stage.setAttribute("hide-milestones", "")
 if (shared.get("compare") === "1") stage.setAttribute("compare-account", "")
+/* \`observer=\` picks which recording of a case opens first: an observer's id, a recording's file name, or its place in the list (1 is the first). */
+const observerAsked = shared.get("observer")
+if (observerAsked) stage.setAttribute("observer", observerAsked)
 const playsAtOnce = new URLSearchParams(location.search).get("play") !== "false"
 const startPlaying = () => {
   if (playsAtOnce) stage.scene?.ufoElement?.play()

@@ -76,6 +76,16 @@ export const COMPARE_ACCOUNT_ATTRIBUTE = "compare-account"
  */
 export const START_TIME_ATTRIBUTE = "start-time"
 
+/**
+ * Which recording of a case opens first: `observer="ChauffourValerie"` — the observer's id, the recording's file name,
+ * or its place in the case's list (1 is the first). Without it, or with one that names nothing, the first opens. Applied
+ * when the case is read, and again whenever it changes, so a link can say which account it is about.
+ */
+export const OBSERVER_ATTRIBUTE = "observer"
+
+/** The share dialog's choice of the whole case, as opposed to one recording's address. */
+const CASE_SCOPE = "case"
+
 /** The choice's value for the recording's own account — see offerInterpretations. */
 const ACCOUNT_OPTION = "account"
 
@@ -109,7 +119,7 @@ const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
  */
 export class SightingElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "show-labels", START_TIME_ATTRIBUTE, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
+    return ["src", "show-labels", START_TIME_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -144,6 +154,12 @@ export class SightingElement extends HTMLElement {
   private readonly shareCopy: HTMLButtonElement
   private readonly shareStartOn: HTMLInputElement
   private readonly shareStart: HTMLInputElement
+  private readonly shareScopeRow: HTMLElement
+  private readonly shareScopeLabel: HTMLElement
+  private readonly shareScope: HTMLSelectElement
+  private readonly shareOpensRow: HTMLElement
+  private readonly shareOpensLabel: HTMLElement
+  private readonly shareOpens: HTMLSelectElement
   private readonly shareStartLabel: HTMLElement
   private readonly shareOptions: Record<"labels" | "map" | "milestones" | "compare", { input: HTMLInputElement, label: HTMLElement }>
   private readonly embedReplayRadio: HTMLInputElement
@@ -266,6 +282,12 @@ export class SightingElement extends HTMLElement {
     this.shareStartOn = this.shadow.getElementById("share-start-on") as HTMLInputElement
     this.shareStart = this.shadow.getElementById("share-start") as HTMLInputElement
     this.shareStartLabel = this.shadow.getElementById("share-start-label")!
+    this.shareScopeRow = this.shadow.getElementById("share-scope-row")!
+    this.shareScopeLabel = this.shadow.getElementById("share-scope-label")!
+    this.shareScope = this.shadow.getElementById("share-scope") as HTMLSelectElement
+    this.shareOpensRow = this.shadow.getElementById("share-opens-row")!
+    this.shareOpensLabel = this.shadow.getElementById("share-opens-label")!
+    this.shareOpens = this.shadow.getElementById("share-opens") as HTMLSelectElement
     const option = (name: string) => ({
       input: this.shadow.getElementById(`share-opt-${name}`) as HTMLInputElement,
       label: this.shadow.getElementById(`share-opt-${name}-label`)!
@@ -324,6 +346,7 @@ export class SightingElement extends HTMLElement {
     for (const control of [this.shareStartOn, this.shareStart, ...Object.values(this.shareOptions).map(o => o.input)]) {
       control.addEventListener("input", () => this.refreshShareLinks())
     }
+    for (const select of [this.shareScope, this.shareOpens]) select.addEventListener("change", () => this.refreshShareLinks())
     this.shareCopy.addEventListener("click", () => void this.copyText(this.shareLink.value, this.shareLink, this.shareCopy))
     // A press on the dimmed page around the card, which the dialog itself receives, closes it.
     this.shareDialog.addEventListener("click", event => {
@@ -399,6 +422,8 @@ export class SightingElement extends HTMLElement {
     this.shareClose.setAttribute("aria-label", this.messages.close)
     this.shareCopy.textContent = this.messages.embedCopy
     this.shareStartLabel.textContent = this.messages.shareStartAt
+    this.shareScopeLabel.textContent = this.messages.shareScope
+    this.shareOpensLabel.textContent = this.messages.shareOpensOn
     this.shareOptions.labels.label.textContent = this.messages.shareOptionLabels
     this.shareOptions.map.label.textContent = this.messages.shareOptionMap
     this.shareOptions.milestones.label.textContent = this.messages.shareOptionMilestones
@@ -459,6 +484,10 @@ export class SightingElement extends HTMLElement {
     }
     if (name === OBSERVER_MAP_ATTRIBUTE || name === MILESTONES_ATTRIBUTE) {
       this.forwardPlayerAttributes()
+    }
+    if (name === OBSERVER_ATTRIBUTE && this.entries.length > 1) {
+      const asked = this.entryAsked(this.entries)
+      if (asked && asked.src !== this.currentSrc) this.selectObserver(asked.src)
     }
     if (name === COMPARE_ACCOUNT_ATTRIBUTE) {
       this.setComparing(this.hasAttribute(COMPARE_ACCOUNT_ATTRIBUTE))
@@ -567,12 +596,40 @@ export class SightingElement extends HTMLElement {
 
     // Keeps the current observer selected if the new list still has them (e.g. a case
     // re-read), otherwise falls back to the first observer.
-    const next = entries.find(entry => entry.src === this.currentSrc) ?? entries[0]
+    const next = entries.find(entry => entry.src === this.currentSrc) ?? this.entryAsked(entries) ?? entries[0]
     if (next) {
       this.selectObserver(next.src)
     } else {
       this.updateAccountLine()
     }
+  }
+
+  /** The recording the `observer` attribute names among `entries`, if it names one — see OBSERVER_ATTRIBUTE. */
+  private entryAsked(entries: ObserverEntry[]): ObserverEntry | undefined {
+    const asked = this.getAttribute(OBSERVER_ATTRIBUTE)?.trim()
+    if (!asked) return undefined
+    const byId = entries.find(entry => this.plain(entry).observer?.id === asked)
+    if (byId) return byId
+    const byFile = entries.find(entry => entry.src.split("/").pop() === asked.split("/").pop())
+    if (byFile) return byFile
+    return /^\d+$/.test(asked) ? entries[Number(asked) - 1] : undefined
+  }
+
+  /** What names `entry` in a link or an embed: the observer's id, else its place in the case's list. */
+  private observerKeyOf(entry: ObserverEntry): string {
+    return this.plain(entry).observer?.id ?? String(this.entries.indexOf(entry) + 1)
+  }
+
+  /** The entry the share dialog is about — see shareScopeUrl. */
+  private sharedEntry(): ObserverEntry | undefined {
+    const chosen = this.shareScope.value
+    if (!this.caseSource || chosen === CASE_SCOPE) return undefined
+    return this.entries.find(entry => entry.src === chosen)
+  }
+
+  /** Whether the dialog shares the case, opening on `shareOpens`, rather than one recording. */
+  private get sharesCase(): boolean {
+    return this.caseSource !== undefined && !this.shareScopeRow.hidden && this.shareScope.value === CASE_SCOPE
   }
 
   /**
@@ -629,9 +686,11 @@ export class SightingElement extends HTMLElement {
   private embedMarkupFor(kind: "replay" | "edit"): string {
     const tag = kind === "edit" ? "rr0-sighting-editor" : "rr0-sighting"
     const script = new URL(`${tag}.mjs`, import.meta.url).href
-    const src = this.currentSrc ? new URL(this.currentSrc, location.href).href : ""
-    // The replay can open at a stated position; the editor has no such attribute.
-    const start = kind === "replay" ? this.replayAttributes().map(([name, value]) => value === "" ? ` ${name}` : ` ${name}="${value}"`).join("") : ""
+    const shared = this.sharedAddress()
+    const src = shared.src
+    // The replay can open at a stated position, and on a given recording of a case; the editor has no such attributes.
+    const attributes = kind === "replay" ? [...(shared.observer ? [[OBSERVER_ATTRIBUTE, shared.observer]] : []), ...this.replayAttributes()] : []
+    const start = attributes.map(([name, value]) => value === "" ? ` ${name}` : ` ${name}="${value}"`).join("")
     return `<script type="module" src="${script}"></script>\n<${tag} src="${src}"${start}></${tag}>`
   }
 
@@ -664,9 +723,23 @@ export class SightingElement extends HTMLElement {
    * link is the player's own page.
    */
   private playUrl(): string {
-    const query = this.replayQuery().join("&")
-    if (!this.currentSrc) return `${APP_HOME_URL}/play/${query && "?" + query}`
-    return `${APP_HOME_URL}/play/?file=${encodeURIComponent(new URL(this.currentSrc, location.href).href)}${query && "&" + query}`
+    const shared = this.sharedAddress()
+    const query = [...(shared.observer ? [`${OBSERVER_ATTRIBUTE}=${encodeURIComponent(shared.observer)}`] : []), ...this.replayQuery()].join("&")
+    if (!shared.src) return `${APP_HOME_URL}/play/${query && "?" + query}`
+    return `${APP_HOME_URL}/play/?file=${encodeURIComponent(shared.src)}${query && "&" + query}`
+  }
+
+  /**
+   * What the share dialog gives the address of: the recording on show, or — for a recording that is one of a case's,
+   * where the dialog offers the choice — the whole case, opening on the recording asked for, or another of its recordings.
+   */
+  private sharedAddress(): { src: string, observer?: string } {
+    const absolute = (src: string) => src ? new URL(src, location.href).href : ""
+    if (this.sharesCase) {
+      const opening = this.entries.find(entry => entry.src === this.shareOpens.value) ?? this.entries.find(entry => entry.src === this.currentSrc)
+      return { src: this.caseSource!.url, observer: opening ? this.observerKeyOf(opening) : undefined }
+    }
+    return { src: absolute(this.sharedEntry()?.src ?? this.currentSrc ?? "") }
   }
 
   /**
@@ -708,7 +781,11 @@ export class SightingElement extends HTMLElement {
     // The editor takes none of the replay's options, so they are put aside while it is chosen.
     const editing = this.embedEditRadio.checked
     this.shareReplayOptions.disabled = editing
-    this.shareLink.value = editing ? this.editorUrl() : this.playUrl()
+    this.shareOpensRow.hidden = !this.sharesCase
+    const other = this.sharedEntry()
+    this.shareLink.value = editing
+      ? (other && other.src !== this.currentSrc ? `${APP_EDITOR_URL}?file=${encodeURIComponent(new URL(other.src, location.href).href)}` : this.editorUrl())
+      : this.playUrl()
     this.fitShareLink()
     this.refreshEmbedMarkup()
   }
@@ -747,12 +824,39 @@ export class SightingElement extends HTMLElement {
     this.shareOptions.map.input.checked = ufo.observerMapOpen
     this.shareOptions.milestones.input.checked = ufo.milestonesVisible
     this.shareOptions.compare.input.checked = this.sceneElement.compareAccount
+    this.offerShareScope()
     this.refreshShareLinks()
     this.showShareView("link")
     if (typeof this.shareDialog.showModal === "function") this.shareDialog.showModal()
     else this.shareDialog.setAttribute("open", "")
     this.fitShareLink()
     this.shareLink.select()
+  }
+
+  /**
+   * For a recording that is one of a case's: the choice of what is shared — the whole case, which opens on one of its
+   * recordings (the one on show to begin with), or one recording on its own. Not shown for a recording that stands alone.
+   */
+  private offerShareScope(): void {
+    const inCase = this.caseSource !== undefined && this.entries.length > 1
+    this.shareScopeRow.hidden = !inCase
+    this.shareScope.innerHTML = ""
+    this.shareOpens.innerHTML = ""
+    if (!inCase) return
+    const add = (select: HTMLSelectElement, value: string, label: string) => {
+      const option = document.createElement("option")
+      option.value = value
+      option.textContent = label
+      select.appendChild(option)
+    }
+    add(this.shareScope, CASE_SCOPE, this.messages.shareScopeCase)
+    for (const entry of this.entries) {
+      const name = this.observerDisplayName(this.plain(entry).observer) ?? this.messages.unnamedObserver.replace("{n}", String(this.entries.indexOf(entry) + 1))
+      add(this.shareScope, entry.src, name)
+      add(this.shareOpens, entry.src, name)
+    }
+    this.shareScope.value = CASE_SCOPE
+    this.shareOpens.value = this.currentSrc ?? this.entries[0]!.src
   }
 
   private closeShare(): void {
