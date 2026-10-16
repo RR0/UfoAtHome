@@ -22,7 +22,7 @@
  "durationSeconds": {
   "value": 120.0,
   "basis": "derived",
-  "rationale": "his own duration is not given: the captain's, for the same object"
+  "rationale": "his own duration is not given: the captain's"
  },
  "place": [
   {
@@ -59,8 +59,8 @@
   }
  ],
  "description": {
-  "fr": "Le chef steward, dans le poste de pilotage, en uniforme, derrière le commandant Duboc (peut-être à la place du siège observateur, mais rien ne dit qu'il était assis), est le premier à voir l'objet et à s'exclamer : « Un ballon-sonde ! » On ne sait de lui que cela, par le récit des deux pilotes : aucun relèvement, aucune taille, aucune forme qui soit de lui. Pour que sa vue puisse être jouée, l'objet est placé comme le commandant le voit (même relèvement, même forme) : il est à moins d'un mètre de lui, ce qui ne change rien à une direction à 46 km. Il se tient adossé à la cloison du fond, là où le siège observateur est replié, et voit le commandant de dos, la vitre de gauche au-delà de son épaule.",
-  "en": "The chief steward, in the cockpit, standing behind Captain Duboc (perhaps where the observer's seat is, but nothing says he was seated), is the first to see the object and to exclaim: \"A weather balloon!\" That is all that is known of him, through the two pilots' accounts: no bearing, no size, no shape that is his. So that his view can be played, the object is placed as the captain sees it (same bearing, same shape): he is less than a metre from him, which changes nothing about a direction at 46 km. He stands with his back to the rear bulkhead, where the observer's seat is folded away, and sees the captain from behind, the left window beyond his shoulder."
+  "fr": "Le chef steward, dans le poste de pilotage, en uniforme, derrière le commandant Duboc (peut-être à la place du siège observateur, mais rien ne dit qu'il était assis), est le premier à voir l'objet et à s'exclamer : « Un ballon-sonde ! » On ne sait de lui que cela, par le récit des deux pilotes : aucun relèvement, aucune taille, aucune forme qui soit de lui. Pour que sa vue puisse être jouée, l'objet est placé comme les pilotes le disent : à 10 h, puis à 9 h comme chez la copilote, de la forme du disque du commandant. Il se tient adossé à la cloison du fond, là où le siège observateur est replié, juste derrière le commandant, et le voit de dos, la vitre de gauche au-delà de son épaule.",
+  "en": "The chief steward, in the cockpit, standing behind Captain Duboc (perhaps where the observer's seat is, but nothing says he was seated), is the first to see the object and to exclaim: \"A weather balloon!\" That is all that is known of him, through the two pilots' accounts: no bearing, no size, no shape that is his. So that his view can be played, the object is placed as the pilots say: at 10 o'clock, then at 9 as for the co-pilot, in the shape of the captain's disc. He stands with his back to the rear bulkhead, where the observer's seat is folded away, right behind the captain, and sees him from behind, the left window beyond his shoulder."
  },
  "instrument": "eye",
  "observerTrack": {
@@ -72,7 +72,7 @@
      "lng": 3.084231,
      "elevationM": 11700.0,
      "headingDeg": 272.0,
-     "pitchDeg": -3.18,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -82,8 +82,8 @@
      "lat": 48.762168,
      "lng": 3.081928,
      "elevationM": 11700.0,
-     "headingDeg": 271.58,
-     "pitchDeg": -3.19,
+     "headingDeg": 271.9,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -93,8 +93,8 @@
      "lat": 48.765025,
      "lng": 3.079624,
      "elevationM": 11700.0,
-     "headingDeg": 270.74,
-     "pitchDeg": -3.22,
+     "headingDeg": 271.16,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -104,8 +104,8 @@
      "lat": 48.767881,
      "lng": 3.07732,
      "elevationM": 11700.0,
-     "headingDeg": 269.89,
-     "pitchDeg": -3.24,
+     "headingDeg": 269.78,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -115,8 +115,8 @@
      "lat": 48.770737,
      "lng": 3.075016,
      "elevationM": 11700.0,
-     "headingDeg": 269.02,
-     "pitchDeg": -3.27,
+     "headingDeg": 267.86,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -126,8 +126,8 @@
      "lat": 48.773593,
      "lng": 3.072713,
      "elevationM": 11700.0,
-     "headingDeg": 268.14,
-     "pitchDeg": -3.29,
+     "headingDeg": 265.52,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -137,8 +137,8 @@
      "lat": 48.77645,
      "lng": 3.070409,
      "elevationM": 11700.0,
-     "headingDeg": 267.24,
-     "pitchDeg": -3.32,
+     "headingDeg": 262.86,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -148,8 +148,8 @@
      "lat": 48.779306,
      "lng": 3.068105,
      "elevationM": 11700.0,
-     "headingDeg": 266.34,
-     "pitchDeg": -3.34,
+     "headingDeg": 259.98,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -159,8 +159,8 @@
      "lat": 48.782162,
      "lng": 3.065801,
      "elevationM": 11700.0,
-     "headingDeg": 265.41,
-     "pitchDeg": -3.37,
+     "headingDeg": 257.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -170,8 +170,8 @@
      "lat": 48.785018,
      "lng": 3.063497,
      "elevationM": 11700.0,
-     "headingDeg": 264.48,
-     "pitchDeg": -3.39,
+     "headingDeg": 254.02,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -181,8 +181,8 @@
      "lat": 48.787875,
      "lng": 3.061194,
      "elevationM": 11700.0,
-     "headingDeg": 263.53,
-     "pitchDeg": -3.41,
+     "headingDeg": 251.14,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -192,8 +192,8 @@
      "lat": 48.790731,
      "lng": 3.05889,
      "elevationM": 11700.0,
-     "headingDeg": 262.57,
-     "pitchDeg": -3.44,
+     "headingDeg": 248.48,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -203,8 +203,8 @@
      "lat": 48.793587,
      "lng": 3.056586,
      "elevationM": 11700.0,
-     "headingDeg": 261.6,
-     "pitchDeg": -3.46,
+     "headingDeg": 246.14,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -214,8 +214,8 @@
      "lat": 48.796444,
      "lng": 3.054282,
      "elevationM": 11700.0,
-     "headingDeg": 260.61,
-     "pitchDeg": -3.48,
+     "headingDeg": 244.22,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -225,8 +225,8 @@
      "lat": 48.7993,
      "lng": 3.051979,
      "elevationM": 11700.0,
-     "headingDeg": 259.62,
-     "pitchDeg": -3.5,
+     "headingDeg": 242.84,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -236,8 +236,8 @@
      "lat": 48.802156,
      "lng": 3.049675,
      "elevationM": 11700.0,
-     "headingDeg": 258.61,
-     "pitchDeg": -3.52,
+     "headingDeg": 242.1,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -247,8 +247,8 @@
      "lat": 48.805012,
      "lng": 3.047371,
      "elevationM": 11700.0,
-     "headingDeg": 257.59,
-     "pitchDeg": -3.53,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -258,8 +258,8 @@
      "lat": 48.807869,
      "lng": 3.045067,
      "elevationM": 11700.0,
-     "headingDeg": 256.56,
-     "pitchDeg": -3.55,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -269,8 +269,8 @@
      "lat": 48.810725,
      "lng": 3.042763,
      "elevationM": 11700.0,
-     "headingDeg": 255.53,
-     "pitchDeg": -3.57,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -280,8 +280,8 @@
      "lat": 48.813581,
      "lng": 3.04046,
      "elevationM": 11700.0,
-     "headingDeg": 254.48,
-     "pitchDeg": -3.58,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -291,8 +291,8 @@
      "lat": 48.816437,
      "lng": 3.038156,
      "elevationM": 11700.0,
-     "headingDeg": 253.42,
-     "pitchDeg": -3.6,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -302,8 +302,8 @@
      "lat": 48.819294,
      "lng": 3.035852,
      "elevationM": 11700.0,
-     "headingDeg": 252.36,
-     "pitchDeg": -3.61,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -313,8 +313,8 @@
      "lat": 48.82215,
      "lng": 3.033548,
      "elevationM": 11700.0,
-     "headingDeg": 251.29,
-     "pitchDeg": -3.62,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -324,8 +324,8 @@
      "lat": 48.825006,
      "lng": 3.031245,
      "elevationM": 11700.0,
-     "headingDeg": 250.21,
-     "pitchDeg": -3.63,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -335,8 +335,8 @@
      "lat": 48.827862,
      "lng": 3.028941,
      "elevationM": 11700.0,
-     "headingDeg": 249.13,
-     "pitchDeg": -3.64,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -346,8 +346,8 @@
      "lat": 48.830719,
      "lng": 3.026637,
      "elevationM": 11700.0,
-     "headingDeg": 248.04,
-     "pitchDeg": -3.65,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -357,8 +357,8 @@
      "lat": 48.833575,
      "lng": 3.024333,
      "elevationM": 11700.0,
-     "headingDeg": 246.95,
-     "pitchDeg": -3.66,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -368,8 +368,8 @@
      "lat": 48.836431,
      "lng": 3.02203,
      "elevationM": 11700.0,
-     "headingDeg": 245.85,
-     "pitchDeg": -3.66,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -379,8 +379,8 @@
      "lat": 48.839287,
      "lng": 3.019726,
      "elevationM": 11700.0,
-     "headingDeg": 244.75,
-     "pitchDeg": -3.67,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -390,8 +390,8 @@
      "lat": 48.842144,
      "lng": 3.017422,
      "elevationM": 11700.0,
-     "headingDeg": 243.65,
-     "pitchDeg": -3.67,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -401,8 +401,8 @@
      "lat": 48.845,
      "lng": 3.015118,
      "elevationM": 11700.0,
-     "headingDeg": 242.55,
-     "pitchDeg": -3.67,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -412,8 +412,8 @@
      "lat": 48.847856,
      "lng": 3.012814,
      "elevationM": 11700.0,
-     "headingDeg": 241.45,
-     "pitchDeg": -3.67,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -423,8 +423,8 @@
      "lat": 48.850713,
      "lng": 3.010511,
      "elevationM": 11700.0,
-     "headingDeg": 240.35,
-     "pitchDeg": -3.67,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -434,8 +434,8 @@
      "lat": 48.853569,
      "lng": 3.008207,
      "elevationM": 11700.0,
-     "headingDeg": 239.25,
-     "pitchDeg": -3.67,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -445,8 +445,8 @@
      "lat": 48.856425,
      "lng": 3.005903,
      "elevationM": 11700.0,
-     "headingDeg": 238.15,
-     "pitchDeg": -3.66,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -456,8 +456,8 @@
      "lat": 48.859281,
      "lng": 3.003599,
      "elevationM": 11700.0,
-     "headingDeg": 237.05,
-     "pitchDeg": -3.66,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -467,8 +467,8 @@
      "lat": 48.862138,
      "lng": 3.001296,
      "elevationM": 11700.0,
-     "headingDeg": 235.96,
-     "pitchDeg": -3.65,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -478,8 +478,8 @@
      "lat": 48.864994,
      "lng": 2.998992,
      "elevationM": 11700.0,
-     "headingDeg": 234.87,
-     "pitchDeg": -3.64,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -489,8 +489,8 @@
      "lat": 48.86785,
      "lng": 2.996688,
      "elevationM": 11700.0,
-     "headingDeg": 233.79,
-     "pitchDeg": -3.63,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -500,8 +500,8 @@
      "lat": 48.870706,
      "lng": 2.994384,
      "elevationM": 11700.0,
-     "headingDeg": 232.71,
-     "pitchDeg": -3.62,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -511,8 +511,8 @@
      "lat": 48.873563,
      "lng": 2.99208,
      "elevationM": 11700.0,
-     "headingDeg": 231.64,
-     "pitchDeg": -3.61,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -522,8 +522,8 @@
      "lat": 48.876419,
      "lng": 2.989777,
      "elevationM": 11700.0,
-     "headingDeg": 230.58,
-     "pitchDeg": -3.6,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -533,8 +533,8 @@
      "lat": 48.879275,
      "lng": 2.987473,
      "elevationM": 11700.0,
-     "headingDeg": 229.52,
-     "pitchDeg": -3.58,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -544,8 +544,8 @@
      "lat": 48.882131,
      "lng": 2.985169,
      "elevationM": 11700.0,
-     "headingDeg": 228.47,
-     "pitchDeg": -3.57,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -555,8 +555,8 @@
      "lat": 48.884988,
      "lng": 2.982865,
      "elevationM": 11700.0,
-     "headingDeg": 227.44,
-     "pitchDeg": -3.55,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -566,8 +566,8 @@
      "lat": 48.887844,
      "lng": 2.980562,
      "elevationM": 11700.0,
-     "headingDeg": 226.41,
-     "pitchDeg": -3.53,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -577,8 +577,8 @@
      "lat": 48.8907,
      "lng": 2.978258,
      "elevationM": 11700.0,
-     "headingDeg": 225.39,
-     "pitchDeg": -3.52,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -588,8 +588,8 @@
      "lat": 48.893556,
      "lng": 2.975954,
      "elevationM": 11700.0,
-     "headingDeg": 224.38,
-     "pitchDeg": -3.5,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -599,8 +599,8 @@
      "lat": 48.896413,
      "lng": 2.97365,
      "elevationM": 11700.0,
-     "headingDeg": 223.39,
-     "pitchDeg": -3.48,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -610,8 +610,8 @@
      "lat": 48.899269,
      "lng": 2.971346,
      "elevationM": 11700.0,
-     "headingDeg": 222.4,
-     "pitchDeg": -3.46,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -621,8 +621,8 @@
      "lat": 48.902125,
      "lng": 2.969043,
      "elevationM": 11700.0,
-     "headingDeg": 221.43,
-     "pitchDeg": -3.44,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -632,8 +632,8 @@
      "lat": 48.904982,
      "lng": 2.966739,
      "elevationM": 11700.0,
-     "headingDeg": 220.47,
-     "pitchDeg": -3.41,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -643,8 +643,8 @@
      "lat": 48.907838,
      "lng": 2.964435,
      "elevationM": 11700.0,
-     "headingDeg": 219.52,
-     "pitchDeg": -3.39,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -654,8 +654,8 @@
      "lat": 48.910694,
      "lng": 2.962131,
      "elevationM": 11700.0,
-     "headingDeg": 218.59,
-     "pitchDeg": -3.37,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -665,8 +665,8 @@
      "lat": 48.91355,
      "lng": 2.959828,
      "elevationM": 11700.0,
-     "headingDeg": 217.66,
-     "pitchDeg": -3.34,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -676,8 +676,8 @@
      "lat": 48.916407,
      "lng": 2.957524,
      "elevationM": 11700.0,
-     "headingDeg": 216.76,
-     "pitchDeg": -3.32,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -687,8 +687,8 @@
      "lat": 48.919263,
      "lng": 2.95522,
      "elevationM": 11700.0,
-     "headingDeg": 215.86,
-     "pitchDeg": -3.29,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -698,8 +698,8 @@
      "lat": 48.922119,
      "lng": 2.952916,
      "elevationM": 11700.0,
-     "headingDeg": 214.98,
-     "pitchDeg": -3.27,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -709,8 +709,8 @@
      "lat": 48.924975,
      "lng": 2.950613,
      "elevationM": 11700.0,
-     "headingDeg": 214.11,
-     "pitchDeg": -3.24,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -720,8 +720,8 @@
      "lat": 48.927832,
      "lng": 2.948309,
      "elevationM": 11700.0,
-     "headingDeg": 213.26,
-     "pitchDeg": -3.22,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    },
@@ -731,8 +731,8 @@
      "lat": 48.930688,
      "lng": 2.946005,
      "elevationM": 11700.0,
-     "headingDeg": 212.42,
-     "pitchDeg": -3.19,
+     "headingDeg": 242.0,
+     "pitchDeg": -1.49,
      "fovDeg": 60
     }
    }
@@ -766,11 +766,11 @@
        "haloScale": 0,
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.311
+        "heightDeg": 0.252
        },
        "aim": {
         "azimuthDeg": 272.0,
-        "altitudeDeg": -3.179
+        "altitudeDeg": -1.494
        },
        "angle": 0.0
       }
@@ -785,11 +785,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.311
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 271.585,
-        "altitudeDeg": -3.192
+        "azimuthDeg": 271.902,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -803,11 +803,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.312
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 271.166,
-        "altitudeDeg": -3.205
+        "azimuthDeg": 271.618,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -821,11 +821,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.312
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 270.744,
-        "altitudeDeg": -3.218
+        "azimuthDeg": 271.16,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -839,11 +839,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.312
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 270.318,
-        "altitudeDeg": -3.231
+        "azimuthDeg": 270.542,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -857,11 +857,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.313
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 269.889,
-        "altitudeDeg": -3.244
+        "azimuthDeg": 269.778,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -875,11 +875,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.313
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 269.457,
-        "altitudeDeg": -3.257
+        "azimuthDeg": 268.88,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -893,11 +893,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.314
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 269.021,
-        "altitudeDeg": -3.27
+        "azimuthDeg": 267.862,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -911,11 +911,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.314
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 268.582,
-        "altitudeDeg": -3.282
+        "azimuthDeg": 266.738,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -929,11 +929,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.315
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 268.139,
-        "altitudeDeg": -3.295
+        "azimuthDeg": 265.52,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -947,11 +947,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.315
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 267.693,
-        "altitudeDeg": -3.307
+        "azimuthDeg": 264.222,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -965,11 +965,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.315
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 267.244,
-        "altitudeDeg": -3.32
+        "azimuthDeg": 262.858,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -983,11 +983,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.316
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 266.791,
-        "altitudeDeg": -3.332
+        "azimuthDeg": 261.44,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1001,11 +1001,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.316
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 266.335,
-        "altitudeDeg": -3.344
+        "azimuthDeg": 259.982,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1019,11 +1019,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.317
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 265.876,
-        "altitudeDeg": -3.356
+        "azimuthDeg": 258.498,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1037,11 +1037,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.317
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 265.413,
-        "altitudeDeg": -3.368
+        "azimuthDeg": 257.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1055,11 +1055,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.318
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 264.947,
-        "altitudeDeg": -3.38
+        "azimuthDeg": 255.502,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1073,11 +1073,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.318
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 264.478,
-        "altitudeDeg": -3.391
+        "azimuthDeg": 254.018,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1091,11 +1091,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.318
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 264.006,
-        "altitudeDeg": -3.403
+        "azimuthDeg": 252.56,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1109,11 +1109,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.319
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 263.53,
-        "altitudeDeg": -3.414
+        "azimuthDeg": 251.142,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1127,11 +1127,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.319
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 263.052,
-        "altitudeDeg": -3.425
+        "azimuthDeg": 249.778,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1145,11 +1145,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.32
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 262.57,
-        "altitudeDeg": -3.436
+        "azimuthDeg": 248.48,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1163,11 +1163,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.32
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 262.085,
-        "altitudeDeg": -3.447
+        "azimuthDeg": 247.262,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1181,11 +1181,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.32
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 261.597,
-        "altitudeDeg": -3.457
+        "azimuthDeg": 246.138,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1199,11 +1199,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.321
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 261.107,
-        "altitudeDeg": -3.468
+        "azimuthDeg": 245.12,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1217,11 +1217,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.321
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 260.613,
-        "altitudeDeg": -3.478
+        "azimuthDeg": 244.222,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1235,11 +1235,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.321
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 260.116,
-        "altitudeDeg": -3.488
+        "azimuthDeg": 243.458,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1253,11 +1253,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.322
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 259.617,
-        "altitudeDeg": -3.498
+        "azimuthDeg": 242.84,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1271,11 +1271,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.322
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 259.115,
-        "altitudeDeg": -3.507
+        "azimuthDeg": 242.382,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1289,11 +1289,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.322
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 258.61,
-        "altitudeDeg": -3.517
+        "azimuthDeg": 242.098,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1307,11 +1307,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.323
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 258.102,
-        "altitudeDeg": -3.526
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1325,11 +1325,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.323
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 257.592,
-        "altitudeDeg": -3.535
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1343,11 +1343,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.323
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 257.079,
-        "altitudeDeg": -3.543
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1361,11 +1361,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.324
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 256.564,
-        "altitudeDeg": -3.552
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1379,11 +1379,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.324
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 256.046,
-        "altitudeDeg": -3.56
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1397,11 +1397,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.324
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 255.526,
-        "altitudeDeg": -3.568
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1415,11 +1415,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.324
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 255.004,
-        "altitudeDeg": -3.576
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1433,11 +1433,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.325
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 254.479,
-        "altitudeDeg": -3.583
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1451,11 +1451,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.325
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 253.953,
-        "altitudeDeg": -3.59
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1469,11 +1469,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.325
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 253.424,
-        "altitudeDeg": -3.597
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1487,11 +1487,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.325
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 252.893,
-        "altitudeDeg": -3.603
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1505,11 +1505,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.326
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 252.361,
-        "altitudeDeg": -3.61
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1523,11 +1523,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.326
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 251.826,
-        "altitudeDeg": -3.616
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1541,11 +1541,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.326
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 251.29,
-        "altitudeDeg": -3.621
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1559,11 +1559,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.326
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 250.753,
-        "altitudeDeg": -3.627
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1577,11 +1577,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.326
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 250.213,
-        "altitudeDeg": -3.632
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1595,11 +1595,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.326
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 249.672,
-        "altitudeDeg": -3.637
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1613,11 +1613,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 249.13,
-        "altitudeDeg": -3.641
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1631,11 +1631,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 248.587,
-        "altitudeDeg": -3.645
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1649,11 +1649,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 248.042,
-        "altitudeDeg": -3.649
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1667,11 +1667,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 247.496,
-        "altitudeDeg": -3.653
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1685,11 +1685,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 246.95,
-        "altitudeDeg": -3.656
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1703,11 +1703,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 246.402,
-        "altitudeDeg": -3.659
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1721,11 +1721,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 245.853,
-        "altitudeDeg": -3.661
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1739,11 +1739,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 245.304,
-        "altitudeDeg": -3.663
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1757,11 +1757,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 244.755,
-        "altitudeDeg": -3.665
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1775,11 +1775,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 244.204,
-        "altitudeDeg": -3.667
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1793,11 +1793,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.328
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 243.654,
-        "altitudeDeg": -3.668
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1811,11 +1811,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.328
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 243.103,
-        "altitudeDeg": -3.669
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1829,11 +1829,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.328
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 242.551,
-        "altitudeDeg": -3.669
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1847,11 +1847,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.328
+        "heightDeg": 0.252
        },
        "aim": {
         "azimuthDeg": 242.0,
-        "altitudeDeg": -3.669
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1865,11 +1865,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.328
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 241.449,
-        "altitudeDeg": -3.669
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1883,11 +1883,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.328
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 240.897,
-        "altitudeDeg": -3.669
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1901,11 +1901,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.328
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 240.346,
-        "altitudeDeg": -3.668
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1919,11 +1919,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 239.796,
-        "altitudeDeg": -3.667
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1937,11 +1937,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 239.245,
-        "altitudeDeg": -3.665
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1955,11 +1955,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 238.696,
-        "altitudeDeg": -3.663
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1973,11 +1973,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 238.147,
-        "altitudeDeg": -3.661
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -1991,11 +1991,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 237.598,
-        "altitudeDeg": -3.659
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2009,11 +2009,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 237.05,
-        "altitudeDeg": -3.656
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2027,11 +2027,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 236.504,
-        "altitudeDeg": -3.653
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2045,11 +2045,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 235.958,
-        "altitudeDeg": -3.649
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2063,11 +2063,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 235.413,
-        "altitudeDeg": -3.645
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2081,11 +2081,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.327
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 234.87,
-        "altitudeDeg": -3.641
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2099,11 +2099,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.326
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 234.328,
-        "altitudeDeg": -3.637
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2117,11 +2117,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.326
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 233.787,
-        "altitudeDeg": -3.632
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2135,11 +2135,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.326
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 233.247,
-        "altitudeDeg": -3.627
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2153,11 +2153,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.326
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 232.71,
-        "altitudeDeg": -3.621
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2171,11 +2171,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.326
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 232.174,
-        "altitudeDeg": -3.616
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2189,11 +2189,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.326
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 231.639,
-        "altitudeDeg": -3.61
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2207,11 +2207,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.325
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 231.107,
-        "altitudeDeg": -3.603
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2225,11 +2225,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.325
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 230.576,
-        "altitudeDeg": -3.597
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2243,11 +2243,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.325
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 230.047,
-        "altitudeDeg": -3.59
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2261,11 +2261,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.325
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 229.521,
-        "altitudeDeg": -3.583
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2279,11 +2279,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.324
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 228.996,
-        "altitudeDeg": -3.576
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2297,11 +2297,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.324
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 228.474,
-        "altitudeDeg": -3.568
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2315,11 +2315,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.324
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 227.954,
-        "altitudeDeg": -3.56
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2333,11 +2333,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.324
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 227.436,
-        "altitudeDeg": -3.552
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2351,11 +2351,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.323
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 226.921,
-        "altitudeDeg": -3.543
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2369,11 +2369,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.323
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 226.408,
-        "altitudeDeg": -3.535
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2387,11 +2387,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.323
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 225.898,
-        "altitudeDeg": -3.526
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2405,11 +2405,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.322
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 225.39,
-        "altitudeDeg": -3.517
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2423,11 +2423,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.322
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 224.885,
-        "altitudeDeg": -3.507
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2441,11 +2441,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.322
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 224.383,
-        "altitudeDeg": -3.498
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2459,11 +2459,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.321
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 223.884,
-        "altitudeDeg": -3.488
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2477,11 +2477,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.321
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 223.387,
-        "altitudeDeg": -3.478
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2495,11 +2495,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.321
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 222.893,
-        "altitudeDeg": -3.468
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2513,11 +2513,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.32
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 222.403,
-        "altitudeDeg": -3.457
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2531,11 +2531,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.32
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 221.915,
-        "altitudeDeg": -3.447
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2549,11 +2549,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.32
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 221.43,
-        "altitudeDeg": -3.436
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2567,11 +2567,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.319
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 220.948,
-        "altitudeDeg": -3.425
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2585,11 +2585,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.319
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 220.47,
-        "altitudeDeg": -3.414
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2603,11 +2603,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.318
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 219.994,
-        "altitudeDeg": -3.403
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2621,11 +2621,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.318
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 219.522,
-        "altitudeDeg": -3.391
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2639,11 +2639,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.318
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 219.053,
-        "altitudeDeg": -3.38
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2657,11 +2657,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.317
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 218.587,
-        "altitudeDeg": -3.368
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2675,11 +2675,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.317
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 218.124,
-        "altitudeDeg": -3.356
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2693,11 +2693,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.316
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 217.665,
-        "altitudeDeg": -3.344
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2711,11 +2711,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.316
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 217.209,
-        "altitudeDeg": -3.332
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2729,11 +2729,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.315
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 216.756,
-        "altitudeDeg": -3.32
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2747,11 +2747,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.315
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 216.307,
-        "altitudeDeg": -3.307
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2765,11 +2765,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.315
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 215.861,
-        "altitudeDeg": -3.295
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2783,11 +2783,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.314
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 215.418,
-        "altitudeDeg": -3.282
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2801,11 +2801,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.314
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 214.979,
-        "altitudeDeg": -3.27
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2819,11 +2819,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.313
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 214.543,
-        "altitudeDeg": -3.257
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2837,11 +2837,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.313
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 214.111,
-        "altitudeDeg": -3.244
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2855,11 +2855,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.312
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 213.682,
-        "altitudeDeg": -3.231
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2873,11 +2873,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.312
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 213.256,
-        "altitudeDeg": -3.218
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2891,11 +2891,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.312
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 212.834,
-        "altitudeDeg": -3.205
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2909,11 +2909,11 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.311
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 212.415,
-        "altitudeDeg": -3.192
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
       }
      }
@@ -2927,31 +2927,12 @@
       "shape": {
        "angular": {
         "widthDeg": 2.0,
-        "heightDeg": 0.311
+        "heightDeg": 0.252
        },
        "aim": {
-        "azimuthDeg": 212.0,
-        "altitudeDeg": -3.179
+        "azimuthDeg": 242.0,
+        "altitudeDeg": -1.494
        }
-      }
-     }
-    ]
-   },
-   {
-    "t": 121500,
-    "shapes": [
-     {
-      "sourceId": "disc",
-      "shape": {
-       "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.311
-       },
-       "aim": {
-        "azimuthDeg": 212.0,
-        "altitudeDeg": -3.179
-       },
-       "transparency": 1
       }
      }
     ]
@@ -3032,8 +3013,8 @@
     "fr": "Poste de pilotage de l'A320 (adossé à la cloison du fond : le chef steward)",
     "en": "A320 flight deck (back to the rear bulkhead: the chief steward)"
    },
-   "eastM": 0.09,
-   "northM": 0.52,
+   "eastM": 0.3,
+   "northM": 0.63,
    "headingDeg": 332.0,
    "sizeM": {
     "widthM": 3.257,
@@ -3046,176 +3027,176 @@
    "track": [
     {
      "t": 0,
-     "eastM": 0.09,
-     "northM": 0.52,
+     "eastM": 0.3,
+     "northM": 0.63,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 5000,
-     "eastM": -422.48,
-     "northM": 795.45,
+     "eastM": -422.27,
+     "northM": 795.56,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 10000,
-     "eastM": -844.92,
-     "northM": 1590.28,
+     "eastM": -844.71,
+     "northM": 1590.39,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 15000,
-     "eastM": -1267.31,
-     "northM": 2385.21,
+     "eastM": -1267.1,
+     "northM": 2385.33,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 20000,
-     "eastM": -1689.52,
-     "northM": 3180.15,
+     "eastM": -1689.31,
+     "northM": 3180.26,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 25000,
-     "eastM": -2111.67,
-     "northM": 3974.98,
+     "eastM": -2111.46,
+     "northM": 3975.09,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 30000,
-     "eastM": -2533.63,
-     "northM": 4769.91,
+     "eastM": -2533.42,
+     "northM": 4770.02,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 35000,
-     "eastM": -2955.55,
-     "northM": 5564.85,
+     "eastM": -2955.34,
+     "northM": 5564.96,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 40000,
-     "eastM": -3377.27,
-     "northM": 6359.67,
+     "eastM": -3377.06,
+     "northM": 6359.78,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 45000,
-     "eastM": -3798.94,
-     "northM": 7154.61,
+     "eastM": -3798.73,
+     "northM": 7154.72,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 50000,
-     "eastM": -4220.42,
-     "northM": 7949.54,
+     "eastM": -4220.21,
+     "northM": 7949.66,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 55000,
-     "eastM": -4641.78,
-     "northM": 8744.37,
+     "eastM": -4641.57,
+     "northM": 8744.48,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 60000,
-     "eastM": -5063.1,
-     "northM": 9539.31,
+     "eastM": -5062.89,
+     "northM": 9539.42,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 65000,
-     "eastM": -5484.22,
-     "northM": 10334.24,
+     "eastM": -5484.01,
+     "northM": 10334.35,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 70000,
-     "eastM": -5905.29,
-     "northM": 11129.07,
+     "eastM": -5905.08,
+     "northM": 11129.18,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 75000,
-     "eastM": -6326.17,
-     "northM": 11924.0,
+     "eastM": -6325.96,
+     "northM": 11924.11,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 80000,
-     "eastM": -6747.0,
-     "northM": 12718.94,
+     "eastM": -6746.79,
+     "northM": 12719.05,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 85000,
-     "eastM": -7167.64,
-     "northM": 13513.76,
+     "eastM": -7167.43,
+     "northM": 13513.87,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 90000,
-     "eastM": -7588.15,
-     "northM": 14308.7,
+     "eastM": -7587.94,
+     "northM": 14308.81,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 95000,
-     "eastM": -8008.62,
-     "northM": 15103.64,
+     "eastM": -8008.41,
+     "northM": 15103.75,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 100000,
-     "eastM": -8428.9,
-     "northM": 15898.46,
+     "eastM": -8428.69,
+     "northM": 15898.57,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 105000,
-     "eastM": -8849.13,
-     "northM": 16693.4,
+     "eastM": -8848.92,
+     "northM": 16693.51,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 110000,
-     "eastM": -9269.16,
-     "northM": 17488.33,
+     "eastM": -9268.95,
+     "northM": 17488.44,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 115000,
-     "eastM": -9689.15,
-     "northM": 18283.16,
+     "eastM": -9688.94,
+     "northM": 18283.27,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     },
     {
      "t": 120000,
-     "eastM": -10108.94,
-     "northM": 19078.09,
+     "eastM": -10108.73,
+     "northM": 19078.21,
      "altitudeM": 11701.28,
      "headingDeg": 332.0
     }
@@ -3232,8 +3213,8 @@
     "fr": "Le commandant Duboc, au siège gauche",
     "en": "Captain Duboc, at the left seat"
    },
-   "eastM": -0.55,
-   "northM": 0.64,
+   "eastM": -0.34,
+   "northM": 0.75,
    "headingDeg": 332.0,
    "sizeM": {
     "heightM": 1.292
@@ -3244,176 +3225,176 @@
    "track": [
     {
      "t": 0,
-     "eastM": -0.55,
-     "northM": 0.64,
+     "eastM": -0.34,
+     "northM": 0.75,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 5000,
-     "eastM": -423.11,
-     "northM": 795.58,
+     "eastM": -422.9,
+     "northM": 795.69,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 10000,
-     "eastM": -845.55,
-     "northM": 1590.4,
+     "eastM": -845.35,
+     "northM": 1590.51,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 15000,
-     "eastM": -1267.95,
-     "northM": 2385.34,
+     "eastM": -1267.74,
+     "northM": 2385.45,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 20000,
-     "eastM": -1690.15,
-     "northM": 3180.27,
+     "eastM": -1689.94,
+     "northM": 3180.39,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 25000,
-     "eastM": -2112.31,
-     "northM": 3975.1,
+     "eastM": -2112.1,
+     "northM": 3975.21,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 30000,
-     "eastM": -2534.27,
-     "northM": 4770.04,
+     "eastM": -2534.06,
+     "northM": 4770.15,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 35000,
-     "eastM": -2956.18,
-     "northM": 5564.97,
+     "eastM": -2955.98,
+     "northM": 5565.08,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 40000,
-     "eastM": -3377.91,
-     "northM": 6359.8,
+     "eastM": -3377.7,
+     "northM": 6359.91,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 45000,
-     "eastM": -3799.58,
-     "northM": 7154.73,
+     "eastM": -3799.37,
+     "northM": 7154.84,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 50000,
-     "eastM": -4221.06,
-     "northM": 7949.67,
+     "eastM": -4220.85,
+     "northM": 7949.78,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 55000,
-     "eastM": -4642.42,
-     "northM": 8744.49,
+     "eastM": -4642.21,
+     "northM": 8744.6,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 60000,
-     "eastM": -5063.73,
-     "northM": 9539.43,
+     "eastM": -5063.52,
+     "northM": 9539.54,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 65000,
-     "eastM": -5484.85,
-     "northM": 10334.37,
+     "eastM": -5484.64,
+     "northM": 10334.48,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 70000,
-     "eastM": -5905.92,
-     "northM": 11129.19,
+     "eastM": -5905.72,
+     "northM": 11129.3,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 75000,
-     "eastM": -6326.8,
-     "northM": 11924.13,
+     "eastM": -6326.59,
+     "northM": 11924.24,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 80000,
-     "eastM": -6747.63,
-     "northM": 12719.06,
+     "eastM": -6747.43,
+     "northM": 12719.17,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 85000,
-     "eastM": -7168.27,
-     "northM": 13513.89,
+     "eastM": -7168.06,
+     "northM": 13514.0,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 90000,
-     "eastM": -7588.79,
-     "northM": 14308.82,
+     "eastM": -7588.58,
+     "northM": 14308.93,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 95000,
-     "eastM": -8009.26,
-     "northM": 15103.76,
+     "eastM": -8009.05,
+     "northM": 15103.87,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 100000,
-     "eastM": -8429.54,
-     "northM": 15898.58,
+     "eastM": -8429.33,
+     "northM": 15898.7,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 105000,
-     "eastM": -8849.76,
-     "northM": 16693.52,
+     "eastM": -8849.55,
+     "northM": 16693.63,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 110000,
-     "eastM": -9269.8,
-     "northM": 17488.46,
+     "eastM": -9269.59,
+     "northM": 17488.57,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 115000,
-     "eastM": -9689.79,
-     "northM": 18283.28,
+     "eastM": -9689.58,
+     "northM": 18283.39,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     },
     {
      "t": 120000,
-     "eastM": -10109.58,
-     "northM": 19078.22,
+     "eastM": -10109.37,
+     "northM": 19078.33,
      "altitudeM": 11700.26,
      "headingDeg": 332.0
     }
@@ -3433,11 +3414,11 @@
    }
   },
   {
-   "t": 120000,
-   "label": "C",
+   "t": 30000,
+   "label": "B",
    "note": {
-    "fr": "Sur l'arrière gauche (8 h), il devient transparent et disparaît",
-    "en": "Behind on the left (8 o'clock), it turns transparent and vanishes"
+    "fr": "Puis à 9 h, à gauche",
+    "en": "Then at 9 o'clock, to the left"
    }
   }
  ]

@@ -156,11 +156,11 @@ def airframe(total_s, ident, title, model, size, forward_m, left_m, below_m, ext
 # of two of these points.
 COCKPIT_AT = (0.02, 0.684, 2.654)
 CAPTAIN_AT = (-0.484, -0.338, 2.246)
-STEWARD_AT = (-0.3, -0.378, 3.12)                     # standing against the rear bulkhead, behind the captain's right shoulder, 0.64 m behind his eyes
+STEWARD_AT = (-0.537, -0.378, 3.12)                   # standing against the rear bulkhead, right behind the captain, 0.64 m behind his eyes
 EYE_CAPTAIN, EYE_COPILOT = (-0.537, 0.83, 2.48), (0.537, 0.83, 2.48)
-# The chief steward, standing against the rear bulkhead (where the observer's seat is folded away) behind the captain's right shoulder, stooping
-# a little under the overhead panel: he sees the captain from behind, and the left window past his shoulder.
-EYE_STEWARD = (-0.3, 1.0, 3.07)
+# The chief steward, standing against the rear bulkhead (where the observer's seat is folded away) right behind the captain, stooping
+# a little under the overhead panel: he sees the captain from behind, and the left window beyond his shoulder.
+EYE_STEWARD = (-0.537, 1.0, 3.07)
 # He cannot stand straight under the ceiling of the rear of the flight deck (1.7 m above the floor there): a man of 1.62 m, in an Air France uniform
 # (navy), his back to the rear bulkhead where the observer's seat is folded away.
 STEWARD_HEIGHT_M = 1.62
@@ -226,15 +226,8 @@ def shape_move(sid, size, aim, extra=None):
 
 
 # --- the commander ------------------------------------------------------------------------------
-def commander():
-    total = 120.0                                    # "1 ou 2 mn" in the report: the two minutes, the 11 NM of the SEPRA
-    lateral = SPEED * total * math.tan(math.radians(60)) / 2
-    left = HEADING - 90.0
-    target = enu(left, lateral)                      # motionless, abeam at 10 NM when the airliner is in the middle of the track
-
-    def aim_at(t):
-        return aim_of(target, plane_at(t, total))
-
+def disc_frames(total, aim_at, vanishes=True):
+    """The disc of the captain's account, one picture a second, at `aim_at(t)` (compass azimuth and altitude); turning transparent at the end if it `vanishes`."""
     frames = []
     for ms in range(0, int(total * 1000) + 1, STEP_MS):
         t = ms / 1000.0
@@ -248,11 +241,25 @@ def commander():
         sid = "disc"
         frames.append({"t": ms, "shapes": [(shape_full(sid, "oval", tr("disque brun-rouge, bords légèrement flous", "red-brown disc, slightly blurred edges"),
                                                        BROWN_RED, 0, 0.09, size, aim) if ms == 0 else shape_move(sid, size, aim))]})
-    # "je le vois soudain devenir transparent et disparaître sans bouger"
-    last = frames[-1]["shapes"][0]
-    fade = json.loads(json.dumps(last))
-    fade["shape"]["transparency"] = 1
-    frames.append({"t": int(total * 1000) + 1500, "shapes": [fade]})
+    if vanishes:
+        # "je le vois soudain devenir transparent et disparaître sans bouger"
+        last = frames[-1]["shapes"][0]
+        fade = json.loads(json.dumps(last))
+        fade["shape"]["transparency"] = 1
+        frames.append({"t": int(total * 1000) + 1500, "shapes": [fade]})
+    return frames
+
+
+def commander():
+    total = 120.0                                    # "1 ou 2 mn" in the report: the two minutes, the 11 NM of the SEPRA
+    lateral = SPEED * total * math.tan(math.radians(60)) / 2
+    left = HEADING - 90.0
+    target = enu(left, lateral)                      # motionless, abeam at 10 NM when the airliner is in the middle of the track
+
+    def aim_at(t):
+        return aim_of(target, plane_at(t, total))
+
+    frames = disc_frames(total, aim_at)
     return total, frames, aim_at
 
 
@@ -587,13 +594,18 @@ def steward_recording():
     """The chief steward's account: he was behind the captain, and was the first to see the object and to say what it was (\"un ballon-sonde\"). Nothing
     he said gives a bearing, a size or a shape: he is given the captain's (the same object, seen from half a metre behind and 0.44 m above his
     eyes, which is no parallax at all at that distance), the only reason this recording has an object in it. Nobody gives his name."""
-    total, frames, aim_at = commander()
+    total = 120.0
+    # He looks at it as the co-pilot does, from 10 h and then 9 h (from where he stands, behind the captain), and nothing says it vanishes for him.
+    def aim_at(t):
+        return ((HEADING - 60.0 - 30.0 * smooth(t / 30.0)) % 360.0, math.degrees(math.atan2(OBJECT_M - PLANE_M, 46000.0)))
+    frames = disc_frames(total, aim_at, vanishes=False)
     rec = commander_recording()
     rec.pop("_aim", None)
+    rec["timeline"] = {"order": ["disc"], "groups": [["disc"]], "keyframes": frames}
     rec["id"] = "1994-01-28-ChiefSteward"
     rec["observer"] = {"id": "ChiefStewardAF3532", "title": "Le chef steward"}
     rec["account"] = {"observerOccupation": tr("chef steward, Air France", "chief steward, Air France")}
-    rec["durationSeconds"] = stated(total, "derived", "his own duration is not given: the captain's, for the same object")
+    rec["durationSeconds"] = stated(total, "derived", "his own duration is not given: the captain's")
     rec["observerTrack"] = track(total, aim_at, 1.0)
     rec["decor"] = airliner(total, "steward")
     rec["sources"] = [{"type": "article", "title": "Rapport du pilote Duboc pour Dominique Weinstein, copie au SEPRA", "authors": ["Jean-Charles Duboc"],
@@ -602,16 +614,16 @@ def steward_recording():
         "fr": ("Le chef steward, dans le poste de pilotage, en uniforme, derrière le commandant Duboc (peut-être à la place du siège observateur, mais rien ne dit "
                "qu'il était assis), est le premier à voir l'objet et à s'exclamer : « Un ballon-sonde ! » On ne sait de lui que cela, par le "
                "récit des deux pilotes : aucun relèvement, aucune taille, aucune forme qui soit de lui. Pour que sa vue puisse être jouée, "
-               "l'objet est placé comme le commandant le voit (même relèvement, même forme) : il est à moins d'un mètre de lui, ce qui ne change "
-               "rien à une direction à 46 km. Il se tient adossé à la cloison du fond, là où le siège observateur est replié, et voit le commandant de dos, la vitre de gauche au-delà de son épaule."),
+               "l'objet est placé comme les pilotes le disent : à 10 h, puis à 9 h comme chez la copilote, de la forme du disque du commandant. "
+               "Il se tient adossé à la cloison du fond, là où le siège observateur est replié, juste derrière le commandant, et le voit de dos, la vitre de gauche au-delà de son épaule."),
         "en": ("The chief steward, in the cockpit, standing behind Captain Duboc (perhaps where the observer's seat is, but nothing says he was "
                "seated), is the first to see the object and to exclaim: \"A weather balloon!\" That is all that is known of him, through the two "
-               "pilots' accounts: no bearing, no size, no shape that is his. So that his view can be played, the object is placed as the captain "
-               "sees it (same bearing, same shape): he is less than a metre from him, which changes nothing about a direction at 46 km. "
-               "He stands with his back to the rear bulkhead, where the observer's seat is folded away, and sees the captain from behind, the left window beyond his shoulder.")}
+               "pilots' accounts: no bearing, no size, no shape that is his. So that his view can be played, the object is placed as the pilots say: at 10 o'clock, then at 9 "
+               "as for the co-pilot, in the shape of the captain's disc. He stands with his back to the rear bulkhead, where the observer's seat is folded away, "
+               "right behind the captain, and sees him from behind, the left window beyond his shoulder.")}
     rec["milestones"] = [
         {"t": 0, "label": "A", "note": tr("Il le voit le premier, vers 10 h : « Un ballon-sonde ! »", "He sees it first, at about 10 o'clock: \"A weather balloon!\"")},
-        {"t": int(total * 1000), "label": "C", "note": tr("Sur l'arrière gauche (8 h), il devient transparent et disparaît", "Behind on the left (8 o'clock), it turns transparent and vanishes")}]
+        {"t": 30000, "label": "B", "note": tr("Puis à 9 h, à gauche", "Then at 9 o'clock, to the left")}]
     return rec
 
 
