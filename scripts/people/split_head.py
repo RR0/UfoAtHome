@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Gives a figure of the people catalogue a head that can turn.
+"""Gives a figure of the people catalogue a skeleton with a head that turns.
 
 The figures are baked, rigid meshes (scripts/people/build_pilot.py, build_people.py): one body in one piece, with the hair, the eyebrows and whatever
-else sits on the head beside it. A figure that looks at something turns its head, so this cuts the figure at the neck and hangs everything above the cut
-from a node named "head", whose origin is the middle of the neck: the engine (DecorObject.track's gazeAzimuthDeg) turns that node about the vertical.
+else sits on the head beside it, and no skeleton. A figure that looks at something turns its head, so this gives it the smallest skeleton that can:
+two joints, `neck` at the middle of the neck and `head` under it, which the engine turns (DecorPlacementKeyframe.gazeAzimuthDeg turns the joint
+named "head"). The skin is weighted to them by height along the neck: below the cut it follows the body, above it the head, and over a short band
+between (a few centimetres either side) it is blended, so that the neck twists as a neck does and nothing tears: a rigid cut leaves a seam, a jaw
+behind, a hole. What is round the axis of the neck, within a head's radius, is weighted; shoulders and arms are not. Everything that sits on the head
+(hair, eyebrows, eyelashes, glasses, beard, a headset) is carried by the head joint, rigid; clothes stay with the body.
 
-The cut is made where the skin is narrowest between two heights, so that the turned head swivels in its own collar: the vertices of the ring it cuts through
-lie on a circle round the axis of rotation, which a turn about that axis leaves where it was, and no gap opens. Clothes stay with the body (a shirt's collar
-is a collar, not the head), anything on the head goes with it.
-
-    python3 -I scripts/people/split_head.py IN.glb OUT.glb --skin base.001 --head-meshes name,name --between 1.35,1.55
+    python3 -I scripts/people/split_head.py IN.glb OUT.glb --skin base.001 --head-meshes name,name --between 1.35,1.55 [--cut 1.45]
 
 Run from the repository root; reads and writes plain glTF binaries, no Blender.
 """
@@ -19,11 +19,10 @@ import math
 import struct
 
 
-# the neck's stub, inside the head: how far up it goes above the cut, and how much narrower than the neck it is
-STUB_M = 0.03
-STUB_SCALE = 0.93
 # the head and the neck lie within this distance of the axis, the shoulders and the arms beyond
 HEAD_RADIUS_M = 0.14
+# half the height over which the skin goes from following the body to following the head
+BAND_M = 0.03
 
 
 def read_glb(path):
@@ -133,7 +132,7 @@ def main():
     print(f"neck: cut at y={cut:.3f}, axis at x={cx:.3f} z={cz:.3f}, {count} points, widest radius {widest:.3f}")
 
     # geometry out
-    chunks = []          # (bytes, target) in order
+    chunks = []
     views, accessors, meshes = [], [], []
 
     def add_view(data, target=None):
@@ -147,101 +146,81 @@ def main():
         views.append(view)
         return len(views) - 1
 
+    def add_accessor(data, component, count, kind, target=34962, extras=None):
+        entry = {"bufferView": add_view(data, target), "componentType": component, "count": count, "type": kind}
+        if extras:
+            entry.update(extras)
+        accessors.append(entry)
+        return len(accessors) - 1
+
     # images keep their bytes
     for img in gltf.get("images", []):
         old = gltf["bufferViews"][img["bufferView"]]
-        data = blob[old.get("byteOffset", 0):old.get("byteOffset", 0) + old["byteLength"]]
-        img["bufferView"] = add_view(data)
+        img["bufferView"] = add_view(blob[old.get("byteOffset", 0):old.get("byteOffset", 0) + old["byteLength"]])
 
-    def add_primitive(source, wanted_triangles, shift, extended=None):
-        """A primitive made of the triangles `wanted_triangles` (vertex index triples) of `source`, positions moved by `shift`."""
-        attrs = extended if extended is not None else {name: accessor(gltf, blob, index) for name, index in source["attributes"].items()}
-        remap, order = {}, []
-        indices = []
-        for tri in wanted_triangles:
-            for v in tri:
-                if v not in remap:
-                    remap[v] = len(order)
-                    order.append(v)
-                indices.append(remap[v])
+    def copy_primitive(source, skinning=None):
+        """The primitive again, its data repacked (the images' views have moved), with JOINTS_0 and WEIGHTS_0 when `skinning` gives them."""
         out = {"attributes": {}, "material": source.get("material")}
-        for name, values in attrs.items():
-            picked = [values[v] for v in order]
-            if name == "POSITION":
-                picked = [(p[0] - shift[0], p[1] - shift[1], p[2] - shift[2]) for p in picked]
-            width = len(picked[0])
-            data = struct.pack("<" + "f" * (len(picked) * width), *[c for p in picked for c in p])
-            a = {"bufferView": add_view(data, 34962), "componentType": 5126, "count": len(picked), "type": {2: "VEC2", 3: "VEC3"}[width]}
-            if name == "POSITION":
-                a["min"] = [min(p[i] for p in picked) for i in range(3)]
-                a["max"] = [max(p[i] for p in picked) for i in range(3)]
-            accessors.append(a)
-            out["attributes"][name] = len(accessors) - 1
-        accessors.append({"bufferView": add_view(struct.pack("<" + "I" * len(indices), *indices), 34963), "componentType": 5125, "count": len(indices), "type": "SCALAR"})
-        out["indices"] = len(accessors) - 1
+        for name, index in source["attributes"].items():
+            values = accessor(gltf, blob, index)
+            width = len(values[0])
+            data = struct.pack("<" + "f" * (len(values) * width), *[c for v in values for c in v])
+            extras = {"min": [min(v[i] for v in values) for i in range(3)], "max": [max(v[i] for v in values) for i in range(3)]} if name == "POSITION" else None
+            out["attributes"][name] = add_accessor(data, 5126, len(values), {2: "VEC2", 3: "VEC3"}[width], 34962, extras)
+        if "indices" in source:
+            ids = accessor(gltf, blob, source["indices"])
+            out["indices"] = add_accessor(struct.pack("<" + "I" * len(ids), *ids), 5125, len(ids), "SCALAR", 34963)
+        if skinning:
+            joints, weights = skinning
+            out["attributes"]["JOINTS_0"] = add_accessor(struct.pack("<" + "B" * (4 * len(joints)), *[c for j in joints for c in j]), 5121, len(joints), "VEC4")
+            out["attributes"]["WEIGHTS_0"] = add_accessor(struct.pack("<" + "f" * (4 * len(weights)), *[c for w in weights for c in w]), 5126, len(weights), "VEC4")
         return out
 
-    new_nodes, body_nodes, head_children = [], [], []
+    def smoothstep(x):
+        x = max(0.0, min(1.0, x))
+        return x * x * (3 - 2 * x)
+
+    # the skin's weights: by height over the band, and only round the axis of the neck
+    joints, weights = [], []
+    for x, y, z in positions:
+        head = smoothstep((y - (cut - BAND_M)) / (2 * BAND_M)) if math.hypot(x - pivot[0], z - pivot[2]) < HEAD_RADIUS_M else 0.0
+        joints.append((0, 1, 0, 0))
+        weights.append((1.0 - head, head, 0.0, 0.0))
+
+    # nodes: "figure" carries the transform every node of the original shared; under it the body parts (the skinned skin among them) and the joints
+    figure_children, head_children = [], []
+    new_nodes = [{"name": "figure", **shared, "children": []}]
+    joint_neck = {"name": "neck", "translation": list(pivot), "children": []}
+    joint_head = {"name": "head"}
     for node in nodes:
         mesh = gltf["meshes"][node["mesh"]]
         name = node.get("name", "")
-        for primitive in mesh["primitives"]:
-            pos = accessor(gltf, blob, primitive["attributes"]["POSITION"])
-            idx = accessor(gltf, blob, primitive["indices"]) if "indices" in primitive else list(range(len(pos)))
-            tris = [tuple(idx[k:k + 3]) for k in range(0, len(idx), 3)]
-            whole_head = any(name.endswith(h) or h in name for h in head_names) and node is not skin_node
-            if node is skin_node:
-                # cut cleanly at the plane, so that the two halves share one ring of vertices; and a stub of the neck, a little narrower, goes up inside the head
-                # (which has the neck's sleeve down to the cut), so that no hole opens behind the neck when the head turns.
-                attrs = {name_: accessor(gltf, blob, index) for name_, index in primitive["attributes"].items()}
-                # only what is round the neck's axis is cut: a shoulder that rises above the plane stays with the body
-                round_axis = [t for t in tris if all(math.hypot(pos[v][0] - pivot[0], pos[v][2] - pivot[2]) < HEAD_RADIUS_M for v in t)]
-                far = [t for t in tris if t not in set(round_axis)]
-                below, above = clip_triangles(attrs, round_axis, cut)
-                below = below + far
-                stub_top = cut + STUB_M
-                inside, _ = clip_triangles(attrs, above, stub_top)
-                stub_first = len(attrs["POSITION"])
-                parts = [(below, (0, 0, 0), body_nodes, name, attrs), (above, pivot, head_children, name + "-head", attrs)]
-                stub = []
-                shrunk = {}
-                for tri in inside:
-                    new_tri = []
-                    for v in tri:
-                        if v not in shrunk:
-                            for name_, values in attrs.items():
-                                values.append(values[v])
-                            index = len(attrs["POSITION"]) - 1
-                            x, y, z = attrs["POSITION"][index]
-                            attrs["POSITION"][index] = (pivot[0] + (x - pivot[0]) * STUB_SCALE, y, pivot[2] + (z - pivot[2]) * STUB_SCALE)
-                            shrunk[v] = index
-                        new_tri.append(shrunk[v])
-                    stub.append(tuple(new_tri))
-                parts[0] = (below + stub, (0, 0, 0), body_nodes, name, attrs)
-            elif whole_head:
-                parts = [(tris, pivot, head_children, name, None)]
-            else:
-                parts = [(tris, (0, 0, 0), body_nodes, name, None)]
-            for triangles, shift, where, part_name, extended in parts:
-                if not triangles:
-                    continue
-                meshes.append({"name": part_name, "primitives": [add_primitive(primitive, triangles, shift, extended)]})
-                entry = {"mesh": len(meshes) - 1, "name": part_name}
-                if where is body_nodes:
-                    entry.update(shared)
-                new_nodes.append(entry)
-                where.append(len(new_nodes) - 1)
-    # the head node: the shared transform composed with the pivot, its children at the identity
-    scale = shared.get("scale", [1, 1, 1])
-    translation = shared.get("translation", [0, 0, 0])
-    head = {"name": "head", "scale": scale,
-            "translation": [translation[i] + scale[i] * pivot[i] for i in range(3)], "children": head_children}
-    new_nodes.append(head)
+        whole_head = node is not skin_node and any(h in name for h in head_names)
+        primitives = [copy_primitive(prim, (joints, weights) if node is skin_node else None) for prim in mesh["primitives"]]
+        meshes.append({"name": name, "primitives": primitives})
+        entry = {"mesh": len(meshes) - 1, "name": name}
+        if node is skin_node:
+            entry["skin"] = 0
+        if whole_head:
+            # a child of the head joint: its vertices stay where they are, so it is moved back by the joint's own place
+            entry["translation"] = [-c for c in pivot]
+        new_nodes.append(entry)
+        (head_children if whole_head else figure_children).append(len(new_nodes) - 1)
+    new_nodes.append(joint_neck)
+    neck_index = len(new_nodes) - 1
+    new_nodes.append(joint_head)
+    head_index = len(new_nodes) - 1
+    joint_head["children"] = head_children
+    joint_neck["children"] = [head_index]
+    new_nodes[0]["children"] = figure_children + [neck_index]
+    inverse = struct.pack("<32f", *([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -pivot[0], -pivot[1], -pivot[2], 1] * 2))
+    gltf["skins"] = [{"joints": [neck_index, head_index], "skeleton": neck_index,
+                      "inverseBindMatrices": add_accessor(inverse, 5126, 2, "MAT4", None)}]
     gltf["nodes"] = new_nodes
     gltf["meshes"] = meshes
     gltf["accessors"] = accessors
     gltf["bufferViews"] = views
-    gltf["scenes"] = [{"nodes": body_nodes + [len(new_nodes) - 1]}]
+    gltf["scenes"] = [{"nodes": [0]}]
     gltf["scene"] = 0
     data = b"".join(c[0] for c in chunks)
     data += b"\x00" * (-len(data) % 4)
@@ -253,7 +232,7 @@ def main():
         f.write(struct.pack("<4sII", b"glTF", 2, total))
         f.write(struct.pack("<I4s", len(text), b"JSON") + text)
         f.write(struct.pack("<I4s", len(data), b"BIN\x00") + data)
-    print(f"wrote {args.target}: {len(body_nodes)} body parts, {len(head_children)} head parts, {total} bytes")
+    print(f"wrote {args.target}: {len(figure_children)} body parts, {len(head_children)} carried by the head joint, {total} bytes")
 
 
 if __name__ == "__main__":

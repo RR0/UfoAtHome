@@ -111,16 +111,18 @@ His height (1.78 m), his trousers and his shoes are ASSUMED: the portrait shows 
 
 ## A head that turns
 
-A figure that looks at something turns its head. `split_head.py` (plain Python, no Blender) cuts a figure's glb at the neck, where its skin is narrowest, and hangs
-everything above the cut (the head's skin, hair, eyebrows, eyelashes, beard, glasses, headset) from a node named `head`, whose origin is the middle of the neck;
-clothes and shoes stay with the body. The engine turns that node to face the compass azimuth a decor object's track states (`DecorPlacementKeyframe.gazeAzimuthDeg`).
-Made so:
+A figure that looks at something turns its head. `split_head.py` (plain Python, no Blender) gives a figure's glb the smallest skeleton that can: two joints, `neck`
+at the middle of the neck and `head` under it, the skin weighted to them by height (blended over a few centimetres either side of a cut under the jaw, so that the
+neck twists and nothing tears), and everything that sits on the head (hair, eyebrows, eyelashes, glasses, beard, headset) carried by the head joint; clothes stay
+with the body. The engine turns the joint named `head` to face the compass azimuth a decor object's track states (`DecorPlacementKeyframe.gazeAzimuthDeg`), and
+clones a model with its skeleton (SkeletonUtils). A rigid cut was tried first: it leaves a seam, a jaw behind, a hole. Made so:
 
 ```
 python3 -I scripts/people/split_head.py scripts/people/duboc-slumped-headset.glb public/models/makehuman-people/duboc-slumped-headset-gaze.glb \
-  --skin Human.001 --head-meshes beard,glasses,headset,eyebrow,low-poly,short01 --between 1.38,1.56
+  --skin Human.001 --head-meshes beard,glasses,headset,eyebrow,low-poly,short01 --between 1.38,1.56 --cut 1.45
 python3 -I scripts/people/split_head.py public/models/makehuman-people/man-jacket.glb public/models/makehuman-people/chief-steward.glb \
-  --skin Human.001 --head-meshes low-poly,eyebrow,short04 --between 1.4,1.62
+  --skin Human.001 --head-meshes low-poly,eyebrow,short04 --between 1.4,1.62 --cut 1.47
 ```
 
-A model that changes must change its name (see `build_pilot.py`): the `-gaze` of the captain is that.
+MakeHuman's own rig (MPFB) has a neck and a head with their weights, and exporting it posed would give the same; these figures are baked without it, so this one is made
+from the baked meshes. A model that changes must change its name (see `build_pilot.py`): the `-gaze` of the captain is that.

@@ -127,6 +127,7 @@ import { BodySystem, BODY_OVER_LAYER } from "./BodySystem.js"
 import type { BodyState, Ground } from "../engine/interpretation/BodyPlacement.js"
 import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
 import { PhenomenonSystem, PHENOMENON_LAYER } from "./PhenomenonSystem.js"
+import { clone as cloneWithSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js"
 import { ReferenceSystem, REFERENCE_LAYER } from "./ReferenceSystem.js"
 import type { ReferenceView } from "./ReferenceSystem.js"
 import type { SceneReference } from "../engine/model/Reference.js"
@@ -2488,7 +2489,8 @@ export class SceneRenderer {
   }
 
   private applyLoadedDecorModel(object: DecorObject, group: Object3D, loaded: { scene: Object3D, headingOffsetDeg?: number, depictedSizeM?: DecorModelEntry["sizeM"], credit: DecorModelCredit, bindings?: NonNullable<DecorModelEntry["parameters"]>["bindings"] }): void {
-    const copy = loaded.scene.clone(true)
+    // cloned with its skeleton: a figure's head is a joint (see scripts/people/split_head.py), which a plain clone would leave bound to the original's
+    const copy = cloneWithSkeleton(loaded.scene)
     copy.traverse(child => {
       if (child instanceof Mesh) child.userData.sharedModel = true
     })

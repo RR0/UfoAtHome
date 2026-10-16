@@ -64,7 +64,7 @@ the model has none.
 
 ## duboc-slumped-headset-gaze.glb
 
-Captain Jean-Charles Duboc seated at the left seat of an A320 flight deck, built by `scripts/people/build_pilot.py` (then cut at the neck by `scripts/people/split_head.py`, so that the head turns) from the MakeHuman system
+Captain Jean-Charles Duboc seated at the left seat of an A320 flight deck, built by `scripts/people/build_pilot.py` (then given a neck and head skeleton by `scripts/people/split_head.py`, so that the head turns) from the MakeHuman system
 assets (CC0 1.0, https://www.makehumancommunity.org/) with MPFB, like the other people here, after his portrait on rr0.org: stout, balding,
 bearded, glasses, headset, a white shirt with the four stripes of a captain and a black tie. The beard, glasses, headset, epaulettes and tie
 are made by the script itself (CC0 1.0, UFO@home). His height, trousers and shoes are assumed. See `scripts/people/README.md`.
@@ -76,5 +76,5 @@ whole must credit davidmarton1987 wherever it is shared. See `davidmarton-a320-c
 
 ## chief-steward.glb
 
-The chief steward of flight AF 3532, standing in his uniform: `man-jacket.glb` (above), cut at the neck by `scripts/people/split_head.py` so that his head turns, the colour of his clothes
+The chief steward of flight AF 3532, standing in his uniform: `man-jacket.glb` (above), given a neck and head skeleton by `scripts/people/split_head.py` so that his head turns, the colour of his clothes
 stated by the recording (a navy blue). CC0 1.0 like the figure it is made from. Nothing says what he looked like: a stand-in.
