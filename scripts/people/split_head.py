@@ -99,21 +99,35 @@ def main():
     skin_mesh = gltf["meshes"][skin_node["mesh"]]
     skin = skin_mesh["primitives"][0]
     positions = accessor(gltf, blob, skin["attributes"]["POSITION"])
-    # the narrowest slice between the two heights
+    # the neck: the horizontal section of the skin, between the two heights, that is narrowest AND whole (every point of it near its own middle: no jaw, no shoulder),
+    # read where the triangles cross the plane rather than from the vertices near it, of which there are too few to give a middle
+    idx = accessor(gltf, blob, skin["indices"])
     best = None
-    steps = 80
-    for k in range(steps):
-        y0 = low + (high - low) * k / steps
-        y1 = y0 + (high - low) / steps
-        ring = [p for p in positions if y0 <= p[1] < y1]
-        if len(ring) < 8:
+    for k in range(60):
+        y = low + (high - low) * k / 59
+        points = []
+        for t in range(0, len(idx), 3):
+            tri = [positions[idx[t + i]] for i in range(3)]
+            for a_, b_ in ((0, 1), (1, 2), (2, 0)):
+                pa, pb = tri[a_], tri[b_]
+                if (pa[1] - y) * (pb[1] - y) < 0:
+                    f = (y - pa[1]) / (pb[1] - pa[1])
+                    points.append((pa[0] + (pb[0] - pa[0]) * f, pa[2] + (pb[2] - pa[2]) * f))
+        if len(points) < 8:
             continue
-        spread = (max(p[0] for p in ring) - min(p[0] for p in ring)) + (max(p[2] for p in ring) - min(p[2] for p in ring))
-        if best is None or spread < best[0]:
-            best = (spread, (y0 + y1) / 2, ring)
-    spread, cut, ring = best
-    pivot = (sum(p[0] for p in ring) / len(ring), cut, sum(p[2] for p in ring) / len(ring))
-    print(f"neck: cut at y={cut:.3f}, axis at x={pivot[0]:.3f} z={pivot[2]:.3f}, {len(ring)} vertices, spread {spread:.3f}")
+        mx = sorted(p[0] for p in points)[len(points) // 2]
+        mz = sorted(p[1] for p in points)[len(points) // 2]
+        near = [p for p in points if math.hypot(p[0] - mx, p[1] - mz) < 0.1]
+        if len(near) != len(points) or len(near) < 40:
+            continue
+        cx = sum(p[0] for p in near) / len(near)
+        cz = sum(p[1] for p in near) / len(near)
+        widest = max(math.hypot(p[0] - cx, p[1] - cz) for p in near)
+        if best is None or widest < best[0]:
+            best = (widest, y, cx, cz, len(near))
+    widest, cut, cx, cz, count = best
+    pivot = (cx, cut, cz)
+    print(f"neck: cut at y={cut:.3f}, axis at x={cx:.3f} z={cz:.3f}, {count} points, widest radius {widest:.3f}")
 
     # geometry out
     chunks = []          # (bytes, target) in order
