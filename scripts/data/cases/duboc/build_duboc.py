@@ -122,7 +122,7 @@ def track(total_s, aim_at, lag_s, eye_back_m=0.0, eye_up_m=0.0):
     return {"keyframes": keys}
 
 
-def airframe(total_s, ident, title, model, size, forward_m, left_m, below_m, extra, eye_back_m=0.0, eye_up_m=0.0):
+def airframe(total_s, ident, title, model, size, forward_m, left_m, below_m, extra, eye_back_m=0.0, eye_up_m=0.0, gaze=None):
     """A decor object whose track is the observer's own, shifted back by where the eye is in this object (forward_m ahead of its centre,
     left_m to the left of it, below_m under it), so that the eye is exactly where it should be in it, at every moment. A decor's
     altitude is counted from the ground (the schema says from the observer's elevation, the renderer does not), and the eye of a
@@ -143,7 +143,9 @@ def airframe(total_s, ident, title, model, size, forward_m, left_m, below_m, ext
         track.append({"t": ms,
                       "eastM": round((lng - ref_lng) * 111320.0 * math.cos(math.radians(lat)) + centre_e, 2),
                       "northM": round((lat - ref_lat) * 111320.0 + centre_n, 2),
-                      "altitudeM": round(PLANE_M + eye_up_m + 1.6 + below_m, 2), "headingDeg": HEADING})
+                      "altitudeM": round(PLANE_M + eye_up_m + 1.6 + below_m, 2), "headingDeg": HEADING,
+                      # a figure that looks at the phenomenon turns its head to it (DecorPlacementKeyframe.gazeAzimuthDeg)
+                      **({"gazeAzimuthDeg": round(gaze(ms / 1000.0) % 360.0, 1)} if gaze else {})})
     first = track[0]
     return {"id": ident, "kind": "aircraft", "title": title,
             "eastM": first["eastM"], "northM": first["northM"], "headingDeg": HEADING,
@@ -180,6 +182,8 @@ def airliner(total_s, seat="left", seen=("disc",)):
     placed round it, each by its own point of the model's frame. No airframe: the A320 of the catalogue, kept for its wings, had a surface that came
     across the view of the flight deck, and its wings are behind the pilots anyway."""
     eye = EYES[seat]
+    captain_gaze = lambda t: commander_aim()(t)[0]
+    steward_gaze = lambda t: steward_aim(t)[0]
     cockpit_title = {"left": tr("Poste de pilotage de l'A320 (siège gauche : le commandant)", "A320 flight deck (left seat: the captain)"),
                      "right": tr("Poste de pilotage de l'A320 (siège droit : Valérie Chauffour)", "A320 flight deck (right seat: Valérie Chauffour, the co-pilot)"),
                      "steward": tr("Poste de pilotage de l'A320 (adossé à la cloison du fond : le chef steward)", "A320 flight deck (back to the rear bulkhead: the chief steward)")}[seat]
@@ -190,10 +194,10 @@ def airliner(total_s, seat="left", seen=("disc",)):
     # An observer (a companion who was there), not an entity: an entity is a being seen, and the engine would class the case "with occupants"
     if seat != "left":
         objects.append({**airframe(total_s, "af3532-captain", tr("Le commandant Duboc, au siège gauche", "Captain Duboc, at the left seat"),
-                                   "ufoathome-duboc-seated", {"heightM": 1.292}, *around(eye, CAPTAIN_AT), {"occludesSourceIds": list(seen)}), "kind": "observer"})
+                                   "ufoathome-duboc-seated", {"heightM": 1.292}, *around(eye, CAPTAIN_AT), {"occludesSourceIds": list(seen)}, gaze=captain_gaze), "kind": "observer"})
     if seat != "steward":
         objects.append({**airframe(total_s, "af3532-chief-steward", tr("Le chef steward, en uniforme, adossé à la cloison du fond derrière le commandant", "The chief steward, in uniform, his back to the rear bulkhead behind the captain"),
-                                   "makehuman-man-jacket", {"heightM": STEWARD_HEIGHT_M}, *around(eye, STEWARD_AT), {"modelParameters": STEWARD_UNIFORM}), "kind": "observer"})
+                                   "ufoathome-chief-steward", {"heightM": STEWARD_HEIGHT_M}, *around(eye, STEWARD_AT), {"modelParameters": STEWARD_UNIFORM}, gaze=steward_gaze), "kind": "observer"})
     return objects
 
 
@@ -250,14 +254,25 @@ def disc_frames(total, aim_at, vanishes=True):
     return frames
 
 
-def commander():
-    total = 120.0                                    # "1 ou 2 mn" in the report: the two minutes, the 11 NM of the SEPRA
-    lateral = SPEED * total * math.tan(math.radians(60)) / 2
-    left = HEADING - 90.0
-    target = enu(left, lateral)                      # motionless, abeam at 10 NM when the airliner is in the middle of the track
+COMMANDER_TOTAL_S = 120.0                            # "1 ou 2 mn" in the report: the two minutes, the 11 NM of the SEPRA
 
-    def aim_at(t):
-        return aim_of(target, plane_at(t, total))
+
+def commander_aim(total=COMMANDER_TOTAL_S):
+    """The captain's line of sight to the object: (compass azimuth, altitude) at `t` seconds. Held after his two minutes."""
+    lateral = SPEED * total * math.tan(math.radians(60)) / 2
+    target = enu(HEADING - 90.0, lateral)            # motionless, abeam at 10 NM when the airliner is in the middle of the track
+    return lambda t: aim_of(target, plane_at(min(t, total), total))
+
+
+def steward_aim(t):
+    """The chief steward's: from 10 h (63 degrees left of the nose: just past the window pillar, which from where he stands hides 46 to 58) to 9 h, in thirty seconds,
+    as the co-pilot's goes from 10 h to 9 h, and at the altitude of 46 km away."""
+    return ((HEADING - 63.0 - 27.0 * smooth(t / 30.0)) % 360.0, math.degrees(math.atan2(OBJECT_M - PLANE_M, 46000.0)))
+
+
+def commander():
+    total = COMMANDER_TOTAL_S
+    aim_at = commander_aim(total)
 
     frames = disc_frames(total, aim_at)
     return total, frames, aim_at
@@ -596,8 +611,7 @@ def steward_recording():
     eyes, which is no parallax at all at that distance), the only reason this recording has an object in it. Nobody gives his name."""
     total = 120.0
     # He looks at it as the co-pilot does, from 10 h (63 degrees: just past the window pillar, which from where he stands hides 46 to 58) and then 9 h (from where he stands, behind the captain), and nothing says it vanishes for him.
-    def aim_at(t):
-        return ((HEADING - 63.0 - 27.0 * smooth(t / 30.0)) % 360.0, math.degrees(math.atan2(OBJECT_M - PLANE_M, 46000.0)))
+    aim_at = steward_aim
     frames = disc_frames(total, aim_at, vanishes=False)
     rec = commander_recording()
     rec.pop("_aim", None)

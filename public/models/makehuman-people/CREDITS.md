@@ -62,9 +62,9 @@ whose texture is replaced by one colour with a little grain, no logo or pattern)
 build, hair and the colour of their clothes. François wore glasses; the CC0 system assets have none, so
 the model has none.
 
-## duboc-slumped-headset.glb
+## duboc-slumped-headset-gaze.glb
 
-Captain Jean-Charles Duboc seated at the left seat of an A320 flight deck, built by `scripts/people/build_pilot.py` from the MakeHuman system
+Captain Jean-Charles Duboc seated at the left seat of an A320 flight deck, built by `scripts/people/build_pilot.py` (then cut at the neck by `scripts/people/split_head.py`, so that the head turns) from the MakeHuman system
 assets (CC0 1.0, https://www.makehumancommunity.org/) with MPFB, like the other people here, after his portrait on rr0.org: stout, balding,
 bearded, glasses, headset, a white shirt with the four stripes of a captain and a black tie. The beard, glasses, headset, epaulettes and tie
 are made by the script itself (CC0 1.0, UFO@home). His height, trousers and shoes are assumed. See `scripts/people/README.md`.
@@ -73,3 +73,8 @@ The headset is not made here: it is the original one of "A320 Cockpit 2" (https:
 by davidmarton1987 (https://sketchfab.com/davidmarton1987), CC BY 4.0, cut out of that model by `scripts/people/extract_headset.py` (the band, the two cups
 and the boom, turned so that the cups face each other along the ears' axis, scaled to the head and put on it). The rest is CC0 as above; the file as a
 whole must credit davidmarton1987 wherever it is shared. See `davidmarton-a320-cockpit/CREDITS.md`.
+
+## chief-steward.glb
+
+The chief steward of flight AF 3532, standing in his uniform: `man-jacket.glb` (above), cut at the neck by `scripts/people/split_head.py` so that his head turns, the colour of his clothes
+stated by the recording (a navy blue). CC0 1.0 like the figure it is made from. Nothing says what he looked like: a stand-in.

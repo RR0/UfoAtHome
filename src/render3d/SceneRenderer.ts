@@ -118,7 +118,7 @@ import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { WindowLighting } from "./WindowLighting.js"
 import { DecorSystem } from "./DecorSystem.js"
 import type { DecorObject } from "../engine/model/Decor.js"
-import { resolveDecorHeadlightsAt, resolveDecorLitAt, resolveDecorPlacementAt, canHoldObserver, decorModelOf, DEFAULT_DECOR_MODEL } from "../engine/model/Decor.js"
+import { resolveDecorGazeAt, resolveDecorHeadlightsAt, resolveDecorLitAt, resolveDecorPlacementAt, canHoldObserver, decorModelOf, DEFAULT_DECOR_MODEL } from "../engine/model/Decor.js"
 import type { DecorModelCredit, DecorModelRef } from "../engine/model/Decor.js"
 import type { DecorModelEntry, DecorModelProvider } from "./decor/DecorModelProvider.js"
 import { DECOR_MODEL_SOURCES } from "./decor/decorModelSources.js"
@@ -2716,6 +2716,8 @@ export class SceneRenderer {
       const sunlight = this.decorSunlight.get(object.id)
       if (sunlight && !absent) this.lightFromAbove(group, sunlight)
       if (placement.headingDeg !== undefined) group.rotation.y = -placement.headingDeg * DEG_TO_RAD
+      const gaze = resolveDecorGazeAt(object, t)
+      if (gaze !== undefined) SceneRenderer.turnHead(group, placement.headingDeg ?? 0, gaze)
       if (object.kind === "crop" && group.visible) {
         const terrain = this.terrainMesh
         const key = [terrain?.geometry.uuid, x - (terrain?.position.x ?? 0),
@@ -4716,6 +4718,18 @@ export class SceneRenderer {
 
   /** Writes nothing but depth — see renderPhenomenaPass. */
   private readonly decorDepthMaterial = new MeshBasicMaterial({ colorWrite: false })
+
+  /** How far a neck turns, either way from where the body points, degrees. */
+  private static readonly HEAD_TURN_LIMIT_DEG = 85
+
+  /** Turns the head of a figure (the node of its model named "head", see scripts/people/split_head.py) to face the compass azimuth `gazeDeg`, its body pointing at `headingDeg`. */
+  private static turnHead(group: Object3D, headingDeg: number, gazeDeg: number): void {
+    const head = group.getObjectByName("head")
+    if (!head) return
+    const relative = ((((gazeDeg - headingDeg) % 360) + 540) % 360) - 180
+    const turned = Math.max(-SceneRenderer.HEAD_TURN_LIMIT_DEG, Math.min(SceneRenderer.HEAD_TURN_LIMIT_DEG, relative))
+    head.rotation.y = -turned * DEG_TO_RAD
+  }
 
   /** Whether a surface hides what is behind it: it writes depth, and is not a glow added on top. Anything that
    * is not a mesh (a sprite, say) is taken as solid, as a crossing always was. */

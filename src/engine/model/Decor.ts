@@ -625,6 +625,12 @@ export interface DecorPlacementKeyframe {
    * scenery sits; an aircraft is the reason this exists. */
   altitudeM?: number
   headingDeg?: number
+  /**
+   * Where a figure looks, as a compass azimuth: its head turns to face it, as far as a neck turns (85 degrees either side of where its body points),
+   * if its model has a node named "head" (scripts/people/split_head.py). Blended the short way round between keyframes, and held after the last.
+   * Absent: the head stays as it was modelled.
+   */
+  gazeAzimuthDeg?: number
 }
 
 /** Hold-last-value resolution of a decor object's current lit state at time t — same semantics as
@@ -742,6 +748,23 @@ export function resolveDecorPlacementAt(
     }
   }
   return still
+}
+
+/** Where a figure looks at `t` (a compass azimuth), from the keyframes of its track that say so — see DecorPlacementKeyframe.gazeAzimuthDeg — or undefined. */
+export function resolveDecorGazeAt(decor: DecorObject, t: number): number | undefined {
+  const stated = (decor.track ?? []).filter(key => key.gazeAzimuthDeg !== undefined)
+  if (stated.length === 0) return undefined
+  if (t <= stated[0].t) return stated[0].gazeAzimuthDeg
+  for (let i = 0; i < stated.length - 1; i++) {
+    const a = stated[i]
+    const b = stated[i + 1]
+    if (t > b.t) continue
+    const span = b.t - a.t
+    const f = span === 0 ? 0 : (t - a.t) / span
+    const turn = ((((b.gazeAzimuthDeg! - a.gazeAzimuthDeg!) % 360) + 540) % 360) - 180
+    return (((a.gazeAzimuthDeg! + turn * f) % 360) + 360) % 360
+  }
+  return stated[stated.length - 1].gazeAzimuthDeg
 }
 
 function placementOf(keyframe: DecorPlacementKeyframe, decor: DecorObject) {

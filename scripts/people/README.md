@@ -78,7 +78,7 @@ directly. Run it with `python3 scripts/people/derive_socorro_figure.py` (ImageMa
 
 ## The captain of flight AF 3532
 
-`build_pilot.py` builds `makehuman-people/duboc-slumped-headset.glb`, Captain Jean-Charles Duboc seated at the left seat of an A320 flight deck, after the
+`build_pilot.py` builds `scripts/people/duboc-slumped-headset.glb` (kept here: it is the source of the file served, which has a head that turns, see below), Captain Jean-Charles Duboc seated at the left seat of an A320 flight deck, after the
 portrait on his rr0.org page (stout, balding, a pepper-and-salt beard, glasses, a white shirt with four-stripe epaulettes and a black tie, a headset).
 It uses the helpers of `build_people.py` (which only runs as a script) and the same setup as above, plus:
 
@@ -108,3 +108,19 @@ MH_ASSETS=/path/to/makehuman_system_assets_cc0 BLENDER_USER_RESOURCES=/path/to/s
 
 It prints where his eyes are from the middle of the file's box (see `scripts/data/cases/duboc/build_duboc.py`, which places him on the seat).
 His height (1.78 m), his trousers and his shoes are ASSUMED: the portrait shows none of them.
+
+## A head that turns
+
+A figure that looks at something turns its head. `split_head.py` (plain Python, no Blender) cuts a figure's glb at the neck, where its skin is narrowest, and hangs
+everything above the cut (the head's skin, hair, eyebrows, eyelashes, beard, glasses, headset) from a node named `head`, whose origin is the middle of the neck;
+clothes and shoes stay with the body. The engine turns that node to face the compass azimuth a decor object's track states (`DecorPlacementKeyframe.gazeAzimuthDeg`).
+Made so:
+
+```
+python3 -I scripts/people/split_head.py scripts/people/duboc-slumped-headset.glb public/models/makehuman-people/duboc-slumped-headset-gaze.glb \
+  --skin Human.001 --head-meshes beard,glasses,headset,eyebrow,low-poly,short01 --between 1.38,1.56
+python3 -I scripts/people/split_head.py public/models/makehuman-people/man-jacket.glb public/models/makehuman-people/chief-steward.glb \
+  --skin Human.001 --head-meshes low-poly,eyebrow,short04 --between 1.4,1.62
+```
+
+A model that changes must change its name (see `build_pilot.py`): the `-gaze` of the captain is that.
