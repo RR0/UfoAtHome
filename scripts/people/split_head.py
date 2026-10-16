@@ -19,6 +19,11 @@ import math
 import struct
 
 
+# the neck's stub, inside the head: how far up it goes above the cut, and how much narrower than the neck it is
+STUB_M = 0.03
+STUB_SCALE = 0.93
+
+
 def read_glb(path):
     raw = open(path, "rb").read()
     length = struct.unpack("<I", raw[12:16])[0]
@@ -35,6 +40,44 @@ def accessor(gltf, blob, index):
         return [flat[i:i + width] for i in range(0, len(flat), width)] if width > 1 else list(flat)
     code, size = {5123: ("H", 2), 5125: ("I", 4), 5121: ("B", 1)}[a["componentType"]]
     return list(struct.unpack("<" + code * a["count"], blob[start:start + size * a["count"]]))
+
+
+def lerp_vertex(attrs, a, b, f):
+    """A new vertex of `attrs` (name -> list of tuples) at fraction `f` from vertex a to vertex b; normals renormalised. Returns its index."""
+    for name, values in attrs.items():
+        va, vb = values[a], values[b]
+        v = tuple(x + (y - x) * f for x, y in zip(va, vb))
+        if name == "NORMAL":
+            size = math.sqrt(sum(c * c for c in v)) or 1.0
+            v = tuple(c / size for c in v)
+        values.append(v)
+    return len(attrs["POSITION"]) - 1
+
+
+def clip_triangles(attrs, triangles, plane_y):
+    """Cuts the triangles at the plane y = plane_y: the vertices it needs are added to `attrs`; returns (triangles below, triangles above)."""
+    pos = attrs["POSITION"]
+    below, above = [], []
+    for tri in triangles:
+        sides = [pos[v][1] > plane_y for v in tri]
+        if all(sides):
+            above.append(tri)
+        elif not any(sides):
+            below.append(tri)
+        else:
+            # rotate so that the lone vertex (alone on its side) comes first
+            lone = next(i for i in range(3) if sides[i] != sides[(i + 1) % 3] and sides[i] != sides[(i + 2) % 3])
+            a, b, c = tri[lone], tri[(lone + 1) % 3], tri[(lone + 2) % 3]
+            fb = (plane_y - pos[a][1]) / (pos[b][1] - pos[a][1])
+            fc = (plane_y - pos[a][1]) / (pos[c][1] - pos[a][1])
+            ab = lerp_vertex(attrs, a, b, fb)
+            ac = lerp_vertex(attrs, a, c, fc)
+            lone_side = above if sides[lone] else below
+            other_side = below if sides[lone] else above
+            lone_side.append((a, ab, ac))
+            other_side.append((ab, b, c))
+            other_side.append((ab, c, ac))
+    return below, above
 
 
 def main():
@@ -93,9 +136,9 @@ def main():
         data = blob[old.get("byteOffset", 0):old.get("byteOffset", 0) + old["byteLength"]]
         img["bufferView"] = add_view(data)
 
-    def add_primitive(source, wanted_triangles, shift):
+    def add_primitive(source, wanted_triangles, shift, extended=None):
         """A primitive made of the triangles `wanted_triangles` (vertex index triples) of `source`, positions moved by `shift`."""
-        attrs = {name: accessor(gltf, blob, index) for name, index in source["attributes"].items()}
+        attrs = extended if extended is not None else {name: accessor(gltf, blob, index) for name, index in source["attributes"].items()}
         remap, order = {}, []
         indices = []
         for tri in wanted_triangles:
@@ -131,17 +174,37 @@ def main():
             tris = [tuple(idx[k:k + 3]) for k in range(0, len(idx), 3)]
             whole_head = any(name.endswith(h) or h in name for h in head_names) and node is not skin_node
             if node is skin_node:
-                above = [t for t in tris if sum(pos[v][1] for v in t) / 3 > cut]
-                below = [t for t in tris if sum(pos[v][1] for v in t) / 3 <= cut]
-                parts = [(below, (0, 0, 0), body_nodes, name), (above, pivot, head_children, name + "-head")]
+                # cut cleanly at the plane, so that the two halves share one ring of vertices; and a stub of the neck, a little narrower, goes up inside the head
+                # (which has the neck's sleeve down to the cut), so that no hole opens behind the neck when the head turns.
+                attrs = {name_: accessor(gltf, blob, index) for name_, index in primitive["attributes"].items()}
+                below, above = clip_triangles(attrs, tris, cut)
+                stub_top = cut + STUB_M
+                inside, _ = clip_triangles(attrs, above, stub_top)
+                stub_first = len(attrs["POSITION"])
+                parts = [(below, (0, 0, 0), body_nodes, name, attrs), (above, pivot, head_children, name + "-head", attrs)]
+                stub = []
+                shrunk = {}
+                for tri in inside:
+                    new_tri = []
+                    for v in tri:
+                        if v not in shrunk:
+                            for name_, values in attrs.items():
+                                values.append(values[v])
+                            index = len(attrs["POSITION"]) - 1
+                            x, y, z = attrs["POSITION"][index]
+                            attrs["POSITION"][index] = (pivot[0] + (x - pivot[0]) * STUB_SCALE, y, pivot[2] + (z - pivot[2]) * STUB_SCALE)
+                            shrunk[v] = index
+                        new_tri.append(shrunk[v])
+                    stub.append(tuple(new_tri))
+                parts[0] = (below + stub, (0, 0, 0), body_nodes, name, attrs)
             elif whole_head:
-                parts = [(tris, pivot, head_children, name)]
+                parts = [(tris, pivot, head_children, name, None)]
             else:
-                parts = [(tris, (0, 0, 0), body_nodes, name)]
-            for triangles, shift, where, part_name in parts:
+                parts = [(tris, (0, 0, 0), body_nodes, name, None)]
+            for triangles, shift, where, part_name, extended in parts:
                 if not triangles:
                     continue
-                meshes.append({"name": part_name, "primitives": [add_primitive(primitive, triangles, shift)]})
+                meshes.append({"name": part_name, "primitives": [add_primitive(primitive, triangles, shift, extended)]})
                 entry = {"mesh": len(meshes) - 1, "name": part_name}
                 if where is body_nodes:
                     entry.update(shared)
