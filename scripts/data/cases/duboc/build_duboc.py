@@ -37,6 +37,7 @@ LAT_MID, LNG_MID = 48 + 50.7 / 60, 3 + 0.9 / 60      # "48°50'7 N / 003°00'9 E
 HEADING = 332.0
 SPEED = 350 * 1852 / 3600                            # 350 kt, "VS" of the report: about 180 m/s
 PLANE_M, OBJECT_M = 11700.0, 10500.0
+DISC_M, DISC_THICKNESS_M = 1000.0, 100.0              # "1000 m de diamètre pour une épaisseur de 100 m" (interview of 1999)
 BROWN_RED = "#a8421f"                               # "brun-rouge", "rouge brunâtre": a dark red-brown in the daylight reads as a black blot, so a rust red
 SIZE_DEG = 1.24                                      # 1999 interview: 1000 m at 46 km, "the width of his thumb"; the report (200-300 m) and the SEPRA (half the Moon, 0.26) give far less
 STEP_MS = 1000
@@ -200,8 +201,11 @@ def commander():
     for ms in range(0, int(total * 1000) + 1, STEP_MS):
         t = ms / 1000.0
         aim = aim_at(t)
-        # a disc seen "under several angles": its thickness is not the same every second
-        height = SIZE_DEG * (0.3 + 0.3 * math.sin(math.pi * t / 40.0) ** 2)
+        # "sous plusieurs angles": the angle the airliner sees the disc under changes as it flies past, which is all the angles
+        # the account states. A flat disc 1000 m across and 100 m thick, level, seen from `e` below the horizon, is as high as
+        # 1000 sin(e) + 100 cos(e) metres: slowly changing, and never a beat.
+        e = math.radians(-aim[1])
+        height = SIZE_DEG * (DISC_M * math.sin(e) + DISC_THICKNESS_M * math.cos(e)) / DISC_M
         size = (SIZE_DEG, height)
         sid = "disc"
         frames.append({"t": ms, "shapes": [(shape_full(sid, "oval", tr("disque brun-rouge, bords légèrement flous", "red-brown disc, slightly blurred edges"),
