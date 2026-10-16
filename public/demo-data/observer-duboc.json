@@ -776,7 +776,7 @@
        "color": "#a8421f",
        "transparency": 0,
        "brightness": 0,
-       "blur": 0.05,
+       "blur": 0.09,
        "haloScale": 0,
        "angular": {
         "widthDeg": 1.24,

@@ -205,7 +205,7 @@ def commander():
         size = (SIZE_DEG, height)
         sid = "disc"
         frames.append({"t": ms, "shapes": [(shape_full(sid, "oval", tr("disque brun-rouge, bords légèrement flous", "red-brown disc, slightly blurred edges"),
-                                                       BROWN_RED, 0, 0.05, size, aim) if ms == 0 else shape_move(sid, size, aim))]})
+                                                       BROWN_RED, 0, 0.09, size, aim) if ms == 0 else shape_move(sid, size, aim))]})
     # "je le vois soudain devenir transparent et disparaître sans bouger"
     last = frames[-1]["shapes"][0]
     fade = json.loads(json.dumps(last))
@@ -307,7 +307,7 @@ def copilot_recording():
         t = ms / 1000.0
         aim = aim_at(t)
         u = smooth((t - 65.0) / 10.0) - smooth((t - 125.0) / 10.0)   # 0 to 1: how much of a chevron
-        blur = 0.04 + 0.1 * math.sin(math.pi * min(1.0, max(0.0, (t - 30.0) / 110.0))) ** 2   # sharp, then blurred, then sharp again
+        blur = 0.09 + 0.1 * math.sin(math.pi * min(1.0, max(0.0, (t - 30.0) / 110.0))) ** 2   # sharp, then blurred, then sharp again
         lens_size = (SIZE_DEG, SIZE_DEG * 0.35)
         arrow_size = (SIZE_DEG * 1.1, SIZE_DEG * 0.75)
         if ms == 0:
