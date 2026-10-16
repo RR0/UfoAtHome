@@ -160,7 +160,7 @@ STEWARD_AT = (-0.537, -0.378, 3.12)                   # standing against the rea
 EYE_CAPTAIN, EYE_COPILOT = (-0.537, 0.83, 2.48), (0.537, 0.83, 2.48)
 # The chief steward, standing against the rear bulkhead (where the observer's seat is folded away) right behind the captain, stooping
 # a little under the overhead panel: he sees the captain from behind, and the left window beyond his shoulder.
-EYE_STEWARD = (-0.537, 1.0, 3.07)
+EYE_STEWARD = (-0.537, 0.9, 3.07)
 # He cannot stand straight under the ceiling of the rear of the flight deck (1.7 m above the floor there): a man of 1.62 m, in an Air France uniform
 # (navy), his back to the rear bulkhead where the observer's seat is folded away.
 STEWARD_HEIGHT_M = 1.62
@@ -595,9 +595,9 @@ def steward_recording():
     he said gives a bearing, a size or a shape: he is given the captain's (the same object, seen from half a metre behind and 0.44 m above his
     eyes, which is no parallax at all at that distance), the only reason this recording has an object in it. Nobody gives his name."""
     total = 120.0
-    # He looks at it as the co-pilot does, from 10 h and then 9 h (from where he stands, behind the captain), and nothing says it vanishes for him.
+    # He looks at it as the co-pilot does, from 10 h (63 degrees: just past the window pillar, which from where he stands hides 46 to 58) and then 9 h (from where he stands, behind the captain), and nothing says it vanishes for him.
     def aim_at(t):
-        return ((HEADING - 60.0 - 30.0 * smooth(t / 30.0)) % 360.0, math.degrees(math.atan2(OBJECT_M - PLANE_M, 46000.0)))
+        return ((HEADING - 63.0 - 27.0 * smooth(t / 30.0)) % 360.0, math.degrees(math.atan2(OBJECT_M - PLANE_M, 46000.0)))
     frames = disc_frames(total, aim_at, vanishes=False)
     rec = commander_recording()
     rec.pop("_aim", None)
