@@ -3238,6 +3238,200 @@
    "occludesSourceIds": [
     "disc"
    ]
+  },
+  {
+   "id": "af3532-chief-steward",
+   "kind": "observer",
+   "title": {
+    "fr": "Le chef steward, debout derrière le commandant",
+    "en": "The chief steward, standing behind the captain"
+   },
+   "eastM": 0.27,
+   "northM": -0.5,
+   "headingDeg": 332.0,
+   "sizeM": {
+    "heightM": 1.8
+   },
+   "model": {
+    "id": "makehuman-man-jacket"
+   },
+   "track": [
+    {
+     "t": 0,
+     "eastM": 0.27,
+     "northM": -0.5,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 5000,
+     "eastM": -422.3,
+     "northM": 794.43,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 10000,
+     "eastM": -844.74,
+     "northM": 1589.26,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 15000,
+     "eastM": -1267.13,
+     "northM": 2384.19,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 20000,
+     "eastM": -1689.34,
+     "northM": 3179.13,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 25000,
+     "eastM": -2111.49,
+     "northM": 3973.95,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 30000,
+     "eastM": -2533.45,
+     "northM": 4768.89,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 35000,
+     "eastM": -2955.37,
+     "northM": 5563.83,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 40000,
+     "eastM": -3377.09,
+     "northM": 6358.65,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 45000,
+     "eastM": -3798.76,
+     "northM": 7153.59,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 50000,
+     "eastM": -4220.24,
+     "northM": 7948.52,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 55000,
+     "eastM": -4641.6,
+     "northM": 8743.35,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 60000,
+     "eastM": -5062.92,
+     "northM": 9538.28,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 65000,
+     "eastM": -5484.04,
+     "northM": 10333.22,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 70000,
+     "eastM": -5905.11,
+     "northM": 11128.05,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 75000,
+     "eastM": -6325.99,
+     "northM": 11922.98,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 80000,
+     "eastM": -6746.82,
+     "northM": 12717.92,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 85000,
+     "eastM": -7167.46,
+     "northM": 13512.74,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 90000,
+     "eastM": -7587.97,
+     "northM": 14307.68,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 95000,
+     "eastM": -8008.44,
+     "northM": 15102.62,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 100000,
+     "eastM": -8428.72,
+     "northM": 15897.44,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 105000,
+     "eastM": -8848.95,
+     "northM": 16692.38,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 110000,
+     "eastM": -9268.98,
+     "northM": 17487.31,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 115000,
+     "eastM": -9688.97,
+     "northM": 18282.14,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    },
+    {
+     "t": 120000,
+     "eastM": -10108.76,
+     "northM": 19077.07,
+     "altitudeM": 11700.39,
+     "headingDeg": 332.0
+    }
+   ]
   }
  ],
  "milestones": [

@@ -2357,7 +2357,20 @@ export class SceneRenderer {
   get bodyGround(): Ground {
     const { x, z } = this.bodyOrigin
     const originY = this.groundYUnder(x, z)
-    return { heightAt: (eastM, northM) => this.groundYUnder(x + eastM, z - northM) - originY }
+    const eastScale = this.bodyEastScale
+    return { heightAt: (eastM, northM) => this.groundYUnder(x + eastM * eastScale, z - northM) - originY }
+  }
+
+  /**
+   * A body is placed in the frame of where the recording started (its east is metres of that latitude's longitude), while the scene is laid
+   * out in the frame of the latitude it is at now (see updateDecorAnchoring): 9 m apart after ten kilometres flown, which is the distance
+   * a spot of light 0.5 m from the eye of an airline pilot must not drift by. What turns the one into the other.
+   */
+  private get bodyEastScale(): number {
+    const reference = this.decorReferencePose
+    const current = this.decorCurrentPose
+    if (reference?.lat === undefined || current?.lat === undefined) return 1
+    return Math.cos(current.lat * DEG_TO_RAD) / Math.cos(reference.lat * DEG_TO_RAD)
   }
 
   /** How much of the body `bodyId` the decor object `decorId` hides from the observer, 0 to 1; undefined if either is not on show. */
@@ -2373,6 +2386,8 @@ export class SceneRenderer {
   setBodies(states: BodyState[], seconds = 0, ids: readonly string[] = states.map(state => state.id), smoke: readonly SmokeSource[] = [], wind?: { x: number, z: number }): void {
     const { x, z } = this.bodyOrigin
     const sky = this.scatteredSky
+    const eastScale = this.bodyEastScale
+    if (Math.abs(eastScale - 1) > 1e-9) states = states.map(state => ({ ...state, eastM: state.eastM * eastScale }))
     this.bodySystem.set(states, {
       originX: x, originZ: z, originGroundY: this.groundYUnder(x, z), eye: this.camera.position,
       groundYAt: (px, pz) => this.groundYUnder(px, pz), wind, light: this.plumeLight(),

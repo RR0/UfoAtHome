@@ -122,6 +122,13 @@ export interface BodyJson {
    */
   model: DecorModelRef
   /**
+   * Whether the observer carries it: its keyframes, stated FROM THE OBSERVER, are offsets from their eye that go with the eye, instead
+   * of points of the world fixed where the eye was at each keyframe's instant. What a thing that is part of the place they stand in
+   * needs — a spot of light on the glass of a flight deck, half a metre from an airline pilot's eye, which the relief under an
+   * airliner ten kilometres on would otherwise carry up and down by a metre.
+   */
+  withObserver?: boolean
+  /**
    * The node of the model that IS what the observer drew — "hull" for a craft on legs the observer
    * drew as an oval — and so what its outline is measured by (see BodyConfrontation). The whole
    * model when absent, and always for a primitive.

@@ -59,6 +59,10 @@ const RECORDINGS: CaseRecording[] = [
   { published: "observer-silly-le-long.json", dossier: "SillyLeLong/observer-silly-le-long.json" },
   { published: "observer-duboc.json", dossier: "Duboc/observer-duboc.json" },
   { published: "observer-duboc-copilot.json", dossier: "Duboc/observer-duboc-copilot.json" },
+  { published: "observer-duboc-steward.json", dossier: "Duboc/observer-duboc-steward.json" },
+  { published: "interpretation-duboc-hoax.json", dossier: "Duboc/interpretation-duboc-hoax.json" },
+  { published: "interpretation-duboc-copilot-hoax.json", dossier: "Duboc/interpretation-duboc-copilot-hoax.json" },
+  { published: "interpretation-duboc-steward-hoax.json", dossier: "Duboc/interpretation-duboc-steward-hoax.json" },
   { published: "observer-mcminnville.json", dossier: "McMinnville/observer-mcminnville.json" },
   { published: "observer-mcminnville-closeup.json", dossier: "McMinnville/observer-mcminnville-closeup.json" },
   // The readings of a case are recordings too (see InterpretationEventJson): the ones its case.json lists.

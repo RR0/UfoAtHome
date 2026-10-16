@@ -30,6 +30,7 @@ Writes public/demo-data/observer-duboc.json and observer-duboc-copilot.json. Run
 import json
 import math
 import pathlib
+import struct
 
 OUT = pathlib.Path("public/demo-data")
 
@@ -101,20 +102,27 @@ def smooth(x):
     return x * x * (3 - 2 * x)
 
 
-def track(total_s, aim_at, lag_s):
+def eye_at(t_s, total_s, eye_back_m=0.0):
+    """Where the eye is at `t_s`: the pilots' (the reference of the whole flight deck), or one `eye_back_m` behind them."""
+    e, n = plane_at(t_s, total_s)
+    h = math.radians(HEADING)
+    return e - math.sin(h) * eye_back_m, n - math.cos(h) * eye_back_m
+
+
+def track(total_s, aim_at, lag_s, eye_back_m=0.0, eye_up_m=0.0):
     """The airliner moves; the eye follows the object with a lag; the field is the usual 60 degrees."""
     keys = []
     for ms in range(0, int(total_s * 1000) + 1, 2000):
         t = ms / 1000.0
-        e, n = plane_at(t, total_s)
+        e, n = eye_at(t, total_s, eye_back_m)
         lat, lng = geo(e, n, total_s)
         az, alt = aim_at(max(0.0, t - lag_s))
-        keys.append({"t": ms, "pose": {"lat": round(lat, 6), "lng": round(lng, 6), "elevationM": PLANE_M,
+        keys.append({"t": ms, "pose": {"lat": round(lat, 6), "lng": round(lng, 6), "elevationM": PLANE_M + eye_up_m,
                                        "headingDeg": round(az, 2), "pitchDeg": round(alt, 2), "fovDeg": 60}})
     return {"keyframes": keys}
 
 
-def airframe(total_s, ident, title, model, size, forward_m, left_m, below_m, extra):
+def airframe(total_s, ident, title, model, size, forward_m, left_m, below_m, extra, eye_back_m=0.0, eye_up_m=0.0):
     """A decor object whose track is the observer's own, shifted back by where the eye is in this object (forward_m ahead of its centre,
     left_m to the left of it, below_m under it), so that the eye is exactly where it should be in it, at every moment. A decor's
     altitude is counted from the ground (the schema says from the observer's elevation, the renderer does not), and the eye of a
@@ -125,40 +133,64 @@ def airframe(total_s, ident, title, model, size, forward_m, left_m, below_m, ext
     # Where the centre is, from the eye: behind it by the eye's distance from the middle, and to the right of it
     centre_e = -forward[0] * forward_m - left[0] * left_m
     centre_n = -forward[1] * forward_m - left[1] * left_m
-    ref_lat, ref_lng = (round(v, 6) for v in geo(*plane_at(0.0, total_s), total_s))
+    ref_lat, ref_lng = (round(v, 6) for v in geo(*eye_at(0.0, total_s, eye_back_m), total_s))
     track = []
     for ms in range(0, int(total_s * 1000) + 1, 5000):
-        lat, lng = (round(v, 6) for v in geo(*plane_at(ms / 1000.0, total_s), total_s))
+        lat, lng = (round(v, 6) for v in geo(*eye_at(ms / 1000.0, total_s, eye_back_m), total_s))
         # The engine (SceneRenderer.updateDecorAnchoring) places a decor object at its own position plus where the first pose lies as
         # seen from the CURRENT one, with the longitude scaled by the cosine of the current latitude: 8 m of lateral drift after ten
         # kilometres if the track is simply the distance flown, which puts the eye 8 m off after ten kilometres, outside a flight deck 3.3 m wide.
         track.append({"t": ms,
                       "eastM": round((lng - ref_lng) * 111320.0 * math.cos(math.radians(lat)) + centre_e, 2),
                       "northM": round((lat - ref_lat) * 111320.0 + centre_n, 2),
-                      "altitudeM": round(PLANE_M + 1.6 + below_m, 2), "headingDeg": HEADING})
+                      "altitudeM": round(PLANE_M + eye_up_m + 1.6 + below_m, 2), "headingDeg": HEADING})
     first = track[0]
     return {"id": ident, "kind": "aircraft", "title": title,
             "eastM": first["eastM"], "northM": first["northM"], "headingDeg": HEADING,
             "sizeM": size, "model": {"id": model}, "track": track, **extra}
 
 
+# Where things stand in the flight deck model's own frame (x to the right, y up, z towards the tail): the origin of the model of the flight deck
+# (the middle of its box), of the captain (his feet, in his seat), of the chief steward (his feet, behind the captain), and each one's eyes. A decor
+# object is placed by where the OBSERVER's eye is in it (forward_m ahead of its origin, left_m to the left of it, below_m under it): the difference
+# of two of these points.
+COCKPIT_AT = (0.02, 0.684, 2.654)
+CAPTAIN_AT = (-0.484, -0.338, 2.246)
+STEWARD_AT = (-0.537, -0.378, 3.05)                   # standing behind the captain, 0.57 m behind his eyes
+EYE_CAPTAIN, EYE_COPILOT = (-0.537, 0.83, 2.48), (0.537, 0.83, 2.48)
+# The chief steward, to see through the left window past the captain's seat (which the model has, and which hides it from behind, from where he
+# stands), leans forward between the seats, his head level with and beside the captain's right shoulder: his eyes 0.34 m to the right of Duboc's.
+EYE_STEWARD = (-0.2, 0.98, 2.45)
+EYES = {"left": EYE_CAPTAIN, "right": EYE_COPILOT, "steward": EYE_STEWARD}
+
+
+def around(eye, at):
+    """(forward_m, left_m, below_m) of an object whose origin is `at`, for an observer whose eye is `eye`: how far the eye is ahead of the object,
+    to the left of it, and below it (negative: the object is under the eye)."""
+    return at[2] - eye[2], at[0] - eye[0], at[1] - eye[1]
+
+
 def airliner(total_s, seat="left", seen=("disc",)):
-    """The flight deck round the observer (the model cut from davidmarton1987's, scaled to the real size: scripts/extract-a320-cockpit.py), and,
-    seen from the right seat, the captain seated at the left one, on the line of sight to the left window. No airframe: the A320 of the
-    catalogue, kept for its wings, had a surface that came across the view of the flight deck, and its wings are behind the pilots anyway."""
-    cockpit_title = (tr("Poste de pilotage de l'A320 (siège gauche : le commandant)", "A320 flight deck (left seat: the captain)") if seat == "left"
-                     else tr("Poste de pilotage de l'A320 (siège droit : Valérie Chauffour)", "A320 flight deck (right seat: Valérie Chauffour, the co-pilot)"))
-    return [
-        airframe(total_s, "af3532-cockpit", cockpit_title,
-                 "davidmarton-a320-cockpit", {"widthM": 3.257, "lengthM": 2.591, "heightM": 2.127}, COCKPIT_FORWARD_M,
-                 COCKPIT_LEFT_M if seat == "left" else COCKPIT_RIGHT_SEAT_LEFT_M, COCKPIT_BELOW_M,
-                 # The disc was seen through the windows: the frame, the pillars and the captain are in front of it
-                 {"aircraftSound": "airliner-narrow", "occludesSourceIds": list(seen)}),
-    ] + ([] if seat == "left" else [
-        # An observer (a companion who was there), not an entity: an entity is a being seen, and the engine would class the case "with occupants"
-        {**airframe(total_s, "af3532-captain", tr("Le commandant Duboc, au siège gauche", "Captain Duboc, at the left seat"),
-                    "ufoathome-duboc-seated", {"heightM": 1.292}, PILOT_FORWARD_M, PILOT_LEFT_M - SEAT_SPACING_M, PILOT_BELOW_M, {"occludesSourceIds": list(seen)}),
-         "kind": "observer"}])
+    """The flight deck round the observer (the model cut from davidmarton1987's, scaled to the real size: scripts/extract-a320-cockpit.py), the
+    captain at the left seat, the co-pilot's eye at the right one, and the chief steward standing behind the captain: whoever the eye is, the others are
+    placed round it, each by its own point of the model's frame. No airframe: the A320 of the catalogue, kept for its wings, had a surface that came
+    across the view of the flight deck, and its wings are behind the pilots anyway."""
+    eye = EYES[seat]
+    cockpit_title = {"left": tr("Poste de pilotage de l'A320 (siège gauche : le commandant)", "A320 flight deck (left seat: the captain)"),
+                     "right": tr("Poste de pilotage de l'A320 (siège droit : Valérie Chauffour)", "A320 flight deck (right seat: Valérie Chauffour, the co-pilot)"),
+                     "steward": tr("Poste de pilotage de l'A320 (penché entre les sièges : le chef steward)", "A320 flight deck (leaning between the seats: the chief steward)")}[seat]
+    objects = [airframe(total_s, "af3532-cockpit", cockpit_title,
+                        "davidmarton-a320-cockpit", {"widthM": 3.257, "lengthM": 2.591, "heightM": 2.127}, *around(eye, COCKPIT_AT),
+                        # The disc was seen through the windows: the frame, the pillars and the captain are in front of it
+                        {"aircraftSound": "airliner-narrow", "occludesSourceIds": list(seen)})]
+    # An observer (a companion who was there), not an entity: an entity is a being seen, and the engine would class the case "with occupants"
+    if seat != "left":
+        objects.append({**airframe(total_s, "af3532-captain", tr("Le commandant Duboc, au siège gauche", "Captain Duboc, at the left seat"),
+                                   "ufoathome-duboc-seated", {"heightM": 1.292}, *around(eye, CAPTAIN_AT), {"occludesSourceIds": list(seen)}), "kind": "observer"})
+    if seat != "steward":
+        objects.append({**airframe(total_s, "af3532-chief-steward", tr("Le chef steward, debout derrière le commandant", "The chief steward, standing behind the captain"),
+                                   "makehuman-man-jacket", {"heightM": 1.8}, *around(eye, STEWARD_AT), {}), "kind": "observer"})
+    return objects
 
 
 def air(t_ms, wind_kt):
@@ -382,8 +414,218 @@ def copilot_recording():
     }
 
 
+# --- the hoax reading ---------------------------------------------------------------------------------------------------------------------
+# Jérôme Beau's reading (2026-10-16): the chief steward, who was behind Duboc and was the first to point the shape out, shone a small light (a key-ring
+# torch or laser pointer) from behind them on the glass of the flight deck, and what the crew saw was its spot. The spot is wherever the
+# line of sight of each pilot to the shape crosses the glass (the model's panes: scripts/extract-a320-cockpit.py), so it follows what each of
+# them said, and its SHAPE is what the glass makes of the beam: a round beam striking the glass at an angle makes an oval stretched by 1/cos
+# of the angle between the beam and the normal of the pane, long where the beam is nearly grazing it.
+HOAX_AUTHOR = {"people": "BeauJerome"}
+HOAX_TIME = "2026-10-16"
+GLB = pathlib.Path("public/models/davidmarton-a320-cockpit/cockpit.glb")
+# In the model's own frame (see COCKPIT_AT): the chief steward's hand.
+STEWARD_HAND = (-0.537, 1.2, 2.95)                  # his hand, held out beside his head, behind the captain
+SPOT_M = 0.02                                        # a key-ring torch's spot on the glass: about 2 cm, which is 2 degrees from half a metre
+SPOT_COLOR = "#b5301a"                               # a red one, the account says "rouge brunâtre"
+
+
+class Glass:
+    """The panes of the flight deck model (its blended material), as triangles in the model's frame."""
+    def __init__(self):
+        raw = GLB.read_bytes()
+        length = struct.unpack("<I", raw[12:16])[0]
+        self.gltf = json.loads(raw[20:20 + length])
+        self.blob = raw[20 + length + 8:]
+        self.triangles = []
+        for mesh in self.gltf["meshes"]:
+            for primitive in mesh["primitives"]:
+                if self.gltf["materials"][primitive["material"]].get("alphaMode") != "BLEND":
+                    continue
+                positions = self.read(primitive["attributes"]["POSITION"])
+                indices = self.read(primitive["indices"]) if "indices" in primitive else list(range(len(positions)))
+                for k in range(0, len(indices), 3):
+                    self.triangles.append(tuple(positions[indices[k + i]] for i in range(3)))
+
+    def read(self, index):
+        accessor = self.gltf["accessors"][index]
+        view = self.gltf["bufferViews"][accessor["bufferView"]]
+        start = view.get("byteOffset", 0) + accessor.get("byteOffset", 0)
+        if accessor["componentType"] == 5126:
+            width = {"VEC3": 3, "SCALAR": 1}[accessor["type"]]
+            return list(struct.iter_unpack("<" + "f" * width, self.blob[start:start + accessor["count"] * 4 * width]))
+        code = {5123: "H", 5125: "I", 5121: "B"}[accessor["componentType"]]
+        return [v[0] for v in struct.iter_unpack("<" + code, self.blob[start:start + accessor["count"] * struct.calcsize(code)])]
+
+    @staticmethod
+    def sub(a, b):
+        return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
+
+    @staticmethod
+    def cross(a, b):
+        return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+
+    @staticmethod
+    def dot(a, b):
+        return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+    def hit(self, origin, direction):
+        """The nearest pane the ray from `origin` along `direction` meets: (distance, unit normal), or None."""
+        best = None
+        for a, b, c in self.triangles:
+            e1, e2 = self.sub(b, a), self.sub(c, a)
+            p = self.cross(direction, e2)
+            det = self.dot(e1, p)
+            if abs(det) < 1e-9:
+                continue
+            s = self.sub(origin, a)
+            u = self.dot(s, p) / det
+            if u < 0 or u > 1:
+                continue
+            q = self.cross(s, e1)
+            v = self.dot(direction, q) / det
+            if v < 0 or u + v > 1:
+                continue
+            t = self.dot(e2, q) / det
+            if t > 0 and (best is None or t < best[0]):
+                n = self.cross(e1, e2)
+                size = math.sqrt(self.dot(n, n))
+                best = (t, (n[0] / size, n[1] / size, n[2] / size))
+        return best
+
+
+def model_to_world(v):
+    """A vector of the flight deck model (x right, y up, z towards the tail) as the scene's (east, up, south), the aircraft flying on HEADING."""
+    h = math.radians(HEADING)
+    east = v[0] * math.cos(h) + (-v[2]) * math.sin(h)
+    north = v[0] * (-math.sin(h)) + (-v[2]) * math.cos(h)
+    return (east, v[1], -north)
+
+
+def unit(v):
+    size = math.sqrt(sum(c * c for c in v))
+    return tuple(c / size for c in v)
+
+
+def attitude_of(long_axis, normal):
+    """The heading, pitch and roll (BodyAttitude: three's YXZ euler, heading clockwise from north) that stand a primitive with its x on `long_axis` and its
+    y on `normal`, both in the scene's frame (east, up, south)."""
+    x = unit(long_axis)
+    y = unit(normal)
+    z = Glass.cross(x, y)
+    # R = [x y z] as columns; R = Ry(a) Rx(b) Rz(c)
+    b = math.asin(max(-1.0, min(1.0, -z[1])))
+    a = math.atan2(z[0], z[2])
+    c = math.atan2(x[1], y[1])
+    return {"headingDeg": round(-math.degrees(a) % 360.0, 2), "pitchDeg": round(math.degrees(b), 2), "rollDeg": round(-math.degrees(c), 2)}
+
+
+def hoax_spots(account):
+    """The spot of the steward's light on the glass, as a point of the flight deck at each instant of the captain's account: where HIS line of sight to the
+    shape crosses the glass. One physical thing, which the co-pilot and the steward then see from where they are (and which their own accounts are
+    then measured against): (t, point, normal, beam stretch, long axis), in the model's frame."""
+    glass = hoax_spots.glass = getattr(hoax_spots, "glass", None) or Glass()
+    spots = []
+    for frame in account["timeline"]["keyframes"]:
+        if frame["t"] > account["durationSeconds"]["value"] * 1000:
+            continue
+        aim = frame["shapes"][0]["shape"]["aim"]
+        rel = math.radians(aim["azimuthDeg"] - HEADING)
+        alt = math.radians(aim["altitudeDeg"])
+        d = (math.sin(rel) * math.cos(alt), math.sin(alt), -math.cos(rel) * math.cos(alt))
+        found = glass.hit(EYE_CAPTAIN, d)
+        if not found:
+            continue
+        distance, normal = found
+        spot = tuple(EYE_CAPTAIN[i] + d[i] * distance for i in range(3))
+        beam = unit(Glass.sub(spot, STEWARD_HAND))
+        cosine = max(0.2, abs(Glass.dot(beam, normal)))
+        # the beam's direction along the pane: where the oval is stretched, by 1/cos of the angle between the beam and the normal of the pane
+        along = unit(tuple(beam[i] - Glass.dot(beam, normal) * normal[i] for i in range(3)))
+        spots.append((frame["t"], spot, normal, 1.0 / cosine, along))
+    return spots
+
+
+def hoax_reading(account, eye, spots, explains, title_fr, title_en):
+    """The reading of `account` in which what its observer saw is the spot of the steward's light on the glass, seen from `eye`: the spots are the
+    captain's (see hoax_spots), carried with the observer (BodyJson.withObserver) because they are on the glass he is sitting behind."""
+    keys = []
+    last = max(frame["t"] for frame in account["timeline"]["keyframes"])
+    times = [frame["t"] for frame in account["timeline"]["keyframes"] if frame["t"] <= account["durationSeconds"]["value"] * 1000]
+    for t in times:
+        # beyond the captain's account (his lasts less than hers), the spot stays where it was last
+        found = [spot for spot in spots if spot[0] <= t]
+        spot = found[-1] if found else spots[0]
+        _, point, normal, stretch, along = spot
+        v = Glass.sub(point, eye)
+        distance = math.sqrt(Glass.dot(v, v))
+        rel = math.degrees(math.atan2(v[0], -v[2]))
+        altitude = math.degrees(math.asin(v[1] / distance))
+        keys.append({"t": t, "azimuthDeg": round((HEADING + rel) % 360.0, 3), "altitudeDeg": round(altitude, 3), "distanceM": round(distance, 3),
+                     "sizeM": {"widthM": round(SPOT_M * stretch, 4), "lengthM": SPOT_M, "heightM": 0.001},
+                     "attitude": attitude_of(model_to_world(along), model_to_world(normal)),
+                     "appearance": {"color": SPOT_COLOR, "albedo": 0.2, "luminanceCdM2": 9000, "haloScale": 0.2}})
+    reading = {"version": 1, "id": account["id"] + "-hoax"}
+    for key, value in account.items():
+        if key not in ("version", "id", "observer", "account", "description", "sources", "tags", "timeline", "milestones", "interpretation", "_aim"):
+            reading[key] = value
+    reading["tags"] = ["interpretation"]
+    reading["timeline"] = {"keyframes": [], "order": [], "groups": []}
+    reading["interpretation"] = {
+        "title": tr(title_fr, title_en),
+        "bodies": [{"id": "spot", "explains": explains, "withObserver": True,
+                    "title": tr("Le point lumineux de la lampe du chef steward sur la vitre", "The spot of the chief steward's light on the glass"),
+                    "model": {"id": "disc"}, "track": keys}]}
+    return reading
+
+
+# --- the chief steward ----------------------------------------------------------------------------------------------------------------------
+def steward_recording():
+    """The chief steward's account: he was behind the captain, and was the first to see the object and to say what it was (\"un ballon-sonde\"). Nothing
+    he said gives a bearing, a size or a shape: he is given the captain's (the same object, seen from half a metre behind and 0.44 m above his
+    eyes, which is no parallax at all at that distance), the only reason this recording has an object in it. Nobody gives his name."""
+    total, frames, aim_at = commander()
+    rec = commander_recording()
+    rec.pop("_aim", None)
+    rec["id"] = "1994-01-28-ChiefSteward"
+    rec["observer"] = {"id": "ChiefStewardAF3532", "title": "Le chef steward"}
+    rec["account"] = {"observerOccupation": tr("chef steward, Air France", "chief steward, Air France")}
+    rec["durationSeconds"] = stated(total, "derived", "his own duration is not given: the captain's, for the same object")
+    rec["observerTrack"] = track(total, aim_at, 1.0)
+    rec["decor"] = airliner(total, "steward")
+    rec["sources"] = [{"type": "article", "title": "Rapport du pilote Duboc pour Dominique Weinstein, copie au SEPRA", "authors": ["Jean-Charles Duboc"],
+                       "url": "https://rr0.org/science/crypto/ufo/enquete/dossier/Duboc/index.html", "publication": {"publisher": "Velasco 2004"}}]
+    rec["description"] = {
+        "fr": ("Le chef steward, dans le poste de pilotage, debout derrière le commandant Duboc (peut-être à la place du siège observateur, mais rien ne dit "
+               "qu'il était assis), est le premier à voir l'objet et à s'exclamer : « Un ballon-sonde ! » On ne sait de lui que cela, par le "
+               "récit des deux pilotes : aucun relèvement, aucune taille, aucune forme qui soit de lui. Pour que sa vue puisse être jouée, "
+               "l'objet est placé comme le commandant le voit (même relèvement, même forme) : il est à moins d'un mètre de lui, ce qui ne change "
+               "rien à une direction à 46 km. Pour voir par la vitre de gauche, que le siège du commandant lui cache de derrière, il se penche entre les sièges."),
+        "en": ("The chief steward, in the cockpit, standing behind Captain Duboc (perhaps where the observer's seat is, but nothing says he was "
+               "seated), is the first to see the object and to exclaim: \"A weather balloon!\" That is all that is known of him, through the two "
+               "pilots' accounts: no bearing, no size, no shape that is his. So that his view can be played, the object is placed as the captain "
+               "sees it (same bearing, same shape): he is less than a metre from him, which changes nothing about a direction at 46 km. "
+               "To see through the left window, which the captain's seat hides from behind, he leans forward between the seats.")}
+    rec["milestones"] = [
+        {"t": 0, "label": "A", "note": tr("Il le voit le premier, vers 10 h : « Un ballon-sonde ! »", "He sees it first, at about 10 o'clock: \"A weather balloon!\"")},
+        {"t": int(total * 1000), "label": "C", "note": tr("Sur l'arrière gauche (8 h), il devient transparent et disparaît", "Behind on the left (8 o'clock), it turns transparent and vanishes")}]
+    return rec
+
+
 if __name__ == "__main__":
-    for name, rec in (("observer-duboc.json", commander_recording()), ("observer-duboc-copilot.json", copilot_recording())):
+    commander_rec, copilot_rec, steward_rec = commander_recording(), copilot_recording(), steward_recording()
+    spots = hoax_spots(commander_rec)
+    readings = (
+        ("interpretation-duboc-hoax.json", hoax_reading(commander_rec, EYE_CAPTAIN, spots, ["disc"],
+            "Canular : le point d'une lampe du chef steward, sur la vitre, vu par le commandant", "Hoax: the spot of the chief steward's light on the glass, as the captain saw it")),
+        ("interpretation-duboc-copilot-hoax.json", hoax_reading(copilot_rec, EYE_COPILOT, spots, ["lens", "chevron"],
+            "Canular : le point d'une lampe du chef steward, sur la vitre, vu par la copilote", "Hoax: the spot of the chief steward's light on the glass, as the co-pilot saw it")),
+        ("interpretation-duboc-steward-hoax.json", hoax_reading(steward_rec, EYE_STEWARD, spots, ["disc"],
+            "Canular : le point de sa propre lampe, sur la vitre, vu par le chef steward", "Hoax: the spot of his own light on the glass, as the chief steward saw it")),
+    )
+    for name, rec in (("observer-duboc.json", commander_rec), ("observer-duboc-copilot.json", copilot_rec), ("observer-duboc-steward.json", steward_rec)):
         aim = rec.pop("_aim", None)
         (OUT / name).write_text(json.dumps(rec, ensure_ascii=False, indent=1) + "\n")
         print(f"wrote {name} {(OUT / name).stat().st_size} bytes", aim or "")
+    for name, rec in readings:
+        (OUT / name).write_text(json.dumps(rec, ensure_ascii=False, indent=1) + "\n")
+        print(f"wrote {name} {(OUT / name).stat().st_size} bytes, {len(rec['interpretation']['bodies'][0]['track'])} keyframes")

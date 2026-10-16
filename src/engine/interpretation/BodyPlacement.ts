@@ -61,6 +61,8 @@ interface PlacedKey {
   appearance: BodyState["appearance"]
   flame?: BodyFlame
   present: boolean
+  /** Where it stands from the eye at its own instant, for a body that goes with the observer (BodyJson.withObserver). */
+  carried?: { eastM: number, northM: number, upM: number }
 }
 
 /**
@@ -94,7 +96,7 @@ export class BodyPlacement {
   /**
    * @param eyeAt Where the observer's eye is at an instant, in the same frame — see eyeOf.
    */
-  constructor(private readonly body: BodyJson, private readonly ground: Ground, eyeAt: (t: number) => (LocalPoint & { headingDeg?: number }) | undefined) {
+  constructor(private readonly body: BodyJson, private readonly ground: Ground, private readonly eyeAt: (t: number) => (LocalPoint & { headingDeg?: number }) | undefined) {
     const track = [...body.track].sort((a, b) => a.t - b.t)
     this.keys = this.place(track, eyeAt)
     // Each movement from the keyframes that state IT: one stated at 248 s and again at 262 s turns
@@ -219,8 +221,10 @@ export class BodyPlacement {
     if (!from.present) return undefined
     const to = keys[Math.min(index + 1, keys.length - 1)]
     const fraction = to === from || to.t === from.t ? 0 : Math.min(1, (t - from.t) / (to.t - from.t))
-    const eastM = BodyPlacement.lerp(from.eastM, to.eastM, fraction)
-    const northM = BodyPlacement.lerp(from.northM, to.northM, fraction)
+    // A body that goes with the observer is where their eye is NOW, plus its offsets blended.
+    const eyeNow = this.body.withObserver && from.carried && to.carried ? this.eyeAt(t) : undefined
+    const eastM = eyeNow ? eyeNow.eastM + BodyPlacement.lerp(from.carried!.eastM, to.carried!.eastM, fraction) : BodyPlacement.lerp(from.eastM, to.eastM, fraction)
+    const northM = eyeNow ? eyeNow.northM + BodyPlacement.lerp(from.carried!.northM, to.carried!.northM, fraction) : BodyPlacement.lerp(from.northM, to.northM, fraction)
     const sizeM: BodySize = {
       widthM: BodyPlacement.lerp(from.sizeM.widthM, to.sizeM.widthM, fraction),
       lengthM: BodyPlacement.lerp(from.sizeM.lengthM, to.sizeM.lengthM, fraction),
@@ -232,7 +236,9 @@ export class BodyPlacement {
       rollDeg: BodyPlacement.lerp(from.attitude.rollDeg, to.attitude.rollDeg, fraction)
     }
     let upM: number
-    if ("aboveGroundM" in from.vertical && "aboveGroundM" in to.vertical) {
+    if (eyeNow) {
+      upM = eyeNow.upM + BodyPlacement.lerp(from.carried!.upM, to.carried!.upM, fraction)
+    } else if ("aboveGroundM" in from.vertical && "aboveGroundM" in to.vertical) {
       // Both on (or a set height over) the ground: the ground is followed, not cut through.
       const aboveM = BodyPlacement.lerp(from.vertical.aboveGroundM, to.vertical.aboveGroundM, fraction)
       upM = this.groundUnderFootprint(eastM, northM, sizeM, attitude.headingDeg) + aboveM + sizeM.heightM / 2
@@ -335,6 +341,10 @@ export class BodyPlacement {
       const flame = key.flame ?? previous?.flame
       const present = key.present ?? previous?.present ?? true
       previous = { t: key.t, ...position, sizeM, attitude, appearance, flame, present }
+      if (this.body.withObserver && key.azimuthDeg !== undefined && key.distanceM !== undefined) {
+        const direction = BodyPlacement.directionOf(key.azimuthDeg, key.altitudeDeg ?? 0)
+        previous.carried = { eastM: direction.eastM * key.distanceM, northM: direction.northM * key.distanceM, upM: direction.upM * key.distanceM }
+      }
       placed.push(previous)
     }
     return placed
