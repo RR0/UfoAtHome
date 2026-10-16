@@ -61,8 +61,8 @@
   }
  ],
  "description": {
-  "fr": "Même vol, même minute, vu du siège de droite, par la copilote Valérie Chauffour. Elle prend d'abord l'objet pour un ballon-sonde, comme le steward. Pour elle il ne reste pas en arrière : elle le voit constamment vers 9 h, à gauche, et se déplaçant à la vitesse de l'avion, sur une trajectoire rectiligne parallèle à la sienne, pendant 2 à 5 minutes. Sa forme change : une lentille à contour net, qui se floute, devient une forme de « chevron » (géométrie variable, disque évoluant dans les trois dimensions), puis le contour redevient net à la fin ; sombre, brun, de grande taille. Juste avant la disparition, « une sorte de virage ».\n\nNi taille angulaire ni distance chiffrée dans son rapport (« grande taille », 25 à 50 miles nautiques) : la taille est celle de l'interview du commandant (empruntée), et le moment où l'objet quitte le 10 h pour le 9 h est choisi.",
-  "en": "Same flight, same minute, seen from the right-hand seat by the co-pilot, Valérie Chauffour. She first takes the object for a weather balloon, like the steward. For her it does not fall behind: she sees it constantly at about 9 o'clock, to the left, moving at the airliner's speed on a straight path parallel to its own, for 2 to 5 minutes. Its shape changes: a lens with a sharp outline that blurs becomes a \"chevron\" (variable geometry, a disc evolving in all three dimensions), then the outline is sharp again at the end; dark, brown, large. Just before it disappears, \"a sort of turn\".\n\nNo angular size and no figure for the distance in her report (\"large\", 25 to 50 nautical miles): the size is the one the captain's 1999 interview gives (borrowed), and when the object moves from 10 o'clock to 9 is chosen."
+  "fr": "Même vol, même minute, vu du siège de droite, par la copilote Valérie Chauffour. Elle prend d'abord l'objet pour un ballon-sonde, comme le steward. Pour elle il ne reste pas en arrière : elle le voit constamment vers 9 h, à gauche, et se déplaçant à la vitesse de l'avion, sur une trajectoire rectiligne parallèle à la sienne, pendant 2 à 5 minutes. Sa forme change : une lentille à contour net, qui se floute, devient une forme de « chevron » (géométrie variable, disque évoluant dans les trois dimensions), puis le contour redevient net à la fin ; sombre, brun, de grande taille. Juste avant la disparition, « une sorte de virage ».\n\nNi taille angulaire ni distance chiffrée dans son rapport (« grande taille », 25 à 50 miles nautiques) : la taille est supposée : celle de la Lune environ, puisqu'elle prend d'abord l'objet pour un ballon-sonde, rond au début, et le moment où l'objet quitte le 10 h pour le 9 h est choisi.",
+  "en": "Same flight, same minute, seen from the right-hand seat by the co-pilot, Valérie Chauffour. She first takes the object for a weather balloon, like the steward. For her it does not fall behind: she sees it constantly at about 9 o'clock, to the left, moving at the airliner's speed on a straight path parallel to its own, for 2 to 5 minutes. Its shape changes: a lens with a sharp outline that blurs becomes a \"chevron\" (variable geometry, a disc evolving in all three dimensions), then the outline is sharp again at the end; dark, brown, large. Just before it disappears, \"a sort of turn\".\n\nNo angular size and no figure for the distance in her report (\"large\", 25 to 50 nautical miles): the size is assumed: about that of the Moon, since she first takes the object for a weather balloon, round at first, and when the object moves from 10 o'clock to 9 is chosen."
  },
  "instrument": "eye",
  "observerTrack": {
@@ -1096,11 +1096,11 @@
        "color": "#a8421f",
        "transparency": 0,
        "brightness": 0,
-       "blur": 0.09,
+       "blur": 0.12,
        "haloScale": 0,
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.57
        },
        "aim": {
         "azimuthDeg": 272.0,
@@ -1120,11 +1120,11 @@
        "color": "#a8421f",
        "transparency": 1,
        "brightness": 0,
-       "blur": 0.09,
+       "blur": 0.12,
        "haloScale": 0,
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 272.0,
@@ -1160,30 +1160,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.57
        },
        "aim": {
         "azimuthDeg": 271.902,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 271.902,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1195,30 +1195,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.57
        },
        "aim": {
         "azimuthDeg": 271.618,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 271.618,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1230,30 +1230,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.57
        },
        "aim": {
         "azimuthDeg": 271.16,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 271.16,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1265,30 +1265,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.57
        },
        "aim": {
         "azimuthDeg": 270.542,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 270.542,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1300,30 +1300,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.57
        },
        "aim": {
         "azimuthDeg": 269.778,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 269.778,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1335,30 +1335,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.57
        },
        "aim": {
         "azimuthDeg": 268.88,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 268.88,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1370,30 +1370,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.57
        },
        "aim": {
         "azimuthDeg": 267.862,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 267.862,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1405,30 +1405,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.57
        },
        "aim": {
         "azimuthDeg": 266.738,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 266.738,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1440,30 +1440,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.57
        },
        "aim": {
         "azimuthDeg": 265.52,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 265.52,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1475,30 +1475,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.57
        },
        "aim": {
         "azimuthDeg": 264.222,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 264.222,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1510,30 +1510,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.569
        },
        "aim": {
         "azimuthDeg": 262.858,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 262.858,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1545,30 +1545,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.565
        },
        "aim": {
         "azimuthDeg": 261.44,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 261.44,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1580,30 +1580,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.56
        },
        "aim": {
         "azimuthDeg": 259.982,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 259.982,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1615,30 +1615,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.553
        },
        "aim": {
         "azimuthDeg": 258.498,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 258.498,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1650,30 +1650,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.543
        },
        "aim": {
         "azimuthDeg": 257.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 257.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1685,30 +1685,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.533
        },
        "aim": {
         "azimuthDeg": 255.502,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 255.502,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1720,30 +1720,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.52
        },
        "aim": {
         "azimuthDeg": 254.018,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 254.018,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1755,30 +1755,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.507
        },
        "aim": {
         "azimuthDeg": 252.56,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 252.56,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1790,30 +1790,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.492
        },
        "aim": {
         "azimuthDeg": 251.142,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 251.142,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1825,30 +1825,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.477
        },
        "aim": {
         "azimuthDeg": 249.778,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 249.778,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1860,30 +1860,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.46
        },
        "aim": {
         "azimuthDeg": 248.48,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 248.48,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1895,30 +1895,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.443
        },
        "aim": {
         "azimuthDeg": 247.262,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 247.262,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1930,30 +1930,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.426
        },
        "aim": {
         "azimuthDeg": 246.138,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 246.138,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -1965,30 +1965,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.408
        },
        "aim": {
         "azimuthDeg": 245.12,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 245.12,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -2000,30 +2000,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.39
        },
        "aim": {
         "azimuthDeg": 244.222,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 244.222,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -2035,30 +2035,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.372
        },
        "aim": {
         "azimuthDeg": 243.458,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 243.458,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -2070,30 +2070,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.354
        },
        "aim": {
         "azimuthDeg": 242.84,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.84,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -2105,30 +2105,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.337
        },
        "aim": {
         "azimuthDeg": 242.382,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.382,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -2140,30 +2140,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.32
        },
        "aim": {
         "azimuthDeg": 242.098,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.098,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -2175,30 +2175,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.303
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -2210,30 +2210,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.288
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -2245,30 +2245,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.273
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -2280,30 +2280,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.26
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.091
+       "blur": 0.121
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.091
+       "blur": 0.121
       }
      }
     ]
@@ -2315,30 +2315,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.247
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.091
+       "blur": 0.122
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.091
+       "blur": 0.122
       }
      }
     ]
@@ -2350,30 +2350,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.237
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.092
+       "blur": 0.122
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.092
+       "blur": 0.122
       }
      }
     ]
@@ -2385,30 +2385,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.227
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.093
+       "blur": 0.123
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.093
+       "blur": 0.123
       }
      }
     ]
@@ -2420,30 +2420,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.22
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.094
+       "blur": 0.125
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.094
+       "blur": 0.125
       }
      }
     ]
@@ -2455,30 +2455,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.215
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.095
+       "blur": 0.126
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.095
+       "blur": 0.126
       }
      }
     ]
@@ -2490,30 +2490,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.211
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.096
+       "blur": 0.128
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.096
+       "blur": 0.128
       }
      }
     ]
@@ -2525,30 +2525,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.098
+       "blur": 0.13
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.098
+       "blur": 0.13
       }
      }
     ]
@@ -2560,30 +2560,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.1
+       "blur": 0.131
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.1
+       "blur": 0.131
       }
      }
     ]
@@ -2595,30 +2595,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.101
+       "blur": 0.134
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.101
+       "blur": 0.134
       }
      }
     ]
@@ -2630,30 +2630,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.103
+       "blur": 0.136
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.103
+       "blur": 0.136
       }
      }
     ]
@@ -2665,30 +2665,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.105
+       "blur": 0.138
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.105
+       "blur": 0.138
       }
      }
     ]
@@ -2700,30 +2700,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.107
+       "blur": 0.141
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.107
+       "blur": 0.141
       }
      }
     ]
@@ -2735,30 +2735,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.109
+       "blur": 0.143
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.109
+       "blur": 0.143
       }
      }
     ]
@@ -2770,30 +2770,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.112
+       "blur": 0.146
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.112
+       "blur": 0.146
       }
      }
     ]
@@ -2805,30 +2805,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.114
+       "blur": 0.149
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.114
+       "blur": 0.149
       }
      }
     ]
@@ -2840,30 +2840,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.117
+       "blur": 0.152
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.117
+       "blur": 0.152
       }
      }
     ]
@@ -2875,30 +2875,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.119
+       "blur": 0.155
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.119
+       "blur": 0.155
       }
      }
     ]
@@ -2910,30 +2910,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.122
+       "blur": 0.158
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.122
+       "blur": 0.158
       }
      }
     ]
@@ -2945,30 +2945,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.125
+       "blur": 0.161
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.125
+       "blur": 0.161
       }
      }
     ]
@@ -2980,30 +2980,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.127
+       "blur": 0.165
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.127
+       "blur": 0.165
       }
      }
     ]
@@ -3015,30 +3015,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.13
+       "blur": 0.168
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.13
+       "blur": 0.168
       }
      }
     ]
@@ -3050,30 +3050,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.133
+       "blur": 0.171
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.133
+       "blur": 0.171
       }
      }
     ]
@@ -3085,30 +3085,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.136
+       "blur": 0.175
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.136
+       "blur": 0.175
       }
      }
     ]
@@ -3120,30 +3120,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.139
+       "blur": 0.178
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.139
+       "blur": 0.178
       }
      }
     ]
@@ -3155,30 +3155,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.141
+       "blur": 0.182
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.141
+       "blur": 0.182
       }
      }
     ]
@@ -3190,30 +3190,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.144
+       "blur": 0.185
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.144
+       "blur": 0.185
       }
      }
     ]
@@ -3225,30 +3225,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.147
+       "blur": 0.189
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.147
+       "blur": 0.189
       }
      }
     ]
@@ -3260,30 +3260,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.15
+       "blur": 0.192
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.15
+       "blur": 0.192
       }
      }
     ]
@@ -3295,30 +3295,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.153
+       "blur": 0.195
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.153
+       "blur": 0.195
       }
      }
     ]
@@ -3330,30 +3330,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.155
+       "blur": 0.199
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.155
+       "blur": 0.199
       }
      }
     ]
@@ -3365,30 +3365,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.158
+       "blur": 0.202
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.158
+       "blur": 0.202
       }
      }
     ]
@@ -3400,30 +3400,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.161
+       "blur": 0.205
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.161
+       "blur": 0.205
       }
      }
     ]
@@ -3435,30 +3435,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.028,
-       "blur": 0.163
+       "blur": 0.208
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.972,
-       "blur": 0.163
+       "blur": 0.208
       }
      }
     ]
@@ -3470,30 +3470,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.104,
-       "blur": 0.166
+       "blur": 0.211
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.896,
-       "blur": 0.166
+       "blur": 0.211
       }
      }
     ]
@@ -3505,30 +3505,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.216,
-       "blur": 0.168
+       "blur": 0.214
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.784,
-       "blur": 0.168
+       "blur": 0.214
       }
      }
     ]
@@ -3540,30 +3540,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.352,
-       "blur": 0.171
+       "blur": 0.217
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.648,
-       "blur": 0.171
+       "blur": 0.217
       }
      }
     ]
@@ -3575,30 +3575,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.5,
-       "blur": 0.173
+       "blur": 0.219
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.5,
-       "blur": 0.173
+       "blur": 0.219
       }
      }
     ]
@@ -3610,30 +3610,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.648,
-       "blur": 0.175
+       "blur": 0.222
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.352,
-       "blur": 0.175
+       "blur": 0.222
       }
      }
     ]
@@ -3645,30 +3645,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.784,
-       "blur": 0.177
+       "blur": 0.224
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.216,
-       "blur": 0.177
+       "blur": 0.224
       }
      }
     ]
@@ -3680,30 +3680,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.896,
-       "blur": 0.179
+       "blur": 0.226
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.104,
-       "blur": 0.179
+       "blur": 0.226
       }
      }
     ]
@@ -3715,30 +3715,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.972,
-       "blur": 0.18
+       "blur": 0.229
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.028,
-       "blur": 0.18
+       "blur": 0.229
       }
      }
     ]
@@ -3750,30 +3750,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.182
+       "blur": 0.23
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.182
+       "blur": 0.23
       }
      }
     ]
@@ -3785,30 +3785,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.184
+       "blur": 0.232
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.184
+       "blur": 0.232
       }
      }
     ]
@@ -3820,30 +3820,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.185
+       "blur": 0.234
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.185
+       "blur": 0.234
       }
      }
     ]
@@ -3855,30 +3855,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.186
+       "blur": 0.235
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.186
+       "blur": 0.235
       }
      }
     ]
@@ -3890,30 +3890,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.187
+       "blur": 0.237
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.187
+       "blur": 0.237
       }
      }
     ]
@@ -3925,30 +3925,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.188
+       "blur": 0.238
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.188
+       "blur": 0.238
       }
      }
     ]
@@ -3960,30 +3960,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.189
+       "blur": 0.238
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.189
+       "blur": 0.238
       }
      }
     ]
@@ -3995,30 +3995,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.189
+       "blur": 0.239
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.189
+       "blur": 0.239
       }
      }
     ]
@@ -4030,30 +4030,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.19
+       "blur": 0.24
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.19
+       "blur": 0.24
       }
      }
     ]
@@ -4065,30 +4065,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.19
+       "blur": 0.24
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.19
+       "blur": 0.24
       }
      }
     ]
@@ -4100,30 +4100,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.19
+       "blur": 0.24
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.19
+       "blur": 0.24
       }
      }
     ]
@@ -4135,30 +4135,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.19
+       "blur": 0.24
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.19
+       "blur": 0.24
       }
      }
     ]
@@ -4170,30 +4170,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.19
+       "blur": 0.24
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.19
+       "blur": 0.24
       }
      }
     ]
@@ -4205,30 +4205,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.189
+       "blur": 0.239
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.189
+       "blur": 0.239
       }
      }
     ]
@@ -4240,30 +4240,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.189
+       "blur": 0.238
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.189
+       "blur": 0.238
       }
      }
     ]
@@ -4275,30 +4275,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.188
+       "blur": 0.238
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.188
+       "blur": 0.238
       }
      }
     ]
@@ -4310,30 +4310,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.187
+       "blur": 0.237
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.187
+       "blur": 0.237
       }
      }
     ]
@@ -4345,30 +4345,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.186
+       "blur": 0.235
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.186
+       "blur": 0.235
       }
      }
     ]
@@ -4380,30 +4380,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.185
+       "blur": 0.234
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.185
+       "blur": 0.234
       }
      }
     ]
@@ -4415,30 +4415,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.184
+       "blur": 0.232
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.184
+       "blur": 0.232
       }
      }
     ]
@@ -4450,30 +4450,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.182
+       "blur": 0.23
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.182
+       "blur": 0.23
       }
      }
     ]
@@ -4485,30 +4485,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.18
+       "blur": 0.229
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.18
+       "blur": 0.229
       }
      }
     ]
@@ -4520,30 +4520,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.179
+       "blur": 0.226
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.179
+       "blur": 0.226
       }
      }
     ]
@@ -4555,30 +4555,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.177
+       "blur": 0.224
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.177
+       "blur": 0.224
       }
      }
     ]
@@ -4590,30 +4590,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.175
+       "blur": 0.222
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.175
+       "blur": 0.222
       }
      }
     ]
@@ -4625,30 +4625,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.173
+       "blur": 0.219
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.173
+       "blur": 0.219
       }
      }
     ]
@@ -4660,30 +4660,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.171
+       "blur": 0.217
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.171
+       "blur": 0.217
       }
      }
     ]
@@ -4695,30 +4695,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.168
+       "blur": 0.214
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.168
+       "blur": 0.214
       }
      }
     ]
@@ -4730,30 +4730,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.166
+       "blur": 0.211
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.166
+       "blur": 0.211
       }
      }
     ]
@@ -4765,30 +4765,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.163
+       "blur": 0.208
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.163
+       "blur": 0.208
       }
      }
     ]
@@ -4800,30 +4800,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.161
+       "blur": 0.205
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.161
+       "blur": 0.205
       }
      }
     ]
@@ -4835,30 +4835,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.158
+       "blur": 0.202
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.158
+       "blur": 0.202
       }
      }
     ]
@@ -4870,30 +4870,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.155
+       "blur": 0.199
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.155
+       "blur": 0.199
       }
      }
     ]
@@ -4905,30 +4905,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.153
+       "blur": 0.195
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.153
+       "blur": 0.195
       }
      }
     ]
@@ -4940,30 +4940,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.15
+       "blur": 0.192
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.15
+       "blur": 0.192
       }
      }
     ]
@@ -4975,30 +4975,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.147
+       "blur": 0.189
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.147
+       "blur": 0.189
       }
      }
     ]
@@ -5010,30 +5010,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.144
+       "blur": 0.185
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.144
+       "blur": 0.185
       }
      }
     ]
@@ -5045,30 +5045,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.141
+       "blur": 0.182
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.141
+       "blur": 0.182
       }
      }
     ]
@@ -5080,30 +5080,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.139
+       "blur": 0.178
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.139
+       "blur": 0.178
       }
      }
     ]
@@ -5115,30 +5115,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.136
+       "blur": 0.175
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.136
+       "blur": 0.175
       }
      }
     ]
@@ -5150,30 +5150,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.133
+       "blur": 0.171
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.133
+       "blur": 0.171
       }
      }
     ]
@@ -5185,30 +5185,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.13
+       "blur": 0.168
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.13
+       "blur": 0.168
       }
      }
     ]
@@ -5220,30 +5220,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.127
+       "blur": 0.165
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.127
+       "blur": 0.165
       }
      }
     ]
@@ -5255,30 +5255,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.125
+       "blur": 0.161
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.125
+       "blur": 0.161
       }
      }
     ]
@@ -5290,30 +5290,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.122
+       "blur": 0.158
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.122
+       "blur": 0.158
       }
      }
     ]
@@ -5325,30 +5325,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.119
+       "blur": 0.155
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.119
+       "blur": 0.155
       }
      }
     ]
@@ -5360,30 +5360,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.117
+       "blur": 0.152
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.117
+       "blur": 0.152
       }
      }
     ]
@@ -5395,30 +5395,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.114
+       "blur": 0.149
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.114
+       "blur": 0.149
       }
      }
     ]
@@ -5430,30 +5430,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.112
+       "blur": 0.146
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.112
+       "blur": 0.146
       }
      }
     ]
@@ -5465,30 +5465,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.109
+       "blur": 0.143
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.109
+       "blur": 0.143
       }
      }
     ]
@@ -5500,30 +5500,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.107
+       "blur": 0.141
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.107
+       "blur": 0.141
       }
      }
     ]
@@ -5535,30 +5535,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.972,
-       "blur": 0.105
+       "blur": 0.138
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.028,
-       "blur": 0.105
+       "blur": 0.138
       }
      }
     ]
@@ -5570,30 +5570,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.896,
-       "blur": 0.103
+       "blur": 0.136
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.104,
-       "blur": 0.103
+       "blur": 0.136
       }
      }
     ]
@@ -5605,30 +5605,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.784,
-       "blur": 0.101
+       "blur": 0.134
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.216,
-       "blur": 0.101
+       "blur": 0.134
       }
      }
     ]
@@ -5640,30 +5640,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.648,
-       "blur": 0.1
+       "blur": 0.131
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.352,
-       "blur": 0.1
+       "blur": 0.131
       }
      }
     ]
@@ -5675,30 +5675,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.5,
-       "blur": 0.098
+       "blur": 0.13
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.5,
-       "blur": 0.098
+       "blur": 0.13
       }
      }
     ]
@@ -5710,30 +5710,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.352,
-       "blur": 0.096
+       "blur": 0.128
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.648,
-       "blur": 0.096
+       "blur": 0.128
       }
      }
     ]
@@ -5745,30 +5745,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.216,
-       "blur": 0.095
+       "blur": 0.126
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.784,
-       "blur": 0.095
+       "blur": 0.126
       }
      }
     ]
@@ -5780,30 +5780,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.104,
-       "blur": 0.094
+       "blur": 0.125
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.896,
-       "blur": 0.094
+       "blur": 0.125
       }
      }
     ]
@@ -5815,30 +5815,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.028,
-       "blur": 0.093
+       "blur": 0.123
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.972,
-       "blur": 0.093
+       "blur": 0.123
       }
      }
     ]
@@ -5850,30 +5850,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.092
+       "blur": 0.122
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.092
+       "blur": 0.122
       }
      }
     ]
@@ -5885,30 +5885,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.091
+       "blur": 0.122
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.091
+       "blur": 0.122
       }
      }
     ]
@@ -5920,30 +5920,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.091
+       "blur": 0.121
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.091
+       "blur": 0.121
       }
      }
     ]
@@ -5955,30 +5955,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -5990,30 +5990,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6025,30 +6025,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6060,30 +6060,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6095,30 +6095,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6130,30 +6130,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6165,30 +6165,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6200,30 +6200,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6235,30 +6235,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6270,30 +6270,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6305,30 +6305,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6340,30 +6340,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6375,30 +6375,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6410,30 +6410,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6445,30 +6445,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6480,30 +6480,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6515,30 +6515,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6550,30 +6550,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6585,30 +6585,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6620,30 +6620,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6655,30 +6655,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6690,30 +6690,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6725,30 +6725,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6760,30 +6760,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6795,30 +6795,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6830,30 +6830,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6865,30 +6865,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6900,30 +6900,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6935,30 +6935,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -6970,30 +6970,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7005,30 +7005,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7040,30 +7040,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.603,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.603,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7075,30 +7075,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 244.25,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 244.25,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7110,30 +7110,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 246.5,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 246.5,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7145,30 +7145,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 248.75,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 248.75,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7180,30 +7180,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 250.397,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 250.397,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7215,30 +7215,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 251.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 251.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7250,30 +7250,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 250.397,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 250.397,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7285,30 +7285,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 248.75,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 248.75,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7320,30 +7320,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 246.5,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 246.5,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7355,30 +7355,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 244.25,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 244.25,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7390,30 +7390,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.603,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.603,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7425,30 +7425,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 0.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1.0,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
@@ -7460,30 +7460,30 @@
       "sourceId": "lens",
       "shape": {
        "angular": {
-        "widthDeg": 2.0,
-        "heightDeg": 0.7
+        "widthDeg": 0.6,
+        "heightDeg": 0.21
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1,
-       "blur": 0.09
+       "blur": 0.12
       }
      },
      {
       "sourceId": "chevron",
       "shape": {
        "angular": {
-        "widthDeg": 2.2,
-        "heightDeg": 1.5
+        "widthDeg": 0.66,
+        "heightDeg": 0.45
        },
        "aim": {
         "azimuthDeg": 242.0,
         "altitudeDeg": -1.494
        },
        "transparency": 1,
-       "blur": 0.09
+       "blur": 0.12
       }
      }
     ]
