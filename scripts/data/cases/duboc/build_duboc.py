@@ -21,8 +21,8 @@ What the two accounts give, and what is borrowed:
   for the 11 nautical miles the airliner flew gives an equilateral triangle: it is at 10 NM abeam, not 25 (the SEPRA's
   own remark). The recording keeps the angles he gave and borrows that distance only to turn them into a position.
   Its altitude angle follows from his own 10 500 m against the 11 700 m of the airliner.
-- The angular size is his 1999 one, 1000 m at 46 km (1.24 degrees, a thumb at arm's length): at the report's 200 to
-  300 m, or the SEPRA's half Moon (0.26 degrees), the disc is under a pixel and cannot be seen at all.
+- The angular size is the width of his thumb at arm's length from the 1999 interview, about 2 degrees (1000 m at 46 km would be
+  1.24): at the report's 200 to 300 m, or the SEPRA's half Moon (0.26 degrees), the disc is under a pixel and cannot be seen at all.
 
 Writes public/demo-data/observer-duboc.json and observer-duboc-copilot.json. Run from the repository root:
     python3 scripts/data/cases/duboc/build_duboc.py
@@ -39,7 +39,7 @@ SPEED = 350 * 1852 / 3600                            # 350 kt, "VS" of the repor
 PLANE_M, OBJECT_M = 11700.0, 10500.0
 DISC_M, DISC_THICKNESS_M = 1000.0, 100.0              # "1000 m de diamètre pour une épaisseur de 100 m" (interview of 1999)
 BROWN_RED = "#a8421f"                               # "brun-rouge", "rouge brunâtre": a dark red-brown in the daylight reads as a black blot, so a rust red
-SIZE_DEG = 1.24                                      # 1999 interview: 1000 m at 46 km, "the width of his thumb"; the report (200-300 m) and the SEPRA (half the Moon, 0.26) give far less
+SIZE_DEG = 2.0                                       # 1999 interview: "the width of his thumb" at arm's length, about 2 degrees (1000 m at 46 km would be 1.24); the report (200-300 m) and the SEPRA (half the Moon, 0.26) give far less
 STEP_MS = 1000
 
 # In the flight deck model, where the captain's eye is: 0.557 m left of the centre of its box and 0.146 m above it, 0.83 m above the model's
@@ -258,7 +258,7 @@ def commander_recording():
                 "(200 à 300 m dans le rapport, 1000 m sur 100 d'épaisseur, de la largeur de son pouce à bout de bras, dans l'interview de 1999), "
                 "à 25 miles nautiques (46 km), vers 10 500 m. Lorsqu'il le laisse sur l'arrière gauche, vers 8 h, il le voit soudain devenir "
                 "transparent et disparaître, sans bouger.\n\n"
-                "Ici la taille est celle de l'interview de 1999 (1000 m à 46 km, 1,24°) ; le SEPRA la ramène à la moitié de la Lune (0,26°). Les relèvements, 10 h puis 8 h, "
+                "Ici la taille est celle de l'interview de 1999, la largeur d'un pouce à bout de bras (environ 2° ; 1000 m à 46 km feraient 1,24°) ; le SEPRA la ramène à la moitié de la Lune (0,26°). Les relèvements, 10 h puis 8 h, "
                 "pour les 11 miles nautiques parcourus, donnent un triangle équilatéral : l'objet immobile serait à 10 miles nautiques de "
                 "la route, non 25. L'enregistrement garde les angles du pilote et emprunte cette distance seulement pour les situer."),
             "en": (
@@ -273,7 +273,7 @@ def commander_recording():
                 "(200 to 300 m in the report, 1000 m by 100 thick, the width of his thumb at arm's length, in the 1999 interview), 25 "
                 "nautical miles (46 km) away, at about 10,500 m. When he leaves it behind on the left, at about 8 o'clock, he sees it "
                 "suddenly turn transparent and vanish, without moving.\n\n"
-                "The size here is the one from the 1999 interview (1000 m at 46 km, 1.24 degrees); the SEPRA brings it down to half the Moon (0.26). The bearings, 10 o'clock then 8, over "
+                "The size here is the one from the 1999 interview, the width of a thumb at arm's length (about 2 degrees; 1000 m at 46 km would be 1.24); the SEPRA brings it down to half the Moon (0.26). The bearings, 10 o'clock then 8, over "
                 "the 11 nautical miles flown make an equilateral triangle: a motionless object would be 10 nautical miles off the track, not "
                 "25. The recording keeps the pilot's angles and borrows that distance only to place them."),
         },
