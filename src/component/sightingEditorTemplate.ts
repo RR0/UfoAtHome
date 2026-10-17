@@ -93,26 +93,34 @@ export const html = `
       <option id="option-followed-yes" value="yes">yes</option>
       <option id="option-followed-no" value="no">no</option>
     </select></label>
-    <label><span id="label-instrument">Observed through</span> <rr0-popover-picker id="instrument"></rr0-popover-picker></label>
-    <label><span id="label-filter">In front of it</span> <select id="filter"></select></label>
-    <!-- What the device was SET to, when it could be set at all: the lens's focal length (shown as
-         the field of view for an eye, which has no focal length), how far it was stopped down, and
-         how long its shutter stayed open. Each falls back to the instrument's own value and each is
-         disabled when the device fixes it — an Instamatic's owner had nothing to choose. See
-         Instrument.ts and ObserverPose.fNumber/exposureSeconds. -->
-    <label><span id="label-focal-length">Focal length</span> <input id="focalLength" type="number" min="1" max="2000" step="0.1"/> <span id="unit-focal-length">mm</span>
-      <output id="focal-fov" class="apparent-size inline" for="focalLength"></output></label>
-    <label><span id="label-f-number">Aperture</span> f/<input id="fNumber" type="number" min="0.7" max="64" step="0.1"/></label>
-    <label><span id="label-exposure">Exposure</span> <input id="exposureSeconds" type="text" inputmode="decimal" size="7" placeholder="1/250"/> s</label>
-    <label><span id="label-focus-distance">Focused at</span> <input id="focusDistance" type="number" min="0.1" max="30000" step="0.1" placeholder="&#8734;"/> m</label>
-    <!-- With the instrument and not with the place: latitude and heading say where the observer
-         stood and which way they faced, and this says nothing about either. It is how the device
-         was HELD — a camera askew, a head leaned over — which is why it belongs beside the focal
-         length and the aperture whose own spikes it turns. -->
-    <label><span id="label-roll">Roll</span> <input id="roll" type="number" min="-180" max="180" step="1" value="0" title="How far the instrument was tilted about its own line of sight — positive clockwise, as the observer saw it"/> &deg;</label>
-    <!-- How much the body holding it moves the view at rest — see Sighting.sway: 1 a person, 0 a
-         tripod. Blank is the default (1, or 0 for a paralysed observer). -->
-    <label><span id="label-sway">Sway</span> <input id="sway" type="number" min="0" max="3" step="0.1" placeholder="1"/></label>
+    <!-- Everything that is about WHAT THE OBSERVER LOOKED THROUGH, grouped with the picker that names it:
+         the filter in front of it and the settings of the device (see below). Which of them show, and
+         which are read-only, follows the instrument chosen. -->
+    <fieldset id="instrument-group" class="instrument-group">
+      <legend id="label-instrument">Observed through</legend>
+      <rr0-popover-picker id="instrument" aria-labelledby="label-instrument"></rr0-popover-picker>
+      <!-- What the device was SET to, when it could be set at all: the lens's focal length (shown as
+           the field of view for an eye, which has no focal length), how far it was stopped down, and
+           how long its shutter stayed open. Each falls back to the instrument's own value and each is
+           disabled when the device fixes it — an Instamatic's owner had nothing to choose. See
+           Instrument.ts and ObserverPose.fNumber/exposureSeconds. -->
+      <label><span id="label-focal-length">Focal length</span> <input id="focalLength" type="number" min="1" max="2000" step="0.1"/> <span id="unit-focal-length">mm</span>
+        <output id="focal-fov" class="apparent-size inline" for="focalLength"></output></label>
+      <label><span id="label-f-number">Aperture</span> f/<input id="fNumber" type="number" min="0.7" max="64" step="0.1"/></label>
+      <label><span id="label-exposure">Exposure</span> <input id="exposureSeconds" type="text" inputmode="decimal" size="7" placeholder="1/250"/> s</label>
+      <label><span id="label-focus-distance">Focused at</span> <input id="focusDistance" type="number" min="0.1" max="30000" step="0.1" placeholder="&#8734;"/> m</label>
+      <!-- With the instrument and not with the place: latitude and heading say where the observer
+           stood and which way they faced, and this says nothing about either. It is how the device
+           was HELD — a camera askew, a head leaned over — which is why it belongs beside the focal
+           length and the aperture whose own spikes it turns. -->
+      <label><span id="label-roll">Roll</span> <input id="roll" type="number" min="-180" max="180" step="1" value="0" title="How far the instrument was tilted about its own line of sight — positive clockwise, as the observer saw it"/> &deg;</label>
+      <!-- How much the body holding it moves the view at rest — see Sighting.sway: 1 a person, 0 a
+           tripod. Blank is the default (1, or 0 for a paralysed observer). -->
+      <label><span id="label-sway">Sway</span> <input id="sway" type="number" min="0" max="3" step="0.1" placeholder="1"/></label>
+      <!-- Last, and the instrument's own: a solar filter is for an eye or a telescope, a solar film for a
+           camera, so which ones are offered follows the device (see Filter.usableWith). -->
+      <label><span id="label-filter">In front of it</span> <select id="filter"></select></label>
+    </fieldset>
     <button id="add-decor-observer" type="button">Add observer</button>
   </div>
 </section>
@@ -621,6 +629,24 @@ export const css = `
 /* A field as wide as what it holds, from its own min/max/step — see NumberFields, which sets each
    one's width. What stands here is only what a field with no bounds of its own falls back to, and
    the colour swatches, which hold no text at all. */
+/* The instrument and what is set on it, as one box: the picker names the device, and the filter, focal length,
+   aperture, exposure, focus, roll and sway are that device's. */
+.instrument-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  flex: 1 1 100%;
+  margin: 0.2em 0;
+  padding: 0.3em 0.6em 0.5em;
+  border: 1px solid light-dark(#ccc, #4a4c52);
+  border-radius: 4px;
+}
+.instrument-group > legend {
+  padding: 0 0.4em;
+  font-weight: 600;
+}
+.instrument-group [hidden] { display: none !important; }
 .toolbar input[type="number"] {
   width: 7em;
 }

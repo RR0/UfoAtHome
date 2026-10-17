@@ -56,6 +56,7 @@ import { LightRigs } from "../engine/model/LightRig.js"
 import { DARK_SKY_LIMITING_MAGNITUDE, MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { Comets } from "../engine/astronomy/Comets.js"
 import { Filters } from "../engine/instrument/Filter.js"
+import type { Filter } from "../engine/instrument/Filter.js"
 import { LunarDisc } from "../engine/astronomy/LunarDisc.js"
 import { RedMoon } from "../engine/astronomy/RedMoon.js"
 import { SolarEclipse } from "../engine/astronomy/SolarEclipse.js"
@@ -1697,6 +1698,7 @@ export class SightingEditorElement extends HTMLElement {
       // The picture's own shape changes with it — a square 126 frame, a phone held upright — and
       // both the sky and the shapes drawn over it have to take it at the same moment.
       this.sceneElement.applyFrameFormat()
+      this.refreshFilterOptions()
       this.syncOpticsFromInstrument()
       this.ufoElement.refresh()
       this.dispatchEvent(new CustomEvent("sightingchange"))
@@ -6112,6 +6114,7 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshSkyCandidates()
     // The date decides which devices are offered — see refreshInstrumentOptions.
     this.refreshInstrumentOptions()
+    this.refreshFilterOptions()
     this.syncOpticsFromInstrument()
     this.ufoElement.selectedSourceIds = this.selectedSourceIds
     // Disabled once deleting the whole selection would leave nothing behind (a recording always
@@ -6377,15 +6380,27 @@ export class SightingEditorElement extends HTMLElement {
       [Filters.SOLAR_VISUAL.id]: this.messages.filterSolarVisual,
       [Filters.SOLAR_PHOTO.id]: this.messages.filterSolarPhoto
     }
-    const selected = this.filterSelect.value || Filters.NONE.id
-    this.filterSelect.replaceChildren()
-    for (const filter of Filters.ALL) {
-      const option = document.createElement("option")
-      option.value = filter.id
-      option.textContent = names[filter.id] ?? filter.name
-      this.filterSelect.appendChild(option)
+    const label = (filter: Filter): string => names[filter.id] ?? filter.name
+    const built = [...this.filterSelect.options].map(option => option.textContent)
+    // Built when the words change, not every tick: replacing the options of a select that is open closes it.
+    if (built.length !== Filters.ALL.length || Filters.ALL.some((filter, i) => built[i] !== label(filter))) {
+      const selected = this.filterSelect.value || Filters.NONE.id
+      this.filterSelect.replaceChildren()
+      for (const filter of Filters.ALL) {
+        const option = document.createElement("option")
+        option.value = filter.id
+        option.textContent = label(filter)
+        this.filterSelect.appendChild(option)
+      }
+      this.filterSelect.value = selected
     }
-    this.filterSelect.value = selected
+    // Which filters fit is the instrument's: the others stay listed, greyed, with the reason.
+    const instrument = this.ufoElement?.sighting?.instrument
+    for (const option of this.filterSelect.options) {
+      const usable = !instrument || Filters.usableWith(Filters.byId(option.value), instrument)
+      option.disabled = !usable
+      option.title = usable ? "" : this.messages.filterNotForInstrument
+    }
   }
 
   private refreshInstrumentOptions(): void {

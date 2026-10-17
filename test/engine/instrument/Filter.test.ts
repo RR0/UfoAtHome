@@ -32,3 +32,13 @@ describe("a filter in front of the instrument", () => {
     expect(at(90000)).toBe("none")
   })
 })
+
+describe("Filters.usableWith", () => {
+  it("offers a filter only in front of the instruments it is for", () => {
+    expect(Filters.usableWith(Filters.SOLAR_VISUAL, { category: "eye" })).toBe(true)
+    expect(Filters.usableWith(Filters.SOLAR_VISUAL, { category: "dslr" })).toBe(false)
+    expect(Filters.usableWith(Filters.SOLAR_PHOTO, { category: "dslr" })).toBe(true)
+    expect(Filters.usableWith(Filters.SOLAR_PHOTO, { category: "binoculars" })).toBe(false)
+    expect(Filters.usableWith(Filters.NONE, { category: "binoculars" })).toBe(true)
+  })
+})

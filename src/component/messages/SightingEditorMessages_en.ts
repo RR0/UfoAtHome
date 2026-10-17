@@ -178,6 +178,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   instrumentCategoryTelescope: "Telescopes",
   instrumentNotYetOnSale: "Did not exist yet in {year} (on sale from {from})",
   instrumentNoLongerOnSale: "No longer existed in {year} (on sale until {to})",
+  filterNotForInstrument: "Not usable with this instrument",
   unitMillimetres: "mm",
   unitDegrees: "°",
   fieldOfViewReadout: "{deg}° of field",

@@ -508,6 +508,8 @@ export interface SightingEditorMessages extends SightingLabels {
   /** Why a choice is greyed: {year} is the observation's, {from}/{to} the device's own dates. */
   instrumentNotYetOnSale: string
   instrumentNoLongerOnSale: string
+  /** Why a filter is greyed in front of the chosen instrument (see Filter.usableWith). */
+  filterNotForInstrument: string
   /** The two units the focal row switches between. */
   unitMillimetres: string
   unitDegrees: string

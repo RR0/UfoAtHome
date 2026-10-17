@@ -183,6 +183,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   instrumentCategoryTelescope: "Télescopes",
   instrumentNotYetOnSale: "N'existait pas encore en {year} (en vente à partir de {from})",
   instrumentNoLongerOnSale: "N'existait plus en {year} (en vente jusqu'en {to})",
+  filterNotForInstrument: "Inutilisable avec cet instrument",
   unitMillimetres: "mm",
   unitDegrees: "°",
   fieldOfViewReadout: "{deg}° de champ",

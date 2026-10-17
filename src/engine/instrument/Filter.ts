@@ -1,3 +1,5 @@
+import type { InstrumentCategory } from "./Instrument.js"
+
 /**
  * What is held in front of an instrument: a neutral-density filter that takes light out of every
  * direction alike.
@@ -19,6 +21,10 @@ export interface Filter {
   name: string
   /** −log₁₀ of the visible light let through. 0 is no filter. */
   opticalDensity: number
+  /** The kinds of instrument it can be put in front of (see Instrument.category): a filter is the
+   * instrument's own accessory, so which ones are offered depends on what the observer looked
+   * through. Absent means any. */
+  usableWith?: InstrumentCategory[]
 }
 
 export class Filters {
@@ -29,17 +35,22 @@ export class Filters {
    * at least OD 4.6 in the visible; the usual products are OD 5): the Sun through them is a pale
    * orange disc on black.
    */
-  static readonly SOLAR_VISUAL: Filter = { id: "solar-visual", name: "Solar filter for the eye (OD 5)", opticalDensity: 5 }
+  static readonly SOLAR_VISUAL: Filter = { id: "solar-visual", name: "Solar filter for the eye (OD 5)", opticalDensity: 5, usableWith: ["eye", "binoculars", "telescope"] }
 
   /**
    * The lighter film made for photographing the Sun through a lens (OD 3.8, as Baader's AstroSolar
    * photographic film): too bright to look at with, bright enough to expose a short shutter on.
    */
-  static readonly SOLAR_PHOTO: Filter = { id: "solar-photo", name: "Solar film for a camera (OD 3.8)", opticalDensity: 3.8 }
+  static readonly SOLAR_PHOTO: Filter = { id: "solar-photo", name: "Solar film for a camera (OD 3.8)", opticalDensity: 3.8, usableWith: ["camera", "dslr", "phone", "telescope"] }
 
   static readonly ALL: readonly Filter[] = [Filters.NONE, Filters.SOLAR_VISUAL, Filters.SOLAR_PHOTO]
 
   /** The filter of this id; none for an absent or unknown one — a recording from the future must still open. */
+  /** Whether a filter can be put in front of that instrument. */
+  static usableWith(filter: Filter, instrument: { category: InstrumentCategory }): boolean {
+    return !filter.usableWith || filter.usableWith.includes(instrument.category)
+  }
+
   static byId(id: string | undefined): Filter {
     return Filters.ALL.find(filter => filter.id === id) ?? Filters.NONE
   }
