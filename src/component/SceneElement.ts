@@ -1691,6 +1691,8 @@ export class SceneElement extends HTMLElement {
     // reason to pay for it — see updateAstronomy, which says which instants the sky itself asks for.
     if (instant && !instant.sky) return
 
+    // With no date the sky is a placeholder: a camera meters it rather than record its made-up light.
+    this.sceneRenderer.setSkyUnknown(!startDate)
     if (!startDate) {
       this.sceneRenderer.setAstronomy(DEFAULT_ASTRONOMY)
       return

@@ -2964,6 +2964,21 @@ export class SceneRenderer {
    * rebuilding the group, and toggles a streetlight's own real PointLight (built once, up front,
    * in setDecor) visible/invisible to match — never disposed/recreated, since the light itself
    * doesn't change, only whether it's currently switched on. */
+  /** Whether the sky's light is a placeholder rather than the observation's own — see setSkyUnknown. */
+  private skyUnknown = false
+
+  /**
+   * Says that the sky is not the observation's: with no date there is no Sun to light it, and the
+   * neutral sky drawn instead has a luminance nobody stated. A film or sensor exposed by a fixed
+   * shutter and aperture would then record whatever that placeholder happens to be (a black frame
+   * in a blank editor), so such a device meters the scene as a phone does until a date is given.
+   */
+  setSkyUnknown(unknown: boolean): void {
+    if (unknown === this.skyUnknown) return
+    this.skyUnknown = unknown
+    this.render()
+  }
+
   /** How the observer's own vision bends the picture — see setPerception. */
   private perception: Perception = Perceptions.NONE
 
@@ -3016,7 +3031,7 @@ export class SceneRenderer {
       return
     }
     EYE_UNIFORMS.uMedium.value = medium.kind === "negative" ? 1 : medium.kind === "slide" ? 2 : 3
-    const metered = medium.autoExposure ? this.scatteredSky?.sceneAdaptation : undefined
+    const metered = medium.autoExposure || this.skyUnknown ? this.scatteredSky?.sceneAdaptation : undefined
     EYE_UNIFORMS.uMediumExposure.value = metered !== undefined && metered > 0
       ? 1 / (relativeScale * metered)
       : (0.065 * medium.exposureSeconds * medium.iso * this.filterTransmittance) / (medium.fNumber * medium.fNumber * relativeScale)
