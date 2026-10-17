@@ -53,6 +53,7 @@ export class DigitalSlrs {
   static instruments(): Instrument[] {
     return DigitalSlrs.BODIES.map(body => ({
       id: body.id,
+      category: "dslr",
       name: body.name,
       projection: "rectilinear",
       frame: {

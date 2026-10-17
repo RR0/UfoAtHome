@@ -38,14 +38,16 @@ import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import { EdtfDateField } from "./EdtfDateField.js"
+import { register as registerPopoverPicker } from "./PopoverPickerElement.js"
+import type { PopoverPickerElement, PickerNode } from "./PopoverPickerElement.js"
 import { DATE_INPUT_ELEMENT_NAME, register as registerDateInput } from "./DateInputElement.js"
 import { DURATION_INPUT_ELEMENT_NAME, register as registerDurationInput } from "./DurationInputElement.js"
 import type { DurationInputElement } from "./DurationInputElement.js"
 import type { DateInputElement } from "./DateInputElement.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
-import { Instruments } from "../engine/instrument/Instrument.js"
-import type { Instrument } from "../engine/instrument/Instrument.js"
+import { INSTRUMENTS, Instruments } from "../engine/instrument/Instrument.js"
+import type { Instrument, InstrumentCategory } from "../engine/instrument/Instrument.js"
 import { LightRigs } from "../engine/model/LightRig.js"
 import { DARK_SKY_LIMITING_MAGNITUDE, MeteorShowers } from "../engine/astronomy/MeteorShowers.js"
 import { Comets } from "../engine/astronomy/Comets.js"
@@ -557,7 +559,7 @@ export class SightingEditorElement extends HTMLElement {
   private soundPreviewTimer?: ReturnType<typeof setTimeout>
   /** Which instrument the sighting was made through — sighting data, not a view preference, and the
    * one control here that changes the geometry of every shape (see Instrument.ts). */
-  private readonly instrumentSelect: HTMLSelectElement
+  private readonly instrumentSelect: PopoverPickerElement
   private readonly filterSelect: HTMLSelectElement
   private readonly labelFilter: HTMLElement
   /** What that instrument was SET to. Each writes the pose at the playhead, exactly as the
@@ -1184,7 +1186,7 @@ export class SightingEditorElement extends HTMLElement {
     this.soundSrcInput = this.shadow.getElementById("soundSrc") as HTMLInputElement
     this.soundFields = [this.soundKindSelect, this.soundVolumeInput, this.soundPitchInput, this.soundSrcInput]
     this.buildSoundKindOptions()
-    this.instrumentSelect = this.shadow.getElementById("instrument") as HTMLSelectElement
+    this.instrumentSelect = this.shadow.getElementById("instrument") as PopoverPickerElement
     this.filterSelect = this.shadow.getElementById("filter") as HTMLSelectElement
     this.labelFilter = this.shadow.getElementById("label-filter")!
     this.focalLengthInput = this.shadow.getElementById("focalLength") as HTMLInputElement
@@ -6324,21 +6326,36 @@ export class SightingEditorElement extends HTMLElement {
   private refreshInstrumentOptions(): void {
     const sighting = this.ufoElement.sighting
     const year = sighting.event.time?.year
-    const available = Instruments.availableAt(year)
     const current = sighting.instrument
-    const offered = available.includes(current) ? available : [...available, current]
-    const selected = this.instrumentSelect.value || current.id
-    this.instrumentSelect.replaceChildren()
-    for (const instrument of offered) {
-      const option = document.createElement("option")
-      option.value = instrument.id
-      const name = this.naming.instrument(instrument)
-      option.textContent = available.includes(instrument)
-        ? name
-        : this.messages.instrumentOutOfPeriod.replace("{name}", name)
-      this.instrumentSelect.appendChild(option)
+    const headings: Record<InstrumentCategory, string> = {
+      eye: this.messages.instrumentCategoryEye,
+      camera: this.messages.instrumentCategoryCamera,
+      dslr: this.messages.instrumentCategoryDslr,
+      phone: this.messages.instrumentCategoryPhone,
+      binoculars: this.messages.instrumentCategoryBinoculars,
+      telescope: this.messages.instrumentCategoryTelescope
     }
-    this.instrumentSelect.value = offered.some(instrument => instrument.id === selected) ? selected : current.id
+    // Nothing is hidden for its date: what existed and what did not are both listed, the second
+    // greyed with the reason, so a reader sees the whole catalogue and why a choice is out of reach.
+    // The recording's own instrument stays takable even out of its period: dropping it would
+    // silently re-instrument an account, so it is said to be out of period instead.
+    const choice = (instrument: Instrument): PickerNode => {
+      const name = this.naming.instrument(instrument)
+      const gap = Instruments.unavailability(instrument, year)
+      if (!gap) return { id: instrument.id, label: name }
+      const reason = (gap.kind === "before" ? this.messages.instrumentNotYetOnSale : this.messages.instrumentNoLongerOnSale)
+        .replace("{year}", String(year))
+        .replace("{from}", String(gap.from))
+        .replace("{to}", String(gap.to))
+      return instrument.id === current.id
+        ? { id: instrument.id, label: this.messages.instrumentOutOfPeriod.replace("{name}", name), hint: reason }
+        : { id: instrument.id, label: name, disabledReason: reason }
+    }
+    this.instrumentSelect.choices = Instruments.CATEGORIES.map(category => ({
+      label: headings[category],
+      children: INSTRUMENTS.filter(instrument => instrument.category === category).map(choice)
+    })).filter(group => group.children.length > 0)
+    this.instrumentSelect.value = this.instrumentSelect.value || current.id
   }
 
   /**
@@ -10242,6 +10259,7 @@ class LegacyRecorderElement extends SightingEditorElement {
 
 export function register(): void {
   registerDateInput()
+  registerPopoverPicker()
   registerDurationInput()
   registerUfo()
   if (!customElements.get(ELEMENT_NAME)) {

@@ -84,6 +84,7 @@ export class VisualAids {
   static instruments(): Instrument[] {
     const binoculars: Instrument[] = VisualAids.BINOCULARS.map(model => ({
       id: model.id,
+      category: "binoculars",
       name: model.name,
       // At a few degrees across the two projections cannot be told apart.
       projection: "rectilinear",
@@ -93,6 +94,7 @@ export class VisualAids {
     const stop = VisualAids.FIELD_STOP_MM
     const telescopes: Instrument[] = VisualAids.TELESCOPES.map(model => ({
       id: model.id,
+      category: "telescope",
       name: model.name,
       projection: "rectilinear",
       // The field stop is round; the picture is letterboxed to the scene's own shape, with the true

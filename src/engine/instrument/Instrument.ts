@@ -116,7 +116,12 @@ export interface VisualAid {
   eyepieceFocalMm?: number
 }
 
+/** The kinds of thing an observation can be made through, in the order a picker lists them. */
+export type InstrumentCategory = "eye" | "camera" | "dslr" | "phone" | "binoculars" | "telescope"
+
 export interface Instrument {
+  /** What kind of thing it is — how a picker groups it. */
+  category: InstrumentCategory
   /** Stable id — what a case file names, and what an unknown value falls back from. */
   id: string
   /** Short name for the picker, and what a page shows to say how the sighting was recorded — in
@@ -238,6 +243,7 @@ export interface Instrument {
 export const INSTRUMENTS: Instrument[] = [
   {
     id: "eye",
+    category: "eye",
     name: "Naked eye",
     flare: 0,
     projection: "equidistant",
@@ -256,6 +262,7 @@ export const INSTRUMENTS: Instrument[] = [
   },
   {
     id: "rectilinear-lens",
+    category: "camera",
     name: "Camera, unknown device",
     projection: "rectilinear",
     // An ordinary daylight snapshot's settings, and adjustable, since nothing about an unnamed
@@ -277,6 +284,7 @@ export const INSTRUMENTS: Instrument[] = [
     // works from (Condon's plates are 800 x 645 pixels, so 74 x 60 mm), the negative having been
     // cut narrower than the 6 x 9 the maker gave: 41 degrees across rather than 48.
     id: "roamer-1-120",
+    category: "camera",
     name: "Roamer 1, 120 film",
     projection: "rectilinear",
     frame: { widthMm: 74, heightMm: 60, focalLengthMm: 100 },
@@ -298,6 +306,7 @@ export const INSTRUMENTS: Instrument[] = [
     // that is neither the scene's 16:9 nor a phone's tall rectangle. 28 x 28 mm of image behind a
     // 43 mm lens (the Instamatic 100's own), so 36 degrees of field each way.
     id: "instamatic-126",
+    category: "camera",
     name: "Instamatic, 126 film",
     projection: "rectilinear",
     frame: { widthMm: 28, heightMm: 28, focalLengthMm: 43 },
@@ -321,6 +330,7 @@ export const INSTRUMENTS: Instrument[] = [
     // body, giving the narrow 27-degree vertical field that is why a photographed light so often
     // has nothing recognisable beside it in the frame.
     id: "slr-35mm-50",
+    category: "camera",
     name: "35 mm SLR, 50 mm lens",
     projection: "rectilinear",
     frame: { widthMm: 36, heightMm: 24, focalLengthMm: 50 },
@@ -352,6 +362,7 @@ export const INSTRUMENTS: Instrument[] = [
     // the reason a distant aircraft can fill a frame — and the reason a hand-held shot at 210 mm
     // shakes.
     id: "slr-35mm-zoom",
+    category: "camera",
     name: "35 mm SLR, 70-210 mm zoom",
     projection: "rectilinear",
     frame: { widthMm: 36, heightMm: 24, focalLengthMm: 135, focalRangeMm: { minMm: 70, maxMm: 210 } },
@@ -373,6 +384,7 @@ export const INSTRUMENTS: Instrument[] = [
     // A modern phone's main camera, landscape: about 7.6 x 5.7 mm of sensor behind a 5.7 mm lens —
     // the "26 mm equivalent" everybody quotes, which is 67 degrees across.
     id: "phone-landscape",
+    category: "phone",
     name: "Phone, held sideways",
     projection: "rectilinear",
     frame: { widthMm: 7.6, heightMm: 5.7, focalLengthMm: 5.7 },
@@ -403,6 +415,7 @@ export const INSTRUMENTS: Instrument[] = [
     // wide — 67 degrees up and down against 53 across — and a observer who filmed a light rising had
     // rather more sky above it and rather less horizon than the landscape entry would draw.
     id: "phone-portrait",
+    category: "phone",
     name: "Phone, held upright",
     projection: "rectilinear",
     frame: { widthMm: 5.7, heightMm: 7.6, focalLengthMm: 5.7 },
@@ -500,6 +513,19 @@ export class Instruments {
    * still resolves to it (see byId): the record is the record, and this project reports what a file
    * claims rather than silently correcting it.
    */
+  /** The picker's groups, in order, each with the instruments of that kind. */
+  static readonly CATEGORIES: readonly InstrumentCategory[] = ["eye", "camera", "dslr", "phone", "binoculars", "telescope"]
+
+  /** Why an instrument is not on offer in that year, or undefined when it is (or the year is not
+   * known). Kept apart from availableAt so a picker can say WHY, not merely hide. */
+  static unavailability(instrument: Instrument, year: number | undefined): { kind: "before" | "after"; from?: number; to?: number } | undefined {
+    const years = instrument.years
+    if (year === undefined || !years) return undefined
+    if (year < years.from) return { kind: "before", from: years.from }
+    if (years.to !== undefined && year > years.to) return { kind: "after", to: years.to }
+    return undefined
+  }
+
   static availableAt(year: number | undefined): Instrument[] {
     if (year === undefined) return INSTRUMENTS
     return INSTRUMENTS.filter(

@@ -498,6 +498,16 @@ export interface SightingEditorMessages extends SightingLabels {
    * be out of period rather than dropped: dropping it would silently re-instrument a account.
    * {name} is the device's own name. */
   instrumentOutOfPeriod: string
+  /** The headings the instrument picker groups by (see Instruments.CATEGORIES). */
+  instrumentCategoryEye: string
+  instrumentCategoryCamera: string
+  instrumentCategoryDslr: string
+  instrumentCategoryPhone: string
+  instrumentCategoryBinoculars: string
+  instrumentCategoryTelescope: string
+  /** Why a choice is greyed: {year} is the observation's, {from}/{to} the device's own dates. */
+  instrumentNotYetOnSale: string
+  instrumentNoLongerOnSale: string
   /** The two units the focal row switches between. */
   unitMillimetres: string
   unitDegrees: string
