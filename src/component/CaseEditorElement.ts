@@ -13,6 +13,8 @@ import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.
 import type { CaseTrack } from "./CaseSession.js"
 import { register as registerInterview, INTERVIEW_CHANGE_EVENT } from "./InterviewElement.js"
 import type { InterviewElement, InterviewEvent } from "./InterviewElement.js"
+import { InterviewMedia } from "./messages/InterviewMedia.js"
+import type { InterviewMedium } from "../engine/persistence/interviewJson.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
 import { register as registerSightingEditor } from "./SightingEditorElement.js"
@@ -40,8 +42,6 @@ const TEMPLATE = `
   .row { display: flex; align-items: center; gap: .5em; flex-wrap: wrap; margin-bottom: .5em; }
   .row label, .row .field { display: flex; align-items: center; gap: .4em; }
   rr0-date-input { display: inline-flex; align-items: center; gap: .3em; flex-wrap: wrap; }
-  /* The button that says whether the date is precise or in EDTF stands between the label and the field, not after it. */
-  rr0-date-input .edtf-mode { order: -1; }
   .row.recordings label { flex: 1 1 14em; min-width: 0; }
   .row.recordings select { flex: 1 1 auto; min-width: 0; max-width: 100%; text-overflow: ellipsis; }
   .row button { white-space: nowrap; }
@@ -139,6 +139,7 @@ const TEMPLATE = `
         <option value="blank"></option><option value="file"></option><option value="url"></option>
       </select></label>
       <label id="row-witness"><span id="label-witness">Witness</span> <select id="witness"></select></label>
+      <label id="row-medium"><span id="label-medium">Medium</span> <select id="medium"></select></label>
       <label id="row-observer"><span id="label-observer">Observer</span> <input id="observer" type="text"/></label>
       <label id="row-title"><span id="label-title">Title</span> <input id="title" type="text"/></label>
       <label id="row-author"><span id="label-author">Author</span> <input id="author" type="text"/></label>
@@ -197,6 +198,7 @@ export class CaseEditorElement extends HTMLElement {
   private messages: CaseEditorMessages = caseEditorMessages_en
   private said = new SaidTexts(["en"])
   private localeToken = 0
+  private language: UfoLanguage = "en"
   private dialogMode: DialogMode = "add"
   /** What loading waits for, while the author is asked about changes that would be lost. */
   private pendingLoad?: () => void
@@ -215,7 +217,7 @@ export class CaseEditorElement extends HTMLElement {
     ;(this.shadow.getElementById("case-date") as DateInputElement).build()
     this.editor = this.shadow.getElementById("editor") as SightingEditorElement
     this.interviewElement = this.shadow.getElementById("interview") as InterviewElement
-    this.interviewElement.addEventListener(INTERVIEW_CHANGE_EVENT, event => this.interviewChanged((event as CustomEvent<{ field: string }>).detail.field))
+    this.interviewElement.addEventListener(INTERVIEW_CHANGE_EVENT, event => this.interviewChanged((event as CustomEvent<{ field: string, text?: string }>).detail))
     this.editor.addEventListener("caseloaded", event => {
       event.preventDefault()
       const { json, url } = (event as CustomEvent<{ json: unknown, url?: string }>).detail
@@ -386,6 +388,7 @@ export class CaseEditorElement extends HTMLElement {
       : await Promise.all([loadCaseEditorMessages(language), loadSightingEditorMessages(language)])
     if (token !== this.localeToken) return
     this.said = new SaidTexts(preferences)
+    this.language = language
     this.messages = messages
     this.caseDate.messages = editorMessages
     this.editorMessages = editorMessages
@@ -409,6 +412,7 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("track").setAttribute("aria-label", m.event)
     text("label-kind", m.kindField)
     text("label-witness", m.witnessField)
+    text("label-medium", m.mediumField)
     text("label-recording-id", m.recordingId)
     text("make-case", m.addToCase)
     for (const id of ["dirty", "recording-dirty"]) {
@@ -709,16 +713,22 @@ export class CaseEditorElement extends HTMLElement {
     this.currentInterview = interview
     this.interviewElement.witnesses = session.tracks.filter(track => track.kind === "observer")
       .map(track => ({ id: track.event.id ?? session.proposedId(track), label: this.labelOf(track, session.tracks.indexOf(track)) }))
+    // The transcript is the case's to keep between visits, and what its address is relative to is the case's.
+    this.interviewElement.documentUrl = session.url
+    this.interviewElement.transcriptText = session.transcriptText(interview)
     this.interviewElement.event = interview
     this.refreshRow()
   }
 
   /** An interview edited: the case is changed, and a witness chosen who has no id yet is given the one that was offered for them. */
-  private interviewChanged(field: string): void {
+  private interviewChanged(change: { field: string, text?: string }): void {
+    const { field } = change
     const session = this.session
     const interview = this.currentInterview
     if (!session || !interview) return
-    if (field === "witness" && typeof interview.interviewOf === "string") {
+    if (field === "transcript" && change.text !== undefined) session.keepTranscript(interview, change.text)
+    // A witness named, by the select or by the file's text, who has no id yet is given the one that was offered for them.
+    if (typeof interview.interviewOf === "string") {
       const witness = session.tracks.find(track => track.kind === "observer" && (track.event.id ?? session.proposedId(track)) === interview.interviewOf)
       if (witness) session.ensureId(witness)
     }
@@ -910,6 +920,8 @@ export class CaseEditorElement extends HTMLElement {
     ;(this.byId("kind") as HTMLSelectElement).value = "observation"
     const observers = session.tracks.filter(track => track.kind === "observer")
     ;(this.byId("witness") as HTMLSelectElement).replaceChildren(...observers.map(track => new Option(this.labelOf(track, session.tracks.indexOf(track)), String(session.tracks.indexOf(track)))))
+    // What an interview is held through: one of the media, the first of which is where it starts.
+    ;(this.byId("medium") as HTMLSelectElement).replaceChildren(...InterviewMedia.ALL.map(medium => new Option(InterviewMedia.label(medium, this.language), medium)))
     ;(this.byId("source") as HTMLSelectElement).value = "blank"
     for (const id of ["observer", "title", "author", "file", "url"]) this.input(id).value = ""
     this.input("date").value = ""
@@ -925,6 +937,7 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("row-source").hidden = interview
     this.byId("row-of").hidden = interview
     this.byId("row-witness").hidden = !interview
+    this.byId("row-medium").hidden = !interview
     this.byId("row-file").hidden = interview || source !== "file"
     this.byId("row-url").hidden = interview || source !== "url"
     this.byId("row-observer").hidden = interview || reading
@@ -996,7 +1009,8 @@ export class CaseEditorElement extends HTMLElement {
       const title = this.input("title").value.trim()
       const author = this.input("author").value.trim()
       const interview = session.addInterview(witness, this.input("date").value || this.today(),
-        title !== "" ? title : undefined, author !== "" ? author.split(",").map(name => ({ people: name.trim() })).filter(agent => agent.people !== "") : undefined)
+        title !== "" ? title : undefined, author !== "" ? author.split(",").map(name => ({ people: name.trim() })).filter(agent => agent.people !== "") : undefined,
+        (this.byId("medium") as HTMLSelectElement).value as InterviewMedium)
       this.showInterview(interview)
       return true
     }

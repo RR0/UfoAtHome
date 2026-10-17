@@ -260,3 +260,47 @@ describe("A case whose file was edited as text", () => {
   })
 })
 
+
+describe("The transcripts of a case's interviews", () => {
+  const withInterview = (): CaseSession => new CaseSession({
+    id: "X",
+    events: [
+      { type: "event", eventType: "sighting", id: "w", url: "a.json" },
+      { type: "event", eventType: "interview", id: "i", interviewOf: "w", url: "interview-i.json" }
+    ]
+  }, url)
+
+  it("are kept as the author has them, and make the case something to save", () => {
+    const session = withInterview()
+    const [interview] = session.interviews
+    expect(session.transcriptText(interview)).toBeUndefined()
+    expect(session.dirty).toBe(false)
+    session.keepTranscript(interview, "{ \"segments\": [] }\n")
+    expect(session.transcriptText(interview)).toBe("{ \"segments\": [] }\n")
+    expect(session.dirty).toBe(true)
+  })
+
+  it("are written at the address the interview lists, beside the case, with the recordings, once they changed", () => {
+    const session = withInterview()
+    session.keepTranscript(session.interviews[0], "{ \"segments\": [] }\n")
+    expect(session.files(true).map(file => file.path)).toEqual(["case.json", "interview-i.json"])
+    expect(session.files(true)[1].content).toBe("{ \"segments\": [] }\n")
+    expect(session.files(false).map(file => file.path)).toEqual(["case.json"])
+    session.markExported(true)
+    expect(session.dirty).toBe(false)
+    expect(session.files(true).map(file => file.path)).toEqual(["case.json"])
+    expect(session.files(true, true).map(file => file.path)).toEqual(["case.json", "interview-i.json"])
+  })
+
+  it("follow their interview when the text of the case is edited, and go with it when it is deleted", () => {
+    const session = withInterview()
+    session.keepTranscript(session.interviews[0], "text")
+    session.replaceJson({ id: "X", events: [
+      { type: "event", eventType: "sighting", id: "w", url: "a.json" },
+      { type: "event", eventType: "interview", id: "i", interviewOf: "w", url: "interview-i.json", title: "Renamed" }
+    ] })
+    expect(session.transcriptText(session.interviews[0])).toBe("text")
+    expect(session.deleteInterview(session.interviews[0])).toBe(true)
+    expect(session.files(true).map(file => file.path)).toEqual(["case.json"])
+  })
+})

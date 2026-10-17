@@ -36,6 +36,11 @@ describe("case.schema.json", () => {
     const events = (caseFields as unknown as Record<string, { fields: Record<string, { doc?: string, suggest?: string[] }> }>).events.fields
     expect(Object.keys(events)).toEqual(expect.arrayContaining(["eventType", "interviewOf", "by", "summary", "url", "time"]))
     expect(events.eventType.suggest).toEqual(expect.arrayContaining(["sighting", "interview"]))
+    // What an interview was held through is one of a list, which the editor offers and the schema checks.
+    expect(Object.keys(events)).toContain("medium")
+    expect([...(events.medium as unknown as { values: string[] }).values].sort()).toEqual(["chat", "email", "in-person", "letter", "other", "phone", "video"])
+    expect(validate({ id: "X", events: [{ eventType: "interview", medium: "video" }] })).toBe(true)
+    expect(validate({ id: "X", events: [{ eventType: "interview", medium: "telepathy" }] })).toBe(false)
     expect(events.interviewOf.doc).toBeTruthy()
   })
 })

@@ -757,13 +757,16 @@ describe("CaseEditorElement's events", () => {
     const kind = root.getElementById("kind") as HTMLSelectElement
     kind.value = "interview"
     kind.dispatchEvent(new Event("change"))
-    expect([hidden("row-source"), hidden("row-of"), hidden("row-observer"), hidden("row-witness"), hidden("row-title"), hidden("row-author")]).toEqual([true, true, true, false, false, false])
+    expect([hidden("row-source"), hidden("row-of"), hidden("row-observer"), hidden("row-witness"), hidden("row-medium"), hidden("row-title"), hidden("row-author")])
+      .toEqual([true, true, true, false, false, false, false])
+    expect(hidden("row-medium")).toBe(false)
+    ;(root.getElementById("medium") as HTMLSelectElement).value = "phone"
     parts(element).field("title").value = "Phone interview"
     parts(element).field("author").value = "BeauJerome"
     parts(element).field("date").value = "2026-10-13"
     await submit(element)
     const [interview] = element.caseSession!.interviews
-    expect(interview).toMatchObject({ eventType: "interview", title: "Phone interview", time: "2026-10-13", by: [{ people: "BeauJerome" }] })
+    expect(interview).toMatchObject({ eventType: "interview", title: "Phone interview", time: "2026-10-13", medium: "phone", by: [{ people: "BeauJerome" }] })
     // Held with the first account, which now has the id the interview names it by.
     expect(interview.interviewOf).toBe(element.caseSession!.tracks[0].event.id)
     expect(interview.interviewOf).toBeTruthy()

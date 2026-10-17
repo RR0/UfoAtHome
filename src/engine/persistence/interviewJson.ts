@@ -1,6 +1,9 @@
 import type { AgentRef } from "../interpretation/Interpretation.js"
 import type { SaidText } from "../model/SaidText.js"
 
+/** What an interview was held through. */
+export type InterviewMedium = "in-person" | "phone" | "video" | "chat" | "email" | "letter" | "other"
+
 /** Who speaks in an interview. */
 export interface InterviewSpeaker {
   role: "interviewer" | "witness" | string
@@ -28,14 +31,28 @@ export interface InterviewSegment {
  * recognition, proofread or not), what was removed to anonymise it, and a language. A case is JSON; so is this. WebVTT stays what it is best
  * at, subtitles over the recording: see InterviewFile.toVtt, which makes one from it.
  *
+ * It holds the whole of the interview: what the event of the case lists of it (its title, its time, who held it, with whom, what it established: the
+ * summary the case editor shows) AND what was said. The two are kept the same, whichever is edited. `@rr0/data` reads and writes the same file
+ * (`RR0Interview.fromFileJson`, `toFileJson`).
+ *
  * Times are those of the recording, which may not be kept: they stay meaningful as a way to say where in the interview something was said.
  */
 export interface InterviewJson {
   version: 1
   id?: string
   language?: string
+  /** What the interview is called, in the languages it has. */
+  title?: SaidText
   /** When it was held, as RR0 writes a time. */
   time?: string
+  /** What it was held through: face to face (`in-person`), by `phone`, in a `video` call, by `chat`, by `email`, by `letter`, or `other`. */
+  medium?: InterviewMedium
+  /** Who held it. */
+  by?: AgentRef[]
+  /** The `id`, or the ids, of the sighting events of the case it was held with. */
+  interviewOf?: string | string[]
+  /** What it established, in the languages it has. */
+  summary?: SaidText
   speakers: Record<string, InterviewSpeaker>
   transcription?: { method?: "automatic" | "manual", engine?: string, proofread?: boolean, note?: string }
   /** What was taken out to anonymise it, and what stands in its place. */

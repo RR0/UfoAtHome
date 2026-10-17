@@ -3,6 +3,7 @@ import { CaseFile } from "../engine/persistence/caseJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { AgentRef } from "../engine/interpretation/Interpretation.js"
 import type { SaidText } from "../engine/model/SaidText.js"
+import type { InterviewMedium } from "../engine/persistence/interviewJson.js"
 
 /** One recording a case lists: an observer's account, or a reading of one. */
 export interface CaseTrack {
@@ -35,6 +36,11 @@ export class CaseSession {
   readonly tracks: CaseTrack[]
   /** Whether the case itself was changed since it was opened or exported: a recording added or deleted, a field edited. */
   private caseChanged = false
+  /**
+   * The transcripts of interviews the author edited or loaded, as the text of their file, by the event that lists them. `loaded` is the text last
+   * written by an export: a transcript is written once it differs from it, as a recording is once it differs from what was loaded.
+   */
+  private readonly transcripts = new Map<CaseEventJson, { text: string, loaded?: string }>()
 
   constructor(public json: CaseJson, readonly url: string) {
     this.tracks = (json.events ?? [])
@@ -108,7 +114,7 @@ export class CaseSession {
    * Adds an interview to the case: an event of type `interview`, held with an observer's account (`interviewOf`, which gives that account the id it
    * lacks), at a time, by whom, with a title. It has no transcript yet: its `url` is for whoever has one to write.
    */
-  addInterview(witness: CaseTrack | undefined, when: string, title?: SaidText, by?: AgentRef[]): CaseEventJson & { by?: AgentRef[] } {
+  addInterview(witness: CaseTrack | undefined, when: string, title?: SaidText, by?: AgentRef[], medium?: InterviewMedium): CaseEventJson & { by?: AgentRef[] } {
     const taken = this.eventIds()
     const stem = witness ? (witness.event.id ?? this.proposedId(witness)) : "case"
     let n = 1
@@ -119,6 +125,7 @@ export class CaseSession {
       id: `interview-${stem}-${n}`,
       ...(witness ? { interviewOf: this.ensureId(witness) } : {}),
       time: when,
+      ...(medium !== undefined ? { medium } : {}),
       ...(by !== undefined && by.length > 0 ? { by } : {}),
       ...(title !== undefined ? { title } : {})
     }
@@ -127,10 +134,25 @@ export class CaseSession {
     return event
   }
 
+  /** The transcript of an interview as edited or loaded since the case was opened; undefined when it was not, and the file at its address is the transcript. */
+  transcriptText(interview: CaseEventJson): string | undefined {
+    return this.transcripts.get(interview)?.text
+  }
+
+  /** Keeps the transcript of an interview as the author has it now: to be shown again, and written with the case. */
+  keepTranscript(interview: CaseEventJson, text: string): void {
+    this.transcripts.set(interview, { text, loaded: this.transcripts.get(interview)?.loaded })
+  }
+
+  private transcriptChanged(entry: { text: string, loaded?: string }): boolean {
+    return entry.loaded !== entry.text
+  }
+
   /** Removes an interview from the case. Nothing refers to one, so none is refused. */
   deleteInterview(interview: CaseEventJson): boolean {
     if (!this.interviews.includes(interview)) return false
     this.json.events = (this.json.events ?? []).filter(event => event !== interview)
+    this.transcripts.delete(interview)
     this.caseChanged = true
     return true
   }
@@ -160,6 +182,15 @@ export class CaseSession {
       return existing
     })
     this.tracks.splice(0, this.tracks.length, ...tracks)
+    // The transcripts follow the interviews of the new text: by their id, else by the address they are written at.
+    const moved = new Map<CaseEventJson, { text: string, loaded?: string }>()
+    for (const [old, entry] of this.transcripts) {
+      const same = (next.events ?? []).find(event => event.eventType === CaseFile.INTERVIEW_EVENT
+        && ((old.id !== undefined && event.id === old.id) || (old.url !== undefined && event.url === old.url)))
+      if (same) moved.set(same, entry)
+    }
+    this.transcripts.clear()
+    for (const [event, entry] of moved) this.transcripts.set(event, entry)
     this.json = next
     this.caseChanged = true
   }
@@ -171,7 +202,7 @@ export class CaseSession {
 
   /** Whether anything would be lost by leaving: the case was changed, or a recording of it added or edited, and not exported. */
   get dirty(): boolean {
-    return this.caseChanged || this.tracks.some(track => this.changed(track))
+    return this.caseChanged || this.tracks.some(track => this.changed(track)) || [...this.transcripts.values()].some(entry => this.transcriptChanged(entry))
   }
 
   /**
@@ -182,6 +213,7 @@ export class CaseSession {
     this.caseChanged = false
     if (!withRecordings) return
     for (const track of this.tracks) if (track.recording) track.loaded = JSON.stringify(track.recording)
+    for (const entry of this.transcripts.values()) entry.loaded = entry.text
   }
 
   /** Whether a track has to be written: added here, or changed since it was loaded. */
@@ -388,6 +420,9 @@ export class CaseSession {
     const written = this.tracks.filter(track => withRecordings && track.recording !== undefined && (every || this.changed(track)))
       .map(track => ({ path: relative(track.url), content: JSON.stringify(track.recording, null, 2) + "\n" }))
     const name = decodeURIComponent(this.url.replace(/[?#].*$/, "").replace(/^.*\//, "")) || "case.json"
-    return [{ path: name, content: JSON.stringify(this.json, null, 2) + "\n" }, ...written]
+    // The transcripts of the interviews, at the address each is listed at.
+    const transcribed = [...this.transcripts].filter(([event, entry]) => withRecordings && event.url !== undefined && (every || this.transcriptChanged(entry)))
+      .map(([event, entry]) => ({ path: relative(new URL(event.url!, this.url).href), content: entry.text }))
+    return [{ path: name, content: JSON.stringify(this.json, null, 2) + "\n" }, ...written, ...transcribed]
   }
 }

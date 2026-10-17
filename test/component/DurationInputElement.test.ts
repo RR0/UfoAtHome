@@ -77,7 +77,7 @@ describe("<rr0-duration-input>", () => {
   it("says a vague duration as it was stated, and tells the length chosen for the simulation, shown after it in brackets", () => {
     const { number, text, mode, chosen, told } = make()
     mode.click()
-    expect(mode.textContent).toBe("EDTF")
+    expect(mode.textContent).toBe("imprecise")
     text.value = "PT5M/PT10M"
     text.dispatchEvent(new Event("input"))
     expect(told).toEqual([{ seconds: 450, text: "PT5M/PT10M" }])
@@ -120,7 +120,7 @@ describe("<rr0-duration-input>", () => {
   it("shows a recording's duration: exact in the number, or as stated in the text with the length chosen", () => {
     const { element, number, text, mode, chosen } = make()
     element.set(450, "PT5M/PT10M")
-    expect(mode.textContent).toBe("EDTF")
+    expect(mode.textContent).toBe("imprecise")
     expect(text.value).toBe("PT5M/PT10M")
     expect(number.value).toBe("450")
     expect(chosen.hidden).toBe(false)

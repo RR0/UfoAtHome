@@ -19,6 +19,7 @@ export const caseEditorMessages_es: CaseEditorMessages = {
   kindObservation: "Observación",
   kindInterview: "Entrevista",
   witnessField: "Testigo",
+  mediumField: "Medio",
   interviewerField: "Entrevistador",
   plainTitleField: "Título",
   sourceField: "Origen",

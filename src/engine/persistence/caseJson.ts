@@ -1,4 +1,5 @@
 import type { AgentRef, InterpretationEventJson, InterpretationJson } from "../interpretation/Interpretation.js"
+import type { InterviewMedium } from "./interviewJson.js"
 import { Provenance } from "./Provenance.js"
 import type { SaidText } from "../model/SaidText.js"
 
@@ -50,6 +51,8 @@ export interface CaseEventJson {
   place?: string
   /** Who did it: who held an interview, who made a reading. */
   by?: AgentRef[]
+  /** An interview's: what it was held through (see InterviewMedium). */
+  medium?: InterviewMedium
   title?: unknown
   /** An interpretation's, in the older form: the `id` of the recording it interprets. */
   sighting?: string

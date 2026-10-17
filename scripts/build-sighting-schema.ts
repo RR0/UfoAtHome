@@ -216,6 +216,11 @@ class JsonSchemaExport {
     id: JsonSchemaExport.ID, title: "UFO@home recording",
     description: "One observer's recording of a sighting. See https://ufoathome.org/docs/format/", closed: true, provenance: true
   }
+  static readonly INTERVIEW: JsonSchemaOptions = {
+    id: "https://ufoathome.org/interview.schema.json", title: "Interview transcript",
+    description: "The transcript of an interview of a case: who spoke, when, and what was said. The file an event of type interview points at with its url.",
+    closed: true, provenance: false
+  }
   static readonly CASE: JsonSchemaOptions = {
     id: "https://ufoathome.org/case.schema.json", title: "RR0 case",
     description: "A case, as RR0 writes it: its events, among which the observers' accounts and the interviews. UFO@home reads what is described here and leaves the rest as it is. See https://ufoathome.org/docs/format/",
@@ -288,7 +293,7 @@ interface JsonSchemaOptions {
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(scriptDir, "..")
-const program = ts.createProgram([path.join(root, "src", "engine", "persistence", "sightingJson.ts"), path.join(root, "src", "engine", "persistence", "caseJson.ts")], {
+const program = ts.createProgram([path.join(root, "src", "engine", "persistence", "sightingJson.ts"), path.join(root, "src", "engine", "persistence", "caseJson.ts"), path.join(root, "src", "engine", "persistence", "interviewJson.ts")], {
   target: ts.ScriptTarget.ES2022,
   module: ts.ModuleKind.ESNext,
   moduleResolution: ts.ModuleResolutionKind.Bundler,
@@ -314,6 +319,11 @@ const caseSchema = builder.fieldsOf(builder.typeNamed("CaseJson"))
 writeFileSync(path.join(outDir, "caseSchema.json"), `${JSON.stringify(caseSchema, null, 2)}\n`)
 writeFileSync(path.join(outDir, "case.schema.json"), `${JSON.stringify(JsonSchemaExport.of(caseSchema, JsonSchemaExport.CASE), null, 2)}\n`)
 
+// And the transcript of an interview, which the editor of an interview completes from (see InterviewElement).
+const interviewSchema = builder.fieldsOf(builder.typeNamed("InterviewJson"))
+writeFileSync(path.join(outDir, "interviewSchema.json"), `${JSON.stringify(interviewSchema, null, 2)}\n`)
+writeFileSync(path.join(outDir, "interview.schema.json"), `${JSON.stringify(JsonSchemaExport.of(interviewSchema, JsonSchemaExport.INTERVIEW), null, 2)}\n`)
+
 const count = (fields: Record<string, SchemaField>): number =>
   Object.values(fields).reduce((total, field) => total + 1 + (field.fields ? count(field.fields) : 0), 0)
-console.log(`${path.relative(root, outPath)}: ${count(schema)} keys, ${Object.keys(schema).length} at the top level; caseSchema.json: ${count(caseSchema)} keys`)
+console.log(`${path.relative(root, outPath)}: ${count(schema)} keys, ${Object.keys(schema).length} at the top level; caseSchema.json: ${count(caseSchema)} keys; interviewSchema.json: ${count(interviewSchema)} keys`)

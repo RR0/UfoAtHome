@@ -247,7 +247,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     <h3>What each one writes</h3>
     <div class="table-scroll"><table>
       <tr><th>Option</th><th>In the address</th><th>On the element</th></tr>
-      <tr><td>Start at <code>n</code> seconds</td><td><code>t=n</code></td><td><code>start-time="n"</code></td></tr>
+      <tr><td>Start <code>n</code> seconds in (or <code>1:30</code>, <code>1m30s</code>, <code>PT1M30S</code>)</td><td><code>d=n</code></td><td><code>start-time="n"</code></td></tr>
+      <tr><td>Start at a time said during the observation (<code>02:33:15</code>, or <code>2026-08-11T02:33:15</code>)</td><td><code>t=02:33:15</code></td><td><code>start-clock="02:33:15"</code></td></tr>
       <tr><td>Show summary chips</td><td>nothing — they are on; <code>labels=0</code> hides them</td><td><code>show-labels</code></td></tr>
       <tr><td>Open map</td><td><code>map=1</code></td><td><code>show-observer-map</code></td></tr>
       <tr><td>Show moments</td><td><code>moments=0</code> hides them</td><td><code>hide-milestones</code> when off</td></tr>
@@ -361,7 +362,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     <h3>Ce que chacune écrit</h3>
     <div class="table-scroll"><table>
       <tr><th>Option</th><th>Dans l'adresse</th><th>Sur l'élément</th></tr>
-      <tr><td>Commencer à <code>n</code> secondes</td><td><code>t=n</code></td><td><code>start-time="n"</code></td></tr>
+      <tr><td>Commencer <code>n</code> secondes après le début (ou <code>1:30</code>, <code>1m30s</code>, <code>PT1M30S</code>)</td><td><code>d=n</code></td><td><code>start-time="n"</code></td></tr>
+      <tr><td>Commencer à une heure dite pendant l'observation (<code>02:33:15</code>, ou <code>2026-08-11T02:33:15</code>)</td><td><code>t=02:33:15</code></td><td><code>start-clock="02:33:15"</code></td></tr>
       <tr><td>Afficher les chips</td><td>rien — ils sont affichés ; <code>labels=0</code> les masque</td><td><code>show-labels</code></td></tr>
       <tr><td>Ouvrir la carte</td><td><code>map=1</code></td><td><code>show-observer-map</code></td></tr>
       <tr><td>Afficher les moments</td><td><code>moments=0</code> les masque</td><td><code>hide-milestones</code> quand décoché</td></tr>
@@ -477,7 +479,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     <h3>Lo que escribe cada una</h3>
     <div class="table-scroll"><table>
       <tr><th>Opción</th><th>En la dirección</th><th>En el elemento</th></tr>
-      <tr><td>Empezar en <code>n</code> segundos</td><td><code>t=n</code></td><td><code>start-time="n"</code></td></tr>
+      <tr><td>Empezar <code>n</code> segundos después del inicio (o <code>1:30</code>, <code>1m30s</code>, <code>PT1M30S</code>)</td><td><code>d=n</code></td><td><code>start-time="n"</code></td></tr>
+      <tr><td>Empezar a una hora dicha durante la observación (<code>02:33:15</code>, o <code>2026-08-11T02:33:15</code>)</td><td><code>t=02:33:15</code></td><td><code>start-clock="02:33:15"</code></td></tr>
       <tr><td>Mostrar los chips</td><td>nada — están activados; <code>labels=0</code> los oculta</td><td><code>show-labels</code></td></tr>
       <tr><td>Abrir el mapa</td><td><code>map=1</code></td><td><code>show-observer-map</code></td></tr>
       <tr><td>Mostrar los momentos</td><td><code>moments=0</code> los oculta</td><td><code>hide-milestones</code> si se desmarca</td></tr>
@@ -593,7 +596,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     <h3>Che cosa scrive ciascuna</h3>
     <div class="table-scroll"><table>
       <tr><th>Opzione</th><th>Nell'indirizzo</th><th>Sull'elemento</th></tr>
-      <tr><td>Inizia a <code>n</code> secondi</td><td><code>t=n</code></td><td><code>start-time="n"</code></td></tr>
+      <tr><td>Inizia <code>n</code> secondi dopo l'inizio (o <code>1:30</code>, <code>1m30s</code>, <code>PT1M30S</code>)</td><td><code>d=n</code></td><td><code>start-time="n"</code></td></tr>
+      <tr><td>Inizia a un'ora detta durante l'osservazione (<code>02:33:15</code>, o <code>2026-08-11T02:33:15</code>)</td><td><code>t=02:33:15</code></td><td><code>start-clock="02:33:15"</code></td></tr>
       <tr><td>Mostra i chip</td><td>niente — sono attivi; <code>labels=0</code> li nasconde</td><td><code>show-labels</code></td></tr>
       <tr><td>Apri la mappa</td><td><code>map=1</code></td><td><code>show-observer-map</code></td></tr>
       <tr><td>Mostra i momenti</td><td><code>moments=0</code> li nasconde</td><td><code>hide-milestones</code> se deselezionato</td></tr>

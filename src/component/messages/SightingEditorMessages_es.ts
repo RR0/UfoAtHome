@@ -141,7 +141,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   },
   timeQualifierExact: "Exacta",
   durationPrecise: "precisa",
-  durationIso: "EDTF",
+  durationIso: "imprecisa",
   durationModeTitle: "Decir la duración exactamente, o como se enunció: aproximadamente, entre dos duraciones",
   durationInvalid: "No es una duración: PT10M, PT1H30M, PT5M/PT10M…",
   durationHelpTitle: "Lo que acepta el texto (EDTF)",

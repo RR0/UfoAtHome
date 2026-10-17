@@ -136,7 +136,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   fileSearchPhrases: {},
   timeQualifierExact: "Exact",
   durationPrecise: "precise",
-  durationIso: "EDTF",
+  durationIso: "imprecise",
   durationModeTitle: "Say the length exactly, or as stated: about, between two lengths",
   durationInvalid: "Not a duration: PT10M, PT1H30M, PT5M/PT10M…",
   durationHelpTitle: "What the text takes (EDTF)",

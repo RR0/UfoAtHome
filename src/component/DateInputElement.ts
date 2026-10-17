@@ -15,6 +15,11 @@ rr0-date-input .edtf-helppop { position: absolute; left: 0; bottom: calc(100% + 
 rr0-date-input .edtf-helppop { pointer-events: auto; min-width: 16em; }
 rr0-date-input .edtf-helppop p { margin: 0 0 .3em; font-weight: 600; }
 rr0-date-input .edtf-helppop ul { margin: 0; padding-left: 1.1em; }
+/* What says how the date is said (precise, imprecise) reads as part of the label: the same font, a link's underline and nothing of a button, and
+   it comes before the field, so that a date reads "label, how it is said, field". It stays a button, for the keyboard and for what reads the page. */
+rr0-date-input .edtf-mode { order: -1; font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; text-decoration: underline; text-underline-offset: .15em; }
+rr0-date-input .edtf-mode:hover { text-decoration-thickness: 2px; }
+rr0-date-input .edtf-mode:focus-visible { outline: 2px solid #4af; outline-offset: 2px; border-radius: 2px; }
 rr0-date-input [hidden] { display: none !important; }
 `
 

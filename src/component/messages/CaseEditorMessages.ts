@@ -25,6 +25,8 @@ export interface CaseEditorMessages {
   /** The observer an interview is held with. */
   witnessField: string
   interviewerField: string
+  /** What an interview is held through (see InterviewMedia). */
+  mediumField: string
   /** The title of an event that is not a reading: the one of a reading is called "Title of the interpretation". */
   plainTitleField: string
   sourceField: string

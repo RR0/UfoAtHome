@@ -25,13 +25,17 @@ rr0-duration-input .duration-helppop { position: absolute; left: 0; bottom: calc
 rr0-duration-input .duration-helppop { pointer-events: auto; min-width: 16em; }
 rr0-duration-input .duration-helppop p { margin: 0 0 .3em; font-weight: 600; }
 rr0-duration-input .duration-helppop ul { margin: 0; padding-left: 1.1em; }
+/* As the date's: what says how the duration is said reads as part of the label (same font, a link's underline, no button), before the field. */
+rr0-duration-input .duration-mode { order: -1; font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; text-decoration: underline; text-underline-offset: .15em; }
+rr0-duration-input .duration-mode:hover { text-decoration-thickness: 2px; }
+rr0-duration-input .duration-mode:focus-visible { outline: 2px solid #4af; outline-offset: 2px; border-radius: 2px; }
 rr0-duration-input [hidden] { display: none !important; }
 `
 
 /**
  * A length of time, as a date is said: PRECISE (a number of seconds) or as it was STATED when it could not be exact — an
- * ISO 8601 duration with a doubt or a range (`PT10M~`, `PT5M/PT10M`), see DurationText. One button, right after the input, says which — "precise" or
- * "EDTF", as a date's does — and swaps them.
+ * ISO 8601 duration with a doubt or a range (`PT10M~`, `PT5M/PT10M`), see DurationText. One button, which reads as a link before the input, says which — "precise" or
+ * "imprecise" (as stated, in EDTF), as a date's does — and swaps them.
  *
  * `<rr0-duration-input name="durationSeconds">` makes a number (id `durationSeconds`), a text (`durationSeconds-text`) and that
  * button; in the text's tooltip, what is understood of it; in it, a (?) that opens the syntax.

@@ -13,6 +13,8 @@ describe("The Saint-Lô case", () => {
   it("keeps the interview held with him, which names his sighting and which nothing of replays", () => {
     const interview = json.events.find((event: { eventType: string }) => event.eventType === CaseFile.INTERVIEW_EVENT)
     expect(interview.interviewOf).toBe("qb")
+    // It says what it was held through.
+    expect(interview.medium).toBe("video")
     expect(CaseFile.problems(json, [])).toEqual({ duplicateIds: [], unresolved: [] })
   })
 })
@@ -32,6 +34,12 @@ describe.skipIf(!existsSync(TRANSCRIPT))("The transcript of the Saint-Lô interv
     }
     const starts = transcript.segments.map((segment: { start: number }) => segment.start)
     expect(starts).toEqual([...starts].sort((a, b) => a - b))
+  })
+
+  it("holds what the case lists of the interview: its title, time, interviewer, witness and summary are the same", () => {
+    const listed = JSON.parse(readFileSync("public/demo-data/case-saint-lo.json", "utf8")).events
+      .find((event: { eventType: string }) => event.eventType === "interview")
+    for (const key of ["title", "time", "medium", "by", "interviewOf", "summary"]) expect(transcript[key], key).toEqual(listed[key])
   })
 
   it("names the witness by initials and says no first name aloud", () => {

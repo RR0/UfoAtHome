@@ -1302,3 +1302,53 @@ describe("SightingElement info panel fold-outs", () => {
     expect(shadow.getElementById("info-credits-list")!.hidden).toBe(true)
   })
 })
+
+describe("Where a recording opens, as the element's attributes say it", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  const recording = (time?: Record<string, number>) => ({
+    version: 1 as const,
+    observer: { id: "w", title: "A witness" },
+    ...(time ? { time } : {}),
+    timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 600_000, shapes: [] }] }
+  })
+  const openedAt = (attributes: Record<string, string>, time?: Record<string, number>): number => {
+    const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
+    for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value)
+    document.body.appendChild(element)
+    element.sightingData = recording(time) as never
+    return (nestedScene(element).ufoElement as unknown as { currentTime: number }).currentTime / 1000
+  }
+
+  it("opens at the start when nothing is said", () => {
+    expect(openedAt({})).toBe(0)
+  })
+
+  it("takes start-time as a length of time from the start, as durations are said", () => {
+    expect(openedAt({ "start-time": "125" })).toBe(125)
+    expect(openedAt({ "start-time": "1:30" })).toBe(90)
+    expect(openedAt({ "start-time": "1m30s" })).toBe(90)
+    expect(openedAt({ "start-time": "PT2M" })).toBe(120)
+  })
+
+  it("opens at the start for a length it cannot read", () => {
+    expect(openedAt({ "start-time": "soon" })).toBe(0)
+    expect(openedAt({ "start-time": "" })).toBe(0)
+  })
+
+  it("takes start-clock as a time said during the observation, placed by the recording's own start", () => {
+    const start = { year: 2026, month: 8, day: 11, hour: 2, minute: 30 }
+    expect(openedAt({ "start-clock": "02:33:15" }, start)).toBe(195)
+    expect(openedAt({ "start-clock": "2026-08-11T02:31" }, start)).toBe(60)
+  })
+
+  it("lets the time said win over the length when the recording can place it, and falls back on the length when it cannot", () => {
+    const start = { year: 2026, month: 8, day: 11, hour: 2, minute: 30 }
+    expect(openedAt({ "start-clock": "02:33", "start-time": "10" }, start)).toBe(180)
+    // A recording with no time of day gives a time said nothing to count from.
+    expect(openedAt({ "start-clock": "02:33", "start-time": "10" }, { year: 2026 })).toBe(10)
+    expect(openedAt({ "start-clock": "02:33" })).toBe(0)
+  })
+})

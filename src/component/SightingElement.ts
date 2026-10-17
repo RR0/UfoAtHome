@@ -27,6 +27,8 @@ import { sightingMessages_en } from "./messages/SightingMessages_en.js"
 import type { ShareCodeEditor } from "./ShareCodeEditor.js"
 import type { SightingMessages } from "./messages/SightingMessages.js"
 import { SummaryDescription } from "./SummaryDescription.js"
+import { PlaybackPosition } from "../engine/model/PlaybackPosition.js"
+import type { SightingTime } from "../engine/model/Sighting.js"
 
 registerScene()
 
@@ -70,11 +72,18 @@ const APP_HOME_URL = AppLocation.home()
 export const COMPARE_ACCOUNT_ATTRIBUTE = "compare-account"
 
 /**
- * Where the recording opens, in seconds from its start: `start-time="125"`. Applied once, to the
- * recording the element loads next (`src`, or one set directly), not to each observer the reader
- * then picks. A value past the end opens at the end, an unreadable one at the start.
+ * Where the recording opens, as a length of time from its start: `start-time="125"`, in seconds, or as durations are said (see
+ * PlaybackPosition.delta): `1:30`, `1m30s`, `PT1M30S`. Applied once, to the recording the element loads next (`src`, or one set directly),
+ * not to each observer the reader then picks. A value past the end opens at the end, an unreadable one at the start. The link's `d=`.
  */
 export const START_TIME_ATTRIBUTE = "start-time"
+
+/**
+ * Where the recording opens, as a time said during the observation: `start-clock="02:33:15"` (its local time) or with the day,
+ * `start-clock="2026-08-11T02:33:15"`, which the recording's own start turns into a position (see PlaybackPosition.elapsedSince). It wins over
+ * `start-time` when it can be worked out, and is ignored when it cannot (a recording that does not say its time of day). The link's `t=`.
+ */
+export const START_CLOCK_ATTRIBUTE = "start-clock"
 
 /**
  * Which recording of a case opens first: `observer="ChauffourValerie"` — the observer's id, the recording's file name,
@@ -119,7 +128,7 @@ const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
  */
 export class SightingElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "show-labels", START_TIME_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
+    return ["src", "show-labels", START_TIME_ATTRIBUTE, START_CLOCK_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -758,11 +767,12 @@ export class SightingElement extends HTMLElement {
     return attributes
   }
 
-  /** The same options as the player's address takes them: `labels=0`, `map=1`, `moments=0`, `compare=1`. */
+  /** The same options as the player's address takes them: `d=` (the position), `labels=0`, `map=1`, `moments=0`, `compare=1`. */
   private replayQuery(): string[] {
     const options = this.shareOptions
     const query: string[] = []
-    if (this.shareStartSeconds !== undefined) query.push(`t=${this.shareStartSeconds}`)
+    // A length of time from the start (`d=`): `t=` is a time said during the observation, which the dialog does not ask for.
+    if (this.shareStartSeconds !== undefined) query.push(`d=${this.shareStartSeconds}`)
     // The player shows them unless told not to, so it is the absence that is said.
     if (!options.labels.input.checked) query.push("labels=0")
     if (options.map.input.checked) query.push("map=1")
@@ -1025,6 +1035,16 @@ export class SightingElement extends HTMLElement {
   /** Whether the next recording shown is the one `start-time` is about — see START_TIME_ATTRIBUTE. */
   private startPending = false
 
+  /**
+   * Where `entry` opens, in seconds from its start, as the attributes ask: the time said during the observation when the recording can place it,
+   * else the length of time from the start. None when neither is given or readable.
+   */
+  private startSeconds(entry: ObserverEntry): number | undefined {
+    const clock = PlaybackPosition.clock(this.getAttribute(START_CLOCK_ATTRIBUTE))
+    const placed = clock ? PlaybackPosition.elapsedSince(this.plain(entry).time as SightingTime | undefined, clock) : undefined
+    return placed ?? PlaybackPosition.delta(this.getAttribute(START_TIME_ATTRIBUTE))
+  }
+
   private selectObserver(src: string): void {
     const entry = this.entries.find(e => e.src === src)
     if (!entry) return
@@ -1045,8 +1065,8 @@ export class SightingElement extends HTMLElement {
     this.sceneElement.sightingData = entry.sighting
     if (this.startPending) {
       this.startPending = false
-      const seconds = Number(this.getAttribute(START_TIME_ATTRIBUTE))
-      if (this.hasAttribute(START_TIME_ATTRIBUTE) && Number.isFinite(seconds)) this.sceneElement.ufoElement.currentTime = Math.max(0, seconds) * 1000
+      const seconds = this.startSeconds(entry)
+      if (seconds !== undefined) this.sceneElement.ufoElement.currentTime = Math.max(0, seconds) * 1000
     }
     this.offerInterpretations(entry)
     this.updateAccountLine()
