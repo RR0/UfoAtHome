@@ -938,9 +938,10 @@ select.weather-field:disabled {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 0.2em;
+  /* No space between tabs, either way: they touch, sharing their borders (see .group-tab's margins). */
+  gap: 0;
   margin: 0;
-  padding: 0 0.5em;
+  padding: 0;
   border-bottom: 1px solid var(--tab-line);
 }
 .history {
@@ -959,11 +960,11 @@ select.weather-field:disabled {
   color: color-mix(in srgb, CanvasText 70%, transparent);
   background: var(--tab-recessed);
   border: 1px solid var(--tab-line);
-  border-bottom: 0;
   border-radius: 8px 8px 0 0;
-  padding: 0.35em 0.9em;
-  /* Recessed: a little lower than the open tab, which stands on the baseline. */
-  margin-top: 0.3em;
+  padding: 0.4em 0.9em;
+  /* Overlapping its neighbours by one border, and the strip's baseline by one, so that nothing separates
+     two tabs, on a line or from one line to the next. */
+  margin: 0 0 -1px -1px;
   position: relative;
 }
 .group-tab:hover, .subgroup-tab:hover {
@@ -975,10 +976,7 @@ select.weather-field:disabled {
 .group-tab[aria-expanded="true"], .subgroup-tab[aria-expanded="true"] {
   color: CanvasText;
   background: var(--tab-surface);
-  margin-top: 0;
-  margin-bottom: -1px;
-  padding-top: 0.5em;
-  padding-bottom: calc(0.35em + 1px);
+  border-bottom-color: var(--tab-surface);
   box-shadow: inset 0 3px 0 var(--tab-accent);
   z-index: 1;
 }
@@ -1026,7 +1024,6 @@ select.weather-field:disabled {
 /* A strip of handles inside a panel — the weather's three parts. */
 .group-panel > .group-tabs {
   margin-top: 0.5em;
-  padding: 0;
 }
 #description {
   font: inherit;
