@@ -36,7 +36,7 @@ export class CaseSession {
   /** Whether the case itself was changed since it was opened or exported: a recording added or deleted, a field edited. */
   private caseChanged = false
 
-  constructor(readonly json: CaseJson, readonly url: string) {
+  constructor(public json: CaseJson, readonly url: string) {
     this.tracks = (json.events ?? [])
       .filter(event => event.eventType === CaseFile.SIGHTING_EVENT && typeof event.url === "string" && event.url !== "")
       .map(event => ({
@@ -88,12 +88,80 @@ export class CaseSession {
       ?? observers.find(other => other.recording?.id !== undefined && references.includes(other.recording.id))
   }
 
+  /**
+   * The interviews the case holds: its events of type `interview`, which are not recordings and so are not tracks. They are read from the
+   * case each time, since the element that edits one writes into its event in place.
+   */
+  get interviews(): (CaseEventJson & { by?: AgentRef[] })[] {
+    return (this.json.events ?? []).filter(event => event.eventType === CaseFile.INTERVIEW_EVENT)
+  }
+
+  /** The observer's track an interview was held with: the first the event names by its id, else by the id its recording states. */
+  intervieweeOf(interview: CaseEventJson): CaseTrack | undefined {
+    const references = [interview.interviewOf].flat().filter((id): id is string => typeof id === "string")
+    const observers = this.tracks.filter(track => track.kind === "observer")
+    return observers.find(track => track.event.id !== undefined && references.includes(track.event.id))
+      ?? observers.find(track => track.recording?.id !== undefined && references.includes(track.recording.id))
+  }
+
+  /**
+   * Adds an interview to the case: an event of type `interview`, held with an observer's account (`interviewOf`, which gives that account the id it
+   * lacks), at a time, by whom, with a title. It has no transcript yet: its `url` is for whoever has one to write.
+   */
+  addInterview(witness: CaseTrack | undefined, when: string, title?: SaidText, by?: AgentRef[]): CaseEventJson & { by?: AgentRef[] } {
+    const taken = this.eventIds()
+    const stem = witness ? (witness.event.id ?? this.proposedId(witness)) : "case"
+    let n = 1
+    while (taken.has(`interview-${stem}-${n}`)) n++
+    const event: CaseEventJson & { by?: AgentRef[] } = {
+      type: "event",
+      eventType: CaseFile.INTERVIEW_EVENT,
+      id: `interview-${stem}-${n}`,
+      ...(witness ? { interviewOf: this.ensureId(witness) } : {}),
+      time: when,
+      ...(by !== undefined && by.length > 0 ? { by } : {}),
+      ...(title !== undefined ? { title } : {})
+    }
+    this.json.events = [...(this.json.events ?? []), event]
+    this.caseChanged = true
+    return event
+  }
+
+  /** Removes an interview from the case. Nothing refers to one, so none is refused. */
+  deleteInterview(interview: CaseEventJson): boolean {
+    if (!this.interviews.includes(interview)) return false
+    this.json.events = (this.json.events ?? []).filter(event => event !== interview)
+    this.caseChanged = true
+    return true
+  }
+
   /** Remembers what a track's recording is now, as loaded or as edited. */
   keep(track: CaseTrack, recording: SightingRecordingJson, fresh = false): void {
     track.recording = recording
     if (fresh) track.loaded = JSON.stringify(recording)
     // What a reading is called is what its own interpretation says: the case's event follows it.
     if (track.kind === "reading" && recording.interpretation?.title !== undefined) track.event.title = recording.interpretation.title
+  }
+
+  /**
+   * Puts in the case the text of its file as the author edited it: the events are those of `next`, the tracks follow them. A recording the
+   * case still lists by the same address keeps what was loaded or edited of it, and its event is the new one; one it no longer lists is
+   * dropped from the tracks, one it newly lists is a track not loaded yet. The recordings themselves are not touched.
+   */
+  replaceJson(next: CaseJson): void {
+    const wanted = (next.events ?? []).filter(event => event.eventType === CaseFile.SIGHTING_EVENT && typeof event.url === "string" && event.url !== "")
+    const tracks: CaseTrack[] = wanted.map(event => {
+      const url = new URL(event.url!, this.url).href
+      const kind = event.interpretationOf === undefined ? "observer" : "reading"
+      const existing = this.tracks.find(track => track.url === url)
+      if (!existing) return { event, url, kind }
+      existing.event = event
+      existing.kind = kind
+      return existing
+    })
+    this.tracks.splice(0, this.tracks.length, ...tracks)
+    this.json = next
+    this.caseChanged = true
   }
 
   /** Says the case itself was edited — a field of it, which the session cannot see being written. */
@@ -165,9 +233,11 @@ export class CaseSession {
     const named = (reference: string): boolean => reference === previous || reference === track.recording?.id
     const readers = (this.json.events ?? []).filter(event => event.eventType === CaseFile.SIGHTING_EVENT && event.interpretationOf !== undefined
       && [event.interpretationOf].flat().some(reference => reference !== undefined && named(reference)))
+    // The interviews held with this observer name it as a reading does.
+    const interviewers = this.interviews.filter(event => [event.interviewOf].flat().some(reference => reference !== undefined && named(reference)))
     if (id === "") {
       if (previous === undefined) return "ok"
-      if (readers.length > 0) return "empty"
+      if (readers.length > 0 || interviewers.length > 0) return "empty"
       delete track.event.id
       this.caseChanged = true
       return "ok"
@@ -178,6 +248,10 @@ export class CaseSession {
     for (const reader of readers) {
       const references = [reader.interpretationOf!].flat().map(reference => named(reference) ? id : reference)
       reader.interpretationOf = Array.isArray(reader.interpretationOf) ? references : references[0]
+    }
+    for (const interviewer of interviewers) {
+      const references = [interviewer.interviewOf!].flat().map(reference => reference !== undefined && named(reference) ? id : reference)
+      interviewer.interviewOf = Array.isArray(interviewer.interviewOf) ? references : references[0]
     }
     track.event.id = id
     this.caseChanged = true

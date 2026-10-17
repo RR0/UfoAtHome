@@ -7,6 +7,7 @@ import type { CloudEditorMessages } from "./CloudEditorMessages.js"
 import type { BodyEditorMessages } from "./BodyEditorMessages.js"
 import type { LaunchEditorMessages } from "./LaunchEditorMessages.js"
 import type { CaseEditorMessages } from "./CaseEditorMessages.js"
+import type { InterviewMessages } from "./InterviewMessages.js"
 
 export const UFO_SUPPORTED_LANGUAGES = ["en", "fr", "es", "it"] as const
 export type UfoLanguage = (typeof UFO_SUPPORTED_LANGUAGES)[number]
@@ -85,6 +86,17 @@ const caseEditorLoaders: Record<UfoLanguage, () => Promise<CaseEditorMessages>> 
   fr: () => import("./CaseEditorMessages_fr.js").then(m => m.caseEditorMessages_fr),
   es: () => import("./CaseEditorMessages_es.js").then(m => m.caseEditorMessages_es),
   it: () => import("./CaseEditorMessages_it.js").then(m => m.caseEditorMessages_it)
+}
+
+const interviewLoaders: Record<UfoLanguage, () => Promise<InterviewMessages>> = {
+  en: () => import("./InterviewMessages_en.js").then(m => m.interviewMessages_en),
+  fr: () => import("./InterviewMessages_fr.js").then(m => m.interviewMessages_fr),
+  es: () => import("./InterviewMessages_es.js").then(m => m.interviewMessages_es),
+  it: () => import("./InterviewMessages_it.js").then(m => m.interviewMessages_it)
+}
+
+export function loadInterviewMessages(language: UfoLanguage): Promise<InterviewMessages> {
+  return interviewLoaders[language]()
 }
 
 export function loadCaseEditorMessages(language: UfoLanguage): Promise<CaseEditorMessages> {

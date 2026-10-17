@@ -1,4 +1,4 @@
-import type { InterpretationEventJson, InterpretationJson } from "../interpretation/Interpretation.js"
+import type { AgentRef, InterpretationEventJson, InterpretationJson } from "../interpretation/Interpretation.js"
 import { Provenance } from "./Provenance.js"
 import type { SaidText } from "../model/SaidText.js"
 
@@ -31,6 +31,12 @@ export interface CaseJson {
  * `interpretation` names the recording it interprets by its `id` (see InterpretationEventJson). */
 export interface CaseEventJson {
   type?: "event"
+  /**
+   * What kind of event it is. A case may have kinds of its own: those UFO@home reads are `sighting` (an observer's account, or a reading of
+   * one), and `interview` (see CaseFile.INTERVIEW_EVENT).
+   *
+   * @suggest sighting, interview, interpretation, article, image, book
+   */
   eventType: string
   /**
    * What a reading names an account by (`interpretationOf`), local to the case: it has to be unique among the case's events
@@ -40,12 +46,20 @@ export interface CaseEventJson {
   id?: string
   url?: string
   time?: string
+  /** Where it happened, as RR0 names a place. */
+  place?: string
+  /** Who did it: who held an interview, who made a reading. */
+  by?: AgentRef[]
   title?: unknown
   /** An interpretation's, in the older form: the `id` of the recording it interprets. */
   sighting?: string
   /** An interpretation's: the `id`, or the ids, of the sightings this one is a reading of. Set on an
    * event of type `sighting` whose recording is a reading and not an observer's account. */
   interpretationOf?: string | string[]
+  /** An interview's: the `id`, or the ids, of the sighting events of the witnesses it was held with (see CaseFile.INTERVIEW_EVENT). */
+  interviewOf?: string | string[]
+  /** What an event says of itself where its title is not enough: an interview's, what it established. Translatable. */
+  summary?: SaidText
 }
 
 /** Reading a case file for what UFO@home replays of it. */
@@ -53,6 +67,12 @@ export class CaseFile {
 
   static readonly SIGHTING_EVENT = "sighting"
   static readonly INTERPRETATION_EVENT = "interpretation"
+  /**
+   * An interview about the case, held with the witness of one of its sightings: the first event of a case that is neither a
+   * sighting nor a reading of one. It points at the sighting by `interviewOf`, as a reading does by `interpretationOf`, and says
+   * what it established in its `summary`. UFO@home replays nothing of it: a recording is only a sighting's.
+   */
+  static readonly INTERVIEW_EVENT = "interview"
 
   /**
    * Whether a fetched JSON is a case rather than one observer's recording: an object with events,
@@ -120,9 +140,11 @@ export class CaseFile {
     }
     const unresolved: { reading: string, reference: string }[] = []
     for (const event of events) {
-      if (event.eventType !== CaseFile.SIGHTING_EVENT || event.interpretationOf === undefined) continue
-      for (const reference of [event.interpretationOf].flat()) {
-        if (!seen.has(reference) && !recordingIds.includes(reference)) unresolved.push({ reading: event.url ?? "", reference })
+      const references = event.eventType === CaseFile.SIGHTING_EVENT ? event.interpretationOf
+        : event.eventType === CaseFile.INTERVIEW_EVENT ? event.interviewOf : undefined
+      if (references === undefined) continue
+      for (const reference of [references].flat()) {
+        if (!seen.has(reference) && !recordingIds.includes(reference)) unresolved.push({ reading: event.url ?? event.id ?? "", reference })
       }
     }
     return { duplicateIds: [...duplicateIds], unresolved }

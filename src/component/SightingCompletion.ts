@@ -8,6 +8,8 @@ interface SchemaField {
   doc?: string
   type: string
   values?: string[]
+  /** Words worth offering where others would do as well (an event's type, of which a case may have its own). */
+  suggest?: string[]
   fields?: Record<string, SchemaField>
 }
 
@@ -26,17 +28,20 @@ export class SightingCompletion {
 
   private static readonly FIELDS = schema as Record<string, SchemaField>
 
+  /** The format a completion knows by default: a recording's. `fields` is the description of another (a case, see caseSchema.json), the way
+   * the generated recording's one is: what is offered, and what the doc comments of the type say of each key. */
+
   /** `at`: where in a recording the edited text's own top-level object stands, as the keys leading
    * to it (arrays contribute nothing, see pathTo) — empty for a whole recording, and for an excerpt
    * such as one weather keyframe, `["weatherTrack", "keyframes"]`, so that it is offered the keys a
    * weather keyframe has rather than a recording's. */
-  constructor(private readonly at: readonly string[] = []) {
+  constructor(private readonly at: readonly string[] = [], private readonly format: Record<string, SchemaField> = SightingCompletion.FIELDS) {
   }
 
   /** Fields of the object at `path`, or undefined when the path leads nowhere the format knows —
    * a misspelt key, or one of the Record-typed objects whose keys are the author's own. */
   private fieldsAt(path: string[]): Record<string, SchemaField> | undefined {
-    let fields: Record<string, SchemaField> | undefined = SightingCompletion.FIELDS
+    let fields: Record<string, SchemaField> | undefined = this.format
     for (const step of path) {
       const field: SchemaField | undefined = fields?.[step]
       fields = field?.fields
@@ -75,7 +80,7 @@ export class SightingCompletion {
   }
 
   private valueCompletions(field: SchemaField): Completion[] {
-    return (field.values ?? []).map(value => ({ label: `"${value}"`, apply: `"${value}"`, type: "enum" }))
+    return (field.values ?? field.suggest ?? []).map(value => ({ label: `"${value}"`, apply: `"${value}"`, type: "enum" }))
   }
 
   get source(): (context: CompletionContext) => CompletionResult | null {
@@ -121,7 +126,7 @@ export class SightingCompletion {
   }
 
   private values(field: SchemaField | undefined, from: number, to?: number): CompletionResult | null {
-    return field?.values === undefined
+    return field?.values === undefined && field?.suggest === undefined
       ? null
       : { from, ...(to === undefined ? {} : { to }), options: this.valueCompletions(field), validFor: SightingCompletion.WORD }
   }

@@ -11,6 +11,10 @@ import type { DateInputElement } from "./DateInputElement.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 import type { CaseTrack } from "./CaseSession.js"
+import { register as registerInterview, INTERVIEW_CHANGE_EVENT } from "./InterviewElement.js"
+import type { InterviewElement, InterviewEvent } from "./InterviewElement.js"
+import type { SightingFileEditor } from "./SightingFileEditor.js"
+import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
 import { register as registerSightingEditor } from "./SightingEditorElement.js"
 import type { SightingEditorElement } from "./SightingEditorElement.js"
 import type { CaseEditorMessages } from "./messages/CaseEditorMessages.js"
@@ -23,6 +27,9 @@ export const CASE_EDITOR_ELEMENT_NAME = "rr0-case-editor"
 const TEMPLATE = `
 <style>
   :host { display: block; }
+  /* The colours of the file's text editor (see SightingFileEditor): a key, a string, a number or a word, and a mistake. Dark mode redefines them. */
+  :host { --file-key: #1a5fb4; --file-string: #26662f; --file-literal: #a5321f; --rr0-alert: #c33; }
+  @media (prefers-color-scheme: dark) { :host { --file-key: #8cb8ff; --file-string: #8fd39a; --file-literal: #ffa08a; } }
   [hidden] { display: none !important; }
   /* The case, above: what it is, then its observations and what is done with them. */
   /* The case is the container the element stands in (the page's own frame, when there is one): it draws none of its own, so that
@@ -33,6 +40,8 @@ const TEMPLATE = `
   .row { display: flex; align-items: center; gap: .5em; flex-wrap: wrap; margin-bottom: .5em; }
   .row label, .row .field { display: flex; align-items: center; gap: .4em; }
   rr0-date-input { display: inline-flex; align-items: center; gap: .3em; flex-wrap: wrap; }
+  /* The button that says whether the date is precise or in EDTF stands between the label and the field, not after it. */
+  rr0-date-input .edtf-mode { order: -1; }
   .row.recordings label { flex: 1 1 14em; min-width: 0; }
   .row.recordings select { flex: 1 1 auto; min-width: 0; max-width: 100%; text-overflow: ellipsis; }
   .row button { white-space: nowrap; }
@@ -40,7 +49,26 @@ const TEMPLATE = `
   button.link { border: 0; background: none; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
   .icon-btn { width: 1.8em; height: 1.8em; padding: 0; line-height: 1; cursor: pointer; }
   /* The observation being edited, inside: a frame of its own once there is a case around it. */
-  .recording.in-case { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .5em .7em .7em; }
+  .recording.in-case, #interview-section.in-case { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .5em .7em .7em; }
+  /* Tabs as the recording's editor has them (see sightingEditorTemplate): a strip on one baseline, the open tab raised and joined to its panel. */
+  .group-tabs { --tab-line: color-mix(in srgb, CanvasText 35%, transparent); --tab-surface: color-mix(in srgb, CanvasText 5%, Canvas);
+    --tab-recessed: color-mix(in srgb, CanvasText 11%, Canvas); --tab-accent: #4a9eff;
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0; margin: 0; padding: 0; border-bottom: 1px solid var(--tab-line); }
+  .group-tab { font: inherit; font-weight: 600; cursor: pointer; color: color-mix(in srgb, CanvasText 70%, transparent); background: var(--tab-recessed);
+    border: 1px solid var(--tab-line); border-radius: 8px 8px 0 0; padding: .4em .6em; margin: 0 0 -1px -1px; position: relative; }
+  .group-tab:hover { color: CanvasText; background: color-mix(in srgb, CanvasText 16%, Canvas); }
+  .group-tab[aria-expanded="true"] { color: CanvasText; background: var(--tab-surface); border-bottom-color: var(--tab-surface); box-shadow: inset 0 2px 0 var(--tab-accent); z-index: 1; }
+  .group-tab:focus-visible { outline: 2px solid #4af; outline-offset: -2px; }
+  .group-panel { border: 1px solid var(--tab-line, color-mix(in srgb, CanvasText 35%, transparent)); border-top: 0; border-radius: 0 0 4px 4px;
+    background: color-mix(in srgb, CanvasText 5%, Canvas); padding: .5em .75em; margin: 0 0 .5em; }
+  .group-panel[hidden] { display: none; }
+  .group-panel > .row:last-child { margin-bottom: 0; }
+  /* A recording alone is not in a case: the events panel is then no frame around it. In a case, the tabs touch the panel under them. */
+  #case:not(.in-case) > #group-events { border: 0; padding: 0; margin: 0; background: none; }
+  #case.in-case > .case-panel { margin-bottom: 0; }
+  .file-note { font-size: .85em; opacity: .8; margin: .3em 0; }
+  .file-editor { min-height: 18em; margin-top: .5em; }
+  .toolbar input[type="url"] { width: 18em; max-width: 100%; }
   dialog { max-width: min(30em, 92vw); }
   dialog label { display: flex; align-items: center; gap: .5em; margin: .4em 0; }
   dialog label > span { flex: 0 0 9em; }
@@ -61,26 +89,43 @@ const TEMPLATE = `
 <section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
   <div class="row header">
     <div class="title"><h2 id="case-heading">Case</h2><span id="dirty" class="dirty" role="status" title="Changes not saved" hidden>●</span></div>
-    <button id="export" type="button">Save</button>
   </div>
   <div class="row fields">
     <label><span id="label-case-id">ID</span> <input id="case-id" type="text" size="18"/></label>
     <label><span id="label-case-title">Title</span> <input id="case-title" type="text" size="24"/></label>
     <div class="field"><span id="label-case-time">When</span> <rr0-date-input id="case-date" name="case-time"></rr0-date-input></div>
   </div>
-  <h3 id="recordings-heading">Observations</h3>
-  <p id="recording-id-error" class="recording-id-error" role="alert" hidden></p>
-  <p id="case-problems" class="recording-id-error" role="status" hidden></p>
-  <div class="row recordings">
-    <label><span id="label-recording">Recording</span> <select id="track"></select></label>
-    <label id="row-recording-id"><span id="label-recording-id">ID</span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
-    <button id="add" type="button" class="icon-btn">+</button>
-    <button id="delete" type="button" class="icon-btn">🗑</button>
+  <div id="case-tabs" class="group-tabs">
+    <button class="group-tab" type="button" aria-controls="group-events" aria-expanded="true"><span id="label-events-group">Events</span></button>
+    <button class="group-tab" type="button" aria-controls="group-case-file" aria-expanded="false"><span id="label-case-file-group">File</span></button>
   </div>
 </section>
-<section id="recording" class="recording">
-  <rr0-sighting-editor id="editor"><span id="recording-dirty" slot="tab-status" class="dirty" role="status" title="Changes not saved" hidden>●</span></rr0-sighting-editor>
-</section>
+  <section class="group-panel" id="group-events" aria-labelledby="label-events-group">
+    <p id="recording-id-error" class="recording-id-error" role="alert" hidden></p>
+    <p id="case-problems" class="recording-id-error" role="status" hidden></p>
+    <div id="events-row" class="row recordings">
+      <label><select id="track"></select></label>
+      <label id="row-recording-id"><span id="label-recording-id">ID</span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
+      <button id="add" type="button" class="icon-btn">+</button>
+      <button id="delete" type="button" class="icon-btn">🗑</button>
+    </div>
+    <section id="recording" class="recording">
+      <rr0-sighting-editor id="editor"><span id="recording-dirty" slot="tab-status" class="dirty" role="status" title="Changes not saved" hidden>●</span></rr0-sighting-editor>
+    </section>
+    <section id="interview-section" class="recording" hidden>
+      <rr0-interview id="interview"></rr0-interview>
+    </section>
+  </section>
+  <section class="group-panel" id="group-case-file" aria-labelledby="label-case-file-group" hidden>
+    <div class="row toolbar">
+      <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
+      <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/case.json"/></label>
+      <button id="import-url-button" type="button">Load</button>
+      <button id="export" type="button">Save</button>
+    </div>
+    <p id="case-file-note" class="file-note" hidden role="status"></p>
+    <div id="case-file-editor" class="file-editor"></div>
+  </section>
 <p id="make-case-row" class="make-case"><button id="make-case" type="button" class="link">Add to a case</button></p>
 </div>
 <dialog id="dialog">
@@ -89,16 +134,18 @@ const TEMPLATE = `
     <p id="dialog-message" hidden></p>
     <p id="dialog-error" role="alert" hidden></p>
     <div id="fields-add">
-      <label><span id="label-source">Source</span> <select id="source">
+      <label><span id="label-kind">Type</span> <select id="kind"><option value="observation"></option><option value="interview"></option></select></label>
+      <label id="row-source"><span id="label-source">Source</span> <select id="source">
         <option value="blank"></option><option value="file"></option><option value="url"></option>
       </select></label>
+      <label id="row-witness"><span id="label-witness">Witness</span> <select id="witness"></select></label>
       <label id="row-observer"><span id="label-observer">Observer</span> <input id="observer" type="text"/></label>
       <label id="row-title"><span id="label-title">Title</span> <input id="title" type="text"/></label>
       <label id="row-author"><span id="label-author">Author</span> <input id="author" type="text"/></label>
-      <label><span id="label-date">Date</span> <input id="date" type="date"/></label>
+      <label id="row-date"><span id="label-date">Date</span> <input id="date" type="date"/></label>
       <label id="row-file"><span id="label-file">File</span> <input id="file" type="file" accept="application/json,.json"/></label>
       <label id="row-url"><span id="label-url">Address</span> <input id="url" type="url" placeholder="https://…"/></label>
-      <label><span id="label-of">Interpretation of</span> <select id="of"></select></label>
+      <label id="row-of"><span id="label-of">Interpretation of</span> <select id="of"></select></label>
     </div>
     <div id="fields-export">
       <label class="check"><input id="export-recordings" type="checkbox" checked/> <span id="label-export-recordings">Also export the observations</span></label>
@@ -123,6 +170,10 @@ type DialogMode = "add" | "delete" | "export" | "discard"
  * delete one, which it refuses while a reading still interprets it. Exporting the case and what
  * changed as a zip stands in the editor's file group.
  *
+ * What the case lists is its EVENTS, and the picker lists them: an observer's account ("Account by Q. B."), a reading of one, an interview
+ * ("Interview of Q. B."). An account or a reading is shown in the `<rr0-sighting-editor>`; an interview, which is no recording, is shown
+ * in an `<rr0-interview>` that takes its place and edits the event in place.
+ *
  * `src` is passed to the editor, which fetches it: a `case.json` is handed back here (its
  * `caseloaded` event), a plain recording stays the editor's own and this element shows nothing more
  * than the editor. `track` names the recording a case opens on.
@@ -132,6 +183,17 @@ export class CaseEditorElement extends HTMLElement {
   private readonly editor: SightingEditorElement
   private session?: CaseSession
   private current?: CaseTrack
+  /** The interview on show, when the picker is on one: then no track is. */
+  private currentInterview?: InterviewEvent
+  private readonly interviewElement: InterviewElement
+  /** The group on show: the events, or the file `case.json` as text. */
+  private group: "events" | "file" = "events"
+  /** The file's text editor, loaded the first time the File group is opened (CodeMirror is heavy and most authors never need it). */
+  private fileEditor?: SightingFileEditor
+  private fileEditorLoading?: Promise<SightingFileEditor>
+  /** The text the case last gave the editor, or the editor gave the case: what tells an edit of the author's from one of ours. */
+  private fileApplied = ""
+  private editorMessages: SightingEditorMessages = sightingEditorMessages_en
   private messages: CaseEditorMessages = caseEditorMessages_en
   private said = new SaidTexts(["en"])
   private localeToken = 0
@@ -146,11 +208,14 @@ export class CaseEditorElement extends HTMLElement {
   constructor() {
     super()
     registerSightingEditor()
+    registerInterview()
     registerDateInput()
     this.shadow.innerHTML = TEMPLATE
     customElements.upgrade(this.shadow)
     ;(this.shadow.getElementById("case-date") as DateInputElement).build()
     this.editor = this.shadow.getElementById("editor") as SightingEditorElement
+    this.interviewElement = this.shadow.getElementById("interview") as InterviewElement
+    this.interviewElement.addEventListener(INTERVIEW_CHANGE_EVENT, event => this.interviewChanged((event as CustomEvent<{ field: string }>).detail.field))
     this.editor.addEventListener("caseloaded", event => {
       event.preventDefault()
       const { json, url } = (event as CustomEvent<{ json: unknown, url?: string }>).detail
@@ -178,18 +243,26 @@ export class CaseEditorElement extends HTMLElement {
       this.writeCaseField("time", time ? CaseEditorElement.rr0TimeOf(formatEdtfTime(time)) : "")
     })
     this.byId("track").addEventListener("change", () => {
-      const track = this.session?.tracks[Number((this.byId("track") as HTMLSelectElement).value)]
-      if (track) void this.showTrack(track)
+      const item = this.session ? this.items(this.session)[Number((this.byId("track") as HTMLSelectElement).value)] : undefined
+      if (!item) return
+      if (item.interview) this.showInterview(item.interview)
+      else void this.showTrack(item.track)
     })
     const recordingId = this.input("recording-id")
     recordingId.addEventListener("input", () => this.writeRecordingId())
     // What was refused is not kept in the field: it goes back to the id the event has.
     recordingId.addEventListener("blur", () => { this.showRecordingIdError(undefined); this.refreshRow() })
+    for (const tab of this.shadow.querySelectorAll<HTMLButtonElement>("#case-tabs .group-tab")) {
+      tab.addEventListener("click", () => this.openGroup(tab.getAttribute("aria-controls") === "group-case-file" ? "file" : "events"))
+    }
+    this.byId("import-file").addEventListener("change", () => void this.importFromFile())
+    this.byId("import-url-button").addEventListener("click", () => void this.importFromUrl())
     this.byId("add").addEventListener("click", () => this.askAdd())
     this.byId("make-case").addEventListener("click", () => this.makeCase())
     this.byId("delete").addEventListener("click", () => this.askDelete())
     this.byId("export").addEventListener("click", () => this.askExport())
     this.byId("source").addEventListener("change", () => this.syncSourceFields())
+    this.byId("kind").addEventListener("change", () => this.syncSourceFields())
     this.byId("of").addEventListener("change", () => this.syncSourceFields())
     this.byId("cancel").addEventListener("click", () => this.closeDialog())
     // Escape closes the dialog without going through the button.
@@ -315,6 +388,7 @@ export class CaseEditorElement extends HTMLElement {
     this.said = new SaidTexts(preferences)
     this.messages = messages
     this.caseDate.messages = editorMessages
+    this.editorMessages = editorMessages
     this.applyMessages()
     this.refreshRow()
   }
@@ -326,8 +400,15 @@ export class CaseEditorElement extends HTMLElement {
     text("label-case-id", m.caseId)
     text("label-case-title", m.caseTitle)
     text("label-case-time", m.caseTime)
-    text("recordings-heading", m.recordingsHeading)
-    text("label-recording", m.recording)
+    text("label-events-group", m.eventsTab)
+    text("label-case-file-group", m.fileTab)
+    text("label-import-file", m.importFile)
+    text("label-import-url", m.importUrl)
+    text("import-url-button", m.importButton)
+    // The picker has no label: what it shows is the event, and what kind it is, in each option.
+    this.byId("track").setAttribute("aria-label", m.event)
+    text("label-kind", m.kindField)
+    text("label-witness", m.witnessField)
     text("label-recording-id", m.recordingId)
     text("make-case", m.addToCase)
     for (const id of ["dirty", "recording-dirty"]) {
@@ -349,10 +430,179 @@ export class CaseEditorElement extends HTMLElement {
     text("cancel", m.cancel)
     const source = this.byId("source") as HTMLSelectElement
     ;[m.sourceBlank, m.sourceFile, m.sourceUrl].forEach((label, index) => { source.options[index].textContent = label })
+    const kind = this.byId("kind") as HTMLSelectElement
+    ;[m.kindObservation, m.kindInterview].forEach((label, index) => { kind.options[index].textContent = label })
     this.byId("add").title = m.addHint
     this.byId("add").setAttribute("aria-label", m.addHint)
     this.byId("delete").title = m.deleteRecording
     this.byId("delete").setAttribute("aria-label", m.deleteRecording)
+  }
+
+  // -- The groups ----------------------------------------------------------------------------------
+
+  /** Opens the events or the file: the strip's tabs are exclusive, as the recording's editor's. */
+  private openGroup(group: "events" | "file"): void {
+    this.group = group
+    for (const tab of this.shadow.querySelectorAll<HTMLButtonElement>("#case-tabs .group-tab")) {
+      tab.setAttribute("aria-expanded", String(tab.getAttribute("aria-controls") === (group === "file" ? "group-case-file" : "group-events")))
+    }
+    if (group === "file") {
+      void this.loadFileEditor().then(() => this.syncFileEditor(), () => this.showFileNote(this.messages.loadFailed))
+    } else {
+      this.leaveFile()
+    }
+    this.refreshRow()
+  }
+
+  /** What is on show, from where things stand: the picker and the event, or the file; a recording alone has neither tab. */
+  private applySections(): void {
+    const session = this.session
+    const events = session === undefined || this.group === "events"
+    this.byId("events-row").hidden = session === undefined
+    this.byId("group-events").hidden = !events
+    this.byId("group-case-file").hidden = session === undefined || this.group !== "file"
+    this.byId("recording").hidden = this.currentInterview !== undefined
+    this.byId("interview-section").hidden = this.currentInterview === undefined
+  }
+
+  private showFileNote(message: string | undefined): void {
+    const note = this.byId("case-file-note")
+    note.textContent = message ?? ""
+    note.hidden = message === undefined
+  }
+
+  /** The case as the text of its file. */
+  private fileText(): string {
+    return this.session ? JSON.stringify(this.session.json, null, 2) + "\n" : ""
+  }
+
+  /** The text editor, a chunk of its own fetched the first time the File group is opened. */
+  private loadFileEditor(): Promise<SightingFileEditor> {
+    this.fileEditorLoading ??= (async () => {
+      this.showFileNote(this.messages.fileLoading)
+      try {
+        const [{ SightingFileEditor }, { default: schema }] = await Promise.all([import("./SightingFileEditor.js"), import("../generated/caseSchema.json")])
+        const text = this.fileText()
+        this.fileApplied = text
+        this.fileEditor = new SightingFileEditor(this.byId("case-file-editor"), text, edited => this.onFileEdited(edited), this.editorMessages.fileEditorLabel,
+          { baseline: text, phrases: this.editorMessages.fileSearchPhrases, schema: schema as never })
+        return this.fileEditor
+      } catch (error) {
+        this.fileEditorLoading = undefined
+        throw error
+      } finally {
+        this.showFileNote(undefined)
+      }
+    })()
+    return this.fileEditorLoading
+  }
+
+  /** Puts the case in the text when the File group is opened, or after the case was changed from somewhere else (loaded, edited on the form). */
+  private syncFileEditor(): void {
+    if (!this.fileEditor || !this.session) return
+    this.commit()
+    const text = this.fileText()
+    this.fileApplied = text
+    this.fileEditor.replaceText(text, false)
+    this.showFileNote(undefined)
+  }
+
+  /**
+   * The author edited the text. What reads as a case is the case now: its events are those of the text, the recordings it still lists keep
+   * what was loaded or edited of them. What does not read yet leaves the case as it was, and says so, until it does.
+   */
+  private onFileEdited(text: string): void {
+    const session = this.session
+    if (!session) return
+    // Back to the text the case already has, from one it could not read: nothing to apply, and nothing wrong any more.
+    if (text === this.fileApplied) {
+      this.showFileNote(undefined)
+      return
+    }
+    let json: unknown
+    try {
+      json = JSON.parse(text)
+    } catch {
+      this.showFileNote(this.messages.fileInvalid)
+      return
+    }
+    if (!CaseFile.isCase(json)) {
+      this.showFileNote(this.messages.fileInvalid)
+      return
+    }
+    this.fileApplied = text
+    this.showFileNote(undefined)
+    // Spaces, blank lines, a different order of lines: the same case, which is not a change of it.
+    if (JSON.stringify(json) === JSON.stringify(session.json)) return
+    session.replaceJson(json)
+    // What was on show may be gone from the case: the picker then falls back on what is there when the events are shown again.
+    if (this.current && !session.tracks.includes(this.current)) this.current = undefined
+    if (this.currentInterview && !session.interviews.includes(this.currentInterview)) this.currentInterview = undefined
+    this.refreshRow()
+    this.scheduleDirtyCheck()
+  }
+
+  /** Back to the events: what the text did to the case may have taken away what was on show. */
+  private leaveFile(): void {
+    const session = this.session
+    if (!session) return
+    if (this.current === undefined && this.currentInterview === undefined) {
+      const next = session.tracks.find(track => track.kind === "observer") ?? session.tracks[0]
+      if (next) void this.showTrack(next)
+    } else if (this.currentInterview) {
+      this.interviewElement.event = this.currentInterview
+    }
+  }
+
+  /** Runs what replaces the case, after asking when changes would be lost. */
+  private guarded(action: () => void): void {
+    if (!this.dirty) {
+      action()
+      return
+    }
+    this.pendingLoad = action
+    this.openDialog("discard", this.messages.discardTitle, this.messages.discardQuestion)
+  }
+
+  private async importFromFile(): Promise<void> {
+    const input = this.input("import-file")
+    const file = input.files?.[0]
+    if (!file) return
+    try {
+      const json = JSON.parse(await file.text())
+      this.guarded(() => void this.importCase(json, new URL("case.json", location.href).href))
+    } catch {
+      this.showFileNote(this.messages.loadFailed)
+    }
+    input.value = ""
+  }
+
+  private async importFromUrl(): Promise<void> {
+    const url = this.input("import-url").value.trim()
+    if (url === "") return
+    try {
+      const absolute = new URL(url, location.href).href
+      const json = await SightingFetch.json(absolute)
+      this.guarded(() => void this.importCase(json, absolute))
+    } catch {
+      this.showFileNote(this.messages.loadFailed)
+    }
+  }
+
+  /** Opens a case read from a file or an address, in the place of the one open. */
+  private async importCase(json: unknown, url: string): Promise<void> {
+    if (!CaseFile.isCase(json)) {
+      this.showFileNote(this.messages.fileNotACase)
+      return
+    }
+    try {
+      await this.openCase(json, url)
+    } catch {
+      this.showFileNote(this.messages.fileNotACase)
+      return
+    }
+    this.syncFileEditor()
+    this.showFileNote(undefined)
   }
 
   // -- The case ------------------------------------------------------------------------------------
@@ -377,6 +627,7 @@ export class CaseEditorElement extends HTMLElement {
     if (!this.session) return
     this.session = undefined
     this.current = undefined
+    this.currentInterview = undefined
     this.editor.reading = false
     this.editor.accountShapeIds = undefined
     this.refreshRow()
@@ -403,6 +654,7 @@ export class CaseEditorElement extends HTMLElement {
     const session = this.session
     if (!session) return
     this.commit()
+    this.currentInterview = undefined
     try {
       const fresh = !track.recording
       await this.loadTrack(track)
@@ -428,6 +680,51 @@ export class CaseEditorElement extends HTMLElement {
     const ids = new Set<string>()
     for (const keyframe of recording.timeline?.keyframes ?? []) for (const entry of keyframe.shapes ?? []) ids.add(entry.sourceId)
     return [...ids]
+  }
+
+  /** What the picker offers, in order: the case's recordings, then its interviews. */
+  private items(session: CaseSession): { track: CaseTrack, interview?: undefined }[] | { track?: undefined, interview: InterviewEvent }[] {
+    return [...session.tracks.map(track => ({ track })), ...session.interviews.map(interview => ({ interview }))] as never
+  }
+
+  /** What an option says of an event: whose account it is, whom the interview was held with. A reading is called what its interpretation is. */
+  private optionLabel(item: { track?: CaseTrack, interview?: InterviewEvent }, index: number): string {
+    const session = this.session!
+    if (item.interview) {
+      const witness = session.intervieweeOf(item.interview)
+      const name = witness ? this.labelOf(witness, session.tracks.indexOf(witness)) : this.said.read(item.interview.title as never)
+      return name ? `${this.messages.interviewOf} ${name}` : this.messages.untitledInterview.replace("{n}", String(session.interviews.indexOf(item.interview) + 1))
+    }
+    const track = item.track!
+    const label = this.labelOf(track, index)
+    return track.kind === "observer" ? `${this.messages.accountOf} ${label}` : label
+  }
+
+  /** Shows an interview of the case where the recording was: the picker is then on it, and no recording is. */
+  private showInterview(interview: InterviewEvent): void {
+    const session = this.session
+    if (!session) return
+    this.commit()
+    this.current = undefined
+    this.currentInterview = interview
+    this.interviewElement.witnesses = session.tracks.filter(track => track.kind === "observer")
+      .map(track => ({ id: track.event.id ?? session.proposedId(track), label: this.labelOf(track, session.tracks.indexOf(track)) }))
+    this.interviewElement.event = interview
+    this.refreshRow()
+  }
+
+  /** An interview edited: the case is changed, and a witness chosen who has no id yet is given the one that was offered for them. */
+  private interviewChanged(field: string): void {
+    const session = this.session
+    const interview = this.currentInterview
+    if (!session || !interview) return
+    if (field === "witness" && typeof interview.interviewOf === "string") {
+      const witness = session.tracks.find(track => track.kind === "observer" && (track.event.id ?? session.proposedId(track)) === interview.interviewOf)
+      if (witness) session.ensureId(witness)
+    }
+    session.touch()
+    this.refreshRow()
+    this.scheduleDirtyCheck()
   }
 
   private labelOf(track: CaseTrack, index: number): string {
@@ -493,10 +790,12 @@ export class CaseEditorElement extends HTMLElement {
   /** The case on top, when there is one, and the picker of its recordings with what can be done with the one on show. */
   private refreshRow(): void {
     const session = this.session
+    this.applySections()
     this.byId("case-panel").hidden = session === undefined
     this.byId("make-case-row").hidden = session !== undefined
     this.byId("case").classList.toggle("in-case", session !== undefined)
     this.byId("recording").classList.toggle("in-case", session !== undefined)
+    this.byId("interview-section").classList.toggle("in-case", session !== undefined)
     if (!session) {
       this.refreshDirty()
       return
@@ -508,10 +807,12 @@ export class CaseEditorElement extends HTMLElement {
     }
     if (!active?.closest?.("rr0-date-input")) this.showCaseTime(session)
     const select = this.byId("track") as HTMLSelectElement
-    select.replaceChildren(...session.tracks.map((track, index) => new Option(this.labelOf(track, index), String(index))))
-    select.value = String(Math.max(0, this.current ? session.tracks.indexOf(this.current) : 0))
-    // Any recording can leave the case, while the case keeps one.
-    this.byId("delete").hidden = session.tracks.length <= 1
+    const items = this.items(session) as { track?: CaseTrack, interview?: InterviewEvent }[]
+    select.replaceChildren(...items.map((item, index) => new Option(this.optionLabel(item, index), String(index))))
+    const shown = this.currentInterview ? items.findIndex(item => item.interview === this.currentInterview) : this.current ? items.findIndex(item => item.track === this.current) : 0
+    select.value = String(Math.max(0, shown))
+    // Any recording can leave the case, while the case keeps one; an interview can always.
+    this.byId("delete").hidden = this.currentInterview === undefined && session.tracks.length <= 1
     this.refreshRecordingId(session)
     this.refreshDirty()
   }
@@ -606,6 +907,9 @@ export class CaseEditorElement extends HTMLElement {
       ...session.tracks.filter(track => track.kind === "observer")
         .map(track => new Option(this.labelOf(track, session.tracks.indexOf(track)), String(session.tracks.indexOf(track)))))
     of.value = ""
+    ;(this.byId("kind") as HTMLSelectElement).value = "observation"
+    const observers = session.tracks.filter(track => track.kind === "observer")
+    ;(this.byId("witness") as HTMLSelectElement).replaceChildren(...observers.map(track => new Option(this.labelOf(track, session.tracks.indexOf(track)), String(session.tracks.indexOf(track)))))
     ;(this.byId("source") as HTMLSelectElement).value = "blank"
     for (const id of ["observer", "title", "author", "file", "url"]) this.input(id).value = ""
     this.input("date").value = ""
@@ -614,13 +918,20 @@ export class CaseEditorElement extends HTMLElement {
 
   /** What the dialog asks depends on what is added: an observer for an observation, a title and an author for a reading. */
   private syncSourceFields(): void {
+    const interview = (this.byId("kind") as HTMLSelectElement).value === "interview"
     const source = (this.byId("source") as HTMLSelectElement).value
-    const reading = (this.byId("of") as HTMLSelectElement).value !== ""
-    this.byId("row-file").hidden = source !== "file"
-    this.byId("row-url").hidden = source !== "url"
-    this.byId("row-observer").hidden = reading
-    this.byId("row-title").hidden = !reading
-    this.byId("row-author").hidden = !reading
+    const reading = !interview && (this.byId("of") as HTMLSelectElement).value !== ""
+    // An interview is described here, not loaded: no source, no interpretation; it asks whom it was held with, a title and who held it.
+    this.byId("row-source").hidden = interview
+    this.byId("row-of").hidden = interview
+    this.byId("row-witness").hidden = !interview
+    this.byId("row-file").hidden = interview || source !== "file"
+    this.byId("row-url").hidden = interview || source !== "url"
+    this.byId("row-observer").hidden = interview || reading
+    this.byId("row-title").hidden = !(interview || reading)
+    this.byId("row-author").hidden = !(interview || reading)
+    this.byId("label-title").textContent = interview ? this.messages.plainTitleField : this.messages.titleField
+    this.byId("label-author").textContent = interview ? this.messages.interviewerField : this.messages.authorField
   }
 
   private askExport(): void {
@@ -631,6 +942,10 @@ export class CaseEditorElement extends HTMLElement {
 
   private askDelete(): void {
     const session = this.session
+    if (session && this.currentInterview) {
+      this.openDialog("delete", this.messages.deleteRecording, this.messages.deleteInterviewQuestion)
+      return
+    }
     const track = this.current
     if (!session || !track) return
     if (track.kind === "observer") {
@@ -675,10 +990,19 @@ export class CaseEditorElement extends HTMLElement {
   private async addRecording(): Promise<boolean> {
     const session = this.session
     if (!session) return false
+    this.commit()
+    if ((this.byId("kind") as HTMLSelectElement).value === "interview") {
+      const witness = session.tracks[Number((this.byId("witness") as HTMLSelectElement).value)]
+      const title = this.input("title").value.trim()
+      const author = this.input("author").value.trim()
+      const interview = session.addInterview(witness, this.input("date").value || this.today(),
+        title !== "" ? title : undefined, author !== "" ? author.split(",").map(name => ({ people: name.trim() })).filter(agent => agent.people !== "") : undefined)
+      this.showInterview(interview)
+      return true
+    }
     const of = (this.byId("of") as HTMLSelectElement).value
     const account = of === "" ? undefined : session.tracks[Number(of)]
     const source = (this.byId("source") as HTMLSelectElement).value
-    this.commit()
     if (account && source === "blank") {
       if (account.kind !== "observer" || !account.recording) return false
       const title = this.input("title").value.trim()
@@ -738,6 +1062,14 @@ export class CaseEditorElement extends HTMLElement {
   /** Deletes the recording on show — a reading, or an account no reading interprets — and shows another. */
   private deleteCurrent(): void {
     const session = this.session
+    const interview = this.currentInterview
+    if (session && interview) {
+      if (!session.deleteInterview(interview)) return
+      this.currentInterview = undefined
+      const next = session.tracks.find(other => other.kind === "observer") ?? session.tracks[0]
+      if (next) void this.showTrack(next)
+      return
+    }
     const track = this.current
     if (!session || !track) return
     const next = track.kind === "reading"
@@ -766,6 +1098,7 @@ export class CaseEditorElement extends HTMLElement {
     }
     const files = session.files(withRecordings, true)
     session.markExported(withRecordings)
+    this.fileEditor?.markSaved()
     this.refreshDirty()
     // The case alone is the one file it is: no archive around it.
     if (files.length === 1) {

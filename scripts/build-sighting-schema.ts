@@ -26,6 +26,9 @@ interface SchemaField {
   type: string
   /** The values, when the type is a union of string literals. */
   values?: string[]
+  /** Words worth offering where any other would do as well (a `@suggest` tag on the property): an event's type, of which a case's own may be new.
+   * Offered by the editor, and given as examples in the JSON Schema, which they do not restrict. */
+  suggest?: string[]
   /** The keys of the object this holds, or of an array's element when it holds objects. */
   fields?: Record<string, SchemaField>
   /** Set when the type could not be told apart (a union of a string and an object, like a SaidText,
@@ -79,7 +82,8 @@ class SchemaBuilder {
 
   private describe(type: ts.Type, property?: ts.Symbol): SchemaField {
     const doc = property && this.docOf(property)
-    const field: SchemaField = { type: "string", ...(doc === undefined ? {} : { doc }) }
+    const suggest = property && this.suggestionsOf(property)
+    const field: SchemaField = { type: "string", ...(doc === undefined ? {} : { doc }), ...(suggest === undefined ? {} : { suggest }) }
     // undefined is what optionality looks like in a union; it says nothing about what may be
     // written there, so it goes before anything else is decided.
     const parts = (type.isUnion() ? type.types : [type]).filter(part => !(part.flags & ts.TypeFlags.Undefined))
@@ -169,6 +173,13 @@ class SchemaBuilder {
     return fields
   }
 
+  /** The words a `@suggest sighting, interview` tag lists on a property. */
+  private suggestionsOf(property: ts.Symbol): string[] | undefined {
+    const tag = property.getJsDocTags(this.checker).find(candidate => candidate.name === "suggest")
+    const words = tag?.text ? ts.displayPartsToString(tag.text).split(/[,\s]+/).filter(word => word !== "") : []
+    return words.length > 0 ? words : undefined
+  }
+
   /** The first sentence of the doc comment, flattened. The comments in this project are long by
    * design — they carry the reasoning — and a completion popup is not where that is read. */
   private docOf(property: ts.Symbol): string | undefined {
@@ -199,44 +210,58 @@ class JsonSchemaExport {
 
   static readonly ID = "https://ufoathome.org/sighting.schema.json"
 
-  static of(fields: Record<string, SchemaField>): object {
+  /** What differs between the two files this writes: a recording is closed and any of its values may be wrapped with its provenance; a case
+   * passes through what it holds beyond what UFO@home reads (RR0 defines it), and states no provenance. */
+  static readonly RECORDING: JsonSchemaOptions = {
+    id: JsonSchemaExport.ID, title: "UFO@home recording",
+    description: "One observer's recording of a sighting. See https://ufoathome.org/docs/format/", closed: true, provenance: true
+  }
+  static readonly CASE: JsonSchemaOptions = {
+    id: "https://ufoathome.org/case.schema.json", title: "RR0 case",
+    description: "A case, as RR0 writes it: its events, among which the observers' accounts and the interviews. UFO@home reads what is described here and leaves the rest as it is. See https://ufoathome.org/docs/format/",
+    closed: false, provenance: false
+  }
+
+  static of(fields: Record<string, SchemaField>, options: JsonSchemaOptions = JsonSchemaExport.RECORDING): object {
     return {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: JsonSchemaExport.ID,
-      title: "UFO@home recording",
-      description: "One observer's recording of a sighting. See https://ufoathome.org/docs/format/",
-      ...JsonSchemaExport.object(fields),
-      $defs: {
-        stated: {
-          description: "A value with its provenance beside it: what any field may be written as, in place of the bare value.",
-          type: "object",
-          required: ["value"],
-          properties: {
-            value: {},
-            basis: { enum: ["stated", "derived", "assumed"], description: "Absent means stated." },
-            rationale: { type: "string", description: "The working for a derivation, or what a guess was chosen for." }
-          },
-          additionalProperties: false
+      $id: options.id,
+      title: options.title,
+      description: options.description,
+      ...JsonSchemaExport.object(fields, options),
+      ...(options.provenance ? {
+        $defs: {
+          stated: {
+            description: "A value with its provenance beside it: what any field may be written as, in place of the bare value.",
+            type: "object",
+            required: ["value"],
+            properties: {
+              value: {},
+              basis: { enum: ["stated", "derived", "assumed"], description: "Absent means stated." },
+              rationale: { type: "string", description: "The working for a derivation, or what a guess was chosen for." }
+            },
+            additionalProperties: false
+          }
         }
-      }
+      } : {})
     }
   }
 
-  private static object(fields: Record<string, SchemaField>): object {
+  private static object(fields: Record<string, SchemaField>, options: JsonSchemaOptions): object {
     const properties: Record<string, object> = {}
     for (const [name, field] of Object.entries(fields)) {
-      properties[name] = JsonSchemaExport.orStated(JsonSchemaExport.field(field))
+      properties[name] = JsonSchemaExport.orStated(JsonSchemaExport.field(field, options), options)
     }
-    return { type: "object", properties, additionalProperties: false }
+    return { type: "object", properties, additionalProperties: !options.closed }
   }
 
   /** `schema`, or the same value wrapped with its provenance — an array's element can be, too. */
-  private static orStated(schema: object): object {
-    return { anyOf: [schema, { $ref: "#/$defs/stated" }] }
+  private static orStated(schema: object, options: JsonSchemaOptions): object {
+    return options.provenance ? { anyOf: [schema, { $ref: "#/$defs/stated" }] } : schema
   }
 
-  private static field(field: SchemaField): object {
-    const description = field.doc === undefined ? {} : { description: field.doc }
+  private static field(field: SchemaField, options: JsonSchemaOptions): object {
+    const description = { ...(field.doc === undefined ? {} : { description: field.doc }), ...(field.suggest === undefined ? {} : { examples: field.suggest }) }
     if (field.loose) {
       return description
     }
@@ -244,18 +269,26 @@ class JsonSchemaExport {
       case "enum":
         return { ...description, enum: field.values }
       case "object":
-        return { ...description, ...(field.fields ? JsonSchemaExport.object(field.fields) : { type: "object" }) }
+        return { ...description, ...(field.fields ? JsonSchemaExport.object(field.fields, options) : { type: "object" }) }
       case "array":
-        return { ...description, type: "array", ...(field.fields ? { items: JsonSchemaExport.orStated(JsonSchemaExport.object(field.fields)) } : {}) }
+        return { ...description, type: "array", ...(field.fields ? { items: JsonSchemaExport.orStated(JsonSchemaExport.object(field.fields, options), options) } : {}) }
       default:
         return { ...description, type: field.type }
     }
   }
 }
 
+interface JsonSchemaOptions {
+  id: string
+  title: string
+  description: string
+  closed: boolean
+  provenance: boolean
+}
+
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(scriptDir, "..")
-const program = ts.createProgram([path.join(root, "src", "engine", "persistence", "sightingJson.ts")], {
+const program = ts.createProgram([path.join(root, "src", "engine", "persistence", "sightingJson.ts"), path.join(root, "src", "engine", "persistence", "caseJson.ts")], {
   target: ts.ScriptTarget.ES2022,
   module: ts.ModuleKind.ESNext,
   moduleResolution: ts.ModuleResolutionKind.Bundler,
@@ -276,6 +309,11 @@ writeFileSync(outPath, `${JSON.stringify(schema, null, 2)}\n`)
 // Beside it, and copied to the site's root by site/build.ts.
 writeFileSync(path.join(outDir, "sighting.schema.json"), `${JSON.stringify(JsonSchemaExport.of(schema), null, 2)}\n`)
 
+// The case file's own, for the editor of a case (see CaseEditorElement): the same description of what a case holds.
+const caseSchema = builder.fieldsOf(builder.typeNamed("CaseJson"))
+writeFileSync(path.join(outDir, "caseSchema.json"), `${JSON.stringify(caseSchema, null, 2)}\n`)
+writeFileSync(path.join(outDir, "case.schema.json"), `${JSON.stringify(JsonSchemaExport.of(caseSchema, JsonSchemaExport.CASE), null, 2)}\n`)
+
 const count = (fields: Record<string, SchemaField>): number =>
   Object.values(fields).reduce((total, field) => total + 1 + (field.fields ? count(field.fields) : 0), 0)
-console.log(`${path.relative(root, outPath)}: ${count(schema)} keys, ${Object.keys(schema).length} at the top level`)
+console.log(`${path.relative(root, outPath)}: ${count(schema)} keys, ${Object.keys(schema).length} at the top level; caseSchema.json: ${count(caseSchema)} keys`)

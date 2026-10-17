@@ -143,6 +143,8 @@ class SiteBuilder {
     // written by hand or by a language model can be checked before it is played. Linked from the
     // format page; its $id is this address.
     await cp(join(this.root, "src", "generated", "sighting.schema.json"), join(this.out, "sighting.schema.json"))
+    // The same for a case, which the editor of a case completes from; its $id is this address too.
+    await cp(join(this.root, "src", "generated", "case.schema.json"), join(this.out, "case.schema.json"))
     // The skill that teaches an AI assistant to write a recording from a case file (see SkillPackage):
     // the zip to install, and its SKILL.md alone for a reader who wants to see what it says first.
     const skill = new SkillPackage(this.root, version)
@@ -385,6 +387,10 @@ ${retired}
   Access-Control-Allow-Origin: *
 
 /sighting.schema.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+/case.schema.json
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=0, must-revalidate
 

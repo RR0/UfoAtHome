@@ -91,12 +91,12 @@ describe("EdtfDateField", () => {
     expect(told).toEqual([undefined])
   })
 
-  it("has a button that says how the date is said — precise or EDTF — and swaps the two without writing anything", () => {
+  it("has a button that says how the date is said — precise or imprecise (in EDTF) — and swaps the two without writing anything", () => {
     const { field, picker, text, mode, told } = make()
     expect(mode.textContent).toBe("precise")
     expect([picker.hidden, text.hidden]).toEqual([false, true])
     mode.click()
-    expect(mode.textContent).toBe("EDTF")
+    expect(mode.textContent).toBe("imprecise")
     expect([picker.hidden, text.hidden]).toEqual([true, false])
     expect(field.isPrecise).toBe(false)
     mode.click()

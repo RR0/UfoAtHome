@@ -24,6 +24,9 @@ export interface SightingFileEditorOptions {
   baseline?: string
   /** The words of the search panel in the reader's language, by CodeMirror's own English ones. */
   phrases?: Record<string, string>
+  /** What is offered as the author types: the description of the keys of the format being edited (see SightingCompletion). Default: a recording's.
+   * A case has its own, generated from its own type (caseSchema.json). */
+  schema?: ConstructorParameters<typeof SightingCompletion>[1]
   /** Called with the place of the caret, when the author moves it — what the picture selects. */
   caretMoved?: (path: JsonPath) => void
 }
@@ -193,7 +196,7 @@ export class SightingFileEditor {
         EditorState.tabSize.of(2),
         syntaxHighlighting(SightingFileEditor.COLOURS, { fallback: true }),
         json(),
-        jsonLanguage.data.of({ autocomplete: new SightingCompletion().source }),
+        jsonLanguage.data.of({ autocomplete: new SightingCompletion([], options.schema).source }),
         lintGutter(),
         linter(jsonParseLinter()),
         EditorView.contentAttributes.of({ "aria-label": label }),

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { CaseFile } from "../../../src/engine/persistence/caseJson.js"
+import { InterviewFile } from "../../../src/engine/persistence/interviewJson.js"
+import type { InterviewJson } from "../../../src/engine/persistence/interviewJson.js"
 import type { CaseJson } from "../../../src/engine/persistence/caseJson.js"
 import { fromSightingJson, toSightingJson } from "../../../src/engine/persistence/sightingJson.js"
 import type { BodyJson } from "../../../src/engine/interpretation/Interpretation.js"
@@ -118,5 +120,47 @@ describe("A case's own ids", () => {
     expect(CaseFile.problems(local, ["x-1"])).toEqual({ duplicateIds: [], unresolved: [{ reading: "other.json", reference: "ghost" }] })
     const twice = { events: [{ eventType: "sighting", id: "a", url: "a.json" }, { eventType: "sighting", id: "a", url: "b.json" }] }
     expect(CaseFile.problems(twice, []).duplicateIds).toEqual(["a"])
+  })
+})
+
+describe("A case's interview", () => {
+  const caseUrl = "https://example.org/d/case.json"
+  const interviewed = {
+    events: [
+      { eventType: "sighting", id: "qb", url: "observer.json" },
+      { eventType: "interview", id: "interview-qb-1", interviewOf: "qb", time: "2026-10-13 21:27", summary: { fr: "Précisions." } }
+    ]
+  }
+
+  it("is an event of its own: nothing of it is replayed, and it is not offered as an observer", () => {
+    expect(CaseFile.sightingUrls(interviewed, caseUrl)).toEqual(["https://example.org/d/observer.json"])
+    expect(CaseFile.interpretationEvents(interviewed, "qb")).toEqual([])
+  })
+
+  it("names the sighting it was held about, as a reading does, and says so when that names nothing", () => {
+    expect(CaseFile.problems(interviewed, [])).toEqual({ duplicateIds: [], unresolved: [] })
+    const ghost = { events: [{ eventType: "interview", id: "i", interviewOf: ["qb", "ghost"] }, { eventType: "sighting", id: "qb", url: "observer.json" }] }
+    expect(CaseFile.problems(ghost, [])).toEqual({ duplicateIds: [], unresolved: [{ reading: "i", reference: "ghost" }] })
+  })
+})
+
+describe("An interview's transcript file", () => {
+  const transcript: InterviewJson = {
+    version: 1,
+    speakers: { interviewer: { role: "interviewer", by: { people: "BeauJerome" } }, witness: { role: "witness", title: "Q. B.", of: "qb" } },
+    segments: [
+      { speaker: "interviewer", start: 0, end: 27.6, text: "Where do we start?" },
+      { speaker: "witness", start: 25, end: 3725.25, text: "5 < 6 & more" }
+    ]
+  }
+
+  it("names a speaker by the witness's title or the interviewer's agent", () => {
+    expect(InterviewFile.speakerName(transcript, "witness")).toBe("Q. B.")
+    expect(InterviewFile.speakerName(transcript, "interviewer")).toBe("BeauJerome")
+  })
+
+  it("becomes WebVTT with the speaker in a voice tag, no cue overlapping the next, the text escaped", () => {
+    expect(InterviewFile.toVtt(transcript)).toBe(
+      "WEBVTT\n\n00:00:00.000 --> 00:00:25.000\n<v BeauJerome>Where do we start?\n\n00:00:25.000 --> 01:02:05.250\n<v Q. B.>5 &lt; 6 &amp; more\n")
   })
 })

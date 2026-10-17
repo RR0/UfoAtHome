@@ -147,7 +147,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   accountView3d: "3D · bodies",
   accountViewHint: "What the render shows and what is edited: the shapes the observer drew, or the bodies they said those were",
   datePrecise: "precise",
-  dateEdtf: "EDTF",
+  dateEdtf: "imprecise",
   dateHelpTitle: "What the text takes (EDTF)",
   dateHelpLines: "1965 — a year\n1965-07 — a month\n1965-21 — a season (21 spring, 22 summer, 23 autumn, 24 winter)\n1965-07-01 — a day\n1965-07-01T05:00 — a day and a time\n05:00 — a time, the date unknown\nEnd with ? when uncertain, ~ when approximate, % for both",
   edtfModeTitle: "Type an imprecise date instead: a year alone, a month, a time with no date",

@@ -363,14 +363,15 @@ describe("CaseEditorElement", () => {
     const container = root.getElementById("case")!
     expect(container.classList.contains("in-case")).toBe(true)
     expect(container.contains(panel) && container.contains(frame)).toBe(true)
-    expect(frame.parentElement).toBe(container)
+    // The event on show is inside the Events panel, in a container of its own, under the picker.
+    expect(frame.parentElement).toBe(root.getElementById("group-events"))
+    expect(frame.parentElement!.contains(parts(element).select)).toBe(true)
     expect(panel.compareDocumentPosition(frame) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(frame.classList.contains("in-case")).toBe(true)
     expect(frame.contains(root.getElementById("editor"))).toBe(true)
-    expect(panel.contains(parts(element).exportButton)).toBe(true)
-    // The export stands last on the heading's line: top right of the case's own part, before its observations.
-    const header = root.querySelector(".case-panel .header")!
-    expect(header.lastElementChild).toBe(parts(element).exportButton)
+    // The export is in the File group, with what loads and shows the case's file; the heading's line holds the title and its mark.
+    expect(root.getElementById("group-case-file")!.contains(parts(element).exportButton)).toBe(true)
+    expect(root.querySelector(".case-panel .header")!.contains(parts(element).exportButton)).toBe(false)
     // What is selected is not repeated inside the observation's container.
     expect(root.getElementById("recording-heading")).toBeNull()
   })
@@ -649,5 +650,204 @@ describe("CaseEditorElement", () => {
       link.dispatchEvent(event)
       expect((element.shadowRoot!.getElementById("dialog") as HTMLDialogElement).open).toBe(false)
     })
+  })
+})
+
+describe("CaseEditorElement's events", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    vi.unstubAllGlobals()
+    globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
+  })
+
+  const interviewed = () => ({
+    events: [
+      { type: "event", eventType: "sighting", id: "w", title: "An account", url: "account.json" },
+      { type: "event", eventType: "interview", id: "interview-w-1", interviewOf: "w", time: "2026-10-13 21:27", title: { en: "Video interview" }, summary: { en: "It fixed the figures." } }
+    ]
+  })
+  const interviewPart = (element: CaseEditorElement) => element.shadowRoot!.getElementById("interview") as HTMLElement
+  const interviewField = (element: CaseEditorElement, id: string) => interviewPart(element).shadowRoot!.getElementById(id) as HTMLInputElement
+  const choose = async (element: CaseEditorElement, index: number) => {
+    const { select } = parts(element)
+    select.value = String(index)
+    select.dispatchEvent(new Event("change"))
+    await wait()
+  }
+
+  it("offers an account as 'Observation of' and an interview as 'Interview of', the witness it names", async () => {
+    const element = await open(undefined, interviewed())
+    expect([...parts(element).select.options].map(option => option.textContent)).toEqual(["Observation of An account", "Interview of An account"])
+  })
+
+  it("shows an interview in an <rr0-interview> in place of the recording, and the recording again when an account is chosen", async () => {
+    const element = await open(undefined, interviewed())
+    const root = element.shadowRoot!
+    expect(root.getElementById("interview-section")!.hidden).toBe(true)
+    await choose(element, 1)
+    expect(root.getElementById("interview-section")!.hidden).toBe(false)
+    expect(root.getElementById("recording")!.hidden).toBe(true)
+    expect(interviewField(element, "title").value).toBe("Video interview")
+    expect(interviewField(element, "time").value).toBe("2026-10-13 21:27")
+    expect((interviewField(element, "witness") as unknown as HTMLSelectElement).value).toBe("w")
+    await choose(element, 0)
+    expect(root.getElementById("interview-section")!.hidden).toBe(true)
+    expect(root.getElementById("recording")!.hidden).toBe(false)
+  })
+
+  it("edits the interview's event in place, which changes the case and keeps the other languages", async () => {
+    const element = await open(undefined, interviewed())
+    await choose(element, 1)
+    expect(element.caseSession!.dirty).toBe(false)
+    const field = interviewField(element, "summary")
+    field.value = "It fixed the figures and the azimuth."
+    field.dispatchEvent(new Event("input", { bubbles: true }))
+    const event = element.caseSession!.interviews[0]
+    expect(event.summary).toEqual({ en: "It fixed the figures and the azimuth." })
+    expect(element.caseSession!.dirty).toBe(true)
+    const by = interviewField(element, "by")
+    by.value = "BeauJerome, Chabin"
+    by.dispatchEvent(new Event("input", { bubbles: true }))
+    expect(event.by).toEqual([{ people: "BeauJerome" }, { people: "Chabin" }])
+    // The transcript file is optional: an address is kept, and emptied it is not.
+    const url = interviewField(element, "url")
+    url.value = "interview-saint-lo.json"
+    url.dispatchEvent(new Event("input", { bubbles: true }))
+    expect(event.url).toBe("interview-saint-lo.json")
+    url.value = " "
+    url.dispatchEvent(new Event("input", { bubbles: true }))
+    expect("url" in event).toBe(false)
+  })
+
+  it("keeps the interview in what is exported, and drops it when it is deleted", async () => {
+    const element = await open(undefined, interviewed())
+    expect(JSON.parse(element.caseSession!.files(false)[0].content).events.map((event: { eventType: string }) => event.eventType)).toEqual(["sighting", "interview"])
+    await choose(element, 1)
+    parts(element).remove.click()
+    await wait()
+    await submit(element)
+    expect(element.caseSession!.interviews).toHaveLength(0)
+    expect(parts(element).select.options).toHaveLength(1)
+    expect(element.shadowRoot!.getElementById("recording")!.hidden).toBe(false)
+  })
+
+  it("keeps an interview naming an account by the account's new id when that id is changed", async () => {
+    const element = await open(undefined, interviewed())
+    const id = parts(element).field("recording-id")
+    id.value = "qb"
+    id.dispatchEvent(new Event("input", { bubbles: true }))
+    expect(element.caseSession!.interviews[0].interviewOf).toBe("qb")
+  })
+
+  it("has a + button whose tooltip says it adds an event, and no label before the picker", async () => {
+    const element = await open(undefined, interviewed())
+    expect(parts(element).add.textContent).toBe("+")
+    expect(parts(element).add.title).toBe("Add an event")
+    expect(element.shadowRoot!.getElementById("label-recording")).toBeNull()
+    expect(parts(element).select.getAttribute("aria-label")).toBe("Event")
+  })
+
+  it("adds an event of the type chosen in the dialog: an interview asks whom it was held with, a title and who held it", async () => {
+    const element = await open()
+    const root = element.shadowRoot!
+    const hidden = (id: string) => (root.getElementById(id) as HTMLElement).hidden
+    parts(element).add.click()
+    expect(hidden("row-source")).toBe(false)
+    expect(hidden("row-witness")).toBe(true)
+    const kind = root.getElementById("kind") as HTMLSelectElement
+    kind.value = "interview"
+    kind.dispatchEvent(new Event("change"))
+    expect([hidden("row-source"), hidden("row-of"), hidden("row-observer"), hidden("row-witness"), hidden("row-title"), hidden("row-author")]).toEqual([true, true, true, false, false, false])
+    parts(element).field("title").value = "Phone interview"
+    parts(element).field("author").value = "BeauJerome"
+    parts(element).field("date").value = "2026-10-13"
+    await submit(element)
+    const [interview] = element.caseSession!.interviews
+    expect(interview).toMatchObject({ eventType: "interview", title: "Phone interview", time: "2026-10-13", by: [{ people: "BeauJerome" }] })
+    // Held with the first account, which now has the id the interview names it by.
+    expect(interview.interviewOf).toBe(element.caseSession!.tracks[0].event.id)
+    expect(interview.interviewOf).toBeTruthy()
+    expect(root.getElementById("interview-section")!.hidden).toBe(false)
+    expect(element.caseSession!.dirty).toBe(true)
+  })
+
+  it("still adds an observation by default, as before", async () => {
+    const element = await open()
+    parts(element).add.click()
+    const root = element.shadowRoot!
+    expect((root.getElementById("kind") as HTMLSelectElement).value).toBe("observation")
+    expect(element.caseSession!.interviews).toHaveLength(0)
+  })
+
+  it("has two tabs, the events and the file, the events on show first and the selected event inside their panel", async () => {
+    const element = await open(undefined, interviewed())
+    const root = element.shadowRoot!
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>("#case-tabs .group-tab")]
+    expect(tabs.map(tab => tab.getAttribute("aria-controls"))).toEqual(["group-events", "group-case-file"])
+    expect(tabs.map(tab => tab.getAttribute("aria-expanded"))).toEqual(["true", "false"])
+    const events = root.getElementById("group-events")!
+    expect(events.hidden).toBe(false)
+    expect(root.getElementById("group-case-file")!.hidden).toBe(true)
+    // What is selected is in the events panel, in a container of its own: the recording, then the interview when that is chosen.
+    expect(events.contains(root.getElementById("recording"))).toBe(true)
+    await choose(element, 1)
+    expect(events.contains(root.getElementById("interview-section"))).toBe(true)
+    expect(root.getElementById("interview-section")!.hidden).toBe(false)
+  })
+
+  it("shows the file instead of the events when its tab is opened, and the event again when the events are", async () => {
+    const element = await open(undefined, interviewed())
+    const root = element.shadowRoot!
+    const [events, file] = [...root.querySelectorAll<HTMLButtonElement>("#case-tabs .group-tab")]
+    file.click()
+    expect(root.getElementById("group-events")!.hidden).toBe(true)
+    expect(root.getElementById("group-case-file")!.hidden).toBe(false)
+    expect(file.getAttribute("aria-expanded")).toBe("true")
+    expect(events.getAttribute("aria-expanded")).toBe("false")
+    // The file group has what loads, saves and shows the case's file.
+    expect(root.getElementById("group-case-file")!.contains(parts(element).exportButton)).toBe(true)
+    expect(root.getElementById("import-file")).not.toBeNull()
+    expect(root.getElementById("import-url")).not.toBeNull()
+    events.click()
+    expect(root.getElementById("group-events")!.hidden).toBe(false)
+    expect(root.getElementById("group-case-file")!.hidden).toBe(true)
+    expect(root.getElementById("recording")!.hidden).toBe(false)
+  })
+
+  it("loads a case from an address in the place of the one open, and says so when that is not a case", async () => {
+    const element = await open(undefined, interviewed())
+    files["https://example.org/other/case.json"] = { id: "Other", events: [{ type: "event", eventType: "sighting", id: "o", title: "Other witness", url: "account.json" }] }
+    files["https://example.org/other/account.json"] = account
+    files["https://example.org/other/plain.json"] = { version: 1, id: "plain", timeline: { keyframes: [] } }
+    const root = element.shadowRoot!
+    const load = async (address: string) => {
+      const url = root.getElementById("import-url") as HTMLInputElement
+      url.value = address
+      ;(root.getElementById("import-url-button") as HTMLButtonElement).click()
+      await wait(60)
+    }
+    await load("https://example.org/other/plain.json")
+    expect(root.getElementById("case-file-note")!.hidden).toBe(false)
+    expect(element.caseSession!.json.id).toBe("X")
+    await load("https://example.org/other/case.json")
+    expect(element.caseSession!.json.id).toBe("Other")
+    expect([...parts(element).select.options].map(option => option.textContent)).toEqual(["Observation of Other witness"])
+  })
+
+  it("asks before it loads a case over changes not exported, and loads nothing if the author declines", async () => {
+    const element = await open(undefined, interviewed())
+    files["https://example.org/other/case.json"] = { id: "Other", events: [{ type: "event", eventType: "sighting", id: "o", title: "Other witness", url: "account.json" }] }
+    files["https://example.org/other/account.json"] = account
+    const root = element.shadowRoot!
+    parts(element).field("case-title").value = "Changed"
+    parts(element).field("case-title").dispatchEvent(new Event("input", { bubbles: true }))
+    ;(root.getElementById("import-url") as HTMLInputElement).value = "https://example.org/other/case.json"
+    ;(root.getElementById("import-url-button") as HTMLButtonElement).click()
+    await wait(60)
+    expect((root.getElementById("dialog") as HTMLDialogElement).open).toBe(true)
+    expect(element.caseSession!.json.id).toBe("X")
+    ;(root.getElementById("cancel") as HTMLButtonElement).click()
+    await wait()
+    expect(element.caseSession!.json.id).toBe("X")
   })
 })

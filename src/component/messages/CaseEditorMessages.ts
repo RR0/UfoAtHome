@@ -1,6 +1,14 @@
 /** What the case editor says — see CaseEditorElement. */
 export interface CaseEditorMessages {
-  recording: string
+  /** What the picker of the case's events is called: its options are the accounts, the readings and the interviews. */
+  event: string
+  /** Before the name of an observer, in the picker: "Observation of Q. B." */
+  accountOf: string
+  /** Before the name of the witness interviewed: "Interview of Q. B." */
+  interviewOf: string
+  /** With `{n}`: an interview whose case gives no title. */
+  untitledInterview: string
+  deleteInterviewQuestion: string
   untitledReading: string
   untitledObservation: string
   deleteRecording: string
@@ -9,7 +17,16 @@ export interface CaseEditorMessages {
   deleteRefused: string
   titleField: string
   authorField: string
+  /** The dialog of the + button: it adds an event of the case, of the type chosen in it. */
   addTitle: string
+  kindField: string
+  kindObservation: string
+  kindInterview: string
+  /** The observer an interview is held with. */
+  witnessField: string
+  interviewerField: string
+  /** The title of an event that is not a reading: the one of a reading is called "Title of the interpretation". */
+  plainTitleField: string
   sourceField: string
   sourceBlank: string
   sourceFile: string
@@ -33,7 +50,16 @@ export interface CaseEditorMessages {
   readingUnresolved: string
   caseTitle: string
   caseTime: string
-  recordingsHeading: string
+  /** The case editor's two groups, as the recording's editor has its own: the events, and the file `case.json` as text. */
+  eventsTab: string
+  fileTab: string
+  importFile: string
+  importUrl: string
+  importButton: string
+  fileNotACase: string
+  /** Said while the text of the file is not a case the editor can read: the case keeps the last text it understood. */
+  fileInvalid: string
+  fileLoading: string
   add: string
   addHint: string
   interpretationOf: string

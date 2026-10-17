@@ -213,3 +213,50 @@ describe("A case being edited", () => {
     })
   })
 })
+
+describe("A case whose file was edited as text", () => {
+  it("takes the events of the text, the recordings it still lists keeping what was loaded of them", () => {
+    const session = new CaseSession(caseJson(), url)
+    session.keep(session.tracks[0], account, true)
+    const kept = session.tracks[0]
+    const next: CaseJson = {
+      id: "McMinnville1950",
+      events: [
+        { type: "event", eventType: "sighting", title: "Paul Trent, renamed", url: "observer-mcminnville.json" },
+        { type: "event", eventType: "sighting", title: "A new witness", url: "observer-new.json" }
+      ]
+    }
+    session.replaceJson(next)
+    expect(session.json).toBe(next)
+    // The first recording is the same track, with its recording and the event of the new text; the reading is gone; a witness is added, not loaded yet.
+    expect(session.tracks[0]).toBe(kept)
+    expect(kept.recording).toBe(account)
+    expect(kept.event).toBe(next.events![0])
+    expect(session.tracks.map(track => track.url)).toEqual([
+      "https://example.org/dossier/McMinnville/observer-mcminnville.json", "https://example.org/dossier/McMinnville/observer-new.json"])
+    expect(session.tracks[1].recording).toBeUndefined()
+    expect(session.dirty).toBe(true)
+  })
+
+  it("keeps the interviews of the text, and reads which account each was held with", () => {
+    const session = new CaseSession({ id: "X", events: [{ type: "event", eventType: "sighting", id: "w", url: "a.json" }] }, url)
+    session.replaceJson({ id: "X", events: [
+      { type: "event", eventType: "sighting", id: "w", url: "a.json" },
+      { type: "event", eventType: "interview", id: "i", interviewOf: "w", title: "Interview" }
+    ] })
+    expect(session.interviews).toHaveLength(1)
+    expect(session.intervieweeOf(session.interviews[0])).toBe(session.tracks[0])
+  })
+
+  it("adds an interview held with an account, which gives that account the id it is named by", () => {
+    const session = new CaseSession({ id: "X", events: [{ type: "event", eventType: "sighting", url: "a.json", title: "Trent" }] }, url)
+    const interview = session.addInterview(session.tracks[0], "2026-10-13", "Phone", [{ people: "BeauJerome" }])
+    expect(session.tracks[0].event.id).toBeTruthy()
+    expect(interview).toMatchObject({ eventType: "interview", interviewOf: session.tracks[0].event.id, time: "2026-10-13", title: "Phone", by: [{ people: "BeauJerome" }] })
+    expect(session.interviews).toEqual([interview])
+    expect(session.addInterview(session.tracks[0], "2026-10-14").id).not.toBe(interview.id)
+    expect(session.deleteInterview(interview)).toBe(true)
+    expect(session.interviews).toHaveLength(1)
+  })
+})
+

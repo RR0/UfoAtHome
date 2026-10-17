@@ -1,0 +1,39 @@
+{
+ "id": "SaintLo2026",
+ "title": "Saint-Lô",
+ "summary": {
+  "en": "11 August 2026, about 2:30 am. In a park in Saint-Lô, an observer first sees a small light, then a translucent white arch with a toothed rear crossing the sky over the zenith, turning, rolling and spiralling down behind the trees in about five seconds. Replay his account; the case also keeps the interview that fixed its figures.",
+  "fr": "11 août 2026, vers 2 h 30. Dans un parc de Saint-Lô, un observateur voit d'abord une petite lumière, puis une arche blanche translucide à l'arrière denté traverser le ciel au-dessus du zénith, virer, faire un tonneau et descendre en spirale derrière les arbres en cinq secondes environ. Rejouez son compte rendu ; le dossier garde aussi l'entretien qui en a précisé les valeurs."
+ },
+ "time": "2026-08-11 02:30",
+ "events": [
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "qb",
+   "time": "2026-08-11 02:30",
+   "title": "Q. B.",
+   "url": "observer-saint-lo.json"
+  },
+  {
+   "type": "event",
+   "eventType": "interview",
+   "id": "interview-qb-1",
+   "interviewOf": "qb",
+   "time": "2026-10-13 21:27",
+   "by": [
+    {
+     "people": "BeauJerome"
+    }
+   ],
+   "title": {
+    "fr": "Entretien en visioconférence avec Q. B.",
+    "en": "Video interview with Q. B."
+   },
+   "summary": {
+    "fr": "Entretien d'environ 1 h 30, mené après deux versions de la démo pour préciser son compte rendu. Il regardait vers l'est, un peu sud-est, à l'horizon, quand son œil a été attiré par une lumière venant du nord-nord-est (environ 25° à l'est du nord, à vérifier à la boussole), aperçue vers 20 à 30° de hauteur. En environ 500 ms elle était dans le cercle zénithal, la zone du ciel autour du zénith. Un premier virage à gauche d'environ une seconde, un virage à droite d'environ 25°, un dernier de 5 à 10°, puis un tonneau de près de 340° dont les 20° manquants sont cachés par les arbres : 4 s à partir du zénith, 5 s au plus en tout. Il donne plusieurs estimations (largeur, distance, durée des virages) en fourchettes, et en corrige certaines au fil de l'entretien. Son ami, tourné vers l'ouest puis vers l'est, n'a rien vu.",
+    "en": "An interview of about 1 h 30, held after two versions of the demo to pin down his account. He was looking east, a little south-east, at the horizon when his eye was caught by a light coming from the north-north-east (about 25 degrees east of north, to be checked with a compass), first seen at 20 to 30 degrees up. Within about 500 ms it was in the zenith circle, the part of the sky around the zenith. A first turn to the left of about a second, a turn to the right of about 25 degrees, a last one of 5 to 10, then a roll of nearly 340 degrees whose missing 20 are hidden by the trees: 4 s from the zenith, 5 s at most in all. He gives several estimates (width, distance, length of the turns) as ranges, and corrects some of them during the interview. His friend, facing west and then east, saw nothing."
+   }
+  }
+ ]
+}
