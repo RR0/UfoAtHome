@@ -113,6 +113,7 @@ export class LimitingMagnitude {
     instrument: Instrument,
     settings: { fNumber?: number; focalLengthMm?: number; exposureSeconds?: number } = {}
   ): { apertureMm: number; exposureSeconds: number; resolutionArcsec: number } {
+    if (instrument.visualAid) return LimitingMagnitude.visualAidGrasp(instrument, settings.focalLengthMm)
     const exposureSeconds = settings.exposureSeconds ?? instrument.exposureSeconds
     const fNumber = settings.fNumber ?? instrument.fNumber
     if (exposureSeconds === undefined || fNumber === undefined || !(exposureSeconds > 0) || !(fNumber > 0)) {
@@ -126,6 +127,35 @@ export class LimitingMagnitude {
       apertureMm,
       exposureSeconds: Math.min(exposureSeconds, LimitingMagnitude.trailLimitedSeconds(resolutionArcsec)),
       resolutionArcsec
+    }
+  }
+
+  /**
+   * The grasp of binoculars or a telescope: the eye's own exposure, behind a bigger opening and a
+   * sharper view.
+   *
+   * Only the part of the opening the pupil can use counts: past a 7 mm exit pupil (objective over
+   * magnification) the extra glass is wasted on the eye, which is why 7x50 binoculars are not worth
+   * their weight for a dilated pupil that has aged. And magnification divides the eye's acuity, so
+   * the star's image covers that much less retina.
+   */
+  static visualAidGrasp(
+    instrument: Instrument,
+    focalLengthMm?: number
+  ): { apertureMm: number; exposureSeconds: number; resolutionArcsec: number } {
+    const aid = instrument.visualAid!
+    const eye = LimitingMagnitude.EYE
+    const focal = focalLengthMm ?? instrument.frame?.focalLengthMm
+    const magnification =
+      aid.magnification ?? (focal !== undefined && aid.eyepieceFocalMm ? focal / aid.eyepieceFocalMm : 1)
+    const usable = Math.min(aid.apertureMm, eye.apertureMm * magnification)
+    return {
+      apertureMm: Math.max(usable, eye.apertureMm),
+      exposureSeconds: eye.exposureSeconds,
+      // Magnification only deepens the view until the star is spread over as little retina as the
+      // aperture can resolve (an exit pupil of 7 mm); past that it darkens the sky no further, which
+      // is what keeps this at the textbook 5·log10(D/7) however far a telescope is pushed.
+      resolutionArcsec: eye.resolutionArcsec / Math.max(1, Math.min(magnification, aid.apertureMm / eye.apertureMm))
     }
   }
 

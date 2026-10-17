@@ -1,3 +1,6 @@
+import { DigitalSlrs } from "./DigitalSlrs.js"
+import { VisualAids } from "./VisualAids.js"
+
 /**
  * What the observation was made THROUGH — an eye, a camera, a camcorder — and, for now, the one
  * property of it that changes the geometry of every recorded shape: how an angle becomes a pixel.
@@ -94,6 +97,23 @@ export interface RecordingMedium {
   /** A device that sets its own exposure from the scene, as a phone does: its speed then follows
    * the light, like an eye's, and only its curve is its own. */
   autoExposure?: boolean
+}
+
+/**
+ * What binoculars and telescopes add to an eye: light gathered by a bigger opening, and a field
+ * narrowed by the magnification. Nothing else changes: there is still no shutter, no film.
+ */
+export interface VisualAid {
+  /** Diameter of the objective, millimetres. */
+  apertureMm: number
+  /** Fixed magnification (binoculars). Absent on a telescope, whose magnification is its focal
+   * length over the eyepiece's. */
+  magnification?: number
+  /** The sky binoculars take in, degrees across. Absent on a telescope, whose field comes from its
+   * frame (see VisualAids). */
+  trueFieldDeg?: number
+  /** The eyepiece a telescope's frame was built around, millimetres. */
+  eyepieceFocalMm?: number
 }
 
 export interface Instrument {
@@ -205,6 +225,8 @@ export interface Instrument {
    * optical stabilisation would be stated here, and is not claimed by any entry below.
    */
   stabilization?: number
+  /** Binoculars or a telescope: see VisualAid. Absent on an eye and on every camera. */
+  visualAid?: VisualAid
   /** What it records on, and so how the picture answers light — see RecordingMedium. Absent for an
    * eye, and for a lens stated without its camera. */
   medium?: RecordingMedium
@@ -399,7 +421,11 @@ export const INSTRUMENTS: Instrument[] = [
     // The same silicon held the other way up: the same 1.4 µm pixels.
     detailUm: 1.4,
     medium: { kind: "sensor", iso: 100, autoExposure: true }
-  }
+  },
+  // Sensors from Stellarium's Oculars catalogue (see DigitalSlrs): the digital bodies a recent
+  // photograph is most likely to have been made with.
+  ...DigitalSlrs.instruments(),
+  ...VisualAids.instruments()
 ]
 
 export class Instruments {
@@ -443,7 +469,7 @@ export class Instruments {
    */
   static fieldOfViewDeg(instrument: Instrument): number {
     const frame = instrument.frame
-    if (!frame) return Instruments.UNAIDED_FIELD_DEG
+    if (!frame) return instrument.visualAid?.trueFieldDeg ?? Instruments.UNAIDED_FIELD_DEG
     return (2 * Math.atan(frame.heightMm / (2 * frame.focalLengthMm)) * 180) / Math.PI
   }
 

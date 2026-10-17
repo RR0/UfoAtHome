@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { INSTRUMENTS, Instruments } from "../../src/engine/instrument/Instrument.js"
+import { LimitingMagnitude } from "../../src/engine/instrument/LimitingMagnitude.js"
 import type { Instrument } from "../../src/engine/instrument/Instrument.js"
 
 describe("Instruments", () => {
@@ -81,7 +82,8 @@ describe("Instruments", () => {
       expect(ids(2020)).toContain("phone-portrait")
       expect(ids(2020)).not.toContain("instamatic-126")
       // Before any of them: the eye, and a camera stated so generically that no date bounds it.
-      expect(ids(1900)).toEqual(["eye", "rectilinear-lens"])
+      // (plus the generic telescopes, which existed long before).
+      expect(ids(1900)).toEqual(["eye", "rectilinear-lens", "telescope-generic-60-700", "telescope-generic-60-1000"])
       // An undated sighting is not an argument for hiding anything.
       expect(ids(undefined).length).toBe(INSTRUMENTS.length)
     })
@@ -91,5 +93,39 @@ describe("Instruments", () => {
       // would be this project editing account.
       expect(Instruments.byId("phone-portrait").id).toBe("phone-portrait")
     })
+  })
+})
+
+describe("digital SLR catalogue (Stellarium sensors)", () => {
+  it("gives a full-frame body the film SLR's field and an APS-C body a narrower one", () => {
+    const fullFrame = Instruments.byId("eos-5d-iii")
+    const apsc = Instruments.byId("eos-70d")
+    expect(fullFrame.id).toBe("eos-5d-iii")
+    expect(Instruments.fieldOfViewDeg(fullFrame)).toBeCloseTo(Instruments.fieldOfViewDeg(Instruments.byId("slr-35mm-50")), 6)
+    expect(Instruments.fieldOfViewDeg(apsc)).toBeLessThan(Instruments.fieldOfViewDeg(fullFrame))
+  })
+
+  it("keeps the pixel pitch as the detail the receptor keeps, and dates the body", () => {
+    const body = Instruments.byId("nikon-d7000")
+    expect(body.detailUm).toBe(4.78)
+    expect(Instruments.availableAt(2005).map(i => i.id)).not.toContain("nikon-d7000")
+    expect(Instruments.availableAt(2012).map(i => i.id)).toContain("nikon-d7000")
+  })
+})
+
+describe("binoculars and telescopes (Stellarium catalogue)", () => {
+  it("takes the true field of binoculars as the field, and a telescope's from focal length and field stop", () => {
+    expect(Instruments.fieldOfViewDeg(Instruments.byId("binoculars-nikon-10x42-edg"))).toBe(6.5)
+    const c8 = Instruments.fieldOfViewDeg(Instruments.byId("telescope-celestron-c8"))
+    // 26 mm Plossl of 52 degrees behind 2032 mm: about 52 · 26 / 2032 = 0.67 degrees.
+    expect(c8).toBeGreaterThan(0.6)
+    expect(c8).toBeLessThan(0.75)
+  })
+
+  it("reaches the textbook depth: about 4 magnitudes for 10x50 and 7.3 for a 203 mm aperture", () => {
+    const binoculars = LimitingMagnitude.gainOverEye(Instruments.byId("binoculars-jenoptem-10x50"))
+    expect(binoculars).toBeGreaterThan(4)
+    expect(binoculars).toBeLessThan(4.5)
+    expect(LimitingMagnitude.gainOverEye(Instruments.byId("telescope-celestron-c8"))).toBeCloseTo(7.3, 0)
   })
 })

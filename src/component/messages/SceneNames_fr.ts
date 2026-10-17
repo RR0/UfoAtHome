@@ -1,3 +1,5 @@
+import { VisualAids } from "../../engine/instrument/VisualAids.js"
+import { DigitalSlrs } from "../../engine/instrument/DigitalSlrs.js"
 import type { SceneNames } from "./SceneNames.js"
 
 /**
@@ -121,7 +123,9 @@ export const sceneNames_fr: SceneNames = {
     "slr-35mm-50": "Reflex 35 mm, objectif 50 mm",
     "slr-35mm-zoom": "Reflex 35 mm, zoom 70-210 mm",
     "phone-landscape": "Téléphone, tenu couché",
-    "phone-portrait": "Téléphone, tenu debout"
+    "phone-portrait": "Téléphone, tenu debout",
+    ...DigitalSlrs.names(),
+    ...VisualAids.names()
   },
   decorKinds: {
     building: "Bâtiment",
