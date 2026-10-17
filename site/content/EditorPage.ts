@@ -239,11 +239,15 @@ if (docs) {
           deleted individually.</p>
       </li>
       <li>
-        <h3>Record the movement</h3>
-        <p>Press <strong>Record</strong> and move the pointer over the canvas along the path the
-          object took, then <strong>Stop</strong>. Playback replays it over the observation's own
-          <em>real</em> duration — a five-minute sighting takes five minutes, not the second the
-          drag took.</p>
+        <h3>Give it a movement</h3>
+        <p>Move the playhead to an instant of the observation and put the shape where it was
+          then: drag it, size it with its handles, or edit its fields. Each of those writes a
+          <strong>keyframe</strong> at that instant. Do it again at another instant and playback blends
+          from one keyframe to the next: two or three are often enough for a straight line or a slow
+          drift. For a path that no pair of keyframes would draw, press <strong>Record</strong> instead
+          and move the pointer over the canvas along it, then <strong>Stop</strong>: playback replays
+          the gesture over the observation's <em>real</em> duration, so a five-minute sighting takes
+          five minutes, not the second the drag took.</p>
       </li>
     </ol>
     <p class="small">Under the playback bar, a tick marks each keyframe of what the open group edits
@@ -690,11 +694,16 @@ if (docs) {
           suppriment un par un.</p>
       </li>
       <li>
-        <h3>Enregistrer le mouvement</h3>
-        <p>Appuyez sur <strong>Enregistrer</strong> et déplacez le curseur sur le canevas le long du
-          trajet suivi par l'objet, puis <strong>Arrêter</strong>. La lecture le rejoue sur la durée
-          <em>réelle</em> de l'observation : une observation de cinq minutes prend cinq minutes, pas
-          la seconde qu'a duré le geste.</p>
+        <h3>Lui donner un mouvement</h3>
+        <p>Placez la tête de lecture à un instant de l'observation et mettez la forme là où elle
+          était alors : glissez-la, dimensionnez-la avec ses poignées ou modifiez ses champs. Chacun de
+          ces gestes écrit un <strong>keyframe</strong> à cet instant. Recommencez à un autre instant et
+          la lecture passe de l'un à l'autre en interpolant : deux ou trois suffisent souvent pour une
+          ligne droite ou une dérive lente. Pour un trajet que deux keyframes ne dessineraient pas,
+          appuyez plutôt sur <strong>Enregistrer</strong> et déplacez le curseur sur le canevas le long
+          de ce trajet, puis <strong>Arrêter</strong> : la lecture rejoue le geste sur la durée
+          <em>réelle</em> de l'observation, donc cinq minutes de lecture pour une observation de cinq
+          minutes, pas la seconde qu'a duré le geste.</p>
       </li>
     </ol>
     <p class="small">Sous la barre de lecture, un trait marque chaque image clé de ce que le groupe
@@ -1174,10 +1183,15 @@ if (docs) {
           pueden añadirse, moverse y eliminarse uno a uno.</p>
       </li>
       <li>
-        <h3>Grabar el movimiento</h3>
-        <p>Pulsa <strong>Grabar</strong> y mueve el puntero sobre el lienzo siguiendo la trayectoria
-          del objeto, y luego <strong>Detener</strong>. La reproducción lo repite a lo largo de la
-          duración <em>real</em> de la observación: un avistamiento de cinco minutos dura cinco minutos,
+        <h3>Darle movimiento</h3>
+        <p>Lleva el cursor de reproducción a un instante de la observación y coloca la forma donde
+          estaba entonces: arrástrala, dimensiónala con sus tiradores o edita sus campos. Cada uno de
+          esos gestos escribe un <strong>keyframe</strong> en ese instante. Repítelo en otro instante y la
+          reproducción pasa de uno a otro interpolando: dos o tres bastan a menudo para una línea recta
+          o una deriva lenta. Para una trayectoria que dos keyframes no trazarían, pulsa mejor
+          <strong>Grabar</strong> y mueve el puntero sobre el lienzo siguiéndola, y luego
+          <strong>Detener</strong>: la reproducción repite el gesto a lo largo de la duración
+          <em>real</em> de la observación, así que un avistamiento de cinco minutos dura cinco minutos,
           no el segundo que duró el gesto.</p>
       </li>
     </ol>
@@ -1644,11 +1658,16 @@ if (docs) {
           un poligono si possono aggiungere, spostare ed eliminare uno per uno.</p>
       </li>
       <li>
-        <h3>Registrare il movimento</h3>
-        <p>Premi <strong>Registra</strong> e muovi il puntatore sulla tela lungo il percorso
-          seguito dall'oggetto, poi <strong>Ferma</strong>. La riproduzione lo ripete sulla durata
-          <em>reale</em> dell'osservazione: un avvistamento di cinque minuti dura cinque minuti, non il
-          secondo che è durato il trascinamento.</p>
+        <h3>Dargli un movimento</h3>
+        <p>Porta la testina di riproduzione a un istante dell'osservazione e metti la forma dove
+          si trovava allora: trascinala, dimensionala con le sue maniglie o modifica i suoi campi.
+          Ciascuno di questi gesti scrive un <strong>keyframe</strong> in quell'istante. Ripetilo in un
+          altro istante e la riproduzione passa dall'uno all'altro interpolando: due o tre bastano spesso
+          per una linea retta o una deriva lenta. Per un percorso che due keyframe non traccerebbero,
+          premi invece <strong>Registra</strong> e muovi il puntatore sulla tela lungo di esso, poi
+          <strong>Ferma</strong>: la riproduzione ripete il gesto sulla durata <em>reale</em>
+          dell'osservazione, quindi un avvistamento di cinque minuti dura cinque minuti, non il secondo
+          che è durato il trascinamento.</p>
       </li>
     </ol>
     <p class="small">Sotto la barra di riproduzione, una tacca segna ogni fotogramma chiave di ciò che

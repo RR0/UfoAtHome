@@ -54,12 +54,12 @@ export class Shots {
       }
     },
     {
-      page: "edit", after: "record-the-movement", name: "edit-record",
+      page: "edit", after: "give-it-a-movement", name: "edit-keyframes",
       caption: {
-        en: "The record button and its sampling rate, at the foot of the shape editor.",
-        fr: "Le bouton d'enregistrement et sa cadence d'échantillonnage, au pied de l'éditeur de forme.",
-        es: "El botón de grabación y su frecuencia de muestreo, al pie del editor de formas.",
-        it: "Il pulsante di registrazione e la sua frequenza di campionamento, in fondo all'editor di forme."
+        en: "The playback bar: a tick for each keyframe of what is being edited, an amber one for each named moment.",
+        fr: "La barre de lecture : un trait par keyframe de ce qu'on édite, un trait ambre par moment nommé.",
+        es: "La barra de reproducción: una marca por cada keyframe de lo que se edita, una ámbar por cada momento con nombre.",
+        it: "La barra di riproduzione: un segno per ogni keyframe di ciò che si modifica, uno ambra per ogni momento con nome."
       }
     },
     {

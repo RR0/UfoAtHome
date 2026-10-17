@@ -104,18 +104,18 @@ export const SHOTS = [
     }
   },
   {
-    // "Record the movement": the record button and its sampling rate, at the foot of the same editor.
-    name: "edit-record",
+    // "Give it a movement": the playback bar, a tick for each keyframe of what the open group edits.
+    name: "edit-keyframes",
     page: EDIT,
     query: CASE,
     async take({ page, highlight, boxOf }) {
-      const panel = await shapeEditor(page)
-      const record = panel.locator("button").last()
-      const rate = panel.locator("input[type=number], input").last()
-      await highlight(page, record)
-      const across = await boxOf([panel], 0)
-      const row = await boxOf([record, rate], 12)
-      return { clip: { x: across.x - 6, y: row.y, width: across.width + 12, height: row.height } }
+      await page.locator(".group-tab").nth(GROUPS.indexOf("phenomenon")).click()
+      await page.waitForTimeout(1500)
+      const bar = page.locator("input[type=range]:visible").last()
+      await highlight(page, bar)
+      const row = await boxOf([bar], 14)
+      const scene = await boxOf([page.locator("rr0-sighting-editor canvas:visible, canvas:visible").first()], 0)
+      return { clip: { x: scene.x - 6, y: row.y, width: scene.width + 12, height: row.height } }
     }
   },
   {
