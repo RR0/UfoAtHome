@@ -5026,7 +5026,7 @@ export class SightingEditorElement extends HTMLElement {
     this.observerFirstNamesInput.value = sighting.observer?.firstNames?.join(", ") ?? ""
     this.sightingIdInput.value = sighting.id ?? ""
     this.observerAgeInput.value = sighting.account?.observerAgeYears?.toString() ?? ""
-    this.birthDate.setPrecise(EdtfDateField.opensPrecise(sighting.account?.observerBirth))
+    this.birthDate.setPrecise(EdtfDateField.opensPreciseDate(sighting.account?.observerBirth))
     this.birth = sighting.account?.observerBirth
     this.birthDate.time = this.birth
     this.observerOccupationInput.value = this.said.read(sighting.account?.observerOccupation) ?? ""

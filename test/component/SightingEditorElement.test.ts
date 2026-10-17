@@ -541,6 +541,19 @@ describe("SightingEditorElement observer/time fields", () => {
     expect(age.value).toBe("48")
   })
 
+  it("takes a birth date from a date-only picker, with no hour to type, and gives the age", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    setInput(shadow, "obs-time", "2024-09-01T12:00")
+    const picker = shadow.getElementById("observer-birth-native") as HTMLInputElement
+    expect(picker.type).toBe("date")
+    picker.value = "1972-08-12"
+    picker.dispatchEvent(new Event("change"))
+
+    expect((shadow.getElementById("observerAge") as HTMLInputElement).value).toBe("52")
+    expect(element.sightingData.account?.observerBirth?.raw).toBe("1972-08-12")
+  })
+
   it("writes the observation-start EDTF text field into event.time", () => {
     const element = mount()
     const shadow = element.shadowRoot!

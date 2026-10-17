@@ -116,8 +116,8 @@ export class EdtfDateField {
   set(time: SightingTime | undefined): void {
     const { text, picker } = this.parts
     text.value = time ? formatEdtfTime(time) : ""
-    picker.step = EdtfDateField.stepFor(time)
-    picker.value = EdtfDateField.pickerValueOf(time)
+    if (picker.type !== "date") picker.step = EdtfDateField.stepFor(time)
+    picker.value = picker.type === "date" ? EdtfDateField.pickerDateOf(time) : EdtfDateField.pickerValueOf(time)
     text.setCustomValidity("")
     text.classList.remove("invalid")
     this.showDeduction()
@@ -129,6 +129,24 @@ export class EdtfDateField {
    */
   static opensPrecise(...times: (SightingTime | undefined)[]): boolean {
     return times.every(time => time === undefined || (EdtfDateField.isPickable(time) && EdtfDateField.qualifierOf(formatEdtfTime(time)) === ""))
+  }
+
+  /** The way in to open on for a field that holds a DAY and no time of day (a birth date): precise when the day is
+   * complete and carries no doubt, EDTF otherwise. */
+  static opensPreciseDate(...times: (SightingTime | undefined)[]): boolean {
+    return times.every(time => time === undefined || (EdtfDateField.isFullDate(time) && EdtfDateField.qualifierOf(formatEdtfTime(time)) === ""))
+  }
+
+  /** Whether a stated time names a whole day (year, month and day), whatever it says of the hour. */
+  static isFullDate(time: SightingTime | undefined): boolean {
+    return !!time && time.year !== undefined && time.month !== undefined && time.day !== undefined
+  }
+
+  /** The value a date picker (no time of day) takes for a stated time — "" for anything it cannot hold. */
+  static pickerDateOf(time: SightingTime | undefined): string {
+    if (!EdtfDateField.isFullDate(time)) return ""
+    const pad = (n: number, width = 2): string => String(n).padStart(width, "0")
+    return `${pad(time!.year!, 4)}-${pad(time!.month!)}-${pad(time!.day!)}`
   }
 
   /** Whether a stated time is a full instant to the minute, which the native picker can hold (seconds too, once stepped to them). */

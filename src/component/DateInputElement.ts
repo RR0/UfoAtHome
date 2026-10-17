@@ -22,7 +22,7 @@ rr0-date-input [hidden] { display: none !important; }
  * A date as the project says it: precise (a picker for a full instant) or in EDTF (a text, for a bare year, a
  * month, a time with no date, or any date with a doubt) — see EdtfDateField, which does the work this element stands on.
  *
- * `<rr0-date-input name="obs-time">` makes, in its own light DOM so that the page's styles reach them, a
+ * `<rr0-date-input name="obs-time">` (or `date-only`, for a day with no time of day: a birth) makes, in its own light DOM so that the page's styles reach them, a
  * datetime-local (`obs-time-native`), a text (`obs-time`) and a button that says which of the two the date is said
  * in («precise» or «EDTF») and swaps them. The text's tooltip says what is deduced from it ("→ May 1950 — uncertain"); in
  * it, a (?) opens the syntax the text takes. The ids derive from `name`,
@@ -50,8 +50,10 @@ export class DateInputElement extends HTMLElement {
     const field = doc.createElement("span")
     field.className = "edtf-field"
     const picker = doc.createElement("input")
-    picker.type = "datetime-local"
-    picker.step = "60"
+    // A date of birth has no time of day: a datetime-local would stay half entered, and so say nothing, until
+    // an hour nobody has is typed (see EdtfDateField.writeFromPicker).
+    picker.type = this.hasAttribute("date-only") ? "date" : "datetime-local"
+    if (picker.type !== "date") picker.step = "60"
     const text = doc.createElement("input")
     text.type = "text"
     text.hidden = true
