@@ -187,8 +187,17 @@ export class DepthOfFieldPass {
   resize(width: number, height: number): void {
     this.width = Math.max(1, width)
     this.height = Math.max(1, height)
-    this.target.setSize(this.width, this.height)
-    this.overlayTarget.setSize(this.width, this.height)
+    for (const target of [this.target, this.overlayTarget]) {
+      target.setSize(this.width, this.height)
+      // three resizes the colour textures and not the depth texture a target was given: left at its first
+      // size, the framebuffer is incomplete ("attachments are not all the same size") and the frame is black.
+      const depth = target.depthTexture
+      if (depth && (depth.image.width !== this.width || depth.image.height !== this.height)) {
+        depth.image.width = this.width
+        depth.image.height = this.height
+        depth.dispose()
+      }
+    }
     this.material.uniforms.uResolution.value.set(this.width, this.height)
   }
 
