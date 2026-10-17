@@ -159,8 +159,6 @@ void load()`
     const words = DemosPage.WORDS[language]
     const count = this.catalogue.groups.reduce((total, group) => total + group.demos.length, 0)
     const cards = this.catalogue.sections.map(section => {
-      const demos = this.catalogue.groups.filter(group => group.section === section.id)
-        .reduce((total, group) => total + group.demos.length, 0)
       return `      <a class="use" href="/demos/${section.id}/">
         <h3>${section.title[language]}</h3>
         <p>${section.blurb[language]}</p>
