@@ -61,6 +61,15 @@ export interface Weather {
    */
   iceCrystalAlignment?: number
   /**
+   * The share of a cirrus deck's crystals that are the rare kinds, 0 to 1: columns capped with
+   * pyramids, which draw the odd-radius rings (9, 20, 35 degrees), and plates free to turn about a
+   * level axis, which draw Lowitz's arcs sloping from the sundogs. Declared, never deduced, for the
+   * same reason as the alignment: no record counts the crystals. Undefined means nobody said, and
+   * a few per cent — the ordinary cirrus — stands in; raise it to show those forms, which on an
+   * ordinary sky are faint and are the displays almost nobody has seen.
+   */
+  rareIceCrystals?: number
+  /**
    * Relative humidity near the ground, 0 to 1. What decides how milky the clear sky is: haze
    * particles swell with water as the air nears saturation (see HumidHaze). Undefined means nobody
    * stated it, and a typical haze stands in.
@@ -106,6 +115,9 @@ export const DEFAULT_CLOUD_BASE_M = 1000
  * sundogs beside its ring but not the once-a-decade display. See Weather.iceCrystalAlignment for why
  * this is a stated assumption rather than a reading. */
 export const DEFAULT_ICE_CRYSTAL_ALIGNMENT = 0.65
+
+/** What stands in for Weather.rareIceCrystals when nobody said: the share of the ordinary mix. */
+export const DEFAULT_RARE_ICE_CRYSTALS = 0.05
 
 export const DEFAULT_WEATHER: Weather = {
   cloudCover: 0,

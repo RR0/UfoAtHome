@@ -7,7 +7,7 @@ export interface TraceJob {
 }
 
 /** What a job asks, without the id the pool gives it. */
-type JobRequest = { type: "halo"; altitudeDeg: number; alignment: number; rays: number } | { type: "glow" }
+type JobRequest = { type: "halo"; altitudeDeg: number; alignment: number; rare: number; rays: number } | { type: "glow" }
 
 interface PendingJob {
   id: number
@@ -71,9 +71,9 @@ export class OffThreadTracer {
   }
 
   /** Traces a halo display. `failed` is called if the worker dies, so the caller can do it itself. */
-  trace(altitudeDeg: number, alignment: number, rays: number,
+  trace(altitudeDeg: number, alignment: number, rare: number, rays: number,
         done: (texels: Uint16Array) => void, failed: () => void): TraceJob {
-    return this.submit({ type: "halo", altitudeDeg, alignment, rays },
+    return this.submit({ type: "halo", altitudeDeg, alignment, rare, rays },
       result => done((result as { texels: Uint16Array }).texels), failed)
   }
 

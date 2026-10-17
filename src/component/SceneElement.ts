@@ -44,6 +44,7 @@ import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { loadSceneNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { SceneNaming } from "./messages/SceneNames.js"
+import { OPTICS_TOOLTIPS_EN } from "./messages/OpticsTooltips.js"
 import { SceneCredits } from "./SceneCredits.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import type { InvestigatorTrace } from "../engine/model/Trace.js"
@@ -282,7 +283,7 @@ export interface BodyReading {
  */
 /** What is under a point of the picture: what kind of thing, which one, and what it is called. */
 export interface ScenePick {
-  kind: "sky" | "body" | "decor" | "traffic" | "satellite" | "star"
+  kind: "sky" | "body" | "decor" | "traffic" | "satellite" | "optics" | "star"
   /** The sky body's key, the interpretation body's id or the decor object's id, when it has one. */
   id?: string
   name: string
@@ -521,6 +522,14 @@ export class SceneElement extends HTMLElement {
           .replace("{height}", Math.round(satellite.heightKm).toLocaleString())
       }
     }
+    // A ring, an arc or a sundog of the ice display: where the traced display has light, named for what made it.
+    const optics = this.sceneRenderer.pickOpticsAt(ndcX, ndcY)
+    if (optics) {
+      // The name alone by default, and what it is and what makes it with Alt held — the same two depths a decor object's tooltip
+      // has. Each text is "name — explanation", so the name is what comes before the dash.
+      const full = (names?.opticsTooltips ?? OPTICS_TOOLTIPS_EN)[optics.id].replace("{angle}", String(Math.round(optics.angleDeg ?? 0)))
+      return { kind: "optics", id: optics.id, name: full.split(" — ")[0], detail: () => full }
+    }
     const star = this.sceneRenderer.pickStarAt(ndcX, ndcY)
     if (star) {
       // toLocaleString with the page's own locale, like every other number this project prints —
@@ -654,7 +663,11 @@ export class SceneElement extends HTMLElement {
     // Positioned relative to #stage (the tooltip's own offsetParent), not the page — clientX/Y are
     // page-relative, so subtracting the stage's own origin converts them to that local frame.
     const stageRect = this.stageElement.getBoundingClientRect()
-    this.hoverTooltip.style.left = `${event.clientX - stageRect.left + 12}px`
+    // Pushed back inside the picture when it would run off its right edge, which a sentence-long
+    // tooltip near the right does; the pointer stays on the spot it names, the text just sits left.
+    const wanted = event.clientX - stageRect.left + 12
+    const overflow = wanted + this.hoverTooltip.offsetWidth - stageRect.width
+    this.hoverTooltip.style.left = `${overflow > 0 ? Math.max(0, wanted - overflow - 4) : wanted}px`
     this.hoverTooltip.style.top = `${event.clientY - stageRect.top + 12}px`
   }
 

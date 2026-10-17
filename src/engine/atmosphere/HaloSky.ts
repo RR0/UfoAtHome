@@ -1,3 +1,4 @@
+import { DEFAULT_RARE_ICE_CRYSTALS } from "../model/Weather.js"
 import { IceCrystal, IceRefraction, type EmergentRay } from "./IceCrystal.js"
 import { VisibleSpectrum } from "./Spectrum.js"
 
@@ -46,14 +47,18 @@ export interface HaloSkyMap {
  * that also keep a pair of faces level — Parry's orientation, named for the 1820 arctic voyage
  * whose record first showed the arcs — give the rarest of them.
  */
-interface CrystalPopulation {
-  readonly orientation: "tumbling" | "plate" | "column" | "parry"
+export interface CrystalPopulation {
+  /** "pyramidal" is a column with pyramid ends, tumbling; "lowitz" is a plate or column free to
+   * rotate about a near-horizontal axis through two opposite prism edges. */
+  readonly orientation: "tumbling" | "plate" | "column" | "parry" | "pyramidal" | "lowitz"
   /** Across the main axis and along it, microns. Real cirrus dimensions: what decides how much
    * light each habit gathers, and so which forms win. */
   readonly widthMicrons: number
   readonly lengthMicrons: number
   /** What fraction of the crystals fall this way. */
   readonly share: number
+  /** How tall the pyramid ends stand, from 0 (flat ends) to 1 (a full pyramid to its point). */
+  readonly capFraction?: number
 }
 
 export class HaloSky {
@@ -75,12 +80,45 @@ export class HaloSky {
    * the form almost nobody has. Everything else in this family is derived; this is the one place a
    * reader is being told "assume the sky was ordinary".
    */
-  private static readonly POPULATIONS: readonly CrystalPopulation[] = [
-    { orientation: "tumbling", widthMicrons: 50, lengthMicrons: 50, share: 0.52 },
+  static readonly DEFAULT_POPULATIONS: readonly CrystalPopulation[] = [
+    { orientation: "tumbling", widthMicrons: 50, lengthMicrons: 50, share: 0.48 },
     { orientation: "plate", widthMicrons: 100, lengthMicrons: 15, share: 0.27 },
-    { orientation: "column", widthMicrons: 40, lengthMicrons: 120, share: 0.19 },
-    { orientation: "parry", widthMicrons: 40, lengthMicrons: 120, share: 0.02 }
+    { orientation: "column", widthMicrons: 40, lengthMicrons: 120, share: 0.18 },
+    { orientation: "parry", widthMicrons: 40, lengthMicrons: 120, share: 0.02 },
+    // The rarities: pyramid-ended columns are what the odd-radius rings (9, 18, 20, 23, 24 and 35
+    // degrees) need, and Lowitz's orientation is the one behind the arcs that slope down from the
+    // sundogs. Both are real and both are uncommon, which is why they are a few per cent each.
+    { orientation: "pyramidal", widthMicrons: 40, lengthMicrons: 120, share: 0.03, capFraction: 0.5 },
+    { orientation: "lowitz", widthMicrons: 100, lengthMicrons: 15, share: 0.02 }
   ]
+
+  /** The share of the default mix that is the two rarities together (pyramid-ended columns and
+   * Lowitz plates): what a reader gets when nothing says otherwise. */
+  static readonly DEFAULT_RARE_SHARE = DEFAULT_RARE_ICE_CRYSTALS
+
+  /**
+   * The default mix with the rarities made more or less common: `rare` is the share of crystals
+   * that are pyramid-ended or Lowitz-oriented, 0 to 1, and everything else keeps its proportions
+   * within what is left. At DEFAULT_RARE_SHARE this IS the default mix. Those two are the crystals
+   * that make the odd-radius rings and the arcs sloping from the sundogs, and no record says how
+   * many a cirrus deck held — so it is a stated condition, like the alignment, and a recording can
+   * state it.
+   */
+  static populationsFor(rare: number): readonly CrystalPopulation[] {
+    const share = Math.min(0.9, Math.max(0, rare))
+    if (Math.abs(share - HaloSky.DEFAULT_RARE_SHARE) < 1e-9) return HaloSky.DEFAULT_POPULATIONS
+    const ordinary = (1 - share) / (1 - HaloSky.DEFAULT_RARE_SHARE)
+    return HaloSky.DEFAULT_POPULATIONS.map(population =>
+      population.orientation === "pyramidal" || population.orientation === "lowitz"
+        ? { ...population, share: (population.share / HaloSky.DEFAULT_RARE_SHARE) * share }
+        : { ...population, share: population.share * ordinary }
+    )
+  }
+
+  /** The mixture this display is traced with — the default unless the caller states another, as
+   * HaloSim's crystal files do. Shares are normalised, so they only have to be proportions. */
+  private populations: readonly CrystalPopulation[] = HaloSky.DEFAULT_POPULATIONS
+  private populationTotal = 1
 
   /**
    * How far a crystal's fall wanders from level when nothing holds it steady, and when everything
@@ -138,7 +176,14 @@ export class HaloSky {
    * honestly, why the same sky shows a bare ring one hour and a display of half a dozen forms the
    * next, and why a photograph almost never shows all of them at once.
    */
-  begin(sourceAltitudeDeg: number, alignment: number, seed = 0x9e3779b9): void {
+  begin(
+    sourceAltitudeDeg: number,
+    alignment: number,
+    seed = 0x9e3779b9,
+    populations: readonly CrystalPopulation[] = HaloSky.DEFAULT_POPULATIONS
+  ): void {
+    this.populations = populations
+    this.populationTotal = populations.reduce((total, population) => total + population.share, 0) || 1
     this.seed = seed >>> 0 || 1
     this.hasSpare = false
     this.tally.fill(0)
@@ -231,8 +276,14 @@ export class HaloSky {
   }
 
   /** The whole thing in one call, for a caller that can afford to wait — tests, mostly. */
-  compute(sourceAltitudeDeg: number, alignment: number, rayCount: number, seed?: number): HaloSkyMap {
-    this.begin(sourceAltitudeDeg, alignment, seed)
+  compute(
+    sourceAltitudeDeg: number,
+    alignment: number,
+    rayCount: number,
+    seed?: number,
+    populations?: readonly CrystalPopulation[]
+  ): HaloSkyMap {
+    this.begin(sourceAltitudeDeg, alignment, seed, populations)
     this.trace(rayCount)
     return this.harvest()
   }
@@ -305,13 +356,13 @@ export class HaloSky {
   }
 
   private pickPopulation(): CrystalPopulation {
-    const draw = this.random()
+    const draw = this.random() * this.populationTotal
     let cumulative = 0
-    for (const population of HaloSky.POPULATIONS) {
+    for (const population of this.populations) {
       cumulative += population.share
       if (draw <= cumulative) return population
     }
-    return HaloSky.POPULATIONS[HaloSky.POPULATIONS.length - 1]
+    return this.populations[this.populations.length - 1]
   }
 
   /** Draws one crystal from a population: which way its main axis points, and how it is turned
@@ -323,6 +374,7 @@ export class HaloSky {
     let cy = 0
     let cz = 1
     switch (population.orientation) {
+      case "pyramidal":
       case "tumbling": {
         // Uniform over the sphere, which is what "no preferred direction" means and what a small
         // crystal in stirred air actually does.
@@ -360,7 +412,35 @@ export class HaloSky {
         break
       }
     }
-    this.crystal.set(cx, cy, cz, roll, population.widthMicrons, population.lengthMicrons)
+    if (population.orientation === "lowitz") {
+      // Free to turn about a near-horizontal axis that runs through two opposite prism EDGES —
+      // corners of the hexagon, not the middles of its flats — so the main axis sweeps a plane
+      // standing across that axis, and every position round it is as likely as any other. The
+      // axis itself wanders out of level by the same fall-stability angle as everything else.
+      const level = this.spreadAboutAPlane(tilt)
+      const flat = Math.sqrt(Math.max(0, 1 - level * level))
+      const ax = flat * Math.cos(azimuth)
+      const ay = flat * Math.sin(azimuth)
+      const az = level
+      // Two directions across the axis, one of them as near the vertical as the axis allows.
+      let bx = -az * ax
+      let by = -az * ay
+      let bz = 1 - az * az
+      const bLength = Math.hypot(bx, by, bz) || 1
+      bx /= bLength
+      by /= bLength
+      bz /= bLength
+      const dx = ay * bz - az * by
+      const dy = az * bx - ax * bz
+      const dz = ax * by - ay * bx
+      const turn = this.random() * 2 * Math.PI
+      cx = bx * Math.cos(turn) + dx * Math.sin(turn)
+      cy = by * Math.cos(turn) + dy * Math.sin(turn)
+      cz = bz * Math.cos(turn) + dz * Math.sin(turn)
+      // A corner of the hexagon lies thirty degrees off a face normal.
+      roll = IceCrystal.rollToward(cx, cy, cz, ax, ay, az) + Math.PI / 6
+    }
+    this.crystal.set(cx, cy, cz, roll, population.widthMicrons, population.lengthMicrons, population.capFraction ?? 0)
   }
 
   /** A deterministic generator, so the same sky is the same sky: a display that shimmered when a

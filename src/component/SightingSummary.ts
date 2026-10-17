@@ -408,6 +408,8 @@ export class SightingSummary {
     // tumbling crystals still ring the Sun, which is a display and not a nothing.
     this.push(entries, "weather", "iceCrystalAlignment", this.labels.iceCrystalAlignment,
       this.showsPercent(weather.highCloudCover) ? this.percent(weather.iceCrystalAlignment) : undefined)
+    this.push(entries, "weather", "rareIceCrystals", this.labels.rareIceCrystals,
+      this.showsPercent(weather.highCloudCover) ? this.percent(weather.rareIceCrystals) : undefined)
     // Both qualify the deck rather than assert it: clouds that are white (0 % dark) are as visible
     // as black ones, and a base has a height only while something sits on it.
     this.push(entries, "weather", "cloudDarkness", this.labels.cloudDarkness,

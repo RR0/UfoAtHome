@@ -83,7 +83,7 @@ import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE, MIN_POLYGON_VERTICES } from "
 import type { HandleId, ResizeAxis } from "../engine/shape/ShapeHandles.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { plainSightingJson } from "../engine/persistence/sightingJson.js"
-import { DEFAULT_ICE_CRYSTAL_ALIGNMENT } from "../engine/model/Weather.js"
+import { DEFAULT_ICE_CRYSTAL_ALIGNMENT, DEFAULT_RARE_ICE_CRYSTALS } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
 import type { Account } from "../engine/model/Account.js"
@@ -660,9 +660,12 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelCloudCover: HTMLElement
   private readonly labelHighCloud: HTMLElement
   private readonly labelIceAlignment: HTMLElement
+  private readonly labelRareIce: HTMLElement
   private readonly highCloudCoverInput: HTMLInputElement
   /** The one weather control no record can fill in — see Weather.iceCrystalAlignment. */
   private readonly iceCrystalAlignmentInput: HTMLInputElement
+  /** Stated, never looked up, like the alignment — see Weather.rareIceCrystals. */
+  private readonly rareIceCrystalsInput: HTMLInputElement
   private readonly labelCloudDarkness: HTMLElement
   private readonly labelCloudBase: HTMLElement
   private readonly labelPrecipitationType: HTMLElement
@@ -1141,6 +1144,7 @@ export class SightingEditorElement extends HTMLElement {
     this.cloudCoverInput = this.shadow.getElementById("cloudCover") as HTMLInputElement
     this.highCloudCoverInput = this.shadow.getElementById("highCloudCover") as HTMLInputElement
     this.iceCrystalAlignmentInput = this.shadow.getElementById("iceCrystalAlignment") as HTMLInputElement
+    this.rareIceCrystalsInput = this.shadow.getElementById("rareIceCrystals") as HTMLInputElement
     this.cloudDarknessInput = this.shadow.getElementById("cloudDarkness") as HTMLInputElement
     this.cloudBaseInput = this.shadow.getElementById("cloudBase") as HTMLInputElement
     this.precipitationTypeSelect = this.shadow.getElementById("precipitationType") as HTMLSelectElement
@@ -1164,6 +1168,7 @@ export class SightingEditorElement extends HTMLElement {
       // work, and cost a reader an evening deciding the halos were "constant".
       this.highCloudCoverInput,
       this.iceCrystalAlignmentInput,
+      this.rareIceCrystalsInput,
       this.cloudDarknessInput,
       this.cloudBaseInput,
       this.precipitationTypeSelect,
@@ -1288,6 +1293,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelCloudCover = this.shadow.getElementById("label-cloud-cover")!
     this.labelHighCloud = this.shadow.getElementById("label-high-cloud")!
     this.labelIceAlignment = this.shadow.getElementById("label-ice-alignment")!
+    this.labelRareIce = this.shadow.getElementById("label-rare-ice")!
     this.labelCloudDarkness = this.shadow.getElementById("label-cloud-darkness")!
     this.labelCloudBase = this.shadow.getElementById("label-cloud-base")!
     this.labelPrecipitationType = this.shadow.getElementById("label-precipitation-type")!
@@ -1738,7 +1744,7 @@ export class SightingEditorElement extends HTMLElement {
       // is listed here because it IS a weather field and the whole point of that list is that no
       // weather field goes unlistened-to, but it must not go through the general path, which would
       // take the recording away from the record it was looked up from.
-      if (input === this.iceCrystalAlignmentInput) {
+      if (input === this.iceCrystalAlignmentInput || input === this.rareIceCrystalsInput) {
         input.addEventListener("input", () => this.applyIceAlignmentAtPlayhead())
         continue
       }
@@ -3472,7 +3478,8 @@ export class SightingEditorElement extends HTMLElement {
     this.sceneElement.resumeWeatherAudio()
     const weather: Weather = {
       ...resolveWeatherAt(this.ufoElement.sighting, this.ufoElement.currentTime),
-      iceCrystalAlignment: Number(this.iceCrystalAlignmentInput.value)
+      iceCrystalAlignment: Number(this.iceCrystalAlignmentInput.value),
+      rareIceCrystals: Number(this.rareIceCrystalsInput.value)
     }
     this.ufoElement.sighting.weatherTrack.addKeyframe(this.ufoElement.currentTime, weather)
     this.ufoElement.refresh()
@@ -4447,7 +4454,7 @@ export class SightingEditorElement extends HTMLElement {
       // sky did not, and the value snapped back. A control that cannot be acted on has to look
       // like one, which is the same rule the appearance fields already follow.
       field.disabled =
-        (inferred && source !== undefined && field !== this.iceCrystalAlignmentInput) ||
+        (inferred && source !== undefined && field !== this.iceCrystalAlignmentInput && field !== this.rareIceCrystalsInput) ||
         this.ufoElement.playbackState === "playing"
       if (this.ufoElement.playbackState === "playing") {
         field.title = this.messages.weatherWhilePlaying
@@ -4998,6 +5005,9 @@ export class SightingEditorElement extends HTMLElement {
     if (active !== this.highCloudCoverInput) this.highCloudCoverInput.value = String(weather.highCloudCover ?? 0)
     if (active !== this.iceCrystalAlignmentInput) {
       this.iceCrystalAlignmentInput.value = String(weather.iceCrystalAlignment ?? DEFAULT_ICE_CRYSTAL_ALIGNMENT)
+    }
+    if (active !== this.rareIceCrystalsInput) {
+      this.rareIceCrystalsInput.value = String(weather.rareIceCrystals ?? DEFAULT_RARE_ICE_CRYSTALS)
     }
     if (active !== this.cloudDarknessInput) this.cloudDarknessInput.value = String(weather.cloudDarkness)
     if (active !== this.cloudBaseInput) this.cloudBaseInput.value = weather.cloudBaseM === undefined ? "" : String(weather.cloudBaseM)
@@ -8943,6 +8953,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelCloudCover.textContent = messages.cloudCover
     this.labelHighCloud.textContent = messages.highCloudCover
     this.labelIceAlignment.textContent = messages.iceCrystalAlignment
+    this.labelRareIce.textContent = messages.rareIceCrystals
     this.labelFNumber.textContent = messages.aperture
     this.labelExposure.textContent = messages.exposure
     this.labelFocusDistance.textContent = messages.focusDistance

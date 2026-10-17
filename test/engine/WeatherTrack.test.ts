@@ -162,3 +162,15 @@ describe("WeatherTrack.fromJSON", () => {
     expect(weather?.windSpeed).toBe(1.5)
   })
 })
+
+describe("lerpWeather rareIceCrystals", () => {
+  const base = DEFAULT_WEATHER
+  it("blends between two stated shares, so the rare forms fade in rather than switch on", () => {
+    const blended = lerpWeather({ ...base, rareIceCrystals: 0.05 }, { ...base, rareIceCrystals: 0.55 }, 0.5)
+    expect(blended.rareIceCrystals).toBeCloseTo(0.3, 6)
+  })
+
+  it("stays unstated when either side is, because unstated has no midpoint", () => {
+    expect(lerpWeather({ ...base }, { ...base, rareIceCrystals: 0.5 }, 0.5).rareIceCrystals).toBeUndefined()
+  })
+})

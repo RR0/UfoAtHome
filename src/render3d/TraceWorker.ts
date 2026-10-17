@@ -7,7 +7,7 @@ import { HaloTexels } from "./HaloTexels.js"
 /** What the page asks of a worker: a display or the glow maps to work out, or the end of one it no
  * longer wants. */
 export type TraceRequest =
-  | { type: "halo"; id: number; altitudeDeg: number; alignment: number; rays: number }
+  | { type: "halo"; id: number; altitudeDeg: number; alignment: number; rare: number; rays: number }
   | { type: "glow"; id: number }
   | { type: "cancel"; id: number }
 
@@ -79,8 +79,8 @@ export class TraceWorker {
     return new Promise<void>(resolve => setTimeout(resolve))
   }
 
-  private async traceHalo(job: { id: number; altitudeDeg: number; alignment: number; rays: number }): Promise<void> {
-    this.sky.begin(job.altitudeDeg, job.alignment)
+  private async traceHalo(job: { id: number; altitudeDeg: number; alignment: number; rare: number; rays: number }): Promise<void> {
+    this.sky.begin(job.altitudeDeg, job.alignment, undefined, HaloSky.populationsFor(job.rare))
     while (this.sky.tracedRays < job.rays && !this.cancelled.has(job.id)) {
       this.sky.trace(Math.min(TraceWorker.RAYS_PER_BATCH, job.rays - this.sky.tracedRays))
       await TraceWorker.yield()

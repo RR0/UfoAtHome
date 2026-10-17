@@ -112,6 +112,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     pickTrafficAt(): string | undefined {
       return pickedTraffic.id
     }
+    pickOpticsAt(): undefined {
+      return undefined
+    }
     pickSatelliteAt(): undefined {
       return undefined
     }

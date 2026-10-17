@@ -106,6 +106,10 @@ export function lerpWeather(a: Weather, b: Weather, t: number): Weather {
       a.iceCrystalAlignment === undefined || b.iceCrystalAlignment === undefined
         ? undefined
         : lerpNumber(a.iceCrystalAlignment, b.iceCrystalAlignment, t),
+    rareIceCrystals:
+      a.rareIceCrystals === undefined || b.rareIceCrystals === undefined
+        ? undefined
+        : lerpNumber(a.rareIceCrystals, b.rareIceCrystals, t),
     lowerCloudCover:
       a.lowerCloudCover === undefined || b.lowerCloudCover === undefined ? undefined : lerpNumber(a.lowerCloudCover, b.lowerCloudCover, t),
     // A deck really does lift or lower during an observation, so this blends like the other

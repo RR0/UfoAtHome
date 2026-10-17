@@ -152,6 +152,20 @@ export const sceneNames_fr: SceneNames = {
   starTooltipBelow: "{name} — mag {mag}, {alt}° sous l'horizontale",
   decorTooltip: "{name} — {size}, à {distance}",
   satelliteTooltip: "{name} — satellite, mag {mag}, à {height} km d'altitude",
+  opticsTooltips: {
+    halo22: "Halo de 22° — un anneau autour du Soleil, dû à la lumière déviée par des cristaux de glace hexagonaux dans les cirrus ; son bord interne est rouge, à 21,7°",
+    halo46: "Halo de 46° — un anneau plus rare et plus faible : la lumière entre par une face latérale d'un cristal et sort par une face de bout",
+    oddRadius: "Halo de {angle}° — un anneau à rayon impair, rare et faible, dû à des cristaux de glace à bouts pyramidaux",
+    parhelion: "Parhélie — une tache brillante colorée à côté du Soleil, à sa hauteur, due à des plaquettes de glace tombant à plat ; rouge côté Soleil",
+    parhelion120: "Parhélie à 120° — une faible tache blanche à 120° du Soleil, due à la lumière réfléchie à l'intérieur de plaquettes à plat",
+    upperTangentArc: "Arc tangent supérieur — un arc brillant posé sur le haut du halo de 22°, dû à des colonnes couchées à l'horizontale",
+    lowerTangentArc: "Arc tangent inférieur — un arc touchant le bas du halo de 22°, dû à des colonnes couchées à l'horizontale",
+    circumzenithal: "Arc circumzénithal — une bande vivement colorée près du zénith, due à la lumière entrant par la face du dessus de plaquettes à plat (seulement Soleil sous 32°)",
+    circumhorizontal: "Arc circumhorizontal — une bande colorée basse dans le ciel, due à la lumière entrant par la face latérale de plaquettes à plat (seulement Soleil au-dessus de 58°)",
+    parhelicCircle: "Cercle parhélique — un cercle blanc faisant tout le tour du ciel à la hauteur du Soleil, dû aux reflets sur les faces verticales de plaquettes à plat",
+    pillar: "Pilier de lumière — une colonne de lumière dressée au-dessus du Soleil, due aux reflets sur des plaquettes à plat légèrement inclinées",
+    subsun: "Sous-soleil — une image du Soleil sous l'horizon, due aux reflets sur les faces plates de plaquettes"
+  },
   trafficTooltip: {
     unnamed: "Aéronef {hex}",
     altitude: "{value} ft",

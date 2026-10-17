@@ -108,6 +108,7 @@ import { LightningBolt } from "./LightningBolt.js"
 import { LightningSchedule } from "../engine/weather/LightningSchedule.js"
 import type { LightningFlash } from "../engine/weather/LightningSchedule.js"
 import type { SceneSatellite } from "./SatelliteField.js"
+import type { OpticsFeature } from "../engine/atmosphere/HaloFeatures.js"
 import { IceHaloEffect } from "./IceHaloEffect.js"
 import { RainbowEffect } from "./RainbowEffect.js"
 import { MeteorSystem } from "./MeteorSystem.js"
@@ -169,6 +170,7 @@ function weatherEquals(a: Weather, b: Weather): boolean {
     // arrived: the value reached resolveWeatherAt correctly and never got past this line.
     a.highCloudCover === b.highCloudCover &&
     a.iceCrystalAlignment === b.iceCrystalAlignment &&
+    a.rareIceCrystals === b.rareIceCrystals &&
     a.lowerCloudCover === b.lowerCloudCover &&
     a.relativeHumidity === b.relativeHumidity &&
     a.precipitationType === b.precipitationType &&
@@ -5355,6 +5357,17 @@ export class SceneRenderer {
   }
 
   /**
+   * The optical feature of the ice display (a ring, a sundog, an arc) under a point of the visible image, if the
+   * display is up and has light there — what a hover tooltip names. The ground hides it like it hides a star.
+   */
+  pickOpticsAt(ndcX: number, ndcY: number): OpticsFeature | undefined {
+    if (!this.iceHalos) return undefined
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
+    const feature = this.iceHalos.featureAt(this.raycaster.ray.direction)
+    return feature && !this.groundHides(ndcX, ndcY) ? feature : undefined
+  }
+
+  /**
    * Which body the pointer is on or nearest to: the one it is inside of, and failing that the one whose
    * edge it is nearest to, if within `reachRad` of it. Inside takes precedence over near, and where two discs
    * both hold the pointer the one `inFront` wins (the Moon over the Sun it covers), else the smaller (a
@@ -6357,7 +6370,8 @@ export class SceneRenderer {
       strength,
       light.tint,
       { cover: cirrusMask?.cover ?? ice, layerHeight: cirrusMask?.layerHeight ?? CIRRUS_LAYER_HEIGHT },
-      cirrusMask?.iceCrystalAlignment ?? this.weather.iceCrystalAlignment ?? DEFAULT_ICE_CRYSTAL_ALIGNMENT
+      cirrusMask?.iceCrystalAlignment ?? this.weather.iceCrystalAlignment ?? DEFAULT_ICE_CRYSTAL_ALIGNMENT,
+      this.weather.rareIceCrystals
     )
   }
 

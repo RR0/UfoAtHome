@@ -148,6 +148,20 @@ export const sceneNames_es: SceneNames = {
   starTooltipBelow: "{name} — mag {mag}, {alt}° bajo la horizontal",
   decorTooltip: "{name} — {size}, a {distance}",
   satelliteTooltip: "{name} — satélite, mag {mag}, a {height} km de altitud",
+  opticsTooltips: {
+    halo22: "Halo de 22° — un anillo alrededor del Sol, por luz desviada en cristales de hielo hexagonales de los cirros; su borde interior es rojo, a 21,7°",
+    halo46: "Halo de 46° — un anillo más raro y débil: la luz entra por una cara lateral del cristal y sale por una cara del extremo",
+    oddRadius: "Halo de {angle}° — un anillo de radio impar, raro y débil, hecho por cristales de hielo con extremos piramidales",
+    parhelion: "Parhelio — una mancha brillante de colores junto al Sol, a su altura, por placas de hielo que caen planas; rojo hacia el Sol",
+    parhelion120: "Parhelio de 120° — una mancha blanca débil a 120° del Sol, por luz reflejada dentro de placas planas",
+    upperTangentArc: "Arco tangente superior — un arco brillante apoyado sobre el halo de 22°, por columnas tumbadas en horizontal",
+    lowerTangentArc: "Arco tangente inferior — un arco que toca la base del halo de 22°, por columnas tumbadas en horizontal",
+    circumzenithal: "Arco circuncenital — una banda de colores vivos cerca del cenit, por luz que entra por la cara superior de placas planas (solo con el Sol bajo 32°)",
+    circumhorizontal: "Arco circunhorizontal — una banda de colores baja en el cielo, por luz que entra por la cara lateral de placas planas (solo con el Sol sobre 58°)",
+    parhelicCircle: "Círculo parhélico — un círculo blanco alrededor de todo el cielo a la altura del Sol, por reflejos en las caras verticales de placas planas",
+    pillar: "Pilar de luz — una columna de luz sobre el Sol, por reflejos en placas planas ligeramente inclinadas",
+    subsun: "Subsol — una imagen del Sol bajo el horizonte, por reflejos en las caras planas de las placas"
+  },
   trafficTooltip: {
     unnamed: "Aeronave {hex}",
     altitude: "{value} ft",

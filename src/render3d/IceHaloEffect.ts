@@ -11,6 +11,7 @@ import {
   SphereGeometry,
   Vector3
 } from "three"
+import { HaloFeatures, type OpticsFeature } from "../engine/atmosphere/HaloFeatures.js"
 import { HaloSky } from "../engine/atmosphere/HaloSky.js"
 import { HaloTexels } from "./HaloTexels.js"
 import type { TraceJob } from "./OffThreadTracer.js"
@@ -122,6 +123,7 @@ export class IceHaloEffect {
    * differ. NaN until the first display has been traced. */
   private mappedAltitudeDeg = Number.NaN
   private mappedAlignment = Number.NaN
+  private mappedRare = Number.NaN
   private tracing = false
   private everDisplayed = false
   private urgent = false
@@ -258,7 +260,8 @@ export class IceHaloEffect {
     strength: number,
     tint: [number, number, number],
     ice: { cover: number; layerHeight: number },
-    alignment: number
+    alignment: number,
+    rare = HaloSky.DEFAULT_RARE_SHARE
   ): void {
     const uniforms = this.material.uniforms
     if (strength <= 0) {
@@ -276,21 +279,62 @@ export class IceHaloEffect {
     uniforms.uIceCover.value = ice.cover
     uniforms.uIceHeight.value = ice.layerHeight
     this.show(this.everDisplayed)
-    this.requestMap(sourceAltitudeDeg, alignment)
+    this.requestMap(sourceAltitudeDeg, alignment, rare)
+  }
+
+  /**
+   * Which optical feature of the display the direction `aim` points at, if any — what a hover
+   * tooltip names. Answered from the traced map itself (see HaloFeatures), so it names what the
+   * picture shows and is silent where the picture is.
+   */
+  featureAt(aim: Vector3): OpticsFeature | undefined {
+    const uniforms = this.material.uniforms
+    if (!this.everDisplayed || !(uniforms.uStrength.value > 0) || !(this.mappedAltitudeDeg === this.mappedAltitudeDeg)) return undefined
+    const up = (uniforms.uUp.value as Vector3).clone().normalize()
+    const source = (uniforms.uSource.value as Vector3).clone().normalize()
+    const rad = Math.PI / 180
+    const altitudeDeg = Math.asin(Math.max(-1, Math.min(1, aim.dot(up)))) / rad
+    const sourceAltitudeDeg = Math.asin(Math.max(-1, Math.min(1, source.dot(up)))) / rad
+    const level = (direction: Vector3) => direction.clone().sub(up.clone().multiplyScalar(direction.dot(up)))
+    const sourceLevel = level(source)
+    const aimLevel = level(aim)
+    const aroundDeg =
+      sourceLevel.length() < 1e-4 || aimLevel.length() < 1e-4
+        ? 0
+        : (Math.acos(Math.max(-1, Math.min(1, sourceLevel.dot(aimLevel) / (sourceLevel.length() * aimLevel.length())))) / rad)
+    const width = HaloSky.AZIMUTH_BINS
+    const height = HaloSky.ALTITUDE_BINS
+    const texels = this.texels
+    const radiance = (altitude: number, around: number): number => {
+      if (altitude < -90 || altitude > 90) return 0
+      const column = Math.min(width - 1, Math.max(0, Math.floor((Math.min(180, Math.abs(around)) / 180) * width)))
+      const row = Math.min(height - 1, Math.max(0, Math.floor(((altitude + 90) / 180) * height)))
+      return IceHaloEffect.halfToFloat(texels[(row * width + column) * 4 + 1])
+    }
+    return HaloFeatures.at(sourceAltitudeDeg, altitudeDeg, aroundDeg, radiance)
+  }
+
+  /** A half-float's bits as a number: the map is held as halves, which is what the shader reads. */
+  private static halfToFloat(bits: number): number {
+    const exponent = (bits >> 10) & 31
+    const mantissa = bits & 1023
+    const sign = bits >> 15 ? -1 : 1
+    return exponent === 0 ? sign * mantissa * 5.960464477539063e-8 : sign * 2 ** (exponent - 15) * (1 + mantissa / 1024)
   }
 
   /** Starts tracing a display for that source height and those crystals, unless the one already on
    * screen was traced for near enough the same and would look the same. */
-  private requestMap(sourceAltitudeDeg: number, alignment: number): void {
+  private requestMap(sourceAltitudeDeg: number, alignment: number, rare: number): void {
     const stale =
       !(Math.abs(sourceAltitudeDeg - this.mappedAltitudeDeg) < IceHaloEffect.ALTITUDE_STEP_DEG) ||
-      !(Math.abs(alignment - this.mappedAlignment) < IceHaloEffect.ALIGNMENT_STEP)
+      !(Math.abs(alignment - this.mappedAlignment) < IceHaloEffect.ALIGNMENT_STEP) ||
+      !(Math.abs(rare - this.mappedRare) < IceHaloEffect.ALIGNMENT_STEP)
     if (!stale) {
       this.next = undefined
       return
     }
     if (this.tracing) {
-      if (this.tracingFor(sourceAltitudeDeg, alignment)) {
+      if (this.tracingFor(sourceAltitudeDeg, alignment, rare)) {
         this.next = undefined
         return
       }
@@ -298,18 +342,20 @@ export class IceHaloEffect {
       // after it — the display follows the change a tracing behind, rather than never.
       const leap =
         !(Math.abs(sourceAltitudeDeg - this.pendingAltitudeDeg) < IceHaloEffect.LEAP_ALTITUDE_DEG) ||
-        !(Math.abs(alignment - this.pendingAlignment) < IceHaloEffect.LEAP_ALIGNMENT)
+        !(Math.abs(alignment - this.pendingAlignment) < IceHaloEffect.LEAP_ALIGNMENT) ||
+        !(Math.abs(rare - this.pendingRare) < IceHaloEffect.LEAP_ALIGNMENT)
       if (!leap) {
-        this.next = { sourceAltitudeDeg, alignment }
+        this.next = { sourceAltitudeDeg, alignment, rare }
         return
       }
     }
     this.next = undefined
     this.pendingAltitudeDeg = sourceAltitudeDeg
     this.pendingAlignment = alignment
+    this.pendingRare = rare
     this.stopWork()
     this.tracing = true
-    this.startTracing(sourceAltitudeDeg, alignment)
+    this.startTracing(sourceAltitudeDeg, alignment, rare)
   }
 
   /**
@@ -321,16 +367,16 @@ export class IceHaloEffect {
    * it has arrived the display counts as being traced — a scene's first frame waits for it either
    * way — and a request that was abandoned meanwhile is recognised by its ticket.
    */
-  private startTracing(sourceAltitudeDeg: number, alignment: number): void {
+  private startTracing(sourceAltitudeDeg: number, alignment: number, rare: number): void {
     const ticket = ++this.ticket
     const inThread = () => {
       if (ticket !== this.ticket || !this.tracing) return
-      this.sky.begin(sourceAltitudeDeg, alignment)
+      this.sky.begin(sourceAltitudeDeg, alignment, undefined, HaloSky.populationsFor(rare))
       this.scheduleWork()
     }
     TracerPool.with(pool => {
       if (ticket !== this.ticket || !this.tracing) return
-      this.job = pool.trace(sourceAltitudeDeg, alignment, IceHaloEffect.RAYS, texels => {
+      this.job = pool.trace(sourceAltitudeDeg, alignment, rare, IceHaloEffect.RAYS, texels => {
         this.job = undefined
         this.texels.set(texels)
         this.display()
@@ -344,14 +390,16 @@ export class IceHaloEffect {
 
   private pendingAltitudeDeg = Number.NaN
   private pendingAlignment = Number.NaN
+  private pendingRare = Number.NaN
   /** What was asked for while another display was being traced — see requestMap. */
-  private next?: { sourceAltitudeDeg: number; alignment: number }
+  private next?: { sourceAltitudeDeg: number; alignment: number; rare: number }
 
-  private tracingFor(sourceAltitudeDeg: number, alignment: number): boolean {
+  private tracingFor(sourceAltitudeDeg: number, alignment: number, rare: number): boolean {
     return (
       this.tracing &&
       Math.abs(sourceAltitudeDeg - this.pendingAltitudeDeg) < IceHaloEffect.ALTITUDE_STEP_DEG &&
-      Math.abs(alignment - this.pendingAlignment) < IceHaloEffect.ALIGNMENT_STEP
+      Math.abs(alignment - this.pendingAlignment) < IceHaloEffect.ALIGNMENT_STEP &&
+      Math.abs(rare - this.pendingRare) < IceHaloEffect.ALIGNMENT_STEP
     )
   }
 
@@ -388,8 +436,9 @@ export class IceHaloEffect {
     this.tracing = false
     this.mappedAltitudeDeg = this.pendingAltitudeDeg
     this.mappedAlignment = this.pendingAlignment
+    this.mappedRare = this.pendingRare
     const next = this.next
-    if (next) this.requestMap(next.sourceAltitudeDeg, next.alignment)
+    if (next) this.requestMap(next.sourceAltitudeDeg, next.alignment, next.rare)
   }
 
   private stopWork(): void {

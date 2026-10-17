@@ -320,10 +320,10 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-halos.json",
           title: { en: "Ice haloes and sundogs", fr: "Halos de glace et parhélies", es: "Halos de hielo y parhelios", it: "Aloni di ghiaccio e pareli" },
           blurb: {
-            en: "A cirrus veil, a Sun 20° up, crystals falling level: a hexagonal ice prism and Snell's law give every angle. Then the crystals tumble, the veil thins, a cumulus deck passes under it, and the display changes with each.",
-            fr: "Un voile de cirrus, un Soleil à 20°, des cristaux tombant à plat : un prisme hexagonal de glace et la loi de Snell donnent chaque angle. Puis les cristaux tourbillonnent, le voile s'amincit, des cumulus passent dessous, et le halo change avec chacun.",
-            es: "Un velo de cirros, un Sol a 20° de altura, cristales que caen planos: un prisma hexagonal de hielo y la ley de Snell dan cada ángulo. Luego los cristales dan vueltas, el velo se adelgaza, una capa de cúmulos pasa por debajo, y el halo cambia con cada uno.",
-            it: "Un velo di cirri, un Sole alto 20°, cristalli che cadono orizzontali: un prisma esagonale di ghiaccio e la legge di Snell danno ogni angolo. Poi i cristalli ruotano, il velo si assottiglia, uno strato di cumuli gli passa sotto, e l'alone cambia con ciascuno."
+            en: "A cirrus veil, a Sun 20° up, crystals falling level: a hexagonal ice prism and Snell's law give every angle. Then the crystals tumble, the veil thins, a cumulus deck passes under it, and the display changes with each. Last, the rare crystals take over: odd-radius haloes and Lowitz arcs. Angles checked against Atmospheric Optics.",
+            fr: "Un voile de cirrus, un Soleil à 20°, des cristaux tombant à plat : un prisme hexagonal de glace et la loi de Snell donnent chaque angle. Puis les cristaux tourbillonnent, le voile s'amincit, des cumulus passent dessous, et le halo change avec chacun. Enfin les cristaux rares prennent le dessus : halos à rayon impair et arcs de Lowitz. Angles vérifiés cohérents avec Atmospheric Optics.",
+            es: "Un velo de cirros, un Sol a 20° de altura, cristales que caen planos: un prisma hexagonal de hielo y la ley de Snell dan cada ángulo. Luego los cristales dan vueltas, el velo se adelgaza, una capa de cúmulos pasa por debajo, y el halo cambia con cada uno. Por último, los cristales raros toman el relevo: halos de radio impar y arcos de Lowitz. Ángulos comprobados con Atmospheric Optics.",
+            it: "Un velo di cirri, un Sole alto 20°, cristalli che cadono orizzontali: un prisma esagonale di ghiaccio e la legge di Snell danno ogni angolo. Poi i cristalli ruotano, il velo si assottiglia, uno strato di cumuli gli passa sotto, e l'alone cambia con ciascuno. Infine i cristalli rari prendono il sopravvento: aloni a raggio dispari e archi di Lowitz. Angoli verificati con Atmospheric Optics."
           }
         },
         {

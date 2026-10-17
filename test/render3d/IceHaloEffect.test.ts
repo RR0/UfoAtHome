@@ -99,7 +99,7 @@ describe("IceHaloEffect under a changing sky", () => {
     const withPool = () => {
       const asked: Asked[] = []
       const pool = {
-        trace: (altitude: number, alignment: number, rays: number, done: (texels: Uint16Array) => void, failed: () => void) => {
+        trace: (altitude: number, alignment: number, _rare: number, rays: number, done: (texels: Uint16Array) => void, failed: () => void) => {
           const job: Asked = { altitude, alignment, rays, done, failed, cancelled: false }
           asked.push(job)
           return { cancel: () => { job.cancelled = true } }

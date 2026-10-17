@@ -146,6 +146,7 @@ export interface SightingLabels {
   focusDistance: string
   /** The label on the control for how steadily the crystals were falling. */
   iceCrystalAlignment: string
+  rareIceCrystals: string
   /** The empty entry of that picker: an object with no lamps at all, which is most scenery. */
   decorLightsNone: string
   /** What the observation was made THROUGH — see Instrument.ts. Sighting data, unlike the view

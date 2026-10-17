@@ -70,10 +70,15 @@ export interface EmergentRay {
  * minimum over eight numbers, with no polygon clipping anywhere.
  */
 export class IceCrystal {
-  /** Outward normals, xyz triples, packed: 6 prism faces then the 2 basal faces. */
-  private readonly normals = new Float64Array(24)
+  /** Six prism faces, two basal, and six pyramid faces at each end. */
+  static readonly MAX_FACES = 20
+  /** Outward normals, xyz triples, packed: 6 prism faces, the 2 basal faces, then — only when the
+   * crystal has pyramid ends — the 6 upper and the 6 lower pyramid faces. */
+  private readonly normals = new Float64Array(IceCrystal.MAX_FACES * 3)
   /** Each face's distance from the crystal's centre. */
-  private readonly offsets = new Float64Array(8)
+  private readonly offsets = new Float64Array(IceCrystal.MAX_FACES)
+  /** How many of the planes above are in use: 8 for a plain prism, 20 with pyramid ends. */
+  private faceCount = 8
   /** A sphere that certainly contains the crystal — where incident rays are aimed from. */
   private radius = 1
 
@@ -88,7 +93,15 @@ export class IceCrystal {
    * display most people have seen and Parry arcs one almost nobody has. Give every habit the same
    * width and that difference vanishes, and the sky comes out with the wrong forms winning.
    */
-  set(cx: number, cy: number, cz: number, roll: number, width: number, length: number): void {
+  set(
+    cx: number,
+    cy: number,
+    cz: number,
+    roll: number,
+    width: number,
+    length: number,
+    capFraction = 0
+  ): void {
     // Any two directions across the axis will do for the hexagon's own frame; the roll then turns
     // the faces to where the caller wants them.
     let ux = 0
@@ -129,7 +142,67 @@ export class IceCrystal {
     this.normals[22] = -cy
     this.normals[23] = -cz
     this.offsets[7] = halfLength
-    this.radius = Math.hypot(halfWidth, halfLength)
+    this.faceCount = 8
+    if (capFraction > 0) {
+      // A pyramid end: six more planes at each end, each leaning over the prism face beneath it.
+      // The tilt is not chosen: ice's pyramid faces stand 28 degrees off the main axis, which is
+      // what makes the wedges of 28, 62 and 90 degrees whose deviations are the 9, 23 and 46 degree
+      // rings — the odd-radius halos nothing but a pyramid end can produce.
+      const tilt = IceCrystal.PYRAMID_TILT
+      const cosine = Math.cos(tilt)
+      const sine = Math.sin(tilt)
+      // How tall the cap stands, as a share of the most it could: the full pyramid would run to a
+      // point, and a crystal with a flat top stops short of it. Never taller than the half-length,
+      // or the two caps would pass through each other.
+      const capHeight = Math.min(halfLength, capFraction * halfWidth * Math.tan(tilt))
+      const shoulder = halfLength - capHeight
+      const offset = cosine * shoulder + sine * halfWidth
+      for (let face = 0; face < 6; face++) {
+        const radial = face * 3
+        const upper = (8 + face) * 3
+        const lower = (14 + face) * 3
+        this.normals[upper] = cosine * cx + sine * this.normals[radial]
+        this.normals[upper + 1] = cosine * cy + sine * this.normals[radial + 1]
+        this.normals[upper + 2] = cosine * cz + sine * this.normals[radial + 2]
+        this.normals[lower] = -cosine * cx + sine * this.normals[radial]
+        this.normals[lower + 1] = -cosine * cy + sine * this.normals[radial + 1]
+        this.normals[lower + 2] = -cosine * cz + sine * this.normals[radial + 2]
+        this.offsets[8 + face] = offset
+        this.offsets[14 + face] = offset
+      }
+      this.faceCount = IceCrystal.MAX_FACES
+    }
+    // The circle through the hexagon's corners, not the one inside its flats.
+    this.radius = Math.hypot((halfWidth * 2) / Math.sqrt(3), halfLength)
+  }
+
+  /**
+   * The angle, in the hexagon's own frame about the axis (cx, cy, cz), of a direction lying across
+   * that axis — what `set`'s `roll` has to be to turn a given side face to a given direction. A
+   * caller that wants a face (or, thirty degrees off, a corner) pointing somewhere in particular
+   * has no other way to know where the frame `set` builds for itself put its zero.
+   */
+  static rollToward(cx: number, cy: number, cz: number, dx: number, dy: number, dz: number): number {
+    let ux: number
+    let uy: number
+    let uz: number
+    if (Math.abs(cz) < 0.9) {
+      ux = -cy
+      uy = cx
+      uz = 0
+    } else {
+      ux = 0
+      uy = -cz
+      uz = cy
+    }
+    const uLength = Math.hypot(ux, uy, uz) || 1
+    ux /= uLength
+    uy /= uLength
+    uz /= uLength
+    const vx = cy * uz - cz * uy
+    const vy = cz * ux - cx * uz
+    const vz = cx * uy - cy * ux
+    return Math.atan2(dx * vx + dy * vy + dz * vz, dx * ux + dy * uy + dz * uz)
   }
 
   /** How far off the crystal's centre an incident ray may pass and still have a chance of hitting
@@ -184,7 +257,7 @@ export class IceCrystal {
     let entryFace = -1
     let entryT = -Infinity
     let exitT = Infinity
-    for (let face = 0; face < 8; face++) {
+    for (let face = 0; face < this.faceCount; face++) {
       const nx = this.normals[face * 3]
       const ny = this.normals[face * 3 + 1]
       const nz = this.normals[face * 3 + 2]
@@ -234,7 +307,7 @@ export class IceCrystal {
     for (let bounce = 0; bounce < IceCrystal.MAX_BOUNCES && weight > IceCrystal.MIN_WEIGHT; bounce++) {
       let hitFace = -1
       let hitT = Infinity
-      for (let face = 0; face < 8; face++) {
+      for (let face = 0; face < this.faceCount; face++) {
         const nx = this.normals[face * 3]
         const ny = this.normals[face * 3 + 1]
         const nz = this.normals[face * 3 + 2]
@@ -279,5 +352,8 @@ export class IceCrystal {
   /** How many times a ray is allowed to bounce around inside before what is left of it is dropped.
    * The forms that need three or four faces exist; nothing anybody has photographed needs eight. */
   static readonly MAX_BOUNCES = 6
+  /** How far the normal of a pyramid face leans from the main axis, radians: 62 degrees, which is
+   * to say the face itself stands 28 degrees off the axis. Measured on real crystals, not derived. */
+  static readonly PYRAMID_TILT = (62 * Math.PI) / 180
   private static readonly MIN_WEIGHT = 1e-4
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { HaloSky, type HaloSkyMap } from "../../../src/engine/atmosphere/HaloSky.js"
+import { HaloSky, type CrystalPopulation, type HaloSkyMap } from "../../../src/engine/atmosphere/HaloSky.js"
 import { IceHalos } from "../../../src/engine/atmosphere/IceHalos.js"
 
 /**
@@ -208,6 +208,67 @@ describe("HaloSky, which traces light through crystals and is told no angles at 
       inPieces.begin(12, 0.7)
       for (let batch = 0; batch < 4; batch++) inPieces.trace(10_000)
       expect([...inPieces.harvest().data.slice(0, 3000)]).toEqual([...whole.data.slice(0, 3000)])
+    })
+  })
+
+  describe("the crystals HaloSim lets its user add", () => {
+    const column = (orientation: CrystalPopulation["orientation"], capFraction?: number): CrystalPopulation => ({
+      orientation,
+      widthMicrons: 40,
+      lengthMicrons: 120,
+      share: 1,
+      capFraction
+    })
+
+    it("draws the odd-radius rings from pyramid ends alone, and none from a plain prism", () => {
+      // A pyramid face stands 28 degrees off the axis, and the wedges that makes with the other
+      // faces are 28 and 62 degrees: min deviation 9 and 23 degrees, from the same formula as the
+      // 22. Nothing here says those numbers; the geometry has to produce them.
+      const pyramids = new HaloSky().compute(30, 0, RAYS * 4, 1, [column("pyramidal", 0.5)])
+      const prisms = new HaloSky().compute(30, 0, RAYS * 4, 1, [column("tumbling")])
+      // The 9 degree ring is the clear one: tenfold the plain prism's sky, and bare sky inside it.
+      expect(meanAt(pyramids, 30, 9.5)).toBeGreaterThan(meanAt(pyramids, 30, 7.5) * 10)
+      expect(meanAt(pyramids, 30, 9.5)).toBeGreaterThan(meanAt(prisms, 30, 9.5) * 10)
+      // The 20 and 35 degree ones are fainter, as they are in photographs; against a plain prism
+      // they still stand out.
+      expect(meanAt(pyramids, 30, 20.5)).toBeGreaterThan(meanAt(prisms, 30, 20.5) * 3)
+      expect(meanAt(pyramids, 30, 36)).toBeGreaterThan(meanAt(prisms, 30, 36) * 1.3)
+    })
+
+    it("keeps the pyramids out of the default mix's way: the common ring is where it was", () => {
+      const map = new HaloSky().compute(5, 1, RAYS)
+      const radius = IceHalos.halo22().redAngleDeg!
+      expect(meanAt(map, 5, radius + 0.5)).toBeGreaterThan(meanAt(map, 5, radius - 1.5) * 8)
+    })
+
+    it("lights, in Lowitz's orientation, places that level plates leave dark", () => {
+      const plates: CrystalPopulation[] = [{ orientation: "plate", widthMicrons: 100, lengthMicrons: 15, share: 1 }]
+      const lowitz: CrystalPopulation[] = [{ orientation: "lowitz", widthMicrons: 100, lengthMicrons: 15, share: 1 }]
+      const level = new HaloSky().compute(30, 1, RAYS * 4, 1, plates)
+      const free = new HaloSky().compute(30, 1, RAYS * 4, 1, lowitz)
+      // Beside the Sun, off its own height, where the arcs that slope away from the sundogs run.
+      expect(meanAt(free, 30, 23)).toBeGreaterThan(meanAt(level, 30, 23) * 2)
+    })
+
+    it("makes the rarities more or less common while the rest keep their proportions", () => {
+      const share = (mix: readonly CrystalPopulation[], kinds: string[]) =>
+        mix.filter(population => kinds.includes(population.orientation)).reduce((total, population) => total + population.share, 0)
+      const total = (mix: readonly CrystalPopulation[]) => mix.reduce((sum, population) => sum + population.share, 0)
+      const rare = ["pyramidal", "lowitz"]
+      expect(HaloSky.populationsFor(HaloSky.DEFAULT_RARE_SHARE)).toBe(HaloSky.DEFAULT_POPULATIONS)
+      const more = HaloSky.populationsFor(0.55)
+      expect(share(more, rare) / total(more)).toBeCloseTo(0.55, 6)
+      // Plates and columns are in the same ratio as before: the rarities took their share from
+      // everything alike.
+      const ratio = (mix: readonly CrystalPopulation[]) => share(mix, ["plate"]) / share(mix, ["column"])
+      expect(ratio(more)).toBeCloseTo(ratio(HaloSky.DEFAULT_POPULATIONS), 6)
+      expect(share(HaloSky.populationsFor(0), rare)).toBe(0)
+    })
+
+    it("takes the mixture it is given, in proportions and not in absolutes", () => {
+      const a = new HaloSky().compute(10, 1, RAYS, 1, [{ ...column("tumbling"), share: 1 }])
+      const b = new HaloSky().compute(10, 1, RAYS, 1, [{ ...column("tumbling"), share: 7 }])
+      expect(meanAt(b, 10, 22.5)).toBeCloseTo(meanAt(a, 10, 22.5), 6)
     })
   })
 })

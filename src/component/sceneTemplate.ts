@@ -322,7 +322,9 @@ export const css = `
   font-size: 0.85em;
   border-radius: 3px;
   pointer-events: none;
-  /* Kept on the lines it is given, and not wrapped: the label of an aircraft has several. */
-  white-space: pre;
+  /* Kept on the lines it is given (the label of an aircraft has several), and wrapped where a line is
+     longer than the picture can hold: what an optical feature says of itself runs to a sentence. */
+  white-space: pre-wrap;
+  max-width: min(24em, 70%);
 }
 `

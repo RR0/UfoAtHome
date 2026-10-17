@@ -341,6 +341,9 @@ export const html = `
            record holds it: what the crystals were doing up there was never measured. See
            Weather.iceCrystalAlignment. -->
       <label hidden><span id="label-ice-alignment">Crystal alignment</span> <input id="iceCrystalAlignment" class="weather-field" type="range" min="0" max="1" step="0.05" value="0.65"/></label>
+      <!-- Stated like the alignment, and for the same reason: nobody counted the crystals. See
+           Weather.rareIceCrystals. -->
+      <label hidden><span id="label-rare-ice">Rare crystals</span> <input id="rareIceCrystals" class="weather-field" type="range" min="0" max="1" step="0.05" value="0.05"/></label>
       <label hidden><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
       <label hidden><span id="label-cloud-base">Cloud base</span>
         <input id="cloudBase" class="weather-field" type="number" min="0" max="20000" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the observer is under the deck or above it"/> m</label>

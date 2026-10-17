@@ -1,3 +1,4 @@
+import type { OpticsFeatureId } from "../../engine/atmosphere/HaloFeatures.js"
 import type { DecorKind } from "../../engine/model/Decor.js"
 import { Compass } from "../../engine/astronomy/Compass.js"
 
@@ -78,6 +79,8 @@ export interface SceneNames {
   readonly decorTooltip: string
   /** A satellite's hover tooltip: {name}, {mag}, {height}. */
   readonly satelliteTooltip: string
+  /** What an optical feature of the ice display says when pointed at, by feature, as "name — explanation": the name alone is the tooltip, the whole of it is what Alt adds. {angle} is a ring's radius. */
+  readonly opticsTooltips: Readonly<Record<OpticsFeatureId, string>>
   /** What is said of an aircraft pointed at: see TrafficTooltip. */
   readonly trafficTooltip: TrafficTexts
   /** The scene's credits button. */

@@ -145,6 +145,20 @@ export const sceneNames_it: SceneNames = {
   starTooltipBelow: "{name} — mag {mag}, {alt}° sotto l'orizzontale",
   decorTooltip: "{name} — {size}, a {distance}",
   satelliteTooltip: "{name} — satellite, mag {mag}, a {height} km di quota",
+  opticsTooltips: {
+    halo22: "Alone di 22° — un anello attorno al Sole, dovuto alla luce deviata da cristalli di ghiaccio esagonali nei cirri; il bordo interno è rosso, a 21,7°",
+    halo46: "Alone di 46° — un anello più raro e debole: la luce entra da una faccia laterale del cristallo ed esce da una faccia di estremità",
+    oddRadius: "Alone di {angle}° — un anello a raggio dispari, raro e debole, prodotto da cristalli di ghiaccio con estremità piramidali",
+    parhelion: "Parelio — una macchia luminosa colorata accanto al Sole, alla sua altezza, da lastrine di ghiaccio che cadono piatte; rosso verso il Sole",
+    parhelion120: "Parelio di 120° — una debole macchia bianca a 120° dal Sole, da luce riflessa dentro lastrine piatte",
+    upperTangentArc: "Arco tangente superiore — un arco luminoso appoggiato sull'alone di 22°, da colonne coricate in orizzontale",
+    lowerTangentArc: "Arco tangente inferiore — un arco che tocca la base dell'alone di 22°, da colonne coricate in orizzontale",
+    circumzenithal: "Arco circumzenitale — una banda di colori vivi vicino allo zenit, da luce che entra dalla faccia superiore di lastrine piatte (solo con il Sole sotto i 32°)",
+    circumhorizontal: "Arco circumorizzontale — una banda colorata bassa nel cielo, da luce che entra dalla faccia laterale di lastrine piatte (solo con il Sole sopra i 58°)",
+    parhelicCircle: "Cerchio parelico — un cerchio bianco attorno a tutto il cielo all'altezza del Sole, da riflessi sulle facce verticali di lastrine piatte",
+    pillar: "Colonna di luce — un fascio di luce sopra il Sole, da riflessi su lastrine piatte leggermente inclinate",
+    subsun: "Sotto-sole — un'immagine del Sole sotto l'orizzonte, da riflessi sulle facce piatte delle lastrine"
+  },
   trafficTooltip: {
     unnamed: "Aeromobile {hex}",
     altitude: "{value} ft",

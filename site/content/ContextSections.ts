@@ -462,7 +462,11 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       en: `    <p>22° and 46° haloes, sundogs, the parhelic circle, tangent, circumzenithal and circumhorizontal
       arcs: not one of those angles is stored. Each is derived from the refractive index of ice and
       the geometry of the crystal, which is what makes the whole display move together and stay
-      consistent with the Sun's own height.</p>
+      consistent with the Sun's own height. Pyramid-ended crystals add the odd-radius haloes
+      (9°, 20°, 35°), and plates free to turn about a level axis add Lowitz's arcs; the mix of
+      crystals is stated by the recording, since no record counts them. Point at a ring, an arc or a sundog to have it named; hold Alt for what it is and what makes it.</p>
+    <p>The halo simulation was checked against <a href="https://atoptics.co.uk">Atmospheric Optics</a>, the reference on these phenomena: the
+      22° halo (red edge at 21.7°) and the sundogs (about 22° from a low Sun) agree.</p>
     <p>Rainbows and moonbows are ray-traced through a spherical drop for the same reason — the
       order of the colours, the gap between the two bows and the light inside the primary come out
       of the trace rather than being drawn in.</p>
@@ -470,7 +474,13 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       fr: `    <p>Halos à 22° et 46°, parhélies, cercle parhélique, arcs tangents, circumzénithal et
       circumhorizontal : pas un de ces angles n'est stocké. Chacun est dérivé de l'indice de
       réfraction de la glace et de la géométrie du cristal, ce qui fait que tout le cortège bouge
-      ensemble et reste cohérent avec la hauteur du Soleil.</p>
+      ensemble et reste cohérent avec la hauteur du Soleil. Des cristaux à bouts pyramidaux ajoutent les halos à
+      rayon impair (9°, 20°, 35°), et des plaquettes libres de tourner autour d'un axe horizontal
+      ajoutent les arcs de Lowitz ; le mélange de cristaux est déclaré par l'enregistrement, puisque
+      aucun relevé ne les compte. Pointez un anneau, un arc ou une parhélie pour qu'il soit nommé ; maintenez Alt pour savoir ce que c'est et ce qui le produit.</p>
+    <p>La simulation des halos a été vérifiée cohérente avec <a href="https://atoptics.co.uk">Atmospheric Optics</a>, la référence sur ces
+      phénomènes : le halo de 22° (bord rouge à 21,7°) et les parhélies (environ 22° d'un Soleil bas)
+      concordent.</p>
     <p>Arcs-en-ciel et arcs lunaires sont tracés dans une goutte sphérique pour la même raison :
       l'ordre des couleurs, la bande sombre entre les deux arcs et la clarté à l'intérieur du
       premier sortent du tracé au lieu d'y être ajoutés.</p>
@@ -478,7 +488,13 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       es: `    <p>Halos de 22° y 46°, parhelios, el círculo parhélico, arcos tangentes, circuncenital y
       circunhorizontal: ninguno de esos ángulos está almacenado. Cada uno se deriva del índice de
       refracción del hielo y de la geometría del cristal, que es lo que hace que todo el conjunto se
-      mueva a la vez y siga siendo coherente con la altura del propio Sol.</p>
+      mueva a la vez y siga siendo coherente con la altura del propio Sol. Los cristales con extremos piramidales añaden los halos
+      de radio impar (9°, 20°, 35°), y las placas libres de girar en torno a un eje horizontal
+      añaden los arcos de Lowitz; la mezcla de cristales la declara la grabación, porque ningún
+      registro los cuenta. Señale un anillo, un arco o un parhelio para que se nombre; mantenga Alt para saber qué es y qué lo produce.</p>
+    <p>La simulación de los halos se ha comprobado coherente con <a href="https://atoptics.co.uk">Atmospheric Optics</a>, la referencia sobre
+      estos fenómenos: el halo de 22° (borde rojo a 21,7°) y los parhelios (unos 22° con un Sol bajo)
+      concuerdan.</p>
     <p>Los arcoíris y los arcos lunares se trazan con rayos a través de una gota esférica por la misma
       razón — el orden de los colores, el hueco entre los dos arcos y la luz dentro del primario
       salen del trazado en lugar de dibujarse.</p>
@@ -486,7 +502,13 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       it: `    <p>Aloni di 22° e 46°, pareli, il cerchio parelico, archi tangenti, circumzenitale e
       circumorizzontale: nessuno di quegli angoli è memorizzato. Ciascuno è derivato dall'indice di
       rifrazione del ghiaccio e dalla geometria del cristallo, ed è questo che fa muovere insieme
-      l'intero fenomeno e lo mantiene coerente con l'altezza del Sole stesso.</p>
+      l'intero fenomeno e lo mantiene coerente con l'altezza del Sole stesso. I cristalli con estremità piramidali aggiungono gli aloni
+      a raggio dispari (9°, 20°, 35°), e le lastrine libere di ruotare attorno a un asse orizzontale
+      aggiungono gli archi di Lowitz; la miscela di cristalli è dichiarata dalla registrazione, perché
+      nessun dato li conta. Punta un anello, un arco o un parelio per vederlo nominato; tieni premuto Alt per sapere cos'è e cosa lo produce.</p>
+    <p>La simulazione degli aloni è stata verificata coerente con <a href="https://atoptics.co.uk">Atmospheric Optics</a>, il riferimento su questi
+      fenomeni: l'alone di 22° (bordo rosso a 21,7°) e i pareli (circa 22° da un Sole basso)
+      concordano.</p>
     <p>Arcobaleni e arcobaleni lunari sono tracciati con raggi attraverso una goccia sferica per la
       stessa ragione — l'ordine dei colori, lo spazio fra i due archi e la luce all'interno del
       primario escono dal tracciamento invece di essere disegnati.</p>

@@ -60,6 +60,7 @@ export const sightingLabels_en: SightingLabels = {
   exposure: "Exposure",
   focusDistance: "Focused at",
   iceCrystalAlignment: "Crystal alignment",
+  rareIceCrystals: "Rare crystals",
   cloudDarkness: "Cloud darkness",
   precipitationType: "Precipitation",
   precipitationNone: "None",
