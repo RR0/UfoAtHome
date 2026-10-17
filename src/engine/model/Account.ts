@@ -1,4 +1,5 @@
 import type { SaidText } from "./SaidText.js"
+import type { SightingTime } from "./Sighting.js"
 
 /**
  * How an account reached whoever wrote the recording.
@@ -59,6 +60,12 @@ export interface Account {
   /** The main observer's age in years AT THE TIME, not today — a 1974 account is read by whoever
    * finds it decades later, and the number that means anything is the one from then. */
   observerAgeYears?: number
+  /**
+   * The main observer's birth date, as precisely as it is known (a full date, a year, or one
+   * marked approximate): the other way of stating `observerAgeYears`, which the editor keeps in
+   * step with it against the observation date (see ObserverAge).
+   */
+  observerBirth?: SightingTime
   /**
    * What the main observer did, as they are described: "boulanger", "pilote de ligne", "gendarme".
    *

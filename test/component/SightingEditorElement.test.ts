@@ -514,6 +514,33 @@ describe("SightingEditorElement observer/time fields", () => {
     expect((shadow.getElementById("exposureSeconds") as HTMLInputElement).value).toBe("1/90")
   })
 
+  it("keeps the birth date and the age then in step, both ways, against the observation date", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const age = shadow.getElementById("observerAge") as HTMLInputElement
+    setInput(shadow, "obs-time", "1974-03-10")
+
+    // A birth date gives the age...
+    setInput(shadow, "observer-birth", "1931-03-14")
+    expect(age.value).toBe("42")
+    expect(element.sightingData.account?.observerAgeYears).toBe(42)
+    expect(element.sightingData.account?.observerBirth?.year).toBe(1931)
+
+    // ...an age that disagrees with it replaces it by the approximate year it implies...
+    setInput(shadow, "observerAge", "50")
+    expect(element.sightingData.account?.observerBirth).toEqual({ year: 1924, raw: "1924~" })
+    expect((shadow.getElementById("observer-birth") as HTMLInputElement).value).toBe("1924~")
+
+    // ...and an age that is consistent with a stated birth leaves it alone.
+    setInput(shadow, "observer-birth", "1931-03-14")
+    setInput(shadow, "observerAge", "42")
+    expect(element.sightingData.account?.observerBirth?.raw).toBe("1931-03-14")
+
+    // Correcting the observation date moves the age of a firm birth.
+    setInput(shadow, "obs-time", "1980-03-10")
+    expect(age.value).toBe("48")
+  })
+
   it("writes the observation-start EDTF text field into event.time", () => {
     const element = mount()
     const shadow = element.shadowRoot!

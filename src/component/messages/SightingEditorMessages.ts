@@ -775,6 +775,8 @@ export interface SightingEditorMessages extends SightingLabels {
   narrativeErrorRejected: string
   /** The main observer's age AT THE TIME, not today. */
   observerAge: string
+  /** The observer's birth date, which stays in step with their age then. */
+  observerBirth: string
   /** What they did, in prose — never a level: banding occupations is each method's own argument
    * (see Account.observerOccupation). */
   observerOccupation: string

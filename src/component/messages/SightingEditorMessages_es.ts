@@ -375,6 +375,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   narrativeErrorUnreachable: "Nada respondió: revisa la conexión",
   narrativeErrorRejected: "Rechazado: {detail}",
   observerAge: "Edad entonces",
+  observerBirth: "Nacido el",
   observerOccupation: "Profesión",
   accountSource: "Relato obtenido",
   accountUrl: "Fuente (URL)",

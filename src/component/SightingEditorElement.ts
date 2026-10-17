@@ -46,6 +46,7 @@ import type { DurationInputElement } from "./DurationInputElement.js"
 import type { DateInputElement } from "./DateInputElement.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
+import { ObserverAge } from "../engine/model/ObserverAge.js"
 import { INSTRUMENTS, Instruments } from "../engine/instrument/Instrument.js"
 import type { Instrument, InstrumentCategory } from "../engine/instrument/Instrument.js"
 import { LightRigs } from "../engine/model/LightRig.js"
@@ -613,6 +614,10 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelObserverLastName: HTMLElement
   private readonly labelObserverFirstNames: HTMLElement
   private readonly labelObserverAge: HTMLElement
+  private readonly labelObserverBirth: HTMLElement
+  private birthDate!: DateInputElement
+  /** What the birth field says now: the date input only reports it by event, never back. */
+  private birth?: SightingTime
   private readonly labelObserverOccupation: HTMLElement
   private readonly labelAccountSource: HTMLElement
   private readonly labelAccountFollowedUp: HTMLElement
@@ -1255,6 +1260,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelObserverLastName = this.shadow.getElementById("label-observer-last-name")!
     this.labelObserverFirstNames = this.shadow.getElementById("label-observer-first-names")!
     this.labelObserverAge = this.shadow.getElementById("label-observer-age")!
+    this.labelObserverBirth = this.shadow.getElementById("label-observer-birth")!
     this.labelObserverOccupation = this.shadow.getElementById("label-observer-occupation")!
     this.labelAccountSource = this.shadow.getElementById("label-account-source")!
     this.labelAccountFollowedUp = this.shadow.getElementById("label-account-followed-up")!
@@ -1703,8 +1709,10 @@ export class SightingEditorElement extends HTMLElement {
     const dateOf = (name: string): DateInputElement => this.shadow.querySelector<DateInputElement>(`${DATE_INPUT_ELEMENT_NAME}[name="${name}"]`)!
     this.startDate = dateOf("obs-time")
     this.endDate = dateOf("obs-end-time")
+    this.birthDate = dateOf("observer-birth")
     this.startDate.messages = this.messages
     this.endDate.messages = this.messages
+    this.birthDate.messages = this.messages
     // The picker says nothing through "datechange" while a segment is missing, so the weather has to hear of it here.
     for (const type of ["input", "change"]) {
       this.shadow.getElementById("obs-time-native")?.addEventListener(type, () => {
@@ -1718,7 +1726,15 @@ export class SightingEditorElement extends HTMLElement {
     this.startDate.addEventListener("datechange", event => {
       const { time } = (event as CustomEvent<{ time: SightingTime | undefined }>).detail
       this.editDate(() => { this.ufoElement.sighting.event.time = time })
+      this.syncAgeFromBirth(true)
     })
+    // A birth date and an age then say one thing two ways: see syncAgeFromBirth / syncBirthFromAge.
+    this.birthDate.addEventListener("datechange", event => {
+      this.birth = (event as CustomEvent<{ time: SightingTime | undefined }>).detail.time
+      this.syncAgeFromBirth(false)
+      this.updateObserverMetadata()
+    })
+    this.observerAgeInput.addEventListener("input", () => this.syncBirthFromAge())
     this.endDate.addEventListener("datechange", event => {
       const { time } = (event as CustomEvent<{ time: SightingTime | undefined }>).detail
       this.editDate(() => { this.ufoElement.sighting.event.endTime = time })
@@ -3146,6 +3162,40 @@ export class SightingEditorElement extends HTMLElement {
    * ambiguous, see sightingDurationBlockedReason). What the date field itself does with text that does
    * not read yet is its own (see EdtfDateField).
    */
+  /**
+   * Carries a birth date over to the age then, against the observation date.
+   *
+   * Only a firm birth moves the age when the OBSERVATION date is corrected (`observationMoved`): a
+   * birth worked back from an age is approximate, and the age was the author's statement — it must
+   * not drift because a date beside it was fixed. Typing the birth always updates the age.
+   */
+  private syncAgeFromBirth(observationMoved: boolean): void {
+    const birth = this.birth
+    const at = this.ufoElement.sighting.event.time
+    if (!birth || !at) return
+    if (observationMoved && !ObserverAge.isFirm(birth)) return
+    const age = ObserverAge.at(birth, at)
+    if (age === undefined) return
+    this.observerAgeInput.value = String(age)
+    this.updateObserverMetadata()
+  }
+
+  /** Carries a typed age over to the birth date: kept when it already gives that age (a stated
+   * birth is worth more than the year its age implies), otherwise replaced by the approximate year. */
+  private syncBirthFromAge(): void {
+    const at = this.ufoElement.sighting.event.time
+    const age = this.numberOrUndefined(this.observerAgeInput.value)
+    if (!at || age === undefined) return
+    const birth = this.birth
+    if (birth && ObserverAge.at(birth, at) === age) return
+    const derived = ObserverAge.birthFor(age, at)
+    if (!derived) return
+    this.birthDate.setPrecise(false)
+    this.birth = derived
+    this.birthDate.time = derived
+    this.updateObserverMetadata()
+  }
+
   private editDate(assign: () => void): void {
     assign()
     this.dropDurationOutrankedByDates()
@@ -3371,6 +3421,7 @@ export class SightingEditorElement extends HTMLElement {
     const followedUp = this.accountFollowedUpSelect.value
     const account: Account = {
       observerAgeYears: this.numberOrUndefined(this.observerAgeInput.value),
+      observerBirth: this.birth,
       observerOccupation: this.observerOccupationInput.value.trim() === ""
         ? undefined
         : this.said.write(sighting.account?.observerOccupation, this.observerOccupationInput.value, this.writingLanguage),
@@ -4975,6 +5026,9 @@ export class SightingEditorElement extends HTMLElement {
     this.observerFirstNamesInput.value = sighting.observer?.firstNames?.join(", ") ?? ""
     this.sightingIdInput.value = sighting.id ?? ""
     this.observerAgeInput.value = sighting.account?.observerAgeYears?.toString() ?? ""
+    this.birthDate.setPrecise(EdtfDateField.opensPrecise(sighting.account?.observerBirth))
+    this.birth = sighting.account?.observerBirth
+    this.birthDate.time = this.birth
     this.observerOccupationInput.value = this.said.read(sighting.account?.observerOccupation) ?? ""
     this.accountSourceSelect.value = sighting.account?.source ?? ""
     this.accountUrlInput.value = sighting.sources?.[0]?.url ?? ""
@@ -8831,6 +8885,7 @@ export class SightingEditorElement extends HTMLElement {
     this.importUrlInput.placeholder = messages.importUrlPlaceholder
     this.importUrlButton.textContent = messages.importButton
     this.labelObserverAge.textContent = messages.observerAge
+    this.labelObserverBirth.textContent = messages.observerBirth
     this.labelObserverOccupation.textContent = messages.observerOccupation
     this.labelAccountSource.textContent = messages.accountSource
     this.labelAccountUrl.textContent = messages.accountUrl
@@ -8960,6 +9015,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelWeatherGroup.textContent = messages.weather
     this.startDate.messages = messages
     this.endDate.messages = messages
+    this.birthDate.messages = messages
     // The chips hold translated labels, so they are rebuilt with the new ones — and the signature
     // check lets that happen without a diff, since every label changed.
     this.paramSummaryBuilder = new SightingSummary(messages, this.naming, this.said, this.tagNames, { messages, locale: this.language })
