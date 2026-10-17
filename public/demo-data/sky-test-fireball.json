@@ -2,6 +2,7 @@
   "version": 1,
   "id": "sky-test-fireball",
   "image": "https://ufoathome.org/demo-data/share/sky-test-fireball.jpg",
+  "summaryTime": 4,
   "tags": [
     "fireball",
     "meteor",

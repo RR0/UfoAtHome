@@ -216,7 +216,7 @@ export interface SightingEvent {
    */
   summary?: SaidText
   /**
-   * The second of the recording (from its start) the project's capture tool photographs for `image`, when the first image
+   * The second of the recording's own timeline (from its start; the player's counter shows the real time instead, stretched over the stated duration: a recording whose motion lasts 20.5 s over a stated 25 s reads 23 on the counter at 18.86 s here) the project's capture tool photographs for `image`, when the first image
    * is not the one that shows the phenomenon: `summaryTime: 3.2`. Absent, 0: the first image. Read by the tool that makes the
    * pictures (scripts/share-cards), never by the player.
    */
