@@ -23,9 +23,11 @@ describe("The Saint-Lô case", () => {
 const TRANSCRIPT = "public/demo-data/interview-saint-lo-2026-10-13.json"
 
 describe.skipIf(!existsSync(TRANSCRIPT))("The transcript of the Saint-Lô interview", () => {
-  const transcript = JSON.parse(readFileSync(TRANSCRIPT, "utf8"))
+  // Read when a test runs, not when the suite is collected: a skipped suite is still collected, and the file is not there for everyone.
+  const read = () => JSON.parse(readFileSync(TRANSCRIPT, "utf8"))
 
   it("gives every turn a known speaker and times in order", () => {
+    const transcript = read()
     expect(transcript.segments.length).toBeGreaterThan(100)
     for (const segment of transcript.segments) {
       expect(Object.keys(transcript.speakers)).toContain(segment.speaker)
@@ -37,12 +39,14 @@ describe.skipIf(!existsSync(TRANSCRIPT))("The transcript of the Saint-Lô interv
   })
 
   it("holds what the case lists of the interview: its title, time, interviewer, witness and summary are the same", () => {
+    const transcript = read()
     const listed = JSON.parse(readFileSync("public/demo-data/case-saint-lo.json", "utf8")).events
       .find((event: { eventType: string }) => event.eventType === "interview")
     for (const key of ["title", "time", "medium", "by", "interviewOf", "summary"]) expect(transcript[key], key).toEqual(listed[key])
   })
 
   it("names the witness by initials and says no first name aloud", () => {
+    const transcript = read()
     expect(transcript.speakers.witness.title).toBe("Q. B.")
     const said = transcript.segments.map((segment: { text: string }) => segment.text).join(" ")
     expect(said).not.toMatch(/Quentin|Jérôme|Bézard/)
