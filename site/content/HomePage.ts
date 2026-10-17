@@ -212,14 +212,12 @@ ${carousel}
           moment appears behind it, along with the weather that was on record. Correct the shape
           until it matches. What you get is a file that is yours; there is no account and nothing is
           uploaded.</p>
-        <p class="use-more">Open the editor →</p>
       </a>
       <a class="use" href="/docs/">
         <h3>Put it on your own site</h3>
         <p>Two lines of HTML place a reconstruction in an article, a case file or a report — your
           recording, on your host, under your name. No framework, no build step, no dependency on
           this site once you hold the files. Use it, change it, redistribute it, fork it.</p>
-        <p class="use-more">Read the documentation →</p>
       </a>
     </div>
   </div>
@@ -237,59 +235,52 @@ ${carousel}
         one this sky has just ruled out. The witness supplies the phenomenon; nothing else is left
         to memory.</p>
       <div class="cards">
-        <div class="card">
+        <a class="card" href="/context/sky/">
           <h4>The sky</h4>
           <p>Sun, Moon and its phase, planets, stars, the Milky Way and the zodiacal light, placed by
             ephemeris for that instant and that place. What is drawn stops where the eye that was
             looking stopped — and where the data itself stops, the tool says so rather than drawing a
             sky emptier than the night was. Point at any of it and it names itself.</p>
-          <p class="card-more"><a href="/context/#sky">Down to which magnitude →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/space/">
           <h4>What else was up there</h4>
           <p>Comets, novae and supernovae, meteor showers, satellites — each drawn only if it could have been visible from
             there, then. Being lit is not the same as being seen, and the Earth's shadow settles that
             one.</p>
-          <p class="card-more"><a href="/context/#space">How each is decided →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/ice/">
           <h4>Ice and water</h4>
           <p>Haloes, sundogs, pillars, tangent and circumzenithal arcs, rainbows and moonbows. Not one
             of those angles is stored: they come out of ice's refractive index and the shape of a
             drop, which is what keeps the whole display consistent with the Sun that made it.</p>
-          <p class="card-more"><a href="/context/#ice">Which ones, and from what →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/weather/">
           <h4>The weather that day</h4>
           <p>Cloud, rain, snow, storms and wind, read from a worldwide hourly reanalysis going back to
             1940 and keyframed along the observation. Clouds form separate metre-based layers with
             their own type, thickness, size, density and motion; individual volumes can be moved to
             test whether they really hide the phenomenon. The exact query stays checkable.</p>
-          <p class="card-more"><a href="/context/#weather">Which record, and what it gives →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/ground/">
           <h4>The ground</h4>
           <p>Real relief and aerial imagery around the witness, and the decor that got in the way:
             buildings, trees, streetlights, vehicles, windows, other witnesses. How high they stood is
             looked up from where they stood, and nobody can be placed under the ground.</p>
-          <p class="card-more"><a href="/context/#ground">Why the horizon moves →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/instrument/">
           <h4>The instrument</h4>
           <p>An eye is not a lens, and the device decides the picture: only the settings it could
             really have had are offered, one that did not exist yet is flagged against the date, and
             it — not the witness — sets how faint a thing could be recorded at all. Which is why so
             many “the sky was full of stars” accounts come with an empty black photograph.</p>
-          <p class="card-more"><a href="/context/#instrument">The numbers behind that →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/pictures/">
           <h4>A picture of the place</h4>
           <p>Everything the scene draws is computed, and nothing tells a faithful reconstruction from
             a plausible one. A photograph of the same place does: laid over the render at any
             opacity, lined up on two or three landmarks, it shows every tree the relief did not know
             — and hands back the heading the witness actually faced, as a measurement.</p>
-          <p class="card-more"><a href="/context/#pictures">How a picture is lined up →</a></p>
-        </div>
+        </a>
       </div>
       <p class="small">Every source is named where its data is reported, and can be swapped for
         another — the picker <em>is</em> the credit. Where each one comes from, what it gives and
@@ -365,7 +356,6 @@ ${carousel}
             ciel de cet instant apparaît derrière, avec la météo qui était relevée. Corrigez la forme
             jusqu'à ce que cela corresponde. Ce que vous obtenez est un fichier qui est le vôtre : il
             n'y a pas de compte, et rien n'est téléversé.</p>
-          <p class="use-more">Ouvrir l'éditeur →</p>
         </a>
         <a class="use" href="/docs/">
           <h3>L'intégrer à votre site</h3>
@@ -373,7 +363,6 @@ ${carousel}
             votre enregistrement, sur votre hébergement, sous votre nom. Aucun <i lang="en">framework</i>,
             aucune compilation, aucune dépendance à ce site dès lors que vous avez les fichiers.
             Utilisez-le, modifiez-le, redistribuez-le, forkez-le.</p>
-          <p class="use-more">Lire la documentation →</p>
         </a>
       </div>
     </div>
@@ -391,63 +380,56 @@ ${carousel}
           ciel vient d'exclure. Le témoin fournit le phénomène ; rien d'autre n'est laissé à la
           mémoire.</p>
       <div class="cards">
-        <div class="card">
+        <a class="card" href="/context/sky/">
           <h4>Le ciel</h4>
           <p>Soleil, Lune et sa phase, planètes, étoiles, Voie lactée et lumière zodiacale, placés par
             éphémérides pour cet instant et ce lieu. Ce qui est dessiné s'arrête où s'arrêtait l'œil
             qui regardait — et là où c'est la donnée qui s'arrête, l'outil le dit plutôt que de
             dessiner un ciel plus vide que ne l'était la nuit. Pointez n'importe quoi et cela se
             nomme.</p>
-          <p class="card-more"><a href="/context/#sky">Jusqu'à quelle magnitude →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/space/">
           <h4>Ce qu'il y avait d'autre là-haut</h4>
           <p>Comètes, novae et supernovae, pluies de météores, satellites — chacun n'est dessiné que s'il pouvait être vu
             de là, à ce moment-là. Être éclairé n'est pas être vu, et c'est l'ombre de la Terre qui
             tranche.</p>
-          <p class="card-more"><a href="/context/#space">Comment chacun est décidé →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/ice/">
           <h4>La glace et l'eau</h4>
           <p>Halos, parhélies, piliers, arcs tangents et circumzénithaux, arcs-en-ciel et arcs
             lunaires. Aucun de ces angles n'est stocké : ils sortent de l'indice de réfraction de la
             glace et de la forme d'une goutte, ce qui garde tout le cortège cohérent avec le Soleil
             qui l'a fait.</p>
-          <p class="card-more"><a href="/context/#ice">Lesquels, et d'après quoi →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/weather/">
           <h4>La météo de ce jour-là</h4>
           <p>Nuages, pluie, neige, orages et vent, lus dans une réanalyse mondiale et horaire qui
             remonte à 1940 et keyframés le long de l'observation. Les nuages forment des couches
             métriques distinctes avec leurs propres type, épaisseur, taille, densité et mouvement ;
             des volumes individuels peuvent être déplacés pour vérifier s'ils masquent réellement le
             phénomène. La requête exacte reste vérifiable.</p>
-          <p class="card-more"><a href="/context/#weather">Quelle source, et ce qu'elle donne →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/ground/">
           <h4>Le sol</h4>
           <p>Relief réel et imagerie aérienne autour du témoin, et le décor qui s'est interposé :
             bâtiments, arbres, lampadaires, véhicules, vitrages, autres témoins. À quelle hauteur il
             se tenait se relève d'où il se tenait, et on ne peut placer personne sous le sol.</p>
-          <p class="card-more"><a href="/context/#ground">Pourquoi l'horizon se déplace →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/instrument/">
           <h4>L'instrument</h4>
           <p>Un œil n'est pas un objectif, et c'est l'appareil qui décide de l'image : seuls les
             réglages qu'il pouvait réellement avoir sont proposés, un appareil qui n'existait pas
             encore est signalé face à la date, et c'est lui — non le témoin — qui fixe ce qui pouvait
             être enregistré. D'où tant de récits de « ciel plein d'étoiles » accompagnés d'une
             photographie noire et vide.</p>
-          <p class="card-more"><a href="/context/#instrument">Les nombres derrière cela →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/pictures/">
           <h4>Une photo des lieux</h4>
           <p>Tout ce que la scène dessine est calculé, et rien ne distingue une reconstitution fidèle
             d'une reconstitution vraisemblable. Une photo du même endroit, si : posée sur le rendu à
             l'opacité qu'on veut, recalée sur deux ou trois repères, elle montre chaque arbre que le
             relief ignorait — et rend le cap que le témoin avait réellement, comme une mesure.</p>
-          <p class="card-more"><a href="/context/#pictures">Comment une photo se recale →</a></p>
-        </div>
+        </a>
       </div>
       <p class="small">Chaque source est nommée là où sa donnée est rapportée, et peut être
         remplacée par une autre — le sélecteur <em>est</em> le crédit. D'où vient chacune, ce qu'elle
@@ -526,7 +508,6 @@ ${carousel}
           momento aparece detrás, junto con el tiempo que quedó registrado. Corrige la forma hasta
           que coincida. Lo que obtienes es un archivo que es tuyo: no hay cuenta y no se sube
           nada.</p>
-        <p class="use-more">Abrir el editor →</p>
       </a>
       <a class="use" href="/docs/">
         <h3>Ponlo en tu propio sitio</h3>
@@ -534,7 +515,6 @@ ${carousel}
           tu grabación, en tu alojamiento, con tu nombre. Sin <i lang="en">framework</i>, sin paso de
           compilación, sin depender de este sitio una vez que tienes los archivos. Úsalo, modifícalo,
           redistribúyelo, haz un fork.</p>
-        <p class="use-more">Leer la documentación →</p>
       </a>
     </div>
   </div>
@@ -552,63 +532,56 @@ ${carousel}
         otra la acaba de descartar este cielo. El testigo aporta el fenómeno; nada más se deja a la
         memoria.</p>
       <div class="cards">
-        <div class="card">
+        <a class="card" href="/context/sky/">
           <h4>El cielo</h4>
           <p>Sol, Luna y su fase, planetas, estrellas, la Vía Láctea y la luz zodiacal, situados por
             efemérides para ese instante y ese lugar. Lo que se dibuja se detiene donde se detenía el
             ojo que miraba — y donde se detienen los propios datos, la herramienta lo dice en lugar de
             dibujar un cielo más vacío de lo que estaba la noche. Señala cualquier cosa y dirá su
             nombre.</p>
-          <p class="card-more"><a href="/context/#sky">Hasta qué magnitud →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/space/">
           <h4>Qué más había allá arriba</h4>
           <p>Cometas, novas y supernovas, lluvias de meteoros, satélites — cada uno dibujado solo si pudo ser visible desde
             allí, en ese momento. Estar iluminado no es lo mismo que ser visto, y la sombra de la
             Tierra lo decide.</p>
-          <p class="card-more"><a href="/context/#space">Cómo se decide cada uno →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/ice/">
           <h4>Hielo y agua</h4>
           <p>Halos, parhelios, pilares, arcos tangentes y circuncenitales, arcoíris y arcoíris
             lunares. Ninguno de esos ángulos está almacenado: salen del índice de refracción del hielo
             y de la forma de una gota, lo que mantiene todo el conjunto coherente con el Sol que lo
             produjo.</p>
-          <p class="card-more"><a href="/context/#ice">Cuáles, y a partir de qué →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/weather/">
           <h4>El tiempo de aquel día</h4>
           <p>Nubes, lluvia, nieve, tormentas y viento, leídos de un reanálisis mundial y horario que
             se remonta a 1940 y fijados en fotogramas clave a lo largo de la observación. Las nubes
             forman capas distintas, medidas en metros, con su propio tipo, espesor, tamaño, densidad y
             movimiento; los volúmenes individuales pueden moverse para comprobar si ocultan realmente
             el fenómeno. La consulta exacta sigue siendo comprobable.</p>
-          <p class="card-more"><a href="/context/#weather">Qué registro, y qué aporta →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/ground/">
           <h4>El suelo</h4>
           <p>Relieve real e imágenes aéreas alrededor del testigo, y el decorado que se interpuso:
             edificios, árboles, farolas, vehículos, ventanas, otros testigos. A qué altura estaban se
             consulta desde donde estaban, y nadie puede quedar colocado bajo tierra.</p>
-          <p class="card-more"><a href="/context/#ground">Por qué se mueve el horizonte →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/instrument/">
           <h4>El instrumento</h4>
           <p>Un ojo no es un objetivo, y el aparato decide la imagen: solo se ofrecen los ajustes que
             realmente pudo tener, uno que aún no existía se señala frente a la fecha, y es él — no el
             testigo — quien fija lo débil que podía ser algo para quedar registrado. Por eso tantos
             relatos de «el cielo estaba lleno de estrellas» vienen con una fotografía negra y
             vacía.</p>
-          <p class="card-more"><a href="/context/#instrument">Las cifras que hay detrás →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/pictures/">
           <h4>Una foto del lugar</h4>
           <p>Todo lo que dibuja la escena está calculado, y nada distingue una reconstrucción fiel de
             una verosímil. Una fotografía del mismo lugar sí: superpuesta al render con cualquier
             opacidad, alineada con dos o tres referencias, muestra cada árbol que el relieve no
             conocía — y devuelve el rumbo al que miraba realmente el testigo, como una medida.</p>
-          <p class="card-more"><a href="/context/#pictures">Cómo se alinea una foto →</a></p>
-        </div>
+        </a>
       </div>
       <p class="small">Cada fuente se nombra allí donde se presentan sus datos, y puede sustituirse
         por otra — el selector <em>es</em> el crédito. De dónde viene cada una, qué aporta y dónde se
@@ -684,7 +657,6 @@ ${carousel}
           quel momento compare dietro, insieme al meteo che era stato registrato. Correggi la forma
           finché non corrisponde. Ciò che ottieni è un file tuo: non c'è nessun account e non viene
           caricato nulla.</p>
-        <p class="use-more">Apri l'editor →</p>
       </a>
       <a class="use" href="/docs/">
         <h3>Mettilo sul tuo sito</h3>
@@ -692,7 +664,6 @@ ${carousel}
           rapporto — la tua registrazione, sul tuo hosting, a tuo nome. Nessun
           <i lang="en">framework</i>, nessuna fase di compilazione, nessuna dipendenza da questo sito
           una volta che hai i file. Usalo, modificalo, ridistribuiscilo, fanne un fork.</p>
-        <p class="use-more">Leggi la documentazione →</p>
       </a>
     </div>
   </div>
@@ -710,65 +681,58 @@ ${carousel}
         questo cielo ha appena escluso. Il testimone fornisce il fenomeno; nient'altro è lasciato alla
         memoria.</p>
       <div class="cards">
-        <div class="card">
+        <a class="card" href="/context/sky/">
           <h4>Il cielo</h4>
           <p>Sole, Luna e la sua fase, pianeti, stelle, la Via Lattea e la luce zodiacale, collocati
             tramite effemeridi per quell'istante e quel luogo. Ciò che viene disegnato si ferma dove
             si fermava l'occhio che guardava — e dove si fermano i dati stessi, lo strumento lo dice
             invece di disegnare un cielo più vuoto di quanto fosse la notte. Indica qualsiasi cosa e
             ti dirà il suo nome.</p>
-          <p class="card-more"><a href="/context/#sky">Fino a quale magnitudine →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/space/">
           <h4>Cos'altro c'era lassù</h4>
           <p>Comete, novae e supernovae, sciami meteorici, satelliti — ciascuno disegnato solo se poteva essere visibile da
             lì, in quel momento. Essere illuminato non è la stessa cosa che essere visto, ed è l'ombra
             della Terra a deciderlo.</p>
-          <p class="card-more"><a href="/context/#space">Come si decide ciascuno →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/ice/">
           <h4>Ghiaccio e acqua</h4>
           <p>Aloni, pareli, colonne di luce, archi tangenti e circumzenitali, arcobaleni e arcobaleni
             lunari. Nessuno di quegli angoli è memorizzato: derivano dall'indice di rifrazione del
             ghiaccio e dalla forma di una goccia, ed è questo che mantiene l'intero fenomeno coerente
             con il Sole che lo ha prodotto.</p>
-          <p class="card-more"><a href="/context/#ice">Quali, e a partire da cosa →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/weather/">
           <h4>Il meteo di quel giorno</h4>
           <p>Nuvole, pioggia, neve, temporali e vento, letti da una rianalisi mondiale oraria che
             risale al 1940 e fissati in fotogrammi chiave lungo l'osservazione. Le nuvole formano
             strati distinti, misurati in metri, ciascuno con il proprio tipo, spessore, dimensione,
             densità e movimento; i singoli volumi possono essere spostati per verificare se nascondono
             davvero il fenomeno. La richiesta esatta resta verificabile.</p>
-          <p class="card-more"><a href="/context/#weather">Quale fonte, e cosa fornisce →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/ground/">
           <h4>Il suolo</h4>
           <p>Rilievo reale e immagini aeree attorno al testimone, e gli elementi che si sono
             frapposti: edifici, alberi, lampioni, veicoli, finestre, altri testimoni. L'altezza a cui
             si trovavano viene ricavata dal punto in cui si trovavano, e nessuno può essere collocato
             sottoterra.</p>
-          <p class="card-more"><a href="/context/#ground">Perché l'orizzonte si sposta →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/instrument/">
           <h4>Lo strumento</h4>
           <p>Un occhio non è un obiettivo, ed è l'apparecchio a decidere l'immagine: vengono proposte
             solo le impostazioni che poteva avere davvero, uno che ancora non esisteva viene segnalato
             rispetto alla data, ed è lui — non il testimone — a stabilire quanto debole potesse essere
             una cosa per venire registrata. Ecco perché tanti racconti di «il cielo era pieno di
             stelle» sono accompagnati da una fotografia nera e vuota.</p>
-          <p class="card-more"><a href="/context/#instrument">I numeri dietro tutto questo →</a></p>
-        </div>
-        <div class="card">
+        </a>
+        <a class="card" href="/context/pictures/">
           <h4>Una foto del luogo</h4>
           <p>Tutto ciò che la scena disegna è calcolato, e nulla distingue una ricostruzione fedele da
             una verosimile. Una fotografia dello stesso luogo sì: sovrapposta al rendering con
             qualsiasi opacità, allineata su due o tre punti di riferimento, mostra ogni albero che il
             rilievo non conosceva — e restituisce la direzione verso cui guardava davvero il
             testimone, come una misura.</p>
-          <p class="card-more"><a href="/context/#pictures">Come si allinea una foto →</a></p>
-        </div>
+        </a>
       </div>
       <p class="small">Ogni fonte è nominata là dove i suoi dati vengono riportati, e può essere
         sostituita con un'altra — il selettore <em>è</em> il credito. Da dove viene ciascuna, cosa

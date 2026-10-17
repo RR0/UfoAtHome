@@ -1,5 +1,6 @@
 import { Licence } from "./Licence.js"
 import { Headings } from "./Headings.js"
+import { Shots } from "./Shots.js"
 import { OfflineKit } from "./OfflineKit.js"
 import { ShareCard } from "./ShareCard.js"
 import {
@@ -78,6 +79,7 @@ export class Layout {
   }
 
   private readonly headings = new Headings()
+  private readonly shots = new Shots()
 
   constructor(private readonly pages: readonly SitePage[], private readonly version: string) {
   }
@@ -183,7 +185,7 @@ ${this.languageRedirect(page, language)}
 <body>
 ${this.header(page, language)}
 <main>
-${this.headings.withAnchors(page.render(language), words.sectionLink, this.anchors(page, language))}
+${this.shots.insert(this.headings.withAnchors(page.render(language), words.sectionLink, this.anchors(page, language)), meta.slug, language)}
 </main>
 ${this.siteFooter(language)}
 ${script ? `<script type="module">\n// Where this site's own pages load their modules from — see Layout.versioned.\nconst SITE_LIB = ${JSON.stringify(this.versioned("/lib"))}\n${script}\n</script>` : ""}

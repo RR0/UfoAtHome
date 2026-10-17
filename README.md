@@ -215,6 +215,13 @@ generated into `dist-site/` too; do not add them to `netlify.toml`.
 A change to the components' API or to the recording format is documented **there**, in `DocsComponentPage.ts`,
 `DocsFormatPage.ts` and friends, in the same commit.
 
+The pages are illustrated with screenshots of the real interface, one WebP per language (the interface shown is in the
+reader's language) in `site/shots/`. `site/Shots.ts` says which heading each one follows and what its caption is, in the
+four languages; the build floats them right and left in turn and fails if a heading or a file is missing.
+`scripts/site-shots/shots.mjs` says how each is taken, and `node scripts/site-shots/capture.mjs [--lang fr] [name ...]`
+takes them from a running `dist-site` (`SITE=http://localhost:3000`). The editor needs WebGL, so the capture runs in a
+headed Chromium, hence outside the sandbox. Change the interface, retake the shots it appears in.
+
 ## Releasing
 
 1. `npm test`, then `npm run build:site` and check the result with `npm run site:serve`.

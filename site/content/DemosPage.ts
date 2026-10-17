@@ -158,14 +158,12 @@ void load()`
   render(language: SiteLanguage): string {
     const words = DemosPage.WORDS[language]
     const count = this.catalogue.groups.reduce((total, group) => total + group.demos.length, 0)
-    const open = { en: "Open", fr: "Ouvrir", es: "Abrir", it: "Apri" }
     const cards = this.catalogue.sections.map(section => {
       const demos = this.catalogue.groups.filter(group => group.section === section.id)
         .reduce((total, group) => total + group.demos.length, 0)
       return `      <a class="use" href="/demos/${section.id}/">
         <h3>${section.title[language]}</h3>
         <p>${section.blurb[language]}</p>
-        <p class="use-more">${open[language]} (${demos}) →</p>
       </a>`
     }).join("\n")
     return `

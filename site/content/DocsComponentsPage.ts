@@ -183,9 +183,9 @@ sighting.scene.ufoElement.play()  // so playback is two properties away</code></
       what you need from one of them is never what you need from the other two at the same
       moment.</p>
     <div class="uses">
-      <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>The shape and its playback, in the real sky and horizon of the recording's own date and place.</p><p class="use-more">Read →</p></a>
-      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>The standard view of a real account: one observer or several, with their toolbar.</p><p class="use-more">Read →</p></a>
-      <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>The whole authoring toolbar, for describing an observation or correcting one.</p><p class="use-more">Read →</p></a>
+      <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>The shape and its playback, in the real sky and horizon of the recording's own date and place.</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>The standard view of a real account: one observer or several, with their toolbar.</p></a>
+      <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>The whole authoring toolbar, for describing an observation or correcting one.</p></a>
     </div>
 
     <h2>Putting one in your application</h2>
@@ -308,9 +308,9 @@ sighting.scene.ufoElement.play()  // la lecture est donc à deux propriétés</c
       que ce dont vous avez besoin de l'un n'est jamais ce dont vous avez besoin des deux autres
       au même moment.</p>
     <div class="uses">
-      <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La forme et sa lecture, dans le vrai ciel et le vrai horizon de la date et du lieu de l'observation.</p><p class="use-more">Lire →</p></a>
-      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vue standard d'un compte rendu réel : un ou plusieurs observateurs, avec leur barre d'outils.</p><p class="use-more">Lire →</p></a>
-      <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>Toute la barre d'outils d'écriture, pour décrire une observation ou en corriger une.</p><p class="use-more">Lire →</p></a>
+      <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La forme et sa lecture, dans le vrai ciel et le vrai horizon de la date et du lieu de l'observation.</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vue standard d'un compte rendu réel : un ou plusieurs observateurs, avec leur barre d'outils.</p></a>
+      <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>Toute la barre d'outils d'écriture, pour décrire une observation ou en corriger une.</p></a>
     </div>
 
     <h2>Intégrer dans votre application</h2>
@@ -433,9 +433,9 @@ sighting.scene.ufoElement.play()  // así que la reproducción está a dos propi
       necesitas de uno de ellos nunca es lo que necesitas de los otros dos en el mismo
       momento.</p>
     <div class="uses">
-      <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La forma y su reproducción, en el cielo y el horizonte reales de la fecha y el lugar del registro.</p><p class="use-more">Leer →</p></a>
-      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vista estándar de un relato real: uno o varios observadores, con su barra de herramientas.</p><p class="use-more">Leer →</p></a>
-      <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>Toda la barra de herramientas de edición, para describir una observación o corregir una.</p><p class="use-more">Leer →</p></a>
+      <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La forma y su reproducción, en el cielo y el horizonte reales de la fecha y el lugar del registro.</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vista estándar de un relato real: uno o varios observadores, con su barra de herramientas.</p></a>
+      <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>Toda la barra de herramientas de edición, para describir una observación o corregir una.</p></a>
     </div>
 
     <h2>Integrarlo en tu aplicación</h2>
@@ -559,9 +559,9 @@ sighting.scene.ufoElement.play()  // quindi la riproduzione è a due proprietà 
       che ti serve da uno di loro non è mai ciò che ti serve dagli altri due nello stesso
       momento.</p>
     <div class="uses">
-      <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La forma e la sua riproduzione, nel cielo e nell'orizzonte reali della data e del luogo della registrazione.</p><p class="use-more">Leggi →</p></a>
-      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vista standard di un resoconto reale: uno o più osservatori, con la loro barra degli strumenti.</p><p class="use-more">Leggi →</p></a>
-      <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>L'intera barra degli strumenti di redazione, per descrivere un'osservazione o correggerne una.</p><p class="use-more">Leggi →</p></a>
+      <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La forma e la sua riproduzione, nel cielo e nell'orizzonte reali della data e del luogo della registrazione.</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vista standard di un resoconto reale: uno o più osservatori, con la loro barra degli strumenti.</p></a>
+      <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>L'intera barra degli strumenti di redazione, per descrivere un'osservazione o correggerne una.</p></a>
     </div>
 
     <h2>Integrarlo nella tua applicazione</h2>

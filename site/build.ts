@@ -21,7 +21,8 @@ import { COMPONENT_DOCS, DocsComponentPage } from "./content/DocsComponentPage.j
 import { FaqPage } from "./content/FaqPage.js"
 import { PrivacyPage } from "./content/PrivacyPage.js"
 import { HtmlPageTree } from "./HtmlPageTree.js"
-import { ContextPage } from "./content/ContextPage.js"
+import { ContextPage, ContextSectionPage } from "./content/ContextPage.js"
+import { CONTEXT_SECTIONS } from "./content/ContextSections.js"
 import { SkillPackage } from "./SkillPackage.js"
 import { OfflineKit } from "./OfflineKit.js"
 
@@ -105,7 +106,8 @@ class SiteBuilder {
       // Written as HTML, with its sub-pages as sub-directories — see HtmlPage and HtmlPageTree.
       ...await HtmlPageTree.read(join(this.root, "site", "pages", "roadmap"), "roadmap", version, { asideFromNav: true }),
       // The long form of the home page's "Contextualise" cards.
-      new ContextPage()
+      new ContextPage(),
+      ...CONTEXT_SECTIONS.map(section => new ContextSectionPage(section))
     ]
     const layout = new Layout(this.pages, version)
 
@@ -135,6 +137,7 @@ class SiteBuilder {
     for (const asset of ["favicon.ico", "icon-192.png", "apple-touch-icon.png", "logo.png", "logo-96.png"]) {
       await cp(join(this.root, "site", "assets", asset), join(this.out, asset))
     }
+    await cp(join(this.root, "site", "shots"), join(this.out, "shots"), { recursive: true })
     await cp(join(this.root, "public", "demo-data"), join(this.out, "demo-data"), { recursive: true })
     // The recording format as a JSON Schema, generated from the types by build:schema, so that a file
     // written by hand or by a language model can be checked before it is played. Linked from the

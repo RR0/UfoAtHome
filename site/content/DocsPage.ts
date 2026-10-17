@@ -99,7 +99,6 @@ export class DocsPage implements SitePage {
     const grid = (cards: ReadonlyArray<Card>) => cards.map(([href, title, blurb]) => `      <a class="use" href="${href}">
         <h3>${title}</h3>
         <p>${blurb}</p>
-        <p class="use-more">${({ en: "Read", fr: "Lire", es: "Leer", it: "Leggi" })[language]} →</p>
       </a>`).join("\n")
 
     return `
