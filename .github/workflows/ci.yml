@@ -36,6 +36,9 @@ jobs:
       # On Windows, a worker per core left the main process too busy to answer the workers' progress
       # reports: every test passed and the run still failed on vitest's "Timeout calling
       # onTaskUpdate" (Node 22, 2026-09-25 and 26). Two workers leave it room.
-      - run: npm test -- --testTimeout=30000 ${{ runner.os == 'Windows' && '--maxWorkers=2' || '' }}
+      # The same on every platform since 2026-10-18: the suite grew, and a worker per core left the main process too busy to answer the workers'
+      # requests for modules ("Timeout calling fetch", on a different job each run: Windows, then macOS, with every test passing). Vitest then
+      # fails the run on those unhandled errors.
+      - run: npm test -- --testTimeout=30000 --maxWorkers=2
       - run: npm run build
       - run: npm run build:site
