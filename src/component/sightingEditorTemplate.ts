@@ -926,11 +926,22 @@ select.weather-field:disabled {
    line on a phone, but at the cost of putting half the groups off-screen with nothing to say they
    are there — the whole complaint being answered here is exactly that kind of invisibility. Two
    wrapped lines of 8 handles at 375px is still a twentieth of what the stacked groups cost. */
+/* Real tabs: a strip sharing one baseline, the open tab raised and joined to the panel below it (same
+   surface, no line between them), the others recessed and lighter. Mixed from CanvasText and Canvas,
+   which this widget's own color-scheme (light dark) makes follow the host page's scheme: a tab that
+   merges with its panel needs a SOLID surface, and a fixed colour read wrong on one of the two schemes. */
 .group-tabs {
+  --tab-line: color-mix(in srgb, CanvasText 35%, transparent);
+  --tab-surface: color-mix(in srgb, CanvasText 5%, Canvas);
+  --tab-recessed: color-mix(in srgb, CanvasText 11%, Canvas);
+  --tab-accent: #4a9eff;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35em;
-  margin-bottom: 0.5em;
+  align-items: flex-end;
+  gap: 0.2em;
+  margin: 0;
+  padding: 0 0.5em;
+  border-bottom: 1px solid var(--tab-line);
 }
 .history {
   display: inline-flex;
@@ -945,31 +956,41 @@ select.weather-field:disabled {
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  color: inherit;
-  background: transparent;
-  /* Mixed from the host page's own text colour, like the chips below — see their rule for why.
-     A fixed #333 fill read as dark-on-dark the first time this element was put on a light page. */
-  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
-  border-radius: 4px;
-  padding: 0.35em 0.7em;
+  color: color-mix(in srgb, CanvasText 70%, transparent);
+  background: var(--tab-recessed);
+  border: 1px solid var(--tab-line);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  padding: 0.35em 0.9em;
+  /* Recessed: a little lower than the open tab, which stands on the baseline. */
+  margin-top: 0.3em;
+  position: relative;
 }
 .group-tab:hover, .subgroup-tab:hover {
-  border-color: color-mix(in srgb, currentColor 55%, transparent);
+  color: CanvasText;
+  background: color-mix(in srgb, CanvasText 16%, Canvas);
 }
-/* The open group's handle reads as attached to the panel below it: same border colour, and the
-   only one filled. Without it, an open panel on a narrow screen (where the handle may have wrapped
-   onto another line entirely) gives no clue which of the eight it belongs to. */
+/* The open tab is raised, joined to its panel (the panel has no top border, and this overlaps the baseline
+   with the panel's own surface) and marked by an accent along its top. */
 .group-tab[aria-expanded="true"], .subgroup-tab[aria-expanded="true"] {
-  background: color-mix(in srgb, currentColor 12%, transparent);
-  border-color: color-mix(in srgb, currentColor 55%, transparent);
+  color: CanvasText;
+  background: var(--tab-surface);
+  margin-top: 0;
+  margin-bottom: -1px;
+  padding-top: 0.5em;
+  padding-bottom: calc(0.35em + 1px);
+  box-shadow: inset 0 3px 0 var(--tab-accent);
+  z-index: 1;
 }
 .group-tab:focus-visible, .subgroup-tab:focus-visible {
   outline: 2px solid #4af;
-  outline-offset: 1px;
+  outline-offset: -2px;
 }
 .group-panel, .subgroup-panel {
-  border: 1px solid #777;
-  border-radius: 4px;
+  border: 1px solid var(--tab-line, color-mix(in srgb, CanvasText 35%, transparent));
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+  background: color-mix(in srgb, CanvasText 5%, Canvas);
   padding: 0.5em 0.75em;
   margin: 0 0 0.5em;
 }
@@ -1005,6 +1026,7 @@ select.weather-field:disabled {
 /* A strip of handles inside a panel — the weather's three parts. */
 .group-panel > .group-tabs {
   margin-top: 0.5em;
+  padding: 0;
 }
 #description {
   font: inherit;
