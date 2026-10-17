@@ -1,6 +1,7 @@
 {
   "version": 1,
   "id": "sky-test-comet",
+  "image": "https://ufoathome.org/demo-data/share/sky-test-comet.jpg",
   "tags": [
     "comet",
     "astronomy"

@@ -1,6 +1,7 @@
 {
   "version": 1,
   "id": "instrument-slr",
+  "image": "https://ufoathome.org/demo-data/share/instrument-slr.jpg",
   "time": {
     "year": 1964,
     "month": 4,

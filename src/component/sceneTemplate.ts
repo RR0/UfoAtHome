@@ -8,6 +8,8 @@ export const html = `
 <div class="stage" id="stage">
   <div class="frame" id="frame">
     <canvas id="scene-canvas"></canvas>
+    <!-- The recording's cover picture, over the scene (and the loader's place) until the reader asks to play: see ScenePoster. -->
+    <img id="scene-poster" class="scene-poster" alt="" hidden>
     <!-- What a reader waiting on a picture may take this for — a video, which it is not — and under it what
          it is: a simulation (see SceneNames.notAVideo and isASimulation). Their letters light up one
          after the other, left to right, while the picture waits (SceneElement.renderLoaderText). Where
@@ -186,6 +188,19 @@ export const css = `
   height: 64px;
   margin: 0.6em 0;
   border-radius: 14px;
+}
+.scene-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+  pointer-events: none;
+  z-index: 1;
+}
+.scene-poster[hidden] {
+  display: none;
 }
 .scene-loader[hidden] {
   display: none;

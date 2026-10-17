@@ -1,6 +1,7 @@
 {
   "version": 1,
   "id": "sky-test-halos",
+  "image": "https://ufoathome.org/demo-data/share/sky-test-halos.jpg",
   "tags": [
     "halo",
     "atmospheric optics",

@@ -17,6 +17,8 @@
   registerSighting()
   const query = new URLSearchParams(location.search)
   const stage = document.getElementById("stage")
+  // The scene itself is photographed, never the recording's cover picture (see SceneElement.showPoster).
+  stage.sceneElement.showPoster = () => {}
   if (query.get("t")) stage.setAttribute("start-time", query.get("t"))
   stage.setAttribute("src", query.get("src"))
   window.__stage = stage

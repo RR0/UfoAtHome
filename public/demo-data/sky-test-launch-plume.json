@@ -1,6 +1,8 @@
 {
   "version": 1,
   "id": "sky-test-launch-plume",
+  "image": "https://ufoathome.org/demo-data/share/sky-test-launch-plume.jpg",
+  "summaryTime": 90,
   "tags": [
     "rocket launch",
     "space jellyfish",

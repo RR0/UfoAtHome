@@ -431,6 +431,50 @@ describe("a scene out of sight", () => {
     expect(element.ufoElement.playbackState).toBe("playing")
   })
 
+  it("shows the cover instead of the loader until play is asked, then the loader for what is left of the wait", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const loader = shadow.getElementById("scene-loader")!
+    const poster = shadow.getElementById("scene-poster") as HTMLImageElement
+    const hold = (element as unknown as { sceneRenderer: { onFirstFrameHold: (holding: boolean) => void } }).sceneRenderer.onFirstFrameHold
+    hold(true)
+    expect(loader.hidden).toBe(false)
+    element.showPoster("https://example.test/cover.jpg")
+    expect(poster.hidden).toBe(false)
+    expect(loader.hidden).toBe(true)
+    // Neither controls nor account's moment over it, as over the loader.
+    const stage = element.ufoElement.shadowRoot!.getElementById("stage")!
+    expect(stage.classList.contains("controls-held")).toBe(true)
+    expect(stage.classList.contains("caption-held")).toBe(true)
+    // Prepared behind it: the scene is whole, and play lets it be seen with no loader.
+    hold(false)
+    expect(stage.classList.contains("controls-held")).toBe(true)
+    element.ufoElement.play()
+    expect(poster.hidden).toBe(true)
+    expect(loader.hidden).toBe(true)
+    expect(stage.classList.contains("controls-held")).toBe(false)
+    // Another recording, not ready when play is asked: the loader takes the poster's place.
+    element.showPoster("https://example.test/cover.jpg")
+    hold(true)
+    expect(loader.hidden).toBe(true)
+    element.ufoElement.play()
+    expect(poster.hidden).toBe(true)
+    expect(loader.hidden).toBe(false)
+  })
+
+  it("puts up the cover of a recording it reads from an address, relative to that address", async () => {
+    const fetched = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ ...rainyJson, image: "cover.svg" })))
+    try {
+      const element = mount()
+      await element.loadFromSrc("https://example.test/demo/rec.json")
+      const poster = element.shadowRoot!.getElementById("scene-poster") as HTMLImageElement
+      expect(poster.hidden).toBe(false)
+      expect(poster.src).toBe("https://example.test/demo/cover.svg")
+    } finally {
+      fetched.mockRestore()
+    }
+  })
+
   it("leaves a replay that was paused paused when the loader goes", async () => {
     const element = mount()
     element.ufoElement.holdClock(true)

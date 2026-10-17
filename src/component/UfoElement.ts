@@ -1051,9 +1051,20 @@ export class UfoElement extends HTMLElement {
     // Asked while a composing element's loader is up: it starts when the loader goes, not behind it.
     if (this.clockHeld) {
       this.playAfterHold = true
+      this.announcePlayRequest()
       return
     }
     this.togglePlayPause()
+  }
+
+  /** Whether the recording plays, or is to as soon as the loader of a composing element goes. */
+  get playRequested(): boolean {
+    return this.playbackState === "playing" || this.playAfterHold
+  }
+
+  /** Tells a composing element the reader asked to play — whether it starts now or when its loader goes (see playRequested). */
+  private announcePlayRequest(): void {
+    this.dispatchEvent(new CustomEvent("playrequest"))
   }
 
   /** Whether a composing element has the clock held behind its loader — see holdClock. */
@@ -2090,8 +2101,10 @@ export class UfoElement extends HTMLElement {
     } else if (this.clockHeld) {
       // Pressed behind the loader: it is what starts the recording when the loader goes.
       this.playAfterHold = !this.playAfterHold
+      if (this.playAfterHold) this.announcePlayRequest()
       return
     } else {
+      this.announcePlayRequest()
       // This call is only ever reached from a real user gesture (the Play button, the canvas's own
       // click-to-play, or a composing element's external button) — exactly what AudioContext.
       // resume() requires, and the only place this element has one.

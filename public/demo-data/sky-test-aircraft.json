@@ -1,6 +1,7 @@
 {
   "version": 1,
   "id": "sky-test-aircraft",
+  "image": "https://ufoathome.org/demo-data/share/sky-test-aircraft.jpg",
   "tags": [
     "aircraft",
     "long exposure",

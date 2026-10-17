@@ -1,6 +1,8 @@
 {
   "version": 1,
   "id": "sky-test-satellites",
+  "image": "https://ufoathome.org/demo-data/share/sky-test-satellites.jpg",
+  "summaryTime": 46,
   "tags": [
     "satellite",
     "Starlink",

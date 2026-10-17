@@ -11,6 +11,7 @@
  *   PLAYWRIGHT_MODULE=/path/to/node_modules/playwright-core npx tsx scripts/share-cards/ShareCards.ts
  *   ... --sheet [name...]     writes the contact sheets to $TMPDIR/share-sheets instead
  *   ... [name...]             only the named recordings (observer-cussac, ...)
+ *   SHARE_CARDS_GL=software    draws with SwiftShader instead of the graphics card: its ground is a black disc edged with white, only for a machine with none
  *   ... --link [name...]      writes the `image` fields from the photographs already taken, without photographing
  *
  * The last step of making a recording: once photographed, its `image` is written into it (see `link`), so that
@@ -36,6 +37,8 @@ class ShareCards {
   /** A frame needs the scene to be whole (the loader gone) and a moment for the last textures to be drawn. */
   static readonly SETTLE_MS = 2000
   static readonly TIMEOUT_MS = 120_000
+  /** How long the relief and imagery under the observer are waited for, once the first frame is shown. */
+  static readonly GROUND_MS = 60_000
   /** What a JPEG of the card's size weighs under which it holds nothing but black (a real night scene weighs more), and how many more looks it is given. */
   static readonly BLACK_FRAME_BYTES = 8 * 1024
   static readonly BLACK_FRAME_RETRIES = 15
@@ -43,9 +46,9 @@ class ShareCards {
   private readonly root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..")
   private readonly demoData = path.join(this.root, "public", "demo-data")
 
-  /** The accounts a case replays (not the readings of it): what a card is a picture of. */
+  /** The accounts a case replays (not the readings of it), and the sky and instrument demos: what a card, and the player's poster, is a picture of. */
   recordings(names: string[]): string[] {
-    const all = readdirSync(this.demoData).filter(file => /^observer-.*\.json$/.test(file)).map(file => file.replace(/\.json$/, ""))
+    const all = readdirSync(this.demoData).filter(file => /^(observer|sky-test|instrument)-.*\.json$/.test(file)).map(file => file.replace(/\.json$/, ""))
     return names.length > 0 ? all.filter(name => names.includes(name)) : all
   }
 
@@ -59,7 +62,9 @@ class ShareCards {
   private span(name: string): { start: number, end: number } {
     const json = JSON.parse(readFileSync(path.join(this.demoData, `${name}.json`), "utf8"))
     const times = (json.timeline?.keyframes ?? []).map((keyframe: { t: number }) => keyframe.t / 1000)
-    return times.length > 0 ? { start: Math.min(...times), end: Math.max(...times) } : { start: 0, end: 10 }
+    // A sky that is set once and left to run states its length, not keyframes.
+    const length = typeof json.durationSeconds === "number" ? json.durationSeconds : 0
+    return times.length > 0 ? { start: Math.min(...times), end: Math.max(length, ...times) } : { start: 0, end: Math.max(length, 10) }
   }
 
   async run(args: string[]): Promise<void> {
@@ -76,7 +81,7 @@ class ShareCards {
     const browser = await chromium.launch({
       executablePath: ShareCards.CHROME,
       headless: true,
-      args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"]
+      args: process.env.SHARE_CARDS_GL === "software" ? ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] : ["--use-angle=metal", "--ignore-gpu-blocklist"]
     })
     try {
       const out = sheet ? path.join(tmpdir(), "share-sheets") : path.join(this.demoData, "share")
@@ -103,6 +108,18 @@ class ShareCards {
     const image = `${ShareCards.ORIGIN}/demo-data/share/${name.replace(/^observer-/, "")}.jpg`
     const text = readFileSync(file, "utf8")
     const layout = /^( *)"version":( ?)/m.exec(text)
+    if (!layout && /^\{ ?"version"/.test(text)) {
+      // A recording written on one line: the field goes after its id, on that line.
+      const inline = /"id": ?"[^"]*",/
+      const existingInline = /"image": ?"[^"]*", ?/
+      const withField = existingInline.test(text)
+        ? text.replace(existingInline, `"image": ${JSON.stringify(image)}, `)
+        : text.replace(inline, match => `${match} "image": ${JSON.stringify(image)},`)
+      JSON.parse(withField)
+      writeFileSync(file, withField)
+      console.log(`${name}.json: ${image}`)
+      return
+    }
     if (!layout) throw new Error(`${name}.json has no top-level "version" to read its layout from`)
     const [, indent, space] = layout
     const field = `${indent}"image":${space}${JSON.stringify(image)},\n`
@@ -124,6 +141,10 @@ class ShareCards {
         const loader = stage?.scene?.shadowRoot?.getElementById("scene-loader")
         return loader && loader.hidden === true
       }, null, { timeout: ShareCards.TIMEOUT_MS, polling: 500 })
+      // The ground of a recording with a place is asked for over the network, after the loader has gone: waited for, or the horizon is a black disc
+      // edged with white. A recording without a place never has one, and gives up after the time it was promised.
+      await page.waitForFunction(() => Boolean((window as any).__stage.scene.sceneRenderer.terrainMesh), null, { timeout: ShareCards.GROUND_MS, polling: 500 })
+        .catch(() => undefined)
       await page.waitForTimeout(ShareCards.SETTLE_MS)
       const frame = await page.evaluate(() => {
         const box = (window as any).__stage.scene.shadowRoot.getElementById("frame").getBoundingClientRect()

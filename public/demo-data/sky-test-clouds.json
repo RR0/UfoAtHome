@@ -1,6 +1,7 @@
 {
   "version": 1,
   "id": "sky-test-clouds",
+  "image": "https://ufoathome.org/demo-data/share/sky-test-clouds.jpg",
   "tags": [
     "clouds",
     "weather"

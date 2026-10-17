@@ -1,6 +1,7 @@
 {
   "version": 1,
   "id": "instrument-instamatic",
+  "image": "https://ufoathome.org/demo-data/share/instrument-instamatic.jpg",
   "time": {
     "year": 1964,
     "month": 4,

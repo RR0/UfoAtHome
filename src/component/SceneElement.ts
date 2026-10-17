@@ -44,6 +44,7 @@ import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { loadSceneNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { SceneNaming } from "./messages/SceneNames.js"
+import { ScenePoster } from "./ScenePoster.js"
 import { OPTICS_TOOLTIPS_EN } from "./messages/OpticsTooltips.js"
 import { SceneCredits } from "./SceneCredits.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
@@ -795,18 +796,15 @@ export class SceneElement extends HTMLElement {
     this.renderLoaderText("This is not a video", "It is a real-time simulation.")
     this.busyElement = this.shadow.getElementById("scene-busy")!
     this.busyNote = this.shadow.getElementById("scene-busy-note")!
+    this.loader = loader
+    this.poster = new ScenePoster(this.shadow.getElementById("scene-poster") as HTMLImageElement, () => {
+      // The poster goes while the scene still waits: the loader comes at once, with no pause before its first appearance.
+      this.loader.style.animationDelay = !this.poster.up && this.holding ? "0s" : ""
+      this.applyHold()
+    })
     this.sceneRenderer.onFirstFrameHold = holding => {
-      loader.hidden = !holding
       this.holding = holding
-      // Nothing of the scene under the black screen is named: not an object's tooltip, not the account's first moment
-      if (holding) this.hoverTooltip.hidden = true
-      // The sentence saying what this is not (a video) has the picture to itself while it waits: the
-      // account's first moment would be printed over it, both centred, and neither could be read.
-      this.ufoElement.captionHeld = holding
-      // Nor are the controls: on a phone they stood over the sentence saying what this is.
-      this.ufoElement.controlsHeld = holding
-      // And the clock: the observation does not begin behind the loader.
-      this.ufoElement.holdClock(holding)
+      this.applyHold()
     }
     this.hoverTooltip = this.shadow.getElementById("hover-tooltip")!
 
@@ -842,6 +840,8 @@ export class SceneElement extends HTMLElement {
     this.creditsButton.setAttribute("aria-label", CREDITS_LABEL)
     this.sceneRenderer.onMapSubjectBounds = bounds => this.ufoElement.setMapSubjectBounds(bounds)
     this.ufoElement.addEventListener("timeupdate", this.handleTimeUpdate)
+    // Playing is what takes the cover away — the scene behind it is shown at once if whole, else behind the loader.
+    this.ufoElement.addEventListener("playrequest", () => this.poster.release())
     this.ufoElement.seekPreviewPainter = (t, canvas) => this.seekPreviewOf(canvas).paint(t, canvas)
     // The weather is heard through this element, the button that silences it is the player's.
     this.ufoElement.addEventListener("mutedchange", () => this.applyLevel())
@@ -1182,7 +1182,38 @@ export class SceneElement extends HTMLElement {
     this.holdForNewScene(fetching)
     const json = (await fetching) as SightingRecordingJson
     this.documentUrl = new URL(url, location.href).href
+    // Its cover picture, if it has one, stands in for the loader until play is asked — see showPoster.
+    this.showPoster(this.ufoElement.playRequested ? undefined : json.image, this.documentUrl)
     this.sightingData = json
+  }
+
+  private loader!: HTMLElement
+  private poster!: ScenePoster
+
+  /**
+   * Shows the recording's cover picture at once, in place of the loader, until the reader asks to play; the scene is prepared behind it.
+   * Without a picture the loader shows as always. Set it AFTER `sightingData`'s hold has begun or before: either way, it is the poster
+   * that stands while the scene waits.
+   */
+  showPoster(image: string | undefined, base?: string): void {
+    this.poster.show(image, base)
+  }
+
+  /** Puts on screen what the hold on the first frame asks for: the loader, or the poster standing in for it. */
+  private applyHold(): void {
+    const holding = this.holding
+    const covered = this.poster.up
+    this.loader.hidden = !holding || covered
+    // Nothing of the scene under the black screen is named: not an object's tooltip, not the account's first moment
+    if (holding) this.hoverTooltip.hidden = true
+    // The sentence saying what this is not (a video) has the picture to itself while it waits: the
+    // account's first moment would be printed over it, both centred, and neither could be read.
+    // The poster is no different: it has neither the caption nor the controls over it.
+    this.ufoElement.captionHeld = holding || covered
+    // Nor are the controls: on a phone they stood over the sentence saying what this is.
+    this.ufoElement.controlsHeld = holding || covered
+    // And the clock: the observation does not begin behind the loader.
+    this.ufoElement.holdClock(holding)
   }
 
   /**

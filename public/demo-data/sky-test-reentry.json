@@ -1,6 +1,8 @@
 {
   "version": 1,
   "id": "sky-test-reentry",
+  "image": "https://ufoathome.org/demo-data/share/sky-test-reentry.jpg",
+  "summaryTime": 52,
   "tags": [
     "reentry",
     "space debris",

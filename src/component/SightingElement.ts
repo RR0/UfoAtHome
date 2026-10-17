@@ -1035,6 +1035,11 @@ export class SightingElement extends HTMLElement {
     // A recording read from an address states its models' addresses relative to it; one set in
     // memory (src "") has none, and the page's own address is all its relative ones can mean.
     this.sceneElement.documentUrl = entry.src ? new URL(entry.src, location.href).href : undefined
+    // Its cover picture stands in for the loader until play is asked, unless it already was (another observer picked while playing).
+    // The recording's own picture, else the case's; relative to the file stating it.
+    if (this.sceneElement.ufoElement.playRequested) this.sceneElement.showPoster(undefined)
+    else if (entry.sighting.image) this.sceneElement.showPoster(entry.sighting.image, entry.src ? new URL(entry.src, location.href).href : undefined)
+    else this.sceneElement.showPoster(this.caseSource?.json.image, this.caseSource?.url)
     // Another recording: shown once it is whole, not built in view — see SceneElement.holdForNewScene.
     this.sceneElement.holdForNewScene()
     this.sceneElement.sightingData = entry.sighting
