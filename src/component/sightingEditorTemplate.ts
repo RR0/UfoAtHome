@@ -961,7 +961,7 @@ select.weather-field:disabled {
   background: var(--tab-recessed);
   border: 1px solid var(--tab-line);
   border-radius: 8px 8px 0 0;
-  padding: 0.4em 0.9em;
+  padding: 0.4em 0.6em;
   /* Overlapping its neighbours by one border, and the strip's baseline by one, so that nothing separates
      two tabs, on a line or from one line to the next. */
   margin: 0 0 -1px -1px;
