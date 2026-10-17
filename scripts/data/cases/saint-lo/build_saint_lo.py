@@ -32,6 +32,7 @@ import pathlib
 # A variant for trying another start without touching the published file: START_AZ=300 OUT_NAME=observer-saint-lo-wnw.json (the call sheet of 2026-10-13 had
 # west-north-west; in the call itself he said north-north-east, about 25 degrees east of north, and will check with a compass: see ZENITH_MS below).
 START_AZ = float(os.environ.get("START_AZ", "25"))
+FOV = float(os.environ.get("FOV", "60"))                # only to look closer at the wing: the published recording keeps 60
 OUT = pathlib.Path("public/demo-data") / os.environ.get("OUT_NAME", "observer-saint-lo.json")
 SURROUNDINGS = pathlib.Path(__file__).with_name("surroundings.json")
 
@@ -355,6 +356,77 @@ SHAPES = [
     ("aura", "oval", None, 1.8, 4.0, HEAD_DEPTH / 2 + 0.9, 0.0, "#f2e08a", 0.95, 0, 0.8,
      tr("nappe jaunâtre autour de l'arrière", "yellowish veil around the rear")),
 ]
+
+
+# --- the wing as he drew it flat (call-2026-10-13/vue-a-plat-4k.png), WING=flat -------------------------------------
+# A symmetric arch, flatter than a half-moon: a bright rim along the front, under it a translucent veil of the same arch, and from the rim a comb of
+# elongated lobes that fade backwards, the middle ones the longest. Measured on the drawing (as fractions of its width): the arch drops by 0.23 from its
+# top to its tips, the rim is 0.055 thick, the lobes reach 0.15 to 0.2 behind it (0.33 in the middle), more than thirty of them. He told 4 a side and
+# 2 in the middle, and an arc of 20 degrees: the drawing says otherwise, and the drawing is what he is satisfied with.
+WING = os.environ.get("WING", "flat")                 # "crescent": the half-moon of the first versions, from his written replies
+FLAT_SAG, FLAT_RIM, FLAT_VEIL, FLAT_LOBES = 0.23, 0.07, 0.24, 25
+FLAT_DEPTH = FLAT_SAG + FLAT_VEIL                  # of the width: from the top of the arch to the back of the veil
+
+
+def _arch(u, lift=0.0):
+    """x (0 back, 1 front, in the box) of the arch at u (-1 to 1 across), `lift` of the width behind the front."""
+    return 1.0 - FLAT_SAG / FLAT_DEPTH * u * u - lift / FLAT_DEPTH
+
+
+def _band(lift_front, lift_back, steps=21):
+    us = [-1 + 2 * i / (steps - 1) for i in range(steps)]
+    front = [{"x": round(max(0.0, _arch(u, lift_front)), 3), "y": round((u + 1) / 2, 3)} for u in us]
+    back = [{"x": round(max(0.0, _arch(u, lift_back)), 3), "y": round((u + 1) / 2, 3)} for u in reversed(us)]
+    return front + back
+
+
+def _tooth_length(i, u):
+    """How far behind the rim the i-th tooth reaches, as a part of the width: uneven, and the longest in the middle."""
+    return 0.2 + 0.04 * math.sin(i * 2.3) + 0.03 * math.sin(i * 5.1) + 0.15 * math.exp(-(u / 0.14) ** 2)
+
+
+def _comb(width_part, length_part, root):
+    """One polygon whose front follows the arch and whose back is cut into rounded teeth with narrow gaps between them: the back of the wing is
+    striated and toothed. One shape, not one a tooth: every shape is a canvas painted again at each frame, and fifty of them took the player
+    from 62 to 24 frames a second (measured, in the pane)."""
+    pitch = 1.9 / (FLAT_LOBES - 1)
+    hw = pitch / 2 * width_part                      # half-width of a tooth, across, in halves of the width
+    rr = hw / 2                                      # the same, as a part of the width: the radius of its rounded tip
+
+    def at(u, lift):
+        return {"x": round(max(0.0, _arch(u, lift)), 3), "y": round((u + 1) / 2, 3)}
+
+    steps = 21
+    points = [at(-1 + 2 * k / (steps - 1), root) for k in range(steps)]
+    for i in reversed(range(FLAT_LOBES)):
+        u = -0.95 + pitch * i
+        tip = root + _tooth_length(i, u) * length_part
+        points.append(at(u + hw, root + 0.004))
+        points.append(at(u + hw, tip - rr))
+        points += [at(u + hw * math.cos(t * math.pi / 6), tip - rr + rr * math.sin(t * math.pi / 6)) for t in range(1, 6)]
+        points.append(at(u - hw, tip - rr))
+        points.append(at(u - hw, root + 0.004))
+    return points
+
+
+def flat_shapes():
+    depth = FLAT_DEPTH * ACROSS
+    rim = ("rim", "polygon", _band(0.0, FLAT_RIM), depth, ACROSS, 0.0, 0.0, "#fffdf4", 0.05, 0.1, 0.06,
+           tr("bord avant brillant, net", "bright, sharp front edge"))
+    # A thin veil right under the rim, where the teeth are brightest, not a flat fill.
+    veil = ("veil", "polygon", _band(FLAT_RIM * 0.6, FLAT_RIM + 0.06), depth, ACROSS, 0.0, 0.0, "#8d8a78", 0.8, 0, 0.1,
+            tr("voile translucide sous le bord", "translucent veil under the edge"))
+    grey = ("teeth", "polygon", _comb(0.9, 0.85, FLAT_RIM * 0.5), depth, ACROSS, 0.0, 0.0, "#cdc8ad", 0.35, 0, 0.04,
+            tr("arrière strié et denté", "striated, toothed rear"))
+    threads = ("filaments", "polygon", _comb(0.28, 1.0, FLAT_RIM * 0.8), depth, ACROSS, 0.0, 0.0, "#f7f0d0", 0.05, 0.1, 0.02,
+               tr("filaments clairs entre les dents", "light filaments between the teeth"))
+    aura = ("aura", "oval", None, 0.4 * ACROSS, 1.0 * ACROSS, depth / 2 + 0.1, 0.0, "#f2e08a", 0.985, 0, 0.4,
+            tr("nappe jaunâtre autour de l'arrière", "yellowish veil around the rear"))
+    return [rim, veil, grey, threads, aura]
+
+
+if WING == "flat":
+    SHAPES = flat_shapes()
 IDS = [s[0] for s in SHAPES]
 
 
@@ -416,7 +488,7 @@ def observer_track():
     for t in range(0, DURATION_MS + 1, STEP_MS * 2):
         heading, pitch = eye(t)
         keys.append({"t": t, "pose": {"lat": LAT, "lng": LNG, "elevationM": 0,
-                                      "headingDeg": round(heading, 2), "pitchDeg": round(pitch, 2), "fovDeg": 60}})
+                                      "headingDeg": round(heading, 2), "pitchDeg": round(pitch, 2), "fovDeg": FOV}})
     keys[0]["pose"]["headingDeg"] = stated(GAZE_AZ, "stated",
         "call of 2026-10-13: \"je regardais [...] est, sud-est, mais légèrement\" (the written reply said west-south-west; his friend was the one looking west)")
     keys[0]["pose"]["pitchDeg"] = stated(GAZE_PITCH, "stated",
