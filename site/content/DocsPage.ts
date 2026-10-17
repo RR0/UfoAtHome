@@ -1,4 +1,5 @@
 import type { PageMeta, Said, SiteLanguage, SitePage } from "../SitePage.js"
+import { Licence } from "../Licence.js"
 
 /**
  * The documentation hub.
@@ -197,17 +198,17 @@ npm run build:all    # ${({
     <p>${({
       en: `These pages are the reference. The <a href="https://github.com/RR0/UfoAtHome#readme">README</a>
          says what contributing takes: installing, rebuilding the data, testing, debugging, releasing;
-         the reasoning behind each choice is in the code comments. Everything is MIT — see <a href="/faq/">the FAQ</a> for what that lets you do.`,
+         the reasoning behind each choice is in the code comments. Everything is ${Licence.mit()} — see <a href="/faq/">the FAQ</a> for what that lets you do.`,
       fr: `Ces pages sont la référence. Le <a href="https://github.com/RR0/UfoAtHome#readme">README</a>
          dit ce qu'il faut pour contribuer : installer, reconstruire les données, tester, déboguer,
-         publier ; le raisonnement derrière chaque choix est dans les commentaires du code. Tout est en MIT — voir <a href="/faq/">la FAQ</a> pour ce que cela vous
+         publier ; le raisonnement derrière chaque choix est dans les commentaires du code. Tout est en ${Licence.mit()} — voir <a href="/faq/">la FAQ</a> pour ce que cela vous
          autorise.`,
       es: `Estas páginas son la referencia. El <a href="https://github.com/RR0/UfoAtHome#readme">README</a>
          dice lo que hace falta para contribuir: instalar, reconstruir los datos, probar, depurar, publicar;
-         el razonamiento detrás de cada decisión está en los comentarios del código. Todo está bajo MIT — consulta <a href="/faq/">las preguntas frecuentes</a> para saber lo que eso te permite.`,
+         el razonamiento detrás de cada decisión está en los comentarios del código. Todo está bajo ${Licence.mit()} — consulta <a href="/faq/">las preguntas frecuentes</a> para saber lo que eso te permite.`,
       it: `Queste pagine sono il riferimento. Il <a href="https://github.com/RR0/UfoAtHome#readme">README</a>
          dice cosa serve per contribuire: installare, ricostruire i dati, testare, fare il debug, pubblicare;
-         il ragionamento dietro ogni scelta è nei commenti del codice. Tutto è sotto licenza MIT — vedi <a href="/faq/">le FAQ</a> per sapere cosa ti consente di fare.`
+         il ragionamento dietro ogni scelta è nei commenti del codice. Tutto è sotto licenza ${Licence.mit()} — vedi <a href="/faq/">le FAQ</a> per sapere cosa ti consente di fare.`
     })[language]}</p>
   </div>
 </section>

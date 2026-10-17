@@ -1,5 +1,6 @@
 import { DocsSection } from "./DocsSection.js"
 import type { PageMeta, Said, SiteLanguage } from "../SitePage.js"
+import { Licence } from "../Licence.js"
 
 /** One source, as the table states it. Every cell is said in both languages. */
 interface SourceRow {
@@ -10,6 +11,8 @@ interface SourceRow {
   when: Said<string>
   /** Where the page gets it from, and the credit or licence it is used under. */
   hosting: Said<string>
+  /** Where the text of the library's licence is, when the hosting cell names it (a word MIT then links to it). */
+  licenceUrl?: string
   /** Why this source, what was turned down, and the limits that are kept in view. */
   choices: Said<string>
 }
@@ -133,7 +136,7 @@ export class DocsSourcesPage extends DocsSection {
       heading: { en: "The sky", fr: "Le ciel", es: "El cielo", it: "Il cielo" },
       rows: [
         {
-          name: "astronomy-engine", url: "https://github.com/cosinekitty/astronomy",
+          name: "astronomy-engine", url: "https://github.com/cosinekitty/astronomy", licenceUrl: "https://github.com/cosinekitty/astronomy/blob/HEAD/LICENSE",
           provides: { en: "Positions and magnitudes of the Sun, Moon and planets; the Moon's phase; sky coordinates; and, for an eclipse, how much of the Sun the Moon hides from this place at this instant.", fr: "Positions et magnitudes du Soleil, de la Lune et des planètes ; phase de la Lune ; coordonnées célestes ; et, pour une éclipse, quelle part du Soleil la Lune cache de ce lieu à cet instant.", es: "Posiciones y magnitudes del Sol, la Luna y los planetas; la fase de la Luna; coordenadas celestes; y, para un eclipse, qué parte del Sol oculta la Luna desde este lugar en este instante.", it: "Posizioni e magnitudini del Sole, della Luna e dei pianeti; la fase della Luna; coordinate celesti; e, per un'eclissi, quanta parte del Sole la Luna nasconde da questo luogo in questo istante." },
           when: { en: "In the page, for every recording with a date.", fr: "Dans la page, pour tout enregistrement daté.", es: "En la página, para toda grabación con fecha.", it: "Nella pagina, per ogni registrazione datata." },
           hosting: { en: "Bundled library, MIT.", fr: "Bibliothèque embarquée, MIT.", es: "Biblioteca incluida, MIT.", it: "Libreria inclusa, MIT." },
@@ -297,7 +300,7 @@ export class DocsSourcesPage extends DocsSection {
           choices: { en: "Hosted here because the original server cannot be read from a browser. 2.8 GB of snapshots are kept as 113 MB: every day for naked-eye objects and for Starlinks in their first 60 days (the trains), one set a week otherwise. Debris and objects nobody measured are dropped. A set is never used more than 7 days from its epoch, so a hole in the archive (three months in late 2025) is reported as a hole rather than filled with a stale orbit.", fr: "Hébergée ici parce que le serveur d'origine n'est pas lisible depuis un navigateur. 2,8 Go de relevés sont gardés en 113 Mo : chaque jour pour les objets visibles et les Starlink dans leurs 60 premiers jours (les trains), un jeu par semaine sinon. Les débris et les objets que personne n'a mesurés sont écartés. Un jeu n'est jamais utilisé à plus de 7 jours de son époque : un trou dans l'archive (trois mois fin 2025) est signalé comme un trou plutôt que comblé par une orbite périmée.", es: "Alojado aquí porque el servidor original no puede leerse desde un navegador. 2,8 GB de instantáneas se conservan en 113 MB: cada día para los objetos visibles a simple vista y para los Starlink en sus primeros 60 días (los trenes), un conjunto por semana en los demás casos. Se descartan los desechos y los objetos que nadie midió. Un conjunto nunca se usa a más de 7 días de su época, así que un hueco en el archivo (tres meses a finales de 2025) se señala como hueco en lugar de rellenarse con una órbita caducada.", it: "Ospitato qui perché il server originale non è leggibile da un browser. 2,8 GB di istantanee sono conservati in 113 MB: ogni giorno per gli oggetti visibili a occhio nudo e per gli Starlink nei loro primi 60 giorni (i treni), un set a settimana altrimenti. Detriti e oggetti che nessuno ha misurato sono scartati. Un set non è mai usato a più di 7 giorni dalla sua epoca, quindi un buco nell'archivio (tre mesi a fine 2025) è segnalato come buco anziché riempito con un'orbita superata." }
         },
         {
-          name: "satellite.js (SGP4)", url: "https://github.com/shashwatak/satellite-js",
+          name: "satellite.js (SGP4)", url: "https://github.com/shashwatak/satellite-js", licenceUrl: "https://github.com/shashwatak/satellite-js/blob/HEAD/LICENSE.md",
           provides: { en: "The standard propagator for these element sets, and the Sun's position; the Earth's umbra and penumbra are computed on top.", fr: "Le propagateur standard de ces éléments, et la position du Soleil ; l'ombre et la pénombre de la Terre sont calculées par-dessus.", es: "El propagador estándar para estos conjuntos de elementos, y la posición del Sol; la umbra y la penumbra de la Tierra se calculan encima.", it: "Il propagatore standard per questi set di elementi, e la posizione del Sole; l'ombra e la penombra della Terra sono calcolate in aggiunta." },
           when: { en: "Loaded on demand, for covered dates only.", fr: "Chargé à la demande, pour les dates couvertes seulement.", es: "Cargado bajo demanda, solo para las fechas cubiertas.", it: "Caricato su richiesta, solo per le date coperte." },
           hosting: { en: "Bundled library, MIT.", fr: "Bibliothèque embarquée, MIT.", es: "Biblioteca incluida, MIT.", it: "Libreria inclusa, MIT." },
@@ -622,7 +625,7 @@ export class DocsSourcesPage extends DocsSection {
         <td><a href="${row.url}">${this.escape(row.name)}</a></td>
         <td>${this.escape(row.provides[language])}</td>
         <td>${this.escape(row.when[language])}</td>
-        <td>${this.escape(row.hosting[language])}</td>
+        <td>${this.hosting(row, language)}</td>
         <td>${this.escape(row.choices[language])}</td>
       </tr>`).join("\n")
       return `
@@ -650,6 +653,12 @@ ${sections}
   </div>
 </section>
 `
+  }
+
+  /** What a row says of how it is hosted, the word MIT a link to the library's licence when the row gives one. */
+  private hosting(row: SourceRow, language: SiteLanguage): string {
+    const text = this.escape(row.hosting[language])
+    return row.licenceUrl ? text.replace(/\bMIT\b/, Licence.mit(row.licenceUrl)) : text
   }
 
   private escape(text: string): string {

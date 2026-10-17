@@ -1,4 +1,5 @@
 import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
+import { Licence } from "../Licence.js"
 
 /** The page that answers the questions people actually hesitate on before adopting the thing. */
 export class FaqPage implements SitePage {
@@ -64,7 +65,7 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>What does the licence allow?</h3>
-      <p>UFO@home is under the <a href="https://github.com/RR0/UfoAtHome/blob/master/LICENSE">MIT
+      <p>UFO@home is under the <a href="${Licence.OWN_URL}">MIT
         licence</a>. That allows you to:</p>
       <ul class="plain">
         <li>use it on any site, including a commercial one;</li>
@@ -219,10 +220,10 @@ export class FaqPage implements SitePage {
         an <em>observer</em> described, and it is built around what an account can and cannot say —
         angles rather than metres, a stated appearance rather than a placed object, and an explicit
         record of who supplied every non-testimonial fact.</p>
-      <p>Their licences differ too. Sitrec was MIT-licensed; it was archived in March 2026 in
+      <p>Their licences differ too. Sitrec was ${Licence.mit(Licence.SITREC_URL)}-licensed; it was archived in March 2026 in
         favour of <a href="https://github.com/MickWest/Sitrec2">Sitrec2</a>, whose licence permits
         personal or non-commercial academic use only, and neither redistribution nor modification.
-        UFO@home is MIT.</p>
+        UFO@home is ${Licence.mit()}.</p>
     </div>
 
     <div class="faq-item">
@@ -295,7 +296,7 @@ export class FaqPage implements SitePage {
         <li><strong>What you would conclude from it.</strong> A feature that cannot change anyone's
           reading of a case is decoration.</li>
       </ul>
-      <p>Pull requests are welcome on the same terms as any MIT project. If you would rather not use
+      <p>Pull requests are welcome on the same terms as any ${Licence.mit()} project. If you would rather not use
         GitHub, the maintainer's contact is on <a href="https://rr0.org/Contact.html">rr0.org</a>.</p>
     </div>
 
@@ -387,7 +388,7 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Qu'autorise la licence ?</h3>
-      <p>UFO@home est sous <a href="https://github.com/RR0/UfoAtHome/blob/master/LICENSE">licence
+      <p>UFO@home est sous <a href="${Licence.OWN_URL}">licence
         MIT</a>. Elle vous permet de :</p>
       <ul class="plain">
         <li>l'utiliser sur n'importe quel site, y compris commercial ;</li>
@@ -553,10 +554,10 @@ export class FaqPage implements SitePage {
         ce qu'un <em>observateur</em> a décrit, et il est bâti autour de ce qu'un compte rendu peut et ne
         peut pas dire — des angles plutôt que des mètres, une apparence énoncée plutôt qu'un objet
         placé, et la trace explicite de qui a fourni chaque fait non testimonial.</p>
-      <p>Leurs licences diffèrent aussi. Sitrec était sous licence MIT ; il a été archivé en mars
+      <p>Leurs licences diffèrent aussi. Sitrec était sous licence ${Licence.mit(Licence.SITREC_URL)} ; il a été archivé en mars
         2026 au profit de <a href="https://github.com/MickWest/Sitrec2">Sitrec2</a>, dont la licence
         n'autorise qu'un usage personnel ou académique non commercial, à l'exclusion de toute
-        redistribution ou modification. UFO@home est en MIT.</p>
+        redistribution ou modification. UFO@home est en ${Licence.mit()}.</p>
     </div>
 
     <div class="faq-item">
@@ -637,7 +638,7 @@ export class FaqPage implements SitePage {
           lecture d'aucun dossier est un ornement.</li>
       </ul>
       <p>Les <i lang="en">pull requests</i> sont les bienvenues, aux conditions habituelles d'un
-        projet MIT. Si vous préférez ne pas passer par GitHub, le contact du mainteneur est sur
+        projet ${Licence.mit()}. Si vous préférez ne pas passer par GitHub, le contact du mainteneur est sur
         <a href="https://rr0.org/Contact.html">rr0.org</a>.</p>
     </div>
 
@@ -734,7 +735,7 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>¿Qué permite la licencia?</h3>
-      <p>UFO@home está bajo la <a href="https://github.com/RR0/UfoAtHome/blob/master/LICENSE">licencia
+      <p>UFO@home está bajo la <a href="${Licence.OWN_URL}">licencia
         MIT</a>. Esta te permite:</p>
       <ul class="plain">
         <li>usarla en cualquier sitio, incluido uno comercial;</li>
@@ -889,10 +890,10 @@ export class FaqPage implements SitePage {
         un <em>observador</em> describió, y está construida en torno a lo que un relato puede y no puede decir —
         ángulos en lugar de metros, una apariencia declarada en lugar de un objeto colocado, y un registro
         explícito de quién aportó cada hecho no testimonial.</p>
-      <p>Sus licencias también difieren. Sitrec tenía licencia MIT; se archivó en marzo de 2026 en
+      <p>Sus licencias también difieren. Sitrec tenía licencia ${Licence.mit(Licence.SITREC_URL)}; se archivó en marzo de 2026 en
         favor de <a href="https://github.com/MickWest/Sitrec2">Sitrec2</a>, cuya licencia solo permite
         el uso personal o académico no comercial, y ni la redistribución ni la modificación.
-        UFO@home es MIT.</p>
+        UFO@home es ${Licence.mit()}.</p>
     </div>
 
     <div class="faq-item">
@@ -965,7 +966,7 @@ export class FaqPage implements SitePage {
         <li><strong>Lo que concluirías a partir de ello.</strong> Una funcionalidad que no puede cambiar la
           lectura de ningún caso es decoración.</li>
       </ul>
-      <p>Las <i lang="en">pull requests</i> son bienvenidas en las mismas condiciones que en cualquier proyecto MIT. Si prefieres no usar
+      <p>Las <i lang="en">pull requests</i> son bienvenidas en las mismas condiciones que en cualquier proyecto ${Licence.mit()}. Si prefieres no usar
         GitHub, el contacto del mantenedor está en <a href="https://rr0.org/Contact.html">rr0.org</a>.</p>
     </div>
 
@@ -1058,7 +1059,7 @@ export class FaqPage implements SitePage {
 
     <div class="faq-item">
       <h3>Che cosa permette la licenza?</h3>
-      <p>UFO@home è sotto <a href="https://github.com/RR0/UfoAtHome/blob/master/LICENSE">licenza
+      <p>UFO@home è sotto <a href="${Licence.OWN_URL}">licenza
         MIT</a>. Questa ti permette di:</p>
       <ul class="plain">
         <li>usarlo su qualsiasi sito, anche commerciale;</li>
@@ -1213,10 +1214,10 @@ export class FaqPage implements SitePage {
         un <em>osservatore</em> ha descritto, ed è costruito attorno a ciò che un resoconto può e non può dire —
         angoli anziché metri, un aspetto dichiarato anziché un oggetto collocato, e una traccia
         esplicita di chi ha fornito ogni fatto non testimoniale.</p>
-      <p>Anche le loro licenze differiscono. Sitrec era sotto licenza MIT; è stato archiviato nel marzo 2026 a
+      <p>Anche le loro licenze differiscono. Sitrec era sotto licenza ${Licence.mit(Licence.SITREC_URL)}; è stato archiviato nel marzo 2026 a
         favore di <a href="https://github.com/MickWest/Sitrec2">Sitrec2</a>, la cui licenza consente
         solo un uso personale o accademico non commerciale, e né la ridistribuzione né la modifica.
-        UFO@home è MIT.</p>
+        UFO@home è ${Licence.mit()}.</p>
     </div>
 
     <div class="faq-item">
@@ -1289,7 +1290,7 @@ export class FaqPage implements SitePage {
         <li><strong>Che cosa ne concluderesti.</strong> Una funzionalità che non può cambiare la
           lettura di nessun caso è decorazione.</li>
       </ul>
-      <p>Le <i lang="en">pull request</i> sono benvenute alle stesse condizioni di qualsiasi progetto MIT. Se preferisci non usare
+      <p>Le <i lang="en">pull request</i> sono benvenute alle stesse condizioni di qualsiasi progetto ${Licence.mit()}. Se preferisci non usare
         GitHub, il contatto del manutentore è su <a href="https://rr0.org/Contact.html">rr0.org</a>.</p>
     </div>
 
