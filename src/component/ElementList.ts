@@ -61,6 +61,8 @@ export class ElementList {
   private readonly pickerRow: HTMLLabelElement
   private readonly removeButton: HTMLButtonElement
   private readonly addButton: HTMLButtonElement
+  /** Why the add button cannot be pressed, beside it — see setAddState. */
+  private addReason?: HTMLElement
   private readonly kindSelect?: HTMLSelectElement
   private readonly previousButton?: HTMLButtonElement
   private readonly nextButton?: HTMLButtonElement
@@ -227,6 +229,16 @@ export class ElementList {
     const text = title ?? this.addLabel
     this.addButton.title = text
     this.addButton.setAttribute("aria-label", text)
+    // A button greyed out with the reason only in its tooltip tells nobody why: a text given for a button that
+    // cannot be pressed is also said beside it, in plain sight.
+    if (!this.addReason) {
+      this.addReason = this.addButton.ownerDocument.createElement("span")
+      this.addReason.className = "add-reason"
+      this.addReason.style.cssText = "font-size: .85em; opacity: .8; align-self: center;"
+      this.addButton.after(this.addReason)
+    }
+    this.addReason.textContent = !enabled && title ? title : ""
+    this.addReason.hidden = enabled || !title
   }
 
   /** Renames an entry without redrawing the list, which would take the focus from whatever is being typed. */

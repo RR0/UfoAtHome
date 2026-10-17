@@ -70,11 +70,7 @@ export class LaunchEditor {
     if (!launches.some(launch => launch.id === this.currentId)) this.currentId = launches[0]?.id
     this.list?.setItems(launches.map(launch => ({ id: launch.id, label: this.labelOf(launch) })), this.currentId)
     this.list?.setAddState(this.startOfNew() !== undefined, this.startOfNew() === undefined ? this.messages.addLaunchNowhere : undefined)
-    // The reason the add button is greyed is said in plain sight, not only in its tooltip: in a blank editor
-    // nothing else says why a launch cannot be added.
-    const none = this.element("launch-none")
-    none.hidden = launches.length > 0
-    none.textContent = this.startOfNew() === undefined ? `${this.messages.none}. ${this.messages.addLaunchNowhere}.` : this.messages.none
+    this.element("launch-none").hidden = launches.length > 0
     const launch = this.current
     this.element("launch-fields").hidden = launch === undefined
     if (!launch) return
