@@ -246,6 +246,8 @@ export class DemoCatalogue {
         {
           id: "saint-lo",
           src: "/demo-data/observer-saint-lo.json",
+          // The case, for the player and its editor: the observer's account, and the interview held with him.
+          playSrc: "/demo-data/case-saint-lo.json",
           title: { en: "Saint-Lô, 2026", fr: "Saint-Lô, 2026", es: "Saint-Lô, 2026", it: "Saint-Lô, 2026" },
           titleIsName: true,
           blurb: {
