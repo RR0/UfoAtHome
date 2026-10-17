@@ -124,6 +124,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setInstrumentGain(): void {}
     setLightPollution(): void {}
     setMedium(): void {}
+    setPerception(): void {}
     setLensOptics(): void {}
     setExposure(): void {}
     private meteors: { t: number; durationMs: number }[] = []
@@ -552,6 +553,26 @@ describe("SightingEditorElement observer/time fields", () => {
 
     expect((shadow.getElementById("observerAge") as HTMLInputElement).value).toBe("52")
     expect(element.sightingData.account?.observerBirth?.raw).toBe("1972-08-12")
+  })
+
+  it("offers each observer provider's settings, and stores only what differs from the default", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const type = shadow.getElementById("color-vision-type") as HTMLSelectElement
+    type.value = "deutan"
+    type.dispatchEvent(new Event("change", { bubbles: true }))
+    expect(element.sightingData.account?.observerPerception).toEqual({ "color-vision": { type: "deutan" } })
+
+    setInput(shadow, "intoxication-bloodAlcohol", "0.08")
+    expect(element.sightingData.account?.observerPerception).toEqual({
+      "color-vision": { type: "deutan" },
+      intoxication: { bloodAlcohol: 0.08 }
+    })
+
+    type.value = "normal"
+    type.dispatchEvent(new Event("change", { bubbles: true }))
+    setInput(shadow, "intoxication-bloodAlcohol", "0")
+    expect(element.sightingData.account).toBeUndefined()
   })
 
   it("writes the observation-start EDTF text field into event.time", () => {

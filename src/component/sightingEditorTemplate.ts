@@ -73,6 +73,7 @@ export const html = `
     <p id="observer-identity-hint" class="file-note"></p>
     <label><span id="label-observer-age">Age then</span> <input id="observerAge" type="number" min="0" max="120" step="1" size="4" placeholder="years"/></label>
     <label><span id="label-observer-birth">Born</span> <rr0-date-input name="observer-birth" date-only></rr0-date-input></label>
+    <rr0-provider-settings id="observerPerception"></rr0-provider-settings>
     <label><span id="label-observer-occupation">Occupation</span> <input id="observerOccupation" type="text" placeholder="baker, airline pilot…"/></label>
     <label><span id="label-account-source">Account obtained</span> <select id="accountSource">
       <option id="option-source-unknown" value="">unknown</option>

@@ -1,5 +1,6 @@
 import type { SaidText } from "./SaidText.js"
 import type { SightingTime } from "./Sighting.js"
+import type { ObserverSettings } from "../observer/ObserverProvider.js"
 
 /**
  * How an account reached whoever wrote the recording.
@@ -66,6 +67,12 @@ export interface Account {
    * step with it against the observation date (see ObserverAge).
    */
   observerBirth?: SightingTime
+  /**
+   * How the main observer's own perception differs from a typical one — colour vision, alcohol,
+   * fatigue — as the values of the ObserverProviders' settings, by provider id. Only what differs
+   * from the default is stored; absent means a typical observer.
+   */
+  observerPerception?: Record<string, ObserverSettings>
   /**
    * What the main observer did, as they are described: "boulanger", "pilote de ligne", "gendarme".
    *

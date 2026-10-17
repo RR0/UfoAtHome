@@ -29,6 +29,7 @@ import type { ObserverGeo } from "../engine/astronomy/CelestialPositions.js"
 import { LunarLimb } from "../engine/astronomy/LunarLimb.js"
 import type { LimbProfile, LunarRelief } from "../engine/astronomy/LunarLimb.js"
 import { LunarReliefLoader } from "../engine/astronomy/LunarReliefLoader.js"
+import { ObserverProviders } from "../engine/observer/ObserverProviders.js"
 import { Filters } from "../engine/instrument/Filter.js"
 import { LunarDisc } from "../engine/astronomy/LunarDisc.js"
 import { SolarEclipse } from "../engine/astronomy/SolarEclipse.js"
@@ -1627,6 +1628,8 @@ export class SceneElement extends HTMLElement {
     // And how the picture answers it: a film's own curve at the exposure it was given, not an
     // eye's adapting response (see RecordingMedium).
     this.sceneRenderer.setMedium(sighting.instrument.medium, sighting.exposure, pose?.fNumber ?? sighting.instrument.fNumber, sighting.iso)
+    // And how the observer's own vision bends what an eye receives of it (see ObserverProvider).
+    this.sceneRenderer.setPerception(ObserverProviders.perceptionOf(sighting.account?.observerPerception))
     // What the observer's own legs are doing to their eye between two recorded positions — nothing
     // for a observer who stood still — the slow sway of a living body, see Stance — and a couple of
     // centimetres of rise and sway for one who walked. Rebuilt each tick rather than cached: the

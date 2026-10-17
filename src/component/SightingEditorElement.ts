@@ -38,6 +38,9 @@ import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import { EdtfDateField } from "./EdtfDateField.js"
+import { register as registerProviderSettings } from "./ProviderSettingsElement.js"
+import type { ProviderSettingsElement } from "./ProviderSettingsElement.js"
+import { ObserverProviders } from "../engine/observer/ObserverProviders.js"
 import { register as registerPopoverPicker } from "./PopoverPickerElement.js"
 import type { PopoverPickerElement, PickerNode } from "./PopoverPickerElement.js"
 import { DATE_INPUT_ELEMENT_NAME, register as registerDateInput } from "./DateInputElement.js"
@@ -616,6 +619,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelObserverAge: HTMLElement
   private readonly labelObserverBirth: HTMLElement
   private birthDate!: DateInputElement
+  private perceptionSettings!: ProviderSettingsElement
   /** What the birth field says now: the date input only reports it by event, never back. */
   private birth?: SightingTime
   private readonly labelObserverOccupation: HTMLElement
@@ -1710,6 +1714,11 @@ export class SightingEditorElement extends HTMLElement {
     this.startDate = dateOf("obs-time")
     this.endDate = dateOf("obs-end-time")
     this.birthDate = dateOf("observer-birth")
+    // What bends this observer's perception is whatever the providers list: see ObserverProviders.
+    this.perceptionSettings = this.shadow.getElementById("observerPerception") as ProviderSettingsElement
+    this.perceptionSettings.providers = ObserverProviders.ALL
+    this.perceptionSettings.labels = this.messages.observerPerception
+    this.perceptionSettings.addEventListener("settingschange", () => this.updateObserverMetadata())
     this.startDate.messages = this.messages
     this.endDate.messages = this.messages
     this.birthDate.messages = this.messages
@@ -3422,6 +3431,7 @@ export class SightingEditorElement extends HTMLElement {
     const account: Account = {
       observerAgeYears: this.numberOrUndefined(this.observerAgeInput.value),
       observerBirth: this.birth,
+      observerPerception: ObserverProviders.compact(this.perceptionSettings.values),
       observerOccupation: this.observerOccupationInput.value.trim() === ""
         ? undefined
         : this.said.write(sighting.account?.observerOccupation, this.observerOccupationInput.value, this.writingLanguage),
@@ -5027,6 +5037,7 @@ export class SightingEditorElement extends HTMLElement {
     this.sightingIdInput.value = sighting.id ?? ""
     this.observerAgeInput.value = sighting.account?.observerAgeYears?.toString() ?? ""
     this.birthDate.setPrecise(EdtfDateField.opensPreciseDate(sighting.account?.observerBirth))
+    this.perceptionSettings.values = sighting.account?.observerPerception ?? {}
     this.birth = sighting.account?.observerBirth
     this.birthDate.time = this.birth
     this.observerOccupationInput.value = this.said.read(sighting.account?.observerOccupation) ?? ""
@@ -8886,6 +8897,7 @@ export class SightingEditorElement extends HTMLElement {
     this.importUrlButton.textContent = messages.importButton
     this.labelObserverAge.textContent = messages.observerAge
     this.labelObserverBirth.textContent = messages.observerBirth
+    this.perceptionSettings.labels = messages.observerPerception
     this.labelObserverOccupation.textContent = messages.observerOccupation
     this.labelAccountSource.textContent = messages.accountSource
     this.labelAccountUrl.textContent = messages.accountUrl
@@ -10316,6 +10328,7 @@ class LegacyRecorderElement extends SightingEditorElement {
 export function register(): void {
   registerDateInput()
   registerPopoverPicker()
+  registerProviderSettings()
   registerDurationInput()
   registerUfo()
   if (!customElements.get(ELEMENT_NAME)) {

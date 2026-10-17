@@ -1,3 +1,4 @@
+import { Matrix3 } from "three"
 import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
 
 
@@ -47,6 +48,11 @@ const vec3 SCOTOPIC_TINT = vec3(${EyeAdaptation.SCOTOPIC_TINT.map(value => value
 /** The share of the seeing the rods do, and what one relative unit is in cd/m²: see EYE_UNIFORMS. */
 uniform float uRodShare;
 uniform float uRelativeScale;
+/** The observer's own vision (see Perception): a recolouring of linear light, and the share of the
+ * picture's contrast kept. Identity and 1 for an observer nothing bends. An eye's only: a film
+ * records what is there. */
+uniform mat3 uColorVision;
+uniform float uContrast;
 
 /** CIE's lightness scale undone: the luminance, 0 to 1, that looks this light (0 to 1) to a viewer. */
 float fromLightness(float lightness) {
@@ -104,7 +110,7 @@ float recorded(float h) {
 vec3 respond(vec3 relative) {
   // A medium has no rods: no Purkinje shift, its colours are its own.
   vec3 clamped = clamp(relative, vec3(0.0), vec3(60000.0));
-  if (uMedium < 0.5) clamped = purkinje(clamped);
+  if (uMedium < 0.5) clamped = uColorVision * purkinje(clamped);
   float y = dot(clamped, vec3(0.2126, 0.7152, 0.0722));
   if (y <= 0.0) return vec3(0.0);
   float response;
@@ -113,6 +119,8 @@ vec3 respond(vec3 relative) {
   } else {
     float power = pow(y, EYE_RESPONSE_EXPONENT);
     response = power / (power + 1.0);
+    // Lower contrast sensitivity: the lightness (0 to 1) squeezed about its middle.
+    response = 0.5 + (response - 0.5) * uContrast;
     // The response is how light the observer saw it. Shown as a luminance, the reader's own eye
     // compressed it a second time and every scene came out pastel, a sunlit ground as pale as the
     // sky; shown as the luminance that LOOKS that light (CIE L*), it is seen once. Chosen by the
@@ -142,7 +150,8 @@ vec3 respond(vec3 relative) {
  */
 export const EYE_UNIFORMS = {
   uRodShare: { value: 0 }, uRelativeScale: { value: 1 }, uHasOverlay: { value: 1 },
-  uMedium: { value: 0 }, uMediumExposure: { value: 1 }
+  uMedium: { value: 0 }, uMediumExposure: { value: 1 },
+  uColorVision: { value: new Matrix3() }, uContrast: { value: 1 }
 }
 
 /**

@@ -111,6 +111,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setInstrumentGain(): void {}
     setLightPollution(): void {}
     setMedium(): void {}
+    setPerception(): void {}
     setLensOptics(): void {}
     setExposure(): void {}
     private meteors: { t: number; durationMs: number }[] = []

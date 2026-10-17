@@ -95,6 +95,7 @@ import type { PointLayerHost } from "./PointLayerPass.js"
 import { DepthOfFieldPass } from "./DepthOfFieldPass.js"
 import { FinishPass } from "./FinishPass.js"
 import { EYE_UNIFORMS, type UnfinishedFrame } from "./colorSpace.js"
+import { Perceptions, type Perception } from "../engine/observer/Perception.js"
 import { AdaptiveResolution } from "./AdaptiveResolution.js"
 import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
@@ -2963,6 +2964,21 @@ export class SceneRenderer {
    * rebuilding the group, and toggles a streetlight's own real PointLight (built once, up front,
    * in setDecor) visible/invisible to match — never disposed/recreated, since the light itself
    * doesn't change, only whether it's currently switched on. */
+  /** How the observer's own vision bends the picture — see setPerception. */
+  private perception: Perception = Perceptions.NONE
+
+  /**
+   * How the observer's own vision changes what an eye receives (colour deficiency, lowered contrast
+   * sensitivity): applied by the finish to an eye's picture and to nothing a medium records. The
+   * identity for an observer nothing bends, which costs the finish one matrix product it already
+   * paid the arithmetic for.
+   */
+  setPerception(perception: Perception): void {
+    if (JSON.stringify(perception) === JSON.stringify(this.perception)) return
+    this.perception = perception
+    this.render()
+  }
+
   /** What the picture is recorded on and how it was exposed — see setMedium. */
   private medium?: { kind: RecordingMedium["kind"], iso: number, autoExposure: boolean, exposureSeconds: number, fNumber: number }
 
@@ -2991,6 +3007,10 @@ export class SceneRenderer {
   private applyMedium(): void {
     const medium = this.medium
     const relativeScale = Math.max(this.relativeScale, 1e-30)
+    // The observer's own vision bends what an eye receives, never what a film records.
+    const perception = medium ? Perceptions.NONE : (this.perception ?? Perceptions.NONE)
+    EYE_UNIFORMS.uColorVision.value.set(...(perception.colorMatrix as [number, number, number, number, number, number, number, number, number]))
+    EYE_UNIFORMS.uContrast.value = perception.contrastGain
     if (!medium) {
       EYE_UNIFORMS.uMedium.value = 0
       return
