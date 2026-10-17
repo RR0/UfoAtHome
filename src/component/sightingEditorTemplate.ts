@@ -977,7 +977,7 @@ select.weather-field:disabled {
   color: CanvasText;
   background: var(--tab-surface);
   border-bottom-color: var(--tab-surface);
-  box-shadow: inset 0 3px 0 var(--tab-accent);
+  box-shadow: inset 0 2px 0 var(--tab-accent);
   z-index: 1;
 }
 .group-tab:focus-visible, .subgroup-tab:focus-visible {
