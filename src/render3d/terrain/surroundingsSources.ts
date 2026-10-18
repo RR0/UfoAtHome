@@ -1,4 +1,5 @@
 import type { DataSource } from "../../engine/source/DataSource.js"
+import { CachedSurroundingsProvider } from "./CachedSurroundingsProvider.js"
 import { FirstSurroundingsThatAnswers } from "./FirstSurroundingsThatAnswers.js"
 import type { SurroundingsProvider } from "./SurroundingsProvider.js"
 import { IgnLidarSurroundingsProvider } from "./providers/IgnLidarSurroundingsProvider.js"
@@ -13,6 +14,8 @@ import { OsmStreetLamps } from "./providers/OsmStreetLamps.js"
  * and so cover France; the last is OpenStreetMap's buildings, which cover the world as far as its volunteers have drawn it, and is what a place outside
  * France is given when the author has not chosen. Other countries have their own scans (the USGS 3DEP in the United States, the AHN in the
  * Netherlands, Wallonia's relief) and would be entries here, each saying where it covers.
+ *
+ * Each answers a place it was already asked about from what it said then (see CachedSurroundingsProvider).
  */
 export const SURROUNDINGS_SOURCES: DataSource<SurroundingsProvider>[] = [
   {
@@ -20,28 +23,28 @@ export const SURROUNDINGS_SOURCES: DataSource<SurroundingsProvider>[] = [
     name: "IGN LiDAR HD + BD TOPO",
     credit: "© IGN, LiDAR HD and BD TOPO, Licence Ouverte 2.0; street lamps © OpenStreetMap contributors",
     creditUrl: "https://geoservices.ign.fr/lidarhd",
-    create: () => new IgnLidarTopoSurroundingsProvider({}, new OsmStreetLamps())
+    create: () => new CachedSurroundingsProvider(new IgnLidarTopoSurroundingsProvider({}, new OsmStreetLamps()))
   },
   {
     id: "ign-lidar-hd",
     name: "IGN LiDAR HD",
     credit: "© IGN, LiDAR HD, Licence Ouverte 2.0; street lamps © OpenStreetMap contributors",
     creditUrl: "https://geoservices.ign.fr/lidarhd",
-    create: () => new IgnLidarSurroundingsProvider({}, new OsmStreetLamps())
+    create: () => new CachedSurroundingsProvider(new IgnLidarSurroundingsProvider({}, new OsmStreetLamps()))
   },
   {
     id: "ign-bd-topo",
     name: "IGN BD TOPO",
     credit: "© IGN, BD TOPO, Licence Ouverte 2.0; street lamps © OpenStreetMap contributors",
     creditUrl: "https://geoservices.ign.fr/bdtopo",
-    create: () => new IgnTopoSurroundingsProvider({}, new OsmStreetLamps())
+    create: () => new CachedSurroundingsProvider(new IgnTopoSurroundingsProvider({}, new OsmStreetLamps()))
   },
   {
     id: "osm-buildings",
     name: "OpenStreetMap buildings",
     credit: "Buildings and street lamps © OpenStreetMap contributors (ODbL)",
     creditUrl: "https://www.openstreetmap.org/copyright",
-    create: () => new OsmBuildingsSurroundingsProvider({}, new OsmStreetLamps())
+    create: () => new CachedSurroundingsProvider(new OsmBuildingsSurroundingsProvider({}, new OsmStreetLamps()))
   }
 ]
 
