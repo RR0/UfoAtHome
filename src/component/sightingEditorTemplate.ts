@@ -1016,6 +1016,10 @@ select.weather-field:disabled {
   border-top: 0;
   border-radius: 0 0 4px 4px;
   background: color-mix(in srgb, CanvasText 5%, Canvas);
+  /* The text goes with the surface it stands on: both from this widget's own color scheme. Left to inherit the
+     host page's colour, labels came out pale on a light panel (and dark on a dark one) whenever the host's text
+     and the system's scheme disagreed. */
+  color: CanvasText;
   padding: 0.5em 0.75em;
   margin: 0 0 0.5em;
 }
