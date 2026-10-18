@@ -5,7 +5,7 @@ import { RegionalWaterProvider } from "../../../../src/render3d/terrain/provider
 import type { WaterProvider } from "../../../../src/render3d/terrain/WaterProvider.js"
 
 const PARIS = { south: 48.851, north: 48.855, west: 2.346, east: 2.352 }
-// Socorro: the box that says France holds a corner of Belgium, which the IGN answers with nothing, as a place in France with no water.
+// Socorro, well out of the box that says France.
 const ABROAD = { south: 34.05, north: 34.07, west: -106.9, east: -106.88 }
 
 function answering(body: unknown): typeof fetch {
@@ -87,10 +87,8 @@ describe("RegionalWaterProvider", () => {
     expect((await new RegionalWaterProvider(failing, osm).getWater(PARIS))[0].id).toBe("osm")
   })
 
-  it("does not ask the worldwide map about a place in France the IGN says has no water", async () => {
+  it("asks the worldwide map where the IGN has nothing: the box that says France takes in a corner of Belgium", async () => {
     const none: WaterProvider = { attribution: "ign", getWater: vi.fn(async () => []) }
-    const osm = giving("osm")
-    expect(await new RegionalWaterProvider(none, osm).getWater(PARIS)).toEqual([])
-    expect(osm.getWater).not.toHaveBeenCalled()
+    expect((await new RegionalWaterProvider(none, giving("osm")).getWater(PARIS))[0].id).toBe("osm")
   })
 })

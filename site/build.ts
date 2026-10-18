@@ -165,6 +165,9 @@ class SiteBuilder {
     // script has been run at least once, which is not a failure: a scene then draws no roads.
     await cp(join(this.root, "public", "roads"), join(this.out, "roads"), { recursive: true })
       .catch(() => undefined)
+    // The water of the same places, frozen for the same reason (see ArchivedWaterProvider, and `npm run build:water`).
+    await cp(join(this.root, "public", "water"), join(this.out, "water"), { recursive: true })
+      .catch(() => undefined)
     // The World Atlas of the artificial night sky brightness, cut into tiles the editor reads a
     // place's night sky from (see AtlasLightPollutionProvider, and `npm run build:light-pollution`).
     await cp(join(this.root, "public", "light-pollution"), join(this.out, "light-pollution"), { recursive: true })
@@ -209,7 +212,7 @@ class SiteBuilder {
         const path = join(directory, entry.name)
         // The bundles, the recordings and the models hold no page of the site.
         if (entry.isDirectory()) {
-          if (!["lib", "demo-data", "models", "roads", "tle", "aircraft", "fireballs", "reentries", "light-pollution"].includes(entry.name)) await walk(path)
+          if (!["lib", "demo-data", "models", "roads", "water", "tle", "aircraft", "fireballs", "reentries", "light-pollution"].includes(entry.name)) await walk(path)
         } else if (entry.name.endsWith(".html")) pages.push(path)
       }
     }
@@ -435,6 +438,15 @@ ${retired}
 # Its index is the exception, as it is for the models: the name never changes and the contents gain
 # an entry every time a case is published.
 /roads/index.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+# The frozen water of the same places, cached as the roads are, its index revalidated.
+/water/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=604800
+
+/water/index.json
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=0, must-revalidate
 

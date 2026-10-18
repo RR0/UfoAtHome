@@ -13,6 +13,8 @@ import { RegionalRoadProvider } from "./providers/RegionalRoadProvider.js"
 import { IgnTopoWaterProvider } from "./providers/IgnTopoWaterProvider.js"
 import { OverpassWaterProvider } from "./providers/OverpassWaterProvider.js"
 import { RegionalWaterProvider } from "./providers/RegionalWaterProvider.js"
+import { ArchivedWaterProvider } from "./providers/ArchivedWaterProvider.js"
+import { CachedWaterProvider } from "./providers/CachedWaterProvider.js"
 
 export interface TerrainProviders {
   elevation: ElevationProvider
@@ -72,7 +74,11 @@ export function defaultRoadProvider(): RoadProvider {
   return new ArchivedRoadProvider({ fallback: new RegionalRoadProvider(new IgnTopoRoadProvider(), new OverpassRoadProvider()) })
 }
 
-/** The water half on its own: the IGN's map in France, OpenStreetMap elsewhere (see RegionalWaterProvider). */
+/**
+ * The water half on its own: what UFO@home has frozen for the cases it publishes, and for any other place the IGN's map in France and
+ * OpenStreetMap elsewhere (see RegionalWaterProvider), each answer kept a month (see CachedWaterProvider). In that order for the reason the roads
+ * are (see defaultRoadProvider): a published scene asks Overpass nothing.
+ */
 export function defaultWaterProvider(): WaterProvider {
-  return new RegionalWaterProvider(new IgnTopoWaterProvider(), new OverpassWaterProvider())
+  return new ArchivedWaterProvider({ fallback: new CachedWaterProvider(new RegionalWaterProvider(new IgnTopoWaterProvider(), new OverpassWaterProvider())) })
 }
