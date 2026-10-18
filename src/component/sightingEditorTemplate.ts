@@ -950,21 +950,18 @@ select.weather-field:disabled {
 #group-tabs {
   position: relative;
   /* One button wide: the two are stacked, so the reserve is a column and not a row. */
-  padding-inline-end: 2.2em;
-  /* ...and as tall as the stack, so that a strip of a single row does not let it climb out of the strip. */
-  min-height: 2.5em;
+  padding-inline-end: 2.4em;
+  /* ...and as tall as the stack (two squares and the margin between them), so that a strip of a single
+     row does not let it climb out of the strip. The tabs stay on the baseline. */
+  min-height: 4.1em;
 }
 .history {
   position: absolute;
   inset-inline-end: 0.2em;
-  bottom: 0.1em;
+  top: 0.2em;
   display: inline-flex;
   flex-direction: column;
-  gap: 0.1em;
-}
-.history .icon-btn {
-  width: 1.8em;
-  height: 1.1em;
+  gap: 0.3em;
 }
 .history .icon-btn:disabled {
   opacity: 0.35;
