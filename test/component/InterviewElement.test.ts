@@ -290,7 +290,8 @@ describe("What the summary shows is what the file holds, and the other way round
       { speaker: "witness", start: 5, end: 9, text: "In the park.", refs: [{ at: 0.5 }] },
       { speaker: "witness", start: 10, end: 12, redacted: { reason: { en: "Private life" } } },
       { speaker: "interviewer", start: 12, end: 14, redacted: { reason: { en: "Private life" } } },
-      { speaker: "witness", start: 15, end: 17, text: "Then it left." }
+      { speaker: "witness", start: 15, end: 17, text: "Then it left." },
+      { speaker: "witness", start: 18, end: 20, parts: [{ text: "No lights." }, { redacted: { reason: { en: "Place" } } }, { text: "That is all." }] }
     ]
   }
 
@@ -300,12 +301,14 @@ describe("What the summary shows is what the file holds, and the other way round
     tabs(element)[1].click()
     await wait(100)
     const turns = [...element.shadowRoot!.querySelectorAll<HTMLElement>("#exchanges .turn")]
-    expect(turns.map(turn => turn.querySelector(".who span")!.textContent)).toEqual(["BeauJerome", "Q. B.", "", "Q. B."])
+    expect(turns.map(turn => turn.querySelector(".who span")!.textContent)).toEqual(["BeauJerome", "Q. B.", "", "Q. B.", "Q. B."])
     expect(turns[1].querySelector(".said")!.textContent).toBe("In the park.")
     expect(turns[2].classList.contains("is-redacted")).toBe(true)
-    expect(turns[2].querySelector(".redacted")!.textContent).toBe("Passage removed")
-    expect((turns[2].querySelector(".redacted") as HTMLElement).title).toBe("Private life")
-    expect(turns[2].textContent).not.toContain("Private life,")
+    // The reason is said, not left to a tooltip.
+    expect(turns[2].querySelector(".redacted")!.textContent).toBe("Passage removed : Private life")
+    // Only a stretch taken out: the rest is still there, the gap said in its place.
+    expect(turns[4].querySelector(".said")!.textContent).toBe("No lights. Passage removed : Place That is all. ")
+    expect(turns[4].querySelectorAll(".said .bar")).toHaveLength(1)
     expect(part(element, "exchanges-status").textContent).toBe("Not proofread yet by: Q. B.")
     expect(turns[0].querySelector(".when")!.textContent).toBe("0:00")
   })

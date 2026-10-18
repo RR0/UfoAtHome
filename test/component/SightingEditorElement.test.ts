@@ -3686,6 +3686,15 @@ describe("SightingEditorElement playback controls", () => {
     expect(ufo.currentTime).toBe(4000)
   })
 
+  it("seekTo takes seconds, as an interview's passage says them, and moves the seek bar with the player", () => {
+    const element = mount()
+    setDuration(element, "10")
+    const seekInput = element.shadowRoot!.getElementById("seek") as HTMLInputElement
+    element.seekTo(4.5)
+    expect((nestedUfo(element) as unknown as { currentTime: number }).currentTime).toBe(4500)
+    expect(Number(seekInput.value)).toBe(4500)
+  })
+
   it("resyncs (max/value) after an unrelated timeline change, via the existing timeupdate mechanism", () => {
     const element = mount()
     setDuration(element, "5")

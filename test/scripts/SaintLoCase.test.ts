@@ -35,6 +35,9 @@ describe.skipIf(!existsSync(TRANSCRIPT))("The transcript of the Saint-Lô interv
       if (segment.redacted) {
         expect(segment.text, "a redacted passage keeps nothing of what was said").toBeUndefined()
         expect(Object.keys(segment.redacted.reason).length).toBeGreaterThan(0)
+      } else if (segment.parts) {
+        expect(segment.text, "a segment with parts has no text of its own").toBeUndefined()
+        expect(segment.parts.some((part: { text?: string }) => part.text !== undefined && part.text.trim() !== "")).toBe(true)
       } else expect(segment.text.trim()).not.toBe("")
     }
     const starts = transcript.segments.map((segment: { start: number }) => segment.start)

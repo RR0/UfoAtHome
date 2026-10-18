@@ -35,11 +35,17 @@ export interface InterviewRedaction {
   reason: SaidText
 }
 
+/** A stretch of a segment: said, or taken out (see InterviewSegment.parts). */
+export type InterviewSegmentPart = { text: string } | { redacted: InterviewRedaction }
+
 /**
  * One turn of speech: one speaker, from `start` to `end` seconds after the beginning of the recording, and what was said.
  *
  * A passage taken out of the published file keeps its place (speaker and times) but loses its `text`, and says why in `redacted`: a reader can
  * show it as blacked out rather than hide that it existed.
+ *
+ * Only a stretch of it may be taken out, the rest staying (the answer to a question, without the detail that would identify): then it has
+ * `parts` instead of `text`, in order, each said or redacted. `refs[].range` counts in `text`, so a segment with `parts` has none.
  */
 export interface InterviewSegment {
   speaker: string
@@ -47,6 +53,7 @@ export interface InterviewSegment {
   end: number
   text?: string
   redacted?: InterviewRedaction
+  parts?: InterviewSegmentPart[]
   /** The moments of the observation this passage tells of. */
   refs?: InterviewSightingRef[]
 }
@@ -131,6 +138,12 @@ export class InterviewFile {
     })
   }
 
+  /** What a segment says as published: its text, or its said parts joined with `…` where a stretch was taken out; undefined when it is taken out whole. */
+  static said(segment: InterviewSegment): string | undefined {
+    if (segment.parts) return segment.parts.map(part => "text" in part ? part.text : "…").join(" ")
+    return segment.redacted ? undefined : segment.text ?? ""
+  }
+
   /** The `id`s of the sightings the interview was held with. */
   static sightingsOf(json: InterviewJson): string[] {
     return [json.interviewOf].flat().filter((id): id is string => typeof id === "string")
@@ -146,7 +159,8 @@ export class InterviewFile {
     json.segments.forEach((segment, index) => {
       for (const ref of segment.refs ?? []) {
         if (ref.sighting === undefined ? !held.includes(sighting) : ref.sighting !== sighting) continue
-        passages.push({ index, speaker: segment.speaker, at: ref.at, ...(segment.text !== undefined ? { text: segment.text } : {}), ...(ref.range ? { range: ref.range } : {}) })
+        const text = InterviewFile.said(segment)
+        passages.push({ index, speaker: segment.speaker, at: ref.at, ...(text !== undefined ? { text } : {}), ...(ref.range ? { range: ref.range } : {}) })
       }
     })
     return passages.sort((a, b) => a.at - b.at || a.index - b.index)
@@ -187,7 +201,7 @@ export class InterviewFile {
     const cues = json.segments.map((segment, index) => {
       const next = json.segments[index + 1]
       const end = next && next.start < segment.end ? Math.max(segment.start, next.start) : segment.end
-      return `${InterviewFile.stamp(segment.start)} --> ${InterviewFile.stamp(end)}\n<v ${escape(InterviewFile.speakerName(json, segment.speaker))}>${segment.redacted ? "[…]" : escape(segment.text ?? "")}`
+      return `${InterviewFile.stamp(segment.start)} --> ${InterviewFile.stamp(end)}\n<v ${escape(InterviewFile.speakerName(json, segment.speaker))}>${escape(InterviewFile.said(segment) ?? "[…]")}`
     })
     return `WEBVTT\n\n${cues.join("\n\n")}\n`
   }

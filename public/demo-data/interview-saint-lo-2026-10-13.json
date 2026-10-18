@@ -2520,12 +2520,22 @@
    "speaker": "witness",
    "start": 4063.4,
    "end": 4081.4,
-   "redacted": {
-    "reason": {
-     "fr": "Détails du lieu précis de l'observation (le témoin souhaite qu'il ne soit pas public).",
-     "en": "Details of the exact place of the observation (the witness does not want it public)."
+   "parts": [
+    {
+     "text": "Non, non, non, voilà. Il n'y en a pas."
+    },
+    {
+     "redacted": {
+      "reason": {
+       "fr": "Détails du lieu précis de l'observation (le témoin souhaite qu'il ne soit pas public).",
+       "en": "Details of the exact place of the observation (the witness does not want it public)."
+      }
+     }
+    },
+    {
+     "text": "Mais, ouais, mais c'est tout."
     }
-   }
+   ]
   },
   {
    "speaker": "interviewer",

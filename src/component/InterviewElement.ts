@@ -63,6 +63,8 @@ const TEMPLATE = `
   input[type="text"] { min-width: 0; }
   #by { width: 16em; }
   input[type="url"] { width: 18em; max-width: 100%; }
+  /* Addresses and file names are read letter by letter. */
+  input[type="url"], #url { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
   select { min-width: 0; max-width: 100%; text-overflow: ellipsis; }
   fieldset.witnesses { display: flex; flex-wrap: wrap; align-items: center; gap: .25em .75em; border: 0; margin: 0; padding: 0; min-width: 0; }
   fieldset.witnesses legend { float: left; padding: 0; margin-right: .4em; }
@@ -73,8 +75,11 @@ const TEMPLATE = `
   .turn .who { font-weight: 600; color: var(--speaker, inherit); overflow-wrap: anywhere; }
   .turn .when { display: none; font-weight: 400; font-size: .85em; opacity: .75; font-variant-numeric: tabular-nums; }
   :host([data-times]) .turn .when { display: block; }
+  #exchanges { max-height: 32em; overflow-y: auto; }
+  .bar { display: inline-block; width: 3em; height: .9em; vertical-align: -.1em; border-radius: 2px; background: CanvasText; margin-right: .4em; }
+  .turn .why { font-size: .85em; font-style: italic; opacity: .8; }
   .turn .said { margin: 0; white-space: pre-wrap; }
-  .turn .redacted { margin: 0; padding: 0 .4em; border-radius: 3px; background: CanvasText; color: transparent; user-select: none; cursor: help; }
+  .turn .redacted { margin: 0; }
   .turn.is-redacted .who { color: inherit; opacity: .6; font-weight: 400; }
   .turn .refs { grid-column: 2; display: flex; flex-wrap: wrap; gap: .25em; }
   .turn .ref { font: inherit; font-size: .8em; cursor: pointer; border: 1px solid var(--tab-line); border-radius: 999px; background: transparent; color: inherit; padding: 0 .5em; }
@@ -460,19 +465,35 @@ export class InterviewElement extends HTMLElement {
       when.className = "when"
       when.textContent = InterviewFile.clock(segment.start)
       who.append(name, when)
-      const said = document.createElement("p")
+      // What stands in the place of a stretch taken out: a bar, and why, said and not left to a tooltip.
+      const gap = (reasonText: SaidText, tag: "p" | "span"): HTMLElement => {
+        const node = document.createElement(tag)
+        const bar = document.createElement("span")
+        bar.className = "bar"
+        const why = document.createElement("span")
+        why.className = "why"
+        why.textContent = `${m.redacted} : ${this.said.read(reasonText) ?? ""}`
+        node.append(bar, why)
+        return node
+      }
       if (segment.redacted) {
         turn.classList.add("is-redacted")
-        said.className = "redacted"
-        said.textContent = m.redacted
-        said.title = this.said.read(segment.redacted.reason) ?? ""
+        const gone = gap(segment.redacted.reason, "p")
+        gone.className = "redacted"
         previous = { block: turn, reason: reason! }
+        turn.append(who, gone)
       } else {
+        const said = document.createElement("p")
         said.className = "said"
-        said.textContent = segment.text ?? ""
+        if (segment.parts) {
+          for (const part of segment.parts) {
+            if ("text" in part) said.append(part.text, " ")
+            else said.append(gap(part.redacted.reason, "span"), " ")
+          }
+        } else said.textContent = segment.text ?? ""
         previous = undefined
+        turn.append(who, said)
       }
-      turn.append(who, said)
       if (segment.refs?.length) {
         const refs = document.createElement("div")
         refs.className = "refs"

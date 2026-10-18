@@ -55,7 +55,7 @@ const TEMPLATE = `
   .passages ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .2em; }
   .passages li { display: flex; gap: .5em; align-items: baseline; }
   .passages button { font: inherit; cursor: pointer; }
-  .passages .at { font-variant-numeric: tabular-nums; }
+  .passages .at { font-variant-numeric: tabular-nums; min-width: 6em; text-align: center; }
   .passages .excerpt { border: 0; background: none; padding: 0; text-align: left; color: LinkText; text-decoration: underline; }
   .recording.in-case, #interview-section.in-case { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .5em .7em .7em; }
   /* Tabs as the recording's editor has them (see sightingEditorTemplate): a strip on one baseline, the open tab raised and joined to its panel. */
@@ -76,6 +76,7 @@ const TEMPLATE = `
   #case.in-case > .case-panel { margin-bottom: 0; }
   .file-note { font-size: .85em; opacity: .8; margin: .3em 0; }
   .file-editor { min-height: 18em; margin-top: .5em; }
+  input[type="url"] { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
   .toolbar input[type="url"] { width: 18em; max-width: 100%; }
   dialog { max-width: min(30em, 92vw); }
   dialog label { display: flex; align-items: center; gap: .5em; margin: .4em 0; }

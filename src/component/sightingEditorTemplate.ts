@@ -583,6 +583,8 @@ export const html = `
 `
 
 export const css = `
+/* Addresses and file names are read letter by letter: monospaced, as the file editor is. */
+input[type="url"], #referenceSrc { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 :host {
   color-scheme: light dark;
   display: block;

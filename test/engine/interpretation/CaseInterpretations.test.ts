@@ -205,4 +205,11 @@ describe("An interview's transcript file", () => {
     expect(InterviewFile.clock(1.5)).toBe("0:01.5")
     expect(InterviewFile.clock(3725)).toBe("1:02:05")
   })
+
+  it("says what a segment says as published: its text, its said parts around a gap, or nothing when taken out whole", () => {
+    expect(InterviewFile.said({ speaker: "witness", start: 0, end: 1, text: "Hi" })).toBe("Hi")
+    expect(InterviewFile.said({ speaker: "witness", start: 0, end: 1, parts: [{ text: "No lights." }, { redacted: { reason: { en: "place" } } }, { text: "That is all." }] }))
+      .toBe("No lights. … That is all.")
+    expect(InterviewFile.said({ speaker: "witness", start: 0, end: 1, redacted: { reason: { en: "private" } } })).toBeUndefined()
+  })
 })
