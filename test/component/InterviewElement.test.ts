@@ -13,6 +13,7 @@ const interview = {
   segments: [
     { speaker: "interviewer", text: "When did you meet him?" },
     { speaker: "witness", parts: [{ text: "I met" }, { text: "Allen Hynek", href: "../people/h/HynekJosefAllen/", title: "J. Allen Hynek" }, { text: "in 1960." }], refs: [{ at: 12 }] },
+    { speaker: "interviewer", parts: [{ text: "Since" }, { text: "Fastwalker", italic: true, lang: "en" }, { text: "and" }, { text: "Science interdite", italic: true, href: "../book/si/" }, { text: "?" }] },
     { speaker: "witness", parts: [{ text: "He lived in" }, { redacted: { reason: { en: "Address" } } }, { text: ", near Chicago." }] }
   ]
 }
@@ -40,7 +41,7 @@ describe("InterviewElement", () => {
     const element = await make({ src: "https://example.org/time/interview.json" })
     expect(element.shadowRoot).toBeNull()
     const turns = [...element.querySelectorAll<HTMLElement>(".turn")]
-    expect(turns.map(turn => turn.querySelector(".who")!.textContent)).toEqual(["Ross Coulthart", "Jacques Vallee", "Jacques Vallee"])
+    expect(turns.map(turn => turn.querySelector(".who")!.textContent)).toEqual(["Ross Coulthart", "Jacques Vallee", "Ross Coulthart", "Jacques Vallee"])
     expect(document.head.querySelectorAll("style[data-rr0-interview]")).toHaveLength(1)
   })
 
@@ -54,8 +55,28 @@ describe("InterviewElement", () => {
     expect(link.title).toBe("J. Allen Hynek")
     expect(said[1].textContent).toBe("I met Allen Hynek in 1960.")
     // A stretch taken out stays a bar that says why; the punctuation after it follows it.
-    expect((said[2].querySelector(".bar") as HTMLElement).dataset.tip).toBe("Passage removed : Address")
-    expect(said[2].textContent).toBe("He lived in , near Chicago.")
+    expect((said[3].querySelector(".bar") as HTMLElement).dataset.tip).toBe("Passage removed : Address")
+    expect(said[3].textContent).toBe("He lived in , near Chicago.")
+  })
+
+  it("sets titles and foreign words in italics, in their language, a linked title as a link in italics", async () => {
+    files["https://example.org/time/interview.json"] = interview
+    const element = await make({ src: "https://example.org/time/interview.json" })
+    const said = element.querySelectorAll(".turn .said")[2]
+    const [foreign, title] = [...said.querySelectorAll("i")]
+    expect(foreign.textContent).toBe("Fastwalker")
+    expect(foreign.lang).toBe("en")
+    expect(title.querySelector("a")!.href).toBe("https://example.org/book/si/")
+    expect(title.lang).toBe("")
+    expect(said.textContent).toBe("Since Fastwalker and Science interdite?")
+  })
+
+  it("keeps the spaces a stretch already has, adding none", async () => {
+    const element = await make({})
+    element.interview = { version: 1, speakers: { witness: { role: "witness" } }, segments: [
+      { speaker: "witness", parts: [{ text: "Depuis la trilogie " }, { text: "Dimensions", italic: true }, { text: ", et (" }, { text: "Fastwalker", italic: true, lang: "en" }, { text: ")." }] }
+    ] }
+    expect(element.querySelector(".turn .said")!.textContent).toBe("Depuis la trilogie Dimensions, et (Fastwalker).")
   })
 
   it("says nothing of proofreading when the file does not say who has proofread it", async () => {

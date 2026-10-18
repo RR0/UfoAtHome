@@ -132,7 +132,7 @@ export class DocsInterviewPage extends DocsSection {
         ["start, end", "Seconds from the beginning of the recording, both optional: a transcript typed by hand has none, and a turn without a time is not in the subtitles"],
         ["text", "What was said"],
         ["redacted", "<code>{ reason }</code>: the whole turn was taken out of the published file. It then has no <code>text</code>"],
-        ["parts", "Instead of <code>text</code>, when a stretch was taken out or links to a page (a person, a place, a date, a source): a list of <code>{ text }</code>, <code>{ text, href, title? }</code> and <code>{ redacted }</code>, in order. A link is relative to the file"],
+        ["parts", "Instead of <code>text</code>, when a stretch was taken out, links to a page (a person, a place, a date, a source) or is in italics: a list of <code>{ text }</code>, <code>{ text, italic: true, lang? }</code> (a title, a foreign word), <code>{ text, href, title?, italic?, lang? }</code> and <code>{ redacted }</code>, in order, each with its own spaces. A link is relative to the file"],
         ["refs", "The moments of the observation this turn tells of (see “Links with the observation”)"]
       ],
       exampleHeading: "An example",
@@ -198,7 +198,7 @@ export class DocsInterviewPage extends DocsSection {
         ["start, end", "Secondes depuis le début de l'enregistrement, tous deux facultatifs : une transcription tapée à la main n'en a pas, et un tour sans temps n'est pas dans les sous-titres"],
         ["text", "Ce qui a été dit"],
         ["redacted", "<code>{ reason }</code> : le tour entier a été retiré du fichier publié. Il n'a alors pas de <code>text</code>"],
-        ["parts", "À la place de <code>text</code>, quand un passage a été retiré ou renvoie à une page (une personne, un lieu, une date, une source) : une liste de <code>{ text }</code>, <code>{ text, href, title? }</code> et <code>{ redacted }</code>, dans l'ordre. Un lien est relatif au fichier"],
+        ["parts", "À la place de <code>text</code>, quand un passage a été retiré ou renvoie à une page (une personne, un lieu, une date, une source) ou est en italique : une liste de <code>{ text }</code>, <code>{ text, italic: true, lang? }</code> (un titre, un mot étranger), <code>{ text, href, title?, italic?, lang? }</code> et <code>{ redacted }</code>, dans l'ordre, chacune avec ses propres espaces. Un lien est relatif au fichier"],
         ["refs", "Les moments de l'observation que ce tour raconte (voir « Liens avec l'observation »)"]
       ],
       exampleHeading: "Un exemple",
@@ -264,7 +264,7 @@ export class DocsInterviewPage extends DocsSection {
         ["start, end", "Segundos desde el inicio de la grabación, ambos opcionales: una transcripción escrita a mano no los tiene, y un turno sin tiempo no está en los subtítulos"],
         ["text", "Lo que se dijo"],
         ["redacted", "<code>{ reason }</code>: el turno entero se eliminó del archivo publicado. Entonces no tiene <code>text</code>"],
-        ["parts", "En lugar de <code>text</code>, cuando se eliminó un tramo o enlaza a una página (una persona, un lugar, una fecha, una fuente): una lista de <code>{ text }</code>, <code>{ text, href, title? }</code> y <code>{ redacted }</code>, en orden. Un enlace es relativo al archivo"],
+        ["parts", "En lugar de <code>text</code>, cuando se eliminó un tramo o enlaza a una página (una persona, un lugar, una fecha, una fuente): una lista de <code>{ text }</code>, <code>{ text, italic: true, lang? }</code> (un título, una palabra extranjera), <code>{ text, href, title?, italic?, lang? }</code> y <code>{ redacted }</code>, en orden, cada uno con sus propios espacios. Un enlace es relativo al archivo"],
         ["refs", "Los momentos de la observación que cuenta este turno (véase «Vínculos con la observación»)"]
       ],
       exampleHeading: "Un ejemplo",
@@ -330,7 +330,7 @@ export class DocsInterviewPage extends DocsSection {
         ["start, end", "Secondi dall'inizio della registrazione, entrambi facoltativi: una trascrizione scritta a mano non ne ha, e un turno senza tempo non è nei sottotitoli"],
         ["text", "Ciò che è stato detto"],
         ["redacted", "<code>{ reason }</code>: l'intero turno è stato tolto dal file pubblicato. Non ha allora <code>text</code>"],
-        ["parts", "Al posto di <code>text</code>, quando è stato tolto un tratto o rimanda a una pagina (una persona, un luogo, una data, una fonte): un elenco di <code>{ text }</code>, <code>{ text, href, title? }</code> e <code>{ redacted }</code>, in ordine. Un link è relativo al file"],
+        ["parts", "Al posto di <code>text</code>, quando è stato tolto un tratto o rimanda a una pagina (una persona, un luogo, una data, una fonte): un elenco di <code>{ text }</code>, <code>{ text, italic: true, lang? }</code> (un titolo, una parola straniera), <code>{ text, href, title?, italic?, lang? }</code> e <code>{ redacted }</code>, in ordine, ognuno con i propri spazi. Un link è relativo al file"],
         ["refs", "I momenti dell'osservazione di cui parla questo turno (vedi «Legami con l'osservazione»)"]
       ],
       exampleHeading: "Un esempio",

@@ -46,7 +46,7 @@ interface Seekable {
 
 /**
  * An interview, read as a dialogue: who said what, the passages taken out of the published transcript as bars that say why, the stretches that
- * link to a page as links, the time of each turn when it is pointed at, and the passages that tell of a moment of the observation as buttons
+ * link to a page as links, titles and foreign words in italics, the time of each turn when it is pointed at, and the passages that tell of a moment of the observation as buttons
  * that go there.
  *
  * `src` is the interview's file (see InterviewJson), relative to the page; `interview` sets one directly, and `documentUrl` is then what its
@@ -194,6 +194,15 @@ export class InterviewElement extends HTMLElement {
     return link
   }
 
+  /** A stretch in italics (a title, a foreign word) as `<i>`, its language said; as it is otherwise. */
+  private styled(node: Node, italic: true | undefined, lang: string | undefined): Node {
+    if (!italic && !lang) return node
+    const wrapper = document.createElement(italic ? "i" : "span")
+    if (lang) wrapper.lang = lang
+    wrapper.append(node)
+    return wrapper
+  }
+
   private draw(): void {
     const m = this.messages
     const json = this.json
@@ -244,13 +253,17 @@ export class InterviewElement extends HTMLElement {
         const said = document.createElement("p")
         said.className = "said"
         if (segment.parts) {
-          // Stretches follow each other as they were said; the space between them is the transcript's own, else one.
-          segment.parts.forEach((part, at) => {
-            if (at > 0 && !("redacted" in part) && !/^[\s,.;:!?…)»]/.test(part.text)) said.append(" ")
-            if ("redacted" in part) said.append(...(at > 0 ? [" "] : []), this.gap(part.redacted.reason, "span"))
-            else if ("href" in part) said.append(this.link(part.text, part.href, part.title))
+          // Stretches follow each other as they were said, with their own spaces; two words they leave touching get one between them.
+          let before = ""
+          for (const part of segment.parts) {
+            const text = "redacted" in part ? "▮" : part.text
+            if (/[\p{L}\p{N}.,;:!?)»”…▮]$/u.test(before) && /^[\p{L}\p{N}(«“▮]/u.test(text)) said.append(" ")
+            if ("redacted" in part) said.append(this.gap(part.redacted.reason, "span"))
+            else if ("href" in part) said.append(this.styled(this.link(part.text, part.href, part.title), part.italic, part.lang))
+            else if ("italic" in part) said.append(this.styled(document.createTextNode(part.text), part.italic, part.lang))
             else said.append(part.text)
-          })
+            before = text
+          }
         } else said.textContent = segment.text ?? ""
         previous = undefined
         turn.append(who, said)

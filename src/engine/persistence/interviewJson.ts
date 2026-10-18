@@ -42,10 +42,21 @@ export interface InterviewLinkPart {
   href: string
   /** What the link says when pointed at. */
   title?: string
+  /** Set in italics too: the title of a work that has its page. */
+  italic?: true
+  /** The language of the stretch, when it is not the transcript's. */
+  lang?: string
 }
 
-/** A stretch of a segment: said, said with a link, or taken out (see InterviewSegment.parts). */
-export type InterviewSegmentPart = { text: string } | InterviewLinkPart | { redacted: InterviewRedaction }
+/** A stretch of a segment set in italics: the title of a work, or words in another language than the transcript's (`lang`). */
+export interface InterviewItalicPart {
+  text: string
+  italic: true
+  lang?: string
+}
+
+/** A stretch of a segment: said, said in italics, said with a link, or taken out (see InterviewSegment.parts). */
+export type InterviewSegmentPart = { text: string } | InterviewItalicPart | InterviewLinkPart | { redacted: InterviewRedaction }
 
 /**
  * One turn of speech: one speaker, from `start` to `end` seconds after the beginning of the recording, and what was said. A transcript that comes
@@ -55,7 +66,8 @@ export type InterviewSegmentPart = { text: string } | InterviewLinkPart | { reda
  * show it as blacked out rather than hide that it existed.
  *
  * Only a stretch of it may be taken out, the rest staying (the answer to a question, without the detail that would identify), or a stretch may
- * link to a page (a person, a place, a date, a source): then it has `parts` instead of `text`, in order, each said, linked or redacted. `refs[].range` counts in `text`, so a segment with `parts` has none.
+ * link to a page (a person, a place, a date, a source) or be set in italics (a title, a foreign word): then it has `parts` instead of `text`, in
+ * order, each said, in italics, linked or redacted. `refs[].range` counts in `text`, so a segment with `parts` has none.
  */
 export interface InterviewSegment {
   speaker: string
