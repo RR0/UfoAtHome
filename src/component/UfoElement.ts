@@ -1258,6 +1258,23 @@ export class UfoElement extends HTMLElement {
   }
 
   /**
+   * Paints the shapes, their handles and the overlay again at the same instant, after `selectionShown` or `overlayPainter` changed, and tells
+   * nobody: the instant has not moved, and a composing scene hearing a "timeupdate" redraws the whole world (see SceneElement.handleTimeUpdate),
+   * which on a heavy case took a second for an editor tab that only changes what is painted over it.
+   */
+  repaintOverlay(): void {
+    this.quietFrame = true
+    try {
+      this.player.seek(this.player.time)
+    } finally {
+      this.quietFrame = false
+    }
+  }
+
+  /** Set while repaintOverlay paints: the frame is the same instant, and is not announced. */
+  private quietFrame = false
+
+  /**
    * Puts the toggles — the account's moments, the pictures of the place and their opacity, the
    * observer's map — into `host`, or, when `host` is undefined, into this element's own playback
    * bar, just before the fullscreen button that ends it. Never over the picture: its top-right
@@ -2023,6 +2040,7 @@ export class UfoElement extends HTMLElement {
     // Mirrors <video>'s own timeupdate event/semantics — fires on every playback tick AND every
     // seek, since both funnel through this one onFrame sink. Lets SightingEditorElement know when
     // to resync its appearance toolbar to whatever's at the current playhead.
+    if (this.quietFrame) return
     this.dispatchEvent(new CustomEvent("timeupdate", { detail: { time: t } }))
   }
 

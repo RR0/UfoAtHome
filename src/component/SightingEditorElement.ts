@@ -5622,7 +5622,8 @@ export class SightingEditorElement extends HTMLElement {
     // group, the picture's frame and landmarks in its own, nothing elsewhere.
     this.ufoElement.selectionShown = mode === "shape"
     this.ufoElement.overlayPainter = pictureNow ? this.paintPictureOverlay : mode === "body" ? this.paintBodyOverlay : mode === "decor" ? this.paintDecorOverlay : undefined
-    if (changed) this.ufoElement.refresh()
+    // Only what is painted over the picture changes with the mode, not the world in it (see UfoElement.repaintOverlay).
+    if (changed) this.ufoElement.repaintOverlay()
     // Click-to-play is off for the whole editor already (see the constructor): the canvas is for
     // editing here, whichever mode it is in.
     if (pictureNow !== pictureBefore) this.setCanvasCursor(pictureNow ? "pan" : this.hoverCursor)
