@@ -2553,6 +2553,9 @@ export class SceneElement extends HTMLElement {
   }
 
   set compareAccount(comparing: boolean) {
+    // Said again with every tab the editor opens (see SightingEditorElement.syncBodiesShown): restated, it redrew the whole scene for
+    // nothing, its reflections included, and a heavy scene took a second to let the tab open.
+    if (comparing === this.comparing) return
     this.comparing = comparing
     this.syncAccountHidden()
     this.updateAstronomy(this.lastTimeMs)
