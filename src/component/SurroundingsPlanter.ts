@@ -262,7 +262,7 @@ export class SurroundingsPlanter {
     if (!planted.some(object => object.kind === "streetlight" || object.kind === "trafficlight" || object.kind === "crossing" || object.kind === "roadsign")) return ""
     // Named by the survey, each source once and only for what it gave (a town's inventory, its lamps); the volunteers' map where it says nothing,
     // which is where the furniture of a street came from before towns did.
-    const gave = (credit: SurveyCredit) => credit.of !== "lamps" || count("streetlight") > 0
+    const gave = (credit: SurveyCredit) => credit.of === "lamps" ? count("streetlight") > 0 : credit.of === "signals" ? count("trafficlight") > 0 : true
     const names = [...new Set((found.credits ?? []).filter(gave).map(credit => credit.name))]
     const sources = names.join(" + ") || "OpenStreetMap"
     return this.messages.surveyFurnitureDone.replace("{source}", sources)

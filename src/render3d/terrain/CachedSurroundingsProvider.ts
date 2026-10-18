@@ -30,9 +30,9 @@ export class CachedSurroundingsProvider implements SurroundingsProvider {
    * What an answer holds, as a number raised when a survey starts to say more than it did: an answer kept before it does not say it, and is not
    * kept for a month more. 2: the traffic lights, crossings and signs of the streets. 3: what kind of building each is (a church, an old
    * one), and the walls and roofs of that kind. 4: a town's own lamps in place of the volunteers' map's, with their colour and flux (see
-   * StreetLampSource).
+   * StreetLampSource). 5: a town's own traffic lights in place of the map's (see StreetSignalSource).
    */
-  static readonly FORMAT = 4
+  static readonly FORMAT = 5
   /** How many answers are kept on disk, the oldest going first: a few hundred places, a few megabytes. */
   static readonly MAX_STORED = 400
 

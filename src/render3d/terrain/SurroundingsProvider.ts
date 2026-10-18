@@ -124,14 +124,22 @@ export interface StreetLampSource {
   lampsNear(centre: { lat: number, lng: number }, radiusM: number): Promise<SurveyedLamp[]>
 }
 
+/** A source of the traffic lights of a place that is not the survey's own: a town's inventory of its signals (see OsmStreetFurniture). */
+export interface StreetSignalSource {
+  readonly credit: SurveyCredit
+  covers(lat: number, lng: number): boolean
+  /** The heads within `radiusM` of the centre, the nearest first. Throws when the service does not answer. */
+  signalsNear(centre: { lat: number, lng: number }, radiusM: number): Promise<SurveyedSignal[]>
+}
+
 /** Where some of what a survey found was taken from, when it is not the survey's own: to be credited where it is used. */
 export interface SurveyCredit {
   name: string
   url: string
   /** Its licence, where it asks for its credit ("ODbL"). */
   licence?: string
-  /** What of the survey it gave, where it gave one thing only: "lamps" for a town's inventory of its lighting. Absent: any of it. */
-  of?: "lamps"
+  /** What of the survey it gave, where it gave one thing only: "lamps" or "signals" for a town's inventory of its lighting or its traffic lights. Absent: any of it. */
+  of?: "lamps" | "signals"
 }
 
 /** One traffic light, as a map has it: a head on its post at the kerb, in metres from the place asked about. */

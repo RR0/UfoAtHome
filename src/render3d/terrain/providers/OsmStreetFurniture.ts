@@ -1,4 +1,4 @@
-import type { StreetLampSource, Surroundings, SurveyCredit, SurveyedCrossing, SurveyedLamp, SurveyedSign, SurveyedSignal } from "../SurroundingsProvider.js"
+import type { StreetLampSource, StreetSignalSource, Surroundings, SurveyCredit, SurveyedCrossing, SurveyedLamp, SurveyedSign, SurveyedSignal } from "../SurroundingsProvider.js"
 import { TrafficSignals } from "../../../engine/model/LightRig.js"
 import { OverpassClient } from "./OverpassClient.js"
 import type { OverpassClientOptions, OverpassResponse } from "./OverpassClient.js"
@@ -9,6 +9,12 @@ import { OsmStreetLamps } from "./OsmStreetLamps.js"
 export type StreetFurniture = Pick<Surroundings, "lamps" | "signals" | "crossings" | "signs" | "incomplete" | "credits">
 
 type Element = NonNullable<OverpassResponse["elements"]>[number]
+
+/** What the towns' inventories gave of a place (see OsmStreetFurniture.local): each kind with the source to credit, absent where none answered. */
+interface TownFurniture {
+  lamps?: { credit: SurveyCredit, found: SurveyedLamp[] }
+  signals?: { credit: SurveyCredit, found: SurveyedSignal[] }
+}
 type Metres = [number, number]
 
 /** A road a node of the map stands on, and where on it. */
@@ -69,35 +75,49 @@ export class OsmStreetFurniture {
    * at the same time as the map, and the map gives the rest. A town's inventory has every lamp it maintains, at its surveyed place, with the colour
    * and the flux of its light; the map has some, and draws the others along the streets it says are lit (see OsmStreetLamps).
    */
-  constructor(options: OverpassClientOptions = {}, private readonly lampSources: readonly StreetLampSource[] = []) {
+  constructor(options: OverpassClientOptions = {}, private readonly lampSources: readonly StreetLampSource[] = [], private readonly signalSources: readonly StreetSignalSource[] = []) {
     this.client = new OverpassClient(options)
   }
 
-  /** The lamps a town's inventory has of the place, where one covers it and answers: asked once for the page, as the map is (see pending). */
-  private local(centre: { lat: number, lng: number }, radiusM: number): Promise<{ credit: SurveyCredit, lamps: SurveyedLamp[] } | undefined> {
-    const source = this.lampSources.find(candidate => candidate.covers(centre.lat, centre.lng))
-    if (!source) return Promise.resolve(undefined)
-    const key = `${source.credit.url} ${OsmStreetFurniture.boxOf(centre, radiusM)}`
-    let asked = OsmStreetFurniture.localPending.get(key)
-    if (!asked) {
-      asked = source.lampsNear(centre, radiusM).then(lamps => ({ credit: source.credit, lamps }), () => {
-        OsmStreetFurniture.localPending.delete(key)
-        return undefined
-      })
-      OsmStreetFurniture.localPending.set(key, asked)
+  /**
+   * What the towns' inventories have of the place, where one covers it and answers: its lamps, its traffic lights. Each asked once for the page, as
+   * the map is (see pending), and a failure forgotten, so that the next survey asks again.
+   */
+  private local(centre: { lat: number, lng: number }, radiusM: number): Promise<TownFurniture> {
+    const box = OsmStreetFurniture.boxOf(centre, radiusM)
+    const ask = <T>(source: { credit: SurveyCredit, covers(lat: number, lng: number): boolean } | undefined, near: () => Promise<T[]>): Promise<{ credit: SurveyCredit, found: T[] } | undefined> => {
+      if (!source) return Promise.resolve(undefined)
+      const key = `${source.credit.url} ${box}`
+      let asked = OsmStreetFurniture.localPending.get(key) as Promise<{ credit: SurveyCredit, found: T[] } | undefined> | undefined
+      if (!asked) {
+        asked = near().then(found => ({ credit: source.credit, found }), () => {
+          OsmStreetFurniture.localPending.delete(key)
+          return undefined
+        })
+        OsmStreetFurniture.localPending.set(key, asked)
+      }
+      return asked
     }
-    return asked
+    const lampSource = this.lampSources.find(candidate => candidate.covers(centre.lat, centre.lng))
+    const signalSource = this.signalSources.find(candidate => candidate.covers(centre.lat, centre.lng))
+    return Promise.all([ask(lampSource, () => lampSource!.lampsNear(centre, radiusM)), ask(signalSource, () => signalSource!.signalsNear(centre, radiusM))])
+      .then(([lamps, signals]) => ({ lamps, signals }))
   }
 
-  private static readonly localPending = new Map<string, Promise<{ credit: SurveyCredit, lamps: SurveyedLamp[] } | undefined>>()
+  private static readonly localPending = new Map<string, Promise<unknown>>()
 
-  /** The map's furniture with a town's lamps in place of its own, where a town gave them; each credited. */
-  private static withLocal(map: StreetFurniture, local: { credit: SurveyCredit, lamps: SurveyedLamp[] } | undefined): StreetFurniture {
-    const { lamps: mapLamps, ...rest } = map
-    const lamps = local ? local.lamps : mapLamps
-    const fromMap = OsmStreetFurniture.found({ ...rest, ...(local ? {} : { lamps: mapLamps }) })
-    const credits = [...(fromMap ? [OsmStreetFurniture.CREDIT] : []), ...(local && local.lamps.length > 0 ? [local.credit] : [])]
-    return { ...rest, ...(lamps?.length ? { lamps } : {}), ...(credits.length > 0 ? { credits } : {}) }
+  /** The map's furniture with the towns' lamps and traffic lights in place of its own, where towns gave them; each source credited for what it gave. */
+  private static withLocal(map: StreetFurniture, town: TownFurniture | undefined): StreetFurniture {
+    const lamps = town?.lamps ? town.lamps.found : map.lamps
+    const signals = town?.signals ? town.signals.found : map.signals
+    const fromMap = OsmStreetFurniture.found({ crossings: map.crossings, signs: map.signs, ...(town?.lamps ? {} : { lamps }), ...(town?.signals ? {} : { signals }) })
+    const credits = [
+      ...(fromMap ? [OsmStreetFurniture.CREDIT] : []),
+      ...(town?.lamps && town.lamps.found.length > 0 ? [town.lamps.credit] : []),
+      ...(town?.signals && town.signals.found.length > 0 ? [town.signals.credit] : [])
+    ]
+    const { lamps: _lamps, signals: _signals, credits: _credits, ...rest } = map
+    return { ...rest, ...(lamps?.length ? { lamps } : {}), ...(signals?.length ? { signals } : {}), ...(credits.length > 0 ? { credits } : {}) }
   }
 
   /** The day the volunteers' map was asked, which is the day it is as of. */
@@ -134,18 +154,18 @@ export class OsmStreetFurniture {
 
   async near(centre: { lat: number, lng: number }, radiusM: number): Promise<StreetFurniture> {
     const asked = this.ask(OsmStreetFurniture.boxOf(centre, radiusM))
-    const town = this.local(centre, radiusM)
+    const towns = this.local(centre, radiusM)
     // The furniture never holds up the rest of a survey: an instance that does not answer is waited for a few seconds, not until its own timeout.
     let timer: ReturnType<typeof setTimeout> | undefined
     const late = Symbol("late")
     const patience = new Promise<typeof late>(resolve => { timer = setTimeout(() => resolve(late), OsmStreetLamps.PATIENCE_MS) })
     try {
-      const [answer, local] = await Promise.all([Promise.race([asked, patience]), Promise.race([town, patience])])
-      const lamps = local === late ? undefined : local
+      const [answer, local] = await Promise.all([Promise.race([asked, patience]), Promise.race([towns, patience])])
+      const town = local === late ? undefined : local
       // Late or refused, it is not that the streets have nothing: the survey says it is not whole, and is not kept as the place's answer. A town's
-      // lamps that came are its lamps all the same.
-      if (answer === late || answer === undefined) return { ...OsmStreetFurniture.withLocal({}, lamps), incomplete: true }
-      return OsmStreetFurniture.withLocal(OsmStreetFurniture.from(answer, centre, radiusM), lamps)
+      // lamps and lights that came are its all the same.
+      if (answer === late || answer === undefined) return { ...OsmStreetFurniture.withLocal({}, town), incomplete: true }
+      return OsmStreetFurniture.withLocal(OsmStreetFurniture.from(answer, centre, radiusM), town)
     } finally {
       clearTimeout(timer)
     }
