@@ -14,6 +14,7 @@ import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./interviewEvents.
 import { register as registerInterview } from "./InterviewElement.js"
 import type { InterviewElement } from "./InterviewElement.js"
 import type { InterviewJson } from "../engine/persistence/interviewJson.js"
+import { InputFont } from "./InputFont.js"
 
 export const INTERVIEW_EDITOR_ELEMENT_NAME = "rr0-interview-editor"
 
@@ -52,14 +53,13 @@ const TEMPLATE = `
   .group-panel > .row:last-child { margin-bottom: 0; }
   label { display: flex; align-items: center; gap: .4em; }
   label.wide { flex: 1 1 100%; align-items: flex-start; }
-  label.wide textarea { flex: 1 1 auto; min-width: 0; min-height: 9em; font: inherit; }
+  label.wide textarea { flex: 1 1 auto; min-width: 0; min-height: 9em; }
   label.fill { flex: 1 1 100%; }
   label.fill input { flex: 1 1 auto; }
   input[type="text"] { min-width: 0; }
   #by { width: 16em; }
   input[type="url"] { width: 18em; max-width: 100%; }
-  /* Addresses and file names are read letter by letter. */
-  input[type="url"], #url { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  ${InputFont.CSS}
   select { min-width: 0; max-width: 100%; text-overflow: ellipsis; }
   fieldset.witnesses { display: flex; flex-wrap: wrap; align-items: center; gap: .25em .75em; border: 0; margin: 0; padding: 0; min-width: 0; }
   fieldset.witnesses legend { float: left; padding: 0; margin-right: .4em; }

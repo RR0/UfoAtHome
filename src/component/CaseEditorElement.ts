@@ -22,6 +22,7 @@ import type { CaseEditorMessages } from "./messages/CaseEditorMessages.js"
 import { caseEditorMessages_en } from "./messages/CaseEditorMessages_en.js"
 import { loadCaseEditorMessages, loadSightingEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
+import { InputFont } from "./InputFont.js"
 
 export const CASE_EDITOR_ELEMENT_NAME = "rr0-case-editor"
 
@@ -73,7 +74,7 @@ const TEMPLATE = `
   #case.in-case > .case-panel { margin-bottom: 0; }
   .file-note { font-size: .85em; opacity: .8; margin: .3em 0; }
   .file-editor { min-height: 18em; margin-top: .5em; }
-  input[type="url"] { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  ${InputFont.CSS}
   .toolbar input[type="url"] { width: 18em; max-width: 100%; }
   dialog { max-width: min(30em, 92vw); }
   dialog label { display: flex; align-items: center; gap: .5em; margin: .4em 0; }

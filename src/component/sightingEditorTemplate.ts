@@ -1,4 +1,5 @@
 import { SummaryDescription } from "./SummaryDescription.js"
+import { InputFont } from "./InputFont.js"
 export const html = `
 <!-- The groups' own handles, gathered onto one wrapping strip instead of standing as seven stacked
      <summary> rows down the left edge. Seven collapsed rows cost 259px of pure chrome before a
@@ -582,9 +583,7 @@ export const html = `
 </div>
 `
 
-export const css = `
-/* Addresses and file names are read letter by letter: monospaced, as the file editor is. */
-input[type="url"], #referenceSrc { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+export const css = `${InputFont.CSS}
 :host {
   color-scheme: light dark;
   display: block;
@@ -869,8 +868,7 @@ input.invalid {
 /* Wide enough for a real place name with its region and country, which is what gets stored (see
    PlaceMatch.name) — a name short enough to fit a default input is exactly the ambiguous kind. */
 .place-name {
-  width: 18em;
-  font: inherit;
+  width: 24em;
 }
 /* How many places matched, and the credit the data requires — quieter than the field it explains,
    same role and styling as .weather-source/.apparent-size. */
@@ -1059,7 +1057,6 @@ select.weather-field:disabled {
   margin-top: 0.5em;
 }
 #description {
-  font: inherit;
   resize: vertical;
 }
 /* A provider's own settings sit in the row like any other field; a key is long, a workspace id
@@ -1068,12 +1065,10 @@ select.weather-field:disabled {
   display: contents;
 }
 #narrative-key {
-  width: 12em;
-  font: inherit;
+  width: 16em;
 }
 #narrative-workspace {
-  width: 11em;
-  font: inherit;
+  width: 14em;
 }
 /* A failure has to be visible without opening a console. The status line carries three quite
    different things — working, written, refused — and only the last is a problem, so only the last
