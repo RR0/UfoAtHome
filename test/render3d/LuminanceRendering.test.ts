@@ -7,6 +7,20 @@ import { Veil } from "../../src/render3d/Veil.js"
 import { EYE_RESPONSE_GLSL } from "../../src/render3d/colorSpace.js"
 
 describe("rendering in luminance", () => {
+  it("keeps a lamp's colour where it is too bright for the screen, and takes anything else towards white", () => {
+    // A red traffic light's lens, ten thousand candela a square metre, to an eye adapted to a few: far up the response.
+    const red: [number, number, number] = [3000, 39, 0]
+    const surface = EyeAdaptation.finish(red)
+    const lamp = EyeAdaptation.finish(red, 1)
+    expect(Math.min(...surface)).toBeGreaterThan(0.9)
+    expect(lamp[0]).toBeCloseTo(1, 6)
+    expect(lamp[1]).toBeCloseTo(0.013, 3)
+    expect(lamp[2]).toBe(0)
+    // Within the screen, a lamp is shown as anything else is.
+    expect(EyeAdaptation.finish([0.2, 0.1, 0.05], 1)).toEqual(EyeAdaptation.finish([0.2, 0.1, 0.05]))
+    expect(EYE_RESPONSE_GLSL).toContain("vec3 respond(vec3 relative, float lamp)")
+  })
+
   it("finishes a relative light into what the eye made of it, shown as a lightness", () => {
     // Drawn as light and responded to once at the end, the sky keeps the colour it had when each
     // pixel went through the response itself, and its response is shown as the luminance of that

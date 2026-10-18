@@ -170,7 +170,9 @@ export class DepthOfFieldPass {
         }
 
         void main() {
-          vec3 scene = throughLens(uColour, uDepth).rgb;
+          vec4 texel = throughLens(uColour, uDepth);
+          vec3 scene = texel.rgb;
+          float lamp = lampOf(texel.a);
           // The phenomena are blurred by the distance they are DRAWN at — a parameter of the
           // picture, not a fact (see PhenomenonDepth), and the one place it shows as something
           // other than what hides the shape.

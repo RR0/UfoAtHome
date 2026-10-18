@@ -102,7 +102,9 @@ export class ExposureAccumulation {
         uniform sampler2D uOverlay;
         uniform float uGain;
         void main() {
-          gl_FragColor = vec4(finish(texture2D(uFilm, vUv).rgb * uGain, texture2D(uOverlay, vUv) * uGain), 1.0);
+          // A lamp's mark is averaged over the pose like its light: a lamp lit through the whole of it is still a lamp.
+          vec4 film = texture2D(uFilm, vUv) * uGain;
+          gl_FragColor = vec4(finish(film.rgb, texture2D(uOverlay, vUv) * uGain, lampOf(film.a)), 1.0);
         }
       `,
       blending: NoBlending,

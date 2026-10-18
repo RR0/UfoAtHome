@@ -47,7 +47,9 @@ export class FinishPass {
         uniform float uMode;
         varying vec2 vUv;
         void main() {
-          vec3 scene = texture2D(uSource, vUv).rgb;
+          vec4 texel = texture2D(uSource, vUv);
+          vec3 scene = texel.rgb;
+          float lamp = lampOf(texel.a);
           vec4 overlay = texture2D(uOverlay, vUv);
           ${FINISH_BY_MODE_GLSL}
         }

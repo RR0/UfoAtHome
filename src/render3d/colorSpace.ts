@@ -1,4 +1,5 @@
-import { Matrix3 } from "three"
+import { AddEquation, CustomBlending, Matrix3, OneFactor, SrcAlphaFactor, ZeroFactor } from "three"
+import type { Material } from "three"
 import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
 
 
@@ -107,7 +108,13 @@ float recorded(float h) {
   return power / (power + (1.0 / MEDIUM_MID_GREY - 1.0));
 }
 
-vec3 respond(vec3 relative) {
+/**
+ * \`lamp\` (0 to 1) is how much of the pixel is a lamp (see LampMark): a small light seen for itself, whose colour is what it says. Too bright
+ * and too saturated to fit on the screen, a lamp keeps its hue and gives up brightness, where the rest of the picture keeps its brightness and
+ * gives up saturation: a red traffic light ten thousand candela a square metre bright is red to an eye (colourfulness grows with luminance), and
+ * taken towards white it was a white dot no one would call red.
+ */
+vec3 respond(vec3 relative, float lamp) {
   // A medium has no rods: no Purkinje shift, its colours are its own.
   vec3 clamped = clamp(relative, vec3(0.0), vec3(60000.0));
   if (uMedium < 0.5) clamped = uColorVision * purkinje(clamped);
@@ -135,8 +142,15 @@ vec3 respond(vec3 relative) {
   // the top of its range.
   float top = max(shown.r, max(shown.g, shown.b));
   // At the very top the response rounds to one and there is no room left for any colour: white.
-  if (top > 1.0) shown = response >= 0.9999 ? vec3(1.0) : vec3(response) + (shown - vec3(response)) * (1.0 - response) / max(top - response, 1e-6);
+  if (top > 1.0) {
+    vec3 grey = response >= 0.9999 ? vec3(1.0) : vec3(response) + (shown - vec3(response)) * (1.0 - response) / max(top - response, 1e-6);
+    shown = mix(grey, shown / top, clamp(lamp, 0.0, 1.0));
+  }
   return shown;
+}
+
+vec3 respond(vec3 relative) {
+  return respond(relative, 0.0);
 }
 `
 
@@ -166,8 +180,18 @@ ${SRGB_ENCODE_GLSL}
 ${EYE_RESPONSE_GLSL}
 /** Whether anything is laid over the picture at all: see EYE_UNIFORMS. */
 uniform float uHasOverlay;
+vec3 finish(vec3 relative, vec4 overlay, float lamp) {
+  return encodeSrgb(respond(relative, lamp) * (1.0 - overlay.a) + overlay.rgb);
+}
 vec3 finish(vec3 relative, vec4 overlay) {
-  return encodeSrgb(respond(relative) * (1.0 - overlay.a) + overlay.rgb);
+  return finish(relative, overlay, 0.0);
+}
+/**
+ * How much of a pixel of the scene's layer is a lamp, from its alpha (see LampMark): all of it from a quarter covered, since a lamp's light
+ * outweighs what is behind it by thousands. Taken as the share covered, the rim of a lens a few pixels across was half white.
+ */
+float lampOf(float alpha) {
+  return clamp(4.0 * (1.0 - alpha), 0.0, 1.0);
 }
 `
 
@@ -187,11 +211,31 @@ export const enum FinishMode {
   Overlay = 2
 }
 
-/** The body of a finishing shader's main() once it has `scene` and `overlay` in hand — see FinishMode. */
+/**
+ * How a lamp says that a pixel is its own (see respond's `lamp`): it leaves no alpha in the scene's layer, which everything else leaves at one
+ * or more (opaque surfaces write one, what is added onto them adds to it, the glass and the clouds blend it back to one). Measured on a day
+ * and a night scene: one everywhere by day, one to two at night, never under one.
+ */
+export class LampMark {
+  /** Makes `material` add its light to what is behind it, as a lamp does, and mark the pixels it covers as a lamp's. */
+  static apply(material: Material): void {
+    material.blending = CustomBlending
+    material.blendEquation = AddEquation
+    material.blendSrc = SrcAlphaFactor
+    material.blendDst = OneFactor
+    material.blendSrcAlpha = ZeroFactor
+    material.blendDstAlpha = ZeroFactor
+  }
+}
+
+/**
+ * The body of a finishing shader's main() once it has `scene`, `overlay` and `lamp` (see lampOf) in hand — see FinishMode. The scene's
+ * layer alone keeps its lamps marked, for the exposure it is on its way into.
+ */
 export const FINISH_BY_MODE_GLSL = `
   // A picture with nothing laid over it does not even clear its overlay (see EYE_UNIFORMS).
   overlay *= uHasOverlay;
-  if (uMode < 0.5) gl_FragColor = vec4(finish(scene, overlay), 1.0);
-  else if (uMode < 1.5) gl_FragColor = vec4(scene, 1.0);
+  if (uMode < 0.5) gl_FragColor = vec4(finish(scene, overlay, lamp), 1.0);
+  else if (uMode < 1.5) gl_FragColor = vec4(scene, 1.0 - lamp);
   else gl_FragColor = overlay;
 `

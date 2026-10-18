@@ -1,5 +1,5 @@
 import { GrassDetail } from "./terrain/GrassDetail.js"
-import { AdditiveBlending, BackSide, Box3, DoubleSide, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
+import { BackSide, Box3, DoubleSide, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry, Uint32BufferAttribute, Vector3 } from "three"
 import type { Material, Object3D } from "three"
 import type { ModelParameters } from "../engine/model/DecorTraits.js"
 import { DecorBase } from "../engine/model/DecorBase.js"
@@ -15,6 +15,7 @@ import { WireGeometry } from "./WireGeometry.js"
 import { DryStoneWall } from "./DryStoneWall.js"
 import { StreetFurnitureGeometry } from "./StreetFurnitureGeometry.js"
 import { TrafficSignals } from "../engine/model/LightRig.js"
+import { LampMark } from "./colorSpace.js"
 
 const DEG_TO_RAD = Math.PI / 180
 
@@ -86,6 +87,13 @@ const LAMP_MIN_ANGULAR_RADIUS_RAD = 0.002
  * the eye's response, which keeps a colour's hue, shows a red light red however bright it burns.
  */
 const LAMP_CANDELA = 100
+/**
+ * The most a lamp's brightest channel is drawn at, in the scene's relative units. The picture is held in half floats, which stop at 65 504; a
+ * 300 cd lens of ten centimetres, to an eye adapted to the night, is some ten million, so its weak channels overflowed with its strong one and a
+ * red light came out yellow, a green one cyan. Thirty thousand times the eye's semi-saturation is white for anything but a lamp, and a
+ * lamp keeps its colour there (see LampMark).
+ */
+const LAMP_MAX_RELATIVE = 30000
 /** A streetlamp's head: a ten-thousand-lumen road lamp, some 1 500 candela, from a globe of the
  * lamp head's size. */
 const STREETLIGHT_HEAD_CANDELA = 1500
@@ -95,13 +103,19 @@ const STREETLIGHT_HEAD_RADIUS_M = 0.25
 const HEADLIGHT_CANDELA = 1000
 const HEADLIGHT_RADIUS_M = 0.15
 
-/** `#rrggbb` to the 0-1 triple every material here takes. Falls back to white rather than throwing:
+/** `#rrggbb` to the linear 0-1 triple every material here takes. Falls back to white rather than throwing:
  * a lamp of an unparseable colour should still light up. */
 function hexToRgb(hex: string): RgbColor {
   const match = /^#([0-9a-f]{6})$/i.exec(hex)
   if (!match) return [1, 1, 1]
   const value = parseInt(match[1], 16)
-  return [((value >> 16) & 0xff) / 255, ((value >> 8) & 0xff) / 255, (value & 0xff) / 255]
+  // A CSS colour is sRGB, and the scene's light is linear: taken as it is, the 0x1e of a traffic light's red was a green of 12 % instead of 1 %,
+  // and the red came out orange.
+  const linear = (byte: number): number => {
+    const c = byte / 255
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+  }
+  return [linear((value >> 16) & 0xff), linear((value >> 8) & 0xff), linear(value & 0xff)]
 }
 
 const UNLIT_LAMP_COLOR: RgbColor = [0.62, 0.62, 0.6]
@@ -1458,7 +1472,8 @@ export class DecorSystem {
       // already holds — drawn through the fog, the lamp would add that airlight a second time and shine brighter the
       // further it was.
       const material = mesh.material as MeshBasicMaterial
-      material.blending = AdditiveBlending
+      // Marked as a lamp's besides: too bright for the screen, it keeps its colour rather than going white (see LampMark).
+      LampMark.apply(material)
       material.transparent = true
       material.depthWrite = false
       material.fog = false
@@ -1529,7 +1544,10 @@ export class DecorSystem {
       const base = (child.userData as DecorMeshUserData).lightColor
       if (base) {
         const emitted = share * towardEye * LAMP_CANDELA * (light.intensity ?? 1) * luminancePerCandela
-        material.color.setRGB(base[0] * emitted * transmittance[0], base[1] * emitted * transmittance[1], base[2] * emitted * transmittance[2])
+        const rgb = [base[0] * emitted * transmittance[0], base[1] * emitted * transmittance[1], base[2] * emitted * transmittance[2]]
+        // Held where the picture's half floats still tell its channels apart (see LAMP_MAX_RELATIVE): far above white, and the hue kept.
+        const fit = Math.min(1, LAMP_MAX_RELATIVE / Math.max(rgb[0], rgb[1], rgb[2], 1e-30))
+        material.color.setRGB(rgb[0] * fit, rgb[1] * fit, rgb[2] * fit)
       }
       child.scale.setScalar(scale)
     }

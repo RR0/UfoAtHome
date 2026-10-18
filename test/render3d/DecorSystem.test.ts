@@ -1,6 +1,6 @@
 import { LightRigs } from "../../src/engine/model/LightRig.js"
 import { describe, expect, it } from "vitest"
-import { AdditiveBlending, Box3, BoxGeometry, Color, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshStandardMaterial, Vector3, type Object3D } from "three"
+import { Box3, CustomBlending, OneFactor, SrcAlphaFactor, ZeroFactor, BoxGeometry, Color, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshStandardMaterial, Vector3, type Object3D } from "three"
 import { DecorSystem } from "../../src/render3d/DecorSystem.js"
 import type { DecorObject } from "../../src/engine/model/Decor.js"
 
@@ -471,9 +471,15 @@ describe("DecorSystem declared lamps seen against a sky", () => {
 
   it("adds its light to what is behind it instead of replacing it: a lamp is no black dot against a bright sky", () => {
     const material = lamp(aircraft()).material as MeshBasicMaterial
-    expect(material.blending).toBe(AdditiveBlending)
+    expect(material.blending).toBe(CustomBlending)
+    expect([material.blendSrc, material.blendDst]).toEqual([SrcAlphaFactor, OneFactor])
     expect(material.transparent).toBe(true)
     expect(material.depthWrite).toBe(false)
+  })
+
+  it("marks the pixels it covers as a lamp's, by leaving no alpha there, for the finish to keep its colour", () => {
+    const material = lamp(aircraft()).material as MeshBasicMaterial
+    expect([material.blendSrcAlpha, material.blendDstAlpha]).toEqual([ZeroFactor, ZeroFactor])
   })
 
   it("is out of the fog, whose airlight it would otherwise add a second time, and the further the brighter", () => {

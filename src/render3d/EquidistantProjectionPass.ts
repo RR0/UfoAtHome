@@ -154,10 +154,13 @@ export class EquidistantProjectionPass {
           // Behind the observer: nothing the source could possibly hold.
           vec3 scene = vec3(0.0);
           vec4 overlay = vec4(0.0);
+          float lamp = 0.0;
           if (dir.z < -1e-6) {
             vec2 src = vec2(dir.x / -dir.z / (uSrcTanHalfFovY * uAspect), dir.y / -dir.z / uSrcTanHalfFovY);
             if (all(lessThanEqual(abs(src), vec2(1.0)))) {
-              scene = texture2D(uSource, src * 0.5 + 0.5).rgb;
+              vec4 texel = texture2D(uSource, src * 0.5 + 0.5);
+              scene = texel.rgb;
+              lamp = lampOf(texel.a);
               overlay = texture2D(uOverlay, src * 0.5 + 0.5);
             }
           }
@@ -478,7 +481,9 @@ export class EquidistantProjectionPass {
         uniform float uMode;
         varying vec2 vUv;
         void main() {
-          vec3 scene = texture2D(uSource, vUv).rgb;
+          vec4 texel = texture2D(uSource, vUv);
+          vec3 scene = texel.rgb;
+          float lamp = lampOf(texel.a);
           vec4 overlay = texture2D(uOverlay, vUv);
           ${FINISH_BY_MODE_GLSL}
         }
@@ -633,13 +638,16 @@ export class EquidistantProjectionPass {
           float theta = length(angle);
           vec3 scene = vec3(0.0);
           vec4 overlay = vec4(0.0);
+          float lamp = 0.0;
           if (theta <= 3.14159265) {
             vec3 dir = vec3(0.0, 0.0, -1.0);
             if (theta > 1e-6) {
               vec2 axis = angle / theta;
               dir = vec3(axis * sin(theta), -cos(theta));
             }
-            scene = textureCube(uCube, uCameraRotation * dir).rgb;
+            vec4 texel = textureCube(uCube, uCameraRotation * dir);
+            scene = texel.rgb;
+            lamp = lampOf(texel.a);
             overlay = textureCube(uOverlayCube, uCameraRotation * dir);
           }
           ${FINISH_BY_MODE_GLSL}

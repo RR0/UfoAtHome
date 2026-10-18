@@ -210,8 +210,8 @@ export class EyeAdaptation {
 
   /** A linear display colour for a relative one: the response shown as a lightness, its
    * chromaticity kept, and desaturated towards its own grey where it would not fit on the screen —
-   * EYE_RESPONSE_GLSL's own arithmetic, Purkinje's shift aside. */
-  static finish(relative: readonly [number, number, number]): DisplayRgb {
+   * EYE_RESPONSE_GLSL's own arithmetic, Purkinje's shift aside. A `lamp` (0 to 1, see LampMark) keeps its hue there and gives up brightness. */
+  static finish(relative: readonly [number, number, number], lamp = 0): DisplayRgb {
     const y = 0.2126 * relative[0] + 0.7152 * relative[1] + 0.0722 * relative[2]
     if (!(y > 0)) return [0, 0, 0]
     const response = EyeAdaptation.fromLightness(EyeAdaptation.respond(y))
@@ -219,7 +219,8 @@ export class EyeAdaptation {
     const shown: DisplayRgb = [relative[0] * k, relative[1] * k, relative[2] * k]
     const top = Math.max(...shown)
     if (top <= 1) return shown
-    const share = (1 - response) / (top - response)
-    return shown.map(value => response + (value - response) * share) as DisplayRgb
+    const share = response >= 0.9999 ? 0 : (1 - response) / (top - response)
+    const weight = Math.min(Math.max(lamp, 0), 1)
+    return shown.map(value => (1 - weight) * (response >= 0.9999 ? 1 : response + (value - response) * share) + weight * value / top) as DisplayRgb
   }
 }
