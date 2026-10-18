@@ -199,6 +199,10 @@ export class DocsCasePage extends DocsSection {
     }
   }
 
+  script(): string {
+    return this.excerptsScript()
+  }
+
   render(language: SiteLanguage): string {
     const t = this.text[language]
     const table = (rows: ReadonlyArray<[string, string]>): string => `
@@ -239,13 +243,64 @@ export class DocsCasePage extends DocsSection {
 
     <h2>${t.techHeading}</h2>
     <p>${t.techIntro}</p>
+    <p class="small">${this.excerptNote(language)}</p>
     <h3>${t.exampleHeading}</h3>
-    <pre><code>${EXAMPLE.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</code></pre>
+    <pre data-schema="case"><code>${EXAMPLE.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</code></pre>
     <h3>${t.caseHeading}</h3>${table(t.caseRows)}
     <h3>${t.eventHeading}</h3>${table(t.eventRows)}
-    <p>${t.techOutro}</p>
+    <p>${t.techOutro}</p>${this.caseEditor(language)}
   </div>
 </section>
 `
+  }
+
+  /** `<rr0-case-editor>`, the editor this page's "In the case editor" is about. */
+  private caseEditor(language: SiteLanguage): string {
+    const said = (en: string, fr: string, es: string, it: string): Said<string> => ({ en, fr, es, it })
+    return this.componentSection(language, "rr0-case-editor",
+      said(
+        "The editor of a case: the picker of its events, each opened in the editor of its kind, and the case file as text.",
+        "L'éditeur de dossier : le sélecteur de ses événements, chacun ouvert dans l'éditeur de son genre, et le fichier de dossier en texte.",
+        "El editor de casos: el selector de sus eventos, cada uno abierto en el editor de su tipo, y el archivo del caso como texto.",
+        "L'editor di casi: il selettore dei suoi eventi, ciascuno aperto nell'editor del suo tipo, e il file del caso come testo."),
+      `<script type="module" src="https://ufoathome.org/lib/rr0-sighting-editor.mjs"></script>
+<rr0-case-editor src="/cases/saint-lo/case.json"></rr0-case-editor>`,
+      said(
+        "The module of the recording's editor registers it, with the <code>&lt;rr0-sighting-editor&gt;</code> it holds. The editor of an interview is fetched the first time an interview is shown.",
+        "Le module de l'éditeur d'enregistrement l'enregistre, avec le <code>&lt;rr0-sighting-editor&gt;</code> qu'il contient. L'éditeur d'interview est chargé la première fois qu'une interview est montrée.",
+        "El módulo del editor de grabaciones lo registra, con el <code>&lt;rr0-sighting-editor&gt;</code> que contiene. El editor de entrevistas se descarga la primera vez que se muestra una entrevista.",
+        "Il modulo dell'editor di registrazioni lo registra, con il <code>&lt;rr0-sighting-editor&gt;</code> che contiene. L'editor di interviste viene scaricato la prima volta che si mostra un'intervista."),
+      [
+        ["src", "attribute", said(
+          "The address of a case (<code>case.json</code>), or of one recording, which it then offers to add to a case.",
+          "L'adresse d'un dossier (<code>case.json</code>), ou d'un seul enregistrement, qu'il propose alors d'ajouter à un dossier.",
+          "La dirección de un caso (<code>case.json</code>), o de una sola grabación, que entonces ofrece añadir a un caso.",
+          "L'indirizzo di un caso (<code>case.json</code>), o di una sola registrazione, che allora propone di aggiungere a un caso.")],
+        ["track", "attribute", said(
+          "The address of the recording to open first, relative to the case; by default the first observer's.",
+          "L'adresse de l'enregistrement à ouvrir d'abord, relative au dossier ; par défaut celui du premier observateur.",
+          "La dirección de la grabación que se abre primero, relativa al caso; por defecto la del primer observador.",
+          "L'indirizzo della registrazione da aprire per prima, relativo al caso; per impostazione predefinita quella del primo osservatore.")],
+        ["sightingData", "property", said(
+          "The recording on show, as a plain object.",
+          "L'enregistrement affiché, comme objet simple.",
+          "La grabación mostrada, como objeto simple.",
+          "La registrazione mostrata, come oggetto semplice.")],
+        ["sightingEditor", "property", said(
+          "The <code>&lt;rr0-sighting-editor&gt;</code> that holds it, for whoever needs more of it than this element offers.",
+          "Le <code>&lt;rr0-sighting-editor&gt;</code> qui le contient, pour qui a besoin de plus que ce que cet élément offre.",
+          "El <code>&lt;rr0-sighting-editor&gt;</code> que lo contiene, para quien necesite más de lo que este elemento ofrece.",
+          "Il <code>&lt;rr0-sighting-editor&gt;</code> che lo contiene, per chi ha bisogno di più di ciò che questo elemento offre.")],
+        ["caseSession", "property", said(
+          "The case being edited, when one is open.",
+          "Le dossier en cours d'édition, quand un est ouvert.",
+          "El caso que se está editando, cuando hay uno abierto.",
+          "Il caso in modifica, quando ce n'è uno aperto.")],
+        ["dirty", "property", said(
+          "True when the case, or any recording of it, has changes not saved.",
+          "Vrai quand le dossier, ou l'un de ses enregistrements, a des modifications non sauvées.",
+          "Verdadero cuando el caso, o alguna de sus grabaciones, tiene cambios sin guardar.",
+          "Vero quando il caso, o una sua registrazione, ha modifiche non salvate.")]
+      ])
   }
 }

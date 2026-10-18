@@ -133,7 +133,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       horizon, and the clouds are drawn on their own rather than dimming the light of the sky around
       them. How much haze a given town put in the air is unknowable from a record of 1948; only how
       much the humidity swelled it is modelled. The sources, and the choices behind each of them, are
-      listed under <a href="/docs/sources/#air">the air</a>.</p>
+      listed under <a href="/docs/format/#air">the air</a>.</p>
 `,
       fr: `    <p>Le ciel lui-même n'est pas un dégradé de couleurs. La lumière du Soleil et de la Lune est
       suivie à travers une atmosphère sphérique, à quinze longueurs d'onde couvrant ce que voit un
@@ -169,7 +169,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       du Soleil sous l'horizon, et les nuages sont dessinés à part au lieu d'assombrir la lumière du
       ciel autour d'eux. La quantité de brume qu'une ville mettait dans l'air ne peut pas se lire dans
       un relevé de 1948 ; seul son gonflement par l'humidité est modélisé. Les sources, et les choix
-      faits pour chacune, sont listés sous <a href="/docs/sources/#air">l'air</a>.</p>
+      faits pour chacune, sont listés sous <a href="/docs/format/#air">l'air</a>.</p>
 `,
       es: `    <p>El cielo en sí no es un degradado de color. La luz del Sol y de la Luna se sigue a través de
       una atmósfera esférica en quince longitudes de onda que cubren lo que ve un ojo, tal como la
@@ -205,7 +205,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       horizonte, y las nubes se dibujan aparte en lugar de atenuar la luz del cielo a su alrededor.
       Cuánta bruma ponía en el aire una ciudad dada no puede saberse a partir de un registro de 1948;
       solo se modela cuánto la hinchaba la humedad. Las fuentes, y las decisiones detrás de cada una,
-      se enumeran en <a href="/docs/sources/#air">el aire</a>.</p>
+      se enumeran en <a href="/docs/format/#air">el aire</a>.</p>
 `,
       it: `    <p>Il cielo stesso non è una sfumatura di colore. La luce del Sole e della Luna è seguita
       attraverso un'atmosfera sferica a quindici lunghezze d'onda che coprono ciò che vede un occhio,
@@ -242,7 +242,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       Sole sotto l'orizzonte, e le nuvole sono disegnate a parte invece di attenuare la luce del cielo
       attorno a loro. Quanta foschia mettesse nell'aria una data città non si può sapere da un dato
       del 1948; è modellato solo quanto l'umidità la gonfiasse. Le fonti, e le scelte dietro ciascuna,
-      sono elencate sotto <a href="/docs/sources/#air">l'aria</a>.</p>
+      sono elencate sotto <a href="/docs/format/#air">l'aria</a>.</p>
 `
     }
   },

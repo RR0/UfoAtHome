@@ -144,7 +144,7 @@ export class DocsInterviewPage extends DocsSection {
       people: "An interview may have any number of speakers. <code>by</code> lists every interviewer and <code>interviewOf</code> every observation held with; in the file the first interviewer is <code>interviewer</code>, the next <code>interviewer2</code>, and likewise <code>witness</code>, <code>witness2</code>… The editor keeps them in step with the event.",
       linksHeading: "Links with the observation",
       links: "A turn can say which moment of the observation it tells of: <code>\"refs\": [{ \"at\": 0.5 }]</code>, in seconds from the beginning of the observation. <code>sighting</code> names the observation when the interview was held with several, and <code>range</code> (<code>[from, to]</code> in characters of <code>text</code>) the part of the turn concerned. In the editor a turn with a reference has a button that shows the observation at that moment, and the observation lists, under it, the passages that tell of it (“Reported in …”), each a link back to the turn.",
-      editorHeading: "In the editor",
+      editorHeading: "In the interview editor",
       editor: "<code>&lt;rr0-interview&gt;</code> has three groups: the <strong>Summary</strong> (title, witnesses, medium, date, interviewers, description), the <strong>Exchanges</strong> (the interview read as a dialogue: who said what, the time of each turn as a tooltip, passages taken out blacked out with their reason, who has not approved yet) and the <strong>File</strong> (the transcript as text, completed from its schema, to load and to save). It is a chunk of its own, fetched only when a case has an interview.",
       importHeading: "Importing a transcript that is not in our format",
       importIntro: "Most transcripts come from somewhere else. In the File group, “Load a file” reads, besides JSON:",
@@ -210,7 +210,7 @@ export class DocsInterviewPage extends DocsSection {
       people: "Une interview peut avoir autant de locuteurs qu'on veut. <code>by</code> liste chaque enquêteur et <code>interviewOf</code> chaque observation avec laquelle elle a eu lieu ; dans le fichier, le premier enquêteur est <code>interviewer</code>, le suivant <code>interviewer2</code>, et de même <code>witness</code>, <code>witness2</code>… L'éditeur les garde en accord avec l'événement.",
       linksHeading: "Liens avec l'observation",
       links: "Un tour peut dire de quel moment de l'observation il parle : <code>\"refs\": [{ \"at\": 0.5 }]</code>, en secondes depuis le début de l'observation. <code>sighting</code> nomme l'observation quand l'interview en concerne plusieurs, et <code>range</code> (<code>[de, à]</code> en caractères de <code>text</code>) la partie du tour concernée. Dans l'éditeur, un tour avec une référence a un bouton qui montre l'observation à ce moment, et l'observation liste, dessous, les passages qui la racontent (« Relaté dans … »), chacun un lien en retour vers le tour.",
-      editorHeading: "Dans l'éditeur",
+      editorHeading: "Dans l'éditeur d'interview",
       editor: "<code>&lt;rr0-interview&gt;</code> a trois groupes : le <strong>Résumé</strong> (titre, témoins, moyen, date, enquêteurs, description), les <strong>Échanges</strong> (l'interview lue comme un dialogue : qui a dit quoi, le temps de chaque tour en infobulle, les passages retirés noircis avec leur raison, qui n'a pas encore approuvé) et le <strong>Fichier</strong> (la transcription en texte, complétée d'après son schéma, à charger et à sauver). C'est un morceau à part, chargé seulement quand un dossier contient une interview.",
       importHeading: "Importer une transcription qui n'est pas dans notre format",
       importIntro: "La plupart des transcriptions viennent d'ailleurs. Dans le groupe Fichier, « Charger un fichier » lit, en plus du JSON :",
@@ -276,7 +276,7 @@ export class DocsInterviewPage extends DocsSection {
       people: "Una entrevista puede tener cualquier número de hablantes. <code>by</code> enumera cada entrevistador e <code>interviewOf</code> cada observación con la que se celebró; en el archivo, el primer entrevistador es <code>interviewer</code>, el siguiente <code>interviewer2</code>, y lo mismo <code>witness</code>, <code>witness2</code>… El editor los mantiene de acuerdo con el evento.",
       linksHeading: "Vínculos con la observación",
       links: "Un turno puede decir de qué momento de la observación habla: <code>\"refs\": [{ \"at\": 0.5 }]</code>, en segundos desde el inicio de la observación. <code>sighting</code> nombra la observación cuando la entrevista se celebró con varias, y <code>range</code> (<code>[desde, hasta]</code> en caracteres de <code>text</code>) la parte del turno afectada. En el editor, un turno con referencia tiene un botón que muestra la observación en ese momento, y la observación enumera debajo los pasajes que la cuentan («Relatado en …»), cada uno un enlace de vuelta al turno.",
-      editorHeading: "En el editor",
+      editorHeading: "En el editor de entrevistas",
       editor: "<code>&lt;rr0-interview&gt;</code> tiene tres grupos: el <strong>Resumen</strong> (título, testigos, medio, fecha, entrevistadores, descripción), los <strong>Intercambios</strong> (la entrevista leída como un diálogo: quién dijo qué, el tiempo de cada turno en un globo, los pasajes eliminados ennegrecidos con su razón, quién aún no ha aprobado) y el <strong>Archivo</strong> (la transcripción como texto, completada según su esquema, para cargar y guardar). Es un fragmento aparte, que se descarga solo cuando un caso tiene una entrevista.",
       importHeading: "Importar una transcripción que no está en nuestro formato",
       importIntro: "La mayoría de las transcripciones vienen de otra parte. En el grupo Archivo, «Cargar un archivo» lee, además de JSON:",
@@ -342,7 +342,7 @@ export class DocsInterviewPage extends DocsSection {
       people: "Un'intervista può avere un numero qualsiasi di parlanti. <code>by</code> elenca ogni intervistatore e <code>interviewOf</code> ogni osservazione con cui si è tenuta; nel file il primo intervistatore è <code>interviewer</code>, il successivo <code>interviewer2</code>, e così <code>witness</code>, <code>witness2</code>… L'editor li tiene allineati all'evento.",
       linksHeading: "Legami con l'osservazione",
       links: "Un turno può dire di quale momento dell'osservazione parla: <code>\"refs\": [{ \"at\": 0.5 }]</code>, in secondi dall'inizio dell'osservazione. <code>sighting</code> nomina l'osservazione quando l'intervista ne riguarda più d'una, e <code>range</code> (<code>[da, a]</code> in caratteri di <code>text</code>) la parte del turno interessata. Nell'editor un turno con un riferimento ha un pulsante che mostra l'osservazione in quel momento, e l'osservazione elenca sotto i passaggi che la raccontano («Riportato in …»), ciascuno un link di ritorno al turno.",
-      editorHeading: "Nell'editor",
+      editorHeading: "Nell'editor di interviste",
       editor: "<code>&lt;rr0-interview&gt;</code> ha tre gruppi: il <strong>Riassunto</strong> (titolo, testimoni, mezzo, data, intervistatori, descrizione), gli <strong>Scambi</strong> (l'intervista letta come un dialogo: chi ha detto cosa, il tempo di ogni turno in un suggerimento, i passaggi tolti anneriti con la loro ragione, chi non ha ancora approvato) e il <strong>File</strong> (la trascrizione come testo, completata secondo il suo schema, da caricare e salvare). È un blocco a parte, scaricato solo quando un caso ha un'intervista.",
       importHeading: "Importare una trascrizione che non è nel nostro formato",
       importIntro: "La maggior parte delle trascrizioni viene da altrove. Nel gruppo File, «Carica un file» legge, oltre al JSON:",
@@ -358,6 +358,73 @@ export class DocsInterviewPage extends DocsSection {
       field: "Campo",
       meaning: "Significato"
     }
+  }
+
+  script(): string {
+    return this.excerptsScript()
+  }
+
+  /** `<rr0-interview>`, the editor this page's "In the editor" is about. */
+  private component(language: SiteLanguage): string {
+    const said = (en: string, fr: string, es: string, it: string): Said<string> => ({ en, fr, es, it })
+    return this.componentSection(language, "rr0-interview",
+      said(
+        "The editor of one interview of a case: its summary, its exchanges and its transcript file. The case editor shows it in place of the recording's editor when an interview is chosen.",
+        "L'éditeur d'une interview d'un dossier : son résumé, ses échanges et son fichier de transcription. L'éditeur de dossier le montre à la place de l'éditeur d'enregistrement quand une interview est choisie.",
+        "El editor de una entrevista de un caso: su resumen, sus intercambios y su archivo de transcripción. El editor de casos lo muestra en lugar del editor de grabaciones cuando se elige una entrevista.",
+        "L'editor di un'intervista di un caso: il suo riassunto, i suoi scambi e il suo file di trascrizione. L'editor di casi lo mostra al posto dell'editor di registrazioni quando si sceglie un'intervista."),
+      `const interview = document.createElement("rr0-interview")
+interview.documentUrl = "https://example.org/cases/saint-lo/case.json"
+interview.witnesses = [{ id: "qb", label: "Q. B." }]
+interview.event = { type: "event", eventType: "interview", interviewOf: "qb" }
+interview.addEventListener("interviewchange", event => console.log(event.detail.field))`,
+      said(
+        "Not a bundle of its own: the case editor's module fetches it, and defines it, the first time an interview is shown, since most cases have none.",
+        "Pas un module à part : celui de l'éditeur de dossier le charge, et le définit, la première fois qu'une interview est montrée, puisque la plupart des dossiers n'en ont pas.",
+        "No es un módulo aparte: el del editor de casos lo descarga, y lo define, la primera vez que se muestra una entrevista, ya que la mayoría de los casos no tienen ninguna.",
+        "Non è un modulo a parte: quello dell'editor di casi lo scarica, e lo definisce, la prima volta che si mostra un'intervista, poiché la maggior parte dei casi non ne ha."),
+      [
+        ["event", "property", said(
+          "The interview's event of the case, edited in place.",
+          "L'événement du dossier qui est l'interview, modifié en place.",
+          "El evento del caso que es la entrevista, editado en su sitio.",
+          "L'evento del caso che è l'intervista, modificato sul posto.")],
+        ["witnesses", "property", said(
+          "The observers it may have been held with, <code>[{ id, label }]</code>: one box each, at least one checked.",
+          "Les observateurs avec qui elle a pu avoir lieu, <code>[{ id, label }]</code> : une case chacun, une au moins cochée.",
+          "Los observadores con quienes pudo celebrarse, <code>[{ id, label }]</code>: una casilla cada uno, al menos una marcada.",
+          "Gli osservatori con cui può essersi tenuta, <code>[{ id, label }]</code>: una casella ciascuno, almeno una spuntata.")],
+        ["documentUrl", "property", said(
+          "What the transcript's <code>url</code> is relative to: the address of the case.",
+          "Ce à quoi l'<code>url</code> de la transcription est relative : l'adresse du dossier.",
+          "Aquello a lo que es relativa la <code>url</code> de la transcripción: la dirección del caso.",
+          "Ciò a cui è relativo l'<code>url</code> della trascrizione: l'indirizzo del caso.")],
+        ["transcriptText", "property", said(
+          "The transcript as text, once edited or loaded; undefined until then, when it is fetched from the event's <code>url</code>.",
+          "La transcription en texte, une fois modifiée ou chargée ; indéfinie avant, quand elle est lue à l'<code>url</code> de l'événement.",
+          "La transcripción como texto, una vez editada o cargada; indefinida hasta entonces, cuando se lee de la <code>url</code> del evento.",
+          "La trascrizione come testo, una volta modificata o caricata; indefinita fino ad allora, quando viene letta dall'<code>url</code> dell'evento.")],
+        ["readonly", "attribute", said(
+          "Only shows the interview.",
+          "Ne fait que montrer l'interview.",
+          "Solo muestra la entrevista.",
+          "Mostra soltanto l'intervista.")],
+        ["revealSegment(index)", "method", said(
+          "Opens the Exchanges group at that turn and shows where it is.",
+          "Ouvre le groupe Échanges à ce tour et montre où il est.",
+          "Abre el grupo Intercambios en ese turno y muestra dónde está.",
+          "Apre il gruppo Scambi a quel turno e mostra dove si trova.")],
+        ["interviewchange", "event", said(
+          "Sent, and bubbling, at each edit: <code>detail</code> is <code>{ field, event, text? }</code>, the transcript's text being in <code>text</code>.",
+          "Envoyé, en remontant, à chaque modification : <code>detail</code> vaut <code>{ field, event, text? }</code>, le texte de la transcription étant dans <code>text</code>.",
+          "Enviado, y propagado, en cada edición: <code>detail</code> es <code>{ field, event, text? }</code>, con el texto de la transcripción en <code>text</code>.",
+          "Inviato, e propagato, a ogni modifica: <code>detail</code> è <code>{ field, event, text? }</code>, con il testo della trascrizione in <code>text</code>.")],
+        ["interviewseek", "event", said(
+          "Sent, and bubbling, when a reader follows a turn to the moment of the observation it tells of: <code>detail</code> is <code>{ sighting, at }</code>, <code>at</code> in seconds since the start of the observation.",
+          "Envoyé, en remontant, quand un lecteur suit un tour jusqu'au moment de l'observation qu'il raconte : <code>detail</code> vaut <code>{ sighting, at }</code>, <code>at</code> en secondes depuis le début de l'observation.",
+          "Enviado, y propagado, cuando un lector sigue un turno hasta el momento de la observación que cuenta: <code>detail</code> es <code>{ sighting, at }</code>, con <code>at</code> en segundos desde el inicio de la observación.",
+          "Inviato, e propagato, quando un lettore segue un turno fino al momento dell'osservazione che racconta: <code>detail</code> è <code>{ sighting, at }</code>, con <code>at</code> in secondi dall'inizio dell'osservazione.")]
+      ])
   }
 
   render(language: SiteLanguage): string {
@@ -410,11 +477,12 @@ export class DocsInterviewPage extends DocsSection {
     <h4>${t.segmentHeading}</h4>
     <p>${t.segmentIntro}</p>${table(t.segmentRows)}
 
+    <p class="small">${this.excerptNote(language)}</p>
     <h4>${t.exampleHeading}</h4>
-    <pre><code>${EXAMPLE.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</code></pre>
+    <pre data-schema="interview"><code>${EXAMPLE.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</code></pre>
 
     <h3>${t.dataHeading}</h3>
-    <p>${t.data}</p>
+    <p>${t.data}</p>${this.component(language)}
   </div>
 </section>
 `

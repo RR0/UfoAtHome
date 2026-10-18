@@ -1,6 +1,9 @@
 import { DocsSection } from "./DocsSection.js"
 import { tagNames_fr } from "../../src/component/messages/TagNames_fr.js"
 import type { PageMeta, Said, SiteLanguage } from "../SitePage.js"
+import { DocsComponentsPage } from "./DocsComponentsPage.js"
+import { COMPONENT_DOCS, DocsComponentPage } from "./DocsComponentPage.js"
+import { DocsSourcesPage } from "./DocsSourcesPage.js"
 
 /**
  * "What is in the file?" — the recording format, field by field.
@@ -48,47 +51,45 @@ export class DocsFormatPage extends DocsSection {
   private body(language: SiteLanguage): string {
     switch (language) {
       case "fr":
-        return this.fr()
+        return this.fr() + this.components(language)
       case "es":
-        return this.es()
+        return this.es() + this.components(language)
       case "it":
-        return this.it()
+        return this.it() + this.components(language)
       default:
-        return this.en()
+        return this.en() + this.components(language)
     }
   }
 
   /**
-   * Shows every JSON excerpt on the page — the whole example and each fragment — in the site's code
-   * view: coloured, numbered, foldable, and checked. Read-only, because nothing here plays what
-   * would be typed (the Player is where a recording is changed and seen at once), but each still
-   * lists, on demand, every key that could go where the caret stands.
-   *
-   * The <pre> stays until CodeMirror arrives and stays for good if it never does, so a reader
-   * without it still has the excerpts.
+   * The components that show or edit an observation, as the last part of its technical side: what they have in common, then the scene, the
+   * player and the editor of a recording, each as a section. They used to be pages of their own; a reader who has the file in hand and wants to
+   * put it on a page is on this one.
    */
-  script(): string {
-    return `const excerpts = [...document.querySelectorAll("pre[data-json]")]
-if (excerpts.length > 0) {
-  void (async () => {
-    try {
-      const { JsonEditor } = await import(SITE_LIB + "/site-json-editor.mjs")
-      // One module for them all: once it is in, each further excerpt is an editor for nothing.
-      for (const pre of excerpts) {
-        const mount = document.createElement("div")
-        mount.className = "code-view"
-        pre.after(mount)
-        // Where in a recording the excerpt stands, for what its completion lists; "none" for JSON that
-        // is not a recording. Read-only: nothing on this page plays what would be typed (see JsonEditor).
-        const at = pre.dataset.json
-        new JsonEditor(mount, pre.textContent.trimEnd(), { at: at === "none" ? null : at ? at.split(".") : [], readOnly: true })
-        pre.hidden = true
-      }
-    } catch {
-      /* No editor, then. The listings are still there and still say the same thing. */
+  private components(language: SiteLanguage): string {
+    const heading: Said<string> = { en: "Components", fr: "Les composants", es: "Los componentes", it: "I componentes".replace("componentes", "componenti") }
+    const lede: Said<string> = {
+      en: "Three of the standard elements are about an observation: the scene it is replayed in, the player that shows it, and the editor that describes it. The editor of a case and the editor of an interview have their own sections, on the pages about those.",
+      fr: "Trois des éléments standards concernent une observation : la scène où elle est rejouée, le lecteur qui la montre, et l'éditeur qui la décrit. L'éditeur de dossier et l'éditeur d'interview ont leurs sections, sur les pages qui en parlent.",
+      es: "Tres de los elementos estándar tratan de una observación: la escena en que se reproduce, el reproductor que la muestra y el editor que la describe. El editor de casos y el editor de entrevistas tienen sus secciones en las páginas que hablan de ellos.",
+      it: "Tre degli elementi standard riguardano un'osservazione: la scena in cui viene riprodotta, il lettore che la mostra e l'editor che la descrive. L'editor di casi e l'editor di interviste hanno le loro sezioni, nelle pagine che ne parlano."
     }
-  })()
-}`
+    const order = ["rr0-sighting", "rr0-scene", "rr0-sighting-editor"]
+    const docs = order.flatMap(tag => COMPONENT_DOCS.filter(doc => doc.tag === tag))
+    return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>${heading[language]}</h2>
+    <p>${lede[language]}</p>
+    ${new DocsComponentsPage().section(language)}
+    ${docs.map(doc => new DocsComponentPage(doc).section(language)).join("\n")}
+  </div>
+</section>
+` + new DocsSourcesPage().section(language, ["sky", "air", "satellites", "aircraft", "weather", "ground", "place-time", "decor"], true)
+  }
+
+  script(): string {
+    return this.excerptsScript()
   }
 
   /** The tags a translation is known for, listed from the translations themselves so that the page

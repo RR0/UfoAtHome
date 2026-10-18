@@ -625,7 +625,7 @@ if (docs) {
         in it, field by field, is on <a href="/docs/format/">the sighting file</a>'s page.</p>
       <p>What to do with it next has its own pages, with examples you can run and copy:
         <a href="/docs/share/">sharing an observation</a>, which is a link to send or two lines of
-        HTML in a page of your own, and <a href="/docs/components/">the components</a>, if you want
+        HTML in a page of your own, and <a href="/docs/format/#components">the components</a>, if you want
         to choose which one that page loads.</p>
     </div>
   </div>
@@ -1115,7 +1115,7 @@ if (docs) {
         <a href="/docs/format/">fichier d'observation</a>.</p>
       <p>Ce que vous en faites ensuite a ses propres pages, avec des exemples à essayer et à
         copier : <a href="/docs/share/">partager une observation</a>, c'est-à-dire un lien à envoyer
-        ou deux lignes de HTML dans votre page, et <a href="/docs/components/">les composants</a>,
+        ou deux lignes de HTML dans votre page, et <a href="/docs/format/#components">les composants</a>,
         si vous voulez choisir celui que cette page charge.</p>
     </div>
   </div>
@@ -1590,7 +1590,7 @@ if (docs) {
         avistamiento</a>.</p>
       <p>Qué hacer después con él tiene sus propias páginas, con ejemplos que puedes ejecutar y copiar:
         <a href="/docs/share/">compartir una observación</a>, que es un enlace que enviar o dos líneas
-        de HTML en una página tuya, y <a href="/docs/components/">los componentes</a>, si quieres
+        de HTML en una página tuya, y <a href="/docs/format/#components">los componentes</a>, si quieres
         elegir cuál carga esa página.</p>
     </div>
   </div>
@@ -2069,7 +2069,7 @@ if (docs) {
         di avvistamento</a>.</p>
       <p>Cosa farne dopo ha le sue pagine, con esempi che puoi eseguire e copiare:
         <a href="/docs/share/">condividere un'osservazione</a>, cioè un link da inviare o due righe di
-        HTML in una tua pagina, e <a href="/docs/components/">i componenti</a>, se vuoi scegliere
+        HTML in una tua pagina, e <a href="/docs/format/#components">i componenti</a>, se vuoi scegliere
         quale carica quella pagina.</p>
     </div>
   </div>

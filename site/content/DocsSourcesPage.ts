@@ -1,5 +1,4 @@
-import { DocsSection } from "./DocsSection.js"
-import type { PageMeta, Said, SiteLanguage } from "../SitePage.js"
+import type { Said, SiteLanguage } from "../SitePage.js"
 import { Licence } from "../Licence.js"
 
 /** One source, as the table states it. Every cell is said in both languages. */
@@ -32,24 +31,7 @@ interface SourceGroup {
  * rest of the site says what the tool does; this is the page to check before trusting it, and the
  * one to update whenever a source is added or changed.
  */
-export class DocsSourcesPage extends DocsSection {
-
-  readonly meta: PageMeta = {
-    slug: "docs/sources",
-    navLabel: { en: "Sources and choices", fr: "Sources et choix", es: "Fuentes y decisiones", it: "Fonti e scelte" },
-    title: { en: "Data sources and the choices behind them", fr: "Les sources de données et les choix faits", es: "Las fuentes de datos y las decisiones tomadas", it: "Le fonti dei dati e le scelte fatte" },
-    description: {
-      en: "Every catalogue, service and measurement UFO@home uses: what it provides, when it is read, "
-        + "where it is served from, its credit, and why it was chosen over the alternatives.",
-      fr: "Chaque catalogue, service et mesure qu'utilise UFO@home : ce qu'il fournit, quand il est "
-        + "lu, d'où il est servi, son crédit, et pourquoi il a été préféré aux autres.",
-      es: "Cada catálogo, servicio y medición que usa UFO@home: lo que proporciona, cuándo se lee, "
-        + "desde dónde se sirve, su crédito, y por qué se eligió frente a las alternativas.",
-      it: "Ogni catalogo, servizio e misura che UFO@home usa: cosa fornisce, quando viene letto, "
-        + "da dove è servito, il suo credito, e perché è stato scelto rispetto alle alternative."
-    },
-    asideFromNav: true
-  }
+export class DocsSourcesPage {
 
   private readonly lede: Said<string> = {
     en: "Nothing the tool draws is invented. Each value comes from a named source, read at a stated "
@@ -599,28 +581,50 @@ export class DocsSourcesPage extends DocsSection {
     }
   ]
 
-  render(language: SiteLanguage): string {
+  /**
+   * The sources the page it is on is about, as the technical part of that page: the groups asked for, a table each. The principles are given
+   * once, with the page that has the most of them (the observation's); the others say only their own sources.
+   */
+  section(language: SiteLanguage, ids: ReadonlyArray<string>, withPrinciples: boolean): string {
+    const heading = ({ en: "Sources and choices", fr: "Sources et choix", es: "Fuentes y decisiones", it: "Fonti e scelte" } satisfies Said<string>)[language]
+    const principlesHeading = ({ en: "The principles", fr: "Les principes", es: "Los principios", it: "I principi" } satisfies Said<string>)[language]
+    const groups = this.groups.filter(group => ids.includes(group.id))
+    const toc = groups.map(group => `<a href="#${group.id}">${group.heading[language]}</a>`).join(" · ")
+    return `
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>${heading}</h2>
+    <p>${this.lede[language]}</p>${withPrinciples ? `
+    <h3>${principlesHeading}</h3>
+    <ul>
+${this.principles[language].map(principle => `      <li>${principle}</li>`).join("\n")}
+    </ul>` : ""}
+    <p>${toc}</p>
+${this.tables(language, groups, "h3")}
+    <p>${this.details(language)}</p>
+  </div>
+</section>
+`
+  }
+
+  /** The detail of each choice is in the code, and what a looked-up value becomes in the file is on the observation's page. */
+  private details(language: SiteLanguage): string {
+    return ({
+      en: "The detail of each choice, with the measurements that settled it, is in the code comments of each source in the <a href=\"https://github.com/RR0/UfoAtHome\">repository</a>.",
+      fr: "Le détail de chaque choix, avec les mesures qui l'ont décidé, est dans les commentaires du <a href=\"https://github.com/RR0/UfoAtHome\">code</a> de chaque source.",
+      es: "El detalle de cada decisión, con las mediciones que la zanjaron, está en los comentarios del código de cada fuente en el <a href=\"https://github.com/RR0/UfoAtHome\">repositorio</a>.",
+      it: "Il dettaglio di ogni scelta, con le misure che l'hanno decisa, è nei commenti al codice di ogni fonte nel <a href=\"https://github.com/RR0/UfoAtHome\">repository</a>."
+    } satisfies Said<string>)[language]
+  }
+
+  private tables(language: SiteLanguage, groups: ReadonlyArray<SourceGroup>, level: "h2" | "h3"): string {
     const columns = ({
       en: ["Source", "What it provides", "When it is read", "Hosting and credit", "Choices and limits"],
       fr: ["Source", "Ce qu'elle fournit", "Quand elle est lue", "Hébergement et crédit", "Choix et limites"],
       es: ["Fuente", "Qué proporciona", "Cuándo se lee", "Alojamiento y crédito", "Decisiones y límites"],
       it: ["Fonte", "Cosa fornisce", "Quando viene letta", "Hosting e credito", "Scelte e limiti"]
     } satisfies Said<string[]>)[language]
-    const principlesHeading = ({ en: "The principles", fr: "Les principes", es: "Los principios", it: "I principi" } satisfies Said<string>)[language]
-    const details = ({
-      en: "The detail of each choice, with the measurements that settled it, is in the code comments of each source in the <a href=\"https://github.com/RR0/UfoAtHome\">repository</a>, and the <a href=\"https://github.com/RR0/UfoAtHome#data\">README</a> says how to rebuild each catalogue.",
-      fr: "Le détail de chaque choix, avec les mesures qui l'ont décidé, est dans les commentaires du <a href=\"https://github.com/RR0/UfoAtHome\">code</a> de chaque source, et le <a href=\"https://github.com/RR0/UfoAtHome#data\">README</a> dit comment reconstruire chaque catalogue.",
-      es: "El detalle de cada decisión, con las mediciones que la zanjaron, está en los comentarios del código de cada fuente en el <a href=\"https://github.com/RR0/UfoAtHome\">repositorio</a>, y el <a href=\"https://github.com/RR0/UfoAtHome#data\">README</a> explica cómo reconstruir cada catálogo.",
-      it: "Il dettaglio di ogni scelta, con le misure che l'hanno decisa, è nei commenti al codice di ogni fonte nel <a href=\"https://github.com/RR0/UfoAtHome\">repository</a>, e il <a href=\"https://github.com/RR0/UfoAtHome#data\">README</a> spiega come ricostruire ogni catalogo."
-    } satisfies Said<string>)[language]
-    const fileNote = ({
-      en: "What a looked-up value becomes in the file (<code>weatherSource</code>, the <code>record-low</code>, <code>record-mid</code> and <code>record-high</code> layers) is described on <a href=\"/docs/format/\">the sighting file</a>'s page.",
-      fr: "Ce qu'une valeur relevée devient dans le fichier (<code>weatherSource</code>, les couches <code>record-low</code>, <code>record-mid</code> et <code>record-high</code>) est décrit sur la page du <a href=\"/docs/format/\">fichier d'observation</a>.",
-      es: "En qué se convierte en el archivo un valor consultado (<code>weatherSource</code>, las capas <code>record-low</code>, <code>record-mid</code> y <code>record-high</code>) se describe en la página del <a href=\"/docs/format/\">archivo de avistamiento</a>.",
-      it: "Che cosa diventa nel file un valore consultato (<code>weatherSource</code>, gli strati <code>record-low</code>, <code>record-mid</code> e <code>record-high</code>) è descritto nella pagina del <a href=\"/docs/format/\">file di avvistamento</a>."
-    } satisfies Said<string>)[language]
-    const toc = this.groups.map(group => `<a href="#${group.id}">${group.heading[language]}</a>`).join(" · ")
-    const sections = this.groups.map(group => {
+    return groups.map(group => {
       const rows = group.rows.map(row => `      <tr>
         <td><a href="${row.url}">${this.escape(row.name)}</a></td>
         <td>${this.escape(row.provides[language])}</td>
@@ -629,7 +633,7 @@ export class DocsSourcesPage extends DocsSection {
         <td>${this.escape(row.choices[language])}</td>
       </tr>`).join("\n")
       return `
-    <h2 id="${group.id}">${group.heading[language]}</h2>
+    <${level} id="${group.id}">${group.heading[language]}</${level}>
     ${group.intro ? `<p>${this.escape(group.intro[language])}</p>` : ""}
     <div class="table-scroll">
     <table>
@@ -638,21 +642,6 @@ ${rows}
     </table>
     </div>`
     }).join("\n")
-    return `${this.hero(language, this.meta.title, this.lede)}
-
-<section class="band">
-  <div class="wrap prose-wide">
-    <h2>${principlesHeading}</h2>
-    <ul>
-${this.principles[language].map(principle => `      <li>${principle}</li>`).join("\n")}
-    </ul>
-    <p>${toc}</p>
-${sections}
-    <p>${details}</p>
-    <p>${fileNote}</p>
-  </div>
-</section>
-`
   }
 
   /** What a row says of how it is hosted, the word MIT a link to the library's licence when the row gives one. */

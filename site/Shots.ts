@@ -242,6 +242,70 @@ export class Shots {
         it: "L'editor, qui sulla scena di una registrazione."
       }
     }
+,
+    {
+      page: "docs/case", after: "in-the-case-editor", name: "case-events",
+      caption: {
+        en: "The case editor: the picker of the case's events, and the + that adds one.",
+        fr: "L'éditeur de dossier : le sélecteur des événements du dossier, et le + qui en ajoute un.",
+        es: 'El editor de casos: el selector de los eventos del caso, y el + que añade uno.',
+        it: "L'editor di casi: il selettore degli eventi del caso, e il + che ne aggiunge uno."
+      }
+    },
+    {
+      page: "docs/case", after: "in-the-case-editor", name: "case-file",
+      caption: {
+        en: 'The File group of the case editor: the case file as text, completed from its own schema.',
+        fr: "Le groupe Fichier de l'éditeur de dossier : le fichier de dossier en texte, complété d'après son propre schéma.",
+        es: 'El grupo Archivo del editor de casos: el archivo del caso como texto, completado según su propio esquema.',
+        it: "Il gruppo File dell'editor di casi: il file del caso come testo, completato secondo il suo schema."
+      }
+    },
+    {
+      page: "docs/interview", after: "in-the-interview-editor", name: "interview-summary",
+      caption: {
+        en: 'Summary: the witnesses, the medium, the date, the interviewers and what the interview established.',
+        fr: "Résumé : les témoins, le moyen, la date, les enquêteurs et ce que l'interview a établi.",
+        es: 'Resumen: los testigos, el medio, la fecha, los entrevistadores y lo que estableció la entrevista.',
+        it: "Riassunto: i testimoni, il mezzo, la data, gli intervistatori e ciò che l'intervista ha stabilito."
+      }
+    },
+    {
+      page: "docs/interview", after: "in-the-interview-editor", name: "interview-exchanges",
+      caption: {
+        en: 'Exchanges: the interview as a dialogue, a turn that tells of a moment of the observation with its link.',
+        fr: "Échanges : l'interview comme un dialogue, un tour qui raconte un moment de l'observation avec son lien.",
+        es: 'Intercambios: la entrevista como un diálogo, un turno que cuenta un momento de la observación con su enlace.',
+        it: "Scambi: l'intervista come un dialogo, un turno che racconta un momento dell'osservazione con il suo link."
+      }
+    },
+    {
+      page: "docs/interview", after: "in-the-interview-editor", name: "interview-file",
+      caption: {
+        en: 'File: the transcript as text, completed from its schema, to load from a file and to save.',
+        fr: "Fichier : la transcription en texte, complétée d'après son schéma, à charger depuis un fichier et à sauver.",
+        es: 'Archivo: la transcripción como texto, completada según su esquema, para cargar desde un archivo y guardar.',
+        it: 'File: la trascrizione come testo, completata secondo il suo schema, da caricare da un file e salvare.'
+      }
+    },
+    {
+      page: "docs/create/interpretation", after: "in-the-case-editor", name: "case-add-interpretation",
+      caption: {
+        en: 'The dialog of the + button: the observation the new one is an interpretation of is chosen.',
+        fr: "La boîte du bouton + : on choisit l'observation dont la nouvelle est l'interprétation.",
+        es: 'El cuadro del botón +: se elige la observación de la que la nueva es interpretación.',
+        it: "La finestra del pulsante +: si sceglie l'osservazione di cui la nuova è l'interpretazione."
+      }
+    },
+    {
+      page: "docs/create/interview", after: "in-the-case-editor", name: "case-add-interview",
+      caption: {
+        en: 'The dialog of the + button for an interview: the witness, the medium, the title, the interviewer and the date.',
+        fr: "La boîte du bouton + pour une interview : le témoin, le moyen, le titre, l'enquêteur et la date.",
+        es: 'El cuadro del botón + para una entrevista: el testigo, el medio, el título, el entrevistador y la fecha.',
+        it: "La finestra del pulsante + per un'intervista: il testimone, il mezzo, il titolo, l'intervistatore e la data."
+      }
+    }
   ]
 
   /** The shots of one page, in the order the page lists them. */

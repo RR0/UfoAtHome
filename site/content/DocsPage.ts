@@ -40,40 +40,46 @@ export class DocsPage implements SitePage {
       en: [
         ["/docs/create/", "Create an observation",
           "In the editor, or by writing the file yourself. Both produce the same thing: one JSON file that is yours."],
+        ["/docs/create/interpretation/", "Create an interpretation",
+          "In the case editor, or in the case file: an alternative explanation of what was seen, as an observation of its own."],
+        ["/docs/create/interview/", "Create an interview",
+          "In the case editor, or in the files: who took part, how, and the transcript if you have one."],
         ["/docs/share/", "Share an observation",
           "A link to send, or two lines of HTML on your own page. Both with a working example you can try and copy."],
-        ["/docs/sources/", "Sources and choices",
-          "Where each piece of data comes from, when it is read, where it is served from, and why that source over another."]
       ],
       fr: [
         ["/docs/create/", "Créer une observation",
           "Dans l'éditeur, ou en écrivant le fichier vous-même. Les deux produisent la même chose : un fichier JSON qui est le vôtre."],
+        ["/docs/create/interpretation/", "Créer une interprétation",
+          "Dans l'éditeur de dossier, ou dans le fichier de dossier : une explication alternative de ce qui a été vu, comme une observation à part."],
+        ["/docs/create/interview/", "Créer une interview",
+          "Dans l'éditeur de dossier, ou dans les fichiers : qui y a pris part, comment, et la transcription si vous en avez une."],
         ["/docs/share/", "Partager une observation",
           "Un lien à envoyer, ou deux lignes de HTML sur votre propre page. Les deux avec un exemple qui marche, à essayer et à copier."],
-        ["/docs/sources/", "Les sources et les choix",
-          "D'où vient chaque donnée, quand elle est lue, d'où elle est servie, et pourquoi cette source plutôt qu'une autre."]
       ],
       es: [
         ["/docs/create/", "Crear una observación",
           "En el editor, o escribiendo tú mismo el archivo. Ambos producen lo mismo: un archivo JSON que es tuyo."],
+        ["/docs/create/interpretation/", "Crear una interpretación",
+          "En el editor de casos, o en el archivo del caso: una explicación alternativa de lo que se vio, como una observación aparte."],
+        ["/docs/create/interview/", "Crear una entrevista",
+          "En el editor de casos, o en los archivos: quién participó, cómo, y la transcripción si la tienes."],
         ["/docs/share/", "Compartir una observación",
           "Un enlace para enviar, o dos líneas de HTML en tu propia página. Ambos con un ejemplo que funciona, para probar y copiar."],
-        ["/docs/sources/", "Fuentes y decisiones",
-          "De dónde procede cada dato, cuándo se lee, desde dónde se sirve y por qué esa fuente y no otra."]
       ],
       it: [
         ["/docs/create/", "Creare un'osservazione",
           "Nell'editor, o scrivendo tu stesso il file. Entrambi producono la stessa cosa: un file JSON che è tuo."],
+        ["/docs/create/interpretation/", "Creare un'interpretazione",
+          "Nell'editor di casi, o nel file del caso: una spiegazione alternativa di ciò che è stato visto, come osservazione a parte."],
+        ["/docs/create/interview/", "Creare un'intervista",
+          "Nell'editor di casi, o nei file: chi ha preso parte, come, e la trascrizione se c'è."],
         ["/docs/share/", "Condividere un'osservazione",
           "Un link da inviare, o due righe di HTML sulla tua pagina. Entrambi con un esempio funzionante da provare e copiare."],
-        ["/docs/sources/", "Fonti e scelte",
-          "Da dove viene ogni dato, quando viene letto, da dove viene servito e perché quella fonte anziché un'altra."]
       ]
     } satisfies Said<ReadonlyArray<Card>>)[language]
-    const technical: ReadonlyArray<Card> = ({
+    const understanding: ReadonlyArray<Card> = ({
       en: [
-        ["/docs/components/", "The components",
-          "Four standard elements, one page each: which one you want, what it draws, and everything it answers to."],
         ["/docs/case/", "What is a UFO case?",
           "What a case gathers, the three kinds of event it holds (observations, interpretations, interviews) and how they can be linked."],
         ["/docs/format/", "Observations",
@@ -82,8 +88,6 @@ export class DocsPage implements SitePage {
           "What an interview of a case holds: the event, its transcript, passages taken out, who approved it, links to the observation, and importing a transcript from another format."]
       ],
       fr: [
-        ["/docs/components/", "Les composants",
-          "Quatre éléments standards, une page chacun : lequel vous voulez, ce qu'il dessine, et tout ce à quoi il répond."],
         ["/docs/case/", "Qu'est-ce qu'un dossier ufologique ?",
           "Ce qu'un dossier réunit, les trois sortes d'événements qu'il contient (observations, interprétations, interviews) et comment ils peuvent être liés."],
         ["/docs/format/", "Les observations",
@@ -92,8 +96,6 @@ export class DocsPage implements SitePage {
           "Ce que contient une interview d'un dossier : l'événement, sa transcription, les passages retirés, qui l'a approuvée, les liens avec l'observation, et l'import d'une transcription d'un autre format."]
       ],
       es: [
-        ["/docs/components/", "Los componentes",
-          "Cuatro elementos estándar, una página cada uno: cuál quieres, qué dibuja y todo aquello a lo que responde."],
         ["/docs/case/", "¿Qué es un caso ovni?",
           "Lo que reúne un caso, los tres tipos de evento que contiene (observaciones, interpretaciones, entrevistas) y cómo pueden estar vinculados."],
         ["/docs/format/", "Las observaciones",
@@ -102,8 +104,6 @@ export class DocsPage implements SitePage {
           "Lo que contiene una entrevista de un caso: el evento, su transcripción, los pasajes eliminados, quién la aprobó, los vínculos con la observación y la importación de una transcripción de otro formato."]
       ],
       it: [
-        ["/docs/components/", "I componenti",
-          "Quattro elementi standard, una pagina ciascuno: quale ti serve, cosa disegna e tutto ciò a cui risponde."],
         ["/docs/case/", "Che cos'è un caso ufologico?",
           "Cosa riunisce un caso, i tre tipi di evento che contiene (osservazioni, interpretazioni, interviste) e come possono essere collegati."],
         ["/docs/format/", "Le osservazioni",
@@ -113,8 +113,6 @@ export class DocsPage implements SitePage {
       ]
     } satisfies Said<ReadonlyArray<Card>>)[language]
     // What a case is comes first, the three pages that say it; then what to do; then what a builder needs.
-    const understanding = technical.filter(([href]) => ["/docs/case/", "/docs/format/", "/docs/interview/"].includes(href))
-    const components = technical.filter(([href]) => href === "/docs/components/")
     const grid = (cards: ReadonlyArray<Card>) => cards.map(([href, title, blurb]) => `      <a class="use" href="${href}">
         <h3>${title}</h3>
         <p>${blurb}</p>
@@ -142,17 +140,17 @@ export class DocsPage implements SitePage {
 <section class="band">
   <div class="wrap">
     <h2>${({ en: "Understanding", fr: "Comprendre", es: "Comprender", it: "Capire" })[language]}</h2>
-    <div class="uses">
-${grid(understanding)}
+    <div class="uses uses-root">
+${grid(understanding.slice(0, 1))}
+    </div>
+    <div class="uses uses-sub">
+${grid(understanding.slice(1))}
     </div>
     <h2>${({ en: "Doing", fr: "Faire", es: "Hacer", it: "Fare" })[language]}</h2>
     <div class="uses">
 ${grid(essentials)}
     </div>
-    <h2>${({ en: "Technical", fr: "La technique", es: "La parte técnica", it: "La parte tecnica" })[language]}</h2>
-    <div class="uses">
-${grid(components)}
-    </div>
+
   </div>
 </section>
 

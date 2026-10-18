@@ -194,7 +194,7 @@ export class PrivacyPage implements SitePage {
       this site's address (without the page path) as the referrer.</p>
     ${this.table("en", ["Service", "Where", "What for"])}
     <p>Several of these are outside the European Union. Their own policies apply to what they receive.
-      What each one provides, and under which licence, is on <a href="/docs/sources/">Sources and choices</a>; this table only says who receives your request.
+      What each one provides, and under which licence, is on <a href="/docs/format/#sources-and-choices">Sources and choices</a>; this table only says who receives your request.
       To avoid all of them, host the components yourself and point the providers at your own server
       (see the <a href="/faq/">FAQ</a>).</p>
 
@@ -275,7 +275,7 @@ export class PrivacyPage implements SitePage {
       du site (sans le chemin de la page).</p>
     ${this.table("fr", ["Service", "Où", "À quoi ça sert"])}
     <p>Plusieurs se trouvent hors de l'Union européenne. Leurs propres politiques s'appliquent à ce qu'ils reçoivent.
-      Ce que chacune fournit, et sous quelle licence, est sur <a href="/docs/sources/">Sources et choix</a> ; ce tableau dit seulement qui reçoit votre requête.
+      Ce que chacune fournit, et sous quelle licence, est sur <a href="/docs/format/#sources-and-choices">Sources et choix</a> ; ce tableau dit seulement qui reçoit votre requête.
       Pour tous les éviter, hébergez les composants vous-même et pointez les fournisseurs vers votre serveur
       (voir la <a href="/faq/">FAQ</a>).</p>
 
@@ -357,7 +357,7 @@ export class PrivacyPage implements SitePage {
       (sin la ruta de la página).</p>
     ${this.table("es", ["Servicio", "Dónde", "Para qué"])}
     <p>Varios están fuera de la Unión Europea. Sus propias políticas se aplican a lo que reciben.
-      Lo que aporta cada una, y con qué licencia, está en <a href="/docs/sources/">Fuentes y decisiones</a>; esta tabla solo dice quién recibe tu petición.
+      Lo que aporta cada una, y con qué licencia, está en <a href="/docs/format/#sources-and-choices">Fuentes y decisiones</a>; esta tabla solo dice quién recibe tu petición.
       Para evitarlos todos, aloja los componentes tú mismo y apunta los proveedores a tu propio servidor
       (véanse las <a href="/faq/">preguntas frecuentes</a>).</p>
 
@@ -437,7 +437,7 @@ export class PrivacyPage implements SitePage {
       sito (senza il percorso della pagina).</p>
     ${this.table("it", ["Servizio", "Dove", "A che cosa serve"])}
     <p>Diversi si trovano fuori dall'Unione europea. Si applicano le loro politiche a ciò che ricevono.
-      Che cosa fornisce ciascuna, e con quale licenza, è in <a href="/docs/sources/">Fonti e scelte</a>; questa tabella dice solo chi riceve la tua richiesta.
+      Che cosa fornisce ciascuna, e con quale licenza, è in <a href="/docs/format/#sources-and-choices">Fonti e scelte</a>; questa tabella dice solo chi riceve la tua richiesta.
       Per evitarli tutti, ospita i componenti da te e indirizza i fornitori al tuo server
       (vedi le <a href="/faq/">domande frequenti</a>).</p>
 

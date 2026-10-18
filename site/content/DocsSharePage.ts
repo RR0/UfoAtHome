@@ -314,7 +314,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 
     <p>That is a live element, not a picture — the same one those two lines would give you. Which of
       the three components to use instead, and everything they can be told, is on
-      <a href="/docs/components/">the components page</a>.</p>
+      <a href="/docs/format/#components">the components page</a>.</p>
     <p class="small">The script's address has no version in it, so your page follows each release
       without being edited: browsers ask on every visit whether it changed, and the answer costs
       nothing while it has not.</p>
@@ -429,7 +429,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 
     <p>C'est un élément vivant, pas une image — celui-là même que ces deux lignes vous donneraient.
       Lequel des trois composants employer à la place, et tout ce qu'on peut leur dire, est sur
-      <a href="/docs/components/">la page des composants</a>.</p>
+      <a href="/docs/format/#components">la page des composants</a>.</p>
     <p class="small">L'adresse du script ne porte pas de version : votre page suit donc chaque
       version sans être modifiée. Les navigateurs demandent à chaque visite s'il a changé, et la
       réponse ne coûte rien tant qu'il n'a pas changé.</p>
@@ -546,7 +546,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 
     <p>Es un elemento vivo, no una imagen — el mismo que te darían esas dos líneas. Cuál de los tres
       componentes usar en su lugar, y todo lo que se les puede indicar, está en
-      <a href="/docs/components/">la página de los componentes</a>.</p>
+      <a href="/docs/format/#components">la página de los componentes</a>.</p>
     <p class="small">La dirección del script no lleva versión, así que tu página sigue cada versión
       sin que haya que editarla: los navegadores preguntan en cada visita si ha cambiado, y la
       respuesta no cuesta nada mientras no haya cambiado.</p>
@@ -663,7 +663,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 
     <p>È un elemento vivo, non un'immagine — lo stesso che ti darebbero quelle due righe. Quale dei
       tre componenti usare invece, e tutto ciò che si può indicare loro, è nella
-      <a href="/docs/components/">pagina dei componenti</a>.</p>
+      <a href="/docs/format/#components">pagina dei componenti</a>.</p>
     <p class="small">L'indirizzo dello script non contiene una versione, quindi la tua pagina
       segue ogni rilascio senza essere modificata: i browser chiedono a ogni visita se è cambiato, e
       la risposta non costa nulla finché non è cambiato.</p>

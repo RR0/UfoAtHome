@@ -85,7 +85,7 @@ export class FaqPage implements SitePage {
       <p>Recordings stay in your browser: there is no account and no server-side storage.
         <strong>Save</strong> writes a file to your disk, and that file is the whole recording. What is kept, what third parties receive, and who answers for what is published: see <a href="/privacy/">Privacy</a>.</p>
       <p>Everything that is fetched — from where, when, and under which licence — is listed source by
-        source on <a href="/docs/sources/">Sources and choices</a>, the one list there is, so that
+        source on <a href="/docs/format/#sources-and-choices">Sources and choices</a>, the one list there is, so that
         this answer does not have to keep a second copy of it. In short:</p>
       <ul>
         <li><strong>While you author</strong>, the editor looks things up for you: a place's
@@ -410,7 +410,7 @@ export class FaqPage implements SitePage {
         serveur. <strong>Sauver</strong> écrit un fichier sur votre disque, et ce fichier est
         l'enregistrement complet. Ce qui est conservé, ce que reçoivent des tiers et qui répond de ce qui est publié : voir <a href="/privacy/">Confidentialité</a>.</p>
       <p>Tout ce qui est appelé — d'où, quand, et sous quelle licence — est listé source par source
-        sur <a href="/docs/sources/">Les sources et les choix</a>, la seule liste qui existe, pour que
+        sur <a href="/docs/format/#sources-and-choices">Les sources et les choix</a>, la seule liste qui existe, pour que
         cette réponse n'ait pas à en tenir une seconde copie. En bref :</p>
       <ul>
         <li><strong>Pendant la saisie</strong>, l'éditeur relève les choses pour vous : les
@@ -755,7 +755,7 @@ export class FaqPage implements SitePage {
       <p>Las grabaciones se quedan en tu navegador: no hay cuenta ni almacenamiento en el servidor.
         <strong>Guardar</strong> escribe un archivo en tu disco, y ese archivo es la grabación completa. Qué se conserva, qué reciben terceros y quién responde de lo que se publica: véase <a href="/privacy/">Privacidad</a>.</p>
       <p>Todo lo que se descarga — de dónde, cuándo y bajo qué licencia — figura fuente por fuente en
-        <a href="/docs/sources/">Fuentes y decisiones</a>, la única lista que existe, para que esta
+        <a href="/docs/format/#sources-and-choices">Fuentes y decisiones</a>, la única lista que existe, para que esta
         respuesta no tenga que mantener una segunda copia. En resumen:</p>
       <ul>
         <li><strong>Mientras redactas</strong>, el editor te busca las cosas: las coordenadas de un
@@ -1079,7 +1079,7 @@ export class FaqPage implements SitePage {
       <p>Le registrazioni restano nel tuo browser: non c'è alcun account né alcuna archiviazione lato server.
         <strong>Salva</strong> scrive un file sul tuo disco, e quel file è l'intera registrazione. Che cosa viene conservato, che cosa ricevono i terzi e chi risponde di ciò che si pubblica: vedi <a href="/privacy/">Privacy</a>.</p>
       <p>Tutto ciò che viene scaricato — da dove, quando e con quale licenza — è elencato fonte per
-        fonte in <a href="/docs/sources/">Fonti e scelte</a>, l'unico elenco che esista, perché
+        fonte in <a href="/docs/format/#sources-and-choices">Fonti e scelte</a>, l'unico elenco che esista, perché
         questa risposta non debba tenerne una seconda copia. In breve:</p>
       <ul>
         <li><strong>Mentre compili</strong>, l'editor cerca le cose per te: le coordinate di un

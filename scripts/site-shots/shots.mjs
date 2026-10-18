@@ -45,7 +45,86 @@ const scene = (name, file) => ({
   }
 })
 
+const SAINT_LO = "?file=/demo-data/case-saint-lo.json"
+
+/** Chooses an event of the case in the picker by its place in the list (0 the observation, 1 the interview). */
+const choose = async (page, index) => {
+  await page.locator("rr0-case-editor #track").selectOption(String(index))
+  await page.waitForTimeout(1500)
+}
+
+/** An interview's editor, opened on the case of Saint-Lô, one of its three groups shown and its tab outlined. */
+const interviewGroup = (name, index) => ({
+  name: `interview-${name}`,
+  page: EDIT,
+  query: SAINT_LO,
+  async take({ page, highlight }) {
+    await choose(page, 1)
+    const tabs = page.locator("rr0-interview #tabs .group-tab")
+    await tabs.nth(index).click()
+    await page.waitForTimeout(2500)
+    if (name === "exchanges") {
+      // Scrolled to a turn that tells of a moment of the observation: its link, outlined, is what the page talks about.
+      const turn = page.locator("rr0-interview .turn:has(.ref)").first()
+      await turn.scrollIntoViewIfNeeded()
+      await page.waitForTimeout(400)
+      await highlight(page, turn.locator(".ref").first())
+    }
+    await highlight(page, tabs.nth(index))
+    return { region: [page.locator("rr0-interview #tabs"), page.locator("rr0-interview section.group-panel:visible").first()] }
+  }
+})
+
+/** The dialog of the "+" button, with the type chosen, over the case of Saint-Lô. */
+const addDialog = (name, fill) => ({
+  name,
+  page: EDIT,
+  query: SAINT_LO,
+  async take({ page }) {
+    await page.locator("rr0-case-editor #add").click()
+    await page.waitForTimeout(600)
+    await fill(page)
+    await page.waitForTimeout(400)
+    return { region: [page.locator("rr0-case-editor #dialog form")] }
+  }
+})
+
 export const SHOTS = [
+  {
+    // The picker of a case's events, and the "+" that adds one.
+    name: "case-events",
+    page: EDIT,
+    query: SAINT_LO,
+    async take({ page, highlight, boxOf }) {
+      await highlight(page, page.locator("rr0-case-editor #track"))
+      await highlight(page, page.locator("rr0-case-editor #add"))
+      const whole = await boxOf([page.locator("rr0-case-editor")], 0)
+      const row = await boxOf([page.locator("rr0-case-editor #events-row")], 10)
+      return { clip: { x: whole.x, y: whole.y, width: whole.width, height: row.y + row.height - whole.y } }
+    }
+  },
+  addDialog("case-add-interview", async page => {
+    await page.locator("rr0-case-editor #kind").selectOption("interview")
+  }),
+  addDialog("case-add-interpretation", async page => {
+    await page.locator("rr0-case-editor #of").selectOption({ index: 1 })
+  }),
+  {
+    // The case file as text, in the case editor's own File group.
+    name: "case-file",
+    page: EDIT,
+    query: SAINT_LO,
+    async take({ page, highlight }) {
+      const tabs = page.locator("rr0-case-editor > div .group-tab, rr0-case-editor .case-panel .group-tab").first()
+      await page.locator("rr0-case-editor [aria-controls=group-case-file]").click()
+      await page.waitForTimeout(2500)
+      await highlight(page, page.locator("rr0-case-editor [aria-controls=group-case-file]"))
+      return { region: [page.locator("rr0-case-editor [aria-controls=group-events]"), page.locator("rr0-case-editor #group-case-file")] }
+    }
+  },
+  interviewGroup("summary", 0),
+  interviewGroup("exchanges", 1),
+  interviewGroup("file", 2),
   {
     // A photograph of the place laid over the render, the observer's hand-drawn sphere on it.
     name: "scene-pictures",

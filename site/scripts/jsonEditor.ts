@@ -4,6 +4,8 @@ import { json, jsonLanguage, jsonParseLinter } from "@codemirror/lang-json"
 import { linter, lintGutter } from "@codemirror/lint"
 import { SiteCodeTheme } from "./codeTheme.js"
 import { SightingCompletion } from "../../src/component/SightingCompletion.js"
+import caseSchema from "../../src/generated/caseSchema.json"
+import interviewSchema from "../../src/generated/interviewSchema.json"
 import type { CompletionContext, CompletionResult } from "@codemirror/autocomplete"
 
 /**
@@ -32,7 +34,7 @@ export class JsonEditor {
    * worth reading; picking from it changes nothing.
    */
   constructor(parent: HTMLElement, initialValue: string,
-              { at = [], readOnly = false }: { at?: readonly string[] | null, readOnly?: boolean } = {}) {
+              { at = [], readOnly = false, schema = "sighting" }: { at?: readonly string[] | null, readOnly?: boolean, schema?: "sighting" | "case" | "interview" } = {}) {
     this.view = new EditorView({
       parent,
       doc: initialValue,
@@ -43,7 +45,7 @@ export class JsonEditor {
         // What turns this from a text box into a way of LEARNING the format: every key the model
         // has, the words a key will accept, and the model's own comment about it — read out of the
         // TypeScript at build time, so it says what the code says. See SightingCompletion.
-        ...(at ? [jsonLanguage.data.of({ autocomplete: JsonEditor.completionSource(new SightingCompletion(at), readOnly) })] : []),
+        ...(at ? [jsonLanguage.data.of({ autocomplete: JsonEditor.completionSource(JsonEditor.completionFor(at, schema), readOnly) })] : []),
         // Unlike the Share page's HtmlView, still focusable: the caret is how a reader points at
         // the object whose possible keys they want listed.
         ...(readOnly ? [EditorState.readOnly.of(true)] : []),
@@ -53,6 +55,13 @@ export class JsonEditor {
         linter(jsonParseLinter())
       ]
     })
+  }
+
+  /** The completion of the format the text is in: a recording's (the default), a case's, or an interview's, each described by the schema generated from its own type. */
+  private static completionFor(at: readonly string[], schema: "sighting" | "case" | "interview"): SightingCompletion {
+    if (schema === "case") return new SightingCompletion(at, caseSchema as never)
+    if (schema === "interview") return new SightingCompletion(at, interviewSchema as never)
+    return new SightingCompletion(at)
   }
 
   /** The completion, made inert for a read-only text: CodeMirror refuses to accept one from the

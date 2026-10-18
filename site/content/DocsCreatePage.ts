@@ -1,5 +1,6 @@
 import { DocsSection } from "./DocsSection.js"
 import type { PageMeta, Said, SiteLanguage } from "../SitePage.js"
+import { DocsSourcesPage } from "./DocsSourcesPage.js"
 
 /**
  * "How do I make one?" — the editor, an AI assistant working from the case file, or the file
@@ -63,7 +64,9 @@ export class DocsCreatePage extends DocsSection {
   }
 
   render(language: SiteLanguage): string {
+    // The one source that is about making an observation, and not about replaying it: the drafting panel and the classification.
     return this.hero(language, this.meta.title, this.lede) + ({ en: () => this.en(), fr: () => this.fr(), es: () => this.es(), it: () => this.it() })[language]()
+      + new DocsSourcesPage().section(language, ["drafting"], false)
   }
 
   private en(): string {
@@ -115,7 +118,7 @@ https://ufoathome.org/sighting.schema.json .
 - Say in "summary", in a sentence or two, what the case is about.
 - List the contradictions between the documents, and the questions to
   put back to the observer or the investigator.</code></pre>
-    <p>Two more things worth telling it. What the player works out by itself from the date and the place (the sky, the planets, the Moon and eclipses, the satellites, the relief and the imagery) is not to be written into the file: the page <a href="/docs/sources/">Sources and choices</a> lists what is read and from where, and what the file has to bring is only what the documents say. And the models are chosen from the <a href="/models/index.json">catalogue</a> by <code>id</code>, which also says which settings each one offers (<code>modelParameters</code>): a person is never drawn as a built-in shape.</p>
+    <p>Two more things worth telling it. What the player works out by itself from the date and the place (the sky, the planets, the Moon and eclipses, the satellites, the relief and the imagery) is not to be written into the file: the page <a href="/docs/format/#sources-and-choices">Sources and choices</a> lists what is read and from where, and what the file has to bring is only what the documents say. And the models are chosen from the <a href="/models/index.json">catalogue</a> by <code>id</code>, which also says which settings each one offers (<code>modelParameters</code>): a person is never drawn as a built-in shape.</p>
     <p>Or install the <strong>UFO@home skill</strong> in your assistant: the same instructions,
       with the method, the format's rules, the schema, an example and a validator that needs only
       Python, so you only have to hand it the documents.
@@ -217,7 +220,7 @@ https://ufoathome.org/sighting.schema.json .
 - Dis dans "summary", en une phrase ou deux, de quoi parle le dossier.
 - Liste les contradictions entre les documents, et les questions à
   reposer à l'observateur ou à l'enquêteur.</code></pre>
-    <p>Deux choses encore à lui dire. Ce que le lecteur calcule de lui-même d'après la date et le lieu (le ciel, les planètes, la Lune et les éclipses, les satellites, le relief et l'imagerie) ne s'écrit pas dans le fichier : la page <a href="/docs/sources/">Sources et choix</a> liste ce qui est lu et d'où, et le fichier n'a à apporter que ce que disent les documents. Et les modèles se choisissent dans le <a href="/models/index.json">catalogue</a> par leur <code>id</code>, qui dit aussi quels réglages chacun offre (<code>modelParameters</code>) : une personne n'est jamais dessinée comme une forme intégrée.</p>
+    <p>Deux choses encore à lui dire. Ce que le lecteur calcule de lui-même d'après la date et le lieu (le ciel, les planètes, la Lune et les éclipses, les satellites, le relief et l'imagerie) ne s'écrit pas dans le fichier : la page <a href="/docs/format/#sources-and-choices">Sources et choix</a> liste ce qui est lu et d'où, et le fichier n'a à apporter que ce que disent les documents. Et les modèles se choisissent dans le <a href="/models/index.json">catalogue</a> par leur <code>id</code>, qui dit aussi quels réglages chacun offre (<code>modelParameters</code>) : une personne n'est jamais dessinée comme une forme intégrée.</p>
     <p>Ou installez le <strong>skill UFO@home</strong> dans votre assistant : les mêmes consignes,
       avec la méthode, les règles du format, le schéma, un exemple et un validateur qui ne demande
       que Python, si bien qu'il ne reste qu'à lui confier les documents.
@@ -319,7 +322,7 @@ https://ufoathome.org/sighting.schema.json .
 - Di en "summary", en una o dos frases, de qué trata el caso.
 - Enumera las contradicciones entre los documentos, y las preguntas que
   hay que volver a plantear al observador o al investigador.</code></pre>
-    <p>Dos cosas más que conviene decirle. Lo que el reproductor calcula por sí mismo a partir de la fecha y el lugar (el cielo, los planetas, la Luna y los eclipses, los satélites, el relieve y las imágenes) no se escribe en el archivo: la página <a href="/docs/sources/">Fuentes y decisiones</a> enumera lo que se lee y de dónde, y el archivo solo tiene que aportar lo que dicen los documentos. Y los modelos se eligen del <a href="/models/index.json">catálogo</a> por su <code>id</code>, que dice también qué ajustes ofrece cada uno (<code>modelParameters</code>): una persona nunca se dibuja como forma integrada.</p>
+    <p>Dos cosas más que conviene decirle. Lo que el reproductor calcula por sí mismo a partir de la fecha y el lugar (el cielo, los planetas, la Luna y los eclipses, los satélites, el relieve y las imágenes) no se escribe en el archivo: la página <a href="/docs/format/#sources-and-choices">Fuentes y decisiones</a> enumera lo que se lee y de dónde, y el archivo solo tiene que aportar lo que dicen los documentos. Y los modelos se eligen del <a href="/models/index.json">catálogo</a> por su <code>id</code>, que dice también qué ajustes ofrece cada uno (<code>modelParameters</code>): una persona nunca se dibuja como forma integrada.</p>
     <p>O instala la <strong>skill de UFO@home</strong> en tu asistente: las mismas instrucciones,
       con el método, las reglas del formato, el esquema, un ejemplo y un validador que solo necesita
       Python, de modo que solo tengas que darle los documentos.
@@ -421,7 +424,7 @@ https://ufoathome.org/sighting.schema.json .
 - Di' in "summary", in una o due frasi, di che cosa tratta il caso.
 - Elenca le contraddizioni tra i documenti, e le domande da riproporre
   all'osservatore o all'investigatore.</code></pre>
-    <p>Altre due cose da dirgli. Ciò che il lettore calcola da sé a partire dalla data e dal luogo (il cielo, i pianeti, la Luna e le eclissi, i satelliti, il rilievo e le immagini) non si scrive nel file: la pagina <a href="/docs/sources/">Fonti e scelte</a> elenca ciò che è letto e da dove, e il file deve portare solo ciò che dicono i documenti. E i modelli si scelgono dal <a href="/models/index.json">catalogo</a> per <code>id</code>, che dice anche quali impostazioni offre ciascuno (<code>modelParameters</code>): una persona non è mai disegnata come forma integrata.</p>
+    <p>Altre due cose da dirgli. Ciò che il lettore calcola da sé a partire dalla data e dal luogo (il cielo, i pianeti, la Luna e le eclissi, i satelliti, il rilievo e le immagini) non si scrive nel file: la pagina <a href="/docs/format/#sources-and-choices">Fonti e scelte</a> elenca ciò che è letto e da dove, e il file deve portare solo ciò che dicono i documenti. E i modelli si scelgono dal <a href="/models/index.json">catalogo</a> per <code>id</code>, che dice anche quali impostazioni offre ciascuno (<code>modelParameters</code>): una persona non è mai disegnata come forma integrata.</p>
     <p>Oppure installa la <strong>skill di UFO@home</strong> nel tuo assistente: le stesse
       istruzioni, con il metodo, le regole del formato, lo schema, un esempio e un validatore che
       richiede solo Python, così che non resti che affidargli i documenti.

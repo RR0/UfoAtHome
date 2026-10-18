@@ -38,16 +38,36 @@ export class DocsComponentsPage extends DocsSection {
 
   /** Where each tag's own page is, by the tag itself. */
   private static readonly PAGES: ReadonlyArray<readonly [string, string]> = [
-    ["rr0-scene", "/docs/components/scene/"],
-    ["rr0-case-editor", "/docs/components/edit/"],
-    ["rr0-date-input", "/docs/components/edit/"],
-    ["rr0-sighting-editor", "/docs/components/edit/"],
-    ["rr0-sighting", "/docs/components/sighting/"]
+    ["rr0-scene", "/docs/format/#rr0-scene"],
+    ["rr0-case-editor", "/docs/case/#rr0-case-editor"],
+    ["rr0-interview", "/docs/interview/#rr0-interview"],
+    ["rr0-date-input", "/docs/format/#rr0-sighting-editor"],
+    ["rr0-sighting-editor", "/docs/format/#rr0-sighting-editor"],
+    ["rr0-sighting", "/docs/format/#rr0-sighting"]
   ]
 
   render(language: SiteLanguage): string {
     return this.hero(language, this.meta.title, this.lede)
       + this.linked({ en: () => this.en(), fr: () => this.fr(), es: () => this.es(), it: () => this.it() }[language]())
+  }
+
+  /**
+   * What the components have in common, as the first part of the Components section of the observation's page: what a Web Component buys, how
+   * they nest, which one to load, how to put one in an application, and the language. Without the list of the components' own pages, which are
+   * sections of the pages they belong to.
+   */
+  section(language: SiteLanguage): string {
+    let html = this.linked({ en: () => this.en(), fr: () => this.fr(), es: () => this.es(), it: () => this.it() }[language]())
+      .replace(/<section class="band">\s*<div class="wrap prose-wide">/g, "")
+      .replace(/<\/div>\s*<\/section>/g, "")
+    // The pointers to the components' own pages are no longer needed: they follow on this page.
+    const cards = html.indexOf('<div class="uses">')
+    if (cards >= 0) {
+      const from = html.lastIndexOf("<h2>", cards)
+      const to = html.indexOf("</div>", cards) + "</div>".length
+      html = html.slice(0, from) + html.slice(to)
+    }
+    return html.replace(/<(\/?)h2\b/g, "<$1h3")
   }
 
   /**

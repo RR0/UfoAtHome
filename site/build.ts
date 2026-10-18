@@ -17,9 +17,7 @@ import { DocsFormatPage } from "./content/DocsFormatPage.js"
 import { DocsSharePage } from "./content/DocsSharePage.js"
 import { DocsInterviewPage } from "./content/DocsInterviewPage.js"
 import { DocsCasePage } from "./content/DocsCasePage.js"
-import { DocsSourcesPage } from "./content/DocsSourcesPage.js"
-import { DocsComponentsPage } from "./content/DocsComponentsPage.js"
-import { COMPONENT_DOCS, DocsComponentPage } from "./content/DocsComponentPage.js"
+import { DocsCreateEventPage } from "./content/DocsCreateEventPage.js"
 import { FaqPage } from "./content/FaqPage.js"
 import { PrivacyPage } from "./content/PrivacyPage.js"
 import { HtmlPageTree } from "./HtmlPageTree.js"
@@ -100,9 +98,7 @@ class SiteBuilder {
       new HomePage(), new PlayerPage(), new EditorPage(), new DemosPage(), ...new DemoCatalogue().sections.map(section => new DemoSectionPage(section, new DemoCatalogue())), new DocsPage(),
       // The documentation pages sit under the hub above and stay out of the navigation, which names
       // only it — see DocsSection for why they are split by question rather than by subject.
-      new DocsCreatePage(), new DocsCasePage(), new DocsFormatPage(example.trim()), new DocsInterviewPage(), new DocsSharePage(), new DocsComponentsPage(), new DocsSourcesPage(),
-      // One page per component, under that hub — see DocsComponentPage.
-      ...COMPONENT_DOCS.map(doc => new DocsComponentPage(doc)),
+      new DocsCreatePage(), new DocsCreateEventPage("interpretation"), new DocsCreateEventPage("interview"), new DocsCasePage(), new DocsFormatPage(example.trim()), new DocsInterviewPage(), new DocsSharePage(),
       new FaqPage(),
       new PrivacyPage(),
       // Written as HTML, with its sub-pages as sub-directories — see HtmlPage and HtmlPageTree.
@@ -312,7 +308,13 @@ class SiteBuilder {
     ["/fr/demos/", "/demos/"],
     ["/fr/documentation/", "/docs/"],
     ["/fr/faq/", "/faq/"],
-    ["/fr/plan/", "/roadmap/"]
+    ["/fr/plan/", "/roadmap/"],
+    // The components' pages and the sources' page, now sections of the pages they belong to (see DocsFormatPage).
+    ["/docs/sources/", "/docs/format/#sources-and-choices"],
+    ["/docs/components/", "/docs/format/#components"],
+    ["/docs/components/scene/", "/docs/format/#rr0-scene"],
+    ["/docs/components/sighting/", "/docs/format/#rr0-sighting"],
+    ["/docs/components/edit/", "/docs/format/#rr0-sighting-editor"]
   ]
 
   /**
