@@ -67,8 +67,14 @@ const TEMPLATE = `
   .turn.flash { background: color-mix(in srgb, #fc3 28%, transparent); }
   .turn .who { font-weight: 600; color: var(--speaker, inherit); overflow-wrap: anywhere; }
   #exchanges { max-height: 32em; overflow-y: auto; }
-  .bar { display: inline-block; width: 3em; height: .9em; vertical-align: -.1em; border-radius: 2px; background: CanvasText; margin-right: .4em; }
-  .turn .why { font-size: .85em; font-style: italic; opacity: .8; }
+  /* Tooltips drawn here rather than left to the browser's own, which some hosts (an embedded pane) never show. */
+  .turn { position: relative; }
+  .turn[data-time]:hover:not(:has(.bar:hover, .bar:focus))::after { content: attr(data-time); position: absolute; right: .4em; top: -.1em; z-index: 2; padding: 0 .4em; border-radius: 3px;
+    font-size: .8em; font-variant-numeric: tabular-nums; background: CanvasText; color: Canvas; pointer-events: none; }
+  .bar { position: relative; display: inline-block; width: 3em; height: .9em; vertical-align: -.1em; border-radius: 2px; background: CanvasText; margin: 0 .2em; cursor: help; }
+  .bar::after { content: attr(data-tip); display: none; position: absolute; left: 0; top: 1.4em; z-index: 3; width: max-content; max-width: 22em; padding: .3em .5em; border-radius: 4px;
+    background: CanvasText; color: Canvas; font-size: .85em; line-height: 1.3; white-space: normal; }
+  .bar:hover::after, .bar:focus::after { display: block; }
   .turn .said { margin: 0; white-space: pre-wrap; }
   .turn .redacted { margin: 0; }
   .turn.is-redacted .who { color: inherit; opacity: .6; font-weight: 400; }
@@ -436,19 +442,21 @@ export class InterviewElement extends HTMLElement {
       who.className = "who"
       const name = document.createElement("span")
       name.textContent = segment.redacted ? "" : InterviewFile.speakerName(json, segment.speaker)
-      // The time is in the tooltip of the whole turn, not in the layout.
-      if (segment.start !== undefined) turn.title = InterviewFile.clock(segment.start, true)
+      // The time is a tooltip over the whole turn, not in the layout.
+      if (segment.start !== undefined) turn.dataset.time = InterviewFile.clock(segment.start, true)
       who.append(name)
       // What stands in the place of a stretch taken out: a bar, and why, said and not left to a tooltip.
       const gap = (reasonText: SaidText, tag: "p" | "span"): HTMLElement => {
         const node = document.createElement(tag)
         const bar = document.createElement("span")
         bar.className = "bar"
-        const why = document.createElement("span")
-        why.className = "why"
-        why.textContent = `${m.redacted} : ${this.said.read(reasonText) ?? ""}`
-        node.title = why.textContent
-        node.append(bar, why)
+        // What was taken out is a bar; why is what it says when the reader points at it.
+        const why = `${m.redacted} : ${this.said.read(reasonText) ?? ""}`
+        bar.dataset.tip = why
+        bar.tabIndex = 0
+        bar.setAttribute("role", "img")
+        bar.setAttribute("aria-label", why)
+        node.append(bar)
         return node
       }
       if (segment.redacted) {
