@@ -3037,7 +3037,9 @@ export class SightingEditorElement extends HTMLElement {
     this.placeMatchRow.hidden = true
     this.placeStatusText.textContent = match ? "" : this.messages.placeNotFound
     this.placeSourceRow.hidden = !match
-    this.updateObserver()
+    // The name is what this answers, and all it writes: not the pose at the playhead, which updateObserver would read off the fields again.
+    const place = this.ufoElement.sighting.event.place?.[0] ?? { lat, lng }
+    this.ufoElement.sighting.event.place = [{ lat: place.lat, lng: place.lng, name: this.stringOrUndefined(this.placeNameInput.value.trim()) }]
   }
 
   /** Writes the observer's lat/lng into the legacy `event.place` (kept in sync for any consumer
@@ -4992,9 +4994,9 @@ export class SightingEditorElement extends HTMLElement {
     const heightAboveGround = Math.max(0, (this.numberOrUndefined(this.elevationInput.value) ?? 0) - (this.groundElevationM ?? 0))
     this.groundElevationM = Math.round(ground)
     this.syncElevationField(heightAboveGround)
-    // The pose itself is unchanged, but the number in the field now means something different —
-    // write it back so the two can't disagree.
-    this.updateObserver()
+    // The pose is unchanged, and not written again: it keeps a height above the ground, which the field now shows measured from
+    // the sea, the same height. Written back through updateObserver, the whole pose was read off the fields at the playhead, rounded,
+    // as a keyframe nobody typed — and after an undo, a change of the recording that the history did not hold.
   }
 
   /** Shows `heightAboveGroundM` as what it is in the world: an altitude above sea level, floored at
