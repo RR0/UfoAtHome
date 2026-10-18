@@ -163,4 +163,22 @@ describe("An interview's transcript file", () => {
     expect(InterviewFile.toVtt(transcript)).toBe(
       "WEBVTT\n\n00:00:00.000 --> 00:00:25.000\n<v BeauJerome>Where do we start?\n\n00:00:25.000 --> 01:02:05.250\n<v Q. B.>5 &lt; 6 &amp; more\n")
   })
+
+  it("shows a redacted passage as a gap in the subtitles, whatever its reason", () => {
+    const redacted: InterviewJson = {
+      ...transcript,
+      segments: [{ speaker: "witness", start: 1, end: 2, redacted: { reason: { en: "private life" } } }]
+    }
+    expect(InterviewFile.toVtt(redacted)).toBe("WEBVTT\n\n00:00:01.000 --> 00:00:02.000\n<v Q. B.>[…]\n")
+  })
+
+  it("is proofread only when every speaker approved it, directly or through a fuller version", () => {
+    expect(InterviewFile.isProofread(transcript)).toBe(false)
+    const speakers = Object.keys(transcript.speakers)
+    const approved = (status: "approved" | "covered" | "pending") => Object.fromEntries(speakers.map(id => [id, { status }]))
+    expect(InterviewFile.isProofread({ ...transcript, proofreading: approved("approved") })).toBe(true)
+    expect(InterviewFile.isProofread({ ...transcript, proofreading: approved("covered") })).toBe(true)
+    expect(InterviewFile.isProofread({ ...transcript, proofreading: { ...approved("approved"), [speakers[0]]: { status: "pending" } } })).toBe(false)
+    expect(InterviewFile.isProofread({ ...transcript, proofreading: { [speakers[0]]: { status: "approved" } } })).toBe(false)
+  })
 })

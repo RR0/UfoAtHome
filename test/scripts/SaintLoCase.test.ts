@@ -32,7 +32,10 @@ describe.skipIf(!existsSync(TRANSCRIPT))("The transcript of the Saint-Lô interv
     for (const segment of transcript.segments) {
       expect(Object.keys(transcript.speakers)).toContain(segment.speaker)
       expect(segment.end).toBeGreaterThanOrEqual(segment.start)
-      expect(segment.text.trim()).not.toBe("")
+      if (segment.redacted) {
+        expect(segment.text, "a redacted passage keeps nothing of what was said").toBeUndefined()
+        expect(Object.keys(segment.redacted.reason).length).toBeGreaterThan(0)
+      } else expect(segment.text.trim()).not.toBe("")
     }
     const starts = transcript.segments.map((segment: { start: number }) => segment.start)
     expect(starts).toEqual([...starts].sort((a, b) => a - b))

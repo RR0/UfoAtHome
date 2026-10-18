@@ -1,0 +1,3932 @@
+{
+ "version": 1,
+ "id": "interview-saint-lo-2026-10-13",
+ "language": "fr",
+ "title": {
+  "fr": "Entretien en visioconférence avec Q. B.",
+  "en": "Video interview with Q. B."
+ },
+ "time": "2026-10-13 21:27",
+ "medium": "video",
+ "by": [
+  {
+   "people": "BeauJerome"
+  }
+ ],
+ "interviewOf": "qb",
+ "summary": {
+  "fr": "Entretien d'environ 1 h 30, mené après deux versions de la démo pour préciser son compte rendu. Il regardait vers l'est, un peu sud-est, à l'horizon, quand son œil a été attiré par une lumière venant du nord-nord-est (environ 25° à l'est du nord, à vérifier à la boussole), aperçue vers 20 à 30° de hauteur. En environ 500 ms elle était dans le cercle zénithal, la zone du ciel autour du zénith. Un premier virage à gauche d'environ une seconde, un virage à droite d'environ 25°, un dernier de 5 à 10°, puis un tonneau de près de 340° dont les 20° manquants sont cachés par les arbres : 4 s à partir du zénith, 5 s au plus en tout. Il donne plusieurs estimations (largeur, distance, durée des virages) en fourchettes, et en corrige certaines au fil de l'entretien. Son ami, tourné vers l'ouest puis vers l'est, n'a rien vu.",
+  "en": "An interview of about 1 h 30, held after two versions of the demo to pin down his account. He was looking east, a little south-east, at the horizon when his eye was caught by a light coming from the north-north-east (about 25 degrees east of north, to be checked with a compass), first seen at 20 to 30 degrees up. Within about 500 ms it was in the zenith circle, the part of the sky around the zenith. A first turn to the left of about a second, a turn to the right of about 25 degrees, a last one of 5 to 10, then a roll of nearly 340 degrees whose missing 20 are hidden by the trees: 4 s from the zenith, 5 s at most in all. He gives several estimates (width, distance, length of the turns) as ranges, and corrects some of them during the interview. His friend, facing west and then east, saw nothing."
+ },
+ "speakers": {
+  "interviewer": {
+   "role": "interviewer",
+   "by": {
+    "people": "BeauJerome"
+   }
+  },
+  "witness": {
+   "role": "witness",
+   "title": "Q. B.",
+   "of": "qb"
+  }
+ },
+ "transcription": {
+  "method": "automatic",
+  "engine": "whisper.cpp large-v3-turbo",
+  "note": "Numbers and words may be misheard (\"500 000 secondes\" is \"500 millisecondes\"); who speaks is told from the two audio tracks, and where both speak at once a turn may be missing or attributed wrongly."
+ },
+ "proofreading": {
+  "interviewer": {
+   "status": "pending"
+  },
+  "witness": {
+   "status": "pending"
+  }
+ },
+ "anonymization": {
+  "replaced": [
+   "first names",
+   "passages removed"
+  ],
+  "marker": "[prénom]"
+ },
+ "segments": [
+  {
+   "speaker": "interviewer",
+   "start": 0.0,
+   "end": 27.6,
+   "text": "Ok. Donc là, tu vois, il y a la simulation qui restait dans l'état où j'étais arrivé avec nos échanges. Ce que j'ai préparé, c'est... mais sinon, moi, j'ai préparé une série de questions qui pourraient nous aider à affiner tout ça."
+  },
+  {
+   "speaker": "witness",
+   "start": 30.0,
+   "end": 53.0,
+   "text": "Bien sûr, je répondrai à toutes tes questions volontaires. Alors, oui, déjà, tu sais, par rapport au début de cette observation, c'est vrai que c'est allé très vite, mais en gros, de ce que j'ai cru comprendre, la direction, ça venait à peu près du nord, mais nord-nord-ouest, on va dire, tu vois."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 53.3,
+   "end": 54.2,
+   "text": "Oui, c'est ce que tu avais dit."
+  },
+  {
+   "speaker": "witness",
+   "start": 54.4,
+   "end": 134.9,
+   "text": "Donc, en fait, c'était comme au-dessus de la ville, ça venait comme de la direction du centre-ville, par rapport à là où j'étais. Donc, le point fixe, le point GPS que je t'ai envoyé, il est à, je ne sais pas, même pas un mètre de là où j'ai observé ce phénomène. Donc, c'est le banc à droite, en fait, sur le screen. Ah oui, non, je n'ai pas screen, mais si tu fais direction nord, c'est le banc à droite. On était sur ce fameux banc, d'ailleurs, on a même tourné une vidéo, enfin, c'est mon ami qui a tourné une vidéo ce soir-là, pour, je ne sais pas trop, parce qu'il est jeune, il s'amuse. En fait, il voulait faire une vidéo un peu comme ufologique, mais il ne connaît pas grand-chose. Donc, en fait, on a fait une vidéo sur le réglage d'un appareil argentique. Donc, je donne les réglages pour la nuit, en fait. De mémoire, en tout cas, parce que c'est vrai que je ne pratique pas trop l'argentique, mais bon. Puis, voilà, du coup, c'est comme ça que j'ai pu réavoir la date exacte du fameux jour et donc aussi l'heure approximative. Parce que c'était, ouais, voilà, c'était le même sort, pendant la même veillée, ouais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 136.8,
+   "end": 140.7,
+   "text": "Et donc, il y avait toi, ton ami, est-ce qu'il y avait d'autres personnes ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 140.6,
+   "end": 141.6,
+   "text": "Non, on était tous les deux."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 141.7,
+   "end": 142.0,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 144.6,
+   "end": 153.9,
+   "text": "J'aurais préféré qu'on soit plusieurs, parce que peut-être que quelqu'un d'autre aurait pu le voir, à la vitesse à laquelle c'est passé. Ouais, c'était particulier."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 155.3,
+   "end": 162.9,
+   "text": "Oui, ça réduit les chances. Après, si c'est justement très haut, effectivement, il y a des chances que d'autres gens puissent l'avoir vu."
+  },
+  {
+   "speaker": "witness",
+   "start": 159.7,
+   "end": 163.9,
+   "text": "Ouais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 164.4,
+   "end": 166.5,
+   "text": "Mais bon, on va voir ça."
+  },
+  {
+   "speaker": "witness",
+   "start": 167.2,
+   "end": 179.9,
+   "text": "Ça semblait quand même assez haut au départ. Donc, mais vu l'heure très avancée dans la nuit, les gens ne regardent pas trop le ciel, quoi. Au mois d'août, plus, mais..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 178.6,
+   "end": 179.1,
+   "text": "Ouais, ouais."
+  },
+  {
+   "speaker": "witness",
+   "start": 179.9,
+   "end": 203.4,
+   "text": "Donc, c'est vrai que tu n'as pas tort, il faudrait quand même que je fasse une recherche, pourquoi pas un appel à témoin, pour faire les choses sérieusement. Juste que, voilà, en ce moment, dans ma vie, ce n'est pas très évident, là, mais je verrai ça. En tout cas, ouais, voilà, en tout cas, je surveille quand même les dépôts au GEPAN, etc., forcément. J'ai des amis qui m'aident. Voilà."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 204.7,
+   "end": 211.9,
+   "text": "Lieu, pas trop loin, quoi. Tu veux rajouter d'autres choses ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 214.4,
+   "end": 216.3,
+   "text": "Ce n'est pas ma première..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 216.3,
+   "end": 216.4,
+   "text": "Ouais."
+  },
+  {
+   "speaker": "witness",
+   "start": 216.3,
+   "end": 259.6,
+   "text": "Pour cette observation, ce n'est pas ma première observation. Alors, de ce type, c'est ma première observation, mais de phénomène inexpliqué, ce n'est pas ma première observation. Donc, je sais très bien qu'on peut être un satellite d'un avion, d'un drone, d'un hélicoptère, d'avion de chasse. Enfin, bon, ça va, je pense. Je ne m'en sors pas trop mal sur tout ça. Et là, clairement, c'est arrivé sans faire de bruit, à une vitesse incommensurable. Je ne sais pas si j'arriverai à bien définir sa vitesse, tu sais, au début, pendant ces fameux 500 millisecondes, parce que ça avait l'air d'aller vraiment très, très vite, quoi. Beaucoup plus vite qu'après. Donc, c'est comme si, dès que mon regard l'a capturé, ça a commencé à ralentir, en fait, un peu avant, quoi."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 259.7,
+   "end": 261.2,
+   "text": "D'accord. C'est intéressant, ça."
+  },
+  {
+   "speaker": "witness",
+   "start": 262.0,
+   "end": 270.3,
+   "text": "Ouais, ouais. Je t'ai dit, par mail, ça aurait été compliqué de tout dire, tout écrire, parce qu'il y a trop de... Ok, c'est cool."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 269.7,
+   "end": 278.2,
+   "text": "Et puis, on interprète, on interprète mal, on projette soi-même, c'est l'image qu'on a en tête, voilà."
+  },
+  {
+   "speaker": "witness",
+   "start": 278.9,
+   "end": 311.3,
+   "text": "Oui, puis bon, il y a plein de méprises, voilà, c'était intéressant quand même pour la roquette, le débris de la roquette, tout ça. Effectivement, voilà, j'ai rien dit, parce que c'est normal, en fait, vous cherchez à trouver une correspondance qui pourrait expliquer tangiblement ce qui s'est passé. Ah ouais, non, clairement pas."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 305.1,
+   "end": 309.3,
+   "text": "Mais oui, oui, de toute façon, tu l'as dit, que c'était pas ça, que ça collait pas."
+  },
+  {
+   "speaker": "witness",
+   "start": 311.7,
+   "end": 317.8,
+   "text": "Le problème, c'est que ça a traversé le ciel en... Voilà, en 7 secondes, quoi. C'est ce que je disais, ouais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 318.8,
+   "end": 324.9,
+   "text": "Ok, et donc, tu disais que ton ami, lui, il n'a pas regardé ailleurs, il n'a pas vu."
+  },
+  {
+   "speaker": "witness",
+   "start": 326.0,
+   "end": 363.1,
+   "text": "Alors, en fait, de là, on se situait... Excuse-moi, j'ai la bouche pleine. Moi, je regardais à droite, et lui, il regardait à gauche. Donc, je dis, regarde. Et en fait, il s'est retourné vers moi. Je lui fais, mais non, retourne-toi. Il regarde dans l'autre mauvais sens, encore une fois. Il regarde vers l'ouest, en fait, à ce moment-là. Alors qu'en fait, à ce moment-là, pile, quand il regarde à l'ouest, l'objet, il vient pile au-dessus de nous. Et de là, je l'attrape pour le retourner, donc, vers l'est, pour qu'il puisse le voir, en fait, dans le ciel."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 362.5,
+   "end": 364.5,
+   "text": "Alors, tu lui tournes la tête, mais regarde par là."
+  },
+  {
+   "speaker": "witness",
+   "start": 364.6,
+   "end": 417.7,
+   "text": "Je l'ai attrapé par les épaules. Pour le retourner succinctement, mais moi, je ne voulais pas louper l'objet. Donc, en fait, j'étais concentré, en fait, sur ce que je regardais. Le temps de réaction, plus je lui parlais, de lui dire, de réagir, c'était compliqué. Et en plus, je devais essayer de prendre une photo, ce que je n'ai pas pu faire, du coup, à cause de tout ça. Parce que ça a été trop rapide, et parce qu'en plus de ça, je devais gérer mon second témoin, qui était complètement ailleurs. Alors, du coup, il s'est retourné de l'ouest à l'est, sauf qu'il l'a encore loupé, parce que du coup, comme tu le sais, c'est parti vers le sud. Et donc, à ce moment-là, je lui ai attrapé la tête pour qu'il voit la fin. Et malheureusement, il a regardé trop haut. Donc, il n'a pas vu le fameux tonneau."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 418.2,
+   "end": 419.1,
+   "text": "Oui, c'est ça, le tonneau."
+  },
+  {
+   "speaker": "witness",
+   "start": 421.7,
+   "end": 445.6,
+   "text": "Et voilà. Donc, du coup, effectivement, je me retrouve tout seul. Mais alors, ce qui est le plus intriguant par rapport à tout ça, c'est qu'au final, l'objet, c'est comme s'il avait compris où allait le regard de mon ami et l'esquiver, en fait. Ça, ça m'a choqué. Parce que c'est comme si ces virages-là, le grand virage à gauche et le grand virage à droite, c'est comme s'il les avait faits en considération du champ de pitié, quoi."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 444.7,
+   "end": 455.0,
+   "text": "Comme s'il avait voulu éviter d'être vu par d'autres personnes que toi."
+  },
+  {
+   "speaker": "witness",
+   "start": 456.6,
+   "end": 489.0,
+   "text": "Voilà, c'est ça. En tout cas, lui. Apparemment. Voilà. Apparemment, ça sent qu'à être ciblé, quoi. Mais je ne sais pas. C'était peut-être un hasard, mais c'était quand même gros. Oui, bien sûr."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 470.8,
+   "end": 486.9,
+   "text": "D'accord. Dans notre échange, si tu veux, on peut enchaîner avec les questions que j'avais préparées."
+  },
+  {
+   "speaker": "witness",
+   "start": 489.0,
+   "end": 777.3,
+   "text": "Si tu veux, je peux refaire un topo de, vu que tu enregistres, je ne sais pas, de faire un topo complet de, qu'est-ce que j'ai observé. Et puis après, tu t'enchaînes avec les poquettes, ça va se décoller. Donc du coup, je regardais en fait vers l'est. Et là, est un peu, un peu est, sud-est, mais légèrement. Parce que je sillonne régulièrement le ciel quand je suis en veillée. Je regarde tout autour de moi, je regarde au-dessus, je regarde partout en fait. Partout dans le ciel, mais surtout dans le ciel. Et donc à ce moment-là, j'étais direction, voilà, est, sud-est. Mon regard était est, sud-est. Et donc, mon regard est attiré par un objet qui semble venir côté, comment on dit, nord, nord-ouest. Je ne veux pas dire de bêtises. Non, oui, nord-nord-est, excuse-moi. Et, alors c'est ça, nord-nord-est, ouais, c'est ça. Et donc, je vois une lumière. On a déjà vu quelques étoiles filantes auparavant dans la soirée. Donc, on a le regard déjà habitué à la luminosité, à l'obscurité. Et surtout, je constate que le mouvement est assez rapide, mais que ça ne disparaît pas en fait. Donc, je pose mon regard dessus parce que tu sais, quand on loupe une étoile filante, on sait habituellement que dans le champ périphérique visuel, on n'aura pas le temps de la voir. Sauf que là, ça continuait en fait. Donc, j'ai eu le temps de poser le regard. Ça m'a pris environ, du coup, j'ai des réflexes assez bons. Deux fois mon délai de réflexe habituel parce que, justement, le temps que je comprenne que ce n'était pas une étoile filante et que, du coup, il fallait que je porte mon attention dessus, ça a pris 500 millisecondes. J'ai fait déjà des tests de temps de réflexe sur un site internet. Je peux monter à 250 millisecondes. Donc, ce n'est pas rien, c'est des peaux réflexes. Notamment parce que je joue probablement à des jeux de FPS depuis un moment. Je fais aussi du pilotage de drones, etc. Donc, enfin, ouais, de quadricoptère, ouais. Bon, ça fait un moment que je n'en ai pas fait, mais voilà, bon. Et alors, donc, cette lumière m'attire. Elle a l'air de se déplacer quand même assez rapidement. Je la regarde directement. Et donc, là, effectivement, je vois une sorte de demi-lune, d'aile volante, assez blanche quand même, mais qui paraît comme translucide. Et dégradée vers l'arrière de façon un peu transparente, avec ces fameux filaments, là. Et donc, j'ai dit automatiquement, mon ami, regarde ! Et là, en fait, lui, il regardait, voilà, il regardait plein, c'était quoi déjà ? Plein Est, Est, Sud-Est, en fait. Voilà, plutôt dans cette zone. Un peu comme moi au début, en fait, mais bon, moi, j'étais plus, mon regard était plus centré vers l'Est. Donc, du coup, ça m'a permis de capter le mouvement. Et lui, pas. Donc, il ne savait pas regarder. Du coup, bon, je ne vais pas refaire ce que lui, il a fait. On en a parlé juste avant. Je vais juste te dire ce que moi, j'ai vu. Donc, je lui ai dit, regarde, de là, l'objet semblait se déplacer de façon linéaire, donc, jusqu'au zénith. De là, du zénith, il a commencé à décrire un virage. Au moment où j'attrape mon ami pour le tourner, il décrit un virage, puis un second virage. Au deuxième virage, il a déjà fait la moitié du ciel, quoi. Et il est déjà en train de perdre l'altitude. Et de là, il descend encore et s'éloigne très rapidement, apparemment, vu que sa taille diminue fortement. Il approche très fortement l'horizon vers le sud. Et de là, il me fait ce... J'ai l'impression qu'en fait, il avait fait comme une sorte de boucle verticale au début, tu vois. Une boucle verticale. À la verticale, excuse-moi. Une boucle à la verticale, excuse-moi. Donc, juste un cercle, quoi, à la verticale. Et c'est après que j'ai compris, parce que justement, dans cette boucle, l'objet continuait de fortement diminuer, que j'ai compris que c'était un virage en tonneau, en fait. Et puis, avec les ailes, je vais les appeler les ailes, hein, voilà. Et la perspective, donc, ça me permettait de bien visualiser correctement tous les mouvements en trois dimensions. C'est comme ça que j'ai pu comprendre tous les virages et le fameux tonneau à la fin."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 778.1,
+   "end": 783.3,
+   "text": "Mais c'est comme ça que tu as pu appréhender la structure de l'objet, de comment il était fait,"
+  },
+  {
+   "speaker": "witness",
+   "start": 783.3,
+   "end": 783.6,
+   "text": "Exact."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 787.9,
+   "end": 788.9,
+   "text": "D'accord, ok."
+  },
+  {
+   "speaker": "witness",
+   "start": 791.3,
+   "end": 794.5,
+   "text": "C'est surtout la fin, ouais. J'ai pu voir qu'il était très fin, ouais. Excuse-moi."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 794.8,
+   "end": 799.7,
+   "text": "Oui, et la disparition, ah, tu as vu qu'il était très fin, d'accord. C'est intéressant."
+  },
+  {
+   "speaker": "witness",
+   "start": 800.4,
+   "end": 821.0,
+   "text": "Ouais, ouais. Donc, je voyais mi-profile, mi-diagonale pendant le tonneau. Avant le tonneau, je le voyais de profil, enfin de profil, vu de l'arrière. Je dis de profil, hein, mais c'est profil arrière. Donc, à plat. Et, excuse-moi la question."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 822.0,
+   "end": 824.1,
+   "text": "Après le tonneau, est-ce que tu es..."
+  },
+  {
+   "speaker": "witness",
+   "start": 824.1,
+   "end": 843.0,
+   "text": "Oui. Et donc, il fait, je ne sais pas moi, 340 degrés en tonneau, et les 20 degrés qui manquent, je ne les ai pas vus. Et il était, il avait quasiment rétabli son assiette, mais il passe derrière les arbres à ce moment-là. Donc, il n'y a pas de lumière qui passe au travers des arbres, c'est opaque, quoi."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 843.3,
+   "end": 844.8,
+   "text": "Oui, ok. D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 845.7,
+   "end": 850.9,
+   "text": "Voilà. Voilà."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 850.0,
+   "end": 855.8,
+   "text": "Bon, je pense que, par rapport aux questions que j'avais préparées, il y a 80%"
+  },
+  {
+   "speaker": "witness",
+   "start": 854.9,
+   "end": 855.9,
+   "text": "Voilà."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 855.8,
+   "end": 902.0,
+   "text": "auxquels tu viens de répondre en décrivant ce que tu viens de faire, ce que tu viens de dire, pardon. et je vais quand même te les poser, déjà pour enteriner vraiment ces détails-là, et puis peut-être capter d'autres détails avec des questions connexes aux réponses que tu vas donner. Donc, ça te va, ouais ? Alors, donc, première partie, c'est sur le départ et la direction. Donc, on revient au départ. D'où ça arrive ? Au niveau,"
+  },
+  {
+   "speaker": "witness",
+   "start": 901.9,
+   "end": 956.4,
+   "text": "Eh ouais. Eh ouais, ça, c'est vraiment la question. Ben, je ne sais pas. Ce que je sais, c'est que l'arbre ne cachait pas sa trajectoire, parce que l'arbre était, l'arbre vis-à-vis de sa trajectoire était quand même sur ma droite, quoi. En fait, l'arbre est sur ma droite de base au niveau du banc, quand on se tient à cet endroit, et il n'est pas là, juste à côté, tu vois, il y a au moins 10-15 mètres. Je t'avais dit que les arbres étaient à 20 mètres, effectivement, j'avais un peu sous-estimé, c'était plutôt à 40 mètres de là où on se situait, ouais. Et donc, ce qui est la pelouse à traverser, et puis il y a le petit chemin, quand même. Et donc, alors, pour la première apparition, effectivement, ça semblait venir, donc le nord, à chaque fois, je le décale un peu trop sur la gauche de mémoire, parce que ce n'est pas forcément évident de se repérer. Donc, je vais... Ah non, non, non, c'est pas ça."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 954.3,
+   "end": 955.1,
+   "text": "c'est une réponse."
+  },
+  {
+   "speaker": "witness",
+   "start": 957.1,
+   "end": 967.0,
+   "text": "Non, non, c'est pas ça. Parce que j'ai déjà vérifié les points cardinaux au parc, en fait, plus d'une fois. Et quand je suis sur place, je me trompe peut-être de 10 degrés, tu vois."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 967.4,
+   "end": 968.9,
+   "text": "Oui, mais ça, bon..."
+  },
+  {
+   "speaker": "witness",
+   "start": 968.9,
+   "end": 990.0,
+   "text": "J'ai une boussole, une vraie boussole, je vais l'emmener au parc. Et je te redirai exactement les degrés, là où j'estime l'avoir vu exactement. Mais en tout cas, c'était au-dessus du centre-ville, donc si c'est pas plein nord, c'est un peu nord-nord-est, quoi, tu vois. Allez, 25 degrés vers l'est, quoi, en partant du nord."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 990.8,
+   "end": 1011.3,
+   "text": "D'accord. Peut-être nord-nord-est. 25 degrés. Donc, au niveau certitude de... Alors, ah oui, attends. Au niveau certitude de la direction, on va dire que..."
+  },
+  {
+   "speaker": "witness",
+   "start": 1012.1,
+   "end": 1030.0,
+   "text": "Ce qui est bien, c'est que j'ai des points de repère visuels. Il y a l'arbre, il y a le centre-ville. Et en fait, c'est le seul endroit dégagé à l'horizon. C'est la seule zone. C'est vraiment la fenêtre de tir. C'est marrant parce que, dans cette direction exacte, si on continue en ligne droite, on tombe sur la Manche."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1031.1,
+   "end": 1032.5,
+   "text": "La manche. D'accord, OK."
+  },
+  {
+   "speaker": "witness",
+   "start": 1033.0,
+   "end": 1041.3,
+   "text": "On tombe littéralement, il me semble, de mémoire, là, c'est, en fait, c'est Flamanville derrière, quoi. Flamanville-Cherbourg et après, on part dans l'océan, quoi."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1041.8,
+   "end": 1042.1,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 1043.5,
+   "end": 1061.3,
+   "text": "C'est possible que ça s'aligne avec l'Angleterre. Et bon, je ne veux pas partir dans les hypothèses fumeuses, mais bon. Ce n'est pas la première fois que je vois un objet passer dans ce parc la nuit, à très haute vitesse. C'est le deuxième figure, toi. Si tu veux, je te le raconterai après."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1061.7,
+   "end": 1062.0,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 1065.3,
+   "end": 1081.4,
+   "text": "Je suis tout à fait sûr parce que la luminosité de l'objet était quand même relativement forte."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1065.8,
+   "end": 1074.2,
+   "text": "Donc, est-ce que pour la direction, tu dirais que tu es très sûr, assez sûr, ou c'est juste de mémoire, pour l'instant, pour l'instant ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1083.6,
+   "end": 1111.7,
+   "text": "Et au final, vu que moi, je regardais, mon regard était basé sur l'horizon, tu vois, et pas en hauteur à la base. C'est vraiment le mouvement de l'objet qui m'a emmené, qui a emmené mon regard en l'air, quoi. Donc, non seulement il m'a emmené le regard en l'air en partant de l'horizon à la base, mais en plus, il m'a ramené le regard vers l'horizon, au niveau de l'objet."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1108.8,
+   "end": 1112.5,
+   "text": "de la certitude de la direction d'où ça. Oui, oui."
+  },
+  {
+   "speaker": "witness",
+   "start": 1113.1,
+   "end": 1118.5,
+   "text": "Excuse-moi, donc, oui, oui, j'en suis sûr parce que, comme je te l'ai dit, voilà."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1113.7,
+   "end": 1114.5,
+   "text": "Cardinal, oui."
+  },
+  {
+   "speaker": "witness",
+   "start": 1118.9,
+   "end": 1126.3,
+   "text": "Je regardais vraiment direction est, plein est, parce que je sais qu'il y a il y a plein est, il y a l'Atlantique, voilà."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1128.2,
+   "end": 1133.5,
+   "text": "Tu regardais Est, et tu l'as vu au Nord. Donc, de l'autre côté."
+  },
+  {
+   "speaker": "witness",
+   "start": 1134.7,
+   "end": 1138.3,
+   "text": "Ouais, comme je t'ai dit, c'était pas au nord exact, c'était un peu le reste."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1137.8,
+   "end": 1138.4,
+   "text": "il est au Nord-Est."
+  },
+  {
+   "speaker": "witness",
+   "start": 1139.1,
+   "end": 1139.3,
+   "text": "Voilà."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1140.3,
+   "end": 1141.6,
+   "text": "Et niveau hauteur,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1145.4,
+   "end": 1152.4,
+   "text": "Apparemment, soit il venait de l'horizon, il gardait son altitude, mais je crois pas ça."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1146.7,
+   "end": 1146.9,
+   "text": "Apparemment,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1153.3,
+   "end": 1157.3,
+   "text": "Apparemment, il est arrivé au-dessus de Saint-Lô et il a rapidement pris de l'altitude en passant au-dessus de nous."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1157.8,
+   "end": 1165.5,
+   "text": "En degrés, un point comme ça, ça fait 10 degrés. Tu mettrais combien de points pour avoir la hauteur d'arrivée où tu l'as marqué ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1165.3,
+   "end": 1167.8,
+   "text": "Ah, bien vu le point, effectivement."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1168.3,
+   "end": 1169.5,
+   "text": "Un point à bout de bras ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1169.7,
+   "end": 1173.8,
+   "text": "Trois points. Ouais, ouais, bien sûr. Trois points max, je l'ai vu apparaître dans le ciel."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1174.0,
+   "end": 1174.5,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 1175.3,
+   "end": 1193.2,
+   "text": "Enfin, je l'ai aperçu en tout cas. Parce que c'est sûr que le début, moi je ne l'ai pas vu sortir de derrière l'horizon. Je n'avais pas le regard dessus, je ne vais pas inventer des choses que je n'ai pas vues. Mais voilà. Oh, elle est pas mal ta reprod là. Ça s'améliore. Je sais, je sais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1195.4,
+   "end": 1206.9,
+   "text": "et ton regard à ce moment-là, parce que toi, tu l'avais eu à 30 degrés, donc on va dire trois points. Ton regard, lui, il était à quelle hauteur ? Il était à 45 degrés ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1206.7,
+   "end": 1233.6,
+   "text": "C'est ce que je te disais, j'étais le regard à l'horizon plein-est à la base. Parce que je connais un peu le phénomène OVNI, ce n'est pas pour me la péter, mais je sais qu'il aime bien jouer au niveau de l'horizon, être assez bas pour ne pas être trop visible. Mais des fois, ça peut aussi être tout à fait en l'air. Donc, en règle générale, je fais des scans de l'horizon. Tu vois, je tourne à 300 degrés complètement sur moi debout. Et après, je fais la même chose, mais en regardant en l'air."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1234.3,
+   "end": 1236.1,
+   "text": "D'accord. Toi, tu peux regarder"
+  },
+  {
+   "speaker": "witness",
+   "start": 1236.0,
+   "end": 1252.9,
+   "text": "Mais là, je ne le fais pas tout le temps. Je ne vais pas tourner en permanence sur moi, t'imagines bien. Donc là, à ce moment-là, j'étais fixé plein-est. Ça faisait peut-être une minute que je n'avais pas fait de rotation sur moi-même. Je regardais au niveau de l'horizon."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1253.5,
+   "end": 1253.5,
+   "text": "Donc,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1253.5,
+   "end": 1257.0,
+   "text": "Donc, 10 degrés max, quoi. 10 degrés. 10-20 degrés volume."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1258.8,
+   "end": 1261.1,
+   "text": "tu disais 500 minutes."
+  },
+  {
+   "speaker": "witness",
+   "start": 1261.9,
+   "end": 1268.7,
+   "text": "Voilà. Ça, c'était sûr. Ça m'a choqué. La vitesse de l'objet, ça m'a choqué."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1269.6,
+   "end": 1287.1,
+   "text": "Alors, la chronologie maintenant, donc, si on essaye de décomposer les phases entre le début, le zénith, la fin du premier virage, la fin du second virage, le début du troisième virage, le début de la spirale et la disparition,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1287.7,
+   "end": 1304.1,
+   "text": "C'est vrai que je ne l'ai pas fait."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1288.7,
+   "end": 1308.7,
+   "text": "sur le temps total, donc, pour l'instant, on estimerait à six secondes environ. Comment tu décomposerais ça en séquence de temps ? Par exemple, le zénith, est-ce que c'est Le premier virage à une seconde, la fin du premier virage à deux secondes, trois ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1309.0,
+   "end": 1323.7,
+   "text": "Je l'ai fait, mais sans vraiment le faire. Mais je pensais que tu avais compris. Mais ce n'est pas grave. En gros, à partir du moment où je l'aperçois jusqu'au zénith, comme je t'ai dit, ça prend 500 millisecondes max, en fait. Le temps que je réagisse, en fait."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1323.5,
+   "end": 1323.8,
+   "text": "en fait,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1325.0,
+   "end": 1343.8,
+   "text": "Donc, c'est comme si mon regard, il capte le mouvement. Le temps que mes yeux se mettent dessus, que je réagisse, bien sûr, et que mes yeux se mettent dessus, et que mes yeux se... Le cible, voilà, je vais y arriver. Il est arrivé au zénith, quoi. Il était déjà dans le cercle zénithal."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1345.2,
+   "end": 1348.4,
+   "text": "Mais tu l'as vu monter quand même au zénith ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1348.2,
+   "end": 1360.2,
+   "text": "Oui, par contre, voilà. Par contre, il avait... Je pense qu'il avait plus d'altitude que sur ta reconstitution. Ce qui permet de le garder... Ou alors, c'est peut-être l'angle de vue qui est..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1359.5,
+   "end": 1360.2,
+   "text": "Oui, parce que là,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1360.2,
+   "end": 1372.9,
+   "text": "Oui, mais ce que je voulais dire,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1366.8,
+   "end": 1371.1,
+   "text": "Là, c'est ton angle de vue humain où tu laves les yeux, tu ne vois pas tout."
+  },
+  {
+   "speaker": "witness",
+   "start": 1372.9,
+   "end": 1377.9,
+   "text": "c'est que dans ta reconstitution, on n'a pas l'angle de vue... Enfin, je ne sais pas si tu peux le reproduire."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1378.9,
+   "end": 1382.0,
+   "text": "Ah oui, à quel angle est le phénomène ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1382.1,
+   "end": 1394.4,
+   "text": "Excuse-moi, le champ de vision naturelle des yeux, en fait. Non, il n'y a pas de problème."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1388.0,
+   "end": 1392.6,
+   "text": "J'essaie de le rendre, mais en fait, dans cette projection-là, forcément,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1396.2,
+   "end": 1427.3,
+   "text": "Oui, oui, j'imagine bien. Mais c'est comme si, en fait... C'est un peu bizarre. C'est comme si... Donc, il était sur ma droite. Il est monté au zénith, mais un peu devant moi. Légèrement décalé devant moi. Donc, ce n'est pas... Excuse-moi, quand j'ai dit au zénith, c'est dans le cercle zénithal, mais à l'opposé de là où je me situais, dans le cercle zénithal. Donc, en fait, si mes yeux avaient été une caméra, ça reste bien au milieu du cadre, si tu préfères."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1427.6,
+   "end": 1427.8,
+   "text": "Oui."
+  },
+  {
+   "speaker": "witness",
+   "start": 1429.2,
+   "end": 1431.0,
+   "text": "C'est vraiment ça que je..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1430.7,
+   "end": 1431.3,
+   "text": "Et donc,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1431.0,
+   "end": 1436.4,
+   "text": "Comme je t'ai dit,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1431.4,
+   "end": 1434.2,
+   "text": "ce temps pour monter au zénith, ça a été combien de temps environ ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1437.5,
+   "end": 1456.6,
+   "text": "entre le moment où je l'aperçois et le moment où il rentre dans le cercle zénithal, ça a pris 500 millisecondes, pas plus. C'est juste qu'au moment où, du coup, je pose mon regard dessus, je constate que sa vitesse est rapide, mais semble avoir quand même drastiquement ralenti de..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1457.2,
+   "end": 1457.5,
+   "text": "Oui,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1457.7,
+   "end": 1481.2,
+   "text": "Quoi ? Oui, d'accord."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1459.1,
+   "end": 1480.7,
+   "text": "Non, non, ma question, ce n'était pas ça, ce n'était pas le 500 millisecondes. 500 millisecondes, c'est ce qu'il faut pour le remarquer, c'est ça ? Et ensuite, tu le vois monter. La question, c'est si on prend ses 500 millisecondes, après combien de temps pour ce qu'il arrive au zénith avant qu'il commence à faire son premier virage ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1486.2,
+   "end": 1507.9,
+   "text": "En soi, je crois que tu rajoutes une étape où il n'y en a pas. Parce que j'ai compté son arrivée au zénith, ça te paraît incroyable, mais dans les 500 millisecondes. Ouais, ouais, c'est ça le truc, c'est que quand je pose mes yeux, il est déjà dans le cercle zénithal."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1508.2,
+   "end": 1510.4,
+   "text": "Donc tu ne l'as pas vu monter au zénith, alors ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1510.2,
+   "end": 1531.9,
+   "text": "Ben si, mais dans mon champ périphérique, visuel, pendant les 500 millisecondes. C'est ça l'histoire, c'est que c'est une folie. Genre, le truc, il a fait la moitié du ciel en 500 millisecondes. C'est ça, en fait, qu'il faut comprendre, quoi. Et franchement, si j'avais été un peu moins alerte, ce serait passé une lettre à la poste, je ne l'aurais jamais vu."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1536.2,
+   "end": 1541.6,
+   "text": "Et donc, est-ce que tu saurais dire après les timings du premier virage,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1541.3,
+   "end": 1599.8,
+   "text": "Parce qu'en fait, dès que je l'ai vu, bon, ben déjà, j'en ai parlé avec mon ami, et ensuite, du coup, je me suis amusé à le retracer plusieurs fois du doigt pour lui montrer, en fait, ce qui s'était passé. Pour qu'il comprenne aussi à quel point ça a esquivé son regard. On a tout reconstitué sur place deux fois de suite. Donc, c'est-à-dire, le déplacement de l'objet et le champ de vision de mon ami en même temps. Et ça a corroboré le fait qu'apparemment, ça a esquivé son champ de vision. Mais alors, oui. Donc, après le passage du cercle zénital, effectivement, on fait un grand virage sur la gauche et puis ensuite, un grand virage sur la droite. Puis ensuite, un petit virage sur la gauche pour descendre, bien sûr, avec le virage à droite quand il descendait, comme je te l'avais écrit. Et puis, pour finir, sur le tonneau. Mais je vais tout te décrire là en détail. Parce que c'est ce que t'attends, j'imagine."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1599.9,
+   "end": 1601.1,
+   "text": "Oui, en seconde, ouais."
+  },
+  {
+   "speaker": "witness",
+   "start": 1601.9,
+   "end": 1610.8,
+   "text": "Donc, sorti du cercle, il amorce le virage il y a 500 millisecondes, je pense. C'est ça, le truc."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1611.0,
+   "end": 1612.1,
+   "text": "On arrive à une seconde."
+  },
+  {
+   "speaker": "witness",
+   "start": 1613.4,
+   "end": 1620.0,
+   "text": "Voilà. C'est ça, le truc. C'est que là, il a déjà comme décéléré de... Je ne sais pas, moi. Cinq fois sa vitesse."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1622.0,
+   "end": 1626.7,
+   "text": "donc virage, il commence à une seconde, ensuite, il finit son virage à combien ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1631.9,
+   "end": 1660.8,
+   "text": "On va remettre le compteur à zéro à chaque fois qu'on décortique. Ça ne te dérange pas ? Ça m'est tard de perturber. Donc, du zénith, il fait le premier virage à gauche. Donc, comme je t'ai dit, franchement, il y a eu une première 500 millisecondes jusqu'à arriver au milieu de ce virage. Et après, pour arriver jusqu'au virage de droite, il y a dû avoir une seconde. En fait, c'est les 4 secondes dont je te parlais. C'est les 4 secondes où il part."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1662.6,
+   "end": 1662.9,
+   "text": "donc,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1662.8,
+   "end": 1667.7,
+   "text": "Donc, je comprends. Tu veux qu'on décortique les virages ? Je comprends."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1667.4,
+   "end": 1667.8,
+   "text": "je comprends."
+  },
+  {
+   "speaker": "witness",
+   "start": 1669.5,
+   "end": 1707.6,
+   "text": "Donc, ouais, il y a peut-être un peu plus d'une seconde pour le virage de gauche, c'est vrai. Mais il restait quand même assez rapide à ce moment-là. Ouais, donc je dirais une seconde pour le virage complet à gauche. Et après, il a été beaucoup plus long. Et en même temps, vu qu'il est parti à l'horizon mais qu'il restait visible, ça remplit les 4 secondes, clairement. Tu vois, j'essaye de resituer temporellement parce que la vitesse, je l'ai bien en tête, la trajectoire également. Voilà. Mais c'est vrai que décortiquer temporellement chaque séquence, je ne l'avais pas fait encore. Donc, on est en train de le faire."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1707.4,
+   "end": 1714.3,
+   "text": "mais tu peux me dire que je ne saurais pas le dire exactement ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1714.3,
+   "end": 1717.6,
+   "text": "Ah bah si, si, si. Parce que quand j'ai vu que ça n'avait duré que 5 secondes, j'étais là, genre,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1717.7,
+   "end": 1717.7,
+   "text": "genre,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1717.7,
+   "end": 1728.5,
+   "text": "il faut absolument que je me souvienne, tu vois. Et je me souvenais qu'effectivement, bon, il est parti plus lentement qu'il est arrivé et clairement, ça a pris 4 secondes. ça a pris 4 secondes, c'est parti plus lentement. C'est parti plus lentement."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1728.4,
+   "end": 1728.8,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 1728.5,
+   "end": 1759.7,
+   "text": "C'est parti plus lentement. C'est parti plus lentement. C'est parti plus lentement. C'est parti plus lentement. C'est parti plus lentement. C'est parti plus lentement."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1733.0,
+   "end": 1754.3,
+   "text": "Donc, la vitesse a décru. Bon, je ne vais pas mettre de timing puisque, bon, c'est un peu, ce n'est pas évident. Donc, la durée totale, aujourd'hui, tu l'estimes à 5 secondes, tu m'as dit, ou 4 ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1759.7,
+   "end": 1783.1,
+   "text": "Alors, ce qui est sûr, c'est que c'est 4 secondes à partir du Zenith et puis du coup, tu peux rajouter 500 millisecondes à peut-être une seconde. Il y aurait peut-être 500 millisecondes que j'ai loupées et que je n'aurais pas pu voir à partir du moment où il dépasse l'horizon côté nord. Mais je ne pourrais pas te dire. Donc, au final, oui, 4,5, 5 secondes maximum."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1783.1,
+   "end": 1783.2,
+   "text": "D'accord,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1783.1,
+   "end": 1786.5,
+   "text": "Oui., c'est parti plus lentement. C'est parti plus lentement."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1786.2,
+   "end": 1787.4,
+   "text": "La vitesse,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1786.5,
+   "end": 1788.3,
+   "text": "C'est parti plus lentement. C'est parti plus lentement."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1787.8,
+   "end": 1789.2,
+   "text": "donc, le roulis,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1788.3,
+   "end": 1789.5,
+   "text": "C'est parti plus lentement. C'est parti plus lentement."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1789.3,
+   "end": 1789.8,
+   "text": "le piqué,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1789.5,
+   "end": 1790.5,
+   "text": "C'est parti plus lentement."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1790.0,
+   "end": 1790.3,
+   "text": "tout ça,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1790.5,
+   "end": 1791.5,
+   "text": "C'est parti plus lentement."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1791.4,
+   "end": 1791.9,
+   "text": "donc,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1791.5,
+   "end": 1820.7,
+   "text": "Non, non, non, non, non, non, non."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1792.2,
+   "end": 1822.4,
+   "text": "j'ai compris que tu décrivais les virages comme un télépilote, comme si tu étais l'engin. Donc, l'angle, ici, il a été, comme tu as dit, du côté gauche, il a fait un virage à quoi ? À 180, là ? à combien de degrés ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1821.5,
+   "end": 1832.8,
+   "text": "Je t'avais dit, je crois qu'il n'y avait pas grand-chose. Oui, voilà, c'était ça. C'était 15. Il y avait un grand virage. C'était un virage très, très... C'est..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1832.8,
+   "end": 1834.2,
+   "text": "c'était combien de degrés ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1832.8,
+   "end": 1837.2,
+   "text": "Oui, le virage de droite était un peu plus resserré. Je crois que c'était 20, 25."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1837.4,
+   "end": 1840.9,
+   "text": "Ouais, c'est ça. Et le troisième,"
+  },
+  {
+   "speaker": "witness",
+   "start": 1844.4,
+   "end": 1849.5,
+   "text": "Le troisième, lui, est plus subtil. C'est pour ça, je pense qu'il fait 5 degrés. 5, 10 degrés max."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1850.0,
+   "end": 1850.4,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 1850.5,
+   "end": 1859.9,
+   "text": "C'est pour ça que je ne t'avais pas dit explicitement que je t'avais dit tu te référeras à ce qui reste entre le sud et le dernier virage parce que moi-même, je ne suis pas sûr, en fait. C'est pour ça."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1859.9,
+   "end": 1872.7,
+   "text": "Oui, d'accord. à la fin, dans le deuxième virage, tu disais que l'aile s'inclinait sur le côté ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1873.3,
+   "end": 1891.4,
+   "text": "Oui, oui, en fait, dans tous les virages. Dans tous les virages. Entre chaque virage, il y a un repositionnement et... En fait, on dirait un avion, quoi. On dirait un avion. On dirait que cet engin utilise une forme d'aérodynamisme. C'est ce qui m'a le plus étonné."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1893.1,
+   "end": 1894.5,
+   "text": "comme un avion, c'est ça, donc ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1894.2,
+   "end": 1904.6,
+   "text": "Ah oui, clairement, oui. C'est ce qui m'a vraiment choqué. C'est comme ça que j'ai pu appréhender aussi un peu la tridimension de cet objet."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1906.7,
+   "end": 1910.8,
+   "text": "tu voyais des corrections rapides ou de trajectoire ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 1910.7,
+   "end": 1915.7,
+   "text": "J'en ai vu une, oui. Entre les deux grands virages, justement. C'était assez impressionnant."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1919.9,
+   "end": 1922.0,
+   "text": "Entre les deux, le premier virage."
+  },
+  {
+   "speaker": "witness",
+   "start": 1924.7,
+   "end": 1959.1,
+   "text": "Entre le virage de gauche, très large, et le virage de droite, un peu plus resserré, du coup. Au début du virage de droite, clairement, il était encore penché pour... en sortie de son virage de gauche, mais il allait quasiment tout droit à ce moment-là. Et puis là, il s'est penché donc vers la gauche pour prendre le virage de droite, mais vraiment assez rapidement et de façon comme un peu... Là, pour le coup, ça ne respectait plus l'aérodynamique, si tu préfères. Et c'est juste un peu après ça que j'ai vu des sortes de vibrations."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1960.9,
+   "end": 1967.7,
+   "text": "Ok, on va y venir. Donc, vers la fin, tu disais que c'était très fin."
+  },
+  {
+   "speaker": "witness",
+   "start": 1969.5,
+   "end": 1973.9,
+   "text": "Ouais, donc en fait, c'est quand même..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1972.8,
+   "end": 1973.0,
+   "text": "je crois."
+  },
+  {
+   "speaker": "witness",
+   "start": 1973.9,
+   "end": 1986.8,
+   "text": "Alors, voilà, je le voyais clairement à l'horizontale, comme s'il était face à moi, finalement. Mais, bah, vu arrière, apparemment, parce qu'il gardait toujours la tête vers l'avant."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 1987.6,
+   "end": 1996.3,
+   "text": "D'accord. La spirale, maintenant, donc, c'était le sens horaire."
+  },
+  {
+   "speaker": "witness",
+   "start": 1998.8,
+   "end": 2012.9,
+   "text": "Non, mais ça va, là."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2003.7,
+   "end": 2010.4,
+   "text": "Donc là, ça rentre plus. Alors, ouais, je ne montre pas vraiment une spirale, elle n'est pas très visible."
+  },
+  {
+   "speaker": "witness",
+   "start": 2013.9,
+   "end": 2019.9,
+   "text": "Ce qui m'intéresse surtout, ce serait de revoir les deux virages, comment tu les as configurés cette fois-ci. Je te remercie."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2019.4,
+   "end": 2020.0,
+   "text": "Je te donne ça."
+  },
+  {
+   "speaker": "witness",
+   "start": 2023.3,
+   "end": 2023.8,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2023.3,
+   "end": 2023.9,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 2024.5,
+   "end": 2050.3,
+   "text": "Alors, il y a juste le mouvement de la caméra qui ne va pas, mais là, ça commence à devenir beaucoup plus réaliste. Comme je t'ai dit, en gros, il est arrivé de la droite, il est parti de la gauche, et par rapport à moi, c'est vraiment resté dans cette perspective. C'est-à-dire que il passe le zénith, mais pas au centre du zénith. Et de... C'est pas... Bon, le zénith, c'est censé être mon zénith à moi, on est d'accord."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2050.8,
+   "end": 2050.9,
+   "text": "Oui."
+  },
+  {
+   "speaker": "witness",
+   "start": 2051.8,
+   "end": 2071.3,
+   "text": "Mais là, c'est comme si, donc moi, j'étais au bord du cercle d'un côté, et lui, il était de l'autre bord. Excuse-moi, c'est vrai que j'ai pas été très clair là-dessus. Mais bon, alors si on prend, on reconsidère le zénith classique, c'est mon zénith à moi, donc il était un peu en dehors du zénith,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2071.5,
+   "end": 2071.8,
+   "text": "du coup."
+  },
+  {
+   "speaker": "witness",
+   "start": 2071.5,
+   "end": 2074.2,
+   "text": "du coup. Je suis désolé, j'ai pas été assez clair là-dessus."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2074.5,
+   "end": 2081.1,
+   "text": "Non, non, mais... Je vais peut-être pas pouvoir simuler tout ça en direct, mais je vais le prendre en compte de toute façon, après,"
+  },
+  {
+   "speaker": "witness",
+   "start": 2081.2,
+   "end": 2082.7,
+   "text": "Il faut juste que tu décales"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2081.2,
+   "end": 2081.4,
+   "text": "avec la planète."
+  },
+  {
+   "speaker": "witness",
+   "start": 2082.7,
+   "end": 2092.8,
+   "text": "un peu sur la... Enfin là, par rapport au point de vue qu'on a là actuellement, tu le décales un peu sur la droite, quoi. Quand il... Juste au départ, quoi, juste après les 500 millisecondes."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2093.7,
+   "end": 2095.5,
+   "text": "Au départ, tu vois, il est déjà un petit peu..."
+  },
+  {
+   "speaker": "witness",
+   "start": 2095.4,
+   "end": 2099.5,
+   "text": "Tiens, on regarde, laisse là, tu vois le dégradé de luminosité du ciel."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2099.7,
+   "end": 2099.7,
+   "text": "Oui, oui."
+  },
+  {
+   "speaker": "witness",
+   "start": 2100.6,
+   "end": 2112.7,
+   "text": "Eh bien, les anneaux, voilà. Eh bien, donc tu as la première tâche la plus foncée là. Il faudrait que tu le places un peu à gauche du centre de ton cercle."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2113.0,
+   "end": 2114.1,
+   "text": "Par ici ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2114.2,
+   "end": 2122.6,
+   "text": "Encore un peu à gauche et un peu plus bas. Voilà. Encore un peu plus bas. Encore un peu plus bas. Un peu à droite. Voilà, par là, exact."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2123.4,
+   "end": 2124.3,
+   "text": "Ah, ok."
+  },
+  {
+   "speaker": "witness",
+   "start": 2124.4,
+   "end": 2150.1,
+   "text": "Ouais, ouais, mais effectivement, là où tu l'as fait, là où il apparaît actuellement, ce qu'on remarque, voilà. Plus bas, c'est à peu près là où il était. Mais donc, c'est comme si tu devais tracer une diagonale entre ta souris et le bas de l'écran euh... Ah mince. Au niveau de... Non, non, au niveau de l'appareil là où il se tient actuellement."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2151.1,
+   "end": 2152.3,
+   "text": "Ah, d'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 2152.1,
+   "end": 2156.3,
+   "text": "Voilà. Voilà. Donc, tout en bas, ouais, de l'écran, en fait. Excuse-moi,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2156.1,
+   "end": 2156.4,
+   "text": "excuse-moi."
+  },
+  {
+   "speaker": "witness",
+   "start": 2156.6,
+   "end": 2211.6,
+   "text": "tout simplement. Enfin, je dis tout en bas. À droite, du coup. Mais, excuse-moi, le point, le premier point que je t'ai donné était correct, mais je te disais, pour son déplacement au départ, c'est comme s'il faisait une diagonale entre là où se tient ta souris et le point en ligne droite tout en bas de là où l'appareil est figuré actuellement. que tu avais trouvé. Encore, encore, voilà. Et là, tu traces une diagonale entre ici et le premier point. Un peu moins incliné, mais t'es bon. Donc, c'est vraiment apparu comme ça dans mon champ de vision. on va dire les degrés, la disposition. Je n'avais pas le regard aussi élevé aussi peut-être à ce moment-là. Tu vois, j'étais encore à 30 degrés, pas plus."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2212.4,
+   "end": 2230.5,
+   "text": "Ah, d'accord. C'est intéressant. Oui, bah c'est ce que... Attends. Qu'est-ce que j'avais noté ? Tu as déjà commencé à lever la tête,"
+  },
+  {
+   "speaker": "witness",
+   "start": 2225.0,
+   "end": 2233.8,
+   "text": "Voilà."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2230.5,
+   "end": 2235.1,
+   "text": "que tu étais à 10 degrés au départ. Et tu as..."
+  },
+  {
+   "speaker": "witness",
+   "start": 2235.0,
+   "end": 2277.7,
+   "text": "C'est ça. Donc, dans les 500 millisecondes, je tourne la tête, je tourne les yeux. Voilà. Et donc, c'est comme si je faisais un vrai tracking, un caméra tracking sur l'objet en mouvement. Donc ça, c'est bien vu de ta part. Sauf que les angles sont légèrement incorrects. C'est comme si, rapidement, j'avais pu le centrer et une fois centré, une fois centré, je le suis au travers du... Bon, la bordure du zénith, on va dire. Mais, mais voilà. Le temps que je me centre, etc., ça a pris 500 millisecondes et donc, il était déjà au point que je te montrais le point que je te donnais. C'est ça."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2278.7,
+   "end": 2282.0,
+   "text": "Donc..."
+  },
+  {
+   "speaker": "witness",
+   "start": 2281.7,
+   "end": 2283.7,
+   "text": "Est-ce compliqué ? Je suis désolé."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2283.8,
+   "end": 2285.6,
+   "text": "Oui, oui, non, mais c'est jamais simple."
+  },
+  {
+   "speaker": "witness",
+   "start": 2284.9,
+   "end": 2298.6,
+   "text": "Alors non,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2287.9,
+   "end": 2295.8,
+   "text": "Donc, c'est... Le sens de rotation, donc c'est vu de la place du pilote, en quelque sorte. Donc, il a fait deux tours au total."
+  },
+  {
+   "speaker": "witness",
+   "start": 2298.9,
+   "end": 2321.1,
+   "text": "en soi, l'engin, quand il arrive, ça paraît, bon, l'aile, on va dire, on va l'appeler l'aile volante, elle paraît planée de façon classique avec une assiette basée sur... Ah mince, j'oublie mon jargon, tiens donc ! Basée sur... C'est quoi déjà ? Ça n'a pas un parallélisme ?"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2321.1,
+   "end": 2322.1,
+   "text": "c'est quoi ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2321.1,
+   "end": 2372.3,
+   "text": "C'est quoi ? Un gyroscope, voilà, j'imagine. Bon, en tout cas, l'assiette semblait parallèle à la latitude, c'est ça ? Si je ne dis pas de bêtises ? Bon. En tout cas, au sol. Et puis, donc, l'objet était comme horizontal, de façon horizontale, mais avait l'air de quand même grimper, donc avait un peu le nez en avant, et puis, arrivé, là où il se situe à peu près dans son image, effectivement, il a commencé à faire le virage à gauche, donc là, il s'est légèrement comment on dit, incurvé, il s'est légèrement penché, voilà, comme vers moi, en fait. Donc là, je ne l'ai pas vu de la tranche, mais quasiment, je l'avais toujours en perspective."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2372.3,
+   "end": 2375.1,
+   "text": "Il allait sur toi ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2375.1,
+   "end": 2448.5,
+   "text": "Alors, non, parce que il passait quand même comme au-dessus de moi, donc, je n'avais pas la tête complètement levée, je dirais que, excuse-moi, je lève la tête pour essayer de me souvenir. Ouais, je suis quand même à un bon, excuse-moi, du zénith, du coup, ça fait 15, 25 degrés maximum, mais du coup, depuis le sol, ça me faisait un bon, ouais, 160 degrés, quoi, 150, 160 degrés, mais du coup, ça a varié, tu comprends, parce qu'il se déplaçait. Mais donc, son virage de gauche, il fait en sorte que, c'est comme s'il perdait rapidement de l'altitude, en fait. Il n'en perd pas, bien sûr, mais visuellement, je veux dire, c'était pas, voilà, vu qu'il, en fait, il est passé, comme sur ma position, un peu décalé, donc, en face de moi, je dirais, je ne sais pas, 500 mètres max, pendant le virage de gauche."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2453.1,
+   "end": 2456.1,
+   "text": "c'est ton estimation de distance ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2455.8,
+   "end": 2462.1,
+   "text": "Ouais, donc là, c'est, sans l'altitude, juste la distance directe,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2462.1,
+   "end": 2462.2,
+   "text": "quoi,"
+  },
+  {
+   "speaker": "witness",
+   "start": 2462.1,
+   "end": 2475.0,
+   "text": "quoi, entre moi et l'objet. il était à 500 mètres, quoi, max. Et je pense que, pendant le virage, il a dû approcher à 300 mètres, quelque chose comme ça, pour ensuite repartir, du coup,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2474.7,
+   "end": 2475.0,
+   "text": "du coup,"
+  },
+  {
+   "speaker": "witness",
+   "start": 2475.2,
+   "end": 2477.4,
+   "text": "pour le coup, vers le sud, donc là, c'est éloigné drastiquement."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2478.6,
+   "end": 2489.2,
+   "text": "D'accord. La taille apparente par rapport à la Lune, tu la jugerais comment, par rapport à la taille de la Lune ? Un peu plus grosse ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2489.2,
+   "end": 2550.6,
+   "text": "Non, non, c'était un coup plus petit. Parce que, en fait, l'objet en lui-même, si on le voyait de près, je pense qu'il semblerait assez conséquent. Étant donné, le visuel qui ressortait, la luminosité qui était assez, quand même, forte, malgré l'aspect transparent, bien sûr, j'ai peu de points de repère, si ce n'est l'horizon à la fin, où j'ai pu quand même estimer sa taille par rapport à la distance que je connaissais de cet horizon, et le fait que, bon, même s'il est passé au-dessus des arbres, et puis ensuite, qu'il est passé derrière, entre deux, j'ai pu le voir quand même, à la fois dans le tonneau, et avant le tonneau, j'ai pu le voir quand même, fortement diminuer en taille, ce qui m'a permis d'estimer sa taille, en fait. À la louche, bien sûr, mais voilà. Donc moi, de mon point de vue, il paraissait quand même plus petit, encore, que ce que tu fais là."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2552.1,
+   "end": 2554.2,
+   "text": "oui, oui, oui, non, mais justement, je note."
+  },
+  {
+   "speaker": "witness",
+   "start": 2555.0,
+   "end": 2584.8,
+   "text": "Pas de soucis. Donc, oui, je t'avais dit une pièce et demie, c'est ça. Peut-être, donc beaucoup moins quand il arrive, au tout départ, quand je le capte, ça fait genre la taille d'une étoile filante, 500 millisecondes après, il fait une pièce de 1 euro. Après, il passe là, au niveau zénital, une pièce et demie. Et là, dans le virage de gauche, ça y est, il commence déjà à rediminuer, il est déjà à la taille d'une pièce. Et virage de droite, il fait une demi-pièce déjà."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2586.3,
+   "end": 2592.2,
+   "text": "D'accord. D'après toi,"
+  },
+  {
+   "speaker": "witness",
+   "start": 2592.3,
+   "end": 2599.9,
+   "text": "Il semblait,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2593.0,
+   "end": 2598.3,
+   "text": "tu avais l'impression que l'assiette était rétablie derrière l'horizon ? Non, bon, après,"
+  },
+  {
+   "speaker": "witness",
+   "start": 2599.9,
+   "end": 2602.9,
+   "text": "ouais, effectivement, quand même, finir sa manœuvre de tonneau."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2603.5,
+   "end": 2606.0,
+   "text": "Et donc, il a passé la lidière, la tête en bas ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2607.2,
+   "end": 2622.1,
+   "text": "Non, 20 degrés, il avait quasiment fini le tonneau. Donc, je l'ai vu la tête en bas, mais effectivement, après, il a quand même terminé, j'ai pu voir le mouvement se terminer du tonneau. Donc, j'ai vu 340 degrés."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2623.0,
+   "end": 2623.3,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 2623.0,
+   "end": 2624.5,
+   "text": "Il manquait 20 degrés du tonneau."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2624.9,
+   "end": 2627.0,
+   "text": "Et le tonneau était large ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2628.9,
+   "end": 2645.3,
+   "text": "C'était impressionnant. Tu sais, je fais du quadricoptère, mais j'en fais par passion. Dans ce qu'on appelle le FPV, donc c'est First Person View. Donc,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2645.4,
+   "end": 2645.4,
+   "text": "Donc,"
+  },
+  {
+   "speaker": "witness",
+   "start": 2645.4,
+   "end": 2698.2,
+   "text": "tu sais, c'est un concept. On utilise des lunettes pour avoir une vue interne de notre appareil, pour pouvoir le piloter comme un vrai pilote, en fait. d'un point de vue d'un vrai pilote. Comme si on était embarqué dedans, finalement. Et donc, on a des... Il y a plusieurs, on va dire, plusieurs disciplines, dont le freestyle en FPV. Et c'est ce que je fais, justement. Je fais du FPV freestyle. Donc, le concept, c'est de travailler ses courbes, de travailler ses déplacements, de travailler ses trajectoires, et notamment, de faire des... des tonneaux. Alors, ça porte des noms particuliers en anglais. j'ai oublié. Il faudrait que je revoie mon vocabulaire. Mais en gros, c'est un rôle."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2698.5,
+   "end": 2699.0,
+   "text": "Oui, un rôle."
+  },
+  {
+   "speaker": "witness",
+   "start": 2699.6,
+   "end": 2752.4,
+   "text": "Voilà. Mais ce n'est pas juste un simple rôle. c'est vraiment un... Je crois que ça s'appelle un bare role. Je ne sais plus trop. Mais en gros, ce n'est pas du tout un roulis, un pivot sur soi-même seulement. c'est vraiment un roulis en trois dimensions. Donc, on donne, en fait, une impédance en quadricoptère pour y arriver. C'est comme si on accélère... On accélère... On met une accélération supplémentaire, pas juste pour avancer, mais aussi pour... comme... Prendre de l'altitude, finalement. Sauf que du coup, on tourne en même temps sur le rôle, ce qui fait vraiment une sorte de spirale très, très large. Après, ça dépend de la largeur, des degrés de rotation qu'on met dans la manœuvre. Mais... Est-ce que je pourrais donner un exemple concret"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2752.3,
+   "end": 2754.0,
+   "text": "C'est ce que tu as"
+  },
+  {
+   "speaker": "witness",
+   "start": 2752.4,
+   "end": 2753.2,
+   "text": "que tu pourrais?"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2754.0,
+   "end": 2757.8,
+   "text": "l'impression d'avoir vu, une spirale très large."
+  },
+  {
+   "speaker": "witness",
+   "start": 2758.6,
+   "end": 2791.6,
+   "text": "Ça a commencé par une spirale vraiment très large qui ensuite se rétrécit. Ouais. Qui ensuite se rétrécit. Donc, la spirale, la manœuvre sur place, je dirais que... Le premier demi-cercle, il faisait au moins... Excuse-moi. Ouais, au moins 200, 300 mètres d'altitude. Un vrai beau... Tu vois? C'était une démonstration, quoi. Moi, je n'ai pas compris. Franchement. Parce que si, cherchent à ne pas être vu, ça rater."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2792.0,
+   "end": 2793.1,
+   "text": "Oui, ça, oui."
+  },
+  {
+   "speaker": "witness",
+   "start": 2795.7,
+   "end": 2796.0,
+   "text": "Voilà."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2796.5,
+   "end": 2806.5,
+   "text": "tes estimations de taille, distance, altitude, donc la largeur d'après toi, soit en degrés, soit en mètres ou de deux."
+  },
+  {
+   "speaker": "witness",
+   "start": 2807.6,
+   "end": 2813.2,
+   "text": "Oui. Sur la spirale, toujours ou... Excuse-moi. On part sur l'objet?"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2813.4,
+   "end": 2813.5,
+   "text": "Oui."
+  },
+  {
+   "speaker": "witness",
+   "start": 2814.9,
+   "end": 2816.4,
+   "text": "la dimension de l'objet."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2816.7,
+   "end": 2822.1,
+   "text": "Oui, d'après toi. En mètres,"
+  },
+  {
+   "speaker": "witness",
+   "start": 2822.0,
+   "end": 2839.2,
+   "text": "Par rapport... Ouais. Par rapport au fait que je l'ai vu arriver et repartir, et que donc, il s'est quand même pas mal rapproché de moi, même s'il avait une certaine altitude, bien sûr. Il a gardé cette altitude. pour ensuite partir et perdre cette altitude, clairement, il faisait un bon 20 mètres."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2840.1,
+   "end": 2840.4,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 2841.0,
+   "end": 2856.4,
+   "text": "Bon, peut-être que j'exagère. Peut-être qu'il faisait que 10 mètres. Mais en tout cas, il faisait entre 10 et 20 mètres. J'ai même tendance à dire, vu la... Donc là, je parle de la largeur, bien sûr, en prenant en compte les extrémités des deux ailes."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2856.7,
+   "end": 2856.8,
+   "text": "Oui."
+  },
+  {
+   "speaker": "witness",
+   "start": 2857.9,
+   "end": 2865.7,
+   "text": "Peut-être même qu'on atteignait les 25-30 mètres. Mais je ne suis pas formel. En tout cas, c'était plus de 10 mètres, ça c'est sûr."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2868.1,
+   "end": 2872.4,
+   "text": "Et en degré, tu pourrais dire ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2874.1,
+   "end": 2878.6,
+   "text": "Qu'est-ce que tu entends par degré, du coup ? Ah ouais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2878.9,
+   "end": 2879.9,
+   "text": "360 degré."
+  },
+  {
+   "speaker": "witness",
+   "start": 2882.5,
+   "end": 2883.6,
+   "text": "Sur un cercle à plat,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2884.0,
+   "end": 2885.0,
+   "text": "tu peux dire ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2884.0,
+   "end": 2886.7,
+   "text": "tu peux dire ?"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2885.0,
+   "end": 2885.2,
+   "text": "Ouais."
+  },
+  {
+   "speaker": "witness",
+   "start": 2886.7,
+   "end": 2891.0,
+   "text": "Quelle superficie il prendrait sur ce cercle ?"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2890.8,
+   "end": 2899.0,
+   "text": "Imagine tout autour de toi, c'est un cercle de 360. Combien de degrés prendrait la largeur des phénomènes ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2899.2,
+   "end": 2903.5,
+   "text": "Donc, d'accord, là on repart sur ce que moi j'ai vu visuellement."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2903.9,
+   "end": 2904.0,
+   "text": "Oui,"
+  },
+  {
+   "speaker": "witness",
+   "start": 2904.8,
+   "end": 2905.8,
+   "text": "D'accord, d'accord, d'accord."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2905.7,
+   "end": 2905.8,
+   "text": "d'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 2907.7,
+   "end": 2917.7,
+   "text": "D'accord. Ouais, ouais, je vois. Donc en termes de degré, la largeur de l'objet. Ok, d'accord. Franchement, de de... Ouais, ouais, de degré, excusez-moi. Allez, peut-être plutôt 4-5 degrés."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2917.3,
+   "end": 2917.7,
+   "text": "c'est un degré."
+  },
+  {
+   "speaker": "witness",
+   "start": 2918.2,
+   "end": 2922.3,
+   "text": "Attends, j'ai pas de rapporteur là, mais..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2922.0,
+   "end": 2927.0,
+   "text": "non, mais tu peux dire ne pas savoir, on peut rester sur les 20 mètres et puis après, on peut imaginer..."
+  },
+  {
+   "speaker": "witness",
+   "start": 2926.9,
+   "end": 2930.5,
+   "text": "Non, je peux te l'estimer. Je peux carrément te l'estimer. Attends."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2930.4,
+   "end": 2930.6,
+   "text": "Attends."
+  },
+  {
+   "speaker": "witness",
+   "start": 2932.5,
+   "end": 2933.5,
+   "text": "356 degrés."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2932.6,
+   "end": 2933.5,
+   "text": "366 degrés,"
+  },
+  {
+   "speaker": "witness",
+   "start": 2934.9,
+   "end": 2942.5,
+   "text": "45 degrés. Ouais, non, on était sur 10-15 degrés, ouais, je pense."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2950.5,
+   "end": 2956.4,
+   "text": "Et le rayon de la spirale, tu me disais, il m'a combien en mètres, le rayon de la spirale ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2956.1,
+   "end": 2957.9,
+   "text": "Ouais, ouais, 50, ouais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2958.3,
+   "end": 2959.5,
+   "text": "50 mètres ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2959.4,
+   "end": 2967.1,
+   "text": "Ouais, je faisais 100 mètres de diamètre le tonneau. Je suis bon en géométrie, t'as de la chance."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2968.3,
+   "end": 2973.4,
+   "text": "Et le diamètre apparent de la spirale en degrés, comment tu dirais ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2973.2,
+   "end": 2974.8,
+   "text": "Le diamètre apparent de la spirale."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2975.0,
+   "end": 2977.8,
+   "text": "Ouais, donc tu m'avais dit que tu t'es estimé à 100 mètres"
+  },
+  {
+   "speaker": "witness",
+   "start": 2978.8,
+   "end": 2979.1,
+   "text": "Voilà."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2980.8,
+   "end": 2982.5,
+   "text": "t'as une idée ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 2983.9,
+   "end": 3021.1,
+   "text": "Oui, oui, oui, oui. C'était beaucoup plus loin. Là, c'était plutôt en dessous de 5 degrés, donc 4-5 degrés, ouais, max. C'est très intéressant ta question."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 2993.2,
+   "end": 3019.6,
+   "text": "D'accord, Et donc ça, c'est des distances que tu estimes, et c'est pas des angles que tu as dû mesurer. Et l'altitude de début, l'estimation de l'altitude de début, selon toi, à quelle altitude ça a commencé ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3021.7,
+   "end": 3098.7,
+   "text": "Je pense qu'il était à basse altitude. C'est comme s'il arrivait depuis l'horizon. Le problème, c'est que je ne l'ai pas vu littéralement apparaître. Il est apparu dans mon champ de vision. Il était déjà dans le ciel visible. Mais, je te l'ai dit, il est apparu, voilà, à 20-30 degrés dans mon champ de vision. L'altitude dans le ciel, donc, il manque ces fameux 20-30 degrés d'observation, malheureusement, mais vu qu'à 30 degrés, il était donc pas très haut dans le ciel, à 30 degrés, t'imagines bien. Et que, par contre, en revanche, il est rapidement arrivé comme au zénith, bon, pas au zénith exact, tu as compris, mais voilà, dans le cercle zénital et que, et ce, très rapidement, excuse-moi, au début, je me suis dit qu'il avait une altitude constante et que donc, et que donc, à 30 degrés, il devait déjà avoir cette altitude. Mais, je ne suis pas sûr parce que, à la fin, il a clairement perdu énormément d'altitude et donc, ça m'a donné l'impression que c'est comme s'il avait fait une sorte de bosse, de vague au-dessus de nous, en fait."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3098.5,
+   "end": 3106.0,
+   "text": "en fait. Et donc, à partir de quand il a perdu, il a commencé à descendre en termes d'altitude ? Est-ce que c'était au zénith,"
+  },
+  {
+   "speaker": "witness",
+   "start": 3105.7,
+   "end": 3126.3,
+   "text": "Au milieu du premier, au milieu du virage de gauche, au milieu du virage de gauche, c'est pour ça que c'est compliqué. Et dans le second, il est parti en bon piqué et au troisième virage, il vient comme ça coller, à 10, 20 degrés d'altitude,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3125.5,
+   "end": 3126.5,
+   "text": "de l'altitude, quoi."
+  },
+  {
+   "speaker": "witness",
+   "start": 3126.4,
+   "end": 3128.4,
+   "text": "quoi, avant de faire la spirale."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3129.4,
+   "end": 3129.6,
+   "text": "pardon."
+  },
+  {
+   "speaker": "witness",
+   "start": 3129.5,
+   "end": 3130.8,
+   "text": "Pardon ? Non, non, vas-y."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3131.3,
+   "end": 3137.8,
+   "text": "si ça taille diminue, c'est parce que, selon toi, il s'éloigne, il descend, ou les deux ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3137.7,
+   "end": 3150.7,
+   "text": "Les deux, justement, c'est ce que je disais, les trois, mon commandant, il s'éloigne, il s'éloigne, il perd en altitude et donc, visuellement, il apparaît beaucoup plus petit, ouais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3151.0,
+   "end": 3151.4,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 3152.6,
+   "end": 3159.8,
+   "text": "vraiment,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3154.3,
+   "end": 3158.2,
+   "text": "Quand il était au zénith, j'ai encore t'embêté,"
+  },
+  {
+   "speaker": "witness",
+   "start": 3160.0,
+   "end": 3203.8,
+   "text": "c'est important parce que là, donc, il paraissait comme assez gros, bien sûr. Tu sais, sur la reconstitution que j'ai faite tout à l'heure, je l'ai fait un peu en mode zoomé, complètement même, parce que j'ai pu quand même pas mal distinguer les détails justement quand il est passé bien au-dessus, Donc, ouais, il faisait, tout à l'heure, je t'ai dit, voilà, 15 degrés, c'était ça, c'était par rapport à cet emplacement."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3204.1,
+   "end": 3214.2,
+   "text": "D'accord. Et donc ça, c'est la largeur et la"
+  },
+  {
+   "speaker": "witness",
+   "start": 3215.1,
+   "end": 3217.1,
+   "text": "La longueur ?"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3216.3,
+   "end": 3216.5,
+   "text": "ouais."
+  },
+  {
+   "speaker": "witness",
+   "start": 3217.1,
+   "end": 3224.7,
+   "text": "La longueur, c'est, ouais, 3 degrés, pas plus. Allez, 5 degrés, excusez-moi, parce que 10, il faut,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3224.5,
+   "end": 3225.6,
+   "text": "c'est ce que je disais."
+  },
+  {
+   "speaker": "witness",
+   "start": 3225.5,
+   "end": 3226.6,
+   "text": "je ne sais pas"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3225.6,
+   "end": 3225.8,
+   "text": "Oui,"
+  },
+  {
+   "speaker": "witness",
+   "start": 3226.6,
+   "end": 3229.7,
+   "text": "que les proportions, voilà, que j'avais données, ouais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3229.7,
+   "end": 3230.1,
+   "text": "Ok, ok."
+  },
+  {
+   "speaker": "witness",
+   "start": 3229.7,
+   "end": 3244.8,
+   "text": "C'était,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3231.2,
+   "end": 3244.4,
+   "text": "Donc, maintenant, venons-en justement à cette vibration que tu décrivais là. Quelle ampleur, cette vibration, c'était léger, c'était très net, c'était même fort ou ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3244.9,
+   "end": 3273.7,
+   "text": "voilà, non, c'était visuellement j'ai dit, de quelques millimètres, mais donc, moins d'un degré. En réalité, j'ai eu comme l'impression que c'était son assiette qui vacillait légèrement du fait de la prise de vent entre les, en sortant du virage de gauche pour prendre le virage de droite. C'était comme si, dans son virage de droite, c'était trop sec, donc, il a eu, il a eu des turbulences, quoi."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3273.9,
+   "end": 3275.3,
+   "text": "D'accord, intéressant."
+  },
+  {
+   "speaker": "witness",
+   "start": 3276.1,
+   "end": 3277.4,
+   "text": "Ouais, ça m'a rassuré."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3277.6,
+   "end": 3280.6,
+   "text": "elle commence au bout de combien de temps de..."
+  },
+  {
+   "speaker": "witness",
+   "start": 3280.6,
+   "end": 3285.7,
+   "text": "Justement, pas tout de suite, ouais. Non, 200, 250 millisecondes."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3287.3,
+   "end": 3288.8,
+   "text": "très tôt, alors,"
+  },
+  {
+   "speaker": "witness",
+   "start": 3288.7,
+   "end": 3289.6,
+   "text": "Le virage,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3288.8,
+   "end": 3289.1,
+   "text": "finalement."
+  },
+  {
+   "speaker": "witness",
+   "start": 3289.8,
+   "end": 3300.4,
+   "text": "ouais, ouais, ouais. C'est comme le... Excuse-moi. Donc, dans le virage de droite, le second virage, au tout début, ouais. Et après, il se stabilise pendant le second virage."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3303.1,
+   "end": 3310.7,
+   "text": "Et cette vibration, au niveau de la fréquence, ça bougeait combien de temps ? Je vais dire, combien de temps ça bougeait par seconde ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3310.5,
+   "end": 3343.1,
+   "text": "tu vois, je ne sais pas si tu as déjà vu ce type de micro-turbulence sur des avions de chasse qui peuvent faire ce type de manœuvre très rapidement. Ça donne un peu cette impression. Ou une voile dans le vent, une voile qui prend quand même beaucoup au vent, voilà, qui vibre quand même assez rapidement. je ne pourrais pas être tout à fait exact, mais... Excuse-moi, rappelle-moi la question."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3343.7,
+   "end": 3345.3,
+   "text": "Le nombre de fois que ça vibre"
+  },
+  {
+   "speaker": "witness",
+   "start": 3345.4,
+   "end": 3348.9,
+   "text": "Ah oui, le nombre de fois. Le nombre... Ah ouais, ouais, d'accord."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3348.9,
+   "end": 3350.4,
+   "text": "il vient par seconde."
+  },
+  {
+   "speaker": "witness",
+   "start": 3350.5,
+   "end": 3370.0,
+   "text": "Ouais, ouais, bien vu, bien vu. C'est... C'est... C'est ce qu'il faut. Par seconde, ça fait beaucoup. Parce que du coup, ça a duré que 250 millisecondes, mais... Euh... Je ferme les yeux, j'essaie de me souvenir."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3373.4,
+   "end": 3373.9,
+   "text": "Par exemple,"
+  },
+  {
+   "speaker": "witness",
+   "start": 3373.7,
+   "end": 3390.9,
+   "text": "Ouais, ça a duré... Excuse-moi. Excuse-moi. La vibration a duré une seconde quand même au total, mais elle était graduelle. C'est-à-dire qu'au début, la turbulence était plus forte et après, ça s'est stabilisé. Donc pendant 250 millisecondes, c'était tout à fait visible et puis après, c'était graduellement beaucoup moins visible."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3391.9,
+   "end": 3394.2,
+   "text": "et le nombre de fois où ça vibre en une seconde ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3394.0,
+   "end": 3398.6,
+   "text": "Et le nombre de fois, je... Ah là là, en une seconde,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3398.2,
+   "end": 3399.4,
+   "text": "Ah, si je fais un..."
+  },
+  {
+   "speaker": "witness",
+   "start": 3399.3,
+   "end": 3408.9,
+   "text": "au moins une dizaine de fois. Au moins... Ouais, au moins... Oui,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3404.6,
+   "end": 3406.9,
+   "text": "Est-ce que le bord avant était net ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3409.2,
+   "end": 3420.5,
+   "text": "alors, c'est vrai que je l'ai peut-être pas... Je t'ai dit, de toute façon, je vais refaire une reconstitution un peu plus poussée. Parce que là, j'étais dans Paint, un peu à la bombe, tu vois."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3421.3,
+   "end": 3421.9,
+   "text": "ce que tu as fait."
+  },
+  {
+   "speaker": "witness",
+   "start": 3423.3,
+   "end": 3453.9,
+   "text": "Ouais, je te jure, j'essaie de m'appliquer, mais je sais que ça manque un peu de détails, les proportions sont... je l'ai fait un peu en perspective de billet, comme je l'ai aperçu. Donc, en fait, je l'ai représenté dans son début du virage de gauche, sur la reconstitution. Là où je l'ai vu plus nettement... Voilà. Mais... Ah mince, excuse-moi, repose-moi la question."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3454.7,
+   "end": 3455.2,
+   "text": "était net."
+  },
+  {
+   "speaker": "witness",
+   "start": 3455.9,
+   "end": 3494.9,
+   "text": "Oui, le bord avant, effectivement, il était tout à fait net. C'est ça qui m'a surpris. C'est qu'en fait, c'était très net à l'avant. Donc, je ne pouvais pas... je ne pouvais pas me dire non, par contre, donc, ça avait comme une forme de luminescence interne qui me permettait de distinguer cette... que le bord était tout à fait perceptible à l'avant, mais par contre, à l'arrière, mais rien à voir. l'arrière, lui, était vraiment très diffus et donc sur la longueur, sur toute la longueur de l'engin, enfin, de l'objet."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3495.6,
+   "end": 3498.1,
+   "text": "à travers l'arrière, par exemple ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3498.0,
+   "end": 3506.4,
+   "text": "Oui, c'est ce que j'ai fait, un petit point dedans pour représenter une étoile, effectivement, qu'on pouvait voir au travers. J'ai cru voir une étoile au travers à un moment donné."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3507.1,
+   "end": 3513.4,
+   "text": "Est-ce que les filaments, ils allaient plus loin que le flou qui s'estompe comme ça à l'arrière ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3514.1,
+   "end": 3528.9,
+   "text": "j'essaie de bien le représenter. Je le ferai encore plus précisément sur la prochaine reconstitution, mais effectivement, il y avait clairement des protubérances qui dépassaient et qui étaient, elles, plus visibles. Elles étaient toujours un peu translucides, mais..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3529.3,
+   "end": 3531.0,
+   "text": "De combien elles dépassaient le flou,"
+  },
+  {
+   "speaker": "witness",
+   "start": 3532.9,
+   "end": 3537.3,
+   "text": "Comme sur la reconstitution,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3533.8,
+   "end": 3536.0,
+   "text": "par rapport à l'engin ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3537.5,
+   "end": 3546.5,
+   "text": "c'est assez homogène, finalement. Ça dépasse très peu. Ça dépasse, c'est visible, c'est distinguable. Mais ça fait comme partie d'un ensemble."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3548.2,
+   "end": 3548.8,
+   "text": "Donc il y a donc"
+  },
+  {
+   "speaker": "witness",
+   "start": 3551.2,
+   "end": 3552.8,
+   "text": "On dirait une forme de squelette, en fait."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3552.7,
+   "end": 3552.9,
+   "text": "en fait."
+  },
+  {
+   "speaker": "witness",
+   "start": 3554.1,
+   "end": 3590.5,
+   "text": "Pour décrire un peu les choses de façon organique, ça ressemblait à quelque chose d'organique, finalement. C'est ce qui m'a le plus surpris ce soir-là, parce que je n'avais jamais vu ce genre de choses. J'ai pu voir des orbes lumineuses, j'ai pu voir un cylindre métallique, la fameuse RR5. je t'en parlerai plus précisément plus tard. Et là, à part les orbes lumineuses, des sphères lumineuses comme ça, qui semblent assez éthériques, finalement, assez... Voilà, on dirait du plasma, quoi. c'était pas ça."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3590.8,
+   "end": 3591.1,
+   "text": "Ah oui,"
+  },
+  {
+   "speaker": "witness",
+   "start": 3592.0,
+   "end": 3592.2,
+   "text": "Voilà."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3592.7,
+   "end": 3592.8,
+   "text": "quoi."
+  },
+  {
+   "speaker": "witness",
+   "start": 3595.7,
+   "end": 3597.5,
+   "text": "Matériel transmutide. Excuse-moi."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3600.4,
+   "end": 3603.0,
+   "text": "jaunâtre autour de la queue ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3602.7,
+   "end": 3607.7,
+   "text": "Voilà, j'ai bien réglé les couleurs, par contre, sur la première reconstitution. Je peux t'y fier."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3608.2,
+   "end": 3611.8,
+   "text": "qu'il n'y avait pas de feu ni de lumière"
+  },
+  {
+   "speaker": "witness",
+   "start": 3611.4,
+   "end": 3611.7,
+   "text": "Non."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3611.8,
+   "end": 3613.0,
+   "text": "de signalisation"
+  },
+  {
+   "speaker": "witness",
+   "start": 3615.1,
+   "end": 3616.8,
+   "text": "Je vais parler franco, que dalle."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3617.6,
+   "end": 3627.9,
+   "text": "oui, oui. Que l'aile était, qu'on appelle l'aile, elle était fine, il n'y avait pas vraiment d'épaisseur visible, c'était très fin."
+  },
+  {
+   "speaker": "witness",
+   "start": 3629.3,
+   "end": 3643.4,
+   "text": "Justement, l'aspect translucide laissait percevoir qu'il y avait quand même une certaine profondeur. Quand je l'ai vu au loin, je t'ai dit que ça semblait plutôt plat, mais ça avait quand même une certaine..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3642.9,
+   "end": 3643.5,
+   "text": "Épaisseur."
+  },
+  {
+   "speaker": "witness",
+   "start": 3643.4,
+   "end": 3649.5,
+   "text": "Voilà, une certaine épaisseur, une certaine hauteur, quand même. Je dirais de 2 à 3 mètres."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3650.4,
+   "end": 3650.7,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 3653.1,
+   "end": 3654.8,
+   "text": "Mais à l'arrière, ça semble s'affiner."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3657.0,
+   "end": 3675.4,
+   "text": "Oui, oui, oui. À l'arrière, Et la luminosité, est-ce qu'elle est... Comment tu la compares après par rapport à la luminosité de la lune ? Plus lumineux, moins lumineux ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3675.4,
+   "end": 3711.0,
+   "text": "Moins lumineux. Beaucoup moins lumineux parce que translucide. D'ailleurs, c'est intéressant ta question parce que clairement, la lumière ne venait pas du soleil, vu l'heure. Ce n'était pas possible, comme tu l'as bien fait remarquer et je te remercie. Et surtout, la lumière provenait... Cet objet était sa propre source lumineuse. Mais c'était diffus. Ce n'était pas du tout... Voilà, t'imagines un projecteur braqué sur toi, donc une lumière quand même assez intense. non, pas du tout."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3712.8,
+   "end": 3722.3,
+   "text": "Et sa forme ? J'ai un peu la réponse d'après ton schéma, mais c'est plus un croissant, une demi-lune ou autre ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3722.2,
+   "end": 3743.6,
+   "text": "Alors, sur ma première constitution, le problème, c'est la perspective, ça mène... C'est induit en erreur. C'est très long, très aplati. Ça ressemble vraiment aux vues artistiques de Kenneth Arnold. j'étais un peu surpris par ça d'ailleurs. Alors que ce n'était pas des objets métalliques, d'autant plus."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3743.4,
+   "end": 3749.4,
+   "text": "Et donc, c'était plus croissant que demi-lune ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3750.1,
+   "end": 3753.5,
+   "text": "si je dois donner un angle..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3752.1,
+   "end": 3753.8,
+   "text": "ou autre ? Je ne sais pas."
+  },
+  {
+   "speaker": "witness",
+   "start": 3753.5,
+   "end": 3758.7,
+   "text": "Ouais, non, ça ne décrivait pas du tout."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3758.9,
+   "end": 3760.2,
+   "text": "ou un croissant..."
+  },
+  {
+   "speaker": "witness",
+   "start": 3760.0,
+   "end": 3772.6,
+   "text": "Ça ne décrivait pas du tout un demi-cercle complet. Ça faisait... Excuse-moi, je vais te donner ça tout de suite. Ça faisait 20 degrés. 20 degrés, quoi. La courbe, elle fait 20 degrés, pas plus."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3773.4,
+   "end": 3775.6,
+   "text": "La courbe, c'était 20 degrés."
+  },
+  {
+   "speaker": "witness",
+   "start": 3775.3,
+   "end": 3790.0,
+   "text": "Alors, la courbe de l'objet à l'avant, si tu la places sur un cercle, tu vois, ça décrit que... Voilà, ça décrit que... Voilà, on découpe comme un gâteau, ça ne fait que 20 degrés."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3791.4,
+   "end": 3791.8,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 3792.9,
+   "end": 3794.5,
+   "text": "Comme ça, tu as la courbe."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3794.6,
+   "end": 3801.7,
+   "text": "c'est rempli... Tire un trait, ça fait une demi-lune ? Enfin, pas une demi-lune puisque c'est 20 degrés,"
+  },
+  {
+   "speaker": "witness",
+   "start": 3802.3,
+   "end": 3815.3,
+   "text": "c'est aussi courbé. C'est aussi courbé, mais plus... Voilà. Mais plus... Excuse-moi, plus vers 15 degrés. C'est ce que j'essaie de refaire sur mon croquis, mais ce n'était pas évident. C'est vrai que ça ressemble un peu à une demi-lune. Excuse-moi."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3816.9,
+   "end": 3822.1,
+   "text": "De ce que tu me décris, ça ressemble plus à un croissant si c'est aussi courbé dans le..."
+  },
+  {
+   "speaker": "witness",
+   "start": 3821.9,
+   "end": 3830.0,
+   "text": "Ah oui, mais complètement. Je veux dire, sur mon premier croquis, avec la perspective, c'est clair que c'est induit en erreur. J'ai essayé d'être le... Tu vois,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3830.4,
+   "end": 3831.0,
+   "text": "C'est les joueurs."
+  },
+  {
+   "speaker": "witness",
+   "start": 3831.4,
+   "end": 3834.1,
+   "text": "de respecter la perspective. Mais ça induit un peu en erreur."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3834.7,
+   "end": 3838.7,
+   "text": "Combien tu estimes qu'il y avait de filaments ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3840.5,
+   "end": 3871.3,
+   "text": "C'est une bonne question. Il y en avait pas mal. Je dirais qu'il y en avait au moins 4 de chaque côté. Et comme deux centrales un peu plus larges. Mais... Tu sais, avec tous ces virages, ce n'était pas évident à bien déceler ces petits détails. quoi. Donc là, je n'ai pas pris le temps de compter. Enfin, je n'ai pas eu le temps de compter de façon, tu vois, de bien mémoriser. Ouais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3872.7,
+   "end": 3874.2,
+   "text": "droit"
+  },
+  {
+   "speaker": "witness",
+   "start": 3877.3,
+   "end": 3890.8,
+   "text": "Plutôt. Plutôt, mais ça semblait suivre la courbe un peu. quand même. Ça semblait un peu aller dans... Tu vois. C'est ce que j'essaie de refaire là sur le croquis, mais encore une fois, avec la perspective donnée, ce n'était pas évident."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3891.0,
+   "end": 3894.3,
+   "text": "Un peu comme des plumes ou des côtes ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3894.8,
+   "end": 3897.4,
+   "text": "Non, non, plus comme des queues de méduses."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3899.4,
+   "end": 3901.4,
+   "text": "Oui, mais leur alignement..."
+  },
+  {
+   "speaker": "witness",
+   "start": 3903.4,
+   "end": 3918.9,
+   "text": "C'était pas clair, justement. C'était pas totalement distordu. Ça semblait plutôt aller, donc, comme des courbes vers la gauche sur le côté gauche, des courbes vers la droite sur le côté droit, un peu comme sur mon... sur ma reconstitution, là."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3919.9,
+   "end": 3921.3,
+   "text": "Mais ils allaient tous dans le même temps."
+  },
+  {
+   "speaker": "witness",
+   "start": 3923.0,
+   "end": 3934.9,
+   "text": "Mais voilà, ça restait quand même plutôt aligné avec l'engin. Ça avait l'air de respecter quand même une forme de linéarité,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3931.8,
+   "end": 3933.4,
+   "text": "Le sens du vol ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3935.0,
+   "end": 3936.0,
+   "text": "une forme d'aérodynamisme."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3936.2,
+   "end": 3936.4,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 3936.5,
+   "end": 3937.0,
+   "text": "Je te remercie."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3939.3,
+   "end": 3946.4,
+   "text": "Les pointes du croissant, est-ce qu'elles étaient symétriques ou est-ce qu'il y en avait une qui était plus longue que l'autre ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3946.7,
+   "end": 3965.3,
+   "text": "les ailes étaient symétriques. Il n'y a que cet aspect translucide qui paraissait un peu plus aléatoire et les filaments qui semblaient pas forcément tous à la même longueur, j'ai envie de dire. Mais il semblait y avoir un pattern quand même. Ça semblait respecter un pattern quand même."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3965.4,
+   "end": 3965.9,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 3965.7,
+   "end": 3967.8,
+   "text": "D'où les détails que je te donnais juste à vous."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 3972.7,
+   "end": 3978.1,
+   "text": "il était dans les filaments eux-mêmes ou c'était une nappe qui entourait les filaments ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 3976.7,
+   "end": 4009.6,
+   "text": "Voilà. Donc, en gros, il y avait un dégradé translucide de blanc à l'obscurité du ciel. Les filaments, eux, avaient une racine blanche qui part sur du jaune, du jaune pâle et une aura un peu plus orangée, effectivement, sur toute la seconde partie, la partie arrière du phénomène. Comme je t'ai dit,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4004.8,
+   "end": 4005.2,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "witness",
+   "start": 4010.1,
+   "end": 4038.5,
+   "text": "sur la reconstitution que je t'ai faite, j'essaie d'être le plus réaliste possible sur ce détail, c'est-à-dire l'aspect translucide, le dégradé et les couleurs. Le blanc est un peu trop pétant sur ma première reconstitution, je pense. Tu vois, ce serait peut-être un peu plus mat, un blanc peut-être un peu plus mat que là, mais c'est tout."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4039.5,
+   "end": 4055.6,
+   "text": "D'accord. maintenant le lieu. Tu disais qu'il y avait l'éclairage public qui est coupé à 23 heures. Il n'y avait rien dans le parc, aucun éclairage ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 4055.4,
+   "end": 4060.0,
+   "text": "dans le parc,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4058.2,
+   "end": 4058.5,
+   "text": "Attends."
+  },
+  {
+   "speaker": "witness",
+   "start": 4060.1,
+   "end": 4061.4,
+   "text": "non. Je ne sais plus."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4061.6,
+   "end": 4063.5,
+   "text": "est-ce qu'il y a des éclairages dans le parc ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 4063.4,
+   "end": 4081.4,
+   "redacted": {
+    "reason": {
+     "fr": "Détails du lieu précis de l'observation (le témoin souhaite qu'il ne soit pas public).",
+     "en": "Details of the exact place of the observation (the witness does not want it public)."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4083.6,
+   "end": 4086.4,
+   "text": "Mais ça, c'était loin. D'ailleurs,"
+  },
+  {
+   "speaker": "witness",
+   "start": 4086.3,
+   "end": 4088.8,
+   "text": "C'est invisible, non visible de là où je suis, ouais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4088.9,
+   "end": 4091.5,
+   "text": "Ouais, c'était derrière toi ou..."
+  },
+  {
+   "speaker": "witness",
+   "start": 4091.5,
+   "end": 4106.3,
+   "text": "Le lampadaire bleu est direction centre-ville, donc à peu près dans la direction de laquelle l'objet est apparu, sauf que de là où je me tenais, il y a une maison devant et des arbres, donc je ne peux pas le voir, je ne peux pas le distinguer."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4106.1,
+   "end": 4107.0,
+   "text": "Je ne peux pas le voir. Je ne peux pas le voir. C'est le masqué."
+  },
+  {
+   "speaker": "witness",
+   "start": 4107.9,
+   "end": 4126.7,
+   "text": "Voilà. Et donc, excuse-moi, la ville, en ce moment, elle s'amuse pas mal à changer le temps d'extinction des feux, on va dire. Ça dépend des quartiers. Par exemple, dans mon quartier, ça s'éteint plus toute la nuit, je crois. Ah si, attends."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4126.4,
+   "end": 4126.7,
+   "text": "attends."
+  },
+  {
+   "speaker": "witness",
+   "start": 4128.1,
+   "end": 4158.1,
+   "text": "Est-ce qu'ils ont cassé le lampadaire devant chez moi ? je ne sais pas. Mais en tout cas, il y a une semaine encore, il essaie allumé toute la nuit, mais cet été, ça s'éteignait à 23h. c'est sûr. Et donc, autour du parc, il y a bien la zone industrielle derrière qui reste éclairée toute la nuit, mais c'est un peu plus loin. Bon, ce n'est pas très loin, mais voilà. Il y a quand même un bon 200, 200, 250 mètres, ça dépend dans quelle direction on part, mais voilà."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4160.8,
+   "end": 4165.0,
+   "text": "attends, mais justement, est-ce qu'elle dégage une légère lueur"
+  },
+  {
+   "speaker": "witness",
+   "start": 4163.7,
+   "end": 4166.1,
+   "text": "oui,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4165.0,
+   "end": 4165.9,
+   "text": "au sud ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 4166.8,
+   "end": 4171.1,
+   "text": "c'est pour ça que je t'en parle, mais bon, c'est..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4171.3,
+   "end": 4175.0,
+   "text": "il y a un peu de circulation de l'autoroute ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 4176.1,
+   "end": 4177.8,
+   "text": "Oui, tu sais, je t'en avais parlé,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4178.1,
+   "end": 4178.7,
+   "text": "Oui, oui."
+  },
+  {
+   "speaker": "witness",
+   "start": 4179.4,
+   "end": 4198.3,
+   "text": "mais il y a... je ne crois pas qu'il y ait d'éclairage particulièrement sur cette portion. Il n'y en a pas, il me semble. Oui, il y a un petit bruit diffus régulier, mais à cette heure-là, c'est surtout quelques poids lourds qui passent, en fait, il y a beaucoup moins de trafic."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4198.7,
+   "end": 4213.9,
+   "text": "et la hauteur de la lisière, tu l'estimerais à combien, toujours avec la technique des points tenus à bout de bras qui font 10 degrés ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 4213.7,
+   "end": 4214.9,
+   "text": "la lisière côté sud."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4215.2,
+   "end": 4215.4,
+   "text": "Oui."
+  },
+  {
+   "speaker": "witness",
+   "start": 4216.5,
+   "end": 4238.2,
+   "text": "Alors, c'est ce que je te disais, alors cette lisière, elle me hante, parce que c'est la deuxième observation où j'ai affaire à cette lisière. Tu as été plus précis que moi, parce que du coup, tu t'es référé à... j'imagine au Street View, ou en tout cas aux données. Ah oui,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4234.6,
+   "end": 4236.9,
+   "text": "de hauteur des arbres. C'est pour ça que je t'ai parlé de l'arbre."
+  },
+  {
+   "speaker": "witness",
+   "start": 4238.2,
+   "end": 4281.9,
+   "text": "bien sûr. Ça correspond à ce que tu as retrouvé. C'est vrai que les arbres sont à 40 mètres. Et il me semble qu'en fait, il y a une autre couche d'arbres, parce que, en fait, tu as une première rangée d'arbres là, et puis tu as d'autres rangées derrière, et puis tu as des rangées qui partent dans cette direction aussi. Parce qu'il y a un champ de pommiers en fait, qui est entouré de bocages, donc avec ces fameux arbres. Mais, voilà, les degrés, c'est... Ouais, c'est... Il me semble 15 degrés. 20 degrés max, ouais, ouais. C'est pas..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4280.4,
+   "end": 4280.8,
+   "text": "Deux points."
+  },
+  {
+   "speaker": "witness",
+   "start": 4281.9,
+   "end": 4286.3,
+   "text": "Ouais, 2,5 je dirais, mais de toute façon, je vais aller faire les photos."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4286.8,
+   "end": 4287.3,
+   "text": "Ok, ok."
+  },
+  {
+   "speaker": "witness",
+   "start": 4288.1,
+   "end": 4300.4,
+   "text": "C'est promis. Oui,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4294.0,
+   "end": 4300.2,
+   "text": "Ah oui, tu avais mis un lien pour faire des photos sur un drive ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 4300.6,
+   "end": 4309.1,
+   "text": "c'est la RR5. Ouais, c'est la RR5 de 2015 où il y avait eu une enquête d'OVNI Langda, quoi,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4309.3,
+   "end": 4310.1,
+   "text": "D'accord, ok, ok."
+  },
+  {
+   "speaker": "witness",
+   "start": 4310.4,
+   "end": 4311.0,
+   "text": "d'effectuer."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4312.2,
+   "end": 4313.6,
+   "text": "Je vais rester sur ce cas-là."
+  },
+  {
+   "speaker": "witness",
+   "start": 4313.9,
+   "end": 4317.7,
+   "text": "Oui, bien sûr. Bien sûr, c'était comme ça ce que j'en avais parlé."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4318.2,
+   "end": 4325.1,
+   "text": "Oui, oui, ok, d'accord. Ok, super."
+  },
+  {
+   "speaker": "witness",
+   "start": 4324.3,
+   "end": 4324.5,
+   "text": "Donc..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4326.0,
+   "end": 4344.5,
+   "text": "Si t'as eu l'occasion d'avoir la photo de la lisière qui m'attendait de tout ceci. Bon, écoute, c'est bien. Donc, tu m'as dit que tu comptes... Dans ton mail, tu disais qu'il faut"
+  },
+  {
+   "speaker": "witness",
+   "start": 4343.9,
+   "end": 4351.8,
+   "text": "Oui,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4344.5,
+   "end": 4349.0,
+   "text": "en fournir une version à plat du phénomène."
+  },
+  {
+   "speaker": "witness",
+   "start": 4351.8,
+   "end": 4374.2,
+   "text": "oui, oui, oui, ouais, ben oui. c'est important pour que tu puisses faire correctement la reconstitution. Si tu veux coller le... le... la reproduction qui sera plus qu'un croquis, parce que là, je t'ai fait un croquis assez amélioré, on va dire. mais bon, j'ai eu fait du Photoshop un certain temps, à l'époque."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4374.4,
+   "end": 4376.1,
+   "text": "Franchement, je le trouve très bien ton croquis."
+  },
+  {
+   "speaker": "witness",
+   "start": 4377.3,
+   "end": 4380.8,
+   "text": "c'est du paint, hein, il ne faut pas..."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4379.2,
+   "end": 4380.7,
+   "text": "Franchement, je ne l'aurais pas dit. Du paint,"
+  },
+  {
+   "speaker": "witness",
+   "start": 4380.8,
+   "end": 4387.0,
+   "text": "Alors, c'est vraiment du paint, mais j'ai pris la bombe et le pinceau. Ouais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4387.1,
+   "end": 4388.0,
+   "text": "tu as pris l'aérographe."
+  },
+  {
+   "speaker": "witness",
+   "start": 4388.7,
+   "end": 4413.7,
+   "text": "C'est ça, c'est ça, l'aérograph, bien joué. Alors bon, je tiens à te préciser quand même, je dessine depuis que je suis tout petit, j'ai fait un peu des beaux-arts, mais pas à la vraie école, enfin, c'est la vraie école, mais en extrascolaire. Donc, les arts, ça me connaît, un petit peu quand même. Et puis, j'ai fait du graffiti, du street art pendant une bonne dizaine d'années. Donc, les dégradés, ça me connaît. Voilà, c'est pour ça, l'aérographe."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4415.9,
+   "end": 4425.2,
+   "text": "je vais voir. Bon, très bien. Je vais essayer déjà dans un premier temps d'affiner un peu la reconstruction."
+  },
+  {
+   "speaker": "witness",
+   "start": 4427.5,
+   "end": 4454.6,
+   "text": "Hmm."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4428.0,
+   "end": 4453.2,
+   "text": "Mais bon, je pense que ça ne sera pas encore, ne sera pas satisfaisant. Je n'aurai pas exploité d'autres éléments qu'il pourra fournir comme une photo ou autre. et le croquis, enfin, le dessin à plate, tout. Est-ce que, donc là, pour l'instant, tu vois, le truc, je l'ai publié en anonyme, j'ai juste mis cube B pour repérer de quel cas il s'agit."
+  },
+  {
+   "speaker": "witness",
+   "start": 4454.6,
+   "end": 4454.7,
+   "text": "Hmm."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4454.8,
+   "end": 4458.1,
+   "text": "Est-ce que tu veux qu'on reste comme ça ? Est-ce que tu veux"
+  },
+  {
+   "speaker": "witness",
+   "start": 4457.5,
+   "end": 4472.6,
+   "text": "Je dirais que ça va dépendre du réalisme,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4458.1,
+   "end": 4468.9,
+   "text": "qu'on mette ton nom ? Est-ce que tu veux rien mettre ? Tu veux qu'on retire la simulation ? Est-ce que tu as une exigence particulière là-dessus ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 4472.7,
+   "end": 4491.2,
+   "text": "du niveau de fidélité. Donc, c'est vraiment pas contre toi. Mais, c'est vrai que, ton site là, voilà, UFO Atom, excuse-moi, ça fait un moment que tu l'as, que tu le tiens, je crois,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4491.0,
+   "end": 4492.2,
+   "text": "je crois, non ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 4491.3,
+   "end": 4493.4,
+   "text": "non ?"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4492.2,
+   "end": 4493.6,
+   "text": "Non, j'ai commencé à..."
+  },
+  {
+   "speaker": "witness",
+   "start": 4493.4,
+   "end": 4506.5,
+   "text": "à l'époque,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4493.6,
+   "end": 4505.6,
+   "text": "Enfin, le projet, il date, oui, de longtemps, mais il a été arrêté. J'ai une idée date de 2003, mais il a été arrêté assez rapidement parce que c'est compliqué à faire."
+  },
+  {
+   "speaker": "witness",
+   "start": 4506.5,
+   "end": 4506.8,
+   "text": "à l'époque, à l'époque, ouais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4506.9,
+   "end": 4508.4,
+   "text": "avec l'IA, c'est beaucoup plus facile."
+  },
+  {
+   "speaker": "witness",
+   "start": 4509.2,
+   "end": 4509.5,
+   "text": "Hmm."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4510.0,
+   "end": 4513.5,
+   "text": "Et donc, je l'ai repris. il y a un mois."
+  },
+  {
+   "speaker": "witness",
+   "start": 4514.7,
+   "end": 4523.1,
+   "text": "D'accord, d'accord. Non, parce que, il me semble que la reconstitution, de Maurice Mass, notamment, je l'avais déjà vue, il y a un petit moment en arrière."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4524.8,
+   "end": 4528.1,
+   "text": "tu sais, le cas de Valensolle, tu le vois un peu partout."
+  },
+  {
+   "speaker": "witness",
+   "start": 4529.0,
+   "end": 4530.1,
+   "text": "Non, mais sur ton site, hein."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4530.1,
+   "end": 4531.0,
+   "text": "non ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 4531.0,
+   "end": 4533.9,
+   "text": "Sur ton site, non ?"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4533.3,
+   "end": 4534.3,
+   "text": "Il y a peut-être des photos,"
+  },
+  {
+   "speaker": "witness",
+   "start": 4533.9,
+   "end": 4549.4,
+   "text": "Ah bon ?"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4534.4,
+   "end": 4547.5,
+   "text": "mais il n'y avait pas de... Je l'ai ajouté au dossier, c'est-à-dire, si tu vas maintenant sur un zéro plus de Valensolle, tu vas l'avoir, mais je l'ai ajouté le mois dernier."
+  },
+  {
+   "speaker": "witness",
+   "start": 4549.4,
+   "end": 4550.9,
+   "text": "Mais ça fait longtemps que tu l'avais fait,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4552.3,
+   "end": 4553.4,
+   "text": "C'est quoi ? La reconstitution ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 4553.7,
+   "end": 4572.7,
+   "text": "j'ai un bug graphique chez moi, je ne vois pas du tout ça comme ça, il faut que tu le vois, c'est complètement bugué de mon côté. Ouais, ouais, je t'assure. Et pas que de mon côté, parce que mon ami est allé vérifier aussi. Donc nous, en fait, les champs ici, on les voit comme des montagnes, c'est du grand n'importe quoi. C'est comme si on se tenait sous les champs, en fait. Limite."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4572.6,
+   "end": 4573.8,
+   "text": "Ah oui ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 4573.9,
+   "end": 4578.5,
+   "text": "Ouais, ouais, je suis sur Firefox Windows 10."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4575.3,
+   "end": 4580.2,
+   "text": "Tu étais sous Windows ? ça m'intéresse."
+  },
+  {
+   "speaker": "witness",
+   "start": 4580.8,
+   "end": 4594.9,
+   "text": "Ouais, alors, excuse-moi, je te posais ces questions, parce que, j'ai rencontré Gilles Thomas, ça fait un moment, excuse-moi, en 2009, je crois, c'est ça, 2009,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4594.4,
+   "end": 4595.7,
+   "text": "2009 ?"
+  },
+  {
+   "speaker": "witness",
+   "start": 4595.7,
+   "end": 4642.9,
+   "text": "un truc comme ça, bon. Et puis, et le saut d'ailleurs, vers 2010, 2011, je crois, de mémoire, je suis allé leur rendre visite avec Gilles, à cette époque, ils étaient encore, sur Paris, tu sais, le QG. et donc, oui, effectivement, je les avais rencontrés dans le cadre de mon observation de 2007, où j'ai pu voir une orbe lumineuse faire comme des zigzags dans le ciel. Bon, c'est un peu plus compliqué, mais là, je résume. Et alors, Gilles m'avait parlé de quelqu'un qui faisait des reconstitutions, il me semble qu'il parlait de toi. t'avais fait d'autres reconstitutions."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4636.9,
+   "end": 4645.4,
+   "text": "Peut-être, oui, oui, mais à l'époque, c'était... Oui, oui, j'avais fait une version beaucoup plus embryonnée,"
+  },
+  {
+   "speaker": "witness",
+   "start": 4646.5,
+   "end": 4655.3,
+   "text": "je vois, je vois là la différence, je me souviens de l'ancienne version. D'accord. Donc, oui, c'est bien ton travail que j'avais vu à l'époque."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4655.8,
+   "end": 4663.4,
+   "text": "D'accord, Oui, d'accord. Oui, j'ai fait une appelette qui était assez primaire. J'ai eu des formes."
+  },
+  {
+   "speaker": "witness",
+   "start": 4664.0,
+   "end": 4672.9,
+   "text": "Ah oui, c'est respectable ce que t'as fait, parce que je te promets, le rendu de mon côté, c'était pas du tout ça. Si tu veux, je pourrais te montrer là, juste après."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4673.1,
+   "end": 4676.4,
+   "text": "Oui, si tu peux transmettre une copie d'écran."
+  },
+  {
+   "speaker": "witness",
+   "start": 4677.5,
+   "end": 4686.4,
+   "text": "Oui, après, si tu veux, je te ferai un partage d'écran, carrément, quand on aura fini. Mais, enfin, est-ce qu'on a fini d'ailleurs ? Est-ce qu'il te manque pas des données ?"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4686.3,
+   "end": 4693.5,
+   "text": "Presque, oui, je t'ai demandé"
+  },
+  {
+   "speaker": "witness",
+   "start": 4694.4,
+   "end": 4697.9,
+   "text": "Les photos, tu pourras les superposer sur la reconstitution ?"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4697.8,
+   "end": 4698.9,
+   "text": "Oui, oui, tu peux."
+  },
+  {
+   "speaker": "witness",
+   "start": 4699.3,
+   "end": 4701.9,
+   "text": "génial. Bon, bah, alors, je vais te les envoyer le plus vite possible."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4702.4,
+   "end": 4703.8,
+   "text": "Par exemple, si tu prends le..."
+  },
+  {
+   "speaker": "witness",
+   "start": 4703.6,
+   "end": 4742.1,
+   "text": "Et pour le non, je t'ai pas répondu, oui. Alors, moi, de base, je suis un témoin qui comprend, en tant que nouvel enquêteur, entre guillemets, je me considère pas enquêteur, mais en tout cas, analyste, chercheur, tout ce que tu veux. Je pense que c'est mieux de pas être anonyme. Parce que, il y a trop de gens qui vivent des choses aussi perturbantes que ce que j'ai pu vivre, qui, eux, restent anonymes. Et donc, ça génère, chez les personnes qui n'ont jamais rien vécu, un doute sur la véracité, en fait, des récits. Parce que les gens ne comprennent pas pourquoi on resterait anonyme,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4742.3,
+   "end": 4742.5,
+   "text": "Oui,"
+  },
+  {
+   "speaker": "witness",
+   "start": 4742.5,
+   "end": 4832.5,
+   "redacted": {
+    "reason": {
+     "fr": "Vie privée (parcours personnel, famille, tiers nommés).",
+     "en": "Private life (personal background, family, named third parties)."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4832.3,
+   "end": 4832.5,
+   "redacted": {
+    "reason": {
+     "fr": "Vie privée (parcours personnel, famille, tiers nommés).",
+     "en": "Private life (personal background, family, named third parties)."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 4833.5,
+   "end": 4878.2,
+   "redacted": {
+    "reason": {
+     "fr": "Vie privée (parcours personnel, famille, tiers nommés).",
+     "en": "Private life (personal background, family, named third parties)."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4877.8,
+   "end": 4878.2,
+   "redacted": {
+    "reason": {
+     "fr": "Vie privée (parcours personnel, famille, tiers nommés).",
+     "en": "Private life (personal background, family, named third parties)."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 4880.1,
+   "end": 4883.3,
+   "redacted": {
+    "reason": {
+     "fr": "Vie privée (parcours personnel, famille, tiers nommés).",
+     "en": "Private life (personal background, family, named third parties)."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4887.2,
+   "end": 4894.6,
+   "text": "Oui, donc, je vais juste te montrer ce que ça donnerait à une surimpression de photo. En fait, on peut positionner une photo, tu vois, en surimpression"
+  },
+  {
+   "speaker": "witness",
+   "start": 4897.4,
+   "end": 4897.8,
+   "text": "ouais, ouais, ouais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4898.7,
+   "end": 4909.0,
+   "text": "le rendu 3D avec ce que donne la photo pour être sûr que le rendu est correct et fidèle. Donc là, c'était sur une photo historique de Cusac, mais tu peux aussi..."
+  },
+  {
+   "speaker": "witness",
+   "start": 4908.8,
+   "end": 4909.3,
+   "text": "C'est pas mal."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4910.0,
+   "end": 4911.0,
+   "text": "T'as bien aussi,"
+  },
+  {
+   "speaker": "witness",
+   "start": 4910.2,
+   "end": 4910.6,
+   "text": "Pas mal."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4911.2,
+   "end": 4939.9,
+   "redacted": {
+    "reason": {
+     "fr": "Vie privée (parcours personnel, famille, tiers nommés).",
+     "en": "Private life (personal background, family, named third parties)."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 4941.0,
+   "end": 4941.1,
+   "text": "D'accord."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4942.6,
+   "end": 4943.2,
+   "text": "pareil."
+  },
+  {
+   "speaker": "witness",
+   "start": 4944.9,
+   "end": 4950.7,
+   "text": "oui, ouais. Donc là, dans la photo, tu as incrusté l'objet rajouté."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4950.8,
+   "end": 4951.2,
+   "text": "Ouais, ouais."
+  },
+  {
+   "speaker": "witness",
+   "start": 4952.3,
+   "end": 4961.3,
+   "text": "mais c'est bien fait. D'accord. Donc, oui, il y a plus."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4961.4,
+   "end": 4962.5,
+   "text": "si tu fournis des photos."
+  },
+  {
+   "speaker": "witness",
+   "start": 4963.1,
+   "end": 4965.3,
+   "text": "oui, je vais te donner ça."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4965.3,
+   "end": 4967.0,
+   "text": "et donc je retiens"
+  },
+  {
+   "speaker": "witness",
+   "start": 4965.4,
+   "end": 4976.7,
+   "text": "bon,"
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4967.0,
+   "end": 4975.9,
+   "text": "que toi, tu penses que c'est mieux d'assumer ton témoignage en donnant ton nom et montrer"
+  },
+  {
+   "speaker": "witness",
+   "start": 4976.7,
+   "end": 4984.7,
+   "text": "bon, écoute, si tu me mets à côté de Maurice Mas, je peux pas dire non. Franchement."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 4986.0,
+   "end": 4989.1,
+   "text": "d'être un témoin, mais c'est juste que..."
+  },
+  {
+   "speaker": "witness",
+   "start": 4988.9,
+   "end": 5081.5,
+   "text": "Non, mais je dis ça pour, un peu pour rigoler, mais en soi, je rigole pas du tout. Je pense que ce qu'a vécu Maurice Mas, c'était vrai. j'y croyais pas avant. Mais, j'avais un doute quand même, tu vois, par rapport à cette histoire, au fait que le monsieur, tout le village, c'est un peu retourné compte lui, etc. c'est un petit peu ce que j'ai vécu, quelque part, tu vois, depuis 2007, sur internet notamment. Parce que, bon, comme je te l'ai dit, j'en ai quand même relativement parlé ouvertement, sans couvert d'anonymat. Donc, oui, oui, je pense que c'est plus sain. Et puis, bon, c'est pas pour me mettre en valeur ou quoi, mais c'est vrai que, j'ai même plus en tête le nombre d'observations que j'ai, en fait. Je peux compter, bien sûr, mais là, je ne vais pas le faire tout de suite. Et puis, j'ai vu plus de cinq reprises des phénomènes où j'étais accompagné, en fait. Je n'étais pas le seul témoin, et malheureusement, nos témoignages se corroborent sans influencer les personnes tierces. que c'est pas malheureux, mais je veux dire par là que c'est malheureux pour les sceptiques."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5082.4,
+   "end": 5082.9,
+   "text": "Ah, ok."
+  },
+  {
+   "speaker": "witness",
+   "start": 5085.7,
+   "end": 5198.8,
+   "text": "moi-même, j'aimerais que tout ce qui me soit arrivé, peut-être que c'était des méprises, mais c'est tellement gros, c'est tellement là, c'est tellement à la fois surréaliste et réaliste, que je ne peux pas rester muet dans le silence et me terrer et ne pas en parler, en fait. Parce que j'estime que ça concerne l'humanité tout entière, et que donc, c'est un peu, je ne dirais pas un devoir, mais un peu quand même une forme de responsabilité, de dire ok, sans blague, sans rigoler, sans vouloir être populaire, je pense qu'effectivement, ce que j'ai vécu était vrai, était réel, et que donc, les personnes qui sont dans ce type de situation, comme apparemment, Maurice Mass, ont dit la vérité. Et c'est ça le problème, tu vois, c'est pour moi, depuis que je m'intéresse à l'ufologie, j'ai cette sensation que, en fait, ça arrange bien tout le monde de croire qu'on mentirait. bon, je suis une personne qui a drastiquement horreur de l'injustice, donc, il y a déjà ce premier point, je ne peux pas me faire, ce n'est pas que je veux me faire justice, mais je ne veux pas qu'on me fasse de l'injustice, déjà, personnellement, et au-delà de ma personne, du coup, en découvrant tous ces témoignages, tous ces témoins, tous ces cas, en fait, dont certains sont très bien documentés, comme tu sais bien ce qui est sorti, par exemple, aux Etats-Unis, ces derniers temps, autour de la Navy, etc., pour moi, c'est évident qu'il se passe quelque chose et que ces gens ont dit la vérité. Voilà."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5200.2,
+   "end": 5202.9,
+   "text": "Mais écoute, ça va faire partie de la transcription."
+  },
+  {
+   "speaker": "witness",
+   "start": 5202.6,
+   "end": 5205.6,
+   "text": "ouais. Ouais."
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5206.9,
+   "end": 5232.6,
+   "text": "Bon, on va s'arrêter là si ça te va. Moi, je vais arrêter. Déjà, merci beaucoup pour tous ces détails y compris pour ce que on n'a pas réussi à simuler pour l'instant. Donc, comme je te dis, la prochaine version sera à la même adresse. Je vais essayer d'affiner ce que je peux pour l'instant. Et puis, écoute, je vais arrêter"
+  },
+  {
+   "speaker": "witness",
+   "start": 5232.6,
+   "end": 5236.9,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5232.6,
+   "end": 5237.6,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5238.5,
+   "end": 5246.8,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5247.5,
+   "end": 5248.3,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5247.8,
+   "end": 5253.3,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5248.6,
+   "end": 5256.1,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5256.7,
+   "end": 5274.7,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5273.5,
+   "end": 5277.9,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5277.8,
+   "end": 5295.5,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5278.2,
+   "end": 5291.1,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5295.6,
+   "end": 5311.8,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5308.3,
+   "end": 5310.8,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5312.0,
+   "end": 5326.8,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5319.7,
+   "end": 5326.1,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5326.9,
+   "end": 5330.0,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5331.2,
+   "end": 5344.0,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5344.2,
+   "end": 5355.3,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5354.4,
+   "end": 5356.1,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5355.3,
+   "end": 5355.8,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5356.1,
+   "end": 5357.5,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5357.3,
+   "end": 5357.9,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5358.5,
+   "end": 5361.0,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5359.7,
+   "end": 5360.2,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5361.2,
+   "end": 5368.3,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5371.5,
+   "end": 5411.0,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5400.4,
+   "end": 5409.9,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5411.0,
+   "end": 5413.5,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5411.5,
+   "end": 5414.1,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5413.5,
+   "end": 5420.9,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5414.1,
+   "end": 5418.4,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5420.9,
+   "end": 5424.6,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5423.0,
+   "end": 5423.5,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5424.7,
+   "end": 5466.7,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5468.8,
+   "end": 5469.3,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5469.1,
+   "end": 5481.3,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5483.4,
+   "end": 5485.5,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5486.1,
+   "end": 5487.1,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5486.2,
+   "end": 5486.3,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5487.2,
+   "end": 5487.6,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5487.7,
+   "end": 5494.6,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5496.2,
+   "end": 5500.1,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5500.8,
+   "end": 5509.9,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5509.7,
+   "end": 5546.5,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5546.6,
+   "end": 5547.7,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5546.6,
+   "end": 5566.2,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5567.4,
+   "end": 5567.9,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5569.0,
+   "end": 5571.1,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5571.0,
+   "end": 5571.9,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5571.8,
+   "end": 5572.5,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5573.2,
+   "end": 5574.2,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5575.5,
+   "end": 5578.8,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5579.0,
+   "end": 5586.3,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5587.9,
+   "end": 5597.4,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5597.9,
+   "end": 5600.0,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5601.1,
+   "end": 5601.8,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5602.2,
+   "end": 5602.8,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5602.2,
+   "end": 5604.5,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5602.9,
+   "end": 5603.0,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "witness",
+   "start": 5604.6,
+   "end": 5610.5,
+   "redacted": {
+    "reason": {
+     "fr": "Détails permettant d'identifier le témoin (anonymat, lieu de vie) et fin de l'appel.",
+     "en": "Details that would identify the witness (anonymity, where he lives) and the end of the call."
+    }
+   }
+  },
+  {
+   "speaker": "interviewer",
+   "start": 5610.8,
+   "end": 5612.0,
+   "text": "Merci, bonne soirée."
+  }
+ ]
+}

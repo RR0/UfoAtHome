@@ -15,12 +15,53 @@ export interface InterviewSpeaker {
   of?: string
 }
 
-/** One turn of speech: one speaker, from `start` to `end` seconds after the beginning of the recording, and what was said. */
+/**
+ * A place in the interview that points at a moment of the observation it is about: a part of what was said (`range`, as character offsets
+ * in the segment's `text`, the whole segment when omitted) that tells of what happened `at` that moment. A player can follow it to show the
+ * observation then, and an observation can list, at that moment, the passages of the interview that tell of it.
+ */
+export interface InterviewSightingRef {
+  /** The `id` of the sighting event of the case; the interview's own `interviewOf` when omitted. */
+  sighting?: string
+  /** Seconds since the beginning of the observation. */
+  at: number
+  /** The part of the segment's text it is about, as `[from, to)` character offsets. */
+  range?: [number, number]
+}
+
+/** Why a passage was taken out of a published interview. */
+export interface InterviewRedaction {
+  /** Why, in the languages it has: what kind of passage (private life, identifying detail, small talk, recognition error). */
+  reason: SaidText
+}
+
+/**
+ * One turn of speech: one speaker, from `start` to `end` seconds after the beginning of the recording, and what was said.
+ *
+ * A passage taken out of the published file keeps its place (speaker and times) but loses its `text`, and says why in `redacted`: a reader can
+ * show it as blacked out rather than hide that it existed.
+ */
 export interface InterviewSegment {
   speaker: string
   start: number
   end: number
-  text: string
+  text?: string
+  redacted?: InterviewRedaction
+  /** The moments of the observation this passage tells of. */
+  refs?: InterviewSightingRef[]
+}
+
+/**
+ * Whether a participant has approved the transcript as it is published.
+ * `pending`: not asked or not answered. `approved`: read and approved. `covered`: approved through a FULLER version, since a file that holds
+ * less than one they approved (passages removed, nothing added) needs no new approval; `coveredBy` says which one (its `id`).
+ */
+export interface InterviewProofreading {
+  status: "pending" | "approved" | "covered"
+  /** When, as RR0 writes a time. */
+  date?: string
+  /** For `covered`: the `id` of the fuller version they approved. */
+  coveredBy?: string
 }
 
 /**
@@ -54,7 +95,12 @@ export interface InterviewJson {
   /** What it established, in the languages it has. */
   summary?: SaidText
   speakers: Record<string, InterviewSpeaker>
-  transcription?: { method?: "automatic" | "manual", engine?: string, proofread?: boolean, note?: string }
+  transcription?: { method?: "automatic" | "manual", engine?: string, note?: string }
+  /**
+   * Who approved the transcript, by speaker id. The transcript is proofread when EVERY speaker has (see InterviewFile.isProofread); a
+   * speaker not listed has not.
+   */
+  proofreading?: Record<string, InterviewProofreading>
   /** What was taken out to anonymise it, and what stands in its place. */
   anonymization?: { replaced?: string[], marker?: string }
   segments: InterviewSegment[]
@@ -62,6 +108,15 @@ export interface InterviewJson {
 
 /** Reading an interview transcript. */
 export class InterviewFile {
+
+  /** True when every speaker has approved the transcript (`approved`, or `covered` by a fuller version they approved). */
+  static isProofread(json: InterviewJson): boolean {
+    const ids = Object.keys(json.speakers)
+    return ids.length > 0 && ids.every(id => {
+      const status = json.proofreading?.[id]?.status
+      return status === "approved" || status === "covered"
+    })
+  }
 
   /** How a speaker is named in a subtitle: the witness's title, else the interviewer's agent, else the role. */
   static speakerName(json: InterviewJson, id: string): string {
@@ -88,7 +143,7 @@ export class InterviewFile {
     const cues = json.segments.map((segment, index) => {
       const next = json.segments[index + 1]
       const end = next && next.start < segment.end ? Math.max(segment.start, next.start) : segment.end
-      return `${InterviewFile.stamp(segment.start)} --> ${InterviewFile.stamp(end)}\n<v ${escape(InterviewFile.speakerName(json, segment.speaker))}>${escape(segment.text)}`
+      return `${InterviewFile.stamp(segment.start)} --> ${InterviewFile.stamp(end)}\n<v ${escape(InterviewFile.speakerName(json, segment.speaker))}>${segment.redacted ? "[…]" : escape(segment.text ?? "")}`
     })
     return `WEBVTT\n\n${cues.join("\n\n")}\n`
   }

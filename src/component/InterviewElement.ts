@@ -353,7 +353,7 @@ export class InterviewElement extends HTMLElement {
   private static readonly SHARED = ["title", "time", "medium", "by", "interviewOf", "summary"] as const
 
   /** The order a file reads best in: what the interview is, then who speaks, then what was said. Whatever else it holds follows. */
-  private static readonly ORDER = ["version", "id", "language", "title", "time", "medium", "by", "interviewOf", "summary", "speakers", "transcription", "anonymization", "segments"]
+  private static readonly ORDER = ["version", "id", "language", "title", "time", "medium", "by", "interviewOf", "summary", "speakers", "transcription", "proofreading", "anonymization", "segments"]
 
   private static ordered(json: Record<string, unknown>): Record<string, unknown> {
     const ordered: Record<string, unknown> = {}
