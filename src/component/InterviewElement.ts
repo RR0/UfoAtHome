@@ -9,6 +9,7 @@ import { interviewMessages_en } from "./messages/InterviewMessages_en.js"
 import { INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import { InterviewFile } from "../engine/persistence/interviewJson.js"
 import type { InterviewJson, InterviewSightingRef } from "../engine/persistence/interviewJson.js"
+import { PlayerIcons } from "./PlayerIcons.js"
 
 export const INTERVIEW_ELEMENT_NAME = "rr0-interview"
 
@@ -40,7 +41,8 @@ rr0-interview .bar::after { content: attr(data-tip); display: none; position: ab
 rr0-interview .bar:hover::after, rr0-interview .bar:focus::after { display: block; }
 rr0-interview .turn .refs { display: flex; flex-wrap: wrap; gap: .25em; }
 rr0-interview .turn .ref { font: inherit; font-size: .8em; cursor: pointer; border: 1px solid var(--rr0-interview-line); border-radius: 999px; background: transparent; color: inherit;
-  padding: 0 .35em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  padding: 0 .35em; font-variant-numeric: tabular-nums; white-space: nowrap; display: inline-flex; align-items: center; gap: .15em; }
+rr0-interview .turn .ref svg { width: 1.1em; height: 1.1em; }
 `
 
 /** What a player of the observation offers to be followed to a moment of it (see SightingElement.seekTo). */
@@ -305,7 +307,9 @@ export class InterviewElement extends HTMLElement {
           const button = document.createElement("button")
           button.type = "button"
           button.className = "ref"
-          button.textContent = `↗ ${InterviewFile.clock(ref.at, true)}`
+          // Played from that moment: the player's own play icon, then the moment.
+          button.innerHTML = PlayerIcons.PLAY
+          button.append(InterviewFile.clock(ref.at, true))
           button.addEventListener("click", () => this.seek(ref))
           refs.append(button)
         }

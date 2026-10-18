@@ -117,6 +117,9 @@ describe("InterviewElement", () => {
     const element = await make({ src: "https://example.org/time/interview.json", player: "player" })
     const told: unknown[] = []
     element.addEventListener(INTERVIEW_SEEK_EVENT, event => told.push((event as CustomEvent).detail))
+    // Played from that moment, as the player's own play button says.
+    expect(element.querySelector(".ref svg")).not.toBeNull()
+    expect(element.querySelector(".ref")!.textContent).toBe("00:12.0")
     element.querySelector<HTMLButtonElement>(".ref")!.click()
     expect(told).toEqual([{ sighting: "jv", at: 12 }])
     expect(seeks).toEqual([[12, "jv"]])

@@ -23,6 +23,7 @@ import { caseEditorMessages_en } from "./messages/CaseEditorMessages_en.js"
 import { loadCaseEditorMessages, loadSightingEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { InputFont } from "./InputFont.js"
+import { PlayerIcons } from "./PlayerIcons.js"
 
 export const CASE_EDITOR_ELEMENT_NAME = "rr0-case-editor"
 
@@ -53,7 +54,8 @@ const TEMPLATE = `
   .passages ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .2em; }
   .passages li { display: flex; gap: .5em; align-items: baseline; }
   .passages button { font: inherit; cursor: pointer; }
-  .passages .at { font-variant-numeric: tabular-nums; padding: .1em .35em; text-align: left; white-space: nowrap; flex: none; }
+  .passages .at { font-variant-numeric: tabular-nums; padding: .1em .35em; text-align: left; white-space: nowrap; flex: none; display: inline-flex; align-items: center; gap: .15em; }
+  .passages .at svg { width: 1.1em; height: 1.1em; }
   .passages .excerpt { border: 0; background: none; padding: 0; text-align: left; color: LinkText; text-decoration: underline; }
   .recording.in-case, #interview-section.in-case { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .5em .7em .7em; }
   /* Tabs as the recording's editor has them (see sightingEditorTemplate): a strip on one baseline, the open tab raised and joined to its panel. */
@@ -737,7 +739,8 @@ export class CaseEditorElement extends HTMLElement {
       const at = document.createElement("button")
       at.type = "button"
       at.className = "at"
-      at.textContent = `▶ ${InterviewFile.clock(passage.at, true)}`
+      at.innerHTML = PlayerIcons.PLAY
+      at.append(InterviewFile.clock(passage.at, true))
       at.addEventListener("click", () => this.editor.seekTo(passage.at))
       // The quotation is the link: to the passage, in the interview it is from, which the tooltip names ("Reported in Interview of Q. B.").
       const link = document.createElement("button")

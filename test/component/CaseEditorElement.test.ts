@@ -699,7 +699,9 @@ describe("CaseEditorElement's events", () => {
     expect(root.getElementById("passages")!.hidden).toBe(false)
     const items = [...root.querySelectorAll("#passages-list li")]
     expect(items).toHaveLength(1)
-    expect(items[0].querySelector(".at")!.textContent).toBe("▶ 00:00.5")
+    // The player's own play icon, then the moment.
+    expect(items[0].querySelector(".at")!.textContent).toBe("00:00.5")
+    expect(items[0].querySelector(".at svg")).not.toBeNull()
     // The quotation is the link, and names the interview it is from.
     expect(items[0].querySelectorAll("button")).toHaveLength(2)
     expect(items[0].querySelector(".excerpt")!.textContent).toContain("It reached the zenith at once.")
