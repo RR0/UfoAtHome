@@ -3,7 +3,6 @@ import type { PageMeta, Said, SiteLanguage } from "../SitePage.js"
 
 /** What the page says, in one language: the markup around it is written once, in `render`. */
 interface InterviewDocText {
-  lede: string
   intro: string
   /** What an interview is, said as the investigation knows it before any file is mentioned. */
   concept: string
@@ -82,8 +81,8 @@ export class DocsInterviewPage extends DocsSection {
 
   readonly meta: PageMeta = {
     slug: "docs/interview",
-    navLabel: { en: "The interview file", fr: "Le fichier d'interview", es: "El archivo de entrevista", it: "Il file di intervista" },
-    title: { en: "The interview file", fr: "Le fichier d'interview", es: "El archivo de entrevista", it: "Il file di intervista" },
+    navLabel: { en: "Interviews", fr: "Les interviews", es: "Las entrevistas", it: "Le interviste" },
+    title: { en: "Interviews", fr: "Les interviews", es: "Las entrevistas", it: "Le interviste" },
     description: {
       en: "An interview of a case: the event, its transcript file, passages taken out, who approved it, its links to the observation, and how to import a transcript that is not in our format.",
       fr: "Une interview d'un dossier : l'événement, son fichier de transcription, les passages retirés, qui l'a approuvé, ses liens avec l'observation, et comment importer une transcription qui n'est pas dans notre format.",
@@ -95,7 +94,6 @@ export class DocsInterviewPage extends DocsSection {
 
   private readonly text: Said<InterviewDocText> = {
     en: {
-      lede: 'An interview is a conversation with a witness. The case keeps what it established, and may keep the transcript.',
       intro: "An investigator rarely stops at a witness's first account. They go back to the witness: to fix a figure, to ask what was not said, to check what does not add up. That conversation is an interview, and a case can hold it next to the accounts it is about.",
       concept: 'An interview is a <strong>conversation held with one or several witnesses</strong> of the case, by one or several people (an investigator, an association), at a given time and through some <strong>medium</strong>: face to face, by phone, in a video call, by chat, by email or by letter. What the case keeps of it is what it <strong>established</strong> (a short description, in as many languages as you like) and, when there is one, its <strong>transcript</strong>: who said what, and when. The transcript is what a reader can check the description against.',
       placeHeading: 'Its place in the case',
@@ -161,7 +159,6 @@ export class DocsInterviewPage extends DocsSection {
       meaning: "Meaning"
     },
     fr: {
-      lede: "Une interview est une conversation avec un témoin. Le dossier garde ce qu'elle a établi, et peut garder sa transcription.",
       intro: "Un enquêteur s'arrête rarement au premier compte rendu d'un témoin. Il revient vers lui : pour fixer une valeur, demander ce qui n'a pas été dit, vérifier ce qui ne colle pas. Cette conversation est une interview, et un dossier peut la garder à côté des comptes rendus dont elle parle.",
       concept: "Une interview est une <strong>conversation menée avec un ou plusieurs témoins</strong> du dossier, par une ou plusieurs personnes (un enquêteur, une association), à un moment donné et par un certain <strong>moyen</strong> : face à face, téléphone, visioconférence, chat, mail ou courrier. Ce que le dossier en garde, c'est ce qu'elle a <strong>établi</strong> (une courte description, dans autant de langues qu'on veut) et, quand il y en a une, sa <strong>transcription</strong> : qui a dit quoi, et quand. La transcription est ce à quoi un lecteur peut confronter la description.",
       placeHeading: 'Sa place dans le dossier',
@@ -227,7 +224,6 @@ export class DocsInterviewPage extends DocsSection {
       meaning: "Signification"
     },
     es: {
-      lede: 'Una entrevista es una conversación con un testigo. El caso conserva lo que estableció y puede conservar su transcripción.',
       intro: 'Un investigador rara vez se queda en el primer relato de un testigo. Vuelve a él: para fijar una cifra, preguntar lo que no se dijo, comprobar lo que no cuadra. Esa conversación es una entrevista, y un caso puede guardarla junto a los relatos de los que habla.',
       concept: 'Una entrevista es una <strong>conversación mantenida con uno o varios testigos</strong> del caso, por una o varias personas (un investigador, una asociación), en un momento dado y por algún <strong>medio</strong>: en persona, por teléfono, videollamada, chat, correo electrónico o carta. Lo que el caso conserva de ella es lo que <strong>estableció</strong> (una breve descripción, en tantos idiomas como se quiera) y, cuando existe, su <strong>transcripción</strong>: quién dijo qué y cuándo. La transcripción es lo que un lector puede contrastar con la descripción.',
       placeHeading: 'Su lugar en el caso',
@@ -293,7 +289,6 @@ export class DocsInterviewPage extends DocsSection {
       meaning: "Significado"
     },
     it: {
-      lede: "Un'intervista è una conversazione con un testimone. Il caso conserva ciò che ha stabilito e può conservarne la trascrizione.",
       intro: "Un investigatore raramente si ferma al primo resoconto di un testimone. Torna da lui: per fissare un valore, chiedere ciò che non è stato detto, verificare ciò che non torna. Quella conversazione è un'intervista, e un caso può conservarla accanto ai resoconti di cui parla.",
       concept: "Un'intervista è una <strong>conversazione condotta con uno o più testimoni</strong> del caso, da una o più persone (un investigatore, un'associazione), in un dato momento e con un certo <strong>mezzo</strong>: di persona, per telefono, in videochiamata, in chat, per email o per lettera. Ciò che il caso ne conserva è ciò che ha <strong>stabilito</strong> (una breve descrizione, in quante lingue si vuole) e, quando c'è, la sua <strong>trascrizione</strong>: chi ha detto che cosa e quando. La trascrizione è ciò con cui un lettore può confrontare la descrizione.",
       placeHeading: 'Il suo posto nel caso',
@@ -367,13 +362,11 @@ export class DocsInterviewPage extends DocsSection {
       <tr><th>${t.field}</th><th>${t.meaning}</th></tr>
       ${rows.map(([field, meaning]) => `<tr><td><code>${field.split(", ").join("</code>, <code>")}</code></td><td>${meaning}</td></tr>`).join("\n      ")}
     </table></div>`
-    return this.hero(language, this.meta.title, { en: t.lede, fr: t.lede, es: t.lede, it: t.lede }) + `
+    // What an interview is stands under the title as its subtitle: the page starts on who takes part.
+    const lede = `${t.concept} ${t.intro}`.replace(/<strong>/g, "<em>").replace(/<\/strong>/g, "</em>")
+    return this.hero(language, this.meta.title, { en: lede, fr: lede, es: lede, it: lede }) + `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>${t.intro}</p>
-
-    <p>${t.concept}</p>
-
     <h2>${t.peopleHeading}</h2>
     <p>${t.people}</p>
 

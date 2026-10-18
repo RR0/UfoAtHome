@@ -29,14 +29,10 @@ export class DocsFormatPage extends DocsSection {
   }
 
   private readonly lede: Said<string> = {
-    en: "An observation is what a witness reports of what they saw, and what UFO@home replays. What it is, "
-      + "then, in a technical part, what its file can hold and what each field means.",
-    fr: "Une observation est ce qu'un témoin rapporte de ce qu'il a vu, et ce qu'UFO@home rejoue. Ce qu'elle est, "
-      + "puis, dans une partie technique, ce que son fichier peut contenir et ce que veut dire chaque champ.",
-    es: "Una observación es lo que un testigo relata de lo que vio, y lo que UFO@home reproduce. Qué es, "
-      + "y luego, en una parte técnica, lo que puede contener su archivo y lo que significa cada campo.",
-    it: "Un'osservazione è ciò che un testimone riferisce di ciò che ha visto, e ciò che UFO@home riproduce. Che cos'è, "
-      + "poi, in una parte tecnica, che cosa può contenere il suo file e che cosa significa ogni campo."
+    en: "An observation is <em>what one witness reports of what they saw</em>: when, where, what it looked like, how it moved, and what the sky and the weather were. It is the event UFO@home <em>replays</em>. A <a href=\"/docs/case/\">case</a> holds at least one, and may hold others: other witnesses of the same event, each with their own account, and <a href=\"#another-reading-an-interpretation-is-another-sighting\">alternative explanations</a>, which are observations too. An observation can be referred to by <a href=\"/docs/interview/\">an interview</a> held with the witness, and refer back to it.",
+    fr: "Une observation est <em>ce qu'un témoin rapporte de ce qu'il a vu</em> : quand, où, à quoi cela ressemblait, comment cela bougeait, et ce qu'étaient le ciel et la météo. C'est l'événement qu'UFO@home <em>rejoue</em>. Un <a href=\"/docs/case/\">dossier</a> en contient au moins une, et peut en contenir d'autres : d'autres témoins du même événement, chacun avec son propre compte rendu, et des <a href=\"#another-reading-an-interpretation-is-another-sighting\">explications alternatives</a>, qui sont aussi des observations. Une observation peut être désignée par <a href=\"/docs/interview/\">une interview</a> menée avec le témoin, et y renvoyer en retour.",
+    es: "Una observación es <em>lo que un testigo relata de lo que vio</em>: cuándo, dónde, qué aspecto tenía, cómo se movía y cómo estaban el cielo y el tiempo. Es el evento que UFO@home <em>reproduce</em>. Un <a href=\"/docs/case/\">caso</a> contiene al menos una, y puede contener otras: otros testigos del mismo suceso, cada uno con su propio relato, y <a href=\"#another-reading-an-interpretation-is-another-sighting\">explicaciones alternativas</a>, que también son observaciones. Una observación puede ser designada por <a href=\"/docs/interview/\">una entrevista</a> mantenida con el testigo, y remitir a ella a su vez.",
+    it: "Un'osservazione è <em>ciò che un testimone riferisce di ciò che ha visto</em>: quando, dove, che aspetto aveva, come si muoveva e com'erano il cielo e il tempo. È l'evento che UFO@home <em>riproduce</em>. Un <a href=\"/docs/case/\">caso</a> ne contiene almeno una e può contenerne altre: altri testimoni dello stesso fatto, ciascuno con il proprio resoconto, e <a href=\"#another-reading-an-interpretation-is-another-sighting\">spiegazioni alternative</a>, che sono anch'esse osservazioni. Un'osservazione può essere designata da <a href=\"/docs/interview/\">un'intervista</a> condotta con il testimone, e rimandarvi a sua volta."
   }
 
   /** The whole of `public/demo-data/example-minimal.json`, read at build time and quoted verbatim
@@ -111,8 +107,6 @@ if (excerpts.length > 0) {
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>An observation is <strong>what one witness reports of what they saw</strong>: when, where, what it looked like, how it moved, and what the sky and the weather were. It is the event UFO@home <strong>replays</strong>. A <a href="/docs/case/">case</a> holds at least one, and may hold others: other witnesses of the same event, each with their own account, and <a href="#another-reading-an-interpretation-is-another-sighting">alternative explanations</a>, which are observations too. An observation can be referred to by <a href="/docs/interview/">an interview</a> held with the witness, and refer back to it.</p>
-
     <h2>Technical part: the observation file</h2>
     <p>What follows is for whoever writes these files by hand, generates them or reads them in code. In the editor none of it has to be known.</p>
     <p>A recording is a plain JSON file. Nothing in it is a binary blob, an id into a database, or a
@@ -569,8 +563,6 @@ if (excerpts.length > 0) {
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>Une observation est <strong>ce qu'un témoin rapporte de ce qu'il a vu</strong> : quand, où, à quoi cela ressemblait, comment cela bougeait, et ce qu'étaient le ciel et la météo. C'est l'événement qu'UFO@home <strong>rejoue</strong>. Un <a href="/docs/case/">dossier</a> en contient au moins une, et peut en contenir d'autres : d'autres témoins du même événement, chacun avec son propre compte rendu, et des <a href="#another-reading-an-interpretation-is-another-sighting">explications alternatives</a>, qui sont aussi des observations. Une observation peut être désignée par <a href="/docs/interview/">une interview</a> menée avec le témoin, et y renvoyer en retour.</p>
-
     <h2>Partie technique : le fichier d'observation</h2>
     <p>Ce qui suit est pour qui écrit ces fichiers à la main, les génère ou les lit en code. Dans l'éditeur, rien de cela n'a besoin d'être connu.</p>
     <p>Un enregistrement est un simple fichier JSON. Rien dedans n'est un blob binaire, un
@@ -1038,8 +1030,6 @@ if (excerpts.length > 0) {
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>Una observación es <strong>lo que un testigo relata de lo que vio</strong>: cuándo, dónde, qué aspecto tenía, cómo se movía y cómo estaban el cielo y el tiempo. Es el evento que UFO@home <strong>reproduce</strong>. Un <a href="/docs/case/">caso</a> contiene al menos una, y puede contener otras: otros testigos del mismo suceso, cada uno con su propio relato, y <a href="#another-reading-an-interpretation-is-another-sighting">explicaciones alternativas</a>, que también son observaciones. Una observación puede ser designada por <a href="/docs/interview/">una entrevista</a> mantenida con el testigo, y remitir a ella a su vez.</p>
-
     <h2>Parte técnica: el archivo de observación</h2>
     <p>Lo que sigue es para quien escribe estos archivos a mano, los genera o los lee en código. En el editor no hace falta saber nada de ello.</p>
     <p>Una grabación es un simple archivo JSON. Nada en ella es un blob binario, un identificador de
@@ -1495,8 +1485,6 @@ if (excerpts.length > 0) {
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>Un'osservazione è <strong>ciò che un testimone riferisce di ciò che ha visto</strong>: quando, dove, che aspetto aveva, come si muoveva e com'erano il cielo e il tempo. È l'evento che UFO@home <strong>riproduce</strong>. Un <a href="/docs/case/">caso</a> ne contiene almeno una e può contenerne altre: altri testimoni dello stesso fatto, ciascuno con il proprio resoconto, e <a href="#another-reading-an-interpretation-is-another-sighting">spiegazioni alternative</a>, che sono anch'esse osservazioni. Un'osservazione può essere designata da <a href="/docs/interview/">un'intervista</a> condotta con il testimone, e rimandarvi a sua volta.</p>
-
     <h2>Parte tecnica: il file di osservazione</h2>
     <p>Quanto segue è per chi scrive questi file a mano, li genera o li legge nel codice. Nell'editor non serve conoscerne nulla.</p>
     <p>Una registrazione è un semplice file JSON. Niente al suo interno è un blob binario, un

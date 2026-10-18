@@ -207,11 +207,11 @@ export class DocsCasePage extends DocsSection {
       ${rows.map(([field, meaning]) => `<tr><td><code>${field.split(", ").join("</code>, <code>")}</code></td><td>${meaning}</td></tr>`).join("\n      ")}
     </table></div>`
     const rows = t.refsRows.map(([link, how]) => `<tr><td>${link}</td><td>${how}</td></tr>`).join("\n      ")
-    return this.hero(language, this.meta.title, { en: t.lede, fr: t.lede, es: t.lede, it: t.lede }) + `
+    // What a case is stands under the title as its subtitle: the page starts on the events.
+    const lede = `${t.lede} ${t.what.replace(/<strong>/g, "<em>").replace(/<\/strong>/g, "</em>")}`
+    return this.hero(language, this.meta.title, { en: lede, fr: lede, es: lede, it: lede }) + `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>${t.what}</p>
-
     <h2>${t.eventsHeading}</h2>
     <p>${t.eventsIntro}</p>
     <ul>
