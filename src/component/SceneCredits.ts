@@ -32,6 +32,8 @@ export class SceneCredits {
     if (roadAttribution) add(SceneCredits.text(roadAttribution))
     const waterAttribution = scene.currentWaterAttribution
     if (waterAttribution) add(SceneCredits.text(waterAttribution))
+    const railwayAttribution = scene.currentRailwayAttribution
+    if (railwayAttribution) add(SceneCredits.text(railwayAttribution))
     // The observer map's own tiles, once a reader has opened it and they have arrived — the same
     // licence, owed for a second use of the same service. Skipped when the terrain's line already
     // carries those words: the ground patch and the map are normally drawn from the same provider,

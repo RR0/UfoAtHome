@@ -2,6 +2,7 @@ import type { ElevationProvider } from "./ElevationProvider.js"
 import type { ImageryProvider } from "./ImageryProvider.js"
 import type { RoadProvider } from "./RoadProvider.js"
 import type { WaterProvider } from "./WaterProvider.js"
+import type { RailwayProvider } from "./RailwayProvider.js"
 import { AwsTerrariumElevationProvider } from "./providers/AwsTerrariumElevationProvider.js"
 import { IgnMntElevationProvider } from "./providers/IgnMntElevationProvider.js"
 import { FirstElevationThatAnswers } from "./FirstElevationThatAnswers.js"
@@ -15,6 +16,10 @@ import { OverpassWaterProvider } from "./providers/OverpassWaterProvider.js"
 import { RegionalWaterProvider } from "./providers/RegionalWaterProvider.js"
 import { ArchivedWaterProvider } from "./providers/ArchivedWaterProvider.js"
 import { CachedWaterProvider } from "./providers/CachedWaterProvider.js"
+import { IgnTopoRailwayProvider } from "./providers/IgnTopoRailwayProvider.js"
+import { OverpassRailwayProvider } from "./providers/OverpassRailwayProvider.js"
+import { RegionalRailwayProvider } from "./providers/RegionalRailwayProvider.js"
+import { CachedRailwayProvider } from "./providers/CachedRailwayProvider.js"
 
 export interface TerrainProviders {
   elevation: ElevationProvider
@@ -24,6 +29,8 @@ export interface TerrainProviders {
   roads?: RoadProvider
   /** Optional, as the roads are: a scene with no water provider has its rivers as dry troughs in the relief (see WaterSystem). */
   water?: WaterProvider
+  /** Optional, as the roads are: a scene with no railway provider draws no tracks (see RailwaySystem). */
+  railways?: RailwayProvider
 }
 
 /**
@@ -33,7 +40,7 @@ export interface TerrainProviders {
  * reference a concrete provider class.
  */
 export function defaultTerrainProviders(): TerrainProviders {
-  return { elevation: defaultElevationProvider(), imagery: defaultImageryProvider(), roads: defaultRoadProvider(), water: defaultWaterProvider() }
+  return { elevation: defaultElevationProvider(), imagery: defaultImageryProvider(), roads: defaultRoadProvider(), water: defaultWaterProvider(), railways: defaultRailwayProvider() }
 }
 
 /**
@@ -81,4 +88,13 @@ export function defaultRoadProvider(): RoadProvider {
  */
 export function defaultWaterProvider(): WaterProvider {
   return new ArchivedWaterProvider({ fallback: new CachedWaterProvider(new RegionalWaterProvider(new IgnTopoWaterProvider(), new OverpassWaterProvider())) })
+}
+
+/**
+ * The railways half on its own: the IGN's map in France, OpenStreetMap elsewhere (see RegionalRailwayProvider), each answer kept a month and
+ * given again when the live source fails (see CachedRailwayProvider). Not frozen for the published cases yet, as the roads and the water are: a
+ * published scene outside France asks Overpass once a month a reader.
+ */
+export function defaultRailwayProvider(): RailwayProvider {
+  return new CachedRailwayProvider(new RegionalRailwayProvider(new IgnTopoRailwayProvider(), new OverpassRailwayProvider()))
 }

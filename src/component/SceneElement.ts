@@ -1349,6 +1349,11 @@ export class SceneElement extends HTMLElement {
     return this.sceneRenderer.currentWaterAttribution
   }
 
+  /** The railways' credit (see SceneRenderer.currentRailwayAttribution). */
+  get currentRailwayAttribution(): string | undefined {
+    return this.sceneRenderer.currentRailwayAttribution
+  }
+
   /** Relays a change of terrain source through to the renderer — see its setTerrainProviders.
    * Same "expose the nested renderer to a composing wrapper" arrangement as the getters above. */
   setTerrainProviders(providers: TerrainProviders): void {

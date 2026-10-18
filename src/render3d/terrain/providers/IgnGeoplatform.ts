@@ -212,6 +212,16 @@ export class IgnGeoplatform {
       "cleabs,nature,largeur_de_chaussee,nombre_de_voies,sens_de_circulation,vitesse_moyenne_vl,urbain,nom_voie_ban_gauche,nom_voie_ban_droite,cpx_toponyme_route_nommee,geometrie", 3000)
   }
 
+  /**
+   * The railways of the map in a box (west, south, east, north): every section in service, with what the map says of its tracks. The tunnels too,
+   * whose ends tell where a line at grade goes under the ground; the lines being built or abandoned not, which have no rails to draw.
+   */
+  async railways(box: { west: number, south: number, east: number, north: number }): Promise<VectorFeature[]> {
+    const within = `BBOX(geometrie,${[box.west, box.south, box.east, box.north].map(v => v.toFixed(6)).join(",")},'EPSG:4326')`
+    return this.features("troncon_de_voie_ferree", `${within} AND etat_de_l_objet='En service'`,
+      "cleabs,nature,electrifie,largeur,nombre_de_voies,position_par_rapport_au_sol,cpx_toponyme,geometrie", 3000)
+  }
+
   private async raster(centre: { lat: number, lng: number }, radiusM: number, size: number, layer: string): Promise<GeoTiffRaster> {
     const dLat = radiusM / IgnGeoplatform.METRES_PER_DEGREE
     const dLng = radiusM / (IgnGeoplatform.METRES_PER_DEGREE * Math.cos(centre.lat * Math.PI / 180))
