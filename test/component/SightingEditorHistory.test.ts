@@ -445,3 +445,22 @@ describe("the scenery taken from a survey of the place", () => {
     expect(element.shadowRoot!.getElementById("scenery-status")!.textContent).toBe("")
   })
 })
+
+describe("undo after typing in the File group", () => {
+  it("is available as soon as the text has been edited, without the form being touched", async () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const undo = shadow.getElementById("undo") as HTMLButtonElement
+    const inside = element as unknown as { fileEditor?: { view: { state: { doc: { length: number } }, dispatch(spec: unknown): void } } }
+    const tab = [...shadow.querySelectorAll<HTMLButtonElement>(".group-tab")].find(candidate => candidate.getAttribute("aria-controls") === "group-file")!
+    tab.click()
+    await waitFor(() => inside.fileEditor !== undefined)
+    expect(undo.disabled).toBe(true)
+
+    const view = inside.fileEditor!.view
+    // Whitespace after the closing brace: an edit that leaves the JSON as it was.
+    view.dispatch({ changes: { from: view.state.doc.length, insert: "\n" } })
+
+    expect(undo.disabled).toBe(false)
+  })
+})

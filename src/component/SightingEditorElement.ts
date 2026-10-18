@@ -5392,6 +5392,9 @@ export class SightingEditorElement extends HTMLElement {
   /** Text to form: a text that parses is the recording, a text that does not is left alone (the
    * editor marks the line) and the form keeps the last recording that was valid. */
   private onFileTextEdited(text: string): void {
+    // What was typed in the text is already a step of the text editor's own history: the buttons say so now,
+    // not only when the form is next touched (which is when they used to be told, so Undo stayed grey).
+    this.syncHistoryButtons()
     clearTimeout(this.fileApplyTimer)
     this.fileApplyTimer = setTimeout(() => this.applyFileText(text), 500)
   }

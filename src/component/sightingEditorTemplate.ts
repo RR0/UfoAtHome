@@ -963,6 +963,19 @@ select.weather-field:disabled {
   flex-direction: column;
   gap: 0.3em;
 }
+/* Squares, whatever a host page says of its buttons (a minimum height, a padding): one size on every side. */
+.history .icon-btn {
+  box-sizing: border-box;
+  flex: none;
+  width: 1.8em;
+  height: 1.8em;
+  min-width: 1.8em;
+  min-height: 1.8em;
+  max-width: 1.8em;
+  max-height: 1.8em;
+  aspect-ratio: 1;
+  padding: 0;
+}
 .history .icon-btn:disabled {
   opacity: 0.35;
   cursor: default;
