@@ -168,6 +168,9 @@ class SiteBuilder {
     // The water of the same places, frozen for the same reason (see ArchivedWaterProvider, and `npm run build:water`).
     await cp(join(this.root, "public", "water"), join(this.out, "water"), { recursive: true })
       .catch(() => undefined)
+    // The railways of the same places, frozen for the same reason (see ArchivedRailwayProvider, and `npm run build:railways`).
+    await cp(join(this.root, "public", "railways"), join(this.out, "railways"), { recursive: true })
+      .catch(() => undefined)
     // The World Atlas of the artificial night sky brightness, cut into tiles the editor reads a
     // place's night sky from (see AtlasLightPollutionProvider, and `npm run build:light-pollution`).
     await cp(join(this.root, "public", "light-pollution"), join(this.out, "light-pollution"), { recursive: true })
@@ -212,7 +215,7 @@ class SiteBuilder {
         const path = join(directory, entry.name)
         // The bundles, the recordings and the models hold no page of the site.
         if (entry.isDirectory()) {
-          if (!["lib", "demo-data", "models", "roads", "water", "tle", "aircraft", "fireballs", "reentries", "light-pollution"].includes(entry.name)) await walk(path)
+          if (!["lib", "demo-data", "models", "roads", "water", "railways", "tle", "aircraft", "fireballs", "reentries", "light-pollution"].includes(entry.name)) await walk(path)
         } else if (entry.name.endsWith(".html")) pages.push(path)
       }
     }
@@ -447,6 +450,15 @@ ${retired}
   Cache-Control: public, max-age=604800
 
 /water/index.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+# The frozen railways of the same places, as the water.
+/railways/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=604800
+
+/railways/index.json
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=0, must-revalidate
 

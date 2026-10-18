@@ -43,7 +43,7 @@ class UfoAtHomeWorker {
    * across a deploy may still be loading chunks from. */
   static KEPT_VERSIONS = 2
 
-  static DATA_PREFIXES = ["/demo-data/", "/models/", "/tle/", "/roads/", "/water/", "/light-pollution/", "/reentries/", "/fireballs/", "/aircraft/"]
+  static DATA_PREFIXES = ["/demo-data/", "/models/", "/tle/", "/roads/", "/water/", "/railways/", "/light-pollution/", "/reentries/", "/fireballs/", "/aircraft/"]
 
   /** Vite names a chunk `<name>-<8 hash characters>.<ext>`. The hash must hold a digit or a capital:
    * `rr0-sighting.mjs` has eight letters after its hyphen too, and is NOT immutable. */

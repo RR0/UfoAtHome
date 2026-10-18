@@ -20,6 +20,7 @@ import { IgnTopoRailwayProvider } from "./providers/IgnTopoRailwayProvider.js"
 import { OverpassRailwayProvider } from "./providers/OverpassRailwayProvider.js"
 import { RegionalRailwayProvider } from "./providers/RegionalRailwayProvider.js"
 import { CachedRailwayProvider } from "./providers/CachedRailwayProvider.js"
+import { ArchivedRailwayProvider } from "./providers/ArchivedRailwayProvider.js"
 
 export interface TerrainProviders {
   elevation: ElevationProvider
@@ -91,10 +92,10 @@ export function defaultWaterProvider(): WaterProvider {
 }
 
 /**
- * The railways half on its own: the IGN's map in France, OpenStreetMap elsewhere (see RegionalRailwayProvider), each answer kept a month and
- * given again when the live source fails (see CachedRailwayProvider). Not frozen for the published cases yet, as the roads and the water are: a
- * published scene outside France asks Overpass once a month a reader.
+ * The railways half on its own: what UFO@home has frozen for the cases it publishes, and for any other place the IGN's map in France and
+ * OpenStreetMap elsewhere (see RegionalRailwayProvider), each answer kept a month and given again when the live source fails (see
+ * CachedRailwayProvider). In that order for the reason the roads are (see defaultRoadProvider): a published scene asks Overpass nothing.
  */
 export function defaultRailwayProvider(): RailwayProvider {
-  return new CachedRailwayProvider(new RegionalRailwayProvider(new IgnTopoRailwayProvider(), new OverpassRailwayProvider()))
+  return new ArchivedRailwayProvider({ fallback: new CachedRailwayProvider(new RegionalRailwayProvider(new IgnTopoRailwayProvider(), new OverpassRailwayProvider())) })
 }
