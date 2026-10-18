@@ -953,7 +953,7 @@ select.weather-field:disabled {
   padding-inline-end: 2.4em;
   /* ...and as tall as the stack (two squares and the margin between them), so that a strip of a single
      row does not let it climb out of the strip. The tabs stay on the baseline. */
-  min-height: 4.1em;
+  min-height: 3.7em;
 }
 .history {
   position: absolute;
@@ -963,17 +963,17 @@ select.weather-field:disabled {
   flex-direction: column;
   gap: 0.3em;
 }
-/* Squares, whatever a host page says of its buttons (a minimum height, a padding): one size on every side. */
+/* A little wider than tall (the squares read as taller than wide on the author's screen), whatever a host page says of
+   its buttons (a minimum height, a padding): one size on every side. */
 .history .icon-btn {
   box-sizing: border-box;
   flex: none;
   width: 1.8em;
-  height: 1.8em;
+  height: 1.55em;
   min-width: 1.8em;
-  min-height: 1.8em;
+  min-height: 1.55em;
   max-width: 1.8em;
-  max-height: 1.8em;
-  aspect-ratio: 1;
+  max-height: 1.55em;
   padding: 0;
 }
 .history .icon-btn:disabled {
