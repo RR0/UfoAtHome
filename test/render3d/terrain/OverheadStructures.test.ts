@@ -47,6 +47,27 @@ describe("OverheadStructures bridges", () => {
     expect(OverheadStructures.bridges(vectors({ bridges, elevatedRoads: [bare] }), CENTRE, 100, undefined)[0].name).toBeUndefined()
   })
 
+  it("draws one bridge of the pieces the map cuts it into, whichever way each piece was drawn, and its deck measured over the whole", () => {
+    // The Petit-Pont in Paris: two pieces meeting mid-Seine, the second drawn from its far end.
+    const bridges = [line({ nature: "Pont" }, [0, -20], [0, 0]), line({ nature: "Pont" }, [0, 20], [0, 0])]
+    const size = 100
+    const heights = new Float32Array(size * size)
+    // The deck 9 m over the water from -15 to +15 m; the bank to the south, under the first half's end, is not the deck.
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (Math.abs(x - 50) < 4 && Math.abs(50 - y) < 15) heights[y * size + x] = 9
+    const grid = new HeightGrid(heights, new Uint8Array(size * size), new Uint8Array(size * size), size, 1)
+    const found = OverheadStructures.bridges(vectors({ bridges }), CENTRE, 100, grid)
+    expect(found).toHaveLength(1)
+    expect(found[0].lengthM).toBeCloseTo(40, 0)
+    expect(found[0].northM).toBeCloseTo(0, 0)
+    expect(found[0].headingDeg).toBeCloseTo(0, 0)
+    expect(found[0].heightM).toBe(9)
+  })
+
+  it("keeps apart two bridges that meet at a junction rather than run on", () => {
+    const bridges = [line({ nature: "Pont" }, [0, -20], [0, 0]), line({ nature: "Pont" }, [0, 0], [20, 0])]
+    expect(OverheadStructures.bridges(vectors({ bridges }), CENTRE, 100, undefined)).toHaveLength(2)
+  })
+
   it("leaves out what is too short or too far", () => {
     const found = OverheadStructures.bridges(vectors({ bridges: [line({}, [0, 0], [2, 0]), line({}, [400, 0], [440, 0])] }), CENTRE, 100, undefined)
     expect(found).toEqual([])

@@ -78,6 +78,14 @@ export class OverheadStructures {
   private static readonly FOOTBRIDGE_DECK_M = 2.5
   /** A deck is wider than the carriageway it carries: a pavement and a parapet on each side. */
   private static readonly DECK_MARGIN_M = 2.4
+  /**
+   * Two pieces of the map's centre lines that meet end to end within this are one structure: the map cuts a bridge where a boundary crosses it (the
+   * Petit-Pont and the Pont au Double in Paris are two pieces each, cut mid-Seine), and each piece drawn as a bridge of its own stood on the lowest ground
+   * under its own half, one deck higher than the other.
+   */
+  private static readonly JOIN_M = 1
+  /** And run on within this angle of each other: a bridge that meets another at a junction is another bridge. */
+  private static readonly JOIN_DEG = 25
   /** How near the centre line of a bridge the road that crosses it must be. */
   private static readonly ROAD_MATCH_M = 12
   /** The deck of a bridge where nothing measured it. */
@@ -134,9 +142,7 @@ export class OverheadStructures {
   static bridges(vectors: PlaceVectors, centre: { lat: number, lng: number }, radiusM: number, grid: HeightGrid | undefined): SurveyedBridge[] {
     const roads = vectors.elevatedRoads.map(road => ({ path: OverheadStructures.path(road, centre), properties: road.properties }))
     const found: SurveyedBridge[] = []
-    for (const feature of vectors.bridges) {
-      const path = OverheadStructures.path(feature, centre)
-      if (path.length < 2) continue
+    for (const path of OverheadStructures.joined(vectors.bridges.map(feature => OverheadStructures.path(feature, centre)))) {
       const from = path[0]
       const to = path[path.length - 1]
       const length = Math.hypot(to.east - from.east, to.north - from.north)
@@ -155,6 +161,36 @@ export class OverheadStructures {
     }
     found.sort((a, b) => Math.hypot(a.eastM, a.northM) - Math.hypot(b.eastM, b.northM))
     return found
+  }
+
+  /** The pieces of centre line as whole structures: each chain of pieces that meet end to end and run on (see JOIN_M) as one path. */
+  private static joined(paths: { east: number, north: number }[][]): { east: number, north: number }[][] {
+    const chains = paths.filter(path => path.length >= 2)
+    for (let i = 0; i < chains.length; i++) {
+      for (let j = i + 1; j < chains.length; j++) {
+        const chain = OverheadStructures.join(chains[i], chains[j])
+        if (chain === undefined) continue
+        chains[i] = chain
+        chains.splice(j, 1)
+        // The longer chain may meet a piece already passed by.
+        j = i
+      }
+    }
+    return chains
+  }
+
+  /** One path of two that meet end to end and run on, whichever way each was drawn: undefined where they do not. */
+  private static join(a: { east: number, north: number }[], b: { east: number, north: number }[]): { east: number, north: number }[] | undefined {
+    for (const first of [a, [...a].reverse()]) {
+      for (const second of [b, [...b].reverse()]) {
+        const end = first[first.length - 1]
+        const start = second[0]
+        if (Math.hypot(end.east - start.east, end.north - start.north) > OverheadStructures.JOIN_M) continue
+        const turn = Math.abs(OverheadStructures.bearing(first[0], end) - OverheadStructures.bearing(start, second[second.length - 1]))
+        if (Math.min(turn, 360 - turn) <= OverheadStructures.JOIN_DEG) return [...first, ...second.slice(1)]
+      }
+    }
+    return undefined
   }
 
   /** The road that crosses a bridge at its middle: the width of its deck (the road's, with its edges, or what a bridge of its kind is), and its name. */
