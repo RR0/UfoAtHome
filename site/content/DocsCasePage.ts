@@ -67,7 +67,7 @@ export class DocsCasePage extends DocsSection {
 
   private readonly text: Said<CaseDocText> = {
     en: {
-      lede: "A case gathers everything that is known about one event: what was seen, by whom, how it can be explained, what the witnesses said when asked.",
+      lede: "In UFO@home, a case gathers everything that is known about one event: what was seen, by whom, how it can be explained, what the witnesses said when asked.",
       whatHeading: "What a case is",
       what: "A case is what an investigation is about: a night, a place, a title. It does not describe the event itself. It <strong>lists what happened around it</strong>, as <em>events</em>, each of which is a document of its own. Nobody has to write them all: a case can be one observation, and grow.",
       eventsHeading: "The events of a case",
@@ -101,7 +101,7 @@ export class DocsCasePage extends DocsSection {
       how: "How"
     },
     fr: {
-      lede: "Un dossier réunit tout ce que l'on sait d'un événement : ce qui a été vu, par qui, comment on peut l'expliquer, ce que les témoins ont dit quand on les a interrogés.",
+      lede: "Dans UFO@home, un dossier réunit tout ce que l'on sait d'un événement : ce qui a été vu, par qui, comment on peut l'expliquer, ce que les témoins ont dit quand on les a interrogés.",
       whatHeading: "Ce qu'est un dossier",
       what: "Un dossier est ce dont parle une enquête : une nuit, un lieu, un titre. Il ne décrit pas l'événement lui-même. Il <strong>liste ce qui s'est passé autour</strong>, sous forme d'<em>événements</em>, chacun étant un document à part. Personne n'a à tous les écrire : un dossier peut n'être qu'une observation, et grandir.",
       eventsHeading: "Les événements d'un dossier",
@@ -135,7 +135,7 @@ export class DocsCasePage extends DocsSection {
       how: "Comment"
     },
     es: {
-      lede: "Un caso reúne todo lo que se sabe de un suceso: lo que se vio, quién, cómo puede explicarse, lo que dijeron los testigos al ser preguntados.",
+      lede: "En UFO@home, un caso reúne todo lo que se sabe de un suceso: lo que se vio, quién, cómo puede explicarse, lo que dijeron los testigos al ser preguntados.",
       whatHeading: "Qué es un caso",
       what: "Un caso es de lo que trata una investigación: una noche, un lugar, un título. No describe el suceso en sí. <strong>Enumera lo que ocurrió a su alrededor</strong>, como <em>eventos</em>, cada uno un documento aparte. Nadie tiene que escribirlos todos: un caso puede ser una sola observación, y crecer.",
       eventsHeading: "Los eventos de un caso",
@@ -169,7 +169,7 @@ export class DocsCasePage extends DocsSection {
       how: "Cómo"
     },
     it: {
-      lede: "Un caso riunisce tutto ciò che si sa di un fatto: che cosa è stato visto, da chi, come può essere spiegato, che cosa hanno detto i testimoni quando sono stati interrogati.",
+      lede: "In UFO@home, un caso riunisce tutto ciò che si sa di un fatto: che cosa è stato visto, da chi, come può essere spiegato, che cosa hanno detto i testimoni quando sono stati interrogati.",
       whatHeading: "Che cos'è un caso",
       what: "Un caso è ciò di cui parla un'indagine: una notte, un luogo, un titolo. Non descrive il fatto in sé. <strong>Elenca ciò che è accaduto attorno ad esso</strong>, come <em>eventi</em>, ciascuno un documento a parte. Nessuno deve scriverli tutti: un caso può essere una sola osservazione, e crescere.",
       eventsHeading: "Gli eventi di un caso",
