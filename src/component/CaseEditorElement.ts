@@ -11,12 +11,9 @@ import type { DateInputElement } from "./DateInputElement.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 import type { CaseTrack } from "./CaseSession.js"
-import { register as registerInterview, INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./InterviewElement.js"
-import { InterviewFile } from "../engine/persistence/interviewJson.js"
-import type { InterviewJson, InterviewPassage } from "../engine/persistence/interviewJson.js"
+import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
+import type { InterviewJson, InterviewMedium, InterviewPassage } from "../engine/persistence/interviewJson.js"
 import type { InterviewElement, InterviewEvent } from "./InterviewElement.js"
-import { InterviewMedia } from "./messages/InterviewMedia.js"
-import type { InterviewMedium } from "../engine/persistence/interviewJson.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
 import { register as registerSightingEditor } from "./SightingEditorElement.js"
@@ -55,7 +52,7 @@ const TEMPLATE = `
   .passages ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .2em; }
   .passages li { display: flex; gap: .5em; align-items: baseline; }
   .passages button { font: inherit; cursor: pointer; }
-  .passages .at { font-variant-numeric: tabular-nums; min-width: 6em; text-align: center; }
+  .passages .at { font-variant-numeric: tabular-nums; padding: .1em .35em; text-align: left; white-space: nowrap; flex: none; }
   .passages .excerpt { border: 0; background: none; padding: 0; text-align: left; color: LinkText; text-decoration: underline; }
   .recording.in-case, #interview-section.in-case { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .5em .7em .7em; }
   /* Tabs as the recording's editor has them (see sightingEditorTemplate): a strip on one baseline, the open tab raised and joined to its panel. */
@@ -197,6 +194,8 @@ export class CaseEditorElement extends HTMLElement {
   /** The interview on show, when the picker is on one: then no track is. */
   private currentInterview?: InterviewEvent
   private readonly interviewElement: InterviewElement
+  /** The interview element, fetched and defined the first time an interview is shown: most cases have none (see ensureInterview). */
+  private interviewReady?: Promise<void>
   /** The group on show: the events, or the file `case.json` as text. */
   private group: "events" | "file" = "events"
   /** The file's text editor, loaded the first time the File group is opened (CodeMirror is heavy and most authors never need it). */
@@ -220,7 +219,6 @@ export class CaseEditorElement extends HTMLElement {
   constructor() {
     super()
     registerSightingEditor()
-    registerInterview()
     registerDateInput()
     this.shadow.innerHTML = TEMPLATE
     customElements.upgrade(this.shadow)
@@ -258,7 +256,7 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("track").addEventListener("change", () => {
       const item = this.session ? this.items(this.session)[Number((this.byId("track") as HTMLSelectElement).value)] : undefined
       if (!item) return
-      if (item.interview) this.showInterview(item.interview)
+      if (item.interview) void this.showInterview(item.interview)
       else void this.showTrack(item.track)
     })
     const recordingId = this.input("recording-id")
@@ -718,7 +716,10 @@ export class CaseEditorElement extends HTMLElement {
     const box = this.byId("passages")
     const token = ++this.passagesToken
     box.hidden = true
-    if (!session || track.kind !== "observer") return
+    // A case without interviews has no passages to look for, and none of the interview code to load.
+    if (!session || track.kind !== "observer" || session.interviews.length === 0) return
+    const { InterviewFile } = await import("../engine/persistence/interviewJson.js")
+    if (token !== this.passagesToken) return
     const id = track.event.id ?? session.proposedId(track)
     const found: { interview: InterviewEvent, json: InterviewJson, passage: InterviewPassage }[] = []
     for (const interview of session.interviews) {
@@ -735,22 +736,22 @@ export class CaseEditorElement extends HTMLElement {
       const at = document.createElement("button")
       at.type = "button"
       at.className = "at"
-      at.textContent = `▶ ${InterviewFile.clock(passage.at)}`
+      at.textContent = `▶ ${InterviewFile.clock(passage.at, true)}`
       at.addEventListener("click", () => this.editor.seekTo(passage.at))
+      // The quotation is the link: to the passage, in the interview it is from, which the tooltip names ("Reported in Interview of Q. B.").
       const link = document.createElement("button")
       link.type = "button"
       link.className = "excerpt"
       const items = this.items(session) as { interview?: InterviewEvent }[]
       const index = items.findIndex(candidate => candidate.interview === interview)
-      link.textContent = `${this.messages.passagesHeading} ${this.optionLabel({ interview }, index)}`
-      link.addEventListener("click", () => {
-        this.showInterview(interview)
-        void this.interviewElement.revealSegment(passage.index)
-      })
+      const where = `${this.messages.passagesHeading} ${this.optionLabel({ interview }, index)}`
       const said = passage.text === undefined ? "" : passage.range ? passage.text.slice(passage.range[0], passage.range[1]) : passage.text
-      const excerpt = document.createElement("span")
-      excerpt.textContent = said === "" ? "" : `${InterviewFile.speakerName(json, passage.speaker)} : « ${said.length > 120 ? `${said.slice(0, 117)}…` : said} »`
-      item.append(at, link, excerpt)
+      link.textContent = said === "" ? where : `${InterviewFile.speakerName(json, passage.speaker)} : « ${said.length > 120 ? `${said.slice(0, 117)}…` : said} »`
+      link.title = where
+      link.addEventListener("click", () => {
+        void this.showInterview(interview).then(() => this.interviewElement.revealSegment(passage.index))
+      })
+      item.append(at, link)
       return item
     }))
     box.hidden = false
@@ -765,6 +766,8 @@ export class CaseEditorElement extends HTMLElement {
     if (!track) return
     await this.showTrack(track)
     this.editor.seekTo(target.at)
+    // The link was followed from the interview's form, above the render: the render is what is wanted in view.
+    this.editor.showRender()
   }
 
   private static shapesOf(recording: SightingRecordingJson): string[] {
@@ -792,7 +795,7 @@ export class CaseEditorElement extends HTMLElement {
   }
 
   /** Shows an interview of the case where the recording was: the picker is then on it, and no recording is. */
-  private showInterview(interview: InterviewEvent): void {
+  private async showInterview(interview: InterviewEvent): Promise<void> {
     const session = this.session
     if (!session) return
     this.commit()
@@ -800,13 +803,28 @@ export class CaseEditorElement extends HTMLElement {
     this.passagesToken++
     this.byId("passages").hidden = true
     this.currentInterview = interview
+    this.refreshRow()
+    await this.ensureInterview()
+    // Another event may have been chosen while the element was fetched.
+    if (this.currentInterview !== interview) return
     this.interviewElement.witnesses = session.tracks.filter(track => track.kind === "observer")
       .map(track => ({ id: track.event.id ?? session.proposedId(track), label: this.labelOf(track, session.tracks.indexOf(track)) }))
     // The transcript is the case's to keep between visits, and what its address is relative to is the case's.
     this.interviewElement.documentUrl = session.url
     this.interviewElement.transcriptText = session.transcriptText(interview)
     this.interviewElement.event = interview
-    this.refreshRow()
+  }
+
+  /** Fetches and defines `<rr0-interview>`, once: the editor of an interview is a chunk of its own that a case without interviews never loads. */
+  private ensureInterview(): Promise<void> {
+    this.interviewReady ??= import("./InterviewElement.js").then(({ register }) => {
+      register()
+      customElements.upgrade(this.shadow)
+    }, error => {
+      this.interviewReady = undefined
+      throw error
+    })
+    return this.interviewReady
   }
 
   /** An interview edited: the case is changed, and a witness chosen who has no id yet is given the one that was offered for them. */
@@ -1010,7 +1028,7 @@ export class CaseEditorElement extends HTMLElement {
     const observers = session.tracks.filter(track => track.kind === "observer")
     ;(this.byId("witness") as HTMLSelectElement).replaceChildren(...observers.map(track => new Option(this.labelOf(track, session.tracks.indexOf(track)), String(session.tracks.indexOf(track)))))
     // What an interview is held through: one of the media, the first of which is where it starts.
-    ;(this.byId("medium") as HTMLSelectElement).replaceChildren(...InterviewMedia.ALL.map(medium => new Option(InterviewMedia.label(medium, this.language), medium)))
+    ;(this.byId("medium") as HTMLSelectElement).replaceChildren()
     ;(this.byId("source") as HTMLSelectElement).value = "blank"
     for (const id of ["observer", "title", "author", "file", "url"]) this.input(id).value = ""
     this.input("date").value = ""
@@ -1018,6 +1036,14 @@ export class CaseEditorElement extends HTMLElement {
   }
 
   /** What the dialog asks depends on what is added: an observer for an observation, a title and an author for a reading. */
+  /** The media an interview may be held through, the first of which is where it starts: fetched when an interview is the kind added, not before. */
+  private async fillMedia(): Promise<void> {
+    const { InterviewMedia } = await import("./messages/InterviewMedia.js")
+    const select = this.byId("medium") as HTMLSelectElement
+    if (select.options.length > 0) return
+    select.replaceChildren(...InterviewMedia.ALL.map(medium => new Option(InterviewMedia.label(medium, this.language), medium)))
+  }
+
   private syncSourceFields(): void {
     const interview = (this.byId("kind") as HTMLSelectElement).value === "interview"
     const source = (this.byId("source") as HTMLSelectElement).value
@@ -1027,6 +1053,7 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("row-of").hidden = interview
     this.byId("row-witness").hidden = !interview
     this.byId("row-medium").hidden = !interview
+    if (interview) void this.fillMedia()
     this.byId("row-file").hidden = interview || source !== "file"
     this.byId("row-url").hidden = interview || source !== "url"
     this.byId("row-observer").hidden = interview || reading
@@ -1100,7 +1127,7 @@ export class CaseEditorElement extends HTMLElement {
       const interview = session.addInterview(witness, this.input("date").value || this.today(),
         title !== "" ? title : undefined, author !== "" ? author.split(",").map(name => ({ people: name.trim() })).filter(agent => agent.people !== "") : undefined,
         (this.byId("medium") as HTMLSelectElement).value as InterviewMedium)
-      this.showInterview(interview)
+      await this.showInterview(interview)
       return true
     }
     const of = (this.byId("of") as HTMLSelectElement).value

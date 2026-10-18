@@ -12,7 +12,7 @@ export const interviewMessages_en: InterviewMessages = {
   transcriptHint: "Address of the anonymised transcript file (optional)",
   summaryTab: "Summary",
   fileTab: "File",
-  importFile: "Load JSON file",
+  importFile: "Load a file (JSON, text, WebVTT, SRT)",
   importUrl: "Or load from URL",
   importButton: "Load",
   saveButton: "Save",

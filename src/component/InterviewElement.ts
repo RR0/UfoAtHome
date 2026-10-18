@@ -10,19 +10,13 @@ import type { InterviewMessages } from "./messages/InterviewMessages.js"
 import { interviewMessages_en } from "./messages/InterviewMessages_en.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import { InterviewMedia } from "./messages/InterviewMedia.js"
+import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import { InterviewFile } from "../engine/persistence/interviewJson.js"
 import type { InterviewJson } from "../engine/persistence/interviewJson.js"
 
 export const INTERVIEW_ELEMENT_NAME = "rr0-interview"
 
-/** Sent, and bubbling, each time the interview is edited: what changed is the event the element holds, in place; for the transcript, its text is in `detail.text`. */
-export const INTERVIEW_CHANGE_EVENT = "interviewchange"
-
-/**
- * Sent, and bubbling, when the reader follows a passage of the dialogue to the moment of the observation it tells of: `detail` is the `sighting` (the
- * `id` of the observer's account, or the interview's own when the passage names none) and `at`, in seconds since the beginning of the observation.
- */
-export const INTERVIEW_SEEK_EVENT = "interviewseek"
+export { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT }
 
 type InterviewGroup = "summary" | "exchanges" | "file"
 
@@ -82,7 +76,7 @@ const TEMPLATE = `
   .turn .redacted { margin: 0; }
   .turn.is-redacted .who { color: inherit; opacity: .6; font-weight: 400; }
   .turn .refs { grid-column: 2; display: flex; flex-wrap: wrap; gap: .25em; }
-  .turn .ref { font: inherit; font-size: .8em; cursor: pointer; border: 1px solid var(--tab-line); border-radius: 999px; background: transparent; color: inherit; padding: 0 .5em; }
+  .turn .ref { font: inherit; font-size: .8em; cursor: pointer; border: 1px solid var(--tab-line); border-radius: 999px; background: transparent; color: inherit; padding: 0 .35em; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .file-note { font-size: .85em; opacity: .8; margin: .3em 0; }
   .file-editor { min-height: 18em; margin-top: .5em; }
 </style>
@@ -115,7 +109,7 @@ const TEMPLATE = `
     <label class="fill"><span id="label-url">Transcript</span> <input id="url" type="text" autocomplete="off" spellcheck="false" placeholder="interview-….json"/></label>
   </div>
   <div class="row toolbar">
-    <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
+    <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json,.txt,.md,.vtt,.srt,text/*"/></label>
     <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/interview.json"/></label>
     <button id="import-url-button" type="button">Load</button>
     <button id="save" type="button">Save</button>
@@ -463,7 +457,7 @@ export class InterviewElement extends HTMLElement {
       name.textContent = segment.redacted ? "" : InterviewFile.speakerName(json, segment.speaker)
       const when = document.createElement("span")
       when.className = "when"
-      when.textContent = InterviewFile.clock(segment.start)
+      when.textContent = segment.start === undefined ? "" : InterviewFile.clock(segment.start, true)
       who.append(name, when)
       // What stands in the place of a stretch taken out: a bar, and why, said and not left to a tooltip.
       const gap = (reasonText: SaidText, tag: "p" | "span"): HTMLElement => {
@@ -473,6 +467,7 @@ export class InterviewElement extends HTMLElement {
         const why = document.createElement("span")
         why.className = "why"
         why.textContent = `${m.redacted} : ${this.said.read(reasonText) ?? ""}`
+        node.title = why.textContent
         node.append(bar, why)
         return node
       }
@@ -501,7 +496,7 @@ export class InterviewElement extends HTMLElement {
           const button = document.createElement("button")
           button.type = "button"
           button.className = "ref"
-          button.textContent = `↗ ${InterviewFile.clock(ref.at)}`
+          button.textContent = `↗ ${InterviewFile.clock(ref.at, true)}`
           button.addEventListener("click", () => seek(ref))
           refs.append(button)
         }
@@ -753,7 +748,26 @@ export class InterviewElement extends HTMLElement {
     const file = input.files?.[0]
     if (!file) return
     try {
-      await this.take(JSON.parse(await file.text()))
+      const text = await file.text()
+      let json: unknown
+      try {
+        json = JSON.parse(text)
+      } catch {
+        json = undefined
+      }
+      // A file that is not ours (a transcript out of a recording tool, subtitles, a text with a name before each turn) is read as best it can be.
+      if (typeof json !== "object" || json === null) {
+        const { InterviewImport } = await import("../engine/persistence/interviewImport.js")
+        const event = this.current
+        const held = [event?.interviewOf].flat().filter((id): id is string => typeof id === "string")
+        const imported = InterviewImport.parse(text, {
+          by: (event?.by ?? []).map(agent => InterviewElement.byText([agent])).filter(name => name !== ""),
+          witnesses: this.options.filter(witness => held.length === 0 || held.includes(witness.id))
+        })
+        json = imported && { ...imported, transcription: { note: `Imported from ${file.name}: who speaks and when are as the file gave them, to be checked.` } }
+      }
+      if (json === undefined) this.note(this.messages.notATranscript)
+      else await this.take(json)
     } catch {
       this.note(this.messages.loadFailed)
     }

@@ -310,7 +310,7 @@ describe("What the summary shows is what the file holds, and the other way round
     expect(turns[4].querySelector(".said")!.textContent).toBe("No lights. Passage removed : Place That is all. ")
     expect(turns[4].querySelectorAll(".said .bar")).toHaveLength(1)
     expect(part(element, "exchanges-status").textContent).toBe("Not proofread yet by: Q. B.")
-    expect(turns[0].querySelector(".when")!.textContent).toBe("0:00")
+    expect(turns[0].querySelector(".when")!.textContent).toBe("00:00.0")
   })
 
   it("shows the times when Alt is held, and not otherwise", () => {
@@ -337,6 +337,37 @@ describe("What the summary shows is what the file holds, and the other way round
     tabs(element)[1].click()
     await wait(100)
     expect(part(element, "exchanges").textContent).toBe("Nothing was said yet.")
+  })
+
+  const load = async (element: InterviewElement, name: string, content: string): Promise<void> => {
+    const input = part(element, "import-file") as HTMLInputElement
+    Object.defineProperty(input, "files", { configurable: true, value: [{ name, text: async () => content }] })
+    input.dispatchEvent(new Event("change"))
+    await wait(250)
+  }
+
+  it("loads a transcript that is not in our format, as best it can be read, naming the speakers the case names", async () => {
+    const { element, changes } = make({ ...event(), by: [{ people: "BeauJerome" }], interviewOf: "qb" })
+    element.witnesses = [{ id: "qb", label: "Q. B." }]
+    tabs(element)[2].click()
+    await wait(200)
+    await load(element, "call.txt", "[00:00:05] BeauJerome: Where were you?\n[00:00:09] Q. B.: In the park.\n[00:00:20] BeauJerome: And then?\n[00:00:25] Q. B.: It left.")
+    const json = JSON.parse(element.transcriptText!) as { segments: { speaker: string, start: number, text: string }[], speakers: Record<string, unknown>, transcription: { note: string } }
+    expect(json.segments.map(segment => [segment.speaker, segment.start, segment.text])).toEqual([
+      ["interviewer", 5, "Where were you?"], ["witness", 9, "In the park."], ["interviewer", 20, "And then?"], ["witness", 25, "It left."]
+    ])
+    expect(json.speakers).toMatchObject({ interviewer: { by: { people: "BeauJerome" } }, witness: { of: "qb" } })
+    expect(json.transcription.note).toContain("call.txt")
+    expect(changes.map(change => change.field)).toContain("transcript")
+  })
+
+  it("says so when a file holds nothing that reads as an interview", async () => {
+    const { element } = make(event())
+    tabs(element)[2].click()
+    await wait(200)
+    await load(element, "empty.txt", "   ")
+    expect(part(element, "file-note").hidden).toBe(false)
+    expect(part(element, "file-note").textContent).toContain("not an interview transcript")
   })
 
   it("says what the interview was held through, among the media, and not nothing once one is said", () => {

@@ -5564,6 +5564,11 @@ export class SightingEditorElement extends HTMLElement {
     this.goToMark(seconds * 1000)
   }
 
+  /** Brings the render into view, for a caller that has just moved the playhead from elsewhere on the page (an interview's link to a moment). */
+  showRender(): void {
+    this.sceneElement.scrollIntoView?.({ block: "center", behavior: "smooth" })
+  }
+
   private goToMark(t: number | undefined): void {
     if (t === undefined) return
     this.ufoElement.currentTime = t

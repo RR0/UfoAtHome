@@ -39,7 +39,8 @@ export interface InterviewRedaction {
 export type InterviewSegmentPart = { text: string } | { redacted: InterviewRedaction }
 
 /**
- * One turn of speech: one speaker, from `start` to `end` seconds after the beginning of the recording, and what was said.
+ * One turn of speech: one speaker, from `start` to `end` seconds after the beginning of the recording, and what was said. A transcript that comes
+ * without times (a text a person typed) has neither.
  *
  * A passage taken out of the published file keeps its place (speaker and times) but loses its `text`, and says why in `redacted`: a reader can
  * show it as blacked out rather than hide that it existed.
@@ -49,8 +50,8 @@ export type InterviewSegmentPart = { text: string } | { redacted: InterviewRedac
  */
 export interface InterviewSegment {
   speaker: string
-  start: number
-  end: number
+  start?: number
+  end?: number
   text?: string
   redacted?: InterviewRedaction
   parts?: InterviewSegmentPart[]
@@ -166,14 +167,17 @@ export class InterviewFile {
     return passages.sort((a, b) => a.at - b.at || a.index - b.index)
   }
 
-  /** A length of time as it reads on a clock: `1:02:05` for an hour, `2:05` otherwise, with tenths of a second when there are. */
-  static clock(seconds: number): string {
+  /**
+   * A length of time as it reads on a clock: `1:02:05` for an hour, `2:05` otherwise, with tenths of a second when there are. `fixed` gives it
+   * the same shape whatever it is, minutes padded and tenths always there (`00:05.0`), so that times listed one under the other can be compared.
+   */
+  static clock(seconds: number, fixed = false): string {
     const tenths = Math.round(seconds * 10)
     const whole = Math.floor(tenths / 10)
     const pad = (n: number): string => String(n).padStart(2, "0")
     const hours = Math.floor(whole / 3600)
-    const rest = `${hours > 0 ? pad(Math.floor(whole / 60) % 60) : Math.floor(whole / 60)}:${pad(whole % 60)}`
-    return `${hours > 0 ? `${hours}:` : ""}${rest}${tenths % 10 === 0 ? "" : `.${tenths % 10}`}`
+    const rest = `${hours > 0 || fixed ? pad(Math.floor(whole / 60) % 60) : Math.floor(whole / 60)}:${pad(whole % 60)}`
+    return `${hours > 0 ? `${hours}:` : ""}${rest}${fixed || tenths % 10 !== 0 ? `.${tenths % 10}` : ""}`
   }
 
   /** How a speaker is named in a subtitle: the witness's title, else the interviewer's agent, else the role. */
@@ -198,9 +202,12 @@ export class InterviewFile {
    */
   static toVtt(json: InterviewJson): string {
     const escape = (text: string): string => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    const cues = json.segments.map((segment, index) => {
-      const next = json.segments[index + 1]
-      const end = next && next.start < segment.end ? Math.max(segment.start, next.start) : segment.end
+    // A subtitle needs its time: a turn without one is not in them.
+    const timed = json.segments.filter((segment): segment is InterviewSegment & { start: number } => segment.start !== undefined)
+    const cues = timed.map((segment, index) => {
+      const next = timed[index + 1]
+      const to = segment.end ?? next?.start ?? segment.start + 5
+      const end = next && next.start < to ? Math.max(segment.start, next.start) : to
       return `${InterviewFile.stamp(segment.start)} --> ${InterviewFile.stamp(end)}\n<v ${escape(InterviewFile.speakerName(json, segment.speaker))}>${escape(InterviewFile.said(segment) ?? "[…]")}`
     })
     return `WEBVTT\n\n${cues.join("\n\n")}\n`

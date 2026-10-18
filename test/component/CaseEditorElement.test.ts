@@ -1,6 +1,8 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
 
 import { register } from "../../src/component/CaseEditorElement.js"
+// Defined by the case editor only when an interview is shown, fetched then: loaded here first, as the editor's own chunk would be in a build.
+import "../../src/component/InterviewElement.js"
 import type { CaseEditorElement } from "../../src/component/CaseEditorElement.js"
 
 register()
@@ -697,9 +699,11 @@ describe("CaseEditorElement's events", () => {
     expect(root.getElementById("passages")!.hidden).toBe(false)
     const items = [...root.querySelectorAll("#passages-list li")]
     expect(items).toHaveLength(1)
-    expect(items[0].querySelector(".at")!.textContent).toBe("▶ 0:00.5")
-    expect(items[0].querySelector(".excerpt")!.textContent).toBe("Reported in Interview of An account")
-    expect(items[0].textContent).toContain("It reached the zenith at once.")
+    expect(items[0].querySelector(".at")!.textContent).toBe("▶ 00:00.5")
+    // The quotation is the link, and names the interview it is from.
+    expect(items[0].querySelectorAll("button")).toHaveLength(2)
+    expect(items[0].querySelector(".excerpt")!.textContent).toContain("It reached the zenith at once.")
+    expect((items[0].querySelector(".excerpt") as HTMLElement).title).toBe("Reported in Interview of An account")
     const seek = vi.fn()
     ;(element as unknown as { editor: { seekTo: (t: number) => void } }).editor.seekTo = seek
     items[0].querySelector<HTMLButtonElement>(".at")!.click()
@@ -709,6 +713,19 @@ describe("CaseEditorElement's events", () => {
     expect(root.getElementById("interview-section")!.hidden).toBe(false)
     expect(root.getElementById("passages")!.hidden).toBe(true)
     expect(interviewPart(element).shadowRoot!.getElementById("group-exchanges")!.hidden).toBe(false)
+  })
+
+  it("shows the render, not the interview's form, when a passage is followed to its moment", async () => {
+    const element = await open(undefined, withPassages())
+    await wait(100)
+    const editor = (element as unknown as { editor: { seekTo: (t: number) => void, showRender: () => void } }).editor
+    const calls: string[] = []
+    editor.seekTo = t => calls.push(`seek ${t}`)
+    editor.showRender = () => calls.push("render")
+    await choose(element, 1)
+    interviewPart(element).dispatchEvent(new CustomEvent("interviewseek", { bubbles: true, composed: true, detail: { sighting: "w", at: 2 } }))
+    await wait(100)
+    expect(calls).toEqual(["seek 2", "render"])
   })
 
   it("shows no passages under an observation that no interview tells of", async () => {
@@ -805,6 +822,8 @@ describe("CaseEditorElement's events", () => {
     expect([hidden("row-source"), hidden("row-of"), hidden("row-observer"), hidden("row-witness"), hidden("row-medium"), hidden("row-title"), hidden("row-author")])
       .toEqual([true, true, true, false, false, false, false])
     expect(hidden("row-medium")).toBe(false)
+    // The media are fetched when an interview is the kind chosen.
+    await wait()
     ;(root.getElementById("medium") as HTMLSelectElement).value = "phone"
     parts(element).field("title").value = "Phone interview"
     parts(element).field("author").value = "BeauJerome"
