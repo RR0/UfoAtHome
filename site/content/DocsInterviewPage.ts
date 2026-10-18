@@ -6,7 +6,6 @@ interface InterviewDocText {
   lede: string
   intro: string
   /** What an interview is, said as the investigation knows it before any file is mentioned. */
-  conceptHeading: string
   concept: string
   placeHeading: string
   place: string
@@ -98,7 +97,6 @@ export class DocsInterviewPage extends DocsSection {
     en: {
       lede: 'An interview is a conversation with a witness. The case keeps what it established, and may keep the transcript.',
       intro: "An investigator rarely stops at a witness's first account. They go back to the witness: to fix a figure, to ask what was not said, to check what does not add up. That conversation is an interview, and a case can hold it next to the accounts it is about.",
-      conceptHeading: 'What an interview is',
       concept: 'An interview is a <strong>conversation held with one or several witnesses</strong> of the case, by one or several people (an investigator, an association), at a given time and through some <strong>medium</strong>: face to face, by phone, in a video call, by chat, by email or by letter. What the case keeps of it is what it <strong>established</strong> (a short description, in as many languages as you like) and, when there is one, its <strong>transcript</strong>: who said what, and when. The transcript is what a reader can check the description against.',
       placeHeading: 'Its place in the case',
       place: 'A case holds <a href="/docs/case/">events</a>. An interview is one of them, and it <strong>refers to the observation</strong> of the witness it was held with (to the observations, when several witnesses were interviewed together). The reference goes both ways: a passage of the transcript can say which <strong>moment of the observation</strong> it tells of, and the observation then lists, at that moment, the passages that tell of it. Nothing of an interview is replayed: the observation is what is replayed, the interview is what explains its figures.',
@@ -165,7 +163,6 @@ export class DocsInterviewPage extends DocsSection {
     fr: {
       lede: "Une interview est une conversation avec un témoin. Le dossier garde ce qu'elle a établi, et peut garder sa transcription.",
       intro: "Un enquêteur s'arrête rarement au premier compte rendu d'un témoin. Il revient vers lui : pour fixer une valeur, demander ce qui n'a pas été dit, vérifier ce qui ne colle pas. Cette conversation est une interview, et un dossier peut la garder à côté des comptes rendus dont elle parle.",
-      conceptHeading: "Ce qu'est une interview",
       concept: "Une interview est une <strong>conversation menée avec un ou plusieurs témoins</strong> du dossier, par une ou plusieurs personnes (un enquêteur, une association), à un moment donné et par un certain <strong>moyen</strong> : face à face, téléphone, visioconférence, chat, mail ou courrier. Ce que le dossier en garde, c'est ce qu'elle a <strong>établi</strong> (une courte description, dans autant de langues qu'on veut) et, quand il y en a une, sa <strong>transcription</strong> : qui a dit quoi, et quand. La transcription est ce à quoi un lecteur peut confronter la description.",
       placeHeading: 'Sa place dans le dossier',
       place: 'Un dossier contient des <a href="/docs/case/">événements</a>. Une interview en est un, et elle <strong>renvoie à l\'observation</strong> du témoin avec qui elle a eu lieu (aux observations, quand plusieurs témoins ont été interrogés ensemble). Le renvoi va dans les deux sens : un passage de la transcription peut dire de quel <strong>moment de l\'observation</strong> il parle, et l\'observation liste alors, à ce moment, les passages qui la racontent. Rien d\'une interview n\'est rejoué : l\'observation est ce qu\'on rejoue, l\'interview est ce qui explique ses valeurs.',
@@ -232,7 +229,6 @@ export class DocsInterviewPage extends DocsSection {
     es: {
       lede: 'Una entrevista es una conversación con un testigo. El caso conserva lo que estableció y puede conservar su transcripción.',
       intro: 'Un investigador rara vez se queda en el primer relato de un testigo. Vuelve a él: para fijar una cifra, preguntar lo que no se dijo, comprobar lo que no cuadra. Esa conversación es una entrevista, y un caso puede guardarla junto a los relatos de los que habla.',
-      conceptHeading: 'Qué es una entrevista',
       concept: 'Una entrevista es una <strong>conversación mantenida con uno o varios testigos</strong> del caso, por una o varias personas (un investigador, una asociación), en un momento dado y por algún <strong>medio</strong>: en persona, por teléfono, videollamada, chat, correo electrónico o carta. Lo que el caso conserva de ella es lo que <strong>estableció</strong> (una breve descripción, en tantos idiomas como se quiera) y, cuando existe, su <strong>transcripción</strong>: quién dijo qué y cuándo. La transcripción es lo que un lector puede contrastar con la descripción.',
       placeHeading: 'Su lugar en el caso',
       place: 'Un caso contiene <a href="/docs/case/">eventos</a>. Una entrevista es uno de ellos y <strong>remite a la observación</strong> del testigo con quien se celebró (a las observaciones, cuando se entrevistó a varios testigos juntos). La remisión va en ambos sentidos: un pasaje de la transcripción puede decir de qué <strong>momento de la observación</strong> habla, y la observación enumera entonces, en ese momento, los pasajes que la cuentan. Nada de una entrevista se reproduce: la observación es lo que se reproduce, la entrevista es lo que explica sus cifras.',
@@ -299,7 +295,6 @@ export class DocsInterviewPage extends DocsSection {
     it: {
       lede: "Un'intervista è una conversazione con un testimone. Il caso conserva ciò che ha stabilito e può conservarne la trascrizione.",
       intro: "Un investigatore raramente si ferma al primo resoconto di un testimone. Torna da lui: per fissare un valore, chiedere ciò che non è stato detto, verificare ciò che non torna. Quella conversazione è un'intervista, e un caso può conservarla accanto ai resoconti di cui parla.",
-      conceptHeading: "Che cos'è un'intervista",
       concept: "Un'intervista è una <strong>conversazione condotta con uno o più testimoni</strong> del caso, da una o più persone (un investigatore, un'associazione), in un dato momento e con un certo <strong>mezzo</strong>: di persona, per telefono, in videochiamata, in chat, per email o per lettera. Ciò che il caso ne conserva è ciò che ha <strong>stabilito</strong> (una breve descrizione, in quante lingue si vuole) e, quando c'è, la sua <strong>trascrizione</strong>: chi ha detto che cosa e quando. La trascrizione è ciò con cui un lettore può confrontare la descrizione.",
       placeHeading: 'Il suo posto nel caso',
       place: 'Un caso contiene <a href="/docs/case/">eventi</a>. Un\'intervista è uno di essi e <strong>rimanda all\'osservazione</strong> del testimone con cui si è tenuta (alle osservazioni, quando più testimoni sono stati intervistati insieme). Il rimando va in entrambe le direzioni: un passaggio della trascrizione può dire di quale <strong>momento dell\'osservazione</strong> parla, e l\'osservazione elenca allora, in quel momento, i passaggi che la raccontano. Nulla di un\'intervista viene riprodotto: l\'osservazione è ciò che si riproduce, l\'intervista è ciò che ne spiega i valori.',
@@ -377,7 +372,6 @@ export class DocsInterviewPage extends DocsSection {
   <div class="wrap prose-wide">
     <p>${t.intro}</p>
 
-    <h2>${t.conceptHeading}</h2>
     <p>${t.concept}</p>
 
     <h2>${t.peopleHeading}</h2>

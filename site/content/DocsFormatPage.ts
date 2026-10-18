@@ -111,7 +111,6 @@ if (excerpts.length > 0) {
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>What an observation is</h2>
     <p>An observation is <strong>what one witness reports of what they saw</strong>: when, where, what it looked like, how it moved, and what the sky and the weather were. It is the event UFO@home <strong>replays</strong>. A <a href="/docs/case/">case</a> holds at least one, and may hold others: other witnesses of the same event, each with their own account, and <a href="#another-reading-an-interpretation-is-another-sighting">alternative explanations</a>, which are observations too. An observation can be referred to by <a href="/docs/interview/">an interview</a> held with the witness, and refer back to it.</p>
 
     <h2>Technical part: the observation file</h2>
@@ -570,7 +569,6 @@ if (excerpts.length > 0) {
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Ce qu'est une observation</h2>
     <p>Une observation est <strong>ce qu'un témoin rapporte de ce qu'il a vu</strong> : quand, où, à quoi cela ressemblait, comment cela bougeait, et ce qu'étaient le ciel et la météo. C'est l'événement qu'UFO@home <strong>rejoue</strong>. Un <a href="/docs/case/">dossier</a> en contient au moins une, et peut en contenir d'autres : d'autres témoins du même événement, chacun avec son propre compte rendu, et des <a href="#another-reading-an-interpretation-is-another-sighting">explications alternatives</a>, qui sont aussi des observations. Une observation peut être désignée par <a href="/docs/interview/">une interview</a> menée avec le témoin, et y renvoyer en retour.</p>
 
     <h2>Partie technique : le fichier d'observation</h2>
@@ -1040,7 +1038,6 @@ if (excerpts.length > 0) {
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Qué es una observación</h2>
     <p>Una observación es <strong>lo que un testigo relata de lo que vio</strong>: cuándo, dónde, qué aspecto tenía, cómo se movía y cómo estaban el cielo y el tiempo. Es el evento que UFO@home <strong>reproduce</strong>. Un <a href="/docs/case/">caso</a> contiene al menos una, y puede contener otras: otros testigos del mismo suceso, cada uno con su propio relato, y <a href="#another-reading-an-interpretation-is-another-sighting">explicaciones alternativas</a>, que también son observaciones. Una observación puede ser designada por <a href="/docs/interview/">una entrevista</a> mantenida con el testigo, y remitir a ella a su vez.</p>
 
     <h2>Parte técnica: el archivo de observación</h2>
@@ -1498,7 +1495,6 @@ if (excerpts.length > 0) {
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Che cos'è un'osservazione</h2>
     <p>Un'osservazione è <strong>ciò che un testimone riferisce di ciò che ha visto</strong>: quando, dove, che aspetto aveva, come si muoveva e com'erano il cielo e il tempo. È l'evento che UFO@home <strong>riproduce</strong>. Un <a href="/docs/case/">caso</a> ne contiene almeno una e può contenerne altre: altri testimoni dello stesso fatto, ciascuno con il proprio resoconto, e <a href="#another-reading-an-interpretation-is-another-sighting">spiegazioni alternative</a>, che sono anch'esse osservazioni. Un'osservazione può essere designata da <a href="/docs/interview/">un'intervista</a> condotta con il testimone, e rimandarvi a sua volta.</p>
 
     <h2>Parte tecnica: il file di osservazione</h2>

@@ -215,8 +215,11 @@ export class DocsCasePage extends DocsSection {
     <h2>${t.eventsHeading}</h2>
     <p>${t.eventsIntro}</p>
     <ul>
-      <li>${t.observation}</li>
-      <li>${t.interpretation}</li>
+      <li>${t.observation}
+        <ul>
+          <li>${t.interpretation}</li>
+        </ul>
+      </li>
       <li>${t.interview}</li>
     </ul>
 
