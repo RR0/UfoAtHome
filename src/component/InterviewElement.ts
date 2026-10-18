@@ -68,6 +68,8 @@ export class InterviewElement extends HTMLElement {
   private localeToken = 0
   private loadToken = 0
   private json?: InterviewJson
+  /** The `src` being fetched or fetched last. */
+  private loading?: string
   private base?: string
   private readonly status = document.createElement("p")
   private readonly turns = document.createElement("div")
@@ -93,7 +95,7 @@ export class InterviewElement extends HTMLElement {
     InterviewElement.styleRoot(this.getRootNode())
     if (!this.contains(this.turns)) this.replaceChildren(this.status, this.turns)
     void this.loadLocale()
-    if (this.hasAttribute("src") && this.json === undefined) void this.load()
+    if (this.hasAttribute("src") && this.json === undefined && this.loading !== this.getAttribute("src")) void this.load()
   }
 
   /** The interview shown. */
@@ -125,6 +127,8 @@ export class InterviewElement extends HTMLElement {
   private async load(): Promise<void> {
     const src = this.getAttribute("src")
     const token = ++this.loadToken
+    // An element already in the page when it is defined hears of its `src` and of its connection: one fetch for both.
+    this.loading = src ?? undefined
     if (!src) return
     const url = new URL(src, location.href).href
     let json: InterviewJson | undefined

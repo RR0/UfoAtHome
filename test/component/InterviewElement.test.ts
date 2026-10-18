@@ -106,6 +106,15 @@ describe("InterviewElement", () => {
     expect(seeks).toEqual([[12, "jv"]])
   })
 
+  it("fetches its file once when it is in the page before it is defined", async () => {
+    files["https://example.org/time/interview.json"] = interview
+    await make({})
+    document.body.innerHTML = `<rr0-interview src="https://example.org/time/interview.json"></rr0-interview>`
+    await wait()
+    expect((fetch as unknown as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(1)
+    expect(document.querySelectorAll("rr0-interview .turn")).toHaveLength(4)
+  })
+
   it("says nothing was said when the file cannot be read", async () => {
     const element = await make({ src: "https://example.org/time/missing.json" })
     expect(element.querySelector(".rr0-interview-turns")!.textContent).toBe("Nothing was said yet.")
