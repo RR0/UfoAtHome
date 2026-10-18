@@ -153,6 +153,7 @@ export class SurroundingsCorridor {
     if (answer.signals) SurroundingsCorridor.add((merged.signals ??= []), moved(answer.signals), samePost)
     if (answer.crossings) SurroundingsCorridor.add((merged.crossings ??= []), moved(answer.crossings), samePost)
     if (answer.signs) SurroundingsCorridor.add((merged.signs ??= []), moved(answer.signs), samePost)
+    if (answer.credits) SurroundingsCorridor.add((merged.credits ??= []), answer.credits, (a, b) => a.url === b.url)
   }
 
   /** Puts each of `found` in `into` unless one like it is there already. */

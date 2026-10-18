@@ -226,6 +226,16 @@ export class LampMark {
     material.blendSrcAlpha = ZeroFactor
     material.blendDstAlpha = ZeroFactor
   }
+
+  /** Makes an opaque `material` (a lamp's glass, drawn as a solid) mark the pixels it covers as a lamp's, its colour put there as it is. */
+  static applyOpaque(material: Material): void {
+    material.blending = CustomBlending
+    material.blendEquation = AddEquation
+    material.blendSrc = OneFactor
+    material.blendDst = ZeroFactor
+    material.blendSrcAlpha = ZeroFactor
+    material.blendDstAlpha = ZeroFactor
+  }
 }
 
 /**

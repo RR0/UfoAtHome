@@ -351,7 +351,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   surveyKept: "What you placed by hand is left as it is.",
   surveyUnreachable: "The survey could not be reached. Try again later.",
   surveyFurniturePending: "Public lighting and traffic lights: waiting for OpenStreetMap…",
-  surveyFurnitureDone: "From OpenStreetMap: street lamps {lamps}, traffic lights {signals}, crossings {crossings}, signs {signs}.",
+  surveyFurnitureDone: "From {source}: street lamps {lamps}, traffic lights {signals}, crossings {crossings}, signs {signs}.",
   surveyFurnitureUnavailable: "Public lighting and traffic lights unavailable for now: OpenStreetMap does not answer.",
   surveyFurnitureRetry: "Retry",
   narrativePlaceholder: "What the observer reported, in their own words",

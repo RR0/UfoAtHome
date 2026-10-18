@@ -119,9 +119,10 @@ export class SurveyedDecor {
     if (!hand.streetlight) {
       for (const lamp of found.lamps ?? []) {
         // No `lit`: a public lamp is lit by the dark, not by the author (see SceneRenderer's photocell).
+        const spec = { ...(lamp.colorTemperatureK ? { colorTemperatureK: lamp.colorTemperatureK } : {}), ...(lamp.lumens ? { lumens: lamp.lumens } : {}), ...(lamp.mount === "wall" ? { mount: "wall" as const } : {}) }
         planted.push({
           id: nextId(), kind: "streetlight", title: titled("streetlight", undefined), eastM: lamp.eastM, northM: lamp.northM, headingDeg: 0,
-          ...(lamp.heightM ? { sizeM: { heightM: lamp.heightM } } : {}), origin: providerId, ...newest(dates.lamps)
+          ...(lamp.heightM ? { sizeM: { heightM: lamp.heightM } } : {}), ...(Object.keys(spec).length > 0 ? { lamp: spec } : {}), origin: providerId, ...newest(dates.lamps)
         })
       }
     }

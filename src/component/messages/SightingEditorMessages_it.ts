@@ -356,7 +356,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   surveyKept: "Ciò che avete collocato voi resta com'è.",
   surveyUnreachable: "Impossibile raggiungere il rilievo. Riprovate più tardi.",
   surveyFurniturePending: "Illuminazione pubblica e semafori: in attesa di OpenStreetMap…",
-  surveyFurnitureDone: "Da OpenStreetMap: lampioni {lamps}, semafori {signals}, attraversamenti {crossings}, segnali {signs}.",
+  surveyFurnitureDone: "Da {source}: lampioni {lamps}, semafori {signals}, attraversamenti {crossings}, segnali {signs}.",
   surveyFurnitureUnavailable: "Illuminazione pubblica e semafori non disponibili per ora: OpenStreetMap non risponde.",
   surveyFurnitureRetry: "Riprova",
   narrativePlaceholder: "Ciò che l'osservatore ha riferito, con parole sue",

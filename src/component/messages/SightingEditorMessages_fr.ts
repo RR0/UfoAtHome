@@ -356,7 +356,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   surveyKept: "Ce que vous avez placé vous-même reste tel quel.",
   surveyUnreachable: "Le relevé n'a pas pu être joint. Réessayez plus tard.",
   surveyFurniturePending: "Éclairage public et feux en attente d'OpenStreetMap…",
-  surveyFurnitureDone: "D'après OpenStreetMap : lampadaires {lamps}, feux {signals}, passages piétons {crossings}, panneaux {signs}.",
+  surveyFurnitureDone: "D'après {source} : lampadaires {lamps}, feux {signals}, passages piétons {crossings}, panneaux {signs}.",
   surveyFurnitureUnavailable: "Éclairage public et feux non disponibles pour l'instant : OpenStreetMap ne répond pas.",
   surveyFurnitureRetry: "Réessayer",
   narrativePlaceholder: "Ce que l'observateur a rapporté, dans ses propres mots",

@@ -124,7 +124,7 @@ import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { WindowLighting } from "./WindowLighting.js"
 import { DecorSystem } from "./DecorSystem.js"
 import { StreetFurnitureGeometry } from "./StreetFurnitureGeometry.js"
-import type { DecorObject } from "../engine/model/Decor.js"
+import type { DecorObject, StreetLampSpec } from "../engine/model/Decor.js"
 import { resolveDecorGazeAt, resolveDecorHeadlightsAt, resolveDecorLitAt, resolveDecorPlacementAt, canHoldObserver, decorModelOf, DEFAULT_DECOR_MODEL } from "../engine/model/Decor.js"
 import type { DecorModelCredit, DecorModelRef } from "../engine/model/Decor.js"
 import type { DecorModelEntry, DecorModelProvider } from "./decor/DecorModelProvider.js"
@@ -2378,7 +2378,7 @@ export class SceneRenderer {
       // lit can now change mid-recording (see Decor.ts's own resolveDecorLitAt), so a streetlight
       // that starts off but switches on later still needs a real light waiting to be revealed,
       // not one that was never created at all. updateDecorLitState toggles light.visible per tick.
-      if (object.kind === "streetlight" && lighted.includes(object)) this.addStreetlightLight(object.id, group, lighted.indexOf(object) < STREETLIGHT_SHADOWING_LIGHTS)
+      if (object.kind === "streetlight" && lighted.includes(object)) this.addStreetlightLight(object.id, group, lighted.indexOf(object) < STREETLIGHT_SHADOWING_LIGHTS, object.lamp)
       // Fired and forgotten on purpose: the primitive is already in the scene and is a complete,
       // correct answer on its own, so a model that takes a second to arrive (or never arrives)
       // costs the viewer nothing but detail. See loadDecorModel.
@@ -3265,7 +3265,7 @@ export class SceneRenderer {
       // A vehicle's lights are a setting (see HeadlightMode), and its lamps show whenever it is any but off.
       const headlights = object.kind === "vehicle" ? resolveDecorHeadlightsAt(object, t) : undefined
       const lit = photocell ? this.lastAstronomy!.sun.altitudeDeg < PHOTOCELL_SUN_ALTITUDE_DEG : headlights !== undefined ? Headlights.lamps(headlights) : resolveDecorLitAt(object, t)
-      DecorSystem.setLit(group, object.kind, lit, this.relativeScale)
+      DecorSystem.setLit(group, object.kind, lit, this.relativeScale, object.lamp)
       const light = this.streetlightLights.get(object.id)
       if (light) light.visible = lit
       if (headlights !== undefined) {
@@ -3368,7 +3368,7 @@ export class SceneRenderer {
    * away from their t=0 reference position). local position, not world: `light.position` is
    * interpreted relative to whichever object it's added to, so copying the lamp mesh's own
    * (already-local) position is correct without any conversion. */
-  private addStreetlightLight(id: string, group: Group, shadows: boolean): void {
+  private addStreetlightLight(id: string, group: Group, shadows: boolean, lamp?: StreetLampSpec): void {
     // The lamp head sits inside the body group the stated size scales (see DecorSystem.BODY_NAME),
     // one level below where this used to look — and its position is in that group's own scaled
     // space, so a streetlight stated taller than the primitive puts its real light at the top of
@@ -3376,7 +3376,11 @@ export class SceneRenderer {
     const body = DecorSystem.bodyOf(group)
     const lampHead = body.children.find(child => child.userData.emissive)
     if (!lampHead) return
-    const light = new PointLight(0xffcc66, STREETLIGHT_CANDELA * this.relativeScale, STREETLIGHT_LIGHT_DISTANCE)
+    // Of the lamp's own colour and flux where its inventory says them (see DecorObject.lamp), the warm white road lamp otherwise.
+    const candela = STREETLIGHT_CANDELA * DecorSystem.lampShare(lamp)
+    const light = new PointLight(0xffcc66, candela * this.relativeScale, STREETLIGHT_LIGHT_DISTANCE)
+    if (lamp?.colorTemperatureK) light.color.setRGB(...DecorSystem.lampHue(lamp))
+    light.userData.candela = candela
     light.position.copy(lampHead.position).multiply(body.scale)
     light.castShadow = shadows
     light.shadow.mapSize.set(512, 512)
@@ -3560,7 +3564,7 @@ export class SceneRenderer {
     this.updateCloudLighting(astronomy.sun, this.baseFogColor)
     PointSources.setEye(this.scatteredSky?.rodShare ?? 0, this.relativeScale)
     this.updateTwinkle(this.twinkleSeconds)
-    for (const light of this.streetlightLights.values()) light.intensity = STREETLIGHT_CANDELA * this.relativeScale
+    for (const light of this.streetlightLights.values()) light.intensity = ((light.userData.candela as number | undefined) ?? STREETLIGHT_CANDELA) * this.relativeScale
     this.buildSkyGlow(astronomy, skyColors.zenith)
     // The air between the eye and everything real, with the horizon this sky has just been given
     // as the light it lays over a distant thing — see AerialFog.

@@ -399,6 +399,16 @@ export interface DecorLight {
   beamDeg?: number
 }
 
+/** The lamp of a streetlight (see DecorObject.lamp). */
+export interface StreetLampSpec {
+  /** The colour of its light, kelvins: 2 000 a sodium lamp's orange, 2 700 to 3 000 a warm white LED's, 4 000 a cold one. */
+  colorTemperatureK?: number
+  /** Its luminous flux, lumens. */
+  lumens?: number
+  /** "wall": a bracket on a facade, with no column of its own. Absent: a column. */
+  mount?: "column" | "wall"
+}
+
 /** What the face of a road sign says (see DecorObject.sign). */
 export interface RoadSignFace {
   /** "stop" is the red octagon, "give-way" the triangle point down, "speed-limit" the disc ringed in red; "other" a sign whose face is not drawn. */
@@ -565,6 +575,11 @@ export interface DecorObject {
    * WireStructure. Absent means one strand at `sizeM.heightM`, a pole at each end. Ignored for every
    * other kind. */
   wire?: WireStructure
+  /**
+   * Kind "streetlight" only: the lamp it carries, where it is known (a town's inventory says it). Absent is the 10 000 lumen warm white road lamp
+   * on a column every streetlight was before this existed.
+   */
+  lamp?: StreetLampSpec
   /** Kind "roadsign" only: what its face says. Absent is a sign whose face is not known. */
   sign?: RoadSignFace
   /** Kind "building" only: number of upper stories above the ground floor, set when the building

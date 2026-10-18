@@ -7,6 +7,7 @@ import { IgnLidarTopoSurroundingsProvider } from "./providers/IgnLidarTopoSurrou
 import { IgnTopoSurroundingsProvider } from "./providers/IgnTopoSurroundingsProvider.js"
 import { OsmBuildingsSurroundingsProvider } from "./providers/OsmBuildingsSurroundingsProvider.js"
 import { OsmStreetFurniture } from "./providers/OsmStreetFurniture.js"
+import { ParisStreetLamps } from "./providers/ParisStreetLamps.js"
 
 /**
  * Every survey of the surroundings the trees, buildings, bridges and lines of a place can be taken from, which the author
@@ -23,28 +24,28 @@ export const SURROUNDINGS_SOURCES: DataSource<SurroundingsProvider>[] = [
     name: "IGN LiDAR HD + BD TOPO",
     credit: "© IGN, LiDAR HD and BD TOPO, Licence Ouverte 2.0; street lamps © OpenStreetMap contributors",
     creditUrl: "https://geoservices.ign.fr/lidarhd",
-    create: () => new CachedSurroundingsProvider(new IgnLidarTopoSurroundingsProvider({}, new OsmStreetFurniture()))
+    create: () => new CachedSurroundingsProvider(new IgnLidarTopoSurroundingsProvider({}, new OsmStreetFurniture({}, SurroundingsSources.TOWN_LAMPS)))
   },
   {
     id: "ign-lidar-hd",
     name: "IGN LiDAR HD",
     credit: "© IGN, LiDAR HD, Licence Ouverte 2.0; street lamps © OpenStreetMap contributors",
     creditUrl: "https://geoservices.ign.fr/lidarhd",
-    create: () => new CachedSurroundingsProvider(new IgnLidarSurroundingsProvider({}, new OsmStreetFurniture()))
+    create: () => new CachedSurroundingsProvider(new IgnLidarSurroundingsProvider({}, new OsmStreetFurniture({}, SurroundingsSources.TOWN_LAMPS)))
   },
   {
     id: "ign-bd-topo",
     name: "IGN BD TOPO",
     credit: "© IGN, BD TOPO, Licence Ouverte 2.0; street lamps © OpenStreetMap contributors",
     creditUrl: "https://geoservices.ign.fr/bdtopo",
-    create: () => new CachedSurroundingsProvider(new IgnTopoSurroundingsProvider({}, new OsmStreetFurniture()))
+    create: () => new CachedSurroundingsProvider(new IgnTopoSurroundingsProvider({}, new OsmStreetFurniture({}, SurroundingsSources.TOWN_LAMPS)))
   },
   {
     id: "osm-buildings",
     name: "OpenStreetMap buildings",
     credit: "Buildings and street lamps © OpenStreetMap contributors (ODbL)",
     creditUrl: "https://www.openstreetmap.org/copyright",
-    create: () => new CachedSurroundingsProvider(new OsmBuildingsSurroundingsProvider({}, new OsmStreetFurniture()))
+    create: () => new CachedSurroundingsProvider(new OsmBuildingsSurroundingsProvider({}, new OsmStreetFurniture({}, SurroundingsSources.TOWN_LAMPS)))
   }
 ]
 
@@ -61,6 +62,9 @@ export class SurroundingsSources {
 
   /** The survey that reaches everywhere, and is what a place gets where the default does not reach. */
   static readonly WORLD_ID = "osm-buildings"
+
+  /** The towns that publish their own inventory of their public lamps, whose lamps come before the volunteers' map's (see OsmStreetFurniture). */
+  static readonly TOWN_LAMPS: readonly ParisStreetLamps[] = [new ParisStreetLamps()]
 
   /** Nothing chosen: the scenery is the author's alone. Not a source, and what a preference says in one word. */
   static readonly NONE = "none"

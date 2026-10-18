@@ -4,7 +4,7 @@ import type { Material, Object3D } from "three"
 import type { ModelParameters } from "../engine/model/DecorTraits.js"
 import { DecorBase } from "../engine/model/DecorBase.js"
 import { LightRigs } from "../engine/model/LightRig.js"
-import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize } from "../engine/model/Decor.js"
+import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize, StreetLampSpec } from "../engine/model/Decor.js"
 import { canHoldObserver, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
 import { BridgeGeometry } from "./BridgeGeometry.js"
@@ -16,6 +16,7 @@ import { DryStoneWall } from "./DryStoneWall.js"
 import { StreetFurnitureGeometry } from "./StreetFurnitureGeometry.js"
 import { TrafficSignals } from "../engine/model/LightRig.js"
 import { LampMark } from "./colorSpace.js"
+import { LampColour } from "./LampColour.js"
 
 const DEG_TO_RAD = Math.PI / 180
 
@@ -540,16 +541,19 @@ function buildTerrace(): Group {
   return group
 }
 
-function buildStreetlight(lit: boolean): Group {
+function buildStreetlight(lit: boolean, mount?: StreetLampSpec["mount"], lamp?: StreetLampSpec): Group {
   const group = new Group()
-  addPart(group, new CylinderGeometry(0.05, 0.08, 5, 8), [0.28, 0.28, 0.3], 2.5)
+  // A lamp on a wall bracket has no column of its own: the facade holds it.
+  if (mount !== "wall") addPart(group, new CylinderGeometry(0.05, 0.08, 5, 8), [0.28, 0.28, 0.3], 2.5)
   // The lamp head is ALWAYS emissive (true, not `lit`) — lit can now change mid-recording (see
   // Decor.ts's own resolveDecorLitAt/DecorSystem.setLit), and a mesh built non-emissive here
   // (MeshLambertMaterial, receiving real scene lighting) could never later be toggled to read as
   // a genuine light source in place — only its *color* changes at runtime, never its material
   // class. Building it emissive from the start, in whichever color matches this initial `lit`,
   // is what setLit's own later re-tints actually assume.
-  addPart(group, new SphereGeometry(0.25, 12, 8), lit ? LIT_LAMP_COLOR : UNLIT_LAMP_COLOR, 5.1, true)
+  const head = addPart(group, new SphereGeometry(0.25, 12, 8), lit ? DecorSystem.lampHue(lamp) : UNLIT_LAMP_COLOR, 5.1, true)
+  // A lamp, whose colour the finish keeps (see LampMark): a sodium lamp's orange was white at night.
+  LampMark.applyOpaque(head.material as MeshBasicMaterial)
   return group
 }
 
@@ -1191,7 +1195,7 @@ export class DecorSystem {
             : object.kind === "mound"
               ? buildMound()
               : object.kind === "streetlight"
-            ? buildStreetlight(lit)
+            ? buildStreetlight(lit, object.lamp?.mount, object.lamp)
             : object.kind === "trafficlight"
               ? StreetFurnitureGeometry.trafficLight(TrafficSignals.isPedestrian(object.lights))
             : object.kind === "crossing"
@@ -1579,13 +1583,16 @@ export class DecorSystem {
    * vehicle's two headlights always switch together) without needing to track parts individually.
    * A no-op for building/tree/observer: they have no emissive children (see addPart's own
    * `emissive` flag), so the loop below simply finds nothing to retint. */
-  static setLit(group: Group, kind: DecorKind, lit: boolean, relativeScale = 1): void {
-    // Lit, its light over its own disc (see LAMP_CANDELA); dark, a glass that gives out nothing.
+  static setLit(group: Group, kind: DecorKind, lit: boolean, relativeScale = 1, lamp?: StreetLampSpec): void {
+    // Lit, its light over its own disc (see LAMP_CANDELA); dark, a glass that gives out nothing. A streetlight's lamp as its inventory says it is,
+    // where it says (see DecorObject.lamp).
     const [candela, radiusM, hue] = kind === "streetlight"
-      ? [STREETLIGHT_HEAD_CANDELA, STREETLIGHT_HEAD_RADIUS_M, LIT_LAMP_COLOR]
+      ? [STREETLIGHT_HEAD_CANDELA * DecorSystem.lampShare(lamp), STREETLIGHT_HEAD_RADIUS_M, DecorSystem.lampHue(lamp)]
       : [HEADLIGHT_CANDELA, HEADLIGHT_RADIUS_M, LIT_HEADLIGHT_COLOR]
     const luminance = lit ? (candela * relativeScale) / (Math.PI * radiusM * radiusM) : 0
-    const color: RgbColor = [hue[0] * luminance, hue[1] * luminance, hue[2] * luminance]
+    // Held where the picture's half floats still tell the channels apart, as a declared lamp is (see LAMP_MAX_RELATIVE).
+    const fit = Math.min(1, LAMP_MAX_RELATIVE / Math.max(hue[0] * luminance, hue[1] * luminance, hue[2] * luminance, 1e-30))
+    const color: RgbColor = [hue[0] * luminance * fit, hue[1] * luminance * fit, hue[2] * luminance * fit]
     // Traversed, not iterated over the direct children: a headlight sits inside the body group the
     // stated size scales (see build), a rung below where it used to be.
     group.traverse(child => {
@@ -1595,6 +1602,19 @@ export class DecorSystem {
       if (!(child instanceof Mesh) || !data.emissive || data.lightId) return
       ;(child.material as MeshBasicMaterial).color.setRGB(...color)
     })
+  }
+
+  /** The road lamp a streetlight's figures are written for: ten thousand lumens. */
+  static readonly REFERENCE_LUMENS = 10000
+
+  /** How much a streetlight's lamp gives out against the road lamp its figures are written for (see REFERENCE_LUMENS): one where nothing says. */
+  static lampShare(lamp: StreetLampSpec | undefined): number {
+    return lamp?.lumens ? lamp.lumens / DecorSystem.REFERENCE_LUMENS : 1
+  }
+
+  /** The colour of a streetlight's light: its colour temperature's (see LampColour), else the warm white every streetlight had. */
+  static lampHue(lamp: StreetLampSpec | undefined): RgbColor {
+    return lamp?.colorTemperatureK ? LampColour.ofTemperature(lamp.colorTemperatureK) : LIT_LAMP_COLOR
   }
 
   /** Disposes every mesh's geometry/material — Group itself owns no GPU resource of its own.

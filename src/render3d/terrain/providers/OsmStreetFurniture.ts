@@ -1,4 +1,4 @@
-import type { Surroundings, SurveyedCrossing, SurveyedSign, SurveyedSignal } from "../SurroundingsProvider.js"
+import type { StreetLampSource, Surroundings, SurveyCredit, SurveyedCrossing, SurveyedLamp, SurveyedSign, SurveyedSignal } from "../SurroundingsProvider.js"
 import { TrafficSignals } from "../../../engine/model/LightRig.js"
 import { OverpassClient } from "./OverpassClient.js"
 import type { OverpassClientOptions, OverpassResponse } from "./OverpassClient.js"
@@ -6,7 +6,7 @@ import { OverpassRoadProvider } from "./OverpassRoadProvider.js"
 import { OsmStreetLamps } from "./OsmStreetLamps.js"
 
 /** What stands in a street and is neither a building nor a tree: its lamps, its traffic lights, its painted crossings and its signs. */
-export type StreetFurniture = Pick<Surroundings, "lamps" | "signals" | "crossings" | "signs" | "incomplete">
+export type StreetFurniture = Pick<Surroundings, "lamps" | "signals" | "crossings" | "signs" | "incomplete" | "credits">
 
 type Element = NonNullable<OverpassResponse["elements"]>[number]
 type Metres = [number, number]
@@ -59,10 +59,45 @@ export class OsmStreetFurniture {
   private static readonly ROADS = new Set([...OverpassRoadProvider.DRIVABLE, "living_street", "busway", "road"])
   private static readonly ON_ROAD = "^(traffic_signals|crossing|stop|give_way)$"
 
+  /** The volunteers' map, credited wherever what it gave is used. */
+  static readonly CREDIT: SurveyCredit = { name: "OpenStreetMap", url: "https://www.openstreetmap.org/copyright", licence: "ODbL" }
+
   private readonly client: OverpassClient
 
-  constructor(options: OverpassClientOptions = {}) {
+  /**
+   * @param lampSources The towns' own inventories of their lamps (see StreetLampSource): where one covers the place, its lamps are the lamps, asked
+   * at the same time as the map, and the map gives the rest. A town's inventory has every lamp it maintains, at its surveyed place, with the colour
+   * and the flux of its light; the map has some, and draws the others along the streets it says are lit (see OsmStreetLamps).
+   */
+  constructor(options: OverpassClientOptions = {}, private readonly lampSources: readonly StreetLampSource[] = []) {
     this.client = new OverpassClient(options)
+  }
+
+  /** The lamps a town's inventory has of the place, where one covers it and answers: asked once for the page, as the map is (see pending). */
+  private local(centre: { lat: number, lng: number }, radiusM: number): Promise<{ credit: SurveyCredit, lamps: SurveyedLamp[] } | undefined> {
+    const source = this.lampSources.find(candidate => candidate.covers(centre.lat, centre.lng))
+    if (!source) return Promise.resolve(undefined)
+    const key = `${source.credit.url} ${OsmStreetFurniture.boxOf(centre, radiusM)}`
+    let asked = OsmStreetFurniture.localPending.get(key)
+    if (!asked) {
+      asked = source.lampsNear(centre, radiusM).then(lamps => ({ credit: source.credit, lamps }), () => {
+        OsmStreetFurniture.localPending.delete(key)
+        return undefined
+      })
+      OsmStreetFurniture.localPending.set(key, asked)
+    }
+    return asked
+  }
+
+  private static readonly localPending = new Map<string, Promise<{ credit: SurveyCredit, lamps: SurveyedLamp[] } | undefined>>()
+
+  /** The map's furniture with a town's lamps in place of its own, where a town gave them; each credited. */
+  private static withLocal(map: StreetFurniture, local: { credit: SurveyCredit, lamps: SurveyedLamp[] } | undefined): StreetFurniture {
+    const { lamps: mapLamps, ...rest } = map
+    const lamps = local ? local.lamps : mapLamps
+    const fromMap = OsmStreetFurniture.found({ ...rest, ...(local ? {} : { lamps: mapLamps }) })
+    const credits = [...(fromMap ? [OsmStreetFurniture.CREDIT] : []), ...(local && local.lamps.length > 0 ? [local.credit] : [])]
+    return { ...rest, ...(lamps?.length ? { lamps } : {}), ...(credits.length > 0 ? { credits } : {}) }
   }
 
   /** The day the volunteers' map was asked, which is the day it is as of. */
@@ -99,15 +134,18 @@ export class OsmStreetFurniture {
 
   async near(centre: { lat: number, lng: number }, radiusM: number): Promise<StreetFurniture> {
     const asked = this.ask(OsmStreetFurniture.boxOf(centre, radiusM))
+    const town = this.local(centre, radiusM)
     // The furniture never holds up the rest of a survey: an instance that does not answer is waited for a few seconds, not until its own timeout.
     let timer: ReturnType<typeof setTimeout> | undefined
     const late = Symbol("late")
     const patience = new Promise<typeof late>(resolve => { timer = setTimeout(() => resolve(late), OsmStreetLamps.PATIENCE_MS) })
     try {
-      const answer = await Promise.race([asked, patience])
-      // Late or refused, it is not that the streets have nothing: the survey says it is not whole, and is not kept as the place's answer.
-      if (answer === late || answer === undefined) return { incomplete: true }
-      return OsmStreetFurniture.from(answer, centre, radiusM)
+      const [answer, local] = await Promise.all([Promise.race([asked, patience]), Promise.race([town, patience])])
+      const lamps = local === late ? undefined : local
+      // Late or refused, it is not that the streets have nothing: the survey says it is not whole, and is not kept as the place's answer. A town's
+      // lamps that came are its lamps all the same.
+      if (answer === late || answer === undefined) return { ...OsmStreetFurniture.withLocal({}, lamps), incomplete: true }
+      return OsmStreetFurniture.withLocal(OsmStreetFurniture.from(answer, centre, radiusM), lamps)
     } finally {
       clearTimeout(timer)
     }
@@ -127,7 +165,7 @@ export class OsmStreetFurniture {
     const box = OsmStreetFurniture.boxOf(centre, radiusM)
     for (let attempt = 0; ; attempt++) {
       const answer = await this.ask(box)
-      if (answer) return OsmStreetFurniture.from(answer, centre, radiusM)
+      if (answer) return OsmStreetFurniture.withLocal(OsmStreetFurniture.from(answer, centre, radiusM), await this.local(centre, radiusM))
       if (attempt >= OsmStreetFurniture.RETRY_DELAYS_MS.length) throw new Error("Overpass did not answer")
       await new Promise(resolve => setTimeout(resolve, OsmStreetFurniture.RETRY_DELAYS_MS[attempt]))
     }
@@ -157,6 +195,7 @@ export class OsmStreetFurniture {
   /** Forgets the answers of this page. For tests. */
   static forget(): void {
     OsmStreetFurniture.pending.clear()
+    OsmStreetFurniture.localPending.clear()
   }
 
   /** One Overpass answer as the furniture of the streets, each kind nearest first, inside the circle only. Absent kinds are none. */

@@ -53,10 +53,20 @@ export class PrivacyPage implements SitePage {
       name: "Overpass (OpenStreetMap)", host: "overpass-api.de, overpass.kumi.systems, overpass.private.coffee",
       where: { en: "public instances run by volunteers, in Europe", fr: "instances publiques tenues par des bénévoles, en Europe", es: "instancias públicas mantenidas por voluntarios, en Europa", it: "istanze pubbliche gestite da volontari, in Europa" },
       why: {
-        en: "Buildings around the observer, when that scenery is chosen.",
-        fr: "Bâtiments autour de l'observateur, lorsque ce décor est choisi.",
-        es: "Edificios alrededor del observador, cuando se elige ese entorno.",
-        it: "Edifici intorno all'osservatore, quando si sceglie quell'ambiente."
+        en: "Buildings around the observer, when that scenery is chosen; street lamps, traffic lights, crossings and road signs with every scenery.",
+        fr: "Bâtiments autour de l'observateur, lorsque ce décor est choisi ; lampadaires, feux, passages piétons et panneaux avec tout décor.",
+        es: "Edificios alrededor del observador, cuando se elige ese entorno; farolas, semáforos, pasos de peatones y señales con cualquier entorno.",
+        it: "Edifici intorno all'osservatore, quando si sceglie quell'ambiente; lampioni, semafori, attraversamenti e segnali con ogni ambiente."
+      }
+    },
+    {
+      name: "Paris Data (Ville de Paris)", host: "opendata.paris.fr",
+      where: { en: "France (City of Paris)", fr: "France (Ville de Paris)", es: "Francia (Ayuntamiento de París)", it: "Francia (Comune di Parigi)" },
+      why: {
+        en: "The city's public lamps, their colour and their flux, around an observer in Paris.",
+        fr: "Les lampadaires de la ville, leur couleur et leur flux, autour d'un observateur à Paris.",
+        es: "Las farolas de la ciudad, su color y su flujo, alrededor de un observador en París.",
+        it: "I lampioni della città, il loro colore e il loro flusso, intorno a un osservatore a Parigi."
       }
     },
     {

@@ -106,6 +106,32 @@ export interface SurveyedLamp {
   northM: number
   /** The height of the light above the ground, where the map says (a lamp column is five to eight metres, a lamp on a wall lower). */
   heightM?: number
+  /** The colour of its light, kelvins, where the inventory says (2 000 for a sodium lamp, 2 700 to 3 000 for a town's LEDs). */
+  colorTemperatureK?: number
+  /** Its luminous flux, lumens, where the inventory says (a few thousand for a footpath, ten to thirty thousand for an avenue). */
+  lumens?: number
+  /** What holds it: a column of its own, or a bracket on a wall. Absent: a column. */
+  mount?: "column" | "wall"
+}
+
+/** A source of the lamps of a place that is not the survey's own: a town's inventory of its public lighting (see OsmStreetFurniture). */
+export interface StreetLampSource {
+  /** Who keeps it and where it is published, for the credit. */
+  readonly credit: SurveyCredit
+  /** Cheap and offline: whether the inventory could cover this place (the town's own territory). */
+  covers(lat: number, lng: number): boolean
+  /** The lamps within `radiusM` of the centre, the nearest first. Throws when the service does not answer. */
+  lampsNear(centre: { lat: number, lng: number }, radiusM: number): Promise<SurveyedLamp[]>
+}
+
+/** Where some of what a survey found was taken from, when it is not the survey's own: to be credited where it is used. */
+export interface SurveyCredit {
+  name: string
+  url: string
+  /** Its licence, where it asks for its credit ("ODbL"). */
+  licence?: string
+  /** What of the survey it gave, where it gave one thing only: "lamps" for a town's inventory of its lighting. Absent: any of it. */
+  of?: "lamps"
 }
 
 /** One traffic light, as a map has it: a head on its post at the kerb, in metres from the place asked about. */
@@ -169,6 +195,8 @@ export interface Surroundings {
   signals?: SurveyedSignal[]
   crossings?: SurveyedCrossing[]
   signs?: SurveyedSign[]
+  /** The sources of what the survey brought that are not its own (the volunteers' map, a town's inventory), to be credited with it. */
+  credits?: SurveyCredit[]
   /** A part of the survey did not answer in time (the volunteers' map is often slow): what is here is not all the place has, and is not kept as its answer. */
   incomplete?: boolean
 }

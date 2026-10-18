@@ -1,6 +1,6 @@
 import type { DecorObject } from "../engine/model/Decor.js"
 import type { RecordingSource } from "../engine/model/RecordingSource.js"
-import type { Surroundings, SurroundingsProvider } from "../render3d/terrain/SurroundingsProvider.js"
+import type { Surroundings, SurroundingsProvider, SurveyCredit } from "../render3d/terrain/SurroundingsProvider.js"
 import { SurroundingsCorridor } from "../render3d/terrain/SurroundingsCorridor.js"
 import { SurveyedDecor } from "../render3d/terrain/SurveyedDecor.js"
 import type { SurveyedKind } from "../render3d/terrain/SurveyedDecor.js"
@@ -73,6 +73,9 @@ export class SurroundingsPlanter {
   private token = 0
   /** What the last survey said it brought, which the line about what comes late follows. */
   private surveyed = ""
+  /** What it said of the furniture of the streets that came in time, and whose it was: said again, with the rest, when the rest comes. */
+  private furnitureSaid = ""
+  private furnitureCredits: SurveyCredit[] = []
 
   constructor(
     private readonly status: HTMLElement,
@@ -195,6 +198,7 @@ export class SurroundingsPlanter {
     const count = (kind: DecorObject["kind"]): number => planted.filter(object => object.kind === kind).length
     if (planted.length > 0 || this.host.decor().length !== kept.length) this.host.setDecor([...kept, ...planted])
     if (planted.length === 0) {
+      this.furnitureSaid = ""
       this.surveyed = handPlaced ? this.messages.surveyKept : this.messages.surveyNone.replace("{radius}", String(this.radiusM))
       this.say(this.surveyed, found.incomplete ? this.messages.surveyFurniturePending : "")
       return
@@ -205,7 +209,18 @@ export class SurroundingsPlanter {
       .replace("{bridges}", String(count("bridge"))).replace("{lines}", String(count("wire"))).replace("{source}", provider.name)
     const dated = this.datesText(found.dates)
     this.surveyed = [done, dated, handPlaced ? this.messages.surveyKept : ""].filter(part => part !== "").join(" ")
-    this.say(this.surveyed, found.incomplete ? this.messages.surveyFurniturePending : this.furnitureText(planted))
+    this.citeCredits(found)
+    // What came in time is said, and what is still to come after it.
+    this.furnitureCredits = found.credits ?? []
+    this.furnitureSaid = this.furnitureText(planted, found)
+    this.say(this.surveyed, [this.furnitureSaid, found.incomplete ? this.messages.surveyFurniturePending : ""].filter(part => part !== "").join(" "))
+  }
+
+  /** Cites, among the recording's sources, what the survey took from others than itself: the volunteers' map, a town's inventory of its lamps. */
+  private citeCredits(found: Partial<Surroundings>): void {
+    for (const credit of found.credits ?? []) {
+      this.host.cite({ title: credit.licence ? `${credit.name} (${credit.licence})` : credit.name, url: credit.url, publication: { publisher: credit.name } })
+    }
   }
 
   /**
@@ -219,13 +234,13 @@ export class SurroundingsPlanter {
       this.say(this.surveyed, "")
       return
     }
-    this.say(this.surveyed, this.messages.surveyFurniturePending)
+    this.say(this.surveyed, [this.furnitureSaid, this.messages.surveyFurniturePending].filter(part => part !== "").join(" "))
     late.then(found => {
       if (token !== this.token) return
       this.plantLate(provider, found)
     }, () => {
       if (token !== this.token) return
-      this.say(this.surveyed, this.messages.surveyFurnitureUnavailable, { label: this.messages.surveyFurnitureRetry, run: () => this.awaitLate(provider, stops, token) })
+      this.say(this.surveyed, [this.furnitureSaid, this.messages.surveyFurnitureUnavailable].filter(part => part !== "").join(" "), { label: this.messages.surveyFurnitureRetry, run: () => this.awaitLate(provider, stops, token) })
     })
   }
 
@@ -233,14 +248,24 @@ export class SurroundingsPlanter {
     const decor = this.host.decor()
     const { planted } = SurveyedDecor.of(provider.id, { trees: [], buildings: [], bridges: [], lines: [], ...found }, { kept: decor, kindName: kind => this.host.kindName(kind) })
     if (planted.length > 0) this.host.setDecor([...decor, ...planted])
-    this.say(this.surveyed, this.furnitureText(planted))
+    this.citeCredits(found)
+    // What came in time keeps being said, beside what came now.
+    // One sentence for all the furniture of the place now, what came in time and what came late, each source named once.
+    const furniture = decor.filter(object => object.origin === provider.id).concat(planted)
+    this.furnitureSaid = this.furnitureText(furniture, { credits: [...this.furnitureCredits, ...(found.credits ?? [])] })
+    this.say(this.surveyed, this.furnitureSaid)
   }
 
-  /** The furniture of the streets among what was planted, as a sentence: nothing when there is none. */
-  private furnitureText(planted: readonly DecorObject[]): string {
+  /** The furniture of the streets among what was planted, as a sentence naming where it came from: nothing when there is none. */
+  private furnitureText(planted: readonly DecorObject[], found: Partial<Surroundings>): string {
     const count = (kind: DecorObject["kind"]): number => planted.filter(object => object.kind === kind).length
     if (!planted.some(object => object.kind === "streetlight" || object.kind === "trafficlight" || object.kind === "crossing" || object.kind === "roadsign")) return ""
-    return this.messages.surveyFurnitureDone
+    // Named by the survey, each source once and only for what it gave (a town's inventory, its lamps); the volunteers' map where it says nothing,
+    // which is where the furniture of a street came from before towns did.
+    const gave = (credit: SurveyCredit) => credit.of !== "lamps" || count("streetlight") > 0
+    const names = [...new Set((found.credits ?? []).filter(gave).map(credit => credit.name))]
+    const sources = names.join(" + ") || "OpenStreetMap"
+    return this.messages.surveyFurnitureDone.replace("{source}", sources)
       .replace("{lamps}", String(count("streetlight"))).replace("{signals}", String(count("trafficlight")))
       .replace("{crossings}", String(count("crossing"))).replace("{signs}", String(count("roadsign")))
   }

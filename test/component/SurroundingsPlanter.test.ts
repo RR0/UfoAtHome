@@ -420,3 +420,15 @@ describe("SurroundingsPlanter with furniture that comes late", () => {
     expect(editor.decor.map(object => object.kind)).toEqual(["tree"])
   })
 })
+
+describe("SurroundingsPlanter and the sources of the furniture", () => {
+  it("says where the furniture came from, and cites each source among the recording's", async () => {
+    const editor = new FakeEditor()
+    const paris = { name: "Ville de Paris, Éclairage public", url: "https://opendata.paris.fr/explore/dataset/eclairage-public/", licence: "ODbL" }
+    const survey = new FakeSurvey({ ...Scene.of([OAK], []), lamps: [{ eastM: 3, northM: 4, colorTemperatureK: 2000, lumens: 1630, mount: "wall" }], credits: [paris] })
+    await editor.planter(survey).survey(PLACE.lat, PLACE.lng)
+    expect(editor.text).toContain("From Ville de Paris, Éclairage public: street lamps 1")
+    expect(editor.sources).toContainEqual(expect.objectContaining({ title: "Ville de Paris, Éclairage public (ODbL)", url: paris.url }))
+    expect(editor.decor.find(object => object.kind === "streetlight")?.lamp).toEqual({ colorTemperatureK: 2000, lumens: 1630, mount: "wall" })
+  })
+})
