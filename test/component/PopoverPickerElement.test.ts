@@ -25,11 +25,12 @@ describe("PopoverPickerElement", () => {
     picker.choices = TREE
     return picker
   }
-  const choiceOf = (picker: PopoverPickerElement, id: string) => picker.querySelector<HTMLButtonElement>(`.pp-choice[data-id="${id}"]`)!
+  const choiceOf = (picker: PopoverPickerElement, id: string) => (picker.drawMenu(), picker).querySelector<HTMLButtonElement>(`.pp-choice[data-id="${id}"]`)!
 
   it("lists headings of any depth and shows the selected label on its button", () => {
     const picker = mount()
     picker.value = "eye"
+    picker.drawMenu()
     expect(picker.querySelectorAll(".pp-heading")).toHaveLength(2)
     expect(picker.querySelector(".pp-trigger")!.textContent).toBe("Naked eye")
     expect(picker.value).toBe("eye")

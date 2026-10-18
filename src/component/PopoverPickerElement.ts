@@ -52,6 +52,8 @@ export class PopoverPickerElement extends HTMLElement {
   private current = ""
   private trigger?: HTMLButtonElement
   private panel?: HTMLElement
+  /** True when the menu drawn in the panel no longer matches `tree`/`current`; redrawn when it opens. */
+  private stale = true
 
   /** Makes the controls, once. */
   build(): void {
@@ -72,6 +74,9 @@ export class PopoverPickerElement extends HTMLElement {
     trigger.setAttribute("aria-haspopup", "listbox")
     this.trigger = trigger
     this.panel = panel
+    panel.addEventListener("beforetoggle", event => {
+      if ((event as ToggleEvent).newState === "open") this.drawMenu()
+    })
     this.append(style, trigger, panel)
     this.render()
   }
@@ -138,8 +143,22 @@ export class PopoverPickerElement extends HTMLElement {
 
   private render(): void {
     if (!this.trigger || !this.panel) return
-    const doc = this.ownerDocument
     this.trigger.textContent = this.selectedLabel ?? (this.current || this.placeholder)
+    this.stale = true
+    let open = false
+    try { open = this.panel.matches(":popover-open") } catch { /* no popover support: drawn on demand */ }
+    if (open) this.drawMenu()
+  }
+
+  /**
+   * Draws the menu. Done when the popover opens, not on every change of the tree: a menu of a few hundred
+   * nodes is costly to build and most pickers are never opened. Public so a caller (or a test) can read
+   * the choices without opening it.
+   */
+  drawMenu(): void {
+    if (!this.panel || !this.stale) return
+    this.stale = false
+    const doc = this.ownerDocument
     const draw = (nodes: PickerNode[], depth: number): HTMLElement[] =>
       nodes.flatMap(node => {
         if (node.children) {
