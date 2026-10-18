@@ -43,6 +43,18 @@ describe("RailwaySystem", () => {
     expect(up).toBe(normals.count)
   })
 
+  it("stops the ballast at its own height on an embankment, and draws the bank below it as earth", () => {
+    const system = new RailwaySystem()
+    // The relief falls 1.5 m from the middle of the track to 4 m out on each side, as the smoothed relief of a low embankment does.
+    const bank = (_x: number, z: number): number => 30 - Math.min(1.5, Math.abs(z) * 1.5 / 4)
+    system.set([line({}, [-100, 0], [100, 0])], ORIGIN.lat, ORIGIN.lng, bank)
+    const ballast = bounds(system, "ballast")
+    expect(ballast.max.y - ballast.min.y).toBeLessThan(RailwaySystem.BALLAST_HEIGHT_M + 0.05)
+    const earth = bounds(system, "embankments")
+    expect(earth.min.y).toBeLessThan(29)
+    expect(earth.max.y).toBeLessThanOrEqual(ballast.min.y + 0.001)
+  })
+
   it("draws the two tracks of a double line side by side, and nothing of a tunnel", () => {
     const system = new RailwaySystem()
     system.set([line({ tracks: 2 }, [-100, 0], [100, 0]), line({ id: "tunnel", level: -1 }, [-100, 50], [100, 50])], ORIGIN.lat, ORIGIN.lng, () => 0)

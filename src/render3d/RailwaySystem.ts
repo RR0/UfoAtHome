@@ -109,7 +109,9 @@ export class RailwaySystem {
   /** The shoulder of ballast past the end of the sleepers. */
   static readonly BALLAST_SHOULDER_M = 0.45
   /** A deck under a track that is carried over the ground, when nothing else draws it: its depth under the formation. */
-  static readonly DECK_DEPTH_M = 1.1
+  static readonly DECK_DEPTH_M = 0.8
+  /** The bank of an embankment under the ballast, horizontal over vertical: earth holds at 3 for 2. */
+  static readonly BANK_SLOPE = 1.5
   /** A concrete sleeper of a French main line, and how far apart they are laid. */
   static readonly SLEEPER_LENGTH_M = 2.4
   static readonly SLEEPER_WIDTH_M = 0.29
@@ -150,6 +152,9 @@ export class RailwaySystem {
 
   /** Linear albedos: granite ballast darkened by brake dust, concrete and creosoted wood sleepers, rusted rail sides, galvanised steel, weathered copper. */
   private static readonly BALLAST_ALBEDO: [number, number, number] = [0.17, 0.16, 0.15]
+  /** The grass and earth of a bank, a dull summer one, and the weathered concrete of a deck. */
+  private static readonly BANK_ALBEDO: [number, number, number] = [0.085, 0.09, 0.05]
+  private static readonly DECK_ALBEDO: [number, number, number] = [0.26, 0.255, 0.24]
   private static readonly CONCRETE_ALBEDO: [number, number, number] = [0.36, 0.35, 0.33]
   private static readonly WOOD_ALBEDO: [number, number, number] = [0.07, 0.055, 0.045]
   private static readonly RUST_ALBEDO: [number, number, number] = [0.085, 0.068, 0.058]
@@ -160,7 +165,9 @@ export class RailwaySystem {
   private stepM = RailwaySystem.STEP_M
   private drawn = 0
 
-  private readonly ballastMaterial = RailwaySystem.lambert(RailwaySystem.BALLAST_ALBEDO, true)
+  private readonly ballastMaterial = RailwaySystem.pebbled(RailwaySystem.lambert(RailwaySystem.BALLAST_ALBEDO, true))
+  private readonly earthMaterial = RailwaySystem.lambert(RailwaySystem.BANK_ALBEDO, true)
+  private readonly deckMaterial = RailwaySystem.lambert(RailwaySystem.DECK_ALBEDO, false)
   private readonly concreteSleepers = RailwaySystem.sleeperMaterial(RailwaySystem.CONCRETE_ALBEDO)
   private readonly woodSleepers = RailwaySystem.sleeperMaterial(RailwaySystem.WOOD_ALBEDO)
   private readonly rustMaterial = RailwaySystem.lambert(RailwaySystem.RUST_ALBEDO, true)
@@ -197,7 +204,7 @@ export class RailwaySystem {
     const offset = RailwaySystem.altitudeOffset(shown, groundYAt)
     const anchored = RailwaySystem.groundEnds(projected)
     const batches = {
-      ballast: new Batch(), concrete: new Batch(), wood: new Batch(), rust: new Batch(), head: new Batch(), steel: new Batch(), wire: new Batch()
+      ballast: new Batch(), earth: new Batch(), deck: new Batch(), concrete: new Batch(), wood: new Batch(), rust: new Batch(), head: new Batch(), steel: new Batch(), wire: new Batch()
     }
     for (const { line, path } of shown) {
       const profile = this.profileOf(line, path, groundYAt, offset, anchored)
@@ -207,6 +214,8 @@ export class RailwaySystem {
     }
     const meshes: [Batch, Material, string, boolean][] = [
       [batches.ballast, this.ballastMaterial, "ballast", false],
+      [batches.earth, this.earthMaterial, "embankments", false],
+      [batches.deck, this.deckMaterial, "decks", true],
       [batches.concrete, this.concreteSleepers, "sleepers", false],
       [batches.wood, this.woodSleepers, "sleepers wood", false],
       [batches.rust, this.rustMaterial, "rails", false],
@@ -234,7 +243,7 @@ export class RailwaySystem {
 
   dispose(): void {
     this.clear()
-    for (const material of [this.ballastMaterial, this.concreteSleepers, this.woodSleepers, this.rustMaterial, this.headMaterial, this.steelMaterial, this.wireMaterial]) material.dispose()
+    for (const material of [this.ballastMaterial, this.earthMaterial, this.deckMaterial, this.concreteSleepers, this.woodSleepers, this.rustMaterial, this.headMaterial, this.steelMaterial, this.wireMaterial]) material.dispose()
   }
 
   /** Whether a line comes within `radiusM` (and a margin) of the patch's origin, as RoadSystem.within asks of a road. */
@@ -328,7 +337,7 @@ export class RailwaySystem {
   }
 
   /** The ballast, the sleepers and the rails of every track of a line, and its catenary when it has one. */
-  private lay(line: RailwayLine, profile: Profile, groundYAt: GroundYAt, batches: Record<"ballast" | "concrete" | "wood" | "rust" | "head" | "steel" | "wire", Batch>): void {
+  private lay(line: RailwayLine, profile: Profile, groundYAt: GroundYAt, batches: Record<"ballast" | "earth" | "deck" | "concrete" | "wood" | "rust" | "head" | "steel" | "wire", Batch>): void {
     const spacing = line.highSpeed ? RailwaySystem.TRACK_SPACING_M.highSpeed : RailwaySystem.TRACK_SPACING_M[line.kind]
     const tracks = Math.min(8, Math.max(1, line.tracks))
     const offsets = Array.from({ length: tracks }, (_, i) => (i - (tracks - 1) / 2) * spacing)
@@ -349,23 +358,49 @@ export class RailwaySystem {
       const topRight = rungs.map(i => at(i, -topHalf, bedM + lift))
       batches.ballast.strip(topLeft, topRight)
       if (line.level === 0) {
-        // Down to the ground at each side, at its own height there, never above the top (a cutting's side climbs past it).
+        // The ballast's own slope, down to the formation and no lower: half a metre. Where the ground at its foot stands higher (a cutting,
+        // a crowned relief), it stops on the ground. Where it stands lower, the line is on an embankment, which is earth and grass: drawn
+        // so, from the foot of the ballast down to the ground at the slope of a bank. The ballast went down to the ground before, and on the
+        // low embankments the relief smooths away (the ground 0.3 to 1.5 m below the middle of the track 2 to 6 m out, on the LGV at Mâcon)
+        // a track stood on a grey wall up to two metres high.
         const toe = topHalf + bedM * RailwaySystem.BALLAST_SLOPE
-        const toeAt = (i: number, acrossM: number): Point3 => {
-          const point = at(i, acrossM, 0)
-          point.y = Math.min(groundYAt(point.x, point.z), profile.y[i] + bedM - 0.05) + lift
-          return point
+        for (const side of [1, -1]) {
+          const foot: Point3[] = []
+          const bank: Point3[] = []
+          let banked = false
+          for (const i of rungs) {
+            const point = at(i, side * toe, lift)
+            const ground = groundYAt(point.x, point.z) + lift
+            const drop = point.y - ground
+            if (drop < 0) point.y = Math.min(ground, profile.y[i] + bedM - 0.05 + lift)
+            foot.push(point)
+            const out = at(i, side * (toe + Math.max(0, drop) * RailwaySystem.BANK_SLOPE), lift)
+            out.y = Math.min(groundYAt(out.x, out.z) + lift, point.y)
+            if (point.y - out.y > 0.02) banked = true
+            bank.push(out)
+          }
+          const top = side > 0 ? topLeft : topRight
+          if (side > 0) batches.ballast.strip(foot, top)
+          else batches.ballast.strip(top, foot)
+          if (banked) {
+            if (side > 0) batches.earth.strip(bank, foot)
+            else batches.earth.strip(foot, bank)
+          }
         }
-        batches.ballast.strip(rungs.map(i => toeAt(i, toe)), topLeft)
-        batches.ballast.strip(topRight, rungs.map(i => toeAt(i, -toe)))
       } else {
-        // A deck: its sides and its underside, seen from the street under a viaduct.
+        // A deck of concrete under the ballast: its sides and its underside, seen from the street under a viaduct.
         const depth = -RailwaySystem.DECK_DEPTH_M
-        const bottomLeft = rungs.map(i => at(i, topHalf, depth))
-        const bottomRight = rungs.map(i => at(i, -topHalf, depth))
-        batches.ballast.strip(bottomLeft, topLeft)
-        batches.ballast.strip(topRight, bottomRight)
-        batches.ballast.strip(bottomRight, bottomLeft)
+        const edge = topHalf + 0.15
+        const deckLeft = rungs.map(i => at(i, edge, bedM + lift + 0.1))
+        const deckRight = rungs.map(i => at(i, -edge, bedM + lift + 0.1))
+        const bottomLeft = rungs.map(i => at(i, edge, depth))
+        const bottomRight = rungs.map(i => at(i, -edge, depth))
+        batches.deck.strip(bottomLeft, deckLeft)
+        batches.deck.strip(deckRight, bottomRight)
+        batches.deck.strip(bottomRight, bottomLeft)
+        // The parapet's top, a hand's width, so the ballast is seen to lie in a trough and not on a block.
+        batches.deck.strip(deckLeft, rungs.map(i => at(i, topHalf, bedM + lift + 0.1)))
+        batches.deck.strip(rungs.map(i => at(i, -topHalf, bedM + lift + 0.1)), deckRight)
       }
     }
     const sleepers = line.service ? batches.wood : batches.concrete
@@ -495,6 +530,44 @@ export class RailwaySystem {
       // What lies on the relief is pulled forward a little in depth, as a road is (see RoadSystem.meshOf).
       ...(onGround ? { polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 } : {})
     })
+  }
+
+  /**
+   * The ballast as stones: a crushed granite of 30 to 60 mm, light and dark faces, and the rust and brake dust in patches. Read in the patch's
+   * own metres and let go of with the distance, as the grain of a road is (see RoadSystem.addGrain), before a stone is finer than a pixel: a flat
+   * grey reads as a poured surface, and in a low light as a wall.
+   */
+  private static pebbled(material: MeshLambertMaterial): MeshLambertMaterial {
+    material.onBeforeCompile = shader => {
+      shader.vertexShader = shader.vertexShader
+        .replace("#include <common>", "#include <common>\nvarying vec3 vBallast;")
+        .replace("#include <begin_vertex>", "#include <begin_vertex>\nvBallast = position;")
+      shader.fragmentShader = shader.fragmentShader
+        .replace("#include <common>", `#include <common>
+varying vec3 vBallast;
+float ballastHash(vec2 p) {
+  p = fract(p * vec2(127.1, 311.7));
+  p += dot(p, p + 34.5);
+  return fract(p.x * p.y);
+}
+float ballastNoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(ballastHash(i), ballastHash(i + vec2(1.0, 0.0)), f.x), mix(ballastHash(i + vec2(0.0, 1.0)), ballastHash(i + vec2(1.0, 1.0)), f.x), f.y);
+}`)
+        .replace("#include <map_fragment>", `#include <map_fragment>
+{
+  float eye = length(vViewPosition);
+  vec2 at = vBallast.xz + vec2(0.0, vBallast.y);
+  float stones = (ballastHash(floor(at * 22.0)) - 0.5) * 0.9 * (1.0 - smoothstep(4.0, 18.0, eye))
+    + (ballastNoise(at * 6.0) - 0.5) * 0.5 * (1.0 - smoothstep(15.0, 60.0, eye))
+    + (ballastNoise(at * 0.7) - 0.5) * 0.35 * (1.0 - smoothstep(80.0, 300.0, eye));
+  diffuseColor.rgb *= 1.0 + stones;
+}`)
+    }
+    material.customProgramCacheKey = () => "rr0-railway-ballast"
+    return material
   }
 
   /**
