@@ -3088,8 +3088,6 @@ export class SightingEditorElement extends HTMLElement {
 
     const name = this.stringOrUndefined(this.placeNameInput.value.trim())
     event.place = lat !== undefined && lng !== undefined ? [{ lat, lng, name }] : undefined
-    // Where the author puts the observer is a question to the survey of the place: what stands round it (see SurroundingsPlanter).
-    this.surroundings.placeChanged(lat, lng)
 
     const instrument = this.ufoElement.sighting.instrument
     // A focal length is only ever another way of writing the field, which is what the pose keeps
@@ -3147,6 +3145,11 @@ export class SightingEditorElement extends HTMLElement {
         filter
       })
     }
+    // Where the author puts the observer is a question to the survey of the place: what stands round it (see SurroundingsPlanter).
+    // The place the recording sets off from, as placeLoaded was told, and not the fields': they show the observer at the playhead,
+    // kilometres down the road for one who drives, and a ground height answering after an undo there took that for another place.
+    const standing = this.plantingCentre()
+    this.surroundings.placeChanged(standing?.lat, standing?.lng)
     // Neither field affects the 2D shape canvas, so this refresh() is only for its side effect —
     // it's what makes this edit surface as a "timeupdate" (see the constructor's listener), the
     // signal a composed live preview (e.g. a <rr0-scene>) needs to resync.
