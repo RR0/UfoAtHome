@@ -194,6 +194,15 @@ export class IgnGeoplatform {
     return lines
   }
 
+  /**
+   * The water of the map in a box (west, south, east, north): the surfaces of its rivers, lakes and ponds, as polygons. Only what lies on the ground
+   * (not a river in a culvert) and is there all year: an intermittent stream or a basin that is dry most days is not water to draw.
+   */
+  async waterSurfaces(box: { west: number, south: number, east: number, north: number }): Promise<VectorFeature[]> {
+    const within = `BBOX(geometrie,${[box.west, box.south, box.east, box.north].map(v => v.toFixed(6)).join(",")},'EPSG:4326')`
+    return this.features("surface_hydrographique", `${within} AND position_par_rapport_au_sol='0' AND persistance='Permanent'`, "cleabs,nature,geometrie", 500)
+  }
+
   /** The roads of the map in a box (west, south, east, north): every section a vehicle or a rider could use, with what the map says of each. */
   async roads(box: { west: number, south: number, east: number, north: number }): Promise<VectorFeature[]> {
     const within = `BBOX(geometrie,${[box.west, box.south, box.east, box.north].map(v => v.toFixed(6)).join(",")},'EPSG:4326')`

@@ -1,6 +1,7 @@
 import type { ElevationProvider } from "./ElevationProvider.js"
 import type { ImageryProvider } from "./ImageryProvider.js"
 import type { RoadProvider } from "./RoadProvider.js"
+import type { WaterProvider } from "./WaterProvider.js"
 import { AwsTerrariumElevationProvider } from "./providers/AwsTerrariumElevationProvider.js"
 import { IgnMntElevationProvider } from "./providers/IgnMntElevationProvider.js"
 import { FirstElevationThatAnswers } from "./FirstElevationThatAnswers.js"
@@ -9,6 +10,9 @@ import { OverpassRoadProvider } from "./providers/OverpassRoadProvider.js"
 import { ArchivedRoadProvider } from "./providers/ArchivedRoadProvider.js"
 import { IgnTopoRoadProvider } from "./providers/IgnTopoRoadProvider.js"
 import { RegionalRoadProvider } from "./providers/RegionalRoadProvider.js"
+import { IgnTopoWaterProvider } from "./providers/IgnTopoWaterProvider.js"
+import { OverpassWaterProvider } from "./providers/OverpassWaterProvider.js"
+import { RegionalWaterProvider } from "./providers/RegionalWaterProvider.js"
 
 export interface TerrainProviders {
   elevation: ElevationProvider
@@ -16,6 +20,8 @@ export interface TerrainProviders {
   /** Optional, and absent is a real answer: a scene with no road provider draws no roads, which is
    * what every scene did before this existed. */
   roads?: RoadProvider
+  /** Optional, as the roads are: a scene with no water provider has its rivers as dry troughs in the relief (see WaterSystem). */
+  water?: WaterProvider
 }
 
 /**
@@ -25,7 +31,7 @@ export interface TerrainProviders {
  * reference a concrete provider class.
  */
 export function defaultTerrainProviders(): TerrainProviders {
-  return { elevation: defaultElevationProvider(), imagery: defaultImageryProvider(), roads: defaultRoadProvider() }
+  return { elevation: defaultElevationProvider(), imagery: defaultImageryProvider(), roads: defaultRoadProvider(), water: defaultWaterProvider() }
 }
 
 /**
@@ -64,4 +70,9 @@ export function defaultImageryProvider(): ImageryProvider {
  */
 export function defaultRoadProvider(): RoadProvider {
   return new ArchivedRoadProvider({ fallback: new RegionalRoadProvider(new IgnTopoRoadProvider(), new OverpassRoadProvider()) })
+}
+
+/** The water half on its own: the IGN's map in France, OpenStreetMap elsewhere (see RegionalWaterProvider). */
+export function defaultWaterProvider(): WaterProvider {
+  return new RegionalWaterProvider(new IgnTopoWaterProvider(), new OverpassWaterProvider())
 }

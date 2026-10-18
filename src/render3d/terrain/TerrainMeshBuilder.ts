@@ -6,6 +6,8 @@ import type { ImageryProvider } from "./ImageryProvider.js"
 import type { GeoBounds } from "./GeoBounds.js"
 import { geoToLocalMeters, localMetersToGeo } from "./GeoProjection.js"
 import { fractionWithinBounds } from "./TileMath.js"
+import type { WaterProvider, WaterSurface } from "./WaterProvider.js"
+import { WaterBeds } from "./WaterBeds.js"
 
 /**
  * How many quads across the patch, and so how far apart its vertices stand: 900 m of radius over
@@ -74,7 +76,21 @@ export interface TerrainBuildResult {
   /** The ground's height above sea level at the patch's centre, which the patch itself subtracts out
    * — undefined if the elevation source had nothing there. */
   originElevationM?: number
+  /**
+   * The water the patch's relief was pressed down to (see WaterBeds), for the scene to draw on it: undefined when there was no water provider or it did
+   * not answer in WATER_WAIT_MS, and the relief is then the bare earth's.
+   */
+  water?: WaterSurface[]
+  /** The water still on its way when the relief stopped waiting for it, to be drawn when it comes: never asked twice. */
+  waterLater?: Promise<WaterSurface[]>
 }
+
+/**
+ * How long the relief waits for the water, ms, once the ground itself is in hand: the IGN's map answers in a tenth of a second, OpenStreetMap's
+ * Overpass in tens of them, and the ground is not held for that. Water that comes later is still drawn (see SceneRenderer.buildWater), on a bed the
+ * relief did not flatten.
+ */
+const WATER_WAIT_MS = 1500
 
 /** The square of ground a patch of `radiusM` covers, centred on the observer — also what anything
  * else laid over that same ground has to ask for (see RoadProvider). */
@@ -97,7 +113,7 @@ export function boundsAroundObserver(observerLat: number, observerLng: number, r
 export async function buildTerrainMesh(
   observerLat: number,
   observerLng: number,
-  providers: { elevation: ElevationProvider; imagery: ImageryProvider },
+  providers: { elevation: ElevationProvider; imagery: ImageryProvider; water?: WaterProvider },
   radiusM: number = DEFAULT_RADIUS_M,
   hints?: ElevationHints
 ): Promise<TerrainBuildResult> {
@@ -105,15 +121,26 @@ export async function buildTerrainMesh(
   const fullOpacityM = radiusM * FULL_OPACITY_FRACTION
   const bounds = boundsAroundObserver(observerLat, observerLng, fadeEndM)
   const resolution = { width: ASKED_GRID_SIZE, height: ASKED_GRID_SIZE }
+  // Asked at once, with the ground: a refusal is no water, and never a failed patch.
+  const waterAsked = providers.water?.getWater(bounds).catch((error: unknown) => {
+    console.warn("Water unavailable, drawing none:", error)
+    return [] as WaterSurface[]
+  })
   const [elevationGrid, imageryTexture] = await Promise.all([
     providers.elevation.getElevationGrid(bounds, resolution, hints),
     providers.imagery.getImageryTexture(bounds, { width: IMAGERY_RESOLUTION, height: IMAGERY_RESOLUTION })
   ])
+  let waitTimer: ReturnType<typeof setTimeout> | undefined
+  const water = waterAsked
+    ? await Promise.race([waterAsked, new Promise<undefined>(resolve => { waitTimer = setTimeout(() => resolve(undefined), WATER_WAIT_MS) })])
+    : undefined
+  clearTimeout(waitTimer)
 
   // The grid the source answered with, which is the one it asked for unless the source holds a finer ground.
   if (elevationGrid.width !== elevationGrid.height || elevationGrid.width < 3 || elevationGrid.heights.length !== elevationGrid.width * elevationGrid.height) {
     throw new Error("The ground came as a grid that is not square")
   }
+  if (water && water.length > 0) WaterBeds.flatten(elevationGrid, water, hints?.route)
   const gridSize = elevationGrid.width
   const segments = gridSize - 1
   const centerIndex = Math.floor(gridSize / 2)
@@ -238,7 +265,8 @@ export async function buildTerrainMesh(
   return {
     mesh,
     attribution: providers.imagery.attribution,
-    originElevationM: Number.isFinite(observerElevation) ? observerElevation : undefined
+    originElevationM: Number.isFinite(observerElevation) ? observerElevation : undefined,
+    ...(water ? { water } : waterAsked ? { waterLater: waterAsked } : {})
   }
 }
 

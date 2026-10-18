@@ -1341,6 +1341,11 @@ export class SceneElement extends HTMLElement {
     return this.sceneRenderer.currentRoadAttribution
   }
 
+  /** The same, for the water laid on that patch. Undefined while none has been drawn. */
+  get currentWaterAttribution(): string | undefined {
+    return this.sceneRenderer.currentWaterAttribution
+  }
+
   /** Relays a change of terrain source through to the renderer — see its setTerrainProviders.
    * Same "expose the nested renderer to a composing wrapper" arrangement as the getters above. */
   setTerrainProviders(providers: TerrainProviders): void {

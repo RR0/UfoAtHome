@@ -4,6 +4,7 @@ import { buildTerrainMesh } from "../../../src/render3d/terrain/TerrainMeshBuild
 import type { ElevationGrid, ElevationProvider } from "../../../src/render3d/terrain/ElevationProvider.js"
 import type { ImageryProvider, ImageryTexture } from "../../../src/render3d/terrain/ImageryProvider.js"
 import type { GeoBounds } from "../../../src/render3d/terrain/GeoBounds.js"
+import type { WaterProvider } from "../../../src/render3d/terrain/WaterProvider.js"
 
 const OBSERVER_LAT = 34.058
 const OBSERVER_LNG = -106.891
@@ -147,5 +148,37 @@ describe("buildTerrainMesh and a source with a finer ground", () => {
   it("refuses a grid that is not square rather than draw it skewed", async () => {
     const lopsided: ElevationProvider = { getElevationGrid: async (bounds) => ({ heights: new Float32Array(65 * 33), width: 65, height: 33, bounds }) }
     await expect(buildTerrainMesh(OBSERVER_LAT, OBSERVER_LNG, { elevation: lopsided, imagery: new BlankImagery() })).rejects.toThrow(/square/)
+  })
+
+  it("presses the ground inside the water a map draws down to its level, and hands the water on to be drawn", async () => {
+    // A pond east of the observer, 200 m to 400 m out, on ground that dips to 3 m below the plateau in its middle.
+    const pond = (east: number, north: number) => ({ lat: OBSERVER_LAT + north / 111320, lng: OBSERVER_LNG + east / (111320 * Math.cos(OBSERVER_LAT * Math.PI / 180)) })
+    const water: WaterProvider = { attribution: "test water", getWater: async () => [{ id: "pond", rings: [[pond(200, -100), pond(400, -100), pond(400, 100), pond(200, 100)]] }] }
+    const dipping: ElevationProvider = {
+      async getElevationGrid(bounds, resolution) {
+        const grid = await new FlatElevation().getElevationGrid(bounds, resolution)
+        for (let row = 0; row < resolution.height; row++) {
+          for (let col = 0; col < resolution.width; col++) {
+            const east = (col / (resolution.width - 1) - 0.5) * 1800
+            if (east > 240 && east < 360) grid.heights[row * resolution.width + col] = PLATEAU_M - 3
+          }
+        }
+        return grid
+      }
+    }
+    const result = await buildTerrainMesh(OBSERVER_LAT, OBSERVER_LNG, { elevation: dipping, imagery: new BlankImagery(), water }, 900)
+    expect(result.water?.map(surface => surface.id)).toEqual(["pond"])
+    const position = result.mesh.geometry.getAttribute("position")
+    let inPond = 0
+    for (let i = 0; i < position.count; i++) {
+      const [x, z] = [position.getX(i), position.getZ(i)]
+      if (x > 205 && x < 395 && Math.abs(z) < 95) {
+        inPond++
+        expect(position.getY(i)).toBeCloseTo(-3 + 0.01, 3)
+      } else if (Math.abs(x) < 150) {
+        expect(position.getY(i)).toBeCloseTo(0.01, 3)
+      }
+    }
+    expect(inPond).toBeGreaterThan(0)
   })
 })

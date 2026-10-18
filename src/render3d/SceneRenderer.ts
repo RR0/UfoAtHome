@@ -73,6 +73,8 @@ import type { TerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import { boundsAroundObserver, buildTerrainMesh } from "./terrain/TerrainMeshBuilder.js"
 import { RoadSystem } from "./RoadSystem.js"
 import type { RoadWay } from "./terrain/RoadProvider.js"
+import type { WaterSurface } from "./terrain/WaterProvider.js"
+import type { WaterSystem } from "./WaterSystem.js"
 import type { StatedRoad } from "../engine/model/Road.js"
 import type { InvestigatorTrace } from "../engine/model/Trace.js"
 import type { TraceSystem } from "./TraceSystem.js"
@@ -1026,6 +1028,12 @@ export class SceneRenderer {
    * than a observer moves to another county, and Overpass is a free service answering in tens of
    * seconds: the same square of ground is asked for once. */
   private roadWays?: { lat: number; lng: number; radiusM: number; ways: RoadWay[] }
+  /** The rivers, lakes and ponds laid on the patch, the module that draws them (loaded the first time a place has any, see buildWater), and their credit. */
+  private waterSystem?: WaterSystem
+  private waterSystemLoading?: Promise<WaterSystem>
+  private waterAttribution?: string
+  /** The water last fetched, and the place it was fetched for, as roadWays. */
+  private waterSurfaces?: { lat: number; lng: number; radiusM: number; surfaces: WaterSurface[] }
   /** The roads the recording itself states — held so a rebuilt patch can be re-draped with them. */
   private statedRoads: StatedRoad[] = []
   /** What an investigator drew over the place, and the module that draws it — loaded the first time
@@ -1493,6 +1501,11 @@ export class SceneRenderer {
     return this.roadAttribution
   }
 
+  /** The same, for the water drawn on that patch. Undefined while none has been drawn. */
+  get currentWaterAttribution(): string | undefined {
+    return this.waterAttribution
+  }
+
   resize(width: number, height: number): void {
     this.cssSize.width = width
     this.cssSize.height = height
@@ -1644,6 +1657,8 @@ export class SceneRenderer {
     this.roadSystem.clear()
     this.roadAttribution = undefined
     this.roadWays = undefined
+    this.clearWater()
+    this.waterSurfaces = undefined
     // The flat disc is the only ground again until the next build lands (see applyGroundDepthWrite).
     this.applyGroundDepthWrite()
     // Any build still in flight is about the old source now.
@@ -1736,12 +1751,13 @@ export class SceneRenderer {
     if (!drifted) {
       this.roadSystem.clear()
       this.roadAttribution = undefined
+      this.clearWater()
     }
     this.terrainOrigin = { lat, lng }
     this.terrainRadius = radiusM
     const token = ++this.terrainBuildToken
     this.awaitArrival(buildTerrainMesh(lat, lng, this.terrainProviders, radiusM, { route: this.observerRoute }), SceneRenderer.TERRAIN_PATIENCE_MS)
-      .then(({ mesh, attribution, originElevationM }) => {
+      .then(({ mesh, attribution, originElevationM, water, waterLater }) => {
         if (token !== this.terrainBuildToken) return // superseded by a newer call while this was in flight
         this.setSiteElevation(originElevationM ?? 0)
         // A patch reads zero at its own origin: it is built from real elevations with the observer's
@@ -1790,6 +1806,8 @@ export class SceneRenderer {
         // After the patch, never before: a road is laid on the relief, and there is no relief to
         // lay it on until this point.
         this.buildRoads(lat, lng, radiusM)
+        // The water too, which the relief was pressed down to if it came in time: its level is the relief's in its bed.
+        this.buildWater(lat, lng, radiusM, water, waterLater)
         // The stated ones need no fetch and no permission: they are in the file already.
         this.drapeStatedRoads()
         this.drapeTraces()
@@ -1928,6 +1946,72 @@ export class SceneRenderer {
       .catch(error => {
         console.warn("Roads unavailable, drawing none:", error)
       })
+  }
+
+  /**
+   * Lays the rivers, lakes and ponds over the patch just built (see WaterSystem): those the relief was pressed down to (see WaterBeds), or else asks
+   * the water provider, as for the roads: awaited by nobody but a held first frame, and a refusal is one fewer thing drawn. Past ROADS_MAX_RADIUS_M
+   * nothing is drawn: from an aircraft the photograph under the scene already shows a lake, and a county's ponds are a large download.
+   */
+  private buildWater(lat: number, lng: number, radiusM: number, built?: WaterSurface[], later?: Promise<WaterSurface[]>): void {
+    const provider = this.terrainProviders.water
+    if (!provider || radiusM > SceneRenderer.ROADS_MAX_RADIUS_M) {
+      this.clearWater()
+      return
+    }
+    if (built) {
+      this.waterSurfaces = { lat, lng, radiusM, surfaces: built }
+      this.awaitArrival(this.drapeWater(built, lat, lng, radiusM), SceneRenderer.ROADS_PATIENCE_MS)
+        .catch(error => console.warn("Water not drawn:", error))
+      return
+    }
+    const held = this.waterSurfaces
+    if (held && held.lat === lat && held.lng === lng && held.radiusM === radiusM) {
+      void this.drapeWater(held.surfaces, lat, lng, radiusM)
+      return
+    }
+    // What was in hand for the ground the observer drove on from is still the water round them until this place's comes, as for the roads.
+    if (held && Math.hypot(geoToLocalMeters(lat, lng, held.lat, held.lng).x, geoToLocalMeters(lat, lng, held.lat, held.lng).z) <= held.radiusM) {
+      void this.drapeWater(held.surfaces, lat, lng, radiusM)
+    }
+    this.awaitArrival((later ?? provider.getWater(boundsAroundObserver(lat, lng, radiusM)))
+      .then(surfaces => {
+        // Against the place, as for the roads (see buildRoads).
+        if (this.terrainOrigin?.lat !== lat || this.terrainOrigin?.lng !== lng) return
+        this.waterSurfaces = { lat, lng, radiusM, surfaces }
+        return this.drapeWater(surfaces, lat, lng, radiusM)
+      }), SceneRenderer.ROADS_PATIENCE_MS)
+      .catch(error => {
+        console.warn("Water unavailable, drawing none:", error)
+      })
+  }
+
+  /** Lays surfaces already in hand on the relief as it stands now, loading what draws them the first time there are any. */
+  private async drapeWater(surfaces: WaterSurface[], lat: number, lng: number, radiusM: number): Promise<void> {
+    if (surfaces.length === 0 && !this.waterSystem) return
+    const system = await this.loadWaterSystem()
+    const patch = this.terrainMesh
+    if (!patch) return
+    system.group.position.copy(patch.position)
+    system.set(surfaces, lat, lng, (x, z) => this.groundYOfPatch(patch, x, z), radiusM, this.patchSpacingM(patch))
+    Reflections.reflectOn(system.group)
+    this.waterAttribution = system.count > 0 ? this.terrainProviders.water?.attribution : undefined
+    this.compileNextFrameOffThread()
+    this.render()
+  }
+
+  private loadWaterSystem(): Promise<WaterSystem> {
+    return this.waterSystemLoading ??= import("./WaterSystem.js").then(({ WaterSystem }) => {
+      const system = new WaterSystem()
+      this.scene.add(system.group)
+      this.waterSystem = system
+      return system
+    })
+  }
+
+  private clearWater(): void {
+    this.waterSystem?.clear()
+    this.waterAttribution = undefined
   }
 
   /** Lays ways already in hand on the relief as it stands right now — see RoadSystem.set on why
@@ -2610,6 +2694,7 @@ export class SceneRenderer {
       // what makes carrying its position over enough. Without this, a observer who walks eleven
       // hundred metres drags the whole network out from under the relief it was draped on.
       this.roadSystem.group.position.copy(this.terrainMesh.position)
+      this.waterSystem?.group.position.copy(this.terrainMesh.position)
       this.traceSystem?.group.position.copy(this.terrainMesh.position)
     }
     if (!inhabited) {
@@ -4375,7 +4460,7 @@ export class SceneRenderer {
     // Behind the loader nothing is on screen to spare the GPU for: the eye's probe is taken as soon
     // as the scene has changed, rather than a quarter of a second later.
     const waiting = this.reflections.refresh(this.renderer, this.scene, this.camera.position, this.bodySystem.reflectors,
-      screenOnly, [...this.decorGroups.values()], version, eyeHidden, photograph => this.measureSurroundings(photograph, scale, version),
+      screenOnly, [...this.decorGroups.values(), ...(this.waterSystem ? [this.waterSystem.group] : [])], version, eyeHidden, photograph => this.measureSurroundings(photograph, scale, version),
       holding ? 0 : Reflections.REFRESH_MS)
     if (waiting === undefined || this.reflectionTimer) return
     this.reflectionTimer = setTimeout(() => {
@@ -5687,6 +5772,7 @@ export class SceneRenderer {
     this.disposeMesh(this.groundMesh)
     this.disposeMesh(this.terrainMesh)
     this.roadSystem.dispose()
+    this.waterSystem?.dispose()
     this.traceSystem?.dispose()
     this.contrailSystem?.dispose()
     this.contrailSystem = undefined
