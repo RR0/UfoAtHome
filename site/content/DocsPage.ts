@@ -21,13 +21,13 @@ export class DocsPage implements SitePage {
     // The tab reads "Documentation — UFO@home" already (see Layout); the heading names it in full.
     title: { en: "Documentation", fr: "Documentation", es: "Documentación", it: "Documentazione" },
     description: {
-      en: "Create a recording, read its file field by field, share a reconstruction by link "
+      en: "What a UFO case is, its observations and interviews, how to create a recording, share a reconstruction by link "
         + "or on your own page, drive the components, and see where every piece of data comes from.",
-      fr: "Créer un enregistrement, lire son fichier champ par champ, partager une reconstitution "
+      fr: "Ce qu'est un dossier ufologique, ses observations et ses interviews, comment créer un enregistrement, partager une reconstitution "
         + "par lien ou sur votre page, piloter les composants, et voir d'où vient chaque donnée.",
-      es: "Crear una grabación, leer su archivo campo por campo, compartir una reconstrucción mediante un enlace "
+      es: "Qué es un caso ovni, sus observaciones y entrevistas, cómo crear una grabación, compartir una reconstrucción mediante un enlace "
         + "o en tu propia página, manejar los componentes y ver de dónde procede cada dato.",
-      it: "Creare una registrazione, leggerne il file campo per campo, condividere una ricostruzione con un link "
+      it: "Che cos'è un caso ufologico, le sue osservazioni e interviste, come creare una registrazione, condividere una ricostruzione con un link "
         + "o sulla propria pagina, pilotare i componenti e vedere da dove viene ogni dato."
     }
   }
@@ -75,7 +75,7 @@ export class DocsPage implements SitePage {
         ["/docs/components/", "The components",
           "Four standard elements, one page each: which one you want, what it draws, and everything it answers to."],
         ["/docs/case/", "What is a UFO case?",
-          "What a case gathers, the three kinds of event it holds (observations, readings, interviews) and how they refer to one another."],
+          "What a case gathers, the three kinds of event it holds (observations, interpretations, interviews) and how they can be linked."],
         ["/docs/format/", "Observations",
           "What an observation is, then what its file holds, field by field. With a whole example."],
         ["/docs/interview/", "Interviews",
@@ -85,7 +85,7 @@ export class DocsPage implements SitePage {
         ["/docs/components/", "Les composants",
           "Quatre éléments standards, une page chacun : lequel vous voulez, ce qu'il dessine, et tout ce à quoi il répond."],
         ["/docs/case/", "Qu'est-ce qu'un dossier ufologique ?",
-          "Ce qu'un dossier réunit, les trois sortes d'événements qu'il contient (observations, lectures, interviews) et comment ils se renvoient les uns aux autres."],
+          "Ce qu'un dossier réunit, les trois sortes d'événements qu'il contient (observations, interprétations, interviews) et comment ils peuvent être liés."],
         ["/docs/format/", "Les observations",
           "Ce qu'est une observation, puis ce que contient son fichier, champ par champ. Avec un exemple entier."],
         ["/docs/interview/", "Les interviews",
@@ -95,7 +95,7 @@ export class DocsPage implements SitePage {
         ["/docs/components/", "Los componentes",
           "Cuatro elementos estándar, una página cada uno: cuál quieres, qué dibuja y todo aquello a lo que responde."],
         ["/docs/case/", "¿Qué es un caso ovni?",
-          "Lo que reúne un caso, los tres tipos de evento que contiene (observaciones, lecturas, entrevistas) y cómo se remiten unos a otros."],
+          "Lo que reúne un caso, los tres tipos de evento que contiene (observaciones, interpretaciones, entrevistas) y cómo pueden estar vinculados."],
         ["/docs/format/", "Las observaciones",
           "Qué es una observación, y luego lo que contiene su archivo, campo por campo. Con un ejemplo completo."],
         ["/docs/interview/", "Las entrevistas",
@@ -105,13 +105,16 @@ export class DocsPage implements SitePage {
         ["/docs/components/", "I componenti",
           "Quattro elementi standard, una pagina ciascuno: quale ti serve, cosa disegna e tutto ciò a cui risponde."],
         ["/docs/case/", "Che cos'è un caso ufologico?",
-          "Cosa riunisce un caso, i tre tipi di evento che contiene (osservazioni, letture, interviste) e come si rimandano a vicenda."],
+          "Cosa riunisce un caso, i tre tipi di evento che contiene (osservazioni, interpretazioni, interviste) e come possono essere collegati."],
         ["/docs/format/", "Le osservazioni",
           "Che cos'è un'osservazione, poi che cosa contiene il suo file, campo per campo. Con un esempio completo."],
         ["/docs/interview/", "Le interviste",
           "Cosa contiene un'intervista di un caso: l'evento, la sua trascrizione, i passaggi rimossi, chi l'ha approvata, i legami con l'osservazione e l'importazione di una trascrizione da un altro formato."]
       ]
     } satisfies Said<ReadonlyArray<Card>>)[language]
+    // What a case is comes first, the three pages that say it; then what to do; then what a builder needs.
+    const understanding = technical.filter(([href]) => ["/docs/case/", "/docs/format/", "/docs/interview/"].includes(href))
+    const components = technical.filter(([href]) => href === "/docs/components/")
     const grid = (cards: ReadonlyArray<Card>) => cards.map(([href, title, blurb]) => `      <a class="use" href="${href}">
         <h3>${title}</h3>
         <p>${blurb}</p>
@@ -120,7 +123,7 @@ export class DocsPage implements SitePage {
     return `
 <section class="band hero">
   <div class="wrap">
-    <p class="eyebrow">${({ en: "Five pages", fr: "Cinq pages", es: "Cinco páginas", it: "Cinque pagine" })[language]}</p>
+    <p class="eyebrow">${({ en: "Seven pages", fr: "Sept pages", es: "Siete páginas", it: "Sette pagine" })[language]}</p>
     <h1>${({
       en: "UFO@home documentation",
       fr: "Documentation d'UFO@home",
@@ -128,22 +131,27 @@ export class DocsPage implements SitePage {
       it: "Documentazione di UFO@home"
     })[language]}</h1>
     <p class="lede">${({
-      en: "How to create an observation, what its file holds, how to share or embed it, and where its data comes from. Arranged by the question being asked: take the one that is yours.",
-      fr: "Comment créer une observation, ce que contient son fichier, comment la partager ou l'intégrer, et d'où viennent ses données. Rangées par la question posée : prenez celle qui est la vôtre.",
-      es: "Cómo crear una observación, qué contiene su archivo, cómo compartirla o integrarla y de dónde proceden sus datos. Ordenadas por la pregunta que se plantea: elige la tuya.",
-      it: "Come creare un'osservazione, cosa contiene il suo file, come condividerla o integrarla e da dove vengono i suoi dati. Ordinate secondo la domanda posta: scegli la tua."
+      en: "What a UFO case is and what it holds, how to create an observation, how to share or embed it, and where its data comes from. Arranged by the question being asked: take the one that is yours.",
+      fr: "Ce qu'est un dossier ufologique et ce qu'il contient, comment créer une observation, comment la partager ou l'intégrer, et d'où viennent ses données. Rangées par la question posée : prenez celle qui est la vôtre.",
+      es: "Qué es un caso ovni y qué contiene, cómo crear una observación, cómo compartirla o integrarla y de dónde proceden sus datos. Ordenadas por la pregunta que se plantea: elige la tuya.",
+      it: "Che cos'è un caso ufologico e cosa contiene, come creare un'osservazione, come condividerla o integrarla e da dove vengono i suoi dati. Ordinate secondo la domanda posta: scegli la tua."
     })[language]}</p>
   </div>
 </section>
 
 <section class="band">
   <div class="wrap">
+    <h2>${({ en: "Understanding", fr: "Comprendre", es: "Comprender", it: "Capire" })[language]}</h2>
+    <div class="uses">
+${grid(understanding)}
+    </div>
+    <h2>${({ en: "Doing", fr: "Faire", es: "Hacer", it: "Fare" })[language]}</h2>
     <div class="uses">
 ${grid(essentials)}
     </div>
     <h2>${({ en: "Technical", fr: "La technique", es: "La parte técnica", it: "La parte tecnica" })[language]}</h2>
     <div class="uses">
-${grid(technical)}
+${grid(components)}
     </div>
   </div>
 </section>
