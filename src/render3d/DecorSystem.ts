@@ -1125,7 +1125,7 @@ export class DecorSystem {
     const group = new Group()
     const size = DecorSystem.sizeOf(object)
     const facade = object.facade!
-    const geometry = FacadeGeometry.build(size.widthM, size.lengthM, DecorSystem.wallHeightOf(object, size.heightM), !facade.plain, object.eastM * 7.31 + object.northM * 3.17)
+    const geometry = FacadeGeometry.build(size.widthM, size.lengthM, DecorSystem.wallHeightOf(object, size.heightM), !facade.plain, object.eastM * 7.31 + object.northM * 3.17, facade.openings, facade.storeyM)
     const material = new MeshLambertMaterial({
       color: new Color(facade.color ?? DecorSystem.PLASTER), map: FacadeTexture.texture(),
       // The glass glows where the window's rank is under the share of lit windows, which is nothing by day (see litWindowShare).

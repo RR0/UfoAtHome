@@ -9,7 +9,7 @@ const keys = (kind: DecorKind, extra: object = {}) => DecorParameterSets.of({ ki
 
 describe("DecorParameterSets", () => {
   test("a building has floors, the floor occupied, its walls, its roof, and a window on each of its four sides", () => {
-    expect(keys("building")).toEqual(["floors", "occupiedFloor", "facade.color", "facade.plain", "roof.shape", "roof.riseM", "roof.ridge", "roof.color",
+    expect(keys("building")).toEqual(["floors", "occupiedFloor", "facade.color", "facade.plain", "facade.openings", "roof.shape", "roof.riseM", "roof.ridge", "roof.color",
       "windows.front", "windows.behind", "windows.left", "windows.right"])
   })
 
@@ -22,6 +22,8 @@ describe("DecorParameterSets", () => {
     expect(shown("roof.ridge", { roof: { shape: "gable" } })).toBe(true)
     expect(shown("facade.plain", {})).toBe(false)
     expect(shown("facade.plain", { facade: { color: "#ffffff" } })).toBe(true)
+    expect(shown("facade.openings", {})).toBe(false)
+    expect(shown("facade.openings", { facade: { color: "#ffffff" } })).toBe(true)
   })
 
   test("a building drawn as a model has neither the walls nor the roof of the built-in shape", () => {

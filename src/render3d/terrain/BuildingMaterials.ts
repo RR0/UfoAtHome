@@ -14,6 +14,10 @@ import type { BuildingMaterial, SurveyedBuilding } from "./SurroundingsProvider.
  * so the sun and the sky of the scene light it once. A wall whose material is not known is a plaster of a pale, warm grey, which most of them are, and
  * is varied a little from one building to the next (by where it stands, so that the same place always looks the same) because a street of walls of
  * exactly one colour is not a street.
+ *
+ * What kind of building it is (see BuildingStyles) opens the walls: a church has tall narrow bays and no door of a house, a monument none, an old building
+ * and a tall one that states no floors have tall windows on high storeys. Their walls are of stone where the registry says nothing of them (a church, a
+ * fort, a house of before 1900 in France is built of it), and the roof of an old building is a zinc or a slate grey where nothing measured its colour.
  */
 export class BuildingMaterials {
   private static readonly WALLS: Record<string, BuildingMaterial> = { 1: "stone", 2: "meuliere", 3: "concrete", 4: "brick", 5: "block", 6: "wood", 9: "other" }
@@ -29,6 +33,14 @@ export class BuildingMaterials {
   }
   /** How far a building's colour may be pushed lighter or darker from the typical, as a part of it. */
   private static readonly VARIATION = 0.12
+  /** An old building's roof that no photograph coloured: the zinc of a Paris roof, the slate of the others, which look alike from the street. */
+  private static readonly OLD_ROOF = "#7d858c"
+  /** The storey of an old building that does not state its floors, and of a tall one that does not either. */
+  private static readonly OLD_STOREY_M = 3.6
+  private static readonly GRAND_STOREY_M = 4.5
+  /** The storeys the floors a map states may make: less is a count that is not of floors, more a hall. */
+  private static readonly MIN_STOREY_M = 2.4
+  private static readonly MAX_STOREY_M = 6
 
   /** The main material a code of the registry names, or none where it names none. */
   static of(code: unknown, table: "wall" | "roof"): BuildingMaterial | undefined {
@@ -44,18 +56,38 @@ export class BuildingMaterials {
     return material ? BuildingMaterials.ROOF_COLOURS[material] : undefined
   }
 
-  /** Each building with its facade: the colour of its walls' material, or a plaster, a little different from one place to the next. */
+  /**
+   * Each building with its facade: the colour of its walls' material, or a plaster (a stone for what is built of it), a little different from one place
+   * to the next, and the openings of its kind.
+   */
   static fit(buildings: SurveyedBuilding[]): SurveyedBuilding[] {
     return buildings.map(building => {
-      // A facade a survey already gave (a colour somebody wrote down) is not repainted from a typical one.
-      if (building.facade) return building
-      const facade: DecorFacade = { color: BuildingMaterials.wallColor(building) }
-      return { ...building, facade }
+      const style = building.style
+      // A colour a survey already gave (somebody wrote it down) is not repainted from a typical one: the openings are still those of its kind.
+      const facade: DecorFacade = { ...building.facade, color: building.facade?.color ?? BuildingMaterials.wallColor(building) }
+      if (style === "church") facade.openings = "lancet"
+      else if (style === "monument") facade.plain = true
+      else if (style === "old" || style === "grand") facade.openings = "tall"
+      const storeyM = BuildingMaterials.storeyOf(building)
+      if (storeyM !== undefined && style !== "church" && style !== "monument") facade.storeyM = storeyM
+      const roof = style === "old" && building.roof?.color === undefined ? { shape: "flat" as const, riseM: 0, ...building.roof, color: BuildingMaterials.OLD_ROOF } : building.roof
+      return { ...building, facade, ...(roof ? { roof } : {}) }
     })
   }
 
+  /** The height of a storey: what the floors the survey states make of the walls, else that of its kind, else none (three metres). */
+  private static storeyOf(building: SurveyedBuilding): number | undefined {
+    const walls = building.heightM - (building.roof?.riseM ?? 0)
+    if (building.floors && building.floors > 0) {
+      const storey = walls / building.floors
+      if (storey >= BuildingMaterials.MIN_STOREY_M && storey <= BuildingMaterials.MAX_STOREY_M) return Math.round(storey * 100) / 100
+    }
+    return building.style === "old" ? BuildingMaterials.OLD_STOREY_M : building.style === "grand" ? BuildingMaterials.GRAND_STOREY_M : undefined
+  }
+
   private static wallColor(building: SurveyedBuilding): string {
-    const base = building.wallMaterial ? BuildingMaterials.WALL_COLOURS[building.wallMaterial] : BuildingMaterials.PLASTER
+    const built = building.style === "church" || building.style === "monument" || building.style === "old"
+    const base = building.wallMaterial ? BuildingMaterials.WALL_COLOURS[building.wallMaterial] : built ? BuildingMaterials.WALL_COLOURS.stone : BuildingMaterials.PLASTER
     // From where it stands, in tenths of a metre: stable, and different for neighbours.
     const seed = Math.sin(building.eastM * 12.9898 + building.northM * 78.233) * 43758.5453
     const shade = 1 + (seed - Math.floor(seed) - 0.5) * 2 * BuildingMaterials.VARIATION

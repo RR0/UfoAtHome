@@ -26,6 +26,11 @@ export class CachedSurroundingsProvider implements SurroundingsProvider {
   /** Not "ufoathome…": the site's worker clears every cache of that name it does not know (see sw.js). */
   static readonly CACHE_NAME = "rr0-surroundings"
   static readonly MAX_AGE_MS = 30 * 24 * 3600 * 1000
+  /**
+   * What an answer holds, as a number raised when a survey starts to say more than it did: an answer kept before it does not say it, and is not
+   * kept for a month more. 2: what kind of building each is (a church, an old one), and the walls and roofs of that kind.
+   */
+  static readonly FORMAT = 2
   /** How many answers are kept on disk, the oldest going first: a few hundred places, a few megabytes. */
   static readonly MAX_STORED = 400
 
@@ -66,7 +71,7 @@ export class CachedSurroundingsProvider implements SurroundingsProvider {
    * and a radius is part of the question.
    */
   static key(id: string, centre: { lat: number, lng: number }, radiusM: number): string {
-    return `${id}/${centre.lat.toFixed(5)}/${centre.lng.toFixed(5)}/${Math.round(radiusM)}`
+    return `${id}/v${CachedSurroundingsProvider.FORMAT}/${centre.lat.toFixed(5)}/${centre.lng.toFixed(5)}/${Math.round(radiusM)}`
   }
 
   /** What the disk remembers of this question if it is recent enough, else what the survey says now, written down. */

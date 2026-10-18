@@ -395,6 +395,13 @@ export interface DecorFacade {
   color?: string
   /** A plain wall, with no windows and no door. Absent is false: a wall nobody lived behind is the unusual one. */
   plain?: boolean
+  /**
+   * How the walls are opened. Absent is a house's or a block of flats': a window every three metres of every floor, a door. "tall": an older building's,
+   * a tall French window with its railing in each bay. "lancet": a church's, a tall narrow bay every six metres in walls without a door. `plain` wins over it.
+   */
+  openings?: "tall" | "lancet"
+  /** The height of a storey, metres, where it is known (the floors a survey states, or those of an old building): absent is three. Ignored for "lancet". */
+  storeyM?: number
 }
 
 export interface DecorObject {

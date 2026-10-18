@@ -79,7 +79,10 @@ export class SurveyedDecor {
           id: nextId(), kind: "building", title: titled("building", building.name), eastM: building.eastM, northM: building.northM,
           headingDeg: building.headingDeg, lit: false,
           sizeM: { widthM: building.widthM, lengthM: building.lengthM, heightM: building.heightM },
-          floors: building.floors ?? Math.max(1, Math.round((building.heightM - (building.roof?.riseM ?? 0)) / SurveyedDecor.FLOOR_HEIGHT_M)),
+          // A church or a monument has no floors to count: its walls are of one height (see DecorFacade.openings).
+          ...(building.style === "church" || building.style === "monument" ? {} : {
+            floors: building.floors ?? Math.max(1, Math.round((building.heightM - (building.roof?.riseM ?? 0)) / (building.facade?.storeyM ?? SurveyedDecor.FLOOR_HEIGHT_M)))
+          }),
           ...(building.roof ? { roof: building.roof } : {}), ...(building.facade ? { facade: building.facade } : {}), origin: providerId, ...newest(dates.map, dates.laser, building.roof?.color ? dates.photo : undefined)
         })
       }

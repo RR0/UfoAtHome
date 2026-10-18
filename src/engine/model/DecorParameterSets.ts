@@ -106,6 +106,20 @@ export class DecorParameterSets {
         label: { en: "Plain walls", fr: "Murs nus", es: "Muros lisos", it: "Muri lisci" },
         hint: { en: "No windows and no door on the walls.", fr: "Ni fenêtres ni porte sur les murs.", es: "Ni ventanas ni puerta en los muros.", it: "Né finestre né porta sui muri." },
         visibleWhen: element => (element as { facade?: unknown }).facade !== undefined
+      },
+      {
+        type: "choice", key: "facade.openings", group,
+        label: { en: "Openings", fr: "Ouvertures", es: "Vanos", it: "Aperture" },
+        empty: { en: "A house's", fr: "D'une maison", es: "De una casa", it: "Di una casa" },
+        hint: { en: "A window every three metres of every floor and a door, the tall windows of an old building, or the tall narrow bays of a church.",
+          fr: "Une fenêtre tous les trois mètres de chaque étage et une porte, les hautes fenêtres d'un immeuble ancien, ou les hautes baies étroites d'une église.",
+          es: "Una ventana cada tres metros de cada planta y una puerta, las ventanas altas de un edificio antiguo, o los vanos altos y estrechos de una iglesia.",
+          it: "Una finestra ogni tre metri di ogni piano e una porta, le finestre alte di un edificio antico, o le alte aperture strette di una chiesa." },
+        choices: [
+          { value: "tall", label: { en: "Old building", fr: "Immeuble ancien", es: "Edificio antiguo", it: "Edificio antico" } },
+          { value: "lancet", label: { en: "Church", fr: "Église", es: "Iglesia", it: "Chiesa" } }
+        ],
+        visibleWhen: element => (element as { facade?: unknown }).facade !== undefined
       }
     ]
   }

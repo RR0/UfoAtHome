@@ -45,7 +45,18 @@ export interface SurveyedBuilding {
   wallMaterial?: BuildingMaterial
   /** The material of the roof as the survey states it, where it does. */
   roofMaterial?: BuildingMaterial
+  /** What kind of building the survey says it is, where that shows from the street (see BuildingStyles): absent is an ordinary one. */
+  style?: BuildingStyle
+  /** The year the survey says it was built, where it says. */
+  builtYear?: number
 }
+
+/**
+ * What kind of building it is, as it shows from the street (see BuildingStyles): "church" (stone, tall narrow bays, a pitched roof), "monument" (stone and no
+ * window: a fort, a tower of a castle, a memorial), "old" (built before 1900: stone, tall windows, high storeys), "grand" (a tall building that states
+ * no floors and no one living in it: high storeys and tall windows).
+ */
+export type BuildingStyle = "church" | "monument" | "old" | "grand"
 
 /** What the walls and the roofs of the buildings of a survey are made of, in the words this project draws them with. */
 export type BuildingMaterial = "stone" | "meuliere" | "concrete" | "brick" | "block" | "wood" | "tile" | "slate" | "zinc" | "other"

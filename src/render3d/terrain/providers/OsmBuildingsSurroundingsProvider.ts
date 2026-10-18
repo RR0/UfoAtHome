@@ -2,6 +2,7 @@ import type { DecorFacade, DecorRoof } from "../../../engine/model/Decor.js"
 import type { Surroundings, SurroundingsProvider, SurveyedBuilding } from "../SurroundingsProvider.js"
 import { SurroundingsUnavailableError } from "../SurroundingsProvider.js"
 import { BuildingMaterials } from "../BuildingMaterials.js"
+import { BuildingStyles } from "../BuildingStyles.js"
 import { OsmBuildingTags } from "../OsmBuildingTags.js"
 import { TopoBuildings } from "../TopoBuildings.js"
 import type { VectorFeature } from "../OverheadStructures.js"
@@ -61,7 +62,7 @@ export class OsmBuildingsSurroundingsProvider implements SurroundingsProvider {
     const day = (answer.osm3s?.timestamp_osm_base ?? "").slice(0, 10)
     return {
       trees: [],
-      buildings: BuildingMaterials.fit(OsmBuildingsSurroundingsProvider.buildings(answer, centre, radius)),
+      buildings: BuildingMaterials.fit(BuildingStyles.fit(OsmBuildingsSurroundingsProvider.buildings(answer, centre, radius))),
       bridges: [],
       lines: [],
       ...(lamps ? { lamps } : {}),
@@ -128,9 +129,13 @@ export class OsmBuildingsSurroundingsProvider implements SurroundingsProvider {
     } else if (shape === "flat" || roofColour) {
       roof = { shape: "flat", riseM: 0, ...(roofColour ? { color: roofColour } : {}) }
     }
+    // What the volunteer says it is, else what its height says (see BuildingStyles.ofMap): a church, a castle, a house of 1850.
+    const { style, builtYear } = BuildingStyles.ofOsm(tags)
     return {
       ...building,
       heightM,
+      ...(style ? { style } : {}),
+      ...(builtYear !== undefined ? { builtYear } : {}),
       ...(tags.name ? { name: tags.name } : {}),
       ...(wallMaterial ? { wallMaterial } : {}),
       ...(roofMaterial ? { roofMaterial } : {}),

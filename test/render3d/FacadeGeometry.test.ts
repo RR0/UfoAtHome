@@ -49,6 +49,40 @@ describe("FacadeGeometry", () => {
     const uv = FacadeGeometry.build(9, 9, 6, false).getAttribute("uv")
     for (let i = 0; i < uv.count; i++) expect(Math.floor(uv.getX(i) * FacadeTexture.TILES)).toBe(FacadeTexture.PLAIN)
   })
+
+  /** The tiles of the walls (the top left out), one a bay, and how many storeys high the walls are cut. */
+  const bays = (geometry: ReturnType<typeof FacadeGeometry.build>): { tiles: number[], levels: number } => {
+    const uv = geometry.getAttribute("uv")
+    const position = geometry.getAttribute("position")
+    const tiles: number[] = []
+    const floors = new Set<number>()
+    for (let i = 0; i + 6 <= uv.count - 6; i += 6) {
+      tiles.push(Math.floor(uv.getX(i) * FacadeTexture.TILES))
+      floors.add(Math.round(position.getY(i) * 100))
+    }
+    return { tiles, levels: floors.size }
+  }
+
+  it("cuts an old building's walls into the storeys it states, each bay a tall window, the door on the front", () => {
+    const { tiles, levels } = bays(FacadeGeometry.build(15, 12, 17.2, true, 0, "tall", 17.2 / 7))
+    expect(levels).toBe(7)
+    expect(tiles.filter(tile => tile === FacadeTexture.GROUND_DOOR)).toHaveLength(1)
+    expect(tiles.filter(tile => tile !== FacadeTexture.GROUND_DOOR).every(tile => tile === FacadeTexture.TALL)).toBe(true)
+  })
+
+  it("draws a church's walls with tall narrow bays six metres apart in every other tier of about ten from the top, no door and nothing lit", () => {
+    const geometry = FacadeGeometry.build(90, 14, 35, true, 0, "lancet")
+    const { tiles, levels } = bays(geometry)
+    expect(levels).toBe(4)
+    expect(tiles.every(tile => tile === FacadeTexture.LANCET || tile === FacadeTexture.PLAIN)).toBe(true)
+    // Two long sides of fifteen bays and two short ones of two, on each of four tiers: the top one and the second below it opened.
+    expect(tiles).toHaveLength(4 * (2 * 15 + 2 * 2))
+    expect(tiles.filter(tile => tile === FacadeTexture.LANCET)).toHaveLength(2 * (2 * 15 + 2 * 2))
+    // An aisle, one tier high, is opened.
+    expect(bays(FacadeGeometry.build(40, 14, 12, true, 0, "lancet")).tiles.every(tile => tile === FacadeTexture.LANCET)).toBe(true)
+    const rank = geometry.getAttribute("litRank")
+    for (let i = 0; i < rank.count; i++) expect(rank.getX(i)).toBeGreaterThan(1)
+  })
 })
 
 describe("FacadeGeometry window ranks", () => {

@@ -11,6 +11,9 @@ import { FacadeTexture } from "./FacadeTexture.js"
  * wall has a rank of 2, which no share reaches).
  *
  * Built at the size it is drawn at and never stretched afterwards (a stretched window is a different window), the way a roof is.
+ *
+ * The openings are those of its kind (see DecorFacade.openings): a house's, an old building's tall windows on storeys as high as it states, or a church's
+ * bays, six metres apart in tiers of about ten, every other tier from the top (a tower is bare stone below its belfry), with no door and nothing lit.
  */
 export class FacadeGeometry {
   /** A number from 0 up to 1 that is the same for the same two, and unlike the one beside it: which windows are lit does not change between two looks. */
@@ -19,25 +22,34 @@ export class FacadeGeometry {
     return value - Math.floor(value)
   }
 
-  static build(widthM: number, lengthM: number, heightM: number, openings = true, seed = 0): BufferGeometry {
+  /** A church's bays and tiers. */
+  private static readonly LANCET_BAY_M = 6
+  private static readonly LANCET_TIER_M = 10
+
+  static build(widthM: number, lengthM: number, heightM: number, openings = true, seed = 0, kind?: "tall" | "lancet", storeyM: number = FacadeTexture.FLOOR_M): BufferGeometry {
     const positions: number[] = []
     const uvs: number[] = []
     const ranks: number[] = []
     const halfWidth = widthM / 2
     const halfLength = lengthM / 2
-    const levels = Math.max(1, Math.round(heightM / FacadeTexture.FLOOR_M))
+    const lancet = kind === "lancet"
+    const levels = Math.max(1, Math.round(heightM / (lancet ? FacadeGeometry.LANCET_TIER_M : Math.max(storeyM, 1))))
     const floor = heightM / levels
+    const bayM = lancet ? FacadeGeometry.LANCET_BAY_M : FacadeTexture.BAY_M
     /** A face, given by where it starts and which way it runs (both on the ground plane) and its length: front is at -z and faces -z. */
     const face = (start: [number, number], direction: [number, number], length: number, front: boolean): void => {
-      const bays = Math.max(1, Math.round(length / FacadeTexture.BAY_M))
+      const bays = Math.max(1, Math.round(length / bayM))
       const bay = length / bays
       for (let level = 0; level < levels; level++) {
         for (let at = 0; at < bays; at++) {
+          const door = front && level === 0 && at === Math.floor((bays - 1) / 2)
           const tile = !openings ? FacadeTexture.PLAIN
-            : level > 0 ? FacadeTexture.UPPER
-              : front && at === Math.floor((bays - 1) / 2) ? FacadeTexture.GROUND_DOOR : FacadeTexture.GROUND_WINDOW
-          // The window is lit when the share of the lit ones reaches its rank (see DecorSystem): a door, a plain wall are never.
-          const rank = tile === FacadeTexture.UPPER || tile === FacadeTexture.GROUND_WINDOW ? FacadeGeometry.hash(seed, positions.length) : 2
+            : lancet ? ((levels - 1 - level) % 2 === 0 ? FacadeTexture.LANCET : FacadeTexture.PLAIN)
+              : door ? FacadeTexture.GROUND_DOOR
+                : kind === "tall" ? FacadeTexture.TALL
+                  : level > 0 ? FacadeTexture.UPPER : FacadeTexture.GROUND_WINDOW
+          // The window is lit when the share of the lit ones reaches its rank (see DecorSystem): a door, a plain wall, a church's glass are never.
+          const rank = tile === FacadeTexture.UPPER || tile === FacadeTexture.GROUND_WINDOW || tile === FacadeTexture.TALL ? FacadeGeometry.hash(seed, positions.length) : 2
           for (let corner = 0; corner < 6; corner++) ranks.push(rank)
           const x0 = start[0] + direction[0] * bay * at
           const z0 = start[1] + direction[1] * bay * at

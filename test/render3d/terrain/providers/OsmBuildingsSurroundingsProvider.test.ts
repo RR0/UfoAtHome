@@ -45,8 +45,16 @@ describe("OsmBuildingsSurroundingsProvider", () => {
     expect(house.heightM).toBe(14.5)
     expect(house.name).toBe("Hôtel de ville")
     expect(house.wallMaterial).toBe("brick")
-    expect(house.facade).toEqual({ color: "#c0a37a" })
+    // Its four levels make its storeys: 14.5 m over four.
+    expect(house.facade).toEqual({ color: "#c0a37a", storeyM: 3.63 })
     expect(house.roof).toEqual({ shape: "flat", riseM: 0, color: "#a8483a" })
+  })
+
+  it("draws a church a volunteer tagged as one with a church's walls and roof, not a house's", async () => {
+    const [church] = (await provider([way(1, { building: "church", height: "20" }, 10, 10, 40, 14)]).getSurroundings(BRAINE, 200)).buildings
+    expect(church.style).toBe("church")
+    expect(church.facade?.openings).toBe("lancet")
+    expect(church.roof?.shape).toBe("gable")
   })
 
   it("draws a gabled roof on the walls the levels give, or on the height that is said to be to the ridge", async () => {
