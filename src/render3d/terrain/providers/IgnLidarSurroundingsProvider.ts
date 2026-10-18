@@ -4,7 +4,7 @@ import { BuildingFootprints } from "../BuildingFootprints.js"
 import { CanopyCrowns } from "../CanopyCrowns.js"
 import { BuildingMaterials } from "../BuildingMaterials.js"
 import { RoofShapes } from "../RoofShapes.js"
-import { OsmStreetLamps } from "./OsmStreetLamps.js"
+import { OsmStreetFurniture } from "./OsmStreetFurniture.js"
 import { IgnGeoplatform } from "./IgnGeoplatform.js"
 import type { IgnGeoplatformOptions } from "./IgnGeoplatform.js"
 
@@ -26,12 +26,12 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
   readonly contemporary = true
 
   private readonly platform: IgnGeoplatform
-  /** Where the public lamps come from, when asked for: the registry gives it, a test that fakes only the IGN does not. */
-  private readonly lamps?: OsmStreetLamps
+  /** Where the public lamps, the traffic lights, the crossings and the signs come from, when asked for: the registry gives it, a test that fakes only the IGN does not. */
+  private readonly furniture?: OsmStreetFurniture
 
-  constructor(options: IgnGeoplatformOptions = {}, lamps?: OsmStreetLamps) {
+  constructor(options: IgnGeoplatformOptions = {}, furniture?: OsmStreetFurniture) {
     this.platform = new IgnGeoplatform(options)
-    this.lamps = lamps
+    this.furniture = furniture
   }
 
   covers(lat: number, lng: number): boolean {
@@ -41,7 +41,7 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
   async getSurroundings(centre: { lat: number, lng: number }, radiusM: number): Promise<Surroundings> {
     if (!this.covers(centre.lat, centre.lng)) throw new SurroundingsUnavailableError("no-coverage", "The LiDAR HD survey covers France only")
     const radius = IgnGeoplatform.lidarRadius(radiusM)
-    const [grids, photo, lamps, laser, flown] = await Promise.all([this.platform.lidar(centre, radius), this.platform.photo(centre, radius).catch(() => undefined), this.lamps?.near(centre, radiusM), this.platform.laserDate(centre), this.platform.photoDate(centre)])
+    const [grids, photo, furniture, laser, flown] = await Promise.all([this.platform.lidar(centre, radius), this.platform.photo(centre, radius).catch(() => undefined), this.furniture?.near(centre, radiusM), this.platform.laserDate(centre), this.platform.photoDate(centre)])
     return {
       trees: new CanopyCrowns(grids.heights, grids.vegetation, grids.size, grids.size).trees({ metresPerPixel: grids.metresPerPixel, radiusM: radius }),
       buildings: BuildingMaterials.fit(RoofShapes.fit(
@@ -49,8 +49,8 @@ export class IgnLidarSurroundingsProvider implements SurroundingsProvider {
         grids, photo)),
       bridges: [],
       lines: [],
-      ...(lamps ? { lamps } : {}),
-      dates: { ...(laser ? { laser } : {}), ...(photo && flown ? { photo: flown } : {}), ...(lamps?.length ? { lamps: OsmStreetLamps.today() } : {}) }
+      ...furniture,
+      dates: { ...(laser ? { laser } : {}), ...(photo && flown ? { photo: flown } : {}), ...(OsmStreetFurniture.found(furniture) ? { lamps: OsmStreetFurniture.today() } : {}) }
     }
   }
 }

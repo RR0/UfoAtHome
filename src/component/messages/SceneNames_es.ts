@@ -114,6 +114,8 @@ export const sceneNames_es: SceneNames = {
     "car-headlights": "Coche, faros encendidos",
     "car-hazards": "Coche, luces de emergencia",
     "emergency-beacons": "Rotativos de vehículo de emergencia",
+    "traffic-signal": "Semáforo",
+    "pedestrian-signal": "Semáforo peatonal",
     "streetlamp": "Farola"
   },
   instruments: {
@@ -139,6 +141,9 @@ export const sceneNames_es: SceneNames = {
     mound: "Montón de piedras",
     wall: "Muro de piedra seca",
     streetlight: "Farola",
+    trafficlight: "Semáforo",
+    crossing: "Paso de peatones",
+    roadsign: "Señal de tráfico",
     vehicle: "Vehículo",
     observer: "Observador",
     aircraft: "Aeronave",

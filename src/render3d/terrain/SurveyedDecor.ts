@@ -1,8 +1,9 @@
 import type { DecorObject } from "../../engine/model/Decor.js"
 import type { Surroundings } from "./SurroundingsProvider.js"
+import { TrafficSignals } from "../../engine/model/LightRig.js"
 
 /** The kinds of decor a survey brings. */
-export type SurveyedKind = "tree" | "building" | "bridge" | "wire" | "streetlight"
+export type SurveyedKind = "tree" | "building" | "bridge" | "wire" | "streetlight" | "trafficlight" | "crossing" | "roadsign"
 
 export interface SurveyedDecorOptions {
   /** What the recording already has that no survey brought: what the author placed. Nothing of a kind is brought where it holds one of that kind. */
@@ -28,11 +29,16 @@ export interface SurveyedDecorResult {
 export class SurveyedDecor {
   /** A building about three metres a floor, the common height of one. */
   private static readonly FLOOR_HEIGHT_M = 3
+  /** How long the bands of a crossing are along the road: the French minimum in town. */
+  static readonly CROSSING_LENGTH_M = 2.5
 
   static of(providerId: string, found: Surroundings, options: SurveyedDecorOptions): SurveyedDecorResult {
     const { kept } = options
     const has = (kind: SurveyedKind): boolean => kept.some(object => object.kind === kind)
-    const hand = { tree: has("tree"), building: has("building"), bridge: has("bridge"), wire: has("wire"), streetlight: has("streetlight") }
+    const hand = {
+      tree: has("tree"), building: has("building"), bridge: has("bridge"), wire: has("wire"), streetlight: has("streetlight"),
+      trafficlight: has("trafficlight"), crossing: has("crossing"), roadsign: has("roadsign")
+    }
     const taken = new Set(kept.map(object => object.id))
     let serial = 0
     const nextId = (): string => {
@@ -46,7 +52,10 @@ export class SurveyedDecor {
       building: kept.filter(object => object.kind === "building").length,
       bridge: kept.filter(object => object.kind === "bridge").length,
       wire: kept.filter(object => object.kind === "wire").length,
-      streetlight: kept.filter(object => object.kind === "streetlight").length
+      streetlight: kept.filter(object => object.kind === "streetlight").length,
+      trafficlight: kept.filter(object => object.kind === "trafficlight").length,
+      crossing: kept.filter(object => object.kind === "crossing").length,
+      roadsign: kept.filter(object => object.kind === "roadsign").length
     }
     // What a survey names is called by its name (the town hall), the parts of it after the first numbered ("Mairie de Saint-Lô (2)"); what it does not is "Building 12".
     const names = new Set(kept.map(object => typeof object.title === "string" ? object.title : ""))
@@ -58,7 +67,7 @@ export class SurveyedDecor {
       return title
     }
     // Each kind is as old as the newest of what it was drawn from: a tree is the laser's, a building the map's outline under the laser's roof and
-    // the photograph's colour, a bridge or a line the map's with the laser's height, a lamp the volunteers' map's.
+    // the photograph's colour, a bridge or a line the map's with the laser's height, a lamp, a light, a crossing or a sign the volunteers' map's.
     const dates = found.dates ?? {}
     const newest = (...days: (string | undefined)[]): { surveyedOn?: string } => {
       const latest = days.filter((day): day is string => day !== undefined).sort().at(-1)
@@ -116,6 +125,32 @@ export class SurveyedDecor {
         })
       }
     }
-    return { planted, handPlaced: hand.tree || hand.building || hand.bridge || hand.wire || hand.streetlight }
+    if (!hand.trafficlight) {
+      for (const signal of found.signals ?? []) {
+        // Its lamps are its cycle (see TrafficSignals), which is on day and night: a traffic light is not switched by the dark.
+        planted.push({
+          id: nextId(), kind: "trafficlight", title: titled("trafficlight", undefined), eastM: signal.eastM, northM: signal.northM, headingDeg: signal.headingDeg,
+          lights: signal.for === "pedestrians" ? TrafficSignals.pedestrianLights(signal.phase) : TrafficSignals.vehicleLights(signal.phase),
+          origin: providerId, ...newest(dates.lamps)
+        })
+      }
+    }
+    if (!hand.crossing) {
+      for (const crossing of found.crossings ?? []) {
+        planted.push({
+          id: nextId(), kind: "crossing", title: titled("crossing", undefined), eastM: crossing.eastM, northM: crossing.northM, headingDeg: crossing.headingDeg,
+          sizeM: { widthM: crossing.widthM, lengthM: SurveyedDecor.CROSSING_LENGTH_M }, origin: providerId, ...newest(dates.lamps)
+        })
+      }
+    }
+    if (!hand.roadsign) {
+      for (const sign of found.signs ?? []) {
+        planted.push({
+          id: nextId(), kind: "roadsign", title: titled("roadsign", undefined), eastM: sign.eastM, northM: sign.northM, headingDeg: sign.headingDeg,
+          sign: { face: sign.face, ...(sign.code ? { code: sign.code } : {}), ...(sign.value ? { value: sign.value } : {}) }, origin: providerId, ...newest(dates.lamps)
+        })
+      }
+    }
+    return { planted, handPlaced: Object.values(hand).some(Boolean) }
   }
 }

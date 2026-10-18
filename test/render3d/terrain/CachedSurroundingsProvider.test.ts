@@ -129,6 +129,17 @@ describe("CachedSurroundingsProvider", () => {
       now.mockRestore()
     })
 
+    it("neither writes down nor remembers an answer a part of which did not come in time, and asks again the next time", async () => {
+      const survey = new Counting()
+      const partial = { getSurroundings: async () => ({ ...(await Counting.prototype.getSurroundings.call(survey)), incomplete: true }) }
+      const cached = new CachedSurroundingsProvider(Object.assign(Object.create(survey), partial))
+      await cached.getSurroundings(PLACE, 100)
+      await settled()
+      await cached.getSurroundings(PLACE, 100)
+      expect(survey.asked).toBe(2)
+      expect(cache.entries.size).toBe(0)
+    })
+
     it("keeps no more than it may, the oldest going first", async () => {
       const survey = new Counting()
       const cached = new CachedSurroundingsProvider(survey)

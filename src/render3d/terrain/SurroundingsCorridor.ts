@@ -107,6 +107,13 @@ export class SurroundingsCorridor {
       SurroundingsCorridor.add(merged.lines, moved(answer.lines), (a, b) =>
         Math.hypot(a.eastM - b.eastM, a.northM - b.northM) < SurroundingsCorridor.SAME_STRUCTURE_M && Math.abs(a.lengthM - b.lengthM) < 5)
       if (answer.lamps) SurroundingsCorridor.add((merged.lamps ??= []), moved(answer.lamps), (a, b) => Math.hypot(a.eastM - b.eastM, a.northM - b.northM) < 1)
+      // A light, a crossing or a sign is the one met again from the next stop when it is where it was, facing the same way.
+      const samePost = (a: { eastM: number, northM: number, headingDeg: number }, b: { eastM: number, northM: number, headingDeg: number }) =>
+        Math.hypot(a.eastM - b.eastM, a.northM - b.northM) < 1 && Math.abs(((a.headingDeg - b.headingDeg + 540) % 360) - 180) < 10
+      if (answer.signals) SurroundingsCorridor.add((merged.signals ??= []), moved(answer.signals), samePost)
+      if (answer.crossings) SurroundingsCorridor.add((merged.crossings ??= []), moved(answer.crossings), samePost)
+      if (answer.signs) SurroundingsCorridor.add((merged.signs ??= []), moved(answer.signs), samePost)
+      if (answer.incomplete) merged.incomplete = true
       for (const key of ["laser", "photo", "map", "lamps"] as const) {
         const day = answer.dates?.[key]
         if (day && (!dates[key] || day > dates[key]!)) dates[key] = day

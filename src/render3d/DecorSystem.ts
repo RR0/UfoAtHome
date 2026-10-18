@@ -13,6 +13,8 @@ import { FacadeGeometry } from "./FacadeGeometry.js"
 import { FacadeTexture } from "./FacadeTexture.js"
 import { WireGeometry } from "./WireGeometry.js"
 import { DryStoneWall } from "./DryStoneWall.js"
+import { StreetFurnitureGeometry } from "./StreetFurnitureGeometry.js"
+import { TrafficSignals } from "../engine/model/LightRig.js"
 
 const DEG_TO_RAD = Math.PI / 180
 
@@ -1176,6 +1178,12 @@ export class DecorSystem {
               ? buildMound()
               : object.kind === "streetlight"
             ? buildStreetlight(lit)
+            : object.kind === "trafficlight"
+              ? StreetFurnitureGeometry.trafficLight(TrafficSignals.isPedestrian(object.lights))
+            : object.kind === "crossing"
+              ? StreetFurnitureGeometry.crossing(DecorSystem.sizeOf(object).widthM, DecorSystem.sizeOf(object).lengthM)
+            : object.kind === "roadsign"
+              ? StreetFurnitureGeometry.roadSign(object.sign)
             : object.kind === "vehicle"
               ? buildVehicle(lit, object.windows, object.observerSide, object.observerFacing)
               : object.kind === "aircraft"
@@ -1218,7 +1226,7 @@ export class DecorSystem {
   private static scaleFor(object: DecorObject): Vector3 {
     const size = object.sizeM
     // A bridge is built at its own size already: stretching it would turn its posts into planks.
-    if (!size || DecorSystem.hasFacade(object) || object.kind === "bridge" || object.kind === "wire" || object.kind === "terrace" || object.kind === "wall") return new Vector3(1, 1, 1)
+    if (!size || DecorSystem.hasFacade(object) || object.kind === "bridge" || object.kind === "wire" || object.kind === "terrace" || object.kind === "wall" || object.kind === "crossing") return new Vector3(1, 1, 1)
     const natural = this.naturalSize(object.kind, object.floors)
     // Axis by axis, because a size is allowed to be partial: an axis nobody measured keeps the
     // built-in shape's own proportion rather than being invented to match the ones that were.
@@ -1245,6 +1253,8 @@ export class DecorSystem {
     if (kind === "wire") return WireGeometry.NATURAL_SIZE
     // Stated rather than measured: a terrace is laid on the ground at its own size (see fitTerrace).
     if (kind === "terrace" || kind === "wall") return { widthM: 1, lengthM: 1, heightM: 1 }
+    // A crossing's bands are laid at the width of the road (see StreetFurnitureGeometry.crossing): this is a town street's, at the French minimum length.
+    if (kind === "crossing") return { widthM: 6, lengthM: 2.5, heightM: StreetFurnitureGeometry.CROSSING_LIFT_M }
     const key = `${kind}:${levels}`
     const cached = NATURAL_SIZES.get(key)
     if (cached) return cached
@@ -1261,6 +1271,10 @@ export class DecorSystem {
               ? buildMound()
               : kind === "streetlight"
             ? buildStreetlight(false)
+            : kind === "trafficlight"
+              ? StreetFurnitureGeometry.trafficLight(false)
+            : kind === "roadsign"
+              ? StreetFurnitureGeometry.roadSign(undefined)
             : kind === "vehicle"
               ? buildVehicle(false, undefined, undefined)
               : kind === "aircraft"
@@ -1433,7 +1447,7 @@ export class DecorSystem {
   private static addLights(group: Group, lights: DecorLight[] | undefined): void {
     for (const light of lights ?? []) {
       const colour = hexToRgb(light.color)
-      const mesh = addPart(group, new SphereGeometry(LAMP_RADIUS_M, 8, 6), colour, light.offsetM.y, true)
+      const mesh = addPart(group, new SphereGeometry(light.radiusM ?? LAMP_RADIUS_M, 8, 6), colour, light.offsetM.y, true)
       mesh.position.set(light.offsetM.x, light.offsetM.y, light.offsetM.z)
       mesh.userData = { emissive: true, lightId: light.id, lightColor: colour } satisfies DecorMeshUserData
       mesh.visible = false
@@ -1481,13 +1495,17 @@ export class DecorSystem {
     stepMs = 0,
     relativeScale = 1,
     bloomRadiusRad = LAMP_MIN_ANGULAR_RADIUS_RAD,
-    transmittance: readonly [number, number, number] = [1, 1, 1]
+    transmittance: readonly [number, number, number] = [1, 1, 1],
+    eye?: Vector3
   ): void {
     if (!lights || lights.length === 0) return
     const byId = new Map(lights.map(light => [light.id, light]))
-    const scale = Math.max(1, (distanceM * bloomRadiusRad) / LAMP_RADIUS_M)
-    const radiusM = LAMP_RADIUS_M * scale
-    const luminancePerCandela = relativeScale / (Math.PI * radiusM * radiusM)
+    // Where the eye is in the object's own frame, for a lamp seen from its front only (see DecorLight.beamDeg).
+    let eyeLocal: Vector3 | undefined
+    if (eye && lights.some(light => light.beamDeg !== undefined)) {
+      group.updateWorldMatrix(true, false)
+      eyeLocal = group.worldToLocal(DecorSystem.eyeScratch.copy(eye))
+    }
     for (const child of group.children) {
       if (!(child instanceof Mesh)) continue
       const lightId = (child.userData as DecorMeshUserData).lightId
@@ -1501,15 +1519,40 @@ export class DecorSystem {
       // is what draws dots at the light's own rate along a streak rather than a dotted line at the
       // sampler's. The second keeps a blink on screen a blink.
       const share = stepMs > 0 ? lightOnFractionBetween(light, t, t + stepMs) : (isLightOnAt(light, t) ? 1 : 0)
-      child.visible = share > 0
+      const towardEye = eyeLocal && light.beamDeg !== undefined ? DecorSystem.beamShare(light.beamDeg, child.position, eyeLocal) : 1
+      child.visible = share > 0 && towardEye > 0
+      const lens = light.radiusM ?? LAMP_RADIUS_M
+      const scale = Math.max(1, (distanceM * bloomRadiusRad) / lens)
+      const radiusM = lens * scale
+      const luminancePerCandela = relativeScale / (Math.PI * radiusM * radiusM)
       const material = child.material as MeshBasicMaterial
       const base = (child.userData as DecorMeshUserData).lightColor
       if (base) {
-        const emitted = share * LAMP_CANDELA * (light.intensity ?? 1) * luminancePerCandela
+        const emitted = share * towardEye * LAMP_CANDELA * (light.intensity ?? 1) * luminancePerCandela
         material.color.setRGB(base[0] * emitted * transmittance[0], base[1] * emitted * transmittance[1], base[2] * emitted * transmittance[2])
       }
       child.scale.setScalar(scale)
     }
+  }
+
+  private static readonly eyeScratch = new Vector3()
+
+  /**
+   * What share of its light on its axis a lamp at `lamp` with a beam (see DecorLight.beamDeg) sends toward an eye at `eyeLocal`, both in the object's frame: a
+   * cosine law raised to the power that halves it at the beam's angle, and nothing behind it. A traffic light read from across the junction is
+   * dimmer than from in front of it, and dark from behind.
+   */
+  static beamShare(beamDeg: number, lamp: Vector3, eyeLocal: Vector3): number {
+    const dx = eyeLocal.x - lamp.x
+    const dy = eyeLocal.y - lamp.y
+    const dz = eyeLocal.z - lamp.z
+    const length = Math.hypot(dx, dy, dz)
+    if (length === 0) return 1
+    // The front of a decor object is its −z, where its heading points.
+    const cosine = -dz / length
+    if (cosine <= 0) return 0
+    const exponent = Math.log(0.5) / Math.log(Math.cos((beamDeg * Math.PI) / 180))
+    return Math.pow(cosine, exponent)
   }
 
   /** Re-tints a streetlight's lamp head / vehicle's headlights in place when their lit state

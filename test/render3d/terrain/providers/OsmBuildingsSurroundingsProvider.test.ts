@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import { OsmBuildingsSurroundingsProvider } from "../../../../src/render3d/terrain/providers/OsmBuildingsSurroundingsProvider.js"
-import { OsmStreetLamps } from "../../../../src/render3d/terrain/providers/OsmStreetLamps.js"
+import { OsmStreetFurniture } from "../../../../src/render3d/terrain/providers/OsmStreetFurniture.js"
 import { SURROUNDINGS_SOURCES, SurroundingsSources } from "../../../../src/render3d/terrain/surroundingsSources.js"
 
 const BRAINE = { lat: 50.6055, lng: 4.1400 }
@@ -97,10 +97,10 @@ describe("OsmBuildingsSurroundingsProvider", () => {
   })
 
   it("adds the lamps it is given, with the day they were asked", async () => {
-    const lamps = new OsmStreetLamps({ fetchImpl: overpass([{ type: "node", lat: BRAINE.lat + 10 / METRES, lon: BRAINE.lng, tags: {} }]), endpoints: ["https://overpass.test/api"] })
+    const lamps = new OsmStreetFurniture({ fetchImpl: overpass([{ type: "node", lat: BRAINE.lat + 10 / METRES, lon: BRAINE.lng, tags: { highway: "street_lamp" } }]), endpoints: ["https://overpass.test/api"] })
     const found = await new OsmBuildingsSurroundingsProvider({ fetchImpl: overpass([]), endpoints: ["https://overpass.test/api"] }, lamps).getSurroundings(BRAINE, 200)
     expect(found.lamps).toHaveLength(1)
-    expect(found.dates?.lamps).toBe(OsmStreetLamps.today())
+    expect(found.dates?.lamps).toBe(OsmStreetFurniture.today())
   })
 })
 

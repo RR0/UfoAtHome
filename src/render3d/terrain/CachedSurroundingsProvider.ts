@@ -28,9 +28,10 @@ export class CachedSurroundingsProvider implements SurroundingsProvider {
   static readonly MAX_AGE_MS = 30 * 24 * 3600 * 1000
   /**
    * What an answer holds, as a number raised when a survey starts to say more than it did: an answer kept before it does not say it, and is not
-   * kept for a month more. 2: what kind of building each is (a church, an old one), and the walls and roofs of that kind.
+   * kept for a month more. 2: the traffic lights, crossings and signs of the streets. 3: what kind of building each is (a church, an old
+   * one), and the walls and roofs of that kind.
    */
-  static readonly FORMAT = 2
+  static readonly FORMAT = 3
   /** How many answers are kept on disk, the oldest going first: a few hundred places, a few megabytes. */
   static readonly MAX_STORED = 400
 
@@ -91,6 +92,11 @@ export class CachedSurroundingsProvider implements SurroundingsProvider {
       }
     }
     const surroundings = await this.survey.getSurroundings(centre, radiusM)
+    // A survey a part of which did not answer in time is not what the place has: it is not written down, and the next question asks again.
+    if (surroundings.incomplete) {
+      CachedSurroundingsProvider.asked.delete(key)
+      return surroundings
+    }
     if (cache) void CachedSurroundingsProvider.store(cache, request, surroundings)
     return surroundings
   }

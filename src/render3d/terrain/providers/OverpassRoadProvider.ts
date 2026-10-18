@@ -26,8 +26,8 @@ export class OverpassRoadProvider implements RoadProvider {
   readonly attribution = "Roads © OpenStreetMap contributors, as surveyed today"
   readonly contemporary = true
 
-  /** The ways asked for: everything a vehicle uses, and nothing a pedestrian does. */
-  private static readonly DRIVABLE = [
+  /** The ways asked for: everything a vehicle uses, and nothing a pedestrian does. Read too by what stands at their kerbs (see OsmStreetFurniture). */
+  static readonly DRIVABLE = [
     "motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential",
     "service", "track", "motorway_link", "trunk_link", "primary_link", "secondary_link", "tertiary_link"
   ]
@@ -104,7 +104,7 @@ export class OverpassRoadProvider implements RoadProvider {
   }
 
   /** What OSM says, where it says anything; what the class implies otherwise — see WIDTH_M. */
-  private static widthOf(tags: Record<string, string>): number {
+  static widthOf(tags: Record<string, string>): number {
     const stated = Number.parseFloat(tags.width ?? tags["est_width"] ?? "")
     if (Number.isFinite(stated) && stated > 0) return stated
     const lanes = Number.parseInt(tags.lanes ?? "", 10)

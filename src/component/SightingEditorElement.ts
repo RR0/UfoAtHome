@@ -1340,6 +1340,7 @@ export class SightingEditorElement extends HTMLElement {
       { value: "building", label: "Building" }, { value: "tree", label: "Tree" }, { value: "shrub", label: "Shrub" }, { value: "bridge", label: "Bridge" },
       { value: "wire", label: "Overhead line" }, { value: "crop", label: "Crop row" }, { value: "terrace", label: "Terrace (restanque)" },
       { value: "mound", label: "Stone heap" }, { value: "wall", label: "Dry-stone wall" }, { value: "streetlight", label: "Streetlight" },
+      { value: "trafficlight", label: "Traffic light" }, { value: "crossing", label: "Pedestrian crossing" }, { value: "roadsign", label: "Road sign" },
       { value: "vehicle", label: "Vehicle" }, { value: "aircraft", label: "Aircraft" }, { value: "entity", label: "Being" },
       { value: "observer", label: "Other observer", hidden: true }
     ])
@@ -7164,6 +7165,9 @@ export class SightingEditorElement extends HTMLElement {
       // editable, and none of it is account (see the Decor group's own doc): this is a
       // hypothesis about what the observer might have been looking at.
       ...(kind === "aircraft" ? this.defaultAircraft() : {}),
+      // A traffic light is its lamps and their cycle (see TrafficSignals); a sign starts as a stop, the one everybody can name.
+      ...(kind === "trafficlight" ? { lights: LightRigs.byId("traffic-signal")?.create() } : {}),
+      ...(kind === "roadsign" ? { sign: { face: "stop" as const } } : {}),
       // Only a building has floors at all — see DecorObject.floors's own doc comment.
       ...(kind === "building" ? { floors: DEFAULT_BUILDING_FLOORS } : {}),
       // undefined (spread as a no-op) for a kind with no windows at all — see defaultWindows.
@@ -8994,7 +8998,8 @@ export class SightingEditorElement extends HTMLElement {
       { value: "building", label: messages.decorBuilding }, { value: "tree", label: messages.decorTree }, { value: "shrub", label: messages.decorShrub },
       { value: "bridge", label: messages.decorBridge }, { value: "wire", label: messages.decorWire }, { value: "crop", label: messages.decorCrop },
       { value: "terrace", label: messages.decorTerrace }, { value: "mound", label: messages.decorMound }, { value: "wall", label: messages.decorWall },
-      { value: "streetlight", label: messages.decorStreetlight }, { value: "vehicle", label: messages.decorVehicle },
+      { value: "streetlight", label: messages.decorStreetlight }, { value: "trafficlight", label: messages.decorTrafficLight },
+      { value: "crossing", label: messages.decorCrossing }, { value: "roadsign", label: messages.decorRoadSign }, { value: "vehicle", label: messages.decorVehicle },
       { value: "aircraft", label: messages.decorAircraft }, { value: "entity", label: messages.decorEntity },
       // Added from its own button (the Observer group's): not offered here, but still named, for the label of one that is there.
       { value: "observer", label: messages.decorObserver, hidden: true }

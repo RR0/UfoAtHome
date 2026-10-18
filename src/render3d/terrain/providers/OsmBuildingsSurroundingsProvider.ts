@@ -8,7 +8,7 @@ import { TopoBuildings } from "../TopoBuildings.js"
 import type { VectorFeature } from "../OverheadStructures.js"
 import { OverpassClient } from "./OverpassClient.js"
 import type { OverpassClientOptions, OverpassResponse } from "./OverpassClient.js"
-import { OsmStreetLamps } from "./OsmStreetLamps.js"
+import { OsmStreetFurniture } from "./OsmStreetFurniture.js"
 
 type OverpassElement = NonNullable<OverpassResponse["elements"]>[number]
 
@@ -22,7 +22,7 @@ type OverpassElement = NonNullable<OverpassResponse["elements"]>[number]
  * ordinary building: two storeys, a flat roof, a pale plaster.
  *
  * Outlines go through the same reading as the French map's (TopoBuildings): a rectangle for what is nearly one, rectangles cut along the sides of
- * what is not. Asked of the same public Overpass instances as the roads and the lamps, one request at a time for the page (see OverpassClient).
+ * what is not. Asked of the same public Overpass instances as the roads and the furniture of the streets, one request at a time for the page (see OverpassClient).
  */
 export class OsmBuildingsSurroundingsProvider implements SurroundingsProvider {
   readonly id = "osm-buildings"
@@ -37,11 +37,11 @@ export class OsmBuildingsSurroundingsProvider implements SurroundingsProvider {
   private static readonly MAX_BUILDINGS = 300
 
   private readonly client: OverpassClient
-  private readonly lamps?: OsmStreetLamps
+  private readonly furniture?: OsmStreetFurniture
 
-  constructor(options: OverpassClientOptions = {}, lamps?: OsmStreetLamps) {
+  constructor(options: OverpassClientOptions = {}, furniture?: OsmStreetFurniture) {
     this.client = new OverpassClient(options)
-    this.lamps = lamps
+    this.furniture = furniture
   }
 
   /** Everywhere: the survey cannot tell a place with no building from one nobody has drawn, and says nothing of either. */
@@ -58,15 +58,15 @@ export class OsmBuildingsSurroundingsProvider implements SurroundingsProvider {
     } catch (error) {
       throw new SurroundingsUnavailableError("unreachable", error instanceof Error ? error.message : String(error))
     }
-    const lamps = await this.lamps?.near(centre, radiusM)
+    const furniture = await this.furniture?.near(centre, radiusM)
     const day = (answer.osm3s?.timestamp_osm_base ?? "").slice(0, 10)
     return {
       trees: [],
       buildings: BuildingMaterials.fit(BuildingStyles.fit(OsmBuildingsSurroundingsProvider.buildings(answer, centre, radius))),
       bridges: [],
       lines: [],
-      ...(lamps ? { lamps } : {}),
-      dates: { ...(/^\d{4}-\d{2}-\d{2}$/.test(day) ? { map: day } : {}), ...(lamps?.length ? { lamps: OsmStreetLamps.today() } : {}) }
+      ...furniture,
+      dates: { ...(/^\d{4}-\d{2}-\d{2}$/.test(day) ? { map: day } : {}), ...(OsmStreetFurniture.found(furniture) ? { lamps: OsmStreetFurniture.today() } : {}) }
     }
   }
 

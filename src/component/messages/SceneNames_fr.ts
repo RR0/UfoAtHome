@@ -113,6 +113,8 @@ export const sceneNames_fr: SceneNames = {
     "car-headlights": "Voiture, phares allumés",
     "car-hazards": "Voiture, feux de détresse",
     "emergency-beacons": "Gyrophares de véhicule d'urgence",
+    "traffic-signal": "Feu de circulation",
+    "pedestrian-signal": "Feu piéton",
     "streetlamp": "Lampadaire"
   },
   instruments: {
@@ -138,6 +140,9 @@ export const sceneNames_fr: SceneNames = {
     mound: "Tas de pierres",
     wall: "Muret de pierres sèches",
     streetlight: "Lampadaire",
+    trafficlight: "Feu de circulation",
+    crossing: "Passage piéton",
+    roadsign: "Panneau de signalisation",
     vehicle: "Véhicule",
     observer: "Observateur",
     aircraft: "Aéronef",

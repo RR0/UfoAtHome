@@ -117,6 +117,18 @@ export const LIGHT_RIGS: LightRig[] = [
     ]
   },
   {
+    id: "traffic-signal",
+    name: "Traffic light",
+    kinds: ["trafficlight"],
+    create: () => TrafficSignals.vehicleLights(0)
+  },
+  {
+    id: "pedestrian-signal",
+    name: "Pedestrian light",
+    kinds: ["trafficlight"],
+    create: () => TrafficSignals.pedestrianLights(0)
+  },
+  {
     id: "streetlamp",
     name: "Streetlamp",
     kinds: ["streetlight"],
@@ -135,5 +147,84 @@ export class LightRigs {
    * scenery has no lamps at all) rather than something to fall back from. */
   static byId(id: string | undefined): LightRig | undefined {
     return LIGHT_RIGS.find(rig => rig.id === id)
+  }
+}
+
+/**
+ * The cycle of the traffic lights of a junction, as lamps (see DecorLight): which of them is lit when.
+ *
+ * Nobody knows the timing of a given junction, and the map does not say it: this is a plausible one, the same everywhere, so that what a scene
+ * shows of a light is what such a light does. A cycle of ninety seconds in two phases, the usual cycle of a town's junction: the traffic of one of
+ * two crossing roads has its green for 41 s, its amber for 3 s (the amber of a French town), and a second when every way is red before the other
+ * road's green. A pedestrian crossing a road has a green of its own while that road's traffic is stopped. Which phase a light is in is told by the
+ * direction of its road (see phaseOf), so that two opposite approaches are green together and two crossing ones never.
+ */
+export class TrafficSignals {
+  static readonly CYCLE_S = 90
+  static readonly GREEN_S = 41
+  static readonly AMBER_S = 3
+  /** When a pedestrian's green begins after the traffic it crosses turned red, and how long it lasts. */
+  static readonly PEDESTRIAN_DELAY_S = 2
+  static readonly PEDESTRIAN_GREEN_S = 30
+  /** A traffic light's three lenses of 200 mm: some three hundred candela on its axis, as EN 12368 has them; a pedestrian's less. */
+  static readonly VEHICLE_INTENSITY = 3
+  static readonly PEDESTRIAN_INTENSITY = 1.5
+  static readonly LENS_RADIUS_M = 0.1
+  /** The angle off its axis where a lens gives half its light: a wide-beam head, seen from the pavement across the road and not from behind. */
+  static readonly BEAM_DEG = 30
+  /** Where the lamps of a head are on the post, metres up, and how far in front of the post their lenses are. */
+  static readonly VEHICLE_HEAD_Y_M = 2.9
+  static readonly PEDESTRIAN_HEAD_Y_M = 2.6
+  static readonly LENS_SPACING_M = 0.3
+  static readonly LENS_FRONT_M = 0.13
+  /** The regulated colours: a red, a yellow-amber, a green that leans to blue. */
+  static readonly RED = "#ff1e00"
+  static readonly AMBER = "#ffa200"
+  static readonly GREEN = "#00ff8c"
+
+  /** The phase of a road by its direction: one of two crossing roads (within 45 degrees of north-south, else east-west). */
+  static phaseOf(roadHeadingDeg: number): 0 | 1 {
+    const axis = ((roadHeadingDeg % 180) + 180) % 180
+    return axis >= 45 && axis < 135 ? 1 : 0
+  }
+
+  /** The three lamps of the head that stops the traffic of a road of phase `phase`. */
+  static vehicleLights(phase: 0 | 1): DecorLight[] {
+    const start = phase * TrafficSignals.CYCLE_S / 2
+    const y = TrafficSignals.VEHICLE_HEAD_Y_M
+    const step = TrafficSignals.LENS_SPACING_M
+    return [
+      TrafficSignals.lamp("red", TrafficSignals.RED, y + step, start + TrafficSignals.GREEN_S + TrafficSignals.AMBER_S, TrafficSignals.CYCLE_S - TrafficSignals.GREEN_S - TrafficSignals.AMBER_S, TrafficSignals.VEHICLE_INTENSITY),
+      TrafficSignals.lamp("amber", TrafficSignals.AMBER, y, start + TrafficSignals.GREEN_S, TrafficSignals.AMBER_S, TrafficSignals.VEHICLE_INTENSITY),
+      TrafficSignals.lamp("green", TrafficSignals.GREEN, y - step, start, TrafficSignals.GREEN_S, TrafficSignals.VEHICLE_INTENSITY)
+    ]
+  }
+
+  /** The two lamps of the head of a crossing over a road of phase `phase`: green while that road's traffic is stopped. */
+  static pedestrianLights(phase: 0 | 1): DecorLight[] {
+    const green = phase * TrafficSignals.CYCLE_S / 2 + TrafficSignals.GREEN_S + TrafficSignals.AMBER_S + TrafficSignals.PEDESTRIAN_DELAY_S
+    const y = TrafficSignals.PEDESTRIAN_HEAD_Y_M
+    const half = TrafficSignals.LENS_SPACING_M / 2
+    return [
+      TrafficSignals.lamp("ped-red", TrafficSignals.RED, y + half, green + TrafficSignals.PEDESTRIAN_GREEN_S, TrafficSignals.CYCLE_S - TrafficSignals.PEDESTRIAN_GREEN_S, TrafficSignals.PEDESTRIAN_INTENSITY),
+      TrafficSignals.lamp("ped-green", TrafficSignals.GREEN, y - half, green, TrafficSignals.PEDESTRIAN_GREEN_S, TrafficSignals.PEDESTRIAN_INTENSITY)
+    ]
+  }
+
+  /** Whether these lamps are a pedestrian's head (two lenses) rather than the traffic's (three). */
+  static isPedestrian(lights: readonly DecorLight[] | undefined): boolean {
+    return lights?.some(light => light.id === "ped-green") ?? false
+  }
+
+  /** One lens, lit from `fromS` into the cycle for `forS` seconds (see lightOnFractionBetween: lit while frac(t / period + phase) < duty). */
+  private static lamp(id: string, color: string, y: number, fromS: number, forS: number, intensity: number): DecorLight {
+    const cycle = TrafficSignals.CYCLE_S
+    const phase = Math.round((((1 - fromS / cycle) % 1) + 1) % 1 * 1e6) / 1e6
+    return {
+      id, color, intensity, radiusM: TrafficSignals.LENS_RADIUS_M, beamDeg: TrafficSignals.BEAM_DEG,
+      // In front of the head, which is where the object's heading points: its −z, as the front of every decor object is.
+      offsetM: { x: 0, y, z: -TrafficSignals.LENS_FRONT_M },
+      pattern: { kind: "flash", perMinute: 60 / cycle, dutyCycle: Math.round(forS / cycle * 1e6) / 1e6, ...(phase ? { phase } : {}) }
+    }
   }
 }

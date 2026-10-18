@@ -47,6 +47,21 @@ export type DecorKind =
    */
   | "wall"
   | "building" | "tree" | "crop" | "mound" | "streetlight" | "vehicle" | "observer" | "aircraft"
+  /**
+   * A traffic light: a head of three lamps (red, amber, green) on a post at the kerb, facing the traffic it stops, or a pedestrian's of two (red, green)
+   * facing across the road. `headingDeg` is the direction its lenses look, toward whoever reads it. Its lamps are its `lights`, from the
+   * "traffic-signal" or "pedestrian-signal" rig, each lit for its share of the cycle (see LIGHT_RIGS): a red light at night is a light source a
+   * witness sees, and it changes.
+   */
+  | "trafficlight"
+  /**
+   * A pedestrian crossing: the white bands painted across a carriageway, each `sizeM.lengthM` long along the road and half a metre wide, side by
+   * side over `sizeM.widthM`, the width of the road. `headingDeg` is the direction of the road, which the bands run along. Laid on the ground under
+   * it like the road's own paint (see RoadMarkings).
+   */
+  | "crossing"
+  /** A road sign on its post: what its face says is `sign`. `headingDeg` is the direction its face looks, toward the traffic that reads it. */
+  | "roadsign"
   /** A low bush: the greasewood of a New Mexico wash, the scrub of a garrigue — a clump of rounded
    * crowns on the ground, with no trunk. */
   | "shrub"
@@ -375,6 +390,23 @@ export interface DecorLight {
    * its wingtip strobes 20. */
   intensity?: number
   pattern: LightPattern
+  /** The radius of what shines, metres, where it is not a quarter of a metre: the lens of a traffic light is ten centimetres. */
+  radiusM?: number
+  /**
+   * Where the lamp is seen from, when it is not from everywhere: the angle off the object's front (−z, where its heading points) at which it gives half its light, degrees. A
+   * traffic light's lens throws its light down the road it faces and is dark from behind. Absent: a lamp seen alike from every side.
+   */
+  beamDeg?: number
+}
+
+/** What the face of a road sign says (see DecorObject.sign). */
+export interface RoadSignFace {
+  /** "stop" is the red octagon, "give-way" the triangle point down, "speed-limit" the disc ringed in red; "other" a sign whose face is not drawn. */
+  face: "stop" | "give-way" | "speed-limit" | "other"
+  /** The sign as the map codes it, where it does ("FR:B14[50]"). */
+  code?: string
+  /** The limit, km/h, for a "speed-limit". */
+  value?: number
 }
 
 /** What a building's roof is: the plain box a building is drawn as has a flat one. */
@@ -533,6 +565,8 @@ export interface DecorObject {
    * WireStructure. Absent means one strand at `sizeM.heightM`, a pole at each end. Ignored for every
    * other kind. */
   wire?: WireStructure
+  /** Kind "roadsign" only: what its face says. Absent is a sign whose face is not known. */
+  sign?: RoadSignFace
   /** Kind "building" only: number of upper stories above the ground floor, set when the building
    * is created (default 2, see SightingEditorElement.addDecor) and editable afterward. Drives the
    * window rows in the 3D model and the valid range for occupiedFloor (0 = ground floor, up to and

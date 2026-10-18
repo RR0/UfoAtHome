@@ -1,6 +1,5 @@
 import type { SurveyedLamp } from "../SurroundingsProvider.js"
-import { OverpassClient } from "./OverpassClient.js"
-import type { OverpassClientOptions, OverpassResponse } from "./OverpassClient.js"
+import type { OverpassResponse } from "./OverpassClient.js"
 
 /**
  * The public lamps round a place, as OpenStreetMap's volunteers have mapped them: each lamp mapped (`highway=street_lamp`), and, since
@@ -12,8 +11,7 @@ import type { OverpassClientOptions, OverpassResponse } from "./OverpassClient.j
  * streets has every lamp, the next one has none), so an empty answer says nothing of the lamps there are, and a lamp mapped is a lamp that stood
  * on the day of the map: it is the same suggestion as the trees and the buildings of a survey, for the author to keep, move or remove.
  *
- * Asked of the same Overpass instances the roads are, through the same polite queue (see OverpassClient). A failure is an empty list: the
- * scenery of a place is not worth failing for a lamp.
+ * Asked with the rest of the furniture of the streets, in the same question (see OsmStreetFurniture).
  */
 export class OsmStreetLamps {
   /** A lamp on a column is about this high where nobody wrote a height. */
@@ -25,48 +23,27 @@ export class OsmStreetLamps {
   private static readonly KERB_OFFSET_M = 1
   /** What the width of a road is taken to be when the map gives none (see OverpassRoadProvider for the classes). */
   private static readonly DEFAULT_WIDTH_M = 5.5
-  /** How long a survey waits for the lamps before it goes on without them. */
+  /** How long a survey waits for the furniture of the streets before it goes on without it. */
   static readonly PATIENCE_MS = 15000
   /** More than this and a scene is a forest of lamps: the nearest are kept. */
   private static readonly MAX = 150
 
-  private readonly client: OverpassClient
-
-  constructor(options: OverpassClientOptions = {}) {
-    this.client = new OverpassClient(options)
-  }
-
-  /** The day the volunteers' map was asked, which is the day it is as of. */
-  static today(): string {
-    return new Date().toISOString().slice(0, 10)
-  }
-
-  async near(centre: { lat: number, lng: number }, radiusM: number): Promise<SurveyedLamp[]> {
-    const dLat = radiusM / OsmStreetLamps.METRES_PER_DEGREE
-    const dLng = radiusM / (OsmStreetLamps.METRES_PER_DEGREE * Math.cos(centre.lat * Math.PI / 180))
-    const box = [centre.lat - dLat, centre.lng - dLng, centre.lat + dLat, centre.lng + dLng].map(v => v.toFixed(6)).join(",")
-    // The lamps never hold up the rest of a survey: an instance that does not answer is waited for a few seconds, not until its own timeout.
-    let timer: ReturnType<typeof setTimeout> | undefined
-    const patience = new Promise<undefined>(resolve => { timer = setTimeout(() => resolve(undefined), OsmStreetLamps.PATIENCE_MS) })
-    try {
-      const answer = await Promise.race([this.client.query(`[out:json][timeout:25];(node["highway"="street_lamp"](${box});way["highway"]["lit"="yes"](${box}););out geom;`), patience])
-      return answer ? OsmStreetLamps.lampsFrom(answer, centre, radiusM) : []
-    } catch {
-      return []
-    } finally {
-      clearTimeout(timer)
-    }
-  }
-
   /** One Overpass answer as lamps, nearest first, those inside the circle only. Exposed for the build steps that freeze an answer. */
   static lampsFrom(body: OverpassResponse, centre: { lat: number, lng: number }, radiusM: number): SurveyedLamp[] {
     const lamps: SurveyedLamp[] = []
+    // The answer holds the lamps among the rest of a street's furniture (see OsmStreetFurniture), and a lit road twice when a light stands on it.
+    const seen = new Set<string>()
     for (const element of body.elements ?? []) {
+      if (element.id !== undefined) {
+        const key = `${element.type}/${element.id}`
+        if (seen.has(key)) continue
+        seen.add(key)
+      }
       if (element.type === "way") {
-        OsmStreetLamps.alongStreet(element, centre, lamps)
+        if (element.tags?.lit === "yes") OsmStreetLamps.alongStreet(element, centre, lamps)
         continue
       }
-      if (typeof element.lat !== "number" || typeof element.lon !== "number") continue
+      if (element.tags?.highway !== "street_lamp" || typeof element.lat !== "number" || typeof element.lon !== "number") continue
       const eastM = (element.lon - centre.lng) * OsmStreetLamps.METRES_PER_DEGREE * Math.cos(centre.lat * Math.PI / 180)
       const northM = (element.lat - centre.lat) * OsmStreetLamps.METRES_PER_DEGREE
       if (Math.hypot(eastM, northM) > radiusM) continue

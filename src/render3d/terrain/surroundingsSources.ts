@@ -6,7 +6,7 @@ import { IgnLidarSurroundingsProvider } from "./providers/IgnLidarSurroundingsPr
 import { IgnLidarTopoSurroundingsProvider } from "./providers/IgnLidarTopoSurroundingsProvider.js"
 import { IgnTopoSurroundingsProvider } from "./providers/IgnTopoSurroundingsProvider.js"
 import { OsmBuildingsSurroundingsProvider } from "./providers/OsmBuildingsSurroundingsProvider.js"
-import { OsmStreetLamps } from "./providers/OsmStreetLamps.js"
+import { OsmStreetFurniture } from "./providers/OsmStreetFurniture.js"
 
 /**
  * Every survey of the surroundings the trees, buildings, bridges and lines of a place can be taken from, which the author
@@ -23,28 +23,28 @@ export const SURROUNDINGS_SOURCES: DataSource<SurroundingsProvider>[] = [
     name: "IGN LiDAR HD + BD TOPO",
     credit: "© IGN, LiDAR HD and BD TOPO, Licence Ouverte 2.0; street lamps © OpenStreetMap contributors",
     creditUrl: "https://geoservices.ign.fr/lidarhd",
-    create: () => new CachedSurroundingsProvider(new IgnLidarTopoSurroundingsProvider({}, new OsmStreetLamps()))
+    create: () => new CachedSurroundingsProvider(new IgnLidarTopoSurroundingsProvider({}, new OsmStreetFurniture()))
   },
   {
     id: "ign-lidar-hd",
     name: "IGN LiDAR HD",
     credit: "© IGN, LiDAR HD, Licence Ouverte 2.0; street lamps © OpenStreetMap contributors",
     creditUrl: "https://geoservices.ign.fr/lidarhd",
-    create: () => new CachedSurroundingsProvider(new IgnLidarSurroundingsProvider({}, new OsmStreetLamps()))
+    create: () => new CachedSurroundingsProvider(new IgnLidarSurroundingsProvider({}, new OsmStreetFurniture()))
   },
   {
     id: "ign-bd-topo",
     name: "IGN BD TOPO",
     credit: "© IGN, BD TOPO, Licence Ouverte 2.0; street lamps © OpenStreetMap contributors",
     creditUrl: "https://geoservices.ign.fr/bdtopo",
-    create: () => new CachedSurroundingsProvider(new IgnTopoSurroundingsProvider({}, new OsmStreetLamps()))
+    create: () => new CachedSurroundingsProvider(new IgnTopoSurroundingsProvider({}, new OsmStreetFurniture()))
   },
   {
     id: "osm-buildings",
     name: "OpenStreetMap buildings",
     credit: "Buildings and street lamps © OpenStreetMap contributors (ODbL)",
     creditUrl: "https://www.openstreetmap.org/copyright",
-    create: () => new CachedSurroundingsProvider(new OsmBuildingsSurroundingsProvider({}, new OsmStreetLamps()))
+    create: () => new CachedSurroundingsProvider(new OsmBuildingsSurroundingsProvider({}, new OsmStreetFurniture()))
   }
 ]
 

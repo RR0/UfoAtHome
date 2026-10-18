@@ -121,6 +121,7 @@ import type { Instrument, ProjectionKind, RecordingMedium } from "../engine/inst
 import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { WindowLighting } from "./WindowLighting.js"
 import { DecorSystem } from "./DecorSystem.js"
+import { StreetFurnitureGeometry } from "./StreetFurnitureGeometry.js"
 import type { DecorObject } from "../engine/model/Decor.js"
 import { resolveDecorGazeAt, resolveDecorHeadlightsAt, resolveDecorLitAt, resolveDecorPlacementAt, canHoldObserver, decorModelOf, DEFAULT_DECOR_MODEL } from "../engine/model/Decor.js"
 import type { DecorModelCredit, DecorModelRef } from "../engine/model/Decor.js"
@@ -2784,6 +2785,14 @@ export class SceneRenderer {
           const ends = DecorSystem.wireGround(object, x, z, placement.headingDeg, (px, pz) => this.groundYUnder(px, pz))
           group.userData.footprintGroundY = ends.startY
           DecorSystem.shearWire(group, DecorSystem.sizeOf(object).lengthM, ends.dropM)
+        } else if (object.kind === "crossing") {
+          // Paint on the road: at the ground under its middle, and each band's corners at the ground under them (see StreetFurnitureGeometry.drape).
+          const centreY = this.groundYUnder(x, z)
+          const theta = -(placement.headingDeg ?? 0) * DEG_TO_RAD
+          const cos = Math.cos(theta)
+          const sin = Math.sin(theta)
+          group.userData.footprintGroundY = centreY
+          StreetFurnitureGeometry.drape(DecorSystem.bodyOf(group), (lx, lz) => this.groundYUnder(x + lx * cos + lz * sin, z - lx * sin + lz * cos) - centreY)
         } else {
           group.userData.footprintGroundY = this.groundUnderFootprint(object, x, z, placement.headingDeg, placement.altitudeM)
         }
@@ -3167,7 +3176,8 @@ export class SceneRenderer {
           stepMs,
           this.relativeScale,
           bloomRadiusRad,
-          this.lampTransmittance(lampGroup)
+          this.lampTransmittance(lampGroup),
+          this.camera.position
         )
       }
       if (object.kind !== "streetlight" && object.kind !== "vehicle") continue

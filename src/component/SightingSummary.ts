@@ -485,6 +485,9 @@ export class SightingSummary {
       case "mound": return this.labels.decorMound
       case "wall": return this.labels.decorWall
       case "streetlight": return this.labels.decorStreetlight
+      case "trafficlight": return this.labels.decorTrafficLight
+      case "crossing": return this.labels.decorCrossing
+      case "roadsign": return this.labels.decorRoadSign
       case "vehicle": return this.labels.decorVehicle
       case "aircraft": return this.labels.decorAircraft
       default: return this.labels.decorObserver

@@ -108,6 +108,41 @@ export interface SurveyedLamp {
   heightM?: number
 }
 
+/** One traffic light, as a map has it: a head on its post at the kerb, in metres from the place asked about. */
+export interface SurveyedSignal {
+  eastM: number
+  northM: number
+  /** Degrees clockwise from north: the way its lenses look, toward the traffic (or the pedestrians) it stops. */
+  headingDeg: number
+  /** Whose light it is: the traffic's three lamps, or a pedestrian's two. */
+  for: "vehicles" | "pedestrians"
+  /** Which of the two phases of the junction's cycle it is in (see TrafficSignals.phaseOf). */
+  phase: 0 | 1
+}
+
+/** One pedestrian crossing painted on a road, as a map has it. */
+export interface SurveyedCrossing {
+  eastM: number
+  northM: number
+  /** Degrees clockwise from north: the direction of the road, which the bands run along. */
+  headingDeg: number
+  /** The width of the road it crosses, kerb to kerb. */
+  widthM: number
+}
+
+/** One road sign, as a map has it. */
+export interface SurveyedSign {
+  eastM: number
+  northM: number
+  /** Degrees clockwise from north: the way its face looks, toward the traffic that reads it. */
+  headingDeg: number
+  face: "stop" | "give-way" | "speed-limit" | "other"
+  /** The sign as the map codes it ("FR:B14[50]"), where it does. */
+  code?: string
+  /** The limit, km/h, of a speed limit. */
+  value?: number
+}
+
 /** The days of the surveys an answer was drawn from, as YYYY-MM-DD, where the services say them. */
 export interface SurveyDates {
   /** The last day of the laser flight. */
@@ -116,7 +151,7 @@ export interface SurveyDates {
   photo?: string
   /** The latest edition of the map's buildings. */
   map?: string
-  /** What the volunteers' map says is of its own day: the day it was asked. */
+  /** What the volunteers' map says is of its own day: the day it was asked. Its lamps, and its traffic lights, crossings and signs. */
   lamps?: string
 }
 
@@ -130,6 +165,12 @@ export interface Surroundings {
   lines: SurveyedLine[]
   /** The public lamps: the light of a town at night, not a thing a laser or a footprint draws. A survey without them gives none. */
   lamps?: SurveyedLamp[]
+  /** The traffic lights, the painted crossings and the road signs: the furniture of a street, from the same map as the lamps. */
+  signals?: SurveyedSignal[]
+  crossings?: SurveyedCrossing[]
+  signs?: SurveyedSign[]
+  /** A part of the survey did not answer in time (the volunteers' map is often slow): what is here is not all the place has, and is not kept as its answer. */
+  incomplete?: boolean
 }
 
 /**

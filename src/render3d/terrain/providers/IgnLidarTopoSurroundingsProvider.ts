@@ -9,7 +9,7 @@ import { BuildingStyles } from "../BuildingStyles.js"
 import { RoofShapes } from "../RoofShapes.js"
 import type { RoofPhoto } from "../RoofShapes.js"
 import { TopoBuildings } from "../TopoBuildings.js"
-import { OsmStreetLamps } from "./OsmStreetLamps.js"
+import { OsmStreetFurniture } from "./OsmStreetFurniture.js"
 import { IgnGeoplatform } from "./IgnGeoplatform.js"
 import type { IgnGeoplatformOptions, LidarGrids } from "./IgnGeoplatform.js"
 
@@ -29,12 +29,12 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
   readonly contemporary = true
 
   private readonly platform: IgnGeoplatform
-  /** Where the public lamps come from, when asked for: the registry gives it, a test that fakes only the IGN does not. */
-  private readonly lamps?: OsmStreetLamps
+  /** Where the public lamps, the traffic lights, the crossings and the signs come from, when asked for: the registry gives it, a test that fakes only the IGN does not. */
+  private readonly furniture?: OsmStreetFurniture
 
-  constructor(options: IgnGeoplatformOptions = {}, lamps?: OsmStreetLamps) {
+  constructor(options: IgnGeoplatformOptions = {}, furniture?: OsmStreetFurniture) {
     this.platform = new IgnGeoplatform(options)
-    this.lamps = lamps
+    this.furniture = furniture
   }
 
   covers(lat: number, lng: number): boolean {
@@ -44,7 +44,7 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
   async getSurroundings(centre: { lat: number, lng: number }, radiusM: number): Promise<Surroundings> {
     if (!this.covers(centre.lat, centre.lng)) throw new SurroundingsUnavailableError("no-coverage", "The IGN's surveys cover France only")
     const radius = IgnGeoplatform.radius(radiusM)
-    const [laser, map, photo, lamps, laserDay, photoDay] = await Promise.allSettled([this.platform.lidar(centre, radius), this.platform.vectors(centre, radius, true), this.platform.photo(centre, radius), this.lamps?.near(centre, radiusM) ?? Promise.resolve(undefined), this.platform.laserDate(centre), this.platform.photoDate(centre)])
+    const [laser, map, photo, furniture, laserDay, photoDay] = await Promise.allSettled([this.platform.lidar(centre, radius), this.platform.vectors(centre, radius, true), this.platform.photo(centre, radius), this.furniture?.near(centre, radiusM) ?? Promise.resolve(undefined), this.platform.laserDate(centre), this.platform.photoDate(centre)])
     const laserRadius = IgnGeoplatform.lidarRadius(radius)
     if (laser.status === "rejected" && map.status === "rejected") throw laser.reason
     const grids = laser.status === "fulfilled" ? laser.value : undefined
@@ -58,12 +58,12 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
       buildings: this.roofed(this.buildings(grids, vectors, centre, radius), grids, photo.status === "fulfilled" ? photo.value : undefined),
       bridges: vectors ? OverheadStructures.bridges(vectors, centre, radius, grids?.structures) : [],
       lines: vectors ? OverheadStructures.lines(vectors, centre, radius, grids?.structures) : [],
-      ...(lamps.status === "fulfilled" && lamps.value ? { lamps: lamps.value } : {}),
+      ...(furniture.status === "fulfilled" ? furniture.value : {}),
       dates: {
         ...(laser.status === "fulfilled" && laserDay.status === "fulfilled" && laserDay.value ? { laser: laserDay.value } : {}),
         ...(photo.status === "fulfilled" && photoDay.status === "fulfilled" && photoDay.value ? { photo: photoDay.value } : {}),
         ...(vectors?.mapDate ? { map: vectors.mapDate } : {}),
-        ...(lamps.status === "fulfilled" && lamps.value?.length ? { lamps: OsmStreetLamps.today() } : {})
+        ...(furniture.status === "fulfilled" && OsmStreetFurniture.found(furniture.value) ? { lamps: OsmStreetFurniture.today() } : {})
       }
     }
   }
