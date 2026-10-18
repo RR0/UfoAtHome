@@ -46,8 +46,8 @@ interface Seekable {
 
 /**
  * An interview, read as a dialogue: who said what, the passages taken out of the published transcript as bars that say why, the stretches that
- * link to a page as links, titles and foreign words in italics, the time of each turn when it is pointed at, and the passages that tell of a moment of the observation as buttons
- * that go there.
+ * link to a page as links, titles and foreign words in italics (what was said is plain text or HTML, shown as such), the time of each turn
+ * when it is pointed at, and the passages that tell of a moment of the observation as buttons that go there.
  *
  * `src` is the interview's file (see InterviewJson), relative to the page; `interview` sets one directly, and `documentUrl` is then what its
  * links are relative to. Following a passage to the observation sends an `interviewseek` event; with `player="<id>"`, the `<rr0-sighting>` of
@@ -181,26 +181,31 @@ export class InterviewElement extends HTMLElement {
     return node
   }
 
-  /** A stretch that links to a page, its address relative to the interview's file. */
-  private link(text: string, href: string, title: string | undefined): HTMLAnchorElement {
-    const link = document.createElement("a")
-    link.textContent = text
-    try {
-      link.href = new URL(href, this.base ?? location.href).href
-    } catch {
-      link.setAttribute("href", href)
+  /**
+   * What was said, plain text or HTML, as nodes: HTML is HTML's to say (a link, a title in italics, a foreign word), the addresses in it relative
+   * to the interview's file. Scripts and handlers are no part of what was said, and are left out.
+   */
+  private saidNodes(text: string): Node[] {
+    if (!/[<&]/.test(text)) return [document.createTextNode(text)]
+    const template = document.createElement("template")
+    template.innerHTML = text
+    for (const element of template.content.querySelectorAll("*")) {
+      if (["SCRIPT", "STYLE", "IFRAME", "OBJECT", "EMBED"].includes(element.tagName)) {
+        element.remove()
+        continue
+      }
+      for (const attribute of [...element.attributes]) {
+        if (/^on/i.test(attribute.name) || /^\s*javascript:/i.test(attribute.value)) element.removeAttribute(attribute.name)
+        else if (["href", "src"].includes(attribute.name)) {
+          try {
+            attribute.value = new URL(attribute.value, this.base ?? location.href).href
+          } catch {
+            // left as written
+          }
+        }
+      }
     }
-    if (title) link.title = title
-    return link
-  }
-
-  /** A stretch in italics (a title, a foreign word) as `<i>`, its language said; as it is otherwise. */
-  private styled(node: Node, italic: true | undefined, lang: string | undefined): Node {
-    if (!italic && !lang) return node
-    const wrapper = document.createElement(italic ? "i" : "span")
-    if (lang) wrapper.lang = lang
-    wrapper.append(node)
-    return wrapper
+    return [...template.content.childNodes]
   }
 
   private draw(): void {
@@ -256,15 +261,13 @@ export class InterviewElement extends HTMLElement {
           // Stretches follow each other as they were said, with their own spaces; two words they leave touching get one between them.
           let before = ""
           for (const part of segment.parts) {
-            const text = "redacted" in part ? "▮" : part.text
+            const text = "redacted" in part ? "▮" : InterviewFile.plain(part.text)
             if (/[\p{L}\p{N}.,;:!?)»”…▮]$/u.test(before) && /^[\p{L}\p{N}(«“▮]/u.test(text)) said.append(" ")
             if ("redacted" in part) said.append(this.gap(part.redacted.reason, "span"))
-            else if ("href" in part) said.append(this.styled(this.link(part.text, part.href, part.title), part.italic, part.lang))
-            else if ("italic" in part) said.append(this.styled(document.createTextNode(part.text), part.italic, part.lang))
-            else said.append(part.text)
+            else said.append(...this.saidNodes(part.text))
             before = text
           }
-        } else said.textContent = segment.text ?? ""
+        } else said.append(...this.saidNodes(segment.text ?? ""))
         previous = undefined
         turn.append(who, said)
       }

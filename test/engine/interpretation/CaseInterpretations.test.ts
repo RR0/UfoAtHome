@@ -164,6 +164,13 @@ describe("An interview's transcript file", () => {
       "WEBVTT\n\n00:00:00.000 --> 00:00:25.000\n<v Jerome Beau>Where do we start?\n\n00:00:25.000 --> 01:02:05.250\n<v Q. B.>5 &lt; 6 &amp; more\n")
   })
 
+  it("takes the markup off what was said where plain text is wanted: subtitles, a passage quoted", () => {
+    expect(InterviewFile.plain("Since <i lang=\"en\">Fastwalker</i>&nbsp;? <a href=\"/x\">Hynek</a> &amp; me<br>&#233;t&#xE9;")).toBe("Since Fastwalker\u00a0? Hynek & me\nété")
+    expect(InterviewFile.plain("5 < 6 & more")).toBe("5 < 6 & more")
+    const html: InterviewJson = { ...transcript, segments: [{ speaker: "witness", start: 1, end: 2, text: "<i>Fastwalker</i> &amp; co" }] }
+    expect(InterviewFile.toVtt(html)).toBe("WEBVTT\n\n00:00:01.000 --> 00:00:02.000\n<v Q. B.>Fastwalker &amp; co\n")
+  })
+
   it("shows a redacted passage as a gap in the subtitles, whatever its reason", () => {
     const redacted: InterviewJson = {
       ...transcript,

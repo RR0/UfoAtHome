@@ -130,9 +130,9 @@ export class DocsInterviewPage extends DocsSection {
       segmentRows: [
         ["speaker", "A key of <code>speakers</code>"],
         ["start, end", "Seconds from the beginning of the recording, both optional: a transcript typed by hand has none, and a turn without a time is not in the subtitles"],
-        ["text", "What was said"],
+        ["text", "What was said, as plain text or HTML (a link, a title in italics, a foreign word in its language: what a page publishing it would write), escaped as any JSON string. The format says who speaks and when; the rest is HTML's"],
         ["redacted", "<code>{ reason }</code>: the whole turn was taken out of the published file. It then has no <code>text</code>"],
-        ["parts", "Instead of <code>text</code>, when a stretch was taken out, links to a page (a person, a place, a date, a source) or is in italics: a list of <code>{ text }</code>, <code>{ text, italic: true, lang? }</code> (a title, a foreign word), <code>{ text, href, title?, italic?, lang? }</code> and <code>{ redacted }</code>, in order, each with its own spaces. A link is relative to the file"],
+        ["parts", "Instead of <code>text</code>, when only a stretch was taken out: a list of <code>{ text }</code> and <code>{ redacted }</code>, in order"],
         ["refs", "The moments of the observation this turn tells of (see “Links with the observation”)"]
       ],
       exampleHeading: "An example",
@@ -196,9 +196,9 @@ export class DocsInterviewPage extends DocsSection {
       segmentRows: [
         ["speaker", "Une clé de <code>speakers</code>"],
         ["start, end", "Secondes depuis le début de l'enregistrement, tous deux facultatifs : une transcription tapée à la main n'en a pas, et un tour sans temps n'est pas dans les sous-titres"],
-        ["text", "Ce qui a été dit"],
+        ["text", "Ce qui a été dit, en texte brut ou en HTML (un lien, un titre en italique, un mot étranger dans sa langue : ce qu'écrirait une page qui le publie), échappé comme toute chaîne JSON. Le format dit qui parle et quand ; le reste revient au HTML"],
         ["redacted", "<code>{ reason }</code> : le tour entier a été retiré du fichier publié. Il n'a alors pas de <code>text</code>"],
-        ["parts", "À la place de <code>text</code>, quand un passage a été retiré ou renvoie à une page (une personne, un lieu, une date, une source) ou est en italique : une liste de <code>{ text }</code>, <code>{ text, italic: true, lang? }</code> (un titre, un mot étranger), <code>{ text, href, title?, italic?, lang? }</code> et <code>{ redacted }</code>, dans l'ordre, chacune avec ses propres espaces. Un lien est relatif au fichier"],
+        ["parts", "À la place de <code>text</code>, quand seul un passage a été retiré : une liste de <code>{ text }</code> et de <code>{ redacted }</code>, dans l'ordre"],
         ["refs", "Les moments de l'observation que ce tour raconte (voir « Liens avec l'observation »)"]
       ],
       exampleHeading: "Un exemple",
@@ -262,9 +262,9 @@ export class DocsInterviewPage extends DocsSection {
       segmentRows: [
         ["speaker", "Una clave de <code>speakers</code>"],
         ["start, end", "Segundos desde el inicio de la grabación, ambos opcionales: una transcripción escrita a mano no los tiene, y un turno sin tiempo no está en los subtítulos"],
-        ["text", "Lo que se dijo"],
+        ["text", "Lo que se dijo, como texto plano o HTML (un enlace, un título en cursiva, una palabra extranjera en su idioma: lo que escribiría una página que lo publica), escapado como cualquier cadena JSON. El formato dice quién habla y cuándo; el resto es cosa del HTML"],
         ["redacted", "<code>{ reason }</code>: el turno entero se eliminó del archivo publicado. Entonces no tiene <code>text</code>"],
-        ["parts", "En lugar de <code>text</code>, cuando se eliminó un tramo o enlaza a una página (una persona, un lugar, una fecha, una fuente): una lista de <code>{ text }</code>, <code>{ text, italic: true, lang? }</code> (un título, una palabra extranjera), <code>{ text, href, title?, italic?, lang? }</code> y <code>{ redacted }</code>, en orden, cada uno con sus propios espacios. Un enlace es relativo al archivo"],
+        ["parts", "En lugar de <code>text</code>, cuando solo se eliminó un tramo: una lista de <code>{ text }</code> y <code>{ redacted }</code>, en orden"],
         ["refs", "Los momentos de la observación que cuenta este turno (véase «Vínculos con la observación»)"]
       ],
       exampleHeading: "Un ejemplo",
@@ -328,9 +328,9 @@ export class DocsInterviewPage extends DocsSection {
       segmentRows: [
         ["speaker", "Una chiave di <code>speakers</code>"],
         ["start, end", "Secondi dall'inizio della registrazione, entrambi facoltativi: una trascrizione scritta a mano non ne ha, e un turno senza tempo non è nei sottotitoli"],
-        ["text", "Ciò che è stato detto"],
+        ["text", "Ciò che è stato detto, come testo semplice o HTML (un link, un titolo in corsivo, una parola straniera nella sua lingua: ciò che scriverebbe una pagina che lo pubblica), con l'escape di qualsiasi stringa JSON. Il formato dice chi parla e quando; il resto spetta all'HTML"],
         ["redacted", "<code>{ reason }</code>: l'intero turno è stato tolto dal file pubblicato. Non ha allora <code>text</code>"],
-        ["parts", "Al posto di <code>text</code>, quando è stato tolto un tratto o rimanda a una pagina (una persona, un luogo, una data, una fonte): un elenco di <code>{ text }</code>, <code>{ text, italic: true, lang? }</code> (un titolo, una parola straniera), <code>{ text, href, title?, italic?, lang? }</code> e <code>{ redacted }</code>, in ordine, ognuno con i propri spazi. Un link è relativo al file"],
+        ["parts", "Al posto di <code>text</code>, quando è stato tolto solo un tratto: un elenco di <code>{ text }</code> e <code>{ redacted }</code>, in ordine"],
         ["refs", "I momenti dell'osservazione di cui parla questo turno (vedi «Legami con l'osservazione»)"]
       ],
       exampleHeading: "Un esempio",
@@ -369,10 +369,10 @@ export class DocsInterviewPage extends DocsSection {
     const said = (en: string, fr: string, es: string, it: string): Said<string> => ({ en, fr, es, it })
     return this.componentSection(language, "rr0-interview",
       said(
-        "An interview read as a dialogue: who said what, the passages taken out as bars that say why, the stretches that link to a page as links, the time of each turn when it is pointed at, and the passages that tell of a moment of the observation as buttons that go there. It draws in the page itself, not in a shadow root, so the page's styles reach the text and its links.",
-        "Une interview lue comme un dialogue : qui a dit quoi, les passages retirés en barres qui disent pourquoi, les portions qui renvoient à une page en liens, l'heure de chaque tour au survol, et les passages qui racontent un moment de l'observation en boutons qui y mènent. Il dessine dans la page elle-même, pas dans une racine fantôme : les styles de la page atteignent le texte et ses liens.",
-        "Una entrevista leída como un diálogo: quién dijo qué, los pasajes retirados como barras que dicen por qué, los tramos que enlazan a una página como enlaces, la hora de cada turno al pasar el puntero, y los pasajes que cuentan un momento de la observación como botones que llevan a él. Dibuja en la propia página, no en una raíz oculta: los estilos de la página alcanzan el texto y sus enlaces.",
-        "Un'intervista letta come un dialogo: chi ha detto cosa, i passaggi rimossi come barre che dicono perché, i tratti che rimandano a una pagina come link, l'ora di ogni turno al passaggio del puntatore, e i passaggi che raccontano un momento dell'osservazione come pulsanti che ci portano. Disegna nella pagina stessa, non in una radice ombra: gli stili della pagina raggiungono il testo e i suoi link."),
+        "An interview read as a dialogue: who said what, as the HTML it may be, the passages taken out as bars that say why, the time of each turn when it is pointed at, and the passages that tell of a moment of the observation as buttons that go there. It draws in the page itself, not in a shadow root, so the page's styles reach the text and its links.",
+        "Une interview lue comme un dialogue : qui a dit quoi, tel que son HTML le dit, les passages retirés en barres qui disent pourquoi, l'heure de chaque tour au survol, et les passages qui racontent un moment de l'observation en boutons qui y mènent. Il dessine dans la page elle-même, pas dans une racine fantôme : les styles de la page atteignent le texte et ses liens.",
+        "Una entrevista leída como un diálogo: quién dijo qué, tal como lo dice su HTML, los pasajes retirados como barras que dicen por qué, la hora de cada turno al pasar el puntero, y los pasajes que cuentan un momento de la observación como botones que llevan a él. Dibuja en la propia página, no en una raíz oculta: los estilos de la página alcanzan el texto y sus enlaces.",
+        "Un'intervista letta come un dialogo: chi ha detto cosa, come lo dice il suo HTML, i passaggi rimossi come barre che dicono perché, l'ora di ogni turno al passaggio del puntatore, e i passaggi che raccontano un momento dell'osservazione come pulsanti che ci portano. Disegna nella pagina stessa, non in una radice ombra: gli stili della pagina raggiungono il testo e i suoi link."),
       `<script src="https://ufoathome.org/lib/rr0-interview.mjs" type="module"></script>
 <rr0-sighting id="player" src="case.json"></rr0-sighting>
 <rr0-interview src="interview.json" player="player"></rr0-interview>`,

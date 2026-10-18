@@ -35,28 +35,10 @@ export interface InterviewRedaction {
   reason: SaidText
 }
 
-/** A stretch of a segment that links to a page: what was said, and where it leads (a person's, a place's, a date's or a source's page). */
-export interface InterviewLinkPart {
-  text: string
-  /** Relative to the transcript's own address. */
-  href: string
-  /** What the link says when pointed at. */
-  title?: string
-  /** Set in italics too: the title of a work that has its page. */
-  italic?: true
-  /** The language of the stretch, when it is not the transcript's. */
-  lang?: string
-}
-
-/** A stretch of a segment set in italics: the title of a work, or words in another language than the transcript's (`lang`). */
-export interface InterviewItalicPart {
-  text: string
-  italic: true
-  lang?: string
-}
-
-/** A stretch of a segment: said, said in italics, said with a link, or taken out (see InterviewSegment.parts). */
-export type InterviewSegmentPart = { text: string } | InterviewItalicPart | InterviewLinkPart | { redacted: InterviewRedaction }
+/**
+ * A stretch of a segment: said, or taken out (see InterviewSegment.parts). What is said is plain text or HTML, as `InterviewSegment.text` is.
+ */
+export type InterviewSegmentPart = { text: string } | { redacted: InterviewRedaction }
 
 /**
  * One turn of speech: one speaker, from `start` to `end` seconds after the beginning of the recording, and what was said. A transcript that comes
@@ -65,9 +47,12 @@ export type InterviewSegmentPart = { text: string } | InterviewItalicPart | Inte
  * A passage taken out of the published file keeps its place (speaker and times) but loses its `text`, and says why in `redacted`: a reader can
  * show it as blacked out rather than hide that it existed.
  *
- * Only a stretch of it may be taken out, the rest staying (the answer to a question, without the detail that would identify), or a stretch may
- * link to a page (a person, a place, a date, a source) or be set in italics (a title, a foreign word): then it has `parts` instead of `text`, in
- * order, each said, in italics, linked or redacted. `refs[].range` counts in `text`, so a segment with `parts` has none.
+ * What was said is plain text or HTML (a link to a person's page, a title in italics, a foreign word in its language: what a page publishing it
+ * would write), escaped as JSON escapes any string. A reader shows it as HTML; what wants plain text (subtitles, a passage quoted) takes the
+ * markup off (see InterviewFile.plain).
+ *
+ * Only a stretch of it may be taken out, the rest staying (the answer to a question, without the detail that would identify): then it has
+ * `parts` instead of `text`, in order, each said or redacted. `refs[].range` counts in `text`, so a segment with `parts` has none.
  */
 export interface InterviewSegment {
   speaker: string
@@ -162,8 +147,22 @@ export class InterviewFile {
 
   /** What a segment says as published: its text, or its said parts joined with `…` where a stretch was taken out; undefined when it is taken out whole. */
   static said(segment: InterviewSegment): string | undefined {
-    if (segment.parts) return segment.parts.map(part => "redacted" in part ? "…" : part.text).join(" ")
-    return segment.redacted ? undefined : segment.text ?? ""
+    if (segment.parts) return segment.parts.map(part => "redacted" in part ? "…" : InterviewFile.plain(part.text)).join(" ")
+    return segment.redacted ? undefined : InterviewFile.plain(segment.text ?? "")
+  }
+
+  private static readonly ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: "\"", apos: "'", nbsp: "\u00a0" }
+
+  /**
+   * What a said text reads as without its markup: plain text stays as it is, HTML loses its tags and has its entities read. Only what reads as a
+   * tag (`<i>`, `</a>`) is taken off, so that a plain "5 < 6" stays.
+   */
+  static plain(text: string): string {
+    if (!/[<&]/.test(text)) return text
+    return text.replace(/<br\s*\/?>/gi, "\n").replace(/<\/?[a-z][^>]*>/gi, "")
+      .replace(/&#x([0-9a-f]+);/gi, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+      .replace(/&#(\d+);/g, (_, decimal: string) => String.fromCodePoint(Number(decimal)))
+      .replace(/&(\w+);/g, (entity, name: string) => InterviewFile.ENTITIES[name.toLowerCase()] ?? entity)
   }
 
   /** The `id`s of the sightings the interview was held with. */

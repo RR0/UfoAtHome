@@ -12,9 +12,9 @@ const interview = {
   speakers: { interviewer: { role: "interviewer", by: { people: "CoulthartRoss" } }, witness: { role: "witness", by: { people: "ValleeJacques" } } },
   segments: [
     { speaker: "interviewer", text: "When did you meet him?" },
-    { speaker: "witness", parts: [{ text: "I met" }, { text: "Allen Hynek", href: "../people/h/HynekJosefAllen/", title: "J. Allen Hynek" }, { text: "in 1960." }], refs: [{ at: 12 }] },
-    { speaker: "interviewer", parts: [{ text: "Since" }, { text: "Fastwalker", italic: true, lang: "en" }, { text: "and" }, { text: "Science interdite", italic: true, href: "../book/si/" }, { text: "?" }] },
-    { speaker: "witness", parts: [{ text: "He lived in" }, { redacted: { reason: { en: "Address" } } }, { text: ", near Chicago." }] }
+    { speaker: "witness", text: "I met <a href=\"../people/h/HynekJosefAllen/\" title=\"J. Allen Hynek\">Allen Hynek</a> in 1960.", refs: [{ at: 12 }] },
+    { speaker: "interviewer", text: "Since <i lang=\"en\">Fastwalker</i> and <a href=\"../book/si/\"><i>Science interdite</i></a>&nbsp;? 5 < 6 <script>window.hacked = true</script><b onclick=\"window.hacked = true\">!</b>" },
+    { speaker: "witness", parts: [{ text: "He lived in" }, { redacted: { reason: { en: "Address" } } }, { text: ", near <i>Chicago</i>." }] }
   ]
 }
 
@@ -45,7 +45,7 @@ describe("InterviewElement", () => {
     expect(document.head.querySelectorAll("style[data-rr0-interview]")).toHaveLength(1)
   })
 
-  it("links a stretch to its page, relative to the file, and keeps the spaces of what was said", async () => {
+  it("shows what was said as the HTML it is, its addresses relative to the file", async () => {
     files["https://example.org/time/interview.json"] = interview
     const element = await make({ src: "https://example.org/time/interview.json" })
     const said = element.querySelectorAll(".turn .said")
@@ -54,29 +54,27 @@ describe("InterviewElement", () => {
     expect(link.href).toBe("https://example.org/people/h/HynekJosefAllen/")
     expect(link.title).toBe("J. Allen Hynek")
     expect(said[1].textContent).toBe("I met Allen Hynek in 1960.")
-    // A stretch taken out stays a bar that says why; the punctuation after it follows it.
-    expect((said[3].querySelector(".bar") as HTMLElement).dataset.tip).toBe("Passage removed : Address")
-    expect(said[3].textContent).toBe("He lived in , near Chicago.")
+    const [foreign, title] = [...said[2].querySelectorAll("i")]
+    expect(foreign.lang).toBe("en")
+    expect(title.closest("a")!.href).toBe("https://example.org/book/si/")
+    expect(said[2].textContent).toBe("Since Fastwalker and Science interdite\u00a0? 5 < 6 !")
   })
 
-  it("sets titles and foreign words in italics, in their language, a linked title as a link in italics", async () => {
+  it("leaves scripts and handlers out of what was said", async () => {
     files["https://example.org/time/interview.json"] = interview
     const element = await make({ src: "https://example.org/time/interview.json" })
     const said = element.querySelectorAll(".turn .said")[2]
-    const [foreign, title] = [...said.querySelectorAll("i")]
-    expect(foreign.textContent).toBe("Fastwalker")
-    expect(foreign.lang).toBe("en")
-    expect(title.querySelector("a")!.href).toBe("https://example.org/book/si/")
-    expect(title.lang).toBe("")
-    expect(said.textContent).toBe("Since Fastwalker and Science interdite?")
+    expect(said.querySelector("script")).toBeNull()
+    expect(said.querySelector("b")!.hasAttribute("onclick")).toBe(false)
   })
 
-  it("keeps the spaces a stretch already has, adding none", async () => {
-    const element = await make({})
-    element.interview = { version: 1, speakers: { witness: { role: "witness" } }, segments: [
-      { speaker: "witness", parts: [{ text: "Depuis la trilogie " }, { text: "Dimensions", italic: true }, { text: ", et (" }, { text: "Fastwalker", italic: true, lang: "en" }, { text: ")." }] }
-    ] }
-    expect(element.querySelector(".turn .said")!.textContent).toBe("Depuis la trilogie Dimensions, et (Fastwalker).")
+  it("keeps a stretch taken out as a bar that says why, the rest as said", async () => {
+    files["https://example.org/time/interview.json"] = interview
+    const element = await make({ src: "https://example.org/time/interview.json" })
+    const said = element.querySelectorAll(".turn .said")[3]
+    expect((said.querySelector(".bar") as HTMLElement).dataset.tip).toBe("Passage removed : Address")
+    expect(said.querySelector("i")!.textContent).toBe("Chicago")
+    expect(said.textContent).toBe("He lived in , near Chicago.")
   })
 
   it("says nothing of proofreading when the file does not say who has proofread it", async () => {
