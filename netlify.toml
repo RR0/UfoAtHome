@@ -1,11 +1,11 @@
 # What ufoathome.org builds, and where from.
 #
-# The site is deployed from this repository so that its documentation, its demo catalogue and its
-# roadmap can never describe a version other than the one they ship with. Netlify's own project
-# settings pointed at `npm run build` / `dist` — the local ENGINE DEMO, which is a developer's page
-# and not a site — so this file states the real target instead. A netlify.toml in the repository
-# takes precedence over those settings, which also means the build is reviewable in a diff rather
-# than living only in a web form.
+# The site is built LOCALLY and uploaded by `npm run deploy:site` (build:site, then
+# `netlify deploy --prod --dir dist-site --no-build`): building on every push to master used up
+# Netlify's monthly build minutes. Git builds are stopped in the Netlify project settings, so a push
+# no longer deploys anything. This file still states the build for the CLI (`netlify build`,
+# `netlify deploy` without --no-build) and for the day git builds would be turned back on: the
+# project's own settings point at `npm run build` / `dist`, the local ENGINE DEMO, not the site.
 #
 # Redirects and headers are deliberately NOT here: site/build.ts writes `_redirects` and `_headers`
 # into dist-site/ itself, and Netlify reads those from the deployed directory. They are generated

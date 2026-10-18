@@ -20,7 +20,7 @@ The project's history is in the [Wiki](https://github.com/RR0/UfoAtHome/wiki).
 
 ## Setup
 
-Node ≥ 20 (the site is built on Node 22, pinned in [`netlify.toml`](netlify.toml)).
+Node ≥ 20 (Node 22 recommended, as pinned in [`netlify.toml`](netlify.toml)).
 
 ```bash
 git clone https://github.com/RR0/UfoAtHome.git
@@ -227,7 +227,8 @@ headed Chromium, hence outside the sandbox. Change the interface, retake the sho
 1. `npm test`, then `npm run build:site` and check the result with `npm run site:serve`.
 2. `npm version <patch|minor> --no-git-tag-version`, commit the bump as `<version>`.
 3. `npm publish` (`prepublishOnly` rebuilds the schema and the three embeds, and runs the tests).
-4. `git push`: Netlify rebuilds ufoathome.org from `master` ([`netlify.toml`](netlify.toml)).
+4. `git push`, then `npm run deploy:site`: the site is built locally and uploaded to ufoathome.org (Netlify's git
+   builds are stopped, so a push alone deploys nothing). Needs `netlify login` or `NETLIFY_AUTH_TOKEN`.
 5. If demo recordings changed, `npm run sync:cases` and deploy rr0.org.
 
 ## License
