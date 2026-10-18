@@ -41,6 +41,7 @@ export class DocsComponentsPage extends DocsSection {
     ["rr0-scene", "/docs/format/#rr0-scene"],
     ["rr0-case-editor", "/docs/case/#rr0-case-editor"],
     ["rr0-interview", "/docs/interview/#rr0-interview"],
+    ["rr0-interview-editor", "/docs/interview/#rr0-interview-editor"],
     ["rr0-date-input", "/docs/format/#rr0-sighting-editor"],
     ["rr0-sighting-editor", "/docs/format/#rr0-sighting-editor"],
     ["rr0-sighting", "/docs/format/#rr0-sighting"]

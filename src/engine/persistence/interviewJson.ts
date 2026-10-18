@@ -35,8 +35,17 @@ export interface InterviewRedaction {
   reason: SaidText
 }
 
-/** A stretch of a segment: said, or taken out (see InterviewSegment.parts). */
-export type InterviewSegmentPart = { text: string } | { redacted: InterviewRedaction }
+/** A stretch of a segment that links to a page: what was said, and where it leads (a person's, a place's, a date's or a source's page). */
+export interface InterviewLinkPart {
+  text: string
+  /** Relative to the transcript's own address. */
+  href: string
+  /** What the link says when pointed at. */
+  title?: string
+}
+
+/** A stretch of a segment: said, said with a link, or taken out (see InterviewSegment.parts). */
+export type InterviewSegmentPart = { text: string } | InterviewLinkPart | { redacted: InterviewRedaction }
 
 /**
  * One turn of speech: one speaker, from `start` to `end` seconds after the beginning of the recording, and what was said. A transcript that comes
@@ -45,8 +54,8 @@ export type InterviewSegmentPart = { text: string } | { redacted: InterviewRedac
  * A passage taken out of the published file keeps its place (speaker and times) but loses its `text`, and says why in `redacted`: a reader can
  * show it as blacked out rather than hide that it existed.
  *
- * Only a stretch of it may be taken out, the rest staying (the answer to a question, without the detail that would identify): then it has
- * `parts` instead of `text`, in order, each said or redacted. `refs[].range` counts in `text`, so a segment with `parts` has none.
+ * Only a stretch of it may be taken out, the rest staying (the answer to a question, without the detail that would identify), or a stretch may
+ * link to a page (a person, a place, a date, a source): then it has `parts` instead of `text`, in order, each said, linked or redacted. `refs[].range` counts in `text`, so a segment with `parts` has none.
  */
 export interface InterviewSegment {
   speaker: string
@@ -141,7 +150,7 @@ export class InterviewFile {
 
   /** What a segment says as published: its text, or its said parts joined with `…` where a stretch was taken out; undefined when it is taken out whole. */
   static said(segment: InterviewSegment): string | undefined {
-    if (segment.parts) return segment.parts.map(part => "text" in part ? part.text : "…").join(" ")
+    if (segment.parts) return segment.parts.map(part => "redacted" in part ? "…" : part.text).join(" ")
     return segment.redacted ? undefined : segment.text ?? ""
   }
 
@@ -186,8 +195,17 @@ export class InterviewFile {
     if (!speaker) return id
     const title = typeof speaker.title === "string" ? speaker.title : speaker.title ? Object.values(speaker.title)[0] : undefined
     if (title) return title
-    if (speaker.by) return "people" in speaker.by ? speaker.by.people : "org" in speaker.by ? speaker.by.org : (speaker.by as { title?: string }).title ?? speaker.role
+    if (speaker.by) return InterviewFile.agentName(speaker.by) || speaker.role
     return speaker.role
+  }
+
+  /** How an agent is named to a reader: a person as first name then last name (`BeauJerome` is Jerome Beau), an organization by its name. */
+  static agentName(agent: AgentRef): string {
+    if ("people" in agent) {
+      const [last, ...first] = agent.people.replace(/([a-z])([A-Z])/g, "$1 $2").split(" ")
+      return [...first, last].join(" ")
+    }
+    return "org" in agent ? agent.org : (agent as { title?: string }).title ?? ""
   }
 
   private static stamp(seconds: number): string {

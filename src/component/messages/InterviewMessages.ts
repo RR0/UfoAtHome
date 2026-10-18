@@ -1,4 +1,4 @@
-/** What an interview of a case says — see InterviewElement. */
+/** What an interview of a case says — see InterviewEditorElement. */
 export interface InterviewMessages {
   title: string
   time: string
@@ -25,6 +25,8 @@ export interface InterviewMessages {
   proofreadAll: string
   /** `{names}` is the speakers who have not approved the transcript yet. */
   proofreadPending: string
+  /** How a speaker the transcript does not name is called, by role. */
+  roles: { interviewer: string, interviewee: string, witness: string }
   importFile: string
   importUrl: string
   importButton: string

@@ -13,7 +13,7 @@ import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.
 import type { CaseTrack } from "./CaseSession.js"
 import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import type { InterviewJson, InterviewMedium, InterviewPassage } from "../engine/persistence/interviewJson.js"
-import type { InterviewElement, InterviewEvent } from "./InterviewElement.js"
+import type { InterviewEditorElement, InterviewEvent } from "./InterviewEditorElement.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
 import { register as registerSightingEditor } from "./SightingEditorElement.js"
@@ -120,7 +120,7 @@ const TEMPLATE = `
       <div id="passages" class="passages" hidden><ul id="passages-list"></ul></div>
     </section>
     <section id="interview-section" class="recording" hidden>
-      <rr0-interview id="interview"></rr0-interview>
+      <rr0-interview-editor id="interview"></rr0-interview-editor>
     </section>
   </section>
   <section class="group-panel" id="group-case-file" aria-labelledby="label-case-file-group" hidden>
@@ -180,7 +180,7 @@ type DialogMode = "add" | "delete" | "export" | "discard"
  *
  * What the case lists is its EVENTS, and the picker lists them: an observer's account ("Account by Q. B."), a reading of one, an interview
  * ("Interview of Q. B."). An account or a reading is shown in the `<rr0-sighting-editor>`; an interview, which is no recording, is shown
- * in an `<rr0-interview>` that takes its place and edits the event in place.
+ * in an `<rr0-interview-editor>` that takes its place and edits the event in place.
  *
  * `src` is passed to the editor, which fetches it: a `case.json` is handed back here (its
  * `caseloaded` event), a plain recording stays the editor's own and this element shows nothing more
@@ -193,7 +193,7 @@ export class CaseEditorElement extends HTMLElement {
   private current?: CaseTrack
   /** The interview on show, when the picker is on one: then no track is. */
   private currentInterview?: InterviewEvent
-  private readonly interviewElement: InterviewElement
+  private readonly interviewElement: InterviewEditorElement
   /** The interview element, fetched and defined the first time an interview is shown: most cases have none (see ensureInterview). */
   private interviewReady?: Promise<void>
   /** The group on show: the events, or the file `case.json` as text. */
@@ -224,7 +224,7 @@ export class CaseEditorElement extends HTMLElement {
     customElements.upgrade(this.shadow)
     ;(this.shadow.getElementById("case-date") as DateInputElement).build()
     this.editor = this.shadow.getElementById("editor") as SightingEditorElement
-    this.interviewElement = this.shadow.getElementById("interview") as InterviewElement
+    this.interviewElement = this.shadow.getElementById("interview") as InterviewEditorElement
     this.interviewElement.addEventListener(INTERVIEW_CHANGE_EVENT, event => this.interviewChanged((event as CustomEvent<{ field: string, text?: string }>).detail))
     this.interviewElement.addEventListener(INTERVIEW_SEEK_EVENT, event => void this.followToObservation((event as CustomEvent<{ sighting?: string, at: number }>).detail))
     this.editor.addEventListener("caseloaded", event => {
@@ -815,9 +815,9 @@ export class CaseEditorElement extends HTMLElement {
     this.interviewElement.event = interview
   }
 
-  /** Fetches and defines `<rr0-interview>`, once: the editor of an interview is a chunk of its own that a case without interviews never loads. */
+  /** Fetches and defines `<rr0-interview-editor>`, once: the editor of an interview is a chunk of its own that a case without interviews never loads. */
   private ensureInterview(): Promise<void> {
-    this.interviewReady ??= import("./InterviewElement.js").then(({ register }) => {
+    this.interviewReady ??= import("./InterviewEditorElement.js").then(({ register }) => {
       register()
       customElements.upgrade(this.shadow)
     }, error => {

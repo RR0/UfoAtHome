@@ -558,6 +558,21 @@ export class SightingElement extends HTMLElement {
     this.setEntries([{ src: "", sighting }], undefined)
   }
 
+  /**
+   * Shows the moment `seconds` after the start of an observation: of the account `sighting` names (the id of its event in the case, or the one its
+   * recording states) when the element shows it, else of the account on show. What a passage of an interview links to (see InterviewElement).
+   */
+  seekTo(seconds: number, sighting?: string): void {
+    const caseSource = this.caseSource
+    const entry = sighting === undefined ? undefined : this.entries.find(candidate => {
+      const id = this.plain(candidate).id
+      const ids = caseSource ? CaseFile.accountIds(caseSource.json, caseSource.url, candidate.src, id) : [id]
+      return ids.includes(sighting)
+    })
+    if (entry && entry.src !== this.currentSrc) this.selectObserver(entry.src)
+    this.sceneElement.ufoElement.currentTime = Math.max(0, seconds) * 1000
+  }
+
   get observerUrls(): string[] {
     return this.entries.map(entry => entry.src)
   }

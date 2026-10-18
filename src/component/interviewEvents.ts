@@ -1,6 +1,6 @@
 /**
- * The events an `<rr0-interview>` sends, named apart from the element so that the case editor can listen for them without loading it: most
- * cases have no interview, and the element (see InterviewElement) is fetched only when one is shown.
+ * The events an `<rr0-interview-editor>` sends, named apart from the element so that the case editor can listen for them without loading it: most
+ * cases have no interview, and the element (see InterviewEditorElement) is fetched only when one is shown.
  */
 
 /** Sent, and bubbling, each time the interview is edited: what changed is the event the element holds, in place; for the transcript, its text is in `detail.text`. */

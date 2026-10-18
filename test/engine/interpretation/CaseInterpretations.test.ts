@@ -156,12 +156,12 @@ describe("An interview's transcript file", () => {
 
   it("names a speaker by the witness's title or the interviewer's agent", () => {
     expect(InterviewFile.speakerName(transcript, "witness")).toBe("Q. B.")
-    expect(InterviewFile.speakerName(transcript, "interviewer")).toBe("BeauJerome")
+    expect(InterviewFile.speakerName(transcript, "interviewer")).toBe("Jerome Beau")
   })
 
   it("becomes WebVTT with the speaker in a voice tag, no cue overlapping the next, the text escaped", () => {
     expect(InterviewFile.toVtt(transcript)).toBe(
-      "WEBVTT\n\n00:00:00.000 --> 00:00:25.000\n<v BeauJerome>Where do we start?\n\n00:00:25.000 --> 01:02:05.250\n<v Q. B.>5 &lt; 6 &amp; more\n")
+      "WEBVTT\n\n00:00:00.000 --> 00:00:25.000\n<v Jerome Beau>Where do we start?\n\n00:00:25.000 --> 01:02:05.250\n<v Q. B.>5 &lt; 6 &amp; more\n")
   })
 
   it("shows a redacted passage as a gap in the subtitles, whatever its reason", () => {

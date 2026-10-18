@@ -2,7 +2,7 @@ import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
 
 import { register } from "../../src/component/CaseEditorElement.js"
 // Defined by the case editor only when an interview is shown, fetched then: loaded here first, as the editor's own chunk would be in a build.
-import "../../src/component/InterviewElement.js"
+import "../../src/component/InterviewEditorElement.js"
 import type { CaseEditorElement } from "../../src/component/CaseEditorElement.js"
 
 register()
@@ -742,7 +742,7 @@ describe("CaseEditorElement's events", () => {
     expect([...parts(element).select.options].map(option => option.textContent)[2]).toMatch(/^Interview of .+, .+/)
   })
 
-  it("shows an interview in an <rr0-interview> in place of the recording, and the recording again when an account is chosen", async () => {
+  it("shows an interview in an <rr0-interview-editor> in place of the recording, and the recording again when an account is chosen", async () => {
     const element = await open(undefined, interviewed())
     const root = element.shadowRoot!
     expect(root.getElementById("interview-section")!.hidden).toBe(true)

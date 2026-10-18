@@ -3,6 +3,7 @@ dist/
 dist-embed-scene/
 dist-embed-sighting/
 dist-embed-sighting-editor/
+dist-embed-interview/
 *.log
 .DS_Store
 *.ipr

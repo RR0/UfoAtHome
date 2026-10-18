@@ -55,7 +55,7 @@ class SiteBuilder {
    * them de-duplicates instead of colliding — and `base: "./"` in each Vite config is what makes
    * the `new URL(asset, import.meta.url)` references keep working from there. */
   private readonly bundleDirs = [
-    "dist-embed-scene", "dist-embed-sighting", "dist-embed-sighting-editor", "dist-site-lib"
+    "dist-embed-scene", "dist-embed-sighting", "dist-embed-sighting-editor", "dist-embed-interview", "dist-site-lib"
   ]
 
   /**
