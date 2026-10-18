@@ -23,6 +23,8 @@ rr0-interview .rr0-interview-status { font-size: .85em; opacity: .85; margin: 0 
 rr0-interview .rr0-interview-turns { max-height: var(--rr0-interview-max-height, none); overflow-y: var(--rr0-interview-overflow, visible); }
 rr0-interview .turn { position: relative; padding: .2em .5em; margin: 0 0 .4em; border-left: 3px solid var(--speaker); --speaker: hsl(var(--speaker-hue, 0) 55% 38%); }
 @media (prefers-color-scheme: dark) { rr0-interview .turn { --speaker: hsl(var(--speaker-hue, 0) 65% 70%); } }
+rr0-interview .turn { transition: background-color .15s; }
+rr0-interview .turn:hover { background: color-mix(in srgb, var(--speaker) 7%, transparent); }
 rr0-interview .turn.flash { background: color-mix(in srgb, #fc3 28%, transparent); }
 rr0-interview .turn .who { font-size: .85em; font-weight: 600; color: var(--speaker); overflow-wrap: anywhere; }
 rr0-interview .turn.is-redacted .who, rr0-interview .turn.goes-on .who { display: none; }
