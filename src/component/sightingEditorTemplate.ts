@@ -944,10 +944,19 @@ select.weather-field:disabled {
   padding: 0;
   border-bottom: 1px solid var(--tab-line);
 }
+/* Undo and redo have a place of their own at the right end of the strip, reserved for them: the tabs wrap
+   before it, never into it. As one more item of the wrapping row they dropped onto a line of their own when
+   the tabs filled the width, and left a gap between the tabs and the panel. */
+#group-tabs {
+  position: relative;
+  padding-inline-end: 4.6em;
+}
 .history {
+  position: absolute;
+  inset-inline-end: 0.2em;
+  bottom: 0.25em;
   display: inline-flex;
   gap: 0.2em;
-  margin-inline-start: auto;
 }
 .history .icon-btn:disabled {
   opacity: 0.35;
