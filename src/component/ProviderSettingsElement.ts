@@ -1,5 +1,6 @@
 import type { ObserverProvider, ObserverSetting, ObserverSettings, ObserverSettingValue } from "../engine/observer/ObserverProvider.js"
 import { NumberFields } from "./NumberFields.js"
+import { HostLocale } from "../i18n/locale.js"
 
 export const PROVIDER_SETTINGS_ELEMENT_NAME = "rr0-provider-settings"
 
@@ -11,6 +12,7 @@ rr0-provider-settings { display: block; }
 rr0-provider-settings .ps-provider { margin: .3em 0; }
 rr0-provider-settings .ps-heading { font-weight: 600; margin-right: .6em; }
 rr0-provider-settings .ps-setting { display: inline-flex; align-items: center; gap: .3em; margin-right: .8em; }
+rr0-provider-settings .ps-also { opacity: .75; font-variant-numeric: tabular-nums; }
 `
 
 /**
@@ -122,6 +124,20 @@ export class ProviderSettingsElement extends HTMLElement {
       })
       label.append(input)
       if (setting.unit) label.append(doc.createTextNode(` ${setting.unit}`))
+      const also = setting.also
+      if (also) {
+        // The same value in the unit the reader may know better, following what is typed.
+        const equivalent = doc.createElement("span")
+        equivalent.className = "ps-also"
+        const format = new Intl.NumberFormat(HostLocale.preferencesFor(this) as string[], { minimumFractionDigits: also.digits ?? 0, maximumFractionDigits: also.digits ?? 0 })
+        const show = (): void => {
+          const value = Number(input.value)
+          equivalent.textContent = input.value.trim() !== "" && Number.isFinite(value) ? `(≈ ${format.format(value * also.factor)} ${also.unit})` : ""
+        }
+        input.addEventListener("input", show)
+        show()
+        label.append(" ", equivalent)
+      }
     }
     return label
   }

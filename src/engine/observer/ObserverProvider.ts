@@ -21,6 +21,11 @@ export interface ObserverSetting {
   max?: number
   step?: number
   unit?: string
+  /**
+   * For a number: the same value said in another unit, shown after the field as an equivalence ("≈ 0.8 g/L" beside "0.08 %"), which is
+   * `factor` times the value, with `digits` decimals.
+   */
+  also?: { unit: string; factor: number; digits?: number }
   /** For a choice: its ids, with an English label each (key `<provider>.<id>.<choice>`). */
   choices?: { id: string; label: string }[]
 }

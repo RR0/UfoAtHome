@@ -382,7 +382,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
       "color-vision.type.tritan": "Tritan (blue-weak or blue-blind)",
       "color-vision.severity": "Severity",
       "intoxication": "Alcohol",
-      "intoxication.hint": "Lowers contrast sensitivity by about 0.9 dB at 0.08 % blood alcohol (one controlled study; results vary). Double vision, narrowed field and other drugs are not modelled: no source quantifies them.",
+      "intoxication.hint": "Lowers contrast sensitivity by about 0.9 dB at 0.08 % blood alcohol (one controlled study; results vary), drawn up to 0.1 % at most: a higher level is recorded but shown as 0.1 %, since nothing was measured past it. Double vision, narrowed field and other drugs are not modelled: no source quantifies them.",
       "intoxication.bloodAlcohol": "Blood alcohol",
       "fatigue": "Fatigue",
       "fatigue.hint": "Stated only: sleep loss has not been shown to change what a healthy eye receives, so the picture is unchanged. It bears on attention and memory, not on vision.",

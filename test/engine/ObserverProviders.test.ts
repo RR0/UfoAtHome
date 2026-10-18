@@ -35,6 +35,14 @@ describe("ObserverProviders", () => {
     expect(capped).toBeCloseTo(10 ** (-(0.1 / 0.08) * 0.9 / 20), 6)
   })
 
+  it("records a level past what was measured but draws it as the highest measured one", () => {
+    const at01 = ObserverProviders.perceptionOf({ intoxication: { bloodAlcohol: 0.1 } }).contrastGain
+    expect(ObserverProviders.perceptionOf({ intoxication: { bloodAlcohol: 0.2 } }).contrastGain).toBe(at01)
+    const setting = ObserverProviders.ALL.find(provider => provider.id === "intoxication")!.settings[0]
+    expect(setting.max).toBe(0.5)
+    expect(setting.also).toEqual({ unit: "g/L", factor: 10, digits: 1 })
+  })
+
   it("states fatigue without changing the picture", () => {
     expect(Perceptions.isNone(ObserverProviders.perceptionOf({ fatigue: { hoursAwake: 40 } }))).toBe(true)
   })

@@ -37,6 +37,22 @@ describe("ProviderSettingsElement", () => {
     expect(level.parentElement!.textContent).toMatch(/Level\s*u$/)
   })
 
+  it("says a number in another unit beside it, in the page's language, following what is typed", () => {
+    document.documentElement.lang = "fr"
+    const element = document.createElement("rr0-provider-settings") as ProviderSettingsElement
+    document.body.append(element)
+    element.providers = [{ id: "a", label: "Alcohol", hint: "", settings: [
+      { id: "level", label: "Level", kind: "number", default: 0, min: 0, max: 0.5, step: 0.01, unit: "%", also: { unit: "g/L", factor: 10, digits: 1 } }
+    ] }]
+    element.values = { a: { level: 0.08 } }
+    expect(element.querySelector(".ps-also")!.textContent).toBe("(≈ 0,8 g/L)")
+    const input = element.querySelector<HTMLInputElement>("#a-level")!
+    input.value = "0.2"
+    input.dispatchEvent(new Event("input", { bubbles: true }))
+    expect(element.querySelector(".ps-also")!.textContent).toBe("(≈ 2,0 g/L)")
+    document.documentElement.removeAttribute("lang")
+  })
+
   it("reads in the language it is given, falling back to English per key", () => {
     const element = mount()
     element.labels = { p: "Fournisseur P", "p.mode.b": "Bé" }

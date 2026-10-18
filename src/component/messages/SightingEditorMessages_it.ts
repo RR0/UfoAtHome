@@ -387,7 +387,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
       "color-vision.type.tritan": "Tritan (blu debole o cieco)",
       "color-vision.severity": "Gravità",
       "intoxication": "Alcol",
-      "intoxication.hint": "Riduce la sensibilità al contrasto di circa 0,9 dB a 0,08 % di alcol nel sangue (uno studio controllato; i risultati variano). Visione doppia, campo ristretto e altre droghe non sono modellati: nessuna fonte li quantifica.",
+      "intoxication.hint": "Riduce la sensibilità al contrasto di circa 0,9 dB a 0,08 % di alcol nel sangue (uno studio controllato; i risultati variano), mostrato fino a 0,1 % al massimo: un livello più alto viene registrato ma mostrato come 0,1 %, poiché oltre non è stato misurato nulla. Visione doppia, campo ristretto e altre droghe non sono modellati: nessuna fonte li quantifica.",
       "intoxication.bloodAlcohol": "Alcolemia",
       "fatigue": "Stanchezza",
       "fatigue.hint": "Solo dichiarata: non è dimostrato che la mancanza di sonno cambi ciò che riceve un occhio sano, quindi l'immagine non cambia. Riguarda attenzione e memoria, non la vista.",
