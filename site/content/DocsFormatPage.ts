@@ -612,7 +612,7 @@ if (excerpts.length > 0) {
       appartient : un compte rendu se suffit à lui-même. Ce qui les montre ensemble est le
       <strong>dossier</strong>, qui les désigne :
       le <code>case.json</code> d'un dossier <a href="https://rr0.org">RR0</a>, qui énonce le titre,
-      la date et la classification du cas, et liste tout ce qui lui est arrivé en
+      la date et la classification du dossier, et liste tout ce qui lui est arrivé en
       <code>events</code>. Ses événements de type <code>sighting</code> sont ses comptes rendus, chacun
       pointant vers l'enregistrement d'un observateur :</p>
     <pre data-json="none"><code>{
@@ -627,9 +627,9 @@ if (excerpts.length > 0) {
     <div class="table-scroll">
     <table>
       <tr><th>Champ</th><th>Sens</th></tr>
-      <tr><td><code>id</code></td><td>L'identifiant du dossier lui-même. Sur rr0.org c'est le répertoire du dossier, et il peut être omis ; un fichier de cas isolé l'énonce</td></tr>
-      <tr><td><code>title</code>, <code>time</code></td><td>Le nom du cas, et sa date comme RR0 l'écrit (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). Le lecteur nomme un cas qu'il ouvre par son titre</td></tr>
-      <tr><td><code>events</code></td><td>La chronologie du cas. Seuls les <code>sighting</code> sont rejoués, chacun par son <code>url</code>, lue relativement à l'adresse du fichier de cas (si bien que le même cas marche depuis la page de son dossier comme depuis n'importe où) ; ceux marqués <code>interpretationOf</code> sont des lectures de l'un d'eux (voir plus bas) ; les autres (un article, un film, un aveu) sont ceux de RR0 Un événement porte un <code>id</code> quand une lecture le désigne, et seulement alors : il appartient au dossier, donc il doit être unique parmi les événements du dossier et nulle part ailleurs, et une référence se lit dans le fichier qui l'écrit. Un <code>interpretationOf</code> qu'aucun événement ne porte est lu, comme avant, comme l'<code>id</code> que déclare un enregistrement que le dossier liste ; celui qui ne correspond à aucun des deux est une faute du dossier, que le lecteur signale sur sa console, l'éditeur au-dessus de ses enregistrements, et le <code>validate.py</code> du skill quand on lui donne le fichier du dossier.</td></tr>
+      <tr><td><code>id</code></td><td>L'identifiant du dossier lui-même. Sur rr0.org c'est le répertoire du dossier, et il peut être omis ; un fichier de dossier isolé l'énonce</td></tr>
+      <tr><td><code>title</code>, <code>time</code></td><td>Le nom du dossier, et sa date comme RR0 l'écrit (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). Le lecteur nomme un dossier qu'il ouvre par son titre</td></tr>
+      <tr><td><code>events</code></td><td>La chronologie du dossier. Seuls les <code>sighting</code> sont rejoués, chacun par son <code>url</code>, lue relativement à l'adresse du fichier de dossier (si bien que le même dossier marche depuis la page de son dossier comme depuis n'importe où) ; ceux marqués <code>interpretationOf</code> sont des lectures de l'un d'eux (voir plus bas) ; les autres (un article, un film, un aveu) sont ceux de RR0 Un événement porte un <code>id</code> quand une lecture le désigne, et seulement alors : il appartient au dossier, donc il doit être unique parmi les événements du dossier et nulle part ailleurs, et une référence se lit dans le fichier qui l'écrit. Un <code>interpretationOf</code> qu'aucun événement ne porte est lu, comme avant, comme l'<code>id</code> que déclare un enregistrement que le dossier liste ; celui qui ne correspond à aucun des deux est une faute du dossier, que le lecteur signale sur sa console, l'éditeur au-dessus de ses enregistrements, et le <code>validate.py</code> du skill quand on lui donne le fichier du dossier.</td></tr>
       <tr><td><code>image</code>, <code>summary</code></td><td>Ce que montre un lien partagé vers le dossier, comme pour un enregistrement (voir <a href="/docs/share/">Partager</a>) : une image, et une phrase ou deux, une chaîne ou une par langue</td></tr>
     </table>
     </div>

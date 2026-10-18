@@ -35,7 +35,7 @@ export class DocsCreatePage extends DocsSection {
       en: "Three ways to make a recording: in the editor, with an AI assistant working from the "
         + "case documents, or by writing the file yourself, whose format has its own page.",
       fr: "Trois façons de faire un enregistrement : dans l'éditeur, avec un assistant IA qui "
-        + "travaille sur les documents du cas, ou en écrivant le fichier vous-même, dont le format "
+        + "travaille sur les documents du dossier, ou en écrivant le fichier vous-même, dont le format "
         + "a sa propre page.",
       es: "Tres maneras de hacer una grabación: en el editor, con un asistente de IA que trabaja a "
         + "partir de los documentos del caso, o escribiendo tú mismo el archivo, cuyo formato "
@@ -188,15 +188,15 @@ https://ufoathome.org/sighting.schema.json .
 <section class="band">
   <div class="wrap prose-wide">
     <h2>2. Avec un assistant IA, à partir du dossier</h2>
-    <p>Quand un cas a déjà ses documents (un rapport, un questionnaire, un procès-verbal, des
+    <p>Quand un dossier a déjà ses documents (un rapport, un questionnaire, un procès-verbal, des
       croquis, des photos des lieux, une carte), le plus rapide est souvent de les confier à un
       assistant IA capable de lire des PDF et des images et d'exécuter un peu de code, de lui
       indiquer cette documentation, et de lui faire écrire le fichier. Il lit le récit, mesure les
       dessins, calcule des directions sur la carte, cherche ce qui peut l'être, et écrit ce qu'il a
       trouvé dans le format. Vous regardez ensuite le résultat, et lui dites ce qui ne va pas.</p>
-    <p>L'assistant ne sait du cas que ce que vous lui donnez, et du format que ce que disent ces
+    <p>L'assistant ne sait du dossier que ce que vous lui donnez, et du format que ce que disent ces
       pages. Demandez-lui donc la discipline que garderait un enquêteur :</p>
-    <pre class="doc-prompt"><code>Voici les documents d'un cas d'observation. Construis un enregistrement
+    <pre class="doc-prompt"><code>Voici les documents d'un dossier d'observation. Construis un enregistrement
 UFO@home de ce que l'observateur a vu : le fichier JSON décrit sur
 https://ufoathome.org/docs/format/ , vérifié avec
 https://ufoathome.org/sighting.schema.json .

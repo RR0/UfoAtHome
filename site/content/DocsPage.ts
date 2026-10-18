@@ -84,7 +84,7 @@ export class DocsPage implements SitePage {
       fr: [
         ["/docs/components/", "Les composants",
           "Quatre éléments standards, une page chacun : lequel vous voulez, ce qu'il dessine, et tout ce à quoi il répond."],
-        ["/docs/case/", "Qu'est-ce qu'un cas ufologique ?",
+        ["/docs/case/", "Qu'est-ce qu'un dossier ufologique ?",
           "Ce qu'un dossier réunit, les trois sortes d'événements qu'il contient (observations, lectures, interviews) et comment ils se renvoient les uns aux autres."],
         ["/docs/format/", "Les observations",
           "Ce qu'est une observation, puis ce que contient son fichier, champ par champ. Avec un exemple entier."],

@@ -147,7 +147,7 @@ export class DemoCatalogue {
           titleIsName: true,
           blurb: {
             en: "Low sun, 17:50, New Mexico. The case people argue about the phenomenon's size in — and where the reconstruction refuses to state one.",
-            fr: "Soleil bas, 17:50, Nouveau-Mexique. Le cas dont on discute la taille du phénomène — et où la reconstitution refuse d'en énoncer une.",
+            fr: "Soleil bas, 17:50, Nouveau-Mexique. Le dossier dont on discute la taille du phénomène — et où la reconstitution refuse d'en énoncer une.",
             es: "Sol bajo, 17:50, Nuevo México. El caso en el que se discute el tamaño del fenómeno — y donde la reconstrucción se niega a afirmar uno.",
             it: "Sole basso, 17:50, Nuovo Messico. Il caso in cui si discute delle dimensioni del fenomeno — e in cui la ricostruzione si rifiuta di indicarne una."
           }

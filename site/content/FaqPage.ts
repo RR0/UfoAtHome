@@ -607,12 +607,12 @@ export class FaqPage implements SitePage {
         que le compte rendu : une date, un lieu, des directions et des tailles apparentes au fil du
         temps, chaque valeur marquée comme énoncée, calculée ou supposée. Le ciel, les relevés météo,
         le sol, l'optique de l'œil ou de l'appareil en sont calculés par le même moteur pour tous les
-        cas, testé, et public. Les limites du format font partie du propos : il n'a pas de champ pour
+        dossiers, testé, et public. Les limites du format font partie du propos : il n'a pas de champ pour
         une taille réelle ni une distance, si bien qu'un assistant ne peut pas glisser une conclusion
         parmi les faits, et ce qu'il écrit est un fichier court que chacun peut lire, rejouer,
         corriger, et montrer à l'observateur.</p>
       <p>C'est aussi pourquoi les deux ne sont pas en concurrence. Un assistant IA est un bon moyen
-        d'<a href="/docs/create/">écrire un enregistrement</a> à partir d'un dossier : sur un cas du
+        d'<a href="/docs/create/">écrire un enregistrement</a> à partir d'un dossier : sur un dossier du
         GEIPAN, un assistant qui n'avait que le dossier public et ces pages a produit un
         enregistrement dont le phénomène rejoignait celui fait à la main à un dixième de degré près.
         Ce qu'il ne peut pas faire seul, c'est rendre le résultat vérifiable, et c'est cette partie
@@ -627,7 +627,7 @@ export class FaqPage implements SitePage {
         Un compte GitHub est gratuit et prend une minute.</p>
       <p>Ce qui rend une demande facile à traiter :</p>
       <ul class="plain">
-        <li><strong>Un cas réel, s'il y en a un.</strong> « Les observateurs disent souvent que c'était
+        <li><strong>Un dossier réel, s'il y en a un.</strong> « Les observateurs disent souvent que c'était
           derrière une colline » est une fonctionnalité ; « voici une observation où cela compte,
           datée, située et sourcée » est une fonctionnalité qui sera bien faite.</li>
         <li><strong>Ce que dit le relevé.</strong> Si ce que vous voulez voir reconstitué est mesuré

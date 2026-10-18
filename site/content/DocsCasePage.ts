@@ -4,7 +4,6 @@ import type { PageMeta, Said, SiteLanguage } from "../SitePage.js"
 /** What the page says, in one language: the markup around it is written once, in `render`. */
 interface CaseDocText {
   lede: string
-  whatHeading: string
   what: string
   eventsHeading: string
   eventsIntro: string
@@ -54,8 +53,8 @@ export class DocsCasePage extends DocsSection {
 
   readonly meta: PageMeta = {
     slug: "docs/case",
-    navLabel: { en: "What is a UFO case?", fr: "Qu'est-ce qu'un cas ufologique ?", es: "¿Qué es un caso ovni?", it: "Che cos'è un caso ufologico?" },
-    title: { en: "What is a UFO case?", fr: "Qu'est-ce qu'un cas ufologique ?", es: "¿Qué es un caso ovni?", it: "Che cos'è un caso ufologico?" },
+    navLabel: { en: "What is a UFO case?", fr: "Qu'est-ce qu'un dossier ufologique ?", es: "¿Qué es un caso ovni?", it: "Che cos'è un caso ufologico?" },
+    title: { en: "What is a UFO case?", fr: "Qu'est-ce qu'un dossier ufologique ?", es: "¿Qué es un caso ovni?", it: "Che cos'è un caso ufologico?" },
     description: {
       en: "A case gathers observations, other interpretations of them and interviews with witnesses, and these events refer to one another.",
       fr: "Un dossier réunit des observations, d'autres interprétations d'elles et des interviews de témoins, et ces événements se renvoient les uns aux autres.",
@@ -68,13 +67,12 @@ export class DocsCasePage extends DocsSection {
   private readonly text: Said<CaseDocText> = {
     en: {
       lede: "In UFO@home, a case gathers everything that is known about one event: what was seen, by whom, how it can be explained, what the witnesses said when asked.",
-      whatHeading: "What a case is",
       what: "A case is what an investigation is about: a night, a place, a title. It does not describe the event itself. It <strong>lists what happened around it</strong>, as <em>events</em>, each of which is a document of its own. Nobody has to write them all: a case can be one observation, and grow.",
       eventsHeading: "The events of a case",
       eventsIntro: "A case holds three kinds of event.",
-      observation: "<strong>Observations.</strong> Usually at least one: the account of a witness, which UFO@home replays. A case may hold others, <em>other witnesses</em> of the same event, each with their own account, which can disagree. <a href=\"/docs/format/\">The observation</a> says what one is and has the technical part on its file.",
-      interpretation: "<strong>Interpretations.</strong> An <em>alternative explanation</em> of what was seen: a kite, a planet, an aircraft, a hoax. It is itself an observation, replayed beside the witness's, so that the two can be compared. <a href=\"/docs/format/#another-reading-an-interpretation-is-another-sighting\">How an interpretation is written</a>.",
-      interview: "<strong>Interviews.</strong> A conversation held with a witness, which fixes what they said when asked. It is not replayed. <a href=\"/docs/interview/\">The interview</a> says what one is and has the technical part on its file.",
+      observation: "<strong><a href=\"/docs/format/\">Observations</a>.</strong> Usually at least one: the account of a witness, which UFO@home replays. A case may hold others, <em>other witnesses</em> of the same event, each with their own account, which can disagree.",
+      interpretation: "<strong><a href=\"/docs/format/#another-reading-an-interpretation-is-another-sighting\">Interpretations</a>.</strong> An <em>alternative explanation</em> of what was seen: a kite, a planet, an aircraft, a hoax. It is itself an observation, replayed beside the witness's, so that the two can be compared.",
+      interview: "<strong><a href=\"/docs/interview/\">Interviews</a>.</strong> A conversation held with a witness, which fixes what they said when asked. It is not replayed.",
       refsHeading: "The events of a case can be linked",
       refsIntro: "An event is rarely alone: an interpretation is an interpretation <em>of</em> something, an interview is held <em>with</em> someone. These references are what a reader follows from one to the other.",
       refsRows: [
@@ -102,14 +100,13 @@ export class DocsCasePage extends DocsSection {
     },
     fr: {
       lede: "Dans UFO@home, un dossier réunit tout ce que l'on sait d'un événement : ce qui a été vu, par qui, comment on peut l'expliquer, ce que les témoins ont dit quand on les a interrogés.",
-      whatHeading: "Ce qu'est un dossier",
       what: "Un dossier est ce dont parle une enquête : une nuit, un lieu, un titre. Il ne décrit pas l'événement lui-même. Il <strong>liste ce qui s'est passé autour</strong>, sous forme d'<em>événements</em>, chacun étant un document à part. Personne n'a à tous les écrire : un dossier peut n'être qu'une observation, et grandir.",
       eventsHeading: "Les événements d'un dossier",
       eventsIntro: "Un dossier contient trois sortes d'événements.",
-      observation: "<strong>Des observations.</strong> Généralement au moins une : le compte rendu d'un témoin, qu'UFO@home rejoue. Un dossier peut en contenir d'autres, d'<em>autres témoins</em> du même événement, chacun avec son propre compte rendu, qui peuvent diverger. <a href=\"/docs/format/\">L'observation</a> dit ce qu'en est une et contient la partie technique sur son fichier.",
-      interpretation: "<strong>Des interprétations.</strong> Une <em>explication alternative</em> de ce qui a été vu : un cerf-volant, une planète, un avion, un canular. C'est elle-même une observation, rejouée à côté de celle du témoin, pour que les deux se comparent. <a href=\"/docs/format/#another-reading-an-interpretation-is-another-sighting\">Comment s'écrit une interprétation</a>.",
-      interview: "<strong>Des interviews.</strong> Une conversation menée avec un témoin, qui fixe ce qu'il a dit quand on l'a interrogé. Elle n'est pas rejouée. <a href=\"/docs/interview/\">L'interview</a> dit ce qu'en est une et contient la partie technique sur son fichier.",
-      refsHeading: "Les événements d'un cas peuvent être liés",
+      observation: "<strong><a href=\"/docs/format/\">Des observations</a>.</strong> Généralement au moins une : le compte rendu d'un témoin, qu'UFO@home rejoue. Un dossier peut en contenir d'autres, d'<em>autres témoins</em> du même événement, chacun avec son propre compte rendu, qui peuvent diverger.",
+      interpretation: "<strong><a href=\"/docs/format/#another-reading-an-interpretation-is-another-sighting\">Des interprétations</a>.</strong> Une <em>explication alternative</em> de ce qui a été vu : un cerf-volant, une planète, un avion, un canular. C'est elle-même une observation, rejouée à côté de celle du témoin, pour que les deux se comparent.",
+      interview: "<strong><a href=\"/docs/interview/\">Des interviews</a>.</strong> Une conversation menée avec un témoin, qui fixe ce qu'il a dit quand on l'a interrogé. Elle n'est pas rejouée.",
+      refsHeading: "Les événements d'un dossier peuvent être liés",
       refsIntro: "Un événement est rarement seul : une interprétation est une interprétation <em>de</em> quelque chose, une interview est menée <em>avec</em> quelqu'un. Ces renvois sont ce que suit un lecteur de l'un à l'autre.",
       refsRows: [
         ["Une interprétation → une observation", "Une interprétation nomme l'<strong>observation primaire</strong> qu'elle explique : le compte rendu du témoin dont elle est une autre interprétation. On ne peut la comprendre sans elle."],
@@ -117,7 +114,7 @@ export class DocsCasePage extends DocsSection {
         ["Une observation → une interview", "Dans l'autre sens : un passage d'une interview peut dire de quel <strong>moment de l'observation</strong> il parle. L'observation liste alors, à ce moment, les passages qui la racontent, chacun un lien en retour vers l'interview."]
       ],
       refsOutro: "Un événement est désigné par un <code>id</code> qui lui est propre dans le dossier et nulle part ailleurs. Seul un événement auquel on renvoie en a besoin.",
-      editorHeading: "Dans l'éditeur de cas",
+      editorHeading: "Dans l'éditeur de dossier",
       editor: "L'<a href=\"/edit/\">éditeur</a> ouvre un dossier comme un sélecteur de ses événements (« Observation de Q. B. », « Interview de Q. B. »), celui choisi s'ouvrant dessous. Le <strong>+</strong> ajoute un événement du type choisi, et le groupe <strong>Fichier</strong> montre le dossier en texte.",
       editorSteps: ["<strong>Ouvrir un dossier.</strong> Chargez un <code>case.json</code> depuis un fichier ou une adresse, ou partez d'un enregistrement et choisissez « Ajouter à un dossier ».", "<strong>Le sélecteur</strong> liste les événements (« Observation de Q. B. », une interprétation, « Interview de Q. B. »). Celui que vous choisissez s'ouvre dessous, dans son propre éditeur : l'éditeur d'observation pour une observation ou une interprétation, l'éditeur d'interview pour une interview. Ce que vous avez changé dans les autres est conservé.", "<strong>L'identifiant</strong> à côté du sélecteur est l'<code>id</code> de l'événement, par lequel les autres événements le désignent. Donnez-en un à un événement auquel vous voulez renvoyer ; l'éditeur en propose un, et en donne un à l'observation avec laquelle une interview a eu lieu.", "<strong>+</strong> ajoute un événement : une observation (vierge, depuis un fichier ou une adresse), une interprétation d'une observation, ou une interview (avec qui elle a eu lieu, un titre, qui l'a menée, par quel moyen). La corbeille retire l'événement affiché.", "<strong>Les deux groupes</strong> du dossier : les <em>Événements</em>, le sélecteur et l'événement affiché, et le <em>Fichier</em>, le <code>case.json</code> en texte, complété d'après son propre schéma, à modifier, charger et sauver. Les deux disent la même chose : ce qui change dans l'un change dans l'autre.", "<strong>Sauver</strong> télécharge le dossier avec ses fichiers (un zip quand il y en a plusieurs). Jusque-là le dossier n'est modifié que dans la page, et l'éditeur prévient avant ce qui serait perdu."],
       techHeading: "Partie technique : le fichier de dossier",
@@ -136,13 +133,12 @@ export class DocsCasePage extends DocsSection {
     },
     es: {
       lede: "En UFO@home, un caso reúne todo lo que se sabe de un suceso: lo que se vio, quién, cómo puede explicarse, lo que dijeron los testigos al ser preguntados.",
-      whatHeading: "Qué es un caso",
       what: "Un caso es de lo que trata una investigación: una noche, un lugar, un título. No describe el suceso en sí. <strong>Enumera lo que ocurrió a su alrededor</strong>, como <em>eventos</em>, cada uno un documento aparte. Nadie tiene que escribirlos todos: un caso puede ser una sola observación, y crecer.",
       eventsHeading: "Los eventos de un caso",
       eventsIntro: "Un caso contiene tres tipos de evento.",
-      observation: "<strong>Observaciones.</strong> Por lo general al menos una: el relato de un testigo, que UFO@home reproduce. Un caso puede contener otras, de <em>otros testigos</em> del mismo suceso, cada una con su propio relato, que pueden discrepar. <a href=\"/docs/format/\">La observación</a> dice qué es una y contiene la parte técnica sobre su archivo.",
-      interpretation: "<strong>Interpretaciones.</strong> Una <em>explicación alternativa</em> de lo que se vio: una cometa, un planeta, un avión, un engaño. Es a su vez una observación, reproducida junto a la del testigo, para poder compararlas. <a href=\"/docs/format/#another-reading-an-interpretation-is-another-sighting\">Cómo se escribe una interpretación</a>.",
-      interview: "<strong>Entrevistas.</strong> Una conversación mantenida con un testigo, que fija lo que dijo al ser preguntado. No se reproduce. <a href=\"/docs/interview/\">La entrevista</a> dice qué es una y contiene la parte técnica sobre su archivo.",
+      observation: "<strong><a href=\"/docs/format/\">Observaciones</a>.</strong> Por lo general al menos una: el relato de un testigo, que UFO@home reproduce. Un caso puede contener otras, de <em>otros testigos</em> del mismo suceso, cada una con su propio relato, que pueden discrepar.",
+      interpretation: "<strong><a href=\"/docs/format/#another-reading-an-interpretation-is-another-sighting\">Interpretaciones</a>.</strong> Una <em>explicación alternativa</em> de lo que se vio: una cometa, un planeta, un avión, un engaño. Es a su vez una observación, reproducida junto a la del testigo, para poder compararlas.",
+      interview: "<strong><a href=\"/docs/interview/\">Entrevistas</a>.</strong> Una conversación mantenida con un testigo, que fija lo que dijo al ser preguntado. No se reproduce.",
       refsHeading: "Los eventos de un caso pueden estar vinculados",
       refsIntro: "Un evento rara vez está solo: una interpretación es una interpretación <em>de</em> algo, una entrevista se mantiene <em>con</em> alguien. Estas remisiones son lo que el lector sigue de uno a otro.",
       refsRows: [
@@ -170,13 +166,12 @@ export class DocsCasePage extends DocsSection {
     },
     it: {
       lede: "In UFO@home, un caso riunisce tutto ciò che si sa di un fatto: che cosa è stato visto, da chi, come può essere spiegato, che cosa hanno detto i testimoni quando sono stati interrogati.",
-      whatHeading: "Che cos'è un caso",
       what: "Un caso è ciò di cui parla un'indagine: una notte, un luogo, un titolo. Non descrive il fatto in sé. <strong>Elenca ciò che è accaduto attorno ad esso</strong>, come <em>eventi</em>, ciascuno un documento a parte. Nessuno deve scriverli tutti: un caso può essere una sola osservazione, e crescere.",
       eventsHeading: "Gli eventi di un caso",
       eventsIntro: "Un caso contiene tre tipi di evento.",
-      observation: "<strong>Osservazioni.</strong> Di solito almeno una: il resoconto di un testimone, che UFO@home riproduce. Un caso può contenerne altre, di <em>altri testimoni</em> dello stesso fatto, ciascuna con il proprio resoconto, che possono divergere. <a href=\"/docs/format/\">L'osservazione</a> dice che cos'è e contiene la parte tecnica sul suo file.",
-      interpretation: "<strong>Interpretazioni.</strong> Una <em>spiegazione alternativa</em> di ciò che è stato visto: un aquilone, un pianeta, un aereo, una burla. È a sua volta un'osservazione, riprodotta accanto a quella del testimone, perché le due si possano confrontare. <a href=\"/docs/format/#another-reading-an-interpretation-is-another-sighting\">Come si scrive un\'interpretazione</a>.",
-      interview: "<strong>Interviste.</strong> Una conversazione condotta con un testimone, che fissa ciò che ha detto quando è stato interrogato. Non viene riprodotta. <a href=\"/docs/interview/\">L'intervista</a> dice che cos'è e contiene la parte tecnica sul suo file.",
+      observation: "<strong><a href=\"/docs/format/\">Osservazioni</a>.</strong> Di solito almeno una: il resoconto di un testimone, che UFO@home riproduce. Un caso può contenerne altre, di <em>altri testimoni</em> dello stesso fatto, ciascuna con il proprio resoconto, che possono divergere.",
+      interpretation: "<strong><a href=\"/docs/format/#another-reading-an-interpretation-is-another-sighting\">Interpretazioni</a>.</strong> Una <em>spiegazione alternativa</em> di ciò che è stato visto: un aquilone, un pianeta, un aereo, una burla. È a sua volta un'osservazione, riprodotta accanto a quella del testimone, perché le due si possano confrontare.",
+      interview: "<strong><a href=\"/docs/interview/\">Interviste</a>.</strong> Una conversazione condotta con un testimone, che fissa ciò che ha detto quando è stato interrogato. Non viene riprodotta.",
       refsHeading: "Gli eventi di un caso possono essere collegati",
       refsIntro: "Un evento è raramente solo: un\'interpretazione è un\'interpretazione <em>di</em> qualcosa, un'intervista si tiene <em>con</em> qualcuno. Questi rimandi sono ciò che il lettore segue dall'uno all'altro.",
       refsRows: [
@@ -215,7 +210,6 @@ export class DocsCasePage extends DocsSection {
     return this.hero(language, this.meta.title, { en: t.lede, fr: t.lede, es: t.lede, it: t.lede }) + `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>${t.whatHeading}</h2>
     <p>${t.what}</p>
 
     <h2>${t.eventsHeading}</h2>
