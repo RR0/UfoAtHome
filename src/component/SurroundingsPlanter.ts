@@ -71,6 +71,8 @@ export class SurroundingsPlanter {
   private surveyedFor?: { lat: number, lng: number }
   private timer?: ReturnType<typeof setTimeout>
   private token = 0
+  /** What the last survey said it brought, which the line about what comes late follows. */
+  private surveyed = ""
 
   constructor(
     private readonly status: HTMLElement,
@@ -156,6 +158,7 @@ export class SurroundingsPlanter {
         : await provider.getSurroundings({ lat, lng }, this.radiusM)
       if (token !== this.token) return
       this.plant(provider, found)
+      if (found.incomplete) this.awaitLate(provider, stops, token)
     } catch (error) {
       if (token !== this.token) return
       if (error instanceof SurroundingsUnavailableError && error.reason === "no-coverage") {
@@ -192,7 +195,8 @@ export class SurroundingsPlanter {
     const count = (kind: DecorObject["kind"]): number => planted.filter(object => object.kind === kind).length
     if (planted.length > 0 || this.host.decor().length !== kept.length) this.host.setDecor([...kept, ...planted])
     if (planted.length === 0) {
-      this.say(handPlaced ? this.messages.surveyKept : this.messages.surveyNone.replace("{radius}", String(this.radiusM)))
+      this.surveyed = handPlaced ? this.messages.surveyKept : this.messages.surveyNone.replace("{radius}", String(this.radiusM))
+      this.say(this.surveyed, found.incomplete ? this.messages.surveyFurniturePending : "")
       return
     }
     this.host.cite({ title: `${provider.name}, survey of the surroundings`, url: provider.creditUrl, publication: { publisher: provider.name } })
@@ -200,7 +204,45 @@ export class SurroundingsPlanter {
       .replace("{trees}", String(count("tree"))).replace("{buildings}", String(count("building")))
       .replace("{bridges}", String(count("bridge"))).replace("{lines}", String(count("wire"))).replace("{source}", provider.name)
     const dated = this.datesText(found.dates)
-    this.say([done, dated, handPlaced ? this.messages.surveyKept : ""].filter(part => part !== "").join(" "))
+    this.surveyed = [done, dated, handPlaced ? this.messages.surveyKept : ""].filter(part => part !== "").join(" ")
+    this.say(this.surveyed, found.incomplete ? this.messages.surveyFurniturePending : this.furnitureText(planted))
+  }
+
+  /**
+   * Waits for what the survey said would come late (the furniture of the streets, from an OpenStreetMap that is often slow or down), and plants it
+   * into the decor already planted when it comes, without the author doing anything: one step of the history, the author's own objects untouched,
+   * nothing of a kind they placed some of. Dropped if the place changed meanwhile. When the survey gives up for now, the reader is told, and may ask again.
+   */
+  private awaitLate(provider: SurroundingsProvider, stops: readonly { lat: number, lng: number }[], token: number): void {
+    const late = stops.length > 1 ? SurroundingsCorridor.later(provider, stops, this.radiusM) : provider.later?.(stops[0], this.radiusM)
+    if (!late) {
+      this.say(this.surveyed, "")
+      return
+    }
+    this.say(this.surveyed, this.messages.surveyFurniturePending)
+    late.then(found => {
+      if (token !== this.token) return
+      this.plantLate(provider, found)
+    }, () => {
+      if (token !== this.token) return
+      this.say(this.surveyed, this.messages.surveyFurnitureUnavailable, { label: this.messages.surveyFurnitureRetry, run: () => this.awaitLate(provider, stops, token) })
+    })
+  }
+
+  private plantLate(provider: SurroundingsProvider, found: Partial<Surroundings>): void {
+    const decor = this.host.decor()
+    const { planted } = SurveyedDecor.of(provider.id, { trees: [], buildings: [], bridges: [], lines: [], ...found }, { kept: decor, kindName: kind => this.host.kindName(kind) })
+    if (planted.length > 0) this.host.setDecor([...decor, ...planted])
+    this.say(this.surveyed, this.furnitureText(planted))
+  }
+
+  /** The furniture of the streets among what was planted, as a sentence: nothing when there is none. */
+  private furnitureText(planted: readonly DecorObject[]): string {
+    const count = (kind: DecorObject["kind"]): number => planted.filter(object => object.kind === kind).length
+    if (!planted.some(object => object.kind === "streetlight" || object.kind === "trafficlight" || object.kind === "crossing" || object.kind === "roadsign")) return ""
+    return this.messages.surveyFurnitureDone
+      .replace("{lamps}", String(count("streetlight"))).replace("{signals}", String(count("trafficlight")))
+      .replace("{crossings}", String(count("crossing"))).replace("{signs}", String(count("roadsign")))
   }
 
   /** What was surveyed and when, as one sentence ("Surveyed: laser 2022-10-07, aerial photo 2026-05-23."): nothing when no service said a day. */
@@ -217,7 +259,15 @@ export class SurroundingsPlanter {
     return Math.hypot(north, east) < SurroundingsPlanter.SAME_PLACE_M
   }
 
-  private say(text: string): void {
-    this.status.textContent = text
+  /** The status: what the survey brought, then a line of its own for what comes late, with a button when there is something to do about it. */
+  private say(text: string, late = "", action?: { label: string, run: () => void }): void {
+    this.status.textContent = [text, late].filter(part => part !== "").join(" ")
+    if (!action) return
+    const button = this.status.ownerDocument.createElement("button")
+    button.type = "button"
+    button.className = "scenery-retry"
+    button.textContent = action.label
+    button.addEventListener("click", action.run)
+    this.status.append(" ", button)
   }
 }

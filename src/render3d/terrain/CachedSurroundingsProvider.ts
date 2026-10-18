@@ -62,8 +62,33 @@ export class CachedSurroundingsProvider implements SurroundingsProvider {
     return structuredClone(await answer)
   }
 
+  /**
+   * What the survey lacked when it answered, once it comes (see SurroundingsProvider.later); and the answer it completes, which is then whole, is the
+   * place's answer from now on, for the page and on disk.
+   */
+  later(centre: { lat: number, lng: number }, radiusM: number): Promise<Partial<Surroundings>> | undefined {
+    const late = this.survey.later?.(centre, radiusM)
+    if (!late) return undefined
+    const key = CachedSurroundingsProvider.key(this.survey.id, centre, radiusM)
+    return late.then(found => {
+      const partial = CachedSurroundingsProvider.partial.get(key)
+      if (partial) {
+        CachedSurroundingsProvider.partial.delete(key)
+        const { incomplete: _incomplete, ...rest } = partial
+        const whole: Surroundings = { ...rest, ...found, dates: { ...partial.dates, ...found.dates } }
+        CachedSurroundingsProvider.asked.set(key, Promise.resolve(whole))
+        void CachedSurroundingsProvider.openCache().then(cache => cache && CachedSurroundingsProvider.store(cache, CachedSurroundingsProvider.request(key), whole))
+      }
+      return structuredClone(found)
+    })
+  }
+
+  /** The answers of this page a part of which came late, by key, until it comes. */
+  private static readonly partial = new Map<string, Surroundings>()
+
   /** Forgets what this page was told, not what is on disk. For tests. */
   static forget(): void {
+    CachedSurroundingsProvider.partial.clear()
     CachedSurroundingsProvider.asked.clear()
   }
 
@@ -92,9 +117,11 @@ export class CachedSurroundingsProvider implements SurroundingsProvider {
       }
     }
     const surroundings = await this.survey.getSurroundings(centre, radiusM)
-    // A survey a part of which did not answer in time is not what the place has: it is not written down, and the next question asks again.
+    // A survey a part of which did not answer in time is not what the place has: it is not written down, and the next question asks again. It is
+    // kept aside for the part that comes late (see later), which makes it whole.
     if (surroundings.incomplete) {
       CachedSurroundingsProvider.asked.delete(key)
+      CachedSurroundingsProvider.partial.set(key, structuredClone(surroundings))
       return surroundings
     }
     if (cache) void CachedSurroundingsProvider.store(cache, request, surroundings)

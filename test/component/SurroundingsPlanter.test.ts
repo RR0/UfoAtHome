@@ -347,3 +347,76 @@ describe("SurroundingsPlanter", () => {
     expect(staying.asked).toHaveLength(1)
   })
 })
+
+/** A survey whose furniture comes late: its answer says it is incomplete, and `later` gives the furniture when the test lets it. */
+class LateSurvey extends FakeSurvey {
+  laterAsked = 0
+  private settle?: { resolve: (found: Partial<Surroundings>) => void, reject: (error: Error) => void }
+
+  later(): Promise<Partial<Surroundings>> {
+    this.laterAsked++
+    return new Promise((resolve, reject) => { this.settle = { resolve, reject } })
+  }
+
+  arrive(found: Partial<Surroundings>): void {
+    this.settle?.resolve(found)
+  }
+
+  giveUp(): void {
+    this.settle?.reject(new Error("Overpass did not answer"))
+  }
+}
+
+describe("SurroundingsPlanter with furniture that comes late", () => {
+  const LAMP = { eastM: 3, northM: 4 }
+  const LIGHT = { eastM: 6, northM: 8, headingDeg: 180, for: "vehicles" as const, phase: 0 as const }
+  const flush = () => new Promise(resolve => setTimeout(resolve, 0))
+
+  it("says it waits for it, then plants it into what was planted, in one change, without touching the author's objects", async () => {
+    const editor = new FakeEditor()
+    editor.decor = [{ id: "mine", kind: "vehicle", eastM: 1, northM: 1 }]
+    const survey = new LateSurvey({ ...Scene.of([OAK], []), incomplete: true })
+    await editor.planter(survey).survey(PLACE.lat, PLACE.lng)
+    expect(editor.text).toContain("waiting for OpenStreetMap")
+    const before = editor.decor
+    expect(before.map(object => object.kind)).toEqual(["vehicle", "tree"])
+    survey.arrive({ lamps: [LAMP], signals: [LIGHT], dates: { lamps: "2026-10-19" } })
+    await flush()
+    // A new decor, put in place once: one step of the history.
+    expect(editor.decor).not.toBe(before)
+    expect(editor.decor.map(object => object.kind)).toEqual(["vehicle", "tree", "streetlight", "trafficlight"])
+    expect(editor.decor[0]).toBe(before[0])
+    expect(editor.decor[3].lights).toHaveLength(3)
+    expect(editor.text).toContain("street lamps 1, traffic lights 1, crossings 0, signs 0")
+    expect(editor.text).not.toContain("waiting")
+  })
+
+  it("says when it is not to be had for now, and asks again when the reader says so", async () => {
+    const editor = new FakeEditor()
+    const survey = new LateSurvey({ ...Scene.of([OAK], []), incomplete: true })
+    await editor.planter(survey).survey(PLACE.lat, PLACE.lng)
+    survey.giveUp()
+    await flush()
+    expect(editor.text).toContain("unavailable for now")
+    const retry = editor.status.querySelector("button")!
+    expect(retry.textContent).toBe("Retry")
+    retry.click()
+    expect(survey.laterAsked).toBe(2)
+    expect(editor.text).toContain("waiting for OpenStreetMap")
+    survey.arrive({ lamps: [LAMP] })
+    await flush()
+    expect(editor.decor.map(object => object.kind)).toEqual(["tree", "streetlight"])
+  })
+
+  it("drops what comes for a place the author has since left", async () => {
+    const editor = new FakeEditor()
+    const survey = new LateSurvey({ ...Scene.of([OAK], []), incomplete: true })
+    const planter = editor.planter(survey)
+    await planter.survey(PLACE.lat, PLACE.lng)
+    survey.answer = Scene.of([BEECH], [])
+    await planter.survey(PLACE.lat + 0.01, PLACE.lng)
+    survey.arrive({ lamps: [LAMP] })
+    await flush()
+    expect(editor.decor.map(object => object.kind)).toEqual(["tree"])
+  })
+})

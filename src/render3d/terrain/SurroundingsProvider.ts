@@ -216,4 +216,10 @@ export interface SurroundingsProvider {
   covers(lat: number, lng: number): boolean
   /** What stands within `radiusM` of the centre, the most prominent first. A part the survey could not give (its vectors being out of reach, say) is an empty list. */
   getSurroundings(centre: { lat: number, lng: number }, radiusM: number): Promise<Surroundings>
+  /**
+   * What an answer that came back `incomplete` lacked about the same place, once it comes: asked again while the page is open, with longer waits
+   * between the tries, and failing when the survey gives up for now (asking again later starts over). Undefined where the survey has nothing that
+   * comes late.
+   */
+  later?(centre: { lat: number, lng: number }, radiusM: number): Promise<Partial<Surroundings>> | undefined
 }

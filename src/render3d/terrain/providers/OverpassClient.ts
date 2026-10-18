@@ -58,6 +58,8 @@ export class OverpassClient {
    * one instance per scene.
    */
   private static queue: Promise<unknown> = Promise.resolve()
+  /** How long an instance is waited for before the next one is asked: the queries ask for 25 s of the server's time, and the answer takes its way back. */
+  private static readonly HANG_MS = 40000
   /** How long to wait before the one retry a busy or rate-limited answer gets. */
   private static readonly RETRY_MS = 4000
 
@@ -87,7 +89,8 @@ export class OverpassClient {
     for (const endpoint of this.endpoints) {
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          const response = await this.fetchImpl(`${endpoint}?data=${encodeURIComponent(query)}`)
+          // An instance that hangs is no answer: past the query's own timeout, it is let go and the next one asked.
+          const response = await this.fetchImpl(`${endpoint}?data=${encodeURIComponent(query)}`, { signal: AbortSignal.timeout(OverpassClient.HANG_MS) })
           if (response.ok) return (await response.json()) as OverpassResponse
           last = new Error(`${new URL(endpoint).host} refused (${response.status})`)
           if (response.status !== 429 && response.status !== 504) break

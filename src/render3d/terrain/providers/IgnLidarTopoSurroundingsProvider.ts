@@ -41,6 +41,10 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
     return IgnGeoplatform.covers(lat, lng)
   }
 
+  later(centre: { lat: number, lng: number }, radiusM: number): Promise<Partial<Surroundings>> | undefined {
+    return OsmStreetFurniture.later(this.furniture, centre, radiusM)
+  }
+
   async getSurroundings(centre: { lat: number, lng: number }, radiusM: number): Promise<Surroundings> {
     if (!this.covers(centre.lat, centre.lng)) throw new SurroundingsUnavailableError("no-coverage", "The IGN's surveys cover France only")
     const radius = IgnGeoplatform.radius(radiusM)

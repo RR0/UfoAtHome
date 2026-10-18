@@ -94,6 +94,39 @@ describe("OsmStreetFurniture", () => {
     }
   })
 
+  it("asks again after longer and longer waits when Overpass fails, and gives the furniture when it answers", async () => {
+    vi.useFakeTimers()
+    try {
+      let calls = 0
+      const fetchImpl = vi.fn(async () => {
+        calls++
+        if (calls < 3) throw new Error("down")
+        return { ok: true, status: 200, json: async () => ({ elements: [node(10, 0, 0, { highway: "traffic_signals" }), street()] }) } as Response
+      }) as unknown as typeof fetch
+      const answered = new OsmStreetFurniture({ fetchImpl, endpoints: ["https://overpass.test/api"] }).answered(SAINT_LO, 100)
+      await vi.advanceTimersByTimeAsync(OsmStreetFurniture.RETRY_DELAYS_MS[0] + OsmStreetFurniture.RETRY_DELAYS_MS[1] + 10)
+      expect((await answered).signals).toHaveLength(2)
+      expect(calls).toBe(3)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it("gives up for now after its last try, and starts over when asked again", async () => {
+    vi.useFakeTimers()
+    try {
+      const fetchImpl = vi.fn(async () => { throw new Error("down") }) as unknown as typeof fetch
+      const furniture = new OsmStreetFurniture({ fetchImpl, endpoints: ["https://overpass.test/api"] })
+      const answered = furniture.answered(SAINT_LO, 100)
+      const failed = expect(answered).rejects.toThrow("did not answer")
+      await vi.advanceTimersByTimeAsync(OsmStreetFurniture.RETRY_DELAYS_MS.reduce((sum, ms) => sum + ms, 0) + 10)
+      await failed
+      expect((fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(OsmStreetFurniture.RETRY_DELAYS_MS.length + 1)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it("asks for everything in one question, with the roads the furniture stands on", async () => {
     const fetchImpl = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ elements: [node(10, 0, 0, { highway: "traffic_signals" }), street()] }) }) as Response) as unknown as typeof fetch
     const found = await new OsmStreetFurniture({ fetchImpl, endpoints: ["https://overpass.test/api"] }).near(SAINT_LO, 100)

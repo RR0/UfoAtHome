@@ -43,4 +43,9 @@ export class FirstSurroundingsThatAnswers implements SurroundingsProvider {
     }
     throw failure ?? new SurroundingsUnavailableError("no-coverage", "No survey reaches this place")
   }
+
+  /** What the survey that answered lacked (see SurroundingsProvider.later). */
+  later(centre: { lat: number, lng: number }, radiusM: number): Promise<Partial<Surroundings>> | undefined {
+    return this.current.later?.(centre, radiusM)
+  }
 }

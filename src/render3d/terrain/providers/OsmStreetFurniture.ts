@@ -70,6 +70,14 @@ export class OsmStreetFurniture {
     return new Date().toISOString().slice(0, 10)
   }
 
+  /**
+   * What a survey that waits for `furniture` lacked when it answered without it (see SurroundingsProvider.later): the furniture once Overpass
+   * answers, dated as the volunteers' map is. Undefined for a survey given none.
+   */
+  static later(furniture: OsmStreetFurniture | undefined, centre: { lat: number, lng: number }, radiusM: number): Promise<Partial<Surroundings>> | undefined {
+    return furniture?.answered(centre, radiusM).then(found => ({ ...found, ...(OsmStreetFurniture.found(found) ? { dates: { lamps: OsmStreetFurniture.today() } } : {}) }))
+  }
+
   /** Whether an answer found anything at all: what dates it. */
   static found(furniture: StreetFurniture | undefined): boolean {
     return Boolean(furniture?.lamps?.length || furniture?.signals?.length || furniture?.crossings?.length || furniture?.signs?.length)
@@ -90,18 +98,7 @@ export class OsmStreetFurniture {
   private static readonly pending = new Map<string, Promise<OverpassResponse | undefined>>()
 
   async near(centre: { lat: number, lng: number }, radiusM: number): Promise<StreetFurniture> {
-    const dLat = radiusM / OsmStreetFurniture.METRES_PER_DEGREE
-    const dLng = radiusM / (OsmStreetFurniture.METRES_PER_DEGREE * Math.cos(centre.lat * Math.PI / 180))
-    const box = [centre.lat - dLat, centre.lng - dLng, centre.lat + dLat, centre.lng + dLng].map(v => v.toFixed(6)).join(",")
-    let asked = OsmStreetFurniture.pending.get(box)
-    if (!asked) {
-      // A failure is forgotten, so that the next survey asks again; an answer is kept for as long as the page.
-      asked = this.client.query(OsmStreetFurniture.query(box)).catch(() => {
-        OsmStreetFurniture.pending.delete(box)
-        return undefined
-      })
-      OsmStreetFurniture.pending.set(box, asked)
-    }
+    const asked = this.ask(OsmStreetFurniture.boxOf(centre, radiusM))
     // The furniture never holds up the rest of a survey: an instance that does not answer is waited for a few seconds, not until its own timeout.
     let timer: ReturnType<typeof setTimeout> | undefined
     const late = Symbol("late")
@@ -114,6 +111,47 @@ export class OsmStreetFurniture {
     } finally {
       clearTimeout(timer)
     }
+  }
+
+  /**
+   * How long the furniture is waited for again after Overpass failed, try after try, while the page is open: every instance down is an outage of
+   * minutes to hours (2026-10-19: all five answering 5xx or nothing for an evening), and asking every few seconds would be no help to them.
+   */
+  static readonly RETRY_DELAYS_MS: readonly number[] = [15000, 60000, 180000, 600000]
+
+  /**
+   * The furniture round a place once Overpass answers, however late: the question already on its way is waited for, and one that failed is asked
+   * again after each of RETRY_DELAYS_MS. Fails when the last try has, which is "not for now": calling it again starts over.
+   */
+  async answered(centre: { lat: number, lng: number }, radiusM: number): Promise<StreetFurniture> {
+    const box = OsmStreetFurniture.boxOf(centre, radiusM)
+    for (let attempt = 0; ; attempt++) {
+      const answer = await this.ask(box)
+      if (answer) return OsmStreetFurniture.from(answer, centre, radiusM)
+      if (attempt >= OsmStreetFurniture.RETRY_DELAYS_MS.length) throw new Error("Overpass did not answer")
+      await new Promise(resolve => setTimeout(resolve, OsmStreetFurniture.RETRY_DELAYS_MS[attempt]))
+    }
+  }
+
+  /** The question about a square, the one already on its way if there is one (see pending): undefined when it failed. */
+  private ask(box: string): Promise<OverpassResponse | undefined> {
+    let asked = OsmStreetFurniture.pending.get(box)
+    if (!asked) {
+      // A failure is forgotten, so that the next survey asks again; an answer is kept for as long as the page.
+      asked = this.client.query(OsmStreetFurniture.query(box)).catch(() => {
+        OsmStreetFurniture.pending.delete(box)
+        return undefined
+      })
+      OsmStreetFurniture.pending.set(box, asked)
+    }
+    return asked
+  }
+
+  /** The square round a place, as Overpass is asked about it. */
+  private static boxOf(centre: { lat: number, lng: number }, radiusM: number): string {
+    const dLat = radiusM / OsmStreetFurniture.METRES_PER_DEGREE
+    const dLng = radiusM / (OsmStreetFurniture.METRES_PER_DEGREE * Math.cos(centre.lat * Math.PI / 180))
+    return [centre.lat - dLat, centre.lng - dLng, centre.lat + dLat, centre.lng + dLng].map(v => v.toFixed(6)).join(",")
   }
 
   /** Forgets the answers of this page. For tests. */

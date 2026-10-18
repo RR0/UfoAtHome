@@ -106,13 +106,7 @@ export class SurroundingsCorridor {
       SurroundingsCorridor.add(merged.bridges, moved(answer.bridges), (a, b) => Math.hypot(a.eastM - b.eastM, a.northM - b.northM) < SurroundingsCorridor.SAME_STRUCTURE_M)
       SurroundingsCorridor.add(merged.lines, moved(answer.lines), (a, b) =>
         Math.hypot(a.eastM - b.eastM, a.northM - b.northM) < SurroundingsCorridor.SAME_STRUCTURE_M && Math.abs(a.lengthM - b.lengthM) < 5)
-      if (answer.lamps) SurroundingsCorridor.add((merged.lamps ??= []), moved(answer.lamps), (a, b) => Math.hypot(a.eastM - b.eastM, a.northM - b.northM) < 1)
-      // A light, a crossing or a sign is the one met again from the next stop when it is where it was, facing the same way.
-      const samePost = (a: { eastM: number, northM: number, headingDeg: number }, b: { eastM: number, northM: number, headingDeg: number }) =>
-        Math.hypot(a.eastM - b.eastM, a.northM - b.northM) < 1 && Math.abs(((a.headingDeg - b.headingDeg + 540) % 360) - 180) < 10
-      if (answer.signals) SurroundingsCorridor.add((merged.signals ??= []), moved(answer.signals), samePost)
-      if (answer.crossings) SurroundingsCorridor.add((merged.crossings ??= []), moved(answer.crossings), samePost)
-      if (answer.signs) SurroundingsCorridor.add((merged.signs ??= []), moved(answer.signs), samePost)
+      SurroundingsCorridor.addFurniture(merged, answer, moved)
       if (answer.incomplete) merged.incomplete = true
       for (const key of ["laser", "photo", "map", "lamps"] as const) {
         const day = answer.dates?.[key]
@@ -122,6 +116,43 @@ export class SurroundingsCorridor {
     if (!any) throw failures.find(error => !(error instanceof SurroundingsUnavailableError && error.reason === "no-coverage")) ?? failures[0]
     if (Object.keys(dates).length > 0) merged.dates = dates
     return merged
+  }
+
+  /**
+   * What the stops' answers lacked when they came back incomplete, once it comes (see SurroundingsProvider.later), in metres from the first stop as
+   * `fetch` puts them. Undefined where the survey has nothing that comes late; failing if no stop's comes.
+   */
+  static later(provider: SurroundingsProvider, stops: readonly Stop[], radiusM: number): Promise<Partial<Surroundings>> | undefined {
+    if (!provider.later || stops.length === 0) return undefined
+    const origin = stops[0]
+    const cosine = Math.cos(origin.lat * Math.PI / 180)
+    const asked = stops.map(stop => provider.later!(stop, radiusM) ?? Promise.reject(new Error("Nothing comes late")))
+    return Promise.allSettled(asked).then(answers => {
+      if (!answers.some(answer => answer.status === "fulfilled")) throw (answers[0] as PromiseRejectedResult).reason
+      const merged: Partial<Surroundings> = {}
+      answers.forEach((answer, at) => {
+        if (answer.status !== "fulfilled") return
+        const east = (stops[at].lng - origin.lng) * SurroundingsCorridor.METRES_PER_DEGREE * cosine
+        const north = (stops[at].lat - origin.lat) * SurroundingsCorridor.METRES_PER_DEGREE
+        const moved = <T extends { eastM: number, northM: number }>(objects: T[]): T[] =>
+          objects.map(object => ({ ...object, eastM: Math.round((object.eastM + east) * 10) / 10, northM: Math.round((object.northM + north) * 10) / 10 }))
+        SurroundingsCorridor.addFurniture(merged, answer.value, moved)
+        const day = answer.value.dates?.lamps
+        if (day && (!merged.dates?.lamps || day > merged.dates.lamps)) merged.dates = { lamps: day }
+      })
+      return merged
+    })
+  }
+
+  /** The lamps, lights, crossings and signs of one stop's answer, moved to the first stop's metres, into `merged` unless one like each is there. */
+  private static addFurniture(merged: Partial<Surroundings>, answer: Partial<Surroundings>, moved: <T extends { eastM: number, northM: number }>(objects: T[]) => T[]): void {
+    if (answer.lamps) SurroundingsCorridor.add((merged.lamps ??= []), moved(answer.lamps), (a, b) => Math.hypot(a.eastM - b.eastM, a.northM - b.northM) < 1)
+    // A light, a crossing or a sign is the one met again from the next stop when it is where it was, facing the same way.
+    const samePost = (a: { eastM: number, northM: number, headingDeg: number }, b: { eastM: number, northM: number, headingDeg: number }) =>
+      Math.hypot(a.eastM - b.eastM, a.northM - b.northM) < 1 && Math.abs(((a.headingDeg - b.headingDeg + 540) % 360) - 180) < 10
+    if (answer.signals) SurroundingsCorridor.add((merged.signals ??= []), moved(answer.signals), samePost)
+    if (answer.crossings) SurroundingsCorridor.add((merged.crossings ??= []), moved(answer.crossings), samePost)
+    if (answer.signs) SurroundingsCorridor.add((merged.signs ??= []), moved(answer.signs), samePost)
   }
 
   /** Puts each of `found` in `into` unless one like it is there already. */

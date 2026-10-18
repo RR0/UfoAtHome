@@ -95,3 +95,20 @@ describe("SurroundingsCorridor", () => {
     })
   })
 })
+
+describe("SurroundingsCorridor.later", () => {
+  it("gathers what each stop lacked, in metres from the first stop, once, and the newest day", async () => {
+    const survey = Object.assign(new Fake(empty), {
+      later: (centre: Stop) => Promise.resolve({ lamps: [{ eastM: 0, northM: 5 }], dates: { lamps: centre.lng > 2 ? "2026-10-19" : "2026-10-18" } })
+    })
+    const late = await SurroundingsCorridor.later(survey, eastward(0, 200), 100)!
+    expect(late.lamps?.map(lamp => Math.round(lamp.eastM))).toEqual([0, 200])
+    expect(late.dates).toEqual({ lamps: "2026-10-19" })
+  })
+
+  it("is nothing for a survey with nothing that comes late, and fails when no stop's comes", async () => {
+    expect(SurroundingsCorridor.later(new Fake(empty), eastward(0, 200), 100)).toBeUndefined()
+    const down = Object.assign(new Fake(empty), { later: () => Promise.reject(new Error("down")) })
+    await expect(SurroundingsCorridor.later(down, eastward(0, 200), 100)).rejects.toThrow("down")
+  })
+})

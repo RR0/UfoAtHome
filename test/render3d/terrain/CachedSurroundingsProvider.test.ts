@@ -140,6 +140,24 @@ describe("CachedSurroundingsProvider", () => {
       expect(cache.entries.size).toBe(0)
     })
 
+    it("makes the answer whole when what it lacked comes, for the page and on disk", async () => {
+      const survey = new Counting()
+      const lamp = { eastM: 1, northM: 2 }
+      const partial = {
+        getSurroundings: async () => ({ ...(await Counting.prototype.getSurroundings.call(survey)), incomplete: true, dates: { laser: "2023-03-03" } }),
+        later: () => Promise.resolve({ lamps: [lamp], dates: { lamps: "2026-10-19" } })
+      }
+      const cached = new CachedSurroundingsProvider(Object.assign(Object.create(survey), partial))
+      expect((await cached.getSurroundings(PLACE, 100)).incomplete).toBe(true)
+      expect(await cached.later(PLACE, 100)).toEqual({ lamps: [lamp], dates: { lamps: "2026-10-19" } })
+      await settled()
+      const whole = await cached.getSurroundings(PLACE, 100)
+      expect(whole).toEqual({ trees: [TREE], buildings: [], bridges: [], lines: [], lamps: [lamp], dates: { laser: "2023-03-03", lamps: "2026-10-19" } })
+      expect(survey.asked).toBe(1)
+      expect(cache.entries.size).toBe(1)
+      expect(JSON.parse([...cache.entries.values()][0]).surroundings.lamps).toEqual([lamp])
+    })
+
     it("keeps no more than it may, the oldest going first", async () => {
       const survey = new Counting()
       const cached = new CachedSurroundingsProvider(survey)

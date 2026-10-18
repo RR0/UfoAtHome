@@ -49,6 +49,10 @@ export class OsmBuildingsSurroundingsProvider implements SurroundingsProvider {
     return true
   }
 
+  later(centre: { lat: number, lng: number }, radiusM: number): Promise<Partial<Surroundings>> | undefined {
+    return OsmStreetFurniture.later(this.furniture, centre, radiusM)
+  }
+
   async getSurroundings(centre: { lat: number, lng: number }, radiusM: number): Promise<Surroundings> {
     const radius = Math.min(radiusM, OsmBuildingsSurroundingsProvider.MAX_RADIUS_M)
     let answer: OverpassResponse

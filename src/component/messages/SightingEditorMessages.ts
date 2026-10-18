@@ -717,6 +717,12 @@ export interface SightingEditorMessages extends SightingLabels {
   surveyNone: string
   surveyKept: string
   surveyUnreachable: string
+  /** The street lamps, traffic lights, crossings and signs of a place, which come from OpenStreetMap and often late: waited for, found ({lamps},
+   * {signals}, {crossings}, {signs} are counts), not to be had for now, and the button that asks again. */
+  surveyFurniturePending: string
+  surveyFurnitureDone: string
+  surveyFurnitureUnavailable: string
+  surveyFurnitureRetry: string
   /** The account the recording is drafted from — the label above the textarea a reader pastes a
    * account into. Names the reader's gesture and not the machinery: what happens is that a
    * recording gets drafted from an account, and which service reads it is said by the credit
