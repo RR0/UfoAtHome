@@ -949,14 +949,22 @@ select.weather-field:disabled {
    the tabs filled the width, and left a gap between the tabs and the panel. */
 #group-tabs {
   position: relative;
-  padding-inline-end: 4.6em;
+  /* One button wide: the two are stacked, so the reserve is a column and not a row. */
+  padding-inline-end: 2.2em;
+  /* ...and as tall as the stack, so that a strip of a single row does not let it climb out of the strip. */
+  min-height: 2.5em;
 }
 .history {
   position: absolute;
   inset-inline-end: 0.2em;
-  bottom: 0.25em;
+  bottom: 0.1em;
   display: inline-flex;
-  gap: 0.2em;
+  flex-direction: column;
+  gap: 0.1em;
+}
+.history .icon-btn {
+  width: 1.8em;
+  height: 1.1em;
 }
 .history .icon-btn:disabled {
   opacity: 0.35;
