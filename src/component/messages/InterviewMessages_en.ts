@@ -26,6 +26,5 @@ export const interviewMessages_en: InterviewMessages = {
   exchangesEmpty: "Nothing was said yet.",
   redacted: "Passage removed",
   proofreadAll: "Proofread by everyone.",
-  proofreadPending: "Not proofread yet by: {names}",
-  altForTimes: "Hold Alt to see the times"
+  proofreadPending: "Not proofread yet by: {names}"
 }

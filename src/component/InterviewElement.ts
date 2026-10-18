@@ -63,12 +63,9 @@ const TEMPLATE = `
   fieldset.witnesses { display: flex; flex-wrap: wrap; align-items: center; gap: .25em .75em; border: 0; margin: 0; padding: 0; min-width: 0; }
   fieldset.witnesses legend { float: left; padding: 0; margin-right: .4em; }
   .exchanges-status { font-size: .85em; opacity: .85; margin: 0 0 .5em; }
-  .exchanges-hint { font-size: .8em; opacity: .65; margin: 0 0 .5em; }
   .turn { display: grid; grid-template-columns: 8em 1fr; gap: .1em .6em; padding: .3em .4em; border-left: 3px solid var(--speaker, #888); margin: 0 0 .25em; }
   .turn.flash { background: color-mix(in srgb, #fc3 28%, transparent); }
   .turn .who { font-weight: 600; color: var(--speaker, inherit); overflow-wrap: anywhere; }
-  .turn .when { display: none; font-weight: 400; font-size: .85em; opacity: .75; font-variant-numeric: tabular-nums; }
-  :host([data-times]) .turn .when { display: block; }
   #exchanges { max-height: 32em; overflow-y: auto; }
   .bar { display: inline-block; width: 3em; height: .9em; vertical-align: -.1em; border-radius: 2px; background: CanvasText; margin-right: .4em; }
   .turn .why { font-size: .85em; font-style: italic; opacity: .8; }
@@ -101,7 +98,6 @@ const TEMPLATE = `
 </section>
 <section class="group-panel" id="group-exchanges" aria-labelledby="label-exchanges-group" hidden>
   <p id="exchanges-status" class="exchanges-status" role="status"></p>
-  <p id="exchanges-hint" class="exchanges-hint"></p>
   <div id="exchanges"></div>
 </section>
 <section class="group-panel" id="group-transcript" aria-labelledby="label-file-group" hidden>
@@ -174,11 +170,6 @@ export class InterviewElement extends HTMLElement {
 
   private static readonly GROUPS: Record<string, InterviewGroup> = { "group-summary": "summary", "group-exchanges": "exchanges", "group-transcript": "file" }
 
-  /** Alt held shows the time of each turn, as a modifier shows what is behind a thing. */
-  private readonly altChanged = (event: KeyboardEvent | FocusEvent): void => {
-    this.toggleAttribute("data-times", event instanceof KeyboardEvent && event.altKey)
-  }
-
   static get observedAttributes(): string[] {
     return ["readonly"]
   }
@@ -189,15 +180,6 @@ export class InterviewElement extends HTMLElement {
 
   connectedCallback(): void {
     void this.loadLocale()
-    window.addEventListener("keydown", this.altChanged)
-    window.addEventListener("keyup", this.altChanged)
-    window.addEventListener("blur", this.altChanged)
-  }
-
-  disconnectedCallback(): void {
-    window.removeEventListener("keydown", this.altChanged)
-    window.removeEventListener("keyup", this.altChanged)
-    window.removeEventListener("blur", this.altChanged)
   }
 
   /** The event of the case shown, edited in place. */
@@ -270,7 +252,6 @@ export class InterviewElement extends HTMLElement {
     text("label-summary-group", m.summaryTab)
     text("label-file-group", m.fileTab)
     text("label-exchanges-group", m.exchangesTab)
-    text("exchanges-hint", m.altForTimes)
     text("label-title", m.title)
     text("label-witness", m.witness)
     text("label-medium", m.medium)
@@ -455,10 +436,9 @@ export class InterviewElement extends HTMLElement {
       who.className = "who"
       const name = document.createElement("span")
       name.textContent = segment.redacted ? "" : InterviewFile.speakerName(json, segment.speaker)
-      const when = document.createElement("span")
-      when.className = "when"
-      when.textContent = segment.start === undefined ? "" : InterviewFile.clock(segment.start, true)
-      who.append(name, when)
+      // The time is in the tooltip of the whole turn, not in the layout.
+      if (segment.start !== undefined) turn.title = InterviewFile.clock(segment.start, true)
+      who.append(name)
       // What stands in the place of a stretch taken out: a bar, and why, said and not left to a tooltip.
       const gap = (reasonText: SaidText, tag: "p" | "span"): HTMLElement => {
         const node = document.createElement(tag)

@@ -25,7 +25,6 @@ export interface InterviewMessages {
   proofreadAll: string
   /** `{names}` is the speakers who have not approved the transcript yet. */
   proofreadPending: string
-  altForTimes: string
   importFile: string
   importUrl: string
   importButton: string

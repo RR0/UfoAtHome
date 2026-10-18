@@ -310,15 +310,10 @@ describe("What the summary shows is what the file holds, and the other way round
     expect(turns[4].querySelector(".said")!.textContent).toBe("No lights. Passage removed : Place That is all. ")
     expect(turns[4].querySelectorAll(".said .bar")).toHaveLength(1)
     expect(part(element, "exchanges-status").textContent).toBe("Not proofread yet by: Q. B.")
-    expect(turns[0].querySelector(".when")!.textContent).toBe("00:00.0")
-  })
-
-  it("shows the times when Alt is held, and not otherwise", () => {
-    const { element } = make(event())
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "Alt", altKey: true }))
-    expect(element.hasAttribute("data-times")).toBe(true)
-    window.dispatchEvent(new KeyboardEvent("keyup", { key: "Alt", altKey: false }))
-    expect(element.hasAttribute("data-times")).toBe(false)
+    // The time of a turn is its tooltip: nothing of it is in the layout.
+    expect(turns[0].title).toBe("00:00.0")
+    expect(turns[1].title).toBe("00:05.0")
+    expect(turns[0].querySelector(".when")).toBeNull()
   })
 
   it("follows a passage to the moment of the observation it tells of", async () => {
