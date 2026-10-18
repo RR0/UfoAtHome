@@ -83,6 +83,22 @@ describe("InterviewElement", () => {
       { speaker: "a", text: "Q" }, { speaker: "b", text: "A1" }, { speaker: "b", text: "A2" }, { speaker: "a", text: "Q2" }
     ] }
     expect([...element.querySelectorAll(".turn")].map(turn => turn.classList.contains("goes-on"))).toEqual([false, false, true, false])
+    // What one speaker says before another speaks is one intervention, pointed at as a whole.
+    expect([...element.querySelectorAll(".intervention")].map(intervention => intervention.querySelectorAll(".turn").length)).toEqual([1, 2, 1])
+  })
+
+  it("keeps an intervention whole across a passage of its speaker taken out, and ends it when another speaker takes the floor", async () => {
+    const element = await make({})
+    const gone = { reason: { en: "Private life" } }
+    element.interview = { version: 1, speakers: { a: { role: "interviewer" }, b: { role: "witness", title: "Q. B." } }, segments: [
+      { speaker: "b", redacted: gone }, { speaker: "b", text: "B1" }, { speaker: "b", redacted: { reason: { en: "Place" } } }, { speaker: "b", text: "B2" },
+      { speaker: "a", text: "A1" }, { speaker: "a", redacted: gone }, { speaker: "b", redacted: gone }, { speaker: "a", text: "A2" }
+    ] }
+    const interventions = [...element.querySelectorAll(".intervention")]
+    expect(interventions.map(intervention => intervention.querySelectorAll(".turn").length)).toEqual([4, 2, 1])
+    // Named once, at its first turn that is not taken out.
+    expect([...interventions[0].querySelectorAll(".turn")].map(turn => turn.classList.contains("goes-on"))).toEqual([false, false, false, true])
+    expect(interventions[2].querySelector(".turn")!.classList.contains("goes-on")).toBe(false)
   })
 
   it("says nothing of proofreading when the file does not say who has proofread it", async () => {

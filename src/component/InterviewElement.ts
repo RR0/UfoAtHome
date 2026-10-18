@@ -21,14 +21,14 @@ rr0-interview [hidden] { display: none !important; }
 rr0-interview .rr0-interview-status { font-size: .85em; opacity: .85; margin: 0 0 .5em; }
 /* Scrolling only where a height is asked for: a box that scrolls keeps clear of the page's floated figures for all its height. */
 rr0-interview .rr0-interview-turns { max-height: var(--rr0-interview-max-height, none); overflow-y: var(--rr0-interview-overflow, visible); }
-rr0-interview .turn { position: relative; padding: .2em .5em; margin: 0 0 .4em; border-left: 3px solid var(--speaker); --speaker: hsl(var(--speaker-hue, 0) 55% 38%); }
-@media (prefers-color-scheme: dark) { rr0-interview .turn { --speaker: hsl(var(--speaker-hue, 0) 65% 70%); } }
-rr0-interview .turn { transition: background-color .15s; }
-rr0-interview .turn:hover { background: color-mix(in srgb, var(--speaker) 7%, transparent); }
+/* An intervention: what one speaker says before another speaks, one turn or several; pointed at as a whole. */
+rr0-interview .intervention { margin: 0 0 .4em; border-left: 3px solid var(--speaker); --speaker: hsl(var(--speaker-hue, 0) 55% 38%); transition: background-color .15s; }
+@media (prefers-color-scheme: dark) { rr0-interview .intervention { --speaker: hsl(var(--speaker-hue, 0) 65% 70%); } }
+rr0-interview .intervention:hover { background: color-mix(in srgb, var(--speaker) 7%, transparent); }
+rr0-interview .turn { position: relative; padding: .2em .5em; }
 rr0-interview .turn.flash { background: color-mix(in srgb, #fc3 28%, transparent); }
 rr0-interview .turn .who { font-size: .85em; font-weight: 600; color: var(--speaker); overflow-wrap: anywhere; }
 rr0-interview .turn.is-redacted .who, rr0-interview .turn.goes-on .who { display: none; }
-rr0-interview .turn.goes-on { margin-top: -.4em; padding-top: .6em; }
 rr0-interview .turn .said, rr0-interview .turn .redacted { margin: 0; padding: 0; text-indent: 0; white-space: pre-wrap; }
 rr0-interview .turn .said::before, rr0-interview .turn .said::after { content: none; }
 /* Tooltips drawn here rather than left to the browser's own, which some hosts (an embedded pane) never show. */
@@ -236,7 +236,10 @@ export class InterviewElement extends HTMLElement {
       this.status.textContent = waiting.length === 0 ? m.proofreadAll : m.proofreadPending.replace("{names}", waiting.map(id => this.speakerName(json, id)).join(", "))
       this.status.hidden = false
     } else this.status.hidden = true
-    const turns: HTMLElement[] = []
+    // What each speaker says before another speaks, the turns of each.
+    const interventions: HTMLElement[] = []
+    let intervention: HTMLElement | undefined
+    let named = false
     let previous: { block: HTMLElement, reason: string } | undefined
     let speakerBefore: string | undefined
     segments.forEach((segment, index) => {
@@ -244,21 +247,33 @@ export class InterviewElement extends HTMLElement {
       // Passages taken out one after the other read as one gap.
       if (reason !== undefined && previous?.reason === reason) {
         this.blocks.set(index, previous.block)
+        // Another speaker in that gap has taken the floor, unseen: whoever speaks next starts again.
+        if (segment.speaker !== speakerBefore) speakerBefore = undefined
         return
       }
       const turn = document.createElement("div")
       turn.className = "turn"
       turn.dataset.segment = String(index)
-      turn.style.setProperty("--speaker-hue", String((Math.max(0, ids.indexOf(segment.speaker)) * 67 + 210) % 360))
       const who = document.createElement("div")
       who.className = "who"
       const name = document.createElement("span")
       name.textContent = segment.redacted ? "" : this.speakerName(json, segment.speaker)
       // The time is a tooltip over the whole turn, not in the layout.
       if (segment.start !== undefined) turn.dataset.time = InterviewFile.clock(segment.start, true)
-      // The same speaker going on is not named again.
-      if (!segment.redacted && speakerBefore === segment.speaker) turn.classList.add("goes-on")
-      speakerBefore = segment.redacted ? undefined : segment.speaker
+      // An intervention lasts until another speaker takes the floor, a passage of the same speaker taken out included. Its speaker is named once.
+      if (speakerBefore !== segment.speaker) {
+        intervention = document.createElement("div")
+        intervention.className = "intervention"
+        intervention.style.setProperty("--speaker-hue", String((Math.max(0, ids.indexOf(segment.speaker)) * 67 + 210) % 360))
+        interventions.push(intervention)
+        named = false
+      }
+      if (!segment.redacted) {
+        if (named) turn.classList.add("goes-on")
+        named = true
+      }
+      intervention!.append(turn)
+      speakerBefore = segment.speaker
       who.append(name)
       if (segment.redacted) {
         turn.classList.add("is-redacted")
@@ -297,9 +312,8 @@ export class InterviewElement extends HTMLElement {
         turn.append(refs)
       }
       this.blocks.set(index, turn)
-      turns.push(turn)
     })
-    this.turns.replaceChildren(...turns)
+    this.turns.replaceChildren(...interventions)
   }
 
   /** Shows the segment that tells of an observation's moment, and where it is. */
