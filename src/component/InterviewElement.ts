@@ -69,7 +69,7 @@ const TEMPLATE = `
   #exchanges { max-height: 32em; overflow-y: auto; }
   /* Tooltips drawn here rather than left to the browser's own, which some hosts (an embedded pane) never show. */
   .turn { position: relative; }
-  .turn[data-time]:hover:not(:has(.bar:hover, .bar:focus))::after { content: attr(data-time); position: absolute; right: .4em; top: -.1em; z-index: 2; padding: 0 .4em; border-radius: 3px;
+  .turn[data-time]:hover:not(:has(.bar:hover, .bar:focus))::after { content: attr(data-time); position: absolute; left: .5em; top: 2.3em; z-index: 2; padding: 0 .4em; border-radius: 3px;
     font-size: .8em; font-variant-numeric: tabular-nums; background: CanvasText; color: Canvas; pointer-events: none; }
   .bar { position: relative; display: inline-block; width: 3em; height: .9em; vertical-align: -.1em; border-radius: 2px; background: CanvasText; margin: 0 .2em; cursor: help; }
   .bar::after { content: attr(data-tip); display: none; position: absolute; left: 0; top: 1.4em; z-index: 3; width: max-content; max-width: 22em; padding: .3em .5em; border-radius: 4px;
