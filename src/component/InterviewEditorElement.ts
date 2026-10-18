@@ -63,7 +63,7 @@ const TEMPLATE = `
   select { min-width: 0; max-width: 100%; text-overflow: ellipsis; }
   fieldset.witnesses { display: flex; flex-wrap: wrap; align-items: center; gap: .25em .75em; border: 0; margin: 0; padding: 0; min-width: 0; }
   fieldset.witnesses legend { float: left; padding: 0; margin-right: .4em; }
-  #exchanges { --rr0-interview-max-height: 32em; }
+  #exchanges { --rr0-interview-max-height: 32em; --rr0-interview-overflow: auto; }
   .file-note { font-size: .85em; opacity: .8; margin: .3em 0; }
   .file-editor { min-height: 18em; margin-top: .5em; }
 </style>

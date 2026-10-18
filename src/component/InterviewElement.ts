@@ -19,12 +19,14 @@ const STYLE = `
 rr0-interview { display: block; --rr0-interview-line: color-mix(in srgb, currentColor 35%, transparent); }
 rr0-interview [hidden] { display: none !important; }
 rr0-interview .rr0-interview-status { font-size: .85em; opacity: .85; margin: 0 0 .5em; }
-rr0-interview .rr0-interview-turns { max-height: var(--rr0-interview-max-height, none); overflow-y: auto; }
+/* Scrolling only where a height is asked for: a box that scrolls keeps clear of the page's floated figures for all its height. */
+rr0-interview .rr0-interview-turns { max-height: var(--rr0-interview-max-height, none); overflow-y: var(--rr0-interview-overflow, visible); }
 rr0-interview .turn { position: relative; padding: .2em .5em; margin: 0 0 .4em; border-left: 3px solid var(--speaker); --speaker: hsl(var(--speaker-hue, 0) 55% 38%); }
 @media (prefers-color-scheme: dark) { rr0-interview .turn { --speaker: hsl(var(--speaker-hue, 0) 65% 70%); } }
 rr0-interview .turn.flash { background: color-mix(in srgb, #fc3 28%, transparent); }
 rr0-interview .turn .who { font-size: .85em; font-weight: 600; color: var(--speaker); overflow-wrap: anywhere; }
-rr0-interview .turn.is-redacted .who { display: none; }
+rr0-interview .turn.is-redacted .who, rr0-interview .turn.goes-on .who { display: none; }
+rr0-interview .turn.goes-on { margin-top: -.4em; padding-top: .6em; }
 rr0-interview .turn .said, rr0-interview .turn .redacted { margin: 0; padding: 0; text-indent: 0; white-space: pre-wrap; }
 rr0-interview .turn .said::before, rr0-interview .turn .said::after { content: none; }
 /* Tooltips drawn here rather than left to the browser's own, which some hosts (an embedded pane) never show. */
@@ -54,7 +56,7 @@ interface Seekable {
  * that id in the page is moreover shown at that moment. Who has not proofread the transcript is said above it, when the file says who has.
  *
  * It draws in its own children, not in a shadow root, so that the styles of the page it is put in reach the text and its links, as they do the
- * rest of the page. `--rr0-interview-max-height` makes the dialogue scroll past that height.
+ * rest of the page. `--rr0-interview-max-height` with `--rr0-interview-overflow: auto` makes the dialogue scroll past that height.
  *
  * `<rr0-interview-editor>` (see InterviewEditorElement) shows one in its Exchanges group.
  */
@@ -230,6 +232,7 @@ export class InterviewElement extends HTMLElement {
     } else this.status.hidden = true
     const turns: HTMLElement[] = []
     let previous: { block: HTMLElement, reason: string } | undefined
+    let speakerBefore: string | undefined
     segments.forEach((segment, index) => {
       const reason = segment.redacted ? JSON.stringify(segment.redacted.reason) : undefined
       // Passages taken out one after the other read as one gap.
@@ -247,6 +250,9 @@ export class InterviewElement extends HTMLElement {
       name.textContent = segment.redacted ? "" : this.speakerName(json, segment.speaker)
       // The time is a tooltip over the whole turn, not in the layout.
       if (segment.start !== undefined) turn.dataset.time = InterviewFile.clock(segment.start, true)
+      // The same speaker going on is not named again.
+      if (!segment.redacted && speakerBefore === segment.speaker) turn.classList.add("goes-on")
+      speakerBefore = segment.redacted ? undefined : segment.speaker
       who.append(name)
       if (segment.redacted) {
         turn.classList.add("is-redacted")

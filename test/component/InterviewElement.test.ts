@@ -77,6 +77,14 @@ describe("InterviewElement", () => {
     expect(said.textContent).toBe("He lived in , near Chicago.")
   })
 
+  it("does not name again a speaker who goes on", async () => {
+    const element = await make({})
+    element.interview = { version: 1, speakers: { a: { role: "interviewer" }, b: { role: "witness" } }, segments: [
+      { speaker: "a", text: "Q" }, { speaker: "b", text: "A1" }, { speaker: "b", text: "A2" }, { speaker: "a", text: "Q2" }
+    ] }
+    expect([...element.querySelectorAll(".turn")].map(turn => turn.classList.contains("goes-on"))).toEqual([false, false, true, false])
+  })
+
   it("says nothing of proofreading when the file does not say who has proofread it", async () => {
     files["https://example.org/time/interview.json"] = interview
     const element = await make({ src: "https://example.org/time/interview.json" })
