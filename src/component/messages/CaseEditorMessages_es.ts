@@ -3,6 +3,7 @@ import type { CaseEditorMessages } from "./CaseEditorMessages.js"
 export const caseEditorMessages_es: CaseEditorMessages = {
   event: "Evento",
   accountOf: "Observación de",
+  passagesHeading: "Relatado en",
   interviewOf: "Entrevista a",
   untitledInterview: "Entrevista {n}",
   deleteInterviewQuestion: "¿Eliminar esta entrevista del caso? Nada se escribe hasta guardar el caso.",

@@ -17,6 +17,15 @@ export interface InterviewMessages {
   /** The two groups of an interview, as the editor of a recording has its own: what it established, and the file of its transcript. */
   summaryTab: string
   fileTab: string
+  /** The third group: the interview read as a dialogue, who said what. */
+  exchangesTab: string
+  exchangesEmpty: string
+  /** What stands in the place of a passage taken out of the published transcript. */
+  redacted: string
+  proofreadAll: string
+  /** `{names}` is the speakers who have not approved the transcript yet. */
+  proofreadPending: string
+  altForTimes: string
   importFile: string
   importUrl: string
   importButton: string

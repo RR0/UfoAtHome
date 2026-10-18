@@ -3,6 +3,7 @@ import type { CaseEditorMessages } from "./CaseEditorMessages.js"
 export const caseEditorMessages_fr: CaseEditorMessages = {
   event: "Événement",
   accountOf: "Observation de",
+  passagesHeading: "Relaté dans",
   interviewOf: "Interview de",
   untitledInterview: "Interview {n}",
   deleteInterviewQuestion: "Supprimer cet entretien du dossier ? Rien n'est écrit avant la sauvegarde du dossier.",

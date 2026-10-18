@@ -5556,6 +5556,11 @@ export class SightingEditorElement extends HTMLElement {
     this.timelineMarks.show(marks, this.ufoElement.seekableDuration)
   }
 
+  /** Moves the playhead to `seconds` since the beginning of the recording: where an interview's passage says the observation was at that moment. */
+  seekTo(seconds: number): void {
+    this.goToMark(seconds)
+  }
+
   private goToMark(t: number | undefined): void {
     if (t === undefined) return
     this.ufoElement.currentTime = t

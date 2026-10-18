@@ -21,5 +21,11 @@ export const interviewMessages_it: InterviewMessages = {
   notATranscript: "Quel file non è una trascrizione di intervista (non ha turni di parola).",
   loadFailed: "Impossibile leggere quella trascrizione.",
   editorLabel: "Trascrizione dell'intervista in JSON",
-  byHint: "Identificatori di persone RR0, separati da virgole"
+  byHint: "Identificatori di persone RR0, separati da virgole",
+  exchangesTab: "Scambi",
+  exchangesEmpty: "Non è stato ancora detto nulla.",
+  redacted: "Passaggio rimosso",
+  proofreadAll: "Rivisto da tutti.",
+  proofreadPending: "Non ancora rivisto da: {names}",
+  altForTimes: "Tenere premuto Alt per vedere i tempi"
 }

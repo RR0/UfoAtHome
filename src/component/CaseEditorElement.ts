@@ -11,7 +11,9 @@ import type { DateInputElement } from "./DateInputElement.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 import type { CaseTrack } from "./CaseSession.js"
-import { register as registerInterview, INTERVIEW_CHANGE_EVENT } from "./InterviewElement.js"
+import { register as registerInterview, INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./InterviewElement.js"
+import { InterviewFile } from "../engine/persistence/interviewJson.js"
+import type { InterviewJson, InterviewPassage } from "../engine/persistence/interviewJson.js"
 import type { InterviewElement, InterviewEvent } from "./InterviewElement.js"
 import { InterviewMedia } from "./messages/InterviewMedia.js"
 import type { InterviewMedium } from "../engine/persistence/interviewJson.js"
@@ -49,6 +51,12 @@ const TEMPLATE = `
   button.link { border: 0; background: none; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
   .icon-btn { width: 1.8em; height: 1.8em; padding: 0; line-height: 1; cursor: pointer; }
   /* The observation being edited, inside: a frame of its own once there is a case around it. */
+  .passages { margin: .5em 0 0; font-size: .9em; }
+  .passages ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .2em; }
+  .passages li { display: flex; gap: .5em; align-items: baseline; }
+  .passages button { font: inherit; cursor: pointer; }
+  .passages .at { font-variant-numeric: tabular-nums; }
+  .passages .excerpt { border: 0; background: none; padding: 0; text-align: left; color: LinkText; text-decoration: underline; }
   .recording.in-case, #interview-section.in-case { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .5em .7em .7em; }
   /* Tabs as the recording's editor has them (see sightingEditorTemplate): a strip on one baseline, the open tab raised and joined to its panel. */
   .group-tabs { --tab-line: color-mix(in srgb, CanvasText 35%, transparent); --tab-surface: color-mix(in srgb, CanvasText 5%, Canvas);
@@ -111,6 +119,7 @@ const TEMPLATE = `
     </div>
     <section id="recording" class="recording">
       <rr0-sighting-editor id="editor"><span id="recording-dirty" slot="tab-status" class="dirty" role="status" title="Changes not saved" hidden>●</span></rr0-sighting-editor>
+      <div id="passages" class="passages" hidden><ul id="passages-list"></ul></div>
     </section>
     <section id="interview-section" class="recording" hidden>
       <rr0-interview id="interview"></rr0-interview>
@@ -218,6 +227,7 @@ export class CaseEditorElement extends HTMLElement {
     this.editor = this.shadow.getElementById("editor") as SightingEditorElement
     this.interviewElement = this.shadow.getElementById("interview") as InterviewElement
     this.interviewElement.addEventListener(INTERVIEW_CHANGE_EVENT, event => this.interviewChanged((event as CustomEvent<{ field: string, text?: string }>).detail))
+    this.interviewElement.addEventListener(INTERVIEW_SEEK_EVENT, event => void this.followToObservation((event as CustomEvent<{ sighting?: string, at: number }>).detail))
     this.editor.addEventListener("caseloaded", event => {
       event.preventDefault()
       const { json, url } = (event as CustomEvent<{ json: unknown, url?: string }>).detail
@@ -659,6 +669,7 @@ export class CaseEditorElement extends HTMLElement {
     if (!session) return
     this.commit()
     this.currentInterview = undefined
+    this.byId("passages").hidden = true
     try {
       const fresh = !track.recording
       await this.loadTrack(track)
@@ -678,6 +689,81 @@ export class CaseEditorElement extends HTMLElement {
       this.showError(this.messages.loadFailed)
     }
     this.refreshRow()
+    void this.showPassages(track)
+  }
+
+  private passagesToken = 0
+
+  /** The transcript of an interview of the case as an object: what the author edited, else the file at its address (relative to the case). */
+  private async transcriptOf(interview: InterviewEvent): Promise<InterviewJson | undefined> {
+    const session = this.session
+    if (!session) return undefined
+    try {
+      const text = session.transcriptText(interview)
+      if (text !== undefined) return JSON.parse(text) as InterviewJson
+      if (interview.url) return await SightingFetch.json(new URL(interview.url, session.url ?? location.href).href) as InterviewJson
+    } catch {
+      // an interview whose transcript cannot be read tells of nothing
+    }
+    return undefined
+  }
+
+  /**
+   * Under an observation, the passages of the case's interviews that tell of its moments, each a link back to the passage and the time a link to the
+   * moment itself: the other way round from an interview's passage that follows to the observation.
+   */
+  private async showPassages(track: CaseTrack): Promise<void> {
+    const session = this.session
+    const box = this.byId("passages")
+    const token = ++this.passagesToken
+    box.hidden = true
+    if (!session || track.kind !== "observer") return
+    const id = track.event.id ?? session.proposedId(track)
+    const found: { interview: InterviewEvent, json: InterviewJson, passage: InterviewPassage }[] = []
+    for (const interview of session.interviews) {
+      const json = await this.transcriptOf(interview)
+      if (!json || !Array.isArray(json.segments)) continue
+      // An interview's file may not say whom it was held with: the case's event does.
+      const held = { ...json, interviewOf: json.interviewOf ?? interview.interviewOf }
+      for (const passage of InterviewFile.passagesAbout(held, id)) found.push({ interview, json, passage })
+    }
+    if (token !== this.passagesToken || this.current !== track || found.length === 0) return
+    const list = this.byId("passages-list")
+    list.replaceChildren(...found.sort((a, b) => a.passage.at - b.passage.at).map(({ interview, json, passage }) => {
+      const item = document.createElement("li")
+      const at = document.createElement("button")
+      at.type = "button"
+      at.className = "at"
+      at.textContent = `▶ ${InterviewFile.clock(passage.at)}`
+      at.addEventListener("click", () => this.editor.seekTo(passage.at))
+      const link = document.createElement("button")
+      link.type = "button"
+      link.className = "excerpt"
+      const items = this.items(session) as { interview?: InterviewEvent }[]
+      const index = items.findIndex(candidate => candidate.interview === interview)
+      link.textContent = `${this.messages.passagesHeading} ${this.optionLabel({ interview }, index)}`
+      link.addEventListener("click", () => {
+        this.showInterview(interview)
+        void this.interviewElement.revealSegment(passage.index)
+      })
+      const said = passage.text === undefined ? "" : passage.range ? passage.text.slice(passage.range[0], passage.range[1]) : passage.text
+      const excerpt = document.createElement("span")
+      excerpt.textContent = said === "" ? "" : `${InterviewFile.speakerName(json, passage.speaker)} : « ${said.length > 120 ? `${said.slice(0, 117)}…` : said} »`
+      item.append(at, link, excerpt)
+      return item
+    }))
+    box.hidden = false
+  }
+
+  /** A passage of an interview was followed to the moment it tells of: the observation is shown at that time. */
+  private async followToObservation(target: { sighting?: string, at: number }): Promise<void> {
+    const session = this.session
+    if (!session) return
+    const track = session.tracks.find(candidate => candidate.kind === "observer" && (candidate.event.id ?? session.proposedId(candidate)) === target.sighting)
+      ?? session.tracks.find(candidate => candidate.kind === "observer")
+    if (!track) return
+    await this.showTrack(track)
+    this.editor.seekTo(target.at)
   }
 
   private static shapesOf(recording: SightingRecordingJson): string[] {
@@ -695,8 +781,8 @@ export class CaseEditorElement extends HTMLElement {
   private optionLabel(item: { track?: CaseTrack, interview?: InterviewEvent }, index: number): string {
     const session = this.session!
     if (item.interview) {
-      const witness = session.intervieweeOf(item.interview)
-      const name = witness ? this.labelOf(witness, session.tracks.indexOf(witness)) : this.said.read(item.interview.title as never)
+      const witnesses = session.intervieweesOf(item.interview)
+      const name = witnesses.length > 0 ? witnesses.map(witness => this.labelOf(witness, session.tracks.indexOf(witness))).join(", ") : this.said.read(item.interview.title as never)
       return name ? `${this.messages.interviewOf} ${name}` : this.messages.untitledInterview.replace("{n}", String(session.interviews.indexOf(item.interview) + 1))
     }
     const track = item.track!
@@ -710,6 +796,8 @@ export class CaseEditorElement extends HTMLElement {
     if (!session) return
     this.commit()
     this.current = undefined
+    this.passagesToken++
+    this.byId("passages").hidden = true
     this.currentInterview = interview
     this.interviewElement.witnesses = session.tracks.filter(track => track.kind === "observer")
       .map(track => ({ id: track.event.id ?? session.proposedId(track), label: this.labelOf(track, session.tracks.indexOf(track)) }))
@@ -728,8 +816,8 @@ export class CaseEditorElement extends HTMLElement {
     if (!session || !interview) return
     if (field === "transcript" && change.text !== undefined) session.keepTranscript(interview, change.text)
     // A witness named, by the select or by the file's text, who has no id yet is given the one that was offered for them.
-    if (typeof interview.interviewOf === "string") {
-      const witness = session.tracks.find(track => track.kind === "observer" && (track.event.id ?? session.proposedId(track)) === interview.interviewOf)
+    for (const reference of [interview.interviewOf].flat()) {
+      const witness = session.tracks.find(track => track.kind === "observer" && (track.event.id ?? session.proposedId(track)) === reference)
       if (witness) session.ensureId(witness)
     }
     session.touch()

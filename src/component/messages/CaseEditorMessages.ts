@@ -4,6 +4,8 @@ export interface CaseEditorMessages {
   event: string
   /** Before the name of an observer, in the picker: "Observation of Q. B." */
   accountOf: string
+  /** Before the name of the interview, in the link from a moment of the observation to the passage that tells of it: "Reported in Interview of Q. B." */
+  passagesHeading: string
   /** Before the name of the witness interviewed: "Interview of Q. B." */
   interviewOf: string
   /** With `{n}`: an interview whose case gives no title. */

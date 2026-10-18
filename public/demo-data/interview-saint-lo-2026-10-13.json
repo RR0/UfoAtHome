@@ -710,7 +710,12 @@
    "speaker": "witness",
    "start": 1437.5,
    "end": 1456.6,
-   "text": "entre le moment où je l'aperçois et le moment où il rentre dans le cercle zénithal, ça a pris 500 millisecondes, pas plus. C'est juste qu'au moment où, du coup, je pose mon regard dessus, je constate que sa vitesse est rapide, mais semble avoir quand même drastiquement ralenti de..."
+   "text": "entre le moment où je l'aperçois et le moment où il rentre dans le cercle zénithal, ça a pris 500 millisecondes, pas plus. C'est juste qu'au moment où, du coup, je pose mon regard dessus, je constate que sa vitesse est rapide, mais semble avoir quand même drastiquement ralenti de...",
+   "refs": [
+    {
+     "at": 0.5
+    }
+   ]
   },
   {
    "speaker": "interviewer",
@@ -866,7 +871,12 @@
    "speaker": "witness",
    "start": 1759.7,
    "end": 1783.1,
-   "text": "Alors, ce qui est sûr, c'est que c'est 4 secondes à partir du Zenith et puis du coup, tu peux rajouter 500 millisecondes à peut-être une seconde. Il y aurait peut-être 500 millisecondes que j'ai loupées et que je n'aurais pas pu voir à partir du moment où il dépasse l'horizon côté nord. Mais je ne pourrais pas te dire. Donc, au final, oui, 4,5, 5 secondes maximum."
+   "text": "Alors, ce qui est sûr, c'est que c'est 4 secondes à partir du Zenith et puis du coup, tu peux rajouter 500 millisecondes à peut-être une seconde. Il y aurait peut-être 500 millisecondes que j'ai loupées et que je n'aurais pas pu voir à partir du moment où il dépasse l'horizon côté nord. Mais je ne pourrais pas te dire. Donc, au final, oui, 4,5, 5 secondes maximum.",
+   "refs": [
+    {
+     "at": 5.0
+    }
+   ]
   },
   {
    "speaker": "interviewer",

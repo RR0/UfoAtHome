@@ -680,6 +680,51 @@ describe("CaseEditorElement's events", () => {
     expect([...parts(element).select.options].map(option => option.textContent)).toEqual(["Observation of An account", "Interview of An account"])
   })
 
+  const withPassages = () => {
+    files["https://example.org/d/interview.json"] = {
+      version: 1, interviewOf: "w", speakers: { witness: { role: "witness", title: "A. W." } },
+      segments: [{ speaker: "witness", start: 0, end: 3, text: "It reached the zenith at once.", refs: [{ at: 0.5 }] }, { speaker: "witness", start: 4, end: 6, text: "No ref here." }]
+    }
+    const own = interviewed()
+    ;(own.events[1] as Record<string, unknown>).url = "interview.json"
+    return own
+  }
+
+  it("lists, under an observation, the passages of the interviews that tell of its moments, each linking to its passage and its moment", async () => {
+    const element = await open(undefined, withPassages())
+    await wait(100)
+    const root = element.shadowRoot!
+    expect(root.getElementById("passages")!.hidden).toBe(false)
+    const items = [...root.querySelectorAll("#passages-list li")]
+    expect(items).toHaveLength(1)
+    expect(items[0].querySelector(".at")!.textContent).toBe("▶ 0:00.5")
+    expect(items[0].querySelector(".excerpt")!.textContent).toBe("Reported in Interview of An account")
+    expect(items[0].textContent).toContain("It reached the zenith at once.")
+    const seek = vi.fn()
+    ;(element as unknown as { editor: { seekTo: (t: number) => void } }).editor.seekTo = seek
+    items[0].querySelector<HTMLButtonElement>(".at")!.click()
+    expect(seek).toHaveBeenCalledWith(0.5)
+    items[0].querySelector<HTMLButtonElement>(".excerpt")!.click()
+    await wait(100)
+    expect(root.getElementById("interview-section")!.hidden).toBe(false)
+    expect(root.getElementById("passages")!.hidden).toBe(true)
+    expect(interviewPart(element).shadowRoot!.getElementById("group-exchanges")!.hidden).toBe(false)
+  })
+
+  it("shows no passages under an observation that no interview tells of", async () => {
+    const element = await open(undefined, interviewed())
+    await wait(100)
+    expect(element.shadowRoot!.getElementById("passages")!.hidden).toBe(true)
+  })
+
+  it("names every witness an interview was held with, in the picker", async () => {
+    const own = interviewed()
+    own.events.splice(1, 0, { type: "event", eventType: "sighting", id: "x", title: "Another account", url: "reading.json" } as never)
+    ;(own.events[2] as Record<string, unknown>).interviewOf = ["w", "x"]
+    const element = await open(undefined, own)
+    expect([...parts(element).select.options].map(option => option.textContent)[2]).toMatch(/^Interview of .+, .+/)
+  })
+
   it("shows an interview in an <rr0-interview> in place of the recording, and the recording again when an account is chosen", async () => {
     const element = await open(undefined, interviewed())
     const root = element.shadowRoot!
@@ -689,7 +734,7 @@ describe("CaseEditorElement's events", () => {
     expect(root.getElementById("recording")!.hidden).toBe(true)
     expect(interviewField(element, "title").value).toBe("Video interview")
     expect(interviewField(element, "time").value).toBe("2026-10-13 21:27")
-    expect((interviewField(element, "witness") as unknown as HTMLSelectElement).value).toBe("w")
+    expect([...interviewPart(element).shadowRoot!.querySelectorAll<HTMLInputElement>("#witness input:checked")].map(box => box.value)).toEqual(["w"])
     await choose(element, 0)
     expect(root.getElementById("interview-section")!.hidden).toBe(true)
     expect(root.getElementById("recording")!.hidden).toBe(false)

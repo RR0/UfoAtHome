@@ -10,11 +10,21 @@ import type { InterviewMessages } from "./messages/InterviewMessages.js"
 import { interviewMessages_en } from "./messages/InterviewMessages_en.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import { InterviewMedia } from "./messages/InterviewMedia.js"
+import { InterviewFile } from "../engine/persistence/interviewJson.js"
+import type { InterviewJson } from "../engine/persistence/interviewJson.js"
 
 export const INTERVIEW_ELEMENT_NAME = "rr0-interview"
 
 /** Sent, and bubbling, each time the interview is edited: what changed is the event the element holds, in place; for the transcript, its text is in `detail.text`. */
 export const INTERVIEW_CHANGE_EVENT = "interviewchange"
+
+/**
+ * Sent, and bubbling, when the reader follows a passage of the dialogue to the moment of the observation it tells of: `detail` is the `sighting` (the
+ * `id` of the observer's account, or the interview's own when the passage names none) and `at`, in seconds since the beginning of the observation.
+ */
+export const INTERVIEW_SEEK_EVENT = "interviewseek"
+
+type InterviewGroup = "summary" | "exchanges" | "file"
 
 /** An observer of the case an interview may have been held with. */
 export interface InterviewWitness {
@@ -54,11 +64,26 @@ const TEMPLATE = `
   #by { width: 16em; }
   input[type="url"] { width: 18em; max-width: 100%; }
   select { min-width: 0; max-width: 100%; text-overflow: ellipsis; }
+  fieldset.witnesses { display: flex; flex-wrap: wrap; align-items: center; gap: .25em .75em; border: 0; margin: 0; padding: 0; min-width: 0; }
+  fieldset.witnesses legend { float: left; padding: 0; margin-right: .4em; }
+  .exchanges-status { font-size: .85em; opacity: .85; margin: 0 0 .5em; }
+  .exchanges-hint { font-size: .8em; opacity: .65; margin: 0 0 .5em; }
+  .turn { display: grid; grid-template-columns: 8em 1fr; gap: .1em .6em; padding: .3em .4em; border-left: 3px solid var(--speaker, #888); margin: 0 0 .25em; }
+  .turn.flash { background: color-mix(in srgb, #fc3 28%, transparent); }
+  .turn .who { font-weight: 600; color: var(--speaker, inherit); overflow-wrap: anywhere; }
+  .turn .when { display: none; font-weight: 400; font-size: .85em; opacity: .75; font-variant-numeric: tabular-nums; }
+  :host([data-times]) .turn .when { display: block; }
+  .turn .said { margin: 0; white-space: pre-wrap; }
+  .turn .redacted { margin: 0; padding: 0 .4em; border-radius: 3px; background: CanvasText; color: transparent; user-select: none; cursor: help; }
+  .turn.is-redacted .who { color: inherit; opacity: .6; font-weight: 400; }
+  .turn .refs { grid-column: 2; display: flex; flex-wrap: wrap; gap: .25em; }
+  .turn .ref { font: inherit; font-size: .8em; cursor: pointer; border: 1px solid var(--tab-line); border-radius: 999px; background: transparent; color: inherit; padding: 0 .5em; }
   .file-note { font-size: .85em; opacity: .8; margin: .3em 0; }
   .file-editor { min-height: 18em; margin-top: .5em; }
 </style>
 <div id="tabs" class="group-tabs">
   <button class="group-tab" type="button" aria-controls="group-summary" aria-expanded="true"><span id="label-summary-group">Summary</span></button>
+  <button class="group-tab" type="button" aria-controls="group-exchanges" aria-expanded="false"><span id="label-exchanges-group">Exchanges</span></button>
   <button class="group-tab" type="button" aria-controls="group-transcript" aria-expanded="false"><span id="label-file-group">File</span></button>
 </div>
 <section class="group-panel" id="group-summary" aria-labelledby="label-summary-group">
@@ -66,7 +91,7 @@ const TEMPLATE = `
     <label class="fill"><span id="label-title">Title</span> <input id="title" type="text"/></label>
   </div>
   <div class="row">
-    <label><span id="label-witness">Witness</span> <select id="witness"></select></label>
+    <fieldset id="witness" class="witnesses"><legend id="label-witness">Witness</legend></fieldset>
     <label><span id="label-medium">Medium</span> <select id="medium"></select></label>
     <label><span id="label-time">When</span> <input id="time" type="text" size="16" placeholder="2026-10-13 21:27"/></label>
     <label><span id="label-by">Interviewer</span> <input id="by" type="text" autocomplete="off" spellcheck="false"/></label>
@@ -74,6 +99,11 @@ const TEMPLATE = `
   <div class="row">
     <label class="wide"><span id="label-summary">What it established</span> <textarea id="summary"></textarea></label>
   </div>
+</section>
+<section class="group-panel" id="group-exchanges" aria-labelledby="label-exchanges-group" hidden>
+  <p id="exchanges-status" class="exchanges-status" role="status"></p>
+  <p id="exchanges-hint" class="exchanges-hint"></p>
+  <div id="exchanges"></div>
 </section>
 <section class="group-panel" id="group-transcript" aria-labelledby="label-file-group" hidden>
   <div class="row">
@@ -114,7 +144,7 @@ export class InterviewElement extends HTMLElement {
   private localeToken = 0
   private current?: InterviewEvent
   private options: InterviewWitness[] = []
-  private group: "summary" | "file" = "summary"
+  private group: InterviewGroup = "summary"
   /** What the transcript's address is relative to: the case's. */
   private base?: string
   /** The transcript as edited or loaded since the interview was shown; undefined until it is, when it is fetched from the event's `url`. */
@@ -131,7 +161,7 @@ export class InterviewElement extends HTMLElement {
       this.shadow.getElementById(id)!.addEventListener(id === "witness" || id === "medium" ? "change" : "input", () => this.write(id))
     }
     for (const tab of this.shadow.querySelectorAll<HTMLButtonElement>("#tabs .group-tab")) {
-      tab.addEventListener("click", () => this.openGroup(tab.getAttribute("aria-controls") === "group-transcript" ? "file" : "summary"))
+      tab.addEventListener("click", () => this.openGroup(InterviewElement.GROUPS[tab.getAttribute("aria-controls")!] ?? "summary"))
     }
     // A new address for the transcript, once typed: the file there is what is shown, unless the author has already worked on the text.
     this.shadow.getElementById("url")!.addEventListener("change", () => {
@@ -141,6 +171,13 @@ export class InterviewElement extends HTMLElement {
     this.shadow.getElementById("import-file")!.addEventListener("change", () => void this.importFromFile())
     this.shadow.getElementById("import-url-button")!.addEventListener("click", () => void this.importFromUrl())
     this.shadow.getElementById("save")!.addEventListener("click", () => this.save())
+  }
+
+  private static readonly GROUPS: Record<string, InterviewGroup> = { "group-summary": "summary", "group-exchanges": "exchanges", "group-transcript": "file" }
+
+  /** Alt held shows the time of each turn, as a modifier shows what is behind a thing. */
+  private readonly altChanged = (event: KeyboardEvent | FocusEvent): void => {
+    this.toggleAttribute("data-times", event instanceof KeyboardEvent && event.altKey)
   }
 
   static get observedAttributes(): string[] {
@@ -153,6 +190,15 @@ export class InterviewElement extends HTMLElement {
 
   connectedCallback(): void {
     void this.loadLocale()
+    window.addEventListener("keydown", this.altChanged)
+    window.addEventListener("keyup", this.altChanged)
+    window.addEventListener("blur", this.altChanged)
+  }
+
+  disconnectedCallback(): void {
+    window.removeEventListener("keydown", this.altChanged)
+    window.removeEventListener("keyup", this.altChanged)
+    window.removeEventListener("blur", this.altChanged)
   }
 
   /** The event of the case shown, edited in place. */
@@ -165,6 +211,7 @@ export class InterviewElement extends HTMLElement {
     this.current = event
     this.render()
     if (this.group === "file") void this.showTranscript()
+    if (this.group === "exchanges") void this.showExchanges()
   }
 
   /** The observers an interview may be held with. */
@@ -207,7 +254,7 @@ export class InterviewElement extends HTMLElement {
   private applyReadonly(): void {
     const readonly = this.hasAttribute("readonly")
     for (const id of ["title", "time", "by", "url", "summary"]) this.field(id).readOnly = readonly
-    this.field("witness").disabled = readonly
+    for (const box of this.shadow.querySelectorAll<HTMLInputElement>("#witness input")) box.disabled = readonly
     this.field("medium").disabled = readonly
     for (const id of ["import-file", "import-url", "import-url-button"]) (this.field(id) as unknown as HTMLButtonElement).disabled = readonly
   }
@@ -223,6 +270,8 @@ export class InterviewElement extends HTMLElement {
     const text = (id: string, value: string): void => { this.shadow.getElementById(id)!.textContent = value }
     text("label-summary-group", m.summaryTab)
     text("label-file-group", m.fileTab)
+    text("label-exchanges-group", m.exchangesTab)
+    text("exchanges-hint", m.altForTimes)
     text("label-title", m.title)
     text("label-witness", m.witness)
     text("label-medium", m.medium)
@@ -244,20 +293,20 @@ export class InterviewElement extends HTMLElement {
     set("by", InterviewElement.byText(event?.by))
     set("url", event?.url ?? "")
     set("summary", this.said.read(event?.summary) ?? "")
-    const select = this.shadow.getElementById("witness") as HTMLSelectElement
-    const named = [event?.interviewOf].flat().find((id): id is string => typeof id === "string")
-    select.replaceChildren(...this.options.map(witness => new Option(witness.label, witness.id)))
-    // A witness the case does not list is kept as it is rather than silently dropped.
-    if (named !== undefined && !this.options.some(witness => witness.id === named)) select.append(new Option(named, named))
-    // An interview is held with a witness: nothing is not a choice. An event that names none (written by hand) shows a placeholder, which is
-    // neither offered nor chosen again once a witness is.
-    if (named === undefined) {
-      const none = new Option(m.witnessNone, "")
-      none.disabled = true
-      none.hidden = true
-      select.prepend(none)
-    }
-    select.value = named ?? ""
+    // The witnesses: one box per observer of the case, those the interview was held with checked. An interview has at least one, and may have
+    // several. A witness the case does not list is kept as it is rather than silently dropped.
+    const named = [event?.interviewOf].flat().filter((id): id is string => typeof id === "string")
+    const boxes = this.shadow.getElementById("witness")!
+    const options = [...this.options, ...named.filter(id => !this.options.some(witness => witness.id === id)).map(id => ({ id, label: id }))]
+    boxes.replaceChildren(boxes.querySelector("legend")!, ...options.map(witness => {
+      const label = document.createElement("label")
+      const box = document.createElement("input")
+      box.type = "checkbox"
+      box.value = witness.id
+      box.checked = named.includes(witness.id)
+      label.append(box, witness.label)
+      return label
+    }))
     // What it was held through: one of the media, and not nothing once one is said. An event that says none shows a placeholder, as for the witness.
     const way = this.shadow.getElementById("medium") as HTMLSelectElement
     way.replaceChildren(...InterviewMedia.ALL.map(medium => new Option(InterviewMedia.label(medium, this.language), medium)))
@@ -276,7 +325,7 @@ export class InterviewElement extends HTMLElement {
   private write(id: string): void {
     const event = this.current
     if (!event) return
-    const value = this.field(id).value
+    const value = id === "witness" ? "" : this.field(id).value
     switch (id) {
       case "title": {
         const written = this.said.write(event.title as SaidText | undefined, value, this.language)
@@ -304,10 +353,16 @@ export class InterviewElement extends HTMLElement {
         else event.by = people.map(name => ({ people: name }))
         break
       }
-      case "witness":
-        if (value === "") delete event.interviewOf
-        else event.interviewOf = value
+      case "witness": {
+        // Nothing is not a choice: an interview is held with somebody, so the last box cannot be unchecked.
+        const ids = [...this.shadow.querySelectorAll<HTMLInputElement>("#witness input:checked")].map(box => box.value)
+        if (ids.length === 0) {
+          this.render()
+          return
+        }
+        event.interviewOf = ids.length === 1 ? ids[0] : ids
         break
+      }
       case "medium":
         if (value === "") delete event.medium
         else event.medium = value as InterviewEvent["medium"]
@@ -315,21 +370,137 @@ export class InterviewElement extends HTMLElement {
     }
     this.dispatchEvent(new CustomEvent(INTERVIEW_CHANGE_EVENT, { bubbles: true, composed: true, detail: { field: id, event } }))
     // The placeholder of a witness or a medium not chosen yet goes once one is.
-    if (id === "witness" || id === "medium") this.render()
+    if (id === "medium") this.render()
     // The file holds what the summary shows: it says the same.
     if (id !== "url") this.syncFileFromEvent()
   }
 
   // -- The groups -----------------------------------------------------------------------------------
 
-  private openGroup(group: "summary" | "file"): void {
+  private openGroup(group: InterviewGroup): void {
     this.group = group
+    const panels: Record<InterviewGroup, string> = { summary: "group-summary", exchanges: "group-exchanges", file: "group-transcript" }
     for (const tab of this.shadow.querySelectorAll<HTMLButtonElement>("#tabs .group-tab")) {
-      tab.setAttribute("aria-expanded", String(tab.getAttribute("aria-controls") === (group === "file" ? "group-transcript" : "group-summary")))
+      tab.setAttribute("aria-expanded", String(tab.getAttribute("aria-controls") === panels[group]))
     }
-    this.shadow.getElementById("group-summary")!.hidden = group !== "summary"
-    this.shadow.getElementById("group-transcript")!.hidden = group !== "file"
+    for (const [name, id] of Object.entries(panels)) this.shadow.getElementById(id)!.hidden = name !== group
     if (group === "file") void this.showTranscript()
+    if (group === "exchanges") void this.showExchanges()
+  }
+
+  // -- The exchanges --------------------------------------------------------------------------------
+
+  private exchangesToken = 0
+  /** The block that shows each segment of the transcript on show (several segments taken out in a row share one), by the segment's index. */
+  private readonly blocks = new Map<number, HTMLElement>()
+
+  /** The transcript as an object: the text the author has edited or loaded, else the file at the event's address. Undefined when there is none or it does not read. */
+  private async transcriptJson(event: InterviewEvent): Promise<InterviewJson | undefined> {
+    try {
+      const text = this.fileEditor?.text ?? this.text
+      if (text !== undefined) return JSON.parse(text) as InterviewJson
+      const url = this.transcriptUrl(event)
+      if (url !== undefined) return await SightingFetch.json(url) as InterviewJson
+    } catch {
+      // not readable: there is nothing to show of it
+    }
+    return undefined
+  }
+
+  /** Reads the interview as a dialogue: who said what, the passages taken out blacked out with their reason, the times when Alt is held. */
+  private async showExchanges(): Promise<void> {
+    const event = this.current
+    if (!event) return
+    const token = ++this.exchangesToken
+    const json = await this.transcriptJson(event)
+    if (token !== this.exchangesToken || this.current !== event) return
+    this.drawExchanges(json)
+  }
+
+  private drawExchanges(json: InterviewJson | undefined): void {
+    const m = this.messages
+    const box = this.shadow.getElementById("exchanges")!
+    const status = this.shadow.getElementById("exchanges-status")!
+    this.blocks.clear()
+    const segments = Array.isArray(json?.segments) ? json!.segments : []
+    if (!json || segments.length === 0) {
+      status.textContent = ""
+      const empty = document.createElement("p")
+      empty.textContent = m.exchangesEmpty
+      box.replaceChildren(empty)
+      return
+    }
+    const speakers = json.speakers ?? {}
+    const ids = Object.keys(speakers)
+    const waiting = ids.filter(id => !["approved", "covered"].includes(json.proofreading?.[id]?.status ?? ""))
+    status.textContent = waiting.length === 0 ? m.proofreadAll : m.proofreadPending.replace("{names}", waiting.map(id => InterviewFile.speakerName(json, id)).join(", "))
+    const seek = (ref: { sighting?: string, at: number }): void => {
+      this.dispatchEvent(new CustomEvent(INTERVIEW_SEEK_EVENT, {
+        bubbles: true, composed: true, detail: { sighting: ref.sighting ?? InterviewFile.sightingsOf(json)[0], at: ref.at }
+      }))
+    }
+    const turns: HTMLElement[] = []
+    let previous: { block: HTMLElement, reason: string } | undefined
+    segments.forEach((segment, index) => {
+      const reason = segment.redacted ? JSON.stringify(segment.redacted.reason) : undefined
+      // Passages taken out one after the other read as one gap.
+      if (reason !== undefined && previous?.reason === reason) {
+        this.blocks.set(index, previous.block)
+        return
+      }
+      const turn = document.createElement("div")
+      turn.className = "turn"
+      turn.dataset.segment = String(index)
+      turn.style.setProperty("--speaker", `hsl(${(Math.max(0, ids.indexOf(segment.speaker)) * 67 + 210) % 360} 55% 42%)`)
+      const who = document.createElement("div")
+      who.className = "who"
+      const name = document.createElement("span")
+      name.textContent = segment.redacted ? "" : InterviewFile.speakerName(json, segment.speaker)
+      const when = document.createElement("span")
+      when.className = "when"
+      when.textContent = InterviewFile.clock(segment.start)
+      who.append(name, when)
+      const said = document.createElement("p")
+      if (segment.redacted) {
+        turn.classList.add("is-redacted")
+        said.className = "redacted"
+        said.textContent = m.redacted
+        said.title = this.said.read(segment.redacted.reason) ?? ""
+        previous = { block: turn, reason: reason! }
+      } else {
+        said.className = "said"
+        said.textContent = segment.text ?? ""
+        previous = undefined
+      }
+      turn.append(who, said)
+      if (segment.refs?.length) {
+        const refs = document.createElement("div")
+        refs.className = "refs"
+        for (const ref of segment.refs) {
+          const button = document.createElement("button")
+          button.type = "button"
+          button.className = "ref"
+          button.textContent = `↗ ${InterviewFile.clock(ref.at)}`
+          button.addEventListener("click", () => seek(ref))
+          refs.append(button)
+        }
+        turn.append(refs)
+      }
+      this.blocks.set(index, turn)
+      turns.push(turn)
+    })
+    box.replaceChildren(...turns)
+  }
+
+  /** Opens the dialogue at the segment that tells of an observation's moment, and shows where it is. */
+  async revealSegment(index: number): Promise<void> {
+    this.openGroup("exchanges")
+    await this.showExchanges()
+    const block = this.blocks.get(index)
+    if (!block) return
+    block.scrollIntoView?.({ block: "center" })
+    block.classList.add("flash")
+    window.setTimeout(() => block.classList.remove("flash"), 1600)
   }
 
   private note(message: string | undefined): void {
@@ -362,9 +533,9 @@ export class InterviewElement extends HTMLElement {
     return ordered
   }
 
-  /** The id, or the first, of the sighting the interview was held with. */
-  private static witnessOf(interviewOf: unknown): string | undefined {
-    return [interviewOf].flat().find((id): id is string => typeof id === "string")
+  /** The ids of the sightings the interview was held with. */
+  private static witnessesOf(interviewOf: unknown): string[] {
+    return [interviewOf].flat().filter((id): id is string => typeof id === "string")
   }
 
   /** The shared fields the event has, as they go in the file; and the speakers the file names, kept to the interviewer and the witness the event names. */
@@ -377,10 +548,17 @@ export class InterviewElement extends HTMLElement {
     const speakers = next.speakers
     if (typeof speakers === "object" && speakers !== null) {
       const kept = { ...(speakers as Record<string, Record<string, unknown>>) }
-      const interviewer = event.by?.[0]
-      if (kept.interviewer && interviewer) kept.interviewer = { ...kept.interviewer, by: interviewer }
-      const witness = InterviewElement.witnessOf(event.interviewOf)
-      if (kept.witness && witness) kept.witness = { ...kept.witness, of: witness }
+      // Several interviewers and several witnesses: the first of each is `interviewer` and `witness`, the others `interviewer2`, `witness2`… A
+      // speaker the event names and the file does not is added; one the file has and the event no longer names stays, since segments may be his.
+      const sync = (role: "interviewer" | "witness", key: "by" | "of", values: unknown[]): void => {
+        values.forEach((value, index) => {
+          const id = index === 0 ? role : `${role}${index + 1}`
+          if (kept[id]) kept[id] = { ...kept[id], [key]: value }
+          else if (index > 0) kept[id] = { role, [key]: value }
+        })
+      }
+      sync("interviewer", "by", event.by ?? [])
+      sync("witness", "of", InterviewElement.witnessesOf(event.interviewOf))
       next.speakers = kept
     }
     return InterviewElement.ordered(next)
@@ -524,6 +702,7 @@ export class InterviewElement extends HTMLElement {
       this.dispatchEvent(new CustomEvent(INTERVIEW_CHANGE_EVENT, { bubbles: true, composed: true, detail: { field: "url", event } }))
     }
     this.dispatchEvent(new CustomEvent(INTERVIEW_CHANGE_EVENT, { bubbles: true, composed: true, detail: { field: "transcript", event, text } }))
+    if (this.group === "exchanges") void this.showExchanges()
   }
 
   /** The file changed what the summary shows: shown there, and told to the host. */

@@ -21,5 +21,11 @@ export const interviewMessages_es: InterviewMessages = {
   notATranscript: "Ese archivo no es una transcripción de entrevista (no tiene turnos de palabra).",
   loadFailed: "No se pudo leer esa transcripción.",
   editorLabel: "Transcripción de la entrevista en JSON",
-  byHint: "Identificadores de personas de RR0, separados por comas"
+  byHint: "Identificadores de personas de RR0, separados por comas",
+  exchangesTab: "Intercambios",
+  exchangesEmpty: "Todavía no se ha dicho nada.",
+  redacted: "Pasaje eliminado",
+  proofreadAll: "Revisado por todos.",
+  proofreadPending: "Aún no revisado por: {names}",
+  altForTimes: "Mantenga Alt para ver los tiempos"
 }

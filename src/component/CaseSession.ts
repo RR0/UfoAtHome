@@ -104,10 +104,16 @@ export class CaseSession {
 
   /** The observer's track an interview was held with: the first the event names by its id, else by the id its recording states. */
   intervieweeOf(interview: CaseEventJson): CaseTrack | undefined {
-    const references = [interview.interviewOf].flat().filter((id): id is string => typeof id === "string")
+    return this.intervieweesOf(interview)[0]
+  }
+
+  /** The observers' accounts an interview was held with: one or several, in the order it names them. */
+  intervieweesOf(interview: CaseEventJson): CaseTrack[] {
     const observers = this.tracks.filter(track => track.kind === "observer")
-    return observers.find(track => track.event.id !== undefined && references.includes(track.event.id))
-      ?? observers.find(track => track.recording?.id !== undefined && references.includes(track.recording.id))
+    return [interview.interviewOf].flat().filter((id): id is string => typeof id === "string").flatMap(reference => {
+      const track = observers.find(candidate => candidate.event.id === reference) ?? observers.find(candidate => candidate.recording?.id === reference)
+      return track ? [track] : []
+    })
   }
 
   /**

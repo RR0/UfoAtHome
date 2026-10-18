@@ -21,5 +21,11 @@ export const interviewMessages_en: InterviewMessages = {
   notATranscript: "That file is not an interview transcript (it has no segments).",
   loadFailed: "That transcript could not be read.",
   editorLabel: "Interview transcript as JSON",
-  byHint: "RR0 people ids, separated by commas"
+  byHint: "RR0 people ids, separated by commas",
+  exchangesTab: "Exchanges",
+  exchangesEmpty: "Nothing was said yet.",
+  redacted: "Passage removed",
+  proofreadAll: "Proofread by everyone.",
+  proofreadPending: "Not proofread yet by: {names}",
+  altForTimes: "Hold Alt to see the times"
 }

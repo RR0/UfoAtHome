@@ -181,4 +181,28 @@ describe("An interview's transcript file", () => {
     expect(InterviewFile.isProofread({ ...transcript, proofreading: { ...approved("approved"), [speakers[0]]: { status: "pending" } } })).toBe(false)
     expect(InterviewFile.isProofread({ ...transcript, proofreading: { [speakers[0]]: { status: "approved" } } })).toBe(false)
   })
+
+  it("lists the passages that tell of an observation, in the order of the moments they are about", () => {
+    const withRefs: InterviewJson = {
+      ...transcript,
+      interviewOf: ["qb", "friend"],
+      segments: [
+        { speaker: "witness", start: 1, end: 2, text: "Late.", refs: [{ at: 4 }] },
+        { speaker: "witness", start: 3, end: 4, text: "Early.", refs: [{ at: 0.5, range: [0, 5] }, { sighting: "friend", at: 2 }] },
+        { speaker: "witness", start: 5, end: 6, redacted: { reason: { en: "private" } }, refs: [{ sighting: "qb", at: 1 }] }
+      ]
+    }
+    expect(InterviewFile.passagesAbout(withRefs, "qb").map(passage => [passage.index, passage.at])).toEqual([[1, 0.5], [2, 1], [0, 4]])
+    expect(InterviewFile.passagesAbout(withRefs, "friend").map(passage => [passage.index, passage.at])).toEqual([[1, 0.5], [1, 2], [0, 4]])
+    expect(InterviewFile.passagesAbout(withRefs, "other")).toEqual([])
+    expect(InterviewFile.passagesAbout(withRefs, "qb")[0]).toMatchObject({ text: "Early.", range: [0, 5] })
+    expect(InterviewFile.passagesAbout(withRefs, "qb")[1].text).toBeUndefined()
+  })
+
+  it("writes a time as on a clock", () => {
+    expect(InterviewFile.clock(0)).toBe("0:00")
+    expect(InterviewFile.clock(125)).toBe("2:05")
+    expect(InterviewFile.clock(1.5)).toBe("0:01.5")
+    expect(InterviewFile.clock(3725)).toBe("1:02:05")
+  })
 })

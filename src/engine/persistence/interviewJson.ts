@@ -106,6 +106,19 @@ export interface InterviewJson {
   segments: InterviewSegment[]
 }
 
+/** A passage of an interview that tells of a moment of an observation (see InterviewSightingRef). */
+export interface InterviewPassage {
+  /** Where the segment is in the transcript. */
+  index: number
+  speaker: string
+  /** Seconds since the beginning of the observation. */
+  at: number
+  /** What it says, when it has not been taken out. */
+  text?: string
+  /** The part of `text` it is about. */
+  range?: [number, number]
+}
+
 /** Reading an interview transcript. */
 export class InterviewFile {
 
@@ -116,6 +129,37 @@ export class InterviewFile {
       const status = json.proofreading?.[id]?.status
       return status === "approved" || status === "covered"
     })
+  }
+
+  /** The `id`s of the sightings the interview was held with. */
+  static sightingsOf(json: InterviewJson): string[] {
+    return [json.interviewOf].flat().filter((id): id is string => typeof id === "string")
+  }
+
+  /**
+   * The passages that tell of moments of the observation `sighting`, in the order of those moments: what an observation can list at the time they
+   * are about, each a link back to its segment. A reference that names no sighting is about those the interview was held with.
+   */
+  static passagesAbout(json: InterviewJson, sighting: string): InterviewPassage[] {
+    const held = InterviewFile.sightingsOf(json)
+    const passages: InterviewPassage[] = []
+    json.segments.forEach((segment, index) => {
+      for (const ref of segment.refs ?? []) {
+        if (ref.sighting === undefined ? !held.includes(sighting) : ref.sighting !== sighting) continue
+        passages.push({ index, speaker: segment.speaker, at: ref.at, ...(segment.text !== undefined ? { text: segment.text } : {}), ...(ref.range ? { range: ref.range } : {}) })
+      }
+    })
+    return passages.sort((a, b) => a.at - b.at || a.index - b.index)
+  }
+
+  /** A length of time as it reads on a clock: `1:02:05` for an hour, `2:05` otherwise, with tenths of a second when there are. */
+  static clock(seconds: number): string {
+    const tenths = Math.round(seconds * 10)
+    const whole = Math.floor(tenths / 10)
+    const pad = (n: number): string => String(n).padStart(2, "0")
+    const hours = Math.floor(whole / 3600)
+    const rest = `${hours > 0 ? pad(Math.floor(whole / 60) % 60) : Math.floor(whole / 60)}:${pad(whole % 60)}`
+    return `${hours > 0 ? `${hours}:` : ""}${rest}${tenths % 10 === 0 ? "" : `.${tenths % 10}`}`
   }
 
   /** How a speaker is named in a subtitle: the witness's title, else the interviewer's agent, else the role. */

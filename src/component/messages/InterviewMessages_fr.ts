@@ -21,5 +21,11 @@ export const interviewMessages_fr: InterviewMessages = {
   notATranscript: "Ce fichier n'est pas une transcription d'interview (il n'a pas de tours de parole).",
   loadFailed: "Cette transcription n'a pas pu être lue.",
   editorLabel: "Transcription de l'interview en JSON",
-  byHint: "Identifiants de personnes RR0, séparés par des virgules"
+  byHint: "Identifiants de personnes RR0, séparés par des virgules",
+  exchangesTab: "Échanges",
+  exchangesEmpty: "Rien n'a encore été dit.",
+  redacted: "Passage retiré",
+  proofreadAll: "Relu par tous les participants.",
+  proofreadPending: "Pas encore relu par : {names}",
+  altForTimes: "Maintenez Alt pour voir les temps"
 }
