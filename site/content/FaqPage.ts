@@ -89,7 +89,7 @@ export class FaqPage implements SitePage {
         this answer does not have to keep a second copy of it. In short:</p>
       <ul>
         <li><strong>While you author</strong>, the editor looks things up for you: a place's
-          coordinates when you press <strong>Locate</strong>, the weather record once a full date and
+          coordinates when you press <em>Locate</em>, the weather record once a full date and
           a place are known, the relief and aerial imagery around the observer. Each lookup is a picker
           in the interface, where its data is reported, with the attribution its licence requires.
           Drafting a recording from its description sends that text to the model you chose, with your
@@ -414,7 +414,7 @@ export class FaqPage implements SitePage {
         cette réponse n'ait pas à en tenir une seconde copie. En bref :</p>
       <ul>
         <li><strong>Pendant la saisie</strong>, l'éditeur relève les choses pour vous : les
-          coordonnées d'un lieu quand vous appuyez sur <strong>Localiser</strong>, le relevé météo dès
+          coordonnées d'un lieu quand vous appuyez sur <em>Localiser</em>, le relevé météo dès
           qu'une date complète et un lieu sont connus, le relief et l'imagerie aérienne autour du
           observateur. Chaque consultation est un sélecteur dans l'interface, là où sa donnée est
           rapportée, avec l'attribution qu'exige sa licence. Rédiger un enregistrement depuis sa
@@ -759,7 +759,7 @@ export class FaqPage implements SitePage {
         respuesta no tenga que mantener una segunda copia. En resumen:</p>
       <ul>
         <li><strong>Mientras redactas</strong>, el editor te busca las cosas: las coordenadas de un
-          lugar cuando pulsas <strong>Localizar</strong>, el registro meteorológico en cuanto se conocen una
+          lugar cuando pulsas <em>Localizar</em>, el registro meteorológico en cuanto se conocen una
           fecha completa y un lugar, el relieve y las imágenes aéreas alrededor del observador. Cada
           consulta es un selector de la interfaz, donde se indica su dato, con la atribución que exige
           su licencia. Redactar una grabación a partir de su descripción envía ese texto al modelo que
@@ -1083,7 +1083,7 @@ export class FaqPage implements SitePage {
         questa risposta non debba tenerne una seconda copia. In breve:</p>
       <ul>
         <li><strong>Mentre compili</strong>, l'editor cerca le cose per te: le coordinate di un
-          luogo quando premi <strong>Localizza</strong>, il dato meteorologico non appena sono noti una data completa e
+          luogo quando premi <em>Localizza</em>, il dato meteorologico non appena sono noti una data completa e
           un luogo, il rilievo e le immagini aeree intorno all'osservatore. Ogni consultazione è un selettore
           nell'interfaccia, dove il suo dato è riportato, con l'attribuzione richiesta dalla sua licenza.
           Redigere una registrazione a partire dalla sua descrizione invia quel testo al modello che hai scelto, con la tua
