@@ -5,6 +5,14 @@ import type { PageMeta, Said, SiteLanguage } from "../SitePage.js"
 interface InterviewDocText {
   lede: string
   intro: string
+  /** What an interview is, said as the investigation knows it before any file is mentioned. */
+  conceptHeading: string
+  concept: string
+  placeHeading: string
+  place: string
+  /** The break between what an author needs to know and what a programmer does. */
+  techHeading: string
+  techIntro: string
   eventHeading: string
   eventIntro: string
   eventRows: ReadonlyArray<[string, string]>
@@ -64,11 +72,12 @@ const EXAMPLE = `{
 }`
 
 /**
- * An interview of a case, as the documentation of its own: the event the case lists, the file it points at, what can be taken out of the
- * file and who must approve it, how it ties to the observation, the editor, and how a transcript that is not in our format is imported.
+ * An interview, first as the investigation knows it (a conversation with a witness, which the case keeps and ties to the observation), then
+ * what can be taken out of it and who approves it, the editor and the import of a transcript, and last, set apart as the technical part, the
+ * event and the file.
  *
- * A page of its own, as the sighting has its own (see DocsFormatPage), because an interview is a second kind of event of a case and has its
- * own file.
+ * A page of its own, as the observation has its own (see DocsFormatPage), because an interview is a second kind of event of a case
+ * (see DocsCasePage) and has its own file.
  */
 export class DocsInterviewPage extends DocsSection {
 
@@ -87,8 +96,14 @@ export class DocsInterviewPage extends DocsSection {
 
   private readonly text: Said<InterviewDocText> = {
     en: {
-      lede: "An interview is the second kind of event a case can hold, after the observation. This is the event, the file that holds its transcript, and what you can do with both.",
-      intro: "A case lists what happened around a case: the observers' accounts, and now the interviews held with them. An interview is not replayed: it fixes what an observer said, when, to whom and through what, and its transcript can tie each passage to a moment of the observation.",
+      lede: 'An interview is a conversation with a witness. The case keeps what it established, and may keep the transcript.',
+      intro: "An investigator rarely stops at a witness's first account. They go back to the witness: to fix a figure, to ask what was not said, to check what does not add up. That conversation is an interview, and a case can hold it next to the accounts it is about.",
+      conceptHeading: 'What an interview is',
+      concept: 'An interview is a <strong>conversation held with one or several witnesses</strong> of the case, by one or several people (an investigator, an association), at a given time and through some <strong>medium</strong>: face to face, by phone, in a video call, by chat, by email or by letter. What the case keeps of it is what it <strong>established</strong> (a short description, in as many languages as you like) and, when there is one, its <strong>transcript</strong>: who said what, and when. The transcript is what a reader can check the description against.',
+      placeHeading: 'Its place in the case',
+      place: 'A case holds <a href="/docs/case/">events</a>. An interview is one of them, and it <strong>refers to the observation</strong> of the witness it was held with (to the observations, when several witnesses were interviewed together). The reference goes both ways: a passage of the transcript can say which <strong>moment of the observation</strong> it tells of, and the observation then lists, at that moment, the passages that tell of it. Nothing of an interview is replayed: the observation is what is replayed, the interview is what explains its figures.',
+      techHeading: 'Technical part: the files',
+      techIntro: 'What follows is for whoever writes these files by hand, generates them, or reads them in code. In the editor none of it has to be known.',
       eventHeading: "The event in the case",
       eventIntro: "In <code>case.json</code>, an interview is an event whose <code>eventType</code> is <code>\"interview\"</code>.",
       eventRows: [
@@ -148,8 +163,14 @@ export class DocsInterviewPage extends DocsSection {
       meaning: "Meaning"
     },
     fr: {
-      lede: "Une interview est le second type d'événement qu'un dossier peut contenir, après l'observation. Voici l'événement, le fichier qui contient sa transcription, et ce qu'on peut faire des deux.",
-      intro: "Un dossier liste ce qui s'est passé autour d'un cas : les comptes rendus des observateurs, et maintenant les interviews menées avec eux. Une interview n'est pas rejouée : elle fixe ce qu'un observateur a dit, quand, à qui et par quel moyen, et sa transcription peut relier chaque passage à un moment de l'observation.",
+      lede: "Une interview est une conversation avec un témoin. Le dossier garde ce qu'elle a établi, et peut garder sa transcription.",
+      intro: "Un enquêteur s'arrête rarement au premier compte rendu d'un témoin. Il revient vers lui : pour fixer une valeur, demander ce qui n'a pas été dit, vérifier ce qui ne colle pas. Cette conversation est une interview, et un dossier peut la garder à côté des comptes rendus dont elle parle.",
+      conceptHeading: "Ce qu'est une interview",
+      concept: "Une interview est une <strong>conversation menée avec un ou plusieurs témoins</strong> du dossier, par une ou plusieurs personnes (un enquêteur, une association), à un moment donné et par un certain <strong>moyen</strong> : face à face, téléphone, visioconférence, chat, mail ou courrier. Ce que le dossier en garde, c'est ce qu'elle a <strong>établi</strong> (une courte description, dans autant de langues qu'on veut) et, quand il y en a une, sa <strong>transcription</strong> : qui a dit quoi, et quand. La transcription est ce à quoi un lecteur peut confronter la description.",
+      placeHeading: 'Sa place dans le dossier',
+      place: 'Un dossier contient des <a href="/docs/case/">événements</a>. Une interview en est un, et elle <strong>renvoie à l\'observation</strong> du témoin avec qui elle a eu lieu (aux observations, quand plusieurs témoins ont été interrogés ensemble). Le renvoi va dans les deux sens : un passage de la transcription peut dire de quel <strong>moment de l\'observation</strong> il parle, et l\'observation liste alors, à ce moment, les passages qui la racontent. Rien d\'une interview n\'est rejoué : l\'observation est ce qu\'on rejoue, l\'interview est ce qui explique ses valeurs.',
+      techHeading: 'Partie technique : les fichiers',
+      techIntro: "Ce qui suit est pour qui écrit ces fichiers à la main, les génère ou les lit en code. Dans l'éditeur, rien de cela n'a besoin d'être connu.",
       eventHeading: "L'événement dans le dossier",
       eventIntro: "Dans <code>case.json</code>, une interview est un événement dont l'<code>eventType</code> vaut <code>\"interview\"</code>.",
       eventRows: [
@@ -209,8 +230,14 @@ export class DocsInterviewPage extends DocsSection {
       meaning: "Signification"
     },
     es: {
-      lede: "Una entrevista es el segundo tipo de evento que puede contener un caso, después de la observación. Este es el evento, el archivo con su transcripción y lo que se puede hacer con ambos.",
-      intro: "Un caso enumera lo que ocurrió en torno a un suceso: los relatos de los observadores y ahora las entrevistas realizadas con ellos. Una entrevista no se reproduce: fija lo que dijo un observador, cuándo, a quién y por qué medio, y su transcripción puede vincular cada pasaje con un momento de la observación.",
+      lede: 'Una entrevista es una conversación con un testigo. El caso conserva lo que estableció y puede conservar su transcripción.',
+      intro: 'Un investigador rara vez se queda en el primer relato de un testigo. Vuelve a él: para fijar una cifra, preguntar lo que no se dijo, comprobar lo que no cuadra. Esa conversación es una entrevista, y un caso puede guardarla junto a los relatos de los que habla.',
+      conceptHeading: 'Qué es una entrevista',
+      concept: 'Una entrevista es una <strong>conversación mantenida con uno o varios testigos</strong> del caso, por una o varias personas (un investigador, una asociación), en un momento dado y por algún <strong>medio</strong>: en persona, por teléfono, videollamada, chat, correo electrónico o carta. Lo que el caso conserva de ella es lo que <strong>estableció</strong> (una breve descripción, en tantos idiomas como se quiera) y, cuando existe, su <strong>transcripción</strong>: quién dijo qué y cuándo. La transcripción es lo que un lector puede contrastar con la descripción.',
+      placeHeading: 'Su lugar en el caso',
+      place: 'Un caso contiene <a href="/docs/case/">eventos</a>. Una entrevista es uno de ellos y <strong>remite a la observación</strong> del testigo con quien se celebró (a las observaciones, cuando se entrevistó a varios testigos juntos). La remisión va en ambos sentidos: un pasaje de la transcripción puede decir de qué <strong>momento de la observación</strong> habla, y la observación enumera entonces, en ese momento, los pasajes que la cuentan. Nada de una entrevista se reproduce: la observación es lo que se reproduce, la entrevista es lo que explica sus cifras.',
+      techHeading: 'Parte técnica: los archivos',
+      techIntro: 'Lo que sigue es para quien escribe estos archivos a mano, los genera o los lee en código. En el editor no hace falta saber nada de ello.',
       eventHeading: "El evento en el caso",
       eventIntro: "En <code>case.json</code>, una entrevista es un evento cuyo <code>eventType</code> es <code>\"interview\"</code>.",
       eventRows: [
@@ -270,8 +297,14 @@ export class DocsInterviewPage extends DocsSection {
       meaning: "Significado"
     },
     it: {
-      lede: "Un'intervista è il secondo tipo di evento che un caso può contenere, dopo l'osservazione. Ecco l'evento, il file con la sua trascrizione e ciò che si può fare con entrambi.",
-      intro: "Un caso elenca ciò che è accaduto attorno a un fatto: i resoconti degli osservatori e ora le interviste condotte con loro. Un'intervista non viene riprodotta: fissa ciò che un osservatore ha detto, quando, a chi e con quale mezzo, e la sua trascrizione può collegare ogni passaggio a un momento dell'osservazione.",
+      lede: "Un'intervista è una conversazione con un testimone. Il caso conserva ciò che ha stabilito e può conservarne la trascrizione.",
+      intro: "Un investigatore raramente si ferma al primo resoconto di un testimone. Torna da lui: per fissare un valore, chiedere ciò che non è stato detto, verificare ciò che non torna. Quella conversazione è un'intervista, e un caso può conservarla accanto ai resoconti di cui parla.",
+      conceptHeading: "Che cos'è un'intervista",
+      concept: "Un'intervista è una <strong>conversazione condotta con uno o più testimoni</strong> del caso, da una o più persone (un investigatore, un'associazione), in un dato momento e con un certo <strong>mezzo</strong>: di persona, per telefono, in videochiamata, in chat, per email o per lettera. Ciò che il caso ne conserva è ciò che ha <strong>stabilito</strong> (una breve descrizione, in quante lingue si vuole) e, quando c'è, la sua <strong>trascrizione</strong>: chi ha detto che cosa e quando. La trascrizione è ciò con cui un lettore può confrontare la descrizione.",
+      placeHeading: 'Il suo posto nel caso',
+      place: 'Un caso contiene <a href="/docs/case/">eventi</a>. Un\'intervista è uno di essi e <strong>rimanda all\'osservazione</strong> del testimone con cui si è tenuta (alle osservazioni, quando più testimoni sono stati intervistati insieme). Il rimando va in entrambe le direzioni: un passaggio della trascrizione può dire di quale <strong>momento dell\'osservazione</strong> parla, e l\'osservazione elenca allora, in quel momento, i passaggi che la raccontano. Nulla di un\'intervista viene riprodotto: l\'osservazione è ciò che si riproduce, l\'intervista è ciò che ne spiega i valori.',
+      techHeading: 'Parte tecnica: i file',
+      techIntro: "Quanto segue è per chi scrive questi file a mano, li genera o li legge nel codice. Nell'editor non serve conoscerne nulla.",
       eventHeading: "L'evento nel caso",
       eventIntro: "In <code>case.json</code>, un'intervista è un evento il cui <code>eventType</code> è <code>\"interview\"</code>.",
       eventRows: [
@@ -344,29 +377,21 @@ export class DocsInterviewPage extends DocsSection {
   <div class="wrap prose-wide">
     <p>${t.intro}</p>
 
-    <h2>${t.eventHeading}</h2>
-    <p>${t.eventIntro}</p>${table(t.eventRows)}
+    <h2>${t.conceptHeading}</h2>
+    <p>${t.concept}</p>
 
-    <h2>${t.fileHeading}</h2>
-    <p>${t.fileIntro}</p>${table(t.fileRows)}
+    <h2>${t.peopleHeading}</h2>
+    <p>${t.people}</p>
 
-    <h3>${t.segmentHeading}</h3>
-    <p>${t.segmentIntro}</p>${table(t.segmentRows)}
-
-    <h3>${t.exampleHeading}</h3>
-    <pre><code>${EXAMPLE.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</code></pre>
+    <h2>${t.placeHeading}</h2>
+    <p>${t.place}</p>
+    <p>${t.links}</p>
 
     <h2>${t.redactionHeading}</h2>
     <p>${t.redaction}</p>
 
     <h2>${t.proofreadHeading}</h2>
     <p>${t.proofread}</p>
-
-    <h2>${t.peopleHeading}</h2>
-    <p>${t.people}</p>
-
-    <h2>${t.linksHeading}</h2>
-    <p>${t.links}</p>
 
     <h2>${t.editorHeading}</h2>
     <p>${t.editor}</p>
@@ -379,7 +404,22 @@ export class DocsInterviewPage extends DocsSection {
     <p>${t.importSpeakers}</p>
     <p>${t.importLimits}</p>
 
-    <h2>${t.dataHeading}</h2>
+    <h2>${t.techHeading}</h2>
+    <p>${t.techIntro}</p>
+
+    <h3>${t.eventHeading}</h3>
+    <p>${t.eventIntro}</p>${table(t.eventRows)}
+
+    <h3>${t.fileHeading}</h3>
+    <p>${t.fileIntro}</p>${table(t.fileRows)}
+
+    <h4>${t.segmentHeading}</h4>
+    <p>${t.segmentIntro}</p>${table(t.segmentRows)}
+
+    <h4>${t.exampleHeading}</h4>
+    <pre><code>${EXAMPLE.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</code></pre>
+
+    <h3>${t.dataHeading}</h3>
     <p>${t.data}</p>
   </div>
 </section>

@@ -74,32 +74,40 @@ export class DocsPage implements SitePage {
       en: [
         ["/docs/components/", "The components",
           "Four standard elements, one page each: which one you want, what it draws, and everything it answers to."],
-        ["/docs/format/", "The sighting file",
-          "What that file holds, field by field: the observation, the observers, what was seen, the weather. With a whole example."],
+        ["/docs/case/", "What is a UFO case?",
+          "What a case gathers, the three kinds of event it holds (observations, readings, interviews) and how they refer to one another."],
+        ["/docs/format/", "Observations",
+          "What an observation is, then what its file holds, field by field. With a whole example."],
         ["/docs/interview/", "The interview file",
           "What an interview of a case holds: the event, its transcript, passages taken out, who approved it, links to the observation, and importing a transcript from another format."]
       ],
       fr: [
         ["/docs/components/", "Les composants",
           "Quatre éléments standards, une page chacun : lequel vous voulez, ce qu'il dessine, et tout ce à quoi il répond."],
-        ["/docs/format/", "Le fichier d'observation",
-          "Ce que contient ce fichier, champ par champ : l'observation, les observateurs, ce qui a été vu, la météo. Avec un exemple entier."],
+        ["/docs/case/", "Qu'est-ce qu'un cas ufologique ?",
+          "Ce qu'un dossier réunit, les trois sortes d'événements qu'il contient (observations, lectures, interviews) et comment ils se renvoient les uns aux autres."],
+        ["/docs/format/", "Les observations",
+          "Ce qu'est une observation, puis ce que contient son fichier, champ par champ. Avec un exemple entier."],
         ["/docs/interview/", "Le fichier d'interview",
           "Ce que contient une interview d'un dossier : l'événement, sa transcription, les passages retirés, qui l'a approuvée, les liens avec l'observation, et l'import d'une transcription d'un autre format."]
       ],
       es: [
         ["/docs/components/", "Los componentes",
           "Cuatro elementos estándar, una página cada uno: cuál quieres, qué dibuja y todo aquello a lo que responde."],
-        ["/docs/format/", "El archivo de avistamiento",
-          "Lo que contiene ese archivo, campo por campo: la observación, los observadores, lo que se vio, el tiempo. Con un ejemplo completo."],
+        ["/docs/case/", "¿Qué es un caso ovni?",
+          "Lo que reúne un caso, los tres tipos de evento que contiene (observaciones, lecturas, entrevistas) y cómo se remiten unos a otros."],
+        ["/docs/format/", "Las observaciones",
+          "Qué es una observación, y luego lo que contiene su archivo, campo por campo. Con un ejemplo completo."],
         ["/docs/interview/", "El archivo de entrevista",
           "Lo que contiene una entrevista de un caso: el evento, su transcripción, los pasajes eliminados, quién la aprobó, los vínculos con la observación y la importación de una transcripción de otro formato."]
       ],
       it: [
         ["/docs/components/", "I componenti",
           "Quattro elementi standard, una pagina ciascuno: quale ti serve, cosa disegna e tutto ciò a cui risponde."],
-        ["/docs/format/", "Il file di avvistamento",
-          "Cosa contiene quel file, campo per campo: l'osservazione, gli osservatori, ciò che è stato visto, il meteo. Con un esempio completo."],
+        ["/docs/case/", "Che cos'è un caso ufologico?",
+          "Cosa riunisce un caso, i tre tipi di evento che contiene (osservazioni, letture, interviste) e come si rimandano a vicenda."],
+        ["/docs/format/", "Le osservazioni",
+          "Che cos'è un'osservazione, poi che cosa contiene il suo file, campo per campo. Con un esempio completo."],
         ["/docs/interview/", "Il file di intervista",
           "Cosa contiene un'intervista di un caso: l'evento, la sua trascrizione, i passaggi rimossi, chi l'ha approvata, i legami con l'osservazione e l'importazione di una trascrizione da un altro formato."]
       ]

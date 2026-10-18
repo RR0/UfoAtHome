@@ -13,30 +13,30 @@ export class DocsFormatPage extends DocsSection {
 
   readonly meta: PageMeta = {
     slug: "docs/format",
-    navLabel: { en: "The sighting file", fr: "Le fichier d'observation", es: "El archivo de avistamiento", it: "Il file di avvistamento" },
-    title: { en: "The sighting file", fr: "Le fichier d'observation", es: "El archivo de avistamiento", it: "Il file di avvistamento" },
+    navLabel: { en: "Observations", fr: "Les observations", es: "Las observaciones", it: "Le osservazioni" },
+    title: { en: "Observations", fr: "Les observations", es: "Las observaciones", it: "Le osservazioni" },
     description: {
-      en: "What a recording file holds, field by field: the observation, what was seen, the weather "
+      en: "What an observation is, then what its file holds, field by field: what was seen, the weather "
         + "and its clouds, the case that lists several observers, and a whole working example to type in.",
-      fr: "Ce que contient un fichier d'enregistrement, champ par champ : l'observation, ce qui a été "
+      fr: "Ce qu'est une observation, puis ce que contient son fichier, champ par champ : ce qui a été "
         + "vu, la météo et ses nuages, le dossier qui liste plusieurs observateurs, et un exemple entier à taper.",
-      es: "Lo que contiene un archivo de grabación, campo por campo: la observación, lo que se vio, el tiempo "
+      es: "Qué es una observación, y luego lo que contiene su archivo, campo por campo: lo que se vio, el tiempo "
         + "y sus nubes, el caso que reúne a varios observadores, y un ejemplo completo y funcional para escribir.",
-      it: "Che cosa contiene un file di registrazione, campo per campo: l'osservazione, ciò che è stato visto, il meteo "
+      it: "Che cos'è un'osservazione, poi che cosa contiene il suo file, campo per campo: ciò che è stato visto, il meteo "
         + "e le sue nuvole, il caso che elenca più osservatori, e un esempio completo e funzionante da digitare."
     },
     asideFromNav: true
   }
 
   private readonly lede: Said<string> = {
-    en: "One recording is one JSON file, whether the editor wrote it or you did. This is what it can "
-      + "hold, and what each field means.",
-    fr: "Un enregistrement est un fichier JSON, que l'éditeur l'ait écrit ou vous. Voici ce qu'il peut "
-      + "contenir, et ce que veut dire chaque champ.",
-    es: "Una grabación es un archivo JSON, la haya escrito el editor o tú. Esto es lo que puede "
-      + "contener, y lo que significa cada campo.",
-    it: "Una registrazione è un file JSON, che l'abbia scritta l'editor o tu. Ecco che cosa può "
-      + "contenere, e che cosa significa ogni campo."
+    en: "An observation is what a witness reports of what they saw, and what UFO@home replays. What it is, "
+      + "then, in a technical part, what its file can hold and what each field means.",
+    fr: "Une observation est ce qu'un témoin rapporte de ce qu'il a vu, et ce qu'UFO@home rejoue. Ce qu'elle est, "
+      + "puis, dans une partie technique, ce que son fichier peut contenir et ce que veut dire chaque champ.",
+    es: "Una observación es lo que un testigo relata de lo que vio, y lo que UFO@home reproduce. Qué es, "
+      + "y luego, en una parte técnica, lo que puede contener su archivo y lo que significa cada campo.",
+    it: "Un'osservazione è ciò che un testimone riferisce di ciò che ha visto, e ciò che UFO@home riproduce. Che cos'è, "
+      + "poi, in una parte tecnica, che cosa può contenere il suo file e che cosa significa ogni campo."
   }
 
   /** The whole of `public/demo-data/example-minimal.json`, read at build time and quoted verbatim
@@ -111,6 +111,11 @@ if (excerpts.length > 0) {
     return `
 <section class="band">
   <div class="wrap prose-wide">
+    <h2>What an observation is</h2>
+    <p>An observation is <strong>what one witness reports of what they saw</strong>: when, where, what it looked like, how it moved, and what the sky and the weather were. It is the event UFO@home <strong>replays</strong>. A <a href="/docs/case/">case</a> holds at least one, and may hold others: other witnesses of the same event, each with their own account, and <a href="#another-reading-an-interpretation-is-another-sighting">alternative explanations</a>, which are observations too. An observation can be referred to by <a href="/docs/interview/">an interview</a> held with the witness, and refer back to it.</p>
+
+    <h2>Technical part: the observation file</h2>
+    <p>What follows is for whoever writes these files by hand, generates them or reads them in code. In the editor none of it has to be known.</p>
     <p>A recording is a plain JSON file. Nothing in it is a binary blob, an id into a database, or a
       reference to this site — you can write one by hand, generate one from your own archive, or diff
       two of them in a code review.</p>
@@ -565,6 +570,11 @@ if (excerpts.length > 0) {
     return `
 <section class="band">
   <div class="wrap prose-wide">
+    <h2>Ce qu'est une observation</h2>
+    <p>Une observation est <strong>ce qu'un témoin rapporte de ce qu'il a vu</strong> : quand, où, à quoi cela ressemblait, comment cela bougeait, et ce qu'étaient le ciel et la météo. C'est l'événement qu'UFO@home <strong>rejoue</strong>. Un <a href="/docs/case/">dossier</a> en contient au moins une, et peut en contenir d'autres : d'autres témoins du même événement, chacun avec son propre compte rendu, et des <a href="#another-reading-an-interpretation-is-another-sighting">explications alternatives</a>, qui sont aussi des observations. Une observation peut être désignée par <a href="/docs/interview/">une interview</a> menée avec le témoin, et y renvoyer en retour.</p>
+
+    <h2>Partie technique : le fichier d'observation</h2>
+    <p>Ce qui suit est pour qui écrit ces fichiers à la main, les génère ou les lit en code. Dans l'éditeur, rien de cela n'a besoin d'être connu.</p>
     <p>Un enregistrement est un simple fichier JSON. Rien dedans n'est un blob binaire, un
       identifiant dans une base de données, ni une référence à ce site — vous pouvez en écrire un à
       la main, en engendrer depuis vos propres archives, ou en comparer deux dans une relecture de
@@ -1030,6 +1040,11 @@ if (excerpts.length > 0) {
     return `
 <section class="band">
   <div class="wrap prose-wide">
+    <h2>Qué es una observación</h2>
+    <p>Una observación es <strong>lo que un testigo relata de lo que vio</strong>: cuándo, dónde, qué aspecto tenía, cómo se movía y cómo estaban el cielo y el tiempo. Es el evento que UFO@home <strong>reproduce</strong>. Un <a href="/docs/case/">caso</a> contiene al menos una, y puede contener otras: otros testigos del mismo suceso, cada uno con su propio relato, y <a href="#another-reading-an-interpretation-is-another-sighting">explicaciones alternativas</a>, que también son observaciones. Una observación puede ser designada por <a href="/docs/interview/">una entrevista</a> mantenida con el testigo, y remitir a ella a su vez.</p>
+
+    <h2>Parte técnica: el archivo de observación</h2>
+    <p>Lo que sigue es para quien escribe estos archivos a mano, los genera o los lee en código. En el editor no hace falta saber nada de ello.</p>
     <p>Una grabación es un simple archivo JSON. Nada en ella es un blob binario, un identificador de
       una base de datos ni una referencia a este sitio — puedes escribir una a mano, generarla desde tu
       propio archivo, o comparar dos en una revisión de código.</p>
@@ -1483,6 +1498,11 @@ if (excerpts.length > 0) {
     return `
 <section class="band">
   <div class="wrap prose-wide">
+    <h2>Che cos'è un'osservazione</h2>
+    <p>Un'osservazione è <strong>ciò che un testimone riferisce di ciò che ha visto</strong>: quando, dove, che aspetto aveva, come si muoveva e com'erano il cielo e il tempo. È l'evento che UFO@home <strong>riproduce</strong>. Un <a href="/docs/case/">caso</a> ne contiene almeno una e può contenerne altre: altri testimoni dello stesso fatto, ciascuno con il proprio resoconto, e <a href="#another-reading-an-interpretation-is-another-sighting">spiegazioni alternative</a>, che sono anch'esse osservazioni. Un'osservazione può essere designata da <a href="/docs/interview/">un'intervista</a> condotta con il testimone, e rimandarvi a sua volta.</p>
+
+    <h2>Parte tecnica: il file di osservazione</h2>
+    <p>Quanto segue è per chi scrive questi file a mano, li genera o li legge nel codice. Nell'editor non serve conoscerne nulla.</p>
     <p>Una registrazione è un semplice file JSON. Niente al suo interno è un blob binario, un
       identificativo in un database o un riferimento a questo sito — puoi scriverne una a mano,
       generarla dal tuo archivio, o confrontarne due in una revisione del codice.</p>
