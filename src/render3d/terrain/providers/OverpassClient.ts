@@ -39,14 +39,39 @@ export class OverpassClient {
     "https://overpass.private.coffee/api/interpreter"
   ]
 
+  /**
+   * OpenStreetMap France's own instance, which holds France and answers a page (CORS), asked first for a place in it: on 2026-10-19 the three
+   * above hung or answered 500 all morning, and the lamps of every French scene came a minute late or never, while this one answered at once.
+   */
+  static readonly FRANCE_ENDPOINT = "https://overpass.openstreetmap.fr/api/interpreter"
+
+  /** Metropolitan France and Corsica, as south, west, north, east: where FRANCE_ENDPOINT is asked first. */
+  private static readonly FRANCE = { south: 41.3, west: -5.2, north: 51.1, east: 9.6 }
+
+  /**
+   * The instances to ask for this query, in order: the French one first when the box the query asks about (the first `(south,west,north,east)` in it,
+   * which is how every query of this project says where it looks) is in France, the general ones after it; the general ones alone elsewhere.
+   */
+  static endpointsFor(query: string, general: readonly string[] = OverpassClient.ENDPOINTS): string[] {
+    const box = /\((-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)\)/.exec(query)
+    if (!box) return [...general]
+    const [south, west, north, east] = box.slice(1).map(Number)
+    const lat = (south + north) / 2
+    const lng = (west + east) / 2
+    const france = OverpassClient.FRANCE
+    const inFrance = lat >= france.south && lat <= france.north && lng >= france.west && lng <= france.east
+    return inFrance ? [OverpassClient.FRANCE_ENDPOINT, ...general.filter(endpoint => endpoint !== OverpassClient.FRANCE_ENDPOINT)] : [...general]
+  }
+
   private readonly fetchImpl: typeof fetch
-  private readonly endpoints: string[]
+  /** The instances a test or a caller pointed this client at, in place of those chosen by place (see endpointsFor). */
+  private readonly endpoints?: string[]
 
   constructor(options: OverpassClientOptions = {}) {
     // fetch.bind(globalThis) — an unbound fetch loses the `this` it requires once called as a
     // field (see AwsTerrariumElevationProvider, which learned the same thing).
     this.fetchImpl = options.fetchImpl ?? fetch.bind(globalThis)
-    this.endpoints = options.endpoints ?? OverpassClient.ENDPOINTS
+    this.endpoints = options.endpoints
   }
 
   /**
@@ -86,7 +111,7 @@ export class OverpassClient {
    */
   private async ask(query: string): Promise<OverpassResponse> {
     let last: Error | undefined
-    for (const endpoint of this.endpoints) {
+    for (const endpoint of this.endpoints ?? OverpassClient.endpointsFor(query)) {
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
           // An instance that hangs is no answer: past the query's own timeout, it is let go and the next one asked.
