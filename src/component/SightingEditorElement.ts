@@ -10050,6 +10050,8 @@ export class SightingEditorElement extends HTMLElement {
     const decor = this.editableDecor()
     if (!decor) return false
     if (this.beginFrameDrag(this.decorFrame, point)) return true
+    // A shape is painted over the scenery: a press on one in front of the selected object is for the shape, as the pointer says.
+    if (this.ufoElement.shapeAt(point.x, point.y, EMPTY_SOURCE_IDS)) return false
     if (!this.grabsDecor(event, point, decor)) return false
     const ndc = this.ndcOf(event)
     const start = DecorBase.viewOf(decor, this.ufoElement.currentTime)
@@ -10366,7 +10368,7 @@ export class SightingEditorElement extends HTMLElement {
       const handle = bounds && ShapeHandles.hitTestHandle({ bounds, angle: 0 }, point)
       if (handle) return this.cursorForHandle(handle, 0)
       const selected = this.editableDecor()
-      if (selected && this.grabsDecor(event, point, selected)) return "move"
+      if (selected && !this.ufoElement.shapeAt(point.x, point.y, EMPTY_SOURCE_IDS) && this.grabsDecor(event, point, selected)) return "move"
     }
     const shapeMode = mode === "shape"
     if (editable && shapeMode) {
