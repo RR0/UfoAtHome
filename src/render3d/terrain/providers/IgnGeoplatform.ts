@@ -156,9 +156,9 @@ export class IgnGeoplatform {
   }
 
   /**
-   * What the map draws round a place: the bridges, the road sections that are over the ground (which carry the width of a bridge's road), the
-   * overhead electric lines and, where asked, the outlines of the buildings. Small filtered questions, each a few hundred bytes (a town's
-   * buildings a few tens of kilobytes).
+   * What the map draws round a place: the bridges, the road and railway sections that are over the ground (which carry the width of a bridge's road,
+   * or say that it carries a railway), the overhead electric lines and, where asked, the outlines of the buildings. Small filtered questions, each a
+   * few hundred bytes (a town's buildings a few tens of kilobytes).
    */
   async vectors(centre: { lat: number, lng: number }, radiusM: number, withBuildings: boolean): Promise<PlaceVectors> {
     const radius = IgnGeoplatform.radius(radiusM)
@@ -167,15 +167,18 @@ export class IgnGeoplatform {
     // This service gives the axes of EPSG:4326 as longitude then latitude, the other way round from its WMS.
     const box = [centre.lng - dLng, centre.lat - dLat, centre.lng + dLng, centre.lat + dLat].map(v => v.toFixed(6)).join(",")
     const within = `BBOX(geometrie,${box},'EPSG:4326')`
-    const [bridges, elevatedRoads, lines, buildings, zones] = await Promise.all([
+    const [bridges, elevatedRoads, elevatedRailways, lines, buildings, zones] = await Promise.all([
       this.features("construction_lineaire", `${within} AND nature='Pont'`, "nature,geometrie"),
-      this.features("troncon_de_route", `${within} AND position_par_rapport_au_sol<>'0'`, "nature,largeur_de_chaussee,position_par_rapport_au_sol,nom_voie_ban_gauche,nom_voie_ban_droite,cpx_toponyme_route_nommee,geometrie"),
+      // Over the ground only: a road below it (an underpass, a tunnel) passes under a bridge and is never its deck.
+      this.features("troncon_de_route", `${within} AND position_par_rapport_au_sol>'0'`, "nature,largeur_de_chaussee,position_par_rapport_au_sol,nom_voie_ban_gauche,nom_voie_ban_droite,cpx_toponyme_route_nommee,geometrie"),
+      // The railways carried over the ground, which tell the bridge of a railway from the bridge of a road (see OverheadStructures.bridges).
+      this.features("troncon_de_voie_ferree", `${within} AND position_par_rapport_au_sol>'0'`, "position_par_rapport_au_sol,geometrie").catch((): VectorFeature[] => []),
       this.features("ligne_electrique", within, "voltage,geometrie"),
       withBuildings ? this.features("batiment", within, "nature,usage_1,hauteur,nombre_d_etages,materiaux_des_murs,materiaux_de_la_toiture,date_d_apparition,date_modification,geometrie", 5000) : Promise.resolve([]),
       // The names of the zones (a town hall, a post office, a square): a few, and a building takes the name of the one it stands in.
       withBuildings ? this.features("zone_d_activite_ou_d_interet", within, "toponyme,geometrie", 100).catch((): VectorFeature[] => []) : Promise.resolve([])
     ])
-    return { bridges, elevatedRoads, lines, buildings, zones, mapDate: IgnGeoplatform.latest(buildings.map(building => building.properties.date_modification)) }
+    return { bridges, elevatedRoads, elevatedRailways, lines, buildings, zones, mapDate: IgnGeoplatform.latest(buildings.map(building => building.properties.date_modification)) }
   }
 
   /**

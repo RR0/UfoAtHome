@@ -4,6 +4,8 @@ import type { Material } from "three"
 import type { RailwayLine } from "./terrain/RailwayProvider.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
 import type { GroundYAt } from "./RoadSystem.js"
+import { TrackProfile } from "./TrackProfile.js"
+import type { TrackLayout } from "./TrackProfile.js"
 
 /** A point of the patch's own frame: x east, z south (see GeoProjection), y up. */
 type Point3 = { x: number, y: number, z: number }
@@ -77,7 +79,7 @@ class Batch {
 /** One line laid out: its centre at every rung, the height of its formation there, the direction of travel and the distance along it. */
 interface Profile {
   centre: { x: number, z: number }[]
-  /** The height of the formation the ballast stands on: the ground, or the deck of a bridge. */
+  /** The height of the formation the ballast stands on (see TrackProfile). */
   y: number[]
   /** Unit direction of travel on the ground plane. */
   dir: { x: number, z: number }[]
@@ -85,7 +87,8 @@ interface Profile {
 }
 
 /**
- * The railways under a scene: for every track its ballast, its sleepers and its two rails at its own gauge, laid on the relief as the roads are, and
+ * The railways under a scene: for every track its ballast, its sleepers and its two rails at its own gauge, on a formation of its own profile (see
+ * TrackProfile: not the bare relief, which has a hole under every bridge), on an embankment or a deck where that stands over the ground, and
  * for an electrified line its catenary: the masts, the contact wire the pantograph runs under at its real height, the messenger wire it hangs from.
  *
  * WHY a system and not decor a survey plants (see SurveyedDecor): a railway is data of the place, as a road is, not an object an author places,
@@ -202,16 +205,19 @@ export class RailwaySystem {
     }))
     const shown = projected.filter(({ line, path }) => line.level >= 0 && RailwaySystem.within(path, radiusM))
     const offset = RailwaySystem.altitudeOffset(shown, groundYAt)
-    const anchored = RailwaySystem.groundEnds(projected)
+    const laid = shown.flatMap(({ line, path }) => {
+      const layout = this.layoutOf(line, path)
+      return layout ? [{ line, layout }] : []
+    })
+    // The height of the formation of every line together: a line meets the ones at its ends at the same height (see TrackProfile).
+    const heights = TrackProfile.heights(laid.map(({ layout }) => layout), groundYAt, offset)
     const batches = {
       ballast: new Batch(), earth: new Batch(), deck: new Batch(), concrete: new Batch(), wood: new Batch(), rust: new Batch(), head: new Batch(), steel: new Batch(), wire: new Batch()
     }
-    for (const { line, path } of shown) {
-      const profile = this.profileOf(line, path, groundYAt, offset, anchored)
-      if (!profile) continue
-      this.lay(line, profile, groundYAt, batches)
+    laid.forEach(({ line, layout }, n) => {
+      this.lay(line, { ...layout, y: heights[n] }, groundYAt, batches)
       this.drawn++
-    }
+    })
     const meshes: [Batch, Material, string, boolean][] = [
       [batches.ballast, this.ballastMaterial, "ballast", false],
       [batches.earth, this.earthMaterial, "embankments", false],
@@ -270,27 +276,8 @@ export class RailwaySystem {
     return differences[Math.floor(differences.length / 2)]
   }
 
-  /** The ends that a line at grade reaches: there a bridge's deck meets the ground. Keyed to half a metre. */
-  private static groundEnds(projected: { line: RailwayLine, path: { x: number, z: number }[] }[]): Set<string> {
-    const ends = new Set<string>()
-    for (const { line, path } of projected) {
-      if (line.level !== 0 || path.length < 2) continue
-      ends.add(RailwaySystem.endKey(path[0]))
-      ends.add(RailwaySystem.endKey(path[path.length - 1]))
-    }
-    return ends
-  }
-
-  private static endKey(point: { x: number, z: number }): string {
-    return `${Math.round(point.x * 2)},${Math.round(point.z * 2)}`
-  }
-
-  /**
-   * A line resampled every step, with the height of its formation at each rung. On the ground, the relief right there. Over it, the map's altitude
-   * moved by the patch's offset, bent at each end to meet the ground where a line at grade starts (the map and the relief disagree by a metre there,
-   * and a track does not step); with no altitude, a straight deck from the ground at one end to the ground at the other.
-   */
-  private profileOf(line: RailwayLine, path: { x: number, z: number, altitudeM?: number }[], groundYAt: GroundYAt, offset: number | undefined, anchored: Set<string>): Profile | undefined {
+  /** A line resampled every step along its centre, with its direction of travel and the map's altitude at each rung where it has one. */
+  private layoutOf(line: RailwayLine, path: { x: number, z: number, altitudeM?: number }[]): (TrackLayout & Omit<Profile, "y">) | undefined {
     const centre: { x: number, z: number, altitudeM?: number }[] = []
     for (let i = 0; i < path.length - 1; i++) {
       const from = path[i]
@@ -306,8 +293,7 @@ export class RailwaySystem {
     if (centre.length < 2) return undefined
     const along = [0]
     for (let i = 1; i < centre.length; i++) along.push(along[i - 1] + Math.hypot(centre[i].x - centre[i - 1].x, centre[i].z - centre[i - 1].z))
-    const length = along[along.length - 1]
-    if (length < 0.5) return undefined
+    if (along[along.length - 1] < 0.5) return undefined
     const dir = centre.map((_, i) => {
       const before = centre[Math.max(0, i - 1)]
       const after = centre[Math.min(centre.length - 1, i + 1)]
@@ -316,24 +302,7 @@ export class RailwaySystem {
       const l = Math.hypot(dx, dz)
       return l < 1e-6 ? { x: 1, z: 0 } : { x: dx / l, z: dz / l }
     })
-    let y: number[]
-    if (line.level === 0) {
-      y = centre.map(point => groundYAt(point.x, point.z))
-    } else {
-      const first = centre[0]
-      const last = centre[centre.length - 1]
-      const groundFirst = groundYAt(first.x, first.z)
-      const groundLast = groundYAt(last.x, last.z)
-      if (offset !== undefined && centre.every(point => point.altitudeM !== undefined)) {
-        const mapped = centre.map(point => point.altitudeM! + offset)
-        const startShift = anchored.has(RailwaySystem.endKey(first)) ? groundFirst - mapped[0] : 0
-        const endShift = anchored.has(RailwaySystem.endKey(last)) ? groundLast - mapped[mapped.length - 1] : 0
-        y = mapped.map((value, i) => value + startShift + (endShift - startShift) * along[i] / length)
-      } else {
-        y = along.map(s => groundFirst + (groundLast - groundFirst) * s / length)
-      }
-    }
-    return { centre, y, dir, along }
+    return { kind: line.kind, ...(line.highSpeed ? { highSpeed: true } : {}), level: line.level, centre, along, dir }
   }
 
   /** The ballast, the sleepers and the rails of every track of a line, and its catenary when it has one. */

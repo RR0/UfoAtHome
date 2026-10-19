@@ -9,8 +9,10 @@ export interface VectorFeature {
 /** What the vectors of a place say: the bridges, the roads that carry something over the ground, and the electric lines. */
 export interface PlaceVectors {
   bridges: VectorFeature[]
-  /** The road sections that are not on the ground: the width of the road on a bridge is theirs. */
+  /** The road sections over the ground: the width of the road on a bridge is theirs. */
   elevatedRoads: VectorFeature[]
+  /** The railway sections over the ground: a bridge along one carries a railway, which the scene draws with its tracks (see RailwaySystem). */
+  elevatedRailways?: VectorFeature[]
   lines: VectorFeature[]
   /** The outlines of the buildings, with their height and floors, where they were asked for. */
   buildings: VectorFeature[]
@@ -86,6 +88,8 @@ export class OverheadStructures {
   private static readonly JOIN_M = 1
   /** And run on within this angle of each other: a bridge that meets another at a junction is another bridge. */
   private static readonly JOIN_DEG = 25
+  /** How near the middle of a bridge a railway over the ground must run for the bridge to be the railway's: the centre line of a double track. */
+  private static readonly RAIL_MATCH_M = 6
   /** How near the centre line of a bridge the road that crosses it must be. */
   private static readonly ROAD_MATCH_M = 12
   /** The deck of a bridge where nothing measured it. */
@@ -141,6 +145,7 @@ export class OverheadStructures {
 
   static bridges(vectors: PlaceVectors, centre: { lat: number, lng: number }, radiusM: number, grid: HeightGrid | undefined): SurveyedBridge[] {
     const roads = vectors.elevatedRoads.map(road => ({ path: OverheadStructures.path(road, centre), properties: road.properties }))
+    const railways = (vectors.elevatedRailways ?? []).map(railway => OverheadStructures.path(railway, centre))
     const found: SurveyedBridge[] = []
     for (const path of OverheadStructures.joined(vectors.bridges.map(feature => OverheadStructures.path(feature, centre)))) {
       const from = path[0]
@@ -149,6 +154,9 @@ export class OverheadStructures {
       if (length < OverheadStructures.MIN_BRIDGE_M) continue
       const middle = { east: (from.east + to.east) / 2, north: (from.north + to.north) / 2 }
       if (Math.hypot(middle.east, middle.north) > radiusM + length / 2) continue
+      // The bridge of a railway is not a road bridge: drawn as one, it was a deck with a carriageway and railings along the track, over it. Its
+      // deck is the railway's, laid with its ballast and its rails (see RailwaySystem), and the road under it goes through its opening.
+      if (OverheadStructures.carriesRailway(from, to, railways)) continue
       found.push({
         eastM: OverheadStructures.tenth(middle.east),
         northM: OverheadStructures.tenth(middle.north),
@@ -161,6 +169,20 @@ export class OverheadStructures {
     }
     found.sort((a, b) => Math.hypot(a.eastM, a.northM) - Math.hypot(b.eastM, b.northM))
     return found
+  }
+
+  /** Whether a railway over the ground runs along a bridge: past its middle, within RAIL_MATCH_M, in its direction. */
+  private static carriesRailway(from: { east: number, north: number }, to: { east: number, north: number }, railways: { east: number, north: number }[][]): boolean {
+    const middle = { east: (from.east + to.east) / 2, north: (from.north + to.north) / 2 }
+    const heading = OverheadStructures.bearing(from, to) % 180
+    for (const railway of railways) {
+      for (let i = 0; i + 1 < railway.length; i++) {
+        if (OverheadStructures.distanceToSegment(middle, railway[i], railway[i + 1]) > OverheadStructures.RAIL_MATCH_M) continue
+        const turn = Math.abs(OverheadStructures.bearing(railway[i], railway[i + 1]) % 180 - heading)
+        if (Math.min(turn, 180 - turn) <= OverheadStructures.JOIN_DEG) return true
+      }
+    }
+    return false
   }
 
   /** The pieces of centre line as whole structures: each chain of pieces that meet end to end and run on (see JOIN_M) as one path. */

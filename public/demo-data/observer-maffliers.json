@@ -9908,27 +9908,6 @@
    "surveyedOn": "2026-03-26"
   },
   {
-   "id": "ign-lidar-topo-305",
-   "kind": "bridge",
-   "title": {
-    "fr": "Pont 3",
-    "en": "Bridge 3",
-    "es": "Puente 3",
-    "it": "Ponte 3"
-   },
-   "eastM": 319.1,
-   "northM": -948,
-   "headingDeg": 54.6,
-   "lit": false,
-   "sizeM": {
-    "lengthM": 97.2,
-    "widthM": 6,
-    "heightM": 4
-   },
-   "origin": "ign-lidar-topo",
-   "surveyedOn": "2026-03-26"
-  },
-  {
    "id": "ign-lidar-topo-306",
    "kind": "bridge",
    "title": {
@@ -9943,27 +9922,6 @@
    "lit": false,
    "sizeM": {
     "lengthM": 157.4,
-    "widthM": 6,
-    "heightM": 4
-   },
-   "origin": "ign-lidar-topo",
-   "surveyedOn": "2026-03-26"
-  },
-  {
-   "id": "ign-lidar-topo-307",
-   "kind": "bridge",
-   "title": {
-    "fr": "Pont 5",
-    "en": "Bridge 5",
-    "es": "Puente 5",
-    "it": "Ponte 5"
-   },
-   "eastM": -316.7,
-   "northM": 1077.2,
-   "headingDeg": 142.4,
-   "lit": false,
-   "sizeM": {
-    "lengthM": 32.8,
     "widthM": 6,
     "heightM": 4
    },
@@ -10091,27 +10049,6 @@
    "sizeM": {
     "lengthM": 63,
     "widthM": 12.9,
-    "heightM": 4
-   },
-   "origin": "ign-lidar-topo",
-   "surveyedOn": "2026-03-26"
-  },
-  {
-   "id": "ign-lidar-topo-314",
-   "kind": "bridge",
-   "title": {
-    "fr": "Pont 8",
-    "en": "Bridge 8",
-    "es": "Puente 8",
-    "it": "Ponte 8"
-   },
-   "eastM": -773.6,
-   "northM": 1523.1,
-   "headingDeg": 159.9,
-   "lit": false,
-   "sizeM": {
-    "lengthM": 33.6,
-    "widthM": 6,
     "heightM": 4
    },
    "origin": "ign-lidar-topo",

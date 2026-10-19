@@ -34,7 +34,7 @@ describe("IgnTopoSurroundingsProvider (the map alone)", () => {
     const photographed = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => new URL(String(call[0])).searchParams.get("LAYERS")).filter(Boolean)
     expect(photographed).toEqual(["ORTHOIMAGERY.ORTHOPHOTOS"])
     const layers = (fetchImpl as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => new URL(String(call[0])).searchParams.get("TYPENAMES")).filter(Boolean).sort()
-    expect(layers).toEqual(["BDTOPO_V3:batiment", "BDTOPO_V3:construction_lineaire", "BDTOPO_V3:ligne_electrique", "BDTOPO_V3:troncon_de_route", "BDTOPO_V3:zone_d_activite_ou_d_interet",
+    expect(layers).toEqual(["BDTOPO_V3:batiment", "BDTOPO_V3:construction_lineaire", "BDTOPO_V3:ligne_electrique", "BDTOPO_V3:troncon_de_route", "BDTOPO_V3:troncon_de_voie_ferree", "BDTOPO_V3:zone_d_activite_ou_d_interet",
       "ORTHOIMAGERY.ORTHOPHOTOS.GRAPHE-MOSAIQUAGE:graphe_bdortho"])
   })
 

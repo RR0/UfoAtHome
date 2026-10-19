@@ -39,6 +39,16 @@ describe("OverheadStructures bridges", () => {
     expect(OverheadStructures.bridges(vectors({ bridges, elevatedRoads: [far] }), CENTRE, 100, undefined)[0].widthM).toBe(6)
   })
 
+  it("leaves the bridge of a railway to the railway, and keeps the road bridge that crosses over a railway", () => {
+    // The RER B over the avenue Jean Monnet at Antony: the bridge runs along the track, the road goes under it.
+    const bridges = [line({ nature: "Pont" }, [0, -11], [0, 11])]
+    const railway = line({ position_par_rapport_au_sol: "1" }, [-1, -12], [1, 12])
+    expect(OverheadStructures.bridges(vectors({ bridges, elevatedRailways: [railway] }), CENTRE, 100, undefined)).toEqual([])
+    // A road bridge over the railway: the railway under it is not over the ground, and one over it crosses it, not along it.
+    const across = line({ position_par_rapport_au_sol: "1" }, [-30, 1], [30, 1])
+    expect(OverheadStructures.bridges(vectors({ bridges, elevatedRailways: [across] }), CENTRE, 100, undefined)).toHaveLength(1)
+  })
+
   it("names a bridge for the road it carries, when the map names it", () => {
     const bridges = [line({ nature: "Pont" }, [-20, 0], [20, 0])]
     const named = line({ nature: "Route à 1 chaussée", largeur_de_chaussee: 7, nom_voie_ban_gauche: "Rue de Carentan" }, [-30, 1], [30, 1])
