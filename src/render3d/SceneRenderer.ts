@@ -867,6 +867,11 @@ export class SceneRenderer {
   private scatteredSky?: ScatteredSky
   /** The astronomy last stated, for re-applying the sky's colours when the scattered sky reports new ones. */
   private lastAstronomy?: SceneAstronomy
+
+  /** The Sun's altitude of the sky last set, which the public lamps on their photocell are switched by (see updateDecorLitState): undefined before any. */
+  get sunAltitudeDeg(): number | undefined {
+    return this.lastAstronomy?.sun.altitudeDeg
+  }
   /** Set when the scattered sky has new colours or has become drawable; applied before the next draw. */
   private skyColoursStale = false
   private scatteredSkyFrameId: number | null = null

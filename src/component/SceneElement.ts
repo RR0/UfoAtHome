@@ -419,9 +419,13 @@ export class SceneElement extends HTMLElement {
   /** Where the Sun stood at the last restatement of the sky, from the observer: what the aircraft are lit by, each from its own place. */
   private lastSun?: { altitudeDeg: number; azimuthDeg: number }
 
-  /** The Sun's altitude at the instant on show, once the sky has been worked out: what switches a lamp on its photocell (see switchedByPhotocell). */
+  /**
+   * The Sun's altitude at the instant on show, once the sky has been worked out: what switches a lamp on its photocell (see switchedByPhotocell).
+   * The renderer's, which is the one the lamps are drawn with: this element's own copy is only kept on one of the ways the sky is worked out, and
+   * a lamp drawn lit was shown off in the editor when it had not been taken.
+   */
   get sunAltitudeDeg(): number | undefined {
-    return this.lastSun?.altitudeDeg
+    return this.sceneRenderer.sunAltitudeDeg ?? this.lastSun?.altitudeDeg
   }
   /** The decor the recording states plus the traffic, rebuilt only when either changes: the renderer
    * rebuilds every group when the list it is given is not the one it had. */
