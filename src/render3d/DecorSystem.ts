@@ -1159,8 +1159,10 @@ export class DecorSystem {
     })
     material.onBeforeCompile = shader => {
       shader.uniforms.uLitShare = DecorSystem.litWindowShare
+      shader.uniforms.uWindowLuminance = DecorSystem.windowLuminance
       shader.vertexShader = `attribute float litRank;\nvarying float vLitRank;\n${shader.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\nvLitRank = litRank;")}`
-      shader.fragmentShader = `uniform float uLitShare;\nvarying float vLitRank;\n${shader.fragmentShader.replace("#include <emissivemap_fragment>", "#include <emissivemap_fragment>\ntotalEmissiveRadiance *= step(vLitRank, uLitShare);")}`
+      shader.fragmentShader = `uniform float uLitShare;\nuniform float uWindowLuminance;\nvarying float vLitRank;\n${shader.fragmentShader.replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>
+  totalEmissiveRadiance *= step(vLitRank, uLitShare) * uWindowLuminance * ${DecorSystem.WINDOW_VARIETY_GLSL};`)}`
     }
     // One program for every facade, whatever its colour: the share is a uniform they all hold.
     material.customProgramCacheKey = () => "facade-lit-windows"
@@ -1173,6 +1175,37 @@ export class DecorSystem {
 
   /** What share of the windows of every facade is lit (0: none, as by day), held by one number all their materials read: see buildFacade. */
   private static readonly litWindowShare = { value: 0 }
+
+  /**
+   * What a lit window gives out, in candela per square metre: a room lit for the evening (a hundred to three hundred lux on its walls and ceiling)
+   * seen through its glass and its curtain, which is some tens. It was the emissive colour's 1, about one candela per square metre in a scene
+   * that counts in them (see setLit): grey beside the lamps of the street the eye adapts to.
+   */
+  static readonly WINDOW_LUMINANCE_CD_M2 = 50
+
+  /** The light of a room in the evening: a lamp's, two thousand nine hundred kelvins, as orange to an eye balanced for the day as the street's. */
+  static readonly ROOM_LIGHT_K = 2900
+  /** The colder light of one window in seven: a white LED, a screen. */
+  static readonly COLD_ROOM_LIGHT_K = 4000
+
+  /** The luminance of a lit window in the scene's own light, which follows the eye (see setWindowLuminance). */
+  private static readonly windowLuminance = { value: 0 }
+
+  /**
+   * One room is not another: by its rank (see FacadeGeometry), each window is lit from a third to twice the mean, in the colour of a room's lamp
+   * (ROOM_LIGHT_K), one in seven in a colder light (COLD_ROOM_LIGHT_K), each of unit luminance (see LampColour). The mean of the factor is about one.
+   */
+  private static get WINDOW_VARIETY_GLSL(): string {
+    const vec = (rgb: readonly number[]) => `vec3(${rgb.map(c => c.toFixed(4)).join(", ")})`
+    const warm = LampColour.ofTemperature(DecorSystem.ROOM_LIGHT_K)
+    const cold = LampColour.ofTemperature(DecorSystem.COLD_ROOM_LIGHT_K)
+    return `(mix(0.35, 2.0, fract(vLitRank * 97.13) * fract(vLitRank * 97.13)) * mix(${vec(warm)}, ${vec(cold)}, step(0.86, fract(vLitRank * 53.71))))`
+  }
+
+  /** The luminance of a lit window in the scene's light, set at every frame: what a candela per square metre is changes with the eye (see SceneRenderer.relativeScale). */
+  static setWindowLuminance(relativeScale: number): void {
+    DecorSystem.windowLuminance.value = DecorSystem.WINDOW_LUMINANCE_CD_M2 * relativeScale
+  }
 
   static setLitWindowShare(share: number): void {
     DecorSystem.litWindowShare.value = Math.max(0, Math.min(1, share))

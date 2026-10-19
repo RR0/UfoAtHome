@@ -50,8 +50,8 @@ export class FacadeTexture {
   }
 
   /**
-   * What glows: the glass of the lit variants, a warm white, and nothing else (black). The picture is read as sRGB, so a warm white is nearly white in it: a picture of the orange a lit window is called would be read as a deeper orange still, and look like a brown wall. Multiplied by a material's emissive colour and intensity, so a
-   * scene turns every lit window of every building on at once by raising one number (see DecorSystem.setWindowGlow).
+   * What glows: the glass of the lit variants, the room behind it (see roomLight), and nothing else (black). The picture is read as sRGB, so a warm white is nearly white in it: a picture of the orange a lit window is called would be read as a deeper orange still, and look like a brown wall. Multiplied in the facade's shader by the luminance of a lit window
+   * and the share of those lit, so a scene turns every lit window of every building on at once by raising one number (see DecorSystem.setLitWindowShare, setWindowLuminance).
    */
   static emissive(): DataTexture {
     if (!FacadeTexture.sharedEmissive) {
@@ -82,11 +82,32 @@ export class FacadeTexture {
           // The mullion stays dark: a lit window is two panes.
           if (Math.abs(x - 1.5 * metre) < 0.03 * metre) continue
           const at = (y * width + tile * size + x) * 4
-          data[at] = 255; data[at + 1] = 240; data[at + 2] = 190
+          const [r, g, b] = FacadeTexture.roomLight((x / metre - 0.9) / 1.2, (y / metre - bottom) / (top - bottom))
+          data[at] = r; data[at + 1] = g; data[at + 2] = b
         }
       }
     }
     return data
+  }
+
+  /**
+   * What the glass of a lit window shows of the room behind it, at (u, v) across and up the glass from its bottom left (0 to 1): not a flat
+   * rectangle of light but a room, its ceiling lit by the lamp and brightest, its light falling off towards the sill and the jambs, and a curtain
+   * drawn a little on each side, through which it comes dimmer and warmer. Bytes of the sRGB picture, about grey: the colour is the shader's.
+   */
+  static roomLight(u: number, v: number): [number, number, number] {
+    // The ceiling and the upper wall, lit from the lamp; the lower part of the room is in the shade of the sill and the furniture.
+    const height = 0.35 + 0.65 * Math.pow(Math.max(0, Math.min(1, v)), 0.8)
+    // The jambs: the room is seen at an angle there, and less of it.
+    const across = 1 - 0.45 * Math.pow(Math.abs(2 * u - 1), 3)
+    // The curtains, a sixth of the width on each side, the light through them a third and warmer.
+    const curtain = Math.min(u, 1 - u) < 0.16
+    const level = height * across * (curtain ? 0.35 : 1)
+    // The colour is the room's lamp's, given by the facade's shader (see DecorSystem.ROOM_LIGHT_K): a curtain only warms it a little.
+    const warm: [number, number, number] = curtain ? [255, 225, 195] : [255, 255, 255]
+    // The picture is sRGB: its bytes are the light raised to the inverse of its gamma, about.
+    const k = Math.pow(level, 1 / 2.2)
+    return [Math.round(warm[0] * k), Math.round(warm[1] * k), Math.round(warm[2] * k)]
   }
 
   /** The picture as bytes, row after row from the bottom (so that the bottom of a tile is the floor). Exposed for tests. */

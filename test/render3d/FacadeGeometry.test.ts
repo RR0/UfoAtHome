@@ -137,8 +137,11 @@ describe("FacadeTexture", () => {
     // The glass of a window glows where it is glass, and nowhere else.
     const glow = FacadeTexture.glow()
     const glows = (tile: number, x: number, y: number): number => glow[((Math.round(y * size / 3)) * width + tile * size + Math.round(x * size / 3)) * 4]
-    expect(glows(FacadeTexture.UPPER, 1.2, 1.5)).toBe(255)
-    expect(glows(FacadeTexture.GROUND_WINDOW, 1.2, 1.5)).toBe(255)
+    expect(glows(FacadeTexture.UPPER, 1.2, 1.5)).toBeGreaterThan(150)
+    expect(glows(FacadeTexture.GROUND_WINDOW, 1.2, 1.5)).toBeGreaterThan(150)
+    // A room and not a flat rectangle: its ceiling brighter than the sill, the curtains on each side dimmer than the middle.
+    expect(glows(FacadeTexture.UPPER, 1.2, 2.25)).toBeGreaterThan(glows(FacadeTexture.UPPER, 1.2, 0.95))
+    expect(glows(FacadeTexture.UPPER, 0.95, 1.8)).toBeLessThan(glows(FacadeTexture.UPPER, 1.2, 1.8))
     expect(glows(FacadeTexture.UPPER, 0.3, 1.5)).toBe(0)
     expect(glows(FacadeTexture.UPPER, 1.5, 1.5)).toBe(0)
     expect(glows(FacadeTexture.GROUND_DOOR, 1.5, 1)).toBe(0)

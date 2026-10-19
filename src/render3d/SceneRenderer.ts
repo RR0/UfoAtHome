@@ -4714,6 +4714,8 @@ export class SceneRenderer {
    * poses long enough to move the sky existed. */
   private renderOnce(target?: UnfinishedFrame): void {
     this.aimBeams()
+    // A lit window is in candelas, which the eye's adaptation turns into the scene's light anew at every frame (see DecorSystem.setWindowLuminance).
+    DecorSystem.setWindowLuminance(this.relativeScale)
     if (this.onMapSubjectBounds) {
       const bounds = this.mapSubjectBounds()
       if (target) this.exposureSubjectBounds.push(...bounds)
