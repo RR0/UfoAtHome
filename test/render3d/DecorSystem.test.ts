@@ -685,6 +685,13 @@ describe("DecorSystem building facades", () => {
     expect(flat.getObjectByName(DecorSystem.ROOF_NAME)!.position.y).toBeCloseTo(11)
   })
 
+  it("stands a roof on a building that states no height above its last floor, not into it", () => {
+    const group = DecorSystem.build(building({ floors: 2, roof: { shape: "hip" } }), false)
+    const walls = new Box3().setFromObject(DecorSystem.bodyOf(group)).max.y
+    expect(walls).toBeCloseTo(9)
+    expect(group.getObjectByName(DecorSystem.ROOF_NAME)!.position.y).toBeCloseTo(walls)
+  })
+
   it("holds one share of lit windows for every facade, kept between nothing and all", () => {
     DecorSystem.setLitWindowShare(0.4)
     const first = DecorSystem.build(building({ sizeM: sized, facade: { color: "#ffffff" } }), false)

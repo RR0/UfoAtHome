@@ -1114,7 +1114,8 @@ export class DecorSystem {
   private static addRoof(group: Group, object: DecorObject): void {
     const roof = RoofGeometry.normalised(object.roof!)
     const size = DecorSystem.sizeOf(object)
-    const walls = DecorSystem.wallHeightOf(object, size.heightM)
+    // A height nobody stated is the walls' own (the floors it counts): the roof rises above it, not into its last floor.
+    const walls = object.sizeM?.heightM === undefined ? size.heightM : DecorSystem.wallHeightOf(object, size.heightM)
     const rgb = DecorSystem.roofColor(roof.color)
     const mesh = addPart(group, RoofGeometry.build(roof, size.widthM, size.lengthM), rgb, walls)
     // Seen from below too: the pitched sides are single faces, and a roof is the one part of a building a low observer looks up at.
