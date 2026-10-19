@@ -587,7 +587,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelHalo: HTMLElement
   private readonly labelBlur: HTMLElement
   private readonly labelBrightness: HTMLElement
-  private readonly labelShape: HTMLElement
   private readonly labelShapeTitle: HTMLElement
   private readonly labelUtcOffset: HTMLElement
   private readonly labelApparentWidth: HTMLElement
@@ -799,7 +798,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly referenceFovInput: HTMLInputElement
   private readonly referenceUsePoseButton: HTMLButtonElement
   private readonly referenceStatus: HTMLElement
-  private readonly addReferenceUrlButton: HTMLButtonElement
+  private readonly addReferenceButton: HTMLButtonElement
+  private readonly referenceAddKindSelect: HTMLSelectElement
   private readonly addReferenceFileInput: HTMLInputElement
   private readonly referenceLandmarksSelect: HTMLSelectElement
   private readonly addReferenceLandmarkButton: HTMLButtonElement
@@ -808,7 +808,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelReferenceLandmarks: HTMLElement
   private readonly labelReferenceLandmarkLabel: HTMLElement
   private readonly referenceAdoptPoseButton: HTMLButtonElement
-  private readonly referenceStreetSearchButton: HTMLButtonElement
   private readonly addTraceFileInput: HTMLInputElement
   private readonly traceSelect: HTMLSelectElement
   private readonly deleteTraceButton: HTMLButtonElement
@@ -816,7 +815,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly traceSourceInput: HTMLInputElement
   private readonly traceStatus: HTMLElement
   private readonly labelTraceImport: HTMLElement
-  private readonly labelTrace: HTMLElement
+  private readonly addTraceButton: HTMLButtonElement
   private readonly labelTraceTitle: HTMLElement
   private readonly labelTraceSource: HTMLElement
   private currentTraceId?: string
@@ -842,7 +841,6 @@ export class SightingEditorElement extends HTMLElement {
   /** Every field the selected picture is read from — listened to as one, like the sound's. */
   private readonly referenceFields: (HTMLInputElement | HTMLSelectElement)[]
   private readonly labelReferenceGroup: HTMLElement
-  private readonly labelReference: HTMLElement
   private readonly labelReferenceTitle: HTMLElement
   private readonly labelReferenceSrc: HTMLElement
   private readonly labelReferenceKind: HTMLElement
@@ -855,7 +853,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelReferencePitch: HTMLElement
   private readonly labelReferenceRoll: HTMLElement
   private readonly labelReferenceFov: HTMLElement
-  private readonly labelAddReferenceFile: HTMLElement
   /** Which decor object the DECOR context menu (right-click on the 3D canvas, distinct from the
    * SHAPE context menu's own currentSourceId) currently targets — set by onContextMenu, read by
    * viewObserverAccount(). Only ever set while decorContextMenu is actually open. */
@@ -1217,7 +1214,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelHalo = this.shadow.getElementById("label-halo")!
     this.labelBlur = this.shadow.getElementById("label-blur")!
     this.labelBrightness = this.shadow.getElementById("label-brightness")!
-    this.labelShape = this.shadow.getElementById("label-shape")!
     this.labelShapeTitle = this.shadow.getElementById("label-shape-title")!
     this.labelUtcOffset = this.shadow.getElementById("label-utc-offset")!
     this.labelApparentWidth = this.shadow.getElementById("label-apparent-width")!
@@ -1231,7 +1227,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelSoundPitch = this.shadow.getElementById("label-sound-pitch")!
     this.labelSoundSrc = this.shadow.getElementById("label-sound-src")!
     this.labelReferenceGroup = this.shadow.getElementById("label-reference-group")!
-    this.labelReference = this.shadow.getElementById("label-reference")!
     this.labelReferenceTitle = this.shadow.getElementById("label-reference-title")!
     this.labelReferenceSrc = this.shadow.getElementById("label-reference-src")!
     this.labelReferenceKind = this.shadow.getElementById("label-reference-kind")!
@@ -1244,7 +1239,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelReferencePitch = this.shadow.getElementById("label-reference-pitch")!
     this.labelReferenceRoll = this.shadow.getElementById("label-reference-roll")!
     this.labelReferenceFov = this.shadow.getElementById("label-reference-fov")!
-    this.labelAddReferenceFile = this.shadow.getElementById("label-add-reference-file")!
     this.labelDuration = this.shadow.getElementById("label-duration")!
     this.placeSourceRow = this.shadow.getElementById("place-source-row")!
     this.weatherSourceRow = this.shadow.getElementById("weather-source-row")!
@@ -1329,8 +1323,8 @@ export class SightingEditorElement extends HTMLElement {
     this.optionPrecipitationHail = this.shadow.getElementById("option-precipitation-hail")!
     this.decorList = new ElementList({
       header: this.shadow.getElementById("decor-list-header")!,
-      footer: this.shadow.getElementById("decor-list-footer")!,
-      ids: { list: "decor", label: "label-decor", remove: "delete-decor", add: "add-decor-building", kinds: "decorKind", kind: value => `option-decor-${value}` },
+      body: this.shadow.getElementById("decor-item")!,
+      ids: { list: "decor", remove: "delete-decor", add: "add-decor-building", kinds: "decorKind", kind: value => `option-decor-${value}` },
       actions: [{ id: "look-at-decor", glyph: "🎯", onClick: () => this.lookAtDecor() }],
       onSelect: id => this.selectDecor(id),
       onAdd: kind => this.addDecor(kind as DecorObject["kind"]),
@@ -1345,7 +1339,7 @@ export class SightingEditorElement extends HTMLElement {
       { value: "vehicle", label: "Vehicle" }, { value: "aircraft", label: "Aircraft" }, { value: "entity", label: "Being" },
       { value: "observer", label: "Other observer", hidden: true }
     ])
-    this.decorList.setLabels({ list: "Environment", remove: "Delete decor", add: "Add", actions: { "look-at-decor": "Look at it" } })
+    this.decorList.setLabels({ list: "Environment", remove: "Delete decor", add: "Add", empty: "No decor", actions: { "look-at-decor": "Look at it" } })
     this.addDecorObserverButton = this.shadow.getElementById("add-decor-observer") as HTMLButtonElement
     this.sceneryStatus = this.shadow.getElementById("scenery-status")!
     this.sceneryWarning = this.shadow.getElementById("scenery-warning")!
@@ -1411,7 +1405,8 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceFovInput = this.shadow.getElementById("referenceFov") as HTMLInputElement
     this.referenceUsePoseButton = this.shadow.getElementById("reference-use-pose") as HTMLButtonElement
     this.referenceStatus = this.shadow.getElementById("reference-status")!
-    this.addReferenceUrlButton = this.shadow.getElementById("add-reference-url") as HTMLButtonElement
+    this.addReferenceButton = this.shadow.getElementById("add-reference") as HTMLButtonElement
+    this.referenceAddKindSelect = this.shadow.getElementById("reference-add-kind") as HTMLSelectElement
     this.addReferenceFileInput = this.shadow.getElementById("add-reference-file") as HTMLInputElement
     this.referenceLandmarksSelect = this.shadow.getElementById("reference-landmarks") as HTMLSelectElement
     this.addReferenceLandmarkButton = this.shadow.getElementById("add-reference-landmark") as HTMLButtonElement
@@ -1420,7 +1415,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelReferenceLandmarks = this.shadow.getElementById("label-reference-landmarks")!
     this.labelReferenceLandmarkLabel = this.shadow.getElementById("label-reference-landmark-label")!
     this.referenceAdoptPoseButton = this.shadow.getElementById("reference-adopt-pose") as HTMLButtonElement
-    this.referenceStreetSearchButton = this.shadow.getElementById("reference-street-search") as HTMLButtonElement
     this.addTraceFileInput = this.shadow.getElementById("add-trace-file") as HTMLInputElement
     this.traceSelect = this.shadow.getElementById("trace") as HTMLSelectElement
     this.deleteTraceButton = this.shadow.getElementById("delete-trace") as HTMLButtonElement
@@ -1428,7 +1422,7 @@ export class SightingEditorElement extends HTMLElement {
     this.traceSourceInput = this.shadow.getElementById("traceSource") as HTMLInputElement
     this.traceStatus = this.shadow.getElementById("trace-status")!
     this.labelTraceImport = this.shadow.getElementById("label-trace-import")!
-    this.labelTrace = this.shadow.getElementById("label-trace")!
+    this.addTraceButton = this.shadow.getElementById("add-trace") as HTMLButtonElement
     this.labelTraceTitle = this.shadow.getElementById("label-trace-title")!
     this.labelTraceSource = this.shadow.getElementById("label-trace-source")!
     this.referenceStreetSelect = this.shadow.getElementById("reference-street") as HTMLSelectElement
@@ -1563,14 +1557,14 @@ export class SightingEditorElement extends HTMLElement {
     this.deleteReferenceButton.addEventListener("click", () => this.deleteReference())
     for (const field of this.referenceFields) field.addEventListener("input", () => this.updateReference())
     this.referenceUsePoseButton.addEventListener("click", () => this.useObserverPoseForReference())
-    this.addReferenceUrlButton.addEventListener("click", () => this.addReferenceFromAddress())
+    this.addReferenceButton.addEventListener("click", () => this.addReferenceOfKind())
     this.addReferenceFileInput.addEventListener("change", () => void this.addReferenceFromFile())
     this.addReferenceLandmarkButton.addEventListener("click", () => this.armLandmark())
     this.deleteReferenceLandmarkButton.addEventListener("click", () => this.deleteLandmark())
     this.referenceLandmarksSelect.addEventListener("change", () => this.selectLandmark(this.referenceLandmarksSelect.value))
     this.referenceLandmarkLabelInput.addEventListener("input", () => this.updateLandmarkLabel())
     this.referenceAdoptPoseButton.addEventListener("click", () => this.adoptReferencePose())
-    this.referenceStreetSearchButton.addEventListener("click", () => void this.searchStreetPictures())
+    this.addTraceButton.addEventListener("click", () => this.addTraceFileInput.click())
     this.addTraceFileInput.addEventListener("change", () => void this.addTracesFromFile())
     this.traceSelect.addEventListener("change", () => this.selectTrace(this.traceSelect.value))
     this.deleteTraceButton.addEventListener("click", () => this.deleteTrace())
@@ -3594,18 +3588,11 @@ export class SightingEditorElement extends HTMLElement {
   private syncReferenceFields(): void {
     const reference = this.ufoElement.sighting.references.find(candidate => candidate.id === this.currentReferenceId)
     const hasSelection = reference !== undefined
+    ElementList.showPresence(this.shadow.getElementById("reference-row")!, this.shadow.getElementById("reference-item")!, hasSelection)
     this.deleteReferenceButton.disabled = !hasSelection
     this.referenceUsePoseButton.disabled = !hasSelection
-    for (const field of [this.referenceSelect, ...this.referenceFields]) {
-      field.disabled = !hasSelection
-      this.setRowVisible(field, hasSelection)
-    }
-    this.setRowVisible(this.referenceUsePoseButton, hasSelection)
-    for (const control of [this.referenceLandmarksSelect, this.addReferenceLandmarkButton, this.deleteReferenceLandmarkButton, this.referenceLandmarkLabelInput]) {
-      this.setRowVisible(control, hasSelection)
-    }
+    for (const field of [this.referenceSelect, ...this.referenceFields]) field.disabled = !hasSelection
     this.refreshLandmarkList()
-    this.setRowVisible(this.referenceAdoptPoseButton, hasSelection)
     this.syncCanvasMode()
     if (!reference) {
       this.referenceStatus.textContent = ""
@@ -3993,6 +3980,7 @@ export class SightingEditorElement extends HTMLElement {
     if (this.currentLandmarkId !== undefined && !landmarks.some(landmark => landmark.id === this.currentLandmarkId)) this.currentLandmarkId = undefined
     if (this.currentLandmarkId !== undefined) this.referenceLandmarksSelect.value = this.currentLandmarkId
     const current = landmarks.find(landmark => landmark.id === this.currentLandmarkId)
+    ElementList.showPresence(this.shadow.getElementById("reference-landmark-row")!, this.shadow.getElementById("reference-landmark-item")!, landmarks.length > 0)
     this.referenceLandmarksSelect.disabled = landmarks.length === 0
     this.deleteReferenceLandmarkButton.disabled = current === undefined
     this.referenceLandmarkLabelInput.disabled = current === undefined
@@ -4131,7 +4119,18 @@ export class SightingEditorElement extends HTMLElement {
    * latitude and longitude. */
   private syncStreetSearchAvailability(): void {
     const located = this.numberOrUndefined(this.latInput.value) !== undefined && this.numberOrUndefined(this.lngInput.value) !== undefined
-    this.referenceStreetSearchButton.disabled = !located
+    ;(this.shadow.getElementById("reference-add-street") as HTMLOptionElement).disabled = !located
+    if (!located && this.referenceAddKindSelect.value === "street") this.referenceAddKindSelect.value = "address"
+  }
+
+  /** The "+" of the pictures adds one from where the select before it says: an address typed next, a file of the author's, or a
+   * street-level picture near the spot, looked up first and then picked. */
+  private addReferenceOfKind(): void {
+    switch (this.referenceAddKindSelect.value) {
+      case "file": this.addReferenceFileInput.click(); break
+      case "street": void this.searchStreetPictures(); break
+      default: this.addReferenceFromAddress()
+    }
   }
 
   private async searchStreetPictures(): Promise<void> {
@@ -4141,16 +4140,16 @@ export class SightingEditorElement extends HTMLElement {
     if (lat === undefined || lng === undefined) return
     const radiusM = 300
     this.referenceStatus.textContent = this.messages.referenceStreetSearching
-    this.referenceStreetSearchButton.disabled = true
+    this.addReferenceButton.disabled = true
     try {
       this.streetPictures = await this.streetPictures$.nearby(lat, lng, radiusM)
     } catch {
       this.streetPictures = []
       this.referenceStatus.textContent = this.messages.referenceStreetFailed
-      this.referenceStreetSearchButton.disabled = false
+      this.addReferenceButton.disabled = false
       return
     }
-    this.referenceStreetSearchButton.disabled = false
+    this.addReferenceButton.disabled = false
     this.referenceStreetSelect.innerHTML = ""
     for (const [index, picture] of this.streetPictures.entries()) {
       const option = document.createElement("option")
@@ -4215,10 +4214,8 @@ export class SightingEditorElement extends HTMLElement {
   private syncTraceFields(): void {
     const trace = this.ufoElement.sighting.traces.find(candidate => candidate.id === this.currentTraceId)
     const hasSelection = trace !== undefined
-    for (const field of [this.traceSelect, this.deleteTraceButton, this.traceTitleInput, this.traceSourceInput]) {
-      field.disabled = !hasSelection
-      this.setRowVisible(field, hasSelection)
-    }
+    ElementList.showPresence(this.shadow.getElementById("trace-row")!, this.shadow.getElementById("trace-item")!, hasSelection)
+    for (const field of [this.traceSelect, this.deleteTraceButton, this.traceTitleInput, this.traceSourceInput]) field.disabled = !hasSelection
     this.traceTitleInput.value = this.said.read(trace?.title) ?? ""
     this.traceSourceInput.value = this.said.read(trace?.source) ?? ""
   }
@@ -6165,11 +6162,8 @@ export class SightingEditorElement extends HTMLElement {
    * button stands, the rest (name, appearance, size, record) appears with the first shape. */
   private updateShapeToolbarVisibility(): void {
     const none = this.ufoElement.sighting.timeline.sourceIds.length === 0
-    const toolbar = this.shadow.querySelector("#shape-shapes .toolbar")
-    if (!toolbar) return
-    for (const child of Array.from(toolbar.children)) {
-      if (child.id !== "add-shape") (child as HTMLElement).hidden = none
-    }
+    const row = this.shadow.getElementById("shape-row")
+    if (row) ElementList.showPresence(row, this.shadow.getElementById("shape-item") ?? undefined, !none)
   }
 
   /** When more than one shape is selected, the appearance fields (Name/Color/Transparency/Halo/
@@ -7602,10 +7596,8 @@ export class SightingEditorElement extends HTMLElement {
   private syncMilestoneFields(): void {
     const current = this.ufoElement.sighting.milestones.find(milestone => milestone.t === this.currentMilestoneT)
     const has = current !== undefined
-    for (const control of [this.milestoneSelect, this.goToMilestoneButton, this.milestoneLabelInput, this.milestoneNoteInput, this.deleteMilestoneButton]) {
-      control.disabled = !has
-      this.setRowVisible(control, has)
-    }
+    ElementList.showPresence(this.shadow.getElementById("milestone-row")!, this.shadow.getElementById("milestone-item")!, has)
+    for (const control of [this.milestoneSelect, this.goToMilestoneButton, this.deleteMilestoneButton]) control.disabled = !has
     this.milestoneLabelInput.value = this.said.read(current?.label) ?? ""
     this.milestoneNoteInput.value = this.said.read(current?.note) ?? ""
   }
@@ -8896,7 +8888,8 @@ export class SightingEditorElement extends HTMLElement {
     this.labelHalo.textContent = messages.halo
     this.labelBlur.textContent = messages.blur
     this.labelBrightness.textContent = messages.brightness
-    this.labelShape.textContent = messages.shape
+    this.sourceSelect.setAttribute("aria-label", messages.shape)
+    this.shadow.getElementById("shape-empty")!.textContent = messages.emptyShapes
     this.labelShapeTitle.textContent = messages.shapeTitle
     this.labelUtcOffset.textContent = messages.utcOffset
     this.utcOffsetInput.placeholder = messages.utcOffsetPlaceholder
@@ -9011,7 +9004,7 @@ export class SightingEditorElement extends HTMLElement {
       // Added from its own button (the Observer group's): not offered here, but still named, for the label of one that is there.
       { value: "observer", label: messages.decorObserver, hidden: true }
     ])
-    this.decorList.setLabels({ list: messages.decor, remove: messages.deleteDecor, add: messages.addDecor, actions: { "look-at-decor": messages.lookAtDecor } })
+    this.decorList.setLabels({ list: messages.decor, remove: messages.deleteDecor, add: messages.addDecor, empty: messages.emptyDecor, actions: { "look-at-decor": messages.lookAtDecor } })
     this.showMeteorButton.title = messages.showMeteor
     this.showMeteorButton.setAttribute("aria-label", messages.showMeteor)
     this.showCometButton.title = messages.showComet
@@ -9043,6 +9036,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelMilestones.textContent = messages.milestones
     this.labelMilestoneLabel.textContent = messages.milestoneLabel
     this.labelMilestoneNote.textContent = messages.milestoneNote
+    this.shadow.getElementById("milestone-empty")!.textContent = messages.emptyMilestones
     for (const [button, text] of [[this.addMilestoneButton, messages.addMilestone], [this.goToMilestoneButton, messages.goToMilestone], [this.deleteMilestoneButton, messages.deleteMilestone]] as const) {
       button.title = text
       button.setAttribute("aria-label", text)
@@ -9119,7 +9113,10 @@ export class SightingEditorElement extends HTMLElement {
     this.labelSoundSrc.textContent = messages.soundSrc
     this.soundSrcInput.placeholder = messages.soundSrcPlaceholder
     this.labelReferenceGroup.textContent = messages.referenceGroup
-    this.labelReference.textContent = messages.reference
+    this.referenceSelect.setAttribute("aria-label", messages.reference)
+    this.shadow.getElementById("reference-empty")!.textContent = messages.emptyReferences
+    this.shadow.getElementById("reference-landmark-empty")!.textContent = messages.emptyReferenceLandmarks
+    this.shadow.getElementById("trace-empty")!.textContent = messages.emptyTraces
     this.labelReferenceTitle.textContent = messages.referenceTitle
     this.labelReferenceSrc.textContent = messages.referenceSrc
     this.referenceSrcInput.placeholder = messages.referenceSrcPlaceholder
@@ -9136,20 +9133,28 @@ export class SightingEditorElement extends HTMLElement {
     this.labelReferenceRoll.textContent = messages.referenceRoll
     this.labelReferenceFov.textContent = messages.referenceFov
     this.referenceUsePoseButton.textContent = messages.referenceUsePose
-    this.addReferenceUrlButton.textContent = messages.addReferenceUrl
-    this.labelAddReferenceFile.textContent = messages.addReferenceFile
+    // Where the picture to add comes from, picked before the "+" that adds it (see the Pictures group's template).
+    this.shadow.getElementById("reference-add-address")!.textContent = messages.addReferenceUrl
+    this.shadow.getElementById("reference-add-file-option")!.textContent = messages.addReferenceFile
+    this.shadow.getElementById("reference-add-street")!.textContent = messages.referenceStreetSearch
+    for (const control of [this.addReferenceButton, this.referenceAddKindSelect]) {
+      control.title = messages.addReference
+      control.setAttribute("aria-label", messages.addReference)
+    }
     this.deleteReferenceButton.title = messages.deleteReference
     this.deleteReferenceButton.setAttribute("aria-label", messages.deleteReference)
     this.labelReferenceLandmarks.textContent = messages.referenceLandmarks
-    this.addReferenceLandmarkButton.textContent = messages.addReferenceLandmark
+    this.addReferenceLandmarkButton.title = messages.addReferenceLandmark
+    this.addReferenceLandmarkButton.setAttribute("aria-label", messages.addReferenceLandmark)
     this.deleteReferenceLandmarkButton.title = messages.deleteReferenceLandmark
     this.deleteReferenceLandmarkButton.setAttribute("aria-label", messages.deleteReferenceLandmark)
     this.labelReferenceLandmarkLabel.textContent = messages.referenceLandmarkLabel
     this.referenceLandmarkLabelInput.placeholder = messages.referenceLandmarkLabelPlaceholder
     this.referenceAdoptPoseButton.textContent = messages.referenceAdoptPose
-    this.referenceStreetSearchButton.textContent = messages.referenceStreetSearch
     this.labelTraceImport.textContent = messages.traceImport
-    this.labelTrace.textContent = messages.trace
+    this.traceSelect.setAttribute("aria-label", messages.trace)
+    this.addTraceButton.title = messages.traceImport
+    this.addTraceButton.setAttribute("aria-label", messages.traceImport)
     this.labelTraceTitle.textContent = messages.traceTitle
     this.labelTraceSource.textContent = messages.traceSource
     this.deleteTraceButton.title = messages.deleteTrace

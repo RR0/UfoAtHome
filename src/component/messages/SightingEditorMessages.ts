@@ -821,4 +821,13 @@ export interface SightingEditorMessages extends SightingLabels {
   /** A panel's tab badge tooltip: how many of its questions this recording still answers none
    * of. {count} of them. */
   questionsUnanswered: string
+  /** What a list says, before its "+", while it has nothing to pick (see ElementList): no decor, moment, picture, landmark, line, shape. */
+  emptyDecor: string
+  emptyMilestones: string
+  emptyReferences: string
+  emptyReferenceLandmarks: string
+  emptyTraces: string
+  emptyShapes: string
+  /** The "+" of the pictures, after where the picture comes from. */
+  addReference: string
 }

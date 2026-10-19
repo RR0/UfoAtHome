@@ -27,18 +27,18 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
   // actions are the editor's own, which come further down.
   const actions: { addLayer: () => void, removeLayer: () => void, addCloud: () => void, removeCloud: () => void, pointAtCloud: () => void, pickLayer: () => void, pickCloud: () => void } = {} as never
   const layerList = new ElementList({
-    header: controls.querySelector<HTMLElement>("#cloud-layer-list")!, footer: controls.querySelector<HTMLElement>("#cloud-layer-list")!, rowClass: "cloud-actions",
+    header: controls.querySelector<HTMLElement>("#cloud-layer-list")!, body: controls.querySelector<HTMLElement>("#cloud-layer-parameters")!,
     ids: { list: "cloud-layer", remove: "cloud-layer-delete", add: "cloud-layer-add" },
     onSelect: () => actions.pickLayer(), onAdd: () => actions.addLayer(), onRemove: () => actions.removeLayer()
   })
   const instanceList = new ElementList({
-    header: controls.querySelector<HTMLElement>("#cloud-instance-list")!, footer: controls.querySelector<HTMLElement>("#cloud-instance-list")!, rowClass: "cloud-actions",
+    header: controls.querySelector<HTMLElement>("#cloud-instance-list")!, body: controls.querySelector<HTMLElement>("#cloud-instance-parameters")!,
     ids: { list: "cloud-instance", remove: "cloud-instance-delete", add: "cloud-instance-add" }, optional: true,
     actions: [{ id: "cloud-instance-point", glyph: "🎯", onClick: () => actions.pointAtCloud() }],
     onSelect: () => actions.pickCloud(), onAdd: () => actions.addCloud(), onRemove: () => actions.removeCloud()
   })
   const label = () => {
-    layerList.setLabels({ list: messages.layer, remove: messages.deleteLayer, add: messages.addLayer })
+    layerList.setLabels({ list: messages.layer, remove: messages.deleteLayer, add: messages.addLayer, empty: messages.emptyLayers })
     instanceList.setLabels({ list: messages.individualCloud, remove: messages.deleteCloud, add: messages.addIndividualCloud, none: messages.none,
       actions: { "cloud-instance-point": messages.pointAtCloud } })
   }

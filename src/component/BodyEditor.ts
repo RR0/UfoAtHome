@@ -106,7 +106,6 @@ export class BodyEditor {
     // Always there, so that a recording can be named before it has a body: typing a title creates the interpretation.
     this.input("body-interpretation-title").closest("label")!.hidden = false
     const body = this.current
-    this.element("body-none").hidden = bodies.length > 0
     this.element("body-fields").hidden = body === undefined
     if (!body) return
     this.bodyForm?.sync()
@@ -180,7 +179,6 @@ export class BodyEditor {
     this.container.innerHTML = `<div class="body-editor">
       <p class="body-intro">${m.intro}</p>
       ${field("body-interpretation-title", m.interpretationTitle)}
-      <p id="body-none" class="body-intro">${m.none}</p>
       <div id="body-list" class="body-list"></div>
       <div id="body-fields" class="body-fields">
         <div id="body-parameters" class="body-parameters"></div>
@@ -207,14 +205,14 @@ export class BodyEditor {
     </div>`
     const list = this.element("body-list")
     this.list = new ElementList({
-      header: list, footer: list, rowClass: "body-list-add",
+      header: list, body: this.element("body-fields"),
       ids: { list: "body-select", remove: "body-delete", add: "body-add" },
       actions: [{ id: "body-look", glyph: "🎯", onClick: () => { const body = this.current; if (body) this.host.lookAt(body) } }],
       onSelect: id => { this.currentId = id; this.sync() },
       onAdd: () => this.addBody(),
       onRemove: () => this.deleteCurrent()
     })
-    this.list.setLabels({ list: m.body, remove: m.deleteBody, add: m.addBody, actions: { "body-look": m.lookAtBody } })
+    this.list.setLabels({ list: m.body, remove: m.deleteBody, add: m.addBody, empty: m.none, actions: { "body-look": m.lookAtBody } })
     this.input("body-interpretation-title").addEventListener("change", () => this.updateInterpretationTitle())
     for (const id of ["body-model-url", "body-model-title", "body-model-author", "body-model-license", "body-model-source"]) {
       this.input(id).addEventListener("change", () => this.updateCurrent())
@@ -231,7 +229,7 @@ export class BodyEditor {
     })
     const keys = this.element("body-keys")
     this.keyList = new ElementList({
-      header: keys, footer: keys, rowClass: "body-keys-add", optional: true,
+      header: keys, optional: true,
       ids: { list: "body-key", remove: "body-key-delete", add: "body-key-add" },
       navigation: { scope: this.container, onStep: direction => this.stepKeyframe(direction) },
       onSelect: id => { if (id !== "") this.host.seekTo(Number(id)); this.syncKeyframe(true) },

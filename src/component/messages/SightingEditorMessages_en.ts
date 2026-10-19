@@ -410,4 +410,11 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   questionUnanswered: "Nothing in this recording answers one of the questions a reconstruction needs settled",
   durationRequired: "The observation needs a length to be replayed at all — state one, or an end time, which may be approximate",
   questionsUnanswered: "{count} of the questions a full reconstruction answers are unanswered here",
+  emptyDecor: "No decor",
+  emptyMilestones: "No moment",
+  emptyReferences: "No picture",
+  emptyReferenceLandmarks: "No landmark",
+  emptyTraces: "No investigator's line",
+  emptyShapes: "No shape",
+  addReference: "Add a picture",
 }

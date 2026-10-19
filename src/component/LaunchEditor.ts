@@ -70,7 +70,6 @@ export class LaunchEditor {
     if (!launches.some(launch => launch.id === this.currentId)) this.currentId = launches[0]?.id
     this.list?.setItems(launches.map(launch => ({ id: launch.id, label: this.labelOf(launch) })), this.currentId)
     this.list?.setAddState(this.startOfNew() !== undefined, this.startOfNew() === undefined ? this.messages.addLaunchNowhere : undefined)
-    this.element("launch-none").hidden = launches.length > 0
     const launch = this.current
     this.element("launch-fields").hidden = launch === undefined
     if (!launch) return
@@ -108,7 +107,6 @@ export class LaunchEditor {
     this.form = undefined
     this.container.innerHTML = `<div class="launch-editor">
       <p class="launch-intro">${m.intro}</p>
-      <p id="launch-none" class="launch-intro">${m.none}</p>
       <div id="launch-list"></div>
       <div id="launch-fields" class="launch-fields">
         <fieldset id="launch-path" class="launch-path">
@@ -122,16 +120,16 @@ export class LaunchEditor {
     </div>`
     const list = this.element("launch-list")
     this.list = new ElementList({
-      header: list, footer: list, rowClass: "launch-list-add",
+      header: list, body: this.element("launch-fields"),
       ids: { list: "launch-select", remove: "launch-delete", add: "launch-add" },
       onSelect: id => { this.currentId = id; this.placeIndex = 0; this.sync() },
       onAdd: () => this.addLaunch(),
       onRemove: () => this.deleteCurrent()
     })
-    this.list.setLabels({ list: m.launch, remove: m.deleteLaunch, add: m.addLaunch })
+    this.list.setLabels({ list: m.launch, remove: m.deleteLaunch, add: m.addLaunch, empty: m.none })
     const places = this.element("launch-places")
     this.places = new ElementList({
-      header: places, footer: places, rowClass: "launch-places-add",
+      header: places, body: this.element("launch-place-parameters"),
       ids: { list: "launch-place", remove: "launch-place-delete", add: "launch-place-add" },
       navigation: { scope: this.container, onStep: direction => this.selectPlace(this.placeIndex + direction) },
       onSelect: id => this.selectPlace(Number(id)),

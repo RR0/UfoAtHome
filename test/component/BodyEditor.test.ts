@@ -126,7 +126,7 @@ describe("The Bodies part of the editor", () => {
 
   it("adds a body standing for the selected shape, creating the interpretation a recording lacks", () => {
     const fixture = new Fixture(null)
-    expect(fixture.container.querySelector<HTMLElement>("#body-none")!.hidden).toBe(false)
+    expect(fixture.container.querySelector<HTMLElement>("#body-list .element-list-empty")!.hidden).toBe(false)
     fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
     expect(fixture.sighting.interpretation).toEqual({
       bodies: [{ id: "body-1", explains: ["flame"], model: { id: "ellipsoid" }, track: [{ t: 2000, azimuthDeg: 120, altitudeDeg: 5, distanceM: 100, sizeM: { widthM: 3, lengthM: 3, heightM: 1 } }] }]

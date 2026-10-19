@@ -359,15 +359,17 @@ describe("CaseEditorElement", () => {
     const element = await open()
     const root = element.shadowRoot!
     const panel = root.getElementById("case-panel")!
-    const frame = root.getElementById("recording")!
+    const frame = root.getElementById("event-item")!
     expect(panel.hidden).toBe(false)
     // One container for the case, holding the case's own part and the recording's, which is a container of its own.
     const container = root.getElementById("case")!
     expect(container.classList.contains("in-case")).toBe(true)
     expect(container.contains(panel) && container.contains(frame)).toBe(true)
-    // The event on show is inside the Events panel, in a container of its own, under the picker.
+    // The event on show is inside the Events panel, in the frame every list puts its picked element in, under the picker.
     expect(frame.parentElement).toBe(root.getElementById("group-events"))
     expect(frame.parentElement!.contains(parts(element).select)).toBe(true)
+    expect(frame.contains(parts(element).select)).toBe(false)
+    expect(frame.contains(root.getElementById("recording-id"))).toBe(true)
     expect(panel.compareDocumentPosition(frame) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(frame.classList.contains("in-case")).toBe(true)
     expect(frame.contains(root.getElementById("editor"))).toBe(true)
@@ -489,7 +491,7 @@ describe("CaseEditorElement", () => {
     await submit(element) // the reading goes
     expect([...select.options]).toHaveLength(1)
     remove.click()
-    expect(remove.hidden).toBe(true) // the last recording stays
+    expect(remove.disabled).toBe(true) // the last recording stays
   })
 
   it("leaves case mode when a plain recording is loaded into the editor", async () => {

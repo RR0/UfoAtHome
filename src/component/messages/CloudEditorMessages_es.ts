@@ -22,5 +22,6 @@ export const cloudEditorMessages_es: CloudEditorMessages = {
   savedAtThisTime: "Meteorología guardada en este instante.",
   noCloudHere: "No hay ninguna nube individual aquí.",
   cloudSelected: "Nube seleccionada. Arrástrala para moverla.",
-  cloudAdded: " Nube individual añadida, independiente de la cobertura global."
+  cloudAdded: " Nube individual añadida, independiente de la cobertura global.",
+  emptyLayers: "Ninguna capa de nubes",
 }

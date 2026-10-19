@@ -5,6 +5,7 @@ import { SaidTexts } from "../engine/model/SaidText.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { formatEdtfTime, parseEdtfTime } from "../engine/model/Sighting.js"
 import { CaseSession } from "./CaseSession.js"
+import { ElementList } from "./ElementList.js"
 import { EdtfDateField } from "./EdtfDateField.js"
 import { register as registerDateInput } from "./DateInputElement.js"
 import type { DateInputElement } from "./DateInputElement.js"
@@ -58,7 +59,11 @@ const TEMPLATE = `
   .passages .at { font-variant-numeric: tabular-nums; padding: .1em .35em; text-align: left; white-space: nowrap; flex: none; display: inline-flex; align-items: center; gap: .15em; }
   .passages .at svg { width: 1.1em; height: 1.1em; }
   .passages .excerpt { border: 0; background: none; padding: 0; text-align: left; color: LinkText; text-decoration: underline; }
-  .recording.in-case, #interview-section.in-case { border: 1px solid rgba(128, 128, 128, .45); border-radius: 8px; padding: .5em .7em .7em; }
+  /* The event picked, in the frame every list of the editor puts its picked element in (see ElementList): its id, then the observation
+     or the interview. A recording alone, not in a case, has no list and no frame. */
+  #event-item { display: block; }
+  #event-item:not(.in-case) { border: 0; padding: 0; margin: 0; }
+  #event-item > #row-recording-id { margin-bottom: .5em; }
   /* Tabs as the recording's editor has them (see sightingEditorTemplate): a strip on one baseline, the open tab raised and joined to its panel. */
   .group-tabs { --tab-line: color-mix(in srgb, CanvasText 35%, transparent); --tab-surface: color-mix(in srgb, CanvasText 5%, Canvas);
     --tab-recessed: color-mix(in srgb, CanvasText 11%, Canvas); --tab-accent: #4a9eff;
@@ -94,6 +99,7 @@ const TEMPLATE = `
   dialog .actions { display: flex; gap: .5em; margin-top: .6em; }
   .recording-id-error { margin: .2em 0; }
   ${MessageStyle.rules([".file-note"], [], ["#dialog-error", ".recording-id-error"])}
+  ${ElementList.CSS}
 </style>
 <div id="case" class="case">
 <section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
@@ -113,12 +119,14 @@ const TEMPLATE = `
   <section class="group-panel" id="group-events" aria-labelledby="label-events-group">
     <p id="recording-id-error" class="recording-id-error" role="alert" hidden></p>
     <p id="case-problems" class="recording-id-error" role="status" hidden></p>
-    <div id="events-row" class="row recordings">
-      <label><select id="track"></select></label>
-      <label id="row-recording-id"><span id="label-recording-id">ID</span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
-      <button id="add" type="button" class="icon-btn">+</button>
+    <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, "+", then the frame of the event picked. -->
+    <div id="events-row" class="element-list-row">
+      <label class="element-list-picker"><select id="track"></select></label>
       <button id="delete" type="button" class="icon-btn">🗑</button>
+      <button id="add" type="button" class="icon-btn element-list-add">+</button>
     </div>
+    <div id="event-item" class="element-list-body">
+    <label id="row-recording-id" class="row"><span id="label-recording-id">ID</span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
     <section id="recording" class="recording">
       <rr0-sighting-editor id="editor"><span id="recording-dirty" slot="tab-status" class="dirty" role="status" title="Changes not saved" hidden>●</span></rr0-sighting-editor>
       <div id="passages" class="passages" hidden><ul id="passages-list"></ul></div>
@@ -126,6 +134,7 @@ const TEMPLATE = `
     <section id="interview-section" class="recording" hidden>
       <rr0-interview-editor id="interview"></rr0-interview-editor>
     </section>
+    </div>
   </section>
   <section class="group-panel" id="group-case-file" aria-labelledby="label-case-file-group" hidden>
     <div class="row toolbar">
@@ -914,8 +923,7 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("case-panel").hidden = session === undefined
     this.byId("make-case-row").hidden = session !== undefined
     this.byId("case").classList.toggle("in-case", session !== undefined)
-    this.byId("recording").classList.toggle("in-case", session !== undefined)
-    this.byId("interview-section").classList.toggle("in-case", session !== undefined)
+    this.byId("event-item").classList.toggle("in-case", session !== undefined)
     if (!session) {
       this.refreshDirty()
       return
@@ -932,7 +940,7 @@ export class CaseEditorElement extends HTMLElement {
     const shown = this.currentInterview ? items.findIndex(item => item.interview === this.currentInterview) : this.current ? items.findIndex(item => item.track === this.current) : 0
     select.value = String(Math.max(0, shown))
     // Any recording can leave the case, while the case keeps one; an interview can always.
-    this.byId("delete").hidden = this.currentInterview === undefined && session.tracks.length <= 1
+    ;(this.byId("delete") as HTMLButtonElement).disabled = this.currentInterview === undefined && session.tracks.length <= 1
     this.refreshRecordingId(session)
     this.refreshDirty()
   }

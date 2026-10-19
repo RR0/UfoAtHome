@@ -415,4 +415,11 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   questionUnanswered: "Nulla in questa registrazione risponde a una delle domande che una ricostruzione deve risolvere",
   durationRequired: "L'osservazione ha bisogno di una durata per poter essere riprodotta — indicala, o un'ora di fine, che può essere approssimativa",
   questionsUnanswered: "{count} delle domande a cui risponde una ricostruzione completa restano qui senza risposta",
+  emptyDecor: "Nessun elemento della scenografia",
+  emptyMilestones: "Nessun momento",
+  emptyReferences: "Nessuna foto",
+  emptyReferenceLandmarks: "Nessun punto di riferimento",
+  emptyTraces: "Nessun tracciato dell'investigatore",
+  emptyShapes: "Nessuna forma",
+  addReference: "Aggiungi una foto",
 }

@@ -1,6 +1,7 @@
 import { SummaryDescription } from "./SummaryDescription.js"
 import { InputFont } from "./InputFont.js"
 import { MessageStyle } from "./MessageStyle.js"
+import { ElementList } from "./ElementList.js"
 export const html = `
 <!-- The groups' own handles, gathered onto one wrapping strip instead of standing as seven stacked
      <summary> rows down the left edge. Seven collapsed rows cost 259px of pure chrome before a
@@ -170,26 +171,20 @@ export const html = `
      stay adjacent because a decor object is placed RELATIVE to the location above it. -->
 <section class="group-panel" id="group-decor" aria-labelledby="label-decor-group" hidden>
   <div class="toolbar">
-    <!-- This whole block (picker through Occupied floor) is hidden entirely — not just
-         disabled — while there's no decor at all (see SightingEditorElement.syncDecorVisibility):
-         an empty recording shows nothing here but the Add controls below. Shown first, above
-         the Add row, once at least one decor object exists — see that row's own comment for why
-         it's forced onto its own line after this block instead of just flowing after it. -->
-    <!-- What picks, and acts on, the selected object: drawn by ElementList, with the controls' ids the rest of the editor knows them by. -->
+    <!-- The list of the decor, laid out as every list of the editor is (see ElementList): the picker, 🎯, 🗑, then the kind to add and
+         "+", on one line; under it, the frame of everything that is set on the picked object, gone while there is none. -->
     <div id="decor-list-header" class="decor-list-part"></div>
-    <!-- The base properties — name, place, heading, colour, measures — are drawn from what a decor object says it has (see
-         DecorBaseParameterSets and ParameterForm). The model it is drawn as is the last of them: a window of pictures over the same choice. -->
-    <div id="decor-base" class="decor-parameters"></div>
-    <!-- The properties the kind of this object says it has beyond placement and size — floors, windows, a
-         bridge's railing, a line's poles — drawn from what the kind publishes (see DecorParameterSets and
-         ParameterForm), so that the editor knows no kind. -->
-    <div id="decor-parameters" class="decor-parameters"></div>
-    <!-- Lit, lamps, and where the observer sits: drawn the same way, after the properties of the kind. -->
-    <div id="decor-state" class="decor-parameters"></div>
-    <!-- flex-basis:100% (see the CSS rule below) forces this row onto its own line, after
-         whatever decor properties are showing above — the only thing shown at all when there's
-         no decor yet (see the block above's own comment). -->
-    <div id="decor-list-footer" class="decor-list-part"></div>
+    <div id="decor-item">
+      <!-- The base properties — name, place, heading, colour, measures — are drawn from what a decor object says it has (see
+           DecorBaseParameterSets and ParameterForm). The model it is drawn as is the last of them: a window of pictures over the same choice. -->
+      <div id="decor-base" class="decor-parameters"></div>
+      <!-- The properties the kind of this object says it has beyond placement and size — floors, windows, a
+           bridge's railing, a line's poles — drawn from what the kind publishes (see DecorParameterSets and
+           ParameterForm), so that the editor knows no kind. -->
+      <div id="decor-parameters" class="decor-parameters"></div>
+      <!-- Lit, lamps, and where the observer sits: drawn the same way, after the properties of the kind. -->
+      <div id="decor-state" class="decor-parameters"></div>
+    </div>
     <!-- The scenery the editor takes, by itself, from a survey of the place (see SurroundingsPlanter): a choice of the survey it is taken from, or none (the first of the registry by default,
          and kept by the browser, since asking sends the place to a service), and what it says of what it took: how many trees, buildings, bridges
          and lines, or that the survey could not be reached. Empty where no survey covers the place, which is most of the world. It sits
@@ -233,15 +228,22 @@ export const html = `
     <!-- The named moments of the account (see Milestone) — in the Moment group, because they are
          instants: they name times of the account, not anything about a shape. Added at
          the playhead, which is the only instant a reader has in mind when they name one. -->
-    <span id="label-milestones">Moments</span>
-    <button id="add-milestone" type="button" class="icon-btn" title="Add" aria-label="Add">+</button>
-    <select id="milestone"></select>
-    <!-- A select says nothing when the moment already shown is picked again, which is the one to go
-         back to after playing on past it: this goes there whatever the list shows. -->
-    <button id="go-to-milestone" type="button" class="icon-btn" title="Go to this moment" aria-label="Go to this moment">🎯</button>
-    <button id="delete-milestone" type="button" class="icon-btn" title="Delete moment" aria-label="Delete moment">🗑</button>
-    <label><span id="label-milestone-label">Label</span> <input id="milestoneLabel" type="text" size="4"/></label>
-    <label><span id="label-milestone-note">What happens</span> <input id="milestoneNote" type="text"/></label>
+    <!-- Laid out as every list of the editor is (see ElementList): the picker, 🎯, 🗑, "+", then the frame of the picked moment.
+         Titled, since this tab is not only its moments. -->
+    <span id="label-milestones" class="element-list-title">Moments</span>
+    <div class="element-list-row" id="milestone-row">
+      <label class="element-list-picker"><select id="milestone" aria-labelledby="label-milestones"></select></label>
+      <!-- A select says nothing when the moment already shown is picked again, which is the one to go
+           back to after playing on past it: this goes there whatever the list shows. -->
+      <button id="go-to-milestone" type="button" class="icon-btn" title="Go to this moment" aria-label="Go to this moment">🎯</button>
+      <button id="delete-milestone" type="button" class="icon-btn" title="Delete moment" aria-label="Delete moment">🗑</button>
+      <span id="milestone-empty" class="element-list-empty">No moment</span>
+      <button id="add-milestone" type="button" class="icon-btn element-list-add" title="Add" aria-label="Add">+</button>
+    </div>
+    <div class="element-list-body" id="milestone-item">
+      <label><span id="label-milestone-label">Label</span> <input id="milestoneLabel" type="text" size="4"/></label>
+      <label><span id="label-milestone-note">What happens</span> <input id="milestoneNote" type="text"/></label>
+    </div>
   </div>
 </section>
 <!-- The recording itself, as the file it will be saved as. Last on the strip because it is about the
@@ -343,7 +345,7 @@ export const html = `
   </section>
   <section class="subgroup-panel" id="weather-clouds" aria-labelledby="label-clouds-group" hidden>
     <div class="toolbar">
-      <style>#cloud-editor { flex-basis: 100%; min-width: 0; } #cloud-editor .cloud-panel { min-width: 0; } #cloud-editor .cloud-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; } #cloud-editor .cloud-actions { display: flex; flex-wrap: wrap; gap: .4em; align-items: end; } #cloud-editor button { width: auto; min-height: 2em; padding: .25em .65em; } #cloud-editor label { display: flex; flex-direction: column; align-items: start; } #cloud-editor label[hidden] { display: none !important; } #cloud-editor input, #cloud-editor select { max-width: 100%; box-sizing: border-box; } #cloud-editor p { font-size: .85em; } #cloud-editor .cloud-parameters, #cloud-editor .cloud-parameters .parameter-group { display: contents; border: 0; padding: 0; margin: 0; } #cloud-editor .cloud-parameters[hidden] { display: none; } #cloud-editor .cloud-parameters label { display: block; } #cloud-editor .cloud-parameters label > span { display: block; } #cloud-editor input.parameter-derived::placeholder { opacity: .65; }</style><div id="cloud-editor"></div>
+      <style>#cloud-editor { flex-basis: 100%; min-width: 0; } #cloud-editor .cloud-panel { min-width: 0; } #cloud-editor .cloud-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; } #cloud-editor .cloud-list { grid-column: 1 / -1; min-width: 0; } #cloud-editor button:not(.icon-btn) { width: auto; min-height: 2em; padding: .25em .65em; } #cloud-editor label { display: flex; flex-direction: column; align-items: start; } #cloud-editor label[hidden] { display: none !important; } #cloud-editor input, #cloud-editor select { max-width: 100%; box-sizing: border-box; } #cloud-editor p { font-size: .85em; } #cloud-editor .cloud-parameters { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; } #cloud-editor .cloud-parameters .parameter-group { display: contents; border: 0; padding: 0; margin: 0; } #cloud-editor .cloud-parameters[hidden] { display: none; } #cloud-editor .cloud-parameters label { display: block; } #cloud-editor .cloud-parameters label > span { display: block; } #cloud-editor input.parameter-derived::placeholder { opacity: .65; }</style><div id="cloud-editor"></div>
       <label hidden><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
       <!-- The HIGH deck, kept apart from the total: it is not about how much sky was hidden but about
            whether there were ICE CRYSTALS in it, which is what halos and sundogs need. See
@@ -394,8 +396,28 @@ export const html = `
      relief by dragging it is the next step, not this one. -->
 <section class="group-panel" id="group-reference" aria-labelledby="label-reference-group" hidden>
   <div class="toolbar">
-    <label><span id="label-reference">Picture</span> <select id="reference"></select></label>
-    <button id="delete-reference" type="button" class="icon-btn" title="Delete picture" aria-label="Delete picture">🗑</button>
+    <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, then where the picture to add comes from (an
+         address, a file from the author's own disk, embedded in the recording, or street-level pictures near the spot) and "+";
+         under it, the frame of the picked picture. -->
+    <div class="element-list-row" id="reference-row">
+      <label class="element-list-picker"><select id="reference" aria-label="Picture"></select></label>
+      <button id="delete-reference" type="button" class="icon-btn" title="Delete picture" aria-label="Delete picture">🗑</button>
+      <span id="reference-empty" class="element-list-empty">No picture</span>
+      <select id="reference-add-kind" class="element-list-add-kind" aria-label="Add a picture">
+        <option value="address" id="reference-add-address">From an address</option>
+        <option value="file" id="reference-add-file-option">From a file</option>
+        <option value="street" id="reference-add-street">Street-level pictures nearby</option>
+      </select>
+      <button id="add-reference" type="button" class="icon-btn element-list-add" title="Add a picture" aria-label="Add a picture">+</button>
+      <input id="add-reference-file" class="element-list-add" type="file" accept="image/*" hidden/>
+    </div>
+    <!-- Street-level pictures somebody took near the observer's spot — see PanoramaxPictures. Each
+         comes with where it was taken from and which way it looked, a registration already made. -->
+    <div class="decor-add-row">
+      <select id="reference-street" hidden></select>
+      <button id="reference-street-add" type="button" hidden>Add</button>
+    </div>
+    <div class="element-list-body" id="reference-item">
     <label><span id="label-reference-title">Name</span> <input id="referenceTitle" class="reference-field" type="text"/></label>
     <label><span id="label-reference-src">Address</span> <input id="referenceSrc" class="reference-field" type="text" placeholder="https://…/photo.jpg"/></label>
     <label><span id="label-reference-kind">Kind</span>
@@ -419,33 +441,35 @@ export const html = `
          a click names a landmark on it, then the same landmark in the render. -->
     <button id="reference-adopt-pose" type="button">Adopt as the observer's pose</button>
     <span id="reference-status" class="apparent-size"></span>
-    <!-- The details the picture is lined up on (see PictureLandmark): one row each in the dropdown
-         with how far it still is from fitting, the selected one bolder on the canvas, its name
-         editable, and a button that arms the next two clicks to name a new one. -->
-    <label><span id="label-reference-landmarks">Landmarks</span> <select id="reference-landmarks"></select></label>
-    <button id="add-reference-landmark" type="button">Add a landmark</button>
-    <button id="delete-reference-landmark" type="button" class="icon-btn" title="Delete landmark" aria-label="Delete landmark">🗑</button>
-    <label><span id="label-reference-landmark-label">Name</span> <input id="referenceLandmarkLabel" type="text" placeholder="Masking tree, fence…"/></label>
-    <div class="decor-add-row">
-      <button id="add-reference-url" type="button">Add from an address</button>
-      <label><span id="label-add-reference-file">Add a file</span> <input id="add-reference-file" type="file" accept="image/*"/></label>
+    <!-- The details the picture is lined up on (see PictureLandmark), a list of the picture laid out as every list is: one row
+         each in the dropdown with how far it still is from fitting, the selected one bolder on the canvas, its name editable,
+         and a "+" that arms the next two clicks to name a new one. -->
+    <span id="label-reference-landmarks" class="element-list-title">Landmarks</span>
+    <div class="element-list-row" id="reference-landmark-row">
+      <label class="element-list-picker"><select id="reference-landmarks" aria-labelledby="label-reference-landmarks"></select></label>
+      <button id="delete-reference-landmark" type="button" class="icon-btn" title="Delete landmark" aria-label="Delete landmark">🗑</button>
+      <span id="reference-landmark-empty" class="element-list-empty">No landmark</span>
+      <button id="add-reference-landmark" type="button" class="icon-btn element-list-add" title="Add a landmark" aria-label="Add a landmark">+</button>
     </div>
-    <!-- Street-level pictures somebody took near the observer's spot — see PanoramaxPictures. Each
-         comes with where it was taken from and which way it looked, a registration already made. -->
-    <div class="decor-add-row">
-      <button id="reference-street-search" type="button">Street-level pictures nearby</button>
-      <select id="reference-street" hidden></select>
-      <button id="reference-street-add" type="button" hidden>Add</button>
+    <div class="element-list-body" id="reference-landmark-item">
+      <label><span id="label-reference-landmark-label">Name</span> <input id="referenceLandmarkLabel" type="text" placeholder="Masking tree, fence…"/></label>
+    </div>
     </div>
     <!-- What an investigator drew over the place, from their own file (see InvestigatorTrace): lines
-         of sight, axes, markers. Drawn over the scene as theirs, not as part of the reconstruction. -->
-    <div class="decor-add-row">
-      <label><span id="label-trace-import">Investigator's lines (KML, KMZ)</span> <input id="add-trace-file" type="file" accept=".kml,.kmz,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz"/></label>
-      <label><span id="label-trace">Trace</span> <select id="trace"></select></label>
+         of sight, axes, markers. Drawn over the scene as theirs, not as part of the reconstruction. A list of its own, laid out
+         as every list is; its "+" reads a KML or KMZ file. -->
+    <span id="label-trace-import" class="element-list-title">Investigator's lines (KML, KMZ)</span>
+    <div class="element-list-row" id="trace-row">
+      <label class="element-list-picker"><select id="trace" aria-labelledby="label-trace-import"></select></label>
       <button id="delete-trace" type="button" class="icon-btn" title="Delete trace" aria-label="Delete trace">🗑</button>
+      <span id="trace-empty" class="element-list-empty">No investigator's line</span>
+      <button id="add-trace" type="button" class="icon-btn element-list-add" title="Investigator's lines (KML, KMZ)" aria-label="Investigator's lines (KML, KMZ)">+</button>
+      <input id="add-trace-file" class="element-list-add" type="file" accept=".kml,.kmz,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz" hidden/>
+    </div>
+    <span id="trace-status" class="apparent-size"></span>
+    <div class="element-list-body" id="trace-item">
       <label><span id="label-trace-title">Name</span> <input id="traceTitle" class="trace-field" type="text"/></label>
       <label><span id="label-trace-source">Source</span> <input id="traceSource" class="trace-field" type="text"/></label>
-      <span id="trace-status" class="apparent-size"></span>
     </div>
   </div>
 </section>
@@ -460,6 +484,15 @@ export const html = `
   </div>
   <section class="subgroup-panel" id="shape-shapes" aria-labelledby="label-shapes-subgroup">
   <div class="toolbar">
+    <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, "+", then the frame of what is set on the
+         picked shape, gone while there is none. -->
+    <div class="element-list-row" id="shape-row">
+      <label class="element-list-picker"><select id="source" aria-label="Shape"></select></label>
+      <button id="delete-shape" type="button" class="icon-btn" title="Delete shape" aria-label="Delete shape">🗑</button>
+      <span id="shape-empty" class="element-list-empty">No shape</span>
+      <button id="add-shape" type="button" class="icon-btn element-list-add" title="Add shape" aria-label="Add shape">+</button>
+    </div>
+    <div class="element-list-body" id="shape-item">
     <div class="presets" id="presets-group" role="group" aria-label="UFO shape">
       <button class="preset" id="preset-oval" type="button" data-preset="oval">Oval</button>
       <button class="preset" id="preset-polygon" type="button" data-preset="polygon">Polygon</button>
@@ -476,9 +509,6 @@ export const html = `
          aperture throws, and a core clipped to white. See BaseShape.brightness. -->
     <label><span id="label-brightness">Brilliance</span> <input id="brightness" type="range" min="0" max="1" step="0.05" value="0" title="How dazzling the observer said it was — a light you cannot look at does three things a halo never does"/></label>
     <label><span id="label-blur">Blur</span> <input id="blur" type="range" min="0" max="1" step="0.05" value="0" title="How indistinct the observer said its edges were — not the lens's own depth of field, which never touches the object here"/></label>
-    <label><span id="label-shape">Shape</span> <select id="source"></select></label>
-    <button id="add-shape" type="button" class="icon-btn" title="Add shape" aria-label="Add shape">+</button>
-    <button id="delete-shape" type="button" class="icon-btn" title="Delete shape" aria-label="Delete shape">🗑</button>
     <label><span id="label-shape-title">Name</span> <input id="shapeTitle" type="text"/></label>
     <!-- Three readings of ONE relation, apparent width = f(real width, distance), kept in step.
          Only the apparent width is the recording's (BaseShape.angular); the real width is derived
@@ -514,6 +544,7 @@ export const html = `
     <div class="record-row">
       <button id="record" type="button" class="record-btn"></button>
       <label><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" max="1000" step="16" value="100"/> ms</label>
+    </div>
     </div>
   </div>
   </section>
@@ -584,7 +615,7 @@ export const html = `
 </div>
 `
 
-export const css = `${InputFont.CSS}
+export const css = `${InputFont.CSS}${ElementList.CSS}
 :host {
   color-scheme: light dark;
   display: block;
@@ -592,6 +623,12 @@ export const css = `${InputFont.CSS}
 }
 .decor-list-part {
   display: contents;
+}
+/* What a list is, above it, where its tab holds more than the list (the moments of the Time tab). */
+.element-list-title {
+  flex-basis: 100%;
+  font-weight: 600;
+  margin-top: .3em;
 }
 /* What the scenery taken from a survey says of itself: quiet, on a line of its own below the decor. */
 .decor-scenery {

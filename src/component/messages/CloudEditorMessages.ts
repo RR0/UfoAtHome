@@ -30,4 +30,6 @@ export interface CloudEditorMessages {
   cloudSelected: string
   /** Appended to the status, hence its leading space. */
   cloudAdded: string
+  /** What the list of the layers says, before its "+", while there is none. */
+  emptyLayers: string
 }

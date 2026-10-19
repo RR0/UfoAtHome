@@ -24,7 +24,8 @@ export const cloudEditorMessages_en: CloudEditorMessages = {
   savedAtThisTime: "Weather saved at this time.",
   noCloudHere: "No individual cloud here.",
   cloudSelected: "Cloud selected. Drag to move it.",
-  cloudAdded: " Individual cloud added, independent of global coverage."
+  cloudAdded: " Individual cloud added, independent of global coverage.",
+  emptyLayers: "No cloud layer"
 }
 
 type Key = keyof CloudEditorMessages

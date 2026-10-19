@@ -4,18 +4,18 @@ import { ElementList } from "../../src/component/ElementList.js"
 
 function make() {
   const header = document.createElement("div")
-  const footer = document.createElement("div")
-  document.body.append(header, footer)
+  const body = document.createElement("div")
+  document.body.append(header, body)
   const calls = { select: vi.fn(), add: vi.fn(), remove: vi.fn(), look: vi.fn() }
   const list = new ElementList({
-    header, footer,
-    ids: { list: "things", label: "label-things", remove: "remove-thing", add: "add-thing", kinds: "thing-kind", kind: value => `option-${value}` },
+    header, body,
+    ids: { list: "things", remove: "remove-thing", add: "add-thing", kinds: "thing-kind", kind: value => `option-${value}` },
     actions: [{ id: "look", glyph: "🎯", onClick: calls.look }],
     onSelect: calls.select, onAdd: calls.add, onRemove: calls.remove
   })
   list.setKinds([{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }, { value: "z", label: "Zed", hidden: true }])
-  list.setLabels({ list: "Things", remove: "Remove", add: "Add", actions: { look: "Look" } })
-  return { list, header, footer, calls }
+  list.setLabels({ list: "Things", remove: "Remove", add: "Add", empty: "No thing", actions: { look: "Look" } })
+  return { list, header, footer: header, body, calls }
 }
 
 describe("ElementList", () => {
@@ -27,6 +27,28 @@ describe("ElementList", () => {
     list.setItems([{ id: "x", label: "First" }], "x")
     expect(header.querySelector<HTMLElement>("#remove-thing")!.hidden).toBe(false)
     expect((header.querySelector("#things") as HTMLSelectElement).value).toBe("x")
+  })
+
+  it("lays out the row as every list is: picker, actions, removal, then the kind and the adding last, with no label", () => {
+    const { header } = make()
+    const row = header.querySelector(".element-list-row")!
+    expect([...row.children].map(child => child.id || child.className)).toEqual(["element-list-picker", "look", "remove-thing", "element-list-empty", "thing-kind", "add-thing"])
+    expect(row.querySelector("label")!.textContent).toBe("")
+    expect(header.querySelector("#things")!.getAttribute("aria-label")).toBe("Things")
+  })
+
+  it("says there is none before the adding, and frames the fields of the picked one only while there is one", () => {
+    const { list, header, body } = make()
+    const empty = header.querySelector<HTMLElement>(".element-list-empty")!
+    list.setItems([])
+    expect(empty.hidden).toBe(false)
+    expect(empty.textContent).toBe("No thing")
+    expect(body.hidden).toBe(true)
+    expect(body.classList.contains("element-list-body")).toBe(true)
+    list.setItems([{ id: "x", label: "First" }], "x")
+    expect(empty.hidden).toBe(true)
+    expect(body.hidden).toBe(false)
+    expect(header.querySelector<HTMLButtonElement>("#look")!.disabled).toBe(false)
   })
 
   it("adds the kind that is picked, and names the kinds it does not offer", () => {
@@ -68,7 +90,7 @@ describe("ElementList", () => {
   it("stays on show as a choice of none when it is optional, disabling what acts on the picked one until one is", () => {
     const header = document.createElement("div")
     const list = new ElementList({
-      header, footer: header, optional: true,
+      header, optional: true,
       ids: { list: "clouds", remove: "remove-cloud", add: "add-cloud" },
       actions: [{ id: "point", glyph: "🎯", onClick: () => undefined }],
       onSelect: () => undefined, onAdd: () => undefined, onRemove: () => undefined
@@ -109,7 +131,7 @@ describe("ElementList", () => {
       const header = document.createElement("div")
       scope.replaceChildren(header)
       const list = new ElementList({
-        header, footer: header, ids: { list: "steps", remove: "remove-step", add: "add-step" },
+        header, ids: { list: "steps", remove: "remove-step", add: "add-step" },
         navigation: { scope, onStep: direction => steps.push(direction) },
         onSelect: () => undefined, onAdd: () => undefined, onRemove: () => undefined
       })

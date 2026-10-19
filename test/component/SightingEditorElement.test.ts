@@ -3728,10 +3728,11 @@ describe("SightingEditorElement decor group", () => {
       expect((shadow.getElementById(host) as HTMLElement).hidden, host).toBe(true)
       expect((shadow.getElementById(host) as HTMLElement).children.length, host).toBe(0)
     }
-    // The Add row itself is the one thing that's never hidden — always reachable even with
-    // nothing to edit yet.
-    expect((shadow.getElementById("add-decor-building") as HTMLElement).closest(".decor-add-row")).not.toBeNull()
-    expect(((shadow.getElementById("add-decor-building") as HTMLElement).closest(".decor-add-row") as HTMLElement).hidden).toBe(false)
+    // The adding is the one thing that's never hidden — always reachable even with nothing to edit yet, after what says there is none.
+    const add = shadow.getElementById("add-decor-building") as HTMLButtonElement
+    expect(add.hidden).toBe(false)
+    expect(add.closest(".element-list-row")!.querySelector<HTMLElement>(".element-list-empty")!.hidden).toBe(false)
+    expect((shadow.getElementById("decor-item") as HTMLElement).hidden).toBe(true)
   })
 
   it("shows the picker/delete button/property fields again once a decor object exists", () => {

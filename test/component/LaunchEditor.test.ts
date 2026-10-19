@@ -80,12 +80,12 @@ describe("LaunchEditor", () => {
     expect(sighting.interpretation!.launches!.map(launch => launch.id)).toEqual(["b"])
     container.querySelector<HTMLButtonElement>("#launch-delete")!.click()
     expect(sighting.interpretation).toBeUndefined()
-    expect(container.querySelector<HTMLElement>("#launch-none")!.hidden).toBe(false)
+    expect(container.querySelector<HTMLElement>("#launch-list .element-list-empty")!.hidden).toBe(false)
   })
 
   test("a recording with no interpretation says there is no launch", () => {
     build(null)
-    expect(container.querySelector<HTMLElement>("#launch-none")!.hidden).toBe(false)
+    expect(container.querySelector<HTMLElement>("#launch-list .element-list-empty")!.hidden).toBe(false)
     expect(container.querySelector<HTMLElement>("#launch-fields")!.hidden).toBe(true)
   })
 
@@ -111,7 +111,7 @@ describe("LaunchEditor", () => {
     expect(launches[0].track[0].lat).toBeCloseTo(48, 1)
     expect(launches[0].track).toHaveLength(2)
     expect(changes()).toBe(1)
-    expect(container.querySelector<HTMLElement>("#launch-none")!.hidden).toBe(true)
+    expect(container.querySelector<HTMLElement>("#launch-list .element-list-empty")!.hidden).toBe(true)
     expect(container.querySelector<HTMLSelectElement>("#launch-select")!.value).toBe("launch-1")
     expect(field("vehicle.name").value).toBe("Falcon 9")
   })
