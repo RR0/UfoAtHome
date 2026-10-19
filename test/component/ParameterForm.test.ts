@@ -147,6 +147,19 @@ describe("ParameterForm", () => {
     expect(watts.value).toBe("7")
   })
 
+  test("shows a box as its element states it even while the box keeps the focus of its click", () => {
+    const set: ParameterSet = { kind: "s", title: "S", parameters: [{ type: "boolean", key: "lit", label: "Lit", required: true }] }
+    let current: Record<string, unknown> = { lit: false }
+    const form = new ParameterForm(container, "en")
+    form.show(set, new ParameterTarget(() => current, () => undefined), () => undefined)
+    const box = container.querySelector<HTMLInputElement>('[data-key="lit"]')!
+    box.focus()
+    // Another element is picked, which is lit: its box says so, the focus left on it by the last click notwithstanding.
+    current = { lit: true }
+    form.sync()
+    expect(box.checked).toBe(true)
+  })
+
   describe("what a decor object needs of it", () => {
     const building: ParameterSet = {
       kind: "building",

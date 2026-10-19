@@ -7641,6 +7641,9 @@ export class SightingEditorElement extends HTMLElement {
    * fields that do not apply to this object (a colour for a model, a lamp switch for a house) are left out by the form itself,
    * from what the object says it has (see decorBaseContext).
    */
+  /** The object the base fields were last shown for: see showDecorBase. */
+  private decorBaseShownFor?: string
+
   private showDecorBase(decor: DecorObject | undefined): void {
     this.decorBaseHost.hidden = decor === undefined
     this.decorStateHost.hidden = decor === undefined
@@ -7648,11 +7651,15 @@ export class SightingEditorElement extends HTMLElement {
       this.decorBaseForm.clear()
       this.decorStateForm.clear()
       this.decorBaseShown = false
+      this.decorBaseShownFor = undefined
       return
     }
+    // Another object than the one on show: nothing being typed is its own, and every field is read again from it.
+    const another = this.decorBaseShownFor !== decor.id
+    this.decorBaseShownFor = decor.id
     if (this.decorBaseShown) {
-      this.decorBaseForm.sync()
-      this.decorStateForm.sync()
+      this.decorBaseForm.sync(another)
+      this.decorStateForm.sync(another)
       return
     }
     this.decorBaseShown = true

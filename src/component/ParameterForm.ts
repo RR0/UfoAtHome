@@ -147,8 +147,10 @@ export class ParameterForm {
           select.options[0].textContent = choice ? (this.read(choice.label) ?? choice.value) : (this.read(spec.empty) ?? "—")
         }
       } else if (spec.type === "boolean") {
+        // A box is never being typed in: the focus it keeps after a click is no reason to leave it showing what another element said
+        // (a lamp switched off, then another one picked, kept the first one's box, and took three clicks to switch).
         const input = field as HTMLInputElement
-        if (input !== active) input.checked = stated === true
+        input.checked = stated === true
       } else if (spec.type === "colour") {
         const input = field as HTMLInputElement
         if (input !== active) input.value = ParameterForm.swatchOf(stated, spec.fallback ?? "#808080")
