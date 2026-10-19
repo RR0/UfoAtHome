@@ -1,5 +1,6 @@
 import { SummaryDescription } from "./SummaryDescription.js"
 import { InputFont } from "./InputFont.js"
+import { MessageStyle } from "./MessageStyle.js"
 export const html = `
 <!-- The groups' own handles, gathered onto one wrapping strip instead of standing as seven stacked
      <summary> rows down the left edge. Seven collapsed rows cost 259px of pure chrome before a
@@ -602,21 +603,12 @@ export const css = `${InputFont.CSS}
   flex-wrap: wrap;
   gap: 0.5em;
 }
+/* A warning, as every message is drawn (see MessageStyle at the end). */
 .scenery-warning {
   flex-basis: 100%;
-  font-size: 0.9em;
-  color: #9a5b00;
-  font-weight: bold;
-}
-@media (prefers-color-scheme: dark) {
-  .scenery-warning { color: #f0b04a; }
 }
 .scenery-warning[hidden] {
   display: none;
-}
-#scenery-status {
-  font-size: 0.9em;
-  opacity: 0.8;
 }
 
 #shape-shapes .toolbar > [hidden] { display: none !important; }
@@ -743,8 +735,6 @@ input.invalid {
    the short ones still have nothing to wrap. min-width:0 is what lets them, since a flex item
    otherwise refuses to shrink below its own content. */
 .apparent-size {
-  font-size: 0.85em;
-  opacity: 0.8;
   min-width: 0;
   max-width: 100%;
   overflow-wrap: break-word;
@@ -874,8 +864,6 @@ input.invalid {
    same role and styling as .weather-source/.apparent-size. */
 .place-status,
 .ground-elevation {
-  font-size: 0.85em;
-  opacity: 0.8;
   min-width: 0;
   max-width: 100%;
   overflow-wrap: break-word;
@@ -883,10 +871,6 @@ input.invalid {
 /* Says which record the locked fields came from, and when for — quieter than the fields it
    explains, same role and styling as .apparent-size. The link goes to the exact request that
    produced them, so the claim stays checkable rather than just asserted. */
-.weather-source {
-  font-size: 0.85em;
-  opacity: 0.8;
-}
 /* min-width:0 as well as the clamp itself: a flex item refuses to shrink below its own content by
    default, so an unbreakable 575-character line would simply widen the row and take the ellipsis
    off-screen with it instead of ever being cut. */
@@ -1074,15 +1058,7 @@ select.weather-field:disabled {
    different things — working, written, refused — and only the last is a problem, so only the last
    is coloured. Same palette as an invalid field, and the same reason it is stated rather than left
    to a system colour: this widget has no background of its own. */
-#narrative-status.error {
-  color: #c33;
-  font-weight: 600;
-}
-@media (prefers-color-scheme: dark) {
-  #narrative-status.error {
-    color: #ff9a9a;
-  }
-}
+/* (Drawn as an error by MessageStyle, at the end of this sheet.) */
 /* What the draft claims, and what the account never said. A table would be the obvious shape and
    the wrong one: the quotes are sentences of wildly differing length, and a column sized for the
    longest of them wastes the width every other row needed. */
@@ -1234,12 +1210,10 @@ select.weather-field:disabled {
 }
 .file-note {
   margin: 0.5em 0;
-  opacity: 0.8;
 }
 #observer-identity-hint {
   flex-basis: 100%;
   margin: 0;
-  font-size: 0.8em;
 }
 .file-ask {
   max-width: min(34em, calc(100vw - 2em));
@@ -1582,4 +1556,9 @@ select.weather-field:disabled {
 .submenu label:hover {
   background: light-dark(#eef, #3a3d46);
 }
+${MessageStyle.rules(
+  ["#scenery-status", ".apparent-size", ".place-status", ".ground-elevation", ".weather-source", ".file-note", "#observer-identity-hint", "#narrative-status", "#cloud-status", "#body-key-note", "#body-editor .body-intro"],
+  [".scenery-warning"],
+  ["#narrative-status.error"]
+)}
 `

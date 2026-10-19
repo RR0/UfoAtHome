@@ -1,5 +1,6 @@
 import type { ModelSource } from "../render3d/decor/ModelSource.js"
 import { InputFont } from "./InputFont.js"
+import { MessageStyle } from "./MessageStyle.js"
 
 /** What the window says, in the editor's own language. */
 export interface ModelPickerMessages {
@@ -71,7 +72,8 @@ export class ModelPicker {
 .model-picker .model-picker-address input { min-width: 0; }
 .model-picker input, .model-picker textarea { font-size: var(--rr0-input-font-size, 13px); }
 .model-picker :is(${InputFont.FREE}) { font-family: ${InputFont.FAMILY}; }
-.model-picker .model-picker-address p { margin: 0; font-size: .85em; color: #a40; }
+.model-picker .model-picker-address p { margin: 0; }
+${MessageStyle.rules([], [".model-picker .model-picker-address p"])}
 .model-picker .model-picker-address .model-picker-use { justify-self: start; }
 .model-picker h2 { margin: 0; font-size: 1.1em; }
 .model-picker .model-picker-body { overflow-y: auto; padding: .5em 1em 1em; }

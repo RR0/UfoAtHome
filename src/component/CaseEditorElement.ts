@@ -23,6 +23,7 @@ import { caseEditorMessages_en } from "./messages/CaseEditorMessages_en.js"
 import { loadCaseEditorMessages, loadSightingEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { InputFont } from "./InputFont.js"
+import { MessageStyle } from "./MessageStyle.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 
 export const CASE_EDITOR_ELEMENT_NAME = "rr0-case-editor"
@@ -74,7 +75,7 @@ const TEMPLATE = `
   /* A recording alone is not in a case: the events panel is then no frame around it. In a case, the tabs touch the panel under them. */
   #case:not(.in-case) > #group-events { border: 0; padding: 0; margin: 0; background: none; }
   #case.in-case > .case-panel { margin-bottom: 0; }
-  .file-note { font-size: .85em; opacity: .8; margin: .3em 0; }
+  .file-note { margin: .3em 0; }
   .file-editor { min-height: 18em; margin-top: .5em; }
   ${InputFont.CSS}
   .toolbar input[type="url"] { width: 18em; max-width: 100%; }
@@ -91,8 +92,8 @@ const TEMPLATE = `
   .row.header h2 { margin: 0; }
   dialog input[type="text"], dialog input[type="date"], dialog input[type="url"], dialog select { flex: 1 1 auto; min-width: 0; }
   dialog .actions { display: flex; gap: .5em; margin-top: .6em; }
-  #dialog-error { color: #c00; }
-  .recording-id-error { color: #c00; margin: .2em 0; font-size: .9em; }
+  .recording-id-error { margin: .2em 0; }
+  ${MessageStyle.rules([".file-note"], [], ["#dialog-error", ".recording-id-error"])}
 </style>
 <div id="case" class="case">
 <section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
@@ -463,7 +464,7 @@ export class CaseEditorElement extends HTMLElement {
       tab.setAttribute("aria-expanded", String(tab.getAttribute("aria-controls") === (group === "file" ? "group-case-file" : "group-events")))
     }
     if (group === "file") {
-      void this.loadFileEditor().then(() => this.syncFileEditor(), () => this.showFileNote(this.messages.loadFailed))
+      void this.loadFileEditor().then(() => this.syncFileEditor(), () => this.showFileNote(this.messages.loadFailed, "error"))
     } else {
       this.leaveFile()
     }
@@ -481,10 +482,8 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("interview-section").hidden = this.currentInterview === undefined
   }
 
-  private showFileNote(message: string | undefined): void {
-    const note = this.byId("case-file-note")
-    note.textContent = message ?? ""
-    note.hidden = message === undefined
+  private showFileNote(message: string | undefined, kind: "info" | "error" = "info"): void {
+    MessageStyle.show(this.byId("case-file-note"), message, kind)
   }
 
   /** The case as the text of its file. */
@@ -539,11 +538,11 @@ export class CaseEditorElement extends HTMLElement {
     try {
       json = JSON.parse(text)
     } catch {
-      this.showFileNote(this.messages.fileInvalid)
+      this.showFileNote(this.messages.fileInvalid, "error")
       return
     }
     if (!CaseFile.isCase(json)) {
-      this.showFileNote(this.messages.fileInvalid)
+      this.showFileNote(this.messages.fileInvalid, "error")
       return
     }
     this.fileApplied = text
@@ -588,7 +587,7 @@ export class CaseEditorElement extends HTMLElement {
       const json = JSON.parse(await file.text())
       this.guarded(() => void this.importCase(json, new URL("case.json", location.href).href))
     } catch {
-      this.showFileNote(this.messages.loadFailed)
+      this.showFileNote(this.messages.loadFailed, "error")
     }
     input.value = ""
   }
@@ -601,7 +600,7 @@ export class CaseEditorElement extends HTMLElement {
       const json = await SightingFetch.json(absolute)
       this.guarded(() => void this.importCase(json, absolute))
     } catch {
-      this.showFileNote(this.messages.loadFailed)
+      this.showFileNote(this.messages.loadFailed, "error")
     }
   }
 

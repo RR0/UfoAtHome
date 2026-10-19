@@ -15,6 +15,7 @@ import { register as registerInterview } from "./InterviewElement.js"
 import type { InterviewElement } from "./InterviewElement.js"
 import type { InterviewJson } from "../engine/persistence/interviewJson.js"
 import { InputFont } from "./InputFont.js"
+import { MessageStyle } from "./MessageStyle.js"
 
 export const INTERVIEW_EDITOR_ELEMENT_NAME = "rr0-interview-editor"
 
@@ -64,7 +65,8 @@ const TEMPLATE = `
   fieldset.witnesses { display: flex; flex-wrap: wrap; align-items: center; gap: .25em .75em; border: 0; margin: 0; padding: 0; min-width: 0; }
   fieldset.witnesses legend { float: left; padding: 0; margin-right: .4em; }
   #exchanges { --rr0-interview-max-height: 32em; --rr0-interview-overflow: auto; }
-  .file-note { font-size: .85em; opacity: .8; margin: .3em 0; }
+  .file-note { margin: .3em 0; }
+  ${MessageStyle.rules([".file-note"])}
   .file-editor { min-height: 18em; margin-top: .5em; }
 </style>
 <div id="tabs" class="group-tabs">
@@ -398,10 +400,8 @@ export class InterviewEditorElement extends HTMLElement {
     reader.revealSegment(index)
   }
 
-  private note(message: string | undefined): void {
-    const note = this.shadow.getElementById("file-note")!
-    note.textContent = message ?? ""
-    note.hidden = message === undefined
+  private note(message: string | undefined, kind: "info" | "error" = "info"): void {
+    MessageStyle.show(this.shadow.getElementById("file-note")!, message, kind)
   }
 
   /** The address the transcript is fetched from, absolute. */
@@ -552,7 +552,7 @@ export class InterviewEditorElement extends HTMLElement {
             text = InterviewEditorElement.pretty(json)
           }
         } catch {
-          this.note(this.messages.loadFailed)
+          this.note(this.messages.loadFailed, "error")
         }
       }
       text ??= this.template(event)
@@ -566,7 +566,7 @@ export class InterviewEditorElement extends HTMLElement {
       if (this.text !== undefined || this.transcriptUrl(event) === undefined) this.note(undefined)
       else if (this.shadow.getElementById("file-note")!.textContent === this.messages.loading) this.note(undefined)
     } catch {
-      this.note(this.messages.loadFailed)
+      this.note(this.messages.loadFailed, "error")
     }
   }
 
@@ -584,7 +584,7 @@ export class InterviewEditorElement extends HTMLElement {
     } catch {
       valid = false
     }
-    this.note(valid ? undefined : this.messages.invalid)
+    this.note(valid ? undefined : this.messages.invalid, "error")
     const event = this.current
     // What the text says of the interview is what the summary shows: a field it no longer has is cleared there.
     if (valid && event && typeof parsed === "object" && parsed !== null && !Array.isArray(parsed) && this.applyFileToEvent(parsed as Record<string, unknown>, true)) {
@@ -609,7 +609,7 @@ export class InterviewEditorElement extends HTMLElement {
   /** Puts a transcript read from a file or an address in the text, as an edit of the author's. */
   private async take(json: unknown): Promise<void> {
     if (typeof json !== "object" || json === null || !Array.isArray((json as { segments?: unknown }).segments)) {
-      this.note(this.messages.notATranscript)
+      this.note(this.messages.notATranscript, "error")
       return
     }
     // The file replaces the text, and what it says of the interview is what the summary then shows; what the summary has that it does not say stays.
@@ -645,10 +645,10 @@ export class InterviewEditorElement extends HTMLElement {
         })
         json = imported && { ...imported, transcription: { note: `Imported from ${file.name}: who speaks and when are as the file gave them, to be checked.` } }
       }
-      if (json === undefined) this.note(this.messages.notATranscript)
+      if (json === undefined) this.note(this.messages.notATranscript, "error")
       else await this.take(json)
     } catch {
-      this.note(this.messages.loadFailed)
+      this.note(this.messages.loadFailed, "error")
     }
     input.value = ""
   }
@@ -659,7 +659,7 @@ export class InterviewEditorElement extends HTMLElement {
     try {
       await this.take(await SightingFetch.json(new URL(value, this.base ?? location.href).href))
     } catch {
-      this.note(this.messages.loadFailed)
+      this.note(this.messages.loadFailed, "error")
     }
   }
 

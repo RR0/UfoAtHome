@@ -2,6 +2,7 @@ import { setupCloudEditor } from "./CloudEditor.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
 import { SurroundingsPlanter } from "./SurroundingsPlanter.js"
+import { MessageStyle } from "./MessageStyle.js"
 import { SceneryDates } from "./SceneryDates.js"
 import type { SurroundingsProvider } from "../render3d/terrain/SurroundingsProvider.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
@@ -5250,7 +5251,7 @@ export class SightingEditorElement extends HTMLElement {
     this.syncCanvasMode()
     this.refreshTimelineMarks()
     if (open && tab.getAttribute("aria-controls") === "group-file") {
-      void this.loadFileEditor().then(() => this.syncFileEditor(false), () => this.showFileNote(this.messages.importError))
+      void this.loadFileEditor().then(() => this.syncFileEditor(false), () => this.showFileNote(this.messages.importError, "error"))
     }
   }
 
@@ -5355,9 +5356,8 @@ export class SightingEditorElement extends HTMLElement {
     return undefined
   }
 
-  private showFileNote(text: string | undefined): void {
-    this.fileNote.textContent = text ?? ""
-    this.fileNote.hidden = text === undefined
+  private showFileNote(text: string | undefined, kind: "info" | "error" = "info"): void {
+    MessageStyle.show(this.fileNote, text, kind)
   }
 
   /** What the file would be if saved now — the same text Export writes. */
@@ -5447,7 +5447,7 @@ export class SightingEditorElement extends HTMLElement {
       // The history already holds this text (it is what typing in it, or an undo, made): not a change to write in.
       this.historySnapshot = this.fileText()
     } catch {
-      this.showFileNote(this.messages.importErrorMalformed)
+      this.showFileNote(this.messages.importErrorMalformed, "error")
       this.fileTextApplied = text
     } finally {
       this.applyingFileText = false
