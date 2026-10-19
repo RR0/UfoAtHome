@@ -1,7 +1,8 @@
-import { BoxGeometry, BufferGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshLambertMaterial } from "three"
+import { BoxGeometry, BufferGeometry, CylinderGeometry, Float32BufferAttribute, Group, Matrix4, Mesh, MeshLambertMaterial, Shape, ShapeGeometry, Vector2 } from "three"
 import type { Object3D } from "three"
 import type { RoadSignFace } from "../engine/model/Decor.js"
 import { TrafficSignals } from "../engine/model/LightRig.js"
+import type { PedestrianFigure } from "../engine/model/LightRig.js"
 import type { RgbColor } from "./skyColors.js"
 
 /** One part of a piece of street furniture: a stock geometry, where it goes, and its colour. */
@@ -140,6 +141,27 @@ export class StreetFurnitureGeometry {
       plate(outer * inside, 0.003, r + 0.0205, inner)
     }
     return StreetFurnitureGeometry.group(parts)
+  }
+
+  /**
+   * What a lens of a pedestrian's head shows lit, `heightM` tall: a figure standing face on, or one walking seen from the side, as the R12 signal
+   * of the French road code has them. Flat, looking toward −z as the head does; each one outline and a head apart, never overlapping, as a lamp
+   * adds its light and a part drawn twice would shine twice.
+   */
+  static pedestrianFigure(figure: PedestrianFigure, heightM: number): BufferGeometry {
+    // In a figure one unit tall, centred on the lens.
+    const outline: [number, number][] = figure === "standing"
+      ? [[-0.17, 0.25], [0.17, 0.25], [0.17, -0.08], [0.1, -0.08], [0.1, -0.5], [0.02, -0.5], [0.02, -0.12], [-0.02, -0.12], [-0.02, -0.5], [-0.1, -0.5], [-0.1, -0.08], [-0.17, -0.08]]
+      : [[-0.05, 0.26], [-0.09, 0.22], [-0.24, 0.05], [-0.19, 0.01], [-0.07, 0.13], [-0.07, 0], [-0.18, -0.22], [-0.29, -0.47], [-0.22, -0.5], [-0.1, -0.25],
+        [-0.01, -0.07], [0.09, -0.27], [0.13, -0.5], [0.21, -0.48], [0.16, -0.24], [0.07, 0], [0.07, 0.11], [0.2, 0], [0.24, 0.05], [0.08, 0.22], [0.05, 0.26]]
+    const body = new Shape(outline.map(([x, y]) => new Vector2(x, y)))
+    const head = new Shape()
+    head.absarc(figure === "standing" ? 0 : -0.02, 0.38, 0.1, 0, 2 * Math.PI, false)
+    const geometry = new ShapeGeometry([body, head], 6)
+    geometry.scale(heightM, heightM, heightM)
+    // A shape faces +z: turned to face the front.
+    geometry.rotateY(Math.PI)
+    return geometry
   }
 
   /** A part at (x, y, z) of the piece. */

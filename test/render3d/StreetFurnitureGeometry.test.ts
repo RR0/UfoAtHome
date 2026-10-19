@@ -17,6 +17,18 @@ describe("StreetFurnitureGeometry", () => {
     expect(box.max.z - box.min.z).toBeCloseTo(2.5)
   })
 
+  it("shows a pedestrian's lenses as a figure standing in the red and walking in the green, the lens tall, looking toward the front", () => {
+    const [red, green] = TrafficSignals.pedestrianLights(0)
+    expect([TrafficSignals.figureOf(red), TrafficSignals.figureOf(green)]).toEqual(["standing", "walking"])
+    for (const light of TrafficSignals.vehicleLights(0)) expect(TrafficSignals.figureOf(light)).toBeUndefined()
+    for (const figure of ["standing", "walking"] as const) {
+      const geometry = StreetFurnitureGeometry.pedestrianFigure(figure, 0.18)
+      geometry.computeBoundingBox()
+      expect(geometry.boundingBox!.max.y - geometry.boundingBox!.min.y).toBeCloseTo(0.18 * 0.98, 2)
+      expect(geometry.getAttribute("normal").getZ(0)).toBeCloseTo(-1)
+    }
+  })
+
   it("drapes the bands on the ground under them", () => {
     const group = StreetFurnitureGeometry.crossing(6, 2.5)
     StreetFurnitureGeometry.drape(group, x => x * 0.1)

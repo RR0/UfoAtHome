@@ -1504,7 +1504,12 @@ export class DecorSystem {
   private static addLights(group: Group, lights: DecorLight[] | undefined): void {
     for (const light of lights ?? []) {
       const colour = hexToRgb(light.color)
-      const mesh = addPart(group, new SphereGeometry(light.radiusM ?? LAMP_RADIUS_M, 8, 6), colour, light.offsetM.y, true)
+      // A pedestrian's lens shows a figure, not a disc (see TrafficSignals.figureOf), nine tenths of its width tall.
+      const figure = TrafficSignals.figureOf(light)
+      const geometry = figure
+        ? StreetFurnitureGeometry.pedestrianFigure(figure, 1.8 * (light.radiusM ?? LAMP_RADIUS_M))
+        : new SphereGeometry(light.radiusM ?? LAMP_RADIUS_M, 8, 6)
+      const mesh = addPart(group, geometry, colour, light.offsetM.y, true)
       mesh.position.set(light.offsetM.x, light.offsetM.y, light.offsetM.z)
       mesh.userData = { emissive: true, lightId: light.id, lightColor: colour } satisfies DecorMeshUserData
       mesh.visible = false

@@ -150,6 +150,9 @@ export class LightRigs {
   }
 }
 
+/** The figure a lens of a pedestrian's head shows: standing (wait) or walking (cross). */
+export type PedestrianFigure = "standing" | "walking"
+
 /**
  * The cycle of the traffic lights of a junction, as lamps (see DecorLight): which of them is lit when.
  *
@@ -214,6 +217,14 @@ export class TrafficSignals {
   /** Whether these lamps are a pedestrian's head (two lenses) rather than the traffic's (three). */
   static isPedestrian(lights: readonly DecorLight[] | undefined): boolean {
     return lights?.some(light => light.id === "ped-green") ?? false
+  }
+
+  /**
+   * What a lens of a pedestrian's head shows lit, which is not a disc but a figure: a pedestrian standing in its red, walking in its green
+   * (see StreetFurnitureGeometry.pedestrianFigure). Undefined for any other lamp, which is a disc.
+   */
+  static figureOf(light: DecorLight): PedestrianFigure | undefined {
+    return light.id === "ped-red" ? "standing" : light.id === "ped-green" ? "walking" : undefined
   }
 
   /** One lens, lit from `fromS` into the cycle for `forS` seconds (see lightOnFractionBetween: lit while frac(t / period + phase) < duty). */
