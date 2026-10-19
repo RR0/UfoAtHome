@@ -7659,7 +7659,7 @@ export class SightingEditorElement extends HTMLElement {
     const target = () => new ParameterTarget(
       () => {
         const current = this.ufoElement.sighting.decor.find(candidate => candidate.id === this.currentDecorId)
-        return current ? DecorBase.viewOf(current, this.ufoElement.currentTime) as unknown as ParameterHolder : undefined
+        return current ? DecorBase.viewOf(current, this.ufoElement.currentTime, this.sceneElement.sunAltitudeDeg) as unknown as ParameterHolder : undefined
       },
       (apply, spec) => this.commitDecorBase(apply, spec.key),
       () => this.decorBaseContext()
@@ -7695,7 +7695,7 @@ export class SightingEditorElement extends HTMLElement {
     if (!decor) return
     if ((key === "lit" || key === "headlights") && this.ufoElement.playbackState === "playing") return
     const t = this.ufoElement.currentTime
-    const view = DecorBase.viewOf(decor, t)
+    const view = DecorBase.viewOf(decor, t, this.sceneElement.sunAltitudeDeg)
     change(view as unknown as ParameterHolder)
     const sighting = this.ufoElement.sighting
     sighting.decor = sighting.decor.map(candidate => candidate.id === decor.id ? DecorBase.apply(candidate, view, key, t) : candidate)

@@ -704,7 +704,20 @@ export function resolveDecorHeadlightsAt(decor: DecorObject, t: number): Headlig
   return resolveDecorLitAt(decor, t) ? "dipped" : "off"
 }
 
-export function resolveDecorLitAt(decor: DecorObject, t: number): boolean {
+/** The sun's altitude below which a public lamp's photocell has switched it on. */
+export const PHOTOCELL_SUN_ALTITUDE_DEG = -0.5
+
+/** A public lamp a survey brought is switched by its photocell, which the dark is: nobody wrote when it is on. One the author set or keyed is theirs. */
+export function switchedByPhotocell(decor: DecorObject): boolean {
+  return decor.kind === "streetlight" && decor.origin !== undefined && decor.lit === undefined && !decor.litKeyframes?.length
+}
+
+/**
+ * Whether the object's lamp is on at `t`: as its keyframes or its switch say, or, for a lamp on its photocell (see switchedByPhotocell), as the
+ * Sun at that instant says, when it is given — which is what the scene draws and what the editor's switch must show.
+ */
+export function resolveDecorLitAt(decor: DecorObject, t: number, sunAltitudeDeg?: number): boolean {
+  if (sunAltitudeDeg !== undefined && switchedByPhotocell(decor)) return sunAltitudeDeg < PHOTOCELL_SUN_ALTITUDE_DEG
   const keyframes = decor.litKeyframes
   if (!keyframes || keyframes.length === 0) return decor.lit ?? false
   let latest = keyframes[0]

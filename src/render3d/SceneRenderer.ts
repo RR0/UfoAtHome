@@ -339,8 +339,6 @@ const CELESTIAL_LIGHT_MIN_ALTITUDE_DEG = BODY_HIDE_BELOW_DEG
  */
 const STREETLIGHT_REAL_LIGHTS = 8
 const STREETLIGHT_SHADOWING_LIGHTS = 2
-/** The sun's altitude below which a public lamp's photocell has switched it on. */
-const PHOTOCELL_SUN_ALTITUDE_DEG = -0.5
 const STREETLIGHT_CANDELA = 1500
 /** Where the lamps are on a vehicle: how high over the road, how far back from the front, and how far from the middle, metres (the last as a share of the width for a decor vehicle). */
 const HEADLIGHT_HEIGHT_M = 0.7
@@ -3267,11 +3265,10 @@ export class SceneRenderer {
       if (object.kind !== "streetlight" && object.kind !== "vehicle") continue
       const group = this.decorGroups.get(object.id)
       if (!group) continue
-      // A public lamp a survey brought is switched by its photocell, which the dark is: nobody wrote when it is on. One the author set or keyed is theirs.
-      const photocell = object.kind === "streetlight" && object.origin !== undefined && object.lit === undefined && !object.litKeyframes?.length && this.lastAstronomy
-      // A vehicle's lights are a setting (see HeadlightMode), and its lamps show whenever it is any but off.
+      // A vehicle's lights are a setting (see HeadlightMode), and its lamps show whenever it is any but off. A public lamp a survey brought is on its
+      // photocell (see switchedByPhotocell), which the Sun of this instant switches.
       const headlights = object.kind === "vehicle" ? resolveDecorHeadlightsAt(object, t) : undefined
-      const lit = photocell ? this.lastAstronomy!.sun.altitudeDeg < PHOTOCELL_SUN_ALTITUDE_DEG : headlights !== undefined ? Headlights.lamps(headlights) : resolveDecorLitAt(object, t)
+      const lit = headlights !== undefined ? Headlights.lamps(headlights) : resolveDecorLitAt(object, t, this.lastAstronomy?.sun.altitudeDeg)
       DecorSystem.setLit(group, object.kind, lit, this.relativeScale, object.lamp)
       const light = this.streetlightLights.get(object.id)
       if (light) light.visible = lit

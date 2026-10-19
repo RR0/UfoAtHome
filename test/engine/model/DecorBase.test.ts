@@ -213,3 +213,28 @@ describe("the headlights of a vehicle in the editor", () => {
     expect((DecorBaseParameterSets.HEADLIGHT_LABELS.main as unknown as Record<string, string>).fr).toBe("Feux de route")
   })
 })
+
+describe("a public lamp a survey brought, in the editor", () => {
+  const surveyed: DecorObject = { id: "ign-1", kind: "streetlight", eastM: 0, northM: 0, origin: "ign-lidar-topo" }
+
+  test("is shown lit when its photocell has switched it on, and out by day", () => {
+    expect(DecorBase.viewOf(surveyed, 0, -12).lit).toBe(true)
+    expect(DecorBase.viewOf(surveyed, 0, 30).lit).toBe(false)
+  })
+
+  test("is the author's once switched: the Sun no longer decides", () => {
+    const off = DecorBase.apply(surveyed, { ...DecorBase.viewOf(surveyed, 0, -12), lit: false }, "lit", 0)
+    expect(DecorBase.viewOf(off, 0, -12).lit).toBe(false)
+  })
+
+  test("has its own lamp as the street lamp's rig, which choosing again does not double", () => {
+    expect(DecorBase.viewOf(surveyed, 0).lightRig).toBe(DecorBase.STREETLIGHT_RIG)
+    const kept = DecorBase.apply(surveyed, { ...DecorBase.viewOf(surveyed, 0), lightRig: DecorBase.STREETLIGHT_RIG }, "lightRig", 0)
+    expect(kept.lights).toBeUndefined()
+  })
+
+  test("is a column whose lamp is out when no lights are chosen", () => {
+    const none = DecorBase.apply(surveyed, { ...DecorBase.viewOf(surveyed, 0), lightRig: "" }, "lightRig", 0)
+    expect(DecorBase.viewOf(none, 0, -12).lit).toBe(false)
+  })
+})

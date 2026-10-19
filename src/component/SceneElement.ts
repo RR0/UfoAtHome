@@ -418,6 +418,11 @@ export class SceneElement extends HTMLElement {
   private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription>; audible?: Set<string>; air?: UpperAirSample[]; airSource?: UpperAirSource; contrails?: ContrailTrail[] }
   /** Where the Sun stood at the last restatement of the sky, from the observer: what the aircraft are lit by, each from its own place. */
   private lastSun?: { altitudeDeg: number; azimuthDeg: number }
+
+  /** The Sun's altitude at the instant on show, once the sky has been worked out: what switches a lamp on its photocell (see switchedByPhotocell). */
+  get sunAltitudeDeg(): number | undefined {
+    return this.lastSun?.altitudeDeg
+  }
   /** The decor the recording states plus the traffic, rebuilt only when either changes: the renderer
    * rebuilds every group when the list it is given is not the one it had. */
   private decorMemo?: { base: DecorObject[]; traffic: DecorObject[]; merged: DecorObject[] }

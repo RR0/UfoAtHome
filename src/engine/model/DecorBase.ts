@@ -52,14 +52,19 @@ export interface DecorBaseView {
 
 export class DecorBase {
 
-  /** The rig a decor object's own lamps came from, recognised by the ids of the lamps it produced. */
+  /** The rig a public lamp's own lamp is: the lamp it is built with, without a declared one (see apply). */
+  static readonly STREETLIGHT_RIG = "streetlamp"
+
+  /** The rig a decor object's own lamps came from, recognised by the ids of the lamps it produced; a street lamp's built-in lamp is the street lamp's rig. */
   static rigOf(decor: Pick<DecorObject, "kind" | "lights">): string {
+    if (decor.kind === "streetlight" && !decor.lights?.length) return DecorBase.STREETLIGHT_RIG
     const carried = decor.lights?.map(light => light.id).join() ?? ""
     return LightRigs.forKind(decor.kind).find(rig => rig.create().map(light => light.id).join() === carried)?.id ?? ""
   }
 
   /** The view of an object at `t`; places are as a field shows them, a hundredth of a metre at most. */
-  static viewOf(decor: DecorObject, t: number): DecorBaseView {
+  /** `sunAltitudeDeg`: the Sun at `t`, which switches a lamp on its photocell (see resolveDecorLitAt). */
+  static viewOf(decor: DecorObject, t: number, sunAltitudeDeg?: number): DecorBaseView {
     const placement = resolveDecorPlacementAt(decor, t)
     const round = (value: number) => Number(value.toFixed(2))
     return {
@@ -70,7 +75,7 @@ export class DecorBase {
       headingDeg: round(placement.headingDeg ?? 0),
       color: decor.color,
       sizeM: decor.sizeM ? { ...decor.sizeM } : undefined,
-      lit: resolveDecorLitAt(decor, t),
+      lit: resolveDecorLitAt(decor, t, sunAltitudeDeg),
       headlights: resolveDecorHeadlightsAt(decor, t),
       lightRig: DecorBase.rigOf(decor),
       observerSide: decor.observerSide,
@@ -111,6 +116,10 @@ export class DecorBase {
         return { ...decor, headlightKeyframes }
       }
       case "lightRig": {
+        // A street lamp has its lamp: choosing the street lamp's rig keeps it as it is built, not a second one declared over it, and choosing none
+        // is a column whose lamp is out.
+        if (decor.kind === "streetlight" && view.lightRig === DecorBase.STREETLIGHT_RIG) return { ...decor, lights: undefined }
+        if (decor.kind === "streetlight" && !view.lightRig) return { ...decor, lights: undefined, lit: false, litKeyframes: undefined }
         const rig = LightRigs.byId(view.lightRig === "" ? undefined : view.lightRig)
         return { ...decor, lights: rig ? rig.create() : undefined }
       }
