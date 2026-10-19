@@ -2397,6 +2397,9 @@ export class SceneRenderer {
     // setAstronomy tick): adding the sighting's first-ever decor object shouldn't have to wait an
     // extra tick before it starts actually casting a shadow.
     this.celestialLight.castShadow = this.decorGroups.size > 0 || this.bodySystem.any
+    // A lamp built is dark until it is written for the eye: written now, at the instant last drawn, so that a lamp planted on a paused scene (a
+    // survey that answers late) is the lamp it is in the very photograph the eye measures next.
+    if (this.decorLitAt) this.updateDecorLitState(this.decorLitAt.t, this.decorLitAt.stepMs)
   }
 
   /**
@@ -3235,7 +3238,11 @@ export class SceneRenderer {
     return this.air.transmittance(from, to, group.position.distanceTo(this.camera.position))
   }
 
+  /** The instant the decor's lamps were last written for (see updateDecorLitState), which they are written for again when the eye adapts. */
+  private decorLitAt?: { t: number, stepMs: number }
+
   updateDecorLitState(t: number, stepMs = 0): void {
+    this.decorLitAt = { t, stepMs }
     const bloomRadiusRad = this.lampBloomRadiusRad()
     for (const object of this.decorObjects) {
       const lampGroup = this.decorGroups.get(object.id)
@@ -3565,6 +3572,11 @@ export class SceneRenderer {
     PointSources.setEye(this.scatteredSky?.rodShare ?? 0, this.relativeScale)
     this.updateTwinkle(this.twinkleSeconds)
     for (const light of this.streetlightLights.values()) light.intensity = ((light.userData.candela as number | undefined) ?? STREETLIGHT_CANDELA) * this.relativeScale
+    // And the lamps that shine for the eye (a streetlight's globe, a traffic light's lenses), which are written in the eye's relative units at the
+    // instant last drawn: left as they were when the eye adapted again, they kept the luminance of the eye before. On a paused scene nothing else
+    // writes them again, and the eye's probe, reading a lamp lit for an eye adapted to the dark as one a hundred times brighter, adapted the eye
+    // further up, which made them brighter still: Notre-Dame by night ran away to 33 000 cd/m², the square burnt out until the time was changed.
+    if (this.decorLitAt) this.updateDecorLitState(this.decorLitAt.t, this.decorLitAt.stepMs)
     this.buildSkyGlow(astronomy, skyColors.zenith)
     // The air between the eye and everything real, with the horizon this sky has just been given
     // as the light it lays over a distant thing — see AerialFog.
