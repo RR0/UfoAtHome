@@ -29,7 +29,7 @@ export class MessageStyle {
     const all = (kind: string, more: readonly string[]) => [`.${kind}`, ...more].join(", ")
     return `
 /* A component's messages: information muted, warnings orange, errors red, all three at one smaller size (see MessageStyle). */
-:is(${all(MessageStyle.INFO, info)}, ${all(MessageStyle.WARNING, warning)}, ${all(MessageStyle.ERROR, error)}) { font-size: var(--rr0-message-font-size, 0.85em); font-weight: normal; opacity: 1; }
+:is(${all(MessageStyle.INFO, info)}, ${all(MessageStyle.WARNING, warning)}, ${all(MessageStyle.ERROR, error)}) { font-size: var(--rr0-message-font-size, 0.78em); line-height: var(--rr0-message-line-height, 1.3); font-weight: normal; opacity: 1; }
 :is(${all(MessageStyle.INFO, info)}) { color: color-mix(in srgb, CanvasText 62%, transparent); }
 :is(${all(MessageStyle.WARNING, warning)}) { color: color-mix(in srgb, #e48a00 72%, CanvasText); }
 :is(${all(MessageStyle.ERROR, error)}) { color: color-mix(in srgb, #e5322d 72%, CanvasText); }
