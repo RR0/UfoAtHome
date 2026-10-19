@@ -31,9 +31,10 @@ export class CachedSurroundingsProvider implements SurroundingsProvider {
    * kept for a month more. 2: the traffic lights, crossings and signs of the streets. 3: what kind of building each is (a church, an old
    * one), and the walls and roofs of that kind. 4: a town's own lamps in place of the volunteers' map's, with their colour and flux (see
    * StreetLampSource). 5: a town's own traffic lights in place of the map's (see StreetSignalSource). 6: no bridge of a railway as a road bridge
-   * (see OverheadStructures.bridges).
+   * (see OverheadStructures.bridges). 7: a building's outline whole as soon as any of it is within reach, and every outline of a named zone with it
+   * (see TopoBuildings.buildings), the buildings of a church's zone asked for beyond the square (see IgnGeoplatform.vectors).
    */
-  static readonly FORMAT = 6
+  static readonly FORMAT = 7
   /** How many answers are kept on disk, the oldest going first: a few hundred places, a few megabytes. */
   static readonly MAX_STORED = 400
 

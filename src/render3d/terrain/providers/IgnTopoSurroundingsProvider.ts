@@ -48,7 +48,7 @@ export class IgnTopoSurroundingsProvider implements SurroundingsProvider {
     const [vectors, photo, furniture, flown] = await Promise.all([this.platform.vectors(centre, radius, true), this.platform.photo(centre, radius).catch(() => undefined), this.furniture?.near(centre, radiusM), this.platform.photoDate(centre)])
     return {
       trees: [],
-      buildings: BuildingMaterials.fit(BuildingStyles.fit(RoofShapes.fit(TopoBuildings.named(TopoBuildings.buildings(vectors.buildings, centre, radius), vectors.zones, centre), undefined, photo))),
+      buildings: BuildingMaterials.fit(BuildingStyles.fit(RoofShapes.fit(TopoBuildings.named(TopoBuildings.buildings(vectors.buildings, centre, radius, undefined, undefined, vectors.zones), vectors.zones, centre), undefined, photo))),
       bridges: OverheadStructures.bridges(vectors, centre, radius, undefined),
       lines: OverheadStructures.lines(vectors, centre, radius, undefined),
       ...furniture,

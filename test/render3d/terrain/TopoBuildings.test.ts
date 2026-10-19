@@ -43,6 +43,24 @@ describe("TopoBuildings", () => {
     expect(house.headingDeg % 180).toBeCloseTo(0, 0)
   })
 
+  it("keeps an outline whole as soon as any of it is within reach, however far the middle of its rectangle", () => {
+    // A nave 110 m long whose west end is 90 m away: its middle is 145 m away, and it is there at a radius of 100 m all the same.
+    const [nave] = TopoBuildings.buildings([polygon({ hauteur: 34.9 }, [[90, -6], [200, -6], [200, 6], [90, 6]])], CENTRE, 100)
+    expect(nave.widthM).toBeCloseTo(110, 0)
+    expect(TopoBuildings.buildings([polygon({ hauteur: 34.9 }, [[110, -6], [200, -6], [200, 6], [110, 6]])], CENTRE, 100)).toHaveLength(0)
+  })
+
+  it("brings every outline of a named zone one of them reaches: a cathedral comes whole, its far tower with its near one", () => {
+    const cathedral = polygon({ toponyme: "Cathédrale Notre-Dame" }, [[80, -40], [240, -40], [240, 40], [80, 40]])
+    const near = polygon({ hauteur: 66 }, [[95, -30], [111, -30], [111, -16], [95, -16]])
+    // Its corner on the zone's own line, as the map draws them.
+    const far = polygon({ hauteur: 66 }, [[110, 20], [126, 20], [126, 40], [110, 40]])
+    const elsewhere = polygon({ hauteur: 10 }, [[110, 60], [120, 60], [120, 70], [110, 70]])
+    const found = TopoBuildings.buildings([near, far, elsewhere], CENTRE, 100, 12, 300, [cathedral])
+    expect(found.map(building => Math.round(building.northM)).sort((a, b) => a - b)).toEqual([-23, 30])
+    expect(TopoBuildings.buildings([near, far], CENTRE, 100)).toHaveLength(1)
+  })
+
   it("keeps the outlines apart that a laser would see as one run of roof", () => {
     const found = TopoBuildings.buildings([
       polygon({ hauteur: 6 }, [[-10, 8], [0, 8], [0, 16], [-10, 16]]),

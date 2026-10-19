@@ -174,11 +174,57 @@ export class IgnGeoplatform {
       // The railways carried over the ground, which tell the bridge of a railway from the bridge of a road (see OverheadStructures.bridges).
       this.features("troncon_de_voie_ferree", `${within} AND position_par_rapport_au_sol>'0'`, "position_par_rapport_au_sol,geometrie").catch((): VectorFeature[] => []),
       this.features("ligne_electrique", within, "voltage,geometrie"),
-      withBuildings ? this.features("batiment", within, "nature,usage_1,hauteur,nombre_d_etages,materiaux_des_murs,materiaux_de_la_toiture,date_d_apparition,date_modification,geometrie", 5000) : Promise.resolve([]),
+      withBuildings ? this.features("batiment", within, IgnGeoplatform.BUILDING_PROPERTIES, 5000) : Promise.resolve([]),
       // The names of the zones (a town hall, a post office, a square): a few, and a building takes the name of the one it stands in.
-      withBuildings ? this.features("zone_d_activite_ou_d_interet", within, "toponyme,geometrie", 100).catch((): VectorFeature[] => []) : Promise.resolve([])
+      withBuildings ? this.features("zone_d_activite_ou_d_interet", within, "toponyme,categorie,geometrie", 100).catch((): VectorFeature[] => []) : Promise.resolve([])
     ])
-    return { bridges, elevatedRoads, elevatedRailways, lines, buildings, zones, mapDate: IgnGeoplatform.latest(buildings.map(building => building.properties.date_modification)) }
+    const whole = withBuildings ? await this.wholeWorship(zones, buildings, [centre.lng - dLng, centre.lat - dLat, centre.lng + dLng, centre.lat + dLat]) : []
+    const all = [...buildings, ...whole]
+    return { bridges, elevatedRoads, elevatedRailways, lines, buildings: all, zones, mapDate: IgnGeoplatform.latest(all.map(building => building.properties.date_modification)) }
+  }
+
+  private static readonly BUILDING_PROPERTIES = "cleabs,nature,usage_1,hauteur,nombre_d_etages,materiaux_des_murs,materiaux_de_la_toiture,date_d_apparition,date_modification,geometrie"
+  /** How far past the square asked about a church's zone is followed: a cathedral and its close, not a district called after its parish. */
+  private static readonly MAX_WHOLE_M = 300
+
+  /**
+   * The buildings of a church's zone that lie outside the square asked about: a cathedral is several outlines (two towers, a nave, its aisles) and the
+   * square of a survey from its parvis cuts through it, so its far tower was not in the answer at all and came only with a wider radius. A church
+   * comes whole (see TopoBuildings.buildings), and one more small question, only where a zone of worship crosses the edge of the square, makes it so.
+   */
+  private async wholeWorship(zones: VectorFeature[], buildings: VectorFeature[], box: number[]): Promise<VectorFeature[]> {
+    const [west, south, east, north] = box
+    const margin = IgnGeoplatform.MAX_WHOLE_M / IgnGeoplatform.METRES_PER_DEGREE
+    let reach: number[] | undefined
+    for (const zone of zones) {
+      if (zone.properties.categorie !== "Religieux") continue
+      const [w, s, e, n] = IgnGeoplatform.extent(zone)
+      if (w >= west && s >= south && e <= east && n <= north) continue
+      // Clipped, so that a zone drawn round a whole quarter does not ask for the quarter.
+      const clipped = [Math.max(w, west - margin), Math.max(s, south - margin), Math.min(e, east + margin), Math.min(n, north + margin)]
+      reach = reach ? [Math.min(reach[0], clipped[0]), Math.min(reach[1], clipped[1]), Math.max(reach[2], clipped[2]), Math.max(reach[3], clipped[3])] : clipped
+    }
+    if (!reach) return []
+    const seen = new Set(buildings.map(building => building.properties.cleabs))
+    try {
+      const more = await this.features("batiment", `BBOX(geometrie,${reach.map(v => v.toFixed(6)).join(",")},'EPSG:4326')`, IgnGeoplatform.BUILDING_PROPERTIES, 1000)
+      return more.filter(building => !seen.has(building.properties.cleabs))
+    } catch {
+      // The square's own answer is still an answer.
+      return []
+    }
+  }
+
+  /** The box of a feature's geometry: west, south, east, north. */
+  private static extent(feature: VectorFeature): number[] {
+    let west = Infinity, south = Infinity, east = -Infinity, north = -Infinity
+    const visit = (value: unknown): void => {
+      if (Array.isArray(value) && typeof value[0] === "number") {
+        west = Math.min(west, value[0]); east = Math.max(east, value[0]); south = Math.min(south, value[1] as number); north = Math.max(north, value[1] as number)
+      } else if (Array.isArray(value)) value.forEach(visit)
+    }
+    visit(feature.geometry.coordinates)
+    return [west, south, east, north]
   }
 
   /**

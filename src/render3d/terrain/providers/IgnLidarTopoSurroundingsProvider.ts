@@ -78,7 +78,7 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
   }
 
   private buildings(grids: LidarGrids | undefined, vectors: PlaceVectors | undefined, centre: { lat: number, lng: number }, radius: number) {
-    const drawn = vectors ? TopoBuildings.buildings(vectors.buildings, centre, radius) : []
+    const drawn = vectors ? TopoBuildings.buildings(vectors.buildings, centre, radius, undefined, undefined, vectors.zones) : []
     const found = drawn.length > 0 || grids === undefined
       ? drawn
       : new BuildingFootprints(grids.heights, grids.building, grids.size, grids.size).buildings({ metresPerPixel: grids.metresPerPixel, radiusM: IgnGeoplatform.lidarRadius(radius), maxBuildings: 300 })

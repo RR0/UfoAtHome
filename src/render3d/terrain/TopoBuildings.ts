@@ -26,11 +26,16 @@ export class TopoBuildings {
   /** An outline drawn by a surveyor is a rectangle when it nearly fills its own: a courtyard of a seventh of the area is not one. */
   private static readonly RECTANGLE_FILL = 0.9
 
-  static buildings(features: VectorFeature[], centre: { lat: number, lng: number }, radiusM: number, minAreaM2 = 12, max = 300): SurveyedBuilding[] {
+  /**
+   * The buildings of the outlines that come within `radiusM` of the centre, each whole: an outline is kept as soon as any of it is within reach, and so
+   * is every outline of a named zone (see named) one of the kept ones stands in. A cathedral is several outlines (two towers, a nave, its aisles):
+   * deciding on the middle of each rectangle kept the towers of Notre-Dame from the parvis and left out the nave between them, whose rectangle runs
+   * 110 m east and has its middle farther, so the west front between the towers came and went with the radius.
+   */
+  static buildings(features: VectorFeature[], centre: { lat: number, lng: number }, radiusM: number, minAreaM2 = 12, max = 300, zones: VectorFeature[] = []): SurveyedBuilding[] {
     const found: SurveyedBuilding[] = []
-    for (const feature of features) {
-      const rings = TopoBuildings.rings(feature, centre)
-      if (rings.length === 0) continue
+    for (const rings of TopoBuildings.reached(features, zones, centre, radiusM)) {
+      const feature = rings.feature
       const floors = Number(feature.properties.nombre_d_etages)
       const stated = Number(feature.properties.hauteur)
       const height = Number.isFinite(stated) && stated > 0
@@ -38,8 +43,7 @@ export class TopoBuildings {
         : (Number.isFinite(floors) && floors > 0 ? floors * TopoBuildings.FLOOR_HEIGHT_M : TopoBuildings.DEFAULT_HEIGHT_M)
       // What it is (a church, a house of 1800) is the outline's, and each rectangle of it is that.
       const { style, builtYear } = BuildingStyles.ofMap(feature.properties)
-      for (const building of TopoBuildings.rectanglesOf(rings, height, minAreaM2)) {
-        if (Math.hypot(building.eastM, building.northM) > radiusM) continue
+      for (const building of TopoBuildings.rectanglesOf(rings.rings, height, minAreaM2)) {
         const wallMaterial = BuildingMaterials.of(feature.properties.materiaux_des_murs, "wall")
         const roofMaterial = BuildingMaterials.of(feature.properties.materiaux_de_la_toiture, "roof")
         // The few natures a map gives that a reader knows a building by from a distance: a silo is not "Building 147".
@@ -76,6 +80,43 @@ export class TopoBuildings {
       const zone = outlines.find(candidate => TopoBuildings.inside(building.eastM, building.northM, candidate.rings))
       return zone ? { ...building, name: zone.name } : building
     })
+  }
+
+  /** The outlines kept (see buildings), each with its rings in metres from the centre, in the order the map gave them. */
+  private static reached(features: VectorFeature[], zones: VectorFeature[], centre: { lat: number, lng: number }, radiusM: number): { feature: VectorFeature, rings: { east: number, north: number }[][] }[] {
+    const outlines = features.map(feature => ({ feature, rings: TopoBuildings.rings(feature, centre) })).filter(outline => outline.rings.length > 0)
+    const near = outlines.map(outline => TopoBuildings.reach(outline.rings) <= radiusM)
+    const named = zones.filter(zone => typeof zone.properties.toponyme === "string" && zone.properties.toponyme.length > 0).map(zone => TopoBuildings.rings(zone, centre)).filter(rings => rings.length > 0)
+    if (named.length > 0) {
+      // Where each outline stands: the zone holding the middle of its outer ring's corners. Not a corner: the map draws a zone along its buildings'
+      // walls, and the corner of a tower of Notre-Dame is on the line of the cathedral's zone, in it or not by a rounding.
+      const zoneOf = outlines.map(outline => {
+        const corners = outline.rings[0]
+        const east = corners.reduce((sum, corner) => sum + corner.east, 0) / corners.length
+        const north = corners.reduce((sum, corner) => sum + corner.north, 0) / corners.length
+        return named.findIndex(rings => TopoBuildings.inside(east, north, rings))
+      })
+      const wholeZones = new Set(zoneOf.filter((zone, i) => zone >= 0 && near[i]))
+      zoneOf.forEach((zone, i) => { if (wholeZones.has(zone)) near[i] = true })
+    }
+    return outlines.filter((_, i) => near[i])
+  }
+
+  /** How near the outline comes to the centre: nothing inside it, else the nearest of its edges. */
+  private static reach(rings: { east: number, north: number }[][]): number {
+    if (TopoBuildings.inside(0, 0, rings)) return 0
+    let nearest = Infinity
+    for (const ring of rings) {
+      for (let i = 0; i + 1 < ring.length; i++) {
+        const a = ring[i]
+        const b = ring[i + 1]
+        const de = b.east - a.east
+        const dn = b.north - a.north
+        const along = de * de + dn * dn > 0 ? Math.max(0, Math.min(1, -(a.east * de + a.north * dn) / (de * de + dn * dn))) : 0
+        nearest = Math.min(nearest, Math.hypot(a.east + along * de, a.north + along * dn))
+      }
+    }
+    return nearest
   }
 
   /** Whether a point is inside an outline (an odd number of edges crossed by a ray from it), a courtyard being a hole. */

@@ -25,6 +25,37 @@ describe("IgnTopoSurroundingsProvider (the map alone)", () => {
     expect(Math.hypot(east.widthM - 10, east.lengthM - 8)).toBeLessThan(1.5)
   })
 
+  it("brings a church whole when the square asked about cuts through its zone: its far tower, outside the square, comes with its near one", async () => {
+    const near = outline({ cleabs: "near", nature: "Eglise", usage_1: "Religieux", hauteur: 66 }, [30, -10], [38, -10], [38, -2], [30, -2])
+    const far = outline({ cleabs: "far", nature: "Eglise", usage_1: "Religieux", hauteur: 66 }, [30, 42], [38, 42], [38, 50], [30, 50])
+    const survey = new Survey(40)
+    survey.vectors = {
+      batiment: [near],
+      zone_d_activite_ou_d_interet: [outline({ toponyme: "Cathédrale", categorie: "Religieux" }, [25, -15], [60, -15], [60, 55], [25, 55])]
+    }
+    const answered = survey.fetch()
+    const asked: string[] = []
+    // The square's own question has the near tower; the one of the church's zone has both, as the service would answer each box.
+    const fetchImpl = (async (url: string) => {
+      const parameters = new URL(url).searchParams
+      if (parameters.get("TYPENAMES") === "BDTOPO_V3:batiment") {
+        asked.push(parameters.get("CQL_FILTER") ?? "")
+        if (asked.length > 1) return { ok: true, status: 200, json: async () => ({ features: [near, far] }) } as Response
+      }
+      return answered(url)
+    }) as unknown as typeof fetch
+    const found = await new IgnTopoSurroundingsProvider({ fetchImpl }).getSurroundings(SAINT_LO, 40)
+    expect(asked).toHaveLength(2)
+    expect(found.buildings.map(building => building.name)).toEqual(["Cathédrale", "Cathédrale"])
+    expect(found.buildings.map(building => Math.round(building.northM)).sort((a, b) => a - b)).toEqual([-6, 46])
+    // No church crossing the edge of the square: no second question.
+    survey.vectors = { batiment: TWO_HOUSES }
+    const plain = survey.fetch()
+    await new IgnTopoSurroundingsProvider({ fetchImpl: plain }).getSurroundings(SAINT_LO, 40)
+    const buildingQuestions = (plain as unknown as ReturnType<typeof vi.fn>).mock.calls.filter(call => new URL(String(call[0])).searchParams.get("TYPENAMES") === "BDTOPO_V3:batiment")
+    expect(buildingQuestions).toHaveLength(1)
+  })
+
   it("asks the map only: no laser raster is asked for", async () => {
     const fetchImpl = new Survey(40).fetch()
     await new IgnTopoSurroundingsProvider({ fetchImpl }).getSurroundings(SAINT_LO, 40)
