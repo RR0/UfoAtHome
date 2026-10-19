@@ -20,7 +20,7 @@ import { LampColour } from "./LampColour.js"
 
 const DEG_TO_RAD = Math.PI / 180
 
-/** Self-illuminated parts (a lit lamp head / lit headlight) stay MeshBasicMaterial — a real light
+/** Self-illuminated parts (a declared lamp) stay MeshBasicMaterial — a real light
  * source must read as bright regardless of how dark the surrounding night is, and must not itself
  * cast a shadow of its own glow. Everything else is MeshLambertMaterial, real-lit by
  * SceneRenderer's celestialLight/skyLight (see updateCelestialLight) so it actually receives real
@@ -40,8 +40,12 @@ interface DecorMeshUserData {
   lightColor?: RgbColor
 }
 
-function addPart(group: Group, geometry: BufferGeometry, baseColor: RgbColor, y: number, emissive = false): Mesh {
-  const material = emissive ? new MeshBasicMaterial({ color: new Color(...baseColor) }) : new MeshLambertMaterial({ color: new Color(...baseColor) })
+function addPart(group: Group, geometry: BufferGeometry, baseColor: RgbColor, y: number, emissive = false, glass?: RgbColor): Mesh {
+  // A lamp behind a glass (a streetlight's globe, a car's headlight) is that glass, lit by the day like the column under it, and its light added
+  // over it: a MeshBasicMaterial is only its light, so a lamp out by day was a black ball against the sky (see setLit).
+  const material = emissive && glass
+    ? new MeshLambertMaterial({ color: new Color(...glass), emissive: new Color(...baseColor) })
+    : emissive ? new MeshBasicMaterial({ color: new Color(...baseColor) }) : new MeshLambertMaterial({ color: new Color(...baseColor) })
   const mesh = new Mesh(geometry, material)
   mesh.position.y = y
   mesh.userData = { emissive } satisfies DecorMeshUserData
@@ -119,9 +123,11 @@ function hexToRgb(hex: string): RgbColor {
   return [linear((value >> 16) & 0xff), linear((value >> 8) & 0xff), linear(value & 0xff)]
 }
 
-const UNLIT_LAMP_COLOR: RgbColor = [0.62, 0.62, 0.6]
+/** What a streetlight's globe gives back of the day that falls on it, out or lit: a frosted glass, pale grey. */
+const LAMP_GLASS_ALBEDO: RgbColor = [0.62, 0.62, 0.6]
 const LIT_LAMP_COLOR: RgbColor = [1, 0.85, 0.5]
-const UNLIT_HEADLIGHT_COLOR: RgbColor = [0.25, 0.25, 0.25]
+/** The same of a car's headlight: a clear glass over a reflector, darker. */
+const HEADLIGHT_GLASS_ALBEDO: RgbColor = [0.25, 0.25, 0.25]
 const LIT_HEADLIGHT_COLOR: RgbColor = [1, 0.97, 0.85]
 
 /** No entry at all for a side gets no mesh — a plain, unremarkable stretch of wall, not a distinct
@@ -551,9 +557,9 @@ function buildStreetlight(lit: boolean, mount?: StreetLampSpec["mount"], lamp?: 
   // a genuine light source in place — only its *color* changes at runtime, never its material
   // class. Building it emissive from the start, in whichever color matches this initial `lit`,
   // is what setLit's own later re-tints actually assume.
-  const head = addPart(group, new SphereGeometry(0.25, 12, 8), lit ? DecorSystem.lampHue(lamp) : UNLIT_LAMP_COLOR, 5.1, true)
+  const head = addPart(group, new SphereGeometry(0.25, 12, 8), lit ? DecorSystem.lampHue(lamp) : [0, 0, 0], 5.1, true, LAMP_GLASS_ALBEDO)
   // A lamp, whose colour the finish keeps (see LampMark): a sodium lamp's orange was white at night.
-  LampMark.applyOpaque(head.material as MeshBasicMaterial)
+  LampMark.applyOpaque(head.material as MeshLambertMaterial)
   return group
 }
 
@@ -607,13 +613,13 @@ function buildVehicle(lit: boolean, windows: DecorObject["windows"], observerSid
       wheel.position.z = z
     }
   }
-  const headlightColor = lit ? LIT_HEADLIGHT_COLOR : UNLIT_HEADLIGHT_COLOR
+  const headlightColor: RgbColor = lit ? LIT_HEADLIGHT_COLOR : [0, 0, 0]
   for (const sideX of [-0.7, 0.7]) {
     // The front, -length/2 along Z (see the body's own comment above on why Z is the facing axis).
     // Always emissive (true, not `lit`) — see buildStreetlight's own doc comment on why: lit can
     // change mid-recording, and only a mesh already built emissive can be re-tinted in place later
     // by DecorSystem.setLit.
-    const headlight = addPart(group, new SphereGeometry(0.15, 8, 6), headlightColor, 0.7, true)
+    const headlight = addPart(group, new SphereGeometry(0.15, 8, 6), headlightColor, 0.7, true, HEADLIGHT_GLASS_ALBEDO)
     headlight.position.set(sideX, 0.7, -2.1)
   }
   // Windshield/rear window sit on the cabin box's own front/behind faces — never openable for a
@@ -1600,7 +1606,9 @@ export class DecorSystem {
       // A declared lamp keeps its own regulated colour — a red port light must not be repainted
       // the warm white of a headlight just because both are emissive.
       if (!(child instanceof Mesh) || !data.emissive || data.lightId) return
-      ;(child.material as MeshBasicMaterial).color.setRGB(...color)
+      // A lamp behind a glass gives out its light over the glass the day lights (see addPart); a bare light is only its light.
+      if (child.material instanceof MeshLambertMaterial) child.material.emissive.setRGB(...color)
+      else (child.material as MeshBasicMaterial).color.setRGB(...color)
     })
   }
 
