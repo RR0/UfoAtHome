@@ -106,6 +106,7 @@ export class ElementList {
   private noneLabel = "—"
   private addLabel = ""
   private removeEnabled = true
+  private readonly actionEnabled = new Map<string, boolean>()
 
   constructor(private readonly options: ElementListOptions) {
     this.row = document.createElement("div")
@@ -240,6 +241,13 @@ export class ElementList {
     if (this.nextButton) this.nextButton.disabled = !canNext
   }
 
+  /** Whether an action can act on the picked element (this account's own observer is not looked at from where it stands). */
+  setActionEnabled(id: string, enabled: boolean): void {
+    const button = this.actionButtons.get(id)
+    if (button) button.disabled = !enabled || this.select.disabled
+    this.actionEnabled.set(id, enabled)
+  }
+
   /** Whether the picked element can be removed (a path keeps two places): the button says so. */
   setRemoveEnabled(enabled: boolean): void {
     this.removeEnabled = enabled
@@ -289,7 +297,7 @@ export class ElementList {
     this.select.disabled = !present && !optional
     if (!present) return
     this.removeButton.disabled = !this.removeEnabled
-    for (const button of this.actionButtons.values()) button.disabled = false
+    for (const [id, button] of this.actionButtons) button.disabled = this.actionEnabled.get(id) === false
   }
 
   /** Whether the picker is the thing a "focus the field" request lands on. */

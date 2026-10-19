@@ -3846,6 +3846,26 @@ describe("SightingEditorElement decor group", () => {
     expect(decor[0].kind).toBe("observer")
   })
 
+  it("lists the observers in the Observer group, this account's own first, and edits another there rather than among the decor", () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    const observerTab = [...shadow.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-observer")!
+    observerTab.click()
+    const pick = shadow.getElementById("observer-pick") as HTMLSelectElement
+    expect([...pick.options].map(option => option.value)).toEqual(["principal"])
+    expect((shadow.getElementById("delete-observer") as HTMLButtonElement).disabled).toBe(true)
+    ;(shadow.getElementById("add-decor-observer") as HTMLButtonElement).click()
+    const id = element.sightingData.decor![0].id
+    expect(pick.value).toBe(id)
+    expect((shadow.getElementById("observer-principal") as HTMLElement).hidden).toBe(true)
+    expect(shadow.getElementById("observer-decor-host")!.contains(shadow.getElementById("decor-item"))).toBe(true)
+    expect([...(shadow.getElementById("decor") as HTMLSelectElement).options].map(option => option.value)).not.toContain(id)
+    pick.value = "principal"
+    pick.dispatchEvent(new Event("change"))
+    expect((shadow.getElementById("observer-principal") as HTMLElement).hidden).toBe(false)
+    expect(shadow.getElementById("observer-decor-host")!.contains(shadow.getElementById("decor-item"))).toBe(false)
+  })
+
   it("adds a building decor object (with its default floor count) when Building is picked in the Kind dropdown", () => {
     const element = mount()
     const shadow = element.shadowRoot!

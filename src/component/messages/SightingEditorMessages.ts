@@ -830,4 +830,7 @@ export interface SightingEditorMessages extends SightingLabels {
   emptyShapes: string
   /** The "+" of the pictures, after where the picture comes from. */
   addReference: string
+  /** The observer list of the Observer group: the observer of this account, and the removal of another. */
+  principalObserver: string
+  deleteObserver: string
 }

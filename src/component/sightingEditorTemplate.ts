@@ -64,6 +64,13 @@ export const html = `
 </section>
 <section class="group-panel" id="group-observer" aria-labelledby="label-observer-group" hidden>
   <div class="toolbar">
+    <!-- The observers, laid out as every list of the editor is (see ElementList): the one whose account this is first, then the
+         other observers the scene places (decor of the kind "observer"); 🎯, 🗑 and "+" for those; under it, the frame of the one
+         picked: this account's own observer fields, or the decor fields of another, moved here while they are edited from this tab
+         (see SightingEditorElement.placeDecorItem). -->
+    <div id="observer-list-header" class="decor-list-part"></div>
+    <div id="observer-item">
+    <div id="observer-principal">
     <label><span id="label-observer-id">ID</span> <input id="observerId" type="text"/></label>
     <label><span id="label-observer-title">Title</span> <input id="observerTitle" type="text"/></label>
     <label><span id="label-observer-last-name">Last name</span> <input id="observerLastName" type="text"/></label>
@@ -124,7 +131,9 @@ export const html = `
            camera, so which ones are offered follows the device (see Filter.usableWith). -->
       <label><span id="label-filter">In front of it</span> <select id="filter"></select></label>
     </fieldset>
-    <button id="add-decor-observer" type="button">Add observer</button>
+    </div>
+    <div id="observer-decor-host"></div>
+    </div>
   </div>
 </section>
 <section class="group-panel" id="group-location" aria-labelledby="label-location-group" hidden>
@@ -623,6 +632,26 @@ export const css = `${InputFont.CSS}${ElementList.CSS}
 }
 .decor-list-part {
   display: contents;
+}
+/* The fields of the observer of this account keep the toolbar's flow inside the frame; another observer's are on a line of their own. */
+#observer-principal {
+  display: contents;
+}
+#observer-principal[hidden] {
+  display: none;
+}
+#observer-decor-host {
+  flex-basis: 100%;
+  min-width: 0;
+}
+#observer-decor-host:empty {
+  display: none;
+}
+/* Already in the frame of the observer picked: not a second one. */
+#observer-decor-host > .element-list-body {
+  border: 0;
+  padding: 0;
+  margin: 0;
 }
 /* What a list is, above it, where its tab holds more than the list (the moments of the Time tab). */
 .element-list-title {

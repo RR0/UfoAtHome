@@ -422,4 +422,6 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   emptyTraces: "Nessun tracciato dell'investigatore",
   emptyShapes: "Nessuna forma",
   addReference: "Aggiungi una foto",
+  principalObserver: "Osservatore di questo resoconto",
+  deleteObserver: "Elimina l'osservatore",
 }

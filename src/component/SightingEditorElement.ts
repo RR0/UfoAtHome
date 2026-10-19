@@ -707,7 +707,11 @@ export class SightingEditorElement extends HTMLElement {
   private readonly optionPrecipitationHail: HTMLElement
   /** The picker of the decor objects, what acts on the selected one, and the adding of another (see ElementList). */
   private readonly decorList: ElementList
-  private readonly addDecorObserverButton: HTMLButtonElement
+  /** The observers of the Observer group: this account's own, then the other observers the scene places (see refreshObserverList). */
+  private readonly observerList: ElementList
+  /** Which observer the Observer group shows: OBSERVER_PRINCIPAL for this account's own, else the id of an observer of the decor. */
+  private observerShown = "principal"
+  private static readonly OBSERVER_PRINCIPAL = "principal"
   /** The trees and buildings taken, by itself, from a survey of the place the author gives (see SurroundingsPlanter), whose code is loaded when first needed. */
   private readonly surroundings: SurroundingsPlanter
   /** The survey the scenery is taken from, when one is chosen for it; else the one that covers the place (see surroundingsSources). Mainly for tests. */
@@ -1340,7 +1344,16 @@ export class SightingEditorElement extends HTMLElement {
       { value: "observer", label: "Other observer", hidden: true }
     ])
     this.decorList.setLabels({ list: "Environment", remove: "Delete decor", add: "Add", empty: "No decor", actions: { "look-at-decor": "Look at it" } })
-    this.addDecorObserverButton = this.shadow.getElementById("add-decor-observer") as HTMLButtonElement
+    this.observerList = new ElementList({
+      header: this.shadow.getElementById("observer-list-header")!,
+      body: this.shadow.getElementById("observer-item")!,
+      ids: { list: "observer-pick", remove: "delete-observer", add: "add-decor-observer" },
+      actions: [{ id: "look-at-observer", glyph: "🎯", onClick: () => this.lookAtDecor() }],
+      onSelect: id => this.selectObserver(id),
+      onAdd: () => this.addDecor("observer"),
+      onRemove: () => this.deleteDecor()
+    })
+    this.observerList.setLabels({ list: "Observer", remove: "Delete observer", add: "Add observer", actions: { "look-at-observer": "Look at it" } })
     this.sceneryStatus = this.shadow.getElementById("scenery-status")!
     this.sceneryWarning = this.shadow.getElementById("scenery-warning")!
     this.scenerySource = this.shadow.getElementById("scenery-source") as HTMLSelectElement
@@ -1550,7 +1563,6 @@ export class SightingEditorElement extends HTMLElement {
     this.objectDistanceInput.addEventListener("input", () => this.typing(this.objectDistanceInput, () => this.onDistanceInput()))
     this.sizeLockSelect.addEventListener("change", () => this.applySizeLock())
     this.clearDistanceHypothesisButton.addEventListener("click", () => this.clearDistanceHypothesis())
-    this.addDecorObserverButton.addEventListener("click", () => this.addDecor("observer"))
     this.undoButton.addEventListener("click", () => this.undo())
     this.redoButton.addEventListener("click", () => this.redo())
     this.referenceSelect.addEventListener("change", () => this.selectReference(this.referenceSelect.value))
@@ -1755,7 +1767,10 @@ export class SightingEditorElement extends HTMLElement {
       this.observerOccupationInput,
       this.sightingIdInput
     ]) {
-      input.addEventListener("input", () => this.updateObserverMetadata())
+      input.addEventListener("input", () => {
+        this.updateObserverMetadata()
+        this.observerList.rename(SightingEditorElement.OBSERVER_PRINCIPAL, this.principalObserverLabel())
+      })
     }
     this.descriptionInput.addEventListener("input", () => {
       this.updateDescription()
@@ -5040,6 +5055,7 @@ export class SightingEditorElement extends HTMLElement {
     this.observerTitleInput.value = sighting.observer?.title ?? ""
     this.observerLastNameInput.value = sighting.observer?.lastName ?? ""
     this.observerFirstNamesInput.value = sighting.observer?.firstNames?.join(", ") ?? ""
+    this.observerList.rename(SightingEditorElement.OBSERVER_PRINCIPAL, this.principalObserverLabel())
     this.sightingIdInput.value = sighting.id ?? ""
     this.observerAgeInput.value = sighting.account?.observerAgeYears?.toString() ?? ""
     this.birthDate.setPrecise(EdtfDateField.opensPreciseDate(sighting.account?.observerBirth))
@@ -5245,6 +5261,12 @@ export class SightingEditorElement extends HTMLElement {
       candidate.setAttribute("aria-expanded", String(nowOpen))
       this.groupPanels[index].hidden = !nowOpen
     }
+    if (open && tab.getAttribute("aria-controls") === "group-decor") {
+      const listed = this.decorList.value
+      if (listed !== "" && listed !== this.currentDecorId) this.selectDecor(listed)
+    }
+    if (open && tab.getAttribute("aria-controls") === "group-observer" && this.observerShown !== SightingEditorElement.OBSERVER_PRINCIPAL) this.selectDecor(this.observerShown)
+    this.placeDecorItem()
     this.syncCanvasMode()
     this.refreshTimelineMarks()
     if (open && tab.getAttribute("aria-controls") === "group-file") {
@@ -7135,6 +7157,7 @@ export class SightingEditorElement extends HTMLElement {
    * see SceneRenderer.setDecor's own doc comment on why that reference-equality check depends on
    * it. */
   private addDecor(kind: DecorObject["kind"] = (this.decorList.pickedKind ?? "building") as DecorObject["kind"]): void {
+    this.observerAdded = kind === "observer"
     const sighting = this.ufoElement.sighting
     const n = sighting.decor.length + 1
     const decor: DecorObject = {
@@ -7607,10 +7630,65 @@ export class SightingEditorElement extends HTMLElement {
    * refreshSourceList()'s role for shapes. Disables the field row entirely (rather than leaving
    * stale values editable) whenever there's no decor to edit at all. */
   private refreshDecorList(): void {
-    this.decorList.setItems(this.ufoElement.sighting.decor.map(object => ({ id: object.id, label: this.decorLabel(object) })), this.currentDecorId)
+    // The other observers are listed in the Observer group, not here (see refreshObserverList).
+    this.decorList.setItems(this.ufoElement.sighting.decor.filter(object => object.kind !== "observer")
+      .map(object => ({ id: object.id, label: this.decorLabel(object) })), this.currentDecorId)
     this.syncDecorFields()
     this.syncCanvasMode()
     this.refreshSceneryWarning()
+    this.refreshObserverList()
+  }
+
+  /**
+   * The observers of the Observer group: this account's own first, then the other observers the scene places. One that has just been
+   * added is the one shown; this account's own is shown when the one shown is gone.
+   */
+  private refreshObserverList(): void {
+    const principal = SightingEditorElement.OBSERVER_PRINCIPAL
+    const others = this.ufoElement.sighting.decor.filter(object => object.kind === "observer")
+    if (this.currentDecorId !== undefined && others.some(other => other.id === this.currentDecorId) && this.observerAdded) this.observerShown = this.currentDecorId
+    this.observerAdded = false
+    if (!others.some(other => other.id === this.observerShown)) this.observerShown = principal
+    this.observerList.setItems([{ id: principal, label: this.principalObserverLabel() }, ...others.map(other => ({ id: other.id, label: this.decorLabel(other) }))], this.observerShown)
+    const another = this.observerShown !== principal
+    this.observerList.setRemoveEnabled(another)
+    this.observerList.setActionEnabled("look-at-observer", another)
+    this.placeDecorItem()
+  }
+
+  /** This account's own observer, in the list of the Observer group: their name as the fields say it, and that they are this account's. */
+  private principalObserverLabel(): string {
+    const name = [this.observerTitleInput.value, this.observerFirstNamesInput.value, this.observerLastNameInput.value].map(part => part.trim()).filter(Boolean).join(" ")
+    return name === "" ? this.messages.principalObserver : `${name} (${this.messages.principalObserver.toLowerCase()})`
+  }
+
+  /** An observer was added from the Observer group: the next refresh shows it there. */
+  private observerAdded = false
+
+  private selectObserver(id: string): void {
+    this.observerShown = id
+    if (id !== SightingEditorElement.OBSERVER_PRINCIPAL) this.selectDecor(id)
+    this.refreshObserverList()
+  }
+
+  /**
+   * The frame of the decor object picked stands in the Environment group, except while the Observer group shows another observer:
+   * its fields are then that observer's, and move into the Observer group's frame, in place of this account's own observer's.
+   */
+  private placeDecorItem(): void {
+    const item = this.shadow.getElementById("decor-item")
+    const host = this.shadow.getElementById("observer-decor-host")
+    const principalFields = this.shadow.getElementById("observer-principal")
+    if (!item || !host || !principalFields) return
+    const another = this.observerShown !== SightingEditorElement.OBSERVER_PRINCIPAL
+    principalFields.hidden = another
+    if (another && this.isGroupIdOpen("group-observer")) {
+      if (item.parentElement !== host) host.append(item)
+      item.hidden = false
+      return
+    }
+    if (item.parentElement === host) this.shadow.getElementById("decor-list-header")!.after(item)
+    item.hidden = this.decorList.value === ""
   }
 
   private syncDecorFields(): void {
@@ -9023,7 +9101,9 @@ export class SightingEditorElement extends HTMLElement {
     // The arrow is appended here, not part of the translated string — see SightingEditorMessages.
     // masks's own doc comment.
     this.labelContextMasks.textContent = `${messages.masks} ▸`
-    this.addDecorObserverButton.textContent = messages.addObserver
+    this.observerList.setLabels({ list: messages.observerGroup, remove: messages.deleteObserver, add: messages.addObserver,
+      actions: { "look-at-observer": messages.lookAtDecor } })
+    this.refreshObserverList()
     this.surroundings.setMessages(messages)
     this.labelScenerySource.textContent = messages.surveySource
     this.labelSceneryRadius.textContent = messages.surveyRadius

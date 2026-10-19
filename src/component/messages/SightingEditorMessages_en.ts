@@ -417,4 +417,6 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   emptyTraces: "No investigator's line",
   emptyShapes: "No shape",
   addReference: "Add a picture",
+  principalObserver: "Observer of this account",
+  deleteObserver: "Delete observer",
 }
