@@ -69,7 +69,7 @@ export class LaunchEditor {
     this.shown = [...launches]
     if (!launches.some(launch => launch.id === this.currentId)) this.currentId = launches[0]?.id
     this.list?.setItems(launches.map(launch => ({ id: launch.id, label: this.labelOf(launch) })), this.currentId)
-    this.list?.setAddState(this.startOfNew() !== undefined, this.startOfNew() === undefined ? this.messages.addLaunchNowhere : undefined)
+    this.syncAddState()
     const launch = this.current
     this.element("launch-fields").hidden = launch === undefined
     if (!launch) return
@@ -85,9 +85,17 @@ export class LaunchEditor {
    * leaves the fields alone, so that what is being typed is not drawn again under the cursor.
    */
   refresh(): void {
+    // Whether a launch can be added follows the place, which is given in another group while the launches stay the same.
+    this.syncAddState()
     const launches = this.launches
     if (launches.length === this.shown.length && launches.every((launch, i) => launch === this.shown[i])) return
     this.sync()
+  }
+
+  /** A launch is put in front of the observer: it can be added once the recording has a place. */
+  private syncAddState(): void {
+    const placed = this.startOfNew() !== undefined
+    this.list?.setAddState(placed, placed ? undefined : this.messages.addLaunchNowhere)
   }
 
   /** The launch on show, if any. */

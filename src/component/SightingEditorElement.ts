@@ -5266,6 +5266,8 @@ export class SightingEditorElement extends HTMLElement {
       if (listed !== "" && listed !== this.currentDecorId) this.selectDecor(listed)
     }
     if (open && tab.getAttribute("aria-controls") === "group-observer" && this.observerShown !== SightingEditorElement.OBSERVER_PRINCIPAL) this.selectDecor(this.observerShown)
+    // What the Launches part says it can do depends on the place, which another group may just have given.
+    if (open && tab.getAttribute("aria-controls") === "group-shape" && this.shadow.getElementById("shape-launches")?.hidden === false) this.launchEditor?.refresh()
     this.placeDecorItem()
     this.syncCanvasMode()
     this.refreshTimelineMarks()

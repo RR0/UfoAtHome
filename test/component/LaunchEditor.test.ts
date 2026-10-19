@@ -131,6 +131,11 @@ describe("LaunchEditor", () => {
     const add = container.querySelector<HTMLButtonElement>("#launch-add")!
     expect(add.disabled).toBe(true)
     expect(add.title).not.toBe("")
+    // A place given afterwards, in the Position group, is read when the part is shown again, the launches being the same.
+    ;(sighting.event as { place?: unknown }).place = [{ lat: 48, lng: 2 }]
+    editor.refresh()
+    expect(add.disabled).toBe(false)
+    expect(container.querySelector<HTMLElement>(".add-reason")!.hidden).toBe(true)
   })
 
   test("the burn times are typed in seconds and written in milliseconds, and an empty one shows the end of the path", () => {
