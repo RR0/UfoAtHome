@@ -86,6 +86,12 @@ export class ParameterForm {
           const legend = document.createElement("legend")
           legend.textContent = heading
           group.append(legend)
+        } else {
+          // A group with no title is not a group to the reader: its fields stand in the frame around them, with no frame of their own.
+          group.classList.add("parameter-group-untitled")
+          group.style.border = "0"
+          group.style.padding = "0"
+          group.style.marginInline = "0"
         }
         groups.set(heading, group)
         this.container.append(group)
