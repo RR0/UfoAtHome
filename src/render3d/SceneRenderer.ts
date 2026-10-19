@@ -4570,6 +4570,23 @@ export class SceneRenderer {
    * hemisphere light takes it, and the eye adapts to it. Kept in candela, lux — the photograph was
    * taken at `scale` — so that it stays right however the eye adapts after.
    */
+  /**
+   * What the eye adapts to, cd/m²: the sky's log-average (see ProbeIrradiance), or what the ground throws up where that is brighter.
+   *
+   * The sky alone was what an eye adapted to, which is right in a field at night and by day, where the sky outshines the ground. Under the lamps of
+   * a town square it is not: the sky is black and the ground round the eye, lit by them, some ten to thirty candela a square metre, so an eye
+   * adapted to the sky's 0.05 saw everything the lamps lit at the top of its response, white (Notre-Dame by night, 2026-10-19, once the city's
+   * lamps gave their real flux). An eye looking at the horizon has half its field below it: half the mean luminance below is what it adapts to
+   * when that is the more. Where the sky is brighter (in the country, by day), nothing changes.
+   */
+  static adaptingLuminance(skyLogAverage: number, down: readonly number[]): number {
+    const below = (0.2126 * down[0] + 0.7152 * down[1] + 0.0722 * down[2]) / Math.PI
+    return Math.max(skyLogAverage, SceneRenderer.GROUND_ADAPTATION_SHARE * below)
+  }
+
+  /** The share of the eye's field below the horizon when it looks at it: see adaptingLuminance. */
+  static readonly GROUND_ADAPTATION_SHARE = 0.5
+
   private measureSurroundings(photograph: Texture, scale: number, version: number): void {
     const astronomy = this.lastAstronomy
     if (!astronomy) return
@@ -4588,7 +4605,7 @@ export class SceneRenderer {
       const lit = !before || moved(before.up, next.up) || moved(before.down, next.down)
       if (lit) this.surroundings = next
       this.eyeSettledVersion = -1
-      const adapted = this.scatteredSky?.adaptToSurroundings(Math.exp(light.logAverage) / scale) ?? false
+      const adapted = this.scatteredSky?.adaptToSurroundings(SceneRenderer.adaptingLuminance(Math.exp(light.logAverage) / scale, next.down)) ?? false
       if (!lit && !adapted) {
         this.eyeSettledVersion = version
         // A held frame may have been waiting for exactly this answer; and one photographed at a
