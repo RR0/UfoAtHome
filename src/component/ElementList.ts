@@ -64,7 +64,7 @@ export class ElementList {
 .element-list-picker { flex: 1 1 10em; min-width: 0; display: flex; }
 .element-list-picker select { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
 .element-list-empty { opacity: .75; font-style: italic; }
-.element-list-add-kind { margin-left: .4em; }
+.element-list-add-kind { margin-left: .4em; flex: 0 0 auto; width: auto; }
 .element-list-body { flex: 1 1 100%; min-width: 0; box-sizing: border-box; border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
   border-radius: 6px; padding: .5em .6em; margin: .1em 0 .3em; display: flex; flex-wrap: wrap; align-items: center; gap: .5em; }
 .element-list-row [hidden], .element-list-body[hidden] { display: none !important; }
