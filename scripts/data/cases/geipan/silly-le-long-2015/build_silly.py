@@ -541,7 +541,7 @@ rec = {
 
 # What T1 himself describes, as one body (scripts/build-silly-le-long-craft.ts): held still where
 # he placed it, at the height and heading below, its lights switched as he told them.
-CRAFT_HEADING = 194.5       # its nose towards the van's approach, see the rationale
+CRAFT_HEADING = round((bridge_heading + 90) % 360, 1)   # across the bridge deck, so its rear face is parallel to it (CR p.9): the nose towards the van's approach
 EYE_HEIGHT_M = 1.6          # the renderer's eye above the ground (BodyPlacement.EYE_HEIGHT_M)
 # The reconstitution's elevations are read from his EYE, so the 22 m are above it, not above the ground:
 # 22 m above the ground put the body 1.6 m (0.2 degree at the bridge) under the outline of his account.
@@ -593,9 +593,9 @@ rec["interpretation"] = {
             "20 m front to back, ASSUMED between his 'plus large que longue, mais de très peu' and 'trois fois sa longueur'. "
             "A full triangle, not a chevron: its straight rear face carries the two rectangles parallel and alike, as he drew "
             "them, and the front, where a chevron would be hollow, he never saw. Its underside 22 m above his eye (so 23.6 above the ground, which his eye is 1.6 m over), the middle of it 23 m above, which is what his elevations "
-            "give at those distances. Its nose faces 194.5°, ASSUMED, towards the road he came along: the one heading from which "
-            "he sees both its front faces, and so all three lights, until a few seconds before the bridge, as he said he still "
-            "saw them 'juste avant le pont'. "
+            "give at those distances. Its nose faces 234.4°, the heading across the bridge's deck (144.4°) and so along the RN2, towards the road he came along: "
+            "its rear face is parallel to the bridge, 'perfectly perpendicular to the N2' as he said (CR p.9), and he sees the "
+            "front faces, and the lights, from the road he comes along. "
             "Seen from the front and far, low over the horizon, a flat triangle is the dark bar of drawing 004; from behind and "
             "below, close, it is drawing 005: its straight rear face a band, its underside below running away to the point, "
             "further and so lower, a V point down. "

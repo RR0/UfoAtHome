@@ -118,7 +118,10 @@ not wrap plumbing (\`version\`, \`id\`, \`sourceId\`).
    case, and that no \`id\` is borne twice). It catches misspelt keys and words a closed list does not have; it cannot catch a
    wrong direction.
 10. **Hand over** the file with a short report: the values you derived and how, the list of assumed
-   values, the contradictions, and the questions to put back to the observer or the investigator.
+   values, the contradictions between the account and the computed sky (kept, not corrected), and the
+   questions to put back to the observer or the investigator: one for each "assumed" value you would
+   like replaced (height at the start, timed duration, which way the head turned, standing point,
+   what was behind, sense and radius of a turn).
    Tell the user to play it at https://ufoathome.org/play/ ("From your computer", choosing the
    photos it names along with it) and to check that the phenomenon sits where the drawings put it;
    then to correct it with you, or in the editor at https://ufoathome.org/edit/ for fine placement.
@@ -139,6 +142,18 @@ ${RecordingRules.text("file")}
   in \`interpretation\`.
 - \`description\` filled with your analysis instead of the account: keep the account there, and your
   working in the rationales and the report.
+- Polygon \`points\` written as pixels (0-100) while \`bounds\` is left out: they are fractions of the
+  box (0 to 1), and pixels give a shape hundreds of times too large.
+- A decor object on a shape's line of sight without \`occludesSourceIds\`: the player reads it as the
+  phenomenon passing in front of it, and caps the distance at the object's own.
+- A decor \`track\`'s \`altitudeM\` taken as above the observer: it is above the ground under the object.
+- A \`brightness\` above 0 on something that is not a light: it adds a large ringed halo.
+- A spiral or a long turn written with two keyframes: the shape turns the short way. Add keyframes
+  with unrolled angles. Continuous motion needs a path sampled every 100 ms or so, not six keyframes.
+- A building or garage placed without its plan, which put the camera against a wall: a grey scene.
+- A town centre passed off as the observer's position: mark it "assumed", and take the place from
+  what the account describes.
+- An angle below one pixel enlarged "so that it shows": report that it is invisible instead.
 
 ## Privacy
 

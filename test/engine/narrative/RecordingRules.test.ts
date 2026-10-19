@@ -42,4 +42,12 @@ describe("RecordingRules", () => {
       for (const name of named) expect(fields).toContain(name)
     }
   })
+
+  it("states what the format page used to get wrong, for the file audience", () => {
+    const file = RecordingRules.text("file")
+    expect(file).toContain("FRACTIONS of the box")
+    expect(file).toContain("metres above the GROUND")
+    expect(file).toContain("WITHOUT declaring it")
+    expect(file).not.toContain("pixels from the top-left of its")
+  })
 })

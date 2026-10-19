@@ -50,10 +50,14 @@ export class RecordingRules {
       file: `Sizes are ANGULAR, in degrees (\`angular\`: {widthDeg, heightDeg}), never metric: the format stores
    no physical size, because an observer perceives an angle and a size only follows from a distance
    nobody measured. Convert the comparisons an account gives (the full Moon and the Sun about 0.5
-   degrees across, a thumbnail at arm's length about 1.5, a fist about 10), or measure them: a
+   degrees across, a thumbnail at arm's length about 1.5, a one-euro coin about 1.5 at arm's length,
+   a tennis ball about 6 if held out at arm's length, a fist about 10), or measure them: a
    drawing made on a photograph of the place, with a known field of view or a landmark of known
    bearing, gives degrees per pixel. Where nothing gives a size, work from what the scene implies
-   and put the range in the rationale.`
+   and put the range in the rationale. Never inflate: an angle below one pixel is invisible, and
+   that is a fact about the account to report, not something to enlarge so that the shape shows.
+   If another document gives a larger figure (an interview years later), you may take it, but say
+   which one you took and why.`
     },
     {
       draft: `Directions are \`aim\`: \`azimuthDeg\` clockwise from true north (north 0, east 90, south 180,
@@ -104,7 +108,12 @@ export class RecordingRules {
    the recording. Give a keyframe only for a moment the account distinguishes (where it arrived,
    when it changed, where it went); the player interpolates between them. A keyframe need only
    restate what changes: every field a shape leaves out is held from the keyframe before. To make a
-   shape vanish, keyframe it at \`transparency: 1\`. \`milestones\` ([{t, label, note}]) name the
+   shape vanish, keyframe it at \`transparency: 1\`. There is no field for blinking: write a flash as
+   keyframes a few milliseconds apart, per \`sourceId\` (interpolation is per source). A rotation of more
+   than half a turn between two keyframes needs intermediate keyframes with unrolled angles, or the
+   shape turns the short way round. Motion the account calls continuous or slowing down (a landing,
+   a take-off) needs a path sampled about every 100 ms and eased, not six keyframes joined by
+   straight lines, whose speed jumps at each one. \`milestones\` ([{t, label, note}]) name the
    moments the account itself names ("A", "B"), shown on the seek bar.`
     },
     {
@@ -112,11 +121,14 @@ export class RecordingRules {
    in their language), \`angular\` and \`aim\`. Never a pixel box, a transparency or a halo: those
    are how a drawing is painted, they are derived from the angle and the direction on loading, and
    values for them would be numbers no one observed and no one could check.`,
-      file: `A shape is \`kind\` "oval" or "polygon" (a polygon's \`points\` are pixels from the top-left of its
-   box, spanning the box: they are stretched with it), \`title\` (what the observer called it),
+      file: `A shape is \`kind\` "oval" or "polygon" (a polygon's \`points\` are stretched with its box: when you leave
+   \`bounds\` out, as you should, write them as FRACTIONS of the box from 0 to 1, e.g.
+   {"x": 0.26, "y": 0.98}; values written as pixels (0-100) are multiplied by the box's width and
+   give a giant shape), \`title\` (what the observer called it),
    \`angular\` and \`aim\`. Add \`color\`, \`haloScale\` (a glow around it), \`brightness\` (0 a light
    you can look at, 1 one you cannot) and \`blur\` (0 hard edges, 1 none) only when the account
-   describes them; left out, they assert nothing.`
+   describes them; left out, they assert nothing. \`brightness\` above 0 adds a dazzle veil, a large
+   ringed halo: leave it at 0 on anything that is not a light.`
     },
     {
       draft: `NEVER write \`description\`. It is the account you were just given: it is what the observer said,
@@ -152,7 +164,21 @@ export class RecordingRules {
    0,0, or it is drawn on the lens. Give \`sizeM\` ({widthM, lengthM, heightM}) where known. The
    relief and the roads of the map are drawn for you: add decor for what the account uses (the wood the phenomenon stood before, the car, the other people present, as kind
    "observer"). When the account says the phenomenon went behind something, that object's
-   \`occludesSourceIds\` names the shape. Roads the map lacks go in \`roads\`.`
+   \`occludesSourceIds\` names the shape. The converse is a trap: a decor object that stands on a
+   shape's line of sight WITHOUT declaring it is read as "the phenomenon passed in front of it", and the
+   distance is capped by its own (a car 5 m away gave "at most 0.05 m" for a 6 m object). A distance is
+   an inequality: in front of X is less than X's distance, behind X is at least that. A track's
+   \`altitudeM\` is metres above the GROUND under the object, not above the observer (the eye is
+   at \`elevationM\` + 1.6 m). Draw only what you can place: never a building or garage whose plan you do
+   not have, and no real surroundings when the place is only known to about 0.1 degree; say so
+   instead. Roads the map lacks go in \`roads\`. An obstacle that explains why the account describes what it does (a
+   tree line the phenomenon went behind) may be added from a survey or open data, with its
+   provenance. A decor of kind "entity" counts as seen; a companion who saw nothing is an
+   "observer", placed only where the account puts them: someone in another vehicle whose type and
+   position are unknown is left out and listed in your report, not drawn as a pedestrian in the road.
+   The eye is 1.6 m above the ground plus the pose's \`elevationM\`: for a high seat (a tractor cab, a
+   lorry), raise \`elevationM\` by the difference. A seat that is not a car's (a central seat) is
+   \`observerSide\` "front". Standing decor sits on the ground; only a \`track\` lifts it.`
     },
     {
       draft: `\`observerTrack\` is where the observer stood and which way they faced, over time. One pose is
@@ -166,7 +192,8 @@ export class RecordingRules {
    on it: the eye's own height is added), \`headingDeg\` and \`pitchDeg\` (the direction they LOOKED,
    same conventions as \`aim\`), \`fovDeg\` (the vertical field shown, about 60 for the naked eye).
    A walk is a series of poses; a head turned towards the phenomenon is two poses a fraction of a
-   second apart. \`instrument\` is "eye" unless a camera was used.`
+   second apart. An observer who follows a moving phenomenon looks 0.15 to 0.2 s behind it, so keep
+   the gaze on the same path, sampled as densely, or it leaves the field. \`instrument\` is "eye" unless a camera was used.`
     },
     {
       draft: `\`account\` is about the OBSERVERS and how their account travelled, not about the phenomenon.
@@ -211,6 +238,50 @@ export class RecordingRules {
    but a conclusion: it goes in \`interpretation\` (bodies in metres, see the format page), never in
    the shapes. When it contradicts the angles the observer measured, keep it anyway and say so in
    your report: the player's comparison is what shows the contradiction.`
+    },
+    {
+      file: `Place the observer from the account's own description (the road, the property, the bearing of a
+   landmark), not from the nearest village; when only a town centre is known, mark the place
+   "assumed", not "derived". A shape drawn from a description (a crescent "tips down") rather than measured on the observer's
+   sketch is "assumed", whole, in its envelope. Check coordinates before trusting them: a file placed 2.4 km from a field
+   that photographs showed to be flat sat on an 11 % slope; a memorial is not the place where
+   something happened. The \`{value, basis, rationale}\` envelope may wrap the whole \`{lat, lng}\`. When the account gives
+   only a distance and a direction from a known point ("2 km west of the village"), move from that
+   point by that bearing and distance, mark the result "assumed", and state the offset and the point it
+   started from in the rationale: a bare village centre would be wrong, and a shifted one is honest only
+   if it says it was shifted.`
+    },
+    {
+      file: `Use the sky the account cites to pin and to check the time (a star at a stated azimuth and
+   altitude, the Moon "up" or "down", a sunset), and report the mismatches; if you have no way to
+   compute the sky, say the check was approximate or not made, never that it passed; do not correct the
+   account to fit the computed sky, and do not delete a value that contradicts it. Check that a
+   sentence is testimony before keeping it: "the Sun was still below the horizon" in a summary is not
+   something the observer said. With several observers, share one clock and give each their own offset.
+   Take the legal offset of THAT year, not today's (a weather service answering with \`timezone=auto\`
+   gives today's rules).`
+    },
+    {
+      file: `Do not invent a difference between observers, and do not flatten the ones stated: use a ratio
+   an observer annotated on their own drawing for that observer only, and leave out what nobody
+   said. The light-pollution atlas dates from 2015: do not apply it to an event decades earlier; omit
+   the field and say so. Once written, cross-check your numbers against independent figures in the
+   documents (a table of distances, a runway's axis), and report the residuals.`
+    },
+    {
+      file: `Words: the person is an "observer" (a human and their instruments), what they gave is an
+   "account", what is seen is a "phenomenon". Never "witness", "testimony", "object", "craft", "flew" or
+   "landed" in a title, a summary, a rationale or your report, except in the observer's own words:
+   naming an object already concludes there was one, and excludes a halo, a planet or a reflection.`
+    },
+    {
+      file: `Before handing over, project where each shape and decor object should appear and compare with what
+   the player draws, before touching any value: "misplaced" and "hidden by something" look alike, and
+   a decor 8 m away that looked wrong was right and merely covered. Look at a close-up of the key
+   moment instead of concluding from numbers. A grey or black scene is more often "not loaded" or a
+   camera inside a wall than a data fault. Then list, in your report, the questions whose answers would
+   replace each "assumed" value (height at the start, timed duration, which way the head turned, standing
+   point, what was behind), because that list is what an investigator can act on.`
     }
   ]
 
