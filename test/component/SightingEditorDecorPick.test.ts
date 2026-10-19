@@ -351,6 +351,7 @@ describe("picking scenery on the picture", () => {
   })
 
   it("carries the selected object from anywhere in its frame, even where the picture shows only the ground behind it", () => {
+    // Pressed in the frame away from the shape the recording holds at the middle, which a press on would select instead.
     pickedDecor = undefined
     const element = twoBuildings()
     ;[...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-decor")!.click()
@@ -358,11 +359,25 @@ describe("picking scenery on the picture", () => {
     const before = east.value
     const canvas = nestedCanvas(element)
 
-    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 320, clientY: 180, bubbles: true, composed: true }))
-    document.dispatchEvent(new MouseEvent("pointermove", { clientX: 420, clientY: 180, bubbles: true }))
-    document.dispatchEvent(new MouseEvent("pointerup", { clientX: 420, clientY: 180, bubbles: true }))
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 200, clientY: 120, bubbles: true, composed: true }))
+    document.dispatchEvent(new MouseEvent("pointermove", { clientX: 300, clientY: 120, bubbles: true }))
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: 300, clientY: 120, bubbles: true }))
 
     expect(east.value).not.toBe(before)
+  })
+
+  it("selects a shape painted in front of the selected object, rather than carrying the object behind it", () => {
+    pickedDecor = undefined
+    const element = twoBuildings()
+    ;[...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-decor")!.click()
+    const east = element.shadowRoot!.getElementById("decorBase.eastM") as HTMLInputElement
+    const before = east.value
+    const canvas = nestedCanvas(element)
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 320, clientY: 180, bubbles: true, composed: true }))
+    document.dispatchEvent(new MouseEvent("pointermove", { clientX: 330, clientY: 180, bubbles: true }))
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: 330, clientY: 180, bubbles: true }))
+    expect(east.value).toBe(before)
+    expect(openGroups(element)).toEqual(["group-shape"])
   })
 
   it("does not carry it when another object stands in front of that point, nor when Cmd is held", () => {
@@ -372,9 +387,9 @@ describe("picking scenery on the picture", () => {
     const before = east.value
     const canvas = nestedCanvas(element)
     const drag = (init: MouseEventInit) => {
-      canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 320, clientY: 180, bubbles: true, composed: true, ...init }))
-      document.dispatchEvent(new MouseEvent("pointermove", { clientX: 420, clientY: 180, bubbles: true, ...init }))
-      document.dispatchEvent(new MouseEvent("pointerup", { clientX: 420, clientY: 180, bubbles: true, ...init }))
+      canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 200, clientY: 120, bubbles: true, composed: true, ...init }))
+      document.dispatchEvent(new MouseEvent("pointermove", { clientX: 300, clientY: 120, bubbles: true, ...init }))
+      document.dispatchEvent(new MouseEvent("pointerup", { clientX: 300, clientY: 120, bubbles: true, ...init }))
     }
 
     pickedDecor = "decor-1" // not the selected one (decor-2, the last added): a nearer object
@@ -394,9 +409,9 @@ describe("picking scenery on the picture", () => {
     const north = element.shadowRoot!.getElementById("decorBase.northM") as HTMLInputElement
     const canvas = nestedCanvas(element)
     const drag = (init: MouseEventInit) => {
-      canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 320, clientY: 180, bubbles: true, composed: true, ...init }))
-      document.dispatchEvent(new MouseEvent("pointermove", { clientX: 420, clientY: 230, bubbles: true, ...init }))
-      document.dispatchEvent(new MouseEvent("pointerup", { clientX: 420, clientY: 230, bubbles: true, ...init }))
+      canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 200, clientY: 120, bubbles: true, composed: true, ...init }))
+      document.dispatchEvent(new MouseEvent("pointermove", { clientX: 300, clientY: 170, bubbles: true, ...init }))
+      document.dispatchEvent(new MouseEvent("pointerup", { clientX: 300, clientY: 170, bubbles: true, ...init }))
     }
     const startEast = east.value
     const startNorth = north.value
