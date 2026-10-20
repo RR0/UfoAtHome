@@ -6,6 +6,12 @@ import { IgnGeoplatform } from "./IgnGeoplatform.js"
 import { RouteFollowing } from "../RouteFollowing.js"
 import type { GeoPoint } from "../RouteFollowing.js"
 
+/** A place on a picture, in metres east of its west edge and south of its north edge. */
+interface Point2 {
+  x: number
+  y: number
+}
+
 export interface IgnMntElevationProviderOptions {
   fetchImpl?: typeof fetch
   /** Mainly for tests, and for pointing at a mirror. */
@@ -43,6 +49,12 @@ export class IgnMntElevationProvider implements ElevationProvider {
   /** And the colour of a point the laser did not class, which is what the ends of a deck are. */
   private static readonly NO_CLASS = [0, 0, 0]
   private static readonly DECK_END_PIXELS = 3
+  /** How far each side of a section carried over the ground its deck is laid from the map (see layRouteDecks): a carriageway and its verges. */
+  private static readonly DECK_HALF_WIDTH_M = 8
+  /** How far past each end of it the deck is laid, and its approach read. */
+  private static readonly DECK_APPROACH_M = 10
+  /** Past this length a deck is a viaduct's, not straight. */
+  private static readonly DECK_STRAIGHT_MAX_M = 200
   private static readonly MIN_PIXELS = 8
   private static readonly MAX_PIXELS = 700
   private static readonly NO_DATA_BELOW = -9000
@@ -161,6 +173,21 @@ export class IgnMntElevationProvider implements ElevationProvider {
       const carrying = (await this.geoplatform.elevatedRoadLines({ west: bounds.west, south: bounds.south, east: bounds.east, north: bounds.north }))
         .filter(line => RouteFollowing.follows(route, line))
       if (carrying.length === 0) return
+      const bare = Float32Array.from(ground.values)
+      await this.layClassifiedDecks(ground, bounds, size, carrying)
+      this.layRouteDecks(ground, bare, bounds, carrying)
+    } catch {
+      // The bare earth is still a ground.
+    }
+  }
+
+  /**
+   * The decks the laser saw (see layBridgeDecks), at the height of the surface model, over their whole width. Patchy: the classification calls a deck
+   * only part of its pixels (at Silly-le-Long, the RN2 over the railway: one in three, the rest unclassified or ground), and the surface model of the
+   * LiDAR HD answered one request in two in October 2026 (400 LayerNotDefined, 502): what layRouteDecks lays does not depend on either.
+   */
+  private async layClassifiedDecks(ground: GeoTiffRaster, bounds: GeoBounds, size: { width: number, height: number }, carrying: readonly (readonly GeoPoint[])[]): Promise<void> {
+    try {
       const classes = await this.raster(bounds, size, IgnMntElevationProvider.CLASS_LAYER)
       if (classes.samples < 3 || classes.width !== ground.width || classes.height !== ground.height) return
       const colour = (i: number, [r, g, b]: number[]): boolean =>
@@ -203,8 +230,115 @@ export class IgnMntElevationProvider implements ElevationProvider {
         if (Number.isFinite(top) && top > IgnMntElevationProvider.NO_DATA_BELOW && top > ground.values[i]) ground.values[i] = top
       }
     } catch {
-      // The bare earth is still a ground.
+      // The road's own deck is still laid.
     }
+  }
+
+  /**
+   * The deck under the road the observer drives, from the map alone: along each section carried over the ground (joined end to end, a bridge the map
+   * cuts in two being one), DECK_HALF_WIDTH_M each side and DECK_APPROACH_M past each end, a straight slope between the ground of the two approaches,
+   * wherever the bare earth stands lower. WHY: the RN2 over the railway at Silly-le-Long, a cutting 7.6 m deep under two sections of 27 m, came out of
+   * the classified decks as patches, and the mesh's average of them and of the hole as a dip, a bump and a dip (half a metre to a metre) where the
+   * road is level. A deck between abutments is straight, and the hole under it reaches under the abutments, which is why it is laid past them.
+   * Not a viaduct (longer than DECK_STRAIGHT_MAX_M), whose deck is curved: the surface model's alone.
+   */
+  private layRouteDecks(ground: GeoTiffRaster, bare: Float32Array, bounds: GeoBounds, carrying: readonly (readonly GeoPoint[])[]): void {
+    const { width, height } = ground
+    const latitude = (bounds.north + bounds.south) / 2
+    const metresX = (bounds.east - bounds.west) * IgnMntElevationProvider.METRES_PER_DEGREE * Math.cos(latitude * Math.PI / 180)
+    const metresY = (bounds.north - bounds.south) * IgnMntElevationProvider.METRES_PER_DEGREE
+    const pixelX = metresX / width
+    const pixelY = metresY / height
+    const toMetres = (point: GeoPoint): Point2 => ({
+      x: (point.lng - bounds.west) / (bounds.east - bounds.west) * metresX, y: (bounds.north - point.lat) / (bounds.north - bounds.south) * metresY
+    })
+    const bareAt = (x: number, y: number): number | undefined => {
+      const col = Math.floor(x / pixelX)
+      const row = Math.floor(y / pixelY)
+      if (col < 0 || row < 0 || col >= width || row >= height) return undefined
+      const value = bare[row * width + col]
+      return Number.isFinite(value) && value > IgnMntElevationProvider.NO_DATA_BELOW ? value : undefined
+    }
+    const half = IgnMntElevationProvider.DECK_HALF_WIDTH_M
+    const approach = IgnMntElevationProvider.DECK_APPROACH_M
+    // The ground of an approach: the highest of the road at the end and along the approach past it, which is on the embankment and not in the hole.
+    const approachHeight = (end: Point2, inner: Point2): number | undefined => {
+      const length = Math.hypot(end.x - inner.x, end.y - inner.y) || 1
+      const out = { x: (end.x - inner.x) / length, y: (end.y - inner.y) / length }
+      const heights = [0, approach / 2, approach].map(d => bareAt(end.x + out.x * d, end.y + out.y * d)).filter((value): value is number => value !== undefined)
+      return heights.length > 0 ? Math.max(...heights) : undefined
+    }
+    for (const chain of IgnMntElevationProvider.chains(carrying.map(line => line.map(toMetres)))) {
+      const along = [0]
+      for (let i = 1; i < chain.length; i++) along.push(along[i - 1] + Math.hypot(chain[i].x - chain[i - 1].x, chain[i].y - chain[i - 1].y))
+      const length = along[along.length - 1]
+      if (length < 1 || length > IgnMntElevationProvider.DECK_STRAIGHT_MAX_M) continue
+      const start = approachHeight(chain[0], chain[1])
+      const end = approachHeight(chain[chain.length - 1], chain[chain.length - 2])
+      if (start === undefined || end === undefined) continue
+      const reach = half + approach
+      const fromCol = Math.max(0, Math.floor((Math.min(...chain.map(p => p.x)) - reach) / pixelX))
+      const toCol = Math.min(width - 1, Math.ceil((Math.max(...chain.map(p => p.x)) + reach) / pixelX))
+      const fromRow = Math.max(0, Math.floor((Math.min(...chain.map(p => p.y)) - reach) / pixelY))
+      const toRow = Math.min(height - 1, Math.ceil((Math.max(...chain.map(p => p.y)) + reach) / pixelY))
+      for (let row = fromRow; row <= toRow; row++) {
+        for (let col = fromCol; col <= toCol; col++) {
+          const nearest = IgnMntElevationProvider.nearestAlong(chain, along, { x: (col + 0.5) * pixelX, y: (row + 0.5) * pixelY })
+          if (nearest.distance > half || nearest.s < -approach || nearest.s > length + approach) continue
+          const deck = start + (end - start) * Math.min(1, Math.max(0, nearest.s / length))
+          const i = row * width + col
+          if (!(bare[i] >= deck)) ground.values[i] = deck
+        }
+      }
+    }
+  }
+
+  /** Lines joined where an end of one is an end of another, to a metre. */
+  private static chains(lines: Point2[][]): Point2[][] {
+    const pending = lines.filter(line => line.length >= 2).map(line => [...line])
+    const out: Point2[][] = []
+    const meets = (a: Point2, b: Point2): boolean => Math.hypot(a.x - b.x, a.y - b.y) <= 1
+    while (pending.length > 0) {
+      let chain = pending.shift()!
+      let grown = true
+      while (grown) {
+        grown = false
+        for (let k = 0; k < pending.length; k++) {
+          const line = pending[k]
+          const head = chain[0]
+          const tail = chain[chain.length - 1]
+          if (meets(tail, line[0])) chain = [...chain, ...line.slice(1)]
+          else if (meets(tail, line[line.length - 1])) chain = [...chain, ...[...line].reverse().slice(1)]
+          else if (meets(head, line[line.length - 1])) chain = [...line.slice(0, -1), ...chain]
+          else if (meets(head, line[0])) chain = [...[...line].reverse().slice(0, -1), ...chain]
+          else continue
+          pending.splice(k, 1)
+          grown = true
+          break
+        }
+      }
+      out.push(chain)
+    }
+    return out
+  }
+
+  /** How far along a line (its first and last segments drawn on past its ends) the point nearest to `point` is, and how far it is from it. */
+  private static nearestAlong(chain: Point2[], along: number[], point: Point2): { s: number, distance: number } {
+    let best = { s: 0, distance: Infinity }
+    for (let k = 0; k < chain.length - 1; k++) {
+      const a = chain[k]
+      const b = chain[k + 1]
+      const dx = b.x - a.x
+      const dy = b.y - a.y
+      const length2 = dx * dx + dy * dy
+      if (length2 < 1e-9) continue
+      let t = ((point.x - a.x) * dx + (point.y - a.y) * dy) / length2
+      if (k > 0) t = Math.max(0, t)
+      if (k < chain.length - 2) t = Math.min(1, t)
+      const distance = Math.hypot(point.x - (a.x + dx * t), point.y - (a.y + dy * t))
+      if (distance < best.distance) best = { s: along[k] + t * Math.sqrt(length2), distance }
+    }
+    return best
   }
 
   /** The pixels the lines pass through, and their neighbours: lines drawn on the picture. */

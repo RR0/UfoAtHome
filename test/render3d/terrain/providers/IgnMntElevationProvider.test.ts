@@ -152,7 +152,9 @@ describe("IgnMntElevationProvider and the bridges", () => {
    * A service with a flat ground, a surface of the deck's height, a classification that says "deck" in a band across the picture, and a map that says one
    * road section is carried over the ground.
    */
-  function serveWithDeck(options: { withClasses?: boolean, carried?: { lat: number, lng: number }[][] } = {}): { fetchImpl: typeof fetch, urls: string[] } {
+  function serveWithDeck(
+    options: { withClasses?: boolean, withSurface?: boolean, carried?: { lat: number, lng: number }[][], ground?: (x: number, width: number) => number } = {}
+  ): { fetchImpl: typeof fetch, urls: string[] } {
     const urls: string[] = []
     const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
       urls.push(String(input))
@@ -167,8 +169,8 @@ describe("IgnMntElevationProvider and the bridges", () => {
       const height = Number(query.get("HEIGHT"))
       const body = (buffer: ArrayBuffer) => ({ ok: true, status: 200, arrayBuffer: async () => buffer }) as Response
       const band = (x: number) => Math.abs(x - width / 2) < width / 10
-      if (layer === LASER) return body(TiffFixture.floats(width, height, Array.from({ length: width * height }, () => GROUND)))
-      if (layer === SURFACE) return body(TiffFixture.floats(width, height, Array.from({ length: width * height }, () => DECK)))
+      if (layer === LASER) return body(TiffFixture.floats(width, height, Array.from({ length: width * height }, (_, i) => options.ground?.(i % width, width) ?? GROUND)))
+      if (layer === SURFACE && (options.withSurface ?? true)) return body(TiffFixture.floats(width, height, Array.from({ length: width * height }, () => DECK)))
       if (layer === CLASS && (options.withClasses ?? true)) {
         const values: number[] = []
         for (let i = 0; i < width * height; i++) values.push(...(band(i % width) ? [240, 240, 0, 255] : [207, 150, 70, 255]))
@@ -211,6 +213,19 @@ describe("IgnMntElevationProvider and the bridges", () => {
     const grid = await gridOf(fetchImpl, [at(-100, 1), at(100, 1)])
     expect(Math.max(...grid.heights)).toBeCloseTo(GROUND, 3)
     expect(urls.some(url => url.includes("MNS"))).toBe(false)
+  })
+
+  it("lays the deck of the road driven along the map's section, level between its approaches, over the laser's hole past its abutments", async () => {
+    // A cutting 8 m deep and 30 m wide across the road, which a section of 24 m carries: the hole reaches 3 m under each abutment. Neither the
+    // classification nor the surface answers (the IGN's did one request in two in October 2026).
+    const SQUARE_M = 87.5
+    const ground = (x: number, width: number) => Math.abs(x + 0.5 - width / 2) * SQUARE_M / width < 15 ? GROUND - 8 : GROUND
+    const { fetchImpl } = serveWithDeck({ withClasses: false, withSurface: false, carried: [[at(-12, 0), at(12, 0)]], ground })
+    const grid = await gridOf(fetchImpl, [at(-100, 1), at(100, 1)])
+    const road = Array.from(grid.heights.slice(101, 202))
+    expect(Math.min(...road)).toBeCloseTo(GROUND, 3)
+    // Away from the road, the cutting is still there.
+    expect(Math.min(...Array.from(grid.heights.slice(0, 101)))).toBeCloseTo(GROUND - 8, 3)
   })
 
   it("keeps the bare earth when the map does not answer", async () => {
