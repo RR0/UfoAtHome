@@ -1,8 +1,14 @@
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 import { register, INTERVIEW_CHANGE_EVENT } from "../../src/component/InterviewEditorElement.js"
 import type { InterviewEditorElement, InterviewEvent } from "../../src/component/InterviewEditorElement.js"
 
 register()
+
+// The File group's text editor is a chunk of its own, imported the first time the group opens: cold, on a loaded CI machine, that import alone
+// outlasted the first test's wait for the transcript to show. Imported once here, every test waits for the component's own work only.
+beforeAll(async () => {
+  await Promise.all([import("../../src/component/SightingFileEditor.js"), import("../../src/generated/interviewSchema.json")])
+})
 
 // A browser lays text out; jsdom does not, and CodeMirror asks for the boxes of what it draws: none, here.
 Range.prototype.getClientRects = () => [] as unknown as DOMRectList

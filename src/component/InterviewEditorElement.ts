@@ -173,6 +173,23 @@ export class InterviewEditorElement extends HTMLElement {
     void this.loadLocale()
   }
 
+  disconnectedCallback(): void {
+    // Moving the editor in the page disconnects it and connects it again within the same task: only an editor still out of the page after
+    // that has gone, and its text editor must stop (its linter keeps a timer that dispatches on the view, which fails once the window it
+    // measured against is closed). See SightingEditorElement's.
+    queueMicrotask(() => { if (!this.isConnected) this.releaseFileEditor() })
+  }
+
+  /** Frees the File group's text editor of an editor that left the page, keeping its text; it is made again when it is needed. */
+  private releaseFileEditor(): void {
+    if (!this.fileEditor) return
+    this.text = this.fileEditor.text
+    this.fileEditor.destroy()
+    this.fileEditor = undefined
+    this.fileEditorLoading = undefined
+    this.shownFor = undefined
+  }
+
   /** The event of the case shown, edited in place. */
   get event(): InterviewEvent | undefined {
     return this.current
