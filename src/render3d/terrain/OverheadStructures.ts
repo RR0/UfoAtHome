@@ -97,6 +97,13 @@ export class OverheadStructures {
   private static readonly DECK_STEP_M = 0.5
   private static readonly DECK_GAP_M = 2
   private static readonly DECK_REACH_M = 20
+  /**
+   * Past the deck the laser sees, on to where it is this close to the bare earth, and this far beyond onto the bank: the RD548 at Silly-le-Long stopped
+   * where its deck was still 1.5 m over the earth, and the relief's mesh of a vertex every seven metres rounds a bank's crest off over a cell, so it
+   * met no bank at that end.
+   */
+  private static readonly DECK_MEETS_M = 0.3
+  private static readonly DECK_BEARING_M = 4
   /** The deck of a bridge where nothing measured it. */
   private static readonly DEFAULT_DECK_HEIGHT_M = 4
   /** The shortest a pole can be measured, and the tallest: a reading outside is a tree, a building, or noise. */
@@ -242,7 +249,7 @@ export class OverheadStructures {
 
   /**
    * The two ends of a bridge: the map's, or past them where the laser sees the deck go on (a structure DECK_SEEN_M over the bare earth, without a gap
-   * longer than DECK_GAP_M), up to DECK_REACH_M further. WHY: the map's line of the RD548 over the RN2 at Silly-le-Long stops 5 m short of the deck at
+   * longer than DECK_GAP_M), up to DECK_REACH_M further, then to where it meets its bank and onto it (DECK_MEETS_M, DECK_BEARING_M). WHY: the map's line of the RD548 over the RN2 at Silly-le-Long stops 5 m short of the deck at
    * one end and runs 5 m onto the embankment at the other; drawn at the map's ends, the bridge met the ground on one side and stood off a hole on the
    * other. Never shorter than the map: a deck at the level of its banks (a bridge over a river between quays) is not over anything at its ends.
    */
@@ -252,13 +259,20 @@ export class OverheadStructures {
     const middle = { east: (from.east + to.east) / 2, north: (from.north + to.north) / 2 }
     const unit = { east: (to.east - from.east) / length, north: (to.north - from.north) / length }
     const seen = (s: number): boolean => (grid.structureAt(middle.east + unit.east * s, middle.north + unit.north * s) ?? 0) >= OverheadStructures.DECK_SEEN_M
+    const height = (s: number): number => grid.structureAt(middle.east + unit.east * s, middle.north + unit.north * s) ?? 0
     const reach = (direction: number): number => {
       let last: number | undefined
       for (let s = 0; s <= length / 2 + OverheadStructures.DECK_REACH_M; s += OverheadStructures.DECK_STEP_M) {
         if (seen(direction * s)) last = s
         else if (last !== undefined && s - last > OverheadStructures.DECK_GAP_M) break
       }
-      return Math.max(length / 2, last ?? 0)
+      if (last === undefined) return length / 2
+      // On to where the deck meets its bank, and onto the bank: the edge of the laser's deck is still a metre and a half over the bare earth.
+      let meets = last
+      while (meets - last < OverheadStructures.DECK_REACH_M && height(direction * (meets + OverheadStructures.DECK_STEP_M)) >= OverheadStructures.DECK_MEETS_M) {
+        meets += OverheadStructures.DECK_STEP_M
+      }
+      return Math.max(length / 2, meets + OverheadStructures.DECK_BEARING_M)
     }
     const back = reach(-1)
     const ahead = reach(1)

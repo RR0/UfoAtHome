@@ -78,12 +78,14 @@ describe("OverheadStructures bridges", () => {
     const bridges = [line({ nature: "Pont" }, [0, -20], [0, 20])]
     const size = 120
     const heights = new Float32Array(size * size)
-    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (Math.abs(x - 60) < 4 && 60 - y >= -16 && 60 - y < 26) heights[y * size + x] = 6
+    // Past +26 the bank rises to the deck: 1.5 m under it, then 0.6, then the road on the bank (nothing over the bare earth) from +29.
+    const over = (north: number): number => north >= -16 && north < 26 ? 6 : north >= 26 && north < 27 ? 1.5 : north >= 27 && north < 29 ? 0.6 : 0
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (Math.abs(x - 60) < 4) heights[y * size + x] = over(60 - y)
     const grid = new HeightGrid(heights, new Uint8Array(size * size), new Uint8Array(size * size), size, 1)
     const [bridge] = OverheadStructures.bridges(vectors({ bridges }), CENTRE, 100, grid)
     expect(bridge.northM - bridge.lengthM / 2).toBeCloseTo(-20, 0)
-    // To the pixel: the last one of the deck starts at 25 m.
-    expect(Math.abs(bridge.northM + bridge.lengthM / 2 - 26)).toBeLessThanOrEqual(1)
+    // Where it meets the bank (to the pixel: the last one over 0.3 m starts at 28 m), and four metres onto it.
+    expect(Math.abs(bridge.northM + bridge.lengthM / 2 - 33)).toBeLessThanOrEqual(1)
     expect(bridge.heightM).toBe(6)
   })
 
