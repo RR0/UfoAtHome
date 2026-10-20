@@ -81,8 +81,6 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   fileItemWeather: "Tiempo",
   weatherStatedByObserver: "tal como la dio el observador",
   annexSource: "Archivo",
-  annexStorage: "Guardado",
-  annexStorageUrl: "en un archivo junto al registro",
   annexStorageInline: "dentro del propio registro",
   annexEditorLabel: "El anexo como texto JSON",
   annexUnreadable: "Este archivo no es un anexo de este tipo: no se ha cambiado nada.",

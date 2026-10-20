@@ -22,9 +22,6 @@ function mounted(sighting: Sighting, sources: FreezerSources) {
   // As the editor's Files group has it (see sightingEditorTemplate).
   root.innerHTML = `<span id="label-annex-source"></span> <rr0-input-file id="annex-source" name="annex-source" no-button></rr0-input-file>
     <button id="annex-export" type="button"></button>
-    <span id="label-annex-storage"></span>
-    <label><input type="radio" name="annex-storage" id="annex-storage-url" value="url"/> <span id="label-annex-storage-url"></span></label>
-    <label><input type="radio" name="annex-storage" id="annex-storage-inline" value="inline"/> <span id="label-annex-storage-inline"></span></label>
     <span id="frozen-state"></span> <button id="frozen-refresh" type="button"></button>
     <label><input id="frozen-live" type="checkbox"/> <span id="label-frozen-live"></span></label>
     <p id="frozen-note" hidden></p><div id="annex-editor" hidden></div>`
@@ -33,7 +30,7 @@ function mounted(sighting: Sighting, sources: FreezerSources) {
   const downloads: { blob: Blob; fileName: string }[] = []
   const panel = new FrozenDataPanel(root, {
     sighting: () => sighting, documentUrl: () => "https://example.org/case/sighting.json", sources: () => sources,
-    upperAirHeard: () => undefined, changed, base: () => "silly-sighting", download: (blob, fileName) => downloads.push({ blob, fileName })
+    upperAirHeard: () => undefined, changed, base: () => "silly-sighting", masterUrl: () => "https://example.org/case/sighting.json", download: (blob, fileName) => downloads.push({ blob, fileName })
   })
   panel.localize(sightingEditorMessages_fr)
   return { root, panel, changed, downloads }
@@ -98,7 +95,8 @@ describe("FrozenDataPanel", () => {
     expect(sighting.frozen?.relief).toMatchObject({ live: true, src: "s.relief.zip" })
     panel.show("relief")
     expect(root.querySelector("#frozen-state")!.textContent).toContain("demandé en direct")
-    expect(panel.itemLabel("relief")).toContain("demandé en direct")
+    expect(panel.itemLabel("relief")).toBe("Relief")
+    expect(panel.where("relief")).toContain("demandé en direct")
     const files = await panel.prepare("s")
     expect([...files.keys()]).toEqual(["s.roads.json"])
     expect(sighting.frozen?.relief).toEqual({ live: true })
@@ -145,17 +143,23 @@ describe("FrozenDataPanel", () => {
     const { root, panel } = mounted(sighting, sources())
     await panel.prepare("silly-sighting")
     panel.show("roads")
-    const inline = root.querySelector<HTMLInputElement>("#annex-storage-inline")!
-    expect(root.querySelector<HTMLInputElement>("#annex-storage-url")!.checked).toBe(true)
-    inline.checked = true
-    inline.dispatchEvent(new Event("change"))
+    const source = root.querySelector<InputFileElement>("#annex-source")!
+    expect(source.url).toBe("https://example.org/case/silly-sighting.roads.json")
+    // The recording's own file given as where it is: kept inside the recording.
+    source.controls.url.value = "sighting.json"
+    source.controls.url.dispatchEvent(new Event("change"))
     await vi.waitFor(() => expect(sighting.frozen!.roads!.src).toMatch(/^data:application\/json;base64,/))
-    expect(panel.itemLabel("roads")).toContain(sightingEditorMessages_fr.annexStorageInline)
+    expect(panel.isInlineGroup("roads")).toBe(true)
+    expect(source.url).toBe("https://example.org/case/sighting.json")
+    expect(panel.where("roads")).toBe(sightingEditorMessages_fr.annexStorageInline)
     // Inside the recording, it is no file of the archive; and taken again, it stays inside.
     expect([...(await panel.prepare("silly-sighting")).keys()]).toEqual(["silly-sighting.relief.zip"])
     await panel.refresh("roads")
     expect(sighting.frozen!.roads!.src).toMatch(/^data:/)
-    await panel.setStorage("roads", false)
+    // Another file, where there is none yet: written there at save, with what it holds.
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 404 }) as Response))
+    await panel.replace("roads", { url: "silly-sighting.roads.json" })
+    vi.unstubAllGlobals()
     expect(sighting.frozen!.roads!.src).toBe("silly-sighting.roads.json")
     expect([...(await panel.prepare("silly-sighting")).keys()].sort()).toEqual(["silly-sighting.relief.zip", "silly-sighting.roads.json"])
   })

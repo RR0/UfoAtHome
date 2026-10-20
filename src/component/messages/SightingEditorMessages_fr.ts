@@ -81,8 +81,6 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   fileItemWeather: "Météo",
   weatherStatedByObserver: "telle que l'observateur l'a donnée",
   annexSource: "Fichier",
-  annexStorage: "Gardé",
-  annexStorageUrl: "dans un fichier à côté de l'enregistrement",
   annexStorageInline: "dans l'enregistrement même",
   annexEditorLabel: "L'annexe en texte JSON",
   annexUnreadable: "Ce fichier n'est pas une annexe de ce genre : rien n'a changé.",

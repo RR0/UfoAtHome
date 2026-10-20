@@ -291,18 +291,13 @@ export const html = `
       <button id="identity-ask-back" type="button"></button>
     </div>
   </dialog>
-    <div id="file-editor" class="file-editor"></div>
   </div>
-  <!-- One annex: where it is (a file beside the recording, or inside it), when and from whom it was taken, its text when it is one. -->
+  <!-- One annex: where it is (a file of its own, or the recording itself when it is kept inside it), when and from whom it was taken, its text
+       when it is one. -->
   <div class="element-list-body frozen-data" id="frozen-data" hidden>
     <div class="toolbar">
       <span class="input-file-row"><span id="label-annex-source">File</span> <rr0-input-file id="annex-source" name="annex-source" no-button placeholder="https://…"></rr0-input-file></span>
       <button id="annex-export" type="button">Save</button>
-    </div>
-    <div class="row annex-storage" role="radiogroup" aria-labelledby="label-annex-storage">
-      <span id="label-annex-storage">Kept</span>
-      <label><input type="radio" name="annex-storage" id="annex-storage-url" value="url"/> <span id="label-annex-storage-url">in a file beside the recording</span></label>
-      <label><input type="radio" name="annex-storage" id="annex-storage-inline" value="inline"/> <span id="label-annex-storage-inline">inside the recording</span></label>
     </div>
     <p class="row"><span id="frozen-state" class="frozen-group-state"></span> <button id="frozen-refresh" type="button">Refresh</button></p>
     <p id="frozen-note" class="frozen-note" hidden role="status"></p>
@@ -314,14 +309,11 @@ export const html = `
       <span class="input-file-row"><span id="label-weather-annex-source">File</span> <rr0-input-file id="weather-annex-source" name="weather-annex-source" no-button accept="application/json,.json" placeholder="https://…/sighting.weather.json"></rr0-input-file></span>
       <button id="weather-annex-export" type="button">Save</button>
     </div>
-    <div class="row annex-storage" role="radiogroup" aria-labelledby="label-weather-storage">
-      <span id="label-weather-storage">Kept</span>
-      <label><input type="radio" name="weather-storage" id="weather-storage-url" value="url"/> <span id="label-weather-storage-url"></span></label>
-      <label><input type="radio" name="weather-storage" id="weather-storage-inline" value="inline"/> <span id="label-weather-storage-inline"></span></label>
-    </div>
     <p id="weather-annex-state" class="frozen-group-state"></p>
     <p id="weather-annex-note" class="frozen-note" hidden role="status"></p>
   </div>
+  <!-- The recording as text: the recording's own item, and an item kept inside it, its section shown (see showFileItem). -->
+  <div id="file-editor" class="file-editor"></div>
 </section>
 <section class="group-panel" id="group-weather" aria-labelledby="label-weather-group" hidden>
   <div class="toolbar">

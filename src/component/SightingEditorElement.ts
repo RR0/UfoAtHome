@@ -1306,12 +1306,14 @@ export class SightingEditorElement extends HTMLElement {
         this.refreshFileItems()
       },
       base: () => this.fileBase(),
+      masterUrl: () => this.masterUrl(),
       download: (blob, fileName) => this.download(blob, fileName)
     })
     this.weatherFilePanel = new WeatherFilePanel(this.shadow.getElementById("file-weather")!, {
       sighting: () => this.ufoElement.sighting,
       documentUrl: () => this.sceneElement.documentUrl,
       base: () => this.fileBase(),
+      masterUrl: () => this.masterUrl(),
       download: (blob, fileName) => this.download(blob, fileName),
       changed: () => {
         this.touch()
@@ -2322,16 +2324,19 @@ export class SightingEditorElement extends HTMLElement {
     if (!select) return
     this.syncFilePickers()
     const picked = select.value || "recording"
-    const recordingFile = this.sceneElement.documentUrl?.split(/[?#]/)[0].split("/").pop() || `${this.fileBase()}.json`
+    // What each holds: where it is, its source says.
     select.replaceChildren(
-      new Option(`${this.messages.fileItemRecording} · ${decodeURIComponent(recordingFile)}`, "recording"),
+      new Option(this.messages.fileItemRecording, "recording"),
       new Option(this.weatherFilePanel.itemLabel(), "weather"),
       ...FrozenGroups.NAMES.map(name => new Option(this.frozenPanel.itemLabel(name), name)))
     select.value = picked
     this.showFileItem(select.value)
   }
 
-  /** Shows the detail of one file of the Files group: the recording, or one of its annexes. */
+  /**
+   * Shows the detail of one item of the Files group: the recording, its weather, or one of its annexes. The recording's text is under the
+   * recording, and under an item kept inside it, with that item's section shown: its file is the recording's own.
+   */
   private showFileItem(item: string): void {
     const annex = (FrozenGroups.NAMES as readonly string[]).includes(item)
     const weather = item === "weather"
@@ -2340,6 +2345,21 @@ export class SightingEditorElement extends HTMLElement {
     this.shadow.getElementById("file-weather")!.hidden = !weather
     if (annex) this.frozenPanel.show(item as FrozenGroupName)
     if (weather) this.weatherFilePanel.render()
+    const section: JsonPath | undefined = annex && this.frozenPanel.isInlineGroup(item as FrozenGroupName) ? ["frozen", item, "src"]
+      : weather && this.weatherFilePanel.inline ? ["weatherTrack"]
+      : undefined
+    this.fileEditorHost.hidden = (annex || weather) && section === undefined
+    if (section && this.isGroupIdOpen("group-file")) {
+      void this.loadFileEditor().then(editor => {
+        this.syncFileEditor(false)
+        editor.reveal(section)
+      }, () => undefined)
+    }
+  }
+
+  /** The recording's own file, absolute: the address it was read from, or the file it is saved as. */
+  private masterUrl(): string {
+    return this.sceneElement.documentUrl ?? new URL(`${this.fileBase()}.json`, location.href).href
   }
 
   /** What the weather's picker links to when the weather is read from the file. */
@@ -2989,13 +3009,16 @@ export class SightingEditorElement extends HTMLElement {
     const showCredit = (): void => {
       const fromFile = select.value === SightingEditorElement.FILE_SOURCE
       const source = dataSourceById(sources, fromFile ? liveId() : select.value)
-      select.title = fromFile ? this.frozenPanel.itemLabel(file![0]) : source.credit
+      select.title = fromFile ? this.frozenPanel.where(file![0]) : source.credit
       credit.hidden = fromFile
       credit.href = source.creditUrl
       // The licence's own wording is what has to be shown; the picker only names the service.
       credit.textContent = source.credit
       shown.hidden = !fromFile
-      if (fromFile) shown.textContent = this.frozenPanel.itemLabel(file![0])
+      if (fromFile) {
+        shown.textContent = this.frozenPanel.itemLabel(file![0])
+        shown.title = this.frozenPanel.where(file![0])
+      }
     }
     showCredit()
     select.addEventListener("change", () => {
@@ -4707,7 +4730,10 @@ export class SightingEditorElement extends HTMLElement {
     credit.href = record.creditUrl
     credit.textContent = record.credit
     this.weatherFileLink.hidden = !fromFile
-    if (fromFile) this.weatherFileLink.textContent = this.weatherFileItemLabel()
+    if (fromFile) {
+      this.weatherFileLink.textContent = this.weatherFileItemLabel()
+      this.weatherFileLink.title = this.weatherFilePanel?.where() ?? ""
+    }
   }
 
   private onWeatherInferredToggled(): void {
@@ -5551,7 +5577,10 @@ export class SightingEditorElement extends HTMLElement {
     this.syncCanvasMode()
     this.refreshTimelineMarks()
     if (open && tab.getAttribute("aria-controls") === "group-file") {
-      void this.loadFileEditor().then(() => this.syncFileEditor(false), () => this.showFileNote(this.messages.importError, "error"))
+      void this.loadFileEditor().then(() => {
+        this.syncFileEditor(false)
+        this.showFileItem(this.fileItemSelect.value)
+      }, () => this.showFileNote(this.messages.importError, "error"))
     }
   }
 

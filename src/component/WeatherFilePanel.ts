@@ -15,6 +15,8 @@ export interface WeatherFileHost {
   documentUrl(): string | undefined
   /** The recording's own file name without `.json` (see FrozenDataHost.base). */
   base(): string
+  /** The recording's own file, absolute: where a weather kept inside it is. */
+  masterUrl(): string
   download(blob: Blob, fileName: string): void
   /** Told when the weather or where it is kept changed: an edit of the recording. */
   changed(): void
@@ -32,9 +34,6 @@ export class WeatherFilePanel {
 
   constructor(private readonly root: HTMLElement, private readonly host: WeatherFileHost) {
     this.sourceInput.addEventListener("filepick", event => void this.take((event as CustomEvent<InputFilePick>).detail))
-    for (const radio of this.root.querySelectorAll<HTMLInputElement>("input[name=weather-storage]")) {
-      radio.addEventListener("change", () => this.setStorage(radio.value === "inline"))
-    }
     this.root.querySelector("#weather-annex-export")!.addEventListener("click", () => this.exportAnnex())
   }
 
@@ -50,9 +49,6 @@ export class WeatherFilePanel {
     this.messages = messages
     const text = (id: string, value: string): void => { this.root.querySelector(`#${id}`)!.textContent = value }
     text("label-weather-annex-source", messages.annexSource)
-    text("label-weather-storage", messages.annexStorage)
-    text("label-weather-storage-url", messages.annexStorageUrl)
-    text("label-weather-storage-inline", messages.annexStorageInline)
     text("weather-annex-export", messages.export)
     this.sourceInput.messages = messages
     this.render()
@@ -63,16 +59,26 @@ export class WeatherFilePanel {
     return this.host.sighting().frozen?.weather?.src
   }
 
-  /** What the Files group's picker says of the weather: where it is. */
+  /** What the Files group's picker says of the weather: what it is. Where it is is its source's to say. */
   itemLabel(): string {
-    return `${this.messages.fileItemWeather} · ${this.src ?? this.messages.annexStorageInline}`
+    return this.messages.fileItemWeather
+  }
+
+  /** Where the weather is, in words. */
+  where(): string {
+    return this.src ?? this.messages.annexStorageInline
+  }
+
+  /** Whether the weather is kept inside the recording, as the section `weatherTrack` of its text. */
+  get inline(): boolean {
+    return this.src === undefined
   }
 
   render(): void {
     if (!this.messages) return
     const src = this.src
-    for (const radio of this.root.querySelectorAll<HTMLInputElement>("input[name=weather-storage]")) radio.checked = (radio.value === "inline") === (src === undefined)
-    this.sourceInput.url = src ? new URL(src, this.host.documentUrl() ?? location.href).href : ""
+    // Kept inside the recording, it is in the recording's own file.
+    this.sourceInput.url = src ? new URL(src, this.host.documentUrl() ?? location.href).href : this.host.masterUrl()
     const source = this.host.sighting().weatherSource
     this.root.querySelector("#weather-annex-state")!.textContent = source ? source.name : this.messages.weatherStatedByObserver
   }
@@ -102,6 +108,10 @@ export class WeatherFilePanel {
     return { src, bytes: new TextEncoder().encode(JSON.stringify(annex)) }
   }
 
+  private resolve(url: string): string {
+    return new URL(url, this.host.documentUrl() ?? location.href).href
+  }
+
   private exportAnnex(): void {
     const annex = this.annex() ?? { src: `${this.host.base()}.weather.json`, bytes: this.annexBytesInline() }
     this.host.download(new Blob([annex.bytes as BlobPart], { type: "application/json" }), decodeURIComponent(annex.src.split("/").pop() ?? annex.src))
@@ -115,10 +125,28 @@ export class WeatherFilePanel {
 
   /**
    * Gives the recording the weather of a file: a weather annex, or any recording whose weather it is to take. From an address, the weather
-   * is then kept there.
+   * is then kept there: the recording's own file keeps it inside the recording, and another file where there is none yet becomes where
+   * the weather is to be written, as it is now.
    */
   async take(pick: InputFilePick): Promise<void> {
+    if (pick.url && this.resolve(pick.url) === this.resolve(this.host.masterUrl())) {
+      this.setStorage(true)
+      return
+    }
     let annex: { weatherTrack?: WeatherTrackJson; weatherSource?: WeatherSource }
+    if (pick.url) {
+      try {
+        await fetch(this.resolve(pick.url), { method: "HEAD" }).then(response => { if (!response.ok) throw new Error(String(response.status)) })
+      } catch {
+        // Nothing there yet: the weather goes there as it is.
+        const sighting = this.host.sighting()
+        sighting.frozen = { ...(sighting.frozen ?? {}), weather: { src: pick.url } }
+        MessageStyle.show(this.note, undefined)
+        this.render()
+        this.host.changed()
+        return
+      }
+    }
     try {
       const { InputFileElement } = await import("./InputFileElement.js")
       const url = pick.url ? new URL(pick.url, this.host.documentUrl() ?? location.href).href : undefined

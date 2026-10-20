@@ -11,15 +11,13 @@ function mounted(sighting: Sighting) {
   const root = document.createElement("div")
   // As the editor's Files group has it (see sightingEditorTemplate).
   root.innerHTML = `<span id="label-weather-annex-source"></span> <rr0-input-file id="weather-annex-source" name="weather-annex-source" no-button></rr0-input-file>
-    <button id="weather-annex-export" type="button"></button><span id="label-weather-storage"></span>
-    <label><input type="radio" name="weather-storage" id="weather-storage-url" value="url"/> <span id="label-weather-storage-url"></span></label>
-    <label><input type="radio" name="weather-storage" id="weather-storage-inline" value="inline"/> <span id="label-weather-storage-inline"></span></label>
+    <button id="weather-annex-export" type="button"></button>
     <p id="weather-annex-state"></p><p id="weather-annex-note" hidden></p>`
   document.body.appendChild(root)
   const changed = vi.fn()
   const downloads: { blob: Blob; fileName: string }[] = []
   const panel = new WeatherFilePanel(root, {
-    sighting: () => sighting, documentUrl: () => "https://example.org/d/x.json", base: () => "x-sighting",
+    sighting: () => sighting, documentUrl: () => "https://example.org/d/x.json", base: () => "x-sighting", masterUrl: () => "https://example.org/d/x.json",
     download: (blob, fileName) => downloads.push({ blob, fileName }), changed
   })
   panel.localize(sightingEditorMessages_en)
@@ -31,23 +29,24 @@ afterEach(() => {
 })
 
 describe("WeatherFilePanel", () => {
-  it("keeps the weather inside the recording until it is kept beside it, and writes its annex then", () => {
+  it("keeps the weather inside the recording until it is kept beside it, and writes its annex then", async () => {
     const sighting = Sighting.create()
     sighting.weatherTrack.addKeyframe(0, { ...DEFAULT_WEATHER, cloudCover: 0.3 })
     const { root, panel, changed } = mounted(sighting)
     expect(panel.annex()).toBeUndefined()
-    expect(root.querySelector<HTMLInputElement>("#weather-storage-inline")!.checked).toBe(true)
-    expect(panel.itemLabel()).toBe("Weather · inside the recording")
-    const url = root.querySelector<HTMLInputElement>("#weather-storage-url")!
-    url.checked = true
-    url.dispatchEvent(new Event("change"))
+    const source = root.querySelector<InputFileElement>("#weather-annex-source")!
+    expect(panel.inline).toBe(true)
+    expect(source.url).toBe("https://example.org/d/x.json")
+    expect(panel.itemLabel()).toBe("Weather")
+    panel.setStorage(false)
     expect(changed).toHaveBeenCalled()
     expect(sighting.frozen?.weather).toEqual({ src: "x-sighting.weather.json" })
     const annex = panel.annex()!
     expect(annex.src).toBe("x-sighting.weather.json")
     expect(JSON.parse(new TextDecoder().decode(annex.bytes)).weatherTrack.keyframes[0].weather.cloudCover).toBe(0.3)
     expect(root.querySelector<InputFileElement>("#weather-annex-source")!.url).toBe("https://example.org/d/x-sighting.weather.json")
-    panel.setStorage(true)
+    // The recording's own file given as where it is: kept inside the recording again.
+    await panel.take({ url: "x.json" })
     expect(sighting.frozen).toBeUndefined()
   })
 

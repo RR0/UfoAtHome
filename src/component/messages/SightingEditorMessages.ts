@@ -162,10 +162,6 @@ export interface SightingEditorMessages extends InputFileMessages, SightingLabel
   weatherStatedByObserver: string
   /** Before the file or address of an annex. */
   annexSource: string
-  /** Before where an annex is kept. */
-  annexStorage: string
-  /** An annex kept in a file of its own, beside the recording. */
-  annexStorageUrl: string
   /** An annex kept inside the recording, as a data: URL. */
   annexStorageInline: string
   /** The accessible name of an annex's text. */

@@ -26,6 +26,8 @@ export interface FrozenDataHost {
   changed(): void
   /** The recording's own file name without `.json`, which its annexes are named after (`x` of `x.relief.zip`). */
   base(): string
+  /** The recording's own file, absolute: what an annex kept inside it is said to be in. */
+  masterUrl(): string
   /** Hands a file to the reader to save. */
   download(blob: Blob, fileName: string): void
 }
@@ -50,9 +52,6 @@ export class FrozenDataPanel {
 
   constructor(private readonly root: HTMLElement, private readonly host: FrozenDataHost) {
     this.sourceInput.addEventListener("filepick", event => void this.replace(this.shown, (event as CustomEvent<InputFilePick>).detail))
-    for (const radio of this.root.querySelectorAll<HTMLInputElement>("input[name=annex-storage]")) {
-      radio.addEventListener("change", () => void this.setStorage(this.shown, radio.value === "inline"))
-    }
     this.root.querySelector("#frozen-refresh")!.addEventListener("click", () => void this.refresh(this.shown))
     this.root.querySelector("#annex-export")!.addEventListener("click", () => void this.exportAnnex(this.shown))
   }
@@ -74,24 +73,30 @@ export class FrozenDataPanel {
     this.root.title = messages.frozenHint
     const text = (id: string, value: string): void => { this.root.querySelector(`#${id}`)!.textContent = value }
     text("label-annex-source", messages.annexSource)
-    text("label-annex-storage", messages.annexStorage)
-    text("label-annex-storage-url", messages.annexStorageUrl)
-    text("label-annex-storage-inline", messages.annexStorageInline)
     text("frozen-refresh", messages.frozenRefresh)
     text("annex-export", messages.export)
     this.sourceInput.messages = messages
     this.render()
   }
 
-  /** What the Files group's picker says of an annex: the group, and where it is, that it is still to be taken, or that it is asked live. */
+  /** What the Files group's picker says of an annex: the kind of data it holds. Where it is is its source's to say. */
   itemLabel(name: FrozenGroupName): string {
-    const frozen = this.host.sighting().frozen
+    return this.groupName(name)
+  }
+
+  /** Where an annex is, in words: what a source picker's link to it says in its tooltip. */
+  where(name: FrozenGroupName): string {
     const group = this.annex(name)
-    const where = FrozenGroups.isLive(frozen, name) ? this.messages.frozenLiveState
+    return this.isLive(name) ? this.messages.frozenLiveState
       : !group || group.refresh ? this.messages.frozenPending
       : FrozenDataPanel.isInline(group.src) ? this.messages.annexStorageInline
       : group.src
-    return `${this.groupName(name)} · ${where}`
+  }
+
+  /** Whether the annex of `name` is kept inside the recording, as the section `frozen.<name>.src` of its text. */
+  isInlineGroup(name: FrozenGroupName): boolean {
+    const group = this.annex(name)
+    return group !== undefined && !this.isLive(name) && FrozenDataPanel.isInline(group.src)
   }
 
   /** The annex the recording names for `name`, whether or not it is read now (asked live, or to be taken again). */
@@ -144,15 +149,13 @@ export class FrozenDataPanel {
     refresh.disabled = this.busy || live
     const held = group !== undefined && !group.refresh && !live
     const inline = held && FrozenDataPanel.isInline(group.src)
-    this.sourceInput.url = held && !inline ? this.address(group.src) : ""
-    if (inline) this.sourceInput.mode = "file"
+    // Kept inside the recording, it is in the recording's own file.
+    this.sourceInput.url = !held ? "" : inline ? this.host.masterUrl() : this.address(group.src)
+    if (!held) this.sourceInput.mode = "file"
     this.sourceInput.disabled = this.busy || live
-    for (const radio of this.root.querySelectorAll<HTMLInputElement>("input[name=annex-storage]")) {
-      radio.checked = held && (radio.value === "inline") === inline
-      radio.disabled = !held || this.busy
-    }
-    this.root.querySelector<HTMLButtonElement>("#annex-export")!.disabled = !held || this.busy
-    void this.renderEditor(held ? group : undefined)
+    this.root.querySelector<HTMLButtonElement>("#annex-export")!.disabled = group === undefined || this.busy
+    // A text of its own; one kept inside the recording is shown in the recording's (see SightingEditorElement.showFileItem).
+    void this.renderEditor(held && !inline ? group : undefined)
   }
 
   /** The text of a JSON annex, to edit: a zip is not text, and an annex not taken yet has none. */
@@ -193,18 +196,41 @@ export class FrozenDataPanel {
     }, 600)
   }
 
-  /** Gives the annex of `name` the file picked: a file of the author's is held as the annex (where it is kept now), an address becomes where it is. */
+  /**
+   * Gives the annex of `name` the file picked. A file of the author's is held as the annex, where it is kept now. An address is where it
+   * is: the recording's own file keeps it inside the recording; another file is read as the annex when there is one there, and otherwise
+   * becomes where the annex is to be written, with what it holds now (Save writes it there, beside the recording).
+   */
   async replace(name: FrozenGroupName, pick: InputFilePick): Promise<void> {
     if (pick.url) {
-      const frozen: FrozenData = { ...(this.host.sighting().frozen ?? {}) }
-      try {
-        const described = await FrozenDataPanel.describe(name, await this.bytesAt(pick.url))
-        frozen[name] = { src: pick.url, ...described }
-        MessageStyle.show(this.note, undefined)
-      } catch {
-        MessageStyle.show(this.note, this.messages.frozenMissing.replaceAll("{file}", pick.url), "warning")
+      if (this.address(pick.url) === new URL(this.host.masterUrl(), location.href).href) {
+        await this.setStorage(name, true)
         return
       }
+      const frozen: FrozenData = { ...(this.host.sighting().frozen ?? {}) }
+      let bytes: Uint8Array | undefined
+      try {
+        bytes = await this.bytesAt(pick.url)
+      } catch {
+        bytes = undefined
+      }
+      if (bytes !== undefined) {
+        try {
+          frozen[name] = { src: pick.url, ...(await FrozenDataPanel.describe(name, bytes)) }
+        } catch {
+          MessageStyle.show(this.note, this.messages.annexUnreadable, "warning")
+          return
+        }
+      } else {
+        const group = this.annex(name)
+        if (!group) {
+          MessageStyle.show(this.note, this.messages.frozenMissing.replaceAll("{file}", pick.url), "warning")
+          return
+        }
+        FrozenAnnexes.hold(this.address(pick.url), await this.bytesOf(group))
+        frozen[name] = { ...group, src: pick.url }
+      }
+      MessageStyle.show(this.note, undefined)
       this.setFrozen(frozen)
       return
     }
@@ -492,7 +518,7 @@ export class FrozenDataPanel {
     return bytes < 1e6 ? `${Math.max(1, Math.round(bytes / 1e3))} kB` : `${(bytes / 1e6).toFixed(1)} MB`
   }
 
-  private groupName(name: FrozenGroupName): string {
+  groupName(name: FrozenGroupName): string {
     const names: Record<FrozenGroupName, string> = {
       relief: this.messages.frozenRelief, imagery: this.messages.frozenImagery, roads: this.messages.frozenRoads,
       water: this.messages.frozenWater, railways: this.messages.frozenRailways, upperAir: this.messages.frozenUpperAir, map: this.messages.frozenMap
