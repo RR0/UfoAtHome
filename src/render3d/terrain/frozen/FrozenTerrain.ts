@@ -1,4 +1,4 @@
-import type { FrozenData, FrozenGroup } from "../../../engine/model/FrozenData.js"
+import type { FrozenData, HeldGroup } from "../../../engine/model/FrozenData.js"
 import { FrozenGroups } from "../../../engine/model/FrozenData.js"
 import type { TerrainProviders } from "../defaultTerrainProviders.js"
 import type { RoadWay } from "../RoadProvider.js"
@@ -23,7 +23,7 @@ export class FrozenTerrain {
     const held = (name: "relief" | "imagery" | "roads" | "water" | "railways") => FrozenGroups.held(frozen, name)
     const relief = held("relief"), imagery = held("imagery"), roads = held("roads"), water = held("water"), railways = held("railways")
     if (!relief && !imagery && !roads && !water && !railways) return live
-    const address = (group: FrozenGroup) => FrozenAnnexes.address(group.src, documentUrl)
+    const address = (group: HeldGroup) => FrozenAnnexes.address(group.src, documentUrl)
     const lists: Promise<readonly FrozenPatch[]>[] = []
     const providers: TerrainProviders = { ...live }
     if (relief) {
@@ -57,7 +57,7 @@ export class FrozenTerrain {
   }
 
   /** The observer map's photograph, read from the annex of the `map` group. */
-  static map(group: FrozenGroup, documentUrl: string | undefined): FrozenMapImagery {
+  static map(group: HeldGroup, documentUrl: string | undefined): FrozenMapImagery {
     const annex = FrozenAnnexes.zip(FrozenAnnexes.address(group.src, documentUrl)).then(files => ImageryAnnex.decode(files))
     return new FrozenMapImagery(annex, group.attribution)
   }

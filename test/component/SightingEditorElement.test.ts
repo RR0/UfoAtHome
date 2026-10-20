@@ -4967,7 +4967,7 @@ describe("SightingEditorElement inferred weather", () => {
       expect(weatherField(element, id).disabled).toBe(true)
     }
     expect(sourceLink(element).href).toBe(SOURCE.url)
-    // The record that answered is named by a picker beside the line, not baked into it.
+    // The record that answered is named by the picker of where the weather comes from, not baked into the line.
     expect((weatherField(element, "weatherSource") as HTMLSelectElement).value).toBe("era5")
     // 05:00 on the UTC+1 clock the sighting declares — a wrong time zone shows up here first.
     expect(sourceLink(element).textContent).toContain("1965-07-01 04:00 UTC")

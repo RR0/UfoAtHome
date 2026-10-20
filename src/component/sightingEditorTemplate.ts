@@ -305,9 +305,22 @@ export const html = `
       <label><input type="radio" name="annex-storage" id="annex-storage-inline" value="inline"/> <span id="label-annex-storage-inline">inside the recording</span></label>
     </div>
     <p class="row"><span id="frozen-state" class="frozen-group-state"></span> <button id="frozen-refresh" type="button">Refresh</button></p>
-    <label><input id="frozen-live" type="checkbox"/> <span id="label-frozen-live"></span></label>
     <p id="frozen-note" class="frozen-note" hidden role="status"></p>
     <div id="annex-editor" class="file-editor" hidden></div>
+  </div>
+  <!-- The weather: inside the recording, or in an annex beside it (see WeatherFilePanel). Its text is the recording's own. -->
+  <div class="element-list-body frozen-data" id="file-weather" hidden>
+    <div class="toolbar">
+      <span class="input-file-row"><span id="label-weather-annex-source">File</span> <rr0-input-file id="weather-annex-source" name="weather-annex-source" no-button accept="application/json,.json" placeholder="https://…/sighting.weather.json"></rr0-input-file></span>
+      <button id="weather-annex-export" type="button">Save</button>
+    </div>
+    <div class="row annex-storage" role="radiogroup" aria-labelledby="label-weather-storage">
+      <span id="label-weather-storage">Kept</span>
+      <label><input type="radio" name="weather-storage" id="weather-storage-url" value="url"/> <span id="label-weather-storage-url"></span></label>
+      <label><input type="radio" name="weather-storage" id="weather-storage-inline" value="inline"/> <span id="label-weather-storage-inline"></span></label>
+    </div>
+    <p id="weather-annex-state" class="frozen-group-state"></p>
+    <p id="weather-annex-note" class="frozen-note" hidden role="status"></p>
   </div>
 </section>
 <section class="group-panel" id="group-weather" aria-labelledby="label-weather-group" hidden>
@@ -319,7 +332,12 @@ export const html = `
          to tune. Unchecking hands the fields back to the observer, whose account then outranks the
          record and is never overwritten by it (Sighting.weatherSource). -->
     <div class="weather-source-row">
-      <label><input id="weatherInferred" type="checkbox" checked/> <span id="label-weather-inferred">From weather records</span></label>
+      <!-- Where the weather is read from: a record, asked again whenever the date or the place change, or the recording's own file,
+           where the observer's account or a record asked once is kept and never asked again. The box under it is what the editor
+           reasons on (see onWeatherInferredToggled): the picker ticks it for a record and unticks it for the file. -->
+      <label><span id="label-weather-inferred">Source</span> <select id="weatherSource"></select> <a id="weather-credit" class="source-credit" target="_blank" rel="noopener noreferrer"></a></label>
+      <button id="weather-file-link" type="button" class="source-file-link" hidden></button>
+      <input id="weatherInferred" type="checkbox" checked hidden/>
       <!-- Clamped to one line unless the reader asks for the rest (see #sky-details below). What
            these two lines say is worth saying — which record answered, and what else was up there
            that night — but they say it in prose, and the sky line runs to 575 characters on a night
@@ -931,6 +949,16 @@ input.invalid {
 }
 .source-credit {
   color: inherit;
+  text-decoration: underline dotted;
+}
+/* Where a source read from the recording's file is: a link to its item of the Files group, as the credit of a source asked live is. */
+.source-file-link {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
   text-decoration: underline dotted;
 }
 /* Same "one control, its own line" treatment as .record-row/.weather-source-row — the name and

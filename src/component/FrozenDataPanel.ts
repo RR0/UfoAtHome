@@ -1,4 +1,4 @@
-import type { FrozenData, FrozenGroup, FrozenGroupName, FrozenTerrainGroupName } from "../engine/model/FrozenData.js"
+import type { FrozenData, FrozenGroupName, FrozenTerrainGroupName, HeldGroup } from "../engine/model/FrozenData.js"
 import { FrozenGroups } from "../engine/model/FrozenData.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { UpperAirAnnexData, UpperAirHeard } from "../engine/traffic/FrozenUpperAirProvider.js"
@@ -49,12 +49,6 @@ export class FrozenDataPanel {
   private editTimer?: ReturnType<typeof setTimeout>
 
   constructor(private readonly root: HTMLElement, private readonly host: FrozenDataHost) {
-    this.liveInput.addEventListener("change", () => {
-      const frozen: FrozenData = { ...(this.host.sighting().frozen ?? {}) }
-      if (this.liveInput.checked) frozen.live = true
-      else delete frozen.live
-      this.setFrozen(frozen)
-    })
     this.sourceInput.addEventListener("filepick", event => void this.replace(this.shown, (event as CustomEvent<InputFilePick>).detail))
     for (const radio of this.root.querySelectorAll<HTMLInputElement>("input[name=annex-storage]")) {
       radio.addEventListener("change", () => void this.setStorage(this.shown, radio.value === "inline"))
@@ -71,10 +65,6 @@ export class FrozenDataPanel {
     return this.root.querySelector<HTMLElement>("#annex-editor")!
   }
 
-  private get liveInput(): HTMLInputElement {
-    return this.root.querySelector<HTMLInputElement>("#frozen-live")!
-  }
-
   private get note(): HTMLElement {
     return this.root.querySelector<HTMLElement>("#frozen-note")!
   }
@@ -83,7 +73,6 @@ export class FrozenDataPanel {
     this.messages = messages
     this.root.title = messages.frozenHint
     const text = (id: string, value: string): void => { this.root.querySelector(`#${id}`)!.textContent = value }
-    text("label-frozen-live", messages.frozenLive)
     text("label-annex-source", messages.annexSource)
     text("label-annex-storage", messages.annexStorage)
     text("label-annex-storage-url", messages.annexStorageUrl)
@@ -94,15 +83,45 @@ export class FrozenDataPanel {
     this.render()
   }
 
-  /** What the Files group's picker says of an annex: the group, and where it is or that it is still to be taken. */
+  /** What the Files group's picker says of an annex: the group, and where it is, that it is still to be taken, or that it is asked live. */
   itemLabel(name: FrozenGroupName): string {
     const frozen = this.host.sighting().frozen
-    const group = frozen?.[name]
-    const where = frozen?.live ? this.messages.frozenLiveState
+    const group = this.annex(name)
+    const where = FrozenGroups.isLive(frozen, name) ? this.messages.frozenLiveState
       : !group || group.refresh ? this.messages.frozenPending
       : FrozenDataPanel.isInline(group.src) ? this.messages.annexStorageInline
       : group.src
     return `${this.groupName(name)} · ${where}`
+  }
+
+  /** The annex the recording names for `name`, whether or not it is read now (asked live, or to be taken again). */
+  private annex(name: FrozenGroupName): HeldGroup | undefined {
+    const group = this.host.sighting().frozen?.[name]
+    return group?.src !== undefined ? group as HeldGroup : undefined
+  }
+
+  /** Whether `name` is asked of its source at every play. */
+  isLive(name: FrozenGroupName): boolean {
+    return FrozenGroups.isLive(this.host.sighting().frozen, name)
+  }
+
+  /**
+   * Has `name` asked of its source at every play (`live`), or read from its file: the annex it names, or one taken at the next save. An annex
+   * named stays named while the group is asked live, for the file to be chosen again, and is dropped only once the recording is saved so.
+   */
+  setLive(name: FrozenGroupName, live: boolean): void {
+    if (this.isLive(name) === live) return
+    const frozen: FrozenData = { ...(this.host.sighting().frozen ?? {}) }
+    if (frozen.live) {
+      // Every group was asked live: each but this one stays so, said of itself.
+      delete frozen.live
+      for (const other of FrozenGroups.NAMES) frozen[other] = { ...(frozen[other] ?? {}), live: true }
+    }
+    const group = { ...(frozen[name] ?? {}) }
+    if (live) group.live = true
+    else delete group.live
+    frozen[name] = Object.keys(group).length > 0 ? group : undefined
+    this.setFrozen(frozen)
   }
 
   /** Shows the annex of `name`. */
@@ -114,21 +133,20 @@ export class FrozenDataPanel {
   /** States the annex shown as it now is. */
   render(): void {
     if (!this.messages) return
-    const frozen = this.host.sighting().frozen
     const name = this.shown
-    const group = frozen?.[name]
-    this.liveInput.checked = frozen?.live === true
+    const live = this.isLive(name)
+    const group = this.annex(name)
     const state = this.root.querySelector<HTMLElement>("#frozen-state")!
-    state.textContent = frozen?.live ? this.messages.frozenLiveState
+    state.textContent = live ? this.messages.frozenLiveState
       : group && !group.refresh ? [this.messages.frozenTakenOn.replaceAll("{date}", group.takenOn ?? "?"), group.attribution].filter(Boolean).join(" · ")
       : this.messages.frozenPending
     const refresh = this.root.querySelector<HTMLButtonElement>("#frozen-refresh")!
-    refresh.disabled = this.busy || frozen?.live === true
-    const held = group !== undefined && !group.refresh
+    refresh.disabled = this.busy || live
+    const held = group !== undefined && !group.refresh && !live
     const inline = held && FrozenDataPanel.isInline(group.src)
     this.sourceInput.url = held && !inline ? this.address(group.src) : ""
     if (inline) this.sourceInput.mode = "file"
-    this.sourceInput.disabled = this.busy || frozen?.live === true
+    this.sourceInput.disabled = this.busy || live
     for (const radio of this.root.querySelectorAll<HTMLInputElement>("input[name=annex-storage]")) {
       radio.checked = held && (radio.value === "inline") === inline
       radio.disabled = !held || this.busy
@@ -138,7 +156,7 @@ export class FrozenDataPanel {
   }
 
   /** The text of a JSON annex, to edit: a zip is not text, and an annex not taken yet has none. */
-  private async renderEditor(group: FrozenGroup | undefined): Promise<void> {
+  private async renderEditor(group: HeldGroup | undefined): Promise<void> {
     const name = this.shown
     const text = group && !FrozenDataPanel.isZip(name) ? await this.textOf(group).catch(() => undefined) : undefined
     if (name !== this.shown) return
@@ -156,7 +174,7 @@ export class FrozenDataPanel {
       { schema: {}, phrases: this.messages.fileSearchPhrases })
   }
 
-  private async textOf(group: FrozenGroup): Promise<string> {
+  private async textOf(group: HeldGroup): Promise<string> {
     return JSON.stringify(JSON.parse(new TextDecoder().decode(await this.bytesOf(group))), null, 1)
   }
 
@@ -197,7 +215,7 @@ export class FrozenDataPanel {
   /** Writes `bytes` as the annex of `name`, kept where it is kept now (inside the recording, or beside it). */
   private async write(name: FrozenGroupName, bytes: Uint8Array, options: { keepEditor?: boolean } = {}): Promise<void> {
     const frozen: FrozenData = { ...(this.host.sighting().frozen ?? {}) }
-    const group = frozen[name]
+    const group = this.annex(name)
     let described: { takenOn?: string; attribution?: string }
     try {
       described = await FrozenDataPanel.describe(name, bytes)
@@ -208,7 +226,7 @@ export class FrozenDataPanel {
     const inline = group !== undefined && FrozenDataPanel.isInline(group.src)
     const src = inline ? FrozenDataPanel.dataUrl(name, bytes) : group?.src ?? FrozenGroups.annexName(this.host.base(), name)
     if (!inline) FrozenAnnexes.hold(this.address(src), bytes)
-    frozen[name] = { src, ...described }
+    frozen[name] = { ...(frozen[name]?.live ? { live: true } : {}), src, ...described }
     MessageStyle.show(this.note, undefined)
     if (options.keepEditor) this.editorFor = `${name}|${src}`
     this.setFrozen(frozen)
@@ -217,7 +235,7 @@ export class FrozenDataPanel {
   /** Keeps the annex of `name` inside the recording (a data: URL) or in a file beside it. */
   async setStorage(name: FrozenGroupName, inline: boolean): Promise<void> {
     const frozen: FrozenData = { ...(this.host.sighting().frozen ?? {}) }
-    const group = frozen[name]
+    const group = this.annex(name)
     if (!group || FrozenDataPanel.isInline(group.src) === inline) return
     const bytes = await this.bytesOf(group)
     let src: string
@@ -234,7 +252,7 @@ export class FrozenDataPanel {
 
   /** Hands the annex of `name` to the reader to save, named as it is beside the recording. */
   async exportAnnex(name: FrozenGroupName): Promise<void> {
-    const group = this.host.sighting().frozen?.[name]
+    const group = this.annex(name)
     if (!group) return
     const bytes = await this.bytesOf(group)
     const fileName = FrozenDataPanel.isInline(group.src) ? FrozenGroups.annexName(this.host.base(), name) : decodeURIComponent(group.src.split("/").pop() ?? group.src)
@@ -322,38 +340,45 @@ export class FrozenDataPanel {
     this.busy = true
     this.render()
     try {
-      const plan = frozen.live ? [] : TerrainFreezer.plan(sighting)
+      const live = (name: FrozenGroupName) => FrozenGroups.isLive(frozen, name)
+      const named = (name: FrozenGroupName) => frozen[name]?.src !== undefined ? frozen[name] as HeldGroup : undefined
+      // A group asked live keeps no annex once saved so: it would name a file the archive does not hold.
+      for (const name of FrozenGroups.NAMES) if (!frozen.live && frozen[name]?.live) frozen[name] = { live: true }
+      const plan = TerrainFreezer.plan(sighting)
       let sources: FreezerSources | undefined
       for (const name of FrozenGroups.TERRAIN) {
-        const group = frozen[name]
-        const stale = !frozen.live && plan.length > 0 && (!group || group.refresh || !(await this.fits(name, group, plan)))
+        if (live(name)) continue
+        const group = named(name)
+        const stale = plan.length > 0 && (!group || group.refresh || !(await this.fits(name, group, plan)))
         if (stale && await this.take(name, frozen, plan, sources ??= this.host.sources(), base)) {
-          await this.keep(frozen[name]!, files)
+          await this.keep(named(name)!, files)
           continue
         }
         if (group?.refresh) frozen[name] = { ...group, refresh: undefined }
-        if (frozen[name]) await this.keep(frozen[name]!, files)
+        if (named(name)) await this.keep(named(name)!, files)
       }
-      const map = frozen.map
-      const mapStale = !frozen.live && TerrainFreezer.mapGround(sighting) !== undefined && (!map || map.refresh || !(await this.fitsMap(map)))
-      if (mapStale && await this.takeMap(frozen, sources ??= this.host.sources(), base)) {
-        await this.keep(frozen.map!, files)
-      } else if (map) {
-        if (map.refresh) frozen.map = { ...map, refresh: undefined }
-        await this.keep(frozen.map!, files)
+      if (!live("map")) {
+        const map = named("map")
+        const mapStale = TerrainFreezer.mapGround(sighting) !== undefined && (!map || map.refresh || !(await this.fitsMap(map)))
+        if (mapStale && await this.takeMap(frozen, sources ??= this.host.sources(), base)) {
+          await this.keep(named("map")!, files)
+        } else if (map) {
+          if (map.refresh) frozen.map = { ...map, refresh: undefined }
+          await this.keep(named("map")!, files)
+        }
       }
       const heard = this.host.upperAirHeard()
-      const air = frozen.upperAir
-      if (!frozen.live && heard && (!air || air.refresh)) {
+      const air = named("upperAir")
+      if (!live("upperAir") && heard && (!air || air.refresh)) {
         const takenOn = new Date().toISOString().slice(0, 10)
         const annex: UpperAirAnnexData = { version: 1, takenOn, attribution: heard.answer.source.name, answers: [heard] }
         const bytes = new TextEncoder().encode(JSON.stringify(annex))
         const src = this.place("upperAir", air?.src, base, bytes)
         frozen.upperAir = { src, takenOn, attribution: heard.answer.source.name }
         if (!FrozenDataPanel.isInline(src)) files.set(src, bytes)
-      } else if (air) {
+      } else if (air && !live("upperAir")) {
         if (air.refresh) frozen.upperAir = { ...air, refresh: undefined }
-        await this.keep(frozen.upperAir!, files)
+        await this.keep(named("upperAir")!, files)
       }
     } finally {
       this.busy = false
@@ -384,7 +409,7 @@ export class FrozenDataPanel {
   }
 
   /** Whether the map's annex was taken of the ground the map is fitted to now: a moved observer or trace is another box. */
-  private async fitsMap(group: FrozenGroup): Promise<boolean> {
+  private async fitsMap(group: HeldGroup): Promise<boolean> {
     const ground = TerrainFreezer.mapGround(this.host.sighting())
     try {
       const index = JSON.parse(new TextDecoder().decode((await FrozenAnnexes.zip(this.address(group.src)))["index.json"])) as { map?: { bounds: GeoBounds } }
@@ -395,7 +420,7 @@ export class FrozenDataPanel {
   }
 
   /** Whether the annex of a group was taken for the patches the recording plays through now: a moved place or track is another ground. */
-  private async fits(name: FrozenGroupName, group: FrozenGroup, plan: readonly FrozenPatch[]): Promise<boolean> {
+  private async fits(name: FrozenGroupName, group: HeldGroup, plan: readonly FrozenPatch[]): Promise<boolean> {
     try {
       const address = this.address(group.src)
       const patches = group.src.endsWith(".zip")
@@ -424,7 +449,7 @@ export class FrozenDataPanel {
    * An annex the recording keeps beside it, into the export. One kept inside the recording goes with it, and one that cannot be read any
    * more is left out, and said.
    */
-  private async keep(group: FrozenGroup, files: Map<string, Uint8Array>): Promise<void> {
+  private async keep(group: HeldGroup, files: Map<string, Uint8Array>): Promise<void> {
     if (FrozenDataPanel.isInline(group.src)) return
     try {
       files.set(group.src, await this.bytesOf(group))
@@ -433,7 +458,7 @@ export class FrozenDataPanel {
     }
   }
 
-  private bytesOf(group: FrozenGroup): Promise<Uint8Array> {
+  private bytesOf(group: HeldGroup): Promise<Uint8Array> {
     return FrozenAnnexes.bytes(this.address(group.src))
   }
 

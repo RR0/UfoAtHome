@@ -15,10 +15,15 @@ export type FrozenGroupName = "relief" | "imagery" | "roads" | "water" | "railwa
 /** The groups laid on a patch of ground. */
 export type FrozenTerrainGroupName = Exclude<FrozenGroupName, "upperAir" | "map">
 
-/** One group, frozen: where its annex is, and when and from whom it was taken. */
+/** One group, frozen: where its annex is, and when and from whom it was taken. Or a group asked of its source at every play, and never frozen. */
 export interface FrozenGroup {
-  /** The annex holding it, relative to the recording's own file (as a model's `url` is). */
-  src: string
+  /**
+   * The annex holding it, relative to the recording's own file (as a model's `url` is), or a `data:` URL for an annex kept inside the
+   * recording itself. Absent for a group asked live.
+   */
+  src?: string
+  /** Asked of its source at every play, and never taken at save: what an author chooses by picking a source rather than the file. */
+  live?: boolean
   /** The day it was taken from its source, YYYY-MM-DD: what the data is a picture of (a road network, a survey) is that day's. */
   takenOn?: string
   /** Whom it was taken from, as their licence asks it to be said. */
@@ -47,7 +52,24 @@ export interface FrozenData {
   railways?: FrozenGroup
   upperAir?: FrozenGroup
   map?: FrozenGroup
+  /**
+   * Where the weather is kept, when it is not inside the recording (its `weatherTrack` and `weatherSource`): an annex holding them
+   * (see WeatherAnnex), read as the recording is loaded. Absent, the weather is the recording's own.
+   */
+  weather?: FrozenGroup
 }
+
+/** The weather annex: a recording's `weatherTrack` and `weatherSource`, kept in a file beside it. */
+export interface WeatherAnnex {
+  version: 1
+  takenOn?: string
+  attribution?: string
+  weatherTrack?: unknown
+  weatherSource?: unknown
+}
+
+/** A group the scene reads from its annex. */
+export type HeldGroup = FrozenGroup & { src: string }
 
 /** What can be asked of a recording's frozen data, group by group. */
 export class FrozenGroups {
@@ -56,10 +78,15 @@ export class FrozenGroups {
   static readonly TERRAIN: readonly FrozenTerrainGroupName[] = ["relief", "imagery", "roads", "water", "railways"]
 
   /** The group as the scene reads it: its annex, or undefined when it is asked for live (no annex, `live`, or a `refresh` asked). */
-  static held(data: FrozenData | undefined, name: FrozenGroupName): FrozenGroup | undefined {
+  static held(data: FrozenData | undefined, name: FrozenGroupName): HeldGroup | undefined {
     if (!data || data.live) return undefined
     const group = data[name]
-    return group && !group.refresh ? group : undefined
+    return group && !group.live && !group.refresh && group.src !== undefined ? group as HeldGroup : undefined
+  }
+
+  /** Whether the group is asked of its source at every play: chosen so for itself, or for every group. Never taken at save, then. */
+  static isLive(data: FrozenData | undefined, name: FrozenGroupName): boolean {
+    return data?.live === true || data?.[name]?.live === true
   }
 
   /** The annex's file name for a recording saved as `base` (its file name without `.json`). */
@@ -71,6 +98,6 @@ export class FrozenGroups {
 
   /** Whether the recording says anything at all about frozen data. */
   static isEmpty(data: FrozenData | undefined): boolean {
-    return !data || (!data.live && FrozenGroups.NAMES.every(name => !data[name]))
+    return !data || (!data.live && FrozenGroups.NAMES.every(name => !data[name]) && !data.weather)
   }
 }

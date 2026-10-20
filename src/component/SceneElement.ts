@@ -1221,7 +1221,7 @@ export class SceneElement extends HTMLElement {
 
   /** Fetches a SightingRecordingJson from `url` and loads it — what the `src` attribute uses. */
   async loadFromSrc(url: string): Promise<void> {
-    const fetching = SightingFetch.json(url)
+    const fetching = SightingFetch.recording(url)
     this.holdForNewScene(fetching)
     const json = (await fetching) as SightingRecordingJson
     this.documentUrl = new URL(url, location.href).href

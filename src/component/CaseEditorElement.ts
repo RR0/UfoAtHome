@@ -662,7 +662,7 @@ export class CaseEditorElement extends HTMLElement {
 
   private async loadTrack(track: CaseTrack): Promise<void> {
     if (track.recording) return
-    track.recording = (await SightingFetch.json(track.url)) as SightingRecordingJson
+    track.recording = (await SightingFetch.recording(track.url)) as SightingRecordingJson
     // As it was fetched: what a recording is changed from. A recording shown has it taken again from the form (see showTrack).
     track.loaded = JSON.stringify(track.recording)
   }
@@ -1190,7 +1190,7 @@ export class CaseEditorElement extends HTMLElement {
   private async readFile(): Promise<unknown> {
     const given = this.inputFile("add-source").value
     if (!given) throw new Error("No file")
-    if (given.url) return SightingFetch.json(new URL(given.url, location.href).href)
+    if (given.url) return SightingFetch.recording(new URL(given.url, location.href).href)
     const file = given.file!
     const text = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader()

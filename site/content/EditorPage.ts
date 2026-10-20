@@ -383,7 +383,7 @@ if (docs) {
         instant, and the two groups above already state both — so it is looked up from ERA5, the
         ECMWF reanalysis, and shown <em>read-only</em> above a line naming the dataset and the exact
         UTC instant described. A wrong time zone shows up there before it shows up in the sky.</p>
-      <p>Unchecking <strong>From weather records</strong> hands the fields back to the observer: the
+      <p>Choosing <strong>File</strong> rather than <strong>Open-Meteo</strong> as the weather's <strong>Source</strong> hands the fields back to the observer, the weather being then what the recording's own file says (inside it, or in a file beside it: see the Files tab): the
         looked-up values stay as a starting point, the source is dropped, and no later lookup may
         overwrite them. A recording that names a source is replayed exactly as authored and never
         looked up again, so a published case file reads identically offline.</p>
@@ -439,7 +439,7 @@ if (docs) {
         Keyframe it twice and it drifts, grows or darkens between the two; on top of that it rides
         the layer's wind like every other cloud.</p>
       <p>Any cloud edit takes the weather away from the record: the source is dropped and no later
-        lookup may overwrite what you set. Tick <strong>From weather records</strong> again and the
+        lookup may overwrite what you set. Choose <strong>Open-Meteo</strong> again as the source and the
         record's three layers come back, replacing yours. The one exception is
         <strong>Crystal alignment</strong>, offered on a cirrus layer only: no weather record
         measures it, so it stays editable with ERA5 selected. Tumbling crystals give a bare ring;
@@ -604,7 +604,7 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Files</h3>
-      <p>The files the recording is made of, picked one at a time above the tab: the recording itself, and each annex it carries frozen beside it (relief, photograph of the ground, roads, water, railways, air aloft, map photograph; see <code>frozen</code> in the format). An annex shows where it is (its address, which a file of yours or another address replaces), whether it is kept in a file beside the recording or inside the recording itself, when and from whom it was taken, with <strong>Refresh</strong> to take it again, <strong>Save</strong> to have its file, and its text to edit when it is JSON.</p>
+      <p>The files the recording is made of, picked one at a time above the tab: the recording itself, and each annex it carries frozen beside it (relief, photograph of the ground, roads, water, railways, air aloft, map photograph; see <code>frozen</code> in the format). An annex shows where it is (its address, which a file of yours or another address replaces), whether it is kept in a file beside the recording or inside the recording itself, when and from whom it was taken, with <strong>Refresh</strong> to take it again, <strong>Save</strong> to have its file, and its text to edit when it is JSON. The weather is one of them too, kept inside the recording or in a file of its own beside it. Every source the scene would ask (relief, imagery, roads, water, railways, air aloft, weather) is picked, in its own group, between the service asked live and <strong>File</strong>, which reads it from the recording's files and links to its item here; a file not taken yet is taken at the next save.</p>
       <p>The recording itself. <strong>Load sighting file</strong> brings an existing recording in, <em>from your disk</em> or, a click on these words, <em>from an address</em>, and <strong>Save</strong> hands you the file. A dot after this tab says the recording holds changes not saved; loading another file or address while it does asks first. Under them,
         the same recording as JSON text, kept in step both ways: what you change in the form or on
         the render appears in it, and a text that parses becomes the recording as soon as you stop
@@ -852,7 +852,7 @@ if (docs) {
         dans ERA5, la réanalyse de l'ECMWF, et affichée <em>en lecture seule</em> au-dessus d'une
         ligne nommant le jeu de données et l'instant UTC exact décrit. Un mauvais fuseau horaire s'y
         voit avant de se voir dans le ciel.</p>
-      <p>Décocher <strong>D'après les relevés</strong> rend les champs à l'observateur : les valeurs
+      <p>Choisir <strong>Fichier</strong> plutôt qu'<strong>Open-Meteo</strong> comme <strong>Source</strong> de la météo rend les champs à l'observateur, la météo étant alors ce que dit le fichier de l'enregistrement (en lui-même, ou dans un fichier à côté : voir l'onglet Fichiers) : les valeurs
         relevées restent comme point de départ, la source est retirée, et aucune consultation
         ultérieure ne peut les écraser. Un enregistrement qui nomme une source est rejoué tel qu'il
         a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors
@@ -913,8 +913,8 @@ if (docs) {
         Posez-le à deux instants et il dérive, grossit ou s'assombrit entre les deux ; par-dessus,
         il suit le vent de la couche comme tout autre nuage.</p>
       <p>Toute modification des nuages retire la météo au relevé : la source est abandonnée et
-        aucune consultation ultérieure ne peut écraser ce que vous avez réglé. Recochez
-        <strong>D'après les relevés</strong> et les trois couches du relevé reviennent, à la place des
+        aucune consultation ultérieure ne peut écraser ce que vous avez réglé. Rechoisissez
+        <strong>Open-Meteo</strong> comme source et les trois couches du relevé reviennent, à la place des
         vôtres. La seule exception est l'<strong>alignement des cristaux</strong>, proposé sur une
         couche de cirrus seulement : aucun relevé météo ne le mesure, il reste donc modifiable avec
         ERA5. Des cristaux culbutant donnent un anneau nu ; des plaquettes à plat et des colonnes
@@ -1092,7 +1092,7 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Fichiers</h3>
-      <p>Les fichiers dont l'enregistrement est fait, choisis un à un au-dessus de l'onglet : l'enregistrement lui-même, et chaque annexe qu'il porte figée à côté de lui (relief, photo du sol, routes, eau, voies ferrées, haute atmosphère, photo de la carte ; voir <code>frozen</code> dans le format). Une annexe montre où elle est (son adresse, que remplace un fichier à vous ou une autre adresse), si elle est gardée dans un fichier à côté de l'enregistrement ou dans l'enregistrement même, quand et auprès de qui elle a été relevée, avec <strong>Rafraîchir</strong> pour la relever à nouveau, <strong>Sauver</strong> pour avoir son fichier, et son texte à modifier quand c'est du JSON.</p>
+      <p>Les fichiers dont l'enregistrement est fait, choisis un à un au-dessus de l'onglet : l'enregistrement lui-même, et chaque annexe qu'il porte figée à côté de lui (relief, photo du sol, routes, eau, voies ferrées, haute atmosphère, photo de la carte ; voir <code>frozen</code> dans le format). Une annexe montre où elle est (son adresse, que remplace un fichier à vous ou une autre adresse), si elle est gardée dans un fichier à côté de l'enregistrement ou dans l'enregistrement même, quand et auprès de qui elle a été relevée, avec <strong>Rafraîchir</strong> pour la relever à nouveau, <strong>Sauver</strong> pour avoir son fichier, et son texte à modifier quand c'est du JSON. La météo en est une aussi, gardée dans l'enregistrement ou dans un fichier à elle à côté. Chaque source que la scène interrogerait (relief, imagerie, routes, eau, voies ferrées, haute atmosphère, météo) se choisit, dans son propre groupe, entre le service interrogé en direct et <strong>Fichier</strong>, qui la lit dans les fichiers de l'enregistrement et renvoie à son élément ici ; un fichier pas encore relevé l'est à la sauvegarde suivante.</p>
       <p>L'enregistrement lui-même. <strong>Charger un fichier d'observation</strong> fait entrer un enregistrement existant, <em>depuis votre disque</em> ou, d'un clic sur ces mots, <em>depuis une adresse</em>, et <strong>Sauver</strong>
         vous remet le fichier. Un point après cet onglet dit que l\'enregistrement contient des modifications non sauvées ; charger un autre fichier ou une autre adresse alors qu\'il en contient demande d\'abord confirmation. Dessous, le même enregistrement en texte JSON, tenu à jour dans les
         deux sens : ce que vous changez dans le formulaire ou sur le rendu y apparaît, et un texte
@@ -1338,7 +1338,7 @@ if (docs) {
         reanálisis del ECMWF, y se muestra <em>en solo lectura</em> sobre una línea que nombra el
         conjunto de datos y el instante UTC exacto descrito. Una zona horaria equivocada se nota ahí
         antes de notarse en el cielo.</p>
-      <p>Desmarcar <strong>Según los registros</strong> devuelve los campos al
+      <p>Elegir <strong>Archivo</strong> en lugar de <strong>Open-Meteo</strong> como <strong>Fuente</strong> del tiempo devuelve los campos al
         observador: los valores consultados se quedan como punto de partida, la fuente se retira, y
         ninguna consulta posterior puede sobrescribirlos. Un registro que nombra una fuente se reproduce
         exactamente como se compuso y nunca se vuelve a consultar, así que un caso publicado se lee
@@ -1394,8 +1394,8 @@ if (docs) {
         crece o se oscurece entre ambos; además, se deja llevar por el viento de la capa como cualquier
         otra nube.</p>
       <p>Cualquier edición de nubes aparta el tiempo del registro meteorológico: la fuente se retira y
-        ninguna consulta posterior puede sobrescribir lo que has ajustado. Vuelve a marcar
-        <strong>Según los registros</strong> y regresan las tres capas del registro, en
+        ninguna consulta posterior puede sobrescribir lo que has ajustado. Vuelve a elegir
+        <strong>Open-Meteo</strong> como fuente y regresan las tres capas del registro, en
         lugar de las tuyas. La única excepción es <strong>Alineación de los cristales</strong>, que
         solo se ofrece en una capa de cirros: ningún registro meteorológico la mide, así que sigue siendo
         editable con ERA5 seleccionado. Los cristales que dan tumbos producen un anillo desnudo; las
@@ -1569,7 +1569,7 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Archivos</h3>
-      <p>Los archivos de los que está hecho el registro, elegidos uno a uno encima de la pestaña: el propio registro, y cada anexo que lleva congelado junto a él (relieve, foto del suelo, carreteras, agua, vías férreas, aire en altura, foto del mapa; véase <code>frozen</code> en el formato). Un anexo muestra dónde está (su dirección, que sustituye un archivo suyo u otra dirección), si se guarda en un archivo junto al registro o dentro del propio registro, cuándo y de quién se tomó, con <strong>Actualizar</strong> para tomarlo de nuevo, <strong>Guardar</strong> para tener su archivo, y su texto para editar cuando es JSON.</p>
+      <p>Los archivos de los que está hecho el registro, elegidos uno a uno encima de la pestaña: el propio registro, y cada anexo que lleva congelado junto a él (relieve, foto del suelo, carreteras, agua, vías férreas, aire en altura, foto del mapa; véase <code>frozen</code> en el formato). Un anexo muestra dónde está (su dirección, que sustituye un archivo suyo u otra dirección), si se guarda en un archivo junto al registro o dentro del propio registro, cuándo y de quién se tomó, con <strong>Actualizar</strong> para tomarlo de nuevo, <strong>Guardar</strong> para tener su archivo, y su texto para editar cuando es JSON. El tiempo también lo es, guardado dentro del registro o en un archivo propio junto a él. Cada fuente que la escena consultaría (relieve, imágenes, carreteras, agua, vías férreas, aire en altura, tiempo) se elige, en su propio grupo, entre el servicio consultado en directo y <strong>Archivo</strong>, que la lee de los archivos del registro y remite a su elemento aquí; un archivo aún no tomado se toma al guardar.</p>
       <p>El registro en sí. <strong>Cargar un archivo de observación</strong> trae un registro existente, <em>desde su disco</em> o, con un clic en estas palabras, <em>desde una dirección</em>, y <strong>Guardar</strong> te entrega el archivo. Un punto tras esta pestaña indica que la grabación tiene cambios sin guardar; cargar otro archivo u otra dirección mientras los tenga pide confirmación antes.
         Debajo, el mismo registro como texto JSON, mantenido al día en los dos sentidos: lo que
         cambias en el formulario o en el render aparece en él, y un texto que se analiza pasa a ser
@@ -1817,7 +1817,7 @@ if (docs) {
         dell'ECMWF, e mostrato <em>in sola lettura</em> sopra una riga che nomina il set di dati e
         l'istante UTC esatto descritto. Un fuso orario sbagliato si vede lì prima di vedersi nel
         cielo.</p>
-      <p>Togliere la spunta a <strong>Dai rilevamenti</strong> restituisce i campi
+      <p>Scegliere <strong>File</strong> invece di <strong>Open-Meteo</strong> come <strong>Fonte</strong> del meteo restituisce i campi
         all'osservatore: i valori ricavati restano come punto di partenza, la fonte viene tolta, e
         nessuna consultazione successiva può sovrascriverli. Una registrazione che nomina una fonte viene
         riprodotta esattamente come è stata composta e mai più consultata, così un caso pubblicato si
@@ -1874,8 +1874,8 @@ if (docs) {
         strato. Assegnale due fotogrammi chiave e deriva, cresce o si scurisce tra i due; in più, segue il
         vento dello strato come ogni altra nuvola.</p>
       <p>Qualsiasi modifica delle nuvole sottrae il meteo ai dati: la fonte viene tolta e nessuna
-        consultazione successiva può sovrascrivere ciò che hai impostato. Rimetti la spunta a
-        <strong>Dai rilevamenti</strong> e i tre strati dei dati tornano, al posto dei tuoi.
+        consultazione successiva può sovrascrivere ciò che hai impostato. Riscegli
+        <strong>Open-Meteo</strong> come fonte e i tre strati dei dati tornano, al posto dei tuoi.
         L'unica eccezione è <strong>Allineamento dei cristalli</strong>, proposto solo su uno strato
         di cirri: nessun dato meteorologico lo misura, quindi resta modificabile con ERA5 selezionato. I
         cristalli che ruotano in modo casuale danno un anello semplice; le piastrine orizzontali e le
@@ -2049,7 +2049,7 @@ if (docs) {
 
     <div class="group-doc">
       <h3>File</h3>
-      <p>I file di cui è fatta la registrazione, scelti uno alla volta sopra la scheda: la registrazione stessa, e ogni allegato che porta congelato accanto a sé (rilievo, foto del suolo, strade, acque, ferrovie, aria in quota, foto della mappa; vedi <code>frozen</code> nel formato). Un allegato mostra dov'è (il suo indirizzo, che un proprio file o un altro indirizzo sostituisce), se è conservato in un file accanto alla registrazione o dentro la registrazione stessa, quando e da chi è stato rilevato, con <strong>Aggiorna</strong> per rilevarlo di nuovo, <strong>Salva</strong> per averne il file, e il suo testo da modificare quando è JSON.</p>
+      <p>I file di cui è fatta la registrazione, scelti uno alla volta sopra la scheda: la registrazione stessa, e ogni allegato che porta congelato accanto a sé (rilievo, foto del suolo, strade, acque, ferrovie, aria in quota, foto della mappa; vedi <code>frozen</code> nel formato). Un allegato mostra dov'è (il suo indirizzo, che un proprio file o un altro indirizzo sostituisce), se è conservato in un file accanto alla registrazione o dentro la registrazione stessa, quando e da chi è stato rilevato, con <strong>Aggiorna</strong> per rilevarlo di nuovo, <strong>Salva</strong> per averne il file, e il suo testo da modificare quando è JSON. Anche il meteo lo è, conservato dentro la registrazione o in un proprio file accanto. Ogni fonte che la scena interrogherebbe (rilievo, immagini, strade, acque, ferrovie, aria in quota, meteo) si sceglie, nel proprio gruppo, tra il servizio interrogato in diretta e <strong>File</strong>, che la legge dai file della registrazione e rimanda al suo elemento qui; un file non ancora rilevato lo è al salvataggio successivo.</p>
       <p>La registrazione stessa. <strong>Carica un file di osservazione</strong> porta dentro una registrazione esistente, <em>dal proprio disco</em> o, con un clic su queste parole, <em>da un indirizzo</em>, ed <strong>Salva</strong> ti
         consegna il file. Un punto dopo questa scheda indica che la registrazione contiene modifiche non salvate; caricare un altro file o un altro indirizzo mentre ne contiene chiede prima conferma. Sotto, la stessa registrazione come testo JSON, tenuta allineata nei due
         sensi: ciò che cambi nel modulo o nel rendering vi compare, e un testo che si interpreta

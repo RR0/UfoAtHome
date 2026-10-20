@@ -961,7 +961,7 @@ export class UfoElement extends HTMLElement {
 
   /** Fetches a SightingRecordingJson from `url` and loads it — what the `src` attribute uses. */
   async loadFromSrc(url: string): Promise<void> {
-    this.sightingData = (await SightingFetch.json(url)) as SightingRecordingJson
+    this.sightingData = (await SightingFetch.recording(url)) as SightingRecordingJson
   }
 
   get sightingData(): SightingRecordingJson {

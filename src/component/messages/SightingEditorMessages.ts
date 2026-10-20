@@ -156,6 +156,10 @@ export interface SightingEditorMessages extends InputFileMessages, SightingLabel
   frozenMap: string
   /** The recording itself, first in the Files group's picker. */
   fileItemRecording: string
+  /** The recording's weather, in the Files group's picker. */
+  fileItemWeather: string
+  /** Where a weather no record gave comes from. */
+  weatherStatedByObserver: string
   /** Before the file or address of an annex. */
   annexSource: string
   /** Before where an annex is kept. */
@@ -219,6 +223,8 @@ export interface SightingEditorMessages extends InputFileMessages, SightingLabel
   sourceImagery: string
   /** The label of the air traffic source picker: where the aircraft around the observer are read from. */
   sourceAircraft: string
+  /** The choice, in a source picker, of the recording's own file rather than a source asked live (see FrozenData). */
+  sourceFile: string
   placeNamePlaceholder: string
   /** The button (and Enter) that runs the search. */
   searchPlace: string

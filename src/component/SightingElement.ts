@@ -521,7 +521,7 @@ export class SightingElement extends HTMLElement {
    * before cases, is refused by name rather than misread. */
   async loadFromSrc(url: string): Promise<void> {
     this.startPending = true
-    const fetching = SightingFetch.json(url)
+    const fetching = SightingFetch.recording(url)
     // The loader from the moment a recording is asked for — see SceneElement.holdForNewScene.
     this.sceneElement.holdForNewScene(fetching)
     const json = await fetching
@@ -584,7 +584,7 @@ export class SightingElement extends HTMLElement {
   private async loadObserverUrls(urls: string[], caseSource?: { json: CaseJson, url: string }): Promise<void> {
     const entries = await Promise.all(
       urls.map(async (src): Promise<ObserverEntry> => (
-        { src, sighting: (await SightingFetch.json(src)) as SightingRecordingJson }
+        { src, sighting: (await SightingFetch.recording(src)) as SightingRecordingJson }
       ))
     )
     this.setEntries(entries, caseSource)
@@ -937,7 +937,7 @@ export class SightingElement extends HTMLElement {
         const title = this.said.read(event.title) ?? `#${index + 1}`
         const by = (event.by ?? []).map(agent => this.agentName(agent)).filter(Boolean).join(", ")
         offer(`case-${index}`, by ? this.messages.interpretationBy.replace("{title}", title).replace("{by}", by) : title,
-          () => CaseFile.interpretationOf(event, source.url, url => SightingFetch.json(url)))
+          () => CaseFile.interpretationOf(event, source.url, url => SightingFetch.recording(url)))
       })
     }
     const kept = sameRecording && [...this.interpretationSelect.options].some(option => option.value === previous)

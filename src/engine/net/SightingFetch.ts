@@ -30,6 +30,25 @@ export class SightingFetchError extends Error {
  */
 export class SightingFetch {
 
+  /**
+   * A recording, with what it keeps in files beside it that is part of the recording itself rather than of its scene put back in it: its
+   * weather, when it keeps it in an annex (see FrozenData.weather). An annex that cannot be read leaves the recording as it is.
+   */
+  static async recording(url: string): Promise<unknown> {
+    const json = await SightingFetch.json(url) as { frozen?: { weather?: { src?: string, live?: boolean } }, weatherTrack?: unknown, weatherSource?: unknown }
+    const weather = json?.frozen?.weather
+    if (weather?.src && !weather.live) {
+      try {
+        const annex = await SightingFetch.json(new URL(weather.src, new URL(url, location.href)).href) as { weatherTrack?: unknown, weatherSource?: unknown }
+        if (annex.weatherTrack !== undefined) json.weatherTrack = annex.weatherTrack
+        if (annex.weatherSource !== undefined) json.weatherSource = annex.weatherSource
+      } catch {
+        // The recording plays with what it holds itself.
+      }
+    }
+    return json
+  }
+
   static async json(url: string): Promise<unknown> {
     // Resolved only to be REASONED about — which origin, which protocol. What is handed to fetch
     // stays the caller's own string, relative or not, because that is what every consumer of this

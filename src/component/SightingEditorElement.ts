@@ -130,6 +130,7 @@ import type { WeatherProvider } from "../engine/weather/WeatherProvider.js"
 import { defaultPlaceProvider } from "../engine/place/defaultPlaceProvider.js"
 import { PLACE_SOURCES } from "../engine/place/placeSources.js"
 import { isRecordSource, WEATHER_SOURCES } from "../engine/weather/weatherSources.js"
+import { UPPER_AIR_SOURCES } from "../engine/traffic/upperAirSources.js"
 import { AIRCRAFT_SOURCES } from "../engine/traffic/aircraftSources.js"
 import { SOUND_KINDS } from "../engine/model/Sound.js"
 import type { SightingSound, SoundKind } from "../engine/model/Sound.js"
@@ -144,6 +145,7 @@ import { GroundElevation } from "../render3d/terrain/ElevationProvider.js"
 import { TimeZones } from "../engine/time/TimeZones.js"
 import { dataSourceById } from "../engine/source/DataSource.js"
 import { FrozenDataPanel } from "./FrozenDataPanel.js"
+import { WeatherFilePanel } from "./WeatherFilePanel.js"
 import { FrozenGroups, type FrozenGroupName } from "../engine/model/FrozenData.js"
 import { FrozenAnnexes } from "../render3d/terrain/frozen/FrozenAnnexes.js"
 import type { FreezerSources } from "../render3d/terrain/frozen/TerrainFreezer.js"
@@ -416,6 +418,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly exportButton: HTMLButtonElement
   /** The File group's account of the data frozen beside the recording, and what takes it at export. */
   private readonly frozenPanel: FrozenDataPanel
+  /** The Files group's account of the recording's weather, kept inside it or beside it. */
+  private readonly weatherFilePanel: WeatherFilePanel
   /** The Files group's picker: the recording, then each annex (see refreshFileItems). */
   private readonly fileItemSelect: HTMLSelectElement
   /** Where a recording comes in: a file of the author's, or an address (see InputFileElement). */
@@ -703,6 +707,9 @@ export class SightingEditorElement extends HTMLElement {
    * inside the panel that works like the groups' strip, one part open at a time. */
   private readonly subgroupTabs: HTMLButtonElement[]
   private readonly labelWeatherInferred: HTMLElement
+  /** Where the weather is read from: a record (ticks weatherInferredInput) or the recording's file (unticks it). */
+  private readonly weatherProviderSelect: HTMLSelectElement
+  private readonly weatherFileLink: HTMLButtonElement
   private readonly labelSoundGroup: HTMLElement
   private readonly labelSoundKind: HTMLElement
   private readonly labelSoundVolume: HTMLElement
@@ -1301,6 +1308,21 @@ export class SightingEditorElement extends HTMLElement {
       base: () => this.fileBase(),
       download: (blob, fileName) => this.download(blob, fileName)
     })
+    this.weatherFilePanel = new WeatherFilePanel(this.shadow.getElementById("file-weather")!, {
+      sighting: () => this.ufoElement.sighting,
+      documentUrl: () => this.sceneElement.documentUrl,
+      base: () => this.fileBase(),
+      download: (blob, fileName) => this.download(blob, fileName),
+      changed: () => {
+        this.touch()
+        this.ufoElement.refresh()
+        this.syncWeatherFromTimeline()
+        this.syncWeatherSourceState()
+        this.scheduleFileSync()
+        this.refreshFileItems()
+      }
+    })
+    this.weatherFilePanel.localize(this.messages)
     this.fileItemSelect = this.shadow.getElementById("file-item") as HTMLSelectElement
     this.fileItemSelect.addEventListener("change", () => this.showFileItem(this.fileItemSelect.value))
     // In the language the editor starts in: the others come with their locale, if one is asked (see applyMessages).
@@ -1346,6 +1368,8 @@ export class SightingEditorElement extends HTMLElement {
     this.labelPrecipitationGroup = this.shadow.getElementById("label-precipitation-group")!
     this.labelWindGroup = this.shadow.getElementById("label-wind-group")!
     this.labelWeatherInferred = this.shadow.getElementById("label-weather-inferred")!
+    this.weatherProviderSelect = this.shadow.getElementById("weatherSource") as HTMLSelectElement
+    this.weatherFileLink = this.shadow.getElementById("weather-file-link") as HTMLButtonElement
     this.labelInstrument = this.shadow.getElementById("label-instrument")!
     this.optionPrecipitationNone = this.shadow.getElementById("option-precipitation-none")!
     this.optionPrecipitationRain = this.shadow.getElementById("option-precipitation-rain")!
@@ -1827,6 +1851,8 @@ export class SightingEditorElement extends HTMLElement {
       field.addEventListener("input", () => this.applySoundAtPlayhead())
     }
     this.weatherInferredInput.addEventListener("change", () => this.onWeatherInferredToggled())
+    this.weatherProviderSelect.addEventListener("change", () => this.onWeatherProviderChosen())
+    this.weatherFileLink.addEventListener("click", () => this.openFileItem("weather"))
 
     this.skyDetailsButton = this.shadow.getElementById("sky-details") as HTMLButtonElement
     this.clampedLines = [this.shadow.getElementById("weather-source")!, this.shadow.getElementById("sky-candidates")!]
@@ -2253,6 +2279,14 @@ export class SightingEditorElement extends HTMLElement {
       }
     }
     const json = this.sightingData
+    // The weather kept beside the recording is written there, and not inside it too.
+    const weather = this.weatherFilePanel.annex()
+    if (weather) {
+      // Beside the recording, it goes into the archive; at an address of its own, it is read from there.
+      if (!/^[a-z][a-z0-9+.-]*:/i.test(weather.src)) annexes.set(weather.src, weather.bytes)
+      delete json.weatherTrack
+      delete json.weatherSource
+    }
     const fileName = `${base}.json`
     const text = JSON.stringify(json, null, 2)
     if (annexes.size === 0) {
@@ -2269,8 +2303,13 @@ export class SightingEditorElement extends HTMLElement {
     this.markClean()
   }
 
-  /** The recording's file name without `.json`, as it is saved, and as its annexes are named after it. */
+  /**
+   * The recording's file name without `.json`, as it is saved, and as its annexes are named after it: the file it was read from, so that
+   * it is saved under its own name beside the annexes it names, or else one made from its observer.
+   */
   private fileBase(): string {
+    const read = this.sceneElement.documentUrl?.split(/[?#]/)[0].split("/").pop()
+    if (read?.endsWith(".json") && read.length > ".json".length) return decodeURIComponent(read.slice(0, -".json".length))
     return `${this.sightingData.observer?.id ?? "sighting"}-sighting`
   }
 
@@ -2281,10 +2320,12 @@ export class SightingEditorElement extends HTMLElement {
   private refreshFileItems(): void {
     const select = this.fileItemSelect
     if (!select) return
+    this.syncFilePickers()
     const picked = select.value || "recording"
     const recordingFile = this.sceneElement.documentUrl?.split(/[?#]/)[0].split("/").pop() || `${this.fileBase()}.json`
     select.replaceChildren(
       new Option(`${this.messages.fileItemRecording} · ${decodeURIComponent(recordingFile)}`, "recording"),
+      new Option(this.weatherFilePanel.itemLabel(), "weather"),
       ...FrozenGroups.NAMES.map(name => new Option(this.frozenPanel.itemLabel(name), name)))
     select.value = picked
     this.showFileItem(select.value)
@@ -2292,10 +2333,18 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Shows the detail of one file of the Files group: the recording, or one of its annexes. */
   private showFileItem(item: string): void {
-    const recording = item === "recording" || !(FrozenGroups.NAMES as readonly string[]).includes(item)
-    this.shadow.getElementById("file-recording")!.hidden = !recording
-    this.shadow.getElementById("frozen-data")!.hidden = recording
-    if (!recording) this.frozenPanel.show(item as FrozenGroupName)
+    const annex = (FrozenGroups.NAMES as readonly string[]).includes(item)
+    const weather = item === "weather"
+    this.shadow.getElementById("file-recording")!.hidden = annex || weather
+    this.shadow.getElementById("frozen-data")!.hidden = !annex
+    this.shadow.getElementById("file-weather")!.hidden = !weather
+    if (annex) this.frozenPanel.show(item as FrozenGroupName)
+    if (weather) this.weatherFilePanel.render()
+  }
+
+  /** What the weather's picker links to when the weather is read from the file. */
+  private weatherFileItemLabel(): string {
+    return this.weatherFilePanel?.itemLabel() ?? ""
   }
 
   private download(blob: Blob, fileName: string): void {
@@ -2367,14 +2416,21 @@ export class SightingEditorElement extends HTMLElement {
     if (bytes[0] !== 0x50 || bytes[1] !== 0x4b) return new TextDecoder().decode(bytes)
     const { unzipSync, strFromU8 } = await import("fflate")
     const files = unzipSync(bytes)
-    const annex = /\.(relief|imagery)\.zip$|\.(roads|water|railways|upper-air)\.json$/
+    const annex = /\.(relief|imagery|map)\.zip$|\.(roads|water|railways|upper-air|weather)\.json$/
     const name = Object.keys(files).find(path => path.endsWith(".json") && !annex.test(path))
     if (!name) throw new Error("No recording in this archive")
     const folder = name.includes("/") ? name.slice(0, name.lastIndexOf("/") + 1) : ""
     for (const [path, content] of Object.entries(files)) {
       if (path !== name && path.startsWith(folder)) FrozenAnnexes.hold(FrozenAnnexes.address(path.slice(folder.length), undefined), content)
     }
-    return strFromU8(files[name])
+    const text = strFromU8(files[name])
+    // The weather kept beside the recording is put back in it, as a player does (see SightingFetch.recording).
+    const json = JSON.parse(text) as SightingRecordingJson & { frozen?: { weather?: { src?: string } } }
+    const weather = json.frozen?.weather?.src
+    const weatherFile = weather !== undefined ? files[folder + weather] : undefined
+    if (!weatherFile) return text
+    const kept = JSON.parse(strFromU8(weatherFile)) as Pick<SightingRecordingJson, "weatherTrack" | "weatherSource">
+    return JSON.stringify({ ...json, weatherTrack: kept.weatherTrack ?? json.weatherTrack, weatherSource: kept.weatherSource ?? json.weatherSource })
   }
 
   // -- A case, which this editor does not hold ---------------------------------------------------
@@ -2414,7 +2470,7 @@ export class SightingEditorElement extends HTMLElement {
 
   private async loadUrl(url: string): Promise<void> {
     try {
-      const fetched = await SightingFetch.json(url)
+      const fetched = await SightingFetch.recording(url)
       // A case is not a recording: whoever edits cases takes it (see offerCase).
       if (CaseFile.isCase(fetched)) {
         const address = new URL(url, location.href).href
@@ -2870,13 +2926,9 @@ export class SightingEditorElement extends HTMLElement {
         this.placeProvider = source.create()
       })
     )
-    this.weatherSourceRow.replaceChildren(
-      this.sourcePicker("weather", WEATHER_SOURCES, source => {
-        this.weatherInference = new WeatherInference(source.create())
-        // The values on screen came from the previous record — ask the new one for its own.
-        this.scheduleWeatherLookup()
-      })
-    )
+    // The record is picked, and credited, above, with the file (see weatherProviderSelect).
+    this.weatherSourceRow.replaceChildren()
+    this.fillWeatherProvider()
     this.lightPollutionSourceRow.replaceChildren(
       document.createTextNode(`${this.messages.according} `),
       this.sourcePicker("light-pollution", LIGHT_POLLUTION_SOURCES, source => {
@@ -2895,8 +2947,12 @@ export class SightingEditorElement extends HTMLElement {
       })
     )
     this.terrainSourceRows.replaceChildren(
-      this.labelledPicker("elevation", this.messages.sourceElevation, ELEVATION_SOURCES, () => this.applyTerrainSources()),
-      this.labelledPicker("imagery", this.messages.sourceImagery, IMAGERY_SOURCES, () => this.applyTerrainSources()),
+      this.labelledPicker("elevation", this.messages.sourceElevation, ELEVATION_SOURCES, () => this.applyTerrainSources(), ["relief"]),
+      this.labelledPicker("imagery", this.messages.sourceImagery, IMAGERY_SOURCES, () => this.applyTerrainSources(), ["imagery", "map"]),
+      this.labelledPicker("roads", this.messages.frozenRoads, [SightingEditorElement.LIVE_ROADS], () => undefined, ["roads"]),
+      this.labelledPicker("water", this.messages.frozenWater, [SightingEditorElement.LIVE_WATER], () => undefined, ["water"]),
+      this.labelledPicker("railways", this.messages.frozenRailways, [SightingEditorElement.LIVE_RAILWAYS], () => undefined, ["railways"]),
+      this.labelledPicker("upper-air", this.messages.frozenUpperAir, UPPER_AIR_SOURCES, () => undefined, ["upperAir"]),
       this.labelledPicker("aircraft", this.messages.sourceAircraft, AIRCRAFT_SOURCES, () => this.applyAircraftSource()),
       this.labelledPicker("decor-model", this.messages.decorModel, DECOR_MODEL_SOURCES, () => this.applyDecorModelSource())
     )
@@ -2906,7 +2962,7 @@ export class SightingEditorElement extends HTMLElement {
    * link beside it. Built in script rather than spelled out in the template because the options ARE
    * the registry: adding a second geocoder, or a third imagery tileset, must not also mean adding
    * markup and element ids for it. */
-  private sourcePicker<T>(kind: string, sources: DataSource<T>[], apply: (source: DataSource<T>) => void): DocumentFragment {
+  private sourcePicker<T>(kind: string, sources: DataSource<T>[], apply: (source: DataSource<T>) => void, file?: readonly FrozenGroupName[]): DocumentFragment {
     const fragment = document.createDocumentFragment()
     const select = document.createElement("select")
     select.id = `${kind}Source`
@@ -2917,34 +2973,79 @@ export class SightingEditorElement extends HTMLElement {
       option.title = source.credit
       select.appendChild(option)
     }
-    select.value = this.chosenSourceId.get(kind) ?? sources[0].id
+    // Data the recording can carry frozen is also read from its file: the annex of the Files group, taken at save when it is not yet.
+    if (file) select.appendChild(new Option(this.messages.sourceFile, SightingEditorElement.FILE_SOURCE))
+    const liveId = (): string => this.chosenSourceId.get(kind) ?? sources[0].id
+    select.value = file && !this.frozenPanel.isLive(file[0]) ? SightingEditorElement.FILE_SOURCE : liveId()
     const credit = document.createElement("a")
     credit.className = "source-credit"
     credit.target = "_blank"
     credit.rel = "noopener noreferrer"
+    // Where the file is: a link to its item of the Files group.
+    const shown = document.createElement("button")
+    shown.type = "button"
+    shown.className = "link source-file-link"
+    shown.addEventListener("click", () => this.openFileItem(file![0]))
     const showCredit = (): void => {
-      const source = dataSourceById(sources, select.value)
-      select.title = source.credit
+      const fromFile = select.value === SightingEditorElement.FILE_SOURCE
+      const source = dataSourceById(sources, fromFile ? liveId() : select.value)
+      select.title = fromFile ? this.frozenPanel.itemLabel(file![0]) : source.credit
+      credit.hidden = fromFile
       credit.href = source.creditUrl
       // The licence's own wording is what has to be shown; the picker only names the service.
       credit.textContent = source.credit
+      shown.hidden = !fromFile
+      if (fromFile) shown.textContent = this.frozenPanel.itemLabel(file![0])
     }
     showCredit()
     select.addEventListener("change", () => {
-      this.chosenSourceId.set(kind, select.value)
+      const fromFile = select.value === SightingEditorElement.FILE_SOURCE
+      if (!fromFile) this.chosenSourceId.set(kind, select.value)
+      for (const group of file ?? []) this.frozenPanel.setLive(group, !fromFile)
       showCredit()
-      apply(dataSourceById(sources, select.value))
+      if (!fromFile) apply(dataSourceById(sources, select.value))
     })
-    fragment.append(select, document.createTextNode(" "), credit)
+    if (file) this.filePickers.set(kind, () => {
+      select.value = this.frozenPanel.isLive(file[0]) ? liveId() : SightingEditorElement.FILE_SOURCE
+      showCredit()
+    })
+    fragment.append(select, document.createTextNode(" "), credit, shown)
     return fragment
   }
 
-  /** The same picker with a label in front, for the two sources that have no sentence to sit in. */
-  private labelledPicker<T>(kind: string, label: string, sources: DataSource<T>[], apply: () => void): HTMLElement {
+  /** What a source picker offers to read the data from the recording's own files (see FrozenData). */
+  private static readonly FILE_SOURCE = "file"
+
+  /** The pickers that may read from the recording's files, each said again as the recording changes (see syncFilePickers). */
+  private readonly filePickers = new Map<string, () => void>()
+
+  /** Says again, in every picker that may read from the recording's files, whether it does. */
+  private syncFilePickers(): void {
+    for (const sync of this.filePickers.values()) sync()
+  }
+
+  /** Opens the Files group on one of its items. */
+  private openFileItem(item: string): void {
+    const tab = this.groupTabs.find(candidate => candidate.getAttribute("aria-controls") === "group-file")
+    if (tab) this.toggleGroup(tab, true)
+    this.fileItemSelect.value = item
+    this.showFileItem(item)
+  }
+
+  /** The roads, the water and the railways are each asked of one source, which says which map it reads in which country. */
+  private static readonly LIVE_ROADS: DataSource<undefined> = {
+    id: "ign-osm", name: "IGN BD TOPO / OpenStreetMap", credit: "© IGN, BD TOPO (Licence Ouverte 2.0) in France; © OpenStreetMap contributors (ODbL) elsewhere",
+    creditUrl: "https://www.openstreetmap.org/copyright", create: () => undefined
+  }
+  private static readonly LIVE_WATER: DataSource<undefined> = SightingEditorElement.LIVE_ROADS
+  private static readonly LIVE_RAILWAYS: DataSource<undefined> = SightingEditorElement.LIVE_ROADS
+
+  /** The same picker with a label in front, for the sources that have no sentence to sit in. */
+  private labelledPicker<T>(kind: string, label: string, sources: DataSource<T>[], apply: () => void, file?: readonly FrozenGroupName[]): HTMLElement {
     const labelElement = document.createElement("label")
     const labelText = document.createElement("span")
     labelText.textContent = label
-    labelElement.append(labelText, this.sourcePicker(kind, sources, apply))
+    labelElement.append(labelText, this.sourcePicker(kind, sources, apply, file))
     return labelElement
   }
 
@@ -4568,6 +4669,47 @@ export class SightingEditorElement extends HTMLElement {
    * back to the observer. Unchecking keeps the values exactly as they are — a real record is the
    * best starting point a correction can have — but drops the claim that they were measured, and
    * with it any right of a later lookup to overwrite them (see Sighting.weatherSource). */
+  /** A record picked as where the weather comes from is asked (the box ticked); the file picked keeps what the file says (the box unticked). */
+  private onWeatherProviderChosen(): void {
+    const fromFile = this.weatherProviderSelect.value === SightingEditorElement.FILE_SOURCE
+    if (!fromFile) {
+      const source = dataSourceById(WEATHER_SOURCES, this.weatherProviderSelect.value)
+      if (source.id !== this.chosenSourceId.get("weather")) {
+        this.chosenSourceId.set("weather", source.id)
+        this.weatherInference = new WeatherInference(source.create())
+      }
+    }
+    if (this.weatherInferredInput.checked === !fromFile) return
+    this.weatherInferredInput.checked = !fromFile
+    this.weatherInferredInput.dispatchEvent(new Event("change"))
+  }
+
+  /** The weather's picker, as the box under it says: its records, then the file. */
+  private fillWeatherProvider(): void {
+    this.weatherProviderSelect.replaceChildren(
+      ...WEATHER_SOURCES.map(source => {
+        const option = new Option(source.name, source.id)
+        option.title = source.credit
+        return option
+      }),
+      new Option(this.messages.sourceFile, SightingEditorElement.FILE_SOURCE))
+    this.syncWeatherProvider()
+  }
+
+  private syncWeatherProvider(): void {
+    const fromFile = !this.weatherInferredInput.checked
+    this.weatherProviderSelect.value = fromFile ? SightingEditorElement.FILE_SOURCE : dataSourceById(WEATHER_SOURCES, this.chosenSourceId.get("weather")).id
+    this.weatherProviderSelect.disabled = this.weatherInferredInput.disabled
+    this.weatherProviderSelect.title = this.weatherInferredInput.title
+    const record = dataSourceById(WEATHER_SOURCES, this.chosenSourceId.get("weather"))
+    const credit = this.shadow.getElementById("weather-credit") as HTMLAnchorElement
+    credit.hidden = fromFile
+    credit.href = record.creditUrl
+    credit.textContent = record.credit
+    this.weatherFileLink.hidden = !fromFile
+    if (fromFile) this.weatherFileLink.textContent = this.weatherFileItemLabel()
+  }
+
   private onWeatherInferredToggled(): void {
     this.weatherFromRecords = this.weatherInferredInput.checked
     if (this.weatherFromRecords) {
@@ -4706,6 +4848,7 @@ export class SightingEditorElement extends HTMLElement {
     const inferredTitle = canLookUp ? this.messages.weatherInferredTitle : this.messages.weatherNeedsDateAndPlace
     this.weatherInferredInput.title = inferredTitle
     this.labelWeatherInferred.title = inferredTitle
+    this.syncWeatherProvider()
     const sourced = inferred && source !== undefined
     // "From [ERA5 (Open-Meteo)] © Copernicus/ECMWF, 2026-08-21 15:30 UTC" — the record that
     // answered is named by a picker, not a static line, for the same reason the geocoder is (see
@@ -9145,6 +9288,7 @@ export class SightingEditorElement extends HTMLElement {
     this.contextDeleteButton.textContent = messages.contextMenuDelete
     this.exportButton.textContent = messages.export
     this.frozenPanel.localize(messages)
+    this.weatherFilePanel.localize(messages)
     this.shadow.getElementById("observer-identity-hint")!.textContent = messages.identityHint
     this.shadow.getElementById("identity-ask-initials")!.textContent = messages.identityInitials
     this.shadow.getElementById("identity-ask-keep")!.textContent = messages.identityKeep

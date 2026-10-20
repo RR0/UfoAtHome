@@ -87,20 +87,41 @@ describe("FrozenDataPanel", () => {
     expect(from.asked).toHaveLength(2)
   })
 
-  it("takes nothing when everything is to be asked live, and says so", async () => {
+  it("takes nothing of a group asked live, says so, and drops its annex once saved so", async () => {
     const sighting = standing()
     const from = sources()
     const { root, panel, changed } = mounted(sighting, from)
-    const live = root.querySelector<HTMLInputElement>("#frozen-live")!
-    live.checked = true
-    live.dispatchEvent(new Event("change"))
-    expect(sighting.frozen).toEqual({ live: true })
+    await panel.prepare("s")
+    expect(sighting.frozen?.relief?.src).toBe("s.relief.zip")
+    panel.setLive("relief", true)
     expect(changed).toHaveBeenCalled()
-    expect(await panel.prepare("s")).toEqual(new Map())
-    expect(from.asked).toHaveLength(0)
+    expect(sighting.frozen?.relief).toMatchObject({ live: true, src: "s.relief.zip" })
     panel.show("relief")
     expect(root.querySelector("#frozen-state")!.textContent).toContain("demandé en direct")
     expect(panel.itemLabel("relief")).toContain("demandé en direct")
+    const files = await panel.prepare("s")
+    expect([...files.keys()]).toEqual(["s.roads.json"])
+    expect(sighting.frozen?.relief).toEqual({ live: true })
+    expect(from.asked).toHaveLength(1)
+    // Read from its file again: taken at the next save.
+    panel.setLive("relief", false)
+    expect(sighting.frozen?.relief).toBeUndefined()
+    await panel.prepare("s")
+    expect(from.asked).toHaveLength(2)
+    expect(sighting.frozen?.relief?.src).toBe("s.relief.zip")
+  })
+
+  it("reads every group but one live when the recording asked them all live", async () => {
+    const sighting = standing()
+    sighting.frozen = { live: true }
+    const { panel } = mounted(sighting, sources())
+    panel.setLive("roads", false)
+    expect(sighting.frozen.live).toBeUndefined()
+    expect(panel.isLive("roads")).toBe(false)
+    expect(panel.isLive("relief")).toBe(true)
+    await panel.prepare("s")
+    expect(sighting.frozen?.roads?.src).toBe("s.roads.json")
+    expect(sighting.frozen?.relief).toEqual({ live: true })
   })
 
   it("takes one group again on Refresh, and states the day it was taken", async () => {
