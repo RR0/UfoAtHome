@@ -162,6 +162,8 @@ export interface SightingEditorMessages extends InputFileMessages, SightingLabel
   fileItemPlace: string
   /** The recording's night sky, in the same pickers. */
   fileItemLightPollution: string
+  /** The recording's scenery, in the same pickers. */
+  fileItemDecor: string
   /** Where a weather no record gave comes from. */
   weatherStatedByObserver: string
   /** Before the file or address of an annex. */

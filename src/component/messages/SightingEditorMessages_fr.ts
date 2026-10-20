@@ -81,6 +81,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   fileItemWeather: "Météo",
   fileItemPlace: "Lieu",
   fileItemLightPollution: "Pollution lumineuse",
+  fileItemDecor: "Décor",
   weatherStatedByObserver: "telle que l'observateur l'a donnée",
   annexSource: "Fichier",
   annexStorageInline: "dans l'enregistrement même",

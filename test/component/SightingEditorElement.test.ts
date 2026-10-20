@@ -5757,13 +5757,19 @@ describe("SightingEditorElement data sources", () => {
   it("shows the source of one kind of data at a time, the kind picked first", () => {
     const element = mount()
     const kind = element.shadowRoot!.getElementById("source-kind") as HTMLSelectElement
-    expect([...kind.options].map(option => option.value)).toEqual(["place", "light-pollution", "elevation", "imagery", "roads", "water", "railways", "aircraft", "decor-model"])
+    expect([...kind.options].map(option => option.value)).toEqual(["place", "light-pollution", "elevation", "imagery", "roads", "water", "railways"])
     const shown = () => [...element.shadowRoot!.querySelectorAll<HTMLElement>("#terrain-source-rows .source-picker")].filter(span => !span.hidden).map(span => span.dataset.kind)
     expect(shown()).toEqual(["place"])
     kind.value = "elevation"
     kind.dispatchEvent(new Event("change"))
     expect(shown()).toEqual(["elevation"])
     expect([...select(element, "elevation").options].map(option => option.value)).toContain("file")
+  })
+
+  it("shows the scenery's survey, the air traffic's source and the models' in the Environment group, one at a time", () => {
+    const element = mount()
+    const kind = element.shadowRoot!.getElementById("decor-source-kind") as HTMLSelectElement
+    expect([...kind.options].map(option => option.value)).toEqual(["scenery", "aircraft", "decor-model"])
     expect([...select(element, "aircraft").options].map(option => option.value)).not.toContain("file")
   })
 

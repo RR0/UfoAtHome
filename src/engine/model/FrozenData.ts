@@ -67,10 +67,15 @@ export interface FrozenData {
    * recording, or in the annex `src` names. Absent, the editor reads it from the atlas as the observer moves.
    */
   lightPollution?: FrozenGroup
+  /**
+   * The scenery (`decor`), read from the recording's file rather than taken again from a survey of the place as the observer moves, when
+   * present: inside the recording, or in the annex `src` names.
+   */
+  decor?: FrozenGroup
 }
 
 /** The parts of a recording's own text that it may keep in a file beside it rather than inside it. */
-export type RecordingSectionName = "weather" | "place" | "lightPollution"
+export type RecordingSectionName = "weather" | "place" | "lightPollution" | "decor"
 
 /** A section's annex: those keys of the recording, kept in a file beside it, with when and from whom they were taken. */
 export interface SectionAnnex {
@@ -82,12 +87,13 @@ export interface SectionAnnex {
 
 /** What a recording keeps of its own text in files beside it. */
 export class RecordingSections {
-  static readonly NAMES: readonly RecordingSectionName[] = ["weather", "place", "lightPollution"]
+  static readonly NAMES: readonly RecordingSectionName[] = ["weather", "place", "lightPollution", "decor"]
   /** The recording's keys each section holds. */
   static readonly KEYS: Readonly<Record<RecordingSectionName, readonly string[]>> = {
     weather: ["weatherTrack", "weatherSource"],
     place: ["place"],
-    lightPollution: ["lightPollution"]
+    lightPollution: ["lightPollution"],
+    decor: ["decor"]
   }
 
   /** The annex's file name for a recording saved as `base`. */

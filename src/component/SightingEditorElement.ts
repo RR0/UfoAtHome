@@ -1448,11 +1448,20 @@ export class SightingEditorElement extends HTMLElement {
     // The first survey of the registry unless the author chose another, or none, which the browser remembers: asking sends the place to a
     // service, and that is the author's to allow.
     this.sceneryChoice = this.readSceneryChoice()
-    this.surroundings.setEnabled(this.sceneryChoice !== SightingEditorElement.NO_SCENERY)
+    this.surroundings.setEnabled(this.sceneryAsked())
+    this.shadow.getElementById("scenery-file-link")!.addEventListener("click", () => this.openFileItem("decor"))
     this.scenerySource.addEventListener("change", () => {
+      // The file: the scenery is what the recording says, and no survey is asked; the survey the browser remembers stays remembered.
+      const fromFile = this.scenerySource.value === SightingEditorElement.FILE_SOURCE
+      this.setDecorFromFile(fromFile)
+      if (fromFile) {
+        this.syncSceneryPicker()
+        return
+      }
       this.sceneryChoice = this.scenerySource.value
       this.writeSceneryChoice(this.sceneryChoice)
-      this.surroundings.setEnabled(this.sceneryChoice !== SightingEditorElement.NO_SCENERY)
+      this.surroundings.setEnabled(this.sceneryAsked())
+      this.syncSceneryPicker()
       if (this.sceneryChoice === SightingEditorElement.NO_SCENERY) {
         // None: the scenery is the author's alone, so what a survey brought goes (and comes back with Undo); what they placed stays.
         this.surroundings.withdraw()
@@ -2058,6 +2067,7 @@ export class SightingEditorElement extends HTMLElement {
     // A recording that is loaded stands where it stands, and its scenery is its own: nothing is asked of the survey.
     const standing = this.plantingCentre()
     this.surroundings.placeLoaded(standing?.lat, standing?.lng)
+    this.syncSceneryPicker()
     this.syncWeatherOwnership()
     this.frozenPanel.render()
     this.refreshFileItems()
@@ -2376,7 +2386,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** Whether a part of the recording is read from its file rather than asked of its source (see RecordingSections.fromFile). */
-  private sectionFromFile(name: "place" | "lightPollution"): boolean {
+  private sectionFromFile(name: "place" | "lightPollution" | "decor"): boolean {
     return RecordingSections.fromFile(this.ufoElement.sighting.frozen, name)
   }
 
@@ -3006,6 +3016,9 @@ export class SightingEditorElement extends HTMLElement {
       ["roads", this.messages.frozenRoads, this.sourcePicker("roads", [SightingEditorElement.LIVE_ROADS], () => undefined, this.groupChoice(["roads"]))],
       ["water", this.messages.frozenWater, this.sourcePicker("water", [SightingEditorElement.LIVE_WATER], () => undefined, this.groupChoice(["water"]))],
       ["railways", this.messages.frozenRailways, this.sourcePicker("railways", [SightingEditorElement.LIVE_RAILWAYS], () => undefined, this.groupChoice(["railways"]))],
+    ])
+    this.sourcePickers(this.shadow.getElementById("decor-source-rows")!, "decor-source-kind", "decor", [
+      ["scenery", this.messages.fileItemDecor, this.shadow.getElementById("scenery-picker")!],
       ["aircraft", this.messages.sourceAircraft, this.sourcePicker("aircraft", AIRCRAFT_SOURCES, () => this.applyAircraftSource())],
       ["decor-model", this.messages.decorModel, this.sourcePicker("decor-model", DECOR_MODEL_SOURCES, () => this.applyDecorModelSource())]
     ])
@@ -7696,9 +7709,52 @@ export class SightingEditorElement extends HTMLElement {
       option.title = source.credit
       return option
     })
-    this.scenerySource.replaceChildren(none, ...options)
-    this.scenerySource.value = this.sceneryChoice === SightingEditorElement.NO_SCENERY ? SightingEditorElement.NO_SCENERY
-      : (SurroundingsSources.byId(this.sceneryChoice)?.id ?? SurroundingsSources.DEFAULT_ID)
+    const file = new Option(this.messages.sourceFile, SightingEditorElement.FILE_SOURCE)
+    file.id = "option-scenery-file"
+    this.scenerySource.replaceChildren(none, ...options, file)
+    this.surveyIds = SURROUNDINGS_SOURCES.map(source => source.id)
+    this.defaultSurveyId = SurroundingsSources.DEFAULT_ID
+    this.syncSceneryPicker()
+  }
+
+  /** The surveys the scenery picker offers, once its registry is loaded, and the one taken when none was chosen. */
+  private surveyIds?: string[]
+  private defaultSurveyId?: string
+
+  /** Whether a survey is asked for the scenery: one chosen, and the scenery not read from the recording's file. */
+  private sceneryAsked(): boolean {
+    return this.sceneryChoice !== SightingEditorElement.NO_SCENERY && !this.sectionFromFile("decor")
+  }
+
+  /** The scenery picker as the recording and the browser say: the file, or the survey remembered (or none). */
+  private syncSceneryPicker(): void {
+    const fromFile = this.sectionFromFile("decor")
+    if (this.surveyIds) {
+      this.scenerySource.value = fromFile ? SightingEditorElement.FILE_SOURCE
+        : this.sceneryChoice === SightingEditorElement.NO_SCENERY ? SightingEditorElement.NO_SCENERY
+        : this.surveyIds.includes(this.sceneryChoice ?? "") ? this.sceneryChoice! : this.defaultSurveyId ?? this.surveyIds[0]
+    }
+    this.surroundings.setEnabled(this.sceneryAsked())
+    ;(this.shadow.getElementById("scenery-radius-row") as HTMLElement).hidden = fromFile || this.sceneryChoice === SightingEditorElement.NO_SCENERY
+    const link = this.shadow.getElementById("scenery-file-link")!
+    link.hidden = !fromFile
+    if (fromFile) {
+      link.textContent = this.sectionFilePanel.itemLabel("decor")
+      link.title = this.sectionFilePanel.where("decor")
+    }
+  }
+
+  /** Says in the recording whether its scenery is read from its file (`frozen.decor`) or taken again from a survey as the observer moves. */
+  private setDecorFromFile(fromFile: boolean): void {
+    const sighting = this.ufoElement.sighting
+    if (this.sectionFromFile("decor") === fromFile) return
+    const frozen: FrozenData = { ...(sighting.frozen ?? {}) }
+    if (fromFile) frozen.decor = frozen.decor ?? {}
+    else delete frozen.decor
+    sighting.frozen = FrozenGroups.isEmpty(frozen) ? undefined : frozen
+    this.touch()
+    this.scheduleFileSync()
+    this.refreshFileItems()
   }
 
   /**

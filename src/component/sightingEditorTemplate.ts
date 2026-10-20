@@ -199,8 +199,12 @@ export const html = `
          and lines, or that the survey could not be reached. Empty where no survey covers the place, which is most of the world. It sits
          on a line of its own, below what the list of the decor draws, and is read out by whoever listens to the page. -->
     <div id="scenery" class="decor-scenery">
-      <label><span id="label-scenery-source">Scenery survey</span> <select id="scenery-source"><option value="none" id="option-scenery-none">None (all by hand)</option></select></label>
-      <label><span id="label-scenery-radius">Radius</span> <input type="number" id="scenery-radius" min="20" max="3000" step="10" value="100"/> m</label>
+      <!-- The data of the environment, one kind at a time, as the Location group's (see SightingEditorElement.sourcePickers): the scenery,
+           whose picker is this one, the air traffic and the 3D models. -->
+      <div id="decor-source-rows" class="terrain-source-rows"></div>
+      <span id="scenery-picker"><span id="label-scenery-source" hidden>Scenery survey</span><select id="scenery-source"><option value="none" id="option-scenery-none">None (all by hand)</option></select>
+      <label id="scenery-radius-row"><span id="label-scenery-radius">Radius</span> <input type="number" id="scenery-radius" min="20" max="3000" step="10" value="100"/> m</label>
+      <button id="scenery-file-link" type="button" class="source-file-link" hidden></button></span>
       <span id="scenery-status" role="status" aria-live="polite"></span>
       <span id="scenery-warning" class="scenery-warning" role="alert" hidden></span>
     </div>
@@ -947,6 +951,10 @@ input.invalid {
   text-decoration: underline dotted;
 }
 /* Where a source read from the recording's file is: a link to its item of the Files group, as the credit of a source asked live is. */
+/* The survey's radius means nothing while no survey is asked: the labels of the toolbar are flex, which [hidden] alone does not undo. */
+#scenery-radius-row[hidden] {
+  display: none;
+}
 .source-file-link {
   font: inherit;
   color: inherit;

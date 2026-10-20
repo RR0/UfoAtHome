@@ -22,7 +22,8 @@ export interface SectionFileHost {
 }
 
 /**
- * The Files group's account of a part of the recording's own text (see RecordingSections): its weather, its place, its night sky. Each is
+ * The Files group's account of a part of the recording's own text (see RecordingSections): its weather, its place, its night sky, its
+ * scenery. Each is
  * kept inside the recording, as it always was, or in an annex beside it (`frozen.<section>.src`), which the players put back in the
  * recording as they load it (see SightingFetch.recording). A file of the author's, or one at an address, gives the recording that part;
  * Save gives it as an annex, wherever it is kept.
@@ -71,7 +72,8 @@ export class SectionFilePanel {
   /** What the Files group's picker says of a section: what it is. Where it is is its source's to say. */
   itemLabel(name: RecordingSectionName): string {
     const labels: Record<RecordingSectionName, string> = {
-      weather: this.messages.fileItemWeather, place: this.messages.fileItemPlace, lightPollution: this.messages.fileItemLightPollution
+      weather: this.messages.fileItemWeather, place: this.messages.fileItemPlace, lightPollution: this.messages.fileItemLightPollution,
+      decor: this.messages.fileItemDecor
     }
     return labels[name]
   }
@@ -109,6 +111,8 @@ export class SectionFilePanel {
         return sighting.event.place?.[0]?.name ?? ""
       case "lightPollution":
         return sighting.provenance.at("lightPollution")?.rationale ?? (sighting.lightPollution === undefined ? "" : String(sighting.lightPollution))
+      case "decor":
+        return ""
     }
   }
 
@@ -208,6 +212,9 @@ export class SectionFilePanel {
         break
       case "lightPollution":
         to.lightPollution = from.lightPollution
+        break
+      case "decor":
+        to.decor = from.decor
         break
     }
     for (const key of RecordingSections.KEYS[name]) {

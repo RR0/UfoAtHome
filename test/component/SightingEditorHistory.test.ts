@@ -388,8 +388,8 @@ describe("the scenery taken from a survey of the place", () => {
       const select = element.shadowRoot!.getElementById("scenery-source") as HTMLSelectElement
       // The registry is loaded in the background: the choice is there a moment after the editor.
       await waitFor(() => select.options.length > 1)
-      expect([...select.options].map(option => option.value)).toEqual(["none", "ign-lidar-topo", "ign-lidar-hd", "ign-bd-topo", "osm-buildings"])
-      expect([...select.options].map(option => option.textContent)).toEqual(["None (all by hand)", "IGN LiDAR HD + BD TOPO", "IGN LiDAR HD", "IGN BD TOPO", "OpenStreetMap buildings"])
+      expect([...select.options].map(option => option.value)).toEqual(["none", "ign-lidar-topo", "ign-lidar-hd", "ign-bd-topo", "osm-buildings", "file"])
+      expect([...select.options].map(option => option.textContent)).toEqual(["None (all by hand)", "IGN LiDAR HD + BD TOPO", "IGN LiDAR HD", "IGN BD TOPO", "OpenStreetMap buildings", "File"])
       expect(select.value).toBe("ign-lidar-topo")
       select.value = "none"
       select.dispatchEvent(new Event("change", { bubbles: true, composed: true }))
@@ -407,6 +407,32 @@ describe("the scenery taken from a survey of the place", () => {
       select.dispatchEvent(new Event("change", { bubbles: true, composed: true }))
       await waitFor(() => (element.sightingData.decor ?? []).length === 3)
       expect(localStorage.getItem(KEY)).toBe("ign-bd-topo")
+    } finally {
+      localStorage.removeItem(KEY)
+    }
+  })
+
+  it("keeps the scenery the file says, asks no survey as the place changes, and leaves the survey the browser remembers as it was", async () => {
+    const KEY = "rr0-sighting-editor.surroundings"
+    localStorage.removeItem(KEY)
+    try {
+      const element = mount()
+      const shadow = element.shadowRoot!
+      const select = shadow.getElementById("scenery-source") as HTMLSelectElement
+      await waitFor(() => select.options.length > 1)
+      element.surroundingsProvider = surveyOf(FOUND)
+      shadow.getElementById("lat")!.dispatchEvent(new Event("pointerdown", { bubbles: true, composed: true }))
+      placeAt(element, "49.1049", "-1.0754")
+      await waitFor(() => (element.sightingData.decor ?? []).length === 3)
+      select.value = "file"
+      select.dispatchEvent(new Event("change", { bubbles: true, composed: true }))
+      expect(element.sightingData.frozen?.decor).toEqual({})
+      expect(localStorage.getItem(KEY)).toBeNull()
+      expect(shadow.getElementById("scenery-file-link")!.hidden).toBe(false)
+      element.surroundingsProvider = surveyOf({ trees: [], buildings: [], bridges: [], lines: [] })
+      placeAt(element, "49.2049", "-1.1754")
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      expect(element.sightingData.decor ?? []).toHaveLength(3)
     } finally {
       localStorage.removeItem(KEY)
     }
