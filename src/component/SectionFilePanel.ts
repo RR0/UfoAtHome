@@ -118,8 +118,6 @@ export class SectionFilePanel {
     if (inline === (frozen[name]?.src === undefined)) return
     const { src: _src, ...rest } = frozen[name] ?? {}
     frozen[name] = inline ? rest : { ...rest, src: RecordingSections.annexName(this.host.base(), name) }
-    // The weather inside the recording needs saying nothing: it always was there.
-    if (inline && name === "weather" && Object.keys(frozen.weather!).length === 0) delete frozen.weather
     this.write(name, frozen)
   }
 
@@ -186,7 +184,7 @@ export class SectionFilePanel {
     SectionFilePanel.copy(name, read, sighting)
     const frozen: FrozenData = { ...(sighting.frozen ?? {}) }
     if (pick.url) frozen[name] = { ...(frozen[name] ?? {}), src: pick.url }
-    else if (name !== "weather") frozen[name] = frozen[name] ?? {}
+    else frozen[name] = frozen[name] ?? {}
     MessageStyle.show(this.note, undefined)
     this.write(name, frozen)
   }

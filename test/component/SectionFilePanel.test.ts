@@ -49,7 +49,7 @@ describe("SectionFilePanel", () => {
     expect(source.url).toBe("https://example.org/d/x-sighting.weather.json")
     // The recording's own file given as where it is: kept inside the recording again.
     await panel.take("weather", { url: "x.json" })
-    expect(sighting.frozen).toBeUndefined()
+    expect(sighting.frozen).toEqual({ weather: {} })
   })
 
   it("takes the weather of a file the author picks, and refuses one with none", async () => {

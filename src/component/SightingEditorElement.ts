@@ -2971,9 +2971,13 @@ export class SightingEditorElement extends HTMLElement {
     // Who answered is said in the sentence reporting the answer; the source itself is picked with the other data of the place, below.
     this.placeSourceRow.replaceChildren(document.createTextNode(`${this.messages.according} `),
       SightingEditorElement.creditLink(dataSourceById(PLACE_SOURCES, this.chosenSourceId.get("place"))))
-    // The record is picked, and credited, above, with the file (see weatherProviderSelect).
+    // The record is picked, and credited, above, with the file (see weatherProviderSelect), and the air aloft beside it.
     this.weatherSourceRow.replaceChildren()
     this.fillWeatherProvider()
+    this.sourcePickers(this.shadow.getElementById("weather-source-rows")!, "weather-source-kind", "weather", [
+      ["weather", this.messages.fileItemWeather, this.shadow.getElementById("weather-picker")!],
+      ["upper-air", this.messages.frozenUpperAir, this.sourcePicker("upper-air", UPPER_AIR_SOURCES, () => undefined, this.groupChoice(["upperAir"]))]
+    ])
     this.lightPollutionSourceRow.replaceChildren(document.createTextNode(`${this.messages.according} `),
       SightingEditorElement.creditLink(dataSourceById(LIGHT_POLLUTION_SOURCES, this.chosenSourceId.get("light-pollution"))))
     this.narrativeSourceRow.replaceChildren(
@@ -2987,7 +2991,7 @@ export class SightingEditorElement extends HTMLElement {
       })
     )
     // The data of the place, one kind at a time: which kind, then where it is read from (its source, or the recording's file).
-    this.sourcePickers([
+    this.sourcePickers(this.terrainSourceRows, "source-kind", "location", [
       ["place", this.messages.fileItemPlace, this.sourcePicker("place", PLACE_SOURCES, source => {
         this.placeProvider = source.create()
         this.refreshSourceCredits()
@@ -3002,7 +3006,6 @@ export class SightingEditorElement extends HTMLElement {
       ["roads", this.messages.frozenRoads, this.sourcePicker("roads", [SightingEditorElement.LIVE_ROADS], () => undefined, this.groupChoice(["roads"]))],
       ["water", this.messages.frozenWater, this.sourcePicker("water", [SightingEditorElement.LIVE_WATER], () => undefined, this.groupChoice(["water"]))],
       ["railways", this.messages.frozenRailways, this.sourcePicker("railways", [SightingEditorElement.LIVE_RAILWAYS], () => undefined, this.groupChoice(["railways"]))],
-      ["upper-air", this.messages.frozenUpperAir, this.sourcePicker("upper-air", UPPER_AIR_SOURCES, () => undefined, this.groupChoice(["upperAir"]))],
       ["aircraft", this.messages.sourceAircraft, this.sourcePicker("aircraft", AIRCRAFT_SOURCES, () => this.applyAircraftSource())],
       ["decor-model", this.messages.decorModel, this.sourcePicker("decor-model", DECOR_MODEL_SOURCES, () => this.applyDecorModelSource())]
     ])
@@ -3131,13 +3134,13 @@ export class SightingEditorElement extends HTMLElement {
    * One picker of the kind of data, then the picker of the kind picked (its source, or the recording's file) and its credit or its link:
    * a group asking for ten kinds of data shows one at a time, rather than ten rows of them.
    */
-  private sourcePickers(kinds: [kind: string, label: string, picker: DocumentFragment][]): void {
+  private sourcePickers(container: HTMLElement, id: string, group: string, kinds: [kind: string, label: string, picker: Node][]): void {
     const label = document.createElement("label")
     const labelText = document.createElement("span")
-    labelText.id = "label-source-kind"
+    labelText.id = `label-${id}`
     labelText.textContent = this.messages.sourceKind
     const select = document.createElement("select")
-    select.id = "source-kind"
+    select.id = id
     const pickers = kinds.map(([kind, name, picker]) => {
       select.append(new Option(name, kind))
       const span = document.createElement("span")
@@ -3146,19 +3149,19 @@ export class SightingEditorElement extends HTMLElement {
       span.append(picker)
       return span
     })
-    select.value = this.sourceKindShown
+    select.value = this.sourceKindShown.get(group) ?? kinds[0][0]
     const show = (): void => {
-      this.sourceKindShown = select.value
+      this.sourceKindShown.set(group, select.value)
       for (const span of pickers) span.hidden = span.dataset.kind !== select.value
     }
     select.addEventListener("change", show)
     show()
     label.append(labelText, document.createTextNode(" "), select)
-    this.terrainSourceRows.replaceChildren(label, ...pickers)
+    container.replaceChildren(label, ...pickers)
   }
 
-  /** The kind of data whose source the Location group shows: kept as the pickers are made again (a language changed). */
-  private sourceKindShown = "place"
+  /** The kind of data whose source each group shows, by group: kept as the pickers are made again (a language changed). */
+  private readonly sourceKindShown = new Map<string, string>()
 
   /** Who answered, by the credit its licence asks for. */
   private static creditLink(source: DataSource<unknown>): HTMLAnchorElement {
@@ -3873,6 +3876,10 @@ export class SightingEditorElement extends HTMLElement {
     if (this.weatherFromRecords) {
       this.weatherFromRecords = false
       this.cancelWeatherLookup()
+      this.ufoElement.sighting.weatherSource = undefined
+      this.syncWeatherSourceState()
+    } else if (this.ufoElement.sighting.weatherSource !== undefined) {
+      // Read from the file with the record it came from: changed, it is no longer that record's.
       this.ufoElement.sighting.weatherSource = undefined
       this.syncWeatherSourceState()
     }
@@ -4811,9 +4818,33 @@ export class SightingEditorElement extends HTMLElement {
         this.weatherInference = new WeatherInference(source.create())
       }
     }
+    this.setWeatherFromFile(fromFile)
     if (this.weatherInferredInput.checked === !fromFile) return
     this.weatherInferredInput.checked = !fromFile
-    this.weatherInferredInput.dispatchEvent(new Event("change"))
+    // Read from the file, the weather stays what the file says, the record it came from named with it: it is only no longer asked again.
+    this.keepWeatherSource = fromFile
+    try {
+      this.weatherInferredInput.dispatchEvent(new Event("change"))
+    } finally {
+      this.keepWeatherSource = false
+    }
+  }
+
+  /** Set while the weather is put in the file's hands by its picker, which keeps the record it came from named (see onWeatherInferredToggled). */
+  private keepWeatherSource = false
+
+  /** Says in the recording whether its weather is read from its file (`frozen.weather`) or asked of a record again as the date or the place change. */
+  private setWeatherFromFile(fromFile: boolean): void {
+    const sighting = this.ufoElement.sighting
+    if (RecordingSections.fromFile(sighting.frozen, "weather") === fromFile) return
+    const frozen: FrozenData = { ...(sighting.frozen ?? {}) }
+    if (fromFile) frozen.weather = { ...(frozen.weather ?? {}), live: undefined }
+    else delete frozen.weather
+    if (frozen.weather && frozen.weather.live === undefined) delete frozen.weather.live
+    sighting.frozen = FrozenGroups.isEmpty(frozen) ? undefined : frozen
+    this.touch()
+    this.scheduleFileSync()
+    this.refreshFileItems()
   }
 
   /** The weather's picker, as the box under it says: its records, then the file. */
@@ -4847,11 +4878,12 @@ export class SightingEditorElement extends HTMLElement {
 
   private onWeatherInferredToggled(): void {
     this.weatherFromRecords = this.weatherInferredInput.checked
+    this.setWeatherFromFile(!this.weatherFromRecords)
     if (this.weatherFromRecords) {
       this.scheduleWeatherLookup(true)
     } else {
       this.cancelWeatherLookup()
-      this.ufoElement.sighting.weatherSource = undefined
+      if (!this.keepWeatherSource) this.ufoElement.sighting.weatherSource = undefined
       this.syncWeatherSourceState()
     }
   }
@@ -5061,7 +5093,8 @@ export class SightingEditorElement extends HTMLElement {
     this.pendingWeatherEdit = undefined
     this.closeFileAsk()
     this.weatherLookupResult = undefined
-    this.weatherFromRecords = sighting.weatherSource !== undefined || sighting.weatherTrack.allKeyframes.length === 0
+    this.weatherFromRecords = !RecordingSections.fromFile(sighting.frozen, "weather") &&
+      (sighting.weatherSource !== undefined || sighting.weatherTrack.allKeyframes.length === 0)
     this.syncWeatherSourceState()
     if (this.weatherFromRecords && sighting.weatherSource === undefined) {
       this.scheduleWeatherLookup()

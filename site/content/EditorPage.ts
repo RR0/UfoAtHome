@@ -383,10 +383,7 @@ if (docs) {
         instant, and the two groups above already state both — so it is looked up from ERA5, the
         ECMWF reanalysis, and shown <em>read-only</em> above a line naming the dataset and the exact
         UTC instant described. A wrong time zone shows up there before it shows up in the sky.</p>
-      <p>Choosing <strong>File</strong> rather than <strong>Open-Meteo</strong> as the weather's <strong>Source</strong> hands the fields back to the observer, the weather being then what the recording's own file says (inside it, or in a file beside it: see the Files tab): the
-        looked-up values stay as a starting point, the source is dropped, and no later lookup may
-        overwrite them. A recording that names a source is replayed exactly as authored and never
-        looked up again, so a published case file reads identically offline.</p>
+      <p>Choosing <strong>File</strong> rather than <strong>Open-Meteo</strong> (in <strong>Data</strong>, <strong>Weather</strong>) reads the weather from the recording's own file (inside it, or in a file beside it: see the Files tab) and asks nobody for it any more: the values stay what they were, with the record they came from, and the fields become editable; once changed, the weather is the observer's and the record is no longer named. A recording that names a source is replayed exactly as authored and never looked up again, so a published case file reads identically offline.</p>
       <p>A lookup writes a weather keyframe at the start, at each whole hour and at the end of the
         recording, each at wherever the observer stands at that moment; the track is laid out again
         when the recording's length changes.</p>
@@ -852,11 +849,7 @@ if (docs) {
         dans ERA5, la réanalyse de l'ECMWF, et affichée <em>en lecture seule</em> au-dessus d'une
         ligne nommant le jeu de données et l'instant UTC exact décrit. Un mauvais fuseau horaire s'y
         voit avant de se voir dans le ciel.</p>
-      <p>Choisir <strong>Fichier</strong> plutôt qu'<strong>Open-Meteo</strong> comme <strong>Source</strong> de la météo rend les champs à l'observateur, la météo étant alors ce que dit le fichier de l'enregistrement (en lui-même, ou dans un fichier à côté : voir l'onglet Fichiers) : les valeurs
-        relevées restent comme point de départ, la source est retirée, et aucune consultation
-        ultérieure ne peut les écraser. Un enregistrement qui nomme une source est rejoué tel qu'il
-        a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors
-        ligne.</p>
+      <p>Choisir <strong>Fichier</strong> plutôt qu'<strong>Open-Meteo</strong> (dans <strong>Données</strong>, <strong>Météo</strong>) lit la météo dans le fichier de l'enregistrement (en lui-même, ou dans un fichier à côté : voir l'onglet Fichiers) et ne la redemande plus à personne : les valeurs restent ce qu'elles étaient, avec le relevé dont elles viennent, et les champs deviennent modifiables ; modifiée, la météo devient celle de l'observateur et le relevé n'est plus nommé. Un enregistrement qui nomme une source est rejoué tel qu'il a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors ligne.</p>
       <p>Une consultation écrit un point météo au début, à chaque heure pleine et à la fin de
         l'enregistrement, chacun là où se tient l'observateur à ce moment ; la piste est redisposée
         quand la durée de l'enregistrement change.</p>
@@ -1338,11 +1331,7 @@ if (docs) {
         reanálisis del ECMWF, y se muestra <em>en solo lectura</em> sobre una línea que nombra el
         conjunto de datos y el instante UTC exacto descrito. Una zona horaria equivocada se nota ahí
         antes de notarse en el cielo.</p>
-      <p>Elegir <strong>Archivo</strong> en lugar de <strong>Open-Meteo</strong> como <strong>Fuente</strong> del tiempo devuelve los campos al
-        observador: los valores consultados se quedan como punto de partida, la fuente se retira, y
-        ninguna consulta posterior puede sobrescribirlos. Un registro que nombra una fuente se reproduce
-        exactamente como se compuso y nunca se vuelve a consultar, así que un caso publicado se lee
-        igual sin conexión.</p>
+      <p>Elegir <strong>Archivo</strong> en lugar de <strong>Open-Meteo</strong> (en <strong>Datos</strong>, <strong>Tiempo</strong>) lee el tiempo del archivo del registro (dentro de él, o en un archivo junto a él: véase la pestaña Archivos) y ya no lo pide a nadie: los valores siguen siendo los que eran, con el registro del que vienen, y los campos se vuelven editables; cambiado, el tiempo pasa a ser el del observador y el registro deja de nombrarse. Un registro que nombra una fuente se reproduce exactamente como se compuso y nunca se vuelve a consultar, así que un caso publicado se lee igual sin conexión.</p>
       <p>Una consulta escribe un fotograma clave meteorológico al inicio, en cada hora en punto y al
         final del registro, cada uno allí donde está el observador en ese momento; la pista se vuelve a
         disponer cuando cambia la duración del registro.</p>
@@ -1817,11 +1806,7 @@ if (docs) {
         dell'ECMWF, e mostrato <em>in sola lettura</em> sopra una riga che nomina il set di dati e
         l'istante UTC esatto descritto. Un fuso orario sbagliato si vede lì prima di vedersi nel
         cielo.</p>
-      <p>Scegliere <strong>File</strong> invece di <strong>Open-Meteo</strong> come <strong>Fonte</strong> del meteo restituisce i campi
-        all'osservatore: i valori ricavati restano come punto di partenza, la fonte viene tolta, e
-        nessuna consultazione successiva può sovrascriverli. Una registrazione che nomina una fonte viene
-        riprodotta esattamente come è stata composta e mai più consultata, così un caso pubblicato si
-        legge identico anche offline.</p>
+      <p>Scegliere <strong>File</strong> invece di <strong>Open-Meteo</strong> (in <strong>Dati</strong>, <strong>Meteo</strong>) legge il meteo dal file della registrazione (dentro di essa, o in un file accanto: vedi la scheda File) e non lo chiede più a nessuno: i valori restano quelli che erano, con il rilevamento da cui vengono, e i campi diventano modificabili; modificato, il meteo diventa quello dell'osservatore e il rilevamento non è più nominato. Una registrazione che nomina una fonte viene riprodotta esattamente come è stata composta e mai più consultata, così un caso pubblicato si legge identico anche offline.</p>
       <p>Una consultazione scrive un fotogramma chiave meteorologico all'inizio, a ogni ora esatta e alla
         fine della registrazione, ciascuno dove si trova l'osservatore in quel momento; la traccia viene
         ridisposta quando la durata della registrazione cambia.</p>

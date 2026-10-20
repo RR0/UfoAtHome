@@ -328,8 +328,10 @@ export const html = `
       <!-- Where the weather is read from: a record, asked again whenever the date or the place change, or the recording's own file,
            where the observer's account or a record asked once is kept and never asked again. The box under it is what the editor
            reasons on (see onWeatherInferredToggled): the picker ticks it for a record and unticks it for the file. -->
-      <label><span id="label-weather-inferred">Source</span> <select id="weatherSource"></select> <a id="weather-credit" class="source-credit" target="_blank" rel="noopener noreferrer"></a></label>
-      <button id="weather-file-link" type="button" class="source-file-link" hidden></button>
+      <!-- The data of the weather, one kind at a time, as the Location group's (see SightingEditorElement.sourcePickers): the weather itself,
+           whose picker is this one, and the air aloft. -->
+      <div id="weather-source-rows" class="terrain-source-rows"></div>
+      <span id="weather-picker"><span id="label-weather-inferred" hidden>Source</span><select id="weatherSource"></select> <a id="weather-credit" class="source-credit" target="_blank" rel="noopener noreferrer"></a><button id="weather-file-link" type="button" class="source-file-link" hidden></button></span>
       <input id="weatherInferred" type="checkbox" checked hidden/>
       <!-- Clamped to one line unless the reader asks for the rest (see #sky-details below). What
            these two lines say is worth saying — which record answered, and what else was up there

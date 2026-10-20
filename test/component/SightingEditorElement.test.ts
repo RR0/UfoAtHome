@@ -4956,6 +4956,20 @@ describe("SightingEditorElement inferred weather", () => {
     expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.1)
   })
 
+  it("keeps the looked-up values and their record when the weather is read from the file, until they are changed", async () => {
+    const element = mount(recordProvider())
+    stateDateAndPlace(element)
+    await waitFor(() => sourceLink(element).hidden === false)
+    const picker = weatherField(element, "weatherSource") as HTMLSelectElement
+    picker.value = "file"
+    picker.dispatchEvent(new Event("change"))
+    expect(element.sightingData.weatherSource).toEqual(SOURCE)
+    expect(element.sightingData.frozen?.weather).toEqual({})
+    expect(weatherField(element, "cloudCover").disabled).toBe(false)
+    setInput(element.shadowRoot!, "cloudCover", "0.7")
+    expect(element.sightingData.weatherSource).toBeUndefined()
+  })
+
   it("shows the looked-up values, read-only, with the record and the instant they describe", async () => {
     const element = mount(recordProvider())
     stateDateAndPlace(element)
@@ -5743,14 +5757,39 @@ describe("SightingEditorElement data sources", () => {
   it("shows the source of one kind of data at a time, the kind picked first", () => {
     const element = mount()
     const kind = element.shadowRoot!.getElementById("source-kind") as HTMLSelectElement
-    expect([...kind.options].map(option => option.value)).toEqual(["place", "light-pollution", "elevation", "imagery", "roads", "water", "railways", "upper-air", "aircraft", "decor-model"])
-    const shown = () => [...element.shadowRoot!.querySelectorAll<HTMLElement>(".source-picker")].filter(span => !span.hidden).map(span => span.dataset.kind)
+    expect([...kind.options].map(option => option.value)).toEqual(["place", "light-pollution", "elevation", "imagery", "roads", "water", "railways", "aircraft", "decor-model"])
+    const shown = () => [...element.shadowRoot!.querySelectorAll<HTMLElement>("#terrain-source-rows .source-picker")].filter(span => !span.hidden).map(span => span.dataset.kind)
     expect(shown()).toEqual(["place"])
     kind.value = "elevation"
     kind.dispatchEvent(new Event("change"))
     expect(shown()).toEqual(["elevation"])
     expect([...select(element, "elevation").options].map(option => option.value)).toContain("file")
     expect([...select(element, "aircraft").options].map(option => option.value)).not.toContain("file")
+  })
+
+  it("shows the weather's source and the air aloft's in the Weather group, one at a time", () => {
+    const element = mount()
+    const kind = element.shadowRoot!.getElementById("weather-source-kind") as HTMLSelectElement
+    expect([...kind.options].map(option => option.value)).toEqual(["weather", "upper-air"])
+    const picker = (id: string) => element.shadowRoot!.getElementById(id)!.closest<HTMLElement>(".source-picker")!
+    expect(picker("weatherSource").hidden).toBe(false)
+    expect(picker("upper-airSource").hidden).toBe(true)
+    kind.value = "upper-air"
+    kind.dispatchEvent(new Event("change"))
+    expect(picker("weatherSource").hidden).toBe(true)
+    expect(picker("upper-airSource").hidden).toBe(false)
+  })
+
+  it("keeps the weather read from the file, and the record it came from, and asks the record nothing more", async () => {
+    const element = mount()
+    const weather = element.shadowRoot!.getElementById("weatherSource") as HTMLSelectElement
+    weather.value = "file"
+    weather.dispatchEvent(new Event("change"))
+    expect(element.sightingData.frozen?.weather).toEqual({})
+    expect((element.shadowRoot!.getElementById("weatherInferred") as HTMLInputElement).checked).toBe(false)
+    weather.value = "era5"
+    weather.dispatchEvent(new Event("change"))
+    expect(element.sightingData.frozen?.weather).toBeUndefined()
   })
 
   it("asks no geocoder for a place read from the file", async () => {
