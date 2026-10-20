@@ -1,3 +1,5 @@
+import { RecordingSections } from "../model/FrozenData.js"
+
 /** What went wrong fetching a recording, as far as a browser will ever let a page find out. */
 export type SightingFetchKind = "cors" | "mixed-content" | "unreachable" | "status" | "malformed"
 
@@ -31,17 +33,17 @@ export class SightingFetchError extends Error {
 export class SightingFetch {
 
   /**
-   * A recording, with what it keeps in files beside it that is part of the recording itself rather than of its scene put back in it: its
-   * weather, when it keeps it in an annex (see FrozenData.weather). An annex that cannot be read leaves the recording as it is.
+   * A recording, with what it keeps of its own text in files beside it put back in it: its weather, its place, its night sky, when it keeps
+   * them in annexes (see RecordingSections). An annex that cannot be read leaves the recording as it is.
    */
   static async recording(url: string): Promise<unknown> {
-    const json = await SightingFetch.json(url) as { frozen?: { weather?: { src?: string, live?: boolean } }, weatherTrack?: unknown, weatherSource?: unknown }
-    const weather = json?.frozen?.weather
-    if (weather?.src && !weather.live) {
+    const json = await SightingFetch.json(url) as Record<string, unknown> & { frozen?: Record<string, { src?: string, live?: boolean } | undefined> }
+    for (const name of RecordingSections.NAMES) {
+      const section = json?.frozen?.[name]
+      if (!section?.src || section.live) continue
       try {
-        const annex = await SightingFetch.json(new URL(weather.src, new URL(url, location.href)).href) as { weatherTrack?: unknown, weatherSource?: unknown }
-        if (annex.weatherTrack !== undefined) json.weatherTrack = annex.weatherTrack
-        if (annex.weatherSource !== undefined) json.weatherSource = annex.weatherSource
+        const annex = await SightingFetch.json(new URL(section.src, new URL(url, location.href)).href) as Record<string, unknown>
+        for (const key of RecordingSections.KEYS[name]) if (annex[key] !== undefined) json[key] = annex[key]
       } catch {
         // The recording plays with what it holds itself.
       }

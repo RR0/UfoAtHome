@@ -303,14 +303,15 @@ export const html = `
     <p id="frozen-note" class="frozen-note" hidden role="status"></p>
     <div id="annex-editor" class="file-editor" hidden></div>
   </div>
-  <!-- The weather: inside the recording, or in an annex beside it (see WeatherFilePanel). Its text is the recording's own. -->
-  <div class="element-list-body frozen-data" id="file-weather" hidden>
+  <!-- A part of the recording's own text (its weather, its place, its night sky): inside the recording, or in an annex beside it (see
+       SectionFilePanel). Its text is the recording's own. -->
+  <div class="element-list-body frozen-data" id="file-section" hidden>
     <div class="toolbar">
-      <span class="input-file-row"><span id="label-weather-annex-source">File</span> <rr0-input-file id="weather-annex-source" name="weather-annex-source" no-button accept="application/json,.json" placeholder="https://…/sighting.weather.json"></rr0-input-file></span>
-      <button id="weather-annex-export" type="button">Save</button>
+      <span class="input-file-row"><span id="label-section-annex-source">File</span> <rr0-input-file id="section-annex-source" name="section-annex-source" no-button accept="application/json,.json" placeholder="https://…/sighting.weather.json"></rr0-input-file></span>
+      <button id="section-annex-export" type="button">Save</button>
     </div>
-    <p id="weather-annex-state" class="frozen-group-state"></p>
-    <p id="weather-annex-note" class="frozen-note" hidden role="status"></p>
+    <p id="section-annex-state" class="frozen-group-state"></p>
+    <p id="section-annex-note" class="frozen-note" hidden role="status"></p>
   </div>
   <!-- The recording as text: the recording's own item, and an item kept inside it, its section shown (see showFileItem). -->
   <div id="file-editor" class="file-editor"></div>

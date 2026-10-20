@@ -5717,7 +5717,7 @@ describe("SightingEditorElement data sources", () => {
     }
   })
 
-  it("puts the geocoder's picker in the sentence reporting what it found", async () => {
+  it("says in the sentence reporting what it found who found it, and picks it with the other data of the place", async () => {
     const element = mount()
     element.placeSearchProvider = {
       attribution: { text: "© OpenStreetMap", url: "https://osm.org/copyright" },
@@ -5736,7 +5736,40 @@ describe("SightingEditorElement data sources", () => {
 
     expect(element.shadowRoot!.getElementById("place-status-text")!.textContent).toContain("1")
     expect(row.textContent).toContain("according to")
-    expect(row.querySelector("select")!.value).toBe("nominatim")
+    expect(row.querySelector(".source-credit")!.textContent).toContain("OpenStreetMap")
+    expect(select(element, "place").value).toBe("nominatim")
+  })
+
+  it("shows the source of one kind of data at a time, the kind picked first", () => {
+    const element = mount()
+    const kind = element.shadowRoot!.getElementById("source-kind") as HTMLSelectElement
+    expect([...kind.options].map(option => option.value)).toEqual(["place", "light-pollution", "elevation", "imagery", "roads", "water", "railways", "upper-air", "aircraft", "decor-model"])
+    const shown = () => [...element.shadowRoot!.querySelectorAll<HTMLElement>(".source-picker")].filter(span => !span.hidden).map(span => span.dataset.kind)
+    expect(shown()).toEqual(["place"])
+    kind.value = "elevation"
+    kind.dispatchEvent(new Event("change"))
+    expect(shown()).toEqual(["elevation"])
+    expect([...select(element, "elevation").options].map(option => option.value)).toContain("file")
+    expect([...select(element, "aircraft").options].map(option => option.value)).not.toContain("file")
+  })
+
+  it("asks no geocoder for a place read from the file", async () => {
+    const element = mount()
+    const search = vi.fn(() => Promise.resolve([{ name: "Valensole, France", lat: 43.8, lng: 5.9 }]))
+    element.placeSearchProvider = { attribution: { text: "© OSM", url: "https://osm.org/copyright" }, search, reverse: () => Promise.resolve(undefined) }
+    const place = select(element, "place")
+    place.value = "file"
+    place.dispatchEvent(new Event("change"))
+    expect(element.sightingData.frozen?.place).toEqual({})
+    const input = element.shadowRoot!.getElementById("placeName") as HTMLInputElement
+    input.value = "Valensole"
+    input.dispatchEvent(new Event("input"))
+    ;(element.shadowRoot!.getElementById("search-place") as HTMLButtonElement).click()
+    await new Promise(resolve => setTimeout(resolve, 50))
+    expect(search).not.toHaveBeenCalled()
+    place.value = "nominatim"
+    place.dispatchEvent(new Event("change"))
+    expect(element.sightingData.frozen?.place).toBeUndefined()
   })
 
   it("carries each source's own attribution beside its picker", () => {

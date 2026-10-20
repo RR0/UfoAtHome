@@ -53,19 +53,52 @@ export interface FrozenData {
   upperAir?: FrozenGroup
   map?: FrozenGroup
   /**
-   * Where the weather is kept, when it is not inside the recording (its `weatherTrack` and `weatherSource`): an annex holding them
-   * (see WeatherAnnex), read as the recording is loaded. Absent, the weather is the recording's own.
+   * Where the weather is kept, when it is not inside the recording (its `weatherTrack` and `weatherSource`): an annex holding them,
+   * read as the recording is loaded (see RecordingSections). Absent, the weather is the recording's own.
    */
   weather?: FrozenGroup
+  /**
+   * The place's name and coordinates (`place`), read from the recording's file rather than looked up by a geocoder when present: inside the
+   * recording, or in the annex `src` names. Absent, the editor names the place by the geocoder as the observer moves.
+   */
+  place?: FrozenGroup
+  /**
+   * The night sky's figure (`lightPollution`), read from the recording's file rather than looked up in the atlas when present: inside the
+   * recording, or in the annex `src` names. Absent, the editor reads it from the atlas as the observer moves.
+   */
+  lightPollution?: FrozenGroup
 }
 
-/** The weather annex: a recording's `weatherTrack` and `weatherSource`, kept in a file beside it. */
-export interface WeatherAnnex {
+/** The parts of a recording's own text that it may keep in a file beside it rather than inside it. */
+export type RecordingSectionName = "weather" | "place" | "lightPollution"
+
+/** A section's annex: those keys of the recording, kept in a file beside it, with when and from whom they were taken. */
+export interface SectionAnnex {
   version: 1
   takenOn?: string
   attribution?: string
-  weatherTrack?: unknown
-  weatherSource?: unknown
+  [key: string]: unknown
+}
+
+/** What a recording keeps of its own text in files beside it. */
+export class RecordingSections {
+  static readonly NAMES: readonly RecordingSectionName[] = ["weather", "place", "lightPollution"]
+  /** The recording's keys each section holds. */
+  static readonly KEYS: Readonly<Record<RecordingSectionName, readonly string[]>> = {
+    weather: ["weatherTrack", "weatherSource"],
+    place: ["place"],
+    lightPollution: ["lightPollution"]
+  }
+
+  /** The annex's file name for a recording saved as `base`. */
+  static annexName(base: string, name: RecordingSectionName): string {
+    return `${base}.${name.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}.json`
+  }
+
+  /** Whether the section is read from the recording's file rather than asked of its source: said for the place and the night sky. */
+  static fromFile(data: FrozenData | undefined, name: RecordingSectionName): boolean {
+    return data?.[name] !== undefined && data[name]!.live !== true
+  }
 }
 
 /** A group the scene reads from its annex. */
@@ -98,6 +131,6 @@ export class FrozenGroups {
 
   /** Whether the recording says anything at all about frozen data. */
   static isEmpty(data: FrozenData | undefined): boolean {
-    return !data || (!data.live && FrozenGroups.NAMES.every(name => !data[name]) && !data.weather)
+    return !data || (!data.live && FrozenGroups.NAMES.every(name => !data[name]) && RecordingSections.NAMES.every(name => !data[name]))
   }
 }
