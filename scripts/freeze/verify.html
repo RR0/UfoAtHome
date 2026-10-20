@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Check a frozen demo</title>
+  <style>
+    body { margin: 0; }
+    rr0-sighting { display: block; width: 100vw; height: 90vh; }
+  </style>
+</head>
+<body>
+<!--
+  Plays one recording and says what its page asked of any server but this one: none, for a recording whose third-party data is frozen.
+
+    /scripts/freeze/verify.html?src=/demo-data/observer-cussac.json
+
+  then, once the scene has settled, `thirdParty()` in the console.
+-->
+<rr0-sighting id="sighting"></rr0-sighting>
+<!-- Before anything is fetched: the dev server alone serves more modules than the 250 entries a page keeps by default. -->
+<script>performance.setResourceTimingBufferSize(100000)</script>
+<script type="module">
+  import { registerSighting } from "/src/component/SightingElement.ts"
+  import { registerScene } from "/src/component/SceneElement.ts"
+
+  registerSighting()
+  registerScene()
+  document.getElementById("sighting").setAttribute("src", new URLSearchParams(location.search).get("src"))
+  /** Every address this page fetched from another host than its own, and how many of its own it fetched. */
+  window.thirdParty = () => {
+    const entries = performance.getEntriesByType("resource")
+    const own = entries.filter(entry => new URL(entry.name).host === location.host)
+    return { own: own.length, frozen: own.filter(entry => /\.(relief|imagery)\.zip|\.(roads|water|railways|upper-air)\.json/.test(entry.name)).map(entry => entry.name.split("/").pop()),
+      thirdParty: entries.filter(entry => new URL(entry.name).host !== location.host && !entry.name.startsWith("data:") && !entry.name.startsWith("blob:")).map(entry => entry.name) }
+  }
+</script>
+</body>
+</html>

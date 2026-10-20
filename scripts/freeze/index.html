@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Freeze the demos</title>
+  <style>
+    body { margin: 0; font: 13px system-ui, sans-serif; }
+    #log { white-space: pre-wrap; font-family: ui-monospace, monospace; padding: 8px; max-height: 30vh; overflow: auto; }
+    rr0-sighting-editor { display: block; height: 70vh; }
+  </style>
+</head>
+<body>
+<!--
+  Takes the frozen data of recordings (see FrozenData) the way the editor's Save does, and writes the annexes beside each, with its `frozen`
+  block, through the writer of vite.freeze.config.ts. Served by that config only.
+
+    /scripts/freeze/index.html?files=observer-cussac,sky-test-halos
+
+  or, from the console, `await freeze(["observer-cussac"])`. Each line of the log says what was written.
+-->
+<div id="log"></div>
+<rr0-sighting-editor id="editor"></rr0-sighting-editor>
+<script type="module">
+  import { register } from "/src/component/SightingEditorElement.ts"
+
+  register()
+  const editor = document.getElementById("editor")
+  const logged = document.getElementById("log")
+  const log = line => {
+    logged.textContent += line + "\n"
+    console.log(line)
+  }
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+  async function put(name, body, frozenBlock) {
+    const response = await fetch(`/__freeze/${encodeURIComponent(name)}`, {
+      method: "PUT", body, headers: frozenBlock ? { "x-frozen-block": "1" } : {}
+    })
+    if (!response.ok) throw new Error(`${name}: ${response.status} ${await response.text()}`)
+  }
+
+  /** Loads the recording, lets its scene ask for its aircraft and the air aloft, and takes what a save would take. */
+  async function freezeOne(base) {
+    const loaded = new Promise(resolve => editor.addEventListener("recordingloaded", resolve, { once: true }))
+    editor.setAttribute("src", `/demo-data/${base}.json`)
+    await loaded
+    const scene = editor.sceneElement
+    // The air aloft is only heard once the scene has found aircraft: wait for the traffic to settle, then for the air.
+    for (let waited = 0; waited < 20000; waited += 250) {
+      const traffic = scene.traffic
+      if (traffic && traffic.status !== "loading") break
+      await sleep(250)
+    }
+    if (scene.traffic?.status === "ready" && scene.traffic.set?.shown > 0) {
+      for (let waited = 0; waited < 30000 && !scene.upperAirHeard; waited += 250) await sleep(250)
+    }
+    const panel = editor.frozenPanel
+    if (!panel.hasWork()) return { base, files: [] }
+    const files = await panel.prepare(base)
+    const written = []
+    for (const [name, bytes] of files) {
+      await put(name, bytes)
+      written.push([name, bytes.length])
+    }
+    const frozen = editor.sightingData.frozen
+    if (frozen) await put(`${base}.json`, JSON.stringify(frozen), true)
+    return { base, files: written, frozen }
+  }
+
+  window.freeze = async bases => {
+    const results = []
+    for (const base of bases) {
+      try {
+        const result = await freezeOne(base)
+        const total = result.files.reduce((sum, [, size]) => sum + size, 0)
+        log(`${base}: ${result.files.map(([name, size]) => `${name.slice(base.length + 1)} ${(size / 1e3).toFixed(0)} kB`).join(", ") || "nothing to freeze"} = ${(total / 1e3).toFixed(0)} kB`)
+        results.push(result)
+      } catch (error) {
+        log(`${base}: FAILED ${error?.stack ?? error}`)
+        results.push({ base, error: String(error) })
+      }
+    }
+    log("done")
+    return results
+  }
+  // The editor's alerts would stop a run that nobody watches.
+  window.alert = message => log(`alert: ${message}`)
+
+  const asked = new URLSearchParams(location.search).get("files")
+  if (asked) void window.freeze(asked.split(",").filter(Boolean))
+</script>
+</body>
+</html>

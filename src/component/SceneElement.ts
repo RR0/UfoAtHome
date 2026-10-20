@@ -2007,6 +2007,9 @@ export class SceneElement extends HTMLElement {
     const key = startMs === undefined || pose?.lat === undefined || pose.lng === undefined ? ""
       : `${this.aircraftSource.id}|${startMs}+${spanMs}|${pose.lat.toFixed(3)},${pose.lng.toFixed(3)}|${Math.round(pose.elevationM ?? 0)}`
     if (this.traffic?.key === key) return this.traffic.set
+    // What was heard of the air aloft was heard for other aircraft, at another place or time: an editor that loaded another recording would
+    // otherwise freeze the last one's air into this one.
+    this.upperAirHeardLive = undefined
     if (key === "" || startMs === undefined || pose?.lat === undefined || pose.lng === undefined) {
       this.traffic = { key, status: "outside" }
       return undefined
