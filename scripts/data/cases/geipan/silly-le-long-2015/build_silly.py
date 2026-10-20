@@ -448,31 +448,25 @@ for el in osm["elements"]:
                   "eastM": e, "northM": n, "headingDeg": round(hd, 1), "floors": 1,
                   "sizeM": {"widthM": round(max(across) - min(across), 1), "lengthM": round(max(along) - min(along), 1), "heightM": 10}})
 
-# The RD548 bridge over the RN2: its deck is OSM way 188333869 (42 m, heading 144.8), and the
-# RD548 runs straight on in the same line for about 90 m to the north-west and 110 m to the
-# south-east before it bends — its embankments, taken as 100 m each side. The deck's width (9 m),
-# the road's height over the ground (6.5 m: the 4.75 m clearance a national road requires, a deck
-# and a margin) and the railing are ASSUMED: nothing in the file measures them. The photographs
-# (PV p.22, 24) show a grassed bank, a slab and a railing of posts and two rails.
+# The RD548 bridge over the RN2 is not drawn here any more: the IGN's survey has it, measured (BD TOPO's line, the LiDAR's deck: 54.5 m, 6.1 m
+# over the road; the bridge drawn here was 241.6 m with a width, a height and a railing ASSUMED). So are the buildings of Holcim's site, of which the
+# ones above (heights ASSUMED) only serve to find and name the surveyed ones. After this script, freeze the survey and add it:
+#
+#   node --import tsx scripts/fetch-surroundings.ts scripts/data/cases/geipan/silly-le-long-2015/surroundings.json 49.1055258 2.7537538 400 \
+#     --along public/demo-data/observer-silly-le-long.json
+#   python3 scripts/data/cases/add_surroundings.py scripts/data/cases/geipan/silly-le-long-2015/surroundings.json tree,building,bridge,wire \
+#     --site osm- '{"fr": "Site Holcim Granulats, bâtiment", ...}' --whole-site \
+#     --occludes 1377,930 pan,blanc-g,blanc-d,rouge,rect-g,rect-d \
+#     public/demo-data/observer-silly-le-long.json public/demo-data/interpretation-silly-le-long-1.json
+#
+# `--occludes`: driving under it, the deck hides the lights ("Juste avant le pont, on voyait encore les trois lumières", CR p.8); the phenomenon was
+# beyond it, a gap between them (CR p.8).
+#
+# Its heading, which the craft is set across (see CRAFT_HEADING): the deck's, OSM way 188333869.
 b0 = ways[188333869]["geometry"]
 be0, bn0 = enu(b0[0]["lat"], b0[0]["lon"])
 be1, bn1 = enu(b0[-1]["lat"], b0[-1]["lon"])
-span = math.hypot(be1 - be0, bn1 - bn0)
 bridge_heading = math.degrees(math.atan2(be1 - be0, bn1 - bn0)) % 360
-e, n = rel((be0 + be1) / 2, (bn0 + bn1) / 2)
-decor.append({
-    "id": "pont-rd548",
-    "kind": "bridge",
-    "title": {"fr": "Pont de la RD548 sur la RN2 (largeur, hauteur et garde-corps supposés)",
-              "en": "The RD548 bridge over the RN2 (width, height and railing assumed)", "es": "El puente de la RD548 sobre la RN2 (anchura, altura y barandilla supuestas)", "it": "Il ponte della RD548 sulla RN2 (larghezza, altezza e parapetto ipotizzati)"},
-    "eastM": e, "northM": n, "headingDeg": round(bridge_heading, 1),
-    "sizeM": {"widthM": 9, "lengthM": round(span + 200, 1), "heightM": 6.5},
-    "bridge": {"spanM": round(span, 1), "deckThicknessM": 1.2,
-               "railing": {"heightM": 1.05, "postSpacingM": 1.5, "rails": 2}},
-    # Driving under it, the deck hides the lights ("Juste avant le pont, on voyait encore les trois
-    # lumières", CR p.8); the phenomenon was beyond it, a gap between them (CR p.8).
-    "occludesSourceIds": ["pan", "blanc-g", "blanc-d", "rouge", "rect-g", "rect-d"],
-})
 
 rec = {
     "version": 1,

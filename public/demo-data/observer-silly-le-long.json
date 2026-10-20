@@ -40831,117 +40831,6 @@
    ]
   },
   {
-   "id":"osm-292977570",
-   "kind":"building",
-   "title":{
-    "fr":"Bâtiment (OSM)",
-    "en":"Building (OSM)",
-    "es":"Edificio (OSM)",
-    "it":"Edificio (OSM)"
-   },
-   "eastM":1555.9,
-   "northM":1045.2,
-   "headingDeg":222.0,
-   "floors":1,
-   "sizeM":{
-    "widthM":2.7,
-    "lengthM":5.7,
-    "heightM":10
-   }
-  },
-  {
-   "id":"osm-292977708",
-   "kind":"building",
-   "title":{
-    "fr":"Bâtiment (OSM)",
-    "en":"Building (OSM)",
-    "es":"Edificio (OSM)",
-    "it":"Edificio (OSM)"
-   },
-   "eastM":1583.1,
-   "northM":1060.8,
-   "headingDeg":220.9,
-   "floors":1,
-   "sizeM":{
-    "widthM":2.4,
-    "lengthM":4.2,
-    "heightM":10
-   }
-  },
-  {
-   "id":"osm-292977824",
-   "kind":"building",
-   "title":{
-    "fr":"Bâtiment (OSM)",
-    "en":"Building (OSM)",
-    "es":"Edificio (OSM)",
-    "it":"Edificio (OSM)"
-   },
-   "eastM":1570.4,
-   "northM":1032.2,
-   "headingDeg":218.5,
-   "floors":1,
-   "sizeM":{
-    "widthM":3.6,
-    "lengthM":6.2,
-    "heightM":10
-   }
-  },
-  {
-   "id":"osm-292977942",
-   "kind":"building",
-   "title":{
-    "fr":"Bâtiment (OSM)",
-    "en":"Building (OSM)",
-    "es":"Edificio (OSM)",
-    "it":"Edificio (OSM)"
-   },
-   "eastM":1591.6,
-   "northM":1068.3,
-   "headingDeg":221.0,
-   "floors":1,
-   "sizeM":{
-    "widthM":5.4,
-    "lengthM":5.8,
-    "heightM":10
-   }
-  },
-  {
-   "id":"pont-rd548",
-   "kind":"bridge",
-   "title":{
-    "fr":"Pont de la RD548 sur la RN2 (largeur, hauteur et garde-corps supposés)",
-    "en":"The RD548 bridge over the RN2 (width, height and railing assumed)",
-    "es":"El puente de la RD548 sobre la RN2 (anchura, altura y barandilla supuestas)",
-    "it":"Il ponte della RD548 sulla RN2 (larghezza, altezza e parapetto ipotizzati)"
-   },
-   "eastM":1377.5,
-   "northM":928.9,
-   "headingDeg":144.4,
-   "sizeM":{
-    "widthM":9,
-    "lengthM":241.6,
-    "heightM":6.5
-   },
-   "bridge":{
-    "spanM":41.6,
-    "deckThicknessM":1.2,
-    "railing":{
-     "heightM":1.05,
-     "postSpacingM":1.5,
-     "rails":2
-    }
-   },
-   "occludesSourceIds":[
-    "pan",
-    "blanc-g",
-    "blanc-d",
-    "rouge",
-    "rect-g",
-    "rect-d"
-   ]
-  },
-  {
    "id":"ign-lidar-topo-1",
    "kind":"tree",
    "title":{
@@ -45796,7 +45685,8 @@
     "color":"#edece5"
    },
    "facade":{
-    "color":"#e5dbc7"
+    "color":"#e5dbc7",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -45821,7 +45711,8 @@
     "color":"#a5a39e"
    },
    "facade":{
-    "color":"#c8bfae"
+    "color":"#c8bfae",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -45846,7 +45737,8 @@
     "color":"#d9dde1"
    },
    "facade":{
-    "color":"#cac2b0"
+    "color":"#cac2b0",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -45871,7 +45763,8 @@
     "color":"#e7edee"
    },
    "facade":{
-    "color":"#c2baa9"
+    "color":"#c2baa9",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -45896,7 +45789,8 @@
     "color":"#ebf0f1"
    },
    "facade":{
-    "color":"#ccc3b2"
+    "color":"#ccc3b2",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -45921,7 +45815,8 @@
     "color":"#d7dadb"
    },
    "facade":{
-    "color":"#d7cebc"
+    "color":"#d7cebc",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -45946,7 +45841,8 @@
     "color":"#e3e8ec"
    },
    "facade":{
-    "color":"#d5ccba"
+    "color":"#d5ccba",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -45971,7 +45867,8 @@
     "color":"#6e6f6f"
    },
    "facade":{
-    "color":"#dcd3c0"
+    "color":"#dcd3c0",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -45996,7 +45893,8 @@
     "color":"#eae8e0"
    },
    "facade":{
-    "color":"#eae0cc"
+    "color":"#eae0cc",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -46021,7 +45919,8 @@
     "color":"#eef4f8"
    },
    "facade":{
-    "color":"#d9d0bd"
+    "color":"#d9d0bd",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -46046,7 +45945,8 @@
     "color":"#9c9da3"
    },
    "facade":{
-    "color":"#c7beae"
+    "color":"#c7beae",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -46071,7 +45971,8 @@
     "color":"#afb0b2"
    },
    "facade":{
-    "color":"#e6dcc9"
+    "color":"#e6dcc9",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -46096,7 +45997,8 @@
     "color":"#605d61"
    },
    "facade":{
-    "color":"#e2d9c5"
+    "color":"#e2d9c5",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -46121,7 +46023,8 @@
     "color":"#ffffff"
    },
    "facade":{
-    "color":"#dbd1bf"
+    "color":"#dbd1bf",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -46146,7 +46049,8 @@
     "color":"#919095"
    },
    "facade":{
-    "color":"#c0b8a7"
+    "color":"#c0b8a7",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -46171,7 +46075,8 @@
     "color":"#a6abaf"
    },
    "facade":{
-    "color":"#dfd5c2"
+    "color":"#dfd5c2",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -46196,7 +46101,8 @@
     "color":"#eaf0f1"
    },
    "facade":{
-    "color":"#ece2ce"
+    "color":"#ece2ce",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -46221,7 +46127,8 @@
     "color":"#95989b"
    },
    "facade":{
-    "color":"#bbb3a3"
+    "color":"#bbb3a3",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -46246,7 +46153,8 @@
     "color":"#acb1b3"
    },
    "facade":{
-    "color":"#d7cebb"
+    "color":"#d7cebb",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
@@ -46255,6 +46163,596 @@
    "id":"ign-lidar-topo-250",
    "kind":"building",
    "title":"Zone Industrielle des Meuniers (19)",
+   "eastM":401.7,
+   "northM":5.7,
+   "headingDeg":0,
+   "lit":false,
+   "sizeM":{
+    "widthM":8.5,
+    "lengthM":7.8,
+    "heightM":8.3
+   },
+   "floors":3,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#f4f3e5"
+   },
+   "facade":{
+    "color":"#d5ccba",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-251",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (20)",
+   "eastM":413.3,
+   "northM":-1,
+   "headingDeg":177,
+   "lit":false,
+   "sizeM":{
+    "widthM":35.4,
+    "lengthM":2.8,
+    "heightM":13.6
+   },
+   "floors":1,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#adafb2"
+   },
+   "facade":{
+    "color":"#d0c7b6",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-252",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (21)",
+   "eastM":-143.2,
+   "northM":-390,
+   "headingDeg":132,
+   "lit":false,
+   "sizeM":{
+    "widthM":45.3,
+    "lengthM":9.9,
+    "heightM":11.7
+   },
+   "floors":4,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#b0b2b9"
+   },
+   "facade":{
+    "color":"#e4dac7",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-253",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (22)",
+   "eastM":-367.1,
+   "northM":-216,
+   "headingDeg":153,
+   "lit":false,
+   "sizeM":{
+    "widthM":39.6,
+    "lengthM":26.9,
+    "heightM":11.7
+   },
+   "floors":1,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#eef4f7"
+   },
+   "facade":{
+    "color":"#d6cdbb",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-254",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (23)",
+   "eastM":-338.3,
+   "northM":-266.4,
+   "headingDeg":153,
+   "lit":false,
+   "sizeM":{
+    "widthM":33.9,
+    "lengthM":7.1,
+    "heightM":11.7
+   },
+   "floors":1,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#ffffff"
+   },
+   "facade":{
+    "color":"#dbd1bf",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-255",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (24)",
+   "eastM":-239.5,
+   "northM":-374.5,
+   "headingDeg":49.4,
+   "lit":false,
+   "sizeM":{
+    "widthM":24.4,
+    "lengthM":20.6,
+    "heightM":6.9
+   },
+   "floors":2,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#8f9299"
+   },
+   "facade":{
+    "color":"#ebe1cd",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-256",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (25)",
+   "eastM":446.5,
+   "northM":-39.6,
+   "headingDeg":87,
+   "lit":false,
+   "sizeM":{
+    "widthM":83.4,
+    "lengthM":26.9,
+    "heightM":13.6
+   },
+   "floors":1,
+   "facade":{
+    "color":"#ccc3b2",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-257",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (26)",
+   "eastM":-356.4,
+   "northM":-274.8,
+   "headingDeg":63,
+   "lit":false,
+   "sizeM":{
+    "widthM":5.7,
+    "lengthM":5.7,
+    "heightM":11.7
+   },
+   "floors":1,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#f5f5f1"
+   },
+   "facade":{
+    "color":"#dad0be",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-258",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (27)",
+   "eastM":438.7,
+   "northM":-101.3,
+   "headingDeg":87,
+   "lit":false,
+   "sizeM":{
+    "widthM":7.1,
+    "lengthM":5.7,
+    "heightM":13.6
+   },
+   "floors":1,
+   "facade":{
+    "color":"#e3d9c6",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-259",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (28)",
+   "eastM":438.4,
+   "northM":-106,
+   "headingDeg":177,
+   "lit":false,
+   "sizeM":{
+    "widthM":4.2,
+    "lengthM":2.8,
+    "heightM":13.6
+   },
+   "floors":1,
+   "facade":{
+    "color":"#c9c0af",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-260",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (29)",
+   "eastM":-304.5,
+   "northM":-332.9,
+   "headingDeg":139.6,
+   "lit":false,
+   "sizeM":{
+    "widthM":87.4,
+    "lengthM":30.8,
+    "heightM":8.1
+   },
+   "floors":3,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#bcc2c4"
+   },
+   "facade":{
+    "color":"#d5ccba",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-261",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (30)",
+   "eastM":442.1,
+   "northM":-90.1,
+   "headingDeg":87,
+   "lit":false,
+   "sizeM":{
+    "widthM":17,
+    "lengthM":12.7,
+    "heightM":13.6
+   },
+   "floors":1,
+   "facade":{
+    "color":"#d1c8b6",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-262",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (31)",
+   "eastM":-160.5,
+   "northM":-422.9,
+   "headingDeg":132,
+   "lit":false,
+   "sizeM":{
+    "widthM":117.4,
+    "lengthM":8.5,
+    "heightM":11.7
+   },
+   "floors":4,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#9b9da8"
+   },
+   "facade":{
+    "color":"#e9dfcb",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-263",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (32)",
+   "eastM":442.4,
+   "northM":-100.2,
+   "headingDeg":177,
+   "lit":false,
+   "sizeM":{
+    "widthM":4.2,
+    "lengthM":2.8,
+    "heightM":13.6
+   },
+   "floors":1,
+   "facade":{
+    "color":"#bbb3a3",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-264",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (33)",
+   "eastM":449.7,
+   "northM":-92,
+   "headingDeg":87,
+   "lit":false,
+   "sizeM":{
+    "widthM":4.2,
+    "lengthM":2.8,
+    "heightM":13.6
+   },
+   "floors":1,
+   "facade":{
+    "color":"#e7ddc9",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-265",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (34)",
+   "eastM":451.3,
+   "northM":-85.8,
+   "headingDeg":87,
+   "lit":false,
+   "sizeM":{
+    "widthM":8.5,
+    "lengthM":7.1,
+    "heightM":13.6
+   },
+   "floors":1,
+   "facade":{
+    "color":"#beb6a6",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-266",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (35)",
+   "eastM":457.5,
+   "northM":-81.9,
+   "headingDeg":177,
+   "lit":false,
+   "sizeM":{
+    "widthM":5.7,
+    "lengthM":4.2,
+    "heightM":13.6
+   },
+   "floors":1,
+   "facade":{
+    "color":"#d9d0bd",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-267",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (36)",
+   "eastM":-84.6,
+   "northM":-458.4,
+   "headingDeg":126,
+   "lit":false,
+   "sizeM":{
+    "widthM":9.9,
+    "lengthM":2.8,
+    "heightM":11.7
+   },
+   "floors":4,
+   "facade":{
+    "color":"#dad1be",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-268",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (37)",
+   "eastM":-95.4,
+   "northM":-461.6,
+   "headingDeg":132,
+   "lit":false,
+   "sizeM":{
+    "widthM":39.6,
+    "lengthM":9.9,
+    "heightM":11.7
+   },
+   "floors":4,
+   "facade":{
+    "color":"#dcd2c0",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-269",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (38)",
+   "eastM":-398.2,
+   "northM":-254.1,
+   "headingDeg":63.4,
+   "lit":false,
+   "sizeM":{
+    "widthM":81.2,
+    "lengthM":50.8,
+    "heightM":14.2
+   },
+   "floors":5,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#b2b7ba"
+   },
+   "facade":{
+    "color":"#c9c1b0",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-270",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (39)",
+   "eastM":-254.7,
+   "northM":-404.1,
+   "headingDeg":141,
+   "lit":false,
+   "sizeM":{
+    "widthM":19.1,
+    "lengthM":15.6,
+    "heightM":7.9
+   },
+   "floors":3,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#afb3b6"
+   },
+   "facade":{
+    "color":"#d2c9b7",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-271",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (40)",
+   "eastM":-275.6,
+   "northM":-395.1,
+   "headingDeg":141,
+   "lit":false,
+   "sizeM":{
+    "widthM":39.6,
+    "lengthM":24.7,
+    "heightM":7.9
+   },
+   "floors":3,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#b3b8ba"
+   },
+   "facade":{
+    "color":"#c1b8a8",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-272",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (41)",
+   "eastM":-154.6,
+   "northM":-471.3,
+   "headingDeg":132,
+   "lit":false,
+   "sizeM":{
+    "widthM":182.4,
+    "lengthM":65.1,
+    "heightM":11.7
+   },
+   "floors":4,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#9ea2a8"
+   },
+   "facade":{
+    "color":"#cec5b4",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-273",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (42)",
+   "eastM":-203.5,
+   "northM":-470.8,
+   "headingDeg":42,
+   "lit":false,
+   "sizeM":{
+    "widthM":8.5,
+    "lengthM":5.7,
+    "heightM":11.7
+   },
+   "floors":4,
+   "facade":{
+    "color":"#beb6a6",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-274",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (43)",
+   "eastM":-144.1,
+   "northM":-516.7,
+   "headingDeg":132,
+   "lit":false,
+   "sizeM":{
+    "widthM":19.8,
+    "lengthM":11.3,
+    "heightM":11.7
+   },
+   "floors":4,
+   "facade":{
+    "color":"#c1b9a9",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-275",
+   "kind":"building",
+   "title":"Zone Industrielle des Meuniers (44)",
    "eastM":421.7,
    "northM":6.9,
    "headingDeg":153,
@@ -46271,15 +46769,16 @@
     "color":"#f8f0e5"
    },
    "facade":{
-    "color":"#d6cdbb"
+    "color":"#d6cdbb",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-251",
+   "id":"ign-lidar-topo-276",
    "kind":"building",
-   "title":"Zone Industrielle des Meuniers (20)",
+   "title":"Zone Industrielle des Meuniers (45)",
    "eastM":412.5,
    "northM":4.6,
    "headingDeg":90,
@@ -46296,65 +46795,16 @@
     "color":"#606065"
    },
    "facade":{
-    "color":"#dad1be"
+    "color":"#dad1be",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-252",
+   "id":"ign-lidar-topo-277",
    "kind":"building",
-   "title":"Zone Industrielle des Meuniers (21)",
-   "eastM":401.9,
-   "northM":5.6,
-   "headingDeg":0,
-   "lit":false,
-   "sizeM":{
-    "widthM":8.5,
-    "lengthM":7.8,
-    "heightM":8.3
-   },
-   "floors":3,
-   "roof":{
-    "shape":"flat",
-    "riseM":0,
-    "color":"#f3f0e1"
-   },
-   "facade":{
-    "color":"#e1d8c4"
-   },
-   "origin":"ign-lidar-topo",
-   "surveyedOn":"2026-03-20"
-  },
-  {
-   "id":"ign-lidar-topo-253",
-   "kind":"building",
-   "title":"Zone Industrielle des Meuniers (22)",
-   "eastM":413.9,
-   "northM":-0.9,
-   "headingDeg":177,
-   "lit":false,
-   "sizeM":{
-    "widthM":36.8,
-    "lengthM":2.8,
-    "heightM":13.6
-   },
-   "floors":1,
-   "roof":{
-    "shape":"flat",
-    "riseM":0,
-    "color":"#b9b9ba"
-   },
-   "facade":{
-    "color":"#d5ccb9"
-   },
-   "origin":"ign-lidar-topo",
-   "surveyedOn":"2026-03-20"
-  },
-  {
-   "id":"ign-lidar-topo-254",
-   "kind":"building",
-   "title":"Zone Industrielle des Meuniers (23)",
+   "title":"Zone Industrielle des Meuniers (46)",
    "eastM":323.2,
    "northM":-5.5,
    "headingDeg":165,
@@ -46371,15 +46821,16 @@
     "color":"#5a575e"
    },
    "facade":{
-    "color":"#d9d0bd"
+    "color":"#d9d0bd",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-255",
+   "id":"ign-lidar-topo-278",
    "kind":"building",
-   "title":"Zone Industrielle des Meuniers (24)",
+   "title":"Zone Industrielle des Meuniers (47)",
    "eastM":447.1,
    "northM":-40.3,
    "headingDeg":87,
@@ -46396,40 +46847,16 @@
     "color":"#9da0a4"
    },
    "facade":{
-    "color":"#bab2a3"
+    "color":"#bab2a3",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-256",
+   "id":"ign-lidar-topo-279",
    "kind":"building",
-   "title":"Zone Industrielle des Meuniers (25)",
-   "eastM":456.4,
-   "northM":-84.1,
-   "headingDeg":177,
-   "lit":false,
-   "sizeM":{
-    "widthM":7.1,
-    "lengthM":2.8,
-    "heightM":13.6
-   },
-   "floors":1,
-   "roof":{
-    "shape":"flat",
-    "riseM":0,
-    "color":"#95959b"
-   },
-   "facade":{
-    "color":"#e7ddc9"
-   },
-   "origin":"ign-lidar-topo",
-   "surveyedOn":"2026-03-20"
-  },
-  {
-   "id":"ign-lidar-topo-257",
-   "kind":"building",
-   "title":"Zone Industrielle des Meuniers (26)",
+   "title":"Zone Industrielle des Meuniers (48)",
    "eastM":445.3,
    "northM":-87.8,
    "headingDeg":177,
@@ -46446,15 +46873,16 @@
     "color":"#989b9f"
    },
    "facade":{
-    "color":"#beb6a6"
+    "color":"#beb6a6",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-258",
+   "id":"ign-lidar-topo-280",
    "kind":"building",
-   "title":"Zone Industrielle des Meuniers (27)",
+   "title":"Zone Industrielle des Meuniers (49)",
    "eastM":446.4,
    "northM":-95.3,
    "headingDeg":87,
@@ -46471,15 +46899,16 @@
     "color":"#98999c"
    },
    "facade":{
-    "color":"#e0d6c3"
+    "color":"#e0d6c3",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-259",
+   "id":"ign-lidar-topo-281",
    "kind":"building",
-   "title":"Zone Industrielle des Meuniers (28)",
+   "title":"Zone Industrielle des Meuniers (50)",
    "eastM":441.3,
    "northM":-97.9,
    "headingDeg":102,
@@ -46496,38 +46925,14 @@
     "color":"#9b9ea2"
    },
    "facade":{
-    "color":"#c0b7a7"
+    "color":"#c0b7a7",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-260",
-   "kind":"building",
-   "title":"Zone Industrielle des Meuniers (29)",
-   "eastM":439.6,
-   "northM":-104.6,
-   "headingDeg":177,
-   "lit":false,
-   "sizeM":{
-    "widthM":4.2,
-    "lengthM":2.8,
-    "heightM":13.6
-   },
-   "floors":1,
-   "roof":{
-    "shape":"flat",
-    "riseM":0,
-    "color":"#9b9fa3"
-   },
-   "facade":{
-    "color":"#c9c0af"
-   },
-   "origin":"ign-lidar-topo",
-   "surveyedOn":"2026-03-20"
-  },
-  {
-   "id":"ign-lidar-topo-261",
+   "id":"ign-lidar-topo-282",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 2",
@@ -46557,7 +46962,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-262",
+   "id":"ign-lidar-topo-283",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 3",
@@ -46587,7 +46992,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-263",
+   "id":"ign-lidar-topo-284",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 4",
@@ -46617,7 +47022,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-264",
+   "id":"ign-lidar-topo-285",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 5",
@@ -46647,7 +47052,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-265",
+   "id":"ign-lidar-topo-286",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 6",
@@ -46677,7 +47082,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-266",
+   "id":"ign-lidar-topo-287",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 7",
@@ -46707,7 +47112,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-267",
+   "id":"ign-lidar-topo-288",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 8",
@@ -46737,7 +47142,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-268",
+   "id":"ign-lidar-topo-289",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 9",
@@ -46767,7 +47172,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-269",
+   "id":"ign-lidar-topo-290",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 10",
@@ -46797,7 +47202,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-270",
+   "id":"ign-lidar-topo-291",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 11",
@@ -46821,13 +47226,14 @@
     "color":"#b1b1b7"
    },
    "facade":{
-    "color":"#9e5a44"
+    "color":"#9e5a44",
+    "storeyM":2.85
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-271",
+   "id":"ign-lidar-topo-292",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 12",
@@ -46857,7 +47263,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-272",
+   "id":"ign-lidar-topo-293",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 13",
@@ -46887,7 +47293,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-273",
+   "id":"ign-lidar-topo-294",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 14",
@@ -46917,7 +47323,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-274",
+   "id":"ign-lidar-topo-295",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 15",
@@ -46947,7 +47353,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-275",
+   "id":"ign-lidar-topo-296",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 16",
@@ -46977,7 +47383,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-276",
+   "id":"ign-lidar-topo-297",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 17",
@@ -47007,7 +47413,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-277",
+   "id":"ign-lidar-topo-298",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 18",
@@ -47037,7 +47443,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-278",
+   "id":"ign-lidar-topo-299",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 19",
@@ -47061,13 +47467,14 @@
     "color":"#b1978e"
    },
    "facade":{
-    "color":"#aeaca6"
+    "color":"#aeaca6",
+    "storeyM":2.6
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-279",
+   "id":"ign-lidar-topo-300",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 20",
@@ -47091,13 +47498,14 @@
     "color":"#cdbdb0"
    },
    "facade":{
-    "color":"#e1d7c2"
+    "color":"#e1d7c2",
+    "storeyM":2.6
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-280",
+   "id":"ign-lidar-topo-301",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 21",
@@ -47127,7 +47535,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-281",
+   "id":"ign-lidar-topo-302",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 22",
@@ -47157,7 +47565,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-282",
+   "id":"ign-lidar-topo-303",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 23",
@@ -47187,7 +47595,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-283",
+   "id":"ign-lidar-topo-304",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 24",
@@ -47217,7 +47625,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-284",
+   "id":"ign-lidar-topo-305",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 25",
@@ -47241,13 +47649,14 @@
     "color":"#beb09e"
    },
    "facade":{
-    "color":"#c9c0ae"
+    "color":"#c9c0ae",
+    "storeyM":3.05
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-285",
+   "id":"ign-lidar-topo-306",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 26",
@@ -47277,7 +47686,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-286",
+   "id":"ign-lidar-topo-307",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 27",
@@ -47307,7 +47716,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-287",
+   "id":"ign-lidar-topo-308",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 28",
@@ -47331,13 +47740,14 @@
     "color":"#b79185"
    },
    "facade":{
-    "color":"#bebcb5"
+    "color":"#bebcb5",
+    "storeyM":2.4
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-288",
+   "id":"ign-lidar-topo-309",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 29",
@@ -47367,7 +47777,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-289",
+   "id":"ign-lidar-topo-310",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 30",
@@ -47397,7 +47807,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-290",
+   "id":"ign-lidar-topo-311",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 31",
@@ -47427,7 +47837,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-291",
+   "id":"ign-lidar-topo-312",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 32",
@@ -47457,7 +47867,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-292",
+   "id":"ign-lidar-topo-313",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 33",
@@ -47487,7 +47897,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-293",
+   "id":"ign-lidar-topo-314",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 34",
@@ -47517,7 +47927,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-294",
+   "id":"ign-lidar-topo-315",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 35",
@@ -47547,7 +47957,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-295",
+   "id":"ign-lidar-topo-316",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 36",
@@ -47577,7 +47987,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-296",
+   "id":"ign-lidar-topo-317",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 37",
@@ -47607,7 +48017,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-297",
+   "id":"ign-lidar-topo-318",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 38",
@@ -47631,13 +48041,14 @@
     "color":"#ffffff"
    },
    "facade":{
-    "color":"#e1d7c4"
+    "color":"#e1d7c4",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-298",
+   "id":"ign-lidar-topo-319",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 39",
@@ -47661,13 +48072,14 @@
     "color":"#b99588"
    },
    "facade":{
-    "color":"#cdba9a"
+    "color":"#cdba9a",
+    "storeyM":2.85
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-299",
+   "id":"ign-lidar-topo-320",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 40",
@@ -47697,7 +48109,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-300",
+   "id":"ign-lidar-topo-321",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 41",
@@ -47721,13 +48133,14 @@
     "color":"#e4c4b5"
    },
    "facade":{
-    "color":"#d9d0bc"
+    "color":"#d9d0bc",
+    "storeyM":5.2
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-301",
+   "id":"ign-lidar-topo-322",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 42",
@@ -47757,7 +48170,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-302",
+   "id":"ign-lidar-topo-323",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 43",
@@ -47787,7 +48200,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-303",
+   "id":"ign-lidar-topo-324",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 44",
@@ -47817,7 +48230,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-304",
+   "id":"ign-lidar-topo-325",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 45",
@@ -47841,13 +48254,14 @@
     "color":"#a39291"
    },
    "facade":{
-    "color":"#ccc4b2"
+    "color":"#ccc4b2",
+    "storeyM":2.9
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-305",
+   "id":"ign-lidar-topo-326",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 46",
@@ -47877,7 +48291,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-306",
+   "id":"ign-lidar-topo-327",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 47",
@@ -47901,13 +48315,14 @@
     "color":"#d9c3b8"
    },
    "facade":{
-    "color":"#d2c8b6"
+    "color":"#d2c8b6",
+    "storeyM":3.5
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-307",
+   "id":"ign-lidar-topo-328",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 48",
@@ -47931,13 +48346,14 @@
     "color":"#c9ac9e"
    },
    "facade":{
-    "color":"#a45e47"
+    "color":"#a45e47",
+    "storeyM":2.7
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-308",
+   "id":"ign-lidar-topo-329",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 49",
@@ -47967,7 +48383,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-309",
+   "id":"ign-lidar-topo-330",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 50",
@@ -47997,7 +48413,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-310",
+   "id":"ign-lidar-topo-331",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 51",
@@ -48027,13 +48443,136 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-311",
+   "id":"ign-lidar-topo-332",
    "kind":"building",
    "title":{
     "fr":"Bâtiment 52",
     "en":"Building 52",
     "es":"Edificio 52",
     "it":"Edificio 52"
+   },
+   "eastM":386,
+   "northM":-260.1,
+   "headingDeg":45,
+   "lit":false,
+   "sizeM":{
+    "widthM":11.3,
+    "lengthM":6.4,
+    "heightM":8.7
+   },
+   "floors":3,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#a39791"
+   },
+   "facade":{
+    "color":"#e6dcc9",
+    "storeyM":2.9
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-333",
+   "kind":"building",
+   "title":{
+    "fr":"Bâtiment 53",
+    "en":"Building 53",
+    "es":"Edificio 53",
+    "it":"Edificio 53"
+   },
+   "eastM":555.3,
+   "northM":-244.2,
+   "headingDeg":51,
+   "lit":false,
+   "sizeM":{
+    "widthM":12.7,
+    "lengthM":8.5,
+    "heightM":5.9
+   },
+   "floors":2,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#978c8e"
+   },
+   "facade":{
+    "color":"#c1b9a8"
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-334",
+   "kind":"building",
+   "title":{
+    "fr":"Bâtiment 54",
+    "en":"Building 54",
+    "es":"Edificio 54",
+    "it":"Edificio 54"
+   },
+   "eastM":487.5,
+   "northM":-261.1,
+   "headingDeg":48,
+   "lit":false,
+   "sizeM":{
+    "widthM":17,
+    "lengthM":9.2,
+    "heightM":5
+   },
+   "floors":1,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#848281"
+   },
+   "facade":{
+    "color":"#c5c3bc",
+    "storeyM":5
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-335",
+   "kind":"building",
+   "title":{
+    "fr":"Bâtiment 55",
+    "en":"Building 55",
+    "es":"Edificio 55",
+    "it":"Edificio 55"
+   },
+   "eastM":523.1,
+   "northM":-255.3,
+   "headingDeg":45,
+   "lit":false,
+   "sizeM":{
+    "widthM":10.6,
+    "lengthM":8.1,
+    "heightM":5.8
+   },
+   "floors":2,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#af9d96"
+   },
+   "facade":{
+    "color":"#b1afa9",
+    "storeyM":2.9
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-336",
+   "kind":"building",
+   "title":{
+    "fr":"Bâtiment 56",
+    "en":"Building 56",
+    "es":"Edificio 56",
+    "it":"Edificio 56"
    },
    "eastM":1107.8,
    "northM":728.8,
@@ -48051,13 +48590,14 @@
     "color":"#a4a3a0"
    },
    "facade":{
-    "color":"#bfb5a3"
+    "color":"#bfb5a3",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-312",
+   "id":"ign-lidar-topo-337",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment",
@@ -48081,13 +48621,14 @@
     "color":"#acacab"
    },
    "facade":{
-    "color":"#d2c9b7"
+    "color":"#d2c9b7",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-313",
+   "id":"ign-lidar-topo-338",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (2)",
@@ -48111,13 +48652,14 @@
     "color":"#a4a5a8"
    },
    "facade":{
-    "color":"#c2baa9"
+    "color":"#c2baa9",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-314",
+   "id":"ign-lidar-topo-339",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (3)",
@@ -48141,13 +48683,14 @@
     "color":"#a5a4a5"
    },
    "facade":{
-    "color":"#d7cdbb"
+    "color":"#d7cdbb",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-315",
+   "id":"ign-lidar-topo-340",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (4)",
@@ -48171,13 +48714,14 @@
     "color":"#969697"
    },
    "facade":{
-    "color":"#ece2ce"
+    "color":"#ece2ce",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-316",
+   "id":"ign-lidar-topo-341",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (5)",
@@ -48201,13 +48745,14 @@
     "color":"#a3a3a6"
    },
    "facade":{
-    "color":"#cfc6b5"
+    "color":"#cfc6b5",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-317",
+   "id":"ign-lidar-topo-342",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (6)",
@@ -48231,13 +48776,14 @@
     "color":"#b5b7b9"
    },
    "facade":{
-    "color":"#c6bead"
+    "color":"#c6bead",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-318",
+   "id":"ign-lidar-topo-343",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (7)",
@@ -48261,13 +48807,14 @@
     "color":"#afb1b1"
    },
    "facade":{
-    "color":"#cbc2b1"
+    "color":"#cbc2b1",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-319",
+   "id":"ign-lidar-topo-344",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (8)",
@@ -48291,13 +48838,14 @@
     "color":"#a6a8aa"
    },
    "facade":{
-    "color":"#c0b8a7"
+    "color":"#c0b8a7",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-320",
+   "id":"ign-lidar-topo-345",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (9)",
@@ -48321,19 +48869,20 @@
     "color":"#a2a3a4"
    },
    "facade":{
-    "color":"#c4bcab"
+    "color":"#c4bcab",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-321",
+   "id":"ign-lidar-topo-346",
    "kind":"building",
    "title":{
-    "fr":"Bâtiment 62",
-    "en":"Building 62",
-    "es":"Edificio 62",
-    "it":"Edificio 62"
+    "fr":"Bâtiment 66",
+    "en":"Building 66",
+    "es":"Edificio 66",
+    "it":"Edificio 66"
    },
    "eastM":921.6,
    "northM":879.7,
@@ -48351,19 +48900,20 @@
     "color":"#d6d6d2"
    },
    "facade":{
-    "color":"#e9dfcb"
+    "color":"#e9dfcb",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-322",
+   "id":"ign-lidar-topo-347",
    "kind":"building",
    "title":{
-    "fr":"Bâtiment 63",
-    "en":"Building 63",
-    "es":"Edificio 63",
-    "it":"Edificio 63"
+    "fr":"Bâtiment 67",
+    "en":"Building 67",
+    "es":"Edificio 67",
+    "it":"Edificio 67"
    },
    "eastM":926,
    "northM":884.5,
@@ -48381,19 +48931,20 @@
     "color":"#f9f5f4"
    },
    "facade":{
-    "color":"#bcb4a4"
+    "color":"#bcb4a4",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-323",
+   "id":"ign-lidar-topo-348",
    "kind":"building",
    "title":{
-    "fr":"Bâtiment 64",
-    "en":"Building 64",
-    "es":"Edificio 64",
-    "it":"Edificio 64"
+    "fr":"Bâtiment 68",
+    "en":"Building 68",
+    "es":"Edificio 68",
+    "it":"Edificio 68"
    },
    "eastM":1224.8,
    "northM":980.4,
@@ -48411,19 +48962,20 @@
     "color":"#b3bec7"
    },
    "facade":{
-    "color":"#c4bcab"
+    "color":"#c4bcab",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-324",
+   "id":"ign-lidar-topo-349",
    "kind":"building",
    "title":{
-    "fr":"Bâtiment 65",
-    "en":"Building 65",
-    "es":"Edificio 65",
-    "it":"Edificio 65"
+    "fr":"Bâtiment 69",
+    "en":"Building 69",
+    "es":"Edificio 69",
+    "it":"Edificio 69"
    },
    "eastM":1253.5,
    "northM":983.2,
@@ -48441,13 +48993,15 @@
     "color":"#e7f1f5"
    },
    "facade":{
-    "color":"#bdb5a5"
+    "color":"#bdb5a5",
+    "plain":true,
+    "storeyM":4
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-325",
+   "id":"ign-lidar-topo-350",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (10)",
@@ -48466,13 +49020,14 @@
    },
    "floors":1,
    "facade":{
-    "color":"#d9d0bd"
+    "color":"#d9d0bd",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-326",
+   "id":"ign-lidar-topo-351",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (11)",
@@ -48496,13 +49051,14 @@
     "color":"#ffffff"
    },
    "facade":{
-    "color":"#c3bbaa"
+    "color":"#c3bbaa",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-327",
+   "id":"ign-lidar-topo-352",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (12)",
@@ -48526,13 +49082,14 @@
     "color":"#a3adb5"
    },
    "facade":{
-    "color":"#d1c8b6"
+    "color":"#d1c8b6",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-328",
+   "id":"ign-lidar-topo-353",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (13)",
@@ -48556,13 +49113,15 @@
     "color":"#c2a6ab"
    },
    "facade":{
-    "color":"#cfc6b4"
+    "color":"#cfc6b4",
+    "plain":true,
+    "storeyM":2.9
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-329",
+   "id":"ign-lidar-topo-354",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (14)",
@@ -48592,7 +49151,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-330",
+   "id":"ign-lidar-topo-355",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (15)",
@@ -48622,13 +49181,13 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-331",
+   "id":"ign-lidar-topo-356",
    "kind":"building",
    "title":{
-    "fr":"Bâtiment 72",
-    "en":"Building 72",
-    "es":"Edificio 72",
-    "it":"Edificio 72"
+    "fr":"Bâtiment 76",
+    "en":"Building 76",
+    "es":"Edificio 76",
+    "it":"Edificio 76"
    },
    "eastM":1121.8,
    "northM":1070.8,
@@ -48646,13 +49205,14 @@
     "color":"#e5edf0"
    },
    "facade":{
-    "color":"#ddd4c1"
+    "color":"#ddd4c1",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-332",
+   "id":"ign-lidar-topo-357",
    "kind":"building",
    "title":{
     "fr":"Site Holcim Granulats, bâtiment (16)",
@@ -48682,13 +49242,13 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-333",
+   "id":"ign-lidar-topo-358",
    "kind":"building",
    "title":{
-    "fr":"Bâtiment 74",
-    "en":"Building 74",
-    "es":"Edificio 74",
-    "it":"Edificio 74"
+    "fr":"Bâtiment 78",
+    "en":"Building 78",
+    "es":"Edificio 78",
+    "it":"Edificio 78"
    },
    "eastM":1711.3,
    "northM":1178.1,
@@ -48706,19 +49266,20 @@
     "color":"#6b695d"
    },
    "facade":{
-    "color":"#c2baa9"
+    "color":"#c2baa9",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-334",
+   "id":"ign-lidar-topo-359",
    "kind":"building",
    "title":{
-    "fr":"Bâtiment 75",
-    "en":"Building 75",
-    "es":"Edificio 75",
-    "it":"Edificio 75"
+    "fr":"Bâtiment 79",
+    "en":"Building 79",
+    "es":"Edificio 79",
+    "it":"Edificio 79"
    },
    "eastM":1715.4,
    "northM":1180.8,
@@ -48736,13 +49297,14 @@
     "color":"#847c6f"
    },
    "facade":{
-    "color":"#eae0cc"
+    "color":"#eae0cc",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-335",
+   "id":"ign-lidar-topo-360",
    "kind":"building",
    "title":"Parc d'Activités du Ferrier",
    "eastM":2749.2,
@@ -48761,13 +49323,14 @@
     "color":"#8e8b95"
    },
    "facade":{
-    "color":"#d2c9b7"
+    "color":"#d2c9b7",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-336",
+   "id":"ign-lidar-topo-361",
    "kind":"building",
    "title":"Parc d'Activités du Ferrier (2)",
    "eastM":2722.1,
@@ -48786,13 +49349,14 @@
     "color":"#f2ebe8"
    },
    "facade":{
-    "color":"#c3bbaa"
+    "color":"#c3bbaa",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-337",
+   "id":"ign-lidar-topo-362",
    "kind":"building",
    "title":"Parc d'Activités du Ferrier (3)",
    "eastM":2697.8,
@@ -48811,13 +49375,14 @@
     "color":"#f5f1ec"
    },
    "facade":{
-    "color":"#d0c8b6"
+    "color":"#d0c8b6",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-338",
+   "id":"ign-lidar-topo-363",
    "kind":"building",
    "title":"Parc d'Activités du Ferrier (4)",
    "eastM":2714.7,
@@ -48836,13 +49401,14 @@
     "color":"#ecebe5"
    },
    "facade":{
-    "color":"#bab2a2"
+    "color":"#bab2a2",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-339",
+   "id":"ign-lidar-topo-364",
    "kind":"building",
    "title":"Parc d'Activités du Ferrier (5)",
    "eastM":2450.4,
@@ -48861,13 +49427,14 @@
     "color":"#b7bdc2"
    },
    "facade":{
-    "color":"#c0b7a7"
+    "color":"#c0b7a7",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-340",
+   "id":"ign-lidar-topo-365",
    "kind":"building",
    "title":"Parc d'Activités du Ferrier (6)",
    "eastM":2766.1,
@@ -48892,7 +49459,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-341",
+   "id":"ign-lidar-topo-366",
    "kind":"building",
    "title":"Parc d'Activités du Ferrier (7)",
    "eastM":2666.9,
@@ -48911,13 +49478,349 @@
     "color":"#fef4f4"
    },
    "facade":{
-    "color":"#d6cdba"
+    "color":"#d6cdba",
+    "plain":true
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-342",
+   "id":"ign-lidar-topo-367",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (8)",
+   "eastM":2528.6,
+   "northM":2867.7,
+   "headingDeg":171,
+   "lit":false,
+   "sizeM":{
+    "widthM":824.5,
+    "lengthM":94.8,
+    "heightM":17.6
+   },
+   "floors":6,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#dee1e4"
+   },
+   "facade":{
+    "color":"#e3d9c6",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-368",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (9)",
+   "eastM":2401.4,
+   "northM":2789.6,
+   "headingDeg":171,
+   "lit":false,
+   "sizeM":{
+    "widthM":67.9,
+    "lengthM":2.8,
+    "heightM":17.6
+   },
+   "floors":6,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#dbb0a9"
+   },
+   "facade":{
+    "color":"#e8deca",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-369",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (10)",
+   "eastM":2350.9,
+   "northM":2787.3,
+   "headingDeg":171,
+   "lit":false,
+   "sizeM":{
+    "widthM":448.3,
+    "lengthM":8.5,
+    "heightM":17.6
+   },
+   "floors":6,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#ffffff"
+   },
+   "facade":{
+    "color":"#d7cebc",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-370",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (11)",
+   "eastM":2743.9,
+   "northM":2954.8,
+   "headingDeg":171,
+   "lit":false,
+   "sizeM":{
+    "widthM":371.9,
+    "lengthM":9.9,
+    "heightM":17.6
+   },
+   "floors":6,
+   "facade":{
+    "color":"#bdb5a5",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-371",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (12)",
+   "eastM":2699.8,
+   "northM":2966.4,
+   "headingDeg":81,
+   "lit":false,
+   "sizeM":{
+    "widthM":21.2,
+    "lengthM":17,
+    "heightM":17.6
+   },
+   "floors":6,
+   "facade":{
+    "color":"#d4cbb9",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-372",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (13)",
+   "eastM":2460.7,
+   "northM":2907.8,
+   "headingDeg":171,
+   "lit":false,
+   "sizeM":{
+    "widthM":202.2,
+    "lengthM":5.7,
+    "heightM":17.6
+   },
+   "floors":6,
+   "facade":{
+    "color":"#e6dcc8",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-373",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (14)",
+   "eastM":2810,
+   "northM":2971.7,
+   "headingDeg":171,
+   "lit":false,
+   "sizeM":{
+    "widthM":236.2,
+    "lengthM":2.8,
+    "heightM":17.6
+   },
+   "floors":6,
+   "facade":{
+    "color":"#cdc4b2",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-374",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (15)",
+   "eastM":2249.2,
+   "northM":2764.7,
+   "headingDeg":171,
+   "lit":false,
+   "sizeM":{
+    "widthM":240.4,
+    "lengthM":4.2,
+    "heightM":17.6
+   },
+   "floors":6,
+   "roof":{
+    "shape":"flat",
+    "riseM":0,
+    "color":"#dbada8"
+   },
+   "facade":{
+    "color":"#cac1b0",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-375",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (16)",
+   "eastM":2349.1,
+   "northM":2889.4,
+   "headingDeg":171,
+   "lit":false,
+   "sizeM":{
+    "widthM":24,
+    "lengthM":4.2,
+    "heightM":17.6
+   },
+   "floors":6,
+   "facade":{
+    "color":"#dfd5c2",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-376",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (17)",
+   "eastM":2913.4,
+   "northM":3001,
+   "headingDeg":81,
+   "lit":false,
+   "sizeM":{
+    "widthM":22.6,
+    "lengthM":17,
+    "heightM":17.6
+   },
+   "floors":6,
+   "facade":{
+    "color":"#e3d9c6",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-377",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (18)",
+   "eastM":2327.1,
+   "northM":2896.6,
+   "headingDeg":81,
+   "lit":false,
+   "sizeM":{
+    "widthM":25.5,
+    "lengthM":17,
+    "heightM":17.6
+   },
+   "floors":6,
+   "facade":{
+    "color":"#dad1be",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-378",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (19)",
+   "eastM":2185.5,
+   "northM":2751.1,
+   "headingDeg":171,
+   "lit":false,
+   "sizeM":{
+    "widthM":110.3,
+    "lengthM":2.8,
+    "heightM":17.6
+   },
+   "floors":6,
+   "facade":{
+    "color":"#cac1b0",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-379",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (20)",
+   "eastM":2276.5,
+   "northM":2877.2,
+   "headingDeg":171,
+   "lit":false,
+   "sizeM":{
+    "widthM":89.1,
+    "lengthM":2.8,
+    "heightM":17.6
+   },
+   "floors":6,
+   "facade":{
+    "color":"#d1c8b6",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-380",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (21)",
+   "eastM":2113.4,
+   "northM":2835.6,
+   "headingDeg":81,
+   "lit":false,
+   "sizeM":{
+    "widthM":62.2,
+    "lengthM":5.7,
+    "heightM":17.6
+   },
+   "floors":6,
+   "facade":{
+    "color":"#e4dac7",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-381",
+   "kind":"building",
+   "title":"Parc d'Activités du Ferrier (22)",
+   "eastM":2117.5,
+   "northM":2859.9,
+   "headingDeg":81,
+   "lit":false,
+   "sizeM":{
+    "widthM":18.4,
+    "lengthM":9.9,
+    "heightM":17.6
+   },
+   "floors":6,
+   "facade":{
+    "color":"#c7bfae",
+    "plain":true
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20"
+  },
+  {
+   "id":"ign-lidar-topo-382",
    "kind":"bridge",
    "title":{
     "fr":"Pont 1",
@@ -48925,12 +49828,12 @@
     "es":"Puente 1",
     "it":"Ponte 1"
    },
-   "eastM":-139.5,
-   "northM":-47.6,
+   "eastM":-143,
+   "northM":-48.9,
    "headingDeg":69.2,
    "lit":false,
    "sizeM":{
-    "lengthM":35,
+    "lengthM":42.5,
     "widthM":12.4,
     "heightM":5.7
    },
@@ -48938,7 +49841,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-343",
+   "id":"ign-lidar-topo-383",
    "kind":"bridge",
    "title":{
     "fr":"Pont 2",
@@ -48946,20 +49849,20 @@
     "es":"Puente 2",
     "it":"Ponte 2"
    },
-   "eastM":-144.1,
-   "northM":-38.6,
+   "eastM":-148.7,
+   "northM":-40.3,
    "headingDeg":69.6,
    "lit":false,
    "sizeM":{
-    "lengthM":37.3,
+    "lengthM":47.2,
     "widthM":12.4,
-    "heightM":5.1
+    "heightM":5.7
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-344",
+   "id":"ign-lidar-topo-384",
    "kind":"bridge",
    "title":{
     "fr":"Pont 3",
@@ -48967,20 +49870,49 @@
     "es":"Puente 3",
     "it":"Ponte 3"
    },
-   "eastM":-52.4,
-   "northM":-185.1,
+   "eastM":-52.3,
+   "northM":-185.3,
    "headingDeg":154.8,
    "lit":false,
    "sizeM":{
-    "lengthM":15.8,
+    "lengthM":21.5,
     "widthM":7.4,
-    "heightM":4
+    "heightM":6.4
    },
    "origin":"ign-lidar-topo",
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-346",
+   "id":"ign-lidar-topo-385",
+   "kind":"bridge",
+   "title":{
+    "fr":"Pont 4",
+    "en":"Bridge 4",
+    "es":"Puente 4",
+    "it":"Ponte 4"
+   },
+   "eastM":1377.1,
+   "northM":929.6,
+   "headingDeg":144.6,
+   "lit":false,
+   "sizeM":{
+    "lengthM":54.5,
+    "widthM":7.4,
+    "heightM":6.1
+   },
+   "origin":"ign-lidar-topo",
+   "surveyedOn":"2026-03-20",
+   "occludesSourceIds":[
+    "pan",
+    "blanc-g",
+    "blanc-d",
+    "rouge",
+    "rect-g",
+    "rect-d"
+   ]
+  },
+  {
+   "id":"ign-lidar-topo-386",
    "kind":"wire",
    "title":{
     "fr":"Ligne électrique (63 kV)",
@@ -49018,7 +49950,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-347",
+   "id":"ign-lidar-topo-387",
    "kind":"wire",
    "title":{
     "fr":"Ligne électrique (63 kV) (2)",
@@ -49056,7 +49988,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-348",
+   "id":"ign-lidar-topo-388",
    "kind":"wire",
    "title":{
     "fr":"Ligne électrique (63 kV) (3)",
@@ -49094,7 +50026,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-349",
+   "id":"ign-lidar-topo-389",
    "kind":"wire",
    "title":{
     "fr":"Ligne électrique (63 kV) (4)",
@@ -49132,7 +50064,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-350",
+   "id":"ign-lidar-topo-390",
    "kind":"wire",
    "title":{
     "fr":"Ligne électrique (63 kV) (5)",
@@ -49170,7 +50102,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-351",
+   "id":"ign-lidar-topo-391",
    "kind":"wire",
    "title":{
     "fr":"Ligne électrique (63 kV) (6)",
@@ -49208,7 +50140,7 @@
    "surveyedOn":"2026-03-20"
   },
   {
-   "id":"ign-lidar-topo-352",
+   "id":"ign-lidar-topo-392",
    "kind":"wire",
    "title":{
     "fr":"Ligne électrique (63 kV) (7)",
