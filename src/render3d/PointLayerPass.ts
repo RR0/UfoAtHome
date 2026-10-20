@@ -51,6 +51,8 @@ export class PointLayerPass {
   /** The layers the foreground and the clouds are put on for the small picture of them. */
   static readonly OCCLUDER_LAYER = 6
   static readonly CLOUD_LAYER = 7
+  /** The opacity from which a transparent surface that writes its depth is a foreground (see markForeground). */
+  private static readonly SOLID_OPACITY = 0.5
   /** Pixels of that picture, as a share of the source's, on each side. */
   private static readonly OCCLUSION_SCALE = 0.5
 
@@ -163,7 +165,10 @@ export class PointLayerPass {
       // layers of their own, and do not hide a star.
       if (child instanceof Mesh && child.layers.isEnabled(0)) {
         const material = Array.isArray(child.material) ? child.material[0] : child.material
-        const solid = material.depthWrite !== false && !material.transparent && material.blending !== AdditiveBlending
+        // A surface that writes its depth hides what is behind it, transparent or not: the ground is (it fades into the haze at the edge of its patch),
+        // and taken for see-through it let the stars shine through every hill and bank over the horizon (the RN2's embankment at Silly-le-Long).
+        // Not what is mostly see-through, nor added light.
+        const solid = material.depthWrite !== false && material.blending !== AdditiveBlending && (!material.transparent || material.opacity >= PointLayerPass.SOLID_OPACITY)
         if (solid) child.layers.enable(PointLayerPass.OCCLUDER_LAYER)
         else child.layers.disable(PointLayerPass.OCCLUDER_LAYER)
       }

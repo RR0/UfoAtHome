@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { BufferAttribute, BufferGeometry, Group, Object3D, Points } from "three"
+import { AdditiveBlending, BoxGeometry, BufferAttribute, BufferGeometry, Group, Mesh, MeshBasicMaterial, Object3D, Points, Scene } from "three"
 import { PointLayerPass, type PointLayerHost } from "../../src/render3d/PointLayerPass.js"
 import { PointSources } from "../../src/render3d/PointSources.js"
 
@@ -57,5 +57,23 @@ describe("PointLayerPass", () => {
     expect(proxy.matrixWorld.elements[0]).toBeCloseTo(100 / 3, 6)
     expect(proxy.matrixWorld.elements[13]).toBeCloseTo(1499.5, 6)
   })
-})
 
+  it("hides the stars behind the ground, which is transparent at the edge of its patch, and not behind what is mostly see-through or added light", () => {
+    const markForeground = (PointLayerPass as unknown as { markForeground(object: Scene, sky: Group): void }).markForeground.bind(PointLayerPass)
+    const scene = new Scene()
+    const sky = new Group()
+    const ground = new Mesh(new BoxGeometry(), new MeshBasicMaterial({ transparent: true }))
+    const haze = new Mesh(new BoxGeometry(), new MeshBasicMaterial({ transparent: true, opacity: 0.2 }))
+    const glow = new Mesh(new BoxGeometry(), new MeshBasicMaterial({ blending: AdditiveBlending }))
+    const veil = new Mesh(new BoxGeometry(), new MeshBasicMaterial({ transparent: true, depthWrite: false }))
+    const star = new Mesh(new BoxGeometry(), new MeshBasicMaterial())
+    sky.add(star)
+    scene.add(ground, haze, glow, veil, sky)
+    markForeground(scene, sky)
+    expect(ground.layers.isEnabled(PointLayerPass.OCCLUDER_LAYER)).toBe(true)
+    expect(haze.layers.isEnabled(PointLayerPass.OCCLUDER_LAYER)).toBe(false)
+    expect(glow.layers.isEnabled(PointLayerPass.OCCLUDER_LAYER)).toBe(false)
+    expect(veil.layers.isEnabled(PointLayerPass.OCCLUDER_LAYER)).toBe(false)
+    expect(star.layers.isEnabled(PointLayerPass.OCCLUDER_LAYER)).toBe(false)
+  })
+})
