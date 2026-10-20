@@ -17,7 +17,8 @@ export const html = `
   <div id="playback-flash" class="playback-flash" aria-hidden="true"></div>
   <!-- A thumbnail's only chrome (see MINIFIED_ATTRIBUTE): the played bar along the bottom edge, the time left above its right end,
        the sound button in the top-right corner. Hidden in every other player. -->
-  <div class="mini-bar" aria-hidden="true"><div id="mini-played" class="mini-played"></div></div>
+  <!-- The bar is also where a click sets the position, as on the video sites: a band taller than the line, for a pointer to find. -->
+  <div id="mini-bar" class="mini-bar" aria-hidden="true"><div class="mini-track"><div id="mini-played" class="mini-played"></div></div></div>
   <span id="mini-remaining" class="mini-remaining"></span>
   <button id="mini-mute" type="button" class="mini-mute" title="Mute" aria-label="Mute" aria-pressed="false" hidden></button>
   <!-- What is being played, top left over the picture as on a video site, and there with the controls
@@ -632,12 +633,25 @@ canvas[data-cursor="rotate"] {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.3);
+  height: 14px;
+  cursor: pointer;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.15s;
   z-index: 3;
+}
+.mini-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  transition: height 0.1s;
+}
+/* Thicker under the pointer, as on the video sites: it says the bar can be clicked. */
+.mini-bar:hover .mini-track {
+  height: 5px;
 }
 .mini-played {
   height: 100%;
@@ -690,10 +704,11 @@ canvas[data-cursor="rotate"] {
 .stage.minified:not(.unstarted) .mini-bar,
 .stage.minified:hover .mini-mute:not([hidden]) {
   opacity: 1;
-  pointer-events: auto;
 }
-.stage.minified:hover .mini-bar {
-  pointer-events: none;
+/* Only while hovered: at rest a click anywhere on the thumbnail, its bar included, is the page's. */
+.stage.minified:hover .mini-bar,
+.stage.minified:hover .mini-mute:not([hidden]) {
+  pointer-events: auto;
 }
 /* Only where there is a hover to speak of: a touch screen keeps ":hover" on whatever was touched last,
    and a focus ring on the button just tapped — either would keep the controls over the picture for

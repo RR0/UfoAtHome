@@ -719,6 +719,16 @@ export class UfoElement extends HTMLElement {
     this.miniPlayed = this.shadow.getElementById("mini-played")!
     this.miniRemaining = this.shadow.getElementById("mini-remaining")!
     this.miniMuteButton = this.shadow.getElementById("mini-mute") as HTMLButtonElement
+    const miniBar = this.shadow.getElementById("mini-bar")!
+    miniBar.addEventListener("click", event => {
+      // A click on the bar sets the position there, as on the video sites — and does not open the recording, which the rest of the
+      // thumbnail does.
+      event.stopPropagation()
+      const rect = miniBar.getBoundingClientRect()
+      const duration = this.player.seekableDuration
+      if (rect.width <= 0 || duration <= 0) return
+      this.player.seek(Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1) * duration)
+    })
     this.miniMuteButton.addEventListener("click", event => {
       // The thumbnail's own click is the page's (it opens the recording): this one is only the sound's.
       event.stopPropagation()
