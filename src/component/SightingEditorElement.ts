@@ -6043,18 +6043,6 @@ export class SightingEditorElement extends HTMLElement {
     if (tab) this.openSubgroup(tab)
   }
 
-  /** The groups a chip can send you to, in the order their handles stand on the strip, which is
-   * also the order SightingSummary emits them in — so a chip's own group names the panel to open.
-   *
-   * Seven of the eight handles: Phenomenon is missing because the summary says nothing about
-   * shapes. It describes the OBSERVATION, one recording of which holds several shapes, so an
-   * appearance here could only ever be the selected one's — a fact about the editor's state, not
-   * about the sighting, and one that changed under the reader as they clicked. The way to a
-   * shape's fields is the shape itself: clicking one opens that panel (see revealShapePanel). */
-  private static readonly SUMMARY_GROUPS: SummaryGroup[] = [
-    "observation", "observer", "location", "decor", "temporal", "weather", "sound"
-  ]
-
   /** The panel a group tab opens, read off the tab itself ("group-shape" → "shape") rather than
    * kept in a list of its own. A hand-kept list fell behind when the Pictures tab came in before
    * Phenomenon: every index from there on named the wrong panel, and the Phenomenon's unanswered
@@ -6192,7 +6180,8 @@ export class SightingEditorElement extends HTMLElement {
 
   /** The tab a summary group leads to: by position for the groups that predate the Pictures tab, and by the panel it controls for the Phenomenon. */
   private summaryPanelIndex(group: SummaryGroup): number {
-    return group === "phenomenon" ? this.panelIndex("shape") : SightingEditorElement.SUMMARY_GROUPS.indexOf(group)
+    // By the panel's own name, not by a place in a list: the tabs are reordered as the editor is.
+    return this.panelIndex(group === "phenomenon" ? "shape" : group)
   }
 
   /**
@@ -9454,7 +9443,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelFileGroup.textContent = messages.fileGroup
     this.labelLocationGroup.textContent = messages.locationGroup
     this.labelObservationGroup.textContent = messages.observationGroup
-    this.labelObserverGroup.textContent = messages.observerGroup
+    this.labelObserverGroup.textContent = messages.observerTab
     // The group's own handle now carries the caption that used to stand inside it, so the one
     // message serves both and "Circumstances" — which never named what the group actually holds —
     // is gone.

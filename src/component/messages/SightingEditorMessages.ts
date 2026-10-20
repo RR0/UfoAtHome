@@ -325,6 +325,8 @@ export interface SightingEditorMessages extends InputFileMessages, SightingLabel
   dateHelpLines: string
   edtfModeTitle: string
   locationGroup: string
+  /** The tab of the observer's own group: who saw it (the rest of the editor says "observer", see SightingLabels.observerGroup). */
+  observerTab: string
   observationGroup: string
   /** Label of the checkbox that decides whether the weather fields are looked up from a real
    * record (checked, and then read-only) or stated by the observer (unchecked, and then never

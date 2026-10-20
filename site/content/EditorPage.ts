@@ -227,7 +227,7 @@ if (docs) {
     <ol class="steps">
       <li>
         <h3>Say when and where</h3>
-        <p>Fill <strong>Moment</strong> and <strong>Location</strong>. That is the moment the
+        <p>Fill <strong>Location</strong> and <strong>Date</strong>. That is the moment the
           sky appears: the Sun, the Moon and its phase, the planets, the stars of that night — and
           the weather record for that hour is fetched on its own. Doing it first means drawing
           against the real sky rather than on an empty canvas.</p>
@@ -280,7 +280,7 @@ if (docs) {
     </div>
 
     <div class="group-doc">
-      <h3>Observer</h3>
+      <h3>Witness</h3>
       <p>Who gave the account — and, just as importantly, <strong>what they observed it
         through</strong>. An eye is not a lens: naked-eye vision maps an angle to an angle, a camera
         maps it to <code>f·tan θ</code>, and the two draw genuinely different frames. Pick a camera
@@ -323,6 +323,24 @@ if (docs) {
     </div>
 
     <div class="group-doc">
+      <h3>Date</h3>
+      <p>A start, an end, a duration — and a <strong>time zone</strong>, which is the rule, not the
+        number. Pick the observer's own zone and the offset is derived from that zone's rules
+        <em>at the observation's date</em>: Valensole in July 1965 resolves to UTC+1, not today's
+        UTC+2, because France only reintroduced summer time in 1976.</p>
+      <p>The zone is filled in from the coordinates, and never replaces one you chose. Zone
+        boundaries are coarse (Montgomery, Alabama falls in America/Chicago, which kept summer time
+        in 1948 when Alabama did not), so the two are one thing said both ways, kept in step: pick a zone and the offset follows; type an offset and a zone that reads it that day is picked (the place's own when it fits). The only other choice is <em>unknown</em>, which has no offset, and a number no zone reads that day is refused. An offset that
+        no clock at that longitude could have kept is flagged, the meridian's solar time in its
+        tooltip. Editing either date drops an explicit duration once the two dates give an exact
+        length of their own.</p>
+      <p>Each date is either <strong>precise</strong> — a picker, for an exact full instant — or said in <strong>EDTF</strong>, a text, for everything a picker cannot say: a bare year, a month, a time with no date, or any date in doubt, which ends with <code>?</code> (uncertain), <code>~</code> (approximate) or <code>%</code> (both). The button beside it says which it is and swaps the two. Hovering the text shows, in its tooltip, what was understood (“→ July 1965 — uncertain”), and a <strong>(?)</strong> in the field lists the syntax. Most archives need EDTF — of 241 case files on rr0.org, 43% state a bare year and only 17% a date with a time. A case's own date is the same field. <strong>Duration</strong> is said the same way: precise, a number of seconds, or as it was stated — an ISO 8601 duration with a doubt or a range (<code>PT10M~</code>, <code>PT5M/PT10M</code>) — and, in brackets after it, the one length the simulation is played at.
+      <p><strong>Moments</strong> names the instant at the playhead (A, B, C… as case sketches do),
+        with a sentence of what happens then. Picking one in the list goes there; <strong>🎯</strong>
+        goes back to the one shown, which the list cannot do once playback has moved on past it.</p>
+    </div>
+
+    <div class="group-doc">
       <h3>Environment</h3>
       <p>What stood around the observer, at a real distance east and north: buildings with their
         floors and windows, trees, streetlights, vehicles, aircraft — and <strong>other
@@ -357,24 +375,6 @@ if (docs) {
         photograph of an airliner is told from a photograph of something that does not blink.</p>
       <p>The <strong>ready-made sets of lamps</strong> offered for an object are those that suit the model it is drawn as, and are scaled to the size of the machine: an airliner is not offered a helicopter's, a patrol car gets its emergency beacons. The model also says what noise an aircraft makes in flight (an A350 is heard as a wide-body, a stand-in for something whose noise nobody reported is silent) and gives a vehicle its engine.</p>
       <p>A <strong>vehicle's lights</strong> are a setting and not a switch, because not everybody puts them on, nor as they should: <strong>off</strong>, <strong>position lights</strong> (which show the vehicle and light nothing), <strong>dipped beam</strong>, <strong>main beam</strong> (far, narrow, dazzling) or <strong>fog lamps</strong> (low and wide). Choose it in the object's <em>State</em> group at the instant you want it to change: it is written as a keyframe, as the lamp switch is, and holds until the next. A beam really lights the road, the verges, the trees and the walls in front of the vehicle. The vehicle the observer rides (the recording's <code>vehicle</code>) puts its dipped beam on by itself from the dusk on unless the file says otherwise.</p>
-    </div>
-
-    <div class="group-doc">
-      <h3>Moment</h3>
-      <p>A start, an end, a duration — and a <strong>time zone</strong>, which is the rule, not the
-        number. Pick the observer's own zone and the offset is derived from that zone's rules
-        <em>at the observation's date</em>: Valensole in July 1965 resolves to UTC+1, not today's
-        UTC+2, because France only reintroduced summer time in 1976.</p>
-      <p>The zone is filled in from the coordinates, and never replaces one you chose. Zone
-        boundaries are coarse (Montgomery, Alabama falls in America/Chicago, which kept summer time
-        in 1948 when Alabama did not), so the two are one thing said both ways, kept in step: pick a zone and the offset follows; type an offset and a zone that reads it that day is picked (the place's own when it fits). The only other choice is <em>unknown</em>, which has no offset, and a number no zone reads that day is refused. An offset that
-        no clock at that longitude could have kept is flagged, the meridian's solar time in its
-        tooltip. Editing either date drops an explicit duration once the two dates give an exact
-        length of their own.</p>
-      <p>Each date is either <strong>precise</strong> — a picker, for an exact full instant — or said in <strong>EDTF</strong>, a text, for everything a picker cannot say: a bare year, a month, a time with no date, or any date in doubt, which ends with <code>?</code> (uncertain), <code>~</code> (approximate) or <code>%</code> (both). The button beside it says which it is and swaps the two. Hovering the text shows, in its tooltip, what was understood (“→ July 1965 — uncertain”), and a <strong>(?)</strong> in the field lists the syntax. Most archives need EDTF — of 241 case files on rr0.org, 43% state a bare year and only 17% a date with a time. A case's own date is the same field. <strong>Duration</strong> is said the same way: precise, a number of seconds, or as it was stated — an ISO 8601 duration with a doubt or a range (<code>PT10M~</code>, <code>PT5M/PT10M</code>) — and, in brackets after it, the one length the simulation is played at.
-      <p><strong>Moments</strong> names the instant at the playhead (A, B, C… as case sketches do),
-        with a sentence of what happens then. Picking one in the list goes there; <strong>🎯</strong>
-        goes back to the one shown, which the list cannot do once playback has moved on past it.</p>
     </div>
 
     <div class="group-doc">
@@ -459,53 +459,6 @@ if (docs) {
         stars are drawn only as far as this project's catalogue goes; and a rainbow is mentioned only
         when rain was reported.
         Whether any of it explains anything is the reader's conclusion, never the file's claim.</p>
-    </div>
-
-    <div class="group-doc">
-      <h3>Sound</h3>
-      <p>Half of what makes these accounts strange is the sound — most often its absence. A
-        <strong>kind</strong> (hum, whistle, rumble, crackle, or none), a <strong>loudness</strong>
-        and a <strong>pitch</strong>, keyframed on the same clock as the shape: a craft sitting
-        silently on the ground and heard only as it lifts off is two keyframes.</p>
-      <p>The sound is <em>synthesized</em> from that description, exactly as the shape is drawn from
-        its own, at no cost in bundled audio. A recording that actually captured the sound can point
-        at the audio file instead. Note the difference between the two silences: <em>none</em> means
-        the observer reported hearing nothing; no sound track at all means nobody was asked.</p>
-      <p>Loudness and pitch glide from one keyframe to the next; the kind and the audio file change
-        at the keyframe. An audio file on another site must be served to any origin (CORS), and a
-        browser plays nothing until the reader has clicked the page once.</p>
-    </div>
-
-    <div class="group-doc">
-      <h3>Pictures</h3>
-      <p>Photographs of the place, laid over the scene so the two can be compared. <strong>Add from
-        an address</strong> takes a picture served to any origin (rr0.org's case pictures are);
-        <strong>Add a file</strong> embeds one from your disk in the recording, with a word about its
-        weight. Give it a <strong>name</strong>, a <strong>credit</strong> and its link, say whether it
-        was <strong>taken at</strong> an instant of the observation and whether somebody <strong>drew
-        on</strong> it, and set its starting <strong>opacity</strong> — the reader slides it afterwards.</p>
-      <p>While this group is open the canvas belongs to the selected picture, its frame dashed in
-        blue: <strong>drag</strong> on it to turn it (a drag outside it still turns the observer),
-        <strong>wheel</strong> to change its field, or type
-        <strong>heading</strong>, <strong>pitch</strong>, <strong>roll</strong> and <strong>vertical
-        field</strong>, or <strong>use the observer's pose</strong> as a start. To measure rather than
-        eyeball, <strong>Add a landmark</strong> arms two clicks: a detail on the picture, then the same
-        detail in the render. Two landmarks turn the picture to fit them, three or more fit its field
-        too; each has a name and a residual, green within a degree, orange within three, red beyond,
-        and either end of one can be dragged. <strong>Adopt as the observer's pose</strong> then writes
-        the fitted heading, pitch and roll into the pose at the playhead as a measurement, with its
-        provenance. <strong>Street-level pictures nearby</strong> asks Panoramax for pictures taken
-        within 300 m of the observer's spot, each arriving already lined up in heading.</p>
-      <p><strong>Investigator's lines (KML, KMZ)</strong> reads a Google Earth file and adds what it
-        draws: lines of sight, axes, outlines and markers, with their names, colours and heights. They
-        are drawn over the scene and on the map in their own colour, dashed on the map, as the
-        investigator's and not the reconstruction's: nothing is fitted to them, and each is credited to
-        the file it came from until you say better. Rename one, set its <strong>source</strong>, or
-        delete it; the player offers a button to hide them all. Names stand beside what they name, in the scene as on the map; the map widens to frame what lies near the observer (a line running off to the horizon is left to run off), and each source is listed in the credits. GPS tracks (<code>gx:Track</code>) are read as lines.</p>
-      <p>A picture holds from one point only, so lining it up also records <em>where</em> it was
-        lined up from: the observer's position at the playhead. Playing, it fades out as the observer
-        walks away from that point (fully shown within 2 m, gone beyond 20 m) and back in as they
-        return, rather than show a comparison that no longer holds.</p>
     </div>
 
     <div class="group-doc">
@@ -603,6 +556,53 @@ if (docs) {
     </div>
 
     <div class="group-doc">
+      <h3>Sound</h3>
+      <p>Half of what makes these accounts strange is the sound — most often its absence. A
+        <strong>kind</strong> (hum, whistle, rumble, crackle, or none), a <strong>loudness</strong>
+        and a <strong>pitch</strong>, keyframed on the same clock as the shape: a craft sitting
+        silently on the ground and heard only as it lifts off is two keyframes.</p>
+      <p>The sound is <em>synthesized</em> from that description, exactly as the shape is drawn from
+        its own, at no cost in bundled audio. A recording that actually captured the sound can point
+        at the audio file instead. Note the difference between the two silences: <em>none</em> means
+        the observer reported hearing nothing; no sound track at all means nobody was asked.</p>
+      <p>Loudness and pitch glide from one keyframe to the next; the kind and the audio file change
+        at the keyframe. An audio file on another site must be served to any origin (CORS), and a
+        browser plays nothing until the reader has clicked the page once.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Pictures</h3>
+      <p>Photographs of the place, laid over the scene so the two can be compared. <strong>Add from
+        an address</strong> takes a picture served to any origin (rr0.org's case pictures are);
+        <strong>Add a file</strong> embeds one from your disk in the recording, with a word about its
+        weight. Give it a <strong>name</strong>, a <strong>credit</strong> and its link, say whether it
+        was <strong>taken at</strong> an instant of the observation and whether somebody <strong>drew
+        on</strong> it, and set its starting <strong>opacity</strong> — the reader slides it afterwards.</p>
+      <p>While this group is open the canvas belongs to the selected picture, its frame dashed in
+        blue: <strong>drag</strong> on it to turn it (a drag outside it still turns the observer),
+        <strong>wheel</strong> to change its field, or type
+        <strong>heading</strong>, <strong>pitch</strong>, <strong>roll</strong> and <strong>vertical
+        field</strong>, or <strong>use the observer's pose</strong> as a start. To measure rather than
+        eyeball, <strong>Add a landmark</strong> arms two clicks: a detail on the picture, then the same
+        detail in the render. Two landmarks turn the picture to fit them, three or more fit its field
+        too; each has a name and a residual, green within a degree, orange within three, red beyond,
+        and either end of one can be dragged. <strong>Adopt as the observer's pose</strong> then writes
+        the fitted heading, pitch and roll into the pose at the playhead as a measurement, with its
+        provenance. <strong>Street-level pictures nearby</strong> asks Panoramax for pictures taken
+        within 300 m of the observer's spot, each arriving already lined up in heading.</p>
+      <p><strong>Investigator's lines (KML, KMZ)</strong> reads a Google Earth file and adds what it
+        draws: lines of sight, axes, outlines and markers, with their names, colours and heights. They
+        are drawn over the scene and on the map in their own colour, dashed on the map, as the
+        investigator's and not the reconstruction's: nothing is fitted to them, and each is credited to
+        the file it came from until you say better. Rename one, set its <strong>source</strong>, or
+        delete it; the player offers a button to hide them all. Names stand beside what they name, in the scene as on the map; the map widens to frame what lies near the observer (a line running off to the horizon is left to run off), and each source is listed in the credits. GPS tracks (<code>gx:Track</code>) are read as lines.</p>
+      <p>A picture holds from one point only, so lining it up also records <em>where</em> it was
+        lined up from: the observer's position at the playhead. Playing, it fades out as the observer
+        walks away from that point (fully shown within 2 m, gone beyond 20 m) and back in as they
+        return, rather than show a comparison that no longer holds.</p>
+    </div>
+
+    <div class="group-doc">
       <h3>Files</h3>
       <p>The files the recording is made of, picked one at a time above the tab: the recording itself, and each annex it carries frozen beside it (relief, photograph of the ground, roads, water, railways, air aloft, map photograph; see <code>frozen</code> in the format). The picker names only what each holds; where it is, its file says: its address, which a file of yours or another address replaces. The recording's own address keeps it inside the recording, and the recording's text is then shown under it with its section highlighted; another address where there is no file yet is where Save writes it. An annex says when and from whom it was taken, with <strong>Refresh</strong> to take it again, <strong>Save</strong> to have its file, and its text to edit when it is JSON. The weather is one of them too, inside the recording or in a file of its own. Whatever is picked, <strong>Save</strong> gives its data. Every source the scene would ask (relief, imagery, roads, water, railways, air aloft, weather) is picked, in its own group, between the service asked live and <strong>File</strong>, which reads it from the recording's files and links to its item here; a file not taken yet is taken at the next save.</p>
       <p>The recording itself. <strong>Load sighting file</strong> brings an existing recording in, <em>from your disk</em> or, a click on these words, <em>from an address</em>, and <strong>Save</strong> hands you the file. A dot after this tab says the recording holds changes not saved; loading another file or address while it does asks first. Under them,
@@ -684,7 +684,7 @@ if (docs) {
     <ol class="steps">
       <li>
         <h3>Dire quand et où</h3>
-        <p>Remplissez <strong>Moment</strong> et <strong>Lieu</strong>. C'est là que le ciel
+        <p>Remplissez <strong>Lieu</strong> et <strong>Date</strong>. C'est là que le ciel
           apparaît : le Soleil, la Lune et sa phase, les planètes, les étoiles de cette nuit-là — et
           le relevé météo de cette heure-là est cherché tout seul. Commencer par là, c'est dessiner
           sur le ciel réel plutôt que sur un canevas vide.</p>
@@ -739,7 +739,7 @@ if (docs) {
     </div>
 
     <div class="group-doc">
-      <h3>Observateur</h3>
+      <h3>Témoin</h3>
       <p>Qui a livré le récit — et, tout aussi important, <strong>à travers quoi il a
         observé</strong>. Un œil n'est pas un objectif : à l'œil nu un angle reste un angle, un
         appareil le projette en <code>f·tan θ</code>, et les deux dessinent des images réellement
@@ -788,6 +788,25 @@ if (docs) {
     </div>
 
     <div class="group-doc">
+      <h3>Date</h3>
+      <p>Un début, une fin, une durée — et un <strong>fuseau horaire</strong>, qui est la règle et
+        non le nombre. Choisissez le fuseau de l'observateur et le décalage est dérivé des règles de ce
+        fuseau <em>à la date de l'observation</em> : Valensole en juillet 1965 donne UTC+1, pas
+        l'UTC+2 d'aujourd'hui, la France n'ayant rétabli l'heure d'été qu'en 1976.</p>
+      <p>Le fuseau est rempli d'après les coordonnées, et ne remplace jamais celui que vous avez
+        choisi. Les frontières de fuseaux sont grossières (Montgomery, en Alabama, tombe dans
+        America/Chicago, qui avait l'heure d'été en 1948 quand l'Alabama ne l'avait pas) : les deux sont donc une seule chose dite dans les deux sens, tenue en phase : choisissez un fuseau et le décalage suit ; saisissez un décalage et un fuseau qui l'indique ce jour-là est choisi (celui du lieu quand il convient). Le seul autre choix est <em>inconnu</em>, qui n'a pas de décalage, et un nombre qu'aucun fuseau n'indique ce jour-là est refusé. Un décalage qu'aucune horloge à cette longitude
+        n'aurait pu suivre est signalé, l'heure solaire du méridien dans son infobulle. Modifier l'une
+        des deux dates retire une durée explicite dès que les deux dates donnent une durée exacte à
+        elles seules.</p>
+      <p>Chaque date est soit <strong>précise</strong> — un sélecteur, pour un instant complet exact — soit dite en <strong>EDTF</strong>, un texte, pour tout ce qu'un sélecteur ne sait pas dire : une année seule, un mois, une heure sans date, ou toute date en doute, qui se termine par <code>?</code> (incertain), <code>~</code> (approximatif) ou <code>%</code> (les deux). Le bouton à côté dit laquelle c'est et bascule de l'une à l'autre. Survoler le texte montre, dans son infobulle, ce qui a été compris (« → juillet 1965 — incertaine »), et un <strong>(?)</strong> dans le champ liste la syntaxe. La plupart des archives ont besoin de l'EDTF : sur 241 dossiers de rr0.org, 43 % n'énoncent qu'une année et 17 % seulement une date avec une heure. La date d'un dossier est le même champ. La <strong>durée</strong> se dit de la même façon : précise, un nombre de secondes, ou telle qu'elle a été énoncée — une durée ISO 8601 avec un doute ou une plage (<code>PT10M~</code>, <code>PT5M/PT10M</code>) — et, entre parenthèses après elle, l'unique durée à laquelle la simulation est jouée.
+      <p><strong>Moments</strong> nomme l'instant de la tête de lecture (A, B, C… comme les croquis
+        des enquêtes), avec une phrase de ce qui s'y passe. En choisir un dans la liste y va ;
+        <strong>🎯</strong> retourne à celui affiché, ce que la liste ne peut pas faire une fois la
+        lecture passée au-delà.</p>
+    </div>
+
+    <div class="group-doc">
       <h3>Environnement</h3>
       <p>Ce qui se tenait autour de l'observateur, à une distance réelle vers l'est et vers le nord :
         bâtiments avec leurs étages et leurs fenêtres, arbres, lampadaires, véhicules, aéronefs —
@@ -824,25 +843,6 @@ if (docs) {
         d'un avion de ligne de celle d'un objet qui ne clignote pas.</p>
       <p>Les <strong>jeux de lampes prêts à l'emploi</strong> proposés pour un objet sont ceux qui conviennent au modèle dont il est dessiné, mis à l'échelle de la machine : on n'offre pas à un avion de ligne ceux d'un hélicoptère, une voiture de police reçoit ses gyrophares. Le modèle dit aussi quel bruit fait un aéronef en vol (un A350 s'entend comme un gros porteur, la doublure de quelque chose dont personne n'a rapporté le bruit est silencieuse) et donne son moteur à un véhicule.</p>
       <p>Les <strong>feux d'un véhicule</strong> sont un réglage et non un interrupteur, car tout le monde ne les met pas, ni comme il faut : <strong>éteints</strong>, <strong>feux de position</strong> (qui montrent le véhicule et n'éclairent rien), <strong>feux de croisement</strong>, <strong>feux de route</strong> (loin, étroits, éblouissants) ou <strong>antibrouillards</strong> (bas et larges). On le choisit dans le groupe <em>État</em> de l'objet, à l'instant où l'on veut qu'il change : c'est écrit comme une image clé, comme l'interrupteur des lampes, et cela tient jusqu'à la suivante. Un faisceau éclaire vraiment la route, les bas-côtés, les arbres et les murs devant le véhicule. Le véhicule où roule l'observateur (le <code>vehicle</code> de l'enregistrement) met ses feux de croisement tout seul à partir du crépuscule, sauf si le fichier dit autre chose.</p>
-    </div>
-
-    <div class="group-doc">
-      <h3>Moment</h3>
-      <p>Un début, une fin, une durée — et un <strong>fuseau horaire</strong>, qui est la règle et
-        non le nombre. Choisissez le fuseau de l'observateur et le décalage est dérivé des règles de ce
-        fuseau <em>à la date de l'observation</em> : Valensole en juillet 1965 donne UTC+1, pas
-        l'UTC+2 d'aujourd'hui, la France n'ayant rétabli l'heure d'été qu'en 1976.</p>
-      <p>Le fuseau est rempli d'après les coordonnées, et ne remplace jamais celui que vous avez
-        choisi. Les frontières de fuseaux sont grossières (Montgomery, en Alabama, tombe dans
-        America/Chicago, qui avait l'heure d'été en 1948 quand l'Alabama ne l'avait pas) : les deux sont donc une seule chose dite dans les deux sens, tenue en phase : choisissez un fuseau et le décalage suit ; saisissez un décalage et un fuseau qui l'indique ce jour-là est choisi (celui du lieu quand il convient). Le seul autre choix est <em>inconnu</em>, qui n'a pas de décalage, et un nombre qu'aucun fuseau n'indique ce jour-là est refusé. Un décalage qu'aucune horloge à cette longitude
-        n'aurait pu suivre est signalé, l'heure solaire du méridien dans son infobulle. Modifier l'une
-        des deux dates retire une durée explicite dès que les deux dates donnent une durée exacte à
-        elles seules.</p>
-      <p>Chaque date est soit <strong>précise</strong> — un sélecteur, pour un instant complet exact — soit dite en <strong>EDTF</strong>, un texte, pour tout ce qu'un sélecteur ne sait pas dire : une année seule, un mois, une heure sans date, ou toute date en doute, qui se termine par <code>?</code> (incertain), <code>~</code> (approximatif) ou <code>%</code> (les deux). Le bouton à côté dit laquelle c'est et bascule de l'une à l'autre. Survoler le texte montre, dans son infobulle, ce qui a été compris (« → juillet 1965 — incertaine »), et un <strong>(?)</strong> dans le champ liste la syntaxe. La plupart des archives ont besoin de l'EDTF : sur 241 dossiers de rr0.org, 43 % n'énoncent qu'une année et 17 % seulement une date avec une heure. La date d'un dossier est le même champ. La <strong>durée</strong> se dit de la même façon : précise, un nombre de secondes, ou telle qu'elle a été énoncée — une durée ISO 8601 avec un doute ou une plage (<code>PT10M~</code>, <code>PT5M/PT10M</code>) — et, entre parenthèses après elle, l'unique durée à laquelle la simulation est jouée.
-      <p><strong>Moments</strong> nomme l'instant de la tête de lecture (A, B, C… comme les croquis
-        des enquêtes), avec une phrase de ce qui s'y passe. En choisir un dans la liste y va ;
-        <strong>🎯</strong> retourne à celui affiché, ce que la liste ne peut pas faire une fois la
-        lecture passée au-delà.</p>
     </div>
 
     <div class="group-doc">
@@ -936,58 +936,6 @@ if (docs) {
         de ce projet ; et un arc-en-ciel n'est mentionné que si de la pluie a été signalée.
         Que cela explique ou non quelque chose est la conclusion du lecteur, jamais l'affirmation du
         fichier.</p>
-    </div>
-
-    <div class="group-doc">
-      <h3>Son</h3>
-      <p>La moitié de ce qui rend ces récits étranges tient au son — le plus souvent à son absence.
-        Un <strong>timbre</strong> (bourdonnement, sifflement, grondement, crépitement, ou aucun),
-        une <strong>intensité</strong> et une <strong>hauteur</strong>, keyframés sur la même
-        horloge que la forme : un engin posé silencieux au sol et entendu seulement au décollage,
-        cela fait deux keyframes.</p>
-      <p>Le son est <em>synthétisé</em> à partir de cette description, exactement comme la forme est
-        dessinée à partir de la sienne, sans un octet d'audio embarqué. Un enregistrement qui a
-        réellement capté le son peut pointer vers le fichier audio. Notez la différence entre les
-        deux silences : <em>aucun</em> signifie que l'observateur a déclaré n'avoir rien entendu ;
-        l'absence totale de piste sonore signifie que personne ne le lui a demandé.</p>
-      <p>Intensité et hauteur glissent d'une image clé à l'autre ; le timbre et le fichier audio
-        changent à l'image clé. Un fichier audio sur un autre site doit être servi à toute origine
-        (CORS), et un navigateur ne joue rien tant que le lecteur n'a pas cliqué une fois dans la
-        page.</p>
-    </div>
-
-    <div class="group-doc">
-      <h3>Photos</h3>
-      <p>Des photos des lieux, posées sur la scène pour comparer les deux. <strong>Ajouter depuis une
-        adresse</strong> prend une photo servie à tout site (celles des dossiers de rr0.org le sont) ;
-        <strong>Ajouter un fichier</strong> en embarque une de votre disque dans l'enregistrement, en
-        vous disant son poids. Donnez-lui un <strong>nom</strong>, un <strong>crédit</strong> et son
-        lien, dites si elle a été <strong>prise à</strong> un instant de l'observation et si quelqu'un a
-        fait un <strong>dessin par-dessus</strong>, et réglez son <strong>opacité</strong> de départ — le
-        lecteur la fera glisser ensuite.</p>
-      <p>Tant que ce groupe est ouvert, le canvas appartient à la photo sélectionnée, son cadre en
-        pointillés bleus : <strong>glissez</strong> dessus pour la tourner (glisser à côté tourne toujours
-        l'observateur), <strong>molette</strong> pour son
-        champ, ou saisissez <strong>cap</strong>, <strong>assiette</strong>, <strong>roulis</strong> et
-        <strong>champ vertical</strong>, ou <strong>prenez la pose de l'observateur</strong> comme point de
-        départ. Pour mesurer plutôt qu'estimer, <strong>Ajouter un repère</strong> arme deux clics : un
-        détail sur la photo, puis le même détail dans le rendu. Deux repères tournent la photo pour les
-        faire coïncider, trois ou plus ajustent aussi son champ ; chacun a un nom et un écart, vert
-        jusqu'à un degré, orange jusqu'à trois, rouge au-delà, et chaque extrémité se déplace.
-        <strong>Adopter comme pose de l'observateur</strong> écrit alors cap, assiette et roulis ajustés dans
-        la pose au point de lecture, comme une mesure, avec sa provenance. <strong>Photos de rue à
-        proximité</strong> demande à Panoramax les photos prises à moins de 300 m de l'observateur, chacune
-        arrivant déjà recalée en cap.</p>
-      <p><strong>Tracés d'enquêteur (KML, KMZ)</strong> lit un fichier Google Earth et ajoute ce qu'il
-        dessine : lignes de visée, axes, contours et repères, avec leurs noms, couleurs et hauteurs. Ils
-        sont affichés sur la scène et sur la carte dans leur couleur propre, en pointillés sur la carte,
-        comme ceux de l'enquêteur et non de la reconstitution : rien n'est ajusté sur eux, et chacun est
-        crédité au fichier d'où il vient tant que vous n'avez pas mieux à dire. Renommez-en un, indiquez sa
-        <strong>source</strong>, ou supprimez-le ; le lecteur offre un bouton pour les masquer tous. Les noms s'affichent à côté de ce qu'ils nomment, sur la scène comme sur la carte ; la carte s'élargit pour cadrer ce qui est proche de l'observateur (une ligne qui file vers l'horizon est laissée filer), et chaque source figure dans les crédits. Les traces GPS (<code>gx:Track</code>) sont lues comme des lignes.</p>
-      <p>Une photo ne vaut que depuis un point : la recaler enregistre donc aussi <em>d'où</em> elle a
-        été recalée, la position de l'observateur à la tête de lecture. En lecture, elle s'efface en
-        fondu quand l'observateur s'éloigne de ce point (entière à moins de 2 m, disparue au-delà de
-        20 m) et revient quand il y retourne, plutôt que de montrer une comparaison qui ne tient plus.</p>
     </div>
 
     <div class="group-doc">
@@ -1091,6 +1039,58 @@ if (docs) {
     </div>
 
     <div class="group-doc">
+      <h3>Son</h3>
+      <p>La moitié de ce qui rend ces récits étranges tient au son — le plus souvent à son absence.
+        Un <strong>timbre</strong> (bourdonnement, sifflement, grondement, crépitement, ou aucun),
+        une <strong>intensité</strong> et une <strong>hauteur</strong>, keyframés sur la même
+        horloge que la forme : un engin posé silencieux au sol et entendu seulement au décollage,
+        cela fait deux keyframes.</p>
+      <p>Le son est <em>synthétisé</em> à partir de cette description, exactement comme la forme est
+        dessinée à partir de la sienne, sans un octet d'audio embarqué. Un enregistrement qui a
+        réellement capté le son peut pointer vers le fichier audio. Notez la différence entre les
+        deux silences : <em>aucun</em> signifie que l'observateur a déclaré n'avoir rien entendu ;
+        l'absence totale de piste sonore signifie que personne ne le lui a demandé.</p>
+      <p>Intensité et hauteur glissent d'une image clé à l'autre ; le timbre et le fichier audio
+        changent à l'image clé. Un fichier audio sur un autre site doit être servi à toute origine
+        (CORS), et un navigateur ne joue rien tant que le lecteur n'a pas cliqué une fois dans la
+        page.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Photos</h3>
+      <p>Des photos des lieux, posées sur la scène pour comparer les deux. <strong>Ajouter depuis une
+        adresse</strong> prend une photo servie à tout site (celles des dossiers de rr0.org le sont) ;
+        <strong>Ajouter un fichier</strong> en embarque une de votre disque dans l'enregistrement, en
+        vous disant son poids. Donnez-lui un <strong>nom</strong>, un <strong>crédit</strong> et son
+        lien, dites si elle a été <strong>prise à</strong> un instant de l'observation et si quelqu'un a
+        fait un <strong>dessin par-dessus</strong>, et réglez son <strong>opacité</strong> de départ — le
+        lecteur la fera glisser ensuite.</p>
+      <p>Tant que ce groupe est ouvert, le canvas appartient à la photo sélectionnée, son cadre en
+        pointillés bleus : <strong>glissez</strong> dessus pour la tourner (glisser à côté tourne toujours
+        l'observateur), <strong>molette</strong> pour son
+        champ, ou saisissez <strong>cap</strong>, <strong>assiette</strong>, <strong>roulis</strong> et
+        <strong>champ vertical</strong>, ou <strong>prenez la pose de l'observateur</strong> comme point de
+        départ. Pour mesurer plutôt qu'estimer, <strong>Ajouter un repère</strong> arme deux clics : un
+        détail sur la photo, puis le même détail dans le rendu. Deux repères tournent la photo pour les
+        faire coïncider, trois ou plus ajustent aussi son champ ; chacun a un nom et un écart, vert
+        jusqu'à un degré, orange jusqu'à trois, rouge au-delà, et chaque extrémité se déplace.
+        <strong>Adopter comme pose de l'observateur</strong> écrit alors cap, assiette et roulis ajustés dans
+        la pose au point de lecture, comme une mesure, avec sa provenance. <strong>Photos de rue à
+        proximité</strong> demande à Panoramax les photos prises à moins de 300 m de l'observateur, chacune
+        arrivant déjà recalée en cap.</p>
+      <p><strong>Tracés d'enquêteur (KML, KMZ)</strong> lit un fichier Google Earth et ajoute ce qu'il
+        dessine : lignes de visée, axes, contours et repères, avec leurs noms, couleurs et hauteurs. Ils
+        sont affichés sur la scène et sur la carte dans leur couleur propre, en pointillés sur la carte,
+        comme ceux de l'enquêteur et non de la reconstitution : rien n'est ajusté sur eux, et chacun est
+        crédité au fichier d'où il vient tant que vous n'avez pas mieux à dire. Renommez-en un, indiquez sa
+        <strong>source</strong>, ou supprimez-le ; le lecteur offre un bouton pour les masquer tous. Les noms s'affichent à côté de ce qu'ils nomment, sur la scène comme sur la carte ; la carte s'élargit pour cadrer ce qui est proche de l'observateur (une ligne qui file vers l'horizon est laissée filer), et chaque source figure dans les crédits. Les traces GPS (<code>gx:Track</code>) sont lues comme des lignes.</p>
+      <p>Une photo ne vaut que depuis un point : la recaler enregistre donc aussi <em>d'où</em> elle a
+        été recalée, la position de l'observateur à la tête de lecture. En lecture, elle s'efface en
+        fondu quand l'observateur s'éloigne de ce point (entière à moins de 2 m, disparue au-delà de
+        20 m) et revient quand il y retourne, plutôt que de montrer une comparaison qui ne tient plus.</p>
+    </div>
+
+    <div class="group-doc">
       <h3>Fichiers</h3>
       <p>Les fichiers dont l'enregistrement est fait, choisis un à un au-dessus de l'onglet : l'enregistrement lui-même, et chaque annexe qu'il porte figée à côté de lui (relief, photo du sol, routes, eau, voies ferrées, haute atmosphère, photo de la carte ; voir <code>frozen</code> dans le format). Le sélecteur ne nomme que ce que chacun contient ; où il est, son fichier le dit : son adresse, que remplace un fichier à vous ou une autre adresse. L'adresse de l'enregistrement lui-même le garde dans l'enregistrement, dont le texte s'affiche alors dessous avec sa section surlignée ; une autre adresse où il n'y a pas encore de fichier est celle où Sauver l'écrit. Une annexe dit quand et auprès de qui elle a été relevée, avec <strong>Rafraîchir</strong> pour la relever à nouveau, <strong>Sauver</strong> pour avoir son fichier, et son texte à modifier quand c'est du JSON. La météo en est une aussi, dans l'enregistrement ou dans un fichier à elle. Quoi qu'on choisisse, <strong>Sauver</strong> en donne les données. Chaque source que la scène interrogerait (relief, imagerie, routes, eau, voies ferrées, haute atmosphère, météo) se choisit, dans son propre groupe, entre le service interrogé en direct et <strong>Fichier</strong>, qui la lit dans les fichiers de l'enregistrement et renvoie à son élément ici ; un fichier pas encore relevé l'est à la sauvegarde suivante.</p>
       <p>L'enregistrement lui-même. <strong>Charger un fichier d'observation</strong> fait entrer un enregistrement existant, <em>depuis votre disque</em> ou, d'un clic sur ces mots, <em>depuis une adresse</em>, et <strong>Sauver</strong>
@@ -1174,7 +1174,7 @@ if (docs) {
     <ol class="steps">
       <li>
         <h3>Decir cuándo y dónde</h3>
-        <p>Rellena <strong>Momento</strong> y <strong>Lugar</strong>. En ese momento aparece el
+        <p>Rellena <strong>Lugar</strong> y <strong>Fecha</strong>. En ese momento aparece el
           cielo: el Sol, la Luna y su fase, los planetas, las estrellas de aquella noche; y el
           registro meteorológico de esa hora se obtiene por sí solo. Empezar por ahí significa dibujar
           sobre el cielo real y no sobre un lienzo vacío.</p>
@@ -1228,7 +1228,7 @@ if (docs) {
     </div>
 
     <div class="group-doc">
-      <h3>Observador</h3>
+      <h3>Testigo</h3>
       <p>Quién dio el relato y, no menos importante, <strong>a través de qué lo
         observó</strong>. Un ojo no es un objetivo: la visión a simple vista transforma un ángulo en un
         ángulo, una cámara lo transforma en <code>f·tan θ</code>, y ambos dibujan encuadres realmente
@@ -1275,6 +1275,25 @@ if (docs) {
     </div>
 
     <div class="group-doc">
+      <h3>Fecha</h3>
+      <p>Un inicio, un final, una duración y una <strong>Zona horaria</strong>, que es la regla y no
+        la cifra. Elige la zona propia del observador y el desfase se deriva de las reglas de esa zona
+        <em>en la fecha de la observación</em>: Valensole en julio de 1965 da UTC+1, no el UTC+2 de hoy,
+        porque Francia no reintrodujo el horario de verano hasta 1976.</p>
+      <p>La zona se rellena a partir de las coordenadas, y nunca sustituye a una que tú hayas
+        elegido. Los límites de las zonas son toscos (Montgomery, Alabama, cae en America/Chicago, que
+        tenía horario de verano en 1948 cuando Alabama no lo tenía), así que ambos son una sola cosa dicha en los dos sentidos, mantenida en fase: elija una zona y el desfase la sigue; escriba un desfase y se elige una zona que lo marque ese día (la del lugar cuando encaja). La única otra opción es <em>desconocido</em>, que no tiene desfase, y un número que ninguna zona marca ese día se rechaza. Un desfase que ningún reloj a esa longitud habría
+        podido llevar se señala, con la hora solar del meridiano en su información emergente. Editar
+        cualquiera de las dos fechas elimina una duración explícita en cuanto ambas fechas dan por sí
+        solas una duración exacta.</p>
+      <p>Cada fecha es o bien <strong>precisa</strong> — un selector, para un instante completo exacto — o bien dicha en <strong>EDTF</strong>, un texto, para todo lo que un selector no sabe decir: un año solo, un mes, una hora sin fecha, o cualquier fecha en duda, que termina con <code>?</code> (incierto), <code>~</code> (aproximado) o <code>%</code> (ambos). El botón de al lado dice cuál es y cambia de una a otra. Pasar el cursor sobre el texto muestra, en su información emergente, lo que se entendió («→ julio de 1965 — incierto»), y un <strong>(?)</strong> en el campo lista la sintaxis. La mayoría de los archivos necesitan EDTF: de 241 casos de rr0.org, el 43 % indica solo un año y apenas el 17 % una fecha con hora. La fecha de un caso es el mismo campo. La <strong>duración</strong> se dice igual: precisa, un número de segundos, o tal como se enunció — una duración ISO 8601 con una duda o un rango (<code>PT10M~</code>, <code>PT5M/PT10M</code>) — y, entre paréntesis después, la única duración a la que se reproduce la simulación.
+      <p><strong>Momentos</strong> nombra el instante del cabezal de reproducción (A, B, C…, como hacen
+        los croquis de los casos), con una frase sobre lo que ocurre entonces. Elegir uno en la lista
+        lleva hasta él; <strong>🎯</strong> vuelve al que se muestra, cosa que la lista no puede hacer
+        una vez que la reproducción lo ha dejado atrás.</p>
+    </div>
+
+    <div class="group-doc">
       <h3>Entorno</h3>
       <p>Lo que había alrededor del observador, a una distancia real hacia el este y el norte:
         edificios con sus plantas y ventanas, árboles, farolas, vehículos, aeronaves y <strong>otros
@@ -1310,25 +1329,6 @@ if (docs) {
         de la de algo que no parpadea.</p>
       <p>Los <strong>juegos de luces ya preparados</strong> que se ofrecen para un objeto son los que convienen al modelo con que se dibuja, a la escala de la máquina: a un avión de línea no se le ofrecen los de un helicóptero, un coche de policía recibe sus balizas. El modelo dice también qué ruido hace una aeronave en vuelo (un A350 se oye como un gran avión, un sustituto de algo cuyo ruido nadie refirió es silencioso) y da su motor a un vehículo.</p>
       <p>Las <strong>luces de un vehículo</strong> son un ajuste y no un interruptor, porque no todo el mundo las enciende, ni como debe: <strong>apagadas</strong>, <strong>luces de posición</strong> (que muestran el vehículo y no iluminan nada), <strong>luces de cruce</strong>, <strong>luces de carretera</strong> (lejos, estrechas, deslumbrantes) o <strong>faros antiniebla</strong> (bajos y anchos). Se elige en el grupo <em>Estado</em> del objeto, en el instante en que se quiere que cambie: se escribe como un fotograma clave, como el interruptor de las lámparas, y vale hasta el siguiente. Un haz ilumina de verdad la carretera, los arcenes, los árboles y las paredes delante del vehículo. El vehículo en el que va el observador (el <code>vehicle</code> de la grabación) enciende solo las luces de cruce desde el crepúsculo, salvo que el archivo diga otra cosa.</p>
-    </div>
-
-    <div class="group-doc">
-      <h3>Momento</h3>
-      <p>Un inicio, un final, una duración y una <strong>Zona horaria</strong>, que es la regla y no
-        la cifra. Elige la zona propia del observador y el desfase se deriva de las reglas de esa zona
-        <em>en la fecha de la observación</em>: Valensole en julio de 1965 da UTC+1, no el UTC+2 de hoy,
-        porque Francia no reintrodujo el horario de verano hasta 1976.</p>
-      <p>La zona se rellena a partir de las coordenadas, y nunca sustituye a una que tú hayas
-        elegido. Los límites de las zonas son toscos (Montgomery, Alabama, cae en America/Chicago, que
-        tenía horario de verano en 1948 cuando Alabama no lo tenía), así que ambos son una sola cosa dicha en los dos sentidos, mantenida en fase: elija una zona y el desfase la sigue; escriba un desfase y se elige una zona que lo marque ese día (la del lugar cuando encaja). La única otra opción es <em>desconocido</em>, que no tiene desfase, y un número que ninguna zona marca ese día se rechaza. Un desfase que ningún reloj a esa longitud habría
-        podido llevar se señala, con la hora solar del meridiano en su información emergente. Editar
-        cualquiera de las dos fechas elimina una duración explícita en cuanto ambas fechas dan por sí
-        solas una duración exacta.</p>
-      <p>Cada fecha es o bien <strong>precisa</strong> — un selector, para un instante completo exacto — o bien dicha en <strong>EDTF</strong>, un texto, para todo lo que un selector no sabe decir: un año solo, un mes, una hora sin fecha, o cualquier fecha en duda, que termina con <code>?</code> (incierto), <code>~</code> (aproximado) o <code>%</code> (ambos). El botón de al lado dice cuál es y cambia de una a otra. Pasar el cursor sobre el texto muestra, en su información emergente, lo que se entendió («→ julio de 1965 — incierto»), y un <strong>(?)</strong> en el campo lista la sintaxis. La mayoría de los archivos necesitan EDTF: de 241 casos de rr0.org, el 43 % indica solo un año y apenas el 17 % una fecha con hora. La fecha de un caso es el mismo campo. La <strong>duración</strong> se dice igual: precisa, un número de segundos, o tal como se enunció — una duración ISO 8601 con una duda o un rango (<code>PT10M~</code>, <code>PT5M/PT10M</code>) — y, entre paréntesis después, la única duración a la que se reproduce la simulación.
-      <p><strong>Momentos</strong> nombra el instante del cabezal de reproducción (A, B, C…, como hacen
-        los croquis de los casos), con una frase sobre lo que ocurre entonces. Elegir uno en la lista
-        lleva hasta él; <strong>🎯</strong> vuelve al que se muestra, cosa que la lista no puede hacer
-        una vez que la reproducción lo ha dejado atrás.</p>
     </div>
 
     <div class="group-doc">
@@ -1415,58 +1415,6 @@ if (docs) {
         de la magnitud 9, la línea indica que las estrellas solo se dibujan hasta donde llega el
         catálogo de este proyecto; y un arcoíris solo se menciona si se registró lluvia.
         Que algo de ello explique algo es la conclusión del lector, nunca la afirmación del archivo.</p>
-    </div>
-
-    <div class="group-doc">
-      <h3>Sonido</h3>
-      <p>La mitad de lo que hace extraños estos relatos es el sonido, y muy a menudo su ausencia. Un
-        <strong>tipo</strong> (zumbido, silbido, retumbo, crepitación o ninguno), un
-        <strong>Volumen</strong> y un <strong>Tono</strong>, con fotogramas clave en el mismo reloj
-        que la forma: un aparato posado en silencio en el suelo y que solo se oye al despegar son dos
-        fotogramas clave.</p>
-      <p>El sonido se <em>sintetiza</em> a partir de esa descripción, exactamente como la forma se
-        dibuja a partir de la suya, sin coste alguno de audio incluido. Un registro que realmente captó
-        el sonido puede apuntar en su lugar al archivo de audio. Observa la diferencia entre los dos
-        silencios: <em>ninguno</em> significa que el observador declaró no haber oído nada; la ausencia
-        total de pista sonora significa que nadie se lo preguntó.</p>
-      <p>La intensidad y el tono se deslizan de un fotograma clave al siguiente; el tipo y el archivo
-        de audio cambian en el fotograma clave. Un archivo de audio alojado en otro sitio debe servirse
-        a cualquier origen (CORS), y un navegador no reproduce nada hasta que el lector ha hecho clic
-        una vez en la página.</p>
-    </div>
-
-    <div class="group-doc">
-      <h3>Fotos</h3>
-      <p>Fotografías del lugar, superpuestas a la escena para poder comparar ambas. <strong>Añadir desde una dirección</strong> toma una imagen servida a cualquier origen (las de los casos de
-        rr0.org lo están); <strong>Añadir un archivo</strong> incrusta una de tu disco en el registro,
-        con un aviso sobre su peso. Dale un <strong>Nombre</strong>, un <strong>Crédito</strong> y su
-        enlace, indica si fue tomada en un instante (<strong>Tomada en</strong>) de la observación y si alguien dibujó encima
-        (<strong>Dibujo encima</strong>), y ajusta su <strong>Opacidad</strong> inicial: el lector la
-        deslizará después.</p>
-      <p>Mientras este grupo está abierto, el lienzo pertenece a la foto seleccionada, con su marco en
-        azul discontinuo: <strong>arrastra</strong> sobre ella para girarla (un arrastre fuera de ella
-        sigue girando al observador), usa la <strong>rueda</strong> para cambiar su campo, o escribe
-        <strong>Rumbo</strong>, <strong>Cabeceo</strong>, <strong>Alabeo</strong> y <strong>Campo vertical</strong>, o pulsa <strong>Usar la pose del observador</strong> para partir de ella. Para
-        medir en lugar de calcular a ojo, <strong>Añadir un punto de referencia</strong> prepara dos
-        clics: un detalle en la foto y luego el mismo detalle en el render. Dos puntos de referencia
-        giran la foto para ajustarla a ellos, tres o más ajustan también su campo; cada uno tiene un
-        nombre y un residuo, verde hasta un grado, naranja hasta tres, rojo por encima, y cualquiera de
-        sus extremos puede arrastrarse. <strong>Adoptar como pose del observador</strong> escribe
-        entonces el rumbo, el cabeceo y el alabeo ajustados en la pose del cabezal de reproducción, como
-        una medición, con su procedencia. <strong>Fotos a pie de calle cercanas</strong> pide a
-        Panoramax las imágenes tomadas a menos de 300 m del punto del observador, cada una ya alineada en
-        rumbo.</p>
-      <p><strong>Trazos del investigador (KML, KMZ)</strong> lee un archivo de Google Earth y añade lo que
-        dibuja: líneas de visión, ejes, contornos y marcadores, con sus nombres, colores y alturas. Se
-        muestran sobre la escena y en el mapa con su propio color, discontinuos en el mapa, como del
-        investigador y no de la reconstrucción: nada se ajusta a ellos, y cada uno se atribuye al archivo
-        de donde viene mientras no diga algo mejor. Renombre uno, indique su <strong>fuente</strong> o
-        elimínelo; el reproductor ofrece un botón para ocultarlos todos. Los nombres se muestran junto a lo que nombran, en la escena y en el mapa; el mapa se ensancha para encuadrar lo que queda cerca del observador (una línea que corre hasta el horizonte se deja correr) y cada fuente figura en los créditos. Las trazas GPS (<code>gx:Track</code>) se leen como líneas.</p>
-      <p>Una foto solo vale desde un punto, así que alinearla registra también <em>desde dónde</em> se
-        alineó: la posición del observador en el cabezal de reproducción. Durante la reproducción se
-        desvanece cuando el observador se aleja de ese punto (visible del todo a menos de 2 m,
-        desaparecida más allá de 20 m) y vuelve cuando regresa, en lugar de mostrar una comparación que
-        ya no se sostiene.</p>
     </div>
 
     <div class="group-doc">
@@ -1568,6 +1516,58 @@ if (docs) {
     </div>
 
     <div class="group-doc">
+      <h3>Sonido</h3>
+      <p>La mitad de lo que hace extraños estos relatos es el sonido, y muy a menudo su ausencia. Un
+        <strong>tipo</strong> (zumbido, silbido, retumbo, crepitación o ninguno), un
+        <strong>Volumen</strong> y un <strong>Tono</strong>, con fotogramas clave en el mismo reloj
+        que la forma: un aparato posado en silencio en el suelo y que solo se oye al despegar son dos
+        fotogramas clave.</p>
+      <p>El sonido se <em>sintetiza</em> a partir de esa descripción, exactamente como la forma se
+        dibuja a partir de la suya, sin coste alguno de audio incluido. Un registro que realmente captó
+        el sonido puede apuntar en su lugar al archivo de audio. Observa la diferencia entre los dos
+        silencios: <em>ninguno</em> significa que el observador declaró no haber oído nada; la ausencia
+        total de pista sonora significa que nadie se lo preguntó.</p>
+      <p>La intensidad y el tono se deslizan de un fotograma clave al siguiente; el tipo y el archivo
+        de audio cambian en el fotograma clave. Un archivo de audio alojado en otro sitio debe servirse
+        a cualquier origen (CORS), y un navegador no reproduce nada hasta que el lector ha hecho clic
+        una vez en la página.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Fotos</h3>
+      <p>Fotografías del lugar, superpuestas a la escena para poder comparar ambas. <strong>Añadir desde una dirección</strong> toma una imagen servida a cualquier origen (las de los casos de
+        rr0.org lo están); <strong>Añadir un archivo</strong> incrusta una de tu disco en el registro,
+        con un aviso sobre su peso. Dale un <strong>Nombre</strong>, un <strong>Crédito</strong> y su
+        enlace, indica si fue tomada en un instante (<strong>Tomada en</strong>) de la observación y si alguien dibujó encima
+        (<strong>Dibujo encima</strong>), y ajusta su <strong>Opacidad</strong> inicial: el lector la
+        deslizará después.</p>
+      <p>Mientras este grupo está abierto, el lienzo pertenece a la foto seleccionada, con su marco en
+        azul discontinuo: <strong>arrastra</strong> sobre ella para girarla (un arrastre fuera de ella
+        sigue girando al observador), usa la <strong>rueda</strong> para cambiar su campo, o escribe
+        <strong>Rumbo</strong>, <strong>Cabeceo</strong>, <strong>Alabeo</strong> y <strong>Campo vertical</strong>, o pulsa <strong>Usar la pose del observador</strong> para partir de ella. Para
+        medir en lugar de calcular a ojo, <strong>Añadir un punto de referencia</strong> prepara dos
+        clics: un detalle en la foto y luego el mismo detalle en el render. Dos puntos de referencia
+        giran la foto para ajustarla a ellos, tres o más ajustan también su campo; cada uno tiene un
+        nombre y un residuo, verde hasta un grado, naranja hasta tres, rojo por encima, y cualquiera de
+        sus extremos puede arrastrarse. <strong>Adoptar como pose del observador</strong> escribe
+        entonces el rumbo, el cabeceo y el alabeo ajustados en la pose del cabezal de reproducción, como
+        una medición, con su procedencia. <strong>Fotos a pie de calle cercanas</strong> pide a
+        Panoramax las imágenes tomadas a menos de 300 m del punto del observador, cada una ya alineada en
+        rumbo.</p>
+      <p><strong>Trazos del investigador (KML, KMZ)</strong> lee un archivo de Google Earth y añade lo que
+        dibuja: líneas de visión, ejes, contornos y marcadores, con sus nombres, colores y alturas. Se
+        muestran sobre la escena y en el mapa con su propio color, discontinuos en el mapa, como del
+        investigador y no de la reconstrucción: nada se ajusta a ellos, y cada uno se atribuye al archivo
+        de donde viene mientras no diga algo mejor. Renombre uno, indique su <strong>fuente</strong> o
+        elimínelo; el reproductor ofrece un botón para ocultarlos todos. Los nombres se muestran junto a lo que nombran, en la escena y en el mapa; el mapa se ensancha para encuadrar lo que queda cerca del observador (una línea que corre hasta el horizonte se deja correr) y cada fuente figura en los créditos. Las trazas GPS (<code>gx:Track</code>) se leen como líneas.</p>
+      <p>Una foto solo vale desde un punto, así que alinearla registra también <em>desde dónde</em> se
+        alineó: la posición del observador en el cabezal de reproducción. Durante la reproducción se
+        desvanece cuando el observador se aleja de ese punto (visible del todo a menos de 2 m,
+        desaparecida más allá de 20 m) y vuelve cuando regresa, en lugar de mostrar una comparación que
+        ya no se sostiene.</p>
+    </div>
+
+    <div class="group-doc">
       <h3>Archivos</h3>
       <p>Los archivos de los que está hecho el registro, elegidos uno a uno encima de la pestaña: el propio registro, y cada anexo que lleva congelado junto a él (relieve, foto del suelo, carreteras, agua, vías férreas, aire en altura, foto del mapa; véase <code>frozen</code> en el formato). El selector solo nombra lo que contiene cada uno; dónde está lo dice su archivo: su dirección, que sustituye un archivo suyo u otra dirección. La dirección del propio registro lo guarda dentro del registro, cuyo texto se muestra entonces debajo con su sección resaltada; otra dirección donde aún no hay archivo es donde Guardar lo escribe. Un anexo dice cuándo y de quién se tomó, con <strong>Actualizar</strong> para tomarlo de nuevo, <strong>Guardar</strong> para tener su archivo, y su texto para editar cuando es JSON. El tiempo también lo es, dentro del registro o en un archivo propio. Se elija lo que se elija, <strong>Guardar</strong> da sus datos. Cada fuente que la escena consultaría (relieve, imágenes, carreteras, agua, vías férreas, aire en altura, tiempo) se elige, en su propio grupo, entre el servicio consultado en directo y <strong>Archivo</strong>, que la lee de los archivos del registro y remite a su elemento aquí; un archivo aún no tomado se toma al guardar.</p>
       <p>El registro en sí. <strong>Cargar un archivo de observación</strong> trae un registro existente, <em>desde su disco</em> o, con un clic en estas palabras, <em>desde una dirección</em>, y <strong>Guardar</strong> te entrega el archivo. Un punto tras esta pestaña indica que la grabación tiene cambios sin guardar; cargar otro archivo u otra dirección mientras los tenga pide confirmación antes.
@@ -1650,7 +1650,7 @@ if (docs) {
     <ol class="steps">
       <li>
         <h3>Dire quando e dove</h3>
-        <p>Compila <strong>Momento</strong> e <strong>Luogo</strong>. È in quel momento che compare
+        <p>Compila <strong>Luogo</strong> e <strong>Data</strong>. È in quel momento che compare
           il cielo: il Sole, la Luna e la sua fase, i pianeti, le stelle di quella notte; e i dati
           meteorologici di quell'ora vengono recuperati da soli. Cominciare da qui significa disegnare
           sul cielo reale invece che su una tela vuota.</p>
@@ -1708,7 +1708,7 @@ if (docs) {
     </div>
 
     <div class="group-doc">
-      <h3>Osservatore</h3>
+      <h3>Testimone</h3>
       <p>Chi ha fornito il resoconto e, altrettanto importante, <strong>attraverso che cosa ha
         osservato</strong>. Un occhio non è un obiettivo: la visione a occhio nudo trasforma un angolo in
         un angolo, una fotocamera lo trasforma in <code>f·tan θ</code>, e i due disegnano inquadrature
@@ -1757,6 +1757,21 @@ if (docs) {
     </div>
 
     <div class="group-doc">
+      <h3>Data</h3>
+      <p>Un inizio, una fine, una durata e un <strong>Fuso orario</strong>, che è la regola e non il
+        numero. Scegli il fuso dell'osservatore e lo scarto viene ricavato dalle regole di quel fuso
+        <em>alla data dell'osservazione</em>: Valensole nel luglio 1965 dà UTC+1, non l'UTC+2 di oggi,
+        perché la Francia ha reintrodotto l'ora legale solo nel 1976.</p>
+      <p>Il fuso viene compilato a partire dalle coordinate, e non sostituisce mai quello che hai
+        scelto tu. I confini dei fusi sono approssimativi (Montgomery, in Alabama, ricade in
+        America/Chicago, che nel 1948 aveva l'ora legale quando l'Alabama non l'aveva), quindi i due sono una cosa sola detta nei due sensi, tenuta in fase: scelga un fuso e lo scarto lo segue; digiti uno scarto e viene scelto un fuso che lo indica quel giorno (quello del luogo quando va bene). L'unica altra scelta è <em>sconosciuto</em>, che non ha scarto, e un numero che nessun fuso indica quel giorno viene rifiutato. Uno scarto che nessun
+        orologio a quella longitudine avrebbe potuto tenere viene segnalato, con l'ora solare del
+        meridiano nel suo suggerimento. Modificare una delle due date elimina una durata esplicita non
+        appena le due date danno da sole una durata esatta.</p>
+      <p>Ogni data è o <strong>precisa</strong> — un selettore, per un istante completo esatto — o detta in <strong>EDTF</strong>, un testo, per tutto ciò che un selettore non sa esprimere: un anno da solo, un mese, un'ora senza data, o qualsiasi data in dubbio, che termina con <code>?</code> (incerto), <code>~</code> (approssimativo) o <code>%</code> (entrambi). Il pulsante accanto dice quale è e passa dall'una all'altra. Passare sul testo mostra, nel suo suggerimento, ciò che è stato capito («→ luglio 1965 — incerto»), e un <strong>(?)</strong> nel campo elenca la sintassi. La maggior parte degli archivi ha bisogno di EDTF: su 241 casi di rr0.org, il 43 % indica solo un anno e appena il 17 % una data con un'ora. La data di un caso è lo stesso campo. La <strong>durata</strong> si dice allo stesso modo: precisa, un numero di secondi, o come è stata enunciata — una durata ISO 8601 con un dubbio o un intervallo (<code>PT10M~</code>, <code>PT5M/PT10M</code>) — e, tra parentesi dopo, l'unica durata a cui è riprodotta la simulazione.
+    </div>
+
+    <div class="group-doc">
       <h3>Ambiente</h3>
       <p>Ciò che c'era intorno all'osservatore, a una distanza reale verso est e verso nord: edifici con
         i loro piani e le loro finestre, alberi, lampioni, veicoli, aeromobili e <strong>altri
@@ -1793,21 +1808,6 @@ if (docs) {
         da quella di qualcosa che non lampeggia.</p>
       <p>Le <strong>serie di luci già pronte</strong> offerte per un oggetto sono quelle che si addicono al modello con cui è disegnato, in scala con la macchina: a un aereo di linea non si offrono quelle di un elicottero, un'auto della polizia riceve i suoi lampeggianti. Il modello dice anche che rumore fa un aeromobile in volo (un A350 si sente come un grosso aereo, il sostituto di qualcosa il cui rumore nessuno ha riferito è silenzioso) e dà il suo motore a un veicolo.</p>
       <p>Le <strong>luci di un veicolo</strong> sono una regolazione e non un interruttore, perché non tutti le accendono, né come si dovrebbe: <strong>spente</strong>, <strong>luci di posizione</strong> (che mostrano il veicolo e non illuminano nulla), <strong>anabbaglianti</strong>, <strong>abbaglianti</strong> (lontani, stretti, accecanti) o <strong>fendinebbia</strong> (bassi e larghi). Si sceglie nel gruppo <em>Stato</em> dell'oggetto, nell'istante in cui si vuole che cambi: è scritto come un fotogramma chiave, come l'interruttore delle lampade, e vale fino al successivo. Un fascio illumina davvero la strada, i bordi, gli alberi e i muri davanti al veicolo. Il veicolo su cui viaggia l'osservatore (il <code>vehicle</code> della registrazione) accende da solo gli anabbaglianti dal crepuscolo, salvo che il file dica altro.</p>
-    </div>
-
-    <div class="group-doc">
-      <h3>Momento</h3>
-      <p>Un inizio, una fine, una durata e un <strong>Fuso orario</strong>, che è la regola e non il
-        numero. Scegli il fuso dell'osservatore e lo scarto viene ricavato dalle regole di quel fuso
-        <em>alla data dell'osservazione</em>: Valensole nel luglio 1965 dà UTC+1, non l'UTC+2 di oggi,
-        perché la Francia ha reintrodotto l'ora legale solo nel 1976.</p>
-      <p>Il fuso viene compilato a partire dalle coordinate, e non sostituisce mai quello che hai
-        scelto tu. I confini dei fusi sono approssimativi (Montgomery, in Alabama, ricade in
-        America/Chicago, che nel 1948 aveva l'ora legale quando l'Alabama non l'aveva), quindi i due sono una cosa sola detta nei due sensi, tenuta in fase: scelga un fuso e lo scarto lo segue; digiti uno scarto e viene scelto un fuso che lo indica quel giorno (quello del luogo quando va bene). L'unica altra scelta è <em>sconosciuto</em>, che non ha scarto, e un numero che nessun fuso indica quel giorno viene rifiutato. Uno scarto che nessun
-        orologio a quella longitudine avrebbe potuto tenere viene segnalato, con l'ora solare del
-        meridiano nel suo suggerimento. Modificare una delle due date elimina una durata esplicita non
-        appena le due date danno da sole una durata esatta.</p>
-      <p>Ogni data è o <strong>precisa</strong> — un selettore, per un istante completo esatto — o detta in <strong>EDTF</strong>, un testo, per tutto ciò che un selettore non sa esprimere: un anno da solo, un mese, un'ora senza data, o qualsiasi data in dubbio, che termina con <code>?</code> (incerto), <code>~</code> (approssimativo) o <code>%</code> (entrambi). Il pulsante accanto dice quale è e passa dall'una all'altra. Passare sul testo mostra, nel suo suggerimento, ciò che è stato capito («→ luglio 1965 — incerto»), e un <strong>(?)</strong> nel campo elenca la sintassi. La maggior parte degli archivi ha bisogno di EDTF: su 241 casi di rr0.org, il 43 % indica solo un anno e appena il 17 % una data con un'ora. La data di un caso è lo stesso campo. La <strong>durata</strong> si dice allo stesso modo: precisa, un numero di secondi, o come è stata enunciata — una durata ISO 8601 con un dubbio o un intervallo (<code>PT10M~</code>, <code>PT5M/PT10M</code>) — e, tra parentesi dopo, l'unica durata a cui è riprodotta la simulazione.
     </div>
 
     <div class="group-doc">
@@ -1896,56 +1896,6 @@ if (docs) {
         questo progetto; e un arcobaleno viene citato solo se è stata segnalata pioggia.
         Che qualcosa di tutto ciò spieghi qualcosa è la conclusione del lettore, mai l'affermazione del
         file.</p>
-    </div>
-
-    <div class="group-doc">
-      <h3>Suono</h3>
-      <p>Metà di ciò che rende strani questi resoconti è il suono, il più delle volte la sua assenza.
-        Un <strong>tipo</strong> (ronzio, fischio, rombo, crepitio, o nessuno), un
-        <strong>Volume</strong> e un <strong>Tono</strong>, con fotogrammi chiave sullo stesso
-        orologio della forma: un velivolo posato in silenzio al suolo e udito solo al decollo sono due
-        fotogrammi chiave.</p>
-      <p>Il suono è <em>sintetizzato</em> a partire da quella descrizione, esattamente come la forma è
-        disegnata a partire dalla sua, senza alcun costo di audio incluso. Una registrazione che ha
-        davvero catturato il suono può invece puntare al file audio. Nota la differenza tra i due
-        silenzi: <em>nessuno</em> significa che l'osservatore ha dichiarato di non aver sentito nulla;
-        nessuna traccia sonora significa che nessuno gliel'ha chiesto.</p>
-      <p>Volume e altezza scorrono da un fotogramma chiave al successivo; il tipo e il file audio
-        cambiano al fotogramma chiave. Un file audio su un altro sito deve essere servito a qualsiasi
-        origine (CORS), e un browser non riproduce nulla finché il lettore non ha fatto clic una volta
-        sulla pagina.</p>
-    </div>
-
-    <div class="group-doc">
-      <h3>Foto</h3>
-      <p>Fotografie del luogo, sovrapposte alla scena per poterle confrontare. <strong>Aggiungi da un indirizzo</strong> prende un'immagine servita a qualsiasi origine (lo sono quelle dei casi di
-        rr0.org); <strong>Aggiungi un file</strong> ne incorpora una dal tuo disco nella
-        registrazione, con un'indicazione sul suo peso. Assegnale un <strong>Nome</strong>, dei
-        <strong>Crediti</strong> e il loro link, di' se è stata scattata in un istante (<strong>Scattata a</strong>)
-        dell'osservazione e se qualcuno ci ha disegnato sopra (<strong>Disegno sopra</strong>), e impostane
-        l'<strong>Opacità</strong> iniziale: il lettore la farà scorrere in seguito.</p>
-      <p>Finché questo gruppo è aperto, la tela appartiene alla foto selezionata, con la cornice
-        tratteggiata in blu: <strong>trascina</strong> su di essa per girarla (un trascinamento fuori
-        da essa gira ancora l'osservatore), usa la <strong>rotellina</strong> per cambiarne il campo,
-        oppure digita <strong>Direzione</strong>, <strong>Beccheggio</strong>, <strong>Rollio</strong>
-        e <strong>Campo verticale</strong>, oppure premi <strong>Usa la posa dell'osservatore</strong> per
-        partire da quella. Per misurare invece di andare a occhio, <strong>Aggiungi un punto di riferimento</strong> prepara due clic: un dettaglio sulla foto, poi lo stesso dettaglio nel
-        rendering. Due punti di riferimento girano la foto per farli coincidere, tre o più ne adattano
-        anche il campo; ciascuno ha un nome e un residuo, verde entro un grado, arancione entro tre,
-        rosso oltre, e ciascuna delle sue estremità si può trascinare. <strong>Adotta come posa dell'osservatore</strong> scrive allora direzione, beccheggio e rollio adattati nella posa alla
-        testina di riproduzione, come una misura, con la sua provenienza. <strong>Foto stradali nei dintorni</strong> chiede a Panoramax le immagini scattate entro 300 m dal punto dell'osservatore,
-        ciascuna già allineata in direzione.</p>
-      <p><strong>Tracciati dell'investigatore (KML, KMZ)</strong> legge un file Google Earth e aggiunge ciò
-        che disegna: linee di vista, assi, contorni e segnaposto, con i loro nomi, colori e altezze. Sono
-        mostrati sulla scena e sulla mappa nel loro colore, tratteggiati sulla mappa, come
-        dell'investigatore e non della ricostruzione: nulla vi si adatta, e ciascuno è attribuito al file da
-        cui proviene finché non si dice di meglio. Rinominane uno, indica la sua <strong>fonte</strong> o
-        eliminalo; il lettore offre un pulsante per nasconderli tutti. I nomi compaiono accanto a ciò che nominano, sulla scena come sulla mappa; la mappa si allarga per inquadrare ciò che è vicino all'osservatore (una linea che fila verso l'orizzonte è lasciata filare) e ogni fonte figura nei crediti. Le tracce GPS (<code>gx:Track</code>) sono lette come linee.</p>
-      <p>Una foto vale da un solo punto, quindi allinearla registra anche <em>da dove</em> è stata
-        allineata: la posizione dell'osservatore alla testina di riproduzione. Durante la riproduzione
-        svanisce in dissolvenza quando l'osservatore si allontana da quel punto (piena entro 2 m,
-        scomparsa oltre 20 m) e ricompare quando lui ritorna, invece di mostrare un confronto che non
-        regge più.</p>
     </div>
 
     <div class="group-doc">
@@ -2045,6 +1995,56 @@ if (docs) {
               <li><strong>Il testo e l'immagine si seguono.</strong> Finché il gruppo File è aperto, mettere il cursore in un oggetto dello scenario o in una forma del testo lo seleziona sull'immagine, e selezionarlo sull'immagine seleziona le sue righe nel testo (il gruppo resta aperto: il testo ha la priorità sul pannello di ciò che clicchi). Le righe modificate dal caricamento della registrazione, o dall'ultimo salvataggio o esportazione, hanno una barra blu nel margine e una tinta chiara. <kbd>F7</kbd> va alla zona modificata successiva, <kbd>Maiusc</kbd>+<kbd>F7</kbd> a quella precedente. Ciò che modifichi, o annulli, sul modulo o sull'immagine viene mostrato allo stesso modo nel testo, che abbia il focus o no. <kbd>Ctrl</kbd>+<kbd>F</kbd> (<kbd>Cmd</kbd>+<kbd>F</kbd>) cerca nel testo, e sostituisce.</li>
               <li><strong>Tutto si può annullare.</strong> Le due frecce in fondo alle schede, o <kbd>Ctrl</kbd>+<kbd>Z</kbd> e <kbd>Ctrl</kbd>+<kbd>Maiusc</kbd>+<kbd>Z</kbd>, tornano indietro e avanti su ciò che hai cambiato, in qualsiasi gruppo e sul render. La cronologia è quella dell'editor di testo del gruppo File, caricato la prima volta che tocchi qualcosa, e dimenticata quando si carica un'altra registrazione. Eliminare qualcosa (una forma, un elemento della scenografia, un momento con nome), con il suo cestino o con <kbd>Canc</kbd> o <kbd>Backspace</kbd>, non chiede nulla: annullare lo rimette.</li>
       </ul>
+    </div>
+
+    <div class="group-doc">
+      <h3>Suono</h3>
+      <p>Metà di ciò che rende strani questi resoconti è il suono, il più delle volte la sua assenza.
+        Un <strong>tipo</strong> (ronzio, fischio, rombo, crepitio, o nessuno), un
+        <strong>Volume</strong> e un <strong>Tono</strong>, con fotogrammi chiave sullo stesso
+        orologio della forma: un velivolo posato in silenzio al suolo e udito solo al decollo sono due
+        fotogrammi chiave.</p>
+      <p>Il suono è <em>sintetizzato</em> a partire da quella descrizione, esattamente come la forma è
+        disegnata a partire dalla sua, senza alcun costo di audio incluso. Una registrazione che ha
+        davvero catturato il suono può invece puntare al file audio. Nota la differenza tra i due
+        silenzi: <em>nessuno</em> significa che l'osservatore ha dichiarato di non aver sentito nulla;
+        nessuna traccia sonora significa che nessuno gliel'ha chiesto.</p>
+      <p>Volume e altezza scorrono da un fotogramma chiave al successivo; il tipo e il file audio
+        cambiano al fotogramma chiave. Un file audio su un altro sito deve essere servito a qualsiasi
+        origine (CORS), e un browser non riproduce nulla finché il lettore non ha fatto clic una volta
+        sulla pagina.</p>
+    </div>
+
+    <div class="group-doc">
+      <h3>Foto</h3>
+      <p>Fotografie del luogo, sovrapposte alla scena per poterle confrontare. <strong>Aggiungi da un indirizzo</strong> prende un'immagine servita a qualsiasi origine (lo sono quelle dei casi di
+        rr0.org); <strong>Aggiungi un file</strong> ne incorpora una dal tuo disco nella
+        registrazione, con un'indicazione sul suo peso. Assegnale un <strong>Nome</strong>, dei
+        <strong>Crediti</strong> e il loro link, di' se è stata scattata in un istante (<strong>Scattata a</strong>)
+        dell'osservazione e se qualcuno ci ha disegnato sopra (<strong>Disegno sopra</strong>), e impostane
+        l'<strong>Opacità</strong> iniziale: il lettore la farà scorrere in seguito.</p>
+      <p>Finché questo gruppo è aperto, la tela appartiene alla foto selezionata, con la cornice
+        tratteggiata in blu: <strong>trascina</strong> su di essa per girarla (un trascinamento fuori
+        da essa gira ancora l'osservatore), usa la <strong>rotellina</strong> per cambiarne il campo,
+        oppure digita <strong>Direzione</strong>, <strong>Beccheggio</strong>, <strong>Rollio</strong>
+        e <strong>Campo verticale</strong>, oppure premi <strong>Usa la posa dell'osservatore</strong> per
+        partire da quella. Per misurare invece di andare a occhio, <strong>Aggiungi un punto di riferimento</strong> prepara due clic: un dettaglio sulla foto, poi lo stesso dettaglio nel
+        rendering. Due punti di riferimento girano la foto per farli coincidere, tre o più ne adattano
+        anche il campo; ciascuno ha un nome e un residuo, verde entro un grado, arancione entro tre,
+        rosso oltre, e ciascuna delle sue estremità si può trascinare. <strong>Adotta come posa dell'osservatore</strong> scrive allora direzione, beccheggio e rollio adattati nella posa alla
+        testina di riproduzione, come una misura, con la sua provenienza. <strong>Foto stradali nei dintorni</strong> chiede a Panoramax le immagini scattate entro 300 m dal punto dell'osservatore,
+        ciascuna già allineata in direzione.</p>
+      <p><strong>Tracciati dell'investigatore (KML, KMZ)</strong> legge un file Google Earth e aggiunge ciò
+        che disegna: linee di vista, assi, contorni e segnaposto, con i loro nomi, colori e altezze. Sono
+        mostrati sulla scena e sulla mappa nel loro colore, tratteggiati sulla mappa, come
+        dell'investigatore e non della ricostruzione: nulla vi si adatta, e ciascuno è attribuito al file da
+        cui proviene finché non si dice di meglio. Rinominane uno, indica la sua <strong>fonte</strong> o
+        eliminalo; il lettore offre un pulsante per nasconderli tutti. I nomi compaiono accanto a ciò che nominano, sulla scena come sulla mappa; la mappa si allarga per inquadrare ciò che è vicino all'osservatore (una linea che fila verso l'orizzonte è lasciata filare) e ogni fonte figura nei crediti. Le tracce GPS (<code>gx:Track</code>) sono lette come linee.</p>
+      <p>Una foto vale da un solo punto, quindi allinearla registra anche <em>da dove</em> è stata
+        allineata: la posizione dell'osservatore alla testina di riproduzione. Durante la riproduzione
+        svanisce in dissolvenza quando l'osservatore si allontana da quel punto (piena entro 2 m,
+        scomparsa oltre 20 m) e ricompare quando lui ritorna, invece di mostrare un confronto che non
+        regge più.</p>
     </div>
 
     <div class="group-doc">

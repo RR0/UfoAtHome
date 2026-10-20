@@ -2917,12 +2917,12 @@ describe("SightingEditorElement toolbar groups", () => {
       "label-observation-group",
       "label-observer-group",
       "label-location-group",
-      "label-decor-group",
       "label-temporal-group",
+      "label-decor-group",
       "label-weather-group",
+      "label-shape-group",
       "label-sound-group",
       "label-reference-group",
-      "label-shape-group",
       "label-file-group"
     ])
     for (const tab of tabs(element)) {
@@ -6722,8 +6722,8 @@ describe("SightingEditorElement missing-value marks", () => {
     const element = mount()
     await waitFor(() => element.shadowRoot!.querySelectorAll(".tab-badge:not([hidden])").length > 0)
 
-    expect(badge(element, "Time").classList.contains("optional")).toBe(false)
-    expect(badge(element, "Position").classList.contains("optional")).toBe(true)
+    expect(badge(element, "Date").classList.contains("optional")).toBe(false)
+    expect(badge(element, "Location").classList.contains("optional")).toBe(true)
   })
 
   it("lets the count follow the duration without waiting for another assessment", async () => {
@@ -6731,7 +6731,7 @@ describe("SightingEditorElement missing-value marks", () => {
     // For the ASSESSMENT to have landed, not merely for the duration to be empty: the strength of
     // the badge is read off the duration and is right from the first frame, while its number needs
     // the assessment, and waiting on the wrong one of the two reads a count of zero.
-    await waitFor(() => badge(element, "Time").textContent === "2")
+    await waitFor(() => badge(element, "Date").textContent === "2")
 
     const duration = field(element, "durationSeconds") as HTMLInputElement
     duration.value = "270"
@@ -6741,8 +6741,8 @@ describe("SightingEditorElement missing-value marks", () => {
     // Faded at once, because that reads off the duration. The number still says 2 until the next
     // assessment comes back and drops "how long" from it, which is the honest thing for it to say:
     // nothing has re-counted yet.
-    expect(badge(element, "Time").classList.contains("optional")).toBe(true)
-    await waitFor(() => badge(element, "Time").textContent === "1")
+    expect(badge(element, "Date").classList.contains("optional")).toBe(true)
+    await waitFor(() => badge(element, "Date").textContent === "1")
   })
 })
 
