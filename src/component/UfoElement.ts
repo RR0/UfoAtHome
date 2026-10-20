@@ -896,12 +896,17 @@ export class UfoElement extends HTMLElement {
   /** A mouse over a thumbnail plays it. Not a touch, which has no "over": on a phone, a tap is the page's. */
   private readonly handleMinifiedEnter = (event: PointerEvent): void => {
     if (!this.minified || event.pointerType === "touch") return
+    this.minifiedHovered = true
     this.play()
   }
+
+  /** Whether the mouse is over a thumbnail: one hovered before its recording arrived plays as soon as it does. */
+  private minifiedHovered = false
 
   /** The mouse gone, the thumbnail is back to what it showed before: its start, and its cover if it has one (see MINIFIED_RESET_EVENT). */
   private readonly handleMinifiedLeave = (event: PointerEvent): void => {
     if (!this.minified || event.pointerType === "touch") return
+    this.minifiedHovered = false
     this.pause()
     this.player.seek(0)
     this.dispatchEvent(new CustomEvent(MINIFIED_RESET_EVENT))
@@ -962,6 +967,8 @@ export class UfoElement extends HTMLElement {
     // After refresh, which is where the new recording's own path is worked out: a page's "start
     // with the map open" is about the recording being loaded, not the one just replaced.
     this.applyObserverMapDefault()
+    // A thumbnail hovered while its recording was on its way had nothing to play then.
+    if (this.minified && this.minifiedHovered) this.play()
   }
 
   /** A title for what is played that is not the recording's own — the interpretation on show, for one — set by

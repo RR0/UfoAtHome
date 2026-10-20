@@ -27,11 +27,12 @@ export class ScenePoster {
    *
    * @param image An address, absolute or relative to `base`, or an RR0 path from the site root (as the share card reads it).
    * @param base The address of the file that states it.
+   * @param up Whether to put it up now. Not when play was already asked: it is only kept, for restore to put back.
    */
-  show(image: string | undefined, base?: string): void {
+  show(image: string | undefined, base?: string, up = true): void {
     const url = ScenePoster.resolve(image, base)
     this.url = url
-    if (!url) {
+    if (!url || !up) {
       this.release()
       return
     }

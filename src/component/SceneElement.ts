@@ -1200,7 +1200,7 @@ export class SceneElement extends HTMLElement {
     const json = (await fetching) as SightingRecordingJson
     this.documentUrl = new URL(url, location.href).href
     // Its cover picture, if it has one, stands in for the loader until play is asked — see showPoster.
-    this.showPoster(this.ufoElement.playRequested ? undefined : json.image, this.documentUrl)
+    this.showPoster(json.image, this.documentUrl, !this.ufoElement.playRequested)
     this.sightingData = json
   }
 
@@ -1210,10 +1210,10 @@ export class SceneElement extends HTMLElement {
   /**
    * Shows the recording's cover picture at once, in place of the loader, until the reader asks to play; the scene is prepared behind it.
    * Without a picture the loader shows as always. Set it AFTER `sightingData`'s hold has begun or before: either way, it is the poster
-   * that stands while the scene waits.
+   * that stands while the scene waits. With `up` false (play already asked) the picture is only kept, for a thumbnail the mouse leaves.
    */
-  showPoster(image: string | undefined, base?: string): void {
-    this.poster.show(image, base)
+  showPoster(image: string | undefined, base?: string, up = true): void {
+    this.poster.show(image, base, up)
   }
 
   /** Puts on screen what the hold on the first frame asks for: the loader, or the poster standing in for it. */
