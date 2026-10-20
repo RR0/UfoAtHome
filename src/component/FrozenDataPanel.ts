@@ -8,6 +8,7 @@ import { TerrainFreezer, type FreezerSources } from "../render3d/terrain/frozen/
 import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
 import { MessageStyle } from "./MessageStyle.js"
 import { TerrainReach } from "../render3d/terrain/TerrainReach.js"
+import type { GeoBounds } from "../render3d/terrain/GeoBounds.js"
 
 /** What the panel needs of the editor holding it. */
 export interface FrozenDataHost {
@@ -100,7 +101,8 @@ export class FrozenDataPanel {
     this.render()
     try {
       const base = FrozenDataPanel.baseOf(frozen[name]?.src) ?? this.defaultBase()
-      const taken = await this.take(name, frozen, TerrainFreezer.plan(this.host.sighting()), this.host.sources(), base)
+      const taken = name === "map" ? await this.takeMap(frozen, this.host.sources(), base)
+        : await this.take(name, frozen, TerrainFreezer.plan(this.host.sighting()), this.host.sources(), base)
       if (!taken) MessageStyle.show(this.note, this.messages.frozenFailed.replaceAll("{group}", this.groupName(name)), "warning")
       else MessageStyle.show(this.note, undefined)
     } finally {
@@ -140,6 +142,14 @@ export class FrozenDataPanel {
         if (group?.refresh) frozen[name] = { ...group, refresh: undefined }
         if (frozen[name]) await this.keep(frozen[name]!, files)
       }
+      const map = frozen.map
+      const mapStale = !frozen.live && TerrainFreezer.mapGround(sighting) !== undefined && (!map || map.refresh || !(await this.fitsMap(map)))
+      if (mapStale && await this.takeMap(frozen, sources ??= this.host.sources(), base)) {
+        files.set(frozen.map!.src, await this.bytesOf(frozen.map!))
+      } else if (map) {
+        if (map.refresh) frozen.map = { ...map, refresh: undefined }
+        await this.keep(frozen.map!, files)
+      }
       const heard = this.host.upperAirHeard()
       const air = frozen.upperAir
       if (!frozen.live && heard && (!air || air.refresh)) {
@@ -172,6 +182,29 @@ export class FrozenDataPanel {
     FrozenAnnexes.hold(this.address(src), annex.bytes)
     frozen[name] = { src, takenOn: annex.takenOn, attribution: annex.attribution }
     return true
+  }
+
+  /** Takes the observer map's photograph into `frozen`, as `take` does a group of the ground. */
+  private async takeMap(frozen: FrozenData, sources: FreezerSources, base: string): Promise<boolean> {
+    MessageStyle.show(this.note, this.messages.frozenTaking.replaceAll("{group}", this.groupName("map")).replaceAll("{done}", "0").replaceAll("{of}", "1"))
+    const annex = await TerrainFreezer.freezeMap(this.host.sighting(), sources.imagery)
+    MessageStyle.show(this.note, undefined)
+    if (!annex) return false
+    const src = frozen.map?.src ?? FrozenGroups.annexName(base, "map")
+    FrozenAnnexes.hold(this.address(src), annex.bytes)
+    frozen.map = { src, takenOn: annex.takenOn, attribution: annex.attribution }
+    return true
+  }
+
+  /** Whether the map's annex was taken of the ground the map is fitted to now: a moved observer or trace is another box. */
+  private async fitsMap(group: FrozenGroup): Promise<boolean> {
+    const ground = TerrainFreezer.mapGround(this.host.sighting())
+    try {
+      const index = JSON.parse(new TextDecoder().decode((await FrozenAnnexes.zip(this.address(group.src)))["index.json"])) as { map?: { bounds: GeoBounds } }
+      return ground !== undefined && index.map !== undefined && FrozenPatches.sameBounds(index.map.bounds, ground)
+    } catch {
+      return false
+    }
   }
 
   /** Whether the annex of a group was taken for the patches the recording plays through now: a moved place or track is another ground. */
@@ -232,7 +265,7 @@ export class FrozenDataPanel {
   private groupName(name: FrozenGroupName): string {
     const names: Record<FrozenGroupName, string> = {
       relief: this.messages.frozenRelief, imagery: this.messages.frozenImagery, roads: this.messages.frozenRoads,
-      water: this.messages.frozenWater, railways: this.messages.frozenRailways, upperAir: this.messages.frozenUpperAir
+      water: this.messages.frozenWater, railways: this.messages.frozenRailways, upperAir: this.messages.frozenUpperAir, map: this.messages.frozenMap
     }
     return names[name]
   }

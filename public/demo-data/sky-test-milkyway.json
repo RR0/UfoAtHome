@@ -135,6 +135,11 @@
       "src": "sky-test-milkyway.railways.json",
       "takenOn": "2026-10-20",
       "attribution": "Railways © OpenStreetMap contributors, as surveyed today"
+    },
+    "map": {
+      "src": "sky-test-milkyway.map.zip",
+      "takenOn": "2026-10-20",
+      "attribution": "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"
     }
   }
 }

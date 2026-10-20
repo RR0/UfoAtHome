@@ -14,6 +14,7 @@ import type { PreviewableScene } from "./SeekPreview.js"
 import type { TerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
 import { defaultTerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
 import { FrozenTerrain } from "../render3d/terrain/frozen/FrozenTerrain.js"
+import type { FrozenMapImagery } from "../render3d/terrain/frozen/ImageryAnnex.js"
 import { FrozenAnnexes } from "../render3d/terrain/frozen/FrozenAnnexes.js"
 import { FrozenGroups } from "../engine/model/FrozenData.js"
 import type { FrozenData } from "../engine/model/FrozenData.js"
@@ -852,6 +853,7 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.classList.add("ufo-overlay")
     // The phenomena stand in the scene below, not on the overlay — see UfoElement.paintsShapes.
     this.ufoElement.paintsShapes = false
+    this.ufoElement.observerMapFrozenSource = frozen => this.frozenMapOf(frozen)
     // Attributes set before this element upgraded are already on it — attributeChangedCallback has
     // not fired for them, since the nested player did not exist yet.
     this.forwardPlayerAttributes()
@@ -1415,12 +1417,25 @@ export class SceneElement extends HTMLElement {
     const refreshUpperAir = this.frozenKey !== undefined && this.traffic?.set !== undefined
     this.frozenKey = key
     this.sceneRenderer.setTerrainProviders(FrozenTerrain.providers(frozen, this.documentUrl, this.liveTerrainProviders ?? defaultTerrainProviders()))
+    // The observer map's photograph too, which the map otherwise asks Esri for whenever it opens.
+    this.ufoElement.observerMapFrozen = this.frozenMapOf(frozen)
     // The air aloft may now be another annex's, or asked live.
     if (refreshUpperAir) {
       this.traffic = undefined
       this.decorMemo = undefined
     }
   }
+
+  /** The observer map's frozen photograph, one per annex and per state of what the page holds unsaved: the map keeps the one it has otherwise. */
+  private frozenMapOf(frozen: FrozenData | undefined): FrozenMapImagery | undefined {
+    const group = FrozenGroups.held(frozen, "map")
+    if (!group) return undefined
+    const key = `${FrozenAnnexes.address(group.src, this.documentUrl)}\n${FrozenAnnexes.generation}`
+    if (this.frozenMap?.key !== key) this.frozenMap = { key, imagery: FrozenTerrain.map(group, this.documentUrl) }
+    return this.frozenMap.imagery
+  }
+
+  private frozenMap?: { key: string, imagery: FrozenMapImagery }
 
   /** Relays a change of 3D-model catalogue through to the renderer — see its
    * setDecorModelProvider. Same arrangement as setTerrainProviders above. */

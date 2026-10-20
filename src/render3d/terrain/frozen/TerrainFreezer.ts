@@ -14,6 +14,9 @@ import { FrozenPatches, type FrozenPatch } from "./FrozenPatches.js"
 import { ReliefAnnex, type FrozenReliefPatch } from "./ReliefAnnex.js"
 import { ImageryAnnex, TileRecorder } from "./ImageryAnnex.js"
 import type { FrozenVectorPatch, VectorAnnexData } from "./VectorAnnex.js"
+import { ObserverPath } from "../../../engine/place/ObserverPath.js"
+import { ObserverMapView } from "../../../render/ObserverMapView.js"
+import type { GeoBounds } from "../GeoBounds.js"
 
 /** Where each group is taken from: the sources the scene asks live. */
 export interface FreezerSources {
@@ -131,6 +134,35 @@ export class TerrainFreezer {
       case "railways":
         return TerrainFreezer.vector(sources.railways, patches, takenOn, report, (provider, bounds) => provider.getRailways(bounds), provider => provider.contemporary)
     }
+  }
+
+  /**
+   * The ground the observer map is fitted to for the recording, as the player fits it with every trace shown (see UfoElement.updateObserverMap):
+   * what the map's photograph is taken of. Undefined for a recording that states no place, which has no map.
+   */
+  static mapGround(sighting: Sighting): GeoBounds | undefined {
+    const path = ObserverPath.of(sighting)
+    return path && ObserverMapView.fitted(path, sighting.traces.flatMap(trace => trace.points))
+  }
+
+  /** Takes the observer map's photograph (see FrozenMapImagery) from the imagery source `source` (an id of IMAGERY_SOURCES), as the map asks for it. */
+  static async freezeMap(sighting: Sighting, source: string): Promise<FrozenAnnex | undefined> {
+    const bounds = TerrainFreezer.mapGround(sighting)
+    if (!bounds) return undefined
+    const takenOn = new Date().toISOString().slice(0, 10)
+    const recorder = new TileRecorder()
+    const imagery = dataSourceById(IMAGERY_SOURCES, source)
+    const provider = imagery.create(recorder.fetch)
+    const pixels = ObserverMapView.IMAGERY_PX
+    try {
+      await provider.getImageryTexture(bounds, { width: pixels, height: pixels })
+    } catch (error) {
+      console.warn("Map imagery not frozen:", error)
+      return undefined
+    }
+    const attribution = provider.attribution
+    const bytes = await ImageryAnnex.encode({ takenOn, source: imagery.id, attribution, patches: [], map: { bounds, pixels }, tiles: recorder.tiles })
+    return { bytes, attribution, takenOn, answered: 1, patches: 1 }
   }
 
   /**

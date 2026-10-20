@@ -30,7 +30,7 @@
   window.thirdParty = () => {
     const entries = performance.getEntriesByType("resource")
     const own = entries.filter(entry => new URL(entry.name).host === location.host)
-    return { own: own.length, frozen: own.filter(entry => /\.(relief|imagery)\.zip|\.(roads|water|railways|upper-air)\.json/.test(entry.name)).map(entry => entry.name.split("/").pop()),
+    return { own: own.length, frozen: own.filter(entry => /\.(relief|imagery|map)\.zip|\.(roads|water|railways|upper-air)\.json/.test(entry.name)).map(entry => entry.name.split("/").pop()),
       thirdParty: entries.filter(entry => new URL(entry.name).host !== location.host && !entry.name.startsWith("data:") && !entry.name.startsWith("blob:")).map(entry => entry.name) }
   }
 </script>

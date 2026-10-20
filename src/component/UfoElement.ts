@@ -33,6 +33,8 @@ import { ObserverMapRenderer } from "../render/ObserverMapRenderer.js"
 import { ObserverMapView } from "../render/ObserverMapView.js"
 import type { ObserverMapMarker, ObserverMapDecor, ObserverMapTarget } from "../render/ObserverMapRenderer.js"
 import { defaultImageryProvider } from "../render3d/terrain/defaultTerrainProviders.js"
+import type { FrozenMapImagery } from "../render3d/terrain/frozen/ImageryAnnex.js"
+import type { FrozenData } from "../engine/model/FrozenData.js"
 import type { ImageryTexture } from "../render3d/terrain/ImageryProvider.js"
 import type { GeoBounds } from "../render3d/terrain/GeoBounds.js"
 import { ImageProjection } from "../engine/instrument/ImageProjection.js"
@@ -121,16 +123,6 @@ export class UfoElement extends HTMLElement {
   private readonly issuesButton: HTMLButtonElement
   private readonly issuesPanel: HTMLElement
   private readonly playPauseButton: HTMLButtonElement
-  /** The smallest piece of ground the map will ever show, metres across. A observer who never moved
-   * has a path of zero span, and this is what stands in for it — about two city blocks, enough to
-   * recognise a road, a building and a field, which is what "where was this" means. */
-  private static readonly OBSERVER_MAP_MIN_SPAN_M = 400
-  /** How much room to leave around the path itself, as a fraction of its own span — a track drawn
-   * edge to edge shows the journey and none of what it went past. */
-  private static readonly OBSERVER_MAP_MARGIN = 0.6
-  /** The photograph is fetched once at this size and then drawn at whatever size the panel is: a
-   * request per resize would be a request per fullscreen toggle. */
-  private static readonly OBSERVER_MAP_IMAGERY_PX = 768
 
   private readonly fullscreenButton: HTMLButtonElement
   /** The picture's top-right row — see showToolbar. */
@@ -990,6 +982,8 @@ export class UfoElement extends HTMLElement {
     this.soundPreview = undefined
     this.sightingAudio.silence()
     this.currentSighting = fromSightingJson(json)
+    // Before refresh opens the map on it: a map opened first would ask live for the photograph the recording carries.
+    if (this.observerMapFrozenSource) this.observerMapFrozen = this.observerMapFrozenSource(this.currentSighting.frozen)
     this.issuesPanel.hidden = true
     this.issuesButton.setAttribute("aria-expanded", "false")
     void this.reportIssues(json, this.currentSighting)
@@ -2667,7 +2661,7 @@ export class UfoElement extends HTMLElement {
       return
     }
     const traced = this.tracesShownState ? this.currentSighting.traces.flatMap(trace => trace.points) : []
-    const bounds = ObserverMapView.including(this.observerPath.boundsAround(UfoElement.OBSERVER_MAP_MIN_SPAN_M, UfoElement.OBSERVER_MAP_MARGIN), traced)
+    const bounds = ObserverMapView.fitted(this.observerPath, traced)
     // Only a real change of ground throws the photograph away. An editor nudging a coordinate moves
     // these bounds by a metre on every keystroke, and refetching a tile grid for that would be one
     // request per keypress for an image indistinguishable from the one already held.
@@ -2708,26 +2702,29 @@ export class UfoElement extends HTMLElement {
    */
   private async loadObserverMapImagery(): Promise<void> {
     const view = this.observerMapViewBounds
-    if (!view || this.observerMapPanel.hidden || this.observerMapImageryLoading || !this.observerMapImageryNeededFor(view)) return
+    if (!view || this.observerMapPanel.hidden || this.observerMapImageryLoading) return
+    // A frozen photograph is the one there is: asked for once, whatever the reader does with the map since.
+    if (this.observerMapFrozenImagery ? this.observerMapImageryBounds !== undefined : !this.observerMapImageryNeededFor(view)) return
     // Zoomed, the map moves — the reader drags it, and it follows the observer — so it is asked for
     // with half a view of ground on every side, at twice the pixels to keep the same sharpness:
     // the next stretch is already there when the map slides onto it. The fitted box never moves
     // and is asked for as it is.
     const zoomed = this.observerMapView.changed
     const bounds = zoomed ? ObserverMapView.expand(view, UfoElement.OBSERVER_MAP_IMAGERY_AHEAD) : view
-    const pixels = UfoElement.OBSERVER_MAP_IMAGERY_PX * (zoomed ? 1 + 2 * UfoElement.OBSERVER_MAP_IMAGERY_AHEAD : 1)
+    const pixels = ObserverMapView.IMAGERY_PX * (zoomed ? 1 + 2 * UfoElement.OBSERVER_MAP_IMAGERY_AHEAD : 1)
     this.observerMapImageryBounds = bounds
     this.observerMapImageryViewWidth = view.east - view.west
     this.observerMapImageryLoading = true
-    const provider = defaultImageryProvider()
+    const frozen = this.observerMapFrozenImagery
+    const provider = frozen ? undefined : defaultImageryProvider()
     try {
-      const imagery = await provider.getImageryTexture(bounds, { width: pixels, height: pixels })
+      const imagery = provider ? await provider.getImageryTexture(bounds, { width: pixels, height: pixels }) : await frozen!.getImagery()
       // The recording may have been swapped while this was in flight — a page playing several in
       // turn does exactly that — and painting one observer's ground under another's path is worse
       // than painting no ground at all.
       if (this.observerMapImageryBounds !== bounds) return
       this.observerMapImagery = imagery
-      this.observerMapImageryCredit = provider.attribution
+      this.observerMapImageryCredit = (provider ?? frozen!).attribution
       this.observerMapImageryFailed = false
     } catch {
       if (this.observerMapImageryBounds !== bounds) return
@@ -2774,6 +2771,36 @@ export class UfoElement extends HTMLElement {
   get observerMapCredit(): string | undefined {
     return this.observerMapImageryCredit
   }
+
+  /**
+   * The map's photograph as the recording froze it (see FrozenData's `map`), set by the scene that reads the recording's annexes; undefined
+   * to have it asked of the imagery source live. A change throws away the photograph held, and the map, if open, takes the new one.
+   */
+  set observerMapFrozen(frozen: FrozenMapImagery | undefined) {
+    if (frozen === this.observerMapFrozenImagery) return
+    this.observerMapFrozenImagery = frozen
+    this.observerMapImagery = undefined
+    this.observerMapImageryCredit = undefined
+    this.observerMapImageryFailed = false
+    this.observerMapImageryBounds = undefined
+    this.observerMapImageryLoading = false
+    if (!this.observerMapPanel.hidden) {
+      void this.loadObserverMapImagery()
+      this.paintObserverMap(this.currentTime)
+    }
+  }
+
+  get observerMapFrozen(): FrozenMapImagery | undefined {
+    return this.observerMapFrozenImagery
+  }
+
+  private observerMapFrozenImagery?: FrozenMapImagery
+
+  /**
+   * Where a composing element that reads the recording's annexes (see `<rr0-scene>`) finds the map's frozen photograph for a recording's
+   * `frozen`: asked as each recording arrives, so that its map never opens on a live request first. Absent, the map asks live.
+   */
+  observerMapFrozenSource?: (frozen: FrozenData | undefined) => FrozenMapImagery | undefined
 
   /** The line along the bottom of the map: the licence where nowhere else carries it, and the
    * missing-imagery note either way. */

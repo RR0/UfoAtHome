@@ -5,7 +5,7 @@ import { fromSightingJson, toSightingJson } from "../../../../src/engine/persist
 import { FrozenAnnexes } from "../../../../src/render3d/terrain/frozen/FrozenAnnexes.js"
 import { FrozenPatches } from "../../../../src/render3d/terrain/frozen/FrozenPatches.js"
 import { FrozenElevationProvider, ReliefAnnex } from "../../../../src/render3d/terrain/frozen/ReliefAnnex.js"
-import { FrozenImageryProvider, ImageryAnnex, TileRecorder } from "../../../../src/render3d/terrain/frozen/ImageryAnnex.js"
+import { FrozenImageryProvider, FrozenMapImagery, ImageryAnnex, TileRecorder } from "../../../../src/render3d/terrain/frozen/ImageryAnnex.js"
 import { FrozenRoadProvider, type VectorAnnexData } from "../../../../src/render3d/terrain/frozen/VectorAnnex.js"
 import { FrozenTerrain } from "../../../../src/render3d/terrain/frozen/FrozenTerrain.js"
 import { TerrainFreezer } from "../../../../src/render3d/terrain/frozen/TerrainFreezer.js"
@@ -13,6 +13,8 @@ import { FrozenUpperAirProvider } from "../../../../src/engine/traffic/FrozenUpp
 import type { TerrainProviders } from "../../../../src/render3d/terrain/defaultTerrainProviders.js"
 import type { RoadWay } from "../../../../src/render3d/terrain/RoadProvider.js"
 import { localMetersToGeo } from "../../../../src/render3d/terrain/GeoProjection.js"
+import { ObserverPath } from "../../../../src/engine/place/ObserverPath.js"
+import { ObserverMapView } from "../../../../src/render/ObserverMapView.js"
 
 const SILLY = { lat: 49.0789, lng: 2.3273 }
 const PATCH = { ...SILLY, radiusM: 900 }
@@ -54,6 +56,7 @@ describe("FrozenGroups", () => {
   it("names each annex after the recording", () => {
     expect(FrozenGroups.annexName("cussac-sighting", "relief")).toBe("cussac-sighting.relief.zip")
     expect(FrozenGroups.annexName("cussac-sighting", "upperAir")).toBe("cussac-sighting.upper-air.json")
+    expect(FrozenGroups.annexName("cussac-sighting", "map")).toBe("cussac-sighting.map.zip")
   })
 
   it("travels in the recording's file", () => {
@@ -108,6 +111,25 @@ describe("ImageryAnnex", () => {
     const served = await replay("https://tiles.example/1/2/3")
     expect(new Uint8Array(await served.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]))
     expect((await replay("https://tiles.example/9/9/9")).status).toBe(404)
+  })
+})
+
+describe("FrozenMapImagery", () => {
+  it("keeps the ground the map asked its photograph for, and refuses an annex that holds no map", async () => {
+    const bounds = ObserverMapView.fitted(ObserverPath.of(standing())!, [])
+    const tiles = new Map([["https://tiles.example/1/2/3", { bytes: new Uint8Array([1]), type: "image/jpeg" }]])
+    const bytes = await ImageryAnnex.encode({ takenOn: "2026-10-20", source: "esri-world", attribution: "Esri", patches: [], map: { bounds, pixels: 768 }, tiles })
+    const { unzipSync } = await import("fflate")
+    expect(ImageryAnnex.decode(unzipSync(bytes)).map).toEqual({ bounds, pixels: 768 })
+    const noMap = new FrozenMapImagery(Promise.resolve({ takenOn: "", source: "esri-world", attribution: "Esri", patches: [], tiles }), "stated")
+    expect(noMap.attribution).toBe("stated")
+    await expect(noMap.getImagery()).rejects.toThrow()
+  })
+
+  it("is taken of the box the map is fitted to, and of none for a recording that states no place", () => {
+    const sighting = driving(1.5, 60)
+    expect(TerrainFreezer.mapGround(sighting)).toEqual(ObserverMapView.fitted(ObserverPath.of(sighting)!, []))
+    expect(TerrainFreezer.mapGround(Sighting.create(undefined, []))).toBeUndefined()
   })
 })
 

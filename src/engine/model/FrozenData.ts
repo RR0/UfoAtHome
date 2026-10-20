@@ -4,15 +4,16 @@
  * - relief: the ground's height, as the elevation source answered for each patch of ground the scene builds;
  * - imagery: the photograph of the ground draped over it, as the tiles the imagery source served;
  * - roads, water, railways: the ways, rivers and tracks laid on each patch;
- * - upperAir: the air at the levels the aircraft fly at, which decides their trails.
+ * - upperAir: the air at the levels the aircraft fly at, which decides their trails;
+ * - map: the photograph under the observer map, as the tiles the imagery source served for the ground the map is fitted to.
  *
  * What is not here is frozen already, in the recording itself: the weather (weatherTrack), the scenery (decor), the place, the time zone and
  * the light pollution are looked up while the recording is made, and written into it.
  */
-export type FrozenGroupName = "relief" | "imagery" | "roads" | "water" | "railways" | "upperAir"
+export type FrozenGroupName = "relief" | "imagery" | "roads" | "water" | "railways" | "upperAir" | "map"
 
 /** The groups laid on a patch of ground. */
-export type FrozenTerrainGroupName = Exclude<FrozenGroupName, "upperAir">
+export type FrozenTerrainGroupName = Exclude<FrozenGroupName, "upperAir" | "map">
 
 /** One group, frozen: where its annex is, and when and from whom it was taken. */
 export interface FrozenGroup {
@@ -45,11 +46,12 @@ export interface FrozenData {
   water?: FrozenGroup
   railways?: FrozenGroup
   upperAir?: FrozenGroup
+  map?: FrozenGroup
 }
 
 /** What can be asked of a recording's frozen data, group by group. */
 export class FrozenGroups {
-  static readonly NAMES: readonly FrozenGroupName[] = ["relief", "imagery", "roads", "water", "railways", "upperAir"]
+  static readonly NAMES: readonly FrozenGroupName[] = ["relief", "imagery", "roads", "water", "railways", "upperAir", "map"]
   /** Those laid on a patch of ground, and therefore taken for each patch the scene builds. */
   static readonly TERRAIN: readonly FrozenTerrainGroupName[] = ["relief", "imagery", "roads", "water", "railways"]
 
@@ -62,7 +64,7 @@ export class FrozenGroups {
 
   /** The annex's file name for a recording saved as `base` (its file name without `.json`). */
   static annexName(base: string, name: FrozenGroupName): string {
-    const extension = name === "relief" || name === "imagery" ? "zip" : "json"
+    const extension = name === "relief" || name === "imagery" || name === "map" ? "zip" : "json"
     const kebab = name.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)
     return `${base}.${kebab}.${extension}`
   }

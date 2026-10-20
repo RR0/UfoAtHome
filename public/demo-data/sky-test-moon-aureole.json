@@ -104,6 +104,11 @@
       "src": "sky-test-moon-aureole.railways.json",
       "takenOn": "2026-10-20",
       "attribution": "Railways © IGN, BD TOPO (Licence Ouverte 2.0), as drawn today; names and services © OpenStreetMap contributors"
+    },
+    "map": {
+      "src": "sky-test-moon-aureole.map.zip",
+      "takenOn": "2026-10-20",
+      "attribution": "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"
     }
   }
 }

@@ -17,6 +17,12 @@ function withFrozen(text: string, frozen: unknown): string {
   const json = JSON.parse(text) as Record<string, unknown>
   // As the file is indented: some are by one space.
   const indent = text.match(/^\{\r?\n( +)"/)?.[1] ?? "  "
+  // Written as the last key: the block already there, and nothing after it, is what is replaced.
+  const last = Object.keys(json).at(-1) === "frozen" ? text.lastIndexOf(`\n${indent}"frozen":`) : -1
+  if (last >= 0) {
+    const block = JSON.stringify(frozen, null, indent).replaceAll("\n", `\n${indent}`)
+    return `${text.slice(0, last)}\n${indent}"frozen": ${block}\n}${text.endsWith("\n") ? "\n" : ""}`
+  }
   if ("frozen" in json) {
     json.frozen = frozen
     return JSON.stringify(json, null, indent) + "\n"

@@ -17,8 +17,16 @@ export interface ImageryAnnexData {
   source: string
   attribution: string
   patches: FrozenPatch[]
+  /** The observer map's annex (see FrozenMapImagery): the ground its photograph was asked for, and at how many pixels. No patch then. */
+  map?: FrozenMapGround
   /** By the address they were asked at. */
   tiles: Map<string, FrozenTile>
+}
+
+/** What the observer map asked its photograph for. */
+export interface FrozenMapGround {
+  bounds: GeoBounds
+  pixels: number
 }
 
 interface ImageryIndexFile {
@@ -27,6 +35,7 @@ interface ImageryIndexFile {
   source: string
   attribution: string
   patches: FrozenPatch[]
+  map?: FrozenMapGround
   tiles: Record<string, { file: string, type: string }>
 }
 
@@ -65,7 +74,7 @@ export class ImageryAnnex {
       files[file] = tile.bytes
       tiles[url] = { file, type: tile.type }
     }
-    const index: ImageryIndexFile = { version: 1, takenOn: annex.takenOn, source: annex.source, attribution: annex.attribution, patches: annex.patches, tiles }
+    const index: ImageryIndexFile = { version: 1, takenOn: annex.takenOn, source: annex.source, attribution: annex.attribution, patches: annex.patches, map: annex.map, tiles }
     files["index.json"] = strToU8(JSON.stringify(index, null, 1))
     // A photograph is compressed already: stored, not deflated again for nothing.
     return zipSync(files, { level: 0 })
@@ -80,7 +89,7 @@ export class ImageryAnnex {
       const bytes = files[file]
       if (bytes) tiles.set(url, { bytes, type })
     }
-    return { takenOn: index.takenOn, source: index.source, attribution: index.attribution, patches: index.patches, tiles }
+    return { takenOn: index.takenOn, source: index.source, attribution: index.attribution, patches: index.patches, map: index.map, tiles }
   }
 }
 
@@ -116,5 +125,35 @@ export class FrozenImageryProvider implements ImageryProvider {
       if (!tile) return new Response(null, { status: 404 })
       return new Response(tile.bytes as BlobPart, { status: 200, headers: { "content-type": tile.type } })
     }
+  }
+}
+
+/**
+ * The observer map's photograph as it was frozen (see FrozenData's `map`): the ground it was taken of, stitched again from the tiles its source
+ * served, by that source, and asked of nobody.
+ *
+ * The map asks for nothing else while it reads this. Its ground is the box the annex was taken of, whatever the reader then does with the map:
+ * a zoom into it shows the same photograph larger, and the ground beyond it, zoomed out, is left blank. Asking live for a sharper or a wider one
+ * would be the request to a third party that freezing exists to spare.
+ */
+export class FrozenMapImagery {
+  private picture?: Promise<ImageryTexture>
+  private attributionRead?: string
+
+  constructor(private readonly annex: Promise<ImageryAnnexData>, private readonly attributionStated = "") {
+  }
+
+  get attribution(): string {
+    return this.attributionRead ?? this.attributionStated
+  }
+
+  /** The photograph, stitched once. Fails when the annex cannot be read or holds no map. */
+  getImagery(): Promise<ImageryTexture> {
+    return this.picture ??= this.annex.then(annex => {
+      if (!annex.map) throw new Error("An imagery annex that holds no map")
+      this.attributionRead = annex.attribution
+      const provider = dataSourceById(IMAGERY_SOURCES, annex.source).create(FrozenImageryProvider.fetchFrom(annex.tiles))
+      return provider.getImageryTexture(annex.map.bounds, { width: annex.map.pixels, height: annex.map.pixels })
+    })
   }
 }

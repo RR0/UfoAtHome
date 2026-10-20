@@ -1654,6 +1654,11 @@
       "src": "observer-valensole-pv-1965-07-02.railways.json",
       "takenOn": "2026-10-20",
       "attribution": "Railways © OpenStreetMap contributors, as surveyed today"
+    },
+    "map": {
+      "src": "observer-valensole-pv-1965-07-02.map.zip",
+      "takenOn": "2026-10-20",
+      "attribution": "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"
     }
   }
 }

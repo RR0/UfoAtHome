@@ -76,6 +76,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   frozenWater: "Water",
   frozenRailways: "Railways",
   frozenUpperAir: "Air aloft",
+  frozenMap: "Map photograph",
   frozenTakenOn: "taken on {date}",
   frozenPending: "taken at save",
   frozenLiveState: "asked live",

@@ -3457,6 +3457,11 @@
    "src": "observer-duboc-steward.imagery.zip",
    "takenOn": "2026-10-20",
    "attribution": "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+  },
+  "map": {
+   "src": "observer-duboc-steward.map.zip",
+   "takenOn": "2026-10-20",
+   "attribution": "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"
   }
  }
 }

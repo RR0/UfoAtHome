@@ -798,6 +798,11 @@
    "src": "observer-mcminnville-closeup.railways.json",
    "takenOn": "2026-10-20",
    "attribution": "Railways © OpenStreetMap contributors, as surveyed today"
+  },
+  "map": {
+   "src": "observer-mcminnville-closeup.map.zip",
+   "takenOn": "2026-10-20",
+   "attribution": "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"
   }
  }
 }

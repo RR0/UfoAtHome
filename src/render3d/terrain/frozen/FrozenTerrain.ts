@@ -7,7 +7,7 @@ import type { RailwayLine } from "../RailwayProvider.js"
 import { FrozenAnnexes } from "./FrozenAnnexes.js"
 import { FrozenPatches, type FrozenPatch } from "./FrozenPatches.js"
 import { FrozenElevationProvider, ReliefAnnex } from "./ReliefAnnex.js"
-import { FrozenImageryProvider, ImageryAnnex } from "./ImageryAnnex.js"
+import { FrozenImageryProvider, FrozenMapImagery, ImageryAnnex } from "./ImageryAnnex.js"
 import { FrozenRailwayProvider, FrozenRoadProvider, FrozenWaterProvider, type VectorAnnexData } from "./VectorAnnex.js"
 
 /**
@@ -54,6 +54,12 @@ export class FrozenTerrain {
     // The first annex that could be read says where the patches are: they were all taken for the same ones (see TerrainFreezer).
     providers.patches = new FrozenPatches(FrozenTerrain.firstRead(lists))
     return providers
+  }
+
+  /** The observer map's photograph, read from the annex of the `map` group. */
+  static map(group: FrozenGroup, documentUrl: string | undefined): FrozenMapImagery {
+    const annex = FrozenAnnexes.zip(FrozenAnnexes.address(group.src, documentUrl)).then(files => ImageryAnnex.decode(files))
+    return new FrozenMapImagery(annex, group.attribution)
   }
 
   private static async firstRead(lists: Promise<readonly FrozenPatch[]>[]): Promise<readonly FrozenPatch[]> {

@@ -152,6 +152,7 @@ export interface SightingEditorMessages extends SightingLabels {
   frozenWater: string
   frozenRailways: string
   frozenUpperAir: string
+  frozenMap: string
   frozenTakenOn: string
   frozenPending: string
   frozenLiveState: string

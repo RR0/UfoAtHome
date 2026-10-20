@@ -1,5 +1,6 @@
 import type { GeoBounds } from "../render3d/terrain/GeoBounds.js"
 import { geoToLocalMeters, localMetersToGeo } from "../render3d/terrain/GeoProjection.js"
+import type { ObserverPath } from "../engine/place/ObserverPath.js"
 
 /**
  * Which part of the observer's ground the map is showing — the fitted box by default, and whatever
@@ -22,6 +23,27 @@ export class ObserverMapView {
   /** In to a sixty-fourth: a 400 m box becomes about 6 m, a car's length on a 280 px panel. Past
    * that the tiles have nothing more to show. */
   static readonly MAX_ZOOM = 64
+  /** The smallest piece of ground the map will ever show, metres across. A observer who never moved
+   * has a path of zero span, and this is what stands in for it — about two city blocks, enough to
+   * recognise a road, a building and a field, which is what "where was this" means. */
+  static readonly MIN_SPAN_M = 400
+  /** How much room to leave around the path itself, as a fraction of its own span — a track drawn
+   * edge to edge shows the journey and none of what it went past. */
+  static readonly MARGIN = 0.6
+  /** The photograph is fetched once at this size and then drawn at whatever size the panel is: a
+   * request per resize would be a request per fullscreen toggle. */
+  static readonly IMAGERY_PX = 768
+
+  /**
+   * The ground the map is fitted to: the observer's path with room around it, widened to the traced
+   * points near enough to frame (see including).
+   *
+   * Here rather than in the player because the map's frozen photograph (see FrozenMapImagery) is
+   * taken of this very box, and two computations of it would be two boxes.
+   */
+  static fitted(path: ObserverPath, traced: ReadonlyArray<{ lat: number; lng: number }>): GeoBounds {
+    return ObserverMapView.including(path.boundsAround(ObserverMapView.MIN_SPAN_M, ObserverMapView.MARGIN), traced)
+  }
 
   /** 1 = the fitted box; 2 = half its width. */
   private zoom = 1
