@@ -3,7 +3,8 @@
  * recording's scene can ever build a terrain patch on, and the way a build step reaches the services that answer about them.
  */
 import { execFile } from "node:child_process"
-import { readdir, readFile } from "node:fs/promises"
+import { createHash } from "node:crypto"
+import { readdir, readFile, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 import { promisify } from "node:util"
 
@@ -117,6 +118,23 @@ export class ArchivedPlaces {
    *
    * A build step may reach for the system's own tools; the RUNTIME provider may not, and does not.
    */
+  /**
+   * Makes each entry of a frozen archive's index (public/roads, water, railways) point at its file with the hash of what it holds: "x.json?v=3f9a0c21d4".
+   * WHY: the files are served for a week (see site/build.ts's _headers) under a name that does not change, and the index, which is asked again every
+   * time, is what tells the reader's browser that one did: the railways frozen again with their names on 2026-10-20 were still read without them,
+   * from the browser's cache, by whoever had played Silly-le-Long before.
+   */
+  static async stampVersions(dir: string): Promise<void> {
+    const path = join(dir, "index.json")
+    const index = JSON.parse(await readFile(path, "utf8")) as { version: number, entries: { file: string }[] }
+    for (const entry of index.entries) {
+      const file = entry.file.split("?")[0]
+      const hash = createHash("sha1").update(await readFile(join(dir, file))).digest("hex").slice(0, 10)
+      entry.file = `${file}?v=${hash}`
+    }
+    await writeFile(path, JSON.stringify(index, null, 1), "utf8")
+  }
+
   static fetchOrCurl = async (input: RequestInfo | URL): Promise<Response> => {
     const url = String(input)
     try {

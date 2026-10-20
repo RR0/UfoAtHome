@@ -2,7 +2,7 @@
  "version": 1,
  "entries": [
   {
-   "file": "1950-05-11-TrentPaul-closeup.json",
+   "file": "1950-05-11-TrentPaul-closeup.json?v=3d4282097b",
    "north": 45.112655740603664,
    "south": 45.095670259396336,
    "east": -123.31852139848368,
@@ -10,7 +10,7 @@
    "about": "1950-05-11-TrentPaul-closeup"
   },
   {
-   "file": "1964-04-24-WilcoxGary.json",
+   "file": "1964-04-24-WilcoxGary.json?v=86e21c8159",
    "north": 42.237651040603666,
    "south": 42.220510959396336,
    "east": -76.16953550528503,
@@ -18,7 +18,7 @@
    "about": "1964-04-24-WilcoxGary"
   },
   {
-   "file": "1964-04-24-ZamoraLonnie.json",
+   "file": "1964-04-24-ZamoraLonnie.json?v=f1b8f6dff3",
    "north": 34.059407040603666,
    "south": 34.03399995939634,
    "east": -106.88144773048288,
@@ -26,7 +26,7 @@
    "about": "1964-04-24-ZamoraLonnie"
   },
   {
-   "file": "1965-07-01-MasseMaurice-pv-1965-07-02.json",
+   "file": "1965-07-01-MasseMaurice-pv-1965-07-02.json?v=a258321792",
    "north": 43.853997040603666,
    "south": 43.83675036435502,
    "east": 5.974970522429513,
@@ -34,7 +34,7 @@
    "about": "1965-07-01-MasseMaurice-pv-1965-07-02"
   },
   {
-   "file": "1965-07-01-MasseMaurice.json",
+   "file": "1965-07-01-MasseMaurice.json?v=4bd3088df3",
    "north": 43.853997040603666,
    "south": 43.836268959396335,
    "east": 5.974970474935113,
@@ -42,7 +42,7 @@
    "about": "1965-07-01-MasseMaurice"
   },
   {
-   "file": "1967-08-29-DelpeuchAnneMarie.json",
+   "file": "1967-08-29-DelpeuchAnneMarie.json?v=d2a4fc685a",
    "north": 45.018123656845134,
    "south": 44.94435434315487,
    "east": 2.9693697100946586,
@@ -50,7 +50,7 @@
    "about": "1967-08-29-DelpeuchAnneMarie"
   },
   {
-   "file": "1967-08-29-DelpeuchFrancois.json",
+   "file": "1967-08-29-DelpeuchFrancois.json?v=31d1e324ca",
    "north": 45.01493870283866,
    "south": 44.94760129716134,
    "east": 2.964983178546031,
@@ -58,7 +58,7 @@
    "about": "1967-08-29-DelpeuchFrancois"
   },
   {
-   "file": "1981-01-08-Trans-en-Provence-Nicolai.json",
+   "file": "1981-01-08-Trans-en-Provence-Nicolai.json?v=b2fa7c4212",
    "north": 43.50558494060366,
    "south": 43.48855305939634,
    "east": 6.517955110334278,
@@ -66,7 +66,7 @@
    "about": "1981-01-08-Trans-en-Provence-Nicolai"
   },
   {
-   "file": "2012-06-29-Maffliers-terrain-only.json",
+   "file": "2012-06-29-Maffliers-terrain-only.json?v=b740571e24",
    "north": 49.09967798814229,
    "south": 49.05815021185771,
    "east": 2.359080181996365,
@@ -74,7 +74,7 @@
    "about": "2012-06-29-Maffliers-terrain-only"
   },
   {
-   "file": "2015-05-31-SillyLeLong-T1.json",
+   "file": "2015-05-31-SillyLeLong-T1.json?v=d412628fb4",
    "north": 49.136118940603666,
    "south": 49.09703675939634,
    "east": 2.8039814305750115,
@@ -82,7 +82,7 @@
    "about": "2015-05-31-SillyLeLong-T1"
   },
   {
-   "file": "2015-07-12-BraineLeComte-AKH.json",
+   "file": "2015-07-12-BraineLeComte-AKH.json?v=67fa4aa79e",
    "north": 50.608489040603665,
    "south": 50.59151095939634,
    "east": 4.113374243757145,
@@ -90,7 +90,7 @@
    "about": "2015-07-12-BraineLeComte-AKH"
   },
   {
-   "file": "2026-08-11-SaintLo.json",
+   "file": "2026-08-11-SaintLo.json?v=fed4470f49",
    "north": 49.11337904060366,
    "south": 49.096400959396334,
    "east": -1.0624152245413339,
@@ -98,7 +98,7 @@
    "about": "2026-08-11-SaintLo"
   },
   {
-   "file": "2026-09-28-GreenstreetSteven.json",
+   "file": "2026-09-28-GreenstreetSteven.json?v=0d30025bb0",
    "north": 33.608489040603665,
    "south": 33.59151095939634,
    "east": -117.661808111273,
@@ -106,7 +106,7 @@
    "about": "2026-09-28-GreenstreetSteven"
   },
   {
-   "file": "example-minimal.json",
+   "file": "example-minimal.json?v=a19c532074",
    "north": 45.19848904060366,
    "south": 45.181510959396334,
    "east": 5.732045326324051,
@@ -114,7 +114,7 @@
    "about": "example-minimal"
   },
   {
-   "file": "example-sighting.json",
+   "file": "example-sighting.json?v=f0814780a2",
    "north": 45.197018040603666,
    "south": 45.18003995939634,
    "east": 5.736569015028998,
@@ -122,7 +122,7 @@
    "about": "example-sighting"
   },
   {
-   "file": "instrument-eye.json",
+   "file": "instrument-eye.json?v=db7c0c4df3",
    "north": 34.05112404060366,
    "south": 34.03401095939633,
    "east": -106.88750523015797,
@@ -130,7 +130,7 @@
    "about": "instrument-eye"
   },
   {
-   "file": "sky-test-air-traffic.json",
+   "file": "sky-test-air-traffic.json?v=870f005c46",
    "north": 48.998489040603666,
    "south": 48.98151095939634,
    "east": 2.4629368491164945,
@@ -138,7 +138,7 @@
    "about": "sky-test-air-traffic"
   },
   {
-   "file": "sky-test-aircraft.json",
+   "file": "sky-test-aircraft.json?v=829ce2578b",
    "north": 48.942389040603665,
    "south": 48.92541095939634,
    "east": 2.311522305276416,
@@ -146,7 +146,7 @@
    "about": "sky-test-aircraft"
   },
   {
-   "file": "sky-test-clouds.json",
+   "file": "sky-test-clouds.json?v=9a3445d2c2",
    "north": 45.00848904060366,
    "south": 44.99151095939634,
    "east": 5.019627739434661,
@@ -154,7 +154,7 @@
    "about": "sky-test-clouds"
   },
   {
-   "file": "sky-test-comet.json",
+   "file": "sky-test-comet.json?v=49d691c3b1",
    "north": 48.865089040603664,
    "south": 48.84811095939634,
    "east": 2.3651023390934207,
@@ -162,7 +162,7 @@
    "about": "sky-test-comet"
   },
   {
-   "file": "sky-test-eclipse.json",
+   "file": "sky-test-eclipse.json?v=f293cc4ed0",
    "north": 49.26678904060366,
    "south": 49.249810959396335,
    "east": 4.044707033731426,
@@ -170,7 +170,7 @@
    "about": "sky-test-eclipse"
   },
   {
-   "file": "sky-test-meteors.json",
+   "file": "sky-test-meteors.json?v=aa0ae8c998",
    "north": 45.708489040603666,
    "south": 45.69151095939634,
    "east": 4.812154717659746,
@@ -178,7 +178,7 @@
    "about": "sky-test-meteors"
   },
   {
-   "file": "sky-test-milkyway.json",
+   "file": "sky-test-milkyway.json?v=655ff8a1aa",
    "north": -23.991510959396336,
    "south": -24.008489040603664,
    "east": -69.99070758818551,
@@ -186,7 +186,7 @@
    "about": "sky-test-milkyway"
   },
   {
-   "file": "sky-test-moon-aureole.json",
+   "file": "sky-test-moon-aureole.json?v=9cc0388b3c",
    "north": 45.00848904060366,
    "south": 44.99151095939634,
    "east": 5.012005316353239,
@@ -194,7 +194,7 @@
    "about": "sky-test-moon-aureole"
   },
   {
-   "file": "sky-test-zodiacal.json",
+   "file": "sky-test-zodiacal.json?v=32f1986696",
    "north": 28.308489040603664,
    "south": 28.291510959396337,
    "east": -16.490358592904368,

@@ -88,6 +88,7 @@ class RailwayArchiveBuilder {
     }
     entries.sort((a, b) => a.file.localeCompare(b.file))
     await writeFile(join(out, "index.json"), JSON.stringify({ version: 1, entries }, null, 1), "utf8")
+    await ArchivedPlaces.stampVersions(out)
     console.log(`public/railways: ${entries.length} places`)
   }
 
