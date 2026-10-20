@@ -46,7 +46,7 @@ export const caseEditorMessages_fr: CaseEditorMessages = {
   caseTime: "Date",
   eventsTab: "Événements",
   fileTab: "Fichier",
-  importFile: "Charger un fichier JSON",
+  importFile: "Charger un fichier de dossier",
   importUrl: "Ou depuis une adresse",
   importButton: "Charger",
   fileNotACase: "Ce fichier n'est pas un dossier (il n'a pas d'événements).",

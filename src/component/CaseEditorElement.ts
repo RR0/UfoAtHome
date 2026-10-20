@@ -138,7 +138,7 @@ const TEMPLATE = `
   </section>
   <section class="group-panel" id="group-case-file" aria-labelledby="label-case-file-group" hidden>
     <div class="row toolbar">
-      <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
+      <label><span id="label-import-file">Load case file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
       <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/case.json"/></label>
       <button id="import-url-button" type="button">Load</button>
       <button id="export" type="button">Save</button>

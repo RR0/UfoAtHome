@@ -263,7 +263,7 @@ export const html = `
      component could carry and most authors never need it. -->
 <section class="group-panel" id="group-file" aria-labelledby="label-file-group" hidden>
   <div class="toolbar">
-    <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json,application/zip,.zip"/></label>
+    <label><span id="label-import-file">Load sighting file</span> <input id="import-file" type="file" accept="application/json,.json,application/zip,.zip"/></label>
     <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
     <button id="import-url-button" type="button">Load</button>
     <button id="export" type="button">Save</button>

@@ -96,7 +96,7 @@ const TEMPLATE = `
     <label class="fill"><span id="label-url">Transcript</span> <input id="url" type="text" autocomplete="off" spellcheck="false" placeholder="interview-….json"/></label>
   </div>
   <div class="row toolbar">
-    <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json,.txt,.md,.vtt,.srt,text/*"/></label>
+    <label><span id="label-import-file">Load a file (JSON, text, WebVTT, SRT)</span> <input id="import-file" type="file" accept="application/json,.json,.txt,.md,.vtt,.srt,text/*"/></label>
     <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/interview.json"/></label>
     <button id="import-url-button" type="button">Load</button>
     <button id="save" type="button">Save</button>

@@ -96,7 +96,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   identityInitials: "Replace with initials",
   identityKeep: "Save anyway",
   identityBack: "Go back",
-  importFile: "Load JSON file",
+  importFile: "Load sighting file",
   importUrl: "Or load from URL",
   importUrlPlaceholder: "https://…/sighting.json",
   importButton: "Load",
