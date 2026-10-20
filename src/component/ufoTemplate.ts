@@ -686,6 +686,8 @@ canvas[data-cursor="rotate"] {
 }
 .stage.minified:hover .mini-bar,
 .stage.minified:not(.paused) .mini-bar,
+/* Once played, the bar stays under the cover, saying how far the reader got, as on the video sites. */
+.stage.minified:not(.unstarted) .mini-bar,
 .stage.minified:hover .mini-mute:not([hidden]) {
   opacity: 1;
   pointer-events: auto;

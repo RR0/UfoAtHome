@@ -94,7 +94,7 @@ export const MILESTONES_ATTRIBUTE = "hide-milestones"
 /**
  * A recording shown as one thumbnail among many, as the video sites list theirs: no controls, only a thin played bar along the bottom
  * edge, the time left in the bottom-right corner and the sound button in the top-right one. Hovering plays it, silent until asked;
- * leaving takes it back to its start, and its cover. A click is the page's: on a list, it opens the recording in a full player.
+ * leaving pauses it under its cover again, and the next hover goes on from where it stopped. A click is the page's: on a list, it opens the recording in a full player.
  */
 export const MINIFIED_ATTRIBUTE = "minified"
 
@@ -903,12 +903,12 @@ export class UfoElement extends HTMLElement {
   /** Whether the mouse is over a thumbnail: one hovered before its recording arrived plays as soon as it does. */
   private minifiedHovered = false
 
-  /** The mouse gone, the thumbnail is back to what it showed before: its start, and its cover if it has one (see MINIFIED_RESET_EVENT). */
+  /** The mouse gone, the thumbnail pauses where it is and shows its cover again, if it has one (see MINIFIED_RESET_EVENT): the next hover
+   * goes on from there, as on the video sites, not from the start. */
   private readonly handleMinifiedLeave = (event: PointerEvent): void => {
     if (!this.minified || event.pointerType === "touch") return
     this.minifiedHovered = false
     this.pause()
-    this.player.seek(0)
     this.dispatchEvent(new CustomEvent(MINIFIED_RESET_EVENT))
   }
 
@@ -3297,6 +3297,6 @@ export function registerUfo(): void {
  * been checked: `detail.issues` is the list of RecordingIssue, empty when there is nothing to say. */
 export const RECORDING_ISSUES_EVENT = "recordingissues"
 
-/** Fired by a minified <rr0-ufo> (see MINIFIED_ATTRIBUTE) when the mouse leaves it and it is back at its start: a composing element
+/** Fired by a minified <rr0-ufo> (see MINIFIED_ATTRIBUTE) when the mouse leaves it and it pauses: a composing element
  * puts its cover back up. */
 export const MINIFIED_RESET_EVENT = "minifiedreset"

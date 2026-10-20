@@ -855,7 +855,7 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.addEventListener("timeupdate", this.handleTimeUpdate)
     // Playing is what takes the cover away — the scene behind it is shown at once if whole, else behind the loader.
     this.ufoElement.addEventListener("playrequest", () => this.poster.release())
-    // A thumbnail the mouse has left is back at its start, under its cover again.
+    // A thumbnail the mouse has left is paused, under its cover again.
     this.ufoElement.addEventListener(MINIFIED_RESET_EVENT, () => this.poster.restore())
     this.ufoElement.seekPreviewPainter = (t, canvas) => this.seekPreviewOf(canvas).paint(t, canvas)
     // The weather is heard through this element, the button that silences it is the player's.

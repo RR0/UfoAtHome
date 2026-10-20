@@ -65,7 +65,7 @@ const mount = async card => {
   // quarters of the sky it was meant to sit in a corner of. The button stays, and the full-size
   // View page opens the map on its own.
   scene.setAttribute("show-observer-map", "false")
-  // A thumbnail as on a list of videos: the mouse over it plays it, leaving takes it back to its cover, and a click opens it in the full
+  // A thumbnail as on a list of videos: the mouse over it plays it, leaving pauses it under its cover (the next hover goes on from there), and a click opens it in the full
   // player (see MINIFIED_ATTRIBUTE).
   scene.setAttribute("minified", "")
   card.querySelector(".demo-mount").replaceChildren(scene)
