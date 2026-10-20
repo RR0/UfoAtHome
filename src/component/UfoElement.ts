@@ -719,16 +719,46 @@ export class UfoElement extends HTMLElement {
     this.miniPlayed = this.shadow.getElementById("mini-played")!
     this.miniRemaining = this.shadow.getElementById("mini-remaining")!
     this.miniMuteButton = this.shadow.getElementById("mini-mute") as HTMLButtonElement
+    this.miniDot = this.shadow.getElementById("mini-dot")!
+    this.miniScrubTime = this.shadow.getElementById("mini-scrub-time")!
     const miniBar = this.shadow.getElementById("mini-bar")!
-    miniBar.addEventListener("click", event => {
-      // A click on the bar sets the position there, as on the video sites — and does not open the recording, which the rest of the
-      // thumbnail does.
-      event.stopPropagation()
-      const rect = miniBar.getBoundingClientRect()
+    const miniTrack = miniBar.querySelector(".mini-track") as HTMLElement
+    // A press on the bar sets the position there and a drag moves it, as on the video sites. The recording waits while dragged, and
+    // goes on from where it was let go if it was playing.
+    const scrubTo = (event: PointerEvent) => {
+      const rect = miniTrack.getBoundingClientRect()
       const duration = this.player.seekableDuration
       if (rect.width <= 0 || duration <= 0) return
-      this.player.seek(Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1) * duration)
+      const t = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1) * duration
+      this.player.seek(t)
+      this.miniScrubTime.textContent = this.formatElapsedAt(t)
+      this.miniScrubTime.style.left = this.miniDot.style.left
+    }
+    let resumeAfterScrub = false
+    miniBar.addEventListener("pointerdown", event => {
+      if (event.button !== 0) return
+      event.stopPropagation()
+      miniBar.setPointerCapture(event.pointerId)
+      miniBar.classList.add("scrubbing")
+      resumeAfterScrub = this.playRequested
+      this.pause()
+      this.miniScrubTime.hidden = false
+      scrubTo(event)
     })
+    miniBar.addEventListener("pointermove", event => {
+      if (miniBar.hasPointerCapture(event.pointerId)) scrubTo(event)
+    })
+    const endScrub = (event: PointerEvent) => {
+      if (!miniBar.classList.contains("scrubbing")) return
+      miniBar.classList.remove("scrubbing")
+      if (miniBar.hasPointerCapture(event.pointerId)) miniBar.releasePointerCapture(event.pointerId)
+      this.miniScrubTime.hidden = true
+      if (resumeAfterScrub) this.play()
+    }
+    miniBar.addEventListener("pointerup", endScrub)
+    miniBar.addEventListener("pointercancel", endScrub)
+    // The click that ends a press on the bar is not the thumbnail's, which opens the recording.
+    miniBar.addEventListener("click", event => event.stopPropagation())
     this.miniMuteButton.addEventListener("click", event => {
       // The thumbnail's own click is the page's (it opens the recording): this one is only the sound's.
       event.stopPropagation()
@@ -1703,9 +1733,15 @@ export class UfoElement extends HTMLElement {
   /** The thumbnail's own bar and time left — see MINIFIED_ATTRIBUTE. */
   private paintMiniProgress(t: number): void {
     const duration = this.player.seekableDuration
-    this.miniPlayed.style.width = `${duration > 0 ? Math.min(Math.max(t / duration, 0), 1) * 100 : 0}%`
+    const share = `${duration > 0 ? Math.min(Math.max(t / duration, 0), 1) * 100 : 0}%`
+    this.miniPlayed.style.width = share
+    this.miniDot.style.left = share
     this.miniRemaining.textContent = this.formatRemaining(t)
   }
+
+  private readonly miniDot: HTMLElement
+  /** The position being dragged to, over the handle of a thumbnail's timeline. */
+  private readonly miniScrubTime: HTMLElement
 
   private paintSeekProgress(t: number): void {
     for (const segment of this.seekSegmentList) segment.played.style.width = UfoElement.fillOf(segment, t)
@@ -3248,6 +3284,13 @@ export class UfoElement extends HTMLElement {
     return this.canShowClockTime
       ? formatClockTime(msToTimeOfDay(this.realStartMs! + realElapsedMs))
       : formatElapsed(realElapsedMs)
+  }
+
+  /** How far into the observation `t` is, as elapsed time: what a thumbnail's handle says while dragged. */
+  private formatElapsedAt(t: number): string {
+    const timelineDuration = this.currentSighting.timeline.duration
+    if (this.realDurationMs === undefined) return formatElapsed(t)
+    return formatElapsed(timelineDuration > 0 && t <= timelineDuration ? (t / timelineDuration) * this.realDurationMs : t)
   }
 
   /** How long is left to play from `t`, as elapsed time whatever the counters read: a thumbnail's corner, as on the video sites. */

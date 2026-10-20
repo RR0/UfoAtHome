@@ -18,7 +18,7 @@ export const html = `
   <!-- A thumbnail's only chrome (see MINIFIED_ATTRIBUTE): the played bar along the bottom edge, the time left above its right end,
        the sound button in the top-right corner. Hidden in every other player. -->
   <!-- The bar is also where a click sets the position, as on the video sites: a band taller than the line, for a pointer to find. -->
-  <div id="mini-bar" class="mini-bar" aria-hidden="true"><div class="mini-track"><div id="mini-played" class="mini-played"></div></div></div>
+  <div id="mini-bar" class="mini-bar" aria-hidden="true"><div class="mini-track"><div id="mini-played" class="mini-played"></div><div id="mini-dot" class="mini-dot"></div><span id="mini-scrub-time" class="mini-scrub-time" hidden></span></div></div>
   <span id="mini-remaining" class="mini-remaining"></span>
   <button id="mini-mute" type="button" class="mini-mute" title="Mute" aria-label="Mute" aria-pressed="false" hidden></button>
   <!-- What is being played, top left over the picture as on a video site, and there with the controls
@@ -649,9 +649,56 @@ canvas[data-cursor="rotate"] {
   background: rgba(255, 255, 255, 0.3);
   transition: height 0.1s;
 }
-/* Thicker under the pointer, as on the video sites: it says the bar can be clicked. */
-.mini-bar:hover .mini-track {
-  height: 5px;
+/* Hovered, the line along the edge becomes a timeline to drag, as on the video sites: inset from the edges, with a handle at the
+   position (see UfoElement's mini bar). */
+.stage.minified:hover .mini-bar {
+  height: 26px;
+}
+.stage.minified:hover .mini-track {
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  height: 4px;
+  border-radius: 2px;
+}
+.mini-dot {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #f00;
+  transform: translate(-50%, -50%);
+}
+.stage.minified:hover .mini-dot {
+  display: block;
+}
+.mini-bar:hover .mini-dot,
+.mini-bar.scrubbing .mini-dot {
+  width: 14px;
+  height: 14px;
+}
+/* The position being dragged to, over the handle. */
+.mini-scrub-time {
+  position: absolute;
+  bottom: 12px;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.mini-scrub-time[hidden] {
+  display: none;
+}
+/* Above the timeline while it is there. */
+.stage.minified:hover .mini-remaining {
+  bottom: 26px;
 }
 .mini-played {
   height: 100%;
