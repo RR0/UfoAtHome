@@ -2,6 +2,7 @@ import type { UfoMessages } from "./UfoMessages.js"
 
 export const ufoMessages_it: UfoMessages = {
   play: "Riproduci",
+  clickToPlay: "Clicca per riprodurre",
   pause: "Pausa",
   noDuration: "Nessuna durata di osservazione",
   currentPosition: "Posizione attuale",

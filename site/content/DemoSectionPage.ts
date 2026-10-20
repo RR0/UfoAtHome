@@ -65,6 +65,9 @@ const mount = async card => {
   // quarters of the sky it was meant to sit in a corner of. The button stays, and the full-size
   // View page opens the map on its own.
   scene.setAttribute("show-observer-map", "false")
+  // A thumbnail as on a list of videos: the mouse over it plays it, leaving takes it back to its cover, and a click opens it in the full
+  // player (see MINIFIED_ATTRIBUTE).
+  scene.setAttribute("minified", "")
   card.querySelector(".demo-mount").replaceChildren(scene)
   await customElements.whenDefined("rr0-scene")
   await scene.loadFromSrc(card.dataset.src)
@@ -101,9 +104,8 @@ const onScreen = new IntersectionObserver(entries => {
     }
     // Nothing starts on its own. Seventeen skies playing at once is seventeen WebGL contexts each
     // asking for sixty frames a second, and the reader is looking at one of them — so a card shows
-    // its first frame and its own play button, and runs when it is asked to. What is still
-    // automatic is STOPPING: a scene the reader has scrolled past keeps its context but gives back
-    // the frames.
+    // its cover or first frame, and runs while the mouse is over it. What is still automatic is
+    // STOPPING: a scene the reader has scrolled past keeps its context but gives back the frames.
     const scene = card.querySelector("rr0-scene")
     if (!entry.isIntersecting) scene?.ufoElement?.pause()
   }
@@ -112,6 +114,9 @@ const onScreen = new IntersectionObserver(entries => {
 for (const card of cards) {
   nearby.observe(card)
   onScreen.observe(card)
+  // The picture is the way in, as its title is: a thumbnail's click opens the recording in the full player.
+  const link = card.querySelector("h3 a")
+  card.querySelector(".demo-mount").addEventListener("click", () => { if (link) location.href = link.href })
 }`
   }
 

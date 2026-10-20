@@ -15,6 +15,11 @@ export const html = `
   <!-- What a play or pause just did, shown for a moment over the picture as on a video site (see
        UfoElement.flashPlayback). Inert to the pointer: a click through it still reaches the canvas. -->
   <div id="playback-flash" class="playback-flash" aria-hidden="true"></div>
+  <!-- A thumbnail's only chrome (see MINIFIED_ATTRIBUTE): the played bar along the bottom edge, the time left above its right end,
+       the sound button in the top-right corner. Hidden in every other player. -->
+  <div class="mini-bar" aria-hidden="true"><div id="mini-played" class="mini-played"></div></div>
+  <span id="mini-remaining" class="mini-remaining"></span>
+  <button id="mini-mute" type="button" class="mini-mute" title="Mute" aria-label="Mute" aria-pressed="false" hidden></button>
   <!-- What is being played, top left over the picture as on a video site, and there with the controls
        only (see UfoElement.syncPlayerTitle). Inert to the pointer. -->
   <div id="player-title" class="player-title auto-hide" hidden></div>
@@ -599,6 +604,94 @@ canvas[data-cursor="rotate"] {
 }
 .milestone-caption b {
   font-weight: 700;
+}
+/* A recording not played yet says a click plays it, as a video under its cover does — see UfoElement.updateStartState. An editor's
+   own cursor (data-cursor) still wins. */
+.stage.unstarted #canvas:not([data-cursor]),
+.stage.minified #canvas:not([data-cursor]) {
+  cursor: pointer;
+}
+/* A thumbnail (see MINIFIED_ATTRIBUTE): none of a player's controls, only its own three. */
+.mini-bar,
+.mini-remaining,
+.mini-mute {
+  display: none;
+}
+.stage.minified .toolbar,
+.stage.minified .corner-buttons,
+.stage.minified .player-title,
+.stage.minified .issues,
+.stage.minified .milestone-caption,
+.stage.minified .playback-flash,
+.stage.minified .observer-map-panel {
+  display: none !important;
+}
+.stage.minified .mini-bar {
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 3;
+}
+.mini-played {
+  height: 100%;
+  width: 0;
+  background: #f00;
+}
+.stage.minified .mini-remaining {
+  display: block;
+  position: absolute;
+  right: 6px;
+  bottom: 8px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+  pointer-events: none;
+  z-index: 3;
+}
+.stage.minified .mini-mute:not([hidden]) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 3;
+}
+.stage.minified .mini-mute svg {
+  width: 100%;
+  height: 100%;
+}
+.stage.minified:hover .mini-bar,
+.stage.minified:not(.paused) .mini-bar,
+.stage.minified:hover .mini-mute:not([hidden]) {
+  opacity: 1;
+  pointer-events: auto;
+}
+.stage.minified:hover .mini-bar {
+  pointer-events: none;
 }
 /* Only where there is a hover to speak of: a touch screen keeps ":hover" on whatever was touched last,
    and a focus ring on the button just tapped — either would keep the controls over the picture for

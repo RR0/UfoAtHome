@@ -4,6 +4,8 @@ import type { RecordingIssueTemplates } from "../../engine/persistence/Recording
 
 export interface UfoMessages {
   play: string
+  /** The title of a recording not yet played, over its cover or its first frame: what a click on it does. */
+  clickToPlay: string
   pause: string
   noDuration: string
   currentPosition: string

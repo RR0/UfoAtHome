@@ -7,7 +7,7 @@ import type { CloudRendering } from "../render3d/LayeredCloudSystem.js"
 import { cloudOffsetAt, cloudPrerollAt } from "../render3d/CloudMotion.js"
 import { html, css } from "./sceneTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
-import { UfoElement, registerUfo, UFO_ELEMENT_NAME, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
+import { UfoElement, registerUfo, UFO_ELEMENT_NAME, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, MINIFIED_ATTRIBUTE, MINIFIED_RESET_EVENT } from "./UfoElement.js"
 import { SceneRenderer } from "../render3d/SceneRenderer.js"
 import { SeekPreview } from "./SeekPreview.js"
 import type { PreviewableScene } from "./SeekPreview.js"
@@ -308,7 +308,7 @@ export class SceneElement extends HTMLElement {
   }
 
   static get observedAttributes(): string[] {
-    return ["src", "star-catalog-src", "deep-star-catalog-src", "show-compass", "max-pixel-ratio", OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]
+    return ["src", "star-catalog-src", "deep-star-catalog-src", "show-compass", "max-pixel-ratio", OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, MINIFIED_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -855,6 +855,8 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.addEventListener("timeupdate", this.handleTimeUpdate)
     // Playing is what takes the cover away — the scene behind it is shown at once if whole, else behind the loader.
     this.ufoElement.addEventListener("playrequest", () => this.poster.release())
+    // A thumbnail the mouse has left is back at its start, under its cover again.
+    this.ufoElement.addEventListener(MINIFIED_RESET_EVENT, () => this.poster.restore())
     this.ufoElement.seekPreviewPainter = (t, canvas) => this.seekPreviewOf(canvas).paint(t, canvas)
     // The weather is heard through this element, the button that silences it is the player's.
     this.ufoElement.addEventListener("mutedchange", () => this.applyLevel())
@@ -1045,16 +1047,18 @@ export class SceneElement extends HTMLElement {
       const ratio = Number(newValue)
       this.sceneRenderer.setMaxPixelRatio(Number.isFinite(ratio) && ratio > 0 ? ratio : Math.min(window.devicePixelRatio || 1, 2))
     }
-    if ((name === OBSERVER_MAP_ATTRIBUTE || name === MILESTONES_ATTRIBUTE) && newValue !== oldValue) {
+    if ((name === OBSERVER_MAP_ATTRIBUTE || name === MILESTONES_ATTRIBUTE || name === MINIFIED_ATTRIBUTE) && newValue !== oldValue) {
       this.forwardPlayerAttributes()
     }
+    // A thumbnail has no credits button nor names under the pointer: its own chrome is the player's three (see MINIFIED_ATTRIBUTE).
+    if (name === MINIFIED_ATTRIBUTE) this.stageElement.classList.toggle("minified", newValue !== null)
   }
 
   /** Passes the page's own instructions about the player's overlays down to the `<rr0-ufo>` that
    * owns them — they live on the nested player's stage, but a page embedding this element has never
    * heard of that player and writes the tag it actually wrote. Same for `<rr0-sighting>` above. */
   private forwardPlayerAttributes(): void {
-    for (const attribute of [OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]) {
+    for (const attribute of [OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, MINIFIED_ATTRIBUTE]) {
       // The value too, not only the presence: `show-observer-map="false"` says something.
       const value = this.getAttribute(attribute)
       if (value === null) this.ufoElement.removeAttribute(attribute)

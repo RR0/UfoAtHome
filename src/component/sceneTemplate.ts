@@ -202,6 +202,11 @@ export const css = `
 .scene-poster[hidden] {
   display: none;
 }
+/* A thumbnail (see MINIFIED_ATTRIBUTE): neither the credits nor the names of what is under the pointer. */
+.stage.minified .credits-btn,
+.stage.minified .hover-tooltip {
+  display: none !important;
+}
 .scene-loader[hidden] {
   display: none;
 }

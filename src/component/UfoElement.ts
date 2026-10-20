@@ -91,9 +91,16 @@ export const OBSERVER_MAP_ATTRIBUTE = "show-observer-map"
  */
 export const MILESTONES_ATTRIBUTE = "hide-milestones"
 
+/**
+ * A recording shown as one thumbnail among many, as the video sites list theirs: no controls, only a thin played bar along the bottom
+ * edge, the time left in the bottom-right corner and the sound button in the top-right one. Hovering plays it, silent until asked;
+ * leaving takes it back to its start, and its cover. A click is the page's: on a list, it opens the recording in a full player.
+ */
+export const MINIFIED_ATTRIBUTE = "minified"
+
 export class UfoElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE]
+    return ["src", OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, MINIFIED_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -709,6 +716,16 @@ export class UfoElement extends HTMLElement {
     this.moreButton = this.shadow.getElementById("controls-more") as HTMLButtonElement
     this.moreButton.addEventListener("click", () => this.setControlsFolded(this.controlsRow.classList.contains("more-open")))
     this.muteButton.addEventListener("click", () => this.toggleMuted())
+    this.miniPlayed = this.shadow.getElementById("mini-played")!
+    this.miniRemaining = this.shadow.getElementById("mini-remaining")!
+    this.miniMuteButton = this.shadow.getElementById("mini-mute") as HTMLButtonElement
+    this.miniMuteButton.addEventListener("click", event => {
+      // The thumbnail's own click is the page's (it opens the recording): this one is only the sound's.
+      event.stopPropagation()
+      this.toggleMuted()
+    })
+    this.stageElement.addEventListener("pointerenter", this.handleMinifiedEnter)
+    this.stageElement.addEventListener("pointerleave", this.handleMinifiedLeave)
     this.volumeInput.addEventListener("input", () => {
       // Dragging down to nothing is muting, and dragging up from it is not: as on the video sites.
       this.setVolume(Number(this.volumeInput.value))
@@ -759,7 +776,7 @@ export class UfoElement extends HTMLElement {
     for (const type of ["touchend", "click"]) this.stageElement.addEventListener(type, () => this.sightingAudio.resume(), true)
     this.stageElement.addEventListener("pointermove", () => this.touchedStage())
     this.canvas.addEventListener("click", event => {
-      if (!this.enableClickToPlay) return
+      if (!this.enableClickToPlay || this.minified) return
       // The touch that brought the controls back is not also a request to pause what is playing.
       if (this.tapRevealedOnly) {
         this.tapRevealedOnly = false
@@ -775,7 +792,7 @@ export class UfoElement extends HTMLElement {
       // Gated on the same flag as the click above, and for the same reason: where a composing
       // element has taken the canvas over for something else (the editor edits shapes on it),
       // this is one of its gestures and not ours.
-      if (!this.enableClickToPlay) return
+      if (!this.enableClickToPlay || this.minified) return
       // Selecting the surrounding page is never what a double-click on a picture meant.
       event.preventDefault()
       this.restorePlayback()
@@ -857,6 +874,52 @@ export class UfoElement extends HTMLElement {
     if (name === MILESTONES_ATTRIBUTE) {
       this.setMilestonesShown(!this.hasAttribute(MILESTONES_ATTRIBUTE))
     }
+    if (name === MINIFIED_ATTRIBUTE) {
+      const minified = this.minified
+      this.stageElement.classList.toggle("minified", minified)
+      // Hovering is not a gesture a browser lets sound start from, and a list that spoke at every pass of the pointer would be
+      // unbearable anyway: silent until the reader asks, as on the video sites.
+      if (minified && oldValue === null) this.muted = true
+      this.updateStartState()
+    }
+  }
+
+  /** Whether this player is a thumbnail — see MINIFIED_ATTRIBUTE. */
+  get minified(): boolean {
+    return this.hasAttribute(MINIFIED_ATTRIBUTE)
+  }
+
+  private readonly miniPlayed: HTMLElement
+  private readonly miniRemaining: HTMLElement
+  private readonly miniMuteButton: HTMLButtonElement
+
+  /** A mouse over a thumbnail plays it. Not a touch, which has no "over": on a phone, a tap is the page's. */
+  private readonly handleMinifiedEnter = (event: PointerEvent): void => {
+    if (!this.minified || event.pointerType === "touch") return
+    this.play()
+  }
+
+  /** The mouse gone, the thumbnail is back to what it showed before: its start, and its cover if it has one (see MINIFIED_RESET_EVENT). */
+  private readonly handleMinifiedLeave = (event: PointerEvent): void => {
+    if (!this.minified || event.pointerType === "touch") return
+    this.pause()
+    this.player.seek(0)
+    this.dispatchEvent(new CustomEvent(MINIFIED_RESET_EVENT))
+  }
+
+  /** Whether the recording has been played since it was loaded — see updateStartState. */
+  private started = false
+
+  /**
+   * A recording not yet played says what a click on it does, as a video does under its cover: the pointer becomes a hand, and its
+   * title says "click to play". Not where the click is something else's (an editor's canvas, a thumbnail's page).
+   */
+  private updateStartState(): void {
+    if (this.playRequested) this.started = true
+    const unstarted = !this.started && this.enableClickToPlay
+    this.stageElement.classList.toggle("unstarted", unstarted)
+    if (unstarted && !this.minified) this.canvas.title = this.messages.clickToPlay
+    else this.canvas.removeAttribute("title")
   }
 
   /** Fetches a SightingRecordingJson from `url` and loads it — what the `src` attribute uses. */
@@ -891,6 +954,7 @@ export class UfoElement extends HTMLElement {
     this.mapFitButton.hidden = true
     this.observerMapAsked = false
     this.player = this.createPlayer()
+    this.started = false
     this.syncPlayerTitle()
     this.updateTimeLabels()
     this.updatePlayPauseButton()
@@ -1064,6 +1128,8 @@ export class UfoElement extends HTMLElement {
 
   /** Tells a composing element the reader asked to play — whether it starts now or when its loader goes (see playRequested). */
   private announcePlayRequest(): void {
+    this.started = true
+    this.updateStartState()
     this.dispatchEvent(new CustomEvent("playrequest"))
   }
 
@@ -1617,6 +1683,13 @@ export class UfoElement extends HTMLElement {
 
   /** Fills the segments up to the playhead and moves the dot to it. Cheap enough for every frame:
    * a handful of style writes, no layout read. */
+  /** The thumbnail's own bar and time left — see MINIFIED_ATTRIBUTE. */
+  private paintMiniProgress(t: number): void {
+    const duration = this.player.seekableDuration
+    this.miniPlayed.style.width = `${duration > 0 ? Math.min(Math.max(t / duration, 0), 1) * 100 : 0}%`
+    this.miniRemaining.textContent = this.formatRemaining(t)
+  }
+
   private paintSeekProgress(t: number): void {
     for (const segment of this.seekSegmentList) segment.played.style.width = UfoElement.fillOf(segment, t)
     const duration = this.player.seekableDuration
@@ -2019,6 +2092,7 @@ export class UfoElement extends HTMLElement {
     this.keepObserverMapClear()
     this.seekInput.value = String(t)
     this.paintSeekProgress(t)
+    if (this.minified) this.paintMiniProgress(t)
     this.timeStartLabel.textContent = this.formatPosition(t)
     this.showMilestoneAt(t)
     this.paintObserverMap(t)
@@ -2297,6 +2371,7 @@ export class UfoElement extends HTMLElement {
     if (isPlaying !== this.wasPlaying && isPlaying && this.hoverless
       && (!this.quietControlsValue || this.stageElement.classList.contains("touched"))) this.revealControls()
     this.wasPlaying = isPlaying
+    this.updateStartState()
     UfoElement.setIcon(this.playPauseButton, isPlaying ? PlayerIcons.PAUSE : PlayerIcons.PLAY)
     // Nothing to play with zero observation duration (no declared duration and nothing recorded
     // yet) — disabled rather than silently doing nothing on click, which otherwise briefly
@@ -2999,6 +3074,12 @@ export class UfoElement extends HTMLElement {
   private updateMuteButton(): void {
     // With no sound track the button is still there, as a muted speaker that cannot be pressed, and there is no volume to set.
     const silent = !this.hasSound
+    this.miniMuteButton.hidden = silent
+    this.miniMuteButton.setAttribute("aria-pressed", String(this.mutedState))
+    UfoElement.setIcon(this.miniMuteButton, this.mutedState ? PlayerIcons.MUTED : PlayerIcons.VOLUME)
+    const miniLabel = this.mutedState ? this.messages.unmute : this.messages.mute
+    this.miniMuteButton.title = miniLabel
+    this.miniMuteButton.setAttribute("aria-label", miniLabel)
     this.muteButton.disabled = silent
     this.volumeInput.hidden = silent
     if (silent) {
@@ -3126,6 +3207,7 @@ export class UfoElement extends HTMLElement {
 
     this.timeEndLabel.textContent = this.formatEndOfTimeline()
     this.timeStartLabel.textContent = this.formatPosition(this.player.time)
+    this.paintMiniProgress(this.player.time)
     // Whether there is a second reading to switch to is decided by realStartMs, which was only
     // just recomputed a few lines above: a sighting loaded after construction changes the answer.
     this.updateTimeLabelTitles()
@@ -3149,6 +3231,14 @@ export class UfoElement extends HTMLElement {
     return this.canShowClockTime
       ? formatClockTime(msToTimeOfDay(this.realStartMs! + realElapsedMs))
       : formatElapsed(realElapsedMs)
+  }
+
+  /** How long is left to play from `t`, as elapsed time whatever the counters read: a thumbnail's corner, as on the video sites. */
+  private formatRemaining(t: number): string {
+    const timelineDuration = this.currentSighting.timeline.duration
+    if (this.realDurationMs === undefined) return formatElapsed(Math.max(0, timelineDuration - t))
+    const realElapsedMs = timelineDuration > 0 && t <= timelineDuration ? (t / timelineDuration) * this.realDurationMs : t
+    return formatElapsed(Math.max(0, this.realDurationMs - realElapsedMs))
   }
 
   /**
@@ -3199,3 +3289,7 @@ export function registerUfo(): void {
 /** Fired by <rr0-ufo> (and so through every component that holds one) once a loaded recording has
  * been checked: `detail.issues` is the list of RecordingIssue, empty when there is nothing to say. */
 export const RECORDING_ISSUES_EVENT = "recordingissues"
+
+/** Fired by a minified <rr0-ufo> (see MINIFIED_ATTRIBUTE) when the mouse leaves it and it is back at its start: a composing element
+ * puts its cover back up. */
+export const MINIFIED_RESET_EVENT = "minifiedreset"

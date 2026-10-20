@@ -3,6 +3,7 @@ import { RecordingIssues } from "../../engine/persistence/RecordingIssue.js"
 
 export const ufoMessages_en: UfoMessages = {
   play: "Play",
+  clickToPlay: "Click to play",
   pause: "Pause",
   noDuration: "No observation duration",
   currentPosition: "Current position",
