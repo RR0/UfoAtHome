@@ -1,1 +1,34 @@
-{"version": 1, "id": "sky-test-air-traffic", "image": "https://ufoathome.org/demo-data/share/sky-test-air-traffic.jpg", "summaryTime": 8, "tags": ["aircraft", "air traffic"], "description": {"fr": "Trafic aérien réel autour de Gonesse (près de Roissy), le 30 décembre 2025 à 16 h 10 UTC : les avions du relevé d'adsb.lol avec leurs feux, le Soleil qui les éclaire encore et les traînées que l'air permettait", "en": "Real air traffic around Gonesse (near Roissy), 30 December 2025, 16:10 UTC: the aircraft of the adsb.lol record with their lamps, the Sun that still lights them and the trails the air allowed", "es": "Tráfico aéreo real alrededor de Gonesse (cerca de Roissy), 30 de diciembre de 2025, 16:10 UTC: los aviones del registro de adsb.lol con sus luces, el Sol que aún los ilumina y las estelas que el aire permitía", "it": "Traffico aereo reale intorno a Gonesse (vicino a Roissy), 30 dicembre 2025, 16:10 UTC: gli aerei dell'archivio di adsb.lol con le loro luci, il Sole che li illumina ancora e le scie che l'aria consentiva"}, "time": {"year": 2025, "month": 12, "day": 30, "hour": 16, "minute": 10}, "utcOffsetHours": 0, "durationSeconds": 300, "place": [{"lat": 48.99, "lng": 2.45, "name": "Gonesse"}], "weatherTrack": {"keyframes": [{"t": 0, "weather": {"cloudCover": 0, "cloudDarkness": 0, "cloudBaseM": 2000, "lowerCloudCover": 0, "highCloudCover": 0, "precipitationType": "none", "precipitationIntensity": 0, "windDirectionDeg": 0, "windSpeed": 0, "storm": false}}]}, "timeline": {"keyframes": [{"t": 0, "shapes": []}], "order": [], "groups": []}, "observerTrack": {"keyframes": [{"t": 0, "pose": {"lat": 48.99, "lng": 2.45, "elevationM": 0, "headingDeg": 95, "pitchDeg": 28, "fovDeg": 60}}]}, "soundTrack": {"keyframes": []}, "decor": []}
+{"version": 1, "id": "sky-test-air-traffic", "image": "https://ufoathome.org/demo-data/share/sky-test-air-traffic.jpg", "summaryTime": 8, "tags": ["aircraft", "air traffic"], "description": {"fr": "Trafic aérien réel autour de Gonesse (près de Roissy), le 30 décembre 2025 à 16 h 10 UTC : les avions du relevé d'adsb.lol avec leurs feux, le Soleil qui les éclaire encore et les traînées que l'air permettait", "en": "Real air traffic around Gonesse (near Roissy), 30 December 2025, 16:10 UTC: the aircraft of the adsb.lol record with their lamps, the Sun that still lights them and the trails the air allowed", "es": "Tráfico aéreo real alrededor de Gonesse (cerca de Roissy), 30 de diciembre de 2025, 16:10 UTC: los aviones del registro de adsb.lol con sus luces, el Sol que aún los ilumina y las estelas que el aire permitía", "it": "Traffico aereo reale intorno a Gonesse (vicino a Roissy), 30 dicembre 2025, 16:10 UTC: gli aerei dell'archivio di adsb.lol con le loro luci, il Sole che li illumina ancora e le scie che l'aria consentiva"}, "time": {"year": 2025, "month": 12, "day": 30, "hour": 16, "minute": 10}, "utcOffsetHours": 0, "durationSeconds": 300, "place": [{"lat": 48.99, "lng": 2.45, "name": "Gonesse"}], "weatherTrack": {"keyframes": [{"t": 0, "weather": {"cloudCover": 0, "cloudDarkness": 0, "cloudBaseM": 2000, "lowerCloudCover": 0, "highCloudCover": 0, "precipitationType": "none", "precipitationIntensity": 0, "windDirectionDeg": 0, "windSpeed": 0, "storm": false}}]}, "timeline": {"keyframes": [{"t": 0, "shapes": []}], "order": [], "groups": []}, "observerTrack": {"keyframes": [{"t": 0, "pose": {"lat": 48.99, "lng": 2.45, "elevationM": 0, "headingDeg": 95, "pitchDeg": 28, "fovDeg": 60}}]}, "soundTrack": {"keyframes": []}, "decor": [],
+  "frozen": {
+    "relief": {
+      "src": "sky-test-air-traffic.relief.zip",
+      "takenOn": "2026-10-20",
+      "attribution": "Relief © IGN, LiDAR HD and RGE ALTI (Licence Ouverte 2.0) in France; © AWS Open Data (SRTM, ETOPO1) elsewhere"
+    },
+    "imagery": {
+      "src": "sky-test-air-traffic.imagery.zip",
+      "takenOn": "2026-10-20",
+      "attribution": "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+    },
+    "roads": {
+      "src": "sky-test-air-traffic.roads.json",
+      "takenOn": "2026-10-20",
+      "attribution": "Roads © IGN, BD TOPO, in France; © OpenStreetMap contributors elsewhere, as drawn today"
+    },
+    "water": {
+      "src": "sky-test-air-traffic.water.json",
+      "takenOn": "2026-10-20",
+      "attribution": "Water © IGN, BD TOPO (Licence Ouverte 2.0)"
+    },
+    "railways": {
+      "src": "sky-test-air-traffic.railways.json",
+      "takenOn": "2026-10-20",
+      "attribution": "Railways © OpenStreetMap contributors, as surveyed today"
+    },
+    "upperAir": {
+      "src": "sky-test-air-traffic.upper-air.json",
+      "takenOn": "2026-10-20",
+      "attribution": "Open-Meteo (historical forecast)"
+    }
+  }
+}
