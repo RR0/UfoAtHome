@@ -99,6 +99,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     pickOpticsAt(): undefined {
       return undefined
     }
+    pickRailwayAt(): undefined {
+      return undefined
+    }
     pickSatelliteAt(): undefined {
       return undefined
     }

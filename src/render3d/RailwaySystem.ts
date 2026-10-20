@@ -164,9 +164,14 @@ export class RailwaySystem {
   private static readonly STEEL_ALBEDO: [number, number, number] = [0.3, 0.31, 0.32]
   private static readonly COPPER_ALBEDO: [number, number, number] = [0.09, 0.085, 0.07]
 
+  /** How far from a line's centre line a point is still that line's (see lineAt): eight tracks, their masts, and a margin. */
+  static readonly LINE_REACH_M = 20
+
   readonly group = new Group()
   private stepM = RailwaySystem.STEP_M
   private drawn = 0
+  /** Each line laid, with its centre line on the group's ground plane: what lineAt looks through. */
+  private laid: { line: RailwayLine, centre: { x: number, z: number }[] }[] = []
 
   private readonly ballastMaterial = RailwaySystem.pebbled(RailwaySystem.lambert(RailwaySystem.BALLAST_ALBEDO, true))
   private readonly earthMaterial = RailwaySystem.lambert(RailwaySystem.BANK_ALBEDO, true)
@@ -216,6 +221,7 @@ export class RailwaySystem {
     }
     laid.forEach(({ line, layout }, n) => {
       this.lay(line, { ...layout, y: heights[n] }, groundYAt, batches)
+      this.laid.push({ line, centre: layout.centre })
       this.drawn++
     })
     const meshes: [Batch, Material, string, boolean][] = [
@@ -245,6 +251,40 @@ export class RailwaySystem {
       ;(child as Mesh).geometry?.dispose()
     }
     this.drawn = 0
+    this.laid = []
+  }
+
+  /**
+   * The line laid nearest a point of the group's own ground plane, within LINE_REACH_M of its centre line: what a hover tooltip names once the pointer
+   * has hit the ballast, a rail, a mast or a wire (see SceneRenderer.pickRailwayAt). Undefined where no line is that near.
+   */
+  lineAt(x: number, z: number): RailwayLine | undefined {
+    let best: { line: RailwayLine, distance: number } | undefined
+    for (const { line, centre } of this.laid) {
+      for (let i = 0; i < centre.length - 1; i++) {
+        const a = centre[i]
+        const b = centre[i + 1]
+        const dx = b.x - a.x
+        const dz = b.z - a.z
+        const length2 = dx * dx + dz * dz
+        const t = length2 === 0 ? 0 : Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / length2))
+        const distance = Math.hypot(x - (a.x + dx * t), z - (a.z + dz * t))
+        if (distance <= RailwaySystem.LINE_REACH_M && (!best || distance < best.distance)) best = { line, distance }
+      }
+    }
+    return best?.line
+  }
+
+  /** The height of a line's contact wire over the rail, metres: undefined for a line that has none (see catenary). */
+  contactHeightM(line: RailwayLine): number | undefined {
+    if (line.electrification !== "overhead" || line.kind === "subway" || line.kind === "funicular") return undefined
+    return RailwaySystem.catenaryOf(line).contactM
+  }
+
+  private static catenaryOf(line: RailwayLine) {
+    return line.kind === "tram" ? RailwaySystem.CATENARY.tram
+      : line.highSpeed ? RailwaySystem.CATENARY.highSpeed
+        : line.service ? RailwaySystem.CATENARY.service : RailwaySystem.CATENARY.rail
   }
 
   dispose(): void {
@@ -405,9 +445,7 @@ export class RailwaySystem {
     line: RailwayLine, profile: Profile, offsets: number[], railTopM: number, at: (i: number, acrossM: number, upM: number) => Point3, groundYAt: GroundYAt,
     batches: Record<"steel" | "wire", Batch>
   ): void {
-    const spec = line.kind === "tram" ? RailwaySystem.CATENARY.tram
-      : line.highSpeed ? RailwaySystem.CATENARY.highSpeed
-        : line.service ? RailwaySystem.CATENARY.service : RailwaySystem.CATENARY.rail
+    const spec = RailwaySystem.catenaryOf(line)
     const length = profile.along[profile.along.length - 1]
     const spans = Math.max(1, Math.round(length / spec.spanM))
     const span = length / spans

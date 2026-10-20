@@ -1,5 +1,6 @@
 import type { OpticsFeatureId } from "../../engine/atmosphere/HaloFeatures.js"
 import type { DecorKind } from "../../engine/model/Decor.js"
+import type { RailwayKind } from "../../render3d/terrain/RailwayProvider.js"
 import { Compass } from "../../engine/astronomy/Compass.js"
 
 /**
@@ -16,6 +17,26 @@ import { Compass } from "../../engine/astronomy/Compass.js"
  * after its discoverers read the same in every language, and are then shown as the catalogue has
  * them.
  */
+/** The words of the label of a railway pointed at, with their {fields}: see RailwayTooltip. */
+export interface RailwayTexts {
+  /** What runs on it, by kind, where the map names the line nothing. */
+  readonly kinds: Readonly<Record<RailwayKind, string>>
+  readonly highSpeed: string
+  readonly service: string
+  /** How many tracks: one, or {count}. */
+  readonly singleTrack: string
+  readonly tracks: string
+  /** How it takes its current: a wire {height} m over the rail, a third rail, none. */
+  readonly overhead: string
+  readonly thirdRail: string
+  readonly notElectrified: string
+  /** A gauge that is not the standard one: {mm}, or the metre gauge. */
+  readonly gauge: string
+  readonly metreGauge: string
+  /** How far it is from the eye: {distance}. */
+  readonly distance: string
+}
+
 /** The sentences of the label of an aircraft pointed at, with their {fields}: see TrafficTooltip. */
 export interface TrafficTexts {
   /** An aircraft the record does not name: {hex}. */
@@ -83,6 +104,8 @@ export interface SceneNames {
   readonly opticsTooltips: Readonly<Record<OpticsFeatureId, string>>
   /** What is said of an aircraft pointed at: see TrafficTooltip. */
   readonly trafficTooltip: TrafficTexts
+  /** What is said of a railway pointed at: see RailwayTooltip. */
+  readonly railwayTooltip: RailwayTexts
   /** The scene's credits button. */
   readonly credits: string
   /** Said above the spinner while the picture loads: what it shows is not a video. */

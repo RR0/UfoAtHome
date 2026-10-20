@@ -5880,6 +5880,29 @@ export class SceneRenderer {
     return entries.find(([, group]) => group === object)?.[0]
   }
 
+  /**
+   * The railway under a point of the picture, with how far its hit is from the eye and the height of its contact wire where it has one: what its
+   * hover tooltip says. The ballast, a rail, a mast or a wire hit, the line is the one whose centre line is nearest (see RailwaySystem.lineAt);
+   * the ground in front of it (the side of a cutting, a hill) hides it, as it hides a star.
+   */
+  pickRailwayAt(ndcX: number, ndcY: number): { line: RailwayLine, distanceM: number, contactM?: number } | undefined {
+    const system = this.railwaySystem
+    if (!system || system.count === 0) return undefined
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
+    const hit = SceneRenderer.firstSolid(this.raycaster.intersectObject(system.group, true))
+    if (!hit) return undefined
+    const ray = this.raycaster.ray
+    if (this.terrainMesh && this.groundBlocks(ray.origin, ray.direction, hit.distance - SceneRenderer.RAILWAY_GROUND_MARGIN_M, UFO_OCCLUSION_MIN_DISTANCE_M)) return undefined
+    const local = system.group.worldToLocal(hit.point.clone())
+    const line = system.lineAt(local.x, local.z)
+    if (!line) return undefined
+    const contactM = system.contactHeightM(line)
+    return { line, distanceM: hit.distance, ...(contactM !== undefined ? { contactM } : {}) }
+  }
+
+  /** How far short of a railway's hit the ground is looked for: the ballast lies a few centimetres over the ground it is laid on. */
+  private static readonly RAILWAY_GROUND_MARGIN_M = 1
+
   dispose(): void {
     this.stopTerrainFade()
     this.stopTwinkle()

@@ -195,6 +195,19 @@ export const sceneNames_fr: SceneNames = {
     restricted: "identité masquée par son propriétaire",
     candidate: "Un candidat compatible, pas une identification"
   },
+  railwayTooltip: {
+    kinds: { rail: "Voie ferrée", light_rail: "Métro léger", tram: "Tramway", subway: "Métro", funicular: "Funiculaire" },
+    highSpeed: "Ligne à grande vitesse",
+    service: "Voie de service",
+    singleTrack: "voie unique",
+    tracks: "{count} voies",
+    overhead: "caténaire, fil de contact à {height} m au-dessus du rail",
+    thirdRail: "troisième rail",
+    notElectrified: "non électrifiée",
+    gauge: "écartement de {mm} mm",
+    metreGauge: "voie métrique",
+    distance: "à {distance}"
+  },
   credits: "Crédits",
   notAVideo: "Ceci n'est pas une vidéo",
   isASimulation: "C'est une simulation en temps réel."

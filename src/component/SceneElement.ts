@@ -45,6 +45,7 @@ import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { loadSceneNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { SceneNaming } from "./messages/SceneNames.js"
+import { RailwayTooltip } from "./RailwayTooltip.js"
 import { ScenePoster } from "./ScenePoster.js"
 import { OPTICS_TOOLTIPS_EN } from "./messages/OpticsTooltips.js"
 import { SceneCredits } from "./SceneCredits.js"
@@ -288,7 +289,7 @@ export interface BodyReading {
  */
 /** What is under a point of the picture: what kind of thing, which one, and what it is called. */
 export interface ScenePick {
-  kind: "sky" | "body" | "decor" | "traffic" | "satellite" | "optics" | "star"
+  kind: "sky" | "body" | "decor" | "railway" | "traffic" | "satellite" | "optics" | "star"
   /** The sky body's key, the interpretation body's id or the decor object's id, when it has one. */
   id?: string
   name: string
@@ -497,7 +498,7 @@ export class SceneElement extends HTMLElement {
    * little around it).
    *
    * In the order a pointer means them: a celestial body, then what the account says was there (a craft, a being) by the name the
-   * interpretation gives it, then a decor object, an aircraft of the air traffic, a satellite and last a star — a shape is painted over
+   * interpretation gives it, then a decor object, a railway, an aircraft of the air traffic, a satellite and last a star — a shape is painted over
    * all of these, and is looked for by whoever asks (see handlePointerMove) before this.
    */
   pickAt(ndcX: number, ndcY: number): ScenePick | undefined {
@@ -517,6 +518,15 @@ export class SceneElement extends HTMLElement {
     if (decor) {
       const name = this.said.read(decor.title) || naming.decorKind(decor.kind, DECOR_KIND_NAMES[decor.kind])
       return { kind: "decor", id: decor.id, name, detail: () => this.decorTooltip(decor, name) }
+    }
+    // A railway: the ground of the place, as the decor is, and what explains a light at night as often as an aircraft (see RailwayTooltip).
+    const railway = this.sceneRenderer.pickRailwayAt(ndcX, ndcY)
+    if (railway) {
+      const texts = names?.railwayTooltip ?? RailwayTooltip.ENGLISH
+      return {
+        kind: "railway", id: railway.line.id, name: RailwayTooltip.name(railway.line, texts),
+        detail: () => RailwayTooltip.detail(railway, texts, metres => this.distanceText(metres))
+      }
     }
     // Last of the four, and deliberately: a shape is painted over everything, a planet is a better
     // answer than the star behind it, and a building stands between the observer and the whole sky.
@@ -568,12 +578,19 @@ export class SceneElement extends HTMLElement {
     return undefined
   }
 
+  /** A distance from the eye as the page writes it: "540 m", "1,7 km". */
+  private distanceText(distanceM: number): string {
+    return distanceM >= 1000
+      ? `${(distanceM / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })} km`
+      : `${distanceM.toLocaleString(undefined, { maximumFractionDigits: distanceM < 10 ? 1 : 0 })} m`
+  }
+
   /** The name of a decor object with what it measures and how far it stands from the eye: "Tree 19 — 2 × 2 × 11.8 m, 540 m away". */
   private decorTooltip(decor: DecorObject, name: string): string {
     const metres = (value: number) => value.toLocaleString(undefined, { maximumFractionDigits: value < 10 ? 1 : 0 })
     const size = DecorSystem.sizeOf(decor)
     const distance = this.sceneRenderer.decorDistanceM(decor.id)
-    const far = distance === undefined ? "" : distance >= 1000 ? `${(distance / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })} km` : `${metres(distance)} m`
+    const far = distance === undefined ? "" : this.distanceText(distance)
     const template = this.naming.names?.decorTooltip ?? DECOR_TOOLTIP
     const text = template.replace("{name}", name).replace("{size}", `${metres(size.widthM)} × ${metres(size.lengthM)} × ${metres(size.heightM)} m`)
     return text.replace("{distance}", far)

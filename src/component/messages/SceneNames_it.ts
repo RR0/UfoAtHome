@@ -188,6 +188,19 @@ export const sceneNames_it: SceneNames = {
     restricted: "identità nascosta dal proprietario",
     candidate: "Un candidato compatibile, non un'identificazione"
   },
+  railwayTooltip: {
+    kinds: { rail: "Ferrovia", light_rail: "Metropolitana leggera", tram: "Tranvia", subway: "Metropolitana", funicular: "Funicolare" },
+    highSpeed: "Linea ad alta velocità",
+    service: "Binario di servizio",
+    singleTrack: "binario unico",
+    tracks: "{count} binari",
+    overhead: "linea aerea, filo di contatto a {height} m sopra la rotaia",
+    thirdRail: "terza rotaia",
+    notElectrified: "non elettrificata",
+    gauge: "scartamento di {mm} mm",
+    metreGauge: "scartamento metrico",
+    distance: "a {distance}"
+  },
   credits: "Crediti",
   notAVideo: "Questo non è un video",
   isASimulation: "È una simulazione in tempo reale."

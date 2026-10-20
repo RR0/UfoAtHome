@@ -129,6 +129,20 @@ describe("RailwaySystem", () => {
     expect(mesh(metro, "rail heads")).toBeDefined()
   })
 
+  it("tells which line is under a point near it, for its tooltip, and the height of its wire", () => {
+    const system = new RailwaySystem()
+    const main = line({ id: "main", electrification: "overhead", tracks: 2 }, [-200, 0], [200, 0])
+    const siding = line({ id: "siding", service: true }, [-200, 60], [200, 60])
+    system.set([main, siding], ORIGIN.lat, ORIGIN.lng, () => 0)
+    expect(system.lineAt(10, 4)?.id).toBe("main")
+    expect(system.lineAt(10, 55)?.id).toBe("siding")
+    expect(system.lineAt(10, 30)).toBeUndefined()
+    expect(system.contactHeightM(main)).toBe(5.5)
+    expect(system.contactHeightM(siding)).toBeUndefined()
+    system.clear()
+    expect(system.lineAt(10, 4)).toBeUndefined()
+  })
+
   it("leaves out the lines that do not come near the patch", () => {
     const system = new RailwaySystem()
     system.set([line({}, [5000, 0], [5100, 0])], ORIGIN.lat, ORIGIN.lng, () => 0, 900)

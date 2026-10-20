@@ -191,6 +191,19 @@ export const sceneNames_es: SceneNames = {
     restricted: "identidad oculta por su propietario",
     candidate: "Un candidato compatible, no una identificación"
   },
+  railwayTooltip: {
+    kinds: { rail: "Vía férrea", light_rail: "Metro ligero", tram: "Tranvía", subway: "Metro", funicular: "Funicular" },
+    highSpeed: "Línea de alta velocidad",
+    service: "Vía de servicio",
+    singleTrack: "vía única",
+    tracks: "{count} vías",
+    overhead: "catenaria, hilo de contacto a {height} m sobre el carril",
+    thirdRail: "tercer carril",
+    notElectrified: "sin electrificar",
+    gauge: "ancho de {mm} mm",
+    metreGauge: "vía métrica",
+    distance: "a {distance}"
+  },
   credits: "Créditos",
   notAVideo: "Esto no es un vídeo",
   isASimulation: "Es una simulación en tiempo real."
