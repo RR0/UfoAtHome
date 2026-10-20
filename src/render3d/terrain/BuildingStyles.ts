@@ -10,6 +10,7 @@ import type { BuildingStyle, SurveyedBuilding } from "./SurroundingsProvider.js"
  * - the map's nature of the building (BD TOPO "Eglise", "Chapelle", "Monument", "Tour, donjon", "Château"…) and its use ("Religieux"), or what an
  *   OpenStreetMap volunteer wrote (`building=church`, `historic=castle`);
  * - the year it was built, where it is stated (BD TOPO `date_d_apparition`, from the land registry; OSM `start_date`): before 1900, an old building;
+ * - its use: works (an industrial site, a farm, an annex), whose walls have no windows of a house;
  * - a building over fifteen metres that states neither its floors nor its year nor that people live in it (a hospital, a ministry, a school of the
  *   nineteenth century): its storeys are not those of a house, and drawing one window every three metres up it makes a tower of flats of it.
  *
@@ -23,12 +24,21 @@ export class BuildingStyles {
     "Eglise": "church", "Chapelle": "church",
     "Monument": "monument", "Tour, donjon": "monument", "Fort, blockhaus, casemate": "monument", "Arc de triomphe": "monument", "Arène ou théâtre antique": "monument",
     // A château has windows, many and tall: it is an old building, which its date often does not say.
-    "Château": "old"
+    "Château": "old",
+    // A shed of a business park or a farm: the map's own nature, where it does not say its use.
+    "Industriel, agricole ou commercial": "works", "Serre": "works", "Silo": "works"
   }
+  /**
+   * The uses of the map that are works and not homes or offices: an industrial site, a farm's buildings, an annex (a garage, a shed). WHY: drawn with a
+   * house's windows, the warehouses of the zone along the RN2 at Silly-le-Long lit them in the middle of the night, from a kilometre off.
+   */
+  private static readonly MAP_WORKS: ReadonlySet<string> = new Set(["Industriel", "Agricole", "Annexe"])
   /** What OSM's `building` says of a building, where it says what it is. */
   private static readonly OSM_BUILDINGS: Readonly<Record<string, BuildingStyle>> = {
     cathedral: "church", church: "church", chapel: "church", basilica: "church", temple: "church", mosque: "church", synagogue: "church", shrine: "church", religious: "church",
-    castle: "old", palace: "old", fortress: "monument", bunker: "monument", triumphal_arch: "monument"
+    castle: "old", palace: "old", fortress: "monument", bunker: "monument", triumphal_arch: "monument",
+    industrial: "works", warehouse: "works", barn: "works", farm_auxiliary: "works", shed: "works", hangar: "works", garage: "works", garages: "works",
+    greenhouse: "works", silo: "works", storage_tank: "works", cowshed: "works", stable: "works", sty: "works", manufacture: "works"
   }
   /** What OSM's `historic` says, where it is a building: the rest of `historic=*` is an old building. */
   private static readonly OSM_HISTORIC: Readonly<Record<string, BuildingStyle>> = {
@@ -50,6 +60,7 @@ export class BuildingStyles {
   static ofMap(properties: Record<string, unknown>): { style?: BuildingStyle, builtYear?: number } {
     const builtYear = BuildingStyles.year(properties.date_d_apparition)
     const stated = BuildingStyles.MAP_NATURES[String(properties.nature ?? "")] ?? (properties.usage_1 === "Religieux" ? "church" : undefined)
+      ?? (BuildingStyles.MAP_WORKS.has(String(properties.usage_1 ?? "")) ? "works" : undefined)
     const style = stated ?? BuildingStyles.ofYear(builtYear) ?? BuildingStyles.grand(properties)
     return { ...(style ? { style } : {}), ...(builtYear !== undefined ? { builtYear } : {}) }
   }

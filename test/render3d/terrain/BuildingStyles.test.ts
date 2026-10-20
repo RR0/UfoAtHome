@@ -34,6 +34,17 @@ describe("BuildingStyles", () => {
     expect(BuildingStyles.ofMap({ nature: "Château", hauteur: 18 }).style).toBe("old")
   })
 
+  it("reads works from the map's use or nature and from OSM's building, and a home or an office as ordinary", () => {
+    // The business park along the RN2 at Silly-le-Long: the map's sheds, said by their use, or by their nature where the use is not given.
+    expect(BuildingStyles.ofMap({ nature: "Industriel, agricole ou commercial", usage_1: "Industriel", hauteur: 9 }).style).toBe("works")
+    expect(BuildingStyles.ofMap({ nature: "Industriel, agricole ou commercial", usage_1: "Indifférencié", hauteur: 7 }).style).toBe("works")
+    expect(BuildingStyles.ofMap({ nature: "Indifférenciée", usage_1: "Agricole", hauteur: 6 }).style).toBe("works")
+    expect(BuildingStyles.ofMap({ nature: "Indifférenciée", usage_1: "Annexe", hauteur: 3 }).style).toBe("works")
+    expect(BuildingStyles.ofMap({ nature: "Indifférenciée", usage_1: "Résidentiel", hauteur: 7 }).style).toBeUndefined()
+    expect(BuildingStyles.ofOsm({ building: "warehouse" }).style).toBe("works")
+    expect(BuildingStyles.ofOsm({ building: "house" }).style).toBeUndefined()
+  })
+
   it("says a building of before 1900 is old, with its year, and one of after is ordinary", () => {
     expect(BuildingStyles.ofMap(HOUSE_OF_1800)).toEqual({ style: "old", builtYear: 1800 })
     expect(BuildingStyles.ofMap(BLOCK_OF_1969)).toEqual({ builtYear: 1969 })

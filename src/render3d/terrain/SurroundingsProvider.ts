@@ -54,9 +54,10 @@ export interface SurveyedBuilding {
 /**
  * What kind of building it is, as it shows from the street (see BuildingStyles): "church" (stone, tall narrow bays, a pitched roof), "monument" (stone and no
  * window: a fort, a tower of a castle, a memorial), "old" (built before 1900: stone, tall windows, high storeys), "grand" (a tall building that states
- * no floors and no one living in it: high storeys and tall windows).
+ * no floors and no one living in it: high storeys and tall windows), "works" (a shed, a warehouse, a barn, a workshop: walls of cladding nobody is
+ * behind at night, drawn with no windows).
  */
-export type BuildingStyle = "church" | "monument" | "old" | "grand"
+export type BuildingStyle = "church" | "monument" | "old" | "grand" | "works"
 
 /** What the walls and the roofs of the buildings of a survey are made of, in the words this project draws them with. */
 export type BuildingMaterial = "stone" | "meuliere" | "concrete" | "brick" | "block" | "wood" | "tile" | "slate" | "zinc" | "other"

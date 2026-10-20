@@ -1178,11 +1178,12 @@ export class DecorSystem {
   private static readonly litWindowShare = { value: 0 }
 
   /**
-   * What a lit window gives out, in candela per square metre: a room lit for the evening (a hundred to three hundred lux on its walls and ceiling)
-   * seen through its glass and its curtain, which is some tens. It was the emissive colour's 1, about one candela per square metre in a scene
-   * that counts in them (see setLit): grey beside the lamps of the street the eye adapts to.
+   * What a lit window gives out, in candela per square metre: a room lit for the evening (a hundred to three hundred lux on walls of a reflectance of
+   * a half, 16 to 48 cd/m²) seen through its glass (0.8) and its curtain (0.3 to 0.5), which is 4 to 20. It was 50, the room seen bare: the windows
+   * of a town at one in the morning, curtained, shone from a kilometre off brighter than anything else in the night (Silly-le-Long). Before that it
+   * was the emissive colour's 1, about one candela per square metre in a scene that counts in them (see setLit): grey beside the lamps of the street.
    */
-  static readonly WINDOW_LUMINANCE_CD_M2 = 50
+  static readonly WINDOW_LUMINANCE_CD_M2 = 15
 
   /** The light of a room in the evening: a lamp's, two thousand nine hundred kelvins, as orange to an eye balanced for the day as the street's. */
   static readonly ROOM_LIGHT_K = 2900

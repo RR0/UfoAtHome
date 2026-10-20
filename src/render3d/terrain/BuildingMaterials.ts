@@ -15,7 +15,7 @@ import type { BuildingMaterial, SurveyedBuilding } from "./SurroundingsProvider.
  * is varied a little from one building to the next (by where it stands, so that the same place always looks the same) because a street of walls of
  * exactly one colour is not a street.
  *
- * What kind of building it is (see BuildingStyles) opens the walls: a church has tall narrow bays and no door of a house, a monument none, an old building
+ * What kind of building it is (see BuildingStyles) opens the walls: a church has tall narrow bays and no door of a house, a monument and a shed none, an old building
  * and a tall one that states no floors have tall windows on high storeys. Their walls are of stone where the registry says nothing of them (a church, a
  * fort, a house of before 1900 in France is built of it), and the roof of an old building is a zinc or a slate grey where nothing measured its colour.
  */
@@ -66,7 +66,7 @@ export class BuildingMaterials {
       // A colour a survey already gave (somebody wrote it down) is not repainted from a typical one: the openings are still those of its kind.
       const facade: DecorFacade = { ...building.facade, color: building.facade?.color ?? BuildingMaterials.wallColor(building) }
       if (style === "church") facade.openings = "lancet"
-      else if (style === "monument") facade.plain = true
+      else if (style === "monument" || style === "works") facade.plain = true
       else if (style === "old" || style === "grand") facade.openings = "tall"
       const storeyM = BuildingMaterials.storeyOf(building)
       if (storeyM !== undefined && style !== "church" && style !== "monument") facade.storeyM = storeyM

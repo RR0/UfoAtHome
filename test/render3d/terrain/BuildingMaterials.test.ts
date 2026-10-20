@@ -39,6 +39,11 @@ describe("BuildingMaterials", () => {
     expect(BuildingMaterials.fit([HOUSE])[0].facade).toEqual(plain.facade)
   })
 
+  it("draws the walls of works with no windows, and a house's with them", () => {
+    expect(BuildingMaterials.fit([{ ...HOUSE, style: "works" }])[0].facade!.plain).toBe(true)
+    expect(BuildingMaterials.fit([HOUSE])[0].facade!.plain).toBeUndefined()
+  })
+
   it("colours a roof by its material where there is no photograph, and the photograph's colour wins where there is one", () => {
     const [slate] = RoofShapes.fit([{ ...HOUSE, roofMaterial: "slate" }], undefined, undefined)
     expect(slate.roof).toEqual({ shape: "flat", riseM: 0, color: "#4a5059" })
