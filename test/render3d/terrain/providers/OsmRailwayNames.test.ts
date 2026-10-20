@@ -35,6 +35,11 @@ describe("OsmRailwayNames", () => {
     expect(line.points).toEqual(IGN.points)
   })
 
+  it("gives a siding beside the main line neither its name, nor its trains, nor its voltage", () => {
+    const siding: RailwayLine = { ...IGN, id: "siding", service: true, tracks: 1, electrification: "none", points: [at(100, 6), at(1300, 6)] }
+    expect(OsmRailwayNames.apply([siding], ANSWER, BOUNDS)[0]).toEqual(siding)
+  })
+
   it("leaves a line no track of OpenStreetMap runs along as it was, and keeps a name it had", () => {
     const far: RailwayLine = { ...IGN, id: "far", points: [at(100, 400), at(1300, 400)] }
     expect(OsmRailwayNames.apply([far], ANSWER, BOUNDS)[0]).toEqual(far)

@@ -35,10 +35,8 @@ class RailwayArchiveBuilder {
     const out = join(this.root, "public", "railways")
     await mkdir(out, { recursive: true })
     const entries: { file: string; north: number; south: number; east: number; west: number; about: string }[] = []
-    if (only) {
-      const kept = JSON.parse(await readFile(join(out, "index.json"), "utf8")) as { entries: typeof entries }
-      entries.push(...kept.entries.filter(entry => !entry.about.includes(only)))
-    }
+    const previous = (JSON.parse(await readFile(join(out, "index.json"), "utf8").catch(() => "{\"entries\":[]}")) as { entries: typeof entries }).entries
+    if (only) entries.push(...previous.filter(entry => !entry.about.includes(only)))
     const seen = new Set<string>()
     for (const place of places) {
       const bounds = place.bounds
@@ -65,8 +63,11 @@ class RailwayArchiveBuilder {
           await new Promise(resolve => setTimeout(resolve, COURTESY_MS))
         }
       } catch (error) {
-        // A refusal is not a reason to lose the places already frozen: the run can be repeated for the rest.
-        console.log(`refused (${String(error)})`)
+        // A refusal is not a reason to lose the places already frozen: the run can be repeated for the rest. Nor this place's own last freeze, which
+        // the index kept pointing at (dropped, its scene would ask the live services, which a published scene never does).
+        const kept = previous.find(entry => entry.about === place.id)
+        if (kept) entries.push(kept)
+        console.log(`refused (${String(error).slice(0, 200)})${kept ? ", its last freeze kept" : ""}`)
         continue
       }
       lines = RailwayArchiveBuilder.within(lines, bounds)

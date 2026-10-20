@@ -7,6 +7,8 @@ import type { OverpassClientOptions, OverpassResponse } from "./OverpassClient.j
 /** What OpenStreetMap says of one of its ways of railway, and where it runs. */
 interface NamedWay {
   name?: string
+  /** A siding, a yard, a spur: matched only with the lines that are such (see apply). */
+  service: boolean
   voltageV?: number
   services: string[]
   path: { x: number, z: number }[]
@@ -19,7 +21,8 @@ interface NamedWay {
  *
  * A line is given what the OSM ways along it say, by most of its length: each point of it, every SAMPLE_M, takes the ways within NEAR_M that run the same
  * way (within ALIGNED_DEG): the nearest's name and voltage, and the services of all of them (OSM draws each track, and a route may use one only). A
- * name is the line's that the most points have, a service one that a quarter of them have at least. A line the ways do not follow keeps what it
+ * name is the line's that the most points have, a service one that a quarter of them have at least. A siding is matched with sidings only: at Silly-le-Long
+ * the two sidings beside the main line took its name, its trains and its 25 kV, and they carry neither trains of passengers nor current. A line the ways do not follow keeps what it
  * had. A service is said as a reader says it: the route's name before its stops ("Transilien K (AEKY) : Crépy-en-Valois → Gare du Nord" is
  * "Transilien K"), else its network and its reference.
  *
@@ -58,9 +61,11 @@ export class OsmRailwayNames {
       const voltages = new Map<number, number>()
       const services = new Map<string, number>()
       let samples = 0
+      // A siding along a main line is not the main line: it does not carry its trains, nor take its name.
+      const kin = ways.filter(way => way.service === Boolean(line.service))
       for (const point of OsmRailwayNames.samples(path)) {
         samples++
-        const along = OsmRailwayNames.waysAt(ways, point)
+        const along = OsmRailwayNames.waysAt(kin, point)
         if (along.length === 0) continue
         const [nearest] = along
         if (nearest.name) names.set(nearest.name, (names.get(nearest.name) ?? 0) + 1)
@@ -70,7 +75,8 @@ export class OsmRailwayNames {
       }
       const most = <T>(counts: Map<T, number>): T | undefined => [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0]
       const name = line.name ?? most(names)
-      const voltageV = line.voltageV ?? most(voltages)
+      // A line the map says carries no current has no voltage, whatever its neighbour's.
+      const voltageV = line.voltageV ?? (line.electrification === "none" ? undefined : most(voltages))
       // A service that runs along part of the line only (a branch leaving it) is still one that runs there.
       const running = [...services.entries()].filter(([, count]) => count * 4 >= samples).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([service]) => service)
       return {
@@ -121,6 +127,7 @@ export class OsmRailwayNames {
       const tags = element.tags ?? {}
       const voltageV = OsmRailwayNames.voltageOf(tags)
       out.push({
+        service: Boolean(tags.service) || tags.usage === "industrial",
         ...(tags.name ? { name: tags.name } : {}),
         ...(voltageV ? { voltageV } : {}),
         services: [...(servicesOf.get(element.id ?? -1) ?? [])],
