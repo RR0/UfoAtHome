@@ -26,7 +26,9 @@ export class RailwayTooltip {
     singleTrack: "single track",
     tracks: "{count} tracks",
     overhead: "overhead wire {height} m above the rail",
+    overheadVoltage: "overhead wire at {voltage}, {height} m above the rail",
     thirdRail: "third rail",
+    thirdRailVoltage: "third rail at {voltage}",
     notElectrified: "not electrified",
     gauge: "{mm} mm gauge",
     metreGauge: "metre gauge",
@@ -41,23 +43,38 @@ export class RailwayTooltip {
     return line.highSpeed ? texts.highSpeed : line.service ? texts.service : texts.kinds[line.kind]
   }
 
-  /** The tooltip without Alt: the line's name, else what it is. */
+  /** The tooltip without Alt: which line it is (its name, else what it is) and which trains run on it, where the survey says. */
   static name(line: RailwayLine, texts: RailwayTexts): string {
-    return line.name ?? RailwayTooltip.kind(line, texts)
+    const name = line.name ?? RailwayTooltip.kind(line, texts)
+    return line.services?.length ? `${name} — ${line.services.join(", ")}` : name
   }
 
-  /** The tooltip with Alt: "name — what it is, its tracks, its current, its gauge, how far". `distance` writes a distance as the page writes it. */
+  /** A voltage as a reader says it: "25 kV", "1,5 kV", "750 V". */
+  static voltage(volts: number, locale?: string): string {
+    return volts >= 1000 ? `${(volts / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })} kV` : `${volts.toLocaleString(locale)} V`
+  }
+
+  /**
+   * The tooltip with Alt: which line and its services, then "what it is, its tracks, its current, its gauge, how far". `distance` writes a distance as
+   * the page writes it.
+   */
   static detail(pick: RailwayPick, texts: RailwayTexts, distance: (metres: number) => string, locale?: string): string {
     const { line } = pick
     const parts: string[] = []
     if (line.name) parts.push(RailwayTooltip.kind(line, texts).toLocaleLowerCase(locale))
     parts.push(line.tracks > 1 ? texts.tracks.replace("{count}", String(line.tracks)) : texts.singleTrack)
-    if (pick.contactM !== undefined) parts.push(texts.overhead.replace("{height}", pick.contactM.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })))
-    else if (line.electrification === "third_rail") parts.push(texts.thirdRail)
+    const voltage = line.voltageV ? RailwayTooltip.voltage(line.voltageV, locale) : undefined
+    if (pick.contactM !== undefined) {
+      const height = pick.contactM.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      parts.push((voltage ? texts.overheadVoltage.replace("{voltage}", voltage) : texts.overhead).replace("{height}", height))
+    } else if (line.electrification === "third_rail") parts.push(voltage ? texts.thirdRailVoltage.replace("{voltage}", voltage) : texts.thirdRail)
     else if (line.electrification === "none") parts.push(texts.notElectrified)
     if (line.gaugeMm === RailwayTooltip.METRE_GAUGE_MM) parts.push(texts.metreGauge)
     else if (line.gaugeMm !== RailwayTooltip.STANDARD_GAUGE_MM) parts.push(texts.gauge.replace("{mm}", line.gaugeMm.toLocaleString(locale)))
     parts.push(texts.distance.replace("{distance}", distance(pick.distanceM)))
-    return `${RailwayTooltip.name(line, texts)} — ${parts.join(", ")}`
+    // The services are their own clause, so that a list of them is not read as a list of the line's features.
+    return line.services?.length
+      ? `${RailwayTooltip.name(line, texts)}; ${parts.join(", ")}`
+      : `${RailwayTooltip.name(line, texts)} — ${parts.join(", ")}`
   }
 }

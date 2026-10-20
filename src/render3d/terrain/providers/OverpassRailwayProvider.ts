@@ -1,4 +1,5 @@
 import type { GeoBounds } from "../GeoBounds.js"
+import { OsmRailwayNames } from "./OsmRailwayNames.js"
 import { OverpassClient } from "./OverpassClient.js"
 import type { OverpassClientOptions, OverpassResponse } from "./OverpassClient.js"
 import type { RailwayElectrification, RailwayKind, RailwayLine, RailwayProvider } from "../RailwayProvider.js"
@@ -25,17 +26,21 @@ export class OverpassRailwayProvider implements RailwayProvider {
 
   async getRailways(bounds: GeoBounds): Promise<RailwayLine[]> {
     const box = `${bounds.south},${bounds.west},${bounds.north},${bounds.east}`
-    const query = `[out:json][timeout:25];way["railway"~"^(${OverpassRailwayProvider.KINDS.join("|")})$"](${box});out tags geom;`
+    // The routes too, which say what runs on each way (see OsmRailwayNames).
+    const query = `[out:json][timeout:25];way["railway"~"^(${OverpassRailwayProvider.KINDS.join("|")})$"](${box})->.w;.w out tags geom;rel(bw.w)["route"~"^(${OsmRailwayNames.ROUTES})$"];out body;`
     return this.linesFrom(await this.client.query(query))
   }
 
   /** One Overpass answer as lines — exposed so a build step can read an answer fetched by other means. */
   linesFrom(body: OverpassResponse): RailwayLine[] {
     const lines: RailwayLine[] = []
+    const servicesOf = OsmRailwayNames.servicesByWay(body)
     for (const element of body.elements ?? []) {
       const geometry = element.geometry
       const tags = element.tags
-      if (!tags || !geometry || geometry.length < 2) continue
+      if (element.type === "relation" || !tags || !geometry || geometry.length < 2) continue
+      const services = [...(servicesOf.get(element.id ?? -1) ?? [])].sort()
+      const voltageV = OsmRailwayNames.voltageOf(tags)
       const kind = OverpassRailwayProvider.kindOf(tags)
       const gauge = Number.parseInt((tags.gauge ?? "").split(";")[0], 10)
       const tracks = Number.parseInt(tags.tracks ?? "", 10)
@@ -44,6 +49,8 @@ export class OverpassRailwayProvider implements RailwayProvider {
       lines.push({
         id: `osm-rail-${element.id ?? lines.length}`,
         ...(tags.name ? { name: tags.name } : {}),
+        ...(services.length > 0 ? { services } : {}),
+        ...(voltageV ? { voltageV } : {}),
         kind,
         ...(tags.service || tags.usage === "industrial" ? { service: true } : {}),
         ...(highSpeed ? { highSpeed: true } : {}),

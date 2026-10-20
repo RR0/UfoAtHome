@@ -13,8 +13,15 @@ export type RailwayElectrification = "overhead" | "third_rail" | "none"
 export interface RailwayLine {
   /** Stable within one fetch. */
   id: string
-  /** What it is called, where it is called anything. */
+  /** What it is called, where it is called anything: "Ligne de La Plaine à Hirson et Anor (frontière)". */
   name?: string
+  /**
+   * The services that run on it, where the survey says (OpenStreetMap's routes): "Transilien K", "TER K15", "RER B". What a reader pointing at a line
+   * wants to know first: which trains pass there, and so at what hours one might.
+   */
+  services?: string[]
+  /** The voltage of its wire or its rail, volts, where the survey says: 25000 on a French main line of the north, 1500 on the older ones. */
+  voltageV?: number
   kind: RailwayKind
   /** A siding, a yard, a depot track: laid lighter than a main line. */
   service?: boolean

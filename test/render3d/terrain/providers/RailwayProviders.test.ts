@@ -114,6 +114,18 @@ describe("OverpassRailwayProvider", () => {
     expect(lines[2].electrification).toBeUndefined()
     expect(lines[3]).toMatchObject({ kind: "tram", gaugeMm: 1000, tracks: 2 })
   })
+
+  it("says which services run on a track, from the routes asked with it, and its voltage", async () => {
+    const fetchImpl = answering({
+      elements: [
+        { type: "way", id: 1, tags: { railway: "rail", name: "Ligne 161", electrified: "contact_line", voltage: "3000" }, geometry: [{ lat: 50.84, lon: 4.34 }, { lat: 50.841, lon: 4.341 }] },
+        { type: "relation", id: 9, tags: { type: "route", route: "train", name: "S8 : Bruxelles-Midi → Ottignies", network: "S Brussel/Bruxelles", ref: "S8" }, members: [{ type: "way", ref: 1 }] }
+      ]
+    })
+    const lines = await new OverpassRailwayProvider({ fetchImpl, endpoints: ["https://overpass.example/api/interpreter"] }).getRailways(BRUSSELS)
+    expect(lines).toHaveLength(1)
+    expect(lines[0]).toMatchObject({ name: "Ligne 161", services: ["S8"], voltageV: 3000 })
+  })
 })
 
 describe("RegionalRailwayProvider", () => {

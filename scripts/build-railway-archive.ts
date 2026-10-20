@@ -1,7 +1,8 @@
 /**
  * One-off build step (not part of `build`/`prepublishOnly`) that freezes the railways each published recording's ground holds, so no reader's
  * browser has to ask for them: in France the IGN's map, elsewhere OpenStreetMap's Overpass, which is free and donated (see ArchivedRailwayProvider,
- * and build-water-archive.ts, which does the same for the water over the same squares).
+ * and build-water-archive.ts, which does the same for the water over the same squares). The IGN's lines are named from OpenStreetMap, with the
+ * services that run on them (see OsmRailwayNames): the map names none.
  *
  * Run with: npm run build:railways   (ONLY=<text> freezes just the recordings whose id contains it, and keeps the other entries)
  *
@@ -12,6 +13,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { IgnTopoRailwayProvider } from "../src/render3d/terrain/providers/IgnTopoRailwayProvider.js"
+import { OsmRailwayNames } from "../src/render3d/terrain/providers/OsmRailwayNames.js"
 import { OverpassRailwayProvider } from "../src/render3d/terrain/providers/OverpassRailwayProvider.js"
 import type { RailwayLine } from "../src/render3d/terrain/RailwayProvider.js"
 import { ArchivedPlaces } from "./ArchivedPlaces.js"
@@ -25,6 +27,7 @@ class RailwayArchiveBuilder {
   private readonly root = fileURLToPath(new URL("..", import.meta.url))
   private readonly ign = new IgnTopoRailwayProvider({ fetchImpl: ArchivedPlaces.fetchOrCurl })
   private readonly osm = new OverpassRailwayProvider({ fetchImpl: ArchivedPlaces.fetchOrCurl })
+  private readonly names = new OsmRailwayNames({ fetchImpl: ArchivedPlaces.fetchOrCurl })
 
   async build(): Promise<void> {
     const only = process.env.ONLY
@@ -67,6 +70,16 @@ class RailwayArchiveBuilder {
         continue
       }
       lines = RailwayArchiveBuilder.within(lines, bounds)
+      if (attribution === this.ign.attribution && lines.length > 0) {
+        // The map's sections name nothing: OpenStreetMap says which line each is, its voltage and the services that run on it.
+        try {
+          lines = await this.names.named(lines, bounds)
+          attribution = `${attribution}; names and services © OpenStreetMap contributors`
+          await new Promise(resolve => setTimeout(resolve, COURTESY_MS))
+        } catch (error) {
+          process.stdout.write(`(no names: ${String(error)}) `)
+        }
+      }
       const file = `${place.id}.json`
       await writeFile(join(out, file), JSON.stringify({ version: 1, attribution, takenOn: new Date().toISOString().slice(0, 10), about: place.id, lines }), "utf8")
       entries.push({ file, ...bounds, about: place.id })

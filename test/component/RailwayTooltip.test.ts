@@ -28,4 +28,13 @@ describe("RailwayTooltip", () => {
     expect(RailwayTooltip.detail({ line: { ...single, electrification: undefined, gaugeMm: 1000 }, distanceM: 80 }, RailwayTooltip.ENGLISH, metres, "en"))
       .toBe("Siding — single track, metre gauge, 80 m away")
   })
+
+  it("says which line it is and which trains run on it, and with Alt its voltage", () => {
+    const silly: RailwayLine = { ...LINE, name: "Ligne de La Plaine à Hirson et Anor (frontière)", services: ["TER K15", "Transilien K"], voltageV: 25000 }
+    expect(RailwayTooltip.name(silly, sceneNames_fr.railwayTooltip)).toBe("Ligne de La Plaine à Hirson et Anor (frontière) — TER K15, Transilien K")
+    expect(RailwayTooltip.detail({ line: silly, distanceM: 196, contactM: 5.5 }, sceneNames_fr.railwayTooltip, metres, "fr"))
+      .toBe("Ligne de La Plaine à Hirson et Anor (frontière) — TER K15, Transilien K; voie ferrée, 2 voies, caténaire en 25 kV, fil de contact à 5,50 m au-dessus du rail, à 196 m")
+    expect(RailwayTooltip.voltage(1500, "fr")).toBe("1,5 kV")
+    expect(RailwayTooltip.voltage(750, "en")).toBe("750 V")
+  })
 })

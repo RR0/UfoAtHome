@@ -28,7 +28,10 @@ export interface RailwayTexts {
   readonly tracks: string
   /** How it takes its current: a wire {height} m over the rail, a third rail, none. */
   readonly overhead: string
+  /** The same where its voltage is known: {voltage}, {height}; and a third rail's, {voltage}. */
+  readonly overheadVoltage: string
   readonly thirdRail: string
+  readonly thirdRailVoltage: string
   readonly notElectrified: string
   /** A gauge that is not the standard one: {mm}, or the metre gauge. */
   readonly gauge: string
