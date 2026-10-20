@@ -142,6 +142,10 @@ import { DecorSystem } from "../render3d/DecorSystem.js"
 import { GroundElevation } from "../render3d/terrain/ElevationProvider.js"
 import { TimeZones } from "../engine/time/TimeZones.js"
 import { dataSourceById } from "../engine/source/DataSource.js"
+import { FrozenDataPanel } from "./FrozenDataPanel.js"
+import { FrozenAnnexes } from "../render3d/terrain/frozen/FrozenAnnexes.js"
+import type { FreezerSources } from "../render3d/terrain/frozen/TerrainFreezer.js"
+import { defaultRailwayProvider, defaultRoadProvider, defaultWaterProvider } from "../render3d/terrain/defaultTerrainProviders.js"
 import type { DataSource } from "../engine/source/DataSource.js"
 import type { PlaceMatch, PlaceProvider } from "../engine/place/PlaceProvider.js"
 import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
@@ -408,6 +412,8 @@ export class SightingEditorElement extends HTMLElement {
   /** The duration, exact or as stated: its number always holds the length the simulation is played at. */
   private readonly durationElement: DurationInputElement
   private readonly exportButton: HTMLButtonElement
+  /** The File group's account of the data frozen beside the recording, and what takes it at export. */
+  private readonly frozenPanel: FrozenDataPanel
   private readonly importFileInput: HTMLInputElement
   private readonly importUrlInput: HTMLInputElement
   private readonly importUrlButton: HTMLButtonElement
@@ -1280,11 +1286,24 @@ export class SightingEditorElement extends HTMLElement {
     this.labelFileGroup = this.shadow.getElementById("label-file-group")!
     this.fileEditorHost = this.shadow.getElementById("file-editor")!
     this.fileNote = this.shadow.getElementById("file-note")!
+    this.frozenPanel = new FrozenDataPanel(this.shadow.getElementById("frozen-data")!, {
+      sighting: () => this.ufoElement.sighting,
+      documentUrl: () => this.sceneElement.documentUrl,
+      sources: () => this.freezerSources(),
+      upperAirHeard: () => this.sceneElement.upperAirHeard,
+      changed: () => {
+        this.touch()
+        this.ufoElement.refresh()
+        this.scheduleFileSync()
+      }
+    })
+    // In the language the editor starts in: the others come with their locale, if one is asked (see applyMessages).
+    this.frozenPanel.localize(this.messages)
     this.fileAsk = this.shadow.getElementById("file-ask") as HTMLDialogElement
     this.identityAsk = this.shadow.getElementById("identity-ask") as HTMLDialogElement
     this.shadow.getElementById("identity-ask-keep")!.addEventListener("click", () => {
       this.closeIdentityAsk()
-      this.downloadJson()
+      void this.downloadJson()
     })
     this.shadow.getElementById("identity-ask-back")!.addEventListener("click", () => this.closeIdentityAsk())
     this.shadow.getElementById("identity-ask-initials")!.addEventListener("click", () => {
@@ -1980,6 +1999,7 @@ export class SightingEditorElement extends HTMLElement {
     const standing = this.plantingCentre()
     this.surroundings.placeLoaded(standing?.lat, standing?.lng)
     this.syncWeatherOwnership()
+    this.frozenPanel.render()
     // Weather itself is resynced by onSelectionOrTimeChanged() above (syncWeatherFromTimeline) —
     // and SceneElement's own updateAstronomy() (driven by the sightingData assignment above,
     // which surfaces as a timeupdate) already resolves+applies it, unlike before this was a
@@ -2138,7 +2158,7 @@ export class SightingEditorElement extends HTMLElement {
   private exportJson(): void {
     const findings = IdentityGuard.inspect(this.sightingData, this.loadedJson())
     if (findings.length === 0) {
-      this.downloadJson()
+      void this.downloadJson()
       return
     }
     this.askAboutIdentity(findings)
@@ -2201,18 +2221,59 @@ export class SightingEditorElement extends HTMLElement {
     this.descriptionInput.dispatchEvent(new Event("input"))
   }
 
-  /** Downloads the recording as a file, once its author has seen what it states. */
-  private downloadJson(): void {
+  /**
+   * Downloads the recording as a file, once its author has seen what it states. With the data it carries frozen (see FrozenDataPanel),
+   * taken first where it has to be: then one zip, of the recording and its annexes as they are to stand beside each other.
+   */
+  private async downloadJson(): Promise<void> {
+    const base = `${this.sightingData.observer?.id ?? "sighting"}-sighting`
+    let annexes = new Map<string, Uint8Array>()
+    // At once when there is nothing to take or to carry: a recording with no place stands on no ground.
+    if (this.frozenPanel.hasWork()) {
+      this.exportButton.disabled = true
+      try {
+        annexes = await this.frozenPanel.prepare(base)
+      } finally {
+        this.exportButton.disabled = false
+      }
+    }
     const json = this.sightingData
-    const fileName = `${json.observer?.id ?? "sighting"}-sighting.json`
-    const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" })
+    const fileName = `${base}.json`
+    const text = JSON.stringify(json, null, 2)
+    if (annexes.size === 0) {
+      this.download(new Blob([text], { type: "application/json" }), fileName)
+    } else {
+      const { zipSync, strToU8 } = await import("fflate")
+      const archive: Record<string, Uint8Array> = { [fileName]: strToU8(text) }
+      for (const [path, bytes] of annexes) archive[path] = bytes
+      // Stored, not deflated: the annexes are compressed already, each its own way.
+      const zip = zipSync(archive, { level: 0 })
+      this.download(new Blob([zip as BlobPart], { type: "application/zip" }), `${base}.zip`)
+      this.showFileNote(this.messages.frozenExported.replaceAll("{count}", String(annexes.size)).replaceAll("{size}", FrozenDataPanel.size(zip.length)))
+    }
+    this.markClean()
+  }
+
+  private download(blob: Blob, fileName: string): void {
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.href = url
     link.download = fileName
     link.click()
     URL.revokeObjectURL(url)
-    this.markClean()
+  }
+
+  /** Where each frozen group is taken from: the sources chosen in the Position group, and the scene's own for the rest. */
+  private freezerSources(): FreezerSources {
+    const elevation = dataSourceById(ELEVATION_SOURCES, this.chosenSourceId.get("elevation"))
+    return {
+      elevation: elevation.create(),
+      elevationCredit: elevation.credit,
+      imagery: dataSourceById(IMAGERY_SOURCES, this.chosenSourceId.get("imagery")).id,
+      roads: defaultRoadProvider(),
+      water: defaultWaterProvider(),
+      railways: defaultRailwayProvider()
+    }
   }
 
   /** Loads a SightingRecordingJson from a user-picked local file — the counterpart to
@@ -2234,12 +2295,14 @@ export class SightingEditorElement extends HTMLElement {
 
   private async loadFile(file: File): Promise<void> {
     try {
-      const text = await new Promise<string>((resolve, reject) => {
+      const bytes = new Uint8Array(await new Promise<ArrayBuffer>((resolve, reject) => {
         const reader = new FileReader()
-        reader.onload = () => resolve(reader.result as string)
+        reader.onload = () => resolve(reader.result as ArrayBuffer)
         reader.onerror = () => reject(reader.error)
-        reader.readAsText(file)
-      })
+        reader.readAsArrayBuffer(file)
+      }))
+      FrozenAnnexes.release()
+      const text = await this.recordingText(bytes)
       const json = JSON.parse(text) as SightingRecordingJson
       if (CaseFile.isCase(json)) {
         if (this.offerCase(json, undefined)) return
@@ -2257,6 +2320,25 @@ export class SightingEditorElement extends HTMLElement {
     } finally {
       this.importFileInput.value = ""
     }
+  }
+
+  /**
+   * The recording's text, from a file that is the recording itself or a zip of it and its annexes (what Save writes when the recording carries
+   * frozen data). The annexes of a zip are held for the scene, at the addresses the recording names them by (see FrozenAnnexes).
+   */
+  private async recordingText(bytes: Uint8Array): Promise<string> {
+    // "PK", the start of every zip.
+    if (bytes[0] !== 0x50 || bytes[1] !== 0x4b) return new TextDecoder().decode(bytes)
+    const { unzipSync, strFromU8 } = await import("fflate")
+    const files = unzipSync(bytes)
+    const annex = /\.(relief|imagery)\.zip$|\.(roads|water|railways|upper-air)\.json$/
+    const name = Object.keys(files).find(path => path.endsWith(".json") && !annex.test(path))
+    if (!name) throw new Error("No recording in this archive")
+    const folder = name.includes("/") ? name.slice(0, name.lastIndexOf("/") + 1) : ""
+    for (const [path, content] of Object.entries(files)) {
+      if (path !== name && path.startsWith(folder)) FrozenAnnexes.hold(FrozenAnnexes.address(path.slice(folder.length), undefined), content)
+    }
+    return strFromU8(files[name])
   }
 
   // -- A case, which this editor does not hold ---------------------------------------------------
@@ -2307,6 +2389,8 @@ export class SightingEditorElement extends HTMLElement {
         throw new Error("A case has no recording to edit here")
       }
       const json = fetched as SightingRecordingJson
+      // Its annexes are beside it, not what the editor held for the last one.
+      FrozenAnnexes.release()
       // What the models it names by `url` are relative to — see SceneElement.documentUrl.
       this.sceneElement.documentUrl = new URL(url, location.href).href
       this.sightingData = json
@@ -9008,6 +9092,7 @@ export class SightingEditorElement extends HTMLElement {
     this.contextSendToBackButton.textContent = messages.sendToBack
     this.contextDeleteButton.textContent = messages.contextMenuDelete
     this.exportButton.textContent = messages.export
+    this.frozenPanel.localize(messages)
     this.shadow.getElementById("observer-identity-hint")!.textContent = messages.identityHint
     this.shadow.getElementById("identity-ask-initials")!.textContent = messages.identityInitials
     this.shadow.getElementById("identity-ask-keep")!.textContent = messages.identityKeep

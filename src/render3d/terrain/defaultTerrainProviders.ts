@@ -3,6 +3,7 @@ import type { ImageryProvider } from "./ImageryProvider.js"
 import type { RoadProvider } from "./RoadProvider.js"
 import type { WaterProvider } from "./WaterProvider.js"
 import type { RailwayProvider } from "./RailwayProvider.js"
+import type { TerrainPatchIndex } from "./frozen/FrozenPatches.js"
 import { AwsTerrariumElevationProvider } from "./providers/AwsTerrariumElevationProvider.js"
 import { IgnMntElevationProvider } from "./providers/IgnMntElevationProvider.js"
 import { FirstElevationThatAnswers } from "./FirstElevationThatAnswers.js"
@@ -32,6 +33,11 @@ export interface TerrainProviders {
   water?: WaterProvider
   /** Optional, as the roads are: a scene with no railway provider draws no tracks (see RailwaySystem). */
   railways?: RailwayProvider
+  /**
+   * Where the patches are built, when what they hold was frozen (see FrozenTerrain): on the patches that were, so that every request is one the
+   * annexes answer. Absent is wherever the observer is, as always.
+   */
+  patches?: TerrainPatchIndex
 }
 
 /**

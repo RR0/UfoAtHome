@@ -21,6 +21,7 @@ import type { Milestone } from "../model/Milestone.js"
 import type { SceneReference } from "../model/Reference.js"
 import type { SaidText } from "../model/SaidText.js"
 import type { InterpretationJson } from "../interpretation/Interpretation.js"
+import type { FrozenData } from "../model/FrozenData.js"
 import { sortedMilestones } from "../model/Milestone.js"
 import { SightingShapes } from "./SightingShapes.js"
 import { Provenance } from "./Provenance.js"
@@ -128,6 +129,9 @@ export interface SightingRecordingJson {
   /** What the observer took it to be, in metres — see InterpretationJson. Absent means they said
    * nothing a body could be made of, which is most of them. */
   interpretation?: InterpretationJson
+  /** Where the data its scene would otherwise ask third parties for is kept, beside this file — see FrozenData. Absent means all of it is
+   * asked for live. */
+  frozen?: FrozenData
 }
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
@@ -181,7 +185,8 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     iso: sighting.iso,
     lightPollution: sighting.lightPollution,
     observerMap: sighting.observerMap,
-    interpretation: sighting.interpretation
+    interpretation: sighting.interpretation,
+    frozen: sighting.frozen
   }
 }
 
@@ -255,6 +260,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.observerMap = json.observerMap
   sighting.vehicle = json.vehicle
   sighting.interpretation = json.interpretation
+  sighting.frozen = json.frozen
   sighting.loadIssues = issues
   SightingShapes.toBounds(sighting)
   // Positions follow the stated directions the way sizes follow the stated angles — and this is the

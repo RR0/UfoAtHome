@@ -18,8 +18,11 @@ export interface DataSource<T> {
   credit: string
   /** Where that attribution points — the licence or the service's own terms. */
   creditUrl: string
-  /** Built on demand, so choosing a source that is never used costs nothing. */
-  create(): T
+  /**
+   * Built on demand, so choosing a source that is never used costs nothing. `fetchImpl`, where a source takes it, is where its requests
+   * go instead of the network: a recording of them, or the annex they were recorded into (see ImageryAnnex).
+   */
+  create(fetchImpl?: typeof fetch): T
 }
 
 /** Looks a source up by id, falling back to the registry's first entry — the default everywhere,

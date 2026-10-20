@@ -12,6 +12,13 @@ import { SceneRenderer } from "../render3d/SceneRenderer.js"
 import { SeekPreview } from "./SeekPreview.js"
 import type { PreviewableScene } from "./SeekPreview.js"
 import type { TerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
+import { defaultTerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
+import { FrozenTerrain } from "../render3d/terrain/frozen/FrozenTerrain.js"
+import { FrozenAnnexes } from "../render3d/terrain/frozen/FrozenAnnexes.js"
+import { FrozenGroups } from "../engine/model/FrozenData.js"
+import type { FrozenData } from "../engine/model/FrozenData.js"
+import { FrozenUpperAirProvider } from "../engine/traffic/FrozenUpperAirProvider.js"
+import type { UpperAirAnnexData, UpperAirHeard } from "../engine/traffic/FrozenUpperAirProvider.js"
 import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import type { DecorModelCredit } from "../engine/model/Decor.js"
 import type { DecorSunlight, SceneAstronomy, SceneComet, SceneNova } from "../render3d/SceneRenderer.js"
@@ -1276,6 +1283,7 @@ export class SceneElement extends HTMLElement {
 
   set sightingData(json: SightingRecordingJson) {
     this.ufoElement.sightingData = json
+    this.upperAirHeardLive = undefined
     this.seekPreview?.recordingChanged(json)
     // An interpretation is OF one recording: another one's bodies have nothing to stand for here.
     // What the new one starts as is its observer's own account of what it was, if they gave one.
@@ -1387,7 +1395,31 @@ export class SceneElement extends HTMLElement {
   /** Relays a change of terrain source through to the renderer — see its setTerrainProviders.
    * Same "expose the nested renderer to a composing wrapper" arrangement as the getters above. */
   setTerrainProviders(providers: TerrainProviders): void {
-    this.sceneRenderer.setTerrainProviders(providers)
+    this.liveTerrainProviders = providers
+    this.frozenKey = undefined
+    this.applyFrozen(this.ufoElement.sighting.frozen)
+  }
+
+  /** The sources the ground is asked of live: the editor's choice, or the renderer's default. What a group the recording froze replaces. */
+  private liveTerrainProviders?: TerrainProviders
+  /** What the ground was last composed from (see applyFrozen): the recording's frozen data, its address, and what the page holds unsaved. */
+  private frozenKey?: string = "none"
+
+  /**
+   * Has the ground read from the recording's annexes what the recording froze, and asked live for the rest (see FrozenTerrain). Cheap when
+   * nothing changed, and nothing is rebuilt then: called at every tick, as an edit of the file may change it.
+   */
+  private applyFrozen(frozen: FrozenData | undefined): void {
+    const key = FrozenGroups.isEmpty(frozen) ? "none" : `${JSON.stringify(frozen)}\n${this.documentUrl ?? ""}\n${FrozenAnnexes.generation}`
+    if (key === this.frozenKey) return
+    const refreshUpperAir = this.frozenKey !== undefined && this.traffic?.set !== undefined
+    this.frozenKey = key
+    this.sceneRenderer.setTerrainProviders(FrozenTerrain.providers(frozen, this.documentUrl, this.liveTerrainProviders ?? defaultTerrainProviders()))
+    // The air aloft may now be another annex's, or asked live.
+    if (refreshUpperAir) {
+      this.traffic = undefined
+      this.decorMemo = undefined
+    }
   }
 
   /** Relays a change of 3D-model catalogue through to the renderer — see its
@@ -1697,6 +1729,7 @@ export class SceneElement extends HTMLElement {
     // opened hanging two and a half metres over its field after Wilcox, and came down only when
     // play was pressed. The decor is re-anchored by the renderer itself at that moment (see
     // SceneRenderer.setTerrainOrigin); the bodies are this element's, so this is where it happens.
+    this.applyFrozen(sighting.frozen)
     this.sceneRenderer.setObserverRoute(this.routeOf(sighting.observerTrack))
     this.sceneRenderer.setObserverHeadlights(this.observerHeadlightsAt(sighting, t))
     this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng, () => {
@@ -2217,11 +2250,22 @@ export class SceneElement extends HTMLElement {
    */
   private async readUpperAir(asked: NonNullable<SceneElement["traffic"]>, runtime: TrafficRuntime, fromMs: number, untilMs: number): Promise<void> {
     if (!asked.observer) return
-    const source = this.upperAirSource ?? runtime.UPPER_AIR_SOURCES[0]
-    let provider = SceneElement.upperAirProviders.get(source.id)
-    if (!provider) SceneElement.upperAirProviders.set(source.id, provider = source.create())
-    const answer = await provider.between(asked.observer, fromMs, untilMs)
+    const held = FrozenGroups.held(this.ufoElement.sighting.frozen, "upperAir")
+    let provider: UpperAirProvider | undefined
+    if (held) {
+      const address = FrozenAnnexes.address(held.src, this.documentUrl)
+      provider = SceneElement.upperAirProviders.get(address)
+      if (!provider) SceneElement.upperAirProviders.set(address, provider = new FrozenUpperAirProvider(FrozenAnnexes.json<UpperAirAnnexData>(address)))
+    } else {
+      const source = this.upperAirSource ?? runtime.UPPER_AIR_SOURCES[0]
+      provider = SceneElement.upperAirProviders.get(source.id)
+      if (!provider) SceneElement.upperAirProviders.set(source.id, provider = source.create())
+    }
+    const observer = { lat: asked.observer.lat, lng: asked.observer.lng }
+    const answer = await provider.between(observer, fromMs, untilMs)
     if (this.traffic !== asked || answer.status !== "found") return
+    // Asked live, and answered: what an editor freezes at the next save (see upperAirHeard).
+    if (!held) this.upperAirHeardLive = { ...observer, startMs: fromMs, endMs: untilMs, answer }
     asked.air = answer.samples
     asked.airSource = answer.source
     this.planContrails(asked, runtime)
@@ -2261,6 +2305,13 @@ export class SceneElement extends HTMLElement {
 
   /** Where the air aloft the trails are worked out from is read: the first of the registry's unless it is pointed elsewhere (see UpperAirProvider). */
   private upperAirSource?: DataSource<UpperAirProvider>
+
+  private upperAirHeardLive?: UpperAirHeard
+
+  /** The last answer of a live record of the air aloft, with what it was asked: what an editor freezes (see FrozenUpperAirProvider). */
+  get upperAirHeard(): UpperAirHeard | undefined {
+    return this.upperAirHeardLive
+  }
 
   /** Points the scene at another record of the air aloft, and works the trails out again. */
   setUpperAirSource(source: DataSource<UpperAirProvider>): void {

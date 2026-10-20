@@ -263,12 +263,19 @@ export const html = `
      component could carry and most authors never need it. -->
 <section class="group-panel" id="group-file" aria-labelledby="label-file-group" hidden>
   <div class="toolbar">
-    <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
+    <label><span id="label-import-file">Load JSON file</span> <input id="import-file" type="file" accept="application/json,.json,application/zip,.zip"/></label>
     <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
     <button id="import-url-button" type="button">Load</button>
     <button id="export" type="button">Save</button>
   </div>
   <p id="file-note" class="file-note" hidden role="status"></p>
+  <!-- What the recording carries frozen beside it, so that it plays without asking third parties (see FrozenDataPanel). -->
+  <fieldset id="frozen-data" class="frozen-data">
+    <legend id="label-frozen">Frozen data</legend>
+    <label><input id="frozen-live" type="checkbox"/> <span id="label-frozen-live"></span></label>
+    <ul id="frozen-groups" class="frozen-groups"></ul>
+    <p id="frozen-note" class="frozen-note" hidden role="status"></p>
+  </fieldset>
   <!-- A question about what an edit of the text just touched: data the editor reads dynamically (see SightingEditorElement.askAboutWeather). Modal: the author has to say what they mean before anything else is done, and the edit stands meanwhile. Escape is the safe answer, which puts back what was read. -->
   <dialog id="file-ask" class="file-ask" aria-labelledby="file-ask-text">
     <p id="file-ask-text"></p>
@@ -1277,6 +1284,30 @@ select.weather-field:disabled {
 .file-note {
   margin: 0.5em 0;
 }
+.frozen-data {
+  margin: 0.5em 0;
+}
+.frozen-groups {
+  list-style: none;
+  margin: 0.3em 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.2em;
+}
+.frozen-groups li {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.frozen-group-name {
+  min-width: 12em;
+}
+.frozen-group-state {
+  flex: 1 1 auto;
+}
+.frozen-note {
+  margin: 0.3em 0 0;
+}
 #observer-identity-hint {
   flex-basis: 100%;
   margin: 0;
@@ -1623,7 +1654,7 @@ select.weather-field:disabled {
   background: light-dark(#eef, #3a3d46);
 }
 ${MessageStyle.rules(
-  ["#scenery-status", ".apparent-size", ".place-status", ".ground-elevation", ".weather-source", ".file-note", "#observer-identity-hint", "#narrative-status", "#cloud-status", "#body-key-note", "#body-editor .body-intro"],
+  ["#scenery-status", ".apparent-size", ".place-status", ".ground-elevation", ".weather-source", ".file-note", ".frozen-note", ".frozen-group-state", "#observer-identity-hint", "#narrative-status", "#cloud-status", "#body-key-note", "#body-editor .body-intro"],
   [".scenery-warning"],
   ["#narrative-status.error"]
 )}

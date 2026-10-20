@@ -70,6 +70,8 @@ import { BRIGHT_STARS } from "../engine/astronomy/brightStarCatalog.js"
 import type { BrightStar } from "../engine/astronomy/brightStarCatalog.js"
 import { defaultTerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import type { TerrainProviders } from "./terrain/defaultTerrainProviders.js"
+import type { TerrainPatchIndex } from "./terrain/frozen/FrozenPatches.js"
+import { TerrainReach } from "./terrain/TerrainReach.js"
 import { boundsAroundObserver, buildTerrainMesh } from "./terrain/TerrainMeshBuilder.js"
 import { RoadSystem } from "./RoadSystem.js"
 import type { RoadWay } from "./terrain/RoadProvider.js"
@@ -200,29 +202,11 @@ const HUD_LAYER = 5
 /** See decorDistancesAt — filters out a spurious near-camera self-intersection with decor
  * geometry built close to the observer, well inside the camera's own near plane. */
 const UFO_OCCLUSION_MIN_DISTANCE_M = 0.5
-const GROUND_RADIUS = 900
-/** Mean Earth radius, for the one thing this scene needs it for: how far a observer can actually
- * see the ground from a given height. */
-const EARTH_RADIUS_M = 6_371_000
-/** How far the ground stays worth drawing through real air — a clear day's visibility. Beyond it
- * everything is haze whatever the geometry says, so there is nothing to gain by building more. */
-const MAX_GROUND_VISIBILITY_M = 30_000
+const GROUND_RADIUS = TerrainReach.GROUND_RADIUS_M
 
-/**
- * How far the ground disc has to reach for a observer at `elevationM`: their real horizon distance
- * (sqrt(2Rh) — 4.5 km at eye height, 138 km at a DC-3's 1500 m), capped by what air lets anyone
- * see anyway, and never smaller than the 900 m this always used at ground level.
- *
- * A fixed 900-unit disc was fine for a observer standing on it and nothing else: from a few hundred
- * metres up its own rim curved away into view with a void beyond — the "fish-eye ground" of a
- * observer in an aircraft. Deliberately NOT an attempt to render Earth's curvature: the horizon
- * only starts visibly bending around 10-15 km up, and at the altitudes a sighting is reported from
- * the real correction is the 1.24deg horizon dip at 1500 m, well under what any observer could
- * judge, while the missing ground was impossible to miss.
- */
+/** How far the ground disc has to reach for a observer at `elevationM` — see TerrainReach.groundRadiusFor. */
 function groundRadiusFor(elevationM: number): number {
-  const horizonM = Math.sqrt(2 * EARTH_RADIUS_M * Math.max(elevationM, 0))
-  return Math.max(GROUND_RADIUS, Math.min(horizonM, MAX_GROUND_VISIBILITY_M))
+  return TerrainReach.groundRadiusFor(elevationM)
 }
 const GROUND_ALBEDO = 0.5
 const STAR_RADIUS = 850
@@ -401,7 +385,7 @@ const TERRAIN_RENDER_ORDER = 1
  * every single frame while the observer is in motion. 150m is comfortably inside the terrain
  * patch's own 900m radius, so the old patch still visibly covers the observer's surroundings for a
  * while after a rebuild, rather than needing to be pixel-perfect the instant they've moved at all. */
-const TERRAIN_REBUILD_DISTANCE_M = 150
+const TERRAIN_REBUILD_DISTANCE_M = TerrainReach.REBUILD_DISTANCE_M
 
 /** Base (zenith, unwarmed, unclouded) magnitude for the always-on lens-flare dazzle's
  * uColorGain uniform — see applyLensFlareTint, which scales this by atmosphericTint per channel and
@@ -1683,6 +1667,9 @@ export class SceneRenderer {
     this.terrainBuildToken++
   }
 
+  /** The list of frozen patches a build is waiting for, so that it is waited for once (see setTerrainOrigin). */
+  private patchesAwaited?: TerrainPatchIndex
+
   /** The way the observer goes, as the recording's track gives it: what a bridge is to the ground depends on it (see ElevationHints). */
   private observerRoute?: readonly { lat: number; lng: number }[]
 
@@ -1701,28 +1688,8 @@ export class SceneRenderer {
    * follow it, and what is out of reach now is within reach later), for scenery that is all near, and for what flies.
    */
   static terrainReachFor(decor: readonly DecorObject[], route: readonly { lat: number; lng: number }[] | undefined): number {
-    if (route && route.length >= 2) {
-      const first = route[0]
-      for (const place of route) {
-        const move = geoToLocalMeters(place.lat, place.lng, first.lat, first.lng)
-        if (Math.hypot(move.x, move.z) > SceneRenderer.STILL_OBSERVER_M) return 0
-      }
-    }
-    let reach = 0
-    for (const object of decor) {
-      if (object.kind === "aircraft" || object.kind === "observer" || object.track) continue
-      const half = Math.max(object.sizeM?.widthM ?? 0, object.sizeM?.lengthM ?? 0) / 2
-      reach = Math.max(reach, Math.hypot(object.eastM, object.northM) + half)
-    }
-    // The patch is whole to 700 of its 900 and fades to nothing at the rim: what must stand on whole ground is inside the first.
-    const needed = Math.ceil(reach / SceneRenderer.PATCH_WHOLE_SHARE / 100) * 100
-    return needed > GROUND_RADIUS * SceneRenderer.PATCH_WHOLE_SHARE ? Math.min(needed, SceneRenderer.MAX_DECOR_TERRAIN_M) : 0
+    return TerrainReach.decorReachFor(decor, route)
   }
-
-  /** A route that stays within this of its start is a still observer's (a stance, a turn of the head, a few steps). */
-  private static readonly STILL_OBSERVER_M = 60
-  private static readonly PATCH_WHOLE_SHARE = 700 / 900
-  private static readonly MAX_DECOR_TERRAIN_M = 3000
 
   /**
    * Offsets the patch on screen, and the one fading out under it, by the distance between each one's own origin and where the observer is now.
@@ -1741,6 +1708,30 @@ export class SceneRenderer {
 
   setTerrainOrigin(lat?: number, lng?: number, onSettled?: () => void): void {
     if (lat === undefined || lng === undefined) return
+    // Where the ground was frozen, the patch built is the frozen one nearest the observer, at its own size (see TerrainPatchIndex), and
+    // nothing is built until the list of them is in hand.
+    const patches = this.terrainProviders.patches
+    let frozenRadiusM: number | undefined
+    if (patches) {
+      if (!patches.loaded) {
+        // Asked once per list, not at every tick it is awaited; and held for, as the patch itself is (see awaitArrival).
+        if (this.patchesAwaited !== patches) {
+          this.patchesAwaited = patches
+          const providers = this.terrainProviders
+          // The build asked from within the wait, so that the frame held for the list is still held for the patch.
+          void this.awaitArrival(patches.ready.then(() => {
+            if (this.terrainProviders === providers) this.setTerrainOrigin(lat, lng, onSettled)
+          }), SceneRenderer.TERRAIN_PATIENCE_MS)
+        }
+        return
+      }
+      const patch = patches.nearest(lat, lng)
+      if (patch) {
+        lat = patch.lat
+        lng = patch.lng
+        frozenRadiusM = patch.radiusM
+      }
+    }
     // How much ground the observer can actually see is what the patch has to cover: 900 m standing
     // on it, tens of kilometres from an aircraft. Built at the flat disc's own radius (see
     // groundRadiusFor), so real relief and imagery reach the horizon instead of stopping a few
@@ -1749,7 +1740,7 @@ export class SceneRenderer {
     // which is exactly right: from up there you see more ground, in less detail.
     // The ground disc, the sky and the haze keep the radius of the observer's reach; the patch of real ground may be wider where a still observer has scenery out
     // beyond it (see terrainReachFor), so that what stands there stands on the relief and not on the flat disc.
-    const radiusM = Math.max(this.groundRadius, this.decorTerrainRadiusM)
+    const radiusM = frozenRadiusM ?? Math.max(this.groundRadius, this.decorTerrainRadiusM)
     if (this.terrainOrigin && Math.abs(this.terrainRadius - radiusM) < radiusM * 0.1) {
       const { x, z } = geoToLocalMeters(lat, lng, this.terrainOrigin.lat, this.terrainOrigin.lng)
       // Scaled to the patch itself: 150 m matters for a 900 m patch and is meaningless for a 30 km one.
@@ -1932,7 +1923,7 @@ export class SceneRenderer {
    * download and a mess. What that reader is looking at is the pattern of the ground, which the
    * photograph under the scene already shows.
    */
-  private static readonly ROADS_MAX_RADIUS_M = 5000
+  private static readonly ROADS_MAX_RADIUS_M = TerrainReach.ROADS_MAX_RADIUS_M
 
   private buildRoads(lat: number, lng: number, radiusM: number): void {
     const provider = this.terrainProviders.roads

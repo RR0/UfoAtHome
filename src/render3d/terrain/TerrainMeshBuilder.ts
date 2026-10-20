@@ -31,7 +31,7 @@ import { WaterBeds } from "./WaterBeds.js"
  */
 const TERRAIN_SEGMENTS = 64
 /** What the mesh asks its source for: odd, so the center vertex lands exactly on the observer. A source with a finer ground answers with a finer grid (see below). */
-const ASKED_GRID_SIZE = TERRAIN_SEGMENTS + 1 // 65
+export const ASKED_GRID_SIZE = TERRAIN_SEGMENTS + 1 // 65
 /**
  * The most texels the ground photograph may hold on a side — a ceiling, not an order: the provider
  * gives what its tiles really carry and no more (see fetchImageryRaster).
@@ -40,7 +40,7 @@ const ASKED_GRID_SIZE = TERRAIN_SEGMENTS + 1 // 65
  * ground under the scene was a smear in which neither the highway nor the track a car turned off
  * onto could be made out. At 2048 the same patch is under a metre, which is what the survey holds.
  */
-const IMAGERY_RESOLUTION = 2048
+export const IMAGERY_RESOLUTION = 2048
 
 /** Full color out to this radius, fading to fully transparent by FADE_END — both kept well inside
  * the guaranteed provider coverage (a 3x3 tile grid sized so a single tile covers half the

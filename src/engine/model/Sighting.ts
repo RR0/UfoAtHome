@@ -23,6 +23,7 @@ import { Provenance } from "../persistence/Provenance.js"
 import type { RecordingIssue } from "../persistence/RecordingIssue.js"
 import type { InterpretationJson } from "../interpretation/Interpretation.js"
 import type { Account } from "./Account.js"
+import type { FrozenData } from "./FrozenData.js"
 import { Level2Date } from "@rr0/time/core"
 import { Level2DateParser } from "@rr0/time/parsers"
 
@@ -463,6 +464,12 @@ export class Sighting {
    * same "reassigned wholesale" reasoning as account above.
    */
   interpretation?: InterpretationJson
+
+  /**
+   * The data its scene would otherwise ask third parties for as it plays (the relief, the photograph of the ground, the roads…), kept in
+   * annexes beside the recording's file — see FrozenData. Absent is every group asked for live, as every recording made before this did.
+   */
+  frozen?: FrozenData
 
   /**
    * How much the observer's body moves the view when they are not walking — see Stance. 1 is a

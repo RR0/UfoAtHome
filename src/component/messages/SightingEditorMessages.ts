@@ -139,6 +139,31 @@ export interface SightingEditorMessages extends SightingLabels {
    * it is also what one does to a recording.
    */
   export: string
+  /**
+   * The data the recording carries frozen beside it (see FrozenData): the title, its explanation, the choice of asking everything live, the
+   * name of each group, what is said of one (`{date}` the day it was taken), and the button taking one again.
+   */
+  frozenTitle: string
+  frozenHint: string
+  frozenLive: string
+  frozenRelief: string
+  frozenImagery: string
+  frozenRoads: string
+  frozenWater: string
+  frozenRailways: string
+  frozenUpperAir: string
+  frozenTakenOn: string
+  frozenPending: string
+  frozenLiveState: string
+  frozenRefresh: string
+  /** While a group is being taken: `{group}`, and `{done}` patches of `{of}`. */
+  frozenTaking: string
+  /** A group whose source did not answer: `{group}`. */
+  frozenFailed: string
+  /** An annex the recording names and that could not be read: `{file}`. */
+  frozenMissing: string
+  /** After an export with annexes: `{count}` of them, `{size}` the archive's. */
+  frozenExported: string
   /** What the editor says before a recording that names or locates a person leaves the author's hands (see IdentityGuard). `{value}` is what was found. */
   identityHint: string
   identityAsk: string

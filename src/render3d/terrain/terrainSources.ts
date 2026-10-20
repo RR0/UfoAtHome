@@ -33,13 +33,13 @@ export const IMAGERY_SOURCES: DataSource<ImageryProvider>[] = [
     name: "Esri World Imagery",
     credit: "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community",
     creditUrl: "https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9",
-    create: () => new EsriWorldImageryProvider()
+    create: fetchImpl => new EsriWorldImageryProvider({ fetchImpl })
   },
   {
     id: "eox-s2cloudless",
     name: "EOX Sentinel-2 cloudless",
     credit: "EOxCloudless by EOX IT Services GmbH (contains modified Copernicus Sentinel data)",
     creditUrl: "https://cloudless.eox.at",
-    create: () => new EoxSentinel2ImageryProvider()
+    create: fetchImpl => new EoxSentinel2ImageryProvider({ fetchImpl })
   }
 ]
