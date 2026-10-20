@@ -263,9 +263,7 @@ export const html = `
      component could carry and most authors never need it. -->
 <section class="group-panel" id="group-file" aria-labelledby="label-file-group" hidden>
   <div class="toolbar">
-    <label><span id="label-import-file">Load sighting file</span> <input id="import-file" type="file" accept="application/json,.json,application/zip,.zip"/></label>
-    <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/sighting.json"/></label>
-    <button id="import-url-button" type="button">Load</button>
+    <span class="input-file-row"><span id="label-import-file">Load sighting file</span> <rr0-input-file id="import" name="import" accept="application/json,.json,application/zip,.zip" placeholder="https://…/sighting.json"></rr0-input-file></span>
     <button id="export" type="button">Save</button>
   </div>
   <p id="file-note" class="file-note" hidden role="status"></p>
@@ -425,7 +423,6 @@ export const html = `
         <option value="street" id="reference-add-street">Street-level pictures nearby</option>
       </select>
       <button id="add-reference" type="button" class="icon-btn element-list-add" title="Add a picture" aria-label="Add a picture">+</button>
-      <input id="add-reference-file" class="element-list-add" type="file" accept="image/*" hidden/>
     </div>
     <!-- Street-level pictures somebody took near the observer's spot — see PanoramaxPictures. Each
          comes with where it was taken from and which way it looked, a registration already made. -->
@@ -435,7 +432,7 @@ export const html = `
     </div>
     <div class="element-list-body" id="reference-item">
     <label><span id="label-reference-title">Name</span> <input id="referenceTitle" class="reference-field" type="text"/></label>
-    <label><span id="label-reference-src">Address</span> <input id="referenceSrc" class="reference-field" type="text" placeholder="https://…/photo.jpg"/></label>
+    <span class="input-file-row"><span id="label-reference-src">Picture</span> <rr0-input-file id="reference-source" name="reference-source" accept="image/*" no-button placeholder="https://…/photo.jpg"></rr0-input-file></span>
     <label><span id="label-reference-kind">Kind</span>
       <select id="referenceKind" class="reference-field">
         <option value="photo" id="reference-kind-photo">Photo</option>
@@ -480,8 +477,9 @@ export const html = `
       <button id="delete-trace" type="button" class="icon-btn" title="Delete trace" aria-label="Delete trace">🗑</button>
       <span id="trace-empty" class="element-list-empty">No investigator's line</span>
       <button id="add-trace" type="button" class="icon-btn element-list-add" title="Investigator's lines (KML, KMZ)" aria-label="Investigator's lines (KML, KMZ)">+</button>
-      <input id="add-trace-file" class="element-list-add" type="file" accept=".kml,.kmz,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz" hidden/>
     </div>
+    <!-- Where the lines added by "+" are read from: a file of the author's, or an address. -->
+    <span id="trace-import-row" class="input-file-row" hidden><rr0-input-file id="trace-import" name="trace-import" accept=".kml,.kmz,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz" placeholder="https://…/lines.kmz"></rr0-input-file></span>
     <span id="trace-status" class="apparent-size"></span>
     <div class="element-list-body" id="trace-item">
       <label><span id="label-trace-title">Name</span> <input id="traceTitle" class="trace-field" type="text"/></label>

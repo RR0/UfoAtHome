@@ -1,9 +1,10 @@
+import type { InputFileMessages } from "../InputFileElement.js"
 import type { SightingLabels } from "./SightingLabels.js"
 
 /** Contract for `<rr0-sighting-editor>`'s user-visible label strings — implemented per language
  * under this directory (`SightingEditorMessages_en.ts`, `SightingEditorMessages_fr.ts`) and loaded
  * via `loadSightingEditorMessages`. */
-export interface SightingEditorMessages extends SightingLabels {
+export interface SightingEditorMessages extends InputFileMessages, SightingLabels {
   oval: string
   /** The "Polygon" preset button — a plain quad, the starting point for a freeform shape (see
    * Shape.ts's own createCustomPolygon doc comment). */
@@ -181,9 +182,7 @@ export interface SightingEditorMessages extends SightingLabels {
   /** The case being edited: the picker of its recordings (accounts and readings), and its buttons. */
   /** The case with what was changed, as a zip. */
   importFile: string
-  importUrl: string
   importUrlPlaceholder: string
-  importButton: string
   importError: string
   /** The one failure whose fix is not the reader's: the file is there and the address is right, and
    * what has to change is a header on somebody else's server. See SightingFetch for how a page

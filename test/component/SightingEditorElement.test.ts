@@ -7020,7 +7020,7 @@ describe("SightingEditorElement investigator's lines", () => {
     <Placemark><name>Clocher</name><Point><coordinates>2.32,49.02</coordinates></Point></Placemark></Document></kml>`
 
   async function importFile(element: SightingEditorElement, name: string, content: string): Promise<void> {
-    const input = element.shadowRoot!.getElementById("add-trace-file") as HTMLInputElement
+    const input = element.shadowRoot!.getElementById("trace-import-file") as HTMLInputElement
     const file = new File([content], name)
     Object.defineProperty(input, "files", { configurable: true, value: [file] })
     input.dispatchEvent(new Event("change"))

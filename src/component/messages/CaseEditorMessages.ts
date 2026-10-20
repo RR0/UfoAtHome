@@ -1,5 +1,6 @@
+import type { InputFileMessages } from "../InputFileElement.js"
 /** What the case editor says — see CaseEditorElement. */
-export interface CaseEditorMessages {
+export interface CaseEditorMessages extends InputFileMessages {
   /** What the picker of the case's events is called: its options are the accounts, the readings and the interviews. */
   event: string
   /** Before the name of an observer, in the picker: "Observation of Q. B." */
@@ -34,10 +35,8 @@ export interface CaseEditorMessages {
   sourceField: string
   sourceBlank: string
   sourceFile: string
-  sourceUrl: string
   observerField: string
   fileField: string
-  urlField: string
   loadFailed: string
   isACase: string
   ok: string
@@ -58,8 +57,6 @@ export interface CaseEditorMessages {
   eventsTab: string
   fileTab: string
   importFile: string
-  importUrl: string
-  importButton: string
   fileNotACase: string
   /** Said while the text of the file is not a case the editor can read: the case keeps the last text it understood. */
   fileInvalid: string

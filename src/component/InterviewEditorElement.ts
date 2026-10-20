@@ -1,4 +1,5 @@
 import type { CaseEventJson } from "../engine/persistence/caseJson.js"
+import { register as registerInputFile, type InputFileElement, type InputFilePick } from "./InputFileElement.js"
 import type { AgentRef } from "../engine/interpretation/Interpretation.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import type { SaidText } from "../engine/model/SaidText.js"
@@ -96,9 +97,7 @@ const TEMPLATE = `
     <label class="fill"><span id="label-url">Transcript</span> <input id="url" type="text" autocomplete="off" spellcheck="false" placeholder="interview-….json"/></label>
   </div>
   <div class="row toolbar">
-    <label><span id="label-import-file">Load a file (JSON, text, WebVTT, SRT)</span> <input id="import-file" type="file" accept="application/json,.json,.txt,.md,.vtt,.srt,text/*"/></label>
-    <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/interview.json"/></label>
-    <button id="import-url-button" type="button">Load</button>
+    <span class="input-file-row"><span id="label-import-file">Load a file (JSON, text, WebVTT, SRT)</span> <rr0-input-file id="import" name="import" accept="application/json,.json,.txt,.md,.vtt,.srt,text/*" placeholder="https://…/interview.json"></rr0-input-file></span>
     <button id="save" type="button">Save</button>
   </div>
   <p id="file-note" class="file-note" hidden role="status"></p>
@@ -124,6 +123,11 @@ const TEMPLATE = `
  */
 export class InterviewEditorElement extends HTMLElement {
   private readonly shadow = this.attachShadow({ mode: "open" })
+
+  /** Where a transcript comes in: a file of the author's, or an address (see InputFileElement). */
+  private get importInput(): InputFileElement {
+    return this.shadow.getElementById("import") as InputFileElement
+  }
   private messages: InterviewMessages = interviewMessages_en
   private said = new SaidTexts(["en"])
   private language: UfoLanguage = "en"
@@ -143,6 +147,9 @@ export class InterviewEditorElement extends HTMLElement {
   constructor() {
     super()
     this.shadow.innerHTML = TEMPLATE
+    // Made now, since its controls are looked up below and an element of a shadow root is not upgraded before the root is in a page.
+    customElements.upgrade(this.shadow)
+    this.importInput.build()
     for (const id of ["title", "time", "by", "url", "summary", "witness", "medium"]) {
       this.shadow.getElementById(id)!.addEventListener(id === "witness" || id === "medium" ? "change" : "input", () => this.write(id))
     }
@@ -154,8 +161,11 @@ export class InterviewEditorElement extends HTMLElement {
       this.shownFor = undefined
       if (this.text === undefined && this.group === "file") void this.showTranscript()
     })
-    this.shadow.getElementById("import-file")!.addEventListener("change", () => void this.importFromFile())
-    this.shadow.getElementById("import-url-button")!.addEventListener("click", () => void this.importFromUrl())
+    this.importInput.addEventListener("filepick", event => {
+      const pick = (event as CustomEvent<InputFilePick>).detail
+      if (pick.file) void this.importFromFile(pick.file)
+      else void this.importFromUrl(pick.url)
+    })
     this.shadow.getElementById("save")!.addEventListener("click", () => this.save())
   }
 
@@ -245,7 +255,7 @@ export class InterviewEditorElement extends HTMLElement {
     for (const id of ["title", "time", "by", "url", "summary"]) this.field(id).readOnly = readonly
     for (const box of this.shadow.querySelectorAll<HTMLInputElement>("#witness input")) box.disabled = readonly
     this.field("medium").disabled = readonly
-    for (const id of ["import-file", "import-url", "import-url-button"]) (this.field(id) as unknown as HTMLButtonElement).disabled = readonly
+    this.importInput.disabled = readonly
   }
 
   /** What `by` says as one line: the ids of the people, the names of the organizations, separated by commas. */
@@ -268,8 +278,7 @@ export class InterviewEditorElement extends HTMLElement {
     text("label-summary", m.summary)
     text("label-url", m.transcript)
     text("label-import-file", m.importFile)
-    text("label-import-url", m.importUrl)
-    text("import-url-button", m.importButton)
+    this.importInput.messages = m
     text("save", m.saveButton)
     this.field("url").title = m.transcriptHint
     this.field("by").title = m.byHint
@@ -639,10 +648,7 @@ export class InterviewEditorElement extends HTMLElement {
     this.onEdited(text)
   }
 
-  private async importFromFile(): Promise<void> {
-    const input = this.field("import-file")
-    const file = input.files?.[0]
-    if (!file) return
+  private async importFromFile(file: File): Promise<void> {
     try {
       const text = await file.text()
       let json: unknown
@@ -667,12 +673,9 @@ export class InterviewEditorElement extends HTMLElement {
     } catch {
       this.note(this.messages.loadFailed, "error")
     }
-    input.value = ""
   }
 
-  private async importFromUrl(): Promise<void> {
-    const value = this.field("import-url").value.trim()
-    if (value === "") return
+  private async importFromUrl(value: string): Promise<void> {
     try {
       await this.take(await SightingFetch.json(new URL(value, this.base ?? location.href).href))
     } catch {
@@ -696,5 +699,6 @@ export class InterviewEditorElement extends HTMLElement {
 
 export function register(): void {
   registerInterview()
+  registerInputFile()
   if (!customElements.get(INTERVIEW_EDITOR_ELEMENT_NAME)) customElements.define(INTERVIEW_EDITOR_ELEMENT_NAME, InterviewEditorElement)
 }

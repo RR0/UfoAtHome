@@ -45,6 +45,7 @@ import { ObserverProviders } from "../engine/observer/ObserverProviders.js"
 import { register as registerPopoverPicker } from "./PopoverPickerElement.js"
 import type { PopoverPickerElement, PickerNode } from "./PopoverPickerElement.js"
 import { DATE_INPUT_ELEMENT_NAME, register as registerDateInput } from "./DateInputElement.js"
+import { INPUT_FILE_ELEMENT_NAME, InputFileElement, register as registerInputFile, type InputFilePick } from "./InputFileElement.js"
 import { DURATION_INPUT_ELEMENT_NAME, register as registerDurationInput } from "./DurationInputElement.js"
 import type { DurationInputElement } from "./DurationInputElement.js"
 import type { DateInputElement } from "./DateInputElement.js"
@@ -414,9 +415,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly exportButton: HTMLButtonElement
   /** The File group's account of the data frozen beside the recording, and what takes it at export. */
   private readonly frozenPanel: FrozenDataPanel
-  private readonly importFileInput: HTMLInputElement
-  private readonly importUrlInput: HTMLInputElement
-  private readonly importUrlButton: HTMLButtonElement
+  /** Where a recording comes in: a file of the author's, or an address (see InputFileElement). */
+  private readonly importInput: InputFileElement
   private readonly narrativeSourceRow: HTMLElement
   private readonly narrativeSettingsBox: HTMLElement
   /** The inputs the current provider's settings were rendered into, by setting id. */
@@ -636,7 +636,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelDescription: HTMLElement
   private readonly labelTags: HTMLElement
   private readonly labelImportFile: HTMLElement
-  private readonly labelImportUrl: HTMLElement
   /**
    * Set by whoever holds this recording as a reading of another (see CaseEditorElement): it has no
    * shape of its own, and its bodies are all there is to see, even while the Shapes part is open.
@@ -795,7 +794,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly referenceSelect: HTMLSelectElement
   private readonly deleteReferenceButton: HTMLButtonElement
   private readonly referenceTitleInput: HTMLInputElement
-  private readonly referenceSrcInput: HTMLInputElement
+  /** Where the selected picture is: embedded from a file of the author's, or at an address (see InputFileElement). */
+  private readonly referenceSourceInput: InputFileElement
   private readonly referenceKindSelect: HTMLSelectElement
   private readonly referenceCreditInput: HTMLInputElement
   private readonly referenceCreditUrlInput: HTMLInputElement
@@ -810,7 +810,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly referenceStatus: HTMLElement
   private readonly addReferenceButton: HTMLButtonElement
   private readonly referenceAddKindSelect: HTMLSelectElement
-  private readonly addReferenceFileInput: HTMLInputElement
   private readonly referenceLandmarksSelect: HTMLSelectElement
   private readonly addReferenceLandmarkButton: HTMLButtonElement
   private readonly deleteReferenceLandmarkButton: HTMLButtonElement
@@ -818,7 +817,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelReferenceLandmarks: HTMLElement
   private readonly labelReferenceLandmarkLabel: HTMLElement
   private readonly referenceAdoptPoseButton: HTMLButtonElement
-  private readonly addTraceFileInput: HTMLInputElement
+  /** Where investigator's lines are read from (see InputFileElement), shown by the "+" of the lines. */
+  private readonly traceImportInput: InputFileElement
   private readonly traceSelect: HTMLSelectElement
   private readonly deleteTraceButton: HTMLButtonElement
   private readonly traceTitleInput: HTMLInputElement
@@ -1014,6 +1014,7 @@ export class SightingEditorElement extends HTMLElement {
     customElements.upgrade(this.shadow)
     for (const date of this.shadow.querySelectorAll<DateInputElement>(DATE_INPUT_ELEMENT_NAME)) date.build()
     for (const duration of this.shadow.querySelectorAll<DurationInputElement>(DURATION_INPUT_ELEMENT_NAME)) duration.build()
+    for (const input of this.shadow.querySelectorAll<InputFileElement>(INPUT_FILE_ELEMENT_NAME)) input.build()
 
     // Created imperatively (not left inline in the template markup) and inserted via
     // document.createElement, which — for an already-defined custom element — synchronously
@@ -1119,9 +1120,7 @@ export class SightingEditorElement extends HTMLElement {
     this.durationElement = this.shadow.querySelector<DurationInputElement>(DURATION_INPUT_ELEMENT_NAME)!
     this.durationInput = this.durationElement.input
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
-    this.importFileInput = this.shadow.getElementById("import-file") as HTMLInputElement
-    this.importUrlInput = this.shadow.getElementById("import-url") as HTMLInputElement
-    this.importUrlButton = this.shadow.getElementById("import-url-button") as HTMLButtonElement
+    this.importInput = this.shadow.getElementById("import") as InputFileElement
     this.narrativeSourceRow = this.shadow.getElementById("narrative-source-row")!
     this.narrativeSettingsBox = this.shadow.getElementById("narrative-settings")!
     this.narrativeRememberInput = this.shadow.getElementById("narrativeRemember") as HTMLInputElement
@@ -1278,7 +1277,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDescription = this.shadow.getElementById("label-description")!
     this.labelTags = this.shadow.getElementById("label-tags")!
     this.labelImportFile = this.shadow.getElementById("label-import-file")!
-    this.labelImportUrl = this.shadow.getElementById("label-import-url")!
     this.labelNarrativeSource = this.shadow.getElementById("label-narrative-source")!
     this.labelNarrativeRemember = this.shadow.getElementById("label-narrative-remember")!
     this.labelShapeGroup = this.shadow.getElementById("label-shape-group")!
@@ -1424,7 +1422,7 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceSelect = this.shadow.getElementById("reference") as HTMLSelectElement
     this.deleteReferenceButton = this.shadow.getElementById("delete-reference") as HTMLButtonElement
     this.referenceTitleInput = this.shadow.getElementById("referenceTitle") as HTMLInputElement
-    this.referenceSrcInput = this.shadow.getElementById("referenceSrc") as HTMLInputElement
+    this.referenceSourceInput = this.shadow.getElementById("reference-source") as InputFileElement
     this.referenceKindSelect = this.shadow.getElementById("referenceKind") as HTMLSelectElement
     this.referenceCreditInput = this.shadow.getElementById("referenceCredit") as HTMLInputElement
     this.referenceCreditUrlInput = this.shadow.getElementById("referenceCreditUrl") as HTMLInputElement
@@ -1439,7 +1437,6 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceStatus = this.shadow.getElementById("reference-status")!
     this.addReferenceButton = this.shadow.getElementById("add-reference") as HTMLButtonElement
     this.referenceAddKindSelect = this.shadow.getElementById("reference-add-kind") as HTMLSelectElement
-    this.addReferenceFileInput = this.shadow.getElementById("add-reference-file") as HTMLInputElement
     this.referenceLandmarksSelect = this.shadow.getElementById("reference-landmarks") as HTMLSelectElement
     this.addReferenceLandmarkButton = this.shadow.getElementById("add-reference-landmark") as HTMLButtonElement
     this.deleteReferenceLandmarkButton = this.shadow.getElementById("delete-reference-landmark") as HTMLButtonElement
@@ -1447,7 +1444,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelReferenceLandmarks = this.shadow.getElementById("label-reference-landmarks")!
     this.labelReferenceLandmarkLabel = this.shadow.getElementById("label-reference-landmark-label")!
     this.referenceAdoptPoseButton = this.shadow.getElementById("reference-adopt-pose") as HTMLButtonElement
-    this.addTraceFileInput = this.shadow.getElementById("add-trace-file") as HTMLInputElement
+    this.traceImportInput = this.shadow.getElementById("trace-import") as InputFileElement
     this.traceSelect = this.shadow.getElementById("trace") as HTMLSelectElement
     this.deleteTraceButton = this.shadow.getElementById("delete-trace") as HTMLButtonElement
     this.traceTitleInput = this.shadow.getElementById("traceTitle") as HTMLInputElement
@@ -1460,7 +1457,7 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceStreetSelect = this.shadow.getElementById("reference-street") as HTMLSelectElement
     this.referenceStreetAddButton = this.shadow.getElementById("reference-street-add") as HTMLButtonElement
     this.referenceFields = [
-      this.referenceTitleInput, this.referenceSrcInput, this.referenceKindSelect, this.referenceCreditInput,
+      this.referenceTitleInput, this.referenceKindSelect, this.referenceCreditInput,
       this.referenceCreditUrlInput, this.referenceTInput, this.referenceDrawingInput, this.referenceOpacityInput,
       this.referenceHeadingInput, this.referencePitchInput, this.referenceRollInput, this.referenceFovInput
     ]
@@ -1530,8 +1527,11 @@ export class SightingEditorElement extends HTMLElement {
     this.addShapeButton.addEventListener("click", () => this.addShape())
     this.deleteShapeButton.addEventListener("click", () => this.deleteShape())
     this.exportButton.addEventListener("click", () => this.exportJson())
-    this.importFileInput.addEventListener("change", () => this.importFromFile())
-    this.importUrlButton.addEventListener("click", () => this.importFromUrl())
+    this.importInput.addEventListener("filepick", event => {
+      const pick = (event as CustomEvent<InputFilePick>).detail
+      if (pick.file) void this.importFromFile(pick.file)
+      else void this.importFromUrl(pick.url)
+    })
     this.accountSourceSelect.addEventListener("change", () => this.updateObserverMetadata())
     this.accountUrlInput.addEventListener("input", () => this.updateSourceUrl())
     this.accountFollowedUpSelect.addEventListener("change", () => this.updateObserverMetadata())
@@ -1589,14 +1589,19 @@ export class SightingEditorElement extends HTMLElement {
     for (const field of this.referenceFields) field.addEventListener("input", () => this.updateReference())
     this.referenceUsePoseButton.addEventListener("click", () => this.useObserverPoseForReference())
     this.addReferenceButton.addEventListener("click", () => this.addReferenceOfKind())
-    this.addReferenceFileInput.addEventListener("change", () => void this.addReferenceFromFile())
+    this.referenceSourceInput.addEventListener("filepick", event => void this.setReferenceSource((event as CustomEvent<InputFilePick>).detail))
     this.addReferenceLandmarkButton.addEventListener("click", () => this.armLandmark())
     this.deleteReferenceLandmarkButton.addEventListener("click", () => this.deleteLandmark())
     this.referenceLandmarksSelect.addEventListener("change", () => this.selectLandmark(this.referenceLandmarksSelect.value))
     this.referenceLandmarkLabelInput.addEventListener("input", () => this.updateLandmarkLabel())
     this.referenceAdoptPoseButton.addEventListener("click", () => this.adoptReferencePose())
-    this.addTraceButton.addEventListener("click", () => this.addTraceFileInput.click())
-    this.addTraceFileInput.addEventListener("change", () => void this.addTracesFromFile())
+    this.addTraceButton.addEventListener("click", () => {
+      const row = this.shadow.getElementById("trace-import-row")!
+      row.hidden = false
+      if (this.traceImportInput.mode === "file") this.traceImportInput.openPicker()
+      else this.traceImportInput.focus()
+    })
+    this.traceImportInput.addEventListener("filepick", event => void this.addTraces((event as CustomEvent<InputFilePick>).detail))
     this.traceSelect.addEventListener("change", () => this.selectTrace(this.traceSelect.value))
     this.deleteTraceButton.addEventListener("click", () => this.deleteTrace())
     this.traceTitleInput.addEventListener("input", () => this.writeTraceFields())
@@ -2279,17 +2284,11 @@ export class SightingEditorElement extends HTMLElement {
   /** Loads a SightingRecordingJson from a user-picked local file — the counterpart to
    * exportJson(). Reads via FileReader (readAsText), not the File API's own newer .text() —
    * jsdom's File doesn't implement .text() (confirmed empirically), and FileReader is the more
-   * broadly-supported option in real browsers too. Resets the input's value afterward so
-   * re-picking the exact same file (e.g. after fixing and re-saving it) still fires a fresh
-   * "change" event. */
-  private async importFromFile(): Promise<void> {
-    const file = this.importFileInput.files?.[0]
-    if (!file) return
-    if (this.holdLoad(() => void this.loadFile(file))) {
-      // Not read yet: the picked file is read when the author agrees, and the field is free again meanwhile.
-      this.importFileInput.value = ""
-      return
-    }
+   * broadly-supported option in real browsers too. The picker empties itself once it has said what
+   * was picked, so that re-picking the exact same file (e.g. after fixing and re-saving it) is said again. */
+  private async importFromFile(file: File): Promise<void> {
+    // Not read yet when held: the picked file is read when the author agrees.
+    if (this.holdLoad(() => void this.loadFile(file))) return
     await this.loadFile(file)
   }
 
@@ -2314,11 +2313,9 @@ export class SightingEditorElement extends HTMLElement {
       this.resetHistory()
       this.dispatchEvent(new CustomEvent("recordingloaded", { bubbles: true, composed: true }))
       // The recording now open came from a file, not from the address still sitting in the field.
-      this.importUrlInput.value = ""
+      this.importInput.url = ""
     } catch {
       window.alert(this.messages.importError)
-    } finally {
-      this.importFileInput.value = ""
     }
   }
 
@@ -2370,7 +2367,7 @@ export class SightingEditorElement extends HTMLElement {
   /** Fetches a recording and loads it into the editor — shared by the "Load from URL" field and
    * by the `src` attribute above. Failure is reported to the user rather than thrown: a bad URL
    * in a shared link should leave a usable empty editor, not a broken page. */
-  private async importFromUrl(url: string = this.importUrlInput.value.trim()): Promise<void> {
+  private async importFromUrl(url: string = this.importInput.url): Promise<void> {
     if (!url) return
     if (this.holdLoad(() => void this.loadUrl(url))) return
     await this.loadUrl(url)
@@ -2383,7 +2380,7 @@ export class SightingEditorElement extends HTMLElement {
       if (CaseFile.isCase(fetched)) {
         const address = new URL(url, location.href).href
         if (this.offerCase(fetched, address)) {
-          this.importUrlInput.value = address
+          this.importInput.url = address
           return
         }
         throw new Error("A case has no recording to edit here")
@@ -2398,7 +2395,7 @@ export class SightingEditorElement extends HTMLElement {
       // Says where the open recording came from, whichever way it was asked for: typed here, the
       // `src` attribute (a site's `?file=` link), or a observer's own file. Absolute, so the
       // address can be copied out of the field and still work, and so the field is a valid URL.
-      this.importUrlInput.value = new URL(url, location.href).href
+      this.importInput.url = new URL(url, location.href).href
       this.dispatchEvent(new CustomEvent("recordingloaded", { bubbles: true, composed: true }))
     } catch (error) {
       window.alert(this.importErrorFor(error))
@@ -3691,6 +3688,7 @@ export class SightingEditorElement extends HTMLElement {
     this.deleteReferenceButton.disabled = !hasSelection
     this.referenceUsePoseButton.disabled = !hasSelection
     for (const field of [this.referenceSelect, ...this.referenceFields]) field.disabled = !hasSelection
+    this.referenceSourceInput.disabled = !hasSelection
     this.refreshLandmarkList()
     this.syncCanvasMode()
     if (!reference) {
@@ -3700,8 +3698,8 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceTitleInput.value = this.said.read(reference.title) ?? ""
     // A picture embedded in the recording is megabytes of base64: shown as what it is, not typed over.
     const embedded = reference.src.startsWith("data:")
-    this.referenceSrcInput.value = embedded ? "" : reference.src
-    this.referenceSrcInput.disabled = embedded
+    this.referenceSourceInput.url = embedded ? "" : reference.src
+    this.referenceSourceInput.mode = embedded ? "file" : "url"
     this.referenceKindSelect.value = reference.kind
     this.referenceCreditInput.value = reference.credit ?? ""
     this.referenceCreditUrlInput.value = reference.creditUrl ?? ""
@@ -3739,7 +3737,7 @@ export class SightingEditorElement extends HTMLElement {
     const seconds = this.referenceTInput.value.trim() === "" ? undefined : Number(this.referenceTInput.value)
     sighting.references = sighting.references.map(reference => {
       if (reference.id !== this.currentReferenceId) return reference
-      const src = reference.src.startsWith("data:") ? reference.src : this.referenceSrcInput.value.trim()
+      const src = reference.src
       const registration = {
         headingDeg,
         pitchDeg: Number(this.referencePitchInput.value) || 0,
@@ -3814,22 +3812,45 @@ export class SightingEditorElement extends HTMLElement {
    * embed answers with nothing. */
   private addReferenceFromAddress(): void {
     this.addReference("")
-    this.referenceSrcInput.focus()
+    this.referenceSourceInput.mode = "url"
+    this.referenceSourceInput.focus()
   }
 
   /** A picture from the author's own disk, embedded in the recording as a data: URL — see
    * SceneReference.src for the trade, and referenceEmbedded for what the author is told of it. */
-  private async addReferenceFromFile(): Promise<void> {
-    const file = this.addReferenceFileInput.files?.[0]
-    if (!file) return
-    const src = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = () => reject(reader.error)
-      reader.readAsDataURL(file)
+  private addReferenceFromFile(): void {
+    this.addReference("")
+    this.referenceSourceInput.mode = "file"
+    this.referenceSourceInput.openPicker()
+  }
+
+  /**
+   * The selected picture taken from where its source now says: a file of the author's is embedded as a data: URL, an address is the
+   * picture's address. A picture still untitled is named after its file.
+   */
+  private async setReferenceSource(pick: InputFilePick): Promise<void> {
+    const id = this.currentReferenceId
+    if (id === undefined) return
+    let src: string
+    if (pick.file) {
+      const file = pick.file
+      src = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = () => reject(reader.error)
+        reader.readAsDataURL(file)
+      })
+    } else {
+      src = pick.url
+    }
+    const sighting = this.ufoElement.sighting
+    sighting.references = sighting.references.map(reference => reference.id !== id ? reference : {
+      ...reference, src,
+      title: reference.title ?? (pick.file ? this.said.write(undefined, pick.file.name.replace(/\.[^.]+$/, ""), this.writingLanguage) : undefined)
     })
-    this.addReferenceFileInput.value = ""
-    this.addReference(src, file.name.replace(/\.[^.]+$/, ""))
+    this.touch()
+    this.refreshReferenceList()
+    this.ufoElement.refresh()
   }
 
   // ---- Lining a picture up on the scene — see PictureRegistration and PictureLandmark.
@@ -4226,7 +4247,7 @@ export class SightingEditorElement extends HTMLElement {
    * street-level picture near the spot, looked up first and then picked. */
   private addReferenceOfKind(): void {
     switch (this.referenceAddKindSelect.value) {
-      case "file": this.addReferenceFileInput.click(); break
+      case "file": this.addReferenceFromFile(); break
       case "street": void this.searchStreetPictures(); break
       default: this.addReferenceFromAddress()
     }
@@ -4341,20 +4362,12 @@ export class SightingEditorElement extends HTMLElement {
    * author is an illustration; the reader module is loaded here, not with the editor, as most
    * recordings never import one.
    */
-  private async addTracesFromFile(): Promise<void> {
-    const file = this.addTraceFileInput.files?.[0]
-    if (!file) return
-    this.addTraceFileInput.value = ""
+  private async addTraces(pick: InputFilePick): Promise<void> {
+    const name = pick.file?.name ?? decodeURIComponent(pick.url!.split("/").pop() ?? pick.url!)
     let result: KmlImportResult
     try {
       const { KmlImport } = await import("../engine/interop/KmlImport.js")
-      const bytes = await new Promise<ArrayBuffer>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result as ArrayBuffer)
-        reader.onerror = () => reject(reader.error)
-        reader.readAsArrayBuffer(file)
-      })
-      result = await KmlImport.fromBytes(new Uint8Array(bytes))
+      result = await KmlImport.fromBytes(await InputFileElement.bytesOf(pick))
     } catch {
       this.traceStatus.textContent = this.messages.traceFailed
       return
@@ -4366,7 +4379,7 @@ export class SightingEditorElement extends HTMLElement {
     const sighting = this.ufoElement.sighting
     const taken = new Set(sighting.traces.map(trace => trace.id))
     let next = 1
-    const source = this.said.write(undefined, result.documentName ?? file.name, this.writingLanguage)
+    const source = this.said.write(undefined, result.documentName ?? name, this.writingLanguage)
     const added = result.traces.map(trace => {
       while (taken.has(`trace-${next}`)) next++
       const id = `trace-${next}`
@@ -4382,7 +4395,7 @@ export class SightingEditorElement extends HTMLElement {
     this.currentTraceId = added[0].id
     this.refreshTraceList()
     const left = result.skipped.length > 0 ? ` ${this.messages.traceSkipped.replace("{what}", result.skipped.join(", "))}` : ""
-    this.traceStatus.textContent = this.messages.traceImported.replace("{n}", String(added.length)).replace("{name}", file.name) + left
+    this.traceStatus.textContent = this.messages.traceImported.replace("{n}", String(added.length)).replace("{name}", name) + left
     this.ufoElement.refresh()
   }
 
@@ -9098,9 +9111,8 @@ export class SightingEditorElement extends HTMLElement {
     this.shadow.getElementById("identity-ask-keep")!.textContent = messages.identityKeep
     this.shadow.getElementById("identity-ask-back")!.textContent = messages.identityBack
     this.labelImportFile.textContent = messages.importFile
-    this.labelImportUrl.textContent = messages.importUrl
-    this.importUrlInput.placeholder = messages.importUrlPlaceholder
-    this.importUrlButton.textContent = messages.importButton
+    this.importInput.placeholder = messages.importUrlPlaceholder
+    for (const input of this.shadow.querySelectorAll<InputFileElement>(INPUT_FILE_ELEMENT_NAME)) input.messages = messages
     this.labelObserverAge.textContent = messages.observerAge
     this.labelObserverBirth.textContent = messages.observerBirth
     this.perceptionSettings.labels = messages.observerPerception
@@ -9286,7 +9298,7 @@ export class SightingEditorElement extends HTMLElement {
     this.shadow.getElementById("trace-empty")!.textContent = messages.emptyTraces
     this.labelReferenceTitle.textContent = messages.referenceTitle
     this.labelReferenceSrc.textContent = messages.referenceSrc
-    this.referenceSrcInput.placeholder = messages.referenceSrcPlaceholder
+    this.referenceSourceInput.placeholder = messages.referenceSrcPlaceholder
     this.labelReferenceKind.textContent = messages.referenceKind
     this.referenceKindSelect.querySelector<HTMLOptionElement>("#reference-kind-photo")!.textContent = messages.referencePhoto
     this.referenceKindSelect.querySelector<HTMLOptionElement>("#reference-kind-panorama")!.textContent = messages.referencePanorama
@@ -10550,6 +10562,7 @@ class LegacyRecorderElement extends SightingEditorElement {
 
 export function register(): void {
   registerDateInput()
+  registerInputFile()
   registerPopoverPicker()
   registerProviderSettings()
   registerDurationInput()

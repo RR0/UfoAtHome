@@ -1,6 +1,7 @@
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
+import type { InputFileElement, InputFilePick } from "./InputFileElement.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { formatEdtfTime, parseEdtfTime } from "../engine/model/Sighting.js"
@@ -138,9 +139,7 @@ const TEMPLATE = `
   </section>
   <section class="group-panel" id="group-case-file" aria-labelledby="label-case-file-group" hidden>
     <div class="row toolbar">
-      <label><span id="label-import-file">Load case file</span> <input id="import-file" type="file" accept="application/json,.json"/></label>
-      <label><span id="label-import-url">Or load from URL</span> <input id="import-url" type="url" placeholder="https://…/case.json"/></label>
-      <button id="import-url-button" type="button">Load</button>
+      <span class="input-file-row"><span id="label-import-file">Load case file</span> <rr0-input-file id="import" name="import" accept="application/json,.json" placeholder="https://…/case.json"></rr0-input-file></span>
       <button id="export" type="button">Save</button>
     </div>
     <p id="case-file-note" class="file-note" hidden role="status"></p>
@@ -156,7 +155,7 @@ const TEMPLATE = `
     <div id="fields-add">
       <label><span id="label-kind">Type</span> <select id="kind"><option value="observation"></option><option value="interview"></option></select></label>
       <label id="row-source"><span id="label-source">Source</span> <select id="source">
-        <option value="blank"></option><option value="file"></option><option value="url"></option>
+        <option value="blank"></option><option value="file"></option>
       </select></label>
       <label id="row-witness"><span id="label-witness">Witness</span> <select id="witness"></select></label>
       <label id="row-medium"><span id="label-medium">Medium</span> <select id="medium"></select></label>
@@ -164,8 +163,7 @@ const TEMPLATE = `
       <label id="row-title"><span id="label-title">Title</span> <input id="title" type="text"/></label>
       <label id="row-author"><span id="label-author">Author</span> <input id="author" type="text"/></label>
       <label id="row-date"><span id="label-date">Date</span> <input id="date" type="date"/></label>
-      <label id="row-file"><span id="label-file">File</span> <input id="file" type="file" accept="application/json,.json"/></label>
-      <label id="row-url"><span id="label-url">Address</span> <input id="url" type="url" placeholder="https://…"/></label>
+      <div id="row-file" class="row-input-file"><span id="label-file">File</span> <rr0-input-file id="add-source" name="add-source" accept="application/json,.json" no-button keep-file></rr0-input-file></div>
       <label id="row-of"><span id="label-of">Interpretation of</span> <select id="of"></select></label>
     </div>
     <div id="fields-export">
@@ -236,6 +234,7 @@ export class CaseEditorElement extends HTMLElement {
     this.shadow.innerHTML = TEMPLATE
     customElements.upgrade(this.shadow)
     ;(this.shadow.getElementById("case-date") as DateInputElement).build()
+    for (const input of this.shadow.querySelectorAll<InputFileElement>("rr0-input-file")) input.build()
     this.editor = this.shadow.getElementById("editor") as SightingEditorElement
     this.interviewElement = this.shadow.getElementById("interview") as InterviewEditorElement
     this.interviewElement.addEventListener(INTERVIEW_CHANGE_EVENT, event => this.interviewChanged((event as CustomEvent<{ field: string, text?: string }>).detail))
@@ -279,8 +278,11 @@ export class CaseEditorElement extends HTMLElement {
     for (const tab of this.shadow.querySelectorAll<HTMLButtonElement>("#case-tabs .group-tab")) {
       tab.addEventListener("click", () => this.openGroup(tab.getAttribute("aria-controls") === "group-case-file" ? "file" : "events"))
     }
-    this.byId("import-file").addEventListener("change", () => void this.importFromFile())
-    this.byId("import-url-button").addEventListener("click", () => void this.importFromUrl())
+    this.inputFile("import").addEventListener("filepick", event => {
+      const pick = (event as CustomEvent<InputFilePick>).detail
+      if (pick.file) void this.importFromFile(pick.file)
+      else void this.importFromUrl(pick.url)
+    })
     this.byId("add").addEventListener("click", () => this.askAdd())
     this.byId("make-case").addEventListener("click", () => this.makeCase())
     this.byId("delete").addEventListener("click", () => this.askDelete())
@@ -428,8 +430,6 @@ export class CaseEditorElement extends HTMLElement {
     text("label-events-group", m.eventsTab)
     text("label-case-file-group", m.fileTab)
     text("label-import-file", m.importFile)
-    text("label-import-url", m.importUrl)
-    text("import-url-button", m.importButton)
     // The picker has no label: what it shows is the event, and what kind it is, in each option.
     this.byId("track").setAttribute("aria-label", m.event)
     text("label-kind", m.kindField)
@@ -451,11 +451,11 @@ export class CaseEditorElement extends HTMLElement {
     text("label-source", m.sourceField)
     text("label-observer", m.observerField)
     text("label-file", m.fileField)
-    text("label-url", m.urlField)
+    for (const input of this.shadow.querySelectorAll<InputFileElement>("rr0-input-file")) input.messages = m
     text("ok", m.ok)
     text("cancel", m.cancel)
     const source = this.byId("source") as HTMLSelectElement
-    ;[m.sourceBlank, m.sourceFile, m.sourceUrl].forEach((label, index) => { source.options[index].textContent = label })
+    ;[m.sourceBlank, m.sourceFile].forEach((label, index) => { source.options[index].textContent = label })
     const kind = this.byId("kind") as HTMLSelectElement
     ;[m.kindObservation, m.kindInterview].forEach((label, index) => { kind.options[index].textContent = label })
     this.byId("add").title = m.addHint
@@ -588,22 +588,16 @@ export class CaseEditorElement extends HTMLElement {
     this.openDialog("discard", this.messages.discardTitle, this.messages.discardQuestion)
   }
 
-  private async importFromFile(): Promise<void> {
-    const input = this.input("import-file")
-    const file = input.files?.[0]
-    if (!file) return
+  private async importFromFile(file: File): Promise<void> {
     try {
       const json = JSON.parse(await file.text())
       this.guarded(() => void this.importCase(json, new URL("case.json", location.href).href))
     } catch {
       this.showFileNote(this.messages.loadFailed, "error")
     }
-    input.value = ""
   }
 
-  private async importFromUrl(): Promise<void> {
-    const url = this.input("import-url").value.trim()
-    if (url === "") return
+  private async importFromUrl(url: string): Promise<void> {
     try {
       const absolute = new URL(url, location.href).href
       const json = await SightingFetch.json(absolute)
@@ -1021,6 +1015,10 @@ export class CaseEditorElement extends HTMLElement {
     return this.byId(id) as HTMLInputElement
   }
 
+  private inputFile(id: string): InputFileElement {
+    return this.byId(id) as InputFileElement
+  }
+
   private today(): string {
     return new Date().toISOString().slice(0, 10)
   }
@@ -1041,7 +1039,8 @@ export class CaseEditorElement extends HTMLElement {
     // What an interview is held through: one of the media, the first of which is where it starts.
     ;(this.byId("medium") as HTMLSelectElement).replaceChildren()
     ;(this.byId("source") as HTMLSelectElement).value = "blank"
-    for (const id of ["observer", "title", "author", "file", "url"]) this.input(id).value = ""
+    for (const id of ["observer", "title", "author"]) this.input(id).value = ""
+    this.inputFile("add-source").clear()
     this.input("date").value = ""
     this.syncSourceFields()
   }
@@ -1066,7 +1065,6 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("row-medium").hidden = !interview
     if (interview) void this.fillMedia()
     this.byId("row-file").hidden = interview || source !== "file"
-    this.byId("row-url").hidden = interview || source !== "url"
     this.byId("row-observer").hidden = interview || reading
     this.byId("row-title").hidden = !(interview || reading)
     this.byId("row-author").hidden = !(interview || reading)
@@ -1167,7 +1165,7 @@ export class CaseEditorElement extends HTMLElement {
           timeline: { keyframes: [], order: [], groups: [] }
         } as unknown as SightingRecordingJson
       } else {
-        const loaded = source === "file" ? await this.readFile() : await SightingFetch.json(this.input("url").value.trim())
+        const loaded = await this.readFile()
         if (CaseFile.isCase(loaded)) {
           this.showError(this.messages.isACase)
           return false
@@ -1188,9 +1186,12 @@ export class CaseEditorElement extends HTMLElement {
     return true
   }
 
+  /** The recording the dialog was given: a file of the author's, or the one at the address typed. */
   private async readFile(): Promise<unknown> {
-    const file = this.input("file").files?.[0]
-    if (!file) throw new Error("No file")
+    const given = this.inputFile("add-source").value
+    if (!given) throw new Error("No file")
+    if (given.url) return SightingFetch.json(new URL(given.url, location.href).href)
+    const file = given.file!
     const text = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = () => resolve(reader.result as string)

@@ -459,9 +459,10 @@ describe("CaseEditorElement", () => {
     const { add, select, field } = parts(element)
     add.click()
     const source = element.shadowRoot!.getElementById("source") as HTMLSelectElement
-    source.value = "url"
+    source.value = "file"
     source.dispatchEvent(new Event("change"))
-    field("url").value = "https://example.org/other.json"
+    ;(element.shadowRoot!.getElementById("add-source-mode") as HTMLButtonElement).click()
+    field("add-source-url").value = "https://example.org/other.json"
     await submit(element)
     expect([...select.options]).toHaveLength(3)
     expect(element.sightingData.id).toBe("other-1")
@@ -473,9 +474,10 @@ describe("CaseEditorElement", () => {
     const { add, field, error } = parts(element)
     add.click()
     const source = element.shadowRoot!.getElementById("source") as HTMLSelectElement
-    source.value = "url"
+    source.value = "file"
     source.dispatchEvent(new Event("change"))
-    field("url").value = "https://example.org/another-case.json"
+    ;(element.shadowRoot!.getElementById("add-source-mode") as HTMLButtonElement).click()
+    field("add-source-url").value = "https://example.org/another-case.json"
     await submit(element)
     expect(error.hidden).toBe(false)
     expect(parts(element).select.options).toHaveLength(2)

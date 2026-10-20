@@ -1,5 +1,6 @@
+import type { InputFileMessages } from "../InputFileElement.js"
 /** What an interview of a case says — see InterviewEditorElement. */
-export interface InterviewMessages {
+export interface InterviewMessages extends InputFileMessages {
   title: string
   time: string
   /** Who put the questions. */
@@ -28,8 +29,6 @@ export interface InterviewMessages {
   /** How a speaker the transcript does not name is called, by role. */
   roles: { interviewer: string, interviewee: string, witness: string }
   importFile: string
-  importUrl: string
-  importButton: string
   saveButton: string
   loading: string
   /** Said while the text of the transcript is not JSON the editor can read: the interview keeps the last text it understood. */

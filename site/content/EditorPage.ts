@@ -604,8 +604,7 @@ if (docs) {
 
     <div class="group-doc">
       <h3>File</h3>
-      <p>The recording itself. <strong>Load sighting file</strong> and <strong>Or load from URL</strong>
-        bring an existing recording in, and <strong>Save</strong> hands you the file. A dot after this tab says the recording holds changes not saved; loading another file or address while it does asks first. Under them,
+      <p>The recording itself. <strong>Load sighting file</strong> brings an existing recording in, <em>from your disk</em> or, a click on these words, <em>from an address</em>, and <strong>Save</strong> hands you the file. A dot after this tab says the recording holds changes not saved; loading another file or address while it does asks first. Under them,
         the same recording as JSON text, kept in step both ways: what you change in the form or on
         the render appears in it, and a text that parses becomes the recording as soon as you stop
         typing (the playhead stays where it was). A text that does not parse is flagged on its own
@@ -1092,8 +1091,7 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Fichier</h3>
-      <p>L'enregistrement lui-même. <strong>Charger un fichier d'observation</strong> et <strong>Ou charger
-        depuis une URL</strong> font entrer un enregistrement existant, et <strong>Sauver</strong>
+      <p>L'enregistrement lui-même. <strong>Charger un fichier d'observation</strong> fait entrer un enregistrement existant, <em>depuis votre disque</em> ou, d'un clic sur ces mots, <em>depuis une adresse</em>, et <strong>Sauver</strong>
         vous remet le fichier. Un point après cet onglet dit que l\'enregistrement contient des modifications non sauvées ; charger un autre fichier ou une autre adresse alors qu\'il en contient demande d\'abord confirmation. Dessous, le même enregistrement en texte JSON, tenu à jour dans les
         deux sens : ce que vous changez dans le formulaire ou sur le rendu y apparaît, et un texte
         qui s'analyse devient l'enregistrement dès que vous cessez de taper (la tête de lecture
@@ -1569,8 +1567,7 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Archivo</h3>
-      <p>El registro en sí. <strong>Cargar un archivo de observación</strong> y <strong>O cargar desde una
-        URL</strong> traen un registro existente, y <strong>Guardar</strong> te entrega el archivo. Un punto tras esta pestaña indica que la grabación tiene cambios sin guardar; cargar otro archivo u otra dirección mientras los tenga pide confirmación antes.
+      <p>El registro en sí. <strong>Cargar un archivo de observación</strong> trae un registro existente, <em>desde su disco</em> o, con un clic en estas palabras, <em>desde una dirección</em>, y <strong>Guardar</strong> te entrega el archivo. Un punto tras esta pestaña indica que la grabación tiene cambios sin guardar; cargar otro archivo u otra dirección mientras los tenga pide confirmación antes.
         Debajo, el mismo registro como texto JSON, mantenido al día en los dos sentidos: lo que
         cambias en el formulario o en el render aparece en él, y un texto que se analiza pasa a ser
         el registro en cuanto dejas de teclear (el cabezal se queda donde estaba). Un texto que no
@@ -2049,8 +2046,7 @@ if (docs) {
 
     <div class="group-doc">
       <h3>File</h3>
-      <p>La registrazione stessa. <strong>Carica un file di osservazione</strong> e <strong>Oppure carica da
-        URL</strong> portano dentro una registrazione esistente, ed <strong>Salva</strong> ti
+      <p>La registrazione stessa. <strong>Carica un file di osservazione</strong> porta dentro una registrazione esistente, <em>dal proprio disco</em> o, con un clic su queste parole, <em>da un indirizzo</em>, ed <strong>Salva</strong> ti
         consegna il file. Un punto dopo questa scheda indica che la registrazione contiene modifiche non salvate; caricare un altro file o un altro indirizzo mentre ne contiene chiede prima conferma. Sotto, la stessa registrazione come testo JSON, tenuta allineata nei due
         sensi: ciò che cambi nel modulo o nel rendering vi compare, e un testo che si interpreta
         diventa la registrazione appena smetti di digitare (il cursore di lettura resta dov'era). Un
