@@ -1,10 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { FrozenDataPanel } from "../../src/component/FrozenDataPanel.js"
+import { register as registerInputFile, type InputFileElement } from "../../src/component/InputFileElement.js"
 import { sightingEditorMessages_fr } from "../../src/component/messages/SightingEditorMessages_fr.js"
 import { Sighting } from "../../src/engine/model/Sighting.js"
 import { FrozenAnnexes } from "../../src/render3d/terrain/frozen/FrozenAnnexes.js"
 import type { FreezerSources } from "../../src/render3d/terrain/frozen/TerrainFreezer.js"
 import type { GeoBounds } from "../../src/render3d/terrain/GeoBounds.js"
+
+registerInputFile()
 
 const SILLY = { lat: 49.0789, lng: 2.3273 }
 
@@ -15,17 +18,25 @@ function standing(at = SILLY): Sighting {
 }
 
 function mounted(sighting: Sighting, sources: FreezerSources) {
-  const root = document.createElement("fieldset")
-  root.innerHTML = `<legend id="label-frozen"></legend><label><input id="frozen-live" type="checkbox"/> <span id="label-frozen-live"></span></label>
-    <ul id="frozen-groups"></ul><p id="frozen-note" hidden></p>`
+  const root = document.createElement("div")
+  // As the editor's Files group has it (see sightingEditorTemplate).
+  root.innerHTML = `<span id="label-annex-source"></span> <rr0-input-file id="annex-source" name="annex-source" no-button></rr0-input-file>
+    <button id="annex-export" type="button"></button>
+    <span id="label-annex-storage"></span>
+    <label><input type="radio" name="annex-storage" id="annex-storage-url" value="url"/> <span id="label-annex-storage-url"></span></label>
+    <label><input type="radio" name="annex-storage" id="annex-storage-inline" value="inline"/> <span id="label-annex-storage-inline"></span></label>
+    <span id="frozen-state"></span> <button id="frozen-refresh" type="button"></button>
+    <label><input id="frozen-live" type="checkbox"/> <span id="label-frozen-live"></span></label>
+    <p id="frozen-note" hidden></p><div id="annex-editor" hidden></div>`
   document.body.appendChild(root)
   const changed = vi.fn()
+  const downloads: { blob: Blob; fileName: string }[] = []
   const panel = new FrozenDataPanel(root, {
     sighting: () => sighting, documentUrl: () => "https://example.org/case/sighting.json", sources: () => sources,
-    upperAirHeard: () => undefined, changed
+    upperAirHeard: () => undefined, changed, base: () => "silly-sighting", download: (blob, fileName) => downloads.push({ blob, fileName })
   })
   panel.localize(sightingEditorMessages_fr)
-  return { root, panel, changed }
+  return { root, panel, changed, downloads }
 }
 
 function sources(): FreezerSources & { asked: GeoBounds[] } {
@@ -87,7 +98,9 @@ describe("FrozenDataPanel", () => {
     expect(changed).toHaveBeenCalled()
     expect(await panel.prepare("s")).toEqual(new Map())
     expect(from.asked).toHaveLength(0)
-    expect(root.querySelector("#frozen-groups")!.textContent).toContain("demandé en direct")
+    panel.show("relief")
+    expect(root.querySelector("#frozen-state")!.textContent).toContain("demandé en direct")
+    expect(panel.itemLabel("relief")).toContain("demandé en direct")
   })
 
   it("takes one group again on Refresh, and states the day it was taken", async () => {
@@ -96,11 +109,60 @@ describe("FrozenDataPanel", () => {
     const { root, panel } = mounted(sighting, from)
     await panel.prepare("s")
     sighting.frozen!.relief!.takenOn = "2020-01-01"
-    panel.render()
-    const reliefRow = root.querySelectorAll("#frozen-groups li")[0]
-    expect(reliefRow.textContent).toContain("relevé le 2020-01-01")
-    await panel.refresh("relief")
+    panel.show("relief")
+    expect(root.querySelector("#frozen-state")!.textContent).toContain("relevé le 2020-01-01")
+    expect(root.querySelector<InputFileElement>("#annex-source")!.url).toBe("https://example.org/case/s.relief.zip")
+    ;(root.querySelector("#frozen-refresh") as HTMLButtonElement).click()
+    await vi.waitFor(() => expect(from.asked).toHaveLength(2))
+    await vi.waitFor(() => expect(sighting.frozen!.relief!.takenOn).toBe(new Date().toISOString().slice(0, 10)))
     expect(from.asked).toHaveLength(2)
     expect(sighting.frozen!.relief!.takenOn).toBe(new Date().toISOString().slice(0, 10))
+  })
+
+  it("keeps an annex inside the recording, as a data: URL that goes with it, and back in a file beside it", async () => {
+    const sighting = standing()
+    const { root, panel } = mounted(sighting, sources())
+    await panel.prepare("silly-sighting")
+    panel.show("roads")
+    const inline = root.querySelector<HTMLInputElement>("#annex-storage-inline")!
+    expect(root.querySelector<HTMLInputElement>("#annex-storage-url")!.checked).toBe(true)
+    inline.checked = true
+    inline.dispatchEvent(new Event("change"))
+    await vi.waitFor(() => expect(sighting.frozen!.roads!.src).toMatch(/^data:application\/json;base64,/))
+    expect(panel.itemLabel("roads")).toContain(sightingEditorMessages_fr.annexStorageInline)
+    // Inside the recording, it is no file of the archive; and taken again, it stays inside.
+    expect([...(await panel.prepare("silly-sighting")).keys()]).toEqual(["silly-sighting.relief.zip"])
+    await panel.refresh("roads")
+    expect(sighting.frozen!.roads!.src).toMatch(/^data:/)
+    await panel.setStorage("roads", false)
+    expect(sighting.frozen!.roads!.src).toBe("silly-sighting.roads.json")
+    expect([...(await panel.prepare("silly-sighting")).keys()].sort()).toEqual(["silly-sighting.relief.zip", "silly-sighting.roads.json"])
+  })
+
+  it("takes a file of the author's as the annex, says when it was taken, and refuses one that is not an annex", async () => {
+    const sighting = standing()
+    const { root, panel } = mounted(sighting, sources())
+    await panel.prepare("silly-sighting")
+    panel.show("roads")
+    const text = JSON.stringify({ version: 1, takenOn: "2019-05-04", attribution: "Somebody's roads", patches: [] })
+    const input = root.querySelector<InputFileElement>("#annex-source")!.controls.file
+    Object.defineProperty(input, "files", { configurable: true, value: [new File([text], "roads.json")] })
+    input.dispatchEvent(new Event("change"))
+    await vi.waitFor(() => expect(sighting.frozen!.roads).toEqual({ src: "silly-sighting.roads.json", takenOn: "2019-05-04", attribution: "Somebody's roads" }))
+    expect(new TextDecoder().decode(await FrozenAnnexes.bytes("https://example.org/case/silly-sighting.roads.json"))).toBe(text)
+    await panel.replace("roads", { file: new File(["not json"], "x.json") })
+    expect(sighting.frozen!.roads!.takenOn).toBe("2019-05-04")
+    expect(root.querySelector("#frozen-note")!.textContent).toBe(sightingEditorMessages_fr.annexUnreadable)
+  })
+
+  it("saves an annex under the name it has beside the recording", async () => {
+    const sighting = standing()
+    const { root, panel, downloads } = mounted(sighting, sources())
+    await panel.prepare("silly-sighting")
+    panel.show("relief")
+    ;(root.querySelector("#annex-export") as HTMLButtonElement).click()
+    await vi.waitFor(() => expect(downloads).toHaveLength(1))
+    expect(downloads[0].fileName).toBe("silly-sighting.relief.zip")
+    expect(downloads[0].blob.type).toBe("application/zip")
   })
 })

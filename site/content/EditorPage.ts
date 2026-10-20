@@ -603,7 +603,8 @@ if (docs) {
     </div>
 
     <div class="group-doc">
-      <h3>File</h3>
+      <h3>Files</h3>
+      <p>The files the recording is made of, picked one at a time above the tab: the recording itself, and each annex it carries frozen beside it (relief, photograph of the ground, roads, water, railways, air aloft, map photograph; see <code>frozen</code> in the format). An annex shows where it is (its address, which a file of yours or another address replaces), whether it is kept in a file beside the recording or inside the recording itself, when and from whom it was taken, with <strong>Refresh</strong> to take it again, <strong>Save</strong> to have its file, and its text to edit when it is JSON.</p>
       <p>The recording itself. <strong>Load sighting file</strong> brings an existing recording in, <em>from your disk</em> or, a click on these words, <em>from an address</em>, and <strong>Save</strong> hands you the file. A dot after this tab says the recording holds changes not saved; loading another file or address while it does asks first. Under them,
         the same recording as JSON text, kept in step both ways: what you change in the form or on
         the render appears in it, and a text that parses becomes the recording as soon as you stop
@@ -1090,7 +1091,8 @@ if (docs) {
     </div>
 
     <div class="group-doc">
-      <h3>Fichier</h3>
+      <h3>Fichiers</h3>
+      <p>Les fichiers dont l'enregistrement est fait, choisis un à un au-dessus de l'onglet : l'enregistrement lui-même, et chaque annexe qu'il porte figée à côté de lui (relief, photo du sol, routes, eau, voies ferrées, haute atmosphère, photo de la carte ; voir <code>frozen</code> dans le format). Une annexe montre où elle est (son adresse, que remplace un fichier à vous ou une autre adresse), si elle est gardée dans un fichier à côté de l'enregistrement ou dans l'enregistrement même, quand et auprès de qui elle a été relevée, avec <strong>Rafraîchir</strong> pour la relever à nouveau, <strong>Sauver</strong> pour avoir son fichier, et son texte à modifier quand c'est du JSON.</p>
       <p>L'enregistrement lui-même. <strong>Charger un fichier d'observation</strong> fait entrer un enregistrement existant, <em>depuis votre disque</em> ou, d'un clic sur ces mots, <em>depuis une adresse</em>, et <strong>Sauver</strong>
         vous remet le fichier. Un point après cet onglet dit que l\'enregistrement contient des modifications non sauvées ; charger un autre fichier ou une autre adresse alors qu\'il en contient demande d\'abord confirmation. Dessous, le même enregistrement en texte JSON, tenu à jour dans les
         deux sens : ce que vous changez dans le formulaire ou sur le rendu y apparaît, et un texte
@@ -1566,7 +1568,8 @@ if (docs) {
     </div>
 
     <div class="group-doc">
-      <h3>Archivo</h3>
+      <h3>Archivos</h3>
+      <p>Los archivos de los que está hecho el registro, elegidos uno a uno encima de la pestaña: el propio registro, y cada anexo que lleva congelado junto a él (relieve, foto del suelo, carreteras, agua, vías férreas, aire en altura, foto del mapa; véase <code>frozen</code> en el formato). Un anexo muestra dónde está (su dirección, que sustituye un archivo suyo u otra dirección), si se guarda en un archivo junto al registro o dentro del propio registro, cuándo y de quién se tomó, con <strong>Actualizar</strong> para tomarlo de nuevo, <strong>Guardar</strong> para tener su archivo, y su texto para editar cuando es JSON.</p>
       <p>El registro en sí. <strong>Cargar un archivo de observación</strong> trae un registro existente, <em>desde su disco</em> o, con un clic en estas palabras, <em>desde una dirección</em>, y <strong>Guardar</strong> te entrega el archivo. Un punto tras esta pestaña indica que la grabación tiene cambios sin guardar; cargar otro archivo u otra dirección mientras los tenga pide confirmación antes.
         Debajo, el mismo registro como texto JSON, mantenido al día en los dos sentidos: lo que
         cambias en el formulario o en el render aparece en él, y un texto que se analiza pasa a ser
@@ -2046,6 +2049,7 @@ if (docs) {
 
     <div class="group-doc">
       <h3>File</h3>
+      <p>I file di cui è fatta la registrazione, scelti uno alla volta sopra la scheda: la registrazione stessa, e ogni allegato che porta congelato accanto a sé (rilievo, foto del suolo, strade, acque, ferrovie, aria in quota, foto della mappa; vedi <code>frozen</code> nel formato). Un allegato mostra dov'è (il suo indirizzo, che un proprio file o un altro indirizzo sostituisce), se è conservato in un file accanto alla registrazione o dentro la registrazione stessa, quando e da chi è stato rilevato, con <strong>Aggiorna</strong> per rilevarlo di nuovo, <strong>Salva</strong> per averne il file, e il suo testo da modificare quando è JSON.</p>
       <p>La registrazione stessa. <strong>Carica un file di osservazione</strong> porta dentro una registrazione esistente, <em>dal proprio disco</em> o, con un clic su queste parole, <em>da un indirizzo</em>, ed <strong>Salva</strong> ti
         consegna il file. Un punto dopo questa scheda indica che la registrazione contiene modifiche non salvate; caricare un altro file o un altro indirizzo mentre ne contiene chiede prima conferma. Sotto, la stessa registrazione come testo JSON, tenuta allineata nei due
         sensi: ciò che cambi nel modulo o nel rendering vi compare, e un testo che si interpreta

@@ -154,6 +154,20 @@ export interface SightingEditorMessages extends InputFileMessages, SightingLabel
   frozenRailways: string
   frozenUpperAir: string
   frozenMap: string
+  /** The recording itself, first in the Files group's picker. */
+  fileItemRecording: string
+  /** Before the file or address of an annex. */
+  annexSource: string
+  /** Before where an annex is kept. */
+  annexStorage: string
+  /** An annex kept in a file of its own, beside the recording. */
+  annexStorageUrl: string
+  /** An annex kept inside the recording, as a data: URL. */
+  annexStorageInline: string
+  /** The accessible name of an annex's text. */
+  annexEditorLabel: string
+  /** Said when a file given as an annex is not one. */
+  annexUnreadable: string
   frozenTakenOn: string
   frozenPending: string
   frozenLiveState: string

@@ -144,6 +144,7 @@ import { GroundElevation } from "../render3d/terrain/ElevationProvider.js"
 import { TimeZones } from "../engine/time/TimeZones.js"
 import { dataSourceById } from "../engine/source/DataSource.js"
 import { FrozenDataPanel } from "./FrozenDataPanel.js"
+import { FrozenGroups, type FrozenGroupName } from "../engine/model/FrozenData.js"
 import { FrozenAnnexes } from "../render3d/terrain/frozen/FrozenAnnexes.js"
 import type { FreezerSources } from "../render3d/terrain/frozen/TerrainFreezer.js"
 import { defaultRailwayProvider, defaultRoadProvider, defaultWaterProvider } from "../render3d/terrain/defaultTerrainProviders.js"
@@ -415,6 +416,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly exportButton: HTMLButtonElement
   /** The File group's account of the data frozen beside the recording, and what takes it at export. */
   private readonly frozenPanel: FrozenDataPanel
+  /** The Files group's picker: the recording, then each annex (see refreshFileItems). */
+  private readonly fileItemSelect: HTMLSelectElement
   /** Where a recording comes in: a file of the author's, or an address (see InputFileElement). */
   private readonly importInput: InputFileElement
   private readonly narrativeSourceRow: HTMLElement
@@ -1293,10 +1296,16 @@ export class SightingEditorElement extends HTMLElement {
         this.touch()
         this.ufoElement.refresh()
         this.scheduleFileSync()
-      }
+        this.refreshFileItems()
+      },
+      base: () => this.fileBase(),
+      download: (blob, fileName) => this.download(blob, fileName)
     })
+    this.fileItemSelect = this.shadow.getElementById("file-item") as HTMLSelectElement
+    this.fileItemSelect.addEventListener("change", () => this.showFileItem(this.fileItemSelect.value))
     // In the language the editor starts in: the others come with their locale, if one is asked (see applyMessages).
     this.frozenPanel.localize(this.messages)
+    this.refreshFileItems()
     this.fileAsk = this.shadow.getElementById("file-ask") as HTMLDialogElement
     this.identityAsk = this.shadow.getElementById("identity-ask") as HTMLDialogElement
     this.shadow.getElementById("identity-ask-keep")!.addEventListener("click", () => {
@@ -2005,6 +2014,7 @@ export class SightingEditorElement extends HTMLElement {
     this.surroundings.placeLoaded(standing?.lat, standing?.lng)
     this.syncWeatherOwnership()
     this.frozenPanel.render()
+    this.refreshFileItems()
     // Weather itself is resynced by onSelectionOrTimeChanged() above (syncWeatherFromTimeline) —
     // and SceneElement's own updateAstronomy() (driven by the sightingData assignment above,
     // which surfaces as a timeupdate) already resolves+applies it, unlike before this was a
@@ -2231,7 +2241,7 @@ export class SightingEditorElement extends HTMLElement {
    * taken first where it has to be: then one zip, of the recording and its annexes as they are to stand beside each other.
    */
   private async downloadJson(): Promise<void> {
-    const base = `${this.sightingData.observer?.id ?? "sighting"}-sighting`
+    const base = this.fileBase()
     let annexes = new Map<string, Uint8Array>()
     // At once when there is nothing to take or to carry: a recording with no place stands on no ground.
     if (this.frozenPanel.hasWork()) {
@@ -2257,6 +2267,35 @@ export class SightingEditorElement extends HTMLElement {
       this.showFileNote(this.messages.frozenExported.replaceAll("{count}", String(annexes.size)).replaceAll("{size}", FrozenDataPanel.size(zip.length)))
     }
     this.markClean()
+  }
+
+  /** The recording's file name without `.json`, as it is saved, and as its annexes are named after it. */
+  private fileBase(): string {
+    return `${this.sightingData.observer?.id ?? "sighting"}-sighting`
+  }
+
+  /**
+   * The Files group's picker, said again: the recording, by the file it was read from or is saved as, then each annex it carries frozen,
+   * by where it is or that it is still to be taken. What was picked stays picked.
+   */
+  private refreshFileItems(): void {
+    const select = this.fileItemSelect
+    if (!select) return
+    const picked = select.value || "recording"
+    const recordingFile = this.sceneElement.documentUrl?.split(/[?#]/)[0].split("/").pop() || `${this.fileBase()}.json`
+    select.replaceChildren(
+      new Option(`${this.messages.fileItemRecording} · ${decodeURIComponent(recordingFile)}`, "recording"),
+      ...FrozenGroups.NAMES.map(name => new Option(this.frozenPanel.itemLabel(name), name)))
+    select.value = picked
+    this.showFileItem(select.value)
+  }
+
+  /** Shows the detail of one file of the Files group: the recording, or one of its annexes. */
+  private showFileItem(item: string): void {
+    const recording = item === "recording" || !(FrozenGroups.NAMES as readonly string[]).includes(item)
+    this.shadow.getElementById("file-recording")!.hidden = !recording
+    this.shadow.getElementById("frozen-data")!.hidden = recording
+    if (!recording) this.frozenPanel.show(item as FrozenGroupName)
   }
 
   private download(blob: Blob, fileName: string): void {

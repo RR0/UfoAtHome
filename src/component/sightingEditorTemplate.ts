@@ -262,18 +262,17 @@ export const html = `
      its own, fetched the first time this group is opened — CodeMirror is the heaviest thing the
      component could carry and most authors never need it. -->
 <section class="group-panel" id="group-file" aria-labelledby="label-file-group" hidden>
-  <div class="toolbar">
-    <span class="input-file-row"><span id="label-import-file">Load sighting file</span> <rr0-input-file id="import" name="import" accept="application/json,.json,application/zip,.zip" placeholder="https://…/sighting.json"></rr0-input-file></span>
-    <button id="export" type="button">Save</button>
+  <!-- The files the recording is made of, one picked at a time as every list of the editor is (see ElementList): the recording itself, and
+       the annexes it carries frozen beside it so that it plays without asking third parties (see FrozenData, FrozenDataPanel). -->
+  <div class="element-list-row" id="file-item-row">
+    <label class="element-list-picker"><select id="file-item" aria-labelledby="label-file-group"></select></label>
   </div>
   <p id="file-note" class="file-note" hidden role="status"></p>
-  <!-- What the recording carries frozen beside it, so that it plays without asking third parties (see FrozenDataPanel). -->
-  <fieldset id="frozen-data" class="frozen-data">
-    <legend id="label-frozen">Frozen data</legend>
-    <label><input id="frozen-live" type="checkbox"/> <span id="label-frozen-live"></span></label>
-    <ul id="frozen-groups" class="frozen-groups"></ul>
-    <p id="frozen-note" class="frozen-note" hidden role="status"></p>
-  </fieldset>
+  <div class="element-list-body" id="file-recording">
+    <div class="toolbar">
+      <span class="input-file-row"><span id="label-import-file">Load sighting file</span> <rr0-input-file id="import" name="import" accept="application/json,.json,application/zip,.zip" placeholder="https://…/sighting.json"></rr0-input-file></span>
+      <button id="export" type="button">Save</button>
+    </div>
   <!-- A question about what an edit of the text just touched: data the editor reads dynamically (see SightingEditorElement.askAboutWeather). Modal: the author has to say what they mean before anything else is done, and the edit stands meanwhile. Escape is the safe answer, which puts back what was read. -->
   <dialog id="file-ask" class="file-ask" aria-labelledby="file-ask-text">
     <p id="file-ask-text"></p>
@@ -292,7 +291,24 @@ export const html = `
       <button id="identity-ask-back" type="button"></button>
     </div>
   </dialog>
-  <div id="file-editor" class="file-editor"></div>
+    <div id="file-editor" class="file-editor"></div>
+  </div>
+  <!-- One annex: where it is (a file beside the recording, or inside it), when and from whom it was taken, its text when it is one. -->
+  <div class="element-list-body frozen-data" id="frozen-data" hidden>
+    <div class="toolbar">
+      <span class="input-file-row"><span id="label-annex-source">File</span> <rr0-input-file id="annex-source" name="annex-source" no-button placeholder="https://…"></rr0-input-file></span>
+      <button id="annex-export" type="button">Save</button>
+    </div>
+    <div class="row annex-storage" role="radiogroup" aria-labelledby="label-annex-storage">
+      <span id="label-annex-storage">Kept</span>
+      <label><input type="radio" name="annex-storage" id="annex-storage-url" value="url"/> <span id="label-annex-storage-url">in a file beside the recording</span></label>
+      <label><input type="radio" name="annex-storage" id="annex-storage-inline" value="inline"/> <span id="label-annex-storage-inline">inside the recording</span></label>
+    </div>
+    <p class="row"><span id="frozen-state" class="frozen-group-state"></span> <button id="frozen-refresh" type="button">Refresh</button></p>
+    <label><input id="frozen-live" type="checkbox"/> <span id="label-frozen-live"></span></label>
+    <p id="frozen-note" class="frozen-note" hidden role="status"></p>
+    <div id="annex-editor" class="file-editor" hidden></div>
+  </div>
 </section>
 <section class="group-panel" id="group-weather" aria-labelledby="label-weather-group" hidden>
   <div class="toolbar">
@@ -1285,23 +1301,11 @@ select.weather-field:disabled {
 .frozen-data {
   margin: 0.5em 0;
 }
-.frozen-groups {
-  list-style: none;
-  margin: 0.3em 0 0;
-  padding: 0;
-  display: grid;
-  gap: 0.2em;
-}
-.frozen-groups li {
+.annex-storage {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5em;
-}
-.frozen-group-name {
-  min-width: 12em;
-}
-.frozen-group-state {
-  flex: 1 1 auto;
+  gap: 0.3em 1em;
 }
 .frozen-note {
   margin: 0.3em 0 0;
