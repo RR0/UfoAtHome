@@ -100,6 +100,23 @@ describe("RailwaySystem", () => {
     expect(steel.count / (24 * 3)).toBe(10)
   })
 
+  it("plants no mast under a road the relief carries over a cutting, nor up the side of the cutting", () => {
+    const system = new RailwaySystem()
+    // A cutting 8 m deep and 6 m wide at its floor; a road over it, 16 m wide, at the ground's level.
+    const ground = (x: number, z: number): number => Math.abs(x - 27) < 8 || Math.abs(z) > 3 ? 0 : -8
+    system.set([line({ electrification: "overhead" }, [-270, 0, -8], [0, 0, -8], [270, 0, -8])], ORIGIN.lat, ORIGIN.lng, ground)
+    const steel = mesh(system, "catenary masts")!.geometry.getAttribute("position")
+    // The mast at 27 m (half a span of 54 from the start at -270) is left out: nine of ten.
+    expect(steel.count / (24 * 3)).toBe(9)
+    for (let i = 0; i < steel.count; i++) expect(steel.getX(i) < 19 || steel.getX(i) > 35).toBe(true)
+    // Every mast stands on the floor of the cutting, not on its top 8 m higher: the foot of each is 8 m down.
+    for (let mast = 0; mast < steel.count; mast += 24 * 3) {
+      let foot = Infinity
+      for (let i = mast; i < mast + 24; i++) foot = Math.min(foot, steel.getY(i))
+      expect(foot).toBeCloseTo(-8, 1)
+    }
+  })
+
   it("gives a tram its rails in the street and a single wire, and a metro no wire at all", () => {
     const tram = new RailwaySystem()
     tram.set([line({ kind: "tram", electrification: "overhead" }, [-60, 0], [60, 0])], ORIGIN.lat, ORIGIN.lng, () => 0)

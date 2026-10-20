@@ -434,11 +434,15 @@ export class RailwaySystem {
       return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t }
     }
     for (const s of stations) {
+      // Under a structure the relief has as ground (a road over a cutting, see TrackProfile.COVERED_M), the wire hangs from the structure: no
+      // mast, which would stand out of the road over it.
+      const axis = atDistance(s, 0, contactUp)
+      if (line.level === 0 && groundYAt(axis.x, axis.z) > axis.y) continue
       for (const side of sides) {
         const mastAcross = side * (outer + RailwaySystem.MAST_OFFSET_M)
-        // On the ground beside a line at grade; on the deck of one carried over it.
+        // On the ground beside a line at grade, down an embankment but never up the side of a cutting; on the deck of one carried over it.
         const foot = atDistance(s, mastAcross, 0)
-        if (line.level === 0) foot.y = groundYAt(foot.x, foot.z)
+        if (line.level === 0) foot.y = Math.min(foot.y, groundYAt(foot.x, foot.z))
         const head = atDistance(s, mastAcross, mastTop)
         batches.steel.beam(foot, head, RailwaySystem.MAST_SIDE_M)
         if (portal) continue

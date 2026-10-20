@@ -178,6 +178,16 @@ describe("RoadMarkings.barriers: the median between two carriageways", () => {
     expect(Math.abs(paths[0].at(-1)!.x - paths[0][0].x)).toBeGreaterThan(100)
   })
 
+  it("leaves no hole where the map cuts a carriageway in two", () => {
+    // The eastbound carriageway in two ways meeting 3 m east of the origin, a step's remainder short of the 4 m step.
+    const cut = (id: string, fromM: number, toM: number): RoadWay => ({
+      ...way(id, "forward", 0), points: [{ lat: LAT, lng: LNG + fromM / 72850 }, { lat: LAT, lng: LNG + toM / 72850 }]
+    })
+    const paths = RoadMarkings.barriers([cut("a1", -100, 3), cut("a2", 3, 100), way("b", "backward", 20)], LAT, LNG)
+    const reaches = paths.map(path => [Math.min(...path.map(point => point.x)), Math.max(...path.map(point => point.x))]).sort((p, q) => p[0] - q[0])
+    for (let i = 1; i < reaches.length; i++) expect(reaches[i][0] - reaches[i - 1][1]).toBeLessThan(0.5)
+  })
+
   it("makes none between two carriageways that go the same way, or that stand too far apart or too close", () => {
     expect(RoadMarkings.barriers([way("a", "forward", 0), way("b", "forward", 20)], LAT, LNG)).toEqual([])
     expect(RoadMarkings.barriers(pair(80), LAT, LNG)).toEqual([])

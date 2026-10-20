@@ -20,7 +20,9 @@ export interface TrackLayout {
  *
  * HOW, for a line on the ground:
  * - the target at each rung is the relief, or the map's own altitude (moved onto the scene's zero, see `offset`) where it stands more than
- *   HOLLOW_M over the relief: the map's altitude is the track's (to a metre and a half), the relief there is a hole under a structure;
+ *   HOLLOW_M over the relief: the map's altitude is the track's (to a metre and a half), the relief there is a hole under a structure; or more
+ *   than COVERED_M under it: the relief there is a structure over the track that the laser took for ground (the N2 over the line to Crépy-en-Valois at
+ *   Silly-le-Long: the road 7.6 m over the floor of the cutting, kept in the relief, lifted the track 2 m and planted its masts on the road);
  * - the height is the median of the targets within WINDOW_M along the line and the lines that meet its ends (and only those: a line passing
  *   alongside at another height, the approach of a flyover, is another profile). A hollow narrower than the window is passed over, a slope is
  *   followed exactly. The lines that meet at a node take the same samples there, so they meet at the same height;
@@ -32,6 +34,8 @@ export interface TrackLayout {
 export class TrackProfile {
   /** A rung's target is the map's altitude where that stands this far over the relief: a hole the laser saw under a structure. */
   static readonly HOLLOW_M = 1
+  /** And where the relief stands this far over it: a deck over the track. Past the map's error, short of the clearance of any overbridge. */
+  static readonly COVERED_M = 3
   /** How far along the lines the median is taken, each side: wider than an underpass and its ramps, narrower than a valley. */
   static readonly WINDOW_M = 30
   /** How far apart the samples are taken along a line. */
@@ -86,7 +90,7 @@ export class TrackProfile {
       const ground = groundYAt(point.x, point.z)
       if (offset === undefined || point.altitudeM === undefined) return ground
       const mapped = point.altitudeM + offset
-      return mapped - ground > TrackProfile.HOLLOW_M ? mapped : ground
+      return mapped - ground > TrackProfile.HOLLOW_M || ground - mapped > TrackProfile.COVERED_M ? mapped : ground
     })
   }
 

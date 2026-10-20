@@ -241,7 +241,10 @@ export class RoadMarkings {
     return best ? { x: (sample.x + best.point.x) / 2, z: (sample.z + best.point.z) / 2 } : undefined
   }
 
-  /** A path with a point every `step` metres, each with the direction of travel there. */
+  /**
+   * A path with a point every `step` metres, each with the direction of travel there, and its last point: a way the map cuts in two (at every
+   * bridge: the RN2 over the railway at Silly-le-Long) is two paths, and a barrier that stopped short of the cut left a hole up to a step long.
+   */
   private static resample(path: Point[], step: number): (Point & { dx: number, dz: number })[] {
     const out: (Point & { dx: number, dz: number })[] = []
     for (let i = 0; i < path.length - 1; i++) {
@@ -251,6 +254,8 @@ export class RoadMarkings {
       const dz = (path[i + 1].z - path[i].z) / length
       for (let s = 0; s < length; s += step) out.push({ x: path[i].x + dx * s, z: path[i].z + dz * s, dx, dz })
     }
+    const last = out.at(-1)
+    if (last) out.push({ ...path[path.length - 1], dx: last.dx, dz: last.dz })
     return out
   }
 

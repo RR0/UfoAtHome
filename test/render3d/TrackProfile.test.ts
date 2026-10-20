@@ -38,6 +38,13 @@ describe("TrackProfile", () => {
     expect(east[0]).toBeCloseTo(10, 5)
   })
 
+  it("takes the map's altitude where the relief stands over it as a road deck over a cutting", () => {
+    // The floor of the cutting at 2, the road and its abutments over it 7.6 m higher over 40 m, kept in the relief; the map says 2 all along.
+    const ground = (x: number): number => Math.abs(x) < 20 ? 9.6 : 2
+    const [y] = TrackProfile.heights([straight(-200, 200, {}, () => 2)], ground, 0)
+    expect(Math.max(...y)).toBeCloseTo(2, 5)
+  })
+
   it("follows a long slope exactly, and holds a line to the grade of its kind", () => {
     const slope = (x: number): number => x * 0.01
     const [y] = TrackProfile.heights([straight(0, 300)], slope, undefined)
