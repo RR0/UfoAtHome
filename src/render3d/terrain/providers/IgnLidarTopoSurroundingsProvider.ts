@@ -1,9 +1,10 @@
-import type { Surroundings, SurroundingsProvider, SurveyedBuilding } from "../SurroundingsProvider.js"
+import type { Surroundings, SurroundingsProvider, SurveyedBridge, SurveyedBuilding } from "../SurroundingsProvider.js"
 import { SurroundingsUnavailableError } from "../SurroundingsProvider.js"
 import { BuildingFootprints } from "../BuildingFootprints.js"
 import { CanopyCrowns } from "../CanopyCrowns.js"
 import { OverheadStructures } from "../OverheadStructures.js"
-import type { PlaceVectors } from "../OverheadStructures.js"
+import type { HeightGrid, PlaceVectors } from "../OverheadStructures.js"
+import { localMetersToGeo } from "../GeoProjection.js"
 import { BuildingMaterials } from "../BuildingMaterials.js"
 import { BuildingStyles } from "../BuildingStyles.js"
 import { RoofShapes } from "../RoofShapes.js"
@@ -27,6 +28,10 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
   readonly attribution = "Canopy © IGN, LiDAR HD; buildings, bridges and lines © IGN, BD TOPO (Licence Ouverte 2.0), as surveyed on days the services do not give"
   readonly creditUrl = "https://geoservices.ign.fr/lidarhd"
   readonly contemporary = true
+
+  /** How far past a bridge's ends its own square of laser reaches (see bridges), and how many bridges are asked for so at most. */
+  private static readonly BRIDGE_MARGIN_M = 30
+  private static readonly MAX_BRIDGE_WINDOWS = 8
 
   private readonly platform: IgnGeoplatform
   /** Where the public lamps, the traffic lights, the crossings and the signs come from, when asked for: the registry gives it, a test that fakes only the IGN does not. */
@@ -60,7 +65,7 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
     return {
       trees: grids ? new CanopyCrowns(grids.heights, grids.vegetation, grids.size, grids.size).trees({ metresPerPixel: grids.metresPerPixel, radiusM: laserRadius }) : [],
       buildings: this.roofed(this.buildings(grids, vectors, centre, radius), grids, photo.status === "fulfilled" ? photo.value : undefined),
-      bridges: vectors ? OverheadStructures.bridges(vectors, centre, radius, grids?.structures) : [],
+      bridges: vectors ? await this.bridges(vectors, centre, radius, grids?.structures, laserRadius) : [],
       lines: vectors ? OverheadStructures.lines(vectors, centre, radius, grids?.structures) : [],
       ...(furniture.status === "fulfilled" ? furniture.value : {}),
       dates: {
@@ -70,6 +75,31 @@ export class IgnLidarTopoSurroundingsProvider implements SurroundingsProvider {
         ...(furniture.status === "fulfilled" && OsmStreetFurniture.found(furniture.value) ? { lamps: OsmStreetFurniture.today() } : {})
       }
     }
+  }
+
+  /**
+   * The bridges, each measured by the laser: those beyond the laser's square (it is asked for 150 m round a place, a survey reaches 400) are asked
+   * for again in a square of their own. WHY: the RD548 over the RN2 at Silly-le-Long, 1.7 km along the observer's road, was drawn with the 4 m deck of
+   * a bridge nothing measured, two metres under the road it carries and under its banks, where the laser has it 6.1 m over the road below.
+   */
+  private async bridges(vectors: PlaceVectors, centre: { lat: number, lng: number }, radius: number, grid: HeightGrid | undefined, laserRadius: number): Promise<SurveyedBridge[]> {
+    const found = OverheadStructures.bridges(vectors, centre, radius, grid)
+    let asked = 0
+    return Promise.all(found.map(async bridge => {
+      if (grid !== undefined && Math.hypot(bridge.eastM, bridge.northM) + bridge.lengthM / 2 <= laserRadius) return bridge
+      const reach = bridge.lengthM / 2 + IgnLidarTopoSurroundingsProvider.BRIDGE_MARGIN_M
+      if (asked++ >= IgnLidarTopoSurroundingsProvider.MAX_BRIDGE_WINDOWS) return bridge
+      const at = localMetersToGeo(bridge.eastM, -bridge.northM, centre.lat, centre.lng)
+      try {
+        const own = await this.platform.lidar(at, reach)
+        const measured = OverheadStructures.bridges(vectors, at, reach, own.structures)
+          .sort((a, b) => Math.hypot(a.eastM, a.northM) - Math.hypot(b.eastM, b.northM))[0]
+        if (!measured || Math.hypot(measured.eastM, measured.northM) > bridge.lengthM / 2) return bridge
+        return { ...measured, eastM: OverheadStructures.tenth(measured.eastM + bridge.eastM), northM: OverheadStructures.tenth(measured.northM + bridge.northM) }
+      } catch {
+        return bridge
+      }
+    }))
   }
 
   /** The roofs the laser and the photograph show (the laser only where it flew, which for a building farther than it was asked is nowhere), and a church's where they do not. */

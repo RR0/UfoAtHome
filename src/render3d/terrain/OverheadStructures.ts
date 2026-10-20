@@ -92,6 +92,11 @@ export class OverheadStructures {
   private static readonly RAIL_MATCH_M = 6
   /** How near the centre line of a bridge the road that crosses it must be. */
   private static readonly ROAD_MATCH_M = 12
+  /** What the laser sees of a deck past the map's ends (see deckReach): how high over the bare earth, read how often, across what gap, how far out. */
+  private static readonly DECK_SEEN_M = 1.5
+  private static readonly DECK_STEP_M = 0.5
+  private static readonly DECK_GAP_M = 2
+  private static readonly DECK_REACH_M = 20
   /** The deck of a bridge where nothing measured it. */
   private static readonly DEFAULT_DECK_HEIGHT_M = 4
   /** The shortest a pole can be measured, and the tallest: a reading outside is a tree, a building, or noise. */
@@ -157,10 +162,11 @@ export class OverheadStructures {
       // The bridge of a railway is not a road bridge: drawn as one, it was a deck with a carriageway and railings along the track, over it. Its
       // deck is the railway's, laid with its ballast and its rails (see RailwaySystem), and the road under it goes through its opening.
       if (OverheadStructures.carriesRailway(from, to, railways)) continue
+      const [start, end] = OverheadStructures.deckReach(from, to, grid)
       found.push({
-        eastM: OverheadStructures.tenth(middle.east),
-        northM: OverheadStructures.tenth(middle.north),
-        lengthM: OverheadStructures.tenth(length),
+        eastM: OverheadStructures.tenth((start.east + end.east) / 2),
+        northM: OverheadStructures.tenth((start.north + end.north) / 2),
+        lengthM: OverheadStructures.tenth(Math.hypot(end.east - start.east, end.north - start.north)),
         widthM: OverheadStructures.roadOf(middle, roads).width,
         heightM: OverheadStructures.tenth(OverheadStructures.deckHeight(from, to, grid)),
         headingDeg: OverheadStructures.tenth(OverheadStructures.bearing(from, to) % 180),
@@ -234,6 +240,34 @@ export class OverheadStructures {
     return named ? { width, name: named } : { width }
   }
 
+  /**
+   * The two ends of a bridge: the map's, or past them where the laser sees the deck go on (a structure DECK_SEEN_M over the bare earth, without a gap
+   * longer than DECK_GAP_M), up to DECK_REACH_M further. WHY: the map's line of the RD548 over the RN2 at Silly-le-Long stops 5 m short of the deck at
+   * one end and runs 5 m onto the embankment at the other; drawn at the map's ends, the bridge met the ground on one side and stood off a hole on the
+   * other. Never shorter than the map: a deck at the level of its banks (a bridge over a river between quays) is not over anything at its ends.
+   */
+  private static deckReach(from: { east: number, north: number }, to: { east: number, north: number }, grid: HeightGrid | undefined): [{ east: number, north: number }, { east: number, north: number }] {
+    const length = Math.hypot(to.east - from.east, to.north - from.north)
+    if (grid === undefined || length === 0) return [from, to]
+    const middle = { east: (from.east + to.east) / 2, north: (from.north + to.north) / 2 }
+    const unit = { east: (to.east - from.east) / length, north: (to.north - from.north) / length }
+    const seen = (s: number): boolean => (grid.structureAt(middle.east + unit.east * s, middle.north + unit.north * s) ?? 0) >= OverheadStructures.DECK_SEEN_M
+    const reach = (direction: number): number => {
+      let last: number | undefined
+      for (let s = 0; s <= length / 2 + OverheadStructures.DECK_REACH_M; s += OverheadStructures.DECK_STEP_M) {
+        if (seen(direction * s)) last = s
+        else if (last !== undefined && s - last > OverheadStructures.DECK_GAP_M) break
+      }
+      return Math.max(length / 2, last ?? 0)
+    }
+    const back = reach(-1)
+    const ahead = reach(1)
+    return [
+      { east: middle.east - unit.east * back, north: middle.north - unit.north * back },
+      { east: middle.east + unit.east * ahead, north: middle.north + unit.north * ahead }
+    ]
+  }
+
   /** The height of the deck: the middle value of what the laser measured on the structure along the middle of its length. */
   private static deckHeight(from: { east: number, north: number }, to: { east: number, north: number }, grid: HeightGrid | undefined): number {
     if (grid === undefined) return OverheadStructures.DEFAULT_DECK_HEIGHT_M
@@ -296,7 +330,7 @@ export class OverheadStructures {
     return heights.length === 0 ? undefined : heights.reduce((sum, height) => sum + height, 0) / heights.length
   }
 
-  private static tenth(value: number): number {
+  static tenth(value: number): number {
     return Math.round(value * 10) / 10
   }
 }

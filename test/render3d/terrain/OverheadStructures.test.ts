@@ -73,6 +73,20 @@ describe("OverheadStructures bridges", () => {
     expect(found[0].heightM).toBe(9)
   })
 
+  it("draws a bridge as far as the laser sees its deck past an end of the map's line, and never shorter than the line", () => {
+    // The RD548 over the RN2 at Silly-le-Long: the map's line from -20 to +20 m, the deck 6 m over the road below from -16 to +26 m.
+    const bridges = [line({ nature: "Pont" }, [0, -20], [0, 20])]
+    const size = 120
+    const heights = new Float32Array(size * size)
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (Math.abs(x - 60) < 4 && 60 - y >= -16 && 60 - y < 26) heights[y * size + x] = 6
+    const grid = new HeightGrid(heights, new Uint8Array(size * size), new Uint8Array(size * size), size, 1)
+    const [bridge] = OverheadStructures.bridges(vectors({ bridges }), CENTRE, 100, grid)
+    expect(bridge.northM - bridge.lengthM / 2).toBeCloseTo(-20, 0)
+    // To the pixel: the last one of the deck starts at 25 m.
+    expect(Math.abs(bridge.northM + bridge.lengthM / 2 - 26)).toBeLessThanOrEqual(1)
+    expect(bridge.heightM).toBe(6)
+  })
+
   it("keeps apart two bridges that meet at a junction rather than run on", () => {
     const bridges = [line({ nature: "Pont" }, [0, -20], [0, 0]), line({ nature: "Pont" }, [0, 0], [20, 0])]
     expect(OverheadStructures.bridges(vectors({ bridges }), CENTRE, 100, undefined)).toHaveLength(2)
