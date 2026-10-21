@@ -713,7 +713,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelBodiesSubgroup: HTMLElement
   private readonly labelLaunchesSubgroup: HTMLElement
   private readonly labelBeamsSubgroup: HTMLElement
-  private readonly labelSkyGroup: HTMLElement
   private readonly labelPrecipitationGroup: HTMLElement
   private readonly labelWindGroup: HTMLElement
   /** The handles of a group's own parts (the weather's clouds, precipitation and wind) — a strip
@@ -1385,7 +1384,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelBodiesSubgroup = this.shadow.getElementById("label-bodies-subgroup")!
     this.labelLaunchesSubgroup = this.shadow.getElementById("label-launches-subgroup")!
     this.labelBeamsSubgroup = this.shadow.getElementById("label-beams-subgroup")!
-    this.labelSkyGroup = this.shadow.getElementById("label-sky-group")!
     this.labelPrecipitationGroup = this.shadow.getElementById("label-precipitation-group")!
     this.labelWindGroup = this.shadow.getElementById("label-wind-group")!
     this.labelWeatherInferred = this.shadow.getElementById("label-weather-inferred")!
@@ -5730,7 +5728,7 @@ export class SightingEditorElement extends HTMLElement {
     if (open && tab.getAttribute("aria-controls") === "group-observer" && this.observerShown !== SightingEditorElement.OBSERVER_PRINCIPAL) this.selectDecor(this.observerShown)
     // What the parts of the Sky group say they can do depends on the place, which another group may just have given; and the part open
     // is built the first time the group opens.
-    if (open && tab.getAttribute("aria-controls") === "group-sky") this.syncSkyParts()
+    if (open && tab.getAttribute("aria-controls") === "group-weather") this.syncSkyParts()
     this.placeDecorItem()
     this.syncCanvasMode()
     this.refreshTimelineMarks()
@@ -6098,7 +6096,7 @@ export class SightingEditorElement extends HTMLElement {
     // The Bodies part of the group moves the bodies (see beginBodyDrag); the Shapes part the shapes.
     if (this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-bodies")?.hidden === false) return "body"
     // The Sky group edits fields only: nothing on the picture is moved from there.
-    if (this.isGroupIdOpen("group-sky")) return "scene"
+    if (this.isGroupIdOpen("group-weather") && (this.shadow.getElementById("sky-launches")?.hidden === false || this.shadow.getElementById("sky-beams")?.hidden === false)) return "scene"
     if (this.isGroupIdOpen("group-shape")) return "shape"
     // The Environment group frames the object it has selected, as the Bodies part does a body.
     if (this.isGroupIdOpen("group-decor") && this.editableDecor() !== undefined) return "decor"
@@ -6156,7 +6154,7 @@ export class SightingEditorElement extends HTMLElement {
    * own each), and what it shows refreshed.
    */
   private syncSkyParts(): void {
-    if (!this.isGroupIdOpen("group-sky")) return
+    if (!this.isGroupIdOpen("group-weather")) return
     if (this.shadow.getElementById("sky-beams")?.hidden === false) void this.loadBeamEditor().then(editor => editor.refresh())
     if (this.shadow.getElementById("sky-launches")?.hidden === false) void this.loadLaunchEditor().then(editor => editor.refresh())
   }
@@ -9649,7 +9647,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelBodiesSubgroup.textContent = messages.bodiesSubgroup
     this.labelLaunchesSubgroup.textContent = messages.launchesSubgroup
     this.labelBeamsSubgroup.textContent = messages.beamsSubgroup
-    this.labelSkyGroup.textContent = messages.sky
     for (const group of ["location", "decor", "weather"]) {
       const button = this.shadow.getElementById(`${group}-settings-button`)
       button?.setAttribute("title", messages.dataSources)
@@ -9668,7 +9665,7 @@ export class SightingEditorElement extends HTMLElement {
     // The group's own handle now carries the caption that used to stand inside it, so the one
     // message serves both and "Circumstances" — which never named what the group actually holds —
     // is gone.
-    this.labelWeatherGroup.textContent = messages.weather
+    this.labelWeatherGroup.textContent = messages.sky
     this.startDate.messages = messages
     this.endDate.messages = messages
     this.birthDate.messages = messages

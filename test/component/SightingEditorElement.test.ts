@@ -2925,7 +2925,6 @@ describe("SightingEditorElement toolbar groups", () => {
       "label-temporal-group",
       "label-decor-group",
       "label-weather-group",
-      "label-sky-group",
       "label-shape-group",
       "label-sound-group",
       "label-reference-group",
@@ -6735,7 +6734,7 @@ describe("SightingEditorElement assessment", () => {
   })
 
   it("puts no badge on a panel whose gaps are answered by drawing or already defaulted", async () => {
-    // Phenomenon's apparent size and place in the sky are drawn; Weather's cloud cover and Sound's
+    // Phenomenon's apparent size and place in the sky are drawn; the Sky's cloud cover and Sound's
     // kind already hold accepted values. Real gaps, counted in the coverage figure, with nothing in
     // the panel to point at — so no badge promising something to find.
     const element = mount()
@@ -6743,7 +6742,7 @@ describe("SightingEditorElement assessment", () => {
 
     const badgeOf = (name: string) => [...element.shadowRoot!.querySelectorAll<HTMLElement>(".group-tab")]
       .find(t => t.querySelector("span")!.textContent === name)!.querySelector<HTMLElement>(".tab-badge")!
-    for (const name of ["Phenomenon", "Weather", "Sound"]) {
+    for (const name of ["Phenomenon", "Sky", "Sound"]) {
       expect(badgeOf(name).hidden).toBe(true)
     }
   })

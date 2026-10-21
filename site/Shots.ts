@@ -108,12 +108,12 @@ export class Shots {
       }
     },
     {
-      page: "edit", after: "weather", name: "edit-weather",
+      page: "edit", after: "sky", name: "edit-weather",
       caption: {
-        en: "Weather: precipitation, clouds and wind, read from records or stated.",
-        fr: "Météo : précipitations, nuages et vent, relevés ou déclarés.",
-        es: "Meteorología: precipitaciones, nubes y viento, consultados o declarados.",
-        it: "Meteo: precipitazioni, nuvole e vento, ricavati o dichiarati."
+        en: "Sky: precipitation, clouds and wind, read from records or stated, and the launches and beams that crossed it.",
+        fr: "Ciel : précipitations, nuages et vent, relevés ou déclarés, et les lancements et faisceaux qui l'ont traversé.",
+        es: "Cielo: precipitaciones, nubes y viento, consultados o declarados, y los lanzamientos y haces que lo cruzaron.",
+        it: "Cielo: precipitazioni, nuvole e vento, ricavati o dichiarati, e i lanci e i fasci che lo hanno attraversato."
       }
     },
     {

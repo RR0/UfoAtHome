@@ -378,12 +378,12 @@ if (docs) {
     </div>
 
     <div class="group-doc">
-      <h3>Weather</h3>
+      <h3>Sky</h3>
       <p>The one group that is not account. Weather is a measurable fact about a place at an
         instant, and the two groups above already state both — so it is looked up from ERA5, the
         ECMWF reanalysis, and shown <em>read-only</em> above a line naming the dataset and the exact
         UTC instant described. A wrong time zone shows up there before it shows up in the sky.</p>
-      <p>Choosing <strong>File</strong> rather than <strong>Open-Meteo</strong> (in <strong>Data sources</strong>, behind the gear at the top right of the group, <strong>Weather</strong>) reads the weather from the recording's own file (inside it, or in a file beside it: see the Files tab) and asks nobody for it any more: the values stay what they were, with the record they came from, and the fields become editable; once changed, the weather is the observer's and the record is no longer named. A recording that names a source is replayed exactly as authored and never looked up again, so a published case file reads identically offline.</p>
+      <p>Choosing <strong>File</strong> rather than <strong>Open-Meteo</strong> (in <strong>Data sources</strong>, behind the gear at the top right of the group, <strong>Weather</strong>, in the <strong>Sky</strong> group) reads the weather from the recording's own file (inside it, or in a file beside it: see the Files tab) and asks nobody for it any more: the values stay what they were, with the record they came from, and the fields become editable; once changed, the weather is the observer's and the record is no longer named. A recording that names a source is replayed exactly as authored and never looked up again, so a published case file reads identically offline.</p>
       <p>A lookup writes a weather keyframe at the start, at each whole hour and at the end of the
         recording, each at wherever the observer stands at that moment; the track is laid out again
         when the recording's length changes.</p>
@@ -504,7 +504,7 @@ if (docs) {
         movement is stated in the file, and shown here. The picture draws the bodies, with the shapes
         beside them as outlines to read them against, whichever group is open, except in the Shapes
         part, where the shapes are drawn alone and in full.</p>
-      <p>What happened in the sky while the recording runs, as facts (a laser shot, a rocket launch), is not part of the Phenomenon group but of its own, <strong>Sky</strong>: it is neither the interpretation, which reads the account, nor decor, which outlasts the observation. Its <strong>Beams</strong> part lists the beams of light (a laser, a searchlight): the points of each one's path (where it leaves the emitter, any mirror, where it ends), its wavelength, power, divergence and when it is on; how bright it shows is what the air scatters of it, computed. Its <strong>Launches</strong> part lists the rocket launches, their path, engine and plume. An empty field shows, greyed, the value in use. These are drawn whatever group is open.</p>
+      <p>What happened in the sky while the recording runs, as facts (a laser shot, a rocket launch), is not part of the Phenomenon group but of <strong>Sky</strong>, beside the state the sky was in (precipitation, clouds, wind): it is neither the interpretation, which reads the account, nor decor, which outlasts the observation. Its <strong>Beams</strong> tab lists the beams of light (a laser, a searchlight): the points of each one's path (where it leaves the emitter, any mirror, where it ends), its wavelength, power, divergence and when it is on; how bright it shows is what the air scatters of it, computed. Its <strong>Launches</strong> tab lists the rocket launches, their path, engine and plume. An empty field shows, greyed, the value in use. These are drawn whatever group is open.</p>
     </div>
     </div>
   </div>
@@ -843,13 +843,13 @@ if (docs) {
     </div>
 
     <div class="group-doc">
-      <h3>Météo</h3>
+      <h3>Ciel</h3>
       <p>Le seul groupe qui ne soit pas un compte rendu. La météo est un fait mesurable en un lieu à
         un instant, et les deux groupes ci-dessus énoncent déjà les deux — elle est donc relevée
         dans ERA5, la réanalyse de l'ECMWF, et affichée <em>en lecture seule</em> au-dessus d'une
         ligne nommant le jeu de données et l'instant UTC exact décrit. Un mauvais fuseau horaire s'y
         voit avant de se voir dans le ciel.</p>
-      <p>Choisir <strong>Fichier</strong> plutôt qu'<strong>Open-Meteo</strong> (dans <strong>Sources des données</strong>, derrière la roue dentée en haut à droite du groupe, <strong>Météo</strong>) lit la météo dans le fichier de l'enregistrement (en lui-même, ou dans un fichier à côté : voir l'onglet Fichiers) et ne la redemande plus à personne : les valeurs restent ce qu'elles étaient, avec le relevé dont elles viennent, et les champs deviennent modifiables ; modifiée, la météo devient celle de l'observateur et le relevé n'est plus nommé. Un enregistrement qui nomme une source est rejoué tel qu'il a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors ligne.</p>
+      <p>Choisir <strong>Fichier</strong> plutôt qu'<strong>Open-Meteo</strong> (dans <strong>Sources des données</strong>, derrière la roue dentée en haut à droite du groupe, <strong>Météo</strong>, dans le groupe <strong>Ciel</strong>) lit la météo dans le fichier de l'enregistrement (en lui-même, ou dans un fichier à côté : voir l'onglet Fichiers) et ne la redemande plus à personne : les valeurs restent ce qu'elles étaient, avec le relevé dont elles viennent, et les champs deviennent modifiables ; modifiée, la météo devient celle de l'observateur et le relevé n'est plus nommé. Un enregistrement qui nomme une source est rejoué tel qu'il a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors ligne.</p>
       <p>Une consultation écrit un point météo au début, à chaque heure pleine et à la fin de
         l'enregistrement, chacun là où se tient l'observateur à ce moment ; la piste est redisposée
         quand la durée de l'enregistrement change.</p>
@@ -981,7 +981,7 @@ if (docs) {
         affiché ici. L'image dessine les corps, avec les formes à côté en contours pour les
         confronter, quel que soit le groupe ouvert, sauf dans la partie Formes, où les formes sont
         dessinées seules et en entier.</p>
-      <p>Ce qui s'est passé dans le ciel pendant l'enregistrement, en tant que faits (un tir laser, un lancement de fusée), n'est pas dans le groupe Phénomène mais dans un groupe à part, <strong>Ciel</strong> : ce n'est ni l'interprétation, qui lit le compte rendu, ni le décor, qui dure plus longtemps que l'observation. Sa partie <strong>Faisceaux</strong> liste les faisceaux de lumière (un laser, un projecteur) : les points de leur trajet (où il quitte l'émetteur, d'éventuels miroirs, où il finit), leur longueur d'onde, leur puissance, leur divergence et quand ils sont allumés ; leur éclat est ce que l'air en diffuse, calculé. Sa partie <strong>Lancements</strong> liste les lancements de fusée, leur chemin, leur moteur et leur panache. Un champ vide montre, en grisé, la valeur utilisée. Ils sont dessinés quel que soit le groupe ouvert.</p>
+      <p>Ce qui s'est passé dans le ciel pendant l'enregistrement, en tant que faits (un tir laser, un lancement de fusée), n'est pas dans le groupe Phénomène mais dans <strong>Ciel</strong>, à côté de l'état du ciel (précipitations, nuages, vent) : ce n'est ni l'interprétation, qui lit le compte rendu, ni le décor, qui dure plus longtemps que l'observation. Sa partie <strong>Faisceaux</strong> liste les faisceaux de lumière (un laser, un projecteur) : les points de leur trajet (où il quitte l'émetteur, d'éventuels miroirs, où il finit), leur longueur d'onde, leur puissance, leur divergence et quand ils sont allumés ; leur éclat est ce que l'air en diffuse, calculé. Sa partie <strong>Lancements</strong> liste les lancements de fusée, leur chemin, leur moteur et leur panache. Un champ vide montre, en grisé, la valeur utilisée. Ils sont dessinés quel que soit le groupe ouvert.</p>
     </div>
     </div>
   </div>
@@ -1325,13 +1325,13 @@ if (docs) {
     </div>
 
     <div class="group-doc">
-      <h3>Meteorología</h3>
+      <h3>Cielo</h3>
       <p>El único grupo que no es relato. El tiempo atmosférico es un hecho medible en un lugar y un
         instante, y los dos grupos anteriores ya indican ambos; por eso se consulta en ERA5, el
         reanálisis del ECMWF, y se muestra <em>en solo lectura</em> sobre una línea que nombra el
         conjunto de datos y el instante UTC exacto descrito. Una zona horaria equivocada se nota ahí
         antes de notarse en el cielo.</p>
-      <p>Elegir <strong>Archivo</strong> en lugar de <strong>Open-Meteo</strong> (en <strong>Fuentes de datos</strong>, tras el engranaje arriba a la derecha del grupo, <strong>Tiempo</strong>) lee el tiempo del archivo del registro (dentro de él, o en un archivo junto a él: véase la pestaña Archivos) y ya no lo pide a nadie: los valores siguen siendo los que eran, con el registro del que vienen, y los campos se vuelven editables; cambiado, el tiempo pasa a ser el del observador y el registro deja de nombrarse. Un registro que nombra una fuente se reproduce exactamente como se compuso y nunca se vuelve a consultar, así que un caso publicado se lee igual sin conexión.</p>
+      <p>Elegir <strong>Archivo</strong> en lugar de <strong>Open-Meteo</strong> (en <strong>Fuentes de datos</strong>, tras el engranaje arriba a la derecha del grupo, <strong>Tiempo</strong>, en el grupo <strong>Cielo</strong>) lee el tiempo del archivo del registro (dentro de él, o en un archivo junto a él: véase la pestaña Archivos) y ya no lo pide a nadie: los valores siguen siendo los que eran, con el registro del que vienen, y los campos se vuelven editables; cambiado, el tiempo pasa a ser el del observador y el registro deja de nombrarse. Un registro que nombra una fuente se reproduce exactamente como se compuso y nunca se vuelve a consultar, así que un caso publicado se lee igual sin conexión.</p>
       <p>Una consulta escribe un fotograma clave meteorológico al inicio, en cada hora en punto y al
         final del registro, cada uno allí donde está el observador en ese momento; la pista se vuelve a
         disponer cuando cambia la duración del registro.</p>
@@ -1456,7 +1456,7 @@ if (docs) {
         movimiento de un cuerpo se indica en el archivo, y se muestra aquí. La imagen dibuja los
         cuerpos, con las formas a su lado como contornos para leerlos frente a ellas, sea cual sea el
         grupo abierto, salvo en la parte Formas, donde las formas se dibujan solas y enteras.</p>
-      <p>Lo que ocurrió en el cielo durante la grabación, como hechos (un disparo láser, un lanzamiento de cohete), no está en el grupo Fenómeno sino en uno propio, <strong>Cielo</strong>: no es la interpretación, que lee el relato, ni el decorado, que dura más que la observación. Su parte <strong>Haces</strong> lista los haces de luz (un láser, un reflector): los puntos de su trayecto (donde sale del emisor, posibles espejos, donde termina), su longitud de onda, potencia, divergencia y cuándo está encendido; su brillo es lo que el aire difunde de él, calculado. Su parte <strong>Lanzamientos</strong> lista los lanzamientos de cohete, su trayectoria, motor y estela. Un campo vacío muestra, en gris, el valor usado. Se dibujan sea cual sea el grupo abierto.</p>
+      <p>Lo que ocurrió en el cielo durante la grabación, como hechos (un disparo láser, un lanzamiento de cohete), no está en el grupo Fenómeno sino en <strong>Cielo</strong>, junto al estado del cielo (precipitaciones, nubes, viento): no es la interpretación, que lee el relato, ni el decorado, que dura más que la observación. Su parte <strong>Haces</strong> lista los haces de luz (un láser, un reflector): los puntos de su trayecto (donde sale del emisor, posibles espejos, donde termina), su longitud de onda, potencia, divergencia y cuándo está encendido; su brillo es lo que el aire difunde de él, calculado. Su parte <strong>Lanzamientos</strong> lista los lanzamientos de cohete, su trayectoria, motor y estela. Un campo vacío muestra, en gris, el valor usado. Se dibujan sea cual sea el grupo abierto.</p>
     </div>
     </div>
   </div>
@@ -1800,13 +1800,13 @@ if (docs) {
     </div>
 
     <div class="group-doc">
-      <h3>Meteo</h3>
+      <h3>Cielo</h3>
       <p>L'unico gruppo che non è resoconto. Il meteo è un fatto misurabile in un luogo a un istante, e
         i due gruppi precedenti indicano già entrambi; per questo viene ricavato da ERA5, la rianalisi
         dell'ECMWF, e mostrato <em>in sola lettura</em> sopra una riga che nomina il set di dati e
         l'istante UTC esatto descritto. Un fuso orario sbagliato si vede lì prima di vedersi nel
         cielo.</p>
-      <p>Scegliere <strong>File</strong> invece di <strong>Open-Meteo</strong> (in <strong>Fonti dei dati</strong>, dietro l'ingranaggio in alto a destra del gruppo, <strong>Meteo</strong>) legge il meteo dal file della registrazione (dentro di essa, o in un file accanto: vedi la scheda File) e non lo chiede più a nessuno: i valori restano quelli che erano, con il rilevamento da cui vengono, e i campi diventano modificabili; modificato, il meteo diventa quello dell'osservatore e il rilevamento non è più nominato. Una registrazione che nomina una fonte viene riprodotta esattamente come è stata composta e mai più consultata, così un caso pubblicato si legge identico anche offline.</p>
+      <p>Scegliere <strong>File</strong> invece di <strong>Open-Meteo</strong> (in <strong>Fonti dei dati</strong>, dietro l'ingranaggio in alto a destra del gruppo, <strong>Meteo</strong>, nel gruppo <strong>Cielo</strong>) legge il meteo dal file della registrazione (dentro di essa, o in un file accanto: vedi la scheda File) e non lo chiede più a nessuno: i valori restano quelli che erano, con il rilevamento da cui vengono, e i campi diventano modificabili; modificato, il meteo diventa quello dell'osservatore e il rilevamento non è più nominato. Una registrazione che nomina una fonte viene riprodotta esattamente come è stata composta e mai più consultata, così un caso pubblicato si legge identico anche offline.</p>
       <p>Una consultazione scrive un fotogramma chiave meteorologico all'inizio, a ogni ora esatta e alla
         fine della registrazione, ciascuno dove si trova l'osservatore in quel momento; la traccia viene
         ridisposta quando la durata della registrazione cambia.</p>
@@ -1934,7 +1934,7 @@ if (docs) {
         di un corpo è indicato nel file, e mostrato qui. L'immagine disegna i corpi, con le forme
         accanto come contorni con cui confrontarli, qualunque sia il gruppo aperto, tranne nella parte
         Forme, dove le forme sono disegnate da sole e per intero.</p>
-      <p>Ciò che è accaduto nel cielo durante la registrazione, come fatti (un tiro laser, un lancio di razzo), non è nel gruppo Fenomeno ma in un gruppo a sé, <strong>Cielo</strong>: non è l'interpretazione, che legge il resoconto, né lo scenario, che dura più dell'osservazione. La sua parte <strong>Fasci</strong> elenca i fasci di luce (un laser, un proiettore): i punti del loro percorso (dove lasciano l'emettitore, eventuali specchi, dove finiscono), la lunghezza d'onda, la potenza, la divergenza e quando sono accesi; la loro luminosità è ciò che l'aria ne diffonde, calcolata. La sua parte <strong>Lanci</strong> elenca i lanci di razzo, il loro percorso, motore e scia. Un campo vuoto mostra, in grigio, il valore usato. Sono disegnati qualunque sia il gruppo aperto.</p>
+      <p>Ciò che è accaduto nel cielo durante la registrazione, come fatti (un tiro laser, un lancio di razzo), non è nel gruppo Fenomeno ma in <strong>Cielo</strong>, accanto allo stato del cielo (precipitazioni, nuvole, vento): non è l'interpretazione, che legge il resoconto, né lo scenario, che dura più dell'osservazione. La sua parte <strong>Fasci</strong> elenca i fasci di luce (un laser, un proiettore): i punti del loro percorso (dove lasciano l'emettitore, eventuali specchi, dove finiscono), la lunghezza d'onda, la potenza, la divergenza e quando sono accesi; la loro luminosità è ciò che l'aria ne diffonde, calcolata. La sua parte <strong>Lanci</strong> elenca i lanci di razzo, il loro percorso, motore e scia. Un campo vuoto mostra, in grigio, il valore usato. Sono disegnati qualunque sia il gruppo aperto.</p>
     </div>
     </div>
   </div>
