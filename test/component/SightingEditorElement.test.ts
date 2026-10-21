@@ -3088,7 +3088,7 @@ describe("SightingEditorElement parameter summary", () => {
   it("boxes a sub-element's chips inside a chip bearing its name", () => {
     const element = mount()
     setInput(element.shadowRoot!, "elevation", "220")
-    element.shadowRoot!.getElementById("add-decor-building")!.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    element.shadowRoot!.getElementById("option-decor-building")!.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     setInput(element.shadowRoot!, "decorBase.altitudeM", "12")
 
     const decorNest = chips(element).find(c => c.dataset.field === "decorBase.altitudeM")!.closest(".param-nest")!
@@ -3750,7 +3750,7 @@ describe("SightingEditorElement decor group", () => {
       const el = shadow.getElementById(id) as HTMLElement
       return (el.closest("label") ?? el).hidden
     }
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    ;(shadow.getElementById("option-decor-building") as HTMLButtonElement).click()
     expect(rowHidden("decor")).toBe(false)
     expect(rowHidden("delete-decor")).toBe(false)
     expect(rowHidden("decorBase.title")).toBe(false)
@@ -3762,8 +3762,7 @@ describe("SightingEditorElement decor group", () => {
     // at" is not the same claim as a value saying "a observer measured this".
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("decorKind") as HTMLSelectElement).value = "vehicle"
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    ;(shadow.getElementById("option-decor-vehicle") as HTMLButtonElement).click()
 
     const length = shadow.getElementById("decorBase.sizeM.lengthM") as HTMLInputElement
     expect(length.value).toBe("")
@@ -3774,8 +3773,7 @@ describe("SightingEditorElement decor group", () => {
   it("states only the axis that was actually filled in, leaving the other two unmeasured", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("decorKind") as HTMLSelectElement).value = "vehicle"
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    ;(shadow.getElementById("option-decor-vehicle") as HTMLButtonElement).click()
 
     const length = shadow.getElementById("decorBase.sizeM.lengthM") as HTMLInputElement
     length.value = "5.44"
@@ -3787,7 +3785,7 @@ describe("SightingEditorElement decor group", () => {
   it("drops the size entirely once every field is cleared again", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    ;(shadow.getElementById("option-decor-building") as HTMLButtonElement).click()
     const height = shadow.getElementById("decorBase.sizeM.heightM") as HTMLInputElement
     height.value = "3"
     height.dispatchEvent(new Event("input"))
@@ -3806,8 +3804,7 @@ describe("SightingEditorElement decor group", () => {
     ;(element as unknown as { decorModelProvider: unknown }).decorModelProvider = {
       entries: () => Promise.resolve(entries), entry: (id: string) => Promise.resolve(entries.find(candidate => candidate.id === id))
     }
-    ;(shadow.getElementById("decorKind") as HTMLSelectElement).value = "vehicle"
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    ;(shadow.getElementById("option-decor-vehicle") as HTMLButtonElement).click()
     await new Promise(resolve => setTimeout(resolve, 20))
     const select = shadow.getElementById("decorBase.model.id") as HTMLSelectElement
     expect([...select.options].map(option => option.value)).toEqual(["", "first", "second"])
@@ -3827,7 +3824,7 @@ describe("SightingEditorElement decor group", () => {
   it("shows the model an object at an address is drawn as without offering it as a choice of the catalogue", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    ;(shadow.getElementById("option-decor-building") as HTMLButtonElement).click()
     element.sightingData = {
       ...element.sightingData,
       decor: [{ id: "d1", kind: "building", eastM: 0, northM: 10, model: { url: "https://example.test/shed.glb", credit: { title: "Shed", license: "CC0 1.0" } } }]
@@ -3877,9 +3874,9 @@ describe("SightingEditorElement decor group", () => {
   it("adds a building decor object (with its default floor count) when Building is picked in the Kind dropdown", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
-    kindSelect.value = "building"
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    let kind = "building"
+    kind = "building"
+    ;(shadow.getElementById(`option-decor-${kind}`) as HTMLButtonElement).click()
 
     const decor = element.sightingData.decor!
     expect(decor).toHaveLength(1)
@@ -3890,12 +3887,12 @@ describe("SightingEditorElement decor group", () => {
   it("adds a decor object of the picked kind, offset from previously added ones", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
-    const addButton = shadow.getElementById("add-decor-building") as HTMLButtonElement
+    let kind = "building"
+    const addButton = { click: () => (shadow.getElementById(`option-decor-${kind}`) as HTMLButtonElement).click() }
 
-    kindSelect.value = "tree"
+    kind = "tree"
     addButton.click()
-    kindSelect.value = "streetlight"
+    kind = "streetlight"
     addButton.click()
 
     const decor = element.sightingData.decor!
@@ -3912,9 +3909,9 @@ describe("SightingEditorElement decor group", () => {
   it("fills the Name field with the same numbered label the dropdown shows, so an untouched decor object is never nameless", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
-    const addButton = shadow.getElementById("add-decor-building") as HTMLButtonElement
-    kindSelect.value = "streetlight"
+    let kind = "building"
+    const addButton = { click: () => (shadow.getElementById(`option-decor-${kind}`) as HTMLButtonElement).click() }
+    kind = "streetlight"
 
     addButton.click()
     addButton.click()
@@ -3930,7 +3927,7 @@ describe("SightingEditorElement decor group", () => {
   it("flags the Name field invalid when cleared, clears the flag once it's non-empty again", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    ;(shadow.getElementById("option-decor-building") as HTMLButtonElement).click()
     const titleInput = shadow.getElementById("decorBase.title") as HTMLInputElement
     expect(titleInput.classList.contains("invalid")).toBe(false)
 
@@ -3948,7 +3945,7 @@ describe("SightingEditorElement decor group", () => {
   it("writes East/North/Heading edits back onto the selected decor object", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    ;(shadow.getElementById("option-decor-building") as HTMLButtonElement).click()
 
     const eastInput = shadow.getElementById("decorBase.eastM") as HTMLInputElement
     const northInput = shadow.getElementById("decorBase.northM") as HTMLInputElement
@@ -3971,7 +3968,7 @@ describe("SightingEditorElement decor group", () => {
     const durationInput = shadow.getElementById("durationSeconds") as HTMLInputElement
     durationInput.value = "10"
     durationInput.dispatchEvent(new Event("input"))
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    ;(shadow.getElementById("option-decor-building") as HTMLButtonElement).click()
     const litInput = shadow.getElementById("decorState.lit") as HTMLInputElement
 
     litInput.checked = true
@@ -3987,7 +3984,7 @@ describe("SightingEditorElement decor group", () => {
     const durationInput = shadow.getElementById("durationSeconds") as HTMLInputElement
     durationInput.value = "10"
     durationInput.dispatchEvent(new Event("input"))
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    ;(shadow.getElementById("option-decor-building") as HTMLButtonElement).click()
     const litInput = shadow.getElementById("decorState.lit") as HTMLInputElement
     litInput.checked = true
     litInput.dispatchEvent(new Event("input"))
@@ -4013,7 +4010,7 @@ describe("SightingEditorElement decor group", () => {
   it("deletes the selected decor object and falls back to whichever one remains, or none", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    const addButton = shadow.getElementById("add-decor-building") as HTMLButtonElement
+    const addButton = { click: () => (shadow.getElementById("option-decor-building") as HTMLButtonElement).click() }
     const deleteButton = shadow.getElementById("delete-decor") as HTMLButtonElement
     addButton.click()
     addButton.click()
@@ -4039,7 +4036,7 @@ describe("SightingEditorElement decor group", () => {
   it("names a decor object via the Name field, updating both the data and the dropdown label", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    ;(shadow.getElementById("option-decor-building") as HTMLButtonElement).click()
 
     const titleInput = shadow.getElementById("decorBase.title") as HTMLInputElement
     titleInput.value = "Streetlight on Elm St"
@@ -4065,13 +4062,13 @@ describe("SightingEditorElement decor group", () => {
   it("gives a freshly created building/vehicle real windows on every side by default (50%, or FIXED_WINDOW_MIN_OPACITY_PERCENT on a fixed side) instead of starting as a windowless box", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
-    kindSelect.value = "building"
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    let kind = "building"
+    kind = "building"
+    ;(shadow.getElementById(`option-decor-${kind}`) as HTMLButtonElement).click()
     expect(element.sightingData.decor![0].windows).toEqual({ front: 50, behind: 50, left: 50, right: 50 })
 
-    kindSelect.value = "vehicle"
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    kind = "vehicle"
+    ;(shadow.getElementById(`option-decor-${kind}`) as HTMLButtonElement).click()
     expect(element.sightingData.decor![1].windows).toEqual({
       front: 90,
       behind: 90,
@@ -4085,9 +4082,9 @@ describe("SightingEditorElement decor group", () => {
   it("writes the 4 window opacity inputs back onto the selected decor object's windows record, leaving the other (already-defaulted) sides alone — empty means no window at all", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
-    kindSelect.value = "building"
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    let kind = "building"
+    kind = "building"
+    ;(shadow.getElementById(`option-decor-${kind}`) as HTMLButtonElement).click()
 
     const frontInput = shadow.getElementById("decorParam.windows.front") as HTMLInputElement
     frontInput.value = "0"
@@ -4102,9 +4099,9 @@ describe("SightingEditorElement decor group", () => {
   it("clamps a fixed (non-openable) side's opacity up to FIXED_WINDOW_MIN_OPACITY_PERCENT even if a lower value is typed, but leaves an openable door window free down to 0", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
-    kindSelect.value = "vehicle"
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    let kind = "building"
+    kind = "vehicle"
+    ;(shadow.getElementById(`option-decor-${kind}`) as HTMLButtonElement).click()
 
     expect((shadow.getElementById("decorParam.windows.front") as HTMLInputElement).min).toBe("90")
     expect((shadow.getElementById("decorParam.windows.behind") as HTMLInputElement).min).toBe("90")
@@ -4133,9 +4130,9 @@ describe("SightingEditorElement decor group", () => {
   it("shows the Occupied floor row alongside Floors as soon as it's a building, even before a observer location is picked", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
-    kindSelect.value = "building"
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    let kind = "building"
+    kind = "building"
+    ;(shadow.getElementById(`option-decor-${kind}`) as HTMLButtonElement).click()
 
     const occupiedFloorInput = shadow.getElementById("decorParam.occupiedFloor") as HTMLInputElement
     expect(occupiedFloorInput.closest("label")!.hidden).toBe(false)
@@ -4162,12 +4159,12 @@ describe("SightingEditorElement decor group", () => {
     // field at all.
     const element = mount()
     const shadow = element.shadowRoot!
-    const kindSelect = shadow.getElementById("decorKind") as HTMLSelectElement
-    kindSelect.value = "building"
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    let kind = "building"
+    kind = "building"
+    ;(shadow.getElementById(`option-decor-${kind}`) as HTMLButtonElement).click()
 
-    kindSelect.value = "vehicle"
-    ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+    kind = "vehicle"
+    ;(shadow.getElementById(`option-decor-${kind}`) as HTMLButtonElement).click()
 
     const decorSelect = shadow.getElementById("decor") as HTMLSelectElement
     const vehicle = element.sightingData.decor!.find(d => d.kind === "vehicle")!
@@ -4188,7 +4185,7 @@ describe("SightingEditorElement decor group", () => {
       const element = mount()
       const shadow = element.shadowRoot!
       ;(shadow.getElementById("decorKind") as HTMLSelectElement).value = kind
-      ;(shadow.getElementById("add-decor-building") as HTMLButtonElement).click()
+      ;(shadow.getElementById(`option-decor-${kind}`) as HTMLButtonElement).click()
       const field = (key: string) => shadow.getElementById(`decorParam.${key}`) as HTMLInputElement
       const type = (key: string, value: string) => {
         const input = field(key)

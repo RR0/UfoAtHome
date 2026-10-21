@@ -261,6 +261,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   referenceAdoptPose: "Adoptar como pose del observador",
   referenceAdoptRationale: "Medido en la foto «{title}»: {n} puntos de referencia alineados, {deg}° de desviación residual",
   referenceStreetSearch: "Fotos a pie de calle cercanas",
+  referenceStreetNoPlace: "Dé primero un lugar a la grabación: las fotos se buscan alrededor",
   referenceStreetSearching: "Buscando fotos tomadas cerca…",
   referenceStreetNone: "Ninguna foto a pie de calle a menos de {m} m (Panoramax)",
   referenceStreetFailed: "No se pudo contactar con Panoramax",

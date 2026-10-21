@@ -29,10 +29,10 @@ describe("ElementList", () => {
     expect((header.querySelector("#things") as HTMLSelectElement).value).toBe("x")
   })
 
-  it("lays out the row as every list is: picker, actions, removal, then the kind and the adding last, with no label", () => {
+  it("lays out the row as every list is: picker, actions, removal, then the adding last and the menu of its kinds, with no label", () => {
     const { header } = make()
     const row = header.querySelector(".element-list-row")!
-    expect([...row.children].map(child => child.id || child.className)).toEqual(["element-list-picker", "look", "remove-thing", "element-list-empty", "thing-kind", "add-thing"])
+    expect([...row.children].map(child => child.id || child.className)).toEqual(["element-list-picker", "look", "remove-thing", "element-list-empty", "add-thing", "thing-kind"])
     expect(row.querySelector("label")!.textContent).toBe("")
     expect(header.querySelector("#things")!.getAttribute("aria-label")).toBe("Things")
   })
@@ -51,24 +51,24 @@ describe("ElementList", () => {
     expect(header.querySelector<HTMLButtonElement>("#look")!.disabled).toBe(false)
   })
 
-  it("adds the kind that is picked, and names the kinds it does not offer", () => {
+  it("opens the kinds from the \"+\" rather than adding, adds the kind picked in it, and names the kinds it does not offer", () => {
     const { list, footer, calls } = make()
-    const kinds = footer.querySelector<HTMLSelectElement>("#thing-kind")!
-    kinds.value = "b"
-    footer.querySelector<HTMLButtonElement>("#add-thing")!.click()
+    const add = footer.querySelector<HTMLButtonElement>("#add-thing")!
+    expect(add.getAttribute("popovertarget")).toBe("thing-kind")
+    add.click()
+    expect(calls.add).not.toHaveBeenCalled()
+    footer.querySelector<HTMLButtonElement>("#option-b")!.click()
     expect(calls.add).toHaveBeenCalledWith("b")
-    expect(footer.querySelector<HTMLOptionElement>("#option-z")!.hidden).toBe(true)
+    expect(list.pickedKind).toBe("b")
+    expect(footer.querySelector<HTMLButtonElement>("#option-z")!.hidden).toBe(true)
     expect(list.kindLabel("z")).toBe("Zed")
     expect(list.kindLabel("unknown")).toBe("unknown")
   })
 
-  it("keeps the kind picked when the language changes", () => {
+  it("names the kinds again in another language", () => {
     const { list, footer } = make()
-    const kinds = footer.querySelector<HTMLSelectElement>("#thing-kind")!
-    kinds.value = "b"
     list.setKinds([{ value: "a", label: "Alfa" }, { value: "b", label: "Bêta" }])
-    expect(kinds.value).toBe("b")
-    expect(kinds.selectedOptions[0].textContent).toBe("Bêta")
+    expect(footer.querySelector<HTMLButtonElement>("#option-b")!.textContent).toBe("Bêta")
   })
 
   it("reports a pick, a removal and an action, and renames an entry in place", () => {

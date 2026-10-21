@@ -2,6 +2,7 @@ import { setupCloudEditor } from "./CloudEditor.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
 import type { BeamEditor } from "./BeamEditor.js"
+import { AddMenu } from "./AddMenu.js"
 import { SurroundingsPlanter } from "./SurroundingsPlanter.js"
 import { MessageStyle } from "./MessageStyle.js"
 import { SceneryDates } from "./SceneryDates.js"
@@ -835,7 +836,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly referenceUsePoseButton: HTMLButtonElement
   private readonly referenceStatus: HTMLElement
   private readonly addReferenceButton: HTMLButtonElement
-  private readonly referenceAddKindSelect: HTMLSelectElement
+  /** Where the picture the "+" of the pictures adds comes from, picked in the menu it opens (see AddMenu). */
+  private readonly referenceAddMenu: AddMenu
   private readonly referenceLandmarksSelect: HTMLSelectElement
   private readonly addReferenceLandmarkButton: HTMLButtonElement
   private readonly deleteReferenceLandmarkButton: HTMLButtonElement
@@ -1506,7 +1508,10 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceUsePoseButton = this.shadow.getElementById("reference-use-pose") as HTMLButtonElement
     this.referenceStatus = this.shadow.getElementById("reference-status")!
     this.addReferenceButton = this.shadow.getElementById("add-reference") as HTMLButtonElement
-    this.referenceAddKindSelect = this.shadow.getElementById("reference-add-kind") as HTMLSelectElement
+    this.referenceAddMenu = new AddMenu(this.addReferenceButton, "reference-add-kind", kind => this.addReferenceOfKind(kind), kind => ({
+      address: "reference-add-address", file: "reference-add-file-option", street: "reference-add-street"
+    })[kind] ?? `reference-add-${kind}`)
+    this.setReferenceAddKinds("From an address", "From a file", "Street-level pictures nearby")
     this.referenceLandmarksSelect = this.shadow.getElementById("reference-landmarks") as HTMLSelectElement
     this.addReferenceLandmarkButton = this.shadow.getElementById("add-reference-landmark") as HTMLButtonElement
     this.deleteReferenceLandmarkButton = this.shadow.getElementById("delete-reference-landmark") as HTMLButtonElement
@@ -1658,7 +1663,6 @@ export class SightingEditorElement extends HTMLElement {
     this.deleteReferenceButton.addEventListener("click", () => this.deleteReference())
     for (const field of this.referenceFields) field.addEventListener("input", () => this.updateReference())
     this.referenceUsePoseButton.addEventListener("click", () => this.useObserverPoseForReference())
-    this.addReferenceButton.addEventListener("click", () => this.addReferenceOfKind())
     this.referenceSourceInput.addEventListener("filepick", event => void this.setReferenceSource((event as CustomEvent<InputFilePick>).detail))
     this.addReferenceLandmarkButton.addEventListener("click", () => this.armLandmark())
     this.deleteReferenceLandmarkButton.addEventListener("click", () => this.deleteLandmark())
@@ -4539,14 +4543,22 @@ export class SightingEditorElement extends HTMLElement {
    * latitude and longitude. */
   private syncStreetSearchAvailability(): void {
     const located = this.numberOrUndefined(this.latInput.value) !== undefined && this.numberOrUndefined(this.lngInput.value) !== undefined
-    ;(this.shadow.getElementById("reference-add-street") as HTMLOptionElement).disabled = !located
-    if (!located && this.referenceAddKindSelect.value === "street") this.referenceAddKindSelect.value = "address"
+    this.referenceAddMenu.setDisabled("street", located ? undefined : this.messages.referenceStreetNoPlace)
   }
 
-  /** The "+" of the pictures adds one from where the select before it says: an address typed next, a file of the author's, or a
+  /** The kinds of picture the "+" offers, as the reader's language calls them, the street pictures kept greyed while there is no place. */
+  private setReferenceAddKinds(address: string, file: string, street: string): void {
+    const located = this.numberOrUndefined(this.latInput?.value ?? "") !== undefined && this.numberOrUndefined(this.lngInput?.value ?? "") !== undefined
+    this.referenceAddMenu.setKinds([
+      { value: "address", label: address }, { value: "file", label: file },
+      { value: "street", label: street, ...(located ? {} : { disabledReason: this.messages?.referenceStreetNoPlace ?? "" }) }
+    ])
+  }
+
+  /** The "+" of the pictures adds one from where its menu says: an address typed next, a file of the author's, or a
    * street-level picture near the spot, looked up first and then picked. */
-  private addReferenceOfKind(): void {
-    switch (this.referenceAddKindSelect.value) {
+  private addReferenceOfKind(kind: string): void {
+    switch (kind) {
       case "file": this.addReferenceFromFile(); break
       case "street": void this.searchStreetPictures(); break
       default: this.addReferenceFromAddress()
@@ -9755,13 +9767,10 @@ export class SightingEditorElement extends HTMLElement {
     this.labelReferenceFov.textContent = messages.referenceFov
     this.referenceUsePoseButton.textContent = messages.referenceUsePose
     // Where the picture to add comes from, picked before the "+" that adds it (see the Pictures group's template).
-    this.shadow.getElementById("reference-add-address")!.textContent = messages.addReferenceUrl
-    this.shadow.getElementById("reference-add-file-option")!.textContent = messages.addReferenceFile
-    this.shadow.getElementById("reference-add-street")!.textContent = messages.referenceStreetSearch
-    for (const control of [this.addReferenceButton, this.referenceAddKindSelect]) {
-      control.title = messages.addReference
-      control.setAttribute("aria-label", messages.addReference)
-    }
+    this.setReferenceAddKinds(messages.addReferenceUrl, messages.addReferenceFile, messages.referenceStreetSearch)
+    this.addReferenceButton.title = messages.addReference
+    this.addReferenceButton.setAttribute("aria-label", messages.addReference)
+    this.referenceAddMenu.panel.setAttribute("aria-label", messages.addReference)
     this.deleteReferenceButton.title = messages.deleteReference
     this.deleteReferenceButton.setAttribute("aria-label", messages.deleteReference)
     this.labelReferenceLandmarks.textContent = messages.referenceLandmarks

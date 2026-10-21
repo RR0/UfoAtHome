@@ -257,7 +257,7 @@ function openGroups(element: SightingEditorElement): string[] {
 
 function twoBuildings(): SightingEditorElement {
   const element = mount()
-  const add = element.shadowRoot!.getElementById("add-decor-building") as HTMLButtonElement
+  const add = element.shadowRoot!.getElementById("option-decor-building") as HTMLButtonElement
   add.click()
   add.click()
   // Nothing open: the picture is the scene, as when the author has just loaded a recording.

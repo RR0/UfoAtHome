@@ -429,6 +429,8 @@ export interface SightingEditorMessages extends InputFileMessages, SightingLabel
    * answer with {m} the radius searched, the failure, the Add button, one entry ({distance},
    * {bearing}, {date}, {panorama}), the 360° suffix, and the title such a picture gets. */
   referenceStreetSearch: string
+  /** Why street-level pictures cannot be looked for: the recording has no place yet. */
+  referenceStreetNoPlace: string
   referenceStreetSearching: string
   referenceStreetNone: string
   referenceStreetFailed: string

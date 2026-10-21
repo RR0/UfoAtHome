@@ -219,7 +219,7 @@ async function waitFor(check: () => boolean, timeoutMs = 20000): Promise<void> {
 }
 
 function addBuildings(element: SightingEditorElement, count: number): void {
-  const add = element.shadowRoot!.getElementById("add-decor-building") as HTMLButtonElement
+  const add = element.shadowRoot!.getElementById("option-decor-building") as HTMLButtonElement
   for (let i = 0; i < count; i++) add.click()
 }
 

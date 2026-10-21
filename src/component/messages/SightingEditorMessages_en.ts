@@ -256,6 +256,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   referenceAdoptPose: "Adopt as the observer's pose",
   referenceAdoptRationale: "Measured on the picture “{title}”: {n} landmarks lined up, {deg}° of residual",
   referenceStreetSearch: "Street-level pictures nearby",
+  referenceStreetNoPlace: "Give the recording a place first: the pictures are looked for round it",
   referenceStreetSearching: "Looking for pictures taken nearby…",
   referenceStreetNone: "No street-level picture within {m} m (Panoramax)",
   referenceStreetFailed: "Panoramax could not be reached",

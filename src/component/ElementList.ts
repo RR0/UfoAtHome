@@ -1,3 +1,5 @@
+import { AddMenu } from "./AddMenu.js"
+
 /** One entry of the list: what it is called, and the id the editor knows it by. */
 export interface ElementListItem {
   id: string
@@ -24,6 +26,7 @@ export interface ElementListOptions {
   /** What holds the fields of the picked element, under the row: framed, and hidden while none is picked. */
   body?: HTMLElement
   /** The ids of the controls, which others find them by (a summary chip focuses the picker; tests read them). */
+  /** `kinds` is the id of the menu of the kinds the "+" opens (see AddMenu), `kind` the id of each kind's choice in it. */
   ids: { list: string, remove: string, add: string, kinds?: string, kind?: (value: string) => string }
   /**
    * The picker offers "none" as a choice of its own and stays on show without elements (the individual cloud of a layer: a layer
@@ -39,7 +42,7 @@ export interface ElementListOptions {
    */
   navigation?: { scope: HTMLElement, onStep: (direction: -1 | 1) => void }
   onSelect: (id: string) => void
-  /** `kind` is the one picked beside the button, absent when the list has no kinds. */
+  /** `kind` is the one picked in the menu the "+" opens, absent when the list has no kinds. */
   onAdd: (kind: string | undefined) => void
   onRemove: () => void
 }
@@ -52,7 +55,7 @@ export interface ElementListOptions {
  *
  * Every list of every tab is laid out the same, so that a reader who has used one knows them all: no label repeating the tab's name,
  * then on one line (wrapping only where there is no room) the picker, what points at the picked element (🎯), its removal (🗑) and
- * last the adding (+, after the kind to add when there are several); under it, one frame holding all the fields of the picked element.
+ * last the adding (+, which opens the kinds to add when there are several: see AddMenu); under it, one frame holding all the fields of the picked element.
  * With no element there is nothing to pick, point at or remove: the row says there is none, before the adding, and the frame goes.
  * The lists the editor's template writes by hand take the same classes (see CSS) and the same presence (see showPresence).
  */
@@ -64,22 +67,21 @@ export class ElementList {
 .element-list-picker { flex: 1 1 10em; min-width: 0; display: flex; }
 .element-list-picker select { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
 .element-list-empty { opacity: .75; font-style: italic; }
-.element-list-add-kind { margin-left: .4em; flex: 0 0 auto; width: auto; }
 .element-list-body { flex: 1 1 100%; min-width: 0; box-sizing: border-box; border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
   border-radius: 6px; padding: .5em .6em; margin: .1em 0 .3em; display: flex; flex-wrap: wrap; align-items: center; gap: .5em; }
 .element-list-row [hidden], .element-list-body[hidden] { display: none !important; }
-`
+${AddMenu.CSS}`
 
   /**
    * What a list says while it has, or has not, an element: the picker, what acts on the picked one and the frame of its fields are
    * there only while there is one; the row then says there is none, before the adding. `row` holds a list laid out as CSS says:
-   * whatever in it is not the adding (`.element-list-add`, `.element-list-add-kind`) nor the saying (`.element-list-empty`) acts on the
+   * whatever in it is not the adding (`.element-list-add`, the menu of its kinds `.add-menu`) nor the saying (`.element-list-empty`) acts on the
    * picked element. A list that is `optional` keeps its picker, and disables what acts on none instead of hiding it. What acts on the
    * picked element is disabled while there is none, and left to the list to enable once there is one.
    */
   static showPresence(row: HTMLElement, body: HTMLElement | undefined, present: boolean, optional = false): void {
     for (const child of row.children as HTMLCollectionOf<HTMLElement>) {
-      if (child.matches(".element-list-add, .element-list-add-kind, .add-reason")) continue
+      if (child.matches(".element-list-add, .add-menu, .add-reason")) continue
       if (child.matches(".element-list-empty")) { child.hidden = present || optional; continue }
       if (child.matches(".element-list-picker")) { child.hidden = !present && !optional; continue }
       child.hidden = !present && !optional
@@ -97,11 +99,10 @@ export class ElementList {
   private readonly addButton: HTMLButtonElement
   /** Why the add button cannot be pressed, beside it — see setAddState. */
   private addReason?: HTMLElement
-  private readonly kindSelect?: HTMLSelectElement
+  private readonly kindMenu?: AddMenu
   private readonly previousButton?: HTMLButtonElement
   private readonly nextButton?: HTMLButtonElement
   private readonly actionButtons = new Map<string, HTMLButtonElement>()
-  private kinds: ElementListKind[] = []
   private items: readonly ElementListItem[] = []
   private noneLabel = "—"
   private addLabel = ""
@@ -148,16 +149,10 @@ export class ElementList {
     this.emptyText.className = "element-list-empty"
     this.addButton = this.iconButton(options.ids.add, "+")
     this.addButton.classList.add("element-list-add")
-    this.addButton.addEventListener("click", () => options.onAdd(this.kindSelect?.value))
-    this.row.append(this.removeButton, this.emptyText)
-    if (options.ids.kinds) {
-      // What kind to add stands just before the "+" that adds it, set apart from the picker it could be taken for.
-      this.kindSelect = document.createElement("select")
-      this.kindSelect.id = options.ids.kinds
-      this.kindSelect.className = "element-list-add-kind"
-      this.row.append(this.kindSelect)
-    }
-    this.row.append(this.addButton)
+    this.row.append(this.removeButton, this.emptyText, this.addButton)
+    // With several kinds, the "+" opens them, and the one picked is added (see AddMenu); with one, it adds it.
+    if (options.ids.kinds) this.kindMenu = new AddMenu(this.addButton, options.ids.kinds, kind => options.onAdd(kind), options.ids.kind)
+    else this.addButton.addEventListener("click", () => options.onAdd(undefined))
     if (options.body) options.body.classList.add("element-list-body")
   }
 
@@ -187,7 +182,7 @@ export class ElementList {
     this.emptyText.textContent = labels.empty ?? ""
     this.noneLabel = labels.none ?? this.noneLabel
     this.addLabel = labels.add
-    if (this.kindSelect) this.kindSelect.setAttribute("aria-label", labels.add)
+    this.kindMenu?.panel.setAttribute("aria-label", labels.add)
     if (this.options.optional) this.listed(this.items, this.select.value)
     for (const [button, text] of [[this.removeButton, labels.remove], [this.addButton, labels.add],
       ...[...this.actionButtons].map(([id, action]) => [action, labels.actions?.[id] ?? ""] as const)] as const) {
@@ -196,29 +191,19 @@ export class ElementList {
     }
   }
 
-  /** The kinds that can be added, as the reader's language calls them; the one picked stays picked. */
+  /** The kinds that can be added, as the reader's language calls them. */
   setKinds(kinds: ElementListKind[]): void {
-    this.kinds = kinds
-    const kindSelect = this.kindSelect
-    if (!kindSelect) return
-    const picked = kindSelect.value
-    kindSelect.replaceChildren(...kinds.map(kind => {
-      const option = new Option(kind.label, kind.value)
-      if (this.options.ids.kind) option.id = this.options.ids.kind(kind.value)
-      option.hidden = kind.hidden === true
-      return option
-    }))
-    if (kinds.some(kind => kind.value === picked && !kind.hidden)) kindSelect.value = picked
+    this.kindMenu?.setKinds(kinds)
   }
 
   /** What a kind is called, or the kind itself where it is not one that is known. */
   kindLabel(value: string): string {
-    return this.kinds.find(kind => kind.value === value)?.label ?? value
+    return this.kindMenu?.labelOf(value) ?? value
   }
 
-  /** The kind picked beside the adding button. */
+  /** The kind last added from the menu of the "+". */
   get pickedKind(): string | undefined {
-    return this.kindSelect?.value
+    return this.kindMenu?.lastPicked
   }
 
   /** Lists these, with `selected` picked. Nothing to pick hides what acts on it (see the class). */

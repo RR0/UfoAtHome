@@ -463,11 +463,6 @@ export const html = `
       <label class="element-list-picker"><select id="reference" aria-label="Picture"></select></label>
       <button id="delete-reference" type="button" class="icon-btn" title="Delete picture" aria-label="Delete picture">🗑</button>
       <span id="reference-empty" class="element-list-empty">No picture</span>
-      <select id="reference-add-kind" class="element-list-add-kind" aria-label="Add a picture">
-        <option value="address" id="reference-add-address">From an address</option>
-        <option value="file" id="reference-add-file-option">From a file</option>
-        <option value="street" id="reference-add-street">Street-level pictures nearby</option>
-      </select>
       <button id="add-reference" type="button" class="icon-btn element-list-add" title="Add a picture" aria-label="Add a picture">+</button>
     </div>
     <!-- Street-level pictures somebody took near the observer's spot — see PanoramaxPictures. Each
