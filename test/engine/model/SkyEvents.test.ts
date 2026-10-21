@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { SkyEvents } from "../../../src/engine/model/SkyEvents.js"
 import type { InterpretationJson } from "../../../src/engine/interpretation/Interpretation.js"
-import { readFileSync } from "node:fs"
+import { Sighting } from "../../../src/engine/model/Sighting.js"
 import { fromSightingJson, toSightingJson } from "../../../src/engine/persistence/sightingJson.js"
 
 const beam = { id: "b", path: [{ lat: 48, lng: 2, altitudeM: 100 }, { lat: 48.1, lng: 2.1, altitudeM: 80 }], wavelengthNm: 532, powerW: 10 }
@@ -25,8 +25,8 @@ describe("SkyEvents", () => {
   })
 
   test("is read from a recording and written back under skyEvents, never in the interpretation", () => {
-    const minimal = JSON.parse(readFileSync("public/demo-data/example-minimal.json", "utf8"))
-    const sighting = fromSightingJson({ ...minimal, interpretation: { bodies: [], launches: [launch] } })
+    const minimal = toSightingJson(Sighting.create(undefined, [{ lat: 48, lng: 2 }]))
+    const sighting = fromSightingJson({ ...minimal, interpretation: { bodies: [], launches: [launch] } as unknown as InterpretationJson })
     expect(sighting.interpretation).toBeUndefined()
     expect(sighting.skyEvents).toEqual({ launches: [launch] })
     const written = toSightingJson(sighting)
