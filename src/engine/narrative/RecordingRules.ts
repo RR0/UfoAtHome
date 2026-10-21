@@ -194,7 +194,10 @@ export class RecordingRules {
    A walk is a series of poses; a head turned towards the phenomenon is two poses a fraction of a
    second apart, the second where the look comes to rest: the player gives the turn its ease and the
    small swing past and back that ends a human look, so state no extra keyframe for them. An observer who follows a moving phenomenon looks 0.15 to 0.2 s behind it, so keep
-   the gaze on the same path, sampled as densely, or it leaves the field. \`instrument\` is "eye" unless a camera was used.`
+   the gaze on the same path, sampled as densely, or it leaves the field. A recording made to show something (a sky test, a
+   demonstration) and not to replay an account never holds still: from one keyframe to the next the look keeps moving, a slow pan
+   along what is shown, a drift up or down, a few steps, and no stretch of more than about 3 s is the same view (a still view is a
+   photograph, not a replay); an observer's own account keeps the stillness it states. \`instrument\` is "eye" unless a camera was used.`
     },
     {
       draft: `\`account\` is about the OBSERVERS and how their account travelled, not about the phenomenon.

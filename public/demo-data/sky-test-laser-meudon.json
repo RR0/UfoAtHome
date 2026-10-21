@@ -80,96 +80,96 @@
      "lng": 2.233,
      "elevationM": 0,
      "fovDeg": 30,
-     "headingDeg": 62,
-     "pitchDeg": 4
+     "headingDeg": 68,
+     "pitchDeg": 3
     }
    },
    {
-    "t": 10000,
+    "t": 8000,
     "pose": {
      "lat": 48.8054,
      "lng": 2.233,
      "elevationM": 0,
      "fovDeg": 30,
-     "headingDeg": 62,
-     "pitchDeg": 4
+     "headingDeg": 52,
+     "pitchDeg": 8
     }
    },
    {
-    "t": 20000,
+    "t": 16000,
     "pose": {
      "lat": 48.8054,
      "lng": 2.233,
      "elevationM": 0,
      "fovDeg": 30,
-     "headingDeg": 20,
+     "headingDeg": 22,
+     "pitchDeg": 20
+    }
+   },
+   {
+    "t": 24000,
+    "pose": {
+     "lat": 48.8054,
+     "lng": 2.233,
+     "elevationM": 0,
+     "fovDeg": 30,
+     "headingDeg": 340,
+     "pitchDeg": 36
+    }
+   },
+   {
+    "t": 32000,
+    "pose": {
+     "lat": 48.8054,
+     "lng": 2.233,
+     "elevationM": 0,
+     "fovDeg": 30,
+     "headingDeg": 292,
      "pitchDeg": 22
     }
    },
    {
-    "t": 28000,
+    "t": 40000,
     "pose": {
      "lat": 48.8054,
      "lng": 2.233,
      "elevationM": 0,
      "fovDeg": 30,
-     "headingDeg": 337,
-     "pitchDeg": 38
+     "headingDeg": 258,
+     "pitchDeg": 8
     }
    },
    {
-    "t": 36000,
+    "t": 58000,
     "pose": {
-     "lat": 48.8054,
-     "lng": 2.233,
+     "lat": 48.80557,
+     "lng": 2.2324,
      "elevationM": 0,
      "fovDeg": 30,
-     "headingDeg": 290,
-     "pitchDeg": 22
+     "headingDeg": 236,
+     "pitchDeg": 10
     }
    },
    {
-    "t": 44000,
-    "pose": {
-     "lat": 48.8054,
-     "lng": 2.233,
-     "elevationM": 0,
-     "fovDeg": 30,
-     "headingDeg": 255,
-     "pitchDeg": 7
-    }
-   },
-   {
-    "t": 50000,
-    "pose": {
-     "lat": 48.8054,
-     "lng": 2.233,
-     "elevationM": 0,
-     "fovDeg": 30,
-     "headingDeg": 255,
-     "pitchDeg": 7
-    }
-   },
-   {
-    "t": 72000,
+    "t": 74000,
     "pose": {
      "lat": 48.8056,
      "lng": 2.2318,
      "elevationM": 0,
      "fovDeg": 30,
-     "headingDeg": 221,
-     "pitchDeg": 10
+     "headingDeg": 224,
+     "pitchDeg": 11
     }
    },
    {
     "t": 90000,
     "pose": {
-     "lat": 48.8056,
-     "lng": 2.2318,
+     "lat": 48.80548,
+     "lng": 2.23164,
      "elevationM": 0,
      "fovDeg": 30,
-     "headingDeg": 221,
-     "pitchDeg": 10
+     "headingDeg": 217,
+     "pitchDeg": 13
     }
    }
   ]
