@@ -83,6 +83,8 @@ import type { StatedRoad } from "../engine/model/Road.js"
 import type { InvestigatorTrace } from "../engine/model/Trace.js"
 import type { TraceSystem } from "./TraceSystem.js"
 import type { ContrailSystem } from "./ContrailSystem.js"
+import type { BeamSystem } from "./BeamSystem.js"
+import type { BeamJson } from "../engine/interpretation/LaserBeam.js"
 import type { ContrailTrail } from "../engine/traffic/AircraftContrails.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
 import { DEFAULT_CLOUD_BASE_M, DEFAULT_ICE_CRYSTAL_ALIGNMENT, DEFAULT_WEATHER } from "../engine/model/Weather.js"
@@ -1099,6 +1101,10 @@ export class SceneRenderer {
   private contrails: readonly ContrailTrail[] = []
   private contrailSystem?: ContrailSystem
   private contrailSystemLoading?: Promise<void>
+  /** The beams of light an interpretation claims — see setBeams. */
+  private beams: readonly BeamJson[] = []
+  private beamSystem?: BeamSystem
+  private beamSystemLoading?: Promise<void>
   /** Where the Sun stands for each trail, by the id of its aircraft — see setContrailSunlight. */
   private contrailSunlight: ReadonlyMap<string, DecorSunlight> = new Map()
   /** The Sun's beam on the ground the scene stands on, per channel, in the units of its lights: what the scene's own
@@ -2467,6 +2473,51 @@ export class SceneRenderer {
 
   private static readonly CONTRAIL_SCATTERING = 1 / (4 * Math.PI)
 
+  /**
+   * Draws the beams of light an interpretation claims (see BeamJson): a laser shot across a city, a searchlight. Cheap to call at every tick, as
+   * setContrails; the code that draws them is loaded only when there is a beam to draw.
+   */
+  setBeams(beams: readonly BeamJson[]): void {
+    if (beams === this.beams) return
+    this.beams = beams
+    if (beams.length === 0 && !this.beamSystem) return
+    void this.loadBeamSystem().then(() => {
+      this.updateBeams()
+      this.render()
+    })
+  }
+
+  /** How many stretches of beam are drawn — see setBeams. */
+  get beamSegmentCount(): number {
+    return this.beamSystem?.segmentCount ?? 0
+  }
+
+  private loadBeamSystem(): Promise<void> {
+    return this.beamSystemLoading ??= import("./BeamSystem.js").then(({ BeamSystem }) => {
+      const system = new BeamSystem()
+      this.scene.add(system.group)
+      this.beamSystem = system
+    })
+  }
+
+  /** Builds the beams as they are at the instant the decor was last placed at, seen from where the eye is now. */
+  private updateBeams(): void {
+    const reference = this.decorReferencePose
+    if (!this.beamSystem || reference?.lat === undefined || reference.lng === undefined) return
+    this.beamSystem.update(this.beams, this.decorTime, {
+      reference: { lat: reference.lat, lng: reference.lng },
+      origin: this.bodyOrigin,
+      eastScale: this.bodyEastScale,
+      siteElevationM: this.siteElevationM,
+      eye: this.camera.position,
+      pixelRad: this.contrailPixelRad(),
+      relativeScale: this.relativeScale,
+      air: this.air,
+      transmittanceTo: (x, y, z) => this.transmittanceTo(x, y, z),
+      groundYAt: (x, z) => this.groundYUnder(x, z)
+    })
+  }
+
   /** Builds the trails as they stand at the instant the decor was last placed at. */
   private updateContrails(): void {
     this.contrailSystem?.update(this.decorTime, { origin: this.bodyOrigin, eye: this.camera.position, pixelRad: this.contrailPixelRad() }, id => this.contrailTint(id))
@@ -2918,6 +2969,7 @@ export class SceneRenderer {
       if (seatGroup) this.camera.position.y = seatGroup.position.y + seatEyeY
     }
     this.updateContrails()
+    this.updateBeams()
     // Decor used to be local scenery, a couple of hundred meters out at most, so a far plane sized
     // for the sky and the ground was always enough. An aircraft is 5 to 10 km away, and would be
     // clipped away entirely. Widened here rather than in setObserverPose because a moving object's
@@ -3534,6 +3586,7 @@ export class SceneRenderer {
       // bright, and the eye measured on it adapted to a sky of three million candela.
       this.buildIceHalos(astronomy.sun, astronomy.moon)
       this.buildRainbow(astronomy.sun, astronomy.moon)
+      this.updateBeams()
     }
     const sky = this.scatteredSky?.ambient ?? SceneRenderer.relativeSkyOf(skyColorsForAltitude(astronomy.sun.altitudeDeg), this.relativeScale)
     const skyColors = sky
@@ -5915,6 +5968,9 @@ export class SceneRenderer {
     this.traceSystem?.dispose()
     this.contrailSystem?.dispose()
     this.contrailSystem = undefined
+    this.beamSystem?.dispose()
+    this.beamSystem = undefined
+    this.beamSystemLoading = undefined
     this.disposeCloudSystem()
     this.disposeCirrus()
     this.disposePrecipitationPoints()

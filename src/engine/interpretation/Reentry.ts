@@ -227,7 +227,7 @@ export class ReentrySighting {
   }
 
   /** Earth-centred, Earth-fixed coordinates of a point, metres. */
-  private static ecef(point: GeoPoint): [number, number, number] {
+  static ecef(point: GeoPoint): [number, number, number] {
     const lat = point.lat * ReentrySighting.DEG
     const lng = point.lng * ReentrySighting.DEG
     const sinLat = Math.sin(lat)

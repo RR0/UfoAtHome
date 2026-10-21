@@ -481,6 +481,17 @@ export class DemoCatalogue {
             es: "Hoboken, 25 de agosto de 2026 a las 05:39: el escape de un Falcon 9 lanzado desde Florida seis minutos antes, iluminado por un Sol que aún no ha salido para el suelo, extendiéndose en campana. La sombra de la Tierra, la luz y la expansión se calculan.",
             it: "Hoboken, 25 agosto 2026 alle 05:39: lo scarico di un Falcon 9 lanciato dalla Florida sei minuti prima, illuminato da un Sole non ancora sorto per il suolo, che si allarga a campana. L'ombra della Terra, la luce e l'espansione sono calcolate."
           }
+        },
+        {
+          id: "laser-meudon",
+          src: "/demo-data/sky-test-laser-meudon.json",
+          title: { en: "A laser beam", fr: "Un faisceau laser", es: "Un haz láser", it: "Un fascio laser" },
+          blurb: {
+            en: "Meudon, 9 October 2026: the 10 W green laser the Paris Observatory shot from its dome of Meudon to its dome of Paris, 8.5 km over the city. What the air scatters of it towards the eye, metre by metre, is computed.",
+            fr: "Meudon, 9 octobre 2026 : le laser vert de 10 W que l'Observatoire de Paris a tiré de sa coupole de Meudon à sa coupole de Paris, 8,5 km au-dessus de la ville. Ce que l'air en diffuse vers l'œil, mètre par mètre, est calculé.",
+            es: "Meudon, 9 de octubre de 2026: el láser verde de 10 W que el Observatorio de París disparó desde su cúpula de Meudon a su cúpula de París, 8,5 km sobre la ciudad. Lo que el aire difunde de él hacia el ojo, metro a metro, se calcula.",
+            it: "Meudon, 9 ottobre 2026: il laser verde da 10 W che l'Osservatorio di Parigi sparò dalla sua cupola di Meudon a quella di Parigi, 8,5 km sopra la città. Ciò che l'aria ne diffonde verso l'occhio, metro per metro, è calcolato."
+          }
         }
       ]
     },

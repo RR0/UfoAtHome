@@ -101,6 +101,7 @@ import type { AircraftModel } from "../engine/traffic/AircraftModels.js"
 import type { AircraftDescription, AircraftPoint, AircraftTrack } from "../engine/traffic/AircraftProvider.js"
 import type { TrafficInfo } from "../engine/traffic/TrafficInfo.js"
 import type { ContrailTrail } from "../engine/traffic/AircraftContrails.js"
+import type { BeamJson } from "../engine/interpretation/LaserBeam.js"
 import type { UpperAirProvider, UpperAirSample, UpperAirSource } from "../engine/traffic/UpperAirProvider.js"
 import { TrafficIds } from "../engine/traffic/TrafficIds.js"
 import type { TrafficDecorSet } from "../engine/traffic/TrafficDecor.js"
@@ -410,6 +411,7 @@ export class SceneElement extends HTMLElement {
   /** How far before a recording the record of air traffic is asked for: the time the sound of an aircraft a hundred kilometres off takes to arrive, near enough. */
   private static readonly SOUND_LOOKBACK_MS = 300_000
   private static readonly NO_CONTRAILS: readonly ContrailTrail[] = []
+  private static readonly NO_BEAMS: readonly BeamJson[] = []
   private static readonly upperAirProviders = new Map<string, UpperAirProvider>()
   private static readonly NO_PRESENCE: ReadonlyMap<string, { fromMs: number; untilMs: number }> = new Map()
   /** Where the air traffic is read from — see AircraftProvider. The editor's picker changes it. */
@@ -1772,6 +1774,8 @@ export class SceneElement extends HTMLElement {
     this.ensureFireballs(startDate)
     const burning = [...(this.interpretationShown?.reentries ?? []), ...(this.fireballs?.reentries ?? [])]
     this.sceneRenderer.setReentries(burning.length === 0 ? [] : ReentrySighting.viewsAt(burning, t, { lat, lng, heightM: observer.elevationM }))
+    // The beams it claims: placed and lit by the renderer, which knows where its scene stands and what its air is.
+    this.sceneRenderer.setBeams(this.interpretationShown?.beams ?? SceneElement.NO_BEAMS)
     // The plumes of the launches it claims: lit by the Sun at the real date and hour, so with no date there is no light to put on them.
     const launches = this.interpretationShown?.launches ?? []
     this.sceneRenderer.setLaunchPlumes(launches.length === 0 || !startDate ? []

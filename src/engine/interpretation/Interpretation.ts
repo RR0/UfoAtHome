@@ -1,6 +1,7 @@
 import type { DecorModelRef } from "../model/Decor.js"
 import type { People } from "../model/People.js"
 import type { SaidText } from "../model/SaidText.js"
+import type { BeamJson } from "./LaserBeam.js"
 import type { LaunchJson } from "./LaunchPlume.js"
 import type { ReentryJson } from "./Reentry.js"
 
@@ -35,6 +36,8 @@ export interface InterpretationJson {
   reentries?: ReentryJson[]
   /** Rocket launches whose exhaust it claims was seen, lit by a Sun the ground no longer sees — see LaunchJson. */
   launches?: LaunchJson[]
+  /** Beams of light sent through the air from the ground — a laser, a searchlight — that it claims were seen: see BeamJson. */
+  beams?: BeamJson[]
 }
 
 /**
@@ -90,6 +93,7 @@ export interface InterpretationEventJson {
   smoke?: SmokeSource[]
   reentries?: ReentryJson[]
   launches?: LaunchJson[]
+  beams?: BeamJson[]
 }
 
 /** The shapes this project builds itself. "figure" is a standing human silhouette — the decor's own

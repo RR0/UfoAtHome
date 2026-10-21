@@ -575,7 +575,7 @@ export class BodyEditor {
     // An interpretation left with no body and no title says nothing, and is not kept as an empty
     // statement.
     const empty = interpretation.bodies.length === 0 && interpretation.title === undefined && interpretation.smoke === undefined &&
-      interpretation.reentries === undefined && interpretation.launches === undefined
+      interpretation.reentries === undefined && interpretation.launches === undefined && interpretation.beams === undefined
     this.host.sighting().interpretation = empty ? undefined : interpretation
     this.host.changed()
     if (refill) {

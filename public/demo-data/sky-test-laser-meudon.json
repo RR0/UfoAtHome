@@ -1,0 +1,171 @@
+{
+ "version": 1,
+ "id": "sky-test-laser-meudon",
+ "summaryTime": 30,
+ "tags": [
+  "laser",
+  "light beam",
+  "speed of light",
+  "Paris Observatory",
+  "Meudon"
+ ],
+ "description": {
+  "en": "A test sky for a beam of light: the shot of 9 October 2026, when the Paris Observatory sent a 10 W green laser (532 nm, pulsed) from the dome of Meudon to the dome of Paris and back, 17 km in 57 microseconds, for the 350 years of Rømer's finite speed of light. Seen from the park of the Meudon observatory, towards Paris. Not an observer's account: the beam as physics makes it, a straight line through space whose light is only what the air scatters of it towards the eye, much brighter where it passes overhead than where it goes off to the horizon. The emitter's height on the building, the beam's spread, the hour and the clouds are assumed from the photographs; its ends, power and colour are those the Observatory gave.",
+  "fr": "Un ciel d'essai pour un faisceau de lumière : le tir du 9 octobre 2026, quand l'Observatoire de Paris a envoyé un laser vert de 10 W (532 nm, pulsé) de la coupole de Meudon à celle de Paris et retour, 17 km en 57 microsecondes, pour les 350 ans de la vitesse finie de la lumière de Rømer. Vu du parc de l'observatoire de Meudon, vers Paris. Ce n'est pas le compte rendu d'un observateur : c'est le faisceau tel que la physique le fait, une droite à travers l'espace dont on ne voit que ce que l'air en diffuse vers l'œil, bien plus vif là où il passe au-dessus de soi que là où il s'en va vers l'horizon. La hauteur de l'émetteur sur le bâtiment, l'ouverture du faisceau, l'heure et les nuages sont supposés d'après les photographies ; ses extrémités, sa puissance et sa couleur sont celles que l'Observatoire a données.",
+  "es": "Un cielo de prueba para un haz de luz: el disparo del 9 de octubre de 2026, cuando el Observatorio de París envió un láser verde de 10 W (532 nm, pulsado) de la cúpula de Meudon a la de París y de vuelta, 17 km en 57 microsegundos, por los 350 años de la velocidad finita de la luz de Rømer. Visto desde el parque del observatorio de Meudon, hacia París. No es el relato de un observador: es el haz tal como lo hace la física, una recta a través del espacio de la que solo se ve lo que el aire difunde hacia el ojo, mucho más vivo donde pasa por encima que donde se aleja hacia el horizonte. La altura del emisor en el edificio, la apertura del haz, la hora y las nubes se suponen a partir de las fotografías; sus extremos, potencia y color son los que dio el Observatorio.",
+  "it": "Un cielo di prova per un fascio di luce: il tiro del 9 ottobre 2026, quando l'Osservatorio di Parigi inviò un laser verde da 10 W (532 nm, pulsato) dalla cupola di Meudon a quella di Parigi e ritorno, 17 km in 57 microsecondi, per i 350 anni della velocità finita della luce di Rømer. Visto dal parco dell'osservatorio di Meudon, verso Parigi. Non è il resoconto di un osservatore: è il fascio come lo fa la fisica, una retta nello spazio di cui si vede solo ciò che l'aria ne diffonde verso l'occhio, molto più vivo dove passa sopra la testa che dove si allontana verso l'orizzonte. L'altezza dell'emettitore sull'edificio, l'apertura del fascio, l'ora e le nuvole sono supposte dalle fotografie; le estremità, la potenza e il colore sono quelli forniti dall'Osservatorio."
+ },
+ "time": {
+  "year": 2026,
+  "month": 10,
+  "day": 9,
+  "hour": 21,
+  "minute": 0,
+  "second": 0
+ },
+ "utcOffsetHours": 2,
+ "durationSeconds": 60,
+ "place": [
+  {
+   "lat": 48.8054,
+   "lng": 2.233,
+   "name": "Observatoire de Meudon"
+  }
+ ],
+ "weatherTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "weather": {
+     "cloudCover": {
+      "value": 0.9,
+      "basis": "assumed",
+      "rationale": "The photograph taken from Meudon towards Paris shows a low overcast lit from below by the city, broken in places."
+     },
+     "cloudDarkness": 0.3,
+     "cloudBaseM": {
+      "value": 1200,
+      "basis": "assumed",
+      "rationale": "A low deck, as the photograph shows it lit by the city."
+     },
+     "lowerCloudCover": 0.9,
+     "highCloudCover": 0,
+     "precipitationType": "none",
+     "precipitationIntensity": 0,
+     "windDirectionDeg": 0,
+     "windSpeed": 0,
+     "storm": false
+    }
+   }
+  ]
+ },
+ "timeline": {
+  "keyframes": [
+   {
+    "t": 0,
+    "shapes": []
+   }
+  ],
+  "order": [],
+  "groups": []
+ },
+ "observerTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "pose": {
+     "lat": 48.8054,
+     "lng": 2.233,
+     "elevationM": 0,
+     "headingDeg": 52,
+     "pitchDeg": 4,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 20000,
+    "pose": {
+     "lat": 48.8054,
+     "lng": 2.233,
+     "elevationM": 0,
+     "headingDeg": 30,
+     "pitchDeg": 25,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 40000,
+    "pose": {
+     "lat": 48.8054,
+     "lng": 2.233,
+     "elevationM": 0,
+     "headingDeg": 60,
+     "pitchDeg": 3,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 60000,
+    "pose": {
+     "lat": 48.8054,
+     "lng": 2.233,
+     "elevationM": 0,
+     "headingDeg": 60,
+     "pitchDeg": 3,
+     "fovDeg": 60
+    }
+   }
+  ]
+ },
+ "soundTrack": {
+  "keyframes": []
+ },
+ "decor": [],
+ "interpretation": {
+  "title": {
+   "en": "Laser shot from Meudon to Paris",
+   "fr": "Tir laser de Meudon à Paris",
+   "es": "Disparo láser de Meudon a París",
+   "it": "Tiro laser da Meudon a Parigi"
+  },
+  "bodies": [],
+  "beams": [
+   {
+    "id": "meudon-paris",
+    "title": {
+     "en": "Laser shot from Meudon to Paris",
+     "fr": "Tir laser de Meudon à Paris",
+     "es": "Disparo láser de Meudon a París",
+     "it": "Tiro laser da Meudon a Parigi"
+    },
+    "path": [
+     {
+      "lat": 48.805,
+      "lng": 2.23105,
+      "altitudeM": {
+       "value": 172,
+       "basis": "assumed",
+       "rationale": "The Observatory says the beam left the dome of Meudon; the photograph of the building shows it leaving the front a dozen metres above the ground, which is at 160 m (IGN RGE ALTI)."
+      }
+     },
+     {
+      "lat": 48.83632,
+      "lng": 2.33702,
+      "altitudeM": {
+       "value": 88,
+       "basis": "assumed",
+       "rationale": "The Arago dome stands on the roof of the Perrault building, some 25 m above the ground of the Paris Observatory, which is at 63 m (IGN RGE ALTI)."
+      }
+     }
+    ],
+    "wavelengthNm": 532,
+    "powerW": 10,
+    "divergenceMrad": {
+     "value": 0.1,
+     "basis": "assumed",
+     "rationale": "Not given: a beam meant to reach a dome 8.5 km away is expanded to spread little, and 0.1 mrad makes it 0.85 m wide there."
+    }
+   }
+  ]
+ }
+}

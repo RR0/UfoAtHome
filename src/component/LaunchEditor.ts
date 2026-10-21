@@ -271,7 +271,7 @@ export class LaunchEditor {
     const launches = this.launches.filter(other => other !== launch)
     const next: InterpretationJson = { ...interpretation, launches: launches.length === 0 ? undefined : launches }
     if (launches.length === 0) delete next.launches
-    const empty = next.bodies.length === 0 && next.title === undefined && next.smoke === undefined && next.reentries === undefined && next.launches === undefined
+    const empty = next.bodies.length === 0 && next.title === undefined && next.smoke === undefined && next.reentries === undefined && next.launches === undefined && next.beams === undefined
     this.host.sighting().interpretation = empty ? undefined : next
     this.host.changed()
     this.sync()
