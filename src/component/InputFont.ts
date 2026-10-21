@@ -37,5 +37,8 @@ input, textarea, select, .rr0-select { font-size: var(--rr0-input-font-size, 13p
   cursor: pointer;
 }
 :is(${InputFont.PICKER}):disabled { opacity: .55; cursor: default; }
+/* A group of fields framed as a list's frame is (see ElementList.CSS), never lighter than the borders round it: the browser's own is a
+   2 px groove, paler on a dark panel than the fields it holds. A fieldset of no border keeps none (its own rule is the more specific). */
+fieldset { border: 1px solid color-mix(in srgb, CanvasText 30%, transparent); border-radius: 4px; }
 `
 }
