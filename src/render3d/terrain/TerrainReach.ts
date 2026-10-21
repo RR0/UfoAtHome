@@ -1,4 +1,5 @@
 import type { DecorObject } from "../../engine/model/Decor.js"
+import type { BeamJson } from "../../engine/interpretation/LaserBeam.js"
 import { geoToLocalMeters } from "./GeoProjection.js"
 
 /**
@@ -66,5 +67,23 @@ export class TerrainReach {
     // The patch is whole to 700 of its 900 and fades to nothing at the rim: what must stand on whole ground is inside the first.
     const needed = Math.ceil(reach / TerrainReach.PATCH_WHOLE_SHARE / 100) * 100
     return needed > TerrainReach.GROUND_RADIUS_M * TerrainReach.PATCH_WHOLE_SHARE ? Math.min(needed, TerrainReach.MAX_DECOR_TERRAIN_M) : 0
+  }
+
+  /**
+   * How wide the patch of real ground has to be for the beams of light a recording claims (see BeamJson): out to the farthest point of their
+   * paths from `centre`, and at most what air lets anyone see. A beam shot from a hill across a valley to a city 8 km off went into the flat
+   * disc 2 km out, which ended the ground at the observer's own height, where the valley and the city are a hundred metres lower: it seemed to
+   * fall into a sea. Whether the observer moves or not, since a beam is where it is.
+   */
+  static beamReachFor(beams: readonly BeamJson[], centre: { lat: number; lng: number }): number {
+    let reach = 0
+    for (const beam of beams) {
+      for (const point of beam.path) {
+        const offset = geoToLocalMeters(point.lat, point.lng, centre.lat, centre.lng)
+        reach = Math.max(reach, Math.hypot(offset.x, offset.z))
+      }
+    }
+    const needed = Math.ceil(reach / TerrainReach.PATCH_WHOLE_SHARE / 100) * 100
+    return needed > TerrainReach.GROUND_RADIUS_M * TerrainReach.PATCH_WHOLE_SHARE ? Math.min(needed, TerrainReach.MAX_GROUND_VISIBILITY_M) : 0
   }
 }

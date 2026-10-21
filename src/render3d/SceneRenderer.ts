@@ -1746,7 +1746,7 @@ export class SceneRenderer {
     // which is exactly right: from up there you see more ground, in less detail.
     // The ground disc, the sky and the haze keep the radius of the observer's reach; the patch of real ground may be wider where a still observer has scenery out
     // beyond it (see terrainReachFor), so that what stands there stands on the relief and not on the flat disc.
-    const radiusM = frozenRadiusM ?? Math.max(this.groundRadius, this.decorTerrainRadiusM)
+    const radiusM = frozenRadiusM ?? Math.max(this.groundRadius, this.decorTerrainRadiusM, TerrainReach.beamReachFor(this.beams, { lat, lng }))
     if (this.terrainOrigin && Math.abs(this.terrainRadius - radiusM) < radiusM * 0.1) {
       const { x, z } = geoToLocalMeters(lat, lng, this.terrainOrigin.lat, this.terrainOrigin.lng)
       // Scaled to the patch itself: 150 m matters for a 900 m patch and is meaningless for a 30 km one.
@@ -2480,6 +2480,8 @@ export class SceneRenderer {
   setBeams(beams: readonly BeamJson[]): void {
     if (beams === this.beams) return
     this.beams = beams
+    // The ground has to reach as far as they go (see TerrainReach.beamReachFor): the patch on screen is rebuilt wider if it does not.
+    if (this.terrainOrigin) this.setTerrainOrigin(this.terrainOrigin.lat, this.terrainOrigin.lng)
     if (beams.length === 0 && !this.beamSystem) return
     void this.loadBeamSystem().then(() => {
       this.updateBeams()

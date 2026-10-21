@@ -67,7 +67,7 @@ export class TerrainFreezer {
     for (let t = 0; ; t = Math.min(endMs, t + TerrainFreezer.STEP_MS)) {
       const pose = resolveObserverPoseAt(sighting, t)
       if (pose?.lat !== undefined && pose.lng !== undefined) {
-        const radiusM = Math.max(TerrainReach.groundRadiusFor(pose.elevationM ?? 0), reachM)
+        const radiusM = Math.max(TerrainReach.groundRadiusFor(pose.elevationM ?? 0), reachM, TerrainReach.beamReachFor(sighting.interpretation?.beams ?? [], { lat: pose.lat, lng: pose.lng }))
         if (!current || !serves(current, pose.lat, pose.lng, radiusM)) {
           current = patches.find(patch => serves(patch, pose.lat!, pose.lng!, radiusM))
           if (!current) patches.push(current = { lat: pose.lat, lng: pose.lng, radiusM })
