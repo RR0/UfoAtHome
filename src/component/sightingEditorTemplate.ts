@@ -355,20 +355,14 @@ export const html = `
            that night — but they say it in prose, and the sky line runs to 575 characters on a night
            with cirrus in it. Left to flow, the two of them were most of this group's height: 550px
            of it on a phone, where the render then no longer fitted under the panel at all. -->
-      <output id="weather-source" class="weather-source clamped" for="lat lng obs-time"><span id="weather-source-text"></span><span id="weather-source-row" class="inline-source" hidden></span><a id="weather-source-link" target="_blank" rel="noopener noreferrer" hidden></a></output>
+      <output id="weather-source" class="weather-source" for="lat lng obs-time"><span id="weather-source-text"></span><span id="weather-source-row" class="inline-source" hidden></span><a id="weather-source-link" target="_blank" rel="noopener noreferrer" hidden></a></output>
     </div>
     <!-- Not account either, and not even a lookup: a meteor shower is a position in the Earth's
          own orbit and a comet's orbit is a solved problem, so the date and the place alone decide
          both. Read-only on purpose — it states what else was in that patch of sky, and whether that
          explains anything is the reader's conclusion, never the file's claim. See MeteorShowers.ts
          and Comets.ts. -->
-    <output id="sky-candidates" class="weather-source clamped" for="lat lng obs-time"></output>
-    <!-- One button for both lines rather than one each: they are the same kind of statement (what
-         the records say about that sky) and they sit together, so two separate disclosures would
-         be more chrome than the sentences they hide. Nothing is ever hidden outright — clamped,
-         each line still shows its opening clause, which is the part that says whether there is
-         anything to expand for. -->
-    <button id="sky-details" type="button" class="icon-btn" aria-expanded="false">&#9662;</button>
+    <output id="sky-candidates" class="weather-source" for="lat lng obs-time"></output>
     <!-- A shooting star for the meteor and a comet for the comet. The meteor button used to carry
          the comet glyph, which was only ever unambiguous while there was nothing else up there. -->
     <button id="show-meteor" type="button" class="icon-btn" title="Show me one" aria-label="Show me one" hidden>🌠</button>
@@ -1005,16 +999,11 @@ input.invalid {
 /* Says which record the locked fields came from, and when for — quieter than the fields it
    explains, same role and styling as .apparent-size. The link goes to the exact request that
    produced them, so the claim stays checkable rather than just asserted. */
-/* min-width:0 as well as the clamp itself: a flex item refuses to shrink below its own content by
-   default, so an unbreakable 575-character line would simply widen the row and take the ellipsis
-   off-screen with it instead of ever being cut. */
-.weather-source.clamped {
+/* Each said whole, as the information it is (see MessageStyle), on as many lines as it takes. */
+.weather-source {
   display: block;
   min-width: 0;
-  flex: 1 1 12em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1 1 100%;
 }
 /* Every link this widget draws — the geocoder's attribution, the weather record's, the account
    reader's. Takes the host page's own text color rather than its link color: this widget has no
@@ -1154,7 +1143,7 @@ select.weather-field:disabled {
   border: 1px solid transparent; border-radius: 4px; background: none; color: inherit; opacity: .7; cursor: pointer;
 }
 .group-panel > .group-settings:hover, .group-panel > .group-settings:focus-visible { opacity: 1; border-color: color-mix(in srgb, CanvasText 35%, transparent); }
-.group-panel:has(> .group-settings) > .toolbar:first-of-type { padding-right: 32px; }
+.group-panel:has(> .group-settings) > .toolbar { padding-right: 32px; }
 .group-settings-panel {
   padding: .6em .8em; border: 1px solid color-mix(in srgb, CanvasText 30%, transparent); border-radius: 4px;
   background: Canvas; color: CanvasText; box-shadow: 0 2px 8px rgba(0, 0, 0, .25); max-width: min(32em, 92vw);
@@ -1722,7 +1711,7 @@ select.weather-field:disabled {
   background: light-dark(#eef, #3a3d46);
 }
 ${MessageStyle.rules(
-  ["#scenery-status", ".apparent-size", ".place-status", ".ground-elevation", ".weather-source", ".file-note", ".frozen-note", ".frozen-group-state", "#observer-identity-hint", "#narrative-status", "#cloud-status", "#body-key-note", "#body-editor .body-intro", ".launch-intro"],
+  ["#scenery-status", ".apparent-size", ".place-status", ".ground-elevation", ".weather-source", ".file-note", ".frozen-note", ".frozen-group-state", "#observer-identity-hint", "#narrative-status", "#cloud-status", "#body-key-note", "#body-editor .body-intro", ".launch-intro", ".cloud-panel > p", ".cloud-panel details > p"],
   [".scenery-warning"],
   ["#narrative-status.error"]
 )}

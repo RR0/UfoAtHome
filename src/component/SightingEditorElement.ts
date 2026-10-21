@@ -691,10 +691,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelLocationGroup: HTMLElement
   private readonly labelObservationGroup: HTMLElement
   private readonly labelObserverGroup: HTMLElement
-  private readonly skyDetailsButton: HTMLButtonElement
-  /** The two prose lines the button unclamps: which record answered, and what else was in that
-   * patch of sky. */
-  private readonly clampedLines: HTMLElement[]
   private readonly labelWeatherGroup: HTMLElement
   private readonly labelCloudCover: HTMLElement
   private readonly labelHighCloud: HTMLElement
@@ -1892,9 +1888,6 @@ export class SightingEditorElement extends HTMLElement {
     this.weatherProviderSelect.addEventListener("change", () => this.onWeatherProviderChosen())
     this.weatherFileLink.addEventListener("click", () => this.openFileItem("weather"))
 
-    this.skyDetailsButton = this.shadow.getElementById("sky-details") as HTMLButtonElement
-    this.clampedLines = [this.shadow.getElementById("weather-source")!, this.shadow.getElementById("sky-candidates")!]
-    this.skyDetailsButton.addEventListener("click", () => this.toggleSkyDetails())
 
     this.groupTabs = [...this.shadow.querySelectorAll<HTMLButtonElement>(".group-tab")]
     this.groupPanels = this.groupTabs.map(tab => this.shadow.getElementById(tab.getAttribute("aria-controls")!)!)
@@ -5703,19 +5696,6 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Runs everything that depends on {currentSourceId, currentTime}: resyncs the appearance
    * toolbar and drives the canvas-native selection highlight on the nested ufo element. */
-  /** Unclamps the weather-record and sky lines, or clamps them again. Both at once: they answer
-   * the same question about the same night, and a reader who wants one wants the other. */
-  private toggleSkyDetails(): void {
-    const expanded = this.skyDetailsButton.getAttribute("aria-expanded") !== "true"
-    this.skyDetailsButton.setAttribute("aria-expanded", String(expanded))
-    this.skyDetailsButton.textContent = expanded ? "\u25B4" : "\u25BE"
-    this.skyDetailsButton.title = expanded ? this.messages.skyDetailsHide : this.messages.skyDetails
-    this.skyDetailsButton.setAttribute("aria-label", this.skyDetailsButton.title)
-    for (const line of this.clampedLines) {
-      line.classList.toggle("clamped", !expanded)
-    }
-  }
-
   private isGroupOpen(tab: HTMLButtonElement): boolean {
     return tab.getAttribute("aria-expanded") === "true"
   }
@@ -9691,9 +9671,6 @@ export class SightingEditorElement extends HTMLElement {
     // check lets that happen without a diff, since every label changed.
     this.paramSummaryBuilder = new SightingSummary(messages, this.naming, this.said, this.tagNames, { messages, locale: this.language })
     this.refreshParamSummary()
-    const skyExpanded = this.skyDetailsButton.getAttribute("aria-expanded") === "true"
-    this.skyDetailsButton.title = skyExpanded ? messages.skyDetailsHide : messages.skyDetails
-    this.skyDetailsButton.setAttribute("aria-label", this.skyDetailsButton.title)
     this.labelCloudCover.textContent = messages.cloudCover
     this.labelHighCloud.textContent = messages.highCloudCover
     this.labelIceAlignment.textContent = messages.iceCrystalAlignment

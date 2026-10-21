@@ -3011,21 +3011,12 @@ describe("SightingEditorElement toolbar groups", () => {
 
   // 575 characters of prose about that night's sky, left to flow, were most of this group's
   // height — and on a phone that alone put the render back off the screen.
-  it("clamps the record and sky lines to one line each until the reader asks for the rest", () => {
+  it("says the record and sky lines whole, as information, with nothing to unfold them", () => {
     const element = mount()
     const shadow = element.shadowRoot!
     const lines = [shadow.getElementById("weather-source")!, shadow.getElementById("sky-candidates")!]
-    const toggle = shadow.getElementById("sky-details") as HTMLButtonElement
-    expect(lines.every(line => line.classList.contains("clamped"))).toBe(true)
-
-    toggle.click()
     expect(lines.some(line => line.classList.contains("clamped"))).toBe(false)
-    expect(toggle.getAttribute("aria-expanded")).toBe("true")
-    expect(toggle.title).toBe(sightingEditorMessages_en.skyDetailsHide)
-
-    toggle.click()
-    expect(lines.every(line => line.classList.contains("clamped"))).toBe(true)
-    expect(toggle.title).toBe(sightingEditorMessages_en.skyDetails)
+    expect(shadow.getElementById("sky-details")).toBeNull()
   })
 
   it("gives decor its own group instead of a fieldset inside location — the single largest thing this editor asks for", () => {

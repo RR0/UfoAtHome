@@ -63,12 +63,17 @@ export class ElementList {
 
   /** The layout of every list, put in each shadow root that shows one: the row, the frame under it, and what says there is none. */
   static readonly CSS = `
-.element-list-row { display: flex; align-items: center; flex-wrap: wrap; gap: .4em; flex: 1 1 100%; min-width: 0; }
+.element-list-row { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .4em; flex: 1 1 100%; min-width: 0; }
 .element-list-picker { flex: 1 1 10em; min-width: 0; display: flex; }
 .element-list-picker select { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
 .element-list-empty { opacity: .75; font-style: italic; }
+/* The fields of the picked element unroll from its picker: the frame starts where the picker ends, with no space between (the gap of the
+   toolbar both stand in is taken back), its corner under the picker square. The row is aligned on its bottom so that the picker's lower edge
+   is the row's, whatever the height of the buttons beside it. */
 .element-list-body { flex: 1 1 100%; min-width: 0; box-sizing: border-box; border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
-  border-radius: 6px; padding: .5em .6em; margin: .1em 0 .3em; display: flex; flex-wrap: wrap; align-items: center; gap: .5em; }
+  border-radius: 0 6px 6px 6px; padding: .5em .6em; margin: calc(-1 * var(--element-list-gap, 8px)) 0 .3em; display: flex; flex-wrap: wrap;
+  align-items: center; gap: .5em; }
+.element-list-picker select { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 .element-list-row [hidden], .element-list-body[hidden] { display: none !important; }
 ${AddMenu.CSS}`
 
