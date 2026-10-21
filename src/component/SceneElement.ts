@@ -298,7 +298,7 @@ export interface BodyReading {
  */
 /** What is under a point of the picture: what kind of thing, which one, and what it is called. */
 export interface ScenePick {
-  kind: "sky" | "body" | "decor" | "railway" | "traffic" | "satellite" | "optics" | "star"
+  kind: "sky" | "body" | "decor" | "beam" | "railway" | "traffic" | "satellite" | "optics" | "star"
   /** The sky body's key, the interpretation body's id or the decor object's id, when it has one. */
   id?: string
   name: string
@@ -523,6 +523,16 @@ export class SceneElement extends HTMLElement {
       ? this.said.read(standingBody.title) || (standingBody.model.id === "figure" ? naming.decorKind("entity", DECOR_KIND_NAMES.entity) : undefined)
       : undefined
     if (standing !== undefined && standingName) return { kind: "body", id: standing, name: standingName }
+    // A beam of light the interpretation claims, before the decor it passes in front of: thin, and found only a few pixels round its line.
+    const beamHit = this.interpretationShown?.beams?.length ? this.sceneRenderer.pickBeamAt(ndcX, ndcY) : undefined
+    const beam = beamHit ? this.interpretationShown?.beams?.find(candidate => candidate.id === beamHit.id) : undefined
+    if (beamHit && beam) {
+      const name = this.said.read(beam.title) || "Laser"
+      return {
+        kind: "beam", id: beam.id, name,
+        detail: () => `${name} (${beam.wavelengthNm} nm, ${beam.powerW.toLocaleString()} W), ${this.distanceText(beamHit.distanceM)}`
+      }
+    }
     const decorId = this.pickDecorAt(ndcX, ndcY)
     const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
     if (decor) {

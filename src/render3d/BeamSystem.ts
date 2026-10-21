@@ -67,6 +67,8 @@ export class BeamSystem {
   private readonly positions = new Float32Array(BeamSystem.MAX_SEGMENTS * BeamSystem.VERTICES_PER_SEGMENT * 3)
   private readonly colors = new Float32Array(BeamSystem.MAX_SEGMENTS * BeamSystem.VERTICES_PER_SEGMENT * 3)
   private segments = 0
+  /** The points of each beam as last drawn, in the scene, for what is under the pointer (see pickAt). */
+  private drawn: { id: string; points: Placed[] }[] = []
   /** The beams cut into points, for a place and an air: cutting them again is only needed when one of those changes. */
   private cut?: { lat: number; lng: number; air: AerialPerspective; views: Map<BeamJson, BeamView> }
 
@@ -93,9 +95,11 @@ export class BeamSystem {
     const views = this.viewsOf(beams, t, frame)
     let vertex = 0
     this.segments = 0
+    this.drawn = []
     for (const view of views) {
       const colour = LaserBeamSighting.colourOf(view.wavelengthNm)
       const placed = this.place(view, frame)
+      this.drawn.push({ id: view.id, points: placed })
       for (let i = 0; i + 1 < placed.length; i++) {
         if (this.segments >= BeamSystem.MAX_SEGMENTS) break
         const next = this.pushSegment(vertex, placed[i], placed[i + 1], view.wavelengthNm, colour, frame)
@@ -194,6 +198,36 @@ export class BeamSystem {
       }
     }
     return vertex
+  }
+
+  /**
+   * The beam a ray from the eye passes nearest, if it passes within `toleranceRad` of one, and how far along the ray: the angle a stretch of
+   * beam is missed by, measured from the eye, so that a beam a centimetre wide is found a few pixels round its line wherever it is.
+   */
+  pickAt(origin: Vector3, direction: Vector3, toleranceRad: number): { id: string; distanceM: number } | undefined {
+    let best: { id: string; distanceM: number; angle: number } | undefined
+    for (const beam of this.drawn) {
+      for (let i = 0; i + 1 < beam.points.length; i++) {
+        const a = beam.points[i]
+        const b = beam.points[i + 1]
+        // The closest points of the ray and the stretch, along each (see Eberly's segment-to-line distance).
+        const u = { x: b.x - a.x, y: b.y - a.y, z: b.z - a.z }
+        const w = { x: a.x - origin.x, y: a.y - origin.y, z: a.z - origin.z }
+        const uu = u.x * u.x + u.y * u.y + u.z * u.z
+        const ud = u.x * direction.x + u.y * direction.y + u.z * direction.z
+        const uw = u.x * w.x + u.y * w.y + u.z * w.z
+        const dw = direction.x * w.x + direction.y * w.y + direction.z * w.z
+        const denominator = uu - ud * ud
+        const s = denominator > 1e-9 ? Math.min(1, Math.max(0, (ud * dw - uw) / denominator)) : 0
+        const point = { x: a.x + u.x * s, y: a.y + u.y * s, z: a.z + u.z * s }
+        const along = (point.x - origin.x) * direction.x + (point.y - origin.y) * direction.y + (point.z - origin.z) * direction.z
+        if (along <= 0) continue
+        const off = Math.hypot(point.x - origin.x - direction.x * along, point.y - origin.y - direction.y * along, point.z - origin.z - direction.z * along)
+        const angle = Math.atan2(off, along)
+        if (angle <= toleranceRad && (!best || angle < best.angle)) best = { id: beam.id, distanceM: Math.hypot(point.x - origin.x, point.y - origin.y, point.z - origin.z), angle }
+      }
+    }
+    return best && { id: best.id, distanceM: best.distanceM }
   }
 
   private cross(a: { x: number; y: number; z: number }, b: { x: number; y: number; z: number }) {

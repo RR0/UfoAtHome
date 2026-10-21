@@ -5946,6 +5946,26 @@ export class SceneRenderer {
     return { line, distanceM: hit.distance, ...(contactM !== undefined ? { contactM } : {}) }
   }
 
+  /**
+   * The beam of light under a point of the picture (see BeamSystem.pickAt), within a few pixels of its line, and how far it is there; not one the
+   * ground or what stands on it hides.
+   */
+  pickBeamAt(ndcX: number, ndcY: number): { id: string, distanceM: number } | undefined {
+    const system = this.beamSystem
+    if (!system || system.segmentCount === 0) return undefined
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
+    const ray = this.raycaster.ray
+    const hit = system.pickAt(ray.origin, ray.direction, SceneRenderer.BEAM_PICK_PIXELS * this.contrailPixelRad())
+    if (!hit) return undefined
+    if (this.terrainMesh && this.groundBlocks(ray.origin, ray.direction, hit.distanceM - 1, UFO_OCCLUSION_MIN_DISTANCE_M)) return undefined
+    const decor = SceneRenderer.firstSolid(this.raycaster.intersectObjects([...this.decorGroups.values()], true))
+    if (decor && decor.distance < hit.distanceM) return undefined
+    return hit
+  }
+
+  /** How many pixels either side of a beam's line the pointer finds it: a line one or two pixels wide is otherwise hard to land on. */
+  private static readonly BEAM_PICK_PIXELS = 6
+
   /** How far short of a railway's hit the ground is looked for: the ballast lies a few centimetres over the ground it is laid on. */
   private static readonly RAILWAY_GROUND_MARGIN_M = 1
 
