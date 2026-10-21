@@ -72,12 +72,12 @@ export class Shots {
       }
     },
     {
-      page: "edit", after: "observer", name: "edit-observer",
+      page: "edit", after: "witness", name: "edit-observer",
       caption: {
-        en: "Observer: who looked, and with what.",
-        fr: "Observateur : qui regardait, et avec quoi.",
-        es: "Observador: quién miraba, y con qué.",
-        it: "Osservatore: chi guardava, e con cosa."
+        en: "Witness: who looked, and with what.",
+        fr: "Témoin : qui regardait, et avec quoi.",
+        es: "Testigo: quién miraba, y con qué.",
+        it: "Testimone: chi guardava, e con cosa."
       }
     },
     {
@@ -99,12 +99,12 @@ export class Shots {
       }
     },
     {
-      page: "edit", after: "moment", name: "edit-moment",
+      page: "edit", after: "date", name: "edit-moment",
       caption: {
-        en: "Moment: start, end, duration and time zone.",
-        fr: "Moment : début, fin, durée et fuseau horaire.",
-        es: "Momento: inicio, fin, duración y huso horario.",
-        it: "Momento: inizio, fine, durata e fuso orario."
+        en: "Date: start, end, duration and time zone.",
+        fr: "Date : début, fin, durée et fuseau horaire.",
+        es: "Fecha: inicio, fin, duración y huso horario.",
+        it: "Data: inizio, fine, durata e fuso orario."
       }
     },
     {
@@ -144,11 +144,11 @@ export class Shots {
       }
     },
     {
-      page: "edit", after: "file", name: "edit-file",
+      page: "edit", after: "files", name: "edit-file",
       caption: {
-        en: "File: loading a recording, or saving the one being edited.",
-        fr: "Fichier : charger un enregistrement, ou sauver celui qu'on édite.",
-        es: "Archivo: cargar un registro, o guardar el que se edita.",
+        en: "Files: loading a recording, or saving the one being edited.",
+        fr: "Fichiers : charger un enregistrement, ou sauver celui qu'on édite.",
+        es: "Archivos: cargar un registro, o guardar el que se edita.",
         it: "File: caricare una registrazione, o salvare quella che si modifica."
       }
     },
