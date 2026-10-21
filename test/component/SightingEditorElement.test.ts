@@ -230,7 +230,7 @@ const NO_RECORD_PROVIDER: WeatherProvider = { getWeather: () => Promise.resolve(
  * empty (see mountEmpty), and most of these tests are about editing a shape. */
 function mount(weatherProvider: WeatherProvider = NO_RECORD_PROVIDER): SightingEditorElement {
   const element = mountEmpty(weatherProvider)
-  ;(element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement).click()
+  ;(element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement).click()
   return element
 }
 
@@ -293,15 +293,16 @@ describe("SightingEditorElement appearance toolbar", () => {
     expect(element.appearance).toEqual({ presetId: "oval", color: "#39ff14", transparency: 0, haloScale: 1.5, blur: 0, brightness: 0 })
   })
 
-  it("clicking a preset button updates the appearance and its pressed state", () => {
+  it("asks the kind of a new shape from its \"+\", and offers no way to change it after: another kind is another shape", () => {
     const element = mount()
-    const polygonButton = element.shadowRoot!.getElementById("preset-polygon") as HTMLButtonElement
-    polygonButton.click()
-
+    const shadow = element.shadowRoot!
+    const add = shadow.getElementById("add-shape") as HTMLButtonElement
+    expect(add.getAttribute("popovertarget")).toBe("add-shape-kind")
+    ;(shadow.getElementById("add-shape-polygon") as HTMLButtonElement).click()
     expect(element.appearance.presetId).toBe("polygon")
-    expect(polygonButton.getAttribute("aria-pressed")).toBe("true")
-    const ovalButton = element.shadowRoot!.getElementById("preset-oval") as HTMLButtonElement
-    expect(ovalButton.getAttribute("aria-pressed")).toBe("false")
+    expect(element.sightingData.timeline.keyframes[0].shapes.at(-1)!.shape.kind).toBe("polygon")
+    expect(shadow.getElementById("preset-oval")).toBeNull()
+    expect(shadow.getElementById("preset-polygon")).toBeNull()
   })
 
   it("changing color/transparency/halo inputs updates the appearance", () => {
@@ -330,18 +331,18 @@ describe("SightingEditorElement appearance toolbar", () => {
   it("changing color/transparency/halo preserves a custom-edited polygon's own points — the real bug this fixes: appearance edits used to always rebuild geometry from the preset's default shape, silently discarding vertex edits", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("preset-polygon") as HTMLButtonElement).click()
+    ;(shadow.getElementById("add-shape-polygon") as HTMLButtonElement).click()
 
     // Reshape it: drag a vertex handle to a custom position (see the "polygon vertex editing"
     // describe block for the same drag mechanics, reused inline here since this test cares about
     // what happens to the RESULT after that edit, not the drag itself).
     const canvas = nestedUfo(element)!.shadowRoot!.getElementById("canvas") as HTMLCanvasElement
     canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 360 } as DOMRect)
-    const shapeBefore = element.sightingData.timeline.keyframes[0].shapes[0].shape as { bounds: { x: number; y: number } }
+    const shapeBefore = element.sightingData.timeline.keyframes[0].shapes.at(-1)!.shape as { bounds: { x: number; y: number } }
     canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: shapeBefore.bounds.x, clientY: shapeBefore.bounds.y }))
     document.dispatchEvent(new MouseEvent("pointermove", { clientX: shapeBefore.bounds.x - 15, clientY: shapeBefore.bounds.y - 10 }))
     document.dispatchEvent(new MouseEvent("pointerup", { clientX: shapeBefore.bounds.x - 15, clientY: shapeBefore.bounds.y - 10 }))
-    const reshaped = element.sightingData.timeline.keyframes[0].shapes[0].shape as { points: unknown; bounds: unknown }
+    const reshaped = element.sightingData.timeline.keyframes[0].shapes.at(-1)!.shape as { points: unknown; bounds: unknown }
     expect(reshaped.points).not.toEqual([
       { x: 0, y: 0 },
       { x: 48, y: 0 },
@@ -353,19 +354,19 @@ describe("SightingEditorElement appearance toolbar", () => {
     colorInput.value = "#ff8800"
     colorInput.dispatchEvent(new Event("input"))
 
-    const afterColorChange = element.sightingData.timeline.keyframes[0].shapes[0].shape as { kind: string; points: unknown; bounds: unknown; color: string }
+    const afterColorChange = element.sightingData.timeline.keyframes[0].shapes.at(-1)!.shape as { kind: string; points: unknown; bounds: unknown; color: string }
     expect(afterColorChange.color).toBe("#ff8800")
     expect(afterColorChange.kind).toBe("polygon")
     expect(afterColorChange.points).toEqual(reshaped.points)
     expect(afterColorChange.bounds).toEqual(reshaped.bounds)
   })
 
-  it("clicking a preset button still rebuilds geometry as before (only appearance-only edits preserve it)", () => {
+  it("adding a polygon builds its own four points (only appearance-only edits preserve an edited one)", () => {
     const element = mount() // default oval
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("preset-polygon") as HTMLButtonElement).click()
+    ;(shadow.getElementById("add-shape-polygon") as HTMLButtonElement).click()
 
-    const shape = element.sightingData.timeline.keyframes[0].shapes[0].shape as { kind: string; points?: unknown[] }
+    const shape = element.sightingData.timeline.keyframes[0].shapes.at(-1)!.shape as { kind: string; points?: unknown[] }
     expect(shape.kind).toBe("polygon")
     expect(shape.points).toHaveLength(4)
   })
@@ -1261,7 +1262,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
   it("keeps the exact same dropdown label after clearing an auto-filled title — no jarring jump to the raw sourceId", () => {
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-shape") as HTMLButtonElement).click() // "ufo-2", auto-titled "Shape 2"
+    ;(shadow.getElementById("add-shape-oval") as HTMLButtonElement).click() // "ufo-2", auto-titled "Shape 2"
     const sourceSelect = shadow.getElementById("source") as HTMLSelectElement
     expect(sourceSelect.options[1].textContent).toBe("Shape 2")
 
@@ -1323,8 +1324,8 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
 
   it("disables the source select, add-shape and delete-shape buttons while recording", () => {
     const element = mount()
+    ;(element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement).click() // a 2nd shape, so delete-shape isn't disabled for an unrelated reason below
     const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
-    addShapeButton.click() // a 2nd shape, so delete-shape isn't disabled for an unrelated reason below
     const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
     const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
     const recordButton = element.shadowRoot!.getElementById("record") as HTMLButtonElement
@@ -1362,7 +1363,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
 
   it("Add shape creates a genuinely new source instead of silently reusing the still-unused default", () => {
     const element = mount()
-    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement
     addShapeButton.click()
 
     // "ufo-1" already exists (construction places an immediately selectable initial keyframe —
@@ -1374,7 +1375,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
 
   it("Delete shape removes the selected source from every keyframe it appears in", () => {
     const element = mount()
-    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement
     addShapeButton.click() // now "ufo-1" (construction default) + "ufo-2"
     const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
     sourceSelect.value = "ufo-1"
@@ -1389,7 +1390,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
 
   it("auto-names a freshly added shape, matching the dropdown/tooltip label, instead of leaving it untitled", () => {
     const element = mount()
-    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement
 
     addShapeButton.click()
     addShapeButton.click()
@@ -1462,7 +1463,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false)
     const element = mount()
     const shadow = element.shadowRoot!
-    ;(shadow.getElementById("add-shape") as HTMLButtonElement).click()
+    ;(shadow.getElementById("add-shape-oval") as HTMLButtonElement).click()
 
     ;(shadow.getElementById("delete-shape") as HTMLButtonElement).click()
 
@@ -1474,7 +1475,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
 
   it("Delete shape stays available once deletion brings the count back down to one", () => {
     const element = mount()
-    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement
     addShapeButton.click() // "ufo-1" + "ufo-2"
     const deleteShapeButton = element.shadowRoot!.getElementById("delete-shape") as HTMLButtonElement
     expect(deleteShapeButton.disabled).toBe(false)
@@ -1697,7 +1698,7 @@ describe("SightingEditorElement click-to-select", () => {
 
   it("addShape also propagates the new shape's selection to the nested ufo's highlight", () => {
     const element = mount()
-    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement
     addShapeButton.click()
 
     const ufo = nestedUfo(element) as unknown as { selectedSourceIds: Set<string> }
@@ -1927,7 +1928,7 @@ describe("SightingEditorElement Delete/Backspace key", () => {
 
   it("deletes the selected shape, as the toolbar button does", () => {
     const element = mount()
-    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement
     addShapeButton.click() // "ufo-1" + "ufo-2", "ufo-2" selected
 
     pressKey(element, "Delete")
@@ -1938,7 +1939,7 @@ describe("SightingEditorElement Delete/Backspace key", () => {
 
   it("Backspace works the same as Delete", () => {
     const element = mount()
-    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement
     addShapeButton.click()
 
     pressKey(element, "Backspace")
@@ -1958,7 +1959,7 @@ describe("SightingEditorElement Delete/Backspace key", () => {
 
   it("does nothing when Delete/Backspace originates from a focused text input", () => {
     const element = mount()
-    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement
     addShapeButton.click()
     const latInput = element.shadowRoot!.getElementById("lat") as HTMLInputElement
     latInput.focus()
@@ -1970,7 +1971,7 @@ describe("SightingEditorElement Delete/Backspace key", () => {
 
   it("ignores a key pressed in another form on the same page", () => {
     const element = mount()
-    ;(element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement).click()
+    ;(element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement).click()
     const foreign = document.createElement("input")
     document.body.appendChild(foreign)
     foreign.focus()
@@ -1987,7 +1988,7 @@ describe("SightingEditorElement Delete/Backspace key", () => {
     // listener testing "did this come from an input?" therefore saw a custom element, decided it
     // had not, and Backspace in the site's search box asked to delete the shape being edited.
     const element = mount()
-    ;(element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement).click()
+    ;(element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement).click()
     const host = document.createElement("div")
     document.body.appendChild(host)
     const closed = host.attachShadow({ mode: "closed" })
@@ -3173,7 +3174,7 @@ describe("SightingEditorElement i18n", () => {
     // it used to be on the export one as well — in the editor of a recorder, where recording is a
     // thing one does, that was the same verb for two unrelated acts.
     expect(element.shadowRoot!.getElementById("export")!.textContent).toBe("Sauver")
-    expect(element.shadowRoot!.getElementById("preset-oval")!.textContent).toBe("Ovale")
+    expect(element.shadowRoot!.getElementById("add-shape-oval")!.textContent).toBe("Ovale")
     const durationInput = element.shadowRoot!.getElementById("durationSeconds") as HTMLInputElement
     expect(durationInput.placeholder).toBe("durée de l'observation")
     const recordButton = element.shadowRoot!.getElementById("record") as HTMLButtonElement
@@ -3707,7 +3708,7 @@ describe("SightingEditorElement playback controls", () => {
     const element = mount()
     setDuration(element, "5")
     const seekInput = element.shadowRoot!.getElementById("seek") as HTMLInputElement
-    const addShapeButton = element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement
+    const addShapeButton = element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement
 
     addShapeButton.click() // an unrelated edit — should still refresh the playback row
 
@@ -4556,11 +4557,11 @@ describe("SightingEditorElement polygon vertex editing", () => {
     }
   }
 
-  it("selecting the Polygon preset creates an editable 4-point quad", () => {
+  it("adding a polygon creates an editable 4-point quad", () => {
     const element = mount()
-    ;(element.shadowRoot!.getElementById("preset-polygon") as HTMLButtonElement).click()
+    ;(element.shadowRoot!.getElementById("add-shape-polygon") as HTMLButtonElement).click()
 
-    const shape = element.sightingData.timeline.keyframes[0].shapes[0].shape as { kind: string; points?: unknown[] }
+    const shape = element.sightingData.timeline.keyframes[0].shapes.at(-1)!.shape as { kind: string; points?: unknown[] }
     expect(shape.kind).toBe("polygon")
     expect(shape.points).toHaveLength(4)
   })
@@ -4744,9 +4745,9 @@ describe("SightingEditorElement hover cursor", () => {
 
   it("advertises a polygon's vertex handles, which sit on top of the bounding box's own", () => {
     const element = mount()
-    ;(element.shadowRoot!.getElementById("preset-polygon") as HTMLButtonElement).click()
+    ;(element.shadowRoot!.getElementById("add-shape-polygon") as HTMLButtonElement).click()
     const canvas = nestedCanvas(element)
-    const shape = selectedShape(element) as PolygonShape
+    const shape = element.sightingData.timeline.keyframes[0].shapes.at(-1)!.shape as PolygonShape
     const vertex = ShapeHandles.vertexPointsFor(shape)[0]
 
     expect(hoverAt(canvas, vertex.x, vertex.y)).toBe("vertex")
@@ -6978,7 +6979,7 @@ describe("SightingEditorElement new recording", () => {
     const picker = shadow.getElementById("source") as HTMLSelectElement
     expect(element.sightingData.timeline.keyframes.flatMap(k => k.shapes)).toEqual([])
     expect(picker.options).toHaveLength(0)
-    ;(shadow.getElementById("add-shape") as HTMLButtonElement).click()
+    ;(shadow.getElementById("add-shape-oval") as HTMLButtonElement).click()
     expect(element.sightingData.timeline.keyframes.flatMap(k => k.shapes.map(shape => shape.sourceId))).toEqual(["ufo-1"])
     expect([...picker.options].map(option => option.value)).toEqual(["ufo-1"])
   })
@@ -6991,7 +6992,7 @@ describe("SightingEditorElement new recording", () => {
     color.dispatchEvent(new Event("input"))
     color.dispatchEvent(new Event("change"))
     expect(element.sightingData.timeline.keyframes.flatMap(k => k.shapes)).toEqual([])
-    ;(shadow.getElementById("add-shape") as HTMLButtonElement).click()
+    ;(shadow.getElementById("add-shape-oval") as HTMLButtonElement).click()
     expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.color).toBe("#ff0000")
   })
 })

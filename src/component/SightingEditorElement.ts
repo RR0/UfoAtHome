@@ -350,8 +350,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly ufoElement: UfoElement
   private readonly recordButton: HTMLButtonElement
   private readonly samplingRateInput: HTMLInputElement
-  private readonly presetButtons: Record<ShapePresetId, HTMLButtonElement>
-  private readonly presetsGroup: HTMLElement
+  /** The kinds of shape the "+" of the shapes adds (see AddMenu): an oval or a polygon, which a shape keeps — another kind is another shape. */
+  private shapeAddMenu!: AddMenu
   private readonly colorInput: HTMLInputElement
   private readonly transparencyInput: HTMLInputElement
   private readonly haloScaleInput: HTMLInputElement
@@ -1092,11 +1092,6 @@ export class SightingEditorElement extends HTMLElement {
 
     this.recordButton = this.shadow.getElementById("record") as HTMLButtonElement
     this.samplingRateInput = this.shadow.getElementById("samplingRate") as HTMLInputElement
-    this.presetsGroup = this.shadow.getElementById("presets-group")!
-    this.presetButtons = {
-      oval: this.shadow.getElementById("preset-oval") as HTMLButtonElement,
-      polygon: this.shadow.getElementById("preset-polygon") as HTMLButtonElement
-    }
     this.colorInput = this.shadow.getElementById("color") as HTMLInputElement
     this.transparencyInput = this.shadow.getElementById("transparency") as HTMLInputElement
     this.haloScaleInput = this.shadow.getElementById("haloScale") as HTMLInputElement
@@ -1599,7 +1594,6 @@ export class SightingEditorElement extends HTMLElement {
     this.previousMarkButton.addEventListener("click", () => this.goToMark(this.timelineMarks.previous(this.ufoElement.currentTime)))
     this.nextMarkButton.addEventListener("click", () => this.goToMark(this.timelineMarks.next(this.ufoElement.currentTime)))
     this.recordButton.addEventListener("click", () => this.toggleRecording())
-    this.addShapeButton.addEventListener("click", () => this.addShape())
     this.deleteShapeButton.addEventListener("click", () => this.deleteShape())
     this.exportButton.addEventListener("click", () => this.exportJson())
     this.importInput.addEventListener("filepick", event => {
@@ -1738,9 +1732,12 @@ export class SightingEditorElement extends HTMLElement {
     // good, since it is only ever attached here in the constructor.
     this.addEventListener("keydown", this.handleKeyDown)
 
-    for (const presetId of PRESET_IDS) {
-      this.presetButtons[presetId].addEventListener("click", () => this.setAppearance({ presetId }))
-    }
+    // An oval or a polygon is picked when the shape is added, and kept: another kind is another shape (delete this one, add that one).
+    this.shapeAddMenu = new AddMenu(this.addShapeButton, "add-shape-kind", kind => {
+      this.currentAppearance = { ...this.currentAppearance, presetId: kind as ShapePresetId }
+      this.addShape()
+    }, kind => `add-shape-${kind}`)
+    this.shapeAddMenu.setKinds(PRESET_IDS.map(presetId => ({ value: presetId, label: presetId === "oval" ? "Oval" : "Polygon" })))
     this.colorInput.addEventListener("input", () => this.setAppearance({ color: this.colorInput.value }))
     this.transparencyInput.addEventListener("input", () =>
       this.setAppearance({ transparency: Number(this.transparencyInput.value) })
@@ -1921,7 +1918,6 @@ export class SightingEditorElement extends HTMLElement {
     this.toggleGroup(this.groupTabs[this.groupPanels.findIndex(panel => panel.id === "group-shape")], true)
     this.fileEditorHost.addEventListener("focusout", () => this.leaveFileEditor())
 
-    this.updatePresetButtons()
     this.setRecordButtonLabel(false)
     // A new recording starts empty: no shape until one is added (+) or recorded. It used to start
     // with a green oval already placed, which every recording then had to delete once the last
@@ -5653,7 +5649,6 @@ export class SightingEditorElement extends HTMLElement {
     // shape's own kind/geometry (see buildAppearanceShape's own doc comment on why this matters).
     const changingPreset = "presetId" in appearance
     this.currentAppearance = { ...this.currentAppearance, ...appearance }
-    this.updatePresetButtons()
     // While actively recording, a toolbar change only seeds the *next* take (unchanged,
     // pre-existing behavior) — the in-flight shapePrototype stays frozen for this take's
     // duration. While playing, the playhead is a moving target, not a specific instant to
@@ -6688,7 +6683,6 @@ export class SightingEditorElement extends HTMLElement {
       this.sizeLockSelect,
       this.clearDistanceHypothesisButton,
       this.sourceSelect,
-      ...Object.values(this.presetButtons)
     ]) {
       input.disabled = multiple
       input.title = title
@@ -6716,7 +6710,6 @@ export class SightingEditorElement extends HTMLElement {
       blur: shape.blur ?? 0,
       brightness: shape.brightness ?? 0
     }
-    this.updatePresetButtons()
     this.colorInput.value = this.currentAppearance.color
     this.transparencyInput.value = String(this.currentAppearance.transparency)
     this.haloScaleInput.value = String(this.currentAppearance.haloScale)
@@ -9343,15 +9336,6 @@ export class SightingEditorElement extends HTMLElement {
     this.updateObserver()
   }
 
-  private updatePresetButtons(): void {
-    for (const presetId of PRESET_IDS) {
-      this.presetButtons[presetId]?.setAttribute(
-        "aria-pressed",
-        String(presetId === this.currentAppearance.presetId)
-      )
-    }
-  }
-
   private get samplingRate(): number {
     return Number(this.samplingRateInput.value)
   }
@@ -9498,8 +9482,7 @@ export class SightingEditorElement extends HTMLElement {
     } else {
       this.messages = messages
     }
-    this.presetButtons.oval.textContent = messages.oval
-    this.presetButtons.polygon.textContent = messages.polygon
+    this.shapeAddMenu.setKinds([{ value: "oval", label: messages.oval }, { value: "polygon", label: messages.polygon }])
     this.contextAddVertexButton.textContent = messages.addVertex
     this.contextDeleteVertexButton.textContent = messages.deleteVertex
     this.labelColor.textContent = messages.color
@@ -9612,7 +9595,7 @@ export class SightingEditorElement extends HTMLElement {
     this.startDate.hint = messages.observationTimeHint
     this.obsEndTimeInput.placeholder = messages.edtfPlaceholder
     this.endDate.hint = messages.observationEndTimeHint
-    this.presetsGroup.setAttribute("aria-label", messages.presetsGroupLabel)
+    this.shapeAddMenu.panel.setAttribute("aria-label", messages.presetsGroupLabel)
     this.labelDecorGroup.textContent = messages.decor
     this.decorList.setKinds([
       { value: "building", label: messages.decorBuilding }, { value: "tree", label: messages.decorTree }, { value: "shrub", label: messages.decorShrub },

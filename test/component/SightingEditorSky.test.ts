@@ -210,7 +210,7 @@ function mount(): SightingEditorElement {
   const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
   element.weatherProvider = NO_RECORD_PROVIDER
   document.body.appendChild(element)
-  ;(element.shadowRoot!.getElementById("add-shape") as HTMLButtonElement).click()
+  ;(element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement).click()
   return element
 }
 

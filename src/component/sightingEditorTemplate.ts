@@ -565,10 +565,6 @@ export const html = `
       <button id="add-shape" type="button" class="icon-btn element-list-add" title="Add shape" aria-label="Add shape">+</button>
     </div>
     <div class="element-list-body" id="shape-item">
-    <div class="presets" id="presets-group" role="group" aria-label="UFO shape">
-      <button class="preset" id="preset-oval" type="button" data-preset="oval">Oval</button>
-      <button class="preset" id="preset-polygon" type="button" data-preset="polygon">Polygon</button>
-    </div>
     <label><span id="label-color">Color</span> <input id="color" type="color" value="#39ff14"/></label>
     <label><span id="label-transparency">Transparency</span> <input id="transparency" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <label><span id="label-halo">Halo</span> <input id="haloScale" type="range" min="0" max="3" step="0.1" value="1.5"/></label>
