@@ -169,6 +169,65 @@ export class HumanMotion {
   }
 
   /**
+   * How long a look takes to settle once it has reached what it turned to, ms: the time constant of the small overshoot and the return
+   * that end a turn of the head or the eyes (see gaze). About a tenth of a second, the time of a corrective saccade.
+   */
+  static readonly SETTLE_MS = 120
+
+  /** What is left of a look's mean pace as it reaches what it turned to (see gaze). */
+  static readonly ARRIVAL = 0.5
+
+  /**
+   * A look (a heading, a pitch) at `t`, between the keyframes `index` and `index + 1`: as `at` with ends at rest, but a look does not stop
+   * dead where it was turning to, the way a camera on a motor does. It arrives still moving, at the pace it turned at, goes a little past,
+   * and comes back to settle where the recording says it looked, as a head and eyes do (see SETTLE_MS). Every keyframe is still met
+   * exactly, and the speed is continuous through it; the swing beyond is a few percent of the turn, and has died away long before the next
+   * keyframe of a pause, which it never moves.
+   *
+   * Applied to every recording, with nothing to state: a turn that ends in a pause is a gaze that settles.
+   */
+  static gaze(times: readonly number[], values: readonly number[], index: number, t: number): number {
+    const t0 = times[index]
+    const t1 = times[index + 1]
+    const h = t1 - t0
+    if (h <= 0) return values[index]
+    const pause = (k: number) => k + 1 < values.length ? values[k + 1] === values[k] : true
+    const moving = values[index + 1] !== values[index]
+    if (moving && pause(index + 1)) {
+      // Arriving still moving, at half the turn's mean pace, instead of slowing to nothing: the speed of a turn of the eyes and the head
+      // rises and falls about its middle, and what is left of it at the end is what carries the look past.
+      const m0 = HumanMotion.tangent(times, values, index, true)
+      const m1 = HumanMotion.ARRIVAL * (values[index + 1] - values[index]) / h
+      return HumanMotion.hermite(values[index], m0, values[index + 1], m1, h, (t - t0) / h)
+    }
+    if (!moving && index > 0 && values[index - 1] !== values[index]) {
+      // Just arrived: the swing past, and back.
+      return values[index] + HumanMotion.settle(times, values, index, t - t0, h)
+    }
+    return HumanMotion.at(times, values, index, t, true)
+  }
+
+  /**
+   * How far past where it arrived at keyframe `k` a look is, `elapsedMs` after: it carries the speed it arrived at, and loses it as a
+   * critically damped spring does, `speed × τ × e^(−τ/T)`, faded out to nothing by the next keyframe `spanMs` later (Infinity for none).
+   */
+  static settle(times: readonly number[], values: readonly number[], k: number, elapsedMs: number, spanMs: number): number {
+    const before = times[k] - times[k - 1]
+    if (before <= 0 || elapsedMs <= 0) return 0
+    const speed = HumanMotion.ARRIVAL * (values[k] - values[k - 1]) / before
+    // Never more than about a tenth of the turn past it, whatever its pace.
+    const settleMs = Math.min(HumanMotion.SETTLE_MS, 0.4 * before)
+    const fade = Number.isFinite(spanMs) ? (1 - Math.min(1, elapsedMs / spanMs)) ** 2 : 1
+    return speed * elapsedMs * Math.exp(-elapsedMs / settleMs) * fade
+  }
+
+  private static hermite(p0: number, m0: number, p1: number, m1: number, h: number, s: number): number {
+    const s2 = s * s
+    const s3 = s2 * s
+    return (2 * s3 - 3 * s2 + 1) * p0 + (s3 - 2 * s2 + s) * h * m0 + (-2 * s3 + 3 * s2) * p1 + (s3 - s2) * h * m1
+  }
+
+  /**
    * How long a walker takes to stop from a walk, or to get into one: under a second. A movement
    * that ends in a pause keeps its pace until then and brakes over this, whatever the time between
    * the two keyframes — a curve spread over the whole stretch would have someone stopping dead
@@ -278,9 +337,28 @@ export class ObserverTrack {
     if (atOrBefore?.t === t) return atOrBefore.pose
     const after = this.keyframes[index]?.t === t ? undefined : this.keyframes[index]
     if (!atOrBefore) return after?.pose
-    if (!after) return atOrBefore.pose
+    if (!after) return this.settledAfterEnd(index - 1, t)
     const linear = lerpObserverPose(atOrBefore.pose, after.pose, clamp((t - atOrBefore.t) / (after.t - atOrBefore.t), 0, 1))
     return this.humanly(index - 1, t, linear)
+  }
+
+  /**
+   * The pose at `t` past the last keyframe `index`: the last one's, but for a look that turned to it, which settles there as it would
+   * before a pause (see HumanMotion.gaze).
+   */
+  private settledAfterEnd(index: number, t: number): ObserverPose {
+    const last = this.keyframes[index]
+    if (index < 1) return last.pose
+    const before = this.keyframes[index - 1]
+    const times = [before.t, last.t]
+    const swing = (a: number | undefined, b: number | undefined) =>
+      a === undefined || b === undefined ? 0 : HumanMotion.settle(times, [a, b], 1, t - last.t, Infinity)
+    const turn = before.pose.headingDeg === undefined || last.pose.headingDeg === undefined ? undefined
+      : ((((last.pose.headingDeg - before.pose.headingDeg) % 360) + 540) % 360) - 180
+    const heading = last.pose.headingDeg === undefined || turn === undefined ? last.pose.headingDeg
+      : (((last.pose.headingDeg + swing(0, turn)) % 360) + 360) % 360
+    const pitch = last.pose.pitchDeg + swing(before.pose.pitchDeg, last.pose.pitchDeg)
+    return heading === last.pose.headingDeg && pitch === last.pose.pitchDeg ? last.pose : { ...last.pose, headingDeg: heading, pitchDeg: pitch }
   }
 
   /**
@@ -299,6 +377,12 @@ export class ObserverTrack {
       if (values.some(value => value === undefined)) return undefined
       return HumanMotion.at(times, values as number[], at, t, endsAtRest)
     }
+    // A look settles where it turned to (see HumanMotion.gaze).
+    const look = (read: (pose: ObserverPose) => number | undefined): number | undefined => {
+      const values = window.map(keyframe => read(keyframe.pose))
+      if (values.some(value => value === undefined)) return undefined
+      return HumanMotion.gaze(times, values as number[], at, t)
+    }
     // Headings unwrapped along the window, so that a turn through north is a turn and not a spin.
     const headings = window.map(keyframe => keyframe.pose.headingDeg)
     let heading: number | undefined
@@ -307,7 +391,7 @@ export class ObserverTrack {
       for (let k = 1; k < headings.length; k++) {
         unwrapped.push(unwrapped[k - 1] + ((((headings[k]! - headings[k - 1]!) % 360) + 540) % 360) - 180)
       }
-      heading = ((HumanMotion.at(times, unwrapped, at, t, true) % 360) + 360) % 360
+      heading = ((HumanMotion.gaze(times, unwrapped, at, t) % 360) + 360) % 360
     }
     // A move into or out of a pause: straight between the two places, at a walker's own pace and
     // braking (see HumanMotion.paced). Anything else: the curve.
@@ -329,7 +413,7 @@ export class ObserverTrack {
       lng: place ? place.lng : channel(pose => pose.lng, false) ?? linear.lng,
       elevationM: place ? place.elevationM : channel(pose => pose.elevationM, false) ?? linear.elevationM,
       headingDeg: heading ?? linear.headingDeg,
-      pitchDeg: channel(pose => pose.pitchDeg, true) ?? linear.pitchDeg,
+      pitchDeg: look(pose => pose.pitchDeg) ?? linear.pitchDeg,
       rollDeg: channel(pose => pose.rollDeg ?? 0, true) ?? linear.rollDeg,
       fovDeg: channel(pose => pose.fovDeg, true) ?? linear.fovDeg
     }

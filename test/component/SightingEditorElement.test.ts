@@ -902,7 +902,10 @@ describe("SightingEditorElement observer keyframes over time", () => {
     const shadow = element.shadowRoot!
     expect((shadow.getElementById("lat") as HTMLInputElement).value).toBe("41")
     expect((shadow.getElementById("lng") as HTMLInputElement).value).toBe("1")
-    expect((shadow.getElementById("heading") as HTMLInputElement).value).toBe("45")
+    // A look turns as a head does, still short of half-way round at half-time (see HumanMotion.gaze).
+    const heading = Number((shadow.getElementById("heading") as HTMLInputElement).value)
+    expect(heading).toBeGreaterThan(30)
+    expect(heading).toBeLessThan(45)
   })
 
   it("does not write or resync observer fields while the nested player is playing", () => {

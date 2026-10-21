@@ -192,7 +192,8 @@ export class RecordingRules {
    on it: the eye's own height is added), \`headingDeg\` and \`pitchDeg\` (the direction they LOOKED,
    same conventions as \`aim\`), \`fovDeg\` (the vertical field shown, about 60 for the naked eye).
    A walk is a series of poses; a head turned towards the phenomenon is two poses a fraction of a
-   second apart. An observer who follows a moving phenomenon looks 0.15 to 0.2 s behind it, so keep
+   second apart, the second where the look comes to rest: the player gives the turn its ease and the
+   small swing past and back that ends a human look, so state no extra keyframe for them. An observer who follows a moving phenomenon looks 0.15 to 0.2 s behind it, so keep
    the gaze on the same path, sampled as densely, or it leaves the field. \`instrument\` is "eye" unless a camera was used.`
     },
     {

@@ -115,22 +115,53 @@ describe("ObserverTrack moves the way a person does", () => {
   const look = (headingDeg: number) => ({ lat: 48, lng: 2, elevationM: 0, headingDeg, pitchDeg: 0, fovDeg: 60 })
   const at = (lat: number) => ({ lat, lng: 2, elevationM: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 60 })
 
-  it("turns the head from still to still, not at a robot's constant speed", () => {
+  it("turns the head from still, and arrives still moving, not at a robot's constant speed", () => {
     const track = new ObserverTrack()
     track.addKeyframe(0, look(300))
     track.addKeyframe(1000, look(350))
-    // A quarter of the way through the time, well under a quarter of the way round…
+    // A quarter of the way through the time, well under a quarter of the way round, and still short of half-way at half-time…
     expect(track.getInterpolatedPoseAt(250)!.headingDeg!).toBeLessThan(300 + 50 * 0.2)
-    // …half-way at half-time, and exactly where the recording says at its instants.
-    expect(track.getInterpolatedPoseAt(500)!.headingDeg!).toBeCloseTo(325, 5)
+    const half = track.getInterpolatedPoseAt(500)!.headingDeg!
+    expect(half).toBeGreaterThan(300 + 50 * 0.4)
+    expect(half).toBeLessThan(325)
+    // …and exactly where the recording says at its instants.
     expect(track.getInterpolatedPoseAt(1000)!.headingDeg!).toBe(350)
+  })
+
+  it("lets a look go a little past what it turned to, and settle back there, as a head does", () => {
+    const track = new ObserverTrack()
+    // Maffliers: the observer turns to the phenomenon, and looks at it.
+    track.addKeyframe(4000, look(303))
+    track.addKeyframe(4600, look(340))
+    track.addKeyframe(4900, look(353.68))
+    track.addKeyframe(25000, look(353.68))
+    const at = (t: number) => track.getInterpolatedPoseAt(t)!.headingDeg!
+    expect(at(4900)).toBe(353.68)
+    // Still turning as it gets there: no dead stop.
+    expect(at(4900) - at(4890)).toBeGreaterThan(0.2)
+    // A little past, a tenth of a second later, and never more than a tenth of the turn…
+    const past = at(5020)
+    expect(past).toBeGreaterThan(353.68 + 0.3)
+    expect(past).toBeLessThan(353.68 + 1.4)
+    // …and settled back well before the next keyframe, which is met exactly.
+    expect(at(6500)).toBeCloseTo(353.68, 2)
+    expect(at(25000)).toBe(353.68)
+  })
+
+  it("settles a look that the recording ends on", () => {
+    const track = new ObserverTrack()
+    track.addKeyframe(0, look(0))
+    track.addKeyframe(500, look(30))
+    expect(track.getInterpolatedPoseAt(620)!.headingDeg!).toBeGreaterThan(30.5)
+    expect(track.getInterpolatedPoseAt(3000)!.headingDeg!).toBeCloseTo(30, 3)
   })
 
   it("turns through north the short way", () => {
     const track = new ObserverTrack()
     track.addKeyframe(0, look(350))
     track.addKeyframe(1000, look(10))
-    expect(track.getInterpolatedPoseAt(500)!.headingDeg!).toBeCloseTo(0, 5)
+    const half = track.getInterpolatedPoseAt(500)!.headingDeg!
+    expect(half > 355 || half < 5).toBe(true)
   })
 
   it("slows down into a stop the data states, and never overshoots it", () => {
