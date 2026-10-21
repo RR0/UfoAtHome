@@ -6144,6 +6144,8 @@ export class SightingEditorElement extends HTMLElement {
     const interpretation = shown ? this.ufoElement.sighting.interpretation : undefined
     this.sceneElement.compareAccount = interpretation !== undefined
     if (this.sceneElement.interpretation !== interpretation) this.sceneElement.interpretation = interpretation
+    // Its beams, launches and re-entries hide no shape: they stay in the sky while the shapes are edited.
+    this.sceneElement.interpretationSky = interpretation ? undefined : this.ufoElement.sighting.interpretation
     // The selector says what is shown, and a reading has no shapes to choose between.
     this.accountViewSelect.value = interpretation !== undefined ? "bodies" : "shapes"
     this.syncLaunchesTab()

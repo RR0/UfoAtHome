@@ -376,6 +376,8 @@ export class SceneElement extends HTMLElement {
   private lastTimeMs = 0
   /** The interpretation whose bodies stand in the scene, if one does — see `interpretation`. */
   private interpretationShown?: InterpretationJson
+  /** The interpretation whose sky alone is drawn while it is not on show — see `interpretationSky`. */
+  private skyShown?: InterpretationJson
   /** What its bodies say against the account at the instant on show — see `confrontation`. */
   private confrontationReadings: ConfrontationReading[] = []
   private confrontationSignature = ""
@@ -524,8 +526,9 @@ export class SceneElement extends HTMLElement {
       : undefined
     if (standing !== undefined && standingName) return { kind: "body", id: standing, name: standingName }
     // A beam of light the interpretation claims, before the decor it passes in front of: thin, and found only a few pixels round its line.
-    const beamHit = this.interpretationShown?.beams?.length ? this.sceneRenderer.pickBeamAt(ndcX, ndcY) : undefined
-    const beam = beamHit ? this.interpretationShown?.beams?.find(candidate => candidate.id === beamHit.id) : undefined
+    const beams = (this.interpretationShown ?? this.skyShown)?.beams
+    const beamHit = beams?.length ? this.sceneRenderer.pickBeamAt(ndcX, ndcY) : undefined
+    const beam = beamHit ? beams?.find(candidate => candidate.id === beamHit.id) : undefined
     if (beamHit && beam) {
       const name = this.said.read(beam.title) || "Laser"
       return {
@@ -1782,12 +1785,14 @@ export class SceneElement extends HTMLElement {
     // a second. Placed on the Earth, so seen from the observer's real place, not the scene's origin.
     // And the fireballs a camera network recorded during it, drawn the same way at their real instant.
     this.ensureFireballs(startDate)
-    const burning = [...(this.interpretationShown?.reentries ?? []), ...(this.fireballs?.reentries ?? [])]
+    // What the interpretation puts in the sky is drawn too when only its sky is asked for (see interpretationSky).
+    const sky = this.interpretationShown ?? this.skyShown
+    const burning = [...(sky?.reentries ?? []), ...(this.fireballs?.reentries ?? [])]
     this.sceneRenderer.setReentries(burning.length === 0 ? [] : ReentrySighting.viewsAt(burning, t, { lat, lng, heightM: observer.elevationM }))
     // The beams it claims: placed and lit by the renderer, which knows where its scene stands and what its air is.
-    this.sceneRenderer.setBeams(this.interpretationShown?.beams ?? SceneElement.NO_BEAMS)
+    this.sceneRenderer.setBeams(sky?.beams ?? SceneElement.NO_BEAMS)
     // The plumes of the launches it claims: lit by the Sun at the real date and hour, so with no date there is no light to put on them.
-    const launches = this.interpretationShown?.launches ?? []
+    const launches = sky?.launches ?? []
     this.sceneRenderer.setLaunchPlumes(launches.length === 0 || !startDate ? []
       : LaunchPlumeSighting.viewsAt(launches, t, { lat, lng, heightM: observer.elevationM }, LaunchPlumeSighting.sunDirectionAt(new Date(startDate.getTime() + t))))
 
@@ -2647,6 +2652,21 @@ export class SceneElement extends HTMLElement {
     this.updateAstronomy(this.lastTimeMs)
     // The bodies have just stood where this interpretation puts them; what the player laid over the picture from them was measured before (see handleTimeUpdate).
     this.ufoElement.repaintChrome()
+  }
+
+  /**
+   * An interpretation whose beams, launches and re-entries are drawn while the interpretation itself is not on show, and so while the account's
+   * shapes are drawn in full: the editor, editing the shapes, takes the interpretation away for its bodies not to hide them, and a beam shot
+   * across the sky, which hides no shape, went with it. Undefined for none.
+   */
+  get interpretationSky(): InterpretationJson | undefined {
+    return this.skyShown
+  }
+
+  set interpretationSky(interpretation: InterpretationJson | undefined) {
+    if (interpretation === this.skyShown) return
+    this.skyShown = interpretation
+    this.updateAstronomy(this.lastTimeMs)
   }
 
   /**
