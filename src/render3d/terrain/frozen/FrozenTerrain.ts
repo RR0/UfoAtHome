@@ -66,7 +66,7 @@ export class FrozenTerrain {
     for (const list of lists) {
       try {
         const patches = await list
-        if (patches.length > 0) return patches.map(({ lat, lng, radiusM }) => ({ lat, lng, radiusM }))
+        if (patches.length > 0) return patches.map(({ lat, lng, radiusM, far }) => ({ lat, lng, radiusM, ...(far ? { far } : {}) }))
       } catch {
         // This annex could not be read: the next may.
       }

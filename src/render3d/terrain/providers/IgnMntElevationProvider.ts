@@ -57,7 +57,13 @@ export class IgnMntElevationProvider implements ElevationProvider {
   private static readonly DECK_STRAIGHT_MAX_M = 200
   private static readonly MIN_PIXELS = 8
   private static readonly MAX_PIXELS = 700
-  private static readonly NO_DATA_BELOW = -9000
+  /**
+   * Below this a value is no ground: the service's −9999, and what it makes of it when it shrinks a picture over a hole, a mix of the two. France's
+   * lowest ground is a couple of metres under the sea; it was −9000, which let those mixes through as wells kilometres deep.
+   */
+  private static readonly NO_DATA_BELOW = -100
+  /** Past this many metres to the pixel, a picture is coarse (see getElevationGrid). */
+  private static readonly COARSE_METRES_PER_PIXEL = 20
   /** The share of vertices over no data that is still filled from the neighbours: more, and the layer does not cover the place. */
   /** A request of this many vertices a side is a mesh's; fewer is a point or two. */
   private static readonly MESH_FROM_VERTICES = 33
@@ -101,7 +107,10 @@ export class IgnMntElevationProvider implements ElevationProvider {
     const size = { width: pixels(widthM + 2 * marginM.x), height: pixels(heightM + 2 * marginM.y) }
     const metresPerPixel = { x: (widthM + 2 * marginM.x) / size.width, y: (heightM + 2 * marginM.y) / size.height }
     let failure: unknown = new Error("No layer of the IGN's relief answered")
-    for (const layer of IgnMntElevationProvider.LAYERS) {
+    // A coarse picture (the far ring round a patch, tens of kilometres) is asked of the older survey first: the laser's metre is lost at that scale,
+    // and where it has not flown yet the service mixes its no-data into the heights it shrinks, which came back as wells hundreds of metres deep.
+    const coarse = Math.max(metresPerPixel.x, metresPerPixel.y) > IgnMntElevationProvider.COARSE_METRES_PER_PIXEL
+    for (const layer of coarse ? [...IgnMntElevationProvider.LAYERS].reverse() : IgnMntElevationProvider.LAYERS) {
       try {
         const raster = await this.heights(fetched, size, layer)
         if (layer === IgnMntElevationProvider.LAYERS[0]) await this.layBridgeDecks(raster, fetched, size, hints?.route)

@@ -37,7 +37,7 @@ export class ReliefAnnex {
       patches: annex.patches.map((patch, i) => {
         const file = `${i}.f32`
         files[file] = ReliefAnnex.byPlane(patch.grid.heights)
-        return { lat: patch.lat, lng: patch.lng, radiusM: patch.radiusM, bounds: patch.grid.bounds, width: patch.grid.width, height: patch.grid.height, file }
+        return { lat: patch.lat, lng: patch.lng, radiusM: patch.radiusM, ...(patch.far ? { far: patch.far } : {}), bounds: patch.grid.bounds, width: patch.grid.width, height: patch.grid.height, file }
       })
     }
     files["index.json"] = strToU8(JSON.stringify(index, null, 1))
@@ -55,7 +55,7 @@ export class ReliefAnnex {
         const bytes = files[patch.file]
         if (!bytes || bytes.length !== patch.width * patch.height * 4) return []
         const grid: ElevationGrid = { heights: ReliefAnnex.fromPlanes(bytes), width: patch.width, height: patch.height, bounds: patch.bounds }
-        return [{ lat: patch.lat, lng: patch.lng, radiusM: patch.radiusM, grid }]
+        return [{ lat: patch.lat, lng: patch.lng, radiusM: patch.radiusM, ...(patch.far ? { far: patch.far } : {}), grid }]
       })
     }
   }

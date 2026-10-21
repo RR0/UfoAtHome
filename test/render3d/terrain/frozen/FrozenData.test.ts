@@ -188,6 +188,19 @@ describe("TerrainFreezer.plan", () => {
     expect(there.length).toBeLessThanOrEqual(11)
     expect(TerrainFreezer.plan(driving(1.5, 60, true))).toHaveLength(there.length)
   })
+
+  it("adds the far ring round the patch where a beam the recording claims goes past it, which the scene finds as such and not as the patch", () => {
+    const sighting = standing()
+    const far = localMetersToGeo(8000, 0, SILLY.lat, SILLY.lng)
+    sighting.interpretation = { bodies: [], beams: [{ id: "b", path: [{ ...SILLY, altitudeM: 100 }, { lat: far.lat, lng: far.lng, altitudeM: 100 }], wavelengthNm: 532, powerW: 10 }] }
+    const plan = TerrainFreezer.plan(sighting)
+    expect(plan).toEqual([PATCH, { ...SILLY, radiusM: 30000, far: true }])
+    const index = new FrozenPatches(Promise.resolve(plan))
+    return index.ready.then(() => {
+      expect(index.nearest(SILLY.lat, SILLY.lng)).toEqual(PATCH)
+      expect(index.farRingOf(SILLY.lat, SILLY.lng)).toEqual({ ...SILLY, radiusM: 30000, far: true })
+    })
+  })
 })
 
 describe("FrozenUpperAirProvider", () => {

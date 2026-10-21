@@ -1657,6 +1657,7 @@ export class SceneRenderer {
     this.terrainProviders = providers
     this.disposeMesh(this.terrainMesh)
     this.terrainMesh = undefined
+    this.dropFarRing()
     this.terrainOrigin = undefined
     this.terrainMeshOrigin = undefined
     this.terrainAttribution = undefined
@@ -1672,6 +1673,13 @@ export class SceneRenderer {
     // Any build still in flight is about the old source now.
     this.terrainBuildToken++
   }
+
+  /** The far ring of ground round the patch of the place, where one is needed (see buildFarRing), and the place it was built round. */
+  private farRing?: { mesh: Mesh, origin: { lat: number, lng: number } }
+  /** How far the far ring reaches from its centre, metres. */
+  private farRingRadiusM = 0
+  /** Bumped at each ring asked for, so that one that lands after another was asked for is dropped. */
+  private farRingToken = 0
 
   /** The list of frozen patches a build is waiting for, so that it is waited for once (see setTerrainOrigin). */
   private patchesAwaited?: TerrainPatchIndex
@@ -1710,6 +1718,11 @@ export class SceneRenderer {
     }
     if (this.terrainMesh && this.terrainMeshOrigin) place(this.terrainMesh, this.terrainMeshOrigin)
     if (this.fadingTerrain) place(this.fadingTerrain.mesh, this.fadingTerrain.origin)
+    if (this.farRing) {
+      const y = this.farRing.mesh.position.y
+      place(this.farRing.mesh, this.farRing.origin)
+      this.farRing.mesh.position.y = y
+    }
   }
 
   setTerrainOrigin(lat?: number, lng?: number, onSettled?: () => void): void {
@@ -1746,7 +1759,7 @@ export class SceneRenderer {
     // which is exactly right: from up there you see more ground, in less detail.
     // The ground disc, the sky and the haze keep the radius of the observer's reach; the patch of real ground may be wider where a still observer has scenery out
     // beyond it (see terrainReachFor), so that what stands there stands on the relief and not on the flat disc.
-    const radiusM = frozenRadiusM ?? Math.max(this.groundRadius, this.decorTerrainRadiusM, TerrainReach.beamReachFor(this.beams, { lat, lng }))
+    const radiusM = frozenRadiusM ?? Math.max(this.groundRadius, this.decorTerrainRadiusM)
     if (this.terrainOrigin && Math.abs(this.terrainRadius - radiusM) < radiusM * 0.1) {
       const { x, z } = geoToLocalMeters(lat, lng, this.terrainOrigin.lat, this.terrainOrigin.lng)
       // Scaled to the patch itself: 150 m matters for a 900 m patch and is meaningless for a 30 km one.
@@ -1828,6 +1841,7 @@ export class SceneRenderer {
         // The stated ones need no fetch and no permission: they are in the file already.
         this.drapeStatedRoads()
         this.drapeTraces()
+        this.buildFarRing(lat, lng, radiusM, mesh, originElevationM)
         this.render()
         onSettled?.()
       })
@@ -1836,6 +1850,82 @@ export class SceneRenderer {
         onSettled?.()
       })
   }
+
+  /**
+   * Builds, keeps or takes down the far ring of ground round the patch of the place just built (see TerrainReach.needsFarRing): coarse relief and
+   * photograph out to what the air lets anyone see, open in its middle where the patch is, on the patch's own zero and a metre under it, so that
+   * where the two overlap the patch is the ground. Without it, from a hill, the land past the patch's edge was the sky below the horizon, a band
+   * of blue taken for a sea; and a beam of light shot across a valley went off the edge of the ground.
+   *
+   * A ring is kept while the patch stays near its centre: it is the far ground, and a car's drive across the patch changes nothing of it. Where the
+   * ground was frozen, the ring is the one frozen round this patch, or none: a frozen scene asks nobody for anything.
+   */
+  private buildFarRing(lat: number, lng: number, nearRadiusM: number, nearMesh: Mesh, referenceElevationM: number | undefined): void {
+    nearMesh.geometry.computeBoundingBox()
+    const lowestY = nearMesh.position.y + (nearMesh.geometry.boundingBox?.min.y ?? 0)
+    const eyeAboveLowestM = this.camera.position.y - lowestY
+    const beamReachM = TerrainReach.beamReachFor(this.beams, { lat, lng })
+    if (!TerrainReach.needsFarRing(nearRadiusM, eyeAboveLowestM, beamReachM)) {
+      this.dropFarRing()
+      return
+    }
+    if (this.farRing) {
+      const { x, z } = geoToLocalMeters(lat, lng, this.farRing.origin.lat, this.farRing.origin.lng)
+      if (Math.hypot(x, z) < nearRadiusM * SceneRenderer.FAR_RING_KEPT_SHARE) return
+    }
+    const patches = this.terrainProviders.patches
+    const frozen = patches?.farRingOf?.(lat, lng)
+    if (patches && !frozen) {
+      this.dropFarRing()
+      return
+    }
+    const radiusM = frozen?.radiusM ?? TerrainReach.FAR_RING_RADIUS_M
+    const token = ++this.farRingToken
+    const providers = this.terrainProviders
+    void buildTerrainMesh(lat, lng, { elevation: providers.elevation, imagery: providers.imagery }, radiusM, undefined, {
+      innerM: nearRadiusM * SceneRenderer.FAR_RING_OPEN_SHARE,
+      referenceElevationM
+    }).then(({ mesh }) => {
+      if (token !== this.farRingToken || this.terrainProviders !== providers) {
+        this.disposeMesh(mesh)
+        return
+      }
+      this.dropFarRing()
+      this.farRingToken = token
+      mesh.renderOrder = SceneRenderer.FAR_RING_RENDER_ORDER
+      mesh.position.y = nearMesh.position.y - SceneRenderer.FAR_RING_DROP_M
+      const material = mesh.material as MeshLambertMaterial
+      material.polygonOffset = true
+      material.polygonOffsetFactor = 2
+      material.polygonOffsetUnits = 8
+      // The opening is not drawn at all, depth included: drawn transparent, it still hid the patch wherever the ring's coarse relief stood over it,
+      // and the sky showed through the ground in pale blue holes.
+      material.alphaTest = 0.5
+      this.farRing = { mesh, origin: { lat, lng } }
+      this.farRingRadiusM = radiusM
+      this.scene.add(mesh)
+      // Built round the patch's own centre: where the patch stands now is where the ring stands (and placeTerrain moves both from here on).
+      mesh.position.x = nearMesh.position.x
+      mesh.position.z = nearMesh.position.z
+      this.compileNextFrameOffThread()
+      this.render()
+    }, error => console.warn("Far ground unavailable, the patch of the place stays the only ground:", error))
+  }
+
+  private dropFarRing(): void {
+    if (!this.farRing) return
+    this.disposeMesh(this.farRing.mesh)
+    this.farRing = undefined
+  }
+
+  /** Inside this share of the patch's radius the ring is open: the patch is whole to 7/9 of it, and fades from there to its edge, where the ring is. */
+  private static readonly FAR_RING_OPEN_SHARE = 0.75
+  /** How far the patch may move from the ring's centre before the opening is no longer under it. */
+  private static readonly FAR_RING_KEPT_SHARE = 0.3
+  /** Under the patch of the place, a few metres (the depth buffer, kilometres out, cannot tell less apart): where the two overlap the patch is drawn. */
+  private static readonly FAR_RING_DROP_M = 3
+  /** Over the flat disc, under the patch. */
+  private static readonly FAR_RING_RENDER_ORDER = 0.5
 
   /** The point the grain of the grass is measured from, for as long as the recording stays near it (see GrassDetail). */
   private grassReference?: { lat: number, lng: number }
@@ -2480,8 +2570,8 @@ export class SceneRenderer {
   setBeams(beams: readonly BeamJson[]): void {
     if (beams === this.beams) return
     this.beams = beams
-    // The ground has to reach as far as they go (see TerrainReach.beamReachFor): the patch on screen is rebuilt wider if it does not.
-    if (this.terrainOrigin) this.setTerrainOrigin(this.terrainOrigin.lat, this.terrainOrigin.lng)
+    // The ground has to reach as far as they go (see buildFarRing).
+    if (this.terrainMesh && this.terrainMeshOrigin) this.buildFarRing(this.terrainMeshOrigin.lat, this.terrainMeshOrigin.lng, this.terrainRadius, this.terrainMesh, this.siteElevationM)
     if (beams.length === 0 && !this.beamSystem) return
     void this.loadBeamSystem().then(() => {
       this.updateBeams()
@@ -2976,7 +3066,11 @@ export class SceneRenderer {
     // for the sky and the ground was always enough. An aircraft is 5 to 10 km away, and would be
     // clipped away entirely. Widened here rather than in setObserverPose because a moving object's
     // distance changes every tick, not only when the observer does.
-    const needed = Math.max(SKY_RADIUS * 1.2, this.groundRadius * 2.5, furthestDecorM * 1.2)
+    // The real ground as far as it is built (a square: its corners are √2 out), the far ring round it, and the beams of light: a beam shot 8 km
+    // across a valley, and the ring of ground under it, were cut off by a far plane 2 km out.
+    const farGroundM = Math.max(this.terrainMesh ? this.terrainRadius : 0, this.farRing ? this.farRingRadiusM : 0) * Math.SQRT2
+    const beamM = this.beams?.length && this.terrainMeshOrigin ? TerrainReach.beamReachFor(this.beams, this.terrainMeshOrigin) : 0
+    const needed = Math.max(SKY_RADIUS * 1.2, this.groundRadius * 2.5, furthestDecorM * 1.2, farGroundM * 1.05, beamM * 1.2)
     if (Math.abs(this.camera.far - needed) > 1) {
       this.camera.far = needed
       this.camera.updateProjectionMatrix()
@@ -5984,6 +6078,7 @@ export class SceneRenderer {
     this.disposeMesh(this.skyMesh)
     this.disposeMesh(this.groundMesh)
     this.disposeMesh(this.terrainMesh)
+    this.dropFarRing()
     this.roadSystem.dispose()
     this.waterSystem?.dispose()
     this.railwaySystem?.dispose()

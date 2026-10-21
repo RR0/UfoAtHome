@@ -67,13 +67,23 @@ export class TerrainFreezer {
     for (let t = 0; ; t = Math.min(endMs, t + TerrainFreezer.STEP_MS)) {
       const pose = resolveObserverPoseAt(sighting, t)
       if (pose?.lat !== undefined && pose.lng !== undefined) {
-        const radiusM = Math.max(TerrainReach.groundRadiusFor(pose.elevationM ?? 0), reachM, TerrainReach.beamReachFor(sighting.interpretation?.beams ?? [], { lat: pose.lat, lng: pose.lng }))
+        const radiusM = Math.max(TerrainReach.groundRadiusFor(pose.elevationM ?? 0), reachM)
         if (!current || !serves(current, pose.lat, pose.lng, radiusM)) {
           current = patches.find(patch => serves(patch, pose.lat!, pose.lng!, radiusM))
           if (!current) patches.push(current = { lat: pose.lat, lng: pose.lng, radiusM })
         }
       }
       if (t >= endMs) break
+    }
+    // The far ring round a patch, where the beams the recording claims go past it (see SceneRenderer.buildFarRing). Not where the eye only overlooks
+    // lower ground: that is known from the relief, which is what is being frozen; a frozen scene then has the patches and no ring.
+    const beams = sighting.interpretation?.beams ?? []
+    if (beams.length > 0) {
+      for (const patch of [...patches]) {
+        if (TerrainReach.needsFarRing(patch.radiusM, 0, TerrainReach.beamReachFor(beams, patch))) {
+          patches.push({ lat: patch.lat, lng: patch.lng, radiusM: TerrainReach.FAR_RING_RADIUS_M, far: true })
+        }
+      }
     }
     return patches
   }

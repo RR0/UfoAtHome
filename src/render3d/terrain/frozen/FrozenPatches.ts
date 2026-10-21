@@ -7,6 +7,8 @@ export interface FrozenPatch {
   lat: number
   lng: number
   radiusM: number
+  /** A far ring round the patch of the place at the same centre (see SceneRenderer.buildFarRing), never the patch a scene builds under the observer. */
+  far?: true
 }
 
 /**
@@ -24,6 +26,8 @@ export interface TerrainPatchIndex {
   readonly ready: Promise<void>
   /** The frozen patch nearest (lat, lng), undefined when there is none (or the list is not in hand yet). */
   nearest(lat: number, lng: number): FrozenPatch | undefined
+  /** The far ring frozen round the patch centred at (lat, lng), undefined when none was. */
+  farRingOf?(lat: number, lng: number): FrozenPatch | undefined
 }
 
 /** A list of patches, and the questions asked of one. */
@@ -47,6 +51,7 @@ export class FrozenPatches implements TerrainPatchIndex {
     let best: FrozenPatch | undefined
     let bestM = Infinity
     for (const patch of this.list) {
+      if (patch.far) continue
       const { x, z } = geoToLocalMeters(patch.lat, patch.lng, lat, lng)
       const distanceM = Math.hypot(x, z)
       if (distanceM < bestM) {
@@ -55,6 +60,10 @@ export class FrozenPatches implements TerrainPatchIndex {
       }
     }
     return best
+  }
+
+  farRingOf(lat: number, lng: number): FrozenPatch | undefined {
+    return this.list.find(patch => patch.far && Math.abs(patch.lat - lat) <= FrozenPatches.SAME_BOUNDS_DEG && Math.abs(patch.lng - lng) <= FrozenPatches.SAME_BOUNDS_DEG)
   }
 
   /** The square of ground a patch is asked for — the same function the scene asks with, so the same numbers. */
@@ -72,6 +81,6 @@ export class FrozenPatches implements TerrainPatchIndex {
   }
 
   static samePatches(a: readonly FrozenPatch[], b: readonly FrozenPatch[]): boolean {
-    return a.length === b.length && a.every((patch, i) => patch.lat === b[i].lat && patch.lng === b[i].lng && patch.radiusM === b[i].radiusM)
+    return a.length === b.length && a.every((patch, i) => patch.lat === b[i].lat && patch.lng === b[i].lng && patch.radiusM === b[i].radiusM && patch.far === b[i].far)
   }
 }

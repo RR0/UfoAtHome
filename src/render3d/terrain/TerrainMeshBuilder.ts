@@ -104,6 +104,18 @@ export function boundsAroundObserver(observerLat: number, observerLng: number, r
 }
 
 /**
+ * What makes a patch the far ring round another (see SceneRenderer.buildFarRing): open in its middle, where the patch of the place is, and
+ * standing on the same zero, so that the two meet.
+ */
+export interface FarRingOptions {
+  /** Inside this (box distance from the centre, metres) the ring is not drawn: the patch of the place is, finer. */
+  innerM: number
+  /** The height above sea level the ring's zero stands for: the patch of the place's own (see TerrainBuildResult.originElevationM), not the ring's
+   * own centre, which a grid hundreds of metres to the posting reads differently. */
+  referenceElevationM?: number
+}
+
+/**
  * Builds a location-accurate, relief-displaced, photo-textured ground patch around
  * (observerLat, observerLng) — see SceneRenderer.setTerrainOrigin(), which swaps this in place of
  * (on top of) the existing flat haze disc once built. Depends only on the ElevationProvider/
@@ -115,14 +127,15 @@ export async function buildTerrainMesh(
   observerLng: number,
   providers: { elevation: ElevationProvider; imagery: ImageryProvider; water?: WaterProvider },
   radiusM: number = DEFAULT_RADIUS_M,
-  hints?: ElevationHints
+  hints?: ElevationHints,
+  ring?: FarRingOptions
 ): Promise<TerrainBuildResult> {
   const fadeEndM = radiusM
   const fullOpacityM = radiusM * FULL_OPACITY_FRACTION
   const bounds = boundsAroundObserver(observerLat, observerLng, fadeEndM)
   const resolution = { width: ASKED_GRID_SIZE, height: ASKED_GRID_SIZE }
   // Asked at once, with the ground: a refusal is no water, and never a failed patch.
-  const waterAsked = providers.water?.getWater(bounds).catch((error: unknown) => {
+  const waterAsked = ring ? undefined : providers.water?.getWater(bounds).catch((error: unknown) => {
     console.warn("Water unavailable, drawing none:", error)
     return [] as WaterSurface[]
   })
@@ -140,11 +153,13 @@ export async function buildTerrainMesh(
   if (elevationGrid.width !== elevationGrid.height || elevationGrid.width < 3 || elevationGrid.heights.length !== elevationGrid.width * elevationGrid.height) {
     throw new Error("The ground came as a grid that is not square")
   }
+  ElevationGaps.fill(elevationGrid.heights, elevationGrid.width)
   if (water && water.length > 0) WaterBeds.flatten(elevationGrid, water, hints?.route)
   const gridSize = elevationGrid.width
   const segments = gridSize - 1
   const centerIndex = Math.floor(gridSize / 2)
-  const observerElevation = elevationGrid.heights[centerIndex * gridSize + centerIndex]
+  const centreElevation = elevationGrid.heights[centerIndex * gridSize + centerIndex]
+  const observerElevation = ring?.referenceElevationM ?? centreElevation
 
   const positions = new Float32Array(gridSize * gridSize * 3)
   const uvs = new Float32Array(gridSize * gridSize * 2)
@@ -159,7 +174,8 @@ export async function buildTerrainMesh(
       const { x, z } = geoToLocalMeters(lat, lng, observerLat, observerLng)
       const elevation = elevationGrid.heights[row * gridSize + col]
       const distance = Math.max(Math.abs(x), Math.abs(z))
-      const alpha = 1 - clamp((distance - fullOpacityM) / (fadeEndM - fullOpacityM), 0, 1)
+      // A ring is open where the patch of the place is: nothing inside, all of it from the first posting outside.
+      const alpha = ring && distance < ring.innerM ? 0 : 1 - clamp((distance - fullOpacityM) / (fadeEndM - fullOpacityM), 0, 1)
       const y = TERRAIN_BASE_Y + TERRAIN_Y_OFFSET + (elevation - observerElevation)
 
       const i = row * gridSize + col
@@ -257,16 +273,60 @@ export async function buildTerrainMesh(
     // actually hiding was the scenery.
   })
 
-  GrassDetail.install(material)
+  // The grass is a grain seen within metres; the ring is kilometres off.
+  if (!ring) GrassDetail.install(material)
 
   const mesh = new Mesh(geometry, material)
-  mesh.receiveShadow = true
-  mesh.castShadow = true
+  // A ring is too far for a shadow of the scene to fall on it, and too coarse to cast one worth its map.
+  mesh.receiveShadow = !ring
+  mesh.castShadow = !ring
   return {
     mesh,
     attribution: providers.imagery.attribution,
-    originElevationM: Number.isFinite(observerElevation) ? observerElevation : undefined,
+    originElevationM: Number.isFinite(centreElevation) ? centreElevation : undefined,
     ...(water ? { water } : waterAsked ? { waterLater: waterAsked } : {})
+  }
+}
+
+/**
+ * The postings a source had no ground for, filled from those round them. A source says it has none with a value no ground has (the IGN's −9999,
+ * or nothing at all), and taken as a height, one such posting was a well eight kilometres deep in the middle of the ground: the far ring round
+ * Meudon had a fiftieth of its postings so, on the water and at the edge of what the survey covers.
+ */
+export class ElevationGaps {
+  /** Lower than any dry ground on Earth (the shore of the Dead Sea is at −430 m): a value below it is no ground. */
+  static readonly LOWEST_GROUND_M = -500
+  private static readonly MAX_PASSES = 64
+
+  /** Fills in place every posting of a square grid `size` a side that holds no ground, with the mean of its neighbours that do, from the edge of each gap in. */
+  static fill(heights: Float32Array | number[], size: number): void {
+    const missing = (value: number) => !Number.isFinite(value) || value < ElevationGaps.LOWEST_GROUND_M
+    let left = 0
+    for (let i = 0; i < heights.length; i++) if (missing(heights[i])) left++
+    for (let pass = 0; left > 0 && pass < ElevationGaps.MAX_PASSES; pass++) {
+      const filled: [number, number][] = []
+      for (let row = 0; row < size; row++) {
+        for (let col = 0; col < size; col++) {
+          const i = row * size + col
+          if (!missing(heights[i])) continue
+          let sum = 0
+          let count = 0
+          for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+            const r = row + dr, c = col + dc
+            if (r < 0 || c < 0 || r >= size || c >= size) continue
+            const value = heights[r * size + c]
+            if (!missing(value)) { sum += value; count++ }
+          }
+          if (count > 0) filled.push([i, sum / count])
+        }
+      }
+      // Set after the pass, so that a gap fills from its edges inwards and not along the order it is read in.
+      for (const [i, value] of filled) heights[i] = value
+      left -= filled.length
+      if (filled.length === 0) break
+    }
+    // A grid with no ground at all: the sea's level.
+    if (left > 0) for (let i = 0; i < heights.length; i++) if (missing(heights[i])) heights[i] = 0
   }
 }
 

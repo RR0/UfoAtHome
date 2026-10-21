@@ -70,11 +70,27 @@ export class TerrainReach {
   }
 
   /**
-   * How wide the patch of real ground has to be for the beams of light a recording claims (see BeamJson): out to the farthest point of their
-   * paths from `centre`, and at most what air lets anyone see. A beam shot from a hill across a valley to a city 8 km off went into the flat
-   * disc 2 km out, which ended the ground at the observer's own height, where the valley and the city are a hundred metres lower: it seemed to
-   * fall into a sea. Whether the observer moves or not, since a beam is where it is.
+   * How far the far ring of ground reaches (see SceneRenderer.buildFarRing): what the air lets anyone see. A ring is coarse whatever its size,
+   * so it reaches all the way rather than as far as the reason it was built for.
    */
+  static readonly FAR_RING_RADIUS_M = TerrainReach.MAX_GROUND_VISIBILITY_M
+  /**
+   * How far above the lowest ground of the patch of the place the eye has to be for the land beyond it to show: from a hill, a valley and the
+   * plain past it are in view out to the horizon of that height (sqrt(2Rh): 16 km at 20 m), far past the patch, where the sky below the horizon
+   * showed instead as a band of blue taken for a sea (the Seine valley from the terrace of Meudon, 100 m above it).
+   */
+  static readonly OVERLOOK_M = 20
+
+  /**
+   * Whether a patch of the place `nearRadiusM` wide needs a far ring round it: the eye overlooks land lower than itself by OVERLOOK_M, so that
+   * the ground it sees goes on far past the patch, or a beam of light the recording claims goes past it (see beamReachFor).
+   */
+  static needsFarRing(nearRadiusM: number, eyeAboveLowestM: number, beamReachM: number): boolean {
+    if (nearRadiusM >= TerrainReach.FAR_RING_RADIUS_M) return false
+    return eyeAboveLowestM >= TerrainReach.OVERLOOK_M || beamReachM > nearRadiusM
+  }
+
+  /** How far from `centre` the beams of light a recording claims go (see BeamJson): the farthest point of their paths, metres. */
   static beamReachFor(beams: readonly BeamJson[], centre: { lat: number; lng: number }): number {
     let reach = 0
     for (const beam of beams) {
@@ -83,7 +99,6 @@ export class TerrainReach {
         reach = Math.max(reach, Math.hypot(offset.x, offset.z))
       }
     }
-    const needed = Math.ceil(reach / TerrainReach.PATCH_WHOLE_SHARE / 100) * 100
-    return needed > TerrainReach.GROUND_RADIUS_M * TerrainReach.PATCH_WHOLE_SHARE ? Math.min(needed, TerrainReach.MAX_GROUND_VISIBILITY_M) : 0
+    return reach
   }
 }
