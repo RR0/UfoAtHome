@@ -1882,10 +1882,12 @@ export class SceneRenderer {
     const radiusM = frozen?.radiusM ?? TerrainReach.FAR_RING_RADIUS_M
     const token = ++this.farRingToken
     const providers = this.terrainProviders
-    void buildTerrainMesh(lat, lng, { elevation: providers.elevation, imagery: providers.imagery }, radiusM, undefined, {
+    // Waited for as the patch is (see awaitArrival): a scene shown before it came showed the band of blue the ring is there to cover, and its first
+    // picture, the cover of a recording, kept it.
+    void this.awaitArrival(buildTerrainMesh(lat, lng, { elevation: providers.elevation, imagery: providers.imagery }, radiusM, undefined, {
       innerM: nearRadiusM * SceneRenderer.FAR_RING_OPEN_SHARE,
       referenceElevationM
-    }).then(({ mesh }) => {
+    }), SceneRenderer.TERRAIN_PATIENCE_MS).then(({ mesh }) => {
       if (token !== this.farRingToken || this.terrainProviders !== providers) {
         this.disposeMesh(mesh)
         return
