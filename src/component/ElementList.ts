@@ -68,10 +68,10 @@ export class ElementList {
 .element-list-picker select { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
 .element-list-empty { opacity: .75; font-style: italic; }
 /* The fields of the picked element unroll from its picker: the frame starts where the picker ends, with no space between (the gap of the
-   toolbar both stand in is taken back), its corner under the picker square. The row is aligned on its bottom so that the picker's lower edge
-   is the row's, whatever the height of the buttons beside it. */
+   container both stand in is taken back, see glue), its corner under the picker square. The row is aligned on its bottom so that the
+   picker's lower edge is the row's, whatever the height of the buttons beside it. */
 .element-list-body { flex: 1 1 100%; min-width: 0; box-sizing: border-box; border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
-  border-radius: 0 6px 6px 6px; padding: .5em .6em; margin: calc(-1 * var(--element-list-gap, 8px)) 0 .3em; display: flex; flex-wrap: wrap;
+  border-radius: 0 6px 6px 6px; padding: .5em .6em; margin: 0 0 .3em; display: flex; flex-wrap: wrap;
   align-items: center; gap: .5em; }
 .element-list-picker select { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 .element-list-row [hidden], .element-list-body[hidden] { display: none !important; }
@@ -93,7 +93,24 @@ ${AddMenu.CSS}`
       // Disabled while there is nothing to act on; whether it can act on the one there is stays the list's own to say.
       if (child instanceof HTMLButtonElement && !present) child.disabled = true
     }
-    if (body) body.hidden = !present
+    if (body) {
+      body.hidden = !present
+      if (present) ElementList.glue(body)
+    }
+  }
+
+  /**
+   * Puts the frame of the picked element right under its picker: it takes back the space the container both stand in puts between its
+   * lines, which is a toolbar's gap in one group, a path's in another, and nothing in a plain panel. Read from the container itself at
+   * every showing, so that no list has to say what its container is.
+   */
+  static glue(body: HTMLElement): void {
+    const parent = body.parentElement
+    const view = body.ownerDocument.defaultView
+    if (!parent || !view) return
+    const style = view.getComputedStyle(parent)
+    const gap = /flex|grid/.test(style.display) ? parseFloat(style.rowGap) || 0 : 0
+    body.style.marginTop = `${-gap}px`
   }
 
   private readonly select: HTMLSelectElement

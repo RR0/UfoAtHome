@@ -1354,7 +1354,13 @@ select.weather-field:disabled {
   margin: 0.5em 0;
 }
 .frozen-data {
-  margin: 0.5em 0;
+  margin-bottom: 0.5em;
+  /* Its content starts at the top of the frame, as every list's does: a paragraph's own margins made the first line taller, and the
+     toolbar on it was centred lower in the annexes than in the recording. */
+  align-items: flex-start;
+}
+.frozen-data > p {
+  margin: 0;
 }
 .annex-storage {
   display: flex;

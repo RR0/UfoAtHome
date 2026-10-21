@@ -2372,6 +2372,11 @@ export class SightingEditorElement extends HTMLElement {
     this.shadow.getElementById("file-recording")!.hidden = annex || part !== undefined
     this.shadow.getElementById("frozen-data")!.hidden = !annex
     this.shadow.getElementById("file-section")!.hidden = part === undefined
+    // The item's frame unrolls from the picker of the files, as every list's does (see ElementList.glue).
+    for (const id of ["file-recording", "frozen-data", "file-section"]) {
+      const frame = this.shadow.getElementById(id)!
+      if (!frame.hidden) ElementList.glue(frame)
+    }
     if (annex) this.frozenPanel.show(item as FrozenGroupName)
     if (part) this.sectionFilePanel.show(part)
     const section: JsonPath | undefined = annex && this.frozenPanel.isInlineGroup(item as FrozenGroupName) ? ["frozen", item, "src"]
