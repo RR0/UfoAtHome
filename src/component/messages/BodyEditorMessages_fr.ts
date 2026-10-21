@@ -28,6 +28,7 @@ export const bodyEditorMessages_fr: BodyEditorMessages = {
   previousKeyframe: "Image clé précédente",
   nextKeyframe: "Image clé suivante",
   atPlayhead: "À {t}",
+  modelFixed: "Le modèle se choisit à l'ajout du corps : pour en changer, supprimez ce corps et ajoutez-en un avec l'autre modèle",
   keyframeHere: "Une image clé est ici : l'éditer la modifie",
   keyframeAdded: "Éditer ajoute une image clé ici",
   appearanceNote: "La couleur et l'albédo peignent les formes de base ; un modèle garde ses propres matériaux. La lumière propre est ce qu'il émet, éclairé ou non.",

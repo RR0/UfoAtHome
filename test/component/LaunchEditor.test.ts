@@ -100,7 +100,7 @@ describe("LaunchEditor", () => {
 
   test("adds a launch with a placeholder path in front of the observer, even to a recording with no interpretation", () => {
     const { sighting, changes } = build(null)
-    container.querySelector<HTMLButtonElement>("#launch-add")!.click()
+    container.querySelector<HTMLButtonElement>("#launch-add-falcon-9")!.click()
     const launches = sighting.skyEvents!.launches!
     expect(launches).toHaveLength(1)
     expect(launches[0].id).toBe("launch-1")
@@ -112,13 +112,14 @@ describe("LaunchEditor", () => {
     expect(changes()).toBe(1)
     expect(container.querySelector<HTMLElement>("#launch-list .element-list-empty")!.hidden).toBe(true)
     expect(container.querySelector<HTMLSelectElement>("#launch-select")!.value).toBe("launch-1")
-    expect(field("vehicle.name").value).toBe("Falcon 9")
+    // The vehicle is the one picked in the menu of the "+", and is not a field: another vehicle is another launch.
+    expect(container.querySelector('[data-key="vehicle.name"]')).toBeNull()
   })
 
   test("numbers a new launch past the ones that exist, and selects it", () => {
     const { sighting } = build()
-    container.querySelector<HTMLButtonElement>("#launch-add")!.click()
-    container.querySelector<HTMLButtonElement>("#launch-add")!.click()
+    container.querySelector<HTMLButtonElement>("#launch-add-falcon-9")!.click()
+    container.querySelector<HTMLButtonElement>("#launch-add-falcon-9")!.click()
     expect(sighting.skyEvents!.launches!.map(launch => launch.id)).toEqual(["a", "b", "launch-3", "launch-4"])
     expect(container.querySelector<HTMLSelectElement>("#launch-select")!.value).toBe("launch-4")
   })

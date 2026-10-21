@@ -1,5 +1,5 @@
 import { LaunchParameters } from "../engine/interpretation/LaunchParameters.js"
-import type { LaunchJson } from "../engine/interpretation/LaunchPlume.js"
+import type { LaunchJson, LaunchVehicle } from "../engine/interpretation/LaunchPlume.js"
 import { SkyEvents } from "../engine/model/SkyEvents.js"
 import { ParameterRegistry } from "../engine/interpretation/Parameters.js"
 import type { Sighting } from "../engine/model/Sighting.js"
@@ -128,12 +128,14 @@ export class LaunchEditor {
     const list = this.element("launch-list")
     this.list = new ElementList({
       header: list, body: this.element("launch-fields"),
-      ids: { list: "launch-select", remove: "launch-delete", add: "launch-add" },
+      ids: { list: "launch-select", remove: "launch-delete", add: "launch-add", kinds: "launch-add-kind", kind: vehicle => `launch-add-${vehicle}` },
       onSelect: id => { this.currentId = id; this.placeIndex = 0; this.sync() },
-      onAdd: () => this.addLaunch(),
+      onAdd: vehicle => this.addLaunch(vehicle ?? LaunchEditor.VEHICLES[0].id),
       onRemove: () => this.deleteCurrent()
     })
     this.list.setLabels({ list: m.launch, remove: m.deleteLaunch, add: m.addLaunch, empty: m.none })
+    // What is launched is picked when the launch is added, and kept: another vehicle is another launch.
+    this.list.setKinds(LaunchEditor.VEHICLES.map(vehicle => ({ value: vehicle.id, label: vehicle.vehicle.name ?? vehicle.id })))
     const places = this.element("launch-places")
     this.places = new ElementList({
       header: places, body: this.element("launch-place-parameters"),
@@ -248,13 +250,17 @@ export class LaunchEditor {
     return [{ t: 0, ...at(300), altitudeKm: 80 }, { t: 60000, ...at(450), altitudeKm: 160 }]
   }
 
-  /** Adds a launch of the vehicle most launches are, to be told apart by the fields below. */
-  private addLaunch(): void {
+  /** The vehicles a launch can be added of, by the "+" (see ElementList's kinds): Falcon 9 only, for now, the commonest by far. */
+  static readonly VEHICLES: ReadonlyArray<{ id: string, vehicle: LaunchVehicle }> = [{ id: "falcon-9", vehicle: { name: "Falcon 9" } }]
+
+  /** Adds a launch of `vehicle` (an id of VEHICLES), to be told apart by the fields below. */
+  private addLaunch(vehicle: string): void {
     const track = this.startOfNew()
     if (!track) return
+    const kind = LaunchEditor.VEHICLES.find(candidate => candidate.id === vehicle) ?? LaunchEditor.VEHICLES[0]
     let n = this.launches.length + 1
     while (this.launches.some(launch => launch.id === `launch-${n}`)) n++
-    const launch: LaunchJson = { id: `launch-${n}`, vehicle: { name: "Falcon 9" }, track }
+    const launch: LaunchJson = { id: `launch-${n}`, vehicle: { ...kind.vehicle }, track }
     const sighting = this.host.sighting()
     sighting.skyEvents = { ...sighting.skyEvents, launches: [...this.launches, launch] }
     this.currentId = launch.id

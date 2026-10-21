@@ -151,6 +151,15 @@ ${MessageStyle.rules([], [".model-picker .model-picker-address p"])}
     show()
   }
 
+  /**
+   * Opens the window over the options of `select` to choose one for something not yet made (a body about to be added): what is chosen is
+   * told to `onChosen` and the select is left as it is. With `address`, a model can be given by its address instead, told to it.
+   */
+  chooseFrom(select: HTMLSelectElement, source: ModelSourceOf, onChosen: (value: string) => void, address?: ModelAddressHost): void {
+    this.ensureStyle()
+    this.open(select, source, address, onChosen)
+  }
+
   private ensureStyle(): void {
     const host = this.root instanceof ShadowRoot ? this.root : this.root.getRootNode()
     const container = host instanceof ShadowRoot ? host : document.head
@@ -161,7 +170,7 @@ ${MessageStyle.rules([], [".model-picker .model-picker-address p"])}
     container.append(style)
   }
 
-  private open(select: HTMLSelectElement, source: ModelSourceOf, address?: ModelAddressHost): void {
+  private open(select: HTMLSelectElement, source: ModelSourceOf, address?: ModelAddressHost, onChosen?: (value: string) => void): void {
     const messages = this.messages()
     const backdrop = document.createElement("div")
     backdrop.className = "model-picker-backdrop"
@@ -200,6 +209,10 @@ ${MessageStyle.rules([], [".model-picker .model-picker-address p"])}
     const sourceOf: ModelSourceOf = id => id === ADDRESS_ID && current ? Promise.resolve({ url: current.url }) : source(id)
     const pick = (value: string): void => {
       finish()
+      if (onChosen) {
+        if (value !== ADDRESS_ID) onChosen(value)
+        return
+      }
       if (value === ADDRESS_ID || value === select.value) return
       select.value = value
       select.dispatchEvent(new Event("change", { bubbles: true }))
@@ -210,7 +223,8 @@ ${MessageStyle.rules([], [".model-picker .model-picker-address p"])}
       const element = document.createElement("button")
       element.type = "button"
       element.className = "model-card"
-      element.setAttribute("aria-pressed", String(option.value === ADDRESS_ID || (option.value === select.value && !current)))
+      element.dataset.value = option.value
+      element.setAttribute("aria-pressed", String(!onChosen && (option.value === ADDRESS_ID || (option.value === select.value && !current))))
       const thumb = document.createElement("div")
       thumb.className = "model-thumb"
       const name = document.createElement("span")

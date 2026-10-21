@@ -36,6 +36,8 @@ export interface BodyEditorMessages {
   nextKeyframe: string
   /** {t} is the playhead, in seconds. */
   atPlayhead: string
+  /** Why the model of a body cannot be changed: it is chosen when the body is added. */
+  modelFixed: string
   keyframeHere: string
   keyframeAdded: string
   /** Under the appearance fields. */

@@ -28,6 +28,7 @@ export const bodyEditorMessages_en: BodyEditorMessages = {
   previousKeyframe: "Previous keyframe",
   nextKeyframe: "Next keyframe",
   atPlayhead: "At {t}",
+  modelFixed: "The model is chosen when the body is added: for another one, delete this body and add one with it",
   keyframeHere: "A keyframe stands here: editing changes it",
   keyframeAdded: "Editing adds a keyframe here",
   appearanceNote: "The colour and the albedo paint the built-in shapes; a model of its own keeps its materials. Light of its own is what it gives out, lit or not.",

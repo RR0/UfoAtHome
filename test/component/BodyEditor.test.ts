@@ -54,6 +54,14 @@ class Fixture {
     this.editor = new BodyEditor(this.container, host, "en")
   }
 
+  /** Adds a body as the "+" does: the window of the models opens, and `model` is picked in it. */
+  async add(model = "ellipsoid"): Promise<void> {
+    this.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    await new Promise(resolve => setTimeout(resolve))
+    this.container.querySelector<HTMLButtonElement>(`.model-card[data-value="${model}"]`)!.click()
+    await new Promise(resolve => setTimeout(resolve))
+  }
+
   field(id: string): HTMLInputElement {
     return this.container.querySelector<HTMLInputElement>(`[id="${id}"]`)!
   }
@@ -124,15 +132,17 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.field("body.id").value).toBe("figure-1")
   })
 
-  it("adds a body standing for the selected shape, creating the interpretation a recording lacks", () => {
+  it("adds a body standing for the selected shape, creating the interpretation a recording lacks", async () => {
     const fixture = new Fixture(null)
     expect(fixture.container.querySelector<HTMLElement>("#body-list .element-list-empty")!.hidden).toBe(false)
-    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    await fixture.add()
     expect(fixture.sighting.interpretation).toEqual({
       bodies: [{ id: "body-1", explains: ["flame"], model: { id: "ellipsoid" }, track: [{ t: 2000, azimuthDeg: 120, altitudeDeg: 5, distanceM: 100, sizeM: { widthM: 3, lengthM: 3, heightM: 1 } }] }]
     })
     expect(fixture.field("body.id").value).toBe("body-1")
-    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    // Its model is the one picked when it was added, and the picker shows it without opening: another model is another body.
+    expect(fixture.container.querySelector<HTMLButtonElement>(".model-picker-button")!.disabled).toBe(true)
+    await fixture.add()
     expect(fixture.sighting.interpretation!.bodies.map(body => body.id)).toEqual(["body-1", "body-2"])
   })
 
@@ -151,10 +161,10 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.sighting.interpretation).toEqual({ title: "A hubcap", bodies: [] })
   })
 
-  it("adds a body where the observer is looking when no shape is drawn", () => {
+  it("adds a body where the observer is looking when no shape is drawn", async () => {
     const fixture = new Fixture(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 90, altitudeDeg: -2, onGround: true } }
-    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    await fixture.add()
     expect(fixture.sighting.interpretation!.bodies[0].explains).toBeUndefined()
     expect(fixture.sighting.interpretation!.bodies[0].track).toEqual([{ t: 0, azimuthDeg: 90, altitudeDeg: -2, onGround: true }])
   })
@@ -169,9 +179,7 @@ describe("The Bodies part of the editor", () => {
   it("gives a body a catalogue model's real size, farther along its line of sight so it spans the same angle", async () => {
     const fixture = new Fixture(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 90, altitudeDeg: 10, distanceM: 5, sizeM: { widthM: 0.7, lengthM: 0.7, heightM: 0.4 } } }
-    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
-    await new Promise(resolve => setTimeout(resolve))
-    fixture.type("body-model", "catalogue-airliner")
+    await fixture.add("catalogue-airliner")
     await new Promise(resolve => setTimeout(resolve))
     expect(fixture.sighting.interpretation!.bodies[0].track).toEqual([{ t: 0, azimuthDeg: 90, altitudeDeg: 10, distanceM: 250, sizeM: { widthM: 35, lengthM: 37, heightM: 12 } }])
   })
@@ -264,9 +272,9 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.sighting.interpretation!.bodies[0].track.map(key => key.t)).toEqual([0, 2500])
   })
 
-  it("states a position from the observer in the observer's terms", () => {
+  it("states a position from the observer in the observer's terms", async () => {
     const fixture = new Fixture(null)
-    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    await fixture.add()
     fixture.time = 2000
     fixture.editor.syncKeyframe()
     expect((fixture.field("bodyKey.mode") as unknown as HTMLSelectElement).value).toBe("observer")
@@ -298,25 +306,23 @@ describe("The Bodies part of the editor", () => {
   it("gives a catalogue model's real size to a body that had none", async () => {
     const fixture = new Fixture(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 90, altitudeDeg: 0, distanceM: 100 } }
-    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
-    await new Promise(resolve => setTimeout(resolve))
-    fixture.type("body-model", "catalogue-airliner")
+    await fixture.add("catalogue-airliner")
     await new Promise(resolve => setTimeout(resolve))
     expect(fixture.sighting.interpretation!.bodies[0].track).toEqual([{ t: 0, azimuthDeg: 90, altitudeDeg: 0, distanceM: 100, sizeM: { widthM: 35, lengthM: 37, heightM: 12 } }])
   })
 
-  it("moves a body stated from the observer to the direction it is dragged to, keeping its distance", () => {
+  it("moves a body stated from the observer to the direction it is dragged to, keeping its distance", async () => {
     const fixture = new Fixture(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 10, altitudeDeg: 2, distanceM: 100 } }
-    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    await fixture.add()
     fixture.editor.dragTo(25, 7)
     expect(fixture.sighting.interpretation!.bodies[0].track[0]).toMatchObject({ t: 0, azimuthDeg: 25, altitudeDeg: 7, distanceM: 100 })
   })
 
-  it("slides a body on the ground over the relief, to where the line of sight meets it", () => {
+  it("slides a body on the ground over the relief, to where the line of sight meets it", async () => {
     const fixture = new Fixture(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 10, altitudeDeg: -1, distanceM: 100, onGround: true } }
-    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    await fixture.add()
     fixture.groundM = 64
     fixture.editor.dragTo(12, -2)
     expect(fixture.sighting.interpretation!.bodies[0].track[0]).toMatchObject({ azimuthDeg: 12, altitudeDeg: -2, distanceM: 64, onGround: true })
@@ -334,10 +340,10 @@ describe("The Bodies part of the editor", () => {
     expect(key.northM).toBeCloseTo(eyeNorth + Math.cos(100 * rad) * level, 1)
   })
 
-  it("takes a body nearer or further along its line of sight", () => {
+  it("takes a body nearer or further along its line of sight", async () => {
     const fixture = new Fixture(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 10, altitudeDeg: 2, distanceM: 100 } }
-    fixture.container.querySelector<HTMLButtonElement>("#body-add")!.click()
+    await fixture.add()
     fixture.editor.scaleDistance(1.5)
     expect(fixture.sighting.interpretation!.bodies[0].track[0]).toMatchObject({ azimuthDeg: 10, altitudeDeg: 2, distanceM: 150 })
   })

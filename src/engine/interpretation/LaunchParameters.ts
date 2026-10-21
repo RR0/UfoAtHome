@@ -53,12 +53,7 @@ export class LaunchParameters {
     title: { en: "Launch", fr: "Lancement", es: "Lanzamiento", it: "Lancio" },
     parameters: ([
       { type: "said", key: "title", label: { en: "Name", fr: "Nom", es: "Nombre", it: "Nome" }, group: { en: "Vehicle", fr: "Lanceur", es: "Lanzador", it: "Lanciatore" } },
-      {
-        type: "text", key: "vehicle.name",
-        label: { en: "Vehicle", fr: "Lanceur", es: "Lanzador", it: "Lanciatore" },
-        placeholder: "Falcon 9",
-        group: { en: "Vehicle", fr: "Lanceur", es: "Lanzador", it: "Lanciatore" }
-      },
+      // The vehicle itself is picked when the launch is added (see LaunchEditor.VEHICLES), and kept: another vehicle is another launch.
       {
         type: "text", key: "vehicle.mission",
         label: { en: "Mission", fr: "Mission", es: "Misión", it: "Missione" },

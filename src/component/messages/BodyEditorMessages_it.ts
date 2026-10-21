@@ -28,6 +28,7 @@ export const bodyEditorMessages_it: BodyEditorMessages = {
   previousKeyframe: "Fotogramma chiave precedente",
   nextKeyframe: "Fotogramma chiave successivo",
   atPlayhead: "A {t}",
+  modelFixed: "Il modello si sceglie quando si aggiunge il corpo: per cambiarlo, elimina questo corpo e aggiungine uno con l'altro modello",
   keyframeHere: "Qui c'è un fotogramma chiave: modificarlo lo cambia",
   keyframeAdded: "Modificare aggiunge qui un fotogramma chiave",
   appearanceNote: "Il colore e l'albedo dipingono le forme di base; un modello proprio conserva i suoi materiali. La luce propria è quella che emette, illuminato o no.",

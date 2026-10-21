@@ -7,6 +7,7 @@ import type { SaidTexts } from "../engine/model/SaidText.js"
 import type { DecorModelEntry, DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import type { BodyReading } from "./SceneElement.js"
 import type { ModelPicker } from "./ModelPicker.js"
+import type { ModelSource } from "../render3d/decor/ModelSource.js"
 import { ElementList } from "./ElementList.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
 import { BodyKeyframes, BodyParameterSets } from "../engine/interpretation/BodyParameterSets.js"
@@ -132,9 +133,12 @@ export class BodyEditor {
     if (!body) return
     const t = this.host.currentTime()
     const m = this.messages
-    this.element("body-key-legend").textContent = m.atPlayhead.replace("{t}", BodyEditor.seconds(t))
     const reading = this.host.readingOf(body, t)
     const here = body.track.find(key => key.t === t)
+    // The instant is named above, by the picker of the keyframes, when there is one there: said again it is noise.
+    const legend = this.element("body-key-legend")
+    legend.textContent = m.atPlayhead.replace("{t}", BodyEditor.seconds(t))
+    legend.hidden = here !== undefined
     this.element("body-key-note").textContent = !reading ? m.notPlaced : here ? m.keyframeHere : m.keyframeAdded
     this.keyList?.setItems(body.track.map(key => ({ id: String(key.t), label: BodyEditor.seconds(key.t) })), here ? String(here.t) : "")
     this.keyList?.setAddState(reading !== undefined && here === undefined)
@@ -209,7 +213,7 @@ export class BodyEditor {
       ids: { list: "body-select", remove: "body-delete", add: "body-add" },
       actions: [{ id: "body-look", glyph: "🎯", onClick: () => { const body = this.current; if (body) this.host.lookAt(body) } }],
       onSelect: id => { this.currentId = id; this.sync() },
-      onAdd: () => this.addBody(),
+      onAdd: () => void this.addBody(),
       onRemove: () => this.deleteCurrent()
     })
     this.list.setLabels({ list: m.body, remove: m.deleteBody, add: m.addBody, empty: m.none, actions: { "body-look": m.lookAtBody } })
@@ -238,9 +242,7 @@ export class BodyEditor {
     })
     this.keyList.setLabels({ list: m.keyframes, remove: m.deleteKeyframe, add: m.addKeyframe, none: m.noKeyframeHere, previous: m.previousKeyframe, next: m.nextKeyframe })
     // The drop-down gives way to a window of pictures, over the same options and the same "change".
-    this.host.modelPicker().enhance(this.select("body-model"), async id => (BODY_PRIMITIVES as readonly string[]).includes(id)
-      ? { shape: id as BodyPrimitive }
-      : this.host.modelProvider().entry(id).then(entry => entry && { url: entry.url, headingOffsetDeg: entry.headingOffsetDeg }), {
+    this.host.modelPicker().enhance(this.select("body-model"), id => this.modelSourceOf(id), {
       current: () => {
         const model = this.current?.model
         return model?.url === undefined ? undefined : {
@@ -261,6 +263,13 @@ export class BodyEditor {
         void this.syncModelOptions(this.current!)
       }
     })
+    // A body's model is chosen when it is added (see addBody) and kept: another model is another body. The picker shows it, and does not open.
+    const shown = this.select("body-model").nextElementSibling as HTMLButtonElement | null
+    if (shown) {
+      shown.disabled = true
+      shown.title = m.modelFixed
+    }
+    this.input("body-model-url").readOnly = true
     // The properties of the body and of its instant: drawn from what a body says it has, and written as they are typed.
     const values = { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() }
     this.bodyForm = new ParameterForm(this.element("body-parameters"), this.language, "body.", values)
@@ -383,16 +392,54 @@ export class BodyEditor {
    * keyframe, so it stays where it was put. The observer's interpretation is created with it when
    * the recording has none.
    */
-  private addBody(): void {
+  /**
+   * The "+" of the bodies: the window of the models opens at once, and the body is made with the model chosen in it (a built-in shape, a
+   * catalogue model, or one given by its address). Its model is then its own: another model is another body (see sync).
+   */
+  private async addBody(): Promise<void> {
+    if (!this.host.newBodyStart()) return
+    const m = this.messages
+    const entries = await this.host.modelProvider().entries().catch(() => [])
+    const choices = document.createElement("select")
+    const primitives = document.createElement("optgroup")
+    primitives.label = m.primitives
+    primitives.append(...BODY_PRIMITIVES.map(primitive => new Option(m.primitive[primitive], primitive)))
+    const catalogue = document.createElement("optgroup")
+    catalogue.label = m.catalogue
+    catalogue.append(...entries.map(entry => new Option(entry.name, entry.id)))
+    choices.append(primitives, catalogue)
+    this.host.modelPicker().chooseFrom(choices, id => this.modelSourceOf(id), id => {
+      this.createBody({ id })
+      if (!(BODY_PRIMITIVES as readonly string[]).includes(id)) void this.adoptCatalogueSize(id)
+    }, {
+      current: () => undefined,
+      apply: address => this.createBody({
+        url: address.url,
+        credit: address.title !== "" && address.license !== ""
+          ? { title: address.title, license: address.license, author: address.author || undefined, sourceUrl: address.source || undefined }
+          : undefined
+      })
+    })
+  }
+
+  /** Adds a body drawn as `model`, standing for the shape picked (or where the observer looks), and shows it. */
+  private createBody(model: DecorModelRef): void {
     const start = this.host.newBodyStart()
     if (!start) return
     const ids = new Set(this.bodies.map(body => body.id))
     let n = ids.size + 1
     while (ids.has(`body-${n}`)) n++
-    const body: BodyJson = { id: `body-${n}`, explains: start.sourceId !== undefined ? [start.sourceId] : undefined, model: { id: "ellipsoid" }, track: [start.keyframe] }
+    const body: BodyJson = { id: `body-${n}`, explains: start.sourceId !== undefined ? [start.sourceId] : undefined, model, track: [start.keyframe] }
     this.currentId = body.id
     const interpretation = this.interpretation ?? { bodies: [] }
     this.write({ ...interpretation, bodies: [...this.bodies, body] }, true)
+  }
+
+  /** What a model of the window is made from, to draw its picture. */
+  private modelSourceOf(id: string): Promise<ModelSource | undefined> {
+    return (BODY_PRIMITIVES as readonly string[]).includes(id)
+      ? Promise.resolve({ shape: id as BodyPrimitive })
+      : this.host.modelProvider().entry(id).then(entry => entry && { url: entry.url, headingOffsetDeg: entry.headingOffsetDeg })
   }
 
   /**
