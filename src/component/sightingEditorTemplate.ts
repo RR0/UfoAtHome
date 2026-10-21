@@ -138,6 +138,13 @@ export const html = `
   </div>
 </section>
 <section class="group-panel" id="group-location" aria-labelledby="label-location-group" hidden>
+  <!-- Where the data of this group is read from, one kind at a time (see SightingEditorElement.sourcePickers): out of the way of what
+       the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
+  <button class="group-settings" type="button" id="location-settings-button" popovertarget="location-settings" style="anchor-name: --location-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
+  <div class="group-settings-panel" id="location-settings" popover style="position-anchor: --location-settings" role="dialog" aria-labelledby="label-location-settings">
+    <div class="group-settings-title" id="label-location-settings">Data sources</div>
+    <div id="terrain-source-rows" class="terrain-source-rows"></div>
+  </div>
   <div class="toolbar">
     <!-- An account names a place, it doesn't give coordinates ("on the Valensole plateau", never
          43.8379 / 5.9840) — so the name is what this group asks for first, and the latitude and
@@ -169,9 +176,6 @@ export const html = `
     <!-- Where that figure came from: "18.79 according to [World Atlas 2015]" while the atlas owns it,
          nothing once the author has typed their own (see SightingEditorElement.lookUpLightPollution). -->
     <output id="light-pollution-status" class="place-status" for="lightPollution"><span id="light-pollution-status-text"></span><span id="light-pollution-source-row" class="inline-source" hidden></span></output>
-    <!-- Relief and imagery describe the ground at the location above, so they are chosen here
-         rather than in a drawer of their own — same reasoning as the place picker's placement. -->
-    <div id="terrain-source-rows" class="terrain-source-rows"></div>
   </div>
 </section>
 <!-- Its own group, no longer a fieldset nested inside Location. What stands around the observer is
@@ -180,6 +184,13 @@ export const html = `
      a time, the one that alone still overflowed a phone. Split out, neither half does. The two
      stay adjacent because a decor object is placed RELATIVE to the location above it. -->
 <section class="group-panel" id="group-decor" aria-labelledby="label-decor-group" hidden>
+  <!-- Where the data of this group is read from, one kind at a time (see SightingEditorElement.sourcePickers): out of the way of what
+       the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
+  <button class="group-settings" type="button" id="decor-settings-button" popovertarget="decor-settings" style="anchor-name: --decor-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
+  <div class="group-settings-panel" id="decor-settings" popover style="position-anchor: --decor-settings" role="dialog" aria-labelledby="label-decor-settings">
+    <div class="group-settings-title" id="label-decor-settings">Data sources</div>
+    <div id="decor-source-rows" class="terrain-source-rows"></div>
+  </div>
   <div class="toolbar">
     <!-- The list of the decor, laid out as every list of the editor is (see ElementList): the picker, 🎯, 🗑, then the kind to add and
          "+", on one line; under it, the frame of everything that is set on the picked object, gone while there is none. -->
@@ -200,9 +211,6 @@ export const html = `
          and lines, or that the survey could not be reached. Empty where no survey covers the place, which is most of the world. It sits
          on a line of its own, below what the list of the decor draws, and is read out by whoever listens to the page. -->
     <div id="scenery" class="decor-scenery">
-      <!-- The data of the environment, one kind at a time, as the Location group's (see SightingEditorElement.sourcePickers): the scenery,
-           whose picker is this one, the air traffic and the 3D models. -->
-      <div id="decor-source-rows" class="terrain-source-rows"></div>
       <span id="scenery-picker"><span id="label-scenery-source" hidden>Scenery survey</span><select id="scenery-source"><option value="none" id="option-scenery-none">None (all by hand)</option></select>
       <label id="scenery-radius-row"><span id="label-scenery-radius">Radius</span> <input type="number" id="scenery-radius" min="20" max="3000" step="10" value="100"/> m</label>
       <button id="scenery-file-link" type="button" class="source-file-link" hidden></button></span>
@@ -322,6 +330,13 @@ export const html = `
   <div id="file-editor" class="file-editor"></div>
 </section>
 <section class="group-panel" id="group-weather" aria-labelledby="label-weather-group" hidden>
+  <!-- Where the data of this group is read from, one kind at a time (see SightingEditorElement.sourcePickers): out of the way of what
+       the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
+  <button class="group-settings" type="button" id="weather-settings-button" popovertarget="weather-settings" style="anchor-name: --weather-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
+  <div class="group-settings-panel" id="weather-settings" popover style="position-anchor: --weather-settings" role="dialog" aria-labelledby="label-weather-settings">
+    <div class="group-settings-title" id="label-weather-settings">Data sources</div>
+    <div id="weather-source-rows" class="terrain-source-rows"></div>
+  </div>
   <div class="toolbar">
     <!-- Weather is the one thing in this editor that isn't account: it's a measurable fact about
          a place at an instant, and the Location and Temporal groups above already state both. So
@@ -333,9 +348,6 @@ export const html = `
       <!-- Where the weather is read from: a record, asked again whenever the date or the place change, or the recording's own file,
            where the observer's account or a record asked once is kept and never asked again. The box under it is what the editor
            reasons on (see onWeatherInferredToggled): the picker ticks it for a record and unticks it for the file. -->
-      <!-- The data of the weather, one kind at a time, as the Location group's (see SightingEditorElement.sourcePickers): the weather itself,
-           whose picker is this one, and the air aloft. -->
-      <div id="weather-source-rows" class="terrain-source-rows"></div>
       <span id="weather-picker"><span id="label-weather-inferred" hidden>Source</span><select id="weatherSource"></select> <a id="weather-credit" class="source-credit" target="_blank" rel="noopener noreferrer"></a><button id="weather-file-link" type="button" class="source-file-link" hidden></button></span>
       <input id="weatherInferred" type="checkbox" checked hidden/>
       <!-- Clamped to one line unless the reader asks for the rest (see #sky-details below). What
@@ -525,17 +537,17 @@ export const html = `
   <!-- What happened in the sky while the recording runs, as facts (see SkyEventsJson): neither the decor, which outlasts the observation,
        nor the interpretation, which reads the account. -->
   <div class="group-tabs" id="sky-tabs">
-    <button class="subgroup-tab" type="button" aria-controls="sky-beams" aria-expanded="true"><span id="label-beams-subgroup">Beams</span></button>
-    <button class="subgroup-tab" type="button" aria-controls="sky-launches" aria-expanded="false"><span id="label-launches-subgroup">Launches</span></button>
+    <button class="subgroup-tab" type="button" aria-controls="sky-launches" aria-expanded="true"><span id="label-launches-subgroup">Launches</span></button>
+    <button class="subgroup-tab" type="button" aria-controls="sky-beams" aria-expanded="false"><span id="label-beams-subgroup">Beams</span></button>
   </div>
-  <section class="subgroup-panel" id="sky-beams" aria-labelledby="label-beams-subgroup">
-    <div class="toolbar">
-      <style>#beam-editor { flex-basis: 100%; min-width: 0; } #beam-editor #beam-list, #beam-editor #beam-places { flex-basis: 100%; min-width: 0; } #beam-editor .launch-editor, #beam-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #beam-editor .launch-fields { flex-basis: 100%; min-width: 0; } #beam-editor [hidden] { display: none !important; } #beam-editor select { min-width: 0; width: 100%; } #beam-editor .launch-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #beam-editor .launch-track { flex-basis: 100%; margin: 0; } #beam-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } #beam-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } #beam-editor input, #beam-editor select { max-width: 100%; box-sizing: border-box; } #beam-editor input[type="text"] { width: 12em; } #beam-editor #launch-title { width: 18em; } #beam-editor label { min-width: 0; max-width: 100%; } #beam-editor input.parameter-derived::placeholder { opacity: .65; } #beam-editor .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }</style><div id="beam-editor"></div>
-    </div>
-  </section>
-  <section class="subgroup-panel" id="sky-launches" aria-labelledby="label-launches-subgroup" hidden>
+  <section class="subgroup-panel" id="sky-launches" aria-labelledby="label-launches-subgroup">
     <div class="toolbar">
       <style>#launch-editor { flex-basis: 100%; min-width: 0; } #launch-editor #launch-list, #launch-editor #launch-places { flex-basis: 100%; min-width: 0; } #launch-editor .launch-editor, #launch-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #launch-editor .launch-fields { flex-basis: 100%; min-width: 0; } #launch-editor [hidden] { display: none !important; } #launch-editor select { min-width: 0; width: 100%; } #launch-editor .launch-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #launch-editor .launch-track { flex-basis: 100%; margin: 0; } #launch-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } #launch-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } #launch-editor input, #launch-editor select { max-width: 100%; box-sizing: border-box; } #launch-editor input[type="text"] { width: 12em; } #launch-editor #launch-title { width: 18em; } #launch-editor label { min-width: 0; max-width: 100%; } #launch-editor input.parameter-derived::placeholder { opacity: .65; } #launch-editor .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }</style><div id="launch-editor"></div>
+    </div>
+  </section>
+  <section class="subgroup-panel" id="sky-beams" aria-labelledby="label-beams-subgroup" hidden>
+    <div class="toolbar">
+      <style>#beam-editor { flex-basis: 100%; min-width: 0; } #beam-editor #beam-list, #beam-editor #beam-places { flex-basis: 100%; min-width: 0; } #beam-editor .launch-editor, #beam-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #beam-editor .launch-fields { flex-basis: 100%; min-width: 0; } #beam-editor [hidden] { display: none !important; } #beam-editor select { min-width: 0; width: 100%; } #beam-editor .launch-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #beam-editor .launch-track { flex-basis: 100%; margin: 0; } #beam-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } #beam-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } #beam-editor input, #beam-editor select { max-width: 100%; box-sizing: border-box; } #beam-editor input[type="text"] { width: 12em; } #beam-editor #launch-title { width: 18em; } #beam-editor label { min-width: 0; max-width: 100%; } #beam-editor input.parameter-derived::placeholder { opacity: .65; } #beam-editor .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }</style><div id="beam-editor"></div>
     </div>
   </section>
 </section>
@@ -1143,6 +1155,25 @@ select.weather-field:disabled {
    declaration outranks the UA one and every panel is permanently open, with the attribute set and
    nothing happening. This component has already been bitten by exactly that once (.icon-btn), so
    the guard is written down. */
+/* The gear of a group whose data comes from somewhere (see the group-settings buttons): at its top right, the group's fields kept clear of it. */
+.group-panel { position: relative; }
+.group-panel > .group-settings {
+  position: absolute; top: 4px; right: 4px; z-index: 1;
+  display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0;
+  border: 1px solid transparent; border-radius: 4px; background: none; color: inherit; opacity: .7; cursor: pointer;
+}
+.group-panel > .group-settings:hover, .group-panel > .group-settings:focus-visible { opacity: 1; border-color: color-mix(in srgb, CanvasText 35%, transparent); }
+.group-panel:has(> .group-settings) > .toolbar:first-of-type { padding-right: 32px; }
+.group-settings-panel {
+  padding: .6em .8em; border: 1px solid color-mix(in srgb, CanvasText 30%, transparent); border-radius: 4px;
+  background: Canvas; color: CanvasText; box-shadow: 0 2px 8px rgba(0, 0, 0, .25); max-width: min(32em, 92vw);
+}
+.group-settings-panel:popover-open { display: flex; flex-direction: column; gap: .5em; }
+@supports (position-area: bottom span-left) {
+  .group-settings-panel:popover-open { inset: auto; position-area: bottom span-left; margin: .2em 0 0 0; }
+}
+.group-settings-title { font-weight: 600; font-size: .9em; }
+.group-settings-panel .terrain-source-rows { flex-direction: column; align-items: flex-start; }
 .group-panel[hidden], .subgroup-panel[hidden] {
   display: none;
 }
@@ -1700,7 +1731,7 @@ select.weather-field:disabled {
   background: light-dark(#eef, #3a3d46);
 }
 ${MessageStyle.rules(
-  ["#scenery-status", ".apparent-size", ".place-status", ".ground-elevation", ".weather-source", ".file-note", ".frozen-note", ".frozen-group-state", "#observer-identity-hint", "#narrative-status", "#cloud-status", "#body-key-note", "#body-editor .body-intro"],
+  ["#scenery-status", ".apparent-size", ".place-status", ".ground-elevation", ".weather-source", ".file-note", ".frozen-note", ".frozen-group-state", "#observer-identity-hint", "#narrative-status", "#cloud-status", "#body-key-note", "#body-editor .body-intro", ".launch-intro"],
   [".scenery-warning"],
   ["#narrative-status.error"]
 )}

@@ -9670,6 +9670,13 @@ export class SightingEditorElement extends HTMLElement {
     this.labelLaunchesSubgroup.textContent = messages.launchesSubgroup
     this.labelBeamsSubgroup.textContent = messages.beamsSubgroup
     this.labelSkyGroup.textContent = messages.sky
+    for (const group of ["location", "decor", "weather"]) {
+      const button = this.shadow.getElementById(`${group}-settings-button`)
+      button?.setAttribute("title", messages.dataSources)
+      button?.setAttribute("aria-label", messages.dataSources)
+      const title = this.shadow.getElementById(`label-${group}-settings`)
+      if (title) title.textContent = messages.dataSources
+    }
     this.bodyEditor?.setLanguage(this.language)
     void this.launchEditor?.setLanguage(this.language)
     void this.beamEditor?.setLanguage(this.language)

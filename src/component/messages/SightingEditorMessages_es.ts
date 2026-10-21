@@ -158,6 +158,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   bodiesSubgroup: "Cuerpos",
   launchesSubgroup: "Lanzamientos",
   sky: "Cielo",
+  dataSources: "Fuentes de datos",
   beamsSubgroup: "Haces",
   soundGroup: "Sonido",
   temporalGroup: "Fecha",
