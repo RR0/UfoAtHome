@@ -19,8 +19,7 @@ export interface PickerNode {
 
 const STYLE = `
 rr0-popover-picker { display: inline-block; }
-rr0-popover-picker .pp-trigger { anchor-name: --rr0-popover-picker; font: inherit; text-align: left; max-width: 100%; cursor: pointer; }
-rr0-popover-picker .pp-trigger::after { content: " ▾"; opacity: .6; }
+rr0-popover-picker .pp-trigger { anchor-name: --rr0-popover-picker; font-family: inherit; text-align: left; max-width: 100%; cursor: pointer; }
 rr0-popover-picker .pp-panel { padding: .3em 0; border: 1px solid light-dark(#ccc, #4a4c52); border-radius: 4px; background: light-dark(#fff, #1e1f22); color: light-dark(#222, #e6e6e6); max-height: 60vh; overflow-y: auto; box-shadow: 0 2px 8px rgba(0, 0, 0, .25); font-size: .9em; }
 @supports (position-area: bottom span-right) {
   rr0-popover-picker .pp-panel:popover-open { position-anchor: --rr0-popover-picker; inset: auto; position-area: bottom span-right; margin: .2em 0 0 0; }
@@ -63,7 +62,8 @@ export class PopoverPickerElement extends HTMLElement {
     style.textContent = STYLE
     const trigger = doc.createElement("button")
     trigger.type = "button"
-    trigger.className = "pp-trigger"
+    // Drawn as every select is, its arrow included (see InputFont.PICKER).
+    trigger.className = "pp-trigger rr0-select"
     const panel = doc.createElement("div")
     panel.className = "pp-panel"
     panel.setAttribute("popover", "")
