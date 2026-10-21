@@ -421,8 +421,8 @@ export interface RoadSignFace {
 
 /** What a building's roof is: the plain box a building is drawn as has a flat one. */
 export interface DecorRoof {
-  /** "flat" is the box; "gable" rises to a ridge along the building's longer side; "hip" slopes down on all four. Absent is flat. */
-  shape?: "flat" | "gable" | "hip"
+  /** "flat" is the box; "gable" rises to a ridge along the building's longer side; "hip" slopes down on all four; "dome" is a cupola over the ellipse the walls hold. Absent is flat. */
+  shape?: "flat" | "gable" | "hip" | "dome"
   /** Which side of the building a gable's ridge runs along: "width" (the longer side, the default) or "depth". Ignored for the other shapes. */
   ridge?: "width" | "depth"
   /** How far the ridge stands above the eaves, metres. `sizeM.heightM` is the height to the ridge, so the walls are that less. Zero for a flat roof; a pitched roof that states none rises 3 m. */

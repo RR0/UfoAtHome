@@ -19,6 +19,16 @@ describe("RoofGeometry", () => {
     expect(gable.max.z - gable.min.z).toBeCloseTo(8 + 2 * OVER)
   })
 
+  it("raises a dome over the ellipse the walls hold, on a slab that covers the corners", () => {
+    const dome = box({ shape: "dome", riseM: 8 }, 16, 16)
+    expect(dome.min.y).toBeCloseTo(0)
+    expect(dome.max.y).toBeCloseTo(RoofGeometry.SLAB_M + 8)
+    expect(dome.max.x - dome.min.x).toBeCloseTo(16 + 2 * OVER)
+    // The crown is in the middle, and nothing of the dome stands out of the walls.
+    const at = RoofGeometry.build({ shape: "dome", riseM: 8 }, 16, 16).getAttribute("position")
+    for (let i = 0; i < at.count; i++) if (at.getY(i) > RoofGeometry.SLAB_M + 1e-6) expect(Math.hypot(at.getX(i), at.getZ(i))).toBeLessThanOrEqual(8 + 1e-6)
+  })
+
   it("runs a gable's ridge the length of the width, and a ridge along the depth the other way", () => {
     const along = RoofGeometry.build({ shape: "gable", riseM: 3 }, 12, 8)
     const ridge = (geometry: typeof along): { x: number[], z: number[] } => {

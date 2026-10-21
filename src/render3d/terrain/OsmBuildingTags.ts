@@ -10,7 +10,7 @@ import type { BuildingMaterial } from "./SurroundingsProvider.js"
  */
 export class OsmBuildingTags {
   private static readonly ROOF_SHAPES: Record<string, DecorRoof["shape"]> = {
-    flat: "flat", gabled: "gable", gambrel: "gable", saltbox: "gable", "half-hipped": "hip", hipped: "hip", pyramidal: "hip", mansard: "hip", round: "gable"
+    flat: "flat", gabled: "gable", gambrel: "gable", saltbox: "gable", "half-hipped": "hip", hipped: "hip", pyramidal: "hip", mansard: "hip", round: "gable", dome: "dome", onion: "dome"
   }
   private static readonly WALL_MATERIALS: Record<string, BuildingMaterial> = {
     brick: "brick", stone: "stone", granite: "stone", sandstone: "stone", limestone: "stone", concrete: "concrete", cement_block: "block", block: "block", wood: "wood", timber_framing: "wood"

@@ -49,7 +49,16 @@ export class BeamSystem {
   private static readonly MAX_SEGMENTS = 6000
   /** The least a ribbon is drawn across, in pixels, edge to edge (see ContrailSystem.MIN_PIXELS). */
   private static readonly MIN_PIXELS = 2
-  private static readonly VERTICES_PER_SEGMENT = 12
+  /** Two ribbons, the line and its halo, of two strips of two triangles each. */
+  private static readonly VERTICES_PER_SEGMENT = 24
+  /**
+   * How far round the beam its halo spreads, metres, and the share of its light the halo carries: the light the haze sends off the beam a
+   * second time, close round it, which the photographs of the Meudon shot show as a faint glow beside the line near the building. A width in
+   * metres and not in degrees: a few metres off the halo is a band beside the line, a kilometre off it is narrower than a pixel and part of the
+   * line. Both are judged on the photographs, not computed: multiple scattering is not modelled.
+   */
+  static readonly HALO_RADIUS_M = 0.3
+  static readonly HALO_SHARE = 0.15
   /** The most a pixel is ever given, relative: under a half float's largest (see PlumeSystem.BRIGHTEST_RELATIVE). */
   private static readonly BRIGHTEST_RELATIVE = 60000
 
@@ -145,37 +154,44 @@ export class BeamSystem {
     const coefficients = LaserBeamSighting.coefficientsAt(frame.air, wavelengthNm, (a.altitudeM + b.altitudeM) / 2)
     const scattered = LaserBeamSighting.phasedScattering(coefficients, cosTurn)
     const through = frame.transmittanceTo(mid.x, mid.y, mid.z)
-    const endOf = (point: Placed) => {
-      const pointDistance = Math.hypot(point.x - frame.eye.x, point.y - frame.eye.y, point.z - frame.eye.z)
-      const shown = Math.max(point.widthM, BeamSystem.MIN_PIXELS * frame.pixelRad * pointDistance)
+    const minShownAt = (point: Placed): number => BeamSystem.MIN_PIXELS * frame.pixelRad * Math.hypot(point.x - frame.eye.x, point.y - frame.eye.y, point.z - frame.eye.z)
+    // The halo, which a picture shows only where it is wider than the line: farther off, its light is the line's.
+    const haloShare = (point: Placed): number => point.widthM + 2 * BeamSystem.HALO_RADIUS_M > minShownAt(point) ? BeamSystem.HALO_SHARE : 0
+    const endOf = (point: Placed, widthM: number, share: number) => {
+      const shown = Math.max(widthM, minShownAt(point))
       // A ribbon that fades from its middle to nothing at its edges carries half the light of a flat one as wide: its middle is twice as bright.
-      const luminance = 2 * LaserBeamSighting.luminanceCdM2(point.powerW, wavelengthNm, scattered, shown, sinTurn)
+      const luminance = 2 * share * LaserBeamSighting.luminanceCdM2(point.powerW, wavelengthNm, scattered, shown, sinTurn)
       const level = colour.map((channel, c) => Math.min(BeamSystem.BRIGHTEST_RELATIVE, luminance * frame.relativeScale * channel * through[c])) as [number, number, number]
       const toPoint = { x: frame.eye.x - point.x, y: frame.eye.y - point.y, z: frame.eye.z - point.z }
       const across = this.normalise(this.cross(along, toPoint))
       return { point, half: shown / 2, level, across }
     }
-    const ends = [endOf(a), endOf(b)]
-    if (ends.every(end => Math.max(...end.level) <= 0)) return vertex
-    const corner = (end: (typeof ends)[number], edge: number): void => {
-      const i = vertex * 3
-      this.positions[i] = end.point.x + end.across.x * end.half * edge
-      this.positions[i + 1] = end.point.y + end.across.y * end.half * edge
-      this.positions[i + 2] = end.point.z + end.across.z * end.half * edge
-      const lit = edge === 0 ? 1 : 0
-      this.colors[i] = end.level[0] * lit
-      this.colors[i + 1] = end.level[1] * lit
-      this.colors[i + 2] = end.level[2] * lit
-      vertex++
-    }
-    const [start, end] = ends
-    for (const outer of [-1, 1] as const) {
-      corner(start, outer)
-      corner(start, 0)
-      corner(end, outer)
-      corner(start, 0)
-      corner(end, 0)
-      corner(end, outer)
+    const ribbons = [
+      [endOf(a, a.widthM, 1 - haloShare(a)), endOf(b, b.widthM, 1 - haloShare(b))],
+      [endOf(a, a.widthM + 2 * BeamSystem.HALO_RADIUS_M, haloShare(a)), endOf(b, b.widthM + 2 * BeamSystem.HALO_RADIUS_M, haloShare(b))]
+    ]
+    for (const ends of ribbons) {
+      if (ends.every(end => Math.max(...end.level) <= 0)) continue
+      const corner = (end: (typeof ends)[number], edge: number): void => {
+        const i = vertex * 3
+        this.positions[i] = end.point.x + end.across.x * end.half * edge
+        this.positions[i + 1] = end.point.y + end.across.y * end.half * edge
+        this.positions[i + 2] = end.point.z + end.across.z * end.half * edge
+        const lit = edge === 0 ? 1 : 0
+        this.colors[i] = end.level[0] * lit
+        this.colors[i + 1] = end.level[1] * lit
+        this.colors[i + 2] = end.level[2] * lit
+        vertex++
+      }
+      const [start, finish] = ends
+      for (const outer of [-1, 1] as const) {
+        corner(start, outer)
+        corner(start, 0)
+        corner(finish, outer)
+        corner(start, 0)
+        corner(finish, 0)
+        corner(finish, outer)
+      }
     }
     return vertex
   }

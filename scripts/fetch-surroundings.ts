@@ -13,7 +13,9 @@
  * a witness driving three kilometres sees the buildings of the whole three, and the scenery is asked for as many as the path is long. Objects are in
  * metres from the first place, the observer's place at the start of the recording.
  *
- * No street lamps are asked for: whether a town's lamps are lit at the hour of a recording is the recording's to say, and a frozen scene should not light a night it cannot vouch for.
+ * No street lamps are asked for unless `--lamps` says so: whether a town's lamps are lit at the hour of a recording is the recording's to say, and a frozen
+ * scene should not light a night it cannot vouch for. With `--lamps`, the public lamps, traffic lights, crossings and signs of the volunteers' map (and of
+ * a town's own inventory where one covers the place) are added, as the editor's survey adds them.
  *
  * The result is the survey of the day it is run, with the days the services say they were flown or drawn (`dates`): a recording that carries it says so in its
  * sources, and the scenery stays what it was when frozen, so that a recording does not change under its readers when the IGN's data does.
@@ -27,6 +29,8 @@ import { dirname } from "node:path"
 import { promisify } from "node:util"
 import { IgnLidarSurroundingsProvider } from "../src/render3d/terrain/providers/IgnLidarSurroundingsProvider.js"
 import { IgnLidarTopoSurroundingsProvider } from "../src/render3d/terrain/providers/IgnLidarTopoSurroundingsProvider.js"
+import { OsmStreetFurniture } from "../src/render3d/terrain/providers/OsmStreetFurniture.js"
+import { SurroundingsSources } from "../src/render3d/terrain/surroundingsSources.js"
 import { readFile } from "node:fs/promises"
 import { SurroundingsCorridor } from "../src/render3d/terrain/SurroundingsCorridor.js"
 import { SurveyedDecor } from "../src/render3d/terrain/SurveyedDecor.js"
@@ -80,13 +84,16 @@ class SurroundingsFetch {
     const along = args.indexOf("--along")
     const recording = along >= 0 ? args[along + 1] : undefined
     const woods = args.flatMap((arg, i) => arg === "--wood" ? [args[i + 1].split(",").map(Number)] : [])
-    const rest = args.filter((arg, i) => arg !== "--wood" && args[i - 1] !== "--wood")
+    const lamps = args.includes("--lamps")
+    const rest = args.filter((arg, i) => arg !== "--wood" && args[i - 1] !== "--wood" && arg !== "--lamps")
     const alongAt = rest.indexOf("--along")
     const [out, lat, lng, radius] = alongAt >= 0 ? rest.filter((_, i) => i !== alongAt && i !== alongAt + 1) : rest
     if (!out || !lat || !lng) throw new Error("usage: fetch-surroundings.ts <out.json> <lat> <lng> [radiusM] [--along <recording.json>]")
     const centre = { lat: Number(lat), lng: Number(lng) }
     const radiusM = radius ? Number(radius) : 100
-    const provider = new IgnLidarTopoSurroundingsProvider({ fetchImpl: SurroundingsFetch.curlFetch })
+    // The French instance of the map's server refuses scripts (a list of allowed callers): the general one is asked.
+    const furniture = lamps ? new OsmStreetFurniture({ fetchImpl: SurroundingsFetch.curlFetch, endpoints: ["https://overpass-api.de/api/interpreter"] }, SurroundingsSources.TOWN_LAMPS, SurroundingsSources.TOWN_SIGNALS) : undefined
+    const provider = new IgnLidarTopoSurroundingsProvider({ fetchImpl: SurroundingsFetch.curlFetch }, furniture)
     let found
     if (recording) {
       const track = JSON.parse(await readFile(recording, "utf8")).observerTrack?.keyframes ?? []
@@ -111,7 +118,7 @@ class SurroundingsFetch {
       decor: planted
     }, null, 1) + "\n", "utf8")
     const count = (kind: string): number => planted.filter(object => object.kind === kind).length
-    console.log(`${out}: trees ${count("tree")}, buildings ${count("building")}, bridges ${count("bridge")}, lines ${count("wire")}`)
+    console.log(`${out}: trees ${count("tree")}, buildings ${count("building")}, bridges ${count("bridge")}, lines ${count("wire")}, lamps ${count("streetlight")}`)
   }
 }
 

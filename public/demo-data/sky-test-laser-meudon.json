@@ -19,12 +19,12 @@
   "year": 2026,
   "month": 10,
   "day": 9,
-  "hour": 21,
-  "minute": 0,
+  "hour": 19,
+  "minute": 40,
   "second": 0
  },
  "utcOffsetHours": 2,
- "durationSeconds": 60,
+ "durationSeconds": 90,
  "place": [
   {
    "lat": 48.8054,
@@ -38,23 +38,24 @@
     "t": 0,
     "weather": {
      "cloudCover": {
-      "value": 0.9,
-      "basis": "assumed",
-      "rationale": "The photograph taken from Meudon towards Paris shows a low overcast lit from below by the city, broken in places."
+      "value": 1.0,
+      "basis": "stated",
+      "rationale": "Open-Meteo's archive (ERA5) gives 98 to 100 % between 19:00 and 20:00 that day at Meudon; the photographs show an overcast."
      },
      "cloudDarkness": 0.3,
      "cloudBaseM": {
       "value": 1200,
       "basis": "assumed",
-      "rationale": "A low deck, as the photograph shows it lit by the city."
+      "rationale": "A low deck, as the photograph from Meudon shows it lit by the city."
      },
-     "lowerCloudCover": 0.9,
+     "lowerCloudCover": 0.85,
      "highCloudCover": 0,
      "precipitationType": "none",
      "precipitationIntensity": 0,
      "windDirectionDeg": 0,
      "windSpeed": 0,
-     "storm": false
+     "storm": false,
+     "relativeHumidity": 0.84
     }
    }
   ]
@@ -77,42 +78,64 @@
      "lat": 48.8054,
      "lng": 2.233,
      "elevationM": 0,
+     "fovDeg": 30,
      "headingDeg": 52,
-     "pitchDeg": 4,
-     "fovDeg": 60
+     "pitchDeg": 4
     }
    },
    {
-    "t": 20000,
+    "t": 15000,
     "pose": {
      "lat": 48.8054,
      "lng": 2.233,
      "elevationM": 0,
-     "headingDeg": 30,
-     "pitchDeg": 25,
-     "fovDeg": 60
+     "fovDeg": 30,
+     "headingDeg": 52,
+     "pitchDeg": 4
     }
    },
    {
-    "t": 40000,
+    "t": 30000,
     "pose": {
      "lat": 48.8054,
      "lng": 2.233,
      "elevationM": 0,
-     "headingDeg": 60,
-     "pitchDeg": 3,
-     "fovDeg": 60
+     "fovDeg": 30,
+     "headingDeg": 20,
+     "pitchDeg": 25
+    }
+   },
+   {
+    "t": 35000,
+    "pose": {
+     "lat": 48.8054,
+     "lng": 2.233,
+     "elevationM": 0,
+     "fovDeg": 30,
+     "headingDeg": 230,
+     "pitchDeg": 8
     }
    },
    {
     "t": 60000,
     "pose": {
-     "lat": 48.8054,
-     "lng": 2.233,
+     "lat": 48.8056,
+     "lng": 2.2318,
      "elevationM": 0,
-     "headingDeg": 60,
-     "pitchDeg": 3,
-     "fovDeg": 60
+     "fovDeg": 30,
+     "headingDeg": 221,
+     "pitchDeg": 10
+    }
+   },
+   {
+    "t": 90000,
+    "pose": {
+     "lat": 48.8056,
+     "lng": 2.2318,
+     "elevationM": 0,
+     "fovDeg": 30,
+     "headingDeg": 221,
+     "pitchDeg": 10
     }
    }
   ]
@@ -120,7 +143,9442 @@
  "soundTrack": {
   "keyframes": []
  },
- "decor": [],
+ "decor": [
+  {
+   "id": "ign-lidar-topo-1",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 1",
+    "en": "Tree 1",
+    "es": "Árbol 1",
+    "it": "Albero 1"
+   },
+   "eastM": -8.7,
+   "northM": 29.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.7,
+    "lengthM": 14.7,
+    "heightM": 22.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-2",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 2",
+    "en": "Tree 2",
+    "es": "Árbol 2",
+    "it": "Albero 2"
+   },
+   "eastM": -61.7,
+   "northM": -13.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.9,
+    "lengthM": 10.9,
+    "heightM": 26.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-3",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 3",
+    "en": "Tree 3",
+    "es": "Árbol 3",
+    "it": "Albero 3"
+   },
+   "eastM": 35.3,
+   "northM": -52.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.2,
+    "lengthM": 13.2,
+    "heightM": 22.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-4",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 4",
+    "en": "Tree 4",
+    "es": "Árbol 4",
+    "it": "Albero 4"
+   },
+   "eastM": 12.8,
+   "northM": -4.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.6,
+    "lengthM": 4.6,
+    "heightM": 6.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-5",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 5",
+    "en": "Tree 5",
+    "es": "Árbol 5",
+    "it": "Albero 5"
+   },
+   "eastM": 77.8,
+   "northM": -19.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.3,
+    "lengthM": 13.3,
+    "heightM": 27.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-6",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 6",
+    "en": "Tree 6",
+    "es": "Árbol 6",
+    "it": "Albero 6"
+   },
+   "eastM": 40.8,
+   "northM": -53.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.4,
+    "lengthM": 9.4,
+    "heightM": 22.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-7",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 7",
+    "en": "Tree 7",
+    "es": "Árbol 7",
+    "it": "Albero 7"
+   },
+   "eastM": 71.3,
+   "northM": -34.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 15.6,
+    "heightM": 25.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-8",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 8",
+    "en": "Tree 8",
+    "es": "Árbol 8",
+    "it": "Albero 8"
+   },
+   "eastM": 6.3,
+   "northM": 38.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 9.9,
+    "heightM": 12.9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-9",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 9",
+    "en": "Tree 9",
+    "es": "Árbol 9",
+    "it": "Albero 9"
+   },
+   "eastM": 74.8,
+   "northM": -32.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.4,
+    "lengthM": 14.4,
+    "heightM": 25.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-10",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 10",
+    "en": "Tree 10",
+    "es": "Árbol 10",
+    "it": "Albero 10"
+   },
+   "eastM": 59.3,
+   "northM": -39.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.7,
+    "lengthM": 14.7,
+    "heightM": 22.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-11",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 11",
+    "en": "Tree 11",
+    "es": "Árbol 11",
+    "it": "Albero 11"
+   },
+   "eastM": 64.3,
+   "northM": -3.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 15.6,
+    "heightM": 20.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-12",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 12",
+    "en": "Tree 12",
+    "es": "Árbol 12",
+    "it": "Albero 12"
+   },
+   "eastM": 73.3,
+   "northM": 20.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.7,
+    "lengthM": 15.7,
+    "heightM": 23.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-13",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 13",
+    "en": "Tree 13",
+    "es": "Árbol 13",
+    "it": "Albero 13"
+   },
+   "eastM": 70.3,
+   "northM": -48.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15,
+    "lengthM": 15,
+    "heightM": 25.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-14",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 14",
+    "en": "Tree 14",
+    "es": "Árbol 14",
+    "it": "Albero 14"
+   },
+   "eastM": 56.8,
+   "northM": -5.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.1,
+    "lengthM": 15.1,
+    "heightM": 17.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-15",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 15",
+    "en": "Tree 15",
+    "es": "Árbol 15",
+    "it": "Albero 15"
+   },
+   "eastM": 51.8,
+   "northM": -6.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.5,
+    "lengthM": 11.5,
+    "heightM": 15.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-16",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 16",
+    "en": "Tree 16",
+    "es": "Árbol 16",
+    "it": "Albero 16"
+   },
+   "eastM": 81.8,
+   "northM": 27.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 24.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-17",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 17",
+    "en": "Tree 17",
+    "es": "Árbol 17",
+    "it": "Albero 17"
+   },
+   "eastM": 68.3,
+   "northM": -0.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.2,
+    "lengthM": 15.2,
+    "heightM": 19.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-18",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 18",
+    "en": "Tree 18",
+    "es": "Árbol 18",
+    "it": "Albero 18"
+   },
+   "eastM": 83.8,
+   "northM": 0.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 24
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-19",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 19",
+    "en": "Tree 19",
+    "es": "Árbol 19",
+    "it": "Albero 19"
+   },
+   "eastM": -59.7,
+   "northM": -53.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.4,
+    "lengthM": 11.4,
+    "heightM": 22.9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-20",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 20",
+    "en": "Tree 20",
+    "es": "Árbol 20",
+    "it": "Albero 20"
+   },
+   "eastM": 86.8,
+   "northM": 29.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.3,
+    "lengthM": 15.3,
+    "heightM": 25.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-21",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 21",
+    "en": "Tree 21",
+    "es": "Árbol 21",
+    "it": "Albero 21"
+   },
+   "eastM": 86.3,
+   "northM": 7.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.9,
+    "lengthM": 13.9,
+    "heightM": 24.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-22",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 22",
+    "en": "Tree 22",
+    "es": "Árbol 22",
+    "it": "Albero 22"
+   },
+   "eastM": 73.8,
+   "northM": 2.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.8,
+    "lengthM": 13.8,
+    "heightM": 20.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-23",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 23",
+    "en": "Tree 23",
+    "es": "Árbol 23",
+    "it": "Albero 23"
+   },
+   "eastM": 90.8,
+   "northM": 29.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 25.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-24",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 24",
+    "en": "Tree 24",
+    "es": "Árbol 24",
+    "it": "Albero 24"
+   },
+   "eastM": 64.3,
+   "northM": 8.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.5,
+    "lengthM": 14.5,
+    "heightM": 17.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-25",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 25",
+    "en": "Tree 25",
+    "es": "Árbol 25",
+    "it": "Albero 25"
+   },
+   "eastM": 67.8,
+   "northM": 29.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14,
+    "lengthM": 14,
+    "heightM": 20
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-26",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 26",
+    "en": "Tree 26",
+    "es": "Árbol 26",
+    "it": "Albero 26"
+   },
+   "eastM": 57.8,
+   "northM": -75.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.1,
+    "lengthM": 15.1,
+    "heightM": 25.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-27",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 27",
+    "en": "Tree 27",
+    "es": "Árbol 27",
+    "it": "Albero 27"
+   },
+   "eastM": 74.3,
+   "northM": 28.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.7,
+    "lengthM": 15.7,
+    "heightM": 21.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-28",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 28",
+    "en": "Tree 28",
+    "es": "Árbol 28",
+    "it": "Albero 28"
+   },
+   "eastM": 89.8,
+   "northM": 3.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.7,
+    "lengthM": 14.7,
+    "heightM": 23.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-29",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 29",
+    "en": "Tree 29",
+    "es": "Árbol 29",
+    "it": "Albero 29"
+   },
+   "eastM": 90.8,
+   "northM": 8.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 13,
+    "heightM": 23.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-30",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 30",
+    "en": "Tree 30",
+    "es": "Árbol 30",
+    "it": "Albero 30"
+   },
+   "eastM": 66.3,
+   "northM": -66.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.1,
+    "lengthM": 15.1,
+    "heightM": 24.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-31",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 31",
+    "en": "Tree 31",
+    "es": "Árbol 31",
+    "it": "Albero 31"
+   },
+   "eastM": -36.2,
+   "northM": -85.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 23.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-32",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 32",
+    "en": "Tree 32",
+    "es": "Árbol 32",
+    "it": "Albero 32"
+   },
+   "eastM": -41.7,
+   "northM": -81.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.4,
+    "lengthM": 15.4,
+    "heightM": 23.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-33",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 33",
+    "en": "Tree 33",
+    "es": "Árbol 33",
+    "it": "Albero 33"
+   },
+   "eastM": 55.8,
+   "northM": -47.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 19.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-34",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 34",
+    "en": "Tree 34",
+    "es": "Árbol 34",
+    "it": "Albero 34"
+   },
+   "eastM": -44.2,
+   "northM": -65.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.1,
+    "lengthM": 15.1,
+    "heightM": 20.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-35",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 35",
+    "en": "Tree 35",
+    "es": "Árbol 35",
+    "it": "Albero 35"
+   },
+   "eastM": 94.8,
+   "northM": -2.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 24.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-36",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 36",
+    "en": "Tree 36",
+    "es": "Árbol 36",
+    "it": "Albero 36"
+   },
+   "eastM": 61.8,
+   "northM": -23.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.5,
+    "lengthM": 13.5,
+    "heightM": 17.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-37",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 37",
+    "en": "Tree 37",
+    "es": "Árbol 37",
+    "it": "Albero 37"
+   },
+   "eastM": 58.3,
+   "northM": 11.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.8,
+    "lengthM": 11.8,
+    "heightM": 15.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-38",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 38",
+    "en": "Tree 38",
+    "es": "Árbol 38",
+    "it": "Albero 38"
+   },
+   "eastM": 66.8,
+   "northM": -12.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.3,
+    "lengthM": 13.3,
+    "heightM": 17.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-39",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 39",
+    "en": "Tree 39",
+    "es": "Árbol 39",
+    "it": "Albero 39"
+   },
+   "eastM": 71.3,
+   "northM": -64.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 24.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-40",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 40",
+    "en": "Tree 40",
+    "es": "Árbol 40",
+    "it": "Albero 40"
+   },
+   "eastM": 71.3,
+   "northM": -58.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.5,
+    "lengthM": 14.5,
+    "heightM": 23.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-41",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 41",
+    "en": "Tree 41",
+    "es": "Árbol 41",
+    "it": "Albero 41"
+   },
+   "eastM": 58.3,
+   "northM": -52.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.7,
+    "lengthM": 14.7,
+    "heightM": 19.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-42",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 42",
+    "en": "Tree 42",
+    "es": "Árbol 42",
+    "it": "Albero 42"
+   },
+   "eastM": -0.7,
+   "northM": 42.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.9,
+    "lengthM": 6.9,
+    "heightM": 11.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-43",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 43",
+    "en": "Tree 43",
+    "es": "Árbol 43",
+    "it": "Albero 43"
+   },
+   "eastM": 70.3,
+   "northM": -11.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.4,
+    "lengthM": 14.4,
+    "heightM": 17.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-44",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 44",
+    "en": "Tree 44",
+    "es": "Árbol 44",
+    "it": "Albero 44"
+   },
+   "eastM": 17.3,
+   "northM": -3.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.8,
+    "lengthM": 5.8,
+    "heightM": 5.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-45",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 45",
+    "en": "Tree 45",
+    "es": "Árbol 45",
+    "it": "Albero 45"
+   },
+   "eastM": -41.7,
+   "northM": -87.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 15.6,
+    "heightM": 23.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-46",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 46",
+    "en": "Tree 46",
+    "es": "Árbol 46",
+    "it": "Albero 46"
+   },
+   "eastM": -31.2,
+   "northM": -82.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.7,
+    "lengthM": 10.7,
+    "heightM": 21.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-47",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 47",
+    "en": "Tree 47",
+    "es": "Árbol 47",
+    "it": "Albero 47"
+   },
+   "eastM": 95.8,
+   "northM": 37.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.2,
+    "lengthM": 14.2,
+    "heightM": 23.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-48",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 48",
+    "en": "Tree 48",
+    "es": "Árbol 48",
+    "it": "Albero 48"
+   },
+   "eastM": 103.3,
+   "northM": 24.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 13,
+    "heightM": 23.9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-49",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 49",
+    "en": "Tree 49",
+    "es": "Árbol 49",
+    "it": "Albero 49"
+   },
+   "eastM": 95.3,
+   "northM": -25.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 22.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-50",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 50",
+    "en": "Tree 50",
+    "es": "Árbol 50",
+    "it": "Albero 50"
+   },
+   "eastM": 82.3,
+   "northM": 18.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.2,
+    "lengthM": 14.2,
+    "heightM": 19.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-51",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 51",
+    "en": "Tree 51",
+    "es": "Árbol 51",
+    "it": "Albero 51"
+   },
+   "eastM": 60.8,
+   "northM": -86.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.1,
+    "lengthM": 15.1,
+    "heightM": 23.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-52",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 52",
+    "en": "Tree 52",
+    "es": "Árbol 52",
+    "it": "Albero 52"
+   },
+   "eastM": 21.8,
+   "northM": -2.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.2,
+    "lengthM": 6.2,
+    "heightM": 6.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-53",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 53",
+    "en": "Tree 53",
+    "es": "Árbol 53",
+    "it": "Albero 53"
+   },
+   "eastM": 64.3,
+   "northM": -86.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.4,
+    "lengthM": 14.4,
+    "heightM": 23.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-54",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 54",
+    "en": "Tree 54",
+    "es": "Árbol 54",
+    "it": "Albero 54"
+   },
+   "eastM": -77.2,
+   "northM": 17.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.8,
+    "lengthM": 12.8,
+    "heightM": 17.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-55",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 55",
+    "en": "Tree 55",
+    "es": "Árbol 55",
+    "it": "Albero 55"
+   },
+   "eastM": 95.3,
+   "northM": 15.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.7,
+    "lengthM": 13.7,
+    "heightM": 20.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-56",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 56",
+    "en": "Tree 56",
+    "es": "Árbol 56",
+    "it": "Albero 56"
+   },
+   "eastM": 103.3,
+   "northM": 19.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 14.8,
+    "heightM": 22.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-57",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 57",
+    "en": "Tree 57",
+    "es": "Árbol 57",
+    "it": "Albero 57"
+   },
+   "eastM": 54.8,
+   "northM": -30.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.4,
+    "lengthM": 12.4,
+    "heightM": 14
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-58",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 58",
+    "en": "Tree 58",
+    "es": "Árbol 58",
+    "it": "Albero 58"
+   },
+   "eastM": 100.3,
+   "northM": 1.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.9,
+    "lengthM": 12.9,
+    "heightM": 21.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-59",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 59",
+    "en": "Tree 59",
+    "es": "Árbol 59",
+    "it": "Albero 59"
+   },
+   "eastM": 66.8,
+   "northM": -93.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.9,
+    "lengthM": 13.9,
+    "heightM": 24.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-60",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 60",
+    "en": "Tree 60",
+    "es": "Árbol 60",
+    "it": "Albero 60"
+   },
+   "eastM": 102.8,
+   "northM": 13.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.3,
+    "lengthM": 12.3,
+    "heightM": 21.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-61",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 61",
+    "en": "Tree 61",
+    "es": "Árbol 61",
+    "it": "Albero 61"
+   },
+   "eastM": 83.8,
+   "northM": 46.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.3,
+    "lengthM": 15.3,
+    "heightM": 20.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-62",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 62",
+    "en": "Tree 62",
+    "es": "Árbol 62",
+    "it": "Albero 62"
+   },
+   "eastM": 80.3,
+   "northM": 54.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14,
+    "lengthM": 14,
+    "heightM": 20.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-63",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 63",
+    "en": "Tree 63",
+    "es": "Árbol 63",
+    "it": "Albero 63"
+   },
+   "eastM": -80.7,
+   "northM": 17.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.1,
+    "lengthM": 12.1,
+    "heightM": 17.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-64",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 64",
+    "en": "Tree 64",
+    "es": "Árbol 64",
+    "it": "Albero 64"
+   },
+   "eastM": 114.8,
+   "northM": -14.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 23.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-65",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 65",
+    "en": "Tree 65",
+    "es": "Árbol 65",
+    "it": "Albero 65"
+   },
+   "eastM": 94.3,
+   "northM": 58.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.5,
+    "lengthM": 14.5,
+    "heightM": 22.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-66",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 66",
+    "en": "Tree 66",
+    "es": "Árbol 66",
+    "it": "Albero 66"
+   },
+   "eastM": 117.3,
+   "northM": -9.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 14.8,
+    "heightM": 23.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-67",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 67",
+    "en": "Tree 67",
+    "es": "Árbol 67",
+    "it": "Albero 67"
+   },
+   "eastM": 100.8,
+   "northM": 35.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.8,
+    "lengthM": 11.8,
+    "heightM": 21.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-68",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 68",
+    "en": "Tree 68",
+    "es": "Árbol 68",
+    "it": "Albero 68"
+   },
+   "eastM": 93.8,
+   "northM": 63.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 22.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-69",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 69",
+    "en": "Tree 69",
+    "es": "Árbol 69",
+    "it": "Albero 69"
+   },
+   "eastM": 61.8,
+   "northM": -96.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.3,
+    "lengthM": 15.3,
+    "heightM": 22.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-70",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 70",
+    "en": "Tree 70",
+    "es": "Árbol 70",
+    "it": "Albero 70"
+   },
+   "eastM": -21.2,
+   "northM": 37.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.1,
+    "lengthM": 12.1,
+    "heightM": 9.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-71",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 71",
+    "en": "Tree 71",
+    "es": "Árbol 71",
+    "it": "Albero 71"
+   },
+   "eastM": 26.3,
+   "northM": -1.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.9,
+    "lengthM": 5.9,
+    "heightM": 6.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-72",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 72",
+    "en": "Tree 72",
+    "es": "Árbol 72",
+    "it": "Albero 72"
+   },
+   "eastM": 91.3,
+   "northM": 68.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 14.8,
+    "heightM": 21.9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-73",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 73",
+    "en": "Tree 73",
+    "es": "Árbol 73",
+    "it": "Albero 73"
+   },
+   "eastM": 86.3,
+   "northM": -25.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.3,
+    "lengthM": 13.3,
+    "heightM": 17.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-74",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 74",
+    "en": "Tree 74",
+    "es": "Árbol 74",
+    "it": "Albero 74"
+   },
+   "eastM": 73.8,
+   "northM": 71.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 19.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-75",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 75",
+    "en": "Tree 75",
+    "es": "Árbol 75",
+    "it": "Albero 75"
+   },
+   "eastM": 123.8,
+   "northM": -5.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.8,
+    "lengthM": 13.8,
+    "heightM": 23.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-76",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 76",
+    "en": "Tree 76",
+    "es": "Árbol 76",
+    "it": "Albero 76"
+   },
+   "eastM": -27.2,
+   "northM": 37.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.7,
+    "lengthM": 10.7,
+    "heightM": 9.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-77",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 77",
+    "en": "Tree 77",
+    "es": "Árbol 77",
+    "it": "Albero 77"
+   },
+   "eastM": 6.8,
+   "northM": 42.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.3,
+    "lengthM": 10.3,
+    "heightM": 9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-78",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 78",
+    "en": "Tree 78",
+    "es": "Árbol 78",
+    "it": "Albero 78"
+   },
+   "eastM": 67.3,
+   "northM": -100.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.9,
+    "lengthM": 13.9,
+    "heightM": 22.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-79",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 79",
+    "en": "Tree 79",
+    "es": "Árbol 79",
+    "it": "Albero 79"
+   },
+   "eastM": -39.2,
+   "northM": -135.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.2,
+    "lengthM": 12.2,
+    "heightM": 25.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-80",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 80",
+    "en": "Tree 80",
+    "es": "Árbol 80",
+    "it": "Albero 80"
+   },
+   "eastM": -51.7,
+   "northM": -104.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15,
+    "lengthM": 15,
+    "heightM": 21.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-81",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 81",
+    "en": "Tree 81",
+    "es": "Árbol 81",
+    "it": "Albero 81"
+   },
+   "eastM": -43.2,
+   "northM": -133.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.7,
+    "lengthM": 13.7,
+    "heightM": 25.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-82",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 82",
+    "en": "Tree 82",
+    "es": "Árbol 82",
+    "it": "Albero 82"
+   },
+   "eastM": 48.8,
+   "northM": -119.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.4,
+    "lengthM": 15.4,
+    "heightM": 23.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-83",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 83",
+    "en": "Tree 83",
+    "es": "Árbol 83",
+    "it": "Albero 83"
+   },
+   "eastM": 105.3,
+   "northM": 49.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.5,
+    "lengthM": 12.5,
+    "heightM": 21.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-84",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 84",
+    "en": "Tree 84",
+    "es": "Árbol 84",
+    "it": "Albero 84"
+   },
+   "eastM": 117.8,
+   "northM": 33.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.3,
+    "lengthM": 12.3,
+    "heightM": 22.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-85",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 85",
+    "en": "Tree 85",
+    "es": "Árbol 85",
+    "it": "Albero 85"
+   },
+   "eastM": -38.2,
+   "northM": -98.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 12.7,
+    "heightM": 19.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-86",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 86",
+    "en": "Tree 86",
+    "es": "Árbol 86",
+    "it": "Albero 86"
+   },
+   "eastM": 35.3,
+   "northM": 55.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9,
+    "lengthM": 9,
+    "heightM": 12.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-87",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 87",
+    "en": "Tree 87",
+    "es": "Árbol 87",
+    "it": "Albero 87"
+   },
+   "eastM": -15.2,
+   "northM": 39.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.8,
+    "lengthM": 11.8,
+    "heightM": 8.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-88",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 88",
+    "en": "Tree 88",
+    "es": "Árbol 88",
+    "it": "Albero 88"
+   },
+   "eastM": 116.8,
+   "northM": 23.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.2,
+    "lengthM": 15.2,
+    "heightM": 21.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-89",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 89",
+    "en": "Tree 89",
+    "es": "Árbol 89",
+    "it": "Albero 89"
+   },
+   "eastM": 73.8,
+   "northM": 65.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.4,
+    "lengthM": 14.4,
+    "heightM": 18.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-90",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 90",
+    "en": "Tree 90",
+    "es": "Árbol 90",
+    "it": "Albero 90"
+   },
+   "eastM": -31.7,
+   "northM": -36.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.3,
+    "lengthM": 5.3,
+    "heightM": 9.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-91",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 91",
+    "en": "Tree 91",
+    "es": "Árbol 91",
+    "it": "Albero 91"
+   },
+   "eastM": 87.3,
+   "northM": 54.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.4,
+    "lengthM": 15.4,
+    "heightM": 18.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-92",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 92",
+    "en": "Tree 92",
+    "es": "Árbol 92",
+    "it": "Albero 92"
+   },
+   "eastM": 52.3,
+   "northM": -123.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.9,
+    "lengthM": 12.9,
+    "heightM": 23.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-93",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 93",
+    "en": "Tree 93",
+    "es": "Árbol 93",
+    "it": "Albero 93"
+   },
+   "eastM": 86.8,
+   "northM": 51.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 15.6,
+    "heightM": 18.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-94",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 94",
+    "en": "Tree 94",
+    "es": "Árbol 94",
+    "it": "Albero 94"
+   },
+   "eastM": -44.7,
+   "northM": -104.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.3,
+    "lengthM": 12.3,
+    "heightM": 20.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-95",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 95",
+    "en": "Tree 95",
+    "es": "Árbol 95",
+    "it": "Albero 95"
+   },
+   "eastM": -29.7,
+   "northM": -44.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.6,
+    "lengthM": 5.6,
+    "heightM": 10.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-96",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 96",
+    "en": "Tree 96",
+    "es": "Árbol 96",
+    "it": "Albero 96"
+   },
+   "eastM": -24.2,
+   "northM": 42.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.8,
+    "lengthM": 11.8,
+    "heightM": 9.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-97",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 97",
+    "en": "Tree 97",
+    "es": "Árbol 97",
+    "it": "Albero 97"
+   },
+   "eastM": -11.2,
+   "northM": 41.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.4,
+    "lengthM": 10.4,
+    "heightM": 8.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-98",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 98",
+    "en": "Tree 98",
+    "es": "Árbol 98",
+    "it": "Albero 98"
+   },
+   "eastM": 106.8,
+   "northM": -6.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.7,
+    "lengthM": 13.7,
+    "heightM": 19
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-99",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 99",
+    "en": "Tree 99",
+    "es": "Árbol 99",
+    "it": "Albero 99"
+   },
+   "eastM": 101.3,
+   "northM": -18.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 18.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-100",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 100",
+    "en": "Tree 100",
+    "es": "Árbol 100",
+    "it": "Albero 100"
+   },
+   "eastM": -44.7,
+   "northM": -138.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.2,
+    "lengthM": 13.2,
+    "heightM": 25
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-101",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 101",
+    "en": "Tree 101",
+    "es": "Árbol 101",
+    "it": "Albero 101"
+   },
+   "eastM": 106.8,
+   "northM": 31.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.5,
+    "lengthM": 10.5,
+    "heightM": 19.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-102",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 102",
+    "en": "Tree 102",
+    "es": "Árbol 102",
+    "it": "Albero 102"
+   },
+   "eastM": -21.2,
+   "northM": -146.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11,
+    "lengthM": 11,
+    "heightM": 24.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-103",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 103",
+    "en": "Tree 103",
+    "es": "Árbol 103",
+    "it": "Albero 103"
+   },
+   "eastM": 124.8,
+   "northM": -22.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.2,
+    "lengthM": 11.2,
+    "heightM": 21.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-104",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 104",
+    "en": "Tree 104",
+    "es": "Árbol 104",
+    "it": "Albero 104"
+   },
+   "eastM": 34.8,
+   "northM": 59.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9,
+    "lengthM": 9,
+    "heightM": 12.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-105",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 105",
+    "en": "Tree 105",
+    "es": "Árbol 105",
+    "it": "Albero 105"
+   },
+   "eastM": 100.3,
+   "northM": 53.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 13,
+    "heightM": 19
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-106",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 106",
+    "en": "Tree 106",
+    "es": "Árbol 106",
+    "it": "Albero 106"
+   },
+   "eastM": 85.8,
+   "northM": 78.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 13,
+    "heightM": 19.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-107",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 107",
+    "en": "Tree 107",
+    "es": "Árbol 107",
+    "it": "Albero 107"
+   },
+   "eastM": 34.3,
+   "northM": 63.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9,
+    "lengthM": 9,
+    "heightM": 12.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-108",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 108",
+    "en": "Tree 108",
+    "es": "Árbol 108",
+    "it": "Albero 108"
+   },
+   "eastM": -121.2,
+   "northM": 0.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.8,
+    "lengthM": 6.8,
+    "heightM": 20
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-109",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 109",
+    "en": "Tree 109",
+    "es": "Árbol 109",
+    "it": "Albero 109"
+   },
+   "eastM": 75.8,
+   "northM": 121.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 12.7,
+    "heightM": 23.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-110",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 110",
+    "en": "Tree 110",
+    "es": "Árbol 110",
+    "it": "Albero 110"
+   },
+   "eastM": 67.8,
+   "northM": 64.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11,
+    "lengthM": 11,
+    "heightM": 15.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-111",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 111",
+    "en": "Tree 111",
+    "es": "Árbol 111",
+    "it": "Albero 111"
+   },
+   "eastM": -11.7,
+   "northM": 46.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.3,
+    "lengthM": 10.3,
+    "heightM": 8.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-112",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 112",
+    "en": "Tree 112",
+    "es": "Árbol 112",
+    "it": "Albero 112"
+   },
+   "eastM": 38.3,
+   "northM": 46.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.1,
+    "lengthM": 8.1,
+    "heightM": 10.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-113",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 113",
+    "en": "Tree 113",
+    "es": "Árbol 113",
+    "it": "Albero 113"
+   },
+   "eastM": 76.3,
+   "northM": 76.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 13,
+    "heightM": 17.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-114",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 114",
+    "en": "Tree 114",
+    "es": "Árbol 114",
+    "it": "Albero 114"
+   },
+   "eastM": 104.3,
+   "northM": -27.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14,
+    "lengthM": 14,
+    "heightM": 17.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-115",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 115",
+    "en": "Tree 115",
+    "es": "Árbol 115",
+    "it": "Albero 115"
+   },
+   "eastM": 130.3,
+   "northM": -47.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.2,
+    "lengthM": 11.2,
+    "heightM": 21.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-116",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 116",
+    "en": "Tree 116",
+    "es": "Árbol 116",
+    "it": "Albero 116"
+   },
+   "eastM": -27.7,
+   "northM": 44.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.1,
+    "lengthM": 11.1,
+    "heightM": 9.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-117",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 117",
+    "en": "Tree 117",
+    "es": "Árbol 117",
+    "it": "Albero 117"
+   },
+   "eastM": 65.3,
+   "northM": -107.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.7,
+    "lengthM": 14.7,
+    "heightM": 19.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-118",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 118",
+    "en": "Tree 118",
+    "es": "Árbol 118",
+    "it": "Albero 118"
+   },
+   "eastM": 33.3,
+   "northM": 70.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.3,
+    "lengthM": 9.3,
+    "heightM": 12.9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-119",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 119",
+    "en": "Tree 119",
+    "es": "Árbol 119",
+    "it": "Albero 119"
+   },
+   "eastM": -37.7,
+   "northM": -115.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.2,
+    "lengthM": 12.2,
+    "heightM": 19.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-120",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 120",
+    "en": "Tree 120",
+    "es": "Árbol 120",
+    "it": "Albero 120"
+   },
+   "eastM": -59.2,
+   "northM": -114.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.7,
+    "lengthM": 9.7,
+    "heightM": 20.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-121",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 121",
+    "en": "Tree 121",
+    "es": "Árbol 121",
+    "it": "Albero 121"
+   },
+   "eastM": 85.3,
+   "northM": 84.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 10.6,
+    "heightM": 18.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-122",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 122",
+    "en": "Tree 122",
+    "es": "Árbol 122",
+    "it": "Albero 122"
+   },
+   "eastM": -22.2,
+   "northM": -140.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.2,
+    "lengthM": 11.2,
+    "heightM": 21.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-123",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 123",
+    "en": "Tree 123",
+    "es": "Árbol 123",
+    "it": "Albero 123"
+   },
+   "eastM": -17.7,
+   "northM": 48.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.3,
+    "lengthM": 12.3,
+    "heightM": 8.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-124",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 124",
+    "en": "Tree 124",
+    "es": "Árbol 124",
+    "it": "Albero 124"
+   },
+   "eastM": -16.2,
+   "northM": 52.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.5,
+    "lengthM": 11.5,
+    "heightM": 9.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-125",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 125",
+    "en": "Tree 125",
+    "es": "Árbol 125",
+    "it": "Albero 125"
+   },
+   "eastM": 31.3,
+   "northM": -0.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 4.9,
+    "heightM": 5.9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-126",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 126",
+    "en": "Tree 126",
+    "es": "Árbol 126",
+    "it": "Albero 126"
+   },
+   "eastM": -119.7,
+   "northM": 49.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.4,
+    "lengthM": 8.4,
+    "heightM": 19.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-127",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 127",
+    "en": "Tree 127",
+    "es": "Árbol 127",
+    "it": "Albero 127"
+   },
+   "eastM": 107.8,
+   "northM": -57.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.4,
+    "lengthM": 9.4,
+    "heightM": 18.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-128",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 128",
+    "en": "Tree 128",
+    "es": "Árbol 128",
+    "it": "Albero 128"
+   },
+   "eastM": 72.3,
+   "northM": 91.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.8,
+    "lengthM": 13.8,
+    "heightM": 17.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-129",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 129",
+    "en": "Tree 129",
+    "es": "Árbol 129",
+    "it": "Albero 129"
+   },
+   "eastM": -123.7,
+   "northM": 75.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.2,
+    "lengthM": 10.2,
+    "heightM": 21.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-130",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 130",
+    "en": "Tree 130",
+    "es": "Árbol 130",
+    "it": "Albero 130"
+   },
+   "eastM": 54.3,
+   "northM": -132.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.3,
+    "lengthM": 13.3,
+    "heightM": 21
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-131",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 131",
+    "en": "Tree 131",
+    "es": "Árbol 131",
+    "it": "Albero 131"
+   },
+   "eastM": -30.7,
+   "northM": -93.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.4,
+    "lengthM": 11.4,
+    "heightM": 15
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-132",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 132",
+    "en": "Tree 132",
+    "es": "Árbol 132",
+    "it": "Albero 132"
+   },
+   "eastM": -24.7,
+   "northM": 51.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.1,
+    "lengthM": 12.1,
+    "heightM": 9.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-133",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 133",
+    "en": "Tree 133",
+    "es": "Árbol 133",
+    "it": "Albero 133"
+   },
+   "eastM": 75.3,
+   "northM": 127.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.5,
+    "lengthM": 11.5,
+    "heightM": 21.3
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-134",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 134",
+    "en": "Tree 134",
+    "es": "Árbol 134",
+    "it": "Albero 134"
+   },
+   "eastM": 79.3,
+   "northM": 92.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.8,
+    "lengthM": 12.8,
+    "heightM": 17.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-135",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 135",
+    "en": "Tree 135",
+    "es": "Árbol 135",
+    "it": "Albero 135"
+   },
+   "eastM": 32.3,
+   "northM": 74.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.3,
+    "lengthM": 9.3,
+    "heightM": 12.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-136",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 136",
+    "en": "Tree 136",
+    "es": "Árbol 136",
+    "it": "Albero 136"
+   },
+   "eastM": -59.2,
+   "northM": -129.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.3,
+    "lengthM": 12.3,
+    "heightM": 20.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-137",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 137",
+    "en": "Tree 137",
+    "es": "Árbol 137",
+    "it": "Albero 137"
+   },
+   "eastM": 135.8,
+   "northM": -14.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 12,
+    "heightM": 19.4
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-138",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 138",
+    "en": "Tree 138",
+    "es": "Árbol 138",
+    "it": "Albero 138"
+   },
+   "eastM": 118.8,
+   "northM": -34.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.8,
+    "lengthM": 10.8,
+    "heightM": 17.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-139",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 139",
+    "en": "Tree 139",
+    "es": "Árbol 139",
+    "it": "Albero 139"
+   },
+   "eastM": -28.2,
+   "northM": -54.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.1,
+    "lengthM": 6.1,
+    "heightM": 9.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-140",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 140",
+    "en": "Tree 140",
+    "es": "Árbol 140",
+    "it": "Albero 140"
+   },
+   "eastM": -31.7,
+   "northM": -114.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.2,
+    "lengthM": 11.2,
+    "heightM": 16.9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-141",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 141",
+    "en": "Tree 141",
+    "es": "Árbol 141",
+    "it": "Albero 141"
+   },
+   "eastM": -24.7,
+   "northM": 54.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.2,
+    "lengthM": 12.2,
+    "heightM": 9.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-142",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 142",
+    "en": "Tree 142",
+    "es": "Árbol 142",
+    "it": "Albero 142"
+   },
+   "eastM": 12.8,
+   "northM": 38.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.6,
+    "lengthM": 9.6,
+    "heightM": 6.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-143",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 143",
+    "en": "Tree 143",
+    "es": "Árbol 143",
+    "it": "Albero 143"
+   },
+   "eastM": 80.3,
+   "northM": 103.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.7,
+    "lengthM": 11.7,
+    "heightM": 17.9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-144",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 144",
+    "en": "Tree 144",
+    "es": "Árbol 144",
+    "it": "Albero 144"
+   },
+   "eastM": -17.2,
+   "northM": 56.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.8,
+    "lengthM": 11.8,
+    "heightM": 9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-145",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 145",
+    "en": "Tree 145",
+    "es": "Árbol 145",
+    "it": "Albero 145"
+   },
+   "eastM": 68.3,
+   "northM": -115.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15,
+    "lengthM": 15,
+    "heightM": 18
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-146",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 146",
+    "en": "Tree 146",
+    "es": "Árbol 146",
+    "it": "Albero 146"
+   },
+   "eastM": 121.3,
+   "northM": -76.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 19.1
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-147",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 147",
+    "en": "Tree 147",
+    "es": "Árbol 147",
+    "it": "Albero 147"
+   },
+   "eastM": 40.8,
+   "northM": 36.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 3.7,
+    "lengthM": 3.7,
+    "heightM": 8.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-148",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 148",
+    "en": "Tree 148",
+    "es": "Árbol 148",
+    "it": "Albero 148"
+   },
+   "eastM": -27.7,
+   "northM": -57.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.3,
+    "lengthM": 6.3,
+    "heightM": 9.2
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-149",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 149",
+    "en": "Tree 149",
+    "es": "Árbol 149",
+    "it": "Albero 149"
+   },
+   "eastM": -29.2,
+   "northM": -106.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.6,
+    "lengthM": 9.6,
+    "heightM": 14.9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-150",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 150",
+    "en": "Tree 150",
+    "es": "Árbol 150",
+    "it": "Albero 150"
+   },
+   "eastM": -13.2,
+   "northM": 60.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 10.6,
+    "heightM": 8.9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-topo-151",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 1",
+    "en": "Building 1",
+    "es": "Edificio 1",
+    "it": "Edificio 1"
+   },
+   "eastM": 7.3,
+   "northM": -18.1,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 85.6,
+    "lengthM": 8.5,
+    "heightM": 9.5
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#fffdf7"
+   },
+   "facade": {
+    "color": "#c9c1af"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-152",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 2",
+    "en": "Building 2",
+    "es": "Edificio 2",
+    "it": "Edificio 2"
+   },
+   "eastM": 23.7,
+   "northM": -8.4,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 48.8,
+    "lengthM": 5.7,
+    "heightM": 9.5
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#fefaf4"
+   },
+   "facade": {
+    "color": "#d7cdbb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-153",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 3",
+    "en": "Building 3",
+    "es": "Edificio 3",
+    "it": "Edificio 3"
+   },
+   "eastM": -27.3,
+   "northM": -16.8,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 4.9,
+    "heightM": 9.5
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#f8f2e4"
+   },
+   "facade": {
+    "color": "#c6bdac"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-154",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 4",
+    "en": "Building 4",
+    "es": "Edificio 4",
+    "it": "Edificio 4"
+   },
+   "eastM": 39.7,
+   "northM": -69.4,
+   "headingDeg": 84,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 9.2,
+    "heightM": 5.7
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#67687c"
+   },
+   "facade": {
+    "color": "#bcb4a4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-155",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 5",
+    "en": "Building 5",
+    "es": "Edificio 5",
+    "it": "Edificio 5"
+   },
+   "eastM": 43.7,
+   "northM": -85.5,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 7.1,
+    "heightM": 2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#827d69"
+   },
+   "facade": {
+    "color": "#d8cfbc",
+    "plain": true
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-156",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 6",
+    "en": "Building 6",
+    "es": "Edificio 6",
+    "it": "Edificio 6"
+   },
+   "eastM": 99.9,
+   "northM": -26.5,
+   "headingDeg": 26.6,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.3,
+    "lengthM": 4.7,
+    "heightM": 5.6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#47575a"
+   },
+   "facade": {
+    "color": "#e7ddc9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-157",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 7",
+    "en": "Building 7",
+    "es": "Edificio 7",
+    "it": "Edificio 7"
+   },
+   "eastM": 46,
+   "northM": -98.2,
+   "headingDeg": 170.5,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.6,
+    "lengthM": 4.3,
+    "heightM": 6.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#2f4143"
+   },
+   "facade": {
+    "color": "#d7cebc"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-158",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 8",
+    "en": "Building 8",
+    "es": "Edificio 8",
+    "it": "Edificio 8"
+   },
+   "eastM": 85.3,
+   "northM": -80.5,
+   "headingDeg": 100.7,
+   "lit": false,
+   "sizeM": {
+    "widthM": 59.5,
+    "lengthM": 9.5,
+    "heightM": 14.980667114257812
+   },
+   "floors": 4,
+   "roof": {
+    "shape": "gable",
+    "riseM": 1.87890625,
+    "color": "#d39d91"
+   },
+   "facade": {
+    "color": "#cabea9",
+    "storeyM": 3.28
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-159",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 9",
+    "en": "Building 9",
+    "es": "Edificio 9",
+    "it": "Edificio 9"
+   },
+   "eastM": 113.4,
+   "northM": -47.1,
+   "headingDeg": 13,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.5,
+    "lengthM": 9.3,
+    "heightM": 15.410202026367188
+   },
+   "floors": 4,
+   "roof": {
+    "shape": "gable",
+    "riseM": 1.9383163452148438,
+    "color": "#d4aa9c"
+   },
+   "facade": {
+    "color": "#c8bca7",
+    "storeyM": 3.37
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-160",
+   "kind": "building",
+   "title": "Domaine National de Meudon",
+   "eastM": -131.9,
+   "northM": -4.8,
+   "headingDeg": 18,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 4.2,
+    "heightM": 8.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#aaa8b3"
+   },
+   "facade": {
+    "color": "#cfc3ae",
+    "openings": "tall",
+    "storeyM": 3.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-161",
+   "kind": "building",
+   "title": "Domaine National de Meudon (2)",
+   "eastM": -136.2,
+   "northM": -18,
+   "headingDeg": 108,
+   "lit": false,
+   "sizeM": {
+    "widthM": 23.3,
+    "lengthM": 20.5,
+    "heightM": 8.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#948a87"
+   },
+   "facade": {
+    "color": "#a59b8a",
+    "openings": "tall",
+    "storeyM": 3.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-162",
+   "kind": "building",
+   "title": "Domaine National de Meudon (3)",
+   "eastM": -130.7,
+   "northM": -43,
+   "headingDeg": 105,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 2.8,
+    "heightM": 8.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9898a0"
+   },
+   "facade": {
+    "color": "#b0a694",
+    "openings": "tall",
+    "storeyM": 3.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-163",
+   "kind": "building",
+   "title": {
+    "en": "Grande Coupole",
+    "fr": "Grande Coupole",
+    "es": "Grande Coupole",
+    "it": "Grande Coupole"
+   },
+   "eastM": -142.3,
+   "northM": -39.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 16.3,
+    "lengthM": 16.3,
+    "heightM": 24.5
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "dome",
+    "riseM": 8,
+    "color": "#2c3a33"
+   },
+   "facade": {
+    "color": "#bcb09d",
+    "openings": "tall",
+    "storeyM": 3.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-164",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 10",
+    "en": "Building 10",
+    "es": "Edificio 10",
+    "it": "Edificio 10"
+   },
+   "eastM": 132.3,
+   "northM": -65.7,
+   "headingDeg": 26.6,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.6,
+    "lengthM": 3.4,
+    "heightM": 11.4
+   },
+   "floors": 4,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#bfc7d3"
+   },
+   "facade": {
+    "color": "#bbb3a3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-165",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 11",
+    "en": "Building 11",
+    "es": "Edificio 11",
+    "it": "Edificio 11"
+   },
+   "eastM": 137.3,
+   "northM": -54.5,
+   "headingDeg": 117,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 4.9,
+    "heightM": 14.1
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#828a92"
+   },
+   "facade": {
+    "color": "#d4cbb9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-166",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 12",
+    "en": "Building 12",
+    "es": "Edificio 12",
+    "it": "Edificio 12"
+   },
+   "eastM": 142.1,
+   "northM": -48.5,
+   "headingDeg": 27,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 3.5,
+    "heightM": 8.5
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#74767c"
+   },
+   "facade": {
+    "color": "#cfc7b5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-167",
+   "kind": "building",
+   "title": "Domaine National de Meudon (5)",
+   "eastM": -142.7,
+   "northM": -49.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 2.8,
+    "heightM": 16.5
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b7bac0"
+   },
+   "facade": {
+    "color": "#a39a89",
+    "openings": "tall",
+    "storeyM": 3.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-168",
+   "kind": "building",
+   "title": "Domaine National de Meudon (6)",
+   "eastM": -148.4,
+   "northM": -28,
+   "headingDeg": 108,
+   "lit": false,
+   "sizeM": {
+    "widthM": 3.5,
+    "lengthM": 3.5,
+    "heightM": 8.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#404a60"
+   },
+   "facade": {
+    "color": "#cfc2ad",
+    "openings": "tall",
+    "storeyM": 3.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-169",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 13",
+    "en": "Building 13",
+    "es": "Edificio 13",
+    "it": "Edificio 13"
+   },
+   "eastM": 138.9,
+   "northM": -69.2,
+   "headingDeg": 27,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 2.8,
+    "heightM": 14.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b9b2af"
+   },
+   "facade": {
+    "color": "#e3d9c6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-170",
+   "kind": "building",
+   "title": "Domaine National de Meudon (7)",
+   "eastM": -151.8,
+   "northM": -39.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 2.8,
+    "heightM": 16.5
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7b7587"
+   },
+   "facade": {
+    "color": "#c0b4a1",
+    "openings": "tall",
+    "storeyM": 3.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-171",
+   "kind": "building",
+   "title": "Jardin Armande Béjart",
+   "eastM": 147.3,
+   "northM": 56.4,
+   "headingDeg": 7.1,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.4,
+    "lengthM": 4.3,
+    "heightM": 3.9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#786b63"
+   },
+   "facade": {
+    "color": "#d1c8b7"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-172",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 14",
+    "en": "Building 14",
+    "es": "Edificio 14",
+    "it": "Edificio 14"
+   },
+   "eastM": 150.3,
+   "northM": -55.7,
+   "headingDeg": 12,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 5.7,
+    "heightM": 14.1
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#81848b"
+   },
+   "facade": {
+    "color": "#e1d7c4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-173",
+   "kind": "building",
+   "title": "Domaine National de Meudon (8)",
+   "eastM": -153.7,
+   "northM": -46.4,
+   "headingDeg": 108,
+   "lit": false,
+   "sizeM": {
+    "widthM": 3.5,
+    "lengthM": 3.5,
+    "heightM": 8.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#e3ddd3"
+   },
+   "facade": {
+    "color": "#b7ac99",
+    "openings": "tall",
+    "storeyM": 3.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-174",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 15",
+    "en": "Building 15",
+    "es": "Edificio 15",
+    "it": "Edificio 15"
+   },
+   "eastM": 131.5,
+   "northM": -93.6,
+   "headingDeg": 138,
+   "lit": false,
+   "sizeM": {
+    "widthM": 21.2,
+    "lengthM": 7.1,
+    "heightM": 11.4
+   },
+   "floors": 4,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#e7e3de"
+   },
+   "facade": {
+    "color": "#e2d9c5",
+    "storeyM": 2.85
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-175",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 16",
+    "en": "Building 16",
+    "es": "Edificio 16",
+    "it": "Edificio 16"
+   },
+   "eastM": 130,
+   "northM": 97.3,
+   "headingDeg": 96,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 4.9,
+    "heightM": 9.3
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#817c83"
+   },
+   "facade": {
+    "color": "#c4bbab"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-176",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 17",
+    "en": "Building 17",
+    "es": "Edificio 17",
+    "it": "Edificio 17"
+   },
+   "eastM": 142.6,
+   "northM": -77.8,
+   "headingDeg": 123,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 9.9,
+    "heightM": 14.7
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#d9e3e7"
+   },
+   "facade": {
+    "color": "#bdb5a5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-177",
+   "kind": "building",
+   "title": "Domaine National de Meudon (9)",
+   "eastM": -149.5,
+   "northM": -63.9,
+   "headingDeg": 105,
+   "lit": false,
+   "sizeM": {
+    "widthM": 28.3,
+    "lengthM": 21.2,
+    "heightM": 8.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#afa9a2"
+   },
+   "facade": {
+    "color": "#b1a795",
+    "openings": "tall",
+    "storeyM": 3.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-178",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 18",
+    "en": "Building 18",
+    "es": "Edificio 18",
+    "it": "Edificio 18"
+   },
+   "eastM": 108.3,
+   "northM": -121.8,
+   "headingDeg": 126,
+   "lit": false,
+   "sizeM": {
+    "widthM": 39.6,
+    "lengthM": 10.6,
+    "heightM": 12.9
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#c9c3bd"
+   },
+   "facade": {
+    "color": "#c0ae90",
+    "openings": "tall",
+    "storeyM": 2.58
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-179",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 19",
+    "en": "Building 19",
+    "es": "Edificio 19",
+    "it": "Edificio 19"
+   },
+   "eastM": 159.4,
+   "northM": -41.5,
+   "headingDeg": 18,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 5.7,
+    "heightM": 17.4
+   },
+   "floors": 6,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b8c0c9"
+   },
+   "facade": {
+    "color": "#c9c0ae",
+    "storeyM": 2.9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-180",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 20",
+    "en": "Building 20",
+    "es": "Edificio 20",
+    "it": "Edificio 20"
+   },
+   "eastM": 158.7,
+   "northM": -49,
+   "headingDeg": 27,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.8,
+    "heightM": 17.5
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b7bcc7"
+   },
+   "facade": {
+    "color": "#d9cfbc",
+    "storeyM": 3.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-181",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 21",
+    "en": "Building 21",
+    "es": "Edificio 21",
+    "it": "Edificio 21"
+   },
+   "eastM": 166.4,
+   "northM": -1.7,
+   "headingDeg": 99,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 3.5,
+    "heightM": 16.8
+   },
+   "floors": 6,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#878fa3"
+   },
+   "facade": {
+    "color": "#c4bba9",
+    "storeyM": 2.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-182",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 22",
+    "en": "Building 22",
+    "es": "Edificio 22",
+    "it": "Edificio 22"
+   },
+   "eastM": 165.5,
+   "northM": -36.5,
+   "headingDeg": 120,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 5.7,
+    "heightM": 17.4
+   },
+   "floors": 6,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8b8f99"
+   },
+   "facade": {
+    "color": "#beb5a4",
+    "storeyM": 2.9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-183",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 23",
+    "en": "Building 23",
+    "es": "Edificio 23",
+    "it": "Edificio 23"
+   },
+   "eastM": 164.2,
+   "northM": -44.7,
+   "headingDeg": 24,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 4.9,
+    "heightM": 17.5
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b5bec6"
+   },
+   "facade": {
+    "color": "#bdb5a4",
+    "storeyM": 3.5
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-184",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 24",
+    "en": "Building 24",
+    "es": "Edificio 24",
+    "it": "Edificio 24"
+   },
+   "eastM": 168.9,
+   "northM": -26,
+   "headingDeg": 18,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 12.7,
+    "heightM": 17.4
+   },
+   "floors": 6,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#aab3be"
+   },
+   "facade": {
+    "color": "#c1b9a7",
+    "storeyM": 2.9
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-185",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 25",
+    "en": "Building 25",
+    "es": "Edificio 25",
+    "it": "Edificio 25"
+   },
+   "eastM": 172.5,
+   "northM": -8.4,
+   "headingDeg": 99,
+   "lit": false,
+   "sizeM": {
+    "widthM": 21.2,
+    "lengthM": 10.6,
+    "heightM": 16.8
+   },
+   "floors": 6,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9ca5b3"
+   },
+   "facade": {
+    "color": "#b8b09f",
+    "storeyM": 2.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-186",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 26",
+    "en": "Building 26",
+    "es": "Edificio 26",
+    "it": "Edificio 26"
+   },
+   "eastM": 168.5,
+   "northM": -39.1,
+   "headingDeg": 118.6,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 3.2,
+    "heightM": 16.6
+   },
+   "floors": 6,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#bfc2c3"
+   },
+   "facade": {
+    "color": "#ddd4c1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-187",
+   "kind": "building",
+   "title": "Domaine National de Meudon (10)",
+   "eastM": -153.7,
+   "northM": -80,
+   "headingDeg": 18,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 4.9,
+    "heightM": 8.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#cfc9c4"
+   },
+   "facade": {
+    "color": "#a99f8d",
+    "openings": "tall",
+    "storeyM": 3.6
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-188",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 27",
+    "en": "Building 27",
+    "es": "Edificio 27",
+    "it": "Edificio 27"
+   },
+   "eastM": 90.4,
+   "northM": -148.8,
+   "headingDeg": 42,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17,
+    "lengthM": 6.4,
+    "heightM": 5.1
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b8b0a8"
+   },
+   "facade": {
+    "color": "#c1bfb8",
+    "storeyM": 2.55
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-189",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 28",
+    "en": "Building 28",
+    "es": "Edificio 28",
+    "it": "Edificio 28"
+   },
+   "eastM": 175.2,
+   "northM": 12.9,
+   "headingDeg": 96,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.8,
+    "lengthM": 9.9,
+    "heightM": 16.1
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#98a2b0"
+   },
+   "facade": {
+    "color": "#c3bbaa"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-190",
+   "kind": "building",
+   "title": "Musée d'Art et d'Histoire de la Ville de Meudon",
+   "eastM": 142.5,
+   "northM": 108.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 26.9,
+    "lengthM": 7.8,
+    "heightM": 9.3
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a69998"
+   },
+   "facade": {
+    "color": "#c2baaa"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-191",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 29",
+    "en": "Building 29",
+    "es": "Edificio 29",
+    "it": "Edificio 29"
+   },
+   "eastM": 177.1,
+   "northM": 31.8,
+   "headingDeg": 96,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 15.6,
+    "heightM": 16.2
+   },
+   "floors": 6,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#959fac"
+   },
+   "facade": {
+    "color": "#c1b9a9",
+    "storeyM": 2.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-192",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 30",
+    "en": "Building 30",
+    "es": "Edificio 30",
+    "it": "Edificio 30"
+   },
+   "eastM": 181.1,
+   "northM": 8.4,
+   "headingDeg": 99,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 2.8,
+    "heightM": 16.1
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#c0c0c4"
+   },
+   "facade": {
+    "color": "#d6cdbb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-193",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 31",
+    "en": "Building 31",
+    "es": "Edificio 31",
+    "it": "Edificio 31"
+   },
+   "eastM": 154.8,
+   "northM": 96,
+   "headingDeg": 87,
+   "lit": false,
+   "sizeM": {
+    "widthM": 16.3,
+    "lengthM": 4.2,
+    "heightM": 9.3
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8a7e87"
+   },
+   "facade": {
+    "color": "#ddd4c1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-194",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 32",
+    "en": "Building 32",
+    "es": "Edificio 32",
+    "it": "Edificio 32"
+   },
+   "eastM": 182,
+   "northM": 41.5,
+   "headingDeg": 6,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 2.8,
+    "heightM": 16.2
+   },
+   "floors": 6,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7a8294"
+   },
+   "facade": {
+    "color": "#c4bbab",
+    "storeyM": 2.7
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-195",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 33",
+    "en": "Building 33",
+    "es": "Edificio 33",
+    "it": "Edificio 33"
+   },
+   "eastM": 85.4,
+   "northM": -167.3,
+   "headingDeg": 120,
+   "lit": false,
+   "sizeM": {
+    "widthM": 16.3,
+    "lengthM": 7.1,
+    "heightM": 6.3
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b0a499"
+   },
+   "facade": {
+    "color": "#d6ccb7",
+    "storeyM": 3.15
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-196",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 34",
+    "en": "Building 34",
+    "es": "Edificio 34",
+    "it": "Edificio 34"
+   },
+   "eastM": 110.2,
+   "northM": 156.4,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 11.3,
+    "heightM": 19.6
+   },
+   "floors": 7,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#aaa29e"
+   },
+   "facade": {
+    "color": "#ddd4c1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-197",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 35",
+    "en": "Building 35",
+    "es": "Edificio 35",
+    "it": "Edificio 35"
+   },
+   "eastM": 134.8,
+   "northM": -135.8,
+   "headingDeg": 36,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 3.5,
+    "heightM": 9.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#6b6e7a"
+   },
+   "facade": {
+    "color": "#dcd2c0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-198",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 36",
+    "en": "Building 36",
+    "es": "Edificio 36",
+    "it": "Edificio 36"
+   },
+   "eastM": 141.8,
+   "northM": -128.6,
+   "headingDeg": 126,
+   "lit": false,
+   "sizeM": {
+    "widthM": 16.3,
+    "lengthM": 6.4,
+    "heightM": 9.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#f3f4f8"
+   },
+   "facade": {
+    "color": "#d1c8b6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-199",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 37",
+    "en": "Building 37",
+    "es": "Edificio 37",
+    "it": "Edificio 37"
+   },
+   "eastM": 132.5,
+   "northM": -138.8,
+   "headingDeg": 126.9,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.5,
+    "lengthM": 4.5,
+    "heightM": 6.5
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#4e474d"
+   },
+   "facade": {
+    "color": "#e7deca"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-200",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 38",
+    "en": "Building 38",
+    "es": "Edificio 38",
+    "it": "Edificio 38"
+   },
+   "eastM": 182.5,
+   "northM": 62.3,
+   "headingDeg": 9,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 12,
+    "heightM": 14.5
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a8adb9"
+   },
+   "facade": {
+    "color": "#ece2ce"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-201",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 39",
+    "en": "Building 39",
+    "es": "Edificio 39",
+    "it": "Edificio 39"
+   },
+   "eastM": 159.1,
+   "northM": 110,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 2.8,
+    "heightM": 9.3
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8a8281"
+   },
+   "facade": {
+    "color": "#ccc4b2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-202",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 40",
+    "en": "Building 40",
+    "es": "Edificio 40",
+    "it": "Edificio 40"
+   },
+   "eastM": 128.5,
+   "northM": -146.5,
+   "headingDeg": 126,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 6.4,
+    "heightM": 6.7
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ab8372"
+   },
+   "facade": {
+    "color": "#e5dbc7"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-203",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 41",
+    "en": "Building 41",
+    "es": "Edificio 41",
+    "it": "Edificio 41"
+   },
+   "eastM": 148.8,
+   "northM": -126.9,
+   "headingDeg": 120,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 3.5,
+    "heightM": 9.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#f4f1f3"
+   },
+   "facade": {
+    "color": "#d5ccba"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-204",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 42",
+    "en": "Building 42",
+    "es": "Edificio 42",
+    "it": "Edificio 42"
+   },
+   "eastM": 185.3,
+   "northM": 82.2,
+   "headingDeg": 98.1,
+   "lit": false,
+   "sizeM": {
+    "widthM": 28.4,
+    "lengthM": 14.4,
+    "heightM": 15.2
+   },
+   "floors": 4,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8c888f"
+   },
+   "facade": {
+    "color": "#a8a6a0",
+    "storeyM": 3.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-205",
+   "kind": "building",
+   "title": "Domaine National de Meudon (11)",
+   "eastM": -205.8,
+   "northM": -0.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 9.2,
+    "heightM": 3.2
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#adb9c3"
+   },
+   "facade": {
+    "color": "#d7cebb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-206",
+   "kind": "building",
+   "title": "Domaine National de Meudon (12)",
+   "eastM": -206.8,
+   "northM": 7.9,
+   "headingDeg": 15,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 4.9,
+    "heightM": 3.1
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8a8383"
+   },
+   "facade": {
+    "color": "#c2baaa"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-207",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 43",
+    "en": "Building 43",
+    "es": "Edificio 43",
+    "it": "Edificio 43"
+   },
+   "eastM": 93.4,
+   "northM": 186.1,
+   "headingDeg": 81,
+   "lit": false,
+   "sizeM": {
+    "widthM": 78.5,
+    "lengthM": 9.9,
+    "heightM": 19.6
+   },
+   "floors": 7,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a29fa0"
+   },
+   "facade": {
+    "color": "#dbd1bf"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-208",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 44",
+    "en": "Building 44",
+    "es": "Edificio 44",
+    "it": "Edificio 44"
+   },
+   "eastM": 181.4,
+   "northM": -103,
+   "headingDeg": 121.1,
+   "lit": false,
+   "sizeM": {
+    "widthM": 64.9,
+    "lengthM": 16.8,
+    "heightM": 18.2
+   },
+   "floors": 6,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#838590"
+   },
+   "facade": {
+    "color": "#e8deca",
+    "storeyM": 3.03
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-209",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 45",
+    "en": "Building 45",
+    "es": "Edificio 45",
+    "it": "Edificio 45"
+   },
+   "eastM": 153.6,
+   "northM": -141.3,
+   "headingDeg": 117,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 5.7,
+    "heightM": 9.7
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#3d474a"
+   },
+   "facade": {
+    "color": "#e7ddca"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-210",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 46",
+    "en": "Building 46",
+    "es": "Edificio 46",
+    "it": "Edificio 46"
+   },
+   "eastM": 176.3,
+   "northM": 112.7,
+   "headingDeg": 97.1,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10,
+    "lengthM": 7,
+    "heightM": 14.7
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#bdb7bc"
+   },
+   "facade": {
+    "color": "#d3cab8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-211",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 47",
+    "en": "Building 47",
+    "es": "Edificio 47",
+    "it": "Edificio 47"
+   },
+   "eastM": 211,
+   "northM": 10.9,
+   "headingDeg": 24,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 7.1,
+    "heightM": 4.8
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#6f6f72"
+   },
+   "facade": {
+    "color": "#ded5c2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-212",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 48",
+    "en": "Building 48",
+    "es": "Edificio 48",
+    "it": "Edificio 48"
+   },
+   "eastM": 187.8,
+   "northM": 100.3,
+   "headingDeg": 9,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 9.2,
+    "heightM": 18.7
+   },
+   "floors": 6,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8f9198"
+   },
+   "facade": {
+    "color": "#e2d9c5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-213",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 49",
+    "en": "Building 49",
+    "es": "Edificio 49",
+    "it": "Edificio 49"
+   },
+   "eastM": 157.4,
+   "northM": -144.8,
+   "headingDeg": 30,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 3.5,
+    "heightM": 9.7
+   },
+   "floors": 3,
+   "facade": {
+    "color": "#ddd4c1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-28"
+  },
+  {
+   "id": "ign-lidar-topo-214",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 50",
+    "en": "Building 50",
+    "es": "Edificio 50",
+    "it": "Edificio 50"
+   },
+   "eastM": 182.9,
+   "northM": 112.3,
+   "headingDeg": 99,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 4.9,
+    "heightM": 18.1
+   },
+   "floors": 6,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b3b5ba"
+   },
+   "facade": {
+    "color": "#e5dbc7"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-215",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 51",
+    "en": "Building 51",
+    "es": "Edificio 51",
+    "it": "Edificio 51"
+   },
+   "eastM": 190.4,
+   "northM": 109.4,
+   "headingDeg": 12,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 7.8,
+    "heightM": 18.7
+   },
+   "floors": 6,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8f909b"
+   },
+   "facade": {
+    "color": "#ddd3c1"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-216",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 52",
+    "en": "Building 52",
+    "es": "Edificio 52",
+    "it": "Edificio 52"
+   },
+   "eastM": 172.4,
+   "northM": 137.5,
+   "headingDeg": 81,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 4.2,
+    "heightM": 21.7
+   },
+   "floors": 8,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#91887b"
+   },
+   "facade": {
+    "color": "#c8c6bf",
+    "storeyM": 2.71
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-217",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 53",
+    "en": "Building 53",
+    "es": "Edificio 53",
+    "it": "Edificio 53"
+   },
+   "eastM": 214.1,
+   "northM": 55.4,
+   "headingDeg": 15,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 3.5,
+    "heightM": 11
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#bdc6d4"
+   },
+   "facade": {
+    "color": "#b3a996",
+    "openings": "tall",
+    "storeyM": 3.67
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-218",
+   "kind": "building",
+   "title": "Domaine National de Meudon (13)",
+   "eastM": -217.1,
+   "northM": -44.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.8,
+    "heightM": 3.4
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#cbd3d9"
+   },
+   "facade": {
+    "color": "#c8c0ae"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-219",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 54",
+    "en": "Building 54",
+    "es": "Edificio 54",
+    "it": "Edificio 54"
+   },
+   "eastM": 215.7,
+   "northM": 50.9,
+   "headingDeg": 102,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 2.8,
+    "heightM": 11
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#d2bab8"
+   },
+   "facade": {
+    "color": "#afa493",
+    "openings": "tall",
+    "storeyM": 3.67
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-220",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 55",
+    "en": "Building 55",
+    "es": "Edificio 55",
+    "it": "Edificio 55"
+   },
+   "eastM": 217.9,
+   "northM": -45.5,
+   "headingDeg": 108,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17,
+    "lengthM": 16.3,
+    "heightM": 15.8
+   },
+   "floors": 4,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#e3e0d9"
+   },
+   "facade": {
+    "color": "#9f9d98",
+    "storeyM": 3.95
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-221",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 56",
+    "en": "Building 56",
+    "es": "Edificio 56",
+    "it": "Edificio 56"
+   },
+   "eastM": 190,
+   "northM": 116.2,
+   "headingDeg": 10.6,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.8,
+    "lengthM": 4.2,
+    "heightM": 15.5
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#4e5668"
+   },
+   "facade": {
+    "color": "#bab2a3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-222",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 57",
+    "en": "Building 57",
+    "es": "Edificio 57",
+    "it": "Edificio 57"
+   },
+   "eastM": 220.9,
+   "northM": 28.6,
+   "headingDeg": 102,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 4.2,
+    "heightM": 16.1
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#cbc4ba"
+   },
+   "facade": {
+    "color": "#e9dfcb",
+    "storeyM": 3.22
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-223",
+   "kind": "building",
+   "title": "Domaine National de Meudon (14)",
+   "eastM": -225,
+   "northM": 10.9,
+   "headingDeg": 15,
+   "lit": false,
+   "sizeM": {
+    "widthM": 28.3,
+    "lengthM": 10.6,
+    "heightM": 3.1
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b3b7ba"
+   },
+   "facade": {
+    "color": "#d5ccba"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-224",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 58",
+    "en": "Building 58",
+    "es": "Edificio 58",
+    "it": "Edificio 58"
+   },
+   "eastM": 226.6,
+   "northM": 23.9,
+   "headingDeg": 9,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 2.8,
+    "heightM": 16.1
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#d9d2c9"
+   },
+   "facade": {
+    "color": "#bbb3a3",
+    "storeyM": 3.22
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-225",
+   "kind": "building",
+   "title": "Domaine National de Meudon (15)",
+   "eastM": -223.2,
+   "northM": -50.3,
+   "headingDeg": 15,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 4.9,
+    "heightM": 3
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ffffff"
+   },
+   "facade": {
+    "color": "#c7bfae"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-226",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 59",
+    "en": "Building 59",
+    "es": "Edificio 59",
+    "it": "Edificio 59"
+   },
+   "eastM": 216.7,
+   "northM": 74.1,
+   "headingDeg": 9,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 4.9,
+    "heightM": 11
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#f9ffff"
+   },
+   "facade": {
+    "color": "#beb29f",
+    "openings": "tall",
+    "storeyM": 3.67
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-227",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 60",
+    "en": "Building 60",
+    "es": "Edificio 60",
+    "it": "Edificio 60"
+   },
+   "eastM": 176.5,
+   "northM": 146.8,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 11.3,
+    "heightM": 21.7
+   },
+   "floors": 8,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#d9cfc6"
+   },
+   "facade": {
+    "color": "#c9c6c0",
+    "storeyM": 2.71
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-228",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 61",
+    "en": "Building 61",
+    "es": "Edificio 61",
+    "it": "Edificio 61"
+   },
+   "eastM": 229.6,
+   "northM": -18.4,
+   "headingDeg": 107.9,
+   "lit": false,
+   "sizeM": {
+    "widthM": 41.9,
+    "lengthM": 12.9,
+    "heightM": 19.7
+   },
+   "floors": 6,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#e7e5de"
+   },
+   "facade": {
+    "color": "#cbc1ae",
+    "storeyM": 3.28
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-229",
+   "kind": "building",
+   "title": "Domaine National de Meudon (16)",
+   "eastM": -213.9,
+   "northM": -88.4,
+   "headingDeg": 93,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 12,
+    "heightM": 2.6
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#cbc9c5"
+   },
+   "facade": {
+    "color": "#c2baa9"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-230",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 62",
+    "en": "Building 62",
+    "es": "Edificio 62",
+    "it": "Edificio 62"
+   },
+   "eastM": 225.6,
+   "northM": -53.4,
+   "headingDeg": 111,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 2.8,
+    "heightM": 4.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#dfded6"
+   },
+   "facade": {
+    "color": "#dbd1bf",
+    "plain": true,
+    "storeyM": 4.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-231",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 63",
+    "en": "Building 63",
+    "es": "Edificio 63",
+    "it": "Edificio 63"
+   },
+   "eastM": 224.1,
+   "northM": 60.7,
+   "headingDeg": 102,
+   "lit": false,
+   "sizeM": {
+    "widthM": 26.9,
+    "lengthM": 9.2,
+    "heightM": 11
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#d8baaf"
+   },
+   "facade": {
+    "color": "#beb29f",
+    "openings": "tall",
+    "storeyM": 3.67
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-232",
+   "kind": "building",
+   "title": "Domaine National de Meudon (17)",
+   "eastM": -211.4,
+   "northM": -98,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 3.5,
+    "heightM": 2.6
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#d7d3c5"
+   },
+   "facade": {
+    "color": "#c3bbaa"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-233",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 64",
+    "en": "Building 64",
+    "es": "Edificio 64",
+    "it": "Edificio 64"
+   },
+   "eastM": 234.1,
+   "northM": 16.1,
+   "headingDeg": 102,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 12.7,
+    "heightM": 16.1
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ddd8d2"
+   },
+   "facade": {
+    "color": "#cdc4b2",
+    "storeyM": 3.22
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-234",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 65",
+    "en": "Building 65",
+    "es": "Edificio 65",
+    "it": "Edificio 65"
+   },
+   "eastM": 216.9,
+   "northM": 90.3,
+   "headingDeg": 96,
+   "lit": false,
+   "sizeM": {
+    "widthM": 26.9,
+    "lengthM": 4.9,
+    "heightM": 14.7
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#cf9b97"
+   },
+   "facade": {
+    "color": "#a65f48",
+    "storeyM": 2.94
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-235",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 66",
+    "en": "Building 66",
+    "es": "Edificio 66",
+    "it": "Edificio 66"
+   },
+   "eastM": 220.4,
+   "northM": 82.5,
+   "headingDeg": 96,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 3.5,
+    "heightM": 14.7
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#caadac"
+   },
+   "facade": {
+    "color": "#b0654c",
+    "storeyM": 2.94
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-236",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 67",
+    "en": "Building 67",
+    "es": "Edificio 67",
+    "it": "Edificio 67"
+   },
+   "eastM": 236,
+   "northM": 4.5,
+   "headingDeg": 12,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 7.1,
+    "heightM": 16.1
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#dedad3"
+   },
+   "facade": {
+    "color": "#ebe1cd",
+    "storeyM": 3.22
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-237",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 68",
+    "en": "Building 68",
+    "es": "Edificio 68",
+    "it": "Edificio 68"
+   },
+   "eastM": 40.2,
+   "northM": 233.4,
+   "headingDeg": 144,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 7.1,
+    "heightM": 5.6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#6a6a6f"
+   },
+   "facade": {
+    "color": "#cac2b0"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-238",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 69",
+    "en": "Building 69",
+    "es": "Edificio 69",
+    "it": "Edificio 69"
+   },
+   "eastM": 144.2,
+   "northM": -189.6,
+   "headingDeg": 108,
+   "lit": false,
+   "sizeM": {
+    "widthM": 23.3,
+    "lengthM": 8.5,
+    "heightM": 7.8
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#818995"
+   },
+   "facade": {
+    "color": "#d1c8b6"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-239",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 70",
+    "en": "Building 70",
+    "es": "Edificio 70",
+    "it": "Edificio 70"
+   },
+   "eastM": 233.4,
+   "northM": -53.8,
+   "headingDeg": 108,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17,
+    "lengthM": 12,
+    "heightM": 4.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#9e9691"
+   },
+   "facade": {
+    "color": "#c7bfae",
+    "plain": true,
+    "storeyM": 4.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-240",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 71",
+    "en": "Building 71",
+    "es": "Edificio 71",
+    "it": "Edificio 71"
+   },
+   "eastM": 221.8,
+   "northM": 92.6,
+   "headingDeg": 98.1,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.5,
+    "lengthM": 4,
+    "heightM": 13
+   },
+   "floors": 4,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#414453"
+   },
+   "facade": {
+    "color": "#e0d6c3"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-241",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 72",
+    "en": "Building 72",
+    "es": "Edificio 72",
+    "it": "Edificio 72"
+   },
+   "eastM": 240.7,
+   "northM": 9.3,
+   "headingDeg": 99,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 3.5,
+    "heightM": 16.1
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#eeece6"
+   },
+   "facade": {
+    "color": "#e3d9c6",
+    "storeyM": 3.22
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-242",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 73",
+    "en": "Building 73",
+    "es": "Edificio 73",
+    "it": "Edificio 73"
+   },
+   "eastM": 227.5,
+   "northM": 79.3,
+   "headingDeg": 12,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 10.6,
+    "heightM": 6.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#616770"
+   },
+   "facade": {
+    "color": "#cfc6b4"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-243",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 74",
+    "en": "Building 74",
+    "es": "Edificio 74",
+    "it": "Edificio 74"
+   },
+   "eastM": 225.9,
+   "northM": 87.9,
+   "headingDeg": 6,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 4.9,
+    "heightM": 14.7
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#dab5b2"
+   },
+   "facade": {
+    "color": "#af644c",
+    "storeyM": 2.94
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-244",
+   "kind": "building",
+   "title": "Domaine National de Meudon (18)",
+   "eastM": -240.2,
+   "northM": -43.9,
+   "headingDeg": 15,
+   "lit": false,
+   "sizeM": {
+    "widthM": 27.6,
+    "lengthM": 10.6,
+    "heightM": 3
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ecece7"
+   },
+   "facade": {
+    "color": "#bab2a2"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-245",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 75",
+    "en": "Building 75",
+    "es": "Edificio 75",
+    "it": "Edificio 75"
+   },
+   "eastM": 227.3,
+   "northM": 91.9,
+   "headingDeg": 9,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 2.8,
+    "heightM": 10.7
+   },
+   "floors": 4,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#635c5b"
+   },
+   "facade": {
+    "color": "#d1c8b6",
+    "storeyM": 2.68
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-246",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 76",
+    "en": "Building 76",
+    "es": "Edificio 76",
+    "it": "Edificio 76"
+   },
+   "eastM": 225.2,
+   "northM": 98.7,
+   "headingDeg": 9,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 8.5,
+    "heightM": 10.7
+   },
+   "floors": 4,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#a89899"
+   },
+   "facade": {
+    "color": "#cac2b1",
+    "storeyM": 2.68
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-247",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 77",
+    "en": "Building 77",
+    "es": "Edificio 77",
+    "it": "Edificio 77"
+   },
+   "eastM": 220.2,
+   "northM": 109.6,
+   "headingDeg": 6,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 4.9,
+    "heightM": 12.5
+   },
+   "floors": 4,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ccb0a0"
+   },
+   "facade": {
+    "color": "#a59b8a",
+    "storeyM": 3.13
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-248",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 78",
+    "en": "Building 78",
+    "es": "Edificio 78",
+    "it": "Edificio 78"
+   },
+   "eastM": 239.7,
+   "northM": -60.3,
+   "headingDeg": 21.8,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.6,
+    "lengthM": 4.6,
+    "heightM": 4.6
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#e8e7d9"
+   },
+   "facade": {
+    "color": "#d3cab8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-249",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 79",
+    "en": "Building 79",
+    "es": "Edificio 79",
+    "it": "Edificio 79"
+   },
+   "eastM": 168.8,
+   "northM": 180.8,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 48.1,
+    "lengthM": 11.3,
+    "heightM": 24
+   },
+   "floors": 7,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#cac4bf"
+   },
+   "facade": {
+    "color": "#b6b4ae",
+    "storeyM": 3.43
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-250",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 80",
+    "en": "Building 80",
+    "es": "Edificio 80",
+    "it": "Edificio 80"
+   },
+   "eastM": 188.6,
+   "northM": 160.8,
+   "headingDeg": 81,
+   "lit": false,
+   "sizeM": {
+    "widthM": 33.9,
+    "lengthM": 12.7,
+    "heightM": 21.7
+   },
+   "floors": 8,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#bfbaba"
+   },
+   "facade": {
+    "color": "#a7a59f",
+    "storeyM": 2.71
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-251",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 81",
+    "en": "Building 81",
+    "es": "Edificio 81",
+    "it": "Edificio 81"
+   },
+   "eastM": 242,
+   "northM": -53.7,
+   "headingDeg": 111,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 4.2,
+    "heightM": 4.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8b8781"
+   },
+   "facade": {
+    "color": "#e2d8c5",
+    "plain": true,
+    "storeyM": 4.8
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-252",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 82",
+    "en": "Building 82",
+    "es": "Edificio 82",
+    "it": "Edificio 82"
+   },
+   "eastM": 224.8,
+   "northM": 109,
+   "headingDeg": 98.1,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.3,
+    "lengthM": 2.8,
+    "heightM": 7.8
+   },
+   "floors": 3,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#b9c5cc"
+   },
+   "facade": {
+    "color": "#d6cdbb"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-253",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 83",
+    "en": "Building 83",
+    "es": "Edificio 83",
+    "it": "Edificio 83"
+   },
+   "eastM": 132.5,
+   "northM": 212.1,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 86.3,
+    "lengthM": 9.9,
+    "heightM": 24
+   },
+   "floors": 7,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#aba9ad"
+   },
+   "facade": {
+    "color": "#a6a49f",
+    "storeyM": 3.43
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-254",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 84",
+    "en": "Building 84",
+    "es": "Edificio 84",
+    "it": "Edificio 84"
+   },
+   "eastM": 233.4,
+   "northM": 90.9,
+   "headingDeg": 9.5,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 3.9,
+    "heightM": 3.9
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#e1ddd7"
+   },
+   "facade": {
+    "color": "#e2d8c5"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-255",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 85",
+    "en": "Building 85",
+    "es": "Edificio 85",
+    "it": "Edificio 85"
+   },
+   "eastM": 231.7,
+   "northM": 97.3,
+   "headingDeg": 98.1,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.3,
+    "lengthM": 4.8,
+    "heightM": 7.7
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#8c817e"
+   },
+   "facade": {
+    "color": "#a2937a",
+    "storeyM": 3.85
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-256",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 86",
+    "en": "Building 86",
+    "es": "Edificio 86",
+    "it": "Edificio 86"
+   },
+   "eastM": 249.6,
+   "northM": -31.4,
+   "headingDeg": 106.2,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.4,
+    "lengthM": 1.9,
+    "heightM": 16.4
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#e4d9d3"
+   },
+   "facade": {
+    "color": "#c5bcac"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-257",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 87",
+    "en": "Building 87",
+    "es": "Edificio 87",
+    "it": "Edificio 87"
+   },
+   "eastM": 224.8,
+   "northM": 115.2,
+   "headingDeg": 6,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 7.1,
+    "heightM": 12.5
+   },
+   "floors": 4,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#d8bcb0"
+   },
+   "facade": {
+    "color": "#b7ac99",
+    "storeyM": 3.13
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-258",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 88",
+    "en": "Building 88",
+    "es": "Edificio 88",
+    "it": "Edificio 88"
+   },
+   "eastM": 228.6,
+   "northM": 108.4,
+   "headingDeg": 96,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 4.9,
+    "heightM": 12.5
+   },
+   "floors": 4,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#bac5cb"
+   },
+   "facade": {
+    "color": "#a89e8d",
+    "storeyM": 3.13
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-259",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 89",
+    "en": "Building 89",
+    "es": "Edificio 89",
+    "it": "Edificio 89"
+   },
+   "eastM": 252.2,
+   "northM": 23.1,
+   "headingDeg": 12,
+   "lit": false,
+   "sizeM": {
+    "widthM": 59.4,
+    "lengthM": 6.4,
+    "heightM": 16.1
+   },
+   "floors": 5,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ded8d0"
+   },
+   "facade": {
+    "color": "#e6dcc8",
+    "storeyM": 3.22
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-260",
+   "kind": "building",
+   "title": "Domaine National de Meudon (19)",
+   "eastM": -234.1,
+   "northM": -97.4,
+   "headingDeg": 95.7,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.9,
+    "lengthM": 4.7,
+    "heightM": 2.5
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#5b5b65"
+   },
+   "facade": {
+    "color": "#c1b9a8"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-261",
+   "kind": "building",
+   "title": "Domaine National de Meudon (20)",
+   "eastM": -211.8,
+   "northM": 141.4,
+   "headingDeg": 135,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 10.6,
+    "heightM": 6.2
+   },
+   "floors": 2,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#c2cacd"
+   },
+   "facade": {
+    "color": "#d9d0bd",
+    "plain": true
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-262",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 90",
+    "en": "Building 90",
+    "es": "Edificio 90",
+    "it": "Edificio 90"
+   },
+   "eastM": 248,
+   "northM": -59.3,
+   "headingDeg": 18,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 9.9,
+    "heightM": 12.5
+   },
+   "floors": 7,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#ded9d8"
+   },
+   "facade": {
+    "color": "#c7bfae"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-263",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 91",
+    "en": "Building 91",
+    "es": "Edificio 91",
+    "it": "Edificio 91"
+   },
+   "eastM": 102.6,
+   "northM": 247.4,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 33.2,
+    "lengthM": 9.9,
+    "heightM": 19.3
+   },
+   "floors": 7,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#c7bfb6"
+   },
+   "facade": {
+    "color": "#bcbab4",
+    "storeyM": 2.76
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-264",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 92",
+    "en": "Building 92",
+    "es": "Edificio 92",
+    "it": "Edificio 92"
+   },
+   "eastM": 243.8,
+   "northM": -121.8,
+   "headingDeg": 22.5,
+   "lit": false,
+   "sizeM": {
+    "widthM": 54,
+    "lengthM": 15,
+    "heightM": 22.3
+   },
+   "floors": 8,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#7e818c"
+   },
+   "facade": {
+    "color": "#bfb7a7",
+    "storeyM": 2.79
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-265",
+   "kind": "building",
+   "title": "Domaine National de Meudon (21)",
+   "eastM": -237,
+   "northM": 141.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 34,
+    "lengthM": 11.5,
+    "heightM": 2.8
+   },
+   "floors": 1,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#f8f8f5"
+   },
+   "facade": {
+    "color": "#e8deca"
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-266",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 93",
+    "en": "Building 93",
+    "es": "Edificio 93",
+    "it": "Edificio 93"
+   },
+   "eastM": 76.1,
+   "northM": 268.5,
+   "headingDeg": 78,
+   "lit": false,
+   "sizeM": {
+    "widthM": 62.2,
+    "lengthM": 9.9,
+    "heightM": 19.3
+   },
+   "floors": 7,
+   "roof": {
+    "shape": "flat",
+    "riseM": 0,
+    "color": "#c9c4c0"
+   },
+   "facade": {
+    "color": "#c2c0ba",
+    "storeyM": 2.76
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2024-08-22"
+  },
+  {
+   "id": "ign-lidar-topo-267",
+   "kind": "building",
+   "title": {
+    "fr": "Bâtiment 94",
+    "en": "Building 94",
+    "es": "Edificio 94",
+    "it": "Edificio 94"
+   },
+   "eastM": 280.5,
+   "northM": 23.5,
+   "headingDeg": 12,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 2.8,
+    "heightM": 16.1
+   },
+   "floors": 5,
+   "facade": {
+    "color": "#c2baa9",
+    "storeyM": 3.22
+   },
+   "origin": "ign-lidar-topo",
+   "surveyedOn": "2023-03-28"
+  },
+  {
+   "id": "ign-lidar-hd-wood-267",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 5",
+    "en": "Tree 5",
+    "es": "Árbol 5",
+    "it": "Albero 5"
+   },
+   "eastM": -167.6,
+   "northM": -164.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 15.6,
+    "heightM": 26.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-268",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 6",
+    "en": "Tree 6",
+    "es": "Árbol 6",
+    "it": "Albero 6"
+   },
+   "eastM": -164.1,
+   "northM": -155.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.9,
+    "lengthM": 13.9,
+    "heightM": 24
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-269",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 7",
+    "en": "Tree 7",
+    "es": "Árbol 7",
+    "it": "Albero 7"
+   },
+   "eastM": -260.6,
+   "northM": -81.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 25.9
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-270",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 8",
+    "en": "Tree 8",
+    "es": "Árbol 8",
+    "it": "Albero 8"
+   },
+   "eastM": -148.6,
+   "northM": -178.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.3,
+    "lengthM": 15.3,
+    "heightM": 27.8
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-271",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 9",
+    "en": "Tree 9",
+    "es": "Árbol 9",
+    "it": "Albero 9"
+   },
+   "eastM": -259.6,
+   "northM": -75.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 14.8,
+    "heightM": 25
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-272",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 11",
+    "en": "Tree 11",
+    "es": "Árbol 11",
+    "it": "Albero 11"
+   },
+   "eastM": -141.6,
+   "northM": -170.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.9,
+    "lengthM": 15.9,
+    "heightM": 26
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-273",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 13",
+    "en": "Tree 13",
+    "es": "Árbol 13",
+    "it": "Albero 13"
+   },
+   "eastM": -269.1,
+   "northM": -75.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 26.6
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-274",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 14",
+    "en": "Tree 14",
+    "es": "Árbol 14",
+    "it": "Albero 14"
+   },
+   "eastM": -196.1,
+   "northM": -149.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 15.6,
+    "heightM": 24.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-275",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 15",
+    "en": "Tree 15",
+    "es": "Árbol 15",
+    "it": "Albero 15"
+   },
+   "eastM": -118.1,
+   "northM": -49.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5,
+    "lengthM": 5,
+    "heightM": 6.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-276",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 16",
+    "en": "Tree 16",
+    "es": "Árbol 16",
+    "it": "Albero 16"
+   },
+   "eastM": -142.6,
+   "northM": -175.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.8,
+    "lengthM": 15.8,
+    "heightM": 26.6
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-277",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 17",
+    "en": "Tree 17",
+    "es": "Árbol 17",
+    "it": "Albero 17"
+   },
+   "eastM": -143.1,
+   "northM": -182.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.2,
+    "lengthM": 14.2,
+    "heightM": 27.9
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-278",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 18",
+    "en": "Tree 18",
+    "es": "Árbol 18",
+    "it": "Albero 18"
+   },
+   "eastM": -232.6,
+   "northM": -129.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.7,
+    "lengthM": 15.7,
+    "heightM": 25
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-279",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 19",
+    "en": "Tree 19",
+    "es": "Árbol 19",
+    "it": "Albero 19"
+   },
+   "eastM": -199.6,
+   "northM": -149.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.7,
+    "lengthM": 15.7,
+    "heightM": 24.1
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-280",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 20",
+    "en": "Tree 20",
+    "es": "Árbol 20",
+    "it": "Albero 20"
+   },
+   "eastM": -280.1,
+   "northM": -61.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14,
+    "lengthM": 14,
+    "heightM": 27.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-281",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 21",
+    "en": "Tree 21",
+    "es": "Árbol 21",
+    "it": "Albero 21"
+   },
+   "eastM": -270.6,
+   "northM": -59.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15,
+    "lengthM": 15,
+    "heightM": 25.7
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-282",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 22",
+    "en": "Tree 22",
+    "es": "Árbol 22",
+    "it": "Albero 22"
+   },
+   "eastM": -258.1,
+   "northM": -85.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 24.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-283",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 24",
+    "en": "Tree 24",
+    "es": "Árbol 24",
+    "it": "Albero 24"
+   },
+   "eastM": -44.1,
+   "northM": -65.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.1,
+    "lengthM": 15.1,
+    "heightM": 20.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-284",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 25",
+    "en": "Tree 25",
+    "es": "Árbol 25",
+    "it": "Albero 25"
+   },
+   "eastM": -239.1,
+   "northM": -119.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 15.6,
+    "heightM": 24.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-285",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 26",
+    "en": "Tree 26",
+    "es": "Árbol 26",
+    "it": "Albero 26"
+   },
+   "eastM": -280.6,
+   "northM": -57.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 12.7,
+    "heightM": 27.1
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-286",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 27",
+    "en": "Tree 27",
+    "es": "Árbol 27",
+    "it": "Albero 27"
+   },
+   "eastM": -121.1,
+   "northM": -58.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.7,
+    "lengthM": 6.7,
+    "heightM": 6.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-287",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 28",
+    "en": "Tree 28",
+    "es": "Árbol 28",
+    "it": "Albero 28"
+   },
+   "eastM": -286.1,
+   "northM": -59.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.3,
+    "lengthM": 13.3,
+    "heightM": 28.1
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-288",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 29",
+    "en": "Tree 29",
+    "es": "Árbol 29",
+    "it": "Albero 29"
+   },
+   "eastM": -236.1,
+   "northM": -128.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.7,
+    "lengthM": 15.7,
+    "heightM": 24.6
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-289",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 30",
+    "en": "Tree 30",
+    "es": "Árbol 30",
+    "it": "Albero 30"
+   },
+   "eastM": -202.1,
+   "northM": -153.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.2,
+    "lengthM": 14.2,
+    "heightM": 24.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-290",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 31",
+    "en": "Tree 31",
+    "es": "Árbol 31",
+    "it": "Albero 31"
+   },
+   "eastM": -262.1,
+   "northM": -86.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 24.6
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-291",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 32",
+    "en": "Tree 32",
+    "es": "Árbol 32",
+    "it": "Albero 32"
+   },
+   "eastM": -269.1,
+   "northM": -117.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 28.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-292",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 33",
+    "en": "Tree 33",
+    "es": "Árbol 33",
+    "it": "Albero 33"
+   },
+   "eastM": -200.1,
+   "northM": -142.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.8,
+    "lengthM": 15.8,
+    "heightM": 22.3
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-293",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 34",
+    "en": "Tree 34",
+    "es": "Árbol 34",
+    "it": "Albero 34"
+   },
+   "eastM": -253.1,
+   "northM": -111.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.9,
+    "lengthM": 15.9,
+    "heightM": 25
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-294",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 35",
+    "en": "Tree 35",
+    "es": "Árbol 35",
+    "it": "Albero 35"
+   },
+   "eastM": -273.1,
+   "northM": -118.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.5,
+    "lengthM": 14.5,
+    "heightM": 28.7
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-295",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 37",
+    "en": "Tree 37",
+    "es": "Árbol 37",
+    "it": "Albero 37"
+   },
+   "eastM": -260.6,
+   "northM": -92.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 15.6,
+    "heightM": 24.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-296",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 38",
+    "en": "Tree 38",
+    "es": "Árbol 38",
+    "it": "Albero 38"
+   },
+   "eastM": -163.1,
+   "northM": -176.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.7,
+    "lengthM": 15.7,
+    "heightM": 25.8
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-297",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 39",
+    "en": "Tree 39",
+    "es": "Árbol 39",
+    "it": "Albero 39"
+   },
+   "eastM": -51.6,
+   "northM": -104.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 21.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-298",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 40",
+    "en": "Tree 40",
+    "es": "Árbol 40",
+    "it": "Albero 40"
+   },
+   "eastM": -259.1,
+   "northM": -116.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.3,
+    "lengthM": 15.3,
+    "heightM": 26
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-299",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 41",
+    "en": "Tree 41",
+    "es": "Árbol 41",
+    "it": "Albero 41"
+   },
+   "eastM": -267.6,
+   "northM": -121.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 27.7
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-300",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 42",
+    "en": "Tree 42",
+    "es": "Árbol 42",
+    "it": "Albero 42"
+   },
+   "eastM": -209.1,
+   "northM": -143.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 22.9
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-301",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 43",
+    "en": "Tree 43",
+    "es": "Árbol 43",
+    "it": "Albero 43"
+   },
+   "eastM": -266.1,
+   "northM": -90.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 15.6,
+    "heightM": 24.9
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-302",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 44",
+    "en": "Tree 44",
+    "es": "Árbol 44",
+    "it": "Albero 44"
+   },
+   "eastM": -246.6,
+   "northM": -123.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.4,
+    "lengthM": 15.4,
+    "heightM": 24.7
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-303",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 46",
+    "en": "Tree 46",
+    "es": "Árbol 46",
+    "it": "Albero 46"
+   },
+   "eastM": -251.1,
+   "northM": -90.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.2,
+    "lengthM": 15.2,
+    "heightM": 22.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-304",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 47",
+    "en": "Tree 47",
+    "es": "Árbol 47",
+    "it": "Albero 47"
+   },
+   "eastM": -116.1,
+   "northM": -42.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6,
+    "lengthM": 6,
+    "heightM": 6.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-305",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 48",
+    "en": "Tree 48",
+    "es": "Árbol 48",
+    "it": "Albero 48"
+   },
+   "eastM": -250.6,
+   "northM": -105.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.4,
+    "lengthM": 14.4,
+    "heightM": 23.3
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-306",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 49",
+    "en": "Tree 49",
+    "es": "Árbol 49",
+    "it": "Albero 49"
+   },
+   "eastM": -159.6,
+   "northM": -181.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 25.9
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-307",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 50",
+    "en": "Tree 50",
+    "es": "Árbol 50",
+    "it": "Albero 50"
+   },
+   "eastM": -213.1,
+   "northM": -145.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.2,
+    "lengthM": 15.2,
+    "heightM": 23.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-308",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 51",
+    "en": "Tree 51",
+    "es": "Árbol 51",
+    "it": "Albero 51"
+   },
+   "eastM": -216.1,
+   "northM": -143.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 23.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-309",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 52",
+    "en": "Tree 52",
+    "es": "Árbol 52",
+    "it": "Albero 52"
+   },
+   "eastM": -258.6,
+   "northM": -59.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.4,
+    "lengthM": 14.4,
+    "heightM": 21.9
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-310",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 53",
+    "en": "Tree 53",
+    "es": "Árbol 53",
+    "it": "Albero 53"
+   },
+   "eastM": -77.6,
+   "northM": 17.9,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.9,
+    "lengthM": 12.9,
+    "heightM": 17.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-311",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 54",
+    "en": "Tree 54",
+    "es": "Árbol 54",
+    "it": "Albero 54"
+   },
+   "eastM": -252.1,
+   "northM": -119.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 15.6,
+    "heightM": 24.7
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-312",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 56",
+    "en": "Tree 56",
+    "es": "Árbol 56",
+    "it": "Albero 56"
+   },
+   "eastM": -231.6,
+   "northM": -135.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.3,
+    "lengthM": 15.3,
+    "heightM": 23.6
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-313",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 57",
+    "en": "Tree 57",
+    "es": "Árbol 57",
+    "it": "Albero 57"
+   },
+   "eastM": -235.1,
+   "northM": -135.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.1,
+    "lengthM": 15.1,
+    "heightM": 24
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-314",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 58",
+    "en": "Tree 58",
+    "es": "Árbol 58",
+    "it": "Albero 58"
+   },
+   "eastM": -115.1,
+   "northM": -38.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.7,
+    "lengthM": 6.7,
+    "heightM": 6.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-315",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 59",
+    "en": "Tree 59",
+    "es": "Árbol 59",
+    "it": "Albero 59"
+   },
+   "eastM": -255.6,
+   "northM": -120.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.7,
+    "lengthM": 15.7,
+    "heightM": 24.8
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-316",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 60",
+    "en": "Tree 60",
+    "es": "Árbol 60",
+    "it": "Albero 60"
+   },
+   "eastM": -44.6,
+   "northM": -139.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 13.4,
+    "heightM": 25
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-317",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 61",
+    "en": "Tree 61",
+    "es": "Árbol 61",
+    "it": "Albero 61"
+   },
+   "eastM": -219.6,
+   "northM": -145.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 23.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-318",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 62",
+    "en": "Tree 62",
+    "es": "Árbol 62",
+    "it": "Albero 62"
+   },
+   "eastM": -288.6,
+   "northM": -40.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.1,
+    "lengthM": 13.1,
+    "heightM": 26.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-319",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 63",
+    "en": "Tree 63",
+    "es": "Árbol 63",
+    "it": "Albero 63"
+   },
+   "eastM": -282.6,
+   "northM": -70.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.3,
+    "lengthM": 13.3,
+    "heightM": 25.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-320",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 64",
+    "en": "Tree 64",
+    "es": "Árbol 64",
+    "it": "Albero 64"
+   },
+   "eastM": -77.1,
+   "northM": -138.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.9,
+    "lengthM": 13.9,
+    "heightM": 21.1
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-321",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 66",
+    "en": "Tree 66",
+    "es": "Árbol 66",
+    "it": "Albero 66"
+   },
+   "eastM": -125.1,
+   "northM": 17.9,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.8,
+    "lengthM": 11.8,
+    "heightM": 12.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-322",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 67",
+    "en": "Tree 67",
+    "es": "Árbol 67",
+    "it": "Albero 67"
+   },
+   "eastM": -251.6,
+   "northM": -49.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 10.6,
+    "heightM": 19.7
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-323",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 68",
+    "en": "Tree 68",
+    "es": "Árbol 68",
+    "it": "Albero 68"
+   },
+   "eastM": -225.1,
+   "northM": -142.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.1,
+    "lengthM": 15.1,
+    "heightM": 23
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-324",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 69",
+    "en": "Tree 69",
+    "es": "Árbol 69",
+    "it": "Albero 69"
+   },
+   "eastM": -263.6,
+   "northM": -107.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14,
+    "lengthM": 14,
+    "heightM": 24.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-325",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 71",
+    "en": "Tree 71",
+    "es": "Árbol 71",
+    "it": "Albero 71"
+   },
+   "eastM": -225.1,
+   "northM": -147.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 14.1,
+    "heightM": 23.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-326",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 72",
+    "en": "Tree 72",
+    "es": "Árbol 72",
+    "it": "Albero 72"
+   },
+   "eastM": -77.1,
+   "northM": -141.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 21
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-327",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 73",
+    "en": "Tree 73",
+    "es": "Árbol 73",
+    "it": "Albero 73"
+   },
+   "eastM": -286.6,
+   "northM": -48.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.8,
+    "lengthM": 12.8,
+    "heightM": 25.1
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-328",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 74",
+    "en": "Tree 74",
+    "es": "Árbol 74",
+    "it": "Albero 74"
+   },
+   "eastM": -123.6,
+   "northM": 75.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.3,
+    "lengthM": 10.3,
+    "heightM": 21.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-329",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 75",
+    "en": "Tree 75",
+    "es": "Árbol 75",
+    "it": "Albero 75"
+   },
+   "eastM": -254.1,
+   "northM": -127.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 24
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-330",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 76",
+    "en": "Tree 76",
+    "es": "Árbol 76",
+    "it": "Albero 76"
+   },
+   "eastM": -236.6,
+   "northM": -1.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 15.6,
+    "heightM": 18.1
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-331",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 78",
+    "en": "Tree 78",
+    "es": "Árbol 78",
+    "it": "Albero 78"
+   },
+   "eastM": -241.1,
+   "northM": -138.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 14.8,
+    "heightM": 23
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-332",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 79",
+    "en": "Tree 79",
+    "es": "Árbol 79",
+    "it": "Albero 79"
+   },
+   "eastM": -278.1,
+   "northM": -51.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 11.3,
+    "heightM": 22.8
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-333",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 80",
+    "en": "Tree 80",
+    "es": "Árbol 80",
+    "it": "Albero 80"
+   },
+   "eastM": -270.1,
+   "northM": -17.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 21.8
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-334",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 81",
+    "en": "Tree 81",
+    "es": "Árbol 81",
+    "it": "Albero 81"
+   },
+   "eastM": -62.6,
+   "northM": -144.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 21.8
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-335",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 82",
+    "en": "Tree 82",
+    "es": "Árbol 82",
+    "it": "Albero 82"
+   },
+   "eastM": -156.6,
+   "northM": -79.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 3.2,
+    "lengthM": 3.2,
+    "heightM": 7.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-336",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 83",
+    "en": "Tree 83",
+    "es": "Árbol 83",
+    "it": "Albero 83"
+   },
+   "eastM": -124.1,
+   "northM": -68.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7,
+    "lengthM": 7,
+    "heightM": 6.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-337",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 84",
+    "en": "Tree 84",
+    "es": "Árbol 84",
+    "it": "Albero 84"
+   },
+   "eastM": -293.1,
+   "northM": -42.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.2,
+    "lengthM": 11.2,
+    "heightM": 25
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-338",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 85",
+    "en": "Tree 85",
+    "es": "Árbol 85",
+    "it": "Albero 85"
+   },
+   "eastM": -257.1,
+   "northM": -135.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.1,
+    "lengthM": 12.1,
+    "heightM": 24.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-339",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 86",
+    "en": "Tree 86",
+    "es": "Árbol 86",
+    "it": "Albero 86"
+   },
+   "eastM": -230.1,
+   "northM": -143.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.2,
+    "lengthM": 15.2,
+    "heightM": 22.1
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-340",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 87",
+    "en": "Tree 87",
+    "es": "Árbol 87",
+    "it": "Albero 87"
+   },
+   "eastM": -72.6,
+   "northM": -141.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.3,
+    "lengthM": 15.3,
+    "heightM": 20.3
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-341",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 89",
+    "en": "Tree 89",
+    "es": "Árbol 89",
+    "it": "Albero 89"
+   },
+   "eastM": -125.6,
+   "northM": 85.9,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.6,
+    "lengthM": 12.6,
+    "heightM": 21.8
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-342",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 90",
+    "en": "Tree 90",
+    "es": "Árbol 90",
+    "it": "Albero 90"
+   },
+   "eastM": -291.6,
+   "northM": -34.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.3,
+    "lengthM": 9.3,
+    "heightM": 24.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-343",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 91",
+    "en": "Tree 91",
+    "es": "Árbol 91",
+    "it": "Albero 91"
+   },
+   "eastM": -180.1,
+   "northM": -173.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.1,
+    "lengthM": 15.1,
+    "heightM": 22.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-344",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 93",
+    "en": "Tree 93",
+    "es": "Árbol 93",
+    "it": "Albero 93"
+   },
+   "eastM": -289.6,
+   "northM": -71.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.2,
+    "lengthM": 11.2,
+    "heightM": 24
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-345",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 94",
+    "en": "Tree 94",
+    "es": "Árbol 94",
+    "it": "Albero 94"
+   },
+   "eastM": -69.6,
+   "northM": -146.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.2,
+    "lengthM": 15.2,
+    "heightM": 20.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-346",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 95",
+    "en": "Tree 95",
+    "es": "Árbol 95",
+    "it": "Albero 95"
+   },
+   "eastM": -109.6,
+   "northM": -188.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.2,
+    "lengthM": 14.2,
+    "heightM": 23.6
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-347",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 96",
+    "en": "Tree 96",
+    "es": "Árbol 96",
+    "it": "Albero 96"
+   },
+   "eastM": -123.6,
+   "northM": -181.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 14.1,
+    "heightM": 22.1
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-348",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 97",
+    "en": "Tree 97",
+    "es": "Árbol 97",
+    "it": "Albero 97"
+   },
+   "eastM": -173.1,
+   "northM": -174.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 15.5,
+    "heightM": 21.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-349",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 98",
+    "en": "Tree 98",
+    "es": "Árbol 98",
+    "it": "Albero 98"
+   },
+   "eastM": -58.6,
+   "northM": -143.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.8,
+    "lengthM": 13.8,
+    "heightM": 20.9
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-350",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 99",
+    "en": "Tree 99",
+    "es": "Árbol 99",
+    "it": "Albero 99"
+   },
+   "eastM": -71.6,
+   "northM": -150.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 14.8,
+    "heightM": 20.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-351",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 100",
+    "en": "Tree 100",
+    "es": "Árbol 100",
+    "it": "Albero 100"
+   },
+   "eastM": -132.1,
+   "northM": 26.9,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.8,
+    "lengthM": 8.8,
+    "heightM": 12.1
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-352",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 101",
+    "en": "Tree 101",
+    "es": "Árbol 101",
+    "it": "Albero 101"
+   },
+   "eastM": -253.1,
+   "northM": -135.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 13.4,
+    "heightM": 22.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-353",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 102",
+    "en": "Tree 102",
+    "es": "Árbol 102",
+    "it": "Albero 102"
+   },
+   "eastM": -128.6,
+   "northM": -182.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.8,
+    "lengthM": 13.8,
+    "heightM": 21.9
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-354",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 103",
+    "en": "Tree 103",
+    "es": "Árbol 103",
+    "it": "Albero 103"
+   },
+   "eastM": -48.6,
+   "northM": -146.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.2,
+    "lengthM": 13.2,
+    "heightM": 22
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-355",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 104",
+    "en": "Tree 104",
+    "es": "Árbol 104",
+    "it": "Albero 104"
+   },
+   "eastM": -117.6,
+   "northM": -177.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.9,
+    "lengthM": 13.9,
+    "heightM": 21.3
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-356",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 105",
+    "en": "Tree 105",
+    "es": "Árbol 105",
+    "it": "Albero 105"
+   },
+   "eastM": -118.1,
+   "northM": -185.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 14.8,
+    "heightM": 22.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-357",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 106",
+    "en": "Tree 106",
+    "es": "Árbol 106",
+    "it": "Albero 106"
+   },
+   "eastM": -127.1,
+   "northM": -186.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 22.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-358",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 107",
+    "en": "Tree 107",
+    "es": "Árbol 107",
+    "it": "Albero 107"
+   },
+   "eastM": -262.1,
+   "northM": -19.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 14.8,
+    "heightM": 19.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-359",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 108",
+    "en": "Tree 108",
+    "es": "Árbol 108",
+    "it": "Albero 108"
+   },
+   "eastM": -121.6,
+   "northM": 11.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.5,
+    "lengthM": 13.5,
+    "heightM": 10.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-360",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 109",
+    "en": "Tree 109",
+    "es": "Árbol 109",
+    "it": "Albero 109"
+   },
+   "eastM": -185.1,
+   "northM": -174.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.5,
+    "lengthM": 14.5,
+    "heightM": 21.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-361",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 110",
+    "en": "Tree 110",
+    "es": "Árbol 110",
+    "it": "Albero 110"
+   },
+   "eastM": -125.1,
+   "northM": -71.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 6.4,
+    "heightM": 6.3
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-362",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 111",
+    "en": "Tree 111",
+    "es": "Árbol 111",
+    "it": "Albero 111"
+   },
+   "eastM": -208.6,
+   "northM": -172.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.1,
+    "lengthM": 15.1,
+    "heightM": 22.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-363",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 112",
+    "en": "Tree 112",
+    "es": "Árbol 112",
+    "it": "Albero 112"
+   },
+   "eastM": -185.1,
+   "northM": -185.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.4,
+    "lengthM": 14.4,
+    "heightM": 22.8
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-364",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 113",
+    "en": "Tree 113",
+    "es": "Árbol 113",
+    "it": "Albero 113"
+   },
+   "eastM": -81.1,
+   "northM": -177.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.7,
+    "lengthM": 14.7,
+    "heightM": 22.8
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-365",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 114",
+    "en": "Tree 114",
+    "es": "Árbol 114",
+    "it": "Albero 114"
+   },
+   "eastM": -131.6,
+   "northM": -188.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.9,
+    "lengthM": 13.9,
+    "heightM": 22.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-366",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 115",
+    "en": "Tree 115",
+    "es": "Árbol 115",
+    "it": "Albero 115"
+   },
+   "eastM": -70.1,
+   "northM": -170.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.4,
+    "lengthM": 15.4,
+    "heightM": 22.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-367",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 116",
+    "en": "Tree 116",
+    "es": "Árbol 116",
+    "it": "Albero 116"
+   },
+   "eastM": -279.6,
+   "northM": -26.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.7,
+    "lengthM": 14.7,
+    "heightM": 21.1
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-368",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 117",
+    "en": "Tree 117",
+    "es": "Árbol 117",
+    "it": "Albero 117"
+   },
+   "eastM": -268.6,
+   "northM": -25.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.9,
+    "lengthM": 14.9,
+    "heightM": 19.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-369",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 118",
+    "en": "Tree 118",
+    "es": "Árbol 118",
+    "it": "Albero 118"
+   },
+   "eastM": -68.1,
+   "northM": -173.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.4,
+    "lengthM": 15.4,
+    "heightM": 22.6
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-370",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 119",
+    "en": "Tree 119",
+    "es": "Árbol 119",
+    "it": "Albero 119"
+   },
+   "eastM": -112.6,
+   "northM": -30.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.4,
+    "lengthM": 7.4,
+    "heightM": 6.3
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-371",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 120",
+    "en": "Tree 120",
+    "es": "Árbol 120",
+    "it": "Albero 120"
+   },
+   "eastM": -185.1,
+   "northM": -179.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.3,
+    "lengthM": 15.3,
+    "heightM": 21.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-372",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 121",
+    "en": "Tree 121",
+    "es": "Árbol 121",
+    "it": "Albero 121"
+   },
+   "eastM": -159.1,
+   "northM": -86.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.4,
+    "lengthM": 4.4,
+    "heightM": 7.9
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-373",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 122",
+    "en": "Tree 122",
+    "es": "Árbol 122",
+    "it": "Albero 122"
+   },
+   "eastM": -138.1,
+   "northM": -192.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.2,
+    "lengthM": 11.2,
+    "heightM": 22.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-374",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 123",
+    "en": "Tree 123",
+    "es": "Árbol 123",
+    "it": "Albero 123"
+   },
+   "eastM": -277.1,
+   "northM": -81.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.5,
+    "lengthM": 14.5,
+    "heightM": 20.7
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-375",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 125",
+    "en": "Tree 125",
+    "es": "Árbol 125",
+    "it": "Albero 125"
+   },
+   "eastM": -284.1,
+   "northM": -28.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.5,
+    "lengthM": 12.5,
+    "heightM": 21
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-376",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 126",
+    "en": "Tree 126",
+    "es": "Árbol 126",
+    "it": "Albero 126"
+   },
+   "eastM": -64.1,
+   "northM": -166.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 13.4,
+    "heightM": 21.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-377",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 127",
+    "en": "Tree 127",
+    "es": "Árbol 127",
+    "it": "Albero 127"
+   },
+   "eastM": -126.1,
+   "northM": -74.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6,
+    "lengthM": 6,
+    "heightM": 6.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-378",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 128",
+    "en": "Tree 128",
+    "es": "Árbol 128",
+    "it": "Albero 128"
+   },
+   "eastM": -146.1,
+   "northM": -193.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.6,
+    "lengthM": 8.6,
+    "heightM": 21.9
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-379",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 129",
+    "en": "Tree 129",
+    "es": "Árbol 129",
+    "it": "Albero 129"
+   },
+   "eastM": -98.6,
+   "northM": -169.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.2,
+    "lengthM": 14.2,
+    "heightM": 19.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-380",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 130",
+    "en": "Tree 130",
+    "es": "Árbol 130",
+    "it": "Albero 130"
+   },
+   "eastM": -256.6,
+   "northM": -17.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.9,
+    "lengthM": 11.9,
+    "heightM": 17.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-381",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 131",
+    "en": "Tree 131",
+    "es": "Árbol 131",
+    "it": "Albero 131"
+   },
+   "eastM": -62.1,
+   "northM": -137.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 14.3,
+    "heightM": 18.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-382",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 132",
+    "en": "Tree 132",
+    "es": "Árbol 132",
+    "it": "Albero 132"
+   },
+   "eastM": -107.6,
+   "northM": -172.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.5,
+    "lengthM": 14.5,
+    "heightM": 19.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-383",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 133",
+    "en": "Tree 133",
+    "es": "Árbol 133",
+    "it": "Albero 133"
+   },
+   "eastM": -218.6,
+   "northM": -8.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.8,
+    "lengthM": 9.8,
+    "heightM": 12.6
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-384",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 134",
+    "en": "Tree 134",
+    "es": "Árbol 134",
+    "it": "Albero 134"
+   },
+   "eastM": -276.6,
+   "northM": -34.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.2,
+    "lengthM": 14.2,
+    "heightM": 19.3
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-385",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 135",
+    "en": "Tree 135",
+    "es": "Árbol 135",
+    "it": "Albero 135"
+   },
+   "eastM": -79.1,
+   "northM": -156.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15,
+    "lengthM": 15,
+    "heightM": 18.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-386",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 136",
+    "en": "Tree 136",
+    "es": "Árbol 136",
+    "it": "Albero 136"
+   },
+   "eastM": -128.1,
+   "northM": 70.9,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.7,
+    "lengthM": 10.7,
+    "heightM": 16.7
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-387",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 137",
+    "en": "Tree 137",
+    "es": "Árbol 137",
+    "it": "Albero 137"
+   },
+   "eastM": -143.6,
+   "northM": 62.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.9,
+    "lengthM": 12.9,
+    "heightM": 15.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-388",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 138",
+    "en": "Tree 138",
+    "es": "Árbol 138",
+    "it": "Albero 138"
+   },
+   "eastM": -133.6,
+   "northM": 1.9,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 3.7,
+    "lengthM": 3.7,
+    "heightM": 7.7
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-389",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 139",
+    "en": "Tree 139",
+    "es": "Árbol 139",
+    "it": "Albero 139"
+   },
+   "eastM": -53.1,
+   "northM": -120.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.9,
+    "lengthM": 7.9,
+    "heightM": 16.9
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-390",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 140",
+    "en": "Tree 140",
+    "es": "Árbol 140",
+    "it": "Albero 140"
+   },
+   "eastM": -109.1,
+   "northM": -176.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.9,
+    "lengthM": 13.9,
+    "heightM": 19.1
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-391",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 141",
+    "en": "Tree 141",
+    "es": "Árbol 141",
+    "it": "Albero 141"
+   },
+   "eastM": -100.1,
+   "northM": -176.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 19.5
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-392",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 142",
+    "en": "Tree 142",
+    "es": "Árbol 142",
+    "it": "Albero 142"
+   },
+   "eastM": -127.1,
+   "northM": -78.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.5,
+    "lengthM": 6.5,
+    "heightM": 6.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-393",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 143",
+    "en": "Tree 143",
+    "es": "Árbol 143",
+    "it": "Albero 143"
+   },
+   "eastM": -127.1,
+   "northM": 94.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.8,
+    "lengthM": 12.8,
+    "heightM": 19.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-394",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 144",
+    "en": "Tree 144",
+    "es": "Árbol 144",
+    "it": "Albero 144"
+   },
+   "eastM": -141.1,
+   "northM": 70.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.2,
+    "lengthM": 14.2,
+    "heightM": 15.9
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-395",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 145",
+    "en": "Tree 145",
+    "es": "Árbol 145",
+    "it": "Albero 145"
+   },
+   "eastM": -249.6,
+   "northM": -141.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.5,
+    "lengthM": 13.5,
+    "heightM": 19.6
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-396",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 146",
+    "en": "Tree 146",
+    "es": "Árbol 146",
+    "it": "Albero 146"
+   },
+   "eastM": -56.1,
+   "northM": -137.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.3,
+    "lengthM": 12.3,
+    "heightM": 17.4
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-397",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 147",
+    "en": "Tree 147",
+    "es": "Árbol 147",
+    "it": "Albero 147"
+   },
+   "eastM": -111.6,
+   "northM": -25.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.5,
+    "lengthM": 7.5,
+    "heightM": 6.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-398",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 148",
+    "en": "Tree 148",
+    "es": "Árbol 148",
+    "it": "Albero 148"
+   },
+   "eastM": -151.6,
+   "northM": -193.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.3,
+    "lengthM": 7.3,
+    "heightM": 19.9
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-399",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 149",
+    "en": "Tree 149",
+    "es": "Árbol 149",
+    "it": "Albero 149"
+   },
+   "eastM": -61.6,
+   "northM": -152.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.6,
+    "lengthM": 14.6,
+    "heightM": 17.7
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  },
+  {
+   "id": "ign-lidar-hd-wood-400",
+   "kind": "tree",
+   "title": {
+    "fr": "Arbre 150",
+    "en": "Tree 150",
+    "es": "Árbol 150",
+    "it": "Albero 150"
+   },
+   "eastM": -126.1,
+   "northM": 26.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.7,
+    "lengthM": 11.7,
+    "heightM": 10.2
+   },
+   "origin": "ign-lidar-hd",
+   "surveyedOn": "2023-03-01"
+  }
+ ],
  "interpretation": {
   "title": {
    "en": "Laser shot from Meudon to Paris",
@@ -140,12 +9598,12 @@
     },
     "path": [
      {
-      "lat": 48.805,
-      "lng": 2.23105,
+      "lat": 48.805055,
+      "lng": 2.231171,
       "altitudeM": {
-       "value": 172,
+       "value": 172.5,
        "basis": "assumed",
-       "rationale": "The Observatory says the beam left the dome of Meudon; the photograph of the building shows it leaving the front a dozen metres above the ground, which is at 160 m (IGN RGE ALTI)."
+       "rationale": "The photograph of the building shows the beam leaving a window of its top floor, under the dome, on the side facing Paris: the east face of the Grande Coupole, about 12.5 m above the ground, which is at 160 m (IGN RGE ALTI)."
       }
      },
      {
@@ -167,5 +9625,47 @@
     }
    }
   ]
- }
+ },
+ "sources": [
+  {
+   "title": "Un tir laser de Meudon à Paris !",
+   "url": "https://lte.observatoiredeparis.psl.eu/Un-tir-laser-de-Meudon-a-Paris",
+   "publication": {
+    "publisher": "Observatoire de Paris - PSL, LTE",
+    "time": "2026-10-16"
+   }
+  },
+  {
+   "title": "LiDAR HD, canopy height model and classification (the trees, the heights and the roofs of what stands round the spot), flown 2023-03-01",
+   "url": "https://geoservices.ign.fr/lidarhd",
+   "publication": {
+    "publisher": "IGN",
+    "time": "2023-03-01"
+   }
+  },
+  {
+   "title": "BD TOPO (the buildings with their heights and materials, the bridges and the lines round the spot), edited 2023-03-28",
+   "url": "https://geoservices.ign.fr/bdtopo",
+   "publication": {
+    "publisher": "IGN",
+    "time": "2023-03-28"
+   }
+  },
+  {
+   "title": "Aerial photograph of the IGN (the colour of the roofs), flown 2024-08-22",
+   "url": "https://geoservices.ign.fr/bdortho",
+   "publication": {
+    "publisher": "IGN",
+    "time": "2024-08-22"
+   }
+  },
+  {
+   "title": "Open-Meteo historical weather (ERA5), Meudon, 9 October 2026: cloud cover 98 to 100 %, low clouds 69 to 98 %, relative humidity 82 to 86 % between 19:00 and 20:00",
+   "url": "https://open-meteo.com/en/docs/historical-weather-api",
+   "publication": {
+    "publisher": "Open-Meteo",
+    "time": "2026-10-21"
+   }
+  }
+ ]
 }

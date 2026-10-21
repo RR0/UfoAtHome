@@ -7,6 +7,8 @@ import type { DecorRoof } from "../engine/model/Decor.js"
  *
  * - "gable": two slopes meeting at a ridge along the width, and a triangle at each end;
  * - "hip": four slopes, the ridge as long as the building is wider than it is deep (a pyramid for a square one);
+ * - "dome": a cupola, the half of an ellipsoid on the ellipse the walls hold, `riseM` high, on a slab that covers the corners it leaves (an
+ *   observatory's dome on its square drum);
  * - "flat": a thin slab, which is where a colour goes on a box.
  *
  * The roof overhangs the walls a little, as a roof does: a roof exactly the size of its walls shows a seam of wall colour at the eaves.
@@ -23,7 +25,7 @@ export class RoofGeometry {
   static readonly DEFAULT_RISE_M = 3
 
   /** What a roof states with every default filled in: its shape, how far it rises, and which side its ridge runs along. */
-  static normalised(roof: DecorRoof): { shape: "flat" | "gable" | "hip", riseM: number, ridge: "width" | "depth", color?: string } {
+  static normalised(roof: DecorRoof): { shape: "flat" | "gable" | "hip" | "dome", riseM: number, ridge: "width" | "depth", color?: string } {
     const shape = roof.shape ?? "flat"
     return { shape, riseM: shape === "flat" ? 0 : Math.max(0, roof.riseM ?? RoofGeometry.DEFAULT_RISE_M), ridge: roof.ridge ?? "width", ...(roof.color ? { color: roof.color } : {}) }
   }
@@ -36,7 +38,9 @@ export class RoofGeometry {
     const halfDepth = (turned ? widthM : lengthM) / 2 + RoofGeometry.OVERHANG_M
     const geometry = roof.shape === "flat" || roof.riseM <= 0
       ? RoofGeometry.slab(halfWidth, halfDepth)
-      : RoofGeometry.pitched(roof.shape, halfWidth, halfDepth, roof.riseM)
+      : roof.shape === "dome"
+        ? RoofGeometry.dome(halfWidth - RoofGeometry.OVERHANG_M, halfDepth - RoofGeometry.OVERHANG_M, halfWidth, halfDepth, roof.riseM)
+        : RoofGeometry.pitched(roof.shape, halfWidth, halfDepth, roof.riseM)
     if (turned) geometry.rotateY(Math.PI / 2)
     geometry.computeVertexNormals()
     return geometry
@@ -77,6 +81,31 @@ export class RoofGeometry {
     }
     // Underneath, so that a roof is not open from below (an observer on a hill never sees it, a low sun's shadow does).
     triangles.push(eave(-halfWidth, -halfDepth), eave(-halfWidth, halfDepth), eave(halfWidth, halfDepth), eave(-halfWidth, -halfDepth), eave(halfWidth, halfDepth), eave(halfWidth, -halfDepth))
+    return RoofGeometry.of(triangles)
+  }
+
+  /** The dome's rings, from its foot to its crown, and the sectors round it: enough for a cupola tens of metres across to be round at any distance it is seen from. */
+  private static readonly DOME_RINGS = 12
+  private static readonly DOME_SECTORS = 48
+
+  /** A half ellipsoid of semi-axes `a` (x) and `b` (z) rising `rise`, standing on the slab of a flat roof the size of the walls. */
+  private static dome(a: number, b: number, halfWidth: number, halfDepth: number, rise: number): BufferGeometry {
+    const slab = RoofGeometry.slab(halfWidth, halfDepth).getAttribute("position").array as Float32Array
+    const triangles: [number, number, number][] = []
+    for (let i = 0; i < slab.length; i += 3) triangles.push([slab[i], slab[i + 1], slab[i + 2]])
+    const at = (ring: number, sector: number): [number, number, number] => {
+      const elevation = (ring / RoofGeometry.DOME_RINGS) * (Math.PI / 2)
+      const azimuth = (sector / RoofGeometry.DOME_SECTORS) * 2 * Math.PI
+      const across = Math.cos(elevation)
+      return [a * across * Math.cos(azimuth), RoofGeometry.SLAB_M + rise * Math.sin(elevation), b * across * Math.sin(azimuth)]
+    }
+    for (let ring = 0; ring < RoofGeometry.DOME_RINGS; ring++) {
+      for (let sector = 0; sector < RoofGeometry.DOME_SECTORS; sector++) {
+        const next = sector + 1
+        // Facing out: counter-clockwise seen from outside.
+        triangles.push(at(ring, sector), at(ring + 1, next), at(ring, next), at(ring, sector), at(ring + 1, sector), at(ring + 1, next))
+      }
+    }
     return RoofGeometry.of(triangles)
   }
 

@@ -123,7 +123,7 @@ export class OsmBuildingsSurroundingsProvider implements SurroundingsProvider {
     const facade: DecorFacade | undefined = wallColour ? { color: wallColour } : undefined
     let roof: DecorRoof | undefined
     let heightM = building.heightM
-    if (shape === "gable" || shape === "hip") {
+    if (shape === "gable" || shape === "hip" || shape === "dome") {
       // How far the ridge stands above the eaves: what the tag says, else a pitch of about thirty degrees over the shorter side.
       const stated = OsmBuildingTags.height(tags["roof:height"])
       const riseM = Math.round((stated ?? Math.min(5, Math.max(1.5, 0.29 * Math.min(building.widthM, building.lengthM)))) * 10) / 10

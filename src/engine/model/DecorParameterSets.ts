@@ -127,17 +127,18 @@ export class DecorParameterSets {
   /** The roof of a building: its shape, how far it rises, which way its ridge runs, its colour. */
   private static roof(): ParameterSpec[] {
     const group: SaidText = { en: "Roof", fr: "Toit", es: "Tejado", it: "Tetto" }
-    const pitched = (element: ParameterHolder): boolean => ["gable", "hip"].includes(String(Parameters.read(element, "roof.shape")))
+    const pitched = (element: ParameterHolder): boolean => ["gable", "hip", "dome"].includes(String(Parameters.read(element, "roof.shape")))
     return [
       {
         type: "choice", key: "roof.shape", group,
         label: { en: "Roof", fr: "Toit", es: "Tejado", it: "Tetto" },
         empty: { en: "Flat", fr: "Plat", es: "Plano", it: "Piano" },
-        hint: { en: "Flat (the box), two slopes to a ridge, or four slopes.", fr: "Plat (la boîte), deux pentes jusqu'à un faîte, ou quatre pentes.", es: "Plano (la caja), dos vertientes hasta una cumbrera, o cuatro vertientes.", it: "Piano (la scatola), due falde fino a un colmo, o quattro falde." },
+        hint: { en: "Flat (the box), two slopes to a ridge, four slopes, or a dome.", fr: "Plat (la boîte), deux pentes jusqu'à un faîte, quatre pentes, ou une coupole.", es: "Plano (la caja), dos vertientes hasta una cumbrera, cuatro vertientes, o una cúpula.", it: "Piano (la scatola), due falde fino a un colmo, quattro falde, o una cupola." },
         choices: [
           { value: "flat", label: { en: "Flat", fr: "Plat", es: "Plano", it: "Piano" } },
           { value: "gable", label: { en: "Two slopes", fr: "Deux pentes", es: "Dos vertientes", it: "Due falde" } },
-          { value: "hip", label: { en: "Four slopes", fr: "Quatre pentes", es: "Cuatro vertientes", it: "Quattro falde" } }
+          { value: "hip", label: { en: "Four slopes", fr: "Quatre pentes", es: "Cuatro vertientes", it: "Quattro falde" } },
+          { value: "dome", label: { en: "Dome", fr: "Coupole", es: "Cúpula", it: "Cupola" } }
         ]
       },
       {
