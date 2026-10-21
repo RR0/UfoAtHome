@@ -52,12 +52,12 @@ export class BeamSystem {
   /** Two ribbons, the line and its halo, of two strips of two triangles each. */
   private static readonly VERTICES_PER_SEGMENT = 24
   /**
-   * How far round the beam its halo spreads, metres, and the share of its light the halo carries: the light the haze sends off the beam a
-   * second time, close round it, which the photographs of the Meudon shot show as a faint glow beside the line near the building. A width in
-   * metres and not in degrees: a few metres off the halo is a band beside the line, a kilometre off it is narrower than a pixel and part of the
-   * line. Both are judged on the photographs, not computed: multiple scattering is not modelled.
+   * How wide the halo round the beam is, radians, full angle, and the share of its light it carries: the glare of the eye or of the lens round
+   * a bright line, which the photographs of the Meudon shot show as a faint glow beside it. An angle and not a width in metres, as glare is:
+   * the line keeps one width along its whole length, and its halo shows where the line is bright (near the building, where the beam comes
+   * towards the eye) and fades where it is dim. Both judged on the photographs, not computed.
    */
-  static readonly HALO_RADIUS_M = 0.3
+  static readonly HALO_RAD = 0.002
   static readonly HALO_SHARE = 0.15
   /** The most a pixel is ever given, relative: under a half float's largest (see PlumeSystem.BRIGHTEST_RELATIVE). */
   private static readonly BRIGHTEST_RELATIVE = 60000
@@ -159,8 +159,10 @@ export class BeamSystem {
     const scattered = LaserBeamSighting.phasedScattering(coefficients, cosTurn)
     const through = frame.transmittanceTo(mid.x, mid.y, mid.z)
     const minShownAt = (point: Placed): number => BeamSystem.MIN_PIXELS * frame.pixelRad * Math.hypot(point.x - frame.eye.x, point.y - frame.eye.y, point.z - frame.eye.z)
-    // The halo, which a picture shows only where it is wider than the line: farther off, its light is the line's.
-    const haloShare = (point: Placed): number => point.widthM + 2 * BeamSystem.HALO_RADIUS_M > minShownAt(point) ? BeamSystem.HALO_SHARE : 0
+    const distanceTo = (point: Placed): number => Math.hypot(point.x - frame.eye.x, point.y - frame.eye.y, point.z - frame.eye.z)
+    const haloWidth = (point: Placed): number => Math.max(point.widthM, BeamSystem.HALO_RAD * distanceTo(point))
+    // The halo, where it is wider than the line: on a picture so coarse that it is not, its light is the line's.
+    const haloShare = (point: Placed): number => haloWidth(point) > minShownAt(point) ? BeamSystem.HALO_SHARE : 0
     const endOf = (point: Placed, widthM: number, share: number) => {
       const shown = Math.max(widthM, minShownAt(point))
       // A ribbon that fades from its middle to nothing at its edges carries half the light of a flat one as wide: its middle is twice as bright.
@@ -172,7 +174,7 @@ export class BeamSystem {
     }
     const ribbons = [
       [endOf(a, a.widthM, 1 - haloShare(a)), endOf(b, b.widthM, 1 - haloShare(b))],
-      [endOf(a, a.widthM + 2 * BeamSystem.HALO_RADIUS_M, haloShare(a)), endOf(b, b.widthM + 2 * BeamSystem.HALO_RADIUS_M, haloShare(b))]
+      [endOf(a, haloWidth(a), haloShare(a)), endOf(b, haloWidth(b), haloShare(b))]
     ]
     for (const ends of ribbons) {
       if (ends.every(end => Math.max(...end.level) <= 0)) continue
