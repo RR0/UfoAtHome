@@ -163,15 +163,15 @@ export class CaseFile {
   static async interpretationOf(event: InterpretationEventJson, caseUrl: string, fetchJson: (url: string) => Promise<unknown>): Promise<InterpretationJson> {
     // Any value may be written with its provenance beside it, as in a recording (see Provenance);
     // what the scene reads is the bare value.
-    if (event.bodies || event.reentries || event.launches || event.beams) {
-      return CaseFile.withModelsFrom(Provenance.strip({ title: event.title, bodies: event.bodies ?? [], smoke: event.smoke, reentries: event.reentries, launches: event.launches, beams: event.beams }).recording, caseUrl)
+    if (event.bodies) {
+      return CaseFile.withModelsFrom(Provenance.strip({ title: event.title, bodies: event.bodies ?? [], smoke: event.smoke }).recording, caseUrl)
     }
     if (!event.url) return { title: event.title, bodies: [] }
     const fileUrl = new URL(event.url, caseUrl).href
     const file = await fetchJson(fileUrl) as InterpretationJson & { interpretation?: InterpretationJson }
     // A recording keeps its bodies in its own `interpretation`; an older file is the interpretation.
     const stated = "timeline" in file && file.interpretation ? file.interpretation : file
-    return CaseFile.withModelsFrom(Provenance.strip({ title: event.title ?? stated.title, bodies: stated.bodies ?? [], smoke: stated.smoke, reentries: stated.reentries, launches: stated.launches, beams: stated.beams }).recording, fileUrl)
+    return CaseFile.withModelsFrom(Provenance.strip({ title: event.title ?? stated.title, bodies: stated.bodies ?? [], smoke: stated.smoke }).recording, fileUrl)
   }
 
   /** An interpretation with its bodies' model addresses made absolute against the file that states

@@ -261,14 +261,7 @@
     "keyframes": []
   },
   "decor": [],
-  "interpretation": {
-    "title": {
-      "en": "Exhaust plume of Starlink Group 10-49",
-      "fr": "Panache d'échappement de Starlink Groupe 10-49",
-      "es": "Estela de escape de Starlink Grupo 10-49",
-      "it": "Scia di scarico di Starlink Gruppo 10-49"
-    },
-    "bodies": [],
+  "skyEvents": {
     "launches": [
       {
         "id": "starlink-10-49",

@@ -1,7 +1,7 @@
 import type { LaunchEditorMessages } from "./LaunchEditorMessages.js"
 
 export const launchEditorMessages_es: LaunchEditorMessages = {
-  intro: "El escape de un lanzamiento de cohete que la interpretación dice que se vio, iluminado por un Sol que el suelo ya no ve. Su trayectoria, su motor y cómo se extiende el escape se ajustan a continuación.",
+  intro: "Un lanzamiento de cohete durante la grabación, un hecho del cielo: su escape se ve iluminado por un Sol que el suelo ya no ve. Su trayectoria, su motor y la expansión del escape se ajustan abajo.",
   none: "Ningún lanzamiento en esta grabación",
   launch: "Lanzamiento",
   deleteLaunch: "Eliminar el lanzamiento",

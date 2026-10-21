@@ -1,7 +1,7 @@
 import type { LaunchEditorMessages } from "./LaunchEditorMessages.js"
 
 export const launchEditorMessages_it: LaunchEditorMessages = {
-  intro: "Lo scarico di un lancio di razzo che l'interpretazione dice sia stato visto, illuminato da un Sole che il suolo non vede più. Il suo percorso, il suo motore e come si allarga lo scarico si regolano qui sotto.",
+  intro: "Un lancio di razzo durante la registrazione, un fatto del cielo: il suo scarico si vede illuminato da un Sole che il suolo non vede più. Il suo percorso, il motore e l'espansione dello scarico si regolano qui sotto.",
   none: "Nessun lancio in questa registrazione",
   launch: "Lancio",
   deleteLaunch: "Elimina il lancio",

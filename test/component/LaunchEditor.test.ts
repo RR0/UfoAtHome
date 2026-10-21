@@ -1,13 +1,12 @@
 import { afterEach, describe, expect, test } from "vitest"
 import { LaunchEditor } from "../../src/component/LaunchEditor.js"
-import type { InterpretationJson } from "../../src/engine/interpretation/Interpretation.js"
+import type { SkyEventsJson } from "../../src/engine/model/SkyEvents.js"
 import { SaidTexts } from "../../src/engine/model/SaidText.js"
 import type { Sighting } from "../../src/engine/model/Sighting.js"
 
 const track = [{ t: 0, lat: 28, lng: -80, altitudeKm: 0 }, { t: 60000, lat: 30, lng: -78, altitudeKm: 150 }]
 
-const stated = (): InterpretationJson => ({
-  bodies: [],
+const stated = (): SkyEventsJson => ({
   launches: [
     { id: "a", title: { en: "First" }, vehicle: { name: "Falcon 9", engine: { thrustKN: 934, specificImpulseS: 348, propellant: "rp1-lox" } }, track },
     { id: "b", track }
@@ -19,8 +18,8 @@ describe("LaunchEditor", () => {
   document.body.append(container)
   afterEach(() => container.replaceChildren())
 
-  const build = (interpretation: InterpretationJson | null = stated()) => {
-    const sighting = { interpretation: interpretation ?? undefined, event: { place: [{ lat: 48, lng: 2 }] }, observerTrack: { getInterpolatedPoseAt: () => ({ headingDeg: 90 }) } } as unknown as Sighting
+  const build = (skyEvents: SkyEventsJson | null = stated()) => {
+    const sighting = { skyEvents: skyEvents ?? undefined, event: { place: [{ lat: 48, lng: 2 }] }, observerTrack: { getInterpolatedPoseAt: () => ({ headingDeg: 90 }) } } as unknown as Sighting
     let changes = 0
     const editor = new LaunchEditor(container, {
       sighting: () => sighting,
@@ -54,10 +53,10 @@ describe("LaunchEditor", () => {
   test("what is typed is written onto the launch, and the recording is told", () => {
     const { sighting, changes } = build()
     typed(field("plume.collarShare"), "0.5")
-    expect(sighting.interpretation!.launches![0].plume).toEqual({ collarShare: 0.5 })
+    expect(sighting.skyEvents!.launches![0].plume).toEqual({ collarShare: 0.5 })
     expect(changes()).toBe(1)
     typed(field("plume.collarShare"), "")
-    expect(sighting.interpretation!.launches![0].plume).toBeUndefined()
+    expect(sighting.skyEvents!.launches![0].plume).toBeUndefined()
   })
 
   test("the other launch has its own fields", () => {
@@ -70,16 +69,16 @@ describe("LaunchEditor", () => {
   test("renaming a launch writes its title in the writing language and updates the list", () => {
     const { sighting } = build()
     typed(field("title"), "Renamed")
-    expect(sighting.interpretation!.launches![0].title).toEqual({ en: "Renamed" })
+    expect(sighting.skyEvents!.launches![0].title).toEqual({ en: "Renamed" })
     expect(container.querySelector<HTMLOptionElement>("#launch-select option")!.textContent).toBe("Renamed (a)")
   })
 
-  test("deleting a launch leaves the other, and the last one leaves no interpretation behind", () => {
+  test("deleting a launch leaves the other, and the last one leaves no event of the sky behind", () => {
     const { sighting } = build()
     container.querySelector<HTMLButtonElement>("#launch-delete")!.click()
-    expect(sighting.interpretation!.launches!.map(launch => launch.id)).toEqual(["b"])
+    expect(sighting.skyEvents!.launches!.map(launch => launch.id)).toEqual(["b"])
     container.querySelector<HTMLButtonElement>("#launch-delete")!.click()
-    expect(sighting.interpretation).toBeUndefined()
+    expect(sighting.skyEvents).toBeUndefined()
     expect(container.querySelector<HTMLElement>("#launch-list .element-list-empty")!.hidden).toBe(false)
   })
 
@@ -94,7 +93,7 @@ describe("LaunchEditor", () => {
     const first = field("plume.collarShare")
     editor.refresh()
     expect(field("plume.collarShare")).toBe(first)
-    sighting.interpretation = { bodies: [], launches: [{ id: "z", track }] }
+    sighting.skyEvents = { launches: [{ id: "z", track }] }
     editor.refresh()
     expect([...container.querySelectorAll<HTMLOptionElement>("#launch-select option")].map(option => option.value)).toEqual(["z"])
   })
@@ -102,7 +101,7 @@ describe("LaunchEditor", () => {
   test("adds a launch with a placeholder path in front of the observer, even to a recording with no interpretation", () => {
     const { sighting, changes } = build(null)
     container.querySelector<HTMLButtonElement>("#launch-add")!.click()
-    const launches = sighting.interpretation!.launches!
+    const launches = sighting.skyEvents!.launches!
     expect(launches).toHaveLength(1)
     expect(launches[0].id).toBe("launch-1")
     expect(launches[0].vehicle?.name).toBe("Falcon 9")
@@ -120,7 +119,7 @@ describe("LaunchEditor", () => {
     const { sighting } = build()
     container.querySelector<HTMLButtonElement>("#launch-add")!.click()
     container.querySelector<HTMLButtonElement>("#launch-add")!.click()
-    expect(sighting.interpretation!.launches!.map(launch => launch.id)).toEqual(["a", "b", "launch-3", "launch-4"])
+    expect(sighting.skyEvents!.launches!.map(launch => launch.id)).toEqual(["a", "b", "launch-3", "launch-4"])
     expect(container.querySelector<HTMLSelectElement>("#launch-select")!.value).toBe("launch-4")
   })
 
@@ -144,11 +143,11 @@ describe("LaunchEditor", () => {
     expect(field("burnFromT").placeholder).toBe("0")
     expect(field("burnUntilT").placeholder).toBe("60")
     typed(field("burnUntilT"), "45.5")
-    expect(sighting.interpretation!.launches![0].burnUntilT).toBe(45500)
+    expect(sighting.skyEvents!.launches![0].burnUntilT).toBe(45500)
     typed(field("burnFromT"), "-3")
-    expect(sighting.interpretation!.launches![0].burnFromT).toBe(-3000)
+    expect(sighting.skyEvents!.launches![0].burnFromT).toBe(-3000)
     typed(field("burnUntilT"), "")
-    expect(sighting.interpretation!.launches![0].burnUntilT).toBeUndefined()
+    expect(sighting.skyEvents!.launches![0].burnUntilT).toBeUndefined()
   })
 
   const placeCell = (key: string) => container.querySelector<HTMLInputElement>(`#launchPlace\\.${key}`)!
@@ -164,7 +163,7 @@ describe("LaunchEditor", () => {
     expect(placeCell("altitudeKm").value).toBe("150")
     typed(placeCell("altitudeKm"), "170.5")
     typed(placeCell("t"), "45")
-    expect(sighting.interpretation!.launches![0].track).toEqual([{ t: 0, lat: 28, lng: -80, altitudeKm: 0 }, { t: 45000, lat: 30, lng: -78, altitudeKm: 170.5 }])
+    expect(sighting.skyEvents!.launches![0].track).toEqual([{ t: 0, lat: 28, lng: -80, altitudeKm: 0 }, { t: 45000, lat: 30, lng: -78, altitudeKm: 170.5 }])
   })
 
   test("steps to the previous and next place with the buttons and with Alt and the arrows, and not past either end", () => {
@@ -191,17 +190,17 @@ describe("LaunchEditor", () => {
   test("adds a place that goes on as the path was going, and removes the one picked down to two", () => {
     const { sighting } = build()
     container.querySelector<HTMLButtonElement>("#launch-place-add")!.click()
-    expect(sighting.interpretation!.launches![0].track[2]).toEqual({ t: 120000, lat: 32, lng: -76, altitudeKm: 300 })
+    expect(sighting.skyEvents!.launches![0].track[2]).toEqual({ t: 120000, lat: 32, lng: -76, altitudeKm: 300 })
     expect(container.querySelector<HTMLSelectElement>("#launch-place")!.value).toBe("2")
     container.querySelector<HTMLButtonElement>("#launch-place-delete")!.click()
-    expect(sighting.interpretation!.launches![0].track).toHaveLength(2)
+    expect(sighting.skyEvents!.launches![0].track).toHaveLength(2)
     expect(container.querySelector<HTMLButtonElement>("#launch-place-delete")!.disabled).toBe(true)
   })
 
   test("keeps the place being edited on show when changing its instant puts it elsewhere in the path", () => {
     const { sighting } = build()
     typed(placeCell("t"), "90")
-    expect(sighting.interpretation!.launches![0].track.map(place => place.t)).toEqual([60000, 90000])
+    expect(sighting.skyEvents!.launches![0].track.map(place => place.t)).toEqual([60000, 90000])
     expect(container.querySelector<HTMLSelectElement>("#launch-place")!.value).toBe("1")
     expect(placeCell("t").value).toBe("90")
   })

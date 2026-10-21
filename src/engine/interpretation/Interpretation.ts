@@ -1,9 +1,6 @@
 import type { DecorModelRef } from "../model/Decor.js"
 import type { People } from "../model/People.js"
 import type { SaidText } from "../model/SaidText.js"
-import type { BeamJson } from "./LaserBeam.js"
-import type { LaunchJson } from "./LaunchPlume.js"
-import type { ReentryJson } from "./Reentry.js"
 
 /**
  * What somebody believes was there: bodies in metres, standing in the world, that a account's
@@ -32,12 +29,6 @@ export interface InterpretationJson {
   bodies: BodyJson[]
   /** Fires the interpretation lights on the ground, as their smoke — see SmokeSource. */
   smoke?: SmokeSource[]
-  /** Re-entries it claims were seen: placed on the Earth, not round the observer — see ReentryJson. */
-  reentries?: ReentryJson[]
-  /** Rocket launches whose exhaust it claims was seen, lit by a Sun the ground no longer sees — see LaunchJson. */
-  launches?: LaunchJson[]
-  /** Beams of light sent through the air from the ground — a laser, a searchlight — that it claims were seen: see BeamJson. */
-  beams?: BeamJson[]
 }
 
 /**
@@ -91,9 +82,6 @@ export interface InterpretationEventJson {
   url?: string
   bodies?: BodyJson[]
   smoke?: SmokeSource[]
-  reentries?: ReentryJson[]
-  launches?: LaunchJson[]
-  beams?: BeamJson[]
 }
 
 /** The shapes this project builds itself. "figure" is a standing human silhouette — the decor's own

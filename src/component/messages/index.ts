@@ -6,6 +6,7 @@ import type { SceneNames } from "./SceneNames.js"
 import type { CloudEditorMessages } from "./CloudEditorMessages.js"
 import type { BodyEditorMessages } from "./BodyEditorMessages.js"
 import type { LaunchEditorMessages } from "./LaunchEditorMessages.js"
+import type { BeamEditorMessages } from "./BeamEditorMessages.js"
 import type { CaseEditorMessages } from "./CaseEditorMessages.js"
 import type { InterviewMessages } from "./InterviewMessages.js"
 
@@ -68,6 +69,17 @@ const bodyEditorLoaders: Record<UfoLanguage, () => Promise<BodyEditorMessages>> 
   fr: () => import("./BodyEditorMessages_fr.js").then(m => m.bodyEditorMessages_fr),
   es: () => import("./BodyEditorMessages_es.js").then(m => m.bodyEditorMessages_es),
   it: () => import("./BodyEditorMessages_it.js").then(m => m.bodyEditorMessages_it)
+}
+
+const beamEditorLoaders: Record<UfoLanguage, () => Promise<BeamEditorMessages>> = {
+  en: () => import("./BeamEditorMessages_en.js").then(m => m.beamEditorMessages_en),
+  fr: () => import("./BeamEditorMessages_fr.js").then(m => m.beamEditorMessages_fr),
+  es: () => import("./BeamEditorMessages_es.js").then(m => m.beamEditorMessages_es),
+  it: () => import("./BeamEditorMessages_it.js").then(m => m.beamEditorMessages_it)
+}
+
+export function loadBeamEditorMessages(language: UfoLanguage): Promise<BeamEditorMessages> {
+  return beamEditorLoaders[language]()
 }
 
 const launchEditorLoaders: Record<UfoLanguage, () => Promise<LaunchEditorMessages>> = {

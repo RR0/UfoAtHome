@@ -238,14 +238,7 @@
     "keyframes": []
   },
   "decor": [],
-  "interpretation": {
-    "title": {
-      "en": "Re-entry of a piece of Zond 4's launcher",
-      "fr": "Rentrée d'une pièce du lanceur de Zond 4",
-      "es": "Reentrada de una pieza del lanzador de Zond 4",
-      "it": "Rientro di un pezzo del lanciatore di Zond 4"
-    },
-    "bodies": [],
+  "skyEvents": {
     "reentries": [
       {
         "id": "zond-iv",

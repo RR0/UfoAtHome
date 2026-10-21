@@ -1,6 +1,7 @@
 import { setupCloudEditor } from "./CloudEditor.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
+import type { BeamEditor } from "./BeamEditor.js"
 import { SurroundingsPlanter } from "./SurroundingsPlanter.js"
 import { MessageStyle } from "./MessageStyle.js"
 import { SceneryDates } from "./SceneryDates.js"
@@ -516,6 +517,9 @@ export class SightingEditorElement extends HTMLElement {
   /** The Launches part, loaded the first time it is opened — see loadLaunchEditor. */
   private launchEditor?: LaunchEditor
   private launchEditorLoading?: Promise<LaunchEditor>
+  /** The Beams part, loaded the first time it is opened — see loadBeamEditor. */
+  private beamEditor?: BeamEditor
+  private beamEditorLoading?: Promise<BeamEditor>
   /** The File group's text editor, loaded the first time the group is opened — see loadFileEditor. */
   private fileEditor?: SightingFileEditor
   private fileEditorLoading?: Promise<SightingFileEditor>
@@ -711,6 +715,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelShapesSubgroup: HTMLElement
   private readonly labelBodiesSubgroup: HTMLElement
   private readonly labelLaunchesSubgroup: HTMLElement
+  private readonly labelBeamsSubgroup: HTMLElement
+  private readonly labelSkyGroup: HTMLElement
   private readonly labelPrecipitationGroup: HTMLElement
   private readonly labelWindGroup: HTMLElement
   /** The handles of a group's own parts (the weather's clouds, precipitation and wind) — a strip
@@ -1385,6 +1391,8 @@ export class SightingEditorElement extends HTMLElement {
     this.labelShapesSubgroup = this.shadow.getElementById("label-shapes-subgroup")!
     this.labelBodiesSubgroup = this.shadow.getElementById("label-bodies-subgroup")!
     this.labelLaunchesSubgroup = this.shadow.getElementById("label-launches-subgroup")!
+    this.labelBeamsSubgroup = this.shadow.getElementById("label-beams-subgroup")!
+    this.labelSkyGroup = this.shadow.getElementById("label-sky-group")!
     this.labelPrecipitationGroup = this.shadow.getElementById("label-precipitation-group")!
     this.labelWindGroup = this.shadow.getElementById("label-wind-group")!
     this.labelWeatherInferred = this.shadow.getElementById("label-weather-inferred")!
@@ -5728,8 +5736,9 @@ export class SightingEditorElement extends HTMLElement {
       if (listed !== "" && listed !== this.currentDecorId) this.selectDecor(listed)
     }
     if (open && tab.getAttribute("aria-controls") === "group-observer" && this.observerShown !== SightingEditorElement.OBSERVER_PRINCIPAL) this.selectDecor(this.observerShown)
-    // What the Launches part says it can do depends on the place, which another group may just have given.
-    if (open && tab.getAttribute("aria-controls") === "group-shape" && this.shadow.getElementById("shape-launches")?.hidden === false) this.launchEditor?.refresh()
+    // What the parts of the Sky group say they can do depends on the place, which another group may just have given; and the part open
+    // is built the first time the group opens.
+    if (open && tab.getAttribute("aria-controls") === "group-sky") this.syncSkyParts()
     this.placeDecorItem()
     this.syncCanvasMode()
     this.refreshTimelineMarks()
@@ -6096,8 +6105,8 @@ export class SightingEditorElement extends HTMLElement {
     }
     // The Bodies part of the group moves the bodies (see beginBodyDrag); the Shapes part the shapes.
     if (this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-bodies")?.hidden === false) return "body"
-    // The Launches part edits fields only: nothing on the picture is moved from there.
-    if (this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-launches")?.hidden === false) return "scene"
+    // The Sky group edits fields only: nothing on the picture is moved from there.
+    if (this.isGroupIdOpen("group-sky")) return "scene"
     if (this.isGroupIdOpen("group-shape")) return "shape"
     // The Environment group frames the object it has selected, as the Bodies part does a body.
     if (this.isGroupIdOpen("group-decor") && this.editableDecor() !== undefined) return "decor"
@@ -6144,23 +6153,20 @@ export class SightingEditorElement extends HTMLElement {
     const interpretation = shown ? this.ufoElement.sighting.interpretation : undefined
     this.sceneElement.compareAccount = interpretation !== undefined
     if (this.sceneElement.interpretation !== interpretation) this.sceneElement.interpretation = interpretation
-    // Its beams, launches and re-entries hide no shape: they stay in the sky while the shapes are edited.
-    this.sceneElement.interpretationSky = interpretation ? undefined : this.ufoElement.sighting.interpretation
     // The selector says what is shown, and a reading has no shapes to choose between.
     this.accountViewSelect.value = interpretation !== undefined ? "bodies" : "shapes"
-    this.syncLaunchesTab()
+    this.syncSkyParts()
     this.shadow.getElementById("account-view-row")!.hidden = this.isReading
   }
 
   /**
-   * The Launches part has its handle always: it is where a launch is added, and a recording with none says so there. What is
-   * on show is read again when the recording changes.
+   * The parts of the Sky group, read again for the recording as it is now: the one open is built the first time it is shown (a chunk of its
+   * own each), and what it shows refreshed.
    */
-  private syncLaunchesTab(): void {
-    const tab = this.subgroupTabs.find(candidate => candidate.getAttribute("aria-controls") === "shape-launches")
-    if (!tab) return
-    tab.hidden = false
-    if (this.launchEditor && this.shadow.getElementById("shape-launches")?.hidden === false) this.launchEditor.refresh()
+  private syncSkyParts(): void {
+    if (!this.isGroupIdOpen("group-sky")) return
+    if (this.shadow.getElementById("sky-beams")?.hidden === false) void this.loadBeamEditor().then(editor => editor.refresh())
+    if (this.shadow.getElementById("sky-launches")?.hidden === false) void this.loadLaunchEditor().then(editor => editor.refresh())
   }
 
   /**
@@ -6189,7 +6195,8 @@ export class SightingEditorElement extends HTMLElement {
     }
     // The shapes it offers to stand for may have been renamed, added or deleted meanwhile.
     if (tab.getAttribute("aria-controls") === "shape-bodies") void this.loadBodyEditor().then(editor => editor.sync())
-    if (tab.getAttribute("aria-controls") === "shape-launches") void this.loadLaunchEditor().then(editor => editor.sync())
+    if (tab.getAttribute("aria-controls") === "sky-launches") void this.loadLaunchEditor().then(editor => editor.sync())
+    if (tab.getAttribute("aria-controls") === "sky-beams") void this.loadBeamEditor().then(editor => editor.sync())
     // What the canvas edits follows the part (see canvasMode), and with it whether bodies are drawn.
     this.syncCanvasMode()
   }
@@ -7354,7 +7361,28 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * The Launches part of the Phenomenon group, fetched and built the first time it is opened: a chunk
+   * The Beams part of the Sky group, fetched and built the first time it is opened: a chunk of its own, since a recording has a beam only
+   * when somebody has put one in (see BeamEditor).
+   */
+  private loadBeamEditor(): Promise<BeamEditor> {
+    this.beamEditorLoading ??= import("./BeamEditor.js").then(({ BeamEditor }) => {
+      this.beamEditor = new BeamEditor(this.shadow.getElementById("beam-editor")!, {
+        sighting: () => this.ufoElement.sighting,
+        said: () => this.said,
+        writingLanguage: () => this.writingLanguage,
+        changed: () => {
+          this.ufoElement.refresh()
+          this.refreshParamSummary()
+          this.sceneElement.redrawSky()
+        }
+      }, this.language)
+      return this.beamEditor
+    })
+    return this.beamEditorLoading
+  }
+
+  /**
+   * The Launches part of the Sky group, fetched and built the first time it is opened: a chunk
    * of its own, since a recording has a launch only when somebody has put one in (see LaunchEditor).
    */
   private loadLaunchEditor(): Promise<LaunchEditor> {
@@ -7366,7 +7394,7 @@ export class SightingEditorElement extends HTMLElement {
         changed: () => {
           this.ufoElement.refresh()
           this.refreshParamSummary()
-          this.syncBodiesShown()
+          this.sceneElement.redrawSky()
         }
       }, this.language)
       return this.launchEditor
@@ -9640,7 +9668,11 @@ export class SightingEditorElement extends HTMLElement {
     this.labelShapesSubgroup.textContent = messages.shapesSubgroup
     this.labelBodiesSubgroup.textContent = messages.bodiesSubgroup
     this.labelLaunchesSubgroup.textContent = messages.launchesSubgroup
+    this.labelBeamsSubgroup.textContent = messages.beamsSubgroup
+    this.labelSkyGroup.textContent = messages.sky
     this.bodyEditor?.setLanguage(this.language)
+    void this.launchEditor?.setLanguage(this.language)
+    void this.beamEditor?.setLanguage(this.language)
     this.labelTemporalGroup.textContent = messages.temporalGroup
     this.labelFileGroup.textContent = messages.fileGroup
     this.labelLocationGroup.textContent = messages.locationGroup

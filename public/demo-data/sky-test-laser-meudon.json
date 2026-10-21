@@ -9613,53 +9613,6 @@
    "surveyedOn": "2023-03-01"
   }
  ],
- "interpretation": {
-  "title": {
-   "en": "Laser shot from Meudon to Paris",
-   "fr": "Tir laser de Meudon à Paris",
-   "es": "Disparo láser de Meudon a París",
-   "it": "Tiro laser da Meudon a Parigi"
-  },
-  "bodies": [],
-  "beams": [
-   {
-    "id": "meudon-paris",
-    "title": {
-     "en": "Laser shot from Meudon to Paris",
-     "fr": "Tir laser de Meudon à Paris",
-     "es": "Disparo láser de Meudon a París",
-     "it": "Tiro laser da Meudon a Parigi"
-    },
-    "path": [
-     {
-      "lat": 48.805055,
-      "lng": 2.231171,
-      "altitudeM": {
-       "value": 172.5,
-       "basis": "assumed",
-       "rationale": "The photograph of the building shows the beam leaving a window of its top floor, under the dome, on the side facing Paris: the east face of the Grande Coupole, about 12.5 m above the ground, which is at 160 m (IGN RGE ALTI)."
-      }
-     },
-     {
-      "lat": 48.83632,
-      "lng": 2.33702,
-      "altitudeM": {
-       "value": 88,
-       "basis": "assumed",
-       "rationale": "The Arago dome stands on the roof of the Perrault building, some 25 m above the ground of the Paris Observatory, which is at 63 m (IGN RGE ALTI)."
-      }
-     }
-    ],
-    "wavelengthNm": 532,
-    "powerW": 10,
-    "divergenceMrad": {
-     "value": 0.1,
-     "basis": "assumed",
-     "rationale": "Not given: a beam meant to reach a dome 8.5 km away is expanded to spread little, and 0.1 mrad makes it 0.85 m wide there."
-    }
-   }
-  ]
- },
  "sources": [
   {
    "title": "Un tir laser de Meudon à Paris !",
@@ -9702,6 +9655,46 @@
    }
   }
  ],
+ "skyEvents": {
+  "beams": [
+   {
+    "id": "meudon-paris",
+    "title": {
+     "en": "Laser shot from Meudon to Paris",
+     "fr": "Tir laser de Meudon à Paris",
+     "es": "Disparo láser de Meudon a París",
+     "it": "Tiro laser da Meudon a Parigi"
+    },
+    "path": [
+     {
+      "lat": 48.805055,
+      "lng": 2.231171,
+      "altitudeM": {
+       "value": 172.5,
+       "basis": "assumed",
+       "rationale": "The photograph of the building shows the beam leaving a window of its top floor, under the dome, on the side facing Paris: the east face of the Grande Coupole, about 12.5 m above the ground, which is at 160 m (IGN RGE ALTI)."
+      }
+     },
+     {
+      "lat": 48.83632,
+      "lng": 2.33702,
+      "altitudeM": {
+       "value": 88,
+       "basis": "assumed",
+       "rationale": "The Arago dome stands on the roof of the Perrault building, some 25 m above the ground of the Paris Observatory, which is at 63 m (IGN RGE ALTI)."
+      }
+     }
+    ],
+    "wavelengthNm": 532,
+    "powerW": 10,
+    "divergenceMrad": {
+     "value": 0.1,
+     "basis": "assumed",
+     "rationale": "Not given: a beam meant to reach a dome 8.5 km away is expanded to spread little, and 0.1 mrad makes it 0.85 m wide there."
+    }
+   }
+  ]
+ },
  "frozen": {
   "relief": {
    "src": "sky-test-laser-meudon.relief.zip",

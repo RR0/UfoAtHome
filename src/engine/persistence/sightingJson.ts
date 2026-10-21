@@ -21,6 +21,7 @@ import type { Milestone } from "../model/Milestone.js"
 import type { SceneReference } from "../model/Reference.js"
 import type { SaidText } from "../model/SaidText.js"
 import type { InterpretationJson } from "../interpretation/Interpretation.js"
+import { SkyEvents, type SkyEventsJson } from "../model/SkyEvents.js"
 import type { FrozenData } from "../model/FrozenData.js"
 import { sortedMilestones } from "../model/Milestone.js"
 import { SightingShapes } from "./SightingShapes.js"
@@ -129,6 +130,8 @@ export interface SightingRecordingJson {
   /** What the observer took it to be, in metres — see InterpretationJson. Absent means they said
    * nothing a body could be made of, which is most of them. */
   interpretation?: InterpretationJson
+  /** What happened in the sky while it runs, as facts (a laser shot, a launch, a re-entry) — see SkyEventsJson. Absent means none was stated. */
+  skyEvents?: SkyEventsJson
   /** Where the data its scene would otherwise ask third parties for is kept, beside this file — see FrozenData. Absent means all of it is
    * asked for live. */
   frozen?: FrozenData
@@ -186,6 +189,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     lightPollution: sighting.lightPollution,
     observerMap: sighting.observerMap,
     interpretation: sighting.interpretation,
+    skyEvents: SkyEvents.written(sighting.skyEvents),
     frozen: sighting.frozen
   }
 }
@@ -259,7 +263,10 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.lightPollution = json.lightPollution
   sighting.observerMap = json.observerMap
   sighting.vehicle = json.vehicle
-  sighting.interpretation = json.interpretation
+  // The events of the sky were written in the interpretation before they had a place of their own: read from there too, and moved out.
+  const stated = SkyEvents.read(json.skyEvents, json.interpretation)
+  sighting.interpretation = stated.interpretation
+  sighting.skyEvents = stated.skyEvents
   sighting.frozen = json.frozen
   sighting.loadIssues = issues
   SightingShapes.toBounds(sighting)

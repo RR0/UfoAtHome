@@ -1,7 +1,7 @@
 import type { LaunchEditorMessages } from "./LaunchEditorMessages.js"
 
 export const launchEditorMessages_fr: LaunchEditorMessages = {
-  intro: "L'échappement d'un lancement de fusée que l'interprétation dit avoir été vu, éclairé par un Soleil que le sol ne voit plus. Son chemin, son moteur et l'étalement de l'échappement se règlent ci-dessous.",
+  intro: "Un lancement de fusée pendant l'enregistrement, un fait du ciel : son échappement se voit éclairé par un Soleil que le sol ne voit plus. Son chemin, son moteur et l'étalement de l'échappement se règlent ci-dessous.",
   none: "Aucun lancement dans cet enregistrement",
   launch: "Lancement",
   deleteLaunch: "Supprimer le lancement",

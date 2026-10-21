@@ -192,7 +192,7 @@ describe("TerrainFreezer.plan", () => {
   it("adds the far ring round the patch where a beam the recording claims goes past it, which the scene finds as such and not as the patch", () => {
     const sighting = standing()
     const far = localMetersToGeo(8000, 0, SILLY.lat, SILLY.lng)
-    sighting.interpretation = { bodies: [], beams: [{ id: "b", path: [{ ...SILLY, altitudeM: 100 }, { lat: far.lat, lng: far.lng, altitudeM: 100 }], wavelengthNm: 532, powerW: 10 }] }
+    sighting.skyEvents = { beams: [{ id: "b", path: [{ ...SILLY, altitudeM: 100 }, { lat: far.lat, lng: far.lng, altitudeM: 100 }], wavelengthNm: 532, powerW: 10 }] }
     const plan = TerrainFreezer.plan(sighting)
     expect(plan).toEqual([PATCH, { ...SILLY, radiusM: 30000, far: true }])
     const index = new FrozenPatches(Promise.resolve(plan))

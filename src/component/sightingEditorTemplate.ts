@@ -18,6 +18,7 @@ export const html = `
   <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false"><span id="label-temporal-group">Date</span></button>
   <button class="group-tab" type="button" aria-controls="group-decor" aria-expanded="false"><span id="label-decor-group">Environment</span></button>
   <button class="group-tab" type="button" aria-controls="group-weather" aria-expanded="false"><span id="label-weather-group">Weather</span></button>
+  <button class="group-tab" type="button" aria-controls="group-sky" aria-expanded="false"><span id="label-sky-group">Sky</span></button>
   <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false"><span id="label-shape-group">Phenomenon</span></button>
   <button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false"><span id="label-sound-group">Sound</span></button>
   <button class="group-tab" type="button" aria-controls="group-reference" aria-expanded="false"><span id="label-reference-group">Pictures</span></button>
@@ -520,6 +521,24 @@ export const html = `
     </div>
   </div>
 </section>
+<section class="group-panel" id="group-sky" aria-labelledby="label-sky-group" hidden>
+  <!-- What happened in the sky while the recording runs, as facts (see SkyEventsJson): neither the decor, which outlasts the observation,
+       nor the interpretation, which reads the account. -->
+  <div class="group-tabs" id="sky-tabs">
+    <button class="subgroup-tab" type="button" aria-controls="sky-beams" aria-expanded="true"><span id="label-beams-subgroup">Beams</span></button>
+    <button class="subgroup-tab" type="button" aria-controls="sky-launches" aria-expanded="false"><span id="label-launches-subgroup">Launches</span></button>
+  </div>
+  <section class="subgroup-panel" id="sky-beams" aria-labelledby="label-beams-subgroup">
+    <div class="toolbar">
+      <style>#beam-editor { flex-basis: 100%; min-width: 0; } #beam-editor #beam-list, #beam-editor #beam-places { flex-basis: 100%; min-width: 0; } #beam-editor .launch-editor, #beam-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #beam-editor .launch-fields { flex-basis: 100%; min-width: 0; } #beam-editor [hidden] { display: none !important; } #beam-editor select { min-width: 0; width: 100%; } #beam-editor .launch-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #beam-editor .launch-track { flex-basis: 100%; margin: 0; } #beam-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } #beam-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } #beam-editor input, #beam-editor select { max-width: 100%; box-sizing: border-box; } #beam-editor input[type="text"] { width: 12em; } #beam-editor #launch-title { width: 18em; } #beam-editor label { min-width: 0; max-width: 100%; } #beam-editor input.parameter-derived::placeholder { opacity: .65; } #beam-editor .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }</style><div id="beam-editor"></div>
+    </div>
+  </section>
+  <section class="subgroup-panel" id="sky-launches" aria-labelledby="label-launches-subgroup" hidden>
+    <div class="toolbar">
+      <style>#launch-editor { flex-basis: 100%; min-width: 0; } #launch-editor #launch-list, #launch-editor #launch-places { flex-basis: 100%; min-width: 0; } #launch-editor .launch-editor, #launch-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #launch-editor .launch-fields { flex-basis: 100%; min-width: 0; } #launch-editor [hidden] { display: none !important; } #launch-editor select { min-width: 0; width: 100%; } #launch-editor .launch-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #launch-editor .launch-track { flex-basis: 100%; margin: 0; } #launch-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } #launch-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } #launch-editor input, #launch-editor select { max-width: 100%; box-sizing: border-box; } #launch-editor input[type="text"] { width: 12em; } #launch-editor #launch-title { width: 18em; } #launch-editor label { min-width: 0; max-width: 100%; } #launch-editor input.parameter-derived::placeholder { opacity: .65; } #launch-editor .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }</style><div id="launch-editor"></div>
+    </div>
+  </section>
+</section>
 <section class="group-panel" id="group-shape" aria-labelledby="label-shape-group" hidden>
   <!-- In two parts: the shapes the observer DREW (angles on their image, the account), and the
        bodies the observer said those shapes WERE (the 3D interpretation, see BodyEditor). The shapes
@@ -527,7 +546,6 @@ export const html = `
   <div class="group-tabs" id="shape-tabs">
     <button class="subgroup-tab" type="button" aria-controls="shape-shapes" aria-expanded="true"><span id="label-shapes-subgroup">Shapes</span></button>
     <button class="subgroup-tab" type="button" aria-controls="shape-bodies" aria-expanded="false"><span id="label-bodies-subgroup">Bodies</span></button>
-    <button class="subgroup-tab" type="button" aria-controls="shape-launches" aria-expanded="false" hidden><span id="label-launches-subgroup">Launches</span></button>
   </div>
   <section class="subgroup-panel" id="shape-shapes" aria-labelledby="label-shapes-subgroup">
   <div class="toolbar">
@@ -598,11 +616,6 @@ export const html = `
   <section class="subgroup-panel" id="shape-bodies" aria-labelledby="label-bodies-subgroup" hidden>
     <div class="toolbar">
       <style>#body-editor { flex-basis: 100%; min-width: 0; } #body-editor .body-list, #body-editor .body-keys { flex-basis: 100%; min-width: 0; } #body-editor .body-editor, #body-editor .body-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-fields { flex-basis: 100%; min-width: 0; } #body-editor .body-fields[hidden], #body-editor [hidden] { display: none !important; } #body-editor select { min-width: 0; width: 100%; } #body-editor .body-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #body-editor .body-explains { flex-basis: 100%; min-width: 0; box-sizing: border-box; margin: 0; } #body-editor #body-explains { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor #body-explains label { white-space: normal; } #body-editor .body-track { margin: 0; } #body-editor details { flex-basis: 100%; min-width: 0; } #body-editor details[open] { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor details > summary { flex-basis: 100%; } #body-editor input, #body-editor select { max-width: 100%; box-sizing: border-box; } #body-editor input[type="color"] { width: 3em; padding: 0; } #body-editor #body-id, #body-editor #body-outline-node { width: 10em; } #body-editor #body-title, #body-editor #body-interpretation-title { width: 18em; } #body-editor label { min-width: 0; max-width: 100%; } #body-editor .body-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-parameters[hidden] { display: none !important; } #body-editor .parameter-group { display: contents; border: 0; padding: 0; margin: 0; } #body-editor .parameter-set { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor .parameter-row { flex-basis: 100%; } #body-editor input.invalid { outline: 2px solid #c33; } #body-editor input[data-key="title"] { width: 18em; } #body-editor input[data-key="id"], #body-editor input[data-key="outlineNode"] { width: 10em; } #body-editor input.parameter-derived::placeholder { opacity: .65; }</style><div id="body-editor"></div>
-    </div>
-  </section>
-  <section class="subgroup-panel" id="shape-launches" aria-labelledby="label-launches-subgroup" hidden>
-    <div class="toolbar">
-      <style>#launch-editor { flex-basis: 100%; min-width: 0; } #launch-editor #launch-list, #launch-editor #launch-places { flex-basis: 100%; min-width: 0; } #launch-editor .launch-editor, #launch-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #launch-editor .launch-fields { flex-basis: 100%; min-width: 0; } #launch-editor [hidden] { display: none !important; } #launch-editor select { min-width: 0; width: 100%; } #launch-editor .launch-intro { flex-basis: 100%; font-size: .85em; margin: 0; } #launch-editor .launch-track { flex-basis: 100%; margin: 0; } #launch-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } #launch-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } #launch-editor input, #launch-editor select { max-width: 100%; box-sizing: border-box; } #launch-editor input[type="text"] { width: 12em; } #launch-editor #launch-title { width: 18em; } #launch-editor label { min-width: 0; max-width: 100%; } #launch-editor input.parameter-derived::placeholder { opacity: .65; } #launch-editor .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }</style><div id="launch-editor"></div>
     </div>
   </section>
 </section>

@@ -286,6 +286,9 @@ export interface SightingEditorMessages extends InputFileMessages, SightingLabel
   shapesSubgroup: string
   bodiesSubgroup: string
   launchesSubgroup: string
+  /** The group of the events of the sky (see SkyEventsJson), and its part for the beams of light. */
+  sky: string
+  beamsSubgroup: string
   /** Summary of the group holding what the sighting sounded like — see SoundTrack.ts. */
   soundGroup: string
   /**

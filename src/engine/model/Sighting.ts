@@ -22,6 +22,7 @@ import type { Instrument } from "../instrument/Instrument.js"
 import { Provenance } from "../persistence/Provenance.js"
 import type { RecordingIssue } from "../persistence/RecordingIssue.js"
 import type { InterpretationJson } from "../interpretation/Interpretation.js"
+import type { SkyEventsJson } from "./SkyEvents.js"
 import type { Account } from "./Account.js"
 import type { FrozenData } from "./FrozenData.js"
 import { Level2Date } from "@rr0/time/core"
@@ -464,6 +465,12 @@ export class Sighting {
    * same "reassigned wholesale" reasoning as account above.
    */
   interpretation?: InterpretationJson
+
+  /**
+   * What happened in the sky while it runs, as facts — a laser shot, a launch, a re-entry: see SkyEventsJson. Not part of the interpretation,
+   * which reads the account; not decor, which outlasts the observation.
+   */
+  skyEvents?: SkyEventsJson
 
   /**
    * The data its scene would otherwise ask third parties for as it plays (the relief, the photograph of the ground, the roads…), kept in

@@ -1,6 +1,6 @@
 import { LaunchParameters } from "../engine/interpretation/LaunchParameters.js"
 import type { LaunchJson } from "../engine/interpretation/LaunchPlume.js"
-import type { InterpretationJson } from "../engine/interpretation/Interpretation.js"
+import { SkyEvents } from "../engine/model/SkyEvents.js"
 import { ParameterRegistry } from "../engine/interpretation/Parameters.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { SaidTexts } from "../engine/model/SaidText.js"
@@ -22,8 +22,7 @@ export interface LaunchEditorHost {
 }
 
 /**
- * The launches of the interpretation, edited: the rocket launches whose exhaust the interpretation
- * says was seen (see LaunchJson), each with the fields its kind publishes (see LaunchParameters) —
+ * The launches of the recording, edited: the rocket launches that happened while it runs, a fact of its sky (see SkyEventsJson, LaunchJson), each with the fields its kind publishes (see LaunchParameters) —
  * the engine, the plume, the collar — drawn by the generic ParameterForm.
  *
  * What is edited here is what a launch IS, how its exhaust behaves, and where it flew: its path is a table of places and instants,
@@ -253,11 +252,11 @@ export class LaunchEditor {
   private addLaunch(): void {
     const track = this.startOfNew()
     if (!track) return
-    const interpretation = this.interpretation ?? { bodies: [] } as InterpretationJson
     let n = this.launches.length + 1
     while (this.launches.some(launch => launch.id === `launch-${n}`)) n++
     const launch: LaunchJson = { id: `launch-${n}`, vehicle: { name: "Falcon 9" }, track }
-    this.host.sighting().interpretation = { ...interpretation, launches: [...this.launches, launch] }
+    const sighting = this.host.sighting()
+    sighting.skyEvents = { ...sighting.skyEvents, launches: [...this.launches, launch] }
     this.currentId = launch.id
     this.host.changed()
     this.sync()
@@ -265,14 +264,10 @@ export class LaunchEditor {
 
   private deleteCurrent(): void {
     const launch = this.current
-    const interpretation = this.interpretation
-    if (!launch || !interpretation) return
+    if (!launch) return
     this.currentId = undefined
-    const launches = this.launches.filter(other => other !== launch)
-    const next: InterpretationJson = { ...interpretation, launches: launches.length === 0 ? undefined : launches }
-    if (launches.length === 0) delete next.launches
-    const empty = next.bodies.length === 0 && next.title === undefined && next.smoke === undefined && next.reentries === undefined && next.launches === undefined && next.beams === undefined
-    this.host.sighting().interpretation = empty ? undefined : next
+    const sighting = this.host.sighting()
+    sighting.skyEvents = SkyEvents.written({ ...sighting.skyEvents, launches: this.launches.filter(other => other !== launch) })
     this.host.changed()
     this.sync()
   }
@@ -282,12 +277,8 @@ export class LaunchEditor {
     return title ? `${title} (${launch.id})` : launch.id
   }
 
-  private get interpretation(): InterpretationJson | undefined {
-    return this.host.sighting().interpretation
-  }
-
   private get launches(): LaunchJson[] {
-    return this.interpretation?.launches ?? []
+    return this.host.sighting().skyEvents?.launches ?? []
   }
 
   private element(id: string): HTMLElement {

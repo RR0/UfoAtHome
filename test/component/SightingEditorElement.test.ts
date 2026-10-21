@@ -2924,6 +2924,7 @@ describe("SightingEditorElement toolbar groups", () => {
       "label-temporal-group",
       "label-decor-group",
       "label-weather-group",
+      "label-sky-group",
       "label-shape-group",
       "label-sound-group",
       "label-reference-group",

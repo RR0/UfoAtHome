@@ -1,7 +1,7 @@
 import type { LaunchEditorMessages } from "./LaunchEditorMessages.js"
 
 export const launchEditorMessages_en: LaunchEditorMessages = {
-  intro: "The exhaust of a rocket launch the interpretation says was seen, lit by a Sun the ground no longer sees. Its path, the engine and how the exhaust spreads are set below.",
+  intro: "A rocket launch while the recording runs, a fact of the sky: its exhaust shows lit by a Sun the ground no longer sees. Its path, its engine and how its exhaust spreads are set below.",
   none: "No launch in this recording",
   launch: "Launch",
   deleteLaunch: "Delete launch",
