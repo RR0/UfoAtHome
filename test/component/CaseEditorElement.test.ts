@@ -616,7 +616,11 @@ describe("CaseEditorElement", () => {
         HTMLAnchorElement.prototype.click = click
         void before
       }
-      expect(fetched).toContain("https://example.org/d/reading.json") // never opened, fetched to be written
+      // Never opened, and written all the same: read now, or already when the account it interprets was shown (its readings are
+      // candidates there, see CandidatesView).
+      const reading = (element as unknown as { session: { tracks: { url: string, recording?: unknown }[] } }).session.tracks.find(track => track.url === "https://example.org/d/reading.json")!
+      expect(fetched.includes(reading.url) || reading.recording !== undefined).toBe(true)
+      expect(reading.recording).toBeDefined()
       expect(written).toEqual(["X.zip"])
       expect(element.dirty).toBe(false)
     })
