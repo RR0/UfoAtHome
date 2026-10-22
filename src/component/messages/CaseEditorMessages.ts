@@ -15,6 +15,9 @@ export interface CaseEditorMessages extends InputFileMessages {
   untitledReading: string
   /** The case's events, listed under its fields: their heading, what opens one, and the way to the one before or after it once open. */
   eventsInTime: string
+  /** What the observation shows over it when it was opened from an interview's link to one of its moments, and the way back. */
+  citedMoment: string
+  backToInterview: string
   openEvent: string
   previousEvent: string
   nextEvent: string

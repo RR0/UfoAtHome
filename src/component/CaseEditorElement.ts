@@ -169,6 +169,9 @@ const TEMPLATE = `
   .crumb-sep { color: var(--ink-faint); }
   .crumb-title { font: 600 20px/1.3 var(--serif); }
   .crumb-nav { display: flex; gap: 6px; margin-left: auto; }
+  .cited { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0 0 14px; padding: 10px 14px;
+    border: 1px solid var(--glow-dim); border-radius: 10px; background: var(--warn-bg); font-size: 14px; }
+  .cited[hidden] { display: none; }
   @container (max-width: 640px) {
     .event-card { grid-template-columns: auto minmax(0, 1fr) auto; }
     .event-links { grid-column: 2 / -1; padding-bottom: 10px; }
@@ -228,6 +231,11 @@ const TEMPLATE = `
         <button id="next-event" type="button" class="icon-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3.5 4.5 4.5L6 12.5"/></svg></button>
       </span>
     </nav>
+    <!-- Over the observation opened from an interview's link to one of its moments: where it was quoted, and the way back (§5). -->
+    <div id="cited" class="cited" role="status" hidden>
+      <span id="cited-text"></span>
+      <button id="cited-back" type="button" class="pill-btn"><span id="label-back-to-interview">Back to the interview</span></button>
+    </div>
     <label id="row-recording-id" class="row"><span id="label-recording-id">ID</span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
     <section id="recording" class="recording">
       <rr0-sighting-editor id="editor"><span id="recording-dirty" slot="tab-status" class="dirty" role="status" title="Changes not saved" hidden>●</span></rr0-sighting-editor>
@@ -372,7 +380,8 @@ export class CaseEditorElement extends HTMLElement {
       this.writeCaseField("time", time ? CaseEditorElement.rr0TimeOf(formatEdtfTime(time)) : "")
     })
     this.byId("track").addEventListener("change", () => {
-      // The list goes at once: the event takes its place while it loads.
+      // The list goes at once: the event takes its place while it loads. What was quoted is no longer what is on show.
+      this.byId("cited").hidden = true
       this.listShown = false
       this.refreshOverview()
       const item = this.session ? this.items(this.session)[Number((this.byId("track") as HTMLSelectElement).value)] : undefined
@@ -393,6 +402,12 @@ export class CaseEditorElement extends HTMLElement {
       else void this.importFromUrl(pick.url)
     })
     this.byId("add").addEventListener("click", () => this.askAdd())
+    this.byId("cited-back").addEventListener("click", () => {
+      const from = this.citedFrom
+      if (!from || !this.session) return
+      const index = (this.items(this.session) as { interview?: InterviewEvent }[]).findIndex(item => item.interview === from)
+      if (index >= 0) this.openEvent(index)
+    })
     this.byId("back-to-case").addEventListener("click", () => {
       this.listShown = true
       this.refreshRow()
@@ -545,6 +560,7 @@ export class CaseEditorElement extends HTMLElement {
     text("case-kicker", m.caseHeading)
     text("label-back-to-case", m.caseHeading)
     text("label-events-in-time", m.eventsInTime)
+    text("label-back-to-interview", m.backToInterview)
     text("label-add", m.addTitle)
     text("label-save-also", m.exportAlso)
     text("label-save-case", m.exportButton)
@@ -894,14 +910,19 @@ export class CaseEditorElement extends HTMLElement {
   }
 
   /** A passage of an interview was followed to the moment it tells of: the observation is shown at that time. */
-  private async followToObservation(target: { sighting?: string, at: number }): Promise<void> {
+  private async followToObservation(target: { sighting?: string, at: number, quote?: string }): Promise<void> {
     const session = this.session
     if (!session) return
     const track = session.tracks.find(candidate => candidate.kind === "observer" && (candidate.event.id ?? session.proposedId(candidate)) === target.sighting)
       ?? session.tracks.find(candidate => candidate.kind === "observer")
     if (!track) return
+    const from = this.currentInterview
+    this.listShown = false
     await this.showTrack(track)
+    // On the Date section, where the moments are, with the playhead on the one quoted (§5).
+    this.editor.openSection("group-temporal")
     this.editor.seekTo(target.at)
+    this.showCited(from, track, target)
     // The link was followed from the interview's form, above the render: the render is what is wanted in view.
     this.editor.showRender()
   }
@@ -943,8 +964,11 @@ export class CaseEditorElement extends HTMLElement {
     await this.ensureInterview()
     // Another event may have been chosen while the element was fetched.
     if (this.currentInterview !== interview) return
+    // The moments of the witnesses' observations, which a passage of theirs can be linked to: their recordings are read for them.
+    for (const witness of session.intervieweesOf(interview)) await this.loadTrack(witness).catch(() => undefined)
+    if (this.currentInterview !== interview) return
     this.interviewElement.witnesses = session.tracks.filter(track => track.kind === "observer")
-      .map(track => ({ id: track.event.id ?? session.proposedId(track), label: this.labelOf(track, session.tracks.indexOf(track)) }))
+      .map(track => ({ id: track.event.id ?? session.proposedId(track), label: this.labelOf(track, session.tracks.indexOf(track)), moments: this.momentsOf(track) }))
     // The transcript is the case's to keep between visits, and what its address is relative to is the case's.
     this.interviewElement.documentUrl = session.url
     this.interviewElement.transcriptText = session.transcriptText(interview)
@@ -986,6 +1010,34 @@ export class CaseEditorElement extends HTMLElement {
     const timeOf = (item: { track?: CaseTrack, interview?: InterviewEvent }) => String((item.track?.event ?? item.interview)?.time ?? "")
     // Stable: events of the same time, or of none, stay in the order the case lists them.
     return items.map((item, index) => ({ item, index })).sort((a, b) => timeOf(a.item).localeCompare(timeOf(b.item)))
+  }
+
+  /** The named moments of an observation, as an interview links to them (see InterviewMoment). */
+  private momentsOf(track: CaseTrack): { at: number, label: string, note?: string }[] {
+    return (track.recording?.milestones ?? []).map(milestone => {
+      const note = this.said.read(milestone.note as never)
+      return { at: milestone.t / 1000, label: this.said.read(milestone.label as never) ?? "", ...(note ? { note } : {}) }
+    })
+  }
+
+  /** The interview a moment of the observation on show was quoted from, if it was opened from it. */
+  private citedFrom?: InterviewEvent
+
+  /** Says over the observation that its moment was quoted in `from`, with what was said, and offers the way back there. */
+  private showCited(from: InterviewEvent | undefined, track: CaseTrack, target: { at: number, quote?: string }): void {
+    const banner = this.byId("cited")
+    this.citedFrom = from
+    if (!from || !this.session) {
+      banner.hidden = true
+      return
+    }
+    const moment = this.momentsOf(track).find(candidate => Math.abs(candidate.at - target.at) < 0.05)
+    const quote = (target.quote ?? "").length > 120 ? `${target.quote!.slice(0, 117)}…` : target.quote ?? ""
+    this.byId("cited-text").textContent = this.messages.citedMoment
+      .replace("{k}", moment?.label ?? `${Math.round(target.at)} s`)
+      .replace("{title}", this.optionLabel({ interview: from }, 0))
+      .replace("{quote}", quote)
+    banner.hidden = false
   }
 
   /** What kind an event is, for its pill and its colour. */

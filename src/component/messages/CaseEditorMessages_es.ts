@@ -9,6 +9,8 @@ export const caseEditorMessages_es: CaseEditorMessages = {
   deleteInterviewQuestion: "¿Eliminar esta entrevista del caso? Nada se escribe hasta guardar el caso.",
   untitledReading: "Lectura {n}",
   eventsInTime: "Eventos · en orden cronológico",
+  citedMoment: "Momento {k}, citado en {title}: «{quote}»",
+  backToInterview: "Volver a la entrevista",
   openEvent: "Abrir",
   previousEvent: "Evento anterior",
   nextEvent: "Evento siguiente",

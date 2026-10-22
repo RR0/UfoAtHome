@@ -9,6 +9,8 @@ export const caseEditorMessages_en: CaseEditorMessages = {
   deleteInterviewQuestion: "Delete this interview from the case? Nothing is written until the case is saved.",
   untitledReading: "Reading {n}",
   eventsInTime: "Events · in the order of time",
+  citedMoment: "Moment {k}, quoted in {title}: “{quote}”",
+  backToInterview: "Back to the interview",
   openEvent: "Open",
   previousEvent: "Previous event",
   nextEvent: "Next event",

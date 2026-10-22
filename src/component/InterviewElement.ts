@@ -8,7 +8,7 @@ import type { InterviewMessages } from "./messages/InterviewMessages.js"
 import { interviewMessages_en } from "./messages/InterviewMessages_en.js"
 import { INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import { InterviewFile } from "../engine/persistence/interviewJson.js"
-import type { InterviewJson, InterviewSightingRef } from "../engine/persistence/interviewJson.js"
+import type { InterviewSegment, InterviewJson, InterviewSightingRef } from "../engine/persistence/interviewJson.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 
 export const INTERVIEW_ELEMENT_NAME = "rr0-interview"
@@ -164,9 +164,11 @@ export class InterviewElement extends HTMLElement {
   }
 
   /** Follows a passage to the moment of the observation it tells of: told to the page, and shown by the player the page names. */
-  private seek(ref: InterviewSightingRef): void {
+  private seek(ref: InterviewSightingRef, segment?: InterviewSegment): void {
     const json = this.json!
-    const detail = { sighting: ref.sighting ?? InterviewFile.sightingsOf(json)[0], at: ref.at }
+    // What was said there, for whoever shows the moment to say where it was quoted from.
+    const said = segment ? InterviewFile.said(segment) : undefined
+    const detail = { sighting: ref.sighting ?? InterviewFile.sightingsOf(json)[0], at: ref.at, ...(said ? { quote: said } : {}) }
     this.dispatchEvent(new CustomEvent(INTERVIEW_SEEK_EVENT, { bubbles: true, composed: true, detail }))
     const id = this.getAttribute("player")
     if (!id) return
@@ -310,7 +312,7 @@ export class InterviewElement extends HTMLElement {
           // Played from that moment: the player's own play icon, then the moment.
           button.innerHTML = PlayerIcons.PLAY
           button.append(InterviewFile.clock(ref.at, true))
-          button.addEventListener("click", () => this.seek(ref))
+          button.addEventListener("click", () => this.seek(ref, segment))
           refs.append(button)
         }
         turn.append(refs)

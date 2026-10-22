@@ -9,6 +9,8 @@ export const caseEditorMessages_fr: CaseEditorMessages = {
   deleteInterviewQuestion: "Supprimer cet entretien du dossier ? Rien n'est écrit avant la sauvegarde du dossier.",
   untitledReading: "Lecture {n}",
   eventsInTime: "Événements · dans l'ordre du temps",
+  citedMoment: "Moment {k}, cité dans {title} : « {quote} »",
+  backToInterview: "Revenir à l'entretien",
   openEvent: "Ouvrir",
   previousEvent: "Événement précédent",
   nextEvent: "Événement suivant",

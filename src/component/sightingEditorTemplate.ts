@@ -1956,7 +1956,10 @@ ${EditorTheme.fields(".app")}
 .form-section > :is(label, .field):not(:has(> input[type="checkbox"], > input[type="radio"])) > :first-child { flex: 1 0 100%; }
 .form-section > :is(label, .field) > :is(input:not([type="checkbox"]):not([type="radio"]):not([type="number"]):not([type="color"]), select, textarea, rr0-popover-picker, rr0-input-file) { flex: 1 1 0; min-width: 0; font-weight: 400; }
 /* A date or a duration holds its own "precise / imprecise" switch beside its field: as wide as both need. */
-.form-section > :is(label, .field) > :is(rr0-date-input, rr0-duration-input) { flex: 1 1 auto; font-weight: 400; }
+.form-section > :is(label, .field) > :is(rr0-date-input, rr0-duration-input) { flex: 1 1 auto; flex-wrap: wrap; min-width: 0; max-width: 100%; font-weight: 400; }
+/* Its field fits the column it is given, never past it into the next one. */
+.form-section :is(rr0-date-input, rr0-duration-input) :is(.edtf-field, .duration-field) { flex: 1 1 10em; min-width: 0; max-width: 100%; }
+.form-section :is(rr0-date-input, rr0-duration-input) input { box-sizing: border-box; min-width: 0; max-width: 100%; width: 100%; }
 .form-section > :is(label, .field) > input[type="color"] { flex: 1 1 0; height: 38px; padding: 3px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--ground); }
 .form-section > :is(label, .field) > input[type="number"] { flex: none; font-weight: 400; }
 .form-section > :is(label, .field) > output { flex: 1 0 100%; font-weight: 400; }

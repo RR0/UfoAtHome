@@ -33,6 +33,20 @@ export interface InterviewSightingRef {
 export interface InterviewRedaction {
   /** Why, in the languages it has: what kind of passage (private life, identifying detail, small talk, recognition error). */
   reason: SaidText
+  /** How many words were taken out: what a reader can be told of a passage whose text is gone ("passage taken out · 10 words"). */
+  words?: number
+}
+
+/**
+ * A recording of the interview, to listen to while reading it: an audio or a video file, `offset` seconds ahead of the transcript's times
+ * (a recording that starts before the interview does). The first one plays; the others are kept as what else exists.
+ */
+export interface InterviewRecording {
+  kind: "audio" | "video"
+  /** Its address, relative to the transcript's file. */
+  src: string
+  /** Seconds of the recording before the transcript's time 0. */
+  offset?: number
 }
 
 /**
@@ -117,6 +131,8 @@ export interface InterviewJson {
   proofreading?: Record<string, InterviewProofreading>
   /** What was taken out to anonymise it, and what stands in its place. */
   anonymization?: { replaced?: string[], marker?: string }
+  /** The recordings of the interview, if any are kept (see InterviewRecording). */
+  recordings?: InterviewRecording[]
   segments: InterviewSegment[]
 }
 

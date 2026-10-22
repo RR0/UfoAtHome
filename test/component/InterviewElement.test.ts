@@ -121,7 +121,7 @@ describe("InterviewElement", () => {
     expect(element.querySelector(".ref svg")).not.toBeNull()
     expect(element.querySelector(".ref")!.textContent).toBe("00:12.0")
     element.querySelector<HTMLButtonElement>(".ref")!.click()
-    expect(told).toEqual([{ sighting: "jv", at: 12 }])
+    expect(told).toEqual([{ sighting: "jv", at: 12, quote: "I met Allen Hynek in 1960." }])
     expect(seeks).toEqual([[12, "jv"]])
   })
 

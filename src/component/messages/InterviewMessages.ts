@@ -27,6 +27,40 @@ export interface InterviewMessages extends InputFileMessages {
   /** `{names}` is the speakers who have not approved the transcript yet. */
   proofreadPending: string
   /** How a speaker the transcript does not name is called, by role. */
+  /** The editor's player: playing, the recordings it plays (their window, each one's fields), and what is said when there is none. */
+  play: string
+  pause: string
+  recordings: string
+  recordingsTitle: string
+  recordingKind: string
+  recordingAudio: string
+  recordingVideo: string
+  recordingFile: string
+  recordingOffset: string
+  recordingRemove: string
+  recordingAdd: string
+  /** The ✕ of the recordings' window. */
+  close: string
+  noRecording: string
+  /** The editor's exchanges: taking passages out and back, editing and deleting a turn, who has proofread, and links to moments. */
+  redactSelection: string
+  redactedWords: string
+  redactAll: string
+  restoreAll: string
+  editTurn: string
+  deleteTurn: string
+  saveTurn: string
+  cancelTurn: string
+  turnEditHint: string
+  selectionOnePassage: string
+  selectionNone: string
+  reviewedBy: string
+  linkMoment: string
+  momentLabel: string
+  unlinkMoment: string
+  noMoments: string
+  /** Why a passage taken out in the editor was: the reason it is given. */
+  redactReason: string
   roles: { interviewer: string, interviewee: string, witness: string }
   importFile: string
   saveButton: string

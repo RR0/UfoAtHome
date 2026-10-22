@@ -15,7 +15,13 @@ import { InterviewMedia } from "./messages/InterviewMedia.js"
 import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import { register as registerInterview } from "./InterviewElement.js"
 import type { InterviewElement } from "./InterviewElement.js"
-import type { InterviewJson } from "../engine/persistence/interviewJson.js"
+import type { InterviewJson, InterviewSegment } from "../engine/persistence/interviewJson.js"
+import { InterviewFile } from "../engine/persistence/interviewJson.js"
+import { InterviewEdits } from "../engine/persistence/InterviewEdits.js"
+import { InterviewPlayer } from "./InterviewPlayer.js"
+import { AddMenu } from "./AddMenu.js"
+import { Icons } from "./Icons.js"
+import { WindowClose } from "./WindowClose.js"
 import { InputFont } from "./InputFont.js"
 import { MessageStyle } from "./MessageStyle.js"
 
@@ -30,6 +36,15 @@ export interface InterviewWitness {
   /** The id of the observer's sighting event in the case: what `interviewOf` names. */
   id: string
   label: string
+  /** The named moments of that observation (see Milestone), which a passage of the witness's can be linked to. */
+  moments?: InterviewMoment[]
+}
+
+/** A named moment of an observation, as an interview links to it: when, in seconds of the observation, its letter, and what happens then. */
+export interface InterviewMoment {
+  at: number
+  label: string
+  note?: string
 }
 
 export type InterviewEvent = CaseEventJson & { by?: AgentRef[] }
@@ -79,7 +94,10 @@ const TEMPLATE = `
     font: 400 15px/1.5 var(--sans);
     color: var(--ink);
   }
+  ${EditorTheme.HEAD}
   ${EditorTheme.fields(".interview-app")}
+  .recordings-window :is(button, input, select) { font: inherit; }
+  .recordings-window .pill-btn { min-height: 36px; }
   /* Its parts, underlined, as the case's are. */
   #tabs { display: flex; gap: 6px; padding: 0; border-bottom: 1px solid var(--line); }
   #tabs .group-tab {
@@ -111,8 +129,53 @@ const TEMPLATE = `
   #exchanges .rr0-interview-status { padding: 8px 12px; border-radius: 8px; background: var(--warn-bg); color: var(--ink-dim); font-size: 13px; }
   #group-transcript > .row { margin-bottom: 12px; }
   @container (max-width: 640px) { #exchanges { --rr0-interview-max-height: 440px; } }
+  ${InterviewPlayer.CSS}
+  ${WindowClose.CSS}
+  ${AddMenu.CSS}
+  ${Icons.CSS}
+  /* Who has proofread it, said once above the exchanges, with a box each to say they have (see renderReview); the reader's own line goes. */
+  #exchanges .rr0-interview-status { display: none; }
+  .review { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 0 0 10px; padding: 10px 14px;
+    border-radius: 10px; background: var(--warn-bg); font-size: 13px; color: var(--ink-dim); }
+  .review[data-done] { background: var(--neutral-bg); }
+  .review-boxes { display: flex; flex-wrap: wrap; gap: 14px; }
+  .review-boxes label { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); }
+  .redact-row { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; }
+  .redact-note { font-size: 13px; color: var(--ink-faint); }
+  .redact-note.error { color: var(--error); }
+  /* Each turn: its time, which plays from there; what is taken out as a label that says how much, and puts it back while it is known. */
+  #exchanges .turn { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); column-gap: 14px; padding: 8px 10px; }
+  #exchanges .turn > .turn-time { grid-row: 1; grid-column: 1; }
+  #exchanges .turn > .who { grid-column: 1; align-self: start; }
+  #exchanges .turn > :not(.who, .turn-time) { grid-column: 2; }
+  #exchanges .turn > .said, #exchanges .turn > .redacted { grid-row: 1 / span 2; }
+  #exchanges .turn.goes-on > .who, #exchanges .turn.is-redacted > .who { display: block; visibility: hidden; }
+  /* The time is on the turn itself here: the reader's tooltip of it would say it twice. */
+  #exchanges .turn[data-time]::after { content: none !important; display: none !important; }
+  .turn-time { justify-self: start; min-height: 0; padding: 0; border: 0; background: none; color: var(--sky); font: 600 13px/1.4 var(--mono); cursor: pointer; }
+  .turn-time:hover:not(:disabled) { background: none; text-decoration: underline; }
+  #exchanges .bar.redacted-label { width: auto; height: auto; padding: 0 8px; border: 1px dashed var(--line-strong); border-radius: 999px; background: none; color: var(--ink-faint);
+    font: 600 12px/1.6 var(--sans); vertical-align: baseline; cursor: default; }
+  #exchanges .bar.redacted-label[data-restorable] { cursor: pointer; }
+  #exchanges .bar.redacted-label[data-restorable]:hover { border-color: var(--glow-dim); color: var(--ink); }
+  .turn-tools { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 12px; margin-top: 6px; }
+  .turn-tools button { min-height: 0; padding: 2px 4px; border: 0; background: none; color: var(--ink-faint); font: 600 13px/1.4 var(--sans); }
+  .turn-tools button:hover:not(:disabled) { background: none; color: var(--ink); }
+  .turn-tools .icon-btn { min-width: 0; }
+  #exchanges .turn.current { background: var(--warn-bg); border-radius: 8px; }
+  #exchanges .intervention:has(.turn.current) { border-color: var(--glow-dim); }
+  #exchanges .turn .refs { align-items: center; }
+  #exchanges .turn .ref { display: inline-block; max-width: calc(100% - 2em); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #exchanges .turn .ref .moment-letter { display: inline-grid; place-items: center; width: 1.4em; height: 1.4em; margin-right: 4px; border-radius: 50%; background: var(--glow-solid); color: var(--glow-on-solid); font: 700 11px/1 var(--sans); }
+  #exchanges .turn .ref-unlink { min-height: 0; padding: 0 4px; border: 0; background: none; color: var(--ink-faint); font: 600 13px/1 var(--sans); }
+  .turn-edit { display: flex; flex-direction: column; gap: 6px; }
+  .turn-edit textarea { box-sizing: border-box; width: 100%; min-height: 6em; }
+  .turn-edit .hint { font-size: 12px; color: var(--ink-faint); }
+  .turn-edit .buttons { display: flex; gap: 8px; }
 </style>
 <div class="interview-app">
+<!-- The player: what plays the interview's recordings, with who speaks along it (see InterviewPlayer). -->
+<div id="player"></div>
 <div id="tabs" class="group-tabs">
   <button class="group-tab" type="button" aria-controls="group-summary" aria-expanded="true"><span id="label-summary-group">Summary</span></button>
   <button class="group-tab" type="button" aria-controls="group-exchanges" aria-expanded="false"><span id="label-exchanges-group">Exchanges</span></button>
@@ -133,6 +196,11 @@ const TEMPLATE = `
   </div>
 </section>
 <section class="group-panel" id="group-exchanges" aria-labelledby="label-exchanges-group" hidden>
+  <div id="review" class="review" hidden></div>
+  <div class="redact-row">
+    <button id="redact-selection" type="button" class="pill-btn">Take out the selection</button>
+    <span id="redact-note" class="redact-note" role="status"></span>
+  </div>
   <rr0-interview id="exchanges"></rr0-interview>
 </section>
 <section class="group-panel" id="group-transcript" aria-labelledby="label-file-group" hidden>
@@ -187,6 +255,15 @@ export class InterviewEditorElement extends HTMLElement {
   private fileEditorLoading?: Promise<SightingFileEditor>
   /** The interview the file editor shows the transcript of. */
   private shownFor?: InterviewEvent
+  /** The player over the tabs (see InterviewPlayer). */
+  private readonly player: InterviewPlayer
+  /** The transcript as last drawn: what the exchanges' tools act on. */
+  private drawn?: InterviewJson
+  /**
+   * What was taken out in this session, to put it back while the page stays: by `segment:nth` for a stretch (the nth taken out of that
+   * segment), `segment:all` for a whole turn. Never written anywhere: the file published keeps no trace of it.
+   */
+  private readonly takenOut = new Map<string, string>()
 
   constructor() {
     super()
@@ -211,6 +288,19 @@ export class InterviewEditorElement extends HTMLElement {
       else void this.importFromUrl(pick.url)
     })
     this.shadow.getElementById("save")!.addEventListener("click", () => this.save())
+    this.player = new InterviewPlayer(this.shadow.getElementById("player")!, {
+      timeChanged: t => this.markCurrentTurn(t),
+      recordingsChanged: recordings => void this.editTranscript(json => {
+        if (recordings.length === 0) delete json.recordings
+        else json.recordings = recordings
+      })
+    }, this.messages)
+    this.shadow.getElementById("redact-selection")!.addEventListener("click", () => void this.redactSelection())
+    // A press on a passage taken out puts it back, while its text is still known.
+    this.shadow.getElementById("exchanges")!.addEventListener("click", event => {
+      const bar = (event.target as HTMLElement).closest<HTMLElement>(".bar[data-restorable]")
+      if (bar) void this.restore(bar.dataset.restorable!)
+    })
   }
 
   private static readonly GROUPS: Record<string, InterviewGroup> = { "group-summary": "summary", "group-exchanges": "exchanges", "group-transcript": "file" }
@@ -253,8 +343,10 @@ export class InterviewEditorElement extends HTMLElement {
     if (event !== this.current) this.shownFor = undefined
     this.current = event
     this.render()
+    this.takenOut.clear()
     if (this.group === "file") void this.showTranscript()
-    if (this.group === "exchanges") void this.showExchanges()
+    // Loaded whichever group is open, for the player over them — once the host has said, in the same breath, what it kept of it.
+    queueMicrotask(() => { if (this.current === event) void this.showExchanges() })
   }
 
   /** The observers an interview may be held with. */
@@ -322,6 +414,8 @@ export class InterviewEditorElement extends HTMLElement {
     text("label-summary", m.summary)
     text("label-url", m.transcript)
     text("label-import-file", m.importFile)
+    text("redact-selection", m.redactSelection)
+    this.player?.setMessages(m)
     this.importInput.messages = m
     text("save", m.saveButton)
     this.field("url").title = m.transcriptHint
@@ -460,6 +554,333 @@ export class InterviewEditorElement extends HTMLElement {
     const reader = this.shadow.getElementById("exchanges") as InterviewElement
     reader.documentUrl = this.current ? this.transcriptUrl(this.current) : undefined
     reader.interview = json
+    this.drawn = json
+    this.player.show(json, this.current ? this.transcriptUrl(this.current) : undefined)
+    this.renderReview(json)
+    this.decorateExchanges(json)
+  }
+
+  // -- Editing the exchanges (see the design handoff, §5) --------------------------------------------------------------------------
+
+  /**
+   * Changes the transcript as `change` says, as an edit of the author's: the text the File group holds is written again (with the summary's
+   * fields, as always), the host is told, and the exchanges and the player are drawn again from it.
+   */
+  private async editTranscript(change: (json: InterviewJson) => void): Promise<void> {
+    const event = this.current
+    if (!event || this.hasAttribute("readonly")) return
+    const json = await this.transcriptJson(event) ?? JSON.parse(this.template(event)) as InterviewJson
+    if (!Array.isArray(json.segments)) json.segments = []
+    change(json)
+    const text = InterviewEditorElement.pretty(InterviewEditorElement.withEventFields(json as unknown as Record<string, unknown>, event))
+    this.fileEditor?.replaceText(text, false)
+    this.onEdited(text)
+  }
+
+  /** What a passage taken out here is said to be: taken out at proofreading, in the reader's language. */
+  private get redactReason(): SaidText {
+    return this.said.write(undefined, this.messages.redactReason, this.language) ?? this.messages.redactReason
+  }
+
+  /** What a speaker is called: their name or initials, else their role. */
+  private speakerLabel(json: InterviewJson, id: string): string {
+    const name = InterviewFile.speakerName(json, id)
+    const role = json.speakers?.[id]?.role
+    return name === role && role in this.messages.roles ? this.messages.roles[role as keyof InterviewMessages["roles"]] : name
+  }
+
+  /** Who has not proofread the transcript yet, and a box each participant ticks once they have. */
+  private renderReview(json: InterviewJson | undefined): void {
+    const review = this.shadow.getElementById("review")!
+    const ids = Object.keys(json?.speakers ?? {})
+    review.hidden = !json || ids.length === 0
+    if (!json || ids.length === 0) return
+    const done = (id: string) => ["approved", "covered"].includes(json.proofreading?.[id]?.status ?? "")
+    const waiting = ids.filter(id => !done(id))
+    const text = document.createElement("span")
+    text.textContent = waiting.length === 0 ? this.messages.proofreadAll : this.messages.proofreadPending.replace("{names}", waiting.map(id => this.speakerLabel(json, id)).join(", "))
+    review.toggleAttribute("data-done", waiting.length === 0)
+    const boxes = document.createElement("span")
+    boxes.className = "review-boxes"
+    for (const id of ids) {
+      const label = document.createElement("label")
+      const box = document.createElement("input")
+      box.type = "checkbox"
+      box.checked = done(id)
+      box.disabled = this.hasAttribute("readonly")
+      box.addEventListener("change", () => void this.editTranscript(next => {
+        next.proofreading ??= {}
+        if (box.checked) next.proofreading[id] = { status: "approved", date: new Date().toISOString().slice(0, 10) }
+        else next.proofreading[id] = { status: "pending" }
+      }))
+      label.append(box, this.messages.reviewedBy.replace("{name}", this.speakerLabel(json, id)))
+      boxes.append(label)
+    }
+    review.replaceChildren(text, boxes)
+  }
+
+  /** The moments the passages of the witness `speaker` can be linked to: those of the observation they are the observer of. */
+  private momentsOf(json: InterviewJson, speaker: string): InterviewMoment[] {
+    const of = json.speakers?.[speaker]?.of ?? InterviewFile.sightingsOf(json)[0]
+    return this.options.find(witness => witness.id === of)?.moments ?? this.options.flatMap(witness => witness.moments ?? [])
+  }
+
+  /** Puts on each turn drawn what the editor does with it: its time, its passages taken out said, its links to moments named, and its tools. */
+  private decorateExchanges(json: InterviewJson | undefined): void {
+    if (!json) return
+    const m = this.messages
+    const readonly = this.hasAttribute("readonly")
+    for (const turn of this.shadow.querySelectorAll<HTMLElement>("#exchanges .turn[data-segment]")) {
+      const index = Number(turn.dataset.segment)
+      const segment = json.segments[index]
+      if (!segment) continue
+      if (segment.start !== undefined) {
+        const time = document.createElement("button")
+        time.type = "button"
+        time.className = "turn-time"
+        time.textContent = InterviewFile.clock(segment.start)
+        time.addEventListener("click", () => this.player.seek(segment.start!))
+        turn.prepend(time)
+      }
+      // The passages taken out, in order: each says how much was, and can be put back while its text is known.
+      const redactions = segment.redacted ? [segment.redacted] : InterviewEdits.partsOf(segment).flatMap(part => "redacted" in part ? [part.redacted] : [])
+      turn.querySelectorAll<HTMLElement>(".bar").forEach((bar, nth) => {
+        const words = redactions[nth]?.words
+        bar.textContent = words !== undefined ? m.redactedWords.replace("{n}", String(words)) : m.redacted
+        bar.classList.add("redacted-label")
+        const key = segment.redacted ? `${index}:all` : `${index}:${nth}`
+        if (this.takenOut.has(key)) bar.dataset.restorable = key
+      })
+      // The links to moments, named after the moment rather than its time, each with its own way out.
+      const moments = this.momentsOf(json, segment.speaker)
+      turn.querySelectorAll<HTMLButtonElement>(".ref").forEach((button, k) => {
+        const ref = segment.refs?.[k]
+        if (!ref) return
+        const moment = moments.find(candidate => Math.abs(candidate.at - ref.at) < 0.05)
+        if (moment) {
+          const letter = document.createElement("span")
+          letter.className = "moment-letter"
+          letter.textContent = moment.label.slice(0, 2)
+          button.replaceChildren(letter, m.momentLabel.replace("{k}", moment.label).replace("{text}", moment.note ?? InterviewFile.clock(ref.at)))
+        }
+        if (readonly) return
+        const unlink = document.createElement("button")
+        unlink.type = "button"
+        unlink.className = "ref-unlink"
+        unlink.textContent = "×"
+        unlink.title = m.unlinkMoment
+        unlink.setAttribute("aria-label", m.unlinkMoment)
+        unlink.addEventListener("click", () => void this.editTranscript(next => {
+          next.segments[index].refs?.splice(k, 1)
+          if (next.segments[index].refs?.length === 0) delete next.segments[index].refs
+        }))
+        button.after(unlink)
+      })
+      if (!readonly) turn.append(this.turnTools(json, index, segment, moments))
+    }
+  }
+
+  /** What can be done to a turn: link it to a moment (a witness's), edit it as text, take it all out or back, delete it. */
+  private turnTools(json: InterviewJson, index: number, segment: InterviewSegment, moments: InterviewMoment[]): HTMLElement {
+    const m = this.messages
+    const tools = document.createElement("div")
+    tools.className = "turn-tools"
+    const button = (label: string, act: () => void): HTMLButtonElement => {
+      const element = document.createElement("button")
+      element.type = "button"
+      element.textContent = label
+      element.addEventListener("click", act)
+      return element
+    }
+    if (json.speakers?.[segment.speaker]?.role === "witness" && !segment.redacted) {
+      const link = button(m.linkMoment, () => undefined)
+      // In its place first: the menu is put beside its button.
+      tools.append(link)
+      const menu = new AddMenu(link, `moment-menu-${index}`, at => void this.editTranscript(next => {
+        const refs = next.segments[index].refs ?? []
+        if (!refs.some(ref => Math.abs(ref.at - Number(at)) < 0.05)) refs.push({ at: Number(at) })
+        next.segments[index].refs = refs
+      }), at => `moment-${index}-${at}`)
+      menu.setKinds(moments.length > 0
+        ? moments.map(moment => ({ value: String(moment.at), label: m.momentLabel.replace("{k}", moment.label).replace("{text}", moment.note ?? InterviewFile.clock(moment.at)) }))
+        : [{ value: "", label: m.noMoments, disabledReason: m.noMoments }])
+    }
+    if (!segment.redacted) tools.append(button(m.editTurn, () => this.editTurn(index)))
+    const restorable = this.takenOut.has(`${index}:all`) || [...this.takenOut.keys()].some(key => key.startsWith(`${index}:`))
+    if (segment.redacted || (segment.parts && restorable)) {
+      const back = button(m.restoreAll, () => void this.restoreAll(index))
+      back.disabled = !restorable
+      tools.append(back)
+    } else {
+      tools.append(button(m.redactAll, () => void this.editTranscript(next => {
+        this.forget(index)
+        this.takenOut.set(`${index}:all`, InterviewEdits.redactWhole(next.segments[index], this.redactReason))
+      })))
+    }
+    const remove = button("", () => void this.editTranscript(next => {
+      next.segments.splice(index, 1)
+      this.shiftTakenOut(index)
+    }))
+    remove.className = "icon-btn"
+    remove.innerHTML = Icons.TRASH
+    remove.title = m.deleteTurn
+    remove.setAttribute("aria-label", m.deleteTurn)
+    tools.append(remove)
+    return tools
+  }
+
+  /** Takes out the words selected in one passage said (see InterviewEdits.redact), or says why it cannot. */
+  private async redactSelection(): Promise<void> {
+    const m = this.messages
+    const note = this.shadow.getElementById("redact-note")!
+    const say = (text: string, error = false) => {
+      note.textContent = text
+      note.classList.toggle("error", error)
+    }
+    const selection = (this.shadow as ShadowRoot & { getSelection?: () => Selection | null }).getSelection?.() ?? document.getSelection()
+    const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined
+    if (!range || range.collapsed) {
+      say(m.selectionNone)
+      return
+    }
+    const element = (node: Node) => (node instanceof Element ? node : node.parentElement)
+    const said = element(range.startContainer)?.closest<HTMLElement>(".said")
+    if (!said || element(range.endContainer)?.closest(".said") !== said || element(range.startContainer)?.closest(".bar") || element(range.endContainer)?.closest(".bar")) {
+      say(m.selectionOnePassage, true)
+      return
+    }
+    const index = Number(said.closest<HTMLElement>(".turn")!.dataset.segment)
+    const from = InterviewEditorElement.offsetIn(said, range.startContainer, range.startOffset)
+    const to = InterviewEditorElement.offsetIn(said, range.endContainer, range.endOffset)
+    let done = false
+    await this.editTranscript(json => {
+      const taken = InterviewEdits.redact(json.segments[index], Math.min(from, to), Math.max(from, to), this.redactReason)
+      if (!taken) return
+      done = true
+      this.shiftParts(index, taken.nth)
+      this.takenOut.set(`${index}:${taken.nth}`, taken.text)
+    })
+    selection?.removeAllRanges()
+    say(done ? "" : m.selectionOnePassage, !done)
+  }
+
+  /** Where `node`'s `offset` falls in what `said` shows, counted as the reader's text is (the labels of passages taken out are no text of it). */
+  private static offsetIn(said: HTMLElement, node: Node, offset: number): number {
+    let at = 0
+    const walker = document.createTreeWalker(said, NodeFilter.SHOW_TEXT, {
+      acceptNode: text => (text.parentElement?.closest(".bar") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT)
+    })
+    for (let text = walker.nextNode(); text; text = walker.nextNode()) {
+      if (text === node) return at + offset
+      if (node.contains(text) && node !== text) {
+        const children = [...node.childNodes]
+        const before = children.slice(0, offset)
+        return at + before.reduce((sum, child) => sum + (child instanceof Element && child.closest(".bar") ? 0 : (child.textContent ?? "").length), 0)
+      }
+      at += (text.textContent ?? "").length
+    }
+    return at
+  }
+
+  /** Puts back what `key` (see takenOut) says was taken out. */
+  private async restore(key: string): Promise<void> {
+    const kept = this.takenOut.get(key)
+    if (kept === undefined) return
+    const [segment, nth] = key.split(":")
+    const index = Number(segment)
+    await this.editTranscript(json => {
+      if (nth === "all") InterviewEdits.restoreWhole(json.segments[index], kept)
+      else {
+        InterviewEdits.restorePart(json.segments[index], Number(nth), kept)
+        this.shiftParts(index, Number(nth), -1)
+      }
+      this.takenOut.delete(key)
+    })
+  }
+
+  /** Puts back all that is known of what was taken out of turn `index`. */
+  private async restoreAll(index: number): Promise<void> {
+    if (this.takenOut.has(`${index}:all`)) {
+      await this.restore(`${index}:all`)
+      return
+    }
+    const parts = [...this.takenOut.keys()].filter(key => key.startsWith(`${index}:`)).map(key => Number(key.split(":")[1])).sort((a, b) => b - a)
+    for (const nth of parts) await this.restore(`${index}:${nth}`)
+  }
+
+  /** The turn `index` as raw text, `⟦ … ⟧` for what is taken out, to edit in place of what it says. */
+  private editTurn(index: number): void {
+    const json = this.drawn
+    const segment = json?.segments[index]
+    const said = this.shadow.querySelector<HTMLElement>(`#exchanges .turn[data-segment="${index}"] .said`)
+    if (!segment || !said) return
+    const m = this.messages
+    const box = document.createElement("div")
+    box.className = "turn-edit"
+    const area = document.createElement("textarea")
+    area.value = InterviewEdits.raw(segment, nth => this.takenOut.get(`${index}:${nth}`))
+    const hint = document.createElement("span")
+    hint.className = "hint"
+    hint.textContent = m.turnEditHint
+    const buttons = document.createElement("div")
+    buttons.className = "buttons"
+    const save = document.createElement("button")
+    save.type = "button"
+    save.className = "pill-btn primary"
+    save.textContent = m.saveTurn
+    save.addEventListener("click", () => void this.editTranscript(next => {
+      const removed = InterviewEdits.fromRaw(next.segments[index], area.value, this.redactReason)
+      this.forget(index)
+      for (const [nth, text] of removed) this.takenOut.set(`${index}:${nth}`, text)
+    }))
+    const cancel = document.createElement("button")
+    cancel.type = "button"
+    cancel.className = "pill-btn"
+    cancel.textContent = m.cancelTurn
+    cancel.addEventListener("click", () => this.drawExchanges(this.drawn))
+    buttons.append(save, cancel)
+    box.append(area, hint, buttons)
+    said.replaceWith(box)
+    area.focus()
+  }
+
+  /** Forgets what was taken out of turn `index`. */
+  private forget(index: number): void {
+    for (const key of [...this.takenOut.keys()]) if (key.startsWith(`${index}:`)) this.takenOut.delete(key)
+  }
+
+  /** A passage taken out (or put back, `by` -1) at `nth` of turn `index` moves those after it by one. */
+  private shiftParts(index: number, nth: number, by = 1): void {
+    const moved = [...this.takenOut].filter(([key]) => key.startsWith(`${index}:`) && key !== `${index}:all` && Number(key.split(":")[1]) >= nth + (by < 0 ? 1 : 0))
+    for (const [key] of moved) this.takenOut.delete(key)
+    for (const [key, text] of moved) this.takenOut.set(`${index}:${Number(key.split(":")[1]) + by}`, text)
+  }
+
+  /** Turn `index` was deleted: what was taken out of it goes, and of those after it moves up by one. */
+  private shiftTakenOut(index: number): void {
+    const entries = [...this.takenOut]
+    this.takenOut.clear()
+    for (const [key, text] of entries) {
+      const [segment, nth] = key.split(":")
+      const at = Number(segment)
+      if (at < index) this.takenOut.set(key, text)
+      else if (at > index) this.takenOut.set(`${at - 1}:${nth}`, text)
+    }
+  }
+
+  /** The turn being said at `t` seconds of the transcript is marked, and kept in view in the list while it plays. */
+  private markCurrentTurn(t: number): void {
+    const segments = this.drawn?.segments ?? []
+    let current = -1
+    segments.forEach((segment, index) => { if (segment.start !== undefined && segment.start <= t) current = index })
+    for (const turn of this.shadow.querySelectorAll<HTMLElement>("#exchanges .turn.current")) turn.classList.remove("current")
+    const turn = this.shadow.querySelector<HTMLElement>(`#exchanges .turn[data-segment="${current}"]`)
+    if (!turn) return
+    turn.classList.add("current")
+    const list = turn.closest<HTMLElement>(".rr0-interview-turns")
+    if (list && (turn.offsetTop < list.scrollTop || turn.offsetTop > list.scrollTop + list.clientHeight - turn.offsetHeight)) {
+      list.scrollTo({ top: turn.offsetTop - list.clientHeight / 3, behavior: "smooth" })
+    }
   }
 
   /** Opens the dialogue at the segment that tells of an observation's moment, and shows where it is. */
@@ -489,7 +910,7 @@ export class InterviewEditorElement extends HTMLElement {
   private static readonly SHARED = ["title", "time", "medium", "by", "interviewOf", "summary"] as const
 
   /** The order a file reads best in: what the interview is, then who speaks, then what was said. Whatever else it holds follows. */
-  private static readonly ORDER = ["version", "id", "language", "title", "time", "medium", "by", "interviewOf", "summary", "speakers", "transcription", "proofreading", "anonymization", "segments"]
+  private static readonly ORDER = ["version", "id", "language", "title", "time", "medium", "by", "interviewOf", "summary", "speakers", "transcription", "proofreading", "anonymization", "recordings", "segments"]
 
   private static ordered(json: Record<string, unknown>): Record<string, unknown> {
     const ordered: Record<string, unknown> = {}
@@ -667,7 +1088,7 @@ export class InterviewEditorElement extends HTMLElement {
       this.dispatchEvent(new CustomEvent(INTERVIEW_CHANGE_EVENT, { bubbles: true, composed: true, detail: { field: "url", event } }))
     }
     this.dispatchEvent(new CustomEvent(INTERVIEW_CHANGE_EVENT, { bubbles: true, composed: true, detail: { field: "transcript", event, text } }))
-    if (this.group === "exchanges") void this.showExchanges()
+    void this.showExchanges()
   }
 
   /** The file changed what the summary shows: shown there, and told to the host. */

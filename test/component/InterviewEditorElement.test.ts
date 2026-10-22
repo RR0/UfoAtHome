@@ -312,9 +312,10 @@ describe("What the summary shows is what the file holds, and the other way round
     expect(turns[2].classList.contains("is-redacted")).toBe(true)
     // The reason is said, not left to a tooltip.
     expect((turns[2].querySelector(".redacted .bar") as HTMLElement).dataset.tip).toBe("Passage removed : Private life")
-    expect(turns[2].querySelector(".redacted")!.textContent).toBe("")
+    // In the editor, a passage taken out says so where it was (and how many words, when that is known).
+    expect(turns[2].querySelector(".redacted")!.textContent).toBe("Passage removed")
     // Only a stretch taken out: the rest is still there, the gap said in its place.
-    expect(turns[4].querySelector(".said")!.textContent).toBe("No lights.  That is all.")
+    expect(turns[4].querySelector(".said")!.textContent).toBe("No lights. Passage removed That is all.")
     expect((turns[4].querySelector(".said .bar") as HTMLElement).dataset.tip).toBe("Passage removed : Place")
     expect(turns[4].querySelectorAll(".said .bar")).toHaveLength(1)
     expect(element.shadowRoot!.querySelector("#exchanges .rr0-interview-status")!.textContent).toBe("Not proofread yet by: Q. B.")
@@ -322,6 +323,63 @@ describe("What the summary shows is what the file holds, and the other way round
     expect(turns[0].dataset.time).toBe("00:00.0")
     expect(turns[1].dataset.time).toBe("00:05.0")
     expect(turns[0].querySelector(".when")).toBeNull()
+  })
+
+  const edited = (changes: { field: string, text?: string }[]) => JSON.parse(changes.filter(change => change.field === "transcript").at(-1)!.text!)
+
+  it("says who has proofread it, and keeps it when a participant's box is ticked", async () => {
+    files["https://example.org/d/interview.json"] = dialogue
+    const { element, changes } = make({ ...event(), url: "interview.json" })
+    tabs(element)[1].click()
+    await wait(100)
+    const root = element.shadowRoot!
+    expect(root.getElementById("review")!.textContent).toContain("Not proofread yet by: Q. B.")
+    const boxes = [...root.querySelectorAll<HTMLInputElement>("#review input[type=checkbox]")]
+    expect(boxes.map(box => box.checked)).toEqual([true, false])
+    boxes[1].checked = true
+    boxes[1].dispatchEvent(new Event("change"))
+    await wait(100)
+    expect(edited(changes).proofreading.witness.status).toBe("approved")
+  })
+
+  it("takes a whole turn out and puts it back while its text is known", async () => {
+    files["https://example.org/d/interview.json"] = dialogue
+    const { element, changes } = make({ ...event(), url: "interview.json" })
+    tabs(element)[1].click()
+    await wait(100)
+    const tool = (index: number, label: string) => [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(`#exchanges .turn[data-segment="${index}"] .turn-tools button`)]
+      .find(button => button.textContent === label)!
+    tool(4, "Take all out").click()
+    await wait(100)
+    expect(edited(changes).segments[4]).toMatchObject({ redacted: { words: 3 } })
+    expect(edited(changes).segments[4].text).toBeUndefined()
+    tool(4, "Restore all").click()
+    await wait(100)
+    expect(edited(changes).segments[4].text).toBe("Then it left.")
+  })
+
+  it("links a witness's passage to a moment of their observation, named after it", async () => {
+    files["https://example.org/d/interview.json"] = dialogue
+    const { element, changes } = make({ ...event(), url: "interview.json" })
+    element.witnesses = [{ id: "qb", label: "Q. B.", moments: [{ at: 0.5, label: "A", note: "A light" }, { at: 3, label: "B", note: "It turns" }] }]
+    tabs(element)[1].click()
+    await wait(100)
+    const root = element.shadowRoot!
+    expect(root.querySelector("#exchanges .turn[data-segment='1'] .ref")!.textContent).toBe("AMoment A · A light")
+    root.querySelector<HTMLButtonElement>("#moment-4-3")!.click()
+    await wait(100)
+    expect(edited(changes).segments[4].refs).toEqual([{ at: 3 }])
+  })
+
+  it("plays nothing without a recording, and says how to get one", async () => {
+    files["https://example.org/d/interview.json"] = dialogue
+    const { element } = make({ ...event(), url: "interview.json" })
+    await wait(100)
+    const root = element.shadowRoot!
+    expect(root.querySelector<HTMLButtonElement>(".player-play")!.disabled).toBe(true)
+    expect(root.querySelector(".player-empty")!.textContent).toContain("No recording")
+    expect(root.querySelector(".player-recordings")!.textContent).toBe("Recordings (0)")
+    expect(root.querySelectorAll(".speaker-track .seg")).toHaveLength(6)
   })
 
   it("follows a passage to the moment of the observation it tells of", async () => {
@@ -332,7 +390,8 @@ describe("What the summary shows is what the file holds, and the other way round
     tabs(element)[1].click()
     await wait(100)
     element.shadowRoot!.querySelector<HTMLButtonElement>("#exchanges .ref")!.click()
-    expect(seen).toEqual([{ sighting: "qb", at: 0.5 }])
+    // With what was said there, for the observation to say where its moment was quoted.
+    expect(seen).toEqual([{ sighting: "qb", at: 0.5, quote: "In the park." }])
   })
 
   it("says nothing was said when the interview has no transcript", async () => {

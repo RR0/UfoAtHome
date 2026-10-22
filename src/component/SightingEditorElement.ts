@@ -6307,6 +6307,12 @@ export class SightingEditorElement extends HTMLElement {
     this.goToMark(seconds * 1000)
   }
 
+  /** Opens the section whose panel is `id` ("group-temporal"…), for a caller that sends the author there (a moment quoted in an interview). */
+  openSection(id: string): void {
+    const tab = this.groupTabs.find(candidate => candidate.getAttribute("aria-controls") === id)
+    if (tab) this.toggleGroup(tab, true)
+  }
+
   /** Brings the render into view, for a caller that has just moved the playhead from elsewhere on the page (an interview's link to a moment). */
   showRender(): void {
     this.sceneElement.scrollIntoView?.({ block: "center", behavior: "smooth" })
