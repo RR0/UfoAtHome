@@ -40,6 +40,9 @@ export class Icons {
    * element as `data-icon`, so what it shows can still be asked of it.
    */
   static show(element: HTMLElement, glyph: string): void {
+    // Shown already: left as it is. Some are set on every frame of a replay (Play/Pause), and an icon written again under the
+    // pointer between its press and its release takes the click away (the element pressed is no longer there to be clicked).
+    if (element.dataset.icon === glyph && element.firstChild) return
     const icon = Icons.BY_GLYPH[glyph]
     if (icon) element.innerHTML = icon
     else element.textContent = glyph
