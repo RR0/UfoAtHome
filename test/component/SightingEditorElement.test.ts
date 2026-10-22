@@ -7196,6 +7196,24 @@ describe("SightingEditorElement header", () => {
     expect(element.shadowRoot!.getElementById("editor-head")!.hidden).toBe(true)
   })
 
+  it("lays the tracks out under the scene, and folds them back", () => {
+    const root = mount().shadowRoot!
+    const toggle = root.getElementById("toggle-tracks") as HTMLButtonElement
+    toggle.click()
+    expect(root.getElementById("timeline-tracks")!.hidden).toBe(false)
+    expect(root.querySelector(".scene-card")!.hasAttribute("data-tracks")).toBe(true)
+    expect(root.querySelectorAll(".track-name")).toHaveLength(4)
+    toggle.click()
+    expect(root.getElementById("timeline-tracks")!.hidden).toBe(true)
+  })
+
+  it("marks the fields the scene shows as they are edited, and says so in their panel", () => {
+    const root = mount().shadowRoot!
+    expect(root.getElementById("heading")!.closest("label")!.classList.contains("scene-linked")).toBe(true)
+    expect(root.querySelector("#group-location .scene-legend")).not.toBeNull()
+    expect(root.querySelector("#group-observation .scene-legend")).toBeNull()
+  })
+
   it("opens each section on its own name", () => {
     const root = mount().shadowRoot!
     expect(root.getElementById("panel-title-shape")!.textContent).toBe(root.getElementById("label-shape-group")!.textContent)

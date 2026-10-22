@@ -1,3 +1,4 @@
+import type { TimelineTracksMessages } from "../TimelineTracks.js"
 import type { SectionFoldMessages } from "../SectionFolds.js"
 import type { InputFileMessages } from "../InputFileElement.js"
 import type { SightingLabels } from "./SightingLabels.js"
@@ -5,7 +6,7 @@ import type { SightingLabels } from "./SightingLabels.js"
 /** Contract for `<rr0-sighting-editor>`'s user-visible label strings — implemented per language
  * under this directory (`SightingEditorMessages_en.ts`, `SightingEditorMessages_fr.ts`) and loaded
  * via `loadSightingEditorMessages`. */
-export interface SightingEditorMessages extends SectionFoldMessages, InputFileMessages, SightingLabels {
+export interface SightingEditorMessages extends SectionFoldMessages, TimelineTracksMessages, InputFileMessages, SightingLabels {
   oval: string
   /** The "Polygon" preset button — a plain quad, the starting point for a freeform shape (see
    * Shape.ts's own createCustomPolygon doc comment). */
@@ -310,6 +311,11 @@ export interface SightingEditorMessages extends SectionFoldMessages, InputFileMe
   /** The ✕ of every window: what it does, said to whoever cannot see it. */
   close: string
   editorKicker: string
+  /** The button that lays the tracks out under the scene, and folds them back. */
+  expandTracks: string
+  collapseTracks: string
+  /** The legend of a panel holding fields the scene shows as they are edited (marked with a small circle). */
+  sceneLinkedLegend: string
   /** The title of each section of a panel, in capitals (see the form-section blocks of sightingEditorTemplate). */
   sectionIdentity: string
   sectionProfile: string

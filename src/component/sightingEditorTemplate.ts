@@ -5,6 +5,7 @@ import { ElementList } from "./ElementList.js"
 import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
 import { SectionFolds } from "./SectionFolds.js"
+import { TimelineTracks } from "./TimelineTracks.js"
 export const html = `
 <!-- From top to bottom, as the design handoff lays it out: what this recording is and whether it is saved, the scene, the
      sections as a row of chips (only one open at a time, see SightingEditorElement.toggleGroup), and the open section. The
@@ -47,7 +48,10 @@ export const html = `
   </div>
   <button id="next-mark" type="button" class="icon-btn" title="Next keyframe" aria-label="Next keyframe">${Icons.NEXT_MARK}</button>
   <span id="time-end" class="time-label">0:00</span>
+  <!-- Lays the tracks out under the scene (see TimelineTracks): the timeline then leaves the picture and stays in view. -->
+  <button id="toggle-tracks" type="button" class="icon-btn" aria-expanded="false" aria-controls="timeline-tracks" title="Expand the tracks" aria-label="Expand the tracks"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/></svg></button>
 </div>
+<div id="timeline-tracks" hidden></div>
 </div>
 <nav id="group-tabs" class="section-chips">
   <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false"><span id="label-observation-group">Summary</span></button>
@@ -745,7 +749,7 @@ export const html = `
 </div>
 `
 
-export const css = `${InputFont.CSS}${ElementList.CSS}${Icons.CSS}${WindowClose.CSS}${SectionFolds.CSS}
+export const css = `${InputFont.CSS}${ElementList.CSS}${Icons.CSS}${WindowClose.CSS}${SectionFolds.CSS}${TimelineTracks.CSS}
 :host {
   color-scheme: light dark;
   display: block;
@@ -2048,6 +2052,47 @@ ${MessageStyle.rules(
 .form-section > :is(label, .field) > output { flex: 1 0 100%; font-weight: 400; }
 .form-section > label:has(> input[type="checkbox"]) { display: flex; align-items: center; gap: 8px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
 .form-section .record-row { display: flex; flex-wrap: wrap; align-items: end; gap: 14px 16px; }
+/* The scene, with nothing over it at rest (see the design handoff, §3.2): its toggles and its timeline show while the pointer is
+   over it, while one of them has the focus, and for a moment after a touch (data-shown, see SightingEditorElement.showOverlays). */
+.scene-card { position: relative; }
+.scene-card > .render-line, .scene-card > .playback-row {
+  position: absolute; z-index: 4; opacity: 0; pointer-events: none; transition: opacity .15s ease;
+}
+.scene-card:is(:hover, :focus-within, [data-shown]) > :is(.render-line, .playback-row) { opacity: 1; pointer-events: auto; }
+.scene-card > .render-line { top: 10px; right: 10px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding: 0; background: none; }
+.scene-card > .render-line .scene-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; margin: 0; }
+.scene-card > :is(.render-line, .playback-row) :is(button, input[type="range"]) { color: #e8ecf4; }
+.scene-card > .render-line button {
+  background: rgba(7, 10, 18, .66); border: 1px solid rgba(255, 255, 255, .18); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.scene-card > .playback-row {
+  left: 0; right: 0; bottom: 0; margin: 0; padding: 8px 14px;
+  background: rgba(7, 10, 18, .66); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: #e8ecf4; border: 0;
+}
+.scene-card > .playback-row .icon-btn { background: transparent; border-color: rgba(255, 255, 255, .18); }
+/* With the tracks laid out, the timeline leaves the picture and stays under it. */
+.scene-card[data-tracks] > .playback-row {
+  position: static; opacity: 1; pointer-events: auto;
+  background: var(--ground-raised); color: var(--ink); -webkit-backdrop-filter: none; backdrop-filter: none; border-top: 1px solid var(--line);
+}
+.scene-card[data-tracks] > .playback-row :is(button, input[type="range"]) { color: var(--ink); }
+.scene-card[data-tracks] > .playback-row .icon-btn { border-color: var(--line-strong); }
+#toggle-tracks[aria-expanded="true"] { background: var(--glow-solid); border-color: var(--glow-solid); color: var(--glow-on-solid); }
+.scene-card > #timeline-tracks { background: var(--ground-raised); color: var(--ink); }
+/* A field the scene shows as it is edited: a small circle after its label, filled while it is the one being edited. */
+.scene-linked > :first-child::after {
+  content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 6px; vertical-align: .05em;
+  border: 1px solid var(--glow-dim); border-radius: 50%; box-sizing: border-box;
+}
+.scene-linked:focus-within > :first-child::after { background: var(--glow-solid); border-color: var(--glow-solid); }
+.scene-legend { margin: 6px 0 0; font-size: 12px; color: var(--ink-faint); }
+.scene-legend::before {
+  content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 6px; vertical-align: .05em;
+  border: 1px solid var(--glow-dim); border-radius: 50%; box-sizing: border-box;
+}
+/* What a click in the scene opened, pointed out for a moment. */
+.flash { background: var(--warn-bg) !important; border-radius: 8px; box-shadow: 0 0 0 6px var(--warn-bg); transition: background .3s ease, box-shadow .3s ease; }
+@media (prefers-reduced-motion: reduce) { .scene-card > :is(.render-line, .playback-row) { transition: none; } }
 /* Narrow: the scene stays in view while the form scrolls under it. */
 @container (max-width: 640px) {
   .scene-card { position: sticky; top: 0; z-index: 3; }

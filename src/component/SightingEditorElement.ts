@@ -2,6 +2,8 @@ import { setupCloudEditor } from "./CloudEditor.js"
 import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
 import { SectionFolds } from "./SectionFolds.js"
+import { TimelineTracks } from "./TimelineTracks.js"
+import type { TimelineTrack } from "./TimelineTracks.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
 import type { BeamEditor } from "./BeamEditor.js"
@@ -438,6 +440,11 @@ export class SightingEditorElement extends HTMLElement {
   /** The file the recording was opened from, or last saved as, for the header's state line. */
   private openedFrom?: string
   private savedAs?: string
+  /** The recording's tracks under the scene, when laid out (see TimelineTracks). */
+  private readonly timelineTracks: TimelineTracks
+  private readonly tracksToggle: HTMLButtonElement
+  /** When the scene's toggles and timeline, shown by a touch, go again. */
+  private overlayTimer?: ReturnType<typeof setTimeout>
   /** The advanced fields of each section, held back where they are (see SectionFolds). */
   private readonly sectionFolds: SectionFolds
   /** The steps written into the history since the recording was opened or saved: what the header counts as changes. */
@@ -1037,6 +1044,7 @@ export class SightingEditorElement extends HTMLElement {
     if (clicked !== undefined) {
       this.selectDecor(clicked)
       this.revealDecorPanel()
+      this.flash(this.shadow.querySelector("#decor-item label, #decor-item .field"))
     }
   }
 
@@ -1155,6 +1163,21 @@ export class SightingEditorElement extends HTMLElement {
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
     this.saveButton = this.shadow.getElementById("save") as HTMLButtonElement
     this.sectionFolds = new SectionFolds(this.shadow)
+    this.timelineTracks = new TimelineTracks(this.shadow.getElementById("timeline-tracks")!, t => this.goToMark(t), this.messages)
+    this.tracksToggle = this.shadow.getElementById("toggle-tracks") as HTMLButtonElement
+    this.tracksToggle.addEventListener("click", () => this.setTracksShown(this.tracksToggle.getAttribute("aria-expanded") !== "true"))
+    // A touch has no hover: it shows the scene's toggles and timeline for a while (see the design handoff, §3.2).
+    this.shadow.querySelector(".scene-card")!.addEventListener("pointerdown", event => {
+      if ((event as PointerEvent).pointerType === "touch") this.showOverlays()
+    })
+    // The fields the scene shows as they are edited (§3.3): marked, and their panels say so.
+    for (const id of SightingEditorElement.SCENE_LINKED) this.shadow.getElementById(id)?.closest("label, .field")?.classList.add("scene-linked")
+    for (const panel of this.shadow.querySelectorAll<HTMLElement>(".group-panel")) {
+      if (!panel.querySelector(".scene-linked")) continue
+      const legend = document.createElement("p")
+      legend.className = "scene-legend"
+      panel.querySelector(".panel-head")!.append(legend)
+    }
     this.importInput = this.shadow.getElementById("import") as InputFileElement
     this.narrativeSourceRow = this.shadow.getElementById("narrative-source-row")!
     this.narrativeSettingsBox = this.shadow.getElementById("narrative-settings")!
@@ -6115,6 +6138,67 @@ export class SightingEditorElement extends HTMLElement {
    * The open group's own and not every track's: an author in the Weather group going back to change
    * a keyframe wants the weather's, and a bar ticked for every shape's every keyframe would bury them.
    */
+  /** The fields whose edit the scene shows as it is made: the gaze, the field of view, the size, the look, the sky, a picture's opacity. */
+  private static readonly SCENE_LINKED = ["heading", "pitch", "focalLength", "apparentWidth", "realWidth", "objectDistance", "color", "haloScale",
+    "cloudCover", "windDirection", "windSpeed", "referenceOpacity"]
+
+  /** Shows the scene's toggles and timeline for 3.5 s, as a hover would. */
+  private showOverlays(): void {
+    const card = this.shadow.querySelector<HTMLElement>(".scene-card")!
+    card.dataset.shown = ""
+    clearTimeout(this.overlayTimer)
+    this.overlayTimer = setTimeout(() => delete card.dataset.shown, 3500)
+  }
+
+  /** Lays the tracks out under the scene, or folds them back into the timeline over it. */
+  private setTracksShown(shown: boolean): void {
+    const card = this.shadow.querySelector<HTMLElement>(".scene-card")!
+    card.toggleAttribute("data-tracks", shown)
+    this.shadow.getElementById("timeline-tracks")!.hidden = !shown
+    this.tracksToggle.setAttribute("aria-expanded", String(shown))
+    const label = shown ? this.messages.collapseTracks : this.messages.expandTracks
+    this.tracksToggle.title = label
+    this.tracksToggle.setAttribute("aria-label", label)
+    this.refreshTracks()
+  }
+
+  /** Points out, for 1.8 s, what a click in the scene has just opened. */
+  private flash(element: Element | null | undefined): void {
+    if (!element) return
+    element.classList.add("flash")
+    setTimeout(() => element.classList.remove("flash"), 1800)
+  }
+
+  /** The tracks under the scene, while they are laid out: one per kind of keyframe the recording holds. */
+  private refreshTracks(): void {
+    if (!this.timelineTracks || this.tracksToggle.getAttribute("aria-expanded") !== "true") return
+    const sighting = this.ufoElement.sighting
+    const m = this.messages
+    const open = (id: string) => {
+      const tab = this.groupTabs.find(candidate => candidate.getAttribute("aria-controls") === id)
+      if (tab) this.toggleGroup(tab, true)
+    }
+    // A keyframe written from here is an edit like any other: it is touched, and goes into the history.
+    const edit = (write: () => void) => () => {
+      this.touch()
+      this.armHistory()
+      write()
+      this.scheduleHistoryRecord()
+      this.refreshTimelineMarks()
+    }
+    const tracks: TimelineTrack[] = [
+      { id: "shapes", label: m.shapesTrack, color: "#f5c451", times: sighting.timeline.allKeyframes.map(keyframe => keyframe.t), open: () => this.revealShapePanel(),
+        add: edit(() => { if (sighting.timeline.sourceIds.includes(this.currentSourceId)) this.applyAppearanceAtPlayhead(undefined, false) }) },
+      { id: "observer", label: m.observerTrack, color: "#7fd4ff", times: sighting.observerTrack.allKeyframes.map(keyframe => keyframe.t), open: () => open("group-location"),
+        add: edit(() => this.updateObserver()) },
+      { id: "weather", label: m.weatherTrack, color: "#b9c8d8", times: sighting.weatherTrack.allKeyframes.map(keyframe => keyframe.t), open: () => open("group-weather"),
+        add: edit(() => this.applyWeatherAtPlayhead()) },
+      { id: "sound", label: m.soundTrack, color: "#9fd9a8", times: sighting.soundTrack.allKeyframes.map(keyframe => keyframe.t), open: () => open("group-sound"),
+        add: edit(() => this.applySoundAtPlayhead()) }
+    ]
+    this.timelineTracks.show(tracks, this.ufoElement.seekableDuration, this.ufoElement.currentTime)
+  }
+
   private refreshTimelineMarks(): void {
     const sighting = this.ufoElement.sighting
     const keyframes = (label: string, times: Iterable<number>): TimelineMark[] =>
@@ -6135,6 +6219,7 @@ export class SightingEditorElement extends HTMLElement {
       marks.push({ t: milestone.t, kind: "milestone", label: this.said.read(milestone.label) ?? "" })
     }
     this.timelineMarks.show(marks, this.ufoElement.seekableDuration)
+    this.refreshTracks()
   }
 
   /**
@@ -9959,6 +10044,9 @@ export class SightingEditorElement extends HTMLElement {
     }
     for (const [key, text] of Object.entries(sections)) this.shadow.getElementById(`label-section-${key}`)!.textContent = text
     this.sectionFolds.setMessages(messages)
+    this.timelineTracks.setMessages(messages)
+    for (const legend of this.shadow.querySelectorAll(".scene-legend")) legend.textContent = messages.sceneLinkedLegend
+    if (this.tracksToggle) this.setTracksShown(this.tracksToggle.getAttribute("aria-expanded") === "true")
     // Every window's ✕ (see WindowClose), answering as its Escape does.
     for (const id of ["location-settings", "decor-settings", "weather-settings"]) WindowClose.popover(this.shadow.getElementById(id)!, messages.close)
     WindowClose.dialog(this.identityAsk, messages.close, () => this.closeIdentityAsk())
@@ -10095,6 +10183,7 @@ export class SightingEditorElement extends HTMLElement {
     // is the way to its own fields. The same move the Environment panel has always made when a
     // building is clicked (see selectDecor).
     this.revealShapePanel()
+    this.flash(this.shapeTitleInput.closest("label"))
     if (event.shiftKey) {
       this.toggleUnitSelection(hit.sourceId)
     } else if (!this.selectedSourceIds.has(hit.sourceId)) {
