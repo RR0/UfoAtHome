@@ -3,6 +3,8 @@ import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
 import { SectionFolds } from "./SectionFolds.js"
 import { WitnessErrorView } from "./WitnessErrorView.js"
+import { CandidatesView } from "./CandidatesView.js"
+import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
 import { TimelineTracks } from "./TimelineTracks.js"
 import { SceneFieldOverlay } from "./SceneFieldOverlay.js"
 import type { TimelineTrack } from "./TimelineTracks.js"
@@ -454,6 +456,8 @@ export class SightingEditorElement extends HTMLElement {
   private overlayTimer?: ReturnType<typeof setTimeout>
   /** The error model of the witness: each value's basis and law, the observer's conditions and Moon gauge (see WitnessErrorView). */
   private readonly witnessErrorView: WitnessErrorView
+  /** The candidate explanations of the Summary section, and the variant on show (see CandidatesView). */
+  private candidatesView?: CandidatesView
   /** The advanced fields of each section, held back where they are (see SectionFolds). */
   private readonly sectionFolds: SectionFolds
   /** The steps written into the history since the recording was opened or saved: what the header counts as changes. */
@@ -1188,7 +1192,12 @@ export class SightingEditorElement extends HTMLElement {
         const account = { ...rest, ...(conditions ? { conditions } : {}) }
         sighting.account = Object.values(account).some(value => value !== undefined) ? account : undefined
       },
-      recordingJson: () => this.sightingData
+      recordingJson: () => this.sightingData,
+      lawsChanged: () => {
+        // An interpretation is contradicted where it is outside the laws, not merely different (see BodyConfrontation.lawsOf).
+        this.sceneElement.confrontationTolerance = BodyConfrontation.lawsOf(this.witnessErrorView.errorModel, this.ufoElement.sighting.account?.conditions)
+        this.candidatesView?.refresh()
+      }
     }, this.shadow.querySelector<HTMLElement>(".app")!)
     this.timelineTracks = new TimelineTracks(this.shadow.getElementById("timeline-tracks")!, t => this.goToMark(t), this.messages)
     this.tracksToggle = this.shadow.getElementById("toggle-tracks") as HTMLButtonElement
@@ -5882,6 +5891,8 @@ export class SightingEditorElement extends HTMLElement {
     // What the parts of the Sky group say they can do depends on the place, which another group may just have given; and the part open
     // is built the first time the group opens.
     if (open && tab.getAttribute("aria-controls") === "group-weather") this.syncSkyParts()
+    // The candidates read the account, the place and the time as they stand now, which another section may just have changed.
+    if (open && tab.getAttribute("aria-controls") === "group-observation") this.candidatesView?.refresh()
     this.placeDecorItem()
     this.syncCanvasMode()
     this.refreshTimelineMarks()
@@ -6248,6 +6259,7 @@ export class SightingEditorElement extends HTMLElement {
    * looked, how wide the shape looked (see WitnessErrorView); and the observer's own sections, after their perception.
    */
   private attachWitnessErrors(): void {
+    const editor = this
     const sighting = () => this.ufoElement.sighting
     const t = () => this.ufoElement.currentTime
     const start = this.shadow.querySelector<HTMLElement>('rr0-date-input[name="obs-time"]')!
@@ -6290,6 +6302,26 @@ export class SightingEditorElement extends HTMLElement {
     })
     const perception = this.shadow.getElementById("observerPerception")!.closest<HTMLElement>(".form-section")!
     this.witnessErrorView.placeObserverSections(perception)
+    const candidates = document.createElement("div")
+    candidates.className = "form-section candidates-section"
+    this.shadow.getElementById("group-observation")!.append(candidates)
+    const label = (element: Element | null) => element?.closest<HTMLElement>("label") ?? undefined
+    this.candidatesView = new CandidatesView({
+      get sighting() { return editor.ufoElement.sighting },
+      messages: () => this.messages.witnessError,
+      model: () => this.witnessErrorView.errorModel,
+      conditions: () => this.ufoElement.sighting.account?.conditions,
+      start: () => {
+        const event = this.ufoElement.sighting.event
+        const place = event.place?.[0]
+        if (!place || event.time?.year === undefined || event.time.hour === undefined) return undefined
+        const date = sightingTimeToDate(event.time, place.lng, event.utcOffsetHours)
+        return date ? { date, observer: { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 } } : undefined
+      },
+      limitAt: sunAltitudeDeg => visibleMagnitudeLimit(sunAltitudeDeg, this.instrumentGain()),
+      fieldLabels: () => ({ time: label(start), heading: label(this.headingInput), size: label(this.apparentWidthInput) }),
+      sceneCard: () => this.shadow.querySelector<HTMLElement>(".scene-card")!
+    }, candidates)
   }
 
   /** Shows the scene's toggles and timeline for 3.5 s, as a hover would. */

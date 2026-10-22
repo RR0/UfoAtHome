@@ -122,5 +122,46 @@ export const witnessErrorMessages_fr: WitnessErrorMessages = {
   "models": {
     "consolidated": "Lectures consolidées (UFO@home)",
     "keul": "Keul (tailles montrées sur place)"
+  },
+  "candidates": {
+    "title": "Explications candidates",
+    "verdicts": {
+      "consolidated": "Compatible avec des biais consolidés",
+      "contested": "Seulement en invoquant des biais contestés",
+      "incompatible": "Incompatible même aux bornes"
+    },
+    "cost": "coût {x} σ",
+    "seeVariant": "Voir cette variante",
+    "variantLabel": "Variante : {name}",
+    "backToAccount": "Revenir au récit",
+    "costNote": "Un coût n'est pas une probabilité : il dit quels biais il faut invoquer, et de combien.",
+    "scopeNote": "Candidats calculés : la Lune et les planètes assez brillantes pour ce ciel. Les interprétations posées dans l'enregistrement ne sont pas encore confrontées ici.",
+    "fields": {
+      "time": "Heure",
+      "heading": "Azimut",
+      "elevation": "Hauteur sur l'horizon",
+      "size": "Largeur apparente"
+    },
+    "biases": {
+      "clock": "décalage d'horloge {x} min",
+      "heading": "rotation du cap {x}°",
+      "elevation": "hauteur surestimée ×{x}",
+      "size": "taille surestimée ×{x}"
+    },
+    "reasons": {
+      "never-seen": "Jamais visible depuis ce lieu dans la marge de l'heure donnée.",
+      "direction": "Trop loin de la direction donnée, même aux bornes des lois.",
+      "size": "Taille trop différente, même aux bornes des lois."
+    },
+    "notAgainst": "Ce n'est pas un argument contre le récit.",
+    "noDirection": "Le récit ne situe pas le phénomène dans le ciel : il n'y a rien à confronter.",
+    "noSky": "Sans date, heure et lieu, aucun astre ne peut être placé.",
+    "bodies": {
+      "Moon": "Lune",
+      "Venus": "Vénus",
+      "Mars": "Mars",
+      "Jupiter": "Jupiter",
+      "Saturn": "Saturne"
+    }
   }
 }

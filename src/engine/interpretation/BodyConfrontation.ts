@@ -4,6 +4,8 @@ import type { AngularExtent } from "../shape/ApparentSize.js"
 import type { ShapeAim } from "../shape/Shape.js"
 import type { Timeline } from "../model/Timeline.js"
 import type { SaidText } from "../model/SaidText.js"
+import type { ErrorModel } from "../witness/WitnessError.js"
+import type { WitnessConditions } from "../model/Account.js"
 
 const DEG_TO_RAD = Math.PI / 180
 const RAD_TO_DEG = 180 / Math.PI
@@ -13,6 +15,16 @@ const RAD_TO_DEG = 180 / Math.PI
 export interface Projection {
   aim: ShapeAim
   angular: AngularExtent
+}
+
+/**
+ * What contradicts a stated value: by default the fixed tolerances below, the same for every observer and every value; with an error
+ * model, the law of each value (see docs/witness-error-model.md, step 4) — a direction beyond the heading's spread or outside the
+ * elevation's one-sided law, a size outside the band its law gives.
+ */
+export interface ConfrontationTolerance {
+  direction(stated: ShapeAim, predicted: ShapeAim, halfWidthDeg: number): boolean
+  size(stated: number, predicted: number): boolean
 }
 
 /** Which part of the account an interpretation fails to reproduce. */
@@ -63,7 +75,26 @@ export class BodyConfrontation {
   private static readonly RINGS = 12
   private static readonly SEGMENTS = 24
 
-  constructor(private readonly timeline: Timeline) {
+  constructor(private readonly timeline: Timeline, private readonly tolerance?: ConfrontationTolerance) {
+  }
+
+  /** The tolerances the laws of `model` give, for an observer in `conditions`: what is contradicted is what is outside its law. */
+  static lawsOf(model: ErrorModel, conditions?: WitnessConditions): ConfrontationTolerance {
+    return {
+      direction(stated, predicted, halfWidthDeg) {
+        const heading = model.law({ kind: "heading", value: stated.azimuthDeg }, conditions)
+        const turn = Math.abs(((((predicted.azimuthDeg - stated.azimuthDeg) % 360) + 540) % 360) - 180)
+        const elevation = model.law({ kind: "elevation", value: stated.altitudeDeg }, conditions)
+        const slack = Math.max(BodyConfrontation.DIRECTION_TOLERANCE_DEG, halfWidthDeg)
+        return turn > (heading.high ?? stated.azimuthDeg) - stated.azimuthDeg + slack
+          || predicted.altitudeDeg > (elevation.high ?? stated.altitudeDeg) + slack
+          || predicted.altitudeDeg < (elevation.low ?? stated.altitudeDeg) - slack
+      },
+      size(stated, predicted) {
+        const law = model.law({ kind: "angularSize", value: stated }, conditions)
+        return predicted < (law.low ?? stated) / BodyConfrontation.SIZE_TOLERANCE || predicted > (law.high ?? stated) * BodyConfrontation.SIZE_TOLERANCE
+      }
+    }
   }
 
   /**
@@ -84,7 +115,7 @@ export class BodyConfrontation {
         // to measure a body against.
         if (!shape || shape.transparency >= 1) continue
         readings.push({
-          ...BodyConfrontation.compare(sourceId, body.id, { aim: shape.aim, angular: shape.angular }, predicted),
+          ...BodyConfrontation.compare(sourceId, body.id, { aim: shape.aim, angular: shape.angular }, predicted, this.tolerance),
           title: shape.title
         })
       }
@@ -92,17 +123,19 @@ export class BodyConfrontation {
     return readings
   }
 
-  static compare(sourceId: string, bodyId: string, stated: ConfrontationReading["stated"], predicted: Projection): ConfrontationReading {
+  static compare(sourceId: string, bodyId: string, stated: ConfrontationReading["stated"], predicted: Projection, tolerance?: ConfrontationTolerance): ConfrontationReading {
     const disagreements: Disagreement[] = []
     const separationDeg = stated.aim ? BodyConfrontation.separationDeg(stated.aim, predicted.aim) : undefined
     if (separationDeg !== undefined) {
       const halfWidth = Math.max(stated.angular?.widthDeg ?? 0, predicted.angular.widthDeg) / 2
-      if (separationDeg > Math.max(BodyConfrontation.DIRECTION_TOLERANCE_DEG, halfWidth)) disagreements.push("direction")
+      const off = tolerance ? tolerance.direction(stated.aim!, predicted.aim, halfWidth) : separationDeg > Math.max(BodyConfrontation.DIRECTION_TOLERANCE_DEG, halfWidth)
+      if (off) disagreements.push("direction")
     }
     const widthRatio = stated.angular && stated.angular.widthDeg > 0 ? predicted.angular.widthDeg / stated.angular.widthDeg : undefined
     const heightRatio = stated.angular && stated.angular.heightDeg > 0 ? predicted.angular.heightDeg / stated.angular.heightDeg : undefined
-    if (widthRatio !== undefined && !BodyConfrontation.withinSize(widthRatio)) disagreements.push("width")
-    if (heightRatio !== undefined && !BodyConfrontation.withinSize(heightRatio)) disagreements.push("height")
+    const sizeOff = (ratio: number, statedDeg: number) => tolerance ? tolerance.size(statedDeg, statedDeg * ratio) : !BodyConfrontation.withinSize(ratio)
+    if (widthRatio !== undefined && sizeOff(widthRatio, stated.angular!.widthDeg)) disagreements.push("width")
+    if (heightRatio !== undefined && sizeOff(heightRatio, stated.angular!.heightDeg)) disagreements.push("height")
     return { sourceId, bodyId, stated, predicted, separationDeg, widthRatio, heightRatio, disagreements }
   }
 

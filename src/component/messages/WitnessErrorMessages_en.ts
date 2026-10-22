@@ -122,5 +122,46 @@ export const witnessErrorMessages_en: WitnessErrorMessages = {
   "models": {
     "consolidated": "Consolidated readings (UFO@home)",
     "keul": "Keul (sizes shown on the spot)"
+  },
+  "candidates": {
+    "title": "Candidate explanations",
+    "verdicts": {
+      "consolidated": "Compatible with consolidated biases",
+      "contested": "Only by invoking contested biases",
+      "incompatible": "Incompatible even at the bounds"
+    },
+    "cost": "cost {x} σ",
+    "seeVariant": "See this variant",
+    "variantLabel": "Variant: {name}",
+    "backToAccount": "Back to the account",
+    "costNote": "A cost is not a probability: it says which biases have to be invoked, and how far.",
+    "scopeNote": "Candidates computed: the Moon and the planets bright enough for this sky. The interpretations placed in the recording are not confronted here yet.",
+    "fields": {
+      "time": "Time",
+      "heading": "Azimuth",
+      "elevation": "Elevation",
+      "size": "Apparent width"
+    },
+    "biases": {
+      "clock": "clock offset {x} min",
+      "heading": "heading rotation {x}°",
+      "elevation": "elevation overestimated ×{x}",
+      "size": "size overestimated ×{x}"
+    },
+    "reasons": {
+      "never-seen": "Never visible from this place within the margin of the time given.",
+      "direction": "Too far from the direction given, even at the bounds of the laws.",
+      "size": "Size too different, even at the bounds of the laws."
+    },
+    "notAgainst": "This is no argument against the account.",
+    "noDirection": "The account does not place the phenomenon in the sky: there is nothing to confront.",
+    "noSky": "Without a date, a time and a place, no celestial body can be placed.",
+    "bodies": {
+      "Moon": "Moon",
+      "Venus": "Venus",
+      "Mars": "Mars",
+      "Jupiter": "Jupiter",
+      "Saturn": "Saturn"
+    }
   }
 }

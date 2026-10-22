@@ -53,3 +53,19 @@ describe("WitnessError", () => {
     expect(WitnessError.rounded(0.04567)).toBe(0.046)
   })
 })
+
+describe("BodyConfrontation with an error model", () => {
+  it("contradicts a direction only outside the laws, not merely beside the account", async () => {
+    const { BodyConfrontation } = await import("../../../src/engine/interpretation/BodyConfrontation.js")
+    const laws = BodyConfrontation.lawsOf(consolidated)
+    const stated = { aim: { azimuthDeg: 200, altitudeDeg: 20 }, angular: { widthDeg: 1, heightDeg: 1 } }
+    const at = (azimuthDeg: number, altitudeDeg: number, widthDeg = 0.3) => ({ aim: { azimuthDeg, altitudeDeg }, angular: { widthDeg, heightDeg: widthDeg } })
+    // 20° off and lower: wrong to the fixed tolerances, within the laws.
+    expect(BodyConfrontation.compare("s", "b", stated, at(220, 12)).disagreements).toContain("direction")
+    expect(BodyConfrontation.compare("s", "b", stated, at(220, 12), laws).disagreements).not.toContain("direction")
+    // Higher than said: elevation is overestimated, never under, so this is contradicted.
+    expect(BodyConfrontation.compare("s", "b", stated, at(200, 35), laws).disagreements).toContain("direction")
+    // A third of the stated size is what an arm's-length overestimate makes of it.
+    expect(BodyConfrontation.compare("s", "b", stated, at(200, 15, 0.3), laws).disagreements).not.toContain("width")
+  })
+})

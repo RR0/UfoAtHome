@@ -51,4 +51,22 @@ export interface WitnessErrorMessages {
   words: Record<WitnessWord, string>
   exposures: Record<WitnessExposure, string>
   models: Record<string, string>
+  /** The candidate explanations of the Summary section and the variant on show (see CandidatesView). */
+  candidates: {
+    title: string
+    verdicts: Record<"consolidated" | "contested" | "incompatible", string>
+    cost: string
+    seeVariant: string
+    variantLabel: string
+    backToAccount: string
+    costNote: string
+    scopeNote: string
+    fields: Record<"time" | "heading" | "elevation" | "size", string>
+    biases: Record<"clock" | "heading" | "elevation" | "size", string>
+    reasons: Record<"never-seen" | "direction" | "size", string>
+    notAgainst: string
+    noDirection: string
+    noSky: string
+    bodies: Record<string, string>
+  }
 }

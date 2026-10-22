@@ -17,6 +17,8 @@ export interface WitnessErrorHost {
   conditionsChanged(conditions: WitnessConditions | undefined): void
   /** The recording as it would be written, for the value a basis is said about. */
   recordingJson(): unknown
+  /** The model or the observer's conditions changed: whatever reads the laws reads them again (the confrontation, the candidates). */
+  lawsChanged(): void
 }
 
 /** A field whose value an observer gave, and whose error the view says. */
@@ -125,6 +127,12 @@ export class WitnessErrorView {
   refresh(): void {
     this.refreshFields()
     this.renderObserver()
+    this.host.lawsChanged()
+  }
+
+  /** The error model picked (see WitnessError.MODELS). */
+  get errorModel(): ErrorModel {
+    return this.model
   }
 
   /** Says again, on every field, what its basis is and the law of its error: what follows the playhead. */

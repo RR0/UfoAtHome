@@ -113,7 +113,7 @@ import { FireballArchive } from "../engine/astronomy/FireballArchive.js"
 import type { FireballRecord } from "../engine/astronomy/FireballArchive.js"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
-import type { ConfrontationReading } from "../engine/interpretation/BodyConfrontation.js"
+import type { ConfrontationReading, ConfrontationTolerance } from "../engine/interpretation/BodyConfrontation.js"
 import type { BodyAppearance, BodyAttitude, BodyJson, BodySize, InterpretationJson } from "../engine/interpretation/Interpretation.js"
 
 registerUfo()
@@ -378,6 +378,11 @@ export class SceneElement extends HTMLElement {
   private interpretationShown?: InterpretationJson
   /** What its bodies say against the account at the instant on show — see `confrontation`. */
   private confrontationReadings: ConfrontationReading[] = []
+  /**
+   * What contradicts a stated value when an interpretation is set against the account: the laws of an error model, when whoever holds
+   * this scene has one (the editor, see WitnessErrorView); the fixed tolerances of BodyConfrontation otherwise.
+   */
+  confrontationTolerance?: ConfrontationTolerance
   private confrontationSignature = ""
   /** Whether the account is shown beside the interpretation, and measured against it — see
    * `compareAccount`. */
@@ -2797,7 +2802,7 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setBodies(states, t / 1000, interpretation?.bodies.map(body => body.id) ?? [], interpretation?.smoke ?? [], wind)
     const eye = interpretation && this.comparing ? eyeAt(t) : undefined
     if (eye) {
-      readings = new BodyConfrontation(sighting.timeline).at(t, states, eye,
+      readings = new BodyConfrontation(sighting.timeline, this.confrontationTolerance).at(t, states, eye,
         state => state.outlineNode ? this.sceneRenderer.bodyOutline?.(state.id, state.outlineNode) : undefined)
     }
     this.confrontationReadings = readings

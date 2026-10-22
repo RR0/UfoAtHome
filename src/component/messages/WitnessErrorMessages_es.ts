@@ -122,5 +122,46 @@ export const witnessErrorMessages_es: WitnessErrorMessages = {
   "models": {
     "consolidated": "Lecturas consolidadas (UFO@home)",
     "keul": "Keul (tamaños mostrados en el lugar)"
+  },
+  "candidates": {
+    "title": "Explicaciones candidatas",
+    "verdicts": {
+      "consolidated": "Compatible con sesgos consolidados",
+      "contested": "Solo invocando sesgos discutidos",
+      "incompatible": "Incompatible incluso en los límites"
+    },
+    "cost": "coste {x} σ",
+    "seeVariant": "Ver esta variante",
+    "variantLabel": "Variante: {name}",
+    "backToAccount": "Volver al relato",
+    "costNote": "Un coste no es una probabilidad: dice qué sesgos hay que invocar, y cuánto.",
+    "scopeNote": "Candidatos calculados: la Luna y los planetas bastante brillantes para este cielo. Las interpretaciones de la grabación aún no se confrontan aquí.",
+    "fields": {
+      "time": "Hora",
+      "heading": "Acimut",
+      "elevation": "Altura sobre el horizonte",
+      "size": "Anchura aparente"
+    },
+    "biases": {
+      "clock": "desfase del reloj {x} min",
+      "heading": "rotación del rumbo {x}°",
+      "elevation": "altura sobreestimada ×{x}",
+      "size": "tamaño sobreestimado ×{x}"
+    },
+    "reasons": {
+      "never-seen": "Nunca visible desde este lugar en el margen de la hora dada.",
+      "direction": "Demasiado lejos de la dirección dada, incluso en los límites de las leyes.",
+      "size": "Tamaño demasiado distinto, incluso en los límites de las leyes."
+    },
+    "notAgainst": "No es un argumento contra el relato.",
+    "noDirection": "El relato no sitúa el fenómeno en el cielo: no hay nada que confrontar.",
+    "noSky": "Sin fecha, hora y lugar, ningún astro puede situarse.",
+    "bodies": {
+      "Moon": "Luna",
+      "Venus": "Venus",
+      "Mars": "Marte",
+      "Jupiter": "Júpiter",
+      "Saturn": "Saturno"
+    }
   }
 }
