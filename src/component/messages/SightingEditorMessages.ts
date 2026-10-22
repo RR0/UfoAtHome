@@ -316,6 +316,10 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   collapseTracks: string
   /** The legend of a panel holding fields the scene shows as they are edited (marked with a small circle). */
   sceneLinkedLegend: string
+  /** What the scene says over itself while a field it shows is edited (see SceneFieldOverlay): the tilt's horizon, the field of view, the wind. */
+  overlayHorizon: string
+  overlayFov: string
+  overlayWind: string
   /** The title of each section of a panel, in capitals (see the form-section blocks of sightingEditorTemplate). */
   sectionIdentity: string
   sectionProfile: string

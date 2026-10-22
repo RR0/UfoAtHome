@@ -6,6 +6,7 @@ import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
 import { SectionFolds } from "./SectionFolds.js"
 import { TimelineTracks } from "./TimelineTracks.js"
+import { SceneFieldOverlay } from "./SceneFieldOverlay.js"
 export const html = `
 <!-- From top to bottom, as the design handoff lays it out: what this recording is and whether it is saved, the scene, the
      sections as a row of chips (only one open at a time, see SightingEditorElement.toggleGroup), and the open section. The
@@ -749,7 +750,7 @@ export const html = `
 </div>
 `
 
-export const css = `${InputFont.CSS}${ElementList.CSS}${Icons.CSS}${WindowClose.CSS}${SectionFolds.CSS}${TimelineTracks.CSS}
+export const css = `${InputFont.CSS}${ElementList.CSS}${Icons.CSS}${WindowClose.CSS}${SectionFolds.CSS}${TimelineTracks.CSS}${SceneFieldOverlay.CSS}
 :host {
   color-scheme: light dark;
   display: block;

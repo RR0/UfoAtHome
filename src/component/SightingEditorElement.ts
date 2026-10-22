@@ -3,6 +3,7 @@ import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
 import { SectionFolds } from "./SectionFolds.js"
 import { TimelineTracks } from "./TimelineTracks.js"
+import { SceneFieldOverlay } from "./SceneFieldOverlay.js"
 import type { TimelineTrack } from "./TimelineTracks.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
@@ -443,6 +444,11 @@ export class SightingEditorElement extends HTMLElement {
   /** The recording's tracks under the scene, when laid out (see TimelineTracks). */
   private readonly timelineTracks: TimelineTracks
   private readonly tracksToggle: HTMLButtonElement
+  /** What the field being edited sets, drawn over the scene (see SceneFieldOverlay), and which field that is. */
+  private readonly sceneFieldOverlay: SceneFieldOverlay
+  private activeSceneField?: string
+  /** Whether the pictures were put on to show the opacity being edited, and are to go off with it. */
+  private referencesShownForField = false
   /** When the scene's toggles and timeline, shown by a touch, go again. */
   private overlayTimer?: ReturnType<typeof setTimeout>
   /** The advanced fields of each section, held back where they are (see SectionFolds). */
@@ -1170,6 +1176,17 @@ export class SightingEditorElement extends HTMLElement {
     this.shadow.querySelector(".scene-card")!.addEventListener("pointerdown", event => {
       if ((event as PointerEvent).pointerType === "touch") this.showOverlays()
     })
+    // The field being edited shows what it sets over the scene, for as long as it is the one edited (§3.3) — over the hover too.
+    this.sceneFieldOverlay = new SceneFieldOverlay(this.shadow.querySelector(".scene-card")!, () => this.ufoElement.canvasElement)
+    this.shadow.addEventListener("focusin", event => {
+      const id = (event.target as HTMLElement).id
+      if (SightingEditorElement.SCENE_LINKED.includes(id)) this.setActiveSceneField(id)
+    })
+    this.shadow.addEventListener("focusout", event => {
+      const next = (event as FocusEvent).relatedTarget as HTMLElement | null
+      if (!next || !SightingEditorElement.SCENE_LINKED.includes(next.id)) this.setActiveSceneField(undefined)
+    })
+    this.shadow.addEventListener("input", () => this.refreshSceneField())
     // The fields the scene shows as they are edited (§3.3): marked, and their panels say so.
     for (const id of SightingEditorElement.SCENE_LINKED) this.shadow.getElementById(id)?.closest("label, .field")?.classList.add("scene-linked")
     for (const panel of this.shadow.querySelectorAll<HTMLElement>(".group-panel")) {
@@ -6142,6 +6159,65 @@ export class SightingEditorElement extends HTMLElement {
   private static readonly SCENE_LINKED = ["heading", "pitch", "focalLength", "apparentWidth", "realWidth", "objectDistance", "color", "haloScale",
     "cloudCover", "windDirection", "windSpeed", "referenceOpacity"]
 
+  /** Makes `id` the field whose setting the scene shows over itself, or none. */
+  private setActiveSceneField(id: string | undefined): void {
+    if (id === this.activeSceneField) return
+    this.activeSceneField = id
+    // A picture's opacity is seen on the picture: it is put on while its opacity is edited, and off again after if it was off.
+    if (id === "referenceOpacity" && !this.ufoElement.referencesShown) {
+      this.ufoElement.toggleReferences()
+      this.referencesShownForField = true
+    } else if (id !== "referenceOpacity" && this.referencesShownForField) {
+      if (this.ufoElement.referencesShown) this.ufoElement.toggleReferences()
+      this.referencesShownForField = false
+    }
+    this.refreshSceneField()
+  }
+
+  /** Draws over the scene what the active field sets, as it stands at the playhead. */
+  private refreshSceneField(): void {
+    const overlay = this.sceneFieldOverlay
+    if (!overlay) return
+    const field = this.activeSceneField
+    const sighting = this.ufoElement.sighting
+    const t = this.ufoElement.currentTime
+    const canvas = this.ufoElement.canvasElement
+    const m = this.messages
+    const number = (input: HTMLInputElement) => this.numberOrUndefined(input.value)
+    const shown = (value: number | undefined, digits = 1) => value === undefined ? "?" : value.toLocaleString(this.language, { maximumFractionDigits: digits })
+    if (field === "pitch") {
+      const pitch = number(this.pitchInput) ?? 0
+      const projection = ImageProjection.of(sighting.instrument, canvas.height, SightingShapes.fovOf(sighting, t))
+      // Looking up puts the horizon below the middle of the picture, by as much as the projection says that angle is.
+      const offset = Math.sign(pitch) * projection.angleDegToRadiusPx(Math.min(89, Math.abs(pitch)))
+      const y = Math.min(1, Math.max(0, (canvas.height / 2 + offset) / canvas.height))
+      overlay.horizon(y, m.overlayHorizon.replaceAll("{deg}", shown(pitch)))
+    } else if (field === "focalLength") {
+      const fov = SightingShapes.fovOf(sighting, t)
+      const projection = ImageProjection.of(sighting.instrument, canvas.height, fov)
+      const width = 2 * projection.halfWidthAngleDeg(canvas.width / canvas.height)
+      overlay.frame(m.overlayFov.replaceAll("{v}", shown(fov)).replaceAll("{h}", shown(width)))
+    } else if (field === "apparentWidth" || field === "realWidth" || field === "objectDistance") {
+      const shape = sighting.timeline.getInterpolatedShapeAt(t, this.currentSourceId)
+      if (!shape) {
+        overlay.hide()
+        return
+      }
+      const b = shape.bounds
+      // What the three fields say, those that say something: an unknown is left out rather than shown as a question mark.
+      const parts: Array<[number | undefined, string, number]> = [[number(this.apparentWidthInput), "°", 1], [number(this.realWidthInput), " m", 1], [number(this.objectDistanceInput), " m", 0]]
+      const label = parts.filter(([value]) => value !== undefined).map(([value, unit, digits]) => `${shown(value, digits)}${unit}`).join(" · ")
+      overlay.measure((b.x + b.width / 2) / canvas.width, (b.y + b.height / 2) / canvas.height, (Math.max(b.width, b.height) * 1.3) / canvas.width, label)
+    } else if (field === "windDirection" || field === "windSpeed") {
+      const toward = number(this.windDirectionInput) ?? 0
+      // Turned from where the observer faces, so "toward the right of the picture" reads as an arrow to the right.
+      const bearing = toward - (number(this.headingInput) ?? 0)
+      overlay.wind(bearing, m.overlayWind.replaceAll("{point}", this.naming.point(toward)).replaceAll("{speed}", shown(number(this.windSpeedInput))))
+    } else {
+      overlay.hide()
+    }
+  }
+
   /** Shows the scene's toggles and timeline for 3.5 s, as a hover would. */
   private showOverlays(): void {
     const card = this.shadow.querySelector<HTMLElement>(".scene-card")!
@@ -6220,6 +6296,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.timelineMarks.show(marks, this.ufoElement.seekableDuration)
     this.refreshTracks()
+    if (this.activeSceneField) this.refreshSceneField()
   }
 
   /**
