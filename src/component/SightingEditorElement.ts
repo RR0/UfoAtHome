@@ -6344,6 +6344,7 @@ export class SightingEditorElement extends HTMLElement {
           ...this.readings
         ]
       },
+      starName: name => this.naming.star({ name }),
       projectionAt: (body, t) => this.sceneElement.bodyProjectionAt(body, t),
       variants: () => this.ufoElement.sighting.variants,
       keep: variant => this.editVariants(variants => [...variants, variant]),

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { CandidatesView } from "../../src/component/CandidatesView.js"
 import { witnessErrorMessages_en } from "../../src/component/messages/WitnessErrorMessages_en.js"
 import { WitnessError } from "../../src/engine/witness/WitnessError.js"
-import { computeBodyPosition } from "../../src/engine/astronomy/CelestialPositions.js"
+import { computeBodyPosition, equatorialToHorizontal } from "../../src/engine/astronomy/CelestialPositions.js"
 import { Timeline } from "../../src/engine/model/Timeline.js"
 import { Provenance } from "../../src/engine/persistence/Provenance.js"
 import { createOval } from "../../src/engine/shape/Shape.js"
@@ -44,6 +44,7 @@ function make(aim: { azimuthDeg: number, altitudeDeg: number }, extra: Record<st
     burning: () => ({ reentries: [], fireballs: [] }),
     traffic: () => undefined,
     interpretations: () => [],
+    starName: (name: string) => name,
     projectionAt: () => undefined,
     variants: () => kept,
     keep: (variant: unknown) => kept.push(variant as never),
@@ -57,8 +58,8 @@ describe("CandidatesView", () => {
   it("finds Venus compatible with consolidated biases when the account puts the light a little higher and turned, and shows that variant", () => {
     const { view, card, section, heading } = make({ azimuthDeg: venus.azimuthDeg - 20, altitudeDeg: venus.altitudeDeg * 1.5 })
     view.refresh()
-    const first = section.querySelector(".candidate")!
-    expect(first.querySelector(".candidate-head")!.textContent).toContain("Venus")
+    // Aldebaran stood beside Venus that evening, and comes as close: Venus is found compatible, not necessarily first.
+    const first = [...section.querySelectorAll(".candidate")].find(row => row.querySelector(".candidate-head")!.textContent!.includes("Venus"))!
     expect(first.querySelector(".verdict")!.getAttribute("data-verdict")).toBe("consolidated")
     first.querySelector<HTMLButtonElement>(".candidate-head")!.click()
     const see = [...first.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "See this variant")!
@@ -75,6 +76,23 @@ describe("CandidatesView", () => {
     ;(view as unknown as { statement: () => undefined }).statement = () => undefined
     view.refresh()
     expect(section.textContent).toContain("does not place the phenomenon in the sky")
+  })
+})
+
+describe("CandidatesView with the stars", () => {
+  it("tries the bright stars nearest where the account puts the light, under their name, as Poher's stars", async () => {
+    // Sirius, low in the south-west that evening: the account puts the light a few degrees from it.
+    const sirius = equatorialToHorizontal(6.7525, -16.7161, date, observer)
+    const { view, section } = make({ azimuthDeg: sirius.azimuthDeg + 4, altitudeDeg: sirius.altitudeDeg + 2 }, {
+      starName: (name: string) => name === "Sirius" ? "Sirius (fr)" : name,
+      poher: () => Promise.resolve({ matrix: new PoherMatrix([{ question: "Hour.Night", knownPhenomenaProbabilities: { Stars: 1, Planets: 1 } }]), labels: {} })
+    })
+    view.refresh()
+    await new Promise(resolve => setTimeout(resolve, 0))
+    const first = section.querySelector(".candidate")!
+    expect(first.querySelector(".candidate-head")!.textContent).toContain("Star Sirius (fr)")
+    expect(first.querySelector(".verdict")!.getAttribute("data-verdict")).toBe("consolidated")
+    expect(first.querySelector(".poher-tag")!.textContent).toBe("Poher: possible, score 1")
   })
 })
 

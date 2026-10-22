@@ -172,6 +172,7 @@ export const witnessErrorMessages_it: WitnessErrorMessages = {
     "keptRecomputed": "ricalcolata: {verdict}, costo {x} σ",
     "keptModel": "modello: {model}",
     "reentry": "Rientro {name}",
+    "star": "Stella {name}",
     "fireball": "Bolide {name}",
     "poherLoading": "Caricamento della matrice di Poher…",
     "poherFailed": "Non è stato possibile leggere la matrice di Poher: sono proposti solo gli astri.",

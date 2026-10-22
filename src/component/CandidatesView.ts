@@ -5,7 +5,7 @@ import type { ErrorModel, LeadStatus } from "../engine/witness/WitnessError.js"
 import { WitnessError } from "../engine/witness/WitnessError.js"
 import { CandidateSearch } from "../engine/witness/CandidateSearch.js"
 import type { AccountStatement, CandidateTrack, MovedValue, Variant } from "../engine/witness/CandidateSearch.js"
-import { computeBodyMagnitude, computeBodyPosition } from "../engine/astronomy/CelestialPositions.js"
+import { computeBodyMagnitude, computeBodyPosition, equatorialToHorizontal } from "../engine/astronomy/CelestialPositions.js"
 import type { CelestialBody } from "../engine/astronomy/CelestialPositions.js"
 import { PoherAnswers } from "../engine/witness/PoherMatrix.js"
 import type { PoherFacts, PoherMatrix, PoherRanking } from "../engine/witness/PoherMatrix.js"
@@ -14,6 +14,7 @@ import { ReentrySighting } from "../engine/interpretation/Reentry.js"
 import type { ReentryJson } from "../engine/interpretation/Reentry.js"
 import type { AircraftDescription, AircraftTrack } from "../engine/traffic/AircraftProvider.js"
 import type { BodyJson, InterpretationJson } from "../engine/interpretation/Interpretation.js"
+import { BRIGHT_STARS } from "../engine/astronomy/brightStarCatalog.js"
 
 /** What the view needs of the editor that holds it. */
 export interface CandidatesHost {
@@ -41,6 +42,8 @@ export interface CandidatesHost {
   traffic(): { tracks: AircraftTrack[], startMs: number, describe(track: AircraftTrack): AircraftDescription | undefined } | undefined
   /** The interpretations of the account: its own, and the readings of it a case holds, each with what it is called. */
   interpretations(): { id: string, label: string, interpretation: InterpretationJson }[]
+  /** What a bright star is called in the reader's language (see SceneNaming.star). */
+  starName(name: string): string
   /** How a body looks from the observer's eye at `t` ms of the recording (see SceneElement.bodyProjectionAt). */
   projectionAt(body: BodyJson, t: number): { aim: { azimuthDeg: number, altitudeDeg: number }, angular: { widthDeg: number } } | undefined
   /** The variants the recording keeps (see InterpretationJson.variant), and keeping or removing one: a change of the author's. */
@@ -50,7 +53,7 @@ export interface CandidatesHost {
 }
 
 /** What a known phenomenon of Poher's matrix is followed by, when its track can be computed. */
-type Tracked = "Moon" | "Planets" | "OrbitingSatellites" | "AtmosphericSatellitesReentry" | "Meteorits" | "HighAltitudePlanes" | "LowAltitudePlanes" | "Helicopters"
+type Tracked = "Moon" | "Planets" | "Stars" | "OrbitingSatellites" | "AtmosphericSatellitesReentry" | "Meteorits" | "HighAltitudePlanes" | "LowAltitudePlanes" | "Helicopters"
 
 /**
  * The candidate explanations of the Summary section (see the design handoff, §6, and docs/witness-error-model.md, "The search"): one
@@ -105,6 +108,11 @@ export class CandidatesView {
 `
 
   private static readonly PLANETS: readonly CelestialBody[] = ["Venus", "Mars", "Jupiter", "Saturn"]
+  /** How many stars are tried: those that shone nearest where the account puts its phenomenon, since a star is only ever mistaken there. */
+  private static readonly STARS = 6
+  /** The faintest star tried: the first-magnitude ones, which are what gets taken for something else; a fainter one nearer would win
+   * on direction alone, the search knowing nothing of how bright the light was. */
+  private static readonly STAR_MAG = 1.5
   /** How many satellite passes are tried: the brightest, since a faint one is no candidate for a light somebody noticed. */
   private static readonly SATELLITES = 4
   /** How many aircraft are tried: the nearest to the observer when the sighting began, since a far one is a dot nobody describes. */
@@ -144,7 +152,7 @@ export class CandidatesView {
   }
 
   /** The candidates whose track can be computed, each as the phenomenon of the matrix it stands for. */
-  private tracks(): CandidateTrack[] {
+  private tracks(statement: AccountStatement): CandidateTrack[] {
     const start = this.host.start()
     if (!start) return []
     const names = this.host.messages().candidates.bodies
@@ -168,6 +176,7 @@ export class CandidatesView {
       tracks.push(body(planet))
       this.phenomenonOf.set(planet, "Planets")
     }
+    tracks.push(...this.starTracks(start, statement))
     // The brightest passes during the observation, followed as they cross: lit, and above the horizon.
     const satellites = this.host.satellites()
     if (satellites) {
@@ -193,6 +202,43 @@ export class CandidatesView {
     }
     tracks.push(...this.burningTracks(start), ...this.aircraftTracks(start), ...this.interpretationTracks())
     return tracks
+  }
+
+  /**
+   * The bright stars seen when the sighting began nearest where the account puts its phenomenon: a star stands still against the horizon
+   * but for the sky's turning, so only those the heading and elevation laws could reach are worth a try. Without a stated direction, the
+   * brightest seen.
+   */
+  private starTracks(start: { date: Date, observer: { lat: number, lng: number, elevationM: number } }, statement: AccountStatement): CandidateTrack[] {
+    const m = this.host.messages().candidates
+    const dateAt = (offsetMinutes: number) => new Date(start.date.getTime() + this.statementT + offsetMinutes * 60_000)
+    const sunAt = (date: Date) => computeBodyPosition("Sun", date, start.observer).altitudeDeg
+    const limit = this.host.limitAt(sunAt(dateAt(0)))
+    const aim = statement.aim
+    const rad = Math.PI / 180
+    const away = (position: { azimuthDeg: number, altitudeDeg: number }) => !aim ? 0 : Math.acos(Math.min(1,
+      Math.sin(aim.altitudeDeg * rad) * Math.sin(position.altitudeDeg * rad)
+      + Math.cos(aim.altitudeDeg * rad) * Math.cos(position.altitudeDeg * rad) * Math.cos((position.azimuthDeg - aim.azimuthDeg) * rad))) / rad
+    const seen = BRIGHT_STARS
+      .filter(star => star.mag <= Math.min(limit, CandidatesView.STAR_MAG))
+      .map(star => ({ star, position: equatorialToHorizontal(star.raHours, star.decDeg, dateAt(0), start.observer) }))
+      .filter(({ position }) => position.altitudeDeg > 0)
+      .sort((a, b) => away(a.position) - away(b.position) || a.star.mag - b.star.mag)
+      .slice(0, CandidatesView.STARS)
+    return seen.map(({ star }) => {
+      const id = `star-${star.name}`
+      this.phenomenonOf.set(id, "Stars")
+      return {
+        id,
+        label: m.star.replace("{name}", this.host.starName(star.name)),
+        at: (offsetMinutes: number) => {
+          const date = dateAt(offsetMinutes)
+          const position = equatorialToHorizontal(star.raHours, star.decDeg, date, start.observer)
+          if (position.altitudeDeg < 0 || star.mag > this.host.limitAt(sunAt(date))) return undefined
+          return { aim: { azimuthDeg: position.azimuthDeg, altitudeDeg: position.altitudeDeg }, widthDeg: 0.01 }
+        }
+      }
+    })
   }
 
   /** The interpretations of the account, each followed by the body that claims to be its main phenomenon (else its first body). */
@@ -329,7 +375,7 @@ export class CandidatesView {
     const m = this.host.messages().candidates
     const statement = this.statement()
     const start = this.host.start()
-    this.variants = statement && start ? new CandidateSearch(this.host.model(), this.host.conditions()).search(statement, this.tracks()) : []
+    this.variants = statement && start ? new CandidateSearch(this.host.model(), this.host.conditions()).search(statement, this.tracks(statement)) : []
     const title = Object.assign(document.createElement("h3"), { className: "section-title", textContent: m.title })
     const nodes: Node[] = [title]
     this.loadPoher()

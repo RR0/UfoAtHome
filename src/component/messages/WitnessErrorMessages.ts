@@ -81,6 +81,8 @@ export interface WitnessErrorMessages {
     keptModel: string
     reentry: string
     fireball: string
+    /** A bright star as a candidate ({name}: its name in the reader's language). */
+    star: string
     poherLoading: string
     poherFailed: string
     poherTitle: string
