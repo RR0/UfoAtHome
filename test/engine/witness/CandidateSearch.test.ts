@@ -92,6 +92,35 @@ describe("CandidateSearch structural readings", () => {
   })
 })
 
+describe("CandidateSearch sweep and duration", () => {
+  const search = new CandidateSearch(WitnessError.byId("consolidated"))
+  // A candidate crossing the sky at 1° a second, eastward from where the account starts.
+  const satellite: CandidateTrack = { id: "satellite", label: "satellite", at: (offsetMinutes: number) => ({ aim: { azimuthDeg: 205 + offsetMinutes * 60, altitudeDeg: 12 }, widthDeg: 0.01 }) }
+  const account = (sweepDeg: number, spanS: number) => ({ aim: { azimuthDeg: 205, altitudeDeg: 12 }, motion: { sweepDeg, spanMinutes: spanS / 60 } })
+
+  it("asks nothing when the candidate sweeps what the account says in the time it says", () => {
+    const variant = search.fit(account(10, 10), satellite)
+    expect(variant.moved.filter(moved => moved.field === "duration" || moved.field === "sweep")).toEqual([])
+    expect(variant.verdict).toBe("consolidated")
+  })
+
+  it("stretches the duration within its law when the candidate is slower than the account says", () => {
+    const variant = search.fit(account(20, 10), satellite)
+    const duration = variant.moved.find(moved => moved.field === "duration")!
+    expect(duration.status).toBe("consolidated")
+    expect(duration.variant).toBeGreaterThan(15)
+    expect(variant.parameters.durationFactor).toBeGreaterThan(1.5)
+    expect(variant.verdict).not.toBe("incompatible")
+  })
+
+  it("makes a candidate far too slow for the account incompatible, by how it moved", () => {
+    // 140° in 5 s: no duration the law allows lets a satellite sweep that.
+    const variant = search.fit(account(140, 5), satellite)
+    expect(variant).toMatchObject({ verdict: "incompatible", reason: "motion" })
+    expect(variant.moved.find(moved => moved.field === "sweep")!.status).toBe("argued")
+  })
+})
+
 describe("Variants kept in a recording", () => {
   it("are read and written back as interpretations carrying what makes them variants", async () => {
     const { fromSightingJson, toSightingJson } = await import("../../../src/engine/persistence/sightingJson.js")

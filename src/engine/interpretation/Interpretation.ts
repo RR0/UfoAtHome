@@ -46,9 +46,9 @@ export interface VariantJson {
   /** The known phenomenon of Poher's matrix it is an instance of, when it is one. */
   phenomenon?: string
   /** The witness parameters applied: a clock offset in minutes, a rotation of the heading in degrees, factors on elevation and size. */
-  parameters: { clockMinutes: number, headingDeg: number, elevationFactor: number, sizeFactor: number }
+  parameters: { clockMinutes: number, headingDeg: number, elevationFactor: number, sizeFactor: number, durationFactor?: number }
   /** The values it moves: what the account says, what the variant reads, the bias and its status. */
-  moved: { field: "time" | "heading" | "elevation" | "size", stated: number, variant: number, parameter: string, amount: number, z: number, status: string }[]
+  moved: { field: "time" | "heading" | "elevation" | "size" | "duration" | "sweep", stated: number, variant: number, parameter: string, amount: number, z: number, status: string }[]
   /** The structural readings it uses (see CandidateSearch's StructuralReading), each with what the studies say of it. */
   readings?: { reading: string, status: string }[]
   /** What it costs, in units of the laws' spread (σ), and the verdict it got. */

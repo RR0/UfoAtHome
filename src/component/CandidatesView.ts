@@ -638,7 +638,7 @@ export class CandidatesView {
     const [stated, variant] = this.values(moved)
     const values = document.createElement("span")
     values.append(Object.assign(document.createElement("s"), { textContent: stated }), " → ", Object.assign(document.createElement("b"), { textContent: variant }))
-    const amount = moved.parameter === "clock" || moved.parameter === "heading"
+    const amount = moved.parameter === "clock" || moved.parameter === "heading" || moved.parameter === "sweep"
       ? `${moved.amount > 0 ? "+" : ""}${this.number(WitnessError.rounded(moved.amount))}`
       : this.number(WitnessError.rounded(moved.amount))
     row.append(Object.assign(document.createElement("span"), { textContent: m.candidates.fields[moved.field] }), values,
@@ -660,6 +660,10 @@ export class CandidatesView {
       if (!start) return ["", ""]
       const at = (date: Date) => date.toLocaleTimeString(document.documentElement.lang || undefined, { hour: "2-digit", minute: "2-digit" })
       return [at(start.date), at(new Date(start.date.getTime() + moved.variant * 60_000))]
+    }
+    if (moved.field === "duration") {
+      const seconds = (value: number) => `${this.number(WitnessError.rounded(value))} s`
+      return [seconds(moved.stated), seconds(moved.variant)]
     }
     const degrees = (value: number) => `${this.number(WitnessError.rounded(value))}°`
     return [degrees(moved.stated), degrees(moved.variant)]

@@ -140,13 +140,17 @@ export const witnessErrorMessages_fr: WitnessErrorMessages = {
       "time": "Heure",
       "heading": "Azimut",
       "elevation": "Hauteur sur l'horizon",
-      "size": "Largeur apparente"
+      "size": "Largeur apparente",
+      "duration": "Durée",
+      "sweep": "Balayage dans le ciel"
     },
     "biases": {
       "clock": "décalage d'horloge {x} min",
       "heading": "rotation du cap {x}°",
       "elevation": "hauteur surestimée ×{x}",
-      "size": "taille surestimée ×{x}"
+      "size": "taille surestimée ×{x}",
+      "duration": "durée mal estimée ×{x}",
+      "sweep": "balayage mal estimé {x}°"
     },
     "reasons": {
       "never-seen": "Jamais visible depuis ce lieu dans la marge de l'heure donnée.",

@@ -46,6 +46,6 @@ export const sightingMessages_it: SightingMessages = {
   hideLabels: "Nascondi ciò che indica",
   variant: "Variante: {name}",
   verdicts: { consolidated: "compatibile con distorsioni consolidate", contested: "solo invocando distorsioni contestate", incompatible: "incompatibile anche ai limiti" },
-  variantFields: { time: "Ora", heading: "Direzione", elevation: "Altezza", size: "Dimensione" },
+  variantFields: { time: "Ora", heading: "Direzione", elevation: "Altezza", size: "Dimensione", duration: "Durata", sweep: "Percorso nel cielo" },
   variantReadings: { "grouped": "luci lette come un solo corpo", "still-seen-moving": "una luce ferma vista muoversi", "moving-seen-still": "una luce in moto vista immobile", "brightening-as-approach": "una luminosità crescente letta come un avvicinamento" }
 }

@@ -53,11 +53,11 @@ export type Verdict = "consolidated" | "contested" | "incompatible"
 
 /** One value of the account as the variant reads it: what the account said, what the candidate needs, and the bias that moves one to the other. */
 export interface MovedValue {
-  field: "time" | "heading" | "elevation" | "size"
+  field: "time" | "heading" | "elevation" | "size" | "duration" | "sweep"
   stated: number
   variant: number
   /** The bias invoked, as the witness parameter it is (see WitnessParameter), and how far, in units of its law's spread. */
-  parameter: "clock" | "heading" | "elevation" | "size"
+  parameter: "clock" | "heading" | "elevation" | "size" | "duration" | "sweep"
   amount: number
   z: number
   status: LeadStatus
@@ -73,7 +73,8 @@ export interface Variant {
   verdict: Verdict
   /** The distance from the account, in units of the laws' spread (σ), summed in quadrature. Not a probability. */
   cost: number
-  parameters: { clockMinutes: number, headingDeg: number, elevationFactor: number, sizeFactor: number }
+  /** `durationFactor`: how many times longer it lasted than the account says, when how it moved was confronted. */
+  parameters: { clockMinutes: number, headingDeg: number, elevationFactor: number, sizeFactor: number, durationFactor?: number }
   moved: MovedValue[]
   /** The structural readings it uses: those the account needs of it and it declares. */
   readings: UsedReading[]
@@ -100,6 +101,11 @@ export class CandidateSearch {
   /** Beyond this sweep, in degrees, a light moved; below STILL_DEG it stood still: between, the account says too little to read either way. */
   static readonly MOVED_DEG = 2
   static readonly STILL_DEG = 0.5
+  /**
+   * The spread of the angle an observer gives between two directions of one light, in degrees: each end is a direction given by eye,
+   * about as uncertain as an elevation, and the two add in quadrature. No study measures it: what it moves is argued.
+   */
+  static readonly SWEEP_SIGMA_DEG = 5 * Math.SQRT2
   /** The most a still light is seen to move: the few degrees the autokinetic effect gives a point in the dark. A light crossing more
    * of the sky moved. */
   static readonly STILL_SEEN_MOVING_MAX_DEG = 10
@@ -191,10 +197,18 @@ export class CandidateSearch {
         moved.push({ field: "size", stated: statement.widthDeg, variant: truth, parameter: "size", amount: sizeFactor, z, status: law.status })
       }
     }
+    const { readings, lacking } = this.structural(statement, candidate, offset, seen)
+    let durationFactor: number | undefined
+    if (!lacking && !readings.some(used => used.reading === "still-seen-moving" || used.reading === "moving-seen-still")) {
+      const motion = this.motionFit(statement, candidate, offset, seen)
+      if (motion) {
+        durationFactor = motion.factor
+        moved.push(...motion.moved)
+      }
+    }
     const cost = Math.sqrt(moved.reduce((sum, value) => sum + value.z * value.z, 0))
     const beyond = moved.find(value => Math.abs(value.z) > CandidateSearch.BOUND_SIGMA)
-    if (beyond) reason = beyond.field === "size" ? "size" : "direction"
-    const { readings, lacking } = this.structural(statement, candidate, offset, seen)
+    if (beyond) reason = beyond.field === "size" ? "size" : beyond.field === "duration" || beyond.field === "sweep" ? "motion" : "direction"
     if (!reason && lacking) reason = lacking
     // Contested when it takes a contested law moving the value at all, or a law's tail, or a reading the studies only argue.
     const contested = moved.some(value => value.status === "contested" || Math.abs(value.z) > CandidateSearch.TAIL_SIGMA)
@@ -202,8 +216,45 @@ export class CandidateSearch {
     const verdict: Verdict = reason ? "incompatible" : contested ? "contested" : "consolidated"
     return {
       candidate: candidate.id, label: candidate.label, verdict, cost: WitnessError.rounded(cost), moved, readings, ...(reason ? { reason } : {}),
-      parameters: { clockMinutes: offset, headingDeg, elevationFactor, sizeFactor }, modelId: this.model.id
+      parameters: { clockMinutes: offset, headingDeg, elevationFactor, sizeFactor, ...(durationFactor !== undefined ? { durationFactor } : {}) },
+      modelId: this.model.id
     }
+  }
+
+  /**
+   * How the account's light moved against how the candidate did, when both moved: the duration, which an observer gets wrong by a factor
+   * (see the duration law), is stretched or shrunk within its law until the candidate sweeps across the sky what the account says it did;
+   * what is left of the sweep is paid in units of SWEEP_SIGMA_DEG. Undefined when the account says nothing of how it moved, or when one of
+   * the two stood still (see the structural readings).
+   */
+  private motionFit(statement: AccountStatement, candidate: CandidateTrack, offset: number, seen: { aim: ShapeAim }): { factor: number, moved: MovedValue[] } | undefined {
+    const motion = statement.motion
+    if (!motion || motion.spanMinutes <= 0 || motion.sweepDeg < CandidateSearch.MOVED_DEG) return undefined
+    const spanS = motion.spanMinutes * 60
+    const law = this.model.law({ kind: "duration", value: spanS }, this.conditions)
+    // The law's band is its usual spread, two σ each way in a log scale; the search goes as far as its bounds.
+    const sigma = Math.log((law.high ?? spanS * 3) / spanS) / 2
+    let best: { factor: number, sweep: number, zDuration: number, zSweep: number } | undefined
+    const steps = 24
+    for (let i = 0; i <= steps; i++) {
+      const factor = Math.exp(sigma * CandidateSearch.BOUND_SIGMA * (2 * i / steps - 1))
+      const end = candidate.at(offset + motion.spanMinutes * factor)
+      if (!end) continue
+      const sweep = CandidateSearch.separation(seen.aim, end.aim)
+      const zDuration = Math.log(factor) / sigma
+      const zSweep = (sweep - motion.sweepDeg) / CandidateSearch.SWEEP_SIGMA_DEG
+      if (!best || zDuration ** 2 + zSweep ** 2 < best.zDuration ** 2 + best.zSweep ** 2) best = { factor, sweep, zDuration, zSweep }
+    }
+    // A candidate that sweeps too little at the shortest to read as still is the still reading's (see structural), not this one's.
+    if (!best || best.sweep < CandidateSearch.STILL_DEG) return undefined
+    const moved: MovedValue[] = []
+    if (Math.abs(Math.log(best.factor)) > Math.log(1.1)) {
+      moved.push({ field: "duration", stated: spanS, variant: spanS * best.factor, parameter: "duration", amount: best.factor, z: best.zDuration, status: law.status })
+    }
+    if (Math.abs(best.sweep - motion.sweepDeg) > 1) {
+      moved.push({ field: "sweep", stated: motion.sweepDeg, variant: best.sweep, parameter: "sweep", amount: best.sweep - motion.sweepDeg, z: best.zSweep, status: "argued" })
+    }
+    return { factor: best.factor, moved }
   }
 
   /**

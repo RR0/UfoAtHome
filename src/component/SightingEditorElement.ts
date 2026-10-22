@@ -6322,7 +6322,7 @@ export class SightingEditorElement extends HTMLElement {
         return date ? { date, observer: { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 } } : undefined
       },
       limitAt: sunAltitudeDeg => visibleMagnitudeLimit(sunAltitudeDeg, this.instrumentGain()),
-      fieldLabels: () => ({ time: label(start), heading: label(this.headingInput), size: label(this.apparentWidthInput) }),
+      fieldLabels: () => ({ time: label(start), heading: label(this.headingInput), size: label(this.apparentWidthInput), duration: label(this.durationInput) }),
       sceneCard: () => this.shadow.querySelector<HTMLElement>(".scene-card")!,
       poher: () => {
         // Its labels are the reader's language's: read again when that changes.

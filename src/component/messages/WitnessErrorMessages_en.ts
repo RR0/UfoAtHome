@@ -140,13 +140,17 @@ export const witnessErrorMessages_en: WitnessErrorMessages = {
       "time": "Time",
       "heading": "Azimuth",
       "elevation": "Elevation",
-      "size": "Apparent width"
+      "size": "Apparent width",
+      "duration": "Duration",
+      "sweep": "Sweep across the sky"
     },
     "biases": {
       "clock": "clock offset {x} min",
       "heading": "heading rotation {x}°",
       "elevation": "elevation overestimated ×{x}",
-      "size": "size overestimated ×{x}"
+      "size": "size overestimated ×{x}",
+      "duration": "duration misjudged ×{x}",
+      "sweep": "sweep misjudged {x}°"
     },
     "reasons": {
       "never-seen": "Never visible from this place within the margin of the time given.",

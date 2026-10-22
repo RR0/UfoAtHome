@@ -1025,6 +1025,7 @@ export class SightingElement extends HTMLElement {
     for (const moved of variant.moved) {
       const [stated, read] = moved.field === "time"
         ? ["0 min", `${moved.variant > 0 ? "+" : ""}${degrees.format(moved.variant)} min`]
+        : moved.field === "duration" ? [`${degrees.format(moved.stated)} s`, `${degrees.format(moved.variant)} s`]
         : [`${degrees.format(moved.stated)}°`, `${degrees.format(moved.variant)}°`]
       const line = document.createElement("span")
       line.append(`${this.messages.variantFields[moved.field]}${this.colon}`, Object.assign(document.createElement("s"), { textContent: stated }), " → ",
