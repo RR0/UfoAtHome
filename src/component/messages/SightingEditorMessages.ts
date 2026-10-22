@@ -305,6 +305,8 @@ export interface SightingEditorMessages extends InputFileMessages, SightingLabel
   beamsSubgroup: string
   /** Summary of the group holding what the sighting sounded like — see SoundTrack.ts. */
   soundGroup: string
+  /** What the editor's header says it is, above the render and the inspector. */
+  appTitle: string
   /**
    * The group holding when the observation happened.
    *

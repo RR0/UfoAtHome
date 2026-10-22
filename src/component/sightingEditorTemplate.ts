@@ -3,25 +3,14 @@ import { InputFont } from "./InputFont.js"
 import { MessageStyle } from "./MessageStyle.js"
 import { ElementList } from "./ElementList.js"
 export const html = `
-<!-- The groups' own handles, gathered onto one wrapping strip instead of standing as seven stacked
-     <summary> rows down the left edge. Seven collapsed rows cost 259px of pure chrome before a
-     single field is shown, which is most of a phone's screen spent on nothing; the same seven
-     handles side by side cost one line, sometimes two when the viewport is narrow. Only one panel
-     opens at a time (see SightingEditorElement.toggleGroup) — with all of them open the form stood
-     1210px tall and pushed the render, the whole point of editing here, off the bottom of the
-     screen. What's set across ALL groups stays legible without opening any of them: see the
-     parameter summary under the render. -->
-<div id="group-tabs" class="group-tabs">
-  <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false"><span id="label-observation-group">Summary</span></button>
-  <button class="group-tab" type="button" aria-controls="group-observer" aria-expanded="false"><span id="label-observer-group">Witness</span></button>
-  <button class="group-tab" type="button" aria-controls="group-location" aria-expanded="false"><span id="label-location-group">Location</span></button>
-  <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false"><span id="label-temporal-group">Date</span></button>
-  <button class="group-tab" type="button" aria-controls="group-decor" aria-expanded="false"><span id="label-decor-group">Environment</span></button>
-  <button class="group-tab" type="button" aria-controls="group-weather" aria-expanded="false"><span id="label-weather-group">Sky</span></button>
-  <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false"><span id="label-shape-group">Phenomenon</span></button>
-  <button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false"><span id="label-sound-group">Sound</span></button>
-  <button class="group-tab" type="button" aria-controls="group-reference" aria-expanded="false"><span id="label-reference-group">Pictures</span></button>
-  <button class="group-tab" type="button" aria-controls="group-file" aria-expanded="false"><span id="label-file-group">Files</span></button>
+<!-- The scene first and widest, and beside it an inspector: every group's handle on a row of its own,
+     followed by the group it opens. Only one is open at a time (see SightingEditorElement.toggleGroup), so
+     what is being edited and the render it changes are both in view; under a narrow host the inspector
+     goes under the render (see the container query in the CSS). What's set across ALL groups stays
+     legible without opening any of them: see the parameter summary under the render. -->
+<div class="app">
+<header class="bar">
+  <strong id="label-app-title" class="app-title">Sighting reconstruction</strong>
   <!-- Step back and forward through what was edited, whichever group it was edited in: the File group's text editor keeps the history (see SightingEditorElement.undo). -->
   <span class="history" role="group">
     <button id="undo" type="button" class="icon-btn" title="Undo" aria-label="Undo" disabled>↶</button>
@@ -29,7 +18,47 @@ export const html = `
   </span>
   <!-- What an element that holds this editor puts after the last tab (see CaseEditorElement): a mark of its own, which takes its room whether it shows or not. -->
   <slot name="tab-status"></slot>
+</header>
+<div class="body">
+<div class="stage-col">
+
+<!-- A case opened for editing: the recordings it lists (the accounts, and the readings of them, which
+     are recordings of their own), one open at a time. Hidden for a single recording. Just above the render, as the player puts its own pickers: what
+     is picked here is what the render shows. -->
+<div class="render-line">
+<!-- How the account is drawn, and which part of the Phenomenon group edits it: the angles the observer drew (2D, the shapes) or what
+     they said those were, in 3D (the bodies). Follows the panels as they are opened, and opens them when chosen. -->
+<label id="account-view-row" class="account-view"><span id="label-account-view">Account</span>
+  <select id="account-view"><option value="shapes">2D · shapes</option><option value="bodies">3D · bodies</option></select></label>
+<!-- The playback layer's own toggles, taken out of the picture — see UfoElement.hostControls. -->
+<div id="scene-controls" class="scene-controls"></div>
 </div>
+<div id="ufo-slot"></div>
+<div class="toolbar playback-row">
+  <button id="play-pause" type="button" class="icon-btn" title="Play" aria-label="Play">▶</button>
+  <span id="time-start" class="time-label">0:00</span>
+  <button id="previous-mark" type="button" class="icon-btn" title="Previous keyframe" aria-label="Previous keyframe">◂◆</button>
+  <!-- The keyframes of what the open group edits, and the named moments — see TimelineMarks. -->
+  <div class="seek-track">
+    <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
+    <div id="timeline-marks" class="timeline-marks"></div>
+  </div>
+  <button id="next-mark" type="button" class="icon-btn" title="Next keyframe" aria-label="Next keyframe">◆▸</button>
+  <span id="time-end" class="time-label">0:00</span>
+</div>
+<!-- Everything this reconstruction actually asserts, on one wrapping strip: only fields that are
+     SET appear (37 of 75 on a real case), so it reads as a statement rather than as a second copy
+     of the form. It has to sit BELOW the render, not between the groups and it: 200px of chips
+     above the canvas would push it back off the screen and undo what the tab strip just bought.
+     Nothing is lost by the move — a summary is read while you are not editing, the render is
+     watched while you are, never both at once. Each chip carries its group and its field, so
+     clicking one opens the right panel and puts the caret in the right input (see
+     SightingEditorElement.refreshParamSummary); a value a data source supplied rather than the
+     author is marked, which is the one thing the form itself never showed at a glance. -->
+<div id="param-summary" class="param-summary"></div>
+</div>
+<aside id="group-tabs" class="inspector">
+<button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false"><span id="label-observation-group">Summary</span></button>
 <section class="group-panel" id="group-observation" aria-labelledby="label-observation-group" hidden>
   <div class="toolbar">
     <!-- The observation's own id, not the observer's nor the case's: what a case and the
@@ -62,6 +91,7 @@ export const html = `
        so invisible) until there has been a draft. -->
   <div id="narrative-report" class="narrative-report" hidden></div>
 </section>
+<button class="group-tab" type="button" aria-controls="group-observer" aria-expanded="false"><span id="label-observer-group">Witness</span></button>
 <section class="group-panel" id="group-observer" aria-labelledby="label-observer-group" hidden>
   <div class="toolbar">
     <!-- The observers, laid out as every list of the editor is (see ElementList): the one whose account this is first, then the
@@ -136,6 +166,7 @@ export const html = `
     </div>
   </div>
 </section>
+<button class="group-tab" type="button" aria-controls="group-location" aria-expanded="false"><span id="label-location-group">Location</span></button>
 <section class="group-panel" id="group-location" aria-labelledby="label-location-group" hidden>
   <!-- Where the data of this group is read from, one kind at a time (see SightingEditorElement.sourcePickers): out of the way of what
        the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
@@ -177,47 +208,7 @@ export const html = `
     <output id="light-pollution-status" class="place-status" for="lightPollution"><span id="light-pollution-status-text"></span><span id="light-pollution-source-row" class="inline-source" hidden></span></output>
   </div>
 </section>
-<!-- Its own group, no longer a fieldset nested inside Location. What stands around the observer is
-     the single largest thing this editor asks for — 34 controls against Location's own 8 — so
-     folded in there it made Location the tallest panel by far (313px) and, with one panel open at
-     a time, the one that alone still overflowed a phone. Split out, neither half does. The two
-     stay adjacent because a decor object is placed RELATIVE to the location above it. -->
-<section class="group-panel" id="group-decor" aria-labelledby="label-decor-group" hidden>
-  <!-- Where the data of this group is read from, one kind at a time (see SightingEditorElement.sourcePickers): out of the way of what
-       the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
-  <button class="group-settings" type="button" id="decor-settings-button" popovertarget="decor-settings" style="anchor-name: --decor-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
-  <div class="group-settings-panel" id="decor-settings" popover style="position-anchor: --decor-settings" role="dialog" aria-labelledby="label-decor-settings">
-    <div class="group-settings-title" id="label-decor-settings">Data sources</div>
-    <div id="decor-source-rows" class="terrain-source-rows"></div>
-  </div>
-  <div class="toolbar">
-    <!-- The list of the decor, laid out as every list of the editor is (see ElementList): the picker, 🎯, 🗑, then the kind to add and
-         "+", on one line; under it, the frame of everything that is set on the picked object, gone while there is none. -->
-    <div id="decor-list-header" class="decor-list-part"></div>
-    <div id="decor-item">
-      <!-- The base properties — name, place, heading, colour, measures — are drawn from what a decor object says it has (see
-           DecorBaseParameterSets and ParameterForm). The model it is drawn as is the last of them: a window of pictures over the same choice. -->
-      <div id="decor-base" class="decor-parameters"></div>
-      <!-- The properties the kind of this object says it has beyond placement and size — floors, windows, a
-           bridge's railing, a line's poles — drawn from what the kind publishes (see DecorParameterSets and
-           ParameterForm), so that the editor knows no kind. -->
-      <div id="decor-parameters" class="decor-parameters"></div>
-      <!-- Lit, lamps, and where the observer sits: drawn the same way, after the properties of the kind. -->
-      <div id="decor-state" class="decor-parameters"></div>
-    </div>
-    <!-- The scenery the editor takes, by itself, from a survey of the place (see SurroundingsPlanter): a choice of the survey it is taken from, or none (the first of the registry by default,
-         and kept by the browser, since asking sends the place to a service), and what it says of what it took: how many trees, buildings, bridges
-         and lines, or that the survey could not be reached. Empty where no survey covers the place, which is most of the world. It sits
-         on a line of its own, below what the list of the decor draws, and is read out by whoever listens to the page. -->
-    <div id="scenery" class="decor-scenery">
-      <span id="scenery-picker"><span id="label-scenery-source" hidden>Scenery survey</span><select id="scenery-source"><option value="none" id="option-scenery-none">None (all by hand)</option></select>
-      <label id="scenery-radius-row"><span id="label-scenery-radius">Radius</span> <input type="number" id="scenery-radius" min="20" max="3000" step="10" value="100"/> m</label>
-      <button id="scenery-file-link" type="button" class="source-file-link" hidden></button></span>
-      <span id="scenery-status" role="status" aria-live="polite"></span>
-      <span id="scenery-warning" class="scenery-warning" role="alert" hidden></span>
-    </div>
-  </div>
-</section>
+<button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false"><span id="label-temporal-group">Date</span></button>
 <section class="group-panel" id="group-temporal" aria-labelledby="label-temporal-group" hidden>
   <div class="toolbar">
     <!-- Two ways to say the same thing, and the native picker is the default because a
@@ -267,67 +258,49 @@ export const html = `
     </div>
   </div>
 </section>
-<!-- The recording itself, as the file it will be saved as. Last on the strip because it is about the
-     whole rather than about any one thing: it is where a recording comes in (a file, an address)
-     and goes out (Export), and where it can be read and edited as the text it is, in both
-     directions with the form (see SightingEditorElement.loadFileEditor). The editor is a chunk of
-     its own, fetched the first time this group is opened — CodeMirror is the heaviest thing the
-     component could carry and most authors never need it. -->
-<section class="group-panel" id="group-file" aria-labelledby="label-file-group" hidden>
-  <!-- The files the recording is made of, one picked at a time as every list of the editor is (see ElementList): the recording itself, and
-       the annexes it carries frozen beside it so that it plays without asking third parties (see FrozenData, FrozenDataPanel). -->
-  <div class="element-list-row" id="file-item-row">
-    <label class="element-list-picker"><select id="file-item" aria-labelledby="label-file-group"></select></label>
+<button class="group-tab" type="button" aria-controls="group-decor" aria-expanded="false"><span id="label-decor-group">Environment</span></button>
+<!-- Its own group, no longer a fieldset nested inside Location. What stands around the observer is
+     the single largest thing this editor asks for — 34 controls against Location's own 8 — so
+     folded in there it made Location the tallest panel by far (313px) and, with one panel open at
+     a time, the one that alone still overflowed a phone. Split out, neither half does. The two
+     stay adjacent because a decor object is placed RELATIVE to the location above it. -->
+<section class="group-panel" id="group-decor" aria-labelledby="label-decor-group" hidden>
+  <!-- Where the data of this group is read from, one kind at a time (see SightingEditorElement.sourcePickers): out of the way of what
+       the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
+  <button class="group-settings" type="button" id="decor-settings-button" popovertarget="decor-settings" style="anchor-name: --decor-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
+  <div class="group-settings-panel" id="decor-settings" popover style="position-anchor: --decor-settings" role="dialog" aria-labelledby="label-decor-settings">
+    <div class="group-settings-title" id="label-decor-settings">Data sources</div>
+    <div id="decor-source-rows" class="terrain-source-rows"></div>
   </div>
-  <p id="file-note" class="file-note" hidden role="status"></p>
-  <div class="element-list-body" id="file-recording">
-    <div class="toolbar">
-      <span class="input-file-row"><span id="label-import-file">Load sighting file</span> <rr0-input-file id="import" name="import" accept="application/json,.json,application/zip,.zip" placeholder="https://…/sighting.json"></rr0-input-file></span>
-      <button id="export" type="button">Save</button>
+  <div class="toolbar">
+    <!-- The list of the decor, laid out as every list of the editor is (see ElementList): the picker, 🎯, 🗑, then the kind to add and
+         "+", on one line; under it, the frame of everything that is set on the picked object, gone while there is none. -->
+    <div id="decor-list-header" class="decor-list-part"></div>
+    <div id="decor-item">
+      <!-- The base properties — name, place, heading, colour, measures — are drawn from what a decor object says it has (see
+           DecorBaseParameterSets and ParameterForm). The model it is drawn as is the last of them: a window of pictures over the same choice. -->
+      <div id="decor-base" class="decor-parameters"></div>
+      <!-- The properties the kind of this object says it has beyond placement and size — floors, windows, a
+           bridge's railing, a line's poles — drawn from what the kind publishes (see DecorParameterSets and
+           ParameterForm), so that the editor knows no kind. -->
+      <div id="decor-parameters" class="decor-parameters"></div>
+      <!-- Lit, lamps, and where the observer sits: drawn the same way, after the properties of the kind. -->
+      <div id="decor-state" class="decor-parameters"></div>
     </div>
-  <!-- A question about what an edit of the text just touched: data the editor reads dynamically (see SightingEditorElement.askAboutWeather). Modal: the author has to say what they mean before anything else is done, and the edit stands meanwhile. Escape is the safe answer, which puts back what was read. -->
-  <dialog id="file-ask" class="file-ask" aria-labelledby="file-ask-text">
-    <p id="file-ask-text"></p>
-    <div class="file-ask-buttons">
-      <button id="file-ask-stop" type="button"></button>
-      <button id="file-ask-keep" type="button"></button>
+    <!-- The scenery the editor takes, by itself, from a survey of the place (see SurroundingsPlanter): a choice of the survey it is taken from, or none (the first of the registry by default,
+         and kept by the browser, since asking sends the place to a service), and what it says of what it took: how many trees, buildings, bridges
+         and lines, or that the survey could not be reached. Empty where no survey covers the place, which is most of the world. It sits
+         on a line of its own, below what the list of the decor draws, and is read out by whoever listens to the page. -->
+    <div id="scenery" class="decor-scenery">
+      <span id="scenery-picker"><span id="label-scenery-source" hidden>Scenery survey</span><select id="scenery-source"><option value="none" id="option-scenery-none">None (all by hand)</option></select>
+      <label id="scenery-radius-row"><span id="label-scenery-radius">Radius</span> <input type="number" id="scenery-radius" min="20" max="3000" step="10" value="100"/> m</label>
+      <button id="scenery-file-link" type="button" class="source-file-link" hidden></button></span>
+      <span id="scenery-status" role="status" aria-live="polite"></span>
+      <span id="scenery-warning" class="scenery-warning" role="alert" hidden></span>
     </div>
-  </dialog>
-  <!-- Asked at Save, the one way a recording leaves the editor, when it names or locates a person (see IdentityGuard). -->
-  <dialog id="identity-ask" class="file-ask" aria-labelledby="identity-ask-text">
-    <p id="identity-ask-text"></p>
-    <ul id="identity-ask-found"></ul>
-    <div class="file-ask-buttons">
-      <button id="identity-ask-initials" type="button"></button>
-      <button id="identity-ask-keep" type="button"></button>
-      <button id="identity-ask-back" type="button"></button>
-    </div>
-  </dialog>
   </div>
-  <!-- One annex: where it is (a file of its own, or the recording itself when it is kept inside it), when and from whom it was taken, its text
-       when it is one. -->
-  <div class="element-list-body frozen-data" id="frozen-data" hidden>
-    <div class="toolbar">
-      <span class="input-file-row"><span id="label-annex-source">File</span> <rr0-input-file id="annex-source" name="annex-source" no-button placeholder="https://…"></rr0-input-file></span>
-      <button id="annex-export" type="button">Save</button>
-    </div>
-    <p class="row"><span id="frozen-state" class="frozen-group-state"></span> <button id="frozen-refresh" type="button">Refresh</button></p>
-    <p id="frozen-note" class="frozen-note" hidden role="status"></p>
-    <div id="annex-editor" class="file-editor" hidden></div>
-  </div>
-  <!-- A part of the recording's own text (its weather, its place, its night sky): inside the recording, or in an annex beside it (see
-       SectionFilePanel). Its text is the recording's own. -->
-  <div class="element-list-body frozen-data" id="file-section" hidden>
-    <div class="toolbar">
-      <span class="input-file-row"><span id="label-section-annex-source">File</span> <rr0-input-file id="section-annex-source" name="section-annex-source" no-button accept="application/json,.json" placeholder="https://…/sighting.weather.json"></rr0-input-file></span>
-      <button id="section-annex-export" type="button">Save</button>
-    </div>
-    <p id="section-annex-state" class="frozen-group-state"></p>
-    <p id="section-annex-note" class="frozen-note" hidden role="status"></p>
-  </div>
-  <!-- The recording as text: the recording's own item, and an item kept inside it, its section shown (see showFileItem). -->
-  <div id="file-editor" class="file-editor"></div>
 </section>
+<button class="group-tab" type="button" aria-controls="group-weather" aria-expanded="false"><span id="label-weather-group">Sky</span></button>
 <section class="group-panel" id="group-weather" aria-labelledby="label-weather-group" hidden>
   <!-- Where the data of this group is read from, one kind at a time (see SightingEditorElement.sourcePickers): out of the way of what
        the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
@@ -437,6 +410,84 @@ export const html = `
     </div>
   </section>
 </section>
+<button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false"><span id="label-shape-group">Phenomenon</span></button>
+<section class="group-panel" id="group-shape" aria-labelledby="label-shape-group" hidden>
+  <!-- In two parts: the shapes the observer DREW (angles on their image, the account), and the
+       bodies the observer said those shapes WERE (the 3D interpretation, see BodyEditor). The shapes
+       come first and open on arrival: they are what the rest of this editor draws and records. -->
+  <div class="group-tabs" id="shape-tabs">
+    <button class="subgroup-tab" type="button" aria-controls="shape-shapes" aria-expanded="true"><span id="label-shapes-subgroup">Shapes</span></button>
+    <button class="subgroup-tab" type="button" aria-controls="shape-bodies" aria-expanded="false"><span id="label-bodies-subgroup">Bodies</span></button>
+  </div>
+  <section class="subgroup-panel" id="shape-shapes" aria-labelledby="label-shapes-subgroup">
+  <div class="toolbar">
+    <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, "+", then the frame of what is set on the
+         picked shape, gone while there is none. -->
+    <div class="element-list-row" id="shape-row">
+      <label class="element-list-picker"><select id="source" aria-label="Shape"></select></label>
+      <button id="delete-shape" type="button" class="icon-btn" title="Delete shape" aria-label="Delete shape">🗑</button>
+      <span id="shape-empty" class="element-list-empty">No shape</span>
+      <button id="add-shape" type="button" class="icon-btn element-list-add" title="Add shape" aria-label="Add shape">+</button>
+    </div>
+    <div class="element-list-body" id="shape-item">
+    <label><span id="label-color">Color</span> <input id="color" type="color" value="#39ff14"/></label>
+    <label><span id="label-transparency">Transparency</span> <input id="transparency" type="range" min="0" max="1" step="0.05" value="0"/></label>
+    <label><span id="label-halo">Halo</span> <input id="haloScale" type="range" min="0" max="3" step="0.1" value="1.5"/></label>
+    <!-- Next to the halo, which it will be confused with, and named for the edge rather than for
+         the light: a halo is a glow AROUND the shape, this is the outline itself losing its
+         position. What it is worth as a distance, through the instrument the recording states, is
+         printed beside the size estimate below. -->
+    <!-- Not a bigger halo: a halo is a coloured fringe, and no fringe reads as painful. This is
+         the light's own behaviour — a veil that washes out the field around it, the spikes its
+         aperture throws, and a core clipped to white. See BaseShape.brightness. -->
+    <label><span id="label-brightness">Brilliance</span> <input id="brightness" type="range" min="0" max="1" step="0.05" value="0" title="How dazzling the observer said it was — a light you cannot look at does three things a halo never does"/></label>
+    <label><span id="label-blur">Blur</span> <input id="blur" type="range" min="0" max="1" step="0.05" value="0" title="How indistinct the observer said its edges were — not the lens's own depth of field, which never touches the object here"/></label>
+    <label><span id="label-shape-title">Name</span> <input id="shapeTitle" type="text"/></label>
+    <!-- Three readings of ONE relation, apparent width = f(real width, distance), kept in step.
+         Only the apparent width is the recording's (BaseShape.angular); the real width is derived
+         from it, and the distance is where the scene DRAWS the shape (see PhenomenonDepth), never a
+         statement. Edit any one and one of the other two follows — the held one never moves, and
+         with nothing held the real width is what a thing keeps: a distance edit changes how big it
+         looks, and a width edit changes the other width at the distance it stands (the shape is
+         resized on the canvas, which is what "try a size at a distance" always did). -->
+    <label><span id="label-apparent-width">Apparent width</span>
+      <input id="apparentWidth" type="number" min="0" max="180" step="0.1" title="How wide it looked, in degrees — the recording's own statement of size"/>°
+      <output id="apparent-size" class="apparent-size inline" for="apparentWidth"></output></label>
+    <label><span id="label-real-width">Real width</span>
+      <input id="realWidth" type="number" min="0" max="30000" step="0.1" title="What that angle is in metres at the distance beside it. Derived, never stored"/> m</label>
+    <label><span id="label-object-distance">Distance</span>
+      <input id="objectDistance" type="number" min="0" max="30000" step="1" title="How far along its line of sight the shape is drawn — what decides what the decor hides of it. A hypothesis, never the observer's statement"/> m</label>
+    <label><span id="label-size-lock">Hold</span>
+      <select id="sizeLock" title="Which of the three stays put while another is edited">
+        <option id="option-lock-none" value="none">nothing</option>
+        <option id="option-lock-apparent" value="apparent">the apparent width</option>
+        <option id="option-lock-real" value="real">the real width</option>
+        <option id="option-lock-distance" value="distance">the distance</option>
+      </select></label>
+    <!-- Shown only while a distance of the reader's own is in force — whichever field put it there:
+         the distance itself, or the real width with the apparent width held. -->
+    <button id="clear-distance-hypothesis" type="button" title="Back to what the recording establishes">Withdraw the distance hypothesis</button>
+    <output id="real-size" class="apparent-size" for="realWidth"></output>
+    <output id="depth-basis" class="apparent-size" for="objectDistance"></output>
+    <!-- The depth of field, read backwards. The scene blurs the WORLD from its distance and leaves
+         the observer's object alone, because that distance is the unknown; a blur the observer
+         STATED runs the geometry the other way and bounds it. See DepthOfField's own doc comment,
+         which says so before anything existed to say it with. -->
+    <output id="blur-bound" class="apparent-size" for="blur"></output>
+    <div class="record-row">
+      <button id="record" type="button" class="record-btn"></button>
+      <label><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" max="1000" step="16" value="100"/> ms</label>
+    </div>
+    </div>
+  </div>
+  </section>
+  <section class="subgroup-panel" id="shape-bodies" aria-labelledby="label-bodies-subgroup" hidden>
+    <div class="toolbar">
+      <style>#body-editor { flex-basis: 100%; min-width: 0; } #body-editor .body-list, #body-editor .body-keys { flex-basis: 100%; min-width: 0; } #body-editor .body-editor, #body-editor .body-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-fields { flex-basis: 100%; min-width: 0; } #body-editor .body-fields[hidden], #body-editor [hidden] { display: none !important; } #body-editor select { min-width: 0; width: 100%; } #body-editor .body-intro { flex-basis: 100%; margin: 0; } #body-editor .body-explains { flex-basis: 100%; min-width: 0; box-sizing: border-box; margin: 0; } #body-editor #body-explains { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor #body-explains label { white-space: normal; } #body-editor .body-track { margin: 0; } #body-editor details { flex-basis: 100%; min-width: 0; } #body-editor details[open] { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor details > summary { flex-basis: 100%; } #body-editor input, #body-editor select { max-width: 100%; box-sizing: border-box; } #body-editor input[type="color"] { width: 3em; padding: 0; } #body-editor #body-id, #body-editor #body-outline-node { width: 10em; } #body-editor #body-title, #body-editor #body-interpretation-title { width: 18em; } #body-editor label { min-width: 0; max-width: 100%; } #body-editor .body-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-parameters[hidden] { display: none !important; } #body-editor .parameter-group { display: contents; border: 0; padding: 0; margin: 0; } #body-editor .parameter-set { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor .parameter-row { flex-basis: 100%; } #body-editor input.invalid { outline: 2px solid #c33; } #body-editor input[data-key="title"] { width: 18em; } #body-editor input[data-key="id"], #body-editor input[data-key="outlineNode"] { width: 10em; } #body-editor input.parameter-derived::placeholder { opacity: .65; }</style><div id="body-editor"></div>
+    </div>
+  </section>
+</section>
+<button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false"><span id="label-sound-group">Sound</span></button>
 <!-- Its own group rather than a row of the Shape group below: what the object sounded like is
      keyframed on the very same clock as its shape (a craft silent on the ground and heard only as
      it lifts off is two keyframes), but it belongs to the sighting, not to any one drawn part of
@@ -455,6 +506,7 @@ export const html = `
     <label><span id="label-sound-src">Recording</span> <input id="soundSrc" class="sound-field" type="url" placeholder="URL of a real recording"/></label>
   </div>
 </section>
+<button class="group-tab" type="button" aria-controls="group-reference" aria-expanded="false"><span id="label-reference-group">Pictures</span></button>
 <!-- Pictures of the place laid over the reconstruction (see SceneReference): one dropdown of them,
      the fields of the selected one, and two ways to add one — an address, or a file from the
      author's own disk, which is embedded in the recording. The registration is typed here for now
@@ -535,117 +587,71 @@ export const html = `
     </div>
   </div>
 </section>
-<section class="group-panel" id="group-shape" aria-labelledby="label-shape-group" hidden>
-  <!-- In two parts: the shapes the observer DREW (angles on their image, the account), and the
-       bodies the observer said those shapes WERE (the 3D interpretation, see BodyEditor). The shapes
-       come first and open on arrival: they are what the rest of this editor draws and records. -->
-  <div class="group-tabs" id="shape-tabs">
-    <button class="subgroup-tab" type="button" aria-controls="shape-shapes" aria-expanded="true"><span id="label-shapes-subgroup">Shapes</span></button>
-    <button class="subgroup-tab" type="button" aria-controls="shape-bodies" aria-expanded="false"><span id="label-bodies-subgroup">Bodies</span></button>
+<button class="group-tab" type="button" aria-controls="group-file" aria-expanded="false"><span id="label-file-group">Files</span></button>
+<!-- The recording itself, as the file it will be saved as. Last on the strip because it is about the
+     whole rather than about any one thing: it is where a recording comes in (a file, an address)
+     and goes out (Export), and where it can be read and edited as the text it is, in both
+     directions with the form (see SightingEditorElement.loadFileEditor). The editor is a chunk of
+     its own, fetched the first time this group is opened — CodeMirror is the heaviest thing the
+     component could carry and most authors never need it. -->
+<section class="group-panel" id="group-file" aria-labelledby="label-file-group" hidden>
+  <!-- The files the recording is made of, one picked at a time as every list of the editor is (see ElementList): the recording itself, and
+       the annexes it carries frozen beside it so that it plays without asking third parties (see FrozenData, FrozenDataPanel). -->
+  <div class="element-list-row" id="file-item-row">
+    <label class="element-list-picker"><select id="file-item" aria-labelledby="label-file-group"></select></label>
   </div>
-  <section class="subgroup-panel" id="shape-shapes" aria-labelledby="label-shapes-subgroup">
-  <div class="toolbar">
-    <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, "+", then the frame of what is set on the
-         picked shape, gone while there is none. -->
-    <div class="element-list-row" id="shape-row">
-      <label class="element-list-picker"><select id="source" aria-label="Shape"></select></label>
-      <button id="delete-shape" type="button" class="icon-btn" title="Delete shape" aria-label="Delete shape">🗑</button>
-      <span id="shape-empty" class="element-list-empty">No shape</span>
-      <button id="add-shape" type="button" class="icon-btn element-list-add" title="Add shape" aria-label="Add shape">+</button>
-    </div>
-    <div class="element-list-body" id="shape-item">
-    <label><span id="label-color">Color</span> <input id="color" type="color" value="#39ff14"/></label>
-    <label><span id="label-transparency">Transparency</span> <input id="transparency" type="range" min="0" max="1" step="0.05" value="0"/></label>
-    <label><span id="label-halo">Halo</span> <input id="haloScale" type="range" min="0" max="3" step="0.1" value="1.5"/></label>
-    <!-- Next to the halo, which it will be confused with, and named for the edge rather than for
-         the light: a halo is a glow AROUND the shape, this is the outline itself losing its
-         position. What it is worth as a distance, through the instrument the recording states, is
-         printed beside the size estimate below. -->
-    <!-- Not a bigger halo: a halo is a coloured fringe, and no fringe reads as painful. This is
-         the light's own behaviour — a veil that washes out the field around it, the spikes its
-         aperture throws, and a core clipped to white. See BaseShape.brightness. -->
-    <label><span id="label-brightness">Brilliance</span> <input id="brightness" type="range" min="0" max="1" step="0.05" value="0" title="How dazzling the observer said it was — a light you cannot look at does three things a halo never does"/></label>
-    <label><span id="label-blur">Blur</span> <input id="blur" type="range" min="0" max="1" step="0.05" value="0" title="How indistinct the observer said its edges were — not the lens's own depth of field, which never touches the object here"/></label>
-    <label><span id="label-shape-title">Name</span> <input id="shapeTitle" type="text"/></label>
-    <!-- Three readings of ONE relation, apparent width = f(real width, distance), kept in step.
-         Only the apparent width is the recording's (BaseShape.angular); the real width is derived
-         from it, and the distance is where the scene DRAWS the shape (see PhenomenonDepth), never a
-         statement. Edit any one and one of the other two follows — the held one never moves, and
-         with nothing held the real width is what a thing keeps: a distance edit changes how big it
-         looks, and a width edit changes the other width at the distance it stands (the shape is
-         resized on the canvas, which is what "try a size at a distance" always did). -->
-    <label><span id="label-apparent-width">Apparent width</span>
-      <input id="apparentWidth" type="number" min="0" max="180" step="0.1" title="How wide it looked, in degrees — the recording's own statement of size"/>°
-      <output id="apparent-size" class="apparent-size inline" for="apparentWidth"></output></label>
-    <label><span id="label-real-width">Real width</span>
-      <input id="realWidth" type="number" min="0" max="30000" step="0.1" title="What that angle is in metres at the distance beside it. Derived, never stored"/> m</label>
-    <label><span id="label-object-distance">Distance</span>
-      <input id="objectDistance" type="number" min="0" max="30000" step="1" title="How far along its line of sight the shape is drawn — what decides what the decor hides of it. A hypothesis, never the observer's statement"/> m</label>
-    <label><span id="label-size-lock">Hold</span>
-      <select id="sizeLock" title="Which of the three stays put while another is edited">
-        <option id="option-lock-none" value="none">nothing</option>
-        <option id="option-lock-apparent" value="apparent">the apparent width</option>
-        <option id="option-lock-real" value="real">the real width</option>
-        <option id="option-lock-distance" value="distance">the distance</option>
-      </select></label>
-    <!-- Shown only while a distance of the reader's own is in force — whichever field put it there:
-         the distance itself, or the real width with the apparent width held. -->
-    <button id="clear-distance-hypothesis" type="button" title="Back to what the recording establishes">Withdraw the distance hypothesis</button>
-    <output id="real-size" class="apparent-size" for="realWidth"></output>
-    <output id="depth-basis" class="apparent-size" for="objectDistance"></output>
-    <!-- The depth of field, read backwards. The scene blurs the WORLD from its distance and leaves
-         the observer's object alone, because that distance is the unknown; a blur the observer
-         STATED runs the geometry the other way and bounds it. See DepthOfField's own doc comment,
-         which says so before anything existed to say it with. -->
-    <output id="blur-bound" class="apparent-size" for="blur"></output>
-    <div class="record-row">
-      <button id="record" type="button" class="record-btn"></button>
-      <label><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" max="1000" step="16" value="100"/> ms</label>
-    </div>
-    </div>
-  </div>
-  </section>
-  <section class="subgroup-panel" id="shape-bodies" aria-labelledby="label-bodies-subgroup" hidden>
+  <p id="file-note" class="file-note" hidden role="status"></p>
+  <div class="element-list-body" id="file-recording">
     <div class="toolbar">
-      <style>#body-editor { flex-basis: 100%; min-width: 0; } #body-editor .body-list, #body-editor .body-keys { flex-basis: 100%; min-width: 0; } #body-editor .body-editor, #body-editor .body-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-fields { flex-basis: 100%; min-width: 0; } #body-editor .body-fields[hidden], #body-editor [hidden] { display: none !important; } #body-editor select { min-width: 0; width: 100%; } #body-editor .body-intro { flex-basis: 100%; margin: 0; } #body-editor .body-explains { flex-basis: 100%; min-width: 0; box-sizing: border-box; margin: 0; } #body-editor #body-explains { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor #body-explains label { white-space: normal; } #body-editor .body-track { margin: 0; } #body-editor details { flex-basis: 100%; min-width: 0; } #body-editor details[open] { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor details > summary { flex-basis: 100%; } #body-editor input, #body-editor select { max-width: 100%; box-sizing: border-box; } #body-editor input[type="color"] { width: 3em; padding: 0; } #body-editor #body-id, #body-editor #body-outline-node { width: 10em; } #body-editor #body-title, #body-editor #body-interpretation-title { width: 18em; } #body-editor label { min-width: 0; max-width: 100%; } #body-editor .body-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-parameters[hidden] { display: none !important; } #body-editor .parameter-group { display: contents; border: 0; padding: 0; margin: 0; } #body-editor .parameter-set { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor .parameter-row { flex-basis: 100%; } #body-editor input.invalid { outline: 2px solid #c33; } #body-editor input[data-key="title"] { width: 18em; } #body-editor input[data-key="id"], #body-editor input[data-key="outlineNode"] { width: 10em; } #body-editor input.parameter-derived::placeholder { opacity: .65; }</style><div id="body-editor"></div>
+      <span class="input-file-row"><span id="label-import-file">Load sighting file</span> <rr0-input-file id="import" name="import" accept="application/json,.json,application/zip,.zip" placeholder="https://…/sighting.json"></rr0-input-file></span>
+      <button id="export" type="button">Save</button>
     </div>
-  </section>
-</section>
-
-<!-- A case opened for editing: the recordings it lists (the accounts, and the readings of them, which
-     are recordings of their own), one open at a time. Hidden for a single recording. Just above the render, as the player puts its own pickers: what
-     is picked here is what the render shows. -->
-<div class="render-line">
-<!-- How the account is drawn, and which part of the Phenomenon group edits it: the angles the observer drew (2D, the shapes) or what
-     they said those were, in 3D (the bodies). Follows the panels as they are opened, and opens them when chosen. -->
-<label id="account-view-row" class="account-view"><span id="label-account-view">Account</span>
-  <select id="account-view"><option value="shapes">2D · shapes</option><option value="bodies">3D · bodies</option></select></label>
-<!-- The playback layer's own toggles, taken out of the picture — see UfoElement.hostControls. -->
-<div id="scene-controls" class="scene-controls"></div>
-</div>
-<div id="ufo-slot"></div>
-<div class="toolbar playback-row">
-  <button id="play-pause" type="button" class="icon-btn" title="Play" aria-label="Play">▶</button>
-  <span id="time-start" class="time-label">0:00</span>
-  <button id="previous-mark" type="button" class="icon-btn" title="Previous keyframe" aria-label="Previous keyframe">◂◆</button>
-  <!-- The keyframes of what the open group edits, and the named moments — see TimelineMarks. -->
-  <div class="seek-track">
-    <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
-    <div id="timeline-marks" class="timeline-marks"></div>
+  <!-- A question about what an edit of the text just touched: data the editor reads dynamically (see SightingEditorElement.askAboutWeather). Modal: the author has to say what they mean before anything else is done, and the edit stands meanwhile. Escape is the safe answer, which puts back what was read. -->
+  <dialog id="file-ask" class="file-ask" aria-labelledby="file-ask-text">
+    <p id="file-ask-text"></p>
+    <div class="file-ask-buttons">
+      <button id="file-ask-stop" type="button"></button>
+      <button id="file-ask-keep" type="button"></button>
+    </div>
+  </dialog>
+  <!-- Asked at Save, the one way a recording leaves the editor, when it names or locates a person (see IdentityGuard). -->
+  <dialog id="identity-ask" class="file-ask" aria-labelledby="identity-ask-text">
+    <p id="identity-ask-text"></p>
+    <ul id="identity-ask-found"></ul>
+    <div class="file-ask-buttons">
+      <button id="identity-ask-initials" type="button"></button>
+      <button id="identity-ask-keep" type="button"></button>
+      <button id="identity-ask-back" type="button"></button>
+    </div>
+  </dialog>
   </div>
-  <button id="next-mark" type="button" class="icon-btn" title="Next keyframe" aria-label="Next keyframe">◆▸</button>
-  <span id="time-end" class="time-label">0:00</span>
+  <!-- One annex: where it is (a file of its own, or the recording itself when it is kept inside it), when and from whom it was taken, its text
+       when it is one. -->
+  <div class="element-list-body frozen-data" id="frozen-data" hidden>
+    <div class="toolbar">
+      <span class="input-file-row"><span id="label-annex-source">File</span> <rr0-input-file id="annex-source" name="annex-source" no-button placeholder="https://…"></rr0-input-file></span>
+      <button id="annex-export" type="button">Save</button>
+    </div>
+    <p class="row"><span id="frozen-state" class="frozen-group-state"></span> <button id="frozen-refresh" type="button">Refresh</button></p>
+    <p id="frozen-note" class="frozen-note" hidden role="status"></p>
+    <div id="annex-editor" class="file-editor" hidden></div>
+  </div>
+  <!-- A part of the recording's own text (its weather, its place, its night sky): inside the recording, or in an annex beside it (see
+       SectionFilePanel). Its text is the recording's own. -->
+  <div class="element-list-body frozen-data" id="file-section" hidden>
+    <div class="toolbar">
+      <span class="input-file-row"><span id="label-section-annex-source">File</span> <rr0-input-file id="section-annex-source" name="section-annex-source" no-button accept="application/json,.json" placeholder="https://…/sighting.weather.json"></rr0-input-file></span>
+      <button id="section-annex-export" type="button">Save</button>
+    </div>
+    <p id="section-annex-state" class="frozen-group-state"></p>
+    <p id="section-annex-note" class="frozen-note" hidden role="status"></p>
+  </div>
+  <!-- The recording as text: the recording's own item, and an item kept inside it, its section shown (see showFileItem). -->
+  <div id="file-editor" class="file-editor"></div>
+</section>
+</aside>
 </div>
-<!-- Everything this reconstruction actually asserts, on one wrapping strip: only fields that are
-     SET appear (37 of 75 on a real case), so it reads as a statement rather than as a second copy
-     of the form. It has to sit BELOW the render, not between the groups and it: 200px of chips
-     above the canvas would push it back off the screen and undo what the tab strip just bought.
-     Nothing is lost by the move — a summary is read while you are not editing, the render is
-     watched while you are, never both at once. Each chip carries its group and its field, so
-     clicking one opens the right panel and puts the caret in the right input (see
-     SightingEditorElement.refreshParamSummary); a value a data source supplied rather than the
-     author is marked, which is the one thing the form itself never showed at a glance. -->
-<div id="param-summary" class="param-summary"></div>
+</div>
 <div id="context-menu" class="context-menu" hidden role="menu">
   <button id="context-group" type="button" role="menuitem">Group</button>
   <button id="context-ungroup" type="button" role="menuitem">Ungroup</button>
@@ -1717,4 +1723,172 @@ ${MessageStyle.rules(
   [".scenery-warning"],
   ["#narrative-status.error"]
 )}
+/* ---- The workshop layout: the scene first and widest, an inspector beside it. ----
+   Its own palette, as tokens: each a light-dark() pair, so it follows the colour scheme this widget is
+   USED in (the host page's, or the system's) exactly as Canvas and CanvasText do — never the OS alone,
+   which a host page can disagree with. */
+:host {
+  --bg: light-dark(#f4f4f2, #14161a);
+  --panel: light-dark(#ffffff, #17191d);
+  --panel-2: light-dark(#fbfbfa, #1c1f25);
+  --line: light-dark(#e6e6e2, #2a2f38);
+  --line-strong: light-dark(#d3d3ce, #3a404b);
+  --fg: light-dark(#1b1c1e, #e7e9ee);
+  --fg-2: light-dark(#43464c, #b6bcc6);
+  --dim: light-dark(#6c6f76, #9aa1ad);
+  --accent: light-dark(#2f6fed, #5b8ff5);
+  --accent-fg: #ffffff;
+  --accent-soft: light-dark(#eff4fe, #1b2740);
+  --accent-line: light-dark(#cfdcf8, #2a3d63);
+  --danger: light-dark(#b3261e, #ff8a80);
+  --radius: 8px;
+  /* What the inspector and the stage adapt to: the width this editor is given, not the window's. */
+  container-type: inline-size;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 13px;
+}
+.app {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+}
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.app-title { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* In the header now, side by side: the strip that reserved them a column is gone. */
+.bar .history { position: static; flex-direction: row; margin-left: auto; gap: 6px; }
+.bar .history .icon-btn { width: 28px; height: 28px; min-width: 28px; min-height: 28px; max-width: none; max-height: none; }
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 34%, 480px);
+  align-items: start;
+}
+.stage-col { display: flex; flex-direction: column; gap: 10px; padding: 14px; min-width: 0; }
+.stage-col > .playback-row {
+  margin: 0;
+  padding: 8px 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.stage-col > .param-summary { margin-top: 0; }
+#group-tabs.inspector {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  align-self: stretch;
+}
+/* A group's handle: a row of its own, the group it opens right under it. */
+.inspector > .group-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 11px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--panel);
+  color: var(--fg);
+  box-shadow: none;
+  text-align: left;
+}
+.inspector > .group-tab::before {
+  content: "";
+  flex: none;
+  width: 0;
+  height: 0;
+  border-block: 4px solid transparent;
+  border-inline-start: 6px solid var(--dim);
+  transition: transform 0.12s ease;
+}
+.inspector > .group-tab:hover { background: var(--panel-2); color: var(--fg); }
+.inspector > .group-tab[aria-expanded="true"] { background: var(--panel); border-bottom-color: transparent; box-shadow: none; color: var(--fg); }
+.inspector > .group-tab[aria-expanded="true"]::before { transform: rotate(90deg); border-inline-start-color: var(--accent); }
+.inspector > .group-tab .tab-badge { margin-left: auto; }
+.inspector > .group-panel {
+  margin: 0;
+  padding: 4px 14px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--panel-2);
+  color: var(--fg);
+}
+/* The parts of a group: chips to pick from rather than a second strip of tabs. */
+.group-panel > .group-tabs { gap: 5px; margin: 8px 0; border-bottom: 0; }
+.subgroup-tab {
+  margin: 0;
+  padding: 4px 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--fg-2);
+  box-shadow: none;
+}
+.subgroup-tab:hover { background: var(--panel); color: var(--fg); border-color: var(--accent); }
+.subgroup-tab[aria-expanded="true"] { background: var(--accent-soft); border-color: var(--accent); border-bottom-color: var(--accent); color: var(--accent); box-shadow: none; }
+.subgroup-panel { margin: 0; padding: 0; border: 0; background: transparent; color: inherit; }
+/* The frame of a picked element, on the inspector's own surface rather than the system's. */
+.inspector .element-list-body { background: var(--panel); border-color: var(--line-strong); color: var(--fg); }
+/* Fields and buttons drawn alike everywhere — under every rule of their own, which still win (no specificity here). */
+:where(.app) :where(input[type="text"], input[type="url"], input[type="number"], input[type="search"], input:not([type]), select, textarea) {
+  padding: 5px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--fg);
+}
+:where(.app) :where(input, select, textarea):focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
+:where(.app) :where(button) {
+  padding: 4px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  background: var(--panel);
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+}
+:where(.app) :where(button:hover:not(:disabled)) { border-color: var(--accent); }
+:where(.app) :where(button:disabled) { opacity: 0.45; cursor: default; }
+:where(.app) input[type="range"] { accent-color: var(--accent); }
+.context-menu {
+  padding: 5px 0;
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.28);
+}
+.context-menu hr { border: 0; border-top: 1px solid var(--line); margin: 5px 0; }
+/* One column when the editor is given less room than a render and an inspector need side by side: the
+   render first, the inspector under it. */
+@container (max-width: 860px) {
+  .body { grid-template-columns: minmax(0, 1fr); }
+  #group-tabs.inspector { border-left: 0; border-top: 1px solid var(--line); }
+}
+@media (pointer: coarse) {
+  :host { font-size: 14px; }
+  .inspector > .group-tab { padding: 14px; }
+  :where(.app) :where(button) { min-height: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inspector > .group-tab::before { transition: none; }
+}
 `
