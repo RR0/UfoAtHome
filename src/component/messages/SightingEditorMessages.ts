@@ -9,6 +9,16 @@ export interface SightingEditorMessages extends InputFileMessages, SightingLabel
   /** The "Polygon" preset button — a plain quad, the starting point for a freeform shape (see
    * Shape.ts's own createCustomPolygon doc comment). */
   polygon: string
+  /** What the "+" of the shapes offers besides an oval and a polygon: shapes observers often describe, added as ordinary ovals and
+   * polygons (see ShapeModel). */
+  modelTriangle: string
+  modelSaucer: string
+  modelCigar: string
+  modelChevron: string
+  modelLight: string
+  /** What a part of a model of several is called after the model's own name: "Saucer 3, dome". */
+  modelPartDisc: string
+  modelPartDome: string
   /** Right-click menu item, only enabled for a single polygon selection — see
    * SightingEditorElement.addVertexAtContextMenu. */
   addVertex: string
@@ -102,6 +112,8 @@ export interface SightingEditorMessages extends InputFileMessages, SightingLabel
   soundTrack: string
   group: string
   ungroup: string
+  /** Right-click menu item: copies the selected shapes, every keyframe of them, beside them — see SightingEditorElement.duplicateSelected. */
+  duplicate: string
   bringToFront: string
   sendToBack: string
   contextMenuDelete: string

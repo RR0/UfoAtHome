@@ -70,3 +70,59 @@ describe("Recorder", () => {
     expect(timeline.getShapeAt(100, "ufo-2")?.bounds).toEqual({ x: 80, y: 80, width: 20, height: 20 })
   })
 })
+
+describe("Recorder thinning", () => {
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => vi.useRealTimers())
+
+  function record(positions: Array<[number, number]>): Timeline {
+    const timeline = new Timeline()
+    const recorder = new Recorder(timeline, new IntervalSamplingClock(100))
+    recorder.start("ufo-1", createOval({ x: 0, y: 0, width: 20, height: 20 }))
+    for (const [x, y] of positions) {
+      recorder.onPointerMove(x, y)
+      vi.advanceTimersByTime(100)
+    }
+    recorder.stop()
+    return timeline
+  }
+
+  it("keeps only the ends of a straight move at constant speed", () => {
+    const timeline = record([[10, 10], [20, 10], [30, 10], [40, 10], [50, 10]])
+    expect(timeline.allKeyframes.map(k => k.t)).toEqual([100, 500])
+  })
+
+  it("keeps the turn of a path", () => {
+    const timeline = record([[10, 10], [20, 10], [30, 10], [30, 20], [30, 30]])
+    expect(timeline.allKeyframes.map(k => k.t)).toEqual([100, 300, 500])
+  })
+
+  it("keeps a pause on a straight line, which the timing alone shows", () => {
+    const timeline = record([[10, 10], [20, 10], [20, 10], [20, 10], [30, 10]])
+    expect(timeline.allKeyframes.map(k => k.t)).toEqual([100, 200, 400, 500])
+  })
+
+  it("plays back within a pixel of every sample it dropped", () => {
+    const positions: Array<[number, number]> = Array.from({ length: 40 }, (_, i) => [100 + 80 * Math.cos(i / 6), 100 + 50 * Math.sin(i / 6)])
+    const timeline = record(positions)
+    expect(timeline.allKeyframes.length).toBeLessThan(positions.length)
+    positions.forEach(([x, y], i) => {
+      const shape = timeline.getInterpolatedShapeAt((i + 1) * 100, "ufo-1")!
+      expect(Math.hypot(shape.bounds.x + 10 - x, shape.bounds.y + 10 - y)).toBeLessThanOrEqual(1)
+    })
+  })
+
+  it("leaves the other sources' keyframes alone", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(200, [{ sourceId: "ufo-2", shape: createOval({ x: 0, y: 0, width: 5, height: 5 }) }])
+    const recorder = new Recorder(timeline, new IntervalSamplingClock(100))
+    recorder.start("ufo-1", createOval({ x: 0, y: 0, width: 20, height: 20 }))
+    for (const x of [10, 20, 30]) {
+      recorder.onPointerMove(x, 10)
+      vi.advanceTimersByTime(100)
+    }
+    recorder.stop()
+    expect(timeline.allKeyframes.map(k => k.t)).toEqual([100, 200, 300])
+    expect(timeline.getKeyframeAt(200)!.shapes.map(s => s.sourceId)).toEqual(["ufo-2"])
+  })
+})

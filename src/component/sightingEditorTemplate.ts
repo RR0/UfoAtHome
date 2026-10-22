@@ -649,6 +649,7 @@ export const html = `
 <div id="context-menu" class="context-menu" hidden role="menu">
   <button id="context-group" type="button" role="menuitem">Group</button>
   <button id="context-ungroup" type="button" role="menuitem">Ungroup</button>
+  <button id="context-duplicate" type="button" role="menuitem">Duplicate</button>
   <hr/>
   <button id="context-bring-to-front" type="button" role="menuitem">Bring to front</button>
   <button id="context-send-to-back" type="button" role="menuitem">Send to back</button>

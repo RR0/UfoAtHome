@@ -193,6 +193,20 @@ export class Timeline {
     this.removeFromGroup(sourceId)
   }
 
+  /** Strips one source out of the keyframe at exactly `t`, the keyframe itself going with it when nothing else is in it — what
+   * removeSource does at every instant, done at one. Recorder uses it to thin a take. */
+  removeShapeAt(t: number, sourceId: string): void {
+    const index = this.findInsertIndex(t)
+    const keyframe = this.keyframes[index]
+    if (keyframe?.t !== t) return
+    const shapes = keyframe.shapes.filter(s => s.sourceId !== sourceId)
+    if (shapes.length === 0) {
+      this.keyframes.splice(index, 1)
+    } else if (shapes.length !== keyframe.shapes.length) {
+      this.keyframes[index] = { t, shapes }
+    }
+  }
+
   /** Groups the given sources into one named group: each is first detached from any group it was
    * already in (shrinking it, or dissolving it entirely if that would drop it below 2 members —
    * a source can belong to at most one group at a time, so re-grouping across existing groups

@@ -3,6 +3,7 @@ import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
 import type { BeamEditor } from "./BeamEditor.js"
 import { AddMenu } from "./AddMenu.js"
+import type { AddMenuKind } from "./AddMenu.js"
 import { SurroundingsPlanter } from "./SurroundingsPlanter.js"
 import { MessageStyle } from "./MessageStyle.js"
 import { SceneryDates } from "./SceneryDates.js"
@@ -38,6 +39,7 @@ import type { SatellitePass } from "../engine/astronomy/SatellitePasses.js"
 import { Recorder } from "../engine/record/Recorder.js"
 import { RafSamplingClock } from "../engine/record/SamplingClock.js"
 import { createShape, moveShapeTo } from "../engine/shape/Shape.js"
+import { ShapeModel } from "../engine/shape/ShapeModel.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import { EdtfDateField } from "./EdtfDateField.js"
@@ -246,7 +248,6 @@ const ARROW_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"])
  * moveOrResizeSelectedShape. Small enough for fine nudges, still visible in one press. */
 const ARROW_KEY_STEP_PX = 4
 const DEFAULT_SOURCE_ID = "ufo-1"
-const PRESET_IDS: ShapePresetId[] = ["oval", "polygon"]
 const DEFAULT_APPEARANCE: Appearance = { presetId: "oval", color: "#39ff14", transparency: 0, haloScale: 1.5, blur: 0, brightness: 0 }
 
 /** What the pointer is currently over on the canvas, as written to its own `data-cursor`
@@ -402,6 +403,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly contextMenu: HTMLElement
   private readonly contextGroupButton: HTMLButtonElement
   private readonly contextUngroupButton: HTMLButtonElement
+  private readonly contextDuplicateButton: HTMLButtonElement
   private readonly contextBringToFrontButton: HTMLButtonElement
   private readonly contextSendToBackButton: HTMLButtonElement
   private readonly contextDeleteButton: HTMLButtonElement
@@ -1110,6 +1112,7 @@ export class SightingEditorElement extends HTMLElement {
     this.contextMenu = this.shadow.getElementById("context-menu")!
     this.contextGroupButton = this.shadow.getElementById("context-group") as HTMLButtonElement
     this.contextUngroupButton = this.shadow.getElementById("context-ungroup") as HTMLButtonElement
+    this.contextDuplicateButton = this.shadow.getElementById("context-duplicate") as HTMLButtonElement
     this.contextBringToFrontButton = this.shadow.getElementById("context-bring-to-front") as HTMLButtonElement
     this.contextSendToBackButton = this.shadow.getElementById("context-send-to-back") as HTMLButtonElement
     this.contextDeleteButton = this.shadow.getElementById("context-delete") as HTMLButtonElement
@@ -1562,6 +1565,7 @@ export class SightingEditorElement extends HTMLElement {
     this.ufoElement.canvasElement.addEventListener("contextmenu", event => this.onContextMenu(event))
     this.contextGroupButton.addEventListener("click", () => this.groupSelected())
     this.contextUngroupButton.addEventListener("click", () => this.ungroupSelected())
+    this.contextDuplicateButton.addEventListener("click", () => this.duplicateSelected())
     this.contextBringToFrontButton.addEventListener("click", () => this.bringSelectedToFront())
     this.contextSendToBackButton.addEventListener("click", () => this.sendSelectedToBack())
     this.contextDeleteButton.addEventListener("click", () => {
@@ -1727,11 +1731,17 @@ export class SightingEditorElement extends HTMLElement {
     this.addEventListener("keydown", this.handleKeyDown)
 
     // An oval or a polygon is picked when the shape is added, and kept: another kind is another shape (delete this one, add that one).
+    // A model is picked there too, and adds ovals and polygons like any other (see ShapeModel).
     this.shapeAddMenu = new AddMenu(this.addShapeButton, "add-shape-kind", kind => {
+      const model = ShapeModel.byId(kind)
+      if (model) {
+        this.addModel(model)
+        return
+      }
       this.currentAppearance = { ...this.currentAppearance, presetId: kind as ShapePresetId }
       this.addShape()
     }, kind => `add-shape-${kind}`)
-    this.shapeAddMenu.setKinds(PRESET_IDS.map(presetId => ({ value: presetId, label: presetId === "oval" ? "Oval" : "Polygon" })))
+    this.shapeAddMenu.setKinds(this.shapeAddKinds())
     this.colorInput.addEventListener("input", () => this.setAppearance({ color: this.colorInput.value }))
     this.transparencyInput.addEventListener("input", () =>
       this.setAppearance({ transparency: Number(this.transparencyInput.value) })
@@ -7519,13 +7529,7 @@ export class SightingEditorElement extends HTMLElement {
   private addShape(): void {
     if (this.isRecording) return
     const timeline = this.ufoElement.sighting.timeline
-    // The first shape of an empty recording takes the id that was waiting for it ("ufo-1").
-    if (timeline.sourceIds.length > 0 || this.currentSourceId === undefined) {
-      const taken = new Set([...timeline.sourceIds, this.currentSourceId])
-      let n = taken.size + 1
-      while (taken.has(`ufo-${n}`)) n++
-      this.currentSourceId = `ufo-${n}`
-    }
+    this.currentSourceId = this.newSourceIds(1)[0]
     this.selectedSourceIds = new Set([this.currentSourceId])
     this.applyAppearanceAtPlayhead(this.offsetDefaultBounds(timeline.sourceIds.length))
     // Filled with a real generated name from the start — same "never leave Name empty by
@@ -7539,6 +7543,87 @@ export class SightingEditorElement extends HTMLElement {
     // dropdown, so no separate refreshSourceList() call is needed here.
     this.shapeTitleInput.value = this.shapeLabel(this.currentSourceId)
     this.updateShapeTitle()
+  }
+
+  /** The ids `count` new shapes take: the first shape of an empty recording takes the id that was waiting for it ("ufo-1"), the
+   * others the next "ufo-N" nobody has. */
+  private newSourceIds(count: number): string[] {
+    const timeline = this.ufoElement.sighting.timeline
+    const ids: string[] = []
+    if (timeline.sourceIds.length === 0 && this.currentSourceId !== undefined) ids.push(this.currentSourceId)
+    const taken = new Set([...timeline.sourceIds, this.currentSourceId])
+    let n = taken.size + 1
+    while (ids.length < count) {
+      while (taken.has(`ufo-${n}`)) n++
+      ids.push(`ufo-${n}`)
+      taken.add(`ufo-${n}`)
+    }
+    return ids
+  }
+
+  /** What the "+" of the shapes offers: an oval, a polygon, then the models (see ShapeModel). */
+  private shapeAddKinds(): AddMenuKind[] {
+    const m = this.messages
+    const modelLabels: Record<string, string> = {
+      triangle: m.modelTriangle, saucer: m.modelSaucer, cigar: m.modelCigar, chevron: m.modelChevron, light: m.modelLight
+    }
+    return [
+      { value: "oval", label: m.oval },
+      { value: "polygon", label: m.polygon },
+      ...ShapeModel.ALL.map(model => ({ value: model.id, label: modelLabels[model.id] }))
+    ]
+  }
+
+  /** Adds the shapes of a model where addShape would add one, each named after the model ("Saucer 3, dome"), grouped when there are
+   * several, and all of them selected — so the first drag moves the model whole, and the group's context menu takes it apart. */
+  private addModel(model: ShapeModel): void {
+    if (this.isRecording || this.ufoElement.playbackState === "playing") return
+    const timeline = this.ufoElement.sighting.timeline
+    const bounds = model.boundsAt(this.offsetDefaultBounds(timeline.sourceIds.length))
+    const shapes = model.shapesIn(bounds, this.currentAppearance)
+    const ids = this.newSourceIds(shapes.length)
+    const label = this.shapeAddKinds().find(kind => kind.value === model.id)!.label
+    const number = /^ufo-(\d+)$/.exec(ids[0])?.[1] ?? ""
+    const partLabels = { disc: this.messages.modelPartDisc, dome: this.messages.modelPartDome }
+    const states = shapes.map((shape, i) => {
+      const part = model.partNames[i]
+      const title = part ? `${label} ${number}, ${partLabels[part]}` : `${label} ${number}`
+      return { sourceId: ids[i], shape: { ...shape, title: this.said.write(undefined, title, this.writingLanguage) } }
+    })
+    this.commitShapes(this.ufoElement.currentTime, states)
+    if (ids.length > 1) timeline.group(ids)
+    this.currentSourceId = ids[ids.length - 1]
+    this.selectedSourceIds = new Set(ids)
+    this.refreshSourceList()
+    this.ufoElement.refresh()
+  }
+
+  /** Copies the selected shapes, every keyframe of them, a step down and to the right of where they are — grouped as they were when
+   * they were one group — and selects the copies. A copy keeps its original's name: the observer named what they saw, and two of
+   * them were seen. */
+  private duplicateSelected(): void {
+    this.hideContextMenu()
+    if (this.isRecording || this.ufoElement.playbackState === "playing") return
+    const timeline = this.ufoElement.sighting.timeline
+    const originals = timeline.sourceIds.filter(id => this.selectedSourceIds.has(id))
+    if (originals.length === 0) return
+    const copies = this.newSourceIds(originals.length)
+    const step = 24
+    for (const keyframe of timeline.allKeyframes) {
+      const states = keyframe.shapes
+        .filter(state => originals.includes(state.sourceId))
+        .map(state => {
+          const { bounds } = state.shape
+          return { sourceId: copies[originals.indexOf(state.sourceId)], shape: { ...state.shape, bounds: { ...bounds, x: bounds.x + step, y: bounds.y + step } } }
+        })
+      if (states.length > 0) this.commitShapes(keyframe.t, states)
+    }
+    const group = timeline.groupMembers(originals[0])
+    if (originals.length > 1 && group?.length === originals.length && originals.every(id => group.includes(id))) timeline.group(copies)
+    this.currentSourceId = copies[copies.length - 1]
+    this.selectedSourceIds = new Set(copies)
+    this.refreshSourceList()
+    this.ufoElement.refresh()
   }
 
   /** Removes the selected shape/source entirely — every keyframe it appears in across the
@@ -9465,7 +9550,7 @@ export class SightingEditorElement extends HTMLElement {
     } else {
       this.messages = messages
     }
-    this.shapeAddMenu.setKinds([{ value: "oval", label: messages.oval }, { value: "polygon", label: messages.polygon }])
+    this.shapeAddMenu.setKinds(this.shapeAddKinds())
     this.contextAddVertexButton.textContent = messages.addVertex
     this.contextDeleteVertexButton.textContent = messages.deleteVertex
     this.labelColor.textContent = messages.color
@@ -9509,6 +9594,7 @@ export class SightingEditorElement extends HTMLElement {
     this.deleteShapeButton.setAttribute("aria-label", messages.deleteShape)
     this.contextGroupButton.textContent = messages.group
     this.contextUngroupButton.textContent = messages.ungroup
+    this.contextDuplicateButton.textContent = messages.duplicate
     this.contextBringToFrontButton.textContent = messages.bringToFront
     this.contextSendToBackButton.textContent = messages.sendToBack
     this.contextDeleteButton.textContent = messages.contextMenuDelete
@@ -10096,6 +10182,7 @@ export class SightingEditorElement extends HTMLElement {
     this.contextUngroupButton.disabled = !grouped
     this.contextUngroupButton.title = grouped ? "" : this.messages.notGrouped
 
+    this.contextDuplicateButton.disabled = this.deleteShapeButton.disabled
     this.contextDeleteButton.disabled = this.deleteShapeButton.disabled
     // Disabled only while recording or playing now: the last shape may go (see deleteShape).
     this.contextDeleteButton.title = ""
