@@ -146,24 +146,37 @@ const TEMPLATE = `
   .event-card, .kind-pill { --kind: var(--glow-solid); --kind-bg: var(--warn-bg); }
   :is(.event-card, .kind-pill)[data-kind="interview"] { --kind: var(--sky); --kind-bg: light-dark(rgba(18, 96, 143, .12), rgba(127, 212, 255, .14)); }
   :is(.event-card, .kind-pill)[data-kind="reading"] { --kind: var(--ink-faint); --kind-bg: var(--neutral-bg); }
-  .event-list { position: relative; display: grid; gap: 10px; margin: 0; padding: 0 0 0 24px; list-style: none; }
-  .event-list::before { content: ""; position: absolute; left: 6px; top: 20px; bottom: 20px; width: 1px; background: var(--line-strong); }
+  /* The line runs through the centre of every dot: each card draws its own stretch of it, from the card above to the card below,
+     the first from its dot down and the last down to its dot. Both are placed from the card's outer edge, past its 1px border.
+     The dot stands level with the kind's pill: the card's middle while the card is one row, the pill's line once it wraps. */
+  .event-list { --rail: 7px; --gap: 10px; display: grid; gap: var(--gap); margin: 0; padding: 0 0 0 24px; list-style: none; }
   .event-card {
-    position: relative; display: grid; grid-template-columns: auto minmax(0, 1.2fr) minmax(0, 1fr) auto auto; align-items: center; gap: 12px;
-    padding: 0 0 0 14px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--ground);
+    --dot-y: 50%;
+    position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 52px;
+    border: 1px solid var(--line-strong); border-radius: 10px; background: var(--ground);
   }
+  .event-card::before, .event-card::after { content: ""; position: absolute; left: calc(var(--rail) - 24px - 1px); }
   .event-card::before {
-    content: ""; position: absolute; left: -23px; top: 50%; width: 9px; height: 9px; transform: translateY(-50%);
+    z-index: 1; top: calc(var(--dot-y) - 1px); box-sizing: border-box; width: 13px; height: 13px; transform: translate(-50%, -50%);
     border: 2px solid var(--kind); border-radius: 50%; background: var(--ground-raised);
   }
-  .kind-pill { justify-self: start; padding: 2px 10px; border-radius: 999px; background: var(--kind-bg); color: var(--ink); font: 700 12px/1.5 var(--sans); white-space: nowrap; }
-  .event-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 12px 0; }
+  .event-card::after { top: calc(-1px - var(--gap) / 2); bottom: calc(-1px - var(--gap) / 2); width: 1px; transform: translateX(-50%); background: var(--line-strong); }
+  .event-card:first-child::after { top: calc(var(--dot-y) - 1px); }
+  .event-card:last-child::after { bottom: calc(100% - var(--dot-y) - 1px); }
+  .event-card:only-child::after { display: none; }
+  .event-body { display: grid; grid-template-columns: minmax(96px, auto) minmax(0, 1.2fr) minmax(0, 1fr) auto; grid-template-areas: "pill main links open";
+    align-items: center; gap: 4px 12px; min-width: 0; padding: 12px 8px 12px 14px; }
+  .kind-pill { grid-area: pill; justify-self: start; padding: 2px 10px; border-radius: 999px; background: var(--kind-bg); color: var(--ink); font: 700 12px/1.5 var(--sans); white-space: nowrap; }
+  .event-main { grid-area: main; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .event-main strong { font: 600 15px/1.35 var(--sans); }
   .event-meta { font-size: 13px; color: var(--ink-faint); overflow-wrap: anywhere; }
-  .event-links { font-size: 13px; color: var(--ink-dim); }
-  .event-open { min-height: 0; padding: 4px 6px; border: 0; background: none; color: var(--sky); font: 600 14px/1.2 var(--sans); white-space: nowrap; }
+  .event-links { grid-area: links; font-size: 13px; color: var(--ink-dim); }
+  .event-links:empty { display: none; }
+  .event-open { grid-area: open; justify-self: start; min-height: 0; padding: 4px 6px; border: 0; background: none; color: var(--sky); font: 600 14px/1.2 var(--sans); white-space: nowrap; }
   .event-open:hover:not(:disabled) { background: none; text-decoration: underline; }
-  .event-delete { align-self: stretch; height: auto; min-height: 0; border: 0; border-left: 1px solid var(--line-strong); border-radius: 0 10px 10px 0; background: none; padding: 0 14px; }
+  .event-delete { display: grid; place-items: center; width: auto; height: auto; min-width: 0; min-height: 0; padding: 0;
+    border: 0; border-left: 1px solid var(--line-strong); border-radius: 0 10px 10px 0; background: none; color: var(--ink-dim); }
+  .event-delete:hover:not(:disabled) { color: var(--error); }
   /* The event open: the way back to the case, and the events before and after. */
   .crumbs { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 16px; padding: 0 0 16px; border-bottom: 1px solid var(--line); }
   .crumb-sep { color: var(--ink-faint); }
@@ -173,9 +186,14 @@ const TEMPLATE = `
     border: 1px solid var(--glow-dim); border-radius: 10px; background: var(--warn-bg); font-size: 14px; }
   .cited[hidden] { display: none; }
   @container (max-width: 640px) {
-    .event-card { grid-template-columns: auto minmax(0, 1fr) auto; }
-    .event-links { grid-column: 2 / -1; padding-bottom: 10px; }
+    /* Narrow, as the handoff's mobile view: the pill above the title, "Open" beside the title, or under what the event is linked to
+       when it says something; the removal keeps its column. */
+    .event-card { --dot-y: 24px; }
+    .event-body { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "pill pill" "main open"; gap: 6px 10px; }
+    .event-body:has(.event-links:not(:empty)) { grid-template-areas: "pill pill" "main main" "links links" "open open"; }
+    .event-open { padding: 4px 0; }
     .editor-head { flex-wrap: wrap; }
+    .editor-head .head-actions { flex: 0 1 auto; flex-wrap: wrap; min-width: 0; }
   }
 </style>
 <div id="case" class="case">
@@ -1128,7 +1146,10 @@ export class CaseEditorElement extends HTMLElement {
       remove.title = m.deleteRecording
       remove.setAttribute("aria-label", m.deleteRecording)
       remove.addEventListener("click", () => void this.deleteFromList(index))
-      card.append(pill, main, links, open, remove)
+      const body = document.createElement("div")
+      body.className = "event-body"
+      body.append(pill, main, links, open)
+      card.append(body, remove)
       return card
     }))
   }
