@@ -1019,7 +1019,7 @@ export class SightingElement extends HTMLElement {
     this.variantMoved.innerHTML = ""
     const index = value.startsWith(VARIANT_OPTION) ? Number(value.slice(VARIANT_OPTION.length)) : -1
     const variant = this.sceneElement.ufoElement.sighting.variants?.[index]?.variant
-    this.variantMoved.hidden = !variant || variant.moved.length === 0
+    this.variantMoved.hidden = !variant || variant.moved.length + (variant.readings?.length ?? 0) === 0
     if (!variant) return
     const degrees = new Intl.NumberFormat(this.language, { maximumFractionDigits: 1 })
     for (const moved of variant.moved) {
@@ -1030,6 +1030,10 @@ export class SightingElement extends HTMLElement {
       line.append(`${this.messages.variantFields[moved.field]}${this.colon}`, Object.assign(document.createElement("s"), { textContent: stated }), " → ",
         Object.assign(document.createElement("b"), { textContent: read }))
       this.variantMoved.append(line)
+    }
+    for (const used of variant.readings ?? []) {
+      const reading = this.messages.variantReadings[used.reading]
+      if (reading) this.variantMoved.append(Object.assign(document.createElement("span"), { className: "reading", textContent: reading }))
     }
   }
 

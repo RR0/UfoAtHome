@@ -46,5 +46,6 @@ export const sightingMessages_fr: SightingMessages = {
   hideLabels: "Masquer ce qu'elle indique",
   variant: "Variante : {name}",
   verdicts: { consolidated: "compatible avec des biais consolidés", contested: "seulement en invoquant des biais contestés", incompatible: "incompatible même aux bornes" },
-  variantFields: { time: "Heure", heading: "Direction", elevation: "Hauteur", size: "Taille" }
+  variantFields: { time: "Heure", heading: "Direction", elevation: "Hauteur", size: "Taille" },
+  variantReadings: { "grouped": "des lumières lues comme un seul corps", "still-seen-moving": "une lumière fixe vue en mouvement", "moving-seen-still": "une lumière en mouvement vue immobile", "brightening-as-approach": "un éclat croissant lu comme un rapprochement" }
 }

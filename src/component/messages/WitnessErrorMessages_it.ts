@@ -151,7 +151,16 @@ export const witnessErrorMessages_it: WitnessErrorMessages = {
     "reasons": {
       "never-seen": "Mai visibile da questo luogo nel margine dell'ora data.",
       "direction": "Troppo lontano dalla direzione data, anche ai limiti delle leggi.",
-      "size": "Dimensione troppo diversa, anche ai limiti delle leggi."
+      "size": "Dimensione troppo diversa, anche ai limiti delle leggi.",
+      "motion": "Non si muove come dice il resoconto, e nulla fa leggere l'uno per l'altro.",
+      "growth": "Non cresce come dice il resoconto, né diventa più luminoso."
+    },
+    "readingTitle": "Lettura",
+    "readings": {
+      "grouped": "luci lette come un solo corpo",
+      "still-seen-moving": "una luce ferma vista muoversi (effetto autocinetico, nuvole che scorrono)",
+      "moving-seen-still": "una luce in moto vista immobile (in arrivo di fronte)",
+      "brightening-as-approach": "una luminosità crescente letta come un avvicinamento"
     },
     "notAgainst": "Non è un argomento contro il racconto.",
     "noDirection": "Il racconto non colloca il fenomeno nel cielo: non c'è nulla da confrontare.",

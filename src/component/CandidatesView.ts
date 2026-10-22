@@ -4,7 +4,7 @@ import type { WitnessConditions } from "../engine/model/Account.js"
 import type { ErrorModel, LeadStatus } from "../engine/witness/WitnessError.js"
 import { WitnessError } from "../engine/witness/WitnessError.js"
 import { CandidateSearch } from "../engine/witness/CandidateSearch.js"
-import type { AccountStatement, CandidateTrack, MovedValue, Variant } from "../engine/witness/CandidateSearch.js"
+import type { AccountStatement, CandidateTrack, MovedValue, StructuralReading, UsedReading, Variant } from "../engine/witness/CandidateSearch.js"
 import { computeBodyMagnitude, computeBodyPosition, equatorialToHorizontal } from "../engine/astronomy/CelestialPositions.js"
 import type { CelestialBody } from "../engine/astronomy/CelestialPositions.js"
 import { PoherAnswers } from "../engine/witness/PoherMatrix.js"
@@ -81,6 +81,7 @@ export class CandidatesView {
 .moved-row s, .variant-value s { color: var(--ink-faint); text-decoration-color: var(--error); }
 .moved-row b, .variant-value b { color: var(--ink); }
 .moved-row .bias { color: var(--ink-dim); }
+.reading-row { grid-template-columns: minmax(8em, auto) minmax(0, 1fr) auto; }
 .candidate-reason { margin: 0; color: var(--ink-dim); }
 .candidates-note { margin: 4px 0 0; font-size: 13px; color: var(--ink-faint); }
 .variant-value { flex: 1 0 100%; font: 400 13px/1.4 var(--sans); }
@@ -148,7 +149,17 @@ export class CandidatesView {
     this.statementT = t
     const shape = timeline.getInterpolatedShapeAt(t, first)
     if (!shape?.aim) return undefined
-    return { aim: shape.aim, widthDeg: shape.angular?.widthDeg, timeHow: sighting.provenance.at("time")?.how }
+    const statement: AccountStatement = { aim: shape.aim, widthDeg: shape.angular?.widthDeg, timeHow: sighting.provenance.at("time")?.how }
+    // How it moved and grew: from the first instant it is placed to the last, when the account places it more than once.
+    const last = [...timeline.allKeyframes].reverse().find(keyframe => keyframe.t > t && timeline.getShapeAt(keyframe.t, first)?.aim)
+    const end = last ? timeline.getInterpolatedShapeAt(last.t, first) : undefined
+    if (last && end?.aim) {
+      statement.motion = { sweepDeg: CandidateSearch.separation(shape.aim, end.aim), spanMinutes: (last.t - t) / 60_000 }
+      const from = shape.angular?.widthDeg
+      const to = end.angular?.widthDeg
+      if (from && to) statement.growth = to / from
+    }
+    return statement
   }
 
   /** The candidates whose track can be computed, each as the phenomenon of the matrix it stands for. */
@@ -166,8 +177,10 @@ export class CandidatesView {
         const sun = computeBodyPosition("Sun", date, start.observer).altitudeDeg
         const magnitude = name === "Moon" ? -10 : computeBodyMagnitude(name, date)
         if (magnitude > this.host.limitAt(sun)) return undefined
-        return { aim: { azimuthDeg: position.azimuthDeg, altitudeDeg: position.altitudeDeg }, widthDeg: name === "Moon" ? WitnessError.MOON_DEG : 0.01 }
-      }
+        return { aim: { azimuthDeg: position.azimuthDeg, altitudeDeg: position.altitudeDeg }, widthDeg: name === "Moon" ? WitnessError.MOON_DEG : 0.01, magnitude }
+      },
+      // A body of the sky stands still against the horizon: seen moving, it is by the autokinetic effect, or behind drifting clouds.
+      readings: ["still-seen-moving"]
     })
     this.phenomenonOf.clear()
     const tracks: CandidateTrack[] = [body("Moon")]
@@ -194,8 +207,10 @@ export class CandidatesView {
           at: (offsetMinutes: number) => {
             const seen = at(new Date(start.date.getTime() + this.statementT + offsetMinutes * 60_000))?.find(position => position.object.norad === pass.object.norad)
             if (!seen || seen.altitudeDeg < 0 || seen.sunlitFraction < 0.5) return undefined
-            return { aim: { azimuthDeg: seen.azimuthDeg, altitudeDeg: seen.altitudeDeg }, widthDeg: 0.01 }
-          }
+            return { aim: { azimuthDeg: seen.azimuthDeg, altitudeDeg: seen.altitudeDeg }, widthDeg: 0.01, magnitude: seen.magnitude }
+          },
+          // A tumbling stage or a panel catching the Sun flares: brighter for a few seconds.
+          readings: ["brightening-as-approach"]
         })
         this.phenomenonOf.set(id, "OrbitingSatellites")
       }
@@ -235,8 +250,9 @@ export class CandidatesView {
           const date = dateAt(offsetMinutes)
           const position = equatorialToHorizontal(star.raHours, star.decDeg, date, start.observer)
           if (position.altitudeDeg < 0 || star.mag > this.host.limitAt(sunAt(date))) return undefined
-          return { aim: { azimuthDeg: position.azimuthDeg, altitudeDeg: position.altitudeDeg }, widthDeg: 0.01 }
-        }
+          return { aim: { azimuthDeg: position.azimuthDeg, altitudeDeg: position.altitudeDeg }, widthDeg: 0.01, magnitude: star.mag }
+        },
+        readings: ["still-seen-moving"] as StructuralReading[]
       }
     })
   }
@@ -283,8 +299,10 @@ export class CandidatesView {
           if (brightest.magnitude > this.host.limitAt(sun)) return undefined
           let spread = 0
           for (const a of views) for (const b of views) spread = Math.max(spread, Math.hypot(a.head.azimuthDeg - b.head.azimuthDeg, a.head.altitudeDeg - b.head.altitudeDeg))
-          return { aim: { azimuthDeg: brightest.head.azimuthDeg, altitudeDeg: brightest.head.altitudeDeg }, widthDeg: Math.max(0.01, spread) }
-        }
+          return { aim: { azimuthDeg: brightest.head.azimuthDeg, altitudeDeg: brightest.head.altitudeDeg }, widthDeg: Math.max(0.01, spread), magnitude: brightest.magnitude }
+        },
+        // Its fragments read as one body, flaring as they break up.
+        readings: ["grouped", "brightening-as-approach"]
       }
     }
     return [...reentries.map(reentry => track(reentry, false)), ...fireballs.map(fireball => track(fireball, true))]
@@ -337,7 +355,9 @@ export class CandidatesView {
           if (seen.altitudeDeg < 0 || seen.distanceKm > CandidatesView.AIRCRAFT_RANGE_KM) return undefined
           const widthDeg = (Math.atan2(CandidatesView.SPAN_M, seen.distanceKm * 1000) * 180) / Math.PI
           return { aim: { azimuthDeg: seen.azimuthDeg, altitudeDeg: seen.altitudeDeg }, widthDeg }
-        }
+        },
+        // Its lights read as one body; coming head on, it seems to hover, its landing lights growing brighter.
+        readings: ["grouped", "moving-seen-still", "brightening-as-approach"] as StructuralReading[]
       }
     })
   }
@@ -413,7 +433,8 @@ export class CandidatesView {
       bodies: of ? structuredClone(of.bodies) : [],
       variant: {
         candidate: variant.candidate, label: variant.label, ...(phenomenon ? { phenomenon } : {}),
-        parameters: variant.parameters, moved: variant.moved.map(moved => ({ ...moved })), cost: variant.cost, verdict: variant.verdict, modelId: variant.modelId
+        parameters: variant.parameters, moved: variant.moved.map(moved => ({ ...moved })), ...(variant.readings.length > 0 ? { readings: variant.readings.map(used => ({ ...used })) } : {}),
+        cost: variant.cost, verdict: variant.verdict, modelId: variant.modelId
       }
     }
     const index = this.host.variants().findIndex(existing => existing.variant?.candidate === variant.candidate && existing.variant?.modelId === variant.modelId)
@@ -451,7 +472,7 @@ export class CandidatesView {
       see.textContent = m.candidates.seeKept
       see.addEventListener("click", () => this.show({
         candidate: json.candidate, label: json.label ?? json.candidate, verdict: json.verdict, cost: json.cost, parameters: json.parameters,
-        moved: json.moved as MovedValue[], modelId: json.modelId
+        moved: json.moved as MovedValue[], readings: (json.readings ?? []) as UsedReading[], modelId: json.modelId
       }))
       const remove = document.createElement("button")
       remove.type = "button"
@@ -578,6 +599,7 @@ export class CandidatesView {
       body.append(Object.assign(document.createElement("p"), { className: "candidate-reason", textContent: `${m.reasons[variant.reason ?? "direction"]} ${m.notAgainst}` }))
     }
     for (const moved of variant.moved) body.append(this.movedRow(moved))
+    for (const used of variant.readings) body.append(this.readingRow(used))
     if (variant.verdict !== "incompatible") {
       const see = document.createElement("button")
       see.type = "button"
@@ -595,6 +617,16 @@ export class CandidatesView {
       body.append(buttons)
     }
     row.append(head, body)
+    return row
+  }
+
+  /** One structural reading the variant uses: what is read otherwise, and what the studies say of it. */
+  private readingRow(used: UsedReading): HTMLElement {
+    const m = this.host.messages().candidates
+    const row = document.createElement("div")
+    row.className = "moved-row reading-row"
+    row.append(Object.assign(document.createElement("span"), { textContent: m.readingTitle }),
+      Object.assign(document.createElement("span"), { className: "bias", textContent: m.readings[used.reading] }), this.status(used.status))
     return row
   }
 

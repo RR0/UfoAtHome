@@ -237,6 +237,9 @@ export const css = `
 .variant-moved span {
   margin-right: 1em;
 }
+.variant-moved .reading {
+  font-style: italic;
+}
 .variant-moved s {
   opacity: .65;
   text-decoration-color: #e04848;

@@ -151,7 +151,16 @@ export const witnessErrorMessages_fr: WitnessErrorMessages = {
     "reasons": {
       "never-seen": "Jamais visible depuis ce lieu dans la marge de l'heure donnée.",
       "direction": "Trop loin de la direction donnée, même aux bornes des lois.",
-      "size": "Taille trop différente, même aux bornes des lois."
+      "size": "Taille trop différente, même aux bornes des lois.",
+      "motion": "Il ne bouge pas comme le dit le récit, et rien ne fait lire l'un pour l'autre.",
+      "growth": "Il ne grossit pas comme le dit le récit, ni ne devient plus brillant."
+    },
+    "readingTitle": "Lecture",
+    "readings": {
+      "grouped": "des lumières lues comme un seul corps",
+      "still-seen-moving": "une lumière fixe vue en mouvement (effet autocinétique, nuages qui défilent)",
+      "moving-seen-still": "une lumière en mouvement vue immobile (arrivant de face)",
+      "brightening-as-approach": "un éclat croissant lu comme un rapprochement"
     },
     "notAgainst": "Ce n'est pas un argument contre le récit.",
     "noDirection": "Le récit ne situe pas le phénomène dans le ciel : il n'y a rien à confronter.",

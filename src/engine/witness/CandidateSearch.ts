@@ -14,6 +14,26 @@ export interface AccountStatement {
   /** How the heading and the elevation were given, and the apparent size (see StatedValue.how). */
   headingHow?: string
   sizeHow?: string
+  /** How far the phenomenon moved across the sky between the first and the last instant the account places it, and in how long. */
+  motion?: { sweepDeg: number, spanMinutes: number }
+  /** How many times wider it looked at the last of those instants than at the first: above 1, what the account reads as it coming nearer. */
+  growth?: number
+}
+
+/**
+ * A misperception that is no value shifted but a different reading of the scene (see docs/witness-error-model.md, "Structural variants"):
+ * - `grouped`: lights read as one body (a formation, a re-entry's fragments, an airliner's lights);
+ * - `still-seen-moving`: a light that stands still seen moving (the autokinetic effect of a point in the dark, the Moon behind clouds);
+ * - `moving-seen-still`: a light that moves seen hovering (an aircraft coming head on);
+ * - `brightening-as-approach`: a light growing brighter read as one coming nearer.
+ * Each comes from the candidate, which declares those it may need; none is ever searched blindly.
+ */
+export type StructuralReading = "grouped" | "still-seen-moving" | "moving-seen-still" | "brightening-as-approach"
+
+/** One structural reading a variant uses, with what the studies say of it, as a law's status. */
+export interface UsedReading {
+  reading: StructuralReading
+  status: LeadStatus
 }
 
 /** A candidate explanation, as it would have looked from where the observer stood, `offsetMinutes` after the time they gave. */
@@ -21,8 +41,11 @@ export interface CandidateTrack {
   id: string
   /** What it is called, in the reader's language. */
   label: string
-  /** Its direction and how wide it looked, or undefined when it could not be seen then (below the horizon, too faint). */
-  at(offsetMinutes: number): { aim: ShapeAim, widthDeg: number } | undefined
+  /** Its direction and how wide it looked, and its magnitude when it is known, or undefined when it could not be seen then (below the
+   * horizon, too faint). */
+  at(offsetMinutes: number): { aim: ShapeAim, widthDeg: number, magnitude?: number } | undefined
+  /** The structural readings it may need (see StructuralReading): none when not said. */
+  readings?: StructuralReading[]
 }
 
 /** The three outcomes of a candidate, in the vocabulary of the leads' statuses. */
@@ -52,8 +75,11 @@ export interface Variant {
   cost: number
   parameters: { clockMinutes: number, headingDeg: number, elevationFactor: number, sizeFactor: number }
   moved: MovedValue[]
-  /** Why it is incompatible, when it is: never seen at all, or seen too far from where and how the account puts it. */
-  reason?: "never-seen" | "direction" | "size"
+  /** The structural readings it uses: those the account needs of it and it declares. */
+  readings: UsedReading[]
+  /** Why it is incompatible, when it is: never seen at all, seen too far from where and how the account puts it, or needing a reading of
+   * how it moved or grew that it does not offer. */
+  reason?: "never-seen" | "direction" | "size" | "motion" | "growth"
   /** The error model it was computed with, to compute it again when the model changes. */
   modelId: string
 }
@@ -71,6 +97,27 @@ export class CandidateSearch {
   static readonly TAIL_SIGMA = 2
   /** The size a point of light is seen at, at the least: glare and blur give a star a disc of a few arcminutes. */
   static readonly POINT_SIZE_DEG = 0.1
+  /** Beyond this sweep, in degrees, a light moved; below STILL_DEG it stood still: between, the account says too little to read either way. */
+  static readonly MOVED_DEG = 2
+  static readonly STILL_DEG = 0.5
+  /** The most a still light is seen to move: the few degrees the autokinetic effect gives a point in the dark. A light crossing more
+   * of the sky moved. */
+  static readonly STILL_SEEN_MOVING_MAX_DEG = 10
+  /** A growth of the account's light beyond this factor reads as it coming nearer. */
+  static readonly GROWTH = 1.5
+  /** A brightening by this many magnitudes is one an observer notices. */
+  static readonly BRIGHTENING_MAG = 0.5
+  /**
+   * What the studies say of each structural reading, as a law's status: the autokinetic effect and induced motion are laboratory findings;
+   * lights read as one body is what every re-entry recorded by many observers shows (Zond IV, 1968); an aircraft coming head on seen
+   * hovering, and a brightening read as an approach, are argued from cases, not measured.
+   */
+  static readonly READING_STATUS: Record<StructuralReading, LeadStatus> = {
+    "grouped": "consolidated",
+    "still-seen-moving": "consolidated",
+    "moving-seen-still": "argued",
+    "brightening-as-approach": "argued"
+  }
   /** The degrees an elevation outside its one-sided law is paid in, per σ. */
   private static readonly ELEVATION_SIGMA_DEG = 5
 
@@ -92,7 +139,7 @@ export class CandidateSearch {
       if (!best || variant.cost < best.cost) best = variant
     }
     return best ?? {
-      candidate: candidate.id, label: candidate.label, verdict: "incompatible", cost: Infinity, reason: "never-seen", moved: [],
+      candidate: candidate.id, label: candidate.label, verdict: "incompatible", cost: Infinity, reason: "never-seen", moved: [], readings: [],
       parameters: { clockMinutes: 0, headingDeg: 0, elevationFactor: 1, sizeFactor: 1 }, modelId: this.model.id
     }
   }
@@ -104,7 +151,7 @@ export class CandidateSearch {
   }
 
   private variantAt(statement: AccountStatement, candidate: CandidateTrack, offset: number, timeSigma: number, timeStatus: LeadStatus,
-    seen: { aim: ShapeAim, widthDeg: number }): Variant {
+    seen: { aim: ShapeAim, widthDeg: number, magnitude?: number }): Variant {
     const moved: MovedValue[] = []
     let reason: Variant["reason"]
     if (Math.abs(offset) > 0.05) moved.push({ field: "time", stated: 0, variant: offset, parameter: "clock", amount: offset, z: offset / timeSigma, status: timeStatus })
@@ -147,12 +194,55 @@ export class CandidateSearch {
     const cost = Math.sqrt(moved.reduce((sum, value) => sum + value.z * value.z, 0))
     const beyond = moved.find(value => Math.abs(value.z) > CandidateSearch.BOUND_SIGMA)
     if (beyond) reason = beyond.field === "size" ? "size" : "direction"
-    // Contested when it takes a contested law moving the value at all, or a law's tail.
+    const { readings, lacking } = this.structural(statement, candidate, offset, seen)
+    if (!reason && lacking) reason = lacking
+    // Contested when it takes a contested law moving the value at all, or a law's tail, or a reading the studies only argue.
     const contested = moved.some(value => value.status === "contested" || Math.abs(value.z) > CandidateSearch.TAIL_SIGMA)
-    const verdict: Verdict = beyond ? "incompatible" : contested ? "contested" : "consolidated"
+      || readings.some(used => used.status !== "consolidated")
+    const verdict: Verdict = reason ? "incompatible" : contested ? "contested" : "consolidated"
     return {
-      candidate: candidate.id, label: candidate.label, verdict, cost: WitnessError.rounded(cost), moved, ...(reason ? { reason } : {}),
+      candidate: candidate.id, label: candidate.label, verdict, cost: WitnessError.rounded(cost), moved, readings, ...(reason ? { reason } : {}),
       parameters: { clockMinutes: offset, headingDeg, elevationFactor, sizeFactor }, modelId: this.model.id
     }
+  }
+
+  /**
+   * The structural readings the account needs of the candidate, from how it moved and grew against how the candidate did over the same
+   * span: those the candidate declares are used, the first it does not is why it is incompatible. A candidate made of several lights is
+   * read as one body whenever it declares so: that is what the account drew.
+   */
+  private structural(statement: AccountStatement, candidate: CandidateTrack, offset: number, seen: { aim: ShapeAim, widthDeg: number, magnitude?: number }):
+    { readings: UsedReading[], lacking?: "motion" | "growth" } {
+    const offered = candidate.readings ?? []
+    const needed: [StructuralReading, "motion" | "growth"][] = []
+    const motion = statement.motion
+    const end = motion && motion.spanMinutes > 0 ? candidate.at(offset + motion.spanMinutes) : undefined
+    if (motion && end) {
+      const sweep = CandidateSearch.separation(seen.aim, end.aim)
+      if (motion.sweepDeg >= CandidateSearch.MOVED_DEG && sweep < CandidateSearch.STILL_DEG) {
+        if (motion.sweepDeg > CandidateSearch.STILL_SEEN_MOVING_MAX_DEG) return { readings: [], lacking: "motion" }
+        needed.push(["still-seen-moving", "motion"])
+      }
+      else if (motion.sweepDeg < CandidateSearch.STILL_DEG && sweep >= CandidateSearch.MOVED_DEG) needed.push(["moving-seen-still", "motion"])
+    }
+    if (statement.growth !== undefined && statement.growth >= CandidateSearch.GROWTH && end && end.widthDeg / Math.max(seen.widthDeg, 1e-6) < CandidateSearch.GROWTH) {
+      // It did not come nearer: only a light growing brighter can be what was read as it did, when the candidate is known to have.
+      const brightened = seen.magnitude === undefined || end.magnitude === undefined || seen.magnitude - end.magnitude >= CandidateSearch.BRIGHTENING_MAG
+      if (brightened) needed.push(["brightening-as-approach", "growth"])
+      else return { readings: [], lacking: "growth" }
+    }
+    const readings: UsedReading[] = offered.includes("grouped") ? [{ reading: "grouped", status: CandidateSearch.READING_STATUS.grouped }] : []
+    for (const [reading, field] of needed) {
+      if (!offered.includes(reading)) return { readings, lacking: field }
+      readings.push({ reading, status: CandidateSearch.READING_STATUS[reading] })
+    }
+    return { readings }
+  }
+
+  /** The angle between two directions, in degrees. */
+  static separation(a: ShapeAim, b: ShapeAim): number {
+    const rad = Math.PI / 180
+    const cos = Math.sin(a.altitudeDeg * rad) * Math.sin(b.altitudeDeg * rad) + Math.cos(a.altitudeDeg * rad) * Math.cos(b.altitudeDeg * rad) * Math.cos((a.azimuthDeg - b.azimuthDeg) * rad)
+    return Math.acos(Math.max(-1, Math.min(1, cos))) / rad
   }
 }

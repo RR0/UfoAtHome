@@ -63,7 +63,10 @@ export interface WitnessErrorMessages {
     scopeNote: string
     fields: Record<"time" | "heading" | "elevation" | "size", string>
     biases: Record<"clock" | "heading" | "elevation" | "size", string>
-    reasons: Record<"never-seen" | "direction" | "size", string>
+    reasons: Record<"never-seen" | "direction" | "size" | "motion" | "growth", string>
+    /** A structural reading a variant uses (see CandidateSearch's StructuralReading), and what heads its line. */
+    readingTitle: string
+    readings: Record<"grouped" | "still-seen-moving" | "moving-seen-still" | "brightening-as-approach", string>
     notAgainst: string
     noDirection: string
     noSky: string

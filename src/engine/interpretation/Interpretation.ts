@@ -49,6 +49,8 @@ export interface VariantJson {
   parameters: { clockMinutes: number, headingDeg: number, elevationFactor: number, sizeFactor: number }
   /** The values it moves: what the account says, what the variant reads, the bias and its status. */
   moved: { field: "time" | "heading" | "elevation" | "size", stated: number, variant: number, parameter: string, amount: number, z: number, status: string }[]
+  /** The structural readings it uses (see CandidateSearch's StructuralReading), each with what the studies say of it. */
+  readings?: { reading: string, status: string }[]
   /** What it costs, in units of the laws' spread (σ), and the verdict it got. */
   cost: number
   verdict: "consolidated" | "contested" | "incompatible"

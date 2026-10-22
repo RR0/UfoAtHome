@@ -77,4 +77,6 @@ export interface SightingMessages extends SightingLabels {
   verdicts: { consolidated: string, contested: string, incompatible: string }
   /** The values a variant moves, as the line under the render names them. */
   variantFields: { time: string, heading: string, elevation: string, size: string }
+  /** The structural readings a variant uses (see CandidateSearch's StructuralReading), as the line under the render says them. */
+  variantReadings: Record<string, string>
 }

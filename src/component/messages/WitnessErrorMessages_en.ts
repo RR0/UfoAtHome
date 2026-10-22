@@ -151,7 +151,16 @@ export const witnessErrorMessages_en: WitnessErrorMessages = {
     "reasons": {
       "never-seen": "Never visible from this place within the margin of the time given.",
       "direction": "Too far from the direction given, even at the bounds of the laws.",
-      "size": "Size too different, even at the bounds of the laws."
+      "size": "Size too different, even at the bounds of the laws.",
+      "motion": "It does not move the way the account says, and nothing reads one as the other.",
+      "growth": "It does not grow as the account says, nor grow brighter."
+    },
+    "readingTitle": "Reading",
+    "readings": {
+      "grouped": "lights read as one body",
+      "still-seen-moving": "a still light seen moving (autokinetic effect, drifting clouds)",
+      "moving-seen-still": "a moving light seen hovering (coming head on)",
+      "brightening-as-approach": "growing brighter read as coming nearer"
     },
     "notAgainst": "This is no argument against the account.",
     "noDirection": "The account does not place the phenomenon in the sky: there is nothing to confront.",

@@ -42,6 +42,56 @@ describe("CandidateSearch", () => {
   })
 })
 
+describe("CandidateSearch structural readings", () => {
+  const search = new CandidateSearch(WitnessError.byId("consolidated"))
+  // A light the account moves 10° across the sky in 2 minutes, from where the candidate stands.
+  const moving = { aim: { azimuthDeg: 205, altitudeDeg: 12 }, motion: { sweepDeg: 10, spanMinutes: 2 } }
+  const crossing = (readings?: CandidateTrack["readings"]): CandidateTrack => ({
+    id: "aircraft", label: "aircraft", readings,
+    at: (offsetMinutes: number) => ({ aim: { azimuthDeg: 205 + offsetMinutes * 5, altitudeDeg: 12 }, widthDeg: 0.05 })
+  })
+
+  it("reads a still light seen moving when the candidate offers it, as a consolidated effect", () => {
+    const variant = search.fit(moving, { ...still("venus", 205, 12), readings: ["still-seen-moving"] })
+    expect(variant.readings).toEqual([{ reading: "still-seen-moving", status: "consolidated" }])
+    expect(variant.verdict).toBe("consolidated")
+  })
+
+  it("reads no still light as one crossing a large part of the sky", () => {
+    const variant = search.fit({ ...moving, motion: { sweepDeg: 140, spanMinutes: 0.1 } }, { ...still("star", 205, 12), readings: ["still-seen-moving"] })
+    expect(variant).toMatchObject({ verdict: "incompatible", reason: "motion" })
+  })
+
+  it("makes a still candidate that offers no such reading incompatible with a moving account, and says why", () => {
+    const variant = search.fit(moving, still("lamp", 205, 12))
+    expect(variant).toMatchObject({ verdict: "incompatible", reason: "motion" })
+  })
+
+  it("needs a moving candidate seen hovering for a still account, an argued reading", () => {
+    const hovering = { aim: { azimuthDeg: 205, altitudeDeg: 12 }, motion: { sweepDeg: 0.1, spanMinutes: 2 } }
+    expect(search.fit(hovering, crossing()).reason).toBe("motion")
+    const variant = search.fit(hovering, crossing(["moving-seen-still"]))
+    expect(variant.readings).toEqual([{ reading: "moving-seen-still", status: "argued" }])
+    expect(variant.verdict).toBe("contested")
+  })
+
+  it("asks nothing of how a candidate moves when it moves as the account says", () => {
+    expect(search.fit(moving, crossing()).readings).toEqual([])
+  })
+
+  it("reads growing as coming nearer only of a candidate that grows brighter", () => {
+    const growing = { aim: { azimuthDeg: 205, altitudeDeg: 12 }, motion: { sweepDeg: 0, spanMinutes: 1 }, growth: 3 }
+    const steady: CandidateTrack = { id: "star", label: "star", readings: ["brightening-as-approach"], at: () => ({ aim: { azimuthDeg: 205, altitudeDeg: 12 }, widthDeg: 0.01, magnitude: 1 }) }
+    expect(search.fit(growing, steady)).toMatchObject({ verdict: "incompatible", reason: "growth" })
+    const flaring: CandidateTrack = { ...steady, at: (offsetMinutes: number) => ({ aim: { azimuthDeg: 205, altitudeDeg: 12 }, widthDeg: 0.01, magnitude: 2 - offsetMinutes * 2 }) }
+    expect(search.fit(growing, flaring).readings).toContainEqual({ reading: "brightening-as-approach", status: "argued" })
+  })
+
+  it("says the lights of a candidate made of several are read as one body", () => {
+    expect(search.fit(moving, crossing(["grouped"])).readings).toEqual([{ reading: "grouped", status: "consolidated" }])
+  })
+})
+
 describe("Variants kept in a recording", () => {
   it("are read and written back as interpretations carrying what makes them variants", async () => {
     const { fromSightingJson, toSightingJson } = await import("../../../src/engine/persistence/sightingJson.js")
