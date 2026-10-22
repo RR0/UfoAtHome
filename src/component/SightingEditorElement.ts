@@ -2235,7 +2235,7 @@ export class SightingEditorElement extends HTMLElement {
    * and is the one to save it.
    */
   set embedded(embedded: boolean) {
-    this.shadow.getElementById("editor-head")!.hidden = embedded
+    // The header keeps Undo and Redo, which the holder has no part in: what it says and Save are the holder's.
     this.shadow.querySelector(".app")!.classList.toggle("embedded", embedded)
   }
 
