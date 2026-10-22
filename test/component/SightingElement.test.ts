@@ -474,6 +474,39 @@ describe("SightingElement", () => {
     expect(element.scene.interpretation?.title).toBe("Own")
   })
 
+  it("offers the variants the recording keeps, by verdict, as chips under the render that strike what each moves", async () => {
+    const variant = (candidate: string, verdict: string, cost: number) => ({
+      title: `Variant: ${candidate}`, bodies: [],
+      variant: { candidate, label: candidate, parameters: { clockMinutes: 0, headingDeg: 20, elevationFactor: 1, sizeFactor: 1 },
+        moved: [{ field: "heading", stated: 200, variant: 220, parameter: "heading", amount: 20, z: 1, status: "consolidated" }], cost, verdict, modelId: "consolidated" }
+    })
+    stubFetch({ "john.json": { ...johnSighting, variants: [variant("Saturn", "contested", 2.1), variant("Venus", "consolidated", 0.8)] } })
+    const element = await connect("john.json")
+    const shadow = element.shadowRoot!
+    const select = shadow.getElementById("interpretation") as HTMLSelectElement
+    expect([...select.options].map(option => option.textContent)).toEqual(["Account", "Variant: Venus (compatible with consolidated biases)",
+      "Variant: Saturn (only by invoking contested biases)"])
+    const chips = [...shadow.querySelectorAll<HTMLButtonElement>("#variant-chips button")]
+    expect(chips.map(chip => chip.textContent)).toEqual(["Account", "Venus", "Saturn"])
+    expect(chips[1].dataset.verdict).toBe("consolidated")
+    expect((shadow.getElementById("variant-moved") as HTMLElement).hidden).toBe(true)
+
+    chips[1].click()
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(select.value).toBe("variant-1")
+    expect(chips[1].getAttribute("aria-pressed")).toBe("true")
+    const moved = shadow.getElementById("variant-moved") as HTMLElement
+    expect(moved.hidden).toBe(false)
+    expect(moved.querySelector("s")!.textContent).toBe("200°")
+    expect(moved.querySelector("b")!.textContent).toBe("220°")
+    // A body of the sky draws none of its own: the account is what is replayed.
+    expect(element.scene.interpretation).toBeUndefined()
+
+    chips[0].click()
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(moved.hidden).toBe(true)
+  })
+
   it("draws a account that says nothing in metres as the angles it states, with nothing to choose or compare", async () => {
     const element = await connect("john.json")
     const shadow = element.shadowRoot!

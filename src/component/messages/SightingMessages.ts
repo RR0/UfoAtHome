@@ -71,4 +71,10 @@ export interface SightingMessages extends SightingLabels {
   /** The toggle that shows the account beside an interpretation, as it reads each way. */
   showComparison: string
   hideComparison: string
+  /** A variant the recording keeps (see InterpretationJson.variant), as the choice and its chip under the render name it ({name}: its candidate). */
+  variant: string
+  /** What the search made of each variant, in the words of the editor's candidates. */
+  verdicts: { consolidated: string, contested: string, incompatible: string }
+  /** The values a variant moves, as the line under the render names them. */
+  variantFields: { time: string, heading: string, elevation: string, size: string }
 }

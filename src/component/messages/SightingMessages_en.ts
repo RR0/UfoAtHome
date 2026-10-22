@@ -43,5 +43,8 @@ export const sightingMessages_en: SightingMessages = {
   confrontationHeight: "height ×{ratio}",
   showComparison: "Compare with the account",
   hideComparison: "Stop comparing with the account",
-  hideLabels: "Hide what it states"
+  hideLabels: "Hide what it states",
+  variant: "Variant: {name}",
+  verdicts: { consolidated: "compatible with consolidated biases", contested: "only by invoking contested biases", incompatible: "incompatible even at the bounds" },
+  variantFields: { time: "Time", heading: "Heading", elevation: "Elevation", size: "Size" }
 }

@@ -107,6 +107,11 @@ export const html = `
   <span id="confrontation-heading" class="confrontation-heading">Against the account</span>
   <ul id="confrontation-list"></ul>
 </div>
+<!-- The variants the recording keeps (see InterpretationJson.variant): one chip a candidate, with
+     its verdict, leading to it; and, while one is on show, each value it moves, the account's struck
+     beside the variant's. The account itself never changes. -->
+<div id="variant-chips" class="variant-chips" hidden></div>
+<div id="variant-moved" class="variant-moved" hidden></div>
 <!-- What this recording states, field by field, in the same words the editor uses for the same
      fields — the very same SightingSummary the editor shows under its own render. Off unless
      the page asks for it (show-labels) or the reader does (the info panel's own toggle): a player
@@ -187,6 +192,55 @@ export const css = `
 }
 /* What the interpretation fails to reproduce. Red, and not struck through: a strike is kept for a
    observer's word the facts contradict, and here it is the interpretation that is at fault. */
+.variant-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 0.5em;
+}
+.variant-chips[hidden], .variant-moved[hidden] {
+  display: none;
+}
+.variant-chips button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+/* The reader takes its colours from the page it is dropped into (see .confrontation): what is
+   pressed is outlined in the text's own colour rather than filled with one of ours. */
+.variant-chips button[aria-pressed="true"] {
+  border-color: currentColor;
+  box-shadow: inset 0 0 0 1px currentColor;
+  font-weight: 600;
+}
+.variant-chips .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.variant-chips [data-verdict="consolidated"] .dot { background: #2e9d5b; }
+.variant-chips [data-verdict="contested"] .dot { background: #e08a2c; }
+.variant-chips [data-verdict="incompatible"] .dot { background: #e04848; }
+.variant-moved {
+  margin-top: 0.4em;
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+}
+.variant-moved span {
+  margin-right: 1em;
+}
+.variant-moved s {
+  opacity: .65;
+  text-decoration-color: #e04848;
+}
 .confrontation .disagrees {
   color: #d33;
 }

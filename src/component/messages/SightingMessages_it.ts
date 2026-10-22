@@ -43,5 +43,8 @@ export const sightingMessages_it: SightingMessages = {
   confrontationHeight: "altezza ×{ratio}",
   showComparison: "Confronta con il resoconto",
   hideComparison: "Smetti di confrontare con il resoconto",
-  hideLabels: "Nascondi ciò che indica"
+  hideLabels: "Nascondi ciò che indica",
+  variant: "Variante: {name}",
+  verdicts: { consolidated: "compatibile con distorsioni consolidate", contested: "solo invocando distorsioni contestate", incompatible: "incompatibile anche ai limiti" },
+  variantFields: { time: "Ora", heading: "Direzione", elevation: "Altezza", size: "Dimensione" }
 }

@@ -43,5 +43,8 @@ export const sightingMessages_fr: SightingMessages = {
   confrontationHeight: "hauteur ×{ratio}",
   showComparison: "Comparer au compte rendu",
   hideComparison: "Ne plus comparer au compte rendu",
-  hideLabels: "Masquer ce qu'elle indique"
+  hideLabels: "Masquer ce qu'elle indique",
+  variant: "Variante : {name}",
+  verdicts: { consolidated: "compatible avec des biais consolidés", contested: "seulement en invoquant des biais contestés", incompatible: "incompatible même aux bornes" },
+  variantFields: { time: "Heure", heading: "Direction", elevation: "Hauteur", size: "Taille" }
 }

@@ -97,6 +97,8 @@ const CASE_SCOPE = "case"
 
 /** The choice's value for the recording's own account — see offerInterpretations. */
 const ACCOUNT_OPTION = "account"
+/** The value of a kept variant in the choice, followed by where it is in the recording's `variants`. */
+const VARIANT_OPTION = "variant-"
 
 /** Where a recording is opened for editing on that site. */
 const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
@@ -209,6 +211,8 @@ export class SightingElement extends HTMLElement {
   private readonly confrontationHeading: HTMLElement
   private readonly confrontationList: HTMLElement
   private readonly compareButton: HTMLButtonElement
+  private readonly variantChips: HTMLElement
+  private readonly variantMoved: HTMLElement
   /** How to get each interpretation the choice offers, by option value — fetched only once chosen,
    * since an analyst's may be a file of its own. */
   private interpretationLoaders = new Map<string, () => Promise<InterpretationJson | undefined>>()
@@ -316,6 +320,8 @@ export class SightingElement extends HTMLElement {
     this.confrontationHeading = this.shadow.getElementById("confrontation-heading")!
     this.confrontationList = this.shadow.getElementById("confrontation-list")!
     this.compareButton = this.shadow.getElementById("compare-account") as HTMLButtonElement
+    this.variantChips = this.shadow.getElementById("variant-chips")!
+    this.variantMoved = this.shadow.getElementById("variant-moved")!
     this.compareButton.addEventListener("click", () => this.setComparing(!this.sceneElement.compareAccount))
 
     this.observerSelect.addEventListener("change", () => this.selectObserver(this.observerSelect.value))
@@ -929,7 +935,8 @@ export class SightingElement extends HTMLElement {
     }
     // The recording's own, as the scene read it: its values with their provenance taken off (see
     // Provenance), the same object the scene is showing.
-    const own = entry === this.entries.find(e => e.src === this.currentSrc) ? this.sceneElement.ufoElement.sighting.interpretation : undefined
+    const current = entry === this.entries.find(e => e.src === this.currentSrc)
+    const own = current ? this.sceneElement.ufoElement.sighting.interpretation : undefined
     offer(ACCOUNT_OPTION, this.messages.account, () => Promise.resolve(own))
     const source = this.caseSource
     if (source) {
@@ -939,6 +946,13 @@ export class SightingElement extends HTMLElement {
         offer(`case-${index}`, by ? this.messages.interpretationBy.replace("{title}", title).replace("{by}", by) : title,
           () => CaseFile.interpretationOf(event, source.url, url => SightingFetch.recording(url)))
       })
+    }
+    // The variants the recording keeps, by verdict and cost: one that draws no body of its own (a body of the sky, which the sky has)
+    // replays the account itself, its moved values said under the render.
+    const variants = current ? this.keptVariants(entry) : []
+    for (const { index, kept } of variants) {
+      offer(`${VARIANT_OPTION}${index}`, `${this.variantLabel(kept)} (${this.messages.verdicts[kept.variant!.verdict]})`,
+        () => Promise.resolve(kept.bodies.length > 0 ? kept : undefined))
     }
     const kept = sameRecording && [...this.interpretationSelect.options].some(option => option.value === previous)
     const value = kept ? previous : ACCOUNT_OPTION
@@ -953,6 +967,70 @@ export class SightingElement extends HTMLElement {
     this.interpretationChoice.hidden = this.interpretationSelect.options.length < 2
     this.showConfrontation(this.sceneElement.confrontation)
     this.updateCompareButton()
+    this.showVariants(variants)
+  }
+
+  /** The variants the recording on show keeps (see InterpretationJson.variant), with where each is in it, by verdict and then by cost. */
+  private keptVariants(entry: ObserverEntry): { index: number, kept: InterpretationJson }[] {
+    const rank = { consolidated: 0, contested: 1, incompatible: 2 }
+    return (entry.sighting.variants ?? []).map((kept, index) => ({ index, kept }))
+      .filter(({ kept }) => kept.variant)
+      .sort((a, b) => rank[a.kept.variant!.verdict] - rank[b.kept.variant!.verdict] || a.kept.variant!.cost - b.kept.variant!.cost)
+  }
+
+  private variantLabel(kept: InterpretationJson): string {
+    return this.messages.variant.replace("{name}", kept.variant!.label ?? kept.variant!.candidate)
+  }
+
+  /** One chip a kept variant under the render, with its verdict, choosing it; the account's own first, to come back to. Then what the one on show moves. */
+  private showVariants(variants: { index: number, kept: InterpretationJson }[]): void {
+    this.variantChips.innerHTML = ""
+    this.variantChips.hidden = variants.length === 0
+    if (variants.length === 0) {
+      this.showVariantMoved()
+      return
+    }
+    const chip = (value: string, label: string, verdict?: string) => {
+      const button = document.createElement("button")
+      button.type = "button"
+      button.dataset.value = value
+      if (verdict) {
+        button.dataset.verdict = verdict
+        button.title = this.messages.verdicts[verdict as keyof SightingMessages["verdicts"]]
+        button.append(Object.assign(document.createElement("span"), { className: "dot" }))
+      }
+      button.append(label)
+      button.addEventListener("click", () => {
+        if (this.interpretationSelect.value === value) return
+        this.interpretationSelect.value = value
+        void this.chooseInterpretation(value)
+      })
+      this.variantChips.append(button)
+    }
+    chip(ACCOUNT_OPTION, this.messages.account)
+    for (const { index, kept } of variants) chip(`${VARIANT_OPTION}${index}`, kept.variant!.label ?? kept.variant!.candidate, kept.variant!.verdict)
+    this.showVariantMoved()
+  }
+
+  /** The chip of what is on show pressed, and the values the variant on show moves: the account's struck, the variant's beside it. */
+  private showVariantMoved(): void {
+    const value = this.interpretationSelect.value
+    for (const button of this.variantChips.querySelectorAll<HTMLButtonElement>("button")) button.setAttribute("aria-pressed", String(button.dataset.value === value))
+    this.variantMoved.innerHTML = ""
+    const index = value.startsWith(VARIANT_OPTION) ? Number(value.slice(VARIANT_OPTION.length)) : -1
+    const variant = this.sceneElement.ufoElement.sighting.variants?.[index]?.variant
+    this.variantMoved.hidden = !variant || variant.moved.length === 0
+    if (!variant) return
+    const degrees = new Intl.NumberFormat(this.language, { maximumFractionDigits: 1 })
+    for (const moved of variant.moved) {
+      const [stated, read] = moved.field === "time"
+        ? ["0 min", `${moved.variant > 0 ? "+" : ""}${degrees.format(moved.variant)} min`]
+        : [`${degrees.format(moved.stated)}°`, `${degrees.format(moved.variant)}°`]
+      const line = document.createElement("span")
+      line.append(`${this.messages.variantFields[moved.field]}${this.colon}`, Object.assign(document.createElement("s"), { textContent: stated }), " → ",
+        Object.assign(document.createElement("b"), { textContent: read }))
+      this.variantMoved.append(line)
+    }
   }
 
   /** Shows the account beside the interpretation, or not — see SceneElement.compareAccount. The
@@ -999,6 +1077,7 @@ export class SightingElement extends HTMLElement {
     this.dispatchEvent(new CustomEvent("interpretationchange", { detail: { track: this.shownTrackUrl() } }))
     this.updateCompareButton()
     this.showConfrontation(this.sceneElement.confrontation)
+    this.showVariantMoved()
   }
 
   /** Who made a claim, as a reader would name them: a person's id, which RR0 writes last name first
