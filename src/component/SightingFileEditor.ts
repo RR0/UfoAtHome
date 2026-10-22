@@ -57,6 +57,8 @@ export class SightingFileEditor {
   ])
 
   private readonly view: EditorView
+  /** Whether the editor is in the page, which it is only while its parent is shown (see placeWhileShown). */
+  private readonly placement?: ResizeObserver
   private changing = false
 
   private readonly changedField: StateField<ChangeMarks>
@@ -176,7 +178,8 @@ export class SightingFileEditor {
     this.changedField = marks.field
     keys.unshift({ key: "F7", run: () => this.gotoChange(1), preventDefault: true }, { key: "Shift-F7", run: () => this.gotoChange(-1), preventDefault: true })
     this.view = new EditorView({
-      parent,
+      // Made out of the page (see placeWhileShown), it is told where it will live: its styles go there, in the editor's shadow root.
+      root: parent.getRootNode() as Document | ShadowRoot,
       doc: text,
       extensions: [
         ...marks.extensions,
@@ -255,6 +258,33 @@ export class SightingFileEditor {
         })
       ]
     })
+    this.placement = this.placeWhileShown(parent)
+  }
+
+  /**
+   * Puts the editor in `parent` while `parent` is shown, and takes it out while it is not. CodeMirror measures itself in a parent that
+   * is not displayed (a group closed, an editor the case hides): its own scroller has no height then, so it takes the page's for its
+   * scroller, reads an offset from it that its measures cannot place, and fails on every measure after (a line asked at NaN: what a
+   * part of the text never measured gives, its height 0). Its viewport stays where it was then, which is the whole text: half a million
+   * lines in the page for a recording with its frozen data, recomputed on every frame of a replay. Out of the page, it measures nothing.
+   *
+   * Whether it is shown is asked once now, and then followed: a parent displayed has a width, even empty; one under a
+   * `display: none` has none. A DOM that cannot tell (a test's) has the editor simply put in.
+   */
+  private placeWhileShown(parent: HTMLElement): ResizeObserver | undefined {
+    if (typeof parent.checkVisibility !== "function" || parent.checkVisibility()) parent.append(this.view.dom)
+    if (typeof ResizeObserver === "undefined") return undefined
+    const observer = new ResizeObserver(entries => {
+      const shown = entries[entries.length - 1].contentRect.width > 0
+      if (shown && !this.view.dom.isConnected) {
+        parent.append(this.view.dom)
+        this.view.requestMeasure()
+      } else if (!shown && this.view.dom.isConnected) {
+        this.view.dom.remove()
+      }
+    })
+    observer.observe(parent)
+    return observer
   }
 
   get text(): string {
@@ -440,6 +470,7 @@ export class SightingFileEditor {
   }
 
   destroy(): void {
+    this.placement?.disconnect()
     this.view.destroy()
   }
 }
