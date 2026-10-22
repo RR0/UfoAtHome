@@ -4,6 +4,8 @@ import { WindowClose } from "./WindowClose.js"
 import { SectionFolds } from "./SectionFolds.js"
 import { WitnessErrorView } from "./WitnessErrorView.js"
 import { CandidatesView } from "./CandidatesView.js"
+import { PoherMatrix } from "../engine/witness/PoherMatrix.js"
+import type { PoherFacts } from "../engine/witness/PoherMatrix.js"
 import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
 import { TimelineTracks } from "./TimelineTracks.js"
 import { SceneFieldOverlay } from "./SceneFieldOverlay.js"
@@ -6320,8 +6322,86 @@ export class SightingEditorElement extends HTMLElement {
       },
       limitAt: sunAltitudeDeg => visibleMagnitudeLimit(sunAltitudeDeg, this.instrumentGain()),
       fieldLabels: () => ({ time: label(start), heading: label(this.headingInput), size: label(this.apparentWidthInput) }),
-      sceneCard: () => this.shadow.querySelector<HTMLElement>(".scene-card")!
+      sceneCard: () => this.shadow.querySelector<HTMLElement>(".scene-card")!,
+      poher: () => {
+        // Its labels are the reader's language's: read again when that changes.
+        if (this.poherMatrix?.language !== this.language) this.poherMatrix = { language: this.language, loaded: PoherMatrix.load(this.language, url => SightingFetch.json(url)) }
+        return this.poherMatrix.loaded
+      },
+      facts: () => this.poherFacts(),
+      satellites: () => {
+        const durationMs = (this.ufoElement.sighting.event.durationSeconds ?? 0) * 1000 || this.ufoElement.seekableDuration
+        const passes = this.sceneElement.satellitePassesDuring(durationMs)
+        return passes.length > 0 ? { passes, positionsAt: (date: Date) => this.sceneElement.satellitePositionsAt(date) } : undefined
+      }
     }, candidates)
+  }
+
+  /** Poher's matrix as rr0.org publishes it, read once (see PoherMatrix.load). */
+  private poherMatrix?: { language: string, loaded: ReturnType<typeof PoherMatrix.load> }
+
+  /**
+   * What the recording says that Poher's matrix asks about (see PoherFacts): the Sun at the start, the duration, the weather when it is
+   * the record's, and of the main phenomenon its elevation, size, how far, how straight and how fast it moved, its colours and its
+   * brilliance; how many phenomena and observers; whether anything was heard.
+   */
+  private poherFacts(): PoherFacts {
+    const sighting = this.ufoElement.sighting
+    const facts: PoherFacts = {}
+    const event = sighting.event
+    const place = event.place?.[0]
+    if (place && event.time?.year !== undefined && event.time.hour !== undefined) {
+      const date = sightingTimeToDate(event.time, place.lng, event.utcOffsetHours)
+      if (date) facts.sunAltitudeDeg = computeBodyPosition("Sun", date, { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 }).altitudeDeg
+    }
+    if (event.durationSeconds !== undefined) facts.durationSeconds = event.durationSeconds
+    // The weather only when it is the record's: the default sky is no statement that the sky was clear.
+    if (sighting.weatherTrack.allKeyframes.length > 0) {
+      const weather = resolveWeatherAt(sighting, 0)
+      facts.cloudCover = weather.cloudCover
+      facts.lightning = weather.storm
+      facts.lowVisibility = weather.precipitationType !== "none" && weather.precipitationIntensity > 0.3
+    }
+    const timeline = sighting.timeline
+    const first = timeline.sourceIds[0]
+    if (first) {
+      const keyframes = timeline.allKeyframes.filter(keyframe => keyframe.shapes.some(state => state.sourceId === first))
+      const aims = keyframes.map(keyframe => ({ t: keyframe.t, shape: timeline.getShapeAt(keyframe.t, first)! })).filter(at => at.shape?.aim)
+      const shape = timeline.getInterpolatedShapeAt(keyframes[0]?.t ?? 0, first)
+      if (shape?.aim) facts.elevationDeg = shape.aim.altitudeDeg
+      if (shape?.angular) {
+        facts.widthDeg = shape.angular.widthDeg
+        const ratio = shape.angular.heightDeg > 0 ? shape.angular.widthDeg / shape.angular.heightDeg : 1
+        facts.round = shape.kind === "oval" && ratio > 0.8 && ratio < 1.25
+      }
+      if (shape?.brightness !== undefined) facts.brightness = shape.brightness
+      if (aims.length > 1) {
+        const separation = (a: { azimuthDeg: number, altitudeDeg: number }, b: { azimuthDeg: number, altitudeDeg: number }) => {
+          const toRad = Math.PI / 180
+          const cos = Math.sin(a.altitudeDeg * toRad) * Math.sin(b.altitudeDeg * toRad) + Math.cos(a.altitudeDeg * toRad) * Math.cos(b.altitudeDeg * toRad) * Math.cos((a.azimuthDeg - b.azimuthDeg) * toRad)
+          return Math.acos(Math.max(-1, Math.min(1, cos))) / toRad
+        }
+        const steps = aims.slice(1).map((at, i) => ({ deg: separation(aims[i].shape.aim!, at.shape.aim!), s: (at.t - aims[i].t) / 1000 }))
+        facts.sweepDeg = separation(aims[0].shape.aim!, aims[aims.length - 1].shape.aim!)
+        const travelled = steps.reduce((sum, step) => sum + step.deg, 0)
+        facts.straysDeg = Math.max(0, travelled - facts.sweepDeg) / 2
+        const span = (aims[aims.length - 1].t - aims[0].t) / 1000
+        if (span > 0) {
+          facts.speedDegPerS = travelled / span
+          const fastest = Math.max(...steps.filter(step => step.s > 0).map(step => step.deg / step.s))
+          facts.speedVariation = facts.speedDegPerS > 0 ? fastest / facts.speedDegPerS : 0
+        }
+      }
+    }
+    // A group of shapes is one phenomenon drawn in parts.
+    const counted = new Set(timeline.sourceIds.map(id => timeline.groupMembers(id)?.[0] ?? id))
+    if (counted.size > 0) facts.count = counted.size
+    // One colour a phenomenon: the parts of one drawn in several colours are not several lights.
+    const colors = new Set([...counted].map(id => timeline.getInterpolatedShapeAt(0, id)?.color).filter((color): color is string => color !== undefined))
+    if (colors.size > 0) facts.colors = [...colors]
+    facts.observers = sighting.observerCount
+    if (sighting.soundTrack.allKeyframes.some(keyframe => keyframe.sound.kind !== "none")) facts.sound = true
+    return facts
   }
 
   /** Shows the scene's toggles and timeline for 3.5 s, as a hover would. */
@@ -10234,6 +10314,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     for (const [key, text] of Object.entries(sections)) this.shadow.getElementById(`label-section-${key}`)!.textContent = text
     this.sectionFolds.setMessages(messages)
+    this.candidatesView?.languageChanged()
     this.witnessErrorView.refresh()
     this.timelineTracks.setMessages(messages)
     for (const legend of this.shadow.querySelectorAll(".scene-legend")) legend.textContent = messages.sceneLinkedLegend

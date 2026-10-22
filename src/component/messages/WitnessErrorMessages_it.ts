@@ -135,7 +135,7 @@ export const witnessErrorMessages_it: WitnessErrorMessages = {
     "variantLabel": "Variante: {name}",
     "backToAccount": "Torna al racconto",
     "costNote": "Un costo non è una probabilità: dice quali distorsioni bisogna invocare, e di quanto.",
-    "scopeNote": "Candidati calcolati: la Luna e i pianeti abbastanza luminosi per questo cielo. Le interpretazioni della registrazione non sono ancora confrontate qui.",
+    "scopeNote": "Matrice di Poher (1977) per la lista di partenza; la Luna, i pianeti e i passaggi di satelliti sono calcolati e confrontati con il racconto.",
     "fields": {
       "time": "Ora",
       "heading": "Azimut",
@@ -162,6 +162,21 @@ export const witnessErrorMessages_it: WitnessErrorMessages = {
       "Mars": "Marte",
       "Jupiter": "Giove",
       "Saturn": "Saturno"
-    }
+    },
+    "poherLoading": "Caricamento della matrice di Poher…",
+    "poherFailed": "Non è stato possibile leggere la matrice di Poher: sono proposti solo gli astri.",
+    "poherTitle": "Secondo la matrice di Poher (1977)",
+    "poherIntro": "Gli altri fenomeni noti della matrice, senza traiettoria calcolata qui: il loro punteggio è il giudizio di Poher, da confrontare a mano.",
+    "poherPossible": "Possibili",
+    "poherExcluded": "Esclusi ({n})",
+    "poherExcludedBy": "escluso da: {list}",
+    "poherDoubted": "dubbio secondo stime: {list}",
+    "poherScore": "punteggio {x}",
+    "poherTag": "Poher: {state}",
+    "poherStatePossible": "possibile, punteggio {x}",
+    "poherStateExcluded": "escluso",
+    "answersTitle": "Risposte dedotte dalla registrazione ({n})",
+    "firm": "ferma",
+    "soft": "stima, da sola non esclude nulla"
   }
 }

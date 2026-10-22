@@ -135,7 +135,7 @@ export const witnessErrorMessages_en: WitnessErrorMessages = {
     "variantLabel": "Variant: {name}",
     "backToAccount": "Back to the account",
     "costNote": "A cost is not a probability: it says which biases have to be invoked, and how far.",
-    "scopeNote": "Candidates computed: the Moon and the planets bright enough for this sky. The interpretations placed in the recording are not confronted here yet.",
+    "scopeNote": "Poher matrix (1977) for the starting list; the Moon, the planets and satellite passes are computed and confronted with the account.",
     "fields": {
       "time": "Time",
       "heading": "Azimuth",
@@ -162,6 +162,21 @@ export const witnessErrorMessages_en: WitnessErrorMessages = {
       "Mars": "Mars",
       "Jupiter": "Jupiter",
       "Saturn": "Saturn"
-    }
+    },
+    "poherLoading": "Loading the Poher matrix…",
+    "poherFailed": "The Poher matrix could not be read: only celestial bodies are offered.",
+    "poherTitle": "From the Poher matrix (1977)",
+    "poherIntro": "The other known phenomena of the matrix, with no track computed here: their score is Poher's judgment, to confront by hand.",
+    "poherPossible": "Possible",
+    "poherExcluded": "Ruled out ({n})",
+    "poherExcludedBy": "ruled out by: {list}",
+    "poherDoubted": "doubtful from estimates: {list}",
+    "poherScore": "score {x}",
+    "poherTag": "Poher: {state}",
+    "poherStatePossible": "possible, score {x}",
+    "poherStateExcluded": "ruled out",
+    "answersTitle": "Answers drawn from the recording ({n})",
+    "firm": "firm",
+    "soft": "an estimate, rules nothing out alone"
   }
 }

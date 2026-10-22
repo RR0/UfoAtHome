@@ -68,5 +68,21 @@ export interface WitnessErrorMessages {
     noDirection: string
     noSky: string
     bodies: Record<string, string>
+    /** The Poher matrix (1977) as the source of the candidates: loading, its verdicts, and the answers drawn from the recording. */
+    poherLoading: string
+    poherFailed: string
+    poherTitle: string
+    poherIntro: string
+    poherPossible: string
+    poherExcluded: string
+    poherExcludedBy: string
+    poherDoubted: string
+    poherScore: string
+    poherTag: string
+    poherStatePossible: string
+    poherStateExcluded: string
+    answersTitle: string
+    firm: string
+    soft: string
   }
 }

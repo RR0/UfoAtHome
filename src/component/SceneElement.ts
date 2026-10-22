@@ -70,7 +70,7 @@ import { LightningSchedule } from "../engine/weather/LightningSchedule.js"
 import type { LightningFlash } from "../engine/weather/LightningSchedule.js"
 import { TleArchive } from "../engine/astronomy/TleArchive.js"
 import type { TleCoverage, TleSnapshot } from "../engine/astronomy/TleArchive.js"
-import type { SatellitePass, SatellitePasses } from "../engine/astronomy/SatellitePasses.js"
+import type { SatellitePosition, SatellitePass, SatellitePasses } from "../engine/astronomy/SatellitePasses.js"
 import type { SceneSatellite } from "../render3d/SatelliteField.js"
 import { SizeEstimate } from "../engine/shape/SizeEstimate.js"
 import type { MeterRange } from "../engine/shape/SizeEstimate.js"
@@ -2459,6 +2459,21 @@ export class SceneElement extends HTMLElement {
    * Scanned every ten seconds, or coarser beyond a hundred minutes so a long night stays under a
    * second of work; capped at four hours, past which "during the observation" stops meaning a moment.
    */
+  /**
+   * Where each orbiting object stood from the observer at `date`, when the satellite archive is loaded: what the candidate search follows
+   * a pass with (see CandidatesView). Undefined when there is no archive or no place.
+   */
+  satellitePositionsAt(date: Date): SatellitePosition[] | undefined {
+    const satellites = this.satellites
+    const sighting = this.ufoElement.sighting
+    const pose = resolveObserverPoseAt(sighting, 0)
+    const place = sighting.event.place?.[0]
+    const lat = pose?.lat ?? place?.lat
+    const lng = pose?.lng ?? place?.lng
+    if (!satellites || lat === undefined || lng === undefined) return undefined
+    return satellites.passes.positionsAt(date, { lat, lng, elevationM: pose?.elevationM ?? 0 })
+  }
+
   satellitePassesDuring(durationMs: number): SatellitePass[] {
     const satellites = this.satellites
     const sighting = this.ufoElement.sighting
