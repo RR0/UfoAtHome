@@ -7218,14 +7218,15 @@ describe("SightingEditorElement header", () => {
     expect((root.getElementById("save") as HTMLButtonElement).disabled).toBe(true)
   })
 
-  it("keeps only Undo and Redo when another editor holds this one, which says what is open and saves it", () => {
-    const element = mount()
-    ;(element as unknown as { embedded: boolean }).embedded = true
-    const root = element.shadowRoot!
-    expect(root.getElementById("editor-head")!.hidden).toBe(false)
-    expect(root.querySelector(".app")!.classList.contains("embedded")).toBe(true)
-    expect(root.getElementById("undo")).not.toBeNull()
-    expect(root.getElementById("redo")).not.toBeNull()
+  it("goes when another editor holds this one, which says what is open, saves it, and puts Undo and Redo where it wants", () => {
+    const element = mount() as unknown as HTMLElement & { embedded: boolean, historyControls: HTMLElement }
+    element.embedded = true
+    expect(element.shadowRoot!.getElementById("editor-head")!.hidden).toBe(true)
+    const controls = element.historyControls
+    expect([...controls.querySelectorAll("button")].map(button => button.id)).toEqual(["undo", "redo"])
+    const holder = document.createElement("div")
+    holder.append(controls)
+    expect(holder.querySelector("#undo")).not.toBeNull()
   })
 
   it("lays the tracks out under the scene, and folds them back", () => {

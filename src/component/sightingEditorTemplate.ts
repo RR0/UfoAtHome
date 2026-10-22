@@ -12,8 +12,8 @@ import { CandidatesView } from "./CandidatesView.js"
 import { EditorTheme } from "./EditorTheme.js"
 export const html = `
 <!-- From top to bottom, as the design handoff lays it out: what this recording is and whether it is saved, the scene, the
-     sections as a row of chips (only one open at a time, see SightingEditorElement.toggleGroup), and the open section. When another
-     editor holds this one (see embedded), the header keeps only Undo and Redo: the holder says what is open and saves it. -->
+     sections as a row of chips (only one open at a time, see SightingEditorElement.toggleGroup), and the open section. The header goes
+     when another editor holds this one (see embedded): the holder says what is open, saves it, and puts Undo and Redo on its own line. -->
 <div class="app">
 <header class="editor-head" id="editor-head">
   <div class="head-text">
@@ -1812,9 +1812,6 @@ ${EditorTheme.TOKENS}
 /* Held by another editor (see embedded): no card of its own inside that one's. */
 .app.embedded { border: 0; border-radius: 0; max-width: none; }
 ${EditorTheme.HEAD}
-/* Held: of the header, only Undo and Redo stay, at the right above the scene; the holder says what is open and saves it. */
-.app.embedded .editor-head { justify-content: flex-end; padding: 0 0 10px; border: 0; background: none; }
-.app.embedded :is(.head-text, #save) { display: none; }
 .scene-card { background: #0b1020; }
 .scene-card > .render-line { padding: 6px 12px; background: var(--ground-raised); }
 .scene-card > .render-line:not(:has(:not(:empty))) { display: none; }

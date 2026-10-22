@@ -68,7 +68,12 @@ const TEMPLATE = `
      or the interview. A recording alone, not in a case, has no list and no frame. */
   #event-item { display: block; }
   #event-item:not(.in-case) { border: 0; padding: 0; margin: 0; }
-  #event-item > #row-recording-id { margin-bottom: .5em; }
+  .event-id-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: .5em; }
+  .event-id-row > .history-slot { margin-left: auto; }
+  .history-slot[hidden] { display: none; }
+  .history-slot .history { display: inline-flex; gap: 8px; }
+  .history-slot .history .icon-btn { box-sizing: border-box; width: 36px; height: 36px; min-width: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+  .history-slot .history .icon-btn:disabled { opacity: .35; cursor: default; }
   /* Tabs as the recording's editor has them (see sightingEditorTemplate): a strip on one baseline, the open tab raised and joined to its panel. */
   .group-tabs { --tab-line: color-mix(in srgb, CanvasText 35%, transparent); --tab-surface: color-mix(in srgb, CanvasText 5%, Canvas);
     --tab-recessed: color-mix(in srgb, CanvasText 11%, Canvas); --tab-accent: #4a9eff;
@@ -254,7 +259,11 @@ const TEMPLATE = `
       <span id="cited-text"></span>
       <button id="cited-back" type="button" class="pill-btn"><span id="label-back-to-interview">Back to the interview</span></button>
     </div>
-    <label id="row-recording-id" class="row"><span id="label-recording-id">ID</span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
+    <!-- The event's id, and on its line the observation's Undo and Redo (see SightingEditorElement.historyControls). -->
+    <div class="event-id-row">
+      <label id="row-recording-id" class="row"><span id="label-recording-id">ID</span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
+      <span id="history-slot" class="history-slot"></span>
+    </div>
     <section id="recording" class="recording">
       <rr0-sighting-editor id="editor"><span id="recording-dirty" slot="tab-status" class="dirty" role="status" title="Changes not saved" hidden>●</span></rr0-sighting-editor>
       <div id="passages" class="passages" hidden><ul id="passages-list"></ul></div>
@@ -380,6 +389,8 @@ export class CaseEditorElement extends HTMLElement {
     // The case keeps the watch over what would be lost by leaving, for the recordings it holds: the editor does not.
     this.editor.guardsLeaving = false
     this.editor.embedded = true
+    // Its Undo and Redo on the line of the event's id, the editor's own header being the case's.
+    this.byId("history-slot").append(this.editor.historyControls)
     // Loading a recording or a case into the editor replaces what is open: asked first when changes were not exported.
     this.editor.addEventListener("beforeload", event => {
       if (!this.dirty) return
@@ -650,6 +661,7 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("group-case-file").hidden = session === undefined || this.group !== "file"
     this.byId("recording").hidden = this.currentInterview !== undefined
     this.byId("interview-section").hidden = this.currentInterview === undefined
+    this.byId("history-slot").hidden = this.currentInterview !== undefined
   }
 
   private showFileNote(message: string | undefined, kind: "info" | "error" = "info"): void {

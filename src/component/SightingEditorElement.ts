@@ -2235,8 +2235,16 @@ export class SightingEditorElement extends HTMLElement {
    * and is the one to save it.
    */
   set embedded(embedded: boolean) {
-    // The header keeps Undo and Redo, which the holder has no part in: what it says and Save are the holder's.
+    this.shadow.getElementById("editor-head")!.hidden = embedded
     this.shadow.querySelector(".app")!.classList.toggle("embedded", embedded)
+  }
+
+  /**
+   * Undo and Redo, for a holder to put where its own header has them (see embedded): what it says and Save are the holder's, but
+   * stepping through the observation's history is the observation's. They work wherever they are put.
+   */
+  get historyControls(): HTMLElement {
+    return this.undoButton.parentElement!
   }
 
   /**

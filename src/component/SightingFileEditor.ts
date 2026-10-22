@@ -179,7 +179,7 @@ export class SightingFileEditor {
     keys.unshift({ key: "F7", run: () => this.gotoChange(1), preventDefault: true }, { key: "Shift-F7", run: () => this.gotoChange(-1), preventDefault: true })
     this.view = new EditorView({
       // Made out of the page (see placeWhileShown), it is told where it will live: its styles go there, in the editor's shadow root.
-      root: parent.getRootNode() as Document | ShadowRoot,
+      ...SightingFileEditor.rootOf(parent),
       doc: text,
       extensions: [
         ...marks.extensions,
@@ -272,12 +272,18 @@ export class SightingFileEditor {
    * `display: none` has none. A DOM that cannot tell (a test's) has the editor simply put in.
    */
   private placeWhileShown(parent: HTMLElement): ResizeObserver | undefined {
-    if (typeof parent.checkVisibility !== "function" || parent.checkVisibility()) parent.append(this.view.dom)
+    const place = () => {
+      parent.append(this.view.dom)
+      // Where it lives may have changed since it was made (a parent not in a document yet): its styles follow it there.
+      const { root } = SightingFileEditor.rootOf(parent)
+      if (root && root !== this.view.root) this.view.setRoot(root)
+    }
+    if (typeof parent.checkVisibility !== "function" || parent.checkVisibility()) place()
     if (typeof ResizeObserver === "undefined") return undefined
     const observer = new ResizeObserver(entries => {
       const shown = entries[entries.length - 1].contentRect.width > 0
       if (shown && !this.view.dom.isConnected) {
-        parent.append(this.view.dom)
+        place()
         this.view.requestMeasure()
       } else if (!shown && this.view.dom.isConnected) {
         this.view.dom.remove()
@@ -314,12 +320,32 @@ export class SightingFileEditor {
     try {
       const head = Math.min(this.view.state.selection.main.head, text.length)
       this.view.dispatch({
-        changes: { from: 0, to: current.length, insert: text }, selection: { anchor: head }, annotations: isolateHistory.of("full")
+        changes: SightingFileEditor.changeBetween(current, text), selection: { anchor: head }, annotations: isolateHistory.of("full")
       })
     } finally {
       this.changing = false
     }
     if (show) this.revealChange(current, SightingFileEditor.MOST_LINES_SHOWN)
+  }
+
+  /** The document or shadow root `parent` is in, for the editor's styles and selection: none while it is in neither. */
+  private static rootOf(parent: HTMLElement): { root?: Document | ShadowRoot } {
+    const root = parent.getRootNode()
+    return root instanceof Document || root instanceof ShadowRoot ? { root } : {}
+  }
+
+  /**
+   * The one change that turns `from` into `to`: what lies between the part they begin with and the part they end with. Replacing the
+   * whole text instead (a recording with its frozen data is fourteen million characters) stretched the editor's viewport over all of
+   * it, which out of the page it can never measure back, and the next step of the history failed on it (see placeWhileShown).
+   */
+  static changeBetween(from: string, to: string): { from: number, to: number, insert: string } {
+    const shorter = Math.min(from.length, to.length)
+    let start = 0
+    while (start < shorter && from.charCodeAt(start) === to.charCodeAt(start)) start++
+    let end = 0
+    while (end < shorter - start && from.charCodeAt(from.length - 1 - end) === to.charCodeAt(to.length - 1 - end)) end++
+    return { from: start, to: from.length - end, insert: to.slice(start, to.length - end) }
   }
 
   /** The widest change shown as an edit: past it the text was rewritten rather than edited. */
@@ -353,6 +379,11 @@ export class SightingFileEditor {
   }
 
   /** The text as it stands is the one the changed lines are changed from — called when the recording is saved or exported. */
+  /** How many lines are marked as changed since the last save, wherever they are in the text (shown or not). */
+  get changedLineCount(): number {
+    return this.view.state.field(this.changedField).changed.size
+  }
+
   markSaved(): void {
     this.view.dispatch({ effects: SightingFileEditor.SET_BASELINE.of(this.view.state.doc.toString()) })
   }
@@ -433,6 +464,15 @@ export class SightingFileEditor {
       this.changing = false
     }
     if (done && show) this.revealChange(before)
+    // Not shown: what was shown of an earlier change is no longer what the text says changed.
+    else if (done && this.view.state.field(SightingFileEditor.revealed) !== null) {
+      this.silent = true
+      try {
+        this.view.dispatch({ effects: SightingFileEditor.REVEAL.of(null) })
+      } finally {
+        this.silent = false
+      }
+    }
     return done
   }
 

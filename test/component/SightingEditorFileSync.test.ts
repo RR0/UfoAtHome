@@ -230,7 +230,7 @@ function openGroup(element: SightingEditorElement, id: string): void {
 }
 
 interface Private {
-  fileEditor?: { text: string, revealedText?: string, reveal(path: (string | number)[]): boolean, view: { state: { selection: { main: { from: number, to: number } } } } }
+  fileEditor?: { text: string, revealedText?: string, changedLineCount: number, reveal(path: (string | number)[]): boolean, view: { state: { selection: { main: { from: number, to: number } } } } }
   focusFromFile(path: (string | number)[]): void
   selectDecor(id: string): void
   canvasMode(): string
@@ -299,14 +299,15 @@ describe("the lines changed since the last save", () => {
     URL.revokeObjectURL = () => undefined
     const element = mount()
     const inside = await fileOpened(element)
-    const view = (inside.fileEditor as unknown as { view: { dom: HTMLElement } }).view
-    expect(view.dom.querySelectorAll(".cm-changed-line")).toHaveLength(0)
+    // Read from the editor rather than from its lines on show: it draws only the ones in view, and the scenery is at the end.
+    const editor = inside.fileEditor!
+    expect(editor.changedLineCount).toBe(0)
 
     addBuildings(element, 1)
-    await waitFor(() => view.dom.querySelectorAll(".cm-changed-line").length > 0, 5000)
+    await waitFor(() => editor.changedLineCount > 0, 5000)
 
     ;(element.shadowRoot!.getElementById("export") as HTMLButtonElement).click()
-    await waitFor(() => view.dom.querySelectorAll(".cm-changed-line").length === 0, 5000)
+    await waitFor(() => editor.changedLineCount === 0, 5000)
   })
 })
 
@@ -342,8 +343,8 @@ describe("undo and redo with the text on show", () => {
 
     undo.click()
 
-    // What was shown of the edit went with the lines the undo took away, and nothing was shown in their place.
-    expect(inside.fileEditor!.revealedText).toBe("")
+    // What was shown of the edit no longer says what changed, and nothing is shown in its place.
+    expect(inside.fileEditor!.revealedText).toBeUndefined()
   })
 })
 
