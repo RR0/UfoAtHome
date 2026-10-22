@@ -10,6 +10,9 @@ import type { CelestialBody } from "../engine/astronomy/CelestialPositions.js"
 import { PoherAnswers } from "../engine/witness/PoherMatrix.js"
 import type { PoherFacts, PoherMatrix, PoherRanking } from "../engine/witness/PoherMatrix.js"
 import type { SatellitePass, SatellitePosition } from "../engine/astronomy/SatellitePasses.js"
+import { ReentrySighting } from "../engine/interpretation/Reentry.js"
+import type { ReentryJson } from "../engine/interpretation/Reentry.js"
+import type { AircraftDescription, AircraftTrack } from "../engine/traffic/AircraftProvider.js"
 
 /** What the view needs of the editor that holds it. */
 export interface CandidatesHost {
@@ -31,10 +34,14 @@ export interface CandidatesHost {
   facts(): PoherFacts
   /** The satellite passes during the observation, and where each object stood at an instant, when the archive is loaded. */
   satellites(): { passes: SatellitePass[], positionsAt(date: Date): SatellitePosition[] | undefined } | undefined
+  /** The re-entries the recording states and the fireballs a camera network recorded during it. */
+  burning(): { reentries: ReentryJson[], fireballs: ReentryJson[] }
+  /** The aircraft of the traffic record, the recording's start in ms UTC, and what is known of each — while there is a record. */
+  traffic(): { tracks: AircraftTrack[], startMs: number, describe(track: AircraftTrack): AircraftDescription | undefined } | undefined
 }
 
 /** What a known phenomenon of Poher's matrix is followed by, when its track can be computed. */
-type Tracked = "Moon" | "Planets" | "OrbitingSatellites"
+type Tracked = "Moon" | "Planets" | "OrbitingSatellites" | "AtmosphericSatellitesReentry" | "Meteorits" | "HighAltitudePlanes" | "LowAltitudePlanes" | "Helicopters"
 
 /**
  * The candidate explanations of the Summary section (see the design handoff, §6, and docs/witness-error-model.md, "The search"): one
@@ -87,6 +94,16 @@ export class CandidatesView {
   private static readonly PLANETS: readonly CelestialBody[] = ["Venus", "Mars", "Jupiter", "Saturn"]
   /** How many satellite passes are tried: the brightest, since a faint one is no candidate for a light somebody noticed. */
   private static readonly SATELLITES = 4
+  /** How many aircraft are tried: the nearest to the observer when the sighting began, since a far one is a dot nobody describes. */
+  private static readonly AIRCRAFT = 12
+  /** Beyond this distance an aircraft's lights are no candidate for anything described. */
+  private static readonly AIRCRAFT_RANGE_KM = 80
+  /** The wingspan an aircraft's lights spread across, when its type is not known: an airliner's. */
+  private static readonly SPAN_M = 35
+  /** Feet in a metre: aircraft state their altitude in feet. */
+  private static readonly FT_M = 0.3048
+  /** When the account's main phenomenon is stated, in ms of the recording: where a re-entry's or an aircraft's track is read from. */
+  private statementT = 0
 
   private poher?: { matrix: PoherMatrix, labels: Record<string, string> }
   private poherState: "idle" | "loading" | "failed" | "ready" = "idle"
@@ -107,6 +124,7 @@ export class CandidatesView {
     const first = timeline.sourceIds[0]
     if (!first) return undefined
     const t = timeline.allKeyframes.find(keyframe => keyframe.shapes.some(state => state.sourceId === first))?.t ?? 0
+    this.statementT = t
     const shape = timeline.getInterpolatedShapeAt(t, first)
     if (!shape?.aim) return undefined
     return { aim: shape.aim, widthDeg: shape.angular?.widthDeg, timeHow: sighting.provenance.at("time")?.how }
@@ -121,7 +139,7 @@ export class CandidatesView {
       id: name,
       label: names[name] ?? name,
       at: (offsetMinutes: number) => {
-        const date = new Date(start.date.getTime() + offsetMinutes * 60_000)
+        const date = new Date(start.date.getTime() + this.statementT + offsetMinutes * 60_000)
         const position = computeBodyPosition(name, date, start.observer)
         if (position.altitudeDeg < 0) return undefined
         const sun = computeBodyPosition("Sun", date, start.observer).altitudeDeg
@@ -152,7 +170,7 @@ export class CandidatesView {
           id,
           label: pass.object.name,
           at: (offsetMinutes: number) => {
-            const seen = at(new Date(start.date.getTime() + offsetMinutes * 60_000))?.find(position => position.object.norad === pass.object.norad)
+            const seen = at(new Date(start.date.getTime() + this.statementT + offsetMinutes * 60_000))?.find(position => position.object.norad === pass.object.norad)
             if (!seen || seen.altitudeDeg < 0 || seen.sunlitFraction < 0.5) return undefined
             return { aim: { azimuthDeg: seen.azimuthDeg, altitudeDeg: seen.altitudeDeg }, widthDeg: 0.01 }
           }
@@ -160,7 +178,91 @@ export class CandidatesView {
         this.phenomenonOf.set(id, "OrbitingSatellites")
       }
     }
+    tracks.push(...this.burningTracks(start), ...this.aircraftTracks(start))
     return tracks
+  }
+
+  /**
+   * The re-entries and the recorded fireballs, each as its brightest fragment seen from the observer at an instant of the recording, its
+   * fragments' spread as its size: a procession is read as one body (see the structural readings of docs/witness-error-model.md).
+   */
+  private burningTracks(start: { date: Date, observer: { lat: number, lng: number, elevationM: number } }): CandidateTrack[] {
+    const m = this.host.messages().candidates
+    const { reentries, fireballs } = this.host.burning()
+    const observer = { lat: start.observer.lat, lng: start.observer.lng, heightM: start.observer.elevationM }
+    const track = (reentry: ReentryJson, fireball: boolean): CandidateTrack => {
+      const id = `${fireball ? "fireball" : "reentry"}-${reentry.id}`
+      this.phenomenonOf.set(id, fireball ? "Meteorits" : "AtmosphericSatellitesReentry")
+      const name = reentry.object?.name ?? reentry.id
+      return {
+        id,
+        label: (fireball ? m.fireball : m.reentry).replace("{name}", name),
+        at: (offsetMinutes: number) => {
+          const t = this.statementT + offsetMinutes * 60_000
+          const views = ReentrySighting.viewsAt([reentry], t, observer).filter(view => view.head.altitudeDeg >= 0)
+          if (views.length === 0) return undefined
+          const sun = computeBodyPosition("Sun", new Date(start.date.getTime() + t), start.observer).altitudeDeg
+          const brightest = views.reduce((best, view) => view.magnitude < best.magnitude ? view : best)
+          if (brightest.magnitude > this.host.limitAt(sun)) return undefined
+          let spread = 0
+          for (const a of views) for (const b of views) spread = Math.max(spread, Math.hypot(a.head.azimuthDeg - b.head.azimuthDeg, a.head.altitudeDeg - b.head.altitudeDeg))
+          return { aim: { azimuthDeg: brightest.head.azimuthDeg, altitudeDeg: brightest.head.altitudeDeg }, widthDeg: Math.max(0.01, spread) }
+        }
+      }
+    }
+    return [...reentries.map(reentry => track(reentry, false)), ...fireballs.map(fireball => track(fireball, true))]
+  }
+
+  /**
+   * The aircraft of the traffic record nearest the observer when the sighting began, each where its track puts it at an instant, its lights
+   * spread across its wingspan at the distance it is: a helicopter, a low or a high aircraft for the matrix, by what it says it is and how
+   * high it flies.
+   */
+  private aircraftTracks(start: { date: Date, observer: { lat: number, lng: number, elevationM: number } }): CandidateTrack[] {
+    const traffic = this.host.traffic()
+    if (!traffic) return []
+    const m = this.host.messages().candidates
+    const observer = { lat: start.observer.lat, lng: start.observer.lng, heightM: start.observer.elevationM }
+    const startMs = traffic.startMs + this.statementT
+    const at = (track: AircraftTrack, ms: number) => {
+      const points = track.points
+      if (points.length === 0 || ms < points[0].t || ms > points[points.length - 1].t) return undefined
+      let i = 0
+      while (i < points.length - 2 && points[i + 1].t < ms) i++
+      const from = points[i]
+      const to = points[Math.min(i + 1, points.length - 1)]
+      const f = to.t > from.t ? (ms - from.t) / (to.t - from.t) : 0
+      return {
+        lat: from.lat + (to.lat - from.lat) * f,
+        lng: from.lng + (to.lng - from.lng) * f,
+        heightM: (from.altitudeFt + (to.altitudeFt - from.altitudeFt) * f) * CandidatesView.FT_M
+      }
+    }
+    const near = traffic.tracks
+      .map(track => ({ track, point: at(track, startMs) }))
+      .filter((candidate): candidate is { track: AircraftTrack, point: { lat: number, lng: number, heightM: number } } => candidate.point !== undefined)
+      .map(candidate => ({ ...candidate, seen: ReentrySighting.seenFrom(observer, candidate.point) }))
+      .filter(candidate => candidate.seen.distanceKm <= CandidatesView.AIRCRAFT_RANGE_KM)
+      .sort((a, b) => a.seen.distanceKm - b.seen.distanceKm)
+      .slice(0, CandidatesView.AIRCRAFT)
+    return near.map(({ track, point }) => {
+      const description = traffic.describe(track)
+      const id = `aircraft-${track.icao}`
+      this.phenomenonOf.set(id, description?.category === "A7" ? "Helicopters" : point.heightM > 15000 * CandidatesView.FT_M ? "HighAltitudePlanes" : "LowAltitudePlanes")
+      const name = description?.restricted ? track.icao.toString(16).toUpperCase() : [description?.type, description?.registration].filter(Boolean).join(" ") || track.icao.toString(16).toUpperCase()
+      return {
+        id,
+        label: m.aircraft.replace("{name}", name),
+        at: (offsetMinutes: number) => {
+          const position = at(track, startMs + offsetMinutes * 60_000)
+          if (!position) return undefined
+          const seen = ReentrySighting.seenFrom(observer, position)
+          if (seen.altitudeDeg < 0 || seen.distanceKm > CandidatesView.AIRCRAFT_RANGE_KM) return undefined
+          const widthDeg = (Math.atan2(CandidatesView.SPAN_M, seen.distanceKm * 1000) * 180) / Math.PI
+          return { aim: { azimuthDeg: seen.azimuthDeg, altitudeDeg: seen.altitudeDeg }, widthDeg }
+        }
+      }
+    })
   }
 
   /** The matrix's ranking of the known phenomena against what the recording answers, once the matrix is read. */

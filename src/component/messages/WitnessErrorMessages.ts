@@ -69,6 +69,10 @@ export interface WitnessErrorMessages {
     noSky: string
     bodies: Record<string, string>
     /** The Poher matrix (1977) as the source of the candidates: loading, its verdicts, and the answers drawn from the recording. */
+    /** What a computed candidate is called: an aircraft of the traffic record, a re-entry, a recorded fireball ({name}: what is known of it). */
+    aircraft: string
+    reentry: string
+    fireball: string
     poherLoading: string
     poherFailed: string
     poherTitle: string

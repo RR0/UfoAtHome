@@ -135,7 +135,7 @@ export const witnessErrorMessages_it: WitnessErrorMessages = {
     "variantLabel": "Variante: {name}",
     "backToAccount": "Torna al racconto",
     "costNote": "Un costo non è una probabilità: dice quali distorsioni bisogna invocare, e di quanto.",
-    "scopeNote": "Matrice di Poher (1977) per la lista di partenza; la Luna, i pianeti e i passaggi di satelliti sono calcolati e confrontati con il racconto.",
+    "scopeNote": "Matrice di Poher (1977) per la lista di partenza; la Luna, i pianeti, i passaggi di satelliti, i rientri, i bolidi registrati e gli aerei del tracciato sono calcolati e confrontati con il racconto.",
     "fields": {
       "time": "Ora",
       "heading": "Azimut",
@@ -163,6 +163,9 @@ export const witnessErrorMessages_it: WitnessErrorMessages = {
       "Jupiter": "Giove",
       "Saturn": "Saturno"
     },
+    "aircraft": "Aeromobile {name}",
+    "reentry": "Rientro {name}",
+    "fireball": "Bolide {name}",
     "poherLoading": "Caricamento della matrice di Poher…",
     "poherFailed": "Non è stato possibile leggere la matrice di Poher: sono proposti solo gli astri.",
     "poherTitle": "Secondo la matrice di Poher (1977)",

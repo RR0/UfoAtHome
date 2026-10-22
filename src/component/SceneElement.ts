@@ -2459,6 +2459,21 @@ export class SceneElement extends HTMLElement {
    * Scanned every ten seconds, or coarser beyond a hundred minutes so a long night stays under a
    * second of work; capped at four hours, past which "during the observation" stops meaning a moment.
    */
+  /** The re-entries the recording states, and the fireballs a camera network recorded during it: what the candidate search follows (see CandidatesView). */
+  burningCandidates(): { reentries: ReentryJson[], fireballs: ReentryJson[] } {
+    return { reentries: this.ufoElement.sighting.skyEvents?.reentries ?? [], fireballs: this.fireballs?.reentries ?? [] }
+  }
+
+  /**
+   * The aircraft the traffic record gave around the observer, with what is known of each (its type, its category), and the start of the
+   * recording in ms UTC: what the candidate search follows. Undefined while there is no record.
+   */
+  trafficCandidates(): { tracks: AircraftTrack[], startMs: number, describe(track: AircraftTrack): AircraftDescription | undefined } | undefined {
+    const traffic = this.traffic
+    if (traffic?.status !== "ready" || !traffic.tracks || traffic.startMs === undefined) return undefined
+    return { tracks: traffic.tracks, startMs: traffic.startMs, describe: track => traffic.descriptions?.get(TrafficIds.keyOf(track)) }
+  }
+
   /**
    * Where each orbiting object stood from the observer at `date`, when the satellite archive is loaded: what the candidate search follows
    * a pass with (see CandidatesView). Undefined when there is no archive or no place.

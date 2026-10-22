@@ -6333,7 +6333,9 @@ export class SightingEditorElement extends HTMLElement {
         const durationMs = (this.ufoElement.sighting.event.durationSeconds ?? 0) * 1000 || this.ufoElement.seekableDuration
         const passes = this.sceneElement.satellitePassesDuring(durationMs)
         return passes.length > 0 ? { passes, positionsAt: (date: Date) => this.sceneElement.satellitePositionsAt(date) } : undefined
-      }
+      },
+      burning: () => this.sceneElement.burningCandidates(),
+      traffic: () => this.sceneElement.trafficCandidates()
     }, candidates)
   }
 

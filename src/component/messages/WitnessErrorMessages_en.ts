@@ -135,7 +135,7 @@ export const witnessErrorMessages_en: WitnessErrorMessages = {
     "variantLabel": "Variant: {name}",
     "backToAccount": "Back to the account",
     "costNote": "A cost is not a probability: it says which biases have to be invoked, and how far.",
-    "scopeNote": "Poher matrix (1977) for the starting list; the Moon, the planets and satellite passes are computed and confronted with the account.",
+    "scopeNote": "Poher matrix (1977) for the starting list; the Moon, the planets, satellite passes, re-entries, recorded fireballs and the aircraft of the traffic record are computed and confronted with the account.",
     "fields": {
       "time": "Time",
       "heading": "Azimuth",
@@ -163,6 +163,9 @@ export const witnessErrorMessages_en: WitnessErrorMessages = {
       "Jupiter": "Jupiter",
       "Saturn": "Saturn"
     },
+    "aircraft": "Aircraft {name}",
+    "reentry": "Re-entry {name}",
+    "fireball": "Fireball {name}",
     "poherLoading": "Loading the Poher matrix…",
     "poherFailed": "The Poher matrix could not be read: only celestial bodies are offered.",
     "poherTitle": "From the Poher matrix (1977)",

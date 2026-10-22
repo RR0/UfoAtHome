@@ -135,7 +135,7 @@ export const witnessErrorMessages_es: WitnessErrorMessages = {
     "variantLabel": "Variante: {name}",
     "backToAccount": "Volver al relato",
     "costNote": "Un coste no es una probabilidad: dice qué sesgos hay que invocar, y cuánto.",
-    "scopeNote": "Matriz de Poher (1977) para la lista de partida; la Luna, los planetas y los pasos de satélites se calculan y se confrontan con el relato.",
+    "scopeNote": "Matriz de Poher (1977) para la lista de partida; la Luna, los planetas, los pasos de satélites, las reentradas, los bólidos registrados y los aviones del registro se calculan y se confrontan con el relato.",
     "fields": {
       "time": "Hora",
       "heading": "Acimut",
@@ -163,6 +163,9 @@ export const witnessErrorMessages_es: WitnessErrorMessages = {
       "Jupiter": "Júpiter",
       "Saturn": "Saturno"
     },
+    "aircraft": "Aeronave {name}",
+    "reentry": "Reentrada {name}",
+    "fireball": "Bólido {name}",
     "poherLoading": "Cargando la matriz de Poher…",
     "poherFailed": "No se pudo leer la matriz de Poher: solo se proponen los astros.",
     "poherTitle": "Según la matriz de Poher (1977)",

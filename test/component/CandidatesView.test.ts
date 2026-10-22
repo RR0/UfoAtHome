@@ -20,7 +20,7 @@ const date = new Date(Date.UTC(2020, 3, 3, 19, 30))
 const observer = { lat: 48.85, lng: 2.35, elevationM: 0 }
 const venus = computeBodyPosition("Venus", date, observer)
 
-function make(aim: { azimuthDeg: number, altitudeDeg: number }) {
+function make(aim: { azimuthDeg: number, altitudeDeg: number }, extra: Partial<{ burning: () => unknown, traffic: () => unknown }> = {}) {
   const timeline = new Timeline()
   timeline.addKeyframe(0, [{ sourceId: "ufo-1", shape: { ...createOval({ x: 0, y: 0, width: 10, height: 10 }), aim, angular: { widthDeg: 0.1, heightDeg: 0.1 } } }])
   const sighting = { timeline, provenance: Provenance.empty(), event: {} } as never
@@ -39,8 +39,11 @@ function make(aim: { azimuthDeg: number, altitudeDeg: number }) {
     sceneCard: () => card,
     poher: () => Promise.resolve({ matrix, labels }),
     facts: () => ({ sunAltitudeDeg: -15 }),
-    satellites: () => undefined
-  }, section)
+    satellites: () => undefined,
+    burning: () => ({ reentries: [], fireballs: [] }),
+    traffic: () => undefined,
+    ...extra
+  } as never, section)
   return { view, card, section, heading }
 }
 
@@ -81,5 +84,30 @@ describe("CandidatesView with the Poher matrix", () => {
     expect(others.textContent).toContain("helicopters")
     expect(others.querySelector("details")!.textContent).toContain("Sun")
     expect(others.textContent).not.toContain("planets")
+  })
+})
+
+describe("CandidatesView with re-entries and aircraft", () => {
+  it("follows a re-entry and an aircraft of the record as candidates, each as the phenomenon of the matrix it is", async () => {
+    // A re-entry crossing high over Paris from west to east during the first minute, and an airliner 20 km east at 3,000 ft.
+    const reentry = {
+      id: "test", object: { name: "TEST R/B" },
+      track: [{ t: -60_000, lat: 48.85, lng: 1.5, altitudeKm: 80 }, { t: 60_000, lat: 48.85, lng: 3.2, altitudeKm: 70 }],
+      fragments: [{ absoluteMagnitude: -6 }]
+    }
+    const startMs = date.getTime()
+    const airliner = { icao: 0x3c6444, nonIcao: false, points: [{ t: startMs - 600_000, lat: 48.85, lng: 2.62, altitudeFt: 3000 }, { t: startMs + 600_000, lat: 48.85, lng: 2.62, altitudeFt: 3000 }] }
+    const { view, section } = make({ azimuthDeg: 90, altitudeDeg: 3 }, {
+      burning: () => ({ reentries: [reentry], fireballs: [] }),
+      traffic: () => ({ tracks: [airliner], startMs, describe: () => ({ type: "A320", registration: "D-AIPX" }) })
+    })
+    view.refresh()
+    await new Promise(resolve => setTimeout(resolve, 0))
+    const heads = [...section.querySelectorAll(".candidate-head")].map(head => head.textContent!)
+    expect(heads.some(head => head.startsWith("Re-entry TEST R/B"))).toBe(true)
+    const aircraft = heads.find(head => head.startsWith("Aircraft A320 D-AIPX"))!
+    expect(aircraft).toBeDefined()
+    // East, low: where the account puts the light, within consolidated biases.
+    expect(aircraft).toContain("Compatible with consolidated biases")
   })
 })
