@@ -430,6 +430,13 @@ export class SightingEditorElement extends HTMLElement {
   /** The duration, exact or as stated: its number always holds the length the simulation is played at. */
   private readonly durationElement: DurationInputElement
   private readonly exportButton: HTMLButtonElement
+  /** The header's own Save: the same export as the File section's, the one way to keep what was done. */
+  private readonly saveButton: HTMLButtonElement
+  /** The file the recording was opened from, or last saved as, for the header's state line. */
+  private openedFrom?: string
+  private savedAs?: string
+  /** The steps written into the history since the recording was opened or saved: what the header counts as changes. */
+  private changeCount = 0
   /** The File group's account of the data frozen beside the recording, and what takes it at export. */
   private readonly frozenPanel: FrozenDataPanel
   /** The Files group's account of the recording's weather, kept inside it or beside it. */
@@ -1141,6 +1148,7 @@ export class SightingEditorElement extends HTMLElement {
     this.durationElement = this.shadow.querySelector<DurationInputElement>(DURATION_INPUT_ELEMENT_NAME)!
     this.durationInput = this.durationElement.input
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
+    this.saveButton = this.shadow.getElementById("save") as HTMLButtonElement
     this.importInput = this.shadow.getElementById("import") as InputFileElement
     this.narrativeSourceRow = this.shadow.getElementById("narrative-source-row")!
     this.narrativeSettingsBox = this.shadow.getElementById("narrative-settings")!
@@ -1594,6 +1602,7 @@ export class SightingEditorElement extends HTMLElement {
     this.recordButton.addEventListener("click", () => this.toggleRecording())
     this.deleteShapeButton.addEventListener("click", () => this.deleteShape())
     this.exportButton.addEventListener("click", () => this.exportJson())
+    this.saveButton.addEventListener("click", () => this.exportJson())
     this.importInput.addEventListener("filepick", event => {
       const pick = (event as CustomEvent<InputFilePick>).detail
       if (pick.file) void this.importFromFile(pick.file)
@@ -1917,6 +1926,8 @@ export class SightingEditorElement extends HTMLElement {
     // Shape is the group left open on load — of the eight it's the one whose every field changes
     // what the canvas right below it draws, so it's the one worth having open while looking at it.
     this.toggleGroup(this.groupTabs[this.groupPanels.findIndex(panel => panel.id === "group-shape")], true)
+    // Named from the start, in the language the template is written in, until the visitor's own is loaded.
+    this.labelPanels(this.messages)
     this.fileEditorHost.addEventListener("focusout", () => this.leaveFileEditor())
 
     this.setRecordButtonLabel(false)
@@ -2116,9 +2127,53 @@ export class SightingEditorElement extends HTMLElement {
     if (this.applyingFileText) return
     this.baseline = JSON.stringify(this.sightingData)
     this.touched = false
+    this.changeCount = 0
     // The text's changed lines are changed from this: the recording as it was loaded or last exported.
     this.savedFileText = this.fileText()
     this.fileEditor?.markSaved()
+    this.refreshEditorHead()
+  }
+
+  /**
+   * Whether another editor holds this one (see CaseEditorElement): then the header goes, since the holder says what is open
+   * and is the one to save it.
+   */
+  set embedded(embedded: boolean) {
+    this.shadow.getElementById("editor-head")!.hidden = embedded
+    this.shadow.querySelector(".app")!.classList.toggle("embedded", embedded)
+  }
+
+  /**
+   * What the header says: the recording's name — where and when, as a reader would call it — and whether what is shown is
+   * saved. Save is off while there is nothing to save, since nothing is kept anywhere but in the file it writes.
+   */
+  private refreshEditorHead(): void {
+    if (!this.saveButton) return
+    this.refreshEditorTitle()
+    const m = this.messages
+    const dirty = this.dirty
+    const state = this.shadow.getElementById("editor-state")!
+    state.textContent = dirty
+      ? (this.changeCount > 1 ? m.stateDirty.replaceAll("{n}", String(this.changeCount)) : m.stateDirtyOne)
+      : this.savedAs ? m.stateSaved.replaceAll("{file}", this.savedAs)
+      : this.openedFrom ? m.stateClean.replaceAll("{file}", this.openedFrom) : m.stateNew
+    state.parentElement!.dataset.state = dirty ? "dirty" : this.savedAs ? "saved" : "clean"
+    this.saveButton.disabled = !dirty
+  }
+
+  /** The recording's name, where and when — cheap enough to follow every edit (see renderParamSummary), unlike the state, which compares the whole recording. */
+  private refreshEditorTitle(): void {
+    const event = this.ufoElement.sighting.event
+    const place = event.place?.[0]?.name?.split(",")[0].trim()
+    const time = event.time
+    let date = ""
+    if (time?.year !== undefined) {
+      date = time.month !== undefined && time.day !== undefined
+        ? new Date(Date.UTC(time.year, time.month - 1, time.day)).toLocaleDateString(this.language, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
+        : String(time.year)
+    }
+    const title = [place, date].filter(Boolean).join(", ") || this.sightingIdInput.value || this.messages.stateNew.split(" · ")[0]
+    this.shadow.getElementById("editor-title")!.textContent = title
   }
 
   /**
@@ -2164,19 +2219,21 @@ export class SightingEditorElement extends HTMLElement {
     this.historyAnswering = false
     editor.replaceText(now, this.fileSyncActive())
     this.fileTextApplied = editor.text
+    this.changeCount++
     this.syncHistoryButtons()
+    this.refreshEditorHead()
   }
 
   /** Takes back the last change. */
   private undo(): void {
-    this.stepHistory(editor => editor.undo(this.fileSyncActive()))
+    this.stepHistory(editor => editor.undo(this.fileSyncActive()), -1)
   }
 
   private redo(): void {
-    this.stepHistory(editor => editor.redo(this.fileSyncActive()))
+    this.stepHistory(editor => editor.redo(this.fileSyncActive()), 1)
   }
 
-  private stepHistory(step: (editor: SightingFileEditor) => boolean): void {
+  private stepHistory(step: (editor: SightingFileEditor) => boolean, changes: number): void {
     // What was just done is written first, or it would be what the step takes back instead of what came before.
     if (this.historyTimer !== undefined) {
       clearTimeout(this.historyTimer)
@@ -2189,7 +2246,9 @@ export class SightingEditorElement extends HTMLElement {
     clearTimeout(this.fileApplyTimer)
     this.applyFileText(editor.text, true)
     this.historyAnswering = true
+    this.changeCount = Math.max(0, this.changeCount + changes)
     this.syncHistoryButtons()
+    this.refreshEditorHead()
   }
 
   private syncHistoryButtons(): void {
@@ -2328,6 +2387,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     const fileName = `${base}.json`
     const text = JSON.stringify(json, null, 2)
+    this.savedAs = annexes.size === 0 ? fileName : `${base}.zip`
     if (annexes.size === 0) {
       this.download(new Blob([text], { type: "application/json" }), fileName)
     } else {
@@ -2466,6 +2526,9 @@ export class SightingEditorElement extends HTMLElement {
       this.sceneElement.documentUrl = undefined
       this.sightingData = json
       this.resetHistory()
+      this.openedFrom = file.name
+      this.savedAs = undefined
+      this.refreshEditorHead()
       this.dispatchEvent(new CustomEvent("recordingloaded", { bubbles: true, composed: true }))
       // The recording now open came from a file, not from the address still sitting in the field.
       this.importInput.url = ""
@@ -2563,6 +2626,9 @@ export class SightingEditorElement extends HTMLElement {
       // `src` attribute (a site's `?file=` link), or a observer's own file. Absolute, so the
       // address can be copied out of the field and still work, and so the field is a valid URL.
       this.importInput.url = new URL(url, location.href).href
+      this.openedFrom = decodeURIComponent(new URL(url, location.href).pathname.split("/").pop() ?? "") || undefined
+      this.savedAs = undefined
+      this.refreshEditorHead()
       this.dispatchEvent(new CustomEvent("recordingloaded", { bubbles: true, composed: true }))
     } catch (error) {
       window.alert(this.importErrorFor(error))
@@ -5731,6 +5797,12 @@ export class SightingEditorElement extends HTMLElement {
       candidate.setAttribute("aria-expanded", String(nowOpen))
       this.groupPanels[index].hidden = !nowOpen
     }
+    // The chips scroll sideways: the one opened is brought into the strip's view, centred, rather than left past its edge.
+    if (open) {
+      const strip = tab.parentElement!.getBoundingClientRect()
+      const chip = tab.getBoundingClientRect()
+      if (chip.left < strip.left || chip.right > strip.right) tab.parentElement!.scrollLeft += chip.left - strip.left - (strip.width - chip.width) / 2
+    }
     if (open && tab.getAttribute("aria-controls") === "group-decor") {
       const listed = this.decorList.value
       if (listed !== "" && listed !== this.currentDecorId) this.selectDecor(listed)
@@ -6284,6 +6356,7 @@ export class SightingEditorElement extends HTMLElement {
   /** Draws the strip from what is currently known: the recording's own chips, then whatever the
    * assessors have most recently concluded. */
   private renderParamSummary(): void {
+    if (this.saveButton) this.refreshEditorTitle()
     const nested = SightingEditorElement.NESTED_GROUPS
     // The summary emits its groups in one run each (see SightingSummary.entriesFor's fixed call
     // order), so a nest opens when a run of one starts and closes when it ends — no sorting, and
@@ -9846,6 +9919,24 @@ export class SightingEditorElement extends HTMLElement {
     this.setRecordButtonLabel(this.isRecording)
     // Refreshes the Play/Pause button's own title/aria-label, which depends on this.messages.
     this.syncPlaybackControls()
+    this.labelPanels(messages)
+  }
+
+  /** The header's own labels, and each section's title and the sentence under it, in `messages`. */
+  private labelPanels(messages: SightingEditorMessages): void {
+    this.shadow.getElementById("label-editor-kicker")!.textContent = messages.editorKicker
+    this.shadow.getElementById("label-save")!.textContent = messages.save
+    const intros: Record<string, string> = {
+      observation: messages.panelIntroObservation, observer: messages.panelIntroObserver, location: messages.panelIntroLocation,
+      temporal: messages.panelIntroTemporal, decor: messages.panelIntroDecor, weather: messages.panelIntroWeather,
+      shape: messages.panelIntroShape, sound: messages.panelIntroSound, reference: messages.panelIntroReference, file: messages.panelIntroFile
+    }
+    // Each section's title is its chip's own label: one name, said twice.
+    for (const [name, intro] of Object.entries(intros)) {
+      this.shadow.getElementById(`panel-title-${name}`)!.textContent = this.shadow.getElementById(`label-${name}-group`)!.textContent
+      this.shadow.getElementById(`panel-intro-${name}`)!.textContent = intro
+    }
+    this.refreshEditorHead()
   }
 
   private onPointerDown(event: PointerEvent): void {

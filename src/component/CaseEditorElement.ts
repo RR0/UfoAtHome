@@ -248,6 +248,7 @@ export class CaseEditorElement extends HTMLElement {
     this.editor.addEventListener("recordingloaded", () => this.closeCase())
     // The case keeps the watch over what would be lost by leaving, for the recordings it holds: the editor does not.
     this.editor.guardsLeaving = false
+    this.editor.embedded = true
     // Loading a recording or a case into the editor replaces what is open: asked first when changes were not exported.
     this.editor.addEventListener("beforeload", event => {
       if (!this.dirty) return

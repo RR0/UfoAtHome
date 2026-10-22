@@ -3,15 +3,50 @@ import { InputFont } from "./InputFont.js"
 import { MessageStyle } from "./MessageStyle.js"
 import { ElementList } from "./ElementList.js"
 export const html = `
-<!-- The groups' own handles, gathered onto one wrapping strip instead of standing as seven stacked
-     <summary> rows down the left edge. Seven collapsed rows cost 259px of pure chrome before a
-     single field is shown, which is most of a phone's screen spent on nothing; the same seven
-     handles side by side cost one line, sometimes two when the viewport is narrow. Only one panel
-     opens at a time (see SightingEditorElement.toggleGroup) — with all of them open the form stood
-     1210px tall and pushed the render, the whole point of editing here, off the bottom of the
-     screen. What's set across ALL groups stays legible without opening any of them: see the
-     parameter summary under the render. -->
-<div id="group-tabs" class="group-tabs">
+<!-- From top to bottom, as the design handoff lays it out: what this recording is and whether it is saved, the scene, the
+     sections as a row of chips (only one open at a time, see SightingEditorElement.toggleGroup), and the open section. The
+     header goes when another editor holds this one (see embedded): the holder says what is open and saves it. -->
+<div class="app">
+<header class="editor-head" id="editor-head">
+  <div class="head-text">
+    <span id="label-editor-kicker" class="kicker">Sighting editor</span>
+    <h1 id="editor-title" class="editor-title"></h1>
+    <p class="editor-state"><span class="state-dot" aria-hidden="true"></span><span id="editor-state"></span></p>
+  </div>
+  <div class="head-actions">
+    <!-- Step back and forward through what was edited, whichever section it was edited in: the File section's text editor keeps the history (see SightingEditorElement.undo). -->
+    <span class="history" role="group">
+      <button id="undo" type="button" class="icon-btn" title="Undo" aria-label="Undo" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4 3 7l3 3"/><path d="M3 7h6.5a3.5 3.5 0 0 1 0 7H8"/></svg></button>
+      <button id="redo" type="button" class="icon-btn" title="Redo" aria-label="Redo" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m10 4 3 3-3 3"/><path d="M13 7H6.5a3.5 3.5 0 0 0 0 7H8"/></svg></button>
+    </span>
+    <!-- The one way to keep what was done: the file, downloaded. Nothing is kept in the browser. -->
+    <button id="save" type="button" class="pill-btn" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8"/><path d="m4.5 7 3.5 3.5L11.5 7"/><path d="M3 13.5h10"/></svg><span id="label-save">Save</span></button>
+  </div>
+</header>
+<div class="scene-card">
+
+<!-- A case opened for editing: the recordings it lists (the accounts, and the readings of them, which
+     are recordings of their own), one open at a time. Hidden for a single recording. Just above the render, as the player puts its own pickers: what
+     is picked here is what the render shows. -->
+<div class="render-line">
+<!-- The playback layer's own toggles, taken out of the picture — see UfoElement.hostControls. -->
+<div id="scene-controls" class="scene-controls"></div>
+</div>
+<div id="ufo-slot"></div>
+<div class="toolbar playback-row">
+  <button id="play-pause" type="button" class="icon-btn" title="Play" aria-label="Play">▶</button>
+  <span id="time-start" class="time-label">0:00</span>
+  <button id="previous-mark" type="button" class="icon-btn" title="Previous keyframe" aria-label="Previous keyframe">◂◆</button>
+  <!-- The keyframes of what the open group edits, and the named moments — see TimelineMarks. -->
+  <div class="seek-track">
+    <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
+    <div id="timeline-marks" class="timeline-marks"></div>
+  </div>
+  <button id="next-mark" type="button" class="icon-btn" title="Next keyframe" aria-label="Next keyframe">◆▸</button>
+  <span id="time-end" class="time-label">0:00</span>
+</div>
+</div>
+<nav id="group-tabs" class="section-chips">
   <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false"><span id="label-observation-group">Summary</span></button>
   <button class="group-tab" type="button" aria-controls="group-observer" aria-expanded="false"><span id="label-observer-group">Witness</span></button>
   <button class="group-tab" type="button" aria-controls="group-location" aria-expanded="false"><span id="label-location-group">Location</span></button>
@@ -22,15 +57,11 @@ export const html = `
   <button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false"><span id="label-sound-group">Sound</span></button>
   <button class="group-tab" type="button" aria-controls="group-reference" aria-expanded="false"><span id="label-reference-group">Pictures</span></button>
   <button class="group-tab" type="button" aria-controls="group-file" aria-expanded="false"><span id="label-file-group">Files</span></button>
-  <!-- Step back and forward through what was edited, whichever group it was edited in: the File group's text editor keeps the history (see SightingEditorElement.undo). -->
-  <span class="history" role="group">
-    <button id="undo" type="button" class="icon-btn" title="Undo" aria-label="Undo" disabled>↶</button>
-    <button id="redo" type="button" class="icon-btn" title="Redo" aria-label="Redo" disabled>↷</button>
-  </span>
   <!-- What an element that holds this editor puts after the last tab (see CaseEditorElement): a mark of its own, which takes its room whether it shows or not. -->
   <slot name="tab-status"></slot>
-</div>
+</nav>
 <section class="group-panel" id="group-observation" aria-labelledby="label-observation-group" hidden>
+  <header class="panel-head"><h2 class="panel-title" id="panel-title-observation"></h2><p class="panel-intro" id="panel-intro-observation"></p></header>
   <div class="toolbar">
     <!-- The observation's own id, not the observer's nor the case's: what a case and the
          interpretations filed in it name this account by (see Sighting.id). -->
@@ -61,8 +92,16 @@ export const html = `
   <!-- What the draft claims and what it could not: the part that makes the rest usable. Empty (and
        so invisible) until there has been a draft. -->
   <div id="narrative-report" class="narrative-report" hidden></div>
+  <!-- Everything this reconstruction actually asserts, on one wrapping strip: only fields that are SET appear (37 of 75 on
+       a real case), so it reads as a statement rather than as a second copy of the form. In the Summary section, where the
+       design handoff puts what the recording states and what is left to fill in: under the scene it pushed the sections
+       out of sight on a real case. Each chip carries its section and its field, so clicking one opens the right section and
+       puts the caret in the right input (see SightingEditorElement.refreshParamSummary); a value a data source supplied
+       rather than the author is marked, which is the one thing the form itself never showed at a glance. -->
+  <div id="param-summary" class="param-summary"></div>
 </section>
 <section class="group-panel" id="group-observer" aria-labelledby="label-observer-group" hidden>
+  <header class="panel-head"><h2 class="panel-title" id="panel-title-observer"></h2><p class="panel-intro" id="panel-intro-observer"></p></header>
   <div class="toolbar">
     <!-- The observers, laid out as every list of the editor is (see ElementList): the one whose account this is first, then the
          other observers the scene places (decor of the kind "observer"); 🎯, 🗑 and "+" for those; under it, the frame of the one
@@ -137,6 +176,7 @@ export const html = `
   </div>
 </section>
 <section class="group-panel" id="group-location" aria-labelledby="label-location-group" hidden>
+  <header class="panel-head"><h2 class="panel-title" id="panel-title-location"></h2><p class="panel-intro" id="panel-intro-location"></p></header>
   <!-- Where the data of this group is read from, one kind at a time (see SightingEditorElement.sourcePickers): out of the way of what
        the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
   <button class="group-settings" type="button" id="location-settings-button" popovertarget="location-settings" style="anchor-name: --location-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
@@ -183,6 +223,7 @@ export const html = `
      a time, the one that alone still overflowed a phone. Split out, neither half does. The two
      stay adjacent because a decor object is placed RELATIVE to the location above it. -->
 <section class="group-panel" id="group-decor" aria-labelledby="label-decor-group" hidden>
+  <header class="panel-head"><h2 class="panel-title" id="panel-title-decor"></h2><p class="panel-intro" id="panel-intro-decor"></p></header>
   <!-- Where the data of this group is read from, one kind at a time (see SightingEditorElement.sourcePickers): out of the way of what
        the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
   <button class="group-settings" type="button" id="decor-settings-button" popovertarget="decor-settings" style="anchor-name: --decor-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
@@ -219,6 +260,7 @@ export const html = `
   </div>
 </section>
 <section class="group-panel" id="group-temporal" aria-labelledby="label-temporal-group" hidden>
+  <header class="panel-head"><h2 class="panel-title" id="panel-title-temporal"></h2><p class="panel-intro" id="panel-intro-temporal"></p></header>
   <div class="toolbar">
     <!-- Two ways to say the same thing, and the native picker is the default because a
          reconstruction needs a full instant to compute a sky at all: of the nine recordings that
@@ -274,6 +316,7 @@ export const html = `
      its own, fetched the first time this group is opened — CodeMirror is the heaviest thing the
      component could carry and most authors never need it. -->
 <section class="group-panel" id="group-file" aria-labelledby="label-file-group" hidden>
+  <header class="panel-head"><h2 class="panel-title" id="panel-title-file"></h2><p class="panel-intro" id="panel-intro-file"></p></header>
   <!-- The files the recording is made of, one picked at a time as every list of the editor is (see ElementList): the recording itself, and
        the annexes it carries frozen beside it so that it plays without asking third parties (see FrozenData, FrozenDataPanel). -->
   <div class="element-list-row" id="file-item-row">
@@ -329,6 +372,7 @@ export const html = `
   <div id="file-editor" class="file-editor"></div>
 </section>
 <section class="group-panel" id="group-weather" aria-labelledby="label-weather-group" hidden>
+  <header class="panel-head"><h2 class="panel-title" id="panel-title-weather"></h2><p class="panel-intro" id="panel-intro-weather"></p></header>
   <!-- Where the data of this group is read from, one kind at a time (see SightingEditorElement.sourcePickers): out of the way of what
        the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
   <button class="group-settings" type="button" id="weather-settings-button" popovertarget="weather-settings" style="anchor-name: --weather-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
@@ -443,6 +487,7 @@ export const html = `
      it — see SoundTrack.ts. The kind dropdown is filled from SOUND_KINDS in script, so adding a
      timbre never means editing markup and element ids (same rule as the data-source pickers). -->
 <section class="group-panel" id="group-sound" aria-labelledby="label-sound-group" hidden>
+  <header class="panel-head"><h2 class="panel-title" id="panel-title-sound"></h2><p class="panel-intro" id="panel-intro-sound"></p></header>
   <div class="toolbar">
     <label><span id="label-sound-kind">Sound</span> <select id="soundKind" class="sound-field"></select></label>
     <label><span id="label-sound-volume">Loudness</span> <input id="soundVolume" class="sound-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
@@ -462,6 +507,7 @@ export const html = `
      the observer's spot most often looks where they looked; lining a picture up on the rendered
      relief by dragging it is the next step, not this one. -->
 <section class="group-panel" id="group-reference" aria-labelledby="label-reference-group" hidden>
+  <header class="panel-head"><h2 class="panel-title" id="panel-title-reference"></h2><p class="panel-intro" id="panel-intro-reference"></p></header>
   <div class="toolbar">
     <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, then where the picture to add comes from (an
          address, a file from the author's own disk, embedded in the recording, or street-level pictures near the spot) and "+";
@@ -536,12 +582,19 @@ export const html = `
   </div>
 </section>
 <section class="group-panel" id="group-shape" aria-labelledby="label-shape-group" hidden>
+  <header class="panel-head"><h2 class="panel-title" id="panel-title-shape"></h2><p class="panel-intro" id="panel-intro-shape"></p></header>
   <!-- In two parts: the shapes the observer DREW (angles on their image, the account), and the
        bodies the observer said those shapes WERE (the 3D interpretation, see BodyEditor). The shapes
        come first and open on arrival: they are what the rest of this editor draws and records. -->
+  <div class="subtabs-row">
   <div class="group-tabs" id="shape-tabs">
     <button class="subgroup-tab" type="button" aria-controls="shape-shapes" aria-expanded="true"><span id="label-shapes-subgroup">Shapes</span></button>
     <button class="subgroup-tab" type="button" aria-controls="shape-bodies" aria-expanded="false"><span id="label-bodies-subgroup">Bodies</span></button>
+  </div>
+  <!-- How the account is drawn, and which part of the Phenomenon group edits it: the angles the observer drew (2D, the shapes) or what
+       they said those were, in 3D (the bodies). Follows the panels as they are opened, and opens them when chosen. -->
+  <label id="account-view-row" class="account-view"><span id="label-account-view">Account</span>
+    <select id="account-view"><option value="shapes">2D · shapes</option><option value="bodies">3D · bodies</option></select></label>
   </div>
   <section class="subgroup-panel" id="shape-shapes" aria-labelledby="label-shapes-subgroup">
   <div class="toolbar">
@@ -611,41 +664,7 @@ export const html = `
     </div>
   </section>
 </section>
-
-<!-- A case opened for editing: the recordings it lists (the accounts, and the readings of them, which
-     are recordings of their own), one open at a time. Hidden for a single recording. Just above the render, as the player puts its own pickers: what
-     is picked here is what the render shows. -->
-<div class="render-line">
-<!-- How the account is drawn, and which part of the Phenomenon group edits it: the angles the observer drew (2D, the shapes) or what
-     they said those were, in 3D (the bodies). Follows the panels as they are opened, and opens them when chosen. -->
-<label id="account-view-row" class="account-view"><span id="label-account-view">Account</span>
-  <select id="account-view"><option value="shapes">2D · shapes</option><option value="bodies">3D · bodies</option></select></label>
-<!-- The playback layer's own toggles, taken out of the picture — see UfoElement.hostControls. -->
-<div id="scene-controls" class="scene-controls"></div>
 </div>
-<div id="ufo-slot"></div>
-<div class="toolbar playback-row">
-  <button id="play-pause" type="button" class="icon-btn" title="Play" aria-label="Play">▶</button>
-  <span id="time-start" class="time-label">0:00</span>
-  <button id="previous-mark" type="button" class="icon-btn" title="Previous keyframe" aria-label="Previous keyframe">◂◆</button>
-  <!-- The keyframes of what the open group edits, and the named moments — see TimelineMarks. -->
-  <div class="seek-track">
-    <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
-    <div id="timeline-marks" class="timeline-marks"></div>
-  </div>
-  <button id="next-mark" type="button" class="icon-btn" title="Next keyframe" aria-label="Next keyframe">◆▸</button>
-  <span id="time-end" class="time-label">0:00</span>
-</div>
-<!-- Everything this reconstruction actually asserts, on one wrapping strip: only fields that are
-     SET appear (37 of 75 on a real case), so it reads as a statement rather than as a second copy
-     of the form. It has to sit BELOW the render, not between the groups and it: 200px of chips
-     above the canvas would push it back off the screen and undo what the tab strip just bought.
-     Nothing is lost by the move — a summary is read while you are not editing, the render is
-     watched while you are, never both at once. Each chip carries its group and its field, so
-     clicking one opens the right panel and puts the caret in the right input (see
-     SightingEditorElement.refreshParamSummary); a value a data source supplied rather than the
-     author is marked, which is the one thing the form itself never showed at a glance. -->
-<div id="param-summary" class="param-summary"></div>
 <div id="context-menu" class="context-menu" hidden role="menu">
   <button id="context-group" type="button" role="menuitem">Group</button>
   <button id="context-ungroup" type="button" role="menuitem">Ungroup</button>
@@ -1717,4 +1736,238 @@ ${MessageStyle.rules(
   [".scenery-warning"],
   ["#narrative-status.error"]
 )}
+/* ---- The design handoff's look (design_handoff_editeurs_ufoathome, README §1–3.1) ----
+   The site's own tokens (site/style.css), each a light-dark() pair: they follow the colour scheme this
+   widget is used in exactly as Canvas and CanvasText do. The scene keeps its own colours in both. */
+:host {
+  --ink: light-dark(#131a26, #e8ecf4);
+  --ink-dim: light-dark(#4c5a70, #a3adc2);
+  --ink-faint: light-dark(#78859b, #6f7b93);
+  --ground: light-dark(#f6f8fc, #070a12);
+  --ground-raised: light-dark(#ffffff, #0e1422);
+  --ground-sunken: light-dark(#eaeff7, #050710);
+  --line: light-dark(#dde4ef, #1e2739);
+  --line-strong: light-dark(#c2ccdc, #2e3a52);
+  --glow: light-dark(#9a6f12, #f5c451);
+  --glow-solid: light-dark(#f0bc44, #f5c451);
+  --glow-on-solid: #1a1405;
+  --glow-dim: light-dark(#a07d29, #a8873a);
+  --sky: light-dark(#12608f, #7fd4ff);
+  --ok: light-dark(#1f7a44, #8fd7a4);
+  --error: light-dark(#c0392b, #ff8a7a);
+  --error-bg: light-dark(rgba(192, 57, 43, .09), rgba(255, 138, 122, .12));
+  --warn-bg: light-dark(rgba(154, 111, 18, .14), rgba(245, 196, 81, .14));
+  --neutral-bg: light-dark(rgba(120, 133, 155, .14), rgba(140, 155, 185, .12));
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --rr0-field-radius: 8px;
+  --rr0-input-font-size: 15px;
+  /* What the layout adapts to: the width this editor is given, never the window's. */
+  container-type: inline-size;
+  font: 400 15px/1.5 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 68rem;
+  margin: 0 auto;
+  background: var(--ground-raised);
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  /* clip, not hidden: hidden would make the card the scene's scrolling box, and the scene could no longer stick (see the narrow layout). */
+  overflow: clip;
+}
+/* Held by another editor (see embedded): no card of its own inside that one's. */
+.app.embedded { border: 0; border-radius: 0; max-width: none; }
+.editor-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.editor-head[hidden] { display: none; }
+.head-text { min-width: 0; }
+.kicker { display: block; font: 600 12px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--glow-dim); }
+.editor-title { margin: 2px 0 4px; font: 600 20px/1.3 var(--serif); color: var(--ink); }
+.editor-state { display: flex; align-items: center; gap: 7px; margin: 0; font-size: 13px; color: var(--ink-faint); }
+.state-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-faint); }
+.editor-state[data-state="dirty"] { color: var(--glow); }
+.editor-state[data-state="dirty"] .state-dot { background: var(--glow-solid); }
+.editor-state[data-state="saved"] .state-dot { background: var(--ok); }
+.head-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+/* In the header now, side by side: the column the old strip reserved for them is gone. */
+.head-actions .history { position: static; flex-direction: row; gap: 8px; }
+.head-actions .history .icon-btn {
+  width: 36px; height: 36px; min-width: 36px; min-height: 36px; max-width: none; max-height: none;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.pill-btn {
+  display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px;
+  border: 1px solid var(--line-strong); border-radius: 999px; background: var(--ground-raised); color: var(--ink);
+  font: 600 14px/1 var(--sans); cursor: pointer;
+}
+#save:not(:disabled) { background: var(--glow-solid); border-color: var(--glow-solid); color: var(--glow-on-solid); }
+.scene-card { background: #0b1020; }
+.scene-card > .render-line { padding: 6px 12px; background: var(--ground-raised); }
+.scene-card > .render-line:not(:has(:not(:empty))) { display: none; }
+.scene-card > .playback-row { margin: 0; padding: 8px 14px; background: var(--ground-raised); border-top: 1px solid var(--line); }
+#group-observation > .param-summary { margin: 18px 0 0; padding: 18px 0 0; border-top: 1px solid var(--line); }
+/* The sections, as a row of chips that scrolls sideways rather than wrapping. */
+#group-tabs.section-chips {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 0;
+  margin: 0;
+  padding: 12px 18px;
+  padding-inline-end: 18px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.section-chips > .group-tab {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--ground-raised);
+  color: var(--ink);
+  box-shadow: none;
+  font: 600 14px/1 var(--sans);
+}
+.section-chips > .group-tab:hover { background: var(--ground-sunken); border-color: var(--glow-dim); color: var(--ink); }
+/* Its state, as a dot: complete, or with something still to answer, or wrong. */
+.section-chips > .group-tab::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+.section-chips > .group-tab:has(.tab-badge:not([hidden]))::before { background: var(--glow-solid); }
+.app:has(#group-observation [aria-invalid="true"]) [aria-controls="group-observation"]::before,
+.app:has(#group-observer [aria-invalid="true"]) [aria-controls="group-observer"]::before,
+.app:has(#group-location [aria-invalid="true"]) [aria-controls="group-location"]::before,
+.app:has(#group-temporal [aria-invalid="true"]) [aria-controls="group-temporal"]::before,
+.app:has(#group-decor [aria-invalid="true"]) [aria-controls="group-decor"]::before,
+.app:has(#group-weather [aria-invalid="true"]) [aria-controls="group-weather"]::before,
+.app:has(#group-shape [aria-invalid="true"]) [aria-controls="group-shape"]::before,
+.app:has(#group-sound [aria-invalid="true"]) [aria-controls="group-sound"]::before,
+.app:has(#group-reference [aria-invalid="true"]) [aria-controls="group-reference"]::before,
+.app:has(#group-file [aria-invalid="true"]) [aria-controls="group-file"]::before { background: var(--error); }
+.section-chips > .group-tab[aria-expanded="true"] { background: var(--ink); border-color: var(--ink); color: var(--ground-raised); box-shadow: none; }
+/* The count stays for whoever reads the chip aloud; the dot says it to the eye. */
+.section-chips .tab-badge { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.app > .group-panel {
+  margin: 0;
+  padding: 20px 18px 24px;
+  border: 0;
+  border-radius: 0;
+  background: var(--ground-raised);
+  color: var(--ink);
+}
+.panel-head { margin: 0 0 16px; padding: 0 0 14px; border-bottom: 1px solid var(--line); }
+.panel-title { margin: 0 0 4px; font: 600 22px/1.25 var(--serif); color: var(--ink); }
+.panel-intro { margin: 0; font-size: 14px; color: var(--ink-dim); }
+.group-panel > .group-settings { top: 20px; right: 18px; }
+/* Fields: the label above, 13px, the value under it at 15px, on a grid that fills the width. */
+.group-panel .toolbar { gap: 14px 16px; align-items: end; }
+.group-panel .toolbar > label:not(:has(> input[type="checkbox"], > input[type="radio"])) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 6px;
+  row-gap: 6px;
+  font: 600 13px/1.3 var(--sans);
+  color: var(--ink-dim);
+}
+.group-panel .toolbar > label:not(:has(> input[type="checkbox"], > input[type="radio"])) > :first-child { grid-column: 1 / -1; }
+.group-panel .toolbar > label > :is(input, select, textarea) { font-weight: 400; }
+.group-panel .toolbar > label.wide { display: flex; }
+:where(.app) :where(input[type="text"], input[type="url"], input[type="number"], input[type="search"], input[type="date"], input[type="time"], input[type="datetime-local"], input:not([type]), select) {
+  /* 38px tall with its border, in the content box the width is fitted in (see NumberFields, which counts its own room for the padding). */
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--ground);
+  color: var(--ink);
+  font-size: 15px;
+}
+:where(.app) :where(textarea) {
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--ground);
+  color: var(--ink);
+  font-size: 15px;
+}
+:where(.app) :where(input, select, textarea):focus-visible { outline: none; border-color: var(--glow-dim); box-shadow: 0 0 0 3px var(--warn-bg); }
+:where(.app) :where([aria-invalid="true"], .invalid) { border-color: var(--error); }
+/* Lists: drawn by InputFont in the tokens above, their chevron 11–16 px from the right edge. */
+.app :is(select:not([multiple]):not([size]), .rr0-select) {
+  height: 38px;
+  padding: 0 30px 0 10px;
+  background-size: 5px 5px, 5px 5px;
+  background-position: calc(100% - 16px) 52%, calc(100% - 11px) 52%;
+  color: var(--ink);
+}
+:where(.app) :where(button) {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--ground-raised);
+  color: var(--ink);
+  font: 600 14px/1 var(--sans);
+  cursor: pointer;
+}
+:where(.app) :where(button:hover:not(:disabled)) { border-color: var(--glow-dim); background: var(--ground-sunken); }
+:where(.app) :where(button:disabled) { opacity: .5; cursor: default; }
+:where(.app) :where(.icon-btn) { min-width: 36px; padding: 0; border-radius: 8px; }
+:where(.app) input[type="range"] { accent-color: var(--glow-solid); }
+:where(.app) input[type="checkbox"], :where(.app) input[type="radio"] { accent-color: var(--glow-solid); }
+/* A section's parts: one segmented control, the part open raised in it. */
+.subtabs-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 16px; }
+.group-panel .group-tabs:has(> .subgroup-tab) {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 0 0 16px;
+  padding: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--ground);
+}
+.subtabs-row > .group-tabs { margin: 0; }
+.subgroup-tab {
+  min-height: 34px;
+  margin: 0;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-dim);
+  box-shadow: none;
+  font: 600 14px/1 var(--sans);
+}
+.subgroup-tab:hover { background: var(--ground-sunken); color: var(--ink); }
+.subgroup-tab[aria-expanded="true"] { background: var(--ground-raised); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .18); }
+.subgroup-panel { margin: 0; padding: 0; border: 0; background: transparent; color: inherit; }
+.account-view { display: inline-flex; align-items: center; gap: 10px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
+.app .element-list-body { border-color: var(--line); border-radius: 0 10px 10px 10px; }
+.context-menu { background: var(--ground-raised); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, .3); }
+.context-menu hr { border: 0; border-top: 1px solid var(--line); }
+/* Narrow: the scene stays in view while the form scrolls under it. */
+@container (max-width: 640px) {
+  .scene-card { position: sticky; top: 0; z-index: 3; }
+  .editor-head { flex-wrap: wrap; }
+  .app > .group-panel, #group-tabs.section-chips, .editor-head { padding-left: 14px; padding-right: 14px; }
+}
 `

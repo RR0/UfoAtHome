@@ -9,6 +9,8 @@
  * PopoverPickerElement) takes the same class and looks the same.
  *
  * Each shadow root puts `InputFont.CSS` in its style: a rule of a page does not cross into it. `--rr0-input-font-size` changes the size.
+ * A component that states the site's tokens (`--ground`, `--ink`, `--line-strong`, `--rr0-field-radius`) has its lists drawn in them; one
+ * that does not keeps the system's field colours.
  */
 export class InputFont {
 
@@ -28,8 +30,8 @@ input, textarea, select, .rr0-select { font-size: var(--rr0-input-font-size, 13p
 :is(${InputFont.PICKER}) {
   -webkit-appearance: none; appearance: none; box-sizing: border-box;
   padding: .3em 1.9em .3em .5em; line-height: 1.2;
-  border: 1px solid color-mix(in srgb, CanvasText 40%, transparent); border-radius: 4px;
-  background-color: Field; color: FieldText;
+  border: 1px solid var(--line-strong, color-mix(in srgb, CanvasText 40%, transparent)); border-radius: var(--rr0-field-radius, 4px);
+  background-color: var(--ground, Field); color: var(--ink, FieldText);
   background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
   background-position: calc(100% - 1em) 55%, calc(100% - .65em) 55%;
   background-size: .35em .35em, .35em .35em;

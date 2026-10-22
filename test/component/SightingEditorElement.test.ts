@@ -3051,10 +3051,9 @@ describe("SightingEditorElement parameter summary", () => {
     input.dispatchEvent(new Event("input"))
   }
 
-  it("sits under the render, not between the groups and it — chips above the canvas would push it back off the screen", () => {
-    const element = mount()
-    const children = [...element.shadowRoot!.children].map(child => child.id || child.tagName.toLowerCase())
-    expect(children.indexOf("param-summary")).toBeGreaterThan(children.indexOf("rr0-scene"))
+  it("sits in the Summary section, where what the recording states is read", () => {
+    const root = mount().shadowRoot!
+    expect(root.getElementById("group-observation")!.contains(root.getElementById("param-summary"))).toBe(true)
   })
 
   it("states only what is set, so it reads as a statement rather than a second copy of the form", () => {
@@ -7176,5 +7175,29 @@ describe("the account's view selector: shapes (2D) or bodies (3D)", () => {
     expect(part(element, "account-view-row").hidden).toBe(false)
     element.reading = true
     expect(part(element, "account-view-row").hidden).toBe(true)
+  })
+})
+
+describe("SightingEditorElement header", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  it("says nothing is to be saved, and offers no Save, until something is changed", () => {
+    const element = mount()
+    const root = element.shadowRoot!
+    expect(root.getElementById("editor-state")!.textContent).toBe("New recording · no changes")
+    expect((root.getElementById("save") as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it("goes when another editor holds this one, which says what is open and saves it", () => {
+    const element = mount()
+    ;(element as unknown as { embedded: boolean }).embedded = true
+    expect(element.shadowRoot!.getElementById("editor-head")!.hidden).toBe(true)
+  })
+
+  it("opens each section on its own name", () => {
+    const root = mount().shadowRoot!
+    expect(root.getElementById("panel-title-shape")!.textContent).toBe(root.getElementById("label-shape-group")!.textContent)
   })
 })

@@ -305,6 +305,28 @@ export interface SightingEditorMessages extends InputFileMessages, SightingLabel
   beamsSubgroup: string
   /** Summary of the group holding what the sighting sounded like — see SoundTrack.ts. */
   soundGroup: string
+  /** The header: what kind of editor this is, its one save button, and the line saying whether what is shown is saved. */
+  editorKicker: string
+  save: string
+  stateNew: string
+  /** {file}: the name of the file the recording was opened from. */
+  stateClean: string
+  stateDirtyOne: string
+  /** {n}: how many changes were made since it was opened or saved. */
+  stateDirty: string
+  /** {file}: the name of the file downloaded. */
+  stateSaved: string
+  /** The sentence under each section's title, saying what it is for. */
+  panelIntroObservation: string
+  panelIntroObserver: string
+  panelIntroLocation: string
+  panelIntroTemporal: string
+  panelIntroDecor: string
+  panelIntroWeather: string
+  panelIntroShape: string
+  panelIntroSound: string
+  panelIntroReference: string
+  panelIntroFile: string
   /**
    * The group holding when the observation happened.
    *
