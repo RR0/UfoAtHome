@@ -1,4 +1,6 @@
 import { CaseFile } from "../engine/persistence/caseJson.js"
+import { Icons } from "./Icons.js"
+import { WindowClose } from "./WindowClose.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import type { InputFileElement, InputFilePick } from "./InputFileElement.js"
@@ -33,6 +35,7 @@ export const CASE_EDITOR_ELEMENT_NAME = "rr0-case-editor"
 const TEMPLATE = `
 <style>
   :host { display: block; }
+  ${WindowClose.CSS}
   /* The colours of the file's text editor (see SightingFileEditor): a key, a string, a number or a word, and a mistake. Dark mode redefines them. */
   :host { --file-key: #1a5fb4; --file-string: #26662f; --file-literal: #a5321f; --rr0-alert: #c33; }
   @media (prefers-color-scheme: dark) { :host { --file-key: #8cb8ff; --file-string: #8fd39a; --file-literal: #ffa08a; } }
@@ -123,7 +126,7 @@ const TEMPLATE = `
     <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, "+", then the frame of the event picked. -->
     <div id="events-row" class="element-list-row">
       <label class="element-list-picker"><select id="track"></select></label>
-      <button id="delete" type="button" class="icon-btn">🗑</button>
+      <button id="delete" type="button" class="icon-btn">${Icons.TRASH}</button>
       <button id="add" type="button" class="icon-btn element-list-add">+</button>
     </div>
     <div id="event-item" class="element-list-body">
@@ -422,6 +425,8 @@ export class CaseEditorElement extends HTMLElement {
   }
 
   private applyMessages(): void {
+    // The dialog's ✕ and its click beside it, answering as Cancel and Escape do (see WindowClose).
+    WindowClose.dialog(this.dialog, this.messages.cancel, () => this.closeDialog())
     const m = this.messages
     const text = (id: string, value: string): void => { this.byId(id).textContent = value }
     text("case-heading", m.caseHeading)

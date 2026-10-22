@@ -1,4 +1,5 @@
 import { AddMenu } from "./AddMenu.js"
+import { Icons } from "./Icons.js"
 
 /** One entry of the list: what it is called, and the id the editor knows it by. */
 export interface ElementListItem {
@@ -183,7 +184,7 @@ ${AddMenu.CSS}`
     button.type = "button"
     button.className = "icon-btn"
     button.id = id
-    button.textContent = glyph
+    Icons.show(button, glyph)
     return button
   }
 

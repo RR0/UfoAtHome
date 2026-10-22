@@ -1,4 +1,7 @@
 import { setupCloudEditor } from "./CloudEditor.js"
+import { Icons } from "./Icons.js"
+import { WindowClose } from "./WindowClose.js"
+import { SectionFolds } from "./SectionFolds.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
 import type { BeamEditor } from "./BeamEditor.js"
@@ -435,6 +438,8 @@ export class SightingEditorElement extends HTMLElement {
   /** The file the recording was opened from, or last saved as, for the header's state line. */
   private openedFrom?: string
   private savedAs?: string
+  /** The advanced fields of each section, held back where they are (see SectionFolds). */
+  private readonly sectionFolds: SectionFolds
   /** The steps written into the history since the recording was opened or saved: what the header counts as changes. */
   private changeCount = 0
   /** The File group's account of the data frozen beside the recording, and what takes it at export. */
@@ -1149,6 +1154,7 @@ export class SightingEditorElement extends HTMLElement {
     this.durationInput = this.durationElement.input
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
     this.saveButton = this.shadow.getElementById("save") as HTMLButtonElement
+    this.sectionFolds = new SectionFolds(this.shadow)
     this.importInput = this.shadow.getElementById("import") as InputFileElement
     this.narrativeSourceRow = this.shadow.getElementById("narrative-source-row")!
     this.narrativeSettingsBox = this.shadow.getElementById("narrative-settings")!
@@ -5384,7 +5390,7 @@ export class SightingEditorElement extends HTMLElement {
     this.ensureWeatherTrackSpan()
     const isPlaying = this.ufoElement.playbackState === "playing"
     const hasDuration = this.ufoElement.seekableDuration > 0
-    this.playPauseButton.textContent = isPlaying ? "⏸" : "▶"
+    Icons.show(this.playPauseButton, isPlaying ? "⏸" : "▶")
     this.playPauseButton.disabled = !hasDuration
     const label = !hasDuration ? this.messages.noDuration : isPlaying ? this.messages.pause : this.messages.play
     this.playPauseButton.title = label
@@ -5814,6 +5820,8 @@ export class SightingEditorElement extends HTMLElement {
     this.placeDecorItem()
     this.syncCanvasMode()
     this.refreshTimelineMarks()
+    // What a fold holds back depends on what the form shows, which the last edit may have changed (an instrument picked).
+    if (open) this.sectionFolds.refresh()
     if (open && tab.getAttribute("aria-controls") === "group-file") {
       void this.loadFileEditor().then(() => {
         this.syncFileEditor(false)
@@ -6657,6 +6665,8 @@ export class SightingEditorElement extends HTMLElement {
     // it is a nicety, called as one so that an environment without scrollIntoView still lands the
     // caret rather than throwing on the way there.
     this.revealSubgroupOf(control)
+    // A field held back in its section is shown before it is pointed at (see SectionFolds).
+    this.sectionFolds.reveal(control)
     control.focus()
     if (control instanceof HTMLInputElement && control.type !== "checkbox" && control.type !== "color" && control.type !== "range") {
       control.select()
@@ -7094,6 +7104,8 @@ export class SightingEditorElement extends HTMLElement {
     this.focalLengthInput.min = String(frame ? frame.focalRangeMm?.minMm ?? 1 : 1)
     this.focalLengthInput.max = String(frame ? frame.focalRangeMm?.maxMm ?? 2000 : 179)
     NumberFields.fit(this.focalLengthInput.parentElement ?? this.shadow)
+    // The device decides which of its settings show, and so how many a fold holds back.
+    this.sectionFolds?.refresh()
     // A device that fixes its lens leaves nothing to type, but what it takes in is still worth
     // reading: the field it gives, beside the millimetres it is stated in.
     this.focalFovOutput.textContent = frame && fovDeg !== undefined
@@ -9526,10 +9538,12 @@ export class SightingEditorElement extends HTMLElement {
   /** Mirrors the nested ufo's own Play/Pause glyph convention (plain Unicode, no icon-asset
    * system) — a red record dot while idle, a stop square while recording. */
   private setRecordButtonLabel(recording: boolean): void {
-    this.recordButton.textContent = recording ? "⏹" : "⏺"
     const label = recording ? this.messages.stop : this.messages.record
     this.recordButton.title = label
     this.recordButton.setAttribute("aria-label", label)
+    Icons.show(this.recordButton, recording ? "⏹" : "⏺")
+    // Said as well as drawn, as every action of the form is.
+    this.recordButton.append(label)
   }
 
   /** Auto-detects the visitor's preferred UI language from `navigator.languages`, falling back
@@ -9924,6 +9938,33 @@ export class SightingEditorElement extends HTMLElement {
 
   /** The header's own labels, and each section's title and the sentence under it, in `messages`. */
   private labelPanels(messages: SightingEditorMessages): void {
+    const sections: Record<string, string> = {
+      "identity": messages.sectionIdentity,
+      "profile": messages.sectionProfile,
+      "testimony": messages.sectionTestimony,
+      "vision": messages.sectionVision,
+      "perception": messages.sectionPerception,
+      "coordinates": messages.sectionCoordinates,
+      "gaze": messages.sectionGaze,
+      "night-sky": messages.sectionNightSky,
+      "period": messages.sectionPeriod,
+      "survey": messages.sectionSurvey,
+      "heard": messages.sectionHeard,
+      "sound-recording": messages.sectionSoundRecording,
+      "picture": messages.sectionPicture,
+      "pose": messages.sectionPose,
+      "appearance": messages.sectionAppearance,
+      "size": messages.sectionSize,
+      "path": messages.sectionPath,
+    }
+    for (const [key, text] of Object.entries(sections)) this.shadow.getElementById(`label-section-${key}`)!.textContent = text
+    this.sectionFolds.setMessages(messages)
+    // Every window's ✕ (see WindowClose), answering as its Escape does.
+    for (const id of ["location-settings", "decor-settings", "weather-settings"]) WindowClose.popover(this.shadow.getElementById(id)!, messages.close)
+    WindowClose.dialog(this.identityAsk, messages.close, () => this.closeIdentityAsk())
+    WindowClose.dialog(this.fileAsk, messages.close, () => this.keepReadingWeather())
+    WindowClose.button(this.contextMenu, messages.close, () => this.hideContextMenu())
+    WindowClose.button(this.decorContextMenu, messages.close, () => this.hideDecorContextMenu())
     this.shadow.getElementById("label-editor-kicker")!.textContent = messages.editorKicker
     this.shadow.getElementById("label-save")!.textContent = messages.save
     const intros: Record<string, string> = {

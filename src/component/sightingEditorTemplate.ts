@@ -2,6 +2,9 @@ import { SummaryDescription } from "./SummaryDescription.js"
 import { InputFont } from "./InputFont.js"
 import { MessageStyle } from "./MessageStyle.js"
 import { ElementList } from "./ElementList.js"
+import { Icons } from "./Icons.js"
+import { WindowClose } from "./WindowClose.js"
+import { SectionFolds } from "./SectionFolds.js"
 export const html = `
 <!-- From top to bottom, as the design handoff lays it out: what this recording is and whether it is saved, the scene, the
      sections as a row of chips (only one open at a time, see SightingEditorElement.toggleGroup), and the open section. The
@@ -34,15 +37,15 @@ export const html = `
 </div>
 <div id="ufo-slot"></div>
 <div class="toolbar playback-row">
-  <button id="play-pause" type="button" class="icon-btn" title="Play" aria-label="Play">▶</button>
+  <button id="play-pause" type="button" class="icon-btn" title="Play" aria-label="Play" data-icon="▶">${Icons.PLAY}</button>
   <span id="time-start" class="time-label">0:00</span>
-  <button id="previous-mark" type="button" class="icon-btn" title="Previous keyframe" aria-label="Previous keyframe">◂◆</button>
+  <button id="previous-mark" type="button" class="icon-btn" title="Previous keyframe" aria-label="Previous keyframe">${Icons.PREVIOUS_MARK}</button>
   <!-- The keyframes of what the open group edits, and the named moments — see TimelineMarks. -->
   <div class="seek-track">
     <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
     <div id="timeline-marks" class="timeline-marks"></div>
   </div>
-  <button id="next-mark" type="button" class="icon-btn" title="Next keyframe" aria-label="Next keyframe">◆▸</button>
+  <button id="next-mark" type="button" class="icon-btn" title="Next keyframe" aria-label="Next keyframe">${Icons.NEXT_MARK}</button>
   <span id="time-end" class="time-label">0:00</span>
 </div>
 </div>
@@ -62,10 +65,12 @@ export const html = `
 </nav>
 <section class="group-panel" id="group-observation" aria-labelledby="label-observation-group" hidden>
   <header class="panel-head"><h2 class="panel-title" id="panel-title-observation"></h2><p class="panel-intro" id="panel-intro-observation"></p></header>
+  <!-- One section, its id held back: what a case names this account by, set once (see SectionFolds). -->
+  <div class="form-section">
   <div class="toolbar">
     <!-- The observation's own id, not the observer's nor the case's: what a case and the
          interpretations filed in it name this account by (see Sighting.id). -->
-    <label><span id="label-sighting-id">ID</span> <input id="sightingId" type="text" placeholder="1964-04-24-ZamoraLonnie"/></label>
+    <label class="adv"><span id="label-sighting-id">ID</span> <input id="sightingId" type="text" placeholder="1964-04-24-ZamoraLonnie"/></label>
     <label><span id="label-tags">Tags</span> <input id="tags" type="text" placeholder="comma-separated"/></label>
   </div>
   <!-- The account, and the button that reads it.
@@ -89,6 +94,7 @@ export const html = `
     <button id="narrative-stop" type="button" hidden>Stop</button>
     <output id="narrative-status" for="description"></output>
   </div>
+  </div>
   <!-- What the draft claims and what it could not: the part that makes the rest usable. Empty (and
        so invisible) until there has been a draft. -->
   <div id="narrative-report" class="narrative-report" hidden></div>
@@ -110,7 +116,9 @@ export const html = `
     <div id="observer-list-header" class="decor-list-part"></div>
     <div id="observer-item">
     <div id="observer-principal">
-    <label><span id="label-observer-id">ID</span> <input id="observerId" type="text"/></label>
+    <div class="form-section">
+    <h3 class="section-title"><span id="label-section-identity">Identity</span></h3>
+    <label class="adv"><span id="label-observer-id">ID</span> <input id="observerId" type="text"/></label>
     <label><span id="label-observer-title">Title</span> <input id="observerTitle" type="text"/></label>
     <label><span id="label-observer-last-name">Last name</span> <input id="observerLastName" type="text"/></label>
     <label><span id="label-observer-first-names">First names</span> <input id="observerFirstNames" type="text" placeholder="comma-separated"/></label>
@@ -120,10 +128,15 @@ export const html = `
          people saw the thing is not here on purpose: a recording is one person's account, and the
          count belongs to the case that gathers them. Blank means unknown. -->
     <p id="observer-identity-hint" class="file-note"></p>
+    </div>
+    <div class="form-section">
+    <h3 class="section-title"><span id="label-section-profile">Profile</span></h3>
     <label><span id="label-observer-age">Age then</span> <input id="observerAge" type="number" min="0" max="120" step="1" size="4" placeholder="years"/></label>
-    <label><span id="label-observer-birth">Born</span> <rr0-date-input name="observer-birth" date-only></rr0-date-input></label>
-    <rr0-provider-settings id="observerPerception"></rr0-provider-settings>
+    <label class="adv"><span id="label-observer-birth">Born</span> <rr0-date-input name="observer-birth" date-only></rr0-date-input></label>
     <label><span id="label-observer-occupation">Occupation</span> <input id="observerOccupation" type="text" placeholder="baker, airline pilot…"/></label>
+    </div>
+    <div class="form-section">
+    <h3 class="section-title"><span id="label-section-testimony">Testimony</span></h3>
     <label><span id="label-account-source">Account obtained</span> <select id="accountSource">
       <option id="option-source-unknown" value="">unknown</option>
       <option id="option-source-on-site" value="on-site">on-site investigation</option>
@@ -145,9 +158,13 @@ export const html = `
     <!-- Everything that is about WHAT THE OBSERVER LOOKED THROUGH, grouped with the picker that names it:
          the filter in front of it and the settings of the device (see below). Which of them show, and
          which are read-only, follows the instrument chosen. -->
-    <fieldset id="instrument-group" class="instrument-group">
-      <legend id="label-instrument">Observed through</legend>
-      <rr0-popover-picker id="instrument" aria-labelledby="label-instrument"></rr0-popover-picker>
+    </div>
+    <div id="instrument-group" class="instrument-group form-section" role="group" aria-labelledby="label-section-vision">
+      <h3 class="section-title"><span id="label-section-vision">Vision</span></h3>
+      <div class="field"><span id="label-instrument">Observed through</span> <rr0-popover-picker id="instrument" aria-labelledby="label-instrument"></rr0-popover-picker></div>
+      <!-- Beside the device, and the device's own: a solar filter is for an eye or a telescope, a solar film for a
+           camera, so which ones are offered follows the device (see Filter.usableWith). -->
+      <label><span id="label-filter">In front of it</span> <select id="filter"></select></label>
       <!-- What the device was SET to, when it could be set at all: the lens's focal length (shown as
            the field of view for an eye, which has no focal length), how far it was stopped down, and
            how long its shutter stayed open. Each falls back to the instrument's own value and each is
@@ -155,21 +172,22 @@ export const html = `
            Instrument.ts and ObserverPose.fNumber/exposureSeconds. -->
       <label><span id="label-focal-length">Focal length</span> <input id="focalLength" type="number" min="1" max="2000" step="0.1"/> <span id="unit-focal-length">mm</span>
         <output id="focal-fov" class="apparent-size inline" for="focalLength"></output></label>
-      <label><span id="label-f-number">Aperture</span> f/<input id="fNumber" type="number" min="0.7" max="64" step="0.1"/></label>
-      <label><span id="label-exposure">Exposure</span> <input id="exposureSeconds" type="text" inputmode="decimal" size="7" placeholder="1/250"/> s</label>
-      <label><span id="label-focus-distance">Focused at</span> <input id="focusDistance" type="number" min="0.1" max="30000" step="0.1" placeholder="&#8734;"/> m</label>
+      <label class="adv"><span id="label-f-number">Aperture</span> f/<input id="fNumber" type="number" min="0.7" max="64" step="0.1"/></label>
+      <label class="adv"><span id="label-exposure">Exposure</span> <input id="exposureSeconds" type="text" inputmode="decimal" size="7" placeholder="1/250"/> s</label>
+      <label class="adv"><span id="label-focus-distance">Focused at</span> <input id="focusDistance" type="number" min="0.1" max="30000" step="0.1" placeholder="&#8734;"/> m</label>
       <!-- With the instrument and not with the place: latitude and heading say where the observer
            stood and which way they faced, and this says nothing about either. It is how the device
            was HELD — a camera askew, a head leaned over — which is why it belongs beside the focal
            length and the aperture whose own spikes it turns. -->
-      <label><span id="label-roll">Roll</span> <input id="roll" type="number" min="-180" max="180" step="1" value="0" title="How far the instrument was tilted about its own line of sight — positive clockwise, as the observer saw it"/> &deg;</label>
+      <label class="adv"><span id="label-roll">Roll</span> <input id="roll" type="number" min="-180" max="180" step="1" value="0" title="How far the instrument was tilted about its own line of sight — positive clockwise, as the observer saw it"/> &deg;</label>
       <!-- How much the body holding it moves the view at rest — see Sighting.sway: 1 a person, 0 a
            tripod. Blank is the default (1, or 0 for a paralysed observer). -->
-      <label><span id="label-sway">Sway</span> <input id="sway" type="number" min="0" max="3" step="0.1" placeholder="1"/></label>
-      <!-- Last, and the instrument's own: a solar filter is for an eye or a telescope, a solar film for a
-           camera, so which ones are offered follows the device (see Filter.usableWith). -->
-      <label><span id="label-filter">In front of it</span> <select id="filter"></select></label>
-    </fieldset>
+      <label class="adv"><span id="label-sway">Sway</span> <input id="sway" type="number" min="0" max="3" step="0.1" placeholder="1"/></label>
+    </div>
+    <div class="form-section" data-fold="all">
+    <h3 class="section-title"><span id="label-section-perception">Perception</span></h3>
+    <rr0-provider-settings id="observerPerception"></rr0-provider-settings>
+    </div>
     </div>
     <div id="observer-decor-host"></div>
     </div>
@@ -198,23 +216,32 @@ export const html = `
            a settings drawer: who answered is part of the answer. See DataSource.ts. -->
       <output id="place-status" class="place-status" for="placeName"><span id="place-status-text"></span><span id="place-source-row" class="inline-source" hidden></span></output>
     </div>
+    <div class="form-section">
+    <h3 class="section-title"><span id="label-section-coordinates">Coordinates</span></h3>
     <label><span id="label-lat">Latitude</span> <input id="lat" type="number" min="-90" max="90" step="0.000001" placeholder="lat"/></label>
     <label><span id="label-lng">Longitude</span> <input id="lng" type="number" min="-180" max="180" step="0.000001" placeholder="lng"/></label>
+    <label><span id="label-elevation">Altitude</span>
+      <input id="elevation" type="number" min="-500" max="9000" step="1" value="0"/> m</label>
+    <output id="ground-elevation" class="ground-elevation" for="lat lng"></output>
+    </div>
+    <div class="form-section">
+    <h3 class="section-title"><span id="label-section-gaze">Gaze</span></h3>
     <label><span id="label-heading">Heading</span> <input id="heading" type="number" min="0" max="360" step="1" placeholder="unknown"/> <span id="heading-unit">&deg;</span></label>
     <label><span id="label-pitch">Tilt</span> <input id="pitch" type="number" min="-90" max="90" step="1" value="0"/> &deg;</label>
     <!-- Above SEA LEVEL, not above the ground: "0 m" is simply false for an observer in the Alps, and
          an editor that offers it invites a recording that says so. The ground's own height at the
          location becomes the field's floor and its default the moment the location is known — see
          SightingEditorElement.applyGroundElevation. -->
-    <label><span id="label-elevation">Altitude</span>
-      <input id="elevation" type="number" min="-500" max="9000" step="1" value="0"/> m</label>
-    <output id="ground-elevation" class="ground-elevation" for="lat lng"></output>
     <!-- The night sky of the place, towns and all — see Sighting.lightPollution. Blank is a natural
          sky, which is what every recording that says nothing gets. -->
+    </div>
+    <div class="form-section" data-fold="all">
+    <h3 class="section-title"><span id="label-section-night-sky">Night sky</span></h3>
     <label><span id="label-light-pollution">Night sky</span> <input id="lightPollution" type="number" min="15" max="22" step="0.01" placeholder="22"/> mag/arcsec&sup2;</label>
     <!-- Where that figure came from: "18.79 according to [World Atlas 2015]" while the atlas owns it,
          nothing once the author has typed their own (see SightingEditorElement.lookUpLightPollution). -->
     <output id="light-pollution-status" class="place-status" for="lightPollution"><span id="light-pollution-status-text"></span><span id="light-pollution-source-row" class="inline-source" hidden></span></output>
+    </div>
   </div>
 </section>
 <!-- Its own group, no longer a fieldset nested inside Location. What stands around the observer is
@@ -250,7 +277,8 @@ export const html = `
          and kept by the browser, since asking sends the place to a service), and what it says of what it took: how many trees, buildings, bridges
          and lines, or that the survey could not be reached. Empty where no survey covers the place, which is most of the world. It sits
          on a line of its own, below what the list of the decor draws, and is read out by whoever listens to the page. -->
-    <div id="scenery" class="decor-scenery">
+    <div id="scenery" class="decor-scenery form-section">
+      <h3 class="section-title"><span id="label-section-survey">Scenery from a survey</span></h3>
       <span id="scenery-picker"><span id="label-scenery-source" hidden>Scenery survey</span><select id="scenery-source"><option value="none" id="option-scenery-none">None (all by hand)</option></select>
       <label id="scenery-radius-row"><span id="label-scenery-radius">Radius</span> <input type="number" id="scenery-radius" min="20" max="3000" step="10" value="100"/> m</label>
       <button id="scenery-file-link" type="button" class="source-file-link" hidden></button></span>
@@ -274,6 +302,8 @@ export const html = `
          write path, one parse, one validation — and the stored raw string therefore stays
          canonical whichever control produced it, which matters because formatEdtfTime returns it
          verbatim and would otherwise display a stale string over fresh numbers. -->
+    <div class="form-section">
+    <h3 class="section-title"><span id="label-section-period">Period</span></h3>
     <label><span id="label-observation-time">Observation start</span>
       <!-- A date is precise (a picker) or said in EDTF (a text: a year, a month, a time with no date, or a doubt: [?~%] at the
            end of the value, or before one of its parts, as @rr0/time reads it: see parseEdtfTime). See DateInputElement
@@ -286,26 +316,29 @@ export const html = `
          summer time included, and as it was then (see engine/time/TimeZones.ts). Pick a zone and
          the number is derived and read-only; leave it on the manual entry and type the number
          yourself, which is all a recording used to be able to say. -->
-    <label><span id="label-utc-offset">Time zone</span> <select id="timeZone"></select>
+    <label class="adv"><span id="label-utc-offset">Time zone</span> <select id="timeZone"></select>
       <input id="utcOffsetHours" type="number" min="-12" max="14" step="0.5" placeholder="from longitude" title="Hours ahead of UTC on the observer's own clock — legal time, which the longitude cannot know (France was on UTC+1 in 1965)"/> UTC&plusmn;h</label>
+    </div>
+    <div class="form-section">
     <!-- The named moments of the account (see Milestone) — in the Moment group, because they are
          instants: they name times of the account, not anything about a shape. Added at
          the playhead, which is the only instant a reader has in mind when they name one. -->
     <!-- Laid out as every list of the editor is (see ElementList): the picker, 🎯, 🗑, "+", then the frame of the picked moment.
          Titled, since this tab is not only its moments. -->
-    <span id="label-milestones" class="element-list-title">Moments</span>
+    <h3 class="section-title"><span id="label-milestones">Moments</span></h3>
     <div class="element-list-row" id="milestone-row">
       <label class="element-list-picker"><select id="milestone" aria-labelledby="label-milestones"></select></label>
       <!-- A select says nothing when the moment already shown is picked again, which is the one to go
            back to after playing on past it: this goes there whatever the list shows. -->
-      <button id="go-to-milestone" type="button" class="icon-btn" title="Go to this moment" aria-label="Go to this moment">🎯</button>
-      <button id="delete-milestone" type="button" class="icon-btn" title="Delete moment" aria-label="Delete moment">🗑</button>
+      <button id="go-to-milestone" type="button" class="icon-btn" title="Go to this moment" aria-label="Go to this moment">${Icons.TARGET}</button>
+      <button id="delete-milestone" type="button" class="icon-btn" title="Delete moment" aria-label="Delete moment">${Icons.TRASH}</button>
       <span id="milestone-empty" class="element-list-empty">No moment</span>
-      <button id="add-milestone" type="button" class="icon-btn element-list-add" title="Add" aria-label="Add">+</button>
+      <button id="add-milestone" type="button" class="icon-btn element-list-add" title="Add" aria-label="Add">${Icons.PLUS}</button>
     </div>
     <div class="element-list-body" id="milestone-item">
       <label><span id="label-milestone-label">Label</span> <input id="milestoneLabel" type="text" size="4"/></label>
       <label><span id="label-milestone-note">What happens</span> <input id="milestoneNote" type="text"/></label>
+    </div>
     </div>
   </div>
 </section>
@@ -408,11 +441,11 @@ export const html = `
     <output id="sky-candidates" class="weather-source" for="lat lng obs-time"></output>
     <!-- A shooting star for the meteor and a comet for the comet. The meteor button used to carry
          the comet glyph, which was only ever unambiguous while there was nothing else up there. -->
-    <button id="show-meteor" type="button" class="icon-btn" title="Show me one" aria-label="Show me one" hidden>🌠</button>
-    <button id="show-comet" type="button" class="icon-btn" title="Show me the comet" aria-label="Show me the comet" hidden>☄</button>
-    <button id="show-nova" type="button" class="icon-btn" title="Show me the new star" aria-label="Show me the new star" hidden>🌟</button>
-    <button id="show-satellite" type="button" class="icon-btn" title="Show me a satellite" aria-label="Show me a satellite" hidden>🛰</button>
-    <button id="show-fireball" type="button" class="icon-btn" title="Show me the fireball" aria-label="Show me the fireball" hidden>✴</button>
+    <button id="show-meteor" type="button" class="icon-btn" title="Show me one" aria-label="Show me one" hidden>${Icons.METEOR}</button>
+    <button id="show-comet" type="button" class="icon-btn" title="Show me the comet" aria-label="Show me the comet" hidden>${Icons.COMET}</button>
+    <button id="show-nova" type="button" class="icon-btn" title="Show me the new star" aria-label="Show me the new star" hidden>${Icons.STAR}</button>
+    <button id="show-satellite" type="button" class="icon-btn" title="Show me a satellite" aria-label="Show me a satellite" hidden>${Icons.SATELLITE}</button>
+    <button id="show-fireball" type="button" class="icon-btn" title="Show me the fireball" aria-label="Show me the fireball" hidden>${Icons.FIREBALL}</button>
   </div>
   <!-- The weather in three parts — what falls (first, and open on arrival: the user's own order), the
        clouds, and what blows — as a strip of handles
@@ -489,15 +522,21 @@ export const html = `
 <section class="group-panel" id="group-sound" aria-labelledby="label-sound-group" hidden>
   <header class="panel-head"><h2 class="panel-title" id="panel-title-sound"></h2><p class="panel-intro" id="panel-intro-sound"></p></header>
   <div class="toolbar">
+    <div class="form-section">
+    <h3 class="section-title"><span id="label-section-heard">What was heard</span></h3>
     <label><span id="label-sound-kind">Sound</span> <select id="soundKind" class="sound-field"></select></label>
     <label><span id="label-sound-volume">Loudness</span> <input id="soundVolume" class="sound-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <label><span id="label-sound-pitch">Pitch</span>
       <input id="soundPitch" class="sound-field" type="range" min="30" max="4000" step="10" value="100" title="How deep or how sharp the sound was — the tone itself for a hum or a whistle, how low the noise sits for a rumble or a crackle"/>
       <output id="sound-pitch-value" class="apparent-size" for="soundPitch"></output></label>
+    </div>
+    <div class="form-section">
+    <h3 class="section-title"><span id="label-section-sound-recording">Recording</span></h3>
     <!-- The rare case where the sound was actually captured: it then plays instead of the
          synthesized description (see SightingSound.src), and the embed stops being self-contained,
          which is why nothing defaults to it. -->
     <label><span id="label-sound-src">Recording</span> <input id="soundSrc" class="sound-field" type="url" placeholder="URL of a real recording"/></label>
+    </div>
   </div>
 </section>
 <!-- Pictures of the place laid over the reconstruction (see SceneReference): one dropdown of them,
@@ -514,9 +553,9 @@ export const html = `
          under it, the frame of the picked picture. -->
     <div class="element-list-row" id="reference-row">
       <label class="element-list-picker"><select id="reference" aria-label="Picture"></select></label>
-      <button id="delete-reference" type="button" class="icon-btn" title="Delete picture" aria-label="Delete picture">🗑</button>
+      <button id="delete-reference" type="button" class="icon-btn" title="Delete picture" aria-label="Delete picture">${Icons.TRASH}</button>
       <span id="reference-empty" class="element-list-empty">No picture</span>
-      <button id="add-reference" type="button" class="icon-btn element-list-add" title="Add a picture" aria-label="Add a picture">+</button>
+      <button id="add-reference" type="button" class="icon-btn element-list-add" title="Add a picture" aria-label="Add a picture">${Icons.PLUS}</button>
     </div>
     <!-- Street-level pictures somebody took near the observer's spot — see PanoramaxPictures. Each
          comes with where it was taken from and which way it looked, a registration already made. -->
@@ -525,6 +564,8 @@ export const html = `
       <button id="reference-street-add" type="button" hidden>Add</button>
     </div>
     <div class="element-list-body" id="reference-item">
+    <div class="form-section">
+    <h3 class="section-title"><span id="label-section-picture">Picture</span></h3>
     <label><span id="label-reference-title">Name</span> <input id="referenceTitle" class="reference-field" type="text"/></label>
     <span class="input-file-row"><span id="label-reference-src">Picture</span> <rr0-input-file id="reference-source" name="reference-source" accept="image/*" no-button placeholder="https://…/photo.jpg"></rr0-input-file></span>
     <label><span id="label-reference-kind">Kind</span>
@@ -533,10 +574,13 @@ export const html = `
         <option value="panorama" id="reference-kind-panorama">Panorama (360°)</option>
       </select></label>
     <label><span id="label-reference-credit">Credit</span> <input id="referenceCredit" class="reference-field" type="text"/></label>
-    <label><span id="label-reference-credit-url">Credit link</span> <input id="referenceCreditUrl" class="reference-field" type="url"/></label>
+    <label class="adv"><span id="label-reference-credit-url">Credit link</span> <input id="referenceCreditUrl" class="reference-field" type="url"/></label>
     <label><span id="label-reference-t">Taken at</span> <input id="referenceT" class="reference-field" type="number" min="0" max="86400" step="0.1" placeholder="—"/> s</label>
     <label><span id="label-reference-drawing">Drawn on</span> <input id="referenceDrawing" class="reference-field" type="checkbox"/></label>
     <label><span id="label-reference-opacity">Opacity</span> <input id="referenceOpacity" class="reference-field" type="range" min="0" max="1" step="0.05" value="0.5"/></label>
+    </div>
+    <div class="form-section" data-fold="all">
+    <h3 class="section-title"><span id="label-section-pose">Pose</span></h3>
     <label><span id="label-reference-heading">Heading</span> <input id="referenceHeading" class="reference-field" type="number" min="0" max="360" step="0.1"/> &deg;</label>
     <label><span id="label-reference-pitch">Pitch</span> <input id="referencePitch" class="reference-field" type="number" min="-90" max="90" step="0.1"/> &deg;</label>
     <label><span id="label-reference-roll">Roll</span> <input id="referenceRoll" class="reference-field" type="number" min="-180" max="180" step="0.1"/> &deg;</label>
@@ -548,29 +592,33 @@ export const html = `
          a click names a landmark on it, then the same landmark in the render. -->
     <button id="reference-adopt-pose" type="button">Adopt as the observer's pose</button>
     <span id="reference-status" class="apparent-size"></span>
+    </div>
+    <div class="form-section">
     <!-- The details the picture is lined up on (see PictureLandmark), a list of the picture laid out as every list is: one row
          each in the dropdown with how far it still is from fitting, the selected one bolder on the canvas, its name editable,
          and a "+" that arms the next two clicks to name a new one. -->
-    <span id="label-reference-landmarks" class="element-list-title">Landmarks</span>
+    <h3 class="section-title"><span id="label-reference-landmarks">Landmarks</span></h3>
     <div class="element-list-row" id="reference-landmark-row">
       <label class="element-list-picker"><select id="reference-landmarks" aria-labelledby="label-reference-landmarks"></select></label>
-      <button id="delete-reference-landmark" type="button" class="icon-btn" title="Delete landmark" aria-label="Delete landmark">🗑</button>
+      <button id="delete-reference-landmark" type="button" class="icon-btn" title="Delete landmark" aria-label="Delete landmark">${Icons.TRASH}</button>
       <span id="reference-landmark-empty" class="element-list-empty">No landmark</span>
-      <button id="add-reference-landmark" type="button" class="icon-btn element-list-add" title="Add a landmark" aria-label="Add a landmark">+</button>
+      <button id="add-reference-landmark" type="button" class="icon-btn element-list-add" title="Add a landmark" aria-label="Add a landmark">${Icons.PLUS}</button>
     </div>
     <div class="element-list-body" id="reference-landmark-item">
       <label><span id="label-reference-landmark-label">Name</span> <input id="referenceLandmarkLabel" type="text" placeholder="Masking tree, fence…"/></label>
     </div>
     </div>
+    </div>
+    <div class="form-section" data-fold="all">
     <!-- What an investigator drew over the place, from their own file (see InvestigatorTrace): lines
          of sight, axes, markers. Drawn over the scene as theirs, not as part of the reconstruction. A list of its own, laid out
          as every list is; its "+" reads a KML or KMZ file. -->
-    <span id="label-trace-import" class="element-list-title">Investigator's lines (KML, KMZ)</span>
+    <h3 class="section-title"><span id="label-trace-import">Investigator's lines (KML, KMZ)</span></h3>
     <div class="element-list-row" id="trace-row">
       <label class="element-list-picker"><select id="trace" aria-labelledby="label-trace-import"></select></label>
-      <button id="delete-trace" type="button" class="icon-btn" title="Delete trace" aria-label="Delete trace">🗑</button>
+      <button id="delete-trace" type="button" class="icon-btn" title="Delete trace" aria-label="Delete trace">${Icons.TRASH}</button>
       <span id="trace-empty" class="element-list-empty">No investigator's line</span>
-      <button id="add-trace" type="button" class="icon-btn element-list-add" title="Investigator's lines (KML, KMZ)" aria-label="Investigator's lines (KML, KMZ)">+</button>
+      <button id="add-trace" type="button" class="icon-btn element-list-add" title="Investigator's lines (KML, KMZ)" aria-label="Investigator's lines (KML, KMZ)">${Icons.PLUS}</button>
     </div>
     <!-- Where the lines added by "+" are read from: a file of the author's, or an address. -->
     <span id="trace-import-row" class="input-file-row" hidden><rr0-input-file id="trace-import" name="trace-import" accept=".kml,.kmz,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz" placeholder="https://…/lines.kmz"></rr0-input-file></span>
@@ -578,6 +626,7 @@ export const html = `
     <div class="element-list-body" id="trace-item">
       <label><span id="label-trace-title">Name</span> <input id="traceTitle" class="trace-field" type="text"/></label>
       <label><span id="label-trace-source">Source</span> <input id="traceSource" class="trace-field" type="text"/></label>
+    </div>
     </div>
   </div>
 </section>
@@ -602,11 +651,14 @@ export const html = `
          picked shape, gone while there is none. -->
     <div class="element-list-row" id="shape-row">
       <label class="element-list-picker"><select id="source" aria-label="Shape"></select></label>
-      <button id="delete-shape" type="button" class="icon-btn" title="Delete shape" aria-label="Delete shape">🗑</button>
+      <button id="delete-shape" type="button" class="icon-btn" title="Delete shape" aria-label="Delete shape">${Icons.TRASH}</button>
       <span id="shape-empty" class="element-list-empty">No shape</span>
-      <button id="add-shape" type="button" class="icon-btn element-list-add" title="Add shape" aria-label="Add shape">+</button>
+      <button id="add-shape" type="button" class="icon-btn element-list-add" title="Add shape" aria-label="Add shape">${Icons.PLUS}</button>
     </div>
     <div class="element-list-body" id="shape-item">
+    <div class="form-section">
+    <h3 class="section-title"><span id="label-section-appearance">Appearance</span></h3>
+    <label><span id="label-shape-title">Name</span> <input id="shapeTitle" type="text"/></label>
     <label><span id="label-color">Color</span> <input id="color" type="color" value="#39ff14"/></label>
     <label><span id="label-transparency">Transparency</span> <input id="transparency" type="range" min="0" max="1" step="0.05" value="0"/></label>
     <label><span id="label-halo">Halo</span> <input id="haloScale" type="range" min="0" max="3" step="0.1" value="1.5"/></label>
@@ -617,9 +669,11 @@ export const html = `
     <!-- Not a bigger halo: a halo is a coloured fringe, and no fringe reads as painful. This is
          the light's own behaviour — a veil that washes out the field around it, the spikes its
          aperture throws, and a core clipped to white. See BaseShape.brightness. -->
-    <label><span id="label-brightness">Brilliance</span> <input id="brightness" type="range" min="0" max="1" step="0.05" value="0" title="How dazzling the observer said it was — a light you cannot look at does three things a halo never does"/></label>
-    <label><span id="label-blur">Blur</span> <input id="blur" type="range" min="0" max="1" step="0.05" value="0" title="How indistinct the observer said its edges were — not the lens's own depth of field, which never touches the object here"/></label>
-    <label><span id="label-shape-title">Name</span> <input id="shapeTitle" type="text"/></label>
+    <label class="adv"><span id="label-brightness">Brilliance</span> <input id="brightness" type="range" min="0" max="1" step="0.05" value="0" title="How dazzling the observer said it was — a light you cannot look at does three things a halo never does"/></label>
+    <label class="adv"><span id="label-blur">Blur</span> <input id="blur" type="range" min="0" max="1" step="0.05" value="0" title="How indistinct the observer said its edges were — not the lens's own depth of field, which never touches the object here"/></label>
+    </div>
+    <div class="form-section">
+    <h3 class="section-title"><span id="label-section-size">Size and distance</span></h3>
     <!-- Three readings of ONE relation, apparent width = f(real width, distance), kept in step.
          Only the apparent width is the recording's (BaseShape.angular); the real width is derived
          from it, and the distance is where the scene DRAWS the shape (see PhenomenonDepth), never a
@@ -651,9 +705,13 @@ export const html = `
          STATED runs the geometry the other way and bounds it. See DepthOfField's own doc comment,
          which says so before anything existed to say it with. -->
     <output id="blur-bound" class="apparent-size" for="blur"></output>
+    </div>
+    <div class="form-section">
+    <h3 class="section-title"><span id="label-section-path">Path</span></h3>
     <div class="record-row">
       <button id="record" type="button" class="record-btn"></button>
-      <label><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" max="1000" step="16" value="100"/> ms</label>
+      <label class="adv"><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" max="1000" step="16" value="100"/> ms</label>
+    </div>
     </div>
     </div>
   </div>
@@ -687,7 +745,7 @@ export const html = `
 </div>
 `
 
-export const css = `${InputFont.CSS}${ElementList.CSS}
+export const css = `${InputFont.CSS}${ElementList.CSS}${Icons.CSS}${WindowClose.CSS}${SectionFolds.CSS}
 :host {
   color-scheme: light dark;
   display: block;
@@ -753,21 +811,6 @@ export const css = `${InputFont.CSS}${ElementList.CSS}
    the colour swatches, which hold no text at all. */
 /* The instrument and what is set on it, as one box: the picker names the device, and the filter, focal length,
    aperture, exposure, focus, roll and sway are that device's. */
-.instrument-group {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5em;
-  flex: 1 1 100%;
-  margin: 0.2em 0;
-  padding: 0.3em 0.6em 0.5em;
-  border: 1px solid light-dark(#ccc, #4a4c52);
-  border-radius: 4px;
-}
-.instrument-group > legend {
-  padding: 0 0.4em;
-  font-weight: 600;
-}
 .instrument-group [hidden] { display: none !important; }
 .toolbar input[type="number"] {
   width: 7em;
@@ -1964,6 +2007,47 @@ ${MessageStyle.rules(
 .app .element-list-body { border-color: var(--line); border-radius: 0 10px 10px 10px; }
 .context-menu { background: var(--ground-raised); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, .3); }
 .context-menu hr { border: 0; border-top: 1px solid var(--line); }
+/* A panel's sections: a title in capitals, then its fields on a grid that fills the width, the label above each. */
+.form-section {
+  flex: 1 1 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 14px 16px;
+  align-items: end;
+  min-width: 0;
+  margin: 0;
+  padding: 18px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+/* The first section of a panel follows its head, which is ruled already. */
+.panel-head + .toolbar > .form-section:first-child, .panel-head + .form-section,
+#observer-principal > .form-section:first-child, .element-list-body > .form-section:first-child { border-top: 0; padding-top: 4px; }
+.form-section:last-child { padding-bottom: 0; }
+.section-title { grid-column: 1 / -1; margin: 0 0 -2px; font: 600 12px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--glow-dim); }
+/* What is not a field takes the whole line: a paragraph, a note, a list, a row of buttons, another section's toolbar. */
+.form-section > :is(.toolbar, p, output, .file-note, .element-list-row, .element-list-body, .record-row, .place-search-row, rr0-provider-settings, .decor-add-row, span:not(.input-file-row), div:not(.field)) { grid-column: 1 / -1; }
+.form-section > .toolbar { margin: 0; }
+/* A field: its label on a line of its own above it, its value under it, filling the column unless it is a number (fitted to its own
+   values, see NumberFields), its unit right after it, and what is said about it (an output) under them. */
+.form-section > :is(label, .field):not(:has(> input[type="checkbox"], > input[type="radio"])) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font: 600 13px/1.3 var(--sans);
+  color: var(--ink-dim);
+}
+.form-section > :is(label, .field):not(:has(> input[type="checkbox"], > input[type="radio"])) > :first-child { flex: 1 0 100%; }
+.form-section > :is(label, .field) > :is(input:not([type="checkbox"]):not([type="radio"]):not([type="number"]):not([type="color"]), select, textarea, rr0-popover-picker, rr0-input-file) { flex: 1 1 0; min-width: 0; font-weight: 400; }
+/* A date or a duration holds its own "precise / imprecise" switch beside its field: as wide as both need. */
+.form-section > :is(label, .field) > :is(rr0-date-input, rr0-duration-input) { flex: 1 1 auto; font-weight: 400; }
+.form-section > :is(label, .field) > input[type="color"] { flex: 1 1 0; height: 38px; padding: 3px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--ground); }
+.form-section > :is(label, .field) > input[type="number"] { flex: none; font-weight: 400; }
+.form-section > :is(label, .field) > output { flex: 1 0 100%; font-weight: 400; }
+.form-section > label:has(> input[type="checkbox"]) { display: flex; align-items: center; gap: 8px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
+.form-section .record-row { display: flex; flex-wrap: wrap; align-items: end; gap: 14px 16px; }
 /* Narrow: the scene stays in view while the form scrolls under it. */
 @container (max-width: 640px) {
   .scene-card { position: sticky; top: 0; z-index: 3; }

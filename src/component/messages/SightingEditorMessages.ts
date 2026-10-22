@@ -1,10 +1,11 @@
+import type { SectionFoldMessages } from "../SectionFolds.js"
 import type { InputFileMessages } from "../InputFileElement.js"
 import type { SightingLabels } from "./SightingLabels.js"
 
 /** Contract for `<rr0-sighting-editor>`'s user-visible label strings — implemented per language
  * under this directory (`SightingEditorMessages_en.ts`, `SightingEditorMessages_fr.ts`) and loaded
  * via `loadSightingEditorMessages`. */
-export interface SightingEditorMessages extends InputFileMessages, SightingLabels {
+export interface SightingEditorMessages extends SectionFoldMessages, InputFileMessages, SightingLabels {
   oval: string
   /** The "Polygon" preset button — a plain quad, the starting point for a freeform shape (see
    * Shape.ts's own createCustomPolygon doc comment). */
@@ -306,7 +307,27 @@ export interface SightingEditorMessages extends InputFileMessages, SightingLabel
   /** Summary of the group holding what the sighting sounded like — see SoundTrack.ts. */
   soundGroup: string
   /** The header: what kind of editor this is, its one save button, and the line saying whether what is shown is saved. */
+  /** The ✕ of every window: what it does, said to whoever cannot see it. */
+  close: string
   editorKicker: string
+  /** The title of each section of a panel, in capitals (see the form-section blocks of sightingEditorTemplate). */
+  sectionIdentity: string
+  sectionProfile: string
+  sectionTestimony: string
+  sectionVision: string
+  sectionPerception: string
+  sectionCoordinates: string
+  sectionGaze: string
+  sectionNightSky: string
+  sectionPeriod: string
+  sectionSurvey: string
+  sectionHeard: string
+  sectionSoundRecording: string
+  sectionPicture: string
+  sectionPose: string
+  sectionAppearance: string
+  sectionSize: string
+  sectionPath: string
   save: string
   stateNew: string
   /** {file}: the name of the file the recording was opened from. */

@@ -1,4 +1,5 @@
 import type { ModelSource } from "../render3d/decor/ModelSource.js"
+import { Icons } from "./Icons.js"
 import { InputFont } from "./InputFont.js"
 import { MessageStyle } from "./MessageStyle.js"
 
@@ -185,7 +186,7 @@ ${MessageStyle.rules([], [".model-picker .model-picker-address p"])}
     close.className = "model-picker-close"
     close.setAttribute("aria-label", messages.close)
     close.title = messages.close
-    close.textContent = "\u2715"
+    close.innerHTML = Icons.CLOSE
     const header = document.createElement("header")
     header.append(heading, close)
     const body = document.createElement("div")

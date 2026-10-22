@@ -3662,12 +3662,12 @@ describe("SightingEditorElement playback controls", () => {
 
     playPauseButton.click()
 
-    expect(playPauseButton.textContent).toBe("⏸")
+    expect(playPauseButton.dataset.icon).toBe("⏸")
     expect(playPauseButton.title).toBe("Pause")
 
     playPauseButton.click()
 
-    expect(playPauseButton.textContent).toBe("▶")
+    expect(playPauseButton.dataset.icon).toBe("▶")
     expect(playPauseButton.title).toBe("Play")
   })
 
