@@ -910,6 +910,34 @@ describe("SightingEditorElement observer keyframes over time", () => {
     expect(heading).toBeLessThan(45)
   })
 
+  it("pauses on a click on the scene while it plays, not at the end of a drag, and never starts it", () => {
+    const element = mount()
+    element.sightingData = {
+      version: 1,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] },
+          { t: 1000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] }
+        ]
+      }
+    }
+    const ufo = nestedUfo(element) as unknown as { playbackState: string, canvasElement: HTMLCanvasElement }
+    const canvas = ufo.canvasElement
+    const press = (x: number, upX = x) => {
+      canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: x, clientY: 10, bubbles: true }))
+      canvas.dispatchEvent(new MouseEvent("click", { clientX: upX, clientY: 10, bubbles: true }))
+    }
+    press(20)
+    expect(ufo.playbackState).not.toBe("playing")
+    ;(nestedUfo(element)!.shadowRoot!.getElementById("play-pause") as HTMLButtonElement).click()
+    expect(ufo.playbackState).toBe("playing")
+    press(20, 80)
+    expect(ufo.playbackState).toBe("playing")
+    press(20)
+    expect(ufo.playbackState).toBe("paused")
+    expect((element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement).dataset.icon).toBe("▶")
+  })
+
   it("does not write or resync observer fields while the nested player is playing", () => {
     const element = mount()
     element.sightingData = {

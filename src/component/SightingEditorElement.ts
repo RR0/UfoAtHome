@@ -775,6 +775,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly observerList: ElementList
   /** Which observer the Observer group shows: OBSERVER_PRINCIPAL for this account's own, else the id of an observer of the decor. */
   private observerShown = "principal"
+  /** How far a press may move and still be a click, in CSS pixels: past it, it was a drag. */
+  private static readonly CLICK_SLOP_PX = 5
   private static readonly OBSERVER_PRINCIPAL = "principal"
   /** The trees and buildings taken, by itself, from a survey of the place the author gives (see SurroundingsPlanter), whose code is loaded when first needed. */
   private readonly surroundings: SurroundingsPlanter
@@ -1649,6 +1651,20 @@ export class SightingEditorElement extends HTMLElement {
       this.onPointerDown(event)
     })
     this.ufoElement.canvasElement.addEventListener("pointermove", event => this.onPointerMove(event))
+    // While it plays, nothing on the scene can be edited, so a click on it is what it is in a player: the pause. Only a click (a press
+    // let go where it was taken), not the end of a drag turning the view, and never while a take is being recorded, which plays too.
+    let pressed: { x: number, y: number, playing: boolean } | undefined
+    this.ufoElement.canvasElement.addEventListener("pointerdown", event => {
+      pressed = { x: event.clientX, y: event.clientY, playing: this.ufoElement.playbackState === "playing" }
+    })
+    this.ufoElement.canvasElement.addEventListener("click", event => {
+      const press = pressed
+      pressed = undefined
+      if (!press?.playing || this.isRecording || this.ufoElement.playbackState !== "playing") return
+      if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > SightingEditorElement.CLICK_SLOP_PX) return
+      this.ufoElement.togglePlayPause()
+      this.syncPlaybackControls()
+    })
     this.ufoElement.canvasElement.addEventListener("contextmenu", event => this.onContextMenu(event))
     this.contextGroupButton.addEventListener("click", () => this.groupSelected())
     this.contextUngroupButton.addEventListener("click", () => this.ungroupSelected())
