@@ -830,6 +830,11 @@ export class CaseEditorElement extends HTMLElement {
       this.editor.documentUrl = track.base ? track.base.url : track.url
       this.editor.reading = track.kind === "reading"
       this.editor.accountShapeIds = track.kind === "reading" && account?.recording ? CaseEditorElement.shapesOf(account.recording) : undefined
+      // The readings of an account are candidates of its own (see CandidatesView): they are read for it.
+      const readings = track.kind === "observer" ? session.readingsOf(track) : []
+      for (const reading of readings) await this.loadTrack(reading).catch(() => undefined)
+      this.editor.readings = readings.filter(reading => reading.recording?.interpretation?.bodies.length)
+        .map(reading => ({ id: reading.event.id ?? session.proposedId(reading), label: this.labelOf(reading, session.tracks.indexOf(reading)), interpretation: reading.recording!.interpretation! }))
       this.editor.sightingData = structuredClone(track.recording!)
       // What the editor holds right after loading is what "changed" is measured from: it does not
       // write a recording back byte for byte, and a track only looked at is not one to write.

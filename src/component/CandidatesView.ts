@@ -13,6 +13,7 @@ import type { SatellitePass, SatellitePosition } from "../engine/astronomy/Satel
 import { ReentrySighting } from "../engine/interpretation/Reentry.js"
 import type { ReentryJson } from "../engine/interpretation/Reentry.js"
 import type { AircraftDescription, AircraftTrack } from "../engine/traffic/AircraftProvider.js"
+import type { BodyJson, InterpretationJson } from "../engine/interpretation/Interpretation.js"
 
 /** What the view needs of the editor that holds it. */
 export interface CandidatesHost {
@@ -38,6 +39,14 @@ export interface CandidatesHost {
   burning(): { reentries: ReentryJson[], fireballs: ReentryJson[] }
   /** The aircraft of the traffic record, the recording's start in ms UTC, and what is known of each — while there is a record. */
   traffic(): { tracks: AircraftTrack[], startMs: number, describe(track: AircraftTrack): AircraftDescription | undefined } | undefined
+  /** The interpretations of the account: its own, and the readings of it a case holds, each with what it is called. */
+  interpretations(): { id: string, label: string, interpretation: InterpretationJson }[]
+  /** How a body looks from the observer's eye at `t` ms of the recording (see SceneElement.bodyProjectionAt). */
+  projectionAt(body: BodyJson, t: number): { aim: { azimuthDeg: number, altitudeDeg: number }, angular: { widthDeg: number } } | undefined
+  /** The variants the recording keeps (see InterpretationJson.variant), and keeping or removing one: a change of the author's. */
+  variants(): InterpretationJson[]
+  keep(variant: InterpretationJson): void
+  remove(index: number): void
 }
 
 /** What a known phenomenon of Poher's matrix is followed by, when its track can be computed. */
@@ -86,6 +95,10 @@ export class CandidatesView {
 .poher-bar { display: inline-block; width: 60px; height: 6px; border-radius: 3px; vertical-align: middle;
   background: linear-gradient(90deg, var(--glow-solid) calc(var(--score) * 100%), var(--line) 0); }
 .poher-list .doubt { color: var(--ink-faint); font-size: 12px; }
+.candidate-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.kept-variants h4 { margin: 14px 0 6px; font: 600 15px/1.3 var(--serif); }
+.kept-variant { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 12px; margin-bottom: 6px; border: 1px dashed var(--line-strong); border-radius: 10px; }
+.kept-variant .recomputed { flex: 1 0 100%; font-size: 13px; color: var(--glow); }
 .variant-badge { position: absolute; top: 10px; left: 10px; z-index: 5; display: inline-flex; align-items: center; gap: 10px; padding: 4px 6px 4px 12px;
   border-radius: 999px; background: rgba(127, 212, 255, .94); color: #07111c; font: 600 13px/1.3 var(--sans); }
 .variant-badge button { min-height: 28px; padding: 0 10px; border: 0; border-radius: 999px; background: rgba(7, 10, 18, .85); color: #e8ecf4; font: 600 12px/1 var(--sans); }
@@ -178,8 +191,26 @@ export class CandidatesView {
         this.phenomenonOf.set(id, "OrbitingSatellites")
       }
     }
-    tracks.push(...this.burningTracks(start), ...this.aircraftTracks(start))
+    tracks.push(...this.burningTracks(start), ...this.aircraftTracks(start), ...this.interpretationTracks())
     return tracks
+  }
+
+  /** The interpretations of the account, each followed by the body that claims to be its main phenomenon (else its first body). */
+  private interpretationTracks(): CandidateTrack[] {
+    const m = this.host.messages().candidates
+    const first = this.host.sighting.timeline.sourceIds[0]
+    return this.host.interpretations().flatMap(({ id, label, interpretation }) => {
+      const body = interpretation.bodies.find(candidate => first !== undefined && candidate.explains?.includes(first)) ?? interpretation.bodies[0]
+      if (!body) return []
+      return [{
+        id: `interpretation-${id}`,
+        label: m.interpretation.replace("{name}", label),
+        at: (offsetMinutes: number) => {
+          const seen = this.host.projectionAt(body, this.statementT + offsetMinutes * 60_000)
+          return seen ? { aim: seen.aim, widthDeg: seen.angular.widthDeg } : undefined
+        }
+      }]
+    })
   }
 
   /**
@@ -314,12 +345,80 @@ export class CandidatesView {
       list.append(...this.variants.map(variant => this.row(variant, ranking?.rows.find(row => row.phenomenon === this.phenomenonOf.get(variant.candidate)))))
       nodes.push(list, this.note(m.costNote))
     }
+    const kept = this.keptBlock()
+    if (kept) nodes.push(kept)
     if (ranking) nodes.push(this.poherBlock(ranking.rows))
     nodes.push(this.note(m.scopeNote))
     this.section.replaceChildren(...nodes)
     // A variant on show is shown again as the search now reads it, or goes with its candidate.
     const shown = this.shown && this.variants.find(variant => variant.candidate === this.shown!.candidate)
     this.show(shown && shown.verdict !== "incompatible" ? shown : undefined)
+  }
+
+  /** Keeps `variant` in the recording, as an interpretation of the account (see InterpretationJson.variant), in place of one kept for the same candidate and model. */
+  private keep(variant: Variant): void {
+    const phenomenon = this.phenomenonOf.get(variant.candidate)
+    const of = variant.candidate.startsWith("interpretation-")
+      ? this.host.interpretations().find(({ id }) => `interpretation-${id}` === variant.candidate)?.interpretation
+      : undefined
+    const kept: InterpretationJson = {
+      title: this.host.messages().candidates.variantLabel.replace("{name}", variant.label),
+      // A variant of an interpretation stands its bodies where it did; one of a body of the sky draws none, the sky has it.
+      bodies: of ? structuredClone(of.bodies) : [],
+      variant: {
+        candidate: variant.candidate, label: variant.label, ...(phenomenon ? { phenomenon } : {}),
+        parameters: variant.parameters, moved: variant.moved.map(moved => ({ ...moved })), cost: variant.cost, verdict: variant.verdict, modelId: variant.modelId
+      }
+    }
+    const index = this.host.variants().findIndex(existing => existing.variant?.candidate === variant.candidate && existing.variant?.modelId === variant.modelId)
+    if (index >= 0) this.host.remove(index)
+    this.host.keep(kept)
+    this.refresh()
+  }
+
+  /** The variants the recording keeps: each as it was kept, what the search makes of its candidate now, and the way to see or remove it. */
+  private keptBlock(): HTMLElement | undefined {
+    const kept = this.host.variants()
+    if (kept.length === 0) return undefined
+    const m = this.host.messages()
+    const block = document.createElement("div")
+    block.className = "kept-variants"
+    block.append(Object.assign(document.createElement("h4"), { textContent: m.candidates.keptTitle.replace("{n}", String(kept.length)) }))
+    kept.forEach((interpretation, index) => {
+      const json = interpretation.variant
+      if (!json) return
+      const row = document.createElement("div")
+      row.className = "kept-variant"
+      const verdict = Object.assign(document.createElement("span"), { className: "verdict", textContent: m.candidates.verdicts[json.verdict] })
+      verdict.dataset.verdict = json.verdict
+      const cost = Object.assign(document.createElement("span"), { className: "cost", textContent: m.candidates.cost.replace("{x}", this.number(json.cost)) })
+      const model = Object.assign(document.createElement("span"), { className: "cost", textContent: m.candidates.keptModel.replace("{model}", m.models[json.modelId] ?? json.modelId) })
+      row.append(Object.assign(document.createElement("strong"), { textContent: json.label ?? json.candidate }), verdict, cost, model)
+      // Computed again under the model and the data as they now stand: said when it no longer reads the same.
+      const now = this.variants.find(variant => variant.candidate === json.candidate)
+      if (now && (now.verdict !== json.verdict || Math.abs(now.cost - json.cost) > 0.05 || now.modelId !== json.modelId)) {
+        row.append(Object.assign(document.createElement("span"), { className: "recomputed", textContent: m.candidates.keptRecomputed.replace("{verdict}", m.candidates.verdicts[now.verdict]).replace("{x}", this.number(now.cost)) }))
+      }
+      const see = document.createElement("button")
+      see.type = "button"
+      see.className = "pill-btn"
+      see.textContent = m.candidates.seeKept
+      see.addEventListener("click", () => this.show({
+        candidate: json.candidate, label: json.label ?? json.candidate, verdict: json.verdict, cost: json.cost, parameters: json.parameters,
+        moved: json.moved as MovedValue[], modelId: json.modelId
+      }))
+      const remove = document.createElement("button")
+      remove.type = "button"
+      remove.className = "pill-btn"
+      remove.textContent = m.candidates.removeVariant
+      remove.addEventListener("click", () => {
+        this.host.remove(index)
+        this.refresh()
+      })
+      row.append(see, remove)
+      block.append(row)
+    })
+    return block
   }
 
   /** The label the matrix gives one of its answers: its question and its choice ("Hour: Night"). */
@@ -439,7 +538,15 @@ export class CandidatesView {
       see.className = "pill-btn"
       see.textContent = m.seeVariant
       see.addEventListener("click", () => this.show(variant))
-      body.append(see)
+      const keep = document.createElement("button")
+      keep.type = "button"
+      keep.className = "pill-btn"
+      keep.textContent = m.keepVariant
+      keep.addEventListener("click", () => this.keep(variant))
+      const buttons = document.createElement("div")
+      buttons.className = "candidate-actions"
+      buttons.append(see, keep)
+      body.append(buttons)
     }
     row.append(head, body)
     return row

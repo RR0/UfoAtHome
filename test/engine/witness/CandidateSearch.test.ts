@@ -41,3 +41,19 @@ describe("CandidateSearch", () => {
     expect(variants.map(variant => variant.candidate)).toEqual(["near", "far", "venus"])
   })
 })
+
+describe("Variants kept in a recording", () => {
+  it("are read and written back as interpretations carrying what makes them variants", async () => {
+    const { fromSightingJson, toSightingJson } = await import("../../../src/engine/persistence/sightingJson.js")
+    const variant = {
+      title: "Variant: Venus", bodies: [],
+      variant: { candidate: "Venus", label: "Venus", phenomenon: "Planets", parameters: { clockMinutes: 2, headingDeg: 20, elevationFactor: 0.6, sizeFactor: 1 },
+        moved: [{ field: "heading" as const, stated: 205, variant: 225, parameter: "heading", amount: 20, z: 0.9, status: "consolidated" }],
+        cost: 0.9, verdict: "consolidated" as const, modelId: "consolidated" }
+    }
+    const sighting = fromSightingJson({ version: 1, timeline: { keyframes: [] }, variants: [variant] } as never)
+    expect(sighting.variants).toEqual([variant])
+    expect(toSightingJson(sighting).variants).toEqual([variant])
+    expect(toSightingJson(fromSightingJson({ version: 1, timeline: { keyframes: [] } } as never)).variants).toBeUndefined()
+  })
+})

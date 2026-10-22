@@ -2783,6 +2783,19 @@ export class SceneElement extends HTMLElement {
   }
 
   /**
+   * How a body looks from the observer's eye at `t` — its direction and its angles — or undefined when it is not there then (or the eye
+   * is inside it): what the candidate search follows an interpretation with (see CandidatesView), as BodyConfrontation measures it.
+   */
+  bodyProjectionAt(body: BodyJson, t: number): { aim: { azimuthDeg: number, altitudeDeg: number }, angular: { widthDeg: number, heightDeg: number } } | undefined {
+    const ground = this.sceneRenderer.bodyGround
+    const sighting = this.ufoElement.sighting
+    const eyeAt = (at: number) => BodyPlacement.eyeOf(sighting, at, ground)
+    const state = new BodyPlacement(body, ground, eyeAt).at(t)
+    const eye = eyeAt(t)
+    return state && eye ? BodyConfrontation.projectionOf(state, eye) : undefined
+  }
+
+  /**
    * The direction from the observer's eye to the middle of a body at `t`, or at its first keyframe
    * when it is not there at `t` — where to turn to look at it. Undefined for a body with no
    * keyframe, or one the eye stands inside.

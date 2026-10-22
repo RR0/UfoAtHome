@@ -130,6 +130,9 @@ export interface SightingRecordingJson {
   /** What the observer took it to be, in metres — see InterpretationJson. Absent means they said
    * nothing a body could be made of, which is most of them. */
   interpretation?: InterpretationJson
+  /** The variants of the account that were kept: each an interpretation saying what the observer would have erred by for it to be a
+   * misperception of a candidate (see InterpretationJson.variant). Absent means none was kept. */
+  variants?: InterpretationJson[]
   /** What happened in the sky while it runs, as facts (a laser shot, a launch, a re-entry) — see SkyEventsJson. Absent means none was stated. */
   skyEvents?: SkyEventsJson
   /** Where the data its scene would otherwise ask third parties for is kept, beside this file — see FrozenData. Absent means all of it is
@@ -189,6 +192,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     lightPollution: sighting.lightPollution,
     observerMap: sighting.observerMap,
     interpretation: sighting.interpretation,
+    variants: sighting.variants.length > 0 ? sighting.variants : undefined,
     skyEvents: SkyEvents.written(sighting.skyEvents),
     frozen: sighting.frozen
   }
@@ -266,6 +270,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   // The events of the sky were written in the interpretation before they had a place of their own: read from there too, and moved out.
   const stated = SkyEvents.read(json.skyEvents, json.interpretation)
   sighting.interpretation = stated.interpretation
+  sighting.variants = Array.isArray(json.variants) ? json.variants : []
   sighting.skyEvents = stated.skyEvents
   sighting.frozen = json.frozen
   sighting.loadIssues = issues

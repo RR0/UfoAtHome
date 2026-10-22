@@ -29,6 +29,31 @@ export interface InterpretationJson {
   bodies: BodyJson[]
   /** Fires the interpretation lights on the ground, as their smoke — see SmokeSource. */
   smoke?: SmokeSource[]
+  /**
+   * When this interpretation is a VARIANT of the account: what the observer would have to have erred by for the account to be a
+   * misperception of a candidate, as the candidate search found it (see CandidateSearch, docs/witness-error-model.md). The account never
+   * changes: the variant is the transformation, kept so it can be replayed and computed again when the error model changes.
+   */
+  variant?: VariantJson
+}
+
+/** What makes an interpretation a variant of the account — see InterpretationJson.variant. */
+export interface VariantJson {
+  /** Which candidate: a body of the sky ("Venus"), a satellite, a re-entry, an aircraft, or another interpretation. */
+  candidate: string
+  /** What the candidate is called, as it was when the variant was kept. */
+  label?: string
+  /** The known phenomenon of Poher's matrix it is an instance of, when it is one. */
+  phenomenon?: string
+  /** The witness parameters applied: a clock offset in minutes, a rotation of the heading in degrees, factors on elevation and size. */
+  parameters: { clockMinutes: number, headingDeg: number, elevationFactor: number, sizeFactor: number }
+  /** The values it moves: what the account says, what the variant reads, the bias and its status. */
+  moved: { field: "time" | "heading" | "elevation" | "size", stated: number, variant: number, parameter: string, amount: number, z: number, status: string }[]
+  /** What it costs, in units of the laws' spread (σ), and the verdict it got. */
+  cost: number
+  verdict: "consolidated" | "contested" | "incompatible"
+  /** The error model it was computed with (see WitnessError.MODELS). */
+  modelId: string
 }
 
 /**

@@ -71,6 +71,14 @@ export interface WitnessErrorMessages {
     /** The Poher matrix (1977) as the source of the candidates: loading, its verdicts, and the answers drawn from the recording. */
     /** What a computed candidate is called: an aircraft of the traffic record, a re-entry, a recorded fireball ({name}: what is known of it). */
     aircraft: string
+    /** An interpretation as a candidate ({name}: its title), and the variants kept in the recording. */
+    interpretation: string
+    keepVariant: string
+    keptTitle: string
+    seeKept: string
+    removeVariant: string
+    keptRecomputed: string
+    keptModel: string
     reentry: string
     fireball: string
     poherLoading: string

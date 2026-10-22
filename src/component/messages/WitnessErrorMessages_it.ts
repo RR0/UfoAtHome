@@ -164,6 +164,13 @@ export const witnessErrorMessages_it: WitnessErrorMessages = {
       "Saturn": "Saturno"
     },
     "aircraft": "Aeromobile {name}",
+    "interpretation": "Interpretazione: {name}",
+    "keepVariant": "Conserva questa variante",
+    "keptTitle": "Varianti conservate ({n})",
+    "seeKept": "Vedi",
+    "removeVariant": "Rimuovi",
+    "keptRecomputed": "ricalcolata: {verdict}, costo {x} σ",
+    "keptModel": "modello: {model}",
     "reentry": "Rientro {name}",
     "fireball": "Bolide {name}",
     "poherLoading": "Caricamento della matrice di Poher…",

@@ -4,6 +4,7 @@ import { WindowClose } from "./WindowClose.js"
 import { SectionFolds } from "./SectionFolds.js"
 import { WitnessErrorView } from "./WitnessErrorView.js"
 import { CandidatesView } from "./CandidatesView.js"
+import type { InterpretationJson } from "../engine/interpretation/Interpretation.js"
 import { PoherMatrix } from "../engine/witness/PoherMatrix.js"
 import type { PoherFacts } from "../engine/witness/PoherMatrix.js"
 import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
@@ -6335,8 +6336,33 @@ export class SightingEditorElement extends HTMLElement {
         return passes.length > 0 ? { passes, positionsAt: (date: Date) => this.sceneElement.satellitePositionsAt(date) } : undefined
       },
       burning: () => this.sceneElement.burningCandidates(),
-      traffic: () => this.sceneElement.trafficCandidates()
+      traffic: () => this.sceneElement.trafficCandidates(),
+      interpretations: () => {
+        const own = this.ufoElement.sighting.interpretation
+        return [
+          ...(own && own.bodies.length > 0 ? [{ id: "own", label: this.said.read(own.title) ?? this.principalObserverLabel(), interpretation: own }] : []),
+          ...this.readings
+        ]
+      },
+      projectionAt: (body, t) => this.sceneElement.bodyProjectionAt(body, t),
+      variants: () => this.ufoElement.sighting.variants,
+      keep: variant => this.editVariants(variants => [...variants, variant]),
+      remove: index => this.editVariants(variants => variants.filter((_, i) => i !== index))
     }, candidates)
+  }
+
+  /**
+   * The readings of this account a case holds (see CaseEditorElement): other analysts' interpretations, which the candidate search follows
+   * beside the account's own.
+   */
+  readings: { id: string, label: string, interpretation: InterpretationJson }[] = []
+
+  /** Keeps or removes a variant of the account: a change of the author's, which goes into the history. */
+  private editVariants(change: (variants: InterpretationJson[]) => InterpretationJson[]): void {
+    this.touch()
+    this.armHistory()
+    this.ufoElement.sighting.variants = change(this.ufoElement.sighting.variants)
+    this.scheduleHistoryRecord()
   }
 
   /** Poher's matrix as rr0.org publishes it, read once (see PoherMatrix.load). */

@@ -20,13 +20,14 @@ const date = new Date(Date.UTC(2020, 3, 3, 19, 30))
 const observer = { lat: 48.85, lng: 2.35, elevationM: 0 }
 const venus = computeBodyPosition("Venus", date, observer)
 
-function make(aim: { azimuthDeg: number, altitudeDeg: number }, extra: Partial<{ burning: () => unknown, traffic: () => unknown }> = {}) {
+function make(aim: { azimuthDeg: number, altitudeDeg: number }, extra: Record<string, unknown> = {}) {
   const timeline = new Timeline()
   timeline.addKeyframe(0, [{ sourceId: "ufo-1", shape: { ...createOval({ x: 0, y: 0, width: 10, height: 10 }), aim, angular: { widthDeg: 0.1, heightDeg: 0.1 } } }])
   const sighting = { timeline, provenance: Provenance.empty(), event: {} } as never
   const card = document.createElement("div")
   const section = document.createElement("div")
   const heading = document.createElement("label")
+  const kept: unknown[] = []
   document.body.append(card, section, heading)
   const view = new CandidatesView({
     sighting,
@@ -42,6 +43,11 @@ function make(aim: { azimuthDeg: number, altitudeDeg: number }, extra: Partial<{
     satellites: () => undefined,
     burning: () => ({ reentries: [], fireballs: [] }),
     traffic: () => undefined,
+    interpretations: () => [],
+    projectionAt: () => undefined,
+    variants: () => kept,
+    keep: (variant: unknown) => kept.push(variant as never),
+    remove: (index: number) => kept.splice(index, 1),
     ...extra
   } as never, section)
   return { view, card, section, heading }
@@ -109,5 +115,32 @@ describe("CandidatesView with re-entries and aircraft", () => {
     expect(aircraft).toBeDefined()
     // East, low: where the account puts the light, within consolidated biases.
     expect(aircraft).toContain("Compatible with consolidated biases")
+  })
+})
+
+describe("CandidatesView variants kept and interpretations", () => {
+  it("keeps a variant in the recording as an interpretation, lists it, and removes it", async () => {
+    const { view, section } = make({ azimuthDeg: venus.azimuthDeg - 20, altitudeDeg: venus.altitudeDeg * 1.5 })
+    view.refresh()
+    await new Promise(resolve => setTimeout(resolve, 0))
+    const venusRow = [...section.querySelectorAll(".candidate")].find(row => row.textContent!.includes("Venus"))!
+    ;[...venusRow.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "Keep this variant")!.click()
+    const kept = section.querySelector(".kept-variants")!
+    expect(kept.textContent).toContain("Variants kept (1)")
+    expect(kept.textContent).toContain("model: Consolidated readings (UFO@home)")
+    ;[...kept.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "Remove")!.click()
+    expect(section.querySelector(".kept-variants")).toBeNull()
+  })
+
+  it("follows an interpretation of the account as a candidate, by the body that claims to be its phenomenon", async () => {
+    const interpretation = { title: "Balloon", bodies: [{ id: "balloon", explains: ["ufo-1"], model: { id: "sphere" }, track: [{ t: 0 }] }] }
+    const { view, section } = make({ azimuthDeg: 100, altitudeDeg: 20 }, {
+      interpretations: () => [{ id: "reading-1", label: "Balloon", interpretation }],
+      projectionAt: () => ({ aim: { azimuthDeg: 110, altitudeDeg: 15 }, angular: { widthDeg: 0.1 } })
+    } as never)
+    view.refresh()
+    await new Promise(resolve => setTimeout(resolve, 0))
+    const row = [...section.querySelectorAll(".candidate-head")].find(head => head.textContent!.startsWith("Interpretation: Balloon"))!
+    expect(row.textContent).toContain("Compatible with consolidated biases")
   })
 })

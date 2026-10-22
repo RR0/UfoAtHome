@@ -466,6 +466,9 @@ export class Sighting {
    */
   interpretation?: InterpretationJson
 
+  /** The variants of the account that were kept — see InterpretationJson.variant. */
+  variants: InterpretationJson[] = []
+
   /**
    * What happened in the sky while it runs, as facts — a laser shot, a launch, a re-entry: see SkyEventsJson. Not part of the interpretation,
    * which reads the account; not decor, which outlasts the observation.
