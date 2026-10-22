@@ -169,7 +169,6 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   dataSources: "Sources des données",
   beamsSubgroup: "Faisceaux",
   soundGroup: "Son",
-  appTitle: "Reconstitution d'observation",
   temporalGroup: "Date",
   fileGroup: "Fichiers",
   fileLoading: "Chargement de l'éditeur…",

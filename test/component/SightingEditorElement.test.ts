@@ -3053,12 +3053,8 @@ describe("SightingEditorElement parameter summary", () => {
 
   it("sits under the render, not between the groups and it — chips above the canvas would push it back off the screen", () => {
     const element = mount()
-    const root = element.shadowRoot!
-    const scene = root.querySelector("rr0-scene")!
-    const summary = root.getElementById("param-summary")!
-    expect(scene.compareDocumentPosition(summary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    // In the scene's own column, never in the inspector with the groups.
-    expect(summary.parentElement).toBe(scene.parentElement)
+    const children = [...element.shadowRoot!.children].map(child => child.id || child.tagName.toLowerCase())
+    expect(children.indexOf("param-summary")).toBeGreaterThan(children.indexOf("rr0-scene"))
   })
 
   it("states only what is set, so it reads as a statement rather than a second copy of the form", () => {

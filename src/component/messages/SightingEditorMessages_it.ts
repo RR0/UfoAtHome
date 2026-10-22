@@ -169,7 +169,6 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   dataSources: "Fonti dei dati",
   beamsSubgroup: "Fasci",
   soundGroup: "Suono",
-  appTitle: "Ricostruzione dell'avvistamento",
   temporalGroup: "Data",
   fileGroup: "File",
   fileLoading: "Caricamento dell'editor…",

@@ -9788,7 +9788,6 @@ export class SightingEditorElement extends HTMLElement {
     // Re-renders the source/status line, whose text is half messages and half live data.
     this.syncWeatherSourceState()
     this.labelSoundGroup.textContent = messages.soundGroup
-    this.shadow.getElementById("label-app-title")!.textContent = messages.appTitle
     this.labelSoundKind.textContent = messages.soundKind
     this.labelSoundVolume.textContent = messages.soundVolume
     this.labelSoundPitch.textContent = messages.soundPitch
