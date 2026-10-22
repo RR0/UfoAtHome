@@ -92,4 +92,42 @@ export interface Account {
    * says nothing about follow-up is not a report that says none happened.
    */
   followedUp?: boolean
+  /**
+   * The conditions of this account and of the sighting as the observer lived it: what the error laws of the values they give read
+   * (see docs/witness-error-model.md and WitnessError). Each absent means unknown.
+   */
+  conditions?: WitnessConditions
+}
+
+/** What the word an observer used for the phenomenon was: it predicts what metric detail they volunteer, not how wrong it is. */
+export type WitnessWord = "light" | "object" | "craft" | "ufo" | "other"
+
+/** What the observer had been exposed to before this account: whether it may echo what they heard or read. */
+export type WitnessExposure = "none" | "press" | "broadcast" | "other-witnesses" | "investigators"
+
+/**
+ * The conditions of one account, as error laws read them: when it was given and which version it is (the earliest weighs most;
+ * retelling lowers the ratio of right to wrong details), the word used, the exposure before it and whether the observers talked to
+ * each other, how the observer could see — and the Moon gauge, the one measure that makes a population law individual.
+ */
+export interface WitnessConditions {
+  /** Days between the sighting and this account. */
+  delayDays?: number
+  /** Which version of the observer's account this is: 1 for the first given. */
+  version?: number
+  word?: WitnessWord
+  exposure?: WitnessExposure
+  /** Whether the observers gave their accounts without talking to each other first. */
+  independent?: boolean
+  /** Whether the observer's eyes were used to the dark. */
+  darkAdapted?: boolean
+  /** Whether the observer wore the glasses or lenses they need. */
+  correctedVision?: boolean
+  /** Whether a bright light dazzled the observer just before. */
+  glare?: boolean
+  /**
+   * How wide the observer showed the full Moon, in degrees, the way they showed the object: their own angular-size factor is this
+   * over the Moon's real 0.52°, applied to every angular size they give (see WitnessError.MOON_DEG).
+   */
+  moonShownDeg?: number
 }

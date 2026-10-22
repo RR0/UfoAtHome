@@ -7,6 +7,7 @@ import { WindowClose } from "./WindowClose.js"
 import { SectionFolds } from "./SectionFolds.js"
 import { TimelineTracks } from "./TimelineTracks.js"
 import { SceneFieldOverlay } from "./SceneFieldOverlay.js"
+import { WitnessErrorView } from "./WitnessErrorView.js"
 import { EditorTheme } from "./EditorTheme.js"
 export const html = `
 <!-- From top to bottom, as the design handoff lays it out: what this recording is and whether it is saved, the scene, the
@@ -751,7 +752,7 @@ export const html = `
 </div>
 `
 
-export const css = `${InputFont.CSS}${ElementList.CSS}${Icons.CSS}${WindowClose.CSS}${SectionFolds.CSS}${TimelineTracks.CSS}${SceneFieldOverlay.CSS}
+export const css = `${InputFont.CSS}${ElementList.CSS}${Icons.CSS}${WindowClose.CSS}${SectionFolds.CSS}${TimelineTracks.CSS}${SceneFieldOverlay.CSS}${WitnessErrorView.CSS}
 :host {
   color-scheme: light dark;
   display: block;

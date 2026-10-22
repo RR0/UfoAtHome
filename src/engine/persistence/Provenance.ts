@@ -11,6 +11,9 @@
  * those left a recording that could not play, which is a worse answer than a marked guess.
  */
 export type Basis =
+  /** Read off an instrument or a gauge — a clock, a compass, an arm's-length gauge — by the observer or an investigator: the
+   * strongest there is, since its error is the instrument's and not a memory's (see docs/witness-error-model.md). */
+  | "measured"
   /** The observer said it. The default when a file states no basis at all. */
   | "stated"
   /** Worked out from what the observer said plus something checkable — a road's width, a place's
@@ -30,12 +33,21 @@ export interface StatedValue<T = unknown> {
    * 20-100 m spans 15 to 3 degrees; 8 taken"), or what a guess was chosen for. Optional because a
    * stated value's justification is the account itself, which is already in the recording. */
   rationale?: string
+  /**
+   * How it was obtained, from a closed list per kind of value (see WitnessError.HOW): a time read on a `clock`, `anchored` to a dated
+   * event or `estimated`; a size `shown-on-the-spot`, through an `arm-length-gauge` or a `recalled-object`; an elevation or a heading
+   * from an `instrument`, a `landmark` or `estimated`; a distance from `occlusion`, a `known-size`, `triangulation` or `estimated`. It
+   * is what selects the law of its error. Absent means an unqualified estimate.
+   */
+  how?: string
 }
 
 /** What is known about one path, once the value has been taken out of it. */
 export interface ProvenanceEntry {
   basis: Basis
   rationale?: string
+  /** See StatedValue.how. */
+  how?: string
   /**
    * The value this was said ABOUT, kept so the saying can expire.
    *
@@ -95,7 +107,7 @@ export class Provenance {
   /** Records what is known about `path`. A "stated" entry with no rationale is dropped rather than
    * stored: it is the default, and writing it would put noise in every file. */
   set(path: string, entry: ProvenanceEntry): void {
-    if (entry.basis === "stated" && entry.rationale === undefined) {
+    if (entry.basis === "stated" && entry.rationale === undefined && entry.how === undefined) {
       this.entries.delete(path)
     } else {
       this.entries.set(path, entry)
@@ -154,7 +166,8 @@ export class Provenance {
       holder[last] = {
         value,
         ...(entry.basis === "stated" ? {} : { basis: entry.basis }),
-        ...(entry.rationale === undefined ? {} : { rationale: entry.rationale })
+        ...(entry.rationale === undefined ? {} : { rationale: entry.rationale }),
+        ...(entry.how === undefined ? {} : { how: entry.how })
       } satisfies StatedValue
     }
     return restored
@@ -174,6 +187,7 @@ export class Provenance {
       into.set(at.join("."), {
         basis: value.basis ?? "stated",
         ...(value.rationale === undefined ? {} : { rationale: value.rationale }),
+        ...(value.how === undefined ? {} : { how: value.how }),
         of: value.value
       })
       // Recur: a wrapped object may hold wrapped fields of its own.

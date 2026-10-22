@@ -1200,7 +1200,7 @@ export class SightingElement extends HTMLElement {
    */
   private basisOf(entry: ObserverEntry, prefixes: readonly string[]): { basis: Basis, rationales: string[] } {
     const provenance = this.stripped(entry).provenance
-    const rank: Record<Basis, number> = { stated: 0, derived: 1, assumed: 2 }
+    const rank: Record<Basis, number> = { measured: -1, stated: 0, derived: 1, assumed: 2 }
     const known = provenance.paths()
       .filter(path => prefixes.some(prefix => path === prefix || path.startsWith(`${prefix}.`)))
       .map(path => provenance.at(path)!)

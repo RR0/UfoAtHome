@@ -13,7 +13,7 @@ export const sightingMessages_it: SightingMessages = {
   case: "Caso",
   description: "Descrizione",
   source: "Fonte",
-  basis: { stated: "dichiarato", derived: "dedotto", assumed: "supposto" },
+  basis: { measured: "misurato", stated: "dichiarato", derived: "dedotto", assumed: "supposto" },
   credits: "Crediti",
   editThisObservation: "Modifica questa osservazione",
   embed: "Incorpora",

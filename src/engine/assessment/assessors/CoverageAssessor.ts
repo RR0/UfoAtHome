@@ -38,7 +38,7 @@ const QUESTIONS: Question[] = [
 ]
 
 /** Weakest first: an answer is worth no more than the least of what holds it up. */
-const WEAKEST_FIRST: Basis[] = ["assumed", "derived", "stated"]
+const WEAKEST_FIRST: Basis[] = ["assumed", "derived", "stated", "measured"]
 
 /**
  * Says how much of a reconstruction the account actually settles, and how much of it was worked out

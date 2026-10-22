@@ -7219,3 +7219,36 @@ describe("SightingEditorElement header", () => {
     expect(root.getElementById("panel-title-shape")!.textContent).toBe(root.getElementById("label-shape-group")!.textContent)
   })
 })
+
+describe("SightingEditorElement witness error model", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  function setInput(shadow: ShadowRoot, id: string, value: string): void {
+    const input = shadow.getElementById(id) as HTMLInputElement
+    input.value = value
+    input.dispatchEvent(new Event("input", { bubbles: true }))
+  }
+
+  it("marks the basis of the values whose error the studies measured, and says the law of each under it", () => {
+    const element = mount()
+    const root = element.shadowRoot!
+    for (const id of ["heading", "apparentWidth"]) expect(root.getElementById(id)!.closest("label")!.querySelector(".basis-mark")).not.toBeNull()
+    setInput(root, "heading", "120")
+    expect(root.getElementById("heading")!.closest("label")!.querySelector(".law")!.textContent).toContain("45")
+  })
+
+  it("keeps the witness's Moon gauge in the account, and makes their size factor individual", () => {
+    const element = mount()
+    const root = element.shadowRoot!
+    const moon = root.querySelector<HTMLInputElement>(".moon-side input")!
+    moon.value = "1.56"
+    moon.dispatchEvent(new Event("change"))
+    expect(element.sightingData.account?.conditions?.moonShownDeg).toBe(1.56)
+    expect(root.querySelector(".moon-side .note")!.textContent).toContain("×3")
+    // Another field of the account typed afterwards keeps it.
+    setInput(root, "observerAge", "40")
+    expect(element.sightingData.account?.conditions?.moonShownDeg).toBe(1.56)
+  })
+})

@@ -2,6 +2,7 @@ import { setupCloudEditor } from "./CloudEditor.js"
 import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
 import { SectionFolds } from "./SectionFolds.js"
+import { WitnessErrorView } from "./WitnessErrorView.js"
 import { TimelineTracks } from "./TimelineTracks.js"
 import { SceneFieldOverlay } from "./SceneFieldOverlay.js"
 import type { TimelineTrack } from "./TimelineTracks.js"
@@ -451,6 +452,8 @@ export class SightingEditorElement extends HTMLElement {
   private referencesShownForField = false
   /** When the scene's toggles and timeline, shown by a touch, go again. */
   private overlayTimer?: ReturnType<typeof setTimeout>
+  /** The error model of the witness: each value's basis and law, the observer's conditions and Moon gauge (see WitnessErrorView). */
+  private readonly witnessErrorView: WitnessErrorView
   /** The advanced fields of each section, held back where they are (see SectionFolds). */
   private readonly sectionFolds: SectionFolds
   /** The steps written into the history since the recording was opened or saved: what the header counts as changes. */
@@ -1169,6 +1172,24 @@ export class SightingEditorElement extends HTMLElement {
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
     this.saveButton = this.shadow.getElementById("save") as HTMLButtonElement
     this.sectionFolds = new SectionFolds(this.shadow)
+    const editor = this
+    this.witnessErrorView = new WitnessErrorView({
+      get sighting() { return editor.ufoElement.sighting },
+      messages: () => this.messages.witnessError,
+      changed: () => {
+        this.touch()
+        this.armHistory()
+        this.scheduleHistoryRecord()
+      },
+      conditionsChanged: conditions => {
+        const sighting = this.ufoElement.sighting
+        const { conditions: _previous, ...rest } = sighting.account ?? {}
+        void _previous
+        const account = { ...rest, ...(conditions ? { conditions } : {}) }
+        sighting.account = Object.values(account).some(value => value !== undefined) ? account : undefined
+      },
+      recordingJson: () => this.sightingData
+    }, this.shadow.querySelector<HTMLElement>(".app")!)
     this.timelineTracks = new TimelineTracks(this.shadow.getElementById("timeline-tracks")!, t => this.goToMark(t), this.messages)
     this.tracksToggle = this.shadow.getElementById("toggle-tracks") as HTMLButtonElement
     this.tracksToggle.addEventListener("click", () => this.setTracksShown(this.tracksToggle.getAttribute("aria-expanded") !== "true"))
@@ -1972,6 +1993,7 @@ export class SightingEditorElement extends HTMLElement {
     // Shape is the group left open on load — of the eight it's the one whose every field changes
     // what the canvas right below it draws, so it's the one worth having open while looking at it.
     this.toggleGroup(this.groupTabs[this.groupPanels.findIndex(panel => panel.id === "group-shape")], true)
+    this.attachWitnessErrors()
     // Named from the start, in the language the template is written in, until the visitor's own is loaded.
     this.labelPanels(this.messages)
     this.fileEditorHost.addEventListener("focusout", () => this.leaveFileEditor())
@@ -3949,7 +3971,9 @@ export class SightingEditorElement extends HTMLElement {
         ? undefined
         : this.said.write(sighting.account?.observerOccupation, this.observerOccupationInput.value, this.writingLanguage),
       source: (this.stringOrUndefined(this.accountSourceSelect.value) as Account["source"]),
-      followedUp: followedUp === "" ? undefined : followedUp === "yes"
+      followedUp: followedUp === "" ? undefined : followedUp === "yes",
+      // Kept by the witness's own sections (see WitnessErrorView), not by these fields.
+      conditions: sighting.account?.conditions
     }
     sighting.account = Object.values(account).some(value => value !== undefined) ? account : undefined
   }
@@ -5646,6 +5670,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private syncObserverMetadataFields(): void {
+    this.witnessErrorView?.refresh()
     const sighting = this.ufoElement.sighting
     this.observerIdInput.value = sighting.observer?.id ?? ""
     this.observerTitleInput.value = sighting.observer?.title ?? ""
@@ -6218,6 +6243,55 @@ export class SightingEditorElement extends HTMLElement {
     }
   }
 
+  /**
+   * The values whose error the studies measured, as this form shows them: when it began, how long it lasted, which way the observer
+   * looked, how wide the shape looked (see WitnessErrorView); and the observer's own sections, after their perception.
+   */
+  private attachWitnessErrors(): void {
+    const sighting = () => this.ufoElement.sighting
+    const t = () => this.ufoElement.currentTime
+    const start = this.shadow.querySelector<HTMLElement>('rr0-date-input[name="obs-time"]')!
+    this.witnessErrorView.attach({
+      kind: "time", label: start.closest("label")!, input: start,
+      path: () => sighting().event.time ? "time" : undefined,
+      value: () => sighting().event.time?.hour !== undefined ? 0 : undefined
+    })
+    this.witnessErrorView.attach({
+      kind: "duration", label: this.durationElement.closest("label")!, input: this.durationElement,
+      path: () => sighting().event.durationSeconds !== undefined ? "durationSeconds" : undefined,
+      value: () => sighting().event.durationSeconds
+    })
+    // The keyframe at or before the playhead holds the value shown: its path is where its basis is said.
+    const before = (times: number[]) => {
+      let index = -1
+      times.forEach((at, i) => { if (at <= t()) index = i })
+      return index === -1 && times.length > 0 ? 0 : index
+    }
+    this.witnessErrorView.attach({
+      kind: "heading", label: this.headingInput.closest("label")!, input: this.headingInput,
+      path: () => {
+        const index = before(sighting().observerTrack.allKeyframes.map(keyframe => keyframe.t))
+        return index === -1 || this.headingInput.value === "" ? undefined : `observerTrack.keyframes.${index}.pose.headingDeg`
+      },
+      value: () => this.numberOrUndefined(this.headingInput.value)
+    })
+    this.witnessErrorView.attach({
+      kind: "angularSize", label: this.apparentWidthInput.closest("label")!, input: this.apparentWidthInput,
+      path: () => {
+        const keyframes = sighting().timeline.allKeyframes
+        const index = before(keyframes.filter(keyframe => keyframe.shapes.some(state => state.sourceId === this.currentSourceId)).map(keyframe => keyframe.t))
+        if (index === -1 || this.apparentWidthInput.value === "") return undefined
+        const holding = keyframes.filter(keyframe => keyframe.shapes.some(state => state.sourceId === this.currentSourceId))[index]
+        const k = keyframes.indexOf(holding)
+        const shape = holding.shapes.findIndex(state => state.sourceId === this.currentSourceId)
+        return `timeline.keyframes.${k}.shapes.${shape}.shape.angular`
+      },
+      value: () => this.numberOrUndefined(this.apparentWidthInput.value)
+    })
+    const perception = this.shadow.getElementById("observerPerception")!.closest<HTMLElement>(".form-section")!
+    this.witnessErrorView.placeObserverSections(perception)
+  }
+
   /** Shows the scene's toggles and timeline for 3.5 s, as a hover would. */
   private showOverlays(): void {
     const card = this.shadow.querySelector<HTMLElement>(".scene-card")!
@@ -6296,6 +6370,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.timelineMarks.show(marks, this.ufoElement.seekableDuration)
     this.refreshTracks()
+    this.witnessErrorView?.refreshFields()
     if (this.activeSceneField) this.refreshSceneField()
   }
 
@@ -10127,6 +10202,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     for (const [key, text] of Object.entries(sections)) this.shadow.getElementById(`label-section-${key}`)!.textContent = text
     this.sectionFolds.setMessages(messages)
+    this.witnessErrorView.refresh()
     this.timelineTracks.setMessages(messages)
     for (const legend of this.shadow.querySelectorAll(".scene-legend")) legend.textContent = messages.sceneLinkedLegend
     if (this.tracksToggle) this.setTracksShown(this.tracksToggle.getAttribute("aria-expanded") === "true")
@@ -11338,6 +11414,8 @@ export class SightingEditorElement extends HTMLElement {
 
 /** Which message heads each group of the draft report — see showNarrativeReport. */
 const BASIS_HEADINGS = {
+  // A draft measures nothing: what it may say was measured, it read in the account, as anything stated.
+  measured: "narrativeStated",
   stated: "narrativeStated",
   derived: "narrativeDerived",
   assumed: "narrativeAssumed"
