@@ -1,6 +1,7 @@
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
+import { EditorTheme } from "./EditorTheme.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import type { InputFileElement, InputFilePick } from "./InputFileElement.js"
@@ -104,32 +105,129 @@ const TEMPLATE = `
   .recording-id-error { margin: .2em 0; }
   ${MessageStyle.rules([".file-note"], [], ["#dialog-error", ".recording-id-error"])}
   ${ElementList.CSS}
+  /* ---- The design handoff's look (design_handoff_editeurs_ufoathome, §2 and §4) ---- */
+  :host {
+    ${EditorTheme.TOKENS}
+    --rr0-field-radius: 8px;
+    --rr0-input-font-size: 15px;
+    container-type: inline-size;
+    font: 400 15px/1.5 var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  ${EditorTheme.HEAD}
+  ${EditorTheme.fields(".case")}
+  /* A case is a card, as the observation alone is: the observation it holds draws none of its own then (see SightingEditorElement.embedded). */
+  .case.in-case { max-width: 68rem; margin: 0 auto; background: var(--ground-raised); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 12px; overflow: clip; }
+  .case-panel { margin: 0; }
+  .editor-head .head-text.title { display: block; }
+  .editor-head .check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-dim); }
+  .editor-state .dirty { display: none !important; }
+  /* Two tabs, underlined. */
+  #case-tabs { display: flex; gap: 6px; padding: 0 18px; border-bottom: 1px solid var(--line); }
+  #case-tabs .group-tab {
+    display: inline-flex; align-items: center; gap: 8px; min-height: 0; margin: 0 0 -1px; padding: 12px 10px;
+    border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; box-shadow: none; color: var(--ink-dim); font: 600 15px/1.2 var(--sans);
+  }
+  #case-tabs .group-tab:hover { background: none; color: var(--ink); }
+  #case-tabs .group-tab[aria-expanded="true"] { color: var(--ink); border-bottom-color: var(--glow-solid); background: none; box-shadow: none; }
+  .count { display: inline-block; min-width: 1.4em; padding: 1px 6px; border-radius: 999px; background: var(--neutral-bg); color: var(--ink-dim); font-size: 12px; text-align: center; }
+  .count:empty { display: none; }
+  .case.in-case > .group-panel { margin: 0; padding: 20px 18px 24px; border: 0; border-radius: 0; background: none; color: var(--ink); }
+  .case.in-case #events-row { display: none !important; }
+  #event-item.in-case { border: 0; padding: 0; margin: 0; }
+  /* The case's own fields: its title the whole width, its date and its id under it. */
+  .case-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px 16px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+  .case-fields > :is(label, .field) { display: flex; flex-direction: column; align-items: stretch; gap: 6px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
+  .case-fields > .wide { grid-column: 1 / -1; }
+  .case-fields input[type="text"] { box-sizing: border-box; width: 100%; height: 38px; font-weight: 400; }
+  .events-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 12px; }
+  .section-title { margin: 0; font: 600 12px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--glow-dim); }
+  /* The events, on a line down their left: each a card, its kind's colour on the line. */
+  .event-card, .kind-pill { --kind: var(--glow-solid); --kind-bg: var(--warn-bg); }
+  :is(.event-card, .kind-pill)[data-kind="interview"] { --kind: var(--sky); --kind-bg: light-dark(rgba(18, 96, 143, .12), rgba(127, 212, 255, .14)); }
+  :is(.event-card, .kind-pill)[data-kind="reading"] { --kind: var(--ink-faint); --kind-bg: var(--neutral-bg); }
+  .event-list { position: relative; display: grid; gap: 10px; margin: 0; padding: 0 0 0 24px; list-style: none; }
+  .event-list::before { content: ""; position: absolute; left: 6px; top: 20px; bottom: 20px; width: 1px; background: var(--line-strong); }
+  .event-card {
+    position: relative; display: grid; grid-template-columns: auto minmax(0, 1.2fr) minmax(0, 1fr) auto auto; align-items: center; gap: 12px;
+    padding: 0 0 0 14px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--ground);
+  }
+  .event-card::before {
+    content: ""; position: absolute; left: -23px; top: 50%; width: 9px; height: 9px; transform: translateY(-50%);
+    border: 2px solid var(--kind); border-radius: 50%; background: var(--ground-raised);
+  }
+  .kind-pill { justify-self: start; padding: 2px 10px; border-radius: 999px; background: var(--kind-bg); color: var(--ink); font: 700 12px/1.5 var(--sans); white-space: nowrap; }
+  .event-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 12px 0; }
+  .event-main strong { font: 600 15px/1.35 var(--sans); }
+  .event-meta { font-size: 13px; color: var(--ink-faint); overflow-wrap: anywhere; }
+  .event-links { font-size: 13px; color: var(--ink-dim); }
+  .event-open { min-height: 0; padding: 4px 6px; border: 0; background: none; color: var(--sky); font: 600 14px/1.2 var(--sans); white-space: nowrap; }
+  .event-open:hover:not(:disabled) { background: none; text-decoration: underline; }
+  .event-delete { align-self: stretch; height: auto; min-height: 0; border: 0; border-left: 1px solid var(--line-strong); border-radius: 0 10px 10px 0; background: none; padding: 0 14px; }
+  /* The event open: the way back to the case, and the events before and after. */
+  .crumbs { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 16px; padding: 0 0 16px; border-bottom: 1px solid var(--line); }
+  .crumb-sep { color: var(--ink-faint); }
+  .crumb-title { font: 600 20px/1.3 var(--serif); }
+  .crumb-nav { display: flex; gap: 6px; margin-left: auto; }
+  @container (max-width: 640px) {
+    .event-card { grid-template-columns: auto minmax(0, 1fr) auto; }
+    .event-links { grid-column: 2 / -1; padding-bottom: 10px; }
+    .editor-head { flex-wrap: wrap; }
+  }
 </style>
 <div id="case" class="case">
+<!-- The case on top (see the design handoff, §4): what it is and whether it is saved, with the one Save there is, which saves the
+     observations too when asked; then its two tabs. -->
 <section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
-  <div class="row header">
-    <div class="title"><h2 id="case-heading">Case</h2><span id="dirty" class="dirty" role="status" title="Changes not saved" hidden>●</span></div>
-  </div>
-  <div class="row fields">
-    <label><span id="label-case-id">ID</span> <input id="case-id" type="text" size="18"/></label>
-    <label><span id="label-case-title">Title</span> <input id="case-title" type="text" size="24"/></label>
-    <div class="field"><span id="label-case-time">When</span> <rr0-date-input id="case-date" name="case-time"></rr0-date-input></div>
-  </div>
+  <header class="editor-head header">
+    <div class="head-text title">
+      <span id="case-kicker" class="kicker">Case</span>
+      <h1 id="case-heading" class="editor-title">Case</h1>
+      <p id="case-state-line" class="editor-state"><span class="state-dot" aria-hidden="true"></span><span id="case-state"></span><span id="dirty" class="dirty" role="status" title="Changes not saved" hidden></span></p>
+    </div>
+    <div class="head-actions">
+      <label class="check"><input id="save-also" type="checkbox" checked/> <span id="label-save-also">Also save the observations</span></label>
+      <button id="save-case" type="button" class="pill-btn primary" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8"/><path d="m4.5 7 3.5 3.5L11.5 7"/><path d="M3 13.5h10"/></svg><span id="label-save-case">Save</span></button>
+    </div>
+  </header>
   <div id="case-tabs" class="group-tabs">
-    <button class="group-tab" type="button" aria-controls="group-events" aria-expanded="true"><span id="label-events-group">Events</span></button>
+    <button class="group-tab" type="button" aria-controls="group-events" aria-expanded="true"><span id="label-events-group">Events</span> <span id="events-count" class="count"></span></button>
     <button class="group-tab" type="button" aria-controls="group-case-file" aria-expanded="false"><span id="label-case-file-group">File</span></button>
   </div>
 </section>
   <section class="group-panel" id="group-events" aria-labelledby="label-events-group">
+    <!-- The case itself while no event is open: its title, its date, its id, then its events in the order of time (see renderEvents). -->
+    <div id="case-overview" class="case-overview" hidden>
+      <div class="case-fields">
+        <label class="wide"><span id="label-case-title">Title</span> <input id="case-title" type="text" size="24"/></label>
+        <div class="field"><span id="label-case-time">When</span> <rr0-date-input id="case-date" name="case-time"></rr0-date-input></div>
+        <label><span id="label-case-id">ID</span> <input id="case-id" type="text" size="18"/></label>
+      </div>
+      <div class="events-head">
+        <h3 id="label-events-in-time" class="section-title">Events · in the order of time</h3>
+        <button id="add" type="button" class="pill-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg><span id="label-add">Add an event</span></button>
+      </div>
+      <ol id="event-list" class="event-list"></ol>
+    </div>
     <p id="recording-id-error" class="recording-id-error" role="alert" hidden></p>
     <p id="case-problems" class="recording-id-error" role="status" hidden></p>
     <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, "+", then the frame of the event picked. -->
     <div id="events-row" class="element-list-row">
       <label class="element-list-picker"><select id="track"></select></label>
       <button id="delete" type="button" class="icon-btn">${Icons.TRASH}</button>
-      <button id="add" type="button" class="icon-btn element-list-add">+</button>
     </div>
     <div id="event-item" class="element-list-body">
+    <!-- The event open, in the case: the way back to it, what kind of event and which, and the events before and after. -->
+    <nav id="event-crumbs" class="crumbs" hidden>
+      <button id="back-to-case" type="button" class="pill-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg><span id="label-back-to-case">Case</span></button>
+      <span class="crumb-sep" aria-hidden="true">›</span>
+      <span id="crumb-kind" class="kind-pill"></span>
+      <span id="crumb-title" class="crumb-title"></span>
+      <span class="crumb-nav">
+        <button id="previous-event" type="button" class="icon-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button>
+        <button id="next-event" type="button" class="icon-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3.5 4.5 4.5L6 12.5"/></svg></button>
+      </span>
+    </nav>
     <label id="row-recording-id" class="row"><span id="label-recording-id">ID</span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
     <section id="recording" class="recording">
       <rr0-sighting-editor id="editor"><span id="recording-dirty" slot="tab-status" class="dirty" role="status" title="Changes not saved" hidden>●</span></rr0-sighting-editor>
@@ -205,6 +303,10 @@ export class CaseEditorElement extends HTMLElement {
   private readonly editor: SightingEditorElement
   private session?: CaseSession
   private current?: CaseTrack
+  /** Whether the case's own fields and its list of events are on show, rather than one event (see the design handoff, §4). */
+  private listShown = true
+  /** The file the case was saved as, last, for its header. */
+  private savedAs?: string
   /** The interview on show, when the picker is on one: then no track is. */
   private currentInterview?: InterviewEvent
   private readonly interviewElement: InterviewEditorElement
@@ -270,6 +372,9 @@ export class CaseEditorElement extends HTMLElement {
       this.writeCaseField("time", time ? CaseEditorElement.rr0TimeOf(formatEdtfTime(time)) : "")
     })
     this.byId("track").addEventListener("change", () => {
+      // The list goes at once: the event takes its place while it loads.
+      this.listShown = false
+      this.refreshOverview()
       const item = this.session ? this.items(this.session)[Number((this.byId("track") as HTMLSelectElement).value)] : undefined
       if (!item) return
       if (item.interview) void this.showInterview(item.interview)
@@ -288,6 +393,13 @@ export class CaseEditorElement extends HTMLElement {
       else void this.importFromUrl(pick.url)
     })
     this.byId("add").addEventListener("click", () => this.askAdd())
+    this.byId("back-to-case").addEventListener("click", () => {
+      this.listShown = true
+      this.refreshRow()
+    })
+    this.byId("previous-event").addEventListener("click", () => this.stepEvent(-1))
+    this.byId("next-event").addEventListener("click", () => this.stepEvent(1))
+    this.byId("save-case").addEventListener("click", () => void this.exportCase(this.input("save-also").checked).then(() => this.refreshDirty()))
     this.byId("make-case").addEventListener("click", () => this.makeCase())
     this.byId("delete").addEventListener("click", () => this.askDelete())
     this.byId("export").addEventListener("click", () => this.askExport())
@@ -347,6 +459,7 @@ export class CaseEditorElement extends HTMLElement {
     const session = this.session
     if (session) this.commit()
     this.byId("dirty").hidden = !(session && session.dirty)
+    this.refreshCaseState()
     const recording = session ? (this.current !== undefined && session.changed(this.current)) : this.editor.dirty
     this.byId("recording-dirty").hidden = !recording
   }
@@ -429,7 +542,16 @@ export class CaseEditorElement extends HTMLElement {
     WindowClose.dialog(this.dialog, this.messages.cancel, () => this.closeDialog())
     const m = this.messages
     const text = (id: string, value: string): void => { this.byId(id).textContent = value }
-    text("case-heading", m.caseHeading)
+    text("case-kicker", m.caseHeading)
+    text("label-back-to-case", m.caseHeading)
+    text("label-events-in-time", m.eventsInTime)
+    text("label-add", m.addTitle)
+    text("label-save-also", m.exportAlso)
+    text("label-save-case", m.exportButton)
+    for (const [id, label] of [["previous-event", m.previousEvent], ["next-event", m.nextEvent]] as const) {
+      this.byId(id).title = label
+      this.byId(id).setAttribute("aria-label", label)
+    }
     text("label-case-id", m.caseId)
     text("label-case-title", m.caseTitle)
     text("label-case-time", m.caseTime)
@@ -447,7 +569,6 @@ export class CaseEditorElement extends HTMLElement {
       this.byId(id).title = m.unsavedChanges
       this.byId(id).setAttribute("aria-label", m.unsavedChanges)
     }
-    text("add", "+")
     text("export", m.exportButton)
     text("label-export-recordings", m.exportAlso)
     text("label-title", m.titleField)
@@ -644,6 +765,9 @@ export class CaseEditorElement extends HTMLElement {
     // Relative to the case, as a recording of it is.
     const absolute = wanted ? new URL(wanted, url).href : undefined
     const start = session.tracks.find(track => track.url === absolute) ?? session.tracks.find(track => track.kind === "observer") ?? session.tracks[0]
+    // A case opens on itself, its events listed; on one of them only when it is asked for by name.
+    this.listShown = absolute === undefined
+    this.savedAs = undefined
     await this.showTrack(start)
   }
 
@@ -856,6 +980,144 @@ export class CaseEditorElement extends HTMLElement {
     this.scheduleDirtyCheck()
   }
 
+  /** The events, in the order of time, with where each stands in `items` (which the picker lists them by). */
+  private eventsInTime(session: CaseSession): { item: { track?: CaseTrack, interview?: InterviewEvent }, index: number }[] {
+    const items = this.items(session) as { track?: CaseTrack, interview?: InterviewEvent }[]
+    const timeOf = (item: { track?: CaseTrack, interview?: InterviewEvent }) => String((item.track?.event ?? item.interview)?.time ?? "")
+    // Stable: events of the same time, or of none, stay in the order the case lists them.
+    return items.map((item, index) => ({ item, index })).sort((a, b) => timeOf(a.item).localeCompare(timeOf(b.item)))
+  }
+
+  /** What kind an event is, for its pill and its colour. */
+  private kindOf(item: { track?: CaseTrack, interview?: InterviewEvent }): "observation" | "interview" | "reading" {
+    return item.interview ? "interview" : item.track!.kind === "reading" ? "reading" : "observation"
+  }
+
+  private kindLabel(kind: "observation" | "interview" | "reading"): string {
+    return { observation: this.messages.kindObservation, interview: this.messages.kindInterview, reading: this.messages.kindReading }[kind]
+  }
+
+  /** Shows the case or the event open, as `listShown` says: the case's fields and its events, or the way back and the event. */
+  private refreshOverview(): void {
+    const session = this.session
+    const overview = this.byId("case-overview")
+    const crumbs = this.byId("event-crumbs")
+    overview.hidden = !session || !this.listShown
+    crumbs.hidden = !session || this.listShown
+    this.byId("event-item").hidden = session !== undefined && this.listShown
+    this.byId("events-count").textContent = session ? String(this.items(session).length) : ""
+    this.byId("case-heading").textContent = (session && String((session.json as Record<string, unknown>).title ?? "")) || this.messages.caseHeading
+    if (!session) return
+    const events = this.eventsInTime(session)
+    this.renderEvents(session, events)
+    const open = events.findIndex(({ item }) => item.interview ? item.interview === this.currentInterview : item.track === this.current)
+    const current = events[open]
+    if (current) {
+      const kind = this.kindOf(current.item)
+      const pill = this.byId("crumb-kind")
+      pill.textContent = this.kindLabel(kind)
+      pill.dataset.kind = kind
+      this.byId("crumb-title").textContent = this.optionLabel(current.item, current.index)
+    }
+    ;(this.byId("previous-event") as HTMLButtonElement).disabled = open <= 0
+    ;(this.byId("next-event") as HTMLButtonElement).disabled = open < 0 || open >= events.length - 1
+  }
+
+  /** One card per event, in the order of time, on a line: its kind, what it is called, when and its id, what it is linked to, "Open", and its removal. */
+  private renderEvents(session: CaseSession, events: { item: { track?: CaseTrack, interview?: InterviewEvent }, index: number }[]): void {
+    const m = this.messages
+    const list = this.byId("event-list")
+    list.replaceChildren(...events.map(({ item, index }) => {
+      const kind = this.kindOf(item)
+      const event = (item.track?.event ?? item.interview)!
+      const card = document.createElement("li")
+      card.className = "event-card"
+      card.dataset.kind = kind
+      const pill = document.createElement("span")
+      pill.className = "kind-pill"
+      pill.dataset.kind = kind
+      pill.textContent = this.kindLabel(kind)
+      const main = document.createElement("div")
+      main.className = "event-main"
+      const title = document.createElement("strong")
+      title.textContent = this.optionLabel(item, index)
+      const meta = document.createElement("span")
+      meta.className = "event-meta"
+      meta.textContent = [event.time ? String(event.time).replace("T", " ") : "", event.id ?? ""].filter(Boolean).join(" · ")
+      main.append(title, meta)
+      const links = document.createElement("span")
+      links.className = "event-links"
+      const said: string[] = []
+      if (item.track?.kind === "observer") {
+        const told = session.interviews.filter(interview => session.intervieweesOf(interview).includes(item.track!))
+          .map(interview => this.optionLabel({ interview }, 0))
+        if (told.length > 0) said.push(`${m.passagesHeading} : ${told.join(", ")}`)
+        const readings = session.readingsOf(item.track).length
+        if (readings > 0) said.push(m.readingsCount.replace("{n}", String(readings)))
+      } else if (item.track) {
+        const account = session.accountOf(item.track)
+        if (account) said.push(`${m.interpretationOf} : ${this.optionLabel({ track: account }, session.tracks.indexOf(account))}`)
+      }
+      links.textContent = said.join(" · ")
+      const open = document.createElement("button")
+      open.type = "button"
+      open.className = "event-open"
+      open.textContent = `${m.openEvent} →`
+      open.addEventListener("click", () => this.openEvent(index))
+      const remove = document.createElement("button")
+      remove.type = "button"
+      remove.className = "icon-btn event-delete"
+      remove.innerHTML = Icons.TRASH
+      remove.title = m.deleteRecording
+      remove.setAttribute("aria-label", m.deleteRecording)
+      remove.addEventListener("click", () => void this.deleteFromList(index))
+      card.append(pill, main, links, open, remove)
+      return card
+    }))
+  }
+
+  /** Opens the event listed `index` in the picker: the list goes, and the event takes its place. */
+  private openEvent(index: number): void {
+    const select = this.byId("track") as HTMLSelectElement
+    select.value = String(index)
+    select.dispatchEvent(new Event("change"))
+  }
+
+  /** Asks to delete an event from the list: it is made the one the deletion is about, without leaving the list. */
+  private async deleteFromList(index: number): Promise<void> {
+    const session = this.session
+    const item = session ? (this.items(session) as { track?: CaseTrack, interview?: InterviewEvent }[])[index] : undefined
+    if (!item) return
+    ;(this.byId("track") as HTMLSelectElement).value = String(index)
+    if (item.interview) await this.showInterview(item.interview)
+    else await this.showTrack(item.track!)
+    this.askDelete()
+  }
+
+  /** Opens the event before or after the one open, in the order of time. */
+  private stepEvent(step: number): void {
+    const session = this.session
+    if (!session) return
+    const events = this.eventsInTime(session)
+    const open = events.findIndex(({ item }) => item.interview ? item.interview === this.currentInterview : item.track === this.current)
+    const next = events[open + step]
+    if (next) this.openEvent(next.index)
+  }
+
+  /** What the header says of the case, and whether there is anything to save. */
+  private refreshCaseState(): void {
+    const session = this.session
+    const m = this.messages
+    const line = this.byId("case-state-line")
+    const dirty = session?.dirty ?? false
+    const from = session?.url && !session.url.startsWith("about:") ? decodeURIComponent(new URL(session.url).pathname.split("/").pop() ?? "") : ""
+    this.byId("case-state").textContent = dirty ? m.caseStateDirty
+      : this.savedAs ? m.caseStateSaved.replace("{file}", this.savedAs)
+      : from && from.endsWith(".json") ? m.caseStateClean.replace("{file}", from) : m.caseStateNew
+    line.dataset.state = dirty ? "dirty" : this.savedAs ? "saved" : "clean"
+    ;(this.byId("save-case") as HTMLButtonElement).disabled = !dirty
+  }
+
   private labelOf(track: CaseTrack, index: number): string {
     const said = this.said.read(track.event.title as never) ?? this.said.read(track.recording?.interpretation?.title as never)
     if (said) return said
@@ -875,6 +1137,8 @@ export class CaseEditorElement extends HTMLElement {
     const title = this.said.read(recording.observer?.title as never)
     const from = this.getAttribute("src") ? new URL(this.getAttribute("src")!, location.href).href : undefined
     this.session = CaseSession.around(recording, when, title, from, location.href)
+    // What was being edited stays on show, in the case now around it.
+    this.listShown = false
     this.current = this.session.tracks[0]
     this.session.keep(this.current, recording)
     this.dateModeFor = undefined
@@ -921,6 +1185,7 @@ export class CaseEditorElement extends HTMLElement {
     const session = this.session
     this.applySections()
     this.byId("case-panel").hidden = session === undefined
+    this.refreshOverview()
     this.byId("make-case-row").hidden = session !== undefined
     this.byId("case").classList.toggle("in-case", session !== undefined)
     this.byId("event-item").classList.toggle("in-case", session !== undefined)
@@ -1265,6 +1530,7 @@ export class CaseEditorElement extends HTMLElement {
     const link = document.createElement("a")
     link.href = url
     link.download = name
+    this.savedAs = name
     link.click()
     URL.revokeObjectURL(url)
   }

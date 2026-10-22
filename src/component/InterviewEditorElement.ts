@@ -1,4 +1,5 @@
 import type { CaseEventJson } from "../engine/persistence/caseJson.js"
+import { EditorTheme } from "./EditorTheme.js"
 import { register as registerInputFile, type InputFileElement, type InputFilePick } from "./InputFileElement.js"
 import type { AgentRef } from "../engine/interpretation/Interpretation.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
@@ -69,7 +70,49 @@ const TEMPLATE = `
   .file-note { margin: .3em 0; }
   ${MessageStyle.rules([".file-note"])}
   .file-editor { min-height: 18em; margin-top: .5em; }
+  /* ---- The design handoff's look (design_handoff_editeurs_ufoathome, §2 and §5) ---- */
+  :host {
+    ${EditorTheme.TOKENS}
+    --rr0-field-radius: 8px;
+    --rr0-input-font-size: 15px;
+    container-type: inline-size;
+    font: 400 15px/1.5 var(--sans);
+    color: var(--ink);
+  }
+  ${EditorTheme.fields(".interview-app")}
+  /* Its parts, underlined, as the case's are. */
+  #tabs { display: flex; gap: 6px; padding: 0; border-bottom: 1px solid var(--line); }
+  #tabs .group-tab {
+    display: inline-flex; align-items: center; gap: 8px; min-height: 0; margin: 0 0 -1px; padding: 12px 10px;
+    border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; box-shadow: none; color: var(--ink-dim); font: 600 15px/1.2 var(--sans);
+  }
+  #tabs .group-tab:hover { background: none; color: var(--ink); }
+  #tabs .group-tab[aria-expanded="true"] { color: var(--ink); border-bottom-color: var(--glow-solid); background: none; box-shadow: none; }
+  .interview-app > .group-panel { margin: 0; padding: 18px 0 0; border: 0; border-radius: 0; background: none; color: var(--ink); }
+  /* Fields: the label above, the value under it, on a grid that fills the width; the title and what was established the whole width. */
+  #group-summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px 16px; }
+  #group-summary > .row { display: contents; }
+  #group-summary label, #group-transcript label { display: flex; flex-direction: column; align-items: stretch; gap: 6px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
+  #group-summary :is(label.fill, label.wide) { grid-column: 1 / -1; }
+  #group-summary :is(input, select, textarea), #group-transcript input[type="text"] { box-sizing: border-box; width: 100%; font-weight: 400; }
+  #group-summary input[type="text"], #group-transcript input[type="text"] { height: 38px; }
+  #group-summary textarea { min-height: 9em; }
+  fieldset.witnesses { flex-direction: column; align-items: flex-start; gap: 6px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
+  #group-summary fieldset.witnesses label { flex-direction: row; align-items: center; gap: 8px; font-weight: 400; color: var(--ink); }
+  /* The exchanges, one card an intervention, the speaker's colour down its side: a list that scrolls past 520 px (440 on a phone). */
+  #exchanges { --rr0-interview-max-height: 520px; --rr0-interview-line: var(--line-strong); }
+  #exchanges .rr0-interview-turns { padding-right: 4px; }
+  #exchanges .intervention { margin: 0 0 10px; padding: 6px 4px; border: 1px solid var(--line-strong); border-left: 3px solid var(--speaker); border-radius: 10px; background: var(--ground); }
+  #exchanges .intervention:hover { background: var(--ground-sunken); }
+  #exchanges .turn .who { display: inline-block; margin-bottom: 4px; padding: 1px 9px; border-radius: 999px; background: color-mix(in srgb, var(--speaker) 18%, transparent); color: var(--ink); font: 700 12px/1.5 var(--sans); }
+  #exchanges .turn .said { font-size: 15px; line-height: 1.55; color: var(--ink); }
+  #exchanges .turn .ref { border-color: var(--glow-dim); background: var(--warn-bg); color: var(--ink); font: 600 12px/1.6 var(--sans); padding: 1px 9px; }
+  #exchanges .turn.flash { background: var(--warn-bg); }
+  #exchanges .rr0-interview-status { padding: 8px 12px; border-radius: 8px; background: var(--warn-bg); color: var(--ink-dim); font-size: 13px; }
+  #group-transcript > .row { margin-bottom: 12px; }
+  @container (max-width: 640px) { #exchanges { --rr0-interview-max-height: 440px; } }
 </style>
+<div class="interview-app">
 <div id="tabs" class="group-tabs">
   <button class="group-tab" type="button" aria-controls="group-summary" aria-expanded="true"><span id="label-summary-group">Summary</span></button>
   <button class="group-tab" type="button" aria-controls="group-exchanges" aria-expanded="false"><span id="label-exchanges-group">Exchanges</span></button>
@@ -103,6 +146,7 @@ const TEMPLATE = `
   <p id="file-note" class="file-note" hidden role="status"></p>
   <div id="file-editor" class="file-editor"></div>
 </section>
+</div>
 `
 
 /**

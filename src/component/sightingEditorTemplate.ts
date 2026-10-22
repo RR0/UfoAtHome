@@ -7,6 +7,7 @@ import { WindowClose } from "./WindowClose.js"
 import { SectionFolds } from "./SectionFolds.js"
 import { TimelineTracks } from "./TimelineTracks.js"
 import { SceneFieldOverlay } from "./SceneFieldOverlay.js"
+import { EditorTheme } from "./EditorTheme.js"
 export const html = `
 <!-- From top to bottom, as the design handoff lays it out: what this recording is and whether it is saved, the scene, the
      sections as a row of chips (only one open at a time, see SightingEditorElement.toggleGroup), and the open section. The
@@ -1788,27 +1789,7 @@ ${MessageStyle.rules(
    The site's own tokens (site/style.css), each a light-dark() pair: they follow the colour scheme this
    widget is used in exactly as Canvas and CanvasText do. The scene keeps its own colours in both. */
 :host {
-  --ink: light-dark(#131a26, #e8ecf4);
-  --ink-dim: light-dark(#4c5a70, #a3adc2);
-  --ink-faint: light-dark(#78859b, #6f7b93);
-  --ground: light-dark(#f6f8fc, #070a12);
-  --ground-raised: light-dark(#ffffff, #0e1422);
-  --ground-sunken: light-dark(#eaeff7, #050710);
-  --line: light-dark(#dde4ef, #1e2739);
-  --line-strong: light-dark(#c2ccdc, #2e3a52);
-  --glow: light-dark(#9a6f12, #f5c451);
-  --glow-solid: light-dark(#f0bc44, #f5c451);
-  --glow-on-solid: #1a1405;
-  --glow-dim: light-dark(#a07d29, #a8873a);
-  --sky: light-dark(#12608f, #7fd4ff);
-  --ok: light-dark(#1f7a44, #8fd7a4);
-  --error: light-dark(#c0392b, #ff8a7a);
-  --error-bg: light-dark(rgba(192, 57, 43, .09), rgba(255, 138, 122, .12));
-  --warn-bg: light-dark(rgba(154, 111, 18, .14), rgba(245, 196, 81, .14));
-  --neutral-bg: light-dark(rgba(120, 133, 155, .14), rgba(140, 155, 185, .12));
-  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+${EditorTheme.TOKENS}
   --rr0-field-radius: 8px;
   --rr0-input-font-size: 15px;
   /* What the layout adapts to: the width this editor is given, never the window's. */
@@ -1828,36 +1809,7 @@ ${MessageStyle.rules(
 }
 /* Held by another editor (see embedded): no card of its own inside that one's. */
 .app.embedded { border: 0; border-radius: 0; max-width: none; }
-.editor-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 16px 18px;
-  border-bottom: 1px solid var(--line);
-}
-.editor-head[hidden] { display: none; }
-.head-text { min-width: 0; }
-.kicker { display: block; font: 600 12px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--glow-dim); }
-.editor-title { margin: 2px 0 4px; font: 600 20px/1.3 var(--serif); color: var(--ink); }
-.editor-state { display: flex; align-items: center; gap: 7px; margin: 0; font-size: 13px; color: var(--ink-faint); }
-.state-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-faint); }
-.editor-state[data-state="dirty"] { color: var(--glow); }
-.editor-state[data-state="dirty"] .state-dot { background: var(--glow-solid); }
-.editor-state[data-state="saved"] .state-dot { background: var(--ok); }
-.head-actions { display: flex; align-items: center; gap: 8px; flex: none; }
-/* In the header now, side by side: the column the old strip reserved for them is gone. */
-.head-actions .history { position: static; flex-direction: row; gap: 8px; }
-.head-actions .history .icon-btn {
-  width: 36px; height: 36px; min-width: 36px; min-height: 36px; max-width: none; max-height: none;
-  display: inline-flex; align-items: center; justify-content: center;
-}
-.pill-btn {
-  display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px;
-  border: 1px solid var(--line-strong); border-radius: 999px; background: var(--ground-raised); color: var(--ink);
-  font: 600 14px/1 var(--sans); cursor: pointer;
-}
-#save:not(:disabled) { background: var(--glow-solid); border-color: var(--glow-solid); color: var(--glow-on-solid); }
+${EditorTheme.HEAD}
 .scene-card { background: #0b1020; }
 .scene-card > .render-line { padding: 6px 12px; background: var(--ground-raised); }
 .scene-card > .render-line:not(:has(:not(:empty))) { display: none; }
@@ -1937,50 +1889,7 @@ ${MessageStyle.rules(
 .group-panel .toolbar > label:not(:has(> input[type="checkbox"], > input[type="radio"])) > :first-child { grid-column: 1 / -1; }
 .group-panel .toolbar > label > :is(input, select, textarea) { font-weight: 400; }
 .group-panel .toolbar > label.wide { display: flex; }
-:where(.app) :where(input[type="text"], input[type="url"], input[type="number"], input[type="search"], input[type="date"], input[type="time"], input[type="datetime-local"], input:not([type]), select) {
-  /* 38px tall with its border, in the content box the width is fitted in (see NumberFields, which counts its own room for the padding). */
-  height: 36px;
-  padding: 0 10px;
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
-  background: var(--ground);
-  color: var(--ink);
-  font-size: 15px;
-}
-:where(.app) :where(textarea) {
-  box-sizing: border-box;
-  padding: 8px 10px;
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
-  background: var(--ground);
-  color: var(--ink);
-  font-size: 15px;
-}
-:where(.app) :where(input, select, textarea):focus-visible { outline: none; border-color: var(--glow-dim); box-shadow: 0 0 0 3px var(--warn-bg); }
-:where(.app) :where([aria-invalid="true"], .invalid) { border-color: var(--error); }
-/* Lists: drawn by InputFont in the tokens above, their chevron 11–16 px from the right edge. */
-.app :is(select:not([multiple]):not([size]), .rr0-select) {
-  height: 38px;
-  padding: 0 30px 0 10px;
-  background-size: 5px 5px, 5px 5px;
-  background-position: calc(100% - 16px) 52%, calc(100% - 11px) 52%;
-  color: var(--ink);
-}
-:where(.app) :where(button) {
-  min-height: 36px;
-  padding: 0 14px;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: var(--ground-raised);
-  color: var(--ink);
-  font: 600 14px/1 var(--sans);
-  cursor: pointer;
-}
-:where(.app) :where(button:hover:not(:disabled)) { border-color: var(--glow-dim); background: var(--ground-sunken); }
-:where(.app) :where(button:disabled) { opacity: .5; cursor: default; }
-:where(.app) :where(.icon-btn) { min-width: 36px; padding: 0; border-radius: 8px; }
-:where(.app) input[type="range"] { accent-color: var(--glow-solid); }
-:where(.app) input[type="checkbox"], :where(.app) input[type="radio"] { accent-color: var(--glow-solid); }
+${EditorTheme.fields(".app")}
 /* A section's parts: one segmented control, the part open raised in it. */
 .subtabs-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 16px; }
 .group-panel .group-tabs:has(> .subgroup-tab) {

@@ -13,6 +13,19 @@ export interface CaseEditorMessages extends InputFileMessages {
   untitledInterview: string
   deleteInterviewQuestion: string
   untitledReading: string
+  /** The case's events, listed under its fields: their heading, what opens one, and the way to the one before or after it once open. */
+  eventsInTime: string
+  openEvent: string
+  previousEvent: string
+  nextEvent: string
+  /** A reading's kind, on its pill; and how many readings an account has. */
+  kindReading: string
+  readingsCount: string
+  /** What the case's header says of it: new, opened from a file ({file}), changed, or saved as a file ({file}). */
+  caseStateNew: string
+  caseStateClean: string
+  caseStateDirty: string
+  caseStateSaved: string
   untitledObservation: string
   deleteRecording: string
   deleteReadingQuestion: string

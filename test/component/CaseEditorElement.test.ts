@@ -811,12 +811,35 @@ describe("CaseEditorElement's events", () => {
     expect(element.caseSession!.interviews[0].interviewOf).toBe("qb")
   })
 
-  it("has a + button whose tooltip says it adds an event, and no label before the picker", async () => {
+  it("has a button that says it adds an event, and no label before the picker", async () => {
     const element = await open(undefined, interviewed())
-    expect(parts(element).add.textContent).toBe("+")
+    expect(parts(element).add.textContent).toBe("Add an event")
     expect(parts(element).add.title).toBe("Add an event")
     expect(element.shadowRoot!.getElementById("label-recording")).toBeNull()
     expect(parts(element).select.getAttribute("aria-label")).toBe("Event")
+  })
+
+  it("opens on the case, its events listed in the order of time, and an event in place of the list", async () => {
+    const element = await open(undefined, interviewed())
+    const root = element.shadowRoot!
+    expect(root.getElementById("case-overview")!.hidden).toBe(false)
+    expect(root.getElementById("event-item")!.hidden).toBe(true)
+    const cards = [...root.querySelectorAll<HTMLElement>(".event-card")]
+    expect(cards.length).toBe(root.querySelectorAll("#track option").length)
+    expect(root.getElementById("events-count")!.textContent).toBe(String(cards.length))
+    cards[0].querySelector<HTMLButtonElement>(".event-open")!.click()
+    expect(root.getElementById("case-overview")!.hidden).toBe(true)
+    expect(root.getElementById("event-item")!.hidden).toBe(false)
+    expect(root.getElementById("event-crumbs")!.hidden).toBe(false)
+    root.getElementById("back-to-case")!.click()
+    expect(root.getElementById("case-overview")!.hidden).toBe(false)
+  })
+
+  it("says in its header whether the case is saved, and offers Save only when it is not", async () => {
+    const element = await open()
+    const root = element.shadowRoot!
+    expect((root.getElementById("save-case") as HTMLButtonElement).disabled).toBe(true)
+    expect(root.getElementById("case-state-line")!.dataset.state).toBe("clean")
   })
 
   it("adds an event of the type chosen in the dialog: an interview asks whom it was held with, a title and who held it", async () => {
