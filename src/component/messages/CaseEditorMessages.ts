@@ -24,10 +24,9 @@ export interface CaseEditorMessages extends InputFileMessages {
   /** A reading's kind, on its pill; and how many readings an account has. */
   kindReading: string
   readingsCount: string
-  /** What the case's header says of it: new, opened from a file ({file}), changed, or saved as a file ({file}). */
+  /** What the case's header says of it: new, opened from a file ({file}), or saved as a file ({file}); whether it changed, Save says. */
   caseStateNew: string
   caseStateClean: string
-  caseStateDirty: string
   caseStateSaved: string
   untitledObservation: string
   deleteRecording: string

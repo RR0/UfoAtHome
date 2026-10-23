@@ -1204,8 +1204,7 @@ export class CaseEditorElement extends HTMLElement {
     const line = this.byId("case-state-line")
     const dirty = session?.dirty ?? false
     const from = session?.url && !session.url.startsWith("about:") ? decodeURIComponent(new URL(session.url).pathname.split("/").pop() ?? "") : ""
-    this.byId("case-state").textContent = dirty ? m.caseStateDirty
-      : this.savedAs ? m.caseStateSaved.replace("{file}", this.savedAs)
+    this.byId("case-state").textContent = this.savedAs && !dirty ? m.caseStateSaved.replace("{file}", this.savedAs)
       : from && from.endsWith(".json") ? m.caseStateClean.replace("{file}", from) : m.caseStateNew
     line.dataset.state = dirty ? "dirty" : this.savedAs ? "saved" : "clean"
     ;(this.byId("save-case") as HTMLButtonElement).disabled = !dirty

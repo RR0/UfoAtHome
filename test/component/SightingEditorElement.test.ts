@@ -7216,7 +7216,7 @@ describe("SightingEditorElement header", () => {
   it("says nothing is to be saved, and offers no Save, until something is changed", () => {
     const element = mount()
     const root = element.shadowRoot!
-    expect(root.getElementById("editor-state")!.textContent).toBe("New recording · no changes")
+    expect(root.getElementById("editor-state")!.textContent).toBe("New recording")
     expect((root.getElementById("save") as HTMLButtonElement).disabled).toBe(true)
   })
 

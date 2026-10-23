@@ -464,8 +464,6 @@ export class SightingEditorElement extends HTMLElement {
   private candidatesView?: CandidatesView
   /** The advanced fields of each section, held back where they are (see SectionFolds). */
   private readonly sectionFolds: SectionFolds
-  /** The steps written into the history since the recording was opened or saved: what the header counts as changes. */
-  private changeCount = 0
   /** The File group's account of the data frozen beside the recording, and what takes it at export. */
   private readonly frozenPanel: FrozenDataPanel
   /** The Files group's account of the recording's weather, kept inside it or beside it. */
@@ -2226,7 +2224,6 @@ export class SightingEditorElement extends HTMLElement {
     if (this.applyingFileText) return
     this.baseline = this.fileText()
     this.touched = false
-    this.changeCount = 0
     // The text's changed lines are changed from this: the recording as it was loaded or last exported.
     this.savedFileText = this.baseline
     this.fileEditor?.markSaved()
@@ -2260,9 +2257,7 @@ export class SightingEditorElement extends HTMLElement {
     const m = this.messages
     const dirty = this.dirty
     const state = this.shadow.getElementById("editor-state")!
-    state.textContent = dirty
-      ? (this.changeCount > 1 ? m.stateDirty.replaceAll("{n}", String(this.changeCount)) : m.stateDirtyOne)
-      : this.savedAs ? m.stateSaved.replaceAll("{file}", this.savedAs)
+    state.textContent = this.savedAs && !dirty ? m.stateSaved.replaceAll("{file}", this.savedAs)
       : this.openedFrom ? m.stateClean.replaceAll("{file}", this.openedFrom) : m.stateNew
     state.parentElement!.dataset.state = dirty ? "dirty" : this.savedAs ? "saved" : "clean"
     this.saveButton.disabled = !dirty
@@ -2279,7 +2274,7 @@ export class SightingEditorElement extends HTMLElement {
         ? new Date(Date.UTC(time.year, time.month - 1, time.day)).toLocaleDateString(this.language, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
         : String(time.year)
     }
-    const title = [place, date].filter(Boolean).join(", ") || this.sightingIdInput.value || this.messages.stateNew.split(" · ")[0]
+    const title = [place, date].filter(Boolean).join(", ") || this.sightingIdInput.value || this.messages.stateNew
     this.shadow.getElementById("editor-title")!.textContent = title
   }
 
@@ -2326,21 +2321,20 @@ export class SightingEditorElement extends HTMLElement {
     this.historyAnswering = false
     editor.replaceText(now, this.fileSyncActive())
     this.fileTextApplied = editor.text
-    this.changeCount++
     this.syncHistoryButtons()
     this.refreshEditorHead()
   }
 
   /** Takes back the last change. */
   private undo(): void {
-    this.stepHistory(editor => editor.undo(this.fileSyncActive()), -1)
+    this.stepHistory(editor => editor.undo(this.fileSyncActive()))
   }
 
   private redo(): void {
-    this.stepHistory(editor => editor.redo(this.fileSyncActive()), 1)
+    this.stepHistory(editor => editor.redo(this.fileSyncActive()))
   }
 
-  private stepHistory(step: (editor: SightingFileEditor) => boolean, changes: number): void {
+  private stepHistory(step: (editor: SightingFileEditor) => boolean): void {
     // What was just done is written first, or it would be what the step takes back instead of what came before.
     if (this.historyTimer !== undefined) {
       clearTimeout(this.historyTimer)
@@ -2353,7 +2347,6 @@ export class SightingEditorElement extends HTMLElement {
     clearTimeout(this.fileApplyTimer)
     this.applyFileText(editor.text, true)
     this.historyAnswering = true
-    this.changeCount = Math.max(0, this.changeCount + changes)
     this.syncHistoryButtons()
     this.refreshEditorHead()
   }
