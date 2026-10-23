@@ -41,7 +41,11 @@ export class SightingShapes {
    * the author's last resize.
    */
   static toAngular(sighting: Sighting): void {
-    this.eachKeyframe(sighting, (shape, projection) => ({ ...shape, angular: projection.ofBounds(shape.bounds) }))
+    this.eachKeyframe(sighting, (shape, projection) => {
+      const angular = projection.ofBounds(shape.bounds)
+      // The same shape when it already says so: a shape left as it is lets what was written of it be written again as it was.
+      return shape.angular?.widthDeg === angular.widthDeg && shape.angular.heightDeg === angular.heightDeg ? shape : { ...shape, angular }
+    })
   }
 
   /**
@@ -264,10 +268,16 @@ export class SightingShapes {
       const pose = resolveObserverPoseAt(sighting, keyframe.t)
       const fovDeg = this.fovOf(sighting, keyframe.t)
       const projection = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
-      timeline.addKeyframe(
-        keyframe.t,
-        keyframe.shapes.map(state => ({ ...state, shape: transform(state.shape, projection, pose) }))
-      )
+      // A keyframe none of whose shapes changed is left as it is, the very same object: what is written of a keyframe is kept as
+      // long as it is that object (see RecordingText), and every save used to make them all new.
+      let changed = false
+      const shapes = keyframe.shapes.map(state => {
+        const shape = transform(state.shape, projection, pose)
+        if (shape === state.shape) return state
+        changed = true
+        return { ...state, shape }
+      })
+      if (changed) timeline.addKeyframe(keyframe.t, shapes)
     }
   }
 }

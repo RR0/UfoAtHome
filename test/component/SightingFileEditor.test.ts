@@ -68,3 +68,41 @@ describe("SightingFileEditor common ends", () => {
     expect(SightingFileEditor.commonSuffix("z" + base, base, base.length)).toBe(base.length)
   })
 })
+
+describe("SightingFileEditor.changesBetween", () => {
+  const apply = (text: string, changes: Array<{ from: number, to: number, insert: string }>) =>
+    [...changes].reverse().reduce((at, change) => at.slice(0, change.from) + change.insert + at.slice(change.to), text)
+
+  it("gives, line by line, what turns one text into the other, whether lines were changed, added or taken away", () => {
+    let seed = 11
+    const random = (n: number) => {
+      seed = (seed * 1103515245 + 12345) % 2147483648
+      return seed % n
+    }
+    for (let round = 0; round < 400; round++) {
+      const lines = Array.from({ length: 1 + random(30) }, (_, i) => `  "k${i}": ${random(5)},`)
+      const after = [...lines]
+      for (let edit = random(6); edit > 0; edit--) {
+        const at = random(after.length)
+        const kind = random(4)
+        if (kind === 0) after.splice(at, 0, `  "n${round}": 1,`)
+        else if (kind === 1 && after.length > 1) after.splice(at, 1)
+        else after[at] = `${after[at]}x`
+      }
+      const from = lines.join("\n")
+      const to = after.join("\n")
+      const changes = SightingFileEditor.changesBetween(from, to)
+      expect(apply(from, changes)).toBe(to)
+      // In order and apart: what an editor is given in one go.
+      for (let i = 1; i < changes.length; i++) expect(changes[i].from).toBeGreaterThan(changes[i - 1].to)
+    }
+  })
+
+  it("gives one change per run of lines changed in place, however far apart", () => {
+    const before = Array.from({ length: 1000 }, (_, i) => `  "azimuthDeg": ${i},`)
+    const after = before.map((line, i) => i % 100 === 0 ? `${line} ` : line)
+    const changes = SightingFileEditor.changesBetween(before.join("\n"), after.join("\n"))
+    expect(changes).toHaveLength(10)
+    expect(changes.every(change => !change.insert.includes("\n"))).toBe(true)
+  })
+})

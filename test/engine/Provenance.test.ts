@@ -142,3 +142,21 @@ describe("Provenance expiry", () => {
     expect(Provenance.restore(recording, provenance)).toEqual({ durationSeconds: { value: 120, basis: "assumed" } })
   })
 })
+
+describe("Provenance.restore and what it is given", () => {
+  it("never writes into the recording it is given, copying only what lies on the way to a value it wraps", () => {
+    const json = {
+      version: 1,
+      observerTrack: { keyframes: [{ t: 0, pose: { headingDeg: { value: 110, rationale: "call" }, pitchDeg: 10 } }] },
+      timeline: { keyframes: [{ t: 0, shapes: [] }] }
+    }
+    const { recording, provenance } = Provenance.strip(json)
+    const before = JSON.stringify(recording)
+    const restored = Provenance.restore(recording, provenance) as typeof json
+    expect(JSON.stringify(recording)).toBe(before)
+    expect(restored).toEqual(json)
+    // What no path goes through is the recording's own, shared rather than copied.
+    expect(restored.timeline).toBe((recording as typeof json).timeline)
+    expect(restored.observerTrack).not.toBe((recording as typeof json).observerTrack)
+  })
+})

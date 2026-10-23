@@ -143,11 +143,14 @@ export class Provenance {
     if (provenance.size === 0) {
       return json
     }
-    const restored = structuredClone(json)
+    // Copied only along the paths it writes to, each object once: the rest is the recording's own, shared, and never written to.
+    // A whole copy made a fourteen-megabyte recording cost a clone at every save and every edit, for a few wrapped values.
+    const restored = { ...json } as unknown as JsonObject
+    const copies = new Set<object>([restored])
     for (const path of provenance.paths()) {
       const entry = provenance.at(path)!
       const steps = path.split(".")
-      const holder = Provenance.holderOf(restored as unknown as JsonObject, steps)
+      const holder = Provenance.writableHolderOf(restored, steps, copies)
       if (!holder) {
         // The path no longer exists: a shape deleted, a keyframe removed. Its provenance goes with
         // it rather than resurrecting an empty wrapper where the value used to be.
@@ -170,7 +173,7 @@ export class Provenance {
         ...(entry.how === undefined ? {} : { how: entry.how })
       } satisfies StatedValue
     }
-    return restored
+    return restored as unknown as T
   }
 
   /** True when `value` is a wrapper rather than a plain object of the recording's own.
@@ -204,16 +207,25 @@ export class Provenance {
     return value
   }
 
-  /** The object holding the last step of `steps`, creating nothing: a path into something that is
-   * no longer there returns undefined rather than building a husk for it. */
-  private static holderOf(root: JsonObject, steps: string[]): JsonObject | undefined {
-    let at: unknown = root
+  /**
+   * The object holding the last step of `steps`, as a copy of its own that may be written to: each object on the way is copied the
+   * first time a path goes through it (`copies` remembers which are), so that nothing of the recording itself is ever written to.
+   * Creates nothing: a path into something that is no longer there returns undefined.
+   */
+  private static writableHolderOf(root: JsonObject, steps: string[], copies: Set<object>): JsonObject | undefined {
+    let at = root
     for (const step of steps.slice(0, -1)) {
-      if (typeof at !== "object" || at === null) {
-        return undefined
+      const next: unknown = at[step]
+      if (typeof next !== "object" || next === null) return undefined
+      if (copies.has(next)) {
+        at = next as JsonObject
+        continue
       }
-      at = (at as JsonObject)[step]
+      const copy = (Array.isArray(next) ? [...next] : { ...next }) as JsonObject
+      copies.add(copy)
+      at[step] = copy
+      at = copy
     }
-    return typeof at === "object" && at !== null ? at as JsonObject : undefined
+    return at
   }
 }

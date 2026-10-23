@@ -353,7 +353,7 @@ export class SightingFileEditor {
     try {
       const head = Math.min(this.view.state.selection.main.head, text.length)
       this.view.dispatch({
-        changes: SightingFileEditor.changeBetween(current, text), selection: { anchor: head },
+        changes: SightingFileEditor.changesBetween(current, text), selection: { anchor: head },
         annotations: [isolateHistory.of("full"), SightingFileEditor.WHOLE_TEXT.of(text)]
       })
     } finally {
@@ -379,6 +379,53 @@ export class SightingFileEditor {
     const start = SightingFileEditor.commonPrefix(from, to)
     const end = SightingFileEditor.commonSuffix(from, to, Math.min(from.length, to.length) - start)
     return { from: start, to: from.length - end, insert: to.slice(start, to.length - end) }
+  }
+
+  /**
+   * The changes that turn `from` into `to`, line by line where the part between their common ends has as many lines on both sides:
+   * a value changed on every keyframe (the observer turned, and every shape's direction with it) is thousands of lines changed in
+   * place, which the editor takes in as so many small changes, where one change over the fourteen million characters between the
+   * first and the last cost it most of a second (its history, its parse, its marks). Otherwise the one change between the ends.
+   */
+  static changesBetween(from: string, to: string): Array<{ from: number, to: number, insert: string }> {
+    const prefix = SightingFileEditor.commonPrefix(from, to)
+    if (prefix === from.length && prefix === to.length) return []
+    const suffix = SightingFileEditor.commonSuffix(from, to, Math.min(from.length, to.length) - prefix)
+    // Out to whole lines, the same on both sides: what lies before and after them is common.
+    const start = from.lastIndexOf("\n", prefix - 1) + 1
+    const fromEndLine = from.indexOf("\n", from.length - suffix)
+    const fromEnd = fromEndLine === -1 ? from.length : fromEndLine
+    const toEnd = to.length - (from.length - fromEnd)
+    const changes: Array<{ from: number, to: number, insert: string }> = []
+    let a = start
+    let b = start
+    while (a <= fromEnd && b <= toEnd) {
+      const aLine = Math.min(SightingFileEditor.lineEnd(from, a), fromEnd)
+      const bLine = Math.min(SightingFileEditor.lineEnd(to, b), toEnd)
+      if (from.slice(a, aLine) !== to.slice(b, bLine)) {
+        const last = changes[changes.length - 1]
+        // A line changed right after another: one change for both.
+        if (last !== undefined && last.to === a - 1) {
+          last.to = aLine
+          last.insert += `\n${to.slice(b, bLine)}`
+        } else {
+          changes.push({ from: a, to: aLine, insert: to.slice(b, bLine) })
+        }
+      }
+      if (aLine === fromEnd || bLine === toEnd) {
+        // Both at their last line together: as many lines on both sides.
+        if (aLine === fromEnd && bLine === toEnd) return changes
+        break
+      }
+      a = aLine + 1
+      b = bLine + 1
+    }
+    return [SightingFileEditor.changeBetween(from, to)]
+  }
+
+  private static lineEnd(text: string, from: number): number {
+    const end = text.indexOf("\n", from)
+    return end === -1 ? text.length : end
   }
 
   /** Characters compared at once by the engine before going one by one: in a text of fourteen million, the loop is the cost. */

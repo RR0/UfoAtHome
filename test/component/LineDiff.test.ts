@@ -59,3 +59,37 @@ describe("LineDiff", () => {
     expect(LineDiff.changed(before, after)).toEqual([100, 2000])
   })
 })
+
+describe("LineDiff on a large text all changed in place", () => {
+  it("marks the lines that changed where they stand, without spending the search's bound on half a million lines", () => {
+    const before = Array.from({ length: 200_000 }, (_, i) => `  "azimuthDeg": ${i},`)
+    // Every hundredth line changed in place, as the direction of every shape is when the observer turns.
+    const after = before.map((line, i) => i % 100 === 0 ? `  "azimuthDeg": ${i}.5,` : line)
+    const start = performance.now()
+    const { changed, removed } = LineDiff.compare(before, after)
+    expect(performance.now() - start).toBeLessThan(1000)
+    expect(changed).toEqual(before.map((_, i) => i).filter(i => i % 100 === 0))
+    expect(removed).toEqual([])
+  })
+})
+
+describe("LineDiff on a large text with lines added all through it", () => {
+  it("marks the lines added, not the whole text, past the search's bound", () => {
+    const before = Array.from({ length: 200_000 }, (_, i) => `  "x": ${i},`)
+    // A field added to every hundredth entry, as one is to every shape when its direction is first written.
+    const after: string[] = []
+    const added: number[] = []
+    before.forEach((line, i) => {
+      after.push(line)
+      if (i % 100 === 0) {
+        added.push(after.length)
+        after.push(`  "aim": ${i},`)
+      }
+    })
+    const start = performance.now()
+    const { changed, removed } = LineDiff.compare(before, after)
+    expect(performance.now() - start).toBeLessThan(1000)
+    expect(changed).toEqual(added)
+    expect(removed).toEqual([])
+  })
+})

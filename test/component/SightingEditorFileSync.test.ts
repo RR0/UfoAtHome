@@ -585,3 +585,38 @@ describe("the weather of a recording", () => {
     expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.8)
   })
 })
+
+describe("the text written of the recording", () => {
+  it("is what a whole write gives, through edits of the form, its keyframes frozen so that none is changed in place", () => {
+    const element = mount()
+    const inside = element as unknown as { fileText(): string, sightingData: unknown, ufoElement: { sighting: { timeline: { allKeyframes: readonly object[] } } } }
+    const deepFreeze = (value: unknown): void => {
+      if (typeof value !== "object" || value === null || Object.isFrozen(value)) return
+      Object.freeze(value)
+      for (const held of Object.values(value)) deepFreeze(held)
+    }
+    const check = () => {
+      expect(inside.fileText()).toBe(JSON.stringify(inside.sightingData, null, 2))
+      // Whatever an edit does to a keyframe, it does by replacing it: frozen, one changed in place would throw.
+      inside.ufoElement.sighting.timeline.allKeyframes.forEach(deepFreeze)
+    }
+    const shadow = element.shadowRoot!
+    const set = (id: string, value: string) => {
+      const input = shadow.getElementById(id) as HTMLInputElement
+      input.value = value
+      input.dispatchEvent(new Event("input", { bubbles: true }))
+      input.dispatchEvent(new Event("change", { bubbles: true }))
+    }
+    check()
+    set("color", "#ff0000")
+    check()
+    set("transparency", "0.4")
+    check()
+    ;(shadow.getElementById("add-shape-oval") as HTMLButtonElement).click()
+    check()
+    addBuildings(element, 2)
+    check()
+    set("color", "#00ff00")
+    check()
+  })
+})

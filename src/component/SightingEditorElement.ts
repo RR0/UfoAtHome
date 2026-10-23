@@ -1,3 +1,4 @@
+import { RecordingText } from "../engine/persistence/RecordingText.js"
 import { setupCloudEditor } from "./CloudEditor.js"
 import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
@@ -2210,7 +2211,7 @@ export class SightingEditorElement extends HTMLElement {
    * when something is about to be lost.
    */
   get dirty(): boolean {
-    return this.touched && JSON.stringify(this.sightingData) !== this.baseline
+    return this.touched && this.fileText() !== this.baseline
   }
 
   /** Whether the author did anything to the form since the recording was loaded or exported — what the editor derives by itself does not count. */
@@ -2221,11 +2222,11 @@ export class SightingEditorElement extends HTMLElement {
   /** Says the recording as it stands is the one that was loaded or exported: nothing to lose. */
   markClean(): void {
     if (this.applyingFileText) return
-    this.baseline = JSON.stringify(this.sightingData)
+    this.baseline = this.fileText()
     this.touched = false
     this.changeCount = 0
     // The text's changed lines are changed from this: the recording as it was loaded or last exported.
-    this.savedFileText = this.fileText()
+    this.savedFileText = this.baseline
     this.fileEditor?.markSaved()
     this.refreshEditorHead()
   }
@@ -6040,8 +6041,11 @@ export class SightingEditorElement extends HTMLElement {
 
   /** What the file would be if saved now — the same text Export writes. */
   private fileText(): string {
-    return JSON.stringify(this.sightingData, null, 2)
+    return this.fileTextWriter.of(this.sightingData)
   }
+
+  /** What was written of the recording's keyframes, kept while they are unchanged (see RecordingText). */
+  private readonly fileTextWriter = new RecordingText()
 
   /**
    * Form to text. Held back while the author is typing in the text (the form is then following the
