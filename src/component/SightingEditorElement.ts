@@ -6063,11 +6063,14 @@ export class SightingEditorElement extends HTMLElement {
     // After an undo or a redo the text holds what the history gave back, and the form is what that text made: rewriting
     // the text in the form's spelling would be a new step in the history, and end the redo.
     if (this.historyAnswering) return
-    // A text left broken is the author's draft, not stale: the form has nothing to say about it.
-    try {
-      JSON.parse(editor.text)
-    } catch {
-      return
+    // A text left broken is the author's draft, not stale: the form has nothing to say about it. Only a text the author typed or a step of
+    // the history gave back can be one: what the form wrote is JSON, and is not read back to be sure (it is fourteen million characters).
+    if (editor.edited) {
+      try {
+        JSON.parse(editor.text)
+      } catch {
+        return
+      }
     }
     editor.replaceText(this.fileText(), show)
     this.fileTextApplied = editor.text

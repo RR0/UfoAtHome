@@ -1,11 +1,11 @@
 import { Decoration, EditorView, GutterMarker, gutter, keymap, lineNumbers, highlightSpecialChars, drawSelection, type KeyBinding } from "@codemirror/view"
-import { EditorState, RangeSetBuilder, StateEffect, StateField } from "@codemirror/state"
+import { Annotation, EditorState, RangeSetBuilder, StateEffect, StateField, Text } from "@codemirror/state"
 import { openSearchPanel, search, searchKeymap } from "@codemirror/search"
 import { defaultKeymap, history, historyKeymap, indentWithTab, isolateHistory, redo, redoDepth, undo, undoDepth } from "@codemirror/commands"
 import { bracketMatching, foldGutter, foldKeymap, HighlightStyle, indentOnInput, syntaxHighlighting } from "@codemirror/language"
 import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from "@codemirror/autocomplete"
 import { json, jsonLanguage, jsonParseLinter } from "@codemirror/lang-json"
-import { linter, lintGutter, lintKeymap } from "@codemirror/lint"
+import { forceLinting, linter, lintGutter, lintKeymap } from "@codemirror/lint"
 import { tags } from "@lezer/highlight"
 import { SightingCompletion } from "./SightingCompletion.js"
 import { JsonPaths, type JsonPath } from "./JsonPaths.js"
@@ -13,7 +13,8 @@ import { LineDiff } from "./LineDiff.js"
 
 /** What a text has changed from the one it is compared to: the lines changed, and the places lines were taken away. */
 interface ChangeMarks {
-  baseline: string[]
+  /** The text compared to, as a string for comparing and as lines for finding where. */
+  baseline: { text: string, doc: Text }
   changed: ReadonlySet<number>
   removed: ReadonlySet<number>
 }
@@ -60,6 +61,11 @@ export class SightingFileEditor {
   /** Whether the editor is in the page, which it is only while its parent is shown (see placeWhileShown). */
   private readonly placement?: ResizeObserver
   private changing = false
+  /** The text, while nothing changed it since it was last read or written: fourteen million characters are not read again for nothing. */
+  private cachedText?: string
+  /** Whether the text holds what the author typed or a step of the history gave back, rather than what the form last wrote: only then
+   * may it not be JSON. */
+  private editedSinceWritten = false
 
   private readonly changedField: StateField<ChangeMarks>
 
@@ -71,6 +77,8 @@ export class SightingFileEditor {
    * every edit from the baseline and the text (see LineDiff), the baseline replaced by {@link markSaved}.
    */
   private static readonly SET_BASELINE = StateEffect.define<string>()
+  /** The whole text a change leaves, when the one making it has it already (see replaceText): the marks need not read it back. */
+  private static readonly WHOLE_TEXT = Annotation.define<string>()
   /** A blue bar for a line changed, a red tick where lines were taken away, both when a line stands where others were taken away. */
   private static marker(changed: boolean, removed: boolean): GutterMarker {
     return new (class extends GutterMarker {
@@ -86,6 +94,9 @@ export class SightingFileEditor {
       }
     })()
   }
+
+  /** Whether the text is JSON, and where it is not (see the linter, which runs only while the editor is in the page). */
+  private static readonly JSON_LINT = jsonParseLinter()
 
   private static readonly CHANGED_MARKER = SightingFileEditor.marker(true, false)
   private static readonly REMOVED_MARKER = SightingFileEditor.marker(false, true)
@@ -124,17 +135,28 @@ export class SightingFileEditor {
   }
 
   private static changeMarks(initial: string): { field: StateField<ChangeMarks>, extensions: import("@codemirror/state").Extension[] } {
-    const compute = (baseline: string[], state: EditorState): ChangeMarks => {
-      const { changed, removed } = LineDiff.compare(baseline, state.doc.toString().split("\n"))
-      return { baseline, changed: new Set(changed), removed: new Set(removed) }
+    const baselineOf = (text: string) => ({ text, doc: Text.of(text.split("\n")) })
+    // Only the lines between what the two texts begin and end with are compared: after a form edit, a line or two of half a million.
+    const compute = (baseline: ChangeMarks["baseline"], state: EditorState, whole?: string): ChangeMarks => {
+      const now = whole ?? state.doc.toString()
+      const prefix = SightingFileEditor.commonPrefix(baseline.text, now)
+      if (prefix === baseline.text.length && prefix === now.length) return { baseline, changed: new Set(), removed: new Set() }
+      const suffix = SightingFileEditor.commonSuffix(baseline.text, now, Math.min(baseline.text.length, now.length) - prefix)
+      const first = state.doc.lineAt(prefix).number
+      const lastBefore = baseline.doc.lineAt(baseline.text.length - suffix).number
+      const lastAfter = state.doc.lineAt(now.length - suffix).number
+      const lines = (doc: Text, last: number) => doc.sliceString(doc.line(first).from, doc.line(last).to).split("\n")
+      const { changed, removed } = LineDiff.compare(lines(baseline.doc, lastBefore), lines(state.doc, lastAfter))
+      const offset = first - 1
+      return { baseline, changed: new Set(changed.map(index => index + offset)), removed: new Set(removed.map(index => index + offset)) }
     }
     const field = StateField.define<ChangeMarks>({
-      create: state => compute(initial.split("\n"), state),
+      create: state => compute(baselineOf(initial), state),
       update: (value, transaction) => {
         let baseline = value.baseline
-        for (const effect of transaction.effects) if (effect.is(SightingFileEditor.SET_BASELINE)) baseline = effect.value.split("\n")
+        for (const effect of transaction.effects) if (effect.is(SightingFileEditor.SET_BASELINE)) baseline = baselineOf(effect.value)
         if (!transaction.docChanged && baseline === value.baseline) return value
-        return compute(baseline, transaction.state)
+        return compute(baseline, transaction.state, transaction.annotation(SightingFileEditor.WHOLE_TEXT))
       }
     })
     const tint = EditorView.decorations.compute([field], state => {
@@ -201,7 +223,8 @@ export class SightingFileEditor {
         json(),
         jsonLanguage.data.of({ autocomplete: new SightingCompletion([], options.schema).source }),
         lintGutter(),
-        linter(jsonParseLinter()),
+        // Out of the page, the text is not checked: it is when it is put back (see placeWhileShown), not at every change no one sees.
+        linter(view => view.dom.isConnected ? SightingFileEditor.JSON_LINT(view) : []),
         EditorView.contentAttributes.of({ "aria-label": label }),
         EditorView.theme({
           "&": { maxHeight: "28rem", fontSize: "0.82em", border: "1px solid color-mix(in srgb, currentColor 25%, transparent)", borderRadius: "4px" },
@@ -246,7 +269,11 @@ export class SightingFileEditor {
           ".cm-searchMatch-selected": { backgroundColor: "color-mix(in srgb, #f2cc60 75%, transparent)" }
         }),
         EditorView.updateListener.of(update => {
-          if (update.docChanged && !this.changing) changed(update.state.doc.toString())
+          if (update.docChanged) this.cachedText = undefined
+          if (update.docChanged && !this.changing) {
+            this.editedSinceWritten = true
+            changed(this.text)
+          }
           // The caret of the author, not the one this class moves itself (see reveal), nor one that is not in the text.
           if (update.selectionSet && !this.silent && !this.changing && update.view.hasFocus) {
             // The author has the caret now: what the picture showed is no longer what is shown.
@@ -274,6 +301,7 @@ export class SightingFileEditor {
   private placeWhileShown(parent: HTMLElement): ResizeObserver | undefined {
     const place = () => {
       parent.append(this.view.dom)
+      forceLinting(this.view)
       // Where it lives may have changed since it was made (a parent not in a document yet): its styles follow it there.
       const { root } = SightingFileEditor.rootOf(parent)
       if (root && root !== this.view.root) this.view.setRoot(root)
@@ -294,7 +322,12 @@ export class SightingFileEditor {
   }
 
   get text(): string {
-    return this.view.state.doc.toString()
+    return this.cachedText ??= this.view.state.doc.toString()
+  }
+
+  /** Whether the text may not be JSON: it holds what the author typed or what a step of the history gave back since the form last wrote it. */
+  get edited(): boolean {
+    return this.editedSinceWritten
   }
 
   /**
@@ -314,17 +347,20 @@ export class SightingFileEditor {
    * (a weather worked out, the whole recording re-ordered) that it would show a screenful of lines and say nothing.
    */
   replaceText(text: string, show: boolean): void {
-    const current = this.view.state.doc.toString()
+    const current = this.text
     if (text === current) return
     this.changing = true
     try {
       const head = Math.min(this.view.state.selection.main.head, text.length)
       this.view.dispatch({
-        changes: SightingFileEditor.changeBetween(current, text), selection: { anchor: head }, annotations: isolateHistory.of("full")
+        changes: SightingFileEditor.changeBetween(current, text), selection: { anchor: head },
+        annotations: [isolateHistory.of("full"), SightingFileEditor.WHOLE_TEXT.of(text)]
       })
     } finally {
       this.changing = false
     }
+    this.cachedText = text
+    this.editedSinceWritten = false
     if (show) this.revealChange(current, SightingFileEditor.MOST_LINES_SHOWN)
   }
 
@@ -340,12 +376,31 @@ export class SightingFileEditor {
    * it, which out of the page it can never measure back, and the next step of the history failed on it (see placeWhileShown).
    */
   static changeBetween(from: string, to: string): { from: number, to: number, insert: string } {
-    const shorter = Math.min(from.length, to.length)
-    let start = 0
-    while (start < shorter && from.charCodeAt(start) === to.charCodeAt(start)) start++
-    let end = 0
-    while (end < shorter - start && from.charCodeAt(from.length - 1 - end) === to.charCodeAt(to.length - 1 - end)) end++
+    const start = SightingFileEditor.commonPrefix(from, to)
+    const end = SightingFileEditor.commonSuffix(from, to, Math.min(from.length, to.length) - start)
     return { from: start, to: from.length - end, insert: to.slice(start, to.length - end) }
+  }
+
+  /** Characters compared at once by the engine before going one by one: in a text of fourteen million, the loop is the cost. */
+  private static readonly CHUNK = 1 << 16
+
+  /** How many characters `a` and `b` begin with in common. */
+  static commonPrefix(a: string, b: string): number {
+    const max = Math.min(a.length, b.length)
+    const chunk = SightingFileEditor.CHUNK
+    let i = 0
+    while (i + chunk <= max && a.slice(i, i + chunk) === b.slice(i, i + chunk)) i += chunk
+    while (i < max && a.charCodeAt(i) === b.charCodeAt(i)) i++
+    return i
+  }
+
+  /** How many characters `a` and `b` end with in common, at most `max`. */
+  static commonSuffix(a: string, b: string, max: number): number {
+    const chunk = SightingFileEditor.CHUNK
+    let i = 0
+    while (i + chunk <= max && a.slice(a.length - i - chunk, a.length - i) === b.slice(b.length - i - chunk, b.length - i)) i += chunk
+    while (i < max && a.charCodeAt(a.length - 1 - i) === b.charCodeAt(b.length - 1 - i)) i++
+    return i
   }
 
   /** The widest change shown as an edit: past it the text was rewritten rather than edited. */
@@ -385,7 +440,7 @@ export class SightingFileEditor {
   }
 
   markSaved(): void {
-    this.view.dispatch({ effects: SightingFileEditor.SET_BASELINE.of(this.view.state.doc.toString()) })
+    this.view.dispatch({ effects: SightingFileEditor.SET_BASELINE.of(this.text) })
   }
 
   /** Opens the search panel (with replace) over the text. */
@@ -455,7 +510,7 @@ export class SightingFileEditor {
 
   /** Silent too, as {@link text} is: the caller applies the text it leaves, at once. */
   private step(command: (target: { state: EditorState, dispatch: (transaction: any) => void }) => boolean, show: boolean): boolean {
-    const before = this.view.state.doc.toString()
+    const before = this.text
     this.changing = true
     let done: boolean
     try {
@@ -463,6 +518,8 @@ export class SightingFileEditor {
     } finally {
       this.changing = false
     }
+    // What a step gives back may be a text the author once left broken.
+    if (done) this.editedSinceWritten = true
     if (done && show) this.revealChange(before)
     // Not shown: what was shown of an earlier change is no longer what the text says changed.
     else if (done && this.view.state.field(SightingFileEditor.revealed) !== null) {
@@ -482,16 +539,13 @@ export class SightingFileEditor {
    */
   private revealChange(before: string, atMostLines = Infinity): void {
     const doc = this.view.state.doc
-    const was = before.split("\n")
-    const now = doc.toString().split("\n")
-    let start = 0
-    while (start < was.length && start < now.length && was[start] === now[start]) start++
-    let endWas = was.length
-    let endNow = now.length
-    while (endWas > start && endNow > start && was[endWas - 1] === now[endNow - 1]) {
-      endWas--
-      endNow--
-    }
+    const now = this.text
+    // The lines between what the two texts begin and end with: found on the characters, not by splitting both into lines.
+    const prefix = SightingFileEditor.commonPrefix(before, now)
+    const same = prefix === before.length && prefix === now.length
+    const suffix = same ? 0 : SightingFileEditor.commonSuffix(before, now, Math.min(before.length, now.length) - prefix)
+    const start = same ? doc.lines : doc.lineAt(prefix).number - 1
+    const endNow = same ? doc.lines : doc.lineAt(now.length - suffix).number
     if (endNow - start > atMostLines) return
     const first = Math.min(start, doc.lines - 1) + 1
     const last = Math.min(Math.max(first, endNow), doc.lines)
