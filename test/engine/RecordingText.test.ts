@@ -73,3 +73,35 @@ describe("RecordingText", () => {
     check()
   })
 })
+
+describe("RecordingText.changedFields", () => {
+  const write = (json: object) => JSON.stringify(json, null, 2)
+
+  it("names the fields written otherwise, nested values and the last field included", () => {
+    const before = { version: 1, observer: { title: "A", lastName: "B" }, description: { fr: "x" }, timeline: { keyframes: [{ t: 0, shapes: [] }] } }
+    expect(RecordingText.changedFields(write(before), write({ ...before, observer: { title: "A", lastName: "C" } }))).toEqual(["observer"])
+    expect(RecordingText.changedFields(write(before), write({ ...before, timeline: { keyframes: [{ t: 1, shapes: [] }] } }))).toEqual(["timeline"])
+    expect(RecordingText.changedFields(write(before), write(before))).toEqual([])
+  })
+
+  it("names a field added or taken away, not the one before it whose comma only came or went, nor the one after it", () => {
+    const before = { version: 1, id: "a", timeline: { keyframes: [] } }
+    expect(RecordingText.changedFields(write(before), write({ ...before, sway: 0.5 }))).toEqual(["sway"])
+    expect(RecordingText.changedFields(write({ ...before, sway: 0.5 }), write(before))).toEqual(["sway"])
+    expect(RecordingText.changedFields(write(before), write({ version: 1, id: "a", observer: { title: "Q" }, timeline: { keyframes: [] } }))).toEqual(["observer"])
+  })
+
+  it("does not tell the fields of a text laid out otherwise, which is then loaded whole", () => {
+    expect(RecordingText.changedFields('{"version":1,"id":"a"}', write({ version: 1, id: "b" }))).toBeUndefined()
+    expect(RecordingText.changedFields("{\n    \"version\": 1\n}", write({ version: 1 }))).toBeUndefined()
+  })
+})
+
+describe("RecordingText.valuesOf", () => {
+  it("reads the fields asked for from their own lines, as the whole text would give them, and nothing for one not there", () => {
+    const json = { version: 1, observer: { title: "Q. B.", firstNames: ["Q"] }, description: { fr: "Une lumière, \"vive\"" }, sway: 0.5 }
+    const text = JSON.stringify(json, null, 2)
+    expect(RecordingText.valuesOf(text, ["observer", "sway", "description", "id"])).toEqual({ observer: json.observer, sway: 0.5, description: json.description })
+    expect(RecordingText.valuesOf('{"version":1}', ["version"])).toBeUndefined()
+  })
+})

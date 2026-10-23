@@ -10,6 +10,7 @@ import { tags } from "@lezer/highlight"
 import { SightingCompletion } from "./SightingCompletion.js"
 import { JsonPaths, type JsonPath } from "./JsonPaths.js"
 import { LineDiff } from "./LineDiff.js"
+import { TextEnds } from "../engine/persistence/TextEnds.js"
 
 /** What a text has changed from the one it is compared to: the lines changed, and the places lines were taken away. */
 interface ChangeMarks {
@@ -428,27 +429,16 @@ export class SightingFileEditor {
     return end === -1 ? text.length : end
   }
 
-  /** Characters compared at once by the engine before going one by one: in a text of fourteen million, the loop is the cost. */
-  private static readonly CHUNK = 1 << 16
-
-  /** How many characters `a` and `b` begin with in common. */
+  /** How many characters `a` and `b` begin with in common (see TextEnds). */
   static commonPrefix(a: string, b: string): number {
-    const max = Math.min(a.length, b.length)
-    const chunk = SightingFileEditor.CHUNK
-    let i = 0
-    while (i + chunk <= max && a.slice(i, i + chunk) === b.slice(i, i + chunk)) i += chunk
-    while (i < max && a.charCodeAt(i) === b.charCodeAt(i)) i++
-    return i
+    return TextEnds.commonPrefix(a, b)
   }
 
-  /** How many characters `a` and `b` end with in common, at most `max`. */
+  /** How many characters `a` and `b` end with in common, at most `max` (see TextEnds). */
   static commonSuffix(a: string, b: string, max: number): number {
-    const chunk = SightingFileEditor.CHUNK
-    let i = 0
-    while (i + chunk <= max && a.slice(a.length - i - chunk, a.length - i) === b.slice(b.length - i - chunk, b.length - i)) i += chunk
-    while (i < max && a.charCodeAt(a.length - 1 - i) === b.charCodeAt(b.length - 1 - i)) i++
-    return i
+    return TextEnds.commonSuffix(a, b, max)
   }
+
 
   /** The widest change shown as an edit: past it the text was rewritten rather than edited. */
   private static readonly MOST_LINES_SHOWN = 120

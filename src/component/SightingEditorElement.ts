@@ -108,7 +108,7 @@ import type { ShapeState } from "../engine/model/Keyframe.js"
 import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE, MIN_POLYGON_VERTICES } from "../engine/shape/ShapeHandles.js"
 import type { HandleId, ResizeAxis } from "../engine/shape/ShapeHandles.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
-import { plainSightingJson } from "../engine/persistence/sightingJson.js"
+import { loadSightingFields, plainSightingJson } from "../engine/persistence/sightingJson.js"
 import { DEFAULT_ICE_CRYSTAL_ALIGNMENT, DEFAULT_RARE_ICE_CRYSTALS } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
@@ -2346,10 +2346,11 @@ export class SightingEditorElement extends HTMLElement {
     }
     const editor = this.fileEditor
     if (editor === undefined || this.isRecording || this.ufoElement.playbackState === "playing") return
+    const before = editor.text
     if (!step(editor)) return
     // At once, not after the half second an author's typing is given: a key pressed to undo is answered now.
     clearTimeout(this.fileApplyTimer)
-    this.applyFileText(editor.text, true)
+    if (!this.applyFileFields(before, editor.text)) this.applyFileText(editor.text, true)
     this.historyAnswering = true
     this.changeCount = Math.max(0, this.changeCount + changes)
     this.syncHistoryButtons()
@@ -6091,6 +6092,36 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** `history`: the text is one an undo or a redo gave back, which is no edit of the author's to ask about (see stepHistory). */
+  /**
+   * A step of the history taken into the form field by field, when it changed only fields the recording in memory can take alone
+   * (see loadSightingFields): a name, a description, the account. Loading the whole recording again, its scene and its player,
+   * was most of what an undo of a word cost. False, and nothing done, when the step changed anything else, or when either text is
+   * not laid out as the form writes them: then the whole text is loaded (see applyFileText).
+   */
+  private applyFileFields(before: string, text: string): boolean {
+    const fields = RecordingText.changedFields(before, text)
+    if (!fields || fields.length === 0) return false
+    let json: SightingRecordingJson
+    try {
+      const values = RecordingText.valuesOf(text, fields)
+      if (!values) return false
+      json = values as unknown as SightingRecordingJson
+    } catch {
+      return false
+    }
+    if (!loadSightingFields(this.ufoElement.sighting, json, fields)) return false
+    this.touched = true
+    // What shows those fields: the form's own, the player's title, the candidates (the variants kept, the account's conditions).
+    this.syncObserverMetadataFields()
+    this.syncDurationField()
+    this.refreshFileItems()
+    this.ufoElement.refreshTitle()
+    this.ufoElement.refresh()
+    this.showFileNote(undefined)
+    this.historySnapshot = this.fileText()
+    return true
+  }
+
   private applyFileText(text: string, history = false): void {
     this.fileApplyTimer = undefined
     let json: unknown

@@ -207,6 +207,47 @@ export function fromSightingJson(json: SightingRecordingJson): Sighting {
   return sighting
 }
 
+/**
+ * The fields of a recording that can be taken from a file into the recording in memory one by one: what they hold is read when it
+ * is needed and is held by nothing else (no track a player plays, no scenery a scene has built), so that replacing it is the whole of
+ * loading it. The others are loaded with the whole recording (see fromSightingJson).
+ */
+export const FIELDS_LOADED_ALONE: ReadonlySet<keyof SightingRecordingJson> = new Set<keyof SightingRecordingJson>([
+  "id", "observer", "account", "sources", "description", "durationText", "summary", "summaryTime", "image", "tags", "variants"
+])
+
+/**
+ * Takes `fields` of `json` into `sighting`, as loading the whole of `json` would have them, their provenance with them: what an
+ * undo that changed only those fields does instead of loading again a recording of fourteen million characters. Only fields of
+ * FIELDS_LOADED_ALONE; false, and nothing done, for any other.
+ */
+export function loadSightingFields(sighting: Sighting, json: SightingRecordingJson, fields: readonly string[]): boolean {
+  if (!fields.every(field => FIELDS_LOADED_ALONE.has(field as keyof SightingRecordingJson))) return false
+  const { recording, provenance } = Provenance.strip(Object.fromEntries(fields.map(field => [field, json[field as keyof SightingRecordingJson]])))
+  const plain = recording as unknown as SightingRecordingJson
+  for (const field of fields) {
+    sighting.provenance.clear(field)
+    switch (field as keyof SightingRecordingJson) {
+      case "id": sighting.id = plain.id; break
+      // As fromPlainSightingJson reads it: the fields a person reference has.
+      case "observer": sighting.observer = plain.observer && {
+        id: plain.observer.id, title: plain.observer.title, lastName: plain.observer.lastName, firstNames: plain.observer.firstNames
+      }; break
+      case "account": sighting.account = plain.account; break
+      case "sources": sighting.sources = plain.sources; break
+      case "variants": sighting.variants = Array.isArray(plain.variants) ? plain.variants : []; break
+      case "description": sighting.event.description = plain.description; break
+      case "durationText": sighting.event.durationText = plain.durationText; break
+      case "summary": sighting.event.summary = plain.summary; break
+      case "summaryTime": sighting.event.summaryTime = plain.summaryTime; break
+      case "image": sighting.event.image = plain.image; break
+      case "tags": sighting.event.tags = plain.tags; break
+    }
+  }
+  for (const path of provenance.paths()) sighting.provenance.set(path, provenance.at(path)!)
+  return true
+}
+
 function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   const issues: RecordingIssue[] = []
   const sighting = new Sighting(

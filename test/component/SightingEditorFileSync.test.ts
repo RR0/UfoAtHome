@@ -620,3 +620,66 @@ describe("the text written of the recording", () => {
     check()
   })
 })
+
+describe("a step of the history that changed only fields loaded alone", () => {
+  it("takes them into the recording without loading it again, as loading it again would have them", async () => {
+    const { fromSightingJson, toSightingJson, FIELDS_LOADED_ALONE } = await import("../../src/engine/persistence/sightingJson.js")
+    const element = mount()
+    const inside = await fileOpened(element) as Private & { ufoElement: object, sightingData: unknown, recordHistory(): void }
+    const shadow = element.shadowRoot!
+    const type = (id: string, value: string) => {
+      const field = shadow.getElementById(id) as HTMLInputElement
+      field.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, composed: true, key: "a" }))
+      field.value = value
+      field.dispatchEvent(new Event("input", { bubbles: true }))
+      field.dispatchEvent(new Event("change", { bubbles: true }))
+    }
+    // Whether the step loaded the whole recording: the player's recording set again.
+    let loads = 0
+    const player = inside.ufoElement
+    const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(player), "sightingData")!
+    Object.defineProperty(player, "sightingData", {
+      configurable: true, get() { return setter.get!.call(this) }, set(value) { loads++; setter.set!.call(this, value) }
+    })
+    for (const [id, value] of [["description", "A light over the hedge."], ["observerTitle", "Q. B."], ["sightingId", "2026-08-11-QB"]] as const) {
+      type(id, value)
+      await waitFor(() => !(shadow.getElementById("undo") as HTMLButtonElement).disabled, 5000)
+      inside.recordHistory()
+      const before = inside.sightingData as Record<string, unknown>
+      ;(shadow.getElementById("undo") as HTMLButtonElement).click()
+      expect(loads).toBe(0)
+      // The fields loaded alone as a whole load gives them; the others as they were, not drawn again from the text (a whole load
+      // derives the boxes from the angles again, and writes 27.999999999999996 where the drawing said 28).
+      const after = inside.sightingData as Record<string, unknown>
+      const loaded = toSightingJson(fromSightingJson(JSON.parse(inside.fileEditor!.text))) as unknown as Record<string, unknown>
+      for (const key of new Set([...Object.keys(after), ...Object.keys(loaded), ...Object.keys(before)])) {
+        const expected = FIELDS_LOADED_ALONE.has(key as never) ? loaded[key] : before[key]
+        expect(JSON.stringify(after[key]), key).toBe(JSON.stringify(expected))
+      }
+      expect(JSON.stringify(after)).not.toBe(JSON.stringify(before))
+      expect((shadow.getElementById(id) as HTMLInputElement).value).not.toBe(value)
+      ;(shadow.getElementById("redo") as HTMLButtonElement).click()
+      expect(loads).toBe(0)
+      expect((shadow.getElementById(id) as HTMLInputElement).value).toBe(value)
+    }
+  })
+
+  it("loads the whole recording when the step changed anything else", async () => {
+    const element = mount()
+    const inside = await fileOpened(element) as Private & { ufoElement: object }
+    const shadow = element.shadowRoot!
+    shadow.getElementById("add-decor-building")!.dispatchEvent(new Event("pointerdown", { bubbles: true, composed: true }))
+    await new Promise(resolve => setTimeout(resolve, 50))
+    addBuildings(element, 1)
+    const undo = shadow.getElementById("undo") as HTMLButtonElement
+    await waitFor(() => !undo.disabled && inside.fileEditor!.text.includes('"building"'), 5000)
+    let loads = 0
+    const player = inside.ufoElement
+    const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(player), "sightingData")!
+    Object.defineProperty(player, "sightingData", {
+      configurable: true, get() { return setter.get!.call(this) }, set(value) { loads++; setter.set!.call(this, value) }
+    })
+    undo.click()
+    expect(loads).toBe(1)
+  })
+})

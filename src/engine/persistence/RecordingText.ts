@@ -1,4 +1,5 @@
 import type { SightingRecordingJson } from "./sightingJson.js"
+import { TextEnds } from "./TextEnds.js"
 
 /**
  * A recording as the text of its file, the very text `JSON.stringify(json, null, 2)` writes, without writing again what was
@@ -40,6 +41,68 @@ export class RecordingText {
       this.lastIndent = indent
     }
     return this.lastJoined
+  }
+
+  /**
+   * The fields of the recording that are not written the same in the two texts, both written as this writes them; undefined when
+   * either is laid out otherwise (typed by hand), and the fields cannot be told apart by their place. A field is a line at the
+   * first indentation and all the deeper ones after it: nothing else starts a line with two spaces and a quote, a string's own line
+   * breaks being written `\n`.
+   */
+  static changedFields(before: string, after: string): string[] | undefined {
+    if (!RecordingText.laidOut(before) || !RecordingText.laidOut(after)) return undefined
+    const prefix = TextEnds.commonPrefix(before, after)
+    if (prefix === before.length && prefix === after.length) return []
+    const suffix = TextEnds.commonSuffix(before, after, Math.min(before.length, after.length) - prefix)
+    // From the start of the field the first difference is in to the start of the field after the last one: only there are fields
+    // looked for, which for a name changed is a line or two of fourteen million characters.
+    const from = before.lastIndexOf(RecordingText.FIELD_START, prefix)
+    if (from === -1) return undefined
+    const next = before.indexOf(RecordingText.FIELD_START, before.length - suffix)
+    const beforeEnd = next === -1 ? before.length - 2 : next
+    const afterEnd = after.length - (before.length - beforeEnd)
+    // Whole fields on both sides: those written the same are not changed, though the difference is next to them (one inserted before).
+    const a = RecordingText.spansIn(before.slice(from, beforeEnd))
+    const b = RecordingText.spansIn(after.slice(from, afterEnd))
+    return [...new Set([...a.keys(), ...b.keys()])].filter(key => a.get(key) !== b.get(key))
+  }
+
+  /** What starts a field of the recording, and nothing else: a line at the first indentation, opening a key. */
+  private static readonly FIELD_START = '\n  "'
+
+  private static laidOut(text: string): boolean {
+    return text.startsWith(`{${RecordingText.FIELD_START}`) && text.endsWith("\n}")
+  }
+
+  /** Each field of `part`, which starts a field and ends where one ends, with what is written of it: up to the next one, its comma left out. */
+  private static spansIn(part: string): Map<string, string> {
+    const starts: { key: string, at: number }[] = []
+    const field = /\n {2}"((?:[^"\\]|\\.)*)": /g
+    for (let match = field.exec(part); match; match = field.exec(part)) starts.push({ key: JSON.parse(`"${match[1]}"`) as string, at: match.index })
+    const spans = new Map<string, string>()
+    starts.forEach(({ key, at }, i) => {
+      const span = part.slice(at, i + 1 < starts.length ? starts[i + 1].at : part.length)
+      spans.set(key, span.endsWith(",") ? span.slice(0, -1) : span)
+    })
+    return spans
+  }
+
+  /**
+   * The values of `fields` in `text`, laid out as this writes it, each read from its own lines alone: a name changed in a recording
+   * of fourteen million characters is not a reason to read them all. Undefined when the text is laid out otherwise.
+   */
+  static valuesOf(text: string, fields: readonly string[]): Record<string, unknown> | undefined {
+    if (!RecordingText.laidOut(text)) return undefined
+    const all = RecordingText.spansIn(text.slice(1, text.length - 2))
+    const values: Record<string, unknown> = {}
+    for (const field of fields) {
+      const span = all.get(field)
+      if (span === undefined) continue
+      // `\n  "key": value`, its comma already left out.
+      const value = span.slice(span.indexOf(": ") + 2)
+      values[field] = JSON.parse(value)
+    }
+    return values
   }
 
   private keyframeText(keyframe: object, indent: string): string {
