@@ -45,11 +45,6 @@ export class EditorTheme {
 .head-text { min-width: 0; }
 .kicker { display: block; font: 600 12px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--glow-dim); }
 .editor-title { margin: 2px 0 4px; font: 600 20px/1.3 var(--serif); color: var(--ink); }
-.editor-state { display: flex; align-items: center; gap: 7px; margin: 0; font-size: 13px; color: var(--ink-faint); }
-.state-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-faint); }
-.editor-state[data-state="dirty"] { color: var(--glow); }
-.editor-state[data-state="dirty"] .state-dot { background: var(--glow-solid); }
-.editor-state[data-state="saved"] .state-dot { background: var(--ok); }
 .head-actions { display: flex; align-items: center; gap: 8px; flex: none; }
 /* In the header now, side by side: the column the old strip reserved for them is gone. */
 .head-actions .history { position: static; flex-direction: row; gap: 8px; }

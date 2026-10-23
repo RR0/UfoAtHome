@@ -11,7 +11,7 @@ import { WitnessErrorView } from "./WitnessErrorView.js"
 import { CandidatesView } from "./CandidatesView.js"
 import { EditorTheme } from "./EditorTheme.js"
 export const html = `
-<!-- From top to bottom, as the design handoff lays it out: what this recording is and whether it is saved, the scene, the
+<!-- From top to bottom, as the design handoff lays it out: what this recording is and its Save, the scene, the
      sections as a row of chips (only one open at a time, see SightingEditorElement.toggleGroup), and the open section. The header goes
      when another editor holds this one (see embedded): the holder says what is open, saves it, and puts Undo and Redo on its own line. -->
 <div class="app">
@@ -19,7 +19,6 @@ export const html = `
   <div class="head-text">
     <span id="label-editor-kicker" class="kicker">Sighting editor</span>
     <h1 id="editor-title" class="editor-title"></h1>
-    <p class="editor-state"><span class="state-dot" aria-hidden="true"></span><span id="editor-state"></span></p>
   </div>
   <div class="head-actions">
     <!-- Step back and forward through what was edited, whichever section it was edited in: the File section's text editor keeps the history (see SightingEditorElement.undo). -->

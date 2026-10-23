@@ -347,12 +347,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   sectionSize: string
   sectionPath: string
   save: string
-  /** Where the recording comes from, changed or not: whether there is anything to save, the Save button says by being on. */
+  /** The header's title of a recording that says neither where nor when, nor has an identifier yet. */
   stateNew: string
-  /** {file}: the name of the file the recording was opened from. */
-  stateClean: string
-  /** {file}: the name of the file downloaded. */
-  stateSaved: string
   /** The sentence under each section's title, saying what it is for. */
   panelIntroObservation: string
   panelIntroObserver: string

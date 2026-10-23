@@ -445,9 +445,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly exportButton: HTMLButtonElement
   /** The header's own Save: the same export as the File section's, the one way to keep what was done. */
   private readonly saveButton: HTMLButtonElement
-  /** The file the recording was opened from, or last saved as, for the header's state line. */
-  private openedFrom?: string
-  private savedAs?: string
   /** The recording's tracks under the scene, when laid out (see TimelineTracks). */
   private readonly timelineTracks: TimelineTracks
   private readonly tracksToggle: HTMLButtonElement
@@ -2248,19 +2245,13 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * What the header says: the recording's name — where and when, as a reader would call it — and whether what is shown is
-   * saved. Save is off while there is nothing to save, since nothing is kept anywhere but in the file it writes.
+   * What the header says: the recording's name, where and when, as a reader would call it. Whether what is shown is saved, Save says
+   * by being on: it is off while there is nothing to save, since nothing is kept anywhere but in the file it writes.
    */
   private refreshEditorHead(): void {
     if (!this.saveButton) return
     this.refreshEditorTitle()
-    const m = this.messages
-    const dirty = this.dirty
-    const state = this.shadow.getElementById("editor-state")!
-    state.textContent = this.savedAs && !dirty ? m.stateSaved.replaceAll("{file}", this.savedAs)
-      : this.openedFrom ? m.stateClean.replaceAll("{file}", this.openedFrom) : m.stateNew
-    state.parentElement!.dataset.state = dirty ? "dirty" : this.savedAs ? "saved" : "clean"
-    this.saveButton.disabled = !dirty
+    this.saveButton.disabled = !this.dirty
   }
 
   /** The recording's name, where and when — cheap enough to follow every edit (see renderParamSummary), unlike the state, which compares the whole recording. */
@@ -2487,7 +2478,6 @@ export class SightingEditorElement extends HTMLElement {
     }
     const fileName = `${base}.json`
     const text = this.writtenText(json)
-    this.savedAs = annexes.size === 0 ? fileName : `${base}.zip`
     if (annexes.size === 0) {
       this.download(new Blob([text], { type: "application/json" }), fileName)
     } else {
@@ -2626,8 +2616,6 @@ export class SightingEditorElement extends HTMLElement {
       this.sceneElement.documentUrl = undefined
       this.sightingData = json
       this.resetHistory()
-      this.openedFrom = file.name
-      this.savedAs = undefined
       this.refreshEditorHead()
       this.dispatchEvent(new CustomEvent("recordingloaded", { bubbles: true, composed: true }))
       // The recording now open came from a file, not from the address still sitting in the field.
@@ -2726,8 +2714,6 @@ export class SightingEditorElement extends HTMLElement {
       // `src` attribute (a site's `?file=` link), or a observer's own file. Absolute, so the
       // address can be copied out of the field and still work, and so the field is a valid URL.
       this.importInput.url = new URL(url, location.href).href
-      this.openedFrom = decodeURIComponent(new URL(url, location.href).pathname.split("/").pop() ?? "") || undefined
-      this.savedAs = undefined
       this.refreshEditorHead()
       this.dispatchEvent(new CustomEvent("recordingloaded", { bubbles: true, composed: true }))
     } catch (error) {

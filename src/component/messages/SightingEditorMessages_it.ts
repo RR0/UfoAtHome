@@ -209,8 +209,6 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   hideSettings: "Nascondi",
   save: "Salva",
   stateNew: "Nuova registrazione",
-  stateClean: "Aperto da {file}",
-  stateSaved: "Salvato · {file} scaricato",
   panelIntroObservation: "Cosa è successo, in poche righe, e cosa resta da completare.",
   panelIntroObserver: "Chi ha visto, e con cosa. Ogni osservatore ha il proprio punto di vista nella scena.",
   panelIntroLocation: "Da dove guardava l'osservatore, e in quale direzione.",
