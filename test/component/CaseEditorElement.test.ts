@@ -831,6 +831,9 @@ describe("CaseEditorElement's events", () => {
     const cards = [...root.querySelectorAll<HTMLElement>(".event-card")]
     expect(cards.length).toBe(root.querySelectorAll("#track option").length)
     expect(root.getElementById("events-count")!.textContent).toBe(String(cards.length))
+    // No "Open" link: the card's title opens it, its hit area stretched over the card.
+    expect(cards[0].textContent).not.toContain("Open")
+    expect(cards[0].querySelector(".event-open")!.textContent).toBe(cards[0].querySelector(".event-main")!.firstChild!.textContent)
     cards[0].querySelector<HTMLButtonElement>(".event-open")!.click()
     expect(root.getElementById("case-overview")!.hidden).toBe(true)
     expect(root.getElementById("event-item")!.hidden).toBe(false)

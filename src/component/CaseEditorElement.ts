@@ -169,17 +169,21 @@ const TEMPLATE = `
   .event-card:first-child::after { top: calc(var(--dot-y) - 1px); }
   .event-card:last-child::after { bottom: calc(100% - var(--dot-y) - 1px); }
   .event-card:only-child::after { display: none; }
-  .event-body { display: grid; grid-template-columns: minmax(96px, auto) minmax(0, 1.2fr) minmax(0, 1fr) auto; grid-template-areas: "pill main links open";
+  .event-body { display: grid; grid-template-columns: minmax(96px, auto) minmax(0, 1.2fr) minmax(0, 1fr); grid-template-areas: "pill main links";
     align-items: center; gap: 4px 12px; min-width: 0; padding: 12px 8px 12px 14px; }
   .kind-pill { grid-area: pill; justify-self: start; padding: 2px 10px; border-radius: 999px; background: var(--kind-bg); color: var(--ink); font: 700 12px/1.5 var(--sans); white-space: nowrap; }
   .event-main { grid-area: main; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-  .event-main strong { font: 600 15px/1.35 var(--sans); }
+  /* The title opens the event, and the whole card with it: its hit area is stretched over the card, the removal standing above it. */
+  .event-open { min-height: 0; padding: 0; border: 0; background: none; color: var(--ink); font: 600 15px/1.35 var(--sans); text-align: left; cursor: pointer; }
+  .event-open::after { content: ""; position: absolute; inset: 0; border-radius: 10px; }
+  .event-open:hover:not(:disabled) { background: none; }
+  .event-open:focus-visible { outline: none; }
+  .event-card:has(.event-open:hover) { background: var(--ground-sunken); }
+  .event-card:has(.event-open:focus-visible) { outline: 2px solid var(--sky); outline-offset: 2px; }
   .event-meta { font-size: 13px; color: var(--ink-faint); overflow-wrap: anywhere; }
   .event-links { grid-area: links; font-size: 13px; color: var(--ink-dim); }
   .event-links:empty { display: none; }
-  .event-open { grid-area: open; justify-self: start; min-height: 0; padding: 4px 6px; border: 0; background: none; color: var(--sky); font: 600 14px/1.2 var(--sans); white-space: nowrap; }
-  .event-open:hover:not(:disabled) { background: none; text-decoration: underline; }
-  .event-delete { display: grid; place-items: center; width: auto; height: auto; min-width: 0; min-height: 0; padding: 0;
+  .event-delete { position: relative; z-index: 1; display: grid; place-items: center; width: auto; height: auto; min-width: 0; min-height: 0; padding: 0;
     border: 0; border-left: 1px solid var(--line-strong); border-radius: 0 10px 10px 0; background: none; color: var(--ink-dim); }
   .event-delete:hover:not(:disabled) { color: var(--error); }
   /* The event open: the way back to the case, and the events before and after. */
@@ -194,9 +198,7 @@ const TEMPLATE = `
     /* Narrow, as the handoff's mobile view: the pill above the title, "Open" beside the title, or under what the event is linked to
        when it says something; the removal keeps its column. */
     .event-card { --dot-y: 24px; }
-    .event-body { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "pill pill" "main open"; gap: 6px 10px; }
-    .event-body:has(.event-links:not(:empty)) { grid-template-areas: "pill pill" "main main" "links links" "open open"; }
-    .event-open { padding: 4px 0; }
+    .event-body { grid-template-columns: minmax(0, 1fr); grid-template-areas: "pill" "main" "links"; gap: 6px 10px; }
     .editor-head { flex-wrap: wrap; }
     .editor-head .head-actions { flex: 0 1 auto; flex-wrap: wrap; min-width: 0; }
   }
@@ -1110,7 +1112,8 @@ export class CaseEditorElement extends HTMLElement {
     ;(this.byId("next-event") as HTMLButtonElement).disabled = open < 0 || open >= events.length - 1
   }
 
-  /** One card per event, in the order of time, on a line: its kind, what it is called, when and its id, what it is linked to, "Open", and its removal. */
+  /** One card per event, in the order of time, on a line: its kind, what it is called, when and its id, what it is linked to, and its
+   * removal. A click anywhere on it but the removal opens it. */
   private renderEvents(session: CaseSession, events: { item: { track?: CaseTrack, interview?: InterviewEvent }, index: number }[]): void {
     const m = this.messages
     const list = this.byId("event-list")
@@ -1126,8 +1129,13 @@ export class CaseEditorElement extends HTMLElement {
       pill.textContent = this.kindLabel(kind)
       const main = document.createElement("div")
       main.className = "event-main"
-      const title = document.createElement("strong")
+      // The title is what opens it: a button, so that the keyboard opens it as the pointer does (see .event-open).
+      const title = document.createElement("button")
+      title.type = "button"
+      title.className = "event-open"
       title.textContent = this.optionLabel(item, index)
+      title.title = m.openEvent
+      title.addEventListener("click", () => this.openEvent(index))
       const meta = document.createElement("span")
       meta.className = "event-meta"
       meta.textContent = [event.time ? String(event.time).replace("T", " ") : "", event.id ?? ""].filter(Boolean).join(" · ")
@@ -1146,11 +1154,6 @@ export class CaseEditorElement extends HTMLElement {
         if (account) said.push(`${m.interpretationOf} : ${this.optionLabel({ track: account }, session.tracks.indexOf(account))}`)
       }
       links.textContent = said.join(" · ")
-      const open = document.createElement("button")
-      open.type = "button"
-      open.className = "event-open"
-      open.textContent = `${m.openEvent} →`
-      open.addEventListener("click", () => this.openEvent(index))
       const remove = document.createElement("button")
       remove.type = "button"
       remove.className = "icon-btn event-delete"
@@ -1160,7 +1163,7 @@ export class CaseEditorElement extends HTMLElement {
       remove.addEventListener("click", () => void this.deleteFromList(index))
       const body = document.createElement("div")
       body.className = "event-body"
-      body.append(pill, main, links, open)
+      body.append(pill, main, links)
       card.append(body, remove)
       return card
     }))
