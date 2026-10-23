@@ -179,7 +179,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   collapseTracks: "Collapse the tracks",
   addKeyframeHere: "Add a keyframe here",
   keyframeHere: "A keyframe is here: editing it changes it",
-  sceneLinkedLegend: "Field shown in the scene — click something in the scene to edit it.",
+  sceneLinkedLegend: "Field shown in the scene: click something in the scene to edit it.",
   overlayHorizon: "Horizon · tilt {deg}°",
   overlayFov: "Field of view {v}° × {h}°",
   overlayWind: "Blowing toward {point} · {speed} m/s",

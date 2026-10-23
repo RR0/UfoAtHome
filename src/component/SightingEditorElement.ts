@@ -1224,14 +1224,8 @@ export class SightingEditorElement extends HTMLElement {
       if (!next || !SightingEditorElement.SCENE_LINKED.includes(next.id)) this.setActiveSceneField(undefined)
     })
     this.shadow.addEventListener("input", () => this.refreshSceneField())
-    // The fields the scene shows as they are edited (§3.3): marked, and their panels say so.
+    // The fields the scene shows as they are edited (§3.3): marked, the mark saying so when pointed at (see labelPanels).
     for (const id of SightingEditorElement.SCENE_LINKED) this.shadow.getElementById(id)?.closest("label, .field")?.classList.add("scene-linked")
-    for (const panel of this.shadow.querySelectorAll<HTMLElement>(".group-panel")) {
-      if (!panel.querySelector(".scene-linked")) continue
-      const legend = document.createElement("p")
-      legend.className = "scene-legend"
-      panel.querySelector(".panel-head")!.append(legend)
-    }
     this.importInput = this.shadow.getElementById("import") as InputFileElement
     this.narrativeSourceRow = this.shadow.getElementById("narrative-source-row")!
     this.narrativeSettingsBox = this.shadow.getElementById("narrative-settings")!
@@ -7049,9 +7043,11 @@ export class SightingEditorElement extends HTMLElement {
       badge.hidden = count === 0
       badge.textContent = String(count)
       badge.classList.toggle("optional", !required)
-      tab.title = count === 0
-        ? ""
+      // What the section is for (see labelPanels), then what is left to answer in it.
+      const unanswered = count === 0
+        ? undefined
         : required ? this.messages.durationRequired : this.messages.questionsUnanswered.replace("{count}", String(count))
+      tab.title = [tab.dataset.intro, unanswered].filter(Boolean).join("\n")
     }
   }
 
@@ -10435,7 +10431,7 @@ export class SightingEditorElement extends HTMLElement {
     this.candidatesView?.languageChanged()
     this.witnessErrorView.refresh()
     this.timelineTracks.setMessages(messages)
-    for (const legend of this.shadow.querySelectorAll(".scene-legend")) legend.textContent = messages.sceneLinkedLegend
+    for (const label of this.shadow.querySelectorAll<HTMLElement>(".scene-linked > :first-child")) label.title = messages.sceneLinkedLegend
     if (this.tracksToggle) this.setTracksShown(this.tracksToggle.getAttribute("aria-expanded") === "true")
     // Every window's ✕ (see WindowClose), answering as its Escape does.
     for (const id of ["location-settings", "decor-settings", "weather-settings"]) WindowClose.popover(this.shadow.getElementById(id)!, messages.close)
@@ -10450,10 +10446,12 @@ export class SightingEditorElement extends HTMLElement {
       temporal: messages.panelIntroTemporal, decor: messages.panelIntroDecor, weather: messages.panelIntroWeather,
       shape: messages.panelIntroShape, sound: messages.panelIntroSound, reference: messages.panelIntroReference, file: messages.panelIntroFile
     }
-    // Each section's title is its chip's own label: one name, said twice.
+    // What a section is for, said by its chip when pointed at: the section itself opens on its fields, the scene above it in view,
+    // and neither repeats the chip's name nor tells again at every visit what the first one taught.
     for (const [name, intro] of Object.entries(intros)) {
-      this.shadow.getElementById(`panel-title-${name}`)!.textContent = this.shadow.getElementById(`label-${name}-group`)!.textContent
-      this.shadow.getElementById(`panel-intro-${name}`)!.textContent = intro
+      const chip = this.shadow.querySelector<HTMLElement>(`[aria-controls="group-${name}"]`)!
+      chip.dataset.intro = intro
+      if (!chip.title.startsWith(intro)) chip.title = intro
     }
     this.refreshEditorHead()
   }

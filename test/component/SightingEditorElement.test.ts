@@ -7240,16 +7240,17 @@ describe("SightingEditorElement header", () => {
     expect(root.getElementById("timeline-tracks")!.hidden).toBe(true)
   })
 
-  it("marks the fields the scene shows as they are edited, and says so in their panel", () => {
+  it("marks the fields the scene shows as they are edited, the mark saying so when pointed at", () => {
     const root = mount().shadowRoot!
-    expect(root.getElementById("heading")!.closest("label")!.classList.contains("scene-linked")).toBe(true)
-    expect(root.querySelector("#group-location .scene-legend")).not.toBeNull()
-    expect(root.querySelector("#group-observation .scene-legend")).toBeNull()
+    const label = root.getElementById("heading")!.closest("label")!
+    expect(label.classList.contains("scene-linked")).toBe(true)
+    expect((label.firstElementChild as HTMLElement).title).toBe("Field shown in the scene: click something in the scene to edit it.")
   })
 
-  it("opens each section on its own name", () => {
+  it("opens each section on its fields, what it is for said by its chip when pointed at", () => {
     const root = mount().shadowRoot!
-    expect(root.getElementById("panel-title-shape")!.textContent).toBe(root.getElementById("label-shape-group")!.textContent)
+    expect(root.querySelector("#group-shape > .panel-head")).toBeNull()
+    expect((root.querySelector('[aria-controls="group-shape"]') as HTMLElement).title).not.toBe("")
   })
 })
 

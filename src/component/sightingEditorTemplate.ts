@@ -72,7 +72,6 @@ export const html = `
   <slot name="tab-status"></slot>
 </nav>
 <section class="group-panel" id="group-observation" aria-labelledby="label-observation-group" hidden>
-  <header class="panel-head"><h2 class="panel-title" id="panel-title-observation"></h2><p class="panel-intro" id="panel-intro-observation"></p></header>
   <!-- One section, its id held back: what a case names this account by, set once (see SectionFolds). -->
   <div class="form-section">
   <div class="toolbar">
@@ -115,7 +114,6 @@ export const html = `
   <div id="param-summary" class="param-summary"></div>
 </section>
 <section class="group-panel" id="group-observer" aria-labelledby="label-observer-group" hidden>
-  <header class="panel-head"><h2 class="panel-title" id="panel-title-observer"></h2><p class="panel-intro" id="panel-intro-observer"></p></header>
   <div class="toolbar">
     <!-- The observers, laid out as every list of the editor is (see ElementList): the one whose account this is first, then the
          other observers the scene places (decor of the kind "observer"); 🎯, 🗑 and "+" for those; under it, the frame of the one
@@ -202,7 +200,6 @@ export const html = `
   </div>
 </section>
 <section class="group-panel" id="group-location" aria-labelledby="label-location-group" hidden>
-  <header class="panel-head"><h2 class="panel-title" id="panel-title-location"></h2><p class="panel-intro" id="panel-intro-location"></p></header>
   <!-- Where the data of this group is read from, one kind at a time (see SightingEditorElement.sourcePickers): out of the way of what
        the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
   <button class="group-settings" type="button" id="location-settings-button" popovertarget="location-settings" style="anchor-name: --location-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
@@ -258,7 +255,6 @@ export const html = `
      a time, the one that alone still overflowed a phone. Split out, neither half does. The two
      stay adjacent because a decor object is placed RELATIVE to the location above it. -->
 <section class="group-panel" id="group-decor" aria-labelledby="label-decor-group" hidden>
-  <header class="panel-head"><h2 class="panel-title" id="panel-title-decor"></h2><p class="panel-intro" id="panel-intro-decor"></p></header>
   <!-- Where the data of this group is read from, one kind at a time (see SightingEditorElement.sourcePickers): out of the way of what
        the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
   <button class="group-settings" type="button" id="decor-settings-button" popovertarget="decor-settings" style="anchor-name: --decor-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
@@ -296,7 +292,6 @@ export const html = `
   </div>
 </section>
 <section class="group-panel" id="group-temporal" aria-labelledby="label-temporal-group" hidden>
-  <header class="panel-head"><h2 class="panel-title" id="panel-title-temporal"></h2><p class="panel-intro" id="panel-intro-temporal"></p></header>
   <div class="toolbar">
     <!-- Two ways to say the same thing, and the native picker is the default because a
          reconstruction needs a full instant to compute a sky at all: of the nine recordings that
@@ -357,7 +352,6 @@ export const html = `
      its own, fetched the first time this group is opened — CodeMirror is the heaviest thing the
      component could carry and most authors never need it. -->
 <section class="group-panel" id="group-file" aria-labelledby="label-file-group" hidden>
-  <header class="panel-head"><h2 class="panel-title" id="panel-title-file"></h2><p class="panel-intro" id="panel-intro-file"></p></header>
   <!-- The files the recording is made of, one picked at a time as every list of the editor is (see ElementList): the recording itself, and
        the annexes it carries frozen beside it so that it plays without asking third parties (see FrozenData, FrozenDataPanel). -->
   <div class="element-list-row" id="file-item-row">
@@ -415,7 +409,6 @@ export const html = `
   <div id="file-editor" class="file-editor"></div>
 </section>
 <section class="group-panel" id="group-weather" aria-labelledby="label-weather-group" hidden>
-  <header class="panel-head"><h2 class="panel-title" id="panel-title-weather"></h2><p class="panel-intro" id="panel-intro-weather"></p></header>
   <!-- Where the data of this group is read from, one kind at a time (see SightingEditorElement.sourcePickers): out of the way of what
        the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
   <button class="group-settings" type="button" id="weather-settings-button" popovertarget="weather-settings" style="anchor-name: --weather-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
@@ -530,7 +523,6 @@ export const html = `
      it — see SoundTrack.ts. The kind dropdown is filled from SOUND_KINDS in script, so adding a
      timbre never means editing markup and element ids (same rule as the data-source pickers). -->
 <section class="group-panel" id="group-sound" aria-labelledby="label-sound-group" hidden>
-  <header class="panel-head"><h2 class="panel-title" id="panel-title-sound"></h2><p class="panel-intro" id="panel-intro-sound"></p></header>
   <div class="toolbar">
     <div class="form-section">
     <h3 class="section-title"><span id="label-section-heard">What was heard</span></h3>
@@ -556,7 +548,6 @@ export const html = `
      the observer's spot most often looks where they looked; lining a picture up on the rendered
      relief by dragging it is the next step, not this one. -->
 <section class="group-panel" id="group-reference" aria-labelledby="label-reference-group" hidden>
-  <header class="panel-head"><h2 class="panel-title" id="panel-title-reference"></h2><p class="panel-intro" id="panel-intro-reference"></p></header>
   <div class="toolbar">
     <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, then where the picture to add comes from (an
          address, a file from the author's own disk, embedded in the recording, or street-level pictures near the spot) and "+";
@@ -641,7 +632,6 @@ export const html = `
   </div>
 </section>
 <section class="group-panel" id="group-shape" aria-labelledby="label-shape-group" hidden>
-  <header class="panel-head"><h2 class="panel-title" id="panel-title-shape"></h2><p class="panel-intro" id="panel-intro-shape"></p></header>
   <!-- In two parts: the shapes the observer DREW (angles on their image, the account), and the
        bodies the observer said those shapes WERE (the 3D interpretation, see BodyEditor). The shapes
        come first and open on arrival: they are what the rest of this editor draws and records. -->
@@ -1875,9 +1865,6 @@ ${EditorTheme.HEAD}
   background: var(--ground-raised);
   color: var(--ink);
 }
-.panel-head { margin: 0 0 16px; padding: 0 0 14px; border-bottom: 1px solid var(--line); }
-.panel-title { margin: 0 0 4px; font: 600 22px/1.25 var(--serif); color: var(--ink); }
-.panel-intro { margin: 0; font-size: 14px; color: var(--ink-dim); }
 .group-panel > .group-settings { top: 20px; right: 18px; }
 /* Fields: the label above, 13px, the value under it at 15px, on a grid that fills the width. */
 .group-panel .toolbar { gap: 14px 16px; align-items: end; }
@@ -1938,8 +1925,8 @@ ${EditorTheme.fields(".app")}
   border: 0;
   border-top: 1px solid var(--line);
 }
-/* The first section of a panel follows its head, which is ruled already. */
-.panel-head + .toolbar > .form-section:first-child, .panel-head + .form-section,
+/* The first section of a panel opens it: no rule above it, the chips row stands there. */
+.group-panel > .toolbar:first-child > .form-section:first-child, .group-panel > .form-section:first-child,
 #observer-principal > .form-section:first-child, .element-list-body > .form-section:first-child { border-top: 0; padding-top: 4px; }
 .form-section:last-child { padding-bottom: 0; }
 .section-title { grid-column: 1 / -1; margin: 0 0 -2px; font: 600 12px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--glow-dim); }
@@ -2002,11 +1989,6 @@ ${EditorTheme.fields(".app")}
   border: 1px solid var(--glow-dim); border-radius: 50%; box-sizing: border-box;
 }
 .scene-linked:focus-within > :first-child::after { background: var(--glow-solid); border-color: var(--glow-solid); }
-.scene-legend { margin: 6px 0 0; font-size: 12px; color: var(--ink-faint); }
-.scene-legend::before {
-  content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 6px; vertical-align: .05em;
-  border: 1px solid var(--glow-dim); border-radius: 50%; box-sizing: border-box;
-}
 /* What a click in the scene opened, pointed out for a moment. */
 .flash { background: var(--warn-bg) !important; border-radius: 8px; box-shadow: 0 0 0 6px var(--warn-bg); transition: background .3s ease, box-shadow .3s ease; }
 @media (prefers-reduced-motion: reduce) { .scene-card > :is(.render-line, .playback-row) { transition: none; } }
