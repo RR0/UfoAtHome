@@ -8,9 +8,8 @@ describe("RecordingText thin, on a recording of outlines over many keyframes", (
     const file = readFileSync("public/demo-data/observer-saint-lo.json", "utf8")
     const sighting = fromSightingJson(JSON.parse(file))
     const json = toSightingJson(sighting)
-    const writer = new RecordingText()
-    const whole = writer.of(json, "whole")
-    const thin = writer.of(json, "thin", SightingShapes.derivable(sighting))
+    const whole = RecordingText.of(json, "whole")
+    const thin = RecordingText.of(json, "thin", SightingShapes.derivable(sighting))
     // Half a million lines whole; thin, about what the file itself is.
     expect(thin.split("\n").length).toBeLessThan(file.split("\n").length * 1.5)
     expect(whole.length).toBeGreaterThan(thin.length * 10)

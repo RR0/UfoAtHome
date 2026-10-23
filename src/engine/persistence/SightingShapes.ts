@@ -326,8 +326,7 @@ export class SightingShapes {
       const pose = resolveObserverPoseAt(sighting, keyframe.t)
       const fovDeg = this.fovOf(sighting, keyframe.t)
       const projection = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
-      // A keyframe none of whose shapes changed is left as it is, the very same object: what is written of a keyframe is kept as
-      // long as it is that object (see RecordingText), and every save used to make them all new.
+      // A keyframe none of whose shapes changed is left as it is, the very same object: every save used to make them all new.
       let changed = false
       const shapes = keyframe.shapes.map(state => {
         const shape = transform(state.shape, projection, pose)

@@ -1014,11 +1014,6 @@ export class UfoElement extends HTMLElement {
 
   private titleOverride?: SaidText
 
-  /** Says the title again, the recording's observer having been changed in place (see SightingEditorElement's undo of a field). */
-  refreshTitle(): void {
-    this.syncPlayerTitle()
-  }
-
   /** What is played, over the picture's top left with the controls: the title the composing element gave it, or else
    * the account's — whose it is, and of what (the observer's own title: "Renato Nicolaï (déposition du 9 janvier 1981)"). */
   private syncPlayerTitle(): void {
