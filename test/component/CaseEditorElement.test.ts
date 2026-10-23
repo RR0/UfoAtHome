@@ -842,11 +842,11 @@ describe("CaseEditorElement's events", () => {
     expect(root.getElementById("case-overview")!.hidden).toBe(false)
   })
 
-  it("says in its header whether the case is saved, and offers Save only when it is not", async () => {
+  it("offers Save only when the case is not saved, and says nothing else of it in its header", async () => {
     const element = await open()
     const root = element.shadowRoot!
     expect((root.getElementById("save-case") as HTMLButtonElement).disabled).toBe(true)
-    expect(root.getElementById("case-state-line")!.dataset.state).toBe("clean")
+    expect(root.querySelector(".editor-state")).toBeNull()
   })
 
   it("adds an event of the type chosen in the dialog: an interview asks whom it was held with, a title and who held it", async () => {

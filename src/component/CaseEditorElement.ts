@@ -126,7 +126,7 @@ const TEMPLATE = `
   .case-panel { margin: 0; }
   .editor-head .head-text.title { display: block; }
   .editor-head .check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-dim); }
-  .editor-state .dirty { display: none !important; }
+  .editor-head .dirty { display: none !important; }
   /* Two tabs, underlined. */
   #case-tabs { display: flex; gap: 6px; padding: 0 18px; border-bottom: 1px solid var(--line); }
   #case-tabs .group-tab {
@@ -204,14 +204,14 @@ const TEMPLATE = `
   }
 </style>
 <div id="case" class="case">
-<!-- The case on top (see the design handoff, §4): what it is and whether it is saved, with the one Save there is, which saves the
-     observations too when asked; then its two tabs. -->
+<!-- The case on top (see the design handoff, §4): what it is, with the one Save there is, on while there is something to save, which
+     saves the observations too when asked; then its two tabs. -->
 <section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
   <header class="editor-head header">
     <div class="head-text title">
       <span id="case-kicker" class="kicker">Case</span>
       <h1 id="case-heading" class="editor-title">Case</h1>
-      <p id="case-state-line" class="editor-state"><span class="state-dot" aria-hidden="true"></span><span id="case-state"></span><span id="dirty" class="dirty" role="status" title="Changes not saved" hidden></span></p>
+      <span id="dirty" class="dirty" role="status" title="Changes not saved" hidden></span>
     </div>
     <div class="head-actions">
       <label class="check"><input id="save-also" type="checkbox" checked/> <span id="label-save-also">Also save the observations</span></label>
@@ -342,8 +342,6 @@ export class CaseEditorElement extends HTMLElement {
   private current?: CaseTrack
   /** Whether the case's own fields and its list of events are on show, rather than one event (see the design handoff, §4). */
   private listShown = true
-  /** The file the case was saved as, last, for its header. */
-  private savedAs?: string
   /** The interview on show, when the picker is on one: then no track is. */
   private currentInterview?: InterviewEvent
   private readonly interviewElement: InterviewEditorElement
@@ -815,7 +813,6 @@ export class CaseEditorElement extends HTMLElement {
     const start = session.tracks.find(track => track.url === absolute) ?? session.tracks.find(track => track.kind === "observer") ?? session.tracks[0]
     // A case opens on itself, its events listed; on one of them only when it is asked for by name.
     this.listShown = absolute === undefined
-    this.savedAs = undefined
     await this.showTrack(start)
   }
 
@@ -1197,17 +1194,9 @@ export class CaseEditorElement extends HTMLElement {
     if (next) this.openEvent(next.index)
   }
 
-  /** What the header says of the case, and whether there is anything to save. */
+  /** Whether there is anything to save: Save, on or off, is all the header says of it. */
   private refreshCaseState(): void {
-    const session = this.session
-    const m = this.messages
-    const line = this.byId("case-state-line")
-    const dirty = session?.dirty ?? false
-    const from = session?.url && !session.url.startsWith("about:") ? decodeURIComponent(new URL(session.url).pathname.split("/").pop() ?? "") : ""
-    this.byId("case-state").textContent = this.savedAs && !dirty ? m.caseStateSaved.replace("{file}", this.savedAs)
-      : from && from.endsWith(".json") ? m.caseStateClean.replace("{file}", from) : m.caseStateNew
-    line.dataset.state = dirty ? "dirty" : this.savedAs ? "saved" : "clean"
-    ;(this.byId("save-case") as HTMLButtonElement).disabled = !dirty
+    ;(this.byId("save-case") as HTMLButtonElement).disabled = !(this.session?.dirty ?? false)
   }
 
   private labelOf(track: CaseTrack, index: number): string {
@@ -1622,7 +1611,6 @@ export class CaseEditorElement extends HTMLElement {
     const link = document.createElement("a")
     link.href = url
     link.download = name
-    this.savedAs = name
     link.click()
     URL.revokeObjectURL(url)
   }
