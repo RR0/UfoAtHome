@@ -1202,7 +1202,7 @@ export class SightingEditorElement extends HTMLElement {
       lawsChanged: () => {
         // An interpretation is contradicted where it is outside the laws, not merely different (see BodyConfrontation.lawsOf).
         this.sceneElement.confrontationTolerance = BodyConfrontation.lawsOf(this.witnessErrorView.errorModel, this.ufoElement.sighting.account?.conditions)
-        this.candidatesView?.refresh()
+        this.refreshCandidatesSoon()
       }
     }, this.shadow.querySelector<HTMLElement>(".app")!)
     this.timelineTracks = new TimelineTracks(this.shadow.getElementById("timeline-tracks")!, t => this.goToMark(t), this.messages)
@@ -6100,7 +6100,9 @@ export class SightingEditorElement extends HTMLElement {
       return
     }
     if (typeof json !== "object" || json === null || Array.isArray(json)) return
-    if (JSON.stringify(json) === JSON.stringify(this.sightingData)) return
+    // What the author typed may say again what the form says. A step of the history never does: it gives back another text, and
+    // two writes of fourteen million characters were not spent to be told so.
+    if (!history && JSON.stringify(json) === JSON.stringify(this.sightingData)) return
     const playhead = this.ufoElement.currentTime
     // The weather is the author's edit when the TEXT's weather is not what the text said the last time it was in step with the
     // form: compared with the form's own, it differed for reasons that were not theirs (a lookup answered while they typed,
@@ -6462,6 +6464,19 @@ export class SightingEditorElement extends HTMLElement {
     facts.observers = sighting.observerCount
     if (sighting.soundTrack.allKeyframes.some(keyframe => keyframe.sound.kind !== "none")) facts.sound = true
     return facts
+  }
+
+  private candidatesTimer?: ReturnType<typeof setTimeout>
+
+  /**
+   * The candidate explanations searched again, a moment from now and only while they are on show: the search goes through every
+   * body of the sky, satellite, aircraft and reading, for a few hundred milliseconds, which every load and every step of the history
+   * paid even with the Summary closed (opening it searches them, see toggleGroup), and an undo waited for.
+   */
+  private refreshCandidatesSoon(): void {
+    clearTimeout(this.candidatesTimer)
+    if (!this.isGroupIdOpen("group-observation")) return
+    this.candidatesTimer = setTimeout(() => this.candidatesView?.refresh(), 150)
   }
 
   /** Shows the scene's toggles and timeline for 3.5 s, as a hover would. */
