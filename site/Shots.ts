@@ -93,7 +93,7 @@ export class Shots {
       page: "edit", after: "environment", name: "edit-environment",
       caption: {
         en: "Environment: what surrounded the observer.",
-        fr: "Environnement : ce qui entourait l'observateur.",
+        fr: "Décor : ce qui entourait l'observateur.",
         es: "Entorno: lo que rodeaba al observador.",
         it: "Ambiente: ciò che circondava l'osservatore."
       }
