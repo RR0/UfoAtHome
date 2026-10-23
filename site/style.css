@@ -228,6 +228,9 @@ section.band:first-of-type { border-top: 0; }
    than inherited. */
 .stage-padded { padding: 0.9rem; }
 .stage-padded rr0-sighting-editor { display: block; }
+/* An editor is a card of its own (the design handoff's): around it the page's card was a second frame, so a stage that holds one
+   draws nothing. */
+.stage:has(> :is(rr0-sighting-editor, rr0-case-editor)) { border: 0; border-radius: 0; background: none; padding: 0; overflow: visible; }
 .stage rr0-sighting, .stage rr0-scene, .stage rr0-sighting-editor, .stage rr0-ufo { display: block; }
 .stage-caption {
   padding: 0.7rem 1rem; border-top: 1px solid var(--line); color: var(--ink-dim);
