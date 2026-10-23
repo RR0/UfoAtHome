@@ -692,6 +692,20 @@ describe("DecorSystem building facades", () => {
     expect(group.getObjectByName(DecorSystem.ROOF_NAME)!.position.y).toBeCloseTo(walls)
   })
 
+  it("lights a fifth as many windows of a place nobody is in at night as of a home", () => {
+    const ranks = (facade: object): number[] => {
+      const wall = DecorSystem.bodyOf(DecorSystem.build(building({ sizeM: sized, facade }), false)).children[0] as Mesh
+      return Array.from(wall.geometry.getAttribute("litRank").array as Float32Array)
+    }
+    const home = ranks({ color: "#ffffff" })
+    const closed = ranks({ color: "#ffffff", closedAtNight: true })
+    expect(closed).toHaveLength(home.length)
+    closed.forEach((rank, i) => expect(rank).toBeCloseTo(home[i] / DecorSystem.CLOSED_AT_NIGHT_SHARE))
+    // A window is lit where its rank is under the share: at a share of 0.5, as many as a home lights at 0.1.
+    const lit = (all: number[], share: number) => all.filter(rank => rank < share).length
+    expect(lit(closed, 0.5)).toBe(lit(home, 0.1))
+  })
+
   it("holds one share of lit windows for every facade, kept between nothing and all", () => {
     DecorSystem.setLitWindowShare(0.4)
     const first = DecorSystem.build(building({ sizeM: sized, facade: { color: "#ffffff" } }), false)

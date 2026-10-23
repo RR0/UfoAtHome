@@ -42,13 +42,13 @@ export class TopoBuildings {
         ? stated
         : (Number.isFinite(floors) && floors > 0 ? floors * TopoBuildings.FLOOR_HEIGHT_M : TopoBuildings.DEFAULT_HEIGHT_M)
       // What it is (a church, a house of 1800) is the outline's, and each rectangle of it is that.
-      const { style, builtYear } = BuildingStyles.ofMap(feature.properties)
+      const { style, builtYear, closedAtNight } = BuildingStyles.ofMap(feature.properties)
       for (const building of TopoBuildings.rectanglesOf(rings.rings, height, minAreaM2)) {
         const wallMaterial = BuildingMaterials.of(feature.properties.materiaux_des_murs, "wall")
         const roofMaterial = BuildingMaterials.of(feature.properties.materiaux_de_la_toiture, "roof")
         // The few natures a map gives that a reader knows a building by from a distance: a silo is not "Building 147".
         const named = TopoBuildings.NAMED_NATURES[String(feature.properties.nature ?? "")]
-        found.push({ ...building, ...(named ? { name: named } : {}), ...(Number.isFinite(floors) && floors > 0 ? { floors } : {}), ...(wallMaterial ? { wallMaterial } : {}), ...(roofMaterial ? { roofMaterial } : {}), ...(style ? { style } : {}), ...(builtYear !== undefined ? { builtYear } : {}) })
+        found.push({ ...building, ...(named ? { name: named } : {}), ...(Number.isFinite(floors) && floors > 0 ? { floors } : {}), ...(wallMaterial ? { wallMaterial } : {}), ...(roofMaterial ? { roofMaterial } : {}), ...(style ? { style } : {}), ...(builtYear !== undefined ? { builtYear } : {}), ...(closedAtNight ? { closedAtNight } : {}) })
       }
     }
     const distanceOf = (building: SurveyedBuilding): number => Math.hypot(building.eastM, building.northM)

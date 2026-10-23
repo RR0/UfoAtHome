@@ -45,6 +45,16 @@ describe("BuildingStyles", () => {
     expect(BuildingStyles.ofOsm({ building: "house" }).style).toBeUndefined()
   })
 
+  it("says a place nobody is in at night by its use: shops and services, sport, and what OSM says is one", () => {
+    // The pool of Saint-Lô, and the business park beside it.
+    expect(BuildingStyles.ofMap({ nature: "Indifférenciée", usage_1: "Sportif", hauteur: 8.1 }).closedAtNight).toBe(true)
+    expect(BuildingStyles.ofMap({ nature: "Industriel, agricole ou commercial", usage_1: "Commercial et services", hauteur: 7.6 })).toMatchObject({ style: "works", closedAtNight: true })
+    expect(BuildingStyles.ofMap({ nature: "Indifférenciée", usage_1: "Résidentiel", hauteur: 7 }).closedAtNight).toBeUndefined()
+    expect(BuildingStyles.ofOsm({ building: "retail" }).closedAtNight).toBe(true)
+    expect(BuildingStyles.ofOsm({ building: "yes", shop: "bakery" }).closedAtNight).toBe(true)
+    expect(BuildingStyles.ofOsm({ building: "house" }).closedAtNight).toBeUndefined()
+  })
+
   it("says a building of before 1900 is old, with its year, and one of after is ordinary", () => {
     expect(BuildingStyles.ofMap(HOUSE_OF_1800)).toEqual({ style: "old", builtYear: 1800 })
     expect(BuildingStyles.ofMap(BLOCK_OF_1969)).toEqual({ builtYear: 1969 })

@@ -134,12 +134,13 @@ export class OsmBuildingsSurroundingsProvider implements SurroundingsProvider {
       roof = { shape: "flat", riseM: 0, ...(roofColour ? { color: roofColour } : {}) }
     }
     // What the volunteer says it is, else what its height says (see BuildingStyles.ofMap): a church, a castle, a house of 1850.
-    const { style, builtYear } = BuildingStyles.ofOsm(tags)
+    const { style, builtYear, closedAtNight } = BuildingStyles.ofOsm(tags)
     return {
       ...building,
       heightM,
       ...(style ? { style } : {}),
       ...(builtYear !== undefined ? { builtYear } : {}),
+      ...(closedAtNight ? { closedAtNight } : {}),
       ...(tags.name ? { name: tags.name } : {}),
       ...(wallMaterial ? { wallMaterial } : {}),
       ...(roofMaterial ? { roofMaterial } : {}),

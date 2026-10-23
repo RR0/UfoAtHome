@@ -49,6 +49,8 @@ export interface SurveyedBuilding {
   style?: BuildingStyle
   /** The year the survey says it was built, where it says. */
   builtYear?: number
+  /** Whether nobody is in it at night, by its use: shops and services, sport (see BuildingStyles, DecorFacade.closedAtNight). */
+  closedAtNight?: boolean
 }
 
 /**

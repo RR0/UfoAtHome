@@ -68,6 +68,7 @@ export class BuildingMaterials {
       if (style === "church") facade.openings = "lancet"
       else if (style === "monument" || style === "works") facade.plain = true
       else if (style === "old" || style === "grand") facade.openings = "tall"
+      if (building.closedAtNight && !facade.plain) facade.closedAtNight = true
       const storeyM = BuildingMaterials.storeyOf(building)
       if (storeyM !== undefined && style !== "church" && style !== "monument") facade.storeyM = storeyM
       const roof = style === "old" && building.roof?.color === undefined ? { shape: "flat" as const, riseM: 0, ...building.roof, color: BuildingMaterials.OLD_ROOF } : building.roof

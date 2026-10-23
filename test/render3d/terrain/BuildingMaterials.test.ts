@@ -39,6 +39,12 @@ describe("BuildingMaterials", () => {
     expect(BuildingMaterials.fit([HOUSE])[0].facade).toEqual(plain.facade)
   })
 
+  it("keeps the windows of a place nobody is in at night, saying so, and has nothing to say of works, which have none", () => {
+    expect(BuildingMaterials.fit([{ ...HOUSE, closedAtNight: true }])[0].facade!.closedAtNight).toBe(true)
+    expect(BuildingMaterials.fit([{ ...HOUSE, style: "works", closedAtNight: true }])[0].facade!.closedAtNight).toBeUndefined()
+    expect(BuildingMaterials.fit([HOUSE])[0].facade!.closedAtNight).toBeUndefined()
+  })
+
   it("draws the walls of works with no windows, and a house's with them", () => {
     expect(BuildingMaterials.fit([{ ...HOUSE, style: "works" }])[0].facade!.plain).toBe(true)
     expect(BuildingMaterials.fit([HOUSE])[0].facade!.plain).toBeUndefined()

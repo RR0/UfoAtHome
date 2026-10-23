@@ -10,7 +10,8 @@ import type { BuildingStyle, SurveyedBuilding } from "./SurroundingsProvider.js"
  * - the map's nature of the building (BD TOPO "Eglise", "Chapelle", "Monument", "Tour, donjon", "Château"…) and its use ("Religieux"), or what an
  *   OpenStreetMap volunteer wrote (`building=church`, `historic=castle`);
  * - the year it was built, where it is stated (BD TOPO `date_d_apparition`, from the land registry; OSM `start_date`): before 1900, an old building;
- * - its use: works (an industrial site, a farm, an annex), whose walls have no windows of a house;
+ * - its use: works (an industrial site, a farm, an annex), whose walls have no windows of a house; and a place nobody is in at night (shops and services,
+ *   sport), whose windows are mostly dark then;
  * - a building over fifteen metres that states neither its floors nor its year nor that people live in it (a hospital, a ministry, a school of the
  *   nineteenth century): its storeys are not those of a house, and drawing one window every three metres up it makes a tower of flats of it.
  *
@@ -33,6 +34,17 @@ export class BuildingStyles {
    * house's windows, the warehouses of the zone along the RN2 at Silly-le-Long lit them in the middle of the night, from a kilometre off.
    */
   private static readonly MAP_WORKS: ReadonlySet<string> = new Set(["Industriel", "Agricole", "Annexe"])
+  /**
+   * The uses of the map whose buildings nobody is in at night: shops, offices and services, sport. WHY: drawn as homes, the pool of Saint-Lô lit its
+   * windows at half past two in the morning. Services include a hospital, which is why such a building keeps some of its windows lit (see
+   * DecorFacade.closedAtNight), and does not go dark.
+   */
+  private static readonly MAP_CLOSED_AT_NIGHT: ReadonlySet<string> = new Set(["Commercial et services", "Sportif"])
+  /** What OSM's `building` says of a building nobody is in at night. */
+  private static readonly OSM_CLOSED_AT_NIGHT: ReadonlySet<string> = new Set([
+    "retail", "commercial", "office", "supermarket", "kiosk", "sports_hall", "sports_centre", "stadium", "school", "university", "college", "kindergarten",
+    "public", "civic", "government", "train_station", "transportation"
+  ])
   /** What OSM's `building` says of a building, where it says what it is. */
   private static readonly OSM_BUILDINGS: Readonly<Record<string, BuildingStyle>> = {
     cathedral: "church", church: "church", chapel: "church", basilica: "church", temple: "church", mosque: "church", synagogue: "church", shrine: "church", religious: "church",
@@ -57,21 +69,23 @@ export class BuildingStyles {
   private static readonly CHURCH_ROOF_COLOUR = "#5a6068"
 
   /** What the map (BD TOPO) says a building is, from its properties: its style where it says one, and its year where it states it. */
-  static ofMap(properties: Record<string, unknown>): { style?: BuildingStyle, builtYear?: number } {
+  static ofMap(properties: Record<string, unknown>): { style?: BuildingStyle, builtYear?: number, closedAtNight?: boolean } {
     const builtYear = BuildingStyles.year(properties.date_d_apparition)
     const stated = BuildingStyles.MAP_NATURES[String(properties.nature ?? "")] ?? (properties.usage_1 === "Religieux" ? "church" : undefined)
       ?? (BuildingStyles.MAP_WORKS.has(String(properties.usage_1 ?? "")) ? "works" : undefined)
     const style = stated ?? BuildingStyles.ofYear(builtYear) ?? BuildingStyles.grand(properties)
-    return { ...(style ? { style } : {}), ...(builtYear !== undefined ? { builtYear } : {}) }
+    const closed = BuildingStyles.MAP_CLOSED_AT_NIGHT.has(String(properties.usage_1 ?? ""))
+    return { ...(style ? { style } : {}), ...(builtYear !== undefined ? { builtYear } : {}), ...(closed ? { closedAtNight: true } : {}) }
   }
 
   /** What an OSM volunteer says a building is, from its tags. */
-  static ofOsm(tags: Record<string, string>): { style?: BuildingStyle, builtYear?: number } {
+  static ofOsm(tags: Record<string, string>): { style?: BuildingStyle, builtYear?: number, closedAtNight?: boolean } {
     const builtYear = BuildingStyles.year(tags.start_date)
     const historic = tags.historic && tags.historic !== "no" ? BuildingStyles.OSM_HISTORIC[tags.historic] ?? "old" : undefined
     const worship = tags.amenity === "place_of_worship" ? "church" : undefined
     const style = BuildingStyles.OSM_BUILDINGS[tags.building ?? ""] ?? historic ?? worship ?? BuildingStyles.ofYear(builtYear)
-    return { ...(style ? { style } : {}), ...(builtYear !== undefined ? { builtYear } : {}) }
+    const closed = BuildingStyles.OSM_CLOSED_AT_NIGHT.has(tags.building ?? "") || (tags.shop !== undefined && tags.shop !== "no")
+    return { ...(style ? { style } : {}), ...(builtYear !== undefined ? { builtYear } : {}), ...(closed ? { closedAtNight: true } : {}) }
   }
 
   /** The year a date the survey writes starts with ("1800-01-01Z", "1872", "c. 1650"): undefined where there is none. */

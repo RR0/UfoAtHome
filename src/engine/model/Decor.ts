@@ -444,6 +444,11 @@ export interface DecorFacade {
   openings?: "tall" | "lancet"
   /** The height of a storey, metres, where it is known (the floors a survey states, or those of an old building): absent is three. Ignored for "lancet". */
   storeyM?: number
+  /**
+   * The windows of a place nobody is in at night (a shop, an office, a pool, a gymnasium): it has windows, but a fifth as many of them lit as a home
+   * has at the same hour (see DecorSystem.CLOSED_AT_NIGHT_SHARE). Absent is false: people live behind the windows of a building that says nothing.
+   */
+  closedAtNight?: boolean
 }
 
 export interface DecorObject {

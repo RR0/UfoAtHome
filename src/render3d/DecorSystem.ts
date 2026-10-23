@@ -1153,6 +1153,11 @@ export class DecorSystem {
     const size = DecorSystem.sizeOf(object)
     const facade = object.facade!
     const geometry = FacadeGeometry.build(size.widthM, size.lengthM, DecorSystem.wallHeightOf(object, size.heightM), !facade.plain, object.eastM * 7.31 + object.northM * 3.17, facade.openings, facade.storeyM)
+    if (facade.closedAtNight) {
+      // A window is lit where its rank is under the share of those lit: ranks stretched over a wider span light a smaller share of them, the same rule.
+      const ranks = geometry.getAttribute("litRank")
+      for (let i = 0; i < ranks.count; i++) ranks.setX(i, ranks.getX(i) / DecorSystem.CLOSED_AT_NIGHT_SHARE)
+    }
     const material = new MeshLambertMaterial({
       color: new Color(facade.color ?? DecorSystem.PLASTER), map: FacadeTexture.texture(),
       // The glass glows where the window's rank is under the share of lit windows, which is nothing by day (see litWindowShare).
@@ -1173,6 +1178,9 @@ export class DecorSystem {
     group.add(mesh)
     return group
   }
+
+  /** The share of its windows a place nobody is in at night lights, against a home's at the same hour (see DecorFacade.closedAtNight). */
+  static readonly CLOSED_AT_NIGHT_SHARE = 0.2
 
   /** What share of the windows of every facade is lit (0: none, as by day), held by one number all their materials read: see buildFacade. */
   private static readonly litWindowShare = { value: 0 }
