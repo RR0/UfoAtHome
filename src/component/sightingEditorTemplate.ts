@@ -1915,7 +1915,8 @@ ${EditorTheme.fields(".app")}
   font: 600 14px/1 var(--sans);
 }
 .subgroup-tab:hover { background: var(--ground-sunken); color: var(--ink); }
-.subgroup-tab[aria-expanded="true"] { background: var(--ground-raised); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .18); }
+/* The part open stands out of the control in both themes: the raised ground alone was within a few levels of the control's own in dark. */
+.subgroup-tab[aria-expanded="true"] { background: color-mix(in srgb, var(--ink) 16%, var(--ground-raised)); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-strong), 0 1px 2px rgba(0, 0, 0, .18); }
 .subgroup-panel { margin: 0; padding: 0; border: 0; background: transparent; color: inherit; }
 .account-view { display: inline-flex; align-items: center; gap: 10px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
 .app .element-list-body { border-color: var(--line); border-radius: 0 10px 10px 10px; }
