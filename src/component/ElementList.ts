@@ -67,7 +67,7 @@ export class ElementList {
 .element-list-row { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .4em; flex: 1 1 100%; min-width: 0; }
 .element-list-picker { flex: 1 1 10em; min-width: 0; display: flex; }
 .element-list-picker select { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
-.element-list-empty { opacity: .75; font-style: italic; }
+.element-list-empty { align-self: center; opacity: .75; font-style: italic; }
 /* The fields of the picked element unroll from its picker: the frame starts where the picker ends, with no space between (the gap of the
    container both stand in is taken back, see glue), its corner under the picker square. The row is aligned on its bottom so that the
    picker's lower edge is the row's, whatever the height of the buttons beside it. */

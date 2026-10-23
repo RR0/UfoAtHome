@@ -59,7 +59,7 @@ export class WitnessErrorView {
 }
 .app .form-section > :is(label, .field):has(> .basis-mark) > :first-child { grid-column: 1; }
 .app .form-section > :is(label, .field):has(> .basis-mark) > .basis-mark { grid-column: 2 / -1; justify-self: start; margin-left: 0; }
-.app .form-section > :is(label, .field):has(> .basis-mark) > .law { grid-column: 1 / -1; }
+.app .form-section > :is(label, .field):has(> .basis-mark) > :is(.law, rr0-date-input, rr0-duration-input) { grid-column: 1 / -1; }
 .law { flex: 1 0 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font: 400 12px/1.4 var(--sans); color: var(--ink-dim); }
 .law-symbol { color: var(--glow-dim); font-weight: 700; }
 .law-reset { color: var(--glow); }

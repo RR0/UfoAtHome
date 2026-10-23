@@ -1241,9 +1241,9 @@ select.weather-field:disabled {
 .toolbar > label.checkbox {
   gap: 0.35em;
 }
-/* A strip of handles inside a panel — the weather's three parts. */
+/* A strip of handles inside a panel, the weather's parts: as far from the toolbar above it as the toolbar's rows are from each other. */
 .group-panel > .group-tabs {
-  margin-top: 0.5em;
+  margin-top: 14px;
 }
 #description {
   resize: vertical;
@@ -1895,13 +1895,14 @@ ${EditorTheme.fields(".app")}
   display: inline-flex;
   flex-wrap: wrap;
   gap: 2px;
-  margin: 0 0 16px;
+  margin-bottom: 16px;
   padding: 4px;
   border: 1px solid var(--line-strong);
   border-radius: 12px;
   background: var(--ground);
 }
-.subtabs-row > .group-tabs { margin: 0; }
+/* As specific as the rule above, which would otherwise push the control up out of the row's middle. */
+.group-panel .subtabs-row > .group-tabs { margin: 0; }
 .subgroup-tab {
   min-height: 34px;
   margin: 0;
@@ -1926,7 +1927,7 @@ ${EditorTheme.fields(".app")}
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 14px 16px;
-  align-items: end;
+  align-items: start;
   min-width: 0;
   margin: 0;
   padding: 18px 0;
@@ -1956,13 +1957,19 @@ ${EditorTheme.fields(".app")}
 .form-section > :is(label, .field) > :is(input:not([type="checkbox"]):not([type="radio"]):not([type="number"]):not([type="color"]), select, textarea, rr0-popover-picker, rr0-input-file) { flex: 1 1 0; min-width: 0; font-weight: 400; }
 /* A date or a duration holds its own "precise / imprecise" switch beside its field: as wide as both need. */
 .form-section > :is(label, .field) > :is(rr0-date-input, rr0-duration-input) { flex: 1 1 auto; flex-wrap: wrap; min-width: 0; max-width: 100%; font-weight: 400; }
-/* Its field fits the column it is given, never past it into the next one. */
+/* Its field fits the column it is given, never past it into the next one, and never shorter than "dd/mm/yyyy --:--" with its calendar: a
+   section that holds a date and time has columns wide enough for the switch and that beside it. */
 .form-section :is(rr0-date-input, rr0-duration-input) :is(.edtf-field, .duration-field) { flex: 1 1 10em; min-width: 0; max-width: 100%; }
+.form-section:has(rr0-date-input:not([date-only])) { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 .form-section :is(rr0-date-input, rr0-duration-input) input { box-sizing: border-box; min-width: 0; max-width: 100%; width: 100%; }
 .form-section > :is(label, .field) > input[type="color"] { flex: 1 1 0; height: 38px; padding: 3px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--ground); }
 .form-section > :is(label, .field) > input[type="number"] { flex: none; font-weight: 400; }
 .form-section > :is(label, .field) > output { flex: 1 0 100%; font-weight: 400; }
 .form-section > label:has(> input[type="checkbox"]) { display: flex; align-items: center; gap: 8px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
+/* The fields of a row line up on their labels, which a value said under one of them (an output) does not move; a slider stands as tall as
+   a field, so that its track is level with the middle of the fields beside it, and a box to tick on the line of their values. */
+.app :is(.form-section, .toolbar) > label > input[type="range"] { height: 38px; margin: 0; }
+.form-section > label:has(> input[type="checkbox"]) { align-self: end; min-height: 38px; }
 .form-section .record-row { display: flex; flex-wrap: wrap; align-items: end; gap: 14px 16px; }
 /* The scene, with nothing over it at rest (see the design handoff, §3.2): its toggles and its timeline show while the pointer is
    over it, while one of them has the focus, and for a moment after a touch (data-shown, see SightingEditorElement.showOverlays). */
