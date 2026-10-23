@@ -368,6 +368,8 @@ export const html = `
     <div class="toolbar">
       <span class="input-file-row"><span id="label-import-file">Load sighting file</span> <rr0-input-file id="import" name="import" accept="application/json,.json,application/zip,.zip" placeholder="https://…/sighting.json"></rr0-input-file></span>
       <button id="export" type="button">Save</button>
+      <!-- How the keyframes are written, in the text below and in the file saved: see RecordingText.of. -->
+      <label class="check"><input id="whole-keyframes" type="checkbox"/> <span id="label-whole-keyframes">Every keyframe whole</span></label>
     </div>
   <!-- A question about what an edit of the text just touched: data the editor reads dynamically (see SightingEditorElement.askAboutWeather). Modal: the author has to say what they mean before anything else is done, and the edit stands meanwhile. Escape is the safe answer, which puts back what was read. -->
   <dialog id="file-ask" class="file-ask" aria-labelledby="file-ask-text">

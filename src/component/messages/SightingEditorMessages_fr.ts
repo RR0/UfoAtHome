@@ -117,6 +117,8 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   identityKeep: "Sauver quand même",
   identityBack: "Revenir",
   importFile: "Charger un fichier d'observation",
+  wholeKeyframes: "Chaque image clé en entier",
+  wholeKeyframesHint: "Sinon une image clé ne dit que ce qui a changé depuis la précédente, comme on écrit un enregistrement à la main. Changer ce choix repart d'un historique d'annulation vide.",
   importUrlPlaceholder: "https://…/sighting.json",
   inputFileFromFile: "depuis votre disque",
   inputFileFromUrl: "depuis une adresse",

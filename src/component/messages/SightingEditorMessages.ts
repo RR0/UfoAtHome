@@ -217,6 +217,9 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   /** The case being edited: the picker of its recordings (accounts and readings), and its buttons. */
   /** The case with what was changed, as a zip. */
   importFile: string
+  /** Whether the recording's text writes every keyframe whole, rather than only what changed since the one before; and why one would. */
+  wholeKeyframes: string
+  wholeKeyframesHint: string
   importUrlPlaceholder: string
   importError: string
   /** The one failure whose fix is not the reader's: the file is there and the address is right, and

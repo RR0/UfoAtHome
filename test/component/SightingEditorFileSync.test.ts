@@ -683,3 +683,31 @@ describe("a step of the history that changed only fields loaded alone", () => {
     expect(loads).toBe(1)
   })
 })
+
+describe("how the keyframes are written", () => {
+  it("writes them thin by default, whole when asked, and either reads back as the same recording", async () => {
+    const { KeyframeCompletion } = await import("../../src/engine/model/KeyframeCompletion.js")
+    const element = mount()
+    const outline = Array.from({ length: 60 }, (_, i) => ({ x: i, y: i % 7 }))
+    const polygon = (x: number) => ({ kind: "polygon", bounds: { x, y: 0, width: 60, height: 7 }, points: outline, color: "#ffffff", angle: 0, transparency: 0, haloScale: 1.5, selected: false })
+    element.sightingData = {
+      version: 1,
+      timeline: { keyframes: [0, 100, 200].map(t => ({ t, shapes: [{ sourceId: "p", shape: polygon(t) }] })), order: ["p"], groups: [] }
+    } as never
+    const inside = element as unknown as { fileText(): string, sightingData: { timeline: { keyframes: unknown[] } } }
+    const thin = inside.fileText()
+    const written = JSON.parse(thin) as { timeline: { keyframes: Array<{ shapes: Array<{ shape: Record<string, unknown> }> }> } }
+    // The outline once, where the shape first appears.
+    expect(written.timeline.keyframes.map(keyframe => "points" in keyframe.shapes[0].shape)).toEqual([true, false, false])
+    expect(KeyframeCompletion.complete(written.timeline.keyframes as never)).toEqual(inside.sightingData.timeline.keyframes)
+
+    const whole = element.shadowRoot!.getElementById("whole-keyframes") as HTMLInputElement
+    whole.checked = true
+    whole.dispatchEvent(new Event("change"))
+    expect(inside.fileText()).toBe(JSON.stringify(inside.sightingData, null, 2))
+    expect(inside.fileText().length).toBeGreaterThan(thin.length)
+    whole.checked = false
+    whole.dispatchEvent(new Event("change"))
+    expect(inside.fileText()).toBe(thin)
+  })
+})

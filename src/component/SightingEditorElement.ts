@@ -108,7 +108,7 @@ import type { ShapeState } from "../engine/model/Keyframe.js"
 import { ShapeHandles, ShapeGroup, MIN_SHAPE_SIZE, MIN_POLYGON_VERTICES } from "../engine/shape/ShapeHandles.js"
 import type { HandleId, ResizeAxis } from "../engine/shape/ShapeHandles.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
-import { loadSightingFields, plainSightingJson } from "../engine/persistence/sightingJson.js"
+import { fromSightingJson, loadSightingFields, plainSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
 import { DEFAULT_ICE_CRYSTAL_ALIGNMENT, DEFAULT_RARE_ICE_CRYSTALS } from "../engine/model/Weather.js"
 import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
@@ -695,6 +695,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelSightingId: HTMLElement
   private readonly labelDescription: HTMLElement
   private readonly labelTags: HTMLElement
+  private readonly wholeKeyframesInput: HTMLInputElement
   private readonly labelImportFile: HTMLElement
   /**
    * Set by whoever holds this recording as a reading of another (see CaseEditorElement): it has no
@@ -1388,6 +1389,13 @@ export class SightingEditorElement extends HTMLElement {
     this.labelDescription = this.shadow.getElementById("label-description")!
     this.labelTags = this.shadow.getElementById("label-tags")!
     this.labelImportFile = this.shadow.getElementById("label-import-file")!
+    this.wholeKeyframesInput = this.shadow.getElementById("whole-keyframes") as HTMLInputElement
+    try {
+      this.wholeKeyframesInput.checked = localStorage.getItem(SightingEditorElement.WHOLE_KEYFRAMES_STORAGE) === "true"
+    } catch {
+      // As in setKeyframesWritten: thin, the default.
+    }
+    this.wholeKeyframesInput.addEventListener("change", () => this.setKeyframesWritten())
     this.labelNarrativeSource = this.shadow.getElementById("label-narrative-source")!
     this.labelNarrativeRemember = this.shadow.getElementById("label-narrative-remember")!
     this.labelShapeGroup = this.shadow.getElementById("label-shape-group")!
@@ -2492,7 +2500,7 @@ export class SightingEditorElement extends HTMLElement {
       for (const key of RecordingSections.KEYS[name]) delete (json as unknown as Record<string, unknown>)[key]
     }
     const fileName = `${base}.json`
-    const text = JSON.stringify(json, null, 2)
+    const text = this.writtenText(json)
     this.savedAs = annexes.size === 0 ? fileName : `${base}.zip`
     if (annexes.size === 0) {
       this.download(new Blob([text], { type: "application/json" }), fileName)
@@ -6042,7 +6050,42 @@ export class SightingEditorElement extends HTMLElement {
 
   /** What the file would be if saved now — the same text Export writes. */
   private fileText(): string {
-    return this.fileTextWriter.of(this.sightingData)
+    return this.writtenText(this.sightingData)
+  }
+
+  /** `json`, this recording's (its keyframes in step with the timeline in memory), as its file is written: see keyframesWritten. */
+  private writtenText(json: SightingRecordingJson): string {
+    const written = this.keyframesWritten()
+    return this.fileTextWriter.of(json, written, written === "thin" ? SightingShapes.derivable(this.ufoElement.sighting) : undefined)
+  }
+
+  /** How the recording's text writes its keyframes, in the File group and in the file saved (see RecordingText.of). */
+  private keyframesWritten(): "thin" | "whole" {
+    return this.wholeKeyframesInput.checked ? "whole" : "thin"
+  }
+
+  /** Where the choice is kept in this browser: a preference of the reader's, like a model picked. */
+  private static readonly WHOLE_KEYFRAMES_STORAGE = "rr0-sighting-editor.whole-keyframes"
+
+  /**
+   * Writes the keyframes the other way: the text below, and what it is compared with to tell what changed since the recording was
+   * saved, both rewritten. The history of Undo is a history of texts written the first way, and starts afresh.
+   */
+  private setKeyframesWritten(): void {
+    try {
+      if (this.wholeKeyframesInput.checked) localStorage.setItem(SightingEditorElement.WHOLE_KEYFRAMES_STORAGE, "true")
+      else localStorage.removeItem(SightingEditorElement.WHOLE_KEYFRAMES_STORAGE)
+    } catch {
+      // Private browsing, a blocked origin: the choice holds for this session.
+    }
+    if (this.baseline) {
+      // Loaded as the recording itself was, so that it is written as it is: thin, what loading draws again is left out of it too.
+      const saved = fromSightingJson(JSON.parse(this.baseline) as SightingRecordingJson)
+      const written = this.keyframesWritten()
+      this.baseline = new RecordingText().of(toSightingJson(saved), written, written === "thin" ? SightingShapes.derivable(saved) : undefined)
+      this.savedFileText = this.baseline
+    }
+    this.resetHistory()
   }
 
   /** What was written of the recording's keyframes, kept while they are unchanged (see RecordingText). */
@@ -10154,6 +10197,8 @@ export class SightingEditorElement extends HTMLElement {
     this.shadow.getElementById("identity-ask-keep")!.textContent = messages.identityKeep
     this.shadow.getElementById("identity-ask-back")!.textContent = messages.identityBack
     this.labelImportFile.textContent = messages.importFile
+    this.shadow.getElementById("label-whole-keyframes")!.textContent = messages.wholeKeyframes
+    this.wholeKeyframesInput.closest("label")!.title = messages.wholeKeyframesHint
     this.importInput.placeholder = messages.importUrlPlaceholder
     for (const input of this.shadow.querySelectorAll<InputFileElement>(INPUT_FILE_ELEMENT_NAME)) input.messages = messages
     this.labelObserverAge.textContent = messages.observerAge

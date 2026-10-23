@@ -117,6 +117,8 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   identityKeep: "Salva comunque",
   identityBack: "Torna indietro",
   importFile: "Carica un file di osservazione",
+  wholeKeyframes: "Ogni fotogramma chiave per intero",
+  wholeKeyframesHint: "Altrimenti un fotogramma chiave dice solo ciò che è cambiato dal precedente, come si scrive una registrazione a mano. Cambiare questa scelta svuota la cronologia di annullamento.",
   importUrlPlaceholder: "https://…/sighting.json",
   inputFileFromFile: "dal proprio disco",
   inputFileFromUrl: "da un indirizzo",

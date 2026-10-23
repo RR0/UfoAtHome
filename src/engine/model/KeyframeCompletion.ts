@@ -52,6 +52,61 @@ export class KeyframeCompletion {
       }))
   }
 
+  /**
+   * The inverse of complete: each shape as a keyframe has to state it for complete to give it back, which is the whole of it where
+   * it first appears, and afterwards only what is not what it was. A polygon's outline, which rarely changes, is then written once
+   * rather than at every keyframe (a recording of five outlines over two hundred keyframes was half a million lines, and is thirty
+   * thousand). A box restated takes its direction and angular size with it, which complete would drop otherwise (see completed).
+   */
+  static thin(keyframes: ReadonlyArray<Keyframe>, boxDrawnAgain?: (keyframe: number, sourceId: string) => boolean):
+    Array<{ t: number, shapes: Array<{ sourceId: string, shape: Partial<Shape> }> }> {
+    const last = new Map<string, Shape>()
+    // The shapes whose box and outline were left out since they were last written: what loading holds of them is not what memory did.
+    const drawnAgain = new Set<string>()
+    return keyframes.map((keyframe, index) => ({
+      t: keyframe.t,
+      shapes: keyframe.shapes.map(state => {
+        const previous = last.get(state.sourceId)
+        last.set(state.sourceId, state.shape)
+        if (!previous) return { sourceId: state.sourceId, shape: state.shape }
+        const shape = KeyframeCompletion.thinned(state.shape, previous)
+        if (boxDrawnAgain) {
+          // Where loading draws the box and the outline again (see SightingShapes.derivable), they are not written. Where it does not
+          // after they were left out, they are, whether or not they changed: what loading holds of them is not what memory held.
+          const box = shape as Record<string, unknown>
+          if (boxDrawnAgain(index, state.sourceId)) {
+            delete box.bounds
+            delete box.points
+            drawnAgain.add(state.sourceId)
+          } else if (drawnAgain.delete(state.sourceId)) {
+            box.bounds = state.shape.bounds
+            if (state.shape.kind === "polygon") box.points = state.shape.points
+            if (state.shape.aim) box.aim = state.shape.aim
+            if (state.shape.angular) box.angular = state.shape.angular
+          }
+        }
+        return { sourceId: state.sourceId, shape }
+      })
+    }))
+  }
+
+  private static thinned(shape: Shape, previous: Shape): Partial<Shape> {
+    const was = previous as unknown as Record<string, unknown>
+    const stated: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(shape)) {
+      // A value said with what it rests on (`{ value, basis }`, see Provenance) is said again: what it rests on is said of this keyframe,
+      // and would not be held as the value is.
+      const said = typeof value === "object" && value !== null && !Array.isArray(value) && "value" in value
+      // The same object first: a held field is shared from keyframe to keyframe, and an outline is long to compare.
+      if (said || (value !== was[key] && JSON.stringify(value) !== JSON.stringify(was[key]))) stated[key] = value
+    }
+    if ("bounds" in stated) {
+      if (shape.aim) stated.aim = shape.aim
+      if (shape.angular) stated.angular = shape.angular
+    }
+    return stated as Partial<Shape>
+  }
+
   private static completed(state: ShapeState, previous: Shape | undefined, path: string, issues: RecordingIssue[]): Shape {
     const stated = (state.shape ?? {}) as Partial<Shape>
     const base: Partial<Shape> = previous ?? KeyframeCompletion.firstAppearance(stated, path, issues)

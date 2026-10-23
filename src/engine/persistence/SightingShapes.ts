@@ -63,20 +63,23 @@ export class SightingShapes {
    * saved.
    */
   static toBounds(sighting: Sighting): void {
-    this.eachKeyframe(sighting, (shape, projection) => {
-      if (!shape.angular) return shape
-      const { width, height } = projection.toBoundsSize(shape.angular)
-      const bounds = {
-        x: shape.bounds.x + (shape.bounds.width - width) / 2,
-        y: shape.bounds.y + (shape.bounds.height - height) / 2,
-        width,
-        height
-      }
-      if (shape.kind !== "polygon") return { ...shape, bounds }
-      const scaleX = shape.bounds.width === 0 ? 1 : width / shape.bounds.width
-      const scaleY = shape.bounds.height === 0 ? 1 : height / shape.bounds.height
-      return { ...shape, bounds, points: shape.points.map(point => ({ x: point.x * scaleX, y: point.y * scaleY })) }
-    })
+    this.eachKeyframe(sighting, (shape, projection) => this.sizedFromAngle(shape, projection))
+  }
+
+  /** One shape as toBounds draws it: its box at the size its angle states, about its own centre, its outline with it. */
+  private static sizedFromAngle(shape: Shape, projection: ImageProjection): Shape {
+    if (!shape.angular) return shape
+    const { width, height } = projection.toBoundsSize(shape.angular)
+    const bounds = {
+      x: shape.bounds.x + (shape.bounds.width - width) / 2,
+      y: shape.bounds.y + (shape.bounds.height - height) / 2,
+      width,
+      height
+    }
+    if (shape.kind !== "polygon") return { ...shape, bounds }
+    const scaleX = shape.bounds.width === 0 ? 1 : width / shape.bounds.width
+    const scaleY = shape.bounds.height === 0 ? 1 : height / shape.bounds.height
+    return { ...shape, bounds, points: shape.points.map(point => ({ x: point.x * scaleX, y: point.y * scaleY })) }
   }
 
   /**
@@ -150,10 +153,65 @@ export class SightingShapes {
    * failure: it is a observer who has looked away, and it is the whole reason this exists.
    */
   static toPosition(sighting: Sighting): void {
-    this.eachKeyframe(sighting, (shape, projection, pose) => {
-      const position = shape.aim && this.positionOf(sighting, shape.aim, shape.bounds, projection, pose)
-      return position ? { ...shape, bounds: { ...shape.bounds, ...position } } : shape
+    this.eachKeyframe(sighting, (shape, projection, pose) => this.placedByAim(sighting, shape, projection, pose))
+  }
+
+  /** One shape as toPosition draws it: its box where its direction puts it, when the pose has a heading to put it from. */
+  private static placedByAim(sighting: Sighting, shape: Shape, projection: ImageProjection, pose: ObserverPose | undefined): Shape {
+    const position = shape.aim && this.positionOf(sighting, shape.aim, shape.bounds, projection, pose)
+    return position ? { ...shape, bounds: { ...shape.bounds, ...position } } : shape
+  }
+
+  /**
+   * Which shapes of which keyframes need not state their box and their outline in a file written thin (see KeyframeCompletion.thin):
+   * those whose box and outline loading draws again by itself, from their angle and their direction (see toBounds, toPosition), within
+   * a rounding error. Worked out by loading the shapes as they would be written: each held from what was written of it before, its
+   * box and outline left out, then sized and placed as a load does; where that is not the box and outline in memory, they are written.
+   * A shape is written whole where it first appears. Keyed by the keyframe's index and the shape's source.
+   */
+  static derivable(sighting: Sighting): (keyframe: number, sourceId: string) => boolean {
+    const leftOut = new Set<string>()
+    const held = new Map<string, Shape>()
+    const previous = new Map<string, Shape>()
+    sighting.timeline.allKeyframes.forEach((keyframe, index) => {
+      const pose = resolveObserverPoseAt(sighting, keyframe.t)
+      const projection = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, this.fovOf(sighting, keyframe.t))
+      for (const { sourceId, shape } of keyframe.shapes) {
+        const was = previous.get(sourceId)
+        const before = held.get(sourceId)
+        previous.set(sourceId, shape)
+        if (!was || !before) {
+          held.set(sourceId, shape)
+          continue
+        }
+        // What is written of it but its box and outline (what changed), over what loading holds of it.
+        const written = Object.fromEntries(Object.entries(shape).filter(([key, value]) =>
+          key !== "bounds" && key !== "points" && JSON.stringify(value) !== JSON.stringify((was as unknown as Record<string, unknown>)[key])))
+        const read = { ...before, ...written } as Shape
+        const loaded = this.placedByAim(sighting, this.sizedFromAngle(read, projection), projection, pose)
+        if (SightingShapes.near(loaded, shape)) {
+          leftOut.add(`${index}:${sourceId}`)
+          held.set(sourceId, read)
+        } else {
+          // Written: what changed, and the box and outline again when they were left out before (see KeyframeCompletion.thin), so that
+          // what loading holds of it is what memory holds.
+          held.set(sourceId, shape)
+        }
+      }
     })
+    return (keyframe, sourceId) => leftOut.has(`${keyframe}:${sourceId}`)
+  }
+
+  /** How far apart, in pixels, a box or a point drawn again may be from the one in memory and be the same: rounding, not a move. */
+  private static readonly SAME_PX = 1e-6
+
+  private static near(loaded: Shape, shape: Shape): boolean {
+    const close = (a: number, b: number) => Math.abs(a - b) <= SightingShapes.SAME_PX * Math.max(1, Math.abs(b))
+    const a = loaded.bounds
+    const b = shape.bounds
+    if (!close(a.x, b.x) || !close(a.y, b.y) || !close(a.width, b.width) || !close(a.height, b.height)) return false
+    if (shape.kind !== "polygon" || loaded.kind !== "polygon") return true
+    return loaded.points.length === shape.points.length && loaded.points.every((point, i) => close(point.x, shape.points[i].x) && close(point.y, shape.points[i].y))
   }
 
   /** Where a box of these dimensions is drawn when it states this direction, or undefined when the
