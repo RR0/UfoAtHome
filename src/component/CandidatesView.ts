@@ -70,7 +70,7 @@ export class CandidatesView {
 .candidate-head:hover:not(:disabled) { background: var(--ground-sunken); }
 .candidate-head::before { content: "›"; color: var(--ink-faint); transition: transform .12s ease; }
 .candidate[open] .candidate-head::before { transform: rotate(90deg); }
-.verdict { padding: 2px 9px; border-radius: 6px; font: 600 12px/1.5 var(--sans); background: var(--neutral-bg); }
+.verdict { user-select: none; padding: 2px 9px; border-radius: 6px; font: 600 12px/1.5 var(--sans); background: var(--neutral-bg); }
 .verdict[data-verdict="consolidated"] { background: light-dark(rgba(31, 122, 68, .14), rgba(143, 215, 164, .16)); }
 .verdict[data-verdict="contested"] { background: var(--warn-bg); }
 .verdict[data-verdict="incompatible"] { background: var(--error-bg); }
@@ -85,7 +85,7 @@ export class CandidatesView {
 .candidate-reason { margin: 0; color: var(--ink-dim); }
 .candidates-note { margin: 4px 0 0; font-size: 13px; color: var(--ink-faint); }
 .variant-value { flex: 1 0 100%; font: 400 13px/1.4 var(--sans); }
-.poher-tag { margin-left: 6px; padding: 1px 7px; border-radius: 6px; background: var(--neutral-bg); color: var(--ink-dim); font: 600 11px/1.6 var(--sans); }
+.poher-tag { user-select: none; margin-left: 6px; padding: 1px 7px; border-radius: 6px; background: var(--neutral-bg); color: var(--ink-dim); font: 600 11px/1.6 var(--sans); }
 .poher-tag[data-excluded="true"] { background: var(--error-bg); }
 .poher-answers { font-size: 13px; color: var(--ink-dim); }
 .poher-answers summary { cursor: pointer; font-weight: 600; }

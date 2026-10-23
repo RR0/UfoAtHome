@@ -17,11 +17,12 @@ export interface SectionFoldMessages {
  * held back whole under its title, with "› Show (N settings)". Each section is opened and closed on its own, and stays as it was left.
  *
  * Counted when asked (see refresh), from what the form shows at that moment: a field hidden for another reason (a camera's settings
- * with the naked eye) is not one held back.
+ * with the naked eye) is not one held back. And not held back at all where it costs no room: fields that, shown, only fill the lines
+ * the section has already (at the width it has now) are shown, and the fold is not offered (see fits).
  */
 export class SectionFolds {
   static readonly CSS = `
-.form-section:not([data-open]) .adv { display: none !important; }
+.form-section:not([data-open], [data-fits]) .adv { display: none !important; }
 .form-section[data-fold="all"]:not([data-open]) > :not(.section-title, .more-toggle) { display: none !important; }
 .more-toggle {
   grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; gap: 6px;
@@ -38,7 +39,7 @@ export class SectionFolds {
   private messages?: SectionFoldMessages
   private readonly toggles = new Map<HTMLElement, HTMLButtonElement>()
 
-  constructor(root: ParentNode) {
+  constructor(root: ParentNode, resized?: Element) {
     for (const section of root.querySelectorAll<HTMLElement>(".form-section")) {
       if (section.dataset.fold !== "all" && !section.querySelector(".adv")) continue
       const toggle = document.createElement("button")
@@ -52,6 +53,16 @@ export class SectionFolds {
       else section.append(toggle)
       this.toggles.set(section, toggle)
     }
+    // Whether the fields held back fit the lines a section has depends on its width: measured again when that changes.
+    if (resized && typeof ResizeObserver !== "undefined") {
+      let width = 0
+      new ResizeObserver(entries => {
+        const now = Math.round(entries[entries.length - 1].contentRect.width)
+        if (now === width) return
+        width = now
+        this.refresh()
+      }).observe(resized)
+    }
   }
 
   setMessages(messages: SectionFoldMessages): void {
@@ -64,15 +75,41 @@ export class SectionFolds {
     const m = this.messages
     if (!m) return
     for (const [section, toggle] of this.toggles) {
+      const fits = this.fits(section, toggle)
+      section.toggleAttribute("data-fits", fits)
       const open = section.hasAttribute("data-open")
       const whole = section.dataset.fold === "all"
       const n = this.count(section)
-      toggle.hidden = !whole && n === 0
+      toggle.hidden = (!whole && n === 0) || fits
       toggle.textContent = whole
         ? (open ? m.hideSettings : n === 0 ? m.showSettingsAny : (n === 1 ? m.showSettingsOne : m.showSettings).replaceAll("{n}", String(n)))
         : (open ? m.lessSettings : m.moreSettings.replaceAll("{n}", String(n)))
       toggle.setAttribute("aria-expanded", String(open))
     }
+  }
+
+  /**
+   * Whether the fields a section holds back, shown, leave it as tall as it is without them: then they only fill lines it has already, and
+   * holding them back saves no room. Measured on the page, not a section that is not on show (a closed group, a test's DOM): that one
+   * keeps its fold. A section held back whole always keeps it: its title alone is what it is folded to.
+   */
+  private fits(section: HTMLElement, toggle: HTMLButtonElement): boolean {
+    if (section.dataset.fold === "all") return false
+    const height = () => section.getBoundingClientRect().height
+    const open = section.hasAttribute("data-open")
+    const hidden = toggle.hidden
+    section.removeAttribute("data-fits")
+    toggle.hidden = true
+    section.removeAttribute("data-open")
+    const folded = height()
+    let fits = false
+    if (folded > 0) {
+      section.setAttribute("data-open", "")
+      fits = height() <= folded + 0.5
+    }
+    section.toggleAttribute("data-open", open)
+    toggle.hidden = hidden
+    return fits
   }
 
   /** Opens the section `element` is in, if it is held back there: a field somebody is sent to has to be seen. */

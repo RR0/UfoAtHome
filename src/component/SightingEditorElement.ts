@@ -1182,7 +1182,7 @@ export class SightingEditorElement extends HTMLElement {
     this.durationInput = this.durationElement.input
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
     this.saveButton = this.shadow.getElementById("save") as HTMLButtonElement
-    this.sectionFolds = new SectionFolds(this.shadow)
+    this.sectionFolds = new SectionFolds(this.shadow, this.shadow.querySelector(".app")!)
     const editor = this
     this.witnessErrorView = new WitnessErrorView({
       get sighting() { return editor.ufoElement.sighting },
@@ -5679,8 +5679,9 @@ export class SightingEditorElement extends HTMLElement {
     this.elevationInput.value = String(Math.round((ground ?? 0) + heightAboveGroundM))
     this.elevationInput.min = ground === undefined ? "" : String(ground)
     this.elevationInput.title = ground === undefined ? "" : this.messages.altitudeAboveSeaLevel
+    // Where the ground is, said only when the observer stands above it: at ground level, the altitude says it already.
     this.groundElevationOutput.textContent =
-      ground === undefined ? "" : this.messages.groundAt.replace("{m}", String(ground))
+      ground === undefined || Math.round(heightAboveGroundM) === 0 ? "" : this.messages.groundAt.replace("{m}", String(ground))
   }
 
   /** A freshly loaded recording is somewhere else: until its own ground height resolves, the
@@ -6868,6 +6869,7 @@ export class SightingEditorElement extends HTMLElement {
       }
     }
     this.paramSummary.replaceChildren(...strip)
+    this.shadow.getElementById("label-param-summary")!.textContent = this.messages.paramSummaryTitle.replace("{n}", String(strip.length))
     this.syncDescription()
   }
 
@@ -10008,9 +10010,14 @@ export class SightingEditorElement extends HTMLElement {
     const label = recording ? this.messages.stop : this.messages.record
     this.recordButton.title = label
     this.recordButton.setAttribute("aria-label", label)
-    Icons.show(this.recordButton, recording ? "⏹" : "⏺")
-    // Said as well as drawn, as every action of the form is.
-    this.recordButton.append(label)
+    // Said as well as drawn, as every action of the form is: the pictogram and the word each in a place of its own, so that writing
+    // one again leaves the other as it is (see Icons.show, which leaves a pictogram already shown).
+    if (!this.recordButton.querySelector(".record-label")) {
+      this.recordButton.replaceChildren(Object.assign(document.createElement("span"), { className: "record-icon" }),
+        Object.assign(document.createElement("span"), { className: "record-label" }))
+    }
+    Icons.show(this.recordButton.querySelector<HTMLElement>(".record-icon")!, recording ? "⏹" : "⏺")
+    this.recordButton.querySelector(".record-label")!.textContent = label
   }
 
   /** Auto-detects the visitor's preferred UI language from `navigator.languages`, falling back

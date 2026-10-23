@@ -47,15 +47,23 @@ export class WitnessErrorView {
   static readonly CSS = `
 .basis-mark {
   display: inline-block; margin-left: 8px; padding: 0 8px; border: 1px solid var(--glow-dim); border-radius: 999px;
-  font: 600 11px/1.6 var(--sans); color: var(--glow); cursor: pointer; visibility: hidden; vertical-align: .05em;
+  font: 600 11px/1.6 var(--sans); color: var(--glow); cursor: pointer; visibility: hidden; vertical-align: .05em; user-select: none;
 }
 :is(label, .field):is(:hover, :focus-within) .basis-mark, .basis-mark:not([data-basis="stated"]) { visibility: visible; }
 .basis-mark[data-basis="assumed"], .basis-mark[data-basis="derived"] { font-style: italic; }
 :is(label, .field)[data-basis="assumed"] :is(input, .edtf-field input) { font-style: italic; }
+/* A field with its basis: its name and the mark on the first line, the value and its unit on the next, the law under them. Left to
+   the field's own flow, the mark (hidden but for the hover) opened the second line and pushed the value aside. */
+.app .form-section > :is(label, .field):has(> .basis-mark) {
+  display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: 6px;
+}
+.app .form-section > :is(label, .field):has(> .basis-mark) > :first-child { grid-column: 1; }
+.app .form-section > :is(label, .field):has(> .basis-mark) > .basis-mark { grid-column: 2 / -1; justify-self: start; margin-left: 0; }
+.app .form-section > :is(label, .field):has(> .basis-mark) > .law { grid-column: 1 / -1; }
 .law { flex: 1 0 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font: 400 12px/1.4 var(--sans); color: var(--ink-dim); }
 .law-symbol { color: var(--glow-dim); font-weight: 700; }
 .law-reset { color: var(--glow); }
-.lead-status { padding: 0 7px; border-radius: 6px; font: 600 11px/1.6 var(--sans); color: var(--ink); background: var(--neutral-bg); }
+.lead-status { user-select: none; padding: 0 7px; border-radius: 6px; font: 600 11px/1.6 var(--sans); color: var(--ink); background: var(--neutral-bg); }
 .lead-status[data-status="individual"] { background: light-dark(rgba(31, 122, 68, .14), rgba(143, 215, 164, .16)); }
 .lead-status:is([data-status="argued"], [data-status="single"]) { background: var(--warn-bg); }
 .lead-status[data-status="contested"] { background: var(--error-bg); }

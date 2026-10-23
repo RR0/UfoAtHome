@@ -117,6 +117,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   identityKeep: "Save anyway",
   identityBack: "Go back",
   importFile: "Load sighting file",
+  paramSummaryTitle: "What the recording states ({n})",
   wholeKeyframes: "Every keyframe whole",
   wholeKeyframesHint: "Otherwise a keyframe states only what changed since the one before, as a recording is written by hand. Changing this starts the history of Undo afresh.",
   importUrlPlaceholder: "https://…/sighting.json",

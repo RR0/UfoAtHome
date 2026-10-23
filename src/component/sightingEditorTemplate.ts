@@ -111,7 +111,11 @@ export const html = `
        out of sight on a real case. Each chip carries its section and its field, so clicking one opens the right section and
        puts the caret in the right input (see SightingEditorElement.refreshParamSummary); a value a data source supplied
        rather than the author is marked, which is the one thing the form itself never showed at a glance. -->
-  <div id="param-summary" class="param-summary"></div>
+  <!-- Folded by default: the form says the same field by field, and the room is the scene's and the form's (see the chips' count). -->
+  <details id="param-summary-fold" class="param-summary-fold">
+    <summary id="label-param-summary">What the recording states</summary>
+    <div id="param-summary" class="param-summary"></div>
+  </details>
 </section>
 <section class="group-panel" id="group-observer" aria-labelledby="label-observer-group" hidden>
   <div class="toolbar">
@@ -1054,6 +1058,7 @@ input.invalid {
   max-width: 100%;
   overflow-wrap: break-word;
 }
+.ground-elevation:empty { display: none; }
 /* Says which record the locked fields came from, and when for — quieter than the fields it
    explains, same role and styling as .apparent-size. The link goes to the exact request that
    produced them, so the claim stays checkable rather than just asserted. */
@@ -1628,15 +1633,16 @@ select.weather-field:disabled {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.8em;
+  gap: 6px;
   height: 1.8em;
-  padding: 0;
+  padding: 0 10px;
   border-radius: 3px;
   cursor: pointer;
   font-size: 1em;
   line-height: 1;
   color: #e33;
 }
+.record-btn .record-label { color: var(--ink); font-weight: 600; }
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -1808,7 +1814,9 @@ ${EditorTheme.HEAD}
 .scene-card > .render-line { padding: 6px 12px; background: var(--ground-raised); }
 .scene-card > .render-line:not(:has(:not(:empty))) { display: none; }
 .scene-card > .playback-row { margin: 0; padding: 8px 14px; background: var(--ground-raised); border-top: 1px solid var(--line); }
-#group-observation > .param-summary { margin: 18px 0 0; padding: 18px 0 0; border-top: 1px solid var(--line); }
+#group-observation > .param-summary-fold { margin: 18px 0 0; padding: 14px 0 0; border-top: 1px solid var(--line); }
+.param-summary-fold > summary { cursor: pointer; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
+.param-summary-fold > .param-summary { margin-top: 10px; }
 /* The sections, as a row of chips that scrolls sideways rather than wrapping. */
 #group-tabs.section-chips {
   display: flex;

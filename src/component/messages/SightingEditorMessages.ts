@@ -218,6 +218,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   /** The case with what was changed, as a zip. */
   importFile: string
   /** Whether the recording's text writes every keyframe whole, rather than only what changed since the one before; and why one would. */
+  /** The fold of the chips that say what the recording states, `{n}` being how many there are. */
+  paramSummaryTitle: string
   wholeKeyframes: string
   wholeKeyframesHint: string
   importUrlPlaceholder: string

@@ -117,6 +117,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   identityKeep: "Guardar de todos modos",
   identityBack: "Volver",
   importFile: "Cargar un archivo de observación",
+  paramSummaryTitle: "Lo que indica la grabación ({n})",
   wholeKeyframes: "Cada fotograma clave entero",
   wholeKeyframesHint: "Si no, un fotograma clave solo dice lo que cambió desde el anterior, como se escribe una grabación a mano. Cambiar esto vacía el historial de deshacer.",
   importUrlPlaceholder: "https://…/sighting.json",

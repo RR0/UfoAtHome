@@ -3082,6 +3082,8 @@ describe("SightingEditorElement parameter summary", () => {
   it("sits in the Summary section, where what the recording states is read", () => {
     const root = mount().shadowRoot!
     expect(root.getElementById("group-observation")!.contains(root.getElementById("param-summary"))).toBe(true)
+    // Folded by default: the form already says it field by field, and the room is the scene's.
+    expect((root.getElementById("param-summary-fold") as HTMLDetailsElement).open).toBe(false)
   })
 
   it("states only what is set, so it reads as a statement rather than a second copy of the form", () => {

@@ -29,6 +29,20 @@ describe("SectionFolds", () => {
     expect(toggle.getAttribute("aria-expanded")).toBe("true")
   })
 
+  it("shows the fields it would hold back, and offers no fold, where they fit the lines the section has", () => {
+    const html = `<div class="form-section"><label>Focal <input/></label><label class="adv">Aperture <input/></label></div>`
+    // A page that lays the section out: as tall open as folded (the fields beside the others), then taller (on lines of their own).
+    for (const [openHeight, fits] of [[40, true], [80, false]] as const) {
+      const root = fixture(html)
+      const section = root.querySelector<HTMLElement>(".form-section")!
+      section.getBoundingClientRect = () => ({ height: section.hasAttribute("data-open") ? openHeight : 40 }) as DOMRect
+      new SectionFolds(root).setMessages(messages)
+      expect(section.hasAttribute("data-fits")).toBe(fits)
+      expect(root.querySelector<HTMLButtonElement>(".more-toggle")!.hidden).toBe(fits)
+      expect(section.hasAttribute("data-open")).toBe(false)
+    }
+  })
+
   it("does not count a field hidden for another reason, and says nothing when none is left", () => {
     const root = fixture(`<div class="form-section"><label>Focal <input/></label><label class="adv" hidden>Aperture <input/></label></div>`)
     new SectionFolds(root).setMessages(messages)

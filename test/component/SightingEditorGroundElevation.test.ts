@@ -255,7 +255,9 @@ describe("SightingEditorElement ground elevation", () => {
     await settle(3000)
 
     expect(elevationLookups).toBe(1)
-    expect(element.shadowRoot!.getElementById("ground-elevation")!.textContent).toContain("585")
+    // At ground level, the altitude says where the ground is, and the note under it says nothing more.
+    expect((element.shadowRoot!.getElementById("elevation") as HTMLInputElement).value).toBe("585")
+    expect(element.shadowRoot!.getElementById("ground-elevation")!.textContent).toBe("")
     // The same loop re-asked the weather record every turn; one place and one date is one question.
     expect(weatherLookups).toBeLessThanOrEqual(2)
   })
