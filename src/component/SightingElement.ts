@@ -535,6 +535,7 @@ export class SightingElement extends HTMLElement {
       throw new Error(`${url} is a bare list of recordings, which is no longer read: list them as the sighting events of a case.json`)
     }
     if (CaseFile.isCase(json)) {
+      CaseFile.check(json)
       // Resolved against the CASE's own address, not the page's: the recordings sit beside it, so
       // the same case.json works read from its dossier's page and from anywhere else.
       const urls = CaseFile.sightingUrls(json, new URL(url, location.href).href)

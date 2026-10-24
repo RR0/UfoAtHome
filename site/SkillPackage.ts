@@ -56,7 +56,7 @@ looked, and the phenomenon as directions and apparent sizes over time. The playe
 it. Your job is to state the account precisely and honestly, not to illustrate it.
 
 Written for UFO@home ${this.version}. Format reference: https://ufoathome.org/docs/format/ ,
-schema: \`references/sighting.schema.json\` (also https://ufoathome.org/sighting.schema.json ),
+schema: \`references/sighting.schema.json\` (also https://ufoathome.org/schema/1/sighting.schema.json ),
 smallest valid example: \`references/example-minimal.json\`.
 
 ## The one rule that matters

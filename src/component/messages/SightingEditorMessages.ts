@@ -239,6 +239,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   importErrorStatus: string
   /** It arrived, and it is not a recording. */
   importErrorMalformed: string
+  /** A file in a version of its format this engine does not read (see FormatVersion). `{found}` is the version it states, `{supported}` the newest read. */
+  formatVersionError: string
   record: string
   stop: string
   /** Connects a reported result to the picker naming who produced it: "2 places found

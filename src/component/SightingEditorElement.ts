@@ -35,6 +35,7 @@ import { NumberFields } from "./NumberFields.js"
 import type { BodyJson, BodyKeyframe } from "../engine/interpretation/Interpretation.js"
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
+import { FormatVersionError } from "../engine/persistence/FormatVersion.js"
 import { NARRATIVE_SOURCES } from "../engine/narrative/narrativeSources.js"
 import { SightingAssessments } from "./SightingAssessments.js"
 import { NarrativeError } from "../engine/narrative/NarrativeError.js"
@@ -2626,6 +2627,8 @@ export class SightingEditorElement extends HTMLElement {
       const text = await this.recordingText(bytes)
       const json = JSON.parse(text) as SightingRecordingJson
       if (CaseFile.isCase(json)) {
+        // Before it is handed over: the case editor opens it later, where a refusal would reach nobody.
+        CaseFile.check(json)
         if (this.offerCase(json, undefined)) return
         throw new Error("A case has no recording to edit here")
       }
@@ -2637,8 +2640,8 @@ export class SightingEditorElement extends HTMLElement {
       this.dispatchEvent(new CustomEvent("recordingloaded", { bubbles: true, composed: true }))
       // The recording now open came from a file, not from the address still sitting in the field.
       this.importInput.url = ""
-    } catch {
-      window.alert(this.messages.importError)
+    } catch (error) {
+      window.alert(this.importErrorFor(error))
     }
   }
 
@@ -2713,6 +2716,8 @@ export class SightingEditorElement extends HTMLElement {
       const fetched = await SightingFetch.recording(url)
       // A case is not a recording: whoever edits cases takes it (see offerCase).
       if (CaseFile.isCase(fetched)) {
+        // Before it is handed over: the case editor opens it later, where a refusal would reach nobody.
+        CaseFile.check(fetched)
         const address = new URL(url, location.href).href
         if (this.offerCase(fetched, address)) {
           this.importInput.url = address
@@ -2749,6 +2754,7 @@ export class SightingEditorElement extends HTMLElement {
    * why the wording hedges.
    */
   private importErrorFor(error: unknown): string {
+    if (error instanceof FormatVersionError) return error.said(this.messages.formatVersionError)
     if (!(error instanceof SightingFetchError)) return this.messages.importError
     switch (error.kind) {
       case "cors":
@@ -6165,8 +6171,8 @@ export class SightingEditorElement extends HTMLElement {
       this.showFileNote(undefined)
       // The history already holds this text (it is what typing in it, or an undo, made): not a change to write in.
       this.historySnapshot = this.fileText()
-    } catch {
-      this.showFileNote(this.messages.importErrorMalformed, "error")
+    } catch (error) {
+      this.showFileNote(error instanceof FormatVersionError ? error.said(this.messages.formatVersionError) : this.messages.importErrorMalformed, "error")
       this.fileTextApplied = text
     } finally {
       this.applyingFileText = false

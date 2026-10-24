@@ -58,6 +58,7 @@ export const caseEditorMessages_fr: CaseEditorMessages = {
   inputFileModeHint: "Cliquer pour le donner autrement : un fichier à vous, ou une adresse",
   inputFileLoad: "Charger",
   fileNotACase: "Ce fichier n'est pas un dossier (il n'a pas d'événements).",
+  formatVersionError: "Ce fichier indique la version {found} de son format ; cet UFO@home lit jusqu'à la version {supported}. Ouvrez-le avec un UFO@home plus récent.",
   fileInvalid: "Ce texte n'est pas encore du JSON valide, ou pas un dossier : le dossier garde ce qu'il a compris en dernier.",
   fileLoading: "Chargement de l'éditeur…",
   add: "Ajouter",

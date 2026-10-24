@@ -1,5 +1,6 @@
 import type { AgentRef } from "../interpretation/Interpretation.js"
 import type { SaidText } from "../model/SaidText.js"
+import { FormatVersion } from "./FormatVersion.js"
 
 /** What an interview was held through. */
 export type InterviewMedium = "in-person" | "phone" | "video" | "chat" | "email" | "letter" | "other"
@@ -107,6 +108,9 @@ export interface InterviewProofreading {
  * Times are those of the recording, which may not be kept: they stay meaningful as a way to say where in the interview something was said.
  */
 export interface InterviewJson {
+  /** The schema this file was written against, for an editor to check it with: https://ufoathome.org/schema/1/interview.schema.json. Not read. */
+  $schema?: string
+  /** The version of the format this file is written in (see FormatVersion): 1, the only one so far. A file of a newer version is refused, not misread. */
   version: 1
   id?: string
   language?: string
@@ -151,6 +155,11 @@ export interface InterviewPassage {
 
 /** Reading an interview transcript. */
 export class InterviewFile {
+
+  /** `json` as a transcript, once its version is one this engine reads (see FormatVersion, which throws otherwise). */
+  static read(json: unknown): InterviewJson {
+    return FormatVersion.check(json, "interview") as InterviewJson
+  }
 
   /** True when every speaker has approved the transcript (`approved`, or `covered` by a fuller version they approved). */
   static isProofread(json: InterviewJson): boolean {

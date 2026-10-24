@@ -25,6 +25,7 @@ import { ContextPage, ContextSectionPage } from "./content/ContextPage.js"
 import { CONTEXT_SECTIONS } from "./content/ContextSections.js"
 import { SkillPackage } from "./SkillPackage.js"
 import { OfflineKit } from "./OfflineKit.js"
+import { FormatVersion } from "../src/engine/persistence/FormatVersion.js"
 
 /**
  * Builds ufoathome.org into `dist-site/`.
@@ -137,14 +138,17 @@ class SiteBuilder {
     }
     await cp(join(this.root, "site", "shots"), join(this.out, "shots"), { recursive: true })
     await cp(join(this.root, "public", "demo-data"), join(this.out, "demo-data"), { recursive: true })
-    // The recording format as a JSON Schema, generated from the types by build:schema, so that a file
-    // written by hand or by a language model can be checked before it is played. Linked from the
-    // format page; its $id is this address.
-    await cp(join(this.root, "src", "generated", "sighting.schema.json"), join(this.out, "sighting.schema.json"))
-    // The same for a case, which the editor of a case completes from; its $id is this address too.
-    await cp(join(this.root, "src", "generated", "case.schema.json"), join(this.out, "case.schema.json"))
-    // And an interview's transcript.
-    await cp(join(this.root, "src", "generated", "interview.schema.json"), join(this.out, "interview.schema.json"))
+    // The formats as JSON Schemas, generated from the types by build:schema, so that a file written by hand or by a language model can
+    // be checked before it is played: a recording's (linked from the format page), a case's (which the editor of a case completes
+    // from) and an interview transcript's. Each at two addresses: under the version of its format, which is its $id and what a file
+    // names in its own $schema, and at the root, the current version, where links made before formats had versions point.
+    for (const format of ["sighting", "case", "interview"] as const) {
+      const schema = join(this.root, "src", "generated", `${format}.schema.json`)
+      const versioned = join(this.out, new URL(FormatVersion.schemaUrl(format)).pathname)
+      await mkdir(dirname(versioned), { recursive: true })
+      await cp(schema, versioned)
+      await cp(schema, join(this.out, `${format}.schema.json`))
+    }
     // The skill that teaches an AI assistant to write a recording from a case file (see SkillPackage):
     // the zip to install, and its SKILL.md alone for a reader who wants to see what it says first.
     const skill = new SkillPackage(this.root, version)
@@ -397,6 +401,12 @@ ${retired}
 
 /demo-data/*
   Access-Control-Allow-Origin: *
+
+# The schemas, at the root (the current version of each format) and under /schema/<version>/. Revalidated there too: a version of a
+# format still gains the fields added to it (which do not change its version, see FormatVersion), so its schema changes with them.
+/schema/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
 
 /sighting.schema.json
   Access-Control-Allow-Origin: *

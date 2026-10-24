@@ -531,9 +531,9 @@ export class InterviewEditorElement extends HTMLElement {
   private async transcriptJson(event: InterviewEvent): Promise<InterviewJson | undefined> {
     try {
       const text = this.fileEditor?.text ?? this.text
-      if (text !== undefined) return JSON.parse(text) as InterviewJson
+      if (text !== undefined) return InterviewFile.read(JSON.parse(text))
       const url = this.transcriptUrl(event)
-      if (url !== undefined) return await SightingFetch.json(url) as InterviewJson
+      if (url !== undefined) return InterviewFile.read(await SightingFetch.json(url))
     } catch {
       // not readable: there is nothing to show of it
     }

@@ -121,7 +121,7 @@ export class DocsFormatPage extends DocsSection {
     <div class="table-scroll">
     <table>
       <tr><th>Field</th><th>Meaning</th></tr>
-      <tr><td><code>version</code></td><td>Always <code>1</code></td></tr>
+      <tr><td><code>version</code></td><td>The version of the format: <code>1</code> (see Versions of the format)</td></tr>
       <tr><td><code>id</code></td><td>Which account this is, unique across every recording anywhere: the day, then who saw it (<code>"1964-04-24-ZamoraLonnie"</code>), or where for an anonymous observer (<code>"1964-04-24-Socorro"</code>). What a case names it by is not this id but its event's own (see below).</td></tr>
       <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, every part optional — that is how the format states “1954” or “around 05:00”. <code>raw</code> is the date as written in <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, and it is what the date means: <code>"1948-07-24T02:45~"</code> (approximate), <code>"2025-06?"</code> (uncertain), <code>"1965-07-01%"</code> (both), <code>"19XX"</code> (a masked year), or <code>"05:00"</code> alone for a time of day remembered without its date. The numbers are kept in step with it for what computes (the sky, the clock). It is a subset of EDTF (level 0, these qualifiers on the whole date, masked years); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> is RR0's full EDTF model, into which UFO@home's own tooling converts a recording's dates <code>season</code> (<code>spring</code>, <code>summer</code>, <code>autumn</code> or <code>winter</code>) states a date known only as “in the spring of 2022” (EDTF <code>2022-21</code>), where <code>month</code> and <code>day</code> are left out.</td></tr>
       <tr><td><code>durationSeconds</code></td><td>An alternative to <code>endTime</code>, and it wins if both are given</td></tr>
@@ -514,7 +514,7 @@ export class DocsFormatPage extends DocsSection {
       or the file for, which is why it is worth writing even when nothing else is.</p>
 
     <h2>Checking a file</h2>
-    <p>The format is also published as a <a href="/sighting.schema.json">JSON Schema</a>,
+    <p>The format is also published as a <a href="/schema/1/sighting.schema.json">JSON Schema</a>,
       generated from the same types as the player: every key it knows, what each may hold, and the
       words a closed list accepts. A misspelt key or an unknown value fails it. It says nothing
       about what may be left out, which is a question of meaning this page answers. To see the
@@ -524,6 +524,21 @@ export class DocsFormatPage extends DocsSection {
       nothing reads, a word outside its list, and what it had to make up because a shape's first
       keyframe left it out (a field held from the keyframe before is the rule above, not a
       problem).</p>
+
+    <h3>Versions of the format</h3>
+    <p>A file states the version of its format in <code>version</code>: <code>1</code>, the only
+      one so far. It is the version of the FORMAT, not of UFO@home: adding a field does not change
+      it, since an older player ignores what it does not know, and every file of version 1 written
+      since the format began still plays. It changes only the day a field would change meaning or
+      shape, and that day the player will read both, the older through a conversion. A file of a
+      version newer than the player is refused with a message saying so, rather than played as
+      something it does not say.</p>
+    <p>Each version has its own schema, at an address that names it:
+      <code>https://ufoathome.org/schema/1/sighting.schema.json</code> (and
+      <code>case.schema.json</code>, <code>interview.schema.json</code> beside it).
+      <code>/sighting.schema.json</code> is always the current version. A file may name the one it
+      was written against in <code>"$schema"</code>, which editors such as VS Code use to check it
+      as it is typed; the player does not read it.</p>
 
     <h2>A whole file</h2>
     <p>The smallest recording that still states something — one silent oval crossing the sky over
@@ -603,7 +618,7 @@ export class DocsFormatPage extends DocsSection {
     <div class="table-scroll">
     <table>
       <tr><th>Champ</th><th>Sens</th></tr>
-      <tr><td><code>version</code></td><td>Toujours <code>1</code></td></tr>
+      <tr><td><code>version</code></td><td>La version du format : <code>1</code> (voir Versions du format)</td></tr>
       <tr><td><code>id</code></td><td>Quel compte rendu c'est, unique parmi tous les enregistrements : le jour, puis qui l'a vu (<code>"1964-04-24-ZamoraLonnie"</code>), ou le lieu pour un observateur anonyme (<code>"1964-04-24-Socorro"</code>). Ce par quoi un dossier le désigne n'est pas cet id mais celui de son événement (voir plus bas).</td></tr>
       <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, chaque partie facultative — c'est ainsi que le format énonce « 1954 » ou « vers 05:00 ». <code>raw</code> est la date telle qu'écrite en <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, et c'est elle qui fait foi : <code>"1948-07-24T02:45~"</code> (approximative), <code>"2025-06?"</code> (incertaine), <code>"1965-07-01%"</code> (les deux), <code>"19XX"</code> (une année masquée), ou <code>"05:00"</code> seul pour une heure dont on a oublié la date. Les nombres sont tenus en accord avec elle pour ce qui calcule (le ciel, l'horloge). C'est un sous-ensemble d'EDTF (niveau 0, ces qualificatifs sur la date entière, années masquées) ; <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> est le modèle EDTF complet de RR0, dans lequel l'outillage d'UFO@home convertit les dates d'un enregistrement <code>season</code> (<code>spring</code>, <code>summer</code>, <code>autumn</code> ou <code>winter</code>) dit une date connue seulement comme « au printemps 2022 » (EDTF <code>2022-21</code>), où <code>month</code> et <code>day</code> sont omis.</td></tr>
       <tr><td><code>durationSeconds</code></td><td>Une alternative à <code>endTime</code>, et c'est elle qui l'emporte si les deux sont là</td></tr>
@@ -1005,7 +1020,7 @@ export class DocsFormatPage extends DocsSection {
       même quand rien d'autre ne l'est.</p>
 
     <h2>Vérifier un fichier</h2>
-    <p>Le format est aussi publié en <a href="/sighting.schema.json">JSON Schema</a>, engendré
+    <p>Le format est aussi publié en <a href="/schema/1/sighting.schema.json">JSON Schema</a>, engendré
       depuis les mêmes types que le lecteur : toutes les clés qu'il connaît, ce que chacune peut
       contenir, et les mots qu'accepte une liste fermée. Une clé mal orthographiée ou une valeur
       inconnue y échoue. Il ne dit rien de ce qui peut être omis, question de sens à laquelle répond
@@ -1015,6 +1030,21 @@ export class DocsFormatPage extends DocsSection {
       qu'il n'a pas pu jouer comme écrit : une clé que rien ne lit, un mot hors de sa liste, et ce
       qu'il a dû inventer parce que la première keyframe d'une forme l'omettait (un champ tenu
       depuis la keyframe précédente relève de la règle ci-dessus, pas d'un problème).</p>
+
+    <h3>Versions du format</h3>
+    <p>Un fichier indique la version de son format dans <code>version</code> : <code>1</code>, la
+      seule à ce jour. C'est la version du FORMAT, pas celle d'UFO@home : ajouter un champ ne la
+      change pas, puisqu'un lecteur plus ancien ignore ce qu'il ne connaît pas, et tout fichier de
+      version 1 écrit depuis les débuts du format se joue encore. Elle ne change que le jour où un
+      champ changerait de sens ou de forme, et ce jour-là le lecteur lira les deux, l'ancienne par
+      une conversion. Un fichier d'une version plus récente que le lecteur est refusé avec un message
+      qui le dit, plutôt que joué comme ce qu'il ne dit pas.</p>
+    <p>Chaque version a son schéma, à une adresse qui la nomme :
+      <code>https://ufoathome.org/schema/1/sighting.schema.json</code> (et
+      <code>case.schema.json</code>, <code>interview.schema.json</code> à côté).
+      <code>/sighting.schema.json</code> est toujours la version courante. Un fichier peut nommer
+      celle d'après laquelle il a été écrit dans <code>"$schema"</code>, dont se servent des
+      éditeurs comme VS Code pour le vérifier pendant la frappe ; le lecteur ne le lit pas.</p>
 
     <h2>Un fichier entier</h2>
     <p>Le plus petit enregistrement qui énonce encore quelque chose — un ovale silencieux traversant
@@ -1092,7 +1122,7 @@ export class DocsFormatPage extends DocsSection {
     <div class="table-scroll">
     <table>
       <tr><th>Campo</th><th>Significado</th></tr>
-      <tr><td><code>version</code></td><td>Siempre <code>1</code></td></tr>
+      <tr><td><code>version</code></td><td>La versión del formato: <code>1</code> (ver Versiones del formato)</td></tr>
       <tr><td><code>id</code></td><td>Qué relato es este, único entre todas las grabaciones de cualquier parte: el día, y luego quién lo vio (<code>"1964-04-24-ZamoraLonnie"</code>), o dónde para un observador anónimo (<code>"1964-04-24-Socorro"</code>). Aquello por lo que un caso lo nombra no es este id sino el de su evento (véase más abajo).</td></tr>
       <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, cada parte opcional — así es como el formato expresa “1954” o “hacia las 05:00”. <code>raw</code> es la fecha tal como se escribe en <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, y es lo que la fecha significa: <code>"1948-07-24T02:45~"</code> (aproximada), <code>"2025-06?"</code> (incierta), <code>"1965-07-01%"</code> (ambas cosas), <code>"19XX"</code> (un año enmascarado), o <code>"05:00"</code> solo, para una hora del día recordada sin su fecha. Los números se mantienen de acuerdo con ella para lo que se calcula (el cielo, el reloj). Es un subconjunto de EDTF (nivel 0, estos calificadores sobre la fecha entera, años enmascarados); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> es el modelo EDTF completo de RR0, al que las herramientas propias de UFO@home convierten las fechas de una grabación <code>season</code> (<code>spring</code>, <code>summer</code>, <code>autumn</code> o <code>winter</code>) dice una fecha conocida solo como «en primavera de 2022» (EDTF <code>2022-21</code>), donde se omiten <code>month</code> y <code>day</code>.</td></tr>
       <tr><td><code>durationSeconds</code></td><td>Una alternativa a <code>endTime</code>, y prevalece si se dan las dos</td></tr>
@@ -1484,7 +1514,7 @@ export class DocsFormatPage extends DocsSection {
       preguntar al observador o buscar en el expediente, y por eso vale la pena escribirla incluso cuando no se escribe nada más.</p>
 
     <h2>Comprobar un archivo</h2>
-    <p>El formato se publica también como <a href="/sighting.schema.json">JSON Schema</a>,
+    <p>El formato se publica también como <a href="/schema/1/sighting.schema.json">JSON Schema</a>,
       generado a partir de los mismos tipos que el reproductor: todas las claves que conoce, lo que puede
       contener cada una, y las palabras que acepta una lista cerrada. Una clave mal escrita o un valor
       desconocido no lo superan. No dice nada de lo que puede omitirse, que es una cuestión de sentido que
@@ -1494,6 +1524,21 @@ export class DocsFormatPage extends DocsSection {
       tal como está escrito: una clave que nada lee, una palabra fuera de su lista, y lo que tuvo que
       inventar porque el primer fotograma clave de una forma lo omitía (un campo mantenido desde el
       fotograma clave anterior es la regla de arriba, no un problema).</p>
+
+    <h3>Versiones del formato</h3>
+    <p>Un archivo indica la versión de su formato en <code>version</code>: <code>1</code>, la única
+      hasta ahora. Es la versión del FORMATO, no la de UFO@home: añadir un campo no la cambia, ya que
+      un reproductor más antiguo ignora lo que no conoce, y todo archivo de versión 1 escrito desde el
+      principio del formato se sigue reproduciendo. Solo cambia el día en que un campo cambiaría de
+      sentido o de forma, y ese día el reproductor leerá ambas, la antigua mediante una conversión. Un
+      archivo de una versión más reciente que el reproductor se rechaza con un mensaje que lo dice, en
+      lugar de reproducirse como algo que no dice.</p>
+    <p>Cada versión tiene su esquema, en una dirección que la nombra:
+      <code>https://ufoathome.org/schema/1/sighting.schema.json</code> (y
+      <code>case.schema.json</code>, <code>interview.schema.json</code> al lado).
+      <code>/sighting.schema.json</code> es siempre la versión actual. Un archivo puede nombrar aquella
+      con la que se escribió en <code>"$schema"</code>, que editores como VS Code usan para comprobarlo
+      mientras se escribe; el reproductor no lo lee.</p>
 
     <h2>Un archivo completo</h2>
     <p>La grabación más pequeña que aún expresa algo — un óvalo silencioso que cruza el cielo en
@@ -1571,7 +1616,7 @@ export class DocsFormatPage extends DocsSection {
     <div class="table-scroll">
     <table>
       <tr><th>Campo</th><th>Significato</th></tr>
-      <tr><td><code>version</code></td><td>Sempre <code>1</code></td></tr>
+      <tr><td><code>version</code></td><td>La versione del formato: <code>1</code> (vedi Versioni del formato)</td></tr>
       <tr><td><code>id</code></td><td>Quale resoconto è, unico fra tutte le registrazioni ovunque: il giorno, poi chi l'ha visto (<code>"1964-04-24-ZamoraLonnie"</code>), o il luogo per un osservatore anonimo (<code>"1964-04-24-Socorro"</code>). Ciò con cui un caso lo designa non è questo id ma quello del suo evento (vedi più sotto).</td></tr>
       <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, ogni parte facoltativa — è così che il formato esprime “1954” o “verso le 05:00”. <code>raw</code> è la data come scritta in <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, ed è ciò che la data significa: <code>"1948-07-24T02:45~"</code> (approssimativa), <code>"2025-06?"</code> (incerta), <code>"1965-07-01%"</code> (entrambe le cose), <code>"19XX"</code> (un anno mascherato), oppure <code>"05:00"</code> da solo per un'ora del giorno ricordata senza la sua data. I numeri sono tenuti in accordo con essa per ciò che si calcola (il cielo, l'orologio). È un sottoinsieme di EDTF (livello 0, questi qualificatori sull'intera data, anni mascherati); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> è il modello EDTF completo di RR0, in cui gli strumenti propri di UFO@home convertono le date di una registrazione <code>season</code> (<code>spring</code>, <code>summer</code>, <code>autumn</code> o <code>winter</code>) dice una data nota solo come «in primavera del 2022» (EDTF <code>2022-21</code>), dove <code>month</code> e <code>day</code> sono omessi.</td></tr>
       <tr><td><code>durationSeconds</code></td><td>Un'alternativa a <code>endTime</code>, e prevale se sono date entrambe</td></tr>
@@ -1964,7 +2009,7 @@ export class DocsFormatPage extends DocsSection {
       o al fascicolo, ed è per questo che vale la pena scriverlo anche quando non si scrive nient'altro.</p>
 
     <h2>Verificare un file</h2>
-    <p>Il formato è pubblicato anche come <a href="/sighting.schema.json">JSON Schema</a>,
+    <p>Il formato è pubblicato anche come <a href="/schema/1/sighting.schema.json">JSON Schema</a>,
       generato dagli stessi tipi del lettore: ogni chiave che conosce, ciò che ciascuna può
       contenere, e le parole che accetta un elenco chiuso. Una chiave scritta male o un valore
       sconosciuto non lo superano. Non dice nulla di ciò che si può omettere, che è una questione di senso a cui
@@ -1974,6 +2019,21 @@ export class DocsFormatPage extends DocsSection {
       così come è scritto: una chiave che nulla legge, una parola fuori dal suo elenco, e ciò che ha dovuto
       inventare perché il primo fotogramma chiave di una forma lo ometteva (un campo mantenuto dal
       fotogramma chiave precedente è la regola di cui sopra, non un problema).</p>
+
+    <h3>Versioni del formato</h3>
+    <p>Un file indica la versione del suo formato in <code>version</code>: <code>1</code>, l'unica
+      finora. È la versione del FORMATO, non quella di UFO@home: aggiungere un campo non la cambia,
+      perché un lettore più vecchio ignora ciò che non conosce, e ogni file di versione 1 scritto dagli
+      inizi del formato si riproduce ancora. Cambia solo il giorno in cui un campo cambierebbe senso o
+      forma, e quel giorno il lettore leggerà entrambe, la vecchia tramite una conversione. Un file di
+      una versione più recente del lettore viene rifiutato con un messaggio che lo dice, invece di essere
+      riprodotto come qualcosa che non dice.</p>
+    <p>Ogni versione ha il suo schema, a un indirizzo che la nomina:
+      <code>https://ufoathome.org/schema/1/sighting.schema.json</code> (e
+      <code>case.schema.json</code>, <code>interview.schema.json</code> accanto).
+      <code>/sighting.schema.json</code> è sempre la versione corrente. Un file può nominare quella
+      secondo cui è stato scritto in <code>"$schema"</code>, che editor come VS Code usano per
+      verificarlo durante la digitazione; il lettore non lo legge.</p>
 
     <h2>Un file completo</h2>
     <p>La registrazione più piccola che esprima ancora qualcosa — un ovale silenzioso che attraversa il cielo in

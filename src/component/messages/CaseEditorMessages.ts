@@ -69,6 +69,8 @@ export interface CaseEditorMessages extends InputFileMessages {
   fileTab: string
   importFile: string
   fileNotACase: string
+  /** A file in a version of its format this engine does not read (see FormatVersion). `{found}` is the version it states, `{supported}` the newest read. */
+  formatVersionError: string
   /** Said while the text of the file is not a case the editor can read: the case keeps the last text it understood. */
   fileInvalid: string
   fileLoading: string

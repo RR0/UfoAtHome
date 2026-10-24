@@ -133,6 +133,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   importErrorUnreachable: "Nothing answered at that address. Check the spelling, and that you are online.",
   importErrorStatus: "That server answered with an error ({status}). The address is probably wrong, or the file has moved.",
   importErrorMalformed: "That address answered, but what came back is not a recording.",
+  formatVersionError: "This file states version {found} of its format; this UFO@home reads up to version {supported}. Open it with a newer UFO@home.",
   record: "Record",
   stop: "Stop",
   according: "according to",

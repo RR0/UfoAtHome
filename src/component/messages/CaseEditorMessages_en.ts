@@ -58,6 +58,7 @@ export const caseEditorMessages_en: CaseEditorMessages = {
   inputFileModeHint: "Click to give it the other way: a file of yours, or an address",
   inputFileLoad: "Load",
   fileNotACase: "That file is not a case (it has no events).",
+  formatVersionError: "This file states version {found} of its format; this UFO@home reads up to version {supported}. Open it with a newer UFO@home.",
   fileInvalid: "This text is not valid JSON yet, or not a case: the case keeps what it last understood.",
   fileLoading: "Loading the editor…",
   add: "Add",

@@ -133,6 +133,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   importErrorUnreachable: "Nulla ha risposto a questo indirizzo. Controlla come è scritto e di essere connesso.",
   importErrorStatus: "Quel server ha risposto con un errore ({status}). Probabilmente l'indirizzo è sbagliato o il file è stato spostato.",
   importErrorMalformed: "Questo indirizzo ha risposto, ma ciò che è tornato non è una registrazione.",
+  formatVersionError: "Questo file indica la versione {found} del suo formato; questo UFO@home legge fino alla versione {supported}. Lo apra con un UFO@home più recente.",
   record: "Registra",
   stop: "Ferma",
   according: "secondo",

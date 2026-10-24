@@ -1,6 +1,7 @@
 import type { AgentRef, InterpretationEventJson, InterpretationJson } from "../interpretation/Interpretation.js"
 import type { InterviewMedium } from "./interviewJson.js"
 import { Provenance } from "./Provenance.js"
+import { FormatVersion } from "./FormatVersion.js"
 import type { SaidText } from "../model/SaidText.js"
 
 /**
@@ -13,6 +14,10 @@ import type { SaidText } from "../model/SaidText.js"
  * each pointing at one observer's recording.
  */
 export interface CaseJson {
+  /** The schema this file was written against, for an editor to check it with: https://ufoathome.org/schema/1/case.schema.json. Not read. */
+  $schema?: string
+  /** The version of the format this file is written in (see FormatVersion): 1 when left out, as RR0 writes it. A file of a newer version is refused, not misread. */
+  version?: 1
   /** The case's identifier. On rr0.org it is the dossier's directory name and may be left out; a
    * case file standing alone states it. No recording carries it: a case names its accounts, a
    * account does not name its case (see Sighting.id). */
@@ -76,6 +81,11 @@ export class CaseFile {
    * what it established in its `summary`. UFO@home replays nothing of it: a recording is only a sighting's.
    */
   static readonly INTERVIEW_EVENT = "interview"
+
+  /** Throws a FormatVersionError unless `json`, a case, is in a version this engine reads (see FormatVersion). */
+  static check(json: CaseJson): CaseJson {
+    return FormatVersion.check(json, "case")
+  }
 
   /**
    * Whether a fetched JSON is a case rather than one observer's recording: an object with events,

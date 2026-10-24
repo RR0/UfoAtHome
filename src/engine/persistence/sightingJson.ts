@@ -26,6 +26,7 @@ import type { FrozenData } from "../model/FrozenData.js"
 import { sortedMilestones } from "../model/Milestone.js"
 import { SightingShapes } from "./SightingShapes.js"
 import { Provenance } from "./Provenance.js"
+import { FormatVersion } from "./FormatVersion.js"
 
 /**
  * Standalone "one JSON file per case" format (e.g. a future sighting.json
@@ -39,6 +40,9 @@ import { Provenance } from "./Provenance.js"
  * consumers all read plain values. What the types say is what a reader gets.
  */
 export interface SightingRecordingJson {
+  /** The schema this file was written against, for an editor to check it with: https://ufoathome.org/schema/1/sighting.schema.json. Not read. */
+  $schema?: string
+  /** The version of the format this file is written in (see FormatVersion): 1, the only one so far. A file of a newer version is refused, not misread. */
   version: 1
   /** Which account this is, unique across every recording anywhere: the day it happened, then
    * who saw it ("1964-04-24-ZamoraLonnie"), or where for an anonymous observer. What a case and its
@@ -199,6 +203,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
 }
 
 export function fromSightingJson(json: SightingRecordingJson): Sighting {
+  FormatVersion.check(json, "sighting")
   // Off first, so that nothing below has to know a value could have arrived wrapped — see
   // Provenance's own doc comment on why the wrapper lives no longer than the file does.
   const { recording: plain, provenance } = Provenance.strip(json)

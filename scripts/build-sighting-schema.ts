@@ -17,6 +17,7 @@ import ts from "typescript"
 import { mkdirSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
+import { FormatVersion } from "../src/engine/persistence/FormatVersion.js"
 
 /** One key the editor can offer, and what is known about what may follow it. */
 interface SchemaField {
@@ -194,7 +195,7 @@ class SchemaBuilder {
 
 /**
  * The same description, as a JSON Schema anybody can validate a recording against — the published
- * one, at ufoathome.org/sighting.schema.json.
+ * one, at ufoathome.org/schema/1/sighting.schema.json: under the version of the format (see FormatVersion), which is also its $id.
  *
  * Its first reader was somebody building a recording from the documentation alone, who had to dig
  * the field list out of the Player page's minified bundle to check their file. It says what a key
@@ -208,21 +209,21 @@ class SchemaBuilder {
  */
 class JsonSchemaExport {
 
-  static readonly ID = "https://ufoathome.org/sighting.schema.json"
+  static readonly ID = FormatVersion.schemaUrl("sighting")
 
   /** What differs between the two files this writes: a recording is closed and any of its values may be wrapped with its provenance; a case
    * passes through what it holds beyond what UFO@home reads (RR0 defines it), and states no provenance. */
   static readonly RECORDING: JsonSchemaOptions = {
-    id: JsonSchemaExport.ID, title: "UFO@home recording",
+    id: JsonSchemaExport.ID, version: FormatVersion.CURRENT.sighting, title: "UFO@home recording",
     description: "One observer's recording of a sighting. See https://ufoathome.org/docs/format/", closed: true, provenance: true
   }
   static readonly INTERVIEW: JsonSchemaOptions = {
-    id: "https://ufoathome.org/interview.schema.json", title: "Interview transcript",
+    id: FormatVersion.schemaUrl("interview"), version: FormatVersion.CURRENT.interview, title: "Interview transcript",
     description: "The transcript of an interview of a case: who spoke, when, and what was said. The file an event of type interview points at with its url.",
     closed: true, provenance: false
   }
   static readonly CASE: JsonSchemaOptions = {
-    id: "https://ufoathome.org/case.schema.json", title: "RR0 case",
+    id: FormatVersion.schemaUrl("case"), version: FormatVersion.CURRENT.case, title: "RR0 case",
     description: "A case, as RR0 writes it: its events, among which the observers' accounts and the interviews. UFO@home reads what is described here and leaves the rest as it is. See https://ufoathome.org/docs/format/",
     closed: false, provenance: false
   }
@@ -233,7 +234,7 @@ class JsonSchemaExport {
       $id: options.id,
       title: options.title,
       description: options.description,
-      ...JsonSchemaExport.object(fields, options),
+      ...JsonSchemaExport.object(fields, options, true),
       ...(options.provenance ? {
         $defs: {
           stated: {
@@ -252,10 +253,12 @@ class JsonSchemaExport {
     }
   }
 
-  private static object(fields: Record<string, SchemaField>, options: JsonSchemaOptions): object {
+  /** @param top Whether this is the file itself, whose `version` is the one this schema describes: the types only say it is a number. */
+  private static object(fields: Record<string, SchemaField>, options: JsonSchemaOptions, top = false): object {
     const properties: Record<string, object> = {}
     for (const [name, field] of Object.entries(fields)) {
-      properties[name] = JsonSchemaExport.orStated(JsonSchemaExport.field(field, options), options)
+      const schema = JsonSchemaExport.field(field, options)
+      properties[name] = JsonSchemaExport.orStated(top && name === "version" ? { ...schema, const: options.version } : schema, options)
     }
     return { type: "object", properties, additionalProperties: !options.closed }
   }
@@ -285,6 +288,8 @@ class JsonSchemaExport {
 
 interface JsonSchemaOptions {
   id: string
+  /** The version of the format this schema describes (see FormatVersion). */
+  version: number
   title: string
   description: string
   closed: boolean

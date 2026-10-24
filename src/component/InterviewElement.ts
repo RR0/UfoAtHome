@@ -135,7 +135,7 @@ export class InterviewElement extends HTMLElement {
     const url = new URL(src, location.href).href
     let json: InterviewJson | undefined
     try {
-      json = await SightingFetch.json(url) as InterviewJson
+      json = InterviewFile.read(await SightingFetch.json(url))
     } catch {
       json = undefined
     }

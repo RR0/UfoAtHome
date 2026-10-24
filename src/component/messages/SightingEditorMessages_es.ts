@@ -133,6 +133,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   importErrorUnreachable: "Nada respondió en esa dirección. Revisa cómo está escrita y que tengas conexión.",
   importErrorStatus: "Ese servidor respondió con un error ({status}). Probablemente la dirección es incorrecta o el archivo se ha movido.",
   importErrorMalformed: "Esa dirección respondió, pero lo que devolvió no es una grabación.",
+  formatVersionError: "Este archivo indica la versión {found} de su formato; este UFO@home lee hasta la versión {supported}. Ábralo con un UFO@home más reciente.",
   record: "Grabar",
   stop: "Detener",
   according: "según",

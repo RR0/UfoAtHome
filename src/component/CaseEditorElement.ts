@@ -18,6 +18,7 @@ import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.
 import type { CaseTrack } from "./CaseSession.js"
 import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import type { InterviewJson, InterviewMedium, InterviewPassage } from "../engine/persistence/interviewJson.js"
+import { FormatVersionError } from "../engine/persistence/FormatVersion.js"
 import type { InterviewEditorElement, InterviewEvent } from "./InterviewEditorElement.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
@@ -718,6 +719,12 @@ export class CaseEditorElement extends HTMLElement {
       this.showFileNote(this.messages.fileInvalid, "error")
       return
     }
+    try {
+      CaseFile.check(json)
+    } catch (error) {
+      this.showFileNote(error instanceof FormatVersionError ? error.said(this.messages.formatVersionError) : this.messages.fileInvalid, "error")
+      return
+    }
     this.fileApplied = text
     this.showFileNote(undefined)
     // Spaces, blank lines, a different order of lines: the same case, which is not a change of it.
@@ -779,8 +786,8 @@ export class CaseEditorElement extends HTMLElement {
     }
     try {
       await this.openCase(json, url)
-    } catch {
-      this.showFileNote(this.messages.fileNotACase)
+    } catch (error) {
+      this.showFileNote(error instanceof FormatVersionError ? error.said(this.messages.formatVersionError) : this.messages.fileNotACase)
       return
     }
     this.syncFileEditor()
@@ -794,6 +801,7 @@ export class CaseEditorElement extends HTMLElement {
    * `track` attribute names, else the first account.
    */
   private async openCase(json: Parameters<typeof CaseFile.sightingUrls>[0], url: string): Promise<void> {
+    CaseFile.check(json)
     const session = new CaseSession(json, url)
     if (session.tracks.length === 0) throw new Error("A case with no recording has nothing to edit")
     this.session = session
@@ -874,9 +882,11 @@ export class CaseEditorElement extends HTMLElement {
     const session = this.session
     if (!session) return undefined
     try {
+      // Imported as in showPassages: a case editor that opens no interview does not load it.
+      const { InterviewFile } = await import("../engine/persistence/interviewJson.js")
       const text = session.transcriptText(interview)
-      if (text !== undefined) return JSON.parse(text) as InterviewJson
-      if (interview.url) return await SightingFetch.json(new URL(interview.url, session.url ?? location.href).href) as InterviewJson
+      if (text !== undefined) return InterviewFile.read(JSON.parse(text))
+      if (interview.url) return InterviewFile.read(await SightingFetch.json(new URL(interview.url, session.url ?? location.href).href))
     } catch {
       // an interview whose transcript cannot be read tells of nothing
     }

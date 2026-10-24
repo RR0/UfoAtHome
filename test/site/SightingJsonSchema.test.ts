@@ -3,7 +3,7 @@ import Ajv2020 from "ajv/dist/2020.js"
 import schema from "../../src/generated/sighting.schema.json"
 
 /**
- * The JSON Schema published at ufoathome.org/sighting.schema.json, generated from the types by
+ * The JSON Schema published at ufoathome.org/schema/1/sighting.schema.json, generated from the types by
  * scripts/build-sighting-schema.ts (run by pretest). Every recording this project ships has to pass
  * it, or the schema would be telling authors that files the player plays are wrong.
  */
@@ -61,5 +61,9 @@ describe("the format page's examples", () => {
   it.each(examples.map((text, index) => ({ index, text })))("accepts the example #$index as a recording", ({ text }) => {
     const json = JSON.parse(text)
     expect(validate(json), JSON.stringify(validate.errors?.slice(0, 3))).toBe(true)
+  })
+
+  it("rejects a version of the format it does not describe", () => {
+    expect(validate({ version: 2, timeline: { keyframes: [] } })).toBe(false)
   })
 })
