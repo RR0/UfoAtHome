@@ -19,9 +19,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       # Shared runners are two to three times slower than the machine the CPU-time budgets were set
-      # on (test/engine/astronomy/SkyGlowVisibility.test.ts measured 46 to 97 ms against 40). Windows's, whose test workers are threads of
-      # one process (see the test step), measured 128.
-      PERF_BUDGET_SCALE: ${{ runner.os == 'Windows' && '4' || '3' }}
+      # on (test/engine/astronomy/SkyGlowVisibility.test.ts measured 46 to 97 ms against 40). Four on Windows: see the test step.
+      PERF_BUDGET_SCALE: 3
       # macOS runners have 7 GB, which gives Node a heap of about 2 GB, and one jsdom test worker
       # outgrew it there (heap out of memory on both Node versions) while Linux and Windows passed.
       NODE_OPTIONS: --max-old-space-size=4096
@@ -43,6 +42,10 @@ jobs:
       # Threads on Windows since 2026-10-24: there, Node 22 timed out a progress report on four runs running (every test passing), with two
       # forked workers and then with one, so the main process was not too busy: the forks' reports go through the pipes between processes,
       # where threads pass them in memory.
+      # The CPU-time budgets a quarter larger there, where the workers are threads of one process (128 ms measured against 120). Set here, not
+      # with the job's other variables: the runner's own context is not known yet there.
       - run: npm test -- --testTimeout=30000 --maxWorkers=2 ${{ runner.os == 'Windows' && '--pool=threads' || '' }}
+        env:
+          PERF_BUDGET_SCALE: ${{ runner.os == 'Windows' && '4' || '3' }}
       - run: npm run build
       - run: npm run build:site
