@@ -1816,7 +1816,7 @@ ${EditorTheme.TOKENS}
   --rr0-scene-max-height: 50dvh;
 }
 .app > :is(.editor-head, .scene-card, #group-tabs) { flex: none; }
-.app > .group-panel { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.app > .group-panel { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
 /* Held by another editor (see embedded): no card of its own inside that one's. */
 .app.embedded { border: 0; border-radius: 0; max-width: none; }
 ${EditorTheme.HEAD}

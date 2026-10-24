@@ -1171,6 +1171,18 @@ export class CaseEditorElement extends HTMLElement {
     const select = this.byId("track") as HTMLSelectElement
     select.value = String(index)
     select.dispatchEvent(new Event("change"))
+    requestAnimationFrame(() => this.bringEditorIntoView())
+  }
+
+  /**
+   * An observation opened: the page is scrolled so that its editor, as tall as the screen, is all of it, the scene in view and its form
+   * scrolling under it. Below the case's own header the editor's foot was off the screen, a section cut there with nothing to scroll.
+   */
+  private bringEditorIntoView(): void {
+    const editor = this.editor as HTMLElement
+    if (!editor.checkVisibility?.()) return
+    const box = editor.getBoundingClientRect()
+    if (Math.abs(box.top) > 1) editor.scrollIntoView?.({ block: "start", behavior: "smooth" })
   }
 
   /** Asks to delete an event from the list: it is made the one the deletion is about, without leaving the list. */
