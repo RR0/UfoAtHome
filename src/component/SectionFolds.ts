@@ -81,9 +81,11 @@ export class SectionFolds {
       const whole = section.dataset.fold === "all"
       const n = this.count(section)
       toggle.hidden = (!whole && n === 0) || fits
-      toggle.textContent = whole
+      const text = whole
         ? (open ? m.hideSettings : n === 0 ? m.showSettingsAny : (n === 1 ? m.showSettingsOne : m.showSettings).replaceAll("{n}", String(n)))
         : (open ? m.lessSettings : m.moreSettings.replaceAll("{n}", String(n)))
+      // Written only when it changes: a text set anew is a node inserted anew, at every refresh of every section.
+      if (toggle.textContent !== text) toggle.textContent = text
       toggle.setAttribute("aria-expanded", String(open))
     }
   }
@@ -96,6 +98,8 @@ export class SectionFolds {
   private fits(section: HTMLElement, toggle: HTMLButtonElement): boolean {
     if (section.dataset.fold === "all") return false
     const height = () => section.getBoundingClientRect().height
+    // Not on show: nothing to measure, and nothing to toggle to measure it.
+    if (height() === 0) return false
     const open = section.hasAttribute("data-open")
     const hidden = toggle.hidden
     section.removeAttribute("data-fits")

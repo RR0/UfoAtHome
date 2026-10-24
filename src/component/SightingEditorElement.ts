@@ -2266,7 +2266,9 @@ export class SightingEditorElement extends HTMLElement {
         : String(time.year)
     }
     const title = [place, date].filter(Boolean).join(", ") || this.sightingIdInput.value || this.messages.stateNew
-    this.shadow.getElementById("editor-title")!.textContent = title
+    // Followed at every edit: written only when it changes, a text set anew being a node inserted anew.
+    const heading = this.shadow.getElementById("editor-title")!
+    if (heading.textContent !== title) heading.textContent = title
   }
 
   /**

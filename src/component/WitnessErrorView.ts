@@ -94,6 +94,8 @@ export class WitnessErrorView {
   private model: ErrorModel = WitnessError.MODELS[0]
   private readonly window: HTMLElement
   private readonly sections: HTMLElement[] = []
+  /** What the observer's sections were last made from (see renderObserver). */
+  private observerShown?: { messages: unknown, model: unknown, conditions: string }
 
   constructor(private readonly host: WitnessErrorHost, windowParent: HTMLElement) {
     this.window = document.createElement("div")
@@ -159,22 +161,27 @@ export class WitnessErrorView {
     const basis: Basis = entry?.basis ?? "stated"
     const mark = field.label.querySelector<HTMLElement>(".basis-mark")!
     mark.dataset.basis = basis
-    mark.textContent = m.basis[basis]
+    // Written only when it changes: every field is said again at each refresh, and a text set anew is a node inserted anew.
+    if (mark.textContent !== m.basis[basis]) mark.textContent = m.basis[basis]
     mark.title = m.basisTitle
     mark.setAttribute("aria-label", `${m.basisTitle} : ${m.basis[basis]}`)
     mark.hidden = field.path() === undefined
     field.label.dataset.basis = basis
     const law = field.label.querySelector<HTMLElement>(".law")!
     if (reset) {
-      law.replaceChildren(Object.assign(document.createElement("span"), { className: "law-reset", textContent: m.basisReset.replace("{basis}", m.basis[reset]) }))
+      this.showLaw(law, [Object.assign(document.createElement("span"), { className: "law-reset", textContent: m.basisReset.replace("{basis}", m.basis[reset]) })])
       return
     }
     const value = field.value()
-    if (value === undefined) {
-      law.replaceChildren()
-      return
-    }
-    law.replaceChildren(...this.lawNodes(this.model.law({ kind: field.kind, value, basis, how: entry?.how }, this.conditions), field.kind))
+    this.showLaw(law, value === undefined ? [] : this.lawNodes(this.model.law({ kind: field.kind, value, basis, how: entry?.how }, this.conditions), field.kind))
+  }
+
+  /** Puts `nodes` under a field, unless what is there already says the same. */
+  private showLaw(law: HTMLElement, nodes: Node[]): void {
+    const said = nodes.map(node => node instanceof HTMLElement ? `${node.className}|${node.textContent}|${node.title}|${node.dataset.status ?? ""}` : node.textContent).join("\n")
+    if (law.dataset.said === said) return
+    law.dataset.said = said
+    law.replaceChildren(...nodes)
   }
 
   /** A law as it reads under its field: ≈ or ∅, what it says in the field's unit, and the status of its lead. */
@@ -297,6 +304,11 @@ export class WitnessErrorView {
     if (this.sections.length === 0) return
     const m = this.host.messages()
     const c = this.conditions ?? {}
+    // Made again only when what they show changed: rebuilt at every refresh, the four sections were most of what a refresh cost.
+    const shown = { messages: m, model: this.model, conditions: JSON.stringify([c, this.host.sighting.provenance.at("time")?.how, this.daylight()]) }
+    const before = this.observerShown
+    if (before && before.messages === shown.messages && before.model === shown.model && before.conditions === shown.conditions) return
+    this.observerShown = shown
     const [account, viewing, moon, parameters] = this.sections
     const title = (text: string) => Object.assign(document.createElement("h3"), { className: "section-title", textContent: text })
     const field = (text: string, control: HTMLElement, unit?: string) => {
