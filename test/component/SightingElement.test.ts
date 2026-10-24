@@ -967,6 +967,24 @@ describe("SightingElement sharing", () => {
     expect(dialog.getElementById("link-box")!.hidden).toBe(false)
   })
 
+  it("copies what is on show, the link or the code, from one line under either with Freeze beside Copy", async () => {
+    const shadow = await mounted()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText } })
+    ;(findDeep(shadow, "share-button") as HTMLButtonElement).click()
+    const dialog = dialogOf(shadow)
+    const copy = dialog.getElementById("copy") as HTMLButtonElement
+    expect(copy.parentElement).toBe(dialog.getElementById("freeze")!.closest("label")!.parentElement)
+    copy.click()
+    await Promise.resolve()
+    expect(writeText).toHaveBeenLastCalledWith((dialog.getElementById("link") as HTMLTextAreaElement).value)
+    ;(dialog.getElementById("embed-option") as HTMLButtonElement).click()
+    copy.click()
+    await Promise.resolve()
+    expect(writeText).toHaveBeenLastCalledWith((dialog.getElementById("embed-markup") as HTMLTextAreaElement).value)
+    vi.unstubAllGlobals()
+  })
+
   it("no longer has the embed in the info panel", async () => {
     const shadow = await mounted()
     expect(shadow.getElementById("info-embed-toggle")).toBeNull()

@@ -146,9 +146,7 @@ const TEMPLATE = `
 }
 .share-link {
   display: flex;
-  align-items: flex-start;
-  gap: 0.5em;
-  padding: 0.5em 0.6em 0.5em 0.8em;
+  padding: 0.5em 0.8em;
   border: 1px solid var(--pop-border);
   border-radius: 0.9em;
 }
@@ -181,11 +179,18 @@ const TEMPLATE = `
 .share-copy:hover, .share-copy:focus-visible {
   background: var(--pop-soft);
 }
-/* Above what it changes, the link as much as the code. */
+/* Under the link or the code, the same line for both: what is copied, frozen or not, and the copying. */
+.share-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  margin-top: 0.6em;
+}
 .share-freeze {
-  display: block;
-  margin-bottom: 0.6em;
   font-size: 0.9em;
+}
+.share-actions .share-copy {
+  margin-left: auto;
 }
 /* The embed code is edited in CodeMirror once its chunk has loaded; the textarea is the stand-in until then, and the model the
    editor mirrors. */
@@ -201,11 +206,6 @@ const TEMPLATE = `
   resize: vertical;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-}
-.embed-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 0.5em;
 }
 </style>
 <dialog id="dialog" class="share-dialog" aria-labelledby="title">
@@ -227,18 +227,18 @@ const TEMPLATE = `
   <!-- What the element that holds the dialog lets its reader choose of what is shared: the player's position and options. -->
   <slot name="options"></slot>
   <p id="note" class="share-note" role="status" hidden></p>
-  <!-- Unticked, what is shared follows each release; ticked, it keeps this one for good (see EmbedScript). -->
-  <label class="share-freeze"><input id="freeze" type="checkbox"/> <span id="freeze-label">Freeze this version</span></label>
   <div id="link-box" class="share-link">
     <textarea id="link" class="share-link-input" rows="2" spellcheck="false" aria-label="Link"></textarea>
-    <button id="link-copy" class="share-copy" type="button">Copy</button>
   </div>
   <div id="embed-box" class="share-embed" hidden>
     <div id="embed-code" class="embed-code"></div>
     <textarea id="embed-markup" class="embed-markup" rows="6" spellcheck="false"></textarea>
-    <div class="embed-row">
-      <button id="embed-copy" class="share-copy" type="button">Copy</button>
-    </div>
+  </div>
+  <div class="share-actions">
+    <!-- Unticked, what is shared follows each release; ticked, it keeps this one for good (see EmbedScript). -->
+    <label class="share-freeze"><input id="freeze" type="checkbox"/> <span id="freeze-label">Freeze this version</span></label>
+    <!-- Copies what is on show: the link, or the code. -->
+    <button id="copy" class="share-copy" type="button">Copy</button>
   </div>
 </dialog>
 `
@@ -268,14 +268,13 @@ export class ShareDialogElement extends HTMLElement {
   private readonly shadow: ShadowRoot
   private readonly dialog: HTMLDialogElement
   private readonly linkField: HTMLTextAreaElement
-  private readonly linkCopy: HTMLButtonElement
+  private readonly copyButton: HTMLButtonElement
   private readonly linkBox: HTMLElement
   private readonly embedBox: HTMLElement
   private readonly linkOption: HTMLButtonElement
   private readonly embedOption: HTMLButtonElement
   private readonly freeze: HTMLInputElement
   private readonly embedMarkup: HTMLTextAreaElement
-  private readonly embedCopy: HTMLButtonElement
   private readonly noteElement: HTMLElement
   private codeEditor?: ShareCodeEditor
   private codeLoading?: Promise<void>
@@ -287,14 +286,13 @@ export class ShareDialogElement extends HTMLElement {
     const byId = <T extends HTMLElement>(id: string) => this.shadow.getElementById(id) as T
     this.dialog = byId("dialog")
     this.linkField = byId("link")
-    this.linkCopy = byId("link-copy")
+    this.copyButton = byId("copy")
     this.linkBox = byId("link-box")
     this.embedBox = byId("embed-box")
     this.linkOption = byId("link-option")
     this.embedOption = byId("embed-option")
     this.freeze = byId("freeze")
     this.embedMarkup = byId("embed-markup")
-    this.embedCopy = byId("embed-copy")
     this.noteElement = byId("note")
     byId("close").addEventListener("click", () => this.close())
     // A press on the dimmed page around the card, which the dialog itself receives, closes it.
@@ -304,8 +302,9 @@ export class ShareDialogElement extends HTMLElement {
     this.linkOption.addEventListener("click", () => this.show("link"))
     this.embedOption.addEventListener("click", () => this.show("embed"))
     this.freeze.addEventListener("change", () => this.refresh())
-    this.linkCopy.addEventListener("click", () => void this.copy(this.linkField.value, this.linkField, this.linkCopy))
-    this.embedCopy.addEventListener("click", () => void this.copy(this.codeEditor?.text ?? this.embedMarkup.value, this.embedMarkup, this.embedCopy))
+    this.copyButton.addEventListener("click", () => void (this.embedBox.hidden
+      ? this.copy(this.linkField.value, this.linkField)
+      : this.copy(this.codeEditor?.text ?? this.embedMarkup.value, this.embedMarkup)))
     this.applyMessages()
   }
 
@@ -367,8 +366,7 @@ export class ShareDialogElement extends HTMLElement {
     text("title", m.share)
     text("link-label", m.link)
     text("embed-label", m.embed)
-    text("link-copy", m.copy)
-    text("embed-copy", m.copy)
+    text("copy", m.copy)
     text("freeze-label", m.freeze.replace("{version}", __APP_VERSION__))
     this.freeze.parentElement!.title = m.freezeHint
     this.shadow.getElementById("close")!.setAttribute("aria-label", m.close)
@@ -406,11 +404,11 @@ export class ShareDialogElement extends HTMLElement {
 
   /** Clipboard write can be refused (permissions, insecure context): falls back to selecting the text so the reader can copy it
    * themselves, rather than failing silently. */
-  private async copy(text: string, field: HTMLTextAreaElement, button: HTMLButtonElement): Promise<void> {
+  private async copy(text: string, field: HTMLTextAreaElement): Promise<void> {
     try {
       await navigator.clipboard.writeText(text)
-      button.textContent = this.messages.copied
-      window.setTimeout(() => (button.textContent = this.messages.copy), 1500)
+      this.copyButton.textContent = this.messages.copied
+      window.setTimeout(() => (this.copyButton.textContent = this.messages.copy), 1500)
     } catch {
       field.select()
     }
