@@ -320,8 +320,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       nothing while it has not.</p>
     <p class="small">To keep the rendering you checked instead, tick <strong>Freeze version</strong>
       in the share dialog: the script then comes from the package as published on npm, served by
-      jsDelivr, which keeps every version, for example
-      <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@0.134.0/dist-embed-sighting/rr0-sighting.mjs</code>. Your page then gets none of the later fixes, but it reads recordings written
+      jsDelivr, which keeps every version:
+      <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@<var>version</var>/dist-embed-sighting/rr0-sighting.mjs</code>. Your page then gets none of the later fixes, but it reads recordings written
       for later versions as long as their format has not changed (see
       <a href="/docs/format/">the format's versions</a>).</p>
   </div>
@@ -441,8 +441,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       réponse ne coûte rien tant qu'il n'a pas changé.</p>
     <p class="small">Pour garder plutôt le rendu que vous avez vérifié, cochez <strong>Figer la
       version</strong> dans la boîte de partage : le script vient alors du paquet publié sur npm,
-      servi par jsDelivr, qui garde toutes les versions, par exemple
-      <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@0.134.0/dist-embed-sighting/rr0-sighting.mjs</code>. Votre page ne reçoit plus les corrections ultérieures, mais lit les
+      servi par jsDelivr, qui garde toutes les versions :
+      <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@<var>version</var>/dist-embed-sighting/rr0-sighting.mjs</code>. Votre page ne reçoit plus les corrections ultérieures, mais lit les
       enregistrements écrits pour des versions plus récentes tant que leur format n'a pas changé
       (voir <a href="/docs/format/">les versions du format</a>).</p>
   </div>
@@ -564,8 +564,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       respuesta no cuesta nada mientras no haya cambiado.</p>
     <p class="small">Para conservar en cambio la representación que comprobaste, marca <strong>Fijar
       la versión</strong> en el cuadro de compartir: el script viene entonces del paquete publicado en
-      npm, servido por jsDelivr, que conserva todas las versiones, por ejemplo
-      <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@0.134.0/dist-embed-sighting/rr0-sighting.mjs</code>. Tu página ya no recibe las correcciones posteriores, pero lee las grabaciones
+      npm, servido por jsDelivr, que conserva todas las versiones:
+      <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@<var>version</var>/dist-embed-sighting/rr0-sighting.mjs</code>. Tu página ya no recibe las correcciones posteriores, pero lee las grabaciones
       escritas para versiones más recientes mientras su formato no haya cambiado (ver
       <a href="/docs/format/">las versiones del formato</a>).</p>
   </div>
@@ -687,8 +687,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       la risposta non costa nulla finché non è cambiato.</p>
     <p class="small">Per mantenere invece la resa che hai verificato, seleziona <strong>Bloccare la
       versione</strong> nella finestra di condivisione: lo script viene allora dal pacchetto
-      pubblicato su npm, servito da jsDelivr, che conserva tutte le versioni, per esempio
-      <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@0.134.0/dist-embed-sighting/rr0-sighting.mjs</code>. La tua pagina non riceve più le correzioni successive, ma legge le
+      pubblicato su npm, servito da jsDelivr, che conserva tutte le versioni:
+      <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@<var>version</var>/dist-embed-sighting/rr0-sighting.mjs</code>. La tua pagina non riceve più le correzioni successive, ma legge le
       registrazioni scritte per versioni più recenti finché il loro formato non è cambiato (vedi
       <a href="/docs/format/">le versioni del formato</a>).</p>
   </div>
