@@ -1946,6 +1946,8 @@ ${EditorTheme.fields(".app")}
 .section-title { grid-column: 1 / -1; margin: 0 0 -2px; font: 600 12px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--glow-dim); }
 /* What is not a field takes the whole line: a paragraph, a note, a list, a row of buttons, another section's toolbar. */
 .form-section > :is(.toolbar, p, output, .file-note, .element-list-row, .element-list-body, .record-row, .place-search-row, rr0-provider-settings, .decor-add-row, span:not(.input-file-row), div:not(.field)) { grid-column: 1 / -1; }
+/* What has nothing to say takes no line: an empty output kept its row and the grid's gap (three of them under Size, with two shapes selected). */
+.form-section > :is(output, p):empty { display: none; }
 .form-section > .toolbar { margin: 0; }
 /* A field: its label on a line of its own above it, its value under it, filling the column unless it is a number (fitted to its own
    values, see NumberFields), its unit right after it, and what is said about it (an output) under them. */
