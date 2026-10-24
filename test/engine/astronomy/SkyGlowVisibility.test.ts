@@ -9,8 +9,18 @@ import { describe, expect, it } from "vitest"
  */
 declare const process: {
   cpuUsage(previous?: { user: number; system: number }): { user: number; system: number }
+  /** Node 22.19 and later: the CPU time of the calling thread only. */
+  threadCpuUsage?(previous?: { user: number; system: number }): { user: number; system: number }
   env: Record<string, string | undefined>
 }
+
+/**
+ * Whether this file runs in a worker thread (vitest's `threads` pool, what the CI runs) rather than in a process of its own. Then the
+ * process's CPU time is also the other workers' (see "what it costs"). Named through a variable so that the type-check, which knows no
+ * Node module, sees a dynamic import of anything.
+ */
+const workerThreads = "node:worker_threads"
+const inWorkerThread = !((await import(/* @vite-ignore */ workerThreads)) as { isMainThread: boolean }).isMainThread
 import { SkyGlowVisibility } from "../../../src/engine/astronomy/SkyGlowVisibility.js"
 import type { ObserverGeo } from "../../../src/engine/astronomy/CelestialPositions.js"
 
@@ -118,15 +128,23 @@ describe("what it costs", () => {
    * budget is about: `process.cpuUsage()` counts only the time this process was actually on a
    * core, so a machine with something else on it changes how long the measurement TAKES and not
    * what it reports.
+   *
+   * Of this THREAD, where Node can tell (22.19 and later): when the test workers are threads of one
+   * process, as the CI runs them, the process's time is also that of the other worker, running other
+   * tests on another core meanwhile. Counted in, it read 125 to 130 ms on the CI's Linux runners for
+   * work that costs 15 here; Node 20, which cannot tell, is not measured at all in a worker thread
+   * (see the test).
    */
   const cpuMillisPerCall = (): number => {
-    const before = process.cpuUsage()
+    const usage = process.threadCpuUsage?.bind(process) ?? process.cpuUsage.bind(process)
+    const before = usage()
     for (let run = 0; run < RUNS_PER_ATTEMPT; run++) glows.assess(darkNight, atacama)
-    const spent = process.cpuUsage(before)
+    const spent = usage(before)
     return (spent.user + spent.system) / 1000 / RUNS_PER_ATTEMPT
   }
 
-  it("answers fast enough to sit on a line that is restated as somebody types", () => {
+  // Skipped, and said so, where the measurement would be of other tests as much as of this one: see cpuMillisPerCall.
+  it.skipIf(inWorkerThread && !process.threadCpuUsage)("answers fast enough to sit on a line that is restated as somebody types", () => {
     // The best of several attempts, because what CPU time does NOT filter out is the noise that is
     // charged to this process itself: a garbage collection that falls inside the window, and the
     // cost of sharing a core (SMT) and a cache with the other workers, which the full suite runs
