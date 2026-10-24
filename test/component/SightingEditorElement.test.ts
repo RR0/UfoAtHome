@@ -170,6 +170,8 @@ beforeAll(async () => {
     import("../../src/component/BeamEditor.js"),
     import("../../src/component/LaunchEditor.js"),
     import("../../src/component/InputFileElement.js"),
+    import("../../src/render3d/decor/ModelViewer.js"),
+    import("../../src/render3d/decor/ModelThumbnails.js"),
     import("../../src/component/trafficRuntime.js"),
     import("../../src/engine/interop/KmlImport.js"),
     import("../../src/engine/astronomy/SatellitePasses.js"),
