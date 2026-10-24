@@ -220,7 +220,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   panelIntroSound: "Ce qui a été entendu.",
   panelIntroReference: "Photos et croquis, recalés sur la scène pour la comparer.",
   panelIntroFile: "Le relevé complet, à sauver ou à recharger.",
-  temporalGroup: "Date",
+  temporalGroup: "Chronologie",
   fileGroup: "Fichiers",
   fileLoading: "Chargement de l'éditeur…",
   weatherEditedAsk: "Cette édition touche à la météo, une donnée lue dynamiquement depuis {source}. Voulez-vous désactiver sa lecture depuis {source} ?",

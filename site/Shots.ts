@@ -102,7 +102,7 @@ export class Shots {
       page: "edit", after: "date", name: "edit-moment",
       caption: {
         en: "Date: start, end, duration and time zone.",
-        fr: "Date : début, fin, durée et fuseau horaire.",
+        fr: "Chronologie : début, fin, durée, fuseau horaire et moments.",
         es: "Fecha: inicio, fin, duración y huso horario.",
         it: "Data: inizio, fine, durata e fuso orario."
       }
