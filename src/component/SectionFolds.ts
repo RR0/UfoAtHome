@@ -39,7 +39,7 @@ export class SectionFolds {
   private messages?: SectionFoldMessages
   private readonly toggles = new Map<HTMLElement, HTMLButtonElement>()
 
-  constructor(root: ParentNode, resized?: Element) {
+  constructor(root: ParentNode) {
     for (const section of root.querySelectorAll<HTMLElement>(".form-section")) {
       if (section.dataset.fold !== "all" && !section.querySelector(".adv")) continue
       const toggle = document.createElement("button")
@@ -53,15 +53,22 @@ export class SectionFolds {
       else section.append(toggle)
       this.toggles.set(section, toggle)
     }
-    // Whether the fields held back fit the lines a section has depends on its width: measured again when that changes.
-    if (resized && typeof ResizeObserver !== "undefined") {
-      let width = 0
-      new ResizeObserver(entries => {
-        const now = Math.round(entries[entries.length - 1].contentRect.width)
-        if (now === width) return
-        width = now
-        this.refresh()
-      }).observe(resized)
+    // Whether the fields held back fit the lines a section has depends on its width, and can only be measured while it is on show: each is
+    // measured again when it comes into view (its group or its part opened, its first shape added) or its width changes. Not its height,
+    // which the measure itself changes.
+    if (typeof ResizeObserver !== "undefined") {
+      const widths = new Map<Element, number>()
+      const observer = new ResizeObserver(entries => {
+        let changed = false
+        for (const entry of entries) {
+          const width = Math.round(entry.contentRect.width)
+          if (widths.get(entry.target) === width) continue
+          widths.set(entry.target, width)
+          changed = true
+        }
+        if (changed) this.refresh()
+      })
+      for (const section of this.toggles.keys()) observer.observe(section)
     }
   }
 
@@ -91,8 +98,8 @@ export class SectionFolds {
   }
 
   /**
-   * Whether the fields a section holds back, shown, leave it as tall as it is without them: then they only fill lines it has already, and
-   * holding them back saves no room. Measured on the page, not a section that is not on show (a closed group, a test's DOM): that one
+   * Whether the fields a section holds back, shown, leave it no taller than it is folded, its "More settings" line included: then holding
+   * them back saves no room (a field beside a button, two pixels taller than it, costs less than the line that would hold it back). Measured on the page, not a section that is not on show (a closed group, a test's DOM): that one
    * keeps its fold. A section held back whole always keeps it: its title alone is what it is folded to.
    */
   private fits(section: HTMLElement, toggle: HTMLButtonElement): boolean {
@@ -103,14 +110,12 @@ export class SectionFolds {
     const open = section.hasAttribute("data-open")
     const hidden = toggle.hidden
     section.removeAttribute("data-fits")
-    toggle.hidden = true
+    toggle.hidden = false
     section.removeAttribute("data-open")
     const folded = height()
-    let fits = false
-    if (folded > 0) {
-      section.setAttribute("data-open", "")
-      fits = height() <= folded + 0.5
-    }
+    section.setAttribute("data-open", "")
+    toggle.hidden = true
+    const fits = height() <= folded + 0.5
     section.toggleAttribute("data-open", open)
     toggle.hidden = hidden
     return fits

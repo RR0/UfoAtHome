@@ -1177,7 +1177,7 @@ export class SightingEditorElement extends HTMLElement {
     this.durationInput = this.durationElement.input
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
     this.saveButton = this.shadow.getElementById("save") as HTMLButtonElement
-    this.sectionFolds = new SectionFolds(this.shadow, this.shadow.querySelector(".app")!)
+    this.sectionFolds = new SectionFolds(this.shadow)
     const editor = this
     this.witnessErrorView = new WitnessErrorView({
       get sighting() { return editor.ufoElement.sighting },
