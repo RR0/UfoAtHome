@@ -39,7 +39,9 @@ jobs:
       # The same on every platform since 2026-10-18: the suite grew, and a worker per core left the main process too busy to answer the workers'
       # requests for modules ("Timeout calling fetch", on a different job each run: Windows, then macOS, with every test passing). Vitest then
       # fails the run on those unhandled errors.
-      # One on Windows since 2026-10-24: with two, Node 22 there still timed out a progress report on three runs running (every test passing).
-      - run: npm test -- --testTimeout=30000 --maxWorkers=${{ runner.os == 'Windows' && '1' || '2' }}
+      # Threads on Windows since 2026-10-24: there, Node 22 timed out a progress report on four runs running (every test passing), with two
+      # forked workers and then with one, so the main process was not too busy: the forks' reports go through the pipes between processes,
+      # where threads pass them in memory.
+      - run: npm test -- --testTimeout=30000 --maxWorkers=2 ${{ runner.os == 'Windows' && '--pool=threads' || '' }}
       - run: npm run build
       - run: npm run build:site
