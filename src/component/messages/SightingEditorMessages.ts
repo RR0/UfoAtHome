@@ -45,6 +45,9 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
    * drawn, and that distance (see SightingEditorElement.applyDistance). */
   realWidth: string
   distance: string
+  /** The shape's turn on the drawing, clockwise, in degrees; and what the field says of it when pointed at. */
+  shapeRotation: string
+  shapeRotationTitle: string
   /** Which of the three stays put while another is edited, and its four choices. */
   sizeLock: string
   lockNone: string
@@ -322,8 +325,6 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   /** The button that lays the tracks out under the scene, and folds them back. */
   expandTracks: string
   collapseTracks: string
-  /** The legend of a panel holding fields the scene shows as they are edited (marked with a small circle). */
-  sceneLinkedLegend: string
   /** What the scene says over itself while a field it shows is edited (see SceneFieldOverlay): the tilt's horizon, the field of view, the wind. */
   overlayHorizon: string
   overlayFov: string

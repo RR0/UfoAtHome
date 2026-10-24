@@ -691,6 +691,9 @@ export const html = `
       <input id="realWidth" type="number" min="0" max="30000" step="0.1" title="What that angle is in metres at the distance beside it. Derived, never stored"/> m</label>
     <label><span id="label-object-distance">Distance</span>
       <input id="objectDistance" type="number" min="0" max="30000" step="1" title="How far along its line of sight the shape is drawn — what decides what the decor hides of it. A hypothesis, never the observer's statement"/> m</label>
+    <!-- The shape's turn on the drawing (BaseShape.angle), as its handle sets it: clockwise on screen, in degrees. -->
+    <label><span id="label-shape-rotation">Rotation</span>
+      <input id="shapeRotation" type="number" min="-180" max="180" step="1"/> &deg;</label>
     <label><span id="label-size-lock">Hold</span>
       <select id="sizeLock" title="Which of the three stays put while another is edited">
         <option id="option-lock-none" value="none">nothing</option>
@@ -2005,12 +2008,6 @@ ${EditorTheme.fields(".app")}
 .scene-card[data-tracks] > .playback-row .icon-btn { border-color: var(--line-strong); }
 #toggle-tracks[aria-expanded="true"] { background: var(--glow-solid); border-color: var(--glow-solid); color: var(--glow-on-solid); }
 .scene-card > #timeline-tracks { background: var(--ground-raised); color: var(--ink); }
-/* A field the scene shows as it is edited: a small circle after its label, filled while it is the one being edited. */
-.scene-linked > :first-child::after {
-  content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 6px; vertical-align: .05em;
-  border: 1px solid var(--glow-dim); border-radius: 50%; box-sizing: border-box;
-}
-.scene-linked:focus-within > :first-child::after { background: var(--glow-solid); border-color: var(--glow-solid); }
 /* What a click in the scene opened, pointed out for a moment. */
 .flash { background: var(--warn-bg) !important; border-radius: 8px; box-shadow: 0 0 0 6px var(--warn-bg); transition: background .3s ease, box-shadow .3s ease; }
 @media (prefers-reduced-motion: reduce) { .scene-card > :is(.render-line, .playback-row) { transition: none; } }

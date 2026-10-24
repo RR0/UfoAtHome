@@ -374,6 +374,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly blurBoundOutput: HTMLElement
   private readonly sourceSelect: HTMLSelectElement
   private readonly shapeTitleInput: HTMLInputElement
+  /** The shape's turn on the drawing, in degrees (BaseShape.angle, in radians). */
+  private readonly shapeRotationInput: HTMLInputElement
   /** The observer's own reported size/distance for the selected shape — the pair that makes
    * its on-screen size computable instead of eyeballed (see ApparentSize/applySizeHypothesis).
    * apparentSizeOutput reads back what they actually produce. */
@@ -1132,6 +1134,7 @@ export class SightingEditorElement extends HTMLElement {
     this.blurBoundOutput = this.shadow.getElementById("blur-bound")!
     this.sourceSelect = this.shadow.getElementById("source") as HTMLSelectElement
     this.shapeTitleInput = this.shadow.getElementById("shapeTitle") as HTMLInputElement
+    this.shapeRotationInput = this.shadow.getElementById("shapeRotation") as HTMLInputElement
     this.utcOffsetInput = this.shadow.getElementById("utcOffsetHours") as HTMLInputElement
     this.timeZoneSelect = this.shadow.getElementById("timeZone") as HTMLSelectElement
     this.apparentWidthInput = this.shadow.getElementById("apparentWidth") as HTMLInputElement
@@ -1225,8 +1228,6 @@ export class SightingEditorElement extends HTMLElement {
       if (!next || !SightingEditorElement.SCENE_LINKED.includes(next.id)) this.setActiveSceneField(undefined)
     })
     this.shadow.addEventListener("input", () => this.refreshSceneField())
-    // The fields the scene shows as they are edited (§3.3): marked, the mark saying so when pointed at (see labelPanels).
-    for (const id of SightingEditorElement.SCENE_LINKED) this.shadow.getElementById(id)?.closest("label, .field")?.classList.add("scene-linked")
     this.importInput = this.shadow.getElementById("import") as InputFileElement
     this.narrativeSourceRow = this.shadow.getElementById("narrative-source-row")!
     this.narrativeSettingsBox = this.shadow.getElementById("narrative-settings")!
@@ -1752,6 +1753,7 @@ export class SightingEditorElement extends HTMLElement {
     // itself already resyncs the toolbar, no separate onSelectionOrTimeChanged() call needed).
     this.sourceSelect.addEventListener("change", () => this.selectUnit(this.sourceSelect.value))
     this.shapeTitleInput.addEventListener("input", () => this.updateShapeTitle())
+    this.shapeRotationInput.addEventListener("input", () => this.updateShapeRotation())
     this.apparentWidthInput.addEventListener("input", () => this.typing(this.apparentWidthInput, () => this.onApparentWidthInput()))
     this.realWidthInput.addEventListener("input", () => this.typing(this.realWidthInput, () => this.onRealWidthInput()))
     this.objectDistanceInput.addEventListener("input", () => this.typing(this.objectDistanceInput, () => this.onDistanceInput()))
@@ -7214,6 +7216,7 @@ export class SightingEditorElement extends HTMLElement {
       this.objectDistanceInput,
       this.sizeLockSelect,
       this.clearDistanceHypothesisButton,
+      this.shapeRotationInput,
     ]) {
       input.disabled = multiple
       input.title = title
@@ -7252,12 +7255,31 @@ export class SightingEditorElement extends HTMLElement {
     if (this.shadow.activeElement !== this.shapeTitleInput) {
       this.shapeTitleInput.value = this.said.read(shape.title) ?? ""
     }
+    if (this.shadow.activeElement !== this.shapeRotationInput) this.shapeRotationInput.value = String(SightingEditorElement.rotationDeg(shape.angle))
     // The size/distance pair is deliberately NOT re-read from the shape here, unlike every other
     // field above: it isn't one of the shape's properties any more (see BaseShape.angular). It is
     // a working hypothesis the author typed — "suppose it was 30 m at 500 m" — and leaving it
     // standing across a change of selection is what lets the same hypothesis be tried on the
     // several shapes of one object.
     this.refreshApparentSize()
+  }
+
+  /** A shape's angle (radians, clockwise on screen) as the Rotation field says it: degrees within ±180, to a tenth. */
+  private static rotationDeg(angle: number): number {
+    const deg = ((angle * 180 / Math.PI) % 360 + 540) % 360 - 180
+    return Math.round((deg === -180 ? 180 : deg) * 10) / 10
+  }
+
+  /** Writes the Rotation field onto the shape at the current playhead, as its rotation handle does. */
+  private updateShapeRotation(): void {
+    const deg = this.numberOrUndefined(this.shapeRotationInput.value)
+    if (deg === undefined) return
+    const timeline = this.ufoElement.sighting.timeline
+    const t = this.ufoElement.currentTime
+    const shape = timeline.getInterpolatedShapeAt(t, this.currentSourceId)
+    if (!shape) return
+    this.commitShapes(t, [{ sourceId: this.currentSourceId, shape: { ...shape, angle: deg * Math.PI / 180 } }])
+    this.ufoElement.refresh()
   }
 
   /** Writes the Name field straight onto the shape at the current playhead — a plain
@@ -10113,6 +10135,8 @@ export class SightingEditorElement extends HTMLElement {
     this.labelApparentWidth.textContent = messages.apparentWidth
     this.labelRealWidth.textContent = messages.realWidth
     this.labelObjectDistance.textContent = messages.distance
+    this.shadow.getElementById("label-shape-rotation")!.textContent = messages.shapeRotation
+    this.shapeRotationInput.title = messages.shapeRotationTitle
     this.labelSizeLock.textContent = messages.sizeLock
     for (const [id, text] of [
       ["option-lock-none", messages.lockNone],
@@ -10424,7 +10448,6 @@ export class SightingEditorElement extends HTMLElement {
     this.candidatesView?.languageChanged()
     this.witnessErrorView.refresh()
     this.timelineTracks.setMessages(messages)
-    for (const label of this.shadow.querySelectorAll<HTMLElement>(".scene-linked > :first-child")) label.title = messages.sceneLinkedLegend
     if (this.tracksToggle) this.setTracksShown(this.tracksToggle.getAttribute("aria-expanded") === "true")
     // Every window's ✕ (see WindowClose), answering as its Escape does.
     for (const id of ["location-settings", "decor-settings", "weather-settings"]) WindowClose.popover(this.shadow.getElementById(id)!, messages.close)

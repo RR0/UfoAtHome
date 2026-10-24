@@ -1350,6 +1350,17 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
     expect(JSON.stringify(element.sightingData)).toBe(before)
   })
 
+  it("shows a shape's rotation in degrees, and turns the shape when it is typed", () => {
+    const element = mount()
+    const root = element.shadowRoot!
+    const field = root.getElementById("shapeRotation") as HTMLInputElement
+    expect(field.value).toBe("0")
+    field.value = "-45"
+    field.dispatchEvent(new Event("input", { bubbles: true }))
+    const shape = element.sightingData.timeline.keyframes.at(-1)!.shapes[0].shape
+    expect(shape.angle).toBeCloseTo(-Math.PI / 4)
+  })
+
   it("leaves the shapes' picker enabled when a saucer is added, its dome and disc both selected", () => {
     const element = mountEmpty()
     ;(element.shadowRoot!.getElementById("add-shape-saucer") as HTMLButtonElement).click()
@@ -7248,13 +7259,6 @@ describe("SightingEditorElement header", () => {
     expect(root.querySelectorAll(".track-name")).toHaveLength(4)
     toggle.click()
     expect(root.getElementById("timeline-tracks")!.hidden).toBe(true)
-  })
-
-  it("marks the fields the scene shows as they are edited, the mark saying so when pointed at", () => {
-    const root = mount().shadowRoot!
-    const label = root.getElementById("heading")!.closest("label")!
-    expect(label.classList.contains("scene-linked")).toBe(true)
-    expect((label.firstElementChild as HTMLElement).title).toBe("Field shown in the scene: click something in the scene to edit it.")
   })
 
   it("opens each section on its fields, what it is for said by its chip when pointed at", () => {
