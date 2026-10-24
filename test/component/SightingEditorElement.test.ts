@@ -156,6 +156,29 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
   }
 }))
 
+// The chunks the editor loads only when asked (the scenery's registry, the assessors, the File group's text editor, the other languages...),
+// loaded once before any test. On a Windows runner (Node 22, since 0.133.0) the worker running this long file stopped being sent any
+// module it had not had yet, after a few hundred tests: every mount's import() then waited until the run ended (407 "Timeout calling
+// fetch"), and the 14 tests that wait on one of them (the assessment's marks, the File group) ran out of time.
+beforeAll(async () => {
+  await Promise.all([
+    import("../../src/render3d/terrain/surroundingsSources.js"),
+    import("../../src/engine/assessment/assessors/CoverageAssessor.js"),
+    import("../../src/engine/assessment/assessors/HynekAssessor.js"),
+    import("../../src/component/SightingFileEditor.js"),
+    import("../../src/component/BodyEditor.js"),
+    import("../../src/component/BeamEditor.js"),
+    import("../../src/component/LaunchEditor.js"),
+    import("../../src/component/InputFileElement.js"),
+    import("../../src/component/trafficRuntime.js"),
+    import("../../src/engine/interop/KmlImport.js"),
+    import("../../src/engine/astronomy/SatellitePasses.js"),
+    import("../../src/generated/sightingSchema.json"),
+    import("fflate"),
+    ...Object.values(import.meta.glob("../../src/component/messages/*_{en,fr,es,it}.ts")).map(load => load())
+  ])
+}, 120_000)
+
 // jsdom's <canvas> has no real 2D context (getContext("2d") returns null without the
 // native `canvas` package) — stub it, same as test/render/CanvasRenderer.test.ts's mock,
 // so mounting the component doesn't throw when it paints its initial preview.

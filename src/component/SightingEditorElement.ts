@@ -8360,7 +8360,10 @@ export class SightingEditorElement extends HTMLElement {
    * registry is offered here without anything else being touched.
    */
   private async fillScenerySources(): Promise<void> {
-    const { SURROUNDINGS_SOURCES, SurroundingsSources } = await import("../render3d/terrain/surroundingsSources.js")
+    // A chunk that does not come (a page offline, a deployment replaced under it) leaves the choice as it is, rather than a rejection nobody handles.
+    const registry = await import("../render3d/terrain/surroundingsSources.js").catch(() => undefined)
+    if (!registry) return
+    const { SURROUNDINGS_SOURCES, SurroundingsSources } = registry
     // The editor can be gone (a test torn down, a page left) while the chunk loads: there is nothing to fill, and no document to make options with.
     if (!this.isConnected) return
     const none = document.createElement("option")
