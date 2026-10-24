@@ -1986,6 +1986,8 @@ ${EditorTheme.fields(".app")}
 /* Its field fits the column it is given, never past it into the next one, and never shorter than "dd/mm/yyyy --:--" with its calendar: a
    section that holds a date and time has columns wide enough for the switch and that beside it. */
 .form-section :is(rr0-date-input, rr0-duration-input) :is(.edtf-field, .duration-field) { flex: 1 1 10em; min-width: 0; max-width: 100%; }
+/* Said in EDTF, a date is a text as wide as its value: its field holds it alone, so that the (?) in its corner stays on the text. */
+.form-section rr0-date-input .edtf-field:has(> input[type="text"]:not([hidden])) { flex: 0 1 auto; }
 .form-section:has(rr0-date-input:not([date-only])) { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 .form-section :is(rr0-date-input, rr0-duration-input) input { box-sizing: border-box; min-width: 0; max-width: 100%; width: 100%; }
 .form-section > :is(label, .field) > input[type="color"] { flex: 1 1 0; height: 38px; padding: 3px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--ground); }

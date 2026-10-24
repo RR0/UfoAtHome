@@ -20,7 +20,7 @@ const STYLE = `
 rr0-duration-input { position: relative; display: inline-flex; align-items: center; gap: .3em; }
 rr0-duration-input .duration-field { position: relative; display: inline-flex; align-items: center; gap: .25em; }
 rr0-duration-input .duration-field input[type="text"] { padding-right: 1.6em; }
-rr0-duration-input .duration-help { position: absolute; right: .25em; top: 50%; transform: translateY(-50%); width: 1.2em; height: 1.2em; padding: 0; border: 1px solid currentColor; border-radius: 50%; background: none; color: inherit; font-size: .75em; line-height: 1; cursor: help; opacity: .7; }
+rr0-duration-input .duration-help { position: absolute; right: .25em; top: 50%; transform: translateY(-50%); box-sizing: border-box; width: 1.2em; height: 1.2em; min-height: 0; min-width: 0; padding: 0; border: 1px solid currentColor; border-radius: 50%; background: none; color: inherit; font-size: .75em; line-height: 1; cursor: help; opacity: .7; }
 rr0-duration-input .duration-helppop { position: absolute; left: 0; bottom: calc(100% + .35em); z-index: 5; max-width: 26em; padding: .35em .6em; border-radius: 4px; background: rgba(0, 0, 0, .88); color: #fff; font-size: .8rem; line-height: 1.35; white-space: normal; pointer-events: none; }
 rr0-duration-input .duration-helppop { pointer-events: auto; min-width: 16em; }
 rr0-duration-input .duration-helppop p { margin: 0 0 .3em; font-weight: 600; }
