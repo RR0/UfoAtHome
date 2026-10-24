@@ -345,6 +345,9 @@ export const html = `
       <label><span id="label-milestone-label">Label</span> <input id="milestoneLabel" type="text" size="4"/></label>
       <label><span id="label-milestone-note">What happens</span> <input id="milestoneNote" type="text"/></label>
     </div>
+    <!-- What the interviews of a case say of this observation's moments, given by the case that holds both (see passages): each its moment,
+         which the playhead goes to, and its quotation, which opens the passage. None outside a case. -->
+    <ul id="moment-passages" class="moment-passages" hidden></ul>
     </div>
   </div>
 </section>
@@ -1954,6 +1957,14 @@ ${EditorTheme.fields(".app")}
 .section-title { grid-column: 1 / -1; margin: 0 0 -2px; font: 600 12px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--glow-dim); }
 /* What is not a field takes the whole line: a paragraph, a note, a list, a row of buttons, another section's toolbar. */
 .form-section > :is(.toolbar, p, output, .file-note, .element-list-row, .element-list-body, .record-row, .place-search-row, rr0-provider-settings, .decor-add-row, span:not(.input-file-row), div:not(.field)) { grid-column: 1 / -1; }
+/* The passages of the case's interviews about the moments: the moment's button and the first line of its quotation on one level. */
+.moment-passages { grid-column: 1 / -1; list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+.moment-passages li { display: flex; gap: 10px; align-items: flex-start; }
+.moment-passages .at { flex: none; box-sizing: border-box; min-height: 0; height: 30px; padding: 0 12px 0 9px; display: inline-flex; align-items: center; gap: 4px;
+  font: 600 13px/1 var(--sans); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.moment-passages .at svg { width: 14px; height: 14px; }
+.moment-passages .excerpt { min-height: 0; margin: 0; padding: 5px 0 0; border: 0; border-radius: 0; background: none; font: 400 14px/1.45 var(--sans);
+  text-align: left; color: var(--sky, LinkText); text-decoration: underline; text-underline-offset: .15em; cursor: pointer; }
 /* What has nothing to say takes no line: an empty output kept its row and the grid's gap (three of them under Size, with two shapes selected). */
 .form-section > :is(output, p):empty { display: none; }
 .form-section > .toolbar { margin: 0; }

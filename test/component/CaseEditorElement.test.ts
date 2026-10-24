@@ -704,12 +704,14 @@ describe("CaseEditorElement's events", () => {
     return own
   }
 
-  it("lists, under an observation, the passages of the interviews that tell of its moments, each linking to its passage and its moment", async () => {
+  it("lists, under an observation's Moments, the passages of the interviews that tell of them, each linking to its passage and its moment", async () => {
     const element = await open(undefined, withPassages())
     await wait(100)
     const root = element.shadowRoot!
-    expect(root.getElementById("passages")!.hidden).toBe(false)
-    const items = [...root.querySelectorAll("#passages-list li")]
+    const passages = () => root.querySelector("rr0-sighting-editor")!.shadowRoot!.getElementById("moment-passages")!
+    expect(passages().hidden).toBe(false)
+    expect(passages().closest(".form-section")!.querySelector("#label-milestones")).not.toBeNull()
+    const items = [...passages().querySelectorAll("li")]
     expect(items).toHaveLength(1)
     // The player's own play icon, then the moment.
     expect(items[0].querySelector(".at")!.textContent).toBe("00:00.5")
@@ -725,7 +727,7 @@ describe("CaseEditorElement's events", () => {
     items[0].querySelector<HTMLButtonElement>(".excerpt")!.click()
     await wait(100)
     expect(root.getElementById("interview-section")!.hidden).toBe(false)
-    expect(root.getElementById("passages")!.hidden).toBe(true)
+    expect(passages().hidden).toBe(true)
     expect(interviewPart(element).shadowRoot!.getElementById("group-exchanges")!.hidden).toBe(false)
   })
 
@@ -745,7 +747,7 @@ describe("CaseEditorElement's events", () => {
   it("shows no passages under an observation that no interview tells of", async () => {
     const element = await open(undefined, interviewed())
     await wait(100)
-    expect(element.shadowRoot!.getElementById("passages")!.hidden).toBe(true)
+    expect(element.shadowRoot!.querySelector("rr0-sighting-editor")!.shadowRoot!.getElementById("moment-passages")!.hidden).toBe(true)
   })
 
   it("names every witness an interview was held with, in the picker", async () => {

@@ -29,7 +29,6 @@ import { loadCaseEditorMessages, loadSightingEditorMessages, UFO_SUPPORTED_LANGU
 import type { UfoLanguage } from "./messages/index.js"
 import { InputFont } from "./InputFont.js"
 import { MessageStyle } from "./MessageStyle.js"
-import { PlayerIcons } from "./PlayerIcons.js"
 
 export const CASE_EDITOR_ELEMENT_NAME = "rr0-case-editor"
 
@@ -57,14 +56,6 @@ const TEMPLATE = `
   button.link { border: 0; background: none; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
   .icon-btn { width: 1.8em; height: 1.8em; padding: 0; line-height: 1; cursor: pointer; }
   /* The observation being edited, inside: a frame of its own once there is a case around it. */
-  .passages { margin: .5em 0 0; font-size: .9em; }
-  .passages ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .2em; }
-  /* The moment's button and the first line of its passage on one level: the button as tall as two thirds more than the line, the line centred in it. */
-  .passages li { display: flex; gap: .6em; align-items: flex-start; }
-  .passages button { font: inherit; cursor: pointer; }
-  .passages .at { font-variant-numeric: tabular-nums; box-sizing: border-box; min-height: 0; height: 2.1em; padding: 0 .75em 0 .55em; text-align: left; white-space: nowrap; flex: none; display: inline-flex; align-items: center; gap: .25em; }
-  .passages .at svg { width: 1.1em; height: 1.1em; }
-  .passages .excerpt { min-height: 0; border: 0; background: none; padding: .3em 0 0; line-height: 1.5; text-align: left; color: LinkText; text-decoration: underline; }
   /* The event picked, in the frame every list of the editor puts its picked element in (see ElementList): its id, then the observation
      or the interview. A recording alone, not in a case, has no list and no frame. */
   #event-item { display: block; }
@@ -269,7 +260,6 @@ const TEMPLATE = `
     </div>
     <section id="recording" class="recording">
       <rr0-sighting-editor id="editor"><span id="recording-dirty" slot="tab-status" class="dirty" role="status" title="Changes not saved" hidden>●</span></rr0-sighting-editor>
-      <div id="passages" class="passages" hidden><ul id="passages-list"></ul></div>
     </section>
     <section id="interview-section" class="recording" hidden>
       <rr0-interview-editor id="interview"></rr0-interview-editor>
@@ -849,7 +839,7 @@ export class CaseEditorElement extends HTMLElement {
     if (!session) return
     this.commit()
     this.currentInterview = undefined
-    this.byId("passages").hidden = true
+    this.editor.passages = undefined
     try {
       const fresh = !track.recording
       await this.loadTrack(track)
@@ -899,9 +889,8 @@ export class CaseEditorElement extends HTMLElement {
    */
   private async showPassages(track: CaseTrack): Promise<void> {
     const session = this.session
-    const box = this.byId("passages")
     const token = ++this.passagesToken
-    box.hidden = true
+    this.editor.passages = undefined
     // A case without interviews has no passages to look for, and none of the interview code to load.
     if (!session || track.kind !== "observer" || session.interviews.length === 0) return
     const { InterviewFile } = await import("../engine/persistence/interviewJson.js")
@@ -916,32 +905,20 @@ export class CaseEditorElement extends HTMLElement {
       for (const passage of InterviewFile.passagesAbout(held, id)) found.push({ interview, json, passage })
     }
     if (token !== this.passagesToken || this.current !== track || found.length === 0) return
-    const list = this.byId("passages-list")
-    list.replaceChildren(...found.sort((a, b) => a.passage.at - b.passage.at).map(({ interview, json, passage }) => {
-      const item = document.createElement("li")
-      const at = document.createElement("button")
-      at.type = "button"
-      at.className = "at"
-      at.innerHTML = PlayerIcons.PLAY
-      at.append(InterviewFile.clock(passage.at, true))
-      at.addEventListener("click", () => this.editor.seekTo(passage.at))
-      // The quotation is the link: to the passage, in the interview it is from, which the tooltip names ("Reported in Interview of Q. B.").
-      const link = document.createElement("button")
-      link.type = "button"
-      link.className = "excerpt"
-      const items = this.items(session) as { interview?: InterviewEvent }[]
-      const index = items.findIndex(candidate => candidate.interview === interview)
-      const where = `${this.messages.passagesHeading} ${this.optionLabel({ interview }, index)}`
+    // Listed by the editor, under the observation's own Moments: the quotation is the link to the passage, in the interview it is from, which
+    // the tooltip names ("Reported in Interview of Q. B.").
+    const items = this.items(session) as { interview?: InterviewEvent }[]
+    this.editor.passages = found.sort((a, b) => a.passage.at - b.passage.at).map(({ interview, json, passage }) => {
+      const where = `${this.messages.passagesHeading} ${this.optionLabel({ interview }, items.findIndex(candidate => candidate.interview === interview))}`
       const said = passage.text === undefined ? "" : passage.range ? passage.text.slice(passage.range[0], passage.range[1]) : passage.text
-      link.textContent = said === "" ? where : `${InterviewFile.speakerName(json, passage.speaker)} : « ${said.length > 120 ? `${said.slice(0, 117)}…` : said} »`
-      link.title = where
-      link.addEventListener("click", () => {
-        void this.showInterview(interview).then(() => this.interviewElement.revealSegment(passage.index))
-      })
-      item.append(at, link)
-      return item
-    }))
-    box.hidden = false
+      return {
+        at: passage.at,
+        clock: InterviewFile.clock(passage.at, true),
+        said: said === "" ? where : `${InterviewFile.speakerName(json, passage.speaker)} : « ${said.length > 120 ? `${said.slice(0, 117)}…` : said} »`,
+        where,
+        open: () => void this.showInterview(interview).then(() => this.interviewElement.revealSegment(passage.index))
+      }
+    })
   }
 
   /** A passage of an interview was followed to the moment it tells of: the observation is shown at that time. */
@@ -993,7 +970,7 @@ export class CaseEditorElement extends HTMLElement {
     this.commit()
     this.current = undefined
     this.passagesToken++
-    this.byId("passages").hidden = true
+    this.editor.passages = undefined
     this.currentInterview = interview
     this.refreshRow()
     await this.ensureInterview()

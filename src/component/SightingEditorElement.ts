@@ -1,3 +1,4 @@
+import { PlayerIcons } from "./PlayerIcons.js"
 import { RecordingText } from "../engine/persistence/RecordingText.js"
 import { setupCloudEditor } from "./CloudEditor.js"
 import { Icons } from "./Icons.js"
@@ -356,6 +357,18 @@ interface FileChoice {
   setFromFile(fromFile: boolean): void
   label(): string
   where(): string
+}
+
+/** A passage of an interview that tells of a moment of the observation being edited (see SightingEditorElement.passages). */
+export interface MomentPassage {
+  /** The moment, in seconds since the recording's beginning, and as the interview's clock says it. */
+  at: number
+  clock: string
+  /** The quotation, as it reads; and where it is from ("Reported in Interview of Q. B."). */
+  said: string
+  where: string
+  /** Opens the passage in its interview. */
+  open: () => void
 }
 
 export class SightingEditorElement extends HTMLElement {
@@ -6586,6 +6599,32 @@ export class SightingEditorElement extends HTMLElement {
    */
   seekTo(seconds: number): void {
     this.goToMark(seconds * 1000)
+  }
+
+  /**
+   * What the interviews of a case say of this observation's moments, listed under its Moments: each a button to its moment and its quotation,
+   * which opens the passage. Given by the case that holds both (this editor knows no interview); none, or `undefined`, lists nothing.
+   */
+  set passages(passages: MomentPassage[] | undefined) {
+    const list = this.shadow.getElementById("moment-passages")!
+    list.replaceChildren(...(passages ?? []).map(passage => {
+      const item = document.createElement("li")
+      const at = document.createElement("button")
+      at.type = "button"
+      at.className = "at"
+      at.innerHTML = PlayerIcons.PLAY
+      at.append(passage.clock)
+      at.addEventListener("click", () => this.seekTo(passage.at))
+      const quote = document.createElement("button")
+      quote.type = "button"
+      quote.className = "excerpt"
+      quote.textContent = passage.said
+      quote.title = passage.where
+      quote.addEventListener("click", () => passage.open())
+      item.append(at, quote)
+      return item
+    }))
+    list.hidden = list.childElementCount === 0
   }
 
   /** Opens the section whose panel is `id` ("group-temporal"…), for a caller that sends the author there (a moment quoted in an interview). */
