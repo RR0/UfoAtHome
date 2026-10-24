@@ -2260,6 +2260,8 @@ export class SightingEditorElement extends HTMLElement {
   set embedded(embedded: boolean) {
     this.shadow.getElementById("editor-head")!.hidden = embedded
     this.shadow.querySelector(".app")!.classList.toggle("embedded", embedded)
+    // Undo and Redo back where its own header has them, from wherever a holder put them (see historyControls).
+    if (!embedded) this.shadow.querySelector("#editor-head .head-actions")!.prepend(this.historyControls)
   }
 
   /**

@@ -65,6 +65,7 @@ const TEMPLATE = `
   #event-item { display: block; }
   #event-item:not(.in-case) { border: 0; padding: 0; margin: 0; }
   .event-id-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: .5em; }
+  .event-id-row[hidden] { display: none; }
   .event-id-row > .history-slot { margin-left: auto; }
   .history-slot[hidden] { display: none; }
   .history-slot .history { display: inline-flex; gap: 8px; }
@@ -261,7 +262,7 @@ const TEMPLATE = `
       <button id="cited-back" type="button" class="pill-btn"><span id="label-back-to-interview">Back to the interview</span></button>
     </div>
     <!-- The event's id, and on its line the observation's Undo and Redo (see SightingEditorElement.historyControls). -->
-    <div class="event-id-row">
+    <div class="event-id-row" hidden>
       <label id="row-recording-id" class="row"><span id="label-recording-id">ID</span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
       <span id="history-slot" class="history-slot"></span>
     </div>
@@ -387,9 +388,6 @@ export class CaseEditorElement extends HTMLElement {
     this.editor.addEventListener("recordingloaded", () => this.closeCase())
     // The case keeps the watch over what would be lost by leaving, for the recordings it holds: the editor does not.
     this.editor.guardsLeaving = false
-    this.editor.embedded = true
-    // Its Undo and Redo on the line of the event's id, the editor's own header being the case's.
-    this.byId("history-slot").append(this.editor.historyControls)
     // Loading a recording or a case into the editor replaces what is open: asked first when changes were not exported.
     this.editor.addEventListener("beforeload", event => {
       if (!this.dirty) return
@@ -1320,6 +1318,7 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("make-case-row").hidden = session !== undefined
     this.byId("case").classList.toggle("in-case", session !== undefined)
     this.byId("event-item").classList.toggle("in-case", session !== undefined)
+    this.holdEditor(session !== undefined)
     if (!session) {
       this.refreshDirty()
       return
@@ -1339,6 +1338,17 @@ export class CaseEditorElement extends HTMLElement {
     ;(this.byId("delete") as HTMLButtonElement).disabled = this.currentInterview === undefined && session.tracks.length <= 1
     this.refreshRecordingId(session)
     this.refreshDirty()
+  }
+
+  /**
+   * The observation's editor inside a case or on its own. In a case, the case's header says what is open and saves it, so the editor
+   * draws none of its own, and its Undo and Redo go on the line of the event's id. On its own, a recording that is no case's, it is the
+   * editor as it stands alone: its title, its Undo and Redo, Share and Save, and no event line, there being no event.
+   */
+  private holdEditor(inCase: boolean): void {
+    this.editor.embedded = inCase
+    if (inCase) this.byId("history-slot").append(this.editor.historyControls)
+    this.shadow.querySelector<HTMLElement>(".event-id-row")!.hidden = !inCase
   }
 
   /** The id of the recording on show: its event's, or, shown greyed, the one it would be given. A reading is not named, nothing reads it. */

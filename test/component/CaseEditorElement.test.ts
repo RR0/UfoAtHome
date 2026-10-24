@@ -1016,3 +1016,34 @@ describe("Sharing from an editor", () => {
     expect(button.title).toContain("address")
   })
 })
+
+describe("The observation's editor, in a case or on its own", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    vi.unstubAllGlobals()
+    globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
+  })
+
+  it("draws its own header for a recording that is no case's: its title, Undo and Redo, Share and Save, and no event line", async () => {
+    files["https://example.org/d/plain.json"] = { version: 1, id: "plain", timeline: { keyframes: [] } }
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: () => Promise.resolve(structuredClone(files[url])), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) })))
+    const element = document.createElement("rr0-case-editor") as CaseEditorElement
+    document.body.appendChild(element)
+    element.setAttribute("src", "https://example.org/d/plain.json")
+    await wait()
+    const head = element.sightingEditor.shadowRoot!.getElementById("editor-head")!
+    expect(head.hidden).toBe(false)
+    expect(head.querySelector("#undo")).not.toBeNull()
+    expect(head.querySelector("#share")).not.toBeNull()
+    expect(head.querySelector("#save")).not.toBeNull()
+    expect((element.shadowRoot!.querySelector(".event-id-row") as HTMLElement).hidden).toBe(true)
+  })
+
+  it("leaves its header to the case's, its Undo and Redo on the event's line", async () => {
+    const element = await open()
+    expect(element.sightingEditor.shadowRoot!.getElementById("editor-head")!.hidden).toBe(true)
+    const row = element.shadowRoot!.querySelector(".event-id-row") as HTMLElement
+    expect(row.hidden).toBe(false)
+    expect(row.querySelector("#history-slot")!.childElementCount).toBe(1)
+  })
+})
