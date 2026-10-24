@@ -1,3 +1,4 @@
+import { HelpPopover } from "./HelpPopover.js"
 import { DurationText } from "../engine/model/DurationText.js"
 import type { DurationReading } from "../engine/model/DurationText.js"
 import type { EdtfDateFieldMessages } from "./EdtfDateField.js"
@@ -19,8 +20,8 @@ export interface DurationInputMessages extends Pick<EdtfDateFieldMessages, "time
 const STYLE = `
 rr0-duration-input { position: relative; display: inline-flex; align-items: center; gap: .3em; }
 rr0-duration-input .duration-field { position: relative; display: inline-flex; align-items: center; gap: .25em; }
-rr0-duration-input .duration-field input[type="text"] { padding-right: 1.6em; }
-rr0-duration-input .duration-help { position: absolute; right: .25em; top: 50%; transform: translateY(-50%); box-sizing: border-box; width: 1.2em; height: 1.2em; min-height: 0; min-width: 0; padding: 0; border: 1px solid currentColor; border-radius: 50%; background: none; color: inherit; font-size: .75em; line-height: 1; cursor: help; opacity: .7; }
+rr0-duration-input .duration-field input[type="text"] { padding-right: 2.1em; }
+rr0-duration-input .duration-help { position: absolute; right: .6em; top: 50%; transform: translateY(-50%); box-sizing: border-box; width: 1.2em; height: 1.2em; min-height: 0; min-width: 0; padding: 0; border: 1px solid currentColor; border-radius: 50%; background: none; color: inherit; font-size: .75em; line-height: 1; cursor: help; opacity: .7; }
 rr0-duration-input .duration-helppop { position: absolute; left: 0; bottom: calc(100% + .35em); z-index: 5; max-width: 26em; padding: .35em .6em; border-radius: 4px; background: rgba(0, 0, 0, .88); color: #fff; font-size: .8rem; line-height: 1.35; white-space: normal; pointer-events: none; }
 rr0-duration-input .duration-helppop { pointer-events: auto; min-width: 16em; }
 rr0-duration-input .duration-helppop p { margin: 0 0 .3em; font-weight: 600; }
@@ -30,6 +31,7 @@ rr0-duration-input .duration-mode { order: -1; font: inherit; color: inherit; ba
 rr0-duration-input .duration-mode:hover { text-decoration-thickness: 2px; }
 rr0-duration-input .duration-mode:focus-visible { outline: 2px solid #4af; outline-offset: 2px; border-radius: 2px; }
 rr0-duration-input [hidden] { display: none !important; }
+${HelpPopover.css("rr0-duration-input .duration-helppop")}
 `
 
 /**
@@ -87,7 +89,7 @@ export class DurationInputElement extends HTMLElement {
     this.helpButton.hidden = true
     this.popup = doc.createElement("div")
     this.popup.className = "duration-helppop"
-    this.popup.hidden = true
+    HelpPopover.attach(this.helpButton, this.popup)
     this.chosen = doc.createElement("span")
     this.chosen.className = "duration-chosen"
     this.chosen.hidden = true
@@ -108,7 +110,7 @@ export class DurationInputElement extends HTMLElement {
     this.textInput.addEventListener("input", () => this.readText())
     this.textInput.addEventListener("focus", () => this.showDeduction())
     this.modeButton.addEventListener("click", () => this.setPrecise(!this.precise))
-    this.helpButton.addEventListener("click", () => { this.popup.hidden = !this.popup.hidden })
+    this.helpButton.addEventListener("click", () => HelpPopover.show(this.popup, this.popup.hidden))
     this.applyWording()
   }
 
@@ -124,11 +126,11 @@ export class DurationInputElement extends HTMLElement {
   }
 
   private readonly closeHelpOutside = (event: Event): void => {
-    if (this.popup && !this.popup.hidden && !event.composedPath().includes(this)) this.popup.hidden = true
+    if (this.popup && !this.popup.hidden && !event.composedPath().includes(this)) HelpPopover.show(this.popup, false)
   }
 
   private readonly closeHelpOnEscape = (event: KeyboardEvent): void => {
-    if (event.key === "Escape" && this.popup) this.popup.hidden = true
+    if (event.key === "Escape" && this.popup) HelpPopover.show(this.popup, false)
   }
 
   /** The number: what holds the length the simulation is played at, whichever way the duration was said. */

@@ -1,6 +1,7 @@
 import type { SightingTime } from "../engine/model/Sighting.js"
 import { HostLocale } from "../i18n/locale.js"
 import { EdtfDateField } from "./EdtfDateField.js"
+import { HelpPopover } from "./HelpPopover.js"
 import type { EdtfDateFieldMessages } from "./EdtfDateField.js"
 import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 
@@ -9,8 +10,9 @@ export const DATE_INPUT_ELEMENT_NAME = "rr0-date-input"
 const STYLE = `
 rr0-date-input { position: relative; display: inline-flex; align-items: center; gap: .3em; }
 rr0-date-input .edtf-field { position: relative; display: inline-flex; align-items: center; }
-rr0-date-input .edtf-field input[type="text"] { padding-right: 1.6em; }
-rr0-date-input .edtf-help { position: absolute; right: .25em; top: 50%; transform: translateY(-50%); box-sizing: border-box; width: 1.2em; height: 1.2em; min-height: 0; min-width: 0; padding: 0; border: 1px solid currentColor; border-radius: 50%; background: none; color: inherit; font-size: .75em; line-height: 1; cursor: help; opacity: .7; }
+/* As wide as what it says, a date, a time and its doubt (~) at least, with room for the (?) at its end: narrower, the doubt was cut off. */
+rr0-date-input .edtf-field input[type="text"] { padding-right: 2.1em; field-sizing: content; width: auto; min-width: calc(18ch + 3.2em); }
+rr0-date-input .edtf-help { position: absolute; right: .6em; top: 50%; transform: translateY(-50%); box-sizing: border-box; width: 1.2em; height: 1.2em; min-height: 0; min-width: 0; padding: 0; border: 1px solid currentColor; border-radius: 50%; background: none; color: inherit; font-size: .75em; line-height: 1; cursor: help; opacity: .7; }
 rr0-date-input .edtf-helppop { position: absolute; left: 0; bottom: calc(100% + .35em); z-index: 5; max-width: 26em; padding: .35em .6em; border-radius: 4px; background: rgba(0, 0, 0, .88); color: #fff; font-size: .8rem; line-height: 1.35; white-space: normal; pointer-events: none; }
 rr0-date-input .edtf-helppop { pointer-events: auto; min-width: 16em; }
 rr0-date-input .edtf-helppop p { margin: 0 0 .3em; font-weight: 600; }
@@ -21,6 +23,7 @@ rr0-date-input .edtf-mode { order: -1; font: inherit; color: inherit; background
 rr0-date-input .edtf-mode:hover { text-decoration-thickness: 2px; }
 rr0-date-input .edtf-mode:focus-visible { outline: 2px solid #4af; outline-offset: 2px; border-radius: 2px; }
 rr0-date-input [hidden] { display: none !important; }
+${HelpPopover.css("rr0-date-input .edtf-helppop")}
 `
 
 /**
@@ -69,7 +72,7 @@ export class DateInputElement extends HTMLElement {
     help.hidden = true
     const popup = doc.createElement("div")
     popup.className = "edtf-helppop"
-    popup.hidden = true
+    HelpPopover.attach(help, popup)
     this.helpPopup = popup
     if (name) {
       picker.id = `${name}-native`
@@ -100,15 +103,15 @@ export class DateInputElement extends HTMLElement {
   }
 
   private readonly closeHelpOutside = (event: Event): void => {
-    if (this.helpPopup && !this.helpPopup.hidden && !event.composedPath().includes(this)) this.helpPopup.hidden = true
+    if (this.helpPopup && !this.helpPopup.hidden && !event.composedPath().includes(this)) HelpPopover.show(this.helpPopup, false)
   }
 
   private readonly closeHelpOnEscape = (event: KeyboardEvent): void => {
-    if (event.key === "Escape" && this.helpPopup) this.helpPopup.hidden = true
+    if (event.key === "Escape" && this.helpPopup) HelpPopover.show(this.helpPopup, false)
   }
 
   private toggleHelp(): void {
-    if (this.helpPopup) this.helpPopup.hidden = !this.helpPopup.hidden
+    if (this.helpPopup) HelpPopover.show(this.helpPopup, this.helpPopup.hidden)
   }
 
   /** The syntax the text takes, one line to a line of the message. */
