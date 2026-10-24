@@ -9,6 +9,7 @@ import type { LaunchEditorMessages } from "./LaunchEditorMessages.js"
 import type { BeamEditorMessages } from "./BeamEditorMessages.js"
 import type { CaseEditorMessages } from "./CaseEditorMessages.js"
 import type { InterviewMessages } from "./InterviewMessages.js"
+import type { ShareMessages } from "./ShareMessages.js"
 
 export const UFO_SUPPORTED_LANGUAGES = ["en", "fr", "es", "it"] as const
 export type UfoLanguage = (typeof UFO_SUPPORTED_LANGUAGES)[number]
@@ -46,6 +47,17 @@ const sightingLoaders: Record<UfoLanguage, () => Promise<SightingMessages>> = {
 
 export function loadSightingMessages(language: UfoLanguage): Promise<SightingMessages> {
   return sightingLoaders[language]()
+}
+
+const shareLoaders: Record<UfoLanguage, () => Promise<ShareMessages>> = {
+  en: () => import("./ShareMessages_en.js").then(m => m.shareMessages_en),
+  fr: () => import("./ShareMessages_fr.js").then(m => m.shareMessages_fr),
+  es: () => import("./ShareMessages_es.js").then(m => m.shareMessages_es),
+  it: () => import("./ShareMessages_it.js").then(m => m.shareMessages_it)
+}
+
+export function loadShareMessages(language: UfoLanguage): Promise<ShareMessages> {
+  return shareLoaders[language]()
 }
 
 /**

@@ -1,3 +1,4 @@
+import { EmbedScript } from "../src/component/EmbedScript.js"
 import { Licence } from "./Licence.js"
 import { Headings } from "./Headings.js"
 import { Shots } from "./Shots.js"
@@ -149,6 +150,35 @@ export class Layout {
     return url.replace(/^\/lib(?=\/|$)/, `/lib/${this.version}`)
   }
 
+  /**
+   * What loads a page's modules, before its own script runs (which uses the elements they define).
+   *
+   * This version's copy (see versioned), unless the address asks for another (`?v=0.135.0`, what a frozen link adds: see
+   * EmbedScript.frozenLink): the player and the editor of that version then come from the package as published on npm, the page
+   * around them staying today's. Imported rather than written as a script tag, since which one is only known from the address; the
+   * head preloads this version's copy, so the usual case starts fetching as early as a tag would. A version that cannot be loaded
+   * (none published under that number) falls back to this one, said on the console.
+   */
+  private moduleLoader(sources: string[]): string {
+    if (sources.length === 0) return ""
+    const entries = sources.map(src => {
+      const name = src.split("/").pop()!.replace(/\.mjs$/, "")
+      const frozen = EmbedScript.freezable(name) ? EmbedScript.frozen(name, "\u0000").split("\u0000") : undefined
+      return { local: this.versioned(src), frozen }
+    })
+    return `{
+  const asked = new URLSearchParams(location.search).get(${JSON.stringify(EmbedScript.VERSION_PARAMETER)})
+  const frozen = asked !== null && /^\\d+\\.\\d+\\.\\d+$/.test(asked) && asked !== ${JSON.stringify(this.version)} ? asked : undefined
+  await Promise.all(${JSON.stringify(entries)}.map(entry => frozen && entry.frozen
+    ? import(entry.frozen.join(frozen)).catch(error => {
+      console.warn("UFO@home " + frozen + " could not be loaded; this version is used instead.", error)
+      return import(entry.local)
+    })
+    : import(entry.local)))
+}
+`
+  }
+
   render(page: SitePage, language: SiteLanguage): string {
     const meta = page.meta
     const words = Layout.SHELL[language]
@@ -158,9 +188,11 @@ export class Layout {
       .concat(`<link rel="alternate" hreflang="x-default" href="${Layout.ORIGIN}${this.path(meta)}">`)
       .join("\n  ")
     const modules = (meta.modules ?? [])
-      .map(src => `<script type="module" src="${this.versioned(src)}"></script>`)
+      .map(src => `<link rel="modulepreload" href="${this.versioned(src)}">`)
       .join("\n  ")
+    const loader = this.moduleLoader(meta.modules ?? [])
     const script = page.script?.(language)
+    const scripts = loader || script ? `<script type="module">\n// Where this site's own pages load their modules from — see Layout.versioned.\nconst SITE_LIB = ${JSON.stringify(this.versioned("/lib"))}\n${loader}${script ?? ""}\n</script>` : ""
     return `<!doctype html>
 <html lang="${language}">
 <head>
@@ -188,7 +220,7 @@ ${this.header(page, language)}
 ${this.shots.insert(this.headings.withAnchors(page.render(language), words.sectionLink, this.anchors(page, language)), meta.slug, language)}
 </main>
 ${this.siteFooter(language)}
-${script ? `<script type="module">\n// Where this site's own pages load their modules from — see Layout.versioned.\nconst SITE_LIB = ${JSON.stringify(this.versioned("/lib"))}\n${script}\n</script>` : ""}
+${scripts}
 ${OfflineKit.REGISTER}
 </body>
 </html>

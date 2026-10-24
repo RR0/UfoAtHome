@@ -960,3 +960,59 @@ describe("CaseEditorElement's events", () => {
     expect(element.caseSession!.json.id).toBe("X")
   })
 })
+
+describe("Sharing from an editor", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    vi.unstubAllGlobals()
+    globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
+  })
+
+  const dialogOf = (root: ShadowRoot) => {
+    const dialog = root.getElementById("share-dialog")!.shadowRoot!
+    return {
+      link: () => (dialog.getElementById("link") as HTMLTextAreaElement).value,
+      markup: () => (dialog.getElementById("embed-markup") as HTMLTextAreaElement).value,
+      note: dialog.getElementById("note")!
+    }
+  }
+
+  it("shares the editor on the case at its address, opening on the recording on show, and nothing else", async () => {
+    const element = await open("reading.json")
+    const root = element.shadowRoot!
+    const button = root.getElementById("share-case") as HTMLButtonElement
+    expect(button.disabled).toBe(false)
+    button.click()
+    const dialog = dialogOf(root)
+    expect(dialog.link()).toBe(`https://ufoathome.org/edit/?file=${encodeURIComponent("https://example.org/d/case.json")}&track=${encodeURIComponent("https://example.org/d/reading.json")}`)
+    expect(dialog.markup()).toContain('<rr0-case-editor src="https://example.org/d/case.json" track="https://example.org/d/reading.json"></rr0-case-editor>')
+    expect(dialog.markup()).toContain("rr0-sighting-editor.mjs")
+    expect(dialog.markup()).not.toContain("<rr0-sighting ")
+    expect(dialog.note.hidden).toBe(true)
+  })
+
+  it("shares a recording that is not a case from the recording's own editor", async () => {
+    files["https://example.org/d/plain.json"] = { version: 1, id: "plain", timeline: { keyframes: [] } }
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: () => Promise.resolve(structuredClone(files[url])), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) })))
+    const element = document.createElement("rr0-case-editor") as CaseEditorElement
+    document.body.appendChild(element)
+    element.setAttribute("src", "https://example.org/d/plain.json")
+    await wait()
+    const editorRoot = element.sightingEditor.shadowRoot!
+    const button = editorRoot.getElementById("share") as HTMLButtonElement
+    expect(button.disabled).toBe(false)
+    button.click()
+    const dialog = dialogOf(editorRoot)
+    expect(dialog.link()).toBe(`https://ufoathome.org/edit/?file=${encodeURIComponent("https://example.org/d/plain.json")}`)
+    expect(dialog.markup()).toContain('<rr0-sighting-editor src="https://example.org/d/plain.json"></rr0-sighting-editor>')
+  })
+
+  it("cannot share a case that has no address, and says why", async () => {
+    const element = document.createElement("rr0-case-editor") as CaseEditorElement
+    document.body.appendChild(element)
+    await wait()
+    const button = element.sightingEditor.shadowRoot!.getElementById("share") as HTMLButtonElement
+    expect(button.disabled).toBe(true)
+    expect(button.title).toContain("address")
+  })
+})

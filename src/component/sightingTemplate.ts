@@ -46,34 +46,15 @@ export const html = `
     </div>
   </div>
 </div>
-<dialog id="share-dialog" class="share-dialog" aria-labelledby="share-title">
-  <div class="share-head">
-    <h3 id="share-title" class="share-title">Share</h3>
-    <button id="share-close" class="share-icon-button share-close" type="button" aria-label="Close">×</button>
-  </div>
-  <div id="share-main">
-    <!-- What is given: the link to the replay, or the code that puts it on another page. -->
-    <div class="share-options">
-      <button id="share-link-option" class="share-option" type="button" aria-pressed="true">
-        <span class="share-option-icon"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <span id="share-link-label">Link</span>
-      </button>
-      <button id="share-embed-option" class="share-option" type="button" aria-pressed="false">
-        <span class="share-option-icon"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <span id="share-embed-label">Embed</span>
-      </button>
-    </div>
+<!-- Sharing the replay (see ShareDialogElement): the dialog is everyone's, what the replay lets its reader choose of it is slotted in. -->
+<rr0-share-dialog id="share-dialog">
+  <div slot="options">
     <!-- Only for a recording that is one of a case's: share the case (opening on one of its recordings) or one recording. -->
     <div id="share-scope-row" class="share-scope" hidden>
       <label><span id="share-scope-label">Share</span> <select id="share-scope"></select></label>
       <label id="share-opens-row"><span id="share-opens-label">Opens on</span> <select id="share-opens"></select></label>
     </div>
-    <!-- What the link and the embed open: the replay, or the editor on the same recording. -->
-    <div class="share-kind">
-      <label><input type="radio" name="embed-kind" id="embed-kind-replay" value="replay" checked/> <span id="label-embed-replay">Player</span></label>
-      <label><input type="radio" name="embed-kind" id="embed-kind-edit" value="edit"/> <span id="label-embed-edit">Editor</span></label>
-    </div>
-    <!-- How a shared replay opens; the editor takes none of them, which disables the group. -->
+    <!-- How the shared replay opens. -->
     <fieldset id="share-replay-options" class="share-flags">
       <span class="share-start">
         <label><input id="share-start-on" type="checkbox"/> <span id="share-start-label">Start at</span></label>
@@ -85,23 +66,8 @@ export const html = `
       <label><input id="share-opt-milestones" type="checkbox" checked/> <span id="share-opt-milestones-label">Show moments</span></label>
       <label><input id="share-opt-compare" type="checkbox"/> <span id="share-opt-compare-label">Compare account</span></label>
     </fieldset>
-    <div class="share-link">
-      <textarea id="share-link" class="share-link-input" rows="2" spellcheck="false" aria-label="Link"></textarea>
-      <button id="share-copy" class="share-copy" type="button">Copy</button>
-    </div>
-    <!-- The markup to put this observation on another page, in an editor that wraps its lines (its code
-       is fetched when this view is first shown); the textarea is what stands in until then. -->
-    <div id="share-embed" class="share-embed" hidden>
-      <div id="embed-code" class="embed-code"></div>
-      <textarea id="embed-markup" class="embed-markup" rows="6" spellcheck="false"></textarea>
-      <div class="embed-row">
-        <!-- Unticked, the embed follows each release; ticked, it keeps this one for good (see EmbedScript). -->
-        <label class="embed-freeze"><input id="embed-freeze" type="checkbox"/> <span id="embed-freeze-label">Freeze this version</span></label>
-        <button id="embed-copy" class="share-copy" type="button">Copy</button>
-      </div>
-    </div>
   </div>
-</dialog>
+</rr0-share-dialog>
 <div id="ufo-slot"></div>
 <!-- The interpretation's bodies against what the observer said, at the instant on show — see
      BodyConfrontation. Only while an interpretation is. -->
@@ -408,7 +374,7 @@ ${SummaryDescription.CSS}
   border-radius: 2px;
   vertical-align: -1px;
 }
-/* What the popups (the info panel, the share dialog) are drawn with: light by default, and the
+/* What the popups (the info panel) are drawn with: light by default, and the
    dark set when the system asks for it, as the editor does. The form controls follow through
    color-scheme. */
 :host {
@@ -587,101 +553,7 @@ ${SummaryDescription.CSS}
 /* The smaller, secondary row below the observation details — app identity on the left, the
    credits reveal on the right, matching the reduced visual weight of "fine print" rather than
    competing with the sighting's own metadata for attention. */
-/* Self-contained markup a reader can paste into their own page — the two lines it takes to embed
-   this very observation, either as a replay or as the full editor. Folded away behind a footer
-   toggle like the credits are: what the panel is FOR is the observation's own metadata, and a
-   block of markup sitting open above it competes with that for no one's benefit. Read-only: it is
-   generated, never typed into, and selecting it wholesale is the only interaction it needs. */
-/* The share dialog, as the video sites draw theirs: a white card centred over a dimmed page, its
-   title and a close button on one line, the ways of sharing as round buttons, and the link to copy
-   in a field with its button inside. Native <dialog>, so the page behind is inert and Escape closes. */
-.share-dialog {
-  color-scheme: light dark;
-  width: min(28em, calc(100vw - 2em));
-  padding: 1em 1.2em 1.2em;
-  border: none;
-  border-radius: 1.2em;
-  background: var(--pop-bg);
-  color: var(--pop-fg);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
-  font-size: 0.95em;
-}
-.share-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.55);
-}
-.share-head {
-  display: grid;
-  grid-template-columns: 2em 1fr 2em;
-  align-items: center;
-  gap: 0.5em;
-  margin-bottom: 0.3em;
-}
-.share-title {
-  grid-column: 2;
-  margin: 0;
-  font-size: 1.15em;
-  font-weight: 500;
-  text-align: center;
-}
-.share-close {
-  grid-column: 3;
-  grid-row: 1;
-}
-.share-icon-button {
-  width: 2em;
-  height: 2em;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: none;
-  font-size: 1.5em;
-  line-height: 1;
-  cursor: pointer;
-  color: inherit;
-}
-.share-icon-button[hidden] {
-  display: none;
-}
-.share-icon-button:hover, .share-icon-button:focus-visible {
-  background: var(--pop-soft);
-}
-.share-options {
-  display: flex;
-  justify-content: center;
-  gap: 1em;
-  margin-bottom: 0.5em;
-}
-.share-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3em;
-  padding: 0.2em;
-  border: none;
-  border-radius: 0.6em;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-.share-option-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3.2em;
-  height: 3.2em;
-  border: 1px solid var(--pop-border);
-  border-radius: 50%;
-  background: var(--pop-fill);
-}
-.share-option:hover .share-option-icon, .share-option:focus-visible .share-option-icon {
-  background: var(--pop-fill-hover);
-}
-/* The one being given: its icon filled, as a pressed tab is. */
-.share-option[aria-pressed="true"] .share-option-icon {
-  background: var(--pop-on);
-  border-color: var(--pop-on-border);
-}
+/* What the replay lets its reader choose of what is shared, slotted into the share dialog (see ShareDialogElement). */
 .share-scope {
   display: flex;
   flex-wrap: wrap;
@@ -697,12 +569,6 @@ ${SummaryDescription.CSS}
   font: inherit;
   max-width: 14em;
 }
-.share-kind {
-  display: flex;
-  justify-content: center;
-  gap: 1.5em;
-  margin-bottom: 0.7em;
-}
 .share-flags {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -711,17 +577,6 @@ ${SummaryDescription.CSS}
   padding: 0;
   border: none;
   font-size: 0.9em;
-}
-.share-flags:disabled {
-  opacity: 0.45;
-}
-.share-link {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5em;
-  padding: 0.5em 0.6em 0.5em 0.8em;
-  border: 1px solid var(--pop-border);
-  border-radius: 0.9em;
 }
 .share-start {
   display: flex;
@@ -733,70 +588,10 @@ ${SummaryDescription.CSS}
   width: 4.5em;
   font: inherit;
 }
-.share-link-input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  outline: none;
-  background: none;
-  resize: none;
-  overflow: hidden;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.8em;
-  line-height: 1.4;
-  color: inherit;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-.share-copy {
-  flex: 0 0 auto;
-  padding: 0.5em 1.1em;
-  border: 1px solid var(--pop-border);
-  border-radius: 1.2em;
-  background: var(--pop-bg);
-  color: inherit;
-  font: inherit;
-  font-weight: 500;
-  cursor: pointer;
-}
-.share-copy:hover, .share-copy:focus-visible {
-  background: var(--pop-soft);
-}
-.share-embed[hidden], .share-link[hidden] {
-  display: none;
-}
 .info-footer-actions {
   display: flex;
   align-items: center;
   gap: 0.8em;
-}
-.embed-row {
-  display: flex;
-  align-items: center;
-  gap: 0.8em;
-  justify-content: flex-end;
-  margin-top: 0.5em;
-}
-.embed-freeze {
-  font-size: 0.9em;
-}
-/* The embed code is edited in CodeMirror once its chunk has loaded; the textarea is the stand-in
-   until then, and the model the editor mirrors. */
-.embed-code:empty, .embed-code[hidden], .embed-markup[hidden] {
-  display: none;
-}
-.embed-markup {
-  width: 100%;
-  box-sizing: border-box;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.8em;
-  line-height: 1.4;
-  resize: vertical;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-.embed-row .share-copy {
-  margin-left: auto;
 }
 .info-footer {
   position: sticky;

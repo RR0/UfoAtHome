@@ -26,10 +26,14 @@ export const html = `
       <button id="undo" type="button" class="icon-btn" title="Undo" aria-label="Undo" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4 3 7l3 3"/><path d="M3 7h6.5a3.5 3.5 0 0 1 0 7H8"/></svg></button>
       <button id="redo" type="button" class="icon-btn" title="Redo" aria-label="Redo" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m10 4 3 3-3 3"/><path d="M13 7H6.5a3.5 3.5 0 0 0 0 7H8"/></svg></button>
     </span>
+    <!-- The editor on this recording, for somebody else: a link to it, or its element for another page (see ShareDialogElement). Off while
+         the recording has no address to give. -->
+    <button id="share" type="button" class="pill-btn" aria-haspopup="dialog" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3 14 7.5 9.5 12V9.3C5.8 9.2 3.8 10.4 2.5 12.8c.4-3.9 2.4-6.6 7-7.3V3z"/></svg><span id="label-share">Share</span></button>
     <!-- The one way to keep what was done: the file, downloaded. Nothing is kept in the browser. -->
     <button id="save" type="button" class="pill-btn" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8"/><path d="m4.5 7 3.5 3.5L11.5 7"/><path d="M3 13.5h10"/></svg><span id="label-save">Save</span></button>
   </div>
 </header>
+<rr0-share-dialog id="share-dialog"></rr0-share-dialog>
 <div class="scene-card">
 
 <!-- A case opened for editing: the recordings it lists (the accounts, and the readings of them, which

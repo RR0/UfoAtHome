@@ -4,6 +4,9 @@ import { WindowClose } from "./WindowClose.js"
 import { EditorTheme } from "./EditorTheme.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
+import { ShareDialogElement, type ShareSubject } from "./ShareDialogElement.js"
+import type { ShareMessages } from "./messages/ShareMessages.js"
+import { AppLocation } from "./AppLocation.js"
 import type { InputFileElement, InputFilePick } from "./InputFileElement.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
@@ -208,9 +211,12 @@ const TEMPLATE = `
     </div>
     <div class="head-actions">
       <label class="check"><input id="save-also" type="checkbox" checked/> <span id="label-save-also">Also save the observations</span></label>
+      <!-- The editor on this case, for somebody else (see ShareDialogElement): off while the case has no address to give. -->
+      <button id="share-case" type="button" class="pill-btn" aria-haspopup="dialog" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3 14 7.5 9.5 12V9.3C5.8 9.2 3.8 10.4 2.5 12.8c.4-3.9 2.4-6.6 7-7.3V3z"/></svg><span id="label-share-case">Share</span></button>
       <button id="save-case" type="button" class="pill-btn primary" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8"/><path d="m4.5 7 3.5 3.5L11.5 7"/><path d="M3 13.5h10"/></svg><span id="label-save-case">Save</span></button>
     </div>
   </header>
+  <rr0-share-dialog id="share-dialog"></rr0-share-dialog>
   <div id="case-tabs" class="group-tabs">
     <button class="group-tab" type="button" aria-controls="group-events" aria-expanded="true"><span id="label-events-group">Events</span> <span id="events-count" class="count"></span></button>
     <button class="group-tab" type="button" aria-controls="group-case-file" aria-expanded="false"><span id="label-case-file-group">File</span></button>
@@ -363,6 +369,7 @@ export class CaseEditorElement extends HTMLElement {
     super()
     registerSightingEditor()
     registerDateInput()
+    ShareDialogElement.register()
     this.shadow.innerHTML = TEMPLATE
     customElements.upgrade(this.shadow)
     ;(this.shadow.getElementById("case-date") as DateInputElement).build()
@@ -374,7 +381,7 @@ export class CaseEditorElement extends HTMLElement {
     this.editor.addEventListener("caseloaded", event => {
       event.preventDefault()
       const { json, url } = (event as CustomEvent<{ json: unknown, url?: string }>).detail
-      void this.openCase(json as Parameters<typeof CaseFile.sightingUrls>[0], url ?? location.href)
+      void this.openCase(json as Parameters<typeof CaseFile.sightingUrls>[0], url ?? location.href, url !== undefined)
     })
     // A recording loaded into the editor by its own fields is not the case's any more.
     this.editor.addEventListener("recordingloaded", () => this.closeCase())
@@ -435,6 +442,9 @@ export class CaseEditorElement extends HTMLElement {
     })
     this.byId("previous-event").addEventListener("click", () => this.stepEvent(-1))
     this.byId("next-event").addEventListener("click", () => this.stepEvent(1))
+    this.shareDialog = this.byId("share-dialog") as ShareDialogElement
+    this.shareDialog.subject = this.shareSubject
+    this.byId("share-case").addEventListener("click", () => this.openShare())
     this.byId("save-case").addEventListener("click", () => void this.exportCase(this.input("save-also").checked).then(() => this.refreshDirty()))
     this.byId("make-case").addEventListener("click", () => this.makeCase())
     this.byId("delete").addEventListener("click", () => this.askDelete())
@@ -571,6 +581,11 @@ export class CaseEditorElement extends HTMLElement {
     this.editorMessages = editorMessages
     this.applyMessages()
     this.refreshRow()
+    const share = await this.shareDialog.useLanguage(language)
+    if (!share || token !== this.localeToken) return
+    this.shareMessages = share
+    this.byId("label-share-case").textContent = share.share
+    this.refreshCaseState()
   }
 
   private applyMessages(): void {
@@ -762,7 +777,7 @@ export class CaseEditorElement extends HTMLElement {
   private async importFromFile(file: File): Promise<void> {
     try {
       const json = JSON.parse(await file.text())
-      this.guarded(() => void this.importCase(json, new URL("case.json", location.href).href))
+      this.guarded(() => void this.importCase(json, new URL("case.json", location.href).href, false))
     } catch {
       this.showFileNote(this.messages.loadFailed, "error")
     }
@@ -772,20 +787,20 @@ export class CaseEditorElement extends HTMLElement {
     try {
       const absolute = new URL(url, location.href).href
       const json = await SightingFetch.json(absolute)
-      this.guarded(() => void this.importCase(json, absolute))
+      this.guarded(() => void this.importCase(json, absolute, true))
     } catch {
       this.showFileNote(this.messages.loadFailed, "error")
     }
   }
 
   /** Opens a case read from a file or an address, in the place of the one open. */
-  private async importCase(json: unknown, url: string): Promise<void> {
+  private async importCase(json: unknown, url: string, fromAddress: boolean): Promise<void> {
     if (!CaseFile.isCase(json)) {
       this.showFileNote(this.messages.fileNotACase)
       return
     }
     try {
-      await this.openCase(json, url)
+      await this.openCase(json, url, fromAddress)
     } catch (error) {
       this.showFileNote(error instanceof FormatVersionError ? error.said(this.messages.formatVersionError) : this.messages.fileNotACase)
       return
@@ -800,9 +815,11 @@ export class CaseEditorElement extends HTMLElement {
    * Opens a case: the recordings it lists are the tracks, one on show at a time. Opens on the one the
    * `track` attribute names, else the first account.
    */
-  private async openCase(json: Parameters<typeof CaseFile.sightingUrls>[0], url: string): Promise<void> {
+  /** @param fromAddress Whether `url` is where the case was read from, rather than where a file picked from the disk would stand. */
+  private async openCase(json: Parameters<typeof CaseFile.sightingUrls>[0], url: string, fromAddress: boolean): Promise<void> {
     CaseFile.check(json)
     const session = new CaseSession(json, url)
+    this.sourceUrl = fromAddress ? url : undefined
     if (session.tracks.length === 0) throw new Error("A case with no recording has nothing to edit")
     this.session = session
     this.current = undefined
@@ -1197,6 +1214,39 @@ export class CaseEditorElement extends HTMLElement {
   /** Whether there is anything to save: Save, on or off, is all the header says of it. */
   private refreshCaseState(): void {
     ;(this.byId("save-case") as HTMLButtonElement).disabled = !(this.session?.dirty ?? false)
+    const share = this.byId("share-case") as HTMLButtonElement
+    share.disabled = this.sourceUrl === undefined
+    share.title = this.sourceUrl === undefined ? this.shareMessages?.unavailable ?? "" : ""
+  }
+
+  /** The address the case was read from: what sharing it gives. Undefined for a case picked from the disk. */
+  private sourceUrl?: string
+  private readonly shareDialog: ShareDialogElement
+  private shareMessages?: ShareMessages
+
+  /** The recording on show, as the `track` a link or an element names to open on it; none while an interview is. */
+  private get sharedTrack(): string | undefined {
+    return this.currentInterview ? undefined : this.current?.url
+  }
+
+  /** What the share dialog shares: the editor on the case at its address, opening on the recording on show, and nothing else. */
+  private readonly shareSubject: ShareSubject = {
+    module: "rr0-sighting-editor",
+    link: () => {
+      const track = this.sharedTrack
+      return `${AppLocation.home()}/edit/?file=${encodeURIComponent(this.sourceUrl ?? "")}${track ? `&track=${encodeURIComponent(track)}` : ""}`
+    },
+    element: () => {
+      const track = this.sharedTrack
+      return `<rr0-case-editor src="${this.sourceUrl ?? ""}"${track ? ` track="${track}"` : ""}></rr0-case-editor>`
+    }
+  }
+
+  /** What is shared is the case at its address: said so when what is on screen is not that case any more. */
+  private openShare(): void {
+    if (this.sourceUrl === undefined) return
+    this.shareDialog.note = this.session?.dirty ? this.shareMessages?.unsaved : undefined
+    this.shareDialog.open()
   }
 
   private labelOf(track: CaseTrack, index: number): string {

@@ -909,22 +909,22 @@ describe("SightingElement sharing", () => {
     return element.shadowRoot!
   }
 
+  /** The share dialog's own tree, where the link and the code are: what the player slots in (its options) stays in its own. */
+  const dialogOf = (shadow: ShadowRoot): ShadowRoot => shadow.getElementById("share-dialog")!.shadowRoot!
+
   it("offers the link that replays this very recording on the site's player", async () => {
     const shadow = await mounted()
     ;(findDeep(shadow, "share-button") as HTMLButtonElement).click()
-    expect((shadow.getElementById("share-link") as HTMLInputElement).value)
+    expect((dialogOf(shadow).getElementById("link") as HTMLTextAreaElement).value)
       .toBe("https://ufoathome.org/play/?file=" + encodeURIComponent("http://localhost:3000/john.json") + "&labels=0")
-    expect(shadow.getElementById("share-dialog")!.hasAttribute("open")).toBe(true)
+    expect(dialogOf(shadow).getElementById("dialog")!.hasAttribute("open")).toBe(true)
   })
 
-  it("offers the link of the editor on the same recording, with no replay option", async () => {
+  it("shares the replay and nothing else: the editor shares itself", async () => {
     const shadow = await mounted()
     ;(findDeep(shadow, "share-button") as HTMLButtonElement).click()
-    const edit = shadow.getElementById("embed-kind-edit") as HTMLInputElement
-    edit.checked = true
-    edit.dispatchEvent(new Event("change"))
-    expect((shadow.getElementById("share-link") as HTMLInputElement).value).toContain("/edit/?file=")
-    expect((shadow.getElementById("share-replay-options") as HTMLFieldSetElement).disabled).toBe(true)
+    expect(findDeep(shadow, "embed-kind-edit")).toBeNull()
+    expect((dialogOf(shadow).getElementById("embed-markup") as HTMLTextAreaElement).value).not.toContain("editor")
   })
 
   it("carries the share options, each offered as the player is now", async () => {
@@ -935,8 +935,8 @@ describe("SightingElement sharing", () => {
       box.checked = !box.checked
       box.dispatchEvent(new Event("input"))
     }
-    const link = () => (shadow.getElementById("share-link") as HTMLInputElement).value
-    const markup = () => (shadow.querySelector("#embed-markup") as HTMLTextAreaElement).value
+    const link = () => (dialogOf(shadow).getElementById("link") as HTMLTextAreaElement).value
+    const markup = () => (dialogOf(shadow).getElementById("embed-markup") as HTMLTextAreaElement).value
     expect((shadow.getElementById("share-opt-labels") as HTMLInputElement).checked).toBe(false)
     expect((shadow.getElementById("share-opt-milestones") as HTMLInputElement).checked).toBe(true)
     expect(link()).toContain("&labels=0")
@@ -956,14 +956,15 @@ describe("SightingElement sharing", () => {
   it("gives the link or the embed code on one screen, under the same options", async () => {
     const shadow = await mounted()
     ;(findDeep(shadow, "share-button") as HTMLButtonElement).click()
-    expect(shadow.getElementById("share-embed")!.hidden).toBe(true)
-    expect((shadow.querySelector(".share-link") as HTMLElement).hidden).toBe(false)
-    ;(shadow.getElementById("share-embed-option") as HTMLButtonElement).click()
-    expect(shadow.getElementById("share-embed")!.hidden).toBe(false)
-    expect((shadow.querySelector(".share-link") as HTMLElement).hidden).toBe(true)
+    const dialog = dialogOf(shadow)
+    expect(dialog.getElementById("embed-box")!.hidden).toBe(true)
+    expect(dialog.getElementById("link-box")!.hidden).toBe(false)
+    ;(dialog.getElementById("embed-option") as HTMLButtonElement).click()
+    expect(dialog.getElementById("embed-box")!.hidden).toBe(false)
+    expect(dialog.getElementById("link-box")!.hidden).toBe(true)
     expect(shadow.getElementById("share-replay-options")).not.toBeNull()
-    ;(shadow.getElementById("share-link-option") as HTMLButtonElement).click()
-    expect((shadow.querySelector(".share-link") as HTMLElement).hidden).toBe(false)
+    ;(dialog.getElementById("link-option") as HTMLButtonElement).click()
+    expect(dialog.getElementById("link-box")!.hidden).toBe(false)
   })
 
   it("no longer has the embed in the info panel", async () => {
@@ -981,45 +982,38 @@ describe("SightingElement embed markup", () => {
     document.body.innerHTML = ""
   })
 
-  async function openInfoPanel(): Promise<HTMLElement> {
+  /** The share dialog's tree, on its embed view. */
+  async function openEmbed(): Promise<ShadowRoot> {
     const element = mount()
     element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
-    // The markup is one of the ways of sharing the observation: share, then embed.
     ;(findDeep(element.shadowRoot!, "share-button") as HTMLButtonElement).click()
-    ;(element.shadowRoot!.getElementById("share-embed-option") as HTMLButtonElement).click()
-    return element.shadowRoot as unknown as HTMLElement
+    const dialog = element.shadowRoot!.getElementById("share-dialog")!.shadowRoot!
+    ;(dialog.getElementById("embed-option") as HTMLButtonElement).click()
+    return dialog
   }
 
   it("offers a self-contained replay snippet with an absolute src", async () => {
-    const shadow = await openInfoPanel()
-    const markup = (shadow.querySelector("#embed-markup") as HTMLTextAreaElement).value
+    const dialog = await openEmbed()
+    const markup = (dialog.getElementById("embed-markup") as HTMLTextAreaElement).value
 
     expect(markup).toContain("<rr0-sighting src=\"http://localhost:3000/john.json\"></rr0-sighting>")
     expect(markup).toContain("rr0-sighting.mjs")
     expect(markup).toContain("<script type=\"module\"")
   })
 
-  it("switches to the editor element, keeping the same recording", async () => {
-    const shadow = await openInfoPanel()
-    const editRadio = shadow.querySelector("#embed-kind-edit") as HTMLInputElement
-    editRadio.checked = true
-    editRadio.dispatchEvent(new Event("change"))
-    const markup = (shadow.querySelector("#embed-markup") as HTMLTextAreaElement).value
-
-    expect(markup).toContain("<rr0-sighting-editor src=\"http://localhost:3000/john.json\"></rr0-sighting-editor>")
-    expect(markup).toContain("rr0-sighting-editor.mjs")
-  })
-
-  it("embeds the current component, or this version for good once frozen", async () => {
-    const shadow = await openInfoPanel()
-    const markup = () => (shadow.querySelector("#embed-markup") as HTMLTextAreaElement).value
-    const freeze = shadow.querySelector("#embed-freeze") as HTMLInputElement
+  it("gives the current component, or this version for good once frozen, in the code and in the link", async () => {
+    const dialog = await openEmbed()
+    const markup = () => (dialog.getElementById("embed-markup") as HTMLTextAreaElement).value
+    const link = () => (dialog.getElementById("link") as HTMLTextAreaElement).value
+    const freeze = dialog.getElementById("freeze") as HTMLInputElement
     expect(freeze.checked).toBe(false)
     expect(markup()).not.toContain("jsdelivr")
+    expect(link()).not.toContain("v=")
     freeze.checked = true
     freeze.dispatchEvent(new Event("change"))
     expect(markup()).toContain(`src="https://cdn.jsdelivr.net/npm/@rr0/ufoathome@${__APP_VERSION__}/dist-embed-sighting/rr0-sighting.mjs"`)
+    expect(link()).toContain(`&v=${__APP_VERSION__}`)
   })
 })
 

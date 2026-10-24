@@ -25,20 +25,11 @@ export interface SightingMessages extends SightingLabels {
   credits: string
   /** Title of the info panel's app link, which opens the observation being shown in the editor. */
   editThisObservation: string
-  /** Heading of the info panel's embed section. */
-  embed: string
-  /** The two things the generated markup can embed: a replay, or the full editor. */
-  embedReplay: string
-  embedEdit: string
-  /** The copy button, and what it says once the markup is on the clipboard. */
   /** The button that opens the share dialog, its title, its embed view's title, and its way back. */
   share: string
   embedObservation: string
   back: string
-  embedCopy: string
   /** The share dialog's option to open the link at the position on show, its value in seconds. */
-  /** The share dialog's option giving the link, beside Embed. */
-  shareLink: string
   /** The share dialog's choice of what is shared when the recording is one of a case's: the whole case, or one of its recordings. */
   shareScope: string
   shareScopeCase: string
@@ -50,11 +41,6 @@ export interface SightingMessages extends SightingLabels {
   shareOptionMap: string
   shareOptionMilestones: string
   shareOptionCompare: string
-  embedCopied: string
-  /** The share dialog's choice of embedding this version for good rather than the current one; `{version}` is this one. */
-  embedFreeze: string
-  /** What freezing does, said when the pointer rests on it. */
-  embedFreezeHint: string
   /** The info panel's toggle for the parameter strip under the render — what the recording states,
    * field by field, in the same words the editor uses for the same fields. */
   showLabels: string

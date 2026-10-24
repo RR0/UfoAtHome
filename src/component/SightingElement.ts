@@ -24,45 +24,21 @@ import { loadSceneNames, loadSightingMessages, loadTagNames, UFO_SUPPORTED_LANGU
 import { SceneNaming } from "./messages/SceneNames.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { sightingMessages_en } from "./messages/SightingMessages_en.js"
-import type { ShareCodeEditor } from "./ShareCodeEditor.js"
-import { EmbedScript } from "./EmbedScript.js"
+import { ShareDialogElement, type ShareSubject } from "./ShareDialogElement.js"
+import { AppLocation } from "./AppLocation.js"
 import type { SightingMessages } from "./messages/SightingMessages.js"
 import { SummaryDescription } from "./SummaryDescription.js"
 import { PlaybackPosition } from "../engine/model/PlaybackPosition.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 
 registerScene()
+ShareDialogElement.register()
 
 interface ObserverEntry {
   src: string
   sighting: SightingRecordingJson
 }
 
-
-/**
- * Where the application is, for the links that open a recording in it (the editor, the player).
- *
- * ufoathome.org, except on a copy of the site served from this very machine: a reader who clicks
- * "edit" on `localhost:5181` has the recording and the editor of THAT copy in front of them (a local
- * file, a recording being written), and was sent to production, where neither exists. Told apart by
- * the bundle having been loaded from the page's own origin, and that origin being a local host: a page
- * that carries its own copy of the bundle for any other reason, on a domain with no editor, still
- * sends its readers to ufoathome.org.
- */
-class AppLocation {
-  static readonly PRODUCTION = "https://ufoathome.org"
-
-  static home(): string {
-    try {
-      const bundle = new URL(import.meta.url)
-      const page = new URL(location.href)
-      const local = page.hostname === "localhost" || page.hostname === "127.0.0.1" || page.hostname === "[::1]" || page.hostname.endsWith(".localhost")
-      return local && bundle.origin === page.origin ? page.origin : AppLocation.PRODUCTION
-    } catch {
-      return AppLocation.PRODUCTION
-    }
-  }
-}
 
 const APP_HOME_URL = AppLocation.home()
 
@@ -151,19 +127,7 @@ export class SightingElement extends HTMLElement {
   private readonly infoCreditsList: HTMLElement
   private readonly infoCloseButton: HTMLButtonElement
   private readonly shareButton: HTMLButtonElement
-  private readonly shareDialog: HTMLDialogElement
-  private readonly shareTitle: HTMLElement
-  private readonly shareLinkOption: HTMLButtonElement
-  private readonly shareLinkLabel: HTMLElement
-  private readonly shareLinkBox: HTMLElement
-  private readonly shareEmbed: HTMLElement
-  private readonly shareClose: HTMLButtonElement
-  private readonly shareEmbedOption: HTMLButtonElement
-  private readonly shareEmbedLabel: HTMLElement
-  private readonly shareLink: HTMLTextAreaElement
-  private readonly shareReplayOptions: HTMLFieldSetElement
-  private readonly embedCode: HTMLElement
-  private readonly shareCopy: HTMLButtonElement
+  private readonly shareDialog: ShareDialogElement
   private readonly shareStartOn: HTMLInputElement
   private readonly shareStart: HTMLInputElement
   private readonly shareScopeRow: HTMLElement
@@ -174,14 +138,6 @@ export class SightingElement extends HTMLElement {
   private readonly shareOpens: HTMLSelectElement
   private readonly shareStartLabel: HTMLElement
   private readonly shareOptions: Record<"labels" | "map" | "milestones" | "compare", { input: HTMLInputElement, label: HTMLElement }>
-  private readonly embedReplayRadio: HTMLInputElement
-  private readonly embedEditRadio: HTMLInputElement
-  private readonly embedFreeze: HTMLInputElement
-  private readonly embedFreezeLabel: HTMLElement
-  private readonly labelEmbedReplay: HTMLElement
-  private readonly labelEmbedEdit: HTMLElement
-  private readonly embedMarkup: HTMLTextAreaElement
-  private readonly embedCopyButton: HTMLButtonElement
   private readonly labelsToggle: HTMLButtonElement
   private readonly paramSummary: HTMLElement
   private summaryBuilder = new SightingSummary(sightingMessages_en, new SceneNaming(), new SaidTexts(["en"]), new SightingTags({}), { messages: sightingMessages_en, locale: "en" })
@@ -240,6 +196,8 @@ export class SightingElement extends HTMLElement {
     const template = document.createElement("template")
     template.innerHTML = `<style>${css}</style>${html}`
     this.shadow.appendChild(template.content.cloneNode(true))
+    // The share dialog, a cloned tag: upgraded now so that it can be told what it shares.
+    customElements.upgrade(this.shadow)
 
     // Created imperatively rather than left inline in the template markup — see
     // SightingEditorElement's constructor for why (an inline tag parsed from
@@ -282,19 +240,8 @@ export class SightingElement extends HTMLElement {
     this.shareButton.setAttribute("aria-haspopup", "dialog")
     this.shareButton.innerHTML = PlayerIcons.SHARE
     this.sceneElement.ufoElement.addControl(this.shareButton)
-    this.shareDialog = this.shadow.getElementById("share-dialog") as HTMLDialogElement
-    this.shareTitle = this.shadow.getElementById("share-title")!
-    this.shareLinkOption = this.shadow.getElementById("share-link-option") as HTMLButtonElement
-    this.shareLinkLabel = this.shadow.getElementById("share-link-label")!
-    this.shareLinkBox = this.shadow.querySelector(".share-link")!
-    this.shareEmbed = this.shadow.getElementById("share-embed")!
-    this.shareClose = this.shadow.getElementById("share-close") as HTMLButtonElement
-    this.shareEmbedOption = this.shadow.getElementById("share-embed-option") as HTMLButtonElement
-    this.shareEmbedLabel = this.shadow.getElementById("share-embed-label")!
-    this.shareLink = this.shadow.getElementById("share-link") as HTMLTextAreaElement
-    this.shareReplayOptions = this.shadow.getElementById("share-replay-options") as HTMLFieldSetElement
-    this.embedCode = this.shadow.getElementById("embed-code")!
-    this.shareCopy = this.shadow.getElementById("share-copy") as HTMLButtonElement
+    this.shareDialog = this.shadow.getElementById("share-dialog") as ShareDialogElement
+    this.shareDialog.subject = this.shareSubject
     this.shareStartOn = this.shadow.getElementById("share-start-on") as HTMLInputElement
     this.shareStart = this.shadow.getElementById("share-start") as HTMLInputElement
     this.shareStartLabel = this.shadow.getElementById("share-start-label")!
@@ -309,14 +256,6 @@ export class SightingElement extends HTMLElement {
       label: this.shadow.getElementById(`share-opt-${name}-label`)!
     })
     this.shareOptions = { labels: option("labels"), map: option("map"), milestones: option("milestones"), compare: option("compare") }
-    this.embedReplayRadio = this.shadow.getElementById("embed-kind-replay") as HTMLInputElement
-    this.embedEditRadio = this.shadow.getElementById("embed-kind-edit") as HTMLInputElement
-    this.labelEmbedReplay = this.shadow.getElementById("label-embed-replay")!
-    this.labelEmbedEdit = this.shadow.getElementById("label-embed-edit")!
-    this.embedMarkup = this.shadow.getElementById("embed-markup") as HTMLTextAreaElement
-    this.embedCopyButton = this.shadow.getElementById("embed-copy") as HTMLButtonElement
-    this.embedFreeze = this.shadow.getElementById("embed-freeze") as HTMLInputElement
-    this.embedFreezeLabel = this.shadow.getElementById("embed-freeze-label")!
 
     this.interpretationChoice = this.shadow.getElementById("interpretation-choice")!
     this.interpretationLabel = this.shadow.getElementById("interpretation-label")!
@@ -360,23 +299,10 @@ export class SightingElement extends HTMLElement {
     this.infoCloseButton.addEventListener("click", () => this.toggleInfoPanel())
     this.infoCreditsToggle.addEventListener("click", () => this.toggleCredits())
     this.shareButton.addEventListener("click", () => this.openShare())
-    this.shareClose.addEventListener("click", () => this.closeShare())
-    this.shareLinkOption.addEventListener("click", () => this.showShareView("link"))
-    this.shareEmbedOption.addEventListener("click", () => this.showShareView("embed"))
     for (const control of [this.shareStartOn, this.shareStart, ...Object.values(this.shareOptions).map(o => o.input)]) {
       control.addEventListener("input", () => this.refreshShareLinks())
     }
     for (const select of [this.shareScope, this.shareOpens]) select.addEventListener("change", () => this.refreshShareLinks())
-    this.shareCopy.addEventListener("click", () => void this.copyText(this.shareLink.value, this.shareLink, this.shareCopy))
-    // A press on the dimmed page around the card, which the dialog itself receives, closes it.
-    this.shareDialog.addEventListener("click", event => {
-      if (event.target === this.shareDialog) this.closeShare()
-    })
-    for (const radio of [this.embedReplayRadio, this.embedEditRadio]) {
-      radio.addEventListener("change", () => this.refreshShareLinks())
-    }
-    this.embedCopyButton.addEventListener("click", () => void this.copyEmbedMarkup())
-    this.embedFreeze.addEventListener("change", () => this.refreshEmbedMarkup())
 
     // Only when already in the page (an element upgraded in place): a detached one has no
     // ancestor to read the page's language from, and would fetch the browser's language before
@@ -440,8 +366,6 @@ export class SightingElement extends HTMLElement {
     if (changed && this.currentSrc) void this.runAssessments()
     this.shareButton.title = this.messages.share
     this.shareButton.setAttribute("aria-label", this.messages.share)
-    this.shareClose.setAttribute("aria-label", this.messages.close)
-    this.shareCopy.textContent = this.messages.embedCopy
     this.shareStartLabel.textContent = this.messages.shareStartAt
     this.shareScopeLabel.textContent = this.messages.shareScope
     this.shareOpensLabel.textContent = this.messages.shareOpensOn
@@ -450,14 +374,7 @@ export class SightingElement extends HTMLElement {
     this.shareOptions.milestones.label.textContent = this.messages.shareOptionMilestones
     this.shareOptions.compare.label.textContent = this.messages.shareOptionCompare
     this.shareStart.setAttribute("aria-label", this.messages.shareStartAt)
-    this.shareEmbedLabel.textContent = this.messages.embed
-    this.shareLinkLabel.textContent = this.messages.shareLink
-    this.shareTitle.textContent = this.messages.share
-    this.labelEmbedReplay.textContent = this.messages.embedReplay
-    this.labelEmbedEdit.textContent = this.messages.embedEdit
-    this.embedCopyButton.textContent = this.messages.embedCopy
-    this.embedFreezeLabel.textContent = this.messages.embedFreeze.replace("{version}", __APP_VERSION__)
-    this.embedFreeze.parentElement!.title = this.messages.embedFreezeHint
+    void this.shareDialog.useLanguage(language)
     if (this.infoOpen) this.populateInfoPanel()
     this.updateAccountLine()
   }
@@ -711,45 +628,21 @@ export class SightingElement extends HTMLElement {
   }
 
   /**
-   * The two lines it takes to put THIS observation on someone else's page — a module script for
-   * the element and the element itself, both with absolute URLs, so the snippet is self-contained
-   * rather than something the reader has to work out. Replay embeds `<rr0-sighting>` (this very
-   * element, so what they paste is what they are looking at); Editor embeds
-   * `<rr0-sighting-editor>`, which takes the same `src`.
-   *
-   * The script is the current component, or this version for good when the author ticks "freeze": see EmbedScript for where each is.
+   * What the share dialog shares: the replay, and nothing else (an editor shares the editor). The link opens the site's player on what is on
+   * show, the embed is this very element, so that what is pasted is what is looked at.
    */
-  private embedMarkupFor(kind: "replay" | "edit"): string {
-    const tag = kind === "edit" ? "rr0-sighting-editor" : "rr0-sighting"
-    const script = this.embedFreeze.checked ? EmbedScript.frozen(tag, __APP_VERSION__) : EmbedScript.current(tag, import.meta.url, APP_HOME_URL)
+  private readonly shareSubject: ShareSubject = {
+    module: "rr0-sighting",
+    link: () => this.playUrl(),
+    element: () => this.replayElement()
+  }
+
+  /** `<rr0-sighting>` on what is shared, with an absolute `src`, opening as the dialog's options say: at a position, on a recording of a case. */
+  private replayElement(): string {
     const shared = this.sharedAddress()
-    const src = shared.src
-    // The replay can open at a stated position, and on a given recording of a case; the editor has no such attributes.
-    const attributes = kind === "replay" ? [...(shared.observer ? [[OBSERVER_ATTRIBUTE, shared.observer]] : []), ...this.replayAttributes()] : []
+    const attributes = [...(shared.observer ? [[OBSERVER_ATTRIBUTE, shared.observer]] : []), ...this.replayAttributes()]
     const start = attributes.map(([name, value]) => value === "" ? ` ${name}` : ` ${name}="${value}"`).join("")
-    return `<script type="module" src="${script}"></script>\n<${tag} src="${src}"${start}></${tag}>`
-  }
-
-  private refreshEmbedMarkup(): void {
-    const markup = this.embedMarkupFor(this.embedEditRadio.checked ? "edit" : "replay")
-    this.embedMarkup.value = markup
-    if (this.shareCodeEditor) this.shareCodeEditor.text = markup
-  }
-
-  /** Clipboard write can be refused (permissions, insecure context) — falls back to selecting the
-   * text so the reader can copy it themselves, rather than failing silently. */
-  private async copyText(text: string, field: HTMLInputElement | HTMLTextAreaElement, button: HTMLButtonElement): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(text)
-      button.textContent = this.messages.embedCopied
-      window.setTimeout(() => (button.textContent = this.messages.embedCopy), 1500)
-    } catch {
-      field.select()
-    }
-  }
-
-  private async copyEmbedMarkup(): Promise<void> {
-    await this.copyText(this.shareCodeEditor?.text ?? this.embedMarkup.value, this.embedMarkup, this.embedCopyButton)
+    return `<rr0-sighting src="${shared.src}"${start}></rr0-sighting>`
   }
 
   /**
@@ -815,40 +708,9 @@ export class SightingElement extends HTMLElement {
   }
 
   private refreshShareLinks(): void {
-    // The editor takes none of the replay's options, so they are put aside while it is chosen.
-    const editing = this.embedEditRadio.checked
-    this.shareReplayOptions.disabled = editing
     this.shareOpensRow.hidden = !this.sharesCase
-    const other = this.sharedEntry()
-    this.shareLink.value = editing
-      ? (other && other.src !== this.currentSrc ? `${APP_EDITOR_URL}?file=${encodeURIComponent(new URL(other.src, location.href).href)}` : this.editorUrl())
-      : this.playUrl()
-    this.fitShareLink()
-    this.refreshEmbedMarkup()
+    this.shareDialog.refresh()
   }
-
-  /** The link wraps, so its field is as tall as the link is long. */
-  private fitShareLink(): void {
-    this.shareLink.style.height = "auto"
-    this.shareLink.style.height = `${this.shareLink.scrollHeight}px`
-  }
-
-  private shareCodeEditor?: ShareCodeEditor
-  private shareCodeLoading?: Promise<void>
-
-  /**
-   * Swaps the embed view's textarea for an editor that wraps and highlights, the first time that
-   * view is shown. Its chunk (CodeMirror) is fetched then and not before, so a player nobody shares
-   * from never loads it; the textarea stands in meanwhile, and stays if the chunk cannot load.
-   */
-  private loadShareCode(): void {
-    this.shareCodeLoading ??= import("./ShareCodeEditor.js").then(({ ShareCodeEditor }) => {
-      this.shareCodeEditor = new ShareCodeEditor(this.embedCode, this.embedMarkup.value,
-        text => { this.embedMarkup.value = text }, this.messages.embed)
-      this.embedMarkup.hidden = true
-    }).catch(() => { this.shareCodeLoading = undefined })
-  }
-
 
   private openShare(): void {
     // Offered at the position on show, as the video sites do, and off until the reader wants it.
@@ -862,12 +724,8 @@ export class SightingElement extends HTMLElement {
     this.shareOptions.milestones.input.checked = ufo.milestonesVisible
     this.shareOptions.compare.input.checked = this.sceneElement.compareAccount
     this.offerShareScope()
-    this.refreshShareLinks()
-    this.showShareView("link")
-    if (typeof this.shareDialog.showModal === "function") this.shareDialog.showModal()
-    else this.shareDialog.setAttribute("open", "")
-    this.fitShareLink()
-    this.shareLink.select()
+    this.shareOpensRow.hidden = !this.sharesCase
+    this.shareDialog.open()
   }
 
   /**
@@ -894,21 +752,6 @@ export class SightingElement extends HTMLElement {
     }
     this.shareScope.value = CASE_SCOPE
     this.shareOpens.value = this.currentSrc ?? this.entries[0]!.src
-  }
-
-  private closeShare(): void {
-    if (typeof this.shareDialog.close === "function") this.shareDialog.close()
-    else this.shareDialog.removeAttribute("open")
-  }
-
-  /** What the dialog gives: the link, or the code — the same options above either, so only what is below them changes. */
-  private showShareView(view: "link" | "embed"): void {
-    this.shareLinkBox.hidden = view !== "link"
-    this.shareEmbed.hidden = view !== "embed"
-    this.shareLinkOption.setAttribute("aria-pressed", String(view === "link"))
-    this.shareEmbedOption.setAttribute("aria-pressed", String(view === "embed"))
-    if (view === "embed") this.loadShareCode()
-    else this.fitShareLink()
   }
 
   /**
@@ -1635,7 +1478,6 @@ export class SightingElement extends HTMLElement {
       }
     }
 
-    this.refreshEmbedMarkup()
     // The application itself, now that editing this observation has a button of its own.
     this.infoAppLink.href = APP_HOME_URL
     this.infoAppLink.textContent = `UFO@home v${__APP_VERSION__}`
@@ -1717,6 +1559,7 @@ class LegacySightingElement extends SightingElement {
 
 export function registerSighting(): void {
   registerScene()
+  ShareDialogElement.register()
   if (!customElements.get(SIGHTING_ELEMENT_NAME)) {
     customElements.define(SIGHTING_ELEMENT_NAME, SightingElement)
   }

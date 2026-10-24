@@ -235,7 +235,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 <section class="band">
   <div class="wrap prose-wide">
     <h2>How it opens</h2>
-    <p>The player's <strong>Share</strong> button gives the same two things as this page, on one screen: the <strong>Link</strong> or the <strong>Embed</strong> code, for the <strong>Player</strong> or for the <strong>Editor</strong> opened on the same recording. The options below are those it offers, each starting as the player is at that moment; they apply to the link and to the code of the sections that follow.</p>
+    <p>The player's <strong>Share</strong> button gives the same two things as this page, on one screen: the <strong>Link</strong> or the <strong>Embed</strong> code of the player. The editor shares itself, with the <strong>Share</strong> button of its own header: the link or the code of the editor opened on the same file, or on the same case. The options below are those it offers, each starting as the player is at that moment; they apply to the link and to the code of the sections that follow.</p>
     <fieldset class="doc-options">
       <label class="doc-option-start"><input id="share-opt-start-on" type="checkbox"> Start at
         <input id="share-opt-start" type="number" min="0" step="1" value="0" aria-label="Start at"> s</label>
@@ -255,7 +255,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <tr><td>Compare account</td><td><code>compare=1</code></td><td><code>compare-account</code></td></tr>
       <tr><td>Open a case on one of its recordings</td><td><code>observer=ObserverId</code> (or a file name, or its number in the list)</td><td><code>observer="ObserverId"</code></td></tr>
       </table></div>
-    <p class="small">The summary chips are the strip of what the recording states, under the picture: the date said in words with its weekday, the position, the observer, the weather, and a <q>Description</q> chip showing the first words of the account, which opens the whole text in place of the chips (a cross puts them back). The player's own page shows them unless <code>labels=0</code>; the element itself shows them only with <code>show-labels</code>. The Editor takes no option, only the recording.</p>
+    <p class="small">The summary chips are the strip of what the recording states, under the picture: the date said in words with its weekday, the position, the observer, the weather, and a <q>Description</q> chip showing the first words of the account, which opens the whole text in place of the chips (a cross puts them back). The player's own page shows them unless <code>labels=0</code>; the element itself shows them only with <code>show-labels</code>. The editor's own sharing takes none of these options: it gives the file at its address, and says so when changes are not saved yet.</p>
   </div>
 </section>
 <section class="band">
@@ -323,7 +323,9 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       jsDelivr, which keeps every version:
       <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@<var>version</var>/dist-embed-sighting/rr0-sighting.mjs</code>. Your page then gets none of the later fixes, but it reads recordings written
       for later versions as long as their format has not changed (see
-      <a href="/docs/format/">the format's versions</a>).</p>
+      <a href="/docs/format/">the format's versions</a>). The box freezes the link too: it then ends
+      with <code>&amp;v=<var>version</var></code>, and the page it opens, today's, loads that version's
+      player or editor from the same place.</p>
   </div>
 </section>
 
@@ -356,7 +358,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Comment elle s'ouvre</h2>
-    <p>Le bouton <strong>Partager</strong> du lecteur donne les mêmes deux choses que cette page, sur un seul écran : le <strong>lien</strong> ou le code d'<strong>intégration</strong>, pour le <strong>lecteur</strong> ou pour l'<strong>éditeur</strong> ouvert sur le même enregistrement. Les options ci-dessous sont celles qu'il propose, chacune partant de l'état du lecteur à cet instant ; elles s'appliquent au lien et au code des sections suivantes.</p>
+    <p>Le bouton <strong>Partager</strong> du lecteur donne les mêmes deux choses que cette page, sur un seul écran : le <strong>lien</strong> ou le code d'<strong>intégration</strong> du lecteur. L'éditeur se partage lui-même, avec le bouton <strong>Partager</strong> de son propre en-tête : le lien ou le code de l'éditeur ouvert sur le même fichier, ou sur le même dossier. Les options ci-dessous sont celles qu'il propose, chacune partant de l'état du lecteur à cet instant ; elles s'appliquent au lien et au code des sections suivantes.</p>
     <fieldset class="doc-options">
       <label class="doc-option-start"><input id="share-opt-start-on" type="checkbox"> Commencer à
         <input id="share-opt-start" type="number" min="0" step="1" value="0" aria-label="Commencer à"> s</label>
@@ -376,7 +378,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <tr><td>Comparer au compte rendu</td><td><code>compare=1</code></td><td><code>compare-account</code></td></tr>
       <tr><td>Ouvrir un dossier sur l'un de ses enregistrements</td><td><code>observer=IdObservateur</code> (ou un nom de fichier, ou son rang dans la liste)</td><td><code>observer="IdObservateur"</code></td></tr>
       </table></div>
-    <p class="small">Les chips de résumé sont le bandeau de ce que l'enregistrement énonce, sous l'image : la date dite en toutes lettres avec son jour de la semaine, la position, l'observateur, la météo, et un chip <q>Description</q> qui montre les premiers mots du récit et ouvre le texte entier à la place des chips (une croix les rend). La page du lecteur les affiche sauf avec <code>labels=0</code> ; l'élément lui-même ne les affiche qu'avec <code>show-labels</code>. L'éditeur ne prend aucune option, seulement l'enregistrement.</p>
+    <p class="small">Les chips de résumé sont le bandeau de ce que l'enregistrement énonce, sous l'image : la date dite en toutes lettres avec son jour de la semaine, la position, l'observateur, la météo, et un chip <q>Description</q> qui montre les premiers mots du récit et ouvre le texte entier à la place des chips (une croix les rend). La page du lecteur les affiche sauf avec <code>labels=0</code> ; l'élément lui-même ne les affiche qu'avec <code>show-labels</code>. Le partage de l'éditeur ne prend aucune de ces options : il donne le fichier à son adresse, et le dit quand des modifications ne sont pas encore enregistrées.</p>
   </div>
 </section>
 <section class="band">
@@ -444,7 +446,9 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       servi par jsDelivr, qui garde toutes les versions :
       <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@<var>version</var>/dist-embed-sighting/rr0-sighting.mjs</code>. Votre page ne reçoit plus les corrections ultérieures, mais lit les
       enregistrements écrits pour des versions plus récentes tant que leur format n'a pas changé
-      (voir <a href="/docs/format/">les versions du format</a>).</p>
+      (voir <a href="/docs/format/">les versions du format</a>). La case fige aussi le lien : il se
+      termine alors par <code>&amp;v=<var>version</var></code>, et la page qu'il ouvre, celle du jour,
+      charge le lecteur ou l'éditeur de cette version au même endroit.</p>
   </div>
 </section>
 
@@ -479,7 +483,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Cómo se abre</h2>
-    <p>El botón <strong>Compartir</strong> del reproductor da las mismas dos cosas que esta página, en una sola pantalla: el <strong>enlace</strong> o el código para <strong>insertar</strong>, para el <strong>reproductor</strong> o para el <strong>editor</strong> abierto sobre la misma grabación. Las opciones de abajo son las que ofrece, cada una partiendo del estado del reproductor en ese momento; se aplican al enlace y al código de las secciones siguientes.</p>
+    <p>El botón <strong>Compartir</strong> del reproductor da las mismas dos cosas que esta página, en una sola pantalla: el <strong>enlace</strong> o el código para <strong>insertar</strong> del reproductor. El editor se comparte a sí mismo, con el botón <strong>Compartir</strong> de su propia cabecera: el enlace o el código del editor abierto sobre el mismo archivo, o sobre el mismo caso. Las opciones de abajo son las que ofrece, cada una partiendo del estado del reproductor en ese momento; se aplican al enlace y al código de las secciones siguientes.</p>
     <fieldset class="doc-options">
       <label class="doc-option-start"><input id="share-opt-start-on" type="checkbox"> Empezar en
         <input id="share-opt-start" type="number" min="0" step="1" value="0" aria-label="Empezar en"> s</label>
@@ -499,7 +503,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <tr><td>Comparar con el relato</td><td><code>compare=1</code></td><td><code>compare-account</code></td></tr>
       <tr><td>Abrir un caso en una de sus grabaciones</td><td><code>observer=IdObservador</code> (o un nombre de archivo, o su número en la lista)</td><td><code>observer="IdObservador"</code></td></tr>
       </table></div>
-    <p class="small">Los chips del resumen son la franja de lo que la grabación enuncia, bajo la imagen: la fecha dicha con palabras y su día de la semana, la posición, el observador, el tiempo, y un chip <q>Descripción</q> que muestra las primeras palabras del relato y abre el texto entero en lugar de los chips (una cruz los devuelve). La página del reproductor los muestra salvo con <code>labels=0</code>; el elemento solo los muestra con <code>show-labels</code>. El editor no admite ninguna opción, solo la grabación.</p>
+    <p class="small">Los chips del resumen son la franja de lo que la grabación enuncia, bajo la imagen: la fecha dicha con palabras y su día de la semana, la posición, el observador, el tiempo, y un chip <q>Descripción</q> que muestra las primeras palabras del relato y abre el texto entero en lugar de los chips (una cruz los devuelve). La página del reproductor los muestra salvo con <code>labels=0</code>; el elemento solo los muestra con <code>show-labels</code>. El compartir del editor no admite ninguna de estas opciones: da el archivo en su dirección, y lo indica cuando hay cambios aún sin guardar.</p>
   </div>
 </section>
 <section class="band">
@@ -567,7 +571,9 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       npm, servido por jsDelivr, que conserva todas las versiones:
       <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@<var>version</var>/dist-embed-sighting/rr0-sighting.mjs</code>. Tu página ya no recibe las correcciones posteriores, pero lee las grabaciones
       escritas para versiones más recientes mientras su formato no haya cambiado (ver
-      <a href="/docs/format/">las versiones del formato</a>).</p>
+      <a href="/docs/format/">las versiones del formato</a>). La casilla fija también el enlace: termina
+      entonces con <code>&amp;v=<var>version</var></code>, y la página que abre, la de hoy, carga el
+      reproductor o el editor de esa versión desde el mismo sitio.</p>
   </div>
 </section>
 
@@ -602,7 +608,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Come si apre</h2>
-    <p>Il pulsante <strong>Condividi</strong> del lettore dà le stesse due cose di questa pagina, in una sola schermata: il <strong>link</strong> o il codice da <strong>incorporare</strong>, per il <strong>lettore</strong> o per l'<strong>editor</strong> aperto sulla stessa registrazione. Le opzioni qui sotto sono quelle che offre, ciascuna a partire dallo stato del lettore in quel momento; valgono per il link e per il codice delle sezioni seguenti.</p>
+    <p>Il pulsante <strong>Condividi</strong> del lettore dà le stesse due cose di questa pagina, in una sola schermata: il <strong>link</strong> o il codice da <strong>incorporare</strong> del lettore. L'editor condivide sé stesso, con il pulsante <strong>Condividi</strong> della sua intestazione: il link o il codice dell'editor aperto sullo stesso file, o sullo stesso caso. Le opzioni qui sotto sono quelle che offre, ciascuna a partire dallo stato del lettore in quel momento; valgono per il link e per il codice delle sezioni seguenti.</p>
     <fieldset class="doc-options">
       <label class="doc-option-start"><input id="share-opt-start-on" type="checkbox"> Inizia a
         <input id="share-opt-start" type="number" min="0" step="1" value="0" aria-label="Inizia a"> s</label>
@@ -622,7 +628,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <tr><td>Confronta col resoconto</td><td><code>compare=1</code></td><td><code>compare-account</code></td></tr>
       <tr><td>Aprire un caso su una delle sue registrazioni</td><td><code>observer=IdOsservatore</code> (o un nome di file, o la sua posizione nell'elenco)</td><td><code>observer="IdOsservatore"</code></td></tr>
       </table></div>
-    <p class="small">I chip del riepilogo sono la striscia di ciò che la registrazione enuncia, sotto l'immagine: la data detta a parole con il suo giorno della settimana, la posizione, l'osservatore, il meteo, e un chip <q>Descrizione</q> che mostra le prime parole del resoconto e apre il testo intero al posto dei chip (una croce li riporta). La pagina del lettore li mostra salvo con <code>labels=0</code>; l'elemento stesso li mostra solo con <code>show-labels</code>. L'editor non accetta opzioni, solo la registrazione.</p>
+    <p class="small">I chip del riepilogo sono la striscia di ciò che la registrazione enuncia, sotto l'immagine: la data detta a parole con il suo giorno della settimana, la posizione, l'osservatore, il meteo, e un chip <q>Descrizione</q> che mostra le prime parole del resoconto e apre il testo intero al posto dei chip (una croce li riporta). La pagina del lettore li mostra salvo con <code>labels=0</code>; l'elemento stesso li mostra solo con <code>show-labels</code>. La condivisione dell'editor non accetta nessuna di queste opzioni: dà il file al suo indirizzo, e lo segnala quando ci sono modifiche non ancora salvate.</p>
   </div>
 </section>
 <section class="band">
@@ -690,7 +696,9 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       pubblicato su npm, servito da jsDelivr, che conserva tutte le versioni:
       <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@<var>version</var>/dist-embed-sighting/rr0-sighting.mjs</code>. La tua pagina non riceve più le correzioni successive, ma legge le
       registrazioni scritte per versioni più recenti finché il loro formato non è cambiato (vedi
-      <a href="/docs/format/">le versioni del formato</a>).</p>
+      <a href="/docs/format/">le versioni del formato</a>). La casella blocca anche il link: termina
+      allora con <code>&amp;v=<var>version</var></code>, e la pagina che apre, quella di oggi, carica il
+      lettore o l'editor di quella versione dallo stesso posto.</p>
   </div>
 </section>
 

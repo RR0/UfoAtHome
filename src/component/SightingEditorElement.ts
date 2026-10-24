@@ -35,6 +35,9 @@ import { NumberFields } from "./NumberFields.js"
 import type { BodyJson, BodyKeyframe } from "../engine/interpretation/Interpretation.js"
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
+import { ShareDialogElement, type ShareSubject } from "./ShareDialogElement.js"
+import type { ShareMessages } from "./messages/ShareMessages.js"
+import { AppLocation } from "./AppLocation.js"
 import { FormatVersionError } from "../engine/persistence/FormatVersion.js"
 import { NARRATIVE_SOURCES } from "../engine/narrative/narrativeSources.js"
 import { SightingAssessments } from "./SightingAssessments.js"
@@ -190,6 +193,7 @@ const EMPTY_SOURCE_IDS: ReadonlySet<string> = new Set()
 
 registerUfo()
 registerScene()
+ShareDialogElement.register()
 
 const DEFAULT_SHAPE_SIZE = { width: 48, height: 28 }
 /** How long a tuned sound keeps playing after the last edit to it — long enough to judge the
@@ -1194,6 +1198,9 @@ export class SightingEditorElement extends HTMLElement {
     this.durationInput = this.durationElement.input
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
     this.saveButton = this.shadow.getElementById("save") as HTMLButtonElement
+    this.shareButton = this.shadow.getElementById("share") as HTMLButtonElement
+    this.shareDialog = this.shadow.getElementById("share-dialog") as ShareDialogElement
+    this.shareDialog.subject = this.shareSubject
     this.sectionFolds = new SectionFolds(this.shadow)
     const editor = this
     this.witnessErrorView = new WitnessErrorView({
@@ -1711,6 +1718,7 @@ export class SightingEditorElement extends HTMLElement {
     this.deleteShapeButton.addEventListener("click", () => this.deleteShape())
     this.exportButton.addEventListener("click", () => this.exportJson())
     this.saveButton.addEventListener("click", () => this.exportJson())
+    this.shareButton.addEventListener("click", () => this.openShare())
     this.importInput.addEventListener("filepick", event => {
       const pick = (event as CustomEvent<InputFilePick>).detail
       if (pick.file) void this.importFromFile(pick.file)
@@ -2158,6 +2166,8 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   set sightingData(json: SightingRecordingJson) {
+    // Wherever it came from, it is not the file at the last address until loadUrl says so.
+    this.sourceUrl = undefined
     this.endDrag() // an in-progress drag references the OLD timeline's shape — don't let it
     // keep writing into the newly-loaded one
     this.ufoElement.sightingData = json
@@ -2268,6 +2278,28 @@ export class SightingEditorElement extends HTMLElement {
     if (!this.saveButton) return
     this.refreshEditorTitle()
     this.saveButton.disabled = !this.dirty
+    this.shareButton.disabled = this.sourceUrl === undefined
+    this.shareButton.title = this.sourceUrl === undefined ? this.shareMessages?.unavailable ?? "" : ""
+  }
+
+  /** The address the recording on show was loaded from, absolute: what sharing it gives. Undefined for one with none (new, picked from the disk). */
+  private sourceUrl?: string
+  private readonly shareButton: HTMLButtonElement
+  private readonly shareDialog: ShareDialogElement
+  private shareMessages?: ShareMessages
+
+  /** What the share dialog shares: the editor on the file at its address, and nothing else (the player shares the replay). */
+  private readonly shareSubject: ShareSubject = {
+    module: "rr0-sighting-editor",
+    link: () => `${AppLocation.home()}/edit/?file=${encodeURIComponent(this.sourceUrl ?? "")}`,
+    element: () => `<rr0-sighting-editor src="${this.sourceUrl ?? ""}"></rr0-sighting-editor>`
+  }
+
+  /** What is shared is the file at its address: said so when what is on screen is not that file any more. */
+  private openShare(): void {
+    if (this.sourceUrl === undefined) return
+    this.shareDialog.note = this.dirty ? this.shareMessages?.unsaved : undefined
+    this.shareDialog.open()
   }
 
   /** The recording's name, where and when — cheap enough to follow every edit (see renderParamSummary), unlike the state, which compares the whole recording. */
@@ -2731,6 +2763,7 @@ export class SightingEditorElement extends HTMLElement {
       // What the models it names by `url` are relative to — see SceneElement.documentUrl.
       this.sceneElement.documentUrl = new URL(url, location.href).href
       this.sightingData = json
+      this.sourceUrl = new URL(url, location.href).href
       this.resetHistory()
       // Says where the open recording came from, whichever way it was asked for: typed here, the
       // `src` attribute (a site's `?file=` link), or a observer's own file. Absolute, so the
@@ -10499,6 +10532,12 @@ export class SightingEditorElement extends HTMLElement {
     WindowClose.button(this.decorContextMenu, messages.close, () => this.hideDecorContextMenu())
     this.shadow.getElementById("label-editor-kicker")!.textContent = messages.editorKicker
     this.shadow.getElementById("label-save")!.textContent = messages.save
+    void this.shareDialog.useLanguage(this.language).then(share => {
+      if (!share) return
+      this.shareMessages = share
+      this.shadow.getElementById("label-share")!.textContent = share.share
+      this.refreshEditorHead()
+    })
     const intros: Record<string, string> = {
       observation: messages.panelIntroObservation, observer: messages.panelIntroObserver, location: messages.panelIntroLocation,
       temporal: messages.panelIntroTemporal, decor: messages.panelIntroDecor, weather: messages.panelIntroWeather,
