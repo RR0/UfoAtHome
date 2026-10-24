@@ -1211,12 +1211,6 @@ export class SightingEditorElement extends HTMLElement {
     this.shadow.querySelector(".scene-card")!.addEventListener("pointerdown", event => {
       if ((event as PointerEvent).pointerType === "touch") this.showOverlays()
     })
-    // Narrow, the scene sticks at the top and the sections' chips stick right under it: they are told how tall it is.
-    if (typeof ResizeObserver !== "undefined") {
-      const card = this.shadow.querySelector<HTMLElement>(".scene-card")!
-      const app = this.shadow.querySelector<HTMLElement>(".app")!
-      new ResizeObserver(() => app.style.setProperty("--scene-height", `${card.getBoundingClientRect().height}px`)).observe(card)
-    }
     // The field being edited shows what it sets over the scene, for as long as it is the one edited (§3.3) — over the hover too.
     this.sceneFieldOverlay = new SceneFieldOverlay(this.shadow.querySelector(".scene-card")!, () => this.ufoElement.canvasElement)
     this.shadow.addEventListener("focusin", event => {

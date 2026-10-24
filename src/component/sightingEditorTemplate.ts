@@ -1806,9 +1806,17 @@ ${EditorTheme.TOKENS}
   color: var(--ink);
   border: 1px solid var(--line-strong);
   border-radius: 12px;
-  /* clip, not hidden: hidden would make the card the scene's scrolling box, and the scene could no longer stick (see the narrow layout). */
   overflow: clip;
+  /* As tall as the screen: the scene and the sections' chips stay in view, and the open section scrolls under them. The scene gives up height
+     before the form does. */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100dvh;
+  --rr0-scene-max-height: 50dvh;
 }
+.app > :is(.editor-head, .scene-card, #group-tabs) { flex: none; }
+.app > .group-panel { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 /* Held by another editor (see embedded): no card of its own inside that one's. */
 .app.embedded { border: 0; border-radius: 0; max-width: none; }
 ${EditorTheme.HEAD}
@@ -1834,11 +1842,6 @@ ${EditorTheme.HEAD}
   border-bottom: 1px solid var(--line);
   overflow-x: auto;
   scrollbar-width: none;
-  /* In view while the open section scrolls under it: what it is, and the way to the others. */
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background: var(--ground-raised);
 }
 .section-chips > .group-tab {
   flex: none;
@@ -2011,10 +2014,7 @@ ${EditorTheme.fields(".app")}
 /* What a click in the scene opened, pointed out for a moment. */
 .flash { background: var(--warn-bg) !important; border-radius: 8px; box-shadow: 0 0 0 6px var(--warn-bg); transition: background .3s ease, box-shadow .3s ease; }
 @media (prefers-reduced-motion: reduce) { .scene-card > :is(.render-line, .playback-row) { transition: none; } }
-/* Narrow: the scene stays in view while the form scrolls under it. */
 @container (max-width: 640px) {
-  .scene-card { position: sticky; top: 0; z-index: 3; }
-  #group-tabs.section-chips { top: var(--scene-height, 0px); }
   .editor-head { flex-wrap: wrap; }
   .app > .group-panel, #group-tabs.section-chips, .editor-head { padding-left: 14px; padding-right: 14px; }
 }

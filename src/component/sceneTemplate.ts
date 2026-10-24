@@ -125,6 +125,8 @@ export const css = `
      ufoTemplate) an overlay stretched over an outer stage by inset:0. */
   height: auto;
   aspect-ratio: 640 / 360;
+  /* A page that has less height to give caps it (the editor, which keeps room for its form): the frame then letterboxes, as for a format. */
+  max-height: var(--rr0-scene-max-height, none);
   /* What lets .frame measure the stage's height in its own width rule — see .frame. */
   container-type: size;
   display: flex;
