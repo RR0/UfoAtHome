@@ -1208,6 +1208,12 @@ export class SightingEditorElement extends HTMLElement {
     this.shadow.querySelector(".scene-card")!.addEventListener("pointerdown", event => {
       if ((event as PointerEvent).pointerType === "touch") this.showOverlays()
     })
+    // Narrow, the scene sticks at the top and the sections' chips stick right under it: they are told how tall it is.
+    if (typeof ResizeObserver !== "undefined") {
+      const card = this.shadow.querySelector<HTMLElement>(".scene-card")!
+      const app = this.shadow.querySelector<HTMLElement>(".app")!
+      new ResizeObserver(() => app.style.setProperty("--scene-height", `${card.getBoundingClientRect().height}px`)).observe(card)
+    }
     // The field being edited shows what it sets over the scene, for as long as it is the one edited (§3.3) — over the hover too.
     this.sceneFieldOverlay = new SceneFieldOverlay(this.shadow.querySelector(".scene-card")!, () => this.ufoElement.canvasElement)
     this.shadow.addEventListener("focusin", event => {
@@ -7187,10 +7193,10 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** When more than one shape is selected, the appearance fields (Name/Color/Transparency/Halo/
-   * source dropdown/preset buttons) only make sense for a single shape — rather than showing one
+   * preset buttons) only make sense for a single shape — rather than showing one
    * arbitrary member's values as if they applied to the whole selection, they're disabled with a
    * title explaining why, the same disabled/title-explain convention the context menu already
-   * uses. syncAppearanceFromTimeline() itself early-returns in this state instead of writing
+   * uses. Not the shapes' picker: it is how one is picked out of them (a saucer, added, is its dome and its disc, both selected). syncAppearanceFromTimeline() itself early-returns in this state instead of writing
    * possibly-misleading values into disabled fields. */
   private updateAppearanceFieldsDisabledState(): void {
     this.updateShapeToolbarVisibility()
@@ -7208,7 +7214,6 @@ export class SightingEditorElement extends HTMLElement {
       this.objectDistanceInput,
       this.sizeLockSelect,
       this.clearDistanceHypothesisButton,
-      this.sourceSelect,
     ]) {
       input.disabled = multiple
       input.title = title

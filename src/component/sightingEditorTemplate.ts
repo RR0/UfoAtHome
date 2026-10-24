@@ -1831,6 +1831,11 @@ ${EditorTheme.HEAD}
   border-bottom: 1px solid var(--line);
   overflow-x: auto;
   scrollbar-width: none;
+  /* In view while the open section scrolls under it: what it is, and the way to the others. */
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--ground-raised);
 }
 .section-chips > .group-tab {
   flex: none;
@@ -2010,6 +2015,7 @@ ${EditorTheme.fields(".app")}
 /* Narrow: the scene stays in view while the form scrolls under it. */
 @container (max-width: 640px) {
   .scene-card { position: sticky; top: 0; z-index: 3; }
+  #group-tabs.section-chips { top: var(--scene-height, 0px); }
   .editor-head { flex-wrap: wrap; }
   .app > .group-panel, #group-tabs.section-chips, .editor-head { padding-left: 14px; padding-right: 14px; }
 }

@@ -1350,6 +1350,14 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
     expect(JSON.stringify(element.sightingData)).toBe(before)
   })
 
+  it("leaves the shapes' picker enabled when a saucer is added, its dome and disc both selected", () => {
+    const element = mountEmpty()
+    ;(element.shadowRoot!.getElementById("add-shape-saucer") as HTMLButtonElement).click()
+    const sourceSelect = element.shadowRoot!.getElementById("source") as HTMLSelectElement
+    expect(sourceSelect.options.length).toBe(2)
+    expect(sourceSelect.disabled).toBe(false)
+  })
+
   it("disables the source select, add-shape and delete-shape buttons while recording", () => {
     const element = mount()
     ;(element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement).click() // a 2nd shape, so delete-shape isn't disabled for an unrelated reason below
