@@ -39,13 +39,13 @@ jobs:
       # The same on every platform since 2026-10-18: the suite grew, and a worker per core left the main process too busy to answer the workers'
       # requests for modules ("Timeout calling fetch", on a different job each run: Windows, then macOS, with every test passing). Vitest then
       # fails the run on those unhandled errors.
-      # Threads on Windows since 2026-10-24: there, Node 22 timed out a progress report on four runs running (every test passing), with two
-      # forked workers and then with one, so the main process was not too busy: the forks' reports go through the pipes between processes,
-      # where threads pass them in memory.
-      # The CPU-time budgets a quarter larger there, where the workers are threads of one process (128 ms measured against 120). Set here, not
+      # Threads since 2026-10-24: Windows (Node 22) timed out a progress report on four runs running (every test passing), with two forked
+      # workers and then with one, so the main process was not too busy: the forks' reports go through the pipes between processes, where
+      # threads pass them in memory. macOS (Node 20) then did the same with forks. Threads ended it on Windows.
+      # The CPU-time budgets twice as large on Windows, whose runners measured 128 and then 165.6 ms against 120 and 160. Set here, not
       # with the job's other variables: the runner's own context is not known yet there.
-      - run: npm test -- --testTimeout=30000 --maxWorkers=2 ${{ runner.os == 'Windows' && '--pool=threads' || '' }}
+      - run: npm test -- --testTimeout=30000 --maxWorkers=2 --pool=threads
         env:
-          PERF_BUDGET_SCALE: ${{ runner.os == 'Windows' && '4' || '3' }}
+          PERF_BUDGET_SCALE: ${{ runner.os == 'Windows' && '6' || '3' }}
       - run: npm run build
       - run: npm run build:site
