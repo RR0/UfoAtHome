@@ -1807,16 +1807,18 @@ ${EditorTheme.TOKENS}
   border: 1px solid var(--line-strong);
   border-radius: 12px;
   overflow: clip;
-  /* As tall as the screen: the scene and the sections' chips stay in view, and the open section scrolls under them. The scene gives up height
-     before the form does. */
+  /* No taller than the screen: the scene and the sections' chips stay in view, and the open section scrolls under them. The scene gives up
+     height before the form does. A section shorter than what is left ends the editor where it ends, with no blank under it. */
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  height: 100dvh;
+  max-height: 100dvh;
   --rr0-scene-max-height: 50dvh;
 }
 .app > :is(.editor-head, .scene-card, #group-tabs) { flex: none; }
-.app > .group-panel { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.app > .group-panel { flex: 0 1 auto; min-height: 0; overflow-y: auto; }
+/* A box to tick in a row of fields stands as tall as they do, its label level with their middle (the toolbars align on their foot). */
+.app .toolbar > label:has(> input[type="checkbox"]) { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; }
 /* Held by another editor (see embedded): no card of its own inside that one's. */
 .app.embedded { border: 0; border-radius: 0; max-width: none; }
 ${EditorTheme.HEAD}

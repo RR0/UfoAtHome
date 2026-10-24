@@ -59,11 +59,12 @@ const TEMPLATE = `
   /* The observation being edited, inside: a frame of its own once there is a case around it. */
   .passages { margin: .5em 0 0; font-size: .9em; }
   .passages ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .2em; }
-  .passages li { display: flex; gap: .5em; align-items: baseline; }
+  /* The moment's button and the first line of its passage on one level: the button as tall as two thirds more than the line, the line centred in it. */
+  .passages li { display: flex; gap: .6em; align-items: flex-start; }
   .passages button { font: inherit; cursor: pointer; }
-  .passages .at { font-variant-numeric: tabular-nums; padding: .1em .35em; text-align: left; white-space: nowrap; flex: none; display: inline-flex; align-items: center; gap: .15em; }
+  .passages .at { font-variant-numeric: tabular-nums; box-sizing: border-box; min-height: 0; height: 2.1em; padding: 0 .75em 0 .55em; text-align: left; white-space: nowrap; flex: none; display: inline-flex; align-items: center; gap: .25em; }
   .passages .at svg { width: 1.1em; height: 1.1em; }
-  .passages .excerpt { border: 0; background: none; padding: 0; text-align: left; color: LinkText; text-decoration: underline; }
+  .passages .excerpt { min-height: 0; border: 0; background: none; padding: .3em 0 0; line-height: 1.5; text-align: left; color: LinkText; text-decoration: underline; }
   /* The event picked, in the frame every list of the editor puts its picked element in (see ElementList): its id, then the observation
      or the interview. A recording alone, not in a case, has no list and no frame. */
   #event-item { display: block; }
