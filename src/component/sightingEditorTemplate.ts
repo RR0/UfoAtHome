@@ -317,13 +317,14 @@ export const html = `
       <rr0-date-input name="obs-time"></rr0-date-input></label>
     <label><span id="label-observation-end-time">Observation end</span>
       <rr0-date-input name="obs-end-time"></rr0-date-input></label>
-    <label><span id="label-duration">Duration</span> <rr0-duration-input name="durationSeconds"></rr0-duration-input></label>
-    <!-- The zone is the RULE, the number is what that rule produced for this sighting's own date —
+    <!-- Beside the dates it reads, not after the duration, and never held back: a time read in the wrong zone is hours off.
+         The zone is the RULE, the number is what that rule produced for this sighting's own date —
          summer time included, and as it was then (see engine/time/TimeZones.ts). Pick a zone and
          the number is derived and read-only; leave it on the manual entry and type the number
          yourself, which is all a recording used to be able to say. -->
-    <label class="adv"><span id="label-utc-offset">Time zone</span> <select id="timeZone"></select>
+    <label><span id="label-utc-offset">Time zone</span> <select id="timeZone"></select>
       <input id="utcOffsetHours" type="number" min="-12" max="14" step="0.5" placeholder="from longitude" title="Hours ahead of UTC on the observer's own clock — legal time, which the longitude cannot know (France was on UTC+1 in 1965)"/> UTC&plusmn;h</label>
+    <label><span id="label-duration">Duration</span> <rr0-duration-input name="durationSeconds"></rr0-duration-input></label>
     </div>
     <div class="form-section">
     <!-- The named moments of the account (see Milestone) — in the Moment group, because they are
