@@ -33,6 +33,8 @@ export const sightingMessages_en: SightingMessages = {
   shareOptionMilestones: "Show moments",
   shareOptionCompare: "Compare account",
   embedCopied: "Copied",
+  embedFreeze: "Freeze version {version}",
+  embedFreezeHint: "The embed keeps the rendering of this version of UFO@home, loaded from jsDelivr, and gets none of the later fixes. Unticked, it follows each release.",
   showLabels: "Show what it states",
   interpretation: "Interpretation",
   account: "Account",

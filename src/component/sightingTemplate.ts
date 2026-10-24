@@ -95,6 +95,8 @@ export const html = `
       <div id="embed-code" class="embed-code"></div>
       <textarea id="embed-markup" class="embed-markup" rows="6" spellcheck="false"></textarea>
       <div class="embed-row">
+        <!-- Unticked, the embed follows each release; ticked, it keeps this one for good (see EmbedScript). -->
+        <label class="embed-freeze"><input id="embed-freeze" type="checkbox"/> <span id="embed-freeze-label">Freeze this version</span></label>
         <button id="embed-copy" class="share-copy" type="button">Copy</button>
       </div>
     </div>
@@ -770,8 +772,13 @@ ${SummaryDescription.CSS}
 }
 .embed-row {
   display: flex;
+  align-items: center;
+  gap: 0.8em;
   justify-content: flex-end;
   margin-top: 0.5em;
+}
+.embed-freeze {
+  font-size: 0.9em;
 }
 /* The embed code is edited in CodeMirror once its chunk has loaded; the textarea is the stand-in
    until then, and the model the editor mirrors. */

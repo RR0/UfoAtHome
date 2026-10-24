@@ -33,6 +33,8 @@ export const sightingMessages_fr: SightingMessages = {
   shareOptionMilestones: "Afficher les moments",
   shareOptionCompare: "Comparer au compte rendu",
   embedCopied: "Copié",
+  embedFreeze: "Figer la version {version}",
+  embedFreezeHint: "L'intégration garde le rendu de cette version d'UFO@home, chargée depuis jsDelivr, sans les corrections ultérieures. Décochée, elle suit chaque nouvelle version.",
   showLabels: "Afficher ce qu'elle indique",
   interpretation: "Interprétation",
   account: "Compte rendu",

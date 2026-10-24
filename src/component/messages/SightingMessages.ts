@@ -51,6 +51,10 @@ export interface SightingMessages extends SightingLabels {
   shareOptionMilestones: string
   shareOptionCompare: string
   embedCopied: string
+  /** The share dialog's choice of embedding this version for good rather than the current one; `{version}` is this one. */
+  embedFreeze: string
+  /** What freezing does, said when the pointer rests on it. */
+  embedFreezeHint: string
   /** The info panel's toggle for the parameter strip under the render — what the recording states,
    * field by field, in the same words the editor uses for the same fields. */
   showLabels: string

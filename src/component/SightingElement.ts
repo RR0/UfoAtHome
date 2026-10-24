@@ -25,6 +25,7 @@ import { SceneNaming } from "./messages/SceneNames.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { sightingMessages_en } from "./messages/SightingMessages_en.js"
 import type { ShareCodeEditor } from "./ShareCodeEditor.js"
+import { EmbedScript } from "./EmbedScript.js"
 import type { SightingMessages } from "./messages/SightingMessages.js"
 import { SummaryDescription } from "./SummaryDescription.js"
 import { PlaybackPosition } from "../engine/model/PlaybackPosition.js"
@@ -175,6 +176,8 @@ export class SightingElement extends HTMLElement {
   private readonly shareOptions: Record<"labels" | "map" | "milestones" | "compare", { input: HTMLInputElement, label: HTMLElement }>
   private readonly embedReplayRadio: HTMLInputElement
   private readonly embedEditRadio: HTMLInputElement
+  private readonly embedFreeze: HTMLInputElement
+  private readonly embedFreezeLabel: HTMLElement
   private readonly labelEmbedReplay: HTMLElement
   private readonly labelEmbedEdit: HTMLElement
   private readonly embedMarkup: HTMLTextAreaElement
@@ -312,6 +315,8 @@ export class SightingElement extends HTMLElement {
     this.labelEmbedEdit = this.shadow.getElementById("label-embed-edit")!
     this.embedMarkup = this.shadow.getElementById("embed-markup") as HTMLTextAreaElement
     this.embedCopyButton = this.shadow.getElementById("embed-copy") as HTMLButtonElement
+    this.embedFreeze = this.shadow.getElementById("embed-freeze") as HTMLInputElement
+    this.embedFreezeLabel = this.shadow.getElementById("embed-freeze-label")!
 
     this.interpretationChoice = this.shadow.getElementById("interpretation-choice")!
     this.interpretationLabel = this.shadow.getElementById("interpretation-label")!
@@ -371,6 +376,7 @@ export class SightingElement extends HTMLElement {
       radio.addEventListener("change", () => this.refreshShareLinks())
     }
     this.embedCopyButton.addEventListener("click", () => void this.copyEmbedMarkup())
+    this.embedFreeze.addEventListener("change", () => this.refreshEmbedMarkup())
 
     // Only when already in the page (an element upgraded in place): a detached one has no
     // ancestor to read the page's language from, and would fetch the browser's language before
@@ -450,6 +456,8 @@ export class SightingElement extends HTMLElement {
     this.labelEmbedReplay.textContent = this.messages.embedReplay
     this.labelEmbedEdit.textContent = this.messages.embedEdit
     this.embedCopyButton.textContent = this.messages.embedCopy
+    this.embedFreezeLabel.textContent = this.messages.embedFreeze.replace("{version}", __APP_VERSION__)
+    this.embedFreeze.parentElement!.title = this.messages.embedFreezeHint
     if (this.infoOpen) this.populateInfoPanel()
     this.updateAccountLine()
   }
@@ -709,14 +717,11 @@ export class SightingElement extends HTMLElement {
    * element, so what they paste is what they are looking at); Editor embeds
    * `<rr0-sighting-editor>`, which takes the same `src`.
    *
-   * The script URL is derived from where THIS bundle was itself loaded from (import.meta.url),
-   * not hardcoded: the four bundles are published side by side, so the sibling's name is enough,
-   * and a snippet generated from a staging or local copy correctly points back at that copy
-   * instead of silently sending readers to production.
+   * The script is the current component, or this version for good when the author ticks "freeze": see EmbedScript for where each is.
    */
   private embedMarkupFor(kind: "replay" | "edit"): string {
     const tag = kind === "edit" ? "rr0-sighting-editor" : "rr0-sighting"
-    const script = new URL(`${tag}.mjs`, import.meta.url).href
+    const script = this.embedFreeze.checked ? EmbedScript.frozen(tag, __APP_VERSION__) : EmbedScript.current(tag, import.meta.url, APP_HOME_URL)
     const shared = this.sharedAddress()
     const src = shared.src
     // The replay can open at a stated position, and on a given recording of a case; the editor has no such attributes.

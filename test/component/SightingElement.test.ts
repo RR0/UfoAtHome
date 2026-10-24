@@ -1010,6 +1010,17 @@ describe("SightingElement embed markup", () => {
     expect(markup).toContain("<rr0-sighting-editor src=\"http://localhost:3000/john.json\"></rr0-sighting-editor>")
     expect(markup).toContain("rr0-sighting-editor.mjs")
   })
+
+  it("embeds the current component, or this version for good once frozen", async () => {
+    const shadow = await openInfoPanel()
+    const markup = () => (shadow.querySelector("#embed-markup") as HTMLTextAreaElement).value
+    const freeze = shadow.querySelector("#embed-freeze") as HTMLInputElement
+    expect(freeze.checked).toBe(false)
+    expect(markup()).not.toContain("jsdelivr")
+    freeze.checked = true
+    freeze.dispatchEvent(new Event("change"))
+    expect(markup()).toContain(`src="https://cdn.jsdelivr.net/npm/@rr0/ufoathome@${__APP_VERSION__}/dist-embed-sighting/rr0-sighting.mjs"`)
+  })
 })
 
 /**
