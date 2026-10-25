@@ -7,8 +7,8 @@ import { CandidateSearch } from "../engine/witness/CandidateSearch.js"
 import type { AccountStatement, CandidateTrack, MovedValue, StructuralReading, UsedReading, Variant } from "../engine/witness/CandidateSearch.js"
 import { computeBodyMagnitude, computeBodyPosition, equatorialToHorizontal } from "../engine/astronomy/CelestialPositions.js"
 import type { CelestialBody } from "../engine/astronomy/CelestialPositions.js"
-import { PoherAnswers } from "../engine/witness/PoherMatrix.js"
-import type { PoherFacts, PoherMatrix, PoherRanking } from "../engine/witness/PoherMatrix.js"
+import { PoherAnswers, PoherMatrix } from "../engine/witness/PoherMatrix.js"
+import type { PoherFacts, PoherMatrixVersion, PoherRanking } from "../engine/witness/PoherMatrix.js"
 import type { SatellitePass, SatellitePosition } from "../engine/astronomy/SatellitePasses.js"
 import { ReentrySighting } from "../engine/interpretation/Reentry.js"
 import type { ReentryJson } from "../engine/interpretation/Reentry.js"
@@ -30,8 +30,8 @@ export interface CandidatesHost {
   fieldLabels(): Partial<Record<MovedValue["field"], HTMLElement>>
   /** Where the label of the variant on show goes: over the scene, always in view. */
   sceneCard(): HTMLElement
-  /** Poher's matrix as rr0.org publishes it, with its labels in the reader's language (see PoherMatrix.load). */
-  poher(): Promise<{ matrix: PoherMatrix, labels: Record<string, string> }>
+  /** A version of Poher's matrix as rr0.org publishes it, with its labels in the reader's language (see PoherMatrix.load). */
+  poher(version: PoherMatrixVersion): Promise<{ matrix: PoherMatrix, labels: Record<string, string> }>
   /** What the recording says that the matrix asks about. */
   facts(): PoherFacts
   /** The satellite passes during the observation, and where each object stood at an instant, when the archive is loaded. */
@@ -99,6 +99,7 @@ export class CandidatesView {
 .poher-bar { display: inline-block; width: 60px; height: 6px; border-radius: 3px; vertical-align: middle;
   background: linear-gradient(90deg, var(--glow-solid) calc(var(--score) * 100%), var(--line) 0); }
 .poher-list .doubt { color: var(--ink-faint); font-size: 12px; }
+.poher-version { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-dim); }
 .candidate-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .kept-variants h4 { margin: 14px 0 6px; font: 600 15px/1.3 var(--serif); }
 .kept-variant { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 12px; margin-bottom: 6px; border: 1px dashed var(--line-strong); border-radius: 10px; }
@@ -129,6 +130,9 @@ export class CandidatesView {
 
   private poher?: { matrix: PoherMatrix, labels: Record<string, string> }
   private poherState: "idle" | "loading" | "failed" | "ready" = "idle"
+  /** Which version of the matrix is read: RR0's unless the reader chose Poher's own, a choice kept for the next visit. */
+  private poherVersion = CandidatesView.storedVersion()
+  private static readonly VERSION_STORAGE = "ufoathome.poherMatrixVersion"
   /** Which phenomenon of the matrix each variant stands for. */
   private readonly phenomenonOf = new Map<string, Tracked>()
 
@@ -380,11 +384,14 @@ export class CandidatesView {
   private loadPoher(): void {
     if (this.poherState !== "idle") return
     this.poherState = "loading"
-    this.host.poher().then(poher => {
+    const version = this.poherVersion
+    this.host.poher(version).then(poher => {
+      if (version !== this.poherVersion) return
       this.poher = poher
       this.poherState = "ready"
       this.refresh()
     }, () => {
+      if (version !== this.poherVersion) return
       this.poherState = "failed"
       this.refresh()
     })
@@ -400,6 +407,7 @@ export class CandidatesView {
     const nodes: Node[] = [title]
     this.loadPoher()
     const ranking = this.ranking()
+    nodes.push(this.versionChoice())
     if (this.poherState === "loading") nodes.push(this.note(m.poherLoading))
     if (this.poherState === "failed") nodes.push(this.note(m.poherFailed))
     if (ranking) nodes.push(this.answersBlock(ranking.answers))
@@ -488,6 +496,49 @@ export class CandidatesView {
     return block
   }
 
+  /** The version stored by the reader's last choice, or the default one: storage may be refused, in a private window. */
+  private static storedVersion(): PoherMatrixVersion {
+    try {
+      const stored = localStorage.getItem(CandidatesView.VERSION_STORAGE)
+      if (stored && stored in PoherMatrix.VERSIONS) return stored as PoherMatrixVersion
+    } catch {
+      // No storage: the default.
+    }
+    return PoherMatrix.DEFAULT_VERSION
+  }
+
+  /** The choice of the version of the matrix read: Poher's of 1977, or RR0's that extends it, which reads its files instead. */
+  private versionChoice(): HTMLElement {
+    const m = this.host.messages().candidates
+    const label = Object.assign(document.createElement("label"), { className: "poher-version", textContent: m.poherVersion })
+    const select = document.createElement("select")
+    for (const version of Object.keys(PoherMatrix.VERSIONS) as PoherMatrixVersion[]) {
+      select.append(Object.assign(document.createElement("option"), { value: version, textContent: m.poherVersions[version], selected: version === this.poherVersion }))
+    }
+    select.addEventListener("change", () => {
+      this.poherVersion = select.value as PoherMatrixVersion
+      try {
+        localStorage.setItem(CandidatesView.VERSION_STORAGE, this.poherVersion)
+      } catch {
+        // Kept for this visit only.
+      }
+      this.poherState = "idle"
+      this.poher = undefined
+      this.refresh()
+    })
+    label.append(select)
+    return label
+  }
+
+  /** The answers that rule `row` out, each with the reason of the version read when that score is its own and not Poher's. */
+  private exclusion(row: PoherRanking): string {
+    const m = this.host.messages().candidates
+    return m.poherExcludedBy.replace("{list}", row.excludedBy.map(question => {
+      const reason = this.poher?.matrix.reason(row.phenomenon, question)
+      return reason ? `${this.answerLabel(question)} (${m.poherRr0Reason.replace("{why}", reason.why)})` : this.answerLabel(question)
+    }).join(", "))
+  }
+
   /** The label the matrix gives one of its answers: its question and its choice ("Hour: Night"). */
   private answerLabel(question: string): string {
     const labels = this.poher?.labels ?? {}
@@ -520,11 +571,13 @@ export class CandidatesView {
     const others = rows.filter(row => !tracked.has(row.phenomenon))
     const block = document.createElement("div")
     block.className = "poher-block"
-    block.append(Object.assign(document.createElement("h4"), { textContent: m.poherTitle }), Object.assign(document.createElement("p"), { className: "candidates-note", textContent: m.poherIntro }))
+    block.append(Object.assign(document.createElement("h4"), { textContent: m.poherTitle.replace("{version}", m.poherVersions[this.poherVersion]) }),
+      Object.assign(document.createElement("p"), { className: "candidates-note", textContent: this.poher?.matrix.reasons ? m.poherIntroRr0 : m.poherIntro }))
     const item = (row: PoherRanking) => {
       const li = document.createElement("li")
       li.append(Object.assign(document.createElement("strong"), { textContent: labels[row.phenomenon] ?? row.phenomenon }))
-      if (row.excludedBy.length > 0) li.append(" — ", m.poherExcludedBy.replace("{list}", row.excludedBy.map(question => this.answerLabel(question)).join(", ")))
+      if (row.added) li.append(" ", Object.assign(document.createElement("span"), { className: "poher-tag", textContent: m.poherAdded }))
+      if (row.excludedBy.length > 0) li.append(" — ", this.exclusion(row))
       else {
         const bar = document.createElement("span")
         bar.className = "poher-bar"
@@ -592,7 +645,7 @@ export class CandidatesView {
     if (poher && poher.excludedBy.length > 0) {
       body.append(Object.assign(document.createElement("p"), {
         className: "candidate-reason",
-        textContent: `${m.poherTag.replace("{state}", m.poherStateExcluded)} — ${m.poherExcludedBy.replace("{list}", poher.excludedBy.map(question => this.answerLabel(question)).join(", "))}`
+        textContent: `${m.poherTag.replace("{state}", m.poherStateExcluded)} — ${this.exclusion(poher)}`
       }))
     }
     if (variant.verdict === "incompatible") {

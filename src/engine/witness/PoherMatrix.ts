@@ -29,7 +29,32 @@ export interface PoherRanking {
   doubtedBy: string[]
   /** The mean of its scores over the answers, from 0 (impossible) to 1 (very possible). */
   mean: number
+  /** Whether the version of the matrix read adds it to Poher's (see PoherReasons). */
+  added: boolean
 }
+
+/** Why a version of the matrix scores a pair the way it does, and on what sources: what it says of a score that is not Poher's. */
+export interface PoherReason {
+  why: string
+  sources: string[]
+}
+
+/**
+ * What a version of the matrix that extends Poher's says of its own scores (`reasons.json` beside its `matrix.json`): a reason for every
+ * score it gives, the scores it does not give being Poher's of 1977, and the sources these reasons cite.
+ */
+export interface PoherReasons {
+  version: string
+  author: string
+  /** The phenomena it adds to Poher's, each with the one of Poher's it was scored from. */
+  phenomena: Record<string, { analogue?: string, summary: string, sources: string[] }>
+  sources: Record<string, { title: string, author?: string, date?: string, url?: string }>
+  /** By phenomenon, then by question. */
+  cells: Record<string, Record<string, PoherReason>>
+}
+
+/** A version of the matrix rr0.org publishes, each in a directory of its own: Poher's of 1977, as he gave it, or RR0's that extends it. */
+export type PoherMatrixVersion = "poher-1977" | "rr0-2026"
 
 /**
  * Claude Poher's matrix of known phenomena (1977): 33 phenomena that observers mistake for something else, against 55 characteristics of
@@ -37,16 +62,28 @@ export interface PoherRanking {
  * the others are ranked by their mean score. Its scores are an expert's judgment of 1977, read as such: the list of candidates it gives
  * is what the search then tests against the account (see CandidateSearch), where a candidate's track can be computed.
  *
- * Read from the file rr0.org publishes, as its own application does, rather than copied here: it is RR0's to correct and extend.
+ * Read from the file rr0.org publishes, as its own application does, rather than copied here: it is RR0's to correct and extend. RR0
+ * extends it (2026) with the mistakes of today Poher could not score (drones, Starlink trains, flares, lasers…) and four characteristics
+ * he did not ask about, every score of its own with its reason and sources; Poher's own stays one choice away (see VERSIONS).
  */
 export class PoherMatrix {
-  /** Where rr0.org publishes the matrix and its labels (`matrix.json`, `Matrix_<lang>.json`), as the matrix's own application reads them. */
-  static readonly BASE_URL = "https://raw.githubusercontent.com/RR0/rr0.org/master/time/1/9/7/7/Poher_Matrice/"
+  /** Where rr0.org publishes its files. */
+  static readonly BASE_URL = "https://raw.githubusercontent.com/RR0/rr0.org/master/"
+  /**
+   * Where each version of the matrix lies, with its labels (`matrix.json`, `Matrix_<lang>.json`), as the matrix's own application reads
+   * them: choosing a version is choosing a directory. RR0's holds Poher's scores unchanged, beside its own and their reasons.
+   */
+  static readonly VERSIONS: Record<PoherMatrixVersion, string> = {
+    "poher-1977": "time/1/9/7/7/Poher_Matrice/",
+    "rr0-2026": "time/2/0/2/6/10/Poher_Matrice_RR0/"
+  }
+  /** The version read unless the reader chooses Poher's own: RR0's, which knows the mistakes Poher could not (drones, Starlink…). */
+  static readonly DEFAULT_VERSION: PoherMatrixVersion = "rr0-2026"
 
   private readonly scores = new Map<string, Record<string, number>>()
   readonly phenomena: string[] = []
 
-  constructor(entries: readonly PoherMatrixEntry[]) {
+  constructor(entries: readonly PoherMatrixEntry[], readonly reasons?: PoherReasons) {
     for (const entry of entries) {
       const scores = entry.knownPhenomenaProbabilities ?? entry.knownPhenomenonProbabilities ?? {}
       this.scores.set(entry.question, scores)
@@ -57,6 +94,11 @@ export class PoherMatrix {
   /** Whether the matrix has a row for `question`. */
   has(question: string): boolean {
     return this.scores.has(question)
+  }
+
+  /** Why the version read scores `phenomenon` against `question` as it does, when that score is its own and not Poher's. */
+  reason(phenomenon: string, question: string): PoherReason | undefined {
+    return this.reasons?.cells[phenomenon]?.[question]
   }
 
   /** Every phenomenon against `answers`: those still possible first, by mean score; then those ruled out, by how many answers rule them out. */
@@ -74,17 +116,20 @@ export class PoherMatrix {
         sum += score
         if (score === 0) (answer.firm ? excludedBy : doubtedBy).push(answer.question)
       }
-      return { phenomenon, excludedBy, doubtedBy, mean: count > 0 ? sum / count : 0 }
+      return { phenomenon, excludedBy, doubtedBy, mean: count > 0 ? sum / count : 0, added: this.reasons?.phenomena[phenomenon] !== undefined }
     })
     return rows.sort((a, b) => (a.excludedBy.length > 0 ? 1 : 0) - (b.excludedBy.length > 0 ? 1 : 0)
       || (a.excludedBy.length - b.excludedBy.length) || b.mean - a.mean)
   }
 
-  /** The matrix as published, and its labels in `language` (English when it has none in that language). */
-  static async load(language: string, fetchJson: (url: string) => Promise<unknown>): Promise<{ matrix: PoherMatrix, labels: Record<string, string> }> {
+  /** The matrix of `version` as published, its labels in `language` (English when it has none in that language), and its reasons when it has some. */
+  static async load(version: PoherMatrixVersion, language: string, fetchJson: (url: string) => Promise<unknown>): Promise<{ matrix: PoherMatrix, labels: Record<string, string> }> {
     const lang = ["fr", "en", "it"].includes(language) ? language : "en"
-    const [entries, labels] = await Promise.all([fetchJson(`${PoherMatrix.BASE_URL}matrix.json`), fetchJson(`${PoherMatrix.BASE_URL}Matrix_${lang}.json`)])
-    return { matrix: new PoherMatrix(entries as PoherMatrixEntry[]), labels: labels as Record<string, string> }
+    const base = `${PoherMatrix.BASE_URL}${PoherMatrix.VERSIONS[version]}`
+    const [entries, labels, reasons] = await Promise.all([
+      fetchJson(`${base}matrix.json`), fetchJson(`${base}Matrix_${lang}.json`), version === "poher-1977" ? undefined : fetchJson(`${base}reasons.json`)
+    ])
+    return { matrix: new PoherMatrix(entries as PoherMatrixEntry[], reasons as PoherReasons | undefined), labels: labels as Record<string, string> }
   }
 }
 
@@ -108,6 +153,8 @@ export interface PoherFacts {
   speedVariation?: number
   /** How many phenomena the account draws (a group counting once). */
   count?: number
+  /** Whether three or more of them stand in a row across the sky. */
+  aligned?: boolean
   /** Whether it was round (an oval about as tall as wide). */
   round?: boolean
   colors?: string[]
@@ -115,6 +162,8 @@ export interface PoherFacts {
   /** How many observers the account puts at the scene. */
   observers?: number
   sound?: boolean
+  /** Whether it was seen with the naked eye: the recording's instrument is an eye, not a camera nor binoculars. */
+  nakedEye?: boolean
 }
 
 /**
@@ -159,6 +208,7 @@ export class PoherAnswers {
         : speed > 10 ? "AngularSpeed.VeryHighStreaking" : "AngularSpeed.SlowLikePlaneAtHighAltitude", false)
     }
     if (facts.count !== undefined) add(facts.count > 1 ? "ObjectsCount.Several" : "ObjectsCount.Single")
+    if (facts.aligned) add("Formation.Line")
     if (facts.round !== undefined) add(facts.round ? "ObjectShape.Round" : "ObjectShape.Other", false)
     if (facts.colors && facts.colors.length > 0) {
       const color = facts.colors.length > 1 ? "Color.MutipleLights" : PoherAnswers.colorClass(facts.colors[0])
@@ -167,10 +217,11 @@ export class PoherAnswers {
     if (facts.brightness !== undefined && facts.brightness >= 0.5) add("Luminosity.Intense", false)
     if (facts.observers !== undefined) add(facts.observers > 1 ? "IndependentWitnessesCount.Several" : "IndependentWitnessesCount.Single", this.conditions?.independent !== false)
     if (facts.sound) add("Noise.Perceived")
+    if (facts.nakedEye) add("Detection.NakedEye")
     return answers
   }
 
-  /** White, or red to orange, by its hue: what Poher's colour classes ask; neither for another colour, which they do not. */
+  /** White, red to orange, or green to blue-green, by its hue: what the colour classes ask (green being RR0's); none for another colour. */
   private static colorClass(color: string): string | undefined {
     const match = /^#([0-9a-f]{6})$/i.exec(color)
     if (!match) return undefined
@@ -179,6 +230,7 @@ export class PoherAnswers {
     const max = Math.max(r, g, b)
     const min = Math.min(r, g, b)
     if (max - min < 40) return "Color.White"
-    return r === max && g < r * 0.85 && b < r * 0.6 ? "Color.RedOrange" : undefined
+    if (r === max && g < r * 0.85 && b < r * 0.6) return "Color.RedOrange"
+    return g === max && r < g * 0.7 ? "Color.Green" : undefined
   }
 }

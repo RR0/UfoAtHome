@@ -111,6 +111,43 @@ describe("CandidatesView with the Poher matrix", () => {
   })
 })
 
+describe("CandidatesView with a version of the matrix", () => {
+  it("reads RR0's version unless the reader chooses Poher's own, and says what RR0 adds and why it rules a phenomenon out", async () => {
+    localStorage.clear()
+    const extended = new PoherMatrix([
+      { question: "Hour.Night", knownPhenomenaProbabilities: { Planets: 1, Helicopters: 0.5, SkyLantern: 1, Sun: 0 } },
+      { question: "Hour.Day", knownPhenomenaProbabilities: { Planets: 0, Helicopters: 1, SkyLantern: 0.1, Sun: 1 } }
+    ], {
+      version: "2026-10-25", author: "RR0", sources: {},
+      phenomena: { SkyLantern: { analogue: "WeatherBalloonsOrMongolfieres", summary: "", sources: [] } },
+      cells: { SkyLantern: { "Hour.Night": { why: "Lit by its flame.", sources: [] } } }
+    })
+    const read: string[] = []
+    const { view, section } = make({ azimuthDeg: venus.azimuthDeg - 20, altitudeDeg: venus.altitudeDeg * 1.5 }, {
+      poher: (version: string) => {
+        read.push(version)
+        return Promise.resolve({ matrix: version === "rr0-2026" ? extended : matrix, labels: { ...labels, SkyLantern: "sky lantern" } })
+      }
+    })
+    view.refresh()
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(read).toEqual(["rr0-2026"])
+    const block = () => section.querySelector(".poher-block")!
+    expect(block().querySelector("h4")!.textContent).toBe("From the matrix of Poher extended by RR0 (2026)")
+    const lantern = [...block().querySelectorAll("li")].find(li => li.textContent!.includes("sky lantern"))!
+    expect(lantern.textContent).toContain("added by RR0")
+    const select = section.querySelector<HTMLSelectElement>(".poher-version select")!
+    select.value = "poher-1977"
+    select.dispatchEvent(new Event("change"))
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(read).toEqual(["rr0-2026", "poher-1977"])
+    expect(block().querySelector("h4")!.textContent).toBe("From the matrix of Poher (1977)")
+    expect(block().textContent).not.toContain("sky lantern")
+    expect(localStorage.getItem("ufoathome.poherMatrixVersion")).toBe("poher-1977")
+    localStorage.clear()
+  })
+})
+
 describe("CandidatesView with re-entries and aircraft", () => {
   it("follows a re-entry and an aircraft of the record as candidates, each as the phenomenon of the matrix it is", async () => {
     // A re-entry crossing high over Paris from west to east during the first minute, and an airliner 20 km east at 3,000 ft.

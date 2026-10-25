@@ -6431,9 +6431,10 @@ export class SightingEditorElement extends HTMLElement {
       limitAt: sunAltitudeDeg => visibleMagnitudeLimit(sunAltitudeDeg, this.instrumentGain()),
       fieldLabels: () => ({ time: label(start), heading: label(this.headingInput), size: label(this.apparentWidthInput), duration: label(this.durationInput) }),
       sceneCard: () => this.shadow.querySelector<HTMLElement>(".scene-card")!,
-      poher: () => {
-        // Its labels are the reader's language's: read again when that changes.
-        if (this.poherMatrix?.language !== this.language) this.poherMatrix = { language: this.language, loaded: PoherMatrix.load(this.language, url => SightingFetch.json(url)) }
+      poher: version => {
+        // Its labels are the reader's language's: read again when that changes, or when the reader chooses another version.
+        const key = `${version}/${this.language}`
+        if (this.poherMatrix?.key !== key) this.poherMatrix = { key, loaded: PoherMatrix.load(version, this.language, url => SightingFetch.json(url)) }
         return this.poherMatrix.loaded
       },
       facts: () => this.poherFacts(),
@@ -6473,8 +6474,8 @@ export class SightingEditorElement extends HTMLElement {
     this.scheduleHistoryRecord()
   }
 
-  /** Poher's matrix as rr0.org publishes it, read once (see PoherMatrix.load). */
-  private poherMatrix?: { language: string, loaded: ReturnType<typeof PoherMatrix.load> }
+  /** The version of Poher's matrix as rr0.org publishes it, read once in a language (see PoherMatrix.load). */
+  private poherMatrix?: { key: string, loaded: ReturnType<typeof PoherMatrix.load> }
 
   /**
    * What the recording says that Poher's matrix asks about (see PoherFacts): the Sun at the start, the duration, the weather when it is
@@ -6532,10 +6533,21 @@ export class SightingEditorElement extends HTMLElement {
     // A group of shapes is one phenomenon drawn in parts.
     const counted = new Set(timeline.sourceIds.map(id => timeline.groupMembers(id)?.[0] ?? id))
     if (counted.size > 0) facts.count = counted.size
+    // In a row: three or more where they first stand, none further from the line between the two furthest apart than a tenth of it.
+    const aims = [...counted].map(id => timeline.getInterpolatedShapeAt(0, id)?.aim).filter(aim => aim !== undefined)
+    if (aims.length >= 3) {
+      const toRad = Math.PI / 180
+      const points = aims.map(aim => ({ x: (((aim.azimuthDeg - aims[0].azimuthDeg) % 360 + 540) % 360 - 180) * Math.cos(aim.altitudeDeg * toRad), y: aim.altitudeDeg }))
+      let [a, b] = [points[0], points[1]]
+      for (const p of points) for (const q of points) if (Math.hypot(p.x - q.x, p.y - q.y) > Math.hypot(a.x - b.x, a.y - b.y)) [a, b] = [p, q]
+      const span = Math.hypot(a.x - b.x, a.y - b.y)
+      facts.aligned = span > 0 && points.every(p => Math.abs((b.x - a.x) * (a.y - p.y) - (a.x - p.x) * (b.y - a.y)) / span <= Math.max(0.5, span * 0.1))
+    }
     // One colour a phenomenon: the parts of one drawn in several colours are not several lights.
     const colors = new Set([...counted].map(id => timeline.getInterpolatedShapeAt(0, id)?.color).filter((color): color is string => color !== undefined))
     if (colors.size > 0) facts.colors = [...colors]
     facts.observers = sighting.observerCount
+    if (sighting.instrument.category === "eye") facts.nakedEye = true
     if (sighting.soundTrack.allKeyframes.some(keyframe => keyframe.sound.kind !== "none")) facts.sound = true
     return facts
   }

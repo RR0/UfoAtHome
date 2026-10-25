@@ -88,8 +88,18 @@ export interface WitnessErrorMessages {
     star: string
     poherLoading: string
     poherFailed: string
+    /** The title of the matrix's other phenomena ({version}: the version read, as poherVersions names it). */
     poherTitle: string
     poherIntro: string
+    /** The intro when the version read is RR0's, whose scores are Poher's or its own, with their reasons. */
+    poherIntroRr0: string
+    /** The label of the choice of the version read. */
+    poherVersion: string
+    poherVersions: Record<"poher-1977" | "rr0-2026", string>
+    /** Beside a phenomenon the version read adds to Poher's. */
+    poherAdded: string
+    /** The reason of a score of RR0's that rules a phenomenon out ({why}). */
+    poherRr0Reason: string
     poherPossible: string
     poherExcluded: string
     poherExcludedBy: string
