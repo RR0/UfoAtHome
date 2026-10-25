@@ -1,6 +1,7 @@
 import type { DecorModelRef } from "../model/Decor.js"
 import type { People } from "../model/People.js"
 import type { SaidText } from "../model/SaidText.js"
+import type { FlareSalvoJson } from "./DecoyFlare.js"
 
 /**
  * What somebody believes was there: bodies in metres, standing in the world, that a account's
@@ -29,6 +30,8 @@ export interface InterpretationJson {
   bodies: BodyJson[]
   /** Fires the interpretation lights on the ground, as their smoke — see SmokeSource. */
   smoke?: SmokeSource[]
+  /** Salvoes of decoy flares an aircraft dispensed, computed into bodies when shown — see FlareSalvoJson. */
+  flares?: FlareSalvoJson[]
   /**
    * When this interpretation is a VARIANT of the account: what the observer would have to have erred by for the account to be a
    * misperception of a candidate, as the candidate search found it (see CandidateSearch, docs/witness-error-model.md). The account never
@@ -109,6 +112,7 @@ export interface InterpretationEventJson {
   url?: string
   bodies?: BodyJson[]
   smoke?: SmokeSource[]
+  flares?: FlareSalvoJson[]
 }
 
 /** The shapes this project builds itself. "figure" is a standing human silhouette — the decor's own

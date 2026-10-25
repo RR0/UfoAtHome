@@ -90,6 +90,7 @@ import { PhenomenonSystem } from "../render3d/PhenomenonSystem.js"
 import type { PlacedPhenomenon } from "../render3d/PhenomenonSystem.js"
 import { Vector3 } from "three"
 import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
+import { DecoyFlare } from "../engine/interpretation/DecoyFlare.js"
 import { LaunchPlumeSighting } from "../engine/interpretation/LaunchPlume.js"
 import { ReentrySighting } from "../engine/interpretation/Reentry.js"
 import type { ReentryJson } from "../engine/interpretation/Reentry.js"
@@ -1308,7 +1309,8 @@ export class SceneElement extends HTMLElement {
     this.seekPreview?.recordingChanged(json)
     // An interpretation is OF one recording: another one's bodies have nothing to stand for here.
     // What the new one starts as is its observer's own account of what it was, if they gave one.
-    this.interpretationShown = this.inTheRound ? this.ufoElement.sighting.interpretation : undefined
+    // Its salvoes of flares, if it states any, are computed into bodies here (see DecoyFlare).
+    this.interpretationShown = this.inTheRound ? DecoyFlare.expand(this.ufoElement.sighting.interpretation) : undefined
     this.syncAccountHidden()
     // A loaded recording may have been made through something with a format of its own.
     this.applyFrameFormat()
@@ -2678,7 +2680,7 @@ export class SceneElement extends HTMLElement {
   }
 
   set interpretation(interpretation: InterpretationJson | undefined) {
-    this.interpretationShown = interpretation
+    this.interpretationShown = DecoyFlare.expand(interpretation)
     // What is played is then the interpretation, and is called so.
     this.ufoElement.playerTitle = interpretation?.title
     this.syncAccountHidden()
