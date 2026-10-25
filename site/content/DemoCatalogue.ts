@@ -91,10 +91,10 @@ export class DemoCatalogue {
       section: "sightings",
       heading: { en: "Real sightings", fr: "Des observations réelles", es: "Avistamientos reales", it: "Avvistamenti reali" },
       intro: {
-        en: "Twelve documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Douze dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
-        es: "Doce casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
-        it: "Dodici casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
+        en: "Fourteen documented cases, each replayed in the sky of its own reported date, time and place.",
+        fr: "Quatorze dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
+        es: "Catorce casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
+        it: "Quattordici casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
       },
       demos: [
         {
@@ -269,6 +269,20 @@ export class DemoCatalogue {
             fr: "Un A320 d'Air France à 11 700 m près de Coulommiers, 13 h 14, au-dessus d'une couche d'altocumulus. Un disque brun-rouge sombre reste immobile en dessous et à gauche, est laissé derrière en deux minutes, puis devient transparent et disparaît. Ouvrez-le en grand pour passer à la copilote, qui l'a vu suivre l'avion et changer de forme.",
             es: "Un A320 de Air France a 11.700 m cerca de Coulommiers, 13:14, sobre una capa de altocúmulos. Un disco pardo rojizo oscuro permanece inmóvil por debajo y a la izquierda, queda atrás en dos minutos, luego se vuelve transparente y desaparece. Ábrelo a tamaño completo para pasar a la copiloto, que lo vio seguir al avión y cambiar de forma.",
             it: "Un A320 Air France a 11.700 m vicino a Coulommiers, 13:14, sopra uno strato di altocumuli. Un disco bruno-rosso scuro resta immobile sotto e a sinistra, viene lasciato indietro in due minuti, poi diventa trasparente e scompare. Aprilo a schermo intero per passare alla copilota, che lo vide tenere il passo dell'aereo e cambiare forma."
+          }
+        },
+        {
+          id: "western-us-event",
+          src: "/demo-data/observer-western-us-event-w3-1.json",
+          // The case, for the player: five federal agents over two evenings and a dawn, and every reading tested against them.
+          playSrc: "/demo-data/case-western-us-event.json",
+          title: { en: "Western US Event, 2023", fr: "Western US Event, 2023", es: "Western US Event, 2023", it: "Western US Event, 2023" },
+          titleIsName: true,
+          blurb: {
+            en: "Dusk in a Nevada valley, 19:00. An orange orb comes on from the east, turns clear and orange in turn, and expels three small red orbs that head south. The case the FBI recreated in two videos, rebuilt here in 3D for all five agents, with the readings tested against them: AARO's decoy flares, an illumination flare, a drone, obstruction lights, gossamer. Open it full size to switch observer and reading.",
+            fr: "Crépuscule dans une vallée du Nevada, 19:00. Une orbe orange arrive de l'est, tour à tour transparente et orange, et expulse trois petites orbes rouges qui partent vers le sud. Le cas que le FBI a reconstitué en deux vidéos, refait ici en 3D pour les cinq agents, avec les lectures confrontées à leurs récits : leurres de l'AARO, fusée éclairante, drone, feux d'obstacle, fils de la Vierge. Ouvrez-le en grand pour changer d'observateur et de lecture.",
+            es: "Anochecer en un valle de Nevada, 19:00. Un orbe naranja llega del este, alternando transparente y naranja, y expulsa tres pequeños orbes rojos que se van hacia el sur. El caso que el FBI recreó en dos vídeos, reconstruido aquí en 3D para los cinco agentes, con las lecturas confrontadas a sus relatos: señuelos de la AARO, bengala de iluminación, dron, luces de obstáculo, hilos de araña. Ábrelo a tamaño completo para cambiar de observador y de lectura.",
+            it: "Crepuscolo in una valle del Nevada, 19:00. Una sfera arancione arriva da est, alternando trasparente e arancione, ed espelle tre piccole sfere rosse che vanno verso sud. Il caso che l'FBI ha ricostruito in due video, rifatto qui in 3D per i cinque agenti, con le letture confrontate ai loro resoconti: esche dell'AARO, razzo illuminante, drone, luci di ostacolo, fili di ragno. Aprilo a schermo intero per cambiare osservatore e lettura."
           }
         }
       ]
