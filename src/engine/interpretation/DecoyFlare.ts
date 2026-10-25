@@ -48,6 +48,28 @@ export interface FlareAircraft {
   /** Drawn when given (a catalogue model or a primitive), dark and unlit as a fighter in an exercise often is. */
   model?: DecorModelRef
   sizeM?: BodySize
+  /** A light it gives off as it flies — its afterburner — which an observer may have taken for a phenomenon of its own. */
+  glow?: AircraftGlow
+}
+
+/**
+ * The light of the aircraft itself, seen as a ball: an afterburner's plume at night is the one thing of a fighter an observer sees from
+ * kilometres away. Lit and put out in turn when `onS` and `offS` say so (a pilot modulating it, or the plume turning away), from `fromT` to
+ * `untilT`.
+ */
+export interface AircraftGlow {
+  /** The phenomena of the account it claims to be — see BodyJson.explains. */
+  explains?: string[]
+  /** How wide it looks, m. */
+  sizeM: number
+  luminousIntensityCd: number
+  color: string
+  /** Ms of the recording. */
+  fromT: number
+  untilT: number
+  /** Seconds lit, then seconds out, repeated from `fromT`; always lit when absent. */
+  onS?: number
+  offS?: number
 }
 
 /** One flare leaving the aircraft. */
@@ -142,6 +164,7 @@ export class DecoyFlare {
       }
       bodies.push({ id: `${salvo.id}-aircraft`, title: salvo.title, model: aircraft.model, track: [at(from), at(to)] })
     }
+    if (aircraft.glow) bodies.push(DecoyFlare.glowBody(salvo, aircraft.glow))
     salvo.releases.forEach((release, index) => bodies.push(DecoyFlare.flareBody(salvo, type, release, index)))
     return bodies
   }
@@ -196,6 +219,32 @@ export class DecoyFlare {
       if (i % perSample === 0 || i === steps) samples.push({ t: releaseT + Math.round(s * 1000), x: state.x, y: state.y, z: state.z })
     }
     return samples
+  }
+
+  /** The aircraft's own light as a body: a glowing sphere on its straight path, lit and put out in turn. */
+  private static glowBody(salvo: FlareSalvoJson, glow: AircraftGlow): BodyJson {
+    const radius = glow.sizeM / 2, full = glow.luminousIntensityCd / (Math.PI * radius * radius)
+    // Every switch is two keyframes a millisecond apart (see BodyKeyframe.lights): the light does not fade from one state to the other.
+    const switches: { t: number, lit: boolean }[] = [{ t: glow.fromT, lit: true }]
+    if (glow.onS && glow.offS) {
+      for (let t = glow.fromT, lit = true; t < glow.untilT; lit = !lit) {
+        t += (lit ? glow.onS : glow.offS) * 1000
+        if (t < glow.untilT) switches.push({ t, lit: !lit })
+      }
+    }
+    const key = (t: number, lit: boolean): BodyKeyframe => {
+      const p = DecoyFlare.aircraftAt(salvo.aircraft, t)
+      return { t, eastM: p.x, northM: p.y, altitudeM: p.z, appearance: { color: glow.color, luminanceCdM2: lit ? full : 0 } }
+    }
+    const track: BodyKeyframe[] = []
+    switches.forEach(({ t, lit }, i) => {
+      if (i > 0) track.push(key(t - 1, !lit))
+      track.push(key(t, lit))
+    })
+    track[0] = { ...track[0], sizeM: { widthM: glow.sizeM, lengthM: glow.sizeM, heightM: glow.sizeM }, present: true }
+    const last = switches[switches.length - 1]
+    track.push(key(glow.untilT, last.lit), { t: glow.untilT + 1, present: false })
+    return { id: `${salvo.id}-glow`, title: salvo.title, explains: glow.explains, model: { id: "sphere" }, track }
   }
 
   /** One flare as a body: a glowing sphere along its computed path, gone once burnt out. */

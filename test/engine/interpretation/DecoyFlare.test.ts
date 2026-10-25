@@ -74,6 +74,22 @@ describe("DecoyFlare", () => {
     expect(withFlares.bodies.length).toBe(3)
   })
 
+  test("the aircraft's own light follows it, lit and put out in turn, and goes when it is said to", () => {
+    const glow = { explains: ["orange"], sizeM: 3, luminousIntensityCd: 50000, color: "#ff9a3a", fromT: 0, untilT: 6000, onS: 2.5, offS: 2.5 }
+    const bodies = DecoyFlare.bodiesOf({ ...salvo(), aircraft: { ...salvo().aircraft, glow } })
+    const light = bodies[0]
+    expect(light.id).toBe("salvo-glow")
+    expect(light.explains).toEqual(["orange"])
+    const lum = (t: number) => [...light.track].reverse().find(key => key.t <= t && key.appearance)?.appearance?.luminanceCdM2
+    expect(lum(1000)).toBeGreaterThan(0)
+    expect(lum(3000)).toBe(0)
+    expect(lum(5500)).toBeGreaterThan(0)
+    // It moves with the aircraft: at 2 s it is where the aircraft is.
+    const at2 = light.track.find(key => key.t === 2500)!
+    expect(at2.northM).toBeCloseTo(DecoyFlare.aircraftAt(salvo().aircraft, 2500).y, 6)
+    expect(light.track[light.track.length - 1]).toEqual({ t: 6001, present: false })
+  })
+
   test("a drawn aircraft comes first, on its own straight track", () => {
     const bodies = DecoyFlare.bodiesOf({ ...salvo(), aircraft: { ...salvo().aircraft, model: { id: "box" }, sizeM: { widthM: 10, lengthM: 15, heightM: 5 } } })
     expect(bodies[0].id).toBe("salvo-aircraft")
