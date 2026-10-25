@@ -18,6 +18,7 @@ import type { Basis } from "../engine/persistence/Provenance.js"
 import type { People } from "../engine/model/People.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
+import type { SaidText } from "../engine/model/SaidText.js"
 import { SightingTags } from "./messages/TagNames.js"
 import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
 import { loadSceneNames, loadSightingMessages, loadTagNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
@@ -539,14 +540,17 @@ export class SightingElement extends HTMLElement {
     this.observerSelect.hidden = !showSelect
     this.observerText.hidden = showSelect
     this.observerSelect.innerHTML = ""
-    for (const entry of entries) {
+    // Never the URL: a recording that names nobody is listed by its place in the list, which at
+    // least says what it is. `/demo-data/sky-test-halos.json` as a observer's name said nothing
+    // and looked like a fault.
+    const names = entries.map((entry, index) => this.observerDisplayName(this.plain(entry).observer)
+      ?? this.messages.unnamedObserver.replace("{n}", String(index + 1)))
+    for (const [index, entry] of entries.entries()) {
       const option = document.createElement("option")
       option.value = entry.src
-      // Never the URL: a recording that names nobody is listed by its place in the list, which at
-      // least says what it is. `/demo-data/sky-test-halos.json` as a observer's name said nothing
-      // and looked like a fault.
-      option.textContent = this.observerDisplayName(this.plain(entry).observer)
-        ?? this.messages.unnamedObserver.replace("{n}", String(entries.indexOf(entry) + 1))
+      // One observer who saw several things has several recordings: each is then told by what the case calls it.
+      const shared = names.filter(name => name === names[index]).length > 1
+      option.textContent = (shared ? this.caseTitleOf(entry) : undefined) ?? names[index]
       this.observerSelect.appendChild(option)
     }
 
@@ -1088,6 +1092,15 @@ export class SightingElement extends HTMLElement {
    * last-resort, machine-oriented fallback — better than nothing, not meant to be end-user
    * copy. Returns undefined (letting the caller fall back to entry.src) only when observer itself
    * is undefined or empty. */
+  /** What the case calls the event whose recording `entry` is, when it is read from a case that names it. */
+  private caseTitleOf(entry: ObserverEntry): string | undefined {
+    const source = this.caseSource
+    if (!source) return undefined
+    const event = source.json.events?.find(candidate => candidate.url !== undefined && !candidate.interpretationOf
+      && new URL(candidate.url, source.url).href === new URL(entry.src, location.href).href)
+    return event ? this.said.read(event.title as SaidText | undefined) : undefined
+  }
+
   private observerDisplayName(observer?: People): string | undefined {
     if (!observer) return undefined
     const fullName = [...(observer.firstNames ?? []), observer.lastName].filter(Boolean).join(" ")
