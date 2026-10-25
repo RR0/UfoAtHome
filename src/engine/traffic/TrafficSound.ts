@@ -3,7 +3,7 @@ import { ReentrySighting } from "../interpretation/Reentry.js"
 import { AircraftModels } from "./AircraftModels.js"
 import type { AircraftKind } from "./AircraftModels.js"
 import { AircraftHearing } from "./AircraftHearing.js"
-import type { AircraftHearingOptions, AircraftSoundCharacter } from "./AircraftHearing.js"
+import type { AircraftHearingOptions, AircraftNoise, AircraftSoundCharacter } from "./AircraftHearing.js"
 import type { AircraftDescription, AircraftTrack } from "./AircraftProvider.js"
 import { SoundInAir } from "./SoundInAir.js"
 
@@ -34,6 +34,8 @@ export interface TrafficSoundOptions extends AircraftHearingOptions {
    * after it has left the record, since it left the aircraft long before.
    */
   only?: (id: string) => boolean
+  /** The noise an id makes, when something other than its kind says it (a body claimed to be quieter than its class: see BodySound). */
+  noiseOf?: (id: string) => AircraftNoise | undefined
   /** What sort of machine an id is, when something other than a record's description knows (a decor aircraft's own sound). */
   kindOf?: (id: string) => AircraftKind | undefined
   /** The amplitude a sound at the ambient noise's own level is played at: see AmbientNoise.referenceAmplitude. */
@@ -97,7 +99,7 @@ export class TrafficSound {
       const flight = flights.get(id)
       if (!flight || options.only?.(id) === false) continue
       const kind = options.kindOf?.(id) ?? AircraftModels.of(descriptions.get(key(flight))).kind
-      const noise = AircraftHearing.noiseOfKind(kind)
+      const noise = options.noiseOf?.(id) ?? AircraftHearing.noiseOfKind(kind)
       const heard = AircraftHearing.heardAt(flight, observer, t, { ...options, noise })
       if (!heard?.audible) continue
       voices.push({

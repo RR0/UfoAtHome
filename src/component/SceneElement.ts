@@ -462,6 +462,8 @@ export class SceneElement extends HTMLElement {
   private readonly vehicleHearing = new VehicleHearing()
   /** The aircraft the recording places in its decor, heard like those of a record — see DecorAircraftHearing. */
   private decorAircraftHearing?: InstanceType<TrafficRuntime["DecorAircraftHearing"]>
+  /** The bodies of the interpretation on show, heard — see BodyHearing. */
+  private bodyHearing?: InstanceType<TrafficRuntime["BodyHearing"]>
   /** What each catalogue model says of the noise it makes in flight, once the catalogue has been asked. */
   private readonly decorModelSounds = new Map<string, AircraftKind | "silent" | undefined>()
 
@@ -2187,6 +2189,7 @@ export class SceneElement extends HTMLElement {
    */
   private pushAircraftSound(sighting: Sighting, t: number): void {
     this.startDecorAircraftSound(sighting)
+    this.startBodySound()
     const audio = this.aircraftAudio
     if (!audio) return
     const runtime = SceneElement.trafficRuntime
@@ -2205,10 +2208,39 @@ export class SceneElement extends HTMLElement {
       this.decorAircraftHearing ??= new runtime.DecorAircraftHearing()
       voices.push(...this.decorAircraftHearing.voices(sighting, t, { lat: here.lat, lng: here.lng, heightM: pose?.elevationM ?? 0 }, options,
         decor => this.decorModelSounds.get(decor.model?.id ?? "")))
+      voices.push(...this.bodyVoices(sighting, t, options, runtime))
       voices.sort((a, b) => b.levelDbA - a.levelDbA)
       voices.length = Math.min(voices.length, 4)
     }
     audio.setVoices(voices, pose?.headingDeg ?? 0)
+  }
+
+  /** Readies the sound player when the interpretation on show has a body that makes a sound (see BodyHearing). */
+  private startBodySound(): void {
+    if (this.aircraftAudio || !this.interpretationShown?.bodies.some(body => body.sound)) return
+    if (SceneElement.trafficRuntime) this.aircraftAudio = this.newAircraftAudio(SceneElement.trafficRuntime)
+    else void SceneElement.loadTrafficRuntime().catch(() => undefined)
+  }
+
+  /** The bodies of the interpretation on show that are heard at `t`: where each stands over the recording, heard from where the ear is now. */
+  private bodyVoices(sighting: Sighting, t: number, options: { ambientDbA: number, referenceAmplitude: number }, runtime: TrafficRuntime): ReturnType<TrafficRuntime["TrafficSound"]["voices"]> {
+    const interpretation = this.interpretationShown
+    const origin = sighting.event.place?.[0]
+    if (!interpretation || !origin || !interpretation.bodies.some(body => body.sound)) return []
+    const ground = this.sceneRenderer.bodyGround
+    const eyeAt = (at: number) => BodyPlacement.eyeOf(sighting, at, ground)
+    const eye = eyeAt(t)
+    if (!eye) return []
+    // Placed only when a body's journey is worked out, which is once per reading (see BodyHearing.trackOf).
+    const placements = new Map<string, BodyPlacement>()
+    const positionAt = (body: BodyJson, at: number) => {
+      let placement = placements.get(body.id)
+      if (!placement) placements.set(body.id, placement = new BodyPlacement(body, ground, eyeAt))
+      return placement.at(at)
+    }
+    this.bodyHearing ??= new runtime.BodyHearing()
+    const spanMs = Math.max(sighting.observerTrack.duration, (sighting.event.durationSeconds ?? 0) * 1000)
+    return this.bodyHearing.voices(interpretation.bodies, positionAt, eye, origin, t, spanMs, options)
   }
 
   /** The aircraft of the record of air traffic that are heard at `t`, if there are any to be. */

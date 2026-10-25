@@ -1,6 +1,6 @@
 import type { DecorModelRef } from "../model/Decor.js"
 import type { SaidText } from "../model/SaidText.js"
-import type { BodyJson, BodyKeyframe, BodySize, InterpretationJson } from "./Interpretation.js"
+import type { BodyJson, BodyKeyframe, BodySize, BodySound, InterpretationJson } from "./Interpretation.js"
 
 /**
  * A salvo of infrared decoy flares an interpretation claims was what the observer saw: a military
@@ -50,6 +50,8 @@ export interface FlareAircraft {
   sizeM?: BodySize
   /** A light it gives off as it flies — its afterburner — which an observer may have taken for a phenomenon of its own. */
   glow?: AircraftGlow
+  /** What it sounds like (see BodySound): heard from the two minutes before the recording on, as its sound takes that long to come from afar. */
+  sound?: BodySound
 }
 
 /**
@@ -155,14 +157,17 @@ export class DecoyFlare {
     const type: FlareType = { ...DecoyFlare.MJU_7, ...salvo.flare }
     const bodies: BodyJson[] = []
     const aircraft = salvo.aircraft
-    if (aircraft.model) {
+    if (aircraft.model || aircraft.sound) {
       const times = salvo.releases.map(release => release.t)
-      const from = Math.min(aircraft.t, ...times) - 5000, to = Math.max(aircraft.t, ...times) + 5000
+      // Long enough either side to be heard coming and going: its sound takes half a minute to cross ten kilometres.
+      const from = Math.min(aircraft.t, ...times) - 120000, to = Math.max(aircraft.t, ...times) + 120000
+      // One that is only heard is drawn as nothing at all.
+      const appearance = aircraft.model ? { color: "#30333a", albedo: 0.15 } : { transparency: 1 }
       const at = (t: number): BodyKeyframe => {
         const p = DecoyFlare.aircraftAt(aircraft, t)
-        return { t, eastM: p.x, northM: p.y, altitudeM: p.z, attitude: { headingDeg: aircraft.headingDeg }, sizeM: aircraft.sizeM, appearance: { color: "#30333a", albedo: 0.15 } }
+        return { t, eastM: p.x, northM: p.y, altitudeM: p.z, attitude: { headingDeg: aircraft.headingDeg }, sizeM: aircraft.sizeM ?? { widthM: 1, lengthM: 1, heightM: 1 }, appearance }
       }
-      bodies.push({ id: `${salvo.id}-aircraft`, title: salvo.title, model: aircraft.model, track: [at(from), at(to)] })
+      bodies.push({ id: `${salvo.id}-aircraft`, title: salvo.title, model: aircraft.model ?? { id: "sphere" }, track: [at(from), at(to)], sound: aircraft.sound })
     }
     if (aircraft.glow) bodies.push(DecoyFlare.glowBody(salvo, aircraft.glow))
     salvo.releases.forEach((release, index) => bodies.push(DecoyFlare.flareBody(salvo, type, release, index)))

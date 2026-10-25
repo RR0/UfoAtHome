@@ -2,6 +2,7 @@ import type { DecorModelRef } from "../model/Decor.js"
 import type { People } from "../model/People.js"
 import type { SaidText } from "../model/SaidText.js"
 import type { FlareSalvoJson } from "./DecoyFlare.js"
+import type { AircraftKind } from "../traffic/AircraftModels.js"
 
 /**
  * What somebody believes was there: bodies in metres, standing in the world, that a account's
@@ -158,6 +159,21 @@ export interface BodyJson {
    */
   outlineNode?: string
   track: BodyKeyframe[]
+  /**
+   * What it sounds like: heard from where the observer stands, late by the time sound takes to come, shifted in pitch as it comes and goes, and
+   * masked by the noise of the place (see BodyHearing). Silent when absent: nothing here is a default, and a body is a claim.
+   */
+  sound?: BodySound
+}
+
+/**
+ * The noise a body makes, as a class of aircraft makes it (see AircraftHearing's classes), and how much quieter the interpretation claims it
+ * was than any machine of that class: what a hypothesis of an unknown, quieter machine has to state for its silence to be weighed.
+ */
+export interface BodySound {
+  kind: AircraftKind
+  /** Decibels less than the class's own sound power, across its spectrum. 0 when absent. */
+  quieterDb?: number
 }
 
 /**
