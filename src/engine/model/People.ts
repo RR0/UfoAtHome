@@ -13,11 +13,15 @@
  * Every field is independently optional. No field takes precedence over another; this type doesn't
  * enforce "exactly one of" anything.
  */
+import type { SaidText } from "./SaidText.js"
+
 export interface People {
   /** Who this is, as a reference: last name then first names, run together ("ZamoraLonnie"),
    * whether or not a page exists for them yet. */
   id?: string
-  title?: string
+  /** What the observer is called when no name is given or wanted — "Witness 2" in one language, "Témoin 2" in another — or their name as they
+   * gave it. In each of the account's languages when it is a designation (see SaidText); a plain string is the same in all of them. */
+  title?: SaidText
   lastName?: string
   firstNames?: string[]
 }

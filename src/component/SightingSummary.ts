@@ -251,7 +251,7 @@ export class SightingSummary {
   private addObserver(entries: SummaryEntry[], sighting: Sighting, timeMs: number): void {
     const observer = sighting.observer
     this.push(entries, "observer", "observerId", this.labels.observerId, observer?.id)
-    this.push(entries, "observer", "observerTitle", this.labels.observerTitle, observer?.title)
+    this.push(entries, "observer", "observerTitle", this.labels.observerTitle, this.said.read(observer?.title))
     this.push(entries, "observer", "observerLastName", this.labels.observerLastName, observer?.lastName)
     const firstNames = observer?.firstNames
     this.push(entries, "observer", "observerFirstNames", this.labels.observerFirstNames,

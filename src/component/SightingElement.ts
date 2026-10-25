@@ -1104,7 +1104,7 @@ export class SightingElement extends HTMLElement {
   private observerDisplayName(observer?: People): string | undefined {
     if (!observer) return undefined
     const fullName = [...(observer.firstNames ?? []), observer.lastName].filter(Boolean).join(" ")
-    return observer.title || fullName || observer.id
+    return this.said.read(observer.title) || fullName || observer.id
   }
 
   /**

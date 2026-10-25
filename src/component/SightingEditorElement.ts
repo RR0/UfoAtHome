@@ -4018,7 +4018,8 @@ export class SightingEditorElement extends HTMLElement {
       .filter(name => name.length > 0)
     const observer: People = {
       id: this.stringOrUndefined(this.observerIdInput.value),
-      title: this.stringOrUndefined(this.observerTitleInput.value),
+      // In the language being written, the others kept, as the occupation is (see SaidTexts.write).
+      title: this.observerTitleInput.value.trim() === "" ? undefined : this.said.write(sighting.observer?.title, this.observerTitleInput.value.trim(), this.writingLanguage),
       lastName: this.stringOrUndefined(this.observerLastNameInput.value),
       firstNames: firstNames.length > 0 ? firstNames : undefined
     }
@@ -5750,7 +5751,7 @@ export class SightingEditorElement extends HTMLElement {
     this.witnessErrorView?.refresh()
     const sighting = this.ufoElement.sighting
     this.observerIdInput.value = sighting.observer?.id ?? ""
-    this.observerTitleInput.value = sighting.observer?.title ?? ""
+    this.observerTitleInput.value = this.said.read(sighting.observer?.title) ?? ""
     this.observerLastNameInput.value = sighting.observer?.lastName ?? ""
     this.observerFirstNamesInput.value = sighting.observer?.firstNames?.join(", ") ?? ""
     this.observerList.rename(SightingEditorElement.OBSERVER_PRINCIPAL, this.principalObserverLabel())
