@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from "node:fs"
 import { resolve } from "node:path"
 import { describe, expect, it } from "vitest"
-import { PoherMatrix } from "../../../src/engine/witness/PoherMatrix.js"
-import type { PoherMatrixEntry, PoherReasons } from "../../../src/engine/witness/PoherMatrix.js"
+import { PoherMatrix } from "../../src/engine/witness/PoherMatrix.js"
+import type { PoherMatrixEntry, PoherReasons } from "../../src/engine/witness/PoherMatrix.js"
 
 /** The versions as rr0.org holds them, beside this repository: checked when it is there. */
 const RR0 = resolve(process.cwd(), "../rr0.org")
