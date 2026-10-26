@@ -148,28 +148,32 @@ export class BeamSystem {
     const length = Math.hypot(along.x, along.y, along.z)
     if (length < 1e-6) return vertex
     const direction = { x: along.x / length, y: along.y / length, z: along.z / length }
-    const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, z: (a.z + b.z) / 2 }
-    const toEye = { x: frame.eye.x - mid.x, y: frame.eye.y - mid.y, z: frame.eye.z - mid.z }
-    const distance = Math.hypot(toEye.x, toEye.y, toEye.z)
-    if (distance < 1e-3) return vertex
-    // The angle the light has to turn by, from the way the beam goes to the way to the eye.
-    const cosTurn = (direction.x * toEye.x + direction.y * toEye.y + direction.z * toEye.z) / distance
-    const sinTurn = Math.sqrt(Math.max(0, 1 - cosTurn * cosTurn))
-    const coefficients = LaserBeamSighting.coefficientsAt(frame.air, wavelengthNm, (a.altitudeM + b.altitudeM) / 2)
-    const scattered = LaserBeamSighting.phasedScattering(coefficients, cosTurn)
-    const through = frame.transmittanceTo(mid.x, mid.y, mid.z)
+    if (Math.hypot((a.x + b.x) / 2 - frame.eye.x, (a.y + b.y) / 2 - frame.eye.y, (a.z + b.z) / 2 - frame.eye.z) < 1e-3) return vertex
+    // What the air at each end scatters of the beam towards the eye, and what of that reaches the eye: worked out at the ends and not at the
+    // middle, so that the next stretch starts from the same light and a beam brightens and fades along its length smoothly, not stretch by stretch.
+    const lightAt = (point: Placed) => {
+      const toEye = { x: frame.eye.x - point.x, y: frame.eye.y - point.y, z: frame.eye.z - point.z }
+      const distance = Math.hypot(toEye.x, toEye.y, toEye.z) || 1e-3
+      // The angle the light has to turn by, from the way the beam goes to the way to the eye.
+      const cosTurn = (direction.x * toEye.x + direction.y * toEye.y + direction.z * toEye.z) / distance
+      const sinTurn = Math.sqrt(Math.max(0, 1 - cosTurn * cosTurn))
+      const scattered = LaserBeamSighting.phasedScattering(LaserBeamSighting.coefficientsAt(frame.air, wavelengthNm, point.altitudeM), cosTurn)
+      return { sinTurn, scattered, through: frame.transmittanceTo(point.x, point.y, point.z) }
+    }
     const minShownAt = (point: Placed): number => BeamSystem.MIN_PIXELS * frame.pixelRad * Math.hypot(point.x - frame.eye.x, point.y - frame.eye.y, point.z - frame.eye.z)
     const distanceTo = (point: Placed): number => Math.hypot(point.x - frame.eye.x, point.y - frame.eye.y, point.z - frame.eye.z)
     const haloWidth = (point: Placed): number => Math.max(point.widthM, BeamSystem.HALO_RAD * distanceTo(point))
     // The halo, where it is wider than the line: on a picture so coarse that it is not, its light is the line's.
     const haloShare = (point: Placed): number => haloWidth(point) > minShownAt(point) ? BeamSystem.HALO_SHARE : 0
+    const lights = new Map([a, b].map(point => [point, lightAt(point)]))
     const endOf = (point: Placed, widthM: number, share: number) => {
       const shown = Math.max(widthM, minShownAt(point))
+      const { sinTurn, scattered, through } = lights.get(point)!
       // A ribbon that fades from its middle to nothing at its edges carries half the light of a flat one as wide: its middle is twice as bright.
       const luminance = 2 * share * LaserBeamSighting.luminanceCdM2(point.powerW, wavelengthNm, scattered, shown, sinTurn)
       const level = colour.map((channel, c) => Math.min(BeamSystem.BRIGHTEST_RELATIVE, luminance * frame.relativeScale * channel * through[c])) as [number, number, number]
       const toPoint = { x: frame.eye.x - point.x, y: frame.eye.y - point.y, z: frame.eye.z - point.z }
-      const across = this.normalise(this.cross(along, toPoint))
+      const across = this.normalise(this.cross(direction, toPoint))
       return { point, half: shown / 2, level, across }
     }
     const ribbons = [
