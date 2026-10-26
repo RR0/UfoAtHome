@@ -46,11 +46,11 @@ interface Placed {
  * far below what the eye resolves, and is seen as a line as wide as its acuity, as bright as all its light shared over that.
  */
 export class BeamSystem {
-  private static readonly MAX_SEGMENTS = 6000
+  private static readonly MAX_SEGMENTS = 12000
   /** The least a ribbon is drawn across, in pixels, edge to edge (see ContrailSystem.MIN_PIXELS). */
   private static readonly MIN_PIXELS = 2
   /** Two ribbons, the line and its halo, of two strips of two triangles each. */
-  private static readonly VERTICES_PER_SEGMENT = 24
+  static readonly VERTICES_PER_SEGMENT = 24
   /**
    * How wide the halo round the beam is, radians, full angle, and the share of its light it carries: the glare of the eye or of the lens round
    * a bright line, which the photographs of the Meudon shot show as a faint glow beside it. An angle and not a width in metres, as glare is:
@@ -143,7 +143,14 @@ export class BeamSystem {
     return placed
   }
 
-  private pushSegment(vertex: number, a: Placed, b: Placed, wavelengthNm: number, colour: readonly [number, number, number], frame: BeamFrame): number {
+  /**
+   * The most the light of a stretch may change from one end to the other, as a ratio, before the stretch is cut in two: the light is drawn
+   * straight between the ends, and near the eye it changes several times over in a few metres, which drawn straight is a staircase.
+   */
+  private static readonly SMOOTH_RATIO = 1.08
+  private static readonly MAX_HALVINGS = 6
+
+  private pushSegment(vertex: number, a: Placed, b: Placed, wavelengthNm: number, colour: readonly [number, number, number], frame: BeamFrame, halvings = 0): number {
     const along = { x: b.x - a.x, y: b.y - a.y, z: b.z - a.z }
     const length = Math.hypot(along.x, along.y, along.z)
     if (length < 1e-6) return vertex
@@ -163,8 +170,13 @@ export class BeamSystem {
     const minShownAt = (point: Placed): number => BeamSystem.MIN_PIXELS * frame.pixelRad * Math.hypot(point.x - frame.eye.x, point.y - frame.eye.y, point.z - frame.eye.z)
     const distanceTo = (point: Placed): number => Math.hypot(point.x - frame.eye.x, point.y - frame.eye.y, point.z - frame.eye.z)
     const haloWidth = (point: Placed): number => Math.max(point.widthM, BeamSystem.HALO_RAD * distanceTo(point))
-    // The halo, where it is wider than the line: on a picture so coarse that it is not, its light is the line's.
-    const haloShare = (point: Placed): number => haloWidth(point) > minShownAt(point) ? BeamSystem.HALO_SHARE : 0
+    // The halo, as it gets wider than the line: on a picture so coarse that it is not, its light is the line's. It takes its share
+    // gradually, from as wide as the line to twice as wide, so that where it starts to show along a beam is not a step in its light.
+    const haloShare = (point: Placed): number => {
+      const ratio = haloWidth(point) / minShownAt(point)
+      const grown = Math.min(1, Math.max(0, ratio - 1))
+      return BeamSystem.HALO_SHARE * grown * grown * (3 - 2 * grown)
+    }
     const lights = new Map([a, b].map(point => [point, lightAt(point)]))
     const endOf = (point: Placed, widthM: number, share: number) => {
       const shown = Math.max(widthM, minShownAt(point))
@@ -180,6 +192,16 @@ export class BeamSystem {
       [endOf(a, a.widthM, 1 - haloShare(a)), endOf(b, b.widthM, 1 - haloShare(b))],
       [endOf(a, haloWidth(a), haloShare(a)), endOf(b, haloWidth(b), haloShare(b))]
     ]
+    const [lineA, lineB] = ribbons[0].map(end => Math.max(...end.level))
+    if (halvings < BeamSystem.MAX_HALVINGS && Math.max(lineA, lineB) > BeamSystem.SMOOTH_RATIO * Math.max(Math.min(lineA, lineB), 1e-12)) {
+      const middle: Placed = {
+        x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, z: (a.z + b.z) / 2, altitudeM: (a.altitudeM + b.altitudeM) / 2,
+        widthM: (a.widthM + b.widthM) / 2, powerW: Math.sqrt(a.powerW * b.powerW)
+      }
+      return this.pushSegment(this.pushSegment(vertex, a, middle, wavelengthNm, colour, frame, halvings + 1), middle, b, wavelengthNm, colour, frame, halvings + 1)
+    }
+    // Nothing past what the buffers hold, however finely the stretches near the eye were cut.
+    if ((vertex + BeamSystem.VERTICES_PER_SEGMENT) * 3 > this.positions.length) return vertex
     for (const ends of ribbons) {
       if (ends.every(end => Math.max(...end.level) <= 0)) continue
       const corner = (end: (typeof ends)[number], edge: number): void => {

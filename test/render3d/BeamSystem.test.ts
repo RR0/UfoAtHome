@@ -52,4 +52,24 @@ describe("BeamSystem", () => {
     for (const entry of shared) expect(entry.lights.length).toBeLessThanOrEqual(2)
     system.dispose()
   })
+
+  it("draws the light of a beam without a staircase, near the eye where it changes fast and where the halo starts to show", () => {
+    // Pictures of several sharpnesses: on some, the halo, whose width is an angle, outgrows the line somewhere along the beam.
+    let worst = 0
+    for (const pixelRad of [0.00002, 0.00005, 0.0001, 0.0002, 0.0005, 0.001, 0.002]) {
+      const system = new BeamSystem()
+      // Watched from a few tens of metres from the dome, as the demo is: there the light changes several times over in a few metres.
+      system.update([SHOT], 0, { ...frame(), eye: new Vector3(-20, 15, 30), pixelRad })
+      const geometry = (system.group.children[0] as Mesh).geometry
+      const colors = geometry.getAttribute("color") as BufferAttribute
+      // The light of the middle of each stretch's line, in order: the second vertex of each stretch is its middle.
+      const middles: number[] = []
+      for (let i = 1; i < geometry.drawRange.count; i += BeamSystem.VERTICES_PER_SEGMENT) middles.push(colors.getY(i))
+      for (let i = 1; i < middles.length; i++) if (middles[i] > 0 && middles[i - 1] > 0) worst = Math.max(worst, Math.abs(Math.log(middles[i] / middles[i - 1])))
+      system.dispose()
+    }
+    // From one stretch to the next the light changes by under a tenth: stretches over which it changed more were cut.
+    expect(worst).toBeLessThan(Math.log(1.1))
+  })
 })
+
