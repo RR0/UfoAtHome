@@ -23,13 +23,31 @@ describe("ContrailGrowth", () => {
       expect(typical).toBeLessThan(strong)
       expect(calm).toBeGreaterThan(500)
       expect(calm).toBeLessThan(1200)
-      // The shear's own share doubles with it.
-      expect((strong - calm) / (typical - calm)).toBeCloseTo(2, 6)
+      // The shear's own share doubles with it, the turbulence's adding to it in quadrature: what the shear adds to the band the wake
+      // let go, three spans wide after an hour.
+      const wake = 3 * 35
+      const sheared = (width: number) => Math.sqrt(width ** 2 - calm ** 2 + wake ** 2) - wake
+      expect(sheared(strong) / sheared(typical)).toBeCloseTo(2, 6)
     })
 
     it("grows faster and faster in a shear, because the trail also deepens", () => {
       const at = (age: number) => ContrailGrowth.widthM(35, age, 0.004) - ContrailGrowth.widthM(35, age, 0)
       expect(at(3600) / at(1800)).toBeGreaterThan(2.5)
+    })
+  })
+
+  describe("profileExponent", () => {
+    it("is a band with sharp sides behind the aircraft and a diffusing Gaussian minutes later", () => {
+      expect(ContrailGrowth.profileExponent(0)).toBeCloseTo(8, 6)
+      expect(ContrailGrowth.profileExponent(60)).toBeGreaterThan(ContrailGrowth.profileExponent(600))
+      expect(ContrailGrowth.profileExponent(1800)).toBeCloseTo(2, 3)
+    })
+  })
+
+  describe("widthM, in the first minutes", () => {
+    it("is a few spans wide once the wake has let it go, and diffuses as the square root of its age", () => {
+      expect(ContrailGrowth.widthM(35, 120, 0)).toBeGreaterThan(130)
+      expect(ContrailGrowth.widthM(35, 120, 0)).toBeLessThan(200)
     })
   })
 
@@ -68,7 +86,11 @@ describe("ContrailGrowth", () => {
     it("is visibly fainter after a few minutes than where the exhaust has just cooled, and much fainter after ten", () => {
       const young = ContrailGrowth.opacity(1, persistent)
       expect(ContrailGrowth.opacity(240, persistent)).toBeLessThan(young * 0.6)
-      expect(ContrailGrowth.opacity(600, persistent)).toBeLessThan(young * 0.35)
+      expect(ContrailGrowth.opacity(600, persistent)).toBeLessThan(young * 0.4)
+      // Yet still the optical depth of an aged trail measured from aircraft, 0.1 to 0.3 (Voigt et al., 2011).
+      const depth = -Math.log(1 - ContrailGrowth.opacity(600, persistent))
+      expect(depth).toBeGreaterThan(0.1)
+      expect(depth).toBeLessThan(0.3)
     })
 
     it("thins faster in a shear that spreads it faster", () => {
@@ -80,9 +102,10 @@ describe("ContrailGrowth", () => {
       expect(ContrailGrowth.opacity(900, persistent)).toBeLessThan(ContrailGrowth.opacity(10, persistent))
     })
 
-    it("disperses in the end: a trail that lasts is not seen after an hour, whatever the shear", () => {
+    it("disperses in the end: a trail that lasts is faint after an hour and not seen after two, whatever the shear", () => {
       for (const shearPerS of [0, 0.001, 0.003, 0.008]) {
-        expect(ContrailGrowth.opacity(3600, { ...persistent, shearPerS })).toBe(0)
+        expect(ContrailGrowth.opacity(3600, { ...persistent, shearPerS })).toBeLessThan(0.03)
+        expect(ContrailGrowth.opacity(7200, { ...persistent, shearPerS })).toBe(0)
       }
     })
 

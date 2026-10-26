@@ -45,7 +45,13 @@ export class ContrailSystem {
    * a distant trail, which is thin, as faint as its old part, which is wide, and no trail seemed to fade at all.
    */
   private static readonly UNRESOLVED_CONTRAST = 0.5
-  private static readonly VERTICES_PER_SEGMENT = 12
+  /**
+   * Where across a ribbon its profile is drawn, as twice the distance from its middle over its width: 1 is where a trail is half as
+   * thick as at its middle, 2.25 where a diffused one has fallen to a thirtieth and the ribbon ends.
+   */
+  private static readonly STATIONS = [0, 0.5, 1, 1.5, 2.25] as const
+  /** Two triangles for each band between two stations, on each side of the middle. */
+  private static readonly VERTICES_PER_SEGMENT = 2 * 6 * (ContrailSystem.STATIONS.length - 1)
 
   readonly object: Mesh
   readonly group = new Group()
@@ -145,31 +151,40 @@ export class ContrailSystem {
       const distance = Math.hypot(sample.x - frame.eye.x, sample.y - frame.eye.y, sample.z - frame.eye.z)
       const width = ContrailGrowth.widthM(spanM, sample.age, sample.point.shearPerS)
       const shown = Math.max(width, ContrailSystem.MIN_PIXELS * frame.pixelRad * distance)
-      return { half: shown / 2, alpha: opacity * (width / shown) ** ContrailSystem.UNRESOLVED_CONTRAST }
+      const alpha = opacity * (width / shown) ** ContrailSystem.UNRESOLVED_CONTRAST
+      const exponent = ContrailGrowth.profileExponent(sample.age)
+      const profile = ContrailSystem.STATIONS.map((u, station) => station === ContrailSystem.STATIONS.length - 1 ? 0 : alpha * Math.exp(-Math.LN2 * u ** exponent))
+      return { half: shown / 2, profile }
     }
-    // Alpha is nil at the edges of the ribbon, so that a trail has no hard side.
+    // The profile across: sharp-sided while the wake holds the trail, a Gaussian once it diffuses, nil at the ribbon's edges so that no
+    // trail has a hard side.
     const ends = [{ sample: a, ...endOf(a, opacityA) }, { sample: b, ...endOf(b, opacityB) }]
-    const corner = (e: (typeof ends)[number], edge: number): void => {
+    const last = ContrailSystem.STATIONS.length - 1
+    const corner = (e: (typeof ends)[number], station: number, side: number): void => {
+      const u = ContrailSystem.STATIONS[station]
+      const offset = e.half * u * side
       const i = vertex * 3
-      this.positions[i] = e.sample.x + across.x * e.half * edge
-      this.positions[i + 1] = e.sample.y + across.y * e.half * edge
-      this.positions[i + 2] = e.sample.z + across.z * e.half * edge
+      this.positions[i] = e.sample.x + across.x * offset
+      this.positions[i + 1] = e.sample.y + across.y * offset
+      this.positions[i + 2] = e.sample.z + across.z * offset
       const j = vertex * 4
       this.colors[j] = tint[0]
       this.colors[j + 1] = tint[1]
       this.colors[j + 2] = tint[2]
-      this.colors[j + 3] = edge === 0 ? e.alpha : 0
+      this.colors[j + 3] = e.profile[station]
       vertex++
     }
-    // Two strips, left and right of the core, two triangles each.
+    // A band between each two stations, left and right of the middle, two triangles each.
     const [start, end] = ends
-    for (const [outer, inner] of [[-1, 0], [1, 0]] as const) {
-      corner(start, outer)
-      corner(start, inner)
-      corner(end, outer)
-      corner(start, inner)
-      corner(end, inner)
-      corner(end, outer)
+    for (const side of [-1, 1]) {
+      for (let station = 0; station < last; station++) {
+        corner(start, station + 1, side)
+        corner(start, station, side)
+        corner(end, station + 1, side)
+        corner(start, station, side)
+        corner(end, station, side)
+        corner(end, station + 1, side)
+      }
     }
     return vertex
   }
