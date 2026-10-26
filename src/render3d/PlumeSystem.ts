@@ -49,6 +49,8 @@ export class PlumeSystem {
   private readonly positions = new Float32Array(PlumeSystem.MAX_PUFFS * PlumeSystem.VERTICES_PER_PUFF * 3)
   private readonly colors = new Float32Array(PlumeSystem.MAX_PUFFS * PlumeSystem.VERTICES_PER_PUFF * 3)
   private shown = 0
+  /** The puffs as last drawn, with which way each is and how wide it looks: what the pointer is looked for among (see pickAt). */
+  private drawn: { view: PlumePuffView; direction: Vector; radiusRad: number }[] = []
 
   constructor() {
     this.object.name = "plumes"
@@ -76,6 +78,7 @@ export class PlumeSystem {
     transmission: (position: HorizontalPosition) => number): void {
     let vertex = 0
     let shown = 0
+    this.drawn = []
     for (const view of views) {
       if (shown >= PlumeSystem.MAX_PUFFS) break
       const through = transmission(view.centre)
@@ -87,6 +90,11 @@ export class PlumeSystem {
       )) as [number, number, number]
       if (Math.max(...colour) <= 0) continue
       vertex = this.pushPuff(vertex, view, colour)
+      this.drawn.push({
+        view,
+        direction: this.normalise(horizontalToCartesian(view.centre.altitudeDeg, view.centre.azimuthDeg, 1)),
+        radiusRad: (view.radiusDeg * Math.PI) / 180
+      })
       shown++
     }
     this.shown = shown
@@ -131,6 +139,23 @@ export class PlumeSystem {
       }
     }
     return vertex
+  }
+
+  /**
+   * The puff under a direction of sight, in the frame the plumes are drawn in, within its own radius or `toleranceRad` of it: the one whose
+   * middle is nearest, as a share of its radius, so that a small bright head is found before the wide faint cloud round it.
+   */
+  pickAt(direction: Vector, toleranceRad: number): PlumePuffView | undefined {
+    const unit = this.normalise(direction)
+    let best: { view: PlumePuffView; score: number } | undefined
+    for (const puff of this.drawn) {
+      const cosine = Math.max(-1, Math.min(1, unit.x * puff.direction.x + unit.y * puff.direction.y + unit.z * puff.direction.z))
+      const angle = Math.acos(cosine)
+      if (angle > puff.radiusRad + toleranceRad) continue
+      const score = angle / (puff.radiusRad + toleranceRad)
+      if (!best || score < best.score) best = { view: puff.view, score }
+    }
+    return best?.view
   }
 
   private push(vertex: number, point: Vector, colour: readonly [number, number, number], share: number): number {

@@ -3949,6 +3949,17 @@ export class SceneRenderer {
     this.render()
   }
 
+  /**
+   * The puff of a rocket's plume under a point of the picture (see PlumeSystem.pickAt): within its own radius, or a few pixels round a puff too
+   * small to land on; not one the ground hides.
+   */
+  pickPlumeAt(ndcX: number, ndcY: number): PlumePuffView | undefined {
+    if (!this.plumeSystem?.count) return undefined
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
+    const puff = this.plumeSystem.pickAt(this.raycaster.ray.direction, SceneRenderer.BEAM_PICK_PIXELS * this.contrailPixelRad())
+    return puff && this.groundHides(ndcX, ndcY) ? undefined : puff
+  }
+
   /** How many puffs of a launch's plume are drawn — see setLaunchPlumes. */
   get plumePuffCount(): number {
     return this.plumeSystem?.count ?? 0

@@ -154,6 +154,7 @@ export const sceneNames_it: SceneNames = {
   starTooltipBelow: "{name} — mag {mag}, {alt}° sotto l'orizzontale",
   decorTooltip: "{name} — {size}, a {distance}",
   satelliteTooltip: "{name} — satellite, mag {mag}, a {height} km di quota",
+  plumeTooltip: { name: "Scia di razzo", detail: "{name} — {part}, a {distance}, a {height} km di quota", ascent: "scarico dell'ascesa", burn: "scarico di un'accensione", vent: "propellenti scaricati" },
   opticsTooltips: {
     halo22: "Alone di 22° — un anello attorno al Sole, dovuto alla luce deviata da cristalli di ghiaccio esagonali nei cirri; il bordo interno è rosso, a 21,7°",
     halo46: "Alone di 46° — un anello più raro e debole: la luce entra da una faccia laterale del cristallo ed esce da una faccia di estremità",

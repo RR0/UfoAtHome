@@ -171,6 +171,16 @@ describe("LaunchPlumeSighting", () => {
     }
     const stageAt = (t: number) => ecef({ lat: 0, lng: 6.35 * t / 120000, heightM: 1000000 })
 
+    test("says, of each puff an observer sees, which of what the stage let go it is and how high it is", () => {
+      const views = LaunchPlumeSighting.viewsAt([coasting([vent])], 60000, { lat: 0, lng: 22, heightM: 0 }, SUN)
+      expect(views.length).toBeGreaterThan(0)
+      for (const view of views) {
+        expect(view.release).toBe("jet:0")
+        expect(view.heightKm).toBeGreaterThan(900)
+        expect(view.heightKm).toBeLessThan(1100)
+      }
+    })
+
     test("with jets of its own and no ascent burn stated, a stage lets go only its jets", () => {
       const puffs = LaunchPlumeSighting.puffsAt([coasting([vent])], 60000)
       expect(puffs.length).toBeGreaterThan(0)

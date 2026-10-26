@@ -178,6 +178,10 @@ export interface PlumePuff {
 /** One puff of a plume as an observer sees it at one instant. */
 export interface PlumePuffView {
   launchId: string
+  /** The burn or jet that let it go (see LaunchRelease.key): "burn" for the ascent's, "jet:…" for the others. */
+  release?: string
+  /** How high it is, km. */
+  heightKm?: number
   /** Where its centre is in the observer's sky, and how far. */
   centre: SkyPoint
   /** The angle its radius subtends, degrees. */
@@ -494,6 +498,8 @@ export class LaunchPlumeSighting {
       if (luminanceCdM2 <= 0) continue
       views.push({
         launchId: puff.launchId,
+        release: puff.release,
+        heightKm: puff.at.heightM / 1000,
         centre,
         radiusDeg: Math.atan2(puff.radiusKm, centre.distanceKm) / LaunchPlumeSighting.DEG,
         luminanceCdM2,

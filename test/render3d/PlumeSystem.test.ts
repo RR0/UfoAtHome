@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest"
 import type { BufferAttribute, Mesh } from "three"
 import type { PlumePuffView } from "../../src/engine/interpretation/LaunchPlume.js"
 import { PlumeSystem } from "../../src/render3d/PlumeSystem.js"
+import { horizontalToCartesian } from "../../src/render3d/skyColors.js"
 
 const puff = (overrides: Partial<PlumePuffView> = {}): PlumePuffView => ({
   launchId: "test",
@@ -54,4 +55,25 @@ describe("PlumeSystem", () => {
     expect(colours.getX(0)).toBeCloseTo(0.5, 6)
     system.dispose()
   })
+
+  test("finds the puff under a direction of sight, within its radius, and the small bright head before the wide cloud round it", () => {
+    const system = new PlumePuffSetup()
+    const head = puff({ launchId: "head", centre: { altitudeDeg: 10, azimuthDeg: 180, distanceKm: 800 }, radiusDeg: 0.2 })
+    const cloud = puff({ launchId: "cloud", centre: { altitudeDeg: 10.5, azimuthDeg: 180, distanceKm: 800 }, radiusDeg: 3 })
+    system.plumes.set([cloud, head], 1, clear, () => 1)
+    expect(system.plumes.pickAt(system.towards(10, 180), 0)?.launchId).toBe("head")
+    expect(system.plumes.pickAt(system.towards(12, 181), 0)?.launchId).toBe("cloud")
+    expect(system.plumes.pickAt(system.towards(30, 90), 0.01)).toBeUndefined()
+    system.plumes.dispose()
+  })
 })
+
+/** A plume system, and the direction of sight towards a point of the sky in the frame it draws in. */
+class PlumePuffSetup {
+  readonly plumes = new PlumeSystem()
+
+  towards(altitudeDeg: number, azimuthDeg: number) {
+    return horizontalToCartesian(altitudeDeg, azimuthDeg, 1)
+  }
+}
+

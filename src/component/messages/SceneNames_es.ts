@@ -157,6 +157,7 @@ export const sceneNames_es: SceneNames = {
   starTooltipBelow: "{name} — mag {mag}, {alt}° bajo la horizontal",
   decorTooltip: "{name} — {size}, a {distance}",
   satelliteTooltip: "{name} — satélite, mag {mag}, a {height} km de altitud",
+  plumeTooltip: { name: "Estela de cohete", detail: "{name} — {part}, a {distance}, a {height} km de altitud", ascent: "escape del ascenso", burn: "escape de un encendido", vent: "propelentes purgados" },
   opticsTooltips: {
     halo22: "Halo de 22° — un anillo alrededor del Sol, por luz desviada en cristales de hielo hexagonales de los cirros; su borde interior es rojo, a 21,7°",
     halo46: "Halo de 46° — un anillo más raro y débil: la luz entra por una cara lateral del cristal y sale por una cara del extremo",

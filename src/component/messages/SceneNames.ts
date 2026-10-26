@@ -103,6 +103,11 @@ export interface SceneNames {
   readonly decorTooltip: string
   /** A satellite's hover tooltip: {name}, {mag}, {height}. */
   readonly satelliteTooltip: string
+  /**
+   * What is said of a rocket's plume pointed at: its name when the launch gives none, and with Alt {name}, {part} (which of what the stage
+   * let go it is), {distance} from the eye and {height} in km.
+   */
+  readonly plumeTooltip: { readonly name: string; readonly detail: string; readonly ascent: string; readonly burn: string; readonly vent: string }
   /** What an optical feature of the ice display says when pointed at, by feature, as "name — explanation": the name alone is the tooltip, the whole of it is what Alt adds. {angle} is a ring's radius. */
   readonly opticsTooltips: Readonly<Record<OpticsFeatureId, string>>
   /** What is said of an aircraft pointed at: see TrafficTooltip. */

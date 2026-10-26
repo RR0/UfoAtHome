@@ -161,6 +161,7 @@ export const sceneNames_fr: SceneNames = {
   starTooltipBelow: "{name} — mag {mag}, {alt}° sous l'horizontale",
   decorTooltip: "{name} — {size}, à {distance}",
   satelliteTooltip: "{name} — satellite, mag {mag}, à {height} km d'altitude",
+  plumeTooltip: { name: "Panache de fusée", detail: "{name} — {part}, à {distance}, à {height} km d'altitude", ascent: "échappement de la montée", burn: "échappement d'un allumage", vent: "ergols vidangés" },
   opticsTooltips: {
     halo22: "Halo de 22° — un anneau autour du Soleil, dû à la lumière déviée par des cristaux de glace hexagonaux dans les cirrus ; son bord interne est rouge, à 21,7°",
     halo46: "Halo de 46° — un anneau plus rare et plus faible : la lumière entre par une face latérale d'un cristal et sort par une face de bout",

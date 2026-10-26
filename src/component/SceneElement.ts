@@ -164,6 +164,9 @@ const DECOR_TOOLTIP = "{name} — {size}, {distance} away"
 /** Hover tooltip of a satellite: see SATELLITE_TOOLTIP's doc. */
 const SATELLITE_TOOLTIP = "{name} — satellite, mag {mag}, {height} km up"
 
+/** What is said of a rocket's plume pointed at: see SceneNames.plumeTooltip. */
+const PLUME_TOOLTIP = { name: "Rocket plume", detail: "{name} — {part}, {distance} away, {height} km up", ascent: "exhaust of the ascent", burn: "exhaust of an engine burn", vent: "vented propellant" }
+
 /** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */import { Headlights } from "../engine/model/Headlights.js"
 import type { HeadlightMode } from "../engine/model/Headlights.js"
 
@@ -299,7 +302,7 @@ export interface BodyReading {
  */
 /** What is under a point of the picture: what kind of thing, which one, and what it is called. */
 export interface ScenePick {
-  kind: "sky" | "body" | "decor" | "beam" | "railway" | "traffic" | "satellite" | "optics" | "star"
+  kind: "sky" | "body" | "decor" | "beam" | "railway" | "traffic" | "plume" | "satellite" | "optics" | "star"
   /** The sky body's key, the interpretation body's id or the decor object's id, when it has one. */
   id?: string
   name: string
@@ -574,6 +577,10 @@ export class SceneElement extends HTMLElement {
     // An aircraft of the record of air traffic: moving, and a candidate for what was seen.
     const traffic = this.trafficTooltipAt(ndcX, ndcY)
     if (traffic) return { kind: "traffic", name: traffic }
+    // A rocket's plume, lit by a Sun the ground no longer sees (see LaunchJson): what the launch is called, and with Alt which of what the stage
+    // let go this is, how far and how high.
+    const plume = this.plumePickAt(ndcX, ndcY)
+    if (plume) return plume
     const satellite = this.sceneRenderer.pickSatelliteAt(ndcX, ndcY)
     if (satellite) {
       return {
@@ -614,6 +621,27 @@ export class SceneElement extends HTMLElement {
       }
     }
     return undefined
+  }
+
+  /** The plume of a launch under a point of the picture, by the launch's name, and what part of it with Alt (see pickAt). */
+  private plumePickAt(ndcX: number, ndcY: number): ScenePick | undefined {
+    const launches = this.ufoElement.sighting.skyEvents?.launches
+    const puff = launches?.length ? this.sceneRenderer.pickPlumeAt(ndcX, ndcY) : undefined
+    const launch = puff ? launches?.find(candidate => candidate.id === puff.launchId) : undefined
+    if (!puff || !launch) return undefined
+    const texts = this.naming.names?.plumeTooltip ?? PLUME_TOOLTIP
+    const name = this.said.read(launch.title) || launch.vehicle?.mission || texts.name
+    const part = (): string => {
+      if (puff.release === undefined || puff.release === "burn") return texts.ascent
+      const jet = launch.jets?.find((candidate, index) => `jet:${candidate.id ?? index}` === puff.release)
+      return jet?.kind === "vent" ? texts.vent : texts.burn
+    }
+    return {
+      kind: "plume", id: launch.id, name,
+      detail: () => texts.detail.replace("{name}", name).replace("{part}", part())
+        .replace("{distance}", this.distanceText(puff.centre.distanceKm * 1000))
+        .replace("{height}", Math.round(puff.heightKm ?? 0).toLocaleString())
+    }
   }
 
   /** A distance from the eye as the page writes it: "540 m", "1,7 km". */
