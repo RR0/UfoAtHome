@@ -12,6 +12,14 @@ export interface LaunchEditorMessages {
   deletePlace: string
   previousPlace: string
   nextPlace: string
+  /** What else the stage lets go: the legend, the picker of its jets, what adds and removes one, and the kinds a jet is added of. */
+  jets: string
+  jet: string
+  noJet: string
+  addJet: string
+  deleteJet: string
+  jetBurn: string
+  jetVent: string
   /** The adding button when the recording has no place to put a launch at. */
   addLaunchNowhere: string
   /** Under the fields: what an empty field means. */

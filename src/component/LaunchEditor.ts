@@ -1,5 +1,5 @@
 import { LaunchParameters } from "../engine/interpretation/LaunchParameters.js"
-import type { LaunchJson, LaunchVehicle } from "../engine/interpretation/LaunchPlume.js"
+import type { LaunchJetJson, LaunchJetKind, LaunchJson, LaunchVehicle } from "../engine/interpretation/LaunchPlume.js"
 import { SkyEvents } from "../engine/model/SkyEvents.js"
 import { ParameterRegistry } from "../engine/interpretation/Parameters.js"
 import type { Sighting } from "../engine/model/Sighting.js"
@@ -38,6 +38,9 @@ export class LaunchEditor {
   private places?: ElementList
   private placeForm?: ParameterForm
   private placeIndex = 0
+  private jets?: ElementList
+  private jetForm?: ParameterForm
+  private jetIndex = 0
   private language: string
   /** The launches the fields were last filled for, to tell a recording replaced from an edit written. */
   private shown: readonly LaunchJson[] = []
@@ -73,6 +76,7 @@ export class LaunchEditor {
     this.element("launch-fields").hidden = launch === undefined
     if (!launch) return
     this.syncPlaces(launch)
+    this.syncJets(launch)
     const set = ParameterRegistry.of("launch")!
     this.form ??= new ParameterForm(this.element("launch-parameters"), this.language, "", { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() })
     this.form.show(set, launch as unknown as Record<string, unknown>, () => this.written())
@@ -121,6 +125,11 @@ export class LaunchEditor {
           <div id="launch-places"></div>
           <div id="launch-place-parameters" class="launch-parameters"></div>
         </fieldset>
+        <fieldset id="launch-jets" class="launch-path">
+          <legend>${m.jets}</legend>
+          <div id="launch-jet-list"></div>
+          <div id="launch-jet-parameters" class="launch-parameters"></div>
+        </fieldset>
         <div id="launch-parameters" class="launch-parameters"></div>
         <p class="launch-intro">${m.derivedNote}</p>
       </div>
@@ -147,6 +156,16 @@ export class LaunchEditor {
     })
     this.places.setLabels({ list: m.place, remove: m.deletePlace, add: m.addPlace, previous: m.previousPlace, next: m.nextPlace })
     this.placeForm = undefined
+    this.jets = new ElementList({
+      header: this.element("launch-jet-list"), body: this.element("launch-jet-parameters"),
+      ids: { list: "launch-jet", remove: "launch-jet-delete", add: "launch-jet-add", kinds: "launch-jet-add-kind", kind: kind => `launch-jet-add-${kind}` },
+      onSelect: id => { this.jetIndex = Number(id); this.syncJets(this.current!, true) },
+      onAdd: kind => this.addJet(kind === "vent" ? "vent" : "burn"),
+      onRemove: () => this.removeJet()
+    })
+    this.jets.setLabels({ list: m.jet, remove: m.deleteJet, add: m.addJet, empty: m.noJet })
+    this.jets.setKinds([{ value: "burn", label: m.jetBurn }, { value: "vent", label: m.jetVent }])
+    this.jetForm = undefined
   }
 
   /** A field of the form was written onto the launch. */
@@ -174,6 +193,72 @@ export class LaunchEditor {
       // Another place may have been stepped to with the focus still in a field of the last one: it is not being typed in.
       this.placeForm.sync(force)
     }
+  }
+
+  /**
+   * The jets of the launch, the one being edited picked, and its fields drawn (see LaunchParameters.JET): what a field left empty shows
+   * is what the jet uses, which for a burn depends on the launch's engine, so the form is told the launch.
+   */
+  private syncJets(launch: LaunchJson, force = false): void {
+    const jets = launch.jets ?? []
+    this.jetIndex = Math.max(0, Math.min(this.jetIndex, jets.length - 1))
+    const m = this.messages
+    this.jets?.setItems(jets.map((jet, i) => ({ id: String(i), label: `${jet.kind === "vent" ? m.jetVent : m.jetBurn} ${this.seconds(jet.fromT)}` })),
+      jets.length ? String(this.jetIndex) : undefined)
+    if (!this.jetForm) {
+      this.jetForm = new ParameterForm(this.element("launch-jet-parameters"), this.language, "launchJet.")
+      this.jetForm.show(LaunchParameters.JET, new ParameterTarget(
+        () => this.current?.jets?.[this.jetIndex] as unknown as ParameterHolder | undefined,
+        apply => this.editJet(apply),
+        () => this.current ? LaunchParameters.jetContext(this.current, this.jetIndex) : undefined
+      ), () => undefined)
+    } else {
+      this.jetForm.sync(force)
+    }
+  }
+
+  /** One field of the jet on show was edited: the jet is replaced by an edited copy, as a place of the path is. */
+  private editJet(apply: (jet: ParameterHolder) => void): void {
+    const launch = this.current
+    if (!launch?.jets) return
+    const jet = { ...launch.jets[this.jetIndex] }
+    apply(jet as unknown as ParameterHolder)
+    launch.jets = launch.jets.map((other, i) => i === this.jetIndex ? jet : other)
+    const m = this.messages
+    this.jets?.rename(String(this.jetIndex), `${jet.kind === "vent" ? m.jetVent : m.jetBurn} ${this.seconds(jet.fromT)}`)
+    this.written()
+  }
+
+  /**
+   * A jet of `kind`, from the middle of the path for half a minute: a burn straight back, propellant vented sideways. Adding the first
+   * jet to a launch whose burn of the ascent was not given its ends states them, so that the ascent's burn stays drawn (see
+   * LaunchJson.jets).
+   */
+  private addJet(kind: LaunchJetKind): void {
+    const launch = this.current
+    if (!launch) return
+    const track = launch.track
+    const from = Math.round((track[0].t + track[track.length - 1].t) / 2)
+    const jet: LaunchJetJson = kind === "vent" ? { kind, fromT: from, untilT: from + 30000, angleDeg: 90 } : { kind, fromT: from, untilT: from + 30000 }
+    if (!launch.jets?.length && launch.burnFromT === undefined && launch.burnUntilT === undefined) {
+      launch.burnFromT = track[0].t
+      launch.burnUntilT = track[track.length - 1].t
+    }
+    launch.jets = [...launch.jets ?? [], jet]
+    this.jetIndex = launch.jets.length - 1
+    this.syncJets(launch, true)
+    this.form?.sync(true)
+    this.host.changed()
+  }
+
+  private removeJet(): void {
+    const launch = this.current
+    if (!launch?.jets?.length) return
+    const jets = launch.jets.filter((_, i) => i !== this.jetIndex)
+    if (jets.length) launch.jets = jets
+    else delete launch.jets
+    this.syncJets(launch, true)
+    this.host.changed()
   }
 
   /** A path needs two places to be a path at all: the plume is let go between them. */

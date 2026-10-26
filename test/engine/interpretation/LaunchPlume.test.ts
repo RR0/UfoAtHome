@@ -144,4 +144,88 @@ describe("LaunchPlumeSighting", () => {
       expect(brightest({ thrustKN: 3000, specificImpulseS: 348, propellant: "rp1-lox" })).toBeGreaterThan(brightest({ thrustKN: 300, specificImpulseS: 348, propellant: "rp1-lox" }))
     })
   })
+
+  test("coarse ice scatters white, ice finer than the wavelength blue", () => {
+    const [red, , blue] = LaunchPlumeSighting.scatteringColour(0.5)
+    expect(blue / red).toBeLessThan(1.15)
+    const [fineRed, , fineBlue] = LaunchPlumeSighting.scatteringColour(0.1)
+    // Rayleigh's law: the fourth power of 0.61 over 0.465.
+    expect(fineBlue / fineRed).toBeCloseTo((0.61 / 0.465) ** 4, 1)
+    // Large particles take twice their area out of the light, whatever its colour.
+    expect(LaunchPlumeSighting.extinctionEfficiency(50, 0.55)).toBeCloseTo(2, 1)
+  })
+
+  describe("a stage that lets things go, seen from any side", () => {
+    /** A spent stage 1 000 km up, coasting east along the equator over longitude 0 at its orbital speed, sunlit. */
+    const coasting = (jets: LaunchJson["jets"]): LaunchJson => ({
+      id: "stage",
+      track: [{ t: 0, lat: 0, lng: 0, altitudeKm: 1000 }, { t: 120000, lat: 0, lng: 6.35, altitudeKm: 1000 }],
+      jets
+    })
+    const vent: NonNullable<LaunchJson["jets"]>[number] = { kind: "vent", fromT: 0, untilT: 60000, angleDeg: 90, spinPeriodS: 20, speedKmPerS: 1, lifetimeS: 600 }
+    const ecef = (p: { lat: number; lng: number; heightM: number }) => {
+      const r = 6371 + p.heightM / 1000
+      const lat = p.lat * Math.PI / 180
+      const lng = p.lng * Math.PI / 180
+      return [r * Math.cos(lat) * Math.cos(lng), r * Math.cos(lat) * Math.sin(lng), r * Math.sin(lat)]
+    }
+    const stageAt = (t: number) => ecef({ lat: 0, lng: 6.35 * t / 120000, heightM: 1000000 })
+
+    test("with jets of its own and no ascent burn stated, a stage lets go only its jets", () => {
+      const puffs = LaunchPlumeSighting.puffsAt([coasting([vent])], 60000)
+      expect(puffs.length).toBeGreaterThan(0)
+      for (const puff of puffs) expect(puff.release).toMatch(/^jet:/)
+    })
+
+    test("propellant vented sideways from a spinning stage draws a spiral round it, across its motion", () => {
+      const t = 60000
+      const stage = stageAt(t)
+      const offsets = LaunchPlumeSighting.puffsAt([coasting([vent])], t).map(puff => ({ ageS: puff.ageS, offset: ecef(puff.at).map((c, i) => c - stage[i]) }))
+      for (const { ageS, offset } of offsets.filter(o => o.ageS >= 10)) {
+        const distance = Math.hypot(...offset)
+        // As far out as it was thrown, give or take what the Earth's pull does to two neighbouring orbits.
+        expect(distance / ageS).toBeGreaterThan(0.85)
+        expect(distance / ageS).toBeLessThan(1.15)
+        // And across the motion, east being the motion here.
+        expect(Math.abs(offset[1]) / distance).toBeLessThan(0.15)
+      }
+      // Half a turn of the stage apart, two puffs went opposite ways: an arm winding round.
+      const direction = (age: number) => {
+        const o = offsets.reduce((best, x) => Math.abs(x.ageS - age) < Math.abs(best.ageS - age) ? x : best).offset
+        const length = Math.hypot(...o)
+        return o.map(c => c / length)
+      }
+      const a = direction(40)
+      const b = direction(30)
+      expect(a[0] * b[0] + a[1] * b[1] + a[2] * b[2]).toBeLessThan(-0.9)
+    })
+
+    test("the same spiral is a disc to an observer it comes towards and a line to one it passes", () => {
+      const spread = (observer: { lat: number; lng: number; heightM: number }) => {
+        const views = LaunchPlumeSighting.viewsAt([coasting([vent])], 60000, observer, SUN)
+        expect(views.length).toBeGreaterThan(20)
+        // How far it reaches across the sky and up it, degrees: the narrower over the wider.
+        const middle = views.reduce((sum, v) => sum + v.centre.azimuthDeg, 0) / views.length
+        const across = views.map(v => (v.centre.azimuthDeg - middle) * Math.cos(v.centre.altitudeDeg * Math.PI / 180))
+        const up = views.map(v => v.centre.altitudeDeg)
+        const extents = [Math.max(...across) - Math.min(...across), Math.max(...up) - Math.min(...up)]
+        return Math.min(...extents) / Math.max(...extents)
+      }
+      // Ahead of the stage, which comes from the west towards them: the spiral face on.
+      expect(spread({ lat: 0, lng: 22, heightM: 0 })).toBeGreaterThan(0.6)
+      // North of its track as it passes: the spiral edge on.
+      expect(spread({ lat: 14, lng: 3.2, heightM: 0 })).toBeLessThan(0.3)
+    })
+
+    test("a braking burn throws its exhaust ahead of the stage", () => {
+      const brake: NonNullable<LaunchJson["jets"]>[number] = { id: "brake", kind: "burn", fromT: 0, untilT: 5000, angleDeg: 180 }
+      const t = 20000
+      const stage = stageAt(t)
+      const trail = LaunchPlumeSighting.puffsAt([coasting([brake])], t).filter(puff => puff.ageS > 15)
+      expect(trail.length).toBeGreaterThan(0)
+      // East of the stage, by about what the exhaust velocity carried it in that time.
+      for (const puff of trail) expect((ecef(puff.at)[1] - stage[1]) / puff.ageS).toBeGreaterThan(2.5)
+    })
+  })
 })
+

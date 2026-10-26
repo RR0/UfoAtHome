@@ -12,6 +12,13 @@ export const launchEditorMessages_fr: LaunchEditorMessages = {
   deletePlace: "Retirer ce point",
   previousPlace: "Point précédent",
   nextPlace: "Point suivant",
+  jets: "Jets",
+  jet: "Jet",
+  noJet: "Aucun : le moteur brûle le long du chemin",
+  addJet: "Ajouter un jet",
+  deleteJet: "Retirer ce jet",
+  jetBurn: "Allumage du moteur",
+  jetVent: "Ergols vidangés",
   addLaunchNowhere: "Donnez d'abord un lieu à l'enregistrement : un lancement est placé devant l'observateur",
   derivedNote: "Un champ vide montre, en grisé, la valeur utilisée : le défaut, ou ce que le moteur implique. Videz un champ pour y revenir."
 }

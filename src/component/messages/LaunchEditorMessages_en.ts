@@ -12,6 +12,13 @@ export const launchEditorMessages_en: LaunchEditorMessages = {
   deletePlace: "Remove this place",
   previousPlace: "Previous place",
   nextPlace: "Next place",
+  jets: "Jets",
+  jet: "Jet",
+  noJet: "None: the engine burns along the path",
+  addJet: "Add a jet",
+  deleteJet: "Remove this jet",
+  jetBurn: "Engine burn",
+  jetVent: "Propellant vented",
   addLaunchNowhere: "Give the recording a place first: a launch is put in front of the observer",
   derivedNote: "An empty field shows, greyed, the value used: the default, or what the engine implies. Clear a field to go back to it."
 }

@@ -1,5 +1,5 @@
 import { LaunchPlumeSighting } from "./LaunchPlume.js"
-import type { LaunchJson, LaunchPlumeJson } from "./LaunchPlume.js"
+import type { LaunchJetJson, LaunchJson, LaunchPlumeJson, LaunchRelease } from "./LaunchPlume.js"
 import { ParameterRegistry } from "./Parameters.js"
 import type { SaidText } from "../model/SaidText.js"
 import type { NumberParameter, ParameterHolder, ParameterSet, ParameterSpec } from "./Parameters.js"
@@ -200,8 +200,127 @@ export class LaunchParameters {
     ] satisfies ParameterSpec[])
   }
 
+  /** What a jet's form is told besides the jet: the launch it belongs to and where it stands among its jets, for the values in force. */
+  static jetContext(launch: LaunchJson, index: number): JetContext {
+    return { launch, index }
+  }
+
+  /** The value a jet uses for `key` when it does not state it: the launch's plume for a burn, the vent's defaults for a vent. */
+  private static jetValue(read: (release: LaunchRelease) => number | undefined): (element: ParameterHolder, context?: unknown) => number | undefined {
+    return (element, context) => {
+      const { launch, index } = context as JetContext ?? {}
+      return launch ? read(LaunchPlumeSighting.releaseOf(launch, element as unknown as LaunchJetJson, index)) : undefined
+    }
+  }
+
+  private static readonly JET_GROUP: SaidText = { en: "Jet", fr: "Jet", es: "Chorro", it: "Getto" }
+
+  /**
+   * One jet of a launch: another burn of its engine, or propellant vented from its tanks (see LaunchJetJson), edited one at a time
+   * (see LaunchEditor). A field left empty shows what the jet uses: the launch's plume for a burn, a vent's defaults for a vent.
+   */
+  static readonly JET: ParameterSet = {
+    kind: "launch-jet",
+    title: { en: "Jet", fr: "Jet", es: "Chorro", it: "Getto" },
+    parameters: ([
+      {
+        type: "choice", key: "kind", required: true,
+        label: { en: "What", fr: "Quoi", es: "Qué", it: "Cosa" },
+        choices: [
+          { value: "burn", label: { en: "Engine burn", fr: "Allumage du moteur", es: "Encendido del motor", it: "Accensione del motore" } },
+          { value: "vent", label: { en: "Propellant vented", fr: "Ergols vidangés", es: "Propelentes purgados", it: "Propellenti scaricati" } }
+        ],
+        group: LaunchParameters.JET_GROUP
+      },
+      {
+        type: "number", key: "fromT", min: -36000, max: 36000, step: 0.1, unit: "s", scale: 0.001, required: true,
+        label: { en: "From", fr: "Début", es: "Desde", it: "Da" },
+        hint: { en: "Seconds of the recording; negative before it began.", fr: "Secondes de l'enregistrement ; négatives avant son début.",
+          es: "Segundos de la grabación; negativos antes de que empezara.", it: "Secondi della registrazione; negativi prima del suo inizio." },
+        group: LaunchParameters.JET_GROUP
+      },
+      {
+        type: "number", key: "untilT", min: -36000, max: 36000, step: 0.1, unit: "s", scale: 0.001, required: true,
+        label: { en: "Until", fr: "Fin", es: "Hasta", it: "Fino a" },
+        group: LaunchParameters.JET_GROUP
+      },
+      {
+        type: "number", key: "angleDeg", min: 0, max: 180, step: 1, unit: "°", effective: () => 0,
+        label: { en: "Direction from aft", fr: "Direction depuis l'arrière", es: "Dirección desde atrás", it: "Direzione da dietro" },
+        hint: { en: "0 straight back along the stage's motion (an engine pushing it on), 90 sideways, 180 straight ahead (an engine braking it).",
+          fr: "0 droit vers l'arrière du mouvement de l'étage (un moteur qui le pousse), 90 sur le côté, 180 droit devant (un moteur qui le freine).",
+          es: "0 hacia atrás del movimiento de la etapa (un motor que la empuja), 90 de lado, 180 hacia delante (un motor que la frena).",
+          it: "0 dritto all'indietro rispetto al moto dello stadio (un motore che lo spinge), 90 di lato, 180 dritto in avanti (un motore che lo frena)." },
+        group: LaunchParameters.JET_GROUP
+      },
+      {
+        type: "number", key: "azimuthDeg", min: -360, max: 360, step: 1, unit: "°", effective: () => 0,
+        label: { en: "Side", fr: "Côté", es: "Lado", it: "Lato" },
+        hint: { en: "Round the line of motion, which side it leaves on at the start: 0 away from the Earth, 90 to the right of the motion.",
+          fr: "Autour de la ligne du mouvement, le côté par lequel il part au début : 0 à l'opposé de la Terre, 90 à droite du mouvement.",
+          es: "Alrededor de la línea del movimiento, el lado por el que sale al principio: 0 opuesto a la Tierra, 90 a la derecha del movimiento.",
+          it: "Attorno alla linea del moto, il lato da cui esce all'inizio: 0 opposto alla Terra, 90 a destra del moto." },
+        group: LaunchParameters.JET_GROUP
+      },
+      {
+        type: "number", key: "spinPeriodS", min: -3600, max: 3600, step: 0.1, unit: "s",
+        label: { en: "Spin period", fr: "Période de rotation", es: "Período de giro", it: "Periodo di rotazione" },
+        hint: { en: "How long the stage takes to turn once round its line of motion; the jet turns with it and vented propellant draws a spiral. Negative turns the other way. Empty: it does not turn.",
+          fr: "Le temps que met l'étage à faire un tour autour de sa ligne de mouvement ; le jet tourne avec lui et les ergols vidangés dessinent une spirale. Négative : dans l'autre sens. Vide : il ne tourne pas.",
+          es: "Lo que tarda la etapa en dar una vuelta alrededor de su línea de movimiento; el chorro gira con ella y los propelentes purgados dibujan una espiral. Negativo: en el otro sentido. Vacío: no gira.",
+          it: "Il tempo che lo stadio impiega a fare un giro attorno alla sua linea di moto; il getto gira con lui e i propellenti scaricati disegnano una spirale. Negativo: nell'altro verso. Vuoto: non gira." },
+        group: LaunchParameters.JET_GROUP
+      },
+      {
+        type: "number", key: "speedKmPerS", min: 0, max: 10, step: 0.01, unit: "km/s", effective: LaunchParameters.jetValue(release => release.speedKmPerS),
+        label: { en: "Speed", fr: "Vitesse", es: "Velocidad", it: "Velocità" },
+        hint: { en: "How fast it leaves the stage. A burn: the engine's exhaust velocity.", fr: "La vitesse à laquelle il quitte l'étage. Un allumage : la vitesse d'éjection du moteur.",
+          es: "La velocidad con que sale de la etapa. Un encendido: la velocidad de escape del motor.", it: "La velocità con cui lascia lo stadio. Un'accensione: la velocità di scarico del motore." },
+        group: LaunchParameters.JET_GROUP
+      },
+      {
+        type: "number", key: "massKgPerS", min: 0, max: 100000, step: 0.1, unit: "kg/s", effective: LaunchParameters.jetValue(release => release.massKgPerS),
+        label: { en: "Flow", fr: "Débit", es: "Caudal", it: "Portata" },
+        group: LaunchParameters.JET_GROUP
+      },
+      {
+        type: "number", key: "condensedShare", min: 0, max: 1, step: 0.01, effective: LaunchParameters.jetValue(release => release.condensedShare),
+        label: { en: "Share that scatters", fr: "Part qui diffuse", es: "Parte que difunde", it: "Parte che diffonde" },
+        group: LaunchParameters.JET_GROUP
+      },
+      {
+        type: "number", key: "particleRadiusUm", min: 0.05, max: 5, step: 0.05, unit: "µm", effective: LaunchParameters.jetValue(release => release.particleRadiusUm),
+        label: { en: "Particle radius", fr: "Rayon des particules", es: "Radio de las partículas", it: "Raggio delle particelle" },
+        group: LaunchParameters.JET_GROUP
+      },
+      {
+        type: "number", key: "expansionKmPerS", min: 0, max: 5, step: 0.01, unit: "km/s", effective: LaunchParameters.jetValue(release => release.populations[0].expansionKmPerS),
+        label: { en: "Spreading", fr: "Étalement", es: "Expansión", it: "Espansione" },
+        hint: { en: "How fast each puff of it widens: a narrow jet keeps the arms of a spiral apart.", fr: "La vitesse à laquelle chaque bouffée s'élargit : un jet étroit garde les bras d'une spirale séparés.",
+          es: "La rapidez con que se ensancha cada bocanada: un chorro estrecho mantiene separados los brazos de una espiral.", it: "Quanto in fretta si allarga ogni sbuffo: un getto stretto tiene separati i bracci di una spirale." },
+        group: LaunchParameters.JET_GROUP
+      },
+      {
+        type: "number", key: "initialRadiusKm", min: 0, max: 50, step: 0.1, unit: "km", effective: LaunchParameters.jetValue(release => release.initialRadiusKm),
+        label: { en: "Radius at release", fr: "Rayon au lâcher", es: "Radio al soltar", it: "Raggio al rilascio" },
+        group: LaunchParameters.JET_GROUP
+      },
+      {
+        type: "number", key: "lifetimeS", min: 1, max: 7200, step: 1, unit: "s", effective: LaunchParameters.jetValue(release => release.populations[0].lifetimeS),
+        label: { en: "Lifetime", fr: "Durée", es: "Duración", it: "Durata" },
+        group: LaunchParameters.JET_GROUP
+      }
+    ] satisfies ParameterSpec[])
+  }
+
   /** Makes the launch kind known to whatever builds forms from the registry. */
   static publish(): void {
     ParameterRegistry.publish(LaunchParameters.SET)
   }
+}
+
+/** See LaunchParameters.jetContext. */
+interface JetContext {
+  launch: LaunchJson
+  index: number
 }

@@ -12,6 +12,13 @@ export const launchEditorMessages_it: LaunchEditorMessages = {
   deletePlace: "Rimuovi questo punto",
   previousPlace: "Punto precedente",
   nextPlace: "Punto successivo",
+  jets: "Getti",
+  jet: "Getto",
+  noJet: "Nessuno: il motore brucia lungo il percorso",
+  addJet: "Aggiungere un getto",
+  deleteJet: "Togliere questo getto",
+  jetBurn: "Accensione del motore",
+  jetVent: "Propellenti scaricati",
   addLaunchNowhere: "Dia prima un luogo alla registrazione: un lancio è posto davanti all'osservatore",
   derivedNote: "Un campo vuoto mostra, in grigio, il valore usato: il predefinito, o ciò che implica il motore. Svuota un campo per tornarci."
 }

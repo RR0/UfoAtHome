@@ -497,6 +497,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "nrol-69-spiral",
+          src: "/demo-data/sky-test-nrol-69-spiral.json",
+          title: { en: "A rocket's spiral", fr: "Une spirale de fusée", es: "Una espiral de cohete", it: "Una spirale di razzo" },
+          blurb: {
+            en: "Angoulême, 24 March 2025 at 20:55: the upper stage that launched NROL-69 braking out of orbit 1 000 km above northern Europe and venting its tanks while it spins. A spiral face on, an S, a halo, a line edge on: the same cloud, from where it passes.",
+            fr: "Angoulême, 24 mars 2025 à 20 h 55 : le deuxième étage qui a lancé NROL-69 freine pour quitter son orbite à 1 000 km au-dessus du nord de l'Europe et vidange ses réservoirs en tournant. Une spirale de face, un S, un halo, une ligne par la tranche : le même nuage, selon où il passe.",
+            es: "Angulema, 24 de marzo de 2025 a las 20:55: la segunda etapa que lanzó NROL-69 frena para salir de su órbita a 1 000 km sobre el norte de Europa y purga sus depósitos mientras gira. Una espiral de frente, una S, un halo, una línea de canto: la misma nube, según por dónde pasa.",
+            it: "Angoulême, 24 marzo 2025 alle 20:55: il secondo stadio che lanciò NROL-69 frena per lasciare l'orbita a 1 000 km sopra il nord Europa e scarica i serbatoi ruotando. Una spirale di fronte, una S, un alone, una linea di taglio: la stessa nube, secondo dove passa."
+          }
+        },
+        {
           id: "laser-meudon",
           src: "/demo-data/sky-test-laser-meudon.json",
           title: { en: "A laser beam", fr: "Un faisceau laser", es: "Un haz láser", it: "Un fascio laser" },

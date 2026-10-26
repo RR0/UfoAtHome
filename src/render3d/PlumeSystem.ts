@@ -1,5 +1,6 @@
 import { BufferAttribute, BufferGeometry, Group, Mesh, type MeshBasicMaterial } from "three"
 import type { HorizontalPosition } from "../engine/astronomy/CelestialPositions.js"
+import { LaunchPlumeSighting } from "../engine/interpretation/LaunchPlume.js"
 import type { PlumePuffView } from "../engine/interpretation/LaunchPlume.js"
 import { SkyRibbons } from "./SkyRibbons.js"
 import { horizontalToCartesian } from "./skyColors.js"
@@ -14,11 +15,11 @@ interface Vector {
  * Draws a rocket's plume lit by a Sun the ground no longer sees: each puff of it (see
  * LaunchPlumeSighting) a soft disc of light on the sky, as wide as the puff has spread by then.
  *
- * Each disc is the column of a uniform sphere of particles seen from afar: brightest across the
- * middle, falling to nothing at the edge as the chord through a sphere does, which is the look of
- * the "jellyfish" bells (a dome whose rim is dim) and of their lengthening trails. Discs add, as
- * light does, so the overlap of many puffs a few seconds apart is the glow along the track and a
- * single young puff is the bright head.
+ * Each disc is the column of a diffusing cloud of particles seen from afar: brightest across the
+ * middle and fading out, with no edge, as a Gaussian does (see LaunchPlumeSighting.SIGMA_OF_RADIUS),
+ * which is the look of the "jellyfish" bells (a dome whose rim is dim), of their lengthening trails
+ * and of the soft arms of a spiral. Discs add, as light does, so the overlap of many puffs a few
+ * seconds apart is the glow along the track and a single young puff is the bright head.
  *
  * In the celestial group, at the radius meteors burn at: a plume stands hundreds of kilometres off
  * and shows no parallax against a few metres of eye height. Drawn as the ribbons are, into the
@@ -26,13 +27,20 @@ interface Vector {
  */
 export class PlumeSystem {
   private static readonly RADIUS = 840
-  private static readonly MAX_PUFFS = 640
-  /** Where the rings stand as a share of the radius, and how much of the middle's light each has: the chord of a sphere, sqrt(1 - r^2). */
-  private static readonly RINGS = [0, 0.5, 0.85, 1] as const
-  private static readonly COLUMN = PlumeSystem.RINGS.map(ring => Math.sqrt(Math.max(0, 1 - ring * ring)))
+  private static readonly MAX_PUFFS = 1000
+  /**
+   * Where the rings stand as a share of the radius, and how much of the middle's light each has: a Gaussian of a standard deviation
+   * of half the radius, cut at a radius and a quarter where it has fallen to a twentieth, and lowered by that so it ends at nothing.
+   */
+  private static readonly RINGS = [0, 0.25, 0.5, 0.75, 1, 1.25] as const
+  private static readonly COLUMN = PlumeSystem.RINGS.map(ring => {
+    const gaussian = (r: number) => Math.exp(-((r / LaunchPlumeSighting.SIGMA_OF_RADIUS) ** 2) / 2)
+    const edge = gaussian(PlumeSystem.RINGS[PlumeSystem.RINGS.length - 1])
+    return Math.max(0, (gaussian(ring) - edge) / (1 - edge))
+  })
   private static readonly SECTORS = 12
-  /** Fan of the middle, then two bands of two triangles per sector. */
-  private static readonly VERTICES_PER_PUFF = PlumeSystem.SECTORS * (3 + 6 + 6)
+  /** Fan of the middle, then a band of two triangles per sector between each two rings. */
+  private static readonly VERTICES_PER_PUFF = PlumeSystem.SECTORS * (3 + 6 * (PlumeSystem.RINGS.length - 2))
   /** The most a pixel is ever given, relative: under a half float's largest, which is 65 504. */
   private static readonly BRIGHTEST_RELATIVE = 60000
 
@@ -75,7 +83,7 @@ export class PlumeSystem {
       const arriving = air(view.centre)
       const colour = [0, 1, 2].map(channel => Math.min(
         PlumeSystem.BRIGHTEST_RELATIVE,
-        view.luminanceCdM2 * relativeScale * view.sunTransmittance[channel] * arriving[channel] * through
+        view.luminanceCdM2 * (view.colour?.[channel] ?? 1) * relativeScale * view.sunTransmittance[channel] * arriving[channel] * through
       )) as [number, number, number]
       if (Math.max(...colour) <= 0) continue
       vertex = this.pushPuff(vertex, view, colour)
@@ -109,7 +117,7 @@ export class PlumeSystem {
       vertex = this.push(vertex, centre, colour, level(0))
       vertex = this.push(vertex, ring(1, s), colour, level(1))
       vertex = this.push(vertex, ring(1, next), colour, level(1))
-      for (const band of [1, 2] as const) {
+      for (let band = 1; band < PlumeSystem.RINGS.length - 1; band++) {
         const a = ring(band, s)
         const b = ring(band, next)
         const c = ring(band + 1, s)

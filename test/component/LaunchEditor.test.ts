@@ -205,4 +205,37 @@ describe("LaunchEditor", () => {
     expect(container.querySelector<HTMLSelectElement>("#launch-place")!.value).toBe("1")
     expect(placeCell("t").value).toBe("90")
   })
+
+  describe("jets", () => {
+    test("a vent added to a launch is listed, shows the vent's values in force, and keeps the ascent's burn drawn", () => {
+      const { sighting, changes } = build()
+      container.querySelector<HTMLButtonElement>("#launch-jet-add-vent")!.click()
+      const launch = sighting.skyEvents!.launches![0]
+      expect(launch.jets).toEqual([{ kind: "vent", fromT: 30000, untilT: 60000, angleDeg: 90 }])
+      // The ascent's burn, which jets would otherwise replace, is stated.
+      expect([launch.burnFromT, launch.burnUntilT]).toEqual([0, 60000])
+      expect(changes()).toBe(1)
+      expect([...container.querySelectorAll<HTMLOptionElement>("#launch-jet option")].map(option => option.textContent)).toEqual(["Propellant vented 30 s"])
+      expect(field("speedKmPerS").placeholder).toBe("0.7")
+      expect(field("angleDeg").value).toBe("90")
+    })
+
+    test("a burn's values in force are the launch's engine's, and what is typed is written onto the jet", () => {
+      const { sighting } = build()
+      container.querySelector<HTMLButtonElement>("#launch-jet-add-burn")!.click()
+      expect(field("massKgPerS").placeholder).toBe("273.68")
+      expect(field("speedKmPerS").placeholder).toBe("3.41")
+      typed(field("angleDeg"), "180")
+      typed(field("spinPeriodS"), "60")
+      expect(sighting.skyEvents!.launches![0].jets![0]).toMatchObject({ kind: "burn", angleDeg: 180, spinPeriodS: 60 })
+    })
+
+    test("removing the last jet leaves the launch with none", () => {
+      const { sighting } = build()
+      container.querySelector<HTMLButtonElement>("#launch-jet-add-vent")!.click()
+      container.querySelector<HTMLButtonElement>("#launch-jet-delete")!.click()
+      expect(sighting.skyEvents!.launches![0].jets).toBeUndefined()
+    })
+  })
 })
+
