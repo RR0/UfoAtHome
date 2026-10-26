@@ -1996,57 +1996,57 @@
             "fromT": {
               "value": -60000,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "untilT": {
               "value": 240000,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "angleDeg": {
               "value": 90,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "azimuthDeg": {
               "value": 0,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "spinPeriodS": {
               "value": 90,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "speedKmPerS": {
               "value": 0.7,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "massKgPerS": {
               "value": 20,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "condensedShare": {
               "value": 0.1,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "expansionKmPerS": {
               "value": 0.15,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "particleRadiusUm": {
               "value": 0.1,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "lifetimeS": {
               "value": 900,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             }
           },
           {
@@ -2055,57 +2055,57 @@
             "fromT": {
               "value": -60000,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "untilT": {
               "value": 240000,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "angleDeg": {
               "value": 90,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "azimuthDeg": {
               "value": 180,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "spinPeriodS": {
               "value": 90,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "speedKmPerS": {
               "value": 0.7,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "massKgPerS": {
               "value": 20,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "condensedShare": {
               "value": 0.1,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "expansionKmPerS": {
               "value": 0.15,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "particleRadiusUm": {
               "value": 0.1,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             },
             "lifetimeS": {
               "value": 900,
               "basis": "assumed",
-              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+              "rationale": "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
             }
           }
         ]

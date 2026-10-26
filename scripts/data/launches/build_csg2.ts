@@ -22,7 +22,8 @@
  *
  * ASSUMED: the observer in Nassau (no account of the ascent from there was found); the ascent's path, typical of a Falcon 9 with a
  * southbound dogleg; the instant and size of the braking burn, chosen so that the stage reaches the air at 01:05 UTC; the vents, their
- * speed, flow and the stage's spin, as for the NROL-69 spiral (see build_nrol_69.ts). Computed by the engine: the Sun, the Earth's shadow,
+ * speed, flow and the stage's spin, chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025: Charente Libre,
+ * Reporterre, L'Actuaire d'Isbergues), the best photographed of them. Computed by the engine: the Sun, the Earth's shadow,
  * the flight of the exhaust and its light.
  *
  * Writes ../../../public/demo-data/{observer-csg2-nassau,observer-csg2-falcon,case-csg2}.json. Run with `node --import tsx`.
@@ -71,7 +72,7 @@ const DOGLEG = { from: 160, to: 192 }
 const ASCENT_RATIONALE = "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
 const ORBIT_RATIONALE = "CSG-2's own first elements from Space-Track (2022-008A, epoch 1 February 2022 11:54 UTC, kept in Laurent Chabin's archive), which Bob Christy found the dump to fit (SeeSat-L): the stage flew with its payload until its braking burn. Propagated with SGP4 back to the burn, then as a free orbit slowed by it."
 const BURN_RATIONALE = "Bob Christy (SeeSat-L): by 00:49 UTC the stage had completed its retro-fire, and it hit the atmosphere near 27 S, 114 W at about 01:05 UTC. The burn's instant (00:46 UTC) is assumed; its size is the one that brings the stage down to 100 km where its track crosses 27 S, a few seconds of the throttled Merlin Vacuum with the stage turned round so that its exhaust leaves ahead of it."
-const VENT_RATIONALE = "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As for the NROL-69 spiral, two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
+const VENT_RATIONALE = "Cees Bassa (SeeSat-L) relayed photographs of very distinct spirals: the tanks vented while the stage spun. As chosen on the photographs of the NROL-69 spiral over Europe (24 March 2025), the best photographed of them: two opposite vents across the motion, 0.7 km/s, a tenth freezing, each puff spreading at 0.15 km/s, ice of 0.1 micrometre (blue), a turn of the stage in a minute and a half; but 20 kg/s each for five minutes, six tonnes: CSG-2 weighs some 2.2 tonnes, far less than a Falcon 9 puts into that orbit, so much propellant was left to dump. All assumed."
 
 const assumed = <T>(value: T, rationale: string) => ({ value, basis: "assumed", rationale })
 const stated = <T>(value: T, rationale: string) => ({ value, basis: "stated", rationale })
