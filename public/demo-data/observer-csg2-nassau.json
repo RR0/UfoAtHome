@@ -1,0 +1,896 @@
+{
+  "version": 1,
+  "id": "observer-csg2-nassau",
+  "image": "https://ufoathome.org/demo-data/share/csg2-nassau.jpg",
+  "tags": [
+    "rocket launch",
+    "space jellyfish",
+    "twilight phenomenon",
+    "Falcon 9",
+    "assumed observer"
+  ],
+  "summaryTime": 180,
+  "description": {
+    "en": "The CSG-2 launch as an observer in Nassau would have seen it, 31 January 2022 just after sunset: a Falcon 9 from Cape Canaveral flying south past the Bahamas, 200 km to the west, its second stage burning 100 to 185 km up where the Sun still shines, between the eye and the set Sun. No account from there was found: this observer is assumed, put where the physics says the plume could be seen (from Orlando the sky was still too bright and the plume too low), and what it shows is what the engine computes, the Sun, the Earth's shadow, the spreading and the light. The same stage is seen an hour and a half later from Colorado (see the case).",
+    "fr": "Le lancement de CSG-2 tel qu'un observateur à Nassau l'aurait vu, le 31 janvier 2022 juste après le coucher du Soleil : un Falcon 9 parti de Cap Canaveral passant vers le sud le long des Bahamas, à 200 km à l'ouest, son deuxième étage brûlant entre 100 et 185 km d'altitude, là où le Soleil brille encore, entre l'œil et le Soleil couché. Aucun compte rendu n'a été trouvé de là : cet observateur est supposé, placé là où la physique dit que le panache pouvait se voir (d'Orlando le ciel était encore trop clair et le panache trop bas), et ce qu'il montre est ce que le moteur calcule, le Soleil, l'ombre de la Terre, l'étalement et la lumière. Le même étage est vu une heure et demie plus tard depuis le Colorado (voir le dossier).",
+    "es": "El lanzamiento de CSG-2 tal como lo habría visto un observador en Nassau, el 31 de enero de 2022 justo después de la puesta del Sol: un Falcon 9 salido de Cabo Cañaveral pasando hacia el sur junto a las Bahamas, a 200 km al oeste, su segunda etapa ardiendo entre 100 y 185 km de altura, donde el Sol aún brilla, entre el ojo y el Sol puesto. No se encontró ningún relato desde allí: este observador se supone, situado donde la física dice que la estela podía verse (desde Orlando el cielo era aún demasiado claro y la estela demasiado baja), y lo que muestra es lo que calcula el motor, el Sol, la sombra de la Tierra, la expansión y la luz. La misma etapa se ve hora y media después desde Colorado (véase el caso).",
+    "it": "Il lancio di CSG-2 come l'avrebbe visto un osservatore a Nassau, il 31 gennaio 2022 subito dopo il tramonto: un Falcon 9 partito da Cape Canaveral che passa verso sud lungo le Bahamas, 200 km a ovest, il secondo stadio che brucia tra 100 e 185 km di quota, dove il Sole splende ancora, tra l'occhio e il Sole tramontato. Non è stato trovato alcun resoconto da lì: questo osservatore è supposto, posto dove la fisica dice che la scia poteva vedersi (da Orlando il cielo era ancora troppo chiaro e la scia troppo bassa), e ciò che mostra è ciò che il motore calcola, il Sole, l'ombra della Terra, l'espansione e la luce. Lo stesso stadio è visto un'ora e mezza dopo dal Colorado (vedi il caso)."
+  },
+  "time": {
+    "year": 2022,
+    "month": 1,
+    "day": 31,
+    "hour": 18,
+    "minute": 13,
+    "second": 0
+  },
+  "utcOffsetHours": -5,
+  "durationSeconds": 480,
+  "place": [
+    {
+      "lat": 25.048,
+      "lng": -77.3554,
+      "name": "Nassau, Bahamas"
+    }
+  ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": {
+            "value": 0,
+            "basis": "assumed",
+            "rationale": "No account from Nassau: no cloud is stated, a clear sky is assumed."
+          },
+          "cloudDarkness": 0,
+          "cloudBaseM": 2000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 0,
+          "windSpeed": 0,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 320.1,
+          "pitchDeg": 8,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 10000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 319.8,
+          "pitchDeg": 8,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 20000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 319.3,
+          "pitchDeg": 8.2,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 30000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 318.8,
+          "pitchDeg": 9.1,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 40000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 318.3,
+          "pitchDeg": 10.1,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 50000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 317.7,
+          "pitchDeg": 11,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 60000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 316.9,
+          "pitchDeg": 12.1,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 70000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 316.1,
+          "pitchDeg": 13.1,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 80000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 314.7,
+          "pitchDeg": 14.5,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 90000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 312.7,
+          "pitchDeg": 16,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 100000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 310.3,
+          "pitchDeg": 17.7,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 110000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 307.6,
+          "pitchDeg": 19.6,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 120000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 304.5,
+          "pitchDeg": 21.6,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 130000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 300.9,
+          "pitchDeg": 23.8,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 140000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 296.1,
+          "pitchDeg": 26.1,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 150000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 289.9,
+          "pitchDeg": 28.5,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 160000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 282.8,
+          "pitchDeg": 30.8,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 170000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 274.7,
+          "pitchDeg": 32.8,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 180000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 265.9,
+          "pitchDeg": 34.3,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 190000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 256.8,
+          "pitchDeg": 35.1,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 200000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 246.4,
+          "pitchDeg": 34.9,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 210000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 236.2,
+          "pitchDeg": 33.8,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 220000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 227.6,
+          "pitchDeg": 32,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 230000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 220.5,
+          "pitchDeg": 30,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 240000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 214.9,
+          "pitchDeg": 28,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 250000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 210.4,
+          "pitchDeg": 26.1,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 260000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 206.6,
+          "pitchDeg": 24.1,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 270000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 203.5,
+          "pitchDeg": 22.2,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 280000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 201,
+          "pitchDeg": 20.6,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 290000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 199,
+          "pitchDeg": 19.1,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 300000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 197.5,
+          "pitchDeg": 17.8,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 310000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 196.2,
+          "pitchDeg": 16.6,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 320000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 195.2,
+          "pitchDeg": 15.5,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 330000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 194.3,
+          "pitchDeg": 14.4,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 340000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 193.7,
+          "pitchDeg": 13.4,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 350000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 193.2,
+          "pitchDeg": 12.5,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 360000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 192.8,
+          "pitchDeg": 11.7,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 370000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 192.5,
+          "pitchDeg": 10.9,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 380000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 192.4,
+          "pitchDeg": 10.2,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 390000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 192.3,
+          "pitchDeg": 9.5,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 400000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 192.2,
+          "pitchDeg": 8.8,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 410000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 192.2,
+          "pitchDeg": 8.6,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 420000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 192.2,
+          "pitchDeg": 8.6,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 430000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 192.2,
+          "pitchDeg": 8.6,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 440000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 192.2,
+          "pitchDeg": 8.6,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 450000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 192.2,
+          "pitchDeg": 8.6,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 460000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 192.2,
+          "pitchDeg": 8.6,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 470000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 192.2,
+          "pitchDeg": 8.6,
+          "fovDeg": 70
+        }
+      },
+      {
+        "t": 480000,
+        "pose": {
+          "lat": 25.048,
+          "lng": -77.3554,
+          "elevationM": 10,
+          "headingDeg": 192.2,
+          "pitchDeg": 8.6,
+          "fovDeg": 70
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": [],
+  "skyEvents": {
+    "launches": [
+      {
+        "id": "csg-2",
+        "title": {
+          "en": "Upper stage of the CSG-2 launch",
+          "fr": "Deuxième étage du lancement de CSG-2",
+          "es": "Segunda etapa del lanzamiento de CSG-2",
+          "it": "Secondo stadio del lancio di CSG-2"
+        },
+        "vehicle": {
+          "name": "Falcon 9",
+          "mission": "COSMO-SkyMed Second Generation FM2 (CSG-2)",
+          "engine": {
+            "thrustKN": {
+              "value": 934,
+              "basis": "stated",
+              "rationale": "SpaceX: a Merlin Vacuum's thrust in vacuum, 934 kN (the Falcon 9 second stage has one)."
+            },
+            "specificImpulseS": {
+              "value": 348,
+              "basis": "stated",
+              "rationale": "SpaceX: a Merlin Vacuum's specific impulse in vacuum, 348 s."
+            },
+            "propellant": {
+              "value": "rp1-lox",
+              "basis": "stated",
+              "rationale": "The Falcon 9 burns RP-1 kerosene and liquid oxygen."
+            }
+          }
+        },
+        "track": [
+          {
+            "t": -106000,
+            "lat": {
+              "value": 28.5618,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "lng": {
+              "value": -80.5772,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "altitudeKm": {
+              "value": 0,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            }
+          },
+          {
+            "t": -76000,
+            "lat": {
+              "value": 28.5576,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "lng": {
+              "value": -80.5754,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "altitudeKm": {
+              "value": 3,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            }
+          },
+          {
+            "t": -46000,
+            "lat": {
+              "value": 28.5195,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "lng": {
+              "value": -80.5597,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "altitudeKm": {
+              "value": 11,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            }
+          },
+          {
+            "t": -16000,
+            "lat": {
+              "value": 28.4096,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "lng": {
+              "value": -80.5145,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "altitudeKm": {
+              "value": 27,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            }
+          },
+          {
+            "t": 14000,
+            "lat": {
+              "value": 28.2061,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "lng": {
+              "value": -80.4329,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "altitudeKm": {
+              "value": 47,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            }
+          },
+          {
+            "t": 49000,
+            "lat": {
+              "value": 27.8996,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "lng": {
+              "value": -80.3146,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "altitudeKm": {
+              "value": 68,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            }
+          },
+          {
+            "t": 74000,
+            "lat": {
+              "value": 27.626,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "lng": {
+              "value": -80.2137,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "altitudeKm": {
+              "value": 82,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            }
+          },
+          {
+            "t": 134000,
+            "lat": {
+              "value": 26.243,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "lng": {
+              "value": -79.769,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "altitudeKm": {
+              "value": 112,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            }
+          },
+          {
+            "t": 194000,
+            "lat": {
+              "value": 24.4848,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "lng": {
+              "value": -79.3515,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "altitudeKm": {
+              "value": 134,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            }
+          },
+          {
+            "t": 254000,
+            "lat": {
+              "value": 22.2104,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "lng": {
+              "value": -79.0388,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "altitudeKm": {
+              "value": 154,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            }
+          },
+          {
+            "t": 314000,
+            "lat": {
+              "value": 19.6493,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "lng": {
+              "value": -78.9737,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "altitudeKm": {
+              "value": 169,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            }
+          },
+          {
+            "t": 374000,
+            "lat": {
+              "value": 16.8739,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "lng": {
+              "value": -79.233,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "altitudeKm": {
+              "value": 180,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            }
+          },
+          {
+            "t": 404000,
+            "lat": {
+              "value": 15.4578,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "lng": {
+              "value": -79.4972,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            },
+            "altitudeKm": {
+              "value": 185,
+              "basis": "assumed",
+              "rationale": "No path of the ascent is published beyond its warning areas: assumed to leave Launch Complex 40 south-southeast along the coast and turn south-southwest between the Bahamas and Cuba into the plane of Marco Langbroek's elset (the 'dogleg' that avoids overflying Florida), with the downrange distance and height a Falcon 9 second stage typically has by that second."
+            }
+          }
+        ],
+        "burnFromT": {
+          "value": 49000,
+          "basis": "assumed",
+          "rationale": "The second stage's single vacuum engine lights when the first stage's stop, at about T+2:35, and burns until the parking orbit at about T+8:30: typical of a Falcon 9, not stated for this flight. The first stage's own exhaust, lower and in thicker air, is left out."
+        },
+        "burnUntilT": {
+          "value": 404000,
+          "basis": "assumed",
+          "rationale": "The second stage's single vacuum engine lights when the first stage's stop, at about T+2:35, and burns until the parking orbit at about T+8:30: typical of a Falcon 9, not stated for this flight. The first stage's own exhaust, lower and in thicker air, is left out."
+        }
+      }
+    ]
+  }
+}

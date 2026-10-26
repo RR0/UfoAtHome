@@ -1,0 +1,34 @@
+{
+  "id": "CSG2-2022",
+  "title": "CSG-2",
+  "time": "2022-01-31 23:11",
+  "summary": {
+    "en": "31 January 2022, 23:11 UTC. A Falcon 9 launches the Italian radar satellite CSG-2 south from Cape Canaveral just after sunset. An hour and a half later its upper stage, back over North America on its first orbit, brakes out of orbit and vents its tanks while it spins: Ron Lee sees it due east from Colorado and reports it on SeeSat-L, others photograph spirals from Oklahoma and Texas. One stage, two skies: the plume of the ascent from Nassau (an observer assumed), the dump from Falcon, Colorado.",
+    "fr": "31 janvier 2022, 23 h 11 UTC. Un Falcon 9 lance le satellite radar italien CSG-2 vers le sud depuis Cap Canaveral juste après le coucher du Soleil. Une heure et demie plus tard, son deuxième étage, revenu au-dessus de l'Amérique du Nord dès sa première orbite, freine pour quitter son orbite et vidange ses réservoirs en tournant : Ron Lee le voit plein est depuis le Colorado et le rapporte sur SeeSat-L, d'autres photographient des spirales depuis l'Oklahoma et le Texas. Un étage, deux ciels : le panache de la montée depuis Nassau (un observateur supposé), la vidange depuis Falcon (Colorado).",
+    "es": "31 de enero de 2022, 23:11 UTC. Un Falcon 9 lanza el satélite radar italiano CSG-2 hacia el sur desde Cabo Cañaveral justo después de la puesta del Sol. Hora y media más tarde, su segunda etapa, de vuelta sobre América del Norte en su primera órbita, frena para salir de su órbita y purga sus depósitos mientras gira: Ron Lee la ve al este desde Colorado y la cuenta en SeeSat-L, otros fotografían espirales desde Oklahoma y Texas. Una etapa, dos cielos: la estela del ascenso desde Nassau (un observador supuesto), la purga desde Falcon (Colorado).",
+    "it": "31 gennaio 2022, 23:11 UTC. Un Falcon 9 lancia il satellite radar italiano CSG-2 verso sud da Cape Canaveral subito dopo il tramonto. Un'ora e mezza dopo il suo secondo stadio, tornato sopra il Nord America alla prima orbita, frena per lasciare l'orbita e scarica i serbatoi ruotando: Ron Lee lo vede a est dal Colorado e lo riferisce su SeeSat-L, altri fotografano spirali dall'Oklahoma e dal Texas. Uno stadio, due cieli: la scia dell'ascesa da Nassau (un osservatore supposto), lo scarico da Falcon (Colorado)."
+  },
+  "events": [
+    {
+      "type": "event",
+      "eventType": "sighting",
+      "time": "2022-01-31 23:13",
+      "id": "nassau",
+      "title": {
+        "en": "Observer in Nassau (assumed)",
+        "fr": "Observateur à Nassau (supposé)",
+        "es": "Observador en Nassau (supuesto)",
+        "it": "Osservatore a Nassau (supposto)"
+      },
+      "url": "observer-csg2-nassau.json"
+    },
+    {
+      "type": "event",
+      "eventType": "sighting",
+      "time": "2022-02-01 00:47",
+      "id": "ron-lee",
+      "title": "Ron Lee",
+      "url": "observer-csg2-falcon.json"
+    }
+  ]
+}

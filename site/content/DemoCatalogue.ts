@@ -91,10 +91,10 @@ export class DemoCatalogue {
       section: "sightings",
       heading: { en: "Real sightings", fr: "Des observations réelles", es: "Avistamientos reales", it: "Avvistamenti reali" },
       intro: {
-        en: "Fourteen documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Quatorze dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
-        es: "Catorce casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
-        it: "Quattordici casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
+        en: "Fifteen documented cases, each replayed in the sky of its own reported date, time and place.",
+        fr: "Quinze dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
+        es: "Quince casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
+        it: "Quindici casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
       },
       demos: [
         {
@@ -318,6 +318,20 @@ export class DemoCatalogue {
             fr: "Gonesse, 30 décembre 2025, 16 h 10 UTC : les avions qui étaient réellement dans ce ciel, d'après le relevé d'adsb.lol. Leurs feux, le Soleil qui les éclaire encore quand le sol l'a perdu, la traînée que leurs moteurs laissent là où l'air en altitude le permet, et le son de ceux qu'on pouvait entendre. Pointez-en un pour lire ce que le relevé en dit. Un candidat compatible, jamais une identification.",
             es: "Gonesse, 30 de diciembre de 2025, 16:10 UTC: los aviones que realmente estaban en este cielo, según el registro de adsb.lol. Sus luces, el Sol que aún los ilumina cuando el suelo lo ha perdido, la estela que dejan sus motores donde el aire en altura lo permite y el sonido de los que podían oírse. Apunte a uno para leer lo que el registro dice de él. Un candidato compatible, nunca una identificación.",
             it: "Gonesse, 30 dicembre 2025, 16:10 UTC: gli aerei che erano davvero in questo cielo, secondo l'archivio di adsb.lol. Le loro luci, il Sole che li illumina ancora quando il suolo l'ha perso, la scia che i loro motori lasciano dove l'aria in quota lo consente e il suono di quelli che si potevano sentire. Puntatene uno per leggere cosa dice l'archivio. Un candidato compatibile, mai un'identificazione."
+          }
+        },
+        {
+          id: "csg2",
+          src: "/demo-data/observer-csg2-falcon.json",
+          // The case, for the player: the same upper stage at its launch and at its end, an hour and a half and 2 500 km apart.
+          playSrc: "/demo-data/case-csg2.json",
+          title: { en: "CSG-2, 2022", fr: "CSG-2, 2022", es: "CSG-2, 2022", it: "CSG-2, 2022" },
+          titleIsName: true,
+          blurb: {
+            en: "Falcon, Colorado, 1 February 2022 at 00:49 UTC, in twilight: a satellite observer sees a cloud due east that fades going south, and others photograph spirals. The upper stage of a Falcon 9 launched from Florida an hour and a half earlier, braking out of orbit and venting its tanks. Open it full size to switch to its launch, as seen from the Bahamas just after sunset.",
+            fr: "Falcon (Colorado), 1er février 2022 à 0 h 49 UTC, au crépuscule : un observateur de satellites voit un nuage plein est qui faiblit en allant vers le sud, d'autres photographient des spirales. Le deuxième étage d'un Falcon 9 lancé de Floride une heure et demie plus tôt, qui freine pour quitter son orbite et vidange ses réservoirs. Ouvrez-le en grand pour passer à son lancement, vu des Bahamas juste après le coucher du Soleil.",
+            es: "Falcon (Colorado), 1 de febrero de 2022 a las 00:49 UTC, en el crepúsculo: un observador de satélites ve una nube al este que se debilita yendo hacia el sur, otros fotografían espirales. La segunda etapa de un Falcon 9 lanzado desde Florida hora y media antes, que frena para salir de su órbita y purga sus depósitos. Ábrelo a tamaño completo para pasar a su lanzamiento, visto desde las Bahamas justo después de la puesta del Sol.",
+            it: "Falcon (Colorado), 1° febbraio 2022 alle 00:49 UTC, nel crepuscolo: un osservatore di satelliti vede una nube a est che si affievolisce andando verso sud, altri fotografano spirali. Il secondo stadio di un Falcon 9 lanciato dalla Florida un'ora e mezza prima, che frena per lasciare l'orbita e scarica i serbatoi. Aprilo a schermo intero per passare al suo lancio, visto dalle Bahamas subito dopo il tramonto."
           }
         },
         {
