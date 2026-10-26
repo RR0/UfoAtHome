@@ -49,8 +49,13 @@ export class PlumeSystem {
   private readonly positions = new Float32Array(PlumeSystem.MAX_PUFFS * PlumeSystem.VERTICES_PER_PUFF * 3)
   private readonly colors = new Float32Array(PlumeSystem.MAX_PUFFS * PlumeSystem.VERTICES_PER_PUFF * 3)
   private shown = 0
-  /** The puffs as last drawn, with which way each is and how wide it looks: what the pointer is looked for among (see pickAt). */
-  private drawn: { view: PlumePuffView; direction: Vector; radiusRad: number }[] = []
+  /** The puffs as last drawn, with which way each is, how wide it looks and how bright its middle is: what the pointer is looked for among (see pickAt). */
+  private drawn: { view: PlumePuffView; direction: Vector; radiusRad: number; luminance: number }[] = []
+  /**
+   * How much a plume must add to the sky behind it to be seen, as a share of the sky's own light: the eye's threshold of contrast for a patch a
+   * degree or more across is a few percent when it has an edge, and a plume has none, fading out as a Gaussian does: about twice that.
+   */
+  static readonly VISIBLE_CONTRAST = 0.1
 
   constructor() {
     this.object.name = "plumes"
@@ -93,7 +98,8 @@ export class PlumeSystem {
       this.drawn.push({
         view,
         direction: this.normalise(horizontalToCartesian(view.centre.altitudeDeg, view.centre.azimuthDeg, 1)),
-        radiusRad: (view.radiusDeg * Math.PI) / 180
+        radiusRad: (view.radiusDeg * Math.PI) / 180,
+        luminance: 0.2126 * colour[0] + 0.7152 * colour[1] + 0.0722 * colour[2]
       })
       shown++
     }
@@ -142,20 +148,34 @@ export class PlumeSystem {
   }
 
   /**
-   * The puff under a direction of sight, in the frame the plumes are drawn in, within its own radius or `toleranceRad` of it: the one whose
-   * middle is nearest, as a share of its radius, so that a small bright head is found before the wide faint cloud round it.
+   * The puff under a direction of sight, in the frame the plumes are drawn in, where the plume is seen: the light all the puffs add there,
+   * each by the same profile they are drawn with (looked for as far as `toleranceRad` from the direction, so that a puff too small to land on
+   * is found), must stand out from the sky behind by VISIBLE_CONTRAST of `background`, its light in the same units. The puff that adds the most
+   * is the one named. Nothing where the plume has faded into the sky, however wide the cloud it was.
    */
-  pickAt(direction: Vector, toleranceRad: number): PlumePuffView | undefined {
+  pickAt(direction: Vector, toleranceRad: number, background = 0): PlumePuffView | undefined {
     const unit = this.normalise(direction)
-    let best: { view: PlumePuffView; score: number } | undefined
+    let total = 0
+    let best: { view: PlumePuffView; light: number } | undefined
     for (const puff of this.drawn) {
       const cosine = Math.max(-1, Math.min(1, unit.x * puff.direction.x + unit.y * puff.direction.y + unit.z * puff.direction.z))
-      const angle = Math.acos(cosine)
-      if (angle > puff.radiusRad + toleranceRad) continue
-      const score = angle / (puff.radiusRad + toleranceRad)
-      if (!best || score < best.score) best = { view: puff.view, score }
+      const share = Math.max(0, Math.acos(cosine) - toleranceRad) / Math.max(puff.radiusRad, 1e-9)
+      const light = puff.luminance * PlumeSystem.profile(share)
+      if (light <= 0) continue
+      total += light
+      if (!best || light > best.light) best = { view: puff.view, light }
     }
-    return best?.view
+    return best && total >= PlumeSystem.VISIBLE_CONTRAST * background ? best.view : undefined
+  }
+
+  /** How much of a puff's middle light it has at `share` of its radius from its middle: the Gaussian it is drawn with (see RINGS). */
+  private static profile(share: number): number {
+    const rings = PlumeSystem.RINGS
+    if (share >= rings[rings.length - 1]) return 0
+    let i = 0
+    while (share > rings[i + 1]) i++
+    const f = (share - rings[i]) / (rings[i + 1] - rings[i])
+    return PlumeSystem.COLUMN[i] + (PlumeSystem.COLUMN[i + 1] - PlumeSystem.COLUMN[i]) * f
   }
 
   private push(vertex: number, point: Vector, colour: readonly [number, number, number], share: number): number {

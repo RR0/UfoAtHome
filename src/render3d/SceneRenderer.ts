@@ -3950,13 +3950,14 @@ export class SceneRenderer {
   }
 
   /**
-   * The puff of a rocket's plume under a point of the picture (see PlumeSystem.pickAt): within its own radius, or a few pixels round a puff too
-   * small to land on; not one the ground hides.
+   * The puff of a rocket's plume under a point of the picture (see PlumeSystem.pickAt), where it stands out from the sky behind it, or a few
+   * pixels round a puff too small to land on; not one the ground hides.
    */
   pickPlumeAt(ndcX: number, ndcY: number): PlumePuffView | undefined {
     if (!this.plumeSystem?.count) return undefined
     this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
-    const puff = this.plumeSystem.pickAt(this.raycaster.ray.direction, SceneRenderer.BEAM_PICK_PIXELS * this.contrailPixelRad())
+    const direction = this.raycaster.ray.direction
+    const puff = this.plumeSystem.pickAt(direction, SceneRenderer.BEAM_PICK_PIXELS * this.contrailPixelRad(), this.skyLightTowards(direction))
     return puff && this.groundHides(ndcX, ndcY) ? undefined : puff
   }
 
@@ -6072,6 +6073,19 @@ export class SceneRenderer {
     const decor = SceneRenderer.firstSolid(this.raycaster.intersectObjects([...this.decorGroups.values()], true))
     if (decor && decor.distance < hit.distanceM) return undefined
     return hit
+  }
+
+  /**
+   * The light of the sky towards a direction, in the scene's relative units, luminance only: from the horizon's to the zenith's as the
+   * direction rises (see SkyAmbient). Nothing before the scattered sky has been worked out, which is to say every faint thing stands out.
+   */
+  private skyLightTowards(direction: { x: number; y: number; z: number }): number {
+    const ambient = this.scatteredSky?.ambient
+    if (!ambient) return 0
+    const luminance = (rgb: readonly [number, number, number]) => 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
+    const length = Math.hypot(direction.x, direction.y, direction.z) || 1
+    const rise = Math.max(0, Math.min(1, direction.y / length))
+    return luminance(ambient.horizon) + (luminance(ambient.zenith) - luminance(ambient.horizon)) * Math.sqrt(rise)
   }
 
   /** How many pixels either side of a beam's line the pointer finds it: a line one or two pixels wide is otherwise hard to land on. */

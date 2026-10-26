@@ -66,6 +66,17 @@ describe("PlumeSystem", () => {
     expect(system.plumes.pickAt(system.towards(30, 90), 0.01)).toBeUndefined()
     system.plumes.dispose()
   })
+
+  test("is found only where it stands out from the sky behind it: not at its faint edge, nor once it has faded", () => {
+    const system = new PlumePuffSetup()
+    // A puff whose middle adds 2 to a sky of 10: a fifth, well seen; its edge, a fortieth, is not.
+    system.plumes.set([puff({ luminanceCdM2: 2, sunTransmittance: [1, 1, 1], radiusDeg: 2 })], 1, clear, () => 1)
+    expect(system.plumes.pickAt(system.towards(10, 180), 0, 10)).toBeDefined()
+    expect(system.plumes.pickAt(system.towards(10, 182.3), 0, 10)).toBeUndefined()
+    // The same puff against a sky fifty times brighter: nothing to point at.
+    expect(system.plumes.pickAt(system.towards(10, 180), 0, 500)).toBeUndefined()
+    system.plumes.dispose()
+  })
 })
 
 /** A plume system, and the direction of sight towards a point of the sky in the frame it draws in. */
