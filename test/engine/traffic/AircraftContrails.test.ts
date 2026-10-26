@@ -105,4 +105,29 @@ describe("AircraftContrails", () => {
     const set = TrafficDecor.from([flight(1, 36000)], observer, START)
     expect(AircraftContrails.plan(set, undefined, [], START)).toEqual([])
   })
+
+  it("knows how long the air stays supersaturated where a trail lasts, reading it ahead", () => {
+    const set = TrafficDecor.from([flight(1, 36000)], observer, START)
+    const level = (relativeHumidity: number) => [500, 400, 300, 250, 200, 150].map(pressureHpa => ({ pressureHpa, temperatureC: -58, relativeHumidity, windSpeedMs: 20, windFromDeg: 270 }))
+    // Supersaturated now, dry in two hours: the air stops feeding the trail somewhere between.
+    const drying: UpperAirSample[] = [{ t: START - 3_600_000, levels: level(ice(-58) * 1.2) }, { t: START, levels: level(ice(-58) * 1.2) }, { t: START + 7_200_000, levels: level(ice(-58) * 0.5) }]
+    const [trail] = AircraftContrails.plan(set, undefined, drying, START)
+    expect(trail.points[0].persistent).toBe(true)
+    expect(trail.points[0].saturatedForS).toBeGreaterThan(1800)
+    expect(trail.points[0].saturatedForS).toBeLessThan(7200)
+    const [steady] = AircraftContrails.plan(set, undefined, air(-58, ice(-58) * 1.2), START)
+    expect(steady.points[0].saturatedForS).toBe(Infinity)
+  })
+
+  it("keeps a position a minute of what was flown long before the recording, and every one of what is flown during it", () => {
+    const early: AircraftTrack = { icao: 2, nonIcao: false, points: [] }
+    for (let s = -1800; s <= 60; s += 5) early.points.push({ t: START + s * 1000, lat: 48, lng: 2.4 + s * 0.0001, altitudeFt: 36000 })
+    const set = TrafficDecor.from([early], observer, START)
+    const [trail] = AircraftContrails.plan(set, undefined, air(-58, ice(-58) * 1.2), START)
+    const old = trail.points.filter(point => point.tMs < -300_000)
+    const recent = trail.points.filter(point => point.tMs >= -300_000)
+    expect(old.length).toBeLessThanOrEqual(26)
+    expect(recent.length).toBe(73)
+  })
 })
+

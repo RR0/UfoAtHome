@@ -8,6 +8,11 @@ export interface ContrailKind {
   spanM: number
   /** How fast the wind changes with height where it flew, per second: how much it is spread. Typical when not stated. */
   shearPerS?: number
+  /**
+   * For one that persists, how long after it formed the air it is in stays supersaturated over ice, s: past that its ice sublimates.
+   * For as long as the record of the air says when absent.
+   */
+  saturatedForS?: number
 }
 
 /**
@@ -44,13 +49,13 @@ export class ContrailGrowth {
   /** The optical depth of a young trail across it: thick enough to be a white line against a blue sky, thin enough to see the sky through. */
   private static readonly YOUNG_OPTICAL_DEPTH = 0.5
   /**
-   * How much of the dilution by spreading shows in the optical depth: all of it would be the same ice over a wider sheet, and the ice that
-   * grows in the supersaturated air gives half of it back, so that a trail spread over a kilometre or two is still an optical depth of a
+   * How much of the dilution by spreading shows in the optical depth while the air is supersaturated: all of it would be the same ice over a
+   * wider sheet, inversely as the width, and the ice that grows in that air gives half of it back, so that a trail spread over a kilometre or two is still an optical depth of a
    * tenth or two (Voigt et al., 2011, measured some 0.1 to 0.3 in aged trails).
    */
   private static readonly DILUTION_EXPONENT = 0.5
-  /** The time over which the mixing of the trail with the air around it makes it less distinct, s: a sharp young trail is a few minutes, an hour's a faint wide band, and none is seen after two. */
-  private static readonly MIXING_S = 1500
+  /** How long the ice of a trail takes to sublimate once the air around it is no longer supersaturated, s: crystals tens of micrometres across, minutes. */
+  private static readonly SUBLIMATION_S = 600
   /** Under this share of the light stopped a trail is not seen against a sky: it has dispersed. */
   private static readonly INVISIBLE = 0.006
   private static readonly MIN_LIFETIME_S = 15
@@ -90,23 +95,33 @@ export class ContrailGrowth {
   /**
    * How much of the light behind the trail it stops, 0 to 1, at `ageS` after the exhaust left the engines.
    *
-   * One that does not last thins to nothing at the end of its life. One that does thins as it spreads and mixes (the same ice over a
-   * wider sheet, less than proportionally because the ice it takes from the air keeps growing), over minutes, until it is no longer
-   * seen: a trail that lasts is half an hour or an hour of visible white, widening into a band, not a line in the sky for ever.
+   * One that does not last thins to nothing at the end of its life. One that does lives as long as the air around it stays supersaturated
+   * over ice, thinning as it spreads (the same ice over a wider sheet, less than proportionally because the ice it takes from the air keeps
+   * growing): a band widening for hours, as the trails that turn into cirrus do. Once the air is no longer supersaturated, its ice
+   * sublimates within minutes.
    */
   static opacity(ageS: number, kind: ContrailKind): number {
     if (ageS < ContrailGrowth.FORMATION_S) return 0
+    // The young depth is that of the band the wake lets go: spreading dilutes it from there.
+    const released = kind.spanM * ContrailGrowth.VORTEX_SPREAD
+    const width = (age: number) => Math.max(released, ContrailGrowth.widthM(kind.spanM, age, kind.shearPerS))
     let depth: number
     if (kind.persistent) {
-      // The young depth is that of the band the wake lets go: spreading dilutes it from there.
-      const released = kind.spanM * ContrailGrowth.VORTEX_SPREAD
-      const diluted = Math.min(1, released / ContrailGrowth.widthM(kind.spanM, ageS, kind.shearPerS)) ** ContrailGrowth.DILUTION_EXPONENT
-      depth = ContrailGrowth.YOUNG_OPTICAL_DEPTH * diluted * Math.exp(-ageS / ContrailGrowth.MIXING_S)
+      // Fed by the supersaturated air, the ice grows as it spreads: the depth falls as the square root of the width only.
+      const fedUntil = Math.min(ageS, kind.saturatedForS ?? Infinity)
+      depth = ContrailGrowth.YOUNG_OPTICAL_DEPTH * (released / width(fedUntil)) ** ContrailGrowth.DILUTION_EXPONENT
+      const past = ageS - fedUntil
+      if (past > 0) {
+        // No longer fed, the same ice over a wider sheet, inversely as the width, while it sublimates.
+        depth *= (width(fedUntil) / width(ageS)) * Math.max(0, 1 - past / ContrailGrowth.SUBLIMATION_S) ** 2
+      }
     } else {
       if (ageS >= kind.lifetimeS) return 0
-      depth = ContrailGrowth.YOUNG_OPTICAL_DEPTH * (1 - ageS / kind.lifetimeS) ** 2
+      // The ice of a trail that does not persist is what the exhaust brought: spread wider, thinner in proportion, as it sublimates.
+      depth = ContrailGrowth.YOUNG_OPTICAL_DEPTH * (released / width(ageS)) * (1 - ageS / kind.lifetimeS) ** 2
     }
     const opacity = 1 - Math.exp(-depth)
     return opacity < ContrailGrowth.INVISIBLE ? 0 : opacity
   }
+
 }

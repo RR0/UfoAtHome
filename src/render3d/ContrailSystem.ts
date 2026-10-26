@@ -10,6 +10,8 @@ export interface ContrailFrame {
   eye: Vector3
   /** The angle of one pixel of the picture, radians: nothing is drawn thinner. Zero for no limit. */
   pixelRad: number
+  /** Towards the Sun, a unit vector in the scene's frame: which way each part of a trail scatters its light to the eye. Isotropic when absent. */
+  sun?: { x: number; y: number; z: number }
 }
 
 /** A position along a trail at the instant shown, with the air's work on it. */
@@ -36,7 +38,7 @@ interface Sample {
  * the same ice, spread over more of the picture.
  */
 export class ContrailSystem {
-  private static readonly MAX_SEGMENTS = 4000
+  private static readonly MAX_SEGMENTS = 8000
   /** The least a ribbon is drawn across, in pixels, edge to edge: its core is soft, so one pixel would be hit and missed by the rasteriser along its length and break into beads. */
   private static readonly MIN_PIXELS = 2
   /**
@@ -52,6 +54,18 @@ export class ContrailSystem {
   private static readonly STATIONS = [0, 0.5, 1, 1.5, 2.25] as const
   /** Two triangles for each band between two stations, on each side of the middle. */
   private static readonly VERTICES_PER_SEGMENT = 2 * 6 * (ContrailSystem.STATIONS.length - 1)
+  /**
+   * The asymmetry of the light ice crystals scatter, as Henyey-Greenstein's g: mostly forward. A trail between the eye and the Sun is
+   * several times brighter than if it scattered alike every way, one seen from the side four times dimmer, one with the Sun behind the eye
+   * ten times: which is why a trail across the evening sky is a bright line towards the sunset and a faint one away from it.
+   */
+  private static readonly ICE_ASYMMETRY = 0.75
+
+  /** The phase function of ice, normalised to 1 over every direction, at the cosine of the scattering angle. */
+  static phase(cosine: number): number {
+    const g = ContrailSystem.ICE_ASYMMETRY
+    return (1 - g * g) / (1 + g * g - 2 * g * cosine) ** 1.5
+  }
 
   readonly object: Mesh
   readonly group = new Group()
@@ -139,14 +153,23 @@ export class ContrailSystem {
   }
 
   private pushSegment(vertex: number, a: Sample, b: Sample, spanM: number, tint: readonly [number, number, number], frame: ContrailFrame): number {
-    const kind = { persistent: a.point.persistent, lifetimeS: a.point.lifetimeS, spanM, shearPerS: a.point.shearPerS }
-    const opacityA = ContrailGrowth.opacity(a.age, kind)
-    const opacityB = ContrailGrowth.opacity(b.age, kind)
+    // Each end with what the air made of the exhaust at its own position: the next segment starts from the same end, with the same value.
+    const kindOf = (sample: Sample) => ({ persistent: sample.point.persistent, lifetimeS: sample.point.lifetimeS, spanM, shearPerS: sample.point.shearPerS, saturatedForS: sample.point.saturatedForS })
+    const opacityA = ContrailGrowth.opacity(a.age, kindOf(a))
+    const opacityB = ContrailGrowth.opacity(b.age, kindOf(b))
     if (opacityA <= 0 && opacityB <= 0) return vertex
     const along = { x: b.x - a.x, y: b.y - a.y, z: b.z - a.z }
     if (Math.hypot(along.x, along.y, along.z) < 1e-6) return vertex
     const toMid = { x: (a.x + b.x) / 2 - frame.eye.x, y: (a.y + b.y) / 2 - frame.eye.y, z: (a.z + b.z) / 2 - frame.eye.z }
     const across = this.normalise(this.cross(along, toMid))
+    // The light the Sun sends each end, scattered towards the eye: the tint is what it would send if it scattered alike every way. Worked out
+    // at the ends, as the opacity is, so that the light of a trail changes along it smoothly and not segment by segment.
+    const scatteredAt = (sample: Sample): readonly [number, number, number] => {
+      if (!frame.sun) return tint
+      const to = { x: sample.x - frame.eye.x, y: sample.y - frame.eye.y, z: sample.z - frame.eye.z }
+      const share = ContrailSystem.phase((frame.sun.x * to.x + frame.sun.y * to.y + frame.sun.z * to.z) / (Math.hypot(to.x, to.y, to.z) || 1))
+      return [tint[0] * share, tint[1] * share, tint[2] * share]
+    }
     const endOf = (sample: Sample, opacity: number) => {
       const distance = Math.hypot(sample.x - frame.eye.x, sample.y - frame.eye.y, sample.z - frame.eye.z)
       const width = ContrailGrowth.widthM(spanM, sample.age, sample.point.shearPerS)
@@ -154,7 +177,7 @@ export class ContrailSystem {
       const alpha = opacity * (width / shown) ** ContrailSystem.UNRESOLVED_CONTRAST
       const exponent = ContrailGrowth.profileExponent(sample.age)
       const profile = ContrailSystem.STATIONS.map((u, station) => station === ContrailSystem.STATIONS.length - 1 ? 0 : alpha * Math.exp(-Math.LN2 * u ** exponent))
-      return { half: shown / 2, profile }
+      return { half: shown / 2, profile, scattered: scatteredAt(sample) }
     }
     // The profile across: sharp-sided while the wake holds the trail, a Gaussian once it diffuses, nil at the ribbon's edges so that no
     // trail has a hard side.
@@ -168,9 +191,9 @@ export class ContrailSystem {
       this.positions[i + 1] = e.sample.y + across.y * offset
       this.positions[i + 2] = e.sample.z + across.z * offset
       const j = vertex * 4
-      this.colors[j] = tint[0]
-      this.colors[j + 1] = tint[1]
-      this.colors[j + 2] = tint[2]
+      this.colors[j] = e.scattered[0]
+      this.colors[j + 1] = e.scattered[1]
+      this.colors[j + 2] = e.scattered[2]
       this.colors[j + 3] = e.profile[station]
       vertex++
     }

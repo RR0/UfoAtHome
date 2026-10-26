@@ -707,19 +707,23 @@ describe("SceneElement air traffic", () => {
     presenceSet.length = 0
   })
 
-  /** A source whose provider answers as told, and counts what it was asked. */
+  /**
+   * A source whose provider answers as told, and counts what it was asked: for the aircraft drawn (`asked`), and apart, over the hour
+   * before, for the trails alone (`trailsAsked`, see SceneElement.TRAIL_LOOKBACK_MS).
+   */
   const stubSource = (answer: AircraftTraffic, mayCover = true) => {
     const asked: { startMs: number; endMs: number }[] = []
+    const trailsAsked: { startMs: number; endMs: number }[] = []
     const provider: AircraftProvider = {
       citation: "stub citation",
       mayCover: () => mayCover,
       between: async (_observer, startMs, endMs) => {
-        asked.push({ startMs, endMs })
+        ;(endMs - startMs > 1_800_000 ? trailsAsked : asked).push({ startMs, endMs })
         return answer
       }
     }
     const source: DataSource<AircraftProvider> = { id: `stub-${++sourceNumber}`, name: "Stub", credit: "Stub credit", creditUrl: "https://example.test/", create: () => provider }
-    return { source, asked }
+    return { source, asked, trailsAsked }
   }
 
   /** One aircraft flying over the observer for a minute from the recording's start. */
@@ -834,6 +838,16 @@ describe("SceneElement air traffic", () => {
       expect(upperAirAsked).toHaveLength(before)
       element.remove()
     })
+  })
+
+  it("asks apart, for their trails alone, the aircraft of the hour before the recording, once there are aircraft to draw", async () => {
+    const { source, asked, trailsAsked } = stubSource(overhead)
+    const { element, tick } = mountAt(AT, source)
+    tick()
+    await vi.waitFor(() => expect(trailsAsked).toHaveLength(1))
+    expect(trailsAsked[0].startMs).toBe(noon - 3_600_000)
+    expect(trailsAsked[0].endMs).toBe(asked[0].endMs)
+    element.remove()
   })
 
   it("asks five minutes before the recording and a minute after: its first instant is not an empty sky, and the sound of what is heard then left earlier", async () => {

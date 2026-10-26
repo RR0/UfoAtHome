@@ -416,6 +416,14 @@ export class SceneElement extends HTMLElement {
   private static readonly aircraftProviders = new Map<string, AircraftProvider>()
   /** How far before a recording the record of air traffic is asked for: the time the sound of an aircraft a hundred kilometres off takes to arrive, near enough. */
   private static readonly SOUND_LOOKBACK_MS = 300_000
+  /**
+   * How far before a recording the aircraft whose trails may still be in its sky are asked for: a trail in supersaturated air lasts hours
+   * and spreads for all of them (see ContrailGrowth), so an aircraft that flew over an hour before still marks the sky. Asked apart from the
+   * aircraft that are drawn, and only for their trails: a record that does not hold that hour leaves the trails of the recording's own.
+   */
+  private static readonly TRAIL_LOOKBACK_MS = 3_600_000
+  /** The most aircraft whose trails are drawn: the nearest, as for the aircraft themselves. */
+  private static readonly TRAIL_MAX_AIRCRAFT = 60
   private static readonly NO_CONTRAILS: readonly ContrailTrail[] = []
   private static readonly NO_BEAMS: readonly BeamJson[] = []
   private static readonly upperAirProviders = new Map<string, UpperAirProvider>()
@@ -432,7 +440,7 @@ export class SceneElement extends HTMLElement {
     SceneElement.trafficRuntimeLoading.catch(() => { SceneElement.trafficRuntimeLoading = undefined })
     return SceneElement.trafficRuntimeLoading
   }
-  private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription>; audible?: Set<string>; air?: UpperAirSample[]; airSource?: UpperAirSource; contrails?: ContrailTrail[] }
+  private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription>; audible?: Set<string>; air?: UpperAirSample[]; airSource?: UpperAirSource; contrails?: ContrailTrail[]; trailSet?: TrafficDecorSet }
   /** Where the Sun stood at the last restatement of the sky, from the observer: what the aircraft are lit by, each from its own place. */
   private lastSun?: { altitudeDeg: number; azimuthDeg: number }
 
@@ -2100,7 +2108,10 @@ export class SceneElement extends HTMLElement {
       this.announceTraffic()
       void this.describeTraffic(provider, asked, runtime, build)
       // Only for a sky that has aircraft: with none there is no trail to work out, and the air is not asked for.
-      if (asked.set.shown > 0) void this.readUpperAir(asked, runtime, startMs - before, startMs + spanMs + after)
+      if (asked.set.shown > 0) {
+        void this.readUpperAir(asked, runtime, startMs - before, startMs + spanMs + after)
+        void this.readTrailTraffic(provider, asked, runtime, observer, startMs - SceneElement.TRAIL_LOOKBACK_MS, startMs + spanMs + after)
+      }
     })
     return undefined
   }
@@ -2319,6 +2330,59 @@ export class SceneElement extends HTMLElement {
   }
 
   /**
+   * Asks the record of air traffic for the aircraft whose trails may still be in the sky, from an hour before the recording (see
+   * TRAIL_LOOKBACK_MS): only those that climbed high enough to leave one, described as the drawn ones are, and drawn as nothing but their
+   * trails. A trail of an aircraft that is drawn takes its id, so that what is said of it is said of that aircraft.
+   */
+  private async readTrailTraffic(provider: AircraftProvider, asked: NonNullable<SceneElement["traffic"]>, runtime: TrafficRuntime, observer: { lat: number; lng: number; heightM: number }, fromMs: number, untilMs: number): Promise<void> {
+    if (asked.startMs === undefined) return
+    const answer = await provider.between(observer, fromMs, untilMs).catch(() => undefined)
+    if (this.traffic !== asked || answer?.status !== "found") return
+    const high = answer.tracks.filter(track => track.points.some(point => point.altitudeFt >= runtime.AircraftContrails.MIN_ALTITUDE_FT))
+    const models = new Map(asked.models ?? [])
+    if (provider.describe) {
+      await Promise.all(high.filter(track => track.points.length > 0 && !models.has(TrafficIds.keyOf(track))).map(async track => {
+        const description = await provider.describe!(track, new Date(track.points[0].t).toISOString().slice(0, 10)).catch(() => undefined)
+        if (description) models.set(TrafficIds.keyOf(track), runtime.AircraftModels.of(description))
+      }))
+    }
+    if (this.traffic !== asked || asked.startMs === undefined) return
+    const trails = runtime.TrafficDecor.from(high, observer, asked.startMs, SceneElement.TRAIL_MAX_AIRCRAFT, { models })
+    asked.trailSet = SceneElement.alignTrailIds(trails, asked.set)
+    asked.models = new Map([...models, ...(asked.models ?? [])])
+    this.planContrails(asked, runtime)
+    this.announceTraffic()
+  }
+
+  /**
+   * The trails' set with the ids of the drawn aircraft they belong to: the same aircraft asked over a longer time may have its flight cut
+   * into more runs, numbered otherwise. A drawn aircraft the hour's nearest pushed out of the trails' set is put back: whatever is drawn
+   * leaves its trail.
+   */
+  private static alignTrailIds(trails: TrafficDecorSet, drawn: TrafficDecorSet | undefined): TrafficDecorSet {
+    if (!drawn) return trails
+    const ids = new Map<string, string>()
+    for (const [id, flight] of drawn.flights) {
+      const presence = drawn.presence.get(id)
+      if (!presence) continue
+      for (const [trailId, trailFlight] of trails.flights) {
+        const trailPresence = trails.presence.get(trailId)
+        if (!trailPresence || TrafficIds.keyOf(trailFlight) !== TrafficIds.keyOf(flight)) continue
+        if (trailPresence.fromMs <= presence.untilMs && presence.fromMs <= trailPresence.untilMs) ids.set(trailId, id)
+      }
+    }
+    const idOf = (id: string) => ids.get(id) ?? `${id}-trail`
+    const kept = new Set(ids.values())
+    const missing = drawn.objects.filter(object => !kept.has(object.id))
+    return {
+      ...trails,
+      objects: [...trails.objects.map(object => ({ ...object, id: idOf(object.id) })), ...missing],
+      presence: new Map([...[...trails.presence].map(([id, presence]) => [idOf(id), presence] as const), ...missing.map(object => [object.id, drawn.presence.get(object.id)!] as const)]),
+      flights: new Map([...[...trails.flights].map(([id, flight]) => [idOf(id), flight] as const), ...missing.map(object => [object.id, drawn.flights.get(object.id)!] as const)])
+    }
+  }
+
+  /**
    * Asks the record of the air aloft for the temperature, humidity and wind at the levels the aircraft fly at, and, once it has come, works out
    * which of them leave a trail and where it goes (see AircraftContrails). Nothing is drawn of a trail the record cannot state.
    */
@@ -2347,8 +2411,9 @@ export class SceneElement extends HTMLElement {
   }
 
   private planContrails(asked: NonNullable<SceneElement["traffic"]>, runtime: TrafficRuntime): void {
-    if (!asked.set || !asked.air || asked.startMs === undefined) return
-    asked.contrails = runtime.AircraftContrails.plan(asked.set, asked.models, asked.air, asked.startMs)
+    const set = asked.trailSet ?? asked.set
+    if (!set || !asked.air || asked.startMs === undefined) return
+    asked.contrails = runtime.AircraftContrails.plan(set, asked.models, asked.air, asked.startMs)
   }
 
   /**
@@ -2358,9 +2423,9 @@ export class SceneElement extends HTMLElement {
   private contrailSunlight(t: number): Map<string, DecorSunlight> {
     const sunlight = new Map<string, DecorSunlight>()
     const traffic = this.traffic
-    const set = traffic?.set
+    const set = traffic?.trailSet ?? traffic?.set
     const sun = this.lastSun
-    if (!set || !sun || !traffic.contrails?.length || traffic.startMs === undefined || !traffic.observer) return sunlight
+    if (!traffic || !set || !sun || !traffic.contrails?.length || traffic.startMs === undefined || !traffic.observer) return sunlight
     for (const trail of traffic.contrails) {
       const presence = set.presence.get(trail.id)
       const flight = set.flights.get(trail.id)

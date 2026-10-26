@@ -91,10 +91,10 @@ describe("ContrailGrowth", () => {
       expect(ContrailGrowth.opacity(30, brief)).toBeLessThan(ContrailGrowth.opacity(5, brief))
     })
 
-    it("is visibly fainter after a few minutes than where the exhaust has just cooled, and much fainter after ten", () => {
+    it("is fainter after a few minutes than where the exhaust has just cooled, and fainter still after ten", () => {
       const young = ContrailGrowth.opacity(1, persistent)
-      expect(ContrailGrowth.opacity(240, persistent)).toBeLessThan(young * 0.6)
-      expect(ContrailGrowth.opacity(600, persistent)).toBeLessThan(young * 0.4)
+      expect(ContrailGrowth.opacity(240, persistent)).toBeLessThan(young * 0.75)
+      expect(ContrailGrowth.opacity(600, persistent)).toBeLessThan(young * 0.55)
       // Yet still the optical depth of an aged trail measured from aircraft, 0.1 to 0.3 (Voigt et al., 2011).
       const depth = -Math.log(1 - ContrailGrowth.opacity(600, persistent))
       expect(depth).toBeGreaterThan(0.1)
@@ -110,11 +110,19 @@ describe("ContrailGrowth", () => {
       expect(ContrailGrowth.opacity(900, persistent)).toBeLessThan(ContrailGrowth.opacity(10, persistent))
     })
 
-    it("disperses in the end: a trail that lasts is faint after an hour and not seen after two, whatever the shear", () => {
+    it("lives as long as the air stays supersaturated: a wide band after an hour, fainter the more the wind spread it", () => {
       for (const shearPerS of [0, 0.001, 0.003, 0.008]) {
-        expect(ContrailGrowth.opacity(3600, { ...persistent, shearPerS })).toBeLessThan(0.03)
-        expect(ContrailGrowth.opacity(7200, { ...persistent, shearPerS })).toBe(0)
+        expect(ContrailGrowth.opacity(3600, { ...persistent, shearPerS })).toBeGreaterThan(0)
+        expect(ContrailGrowth.opacity(3600, { ...persistent, shearPerS })).toBeLessThan(ContrailGrowth.opacity(600, { ...persistent, shearPerS }))
       }
+      expect(ContrailGrowth.opacity(3600, { ...persistent, shearPerS: 0.008 })).toBeLessThan(ContrailGrowth.opacity(3600, { ...persistent, shearPerS: 0 }))
+    })
+
+    it("sublimates within minutes once the air is no longer supersaturated", () => {
+      const drying = { ...persistent, saturatedForS: 1200 }
+      expect(ContrailGrowth.opacity(1100, drying)).toBeCloseTo(ContrailGrowth.opacity(1100, persistent), 6)
+      expect(ContrailGrowth.opacity(1500, drying)).toBeLessThan(ContrailGrowth.opacity(1500, persistent) / 2)
+      expect(ContrailGrowth.opacity(1900, drying)).toBe(0)
     })
 
     it("stays a share", () => {

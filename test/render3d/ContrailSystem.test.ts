@@ -11,7 +11,7 @@ const white = () => [1, 1, 1] as const
 function point(s: number, over: Partial<ContrailPoint> = {}): ContrailPoint {
   return {
     tMs: s * 1000, eastM: 20_000 + SPEED_MS * s, northM: 30_000, upM: 11_000,
-    forms: true, persistent: true, lifetimeS: 60, driftEastMs: 0, driftNorthMs: 0, shearPerS: 0.003, iceRelativeHumidity: 1.1, ...over
+    forms: true, persistent: true, lifetimeS: 60, driftEastMs: 0, driftNorthMs: 0, shearPerS: 0.003, iceRelativeHumidity: 1.1, saturatedForS: Infinity, ...over
   }
 }
 
@@ -151,4 +151,14 @@ describe("ContrailSystem", () => {
     expect(system.segmentCount).toBe(0)
     expect(vertices(system)).toEqual([])
   })
+
+  it("scatters the Sun's light as ice does: much more towards the Sun than sideways or back", () => {
+    expect(ContrailSystem.phase(1)).toBeGreaterThan(10 * ContrailSystem.phase(0))
+    expect(ContrailSystem.phase(0)).toBeGreaterThan(ContrailSystem.phase(-1))
+    // Normalised: averaged over every direction, as much as scattering alike every way.
+    let mean = 0
+    for (let i = 0; i < 20000; i++) mean += ContrailSystem.phase(-1 + (2 * (i + 0.5)) / 20000) / 20000
+    expect(mean).toBeCloseTo(1, 2)
+  })
 })
+

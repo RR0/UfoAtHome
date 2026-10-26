@@ -2614,7 +2614,11 @@ export class SceneRenderer {
 
   /** Builds the trails as they stand at the instant the decor was last placed at. */
   private updateContrails(): void {
-    this.contrailSystem?.update(this.decorTime, { origin: this.bodyOrigin, eye: this.camera.position, pixelRad: this.contrailPixelRad() }, id => this.contrailTint(id))
+    const sun = this.lastAstronomy?.sun
+    this.contrailSystem?.update(this.decorTime, {
+      origin: this.bodyOrigin, eye: this.camera.position, pixelRad: this.contrailPixelRad(),
+      sun: sun ? horizontalToCartesian(sun.altitudeDeg, sun.azimuthDeg, 1) : undefined
+    }, id => this.contrailTint(id))
   }
 
   /** The angle of one pixel of the picture, radians: what a trail is never drawn thinner than. */
