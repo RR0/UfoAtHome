@@ -260,6 +260,7 @@ class Csg2Case {
       version: 1,
       id: "observer-csg2-nassau",
       image: "https://ufoathome.org/demo-data/share/csg2-nassau.jpg",
+      observer: { id: "csg2-nassau", title: { en: "Observer in Nassau (assumed)", fr: "Observateur à Nassau (supposé)", es: "Observador en Nassau (supuesto)", it: "Osservatore a Nassau (supposto)" } },
       tags: ["rocket launch", "space jellyfish", "twilight phenomenon", "Falcon 9", "assumed observer"],
       // The card is taken three minutes in, when the plume is highest and brightest.
       summaryTime: 180,
@@ -311,6 +312,7 @@ class Csg2Case {
       version: 1,
       id: "observer-csg2-falcon",
       image: "https://ufoathome.org/demo-data/share/csg2-falcon.jpg",
+      observer: { id: "LeeRon", title: "Ron Lee" },
       tags: ["rocket launch", "fuel dump", "spiral", "Falcon 9", "deorbit", "SeeSat-L"],
       // The card is taken three minutes in, when the spiral has its S.
       summaryTime: 180,

@@ -2,6 +2,10 @@
   "version": 1,
   "id": "observer-csg2-falcon",
   "image": "https://ufoathome.org/demo-data/share/csg2-falcon.jpg",
+  "observer": {
+    "id": "LeeRon",
+    "title": "Ron Lee"
+  },
   "tags": [
     "rocket launch",
     "fuel dump",

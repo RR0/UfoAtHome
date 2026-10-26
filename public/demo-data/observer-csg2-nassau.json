@@ -2,6 +2,15 @@
   "version": 1,
   "id": "observer-csg2-nassau",
   "image": "https://ufoathome.org/demo-data/share/csg2-nassau.jpg",
+  "observer": {
+    "id": "csg2-nassau",
+    "title": {
+      "en": "Observer in Nassau (assumed)",
+      "fr": "Observateur à Nassau (supposé)",
+      "es": "Observador en Nassau (supuesto)",
+      "it": "Osservatore a Nassau (supposto)"
+    }
+  },
   "tags": [
     "rocket launch",
     "space jellyfish",
