@@ -91,10 +91,10 @@ export class DemoCatalogue {
       section: "sightings",
       heading: { en: "Real sightings", fr: "Des observations réelles", es: "Avistamientos reales", it: "Avvistamenti reali" },
       intro: {
-        en: "Fifteen documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Quinze dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
-        es: "Quince casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
-        it: "Quindici casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
+        en: "Fourteen documented cases, each replayed in the sky of its own reported date, time and place.",
+        fr: "Quatorze dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
+        es: "Catorce casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
+        it: "Quattordici casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
       },
       demos: [
         {
@@ -283,20 +283,6 @@ export class DemoCatalogue {
             fr: "Crépuscule dans une vallée du Nevada, 19:00. Une orbe orange arrive de l'est, tour à tour transparente et orange, et expulse trois petites orbes rouges qui partent vers le sud. Le cas que le FBI a reconstitué en deux vidéos, refait ici en 3D pour les cinq agents, avec les lectures confrontées à leurs récits : leurres de l'AARO, fusée éclairante, drone, feux d'obstacle, fils de la Vierge. Ouvrez-le en grand pour changer d'observateur et de lecture.",
             es: "Anochecer en un valle de Nevada, 19:00. Un orbe naranja llega del este, alternando transparente y naranja, y expulsa tres pequeños orbes rojos que se van hacia el sur. El caso que el FBI recreó en dos vídeos, reconstruido aquí en 3D para los cinco agentes, con las lecturas confrontadas a sus relatos: señuelos de la AARO, bengala de iluminación, dron, luces de obstáculo, hilos de araña. Ábrelo a tamaño completo para cambiar de observador y de lectura.",
             it: "Crepuscolo in una valle del Nevada, 19:00. Una sfera arancione arriva da est, alternando trasparente e arancione, ed espelle tre piccole sfere rosse che vanno verso sud. Il caso che l'FBI ha ricostruito in due video, rifatto qui in 3D per i cinque agenti, con le letture confrontate ai loro resoconti: esche dell'AARO, razzo illuminante, drone, luci di ostacolo, fili di ragno. Aprilo a schermo intero per cambiare osservatore e lettura."
-          }
-        },
-        {
-          id: "csg2",
-          src: "/demo-data/observer-csg2-nassau.json",
-          // The case, for the player: the same upper stage at its launch and at its end, an hour and a half and 2 500 km apart.
-          playSrc: "/demo-data/case-csg2.json",
-          title: { en: "CSG-2, 2022", fr: "CSG-2, 2022", es: "CSG-2, 2022", it: "CSG-2, 2022" },
-          titleIsName: true,
-          blurb: {
-            en: "31 January 2022, just after sunset: a Falcon 9 launched from Florida climbs past the Bahamas, its exhaust lit high above the dusk. An hour and a half later its upper stage, back over North America, brakes out of orbit and vents its tanks: Ron Lee sees it due east from Colorado and reports it on SeeSat-L, others photograph spirals. Open it full size to switch from the launch (an observer assumed in Nassau) to his sky.",
-            fr: "31 janvier 2022, juste après le coucher du Soleil : un Falcon 9 lancé de Floride monte le long des Bahamas, son échappement éclairé très haut au-dessus du crépuscule. Une heure et demie plus tard, son deuxième étage, revenu au-dessus de l'Amérique du Nord, freine pour quitter son orbite et vidange ses réservoirs : Ron Lee le voit plein est depuis le Colorado et le rapporte sur SeeSat-L, d'autres photographient des spirales. Ouvrez-le en grand pour passer du lancement (un observateur supposé à Nassau) à son ciel.",
-            es: "31 de enero de 2022, justo después de la puesta del Sol: un Falcon 9 lanzado desde Florida sube junto a las Bahamas, su escape iluminado muy alto sobre el crepúsculo. Hora y media más tarde su segunda etapa, de vuelta sobre América del Norte, frena para salir de su órbita y purga sus depósitos: Ron Lee la ve al este desde Colorado y la cuenta en SeeSat-L, otros fotografían espirales. Ábrelo a tamaño completo para pasar del lanzamiento (un observador supuesto en Nassau) a su cielo.",
-            it: "31 gennaio 2022, subito dopo il tramonto: un Falcon 9 lanciato dalla Florida sale lungo le Bahamas, lo scarico illuminato molto in alto sopra il crepuscolo. Un'ora e mezza dopo il suo secondo stadio, tornato sopra il Nord America, frena per lasciare l'orbita e scarica i serbatoi: Ron Lee lo vede a est dal Colorado e lo riferisce su SeeSat-L, altri fotografano spirali. Aprilo a schermo intero per passare dal lancio (un osservatore supposto a Nassau) al suo cielo."
           }
         }
       ]
@@ -497,6 +483,20 @@ export class DemoCatalogue {
             fr: "Le lanceur de Zond 4 se désagrégeant au-dessus du Kentucky, 3 mars 1968 à 21 h 45 : la file brûlante dont 78 signalements ont fait une formation, un cigare à fenêtres, un appareil silencieux.",
             es: "El lanzador de Zond 4 desintegrándose sobre Kentucky, 3 de marzo de 1968 a las 21:45: la fila ardiente que 78 informes convirtieron en una formación, un cigarro con ventanas, una nave silenciosa.",
             it: "Il lanciatore di Zond 4 che si disintegra sopra il Kentucky, 3 marzo 1968 alle 21:45: la fila ardente che 78 segnalazioni trasformarono in una formazione, un sigaro con finestre, un velivolo silenzioso."
+          }
+        },
+        {
+          id: "csg2",
+          src: "/demo-data/observer-csg2-nassau.json",
+          // The case, for the player: the same upper stage at its launch and at its end, an hour and a half and 2 500 km apart.
+          playSrc: "/demo-data/case-csg2.json",
+          title: { en: "CSG-2, 2022", fr: "CSG-2, 2022", es: "CSG-2, 2022", it: "CSG-2, 2022" },
+          titleIsName: true,
+          blurb: {
+            en: "31 January 2022, just after sunset: a Falcon 9 launched from Florida climbs past the Bahamas, its exhaust lit high above the dusk. An hour and a half later its upper stage, back over North America, brakes out of orbit and vents its tanks: Ron Lee sees it due east from Colorado and reports it on SeeSat-L, others photograph spirals. Open it full size to switch from the launch (an observer assumed in Nassau) to his sky.",
+            fr: "31 janvier 2022, juste après le coucher du Soleil : un Falcon 9 lancé de Floride monte le long des Bahamas, son échappement éclairé très haut au-dessus du crépuscule. Une heure et demie plus tard, son deuxième étage, revenu au-dessus de l'Amérique du Nord, freine pour quitter son orbite et vidange ses réservoirs : Ron Lee le voit plein est depuis le Colorado et le rapporte sur SeeSat-L, d'autres photographient des spirales. Ouvrez-le en grand pour passer du lancement (un observateur supposé à Nassau) à son ciel.",
+            es: "31 de enero de 2022, justo después de la puesta del Sol: un Falcon 9 lanzado desde Florida sube junto a las Bahamas, su escape iluminado muy alto sobre el crepúsculo. Hora y media más tarde su segunda etapa, de vuelta sobre América del Norte, frena para salir de su órbita y purga sus depósitos: Ron Lee la ve al este desde Colorado y la cuenta en SeeSat-L, otros fotografían espirales. Ábrelo a tamaño completo para pasar del lanzamiento (un observador supuesto en Nassau) a su cielo.",
+            it: "31 gennaio 2022, subito dopo il tramonto: un Falcon 9 lanciato dalla Florida sale lungo le Bahamas, lo scarico illuminato molto in alto sopra il crepuscolo. Un'ora e mezza dopo il suo secondo stadio, tornato sopra il Nord America, frena per lasciare l'orbita e scarica i serbatoi: Ron Lee lo vede a est dal Colorado e lo riferisce su SeeSat-L, altri fotografano spirali. Aprilo a schermo intero per passare dal lancio (un osservatore supposto a Nassau) al suo cielo."
           }
         },
         {
