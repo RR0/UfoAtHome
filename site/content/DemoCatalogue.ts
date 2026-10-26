@@ -500,17 +500,6 @@ export class DemoCatalogue {
           }
         },
         {
-          id: "launch-plume",
-          src: "/demo-data/sky-test-launch-plume.json",
-          title: { en: "A space jellyfish", fr: "Une méduse spatiale", es: "Una medusa espacial", it: "Una medusa spaziale" },
-          blurb: {
-            en: "Hoboken, 25 August 2026 at 05:39: the exhaust of a Falcon 9 launched from Florida six minutes before, lit by a Sun that has not risen for the ground, spreading into a bell. The Earth's shadow, the light and the spreading are computed.",
-            fr: "Hoboken, 25 août 2026 à 5 h 39 : l'échappement d'un Falcon 9 lancé de Floride six minutes plus tôt, éclairé par un Soleil pas encore levé pour le sol, qui s'étale en cloche. L'ombre de la Terre, la lumière et l'étalement sont calculés.",
-            es: "Hoboken, 25 de agosto de 2026 a las 05:39: el escape de un Falcon 9 lanzado desde Florida seis minutos antes, iluminado por un Sol que aún no ha salido para el suelo, extendiéndose en campana. La sombra de la Tierra, la luz y la expansión se calculan.",
-            it: "Hoboken, 25 agosto 2026 alle 05:39: lo scarico di un Falcon 9 lanciato dalla Florida sei minuti prima, illuminato da un Sole non ancora sorto per il suolo, che si allarga a campana. L'ombra della Terra, la luce e l'espansione sono calcolate."
-          }
-        },
-        {
           id: "nrol-69-spiral",
           src: "/demo-data/sky-test-nrol-69-spiral.json",
           title: { en: "A rocket's spiral", fr: "Une spirale de fusée", es: "Una espiral de cohete", it: "Una spirale di razzo" },
