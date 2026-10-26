@@ -20,23 +20,22 @@ export class ContrailGrowth {
   /** How far behind the engines the exhaust has cooled enough to be seen, s: a few tens of metres at cruise speed. */
   static readonly FORMATION_S = 0.3
   /**
-   * The wake's own spreading: the two vortices the wings shed hold the exhaust for a minute or two, then break up and let it go a few
-   * times as wide as the wingspan (Unterstrasser's simulations, Gerz and Holzäpfel's measurements). How many times, and how fast.
+   * The wake's own spreading: the two vortices the wings shed hold the exhaust as wide as the wingspan for a minute or two, then break
+   * up and let it go about twice as wide (Unterstrasser's simulations, Gerz and Holzäpfel's measurements). How many times, and when.
    */
-  private static readonly VORTEX_SPREAD = 3
-  private static readonly VORTEX_S = 60
+  private static readonly VORTEX_SPREAD = 2
+  private static readonly VORTEX_S = 150
   /**
-   * The horizontal diffusivity of the upper troposphere's turbulence, m²/s: a cloud of ice spreads as the square root of its age, a
-   * hundred metres in a minute and some eight hundred in an hour (Schumann et al., 1995, give 10 to 20).
+   * Turbulence spreads a cloud the faster the larger it is (Richardson's law: its variance grows as the cube of its age), so a young
+   * trail barely spreads by it and an old one ever faster: this times the age to the power 1.5, a few metres in a minute, some fifty in
+   * ten, eight hundred in an hour.
    */
-  private static readonly DIFFUSIVITY_M2_PER_S = 15
-  /** The width of a Gaussian at half its height, in standard deviations. */
-  private static readonly FWHM = 2 * Math.sqrt(2 * Math.log(2))
+  private static readonly RICHARDSON_M_PER_S15 = 800 / 3600 ** 1.5
   /**
-   * How long a trail takes to lose its sharp edges, s: a young one is a band as wide as the wake holds it, an old one a cloud thinning out
-   * at its sides as anything diffusing does (see profileExponent).
+   * How long a trail keeps its sharp edges, s: a young one is a band as wide as the wake holds it, an old one a cloud thinning out at
+   * its sides as anything diffusing does (see profileExponent). Sharp for some minutes, a Gaussian after a quarter of an hour.
    */
-  private static readonly DIFFUSING_S = 120
+  private static readonly DIFFUSING_S = 600
   /** The shear of the upper troposphere, per second, when the record states none: 3 m/s for each kilometre of height. */
   static readonly TYPICAL_SHEAR_PER_S = 0.003
   /** How deep a trail is when it has settled behind the aircraft, m, and how fast it deepens (ice falls and the air mixes it): about 500 m after an hour. */
@@ -58,17 +57,18 @@ export class ContrailGrowth {
   private static readonly LIFETIME_SPAN_S = 120
 
   /**
-   * How wide a trail is at `ageS`, m, at half its middle's thickness. The wake's vortices first hold it, then let it go a few spans wide.
-   * The wind differs from the top of a trail to its bottom, so the top is carried away from the bottom at the shear times the depth
-   * between them: the width grows by the integral of that, which grows faster as the trail deepens. Turbulence spreads it besides, as the
-   * square root of its age, which the two add to as independent spreadings do, in quadrature. A shear of 3 m/s per km, the upper
-   * troposphere's typical, gives some kilometres in an hour.
+   * How wide a trail is at `ageS`, m, at half its middle's thickness. The wake's vortices first hold it as wide as the wings, then let it
+   * go twice as wide. The wind differs from the top of a trail to its bottom, so the top is carried away from the bottom at the shear
+   * times the depth between them: the width grows by the integral of that, which grows faster as the trail deepens. Turbulence spreads
+   * it besides, ever faster as it grows (see RICHARDSON_M_PER_S15), which the two add to as independent spreadings do, in quadrature.
+   * Narrow at first and accelerating, but not exponentially: as the square of the age, then. A shear of 3 m/s per km, the upper
+   * troposphere's typical, gives some hundreds of metres in ten minutes and some kilometres in an hour.
    */
   static widthM(spanM: number, ageS: number, shearPerS: number = ContrailGrowth.TYPICAL_SHEAR_PER_S): number {
     const age = Math.max(0, ageS)
-    const wake = spanM * (1 + (ContrailGrowth.VORTEX_SPREAD - 1) * (1 - Math.exp(-age / ContrailGrowth.VORTEX_S)))
+    const wake = spanM * (1 + (ContrailGrowth.VORTEX_SPREAD - 1) * (1 - Math.exp(-((age / ContrailGrowth.VORTEX_S) ** 2))))
     const sheared = shearPerS * (ContrailGrowth.INITIAL_DEPTH_M * age + (ContrailGrowth.DEEPENING_M_PER_S * age * age) / 2)
-    const diffused = ContrailGrowth.FWHM * Math.sqrt(2 * ContrailGrowth.DIFFUSIVITY_M2_PER_S * age)
+    const diffused = ContrailGrowth.RICHARDSON_M_PER_S15 * age ** 1.5
     return Math.hypot(wake + sheared, diffused)
   }
 
@@ -78,7 +78,7 @@ export class ContrailGrowth {
    * diffused.
    */
   static profileExponent(ageS: number): number {
-    return 2 + 6 * Math.exp(-Math.max(0, ageS) / ContrailGrowth.DIFFUSING_S)
+    return 2 + 6 * Math.exp(-((Math.max(0, ageS) / ContrailGrowth.DIFFUSING_S) ** 2))
   }
 
   /** How long a trail lasts in air that is `iceRelativeHumidity` over ice and not supersaturated, s: from seconds in dry air to a few minutes near saturation. */

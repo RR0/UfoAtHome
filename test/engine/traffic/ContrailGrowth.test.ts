@@ -24,8 +24,8 @@ describe("ContrailGrowth", () => {
       expect(calm).toBeGreaterThan(500)
       expect(calm).toBeLessThan(1200)
       // The shear's own share doubles with it, the turbulence's adding to it in quadrature: what the shear adds to the band the wake
-      // let go, three spans wide after an hour.
-      const wake = 3 * 35
+      // let go, two spans wide after an hour.
+      const wake = 2 * 35
       const sheared = (width: number) => Math.sqrt(width ** 2 - calm ** 2 + wake ** 2) - wake
       expect(sheared(strong) / sheared(typical)).toBeCloseTo(2, 6)
     })
@@ -39,15 +39,23 @@ describe("ContrailGrowth", () => {
   describe("profileExponent", () => {
     it("is a band with sharp sides behind the aircraft and a diffusing Gaussian minutes later", () => {
       expect(ContrailGrowth.profileExponent(0)).toBeCloseTo(8, 6)
+      expect(ContrailGrowth.profileExponent(300)).toBeGreaterThan(6)
       expect(ContrailGrowth.profileExponent(60)).toBeGreaterThan(ContrailGrowth.profileExponent(600))
-      expect(ContrailGrowth.profileExponent(1800)).toBeCloseTo(2, 3)
+      expect(ContrailGrowth.profileExponent(1800)).toBeCloseTo(2, 2)
     })
   })
 
   describe("widthM, in the first minutes", () => {
-    it("is a few spans wide once the wake has let it go, and diffuses as the square root of its age", () => {
-      expect(ContrailGrowth.widthM(35, 120, 0)).toBeGreaterThan(130)
-      expect(ContrailGrowth.widthM(35, 120, 0)).toBeLessThan(200)
+    it("is about as wide as the wings for the first minute, the wake holding it, and twice as wide once the wake lets it go", () => {
+      expect(ContrailGrowth.widthM(35, 60, 0)).toBeLessThan(45)
+      expect(ContrailGrowth.widthM(35, 600, 0)).toBeGreaterThan(70)
+      expect(ContrailGrowth.widthM(35, 600, 0)).toBeLessThan(110)
+    })
+
+    it("spreads ever faster as it ages, turbulence taking a larger cloud apart faster", () => {
+      const rate = (age: number) => ContrailGrowth.widthM(35, age + 60, 0) - ContrailGrowth.widthM(35, age, 0)
+      expect(rate(1800)).toBeGreaterThan(rate(600))
+      expect(rate(3600)).toBeGreaterThan(rate(1800))
     })
   })
 
