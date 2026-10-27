@@ -3170,6 +3170,17 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setMeteorShower([...shower, ...sporadics], best.position.altitudeDeg, best.position.azimuthDeg)
   }
 
+  /** Whether the ground, plain or relief, stands in front of that direction from the eye — what a
+   * control turning the observer to something has to ask first. See SceneRenderer.groundHidesDirection. */
+  groundHides(altitudeDeg: number, azimuthDeg: number): boolean {
+    return this.sceneRenderer.groundHidesDirection(altitudeDeg, azimuthDeg)
+  }
+
+  /** Changes when the ground groundHides reads does. */
+  get groundKey(): string {
+    return this.sceneRenderer.groundKey
+  }
+
   /**
    * The rank-th brightest meteor the playhead can be moved to, and where in the sky to look for
    * it — what a control offering to show one needs, and the whole difference between stating that
@@ -3193,6 +3204,12 @@ export class SceneElement extends HTMLElement {
     // is left alone: those meteors really did fall, after the recording stops.
     const reachable = [...this.sceneRenderer.meteorSchedule]
       .filter(meteor => meteor.t + meteor.durationMs <= this.ufoElement.seekableDuration)
+      // And only what is above the ground: a sporadic whose radiant is below the horizon can throw
+      // its streak over it or keep it under, and one behind a hill is a slope to look at.
+      .filter(meteor => {
+        const where = this.sceneRenderer.meteorMidpoint(meteor)
+        return where !== undefined && !this.sceneRenderer.groundHidesDirection(where.altitudeDeg, where.azimuthDeg)
+      })
       // Brightest first. Chronological order sounds like the natural one and is the wrong one
       // here: brightness is a cubed draw, so most of a shower is close to the threshold of being
       // seen at all, and walking the night in order opens on whatever happened to fall first —

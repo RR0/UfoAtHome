@@ -3169,6 +3169,72 @@ export class SceneRenderer {
     return mesh.position.y + this.groundYOfPatch(mesh, x - mesh.position.x, z - mesh.position.z)
   }
 
+  /**
+   * How high the ground stands, degrees, looking out along that bearing from the eye: the horizon a
+   * target has to clear to be seen at all. A hill, a mesa, a valley's far side all raise it above
+   * the flat 0° a level plain gives, and a control that turns the observer to a meteor behind one
+   * lands on a slope. Read on both the patch and the far ring, with the Earth's bulge (and the usual
+   * refraction) taken off what stands far away. -Infinity where there is no ground drawn that way.
+   *
+   * Marched once per half-degree of bearing and kept until the ground, or the eye, moves: asked of
+   * every meteor of a night by toolbars that ask often.
+   */
+  horizonAltitudeDeg(azimuthDeg: number): number {
+    const eye = this.camera.position
+    const key = `${this.terrainMesh?.uuid}|${this.farRing?.mesh.uuid}|${Math.round(eye.x)}|${Math.round(eye.y * 10)}|${Math.round(eye.z)}`
+    if (key !== this.horizonFor) {
+      this.horizonFor = key
+      this.horizonByBearing.fill(Number.NaN)
+    }
+    const buckets = this.horizonByBearing.length
+    const bucket = Math.round((((azimuthDeg % 360) + 360) % 360) / (360 / buckets)) % buckets
+    let altitudeDeg = this.horizonByBearing[bucket]
+    if (Number.isNaN(altitudeDeg)) altitudeDeg = this.horizonByBearing[bucket] = this.marchHorizon((bucket * 360) / buckets)
+    return altitudeDeg
+  }
+
+  /** Whether the ground stands in front of that direction — below the plain's horizon, or behind
+   * relief — with a little clearance, since what grazes the skyline is lost in its haze anyway. */
+  groundHidesDirection(altitudeDeg: number, azimuthDeg: number): boolean {
+    return altitudeDeg < Math.max(0, this.horizonAltitudeDeg(azimuthDeg)) + SceneRenderer.HORIZON_CLEARANCE_DEG
+  }
+
+  private static readonly HORIZON_CLEARANCE_DEG = 1
+  /** The Earth's radius as a line of sight near the ground bends round it: 7/6 of the real one. */
+  private static readonly SIGHT_EARTH_RADIUS_M = 6_371_000 * 7 / 6
+  private readonly horizonByBearing = new Float32Array(720).fill(Number.NaN)
+  private horizonFor?: string
+
+  private marchHorizon(azimuthDeg: number): number {
+    const near = this.terrainMesh
+    if (!near) return Number.NEGATIVE_INFINITY
+    const eye = this.camera.position
+    const azimuth = (azimuthDeg * Math.PI) / 180
+    // North is -z, east is +x (see horizontalToCartesian).
+    const dx = Math.sin(azimuth)
+    const dz = -Math.cos(azimuth)
+    const far = this.farRing?.mesh
+    const end = Math.max(this.terrainRadius, far ? this.farRingRadiusM : 0)
+    const firstStepM = Math.min(Math.max(this.patchSpacingM(near), 1), 50)
+    let best = Number.NEGATIVE_INFINITY
+    // Finer near the eye, where a metre of ground is a degree of sky, coarser far off, where it is not.
+    for (let d = firstStepM; d <= end; d = Math.max(d + firstStepM, d * 1.02)) {
+      const x = eye.x + dx * d
+      const z = eye.z + dz * d
+      const groundY = d <= this.terrainRadius
+        ? this.terrainYUnder(x, z)
+        : far!.position.y + this.groundYOfPatch(far!, x - far!.position.x, z - far!.position.z)
+      const bulgeM = (d * d) / (2 * SceneRenderer.SIGHT_EARTH_RADIUS_M)
+      best = Math.max(best, Math.atan2(groundY - bulgeM - eye.y, d))
+    }
+    return (best * 180) / Math.PI
+  }
+
+  /** What the ground the horizon is read from is, for a caller that keeps answers derived from it. */
+  get groundKey(): string {
+    return `${this.terrainMesh?.uuid ?? ""}|${this.farRing?.mesh.uuid ?? ""}`
+  }
+
   /** How far apart the vertices of a patch stand, metres: what a ribbon laid on it has to be finer than. */
   private patchSpacingM(patch: Mesh): number {
     const position = patch.geometry.getAttribute("position")

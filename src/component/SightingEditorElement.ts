@@ -9245,7 +9245,8 @@ export class SightingEditorElement extends HTMLElement {
     const key = JSON.stringify([
       date?.getTime(), place?.lat, place?.lng, this.groundElevationM, sighting.instrumentId, sighting.exposureSeconds, sighting.lightPollution,
       resolveWeatherAt(sighting, 0), this.messages.skyLine, this.meteorRankFor,
-      this.sceneElement.satelliteState.status, this.satelliteSpanMs(), this.sceneElement.fireballState.status
+      this.sceneElement.satelliteState.status, this.satelliteSpanMs(), this.sceneElement.fireballState.status,
+      this.sceneElement.groundKey
     ])
     if (key === this.skyCandidatesKey) return
     this.skyCandidatesKey = key
@@ -9387,7 +9388,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     // Worth pointing at only when there is somewhere to point: a comet that has not risen is aimed
     // at by looking into the ground.
-    this.showCometButton.hidden = comet.position.altitudeDeg <= 0
+    this.showCometButton.hidden = this.sceneElement.groundHides(comet.position.altitudeDeg, comet.position.azimuthDeg)
     return this.cometText(comet)
   }
 
@@ -9405,7 +9406,7 @@ export class SightingEditorElement extends HTMLElement {
       this.showNovaButton.hidden = true
       return undefined
     }
-    this.showNovaButton.hidden = nova.position.altitudeDeg <= 0
+    this.showNovaButton.hidden = this.sceneElement.groundHides(nova.position.altitudeDeg, nova.position.azimuthDeg)
     return this.novaText(nova)
   }
 
@@ -9590,8 +9591,7 @@ export class SightingEditorElement extends HTMLElement {
       return state.coverage.some(coverage => coverage.status === "gap") ? this.messages.skySatelliteElementsGap : undefined
     }
     const visible = this.visibleSatellitePasses()
-    const reachable = visible.filter(pass => this.passTimelineMs(pass) <= this.ufoElement.seekableDuration)
-    this.showSatelliteButton.hidden = reachable.length === 0
+    this.showSatelliteButton.hidden = this.aimableSatellitePasses(visible).length === 0
     if (visible.length === 0) return lit ? this.messages.skySatellitePassesNone : undefined
     const brightest = visible[0]
     const peak = brightest.peak
@@ -9622,6 +9622,13 @@ export class SightingEditorElement extends HTMLElement {
         return magnitude <= visibleMagnitudeLimit(sun.altitudeDeg, gain, this.skyLossAt(pass.peak.date, observer))
       })
       .sort((a, b) => a.peak.magnitude! - b.peak.magnitude!)
+  }
+
+  /** The passes the satellite button can turn the observer to: on the timeline, and peaking above
+   * the ground rather than behind it. */
+  private aimableSatellitePasses(visible: SatellitePass[]): SatellitePass[] {
+    return visible.filter(pass => this.passTimelineMs(pass) <= this.ufoElement.seekableDuration
+      && !this.sceneElement.groundHides(pass.peak.altitudeDeg, pass.peak.azimuthDeg))
   }
 
   /** A group of Starlinks still close to their launch, which fly low and in a line: the train. */
@@ -9674,7 +9681,7 @@ export class SightingEditorElement extends HTMLElement {
    * minute, not for the whole recording.
    */
   private showNextSatellite(): void {
-    const reachable = this.visibleSatellitePasses().filter(pass => this.passTimelineMs(pass) <= this.ufoElement.seekableDuration)
+    const reachable = this.aimableSatellitePasses(this.visibleSatellitePasses())
     if (reachable.length === 0) return
     const ranking = reachable.map(pass => `${pass.object.norad}@${pass.peak.date.getTime()}`).join()
     if (ranking !== this.satelliteRankFor) {
@@ -9705,6 +9712,13 @@ export class SightingEditorElement extends HTMLElement {
       .sort((a, b) => a.magnitude - b.magnitude)
   }
 
+  /** The fireballs the button can turn the observer to: on the timeline, and peaking above the
+   * ground rather than behind it. */
+  private aimableFireballs(seen: FireballSighting[], date: Date): FireballSighting[] {
+    return seen.filter(fireball => this.fireballTimelineMs(fireball, date) <= this.ufoElement.seekableDuration
+      && !this.sceneElement.groundHides(fireball.peak.altitudeDeg, fireball.peak.azimuthDeg))
+  }
+
   /** Where a fireball's peak falls on the timeline: its start, plus how far along it peaked. */
   private fireballTimelineMs(seen: FireballSighting, date: Date): number {
     const { record } = seen
@@ -9720,7 +9734,7 @@ export class SightingEditorElement extends HTMLElement {
    */
   private fireballClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
     const seen = this.sceneElement.fireballState.status === "ready" ? this.strikingFireballs(date, observer) : []
-    this.showFireballButton.hidden = !seen.some(fireball => this.fireballTimelineMs(fireball, date) <= this.ufoElement.seekableDuration)
+    this.showFireballButton.hidden = this.aimableFireballs(seen, date).length === 0
     if (seen.length === 0) return undefined
     const brightest = seen[0]
     const template = seen.length === 1 ? this.messages.skyFireballsOne : this.messages.skyFireballs
@@ -9743,8 +9757,7 @@ export class SightingEditorElement extends HTMLElement {
     if (!place || place.lng === undefined || !time) return
     const date = sightingTimeToDate(time, place.lng, sighting.event.utcOffsetHours)
     if (!date) return
-    const reachable = this.strikingFireballs(date, this.observerAtStart())
-      .filter(fireball => this.fireballTimelineMs(fireball, date) <= this.ufoElement.seekableDuration)
+    const reachable = this.aimableFireballs(this.strikingFireballs(date, this.observerAtStart()), date)
     if (reachable.length === 0) return
     const fireball = reachable[this.fireballRank++ % reachable.length]
     if (this.ufoElement.playbackState === "playing") this.ufoElement.togglePlayPause()
@@ -10006,7 +10019,7 @@ export class SightingEditorElement extends HTMLElement {
     const date = sightingTimeToDate(time, place.lng, sighting.event.utcOffsetHours)
     if (!date) return
     const comet = Comets.brightestAt(date, { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 })
-    if (!comet) return
+    if (!comet || this.sceneElement.groundHides(comet.position.altitudeDeg, comet.position.azimuthDeg)) return
     this.headingInput.value = String(this.rounded(comet.position.azimuthDeg))
     this.pitchInput.value = String(this.rounded(comet.position.altitudeDeg))
     this.updateObserver()
@@ -10021,7 +10034,7 @@ export class SightingEditorElement extends HTMLElement {
     const date = sightingTimeToDate(time, place.lng, sighting.event.utcOffsetHours)
     if (!date) return
     const nova = Novae.brightestAt(date, { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 })
-    if (!nova) return
+    if (!nova || this.sceneElement.groundHides(nova.position.altitudeDeg, nova.position.azimuthDeg)) return
     this.headingInput.value = String(this.rounded(nova.position.azimuthDeg))
     this.pitchInput.value = String(this.rounded(nova.position.altitudeDeg))
     this.updateObserver()
