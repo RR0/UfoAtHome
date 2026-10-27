@@ -1,9 +1,10 @@
 import { afterAll, afterEach } from "vitest"
 
 /**
- * Taken now, before a test can put fake timers in its place (vitest fakes setImmediate too).
+ * Node's, taken now, before a test can put fake timers in its place (vitest fakes setImmediate too). The tests
+ * are type-checked without Node's types.
  */
-const realSetImmediate = globalThis.setImmediate
+const { setImmediate } = globalThis as unknown as { setImmediate(callback: () => void): unknown }
 
 /**
  * Each test ends with a turn of the event loop. vitest awaits one test after the other, and tests that only
@@ -16,7 +17,7 @@ const realSetImmediate = globalThis.setImmediate
  * for), every test passing and the run failing. 140 tests of half a second each, after one waiting on a
  * setImmediate, did exactly that, and did not with this turn.
  */
-afterEach(() => new Promise<void>((resolve) => realSetImmediate(resolve)))
+afterEach(() => new Promise<void>((resolve) => setImmediate(resolve)))
 
 /**
  * What a test file leaves in the page is taken out at its end, so that what it built (a text editor's
