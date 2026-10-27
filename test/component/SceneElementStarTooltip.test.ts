@@ -107,6 +107,12 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     get meteorSchedule(): [] {
       return []
     }
+    groundHidesDirection(altitudeDeg: number): boolean {
+      return altitudeDeg < 0
+    }
+    get groundKey(): string {
+      return ""
+    }
     meteorMidpoint(): { altitudeDeg: number; azimuthDeg: number } {
       return { altitudeDeg: 42, azimuthDeg: 137 }
     }
