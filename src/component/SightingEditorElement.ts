@@ -5947,7 +5947,6 @@ export class SightingEditorElement extends HTMLElement {
       const nowOpen = candidate === tab && open
       candidate.setAttribute("aria-expanded", String(nowOpen))
       this.groupPanels[index].hidden = !nowOpen
-      SightingEditorElement.titleGroupTab(candidate)
     }
     // The chips scroll sideways: the one opened is brought into the strip's view, centred, rather than left past its edge.
     if (open) {
@@ -7032,8 +7031,8 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Shows the group tabs' names when the strip has room for all of them, and only their pictograms otherwise, each name then in its
-   * tab's tooltip. Measured with the names shown, so that a strip grown wide enough for them again gets them back.
+   * Shows the group tabs' names when the strip has room for all of them, and only their pictograms otherwise, each name then unfolding
+   * when its tab is pointed at. Measured with the names shown, so that a strip grown wide enough for them again gets them back.
    */
   private fitGroupTabs(): void {
     const strip = this.groupTabs[0]?.parentElement
@@ -7045,14 +7044,12 @@ export class SightingEditorElement extends HTMLElement {
     strip.classList.toggle("compact", strip.scrollWidth > strip.clientWidth)
     void strip.offsetWidth
     strip.classList.remove("measuring")
-    for (const tab of this.groupTabs) SightingEditorElement.titleGroupTab(tab)
   }
 
-  /** What a group tab says when pointed at: its name when it shows only its pictogram (closed, on a strip too narrow for every name), what the section is for (see labelPanels), then what
-   * is left to answer in it (see markUnansweredQuestions). */
+  /** What a group tab says when pointed at, besides its name (which a tab showing only its pictogram unfolds then): what the section is
+   * for (see labelPanels), then what is left to answer in it (see markUnansweredQuestions). */
   private static titleGroupTab(tab: HTMLElement): void {
-    const iconOnly = tab.parentElement!.classList.contains("compact") && tab.getAttribute("aria-expanded") !== "true"
-    tab.title = [iconOnly ? SightingEditorElement.tabLabel(tab) : undefined, tab.dataset.intro, tab.dataset.unanswered].filter(Boolean).join("\n")
+    tab.title = [tab.dataset.intro, tab.dataset.unanswered].filter(Boolean).join("\n")
   }
 
   /** What a tab is CALLED, without the count it may also be carrying. */

@@ -1889,9 +1889,9 @@ ${EditorTheme.HEAD}
 .app:has(#group-sound [aria-invalid="true"]) [aria-controls="group-sound"],
 .app:has(#group-reference [aria-invalid="true"]) [aria-controls="group-reference"],
 .app:has(#group-file [aria-invalid="true"]) [aria-controls="group-file"] { border-color: var(--error); }
-/* No room for every name: the pictograms alone, each name in its tab's tooltip (see fitGroupTabs). */
-.section-chips.compact > .group-tab:not([aria-expanded="true"]) { padding: 0 9px; }
-/* ...except the open one, which always says what it is. The name folds away rather than vanishing, so that a tab opened grows into
+/* No room for every name: the pictograms alone (see fitGroupTabs). */
+.section-chips.compact > .group-tab:not([aria-expanded="true"], :hover, :focus-visible) { padding: 0 9px; }
+/* ...except the open one, which always says what it is, and the one pointed at or reached by keyboard, which says it then. The name folds away rather than vanishing, so that a tab opened grows into
    its name and the one closed shrinks back to its pictogram, instead of the strip jumping. Still read aloud, folded: only its width goes. */
 .section-chips > .group-tab { transition: padding 0.2s ease; }
 .section-chips > .group-tab > span:not(.tab-badge) {
@@ -1901,7 +1901,7 @@ ${EditorTheme.HEAD}
   white-space: nowrap;
   transition: max-width 0.2s ease, margin 0.2s ease, opacity 0.2s ease;
 }
-.section-chips.compact > .group-tab:not([aria-expanded="true"]) > span:not(.tab-badge) { max-width: 0; margin-inline-start: -6px; opacity: 0; }
+.section-chips.compact > .group-tab:not([aria-expanded="true"], :hover, :focus-visible) > span:not(.tab-badge) { max-width: 0; margin-inline-start: -6px; opacity: 0; }
 /* Measured at once, not halfway through a fold (see fitGroupTabs). */
 .section-chips.measuring > .group-tab, .section-chips.measuring > .group-tab > span { transition: none; }
 .section-chips > .group-tab[aria-expanded="true"] { background: var(--ink); color: var(--ground-raised); box-shadow: none; }
