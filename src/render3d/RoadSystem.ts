@@ -78,6 +78,12 @@ export class RoadSystem {
   private static readonly SIDEWALK_NONE_M = 0.8
   /** How far from its line a street's middle is taken to be, at most: the IGN's stated precision. Farther, it is the walls that are of another street. */
   private static readonly STREET_MIDDLE_MOST_M = 2.5
+  /** How far a lamp's column stands clear of the carriageway, at least: its own radius and a little. */
+  private static readonly LAMP_CLEARANCE_M = 0.4
+  /** Where a lamp nobody surveyed is drawn: this far onto the pavement from its kerb, the usual place of a column, or half the pavement if narrower. */
+  private static readonly LAMP_FROM_KERB_M = 0.5
+  /** How near a street's line a lamp nobody surveyed must be to be taken for one of its lamps, metres: within the street. */
+  private static readonly KERB_REACH_M = 12
   static readonly SIDEWALK_KERB_M = 0.12
   /** Streets narrower than this have no room for one (a lane, a cycle path), and a carriageway wider than the usual is a road with no pavements of its own. */
   private static readonly SIDEWALK_MIN_ROAD_M = 3.5
@@ -98,6 +104,8 @@ export class RoadSystem {
   /** Where the patch's own origin stands from one fixed point of the recording, so the grain of a road is the same from one patch to the next (see GrassDetail). */
   private readonly grainOrigin = new Vector2()
   private grainReference?: { lat: number, lng: number }
+  /** The streets laid between walls by the last set, each by its rungs and how it lies across at each: where a supposed lamp goes (see atKerb). */
+  private laidStreets: { rungs: { x: number, z: number, dirX: number, dirZ: number }[], across: (x: number, z: number, dirX: number, dirZ: number) => StreetAcross }[] = []
   /** A paint being laid is dropped if another set of roads came since: it was for the patch before. */
   private markingsToken = 0
   private static markingsModule?: Promise<typeof import("./RoadMarkings.js")>
@@ -143,6 +151,7 @@ export class RoadSystem {
     // Only what the patch can show: an archive holds the roads of the whole of a drive, and a town's worth of pavements is paid for by every one of them.
     const ways = RoadSystem.within(allWays, originLat, originLng, radiusM)
     RoadSystem.empty(this.surveyed)
+    this.laidStreets = []
     this.markingsToken++
     this.anchorGrain(originLat, originLng)
     // One mesh per SURFACE, not per way. A town's network is five hundred ways — around Socorro it
@@ -271,16 +280,61 @@ export class RoadSystem {
       }
       return walls
     }
-    const middles = this.rungsOf(path).flatMap(rung => {
+    const rungs = this.rungsOf(path)
+    const middles = rungs.flatMap(rung => {
       const walls = wallsAt(rung.x, rung.z, rung.dirX, rung.dirZ)
       return walls.leftM !== undefined && walls.rightM !== undefined ? [(walls.leftM - walls.rightM) / 2] : []
     }).sort((a, b) => a - b)
-    if (middles.length === 0) return () => surveyed
-    const middle = Math.max(-RoadSystem.STREET_MIDDLE_MOST_M, Math.min(RoadSystem.STREET_MIDDLE_MOST_M, middles[Math.floor((middles.length - 1) / 2)]))
+    const lamps = facades.lampsAlong(path)
+    if (middles.length === 0 && lamps.length === 0) return () => surveyed
+    const between = middles.length > 0 ? middles[Math.floor((middles.length - 1) / 2)] : 0
+    const middle = RoadSystem.clearOf(lamps, way.widthM / 2, Math.max(-RoadSystem.STREET_MIDDLE_MOST_M, Math.min(RoadSystem.STREET_MIDDLE_MOST_M, between)))
+    const laid = { rungs, across: (x: number, z: number, dirX: number, dirZ: number) => RoadSystem.betweenWalls(way, middle, wallsAt(x, z, dirX, dirZ).leftM, wallsAt(x, z, dirX, dirZ).rightM) }
+    this.laidStreets.push(laid)
     return (x, z, dirX, dirZ) => {
       const walls = wallsAt(x, z, dirX, dirZ)
       return RoadSystem.betweenWalls(way, middle, walls.leftM, walls.rightM)
     }
+  }
+
+  /**
+   * The middle of a lane `halfM` wide nearest `preferredM` that leaves every lamp in `lampsM` (each how far to the left of the street's line it
+   * stands) on a pavement: within the survey's precision of its line, and `preferredM` itself where no such middle is.
+   */
+  private static clearOf(lampsM: number[], halfM: number, preferredM: number): number {
+    const clear = (middle: number) => lampsM.every(lamp => Math.abs(lamp - middle) >= halfM + RoadSystem.LAMP_CLEARANCE_M)
+    if (clear(preferredM)) return preferredM
+    const most = RoadSystem.STREET_MIDDLE_MOST_M
+    for (let away = 0.1; away <= 2 * most; away += 0.1) {
+      for (const middle of [preferredM - away, preferredM + away]) {
+        if (Math.abs(middle) <= most && clear(middle)) return middle
+      }
+    }
+    return preferredM
+  }
+
+  /**
+   * Where a lamp that nobody surveyed stands, a point of the patch's own metres near a street laid between walls: at its kerb, on the pavement of
+   * the side it was put on, or on the other's if that side has none. The same point where it is near no such street. See StreetLampSpec.supposed.
+   */
+  atKerb(x: number, z: number): { x: number, z: number } {
+    let nearest: { rung: { x: number, z: number, dirX: number, dirZ: number }, across: StreetAcross, distance: number } | undefined
+    for (const street of this.laidStreets) {
+      for (const rung of street.rungs) {
+        const distance = Math.hypot(x - rung.x, z - rung.z)
+        if (distance <= RoadSystem.KERB_REACH_M && (!nearest || distance < nearest.distance)) nearest = { rung, across: street.across(rung.x, rung.z, rung.dirX, rung.dirZ), distance }
+      }
+    }
+    if (!nearest) return { x, z }
+    const { rung, across } = nearest
+    const lateral = (x - rung.x) * -rung.dirZ + (z - rung.z) * rung.dirX
+    const along = (x - rung.x) * rung.dirX + (z - rung.z) * rung.dirZ
+    const own = lateral >= across.carriageway.offsetM ? across.left : across.right
+    const pavement = own ?? across.left ?? across.right
+    if (!pavement) return { x, z }
+    const outward = Math.sign(pavement.outerM - pavement.kerbM)
+    const at = pavement.kerbM + outward * Math.min(RoadSystem.LAMP_FROM_KERB_M, Math.abs(pavement.outerM - pavement.kerbM) / 2)
+    return { x: rung.x + rung.dirX * along - rung.dirZ * at, z: rung.z + rung.dirZ * along + rung.dirX * at }
   }
 
   /** Where the rungs of a line stand, and which way it goes at each (see appendPath). */
@@ -377,6 +431,7 @@ export class RoadSystem {
    * What the case file states is not touched: it does not depend on anybody answering. */
   clear(): void {
     RoadSystem.empty(this.surveyed)
+    this.laidStreets = []
     this.markingsToken++
   }
 

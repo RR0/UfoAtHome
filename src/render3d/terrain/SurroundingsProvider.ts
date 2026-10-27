@@ -115,6 +115,8 @@ export interface SurveyedLamp {
   lumens?: number
   /** What holds it: a column of its own, or a bracket on a wall. Absent: a column. */
   mount?: "column" | "wall"
+  /** True when it was not surveyed but supposed, along a street the map only says is lit (see StreetLampSpec.supposed). */
+  supposed?: boolean
 }
 
 /** A source of the lamps of a place that is not the survey's own: a town's inventory of its public lighting (see OsmStreetFurniture). */

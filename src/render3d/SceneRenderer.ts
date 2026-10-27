@@ -1664,6 +1664,7 @@ export class SceneRenderer {
     this.terrainMeshOrigin = undefined
     this.terrainAttribution = undefined
     this.roadSystem.clear()
+    this.lampNudges.clear()
     this.roadAttribution = undefined
     this.roadWays = undefined
     this.clearWater()
@@ -1780,6 +1781,7 @@ export class SceneRenderer {
     // (see buildRoads) instead of vanishing, for the time the next ones take, at every hundred and fifty metres.
     if (!drifted) {
       this.roadSystem.clear()
+      this.lampNudges.clear()
       this.roadAttribution = undefined
       this.clearWater()
       this.clearRailways()
@@ -2029,6 +2031,7 @@ export class SceneRenderer {
     const provider = this.terrainProviders.roads
     if (!provider || radiusM > SceneRenderer.ROADS_MAX_RADIUS_M) {
       this.roadSystem.clear()
+      this.lampNudges.clear()
       this.roadAttribution = undefined
       return
     }
@@ -2254,8 +2257,7 @@ export class SceneRenderer {
    * StreetFacades). Nothing that moves, and nothing the observer is inside of.
    */
   private buildingFootprints(lat: number, lng: number): Footprint[] {
-    const reference = this.decorReferencePose
-    const from = reference?.lat !== undefined && reference.lng !== undefined ? geoToLocalMeters(reference.lat, reference.lng, lat, lng) : { x: 0, z: 0 }
+    const from = this.decorOriginInRoads(lat, lng)
     return this.decorObjects.filter(object => object.kind === "building" && !object.observerSide && !object.track).map(object => {
       const natural = DecorSystem.naturalSize(object.kind, object.floors)
       const heading = (object.headingDeg ?? 0) * Math.PI / 180
@@ -2264,6 +2266,37 @@ export class SceneRenderer {
         halfAlongM: (object.sizeM?.lengthM ?? natural.lengthM) / 2, halfAcrossM: (object.sizeM?.widthM ?? natural.widthM) / 2
       }
     })
+  }
+
+  /** Where the decor's reference stands in the frame of roads laid round (lat, lng): decor is placed from it (see updateDecorAnchoring). */
+  private decorOriginInRoads(lat: number, lng: number): { x: number, z: number } {
+    const reference = this.decorReferencePose
+    return reference?.lat !== undefined && reference.lng !== undefined ? geoToLocalMeters(reference.lat, reference.lng, lat, lng) : { x: 0, z: 0 }
+  }
+
+  /** The public lamps of the decor that stand where somebody put them, in the frame of roads laid round (lat, lng): not the supposed ones (see StreetLampSpec.supposed). */
+  private surveyedLamps(lat: number, lng: number): { x: number, z: number }[] {
+    const from = this.decorOriginInRoads(lat, lng)
+    return this.decorObjects.filter(object => object.kind === "streetlight" && !object.lamp?.supposed && !object.track)
+      .map(object => ({ x: from.x + object.eastM, z: from.z - object.northM }))
+  }
+
+  /**
+   * How far each supposed lamp is drawn from where it was put, east and north: to the kerb of the street it stands in as the roads are laid (see
+   * RoadSystem.atKerb). A supposed lamp was put a guessed width from a line of another survey, and fell in the carriageway as often as not.
+   */
+  private readonly lampNudges = new Map<string, { eastM: number, northM: number }>()
+
+  private lampsToKerb(lat: number, lng: number): void {
+    this.lampNudges.clear()
+    const from = this.decorOriginInRoads(lat, lng)
+    for (const object of this.decorObjects) {
+      if (object.kind !== "streetlight" || !object.lamp?.supposed || object.track) continue
+      const x = from.x + object.eastM
+      const z = from.z - object.northM
+      const kerb = this.roadSystem.atKerb(x, z)
+      if (kerb.x !== x || kerb.z !== z) this.lampNudges.set(object.id, { eastM: kerb.x - x, northM: -(kerb.z - z) })
+    }
   }
 
   /** What the buildings of the decor were when the roads were last laid by them: other buildings, and the streets are laid again. */
@@ -2276,7 +2309,9 @@ export class SceneRenderer {
     // patch's position over to the road group.
     this.roadSystem.group.position.copy(patch.position)
     this.roadSystem.setGroundSpacing(this.patchSpacingM(patch))
-    this.roadSystem.set(ways, lat, lng, (x, z) => this.groundYOfPatch(patch, x, z), contemporary, this.terrainRadius, new StreetFacades(this.buildingFootprints(lat, lng)))
+    this.roadSystem.set(ways, lat, lng, (x, z) => this.groundYOfPatch(patch, x, z), contemporary, this.terrainRadius,
+      new StreetFacades(this.buildingFootprints(lat, lng), this.surveyedLamps(lat, lng)))
+    this.lampsToKerb(lat, lng)
     this.roadAttribution = ways.length > 0 ? this.terrainProviders.roads?.attribution : undefined
     this.compileNextFrameOffThread()
     this.render()
@@ -2504,8 +2539,8 @@ export class SceneRenderer {
       }
       else if (!this.reuseLoadedDecorModel(object, group)) void this.awaitArrival(this.loadDecorModel(object, this.decorModelToken))
     }
-    // The streets are laid from wall to wall (see StreetFacades): buildings planted, moved or taken away, and they are laid again.
-    const facadesKey = decor.filter(object => object.kind === "building").map(object => `${object.eastM.toFixed(1)},${object.northM.toFixed(1)},${object.headingDeg ?? 0}`).join(";")
+    // The streets are laid from wall to wall and clear of the lamps (see StreetFacades): buildings or lamps planted, moved or taken away, and they are laid again.
+    const facadesKey = decor.filter(object => object.kind === "building" || object.kind === "streetlight").map(object => `${object.kind}:${object.lamp?.supposed ? "s" : ""}${object.eastM.toFixed(1)},${object.northM.toFixed(1)},${object.headingDeg ?? 0}`).join(";")
     if (facadesKey !== this.roadFacadesKey) {
       this.roadFacadesKey = facadesKey
       const held = this.roadWays
@@ -3022,8 +3057,10 @@ export class SceneRenderer {
       // resolveDecorPlacementAt). Altitude joins the two horizontal axes here — it is the one thing
       // ground-bound scenery never needed and a flying object cannot do without.
       const placement = resolveDecorPlacementAt(object, t)
-      const x = placement.eastM + offset.x + shift.x
-      const z = -placement.northM + offset.z + shift.z
+      // A supposed lamp is drawn at the kerb of its street (see lampsToKerb).
+      const nudge = this.lampNudges.get(object.id)
+      const x = placement.eastM + (nudge?.eastM ?? 0) + offset.x + shift.x
+      const z = -(placement.northM + (nudge?.northM ?? 0)) + offset.z + shift.z
       // Read once per resting place, not once per frame: the ground under an object depends on where
       // it stands ON THE PATCH, and the patch is re-anchored under a walking observer together with
       // the object (the offset above), so a still object keeps its answer while the observer moves.
@@ -6055,6 +6092,11 @@ export class SceneRenderer {
       maxY = Math.max(maxY, ndc.ndcY)
     }
     return { minX, minY, maxX, maxY }
+  }
+
+  /** How far from where it was put a decor object is drawn, east and north: a supposed lamp drawn at the kerb of its street (see lampsToKerb). */
+  decorDrawnOffset(id: string): { eastM: number, northM: number } | undefined {
+    return this.lampNudges.get(id)
   }
 
   /** Where a point of the picture meets the horizontal level `heightM` above the one the decor object

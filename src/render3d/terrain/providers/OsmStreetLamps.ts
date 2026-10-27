@@ -82,7 +82,8 @@ export class OsmStreetLamps {
         const along = next - walked
         lamps.push({
           eastM: Math.round((x0 + ux * along + uy * offset * side) * 10) / 10,
-          northM: Math.round((y0 + uy * along - ux * offset * side) * 10) / 10
+          northM: Math.round((y0 + uy * along - ux * offset * side) * 10) / 10,
+          supposed: true
         })
         side = -side
       }

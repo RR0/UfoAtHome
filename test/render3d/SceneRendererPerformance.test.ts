@@ -11,7 +11,7 @@ function renderer() {
   return Object.assign(Object.create(SceneRenderer.prototype), {
     cloudRendering: "surface", weather: { cloudCover: 0.3, cloudDarkness: 0.2, highCloudCover: 0.1 },
     observerElevationM: 0, cloudFieldOffset: new Vector3(), celestialGroup: new Group(),
-    camera: new PerspectiveCamera(), scene: new Group(), decorGroups: new Map(), decorPresence: new Map(), decorSunlight: new Map(), pendingTrafficModels: new Map(), sceneSunBeam: [0, 0, 0], groundRadius: 1000,
+    camera: new PerspectiveCamera(), scene: new Group(), decorGroups: new Map(), lampNudges: new Map(), decorPresence: new Map(), decorSunlight: new Map(), pendingTrafficModels: new Map(), sceneSunBeam: [0, 0, 0], groundRadius: 1000,
     compassHovered: false, compassForced: false,
     gaitOffset: { eastM: 0, northM: 0, upM: 0 }, poseCameraY: 1.6,
     // What the real constructor builds from the card — see AdaptiveResolution; nothing here has a card.

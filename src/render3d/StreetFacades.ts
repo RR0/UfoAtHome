@@ -28,7 +28,11 @@ export class StreetFacades {
   private static readonly CELL_M = 32
   private readonly cells = new Map<number, Footprint[]>()
 
-  constructor(footprints: readonly Footprint[]) {
+  /**
+   * `lamps` are the public lamps surveyed in the scene, each where it stands (not the ones supposed along a lit street: see StreetLampSpec.supposed).
+   * A lamp stands on a pavement or on a wall, never in the carriageway, so where one is the street's lane is not (see RoadSystem).
+   */
+  constructor(footprints: readonly Footprint[], readonly lamps: readonly { x: number, z: number }[] = []) {
     for (const footprint of footprints) {
       const reach = Math.hypot(footprint.halfAlongM, footprint.halfAcrossM)
       const x0 = Math.floor((footprint.x - reach) / StreetFacades.CELL_M)
@@ -65,11 +69,40 @@ export class StreetFacades {
   }
 
   /**
-   * Whether any building stands within reach of a street laid along these points: most of a town's streets, out to the edge of the patch, have
-   * none of the decor's near them, and are laid at their surveyed width without a wall being looked for.
+   * The surveyed lamps that stand along a street laid along these points, each as how far to the left of the direction of travel it stands
+   * (negative: to the right): those within reach of its line, and abreast of it, not past either of its ends (a lamp past the end of a street
+   * stands at a corner, on the pavement of another).
+   */
+  lampsAlong(points: readonly { x: number, z: number }[]): number[] {
+    const across: number[] = []
+    for (const lamp of this.lamps) {
+      let nearest: { distance: number, lateral: number } | undefined
+      for (let i = 1; i < points.length; i++) {
+        const ax = points[i - 1].x
+        const az = points[i - 1].z
+        const dx = points[i].x - ax
+        const dz = points[i].z - az
+        const length2 = dx * dx + dz * dz
+        if (length2 === 0) continue
+        const t = ((lamp.x - ax) * dx + (lamp.z - az) * dz) / length2
+        if (t < 0 || t > 1) continue
+        const length = Math.sqrt(length2)
+        // Left of the direction of travel, as RoadSystem lays it: (-dz, dx).
+        const lateral = ((lamp.x - ax) * -dz + (lamp.z - az) * dx) / length
+        if (!nearest || Math.abs(lateral) < nearest.distance) nearest = { distance: Math.abs(lateral), lateral }
+      }
+      if (nearest && nearest.distance <= StreetFacades.REACH_M) across.push(nearest.lateral)
+    }
+    return across
+  }
+
+  /**
+   * Whether any building, or any surveyed lamp, stands within reach of a street laid along these points: most of a town's streets, out to the
+   * edge of the patch, have none of the decor's near them, and are laid at their surveyed width without a wall being looked for.
    */
   near(points: readonly { x: number, z: number }[]): boolean {
     if (points.length === 0) return false
+    if (this.lampsAlong(points).length > 0) return true
     const reach = StreetFacades.REACH_M + Math.max(...StreetFacades.SAMPLES_M.map(Math.abs))
     const xs = points.map(point => point.x)
     const zs = points.map(point => point.z)

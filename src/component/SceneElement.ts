@@ -1241,6 +1241,11 @@ export class SceneElement extends HTMLElement {
     return this.sceneRenderer.decorScreenBox(id)
   }
 
+  /** How far from where it was put a decor object is drawn — see SceneRenderer.decorDrawnOffset. */
+  decorDrawnOffset(id: string): { eastM: number, northM: number } | undefined {
+    return this.sceneRenderer.decorDrawnOffset(id)
+  }
+
   /** Where a point of the picture meets the ground the decor object stands on — see
    * SceneRenderer.decorGroundPointAt. */
   decorGroundPointAt(id: string, ndcX: number, ndcY: number, heightM = 0): { x: number, z: number } | undefined {

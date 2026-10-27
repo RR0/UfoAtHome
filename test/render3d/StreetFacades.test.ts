@@ -39,4 +39,10 @@ describe("StreetFacades", () => {
     // A square turned 45° about (0, 10): its nearest corner is 3√2 short of its centre.
     expect(facades.wall(0, 0, 0, 1)).toBeCloseTo(10 - 3 * Math.SQRT2, 5)
   })
+
+  it("gives the surveyed lamps along a street as how far left of it each stands, not one past its ends", () => {
+    const facades = new StreetFacades([], [{ x: 50, z: 2 }, { x: 20, z: -3 }, { x: 120, z: 0 }])
+    expect(facades.lampsAlong([{ x: 0, z: 0 }, { x: 100, z: 0 }])).toEqual([2, -3])
+    expect(facades.near([{ x: 0, z: 0 }, { x: 100, z: 0 }])).toBe(true)
+  })
 })

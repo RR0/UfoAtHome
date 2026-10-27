@@ -79,6 +79,13 @@ describe("SurveyedDecor's street furniture", () => {
     expect(planted.every(object => object.surveyedOn === "2026-10-18" && object.origin === "osm")).toBe(true)
   })
 
+  it("plants a supposed lamp as supposed, and a surveyed one as it was", () => {
+    const { planted } = SurveyedDecor.of("osm", {
+      trees: [], buildings: [], bridges: [], lines: [], lamps: [{ eastM: 1, northM: 2 }, { eastM: 3, northM: 4, supposed: true }]
+    }, { kept: [], kindName: kind => kind })
+    expect(planted.map(object => object.lamp?.supposed)).toEqual([undefined, true])
+  })
+
   it("brings none of a kind the author already placed one of", () => {
     const { planted, handPlaced } = SurveyedDecor.of("osm", { trees: [], buildings: [], bridges: [], lines: [], crossings: [{ eastM: 5, northM: 6, headingDeg: 45, widthM: 7 }] },
       { kept: [{ id: "mine", kind: "crossing", eastM: 0, northM: 0 }], kindName: kind => kind })

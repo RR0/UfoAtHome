@@ -407,6 +407,12 @@ export interface StreetLampSpec {
   lumens?: number
   /** "wall": a bracket on a facade, with no column of its own. Absent: a column. */
   mount?: "column" | "wall"
+  /**
+   * True when nobody surveyed where it stands: it was put there because a map says the street is lit, at the spacing of a town's lamps (see
+   * OsmStreetLamps). It is drawn at the kerb of the street as the scene lays it, the one thing known of where such a lamp is; and it says nothing
+   * of where the street runs, unlike a lamp that was surveyed (see RoadSystem). Absent: it stands where it was surveyed or placed.
+   */
+  supposed?: boolean
 }
 
 /** What the face of a road sign says (see DecorObject.sign). */

@@ -179,10 +179,11 @@ describe("RoadSystem pavements", () => {
 
   describe("between the walls of a street", () => {
     // Rue Maurice Thorez in Nanterre: three metres of lane in the map, façades 6.9 m on one side and 4.2 m on the other.
-    const walls = new StreetFacades([
+    const wallFootprints = [
       { x: 100, z: -6.9 - 5, alongX: 1, alongZ: 0, halfAlongM: 150, halfAcrossM: 5 },
       { x: 100, z: 4.2 + 5, alongX: 1, alongZ: 0, halfAlongM: 150, halfAcrossM: 5 }
-    ])
+    ]
+    const walls = new StreetFacades(wallFootprints)
     const lane = urban(straight("thorez", "paved", 3, 200))
     const drawnZ = (mesh: Mesh<BufferGeometry>): number[] => {
       const points = vertices(mesh)
@@ -221,6 +222,30 @@ describe("RoadSystem pavements", () => {
       const system = new RoadSystem()
       system.set([lane], LAT, LNG, () => 0, true, Infinity, walls)
       expect(sidewalks(system)!.material).toMatchObject({ transparent: false, opacity: 1 })
+    })
+
+    it("moves the lane off a surveyed lamp: a lamp stands on a pavement, never in the carriageway", () => {
+      // The middle of the street is at -1.35; a lamp surveyed there says the lane runs beside it.
+      const lamp = { x: 100, z: -1.35 }
+      const system = new RoadSystem()
+      system.set([lane], LAT, LNG, () => 0, false, Infinity, new StreetFacades(wallFootprints, [lamp]))
+      const carriageway = drawnZ(meshes(system).find(mesh => mesh.name === "roads paved")!)
+      const left = Math.min(...carriageway)
+      const right = Math.max(...carriageway)
+      expect(right - left).toBeCloseTo(3, 1)
+      expect(lamp.z < left - 0.3 || lamp.z > right + 0.3).toBe(true)
+    })
+
+    it("puts a lamp nobody surveyed that fell in the carriageway at the kerb of the side it was put on", () => {
+      const system = new RoadSystem()
+      system.set([lane], LAT, LNG, () => 0, false, Infinity, walls)
+      const carriageway = drawnZ(meshes(system).find(mesh => mesh.name === "roads paved")!)
+      const top = Math.max(...carriageway)
+      const moved = system.atKerb(80, top - 0.5)
+      expect(moved.x).toBeCloseTo(80, 5)
+      expect(moved.z).toBeCloseTo(top + 0.5, 1)
+      // Nowhere near a street laid between walls: where it was.
+      expect(system.atKerb(80, 500)).toEqual({ x: 80, z: 500 })
     })
 
     it("draws pavements along a lane too narrow for them by its width alone, once its walls say there is room", () => {

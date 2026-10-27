@@ -9047,9 +9047,27 @@ export class SightingEditorElement extends HTMLElement {
    * the lamp switch as a keyframe of its own at this instant (never while playing: scrubbing must not write one), and so on. The
    * decor array is replaced by a new one, not mutated, for the same setDecor reference-equality reason as addDecor.
    */
+  /**
+   * A lamp nobody surveyed (see StreetLampSpec.supposed) stands where the scene draws it, at the kerb, once the author takes hold of it: moved
+   * from where it is seen, and from then on where the author puts it, not supposed any more. Any other object as it is.
+   */
+  private placedByAuthor(decor: DecorObject): DecorObject {
+    if (!decor.lamp?.supposed) return decor
+    const drawn = this.sceneElement.decorDrawnOffset(decor.id)
+    const { supposed: _supposed, ...lamp } = decor.lamp
+    const placed: DecorObject = {
+      ...decor, eastM: decor.eastM + (drawn?.eastM ?? 0), northM: decor.northM + (drawn?.northM ?? 0), ...(Object.keys(lamp).length > 0 ? { lamp } : {})
+    }
+    if (Object.keys(lamp).length === 0) delete placed.lamp
+    const sighting = this.ufoElement.sighting
+    sighting.decor = sighting.decor.map(candidate => candidate.id === decor.id ? placed : candidate)
+    return placed
+  }
+
   private commitDecorBase(change: (view: ParameterHolder) => void, key: string): void {
-    const decor = this.ufoElement.sighting.decor.find(candidate => candidate.id === this.currentDecorId)
-    if (!decor) return
+    const found = this.ufoElement.sighting.decor.find(candidate => candidate.id === this.currentDecorId)
+    if (!found) return
+    const decor = key === "eastM" || key === "northM" ? this.placedByAuthor(found) : found
     if ((key === "lit" || key === "headlights") && this.ufoElement.playbackState === "playing") return
     const t = this.ufoElement.currentTime
     const view = DecorBase.viewOf(decor, t, this.sceneElement.sunAltitudeDeg)
@@ -11440,7 +11458,7 @@ export class SightingEditorElement extends HTMLElement {
     if (this.ufoElement.shapeAt(point.x, point.y, EMPTY_SOURCE_IDS)) return false
     if (!this.grabsDecor(event, point, decor)) return false
     const ndc = this.ndcOf(event)
-    const start = DecorBase.viewOf(decor, this.ufoElement.currentTime)
+    const start = DecorBase.viewOf(this.placedByAuthor(decor), this.ufoElement.currentTime)
     const grabHeightM = ndc ? this.sceneElement.decorGrabHeightAt?.(decor.id, ndc.x, ndc.y) ?? 0 : 0
     const ground = ndc && this.sceneElement.decorGroundPointAt(decor.id, ndc.x, ndc.y, grabHeightM)
     if (!ndc || !ground) return false

@@ -55,6 +55,9 @@ describe("OsmStreetLamps", () => {
     expect(lamps.map(lamp => Math.round(lamp.eastM))).toEqual([18, 53, 88])
     // Three metres of half-width and one of kerb: 4 m off the axis (a street running east, so the offset is north or south), alternately.
     expect(lamps.map(lamp => lamp.northM)).toEqual([-4, 4, -4])
+    // Supposed, not surveyed: where along the street they are nobody knows. A mapped lamp is not.
+    expect(lamps.every(lamp => lamp.supposed === true)).toBe(true)
+    expect(OsmStreetLamps.lampsFrom({ elements: [at(1, 1)] }, SAINT_LO, 50)[0].supposed).toBeUndefined()
     expect(OsmStreetLamps.lampsFrom({ elements: [] }, SAINT_LO, 200)).toEqual([])
   })
 
