@@ -1669,6 +1669,12 @@ select.weather-field:disabled {
   cursor: default;
   opacity: 0.4;
 }
+/* The pointer lands on the button, never on its glyph: over a DISABLED button the browser shows
+   the tooltip only when the button itself is what is hovered, so the star — whose open middle put
+   the svg under the pointer — said nothing while the others, hovered on their strokes, did. */
+.icon-btn > .icon {
+  pointer-events: none;
+}
 /* The [hidden] attribute's own display:none (from the browser's UA stylesheet) loses to the
    plain .icon-btn rule above — a class selector outweighs an attribute selector at equal
    specificity-position — same fix, same reason, as .context-menu[hidden] below (see its own
