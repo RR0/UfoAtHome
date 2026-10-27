@@ -61,16 +61,16 @@ export const html = `
 <div id="timeline-tracks" hidden></div>
 </div>
 <nav id="group-tabs" class="section-chips">
-  <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false"><span id="label-observation-group">Summary</span></button>
-  <button class="group-tab" type="button" aria-controls="group-observer" aria-expanded="false"><span id="label-observer-group">Witness</span></button>
-  <button class="group-tab" type="button" aria-controls="group-location" aria-expanded="false"><span id="label-location-group">Location</span></button>
-  <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false"><span id="label-temporal-group">Date</span></button>
-  <button class="group-tab" type="button" aria-controls="group-decor" aria-expanded="false"><span id="label-decor-group">Environment</span></button>
-  <button class="group-tab" type="button" aria-controls="group-weather" aria-expanded="false"><span id="label-weather-group">Sky</span></button>
-  <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false"><span id="label-shape-group">Phenomenon</span></button>
-  <button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false"><span id="label-sound-group">Sound</span></button>
-  <button class="group-tab" type="button" aria-controls="group-reference" aria-expanded="false"><span id="label-reference-group">Pictures</span></button>
-  <button class="group-tab" type="button" aria-controls="group-file" aria-expanded="false"><span id="label-file-group">Files</span></button>
+  <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false">${Icons.SUMMARY}<span id="label-observation-group">Summary</span></button>
+  <button class="group-tab" type="button" aria-controls="group-observer" aria-expanded="false">${Icons.WITNESS}<span id="label-observer-group">Witness</span></button>
+  <button class="group-tab" type="button" aria-controls="group-location" aria-expanded="false">${Icons.LOCATION}<span id="label-location-group">Location</span></button>
+  <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false">${Icons.DATE}<span id="label-temporal-group">Date</span></button>
+  <button class="group-tab" type="button" aria-controls="group-decor" aria-expanded="false">${Icons.ENVIRONMENT}<span id="label-decor-group">Environment</span></button>
+  <button class="group-tab" type="button" aria-controls="group-weather" aria-expanded="false">${Icons.SKY}<span id="label-weather-group">Sky</span></button>
+  <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false">${Icons.PHENOMENON}<span id="label-shape-group">Phenomenon</span></button>
+  <button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false">${Icons.SOUND}<span id="label-sound-group">Sound</span></button>
+  <button class="group-tab" type="button" aria-controls="group-reference" aria-expanded="false">${Icons.PICTURES}<span id="label-reference-group">Pictures</span></button>
+  <button class="group-tab" type="button" aria-controls="group-file" aria-expanded="false">${Icons.FILES}<span id="label-file-group">Files</span></button>
   <!-- What an element that holds this editor puts after the last tab (see CaseEditorElement): a mark of its own, which takes its room whether it shows or not. -->
   <slot name="tab-status"></slot>
 </nav>
@@ -1864,10 +1864,10 @@ ${EditorTheme.HEAD}
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   height: 34px;
   margin: 0;
-  padding: 0 14px;
+  padding: 0 10px;
   border: 1px solid var(--line-strong);
   border-radius: 10px;
   background: var(--ground-raised);
@@ -1875,22 +1875,26 @@ ${EditorTheme.HEAD}
   box-shadow: none;
   font: 600 14px/1 var(--sans);
 }
-.section-chips > .group-tab:hover { background: var(--ground-sunken); border-color: var(--glow-dim); color: var(--ink); }
-/* Its state, as a dot: complete, or with something still to answer, or wrong. */
-.section-chips > .group-tab::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
-.section-chips > .group-tab:has(.tab-badge:not([hidden]))::before { background: var(--glow-solid); }
-.app:has(#group-observation [aria-invalid="true"]) [aria-controls="group-observation"]::before,
-.app:has(#group-observer [aria-invalid="true"]) [aria-controls="group-observer"]::before,
-.app:has(#group-location [aria-invalid="true"]) [aria-controls="group-location"]::before,
-.app:has(#group-temporal [aria-invalid="true"]) [aria-controls="group-temporal"]::before,
-.app:has(#group-decor [aria-invalid="true"]) [aria-controls="group-decor"]::before,
-.app:has(#group-weather [aria-invalid="true"]) [aria-controls="group-weather"]::before,
-.app:has(#group-shape [aria-invalid="true"]) [aria-controls="group-shape"]::before,
-.app:has(#group-sound [aria-invalid="true"]) [aria-controls="group-sound"]::before,
-.app:has(#group-reference [aria-invalid="true"]) [aria-controls="group-reference"]::before,
-.app:has(#group-file [aria-invalid="true"]) [aria-controls="group-file"]::before { background: var(--error); }
-.section-chips > .group-tab[aria-expanded="true"] { background: var(--ink); border-color: var(--ink); color: var(--ground-raised); box-shadow: none; }
-/* The count stays for whoever reads the chip aloud; the dot says it to the eye. */
+.section-chips > .group-tab:hover { background: var(--ground-sunken); color: var(--ink); }
+/* Its state, as its outline: complete, or with something still to answer, or wrong. */
+.section-chips > .group-tab { border: 1.5px solid var(--ok); }
+.section-chips > .group-tab:has(.tab-badge:not([hidden])) { border-color: var(--glow-solid); }
+.app:has(#group-observation [aria-invalid="true"]) [aria-controls="group-observation"],
+.app:has(#group-observer [aria-invalid="true"]) [aria-controls="group-observer"],
+.app:has(#group-location [aria-invalid="true"]) [aria-controls="group-location"],
+.app:has(#group-temporal [aria-invalid="true"]) [aria-controls="group-temporal"],
+.app:has(#group-decor [aria-invalid="true"]) [aria-controls="group-decor"],
+.app:has(#group-weather [aria-invalid="true"]) [aria-controls="group-weather"],
+.app:has(#group-shape [aria-invalid="true"]) [aria-controls="group-shape"],
+.app:has(#group-sound [aria-invalid="true"]) [aria-controls="group-sound"],
+.app:has(#group-reference [aria-invalid="true"]) [aria-controls="group-reference"],
+.app:has(#group-file [aria-invalid="true"]) [aria-controls="group-file"] { border-color: var(--error); }
+/* No room for every name: the pictograms alone, each name in its tab's tooltip (see fitGroupTabs). */
+.section-chips.compact > .group-tab:not([aria-expanded="true"]) { padding: 0 9px; }
+/* ...except the open one, which always says what it is. */
+.section-chips.compact > .group-tab:not([aria-expanded="true"]) > span:not(.tab-badge) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.section-chips > .group-tab[aria-expanded="true"] { background: var(--ink); color: var(--ground-raised); box-shadow: none; }
+/* The count stays for whoever reads the chip aloud; the outline says it to the eye. */
 .section-chips .tab-badge { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .app > .group-panel {
   margin: 0;

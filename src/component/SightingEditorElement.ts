@@ -2028,6 +2028,8 @@ export class SightingEditorElement extends HTMLElement {
     for (const tab of this.groupTabs) {
       tab.addEventListener("click", () => this.toggleGroup(tab, !this.isGroupOpen(tab)))
     }
+    // The names only where they all fit: measured, not guessed from a width, since a language's names are not as long as another's.
+    new ResizeObserver(() => this.fitGroupTabs()).observe(this.groupTabs[0].parentElement!)
     this.subgroupTabs = [...this.shadow.querySelectorAll<HTMLButtonElement>(".subgroup-tab")]
     for (const tab of this.subgroupTabs) {
       tab.addEventListener("click", () => this.openSubgroup(tab))
@@ -5945,6 +5947,7 @@ export class SightingEditorElement extends HTMLElement {
       const nowOpen = candidate === tab && open
       candidate.setAttribute("aria-expanded", String(nowOpen))
       this.groupPanels[index].hidden = !nowOpen
+      SightingEditorElement.titleGroupTab(candidate)
     }
     // The chips scroll sideways: the one opened is brought into the strip's view, centred, rather than left past its edge.
     if (open) {
@@ -7028,6 +7031,25 @@ export class SightingEditorElement extends HTMLElement {
     this.renderParamSummary()
   }
 
+  /**
+   * Shows the group tabs' names when the strip has room for all of them, and only their pictograms otherwise, each name then in its
+   * tab's tooltip. Measured with the names shown, so that a strip grown wide enough for them again gets them back.
+   */
+  private fitGroupTabs(): void {
+    const strip = this.groupTabs[0]?.parentElement
+    if (!strip) return
+    strip.classList.remove("compact")
+    strip.classList.toggle("compact", strip.scrollWidth > strip.clientWidth)
+    for (const tab of this.groupTabs) SightingEditorElement.titleGroupTab(tab)
+  }
+
+  /** What a group tab says when pointed at: its name when it shows only its pictogram (closed, on a strip too narrow for every name), what the section is for (see labelPanels), then what
+   * is left to answer in it (see markUnansweredQuestions). */
+  private static titleGroupTab(tab: HTMLElement): void {
+    const iconOnly = tab.parentElement!.classList.contains("compact") && tab.getAttribute("aria-expanded") !== "true"
+    tab.title = [iconOnly ? SightingEditorElement.tabLabel(tab) : undefined, tab.dataset.intro, tab.dataset.unanswered].filter(Boolean).join("\n")
+  }
+
   /** What a tab is CALLED, without the count it may also be carrying. */
   private static tabLabel(tab: HTMLElement): string {
     return (tab.querySelector<HTMLElement>("span:not(.tab-badge)") ?? tab).textContent!.trim()
@@ -7125,7 +7147,9 @@ export class SightingEditorElement extends HTMLElement {
       const unanswered = count === 0
         ? undefined
         : required ? this.messages.durationRequired : this.messages.questionsUnanswered.replace("{count}", String(count))
-      tab.title = [tab.dataset.intro, unanswered].filter(Boolean).join("\n")
+      if (unanswered) tab.dataset.unanswered = unanswered
+      else delete tab.dataset.unanswered
+      SightingEditorElement.titleGroupTab(tab)
     }
   }
 
@@ -10456,6 +10480,7 @@ export class SightingEditorElement extends HTMLElement {
     // message serves both and "Circumstances" — which never named what the group actually holds —
     // is gone.
     this.labelWeatherGroup.textContent = messages.sky
+    this.fitGroupTabs()
     this.startDate.messages = messages
     this.endDate.messages = messages
     this.birthDate.messages = messages
@@ -10604,7 +10629,7 @@ export class SightingEditorElement extends HTMLElement {
     for (const [name, intro] of Object.entries(intros)) {
       const chip = this.shadow.querySelector<HTMLElement>(`[aria-controls="group-${name}"]`)!
       chip.dataset.intro = intro
-      if (!chip.title.startsWith(intro)) chip.title = intro
+      SightingEditorElement.titleGroupTab(chip)
     }
     this.refreshEditorHead()
   }

@@ -30,6 +30,18 @@ export class Icons {
   static readonly SATELLITE = Icons.draw(`<rect x="6.3" y="6.3" width="3.4" height="3.4" transform="rotate(45 8 8)"/><path d="M5.4 5.4 3 3M10.6 10.6 13 13"/><path d="M1.8 4.2 4.2 1.8M11.8 14.2l2.4-2.4"/><path d="M10.5 3.5a3 3 0 0 1 2 2"/>`)
   static readonly FIREBALL = Icons.draw(`<circle cx="10.5" cy="10.5" r="2.6"/><path d="M8.6 8.6 3 3M8 10.6 4.5 8.5M10.6 8 8.5 4.5"/>`)
 
+  /** The editor's groups, one each, on their tabs: what a tab still says when it has no room left for its name. */
+  static readonly SUMMARY = Icons.draw(`<rect x="3" y="2" width="10" height="12" rx="1.5"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/>`)
+  static readonly WITNESS = Icons.draw(`<circle cx="8" cy="5" r="2.6"/><path d="M2.8 14c.6-3 2.6-4.6 5.2-4.6s4.6 1.6 5.2 4.6"/>`)
+  static readonly LOCATION = Icons.draw(`<path d="M8 14.3s4.5-4.3 4.5-7.8a4.5 4.5 0 0 0-9 0c0 3.5 4.5 7.8 4.5 7.8z"/><circle cx="8" cy="6.5" r="1.6"/>`)
+  static readonly DATE = Icons.draw(`<rect x="2.3" y="3.3" width="11.4" height="10.4" rx="1.5"/><path d="M2.3 6.6h11.4M5.3 1.8v2.8M10.7 1.8v2.8"/>`)
+  static readonly ENVIRONMENT = Icons.draw(`<path d="M1.5 14h13"/><path d="M2.8 14V8.3L6.3 5.5l3.5 2.8V14"/><path d="M12.2 14V9.4"/><circle cx="12.2" cy="7.4" r="2.1"/>`)
+  static readonly SKY = Icons.draw(`<path d="M4.6 12.5h7a2.6 2.6 0 0 0 .3-5.2 3.8 3.8 0 0 0-7.3-.6 2.9 2.9 0 0 0 0 5.8z"/>`)
+  static readonly PHENOMENON = Icons.draw(`<ellipse cx="8" cy="9" rx="6.3" ry="2.1"/><path d="M4.6 7.8a3.4 3.4 0 0 1 6.8 0"/><path d="M5 13.4l.6-1.4M11 13.4l-.6-1.4M8 14v-1.4"/>`)
+  static readonly SOUND = Icons.draw(`<path d="M2.5 6.2h2.3L8 3.5v9L4.8 9.8H2.5z"/><path d="M10.5 6a2.8 2.8 0 0 1 0 4M12.3 4.2a5.4 5.4 0 0 1 0 7.6"/>`)
+  static readonly PICTURES = Icons.draw(`<rect x="2" y="3" width="12" height="10" rx="1.5"/><circle cx="5.8" cy="6.4" r="1.2"/><path d="M2.5 12l3.8-3.6 2.4 2.2 2.2-1.8 2.6 2.5"/>`)
+  static readonly FILES = Icons.draw(`<path d="M4 1.8h5.2L12.5 5v9.2H4z"/><path d="M9 1.8V5.2h3.5"/>`)
+
   /** The pictogram an emoji used to stand for, where there is one. */
   private static readonly BY_GLYPH: Readonly<Record<string, string>> = {
     "🗑": Icons.TRASH, "🎯": Icons.TARGET, "+": Icons.PLUS, "✕": Icons.CLOSE, "▶": Icons.PLAY, "⏸": Icons.PAUSE, "⏺": Icons.RECORD, "⏹": Icons.STOP
