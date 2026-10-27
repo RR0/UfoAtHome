@@ -26,7 +26,7 @@
  * Reporterre, L'Actuaire d'Isbergues), the best photographed of them. Computed by the engine: the Sun, the Earth's shadow,
  * the flight of the exhaust and its light.
  *
- * Writes ../../../public/demo-data/{observer-csg2-nassau,observer-csg2-falcon,observer-csg2-oklahoma,observer-csg2-wichita,case-csg2}.json. Run with `node --import tsx`.
+ * Writes ../../../public/demo-data/{observer-csg2-nassau,observer-csg2-falcon,observer-csg2-oklahoma,case-csg2}.json. Run with `node --import tsx`.
  */
 import * as sat from "satellite.js"
 import { writeFileSync } from "node:fs"
@@ -47,7 +47,6 @@ const PAD = { lat: 28.5618, lng: -80.5772 }
 const NASSAU = { lat: 25.0480, lng: -77.3554, elevationM: 10, name: "Nassau, Bahamas" }
 const FALCON = { lat: 38.9331, lng: -104.6086, elevationM: 2100, name: "Falcon, Colorado" }
 const OKLAHOMA_CITY = { lat: 35.4676, lng: -97.5164, elevationM: 370, name: "Oklahoma City, Oklahoma" }
-const WICHITA = { lat: 37.6872, lng: -97.3301, elevationM: 400, name: "Wichita, Kansas" }
 
 /** A place an observer stands at. */
 interface Place {
@@ -327,8 +326,8 @@ class Csg2Case {
 
   /**
    * The same end seen from further east, where the night was further on (the Sun 11 degrees down instead of 6) and the spiral stood out
-   * far better: from Oklahoma, where some of the photographs of it Cees Bassa relayed were taken, and from Wichita, nearer the stage's
-   * track, where it is largest. Both observers are assumed.
+   * far better: from Oklahoma, where some of the photographs of it Cees Bassa relayed were taken. The observer is assumed. (Wichita, nearer
+   * the stage's track, showed it larger still and face on, too much like this view to keep both.)
    */
   oklahoma(): object {
     return this.dump(OKLAHOMA_CITY, -6, {
@@ -341,21 +340,6 @@ class Csg2Case {
         fr: "Le deuxième étage de CSG-2 freinant pour quitter son orbite et vidangeant ses réservoirs, le 1er février 2022 à 0 h 49 UTC (18 h 49 en Oklahoma), tel qu'un observateur à Oklahoma City l'aurait vu. Des photographies de la spirale ont été prises en Oklahoma ce soir-là (relayées par Cees Bassa sur SeeSat-L), mais aucun compte rendu n'a été trouvé de là : cet observateur est supposé. La nuit y est plus avancée qu'au Colorado, où Ron Lee a vu un nuage pâle : le Soleil est à 11 degrés sous l'horizon au lieu de 6, et la même spirale ressort, lumineuse, sur un ciel sombre, vue en biais. L'orbite est celle de CSG-2 elle-même, d'après Space-Track ; le freinage, les vidanges et la rotation sont supposés.",
         es: "La segunda etapa de CSG-2 frenando para salir de su órbita y purgando sus depósitos, el 1 de febrero de 2022 a las 00:49 UTC (18:49 en Oklahoma), tal como la habría visto un observador en Oklahoma City. Esa tarde se tomaron fotografías de la espiral en Oklahoma (difundidas por Cees Bassa en SeeSat-L), pero no se encontró ningún relato desde allí: este observador se supone. La noche está más avanzada que en Colorado, donde Ron Lee vio una nube pálida: el Sol está 11 grados bajo el horizonte en lugar de 6, y la misma espiral destaca, luminosa, sobre un cielo oscuro, vista de sesgo. La órbita es la de CSG-2 misma, según Space-Track; el frenado, las purgas y el giro se suponen.",
         it: "Il secondo stadio di CSG-2 che frena per lasciare l'orbita e scarica i serbatoi, il 1° febbraio 2022 alle 00:49 UTC (18:49 in Oklahoma), come l'avrebbe visto un osservatore a Oklahoma City. Quella sera in Oklahoma furono scattate fotografie della spirale (diffuse da Cees Bassa su SeeSat-L), ma non è stato trovato alcun resoconto da lì: questo osservatore è supposto. La notte è più avanzata che in Colorado, dove Ron Lee vide una nube pallida: il Sole è 11 gradi sotto l'orizzonte invece di 6, e la stessa spirale risalta, luminosa, su un cielo scuro, vista di sbieco. L'orbita è quella di CSG-2 stesso, secondo Space-Track; la frenata, gli scarichi e la rotazione sono supposti."
-      }
-    })
-  }
-
-  wichita(): object {
-    return this.dump(WICHITA, -6, {
-      key: "wichita",
-      observer: { id: "csg2-wichita", title: { en: "Observer in Wichita (assumed)", fr: "Observateur à Wichita (supposé)", es: "Observador en Wichita (supuesto)", it: "Osservatore a Wichita (supposto)" } },
-      tags: ["rocket launch", "fuel dump", "spiral", "Falcon 9", "deorbit", "assumed observer"],
-      sky: "No account from Wichita: no cloud is stated, a clear sky is assumed.",
-      description: {
-        en: "The CSG-2 upper stage braking out of orbit and venting its tanks, 1 February 2022 at 00:49 UTC (18:49 in Kansas), as an observer in Wichita would have seen it. No account from there was found: this observer is assumed, put where the physics says the spiral was best seen, a few hundred kilometres from the stage's track with the night further on than in Colorado (the Sun 11 degrees down instead of 6). The same cloud Ron Lee saw faint is here a large spiral with its halo, nearly face on. The orbit is CSG-2's own, from Space-Track; the burn, the vents and the spin are assumed.",
-        fr: "Le deuxième étage de CSG-2 freinant pour quitter son orbite et vidangeant ses réservoirs, le 1er février 2022 à 0 h 49 UTC (18 h 49 au Kansas), tel qu'un observateur à Wichita l'aurait vu. Aucun compte rendu n'a été trouvé de là : cet observateur est supposé, placé là où la physique dit que la spirale se voyait le mieux, à quelques centaines de kilomètres de la trajectoire de l'étage et avec la nuit plus avancée qu'au Colorado (le Soleil à 11 degrés sous l'horizon au lieu de 6). Le même nuage que Ron Lee a vu pâle est ici une grande spirale avec son halo, presque de face. L'orbite est celle de CSG-2 elle-même, d'après Space-Track ; le freinage, les vidanges et la rotation sont supposés.",
-        es: "La segunda etapa de CSG-2 frenando para salir de su órbita y purgando sus depósitos, el 1 de febrero de 2022 a las 00:49 UTC (18:49 en Kansas), tal como la habría visto un observador en Wichita. No se encontró ningún relato desde allí: este observador se supone, situado donde la física dice que la espiral se veía mejor, a unos cientos de kilómetros de la trayectoria de la etapa y con la noche más avanzada que en Colorado (el Sol 11 grados bajo el horizonte en lugar de 6). La misma nube que Ron Lee vio pálida es aquí una gran espiral con su halo, casi de frente. La órbita es la de CSG-2 misma, según Space-Track; el frenado, las purgas y el giro se suponen.",
-        it: "Il secondo stadio di CSG-2 che frena per lasciare l'orbita e scarica i serbatoi, il 1° febbraio 2022 alle 00:49 UTC (18:49 in Kansas), come l'avrebbe visto un osservatore a Wichita. Non è stato trovato alcun resoconto da lì: questo osservatore è supposto, posto dove la fisica dice che la spirale si vedeva meglio, a qualche centinaio di chilometri dalla traiettoria dello stadio e con la notte più avanzata che in Colorado (il Sole 11 gradi sotto l'orizzonte invece di 6). La stessa nube che Ron Lee vide pallida è qui una grande spirale con il suo alone, quasi di fronte. L'orbita è quella di CSG-2 stesso, secondo Space-Track; la frenata, gli scarichi e la rotazione sono supposti."
       }
     })
   }
@@ -428,16 +412,15 @@ class Csg2Case {
       title: "CSG-2",
       time: "2022-01-31 23:11",
       summary: {
-        en: "31 January 2022, 23:11 UTC. A Falcon 9 launches the Italian radar satellite CSG-2 south from Cape Canaveral just after sunset. An hour and a half later its upper stage, back over North America on its first orbit, brakes out of orbit and vents its tanks while it spins: Ron Lee sees it due east from Colorado and reports it on SeeSat-L, others photograph spirals from Oklahoma and Texas. One stage, four skies: the plume of the ascent from Nassau, the dump from Falcon, Colorado, as Ron Lee saw it, and from Oklahoma City and Wichita, where the night was further on and the spiral stood out large and bright (three observers assumed).",
-        fr: "31 janvier 2022, 23 h 11 UTC. Un Falcon 9 lance le satellite radar italien CSG-2 vers le sud depuis Cap Canaveral juste après le coucher du Soleil. Une heure et demie plus tard, son deuxième étage, revenu au-dessus de l'Amérique du Nord dès sa première orbite, freine pour quitter son orbite et vidange ses réservoirs en tournant : Ron Lee le voit plein est depuis le Colorado et le rapporte sur SeeSat-L, d'autres photographient des spirales depuis l'Oklahoma et le Texas. Un étage, quatre ciels : le panache de la montée depuis Nassau, la vidange depuis Falcon (Colorado) telle que Ron Lee l'a vue, et depuis Oklahoma City et Wichita, où la nuit était plus avancée et la spirale ressortait, grande et lumineuse (trois observateurs supposés).",
-        es: "31 de enero de 2022, 23:11 UTC. Un Falcon 9 lanza el satélite radar italiano CSG-2 hacia el sur desde Cabo Cañaveral justo después de la puesta del Sol. Hora y media más tarde, su segunda etapa, de vuelta sobre América del Norte en su primera órbita, frena para salir de su órbita y purga sus depósitos mientras gira: Ron Lee la ve al este desde Colorado y la cuenta en SeeSat-L, otros fotografían espirales desde Oklahoma y Texas. Una etapa, cuatro cielos: la estela del ascenso desde Nassau, la purga desde Falcon (Colorado) tal como la vio Ron Lee, y desde Oklahoma City y Wichita, donde la noche estaba más avanzada y la espiral destacaba, grande y luminosa (tres observadores supuestos).",
-        it: "31 gennaio 2022, 23:11 UTC. Un Falcon 9 lancia il satellite radar italiano CSG-2 verso sud da Cape Canaveral subito dopo il tramonto. Un'ora e mezza dopo il suo secondo stadio, tornato sopra il Nord America alla prima orbita, frena per lasciare l'orbita e scarica i serbatoi ruotando: Ron Lee lo vede a est dal Colorado e lo riferisce su SeeSat-L, altri fotografano spirali dall'Oklahoma e dal Texas. Uno stadio, quattro cieli: la scia dell'ascesa da Nassau, lo scarico da Falcon (Colorado) come lo vide Ron Lee, e da Oklahoma City e Wichita, dove la notte era più avanzata e la spirale risaltava, grande e luminosa (tre osservatori supposti)."
+        en: "31 January 2022, 23:11 UTC. A Falcon 9 launches the Italian radar satellite CSG-2 south from Cape Canaveral just after sunset. An hour and a half later its upper stage, back over North America on its first orbit, brakes out of orbit and vents its tanks while it spins: Ron Lee sees it due east from Colorado and reports it on SeeSat-L, others photograph spirals from Oklahoma and Texas. One stage, three skies: the plume of the ascent from Nassau, the dump from Falcon, Colorado, as Ron Lee saw it, and from Oklahoma City, where the night was further on and the spiral stood out large and bright (two observers assumed).",
+        fr: "31 janvier 2022, 23 h 11 UTC. Un Falcon 9 lance le satellite radar italien CSG-2 vers le sud depuis Cap Canaveral juste après le coucher du Soleil. Une heure et demie plus tard, son deuxième étage, revenu au-dessus de l'Amérique du Nord dès sa première orbite, freine pour quitter son orbite et vidange ses réservoirs en tournant : Ron Lee le voit plein est depuis le Colorado et le rapporte sur SeeSat-L, d'autres photographient des spirales depuis l'Oklahoma et le Texas. Un étage, trois ciels : le panache de la montée depuis Nassau, la vidange depuis Falcon (Colorado) telle que Ron Lee l'a vue, et depuis Oklahoma City, où la nuit était plus avancée et la spirale ressortait, grande et lumineuse (deux observateurs supposés).",
+        es: "31 de enero de 2022, 23:11 UTC. Un Falcon 9 lanza el satélite radar italiano CSG-2 hacia el sur desde Cabo Cañaveral justo después de la puesta del Sol. Hora y media más tarde, su segunda etapa, de vuelta sobre América del Norte en su primera órbita, frena para salir de su órbita y purga sus depósitos mientras gira: Ron Lee la ve al este desde Colorado y la cuenta en SeeSat-L, otros fotografían espirales desde Oklahoma y Texas. Una etapa, tres cielos: la estela del ascenso desde Nassau, la purga desde Falcon (Colorado) tal como la vio Ron Lee, y desde Oklahoma City, donde la noche estaba más avanzada y la espiral destacaba, grande y luminosa (dos observadores supuestos).",
+        it: "31 gennaio 2022, 23:11 UTC. Un Falcon 9 lancia il satellite radar italiano CSG-2 verso sud da Cape Canaveral subito dopo il tramonto. Un'ora e mezza dopo il suo secondo stadio, tornato sopra il Nord America alla prima orbita, frena per lasciare l'orbita e scarica i serbatoi ruotando: Ron Lee lo vede a est dal Colorado e lo riferisce su SeeSat-L, altri fotografano spirali dall'Oklahoma e dal Texas. Uno stadio, tre cieli: la scia dell'ascesa da Nassau, lo scarico da Falcon (Colorado) come lo vide Ron Lee, e da Oklahoma City, dove la notte era più avanzata e la spirale risaltava, grande e luminosa (due osservatori supposti)."
       },
       events: [
         { type: "event", eventType: "sighting", time: "2022-01-31 23:13", id: "nassau", title: { en: "Observer in Nassau (assumed)", fr: "Observateur à Nassau (supposé)", es: "Observador en Nassau (supuesto)", it: "Osservatore a Nassau (supposto)" }, url: "observer-csg2-nassau.json" },
         { type: "event", eventType: "sighting", time: "2022-02-01 00:47", id: "ron-lee", title: "Ron Lee", url: "observer-csg2-falcon.json" },
-        { type: "event", eventType: "sighting", time: "2022-02-01 00:47", id: "oklahoma", title: { en: "Observer in Oklahoma City (assumed)", fr: "Observateur à Oklahoma City (supposé)", es: "Observador en Oklahoma City (supuesto)", it: "Osservatore a Oklahoma City (supposto)" }, url: "observer-csg2-oklahoma.json" },
-        { type: "event", eventType: "sighting", time: "2022-02-01 00:47", id: "wichita", title: { en: "Observer in Wichita (assumed)", fr: "Observateur à Wichita (supposé)", es: "Observador en Wichita (supuesto)", it: "Osservatore a Wichita (supposto)" }, url: "observer-csg2-wichita.json" }
+        { type: "event", eventType: "sighting", time: "2022-02-01 00:47", id: "oklahoma", title: { en: "Observer in Oklahoma City (assumed)", fr: "Observateur à Oklahoma City (supposé)", es: "Observador en Oklahoma City (supuesto)", it: "Osservatore a Oklahoma City (supposto)" }, url: "observer-csg2-oklahoma.json" }
       ]
     }
   }
@@ -466,6 +449,5 @@ const write = (name: string, json: object) => writeFileSync(join(OUT, `${name}.j
 write("observer-csg2-nassau", built.nassau())
 write("observer-csg2-falcon", built.falcon())
 write("observer-csg2-oklahoma", built.oklahoma())
-write("observer-csg2-wichita", built.wichita())
 write("case-csg2", built.caseFile())
 console.log("wrote", OUT)
