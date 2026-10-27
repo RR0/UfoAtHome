@@ -119,6 +119,7 @@ import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
 import type { Account } from "../engine/model/Account.js"
 import type { DecorObject } from "../engine/model/Decor.js"
+import { localMetersToGeo } from "../render3d/terrain/GeoProjection.js"
 import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import { sortedMilestones } from "../engine/model/Milestone.js"
 import { DEFAULT_REFERENCE_FOV_DEG, DEFAULT_REFERENCE_OPACITY, REFERENCE_INLINE_WARNING_BYTES } from "../engine/model/Reference.js"
@@ -263,6 +264,10 @@ const AIRCRAFT_PASS_HALF_LENGTH_M = 2000
 const AIRCRAFT_CRUISE_M_PER_S = 250
 
 const ARROW_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"])
+/** How far an arrow key walks the observer forward or back, metres (a stride), and turns them, degrees: tenfold with Shift. See walkOrTurn. */
+const WALK_STEP_M = 1
+const TURN_STEP_DEG = 5
+const STEP_SHIFT_FACTOR = 10
 /** Px per arrow-key press, for both moving and resizing the selected shape — see
  * moveOrResizeSelectedShape. Small enough for fine nudges, still visible in one press. */
 const ARROW_KEY_STEP_PX = 4
@@ -1058,7 +1063,9 @@ export class SightingEditorElement extends HTMLElement {
       // The File group's text editor is a contenteditable, not one of those: its arrows and Delete are the text's.
       if (target instanceof HTMLElement && (target.isContentEditable || target.closest(".cm-editor"))) return
       if (ARROW_KEYS.has(event.key)) {
-        this.moveOrResizeSelectedShapes(event)
+        // With nothing selected and the scene itself in focus (a press on it focuses the editor: see the constructor), the arrows walk the observer.
+        if (this.selectedMembers().length === 0 && target === this) this.walkOrTurn(event)
+        else this.moveOrResizeSelectedShapes(event)
       } else {
         // deleteShape() and deleteDecor() are the single entry points every deletion path
         // (this key, the toolbar button, the context menu) funnels through. What the key deletes is what the canvas is editing: the decor
@@ -11653,6 +11660,31 @@ export class SightingEditorElement extends HTMLElement {
     this.setCanvasCursor(this.hoverCursor)
     document.removeEventListener("pointermove", this.handleDragPointerMove)
     document.removeEventListener("pointerup", this.handleDragPointerUp)
+  }
+
+  /**
+   * The arrows walk the observer through the scene, as a game does: up a step forward along their heading, down a step back, left and right a
+   * turn. Written into the place and the heading as typing them would (see updateObserver), so it is the recording's own pose that moves, at the
+   * playhead, and an undo takes it back. Not while playing or recording, nor from inside a decor object (a room or a car), whose view turns apart.
+   */
+  private walkOrTurn(event: KeyboardEvent): void {
+    event.preventDefault() // arrow keys otherwise scroll the page
+    if (this.isRecording || this.ufoElement.playbackState === "playing" || this.isObserverInsideDecor()) return
+    const factor = event.shiftKey ? STEP_SHIFT_FACTOR : 1
+    const headingDeg = this.numberOrUndefined(this.headingInput.value) ?? 0
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      this.headingInput.value = String(this.rounded(headingDeg + (event.key === "ArrowRight" ? 1 : -1) * TURN_STEP_DEG * factor))
+    } else {
+      const lat = this.numberOrUndefined(this.latInput.value)
+      const lng = this.numberOrUndefined(this.lngInput.value)
+      if (lat === undefined || lng === undefined) return
+      const stepM = (event.key === "ArrowUp" ? 1 : -1) * WALK_STEP_M * factor
+      const heading = headingDeg * Math.PI / 180
+      const to = localMetersToGeo(Math.sin(heading) * stepM, -Math.cos(heading) * stepM, lat, lng)
+      this.latInput.value = to.lat.toFixed(7)
+      this.lngInput.value = to.lng.toFixed(7)
+    }
+    this.updateObserver()
   }
 
   /** Arrow keys nudge the selected shape's position; Shift+arrow resizes it instead — the

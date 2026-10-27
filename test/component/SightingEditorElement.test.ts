@@ -2379,6 +2379,46 @@ describe("SightingEditorElement arrow-key move/resize", () => {
     element.dispatchEvent(new KeyboardEvent("keydown", { key, shiftKey: options.shiftKey ?? false, bubbles: true, composed: true }))
   }
 
+  describe("walking the observer with the arrows", () => {
+    const facingEast = () => ({
+      version: 1,
+      place: [{ lat: 48.8946, lng: 2.196 }],
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: 48.8946, lng: 2.196, elevationM: 0, headingDeg: 90, pitchDeg: 0, fovDeg: 60 } }] },
+      timeline: { keyframes: [] }
+    })
+    const pose = (element: SightingEditorElement) => element.sightingData.observerTrack!.keyframes[0].pose
+
+    it("walks a step forward along the heading with up and back with down, ten with Shift, and the page does not scroll", () => {
+      const element = mount()
+      element.sightingData = facingEast()
+      const up = new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, composed: true, cancelable: true })
+      element.dispatchEvent(up)
+      expect(up.defaultPrevented).toBe(true)
+      const metresEast = (pose(element).lng! - 2.196) * 111320 * Math.cos(48.8946 * Math.PI / 180)
+      expect(metresEast).toBeCloseTo(1, 1)
+      expect(pose(element).lat).toBeCloseTo(48.8946, 6)
+      pressKey(element, "ArrowDown", { shiftKey: true })
+      expect((pose(element).lng! - 2.196) * 111320 * Math.cos(48.8946 * Math.PI / 180)).toBeCloseTo(-9, 1)
+    })
+
+    it("turns with left and right, five degrees a press, fifty with Shift", () => {
+      const element = mount()
+      element.sightingData = facingEast()
+      pressKey(element, "ArrowRight")
+      expect(pose(element).headingDeg).toBe(95)
+      pressKey(element, "ArrowLeft", { shiftKey: true })
+      expect(pose(element).headingDeg).toBe(45)
+    })
+
+    it("leaves the arrows to a field of the editor that has the focus", () => {
+      const element = mount()
+      element.sightingData = facingEast()
+      const heading = element.shadowRoot!.getElementById("heading") as HTMLInputElement
+      heading.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, composed: true }))
+      expect(pose(element).headingDeg).toBe(90)
+    })
+  })
+
   it("arrow keys move the selected shape by a fixed step", () => {
     const element = mount()
     element.sightingData = oneShapeJson()
