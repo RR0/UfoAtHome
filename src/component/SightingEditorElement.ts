@@ -119,7 +119,7 @@ import type { PrecipitationType, Weather } from "../engine/model/Weather.js"
 import type { People } from "../engine/model/People.js"
 import type { Account } from "../engine/model/Account.js"
 import type { DecorObject } from "../engine/model/Decor.js"
-import { localMetersToGeo } from "../render3d/terrain/GeoProjection.js"
+import { geoToLocalMeters, localMetersToGeo } from "../render3d/terrain/GeoProjection.js"
 import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import { sortedMilestones } from "../engine/model/Milestone.js"
 import { DEFAULT_REFERENCE_FOV_DEG, DEFAULT_REFERENCE_OPACITY, REFERENCE_INLINE_WARNING_BYTES } from "../engine/model/Reference.js"
@@ -1555,6 +1555,7 @@ export class SightingEditorElement extends HTMLElement {
       kindName: kind => this.decorList.kindLabel(kind),
       cite: source => this.citeSource(source),
       busy: (on, label) => this.sceneElement.setBusy(on, label),
+      centre: () => this.plantingCentre(),
       track: () => this.ufoElement.sighting.observerTrack.toJSON().keyframes
         .map(keyframe => ({ lat: keyframe.pose.lat, lng: keyframe.pose.lng }))
         .filter((point): point is { lat: number, lng: number } => typeof point.lat === "number" && typeof point.lng === "number")
@@ -11674,17 +11675,41 @@ export class SightingEditorElement extends HTMLElement {
     const headingDeg = this.numberOrUndefined(this.headingInput.value) ?? 0
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
       this.headingInput.value = String(this.rounded(headingDeg + (event.key === "ArrowRight" ? 1 : -1) * TURN_STEP_DEG * factor))
-    } else {
-      const lat = this.numberOrUndefined(this.latInput.value)
-      const lng = this.numberOrUndefined(this.lngInput.value)
-      if (lat === undefined || lng === undefined) return
-      const stepM = (event.key === "ArrowUp" ? 1 : -1) * WALK_STEP_M * factor
-      const heading = headingDeg * Math.PI / 180
-      const to = localMetersToGeo(Math.sin(heading) * stepM, -Math.cos(heading) * stepM, lat, lng)
-      this.latInput.value = to.lat.toFixed(7)
-      this.lngInput.value = to.lng.toFixed(7)
+      this.updateObserver()
+      return
     }
+    const lat = this.numberOrUndefined(this.latInput.value)
+    const lng = this.numberOrUndefined(this.lngInput.value)
+    if (lat === undefined || lng === undefined) return
+    const stepM = (event.key === "ArrowUp" ? 1 : -1) * WALK_STEP_M * factor
+    const heading = headingDeg * Math.PI / 180
+    const to = localMetersToGeo(Math.sin(heading) * stepM, -Math.cos(heading) * stepM, lat, lng)
+    this.latInput.value = to.lat.toFixed(7)
+    this.lngInput.value = to.lng.toFixed(7)
+    const from = this.plantingCentre()
     this.updateObserver()
+    this.keepDecorInPlace(from, this.plantingCentre())
+    // A step is more of the same ground, not another place: see SurroundingsPlanter.walked.
+    this.surroundings.walked(to.lat, to.lng, headingDeg)
+  }
+
+  /**
+   * The decor stands in the world, not round the observer, but is measured from where the recording sets off: moved from `from` to `to` (a walk
+   * that moves where it sets off), every object is moved back by as much, which leaves each where it stood. Nothing when where it sets off stays.
+   */
+  private keepDecorInPlace(from: { lat: number, lng: number } | undefined, to: { lat: number, lng: number } | undefined): void {
+    if (!from || !to) return
+    const moved = geoToLocalMeters(to.lat, to.lng, from.lat, from.lng)
+    const east = moved.x
+    const north = -moved.z
+    if (Math.hypot(east, north) < 1e-6) return
+    const back = (value: number, by: number) => Math.round((value - by) * 1000) / 1000
+    const sighting = this.ufoElement.sighting
+    sighting.decor = sighting.decor.map(object => ({
+      ...object, eastM: back(object.eastM, east), northM: back(object.northM, north),
+      ...(object.track ? { track: object.track.map(keyframe => ({ ...keyframe, eastM: back(keyframe.eastM, east), northM: back(keyframe.northM, north) })) } : {})
+    }))
+    this.ufoElement.refresh()
   }
 
   /** Arrow keys nudge the selected shape's position; Shift+arrow resizes it instead — the

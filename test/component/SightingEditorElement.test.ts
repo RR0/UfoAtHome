@@ -2381,7 +2381,7 @@ describe("SightingEditorElement arrow-key move/resize", () => {
 
   describe("walking the observer with the arrows", () => {
     const facingEast = () => ({
-      version: 1,
+      version: 1 as const,
       place: [{ lat: 48.8946, lng: 2.196 }],
       observerTrack: { keyframes: [{ t: 0, pose: { lat: 48.8946, lng: 2.196, elevationM: 0, headingDeg: 90, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: { keyframes: [] }
@@ -2408,6 +2408,15 @@ describe("SightingEditorElement arrow-key move/resize", () => {
       expect(pose(element).headingDeg).toBe(95)
       pressKey(element, "ArrowLeft", { shiftKey: true })
       expect(pose(element).headingDeg).toBe(45)
+    })
+
+    it("leaves the decor where it stands in the world: measured from where the recording sets off, it is moved back by each step", () => {
+      const element = mount()
+      element.sightingData = { ...facingEast(), decor: [{ id: "oak", kind: "tree", eastM: 5, northM: 2 }] }
+      pressKey(element, "ArrowUp", { shiftKey: true })
+      const oak = element.sightingData.decor!.find(object => object.id === "oak")!
+      expect(oak.eastM).toBeCloseTo(-5, 2)
+      expect(oak.northM).toBeCloseTo(2, 2)
     })
 
     it("leaves the arrows to a field of the editor that has the focus", () => {

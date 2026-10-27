@@ -47,6 +47,7 @@ class FakeEditor {
   planter(survey: SurroundingsProvider | undefined): SurroundingsPlanter {
     return new SurroundingsPlanter(this.status, {
       track: () => this.path,
+      centre: () => PLACE,
       decor: () => this.decor,
       setDecor: decor => { this.decor = decor },
       kindName: kind => kind,
@@ -432,3 +433,56 @@ describe("SurroundingsPlanter and the sources of the furniture", () => {
     expect(editor.decor.find(object => object.kind === "streetlight")?.lamp).toEqual({ colorTemperatureK: 2000, lumens: 1630, mount: "wall" })
   })
 })
+
+describe("SurroundingsPlanter while the observer walks", () => {
+  const settle = () => new Promise(resolve => setTimeout(resolve, 30))
+  const north = (metres: number) => PLACE.lat + metres / 111320
+
+  it("replaces nothing and shows no spinner: what stands ahead is asked about in the background and added", async () => {
+    const editor = new FakeEditor()
+    const survey = new FakeSurvey(Scene.of([OAK], [HOUSE]))
+    const planter = editor.planter(survey)
+    await planter.survey(PLACE.lat, PLACE.lng)
+    const first = editor.decor.map(object => object.id)
+    editor.busy.length = 0
+    // Ahead of the first place by more than half a radius: asked about. The survey answers the same ground, measured from there.
+    planter.walked(north(10), PLACE.lng, 0)
+    await settle()
+    expect(survey.asked).toHaveLength(2)
+    expect(survey.asked[1].centre.lat).toBeGreaterThan(north(10))
+    expect(editor.busy).toEqual([])
+    // What was planted is all still there, and the same objects seen from further on are new ones further on.
+    expect(editor.decor.slice(0, first.length).map(object => object.id)).toEqual(first)
+    expect(editor.decor.length).toBe(first.length * 2)
+    expect(new Set(editor.decor.map(object => object.id)).size).toBe(editor.decor.length)
+  })
+
+  it("does not ask again round a place already asked about, and does not take a step for another place", async () => {
+    const editor = new FakeEditor()
+    const survey = new FakeSurvey(Scene.of([OAK], []))
+    const planter = editor.planter(survey)
+    await planter.survey(PLACE.lat, PLACE.lng)
+    planter.walked(north(10), PLACE.lng, 0)
+    planter.walked(north(11), PLACE.lng, 0)
+    planter.placeChanged(north(80), PLACE.lng)
+    planter.walked(north(80), PLACE.lng, 0)
+    await settle()
+    // The first place, then one ahead of the first step; the second step's ahead is near it; the place change was the walk, which asks ahead of it.
+    expect(survey.asked.map(asked => Math.round((asked.centre.lat - PLACE.lat) * 111320))).toEqual([0, 70, 140])
+  })
+
+  it("adds nothing it already brought: a survey of more of the same ground answers what is near again", async () => {
+    const editor = new FakeEditor()
+    const survey = new FakeSurvey(Scene.of([OAK], [HOUSE]))
+    const planter = editor.planter(survey)
+    await planter.survey(PLACE.lat, PLACE.lng)
+    const count = editor.decor.length
+    // Asked from a place ahead, the survey answers with nothing moved: the same objects, measured from where it was asked, are elsewhere. Asked
+    // for the same objects at the same ground (the planter's own frame), they are not added twice.
+    survey.answer = Scene.of([{ ...OAK, northM: OAK.northM - 70 }], [{ ...HOUSE, northM: HOUSE.northM - 70 }])
+    planter.walked(north(10), PLACE.lng, 0)
+    await settle()
+    expect(editor.decor.length).toBe(count)
+  })
+})
+

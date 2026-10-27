@@ -6,6 +6,9 @@ import { RoadSystem } from "../../src/render3d/RoadSystem.js"
 import { HeadlightSystem } from "../../src/render3d/HeadlightSystem.js"
 import { AerialPerspective } from "../../src/engine/atmosphere/AerialPerspective.js"
 
+/** The renderer's own tests of what it may skip, which are private (see SceneRenderer.onlyMoved). */
+const SceneRendererTesting = SceneRenderer as unknown as { onlyMoved(previous: unknown[], next: unknown[]): boolean }
+
 // Exercise the CPU scene updates without constructing a WebGL context.
 function renderer() {
   return Object.assign(Object.create(SceneRenderer.prototype), {
@@ -30,6 +33,22 @@ function renderer() {
 }
 
 describe("scene playback resource reuse", () => {
+  it("keeps the decor's groups when it is only moved, as an observer walking moves all of it back, and builds them again when anything else changes", () => {
+    const r = renderer()
+    const tree = { id: "t", kind: "tree" as const, eastM: 5, northM: 10, sizeM: { heightM: 8 } }
+    const groups = new Map([["t", new Group()]])
+    Object.assign(r, { decorObjects: [tree], decorGroups: groups, observerRoute: undefined, terrainProviders: {} })
+    const rebuilt = vi.spyOn(DecorSystem, "build")
+    r.setDecor([{ ...tree, eastM: 4, northM: 9 }])
+    expect(rebuilt).not.toHaveBeenCalled()
+    expect(r.decorGroups.get("t")).toBe(groups.get("t"))
+    expect(r.decorObjects[0].eastM).toBe(4)
+    rebuilt.mockRestore()
+    expect(SceneRendererTesting.onlyMoved([tree], [{ ...tree, sizeM: { heightM: 9 } }])).toBe(false)
+    expect(SceneRendererTesting.onlyMoved([tree], [{ ...tree, id: "u" }])).toBe(false)
+    expect(SceneRendererTesting.onlyMoved([tree], [tree, tree])).toBe(false)
+  })
+
   it("reports projected aircraft bounds but excludes background scenery", () => {
     const r = renderer()
     const aircraft = new Group()

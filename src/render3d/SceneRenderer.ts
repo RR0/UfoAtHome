@@ -2299,8 +2299,48 @@ export class SceneRenderer {
     }
   }
 
-  /** What the buildings of the decor were when the roads were last laid by them: other buildings, and the streets are laid again. */
-  private roadFacadesKey = ""
+  /** Whether `next` is `previous` with nothing changed but where each object stands: the same objects, in the same order, each otherwise the same. */
+  private static onlyMoved(previous: readonly DecorObject[], next: readonly DecorObject[]): boolean {
+    if (previous.length !== next.length || previous.length === 0) return false
+    return previous.every((before, at) => {
+      const after = next[at]
+      if (before.id !== after.id || (before.track?.length ?? -1) !== (after.track?.length ?? -1)) return false
+      const keys = new Set([...Object.keys(before), ...Object.keys(after)])
+      for (const key of keys) {
+        if (key === "eastM" || key === "northM" || key === "track") continue
+        if ((before as unknown as Record<string, unknown>)[key] !== (after as unknown as Record<string, unknown>)[key]) return false
+      }
+      return true
+    })
+  }
+
+  /**
+   * Lays the streets again when the buildings or the lamps of the decor were planted, moved or taken away (see StreetFacades): where they stand in
+   * the WORLD, not from where the recording sets off, which an observer walking moves at every step without anything moving.
+   */
+  private layStreetsIfWallsMoved(decor: readonly DecorObject[]): void {
+    const held = this.roadWays
+    const provider = this.terrainProviders.roads
+    if (!held || !provider) return
+    const walls = this.wallsOf(decor, held.lat, held.lng)
+    const before = this.roadWalls
+    // A tenth of a metre: what a walk's rounding of the decor moves it by over a long way, and a wall moved by less is not a street laid otherwise.
+    const same = before?.lat === held.lat && before.lng === held.lng && before.walls.length === walls.length
+      && before.walls.every((wall, at) => wall.what === walls[at].what && Math.hypot(wall.x - walls[at].x, wall.z - walls[at].z) < 0.1)
+    if (!same) this.drapeRoads(held.ways, held.lat, held.lng, provider.contemporary)
+  }
+
+  /** The buildings and lamps of the decor, each what it is and where it stands in the frame of roads laid round (lat, lng), the one their walls are read in. */
+  private wallsOf(decor: readonly DecorObject[], lat: number, lng: number): { what: string, x: number, z: number }[] {
+    const from = this.decorOriginInRoads(lat, lng)
+    return decor.filter(object => object.kind === "building" || object.kind === "streetlight").map(object => ({
+      what: `${object.kind}:${object.lamp?.supposed ? "s" : ""}${object.headingDeg ?? 0}:${object.sizeM?.widthM ?? ""}:${object.sizeM?.lengthM ?? ""}`,
+      x: from.x + object.eastM, z: from.z - object.northM
+    }))
+  }
+
+  /** Where the buildings and lamps of the decor stood when the roads round (lat, lng) were last laid by them: others, and the streets are laid again. */
+  private roadWalls?: { lat: number, lng: number, walls: { what: string, x: number, z: number }[] }
 
   private drapeRoads(ways: RoadWay[], lat: number, lng: number, contemporary: boolean): void {
     const patch = this.terrainMesh
@@ -2311,6 +2351,7 @@ export class SceneRenderer {
     this.roadSystem.setGroundSpacing(this.patchSpacingM(patch))
     this.roadSystem.set(ways, lat, lng, (x, z) => this.groundYOfPatch(patch, x, z), contemporary, this.terrainRadius,
       new StreetFacades(this.buildingFootprints(lat, lng), this.surveyedLamps(lat, lng)))
+    this.roadWalls = { lat, lng, walls: this.wallsOf(this.decorObjects, lat, lng) }
     this.lampsToKerb(lat, lng)
     this.roadAttribution = ways.length > 0 ? this.terrainProviders.roads?.attribution : undefined
     this.compileNextFrameOffThread()
@@ -2504,6 +2545,15 @@ export class SceneRenderer {
    * until that runs moments later in the same tick, before the next real render(). */
   setDecor(decor: DecorObject[]): void {
     if (this.decorObjects === decor) return
+    if (SceneRenderer.onlyMoved(this.decorObjects, decor)) {
+      // The same objects, each where it was moved to (an observer walking keeps the world where it is by moving all of it back: see
+      // SightingEditorElement.keepDecorInPlace): their groups are placed afresh at every tick anyway, and rebuilding the four hundred of a town at
+      // every step was most of what a step cost.
+      this.decorObjects = decor
+      this.decorTerrainRadiusM = SceneRenderer.terrainReachFor(decor, this.observerRoute)
+      this.layStreetsIfWallsMoved(decor)
+      return
+    }
     this.decorObjects = decor
     this.decorTerrainRadiusM = SceneRenderer.terrainReachFor(decor, this.observerRoute)
     this.decorModelToken++
@@ -2539,14 +2589,7 @@ export class SceneRenderer {
       }
       else if (!this.reuseLoadedDecorModel(object, group)) void this.awaitArrival(this.loadDecorModel(object, this.decorModelToken))
     }
-    // The streets are laid from wall to wall and clear of the lamps (see StreetFacades): buildings or lamps planted, moved or taken away, and they are laid again.
-    const facadesKey = decor.filter(object => object.kind === "building" || object.kind === "streetlight").map(object => `${object.kind}:${object.lamp?.supposed ? "s" : ""}${object.eastM.toFixed(1)},${object.northM.toFixed(1)},${object.headingDeg ?? 0}`).join(";")
-    if (facadesKey !== this.roadFacadesKey) {
-      this.roadFacadesKey = facadesKey
-      const held = this.roadWays
-      const provider = this.terrainProviders.roads
-      if (held && provider) this.drapeRoads(held.ways, held.lat, held.lng, provider.contemporary)
-    }
+    this.layStreetsIfWallsMoved(decor)
     // The code of the beams comes in only for a scene that has a vehicle, and a scene that has none never asks for it.
     if (decor.some(candidate => candidate.kind === "vehicle")) void this.loadHeadlights()
     this.syncHeadlightBeams()

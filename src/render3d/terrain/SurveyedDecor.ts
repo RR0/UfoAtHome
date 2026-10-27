@@ -8,6 +8,11 @@ export type SurveyedKind = "tree" | "building" | "bridge" | "wire" | "streetligh
 export interface SurveyedDecorOptions {
   /** What the recording already has that no survey brought: what the author placed. Nothing of a kind is brought where it holds one of that kind. */
   kept: readonly DecorObject[]
+  /**
+   * What a survey brought already, that a survey of more of the same ground adds to (see SurroundingsPlanter.walked): it holds no kind back, but no
+   * id or name of it is given again, and the numbering goes on from it.
+   */
+  others?: readonly DecorObject[]
   /** What a kind is called ("Tree", "Bridge"), for the names that carry one: "Bridge (Rue de Carentan)". */
   kindName(kind: SurveyedKind): string
 }
@@ -39,7 +44,8 @@ export class SurveyedDecor {
       tree: has("tree"), building: has("building"), bridge: has("bridge"), wire: has("wire"), streetlight: has("streetlight"),
       trafficlight: has("trafficlight"), crossing: has("crossing"), roadsign: has("roadsign")
     }
-    const taken = new Set(kept.map(object => object.id))
+    const already = [...kept, ...(options.others ?? [])]
+    const taken = new Set(already.map(object => object.id))
     let serial = 0
     const nextId = (): string => {
       let id: string
@@ -48,17 +54,17 @@ export class SurveyedDecor {
       return id
     }
     const numbers: Record<SurveyedKind, number> = {
-      tree: kept.filter(object => object.kind === "tree").length,
-      building: kept.filter(object => object.kind === "building").length,
-      bridge: kept.filter(object => object.kind === "bridge").length,
-      wire: kept.filter(object => object.kind === "wire").length,
-      streetlight: kept.filter(object => object.kind === "streetlight").length,
-      trafficlight: kept.filter(object => object.kind === "trafficlight").length,
-      crossing: kept.filter(object => object.kind === "crossing").length,
-      roadsign: kept.filter(object => object.kind === "roadsign").length
+      tree: already.filter(object => object.kind === "tree").length,
+      building: already.filter(object => object.kind === "building").length,
+      bridge: already.filter(object => object.kind === "bridge").length,
+      wire: already.filter(object => object.kind === "wire").length,
+      streetlight: already.filter(object => object.kind === "streetlight").length,
+      trafficlight: already.filter(object => object.kind === "trafficlight").length,
+      crossing: already.filter(object => object.kind === "crossing").length,
+      roadsign: already.filter(object => object.kind === "roadsign").length
     }
     // What a survey names is called by its name (the town hall), the parts of it after the first numbered ("Mairie de Saint-Lô (2)"); what it does not is "Building 12".
-    const names = new Set(kept.map(object => typeof object.title === "string" ? object.title : ""))
+    const names = new Set(already.map(object => typeof object.title === "string" ? object.title : ""))
     const titled = (kind: SurveyedKind, name: string | undefined): string => {
       const wanted = name ?? `${options.kindName(kind)} ${++numbers[kind]}`
       let title = wanted

@@ -17,6 +17,11 @@ export interface SurroundingsPlanterHost {
   kindName(kind: SurveyedKind): string
   /** The places the observer goes through, in order, if they move: the survey is asked round each of them, and not only round where they set off. */
   track?(): readonly { lat: number, lng: number }[]
+  /**
+   * Where the decor is measured from now: where the recording sets off. A survey asked round another place (the author walked on while it was being
+   * answered, see walked) is planted from there.
+   */
+  centre?(): { lat: number, lng: number } | undefined
   /** Tells the reader the scenery is being looked up (true, with what to say) or is not any more (false): a spinner over the picture. */
   busy(on: boolean, label: string): void
   /** Says where the scenery came from, among the recording's sources, if it does not already. */
@@ -62,6 +67,15 @@ export class SurroundingsPlanter {
   private static readonly DEFAULT_DEBOUNCE_MS = 800
   /** The trees kept of each place along a path: a long path is many places, and a scene of thousands of trees is not drawn at the pace of a recording. */
   private static readonly TREES_PER_STOP = 80
+  /**
+   * How far ahead of a walking observer the survey is asked, in seconds of their walking and at least in a share of the radius asked: what is ahead
+   * is there before they come to it. Nothing is asked again round a place within half a radius of one already asked about.
+   */
+  private static readonly WALK_LEAD_S = 4
+  private static readonly WALK_LEAD_SHARE = 0.6
+  /** How near another of its kind something a survey brings again is the same: a building is that far, and of about the same size, and the rest closer. */
+  private static readonly SAME_BUILDING_M = 3
+  private static readonly SAME_OBJECT_M = 1.5
 
   private messages: SightingEditorMessages
   private readonly debounceMs: number
@@ -76,6 +90,10 @@ export class SurroundingsPlanter {
   /** What it said of the furniture of the streets that came in time, and whose it was: said again, with the rest, when the rest comes. */
   private furnitureSaid = ""
   private furnitureCredits: SurveyCredit[] = []
+  /** Where the survey was asked round since the place was given, and how the observer walks (see walked). */
+  private asked: { lat: number, lng: number }[] = []
+  private lastStep?: { lat: number, lng: number, atMs: number }
+  private walkSpeedMps = 0
 
   constructor(
     private readonly status: HTMLElement,
@@ -140,10 +158,102 @@ export class SurroundingsPlanter {
     this.timer = setTimeout(() => void this.survey(lat, lng), this.debounceMs)
   }
 
+  /**
+   * The observer took a step, or many (see SightingEditorElement.walkOrTurn), to (lat, lng), heading `headingDeg`: that is no other place, whose
+   * scenery would replace this one's behind a spinner the moment they stop, but more of the same ground. So nothing is replaced; what stands ahead
+   * of them, where they will be in a few seconds at the pace they go, is asked about in the background, without a word, and what it brings that is
+   * not already there is added.
+   */
+  walked(lat: number, lng: number, headingDeg: number, nowMs = Date.now()): void {
+    clearTimeout(this.timer)
+    this.timer = undefined
+    this.surveyedFor = { lat, lng }
+    if (this.lastStep) {
+      const seconds = (nowMs - this.lastStep.atMs) / 1000
+      const metres = this.metresBetween(this.lastStep, lat, lng)
+      // A pause between two steps is a walk set off again, not a slow one.
+      this.walkSpeedMps = seconds > 0 && seconds < 2 ? 0.5 * this.walkSpeedMps + 0.5 * metres / seconds : 0
+    }
+    this.lastStep = { lat, lng, atMs: nowMs }
+    if (!this.enabled) return
+    const lead = Math.max(this.radiusM * SurroundingsPlanter.WALK_LEAD_SHARE, this.walkSpeedMps * SurroundingsPlanter.WALK_LEAD_S)
+    const heading = headingDeg * Math.PI / 180
+    const ahead = {
+      lat: lat + Math.cos(heading) * lead / SurroundingsPlanter.METRES_PER_DEGREE,
+      lng: lng + Math.sin(heading) * lead / (SurroundingsPlanter.METRES_PER_DEGREE * Math.cos(lat * Math.PI / 180))
+    }
+    if (this.asked.some(place => this.metresBetween(place, ahead.lat, ahead.lng) < this.radiusM / 2)) return
+    this.asked.push(ahead)
+    void this.plantAhead(ahead)
+  }
+
+  private async plantAhead(stop: { lat: number, lng: number }): Promise<void> {
+    const token = this.token
+    try {
+      const provider = await this.loadProvider(stop.lat, stop.lng)
+      if (!provider || token !== this.token) return
+      const found = await provider.getSurroundings(stop, this.radiusM)
+      if (token !== this.token) return
+      this.addAhead(provider, this.fromCentre(found, stop))
+      const late = found.incomplete ? provider.later?.(stop, this.radiusM) : undefined
+      late?.then(more => {
+        if (token === this.token) this.addAhead(provider, this.fromCentre({ trees: [], buildings: [], bridges: [], lines: [], ...more }, stop))
+      }, () => undefined)
+    } catch {
+      // Ahead of the observer, and asked again when they come nearer to somewhere not asked about: nothing to tell.
+      this.asked = this.asked.filter(place => place !== stop)
+    }
+  }
+
+  /** What a survey of more of the same ground brought that is not there already, added to the decor: nothing taken away. */
+  private addAhead(provider: SurroundingsProvider, found: Surroundings): void {
+    const decor = this.host.decor()
+    const kept = decor.filter(object => object.origin === undefined)
+    const others = decor.filter(object => object.origin !== undefined)
+    const { planted } = SurveyedDecor.of(provider.id, found, { kept, others, kindName: kind => this.host.kindName(kind) })
+    const fresh = planted.filter(object => !others.some(other => SurroundingsPlanter.same(other, object)))
+    if (fresh.length > 0) this.host.setDecor([...decor, ...fresh])
+  }
+
+  /** Whether two objects a survey brought are the same one, brought again from another place: see SAME_BUILDING_M. */
+  private static same(a: DecorObject, b: DecorObject): boolean {
+    if (a.kind !== b.kind) return false
+    const apart = Math.hypot(a.eastM - b.eastM, a.northM - b.northM)
+    if (a.kind !== "building") return apart < SurroundingsPlanter.SAME_OBJECT_M
+    const size = (object: DecorObject) => [object.sizeM?.widthM ?? 0, object.sizeM?.lengthM ?? 0]
+    return apart < SurroundingsPlanter.SAME_BUILDING_M && size(a).every((value, i) => Math.abs(value - size(b)[i]) < 1.5)
+  }
+
+  /** A survey asked round `asked`, measured from where the decor is measured from now (see SurroundingsPlanterHost.centre). */
+  private fromCentre<T extends Partial<Surroundings>>(found: T, asked: { lat: number, lng: number }): T {
+    const centre = this.host.centre?.()
+    if (!centre) return found
+    const east = (asked.lng - centre.lng) * SurroundingsPlanter.METRES_PER_DEGREE * Math.cos(centre.lat * Math.PI / 180)
+    const north = (asked.lat - centre.lat) * SurroundingsPlanter.METRES_PER_DEGREE
+    if (Math.hypot(east, north) < 0.01) return found
+    const moved = <O extends { eastM: number, northM: number }>(objects: O[] | undefined): O[] | undefined =>
+      objects?.map(object => ({ ...object, eastM: Math.round((object.eastM + east) * 100) / 100, northM: Math.round((object.northM + north) * 100) / 100 }))
+    return {
+      ...found,
+      ...(found.trees ? { trees: moved(found.trees) } : {}), ...(found.buildings ? { buildings: moved(found.buildings) } : {}),
+      ...(found.bridges ? { bridges: moved(found.bridges) } : {}), ...(found.lines ? { lines: moved(found.lines) } : {}),
+      ...(found.lamps ? { lamps: moved(found.lamps) } : {}), ...(found.signals ? { signals: moved(found.signals) } : {}),
+      ...(found.crossings ? { crossings: moved(found.crossings) } : {}), ...(found.signs ? { signs: moved(found.signs) } : {})
+    }
+  }
+
+  private metresBetween(place: { lat: number, lng: number }, lat: number, lng: number): number {
+    const north = (place.lat - lat) * SurroundingsPlanter.METRES_PER_DEGREE
+    const east = (place.lng - lng) * SurroundingsPlanter.METRES_PER_DEGREE * Math.cos(lat * Math.PI / 180)
+    return Math.hypot(north, east)
+  }
+
   /** Asks now. The answer of an earlier question that comes after a later one is dropped. */
   async survey(lat: number, lng: number): Promise<void> {
     const token = ++this.token
     this.surveyedFor = { lat, lng }
+    this.asked = [{ lat, lng }]
+    this.lastStep = undefined
     this.host.busy(true, this.messages.surveyBusy)
     try {
       const provider = await this.loadProvider(lat, lng)
@@ -160,7 +270,7 @@ export class SurroundingsPlanter {
         ? await SurroundingsCorridor.fetch(provider, stops, this.radiusM, { treesPerStop: SurroundingsPlanter.TREES_PER_STOP })
         : await provider.getSurroundings({ lat, lng }, this.radiusM)
       if (token !== this.token) return
-      this.plant(provider, found)
+      this.plant(provider, this.fromCentre(found, { lat, lng }))
       if (found.incomplete) this.awaitLate(provider, stops, token)
     } catch (error) {
       if (token !== this.token) return
@@ -237,7 +347,7 @@ export class SurroundingsPlanter {
     this.say(this.surveyed, [this.furnitureSaid, this.messages.surveyFurniturePending].filter(part => part !== "").join(" "))
     late.then(found => {
       if (token !== this.token) return
-      this.plantLate(provider, found)
+      this.plantLate(provider, this.fromCentre(found, stops[0]))
     }, () => {
       if (token !== this.token) return
       this.say(this.surveyed, [this.furnitureSaid, this.messages.surveyFurnitureUnavailable].filter(part => part !== "").join(" "), { label: this.messages.surveyFurnitureRetry, run: () => this.awaitLate(provider, stops, token) })
@@ -279,9 +389,7 @@ export class SurroundingsPlanter {
   }
 
   private isSamePlace(place: { lat: number, lng: number }, lat: number, lng: number): boolean {
-    const north = (place.lat - lat) * SurroundingsPlanter.METRES_PER_DEGREE
-    const east = (place.lng - lng) * SurroundingsPlanter.METRES_PER_DEGREE * Math.cos(lat * Math.PI / 180)
-    return Math.hypot(north, east) < SurroundingsPlanter.SAME_PLACE_M
+    return this.metresBetween(place, lat, lng) < SurroundingsPlanter.SAME_PLACE_M
   }
 
   /** The status: what the survey brought, then a line of its own for what comes late, with a button when there is something to do about it. */
