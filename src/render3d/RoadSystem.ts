@@ -47,8 +47,12 @@ export class RoadSystem {
   private static readonly BARRIER_ALBEDO: [number, number, number] = [0.32, 0.33, 0.34]
   /** The albedo of a road paint: white, weathered. */
   private static readonly MARKINGS_ALBEDO: [number, number, number] = [0.55, 0.55, 0.5]
-  /** How much the grain of the surface varies its colour, by surface: asphalt is mottled, gravel and dirt more so. */
-  private static readonly GRAIN_CONTRAST: Record<RoadSurface, number> = { paved: 0.8, gravel: 1.1, dirt: 1.1 }
+  /**
+   * How much the grain of the surface varies its colour, by surface. Asphalt is mottled but even: its aggregate is a few millimetres, finer than any pixel past
+   * a metre, and its repairs a shade apart. At 0.8 the octaves summed to nearly twice and nearly nothing of the albedo at the observer's feet, which is a
+   * cobbled or stony track, not a street (Rue Maurice Thorez in Nanterre read as one). Gravel and dirt are as uneven as that.
+   */
+  private static readonly GRAIN_CONTRAST: Record<RoadSurface, number> = { paved: 0.25, gravel: 1.1, dirt: 1.1 }
   /**
    * The pavements of a street: a strip this wide along each side of the carriageway, raised by a kerb. Drawn for the streets the map says are
    * urban, and where a way is not a side street's mouth (see crossesAnother).
