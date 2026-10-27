@@ -120,6 +120,17 @@ export class MeteorFall {
     return meteors
   }
 
+  /** The magnitude the faintest of a fall stands for: the limit hourly rates are counted down to. */
+  static readonly FAINTEST_MAGNITUDE = 6.5
+  /** And the most brilliant: a bright fireball, the rare top of the draw. */
+  static readonly BRIGHTEST_MAGNITUDE = -4
+
+  /** The magnitude a meteor's drawn brightness stands for, linear between the two above: what
+   * settles whether a given sky, through a given instrument, showed it at all. */
+  static magnitudeOf(meteor: Meteor): number {
+    return MeteorFall.FAINTEST_MAGNITUDE - (MeteorFall.FAINTEST_MAGNITUDE - MeteorFall.BRIGHTEST_MAGNITUDE) * meteor.brightness
+  }
+
   /** Those visible at `t`, with how far each has flown, 0 at its head and 1 as it fades. */
   static aliveAt(meteors: Meteor[], t: number): { meteor: Meteor; progress: number }[] {
     return meteors

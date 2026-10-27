@@ -139,6 +139,12 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     get meteorSchedule(): { t: number; durationMs: number }[] {
       return this.meteors
     }
+    groundHidesDirection(altitudeDeg: number): boolean {
+      return altitudeDeg < 0
+    }
+    get groundKey(): string {
+      return ""
+    }
     meteorMidpoint(): { altitudeDeg: number; azimuthDeg: number } {
       return { altitudeDeg: 42, azimuthDeg: 137 }
     }
@@ -6343,7 +6349,11 @@ describe("showing the next meteor", () => {
   }
 
   function clickShowMeteor(element: SightingEditorElement): void {
-    ;(element.shadowRoot!.getElementById("show-meteor") as HTMLButtonElement).click()
+    const button = element.shadowRoot!.getElementById("show-meteor") as HTMLButtonElement
+    // This mount has no date nor place, so the sky line leaves the button disabled; what is tested
+    // here is what a click does once there is one to show.
+    button.disabled = false
+    button.click()
   }
 
   it("stops a running recording, so the streak is still there when the eye arrives", () => {
@@ -6411,14 +6421,14 @@ describe("the sky under an observation being edited", () => {
     // which changes its identity and hides the bug completely.
     const element = mount()
     const button = element.shadowRoot!.getElementById("show-meteor") as HTMLButtonElement
-    expect(button.hidden).toBe(true)
+    expect(button.disabled).toBe(true)
     // The Geminid peak over Provence — radiant 77 degrees up at 3 a.m., about 146 an hour.
     typeInto(element, "obs-time", "2023-12-14 03:00")
     typeInto(element, "lat", "43.8379")
     typeInto(element, "lng", "5.9822")
     typeInto(element, "durationSeconds", "300")
-    await waitFor(() => !button.hidden)
-    expect(button.hidden).toBe(false)
+    await waitFor(() => !button.disabled)
+    expect(button.disabled).toBe(false)
     // Either language: the test environment's own locale decides which, and the point here is that
     // the shower is named at all.
     expect(element.shadowRoot!.getElementById("sky-candidates")!.textContent).toMatch(/G[ée]minid/)
@@ -6441,10 +6451,10 @@ describe("the sky under an observation being edited", () => {
   it("names the comet that really stood over that evening, and offers to look at it", async () => {
     const element = mount()
     const button = element.shadowRoot!.getElementById("show-comet") as HTMLButtonElement
-    expect(button.hidden).toBe(true)
+    expect(button.disabled).toBe(true)
     overProvence(element, "1997-04-01 21:00", "2")
 
-    await waitFor(() => !button.hidden)
+    await waitFor(() => !button.disabled)
     expect(skyLine(element)).toMatch(/Hale-Bopp/)
     // Where it actually was: about 27 degrees up in the north-west, with some twenty degrees of
     // tail. Checked against JPL Horizons in test/engine/astronomy/Comets.test.ts.
@@ -6473,13 +6483,13 @@ describe("the sky under an observation being edited", () => {
   it("names the new star shining that night, and aims at it: V603 Aql over Paris, June 1918", async () => {
     const element = mount()
     const button = element.shadowRoot!.getElementById("show-nova") as HTMLButtonElement
-    expect(button.hidden).toBe(true)
+    expect(button.disabled).toBe(true)
     typeInto(element, "obs-time", "1918-06-10 23:30")
     typeInto(element, "utcOffsetHours", "1")
     typeInto(element, "lat", "48.8566")
     typeInto(element, "lng", "2.3522")
 
-    await waitFor(() => !button.hidden)
+    await waitFor(() => !button.disabled)
     expect(skyLine(element)).toMatch(/1918/)
     button.click()
     const date = new Date("1918-06-10T22:30:00Z")
@@ -6495,7 +6505,7 @@ describe("the sky under an observation being edited", () => {
     const element = mount()
     overProvence(element, "1987-05-20 23:00", "2")
     await waitFor(() => /1987A/.test(skyLine(element)))
-    expect((element.shadowRoot!.getElementById("show-nova") as HTMLButtonElement).hidden).toBe(true)
+    expect((element.shadowRoot!.getElementById("show-nova") as HTMLButtonElement).disabled).toBe(true)
   })
 
   it("says nothing about a nova outside its recorded light curve", async () => {
@@ -6503,7 +6513,7 @@ describe("the sky under an observation being edited", () => {
     overProvence(element, "1918-06-01 23:00", "1")
     await waitFor(() => skyLine(element).length > 0)
     expect(skyLine(element)).not.toMatch(/1918/)
-    expect((element.shadowRoot!.getElementById("show-nova") as HTMLButtonElement).hidden).toBe(true)
+    expect((element.shadowRoot!.getElementById("show-nova") as HTMLButtonElement).disabled).toBe(true)
   })
 
   describe("real satellite passes", () => {
@@ -6552,7 +6562,7 @@ describe("the sky under an observation being edited", () => {
       expect(skyLine(element)).toMatch(/4 satellites crossed this sky bright enough to be seen, the brightest ARIANE 40 R\/B/)
       expect(skyLine(element)).toMatch(/23:06:20|11:06:20/)
       expect(skyLine(element)).toMatch(/a train of 3 Starlinks launched on/)
-      expect(button.hidden).toBe(false)
+      expect(button.disabled).toBe(false)
       button.click()
       expect(Number((element.shadowRoot!.getElementById("heading") as HTMLInputElement).value)).toBe(297)
       expect(Number((element.shadowRoot!.getElementById("pitch") as HTMLInputElement).value)).toBe(28)
@@ -6587,7 +6597,7 @@ describe("the sky under an observation being edited", () => {
 
     expect(Comets.aroundDate(new Date("1965-07-01T04:45:00Z")).map(comet => comet.id)).toContain("ikeya-seki-1965")
     expect(skyLine(element)).not.toMatch(/Ikeya/)
-    expect((element.shadowRoot!.getElementById("show-comet") as HTMLButtonElement).hidden).toBe(true)
+    expect((element.shadowRoot!.getElementById("show-comet") as HTMLButtonElement).disabled).toBe(true)
   })
 
   it("says how close to the Sun a comet stood, and stops there", async () => {

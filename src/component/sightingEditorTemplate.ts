@@ -455,11 +455,11 @@ export const html = `
     <output id="sky-candidates" class="weather-source" for="lat lng obs-time"></output>
     <!-- A shooting star for the meteor and a comet for the comet. The meteor button used to carry
          the comet glyph, which was only ever unambiguous while there was nothing else up there. -->
-    <button id="show-meteor" type="button" class="icon-btn" title="Show me one" aria-label="Show me one" hidden>${Icons.METEOR}</button>
-    <button id="show-comet" type="button" class="icon-btn" title="Show me the comet" aria-label="Show me the comet" hidden>${Icons.COMET}</button>
-    <button id="show-nova" type="button" class="icon-btn" title="Show me the new star" aria-label="Show me the new star" hidden>${Icons.STAR}</button>
-    <button id="show-satellite" type="button" class="icon-btn" title="Show me a satellite" aria-label="Show me a satellite" hidden>${Icons.SATELLITE}</button>
-    <button id="show-fireball" type="button" class="icon-btn" title="Show me the fireball" aria-label="Show me the fireball" hidden>${Icons.FIREBALL}</button>
+    <button id="show-meteor" type="button" class="icon-btn" title="No meteor visible" aria-label="No meteor visible" disabled>${Icons.METEOR}</button>
+    <button id="show-comet" type="button" class="icon-btn" title="No comet visible" aria-label="No comet visible" disabled>${Icons.COMET}</button>
+    <button id="show-nova" type="button" class="icon-btn" title="No new star visible" aria-label="No new star visible" disabled>${Icons.STAR}</button>
+    <button id="show-satellite" type="button" class="icon-btn" title="No satellite visible" aria-label="No satellite visible" disabled>${Icons.SATELLITE}</button>
+    <button id="show-fireball" type="button" class="icon-btn" title="No fireball visible" aria-label="No fireball visible" disabled>${Icons.FIREBALL}</button>
   </div>
   <!-- The weather in three parts — what falls (first, and open on arrival: the user's own order), the
        clouds, and what blows — as a strip of handles
@@ -1674,9 +1674,10 @@ select.weather-field:disabled {
    specificity-position — same fix, same reason, as .context-menu[hidden] below (see its own
    comment): needed once delete-decor (an .icon-btn) started being hidden entirely rather than
    just disabled when there's no decor object to delete (see SightingEditorElement.
-   syncDecorVisibility). */
+   syncDecorVisibility). Important, since the shared icon rule button:has(> .icon:only-child)
+   outranks it too, and left every sky button on show, clickable and pointing at nothing. */
 .icon-btn[hidden] {
-  display: none;
+  display: none !important;
 }
 /* position:fixed (viewport-relative), left/top set from the triggering pointer event's own
    clientX/clientY in JS — works the same regardless of which shadow tree this menu lives in or

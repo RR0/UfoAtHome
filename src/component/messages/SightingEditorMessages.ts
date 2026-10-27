@@ -566,6 +566,13 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
    * that a shower was running without offering this is half a feature: a one-second streak
    * somewhere in sixty degrees of sky is not findable by hand. */
   showMeteor: string
+  /** What the sky buttons say instead while disabled: nothing of that kind clears the ground and the
+   * sky's own brightness during the recording. */
+  noMeteor: string
+  noComet: string
+  noNova: string
+  noSatellite: string
+  noFireball: string
   /** A naked-eye comet standing in that sky — see Comets.ts. {name} is the apparition, {magnitude}
    * how bright the light curve makes it that night, {altitude} its HEIGHT above the horizon,
    * {bearing} the compass point with its own preposition, {tail} how many degrees of sky its tail

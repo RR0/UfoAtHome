@@ -9141,7 +9141,7 @@ export class SightingEditorElement extends HTMLElement {
    * looked at, which is the whole point of a button that says "show me one".
    */
   private showNextMeteor(): void {
-    const next = this.sceneElement.meteorByRank(this.meteorRank++)
+    const next = this.sceneElement.meteorByRank(this.meteorRank++, this.meteorMagnitudeLimit())
     if (!next) return
     if (this.ufoElement.playbackState === "playing") this.ufoElement.togglePlayPause()
     this.ufoElement.currentTime = next.t
@@ -9154,7 +9154,7 @@ export class SightingEditorElement extends HTMLElement {
    * changed. Compared on the answer rather than on the inputs: two different dates can perfectly
    * well give the same shower at the same rate, and that is the same sky to walk through. */
   private resetMeteorRankIfSkyChanged(): void {
-    const brightest = this.sceneElement.meteorByRank(0)
+    const brightest = this.sceneElement.meteorByRank(0, this.meteorMagnitudeLimit())
     const sky = brightest ? `${brightest.t}` : ""
     if (sky === this.meteorRankFor) return
     this.meteorRankFor = sky
@@ -9162,6 +9162,23 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private meteorRankFor?: string
+
+  /**
+   * How faint a meteor this sky still let anybody see at the start of the observation — the same
+   * visibleMagnitudeLimit the stars and the satellites are settled by, through this recording's own
+   * instrument. The meteor button offers nothing fainter: a streak lost in the twilight is not one
+   * to be shown. Infinity where the start cannot be placed.
+   */
+  private meteorMagnitudeLimit(): number {
+    const sighting = this.ufoElement.sighting
+    const observer = this.observerAtStart()
+    const date = sighting.event.time?.year !== undefined
+      ? sightingTimeToDate(sighting.event.time, observer.lng, sighting.event.utcOffsetHours)
+      : undefined
+    if (!date) return Number.POSITIVE_INFINITY
+    const sunAltitudeDeg = computeBodyPosition("Sun", date, observer).altitudeDeg
+    return visibleMagnitudeLimit(sunAltitudeDeg, this.instrumentGain(), this.skyLossAt(date, observer))
+  }
 
   /** What the sky line was last stated from — see refreshSkyCandidates. */
   private skyCandidatesKey?: string
@@ -9251,12 +9268,13 @@ export class SightingEditorElement extends HTMLElement {
     if (key === this.skyCandidatesKey) return
     this.skyCandidatesKey = key
     if (!date || !place || place.lat === undefined || place.lng === undefined) {
-      this.showMeteorButton.hidden = true
-      this.showCometButton.hidden = true
-      this.showNovaButton.hidden = true
-      this.showSatelliteButton.hidden = true
-      this.showFireballButton.hidden = true
+      this.showMeteorButton.disabled = true
+      this.showCometButton.disabled = true
+      this.showNovaButton.disabled = true
+      this.showSatelliteButton.disabled = true
+      this.showFireballButton.disabled = true
       this.skyCandidatesOutput.textContent = this.messages.skyLine.replace("{parts}", this.messages.skyUnknown)
+      this.labelSkyButtons()
       return
     }
     const observer = { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 }
@@ -9275,6 +9293,25 @@ export class SightingEditorElement extends HTMLElement {
       this.glowClause(date, observer)
     ].filter(part => part !== undefined)
     this.skyCandidatesOutput.textContent = this.messages.skyLine.replace("{parts}", parts.join(" · "))
+    this.labelSkyButtons()
+  }
+
+  /** Names each sky button for what a click does, or, while it is disabled, for why there is
+   * nothing to click: a greyed comet saying "show me the comet" reads as a broken button. */
+  private labelSkyButtons(): void {
+    const messages = this.messages
+    const labels: [HTMLButtonElement, string, string][] = [
+      [this.showMeteorButton, messages.showMeteor, messages.noMeteor],
+      [this.showCometButton, messages.showComet, messages.noComet],
+      [this.showNovaButton, messages.showNova, messages.noNova],
+      [this.showSatelliteButton, messages.showSatellite, messages.noSatellite],
+      [this.showFireballButton, messages.showFireball, messages.noFireball]
+    ]
+    for (const [button, show, none] of labels) {
+      const label = button.disabled ? none : show
+      button.title = label
+      button.setAttribute("aria-label", label)
+    }
   }
 
   /**
@@ -9344,7 +9381,7 @@ export class SightingEditorElement extends HTMLElement {
     })
     const active = MeteorShowers.activeAt(date)
     if (active.length === 0) {
-      this.showMeteorButton.hidden = !this.sceneElement.meteorByRank(0)
+      this.showMeteorButton.disabled = !this.sceneElement.meteorByRank(0, this.meteorMagnitudeLimit())
       return this.messages.skyNothingActive.replace("{sporadic}", sporadic)
     }
     // The strongest shower running, by what would ACTUALLY have been seen rather than by its
@@ -9359,11 +9396,11 @@ export class SightingEditorElement extends HTMLElement {
     if (best.rate <= 0) {
       // The shower produced nothing, but the sky is not empty — the background is still falling, and
       // the button still has something to show.
-      this.showMeteorButton.hidden = !this.sceneElement.meteorByRank(0)
+      this.showMeteorButton.disabled = !this.sceneElement.meteorByRank(0, this.meteorMagnitudeLimit())
       return this.messages.skyShowerBelowHorizon.replace("{name}", this.naming.shower(best.entry.shower))
     }
     // Only offered when there is genuinely one to show.
-    this.showMeteorButton.hidden = !this.sceneElement.meteorByRank(0)
+    this.showMeteorButton.disabled = !this.sceneElement.meteorByRank(0, this.meteorMagnitudeLimit())
     return this.messages.skyShowerActive
       .replace("{name}", this.naming.shower(best.entry.shower))
       .replace("{altitude}", String(Math.round(best.position.altitudeDeg)))
@@ -9383,12 +9420,12 @@ export class SightingEditorElement extends HTMLElement {
   private cometClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
     const comet = Comets.brightestAt(date, observer)
     if (!comet || comet.magnitude > DARK_SKY_LIMITING_MAGNITUDE) {
-      this.showCometButton.hidden = true
+      this.showCometButton.disabled = true
       return undefined
     }
     // Worth pointing at only when there is somewhere to point: a comet that has not risen is aimed
     // at by looking into the ground.
-    this.showCometButton.hidden = this.sceneElement.groundHides(comet.position.altitudeDeg, comet.position.azimuthDeg)
+    this.showCometButton.disabled = this.sceneElement.groundHides(comet.position.altitudeDeg, comet.position.azimuthDeg)
     return this.cometText(comet)
   }
 
@@ -9403,10 +9440,10 @@ export class SightingEditorElement extends HTMLElement {
   private novaClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
     const nova = Novae.brightestAt(date, observer)
     if (!nova || nova.magnitude > DARK_SKY_LIMITING_MAGNITUDE) {
-      this.showNovaButton.hidden = true
+      this.showNovaButton.disabled = true
       return undefined
     }
-    this.showNovaButton.hidden = this.sceneElement.groundHides(nova.position.altitudeDeg, nova.position.azimuthDeg)
+    this.showNovaButton.disabled = this.sceneElement.groundHides(nova.position.altitudeDeg, nova.position.azimuthDeg)
     return this.novaText(nova)
   }
 
@@ -9491,7 +9528,7 @@ export class SightingEditorElement extends HTMLElement {
     const sky = Satellites.visibilityAt(date, observer)
     const real = this.realSatelliteClause(sky.lowOrbitLit || sky.sunAltitudeDeg >= 0)
     if (real !== undefined) return real
-    this.showSatelliteButton.hidden = true
+    this.showSatelliteButton.disabled = true
     if (!sky.anythingInOrbit) {
       // Only worth saying against a sky somebody could have seen anything in at all.
       return sky.sunAltitudeDeg < 0 ? this.messages.skySatellitesNotYet : undefined
@@ -9587,11 +9624,11 @@ export class SightingEditorElement extends HTMLElement {
     const state = this.sceneElement.satelliteState
     if (state.status !== "ready") return undefined
     if (state.coverage?.every(coverage => coverage.status !== "covered")) {
-      this.showSatelliteButton.hidden = true
+      this.showSatelliteButton.disabled = true
       return state.coverage.some(coverage => coverage.status === "gap") ? this.messages.skySatelliteElementsGap : undefined
     }
     const visible = this.visibleSatellitePasses()
-    this.showSatelliteButton.hidden = this.aimableSatellitePasses(visible).length === 0
+    this.showSatelliteButton.disabled = this.aimableSatellitePasses(visible).length === 0
     if (visible.length === 0) return lit ? this.messages.skySatellitePassesNone : undefined
     const brightest = visible[0]
     const peak = brightest.peak
@@ -9734,7 +9771,7 @@ export class SightingEditorElement extends HTMLElement {
    */
   private fireballClause(date: Date, observer: { lat: number; lng: number; elevationM: number }): string | undefined {
     const seen = this.sceneElement.fireballState.status === "ready" ? this.strikingFireballs(date, observer) : []
-    this.showFireballButton.hidden = this.aimableFireballs(seen, date).length === 0
+    this.showFireballButton.disabled = this.aimableFireballs(seen, date).length === 0
     if (seen.length === 0) return undefined
     const brightest = seen[0]
     const template = seen.length === 1 ? this.messages.skyFireballsOne : this.messages.skyFireballs
@@ -10353,16 +10390,7 @@ export class SightingEditorElement extends HTMLElement {
       { value: "observer", label: messages.decorObserver, hidden: true }
     ])
     this.decorList.setLabels({ list: messages.decor, remove: messages.deleteDecor, add: messages.addDecor, empty: messages.emptyDecor, actions: { "look-at-decor": messages.lookAtDecor } })
-    this.showMeteorButton.title = messages.showMeteor
-    this.showMeteorButton.setAttribute("aria-label", messages.showMeteor)
-    this.showCometButton.title = messages.showComet
-    this.showCometButton.setAttribute("aria-label", messages.showComet)
-    this.showNovaButton.title = messages.showNova
-    this.showNovaButton.setAttribute("aria-label", messages.showNova)
-    this.showSatelliteButton.title = messages.showSatellite
-    this.showSatelliteButton.setAttribute("aria-label", messages.showSatellite)
-    this.showFireballButton.title = messages.showFireball
-    this.showFireballButton.setAttribute("aria-label", messages.showFireball)
+    this.labelSkyButtons()
     this.undoButton.title = messages.undo
     this.undoButton.setAttribute("aria-label", messages.undo)
     this.redoButton.title = messages.redo

@@ -3193,7 +3193,7 @@ export class SceneElement extends HTMLElement {
    * Wraps, so a reader who reaches the faintest goes round again rather than being told there is
    * nothing.
    */
-  meteorByRank(rank: number): { t: number; altitudeDeg: number; azimuthDeg: number } | undefined {
+  meteorByRank(rank: number, magnitudeLimit = Number.POSITIVE_INFINITY): { t: number; altitudeDeg: number; azimuthDeg: number } | undefined {
     // Asked by the toolbar, which may well run before the scene next paints: schedule on demand
     // rather than answer "no meteors" from a sky that simply has not been worked out yet.
     this.ensureMeteorSchedule(this.ufoElement.sighting)
@@ -3204,6 +3204,8 @@ export class SceneElement extends HTMLElement {
     // is left alone: those meteors really did fall, after the recording stops.
     const reachable = [...this.sceneRenderer.meteorSchedule]
       .filter(meteor => meteor.t + meteor.durationMs <= this.ufoElement.seekableDuration)
+      // Bright enough for that sky: a streak fainter than its limit is one nobody saw.
+      .filter(meteor => MeteorFall.magnitudeOf(meteor) <= magnitudeLimit)
       // And only what is above the ground: a sporadic whose radiant is below the horizon can throw
       // its streak over it or keep it under, and one behind a hill is a slope to look at.
       .filter(meteor => {
