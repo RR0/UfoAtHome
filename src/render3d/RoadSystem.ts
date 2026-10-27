@@ -70,14 +70,14 @@ export class RoadSystem {
    */
   static readonly SIDEWALK_WIDTH_M = 1.8
   /**
-   * The share of a street, façade to façade, its pavements take each, and the narrowest and widest a pavement is: about two metres each side of a
-   * street eleven metres wide, which is a lane, a row of parked cars and two pavements. A pavement narrower than the least is none (a lane between
-   * walls), and what is left between the pavements is the carriageway, never narrower than the survey says it is.
+   * A pavement narrower than this, between a carriageway and a wall, is none: a lane between walls. Wider, it is whatever the carriageway leaves of
+   * the street. The carriageway is what the survey says it is and no wider: the IGN's width is from kerb to kerb, and a street eleven metres from
+   * wall to wall that the map gives three metres is a lane one car goes down (Rue Maurice Thorez in Nanterre), not a road; widened to a fifth of
+   * the street a pavement, it was one two cars could pass on.
    */
-  private static readonly SIDEWALK_SHARE = 0.2
-  private static readonly SIDEWALK_LEAST_M = 1.4
-  private static readonly SIDEWALK_MOST_M = 4
   private static readonly SIDEWALK_NONE_M = 0.8
+  /** How far from its line a street's middle is taken to be, at most: the IGN's stated precision. Farther, it is the walls that are of another street. */
+  private static readonly STREET_MIDDLE_MOST_M = 2.5
   static readonly SIDEWALK_KERB_M = 0.12
   /** Streets narrower than this have no room for one (a lane, a cycle path), and a carriageway wider than the usual is a road with no pavements of its own. */
   private static readonly SIDEWALK_MIN_ROAD_M = 3.5
@@ -165,7 +165,9 @@ export class RoadSystem {
     }
     const pavements = this.sidewalks(ways, paths, streets, groundYAt)
     if (pavements.indices.length > 0) {
-      const mesh = this.meshOf("paved", pavements, contemporary, RoadSystem.SIDEWALK_ALBEDO, false)
+      // Solid whatever the survey's day, unlike the carriageways: a pavement stands up from the ground, and a faint one is a pane of glass along the
+      // street with the road seen through its kerb. The walls it runs along are of the same day and drawn solid too.
+      const mesh = this.meshOf("paved", pavements, false, RoadSystem.SIDEWALK_ALBEDO, false)
       if (mesh) {
         mesh.name = "roads sidewalks"
         this.surveyed.add(mesh)
@@ -247,26 +249,51 @@ export class RoadSystem {
   }
 
   /**
-   * How an urban paved street lies across at each rung of its line: from wall to wall where the scene has buildings either side of it, the
-   * carriageway in the middle of the street and the pavements out to the walls (see StreetFacades), and its pavements at their usual width past
-   * the carriageway the survey states where it has none. Nothing for any other road, which is laid at its own width on its own line. Read once a
-   * rung, for the carriageway, its pavements and their kerbs alike.
+   * How an urban paved street lies across at each rung of its line: where the scene has buildings along it, the carriageway the survey states in
+   * the middle of the street and the pavements out to the walls (see StreetFacades), and its pavements at their usual width past the carriageway
+   * where it has none. Nothing for any other road, which is laid at its own width on its own line. Read once a rung, for the carriageway, its
+   * pavements and their kerbs alike.
+   *
+   * The middle of the street is the same all along a way, not the middle at each rung: walls step back and forward from one house to the next,
+   * and a carriageway that followed them zigzagged down the street. Only the pavements' outer edges follow the walls, which is what pavements do.
    */
   private streetOf(way: RoadWay, path: { x: number, z: number }[], facades: StreetFacades | undefined): ((x: number, z: number, dirX: number, dirZ: number) => StreetAcross) | undefined {
     if (!way.urban || way.surface !== "paved") return undefined
     const surveyed = RoadSystem.surveyedAcross(way)
     if (!facades || !facades.near(path)) return () => surveyed
-    const read = new Map<string, StreetAcross>()
-    return (x, z, dirX, dirZ) => {
+    const read = new Map<string, { leftM?: number, rightM?: number }>()
+    const wallsAt = (x: number, z: number, dirX: number, dirZ: number) => {
       const key = `${x.toFixed(2)}:${z.toFixed(2)}`
-      let across = read.get(key)
-      if (!across) {
-        const walls = facades.across(x, z, dirX, dirZ)
-        across = walls.leftM === undefined && walls.rightM === undefined ? surveyed : RoadSystem.wallToWall(way, walls.leftM, walls.rightM)
-        read.set(key, across)
+      let walls = read.get(key)
+      if (!walls) {
+        walls = facades.across(x, z, dirX, dirZ)
+        read.set(key, walls)
       }
-      return across
+      return walls
     }
+    const middles = this.rungsOf(path).flatMap(rung => {
+      const walls = wallsAt(rung.x, rung.z, rung.dirX, rung.dirZ)
+      return walls.leftM !== undefined && walls.rightM !== undefined ? [(walls.leftM - walls.rightM) / 2] : []
+    }).sort((a, b) => a - b)
+    if (middles.length === 0) return () => surveyed
+    const middle = Math.max(-RoadSystem.STREET_MIDDLE_MOST_M, Math.min(RoadSystem.STREET_MIDDLE_MOST_M, middles[Math.floor((middles.length - 1) / 2)]))
+    return (x, z, dirX, dirZ) => {
+      const walls = wallsAt(x, z, dirX, dirZ)
+      return RoadSystem.betweenWalls(way, middle, walls.leftM, walls.rightM)
+    }
+  }
+
+  /** Where the rungs of a line stand, and which way it goes at each (see appendPath). */
+  private rungsOf(points: { x: number; z: number }[]): { x: number, z: number, dirX: number, dirZ: number }[] {
+    const centre = this.resample(points)
+    return centre.map((point, i) => {
+      const before = centre[Math.max(0, i - 1)]
+      const after = centre[Math.min(centre.length - 1, i + 1)]
+      const dx = after.x - before.x
+      const dz = after.z - before.z
+      const length = Math.hypot(dx, dz)
+      return length < 1e-6 ? { x: point.x, z: point.z, dirX: 1, dirZ: 0 } : { x: point.x, z: point.z, dirX: dx / length, dirZ: dz / length }
+    })
   }
 
   /** A street the scene has no walls for: its carriageway on its line, at its width, and pavements of the usual width either side if it is wide enough for them. */
@@ -277,20 +304,23 @@ export class RoadSystem {
     return { carriageway, left: { kerbM: half, outerM: half + RoadSystem.SIDEWALK_WIDTH_M }, right: { kerbM: -half, outerM: -half - RoadSystem.SIDEWALK_WIDTH_M } }
   }
 
-  /** A street between walls `leftM` and `rightM` from its line, a side with no wall standing where the usual pavement would end. */
-  private static wallToWall(way: RoadWay, leftM: number | undefined, rightM: number | undefined): StreetAcross {
-    const usual = way.widthM / 2 + RoadSystem.SIDEWALK_WIDTH_M
-    const left = leftM ?? usual
-    const right = rightM ?? usual
-    const gap = left + right
-    let pavement = Math.min(RoadSystem.SIDEWALK_MOST_M, Math.max(RoadSystem.SIDEWALK_LEAST_M, gap * RoadSystem.SIDEWALK_SHARE))
-    if (gap - 2 * pavement < way.widthM) pavement = (gap - way.widthM) / 2
-    if (pavement < RoadSystem.SIDEWALK_NONE_M) pavement = 0
-    const centre = (left - right) / 2
-    const half = Math.max(gap / 2 - pavement, Math.min(way.widthM, gap) / 2)
-    const carriageway = { offsetM: centre, halfM: half }
-    if (pavement === 0) return { carriageway }
-    return { carriageway, left: { kerbM: centre + half, outerM: left }, right: { kerbM: centre - half, outerM: -right } }
+  /**
+   * A street whose middle is `middleM` from its line, with walls `leftM` and `rightM` from it where there are: the carriageway the survey states
+   * in the middle, and each pavement from its kerb out to the wall, or of the usual width where there is none. A pavement narrower than
+   * SIDEWALK_NONE_M is none: the carriageway runs up to the wall there.
+   */
+  private static betweenWalls(way: RoadWay, middleM: number, leftM: number | undefined, rightM: number | undefined): StreetAcross {
+    const half = way.widthM / 2
+    const carriageway = { offsetM: middleM, halfM: half }
+    const leftKerb = middleM + half
+    const rightKerb = middleM - half
+    const leftOuter = leftM ?? leftKerb + RoadSystem.SIDEWALK_WIDTH_M
+    const rightOuter = -(rightM ?? -rightKerb + RoadSystem.SIDEWALK_WIDTH_M)
+    return {
+      carriageway,
+      ...(leftOuter - leftKerb >= RoadSystem.SIDEWALK_NONE_M ? { left: { kerbM: leftKerb, outerM: leftOuter } } : {}),
+      ...(rightKerb - rightOuter >= RoadSystem.SIDEWALK_NONE_M ? { right: { kerbM: rightKerb, outerM: rightOuter } } : {})
+    }
   }
 
   /**
