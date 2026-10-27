@@ -7038,8 +7038,13 @@ export class SightingEditorElement extends HTMLElement {
   private fitGroupTabs(): void {
     const strip = this.groupTabs[0]?.parentElement
     if (!strip) return
+    // Without the folds' transition, both ways: measured halfway through one, the names would not fit yet; and the strip's state, put
+    // back at once, must not then unfold and fold again at every resize.
+    strip.classList.add("measuring")
     strip.classList.remove("compact")
     strip.classList.toggle("compact", strip.scrollWidth > strip.clientWidth)
+    void strip.offsetWidth
+    strip.classList.remove("measuring")
     for (const tab of this.groupTabs) SightingEditorElement.titleGroupTab(tab)
   }
 

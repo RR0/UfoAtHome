@@ -1891,8 +1891,19 @@ ${EditorTheme.HEAD}
 .app:has(#group-file [aria-invalid="true"]) [aria-controls="group-file"] { border-color: var(--error); }
 /* No room for every name: the pictograms alone, each name in its tab's tooltip (see fitGroupTabs). */
 .section-chips.compact > .group-tab:not([aria-expanded="true"]) { padding: 0 9px; }
-/* ...except the open one, which always says what it is. */
-.section-chips.compact > .group-tab:not([aria-expanded="true"]) > span:not(.tab-badge) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* ...except the open one, which always says what it is. The name folds away rather than vanishing, so that a tab opened grows into
+   its name and the one closed shrinks back to its pictogram, instead of the strip jumping. Still read aloud, folded: only its width goes. */
+.section-chips > .group-tab { transition: padding 0.2s ease; }
+.section-chips > .group-tab > span:not(.tab-badge) {
+  display: inline-block;
+  max-width: 12em;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width 0.2s ease, margin 0.2s ease, opacity 0.2s ease;
+}
+.section-chips.compact > .group-tab:not([aria-expanded="true"]) > span:not(.tab-badge) { max-width: 0; margin-inline-start: -6px; opacity: 0; }
+/* Measured at once, not halfway through a fold (see fitGroupTabs). */
+.section-chips.measuring > .group-tab, .section-chips.measuring > .group-tab > span { transition: none; }
 .section-chips > .group-tab[aria-expanded="true"] { background: var(--ink); color: var(--ground-raised); box-shadow: none; }
 /* The count stays for whoever reads the chip aloud; the outline says it to the eye. */
 .section-chips .tab-badge { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
