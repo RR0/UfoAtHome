@@ -3,9 +3,20 @@ import { BufferAttribute, BufferGeometry, Color, Group, Mesh, MeshLambertMateria
 import type { RoadSurface, RoadWay } from "./terrain/RoadProvider.js"
 import type { StatedRoad } from "../engine/model/Road.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
+import type { StreetFacades } from "./StreetFacades.js"
 
 /** Where the ground is, in world units, under a point of the scene — SceneRenderer.groundYUnder. */
 export type GroundYAt = (x: number, z: number) => number
+
+/** Where a strip lies across its line at one rung: its middle, metres to the left of the direction of travel, and its half width. */
+type Lateral = { offsetM: number, halfM: number }
+
+/** A street across, at one rung of its line, in metres to the left of the direction of travel (right is negative): the carriageway, and each pavement from its kerb to its outer edge. */
+interface StreetAcross {
+  carriageway: Lateral
+  left?: { kerbM: number, outerM: number }
+  right?: { kerbM: number, outerM: number }
+}
 
 /**
  * The roads under a scene, drawn as real carriageways lying on the real relief.
@@ -58,6 +69,15 @@ export class RoadSystem {
    * urban, and where a way is not a side street's mouth (see crossesAnother).
    */
   static readonly SIDEWALK_WIDTH_M = 1.8
+  /**
+   * The share of a street, façade to façade, its pavements take each, and the narrowest and widest a pavement is: about two metres each side of a
+   * street eleven metres wide, which is a lane, a row of parked cars and two pavements. A pavement narrower than the least is none (a lane between
+   * walls), and what is left between the pavements is the carriageway, never narrower than the survey says it is.
+   */
+  private static readonly SIDEWALK_SHARE = 0.2
+  private static readonly SIDEWALK_LEAST_M = 1.4
+  private static readonly SIDEWALK_MOST_M = 4
+  private static readonly SIDEWALK_NONE_M = 0.8
   static readonly SIDEWALK_KERB_M = 0.12
   /** Streets narrower than this have no room for one (a lane, a cycle path), and a carriageway wider than the usual is a road with no pavements of its own. */
   private static readonly SIDEWALK_MIN_ROAD_M = 3.5
@@ -115,7 +135,11 @@ export class RoadSystem {
     this.stepM = Number.isFinite(spacingM) && spacingM > 0 ? Math.min(RoadSystem.STEP_M, Math.max(1.5, spacingM / 2)) : RoadSystem.STEP_M
   }
 
-  set(allWays: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt, contemporary: boolean, radiusM = Infinity): void {
+  /**
+   * `facades`, when the scene has buildings round the observer, are where the walls of its streets stand: an urban street is then laid from wall
+   * to wall (see StreetFacades) rather than at the width of its carriageway alone.
+   */
+  set(allWays: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt, contemporary: boolean, radiusM = Infinity, facades?: StreetFacades): void {
     // Only what the patch can show: an archive holds the roads of the whole of a drive, and a town's worth of pavements is paid for by every one of them.
     const ways = RoadSystem.within(allWays, originLat, originLng, radiusM)
     RoadSystem.empty(this.surveyed)
@@ -126,16 +150,20 @@ export class RoadSystem {
     // cost more than everything else in the frame put together. They share a material anyway, so
     // there is nothing to lose by sharing a buffer.
     const bySurface = new Map<RoadSurface, { positions: number[]; indices: number[] }>()
-    for (const way of ways) {
+    const paths = ways.map(way => way.points.map(point => geoToLocalMeters(point.lat, point.lng, originLat, originLng)))
+    const streets = ways.map((way, at) => this.streetOf(way, paths[at], facades))
+    for (const [at, way] of ways.entries()) {
       const batch = bySurface.get(way.surface) ?? { positions: [], indices: [] }
       bySurface.set(way.surface, batch)
-      this.appendRibbon(way, originLat, originLng, groundYAt, batch)
+      const street = streets[at]
+      this.appendPath(paths[at], way.widthM, groundYAt, batch,
+        street ? { lateralAt: (x, z, dirX, dirZ) => street(x, z, dirX, dirZ).carriageway } : {})
     }
     for (const [surface, batch] of bySurface) {
       const mesh = this.meshOf(surface, batch, contemporary)
       if (mesh) this.surveyed.add(mesh)
     }
-    const pavements = this.sidewalks(ways, originLat, originLng, groundYAt)
+    const pavements = this.sidewalks(ways, paths, streets, groundYAt)
     if (pavements.indices.length > 0) {
       const mesh = this.meshOf("paved", pavements, contemporary, RoadSystem.SIDEWALK_ALBEDO, false)
       if (mesh) {
@@ -219,23 +247,74 @@ export class RoadSystem {
   }
 
   /**
-   * A pavement along each side of every urban street: its rungs are those of the street, offset past the carriageway's edge, and a rung that
-   * falls on another street's carriageway is left out, which leaves the gap a side street's mouth has between two pavements.
+   * How an urban paved street lies across at each rung of its line: from wall to wall where the scene has buildings either side of it, the
+   * carriageway in the middle of the street and the pavements out to the walls (see StreetFacades), and its pavements at their usual width past
+   * the carriageway the survey states where it has none. Nothing for any other road, which is laid at its own width on its own line. Read once a
+   * rung, for the carriageway, its pavements and their kerbs alike.
    */
-  private sidewalks(ways: RoadWay[], originLat: number, originLng: number, groundYAt: GroundYAt): { positions: number[]; indices: number[] } {
+  private streetOf(way: RoadWay, path: { x: number, z: number }[], facades: StreetFacades | undefined): ((x: number, z: number, dirX: number, dirZ: number) => StreetAcross) | undefined {
+    if (!way.urban || way.surface !== "paved") return undefined
+    const surveyed = RoadSystem.surveyedAcross(way)
+    if (!facades || !facades.near(path)) return () => surveyed
+    const read = new Map<string, StreetAcross>()
+    return (x, z, dirX, dirZ) => {
+      const key = `${x.toFixed(2)}:${z.toFixed(2)}`
+      let across = read.get(key)
+      if (!across) {
+        const walls = facades.across(x, z, dirX, dirZ)
+        across = walls.leftM === undefined && walls.rightM === undefined ? surveyed : RoadSystem.wallToWall(way, walls.leftM, walls.rightM)
+        read.set(key, across)
+      }
+      return across
+    }
+  }
+
+  /** A street the scene has no walls for: its carriageway on its line, at its width, and pavements of the usual width either side if it is wide enough for them. */
+  private static surveyedAcross(way: RoadWay): StreetAcross {
+    const half = way.widthM / 2
+    const carriageway = { offsetM: 0, halfM: half }
+    if (way.widthM < RoadSystem.SIDEWALK_MIN_ROAD_M) return { carriageway }
+    return { carriageway, left: { kerbM: half, outerM: half + RoadSystem.SIDEWALK_WIDTH_M }, right: { kerbM: -half, outerM: -half - RoadSystem.SIDEWALK_WIDTH_M } }
+  }
+
+  /** A street between walls `leftM` and `rightM` from its line, a side with no wall standing where the usual pavement would end. */
+  private static wallToWall(way: RoadWay, leftM: number | undefined, rightM: number | undefined): StreetAcross {
+    const usual = way.widthM / 2 + RoadSystem.SIDEWALK_WIDTH_M
+    const left = leftM ?? usual
+    const right = rightM ?? usual
+    const gap = left + right
+    let pavement = Math.min(RoadSystem.SIDEWALK_MOST_M, Math.max(RoadSystem.SIDEWALK_LEAST_M, gap * RoadSystem.SIDEWALK_SHARE))
+    if (gap - 2 * pavement < way.widthM) pavement = (gap - way.widthM) / 2
+    if (pavement < RoadSystem.SIDEWALK_NONE_M) pavement = 0
+    const centre = (left - right) / 2
+    const half = Math.max(gap / 2 - pavement, Math.min(way.widthM, gap) / 2)
+    const carriageway = { offsetM: centre, halfM: half }
+    if (pavement === 0) return { carriageway }
+    return { carriageway, left: { kerbM: centre + half, outerM: left }, right: { kerbM: centre - half, outerM: -right } }
+  }
+
+  /**
+   * A pavement along each side of every urban street, from its kerb out (see streetOf), raised by the kerb and with the kerb's face standing up from
+   * the carriageway: a pavement lying flat on the ground has no edge to be seen by, from an eye at its own height. A rung that falls on another
+   * street's carriageway is left out, which leaves the gap a side street's mouth has between two pavements.
+   */
+  private sidewalks(
+    ways: RoadWay[], paths: { x: number, z: number }[][], streets: (((x: number, z: number, dirX: number, dirZ: number) => StreetAcross) | undefined)[], groundYAt: GroundYAt
+  ): { positions: number[]; indices: number[] } {
     const batch = { positions: [] as number[], indices: [] as number[] }
-    const paths = ways.map(way => way.points.map(point => geoToLocalMeters(point.lat, point.lng, originLat, originLng)))
     // Where the carriageways are, by cell of ground: asking every segment of every road for every rung of every pavement took three seconds for a town.
     const grid = new SegmentGrid(ways, paths)
-    ways.forEach((way, at) => {
-      if (!way.urban || way.surface !== "paved" || way.widthM < RoadSystem.SIDEWALK_MIN_ROAD_M) return
-      const offset = way.widthM / 2 + RoadSystem.SIDEWALK_WIDTH_M / 2
-      for (const side of [1, -1]) {
-        this.appendPath(paths[at], RoadSystem.SIDEWALK_WIDTH_M, groundYAt, batch, {
-          offsetM: offset * side,
-          liftM: RoadSystem.LIFT_M + RoadSystem.SIDEWALK_KERB_M,
-          skip: (x, z) => grid.onAnotherCarriageway(x, z, at)
-        })
+    ways.forEach((_, at) => {
+      const street = streets[at]
+      if (!street) return
+      const skip = (x: number, z: number) => grid.onAnotherCarriageway(x, z, at)
+      for (const side of ["left", "right"] as const) {
+        const pavementAt = (x: number, z: number, dirX: number, dirZ: number): Lateral | undefined => {
+          const pavement = street(x, z, dirX, dirZ)[side]
+          return pavement && { offsetM: (pavement.kerbM + pavement.outerM) / 2, halfM: Math.abs(pavement.outerM - pavement.kerbM) / 2 }
+        }
+        this.appendPath(paths[at], 0, groundYAt, batch, { lateralAt: pavementAt, liftM: RoadSystem.LIFT_M + RoadSystem.SIDEWALK_KERB_M, minHalfM: 0, skip })
+        this.appendKerb(paths[at], groundYAt, batch, (x, z, dirX, dirZ) => street(x, z, dirX, dirZ)[side]?.kerbM, side === "left", skip)
       }
     })
     return batch
@@ -286,21 +365,20 @@ export class RoadSystem {
   }
 
   /**
-   * One way as a strip of quads: a rung across the road at every step along it, each end put at
+   * One line as a strip of quads: a rung across the road at every step along it, each end put at
    * the height of the ground right there.
    *
    * The rung's direction is the average of the two segments meeting at that point, which is what
    * keeps a bend's outer edge from pinching: taking one segment's normal leaves a notch on every
-   * corner, and a road is mostly corners.
+   * corner, and a road is mostly corners. The centre line is already in the patch's own metres.
    */
-  private appendRibbon(way: RoadWay, originLat: number, originLng: number, groundYAt: GroundYAt, batch: { positions: number[]; indices: number[] }): void {
-    this.appendPath(way.points.map(point => geoToLocalMeters(point.lat, point.lng, originLat, originLng)), way.widthM, groundYAt, batch)
-  }
-
-  /** One centre line, already in the patch's own metres, as a strip of quads — see appendRibbon. */
   private appendPath(
     points: { x: number; z: number }[], widthM: number, groundYAt: GroundYAt, batch: { positions: number[]; indices: number[] },
-    strip: { offsetM?: number, liftM?: number, minHalfM?: number, skip?: (x: number, z: number) => boolean } = {}
+    strip: {
+      offsetM?: number, liftM?: number, minHalfM?: number, skip?: (x: number, z: number) => boolean,
+      /** Where the strip lies across at each rung, in place of `offsetM` and the width: nothing is no strip at that rung. */
+      lateralAt?: (x: number, z: number, dirX: number, dirZ: number) => Lateral | undefined
+    } = {}
   ): void {
     const centre = this.resample(points)
     if (centre.length < 2) return
@@ -318,12 +396,15 @@ export class RoadSystem {
       let dz = after.z - before.z
       const length = Math.hypot(dx, dz)
       if (length < 1e-6) { dx = 1; dz = 0 } else { dx /= length; dz /= length }
+      const lateral = strip.lateralAt ? strip.lateralAt(centre[i].x, centre[i].z, dx, dz) : { offsetM: offset, halfM: half }
+      const rungHalf = lateral ? Math.max(strip.minHalfM ?? 0.5, lateral.halfM) : half
+      const rungOffset = lateral?.offsetM ?? offset
       // Left of the direction of travel, on the ground plane.
-      const nx = -dz * half
-      const nz = dx * half
+      const nx = -dz * rungHalf
+      const nz = dx * rungHalf
       // The strip's own middle, a lateral offset to the left of the direction of travel.
-      const middle = { x: centre[i].x + (-dz) * offset, z: centre[i].z + dx * offset }
-      kept.push(!strip.skip?.(middle.x, middle.z))
+      const middle = { x: centre[i].x + (-dz) * rungOffset, z: centre[i].z + dx * rungOffset }
+      kept.push(lateral !== undefined && lateral.halfM > 0 && !strip.skip?.(middle.x, middle.z))
       rungs.push([{ x: middle.x + nx, z: middle.z + nz }, middle, { x: middle.x - nx, z: middle.z - nz }])
     }
     // A ribbon is flat between two points and the ground is not, and a road on an embankment is crowned: its middle stands higher than its edges. A
@@ -351,6 +432,41 @@ export class RoadSystem {
       // Left to middle, then middle to right: each a pair of triangles between this rung and the next.
       batch.indices.push(a, a + 3, a + 1, a + 1, a + 3, a + 4)
       batch.indices.push(a + 1, a + 4, a + 2, a + 2, a + 4, a + 5)
+    }
+  }
+
+  /**
+   * The face of a kerb: a strip standing SIDEWALK_KERB_M high along a line at `kerbAt` metres to the left of the direction of travel, facing the
+   * carriageway (to the right for the kerb of a left pavement, to the left for a right one).
+   */
+  private appendKerb(
+    points: { x: number; z: number }[], groundYAt: GroundYAt, batch: { positions: number[]; indices: number[] },
+    kerbAt: (x: number, z: number, dirX: number, dirZ: number) => number | undefined, facesRight: boolean, skip: (x: number, z: number) => boolean
+  ): void {
+    const centre = this.resample(points)
+    if (centre.length < 2) return
+    const base = batch.positions.length / 3
+    const kept: boolean[] = []
+    for (let i = 0; i < centre.length; i++) {
+      const before = centre[Math.max(0, i - 1)]
+      const after = centre[Math.min(centre.length - 1, i + 1)]
+      let dx = after.x - before.x
+      let dz = after.z - before.z
+      const length = Math.hypot(dx, dz)
+      if (length < 1e-6) { dx = 1; dz = 0 } else { dx /= length; dz /= length }
+      const kerb = kerbAt(centre[i].x, centre[i].z, dx, dz)
+      const x = centre[i].x + (-dz) * (kerb ?? 0)
+      const z = centre[i].z + dx * (kerb ?? 0)
+      kept.push(kerb !== undefined && !skip(x, z))
+      const bottom = groundYAt(x, z) + RoadSystem.LIFT_M
+      batch.positions.push(x, bottom, z, x, bottom + RoadSystem.SIDEWALK_KERB_M, z)
+    }
+    for (let i = 0; i < centre.length - 1; i++) {
+      if (!kept[i] || !kept[i + 1]) continue
+      const a = base + i * 2
+      // Bottom, next bottom, top faces left of the direction of travel; the other way round, right.
+      if (facesRight) batch.indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2)
+      else batch.indices.push(a, a + 2, a + 1, a + 1, a + 2, a + 3)
     }
   }
 

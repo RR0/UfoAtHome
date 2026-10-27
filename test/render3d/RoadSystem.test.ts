@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import type { BufferGeometry, Mesh } from "three"
 import { RoadSystem } from "../../src/render3d/RoadSystem.js"
 import type { RoadWay } from "../../src/render3d/terrain/RoadProvider.js"
+import { StreetFacades } from "../../src/render3d/StreetFacades.js"
 
 const LAT = 34.050918
 const LNG = -106.891693
@@ -174,6 +175,55 @@ describe("RoadSystem pavements", () => {
     const system = new RoadSystem()
     system.set([urban(straight("lane", "paved", 2.5, 200)), urban(straight("track", "gravel", 6, 200))], LAT, LNG, () => 0, false)
     expect(sidewalks(system)).toBeUndefined()
+  })
+
+  describe("between the walls of a street", () => {
+    // Rue Maurice Thorez in Nanterre: three metres of lane in the map, façades 6.9 m on one side and 4.2 m on the other.
+    const walls = new StreetFacades([
+      { x: 100, z: -6.9 - 5, alongX: 1, alongZ: 0, halfAlongM: 150, halfAcrossM: 5 },
+      { x: 100, z: 4.2 + 5, alongX: 1, alongZ: 0, halfAlongM: 150, halfAcrossM: 5 }
+    ])
+    const lane = urban(straight("thorez", "paved", 3, 200))
+    const drawnZ = (mesh: Mesh<BufferGeometry>): number[] => {
+      const points = vertices(mesh)
+      return [...new Set(Array.from(mesh.geometry.getIndex()!.array))].filter(i => points[i][0] > 20 && points[i][0] < 180).map(i => points[i][2])
+    }
+
+    it("lays the carriageway in the middle of the street, wider than the lane the map states, and the pavements out to the walls", () => {
+      const system = new RoadSystem()
+      system.set([lane], LAT, LNG, () => 0, false, Infinity, walls)
+      const carriageway = drawnZ(meshes(system).find(mesh => mesh.name === "roads paved")!)
+      const pavements = drawnZ(sidewalks(system)!)
+      // From wall to wall, 11.1 m: the pavements at the walls, the carriageway centred between them and much wider than three metres.
+      expect(Math.min(...pavements)).toBeCloseTo(-6.9, 1)
+      expect(Math.max(...pavements)).toBeCloseTo(4.2, 1)
+      const left = Math.min(...carriageway)
+      const right = Math.max(...carriageway)
+      expect(right - left).toBeGreaterThan(5)
+      expect((left + right) / 2).toBeCloseTo((-6.9 + 4.2) / 2, 1)
+    })
+
+    it("stands the face of each kerb up from the carriageway, facing it", () => {
+      const system = new RoadSystem()
+      system.set([lane], LAT, LNG, () => 0, false, Infinity, walls)
+      const mesh = sidewalks(system)!
+      const normals = mesh.geometry.getAttribute("normal")
+      const points = vertices(mesh)
+      const faces = Array.from({ length: normals.count }, (_, i) => i).filter(i => Math.abs(normals.getY(i)) < 0.1 && points[i][0] > 20 && points[i][0] < 180)
+      // Two kerbs, each its height high, and each turned towards the middle of the street.
+      const heights = faces.map(i => points[i][1])
+      expect(Math.max(...heights) - Math.min(...heights)).toBeCloseTo(RoadSystem.SIDEWALK_KERB_M, 5)
+      const middle = (-6.9 + 4.2) / 2
+      for (const i of faces) expect(Math.sign(normals.getZ(i))).toBe(Math.sign(middle - points[i][2]))
+    })
+
+    it("draws pavements along a lane too narrow for them by its width alone, once its walls say there is room", () => {
+      const system = new RoadSystem()
+      system.set([lane], LAT, LNG, () => 0, false)
+      expect(sidewalks(system)).toBeUndefined()
+      system.set([lane], LAT, LNG, () => 0, false, Infinity, walls)
+      expect(sidewalks(system)).toBeDefined()
+    })
   })
 
   it("leaves a gap where a side street opens, instead of a pavement across it", () => {

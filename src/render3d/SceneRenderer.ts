@@ -74,6 +74,8 @@ import type { TerrainPatchIndex } from "./terrain/frozen/FrozenPatches.js"
 import { TerrainReach } from "./terrain/TerrainReach.js"
 import { boundsAroundObserver, buildTerrainMesh } from "./terrain/TerrainMeshBuilder.js"
 import { RoadSystem } from "./RoadSystem.js"
+import { StreetFacades } from "./StreetFacades.js"
+import type { Footprint } from "./StreetFacades.js"
 import type { RoadWay } from "./terrain/RoadProvider.js"
 import type { WaterSurface } from "./terrain/WaterProvider.js"
 import type { RailwayLine } from "./terrain/RailwayProvider.js"
@@ -2247,6 +2249,26 @@ export class SceneRenderer {
     system.set(this.tracesShown ? this.traces : [], this.traceLabels, origin.lat, origin.lng, this.siteElevationM, (x, z) => this.groundYOfPatch(patch, x, z))
   }
 
+  /**
+   * The footprints of the buildings of the decor, in the frame of roads laid round (lat, lng): where the walls of the streets stand (see
+   * StreetFacades). Nothing that moves, and nothing the observer is inside of.
+   */
+  private buildingFootprints(lat: number, lng: number): Footprint[] {
+    const reference = this.decorReferencePose
+    const from = reference?.lat !== undefined && reference.lng !== undefined ? geoToLocalMeters(reference.lat, reference.lng, lat, lng) : { x: 0, z: 0 }
+    return this.decorObjects.filter(object => object.kind === "building" && !object.observerSide && !object.track).map(object => {
+      const natural = DecorSystem.naturalSize(object.kind, object.floors)
+      const heading = (object.headingDeg ?? 0) * Math.PI / 180
+      return {
+        x: from.x + object.eastM, z: from.z - object.northM, alongX: Math.sin(heading), alongZ: -Math.cos(heading),
+        halfAlongM: (object.sizeM?.lengthM ?? natural.lengthM) / 2, halfAcrossM: (object.sizeM?.widthM ?? natural.widthM) / 2
+      }
+    })
+  }
+
+  /** What the buildings of the decor were when the roads were last laid by them: other buildings, and the streets are laid again. */
+  private roadFacadesKey = ""
+
   private drapeRoads(ways: RoadWay[], lat: number, lng: number, contemporary: boolean): void {
     const patch = this.terrainMesh
     if (!patch) return
@@ -2254,7 +2276,7 @@ export class SceneRenderer {
     // patch's position over to the road group.
     this.roadSystem.group.position.copy(patch.position)
     this.roadSystem.setGroundSpacing(this.patchSpacingM(patch))
-    this.roadSystem.set(ways, lat, lng, (x, z) => this.groundYOfPatch(patch, x, z), contemporary, this.terrainRadius)
+    this.roadSystem.set(ways, lat, lng, (x, z) => this.groundYOfPatch(patch, x, z), contemporary, this.terrainRadius, new StreetFacades(this.buildingFootprints(lat, lng)))
     this.roadAttribution = ways.length > 0 ? this.terrainProviders.roads?.attribution : undefined
     this.compileNextFrameOffThread()
     this.render()
@@ -2481,6 +2503,14 @@ export class SceneRenderer {
         void this.awaitArrival(this.loadDecorModel(object, this.decorModelToken, true))
       }
       else if (!this.reuseLoadedDecorModel(object, group)) void this.awaitArrival(this.loadDecorModel(object, this.decorModelToken))
+    }
+    // The streets are laid from wall to wall (see StreetFacades): buildings planted, moved or taken away, and they are laid again.
+    const facadesKey = decor.filter(object => object.kind === "building").map(object => `${object.eastM.toFixed(1)},${object.northM.toFixed(1)},${object.headingDeg ?? 0}`).join(";")
+    if (facadesKey !== this.roadFacadesKey) {
+      this.roadFacadesKey = facadesKey
+      const held = this.roadWays
+      const provider = this.terrainProviders.roads
+      if (held && provider) this.drapeRoads(held.ways, held.lat, held.lng, provider.contemporary)
     }
     // The code of the beams comes in only for a scene that has a vehicle, and a scene that has none never asks for it.
     if (decor.some(candidate => candidate.kind === "vehicle")) void this.loadHeadlights()
