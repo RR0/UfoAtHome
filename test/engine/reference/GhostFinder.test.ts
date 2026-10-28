@@ -205,4 +205,23 @@ describe("GhostFinder", () => {
     expect(Math.hypot(search.pairs[0].ghost.x - ghost.x, search.pairs[0].ghost.y - ghost.y)).toBeLessThan(4)
     expect(Math.hypot(search.pairs[0].light.x - lamp.x, search.pairs[0].light.y - lamp.y)).toBeLessThan(4)
   })
+
+  it("takes the white speck in a hazy sky for a veiled sun's ghost, not the leaves across from its glare", () => {
+    const width = 740, height = 415
+    const sun = { x: 366, y: 150 }, ghost = { x: 340, y: 300 }
+    const pixels = picture(width, height, [{ ...sun, peak: 255, radius: 22 }, { ...ghost, peak: 255, radius: 3 }])
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4
+      // Leaves at the bottom right, uneven, lit here and there; a pale, even sky elsewhere, paler round the sun, which barely stands out
+      // of it (as one veiled by haze: 55 above it, the speck 80 above the sky further off).
+      const leaves = y > 280 && x > 380
+      const sky = Math.max(pixels.data[i], 173 + 27 * Math.exp(-((x - sun.x) ** 2 + (y - sun.y) ** 2) / (2 * 60 ** 2)))
+      const value = leaves ? 40 + ((x * 37 + y * 91) % 120) : sky
+      pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = value
+    }
+    const search = GhostFinder.find(pixels)
+    expect(search.pairs).toHaveLength(1)
+    expect(Math.hypot(search.pairs[0].ghost.x - ghost.x, search.pairs[0].ghost.y - ghost.y)).toBeLessThan(4)
+    expect(Math.hypot(search.pairs[0].light.x - sun.x, search.pairs[0].light.y - sun.y)).toBeLessThan(6)
+  })
 })

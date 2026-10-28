@@ -196,9 +196,22 @@ export class GhostFinder {
     }
     // A lone ghost may also stand out well of a sky lit by a town or a sunset, where nothing is dark: taken only near where its light
     // mirrors, among the few as strong on a like ground (see loneGhost). Among many ghosts, a lit front's windows would be such spots too.
-    const lone = [...candidates, ...spots.filter(spot => !lights.includes(spot) && !candidates.includes(spot)
-      && spot.contrast >= GhostFinder.LARGE_LIGHT_CONTRAST && spot.peak >= 1.5 * spot.background)]
-    return mirrored() ?? some ?? GhostFinder.loneGhost(spots, lights, lone, width, height, tolerance) ?? none
+    // (Saturated is as bright as it can show: on a sky already pale, half again brighter cannot be.)
+    const lone = spots.filter(spot => candidates.includes(spot)
+      || (spot.contrast >= GhostFinder.LARGE_LIGHT_CONTRAST && spot.peak >= Math.min(GhostFinder.SATURATED, 1.5 * spot.background)))
+    const byPixels = mirrored()
+    // Its light, one of the greatest of the picture: saturated, however little it stands out of a hazy sky (a veiled sun does not, by
+    // the measure of a lamp's).
+    const great = [...lights, ...spots.filter(spot => spot.peak >= GhostFinder.SATURATED && !lights.includes(spot))]
+    const alone = () => GhostFinder.loneGhost(spots, great, lone, width, height, tolerance, lights)
+    if (byPixels && byPixels.pairs.length === 1) {
+      // One ghost either way: what tells it is where its axis is, and a lens's is at the picture's centre unless the picture was cropped.
+      // A pale patch of leaves across from the sun's wide glare votes for an axis well off it; a white speck in the sky, near it.
+      const other = alone()
+      const offCentre = (search: GhostSearch) => Math.hypot(search.centre!.x - width / 2, search.centre!.y - height / 2)
+      return other && offCentre(other) < offCentre(byPixels) ? other : byPixels
+    }
+    return byPixels ?? some ?? alone() ?? none
   }
 
   /**
@@ -273,14 +286,14 @@ export class GhostFinder {
    * ("low") when chance would hardly put a spot standing out as much that near: fewer than CHANCE_ALONE of them expected there, given how many
    * the picture has on a like ground.
    */
-  private static loneGhost(spots: PictureSpot[], lights: PictureSpot[], candidates: PictureSpot[], width: number, height: number, tolerance: number):
-    GhostSearch | undefined {
+  private static loneGhost(spots: PictureSpot[], great: PictureSpot[], candidates: PictureSpot[], width: number, height: number, tolerance: number,
+                           lights: PictureSpot[]): GhostSearch | undefined {
     const diagonal = Math.hypot(width, height)
-    const greatest = [...lights].sort((a, b) => b.contrast * b.radius ** 2 - a.contrast * a.radius ** 2).slice(0, GhostFinder.GREAT_LIGHTS)
+    const greatest = [...great].sort((a, b) => b.contrast * b.radius ** 2 - a.contrast * a.radius ** 2).slice(0, GhostFinder.GREAT_LIGHTS)
     let best: { pair: GhostPair, chance: number } | undefined
     for (const light of greatest) {
       const mirror = { x: width - light.x, y: height - light.y }
-      const near = candidates.filter(spot => GhostFinder.canBeGhostOf(spot, light)
+      const near = candidates.filter(spot => spot !== light && GhostFinder.canBeGhostOf(spot, light)
         && Math.hypot(spot.x - mirror.x, spot.y - mirror.y) <= GhostFinder.LONE_REACH * diagonal
         && GhostFinder.apart(spot, light))
       // The one chance would least put there: near where the light mirrors, and as strong as few on a like ground are. Neither the
