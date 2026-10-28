@@ -180,11 +180,45 @@ export class GhostFinder {
     const found = MirrorVote.find(pixels, GhostFinder.SHARP_MIRROR)
     if (!found) return undefined
     const { width, height } = pixels
-    const offCentre = Math.hypot(found.centre.x - width / 2, found.centre.y - height / 2) / Math.hypot(width, height)
+    const diagonal = Math.hypot(width, height)
+    // The axis known, a ghost made of spots (a lit front's windows upside down) is told spot by spot (see atAxis); what is no spot (a
+    // lamp's pale disc) stays the patch the vote found.
+    const bySpot = GhostFinder.atAxis(spots, lights, found.centre, 0.006 * diagonal)
+    const pairs = bySpot.length >= 2 ? [
+      ...bySpot,
+      ...found.pairs.filter(patch => !bySpot.some(pair => Math.hypot(pair.ghost.x - patch.ghost.x, pair.ghost.y - patch.ghost.y) <= patch.ghost.radius))
+    ] : found.pairs
+    const centre = found.centre
+    const offCentre = Math.hypot(centre.x - width / 2, centre.y - height / 2) / diagonal
     return {
-      width, height, lights, spots, pairs: found.pairs, centre: found.centre, scale: -1, cropped: offCentre > GhostFinder.CROPPED,
-      confidence: found.pairs.length >= 2 || found.matched >= GhostFinder.SHAPE_MATCHED ? "high" : "low"
+      width, height, lights, spots, pairs, centre, scale: -1, cropped: offCentre > GhostFinder.CROPPED,
+      confidence: pairs.length >= 2 || found.matched >= GhostFinder.SHAPE_MATCHED ? "high" : "low"
     }
+  }
+
+  /**
+   * The ghosts of a known axis, spot by spot: each spot whose mirror through it falls within a light, which it can be the ghost of. A light
+   * that is a lit front's many windows run together is one wide spot, its ghost the windows apart: each falls somewhere within it, and it
+   * has as many ghosts as fall there.
+   */
+  private static atAxis(spots: PictureSpot[], lights: PictureSpot[], centre: { x: number, y: number }, tolerance: number): GhostPair[] {
+    const pairs: GhostPair[] = []
+    for (const ghost of spots) {
+      const mirror = { x: 2 * centre.x - ghost.x, y: 2 * centre.y - ghost.y }
+      let best: { light: PictureSpot, beyond: number } | undefined
+      for (const light of lights) {
+        if (!GhostFinder.canBeGhostOf(ghost, light)) continue
+        // How far past the light's own extent the mirror falls: 0 within it.
+        const beyond = Math.max(0, Math.hypot(light.x - mirror.x, light.y - mirror.y) - light.radius)
+        if (beyond <= tolerance && (!best || beyond < best.beyond)) best = { light, beyond }
+      }
+      if (!best || Math.hypot(ghost.x - best.light.x, ghost.y - best.light.y) < 4 * Math.max(ghost.radius, best.light.radius)) continue
+      // The light drawn where the ghost's mirror falls on it: the part of it this ghost is of.
+      pairs.push({ ghost, light: { ...best.light, ...mirror }, residualPx: best.beyond })
+    }
+    // The glow round a few of them is a wider spot of its own: they are the ghosts, not it.
+    return pairs.filter(pair => !pairs.some(other => other !== pair && other.ghost.radius < pair.ghost.radius
+      && Math.hypot(other.ghost.x - pair.ghost.x, other.ghost.y - pair.ghost.y) < pair.ghost.radius))
   }
 
   /**

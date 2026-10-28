@@ -109,6 +109,8 @@ describe("GhostFinder", () => {
     expect(search.centre!.x).toBeCloseTo(centre.x, -1)
     expect(search.centre!.y).toBeCloseTo(centre.y, -1)
     for (const pair of search.pairs) expect(pair.ghost.y).toBeLessThan(centre.y)
+    // A ghost for each light of the front, though its lights run together into a few wide spots.
+    expect(search.pairs.length).toBeGreaterThanOrEqual(row.length - 2)
   })
 
   it("finds a lamp's ghost that is a large pale disc of the aperture, not a spot", () => {
