@@ -116,9 +116,14 @@ export class GhostPass {
             // Where in the picture the light that lands here as this ghost came from.
             vec2 from = 0.5 + (uv - 0.5) / k;
             if (any(lessThan(from, vec2(0.0))) || any(greaterThan(from, vec2(1.0)))) continue;
+            // Light from near the edge of the field reaches the surfaces that make the ghost only in part, the lens's barrel cutting it off
+            // gradually: the ghost of a bright foreground fades out where its source leaves the picture, rather than ending in a hard
+            // rectangle of the picture's own edges.
+            vec2 edge = min(from, 1.0 - from);
+            float vignette = smoothstep(0.0, 0.15, edge.x) * smoothstep(0.0, 0.15, edge.y);
             // Its defocus, in the picture's pixels, read where the light came from: the ghost is that picture scaled by k.
             float radiusPx = uBlur[i] * uSize.y / abs(k);
-            sum += uTint[i] * uShare[i] * blurred(from, radiusPx) / (k * k);
+            sum += vignette * uTint[i] * uShare[i] * blurred(from, radiusPx) / (k * k);
           }
           return sum;
         }

@@ -497,6 +497,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "lens-ghosts",
+          src: "/demo-data/sky-test-lens-ghosts.json",
+          title: { en: "Lens ghosts", fr: "Reflets d'objectif", es: "Reflejos del objetivo", it: "Riflessi dell'obiettivo" },
+          blurb: {
+            en: "A phone filming a crossroads at night: a traffic light, streetlamps, the full Moon and a car's headlights, each with its ghost across the centre of the picture, moving against it. The red disc of night street videos.",
+            fr: "Un téléphone filme un carrefour la nuit : un feu, des lampadaires, la pleine Lune et les phares d'une voiture, chacun avec son reflet de l'autre côté du centre de l'image, qui se déplace à l'inverse. Le disque rouge des vidéos de rue nocturnes.",
+            es: "Un teléfono filma un cruce de noche: un semáforo, farolas, la luna llena y los faros de un coche, cada uno con su reflejo al otro lado del centro de la imagen, que se mueve al revés. El disco rojo de los vídeos callejeros nocturnos.",
+            it: "Un telefono filma un incrocio di notte: un semaforo, lampioni, la luna piena e i fari di un'auto, ciascuno col suo riflesso dall'altra parte del centro dell'immagine, che si muove al contrario. Il disco rosso dei video notturni di strada."
+          }
+        },
+        {
           id: "csg2",
           src: "/demo-data/observer-csg2-nassau.json",
           // The case, for the player: the same upper stage at its launch and at its end, an hour and a half and 2 500 km apart.

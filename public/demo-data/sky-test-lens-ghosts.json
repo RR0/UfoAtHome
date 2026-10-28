@@ -1,0 +1,539 @@
+{
+ "version": 1,
+ "id": "sky-test-lens-ghosts",
+ "summaryTime": 20,
+ "tags": [
+  "lens flare",
+  "lens ghost",
+  "misidentification"
+ ],
+ "description": {
+  "en": "A phone filming a crossroads at night: the ghost of every light — a traffic light, the streetlamps, the full Moon, a car's headlights — lies across the centre of the picture, and moves against it.",
+  "fr": "Un téléphone filme un carrefour la nuit : le reflet de chaque lumière (un feu, les lampadaires, la pleine Lune, les phares d'une voiture) est de l'autre côté du centre de l'image, et se déplace à l'inverse.",
+  "es": "Un teléfono filma un cruce de noche: el reflejo de cada luz (un semáforo, las farolas, la luna llena, los faros de un coche) está al otro lado del centro de la imagen, y se mueve al revés.",
+  "it": "Un telefono filma un incrocio di notte: il riflesso di ogni luce (un semaforo, i lampioni, la luna piena, i fari di un'auto) sta dall'altra parte del centro dell'immagine, e si muove al contrario."
+ },
+ "time": {
+  "year": 2026,
+  "month": 1,
+  "day": 3,
+  "hour": 19,
+  "minute": 0,
+  "second": 0
+ },
+ "utcOffsetHours": 1,
+ "durationSeconds": 46,
+ "place": [
+  {
+   "lat": 48.3,
+   "lng": 1.7,
+   "name": "Beauce"
+  }
+ ],
+ "instrument": "phone-landscape",
+ "exposureSeconds": 0.03333333333333333,
+ "weatherTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "weather": {
+     "cloudCover": {
+      "value": 0,
+      "basis": "assumed",
+      "rationale": "Assumed: a crossroads made up to show lens ghosts."
+     },
+     "cloudDarkness": 0,
+     "cloudBaseM": 2000,
+     "lowerCloudCover": 0,
+     "highCloudCover": 0,
+     "precipitationType": "none",
+     "precipitationIntensity": 0,
+     "windDirectionDeg": 0,
+     "windSpeed": 1,
+     "storm": false
+    }
+   }
+  ]
+ },
+ "timeline": {
+  "keyframes": [
+   {
+    "t": 0,
+    "shapes": []
+   }
+  ],
+  "order": [],
+  "groups": []
+ },
+ "observerTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "pose": {
+     "lat": 48.3,
+     "lng": 1.7,
+     "elevationM": 1.6,
+     "headingDeg": 112,
+     "pitchDeg": 4,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 7000,
+    "pose": {
+     "lat": 48.3,
+     "lng": 1.7,
+     "elevationM": 1.6,
+     "headingDeg": 112,
+     "pitchDeg": 4,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 15000,
+    "pose": {
+     "lat": 48.3,
+     "lng": 1.7,
+     "elevationM": 1.6,
+     "headingDeg": 66,
+     "pitchDeg": 4,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 17000,
+    "pose": {
+     "lat": 48.3,
+     "lng": 1.7,
+     "elevationM": 1.6,
+     "headingDeg": 66,
+     "pitchDeg": 9,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 24000,
+    "pose": {
+     "lat": 48.3,
+     "lng": 1.7,
+     "elevationM": 1.6,
+     "headingDeg": 66,
+     "pitchDeg": 9,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 27000,
+    "pose": {
+     "lat": 48.3,
+     "lng": 1.7,
+     "elevationM": 1.6,
+     "headingDeg": 68,
+     "pitchDeg": 4,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 44000,
+    "pose": {
+     "lat": 48.3,
+     "lng": 1.7,
+     "elevationM": 1.6,
+     "headingDeg": 68,
+     "pitchDeg": 4,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 46000,
+    "pose": {
+     "lat": 48.3,
+     "lng": 1.7,
+     "elevationM": 1.6,
+     "headingDeg": 68,
+     "pitchDeg": 4,
+     "fovDeg": 60
+    }
+   }
+  ]
+ },
+ "soundTrack": {
+  "keyframes": []
+ },
+ "milestones": [
+  {
+   "t": 0,
+   "label": "A",
+   "note": {
+    "en": "A traffic light left of centre: its ghost is the red disc as far right of centre, on the same line. Nothing is there.",
+    "fr": "Un feu à gauche du centre : son reflet est le disque rouge aussi loin à droite du centre, sur la même droite. Il n'y a rien là-bas.",
+    "es": "Un semáforo a la izquierda del centro: su reflejo es el disco rojo igual de lejos a la derecha del centro, en la misma recta. Allí no hay nada.",
+    "it": "Un semaforo a sinistra del centro: il suo riflesso è il disco rosso altrettanto a destra del centro, sulla stessa retta. Lì non c'è niente."
+   }
+  },
+  {
+   "t": 7000,
+   "label": "B",
+   "note": {
+    "en": "The phone turns right: the light goes left, its ghost right, through the centre. A ghost always moves against the light.",
+    "fr": "Le téléphone tourne à droite : le feu part à gauche, son reflet à droite, en passant par le centre. Un reflet va toujours à l'inverse de la lumière.",
+    "es": "El teléfono gira a la derecha: el semáforo se va a la izquierda y su reflejo a la derecha, pasando por el centro. Un reflejo va siempre al revés que la luz.",
+    "it": "Il telefono gira a destra: il semaforo va a sinistra, il suo riflesso a destra, passando per il centro. Un riflesso va sempre al contrario della luce."
+   }
+  },
+  {
+   "t": 17000,
+   "label": "C",
+   "note": {
+    "en": "The full Moon and the streetlamps: each light has its ghost on the other side of the centre, the brighter and the nearer the light, the brighter the ghost.",
+    "fr": "La pleine Lune et les lampadaires : chaque lumière a son reflet de l'autre côté du centre, d'autant plus vif que la lumière est forte et proche.",
+    "es": "La luna llena y las farolas: cada luz tiene su reflejo al otro lado del centro, tanto más vivo cuanto más fuerte y cercana es la luz.",
+    "it": "La luna piena e i lampioni: ogni luce ha il suo riflesso dall'altra parte del centro, tanto più vivo quanto più la luce è forte e vicina."
+   }
+  },
+  {
+   "t": 27000,
+   "label": "D",
+   "note": {
+    "en": "A car coming: the closer its headlights, the brighter their ghost, high in the sky across the centre — two lights hovering where there is nothing.",
+    "fr": "Une voiture arrive : plus ses phares approchent, plus leur reflet s'avive, haut dans le ciel de l'autre côté du centre — deux lumières qui planent là où il n'y a rien.",
+    "es": "Llega un coche: cuanto más se acercan sus faros, más se aviva su reflejo, alto en el cielo al otro lado del centro: dos luces que flotan donde no hay nada.",
+    "it": "Arriva un'auto: più i fari si avvicinano, più il loro riflesso si ravviva, alto nel cielo dall'altra parte del centro: due luci sospese dove non c'è niente."
+   }
+  }
+ ],
+ "roads": [
+  {
+   "id": "main-road",
+   "surface": "paved",
+   "widthM": 7,
+   "path": [
+    {
+     "eastM": -300,
+     "northM": 6
+    },
+    {
+     "eastM": 800,
+     "northM": 6
+    }
+   ]
+  },
+  {
+   "id": "side-road",
+   "surface": "paved",
+   "widthM": 5,
+   "path": [
+    {
+     "eastM": 30,
+     "northM": 6
+    },
+    {
+     "eastM": 30,
+     "northM": 400
+    }
+   ]
+  }
+ ],
+ "decor": [
+  {
+   "id": "signal-near",
+   "kind": "trafficlight",
+   "eastM": 26,
+   "northM": 2,
+   "headingDeg": 270,
+   "sizeM": {
+    "widthM": 0.3,
+    "lengthM": 0.3,
+    "heightM": 4.5
+   },
+   "lights": [
+    {
+     "id": "red",
+     "color": "#ff1e00",
+     "intensity": 3,
+     "radiusM": 0.1,
+     "beamDeg": 30,
+     "offsetM": {
+      "x": 0,
+      "y": 3.1999999999999997,
+      "z": -0.13
+     },
+     "pattern": {
+      "kind": "flash",
+      "perMinute": 0.6666666666666666,
+      "dutyCycle": 0.511111,
+      "phase": 0.011111
+     }
+    },
+    {
+     "id": "amber",
+     "color": "#ffa200",
+     "intensity": 3,
+     "radiusM": 0.1,
+     "beamDeg": 30,
+     "offsetM": {
+      "x": 0,
+      "y": 2.9,
+      "z": -0.13
+     },
+     "pattern": {
+      "kind": "flash",
+      "perMinute": 0.6666666666666666,
+      "dutyCycle": 0.033333,
+      "phase": 0.044444
+     }
+    },
+    {
+     "id": "green",
+     "color": "#00ff8c",
+     "intensity": 3,
+     "radiusM": 0.1,
+     "beamDeg": 30,
+     "offsetM": {
+      "x": 0,
+      "y": 2.6,
+      "z": -0.13
+     },
+     "pattern": {
+      "kind": "flash",
+      "perMinute": 0.6666666666666666,
+      "dutyCycle": 0.455556,
+      "phase": 0.5
+     }
+    }
+   ]
+  },
+  {
+   "id": "signal-far",
+   "kind": "trafficlight",
+   "eastM": 34,
+   "northM": 10,
+   "headingDeg": 250,
+   "sizeM": {
+    "widthM": 0.3,
+    "lengthM": 0.3,
+    "heightM": 4.5
+   },
+   "lights": [
+    {
+     "id": "red",
+     "color": "#ff1e00",
+     "intensity": 3,
+     "radiusM": 0.1,
+     "beamDeg": 30,
+     "offsetM": {
+      "x": 0,
+      "y": 3.1999999999999997,
+      "z": -0.13
+     },
+     "pattern": {
+      "kind": "flash",
+      "perMinute": 0.6666666666666666,
+      "dutyCycle": 0.511111,
+      "phase": 0.511111
+     }
+    },
+    {
+     "id": "amber",
+     "color": "#ffa200",
+     "intensity": 3,
+     "radiusM": 0.1,
+     "beamDeg": 30,
+     "offsetM": {
+      "x": 0,
+      "y": 2.9,
+      "z": -0.13
+     },
+     "pattern": {
+      "kind": "flash",
+      "perMinute": 0.6666666666666666,
+      "dutyCycle": 0.033333,
+      "phase": 0.544444
+     }
+    },
+    {
+     "id": "green",
+     "color": "#00ff8c",
+     "intensity": 3,
+     "radiusM": 0.1,
+     "beamDeg": 30,
+     "offsetM": {
+      "x": 0,
+      "y": 2.6,
+      "z": -0.13
+     },
+     "pattern": {
+      "kind": "flash",
+      "perMinute": 0.6666666666666666,
+      "dutyCycle": 0.455556
+     }
+    }
+   ]
+  },
+  {
+   "id": "lamp-1",
+   "kind": "streetlight",
+   "eastM": 15,
+   "northM": 11,
+   "headingDeg": 180,
+   "sizeM": {
+    "widthM": 0.3,
+    "lengthM": 0.3,
+    "heightM": 8
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 10000,
+    "colorTemperatureK": 4000
+   }
+  },
+  {
+   "id": "lamp-2",
+   "kind": "streetlight",
+   "eastM": 45,
+   "northM": 11,
+   "headingDeg": 180,
+   "sizeM": {
+    "widthM": 0.3,
+    "lengthM": 0.3,
+    "heightM": 8
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 10000,
+    "colorTemperatureK": 4000
+   }
+  },
+  {
+   "id": "lamp-3",
+   "kind": "streetlight",
+   "eastM": 75,
+   "northM": 11,
+   "headingDeg": 180,
+   "sizeM": {
+    "widthM": 0.3,
+    "lengthM": 0.3,
+    "heightM": 8
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 10000,
+    "colorTemperatureK": 4000
+   }
+  },
+  {
+   "id": "lamp-4",
+   "kind": "streetlight",
+   "eastM": 105,
+   "northM": 11,
+   "headingDeg": 180,
+   "sizeM": {
+    "widthM": 0.3,
+    "lengthM": 0.3,
+    "heightM": 8
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 10000,
+    "colorTemperatureK": 4000
+   }
+  },
+  {
+   "id": "lamp-5",
+   "kind": "streetlight",
+   "eastM": 135,
+   "northM": 11,
+   "headingDeg": 180,
+   "sizeM": {
+    "widthM": 0.3,
+    "lengthM": 0.3,
+    "heightM": 8
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 10000,
+    "colorTemperatureK": 4000
+   }
+  },
+  {
+   "id": "car",
+   "kind": "vehicle",
+   "eastM": 230,
+   "northM": 7.8,
+   "headingDeg": 270,
+   "sizeM": {
+    "widthM": 1.8,
+    "lengthM": 4.4,
+    "heightM": 1.5
+   },
+   "headlights": "dipped",
+   "lit": true,
+   "lights": [
+    {
+     "id": "head-left",
+     "offsetM": {
+      "x": -0.7,
+      "y": 0.6,
+      "z": 2
+     },
+     "color": "#ffffff",
+     "intensity": 8,
+     "pattern": {
+      "kind": "steady"
+     }
+    },
+    {
+     "id": "head-right",
+     "offsetM": {
+      "x": 0.7,
+      "y": 0.6,
+      "z": 2
+     },
+     "color": "#ffffff",
+     "intensity": 8,
+     "pattern": {
+      "kind": "steady"
+     }
+    },
+    {
+     "id": "tail-left",
+     "offsetM": {
+      "x": -0.7,
+      "y": 0.6,
+      "z": -2
+     },
+     "color": "#ff0000",
+     "pattern": {
+      "kind": "steady"
+     }
+    },
+    {
+     "id": "tail-right",
+     "offsetM": {
+      "x": 0.7,
+      "y": 0.6,
+      "z": -2
+     },
+     "color": "#ff0000",
+     "pattern": {
+      "kind": "steady"
+     }
+    }
+   ],
+   "track": [
+    {
+     "t": 26000,
+     "eastM": 230,
+     "northM": 7.8,
+     "headingDeg": 270
+    },
+    {
+     "t": 46000,
+     "eastM": 30,
+     "northM": 7.8,
+     "headingDeg": 270
+    }
+   ]
+  }
+ ]
+}
