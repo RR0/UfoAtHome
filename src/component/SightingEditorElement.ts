@@ -914,7 +914,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly ghostsStatus: HTMLElement
   /** The ghosts last found, in which picture (at which address): drawn on it over the scene (see paintPictureOverlay). */
   private ghostFinding?: { referenceId: string, src: string, search: GhostSearch }
-  private ghostTexts?: import("./GhostSearchView.js").GhostSearchTexts
   private readonly labelReferenceLandmarks: HTMLElement
   private readonly labelReferenceLandmarkLabel: HTMLElement
   private readonly referenceAdoptPoseButton: HTMLButtonElement
@@ -9150,12 +9149,19 @@ export class SightingEditorElement extends HTMLElement {
   /** Looks for the ghosts of the lens in the selected picture and shows them on it (see GhostSearchView): its code is loaded only now. */
   private async findGhosts(): Promise<void> {
     const reference = this.currentReference()
-    if (!reference?.src || !this.ghostTexts) return
+    if (!reference?.src) return
     this.searchingGhosts = true
     this.syncFindGhosts(reference)
     try {
       const { GhostSearchView } = await import("./GhostSearchView.js")
-      const search = await new GhostSearchView(this.ghostsStatus, this.ghostTexts).search(reference.src)
+      // Taken from the messages now, not when they were applied: English, the template's own, is never applied (see loadLocaleMessages),
+      // and the search did nothing at all in it.
+      const messages = this.messages
+      const texts = {
+        searching: messages.referenceGhostsSearching, found: messages.referenceGhostsFound, foundScaled: messages.referenceGhostsFoundScaled,
+        low: messages.referenceGhostsLow, none: messages.referenceGhostsNone, cropped: messages.referenceGhostsCropped
+      }
+      const search = await new GhostSearchView(this.ghostsStatus, texts).search(reference.src)
       this.ghostFinding = search ? { referenceId: reference.id, src: reference.src, search } : undefined
       this.ufoElement.refresh()
     } finally {
@@ -10630,10 +10636,6 @@ export class SightingEditorElement extends HTMLElement {
     this.label("label-lens-glass", messages.lensGlass)
     this.label("label-reference-ghosts", messages.referenceGhosts)
     this.findGhostsButton.textContent = messages.referenceFindGhosts
-    this.ghostTexts = {
-      searching: messages.referenceGhostsSearching, found: messages.referenceGhostsFound, foundScaled: messages.referenceGhostsFoundScaled,
-      low: messages.referenceGhostsLow, none: messages.referenceGhostsNone, cropped: messages.referenceGhostsCropped
-    }
     this.label("lens-glass-none", messages.lensGlassNone)
     this.label("lens-glass-filter", messages.lensGlassFilter)
     this.label("lens-glass-window", messages.lensGlassWindow)

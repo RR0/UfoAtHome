@@ -3021,6 +3021,20 @@ describe("SightingEditorElement canvas mode", () => {
     expect(element.shadowRoot!.getElementById("group-shape")!.hidden).toBe(false)
   })
 
+  it("looks for ghosts in the selected picture in English, the template's own language, whose messages are never applied", async () => {
+    const { GhostSearchView } = await import("../../src/component/GhostSearchView.js")
+    const search = vi.spyOn(GhostSearchView.prototype, "search").mockResolvedValue(undefined)
+    try {
+      const element = mount()
+      element.sightingData = withPicture()
+      open(element, "group-reference")
+      element.shadowRoot!.getElementById("reference-find-ghosts")!.click()
+      await vi.waitFor(() => expect(search).toHaveBeenCalledWith("https://example.org/vue.jpg"))
+    } finally {
+      search.mockRestore()
+    }
+  })
+
   it("turns the observer, not the picture, when the drag starts outside the picture", async () => {
     const element = mount()
     element.sightingData = withPicture()
