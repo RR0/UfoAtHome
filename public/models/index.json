@@ -1447,6 +1447,20 @@
         "license": "CC0 1.0",
         "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-mcminnville-object.ts"
       }
+    },
+    {
+      "id": "ycpan3468-us-capitol",
+      "kind": "building",
+      "name": "United States Capitol and its grounds (photogrammetry)",
+      "file": "ycpan3468-us-capitol/capitol.glb",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 367.7, "lengthM": 383, "heightM": 101.9 },
+      "credit": {
+        "title": "US_capitol_building (simplified)",
+        "author": "ycpan3468",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/us-capitol-building-d4049804543d4d49813767d2e9b72664"
+      }
     }
   ]
 }

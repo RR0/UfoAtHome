@@ -2,16 +2,22 @@
  * Builds the demo of the photograph of the Capitol in Washington, July 1952: the dome at night with a string of lights above it, published
  * later as a picture of the "Washington carousel" (rr0.org's case file, which has the photograph and the matching of its lights).
  *
- * Every light in the sky of the photograph lies on a line from one of the lamps of the plaza below, through the same point near the centre of
- * the picture, and as far beyond it: each is the ghost of a lamp, mirrored through the centre. That is the ghost a flat glass in front of the
- * lens makes (a filter sends back the image the film reflects, upside down and nearly in focus), not a pane farther off, which doubles a light
- * just beside it. So the camera is given a filter.
+ * Every light in the sky of the photograph lies on a line from one of the lamps at its foot, through the same point of the picture, and as
+ * far beyond it: each is the ghost of a lamp, mirrored through the lens's axis. MEASURED on the photograph (344 x 286 px as rr0.org has it):
+ * that point is at (155.5, 152.5), not the picture's centre, so the picture is a crop; and each light of the sky, mirrored through it, lands
+ * on a lamp at the foot within a few pixels for seven of the nine (the other two on no visible lamp, hidden or lost in the lit windows).
+ * Each light of the sky is a horizontal pair of points: the lamps of the Capitol's grounds are standards of several globes, two of which
+ * stand side by side seen from the front, and a ghost this sharp shows them both. A ghost mirrored through the axis and nearly in focus is
+ * the one a flat glass on the lens makes (a filter sends back the image the film reflects): the camera is given one.
  *
- * ASSUMED, all of it: the night and the hour (the photograph is undated beyond "July 1952"), where the photographer stood (on the axis of the
- * east front, some 170 m off, where the dome fills the frame as in the photograph), the camera (unknown) and its settings, the filter, and the plaza's
- * lamps (posts of the 1950s, warm incandescent globes, set out to fill the foot of the frame as the photograph's do). The Capitol is drawn as
- * plain volumes of about its size (the wings, the drum and its dome), unlit: the floodlighting that made it white in the photograph is not
- * drawn, and is not what the demo is about.
+ * The scene is laid out to the photograph, laid over it: the dome's size in it (some 2.9 px a metre) and a standpoint 250 m west of it, on
+ * the lawn below the west front, give the focal length (733 px); the lens's axis is where the ghosts say it is; and each lamp stands on the
+ * line of sight of its own image in the photograph, at the foot of the west front's terraces, as high as its image is above the axis.
+ *
+ * ASSUMED: the night and the hour (the photograph is undated beyond "July 1952"), the standpoint's distance, the camera, the filter, how far
+ * off each row of lamps is (the terrace's balustrade, and the walks below it), and the globes' light. The Capitol is a photogrammetric model
+ * of today's building and grounds (see public/models/ycpan3468-us-capitol/CREDITS.md), whose daylight is baked into its texture: it stands
+ * for the floodlit building of the photograph, and its east front is the one extended in 1958-1962, which the photograph does not show.
  *
  * Writes ../../../public/demo-data/sky-test-washington-capitol.json. Run with `node --import tsx`.
  */
@@ -20,48 +26,100 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "public", "demo-data", "sky-test-washington-capitol.json")
-/** The centre of the dome, and the observer some 170 m east of it on the axis of the east front. */
-const DOME = { lat: 38.88992, lng: -77.00906 }
-const EAST_M = 170
-const OBSERVER = { lat: DOME.lat, lng: DOME.lng + EAST_M / (111320 * Math.cos(DOME.lat * Math.PI / 180)) }
+const PHOTO = "https://rr0.org/science/crypto/ufo/enquete/dossier/Washington/1952-07-Capitol_color.jpg"
 const DURATION_S = 12
 const why = "Assumed: the photograph is undated beyond July 1952, and its photographer, camera and standpoint are unknown."
 const stone = "#e6e0d2"
 
+/** The centre of the dome, and the standpoint 250 m west of it. */
+const DOME = { lat: 38.88992, lng: -77.00906 }
+const DISTANCE_M = 250
+const METRES_PER_DEG_LNG = 111320 * Math.cos(DOME.lat * Math.PI / 180)
+const OBSERVER = { lat: DOME.lat, lng: DOME.lng - DISTANCE_M / METRES_PER_DEG_LNG }
+
+/** The photograph, as measured on it: its size, the lens's axis in it, and its focal length in its own pixels (see above). */
+const PICTURE = { width: 344, height: 286, axis: { u: 155.5, v: 152.5 }, focalPx: 2.93 * DISTANCE_M }
+/** The statue atop the dome, in the photograph, and how high it stands above the ground at the standpoint, m (from TERRAIN below). */
+const DOME_TOP = { u: 178.5, v: 15 }
+
+/**
+ * What the relief of the scene puts under each place, metres above the ground at the standpoint: MEASURED in the scene once (its relief, as
+ * the player loads it), so that each lamp is as high as its image says. The dome's top is the Capitol's 88 m over the east plaza.
+ */
+const TERRAIN = { domeBaseM: 15.9, rows: [11.0, 8.15] }
+/** How far the model is moved from where its stated geometry puts it, to lie on the photograph: MEASURED by laying it over. */
+const MODEL_SHIFT = { eastM: 0, northM: 0, altitudeM: 0 }
+
+/** Each light of the sky of the photograph, and the row of lamps its own lamp stands in (0 the balustrade, farther; 1 the walks, nearer). */
+const GHOSTS: { u: number, v: number, row: 0 | 1 }[] = [
+  { u: 68, v: 73, row: 0 }, { u: 90, v: 72, row: 0 }, { u: 110, v: 72, row: 0 }, { u: 127, v: 69, row: 0 }, { u: 143, v: 68, row: 0 },
+  { u: 211, v: 72, row: 0 }, { u: 92, v: 51, row: 1 }, { u: 136, v: 52, row: 1 }, { u: 195, v: 51, row: 1 }
+]
+/** How far each row of lamps is from the standpoint, m: the west front's balustrade, and the walks at the foot of its terraces. */
+const ROW_DISTANCE_M = [175, 140]
+/** The height of a globe above its standard's foot, m: what the standard is drawn up to. */
+const GLOBE_HEIGHT_M = 4.5
+const EYE_M = 1.6
+
+const toDeg = (rad: number) => rad * 180 / Math.PI
+/** The angles of a point of the photograph off the lens's axis, degrees: right and up. */
+const offAxis = (u: number, v: number) => ({ right: toDeg(Math.atan((u - PICTURE.axis.u) / PICTURE.focalPx)), up: toDeg(Math.atan((PICTURE.axis.v - v) / PICTURE.focalPx)) })
+
+// The lens's axis: turned off the dome by as much as the dome is off the axis in the photograph, and pitched so that the dome's top is as high.
+const domeTop = offAxis(DOME_TOP.u, DOME_TOP.v)
+const headingDeg = 90 - domeTop.right
+const domeTopUpDeg = toDeg(Math.atan((88 + TERRAIN.domeBaseM - EYE_M) / DISTANCE_M))
+const pitchDeg = domeTopUpDeg - domeTop.up
+
+// Each lamp: on the line of sight of its image, the ghost mirrored through the axis, as high as that line is at its distance.
+const lamps = GHOSTS.map((ghost, i) => {
+  const image = offAxis(2 * PICTURE.axis.u - ghost.u, 2 * PICTURE.axis.v - ghost.v)
+  const azimuth = (headingDeg + image.right) * Math.PI / 180
+  const distance = ROW_DISTANCE_M[ghost.row]
+  const globeAboveEye = distance * Math.tan((pitchDeg + image.up) * Math.PI / 180)
+  const footAboveStandpoint = TERRAIN.rows[ghost.row]
+  const heightM = Math.round((EYE_M + globeAboveEye - footAboveStandpoint) * 10) / 10
+  return {
+    id: `lamp-${i + 1}`, kind: "streetlight",
+    title: { en: "Lamp standard", fr: "Candélabre", es: "Candelabro", it: "Candelabro" },
+    eastM: Math.round(distance * Math.sin(azimuth) * 10) / 10, northM: Math.round(distance * Math.cos(azimuth) * 10) / 10,
+    // Facing the standpoint, so that its globes side by side are side by side in the picture.
+    headingDeg: 270,
+    sizeM: { widthM: 0.5, lengthM: 0.5, heightM },
+    lit: false,
+    // Two globes side by side, as a standard of several shows them from the front: some 150 cd each (an incandescent globe of the 1950s).
+    // A lamp of a standard is placed from its foot: the globes are at its top.
+    lights: [-0.35, 0.35].map((x, j) => ({ id: `globe-${j + 1}`, offsetM: { x, y: heightM, z: 0 }, color: "#ffd9a8", intensity: 1.5, radiusM: 0.2, pattern: { kind: "steady" } }))
+  }
+})
+
 const decor = [
-  // The building: its wings north and south of the centre, and the drum carrying the dome, about their own sizes.
+  // The Capitol and its grounds, a photogrammetric model (see public/models/ycpan3468-us-capitol/CREDITS.md): turned so that its long axis
+  // runs north and south and its west front faces the standpoint, and set so that the dome's axis is where the dome is. The model's box is
+  // centred on the object, the dome's axis 7.2 m off its centre.
   {
     id: "capitol", kind: "building", title: { en: "Capitol", fr: "Capitole", es: "Capitolio", it: "Campidoglio" },
-    eastM: -EAST_M, northM: 0, headingDeg: 90, sizeM: { widthM: 229, lengthM: 100, heightM: 27 }, floors: 4,
-    facade: { color: stone, plain: true }, roof: { shape: "flat", color: stone }
+    eastM: DISTANCE_M - 2.7 + MODEL_SHIFT.eastM, northM: 6.7 + MODEL_SHIFT.northM, headingDeg: 142.7,
+    sizeM: { widthM: 367.7, lengthM: 383, heightM: 101.9 },
+    model: { id: "ycpan3468-us-capitol" },
+    track: [{ t: 0, eastM: DISTANCE_M - 2.7 + MODEL_SHIFT.eastM, northM: 6.7 + MODEL_SHIFT.northM, altitudeM: MODEL_SHIFT.altitudeM, headingDeg: 142.7 }]
   },
-  {
-    id: "dome", kind: "building", title: { en: "Capitol dome", fr: "Dôme du Capitole", es: "Cúpula del Capitolio", it: "Cupola del Campidoglio" },
-    eastM: -EAST_M - 5, northM: 0, headingDeg: 90, sizeM: { widthM: 38, lengthM: 38, heightM: 80 }, floors: 2,
-    facade: { color: stone, plain: true }, roof: { shape: "dome", riseM: 26, color: stone }
-  },
-  // The lamps of the east plaza and its approach: the lights at the foot of the photograph, whose ghosts are the lights above the dome.
-  ...[
-    ...[-90, -60, -30, 30, 60, 90].map(northM => ({ eastM: -110, northM })),
-    ...[-55, -25, 25, 55].map(northM => ({ eastM: -70, northM })),
-    ...[-15, 15].map(northM => ({ eastM: -35, northM }))
-  ].map(({ eastM, northM }, i) => ({
-    id: `lamp-${i + 1}`, kind: "streetlight", eastM, northM, headingDeg: 90, sizeM: { widthM: 0.4, lengthM: 0.4, heightM: 4.5 }, lit: true,
-    lamp: { lumens: 6000, colorTemperatureK: 2800 }
-  }))
+  ...lamps
 ]
 
-const pose = { lat: OBSERVER.lat, lng: OBSERVER.lng, elevationM: 1.6, headingDeg: 270, pitchDeg: 16, fovDeg: 46, fNumber: 4 }
+const pose = { lat: OBSERVER.lat, lng: OBSERVER.lng, elevationM: 0, headingDeg, pitchDeg, fovDeg: 30, fNumber: 4 }
+// The photograph laid over the scene: its own centre is off the lens's axis by as much as it was cropped.
+const centre = offAxis(PICTURE.width / 2, PICTURE.height / 2)
 const recording = {
   version: 1,
   id: "sky-test-washington-capitol",
   summaryTime: 6,
   tags: ["lens flare", "lens ghost", "photograph", "Washington 1952"],
   description: {
-    en: "The Capitol at night, July 1952, with lights above the dome: each the ghost of a lamp of the plaza, mirrored through the centre of the picture by a filter on the lens.",
-    fr: "Le Capitole la nuit, juillet 1952, avec des lumières au-dessus du dôme : chacune est le reflet d'un lampadaire de la place, renvoyé à l'opposé par rapport au centre de l'image par un filtre sur l'objectif.",
-    es: "El Capitolio de noche, julio de 1952, con luces sobre la cúpula: cada una es el reflejo de una farola de la plaza, devuelto al lado opuesto del centro de la imagen por un filtro en el objetivo.",
-    it: "Il Campidoglio di notte, luglio 1952, con luci sopra la cupola: ognuna è il riflesso di un lampione della piazza, rimandato dalla parte opposta del centro dell'immagine da un filtro sull'obiettivo."
+    en: "The Capitol at night, July 1952, with lights above the dome: each the ghost of a lamp standard at its foot, mirrored through the lens's axis by a filter, laid out to the photograph laid over it.",
+    fr: "Le Capitole la nuit, juillet 1952, avec des lumières au-dessus du dôme : chacune est le reflet d'un candélabre à son pied, renvoyé à l'opposé de l'axe de l'objectif par un filtre, la scène étant calée sur la photo posée par-dessus.",
+    es: "El Capitolio de noche, julio de 1952, con luces sobre la cúpula: cada una es el reflejo de un candelabro a su pie, devuelto al otro lado del eje del objetivo por un filtro, con la escena ajustada a la foto superpuesta.",
+    it: "Il Campidoglio di notte, luglio 1952, con luci sopra la cupola: ognuna è il riflesso di un candelabro ai suoi piedi, rimandato dalla parte opposta dell'asse dell'obiettivo da un filtro, con la scena allineata alla foto sovrapposta."
   },
   sources: [{ type: "article", title: "Le carousel de Washington", url: "https://rr0.org/science/crypto/ufo/enquete/dossier/Washington/" }],
   time: { year: 1952, month: 7, day: 19, hour: 23, minute: 30, second: 0 },
@@ -71,7 +129,18 @@ const recording = {
   instrument: "rectilinear-lens",
   exposureSeconds: 2,
   iso: 32,
-  lens: { glass: { value: "filter", basis: "assumed", rationale: "The lights of the sky lie across the centre of the picture from the lamps, nearly in focus: the ghost a flat glass on the lens makes." } },
+  lens: { glass: { value: "filter", basis: "assumed", rationale: "The lights of the sky lie across the lens's axis from the lamps, nearly in focus: the ghost a flat glass on the lens makes." } },
+  references: [{
+    id: "capitol-1952", kind: "photo", src: PHOTO,
+    title: { en: "The Capitol, July 1952", fr: "Le Capitole, juillet 1952", es: "El Capitolio, julio de 1952", it: "Il Campidoglio, luglio 1952" },
+    credit: "rr0.org", creditUrl: "https://rr0.org/science/crypto/ufo/enquete/dossier/Washington/",
+    t: 0, from: { lat: OBSERVER.lat, lng: OBSERVER.lng }, opacity: 0.5,
+    registration: {
+      headingDeg: Math.round((headingDeg + centre.right) * 100) / 100,
+      pitchDeg: Math.round((pitchDeg + centre.up) * 100) / 100,
+      fovDeg: Math.round(2 * toDeg(Math.atan(PICTURE.height / 2 / PICTURE.focalPx)) * 100) / 100
+    }
+  }],
   weatherTrack: {
     keyframes: [{
       t: 0,
@@ -88,14 +157,14 @@ const recording = {
   milestones: [
     {
       t: 0, label: "A", note: {
-        en: "Point at a light above the dome: it is named after the lamp below whose ghost it is, and the line drawn to it passes through the centre.",
-        fr: "Pointez une lumière au-dessus du dôme : elle porte le nom du lampadaire dont elle est le reflet, et la ligne tracée jusqu'à lui passe par le centre.",
-        es: "Señala una luz sobre la cúpula: lleva el nombre de la farola de abajo de la que es el reflejo, y la línea trazada hasta ella pasa por el centro.",
-        it: "Indica una luce sopra la cupola: porta il nome del lampione di sotto di cui è il riflesso, e la linea tracciata fino a esso passa per il centro."
+        en: "Slide the photograph in and out: each light above the dome falls on the ghost of a lamp at its foot. Point at one to see which, and the line through the lens's axis.",
+        fr: "Faites varier l'opacité de la photo : chaque lumière au-dessus du dôme tombe sur le reflet d'un candélabre à son pied. Pointez-en une pour voir lequel, et la ligne qui passe par l'axe de l'objectif.",
+        es: "Varía la opacidad de la foto: cada luz sobre la cúpula cae sobre el reflejo de un candelabro a su pie. Señala una para ver cuál, y la línea que pasa por el eje del objetivo.",
+        it: "Varia l'opacità della foto: ogni luce sopra la cupola cade sul riflesso di un candelabro ai suoi piedi. Indicane una per vedere quale, e la linea che passa per l'asse dell'obiettivo."
       }
     }
   ],
   decor
 }
 writeFileSync(OUT, JSON.stringify(recording, null, 1) + "\n")
-console.log(`→ ${OUT}`)
+console.log(`heading ${headingDeg.toFixed(2)}, pitch ${pitchDeg.toFixed(2)} → ${OUT}`)

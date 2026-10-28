@@ -9,10 +9,10 @@
   "Washington 1952"
  ],
  "description": {
-  "en": "The Capitol at night, July 1952, with lights above the dome: each the ghost of a lamp of the plaza, mirrored through the centre of the picture by a filter on the lens.",
-  "fr": "Le Capitole la nuit, juillet 1952, avec des lumières au-dessus du dôme : chacune est le reflet d'un lampadaire de la place, renvoyé à l'opposé par rapport au centre de l'image par un filtre sur l'objectif.",
-  "es": "El Capitolio de noche, julio de 1952, con luces sobre la cúpula: cada una es el reflejo de una farola de la plaza, devuelto al lado opuesto del centro de la imagen por un filtro en el objetivo.",
-  "it": "Il Campidoglio di notte, luglio 1952, con luci sopra la cupola: ognuna è il riflesso di un lampione della piazza, rimandato dalla parte opposta del centro dell'immagine da un filtro sull'obiettivo."
+  "en": "The Capitol at night, July 1952, with lights above the dome: each the ghost of a lamp standard at its foot, mirrored through the lens's axis by a filter, laid out to the photograph laid over it.",
+  "fr": "Le Capitole la nuit, juillet 1952, avec des lumières au-dessus du dôme : chacune est le reflet d'un candélabre à son pied, renvoyé à l'opposé de l'axe de l'objectif par un filtre, la scène étant calée sur la photo posée par-dessus.",
+  "es": "El Capitolio de noche, julio de 1952, con luces sobre la cúpula: cada una es el reflejo de un candelabro a su pie, devuelto al otro lado del eje del objetivo por un filtro, con la escena ajustada a la foto superpuesta.",
+  "it": "Il Campidoglio di notte, luglio 1952, con luci sopra la cupola: ognuna è il riflesso di un candelabro ai suoi piedi, rimandato dalla parte opposta dell'asse dell'obiettivo da un filtro, con la scena allineata alla foto sovrapposta."
  },
  "sources": [
   {
@@ -34,7 +34,7 @@
  "place": [
   {
    "lat": 38.88992,
-   "lng": -77.00709800101782,
+   "lng": -77.01194529262085,
    "name": "Washington, D.C."
   }
  ],
@@ -45,9 +45,35 @@
   "glass": {
    "value": "filter",
    "basis": "assumed",
-   "rationale": "The lights of the sky lie across the centre of the picture from the lamps, nearly in focus: the ghost a flat glass on the lens makes."
+   "rationale": "The lights of the sky lie across the lens's axis from the lamps, nearly in focus: the ghost a flat glass on the lens makes."
   }
  },
+ "references": [
+  {
+   "id": "capitol-1952",
+   "kind": "photo",
+   "src": "https://rr0.org/science/crypto/ufo/enquete/dossier/Washington/1952-07-Capitol_color.jpg",
+   "title": {
+    "en": "The Capitol, July 1952",
+    "fr": "Le Capitole, juillet 1952",
+    "es": "El Capitolio, julio de 1952",
+    "it": "Il Campidoglio, luglio 1952"
+   },
+   "credit": "rr0.org",
+   "creditUrl": "https://rr0.org/science/crypto/ufo/enquete/dossier/Washington/",
+   "t": 0,
+   "from": {
+    "lat": 38.88992,
+    "lng": -77.01194529262085
+   },
+   "opacity": 0.5,
+   "registration": {
+    "headingDeg": 89.49,
+    "pitchDeg": 12.37,
+    "fovDeg": 22.09
+   }
+  }
+ ],
  "weatherTrack": {
   "keyframes": [
    {
@@ -87,11 +113,11 @@
     "t": 0,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.00709800101782,
-     "elevationM": 1.6,
-     "headingDeg": 270,
-     "pitchDeg": 16,
-     "fovDeg": 46,
+     "lng": -77.01194529262085,
+     "elevationM": 0,
+     "headingDeg": 88.20154252107207,
+     "pitchDeg": 11.622916283225509,
+     "fovDeg": 30,
      "fNumber": 4
     }
    },
@@ -99,11 +125,11 @@
     "t": 12000,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.00709800101782,
-     "elevationM": 1.6,
-     "headingDeg": 270,
-     "pitchDeg": 16,
-     "fovDeg": 46,
+     "lng": -77.01194529262085,
+     "elevationM": 0,
+     "headingDeg": 88.20154252107207,
+     "pitchDeg": 11.622916283225509,
+     "fovDeg": 30,
      "fNumber": 4
     }
    }
@@ -117,10 +143,10 @@
    "t": 0,
    "label": "A",
    "note": {
-    "en": "Point at a light above the dome: it is named after the lamp below whose ghost it is, and the line drawn to it passes through the centre.",
-    "fr": "Pointez une lumière au-dessus du dôme : elle porte le nom du lampadaire dont elle est le reflet, et la ligne tracée jusqu'à lui passe par le centre.",
-    "es": "Señala una luz sobre la cúpula: lleva el nombre de la farola de abajo de la que es el reflejo, y la línea trazada hasta ella pasa por el centro.",
-    "it": "Indica una luce sopra la cupola: porta il nome del lampione di sotto di cui è il riflesso, e la linea tracciata fino a esso passa per il centro."
+    "en": "Slide the photograph in and out: each light above the dome falls on the ghost of a lamp at its foot. Point at one to see which, and the line through the lens's axis.",
+    "fr": "Faites varier l'opacité de la photo : chaque lumière au-dessus du dôme tombe sur le reflet d'un candélabre à son pied. Pointez-en une pour voir lequel, et la ligne qui passe par l'axe de l'objectif.",
+    "es": "Varía la opacidad de la foto: cada luz sobre la cúpula cae sobre el reflejo de un candelabro a su pie. Señala una para ver cuál, y la línea que pasa por el eje del objetivo.",
+    "it": "Varia l'opacità della foto: ogni luce sopra la cupola cade sul riflesso di un candelabro ai suoi piedi. Indicane una per vedere quale, e la linea che passa per l'asse dell'obiettivo."
    }
   }
  ],
@@ -134,255 +160,467 @@
     "es": "Capitolio",
     "it": "Campidoglio"
    },
-   "eastM": -170,
-   "northM": 0,
-   "headingDeg": 90,
+   "eastM": 247.3,
+   "northM": 6.7,
+   "headingDeg": 142.7,
    "sizeM": {
-    "widthM": 229,
-    "lengthM": 100,
-    "heightM": 27
+    "widthM": 367.7,
+    "lengthM": 383,
+    "heightM": 101.9
    },
-   "floors": 4,
-   "facade": {
-    "color": "#e6e0d2",
-    "plain": true
+   "model": {
+    "id": "ycpan3468-us-capitol"
    },
-   "roof": {
-    "shape": "flat",
-    "color": "#e6e0d2"
-   }
-  },
-  {
-   "id": "dome",
-   "kind": "building",
-   "title": {
-    "en": "Capitol dome",
-    "fr": "Dôme du Capitole",
-    "es": "Cúpula del Capitolio",
-    "it": "Cupola del Campidoglio"
-   },
-   "eastM": -175,
-   "northM": 0,
-   "headingDeg": 90,
-   "sizeM": {
-    "widthM": 38,
-    "lengthM": 38,
-    "heightM": 80
-   },
-   "floors": 2,
-   "facade": {
-    "color": "#e6e0d2",
-    "plain": true
-   },
-   "roof": {
-    "shape": "dome",
-    "riseM": 26,
-    "color": "#e6e0d2"
-   }
+   "track": [
+    {
+     "t": 0,
+     "eastM": 247.3,
+     "northM": 6.7,
+     "altitudeM": 0,
+     "headingDeg": 142.7
+    }
+   ]
   },
   {
    "id": "lamp-1",
    "kind": "streetlight",
-   "eastM": -110,
-   "northM": -90,
-   "headingDeg": 90,
-   "sizeM": {
-    "widthM": 0.4,
-    "lengthM": 0.4,
-    "heightM": 4.5
+   "title": {
+    "en": "Lamp standard",
+    "fr": "Candélabre",
+    "es": "Candelabro",
+    "it": "Candelabro"
    },
-   "lit": true,
-   "lamp": {
-    "lumens": 6000,
-    "colorTemperatureK": 2800
-   }
+   "eastM": 174.3,
+   "northM": -15.3,
+   "headingDeg": 270,
+   "sizeM": {
+    "widthM": 0.5,
+    "lengthM": 0.5,
+    "heightM": 7.2
+   },
+   "lit": false,
+   "lights": [
+    {
+     "id": "globe-1",
+     "offsetM": {
+      "x": -0.35,
+      "y": 7.2,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    },
+    {
+     "id": "globe-2",
+     "offsetM": {
+      "x": 0.35,
+      "y": 7.2,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    }
+   ]
   },
   {
    "id": "lamp-2",
    "kind": "streetlight",
-   "eastM": -110,
-   "northM": -60,
-   "headingDeg": 90,
-   "sizeM": {
-    "widthM": 0.4,
-    "lengthM": 0.4,
-    "heightM": 4.5
+   "title": {
+    "en": "Lamp standard",
+    "fr": "Candélabre",
+    "es": "Candelabro",
+    "it": "Candelabro"
    },
-   "lit": true,
-   "lamp": {
-    "lumens": 6000,
-    "colorTemperatureK": 2800
-   }
+   "eastM": 174.7,
+   "northM": -10.1,
+   "headingDeg": 270,
+   "sizeM": {
+    "widthM": 0.5,
+    "lengthM": 0.5,
+    "heightM": 7
+   },
+   "lit": false,
+   "lights": [
+    {
+     "id": "globe-1",
+     "offsetM": {
+      "x": -0.35,
+      "y": 7,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    },
+    {
+     "id": "globe-2",
+     "offsetM": {
+      "x": 0.35,
+      "y": 7,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    }
+   ]
   },
   {
    "id": "lamp-3",
    "kind": "streetlight",
-   "eastM": -110,
-   "northM": -30,
-   "headingDeg": 90,
-   "sizeM": {
-    "widthM": 0.4,
-    "lengthM": 0.4,
-    "heightM": 4.5
+   "title": {
+    "en": "Lamp standard",
+    "fr": "Candélabre",
+    "es": "Candelabro",
+    "it": "Candelabro"
    },
-   "lit": true,
-   "lamp": {
-    "lumens": 6000,
-    "colorTemperatureK": 2800
-   }
+   "eastM": 174.9,
+   "northM": -5.4,
+   "headingDeg": 270,
+   "sizeM": {
+    "widthM": 0.5,
+    "lengthM": 0.5,
+    "heightM": 7
+   },
+   "lit": false,
+   "lights": [
+    {
+     "id": "globe-1",
+     "offsetM": {
+      "x": -0.35,
+      "y": 7,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    },
+    {
+     "id": "globe-2",
+     "offsetM": {
+      "x": 0.35,
+      "y": 7,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    }
+   ]
   },
   {
    "id": "lamp-4",
    "kind": "streetlight",
-   "eastM": -110,
-   "northM": 30,
-   "headingDeg": 90,
-   "sizeM": {
-    "widthM": 0.4,
-    "lengthM": 0.4,
-    "heightM": 4.5
+   "title": {
+    "en": "Lamp standard",
+    "fr": "Candélabre",
+    "es": "Candelabro",
+    "it": "Candelabro"
    },
-   "lit": true,
-   "lamp": {
-    "lumens": 6000,
-    "colorTemperatureK": 2800
-   }
+   "eastM": 175,
+   "northM": -1.3,
+   "headingDeg": 270,
+   "sizeM": {
+    "widthM": 0.5,
+    "lengthM": 0.5,
+    "heightM": 6.3
+   },
+   "lit": false,
+   "lights": [
+    {
+     "id": "globe-1",
+     "offsetM": {
+      "x": -0.35,
+      "y": 6.3,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    },
+    {
+     "id": "globe-2",
+     "offsetM": {
+      "x": 0.35,
+      "y": 6.3,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    }
+   ]
   },
   {
    "id": "lamp-5",
    "kind": "streetlight",
-   "eastM": -110,
-   "northM": 60,
-   "headingDeg": 90,
-   "sizeM": {
-    "widthM": 0.4,
-    "lengthM": 0.4,
-    "heightM": 4.5
+   "title": {
+    "en": "Lamp standard",
+    "fr": "Candélabre",
+    "es": "Candelabro",
+    "it": "Candelabro"
    },
-   "lit": true,
-   "lamp": {
-    "lumens": 6000,
-    "colorTemperatureK": 2800
-   }
+   "eastM": 175,
+   "northM": 2.5,
+   "headingDeg": 270,
+   "sizeM": {
+    "widthM": 0.5,
+    "lengthM": 0.5,
+    "heightM": 6
+   },
+   "lit": false,
+   "lights": [
+    {
+     "id": "globe-1",
+     "offsetM": {
+      "x": -0.35,
+      "y": 6,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    },
+    {
+     "id": "globe-2",
+     "offsetM": {
+      "x": 0.35,
+      "y": 6,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    }
+   ]
   },
   {
    "id": "lamp-6",
    "kind": "streetlight",
-   "eastM": -110,
-   "northM": 90,
-   "headingDeg": 90,
-   "sizeM": {
-    "widthM": 0.4,
-    "lengthM": 0.4,
-    "heightM": 4.5
+   "title": {
+    "en": "Lamp standard",
+    "fr": "Candélabre",
+    "es": "Candelabro",
+    "it": "Candelabro"
    },
-   "lit": true,
-   "lamp": {
-    "lumens": 6000,
-    "colorTemperatureK": 2800
-   }
+   "eastM": 174,
+   "northM": 18.7,
+   "headingDeg": 270,
+   "sizeM": {
+    "widthM": 0.5,
+    "lengthM": 0.5,
+    "heightM": 7
+   },
+   "lit": false,
+   "lights": [
+    {
+     "id": "globe-1",
+     "offsetM": {
+      "x": -0.35,
+      "y": 7,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    },
+    {
+     "id": "globe-2",
+     "offsetM": {
+      "x": 0.35,
+      "y": 7,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    }
+   ]
   },
   {
    "id": "lamp-7",
    "kind": "streetlight",
-   "eastM": -70,
-   "northM": -55,
-   "headingDeg": 90,
-   "sizeM": {
-    "widthM": 0.4,
-    "lengthM": 0.4,
-    "heightM": 4.5
+   "title": {
+    "en": "Lamp standard",
+    "fr": "Candélabre",
+    "es": "Candelabro",
+    "it": "Candelabro"
    },
-   "lit": true,
-   "lamp": {
-    "lumens": 6000,
-    "colorTemperatureK": 2800
-   }
+   "eastM": 139.8,
+   "northM": -7.7,
+   "headingDeg": 270,
+   "sizeM": {
+    "widthM": 0.5,
+    "lengthM": 0.5,
+    "heightM": 2.6
+   },
+   "lit": false,
+   "lights": [
+    {
+     "id": "globe-1",
+     "offsetM": {
+      "x": -0.35,
+      "y": 2.6,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    },
+    {
+     "id": "globe-2",
+     "offsetM": {
+      "x": 0.35,
+      "y": 2.6,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    }
+   ]
   },
   {
    "id": "lamp-8",
    "kind": "streetlight",
-   "eastM": -70,
-   "northM": -25,
-   "headingDeg": 90,
-   "sizeM": {
-    "widthM": 0.4,
-    "lengthM": 0.4,
-    "heightM": 4.5
+   "title": {
+    "en": "Lamp standard",
+    "fr": "Candélabre",
+    "es": "Candelabro",
+    "it": "Candelabro"
    },
-   "lit": true,
-   "lamp": {
-    "lumens": 6000,
-    "colorTemperatureK": 2800
-   }
+   "eastM": 140,
+   "northM": 0.7,
+   "headingDeg": 270,
+   "sizeM": {
+    "widthM": 0.5,
+    "lengthM": 0.5,
+    "heightM": 2.8
+   },
+   "lit": false,
+   "lights": [
+    {
+     "id": "globe-1",
+     "offsetM": {
+      "x": -0.35,
+      "y": 2.8,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    },
+    {
+     "id": "globe-2",
+     "offsetM": {
+      "x": 0.35,
+      "y": 2.8,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    }
+   ]
   },
   {
    "id": "lamp-9",
    "kind": "streetlight",
-   "eastM": -70,
-   "northM": 25,
-   "headingDeg": 90,
-   "sizeM": {
-    "widthM": 0.4,
-    "lengthM": 0.4,
-    "heightM": 4.5
+   "title": {
+    "en": "Lamp standard",
+    "fr": "Candélabre",
+    "es": "Candelabro",
+    "it": "Candelabro"
    },
-   "lit": true,
-   "lamp": {
-    "lumens": 6000,
-    "colorTemperatureK": 2800
-   }
-  },
-  {
-   "id": "lamp-10",
-   "kind": "streetlight",
-   "eastM": -70,
-   "northM": 55,
-   "headingDeg": 90,
+   "eastM": 139.5,
+   "northM": 11.9,
+   "headingDeg": 270,
    "sizeM": {
-    "widthM": 0.4,
-    "lengthM": 0.4,
-    "heightM": 4.5
+    "widthM": 0.5,
+    "lengthM": 0.5,
+    "heightM": 2.6
    },
-   "lit": true,
-   "lamp": {
-    "lumens": 6000,
-    "colorTemperatureK": 2800
-   }
-  },
-  {
-   "id": "lamp-11",
-   "kind": "streetlight",
-   "eastM": -35,
-   "northM": -15,
-   "headingDeg": 90,
-   "sizeM": {
-    "widthM": 0.4,
-    "lengthM": 0.4,
-    "heightM": 4.5
-   },
-   "lit": true,
-   "lamp": {
-    "lumens": 6000,
-    "colorTemperatureK": 2800
-   }
-  },
-  {
-   "id": "lamp-12",
-   "kind": "streetlight",
-   "eastM": -35,
-   "northM": 15,
-   "headingDeg": 90,
-   "sizeM": {
-    "widthM": 0.4,
-    "lengthM": 0.4,
-    "heightM": 4.5
-   },
-   "lit": true,
-   "lamp": {
-    "lumens": 6000,
-    "colorTemperatureK": 2800
-   }
+   "lit": false,
+   "lights": [
+    {
+     "id": "globe-1",
+     "offsetM": {
+      "x": -0.35,
+      "y": 2.6,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    },
+    {
+     "id": "globe-2",
+     "offsetM": {
+      "x": 0.35,
+      "y": 2.6,
+      "z": 0
+     },
+     "color": "#ffd9a8",
+     "intensity": 1.5,
+     "radiusM": 0.2,
+     "pattern": {
+      "kind": "steady"
+     }
+    }
+   ]
   }
  ]
 }
