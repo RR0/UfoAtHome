@@ -162,6 +162,17 @@ const recording = {
         es: "Varía la opacidad de la foto: cada luz sobre la cúpula cae sobre el reflejo de un candelabro a su pie. Señala una para ver cuál, y la línea que pasa por el eje del objetivo.",
         it: "Varia l'opacità della foto: ogni luce sopra la cupola cade sul riflesso di un candelabro ai suoi piedi. Indicane una per vedere quale, e la linea che passa per l'asse dell'obiettivo."
       }
+    },
+    // MEASURED in the scene (the light of the ghosts against the scene's own under them): over the facade the ghosts add a median 3 % of its
+    // light, and the brightest of them there is 70 times fainter than those of the lamps over the sky, which outshine the black sky behind
+    // them by up to 500 times.
+    {
+      t: 6000, label: "B", note: {
+        en: "Why no lights in front of the Capitol? There are ghosts there too, of the lit dome above, sent down: but a ghost carries a thousandth of its light, spread. Measured here, they add 3 % to the lit facade, invisible; the lamps' ghosts, points on a black sky, outshine it up to 500 times.",
+        fr: "Pourquoi pas de lumières devant le Capitole ? Il y a des reflets là aussi, ceux du dôme éclairé, renvoyés vers le bas : mais un reflet porte un millième de sa lumière, étalé. Mesurés ici, ils ajoutent 3 % à la façade éclairée, invisibles ; ceux des candélabres, des points sur un ciel noir, y brillent jusqu'à 500 fois plus que lui.",
+        es: "¿Por qué no hay luces delante del Capitolio? También hay reflejos ahí, los de la cúpula iluminada, devueltos hacia abajo: pero un reflejo lleva una milésima de su luz, extendida. Medidos aquí, añaden un 3 % a la fachada iluminada, invisibles; los de los candelabros, puntos sobre un cielo negro, brillan hasta 500 veces más que él.",
+        it: "Perché nessuna luce davanti al Campidoglio? Anche lì ci sono riflessi, quelli della cupola illuminata, rimandati verso il basso: ma un riflesso porta un millesimo della sua luce, sparsa. Misurati qui, aggiungono il 3 % alla facciata illuminata, invisibili; quelli dei candelabri, punti su un cielo nero, brillano fino a 500 volte più di esso."
+      }
     }
   ],
   decor
