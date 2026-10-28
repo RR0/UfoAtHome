@@ -425,6 +425,58 @@ export class CanvasRenderer {
     ctx.restore()
   }
 
+  /**
+   * The ghosts of the lens found in the picture (see GhostFinder), where they are on it as it stands over the scene: each ghost ringed,
+   * as large as it is, and joined to its light by a dotted line through the lens's axis, its light ringed too, and the axis marked (with the
+   * picture's own centre beside it when the picture was cropped). Light strokes on dark ones, legible on any picture.
+   */
+  paintGhosts(
+    pairs: { ghost: { x: number; y: number }; ghostRadius: number; light: { x: number; y: number } }[],
+    axis?: { x: number; y: number },
+    pictureCentre?: { x: number; y: number }
+  ): void {
+    const ctx = this.ctx
+    ctx.save()
+    const stroke = (draw: () => void, colour: string, width: number, dash: number[] = []) => {
+      ctx.setLineDash(dash)
+      ctx.lineWidth = width + 2
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.6)"
+      draw()
+      ctx.lineWidth = width
+      ctx.strokeStyle = colour
+      draw()
+      ctx.setLineDash([])
+    }
+    const circle = (point: { x: number; y: number }, radius: number) => () => {
+      ctx.beginPath()
+      ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI)
+      ctx.stroke()
+    }
+    // An upright cross for the axis, a slanted one for the picture's centre.
+    const cross = (point: { x: number; y: number }, size: number, slanted: boolean) => () => {
+      const [dx, dy] = slanted ? [size, size] : [size, 0]
+      ctx.beginPath()
+      ctx.moveTo(point.x - dx, point.y - dy)
+      ctx.lineTo(point.x + dx, point.y + dy)
+      ctx.moveTo(point.x + dy, point.y - dx)
+      ctx.lineTo(point.x - dy, point.y + dx)
+      ctx.stroke()
+    }
+    for (const pair of pairs) {
+      stroke(() => {
+        ctx.beginPath()
+        ctx.moveTo(pair.ghost.x, pair.ghost.y)
+        ctx.lineTo(pair.light.x, pair.light.y)
+        ctx.stroke()
+      }, "rgba(255, 255, 255, 0.85)", 1, [4, 4])
+      stroke(circle(pair.light, 7), "#ffffff", 1.5)
+      stroke(circle(pair.ghost, Math.max(9, pair.ghostRadius)), "#ffd23f", 2)
+    }
+    if (axis) stroke(cross(axis, 8, false), "#ffd23f", 2)
+    if (pictureCentre) stroke(cross(pictureCentre, 5, true), "rgba(255, 255, 255, 0.7)", 1)
+    ctx.restore()
+  }
+
   /** Within a degree the landmark fits; within three it is worth a look; beyond, it is wrong or
    * the picture cannot fit. Unknown (a landmark still being named) reads as "worth a look". */
   static landmarkColour(residualDeg: number | undefined): string {

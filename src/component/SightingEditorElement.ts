@@ -134,6 +134,7 @@ import type { PicturePoint } from "../engine/reference/PictureRegistration.js"
 import type { PanoramaxPictures } from "../engine/reference/PanoramaxPictures.js"
 import type { StreetPicture } from "../engine/reference/PanoramaxPictures.js"
 import type { PictureFailure } from "../engine/reference/PictureFetch.js"
+import type { GhostSearch } from "../engine/reference/GhostFinder.js"
 import {
   DEFAULT_BUILDING_FLOORS,
   defaultWindows,
@@ -911,7 +912,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly findGhostsButton: HTMLButtonElement
   private searchingGhosts = false
   private readonly ghostsStatus: HTMLElement
-  private readonly ghostsCanvas: HTMLCanvasElement
+  /** The ghosts last found, in which picture (at which address): drawn on it over the scene (see paintPictureOverlay). */
+  private ghostFinding?: { referenceId: string, src: string, search: GhostSearch }
   private ghostTexts?: import("./GhostSearchView.js").GhostSearchTexts
   private readonly labelReferenceLandmarks: HTMLElement
   private readonly labelReferenceLandmarkLabel: HTMLElement
@@ -1652,7 +1654,6 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceLandmarkLabelInput = this.shadow.getElementById("referenceLandmarkLabel") as HTMLInputElement
     this.findGhostsButton = this.shadow.getElementById("reference-find-ghosts") as HTMLButtonElement
     this.ghostsStatus = this.shadow.getElementById("reference-ghosts-status")!
-    this.ghostsCanvas = this.shadow.getElementById("reference-ghosts-canvas") as HTMLCanvasElement
     this.findGhostsButton.addEventListener("click", () => void this.findGhosts())
     this.labelReferenceLandmarks = this.shadow.getElementById("label-reference-landmarks")!
     this.labelReferenceLandmarkLabel = this.shadow.getElementById("label-reference-landmark-label")!
@@ -4278,9 +4279,12 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceCreditUrlInput.value = reference.creditUrl ?? ""
     this.referenceTInput.value = reference.t === undefined ? "" : String(reference.t / 1000)
     this.referenceDrawingInput.checked = reference.drawing === true
-    // What was found in another picture says nothing of this one.
-    this.ghostsCanvas.hidden = true
-    this.ghostsStatus.textContent = ""
+    // What was found in another picture, or at another address, says nothing of this one.
+    if (this.ghostFinding && (this.ghostFinding.referenceId !== reference.id || this.ghostFinding.src !== reference.src)) {
+      this.ghostFinding = undefined
+      this.ghostsStatus.textContent = ""
+      this.ufoElement.refresh()
+    }
     this.referenceOpacityInput.value = String(reference.opacity)
     this.referenceHeadingInput.value = String(reference.registration.headingDeg)
     this.referencePitchInput.value = String(reference.registration.pitchDeg)
@@ -4814,6 +4818,30 @@ export class SightingEditorElement extends HTMLElement {
       landmarks.filter((landmark): landmark is typeof landmark & { picture: { x: number; y: number } } => landmark.picture !== undefined),
       this.landmarkHint()
     )
+    this.paintGhostFinding(renderer, reference, aspect)
+  }
+
+  /**
+   * The ghosts found in the picture (see findGhosts), drawn on it where it stands over the scene: the largest view there is, and the one
+   * where a ghost's light can be seen to be a lamp of the scene, or the sun.
+   */
+  private paintGhostFinding(renderer: CanvasRenderer, reference: SceneReference, aspect: number): void {
+    const finding = this.ghostFinding
+    if (!finding || finding.referenceId !== reference.id || finding.src !== reference.src) return
+    const { search } = finding
+    const registration = reference.registration
+    // A point of the picture as the analysis read it, on the canvas.
+    const at = (point: { x: number, y: number }) =>
+      this.canvasPointOfDirection(this.pictureRegistration!.worldDirectionOf({ u: point.x / search.width, v: point.y / search.height }, registration, aspect))
+    const pairs: { ghost: { x: number; y: number }; ghostRadius: number; light: { x: number; y: number } }[] = []
+    for (const pair of search.pairs) {
+      const ghost = at(pair.ghost), light = at(pair.light), edge = at({ x: pair.ghost.x + pair.ghost.radius, y: pair.ghost.y })
+      if (!ghost || !light) continue
+      pairs.push({ ghost, light, ghostRadius: edge ? Math.hypot(edge.x - ghost.x, edge.y - ghost.y) : 0 })
+    }
+    const axis = search.centre ? at(search.centre) : undefined
+    const pictureCentre = search.cropped ? at({ x: search.width / 2, y: search.height / 2 }) : undefined
+    renderer.paintGhosts(pairs, axis, pictureCentre)
   }
 
   /**
@@ -9127,7 +9155,9 @@ export class SightingEditorElement extends HTMLElement {
     this.syncFindGhosts(reference)
     try {
       const { GhostSearchView } = await import("./GhostSearchView.js")
-      await new GhostSearchView(this.ghostsCanvas, this.ghostsStatus, this.ghostTexts).search(reference.src)
+      const search = await new GhostSearchView(this.ghostsStatus, this.ghostTexts).search(reference.src)
+      this.ghostFinding = search ? { referenceId: reference.id, src: reference.src, search } : undefined
+      this.ufoElement.refresh()
     } finally {
       this.searchingGhosts = false
       this.syncFindGhosts(this.currentReference())

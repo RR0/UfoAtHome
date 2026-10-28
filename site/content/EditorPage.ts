@@ -596,7 +596,8 @@ if (docs) {
       <p><strong>Look for ghosts</strong> searches the selected picture for the ghosts of the lens: the
         faint copies of a bright light that a lens's glass sends back, each on the far side of the
         lens's axis from its light, as far from it, whatever its shape: a point, a lamp's large pale
-        disc, a lit front upside down. Each ghost found is ringed and joined to its light by a dotted
+        disc, a lit front upside down. Each ghost found is ringed on the picture, where it stands over
+        the scene (so a ghost's light can be seen to be a lamp of it), and joined to its light by a dotted
         line through the axis; the sentence under it says how many, and how sure: a single small one
         can be chance, several on one axis, or one whose whole shape matches its light's, hardly. A
         ghost whose light is outside the picture (the Moon just out of frame) cannot be told from it. When that axis is not the picture's
@@ -1098,7 +1099,8 @@ if (docs) {
         l'objectif : les copies pâles d'une lumière vive que renvoie le verre de l'objectif, chacune de
         l'autre côté de l'axe de l'objectif par rapport à sa lumière, à la même distance, quelle que soit
         sa forme : un point, le grand disque pâle d'un lampadaire, une façade éclairée retournée. Chaque
-        reflet trouvé est cerclé et relié à sa lumière par un pointillé qui passe par l'axe ; la phrase
+        reflet trouvé est cerclé sur la photo, là où elle se tient sur la scène (on voit ainsi que la lumière
+        d'un reflet est un lampadaire du décor), et relié à sa lumière par un pointillé qui passe par l'axe ; la phrase
         dessous dit combien, et avec quelle certitude : un seul petit peut être un hasard, plusieurs sur
         un même axe, ou un dont toute la forme correspond à celle de sa lumière, guère. Le reflet d'une
         lumière hors de l'image (la Lune juste hors cadre) ne peut pas être reconnu d'après elle. Quand cet axe n'est pas le centre de l'image, la photo a été recadrée. La photo
@@ -1588,7 +1590,8 @@ if (docs) {
         las copias tenues de una luz intensa que devuelve el cristal del objetivo, cada una al otro lado
         del eje del objetivo respecto de su luz, a la misma distancia, sea cual sea su forma: un punto,
         el gran disco pálido de una farola, una fachada iluminada invertida. Cada reflejo encontrado se
-        rodea con un círculo y se une a su luz con una línea de puntos que pasa por el eje; la frase de
+        rodea con un círculo sobre la foto, allí donde está sobre la escena (se ve así que la luz de un reflejo
+        es una farola del decorado), y se une a su luz con una línea de puntos que pasa por el eje; la frase de
         debajo dice cuántos, y con qué certeza: uno solo y pequeño puede ser casualidad, varios sobre un
         mismo eje, o uno cuya forma entera coincide con la de su luz, difícilmente. El reflejo de una
         luz fuera de la imagen (la Luna justo fuera del encuadre) no puede reconocerse a partir de ella. Cuando ese eje no es el centro de la imagen, la foto fue recortada. La
@@ -2082,7 +2085,8 @@ if (docs) {
         le copie tenui di una luce intensa che il vetro dell'obiettivo rimanda, ciascuna dall'altra
         parte dell'asse dell'obiettivo rispetto alla sua luce, alla stessa distanza, qualunque sia la sua
         forma: un punto, il grande disco pallido di un lampione, una facciata illuminata capovolta. Ogni
-        riflesso trovato viene cerchiato e unito alla sua luce da una linea tratteggiata che passa per
+        riflesso trovato viene cerchiato sulla foto, là dove sta sulla scena (si vede così che la luce di un
+        riflesso è un lampione della scenografia), e unito alla sua luce da una linea tratteggiata che passa per
         l'asse; la frase sotto dice quanti, e con quale certezza: uno solo e piccolo può essere un caso,
         più d'uno sullo stesso asse, o uno la cui forma intera corrisponde a quella della sua luce,
         difficilmente. Il riflesso di una luce fuori dall'immagine (la Luna appena fuori campo) non può
