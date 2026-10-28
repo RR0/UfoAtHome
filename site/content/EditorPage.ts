@@ -303,7 +303,7 @@ if (docs) {
         through</strong> says what was in front of the lens (a filter, a window, a windscreen, each adding a ghost or a twin of every light),
         and <strong>Drops on the glass</strong>, <strong>Condensation</strong> and <strong>Dirt</strong> (0 to 1) what was on that glass,
         each scattering a halo round every light. Left blank, the drops follow the rain or snow of the weather, unless <strong>Sheltered
-        from the rain</strong> is ticked. Pointing at a ghost in the picture names the light it comes from and draws the way to it.</p>
+        from the rain</strong> is ticked. Pointing at a ghost in the picture names the light it comes from and draws the way to it; with Alt held, a drop on the glass names itself rather than what is behind it.</p>
     </div>
 
     <div class="group-doc">
@@ -769,7 +769,7 @@ if (docs) {
         chacun ajoutant un reflet ou un double de chaque lumière), et <strong>Gouttes sur le verre</strong>, <strong>Buée</strong> et
         <strong>Saleté</strong> (de 0 à 1) ce qu'il y avait sur ce verre, chacun diffusant un halo autour de chaque lumière. Laissées vides,
         les gouttes suivent la pluie ou la neige de la météo, sauf si <strong>À l'abri de la pluie</strong> est coché. Pointer un reflet
-        dans l'image nomme la lumière dont il vient et trace le chemin jusqu'à elle.</p>
+        dans l'image nomme la lumière dont il vient et trace le chemin jusqu'à elle ; Alt enfoncé, une goutte sur le verre se nomme elle-même plutôt que ce qui est derrière.</p>
     </div>
 
     <div class="group-doc">
@@ -1260,7 +1260,7 @@ if (docs) {
         uno con un reflejo o un doble de cada luz), y <strong>Gotas en el cristal</strong>, <strong>Vaho</strong> y <strong>Suciedad</strong>
         (de 0 a 1) qué había sobre ese cristal, cada uno con un halo alrededor de cada luz. Vacías, las gotas siguen la lluvia o la nieve del
         tiempo, salvo si se marca <strong>A cubierto de la lluvia</strong>. Señalar un reflejo en la imagen nombra la luz de la que viene y
-        traza el camino hasta ella.</p>
+        traza el camino hasta ella; con Alt pulsado, una gota en el cristal se nombra a sí misma en lugar de lo que hay detrás.</p>
     </div>
 
     <div class="group-doc">
@@ -1743,7 +1743,7 @@ if (docs) {
         con un riflesso o un doppio di ogni luce), e <strong>Gocce sul vetro</strong>, <strong>Condensa</strong> e <strong>Sporco</strong>
         (da 0 a 1) cosa c'era su quel vetro, ognuno con un alone attorno a ogni luce. Vuote, le gocce seguono la pioggia o la neve del meteo,
         salvo se è spuntato <strong>Al riparo dalla pioggia</strong>. Indicare un riflesso nell'immagine nomina la luce da cui viene e
-        traccia il percorso fino a essa.</p>
+        traccia il percorso fino a essa; tenendo premuto Alt, una goccia sul vetro nomina se stessa invece di ciò che c'è dietro.</p>
     </div>
 
     <div class="group-doc">

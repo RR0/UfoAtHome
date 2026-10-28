@@ -533,7 +533,8 @@ export class SceneElement extends HTMLElement {
     }
     const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1
     const ndcY = -(((event.clientY - rect.top) / rect.height) * 2 - 1)
-    const pick = this.pickAt(ndcX, ndcY)
+    // With Alt, what the pointer is on includes the drops on the glass: a wet glass would otherwise answer for everything behind it.
+    const pick = this.pickAt(ndcX, ndcY, true, event.altKey)
     if (pick) this.showHoverTooltip(event, event.altKey && pick.detail ? pick.detail() : pick.name)
     else this.hoverTooltip.hidden = true
     this.showGhostPath(pick?.path, rect)
@@ -580,11 +581,12 @@ export class SceneElement extends HTMLElement {
    * interpretation gives it, then a decor object, a railway, an aircraft of the air traffic, a satellite and last a star — a shape is painted over
    * all of these, and is looked for by whoever asks (see handlePointerMove) before this.
    */
-  pickAt(ndcX: number, ndcY: number, ghosts = true): ScenePick | undefined {
+  pickAt(ndcX: number, ndcY: number, ghosts = true, drops = false): ScenePick | undefined {
     const naming = this.naming
     const names = naming.names
-    // A drop on the glass the picture is taken through: nearer than anything of the scene, which it deforms.
-    if (ghosts && this.sceneRenderer.pickDropAt(ndcX, ndcY)) {
+    // A drop on the glass the picture is taken through, when asked for: nearer than anything of the scene, which it deforms, but on a wet
+    // glass everywhere, so that it is looked for only on demand (Alt held, see handlePointerMove).
+    if (drops && this.sceneRenderer.pickDropAt(ndcX, ndcY)) {
       const texts = names?.ghostTooltip ?? GHOST_TOOLTIP
       const name = texts.drop[this.ufoElement.sighting.lens?.glass ?? "lens"]
       return { kind: "drop", name, detail: () => texts.dropDetail.replace("{name}", name) }
