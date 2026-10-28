@@ -59,10 +59,29 @@ describe("GhostFinder", () => {
   it("finds nothing in a picture whose faint spots line up with no light", () => {
     const search = GhostFinder.find(picture(800, 600, [
       ...lamps.map(lamp => ({ ...lamp, peak: 255, radius: 3 })),
-      { x: 90, y: 60, peak: 80, radius: 1.5 }, { x: 610, y: 140, peak: 70, radius: 1.5 }
+      // Far from where any lamp mirrors through the centre (the top middle of the picture).
+      { x: 90, y: 400, peak: 80, radius: 1.5 }, { x: 720, y: 140, peak: 70, radius: 1.5 }
     ]))
     expect(search.confidence).toBe("none")
     expect(search.pairs).toHaveLength(0)
+  })
+
+  it("takes the ghost of the sun alone, as bright as the sun but far smaller, in a lit sky and off a cropped picture's centre", () => {
+    // A sunset: a bright sky, the sun low in it, and its ghost, saturated too, where the sun mirrors through an axis 5 % of the diagonal
+    // off the picture's centre (a crop), with a lit building's windows below.
+    const width = 800, height = 600, axis = { x: 445, y: 265 }, sun = { x: 405, y: 390 }
+    const pixels = picture(width, height, [
+      { ...sun, peak: 255, radius: 22 },
+      { x: 2 * axis.x - sun.x, y: 2 * axis.y - sun.y, peak: 255, radius: 4 },
+      ...[120, 200, 280, 520, 600, 680].map(x => ({ x, y: 520, peak: 90, radius: 2 }))
+    ])
+    for (let i = 0; i < width * height; i++) if (i < width * 450 && pixels.data[i * 4] < 110) pixels.data[i * 4] = pixels.data[i * 4 + 1] = pixels.data[i * 4 + 2] = 110
+    const search = GhostFinder.find(pixels)
+    expect(search.confidence).toBe("low")
+    expect(search.pairs).toHaveLength(1)
+    expect(search.centre!.x).toBeCloseTo(axis.x, -1)
+    expect(search.centre!.y).toBeCloseTo(axis.y, -1)
+    expect(search.cropped).toBe(true)
   })
 
   it("takes one ghost alone only when it lies across the picture's own centre", () => {

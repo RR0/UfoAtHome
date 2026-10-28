@@ -61,8 +61,8 @@ export class GhostSearchView {
   private sentence(search: GhostSearch): string {
     const count = String(search.pairs.length)
     if (search.confidence === "none") return this.texts.none
-    if (search.confidence === "low") return this.texts.low.replace("{count}", count)
-    const found = search.scale === -1 ? this.texts.found.replace("{count}", count)
+    const found = search.confidence === "low" ? this.texts.low.replace("{count}", count)
+      : search.scale === -1 ? this.texts.found.replace("{count}", count)
       : this.texts.foundScaled.replace("{count}", count).replace("{scale}", (search.scale ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 }))
     return search.cropped ? `${found} ${this.texts.cropped}` : found
   }
