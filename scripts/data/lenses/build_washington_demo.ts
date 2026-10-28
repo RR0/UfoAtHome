@@ -3,15 +3,16 @@
  * later as a picture of the "Washington carousel" (rr0.org's case file, which has the photograph and the matching of its lights).
  *
  * Every light in the sky of the photograph lies on a line from one of the lamps at its foot, through the same point of the picture, and as
- * far beyond it: each is the ghost of a lamp, mirrored through the lens's axis. MEASURED on the photograph (344 x 286 px as rr0.org has it):
- * that point is at (155.5, 152.5), not the picture's centre, so the picture is a crop; and each light of the sky, mirrored through it, lands
- * on a lamp at the foot within a few pixels for seven of the nine (the other two on no visible lamp, hidden or lost in the lit windows).
+ * far beyond it: each is the ghost of a lamp, mirrored through the lens's axis. MEASURED on the photograph (a 2000 x 1322 px scan): the
+ * eleven lights of its sky and the globes at its foot, fitted together, put that point at (864.5, 678.5), not the picture's centre (so even
+ * this scan is a crop), and the ghosts at exactly -1 times their lamp's offset from it (4.8 px rms over ten of them: the eleventh's lamp is
+ * lost in the lit facade).
  * Each light of the sky is a horizontal pair of points: the lamps of the Capitol's grounds are standards of several globes, two of which
  * stand side by side seen from the front, and a ghost this sharp shows them both. A ghost mirrored through the axis and nearly in focus is
  * the one a flat glass on the lens makes (a filter sends back the image the film reflects): the camera is given one.
  *
- * The scene is laid out to the photograph, laid over it: the dome's size in it (some 2.9 px a metre) and a standpoint 250 m west of it, on
- * the lawn below the west front, give the focal length (733 px); the lens's axis is where the ghosts say it is; and each lamp stands on the
+ * The scene is laid out to the photograph, laid over it: the dome's size in it (some 13 px a metre) and a standpoint 250 m west of it, on
+ * the lawn below the west front, give the focal length (3274 px); the lens's axis is where the ghosts say it is; and each lamp stands on the
  * line of sight of its own image in the photograph, at the foot of the west front's terraces, as high as its image is above the axis.
  *
  * ASSUMED: the night and the hour (the photograph is undated beyond "July 1952"), the standpoint's distance, the camera, the filter, how far
@@ -26,7 +27,8 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "public", "demo-data", "sky-test-washington-capitol.json")
-const PHOTO = "https://rr0.org/science/crypto/ufo/enquete/dossier/Washington/1952-07-Capitol_color.jpg"
+/** The photograph, at 2000 x 1322 px: a scan wider and finer than rr0.org's 344 x 286 crop of it, hosted beside the demo. */
+const PHOTO = "/demo-data/washington-capitol-1952.jpg"
 const DURATION_S = 12
 const why = "Assumed: the photograph is undated beyond July 1952, and its photographer, camera and standpoint are unknown."
 const stone = "#e6e0d2"
@@ -38,9 +40,11 @@ const METRES_PER_DEG_LNG = 111320 * Math.cos(DOME.lat * Math.PI / 180)
 const OBSERVER = { lat: DOME.lat, lng: DOME.lng - DISTANCE_M / METRES_PER_DEG_LNG }
 
 /** The photograph, as measured on it: its size, the lens's axis in it, and its focal length in its own pixels (see above). */
-const PICTURE = { width: 344, height: 286, axis: { u: 155.5, v: 152.5 }, focalPx: 2.93 * DISTANCE_M }
+// The focal length: the dome's size in the photograph (some 13 px a metre in this scan) at the standpoint's distance, which is what the
+// ghosts matched in both scans (this one 4.467 times finer than rr0.org's, where the dome was 2.93 px a metre) give.
+const PICTURE = { width: 2000, height: 1322, axis: { u: 864.5, v: 678.5 }, focalPx: 4.467 * 2.93 * DISTANCE_M }
 /** The statue atop the dome, in the photograph, and how high it stands above the ground at the standpoint, m (from TERRAIN below). */
-const DOME_TOP = { u: 178.5, v: 15 }
+const DOME_TOP = { u: 979.5, v: 29 }
 
 /**
  * What the relief of the scene puts under each place, metres above the ground at the standpoint: MEASURED in the scene once (its relief, as
@@ -52,8 +56,9 @@ const MODEL_SHIFT = { eastM: 0, northM: 0, altitudeM: 0 }
 
 /** Each light of the sky of the photograph, and the row of lamps its own lamp stands in (0 the balustrade, farther; 1 the walks, nearer). */
 const GHOSTS: { u: number, v: number, row: 0 | 1 }[] = [
-  { u: 68, v: 73, row: 0 }, { u: 90, v: 72, row: 0 }, { u: 110, v: 72, row: 0 }, { u: 127, v: 69, row: 0 }, { u: 143, v: 68, row: 0 },
-  { u: 211, v: 72, row: 0 }, { u: 92, v: 51, row: 1 }, { u: 136, v: 52, row: 1 }, { u: 195, v: 51, row: 1 }
+  { u: 481.1, v: 306.8, row: 0 }, { u: 578.4, v: 306.6, row: 0 }, { u: 668.6, v: 306.6, row: 0 }, { u: 758.5, v: 306.9, row: 0 },
+  { u: 848.8, v: 306.4, row: 0 }, { u: 1119.8, v: 307.3, row: 0 }, { u: 747.3, v: 291.8, row: 0 }, { u: 818.8, v: 291.8, row: 0 },
+  { u: 590, v: 212.8, row: 1 }, { u: 791.2, v: 219.3, row: 1 }, { u: 1051.6, v: 212.8, row: 1 }
 ]
 /** How far each row of lamps is from the standpoint, m: the west front's balustrade, and the walks at the foot of its terraces. */
 const ROW_DISTANCE_M = [175, 140]
