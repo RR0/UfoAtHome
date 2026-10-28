@@ -601,7 +601,7 @@ if (docs) {
         line through the axis; the sentence under it says how many, and how sure: a single small one
         can be chance, several on one axis, or one whose whole shape matches its light's, hardly. A
         ghost whose light is outside the picture (the Moon just out of frame) cannot be told from it. When that axis is not the picture's
-        centre, the picture was cropped. The picture must be readable: a file of yours always is, an
+        centre, the picture was cropped. <strong>Hide ghosts</strong> takes them off the scene, to see the picture under them, and <strong>Show ghosts</strong> brings them back. The picture must be readable: a file of yours always is, an
         address only if its site allows it. The search, and what it needs, are loaded only when you
         ask for it, as is everything that handles pictures: a recording without any loads none.</p>
       <p><strong>Investigator's lines (KML, KMZ)</strong> reads a Google Earth file and adds what it
@@ -1103,7 +1103,7 @@ if (docs) {
         d'un reflet est un lampadaire du décor), et relié à sa lumière par un pointillé qui passe par l'axe ; la phrase
         dessous dit combien, et avec quelle certitude : un seul petit peut être un hasard, plusieurs sur
         un même axe, ou un dont toute la forme correspond à celle de sa lumière, guère. Le reflet d'une
-        lumière hors de l'image (la Lune juste hors cadre) ne peut pas être reconnu d'après elle. Quand cet axe n'est pas le centre de l'image, la photo a été recadrée. La photo
+        lumière hors de l'image (la Lune juste hors cadre) ne peut pas être reconnu d'après elle. Quand cet axe n'est pas le centre de l'image, la photo a été recadrée. <strong>Masquer les reflets</strong> les retire de la scène, pour voir la photo dessous, et <strong>Afficher les reflets</strong> les remet. La photo
         doit être lisible : un fichier à vous l'est toujours, une adresse seulement si son site le
         permet. La recherche, et ce dont elle a besoin, ne sont chargées que si vous la demandez, comme
         tout ce qui traite les photos : un enregistrement qui n'en a aucune n'en charge rien.</p>
@@ -1594,7 +1594,7 @@ if (docs) {
         es una farola del decorado), y se une a su luz con una línea de puntos que pasa por el eje; la frase de
         debajo dice cuántos, y con qué certeza: uno solo y pequeño puede ser casualidad, varios sobre un
         mismo eje, o uno cuya forma entera coincide con la de su luz, difícilmente. El reflejo de una
-        luz fuera de la imagen (la Luna justo fuera del encuadre) no puede reconocerse a partir de ella. Cuando ese eje no es el centro de la imagen, la foto fue recortada. La
+        luz fuera de la imagen (la Luna justo fuera del encuadre) no puede reconocerse a partir de ella. Cuando ese eje no es el centro de la imagen, la foto fue recortada. <strong>Ocultar reflejos</strong> los quita de la escena, para ver la foto debajo, y <strong>Mostrar reflejos</strong> los vuelve a poner. La
         foto debe poder leerse: un archivo propio siempre puede, una dirección solo si su sitio lo
         permite. La búsqueda, y lo que necesita, solo se cargan si la pide, como todo lo que trata las
         fotos: una grabación que no tiene ninguna no carga nada de ello.</p>
@@ -2091,7 +2091,7 @@ if (docs) {
         più d'uno sullo stesso asse, o uno la cui forma intera corrisponde a quella della sua luce,
         difficilmente. Il riflesso di una luce fuori dall'immagine (la Luna appena fuori campo) non può
         essere riconosciuto a partire da essa. Quando quell'asse non è il centro dell'immagine, la foto è stata
-        ritagliata. La foto deve essere leggibile: un file vostro lo è sempre, un indirizzo solo se il
+        ritagliata. <strong>Nascondi i riflessi</strong> li toglie dalla scena, per vedere la foto sotto, e <strong>Mostra i riflessi</strong> li rimette. La foto deve essere leggibile: un file vostro lo è sempre, un indirizzo solo se il
         suo sito lo consente. La ricerca, e ciò che le serve, vengono caricate solo se la chiedete, come
         tutto ciò che tratta le foto: una registrazione che non ne ha nessuna non ne carica nulla.</p>
       <p><strong>Tracciati dell'investigatore (KML, KMZ)</strong> legge un file Google Earth e aggiunge ciò

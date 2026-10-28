@@ -61,6 +61,9 @@ export interface SightingLabels {
   referenceGhostsLow: string
   referenceGhostsNone: string
   referenceGhostsCropped: string
+  /** What hides the ghosts found from the scene, and shows them again. */
+  referenceGhostsHide: string
+  referenceGhostsShow: string
   /** What the picture was taken through besides the lens, and what was on that glass — see LensStateJson. */
   lensGlass: string
   lensGlassNone: string

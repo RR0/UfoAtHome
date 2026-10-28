@@ -637,6 +637,7 @@ export const html = `
          ghost of and the lens's axis they lie across. Loaded only when asked for (see GhostSearchView). -->
     <h3 class="section-title"><span id="label-reference-ghosts">Ghosts in the picture</span></h3>
     <button id="reference-find-ghosts" type="button">Look for ghosts</button>
+    <button id="reference-ghosts-shown" type="button" aria-pressed="true" hidden>Hide ghosts</button>
     <span id="reference-ghosts-status" class="apparent-size"></span>
     </div>
     </div>

@@ -28,6 +28,8 @@ export const sightingLabels_en: SightingLabels = {
   referenceGhostsLow: "Perhaps {count} ghost(s): too few to be sure.",
   referenceGhostsNone: "No ghost found: no faint spot lies across one point from a light.",
   referenceGhostsCropped: "The lens's axis is off the picture's centre: the picture was cropped.",
+  referenceGhostsHide: "Hide ghosts",
+  referenceGhostsShow: "Show ghosts",
   lensGlass: "Taken through",
   lensGlassNone: "the lens alone",
   lensGlassFilter: "a filter on the lens",

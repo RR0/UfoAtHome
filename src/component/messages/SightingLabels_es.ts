@@ -28,6 +28,8 @@ export const sightingLabels_es: SightingLabels = {
   referenceGhostsLow: "Quizá {count} reflejo(s): demasiado pocos para estar seguro.",
   referenceGhostsNone: "Ningún reflejo encontrado: ninguna mancha débil está al otro lado de una luz respecto a un mismo punto.",
   referenceGhostsCropped: "El eje del objetivo está desplazado del centro de la imagen: la foto fue recortada.",
+  referenceGhostsHide: "Ocultar reflejos",
+  referenceGhostsShow: "Mostrar reflejos",
   lensGlass: "A través de",
   lensGlassNone: "el objetivo solo",
   lensGlassFilter: "un filtro en el objetivo",

@@ -28,6 +28,8 @@ export const sightingLabels_fr: SightingLabels = {
   referenceGhostsLow: "Peut-être {count} reflet(s) : trop peu pour être sûr.",
   referenceGhostsNone: "Aucun reflet trouvé : aucune tache faible n'est à l'opposé d'une lumière par rapport à un même point.",
   referenceGhostsCropped: "L'axe de l'objectif est décalé du centre de l'image : la photo a été recadrée.",
+  referenceGhostsHide: "Masquer les reflets",
+  referenceGhostsShow: "Afficher les reflets",
   lensGlass: "À travers",
   lensGlassNone: "l'objectif seul",
   lensGlassFilter: "un filtre sur l'objectif",

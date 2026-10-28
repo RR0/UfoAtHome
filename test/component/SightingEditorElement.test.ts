@@ -3035,6 +3035,32 @@ describe("SightingEditorElement canvas mode", () => {
     }
   })
 
+  it("hides the ghosts found from the scene, and shows them again, with a toggle that is there only once some were found", async () => {
+    const { GhostSearchView } = await import("../../src/component/GhostSearchView.js")
+    const found = { width: 100, height: 80, lights: [], spots: [], confidence: "low" as const, centre: { x: 50, y: 40 }, scale: -1,
+      pairs: [{ ghost: { x: 30, y: 20, peak: 200, contrast: 100, background: 20, radius: 2, color: [200, 200, 200] as [number, number, number] },
+        light: { x: 70, y: 60, peak: 255, contrast: 200, background: 20, radius: 3, color: [255, 255, 255] as [number, number, number] }, residualPx: 0 }] }
+    const search = vi.spyOn(GhostSearchView.prototype, "search").mockResolvedValue(found)
+    try {
+      const element = mount()
+      element.sightingData = withPicture()
+      open(element, "group-reference")
+      const toggle = element.shadowRoot!.getElementById("reference-ghosts-shown") as HTMLButtonElement
+      expect(toggle.hidden).toBe(true)
+      element.shadowRoot!.getElementById("reference-find-ghosts")!.click()
+      await vi.waitFor(() => expect(toggle.hidden).toBe(false))
+      expect(toggle.textContent).toBe("Hide ghosts")
+      expect(toggle.getAttribute("aria-pressed")).toBe("true")
+      toggle.click()
+      expect(toggle.textContent).toBe("Show ghosts")
+      expect(toggle.getAttribute("aria-pressed")).toBe("false")
+      toggle.click()
+      expect(toggle.textContent).toBe("Hide ghosts")
+    } finally {
+      search.mockRestore()
+    }
+  })
+
   it("turns the observer, not the picture, when the drag starts outside the picture", async () => {
     const element = mount()
     element.sightingData = withPicture()

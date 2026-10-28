@@ -914,6 +914,9 @@ export class SightingEditorElement extends HTMLElement {
   private readonly ghostsStatus: HTMLElement
   /** The ghosts last found, in which picture (at which address): drawn on it over the scene (see paintPictureOverlay). */
   private ghostFinding?: { referenceId: string, src: string, search: GhostSearch }
+  /** Whether the ghosts found are drawn over the scene: the reader may hide them to see the picture under them, and show them again. */
+  private ghostsShown = true
+  private readonly ghostsShownButton: HTMLButtonElement
   private readonly labelReferenceLandmarks: HTMLElement
   private readonly labelReferenceLandmarkLabel: HTMLElement
   private readonly referenceAdoptPoseButton: HTMLButtonElement
@@ -1654,6 +1657,12 @@ export class SightingEditorElement extends HTMLElement {
     this.findGhostsButton = this.shadow.getElementById("reference-find-ghosts") as HTMLButtonElement
     this.ghostsStatus = this.shadow.getElementById("reference-ghosts-status")!
     this.findGhostsButton.addEventListener("click", () => void this.findGhosts())
+    this.ghostsShownButton = this.shadow.getElementById("reference-ghosts-shown") as HTMLButtonElement
+    this.ghostsShownButton.addEventListener("click", () => {
+      this.ghostsShown = !this.ghostsShown
+      this.syncGhostsShown()
+      this.ufoElement.refresh()
+    })
     this.labelReferenceLandmarks = this.shadow.getElementById("label-reference-landmarks")!
     this.labelReferenceLandmarkLabel = this.shadow.getElementById("label-reference-landmark-label")!
     this.referenceAdoptPoseButton = this.shadow.getElementById("reference-adopt-pose") as HTMLButtonElement
@@ -4282,6 +4291,7 @@ export class SightingEditorElement extends HTMLElement {
     if (this.ghostFinding && (this.ghostFinding.referenceId !== reference.id || this.ghostFinding.src !== reference.src)) {
       this.ghostFinding = undefined
       this.ghostsStatus.textContent = ""
+      this.syncGhostsShown()
       this.ufoElement.refresh()
     }
     this.referenceOpacityInput.value = String(reference.opacity)
@@ -4826,7 +4836,7 @@ export class SightingEditorElement extends HTMLElement {
    */
   private paintGhostFinding(renderer: CanvasRenderer, reference: SceneReference, aspect: number): void {
     const finding = this.ghostFinding
-    if (!finding || finding.referenceId !== reference.id || finding.src !== reference.src) return
+    if (!finding || !this.ghostsShown || finding.referenceId !== reference.id || finding.src !== reference.src) return
     const { search } = finding
     const registration = reference.registration
     // A point of the picture as the analysis read it, on the canvas.
@@ -9162,12 +9172,23 @@ export class SightingEditorElement extends HTMLElement {
         low: messages.referenceGhostsLow, none: messages.referenceGhostsNone, cropped: messages.referenceGhostsCropped
       }
       const search = await new GhostSearchView(this.ghostsStatus, texts).search(reference.src)
-      this.ghostFinding = search ? { referenceId: reference.id, src: reference.src, search } : undefined
+      this.ghostFinding = search && search.pairs.length > 0 ? { referenceId: reference.id, src: reference.src, search } : undefined
+      // A new search shows what it found.
+      this.ghostsShown = true
+      this.syncGhostsShown()
       this.ufoElement.refresh()
     } finally {
       this.searchingGhosts = false
       this.syncFindGhosts(this.currentReference())
     }
+  }
+
+  /** The toggle of the ghosts found: there only when some were, saying what a click does, in the current language (never only when the
+   * messages are applied: English, the template's own, is not — see loadLocaleMessages). */
+  private syncGhostsShown(): void {
+    this.ghostsShownButton.hidden = !this.ghostFinding
+    this.ghostsShownButton.setAttribute("aria-pressed", String(this.ghostsShown))
+    this.ghostsShownButton.textContent = this.ghostsShown ? this.messages.referenceGhostsHide : this.messages.referenceGhostsShow
   }
 
   /**
@@ -10636,6 +10657,7 @@ export class SightingEditorElement extends HTMLElement {
     this.label("label-lens-glass", messages.lensGlass)
     this.label("label-reference-ghosts", messages.referenceGhosts)
     this.findGhostsButton.textContent = messages.referenceFindGhosts
+    this.syncGhostsShown()
     this.label("lens-glass-none", messages.lensGlassNone)
     this.label("lens-glass-filter", messages.lensGlassFilter)
     this.label("lens-glass-window", messages.lensGlassWindow)
