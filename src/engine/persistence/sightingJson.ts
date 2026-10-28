@@ -1,4 +1,5 @@
 import type { RecordingSource } from "../model/RecordingSource.js"
+import type { LensStateJson } from "../instrument/LensGhost.js"
 import type { RecordingIssue } from "./RecordingIssue.js"
 import type { ObserverVehicle } from "../model/Vehicle.js"
 import { Sighting } from "../model/Sighting.js"
@@ -116,6 +117,8 @@ export interface SightingRecordingJson {
   /** The speed of the film or sensor this picture was taken on — see Sighting.iso. Absent means the
    * device's own (Instrument.medium). */
   iso?: number
+  /** See Sighting.lens. */
+  lens?: LensStateJson
   /** How bright the night sky is at the place, towns and all: the zenith of a moonless night in
    * magnitudes per square arcsecond, a Sky Quality Meter's reading or the World Atlas's "SQM" figure
    * (Falchi et al. 2016) — see Sighting.lightPollution. 22.0 is a natural sky. Absent means a natural sky. */
@@ -193,6 +196,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     instrument: sighting.instrumentId,
     exposureSeconds: sighting.exposureSeconds,
     iso: sighting.iso,
+    lens: sighting.lens,
     lightPollution: sighting.lightPollution,
     observerMap: sighting.observerMap,
     interpretation: sighting.interpretation,
@@ -269,6 +273,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.sources = json.sources
   sighting.sway = json.sway
   sighting.iso = json.iso
+  sighting.lens = json.lens
   sighting.lightPollution = json.lightPollution
   sighting.observerMap = json.observerMap
   sighting.vehicle = json.vehicle

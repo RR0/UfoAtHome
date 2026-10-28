@@ -10,7 +10,10 @@
  * car. The night is chosen for the Moon: on 3 January 2026 at 19:00 (UTC+1) it is full, 16 degrees up in the east-north-east, in the same
  * frame as the crossroads. Computed by the engine: the Moon, the lights' light, the ghosts.
  *
- * Writes ../../../public/demo-data/sky-test-lens-ghosts.json. Run with `node --import tsx`.
+ * And the same crossroads filmed through a car's windscreen in the rain: every light doubled by the pane, haloed by the drops on it and a
+ * little condensation, the rain itself (and the windscreen, the drops' strength) ASSUMED as the rest.
+ *
+ * Writes ../../../public/demo-data/sky-test-lens-ghosts.json and sky-test-lens-ghosts-windscreen.json. Run with `node --import tsx`.
  */
 import { writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
@@ -134,3 +137,55 @@ const recording = {
 }
 writeFileSync(OUT, JSON.stringify(recording, null, 1) + "\n")
 console.log(`→ ${OUT}`)
+
+const wet = {
+  ...recording,
+  id: "sky-test-lens-ghosts-windscreen",
+  summaryTime: 42,
+  description: {
+    en: "The same crossroads filmed through a car's windscreen in the rain: every light doubled by the pane, and haloed by the drops on it.",
+    fr: "Le même carrefour filmé à travers le pare-brise d'une voiture sous la pluie : chaque lumière doublée par la vitre, et auréolée par les gouttes.",
+    es: "El mismo cruce filmado a través del parabrisas de un coche bajo la lluvia: cada luz duplicada por el cristal, y con un halo por las gotas.",
+    it: "Lo stesso incrocio filmato attraverso il parabrezza di un'auto sotto la pioggia: ogni luce raddoppiata dal vetro, e aureolata dalle gocce."
+  },
+  lens: { glass: "windscreen", condensation: { value: 0.1, basis: "assumed", rationale: why } },
+  weatherTrack: {
+    keyframes: [{
+      t: 0,
+      weather: {
+        cloudCover: { value: 1, basis: "assumed", rationale: why },
+        cloudDarkness: 0.6, cloudBaseM: 800, lowerCloudCover: 1, highCloudCover: 0,
+        precipitationType: "rain", precipitationIntensity: { value: 0.5, basis: "assumed", rationale: why }, windDirectionDeg: 0, windSpeed: 3, storm: false
+      }
+    }]
+  },
+  milestones: [
+    {
+      t: 0, label: "A", note: {
+        en: "Through the windscreen, every light has a twin just above it: the light that bounced between the two faces of the slanted glass.",
+        fr: "À travers le pare-brise, chaque lumière a un double juste au-dessus : la lumière renvoyée entre les deux faces du verre incliné.",
+        es: "A través del parabrisas, cada luz tiene un doble justo encima: la luz devuelta entre las dos caras del cristal inclinado.",
+        it: "Attraverso il parabrezza, ogni luce ha un doppio appena sopra: la luce rimandata tra le due facce del vetro inclinato."
+      }
+    },
+    {
+      t: 15000, label: "B", note: {
+        en: "The drops on the glass break each light's halo into blotches, which stay where the drops are when the view turns.",
+        fr: "Les gouttes sur le verre morcellent le halo de chaque lumière en taches, qui restent là où sont les gouttes quand la vue tourne.",
+        es: "Las gotas sobre el cristal rompen el halo de cada luz en manchas, que se quedan donde están las gotas cuando la vista gira.",
+        it: "Le gocce sul vetro spezzano l'alone di ogni luce in macchie, che restano dove sono le gocce quando la vista gira."
+      }
+    },
+    {
+      t: 27000, label: "C", note: {
+        en: "A car's headlights: two blazing blotches and their twins, with the lens's own ghosts high on the other side of the centre.",
+        fr: "Les phares d'une voiture : deux taches éclatantes et leurs doubles, avec les reflets de l'objectif haut de l'autre côté du centre.",
+        es: "Los faros de un coche: dos manchas deslumbrantes y sus dobles, con los reflejos del objetivo arriba al otro lado del centro.",
+        it: "I fari di un'auto: due macchie abbaglianti e i loro doppi, con i riflessi dell'obiettivo in alto dall'altra parte del centro."
+      }
+    }
+  ]
+}
+const WET_OUT = OUT.replace("sky-test-lens-ghosts.json", "sky-test-lens-ghosts-windscreen.json")
+writeFileSync(WET_OUT, JSON.stringify(wet, null, 1) + "\n")
+console.log(`→ ${WET_OUT}`)

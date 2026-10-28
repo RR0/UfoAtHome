@@ -1,3 +1,4 @@
+import type { LensStateJson } from "../engine/instrument/LensGhost.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 import { RecordingText } from "../engine/persistence/RecordingText.js"
 import { setupCloudEditor } from "./CloudEditor.js"
@@ -528,6 +529,12 @@ export class SightingEditorElement extends HTMLElement {
   private readonly pitchInput: HTMLInputElement
   private readonly rollInput: HTMLInputElement
   private readonly swayInput: HTMLInputElement
+  /** What the picture was taken through, and what was on that glass — see Sighting.lens. */
+  private readonly lensGlassSelect: HTMLSelectElement
+  private readonly lensDropsInput: HTMLInputElement
+  private readonly lensCondensationInput: HTMLInputElement
+  private readonly lensDirtInput: HTMLInputElement
+  private readonly lensShelteredInput: HTMLInputElement
   private readonly lightPollutionInput: HTMLInputElement
   private readonly lightPollutionStatusText: HTMLElement
   private readonly lightPollutionSourceRow: HTMLElement
@@ -1270,6 +1277,11 @@ export class SightingEditorElement extends HTMLElement {
     this.pitchInput = this.shadow.getElementById("pitch") as HTMLInputElement
     this.rollInput = this.shadow.getElementById("roll") as HTMLInputElement
     this.swayInput = this.shadow.getElementById("sway") as HTMLInputElement
+    this.lensGlassSelect = this.shadow.getElementById("lens-glass") as HTMLSelectElement
+    this.lensDropsInput = this.shadow.getElementById("lens-drops") as HTMLInputElement
+    this.lensCondensationInput = this.shadow.getElementById("lens-condensation") as HTMLInputElement
+    this.lensDirtInput = this.shadow.getElementById("lens-dirt") as HTMLInputElement
+    this.lensShelteredInput = this.shadow.getElementById("lens-sheltered") as HTMLInputElement
     this.lightPollutionInput = this.shadow.getElementById("lightPollution") as HTMLInputElement
     this.lightPollutionStatusText = this.shadow.getElementById("light-pollution-status-text")!
     this.lightPollutionSourceRow = this.shadow.getElementById("light-pollution-source-row")!
@@ -1740,6 +1752,10 @@ export class SightingEditorElement extends HTMLElement {
       this.ufoElement.sighting.sway = this.numberOrUndefined(this.swayInput.value)
       this.ufoElement.refresh()
     })
+    // A value of the whole recording too: the glass in front and what is on it. Blank fields state nothing (and blank drops follow the rain).
+    for (const field of [this.lensGlassSelect, this.lensDropsInput, this.lensCondensationInput, this.lensDirtInput, this.lensShelteredInput]) {
+      field.addEventListener(field instanceof HTMLSelectElement || field.type === "checkbox" ? "change" : "input", () => this.updateLens())
+    }
     // A value of the place, not of a pose: the towns do not move during an observation. Blank is a
     // natural sky.
     // Typed, it is the author's and no record replaces it; emptied, it is the atlas's to answer again.
@@ -5786,6 +5802,12 @@ export class SightingEditorElement extends HTMLElement {
     this.showTags()
     this.instrumentSelect.value = sighting.instrument.id
     this.swayInput.value = sighting.sway?.toString() ?? ""
+    const lens = sighting.lens
+    this.lensGlassSelect.value = lens?.glass ?? ""
+    this.lensDropsInput.value = lens?.drops?.toString() ?? ""
+    this.lensCondensationInput.value = lens?.condensation?.toString() ?? ""
+    this.lensDirtInput.value = lens?.dirt?.toString() ?? ""
+    this.lensShelteredInput.checked = lens?.sheltered === true
     this.lightPollutionInput.value = sighting.lightPollution?.toString() ?? ""
   }
 
@@ -7772,6 +7794,10 @@ export class SightingEditorElement extends HTMLElement {
       this.exposureInput.value = exposure === undefined ? "" : SightingEditorElement.exposureText(exposure)
     }
     this.setRowVisible(this.exposureInput, instrument.exposureSeconds !== undefined)
+    // Glass in front and what is on it lay ghosts over a picture a device records: an eye has none to show.
+    for (const field of [this.lensGlassSelect, this.lensDropsInput, this.lensCondensationInput, this.lensDirtInput, this.lensShelteredInput]) {
+      this.setRowVisible(field, instrument.medium !== undefined)
+    }
     this.exposureInput.disabled = instrument.exposureRangeSeconds === undefined
 
     // Only ever askable of something that can be focused at all, which is to say something with a
@@ -9032,6 +9058,27 @@ export class SightingEditorElement extends HTMLElement {
    * heading) rather than just disabling it — a building's Occupied floor row, or a tree's whole
    * Windows group, isn't merely irrelevant right now, it's a field that doesn't apply to this
    * kind at all and would be confusing left visible-but-grayed-out. */
+  /** Writes what the lens fields say onto the recording: undefined when they say nothing at all. */
+  private updateLens(): void {
+    const glass = this.lensGlassSelect.value as NonNullable<LensStateJson["glass"]> | ""
+    const lens: LensStateJson = {
+      ...(glass ? { glass } : {}),
+      drops: this.numberOrUndefined(this.lensDropsInput.value),
+      condensation: this.numberOrUndefined(this.lensCondensationInput.value),
+      dirt: this.numberOrUndefined(this.lensDirtInput.value),
+      ...(this.lensShelteredInput.checked ? { sheltered: true } : {})
+    }
+    for (const key of ["drops", "condensation", "dirt"] as const) if (lens[key] === undefined) delete lens[key]
+    this.ufoElement.sighting.lens = Object.keys(lens).length > 0 ? lens : undefined
+    this.ufoElement.refresh()
+  }
+
+  /** Sets the text of an element of the editor by its id. */
+  private label(id: string, text: string): void {
+    const element = this.shadow.getElementById(id)
+    if (element) element.textContent = text
+  }
+
   private setRowVisible(field: HTMLElement, visible: boolean): void {
     const row = field.closest("label") ?? field
     ;(row as HTMLElement).hidden = !visible
@@ -10463,6 +10510,19 @@ export class SightingEditorElement extends HTMLElement {
     this.labelRoll.textContent = messages.roll
     this.labelSway.textContent = messages.sway
     this.swayInput.title = messages.swayTitle
+    this.label("label-lens-glass", messages.lensGlass)
+    this.label("lens-glass-none", messages.lensGlassNone)
+    this.label("lens-glass-filter", messages.lensGlassFilter)
+    this.label("lens-glass-window", messages.lensGlassWindow)
+    this.label("lens-glass-windscreen", messages.lensGlassWindscreen)
+    this.label("label-lens-drops", messages.lensDrops)
+    this.lensDropsInput.title = messages.lensDropsTitle
+    this.label("label-lens-condensation", messages.lensCondensation)
+    this.lensCondensationInput.title = messages.lensCondensationTitle
+    this.label("label-lens-dirt", messages.lensDirt)
+    this.lensDirtInput.title = messages.lensDirtTitle
+    this.label("label-lens-sheltered", messages.lensSheltered)
+    this.lensShelteredInput.title = messages.lensShelteredTitle
     this.labelLightPollution.textContent = messages.lightPollution
     this.lightPollutionInput.title = messages.lightPollutionTitle
     this.syncLightPollutionStatus()

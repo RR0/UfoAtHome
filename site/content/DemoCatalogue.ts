@@ -508,6 +508,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "lens-ghosts-windscreen",
+          src: "/demo-data/sky-test-lens-ghosts-windscreen.json",
+          title: { en: "Through a wet windscreen", fr: "À travers un pare-brise mouillé", es: "A través de un parabrisas mojado", it: "Attraverso un parabrezza bagnato" },
+          blurb: {
+            en: "The same crossroads in the rain, filmed from behind a windscreen: every light doubled by the slanted pane, its halo broken into blotches by the drops. Point at one to see what light it comes from.",
+            fr: "Le même carrefour sous la pluie, filmé derrière un pare-brise : chaque lumière doublée par la vitre inclinée, son halo morcelé par les gouttes. Pointez-en un pour voir de quelle lumière il vient.",
+            es: "El mismo cruce bajo la lluvia, filmado tras un parabrisas: cada luz duplicada por el cristal inclinado, su halo roto en manchas por las gotas. Señala uno para ver de qué luz viene.",
+            it: "Lo stesso incrocio sotto la pioggia, filmato dietro un parabrezza: ogni luce raddoppiata dal vetro inclinato, il suo alone spezzato in macchie dalle gocce. Indicane uno per vedere da quale luce viene."
+          }
+        },
+        {
           id: "csg2",
           src: "/demo-data/observer-csg2-nassau.json",
           // The case, for the player: the same upper stage at its launch and at its end, an hour and a half and 2 500 km apart.

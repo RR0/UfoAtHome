@@ -29,6 +29,11 @@ export const html = `
     <p id="scene-busy-note" class="scene-loader-note"></p>
   </div>
   <div id="ufo-slot"></div>
+  <!-- The way from a ghost of the lens pointed at to its light (see SceneElement.showGhostPath): drawn over the picture, never in the
+       way of the pointer. -->
+  <svg id="ghost-path" class="ghost-path" hidden aria-hidden="true">
+    <line class="ghost-path-halo"/><line class="ghost-path-line"/><circle class="ghost-path-centre" r="3"/><circle class="ghost-path-source" r="9"/>
+  </svg>
   <div id="hover-tooltip" class="hover-tooltip" hidden></div>
   <button id="credits-button" class="credits-btn" type="button" popovertarget="credits-panel" aria-label="Credits" title="Credits">©</button>
   <div id="credits-panel" class="credits-panel" popover>
@@ -334,6 +339,40 @@ export const css = `
    identification label (celestial body or decor object name — see SceneElement.
    handlePointerMove), not part of the rendered sky itself, so it sits above everything else and
    ignores pointer events (it must never itself be what a hover/click lands on). */
+.ghost-path {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+.ghost-path[hidden] {
+  display: none;
+}
+/* Over a picture that may be any colour: a light dotted line on a dark one, legible on a night sky as on a lit street. */
+.ghost-path-halo {
+  stroke: rgba(0, 0, 0, 0.55);
+  stroke-width: 3;
+}
+.ghost-path-line {
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+.ghost-path-centre {
+  fill: rgba(255, 255, 255, 0.9);
+  stroke: rgba(0, 0, 0, 0.55);
+}
+.ghost-path-source {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 1.5;
+}
+.stage.minified .ghost-path {
+  display: none !important;
+}
 .hover-tooltip {
   position: absolute;
   z-index: 1;

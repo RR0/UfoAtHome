@@ -2,6 +2,7 @@ import type { OpticsFeatureId } from "../../engine/atmosphere/HaloFeatures.js"
 import type { DecorKind } from "../../engine/model/Decor.js"
 import type { RailwayKind } from "../../render3d/terrain/RailwayProvider.js"
 import { Compass } from "../../engine/astronomy/Compass.js"
+import type { GhostCause } from "../../engine/instrument/LensGhost.js"
 
 /**
  * What the things a scene and its catalogues hold are CALLED, for one language other than English.
@@ -108,6 +109,8 @@ export interface SceneNames {
    * let go it is), {distance} from the eye and {height} in km.
    */
   readonly plumeTooltip: { readonly name: string; readonly detail: string; readonly ascent: string; readonly burn: string; readonly vent: string }
+  /** What is said of a ghost of the lens pointed at: see GhostTooltipTexts. */
+  readonly ghostTooltip: GhostTooltipTexts
   /** What an optical feature of the ice display says when pointed at, by feature, as "name — explanation": the name alone is the tooltip, the whole of it is what Alt adds. {angle} is a ring's radius. */
   readonly opticsTooltips: Readonly<Record<OpticsFeatureId, string>>
   /** What is said of an aircraft pointed at: see TrafficTooltip. */
@@ -179,4 +182,27 @@ export class SceneNaming {
   towards(azimuthDeg: number): string {
     return Compass.towards(azimuthDeg, this.names)
   }
+}
+
+/**
+ * The words of the label of a ghost of the lens pointed at (see SceneElement.ghostPick): what kind of ghost it is and, as {name}, what light
+ * makes it — or `unnamed` for a light the scene cannot name — and with Alt why it is there ({cause}) and where, against its light ({where}).
+ */
+export interface GhostTooltipTexts {
+  /** An image the glass reflects: "Ghost: {name}". */
+  readonly ghost: string
+  /** Light scattered round its light by what is on the glass: "Halo: {name}". */
+  readonly halo: string
+  /** A twin of its light from a pane of glass in front: "Double: {name}". */
+  readonly double: string
+  readonly unnamed: string
+  /** "{name}. {cause}, {where}." */
+  readonly detail: string
+  readonly causes: Readonly<Record<GhostCause, string>>
+  /** Across the centre of the picture from its light. */
+  readonly opposite: string
+  /** On the same side of the centre as its light, nearer to or further from it. */
+  readonly sameSide: string
+  /** Round its light, or just beside it. */
+  readonly around: string
 }

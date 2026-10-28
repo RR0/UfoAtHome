@@ -155,6 +155,18 @@ export const sceneNames_it: SceneNames = {
   decorTooltip: "{name} — {size}, a {distance}",
   satelliteTooltip: "{name} — satellite, mag {mag}, a {height} km di quota",
   plumeTooltip: { name: "Scia di razzo", detail: "{name} — {part}, a {distance}, a {height} km di quota", ascent: "scarico dell'ascesa", burn: "scarico di un'accensione", vent: "propellenti scaricati" },
+  ghostTooltip: {
+    ghost: "Riflesso: {name}", halo: "Alone: {name}", double: "Doppio: {name}", unnamed: "una luce",
+    detail: "{name}. {cause}, {where}.",
+    causes: {
+      lens: "Riflesso tra due superfici dell'obiettivo", sensor: "Riflesso del sensore rimandato dal suo vetro protettivo",
+      filter: "Riflesso del sensore rimandato dal filtro", glass: "Riflesso tra le due facce del vetro davanti all'obiettivo",
+      drops: "Luce diffusa dalle gocce sul vetro", condensation: "Luce diffusa dalla condensa sul vetro",
+      dirt: "Luce diffusa dallo sporco sul vetro"
+    },
+    opposite: "dall'altra parte del centro dell'immagine rispetto alla luce", sameSide: "dallo stesso lato del centro della luce",
+    around: "attorno alla luce"
+  },
   opticsTooltips: {
     halo22: "Alone di 22° — un anello attorno al Sole, dovuto alla luce deviata da cristalli di ghiaccio esagonali nei cirri; il bordo interno è rosso, a 21,7°",
     halo46: "Alone di 46° — un anello più raro e debole: la luce entra da una faccia laterale del cristallo ed esce da una faccia di estremità",

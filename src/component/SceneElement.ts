@@ -52,7 +52,7 @@ import type { SightingRecordingJson } from "../engine/persistence/sightingJson.j
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { loadSceneNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
-import { SceneNaming } from "./messages/SceneNames.js"
+import { SceneNaming, type GhostTooltipTexts } from "./messages/SceneNames.js"
 import { RailwayTooltip } from "./RailwayTooltip.js"
 import { ScenePoster } from "./ScenePoster.js"
 import { OPTICS_TOOLTIPS_EN } from "./messages/OpticsTooltips.js"
@@ -167,6 +167,16 @@ const DECOR_TOOLTIP = "{name} — {size}, {distance} away"
 const SATELLITE_TOOLTIP = "{name} — satellite, mag {mag}, {height} km up"
 
 /** What is said of a rocket's plume pointed at: see SceneNames.plumeTooltip. */
+const GHOST_TOOLTIP: GhostTooltipTexts = {
+  ghost: "Ghost: {name}", halo: "Halo: {name}", double: "Double: {name}", unnamed: "a light",
+  detail: "{name}. {cause}, {where}.",
+  causes: {
+    lens: "A reflection between two surfaces of the lens", sensor: "The sensor's reflection, sent back by its cover glass",
+    filter: "The sensor's reflection, sent back by the filter", glass: "A reflection between the two faces of the glass in front of the lens",
+    drops: "Light scattered by drops on the glass", condensation: "Light scattered by condensation on the glass", dirt: "Light scattered by dirt on the glass"
+  },
+  opposite: "across the centre of the picture from the light", sameSide: "on the same side of the centre as the light", around: "round the light"
+}
 const PLUME_TOOLTIP = { name: "Rocket plume", detail: "{name} — {part}, {distance} away, {height} km up", ascent: "exhaust of the ascent", burn: "exhaust of an engine burn", vent: "vented propellant" }
 
 /** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */import { Headlights } from "../engine/model/Headlights.js"
@@ -304,12 +314,14 @@ export interface BodyReading {
  */
 /** What is under a point of the picture: what kind of thing, which one, and what it is called. */
 export interface ScenePick {
-  kind: "sky" | "body" | "decor" | "beam" | "railway" | "traffic" | "plume" | "satellite" | "optics" | "star"
+  kind: "sky" | "body" | "decor" | "beam" | "ghost" | "railway" | "traffic" | "plume" | "satellite" | "optics" | "star"
   /** The sky body's key, the interpretation body's id or the decor object's id, when it has one. */
   id?: string
   name: string
   /** What the hover tooltip says in addition to the name while Alt is held: a decor object's size and distance. Asked for only then: measuring costs, and most hovers do not want it. */
   detail?: () => string
+  /** For a ghost of the lens: where it is and where its light is, in normalised device coordinates — what the path drawn between them joins. */
+  path?: { from: { x: number, y: number }, to: { x: number, y: number } }
 }
 
 export class SceneElement extends HTMLElement {
@@ -346,6 +358,8 @@ export class SceneElement extends HTMLElement {
   readonly ufoElement: UfoElement
   private readonly sceneRenderer: SceneRenderer
   private readonly hoverTooltip: HTMLElement
+  /** The way from a ghost of the lens pointed at to its light — see showGhostPath. */
+  private readonly ghostPath: SVGSVGElement
   /** Whether the loader's black screen is up: what is under it is not to be looked at, named or captioned yet. */
   private holding = false
   private resizeObserver?: ResizeObserver
@@ -520,6 +534,38 @@ export class SceneElement extends HTMLElement {
     const pick = this.pickAt(ndcX, ndcY)
     if (pick) this.showHoverTooltip(event, event.altKey && pick.detail ? pick.detail() : pick.name)
     else this.hoverTooltip.hidden = true
+    this.showGhostPath(pick?.path, rect)
+  }
+
+  /**
+   * Draws the way from a ghost of the lens pointed at to the light that makes it (see pickAt): a dotted line from one to the other, through
+   * the centre of the picture they lie on either side of, the centre marked and the light circled — the geometry that tells a ghost from a
+   * light, shown on the picture itself. Hidden when the pointer is on anything else.
+   */
+  private showGhostPath(path: ScenePick["path"], canvasRect: DOMRect): void {
+    if (!path) {
+      this.ghostPath.toggleAttribute("hidden", true)
+      return
+    }
+    const stage = this.stageElement.getBoundingClientRect()
+    const toStage = (point: { x: number, y: number }) => ({
+      x: canvasRect.left - stage.left + (point.x + 1) / 2 * canvasRect.width,
+      y: canvasRect.top - stage.top + (1 - point.y) / 2 * canvasRect.height
+    })
+    const from = toStage(path.from), to = toStage(path.to), centre = toStage({ x: 0, y: 0 })
+    this.ghostPath.setAttribute("viewBox", `0 0 ${stage.width} ${stage.height}`)
+    const [line, halo, mark, source] = Array.from(this.ghostPath.children) as SVGElement[]
+    for (const stroke of [line, halo]) {
+      stroke.setAttribute("x1", String(from.x))
+      stroke.setAttribute("y1", String(from.y))
+      stroke.setAttribute("x2", String(to.x))
+      stroke.setAttribute("y2", String(to.y))
+    }
+    mark.setAttribute("cx", String(centre.x))
+    mark.setAttribute("cy", String(centre.y))
+    source.setAttribute("cx", String(to.x))
+    source.setAttribute("cy", String(to.y))
+    this.ghostPath.toggleAttribute("hidden", false)
   }
 
   /**
@@ -532,7 +578,7 @@ export class SceneElement extends HTMLElement {
    * interpretation gives it, then a decor object, a railway, an aircraft of the air traffic, a satellite and last a star — a shape is painted over
    * all of these, and is looked for by whoever asks (see handlePointerMove) before this.
    */
-  pickAt(ndcX: number, ndcY: number): ScenePick | undefined {
+  pickAt(ndcX: number, ndcY: number, ghosts = true): ScenePick | undefined {
     const naming = this.naming
     const names = naming.names
     const bodyKey = this.sceneRenderer.pickBodyAt(ndcX, ndcY)
@@ -556,6 +602,9 @@ export class SceneElement extends HTMLElement {
         detail: () => `${name} (${beam.wavelengthNm} nm, ${beam.powerW.toLocaleString()} W), ${this.distanceText(beamHit.distanceM)}`
       }
     }
+    // A ghost of the lens, laid over whatever is behind it: a disc in the sky where nothing is, named after the light that makes it.
+    const ghost = ghosts ? this.ghostPick(ndcX, ndcY) : undefined
+    if (ghost) return ghost
     const decorId = this.pickDecorAt(ndcX, ndcY)
     const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
     if (decor) {
@@ -623,6 +672,65 @@ export class SceneElement extends HTMLElement {
       }
     }
     return undefined
+  }
+
+  /**
+   * The ghost of the lens under a point of the picture (see SceneRenderer.pickGhostAt), named by what it is (a ghost, a halo, a double) and
+   * by the light that makes it, as the pointer would name that light; with Alt why it is there and where, against its light.
+   */
+  private ghostPick(ndcX: number, ndcY: number): ScenePick | undefined {
+    const hit = this.sceneRenderer.pickGhostAt(ndcX, ndcY)
+    if (!hit) return undefined
+    const texts = this.naming.names?.ghostTooltip ?? GHOST_TOOLTIP
+    // The light is where the picture is brightest, which a lamp's small head, or a light seen as its glare, may only nearly cover: looked for
+    // a few pixels round it too.
+    const canvas = this.ufoElement.canvasElement
+    const step = { x: 8 / Math.max(1, canvas.clientWidth), y: 8 / Math.max(1, canvas.clientHeight) }
+    // Nearest first, out to some 30 pixels; a star only when nothing else is there, the pointer being generous with stars and a lamp's
+    // head small.
+    const offsets: [number, number][] = []
+    for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) offsets.push([dx, dy])
+    offsets.sort((a, b) => Math.hypot(...a) - Math.hypot(...b))
+    let light: ScenePick | undefined, star: ScenePick | undefined
+    for (const [dx, dy] of offsets) {
+      const found = this.pickAt(hit.source.x + dx * step.x, hit.source.y + dy * step.y, false)
+      if (found?.kind === "star") star ??= found
+      else if (found) {
+        light = found
+        break
+      }
+    }
+    // A light of the decor too far to be hit at all: the nearest of those that shine whose outline on the screen is within reach.
+    light ??= this.shiningDecorNear(hit.source.x, hit.source.y, 6 * Math.max(step.x, step.y))
+    light ??= star
+    // A star's label carries its magnitude and height: its name is what comes before them.
+    const lightName = (light?.kind === "star" ? light.name.split(" — ")[0] : light?.name) ?? texts.unnamed
+    const ghost = hit.ghost
+    const template = LensGhosts.scatters(ghost) ? texts.halo : ghost.cause === "glass" ? texts.double : texts.ghost
+    const name = template.replace("{name}", lightName)
+    const where = ghost.scale < 0 ? texts.opposite : ghost.scale === 1 ? texts.around : texts.sameSide
+    return {
+      kind: "ghost", id: light?.id, name,
+      detail: () => texts.detail.replace("{name}", name).replace("{cause}", texts.causes[ghost.cause ?? "lens"]).replace("{where}", where),
+      path: { from: { x: ndcX, y: ndcY }, to: hit.source }
+    }
+  }
+
+  /** The decor object that gives light (a streetlight, a traffic light, a lit vehicle, anything with lamps) whose outline on the screen
+   * comes nearest a point, within `reachNdc`; none when none does. */
+  private shiningDecorNear(ndcX: number, ndcY: number, reachNdc: number): ScenePick | undefined {
+    let best: { distance: number, pick: ScenePick } | undefined
+    for (const decor of this.ufoElement.sighting.decor) {
+      const shines = decor.kind === "streetlight" || decor.kind === "trafficlight" || (decor.lights?.length ?? 0) > 0 || (decor.kind === "vehicle" && decor.lit)
+      if (!shines) continue
+      const box = this.sceneRenderer.decorScreenBox(decor.id)
+      if (!box) continue
+      const distance = Math.hypot(Math.max(box.minX - ndcX, 0, ndcX - box.maxX), Math.max(box.minY - ndcY, 0, ndcY - box.maxY))
+      if (distance > reachNdc || (best && distance >= best.distance)) continue
+      const name = this.said.read(decor.title) || this.naming.decorKind(decor.kind, DECOR_KIND_NAMES[decor.kind])
+      best = { distance, pick: { kind: "decor", id: decor.id, name } }
+    }
+    return best?.pick
   }
 
   /** The plume of a launch under a point of the picture, by the launch's name, and what part of it with Alt (see pickAt). */
@@ -772,6 +880,7 @@ export class SceneElement extends HTMLElement {
 
   private readonly handlePointerLeave = () => {
     this.hoverTooltip.hidden = true
+    this.ghostPath.toggleAttribute("hidden", true)
     this.sceneRenderer.setCompassHovered(false)
   }
 
@@ -905,6 +1014,7 @@ export class SceneElement extends HTMLElement {
       this.applyHold()
     }
     this.hoverTooltip = this.shadow.getElementById("hover-tooltip")!
+    this.ghostPath = this.shadow.getElementById("ghost-path") as unknown as SVGSVGElement
 
     // Created imperatively rather than left inline in the template markup — see
     // SightingEditorElement's constructor for why (an inline tag parsed from
@@ -1784,8 +1894,11 @@ export class SceneElement extends HTMLElement {
     // And how the picture answers it: a film's own curve at the exposure it was given, not an
     // eye's adapting response (see RecordingMedium).
     this.sceneRenderer.setMedium(sighting.instrument.medium, sighting.exposure, pose?.fNumber ?? sighting.instrument.fNumber, sighting.iso)
-    // And the ghosts its glass lays over every light of the picture, when it records one (see LensGhost).
-    this.sceneRenderer.setLensGhosts(LensGhosts.of(sighting.instrument))
+    // And the ghosts its glass lays over every light of the picture, when it records one, at the aperture it is set to, with those of what
+    // it was taken through and the halos of what is on that glass — the drops of the rain falling now among them (see LensGhosts.optics).
+    const lensWeather = resolveWeatherAt(sighting, t)
+    this.sceneRenderer.setLensGhosts(LensGhosts.optics(sighting.instrument, pose?.fNumber ?? sighting.instrument.fNumber, sighting.lens, lensWeather,
+      pose && { headingDeg: pose.headingDeg ?? 0, pitchDeg: pose.pitchDeg, windFromDeg: lensWeather.windDirectionDeg, windSpeedMS: lensWeather.windSpeed }, t / 1000))
     // And how the observer's own vision bends what an eye receives of it (see ObserverProvider).
     this.sceneRenderer.setPerception(ObserverProviders.perceptionOf(sighting.account?.observerPerception))
     // What the observer's own legs are doing to their eye between two recorded positions — nothing

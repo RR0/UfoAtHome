@@ -158,6 +158,18 @@ export const sceneNames_es: SceneNames = {
   decorTooltip: "{name} — {size}, a {distance}",
   satelliteTooltip: "{name} — satélite, mag {mag}, a {height} km de altitud",
   plumeTooltip: { name: "Estela de cohete", detail: "{name} — {part}, a {distance}, a {height} km de altitud", ascent: "escape del ascenso", burn: "escape de un encendido", vent: "propelentes purgados" },
+  ghostTooltip: {
+    ghost: "Reflejo: {name}", halo: "Halo: {name}", double: "Doble: {name}", unnamed: "una luz",
+    detail: "{name}. {cause}, {where}.",
+    causes: {
+      lens: "Reflejo entre dos superficies del objetivo", sensor: "Reflejo del sensor devuelto por su vidrio protector",
+      filter: "Reflejo del sensor devuelto por el filtro", glass: "Reflejo entre las dos caras del cristal delante del objetivo",
+      drops: "Luz difundida por las gotas sobre el cristal", condensation: "Luz difundida por el vaho sobre el cristal",
+      dirt: "Luz difundida por la suciedad sobre el cristal"
+    },
+    opposite: "al otro lado del centro de la imagen respecto a la luz", sameSide: "del mismo lado del centro que la luz",
+    around: "alrededor de la luz"
+  },
   opticsTooltips: {
     halo22: "Halo de 22° — un anillo alrededor del Sol, por luz desviada en cristales de hielo hexagonales de los cirros; su borde interior es rojo, a 21,7°",
     halo46: "Halo de 46° — un anillo más raro y débil: la luz entra por una cara lateral del cristal y sale por una cara del extremo",

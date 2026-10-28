@@ -52,6 +52,20 @@ export interface SightingLabels {
   /** How much the body holding the instrument moves the view at rest — see Sighting.sway. */
   sway: string
   swayTitle: string
+  /** What the picture was taken through besides the lens, and what was on that glass — see LensStateJson. */
+  lensGlass: string
+  lensGlassNone: string
+  lensGlassFilter: string
+  lensGlassWindow: string
+  lensGlassWindscreen: string
+  lensDrops: string
+  lensDropsTitle: string
+  lensCondensation: string
+  lensCondensationTitle: string
+  lensDirt: string
+  lensDirtTitle: string
+  lensSheltered: string
+  lensShelteredTitle: string
   /** The zenith of a moonless night at the place, mag/arcsec² — see Sighting.lightPollution. */
   lightPollution: string
   lightPollutionTitle: string

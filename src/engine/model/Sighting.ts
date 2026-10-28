@@ -1,4 +1,5 @@
 import { DurationText } from "./DurationText.js"
+import type { LensStateJson } from "../instrument/LensGhost.js"
 import type { ObserverVehicle } from "./Vehicle.js"
 import { Timeline } from "./Timeline.js"
 import { ObserverTrack } from "./ObserverTrack.js"
@@ -525,6 +526,12 @@ export class Sighting {
    * Instrument.medium); meaningless for an eye. Not readonly, same reasoning as account above.
    */
   iso?: number
+  /**
+   * What the picture was taken through besides the lens (a filter, a window, a windscreen) and what was on that glass (drops, condensation,
+   * dirt): what lays more ghosts and halos over every light of it — see LensStateJson. Nothing when absent, but the drops the rain or snow of
+   * the recording leaves on an unsheltered glass. Meaningless for an eye.
+   */
+  lens?: LensStateJson
 
   /**
    * The vehicle the observer was in, when it is not drawn — see ObserverVehicle. Heard from inside,

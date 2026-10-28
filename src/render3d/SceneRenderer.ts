@@ -104,8 +104,8 @@ import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
 import type { PointLayerHost } from "./PointLayerPass.js"
 import { DepthOfFieldPass } from "./DepthOfFieldPass.js"
 import { FinishPass } from "./FinishPass.js"
-import { GhostPass } from "./GhostPass.js"
-import type { LensGhost } from "../engine/instrument/LensGhost.js"
+import { GhostPass, type GhostHit } from "./GhostPass.js"
+import { LensGhosts, type LensOptics } from "../engine/instrument/LensGhost.js"
 import { EYE_UNIFORMS, type UnfinishedFrame } from "./colorSpace.js"
 import { Perceptions, type Perception } from "../engine/observer/Perception.js"
 import { AdaptiveResolution } from "./AdaptiveResolution.js"
@@ -1342,7 +1342,7 @@ export class SceneRenderer {
   private finishPass?: FinishPass
   /** The ghosts of the instrument's lens, laid over every picture it takes — see setLensGhosts. */
   private ghostPass?: GhostPass
-  private lensGhosts: readonly LensGhost[] = []
+  private ghostOptics: LensOptics = LensGhosts.NONE
   /** The film a long pose is added up on — built the first time a recording states an exposure long
    * enough for the sky to move a pixel, which is a rare and deliberate thing (see ExposureAccumulation). */
   private exposureAccumulation?: ExposureAccumulation
@@ -4682,7 +4682,7 @@ export class SceneRenderer {
         // Drawn as light, then finished with the lens's ghosts over it (see GhostPass).
         this.exposureSubjectBounds = []
         this.renderOnce(ghosts.frame)
-        ghosts.develop(this.renderer, ghosts.frame, this.lensGhosts)
+        ghosts.develop(this.renderer, ghosts.frame, this.ghostOptics)
         this.onMapSubjectBounds?.(this.exposureSubjectBounds)
       } else {
         this.renderOnce()
@@ -5426,7 +5426,7 @@ export class SceneRenderer {
     this.applyMedium()
     const gain = this.exposureInstants / this.exposureInstantsDone
     const ghosts = this.usableGhostPass()
-    if (ghosts && this.exposureAccumulation) ghosts.develop(this.renderer, this.exposureAccumulation.developed, this.lensGhosts, gain)
+    if (ghosts && this.exposureAccumulation) ghosts.develop(this.renderer, this.exposureAccumulation.developed, this.ghostOptics, gain)
     else this.exposureAccumulation?.develop(this.renderer, gain)
     this.onMapSubjectBounds?.(this.exposureSubjectBounds)
     if (!this.compassSprites.some(sprite => sprite.visible)) return
@@ -5569,21 +5569,30 @@ export class SceneRenderer {
   }
 
   /**
-   * States the ghosts the instrument's lens lays over its pictures (see LensGhost): none for an eye, which then finishes its pictures as it
-   * always has.
+   * States the ghosts the instrument's lens lays over its pictures, and the halos of what is on its glass (see LensGhosts.optics): none for
+   * an eye, which then finishes its pictures as it always has.
    */
-  setLensGhosts(ghosts: readonly LensGhost[]): void {
-    if (JSON.stringify(ghosts) === JSON.stringify(this.lensGhosts)) return
-    this.lensGhosts = ghosts
-    if (ghosts.length === 0) {
+  setLensGhosts(optics: LensOptics): void {
+    if (JSON.stringify(optics) === JSON.stringify(this.ghostOptics)) return
+    this.ghostOptics = optics
+    if (optics.ghosts.length === 0) {
       this.ghostPass?.dispose()
       this.ghostPass = undefined
     }
     this.render()
   }
 
+  /**
+   * The ghost of the lens under a point of the picture, and where the light that makes it is (see GhostPass.pickAt) — what a reader pointing
+   * at a red disc in the sky is pointing at, and what it is the ghost of. None for an eye, or where no ghost shows.
+   */
+  pickGhostAt(ndcX: number, ndcY: number): GhostHit | undefined {
+    if (!this.ghostPass || !this.ghostOptics.ghosts.length) return undefined
+    return this.ghostPass.pickAt(this.renderer, ndcX, ndcY, this.ghostOptics, EYE_UNIFORMS.uMediumExposure.value)
+  }
+
   private usableGhostPass(): GhostPass | undefined {
-    if (!this.lensGhosts?.length) return undefined
+    if (!this.ghostOptics?.ghosts.length) return undefined
     const size = this.renderer.getDrawingBufferSize(new Vector2())
     if (!this.ghostPass) this.ghostPass = new GhostPass(size.x, size.y)
     else this.ghostPass.resize(size.x, size.y)

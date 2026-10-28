@@ -298,6 +298,12 @@ if (docs) {
         photograph as the scene settles.</p>
       <p><strong>Roll</strong> sits here rather than with the place, because it is how the device
         was <em>held</em> — a camera askew, a head leaned over — not where the observer stood.</p>
+      <p>A device that records a picture lays its <strong>lens ghosts</strong> over every light of it: fainter, out-of-focus copies on the
+        line through the centre of the picture, mirrored through it for a phone's main one. Below the instrument, <strong>Taken
+        through</strong> says what was in front of the lens (a filter, a window, a windscreen, each adding a ghost or a twin of every light),
+        and <strong>Drops on the glass</strong>, <strong>Condensation</strong> and <strong>Dirt</strong> (0 to 1) what was on that glass,
+        each scattering a halo round every light. Left blank, the drops follow the rain or snow of the weather, unless <strong>Sheltered
+        from the rain</strong> is ticked. Pointing at a ghost in the picture names the light it comes from and draws the way to it.</p>
     </div>
 
     <div class="group-doc">
@@ -757,6 +763,13 @@ if (docs) {
       <p>Le <strong>roulis</strong> est ici et non avec le lieu, parce qu'il dit comment l'appareil
         était <em>tenu</em> — un appareil de travers, une tête penchée — et non où se tenait le
         observateur.</p>
+      <p>Un appareil qui enregistre une image y pose les <strong>reflets de son objectif</strong> sur chaque lumière : des copies plus
+        faibles et floues sur la droite qui passe par le centre de l'image, symétriques par rapport à lui pour le reflet principal d'un
+        téléphone. Sous l'instrument, <strong>À travers</strong> dit ce qu'il y avait devant l'objectif (un filtre, une vitre, un pare-brise,
+        chacun ajoutant un reflet ou un double de chaque lumière), et <strong>Gouttes sur le verre</strong>, <strong>Buée</strong> et
+        <strong>Saleté</strong> (de 0 à 1) ce qu'il y avait sur ce verre, chacun diffusant un halo autour de chaque lumière. Laissées vides,
+        les gouttes suivent la pluie ou la neige de la météo, sauf si <strong>À l'abri de la pluie</strong> est coché. Pointer un reflet
+        dans l'image nomme la lumière dont il vient et trace le chemin jusqu'à elle.</p>
     </div>
 
     <div class="group-doc">
@@ -1241,6 +1254,13 @@ if (docs) {
       <p>El <strong>Alabeo</strong> está aquí y no con el lugar, porque indica cómo se
         <em>sostenía</em> el aparato (una cámara torcida, una cabeza inclinada), no dónde estaba el
         observador.</p>
+      <p>Un aparato que registra una imagen pone los <strong>reflejos de su objetivo</strong> sobre cada luz: copias más débiles y
+        desenfocadas sobre la recta que pasa por el centro de la imagen, simétricas respecto a él para el reflejo principal de un teléfono.
+        Bajo el instrumento, <strong>A través de</strong> indica qué había delante del objetivo (un filtro, una ventana, un parabrisas, cada
+        uno con un reflejo o un doble de cada luz), y <strong>Gotas en el cristal</strong>, <strong>Vaho</strong> y <strong>Suciedad</strong>
+        (de 0 a 1) qué había sobre ese cristal, cada uno con un halo alrededor de cada luz. Vacías, las gotas siguen la lluvia o la nieve del
+        tiempo, salvo si se marca <strong>A cubierto de la lluvia</strong>. Señalar un reflejo en la imagen nombra la luz de la que viene y
+        traza el camino hasta ella.</p>
     </div>
 
     <div class="group-doc">
@@ -1717,6 +1737,13 @@ if (docs) {
       <p>Il <strong>Rollio</strong> sta qui e non con il luogo, perché dice come era
         <em>tenuto</em> l'apparecchio (una fotocamera storta, una testa inclinata), non dove si trovava
         l'osservatore.</p>
+      <p>Un apparecchio che registra un'immagine vi aggiunge i <strong>riflessi del suo obiettivo</strong> su ogni luce: copie più deboli e
+        sfocate sulla retta che passa per il centro dell'immagine, simmetriche rispetto a esso per il riflesso principale di un telefono.
+        Sotto lo strumento, <strong>Attraverso</strong> dice cosa c'era davanti all'obiettivo (un filtro, una finestra, un parabrezza, ognuno
+        con un riflesso o un doppio di ogni luce), e <strong>Gocce sul vetro</strong>, <strong>Condensa</strong> e <strong>Sporco</strong>
+        (da 0 a 1) cosa c'era su quel vetro, ognuno con un alone attorno a ogni luce. Vuote, le gocce seguono la pioggia o la neve del meteo,
+        salvo se è spuntato <strong>Al riparo dalla pioggia</strong>. Indicare un riflesso nell'immagine nomina la luce da cui viene e
+        traccia il percorso fino a essa.</p>
     </div>
 
     <div class="group-doc">

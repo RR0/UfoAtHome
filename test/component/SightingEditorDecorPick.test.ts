@@ -132,6 +132,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setLightPollution(): void {}
     setMedium(): void {}
     setLensGhosts(): void {}
+    pickGhostAt(): undefined { return undefined }
     setPerception(): void {}
     setSkyUnknown(): void {}
     setLensOptics(): void {}

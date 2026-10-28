@@ -196,6 +196,16 @@ export const html = `
       <!-- How much the body holding it moves the view at rest — see Sighting.sway: 1 a person, 0 a
            tripod. Blank is the default (1, or 0 for a paralysed observer). -->
       <label class="adv"><span id="label-sway">Sway</span> <input id="sway" type="number" min="0" max="3" step="0.1" placeholder="1"/></label>
+      <!-- What the picture was taken through besides the lens, and what was on that glass: what lays more ghosts and halos over every light
+           of it (see LensStateJson). Shown for an instrument that records a picture only: an eye has no glass of its own. -->
+      <label class="adv lens-row"><span id="label-lens-glass">Taken through</span> <select id="lens-glass">
+        <option value="" id="lens-glass-none">the lens alone</option><option value="filter" id="lens-glass-filter">a filter</option>
+        <option value="window" id="lens-glass-window">a window</option><option value="windscreen" id="lens-glass-windscreen">a windscreen</option>
+      </select></label>
+      <label class="adv lens-row"><span id="label-lens-drops">Drops on the glass</span> <input id="lens-drops" type="number" min="0" max="1" step="0.1"/></label>
+      <label class="adv lens-row"><span id="label-lens-condensation">Condensation</span> <input id="lens-condensation" type="number" min="0" max="1" step="0.1"/></label>
+      <label class="adv lens-row"><span id="label-lens-dirt">Dirt</span> <input id="lens-dirt" type="number" min="0" max="1" step="0.1"/></label>
+      <label class="adv lens-row"><input id="lens-sheltered" type="checkbox"/> <span id="label-lens-sheltered">Sheltered from the rain</span></label>
     </div>
     <div class="form-section" data-fold="all">
     <h3 class="section-title"><span id="label-section-perception">Perception</span></h3>

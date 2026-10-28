@@ -162,6 +162,18 @@ export const sceneNames_fr: SceneNames = {
   decorTooltip: "{name} — {size}, à {distance}",
   satelliteTooltip: "{name} — satellite, mag {mag}, à {height} km d'altitude",
   plumeTooltip: { name: "Panache de fusée", detail: "{name} — {part}, à {distance}, à {height} km d'altitude", ascent: "échappement de la montée", burn: "échappement d'un allumage", vent: "ergols vidangés" },
+  ghostTooltip: {
+    ghost: "Reflet : {name}", halo: "Halo : {name}", double: "Double : {name}", unnamed: "une lumière",
+    detail: "{name}. {cause}, {where}.",
+    causes: {
+      lens: "Reflet entre deux surfaces de l'objectif", sensor: "Reflet du capteur renvoyé par sa vitre de protection",
+      filter: "Reflet du capteur renvoyé par le filtre", glass: "Reflet entre les deux faces de la vitre devant l'objectif",
+      drops: "Lumière diffusée par les gouttes sur le verre", condensation: "Lumière diffusée par la buée sur le verre",
+      dirt: "Lumière diffusée par la saleté sur le verre"
+    },
+    opposite: "à l'opposé de la lumière par rapport au centre de l'image", sameSide: "du même côté du centre que la lumière",
+    around: "autour de la lumière"
+  },
   opticsTooltips: {
     halo22: "Halo de 22° — un anneau autour du Soleil, dû à la lumière déviée par des cristaux de glace hexagonaux dans les cirrus ; son bord interne est rouge, à 21,7°",
     halo46: "Halo de 46° — un anneau plus rare et plus faible : la lumière entre par une face latérale d'un cristal et sort par une face de bout",
