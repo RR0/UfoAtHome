@@ -103,7 +103,8 @@ export class GhostSearchView {
         context.stroke()
       }, "rgba(255, 255, 255, 0.85)", 1, [4, 4])
       stroke(circle(pair.light, 6), "#ffffff", 1.5)
-      stroke(circle(pair.ghost, 8), "#ffd23f", 2)
+      // As large as the ghost is: a lamp's ghost may be a wide disc.
+      stroke(circle(pair.ghost, Math.max(8, pair.ghost.radius * toShown)), "#ffd23f", 2)
     }
     if (search.centre) {
       const [x, y] = at(search.centre)

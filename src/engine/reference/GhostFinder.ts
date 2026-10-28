@@ -1,3 +1,5 @@
+import { MirrorVote } from "./MirrorVote.js"
+
 /** The pixels of a picture, RGBA, as a canvas gives them. */
 export interface PicturePixels {
   width: number
@@ -83,6 +85,10 @@ export class GhostFinder {
   private static readonly CHANCE_ALONE = 0.5
   /** How far the axis is from the picture's centre, as a share of the diagonal, for the picture to be said cropped. */
   private static readonly CROPPED = 0.04
+  /** How sharply the pixels' votes must peak for their axis to be taken (see MirrorVote). */
+  private static readonly SHARP_MIRROR = 1.5
+  /** How many of a ghost's pixels must match its light's, mirrored, for its shape to be taken as matched (see MirrorVote.matched). */
+  private static readonly SHAPE_MATCHED = 25
   /** How many spots are considered at most, the ones that stand out most. */
   private static readonly MAX_SPOTS = 2000
 
@@ -103,7 +109,9 @@ export class GhostFinder {
       ? spot.radius <= GhostFinder.DOMINATED * largest && spot.contrast >= GhostFinder.LARGE_LIGHT_CONTRAST
       : spot.background < GhostFinder.DARK && spot.peak >= 2 * spot.background)
     const none: GhostSearch = { width, height, lights, spots, pairs: [], confidence: "none" }
-    if (lights.length === 0 || candidates.length === 0) return none
+    // Ghosts that are no spot (a lamp's ghost as a large pale disc, a lit pier's as the pier upside down) are found from the pixels.
+    const mirrored = () => GhostFinder.mirrored(pixels, lights, spots)
+    if (lights.length === 0 || candidates.length === 0) return mirrored() ?? none
     const tolerance = 0.006 * diagonal
     type Fit = { pairs: GhostPair[], centre: { x: number, y: number }, scale: number, error: number, score: number }
     // Each pair counts for how exactly it lines up: lights in a regular row (a street's lamps, a front's) also pair each ghost with the next
@@ -130,6 +138,7 @@ export class GhostFinder {
     // What chance does in this very picture: the same search with the spots turned over, which keeps how many there are and where they
     // crowd but undoes any line through an axis. A busy picture (a building's windows under a lit sky) lines a few up anywhere; only
     // what does clearly better than that is a finding.
+    let some: GhostSearch | undefined
     if (best && best.pairs.length >= 2) {
       const scale = best.scale
       const chance = Math.max(0, ...[[-1, 1], [1, -1], [-1, -1]].map(([fx, fy]) => bestAt(scale, candidates.map(spot => ({
@@ -139,13 +148,29 @@ export class GhostFinder {
       })))?.score ?? 0))
       if (best.score > GhostFinder.ABOVE_CHANCE * chance) {
         const offCentre = Math.hypot(best.centre.x - width / 2, best.centre.y - height / 2) / diagonal
-        return {
+        some = {
           width, height, lights, spots, pairs: best.pairs, centre: best.centre, scale: best.scale, cropped: offCentre > GhostFinder.CROPPED,
           confidence: best.pairs.length >= 3 ? "high" : "low"
         }
+        if (some.confidence === "high") return some
       }
     }
-    return GhostFinder.loneGhost(spots, lights, candidates, width, height, tolerance) ?? none
+    return mirrored() ?? some ?? GhostFinder.loneGhost(spots, lights, candidates, width, height, tolerance) ?? none
+  }
+
+  /**
+   * The ghosts the pixels vote for (see MirrorVote), as a search: sure of them when two or more stand across one sharp peak of the votes, or
+   * one whose whole shape matches its light's (a lit pier upside down), not a point that chance can put anywhere.
+   */
+  private static mirrored(pixels: PicturePixels, lights: PictureSpot[], spots: PictureSpot[]): GhostSearch | undefined {
+    const found = MirrorVote.find(pixels, GhostFinder.SHARP_MIRROR)
+    if (!found) return undefined
+    const { width, height } = pixels
+    const offCentre = Math.hypot(found.centre.x - width / 2, found.centre.y - height / 2) / Math.hypot(width, height)
+    return {
+      width, height, lights, spots, pairs: found.pairs, centre: found.centre, scale: -1, cropped: offCentre > GhostFinder.CROPPED,
+      confidence: found.pairs.length >= 2 || found.matched >= GhostFinder.SHAPE_MATCHED ? "high" : "low"
+    }
   }
 
   /**

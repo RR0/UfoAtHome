@@ -91,4 +91,43 @@ describe("GhostFinder", () => {
     expect(one({ x: 400, y: 300 }).confidence).toBe("low")
     expect(one({ x: 600, y: 120 }).confidence).toBe("none")
   })
+
+  it("finds a lit front's ghost, the whole front upside down and as bright as it, in a sky over a lit ground", () => {
+    // A pier's row of lights low in the picture, its ghost the same row across the centre (up and reversed), and the lit ground below.
+    const centre = { x: 410, y: 290 }
+    const row = Array.from({ length: 12 }, (_, i) => ({ x: 420 + 14 * i, y: 380 + (i % 3) * 4 }))
+    const pixels = picture(800, 600, [
+      ...row.map(light => ({ ...light, peak: 255, radius: 4 })),
+      ...row.map(light => ({ x: 2 * centre.x - light.x, y: 2 * centre.y - light.y, peak: 200, radius: 4 }))
+    ])
+    for (let y = 470; y < 600; y++) for (let x = 0; x < 800; x++) {
+      const i = (y * 800 + x) * 4
+      pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = 60 + ((x * 7 + y * 13) % 40)
+    }
+    const search = GhostFinder.find(pixels)
+    expect(search.confidence).toBe("high")
+    expect(search.centre!.x).toBeCloseTo(centre.x, -1)
+    expect(search.centre!.y).toBeCloseTo(centre.y, -1)
+    for (const pair of search.pairs) expect(pair.ghost.y).toBeLessThan(centre.y)
+  })
+
+  it("finds a lamp's ghost that is a large pale disc of the aperture, not a spot", () => {
+    const centre = { x: 400, y: 300 }, lamp = { x: 560, y: 470 }
+    const pixels = picture(800, 600, [
+      { ...lamp, peak: 255, radius: 9 },
+      ...[{ x: 120, y: 80 }, { x: 650, y: 140 }, { x: 300, y: 500 }].map(star => ({ ...star, peak: 120, radius: 1.2 }))
+    ])
+    // The disc: flat, faint, 45 pixels across its radius, across the centre from the lamp.
+    const disc = { x: 2 * centre.x - lamp.x, y: 2 * centre.y - lamp.y }
+    for (let y = 0; y < 600; y++) for (let x = 0; x < 800; x++) {
+      if (Math.hypot(x - disc.x, y - disc.y) > 45) continue
+      const i = (y * 800 + x) * 4
+      pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = 55
+    }
+    const search = GhostFinder.find(pixels)
+    expect(search.confidence).not.toBe("none")
+    expect(search.pairs).toHaveLength(1)
+    expect(Math.hypot(search.pairs[0].ghost.x - disc.x, search.pairs[0].ghost.y - disc.y)).toBeLessThan(15)
+    expect(search.pairs[0].ghost.radius).toBeGreaterThan(25)
+  })
 })

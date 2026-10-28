@@ -595,9 +595,11 @@ if (docs) {
         within 300 m of the observer's spot, each arriving already lined up in heading.</p>
       <p><strong>Look for ghosts</strong> searches the selected picture for the ghosts of the lens: the
         faint copies of a bright light that a lens's glass sends back, each on the far side of the
-        lens's axis from its light, as far from it. Each ghost found is ringed and joined to its lamp
-        by a dotted line through the axis; the sentence under it says how many, and how sure: one or
-        two can be chance, three or more on one axis hardly. When that axis is not the picture's
+        lens's axis from its light, as far from it, whatever its shape: a point, a lamp's large pale
+        disc, a lit front upside down. Each ghost found is ringed and joined to its light by a dotted
+        line through the axis; the sentence under it says how many, and how sure: a single small one
+        can be chance, several on one axis, or one whose whole shape matches its light's, hardly. A
+        ghost whose light is outside the picture (the Moon just out of frame) cannot be told from it. When that axis is not the picture's
         centre, the picture was cropped. The picture must be readable: a file of yours always is, an
         address only if its site allows it. The search, and what it needs, are loaded only when you
         ask for it, as is everything that handles pictures: a recording without any loads none.</p>
@@ -1094,10 +1096,12 @@ if (docs) {
         arrivant déjà recalée en cap.</p>
       <p><strong>Chercher les reflets</strong> cherche dans la photo choisie les reflets fantômes de
         l'objectif : les copies pâles d'une lumière vive que renvoie le verre de l'objectif, chacune de
-        l'autre côté de l'axe de l'objectif par rapport à sa lumière, à la même distance. Chaque reflet
-        trouvé est cerclé et relié à sa lampe par un pointillé qui passe par l'axe ; la phrase dessous
-        dit combien, et avec quelle certitude : un ou deux peuvent être un hasard, trois ou plus sur un
-        même axe guère. Quand cet axe n'est pas le centre de l'image, la photo a été recadrée. La photo
+        l'autre côté de l'axe de l'objectif par rapport à sa lumière, à la même distance, quelle que soit
+        sa forme : un point, le grand disque pâle d'un lampadaire, une façade éclairée retournée. Chaque
+        reflet trouvé est cerclé et relié à sa lumière par un pointillé qui passe par l'axe ; la phrase
+        dessous dit combien, et avec quelle certitude : un seul petit peut être un hasard, plusieurs sur
+        un même axe, ou un dont toute la forme correspond à celle de sa lumière, guère. Le reflet d'une
+        lumière hors de l'image (la Lune juste hors cadre) ne peut pas être reconnu d'après elle. Quand cet axe n'est pas le centre de l'image, la photo a été recadrée. La photo
         doit être lisible : un fichier à vous l'est toujours, une adresse seulement si son site le
         permet. La recherche, et ce dont elle a besoin, ne sont chargées que si vous la demandez, comme
         tout ce qui traite les photos : un enregistrement qui n'en a aucune n'en charge rien.</p>
@@ -1582,10 +1586,12 @@ if (docs) {
         rumbo.</p>
       <p><strong>Buscar reflejos</strong> busca en la foto elegida los reflejos fantasma del objetivo:
         las copias tenues de una luz intensa que devuelve el cristal del objetivo, cada una al otro lado
-        del eje del objetivo respecto de su luz, a la misma distancia. Cada reflejo encontrado se rodea
-        con un círculo y se une a su lámpara con una línea de puntos que pasa por el eje; la frase de
-        debajo dice cuántos, y con qué certeza: uno o dos pueden ser casualidad, tres o más sobre un
-        mismo eje difícilmente. Cuando ese eje no es el centro de la imagen, la foto fue recortada. La
+        del eje del objetivo respecto de su luz, a la misma distancia, sea cual sea su forma: un punto,
+        el gran disco pálido de una farola, una fachada iluminada invertida. Cada reflejo encontrado se
+        rodea con un círculo y se une a su luz con una línea de puntos que pasa por el eje; la frase de
+        debajo dice cuántos, y con qué certeza: uno solo y pequeño puede ser casualidad, varios sobre un
+        mismo eje, o uno cuya forma entera coincide con la de su luz, difícilmente. El reflejo de una
+        luz fuera de la imagen (la Luna justo fuera del encuadre) no puede reconocerse a partir de ella. Cuando ese eje no es el centro de la imagen, la foto fue recortada. La
         foto debe poder leerse: un archivo propio siempre puede, una dirección solo si su sitio lo
         permite. La búsqueda, y lo que necesita, solo se cargan si la pide, como todo lo que trata las
         fotos: una grabación que no tiene ninguna no carga nada de ello.</p>
@@ -2074,10 +2080,13 @@ if (docs) {
         ciascuna già allineata in direzione.</p>
       <p><strong>Cerca i riflessi</strong> cerca nella foto scelta i riflessi fantasma dell'obiettivo:
         le copie tenui di una luce intensa che il vetro dell'obiettivo rimanda, ciascuna dall'altra
-        parte dell'asse dell'obiettivo rispetto alla sua luce, alla stessa distanza. Ogni riflesso
-        trovato viene cerchiato e unito alla sua lampada da una linea tratteggiata che passa per l'asse;
-        la frase sotto dice quanti, e con quale certezza: uno o due possono essere un caso, tre o più
-        sullo stesso asse difficilmente. Quando quell'asse non è il centro dell'immagine, la foto è stata
+        parte dell'asse dell'obiettivo rispetto alla sua luce, alla stessa distanza, qualunque sia la sua
+        forma: un punto, il grande disco pallido di un lampione, una facciata illuminata capovolta. Ogni
+        riflesso trovato viene cerchiato e unito alla sua luce da una linea tratteggiata che passa per
+        l'asse; la frase sotto dice quanti, e con quale certezza: uno solo e piccolo può essere un caso,
+        più d'uno sullo stesso asse, o uno la cui forma intera corrisponde a quella della sua luce,
+        difficilmente. Il riflesso di una luce fuori dall'immagine (la Luna appena fuori campo) non può
+        essere riconosciuto a partire da essa. Quando quell'asse non è il centro dell'immagine, la foto è stata
         ritagliata. La foto deve essere leggibile: un file vostro lo è sempre, un indirizzo solo se il
         suo sito lo consente. La ricerca, e ciò che le serve, vengono caricate solo se la chiedete, come
         tutto ciò che tratta le foto: una registrazione che non ne ha nessuna non ne carica nulla.</p>
