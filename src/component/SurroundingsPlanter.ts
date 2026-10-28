@@ -176,7 +176,10 @@ export class SurroundingsPlanter {
     }
     this.lastStep = { lat, lng, atMs: nowMs }
     if (!this.enabled) return
-    const lead = Math.max(this.radiusM * SurroundingsPlanter.WALK_LEAD_SHARE, this.walkSpeedMps * SurroundingsPlanter.WALK_LEAD_S)
+    // Never further than a radius: what is asked then still meets the ground already there, whatever pace two steps a millisecond apart
+    // seem to say.
+    const lead = Math.min(this.radiusM,
+      Math.max(this.radiusM * SurroundingsPlanter.WALK_LEAD_SHARE, this.walkSpeedMps * SurroundingsPlanter.WALK_LEAD_S))
     const heading = headingDeg * Math.PI / 180
     const ahead = {
       lat: lat + Math.cos(heading) * lead / SurroundingsPlanter.METRES_PER_DEGREE,

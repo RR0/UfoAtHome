@@ -1,7 +1,7 @@
-import { createWriteStream, existsSync, mkdirSync, statSync } from "node:fs"
+import { existsSync, mkdirSync, statSync } from "node:fs"
+import { open } from "node:fs/promises"
 import path from "node:path"
 import { Readable } from "node:stream"
-import { pipeline } from "node:stream/promises"
 
 /** One file of a daily release. */
 export interface ReleaseAsset {
@@ -133,7 +133,14 @@ export class AircraftReleaseFetch {
         if (!response.ok || !response.body) throw new Error(`GitHub answered ${response.status} for ${asset.name}`)
         // A server that ignores the range sends the whole file again: start over rather than append to it.
         const resumed = have > 0 && response.status === 206
-        await pipeline(Readable.fromWeb(response.body as any), createWriteStream(file, { flags: resumed ? "a" : "w" }))
+        // Each piece written before the next is read: a connection cut then leaves on disk all it brought, to resume from (a stream
+        // destroyed by the error would drop what it still held, on some systems all of it).
+        const handle = await open(file, resumed ? "a" : "w")
+        try {
+          for await (const chunk of Readable.fromWeb(response.body as any)) await handle.write(chunk as Uint8Array)
+        } finally {
+          await handle.close()
+        }
       } catch (e) {
         if (attempt >= this.retries) throw new Error(`${asset.name}: ${AircraftReleaseFetch.reason(e)} after ${attempt + 1} attempts`)
         this.log(`${asset.name}: ${AircraftReleaseFetch.reason(e)}, resuming`)

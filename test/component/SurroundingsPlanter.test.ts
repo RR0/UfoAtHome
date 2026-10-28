@@ -462,13 +462,26 @@ describe("SurroundingsPlanter while the observer walks", () => {
     const survey = new FakeSurvey(Scene.of([OAK], []))
     const planter = editor.planter(survey)
     await planter.survey(PLACE.lat, PLACE.lng)
-    planter.walked(north(10), PLACE.lng, 0)
-    planter.walked(north(11), PLACE.lng, 0)
+    // At one instant: the pace of the walk, from the time between steps, is not what this is about (a slow machine would make it one).
+    planter.walked(north(10), PLACE.lng, 0, 0)
+    planter.walked(north(11), PLACE.lng, 0, 0)
     planter.placeChanged(north(80), PLACE.lng)
-    planter.walked(north(80), PLACE.lng, 0)
+    planter.walked(north(80), PLACE.lng, 0, 0)
     await settle()
     // The first place, then one ahead of the first step; the second step's ahead is near it; the place change was the walk, which asks ahead of it.
     expect(survey.asked.map(asked => Math.round((asked.centre.lat - PLACE.lat) * 111320))).toEqual([0, 70, 140])
+  })
+
+  it("asks no further ahead than a radius, however fast two steps a millisecond apart seem to go", async () => {
+    const editor = new FakeEditor()
+    const survey = new FakeSurvey(Scene.of([OAK], []))
+    const planter = editor.planter(survey)
+    await planter.survey(PLACE.lat, PLACE.lng)
+    planter.walked(north(10), PLACE.lng, 0, 1000)
+    planter.walked(north(20), PLACE.lng, 0, 1001)
+    await settle()
+    const last = survey.asked[survey.asked.length - 1]
+    expect((last.centre.lat - north(20)) * 111320).toBeLessThanOrEqual(last.radiusM + 1)
   })
 
   it("adds nothing it already brought: a survey of more of the same ground answers what is near again", async () => {
