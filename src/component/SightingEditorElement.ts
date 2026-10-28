@@ -909,6 +909,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly referenceLandmarkLabelInput: HTMLInputElement
   /** The search for the ghosts of the lens in the selected picture — see GhostSearchView, loaded only when asked for. */
   private readonly findGhostsButton: HTMLButtonElement
+  private searchingGhosts = false
   private readonly ghostsStatus: HTMLElement
   private readonly ghostsCanvas: HTMLCanvasElement
   private ghostTexts?: import("./GhostSearchView.js").GhostSearchTexts
@@ -4292,6 +4293,7 @@ export class SightingEditorElement extends HTMLElement {
     // A picture that is not there says so under its address, whatever group the canvas is in.
     const failure = this.sceneElement.referenceFailure(reference.src)
     MessageStyle.show(this.referenceFailure, failure ? this.pictureFailureText(failure) : undefined, "error")
+    this.syncFindGhosts(reference)
     if (this.canvasMode() === "picture") {
       this.syncRegisterStatus()
       return
@@ -9121,13 +9123,26 @@ export class SightingEditorElement extends HTMLElement {
   private async findGhosts(): Promise<void> {
     const reference = this.currentReference()
     if (!reference?.src || !this.ghostTexts) return
-    this.findGhostsButton.disabled = true
+    this.searchingGhosts = true
+    this.syncFindGhosts(reference)
     try {
       const { GhostSearchView } = await import("./GhostSearchView.js")
       await new GhostSearchView(this.ghostsCanvas, this.ghostsStatus, this.ghostTexts).search(reference.src)
     } finally {
-      this.findGhostsButton.disabled = false
+      this.searchingGhosts = false
+      this.syncFindGhosts(this.currentReference())
     }
+  }
+
+  /**
+   * What is done with a picture's pixels, its ghosts looked for (one search at a time) and its landmarks named, is offered only for a
+   * picture that could be read: one that could not says why under its address.
+   */
+  private syncFindGhosts(reference: SceneReference | undefined): void {
+    const unreadable = !reference?.src || this.sceneElement.referenceFailure(reference.src) !== undefined
+    this.findGhostsButton.disabled = this.searchingGhosts || unreadable
+    this.addReferenceLandmarkButton.disabled = unreadable
+    if (unreadable && (this.armingLandmark || this.pendingLandmark)) this.disarmLandmark()
   }
 
   /** Writes what the lens fields say onto the recording: undefined when they say nothing at all. */
@@ -10587,8 +10602,7 @@ export class SightingEditorElement extends HTMLElement {
     this.findGhostsButton.textContent = messages.referenceFindGhosts
     this.ghostTexts = {
       searching: messages.referenceGhostsSearching, found: messages.referenceGhostsFound, foundScaled: messages.referenceGhostsFoundScaled,
-      low: messages.referenceGhostsLow, none: messages.referenceGhostsNone, cropped: messages.referenceGhostsCropped,
-      failed: failure => this.pictureFailureText(failure)
+      low: messages.referenceGhostsLow, none: messages.referenceGhostsNone, cropped: messages.referenceGhostsCropped
     }
     this.label("lens-glass-none", messages.lensGlassNone)
     this.label("lens-glass-filter", messages.lensGlassFilter)

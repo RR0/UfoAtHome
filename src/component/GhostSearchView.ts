@@ -1,5 +1,5 @@
 import { GhostFinder, type GhostSearch } from "../engine/reference/GhostFinder.js"
-import { PictureFetch, PictureFetchError, type PictureFailure } from "../engine/reference/PictureFetch.js"
+import { PictureFetch, PictureFetchError } from "../engine/reference/PictureFetch.js"
 
 /** What the search says, in the reader's language (see SightingLabels). {count} and {scale} are filled in. */
 export interface GhostSearchTexts {
@@ -9,8 +9,6 @@ export interface GhostSearchTexts {
   low: string
   none: string
   cropped: string
-  /** Why the picture could not be read, and what to do about it. */
-  failed: (failure: PictureFailure) => string
 }
 
 /**
@@ -33,8 +31,9 @@ export class GhostSearchView {
     let image: HTMLImageElement
     try {
       image = await GhostSearchView.load(src)
-    } catch (error) {
-      this.status.textContent = this.texts.failed(PictureFetch.failureOf(error))
+    } catch {
+      // Said under the picture's address, and the search is not offered for it (see SightingEditorElement.syncFindGhosts).
+      this.status.textContent = ""
       return undefined
     }
     const scale = Math.min(1, GhostSearchView.ANALYSIS_SIZE / Math.max(image.naturalWidth, image.naturalHeight))
