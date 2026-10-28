@@ -89,6 +89,14 @@ export class GhostFinder {
   private static readonly CHANCE_ALONE = 0.5
   /** How far the axis is from the picture's centre, as a share of the diagonal, for the picture to be said cropped. */
   private static readonly CROPPED = 0.04
+  /** How much larger a light must be for a light in its glare to be part of it, and how far its glare reaches, in its radii. */
+  private static readonly GLARE_SIZE = 2
+  private static readonly GLARE_REACH = 2.5
+  /** A light saturated (luminance 0 to 255), and one standing out of its nearer rings by less than this lost in its own glare (see spotsOf). */
+  private static readonly SATURATED = 250
+  private static readonly LOST_IN_GLARE = 40
+  /** How far a spot must stand out to be told a ghost of a known axis's light (see atAxis), luminance 0 to 255: as a light does. */
+  private static readonly SPOT_GHOST_CONTRAST = 40
   /** How sharply the pixels' votes must peak for their axis to be taken (see MirrorVote). */
   private static readonly SHARP_MIRROR = 1.5
   /** How many of a ghost's pixels must match its light's, mirrored, for its shape to be taken as matched (see MirrorVote.matched). */
@@ -97,6 +105,11 @@ export class GhostFinder {
   private static readonly MAX_SPOTS = 2000
 
   static find(pixels: PicturePixels): GhostSearch {
+    const search = GhostFinder.searched(pixels)
+    return { ...search, pairs: search.pairs.map(pair => ({ ...pair, light: GhostFinder.glaringOver(pair.light, search.lights) })) }
+  }
+
+  private static searched(pixels: PicturePixels): GhostSearch {
     const { width, height } = pixels
     const diagonal = Math.hypot(width, height)
     const spots = GhostFinder.spotsOf(pixels)
@@ -197,13 +210,28 @@ export class GhostFinder {
   }
 
   /**
+   * The light a light is part of: a bright spot in the glare of a far larger light (a ray of the sun's, a patch of its bloom) is that light
+   * itself, and its ghost the larger light's.
+   */
+  private static glaringOver(light: PictureSpot, lights: PictureSpot[]): PictureSpot {
+    let over = light
+    for (const other of lights) {
+      const larger = other.radius >= GhostFinder.GLARE_SIZE * light.radius && other.radius > over.radius
+      if (larger && Math.hypot(other.x - light.x, other.y - light.y) <= GhostFinder.GLARE_REACH * other.radius) over = other
+    }
+    return over
+  }
+
+  /**
    * The ghosts of a known axis, spot by spot: each spot whose mirror through it falls within a light, which it can be the ghost of. A light
    * that is a lit front's many windows run together is one wide spot, its ghost the windows apart: each falls somewhere within it, and it
    * has as many ghosts as fall there.
    */
   private static atAxis(spots: PictureSpot[], lights: PictureSpot[], centre: { x: number, y: number }, tolerance: number): GhostPair[] {
     const pairs: GhostPair[] = []
-    for (const ghost of spots) {
+    // Only spots that stand out as a light does: a wide light (the sun) takes in the mirror of a large share of the picture, where a
+    // faint swell of the sky would be taken for a ghost of it.
+    for (const ghost of spots.filter(spot => spot.contrast >= GhostFinder.SPOT_GHOST_CONTRAST)) {
       const mirror = { x: 2 * centre.x - ghost.x, y: 2 * centre.y - ghost.y }
       let best: { light: PictureSpot, beyond: number } | undefined
       for (const light of lights) {
@@ -213,6 +241,8 @@ export class GhostFinder {
         if (beyond <= tolerance && (!best || beyond < best.beyond)) best = { light, beyond }
       }
       if (!best || Math.hypot(ghost.x - best.light.x, ghost.y - best.light.y) < 4 * Math.max(ghost.radius, best.light.radius)) continue
+      // Two maxima of one ghost are one ghost.
+      if (pairs.some(pair => Math.hypot(pair.ghost.x - ghost.x, pair.ghost.y - ghost.y) < Math.max(2, pair.ghost.radius, ghost.radius))) continue
       // The light drawn where the ghost's mirror falls on it: the part of it this ghost is of.
       pairs.push({ ghost, light: { ...best.light, ...mirror }, residualPx: best.beyond })
     }
@@ -405,8 +435,11 @@ export class GhostFinder {
         // How far it stands out, against a ring round it of the size that shows it best: a ring inside a large lamp's globe would see the
         // globe, and one far round a small spot would see the rest of the picture.
         let contrast = -Infinity, background = 0, ringRadius = ring
-        for (const radius of [ring, 2 * ring, 4 * ring]) {
+        for (const radius of [ring, 2 * ring, 4 * ring, 8 * ring, 16 * ring]) {
           if (x < radius || y < radius || x >= width - radius || y >= height - radius) break
+          // Further only for a light that is lost in its own glare, the sun's: the nearer rings see nothing but it. A lamp that already
+          // stands out is measured against what is near it, as a ghost is.
+          if (radius > 4 * ring && (peak < GhostFinder.SATURATED || contrast >= GhostFinder.LOST_IN_GLARE)) break
           const around: number[] = []
           for (let a = 0; a < 32; a++) {
             const angle = a / 32 * 2 * Math.PI

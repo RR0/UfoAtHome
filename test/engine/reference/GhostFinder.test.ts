@@ -151,4 +151,25 @@ describe("GhostFinder", () => {
     expect(search.centre!.y).toBeCloseTo(centre.y, 0)
     expect(search.pairs.length).toBeGreaterThanOrEqual(ghosts.length - 1)
   })
+
+  it("takes no circle drawn round a ghost on the picture, across from the sun's wide glare, for more ghosts", () => {
+    const centre = { x: 300, y: 400 }, sun = { x: 120, y: 600 }
+    const ghost = { x: 2 * centre.x - sun.x, y: 2 * centre.y - sun.y }
+    const pixels = picture(600, 800, [
+      { ...sun, peak: 255, radius: 40 },
+      { ...ghost, peak: 200, radius: 3 }
+    ])
+    // A blue sky, and a circle drawn round the ghost, thin and faint.
+    for (let i = 0; i < 600 * 800; i++) if (pixels.data[i * 4] < 70) pixels.data[i * 4 + 2] = 70
+    for (let a = 0; a < 2000; a++) {
+      const angle = a / 2000 * 2 * Math.PI
+      const x = Math.round(ghost.x + 70 * Math.cos(angle)), y = Math.round(ghost.y + 90 * Math.sin(angle))
+      const i = (y * 600 + x) * 4
+      pixels.data[i] = 120
+    }
+    const search = GhostFinder.find(pixels)
+    expect(search.pairs).toHaveLength(1)
+    expect(Math.hypot(search.pairs[0].ghost.x - ghost.x, search.pairs[0].ghost.y - ghost.y)).toBeLessThan(4)
+    expect(Math.hypot(search.pairs[0].light.x - sun.x, search.pairs[0].light.y - sun.y)).toBeLessThan(15)
+  })
 })

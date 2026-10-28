@@ -38,8 +38,16 @@ export class MirrorVote {
    * disc of the aperture stands out of a window wider than itself whole, not by its rim; but over such a window less else stands out). */
   private static readonly GROUND = 0.025
   private static readonly WHOLE_GROUND = 0.08
+  /** How far a ghost grown to its whole may have its centre move off the patch it grew from, past that patch's own size, as a share of
+   * the diagonal. */
+  private static readonly GROWN_DRIFT = 0.02
   /** How much the inside of a pale disc votes, a pixel: as one that stands out a little. */
   private static readonly INSIDE_WEIGHT = 0.4
+  /** A thin line, not a ghost (see withoutLines): at least that many pixels, filling less than that share of the box round them. */
+  private static readonly LINE_LENGTH = 12
+  private static readonly LINE_FILL = 0.2
+  /** How far a pixel stands out of its ground to vote fully, luminance 0 to 255. */
+  private static readonly STANDING_FULLY = 60
   /** How near its light a pixel is its glare, not a ghost, as a share of the diagonal. */
   private static readonly NEAREST = 0.08
   /** How far the axis may be from the picture's centre, as a share of its diagonal: a crop moves it, not that far. */
@@ -63,9 +71,12 @@ export class MirrorVote {
         const i = y * width + x, l = luminance[i]
         if (l >= MirrorVote.LIGHT) lights.push({ x, y, weight: (l - MirrorVote.LIGHT + 5) / 30 })
         // A ghost on a dark ground, fainter than a light: the lights' own pixels are lights, not ghosts of each other.
-        else if (background[i] < MirrorVote.DARK && l - background[i] > MirrorVote.STANDS_OUT) faint.push({ x, y, weight: Math.min(1, (l - background[i]) / 60) })
+        else if (background[i] < MirrorVote.DARK && l - background[i] > MirrorVote.STANDS_OUT) {
+          faint.push({ x, y, weight: Math.min(1, (l - background[i]) / MirrorVote.STANDING_FULLY) })
+        }
       }
     }
+    faint.splice(0, faint.length, ...MirrorVote.withoutLines(faint, width, height))
     faint.push(...MirrorVote.insides(faint, lights, width, height))
     if (lights.length === 0 || faint.length === 0) return undefined
     const nearest = MirrorVote.NEAREST * Math.hypot(width, height)
@@ -203,6 +214,40 @@ export class MirrorVote {
   }
 
   /**
+   * The faint pixels but those that make a thin line: a wire, a branch, a contrail, a circle drawn round something on the picture. A ghost
+   * is a patch, round or a row of lights; a line across from a wide glare (the sun's) would find a light for each of its pixels.
+   */
+  private static withoutLines(faint: Voter[], width: number, height: number): Voter[] {
+    const at = new Int32Array(width * height).fill(-1)
+    faint.forEach((voter, n) => at[voter.y * width + voter.x] = n)
+    const seen = new Uint8Array(faint.length)
+    const kept: Voter[] = []
+    for (let start = 0; start < faint.length; start++) {
+      if (seen[start]) continue
+      const group = [start]
+      seen[start] = 1
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity
+      for (let k = 0; k < group.length; k++) {
+        const { x, y } = faint[group[k]]
+        x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y)
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx, ny = y + dy
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue
+          const n = at[ny * width + nx]
+          if (n >= 0 && !seen[n]) {
+            seen[n] = 1
+            group.push(n)
+          }
+        }
+      }
+      const fill = group.length / ((x1 - x0 + 1) * (y1 - y0 + 1))
+      if (group.length >= MirrorVote.LINE_LENGTH && fill < MirrorVote.LINE_FILL) continue
+      for (const n of group) kept.push(faint[n])
+    }
+    return kept
+  }
+
+  /**
    * What a pale flat disc's rim encloses: its inside stands out of nothing near it (it is its own ground), and the rim alone would vote for a
    * ring round the centre, not for the centre. Whatever the picture's edge cannot be reached from without crossing a faint pixel or a light.
    */
@@ -267,7 +312,15 @@ export class MirrorVote {
         stack.push(j)
       }
     }
-    return grown.length >= patch.length ? grown : patch
+    if (grown.length < patch.length) return patch
+    // Grown, it is still that ghost, around where it was found: one that spread off into a swell of the sky is the sky, not more of it.
+    let gx = 0, gy = 0
+    for (const i of grown) {
+      gx += i % width
+      gy += Math.floor(i / width)
+    }
+    const drift = Math.hypot(gx / grown.length - cx, gy / grown.length - cy)
+    return drift <= Math.sqrt(patch.length / Math.PI) + MirrorVote.GROWN_DRIFT * Math.hypot(width, height) ? grown : patch
   }
 
   /** A patch of pixels as a spot: its centre weighted by how much each stands out, its size, its brightest. */
