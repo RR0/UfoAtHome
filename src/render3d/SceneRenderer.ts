@@ -104,7 +104,7 @@ import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
 import type { PointLayerHost } from "./PointLayerPass.js"
 import { DepthOfFieldPass } from "./DepthOfFieldPass.js"
 import { FinishPass } from "./FinishPass.js"
-import { GhostPass, type GhostHit } from "./GhostPass.js"
+import { GhostPass, type BrightSource, type GhostHit } from "./GhostPass.js"
 import { LensGhosts, type LensOptics } from "../engine/instrument/LensGhost.js"
 import { EYE_UNIFORMS, type UnfinishedFrame } from "./colorSpace.js"
 import { Perceptions, type Perception } from "../engine/observer/Perception.js"
@@ -4646,7 +4646,7 @@ export class SceneRenderer {
         // Drawn as light, then finished with the lens's ghosts over it (see GhostPass).
         this.exposureSubjectBounds = []
         this.renderOnce(ghosts.frame)
-        ghosts.develop(this.renderer, ghosts.frame, this.ghostOptics)
+        ghosts.develop(this.renderer, ghosts.frame, this.ghostOptics, 1, this.sunBeyondPicture())
         this.onMapSubjectBounds?.(this.exposureSubjectBounds)
       } else {
         this.renderOnce()
@@ -5416,7 +5416,7 @@ export class SceneRenderer {
     this.applyMedium()
     const gain = this.exposureInstants / this.exposureInstantsDone
     const ghosts = this.usableGhostPass()
-    if (ghosts && this.exposureAccumulation) ghosts.develop(this.renderer, this.exposureAccumulation.developed, this.ghostOptics, gain)
+    if (ghosts && this.exposureAccumulation) ghosts.develop(this.renderer, this.exposureAccumulation.developed, this.ghostOptics, gain, this.sunBeyondPicture())
     else this.exposureAccumulation?.develop(this.renderer, gain)
     this.onMapSubjectBounds?.(this.exposureSubjectBounds)
     if (!this.compassSprites.some(sprite => sprite.visible)) return
@@ -5728,6 +5728,24 @@ export class SceneRenderer {
     // EquidistantProjectionPass), and this runs from inside that widened pass. Reading the
     // recording's field here instead put the dazzle's angles out by half.
     flare.uniforms.uTanHalfFov.value = Math.tan((this.camera.fov * Math.PI) / 360)
+  }
+
+  /**
+   * The Sun as a light the picture cannot hold (see BrightSource): its disc is drawn at the most a pixel takes (BRIGHTEST_RELATIVE), far
+   * less than it is, and its ghosts, made from the picture's light, came out a few thousandths of what a lens throws — lost in a day's
+   * sky, where a phone pointed near the Sun shows them plainly. What is beyond that most, over its disc, is given to them on its own.
+   * Undefined when the Sun is not in the picture, or hidden, or no brighter than a pixel holds.
+   */
+  private sunBeyondPicture(): BrightSource | undefined {
+    const flare = this.lensFlare
+    if (!flare || !flare.mesh.visible) return undefined
+    const excess = this.sunDiscRadiance.map(light => Math.max(0, light - SceneRenderer.BRIGHTEST_RELATIVE) * this.sunUnhiddenFraction)
+    if (excess[1] <= 0) return undefined
+    // Its disc's radius as a share of the picture's height: its angle through the camera's own field.
+    const radius = Math.tan(flare.uniforms.uSourceRadiusDeg.value * Math.PI / 180) / flare.uniforms.uTanHalfFov.value / 2
+    const area = Math.PI * radius * radius
+    const position = flare.uniforms.uLensPosition.value
+    return { x: position.x, y: position.y, radius, flux: [excess[0] * area, excess[1] * area, excess[2] * area] }
   }
 
   /**

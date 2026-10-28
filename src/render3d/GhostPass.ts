@@ -5,6 +5,18 @@ import {
 import { GlassWetting, LensGhosts, type LensGhost, type LensOptics } from "../engine/instrument/LensGhost.js"
 import { EYE_UNIFORMS, FINISH_GLSL, type UnfinishedFrame } from "./colorSpace.js"
 
+/**
+ * A light brighter than the picture can hold (the Sun: a half float holds 65 504, its disc is far more), whose ghosts the picture's own
+ * light would therefore make far too faint: where it is, in normalised device coordinates, how wide its disc is, as a share of the
+ * picture's height, and the light it has beyond what the picture holds, per channel, times its disc's area in that same unit squared.
+ */
+export interface BrightSource {
+  x: number
+  y: number
+  radius: number
+  flux: [number, number, number]
+}
+
 /** A ghost found under a point of the picture (see GhostPass.pickAt): which, and where in the picture the light that makes it is. */
 export interface GhostHit {
   ghost: LensGhost
@@ -101,7 +113,10 @@ export class GhostPass {
         uImpacts: { value: 0 },
         uHistory: { value: new Array<number>(GlassWetting.HISTORY_S).fill(0) },
         uStill: { value: 0 },
-        uRunning: { value: 0 }
+        uRunning: { value: 0 },
+        uBright: { value: new Vector2() },
+        uBrightRadius: { value: 0 },
+        uBrightFlux: { value: new Vector3() }
       },
       vertexShader,
       fragmentShader: `
@@ -123,6 +138,9 @@ export class GhostPass {
         uniform float uHistory[${GlassWetting.HISTORY_S}];
         uniform float uStill;
         uniform float uRunning;
+        uniform vec2 uBright;
+        uniform float uBrightRadius;
+        uniform vec3 uBrightFlux;
         varying vec2 vUv;
 
         // The picture blurred to a disc of this radius, pixels, round this point: the level whose texels are as large as the disc, read at
@@ -301,6 +319,17 @@ export class GhostPass {
           for (int i = 0; i < ${n}; i++) {
             if (i >= uCount) break;
             float k = uScale[i];
+            // The light of a source the picture could not hold (see BrightSource), added as the same ghost: its disc scaled by k and
+            // spread by the defocus, its light conserved over it.
+            if (uKind[i] < 1.5 && uBrightFlux.g > 0.0) {
+              vec2 centre = 0.5 + uOffset[i] + k * (uBright - 0.5);
+              vec2 away = (vUv - centre) * vec2(uSize.x / uSize.y, 1.0);
+              float radius = max(uBlur[i] + abs(k) * uBrightRadius, 1.5 / uSize.y);
+              vec2 sourceEdge = min(uBright, 1.0 - uBright);
+              float sourceVignette = smoothstep(0.0, 0.15, sourceEdge.x) * smoothstep(0.0, 0.15, sourceEdge.y);
+              float inside = smoothstep(radius, 0.8 * radius, length(away));
+              sum += sourceVignette * uTint[i] * uShare[i] * uBrightFlux * inside / (3.14159265 * 0.81 * radius * radius);
+            }
             // Where in the picture the light that lands here as this ghost came from.
             vec2 from = 0.5 + (vUv - 0.5 - uOffset[i]) / k;
             if (any(lessThan(from, vec2(0.0))) || any(greaterThan(from, vec2(1.0)))) continue;
@@ -363,7 +392,7 @@ export class GhostPass {
    * Finishes `source` onto the canvas with the lens's ghosts laid over its light. `gain` is what its light is multiplied by first (see
    * ExposureAccumulation.develop).
    */
-  develop(renderer: WebGLRenderer, source: UnfinishedFrame, optics: LensOptics, gain = 1): void {
+  develop(renderer: WebGLRenderer, source: UnfinishedFrame, optics: LensOptics, gain = 1, bright?: BrightSource): void {
     const previous = renderer.getRenderTarget()
     this.copyMaterial.uniforms.uSource.value = source.scene.texture
     this.copyMaterial.uniforms.uGain.value = gain
@@ -389,6 +418,10 @@ export class GhostPass {
     for (let j = 0; j < history.length; j++) history[j] = optics.history[j] ?? 0
     uniforms.uStill.value = optics.still ? 1 : 0
     uniforms.uRunning.value = optics.running
+    ;(uniforms.uBright.value as Vector2).set(((bright?.x ?? 0) + 1) / 2, ((bright?.y ?? 0) + 1) / 2)
+    uniforms.uBrightRadius.value = bright?.radius ?? 0
+    const flux = bright?.flux ?? [0, 0, 0]
+    ;(uniforms.uBrightFlux.value as Vector3).set(flux[0] * gain, flux[1] * gain, flux[2] * gain)
     this.draw(renderer, this.ghostMaterial, this.ghostLayer)
     const develop = this.developMaterial.uniforms
     develop.uSource.value = source.scene.texture
