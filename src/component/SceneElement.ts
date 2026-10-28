@@ -520,6 +520,15 @@ export class SceneElement extends HTMLElement {
    * own name (if it has one) is UfoElement's own tooltip's job, not this one's — this method just
    * steps aside (hides its own tooltip) rather than duplicating that lookup. */
   private readonly handlePointerMove = (event: PointerEvent) => {
+    this.lastHover = { clientX: event.clientX, clientY: event.clientY, altKey: event.altKey }
+    this.hoverAt(event)
+  }
+
+  /** Where the pointer last was over the picture, while it is: what is under it is asked again at each frame drawn while playing, a ghost
+   * and its light moving under a still pointer (see handleTimeUpdate). */
+  private lastHover?: { clientX: number, clientY: number, altKey: boolean }
+
+  private hoverAt(event: { clientX: number, clientY: number, altKey: boolean }): void {
     this.sceneRenderer.setCompassHovered(true)
     if (this.holding) {
       this.hoverTooltip.hidden = true
@@ -728,7 +737,9 @@ export class SceneElement extends HTMLElement {
     return {
       kind: "ghost", id: light?.id, name,
       detail: () => texts.detail.replace("{name}", name).replace("{cause}", texts.causes[ghost.cause ?? "lens"]).replace("{where}", where),
-      path: { from: { x: ndcX, y: ndcY }, to: hit.source }
+      // From the ghost's own centre, which is its light's place scaled about the centre of the picture: the pointer is only somewhere on
+      // it, and the ghost moves with its light.
+      path: { from: { x: ghost.scale * hit.source.x, y: ghost.scale * hit.source.y }, to: hit.source }
     }
   }
 
@@ -903,7 +914,7 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setCompassPoints(naming.names?.compassPoints)
   }
 
-  private showHoverTooltip(event: PointerEvent, text: string): void {
+  private showHoverTooltip(event: { clientX: number, clientY: number }, text: string): void {
     this.hoverTooltip.textContent = text
     this.hoverTooltip.hidden = false
     // Positioned relative to #stage (the tooltip's own offsetParent), not the page — clientX/Y are
@@ -918,6 +929,7 @@ export class SceneElement extends HTMLElement {
   }
 
   private readonly handlePointerLeave = () => {
+    this.lastHover = undefined
     this.hoverTooltip.hidden = true
     this.ghostPath.toggleAttribute("hidden", true)
     this.sceneRenderer.setCompassHovered(false)
@@ -987,7 +999,12 @@ export class SceneElement extends HTMLElement {
     // above only mark the frame dirty (see SceneRenderer.render). A seek while paused is drawn by
     // the renderer's own one-shot frame request instead, so that a drag's many seeks per frame
     // still cost one drawing.
-    if (this.ufoElement.playbackState === "playing") this.sceneRenderer.frame(performance.now())
+    if (this.ufoElement.playbackState === "playing") {
+      this.sceneRenderer.frame(performance.now())
+      // A ghost's way to its light follows them as they move under a still pointer — only while one is shown: the pick reads the picture
+      // back, which is not free at every frame.
+      if (this.lastHover && !this.ghostPath.hasAttribute("hidden")) this.hoverAt(this.lastHover)
+    }
     // What the player laid over the picture from a body was measured before the body moved.
     this.ufoElement.repaintChrome()
   }
