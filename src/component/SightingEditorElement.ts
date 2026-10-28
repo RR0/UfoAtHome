@@ -1,4 +1,4 @@
-import type { LensStateJson } from "../engine/instrument/LensGhost.js"
+import { LensGhosts, type LensStateJson } from "../engine/instrument/LensGhost.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 import { RecordingText } from "../engine/persistence/RecordingText.js"
 import { setupCloudEditor } from "./CloudEditor.js"
@@ -7796,7 +7796,7 @@ export class SightingEditorElement extends HTMLElement {
     this.setRowVisible(this.exposureInput, instrument.exposureSeconds !== undefined)
     // Glass in front and what is on it lay ghosts over a picture a device records: an eye has none to show.
     for (const field of [this.lensGlassSelect, this.lensDropsInput, this.lensCondensationInput, this.lensDirtInput, this.lensShelteredInput]) {
-      this.setRowVisible(field, instrument.medium !== undefined)
+      this.setRowVisible(field, LensGhosts.records(instrument))
     }
     this.exposureInput.disabled = instrument.exposureRangeSeconds === undefined
 

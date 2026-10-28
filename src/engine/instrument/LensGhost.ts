@@ -170,8 +170,14 @@ export class LensGhosts {
    * binoculars). */
   static of(instrument: Pick<Instrument, "category" | "medium" | "ghosts">): readonly LensGhost[] {
     if (instrument.ghosts) return instrument.ghosts
-    if (!instrument.medium) return []
+    if (!LensGhosts.records(instrument)) return []
     return instrument.category === "phone" ? LensGhosts.PHONE : LensGhosts.CAMERA
+  }
+
+  /** Whether an instrument records a picture, and so has glass whose ghosts it records: a camera or a phone, even one whose film nobody
+   * knows, and anything stating what it records on — not an eye, nor binoculars or a telescope an eye looks through. */
+  static records(instrument: Pick<Instrument, "category" | "medium">): boolean {
+    return instrument.medium !== undefined || instrument.category === "camera" || instrument.category === "dslr" || instrument.category === "phone"
   }
 
   /**

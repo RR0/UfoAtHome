@@ -1,0 +1,388 @@
+{
+ "version": 1,
+ "id": "sky-test-washington-capitol",
+ "summaryTime": 6,
+ "tags": [
+  "lens flare",
+  "lens ghost",
+  "photograph",
+  "Washington 1952"
+ ],
+ "description": {
+  "en": "The Capitol at night, July 1952, with lights above the dome: each the ghost of a lamp of the plaza, mirrored through the centre of the picture by a filter on the lens.",
+  "fr": "Le Capitole la nuit, juillet 1952, avec des lumières au-dessus du dôme : chacune est le reflet d'un lampadaire de la place, renvoyé à l'opposé par rapport au centre de l'image par un filtre sur l'objectif.",
+  "es": "El Capitolio de noche, julio de 1952, con luces sobre la cúpula: cada una es el reflejo de una farola de la plaza, devuelto al lado opuesto del centro de la imagen por un filtro en el objetivo.",
+  "it": "Il Campidoglio di notte, luglio 1952, con luci sopra la cupola: ognuna è il riflesso di un lampione della piazza, rimandato dalla parte opposta del centro dell'immagine da un filtro sull'obiettivo."
+ },
+ "sources": [
+  {
+   "type": "article",
+   "title": "Le carousel de Washington",
+   "url": "https://rr0.org/science/crypto/ufo/enquete/dossier/Washington/"
+  }
+ ],
+ "time": {
+  "year": 1952,
+  "month": 7,
+  "day": 19,
+  "hour": 23,
+  "minute": 30,
+  "second": 0
+ },
+ "utcOffsetHours": -4,
+ "durationSeconds": 12,
+ "place": [
+  {
+   "lat": 38.88992,
+   "lng": -77.00709800101782,
+   "name": "Washington, D.C."
+  }
+ ],
+ "instrument": "rectilinear-lens",
+ "exposureSeconds": 2,
+ "iso": 32,
+ "lens": {
+  "glass": {
+   "value": "filter",
+   "basis": "assumed",
+   "rationale": "The lights of the sky lie across the centre of the picture from the lamps, nearly in focus: the ghost a flat glass on the lens makes."
+  }
+ },
+ "weatherTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "weather": {
+     "cloudCover": {
+      "value": 0,
+      "basis": "assumed",
+      "rationale": "Assumed: the photograph is undated beyond July 1952, and its photographer, camera and standpoint are unknown."
+     },
+     "cloudDarkness": 0,
+     "cloudBaseM": 2000,
+     "lowerCloudCover": 0,
+     "highCloudCover": 0,
+     "precipitationType": "none",
+     "precipitationIntensity": 0,
+     "windDirectionDeg": 0,
+     "windSpeed": 1,
+     "storm": false
+    }
+   }
+  ]
+ },
+ "timeline": {
+  "keyframes": [
+   {
+    "t": 0,
+    "shapes": []
+   }
+  ],
+  "order": [],
+  "groups": []
+ },
+ "observerTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.00709800101782,
+     "elevationM": 1.6,
+     "headingDeg": 270,
+     "pitchDeg": 16,
+     "fovDeg": 46,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 12000,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.00709800101782,
+     "elevationM": 1.6,
+     "headingDeg": 270,
+     "pitchDeg": 16,
+     "fovDeg": 46,
+     "fNumber": 4
+    }
+   }
+  ]
+ },
+ "soundTrack": {
+  "keyframes": []
+ },
+ "milestones": [
+  {
+   "t": 0,
+   "label": "A",
+   "note": {
+    "en": "Point at a light above the dome: it is named after the lamp below whose ghost it is, and the line drawn to it passes through the centre.",
+    "fr": "Pointez une lumière au-dessus du dôme : elle porte le nom du lampadaire dont elle est le reflet, et la ligne tracée jusqu'à lui passe par le centre.",
+    "es": "Señala una luz sobre la cúpula: lleva el nombre de la farola de abajo de la que es el reflejo, y la línea trazada hasta ella pasa por el centro.",
+    "it": "Indica una luce sopra la cupola: porta il nome del lampione di sotto di cui è il riflesso, e la linea tracciata fino a esso passa per il centro."
+   }
+  }
+ ],
+ "decor": [
+  {
+   "id": "capitol",
+   "kind": "building",
+   "title": {
+    "en": "Capitol",
+    "fr": "Capitole",
+    "es": "Capitolio",
+    "it": "Campidoglio"
+   },
+   "eastM": -170,
+   "northM": 0,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 229,
+    "lengthM": 100,
+    "heightM": 27
+   },
+   "floors": 4,
+   "facade": {
+    "color": "#e6e0d2",
+    "plain": true
+   },
+   "roof": {
+    "shape": "flat",
+    "color": "#e6e0d2"
+   }
+  },
+  {
+   "id": "dome",
+   "kind": "building",
+   "title": {
+    "en": "Capitol dome",
+    "fr": "Dôme du Capitole",
+    "es": "Cúpula del Capitolio",
+    "it": "Cupola del Campidoglio"
+   },
+   "eastM": -175,
+   "northM": 0,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 38,
+    "lengthM": 38,
+    "heightM": 80
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e6e0d2",
+    "plain": true
+   },
+   "roof": {
+    "shape": "dome",
+    "riseM": 26,
+    "color": "#e6e0d2"
+   }
+  },
+  {
+   "id": "lamp-1",
+   "kind": "streetlight",
+   "eastM": -110,
+   "northM": -90,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 0.4,
+    "lengthM": 0.4,
+    "heightM": 4.5
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 6000,
+    "colorTemperatureK": 2800
+   }
+  },
+  {
+   "id": "lamp-2",
+   "kind": "streetlight",
+   "eastM": -110,
+   "northM": -60,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 0.4,
+    "lengthM": 0.4,
+    "heightM": 4.5
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 6000,
+    "colorTemperatureK": 2800
+   }
+  },
+  {
+   "id": "lamp-3",
+   "kind": "streetlight",
+   "eastM": -110,
+   "northM": -30,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 0.4,
+    "lengthM": 0.4,
+    "heightM": 4.5
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 6000,
+    "colorTemperatureK": 2800
+   }
+  },
+  {
+   "id": "lamp-4",
+   "kind": "streetlight",
+   "eastM": -110,
+   "northM": 30,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 0.4,
+    "lengthM": 0.4,
+    "heightM": 4.5
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 6000,
+    "colorTemperatureK": 2800
+   }
+  },
+  {
+   "id": "lamp-5",
+   "kind": "streetlight",
+   "eastM": -110,
+   "northM": 60,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 0.4,
+    "lengthM": 0.4,
+    "heightM": 4.5
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 6000,
+    "colorTemperatureK": 2800
+   }
+  },
+  {
+   "id": "lamp-6",
+   "kind": "streetlight",
+   "eastM": -110,
+   "northM": 90,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 0.4,
+    "lengthM": 0.4,
+    "heightM": 4.5
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 6000,
+    "colorTemperatureK": 2800
+   }
+  },
+  {
+   "id": "lamp-7",
+   "kind": "streetlight",
+   "eastM": -70,
+   "northM": -55,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 0.4,
+    "lengthM": 0.4,
+    "heightM": 4.5
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 6000,
+    "colorTemperatureK": 2800
+   }
+  },
+  {
+   "id": "lamp-8",
+   "kind": "streetlight",
+   "eastM": -70,
+   "northM": -25,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 0.4,
+    "lengthM": 0.4,
+    "heightM": 4.5
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 6000,
+    "colorTemperatureK": 2800
+   }
+  },
+  {
+   "id": "lamp-9",
+   "kind": "streetlight",
+   "eastM": -70,
+   "northM": 25,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 0.4,
+    "lengthM": 0.4,
+    "heightM": 4.5
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 6000,
+    "colorTemperatureK": 2800
+   }
+  },
+  {
+   "id": "lamp-10",
+   "kind": "streetlight",
+   "eastM": -70,
+   "northM": 55,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 0.4,
+    "lengthM": 0.4,
+    "heightM": 4.5
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 6000,
+    "colorTemperatureK": 2800
+   }
+  },
+  {
+   "id": "lamp-11",
+   "kind": "streetlight",
+   "eastM": -35,
+   "northM": -15,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 0.4,
+    "lengthM": 0.4,
+    "heightM": 4.5
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 6000,
+    "colorTemperatureK": 2800
+   }
+  },
+  {
+   "id": "lamp-12",
+   "kind": "streetlight",
+   "eastM": -35,
+   "northM": 15,
+   "headingDeg": 90,
+   "sizeM": {
+    "widthM": 0.4,
+    "lengthM": 0.4,
+    "heightM": 4.5
+   },
+   "lit": true,
+   "lamp": {
+    "lumens": 6000,
+    "colorTemperatureK": 2800
+   }
+  }
+ ]
+}

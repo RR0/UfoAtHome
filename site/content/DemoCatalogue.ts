@@ -78,10 +78,10 @@ export class DemoCatalogue {
       id: "instruments",
       title: { en: "Instrument and weather", fr: "Instrument et météo", es: "Instrumento y tiempo", it: "Strumento e meteo" },
       blurb: {
-        en: "The same sighting through an eye, an Instamatic and a reflex; a storm; an airliner on a long exposure.",
-        fr: "La même observation à l'œil, à l'Instamatic et au reflex ; un orage ; un avion en pose longue.",
-        es: "El mismo avistamiento a ojo, con una Instamatic y con una réflex; una tormenta; un avión en exposición larga.",
-        it: "Lo stesso avvistamento a occhio, con una Instamatic e con una reflex; un temporale; un aereo in posa lunga."
+        en: "The same sighting through an eye, an Instamatic and a reflex; a storm; an airliner on a long exposure; the ghosts of a lens, rain on the glass, and the Capitol photograph of 1952.",
+        fr: "La même observation à l'œil, à l'Instamatic et au reflex ; un orage ; un avion en pose longue ; les reflets d'un objectif, la pluie sur le verre, et la photo du Capitole de 1952.",
+        es: "El mismo avistamiento a ojo, con una Instamatic y con una réflex; una tormenta; un avión en exposición larga; los reflejos de un objetivo, la lluvia en el cristal, y la foto del Capitolio de 1952.",
+        it: "Lo stesso avvistamento a occhio, con una Instamatic e con una reflex; un temporale; un aereo in posa lunga; i riflessi di un obiettivo, la pioggia sul vetro, e la foto del Campidoglio del 1952."
       }
     }
   ]
@@ -497,28 +497,6 @@ export class DemoCatalogue {
           }
         },
         {
-          id: "lens-ghosts",
-          src: "/demo-data/sky-test-lens-ghosts.json",
-          title: { en: "Lens ghosts", fr: "Reflets d'objectif", es: "Reflejos del objetivo", it: "Riflessi dell'obiettivo" },
-          blurb: {
-            en: "A phone filming a crossroads at night: a traffic light, streetlamps, the full Moon and a car's headlights, each with its ghost across the centre of the picture, moving against it. The red disc of night street videos.",
-            fr: "Un téléphone filme un carrefour la nuit : un feu, des lampadaires, la pleine Lune et les phares d'une voiture, chacun avec son reflet de l'autre côté du centre de l'image, qui se déplace à l'inverse. Le disque rouge des vidéos de rue nocturnes.",
-            es: "Un teléfono filma un cruce de noche: un semáforo, farolas, la luna llena y los faros de un coche, cada uno con su reflejo al otro lado del centro de la imagen, que se mueve al revés. El disco rojo de los vídeos callejeros nocturnos.",
-            it: "Un telefono filma un incrocio di notte: un semaforo, lampioni, la luna piena e i fari di un'auto, ciascuno col suo riflesso dall'altra parte del centro dell'immagine, che si muove al contrario. Il disco rosso dei video notturni di strada."
-          }
-        },
-        {
-          id: "lens-ghosts-rain",
-          src: "/demo-data/sky-test-lens-ghosts-rain.json",
-          title: { en: "A shower on the window", fr: "Une averse sur la vitre", es: "Un chubasco en la ventana", it: "Un acquazzone sul vetro" },
-          blurb: {
-            en: "The same crossroads through a window as a shower passes: rain from behind leaves the pane dry, then the wind turns and drops land, merge and run down, until the last ones go when it stops. Point at a halo to see what light it comes from.",
-            fr: "Le même carrefour à travers une vitre pendant une averse : la pluie de dos laisse la vitre sèche, puis le vent tourne et les gouttes se posent, fusionnent et coulent, jusqu'aux dernières quand elle s'arrête. Pointez un halo pour voir de quelle lumière il vient.",
-            es: "El mismo cruce a través de una ventana durante un chubasco: la lluvia de espaldas deja el cristal seco, luego el viento gira y las gotas caen, se funden y bajan, hasta las últimas cuando para. Señala un halo para ver de qué luz viene.",
-            it: "Lo stesso incrocio attraverso una finestra durante un acquazzone: la pioggia alle spalle lascia il vetro asciutto, poi il vento gira e le gocce si posano, si fondono e scendono, fino alle ultime quando smette. Indica un alone per vedere da quale luce viene."
-          }
-        },
-        {
           id: "csg2",
           src: "/demo-data/observer-csg2-nassau.json",
           // The case, for the player: the same upper stage at its launch and at its end, an hour and a half and 2 500 km apart.
@@ -644,6 +622,51 @@ export class DemoCatalogue {
             fr: "Ce qu'on voit est un avion de ligne en finale, phares d'atterrissage face à l'objectif. Mettez en pause et la pose de 20 s se développe : les feux fixes tracent des lignes, les clignotants posent des points, et leur espacement est la vitesse angulaire divisée par la cadence.",
             es: "Lo que se ve es un avión de pasajeros en aproximación final, con las luces de aterrizaje hacia el objetivo. Ponlo en pausa y la exposición de 20 s se revela: las luces fijas trazan líneas, las intermitentes dejan puntos, y su separación es la velocidad angular dividida por la frecuencia de destello.",
             it: "Ciò che si vede è un aereo di linea in finale, con i fari di atterraggio rivolti all'obiettivo. Mettilo in pausa e la posa di 20 s si sviluppa: le luci fisse tracciano linee, quelle lampeggianti lasciano punti, e la loro spaziatura è la velocità angolare divisa per la frequenza dei lampi."
+          }
+        }
+      ]
+    },
+    {
+      section: "instruments",
+      heading: { en: "Camera and optics", fr: "Appareil et optique", es: "Cámara y óptica", it: "Fotocamera e ottica" },
+      intro: {
+        en: "What the glass of a camera adds to a picture: the ghosts of its lights, across the centre, and the drops the rain leaves on it, which only land where the rain meets the glass.",
+        fr: "Ce que le verre d'un appareil ajoute à l'image : les reflets de ses lumières, de l'autre côté du centre, et les gouttes que la pluie y laisse, qui ne se posent que là où elle frappe le verre.",
+        es: "Lo que el cristal de una cámara añade a la imagen: los reflejos de sus luces, al otro lado del centro, y las gotas que deja la lluvia, que solo caen donde la lluvia golpea el cristal.",
+        it: "Ciò che il vetro di una fotocamera aggiunge all'immagine: i riflessi delle sue luci, dall'altra parte del centro, e le gocce che vi lascia la pioggia, che si posano solo dove la pioggia colpisce il vetro."
+      },
+      demos: [
+        {
+          id: "lens-ghosts",
+          src: "/demo-data/sky-test-lens-ghosts.json",
+          title: { en: "Lens ghosts", fr: "Reflets d'objectif", es: "Reflejos del objetivo", it: "Riflessi dell'obiettivo" },
+          blurb: {
+            en: "A phone filming a crossroads at night: a traffic light, streetlamps, the full Moon and a car's headlights, each with its ghost across the centre of the picture, moving against it. The red disc of night street videos.",
+            fr: "Un téléphone filme un carrefour la nuit : un feu, des lampadaires, la pleine Lune et les phares d'une voiture, chacun avec son reflet de l'autre côté du centre de l'image, qui se déplace à l'inverse. Le disque rouge des vidéos de rue nocturnes.",
+            es: "Un teléfono filma un cruce de noche: un semáforo, farolas, la luna llena y los faros de un coche, cada uno con su reflejo al otro lado del centro de la imagen, que se mueve al revés. El disco rojo de los vídeos callejeros nocturnos.",
+            it: "Un telefono filma un incrocio di notte: un semaforo, lampioni, la luna piena e i fari di un'auto, ciascuno col suo riflesso dall'altra parte del centro dell'immagine, che si muove al contrario. Il disco rosso dei video notturni di strada."
+          }
+        },
+        {
+          id: "lens-ghosts-rain",
+          src: "/demo-data/sky-test-lens-ghosts-rain.json",
+          title: { en: "A shower on the window", fr: "Une averse sur la vitre", es: "Un chubasco en la ventana", it: "Un acquazzone sul vetro" },
+          blurb: {
+            en: "The same crossroads through a window as a shower passes: rain from behind leaves the pane dry, then the wind turns and drops land, merge and run down, until the last ones go when it stops. Point at a halo to see what light it comes from.",
+            fr: "Le même carrefour à travers une vitre pendant une averse : la pluie de dos laisse la vitre sèche, puis le vent tourne et les gouttes se posent, fusionnent et coulent, jusqu'aux dernières quand elle s'arrête. Pointez un halo pour voir de quelle lumière il vient.",
+            es: "El mismo cruce a través de una ventana durante un chubasco: la lluvia de espaldas deja el cristal seco, luego el viento gira y las gotas caen, se funden y bajan, hasta las últimas cuando para. Señala un halo para ver de qué luz viene.",
+            it: "Lo stesso incrocio attraverso una finestra durante un acquazzone: la pioggia alle spalle lascia il vetro asciutto, poi il vento gira e le gocce si posano, si fondono e scendono, fino alle ultime quando smette. Indica un alone per vedere da quale luce viene."
+          }
+        },
+        {
+          id: "washington-capitol",
+          src: "/demo-data/sky-test-washington-capitol.json",
+          title: { en: "The Capitol, July 1952", fr: "Le Capitole, juillet 1952", es: "El Capitolio, julio de 1952", it: "Il Campidoglio, luglio 1952" },
+          blurb: {
+            en: "The photograph of lights above the Capitol dome during the Washington sightings: each is the ghost of a lamp of the plaza below, mirrored through the centre of the picture by a filter on the lens. Point at one to see which. Camera, standpoint and night assumed.",
+            fr: "La photo de lumières au-dessus du dôme du Capitole lors des observations de Washington : chacune est le reflet d'un lampadaire de la place en contrebas, renvoyé à l'opposé du centre de l'image par un filtre sur l'objectif. Pointez-en une pour voir lequel. Appareil, point de vue et nuit supposés.",
+            es: "La foto de luces sobre la cúpula del Capitolio durante los avistamientos de Washington: cada una es el reflejo de una farola de la plaza de abajo, devuelto al otro lado del centro de la imagen por un filtro en el objetivo. Señala una para ver cuál. Cámara, punto de vista y noche supuestos.",
+            it: "La foto di luci sopra la cupola del Campidoglio durante gli avvistamenti di Washington: ognuna è il riflesso di un lampione della piazza sottostante, rimandato dalla parte opposta del centro dell'immagine da un filtro sull'obiettivo. Indicane una per vedere quale. Fotocamera, punto di vista e notte ipotizzati."
           }
         }
       ]

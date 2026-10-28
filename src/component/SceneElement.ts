@@ -751,7 +751,7 @@ export class SceneElement extends HTMLElement {
     if (this.glassWetting?.sighting !== sighting || this.glassWetting.key !== key) {
       // How many drops land each second: from the rain then, and how square it met the glass then, the way the observer looked.
       const wetting = new GlassWetting(s => {
-        if (!sighting.instrument.medium || !LensGhosts.falling(sighting.lens)) return 0
+        if (!LensGhosts.records(sighting.instrument) || !LensGhosts.falling(sighting.lens)) return 0
         // The rain as it falls, starting and stopping as rain does: what the scene draws falling is what lands.
         const weather = resolveActualWeatherAt(sighting, s * 1000)
         const pose = resolveObserverPoseAt(sighting, s * 1000)
