@@ -73,7 +73,7 @@ export class FinishPass {
     renderer.render(scene, camera)
     afterScene?.()
     // A longer exposure adds its overlay layer up whatever the finish does with it: cleared always.
-    if (overlays || into) {
+    if (overlays || (into && !into.single)) {
       EquidistantProjectionPass.clearTransparent(renderer, frame.overlay)
       overlays?.()
     }

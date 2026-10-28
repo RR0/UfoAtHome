@@ -92,6 +92,7 @@ import { Vector3 } from "three"
 import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
 import { DecoyFlare } from "../engine/interpretation/DecoyFlare.js"
 import { SkyLantern } from "../engine/interpretation/SkyLantern.js"
+import { LensGhosts } from "../engine/instrument/LensGhost.js"
 import { LaunchPlumeSighting } from "../engine/interpretation/LaunchPlume.js"
 import { ReentrySighting } from "../engine/interpretation/Reentry.js"
 import type { ReentryJson } from "../engine/interpretation/Reentry.js"
@@ -1783,6 +1784,8 @@ export class SceneElement extends HTMLElement {
     // And how the picture answers it: a film's own curve at the exposure it was given, not an
     // eye's adapting response (see RecordingMedium).
     this.sceneRenderer.setMedium(sighting.instrument.medium, sighting.exposure, pose?.fNumber ?? sighting.instrument.fNumber, sighting.iso)
+    // And the ghosts its glass lays over every light of the picture, when it records one (see LensGhost).
+    this.sceneRenderer.setLensGhosts(LensGhosts.of(sighting.instrument))
     // And how the observer's own vision bends what an eye receives of it (see ObserverProvider).
     this.sceneRenderer.setPerception(ObserverProviders.perceptionOf(sighting.account?.observerPerception))
     // What the observer's own legs are doing to their eye between two recorded positions — nothing

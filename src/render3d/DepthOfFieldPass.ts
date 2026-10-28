@@ -242,9 +242,12 @@ export class DepthOfFieldPass {
       uniforms.uMode.value = FinishMode.Scene
       renderer.setRenderTarget(into.scene)
       renderer.render(this.quadScene, this.quadCamera)
-      uniforms.uMode.value = FinishMode.Overlay
-      renderer.setRenderTarget(into.overlay)
-      renderer.render(this.quadScene, this.quadCamera)
+      // A single picture with nothing laid over it ignores its overlay layer (see UnfinishedFrame.single): the gather is not run twice for it.
+      if (!into.single || overlays) {
+        uniforms.uMode.value = FinishMode.Overlay
+        renderer.setRenderTarget(into.overlay)
+        renderer.render(this.quadScene, this.quadCamera)
+      }
     } else {
       uniforms.uMode.value = FinishMode.Finished
       renderer.setRenderTarget(originalTarget)

@@ -1,3 +1,4 @@
+import type { LensGhost } from "./LensGhost.js"
 import { DigitalSlrs } from "./DigitalSlrs.js"
 import { VisualAids } from "./VisualAids.js"
 
@@ -201,6 +202,8 @@ export interface Instrument {
    * simply looked up says they were holding a camera.
    */
   apertureBlades?: number
+  /** The ghosts its glass and its sensor lay over the picture (see LensGhost): its kind's when absent (see LensGhosts.of). */
+  ghosts?: readonly LensGhost[]
   /**
    * The finest detail its receptor keeps, micrometres on the film or the sensor.
    *

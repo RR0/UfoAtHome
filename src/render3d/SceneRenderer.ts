@@ -104,6 +104,8 @@ import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
 import type { PointLayerHost } from "./PointLayerPass.js"
 import { DepthOfFieldPass } from "./DepthOfFieldPass.js"
 import { FinishPass } from "./FinishPass.js"
+import { GhostPass } from "./GhostPass.js"
+import type { LensGhost } from "../engine/instrument/LensGhost.js"
 import { EYE_UNIFORMS, type UnfinishedFrame } from "./colorSpace.js"
 import { Perceptions, type Perception } from "../engine/observer/Perception.js"
 import { AdaptiveResolution } from "./AdaptiveResolution.js"
@@ -1338,6 +1340,9 @@ export class SceneRenderer {
   private depthOfFieldPass?: DepthOfFieldPass
   /** The frame no lens reshapes or blurs — see FinishPass. */
   private finishPass?: FinishPass
+  /** The ghosts of the instrument's lens, laid over every picture it takes — see setLensGhosts. */
+  private ghostPass?: GhostPass
+  private lensGhosts: readonly LensGhost[] = []
   /** The film a long pose is added up on — built the first time a recording states an exposure long
    * enough for the sky to move a pixel, which is a rare and deliberate thing (see ExposureAccumulation). */
   private exposureAccumulation?: ExposureAccumulation
@@ -4672,7 +4677,16 @@ export class SceneRenderer {
     this.refreshReflections()
     this.resolution.beginDrawing()
     try {
-      this.renderOnce()
+      const ghosts = this.usableGhostPass()
+      if (ghosts) {
+        // Drawn as light, then finished with the lens's ghosts over it (see GhostPass).
+        this.exposureSubjectBounds = []
+        this.renderOnce(ghosts.frame)
+        ghosts.develop(this.renderer, ghosts.frame, this.lensGhosts)
+        this.onMapSubjectBounds?.(this.exposureSubjectBounds)
+      } else {
+        this.renderOnce()
+      }
       this.drawn++
     } finally {
       this.resolution.endDrawing()
@@ -5410,7 +5424,10 @@ export class SceneRenderer {
     EYE_UNIFORMS.uHasOverlay.value = 1
     EYE_UNIFORMS.uRelativeScale.value = this.relativeScale
     this.applyMedium()
-    this.exposureAccumulation?.develop(this.renderer, this.exposureInstants / this.exposureInstantsDone)
+    const gain = this.exposureInstants / this.exposureInstantsDone
+    const ghosts = this.usableGhostPass()
+    if (ghosts && this.exposureAccumulation) ghosts.develop(this.renderer, this.exposureAccumulation.developed, this.lensGhosts, gain)
+    else this.exposureAccumulation?.develop(this.renderer, gain)
     this.onMapSubjectBounds?.(this.exposureSubjectBounds)
     if (!this.compassSprites.some(sprite => sprite.visible)) return
     const overlay = new Scene()
@@ -5549,6 +5566,28 @@ export class SceneRenderer {
     this.depthOfFieldPass.resize(width, height)
     this.depthOfFieldPass.setLens(optics.focalLengthMm, optics.fNumber, optics.focusDistance, optics.frameHeightMm)
     return this.depthOfFieldPass
+  }
+
+  /**
+   * States the ghosts the instrument's lens lays over its pictures (see LensGhost): none for an eye, which then finishes its pictures as it
+   * always has.
+   */
+  setLensGhosts(ghosts: readonly LensGhost[]): void {
+    if (JSON.stringify(ghosts) === JSON.stringify(this.lensGhosts)) return
+    this.lensGhosts = ghosts
+    if (ghosts.length === 0) {
+      this.ghostPass?.dispose()
+      this.ghostPass = undefined
+    }
+    this.render()
+  }
+
+  private usableGhostPass(): GhostPass | undefined {
+    if (!this.lensGhosts?.length) return undefined
+    const size = this.renderer.getDrawingBufferSize(new Vector2())
+    if (!this.ghostPass) this.ghostPass = new GhostPass(size.x, size.y)
+    else this.ghostPass.resize(size.x, size.y)
+    return this.ghostPass
   }
 
   private usableFinishPass(): FinishPass {
@@ -6321,6 +6360,8 @@ export class SceneRenderer {
     this.skyGlow = undefined
     this.depthOfFieldPass?.dispose()
     this.finishPass?.dispose()
+    this.ghostPass?.dispose()
+    this.ghostPass = undefined
     this.depthOfFieldPass = undefined
     this.cancelExposure()
     this.exposureAccumulation?.dispose()

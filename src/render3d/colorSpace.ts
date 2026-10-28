@@ -202,6 +202,9 @@ float lampOf(float alpha) {
 export interface UnfinishedFrame {
   scene: import("three").WebGLRenderTarget
   overlay: import("three").WebGLRenderTarget
+  /** A single picture, finished as soon as it is drawn, rather than one instant of a longer exposure that adds its layers up: its overlay
+   * layer need not be cleared when nothing is laid over it, as the finish then ignores it (see EYE_UNIFORMS.uHasOverlay). */
+  single?: boolean
 }
 
 /** What a finishing shader is asked for: the finished picture, or one of its two layers alone. */

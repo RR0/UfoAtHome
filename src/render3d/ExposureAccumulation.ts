@@ -115,6 +115,11 @@ export class ExposureAccumulation {
     this.quadScene.add(this.quad)
   }
 
+  /** The film as it stands: the sum of the instants added so far, for whatever develops it other than develop (see GhostPass). */
+  get developed(): UnfinishedFrame {
+    return this.film
+  }
+
   /** Where the caller should draw one instant of the scene. */
   get instantTarget(): UnfinishedFrame {
     return this.frame

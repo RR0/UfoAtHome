@@ -319,9 +319,12 @@ export class EquidistantProjectionPass {
       material.uniforms.uMode.value = FinishMode.Scene
       renderer.setRenderTarget(into.scene)
       renderer.render(this.quadScene, this.quadCamera as Camera)
-      material.uniforms.uMode.value = FinishMode.Overlay
-      renderer.setRenderTarget(into.overlay)
-      renderer.render(this.quadScene, this.quadCamera as Camera)
+      // A single picture with nothing laid over it ignores its overlay layer (see UnfinishedFrame.single): not resampled for nothing.
+      if (!into.single || EYE_UNIFORMS.uHasOverlay.value > 0) {
+        material.uniforms.uMode.value = FinishMode.Overlay
+        renderer.setRenderTarget(into.overlay)
+        renderer.render(this.quadScene, this.quadCamera as Camera)
+      }
       renderer.setRenderTarget(destination)
     } else {
       material.uniforms.uMode.value = FinishMode.Finished
