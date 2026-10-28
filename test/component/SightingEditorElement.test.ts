@@ -6894,6 +6894,33 @@ describe("SightingEditorElement assessment", () => {
     expect(element.shadowRoot!.getElementById("lat")!.title).toBe("")
   })
 
+  it("opens on the section that lacks the most", async () => {
+    // Where the author has the most left to fill in, by the count each tab shows.
+    const element = mount()
+    const shadow = element.shadowRoot!
+    // For the assessment itself: the Date tab's count of the required duration comes before it.
+    await waitFor(() => shadow.querySelectorAll(".wanted").length > 0)
+
+    const marksOf = (tab: HTMLElement) => {
+      const badge = tab.querySelector<HTMLElement>(".tab-badge")!
+      return badge.hidden ? 0 : Number(badge.textContent)
+    }
+    const tabs = [...shadow.querySelectorAll<HTMLElement>(".group-tab")]
+    const most = Math.max(...tabs.map(marksOf))
+    const open = tabs.find(tab => tab.getAttribute("aria-expanded") === "true")!
+    expect(most).toBeGreaterThan(0)
+    expect(marksOf(open)).toBe(most)
+  })
+
+  it("leaves the section the author opened before the assessment arrived", async () => {
+    const element = mount()
+    const shadow = element.shadowRoot!
+    shadow.querySelector<HTMLElement>('.group-tab[aria-controls="group-sound"]')!.click()
+    await waitFor(() => shadow.querySelectorAll(".wanted").length > 0)
+
+    expect(shadow.getElementById("group-sound")!.hidden).toBe(false)
+  })
+
 
 })
 

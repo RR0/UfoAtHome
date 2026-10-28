@@ -2053,6 +2053,9 @@ export class SightingEditorElement extends HTMLElement {
     // Shape is the group left open on load — of the eight it's the one whose every field changes
     // what the canvas right below it draws, so it's the one worth having open while looking at it.
     this.toggleGroup(this.groupTabs[this.groupPanels.findIndex(panel => panel.id === "group-shape")], true)
+    // Not a section the author chose: the first assessment may still open another (see openMostLackingGroup).
+    this.sectionChosen = false
+    this.opensMostLacking = true
     this.attachWitnessErrors()
     // Named from the start, in the language the template is written in, until the visitor's own is loaded.
     this.labelPanels(this.messages)
@@ -2226,6 +2229,9 @@ export class SightingEditorElement extends HTMLElement {
     // which surfaces as a timeupdate) already resolves+applies it, unlike before this was a
     // keyframed track.
     this.markClean()
+    // A recording just opened: its first assessment chooses the section to show, as long as the author has not chosen one
+    // (see openMostLackingGroup).
+    if (!this.sectionChosen) this.opensMostLacking = true
   }
 
   /** The recording as it was when it was loaded or last exported, to tell whether leaving would lose anything. */
@@ -5950,6 +5956,9 @@ export class SightingEditorElement extends HTMLElement {
    * what makes this restriction affordable.
    */
   private toggleGroup(tab: HTMLButtonElement, open: boolean): void {
+    // A section opened by the author, or by a caller sending them there, is not overruled by an assessment arriving later.
+    this.sectionChosen = true
+    this.opensMostLacking = false
     this.cloudEditor?.stopManipulation()
     for (const [index, candidate] of this.groupTabs.entries()) {
       const nowOpen = candidate === tab && open
@@ -6817,6 +6826,8 @@ export class SightingEditorElement extends HTMLElement {
    * part's handle is a place to go, not a switch, since a group with every part folded away
    * would be an empty frame. */
   private openSubgroup(tab: HTMLButtonElement): void {
+    this.sectionChosen = true
+    this.opensMostLacking = false
     this.cloudEditor?.stopManipulation()
     const strip = tab.parentElement!
     for (const candidate of this.subgroupTabs) {
@@ -7035,7 +7046,40 @@ export class SightingEditorElement extends HTMLElement {
       panel: this.panelIndex(entry.about ?? "")
     }))
     this.markUnansweredQuestions(reading.unanswered)
+    this.openMostLackingGroup()
     this.renderParamSummary()
+  }
+
+  /** Whether the next assessment opens the section that lacks the most: set when a recording is opened, cleared once any section is
+   * opened — by that assessment, by the author, or by a caller sending them somewhere. */
+  private opensMostLacking = false
+
+  /** Whether the author, or a caller sending them somewhere, opened a section: from then on, a recording opened leaves them there. */
+  private sectionChosen = false
+
+  /**
+   * Opens, on a recording just opened, the section whose tab counts the most marks (see markUnansweredQuestions): where an author has
+   * the most left to fill in. The count on the tabs, not the questions, because it is what the author sees, and a section opened for
+   * gaps nobody can find in it would be a section opened for nothing. A tie goes to the section already open, then to the first in the
+   * strip; a recording lacking nothing keeps the one open on load.
+   */
+  private openMostLackingGroup(): void {
+    if (!this.opensMostLacking) return
+    this.opensMostLacking = false
+    const marksOf = (tab: HTMLButtonElement) => {
+      const badge = tab.querySelector<HTMLElement>(".tab-badge")
+      return badge && !badge.hidden ? Number(badge.textContent) : 0
+    }
+    const open = this.groupTabs.find(tab => this.isGroupOpen(tab))
+    let most = open && marksOf(open) > 0 ? open : undefined
+    for (const tab of this.groupTabs) {
+      if (marksOf(tab) > (most ? marksOf(most) : 0)) most = tab
+    }
+    if (most && most !== open) {
+      this.toggleGroup(most, true)
+      // Chosen for the author, not by them: the next recording opened chooses again.
+      this.sectionChosen = false
+    }
   }
 
   /**
