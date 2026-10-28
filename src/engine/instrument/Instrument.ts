@@ -173,18 +173,6 @@ export interface Instrument {
   exposureSeconds?: number
   exposureRangeSeconds?: { min: number; max: number }
   /**
-   * How strongly this device's own glass throws the ghosts, streaks and veils that a photograph of
-   * a bright light shows around it, and a observer's account of one does not.
-   *
-   * ZERO IS AN EYE, and it is the whole reason this is stated rather than inferred: those artefacts
-   * are made by reflections between the surfaces of a LENS, so what decides them is whether the
-   * sighting went through glass — not how bright the light was, and not a reader's taste. Every
-   * camera here carries the same one until a real device states its own, which is what the number
-   * of its elements and the age of its coatings would settle; the star is already derived
-   * separately, from the blades (see starPointsOf).
-   */
-  flare?: number
-  /**
    * How many straight blades close down its aperture, if it has an aperture at all.
    *
    * This is what puts a STAR on a bright light, and it is the reason the Sun looks different in
@@ -252,7 +240,6 @@ export const INSTRUMENTS: Instrument[] = [
     id: "eye",
     category: "eye",
     name: "Naked eye",
-    flare: 0,
     projection: "equidistant",
     // Not quite 1: the reflex is very good and is not perfect, and the residue it leaves is the
     // difference between a reconstruction that is dead still because nobody thought about it and
@@ -586,20 +573,6 @@ export class Instruments {
     if (!range) return 1
     if (range.max <= range.min) return 1
     return Math.max(0, Math.min(1, (set - range.min) / (range.max - range.min)))
-  }
-
-  /** What a lens throws when nothing about the device says otherwise — see Instrument.flare. */
-  static readonly LENS_FLARE_ARTIFACTS = 1
-
-  /**
-   * How strongly the lens-flare artefacts show for that instrument — the device's own value, or a
-   * lens's ordinary share, or nothing at all for something with no glass in it.
-   *
-   * This replaced a slider. How much flare a photograph carries is not a preference: it is whether
-   * the observer was holding a camera, which the instrument already says.
-   */
-  static flareArtifactsOf(instrument: Instrument): number {
-    return instrument.flare ?? Instruments.LENS_FLARE_ARTIFACTS
   }
 
   /**
