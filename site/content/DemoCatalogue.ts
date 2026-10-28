@@ -486,6 +486,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "lanterns",
+          src: "/demo-data/sky-test-lanterns.json",
+          title: { en: "Sky lanterns", fr: "Des lanternes célestes", es: "Farolillos voladores", it: "Lanterne volanti" },
+          blurb: {
+            en: "A dozen lanterns let go from a garden, filmed with a phone from a crossroads 1.6 km away: the loose, silent \"formation\" of orange points a viral video took for an invasion fleet. Place and date assumed.",
+            fr: "Une douzaine de lanternes lâchées d'un jardin, filmées au téléphone depuis un carrefour à 1,6 km : la « formation » lâche et silencieuse de points orangés qu'une vidéo virale a prise pour une flotte d'invasion. Lieu et date supposés.",
+            es: "Una docena de farolillos soltados desde un jardín, filmados con un teléfono desde un cruce a 1,6 km: la «formación» suelta y silenciosa de puntos anaranjados que un vídeo viral tomó por una flota de invasión. Lugar y fecha supuestos.",
+            it: "Una dozzina di lanterne lasciate andare da un giardino, filmate col telefono da un incrocio a 1,6 km: la «formazione» sparsa e silenziosa di punti arancioni che un video virale ha preso per una flotta d'invasione. Luogo e data ipotizzati."
+          }
+        },
+        {
           id: "csg2",
           src: "/demo-data/observer-csg2-nassau.json",
           // The case, for the player: the same upper stage at its launch and at its end, an hour and a half and 2 500 km apart.

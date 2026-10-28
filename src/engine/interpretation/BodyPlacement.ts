@@ -215,8 +215,14 @@ export class BodyPlacement {
   at(t: number): BodyState | undefined {
     const keys = this.keys
     if (keys.length === 0 || t < keys[0].t) return undefined
-    let index = keys.length - 1
-    while (index > 0 && keys[index].t > t) index--
+    // The last keyframe at or before t, by halves: a computed flight (a lantern, a flare) has hundreds.
+    let low = 0, high = keys.length - 1
+    while (low < high) {
+      const middle = (low + high + 1) >> 1
+      if (keys[middle].t > t) high = middle - 1
+      else low = middle
+    }
+    const index = low
     const from = keys[index]
     if (!from.present) return undefined
     const to = keys[Math.min(index + 1, keys.length - 1)]

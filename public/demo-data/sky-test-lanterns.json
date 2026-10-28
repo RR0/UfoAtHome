@@ -1,0 +1,151 @@
+{
+ "version": 1,
+ "id": "sky-test-lanterns",
+ "summaryTime": 20,
+ "tags": [
+  "lantern",
+  "misidentification"
+ ],
+ "description": {
+  "en": "A dozen sky lanterns let go from a garden 1.6 km away, seen from a crossroads: a loose group of orange points drifting silently.",
+  "fr": "Une douzaine de lanternes célestes lâchées d'un jardin à 1,6 km, vues d'un carrefour : un groupe lâche de points orangés qui dérive en silence.",
+  "es": "Una docena de farolillos voladores soltados desde un jardín a 1,6 km, vistos desde un cruce: un grupo suelto de puntos anaranjados que deriva en silencio.",
+  "it": "Una dozzina di lanterne volanti lasciate andare da un giardino a 1,6 km, viste da un incrocio: un gruppo sparso di punti arancioni che deriva in silenzio."
+ },
+ "time": {
+  "year": 2026,
+  "month": 1,
+  "day": 1,
+  "hour": 0,
+  "minute": 20,
+  "second": 0
+ },
+ "utcOffsetHours": -6,
+ "durationSeconds": 60,
+ "place": [
+  {
+   "lat": 46.8606,
+   "lng": -96.824,
+   "name": "Fargo, North Dakota"
+  }
+ ],
+ "instrument": "phone-landscape",
+ "exposureSeconds": 0.03333333333333333,
+ "weatherTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "weather": {
+     "cloudCover": {
+      "value": 0,
+      "basis": "assumed",
+      "rationale": "Assumed: neither the place nor the date of the video this demo reproduces is known."
+     },
+     "cloudDarkness": 0,
+     "cloudBaseM": 2000,
+     "lowerCloudCover": 0,
+     "highCloudCover": 0,
+     "precipitationType": "none",
+     "precipitationIntensity": 0,
+     "windDirectionDeg": 280,
+     "windSpeed": 1.5,
+     "storm": false
+    }
+   }
+  ]
+ },
+ "timeline": {
+  "keyframes": [
+   {
+    "t": 0,
+    "shapes": []
+   }
+  ],
+  "order": [],
+  "groups": []
+ },
+ "observerTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "pose": {
+     "lat": 46.8606,
+     "lng": -96.824,
+     "elevationM": 1.6,
+     "headingDeg": 326,
+     "pitchDeg": 5,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 60000,
+    "pose": {
+     "lat": 46.8606,
+     "lng": -96.824,
+     "elevationM": 1.6,
+     "headingDeg": 332,
+     "pitchDeg": 5,
+     "fovDeg": 60
+    }
+   }
+  ]
+ },
+ "soundTrack": {
+  "keyframes": []
+ },
+ "decor": [],
+ "interpretation": {
+  "title": {
+   "en": "Sky lanterns",
+   "fr": "Lanternes célestes",
+   "es": "Farolillos voladores",
+   "it": "Lanterne volanti"
+  },
+  "bodies": [],
+  "lanterns": [
+   {
+    "id": "new-year",
+    "title": {
+     "en": "Sky lanterns",
+     "fr": "Lanternes célestes",
+     "es": "Farolillos voladores",
+     "it": "Lanterne volanti"
+    },
+    "site": {
+     "eastM": {
+      "value": -1300,
+      "basis": "assumed",
+      "rationale": "Assumed: neither the place nor the date of the video this demo reproduces is known."
+     },
+     "northM": 1000,
+     "originElevationM": 275
+    },
+    "group": {
+     "count": 12,
+     "fromT": -330000,
+     "untilT": -198000,
+     "radiusM": 25,
+     "burnS": {
+      "min": 570,
+      "max": 750
+     },
+     "insideExcessK": {
+      "min": 120,
+      "max": 180
+     },
+     "seed": 7
+    },
+    "wind": {
+     "towardDeg": 100,
+     "speedMS": 1.5
+    },
+    "windAloft": {
+     "towardDeg": 30,
+     "speedMS": 4,
+     "atM": 500
+    },
+    "airTemperatureC": -12
+   }
+  ]
+ }
+}

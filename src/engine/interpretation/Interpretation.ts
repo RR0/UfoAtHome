@@ -2,6 +2,7 @@ import type { DecorModelRef } from "../model/Decor.js"
 import type { People } from "../model/People.js"
 import type { SaidText } from "../model/SaidText.js"
 import type { FlareSalvoJson } from "./DecoyFlare.js"
+import type { LanternLaunchJson } from "./SkyLantern.js"
 import type { AircraftKind } from "../traffic/AircraftModels.js"
 
 /**
@@ -33,6 +34,8 @@ export interface InterpretationJson {
   smoke?: SmokeSource[]
   /** Salvoes of decoy flares an aircraft dispensed, computed into bodies when shown — see FlareSalvoJson. */
   flares?: FlareSalvoJson[]
+  /** Sky lanterns let go from the ground, computed into bodies when shown — see LanternLaunchJson. */
+  lanterns?: LanternLaunchJson[]
   /**
    * When this interpretation is a VARIANT of the account: what the observer would have to have erred by for the account to be a
    * misperception of a candidate, as the candidate search found it (see CandidateSearch, docs/witness-error-model.md). The account never
@@ -114,6 +117,7 @@ export interface InterpretationEventJson {
   bodies?: BodyJson[]
   smoke?: SmokeSource[]
   flares?: FlareSalvoJson[]
+  lanterns?: LanternLaunchJson[]
 }
 
 /** The shapes this project builds itself. "figure" is a standing human silhouette — the decor's own

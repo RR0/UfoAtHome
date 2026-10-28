@@ -2811,7 +2811,8 @@ export class SceneRenderer {
       originX: x, originZ: z, originGroundY: this.groundYUnder(x, z), eye: this.camera.position,
       groundYAt: (px, pz) => this.groundYUnder(px, pz), wind, light: this.plumeLight(),
       occluders: [...this.decorGroups.values()],
-      transmittance: (px, py, pz) => this.transmittanceTo(px, py, pz)
+      transmittance: (px, py, pz) => this.transmittanceTo(px, py, pz),
+      pixelRad: (this.camera.fov * Math.PI) / 180 / Math.max(1, this.renderer.getDrawingBufferSize(this.bloomSize).y)
     }, seconds, sky ? (rgb, luminance) => sky.relativeOfLuminance(rgb, luminance) : undefined, ids)
     this.bodySystem.setSmoke(smoke, seconds)
     // Something is there to cast a shadow, whatever the decor says.
@@ -3493,7 +3494,7 @@ export class SceneRenderer {
   }
 
   /** What the picture is recorded on and how it was exposed — see setMedium. */
-  private medium?: { kind: RecordingMedium["kind"], iso: number, autoExposure: boolean, exposureSeconds: number, fNumber: number }
+  private medium?: { kind: RecordingMedium["kind"], iso: number, autoExposure: boolean, maxIso?: number, exposureSeconds: number, fNumber: number }
 
   /**
    * What the picture is recorded on, and the exposure it was given: the shutter, the f-number and
@@ -3503,7 +3504,7 @@ export class SceneRenderer {
    */
   setMedium(medium: RecordingMedium | undefined, exposureSeconds: number | undefined, fNumber: number | undefined, iso?: number): void {
     const next = medium && exposureSeconds !== undefined && exposureSeconds > 0 && fNumber !== undefined && fNumber > 0
-      ? { kind: medium.kind, iso: iso ?? medium.iso, autoExposure: medium.autoExposure === true, exposureSeconds, fNumber }
+      ? { kind: medium.kind, iso: iso ?? medium.iso, autoExposure: medium.autoExposure === true, maxIso: medium.maxIso, exposureSeconds, fNumber }
       : undefined
     if (JSON.stringify(next) === JSON.stringify(this.medium)) return
     this.medium = next
@@ -3530,9 +3531,11 @@ export class SceneRenderer {
     }
     EYE_UNIFORMS.uMedium.value = medium.kind === "negative" ? 1 : medium.kind === "slide" ? 2 : 3
     const metered = medium.autoExposure || this.skyUnknown ? this.scatteredSky?.sceneAdaptation : undefined
+    const set = (iso: number) => (0.065 * medium.exposureSeconds * iso * this.filterTransmittance) / (medium.fNumber * medium.fNumber * relativeScale)
+    // A device exposing itself follows the light only as far as its sensor's gain goes.
     EYE_UNIFORMS.uMediumExposure.value = metered !== undefined && metered > 0
-      ? 1 / (relativeScale * metered)
-      : (0.065 * medium.exposureSeconds * medium.iso * this.filterTransmittance) / (medium.fNumber * medium.fNumber * relativeScale)
+      ? Math.min(1 / (relativeScale * metered), medium.maxIso !== undefined ? set(medium.maxIso) : Infinity)
+      : set(medium.iso)
   }
 
   /** What a recording medium resolves, when the instrument has one — see lampBloomRadiusRad. */
@@ -5129,7 +5132,8 @@ export class SceneRenderer {
       this.celestialGroup.traverse(object => {
         if ((object instanceof Points && object.userData.pointSource) || (object instanceof Mesh && object.userData.skyRibbon)) found.push(object)
       })
-      return found
+      // And the bodies too small for a pixel, drawn as stars are (see BodySystem.drawPoints).
+      return [...found, ...this.bodySystem.pointSources]
     },
     clouds: () => [...(this.layeredClouds?.meshes ?? []), ...(this.cloudMesh ? [this.cloudMesh] : []), ...(this.cirrusMesh ? [this.cirrusMesh] : [])],
     sky: this.celestialGroup

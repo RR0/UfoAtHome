@@ -1,6 +1,7 @@
 import {
-  AnimationAction, AnimationMixer, LoopOnce, Box3, BoxGeometry, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Material, Mesh,
-  MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Quaternion, Raycaster, SphereGeometry, TorusGeometry, Vector2, Vector3
+  AnimationAction, AnimationMixer, LoopOnce, Box3, BoxGeometry, BufferAttribute, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Material, Mesh,
+  MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Points, type PointsMaterial, Quaternion, Raycaster, SphereGeometry, TorusGeometry, Vector2,
+  Vector3
 } from "three"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BODY_PRIMITIVES } from "../engine/interpretation/Interpretation.js"
@@ -12,6 +13,8 @@ import type { DecorObject } from "../engine/model/Decor.js"
 import { GroundPlume } from "./GroundPlume.js"
 import { Photometry } from "./Photometry.js"
 import { Veil } from "./Veil.js"
+import { PointSources } from "./PointSources.js"
+import { magnitudeToBrightness, STAR_BRIGHTNESS_TIERS, starBrightnessTierIndex } from "./skyColors.js"
 import { GlassMaterial } from "./GlassMaterial.js"
 import type { Reflector } from "./Reflections.js"
 import type { LuminanceDisplay } from "./Photometry.js"
@@ -66,6 +69,8 @@ export interface BodyFrame {
    * (see AerialFog). What draws itself additively, outside the fog, is dimmed by it here: a flame
    * and a glare take their airlight from what is already behind them, and need only lose theirs. */
   transmittance?: (x: number, y: number, z: number) => readonly [number, number, number]
+  /** The angle one pixel of the picture covers, radians: under it, a body that glows is drawn as a point source (see BodySystem.points). */
+  pixelRad?: number
 }
 
 /**
@@ -146,6 +151,7 @@ export class BodySystem {
   set(states: BodyState[], frame: BodyFrame, seconds = 0, display?: LuminanceDisplay, ids: readonly string[] = states.map(state => state.id)): void {
     this.frame = frame
     this.lastSet = [states, frame, seconds, display, ids]
+    this.pointLights.clear()
     const seen = new Set<string>()
     for (const state of states) {
       seen.add(state.id)
@@ -182,6 +188,55 @@ export class BodySystem {
         this.remove(id)
       }
     }
+    this.drawPoints()
+  }
+
+  /** The light of each body too small for a pixel, by its id, as an illuminance at the eye in the scene's own units (see shine). */
+  private readonly pointLights = new Map<string, { position: Vector3, light: readonly [number, number, number] }>()
+
+  /** The point sources drawn for the bodies under a pixel — for what draws them at the picture's own pixels (see PointLayerPass). */
+  get pointSources(): readonly Points[] {
+    return this.points ?? []
+  }
+
+  /** The point sources the bodies under a pixel are drawn as, one set per tier of size, as the stars are (see STAR_BRIGHTNESS_TIERS). */
+  private points?: Points[]
+
+  /**
+   * Draws each body too small for a pixel as a point source, by the light it sends. The tier says only how wide its disc is drawn, the light
+   * being the same whatever the width (see PointSources): it is taken from the magnitude of that light, as a star's is.
+   */
+  private drawPoints(): void {
+    if (this.pointLights.size === 0 && !this.points) return
+    this.points ??= STAR_BRIGHTNESS_TIERS.map(tier => {
+      const points = new Points(new BufferGeometry(), PointSources.material(tier.size, false))
+      PointSources.track(points)
+      points.frustumCulled = false
+      points.name = "body-points"
+      this.group.add(points)
+      return points
+    })
+    const perLux = this.sceneUnitsPerLux()
+    const byTier: { position: Vector3, light: readonly [number, number, number] }[][] = this.points.map(() => [])
+    for (const point of this.pointLights.values()) {
+      const lux = Math.max(...point.light) / (perLux || 1)
+      const magnitude = lux > 0 ? -14.18 - 2.5 * Math.log10(lux) : Infinity
+      byTier[Math.max(0, starBrightnessTierIndex(magnitudeToBrightness(magnitude)))].push(point)
+    }
+    this.points.forEach((points, index) => {
+      const entries = byTier[index]
+      const positions = new Float32Array(entries.length * 3)
+      const colors = new Float32Array(entries.length * 3)
+      entries.forEach((entry, i) => {
+        positions.set([entry.position.x, entry.position.y, entry.position.z], i * 3)
+        colors.set(entry.light, i * 3)
+      })
+      points.geometry.dispose()
+      const geometry = new BufferGeometry()
+      geometry.setAttribute("position", new BufferAttribute(positions, 3))
+      geometry.setAttribute("color", new BufferAttribute(colors, 3))
+      points.geometry = geometry
+    })
   }
 
   /**
@@ -248,6 +303,11 @@ export class BodySystem {
       return
     }
     veil.shine(holder.position, [light[0] * seen, light[1] * seen, light[2] * seen], (angularRadius * 180) / Math.PI * reach)
+    // Under a pixel its disc is hit or missed by the rasteriser, and its light with it: a lantern two kilometres off was a point one frame
+    // and nothing the next, or nothing at all. It is then drawn as a star is, by the light it sends (see PointSources).
+    if (frame.pixelRad !== undefined && 2 * angularRadius < frame.pixelRad) {
+      this.pointLights.set(state.id, { position: holder.position.clone(), light: [light[0] * seen, light[1] * seen, light[2] * seen] })
+    }
   }
 
 
@@ -691,6 +751,13 @@ export class BodySystem {
   clear(): void {
     this.token++
     for (const id of [...this.built.keys()]) this.remove(id)
+    this.pointLights.clear()
+    for (const points of this.points ?? []) {
+      points.geometry.dispose()
+      ;(points.material as PointsMaterial).dispose()
+      points.removeFromParent()
+    }
+    this.points = undefined
   }
 
   private build(state: BodyState): { holder: Group, signature: string, material?: MeshStandardMaterial } {

@@ -97,6 +97,10 @@ export interface RecordingMedium {
   /** A device that sets its own exposure from the scene, as a phone does: its speed then follows
    * the light, like an eye's, and only its curve is its own. */
   autoExposure?: boolean
+  /** The highest speed such a device turns its sensor up to, at the shutter the recording states: where its exposure stops following the
+   * light, and what keeps a night it films dark round its lamps as it comes out of a phone, rather than lifted to a grey sky. No limit
+   * when absent. */
+  maxIso?: number
 }
 
 /**
@@ -407,8 +411,9 @@ export const INSTRUMENTS: Instrument[] = [
     // actually deliver — diffraction at 3.2 mm of opening is already 44 arcseconds against the
     // pixel's own 51 — which is the one place on this list where the two limits nearly meet.
     detailUm: 1.4,
-    // A sensor, which the phone exposes itself from the scene it sees.
-    medium: { kind: "sensor", iso: 100, autoExposure: true }
+    // A sensor, which the phone exposes itself from the scene it sees, up to a gain of about ISO 3200 (ASSUMED: what main cameras of
+    // recent phones reach in video, where the shutter cannot be slower than a frame).
+    medium: { kind: "sensor", iso: 100, autoExposure: true, maxIso: 3200 }
   },
   {
     // The same silicon, held the way people actually hold a phone. The picture is TALLER than it is
@@ -433,7 +438,7 @@ export const INSTRUMENTS: Instrument[] = [
     apertureBlades: undefined,
     // The same silicon held the other way up: the same 1.4 µm pixels.
     detailUm: 1.4,
-    medium: { kind: "sensor", iso: 100, autoExposure: true }
+    medium: { kind: "sensor", iso: 100, autoExposure: true, maxIso: 3200 }
   },
   // Sensors from Stellarium's Oculars catalogue (see DigitalSlrs): the digital bodies a recent
   // photograph is most likely to have been made with.
