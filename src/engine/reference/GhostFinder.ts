@@ -20,6 +20,8 @@ export interface PictureSpot {
   radius: number
   /** Its colour, the mean of what it covers, 0 to 255 per channel. */
   color: [number, number, number]
+  /** How uneven what is round it is, luminance 0 to 255 (the spread of the ring's middle half): a sky's little, leaves' much. */
+  spread?: number
 }
 
 /** A ghost found, and the light it is the ghost of. */
@@ -85,6 +87,10 @@ export class GhostFinder {
   /** How many of the picture's greatest lights a lone ghost is looked for, and how far from their mirror image, as a share of the diagonal. */
   private static readonly GREAT_LIGHTS = 3
   private static readonly LONE_REACH = 0.15
+  /** How near two grounds are to be alike, luminance 0 to 255: the spots chance could have put where a lone ghost is are on such a ground. */
+  private static readonly GROUND_ALIKE = 40
+  /** How uneven two grounds may both be, at least, to be alike whatever their difference in that (see groundsAlike). */
+  private static readonly EVEN_ALIKE = 20
   /** How many spots chance may be expected to put as near for a lone ghost to be taken. */
   private static readonly CHANCE_ALONE = 0.5
   /** How far the axis is from the picture's centre, as a share of the diagonal, for the picture to be said cropped. */
@@ -95,6 +101,8 @@ export class GhostFinder {
   /** A light saturated (luminance 0 to 255), and one standing out of its nearer rings by less than this lost in its own glare (see spotsOf). */
   private static readonly SATURATED = 250
   private static readonly LOST_IN_GLARE = 40
+  /** How far out of a light its glare reaches, in its radii (see apart). */
+  private static readonly OUT_OF_GLARE = 2.5
   /** How far a spot must stand out to be told a ghost of a known axis's light (see atAxis), luminance 0 to 255: as a light does. */
   private static readonly SPOT_GHOST_CONTRAST = 40
   /** How sharply the pixels' votes must peak for their axis to be taken (see MirrorVote). */
@@ -112,11 +120,15 @@ export class GhostFinder {
   private static searched(pixels: PicturePixels): GhostSearch {
     const { width, height } = pixels
     const diagonal = Math.hypot(width, height)
-    const spots = GhostFinder.spotsOf(pixels)
-    const brightest = spots.reduce((max, spot) => Math.max(max, spot.peak), 0)
+    const found = GhostFinder.spotsOf(pixels)
+    const brightest = found.reduce((max, spot) => Math.max(max, spot.peak), 0)
+    const lit = Math.min(235, 0.9 * brightest)
+    // A thin line of light (a circle drawn round a ghost, a lit cable) is neither a lamp nor a ghost: none of its spots is either.
+    const lines = GhostFinder.linesOfLight(pixels, lit)
+    const spots = found.filter(spot => !lines[Math.round(spot.y) * width + Math.round(spot.x)])
     // A light is a small bright spot that stands out: a lamp, not the glare of a lit facade or a detail of a white dome. A large one has to
     // stand out all the more: the sun low in the picture does, a lit facade does not.
-    const lights = spots.filter(spot => spot.peak >= Math.min(235, 0.9 * brightest)
+    const lights = spots.filter(spot => spot.peak >= lit
       && (spot.radius <= 0.025 * diagonal ? spot.contrast >= 40 : spot.contrast >= GhostFinder.LARGE_LIGHT_CONTRAST))
     const largest = lights.reduce((max, light) => Math.max(max, light.radius), 0)
     // A ghost that shows is a faint spot on something dark: on a lit facade it would be lost, and the facade's own details (its windows,
@@ -182,7 +194,11 @@ export class GhostFinder {
         if (some.confidence === "high") return some
       }
     }
-    return mirrored() ?? some ?? GhostFinder.loneGhost(spots, lights, candidates, width, height, tolerance) ?? none
+    // A lone ghost may also stand out well of a sky lit by a town or a sunset, where nothing is dark: taken only near where its light
+    // mirrors, among the few as strong on a like ground (see loneGhost). Among many ghosts, a lit front's windows would be such spots too.
+    const lone = [...candidates, ...spots.filter(spot => !lights.includes(spot) && !candidates.includes(spot)
+      && spot.contrast >= GhostFinder.LARGE_LIGHT_CONTRAST && spot.peak >= 1.5 * spot.background)]
+    return mirrored() ?? some ?? GhostFinder.loneGhost(spots, lights, lone, width, height, tolerance) ?? none
   }
 
   /**
@@ -240,7 +256,7 @@ export class GhostFinder {
         const beyond = Math.max(0, Math.hypot(light.x - mirror.x, light.y - mirror.y) - light.radius)
         if (beyond <= tolerance && (!best || beyond < best.beyond)) best = { light, beyond }
       }
-      if (!best || Math.hypot(ghost.x - best.light.x, ghost.y - best.light.y) < 4 * Math.max(ghost.radius, best.light.radius)) continue
+      if (!best || !GhostFinder.apart(ghost, best.light)) continue
       // Two maxima of one ghost are one ghost.
       if (pairs.some(pair => Math.hypot(pair.ghost.x - ghost.x, pair.ghost.y - ghost.y) < Math.max(2, pair.ghost.radius, ghost.radius))) continue
       // The light drawn where the ghost's mirror falls on it: the part of it this ghost is of.
@@ -255,7 +271,7 @@ export class GhostFinder {
    * The ghost of one of the picture's great lights alone (the sun low over a town, a street lamp at night): the spot that stands out most
    * near where that light mirrors through the picture's centre — a lens's axis, unless the picture was cropped. Taken as a possible ghost
    * ("low") when chance would hardly put a spot standing out as much that near: fewer than CHANCE_ALONE of them expected there, given how many
-   * the picture has.
+   * the picture has on a like ground.
    */
   private static loneGhost(spots: PictureSpot[], lights: PictureSpot[], candidates: PictureSpot[], width: number, height: number, tolerance: number):
     GhostSearch | undefined {
@@ -266,19 +282,29 @@ export class GhostFinder {
       const mirror = { x: width - light.x, y: height - light.y }
       const near = candidates.filter(spot => GhostFinder.canBeGhostOf(spot, light)
         && Math.hypot(spot.x - mirror.x, spot.y - mirror.y) <= GhostFinder.LONE_REACH * diagonal
-        && Math.hypot(spot.x - light.x, spot.y - light.y) >= 4 * Math.max(spot.radius, light.radius))
-      if (near.length === 0) continue
-      const ghost = near.reduce((most, spot) => spot.contrast > most.contrast ? spot : most)
-      const asStrong = candidates.filter(spot => spot.contrast >= ghost.contrast && GhostFinder.canBeGhostOf(spot, light)).length
-      const distance = Math.hypot(ghost.x - mirror.x, ghost.y - mirror.y) + tolerance
-      const chance = asStrong * Math.PI * distance ** 2 / (width * height)
-      if (!best || chance < best.chance) best = { pair: { ghost, light, residualPx: 0 }, chance }
+        && GhostFinder.apart(spot, light))
+      // The one chance would least put there: near where the light mirrors, and as strong as few on a like ground are. Neither the
+      // strongest (a backlit leaf further off) nor the nearest (a speck) alone.
+      for (const ghost of near) {
+        // As strong and on a like ground: a busy foreground (lit windows, leaves against the light) is no sky a ghost could have lain in.
+        const asStrong = candidates.filter(spot => spot.contrast >= ghost.contrast && GhostFinder.canBeGhostOf(spot, light)
+          && GhostFinder.groundsAlike(spot, ghost)).length
+        const distance = Math.hypot(ghost.x - mirror.x, ghost.y - mirror.y) + tolerance
+        const chance = asStrong * Math.PI * distance ** 2 / (width * height)
+        if (!best || chance < best.chance) best = { pair: { ghost, light, residualPx: 0 }, chance }
+      }
     }
     if (!best || best.chance >= GhostFinder.CHANCE_ALONE) return undefined
     const { ghost, light } = best.pair
     const centre = { x: (ghost.x + light.x) / 2, y: (ghost.y + light.y) / 2 }
     const offCentre = Math.hypot(centre.x - width / 2, centre.y - height / 2) / diagonal
     return { width, height, lights, spots, pairs: [best.pair], centre, scale: -1, cropped: offCentre > GhostFinder.CROPPED, confidence: "low" }
+  }
+
+  /** Whether two spots stand on a like ground: as bright, and as even (a sky is even, leaves against the light are not). */
+  private static groundsAlike(a: PictureSpot, b: PictureSpot): boolean {
+    const evenness = Math.max(GhostFinder.EVEN_ALIKE, a.spread ?? 0, b.spread ?? 0)
+    return Math.abs(a.background - b.background) <= GhostFinder.GROUND_ALIKE && Math.abs((a.spread ?? 0) - (b.spread ?? 0)) <= evenness / 2
   }
 
   /** The lights by cells of the widest reach a fit looks in (see fit), kept for each set of lights and reach: a fit is tried at many centres. */
@@ -315,6 +341,28 @@ export class GhostFinder {
     return (i + 50_000) * 100_000 + j + 50_000
   }
 
+  /** The pixels of the picture that are thin lines of light (see MirrorVote.withoutLines): no lamp, whatever their brightness. */
+  private static linesOfLight(pixels: PicturePixels, lit: number): Uint8Array {
+    const { width, height, data } = pixels
+    const bright: { x: number, y: number }[] = []
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4
+      if (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2] >= lit) bright.push({ x, y })
+    }
+    const lines = new Uint8Array(width * height)
+    for (const pixel of bright) lines[pixel.y * width + pixel.x] = 1
+    for (const pixel of MirrorVote.withoutLines(bright, width, height)) lines[pixel.y * width + pixel.x] = 0
+    return lines
+  }
+
+  /**
+   * Whether a spot is far enough from a light to be no part of it: a few of its own sizes, and out of the light's glare. Not a few of the
+   * light's sizes: the sun, seventy pixels wide in a thumbnail, has its ghosts nearer than that.
+   */
+  private static apart(ghost: PictureSpot, light: PictureSpot): boolean {
+    return Math.hypot(ghost.x - light.x, ghost.y - light.y) >= Math.max(4 * ghost.radius, GhostFinder.OUT_OF_GLARE * light.radius)
+  }
+
   /** Whether a spot can be the ghost of a light: another spot, fainter than it, or as bright (both saturated) but far smaller. */
   private static canBeGhostOf(ghost: PictureSpot, light: PictureSpot): boolean {
     return ghost !== light && (ghost.peak < light.peak - 5 || ghost.radius <= GhostFinder.DOMINATED * light.radius)
@@ -331,7 +379,7 @@ export class GhostFinder {
         const x = (ghost.x - scale * light.x) / (1 - scale), y = (ghost.y - scale * light.y) / (1 - scale)
         // A lens's axis is in the picture, or not far off it for a crop.
         if (x < -0.25 * width || x > 1.25 * width || y < -0.25 * height || y > 1.25 * height) continue
-        if (Math.hypot(ghost.x - light.x, ghost.y - light.y) < 4 * Math.max(ghost.radius, light.radius)) continue
+        if (!GhostFinder.apart(ghost, light)) continue
         const key = `${Math.floor(x / cell)},${Math.floor(y / cell)}`
         const vote = votes.get(key) ?? { count: 0, x: 0, y: 0 }
         vote.count++
@@ -381,7 +429,7 @@ export class GhostFinder {
             nearest = light
           }
         }
-        if (nearest && distance <= reach * tolerance && Math.hypot(ghost.x - nearest.x, ghost.y - nearest.y) >= 4 * Math.max(ghost.radius, nearest.radius)) {
+        if (nearest && distance <= reach * tolerance && GhostFinder.apart(ghost, nearest)) {
           found.push({ ghost, light: nearest, residualPx: distance * Math.abs(scale) })
         }
       }
@@ -434,7 +482,7 @@ export class GhostFinder {
         if (!isMax) continue
         // How far it stands out, against a ring round it of the size that shows it best: a ring inside a large lamp's globe would see the
         // globe, and one far round a small spot would see the rest of the picture.
-        let contrast = -Infinity, background = 0, ringRadius = ring
+        let contrast = -Infinity, background = 0, ringRadius = ring, spread = 0
         for (const radius of [ring, 2 * ring, 4 * ring, 8 * ring, 16 * ring]) {
           if (x < radius || y < radius || x >= width - radius || y >= height - radius) break
           // Further only for a light that is lost in its own glare, the sun's: the nearer rings see nothing but it. A lamp that already
@@ -451,6 +499,7 @@ export class GhostFinder {
             contrast = peak - median
             background = median
             ringRadius = radius
+            spread = around[24] - around[8]
           }
         }
         if (contrast < 20) continue
@@ -472,7 +521,7 @@ export class GhostFinder {
             cy += w * dy
           }
         }
-        spots.push({ x: x + cx / weight, y: y + cy / weight, peak, contrast, background, radius: Math.sqrt(area / Math.PI), color: [r / area, g / area, b / area] })
+        spots.push({ x: x + cx / weight, y: y + cy / weight, peak, contrast, background, radius: Math.sqrt(area / Math.PI), color: [r / area, g / area, b / area], spread })
       }
     }
     spots.sort((p, q) => q.contrast - p.contrast)

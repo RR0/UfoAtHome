@@ -77,6 +77,7 @@ export class MirrorVote {
       }
     }
     faint.splice(0, faint.length, ...MirrorVote.withoutLines(faint, width, height))
+    lights.splice(0, lights.length, ...MirrorVote.withoutLines(lights, width, height))
     faint.push(...MirrorVote.insides(faint, lights, width, height))
     if (lights.length === 0 || faint.length === 0) return undefined
     const nearest = MirrorVote.NEAREST * Math.hypot(width, height)
@@ -214,14 +215,15 @@ export class MirrorVote {
   }
 
   /**
-   * The faint pixels but those that make a thin line: a wire, a branch, a contrail, a circle drawn round something on the picture. A ghost
-   * is a patch, round or a row of lights; a line across from a wide glare (the sun's) would find a light for each of its pixels.
+   * The pixels but those that make a thin line: a wire, a branch, a contrail, a circle drawn round something on the picture. A ghost is a
+   * patch, round or a row of lights, and so is a light; a faint line across from a wide glare (the sun's) would find a light for each of
+   * its pixels, and a white circle drawn round a ghost is a ring of lights with nothing across from them.
    */
-  private static withoutLines(faint: Voter[], width: number, height: number): Voter[] {
+  static withoutLines<V extends { x: number, y: number }>(faint: V[], width: number, height: number): V[] {
     const at = new Int32Array(width * height).fill(-1)
     faint.forEach((voter, n) => at[voter.y * width + voter.x] = n)
     const seen = new Uint8Array(faint.length)
-    const kept: Voter[] = []
+    const kept: V[] = []
     for (let start = 0; start < faint.length; start++) {
       if (seen[start]) continue
       const group = [start]

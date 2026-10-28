@@ -172,4 +172,37 @@ describe("GhostFinder", () => {
     expect(Math.hypot(search.pairs[0].ghost.x - ghost.x, search.pairs[0].ghost.y - ghost.y)).toBeLessThan(4)
     expect(Math.hypot(search.pairs[0].light.x - sun.x, search.pairs[0].light.y - sun.y)).toBeLessThan(15)
   })
+
+  it("finds a lamp's lone ghost in a sky lit by a town, past leaves against the light and a white circle drawn round it", () => {
+    const width = 780, height = 790
+    const lamp = { x: 210, y: 480 }, ghost = { x: 560, y: 290 }
+    const pixels = picture(width, height, [{ ...lamp, peak: 255, radius: 10 }, { ...ghost, peak: 200, radius: 3 }])
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4
+      if (pixels.data[i] > 40) continue
+      // An even sky above, glowing; leaves below and to the right, uneven, with bright specks.
+      const leaves = y > 380 && x > 450
+      const value = leaves ? 60 + ((x * 37 + y * 91) % 70) : 100
+      pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = value
+    }
+    for (let k = 0; k < 60; k++) {
+      const x = 470 + (k * 53) % 290, y = 400 + (k * 97) % 360
+      const i = (y * width + x) * 4
+      pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = 255
+    }
+    // The circle, white and thick, as drawn on such pictures.
+    for (let a = 0; a < 3000; a++) {
+      const angle = a / 3000 * 2 * Math.PI
+      for (let t = 0; t < 4; t++) {
+        const x = Math.round(ghost.x + (60 + t) * Math.cos(angle)), y = Math.round(ghost.y + (75 + t) * Math.sin(angle))
+        const i = (y * width + x) * 4
+        pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = 255
+      }
+    }
+    const search = GhostFinder.find(pixels)
+    expect(search.confidence).toBe("low")
+    expect(search.pairs).toHaveLength(1)
+    expect(Math.hypot(search.pairs[0].ghost.x - ghost.x, search.pairs[0].ghost.y - ghost.y)).toBeLessThan(4)
+    expect(Math.hypot(search.pairs[0].light.x - lamp.x, search.pairs[0].light.y - lamp.y)).toBeLessThan(4)
+  })
 })
