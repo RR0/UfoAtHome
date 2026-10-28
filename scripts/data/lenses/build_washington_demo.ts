@@ -33,24 +33,30 @@ const DURATION_S = 12
 const why = "Assumed: the photograph is undated beyond July 1952, and its photographer, camera and standpoint are unknown."
 const stone = "#e6e0d2"
 
-/** The centre of the dome, and the standpoint 250 m west of it. */
+/**
+ * The centre of the dome, and the standpoint west of it: MEASURED on the photograph against the model, which three of its features pin down
+ * (see PICTURE): the statue's top, the cornice of the central block's west front 40 m before the dome's axis, and the drum's width. How high
+ * the dome stands over the front depends on how far off it is seen from, and only 228.5 m gives both heights at once.
+ */
 const DOME = { lat: 38.88992, lng: -77.00906 }
-const DISTANCE_M = 250
+const DISTANCE_M = 228.5
 const METRES_PER_DEG_LNG = 111320 * Math.cos(DOME.lat * Math.PI / 180)
 const OBSERVER = { lat: DOME.lat, lng: DOME.lng - DISTANCE_M / METRES_PER_DEG_LNG }
 
-/** The photograph, as measured on it: its size, the lens's axis in it, and its focal length in its own pixels (see above). */
-// The focal length: the dome's size in the photograph (some 13 px a metre in this scan) at the standpoint's distance, which is what the
-// ghosts matched in both scans (this one 4.467 times finer than rr0.org's, where the dome was 2.93 px a metre) give.
-const PICTURE = { width: 2000, height: 1322, axis: { u: 864.5, v: 678.5 }, focalPx: 4.467 * 2.93 * DISTANCE_M }
-/** The statue atop the dome, in the photograph, and how high it stands above the ground at the standpoint, m (from TERRAIN below). */
+/**
+ * The photograph, as measured on it: its size, the lens's axis in it, and its focal length in its own pixels. The focal length is the drum's
+ * width in it (533 px) over the model's (35 m) at the standpoint's distance; with the statue's top at v = 29 and the cornice at v = 787
+ * (the model's 101.4 m and 39 m over the old standpoint's ground, 40 m nearer for the cornice), it fixes the distance (above) and the pitch.
+ */
+const PICTURE = { width: 2000, height: 1322, axis: { u: 864.5, v: 678.5 }, focalPx: 533 / 35 * DISTANCE_M }
+/** The statue atop the dome, in the photograph. */
 const DOME_TOP = { u: 979.5, v: 29 }
 
 /**
  * What the relief of the scene puts under each place, metres above the ground at the standpoint: MEASURED in the scene once (its relief, as
  * the player loads it), so that each lamp is as high as its image says. The dome's top is the Capitol's 88 m over the east plaza.
  */
-const TERRAIN = { domeBaseM: 15.9, rows: [11.0, 8.15] }
+const TERRAIN = { statueM: 100.3, rows: [10.0, 7.38] }
 /** How far the model is moved from where its stated geometry puts it, to lie on the photograph: MEASURED by laying it over. */
 const MODEL_SHIFT = { eastM: 0, northM: 0, altitudeM: 0 }
 
@@ -60,8 +66,8 @@ const GHOSTS: { u: number, v: number, row: 0 | 1 }[] = [
   { u: 848.8, v: 306.4, row: 0 }, { u: 1119.8, v: 307.3, row: 0 }, { u: 747.3, v: 291.8, row: 0 }, { u: 818.8, v: 291.8, row: 0 },
   { u: 590, v: 212.8, row: 1 }, { u: 791.2, v: 219.3, row: 1 }, { u: 1051.6, v: 212.8, row: 1 }
 ]
-/** How far each row of lamps is from the standpoint, m: the west front's balustrade, and the walks at the foot of its terraces. */
-const ROW_DISTANCE_M = [175, 140]
+/** How far each row of lamps is from the dome's axis, m: the west front's balustrade, and the walks at the foot of its terraces. */
+const ROW_FROM_DOME_M = [75, 110]
 /** The height of a globe above its standard's foot, m: what the standard is drawn up to. */
 const GLOBE_HEIGHT_M = 4.5
 const EYE_M = 1.6
@@ -73,14 +79,14 @@ const offAxis = (u: number, v: number) => ({ right: toDeg(Math.atan((u - PICTURE
 // The lens's axis: turned off the dome by as much as the dome is off the axis in the photograph, and pitched so that the dome's top is as high.
 const domeTop = offAxis(DOME_TOP.u, DOME_TOP.v)
 const headingDeg = 90 - domeTop.right
-const domeTopUpDeg = toDeg(Math.atan((88 + TERRAIN.domeBaseM - EYE_M) / DISTANCE_M))
+const domeTopUpDeg = toDeg(Math.atan((TERRAIN.statueM - EYE_M) / DISTANCE_M))
 const pitchDeg = domeTopUpDeg - domeTop.up
 
 // Each lamp: on the line of sight of its image, the ghost mirrored through the axis, as high as that line is at its distance.
 const lamps = GHOSTS.map((ghost, i) => {
   const image = offAxis(2 * PICTURE.axis.u - ghost.u, 2 * PICTURE.axis.v - ghost.v)
   const azimuth = (headingDeg + image.right) * Math.PI / 180
-  const distance = ROW_DISTANCE_M[ghost.row]
+  const distance = DISTANCE_M - ROW_FROM_DOME_M[ghost.row]
   const globeAboveEye = distance * Math.tan((pitchDeg + image.up) * Math.PI / 180)
   const footAboveStandpoint = TERRAIN.rows[ghost.row]
   const heightM = Math.round((EYE_M + globeAboveEye - footAboveStandpoint) * 10) / 10

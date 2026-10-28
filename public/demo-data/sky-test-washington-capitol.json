@@ -34,7 +34,7 @@
  "place": [
   {
    "lat": 38.88992,
-   "lng": -77.01194529262085,
+   "lng": -77.01169715745546,
    "name": "Washington, D.C."
   }
  ],
@@ -64,13 +64,13 @@
    "t": 0,
    "from": {
     "lat": 38.88992,
-    "lng": -77.01194529262085
+    "lng": -77.01169715745546
    },
    "opacity": 0.5,
    "registration": {
-    "headingDeg": 90.36,
-    "pitchDeg": 11.33,
-    "fovDeg": 22.84
+    "headingDeg": 90.34,
+    "pitchDeg": 13.08,
+    "fovDeg": 21.51
    }
   }
  ],
@@ -113,10 +113,10 @@
     "t": 0,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01194529262085,
+     "lng": -77.01169715745546,
      "elevationM": 0,
-     "headingDeg": 87.98711868353078,
-     "pitchDeg": 11.02723166815291,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 12.789070223238243,
      "fovDeg": 30,
      "fNumber": 4
     }
@@ -125,10 +125,10 @@
     "t": 12000,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01194529262085,
+     "lng": -77.01169715745546,
      "elevationM": 0,
-     "headingDeg": 87.98711868353078,
-     "pitchDeg": 11.02723166815291,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 12.789070223238243,
      "fovDeg": 30,
      "fNumber": 4
     }
@@ -170,7 +170,7 @@
     "es": "Capitolio",
     "it": "Campidoglio"
    },
-   "eastM": 247.3,
+   "eastM": 225.8,
    "northM": 6.7,
    "headingDeg": 142.7,
    "sizeM": {
@@ -184,7 +184,7 @@
    "track": [
     {
      "t": 0,
-     "eastM": 247.3,
+     "eastM": 225.8,
      "northM": 6.7,
      "altitudeM": 0,
      "headingDeg": 142.7
@@ -200,13 +200,13 @@
     "es": "Candelabro",
     "it": "Candelabro"
    },
-   "eastM": 174.4,
-   "northM": -14.2,
+   "eastM": 153,
+   "northM": -11.8,
    "headingDeg": 270,
    "sizeM": {
     "widthM": 0.5,
     "lengthM": 0.5,
-    "heightM": 4.5
+    "heightM": 9.6
    },
    "lit": false,
    "lights": [
@@ -214,7 +214,7 @@
      "id": "globe-1",
      "offsetM": {
       "x": -0.35,
-      "y": 4.5,
+      "y": 9.6,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -228,7 +228,7 @@
      "id": "globe-2",
      "offsetM": {
       "x": 0.35,
-      "y": 4.5,
+      "y": 9.6,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -249,13 +249,13 @@
     "es": "Candelabro",
     "it": "Candelabro"
    },
-   "eastM": 174.8,
-   "northM": -9.1,
+   "eastM": 153.3,
+   "northM": -7.5,
    "headingDeg": 270,
    "sizeM": {
     "widthM": 0.5,
     "lengthM": 0.5,
-    "heightM": 4.5
+    "heightM": 9.6
    },
    "lit": false,
    "lights": [
@@ -263,7 +263,7 @@
      "id": "globe-1",
      "offsetM": {
       "x": -0.35,
-      "y": 4.5,
+      "y": 9.6,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -277,7 +277,7 @@
      "id": "globe-2",
      "offsetM": {
       "x": 0.35,
-      "y": 4.5,
+      "y": 9.6,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -298,13 +298,13 @@
     "es": "Candelabro",
     "it": "Candelabro"
    },
-   "eastM": 174.9,
-   "northM": -4.3,
+   "eastM": 153.5,
+   "northM": -3.6,
    "headingDeg": 270,
    "sizeM": {
     "widthM": 0.5,
     "lengthM": 0.5,
-    "heightM": 4.5
+    "heightM": 9.6
    },
    "lit": false,
    "lights": [
@@ -312,7 +312,7 @@
      "id": "globe-1",
      "offsetM": {
       "x": -0.35,
-      "y": 4.5,
+      "y": 9.6,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -326,7 +326,7 @@
      "id": "globe-2",
      "offsetM": {
       "x": 0.35,
-      "y": 4.5,
+      "y": 9.6,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -347,13 +347,13 @@
     "es": "Candelabro",
     "it": "Candelabro"
    },
-   "eastM": 175,
-   "northM": 0.5,
+   "eastM": 153.5,
+   "northM": 0.4,
    "headingDeg": 270,
    "sizeM": {
     "widthM": 0.5,
     "lengthM": 0.5,
-    "heightM": 4.5
+    "heightM": 9.6
    },
    "lit": false,
    "lights": [
@@ -361,7 +361,7 @@
      "id": "globe-1",
      "offsetM": {
       "x": -0.35,
-      "y": 4.5,
+      "y": 9.6,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -375,7 +375,7 @@
      "id": "globe-2",
      "offsetM": {
       "x": 0.35,
-      "y": 4.5,
+      "y": 9.6,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -396,13 +396,13 @@
     "es": "Candelabro",
     "it": "Candelabro"
    },
-   "eastM": 174.9,
-   "northM": 5.3,
+   "eastM": 153.4,
+   "northM": 4.4,
    "headingDeg": 270,
    "sizeM": {
     "widthM": 0.5,
     "lengthM": 0.5,
-    "heightM": 4.5
+    "heightM": 9.6
    },
    "lit": false,
    "lights": [
@@ -410,7 +410,7 @@
      "id": "globe-1",
      "offsetM": {
       "x": -0.35,
-      "y": 4.5,
+      "y": 9.6,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -424,7 +424,7 @@
      "id": "globe-2",
      "offsetM": {
       "x": 0.35,
-      "y": 4.5,
+      "y": 9.6,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -445,13 +445,13 @@
     "es": "Candelabro",
     "it": "Candelabro"
    },
-   "eastM": 173.9,
-   "northM": 19.7,
+   "eastM": 152.6,
+   "northM": 16.3,
    "headingDeg": 270,
    "sizeM": {
     "widthM": 0.5,
     "lengthM": 0.5,
-    "heightM": 4.5
+    "heightM": 9.6
    },
    "lit": false,
    "lights": [
@@ -459,7 +459,7 @@
      "id": "globe-1",
      "offsetM": {
       "x": -0.35,
-      "y": 4.5,
+      "y": 9.6,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -473,7 +473,7 @@
      "id": "globe-2",
      "offsetM": {
       "x": 0.35,
-      "y": 4.5,
+      "y": 9.6,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -494,13 +494,13 @@
     "es": "Candelabro",
     "it": "Candelabro"
    },
-   "eastM": 175,
+   "eastM": 153.5,
    "northM": -0.1,
    "headingDeg": 270,
    "sizeM": {
     "widthM": 0.5,
     "lengthM": 0.5,
-    "heightM": 3.7
+    "heightM": 8.9
    },
    "lit": false,
    "lights": [
@@ -508,7 +508,7 @@
      "id": "globe-1",
      "offsetM": {
       "x": -0.35,
-      "y": 3.7,
+      "y": 8.9,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -522,7 +522,7 @@
      "id": "globe-2",
      "offsetM": {
       "x": 0.35,
-      "y": 3.7,
+      "y": 8.9,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -543,13 +543,13 @@
     "es": "Candelabro",
     "it": "Candelabro"
    },
-   "eastM": 175,
-   "northM": 3.7,
+   "eastM": 153.5,
+   "northM": 3.1,
    "headingDeg": 270,
    "sizeM": {
     "widthM": 0.5,
     "lengthM": 0.5,
-    "heightM": 3.7
+    "heightM": 8.9
    },
    "lit": false,
    "lights": [
@@ -557,7 +557,7 @@
      "id": "globe-1",
      "offsetM": {
       "x": -0.35,
-      "y": 3.7,
+      "y": 8.9,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -571,7 +571,7 @@
      "id": "globe-2",
      "offsetM": {
       "x": 0.35,
-      "y": 3.7,
+      "y": 8.9,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -592,13 +592,13 @@
     "es": "Candelabro",
     "it": "Candelabro"
    },
-   "eastM": 139.8,
-   "northM": -6.8,
+   "eastM": 118.4,
+   "northM": -5.4,
    "headingDeg": 270,
    "sizeM": {
     "widthM": 0.5,
     "lengthM": 0.5,
-    "heightM": 0.6
+    "heightM": 4.9
    },
    "lit": false,
    "lights": [
@@ -606,7 +606,7 @@
      "id": "globe-1",
      "offsetM": {
       "x": -0.35,
-      "y": 0.6,
+      "y": 4.9,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -620,7 +620,7 @@
      "id": "globe-2",
      "offsetM": {
       "x": 0.35,
-      "y": 0.6,
+      "y": 4.9,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -641,13 +641,13 @@
     "es": "Candelabro",
     "it": "Candelabro"
    },
-   "eastM": 140,
-   "northM": 1.8,
+   "eastM": 118.5,
+   "northM": 1.4,
    "headingDeg": 270,
    "sizeM": {
     "widthM": 0.5,
     "lengthM": 0.5,
-    "heightM": 0.9
+    "heightM": 5.2
    },
    "lit": false,
    "lights": [
@@ -655,7 +655,7 @@
      "id": "globe-1",
      "offsetM": {
       "x": -0.35,
-      "y": 0.9,
+      "y": 5.2,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -669,7 +669,7 @@
      "id": "globe-2",
      "offsetM": {
       "x": 0.35,
-      "y": 0.9,
+      "y": 5.2,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -690,13 +690,13 @@
     "es": "Candelabro",
     "it": "Candelabro"
    },
-   "eastM": 139.4,
-   "northM": 12.9,
+   "eastM": 118.1,
+   "northM": 10.3,
    "headingDeg": 270,
    "sizeM": {
     "widthM": 0.5,
     "lengthM": 0.5,
-    "heightM": 0.6
+    "heightM": 4.9
    },
    "lit": false,
    "lights": [
@@ -704,7 +704,7 @@
      "id": "globe-1",
      "offsetM": {
       "x": -0.35,
-      "y": 0.6,
+      "y": 4.9,
       "z": 0
      },
      "color": "#ffd9a8",
@@ -718,7 +718,7 @@
      "id": "globe-2",
      "offsetM": {
       "x": 0.35,
-      "y": 0.6,
+      "y": 4.9,
       "z": 0
      },
      "color": "#ffd9a8",
