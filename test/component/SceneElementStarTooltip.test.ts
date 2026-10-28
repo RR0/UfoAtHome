@@ -48,8 +48,8 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setReferences(): void {}
     setReferencesShown(): void {}
     setReferenceView(): void {}
-    referenceFailedToLoad(): boolean {
-      return false
+    referenceFailure(): undefined {
+      return undefined
     }
     referenceAspect(): undefined {
       return undefined

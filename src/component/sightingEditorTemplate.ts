@@ -590,6 +590,8 @@ export const html = `
     <h3 class="section-title"><span id="label-section-picture">Picture</span></h3>
     <label><span id="label-reference-title">Name</span> <input id="referenceTitle" class="reference-field" type="text"/></label>
     <span class="input-file-row"><span id="label-reference-src">Picture</span> <rr0-input-file id="reference-source" name="reference-source" accept="image/*" no-button placeholder="https://…/photo.jpg"></rr0-input-file></span>
+    <!-- Why the picture could not be read, right under where it was asked for (see PictureFailure). -->
+    <span id="reference-failure" class="reference-failure" role="alert" hidden></span>
     <label><span id="label-reference-kind">Kind</span>
       <select id="referenceKind" class="reference-field">
         <option value="photo" id="reference-kind-photo">Photo</option>
@@ -1827,7 +1829,7 @@ select.weather-field:disabled {
 ${MessageStyle.rules(
   ["#scenery-status", ".apparent-size", ".place-status", ".ground-elevation", ".weather-source", ".file-note", ".frozen-note", ".frozen-group-state", "#observer-identity-hint", "#narrative-status", "#cloud-status", "#body-key-note", "#body-editor .body-intro", ".launch-intro", ".cloud-panel > p", ".cloud-panel details > p"],
   [".scenery-warning"],
-  ["#narrative-status.error"]
+  ["#narrative-status.error", ".reference-failure"]
 )}
 /* ---- The design handoff's look (design_handoff_editeurs_ufoathome, README §1–3.1) ----
    The site's own tokens (site/style.css), each a light-dark() pair: they follow the colour scheme this
@@ -2034,6 +2036,12 @@ ${EditorTheme.fields(".app")}
   color: var(--ink-dim);
 }
 .form-section > :is(label, .field):not(:has(> input[type="checkbox"], > input[type="radio"])) > :first-child { flex: 1 0 100%; }
+/* A file or an address: laid out as a field, but on a line of its own, an address being long, and never over the next field. */
+.form-section > .input-file-row { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0;
+  font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
+.form-section > .input-file-row > :first-child { flex: 1 0 100%; }
+.form-section > .input-file-row > rr0-input-file { flex: 1 1 0; min-width: 0; font-weight: 400; }
+.form-section > .input-file-row > rr0-input-file > input:not([type="file"]) { flex: 1 1 auto; width: auto; min-width: 0; }
 .form-section > :is(label, .field) > :is(input:not([type="checkbox"]):not([type="radio"]):not([type="number"]):not([type="color"]), select, textarea, rr0-popover-picker, rr0-input-file) { flex: 1 1 0; min-width: 0; font-weight: 400; }
 /* A date or a duration holds its own "precise / imprecise" switch beside its field: as wide as both need. */
 .form-section > :is(label, .field) > :is(rr0-date-input, rr0-duration-input) { flex: 1 1 auto; flex-wrap: wrap; min-width: 0; max-width: 100%; font-weight: 400; }

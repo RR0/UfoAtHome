@@ -2,6 +2,8 @@ import { BackSide, LinearFilter, Mesh, MeshBasicMaterial, Object3D, PlaneGeometr
 import type { Camera, Quaternion, Scene, Vector3 } from "three"
 import type { SceneReference } from "../engine/model/Reference.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
+import { PictureFetch, PictureFetchError } from "../engine/reference/PictureFetch.js"
+import type { PictureFailure } from "../engine/reference/PictureFetch.js"
 
 /**
  * The layer the pictures of the place are on, and the only one: the main pass never draws them.
@@ -55,8 +57,8 @@ export class ReferenceSystem {
   /** Each picture's own pixels, once they have arrived — the aspect a photo panel is sized from. */
   private readonly images = new Map<string, { texture: Texture; width: number; height: number }>()
   private readonly loading = new Map<string, Promise<void>>()
-  /** Addresses whose bytes could not be had — not asked for again every tick. */
-  private readonly failed = new Set<string>()
+  /** Addresses whose bytes could not be had, and why — not asked for again every tick. */
+  private readonly failed = new Map<string, PictureFailure>()
   private references: SceneReference[] = []
   private views = new Map<string, ReferenceView>()
   private shown = true
@@ -115,6 +117,13 @@ export class ReferenceSystem {
       if (reference && reference.src === (image.texture.userData.src as string)) continue
       image.texture.dispose()
       this.images.delete(id)
+      // Its panel goes with it: a picture whose new address cannot be read must not go on showing the one it replaced.
+      const mesh = this.meshes.get(id)
+      if (mesh) {
+        this.dispose(mesh)
+        this.meshes.delete(id)
+        this.signatures.delete(id)
+      }
     }
     for (const reference of references) {
       const image = this.images.get(reference.id)
@@ -187,9 +196,9 @@ export class ReferenceSystem {
     return image ? image.width / image.height : undefined
   }
 
-  /** Whether a picture's bytes could not be had — what the editor tells its author. */
-  failedToLoad(src: string): boolean {
-    return this.failed.has(src)
+  /** Why a picture's bytes could not be had, if they could not — what the editor tells its author. */
+  failureOf(src: string): PictureFailure | undefined {
+    return this.failed.get(src)
   }
 
   private load(reference: SceneReference): void {
@@ -207,9 +216,11 @@ export class ReferenceSystem {
       this.images.set(reference.id, image)
       this.build(current, image)
       this.onImageLoaded()
-    }, () => {
+    }, error => {
       this.loading.delete(reference.id)
-      this.failed.add(src)
+      this.failed.set(src, PictureFetch.failureOf(error))
+      // Told as a picture's arrival is, so that whoever shows the pictures' state can say why this one is not there.
+      this.onImageLoaded()
     })
     this.loading.set(reference.id, promise)
   }
@@ -217,12 +228,13 @@ export class ReferenceSystem {
   /** Fetches the picture's bytes — across origins, which WebGL insists on being allowed — the same
    * way the terrain's imagery is fetched (see xyzImageryRaster). */
   private static async fetchImage(src: string): Promise<{ texture: Texture; width: number; height: number }> {
-    const response = await fetch(src)
-    if (!response.ok) throw new Error(`${src}: ${response.status}`)
+    const blob = await PictureFetch.blob(src)
     // Flipped as it is decoded, and told so: a bitmap cannot be turned over on its way to the GPU
     // the way a plain image is (UNPACK_FLIP_Y is ignored for one), and a texture that still asks
     // for it lands upside down — what three's own ImageBitmapLoader does, for the same reason.
-    const bitmap = await createImageBitmap(await response.blob(), { imageOrientation: "flipY" })
+    const bitmap = await createImageBitmap(blob, { imageOrientation: "flipY" }).catch(() => {
+      throw new PictureFetchError(src, { kind: "notPicture" })
+    })
     const texture = new Texture(bitmap)
     texture.flipY = false
     texture.colorSpace = SRGBColorSpace

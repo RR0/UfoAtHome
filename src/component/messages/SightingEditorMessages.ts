@@ -471,8 +471,12 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   /** Under the fields, once a file has been embedded: how much it weighs, and that an address
    * would have been lighter — {kb} is the size in kilobytes. */
   referenceEmbedded: string
-  /** Under the fields when the picture's bytes could not be had. */
+  /** Under the fields when the picture's bytes could not be had, by why (see PictureFailure): its site does not answer, does not let
+   * other sites read it, answered with an error ({status}), or sent something that is not a picture. */
   referenceUnreachable: string
+  referenceNotShared: string
+  referenceNotFound: string
+  referenceNotPicture: string
   /** Under the picture's fields while its group is open: what the pointer does on the canvas now
    * — see SightingEditorElement.canvasMode. */
   referenceRegisterHint: string

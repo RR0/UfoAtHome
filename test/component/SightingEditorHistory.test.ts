@@ -55,8 +55,8 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setReferences(): void {}
     setReferencesShown(): void {}
     setReferenceView(): void {}
-    referenceFailedToLoad(): boolean {
-      return false
+    referenceFailure(): undefined {
+      return undefined
     }
     /** A loaded 3:2 photograph, so the editor can tell the picture from the scene around it. */
     referenceAspect(): number {

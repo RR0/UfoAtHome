@@ -1,4 +1,5 @@
 import { GhostFinder, type GhostSearch } from "../engine/reference/GhostFinder.js"
+import { PictureFetch, PictureFetchError, type PictureFailure } from "../engine/reference/PictureFetch.js"
 
 /** What the search says, in the reader's language (see SightingLabels). {count} and {scale} are filled in. */
 export interface GhostSearchTexts {
@@ -8,7 +9,8 @@ export interface GhostSearchTexts {
   low: string
   none: string
   cropped: string
-  failed: string
+  /** Why the picture could not be read, and what to do about it. */
+  failed: (failure: PictureFailure) => string
 }
 
 /**
@@ -31,8 +33,8 @@ export class GhostSearchView {
     let image: HTMLImageElement
     try {
       image = await GhostSearchView.load(src)
-    } catch {
-      this.status.textContent = this.texts.failed
+    } catch (error) {
+      this.status.textContent = this.texts.failed(PictureFetch.failureOf(error))
       return undefined
     }
     const scale = Math.min(1, GhostSearchView.ANALYSIS_SIZE / Math.max(image.naturalWidth, image.naturalHeight))
@@ -42,14 +44,8 @@ export class GhostSearchView {
     work.height = height
     const context = work.getContext("2d", { willReadFrequently: true })!
     context.drawImage(image, 0, 0, width, height)
-    let pixels: ImageData
-    try {
-      pixels = context.getImageData(0, 0, width, height)
-    } catch {
-      // A picture from another site that does not allow being read: drawn, but not readable.
-      this.status.textContent = this.texts.failed
-      return undefined
-    }
+    // Read from its own bytes (see load): never a picture of another site the canvas would refuse to give back.
+    const pixels = context.getImageData(0, 0, width, height)
     // Let the "searching" sentence show before the work holds the page.
     await new Promise(resolve => setTimeout(resolve, 0))
     const search = GhostFinder.find(pixels)
@@ -134,14 +130,18 @@ export class GhostSearchView {
     canvas.hidden = false
   }
 
-  /** The picture, readable: asked for across sites, which a data: URL does not need and an address has to allow. */
-  private static load(src: string): Promise<HTMLImageElement> {
-    return new Promise((resolve, reject) => {
+  /** The picture, from its bytes read across sites (see PictureFetch), so that the canvas it is drawn on can be read back. */
+  private static async load(src: string): Promise<HTMLImageElement> {
+    const url = URL.createObjectURL(await PictureFetch.blob(src))
+    try {
       const image = new Image()
-      if (!src.startsWith("data:")) image.crossOrigin = "anonymous"
-      image.onload = () => resolve(image)
-      image.onerror = () => reject(new Error(`Could not load ${src}`))
-      image.src = src
-    })
+      image.src = url
+      await image.decode().catch(() => {
+        throw new PictureFetchError(src, { kind: "notPicture" })
+      })
+      return image
+    } finally {
+      URL.revokeObjectURL(url)
+    }
   }
 }

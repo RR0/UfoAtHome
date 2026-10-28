@@ -144,6 +144,7 @@ import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
 import { PhenomenonSystem, PHENOMENON_LAYER } from "./PhenomenonSystem.js"
 import { clone as cloneWithSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js"
 import type { ReferenceSystem, ReferenceView } from "./ReferenceSystem.js"
+import type { PictureFailure } from "../engine/reference/PictureFetch.js"
 import type { SceneReference } from "../engine/model/Reference.js"
 import type { PhenomenonFrame, PlacedPhenomenon } from "./PhenomenonSystem.js"
 import { ScatteredSky, type SkyAmbient } from "./ScatteredSky.js"
@@ -837,6 +838,8 @@ export class SceneRenderer {
   private referencesShown = true
   private readonly referenceViews = new Map<string, ReferenceView>()
   private pendingReferences?: { references: SceneReference[], observerAt?: { lat: number; lng: number } }
+  /** Told whenever a picture has arrived or could not be had — see SceneElement.REFERENCES_CHANGE_EVENT. */
+  onReferencesSettled?: () => void
   private readonly camera: PerspectiveCamera
 
   /** Everything that is, physically, at infinity: the sky dome, the stars, the Sun/Moon/planets
@@ -5276,7 +5279,10 @@ export class SceneRenderer {
     // The latest set asked for wins when the code arrives, as it would have if it had been there.
     this.pendingReferences = { references: relative, observerAt }
     this.referencesLoading ??= import("./ReferenceSystem.js").then(({ ReferenceSystem }) => {
-      const system = new ReferenceSystem(this.scene, () => this.render())
+      const system = new ReferenceSystem(this.scene, () => {
+        this.render()
+        this.onReferencesSettled?.()
+      })
       this.references = system
       for (const [id, view] of this.referenceViews) system.setView(id, view)
       system.setShown(this.referencesShown)
@@ -5299,9 +5305,9 @@ export class SceneRenderer {
     return this.directionAtScreenPoint(ndcX, ndcY, new Vector3())
   }
 
-  /** Whether a picture's bytes could not be had — see ReferenceSystem.failedToLoad. */
-  referenceFailedToLoad(src: string): boolean {
-    return this.references?.failedToLoad(this.documentRelative(src)) ?? false
+  /** Why a picture's bytes could not be had, if they could not — see ReferenceSystem.failureOf. */
+  referenceFailure(src: string): PictureFailure | undefined {
+    return this.references?.failureOf(this.documentRelative(src))
   }
 
   /** Whether the reader has the pictures on at all — the player's own toggle. */

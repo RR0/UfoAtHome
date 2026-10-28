@@ -4,6 +4,7 @@ import type { Mesh } from "three"
 import { ReferenceSystem, REFERENCE_LAYER } from "../../src/render3d/ReferenceSystem.js"
 import type { SceneReference } from "../../src/engine/model/Reference.js"
 import { PhenomenonSystem } from "../../src/render3d/PhenomenonSystem.js"
+import { PictureFetchError } from "../../src/engine/reference/PictureFetch.js"
 
 /** A picture whose bytes are already here: 4:3, the shape of a 1968 print. */
 function loaded(width = 552, height = 385) {
@@ -197,8 +198,23 @@ describe("ReferenceSystem", () => {
     system.set([photo()])
     await settled()
     expect(asked).toBe(1)
-    expect(system.failedToLoad(photo().src)).toBe(true)
+    expect(system.failureOf(photo().src)).toBeDefined()
     expect(system.any).toBe(false)
+  })
+
+  it("stops showing a picture whose address was changed for one that cannot be read, and says why", async () => {
+    const scene = new Scene()
+    const unreadable = "https://elsewhere.example/photo.jpg"
+    const system = new ReferenceSystem(scene, () => {}, src => src === unreadable
+      ? Promise.reject(new PictureFetchError(src, { kind: "notShared" }))
+      : loaded()())
+    system.set([photo()])
+    await settled()
+    expect(meshOf(scene, "vue-1968")).toBeDefined()
+    system.set([photo({}, { src: unreadable })])
+    await settled()
+    expect(meshOf(scene, "vue-1968")).toBeUndefined()
+    expect(system.failureOf(unreadable)).toEqual({ kind: "notShared" })
   })
 
   it("lays a panorama on the inside of a sphere", async () => {

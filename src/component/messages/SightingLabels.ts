@@ -61,7 +61,6 @@ export interface SightingLabels {
   referenceGhostsLow: string
   referenceGhostsNone: string
   referenceGhostsCropped: string
-  referenceGhostsFailed: string
   /** What the picture was taken through besides the lens, and what was on that glass — see LensStateJson. */
   lensGlass: string
   lensGlassNone: string

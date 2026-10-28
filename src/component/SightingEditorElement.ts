@@ -53,7 +53,7 @@ import type { SummaryEntry, SummaryGroup } from "./SightingSummary.js"
 import { UfoElement, registerUfo } from "./UfoElement.js"
 import { TimelineMarks } from "./TimelineMarks.js"
 import type { TimelineMark } from "./TimelineMarks.js"
-import { SceneElement, registerScene, SCENE_ELEMENT_NAME, SATELLITES_CHANGE_EVENT, FIREBALLS_CHANGE_EVENT } from "./SceneElement.js"
+import { SceneElement, registerScene, SCENE_ELEMENT_NAME, SATELLITES_CHANGE_EVENT, FIREBALLS_CHANGE_EVENT, REFERENCES_CHANGE_EVENT } from "./SceneElement.js"
 import type { SatellitePass } from "../engine/astronomy/SatellitePasses.js"
 import { Recorder } from "../engine/record/Recorder.js"
 import { RafSamplingClock } from "../engine/record/SamplingClock.js"
@@ -133,6 +133,7 @@ import type { CanvasRenderer } from "../render/CanvasRenderer.js"
 import type { PicturePoint } from "../engine/reference/PictureRegistration.js"
 import type { PanoramaxPictures } from "../engine/reference/PanoramaxPictures.js"
 import type { StreetPicture } from "../engine/reference/PanoramaxPictures.js"
+import type { PictureFailure } from "../engine/reference/PictureFetch.js"
 import {
   DEFAULT_BUILDING_FLOORS,
   defaultWindows,
@@ -898,6 +899,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly referenceFovInput: HTMLInputElement
   private readonly referenceUsePoseButton: HTMLButtonElement
   private readonly referenceStatus: HTMLElement
+  private readonly referenceFailure: HTMLElement
   private readonly addReferenceButton: HTMLButtonElement
   /** Where the picture the "+" of the pictures adds comes from, picked in the menu it opens (see AddMenu). */
   private readonly referenceAddMenu: AddMenu
@@ -1637,6 +1639,7 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceFovInput = this.shadow.getElementById("referenceFov") as HTMLInputElement
     this.referenceUsePoseButton = this.shadow.getElementById("reference-use-pose") as HTMLButtonElement
     this.referenceStatus = this.shadow.getElementById("reference-status")!
+    this.referenceFailure = this.shadow.getElementById("reference-failure")!
     this.addReferenceButton = this.shadow.getElementById("add-reference") as HTMLButtonElement
     this.referenceAddMenu = new AddMenu(this.addReferenceButton, "reference-add-kind", kind => this.addReferenceOfKind(kind), kind => ({
       address: "reference-add-address", file: "reference-add-file-option", street: "reference-add-street"
@@ -1855,6 +1858,11 @@ export class SightingEditorElement extends HTMLElement {
     this.showSatelliteButton.addEventListener("click", () => this.showNextSatellite())
     this.showFireballButton.addEventListener("click", () => this.showNextFireball())
     // The fireballs on record arrive after the line was first stated: the clause has news.
+    // A picture that arrived, or could not be had, changes what is said under its fields.
+    this.sceneElement.addEventListener(REFERENCES_CHANGE_EVENT, () => {
+      const reference = this.currentReference()
+      if (reference) this.syncReferenceStatus(reference)
+    })
     this.sceneElement.addEventListener(FIREBALLS_CHANGE_EVENT, () => {
       this.skyCandidatesKey = undefined
       this.refreshSkyCandidates()
@@ -4281,6 +4289,9 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private syncReferenceStatus(reference: SceneReference): void {
+    // A picture that is not there says so under its address, whatever group the canvas is in.
+    const failure = this.sceneElement.referenceFailure(reference.src)
+    MessageStyle.show(this.referenceFailure, failure ? this.pictureFailureText(failure) : undefined, "error")
     if (this.canvasMode() === "picture") {
       this.syncRegisterStatus()
       return
@@ -4292,7 +4303,17 @@ export class SightingEditorElement extends HTMLElement {
         : ""
       return
     }
-    this.referenceStatus.textContent = this.sceneElement.referenceFailedToLoad(reference.src) ? this.messages.referenceUnreachable : ""
+    this.referenceStatus.textContent = ""
+  }
+
+  /** Why a picture could not be read, in the reader's language, with what to do about it. */
+  private pictureFailureText(failure: PictureFailure): string {
+    switch (failure.kind) {
+      case "notShared": return this.messages.referenceNotShared
+      case "status": return this.messages.referenceNotFound.replace("{status}", String(failure.status))
+      case "notPicture": return this.messages.referenceNotPicture
+      default: return this.messages.referenceUnreachable
+    }
   }
 
   /** Writes the fields back onto the selected picture — the whole array replaced, as the decor's
@@ -10566,7 +10587,8 @@ export class SightingEditorElement extends HTMLElement {
     this.findGhostsButton.textContent = messages.referenceFindGhosts
     this.ghostTexts = {
       searching: messages.referenceGhostsSearching, found: messages.referenceGhostsFound, foundScaled: messages.referenceGhostsFoundScaled,
-      low: messages.referenceGhostsLow, none: messages.referenceGhostsNone, cropped: messages.referenceGhostsCropped, failed: messages.referenceGhostsFailed
+      low: messages.referenceGhostsLow, none: messages.referenceGhostsNone, cropped: messages.referenceGhostsCropped,
+      failed: failure => this.pictureFailureText(failure)
     }
     this.label("lens-glass-none", messages.lensGlassNone)
     this.label("lens-glass-filter", messages.lensGlassFilter)

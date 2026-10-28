@@ -28,7 +28,6 @@ export const sightingLabels_it: SightingLabels = {
   referenceGhostsLow: "Forse {count} riflesso/i: troppo pochi per esserne sicuri.",
   referenceGhostsNone: "Nessun riflesso trovato: nessuna macchia debole sta dalla parte opposta di una luce rispetto a uno stesso punto.",
   referenceGhostsCropped: "L'asse dell'obiettivo è spostato dal centro dell'immagine: la foto è stata ritagliata.",
-  referenceGhostsFailed: "Impossibile leggere la foto: il suo sito deve permettere che sia letta da un altro.",
   lensGlass: "Attraverso",
   lensGlassNone: "il solo obiettivo",
   lensGlassFilter: "un filtro sull'obiettivo",

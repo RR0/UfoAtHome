@@ -18,6 +18,7 @@ import type { FrozenMapImagery } from "../render3d/terrain/frozen/ImageryAnnex.j
 import { FrozenAnnexes } from "../render3d/terrain/frozen/FrozenAnnexes.js"
 import { FrozenGroups } from "../engine/model/FrozenData.js"
 import type { FrozenData } from "../engine/model/FrozenData.js"
+import type { PictureFailure } from "../engine/reference/PictureFetch.js"
 import { FrozenUpperAirProvider } from "../engine/traffic/FrozenUpperAirProvider.js"
 import type { UpperAirAnnexData, UpperAirHeard } from "../engine/traffic/FrozenUpperAirProvider.js"
 import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
@@ -187,6 +188,8 @@ import type { HeadlightMode } from "../engine/model/Headlights.js"
 export const SATELLITES_CHANGE_EVENT = "satellites-change"
 /** Fired by a scene when the fireballs on record for its recording have arrived — see fireballState. */
 export const FIREBALLS_CHANGE_EVENT = "fireballs-change"
+/** Sent when a picture of the place has arrived, or could not be had (see referenceFailure). */
+export const REFERENCES_CHANGE_EVENT = "references-change"
 /** Fired by a scene when the air traffic recorded around its observer for its recording has arrived — see aircraftState. */
 export const AIRCRAFT_CHANGE_EVENT = "aircraft-change"
 /** Fired whenever what the interpretation on show says against the account changes — see
@@ -1030,6 +1033,7 @@ export class SceneElement extends HTMLElement {
     this.frameElement = this.shadow.getElementById("frame")!
     this.sceneCanvas = this.shadow.getElementById("scene-canvas") as HTMLCanvasElement
     this.sceneRenderer = new SceneRenderer(this.sceneCanvas)
+    this.sceneRenderer.onReferencesSettled = () => this.dispatchEvent(new CustomEvent(REFERENCES_CHANGE_EVENT))
     const loader = this.shadow.getElementById("scene-loader")!
     this.loaderNote = this.shadow.getElementById("scene-loader-note")!
     this.loaderNotVideo = this.shadow.getElementById("scene-loader-not-video")!
@@ -1562,9 +1566,9 @@ export class SceneElement extends HTMLElement {
     return this.sceneRenderer.directionAt(ndcX, ndcY)
   }
 
-  /** Whether a picture's bytes could not be had — what the editor tells its author. */
-  referenceFailedToLoad(src: string): boolean {
-    return this.sceneRenderer.referenceFailedToLoad(src)
+  /** Why a picture's bytes could not be had, if they could not — what the editor tells its author. */
+  referenceFailure(src: string): PictureFailure | undefined {
+    return this.sceneRenderer.referenceFailure(src)
   }
 
   /** What the reader wants of the pictures of the place — the player's own toggle and slider,
