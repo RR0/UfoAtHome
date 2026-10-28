@@ -130,4 +130,23 @@ describe("GhostFinder", () => {
     expect(Math.hypot(search.pairs[0].ghost.x - disc.x, search.pairs[0].ghost.y - disc.y)).toBeLessThan(15)
     expect(search.pairs[0].ghost.radius).toBeGreaterThan(25)
   })
+
+  it("finds the axis of a regular row of lamps, not one half a spacing off that pairs each ghost with the next lamp", () => {
+    // Two rows of lamps about evenly spaced, as along a front (a row spaced to the pixel would be as well explained by an axis half a
+    // spacing off, turned over or not: no finding then), their ghosts mirrored, a few missing, and stars.
+    const centre = { x: 430, y: 330 }
+    const off = [0, 7, -5, 12, -9, 4, -3, 9, -6]
+    const lamps = [...Array.from({ length: 9 }, (_, i) => ({ x: 200 + 60 * i + off[i], y: 520 })),
+      ...Array.from({ length: 6 }, (_, i) => ({ x: 260 + 60 * i - off[i], y: 560 }))]
+    const ghosts = lamps.filter((_, i) => i % 4 !== 3).map(lamp => ({ x: 2 * centre.x - lamp.x, y: 2 * centre.y - lamp.y }))
+    const search = GhostFinder.find(picture(900, 650, [
+      ...lamps.map(lamp => ({ ...lamp, peak: 255, radius: 3 })),
+      ...ghosts.map(ghost => ({ ...ghost, peak: 70, radius: 2.5 })),
+      ...[{ x: 80, y: 60 }, { x: 820, y: 90 }, { x: 600, y: 40 }, { x: 150, y: 300 }].map(star => ({ ...star, peak: 60, radius: 1.5 }))
+    ]))
+    expect(search.confidence).toBe("high")
+    expect(search.centre!.x).toBeCloseTo(centre.x, 0)
+    expect(search.centre!.y).toBeCloseTo(centre.y, 0)
+    expect(search.pairs.length).toBeGreaterThanOrEqual(ghosts.length - 1)
+  })
 })

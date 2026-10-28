@@ -76,7 +76,11 @@ export class GhostFinder {
   private static readonly LARGE_LIGHT_CONTRAST = 80
   /** How much smaller than the largest light a spot as bright as a light must be to be taken for a ghost of it. */
   private static readonly DOMINATED = 0.4
-  /** How much better than the same search on the spots turned over a finding of two ghosts or more must do. */
+  /** The grid of centres tried round the picture's own at the scale of -1: its step, in tolerances (a fit started within it finds the
+   * centre, see fit), and how far it reaches, as a share of the diagonal. */
+  private static readonly GRID_STEP = 2
+  private static readonly GRID_REACH = 0.12
+  /** How much better than the same search on the spots turned over (their mean) a finding of two ghosts or more must do. */
   private static readonly ABOVE_CHANCE = 1.5
   /** How many of the picture's greatest lights a lone ghost is looked for, and how far from their mirror image, as a share of the diagonal. */
   private static readonly GREAT_LIGHTS = 3
@@ -117,9 +121,16 @@ export class GhostFinder {
     // Each pair counts for how exactly it lines up: lights in a regular row (a street's lamps, a front's) also pair each ghost with the next
     // lamp from a centre half a spacing off, roughly — it is the exactness that tells the true centre.
     const scoreOf = (pairs: GhostPair[]) => pairs.reduce((sum, pair) => sum + Math.max(0, 1 - pair.residualPx / tolerance) ** 2, 0)
+    // Near the picture's centre, where most axes are, every point of a grid is tried as well as the voted ones: a regular row of lamps
+    // pulls the votes to an axis half a spacing off, and the true one may then be no voted cell, as the Capitol's was at some sizes.
+    const step = GhostFinder.GRID_STEP * tolerance, reach = GhostFinder.GRID_REACH * diagonal
+    const grid: { x: number, y: number }[] = []
+    for (let y = height / 2 - reach; y <= height / 2 + reach; y += step) {
+      for (let x = width / 2 - reach; x <= width / 2 + reach; x += step) grid.push({ x, y })
+    }
     const bestAt = (scale: number, among = candidates): Fit | undefined => {
       let best: Fit | undefined
-      for (const centre of GhostFinder.voted(among, lights, scale, width, height)) {
+      for (const centre of [...GhostFinder.voted(among, lights, scale, width, height), ...(scale === -1 ? grid : [])]) {
         const fit = GhostFinder.fit(among, lights, centre, scale, tolerance)
         if (!fit) continue
         const score = scoreOf(fit.pairs)
@@ -141,11 +152,14 @@ export class GhostFinder {
     let some: GhostSearch | undefined
     if (best && best.pairs.length >= 2) {
       const scale = best.scale
-      const chance = Math.max(0, ...[[-1, 1], [1, -1], [-1, -1]].map(([fx, fy]) => bestAt(scale, candidates.map(spot => ({
+      // Their mean: the best of a few such searches swings with the picture's least pixel (its colours as one canvas or another reads
+      // them), and took the Capitol's eight ghosts for chance.
+      const turned = [[-1, 1], [1, -1], [-1, -1]].map(([fx, fy]) => bestAt(scale, candidates.map(spot => ({
         ...spot,
         x: fx < 0 ? width - spot.x : spot.x,
         y: fy < 0 ? height - spot.y : spot.y
-      })))?.score ?? 0))
+      })))?.score ?? 0)
+      const chance = turned.reduce((sum, score) => sum + score, 0) / turned.length
       if (best.score > GhostFinder.ABOVE_CHANCE * chance) {
         const offCentre = Math.hypot(best.centre.x - width / 2, best.centre.y - height / 2) / diagonal
         some = {
@@ -203,6 +217,40 @@ export class GhostFinder {
     return { width, height, lights, spots, pairs: [best.pair], centre, scale: -1, cropped: offCentre > GhostFinder.CROPPED, confidence: "low" }
   }
 
+  /** The lights by cells of the widest reach a fit looks in (see fit), kept for each set of lights and reach: a fit is tried at many centres. */
+  private static readonly lightCells = new WeakMap<PictureSpot[], { cell: number, cells: Map<number, PictureSpot[]> }>()
+
+  /** The lights within a cell of a point, a cell being the reach: the only ones a fit can take for a ghost's there. */
+  private static lightsNear(lights: PictureSpot[], cell: number): (x: number, y: number) => PictureSpot[] {
+    let index = GhostFinder.lightCells.get(lights)
+    if (!index || index.cell !== cell) {
+      const cells = new Map<number, PictureSpot[]>()
+      for (const light of lights) {
+        const key = GhostFinder.cellKey(Math.floor(light.x / cell), Math.floor(light.y / cell))
+        const list = cells.get(key)
+        if (list) list.push(light)
+        else cells.set(key, [light])
+      }
+      index = { cell, cells }
+      GhostFinder.lightCells.set(lights, index)
+    }
+    const { cells } = index
+    return (x, y) => {
+      const i = Math.floor(x / cell), j = Math.floor(y / cell)
+      const found: PictureSpot[] = []
+      for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) {
+        const list = cells.get(GhostFinder.cellKey(i + di, j + dj))
+        if (list) found.push(...list)
+      }
+      return found
+    }
+  }
+
+  /** One number for a cell, its column and row (a picture's few thousand pixels away from the origin either way at most). */
+  private static cellKey(i: number, j: number): number {
+    return (i + 50_000) * 100_000 + j + 50_000
+  }
+
   /** Whether a spot can be the ghost of a light: another spot, fainter than it, or as bright (both saturated) but far smaller. */
   private static canBeGhostOf(ghost: PictureSpot, light: PictureSpot): boolean {
     return ghost !== light && (ghost.peak < light.peak - 5 || ghost.radius <= GhostFinder.DOMINATED * light.radius)
@@ -253,6 +301,7 @@ export class GhostFinder {
     { pairs: GhostPair[], centre: { x: number, y: number }, error: number } | undefined {
     let centre = start
     let pairs: GhostPair[] = []
+    const near = GhostFinder.lightsNear(lights, 3 * tolerance)
     // Wide at first: a voted centre is only within a cell or two of the true one, and a light's place from it is off by (1 - 1/k) times that.
     for (const reach of [3, 2, 1, 1]) {
       const found: GhostPair[] = []
@@ -260,7 +309,7 @@ export class GhostFinder {
         // Where its light would be: ghost = c + k (light - c).
         const x = centre.x + (ghost.x - centre.x) / scale, y = centre.y + (ghost.y - centre.y) / scale
         let nearest: PictureSpot | undefined, distance = Infinity
-        for (const light of lights) {
+        for (const light of near(x, y)) {
           if (!GhostFinder.canBeGhostOf(ghost, light)) continue
           const d = Math.hypot(light.x - x, light.y - y)
           if (d < distance) {
