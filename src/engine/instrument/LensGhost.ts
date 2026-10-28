@@ -65,13 +65,48 @@ export interface LensOptics {
   scattered: number
   /** How dense the drops on the glass are, 0 to 1: what the drop halos are shown through (see GhostPass). */
   drops: number
-  /** How often a new drop lands on each spot of the glass the size of a drop's place, per second: from how hard it rains and how square the
-   * glass faces the rain (see LensGhosts.impactRate). 0 when the drops are stated rather than falling. */
-  impactRate: number
+  /** How many drops have landed on each spot of the glass the size of a drop's place since the recording began (see GlassWetting): what
+   * says which drops are there. 0 when the drops are stated rather than falling. */
+  impacts: number
+  /** The same count, one second ago, two seconds ago… (see GlassWetting.HISTORY_S): what says how long ago each landed, so that a drop that
+   * landed just before the rain stopped still runs down after. */
+  history: number[]
+  /** Whether the drops are stated, there for good and still, rather than left by the rain. */
+  still: boolean
   /** How readily drops run down the glass, 0 to 1: a pane's run in streams, a lens's small curved front holds them. */
   running: number
-  /** The recording's clock, s: where the drops are now. */
-  timeS: number
+}
+
+/**
+ * How many drops the rain has landed on each spot of a glass since the recording began, from how many land there each second at each instant
+ * (see LensGhosts.impactRate): the sum, second by second, kept as it is worked out, so that what is on the glass at any instant follows from
+ * the whole shower before it — and played backwards or sought to, the same as played through.
+ */
+export class GlassWetting {
+  /** How far back the drops are followed, s: longer than any drop clings and runs. */
+  static readonly HISTORY_S = 20
+
+  /** The count at each whole second of the recording. */
+  private readonly sums: number[] = [0]
+
+  /** @param rateAt How many drops land on each spot per second at second `s` of the recording. */
+  constructor(private readonly rateAt: (s: number) => number) {}
+
+  /** The count at `s` seconds, 0 before the recording. */
+  at(s: number): number {
+    if (!(s > 0)) return 0
+    const whole = Math.floor(s)
+    while (this.sums.length <= whole + 1) {
+      const n = this.sums.length - 1
+      this.sums.push(this.sums[n] + (this.rateAt(n) + this.rateAt(n + 1)) / 2)
+    }
+    return this.sums[whole] + (this.sums[whole + 1] - this.sums[whole]) * (s - whole)
+  }
+
+  /** The count now, and the counts of each of the seconds before. */
+  stateAt(s: number): { impacts: number, history: number[] } {
+    return { impacts: this.at(s), history: Array.from({ length: GlassWetting.HISTORY_S }, (_, j) => this.at(s - j - 1)) }
+  }
 }
 
 /** Which way the instrument looks, and the wind: what decides how square its glass meets the rain. */
@@ -86,7 +121,7 @@ export interface RainExposure {
 export class LensGhosts {
 
   /** What an eye lays over its picture: nothing. */
-  static readonly NONE: LensOptics = { ghosts: [], blades: 0, bladeAngleRad: 0, scattered: 0, drops: 0, impactRate: 0, running: 0, timeS: 0 }
+  static readonly NONE: LensOptics = { ghosts: [], blades: 0, bladeAngleRad: 0, scattered: 0, drops: 0, impacts: 0, history: [], still: false, running: 0 }
 
   /**
    * A phone: few elements, but a sensor and its cover glass close behind them, which send back a ghost mirrored through the centre, small
@@ -141,13 +176,12 @@ export class LensGhosts {
 
   /**
    * Everything an instrument lays over its picture at an instant: the ghosts of its glass at the aperture it is set to, those of what it was
-   * taken through, and the halos of what is on that glass — with the drops from the weather when the recording says nothing of them. NONE
-   * for an eye.
+   * taken through, and the halos of what is on that glass — with the drops the rain has left on it (`wetting`, see GlassWetting) when the
+   * recording says nothing of them. NONE for an eye.
    */
   static optics(
     instrument: Pick<Instrument, "category" | "medium" | "ghosts" | "fNumber" | "fNumberRange" | "apertureBlades">,
-    fNumber: number | undefined, lens: LensStateJson | undefined, weather: Pick<Weather, "precipitationType" | "precipitationIntensity"> | undefined,
-    exposure?: RainExposure, timeS = 0
+    fNumber: number | undefined, lens: LensStateJson | undefined, wetting?: { impacts: number, history: number[] }
   ): LensOptics {
     const own = LensGhosts.of(instrument)
     if (own.length === 0) return LensGhosts.NONE
@@ -161,10 +195,12 @@ export class LensGhosts {
     // What is on the glass scatters light round each light, its own picture losing what the halo takes.
     const condensation = LensGhosts.share(lens?.condensation)
     const dirt = LensGhosts.share(lens?.dirt)
-    const falling = lens?.drops === undefined && !lens?.sheltered
-    const impactRate = falling ? LensGhosts.impactRate(weather, lens?.glass, exposure) : 0
-    // Stated, the drops are as many as said; falling, as many as land on the glass before they run off or dry (see GhostPass).
-    const drops = lens?.drops !== undefined ? LensGhosts.share(lens.drops) : falling ? Math.min(1, impactRate * LensGhosts.DROP_LIFE_S) : 0
+    const falling = LensGhosts.falling(lens)
+    const impacts = falling ? wetting?.impacts ?? 0 : 0
+    const history = falling ? wetting?.history ?? [] : []
+    // Stated, the drops are as many as said; falling, as many as landed in a drop's life (see GhostPass).
+    const recent = impacts - (history[LensGhosts.DROP_LIFE_S - 1] ?? 0)
+    const drops = lens?.drops !== undefined ? LensGhosts.share(lens.drops) : falling ? Math.min(1, recent) : 0
     if (condensation > 0) {
       ghosts.push({ scale: 1, share: 0.25 * condensation, blur: 0.03, cause: "condensation" })
       ghosts.push({ scale: 1, share: 0.15 * condensation, blur: 0.12, cause: "condensation" })
@@ -179,7 +215,12 @@ export class LensGhosts {
     const widest = instrument.fNumberRange?.min ?? reference
     const blades = instrument.apertureBlades !== undefined && set > widest * 1.15 ? instrument.apertureBlades : 0
     const running = lens?.glass === "window" || lens?.glass === "windscreen" ? 1 : 0.25
-    return { ghosts, blades, bladeAngleRad: 0.3, scattered: Math.min(0.9, scattered), drops, impactRate, running, timeS }
+    return { ghosts, blades, bladeAngleRad: 0.3, scattered: Math.min(0.9, scattered), drops, impacts, history, still: lens?.drops !== undefined, running }
+  }
+
+  /** Whether drops land on the glass from the rain, rather than being stated or kept off it. */
+  static falling(lens: LensStateJson | undefined): boolean {
+    return lens?.drops === undefined && !lens?.sheltered
   }
 
   /** How long a drop stays where it landed, s, before it runs off or dries: what the density of drops on a glass in the rain levels at. */
@@ -188,8 +229,8 @@ export class LensGhosts {
   /**
    * How often a new drop lands on each spot of the glass, per second: the rain's own rate (see dropsFrom) times how square the glass meets
    * it. Rain falls at some 6.5 m/s, snow at 1, the wind carrying both: a lens tilted up to the sky catches it, a pane facing the wind
-   * catches it, a pane with its back to the wind, or square to a rain falling straight down, catches only what eddies and splashes bring
-   * (a tenth). A window is upright whichever way the camera behind it looks; a windscreen leans back 60 degrees, so faces the sky as much
+   * catches it, a pane with its back to the wind, or square to a rain falling straight down, catches only the odd drop eddies and splashes
+   * bring (a fiftieth). A window is upright whichever way the camera behind it looks; a windscreen leans back 60 degrees, so faces the sky as much
    * as the road. ASSUMED proportions.
    */
   static impactRate(weather: Pick<Weather, "precipitationType" | "precipitationIntensity"> | undefined, glass: LensStateJson["glass"],
@@ -205,7 +246,7 @@ export class LensGhosts {
     const normal = [Math.sin(heading) * Math.cos(tilt), Math.cos(heading) * Math.cos(tilt), Math.sin(tilt)]
     const speed = Math.hypot(rain[0], rain[1], rain[2])
     const square = Math.max(0, -(rain[0] * normal[0] + rain[1] * normal[1] + rain[2] * normal[2]) / speed)
-    return wetness * 0.4 * (0.1 + 0.9 * square)
+    return wetness * 0.4 * (0.02 + 0.98 * square)
   }
 
   /** Whether a ghost is light scattered round its light by what is on the glass, rather than an image the glass reflects. */

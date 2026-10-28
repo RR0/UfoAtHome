@@ -508,14 +508,14 @@ export class DemoCatalogue {
           }
         },
         {
-          id: "lens-ghosts-windscreen",
-          src: "/demo-data/sky-test-lens-ghosts-windscreen.json",
-          title: { en: "Through a wet windscreen", fr: "À travers un pare-brise mouillé", es: "A través de un parabrisas mojado", it: "Attraverso un parabrezza bagnato" },
+          id: "lens-ghosts-rain",
+          src: "/demo-data/sky-test-lens-ghosts-rain.json",
+          title: { en: "A shower on the window", fr: "Une averse sur la vitre", es: "Un chubasco en la ventana", it: "Un acquazzone sul vetro" },
           blurb: {
-            en: "The same crossroads in the rain, filmed from behind a windscreen: every light doubled by the slanted pane, its halo broken into blotches by the drops. Point at one to see what light it comes from.",
-            fr: "Le même carrefour sous la pluie, filmé derrière un pare-brise : chaque lumière doublée par la vitre inclinée, son halo morcelé par les gouttes. Pointez-en un pour voir de quelle lumière il vient.",
-            es: "El mismo cruce bajo la lluvia, filmado tras un parabrisas: cada luz duplicada por el cristal inclinado, su halo roto en manchas por las gotas. Señala uno para ver de qué luz viene.",
-            it: "Lo stesso incrocio sotto la pioggia, filmato dietro un parabrezza: ogni luce raddoppiata dal vetro inclinato, il suo alone spezzato in macchie dalle gocce. Indicane uno per vedere da quale luce viene."
+            en: "The same crossroads through a window as a shower passes: rain from behind leaves the pane dry, then the wind turns and drops land, merge and run down, until the last ones go when it stops. Point at a halo to see what light it comes from.",
+            fr: "Le même carrefour à travers une vitre pendant une averse : la pluie de dos laisse la vitre sèche, puis le vent tourne et les gouttes se posent, fusionnent et coulent, jusqu'aux dernières quand elle s'arrête. Pointez un halo pour voir de quelle lumière il vient.",
+            es: "El mismo cruce a través de una ventana durante un chubasco: la lluvia de espaldas deja el cristal seco, luego el viento gira y las gotas caen, se funden y bajan, hasta las últimas cuando para. Señala un halo para ver de qué luz viene.",
+            it: "Lo stesso incrocio attraverso una finestra durante un acquazzone: la pioggia alle spalle lascia il vetro asciutto, poi il vento gira e le gocce si posano, si fondono e scendono, fino alle ultime quando smette. Indica un alone per vedere da quale luce viene."
           }
         },
         {

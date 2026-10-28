@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { Instruments } from "../../../src/engine/instrument/Instrument.js"
-import { LensGhosts } from "../../../src/engine/instrument/LensGhost.js"
+import { GlassWetting, LensGhosts } from "../../../src/engine/instrument/LensGhost.js"
 
 describe("LensGhosts", () => {
   it("gives an eye, and binoculars an eye looks through, no ghosts", () => {
@@ -43,18 +43,18 @@ describe("LensGhosts.optics", () => {
   })
 
   it("widens the ghosts of the glass as the aperture opens, and shapes them by the blades once stopped down", () => {
-    const open = LensGhosts.optics(slr, 2, undefined, undefined)
-    const closed = LensGhosts.optics(slr, 11, undefined, undefined)
+    const open = LensGhosts.optics(slr, 2, undefined)
+    const closed = LensGhosts.optics(slr, 11, undefined)
     expect(open.ghosts[0].blur).toBeGreaterThan(closed.ghosts[0].blur)
     expect(open.blades).toBe(0)
     expect(closed.blades).toBe(slr.apertureBlades)
     // A phone has no blades: round always.
-    expect(LensGhosts.optics(phone, undefined, undefined, undefined).blades).toBe(0)
+    expect(LensGhosts.optics(phone, undefined, undefined).blades).toBe(0)
   })
 
   it("adds the ghost of a filter, or the twin of a pane, further off for a windscreen", () => {
-    expect(LensGhosts.optics(slr, undefined, { glass: "filter" }, undefined).ghosts.some(ghost => ghost.cause === "filter" && ghost.scale === -1)).toBe(true)
-    const pane = (glass: "window" | "windscreen") => LensGhosts.optics(phone, undefined, { glass }, undefined).ghosts.find(ghost => ghost.cause === "glass")!
+    expect(LensGhosts.optics(slr, undefined, { glass: "filter" }).ghosts.some(ghost => ghost.cause === "filter" && ghost.scale === -1)).toBe(true)
+    const pane = (glass: "window" | "windscreen") => LensGhosts.optics(phone, undefined, { glass }).ghosts.find(ghost => ghost.cause === "glass")!
     expect(pane("window").scale).toBe(1)
     expect(pane("windscreen").offset![1]).toBeGreaterThan(pane("window").offset![1])
   })
@@ -64,14 +64,15 @@ describe("LensGhosts.optics", () => {
     const halos = optics.ghosts.filter(ghost => LensGhosts.scatters(ghost))
     expect(halos.length).toBeGreaterThan(0)
     expect(optics.scattered).toBeCloseTo(halos.reduce((sum, ghost) => sum + ghost.share, 0), 9)
-    expect(LensGhosts.optics(phone, undefined, undefined, undefined).scattered).toBe(0)
+    expect(LensGhosts.optics(phone, undefined, undefined).scattered).toBe(0)
   })
 
-  it("wets the glass with the rain falling, unless sheltered or told otherwise", () => {
-    const rain = { precipitationType: "rain" as const, precipitationIntensity: 0.5 }
-    expect(LensGhosts.optics(phone, undefined, undefined, rain).drops).toBeGreaterThan(0)
-    expect(LensGhosts.optics(phone, undefined, { sheltered: true }, rain).drops).toBe(0)
-    expect(LensGhosts.optics(phone, undefined, { drops: 0 }, rain).drops).toBe(0)
+  it("wets the glass with the rain that fell, unless sheltered or told otherwise", () => {
+    const wetting = { impacts: 3, history: Array.from({ length: 20 }, (_, j) => Math.max(0, 2.8 - 0.2 * j)) }
+    expect(LensGhosts.optics(phone, undefined, undefined, wetting).drops).toBeGreaterThan(0)
+    expect(LensGhosts.optics(phone, undefined, { sheltered: true }, wetting).drops).toBe(0)
+    expect(LensGhosts.optics(phone, undefined, { drops: 0 }, wetting).drops).toBe(0)
+    expect(LensGhosts.optics(phone, undefined, { drops: 0.4 }, wetting).still).toBe(true)
     expect(LensGhosts.dropsFrom({ precipitationType: "hail", precipitationIntensity: 1 })).toBe(0)
     expect(LensGhosts.dropsFrom({ precipitationType: "snow", precipitationIntensity: 1 })).toBeLessThan(LensGhosts.dropsFrom({ precipitationType: "rain", precipitationIntensity: 1 }))
   })
@@ -104,6 +105,21 @@ describe("LensGhosts.impactRate", () => {
 
   it("lands nothing in a dry sky, and nothing new on drops that are stated", () => {
     expect(LensGhosts.impactRate({ precipitationType: "none", precipitationIntensity: 0 }, undefined, { headingDeg: 0, pitchDeg: 90 })).toBe(0)
-    expect(LensGhosts.optics(Instruments.byId("phone-landscape"), undefined, { drops: 0.5 }, rain).impactRate).toBe(0)
+    expect(LensGhosts.optics(Instruments.byId("phone-landscape"), undefined, { drops: 0.5 }, { impacts: 4, history: [] }).impacts).toBe(0)
+  })
+})
+
+describe("GlassWetting", () => {
+  it("counts the drops landed so far, and how many by each second before", () => {
+    // Raining for the first ten seconds only, a drop a second.
+    const wetting = new GlassWetting(s => (s < 10 ? 1 : 0))
+    expect(wetting.at(0)).toBe(0)
+    expect(wetting.at(5)).toBeCloseTo(5, 6)
+    // Then nothing more lands: the count holds, and the drops that landed last are still counted, with their age.
+    expect(wetting.at(30)).toBeCloseTo(wetting.at(12), 6)
+    const state = wetting.stateAt(11)
+    expect(state.history).toHaveLength(GlassWetting.HISTORY_S)
+    expect(state.history[0]).toBeCloseTo(wetting.at(10), 6)
+    expect(state.history[19]).toBe(0)
   })
 })

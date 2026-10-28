@@ -92,7 +92,7 @@ import { Vector3 } from "three"
 import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
 import { DecoyFlare } from "../engine/interpretation/DecoyFlare.js"
 import { SkyLantern } from "../engine/interpretation/SkyLantern.js"
-import { LensGhosts } from "../engine/instrument/LensGhost.js"
+import { GlassWetting, LensGhosts } from "../engine/instrument/LensGhost.js"
 import { LaunchPlumeSighting } from "../engine/interpretation/LaunchPlume.js"
 import { ReentrySighting } from "../engine/interpretation/Reentry.js"
 import type { ReentryJson } from "../engine/interpretation/Reentry.js"
@@ -732,6 +732,29 @@ export class SceneElement extends HTMLElement {
     }
     return best?.pick
   }
+
+  /** The drops the rain has landed on the outermost glass of the instrument (see GlassWetting), worked out once per recording, weather and
+   * glass, and again when any of them changes. */
+  private glassWettingOf(sighting: Sighting): GlassWetting {
+    const key = JSON.stringify([sighting.lens, sighting.instrumentId, sighting.weatherTrack.allKeyframes.map(frame => [frame.t, frame.weather.precipitationType,
+      frame.weather.precipitationIntensity, frame.weather.windDirectionDeg, frame.weather.windSpeed])])
+    if (this.glassWetting?.sighting !== sighting || this.glassWetting.key !== key) {
+      // How many drops land each second: from the rain then, and how square it met the glass then, the way the observer looked.
+      const wetting = new GlassWetting(s => {
+        if (!sighting.instrument.medium || !LensGhosts.falling(sighting.lens)) return 0
+        // The rain as it falls, starting and stopping as rain does: what the scene draws falling is what lands.
+        const weather = resolveActualWeatherAt(sighting, s * 1000)
+        const pose = resolveObserverPoseAt(sighting, s * 1000)
+        return (weather.precipitationAmount ?? 1) * LensGhosts.impactRate(weather, sighting.lens?.glass, pose && {
+          headingDeg: pose.headingDeg ?? 0, pitchDeg: pose.pitchDeg, windFromDeg: weather.windDirectionDeg, windSpeedMS: weather.windSpeed
+        })
+      })
+      this.glassWetting = { sighting, key, wetting }
+    }
+    return this.glassWetting.wetting
+  }
+
+  private glassWetting?: { sighting: Sighting, key: string, wetting: GlassWetting }
 
   /** The plume of a launch under a point of the picture, by the launch's name, and what part of it with Alt (see pickAt). */
   private plumePickAt(ndcX: number, ndcY: number): ScenePick | undefined {
@@ -1896,9 +1919,8 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setMedium(sighting.instrument.medium, sighting.exposure, pose?.fNumber ?? sighting.instrument.fNumber, sighting.iso)
     // And the ghosts its glass lays over every light of the picture, when it records one, at the aperture it is set to, with those of what
     // it was taken through and the halos of what is on that glass — the drops of the rain falling now among them (see LensGhosts.optics).
-    const lensWeather = resolveWeatherAt(sighting, t)
-    this.sceneRenderer.setLensGhosts(LensGhosts.optics(sighting.instrument, pose?.fNumber ?? sighting.instrument.fNumber, sighting.lens, lensWeather,
-      pose && { headingDeg: pose.headingDeg ?? 0, pitchDeg: pose.pitchDeg, windFromDeg: lensWeather.windDirectionDeg, windSpeedMS: lensWeather.windSpeed }, t / 1000))
+    this.sceneRenderer.setLensGhosts(LensGhosts.optics(sighting.instrument, pose?.fNumber ?? sighting.instrument.fNumber, sighting.lens,
+      this.glassWettingOf(sighting).stateAt(t / 1000)))
     // And how the observer's own vision bends what an eye receives of it (see ObserverProvider).
     this.sceneRenderer.setPerception(ObserverProviders.perceptionOf(sighting.account?.observerPerception))
     // What the observer's own legs are doing to their eye between two recorded positions — nothing

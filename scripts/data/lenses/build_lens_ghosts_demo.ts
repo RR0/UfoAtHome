@@ -10,10 +10,11 @@
  * car. The night is chosen for the Moon: on 3 January 2026 at 19:00 (UTC+1) it is full, 16 degrees up in the east-north-east, in the same
  * frame as the crossroads. Computed by the engine: the Moon, the lights' light, the ghosts.
  *
- * And the same crossroads filmed through a car's windscreen in the rain: every light doubled by the pane, haloed by the drops on it and a
- * little condensation, the rain itself (and the windscreen, the drops' strength) ASSUMED as the rest.
+ * And the same crossroads filmed through a window as a shower comes and goes, to show the drops the rain leaves on the glass: none while
+ * the wind blows it from behind, landing once the wind turns to throw it on the pane, faster in the downpour, the last ones running down
+ * when it stops. The shower, the wind and the window are ASSUMED as the rest.
  *
- * Writes ../../../public/demo-data/sky-test-lens-ghosts.json and sky-test-lens-ghosts-windscreen.json. Run with `node --import tsx`.
+ * Writes ../../../public/demo-data/sky-test-lens-ghosts.json and sky-test-lens-ghosts-rain.json. Run with `node --import tsx`.
  */
 import { writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
@@ -138,54 +139,96 @@ const recording = {
 writeFileSync(OUT, JSON.stringify(recording, null, 1) + "\n")
 console.log(`→ ${OUT}`)
 
+/** The weather of the shower, at instants of the wet recording: overcast, the rain, and where the wind blows it from. */
+const shower = (t: number, cover: number, rain: number, windFromDeg: number) => ({
+  t,
+  weather: {
+    cloudCover: { value: cover, basis: "assumed", rationale: why },
+    cloudDarkness: 0.5 * cover, cloudBaseM: 900, lowerCloudCover: cover, highCloudCover: 0,
+    precipitationType: rain > 0 ? "rain" : "none", precipitationIntensity: rain, windDirectionDeg: windFromDeg, windSpeed: 6, storm: false
+  }
+})
+/** Where the window faces, the way the observer looks through it: the wind from there throws the rain on it, the wind from behind does not. */
+const FACING = 80
+const WET_DURATION_S = 75
+const wetPose = (headingDeg: number) => ({ lat: PLACE.lat, lng: PLACE.lng, elevationM: 1.6, headingDeg, pitchDeg: 4, fovDeg: 60 })
 const wet = {
   ...recording,
-  id: "sky-test-lens-ghosts-windscreen",
-  summaryTime: 42,
+  id: "sky-test-lens-ghosts-rain",
+  summaryTime: 40,
+  durationSeconds: WET_DURATION_S,
   description: {
-    en: "The same crossroads filmed through a car's windscreen in the rain: every light doubled by the pane, and haloed by the drops on it.",
-    fr: "Le même carrefour filmé à travers le pare-brise d'une voiture sous la pluie : chaque lumière doublée par la vitre, et auréolée par les gouttes.",
-    es: "El mismo cruce filmado a través del parabrisas de un coche bajo la lluvia: cada luz duplicada por el cristal, y con un halo por las gotas.",
-    it: "Lo stesso incrocio filmato attraverso il parabrezza di un'auto sotto la pioggia: ogni luce raddoppiata dal vetro, e aureolata dalle gocce."
+    en: "The same crossroads filmed through a window as a shower comes and goes: dry, rain blown from behind that leaves the pane dry, the wind turning to throw it on the glass, a downpour, then the last drops running down.",
+    fr: "Le même carrefour filmé à travers une vitre pendant une averse : sec, une pluie venant de dos qui laisse la vitre sèche, le vent qui tourne et la jette sur le verre, une pluie battante, puis les dernières gouttes qui coulent.",
+    es: "El mismo cruce filmado a través de una ventana durante un chubasco: seco, una lluvia de espaldas que deja el cristal seco, el viento que gira y la lanza sobre el cristal, un aguacero, y las últimas gotas que bajan.",
+    it: "Lo stesso incrocio filmato attraverso una finestra durante un acquazzone: asciutto, una pioggia alle spalle che lascia il vetro asciutto, il vento che gira e la getta sul vetro, un temporale, poi le ultime gocce che scendono."
   },
-  lens: { glass: "windscreen", condensation: { value: 0.1, basis: "assumed", rationale: why } },
+  lens: { glass: "window" },
   weatherTrack: {
-    keyframes: [{
-      t: 0,
-      weather: {
-        cloudCover: { value: 1, basis: "assumed", rationale: why },
-        cloudDarkness: 0.6, cloudBaseM: 800, lowerCloudCover: 1, highCloudCover: 0,
-        precipitationType: "rain", precipitationIntensity: { value: 0.5, basis: "assumed", rationale: why }, windDirectionDeg: 0, windSpeed: 3, storm: false
-      }
-    }]
+    keyframes: [
+      shower(0, 0.4, 0, FACING + 180),
+      shower(8000, 1, 0, FACING + 180),
+      // Light rain from behind the observer: the window faces away from it. (Rain starts and stops gradually: see PrecipitationRamp.)
+      shower(9000, 1, 0.3, FACING + 180),
+      shower(17000, 1, 0.3, FACING + 180),
+      // The wind veers round, by the side, to the front: the rain comes onto the glass.
+      shower(21000, 1, 0.3, FACING + 90),
+      shower(25000, 1, 0.3, FACING),
+      // The downpour.
+      shower(27000, 1, 1, FACING),
+      shower(42000, 1, 1, FACING),
+      // It stops, over some twenty seconds: what is on the glass clings, or runs down.
+      shower(43000, 1, 0, FACING),
+      shower(WET_DURATION_S * 1000, 0.8, 0, FACING)
+    ]
   },
+  observerTrack: { keyframes: [{ t: 0, pose: wetPose(FACING) }, { t: WET_DURATION_S * 1000, pose: wetPose(FACING + 4) }] },
+  decor: decor.map(object => object.id === "car"
+    ? { ...object, track: [{ t: 36000, eastM: 230, northM: 7.8, headingDeg: 270 }, { t: 56000, eastM: 30, northM: 7.8, headingDeg: 270 }] }
+    : object),
   milestones: [
     {
       t: 0, label: "A", note: {
-        en: "Through the windscreen, every light has a twin just above it: the light that bounced between the two faces of the slanted glass.",
-        fr: "À travers le pare-brise, chaque lumière a un double juste au-dessus : la lumière renvoyée entre les deux faces du verre incliné.",
-        es: "A través del parabrisas, cada luz tiene un doble justo encima: la luz devuelta entre las dos caras del cristal inclinado.",
-        it: "Attraverso il parabrezza, ogni luce ha un doppio appena sopra: la luce rimandata tra le due facce del vetro inclinato."
+        en: "Dry: through the window, only the lens's own ghosts, across the centre from each light.",
+        fr: "Au sec : à travers la vitre, seulement les reflets de l'objectif, de l'autre côté du centre de chaque lumière.",
+        es: "En seco: a través de la ventana, solo los reflejos del objetivo, al otro lado del centro de cada luz.",
+        it: "All'asciutto: attraverso la finestra, solo i riflessi dell'obiettivo, dall'altra parte del centro di ogni luce."
       }
     },
     {
-      t: 15000, label: "B", note: {
-        en: "The drops on the glass break each light's halo into blotches, which stay where the drops are when the view turns.",
-        fr: "Les gouttes sur le verre morcellent le halo de chaque lumière en taches, qui restent là où sont les gouttes quand la vue tourne.",
-        es: "Las gotas sobre el cristal rompen el halo de cada luz en manchas, que se quedan donde están las gotas cuando la vista gira.",
-        it: "Le gocce sul vetro spezzano l'alone di ogni luce in macchie, che restano dove sono le gocce quando la vista gira."
+      t: 10000, label: "B", note: {
+        en: "It rains, blown from behind the observer: the outside of the window faces away from it and stays dry.",
+        fr: "Il pleut, poussé par le vent depuis le dos de l'observateur : l'extérieur de la vitre lui tourne le dos et reste sec.",
+        es: "Llueve, empujado por el viento desde la espalda del observador: el exterior del cristal le da la espalda y sigue seco.",
+        it: "Piove, spinto dal vento dalle spalle dell'osservatore: l'esterno del vetro gli volta le spalle e resta asciutto."
       }
     },
     {
-      t: 27000, label: "C", note: {
-        en: "A car's headlights: two blazing blotches and their twins, with the lens's own ghosts high on the other side of the centre.",
-        fr: "Les phares d'une voiture : deux taches éclatantes et leurs doubles, avec les reflets de l'objectif haut de l'autre côté du centre.",
-        es: "Los faros de un coche: dos manchas deslumbrantes y sus dobles, con los reflejos del objetivo arriba al otro lado del centro.",
-        it: "I fari di un'auto: due macchie abbaglianti e i loro doppi, con i riflessi dell'obiettivo in alto dall'altra parte del centro."
+      t: 21000, label: "C", note: {
+        en: "The wind veers to blow from the crossroads: the rain meets the glass and the first drops land, each light haloed where they are.",
+        fr: "Le vent tourne et souffle du carrefour : la pluie frappe le verre et les premières gouttes se posent, chaque lumière auréolée là où elles sont.",
+        es: "El viento gira y sopla desde el cruce: la lluvia golpea el cristal y caen las primeras gotas, cada luz con su halo allí donde están.",
+        it: "Il vento gira e soffia dall'incrocio: la pioggia colpisce il vetro e si posano le prime gocce, ogni luce con un alone là dove sono."
+      }
+    },
+    {
+      t: 33000, label: "D", note: {
+        en: "The downpour: drops land faster than they go, merge, and the large ones run down, wiping the glass behind them.",
+        fr: "L'averse : les gouttes arrivent plus vite qu'elles ne partent, fusionnent, et les grosses coulent en essuyant le verre derrière elles.",
+        es: "El aguacero: las gotas llegan más deprisa de lo que se van, se funden, y las grandes bajan limpiando el cristal tras ellas.",
+        it: "L'acquazzone: le gocce arrivano più in fretta di quanto se ne vadano, si fondono, e le grandi scendono pulendo il vetro dietro di sé."
+      }
+    },
+    {
+      t: 58000, label: "E", note: {
+        en: "The rain stops: nothing new lands, the last drops still clinging run down one after the other, the small ones dry.",
+        fr: "La pluie s'arrête : plus rien ne se pose, les dernières gouttes accrochées coulent l'une après l'autre, les petites sèchent.",
+        es: "Deja de llover: ya no cae nada, las últimas gotas aún pegadas bajan una tras otra, las pequeñas se secan.",
+        it: "Smette di piovere: non si posa più nulla, le ultime gocce ancora attaccate scendono una dopo l'altra, le piccole si asciugano."
       }
     }
   ]
 }
-const WET_OUT = OUT.replace("sky-test-lens-ghosts.json", "sky-test-lens-ghosts-windscreen.json")
+const WET_OUT = OUT.replace("sky-test-lens-ghosts.json", "sky-test-lens-ghosts-rain.json")
 writeFileSync(WET_OUT, JSON.stringify(wet, null, 1) + "\n")
 console.log(`→ ${WET_OUT}`)

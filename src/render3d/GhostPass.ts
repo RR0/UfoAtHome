@@ -2,7 +2,7 @@ import {
   HalfFloatType, LinearFilter, LinearMipmapLinearFilter, Mesh, NoBlending, OrthographicCamera, PlaneGeometry, Scene, ShaderMaterial, Vector2,
   Vector3, WebGLRenderTarget, type Camera, type WebGLRenderer
 } from "three"
-import { LensGhosts, type LensGhost, type LensOptics } from "../engine/instrument/LensGhost.js"
+import { GlassWetting, LensGhosts, type LensGhost, type LensOptics } from "../engine/instrument/LensGhost.js"
 import { EYE_UNIFORMS, FINISH_GLSL, type UnfinishedFrame } from "./colorSpace.js"
 
 /** A ghost found under a point of the picture (see GhostPass.pickAt): which, and where in the picture the light that makes it is. */
@@ -98,9 +98,10 @@ export class GhostPass {
         uBlades: { value: 0 },
         uBladeAngle: { value: 0 },
         uDrops: { value: 0 },
-        uImpactRate: { value: 0 },
-        uRunning: { value: 0 },
-        uTime: { value: 0 }
+        uImpacts: { value: 0 },
+        uHistory: { value: new Array<number>(GlassWetting.HISTORY_S).fill(0) },
+        uStill: { value: 0 },
+        uRunning: { value: 0 }
       },
       vertexShader,
       fragmentShader: `
@@ -118,9 +119,10 @@ export class GhostPass {
         uniform float uBlades;
         uniform float uBladeAngle;
         uniform float uDrops;
-        uniform float uImpactRate;
+        uniform float uImpacts;
+        uniform float uHistory[${GlassWetting.HISTORY_S}];
+        uniform float uStill;
         uniform float uRunning;
-        uniform float uTime;
         varying vec2 vUv;
 
         // The picture blurred to a disc of this radius, pixels, round this point: the level whose texels are as large as the disc, read at
@@ -156,71 +158,132 @@ export class GhostPass {
           return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
         }
 
-        // A drop that landed in one cell of a grid of the glass, size cells to the picture's height: the latest of those the rain threw
-        // there, for as long as it stays before running off or drying (${LensGhosts.DROP_LIFE_S} s, or until the next lands), or, the drops
-        // being stated rather than falling, one that is there or not for good. Its coverage, and its offset from its centre (in the picture's
-        // own coordinates), which is what it refracts by.
-        vec3 landed(vec2 q, float size, float layer, float aspect) {
-          vec2 cellular = q * size;
-          vec2 cell = floor(cellular);
-          vec2 seed = cell + layer * 17.3;
-          if (uImpactRate > 0.0) {
-            float cycles = uTime * uImpactRate + hash(seed);
-            float n = floor(cycles);
-            float age = (cycles - n) / uImpactRate;
-            if (age > min(${LensGhosts.DROP_LIFE_S}.0, 0.9 / uImpactRate)) return vec3(0.0);
-            seed += n * 7.13;
-          } else if (hash(seed) > 0.2 + 0.6 * uDrops) {
-            return vec3(0.0);
+        // The drops on the glass, as the rain leaves them: drops landing at the rate the rain meets the glass, each the latest of a cell of a
+        // grid the size of a large drop (and the one before it, still living out its life). A small one clings for minutes, then dries,
+        // shrinking. A large one clings for a few seconds, then runs down, faster and faster, a tear with its tail up, wandering a little, leaving a trail of
+        // beads and wiping the fine droplets it crosses. Drops near each other merge: each is a field falling off with the distance from its
+        // centre, the fields of neighbours add up, and the glass is wet where their sum passes one, so that two drops touching are one drop of
+        // their joint outline rather than two discs overlapping. Under them, a mist of fine droplets that only accumulates, and that the
+        // running drops wipe. Stated rather than falling (no impact rate), the drops are there for good, and still.
+
+        // The field one drop throws at a point of the glass, in cells, and its pull on what the drop refracts; wiped grows where its trail
+        // passes. age is the seconds since it landed.
+        float field(vec2 cellular, vec2 cell, vec2 seed, float age, inout vec2 pull, inout float wiped) {
+          float h1 = hash(seed + 1.3), h2 = hash(seed + 2.7), h3 = hash(seed + 4.1), h4 = hash(seed + 5.9), h5 = hash(seed + 8.3);
+          // Many small drops, few large ones.
+          float radius = 0.08 + 0.3 * h3 * h3 * h3;
+          vec2 centre = cell + 0.5 + (vec2(h1, h2) - 0.5) * 0.7;
+          // A drop that does not run stays minutes on a glass before it dries.
+          float life = 60.0 + 120.0 * h4;
+          bool still = uStill > 0.5;
+          bool runs = !still && uRunning > 0.0 && radius > 0.2;
+          float stick = 2.0 + 10.0 * h5;
+          float slid = 0.0;
+          if (runs && age > stick) {
+            float s = age - stick;
+            slid = uRunning * (0.25 * s * s + 0.3 * s);
+            if (slid > 8.0) return 0.0;
+            centre.y -= slid;
+            centre.x += 0.18 * sin(slid * 1.9 + h1 * 6.28);
+            radius *= 0.8 * (1.0 - smoothstep(7.0, 8.0, slid)) + 0.0001;
+          } else if (!still) {
+            if (age > life) return 0.0;
+            // Drying: it shrinks over the last part of its life.
+            radius *= 1.0 - smoothstep(life * 0.5, life, age);
           }
-          vec2 centre = cell + 0.5 + (vec2(hash(seed + 1.3), hash(seed + 2.7)) - 0.5) * 0.5;
-          float radius = 0.2 + 0.25 * hash(seed + 4.1);
-          float cover = smoothstep(radius, radius * 0.5, distance(cellular, centre));
-          return vec3(cover, (cellular - centre) / size / vec2(aspect, 1.0));
+          vec2 d = cellular - centre;
+          // Out of reach of this point, as most drops of the cells looked at are: nothing to work out. A running drop reaches up its trail.
+          if (abs(d.x) > radius * 2.5 || d.y < -radius * 2.5 || d.y > radius * 2.5 + slid) return 0.0;
+          // A running drop is a tear: its tail drawn up behind it, its front round.
+          if (slid > 0.0) d.y *= d.y > 0.0 ? 0.5 : 1.15;
+          float angle = atan(d.y, d.x);
+          float outline = 1.0 + 0.16 * sin(3.0 * angle + h4 * 6.28) + 0.09 * sin(5.0 * angle + h5 * 6.28);
+          float r = length(d) / outline;
+          float f = radius * radius / max(r * r, 1e-4);
+          f = f > 0.3 ? f : 0.0;
+          pull += min(f, 4.0) * d;
+          // Its trail: the strip it ran down, wiped, and beads left along it.
+          if (slid > 0.0 && cellular.y > centre.y && cellular.y < centre.y + slid) {
+            float along = cellular.y - centre.y;
+            float x = cell.x + 0.5 + (h1 - 0.5) * 0.7 + 0.18 * sin((slid - along) * 1.9 + h1 * 6.28);
+            float fade = 1.0 - along / max(slid, 1e-3) * 0.6;
+            wiped = max(wiped, smoothstep(radius * 0.9, radius * 0.4, abs(cellular.x - x)) * fade);
+            float slot = floor(along * 3.0);
+            vec2 bead = vec2(x, centre.y + (slot + 0.5) / 3.0);
+            float rb = 0.05 * fade * step(0.45, hash(seed + slot * 3.7));
+            float fb = rb * rb / max(dot(cellular - bead, cellular - bead), 1e-4);
+            f += fb > 0.3 ? fb : 0.0;
+            pull += min(fb, 4.0) * (cellular - bead);
+          }
+          return f;
         }
 
-        // The drops on the glass at this point of the picture: those running down it in streams, each leaving a trail of beads and the
-        // glass wiped of the drops it ran into, and those that landed and stay. Their coverage and offset, as landed's.
+        // How long ago the count of drops landed reached this value, s (see GlassWetting): found in the counts of the seconds before, by
+        // halves; 1000 when it was reached before all of them.
+        float ageAt(float count) {
+          if (count > uImpacts) return -1.0;
+          if (count > uHistory[0]) return (uImpacts - count) / max(uImpacts - uHistory[0], 1e-6);
+          if (count <= uHistory[${GlassWetting.HISTORY_S - 1}]) return 1e3;
+          int low = 0, high = ${GlassWetting.HISTORY_S - 1};
+          for (int i = 0; i < 5; i++) {
+            int middle = (low + high) / 2;
+            if (uHistory[middle] >= count) low = middle; else high = middle;
+          }
+          float later = uHistory[low], earlier = uHistory[high];
+          return float(low + 1) + (later - count) / max(later - earlier, 1e-6) * float(high - low);
+        }
+
+        // The drops of one cell (the latest to land there, and the one before it), as their summed field.
+        float cellField(vec2 cellular, vec2 cell, inout vec2 pull, inout float wiped) {
+          if (uStill > 0.5) {
+            if (hash(cell) > 0.2 + 0.6 * uDrops) return 0.0;
+            return field(cellular, cell, cell, 0.0, pull, wiped);
+          }
+          // The n-th drop of this cell landed when the count passed n, less the cell's own phase.
+          float phase = hash(cell);
+          float n = floor(uImpacts + phase);
+          float total = 0.0;
+          for (int back = 0; back < 2; back++) {
+            float m = n - float(back);
+            if (m < 1.0) break;
+            float age = ageAt(m - phase);
+            // Landed before the counts kept: long enough ago for any drop that runs to have run off, not for one that clings to have dried.
+            if (age >= 0.0) total += field(cellular, cell, cell + m * 7.13, min(age, 30.0), pull, wiped);
+          }
+          return total;
+        }
+
+        // The wet glass at this point of the picture: how much a drop covers it, and the offset (in the picture's own coordinates) by which
+        // the drop there refracts.
         vec3 drops(vec2 uv) {
           float aspect = uSize.x / uSize.y;
           vec2 q = vec2(uv.x * aspect, uv.y);
-          vec3 best = vec3(0.0);
+          float size = 18.0;
+          vec2 cellular = q * size;
+          vec2 cell = floor(cellular);
+          vec2 pull = vec2(0.0);
           float wiped = 0.0;
-          if (uRunning > 0.0 && uDrops > 0.0) {
-            float width = 0.09;
-            float column = floor(q.x / width);
-            float h = hash(vec2(column, 3.1));
-            if (h < uDrops * uRunning) {
-              float speed = (0.04 + 0.1 * hash(vec2(column, 5.7))) * uRunning;
-              float head = 1.15 - fract(uTime * speed + h * 13.0) * 1.3;
-              float x = (column + 0.5) * width + 0.02 * sin(head * 23.0 + h * 6.28);
-              float r = 0.012 + 0.008 * h;
-              vec2 c = vec2(x, head);
-              float cover = smoothstep(r, r * 0.4, distance(q, c));
-              if (cover > best.x) best = vec3(cover, (q - c) / vec2(aspect, 1.0));
-              float above = q.y - head;
-              if (above > 0.0 && above < 0.3) {
-                float fade = 1.0 - above / 0.3;
-                float xt = (column + 0.5) * width + 0.02 * sin(q.y * 23.0 + h * 6.28);
-                wiped = smoothstep(0.02, 0.01, abs(q.x - xt)) * fade;
-                float slot = floor(q.y * 45.0 + h);
-                vec2 bead = vec2(xt, (slot + 0.5 - h) / 45.0);
-                float rb = 0.004 * fade * step(0.4, hash(vec2(column, slot)));
-                float beadCover = rb > 0.0 ? smoothstep(rb, rb * 0.4, distance(q, bead)) : 0.0;
-                if (beadCover > best.x) best = vec3(beadCover, (q - bead) / vec2(aspect, 1.0));
-              }
-            }
+          float total = 0.0;
+          // Its own cell and those beside it, whose drops it may merge with, and those above, whose drops may have run down to here.
+          total += cellField(cellular, cell + vec2(-1.0, 0.0), pull, wiped);
+          total += cellField(cellular, cell + vec2(1.0, 0.0), pull, wiped);
+          for (int k = 0; k <= 8; k++) total += cellField(cellular, cell + vec2(0.0, float(k)), pull, wiped);
+          float cover = smoothstep(0.9, 1.3, total);
+          // The fine droplets: a dense grid, each there once it has landed (in a few seconds of rain), wiped where a drop ran.
+          vec2 fineCell = floor(q * 90.0);
+          // Each fine droplet there once the count has passed its own share: they only add up, dry rain or not.
+          bool landedFine = uStill > 0.5 ? hash(fineCell + 3.3) < 0.15 + 0.5 * uDrops : hash(fineCell + 9.1) < min(0.45, uImpacts * 0.03);
+          if (landedFine) {
+            vec2 centre = fineCell + 0.5 + (vec2(hash(fineCell + 5.1), hash(fineCell + 6.2)) - 0.5) * 0.6;
+            float fine = smoothstep(0.35, 0.15, distance(q * 90.0, centre)) * (1.0 - wiped);
+            if (fine > cover) return vec3(fine * 0.6, (q * 90.0 - centre) / 90.0 / vec2(aspect, 1.0));
           }
-          // Two grids, so that a drop landing does not have to wait for the one before it to go.
-          vec3 first = landed(q, 14.0, 0.0, aspect), second = landed(q + 0.031, 9.0, 1.0, aspect);
-          vec3 still = first.x > second.x ? first : second;
-          still.x *= 1.0 - wiped;
-          return still.x > best.x ? still : best;
+          return vec3(cover, pull / max(total, 1e-3) / size / vec2(aspect, 1.0));
         }
 
         void main() {
           vec3 sum = vec3(0.0);
-          vec3 drop = uDrops > 0.0 ? drops(vUv) : vec3(0.0);
+          vec3 drop = uDrops > 0.0 || uImpacts > 0.0 ? drops(vUv) : vec3(0.0);
           // What a drop shows of the scene: what is on the other side of it, upside down and out of focus, instead of what is behind it
           // (the finish takes the scene away where the alpha says a drop covers it).
           if (drop.x > 0.0) sum += drop.x * textureLod(uMips, vUv - drop.yz * 4.0, 2.0).rgb;
@@ -310,9 +373,11 @@ export class GhostPass {
     uniforms.uBlades.value = optics.blades
     uniforms.uBladeAngle.value = optics.bladeAngleRad
     uniforms.uDrops.value = optics.drops
-    uniforms.uImpactRate.value = optics.impactRate
+    uniforms.uImpacts.value = optics.impacts
+    const history = uniforms.uHistory.value as number[]
+    for (let j = 0; j < history.length; j++) history[j] = optics.history[j] ?? 0
+    uniforms.uStill.value = optics.still ? 1 : 0
     uniforms.uRunning.value = optics.running
-    uniforms.uTime.value = optics.timeS
     this.draw(renderer, this.ghostMaterial, this.ghostLayer)
     const develop = this.developMaterial.uniforms
     develop.uSource.value = source.scene.texture
