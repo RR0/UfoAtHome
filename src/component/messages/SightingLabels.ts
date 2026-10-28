@@ -52,6 +52,16 @@ export interface SightingLabels {
   /** How much the body holding the instrument moves the view at rest — see Sighting.sway. */
   sway: string
   swayTitle: string
+  /** The search for the ghosts of the lens in a picture — see GhostSearchView. */
+  referenceGhosts: string
+  referenceFindGhosts: string
+  referenceGhostsSearching: string
+  referenceGhostsFound: string
+  referenceGhostsFoundScaled: string
+  referenceGhostsLow: string
+  referenceGhostsNone: string
+  referenceGhostsCropped: string
+  referenceGhostsFailed: string
   /** What the picture was taken through besides the lens, and what was on that glass — see LensStateJson. */
   lensGlass: string
   lensGlassNone: string

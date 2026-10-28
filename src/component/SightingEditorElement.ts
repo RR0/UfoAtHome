@@ -127,11 +127,11 @@ import { DEFAULT_REFERENCE_FOV_DEG, DEFAULT_REFERENCE_OPACITY, REFERENCE_INLINE_
 import type { PictureLandmark, ReferenceKind, SceneReference } from "../engine/model/Reference.js"
 import type { InvestigatorTrace } from "../engine/model/Trace.js"
 import type { KmlImportResult } from "../engine/interop/KmlImport.js"
-import { PictureRegistration } from "../engine/reference/PictureRegistration.js"
+import type { PictureRegistration } from "../engine/reference/PictureRegistration.js"
 import type { Vector3 } from "three"
 import type { CanvasRenderer } from "../render/CanvasRenderer.js"
 import type { PicturePoint } from "../engine/reference/PictureRegistration.js"
-import { PanoramaxPictures } from "../engine/reference/PanoramaxPictures.js"
+import type { PanoramaxPictures } from "../engine/reference/PanoramaxPictures.js"
 import type { StreetPicture } from "../engine/reference/PanoramaxPictures.js"
 import {
   DEFAULT_BUILDING_FLOORS,
@@ -905,6 +905,11 @@ export class SightingEditorElement extends HTMLElement {
   private readonly addReferenceLandmarkButton: HTMLButtonElement
   private readonly deleteReferenceLandmarkButton: HTMLButtonElement
   private readonly referenceLandmarkLabelInput: HTMLInputElement
+  /** The search for the ghosts of the lens in the selected picture — see GhostSearchView, loaded only when asked for. */
+  private readonly findGhostsButton: HTMLButtonElement
+  private readonly ghostsStatus: HTMLElement
+  private readonly ghostsCanvas: HTMLCanvasElement
+  private ghostTexts?: import("./GhostSearchView.js").GhostSearchTexts
   private readonly labelReferenceLandmarks: HTMLElement
   private readonly labelReferenceLandmarkLabel: HTMLElement
   private readonly referenceAdoptPoseButton: HTMLButtonElement
@@ -938,7 +943,11 @@ export class SightingEditorElement extends HTMLElement {
   private referenceFit?: { n: number; residualDeg: number }
   /** What the street-level lookup last found, in the order the dropdown shows. */
   private streetPictures: StreetPicture[] = []
-  private readonly streetPictures$ = new PanoramaxPictures()
+  /** Loaded with the first look for street pictures: see searchStreetPictures. */
+  private streetPictures$?: PanoramaxPictures
+  /** What lines a picture up on the scene, loaded with the first picture: see pictureAspect. */
+  private pictureRegistration?: typeof PictureRegistration
+  private pictureRegistrationLoading?: Promise<void>
   /** Every field the selected picture is read from — listened to as one, like the sound's. */
   private readonly referenceFields: (HTMLInputElement | HTMLSelectElement)[]
   private readonly labelReferenceGroup: HTMLElement
@@ -1637,6 +1646,10 @@ export class SightingEditorElement extends HTMLElement {
     this.addReferenceLandmarkButton = this.shadow.getElementById("add-reference-landmark") as HTMLButtonElement
     this.deleteReferenceLandmarkButton = this.shadow.getElementById("delete-reference-landmark") as HTMLButtonElement
     this.referenceLandmarkLabelInput = this.shadow.getElementById("referenceLandmarkLabel") as HTMLInputElement
+    this.findGhostsButton = this.shadow.getElementById("reference-find-ghosts") as HTMLButtonElement
+    this.ghostsStatus = this.shadow.getElementById("reference-ghosts-status")!
+    this.ghostsCanvas = this.shadow.getElementById("reference-ghosts-canvas") as HTMLCanvasElement
+    this.findGhostsButton.addEventListener("click", () => void this.findGhosts())
     this.labelReferenceLandmarks = this.shadow.getElementById("label-reference-landmarks")!
     this.labelReferenceLandmarkLabel = this.shadow.getElementById("label-reference-landmark-label")!
     this.referenceAdoptPoseButton = this.shadow.getElementById("reference-adopt-pose") as HTMLButtonElement
@@ -4256,6 +4269,9 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceCreditUrlInput.value = reference.creditUrl ?? ""
     this.referenceTInput.value = reference.t === undefined ? "" : String(reference.t / 1000)
     this.referenceDrawingInput.checked = reference.drawing === true
+    // What was found in another picture says nothing of this one.
+    this.ghostsCanvas.hidden = true
+    this.ghostsStatus.textContent = ""
     this.referenceOpacityInput.value = String(reference.opacity)
     this.referenceHeadingInput.value = String(reference.registration.headingDeg)
     this.referencePitchInput.value = String(reference.registration.pitchDeg)
@@ -4406,6 +4422,26 @@ export class SightingEditorElement extends HTMLElement {
 
   // ---- Lining a picture up on the scene — see PictureRegistration and PictureLandmark.
 
+  /**
+   * A picture's aspect once it can be lined up: its bytes in (see SceneElement.referenceAspect), and what lines it up loaded, which the
+   * first picture asks for. Undefined until both are, and the canvas painted again then.
+   */
+  private pictureAspect(id: string): number | undefined {
+    if (!this.pictureRegistration) {
+      void this.loadPictureRegistration()
+      return undefined
+    }
+    return this.sceneElement.referenceAspect(id)
+  }
+
+  /** Asked for as soon as the Pictures group is opened on a picture, so that it is there by the first gesture. */
+  private loadPictureRegistration(): Promise<void> {
+    return this.pictureRegistrationLoading ??= import("../engine/reference/PictureRegistration.js").then(({ PictureRegistration }) => {
+      this.pictureRegistration = PictureRegistration
+      this.ufoElement.refresh()
+    })
+  }
+
   private currentReference(): SceneReference | undefined {
     return this.ufoElement.sighting.references.find(reference => reference.id === this.currentReferenceId)
   }
@@ -4445,9 +4481,9 @@ export class SightingEditorElement extends HTMLElement {
     // Outside the picture the scene is still the scene: grabbing sky or ground there turns the
     // observer, as it does in every other group. Only the picture itself, and its landmarks, are
     // this group's to move.
-    const aspect = this.sceneElement.referenceAspect(reference.id)
+    const aspect = this.pictureAspect(reference.id)
     const onPicture = aspect !== undefined
-      && PictureRegistration.picturePointOf(this.directionAtCanvasPoint(startPointer), reference.registration, aspect) !== undefined
+      && this.pictureRegistration!.picturePointOf(this.directionAtCanvasPoint(startPointer), reference.registration, aspect) !== undefined
     if (!onPicture) {
       this.beginCameraDrag(startPointer)
       return
@@ -4466,13 +4502,13 @@ export class SightingEditorElement extends HTMLElement {
   /** Within a handle's reach of a landmark's ring (on the picture) or dot (in the render). */
   private landmarkEndAt(point: { x: number; y: number }): { landmarkId: string; end: "picture" | "scene" } | undefined {
     const reference = this.currentReference()
-    const aspect = reference ? this.sceneElement.referenceAspect(reference.id) : undefined
+    const aspect = reference ? this.pictureAspect(reference.id) : undefined
     if (!reference || aspect === undefined) return undefined
     const reach = 8
     for (const landmark of this.currentLandmarks()) {
-      const ring = this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(landmark.picture, reference.registration, aspect))
+      const ring = this.canvasPointOfDirection(this.pictureRegistration!.worldDirectionOf(landmark.picture, reference.registration, aspect))
       if (ring && Math.hypot(ring.x - point.x, ring.y - point.y) <= reach) return { landmarkId: landmark.id, end: "picture" }
-      const dot = this.canvasPointOfDirection(PictureRegistration.worldDirection(landmark.scene))
+      const dot = this.canvasPointOfDirection(this.pictureRegistration!.worldDirection(landmark.scene))
       if (dot && Math.hypot(dot.x - point.x, dot.y - point.y) <= reach) return { landmarkId: landmark.id, end: "scene" }
     }
     return undefined
@@ -4502,13 +4538,13 @@ export class SightingEditorElement extends HTMLElement {
 
   private moveLandmarkEnd(landmarkId: string, end: "picture" | "scene", point: { x: number; y: number }): void {
     const reference = this.currentReference()
-    const aspect = reference ? this.sceneElement.referenceAspect(reference.id) : undefined
+    const aspect = reference ? this.pictureAspect(reference.id) : undefined
     if (!reference || aspect === undefined) return
     const direction = this.directionAtCanvasPoint(point)
     this.writeLandmarks(this.currentLandmarks().map(landmark => {
       if (landmark.id !== landmarkId) return landmark
-      if (end === "scene") return { ...landmark, scene: PictureRegistration.aimOf(direction) }
-      const picture = PictureRegistration.picturePointOf(direction, reference.registration, aspect)
+      if (end === "scene") return { ...landmark, scene: this.pictureRegistration!.aimOf(direction) }
+      const picture = this.pictureRegistration!.picturePointOf(direction, reference.registration, aspect)
       return picture ? { ...landmark, picture } : landmark
     }))
     this.ufoElement.refresh()
@@ -4571,12 +4607,12 @@ export class SightingEditorElement extends HTMLElement {
     if (!reference) return
     const direction = this.directionAtCanvasPoint(point)
     if (!this.pendingLandmark) {
-      const aspect = this.sceneElement.referenceAspect(reference.id)
+      const aspect = this.pictureAspect(reference.id)
       if (aspect === undefined) {
         this.referenceStatus.textContent = this.messages.referenceNotLoaded
         return
       }
-      const picturePoint = PictureRegistration.picturePointOf(direction, reference.registration, aspect)
+      const picturePoint = this.pictureRegistration!.picturePointOf(direction, reference.registration, aspect)
       if (!picturePoint) {
         this.referenceStatus.textContent = this.messages.referenceLandmarkOffPicture
         return
@@ -4588,7 +4624,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     const landmarks = this.currentLandmarks()
     const id = this.nextLandmarkId(landmarks)
-    this.writeLandmarks([...landmarks, { id, picture: this.pendingLandmark, scene: PictureRegistration.aimOf(direction) }])
+    this.writeLandmarks([...landmarks, { id, picture: this.pendingLandmark, scene: this.pictureRegistration!.aimOf(direction) }])
     this.armingLandmark = false
     this.pendingLandmark = undefined
     this.currentLandmarkId = id
@@ -4604,10 +4640,10 @@ export class SightingEditorElement extends HTMLElement {
 
   private fitReferenceToLandmarks(): void {
     const reference = this.currentReference()
-    const aspect = reference ? this.sceneElement.referenceAspect(reference.id) : undefined
+    const aspect = reference ? this.pictureAspect(reference.id) : undefined
     if (!reference || aspect === undefined) return
     const landmarks = this.currentLandmarks()
-    const fit = PictureRegistration.solve(landmarks, aspect, reference.registration.fovDeg)
+    const fit = this.pictureRegistration!.solve(landmarks, aspect, reference.registration.fovDeg)
     if (fit) {
       this.referenceFit = { n: landmarks.length, residualDeg: fit.residualDeg }
       this.referenceHeadingInput.value = String(this.rounded(fit.registration.headingDeg))
@@ -4625,8 +4661,8 @@ export class SightingEditorElement extends HTMLElement {
 
   /** How far one landmark still is from fitting, degrees, under the picture's current registration. */
   private landmarkResidualDeg(landmark: PictureLandmark, reference: SceneReference, aspect: number): number {
-    const onPicture = PictureRegistration.worldDirectionOf(landmark.picture, reference.registration, aspect)
-    return (onPicture.angleTo(PictureRegistration.worldDirection(landmark.scene)) * 180) / Math.PI
+    const onPicture = this.pictureRegistration!.worldDirectionOf(landmark.picture, reference.registration, aspect)
+    return (onPicture.angleTo(this.pictureRegistration!.worldDirection(landmark.scene)) * 180) / Math.PI
   }
 
   /** "1 · Arbre masquant · 0,4°": the row a landmark has in the list, and the label it has on the
@@ -4639,7 +4675,7 @@ export class SightingEditorElement extends HTMLElement {
   private refreshLandmarkList(): void {
     const reference = this.currentReference()
     const landmarks = this.currentLandmarks()
-    const aspect = reference ? this.sceneElement.referenceAspect(reference.id) : undefined
+    const aspect = reference ? this.pictureAspect(reference.id) : undefined
     this.referenceLandmarksSelect.innerHTML = ""
     for (const [index, landmark] of landmarks.entries()) {
       const option = document.createElement("option")
@@ -4674,7 +4710,7 @@ export class SightingEditorElement extends HTMLElement {
     const landmarks = this.currentLandmarks()
     const index = landmarks.findIndex(landmark => landmark.id === current)
     const reference = this.currentReference()
-    const aspect = reference ? this.sceneElement.referenceAspect(reference.id) : undefined
+    const aspect = reference ? this.pictureAspect(reference.id) : undefined
     if (option && index >= 0) {
       const residual = reference && aspect !== undefined ? ` · ${this.landmarkResidualDeg(landmarks[index]!, reference, aspect).toFixed(1)}°` : ""
       option.textContent = this.landmarkLabel(landmarks[index]!, index) + residual
@@ -4729,21 +4765,21 @@ export class SightingEditorElement extends HTMLElement {
   private readonly paintPictureOverlay = (renderer: CanvasRenderer): void => {
     const reference = this.currentReference()
     if (!reference) return
-    const aspect = this.sceneElement.referenceAspect(reference.id)
+    const aspect = this.pictureAspect(reference.id)
     if (aspect === undefined) return
     const { registration } = reference
     const corners = [{ u: 0, v: 0 }, { u: 1, v: 0 }, { u: 1, v: 1 }, { u: 0, v: 1 }]
-      .map(corner => this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(corner, registration, aspect)))
+      .map(corner => this.canvasPointOfDirection(this.pictureRegistration!.worldDirectionOf(corner, registration, aspect)))
     const landmarks = this.currentLandmarks().map((landmark, index) => ({
-      picture: this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(landmark.picture, registration, aspect)),
-      scene: this.canvasPointOfDirection(PictureRegistration.worldDirection(landmark.scene)),
+      picture: this.canvasPointOfDirection(this.pictureRegistration!.worldDirectionOf(landmark.picture, registration, aspect)),
+      scene: this.canvasPointOfDirection(this.pictureRegistration!.worldDirection(landmark.scene)),
       label: this.landmarkLabel(landmark, index),
       selected: landmark.id === this.currentLandmarkId,
       residualDeg: this.landmarkResidualDeg(landmark, reference, aspect) as number | undefined
     }))
     if (this.pendingLandmark) {
       landmarks.push({
-        picture: this.canvasPointOfDirection(PictureRegistration.worldDirectionOf(this.pendingLandmark, registration, aspect)),
+        picture: this.canvasPointOfDirection(this.pictureRegistration!.worldDirectionOf(this.pendingLandmark, registration, aspect)),
         scene: undefined,
         label: String(this.currentLandmarks().length + 1),
         selected: true,
@@ -4821,6 +4857,7 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceStatus.textContent = this.messages.referenceStreetSearching
     this.addReferenceButton.disabled = true
     try {
+      this.streetPictures$ ??= new (await import("../engine/reference/PanoramaxPictures.js")).PanoramaxPictures()
       this.streetPictures = await this.streetPictures$.nearby(lat, lng, radiusM)
     } catch {
       this.streetPictures = []
@@ -6785,6 +6822,7 @@ export class SightingEditorElement extends HTMLElement {
     // What is selected on the canvas is what the canvas edits: the shapes' handles in their own
     // group, the picture's frame and landmarks in its own, nothing elsewhere.
     this.ufoElement.selectionShown = mode === "shape"
+    if (pictureNow && this.currentReference()) void this.loadPictureRegistration()
     this.ufoElement.overlayPainter = pictureNow ? this.paintPictureOverlay : mode === "body" ? this.paintBodyOverlay : mode === "decor" ? this.paintDecorOverlay : undefined
     // Only what is painted over the picture changes with the mode, not the world in it (see UfoElement.repaintOverlay).
     if (changed) this.ufoElement.repaintOverlay()
@@ -9058,6 +9096,19 @@ export class SightingEditorElement extends HTMLElement {
    * heading) rather than just disabling it — a building's Occupied floor row, or a tree's whole
    * Windows group, isn't merely irrelevant right now, it's a field that doesn't apply to this
    * kind at all and would be confusing left visible-but-grayed-out. */
+  /** Looks for the ghosts of the lens in the selected picture and shows them on it (see GhostSearchView): its code is loaded only now. */
+  private async findGhosts(): Promise<void> {
+    const reference = this.currentReference()
+    if (!reference?.src || !this.ghostTexts) return
+    this.findGhostsButton.disabled = true
+    try {
+      const { GhostSearchView } = await import("./GhostSearchView.js")
+      await new GhostSearchView(this.ghostsCanvas, this.ghostsStatus, this.ghostTexts).search(reference.src)
+    } finally {
+      this.findGhostsButton.disabled = false
+    }
+  }
+
   /** Writes what the lens fields say onto the recording: undefined when they say nothing at all. */
   private updateLens(): void {
     const glass = this.lensGlassSelect.value as NonNullable<LensStateJson["glass"]> | ""
@@ -10511,6 +10562,12 @@ export class SightingEditorElement extends HTMLElement {
     this.labelSway.textContent = messages.sway
     this.swayInput.title = messages.swayTitle
     this.label("label-lens-glass", messages.lensGlass)
+    this.label("label-reference-ghosts", messages.referenceGhosts)
+    this.findGhostsButton.textContent = messages.referenceFindGhosts
+    this.ghostTexts = {
+      searching: messages.referenceGhostsSearching, found: messages.referenceGhostsFound, foundScaled: messages.referenceGhostsFoundScaled,
+      low: messages.referenceGhostsLow, none: messages.referenceGhostsNone, cropped: messages.referenceGhostsCropped, failed: messages.referenceGhostsFailed
+    }
     this.label("lens-glass-none", messages.lensGlassNone)
     this.label("lens-glass-filter", messages.lensGlassFilter)
     this.label("lens-glass-window", messages.lensGlassWindow)

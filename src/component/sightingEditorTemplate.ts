@@ -630,6 +630,14 @@ export const html = `
       <label><span id="label-reference-landmark-label">Name</span> <input id="referenceLandmarkLabel" type="text" placeholder="Masking tree, fence…"/></label>
     </div>
     </div>
+    <div class="form-section">
+    <!-- The ghosts of the lens in the picture (see GhostFinder): looked for on demand, shown on the picture itself with what each is the
+         ghost of and the lens's axis they lie across. Loaded only when asked for (see GhostSearchView). -->
+    <h3 class="section-title"><span id="label-reference-ghosts">Ghosts in the picture</span></h3>
+    <button id="reference-find-ghosts" type="button">Look for ghosts</button>
+    <span id="reference-ghosts-status" class="apparent-size"></span>
+    <canvas id="reference-ghosts-canvas" class="reference-ghosts-canvas" hidden></canvas>
+    </div>
     </div>
     <div class="form-section" data-fold="all">
     <!-- What an investigator drew over the place, from their own file (see InvestigatorTrace): lines
@@ -930,6 +938,15 @@ input.invalid {
    blur bound another, and on a phone they ran straight out of the element's own box. They wrap;
    the short ones still have nothing to wrap. min-width:0 is what lets them, since a flex item
    otherwise refuses to shrink below its own content. */
+/* A picture searched for the ghosts of its lens, with what was found drawn on it (see GhostSearchView). */
+.reference-ghosts-canvas {
+  display: block;
+  margin-top: 0.5em;
+  border-radius: 4px;
+}
+.reference-ghosts-canvas[hidden] {
+  display: none;
+}
 .apparent-size {
   min-width: 0;
   max-width: 100%;

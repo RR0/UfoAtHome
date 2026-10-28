@@ -593,6 +593,14 @@ if (docs) {
         the fitted heading, pitch and roll into the pose at the playhead as a measurement, with its
         provenance. <strong>Street-level pictures nearby</strong> asks Panoramax for pictures taken
         within 300 m of the observer's spot, each arriving already lined up in heading.</p>
+      <p><strong>Look for ghosts</strong> searches the selected picture for the ghosts of the lens: the
+        faint copies of a bright light that a lens's glass sends back, each on the far side of the
+        lens's axis from its light, as far from it. Each ghost found is ringed and joined to its lamp
+        by a dotted line through the axis; the sentence under it says how many, and how sure: one or
+        two can be chance, three or more on one axis hardly. When that axis is not the picture's
+        centre, the picture was cropped. The picture must be readable: a file of yours always is, an
+        address only if its site allows it. The search, and what it needs, are loaded only when you
+        ask for it, as is everything that handles pictures: a recording without any loads none.</p>
       <p><strong>Investigator's lines (KML, KMZ)</strong> reads a Google Earth file and adds what it
         draws: lines of sight, axes, outlines and markers, with their names, colours and heights. They
         are drawn over the scene and on the map in their own colour, dashed on the map, as the
@@ -1084,6 +1092,15 @@ if (docs) {
         la pose au point de lecture, comme une mesure, avec sa provenance. <strong>Photos de rue à
         proximité</strong> demande à Panoramax les photos prises à moins de 300 m de l'observateur, chacune
         arrivant déjà recalée en cap.</p>
+      <p><strong>Chercher les reflets</strong> cherche dans la photo choisie les reflets fantômes de
+        l'objectif : les copies pâles d'une lumière vive que renvoie le verre de l'objectif, chacune de
+        l'autre côté de l'axe de l'objectif par rapport à sa lumière, à la même distance. Chaque reflet
+        trouvé est cerclé et relié à sa lampe par un pointillé qui passe par l'axe ; la phrase dessous
+        dit combien, et avec quelle certitude : un ou deux peuvent être un hasard, trois ou plus sur un
+        même axe guère. Quand cet axe n'est pas le centre de l'image, la photo a été recadrée. La photo
+        doit être lisible : un fichier à vous l'est toujours, une adresse seulement si son site le
+        permet. La recherche, et ce dont elle a besoin, ne sont chargées que si vous la demandez, comme
+        tout ce qui traite les photos : un enregistrement qui n'en a aucune n'en charge rien.</p>
       <p><strong>Tracés d'enquêteur (KML, KMZ)</strong> lit un fichier Google Earth et ajoute ce qu'il
         dessine : lignes de visée, axes, contours et repères, avec leurs noms, couleurs et hauteurs. Ils
         sont affichés sur la scène et sur la carte dans leur couleur propre, en pointillés sur la carte,
@@ -1563,6 +1580,15 @@ if (docs) {
         una medición, con su procedencia. <strong>Fotos a pie de calle cercanas</strong> pide a
         Panoramax las imágenes tomadas a menos de 300 m del punto del observador, cada una ya alineada en
         rumbo.</p>
+      <p><strong>Buscar reflejos</strong> busca en la foto elegida los reflejos fantasma del objetivo:
+        las copias tenues de una luz intensa que devuelve el cristal del objetivo, cada una al otro lado
+        del eje del objetivo respecto de su luz, a la misma distancia. Cada reflejo encontrado se rodea
+        con un círculo y se une a su lámpara con una línea de puntos que pasa por el eje; la frase de
+        debajo dice cuántos, y con qué certeza: uno o dos pueden ser casualidad, tres o más sobre un
+        mismo eje difícilmente. Cuando ese eje no es el centro de la imagen, la foto fue recortada. La
+        foto debe poder leerse: un archivo propio siempre puede, una dirección solo si su sitio lo
+        permite. La búsqueda, y lo que necesita, solo se cargan si la pide, como todo lo que trata las
+        fotos: una grabación que no tiene ninguna no carga nada de ello.</p>
       <p><strong>Trazos del investigador (KML, KMZ)</strong> lee un archivo de Google Earth y añade lo que
         dibuja: líneas de visión, ejes, contornos y marcadores, con sus nombres, colores y alturas. Se
         muestran sobre la escena y en el mapa con su propio color, discontinuos en el mapa, como del
@@ -2046,6 +2072,15 @@ if (docs) {
         rosso oltre, e ciascuna delle sue estremità si può trascinare. <strong>Adotta come posa dell'osservatore</strong> scrive allora direzione, beccheggio e rollio adattati nella posa alla
         testina di riproduzione, come una misura, con la sua provenienza. <strong>Foto stradali nei dintorni</strong> chiede a Panoramax le immagini scattate entro 300 m dal punto dell'osservatore,
         ciascuna già allineata in direzione.</p>
+      <p><strong>Cerca i riflessi</strong> cerca nella foto scelta i riflessi fantasma dell'obiettivo:
+        le copie tenui di una luce intensa che il vetro dell'obiettivo rimanda, ciascuna dall'altra
+        parte dell'asse dell'obiettivo rispetto alla sua luce, alla stessa distanza. Ogni riflesso
+        trovato viene cerchiato e unito alla sua lampada da una linea tratteggiata che passa per l'asse;
+        la frase sotto dice quanti, e con quale certezza: uno o due possono essere un caso, tre o più
+        sullo stesso asse difficilmente. Quando quell'asse non è il centro dell'immagine, la foto è stata
+        ritagliata. La foto deve essere leggibile: un file vostro lo è sempre, un indirizzo solo se il
+        suo sito lo consente. La ricerca, e ciò che le serve, vengono caricate solo se la chiedete, come
+        tutto ciò che tratta le foto: una registrazione che non ne ha nessuna non ne carica nulla.</p>
       <p><strong>Tracciati dell'investigatore (KML, KMZ)</strong> legge un file Google Earth e aggiunge ciò
         che disegna: linee di vista, assi, contorni e segnaposto, con i loro nomi, colori e altezze. Sono
         mostrati sulla scena e sulla mappa nel loro colore, tratteggiati sulla mappa, come

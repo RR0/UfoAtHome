@@ -143,8 +143,7 @@ import type { BodyState, Ground } from "../engine/interpretation/BodyPlacement.j
 import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
 import { PhenomenonSystem, PHENOMENON_LAYER } from "./PhenomenonSystem.js"
 import { clone as cloneWithSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js"
-import { ReferenceSystem, REFERENCE_LAYER } from "./ReferenceSystem.js"
-import type { ReferenceView } from "./ReferenceSystem.js"
+import type { ReferenceSystem, ReferenceView } from "./ReferenceSystem.js"
 import type { SceneReference } from "../engine/model/Reference.js"
 import type { PhenomenonFrame, PlacedPhenomenon } from "./PhenomenonSystem.js"
 import { ScatteredSky, type SkyAmbient } from "./ScatteredSky.js"
@@ -830,9 +829,14 @@ export class SceneRenderer {
   private readonly scene = new Scene()
   /** The observer's own phenomena, standing in the scene — see PhenomenonSystem and setPhenomena. */
   private readonly phenomena = new PhenomenonSystem(this.scene)
-  /** The pictures of the place laid over it — see ReferenceSystem and setReferences. A picture
-   * whose bytes arrive after the frame was drawn asks for the frame again. */
-  private readonly references = new ReferenceSystem(this.scene, () => this.render())
+  /** The pictures of the place laid over it — see ReferenceSystem and setReferences. Loaded with the first picture: a scene that has none
+   * never fetches what draws them. A picture whose bytes arrive after the frame was drawn asks for the frame again. */
+  private references?: ReferenceSystem
+  private referencesLoading?: Promise<ReferenceSystem>
+  /** What the reader asked of the pictures before they were loaded: applied once they are. */
+  private referencesShown = true
+  private readonly referenceViews = new Map<string, ReferenceView>()
+  private pendingReferences?: { references: SceneReference[], observerAt?: { lat: number; lng: number } }
   private readonly camera: PerspectiveCamera
 
   /** Everything that is, physically, at infinity: the sky dome, the stars, the Sun/Moon/planets
@@ -5095,8 +5099,8 @@ export class SceneRenderer {
       (ndcX, ndcY, into) => this.directionAtScreenPoint(ndcX, ndcY, into),
       direction => this.screenPointOf(direction)
     )
-    this.references.place(this.camera)
-    const furthestPhenomenonM = Math.max(this.phenomena.furthestM, this.references.furthestM) * 1.2
+    this.references?.place(this.camera)
+    const furthestPhenomenonM = Math.max(this.phenomena.furthestM, this.references?.furthestM ?? 0) * 1.2
     if (furthestPhenomenonM > this.camera.far) {
       this.camera.far = furthestPhenomenonM
       this.camera.updateProjectionMatrix()
@@ -5105,7 +5109,7 @@ export class SceneRenderer {
     EYE_UNIFORMS.uRodShare.value = this.scatteredSky?.rodShare ?? 0
     EYE_UNIFORMS.uRelativeScale.value = this.relativeScale
     this.applyMedium()
-    const overlaid = this.references.any || this.phenomena.any || this.compassSprites.some(sprite => sprite.visible)
+    const overlaid = !!this.references?.any || this.phenomena.any || this.compassSprites.some(sprite => sprite.visible)
     EYE_UNIFORMS.uHasOverlay.value = overlaid ? 1 : 0
     const overlays = overlaid ? (camera?: PerspectiveCamera) => this.renderOverlayPasses(camera) : undefined
     // Every path draws light into targets of its own and finishes it once (see FinishPass); the
@@ -5210,7 +5214,7 @@ export class SceneRenderer {
    * that too.
    */
   private renderBodiesOverReferences(camera: PerspectiveCamera): void {
-    if (!this.references.any || !this.bodySystem.any) return
+    if (!this.references?.any || !this.bodySystem.any) return
     const autoClear = this.renderer.autoClear
     const shadows = this.renderer.shadowMap.autoUpdate
     this.renderer.autoClear = false
@@ -5242,12 +5246,12 @@ export class SceneRenderer {
    * left exactly as it was for the phenomena's own pass.
    */
   private renderReferencesPass(camera: PerspectiveCamera): void {
-    if (!this.references.any) return
+    if (!this.references?.any) return
     const autoClear = this.renderer.autoClear
     const shadows = this.renderer.shadowMap.autoUpdate
     this.renderer.autoClear = false
     this.renderer.shadowMap.autoUpdate = false
-    camera.layers.set(REFERENCE_LAYER)
+    camera.layers.set(this.references.layer)
     this.renderer.render(this.scene, camera)
     camera.layers.set(0)
     this.renderer.autoClear = autoClear
@@ -5257,15 +5261,36 @@ export class SceneRenderer {
   /** The pictures of the place to lay over the scene — see ReferenceSystem.set. Cheap to call
    * every tick: a picture already standing at the same registration is left alone. */
   setReferences(references: SceneReference[], observerAt?: { lat: number; lng: number }): void {
-    this.references.set(references.map(reference => {
+    const relative = references.map(reference => {
       const src = this.documentRelative(reference.src)
       return src === reference.src ? reference : { ...reference, src }
-    }), undefined, observerAt)
+    })
+    if (this.references) {
+      this.references.set(relative, undefined, observerAt)
+      return
+    }
+    if (relative.length === 0) {
+      this.pendingReferences = undefined
+      return
+    }
+    // The latest set asked for wins when the code arrives, as it would have if it had been there.
+    this.pendingReferences = { references: relative, observerAt }
+    this.referencesLoading ??= import("./ReferenceSystem.js").then(({ ReferenceSystem }) => {
+      const system = new ReferenceSystem(this.scene, () => this.render())
+      this.references = system
+      for (const [id, view] of this.referenceViews) system.setView(id, view)
+      system.setShown(this.referencesShown)
+      const pending = this.pendingReferences
+      this.pendingReferences = undefined
+      if (pending) system.set(pending.references, undefined, pending.observerAt)
+      this.render()
+      return system
+    })
   }
 
   /** A loaded picture's aspect — see ReferenceSystem.aspectOf. */
   referenceAspect(id: string): number | undefined {
-    return this.references.aspectOf(id)
+    return this.references?.aspectOf(id)
   }
 
   /** The world direction a point of the visible image stands for, under the instrument's own
@@ -5276,18 +5301,20 @@ export class SceneRenderer {
 
   /** Whether a picture's bytes could not be had — see ReferenceSystem.failedToLoad. */
   referenceFailedToLoad(src: string): boolean {
-    return this.references.failedToLoad(this.documentRelative(src))
+    return this.references?.failedToLoad(this.documentRelative(src)) ?? false
   }
 
   /** Whether the reader has the pictures on at all — the player's own toggle. */
   setReferencesShown(shown: boolean): void {
-    this.references.setShown(shown)
+    this.referencesShown = shown
+    this.references?.setShown(shown)
     this.render()
   }
 
   /** The reader's own opacity for one picture — see ReferenceView. */
   setReferenceView(id: string, view: ReferenceView): void {
-    this.references.setView(id, view)
+    this.referenceViews.set(id, view)
+    this.references?.setView(id, view)
     this.render()
   }
 
@@ -6339,7 +6366,7 @@ export class SceneRenderer {
     this.stopTwinkle()
     this.cancelFlush()
     this.phenomena.clear()
-    this.references.disposeAll()
+    this.references?.disposeAll()
     this.terrainBuildToken++ // discard any terrain build still in flight
     this.cancelScatteredSkyPump()
     // The dome may be wearing the scattered sky's material, which is not the mesh's to dispose.

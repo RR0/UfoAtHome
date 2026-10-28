@@ -139,6 +139,9 @@ export class ReferenceSystem {
     if (mesh) this.applyOpacity(mesh, id)
   }
 
+  /** The layer they are on — see REFERENCE_LAYER. */
+  readonly layer = REFERENCE_LAYER
+
   /** Whether anything is standing, so a frame with no picture skips their pass. */
   get any(): boolean {
     for (const mesh of this.meshes.values()) if (mesh.visible) return true

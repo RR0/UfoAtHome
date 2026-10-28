@@ -2991,7 +2991,12 @@ describe("SightingEditorElement canvas mode", () => {
     document.dispatchEvent(new MouseEvent("pointerup", { clientX: to.x, clientY: to.y }))
   }
 
-  it("hands the canvas to the picture while the Pictures group is open, and to the shapes while Phenomenon is", () => {
+  /** What lines a picture up is loaded when the Pictures group opens on one (see SightingEditorElement.loadPictureRegistration). */
+  async function linedUp(element: SightingEditorElement): Promise<void> {
+    await vi.waitFor(() => expect((element as unknown as { pictureRegistration?: unknown }).pictureRegistration).toBeDefined())
+  }
+
+  it("hands the canvas to the picture while the Pictures group is open, and to the shapes while Phenomenon is", async () => {
     const element = mount()
     element.sightingData = withPicture()
     lookingAsTheObserver(element)
@@ -3004,6 +3009,7 @@ describe("SightingEditorElement canvas mode", () => {
     expect(headingOf()).toBe(275)
     // Pictures open: the same drag turns the picture and leaves the shape alone.
     open(element, "group-reference")
+    await linedUp(element)
     drag(element, { x: 320, y: 180 }, { x: 340, y: 180 })
     expect(headingOf()).toBeGreaterThan(275)
     expect(shapeX()).toBeCloseTo(320, 6)
@@ -3015,11 +3021,12 @@ describe("SightingEditorElement canvas mode", () => {
     expect(element.shadowRoot!.getElementById("group-shape")!.hidden).toBe(false)
   })
 
-  it("turns the observer, not the picture, when the drag starts outside the picture", () => {
+  it("turns the observer, not the picture, when the drag starts outside the picture", async () => {
     const element = mount()
     element.sightingData = withPicture()
     lookingAsTheObserver(element)
     open(element, "group-reference")
+    await linedUp(element)
     const pictureHeading = () => element.sightingData.references![0]!.registration.headingDeg
     const observerHeading = () => element.sightingData.observerTrack!.keyframes[0]!.pose.headingDeg
     // The observer faces 288° with 60° of height; the picture, 27° high at 275°, ends well before
