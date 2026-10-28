@@ -163,7 +163,8 @@ describe("SceneElement star tooltip", () => {
     document.body.innerHTML = ""
   })
 
-  function hover(element: SceneElement): string | undefined {
+  /** What the tooltip says with the pointer at (10, 10): the name alone, or with Alt held its details too. */
+  function hover(element: SceneElement, altKey = true): string | undefined {
     const canvas = element.ufoElement.canvasElement
     // jsdom lays nothing out, so every rect is 0x0 — and handlePointerMove bails on a zero-sized
     // canvas before it ever looks at the sky. Mocked 1:1 with the canvas's own pixels, the same
@@ -173,7 +174,7 @@ describe("SceneElement star tooltip", () => {
     // jsdom has no global PointerEvent, and handlePointerMove only reads clientX/clientY — a
     // plain MouseEvent dispatched under that name exercises the same handler, the same substitute
     // the recorder's own drag tests make.
-    canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: 10, clientY: 10, bubbles: true, composed: true }))
+    canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: 10, clientY: 10, altKey, bubbles: true, composed: true }))
     const tooltip = element.shadowRoot!.getElementById("hover-tooltip")!
     return tooltip.hidden ? undefined : tooltip.textContent!
   }
@@ -187,14 +188,16 @@ describe("SceneElement star tooltip", () => {
   /*
    * Three things and not one. A name identifies without explaining: what makes a bright point a
    * candidate for a misidentification is how bright it was and how low it stood, which is the
-   * question this whole tooltip exists to answer.
+   * question this whole tooltip exists to answer — with Alt held, as every detail of the scene's tooltips.
    */
-  it("names the star, and says how bright it was and how high it stood", () => {
+  it("names the star, and with Alt says how bright it was and how high it stood", () => {
     hit.star = { name: "Capella", raHours: 5.27815, decDeg: 45.997991, mag: 0.08 }
     hit.altitudeDeg = 21.4
     const element = mount()
 
     expect(hover(element)).toBe("Capella — mag 0.08, 21° above the horizon")
+    // Without Alt, the name alone: as every other tooltip of the scene.
+    expect(hover(element, false)).toBe("Capella")
   })
 
   /*

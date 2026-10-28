@@ -519,8 +519,8 @@ if (docs) {
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Point at anything and it names itself</h2>
-    <p>Hovering the scene names what is under the pointer. A star gives its name, its magnitude and
-      how high it stood — “Venus, mag −4, 8° above the horizon” answers a report of a bright light
+    <p>Hovering the scene names what is under the pointer. A star gives its name, and with <kbd>Alt</kbd> held its
+      magnitude and how high it stood — “Venus, mag −4, 8° above the horizon” answers a report of a bright light
       near the horizon on its own, where a bare name would not. The Sun, the Moon, the planets and
       any comet up that night answer the same way, and so does everything in the environment: a
       building, a tree, another observer. With <kbd>Alt</kbd> held, an object of the environment also
@@ -1014,8 +1014,8 @@ if (docs) {
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Pointez n'importe quoi, cela se nomme</h2>
-    <p>Survoler la scène nomme ce qui est sous le curseur. Une étoile donne son nom, sa magnitude et
-      sa hauteur — « Vénus, mag −4, 8° au-dessus de l'horizon » répond à lui seul à un signalement
+    <p>Survoler la scène nomme ce qui est sous le curseur. Une étoile donne son nom, et <kbd>Alt</kbd> enfoncé sa
+      magnitude et sa hauteur — « Vénus, mag −4, 8° au-dessus de l'horizon » répond à lui seul à un signalement
       de lumière vive près de l'horizon, là où un nom seul ne répondrait pas. Le Soleil, la Lune, les
       planètes et toute comète levée cette nuit-là répondent de même, et tout l'environnement
       aussi : un bâtiment, un arbre, un autre observateur. Avec <kbd>Alt</kbd> enfoncée, un objet de
@@ -1508,8 +1508,8 @@ if (docs) {
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Señala cualquier cosa y dirá su nombre</h2>
-    <p>Pasar el puntero por la escena nombra lo que hay debajo. Una estrella da su nombre, su magnitud
-      y a qué altura estaba: «Venus, mag −4, 8° sobre el horizonte» responde por sí sola a un informe
+    <p>Pasar el puntero por la escena nombra lo que hay debajo. Una estrella da su nombre, y con <kbd>Alt</kbd> pulsado su
+      magnitud y a qué altura estaba: «Venus, mag −4, 8° sobre el horizonte» responde por sí sola a un informe
       de una luz brillante cerca del horizonte, donde un nombre a secas no lo haría. El Sol, la Luna,
       los planetas y cualquier cometa visible aquella noche responden igual, y también todo lo del
       entorno: un edificio, un árbol, otro observador.</p>
@@ -2005,7 +2005,7 @@ if (docs) {
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Indica qualsiasi cosa e dirà il suo nome</h2>
-    <p>Passare sopra la scena nomina ciò che sta sotto il puntatore. Una stella dà il suo nome, la sua
+    <p>Passare sopra la scena nomina ciò che sta sotto il puntatore. Una stella dà il suo nome, e con <kbd>Alt</kbd> premuto la sua
       magnitudine e quanto era alta: «Venere, mag −4, 8° sopra l'orizzonte» risponde da sola a una
       segnalazione di una luce brillante vicino all'orizzonte, dove un semplice nome non lo farebbe. Il
       Sole, la Luna, i pianeti e qualsiasi cometa visibile quella notte rispondono allo stesso modo, e

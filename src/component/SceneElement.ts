@@ -676,10 +676,13 @@ export class SceneElement extends HTMLElement {
       const template = altitudeDeg < 0
         ? names?.starTooltipBelow ?? STAR_TOOLTIP_BELOW
         : names?.starTooltip ?? STAR_TOOLTIP
+      const name = naming.star(star.star)
+      // The name alone by default, and its magnitude and height with Alt held: the two depths every other tooltip of the scene has.
       return {
         kind: "star",
-        name: template
-          .replace("{name}", naming.star(star.star))
+        name,
+        detail: () => template
+          .replace("{name}", name)
           .replace("{mag}", magnitude.toLocaleString(undefined, { maximumFractionDigits: Math.abs(magnitude) < 1 ? 2 : 1 }))
           .replace("{alt}", String(Math.round(Math.abs(altitudeDeg))))
       }
