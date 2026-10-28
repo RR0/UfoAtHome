@@ -78,10 +78,10 @@ export class DemoCatalogue {
       id: "instruments",
       title: { en: "Instrument and weather", fr: "Instrument et météo", es: "Instrumento y tiempo", it: "Strumento e meteo" },
       blurb: {
-        en: "The same sighting through an eye, an Instamatic and a reflex; a storm; an airliner on a long exposure; the ghosts of a lens, rain on the glass, and the Capitol photograph of 1952.",
-        fr: "La même observation à l'œil, à l'Instamatic et au reflex ; un orage ; un avion en pose longue ; les reflets d'un objectif, la pluie sur le verre, et la photo du Capitole de 1952.",
-        es: "El mismo avistamiento a ojo, con una Instamatic y con una réflex; una tormenta; un avión en exposición larga; los reflejos de un objetivo, la lluvia en el cristal, y la foto del Capitolio de 1952.",
-        it: "Lo stesso avvistamento a occhio, con una Instamatic e con una reflex; un temporale; un aereo in posa lunga; i riflessi di un obiettivo, la pioggia sul vetro, e la foto del Campidoglio del 1952."
+        en: "The same sighting through an eye, an Instamatic and a reflex; a storm; an airliner on a long exposure; the ghosts of a lens, and rain on the glass.",
+        fr: "La même observation à l'œil, à l'Instamatic et au reflex ; un orage ; un avion en pose longue ; les reflets d'un objectif, et la pluie sur le verre.",
+        es: "El mismo avistamiento a ojo, con una Instamatic y con una réflex; una tormenta; un avión en exposición larga; los reflejos de un objetivo, y la lluvia en el cristal.",
+        it: "Lo stesso avvistamento a occhio, con una Instamatic e con una reflex; un temporale; un aereo in posa lunga; i riflessi di un obiettivo, e la pioggia sul vetro."
       }
     }
   ]
@@ -91,10 +91,10 @@ export class DemoCatalogue {
       section: "sightings",
       heading: { en: "Real sightings", fr: "Des observations réelles", es: "Avistamientos reales", it: "Avvistamenti reali" },
       intro: {
-        en: "Fourteen documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Quatorze dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
-        es: "Catorce casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
-        it: "Quattordici casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
+        en: "Fifteen documented cases, each replayed in the sky of its own reported date, time and place.",
+        fr: "Quinze dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
+        es: "Quince casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
+        it: "Quindici casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
       },
       demos: [
         {
@@ -283,6 +283,17 @@ export class DemoCatalogue {
             fr: "Crépuscule dans une vallée du Nevada, 19:00. Une orbe orange arrive de l'est, tour à tour transparente et orange, et expulse trois petites orbes rouges qui partent vers le sud. Le cas que le FBI a reconstitué en deux vidéos, refait ici en 3D pour les cinq agents, avec les lectures confrontées à leurs récits : leurres de l'AARO, fusée éclairante, drone, feux d'obstacle, fils de la Vierge. Ouvrez-le en grand pour changer d'observateur et de lecture.",
             es: "Anochecer en un valle de Nevada, 19:00. Un orbe naranja llega del este, alternando transparente y naranja, y expulsa tres pequeños orbes rojos que se van hacia el sur. El caso que el FBI recreó en dos vídeos, reconstruido aquí en 3D para los cinco agentes, con las lecturas confrontadas a sus relatos: señuelos de la AARO, bengala de iluminación, dron, luces de obstáculo, hilos de araña. Ábrelo a tamaño completo para cambiar de observador y de lectura.",
             it: "Crepuscolo in una valle del Nevada, 19:00. Una sfera arancione arriva da est, alternando trasparente e arancione, ed espelle tre piccole sfere rosse che vanno verso sud. Il caso che l'FBI ha ricostruito in due video, rifatto qui in 3D per i cinque agenti, con le letture confrontate ai loro resoconti: esche dell'AARO, razzo illuminante, drone, luci di ostacolo, fili di ragno. Aprilo a schermo intero per cambiare osservatore e lettura."
+          }
+        },
+        {
+          id: "washington-capitol",
+          src: "/demo-data/sky-test-washington-capitol.json",
+          title: { en: "The Capitol, July 1952", fr: "Le Capitole, juillet 1952", es: "El Capitolio, julio de 1952", it: "Il Campidoglio, luglio 1952" },
+          blurb: {
+            en: "The photograph of lights above the Capitol dome during the Washington sightings, laid over the scene: each is the ghost of a lamp standard below, mirrored through the lens's axis by a filter, a pair of points because the standards carry several globes. Point at one to see which. Camera, standpoint and night assumed.",
+            fr: "La photo de lumières au-dessus du dôme du Capitole lors des observations de Washington, posée sur la scène : chacune est le reflet d'un candélabre en contrebas, renvoyé à l'opposé de l'axe de l'objectif par un filtre, en paire de points parce que les candélabres portent plusieurs globes. Pointez-en une pour voir lequel. Appareil, point de vue et nuit supposés.",
+            es: "La foto de luces sobre la cúpula del Capitolio durante los avistamientos de Washington, superpuesta a la escena: cada una es el reflejo de un candelabro de abajo, devuelto al otro lado del eje del objetivo por un filtro, en pareja de puntos porque los candelabros llevan varios globos. Señala una para ver cuál. Cámara, punto de vista y noche supuestos.",
+            it: "La foto di luci sopra la cupola del Campidoglio durante gli avvistamenti di Washington, sovrapposta alla scena: ognuna è il riflesso di un candelabro sottostante, rimandato dalla parte opposta dell'asse dell'obiettivo da un filtro, in coppia di punti perché i candelabri portano più globi. Indicane una per vedere quale. Fotocamera, punto di vista e notte ipotizzati."
           }
         }
       ]
@@ -656,17 +667,6 @@ export class DemoCatalogue {
             fr: "Le même carrefour à travers une vitre pendant une averse : la pluie de dos laisse la vitre sèche, puis le vent tourne et les gouttes se posent, fusionnent et coulent, jusqu'aux dernières quand elle s'arrête. Pointez un halo pour voir de quelle lumière il vient.",
             es: "El mismo cruce a través de una ventana durante un chubasco: la lluvia de espaldas deja el cristal seco, luego el viento gira y las gotas caen, se funden y bajan, hasta las últimas cuando para. Señala un halo para ver de qué luz viene.",
             it: "Lo stesso incrocio attraverso una finestra durante un acquazzone: la pioggia alle spalle lascia il vetro asciutto, poi il vento gira e le gocce si posano, si fondono e scendono, fino alle ultime quando smette. Indica un alone per vedere da quale luce viene."
-          }
-        },
-        {
-          id: "washington-capitol",
-          src: "/demo-data/sky-test-washington-capitol.json",
-          title: { en: "The Capitol, July 1952", fr: "Le Capitole, juillet 1952", es: "El Capitolio, julio de 1952", it: "Il Campidoglio, luglio 1952" },
-          blurb: {
-            en: "The photograph of lights above the Capitol dome during the Washington sightings, laid over the scene: each is the ghost of a lamp standard below, mirrored through the lens's axis by a filter, a pair of points because the standards carry several globes. Point at one to see which. Camera, standpoint and night assumed.",
-            fr: "La photo de lumières au-dessus du dôme du Capitole lors des observations de Washington, posée sur la scène : chacune est le reflet d'un candélabre en contrebas, renvoyé à l'opposé de l'axe de l'objectif par un filtre, en paire de points parce que les candélabres portent plusieurs globes. Pointez-en une pour voir lequel. Appareil, point de vue et nuit supposés.",
-            es: "La foto de luces sobre la cúpula del Capitolio durante los avistamientos de Washington, superpuesta a la escena: cada una es el reflejo de un candelabro de abajo, devuelto al otro lado del eje del objetivo por un filtro, en pareja de puntos porque los candelabros llevan varios globos. Señala una para ver cuál. Cámara, punto de vista y noche supuestos.",
-            it: "La foto di luci sopra la cupola del Campidoglio durante gli avvistamenti di Washington, sovrapposta alla scena: ognuna è il riflesso di un candelabro sottostante, rimandato dalla parte opposta dell'asse dell'obiettivo da un filtro, in coppia di punti perché i candelabri portano più globi. Indicane una per vedere quale. Fotocamera, punto di vista e notte ipotizzati."
           }
         }
       ]
