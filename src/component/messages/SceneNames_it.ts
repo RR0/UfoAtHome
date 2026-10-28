@@ -165,7 +165,9 @@ export const sceneNames_it: SceneNames = {
       dirt: "Luce diffusa dallo sporco sul vetro"
     },
     opposite: "dall'altra parte del centro dell'immagine rispetto alla luce", sameSide: "dallo stesso lato del centro della luce",
-    around: "attorno alla luce"
+    around: "attorno alla luce",
+    drop: { lens: "Goccia sull'obiettivo", filter: "Goccia sul filtro", window: "Goccia sul vetro", windscreen: "Goccia sul parabrezza" },
+    dropDetail: "{name}. Come una piccola lente, mostra capovolto e sfocato ciò che c'è dall'altra parte di essa, invece di ciò che c'è dietro."
   },
   opticsTooltips: {
     halo22: "Alone di 22° — un anello attorno al Sole, dovuto alla luce deviata da cristalli di ghiaccio esagonali nei cirri; il bordo interno è rosso, a 21,7°",

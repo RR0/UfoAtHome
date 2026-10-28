@@ -172,7 +172,9 @@ export const sceneNames_fr: SceneNames = {
       dirt: "Lumière diffusée par la saleté sur le verre"
     },
     opposite: "à l'opposé de la lumière par rapport au centre de l'image", sameSide: "du même côté du centre que la lumière",
-    around: "autour de la lumière"
+    around: "autour de la lumière",
+    drop: { lens: "Goutte sur l'objectif", filter: "Goutte sur le filtre", window: "Goutte sur la vitre", windscreen: "Goutte sur le pare-brise" },
+    dropDetail: "{name}. Comme une petite lentille, elle montre à l'envers et flou ce qu'il y a de l'autre côté d'elle, au lieu de ce qui est derrière."
   },
   opticsTooltips: {
     halo22: "Halo de 22° — un anneau autour du Soleil, dû à la lumière déviée par des cristaux de glace hexagonaux dans les cirrus ; son bord interne est rouge, à 21,7°",

@@ -205,4 +205,8 @@ export interface GhostTooltipTexts {
   readonly sameSide: string
   /** Round its light, or just beside it. */
   readonly around: string
+  /** A drop on the glass pointed at, by the glass it is on (see LensStateJson.glass; "lens" when there is none in front). */
+  readonly drop: Readonly<Record<"lens" | "filter" | "window" | "windscreen", string>>
+  /** What a drop does to what is seen through it: "{name}. …". */
+  readonly dropDetail: string
 }

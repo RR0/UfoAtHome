@@ -421,6 +421,18 @@ export class GhostPass {
     return best?.hit
   }
 
+  /**
+   * How much of the glass a drop covers at a point of the picture, in normalised device coordinates, 0 to 1: read back from the last picture
+   * developed, where the layer of the ghosts keeps it (see develop). On a hover only.
+   */
+  dropAt(renderer: WebGLRenderer, ndcX: number, ndcY: number): number {
+    const x = Math.round((ndcX + 1) / 2 * this.ghostLayer.width), y = Math.round((ndcY + 1) / 2 * this.ghostLayer.height)
+    if (x < 0 || y < 0 || x >= this.ghostLayer.width || y >= this.ghostLayer.height) return 0
+    const texel = new Uint16Array(4)
+    renderer.readRenderTargetPixels(this.ghostLayer, x, y, 1, 1, texel)
+    return GhostPass.half(texel[3])
+  }
+
   /** The mean luminance of the half-size picture over a square round a texel, and its brightest texel; undefined outside it. */
   private window(renderer: WebGLRenderer, x: number, y: number, radius: number): { mean: number, brightest: { x: number, y: number } } | undefined {
     // A wide ghost is read every few texels: its mean is all that is wanted of it.

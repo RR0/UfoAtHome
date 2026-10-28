@@ -168,7 +168,9 @@ export const sceneNames_es: SceneNames = {
       dirt: "Luz difundida por la suciedad sobre el cristal"
     },
     opposite: "al otro lado del centro de la imagen respecto a la luz", sameSide: "del mismo lado del centro que la luz",
-    around: "alrededor de la luz"
+    around: "alrededor de la luz",
+    drop: { lens: "Gota en el objetivo", filter: "Gota en el filtro", window: "Gota en el cristal", windscreen: "Gota en el parabrisas" },
+    dropDetail: "{name}. Como una pequeña lente, muestra al revés y desenfocado lo que hay al otro lado de ella, en lugar de lo que hay detrás."
   },
   opticsTooltips: {
     halo22: "Halo de 22° — un anillo alrededor del Sol, por luz desviada en cristales de hielo hexagonales de los cirros; su borde interior es rojo, a 21,7°",

@@ -5591,6 +5591,13 @@ export class SceneRenderer {
     return this.ghostPass.pickAt(this.renderer, ndcX, ndcY, this.ghostOptics, EYE_UNIFORMS.uMediumExposure.value)
   }
 
+  /** Whether a drop on the glass the picture is taken through is under a point of it (see GhostPass.dropAt): what then stands between the
+   * pointer and everything of the scene, deforming it. */
+  pickDropAt(ndcX: number, ndcY: number): boolean {
+    if (!this.ghostPass || (this.ghostOptics.impacts <= 0 && this.ghostOptics.drops <= 0)) return false
+    return this.ghostPass.dropAt(this.renderer, ndcX, ndcY) > 0.5
+  }
+
   private usableGhostPass(): GhostPass | undefined {
     if (!this.ghostOptics?.ghosts.length) return undefined
     const size = this.renderer.getDrawingBufferSize(new Vector2())

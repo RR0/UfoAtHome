@@ -175,7 +175,9 @@ const GHOST_TOOLTIP: GhostTooltipTexts = {
     filter: "The sensor's reflection, sent back by the filter", glass: "A reflection between the two faces of the glass in front of the lens",
     drops: "Light scattered by drops on the glass", condensation: "Light scattered by condensation on the glass", dirt: "Light scattered by dirt on the glass"
   },
-  opposite: "across the centre of the picture from the light", sameSide: "on the same side of the centre as the light", around: "round the light"
+  opposite: "across the centre of the picture from the light", sameSide: "on the same side of the centre as the light", around: "round the light",
+  drop: { lens: "Drop on the lens", filter: "Drop on the filter", window: "Drop on the window", windscreen: "Drop on the windscreen" },
+  dropDetail: "{name}. Like a small lens, it shows upside down and blurred what is on the other side of it, rather than what is behind it."
 }
 const PLUME_TOOLTIP = { name: "Rocket plume", detail: "{name} — {part}, {distance} away, {height} km up", ascent: "exhaust of the ascent", burn: "exhaust of an engine burn", vent: "vented propellant" }
 
@@ -314,7 +316,7 @@ export interface BodyReading {
  */
 /** What is under a point of the picture: what kind of thing, which one, and what it is called. */
 export interface ScenePick {
-  kind: "sky" | "body" | "decor" | "beam" | "ghost" | "railway" | "traffic" | "plume" | "satellite" | "optics" | "star"
+  kind: "sky" | "body" | "decor" | "beam" | "ghost" | "drop" | "railway" | "traffic" | "plume" | "satellite" | "optics" | "star"
   /** The sky body's key, the interpretation body's id or the decor object's id, when it has one. */
   id?: string
   name: string
@@ -581,6 +583,12 @@ export class SceneElement extends HTMLElement {
   pickAt(ndcX: number, ndcY: number, ghosts = true): ScenePick | undefined {
     const naming = this.naming
     const names = naming.names
+    // A drop on the glass the picture is taken through: nearer than anything of the scene, which it deforms.
+    if (ghosts && this.sceneRenderer.pickDropAt(ndcX, ndcY)) {
+      const texts = names?.ghostTooltip ?? GHOST_TOOLTIP
+      const name = texts.drop[this.ufoElement.sighting.lens?.glass ?? "lens"]
+      return { kind: "drop", name, detail: () => texts.dropDetail.replace("{name}", name) }
+    }
     const bodyKey = this.sceneRenderer.pickBodyAt(ndcX, ndcY)
     if (bodyKey) return { kind: "sky", id: bodyKey, name: this.bodyName(bodyKey) }
     // What the account says was there — a craft, a being, a person — by the name the interpretation gives it.
