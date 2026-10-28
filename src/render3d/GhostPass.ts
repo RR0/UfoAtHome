@@ -166,6 +166,14 @@ export class GhostPass {
         // their joint outline rather than two discs overlapping. Under them, a mist of fine droplets that only accumulates, and that the
         // running drops wipe. Stated rather than falling (no impact rate), the drops are there for good, and still.
 
+        // The field of a drop of this radius at this distance from its centre: highest at its centre, falling smoothly to nothing at two and
+        // a half radii, and 0.7 at its own edge, which is where the fields of a drop alone pass the threshold. Two drops nearer than that add
+        // up and the glass between them is wet too: they merge into one outline, as drops on a glass do.
+        float kernel(float distance, float radius) {
+          float x = distance / (2.5 * radius);
+          return x < 1.0 ? (1.0 - x * x) * (1.0 - x * x) : 0.0;
+        }
+
         // The field one drop throws at a point of the glass, in cells, and its pull on what the drop refracts; wiped grows where its trail
         // passes. age is the seconds since it landed.
         float field(vec2 cellular, vec2 cell, vec2 seed, float age, inout vec2 pull, inout float wiped) {
@@ -194,14 +202,14 @@ export class GhostPass {
           vec2 d = cellular - centre;
           // Out of reach of this point, as most drops of the cells looked at are: nothing to work out. A running drop reaches up its trail.
           if (abs(d.x) > radius * 2.5 || d.y < -radius * 2.5 || d.y > radius * 2.5 + slid) return 0.0;
-          // A running drop is a tear: its tail drawn up behind it, its front round.
+          // A running drop is a tear: its tail drawn up behind it, its front round. One that clings sags a little under its weight, wider
+          // below than above. Round or oval otherwise, but for a slight unevenness: the shapes of a wet glass come from drops merging.
           if (slid > 0.0) d.y *= d.y > 0.0 ? 0.5 : 1.15;
+          else if (d.y < 0.0) d.y *= 0.88;
           float angle = atan(d.y, d.x);
-          float outline = 1.0 + 0.16 * sin(3.0 * angle + h4 * 6.28) + 0.09 * sin(5.0 * angle + h5 * 6.28);
-          float r = length(d) / outline;
-          float f = radius * radius / max(r * r, 1e-4);
-          f = f > 0.3 ? f : 0.0;
-          pull += min(f, 4.0) * d;
+          float outline = 1.0 + 0.04 * sin(3.0 * angle + h4 * 6.28) + 0.02 * sin(5.0 * angle + h5 * 6.28);
+          float f = kernel(length(d) / outline, radius);
+          pull += f * d;
           // Its trail: the strip it ran down, wiped, and beads left along it.
           if (slid > 0.0 && cellular.y > centre.y && cellular.y < centre.y + slid) {
             float along = cellular.y - centre.y;
@@ -211,9 +219,9 @@ export class GhostPass {
             float slot = floor(along * 3.0);
             vec2 bead = vec2(x, centre.y + (slot + 0.5) / 3.0);
             float rb = 0.05 * fade * step(0.45, hash(seed + slot * 3.7));
-            float fb = rb * rb / max(dot(cellular - bead, cellular - bead), 1e-4);
-            f += fb > 0.3 ? fb : 0.0;
-            pull += min(fb, 4.0) * (cellular - bead);
+            float fb = rb > 0.0 ? kernel(distance(cellular, bead), rb) : 0.0;
+            f += fb;
+            pull += fb * (cellular - bead);
           }
           return f;
         }
@@ -255,7 +263,7 @@ export class GhostPass {
 
         // The wet glass at this point of the picture: how much a drop covers it, and the offset (in the picture's own coordinates) by which
         // the drop there refracts.
-        vec3 drops(vec2 uv) {
+        vec4 drops(vec2 uv) {
           float aspect = uSize.x / uSize.y;
           vec2 q = vec2(uv.x * aspect, uv.y);
           float size = 18.0;
@@ -268,25 +276,28 @@ export class GhostPass {
           total += cellField(cellular, cell + vec2(-1.0, 0.0), pull, wiped);
           total += cellField(cellular, cell + vec2(1.0, 0.0), pull, wiped);
           for (int k = 0; k <= 8; k++) total += cellField(cellular, cell + vec2(0.0, float(k)), pull, wiped);
-          float cover = smoothstep(0.9, 1.3, total);
+          float cover = smoothstep(0.64, 0.76, total);
+          // Darker at its rim, where the glass of water is steepest and turns the light it gets away from the lens: what outlines a drop.
+          float shade = 0.3 + 0.7 * smoothstep(0.7, 1.05, total);
           // The fine droplets: a dense grid, each there once it has landed (in a few seconds of rain), wiped where a drop ran.
           vec2 fineCell = floor(q * 90.0);
           // Each fine droplet there once the count has passed its own share: they only add up, dry rain or not.
           bool landedFine = uStill > 0.5 ? hash(fineCell + 3.3) < 0.15 + 0.5 * uDrops : hash(fineCell + 9.1) < min(0.45, uImpacts * 0.03);
           if (landedFine) {
             vec2 centre = fineCell + 0.5 + (vec2(hash(fineCell + 5.1), hash(fineCell + 6.2)) - 0.5) * 0.6;
-            float fine = smoothstep(0.35, 0.15, distance(q * 90.0, centre)) * (1.0 - wiped);
-            if (fine > cover) return vec3(fine * 0.6, (q * 90.0 - centre) / 90.0 / vec2(aspect, 1.0));
+            float away = distance(q * 90.0, centre);
+            float fine = smoothstep(0.35, 0.25, away) * (1.0 - wiped);
+            if (fine > cover) return vec4(fine * 0.6, (q * 90.0 - centre) / 90.0 / vec2(aspect, 1.0), 0.4 + 0.6 * smoothstep(0.35, 0.1, away));
           }
-          return vec3(cover, pull / max(total, 1e-3) / size / vec2(aspect, 1.0));
+          return vec4(cover, pull / max(total, 1e-3) / size / vec2(aspect, 1.0), shade);
         }
 
         void main() {
           vec3 sum = vec3(0.0);
-          vec3 drop = uDrops > 0.0 || uImpacts > 0.0 ? drops(vUv) : vec3(0.0);
+          vec4 drop = uDrops > 0.0 || uImpacts > 0.0 ? drops(vUv) : vec4(0.0);
           // What a drop shows of the scene: what is on the other side of it, upside down and out of focus, instead of what is behind it
           // (the finish takes the scene away where the alpha says a drop covers it).
-          if (drop.x > 0.0) sum += drop.x * textureLod(uMips, vUv - drop.yz * 4.0, 2.0).rgb;
+          if (drop.x > 0.0) sum += drop.x * drop.w * textureLod(uMips, vUv - drop.yz * 4.0, 2.0).rgb;
           for (int i = 0; i < ${n}; i++) {
             if (i >= uCount) break;
             float k = uScale[i];
