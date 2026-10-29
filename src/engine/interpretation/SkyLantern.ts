@@ -35,6 +35,20 @@ export interface LanternLaunchJson {
   /** The air temperature at the site, °C, falling by 6.5 °C per kilometre above it: what the lanterns' hot air is lighter than. 10 when
    * absent. */
   airTemperatureC?: number
+  /** The gusts and eddies of the air, each lantern meeting its own: what scatters a group let go at one spot (see LanternTurbulence).
+   * SkyLantern.TURBULENCE (a light breeze's) when absent; all zero for a still, laminar air. */
+  turbulence?: LanternTurbulence
+}
+
+/**
+ * How the air a lantern goes through strays from the mean wind: by how much, horizontally and vertically (the spread of its speed about
+ * the mean, m/s), and for how long a gust lasts before another takes over, s. Each lantern meets its own, drawn from its own seed (see
+ * LanternRelease.seed), the same each time.
+ */
+export interface LanternTurbulence {
+  horizontalMS: number
+  verticalMS: number
+  timescaleS: number
 }
 
 /** Where lanterns are let go: metres east and north of the recording's origin, and above the ground there (see BodyKeyframe.altitudeM). */
@@ -93,6 +107,9 @@ export interface LanternRelease {
   burnedS?: number
   /** What this one has of its own: no two fuel cells burn alike, nor do two envelopes hold their air alike. */
   lantern?: Partial<LanternType>
+  /** What the gusts it meets are drawn from (see LanternTurbulence): drawn from the group's seed for a group, from when and where it is let
+   * go when absent. */
+  seed?: number
 }
 
 /** What a lantern is made of and how it burns: what the computation needs of it. */
@@ -162,6 +179,12 @@ export class SkyLantern {
   private static readonly STEP_S = 0.05
   /** How long the air in the envelope takes to follow the flame, s: it is renewed through the opening at the bottom within tens of seconds. */
   static readonly COOLING_S = 20
+  /**
+   * The air's own stirring when nothing is stated, ASSUMED: a light breeze's, its speed straying by some 0.8 m/s about the mean and rising
+   * and sinking by 0.3 m/s, each gust holding some 30 s — what turns a dozen lanterns let go together into the loose, shifting, stretching
+   * string they are seen as, and not a rigid formation.
+   */
+  static readonly TURBULENCE: LanternTurbulence = { horizontalMS: 0.8, verticalMS: 0.3, timescaleS: 30 }
   private static readonly G = 9.81
   /** The gas constant of dry air, J/(kg·K). */
   private static readonly R_AIR = 287.05
@@ -201,6 +224,7 @@ export class SkyLantern {
         eastM: Math.round(r * Math.sin(angle) * 10) / 10,
         northM: Math.round(r * Math.cos(angle) * 10) / 10,
         burnedS: group.burnedS,
+        seed: Math.floor(random() * 4294967296),
         lantern: {
           burnS: Math.round(between(group.burnS ?? { min: 480, max: 900 })),
           insideExcessK: Math.round(between(group.insideExcessK ?? { min: 125, max: 175 }))
@@ -264,6 +288,7 @@ export class SkyLantern {
     const step = SkyLantern.STEP_S, perSample = Math.max(1, Math.round(sampleMs / 1000 / step))
     const steps = Math.ceil(Math.max(0, type.burnS - burned) / step)
     const samples = [{ t: release.t, x: state.x, y: state.y, z: state.z, light: SkyLantern.heatShare(type, burned) }]
+    const gust = SkyLantern.gusts(launch.turbulence ?? SkyLantern.TURBULENCE, SkyLantern.seedOf(release), step)
     for (let i = 1; i <= steps; i++) {
       // Seconds since it was let go, and since the recording first has it.
       const elapsed = i * step, s = burned + elapsed
@@ -278,13 +303,15 @@ export class SkyLantern {
       const lift = (rho - insideRho) * type.envelopeVolumeM3 * SkyLantern.G
       // What the forces move: the lantern, the air it holds, and half the air it displaces as it goes (a sphere's added mass).
       const inertia = mass + insideRho * type.envelopeVolumeM3 + 0.5 * rho * type.envelopeVolumeM3
-      const wind = SkyLantern.windAt(launch, above)
-      const rx = state.vx - wind.x, ry = state.vy - wind.y, rz = state.vz
+      // The mean wind of that height, and the gust it is meeting there.
+      const mean = SkyLantern.windAt(launch, above), stray = gust()
+      const wind = { x: mean.x + stray.x, y: mean.y + stray.y, z: stray.z }
+      const rx = state.vx - wind.x, ry = state.vy - wind.y, rz = state.vz - wind.z
       const k = 0.5 * rho * type.dragAreaM2 * Math.hypot(rx, ry, rz) / inertia
       // Semi-implicit, as the drag is what sets its speed and an explicit step would overshoot it.
       state.vx = (state.vx + k * step * wind.x) / (1 + k * step)
       state.vy = (state.vy + k * step * wind.y) / (1 + k * step)
-      state.vz = (state.vz + (lift - mass * SkyLantern.G) / inertia * step) / (1 + k * step)
+      state.vz = (state.vz + k * step * wind.z + (lift - mass * SkyLantern.G) / inertia * step) / (1 + k * step)
       state.x += state.vx * step
       state.y += state.vy * step
       state.z = Math.max(ground, state.z + state.vz * step)
@@ -293,6 +320,32 @@ export class SkyLantern {
       if (landed) break
     }
     return samples
+  }
+
+  /** A lantern's own seed: the one it was given, or one drawn from when and where it is let go. */
+  private static seedOf(release: LanternRelease): number {
+    if (release.seed !== undefined) return release.seed
+    return (Math.round(release.t) * 2654435761 + Math.round((release.eastM ?? 0) * 100) * 40503 + Math.round((release.northM ?? 0) * 100)) >>> 0
+  }
+
+  /**
+   * The gusts one lantern meets, a step of `stepS` at a time: each component of the air's speed about the mean wanders as a gust does,
+   * drawn back towards none over the timescale and pushed at random meanwhile (an Ornstein–Uhlenbeck process), with the stated spread.
+   */
+  private static gusts(turbulence: LanternTurbulence, seed: number, stepS: number): () => { x: number, y: number, z: number } {
+    const random = SkyLantern.randomFrom(seed)
+    // A normal draw from two uniform ones (Box–Muller).
+    const normal = () => Math.sqrt(-2 * Math.log(Math.max(1e-12, random()))) * Math.cos(2 * Math.PI * random())
+    const keep = turbulence.timescaleS > 0 ? Math.exp(-stepS / turbulence.timescaleS) : 0
+    const push = Math.sqrt(1 - keep * keep)
+    // Started anywhere in its spread, as the air is when the lantern is let go into it.
+    const gust = { x: turbulence.horizontalMS * normal(), y: turbulence.horizontalMS * normal(), z: turbulence.verticalMS * normal() }
+    return () => {
+      gust.x = keep * gust.x + push * turbulence.horizontalMS * normal()
+      gust.y = keep * gust.y + push * turbulence.horizontalMS * normal()
+      gust.z = keep * gust.z + push * turbulence.verticalMS * normal()
+      return gust
+    }
   }
 
   private static componentsOf(wind: LanternWind | undefined): { x: number, y: number } {

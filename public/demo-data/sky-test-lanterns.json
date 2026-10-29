@@ -21,7 +21,7 @@
   "second": 0
  },
  "utcOffsetHours": -6,
- "durationSeconds": 725,
+ "durationSeconds": 779,
  "place": [
   {
    "lat": 46.8606,
@@ -72,9 +72,9 @@
      "lat": 46.8606,
      "lng": -96.824,
      "elevationM": 1.6,
-     "headingDeg": 333,
-     "pitchDeg": 14,
-     "fovDeg": 36
+     "headingDeg": 334,
+     "pitchDeg": 15,
+     "fovDeg": 37
     }
    }
   ]

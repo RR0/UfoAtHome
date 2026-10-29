@@ -24,13 +24,29 @@ describe("SkyLantern", () => {
   })
 
   it("stays over where it was let go without wind, and goes with it otherwise", () => {
-    const still = SkyLantern.trajectory(launch(), launch().releases![0])
+    // In a still, laminar air: no gust to stray from the mean wind.
+    const laminar = { horizontalMS: 0, verticalMS: 0, timescaleS: 30 }
+    const still = SkyLantern.trajectory(launch({ turbulence: laminar }), launch().releases![0])
     expect(Math.abs(still[still.length - 1].x)).toBeLessThan(1e-6)
-    const blown = SkyLantern.trajectory(launch({ wind: { towardDeg: 90, speedMS: 3 } }), launch().releases![0])
+    const blown = SkyLantern.trajectory(launch({ wind: { towardDeg: 90, speedMS: 3 }, turbulence: laminar }), launch().releases![0])
     const after = blown.find(point => point.t === 300000)!
     // Carried at nearly the wind's speed: it weighs next to nothing against the air it pushes aside.
     expect(after.x / 300).toBeGreaterThan(2.7)
     expect(after.x / 300).toBeLessThan(3.01)
+  })
+
+  it("parts from another let go at the same spot, each meeting its own gusts, the same way each time", () => {
+    const windy = launch({ wind: { towardDeg: 90, speedMS: 3 }, releases: [{ t: 0, seed: 1 }, { t: 0, seed: 2 }] })
+    const one = SkyLantern.trajectory(windy, windy.releases![0]), other = SkyLantern.trajectory(windy, windy.releases![1])
+    const at = (path: typeof one, s: number) => path.find(point => point.t === s * 1000)!
+    // A few metres apart after a minute, tens after five: a group stretches and shifts, it does not fly in formation.
+    const apart = (s: number) => Math.hypot(at(one, s).x - at(other, s).x, at(one, s).y - at(other, s).y, at(one, s).z - at(other, s).z)
+    expect(apart(300)).toBeGreaterThan(20)
+    expect(apart(300)).toBeGreaterThan(apart(60))
+    // Still with the wind on the whole: a gust strays from it, it does not carry the lantern off on its own.
+    expect(at(one, 300).x / 300).toBeGreaterThan(2.3)
+    expect(at(one, 300).x / 300).toBeLessThan(3.7)
+    expect(SkyLantern.trajectory(windy, windy.releases![0])).toEqual(one)
   })
 
   it("is carried by the wind of the height it has reached", () => {
