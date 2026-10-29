@@ -29,9 +29,13 @@ const launch: LanternLaunchJson = {
   title: { en: "Sky lanterns", fr: "Lanternes célestes", es: "Farolillos voladores", it: "Lanterne volanti" },
   // A few steps downwind of the phone: what they leave from is in front of it.
   site: { eastM: 14, northM: -3, originElevationM: OBSERVER.elevationM },
-  // Twelve let go about every 8 s from the start, from round a small lawn, each a little unlike the others.
-  group: { count: 12, fromT: 0, untilT: 90000, radiusM: 5, burnS: { min: 570, max: 750 }, insideExcessK: { min: 120, max: 180 }, seed: 7 },
-  wind: { towardDeg: 100, speedMS: 1.5 },
+  // The first let go two metres in front of the phone, by whoever stands beside the one filming: it climbs past the phone, which looks up
+  // into its mouth, at its flame, the brightest thing of the night and the one that throws a ghost in a phone's picture.
+  releases: [{ t: 0, eastM: -12, northM: 3, seed: 3 }],
+  // Eleven more let go about every 8 s after it, from round a small lawn, each a little unlike the others.
+  group: { count: 11, fromT: 8000, untilT: 90000, radiusM: 5, burnS: { min: 570, max: 750 }, insideExcessK: { min: 120, max: 180 }, seed: 7 },
+  // Near calm at the ground, as a clear winter night often is: they climb nearly straight up before the wind aloft takes them.
+  wind: { towardDeg: 100, speedMS: 0.4 },
   windAloft: { towardDeg: 30, speedMS: 4, atM: 500 },
   airTemperatureC: -12
 }
@@ -44,21 +48,24 @@ const paths = SkyLantern.releasesOf(launch).map(release => SkyLantern.trajectory
 const lit = paths.flatMap(path => path.filter(point => point.t >= 0 && point.light >= SEEN_LIGHT))
 const DURATION_S = Math.ceil(Math.max(...lit.map(point => point.t)) / 1000) + 15
 
-// Where the phone points: at the group, every few seconds, as a hand follows it — late by some seconds, never quite on it. The group is
-// the mean direction of its lit lanterns, each a unit vector from the eye.
-const STEP_MS = 2000, LAG_S = 5, FOV_DEG = 62
+// Where the phone points: at the group, every second, as a hand follows it — late, never quite on it. The group is the mean direction of
+// its lit lanterns, each a unit vector from the eye weighed by the light it sends there (as the inverse square of its distance): the eye
+// goes to the brightest, and a lantern climbing past the phone holds it until it is up and away.
+const STEP_MS = 1000, LAG_S = 2.5, FOV_DEG = 62
 const groupAt = (t: number) => {
   const sum = { x: 0, y: 0, z: 0 }
   for (const point of lit) {
     if (Math.abs(point.t - t) > SkyLantern.SAMPLE_MS / 2) continue
     const d = Math.hypot(point.x, point.y, point.z - EYE_M)
-    sum.x += point.x / d; sum.y += point.y / d; sum.z += (point.z - EYE_M) / d
+    const weight = point.light / (d * d * d)
+    sum.x += point.x * weight; sum.y += point.y * weight; sum.z += (point.z - EYE_M) * weight
   }
   return sum.x === 0 && sum.y === 0 && sum.z === 0 ? undefined : sum
 }
 const keyframes: { t: number, pose: object }[] = []
-// Before the first leaves the lawn, the phone is on it: the lanterns held, a little below the horizon.
-let aim = { x: launch.site.eastM, y: launch.site.northM, z: 0.5 - EYE_M }
+// Before the first leaves the ground, the phone is on it, held a little below the horizon.
+const first = launch.releases![0]
+let aim = { x: launch.site.eastM + first.eastM!, y: launch.site.northM + first.northM!, z: 0.5 - EYE_M }
 const keep = Math.exp(-STEP_MS / 1000 / LAG_S)
 for (let t = 0; t <= DURATION_S * 1000; t += STEP_MS) {
   const group = groupAt(t)
