@@ -17,6 +17,7 @@ import type { TimelineTrack } from "./TimelineTracks.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
 import type { BeamEditor } from "./BeamEditor.js"
+import type { LanternEditor } from "./LanternEditor.js"
 import { AddMenu } from "./AddMenu.js"
 import type { AddMenuKind } from "./AddMenu.js"
 import { SurroundingsPlanter } from "./SurroundingsPlanter.js"
@@ -588,6 +589,9 @@ export class SightingEditorElement extends HTMLElement {
   /** The Beams part, loaded the first time it is opened — see loadBeamEditor. */
   private beamEditor?: BeamEditor
   private beamEditorLoading?: Promise<BeamEditor>
+  /** The Lanterns part, loaded the first time it is opened — see loadLanternEditor. */
+  private lanternEditor?: LanternEditor
+  private lanternEditorLoading?: Promise<LanternEditor>
   /** The File group's text editor, loaded the first time the group is opened — see loadFileEditor. */
   private fileEditor?: SightingFileEditor
   private fileEditorLoading?: Promise<SightingFileEditor>
@@ -781,6 +785,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelBodiesSubgroup: HTMLElement
   private readonly labelLaunchesSubgroup: HTMLElement
   private readonly labelBeamsSubgroup: HTMLElement
+  private readonly labelLanternsSubgroup: HTMLElement
   private readonly labelPrecipitationGroup: HTMLElement
   private readonly labelWindGroup: HTMLElement
   /** The handles of a group's own parts (the weather's clouds, precipitation and wind) — a strip
@@ -1531,6 +1536,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelBodiesSubgroup = this.shadow.getElementById("label-bodies-subgroup")!
     this.labelLaunchesSubgroup = this.shadow.getElementById("label-launches-subgroup")!
     this.labelBeamsSubgroup = this.shadow.getElementById("label-beams-subgroup")!
+    this.labelLanternsSubgroup = this.shadow.getElementById("label-lanterns-subgroup")!
     this.labelPrecipitationGroup = this.shadow.getElementById("label-precipitation-group")!
     this.labelWindGroup = this.shadow.getElementById("label-wind-group")!
     this.labelWeatherInferred = this.shadow.getElementById("label-weather-inferred")!
@@ -6927,6 +6933,7 @@ export class SightingEditorElement extends HTMLElement {
   private syncSkyParts(): void {
     if (!this.isGroupIdOpen("group-weather")) return
     if (this.shadow.getElementById("sky-beams")?.hidden === false) void this.loadBeamEditor().then(editor => editor.refresh())
+    if (this.shadow.getElementById("sky-lanterns")?.hidden === false) void this.loadLanternEditor().then(editor => editor.refresh())
     if (this.shadow.getElementById("sky-launches")?.hidden === false) void this.loadLaunchEditor().then(editor => editor.refresh())
   }
 
@@ -6960,6 +6967,7 @@ export class SightingEditorElement extends HTMLElement {
     if (tab.getAttribute("aria-controls") === "shape-bodies") void this.loadBodyEditor().then(editor => editor.sync())
     if (tab.getAttribute("aria-controls") === "sky-launches") void this.loadLaunchEditor().then(editor => editor.sync())
     if (tab.getAttribute("aria-controls") === "sky-beams") void this.loadBeamEditor().then(editor => editor.sync())
+    if (tab.getAttribute("aria-controls") === "sky-lanterns") void this.loadLanternEditor().then(editor => editor.sync())
     // What the canvas edits follows the part (see canvasMode), and with it whether bodies are drawn.
     this.syncCanvasMode()
   }
@@ -8207,6 +8215,29 @@ export class SightingEditorElement extends HTMLElement {
       return this.bodyEditor
     })
     return this.bodyEditorLoading
+  }
+
+  /**
+   * The Lanterns part of the Sky group, fetched and built the first time it is opened: a chunk of its own, since a recording has lanterns
+   * only when somebody has read its lights as such (see LanternEditor). Its edits are of the interpretation, which the scene computes the
+   * lanterns from again when given another one (see syncBodiesShown).
+   */
+  private loadLanternEditor(): Promise<LanternEditor> {
+    this.lanternEditorLoading ??= import("./LanternEditor.js").then(({ LanternEditor }) => {
+      this.lanternEditor = new LanternEditor(this.shadow.getElementById("lantern-editor")!, {
+        sighting: () => this.ufoElement.sighting,
+        said: () => this.said,
+        writingLanguage: () => this.writingLanguage,
+        shapes: () => this.bodyShapeIds().map(id => ({ id, label: this.shapeLabel(id) })),
+        changed: () => {
+          this.ufoElement.refresh()
+          this.refreshParamSummary()
+          this.syncBodiesShown()
+        }
+      }, this.language)
+      return this.lanternEditor
+    })
+    return this.lanternEditorLoading
   }
 
   /**
@@ -10740,6 +10771,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelBodiesSubgroup.textContent = messages.bodiesSubgroup
     this.labelLaunchesSubgroup.textContent = messages.launchesSubgroup
     this.labelBeamsSubgroup.textContent = messages.beamsSubgroup
+    this.labelLanternsSubgroup.textContent = messages.lanternsSubgroup
     for (const group of ["location", "decor", "weather"]) {
       const button = this.shadow.getElementById(`${group}-settings-button`)
       button?.setAttribute("title", messages.dataSources)
@@ -10750,6 +10782,7 @@ export class SightingEditorElement extends HTMLElement {
     this.bodyEditor?.setLanguage(this.language)
     void this.launchEditor?.setLanguage(this.language)
     void this.beamEditor?.setLanguage(this.language)
+    void this.lanternEditor?.setLanguage(this.language)
     this.labelTemporalGroup.textContent = messages.temporalGroup
     this.labelFileGroup.textContent = messages.fileGroup
     this.labelLocationGroup.textContent = messages.locationGroup

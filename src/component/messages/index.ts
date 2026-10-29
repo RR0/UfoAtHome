@@ -7,6 +7,7 @@ import type { CloudEditorMessages } from "./CloudEditorMessages.js"
 import type { BodyEditorMessages } from "./BodyEditorMessages.js"
 import type { LaunchEditorMessages } from "./LaunchEditorMessages.js"
 import type { BeamEditorMessages } from "./BeamEditorMessages.js"
+import type { LanternEditorMessages } from "./LanternEditorMessages.js"
 import type { CaseEditorMessages } from "./CaseEditorMessages.js"
 import type { InterviewMessages } from "./InterviewMessages.js"
 import type { ShareMessages } from "./ShareMessages.js"
@@ -92,6 +93,17 @@ const beamEditorLoaders: Record<UfoLanguage, () => Promise<BeamEditorMessages>> 
 
 export function loadBeamEditorMessages(language: UfoLanguage): Promise<BeamEditorMessages> {
   return beamEditorLoaders[language]()
+}
+
+const lanternEditorLoaders: Record<UfoLanguage, () => Promise<LanternEditorMessages>> = {
+  en: () => import("./LanternEditorMessages_en.js").then(m => m.lanternEditorMessages_en),
+  fr: () => import("./LanternEditorMessages_fr.js").then(m => m.lanternEditorMessages_fr),
+  es: () => import("./LanternEditorMessages_es.js").then(m => m.lanternEditorMessages_es),
+  it: () => import("./LanternEditorMessages_it.js").then(m => m.lanternEditorMessages_it)
+}
+
+export function loadLanternEditorMessages(language: UfoLanguage): Promise<LanternEditorMessages> {
+  return lanternEditorLoaders[language]()
 }
 
 const launchEditorLoaders: Record<UfoLanguage, () => Promise<LaunchEditorMessages>> = {

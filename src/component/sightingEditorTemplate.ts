@@ -483,6 +483,7 @@ export const html = `
     <button class="subgroup-tab" type="button" aria-controls="weather-clouds" aria-expanded="false"><span id="label-clouds-group">Clouds</span></button>
     <button class="subgroup-tab" type="button" aria-controls="weather-wind" aria-expanded="false"><span id="label-wind-group">Wind</span></button>
     <button class="subgroup-tab" type="button" aria-controls="sky-launches" aria-expanded="false"><span id="label-launches-subgroup">Launches</span></button>
+    <button class="subgroup-tab" type="button" aria-controls="sky-lanterns" aria-expanded="false"><span id="label-lanterns-subgroup">Lanterns</span></button>
     <button class="subgroup-tab" type="button" aria-controls="sky-beams" aria-expanded="false"><span id="label-beams-subgroup">Beams</span></button>
   </div>
   <section class="subgroup-panel" id="weather-precipitation" aria-labelledby="label-precipitation-group">
@@ -530,6 +531,13 @@ export const html = `
   <section class="subgroup-panel" id="sky-launches" aria-labelledby="label-launches-subgroup" hidden>
     <div class="toolbar">
       <style>#launch-editor { flex-basis: 100%; min-width: 0; } #launch-editor #launch-list, #launch-editor #launch-places { flex-basis: 100%; min-width: 0; } #launch-editor .launch-editor, #launch-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #launch-editor .launch-fields { flex-basis: 100%; min-width: 0; } #launch-editor [hidden] { display: none !important; } #launch-editor select { min-width: 0; width: 100%; } #launch-editor .launch-intro { flex-basis: 100%; margin: 0; } #launch-editor .launch-track { flex-basis: 100%; margin: 0; } #launch-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } #launch-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } #launch-editor input, #launch-editor select { max-width: 100%; box-sizing: border-box; } #launch-editor input[type="text"] { width: 12em; } #launch-editor #launch-title { width: 18em; } #launch-editor label { min-width: 0; max-width: 100%; } #launch-editor input.parameter-derived::placeholder { opacity: .65; } #launch-editor .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }</style><div id="launch-editor"></div>
+    </div>
+  </section>
+  <!-- Sky lanterns, a reading of the account (InterpretationJson.lanterns) rather than a fact of its sky, beside the launches it would
+       otherwise be taken for: built the first time it is opened (see LanternEditor), with the launches' layout. -->
+  <section class="subgroup-panel" id="sky-lanterns" aria-labelledby="label-lanterns-subgroup" hidden>
+    <div class="toolbar">
+      <style>#lantern-editor { flex-basis: 100%; min-width: 0; } #lantern-editor #lantern-list { flex-basis: 100%; min-width: 0; } #lantern-editor .launch-editor, #lantern-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #lantern-editor .launch-fields { flex-basis: 100%; min-width: 0; } #lantern-editor [hidden] { display: none !important; } #lantern-editor select { min-width: 0; width: 100%; } #lantern-editor .launch-intro { flex-basis: 100%; margin: 0; } #lantern-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } #lantern-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } #lantern-editor input, #lantern-editor select { max-width: 100%; box-sizing: border-box; } #lantern-editor input[type="text"] { width: 12em; } #lantern-editor label { min-width: 0; max-width: 100%; } #lantern-editor input.parameter-derived::placeholder { opacity: .65; }</style><div id="lantern-editor"></div>
     </div>
   </section>
   <section class="subgroup-panel" id="sky-beams" aria-labelledby="label-beams-subgroup" hidden>
