@@ -157,7 +157,8 @@ export class BodySystem {
     this.pointLights.clear()
     this.metered.clear()
     const seen = new Set<string>()
-    for (const state of states) {
+    for (const stated of states) {
+      const state = stated.flicker ? BodySystem.flickered(stated, seconds) : stated
       seen.add(state.id)
       const signature = BodySystem.signatureOf(state)
       let entry = this.built.get(state.id)
@@ -177,6 +178,11 @@ export class BodySystem {
       if (glowing) BodySystem.light(glowing, state, display)
       if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
       this.shine(state, holder, whole ? undefined : glowing, frame)
+      // A device setting its own exposure follows the light over a second or so, not a flame's wavering (see BodyJson.flicker).
+      const metered = this.metered.get(state.id)
+      if (metered && state !== stated && state.appearance.luminanceCdM2 > 0) {
+        metered.luminanceCdM2 *= stated.appearance.luminanceCdM2 / state.appearance.luminanceCdM2
+      }
       this.shineLights(state, holder, whole ? undefined : glowing, frame)
       this.throwFlame(state, holder, seconds, display, frame.eye)
     }
@@ -198,10 +204,10 @@ export class BodySystem {
   /** The light of each body too small for a pixel, by its id, as an illuminance at the eye in the scene's own units (see shine). */
   private readonly pointLights = new Map<string, { position: Vector3, light: readonly [number, number, number] }>()
   /**
-   * The light each body that glows whole sends the eye, by its id, as its luminance times the solid angle it fills, cd/m² × sr, where it
-   * stands: what a device that sets its own exposure meters of it, with the sky (see SceneRenderer.applyMedium).
+   * Each body that glows whole, by its id: where it stands, its luminance and the solid angle it fills — what a device that sets its own
+   * exposure meters of it, with the sky (see SceneRenderer.applyMedium).
    */
-  readonly metered = new Map<string, { position: Vector3, luminanceSr: number }>()
+  readonly metered = new Map<string, { position: Vector3, luminanceCdM2: number, solidAngleSr: number }>()
 
   /** The point sources drawn for the bodies under a pixel — for what draws them at the picture's own pixels (see PointLayerPass). */
   get pointSources(): readonly Points[] {
@@ -312,7 +318,7 @@ export class BodySystem {
       return
     }
     veil.shine(holder.position, [light[0] * seen, light[1] * seen, light[2] * seen], (angularRadius * 180) / Math.PI * reach)
-    this.metered.set(state.id, { position: holder.position.clone(), luminanceSr: luminanceCdM2 * solidAngle * seen })
+    this.metered.set(state.id, { position: holder.position.clone(), luminanceCdM2: luminanceCdM2 * seen, solidAngleSr: solidAngle })
     // Under a pixel its disc is hit or missed by the rasteriser, and its light with it: a lantern two kilometres off was a point one frame
     // and nothing the next, or nothing at all. It is then drawn as a star is, by the light it sends (see PointSources).
     if (frame.pixelRad !== undefined && 2 * angularRadius < frame.pixelRad) {
@@ -526,6 +532,21 @@ export class BodySystem {
   }
 
   private static readonly DOWN = new Vector3(0, -1, 0)
+
+  /**
+   * The body at `seconds` with its light wavering as its flicker says (see BodyJson.flicker): three waves of a few hertz, out of step with
+   * each other and with every other body's (their phases drawn from its id), summed — so the same at the same instant every time.
+   */
+  private static flickered(state: BodyState, seconds: number): BodyState {
+    let seed = 0
+    for (let i = 0; i < state.id.length; i++) seed = (Math.imul(seed, 31) + state.id.charCodeAt(i)) >>> 0
+    const phase = (k: number) => ((Math.imul(seed ^ k, 2654435761) >>> 0) / 4294967296) * 2 * Math.PI
+    const wave = (Math.sin(2 * Math.PI * 2.3 * seconds + phase(1)) + Math.sin(2 * Math.PI * 5.1 * seconds + phase(2))
+      + Math.sin(2 * Math.PI * 8.7 * seconds + phase(3))) / 3
+    const share = Math.max(0, 1 + state.flicker! * wave)
+    const lights = state.lights ? Object.fromEntries(Object.entries(state.lights).map(([name, value]) => [name, value * share])) : undefined
+    return { ...state, appearance: { ...state.appearance, luminanceCdM2: state.appearance.luminanceCdM2 * share }, lights }
+  }
 
   /**
    * What a model's scene says, among its extras, when it glows all over, as a sky lantern's paper does, rather than in parts, as a craft's

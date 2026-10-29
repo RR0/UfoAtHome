@@ -538,6 +538,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly swayInput: HTMLInputElement
   /** What the picture was taken through, and what was on that glass — see Sighting.lens. */
   private readonly lensGlassSelect: HTMLSelectElement
+  private readonly isoInput: HTMLInputElement
+  private readonly meteringSelect: HTMLSelectElement
   private readonly lensDropsInput: HTMLInputElement
   private readonly lensCondensationInput: HTMLInputElement
   private readonly lensDirtInput: HTMLInputElement
@@ -1309,6 +1311,8 @@ export class SightingEditorElement extends HTMLElement {
     this.rollInput = this.shadow.getElementById("roll") as HTMLInputElement
     this.swayInput = this.shadow.getElementById("sway") as HTMLInputElement
     this.lensGlassSelect = this.shadow.getElementById("lens-glass") as HTMLSelectElement
+    this.isoInput = this.shadow.getElementById("iso") as HTMLInputElement
+    this.meteringSelect = this.shadow.getElementById("metering") as HTMLSelectElement
     this.lensDropsInput = this.shadow.getElementById("lens-drops") as HTMLInputElement
     this.lensCondensationInput = this.shadow.getElementById("lens-condensation") as HTMLInputElement
     this.lensDirtInput = this.shadow.getElementById("lens-dirt") as HTMLInputElement
@@ -1962,6 +1966,9 @@ export class SightingEditorElement extends HTMLElement {
     for (const input of [this.focalLengthInput, this.fNumberInput, this.exposureInput, this.focusDistanceInput]) {
       input.addEventListener("input", () => this.updateObserver())
     }
+    // The film's speed and how the device metered are the recording's, not a pose's: one for the whole of it.
+    this.isoInput.addEventListener("input", () => this.updateExposureSettings())
+    this.meteringSelect.addEventListener("change", () => this.updateExposureSettings())
     // Told before the fields' own listeners above, since it made them first: how the place was said is known when it is written.
     this.observerPosition.addEventListener("positionchange", event => {
       this.observerSaid = (event as CustomEvent<PositionChange>).detail.said
@@ -7942,6 +7949,14 @@ export class SightingEditorElement extends HTMLElement {
       this.setRowVisible(field, LensGhosts.records(instrument))
     }
     this.exposureInput.disabled = instrument.exposureRangeSeconds === undefined
+    // A speed and a way of metering are a device's that records: a film or a sensor. Metering is only that of one setting its own exposure.
+    const medium = instrument.medium
+    if (this.isoInput !== this.shadow.activeElement) this.isoInput.value = sighting.iso === undefined ? "" : String(sighting.iso)
+    this.isoInput.placeholder = medium ? (medium.autoExposure ? "auto" : String(medium.iso)) : ""
+    this.setRowVisible(this.isoInput, medium !== undefined)
+    this.meteringSelect.value = sighting.metering ?? ""
+    this.setRowVisible(this.meteringSelect, medium?.autoExposure === true)
+    this.meteringSelect.disabled = sighting.iso !== undefined
 
     // Only ever askable of something that can be focused at all, which is to say something with a
     // lens and a diaphragm: an eye is not focused BY the observer, and its depth of field is not
@@ -9275,6 +9290,16 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** Writes what the lens fields say onto the recording: undefined when they say nothing at all. */
+  /** Writes the film's speed and how the device metered (see Sighting.iso, Sighting.metering) onto the recording. */
+  private updateExposureSettings(): void {
+    const sighting = this.ufoElement.sighting
+    sighting.iso = this.numberOrUndefined(this.isoInput.value)
+    const metering = this.meteringSelect.value
+    sighting.metering = metering === "average" || metering === "highlights" ? metering : undefined
+    this.meteringSelect.disabled = sighting.iso !== undefined
+    this.ufoElement.refresh()
+  }
+
   private updateLens(): void {
     const glass = this.lensGlassSelect.value as NonNullable<LensStateJson["glass"]> | ""
     const lens: LensStateJson = {
@@ -10806,6 +10831,13 @@ export class SightingEditorElement extends HTMLElement {
     this.labelRoll.textContent = messages.roll
     this.labelSway.textContent = messages.sway
     this.swayInput.title = messages.swayTitle
+    this.label("label-iso", messages.iso)
+    this.isoInput.title = messages.isoTitle
+    this.label("label-metering", messages.metering)
+    this.meteringSelect.title = messages.meteringTitle
+    this.label("metering-device", messages.meteringDevice)
+    this.label("metering-average", messages.meteringAverage)
+    this.label("metering-highlights", messages.meteringHighlights)
     this.label("label-lens-glass", messages.lensGlass)
     this.label("label-reference-ghosts", messages.referenceGhosts)
     this.findGhostsButton.textContent = messages.referenceFindGhosts

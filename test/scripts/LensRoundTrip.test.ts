@@ -13,3 +13,13 @@ describe("a recording's lens", () => {
     expect("lens" in toSightingJson(dry) && toSightingJson(dry).lens !== undefined).toBe(false)
   })
 })
+
+describe("a recording's metering", () => {
+  it("is read and written back as stated, and absent when the device's own", () => {
+    const json = JSON.parse(readFileSync("public/demo-data/sky-test-lanterns.json", "utf8"))
+    expect(fromSightingJson(json).metering).toBeUndefined()
+    const sighting = fromSightingJson({ ...json, metering: "average" })
+    expect(sighting.metering).toBe("average")
+    expect(toSightingJson(sighting).metering).toBe("average")
+  })
+})

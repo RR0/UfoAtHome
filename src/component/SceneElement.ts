@@ -1950,7 +1950,7 @@ export class SceneElement extends HTMLElement {
     )
     // And how the picture answers it: a film's own curve at the exposure it was given, not an
     // eye's adapting response (see RecordingMedium).
-    this.sceneRenderer.setMedium(sighting.instrument.medium, sighting.exposure, pose?.fNumber ?? sighting.instrument.fNumber, sighting.iso)
+    this.sceneRenderer.setMedium(sighting.instrument.medium, sighting.exposure, pose?.fNumber ?? sighting.instrument.fNumber, sighting.iso, sighting.metering)
     // And the ghosts its glass lays over every light of the picture, when it records one, at the aperture it is set to, with those of what
     // it was taken through and the halos of what is on that glass — the drops of the rain falling now among them (see LensGhosts.optics).
     this.sceneRenderer.setLensGhosts(LensGhosts.optics(sighting.instrument, pose?.fNumber ?? sighting.instrument.fNumber, sighting.lens,

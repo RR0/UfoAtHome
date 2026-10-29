@@ -157,6 +157,11 @@ export interface BodyJson {
    */
   modelParameters?: Record<string, string | number | boolean>
   /**
+   * How much its light wavers, as a flame's does, as a share of it: 0.15 has it go some 15 % above and below what its track states, a few
+   * times a second, alike every time the recording is played. Steady when absent.
+   */
+  flicker?: number
+  /**
    * Whether the observer carries it: its keyframes, stated FROM THE OBSERVER, are offsets from their eye that go with the eye, instead
    * of points of the world fixed where the eye was at each keyframe's instant. What a thing that is part of the place they stand in
    * needs — a spot of light on the glass of a flight deck, half a metre from an airline pilot's eye, which the relief under an

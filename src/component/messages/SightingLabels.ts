@@ -64,6 +64,14 @@ export interface SightingLabels {
   /** What hides the ghosts found from the scene, and shows them again. */
   referenceGhostsHide: string
   referenceGhostsShow: string
+  /** The speed of the film or sensor (see Sighting.iso), and how a device setting its own exposure read the light (see MeteringMode). */
+  iso: string
+  isoTitle: string
+  metering: string
+  meteringDevice: string
+  meteringAverage: string
+  meteringHighlights: string
+  meteringTitle: string
   /** What the picture was taken through besides the lens, and what was on that glass — see LensStateJson. */
   lensGlass: string
   lensGlassNone: string

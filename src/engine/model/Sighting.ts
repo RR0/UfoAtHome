@@ -19,6 +19,7 @@ import type { SaidText } from "./SaidText.js"
 import type { RecordingSource } from "./RecordingSource.js"
 import type { SceneReference } from "./Reference.js"
 import { Instruments } from "../instrument/Instrument.js"
+import type { MeteringMode } from "../instrument/Instrument.js"
 import type { Instrument } from "../instrument/Instrument.js"
 import { Provenance } from "../persistence/Provenance.js"
 import type { RecordingIssue } from "../persistence/RecordingIssue.js"
@@ -526,6 +527,12 @@ export class Sighting {
    * Instrument.medium); meaningless for an eye. Not readonly, same reasoning as account above.
    */
   iso?: number
+  /**
+   * How the device read the light it exposed the picture by, when it set its own exposure (see MeteringMode): absent means the device's
+   * own (Instrument.medium.metering). Meaningless for an eye, and for a device whose exposure was set by hand: a stated `iso` on a phone
+   * is its manual mode, which meters nothing.
+   */
+  metering?: MeteringMode
   /**
    * What the picture was taken through besides the lens (a filter, a window, a windscreen) and what was on that glass (drops, condensation,
    * dirt): what lays more ghosts and halos over every light of it — see LensStateJson. Nothing when absent, but the drops the rain or snow of

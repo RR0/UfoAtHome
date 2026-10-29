@@ -40,8 +40,8 @@ class SkyLanternModel {
   readonly materials: GltfMaterial[] = [
     // Rice paper: white, glowing with the flame's light through it (see SkyLantern.COMMON.color). Its colour is the model's setting, which
     // filters that light too.
-    GltfWriter.material("paper", "#ffffff", 0, 0.95, { emissiveFactor: GltfWriter.linear("#ffa250") }),
-    GltfWriter.material("paper-inside", "#ffffff", 0, 0.95, { emissiveFactor: GltfWriter.linear("#ffa250") }),
+    GltfWriter.material("paper", "#ffffff", 0, 0.95, { emissiveFactor: GltfWriter.linear("#ff8a24") }),
+    GltfWriter.material("paper-inside", "#ffffff", 0, 0.95, { emissiveFactor: GltfWriter.linear("#ff8a24") }),
     GltfWriter.material("flame", "#000000", 0, 1, { emissiveFactor: [1, 0.78, 0.45] }),
     GltfWriter.material("fuel-cell", "#2a221a", 0, 0.9),
     GltfWriter.material("frame", "#4a3a28", 0, 0.8)

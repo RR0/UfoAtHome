@@ -288,7 +288,7 @@ if (docs) {
         and <strong>focus distance</strong> become available — each disabled where the device fixed
         it, because the owner of a fixed-focus snapshot camera had nothing to choose. Instruments
         outside the observation's own date are left out of the list, except the one the recording
-        already names, which is kept and flagged.</p>
+        already names, which is kept and flagged. A device that records also takes its <strong>sensitivity</strong> (ISO): left empty, a phone sets its own; stated, it is set by hand, as in its manual mode. And a phone's <strong>metering</strong> says how it read the light: the mean of the whole frame (older phones, camcorders), which burns a bright light in a dark frame out to white, or keeping its highlights (recent phones, the default), which keeps a lantern twenty metres off orange and the rest of the night darker.</p>
       <p>A camera's frame is letterboxed inside the element at its own proportions, and its field
         becomes the default one; the eye, or a camera of unknown make, is drawn 16:9 with a 60°
         vertical field. Changing the instrument re-projects the shapes: they keep their angles, so
@@ -762,7 +762,7 @@ if (docs) {
         point</strong> deviennent accessibles — chacun désactivé là où l'appareil le fixait, car le
         propriétaire d'un appareil à mise au point fixe n'avait rien à choisir. Les instruments
         étrangers à la date de l'observation ne sont pas proposés, sauf celui que l'enregistrement
-        nomme déjà, gardé et signalé.</p>
+        nomme déjà, gardé et signalé. Un appareil qui enregistre prend aussi sa <strong>sensibilité</strong> (ISO) : vide, un téléphone la règle lui-même ; indiquée, elle est réglée à la main, comme en mode manuel. Et la <strong>mesure de la lumière</strong> d'un téléphone dit comment il a lu la lumière : la moyenne de toute l'image (anciens téléphones, caméscopes), qui brûle en blanc une lumière vive dans une image sombre, ou en protégeant les hautes lumières (téléphones récents, par défaut), qui garde orange une lanterne à vingt mètres et assombrit le reste de la nuit.</p>
       <p>Le cadre d'un appareil est inscrit dans l'élément à ses propres proportions, bandes noires
         comprises, et son champ devient celui par défaut ; l'œil, ou un appareil de modèle inconnu,
         est dessiné en 16:9 avec un champ vertical de 60°. Changer d'instrument reprojette les formes :
@@ -1265,7 +1265,7 @@ if (docs) {
         <strong>Apertura</strong>, <strong>Exposición</strong> y <strong>Enfocado a</strong>, cada uno desactivado donde el aparato lo fijaba, porque el dueño de una
         cámara compacta de foco fijo no tenía nada que elegir. Los instrumentos ajenos a la fecha de la
         observación quedan fuera de la lista, salvo el que el registro ya nombra, que se conserva y se
-        señala.</p>
+        señala. Un aparato que graba toma también su <strong>sensibilidad</strong> (ISO): vacía, un teléfono la ajusta solo; indicada, se ajusta a mano, como en su modo manual. Y la <strong>medición de la luz</strong> de un teléfono dice cómo leyó la luz: la media de toda la imagen (teléfonos antiguos, videocámaras), que quema en blanco una luz viva en una imagen oscura, o protegiendo las altas luces (teléfonos recientes, por defecto), que mantiene naranja un farolillo a veinte metros y oscurece el resto de la noche.</p>
       <p>El encuadre de una cámara se inscribe en el elemento con sus propias proporciones, con bandas
         negras, y su campo pasa a ser el predeterminado; el ojo, o una cámara de modelo desconocido, se
         dibuja en 16:9 con un campo vertical de 60°. Cambiar de instrumento reproyecta las formas:
@@ -1760,7 +1760,7 @@ if (docs) {
         <strong>Messa a fuoco a</strong>, ciascuno disattivato dove l'apparecchio lo fissava,
         perché il proprietario di una compatta a fuoco fisso non aveva nulla da scegliere. Gli strumenti
         estranei alla data dell'osservazione sono esclusi dall'elenco, tranne quello che la
-        registrazione nomina già, che viene mantenuto e segnalato.</p>
+        registrazione nomina già, che viene mantenuto e segnalato. Un apparecchio che registra prende anche la sua <strong>sensibilità</strong> (ISO): vuota, un telefono la regola da sé; indicata, è regolata a mano, come nella sua modalità manuale. E la <strong>misurazione della luce</strong> di un telefono dice come ha letto la luce: la media di tutta l'immagine (telefoni vecchi, videocamere), che brucia in bianco una luce viva in un'immagine scura, o proteggendo le alte luci (telefoni recenti, predefinita), che mantiene arancione una lanterna a venti metri e scurisce il resto della notte.</p>
       <p>L'inquadratura di una fotocamera è inscritta nell'elemento con le sue proporzioni, bande nere
         comprese, e il suo campo diventa quello predefinito; l'occhio, o una fotocamera di modello
         sconosciuto, è disegnato in 16:9 con un campo verticale di 60°. Cambiare strumento riproietta le

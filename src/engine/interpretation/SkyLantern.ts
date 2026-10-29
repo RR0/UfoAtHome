@@ -134,7 +134,8 @@ export interface LanternType {
   /** How wide and how tall its envelope is, m: the size of the glowing body drawn. */
   widthM: number
   heightM: number
-  /** The colour of its flame's light through white paper, CSS: what its paper's colour then tints (see paperColor). */
+  /** The colour of its flame's light through white paper, CSS: what its paper's colour then tints (see paperColor). The common one's is a
+   * paraffin flame's, which glows as a body at some 1 900 K, a candle's. */
   color: string
   /** Its shape (see public/models/ufoathome-sky-lantern-*): "classic", round at its mouth and square at its flat top, or "balloon", narrow
    * at its mouth and swelling to a wide, lobed top. */
@@ -193,7 +194,7 @@ export class SkyLantern {
     luminousIntensityCd: 10,
     widthM: 0.6,
     heightM: 1,
-    color: "#ffa250",
+    color: "#ff8a24",
     shape: "classic",
     paperColor: "#ffffff"
   }
@@ -203,6 +204,8 @@ export class SkyLantern {
    * looking up into the mouth; from the side it is the paper that glows.
    */
   private static readonly FLAME_CDM2 = 5000
+  /** How much its flame's light wavers (see BodyJson.flicker): ASSUMED, a candle's, some 15 % in still air. */
+  private static readonly FLICKER = 0.15
   /** How much brighter the inside of its paper is than its outside: lit straight by the flame, where the outside has what the paper lets
    * through. ASSUMED: rice paper lets through about half of what falls on it, and sends back most of the rest. */
   private static readonly INSIDE_SHARE = 2
@@ -422,7 +425,7 @@ export class SkyLantern {
     track.push({ t: path[path.length - 1].t + 1, present: false })
     return {
       id: `${launch.id}-lantern-${index + 1}`, title: launch.title, explains: release.explains,
-      model: { id: `ufoathome-sky-lantern-${type.shape}` }, modelParameters: { paperColor: type.paperColor }, track
+      model: { id: `ufoathome-sky-lantern-${type.shape}` }, modelParameters: { paperColor: type.paperColor }, flicker: SkyLantern.FLICKER, track
     }
   }
 

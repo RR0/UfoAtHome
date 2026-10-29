@@ -28,6 +28,8 @@ export interface BodyState {
   model: DecorModelRef
   /** See BodyJson.modelParameters. */
   modelParameters?: Record<string, string | number | boolean>
+  /** See BodyJson.flicker. */
+  flicker?: number
   explains: string[]
   /** See BodyJson.outlineNode. */
   outlineNode?: string
@@ -257,6 +259,7 @@ export class BodyPlacement {
       id: this.body.id,
       model: this.body.model,
       modelParameters: this.body.modelParameters,
+      flicker: this.body.flicker,
       explains: this.body.explains ?? [],
       outlineNode: this.body.outlineNode,
       eastM,

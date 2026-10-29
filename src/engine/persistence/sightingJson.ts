@@ -1,3 +1,4 @@
+import type { MeteringMode } from "../instrument/Instrument.js"
 import type { RecordingSource } from "../model/RecordingSource.js"
 import type { LensStateJson } from "../instrument/LensGhost.js"
 import type { RecordingIssue } from "./RecordingIssue.js"
@@ -118,6 +119,8 @@ export interface SightingRecordingJson {
   /** The speed of the film or sensor this picture was taken on — see Sighting.iso. Absent means the
    * device's own (Instrument.medium). */
   iso?: number
+  /** How the device metered the light it exposed by — see Sighting.metering. Absent means the device's own. */
+  metering?: MeteringMode
   /** See Sighting.lens. */
   lens?: LensStateJson
   /** How bright the night sky is at the place, towns and all: the zenith of a moonless night in
@@ -198,6 +201,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     instrument: sighting.instrumentId,
     exposureSeconds: sighting.exposureSeconds,
     iso: sighting.iso,
+    metering: sighting.metering,
     lens: sighting.lens,
     lightPollution: sighting.lightPollution,
     observerMap: sighting.observerMap,
@@ -275,6 +279,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.sources = json.sources
   sighting.sway = json.sway
   sighting.iso = json.iso
+  sighting.metering = json.metering
   sighting.lens = json.lens
   sighting.lightPollution = json.lightPollution
   sighting.observerMap = json.observerMap

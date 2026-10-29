@@ -187,6 +187,10 @@ export const html = `
         <output id="focal-fov" class="apparent-size inline" for="focalLength"></output></label>
       <label class="adv"><span id="label-f-number">Aperture</span> f/<input id="fNumber" type="number" min="0.7" max="64" step="0.1"/></label>
       <label class="adv"><span id="label-exposure">Exposure</span> <input id="exposureSeconds" type="text" inputmode="decimal" size="7" placeholder="1/250"/> s</label>
+      <label class="adv"><span id="label-iso">Sensitivity</span> ISO <input id="iso" type="number" min="1" max="409600" step="1"/></label>
+      <label class="adv"><span id="label-metering">Metering</span> <select id="metering">
+        <option value="" id="metering-device">the device's own</option><option value="average" id="metering-average">the whole frame (older phones, camcorders)</option>
+        <option value="highlights" id="metering-highlights">keeping highlights (recent phones)</option></select></label>
       <label class="adv"><span id="label-focus-distance">Focused at</span> <input id="focusDistance" type="number" min="0.1" max="30000" step="0.1" placeholder="&#8734;"/> m</label>
       <!-- With the instrument and not with the place: latitude and heading say where the observer
            stood and which way they faced, and this says nothing about either. It is how the device

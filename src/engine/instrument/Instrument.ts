@@ -92,6 +92,18 @@ export interface InstrumentYears {
  * `iso` is its speed, the exposure its middle grey needs (ten lux-seconds over it). Absent `medium`,
  * the picture is answered as an eye answers it.
  */
+/**
+ * How a device that sets its own exposure reads the light of what it frames (see RecordingMedium.metering):
+ * - "average": the mean light of the whole frame, as a camcorder or a phone of the 2000s did: a light that takes up little of a dark
+ *   frame is burnt out to white.
+ * - "highlights": as a recent phone does, the mean, but held back so that no light taking up a fair part of the frame is burnt out: a
+ *   lantern twenty metres off comes out orange, its paper brightest by its flame; a star, or a lantern far off, takes up too little of
+ *   the frame to count.
+ */
+export type MeteringMode = "average" | "highlights"
+
+export const METERING_MODES: readonly MeteringMode[] = ["average", "highlights"]
+
 export interface RecordingMedium {
   kind: "negative" | "slide" | "sensor"
   iso: number
@@ -102,6 +114,9 @@ export interface RecordingMedium {
    * light, and what keeps a night it films dark round its lamps as it comes out of a phone, rather than lifted to a grey sky. No limit
    * when absent. */
   maxIso?: number
+  /** How such a device reads the light it is exposed by (see MeteringMode): "average" when absent. A recording states its own when it
+   * knows it (Sighting.metering). */
+  metering?: MeteringMode
 }
 
 /**
@@ -402,8 +417,9 @@ export const INSTRUMENTS: Instrument[] = [
     // pixel's own 51 — which is the one place on this list where the two limits nearly meet.
     detailUm: 1.4,
     // A sensor, which the phone exposes itself from the scene it sees, up to a gain of about ISO 3200 (ASSUMED: what main cameras of
-    // recent phones reach in video, where the shutter cannot be slower than a frame).
-    medium: { kind: "sensor", iso: 100, autoExposure: true, maxIso: 3200 }
+    // recent phones reach in video, where the shutter cannot be slower than a frame), keeping its highlights as recent phones do (a
+    // recording of an older one states "average", see Sighting.metering).
+    medium: { kind: "sensor", iso: 100, autoExposure: true, maxIso: 3200, metering: "highlights" }
   },
   {
     // The same silicon, held the way people actually hold a phone. The picture is TALLER than it is
@@ -428,7 +444,7 @@ export const INSTRUMENTS: Instrument[] = [
     apertureBlades: undefined,
     // The same silicon held the other way up: the same 1.4 µm pixels.
     detailUm: 1.4,
-    medium: { kind: "sensor", iso: 100, autoExposure: true, maxIso: 3200 }
+    medium: { kind: "sensor", iso: 100, autoExposure: true, maxIso: 3200, metering: "highlights" }
   },
   // Sensors from Stellarium's Oculars catalogue (see DigitalSlrs): the digital bodies a recent
   // photograph is most likely to have been made with.

@@ -127,7 +127,7 @@ import { RainbowEffect } from "./RainbowEffect.js"
 import { MeteorSystem } from "./MeteorSystem.js"
 import type { Meteor } from "../engine/astronomy/MeteorFall.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
-import type { Instrument, ProjectionKind, RecordingMedium } from "../engine/instrument/Instrument.js"
+import type { Instrument, MeteringMode, ProjectionKind, RecordingMedium } from "../engine/instrument/Instrument.js"
 import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { WindowLighting } from "./WindowLighting.js"
 import { DecorSystem } from "./DecorSystem.js"
@@ -3470,7 +3470,7 @@ export class SceneRenderer {
   }
 
   /** What the picture is recorded on and how it was exposed — see setMedium. */
-  private medium?: { kind: RecordingMedium["kind"], iso: number, autoExposure: boolean, maxIso?: number, exposureSeconds: number, fNumber: number }
+  private medium?: { kind: RecordingMedium["kind"], iso: number, autoExposure: boolean, maxIso?: number, metering: MeteringMode, exposureSeconds: number, fNumber: number }
 
   /**
    * What the picture is recorded on, and the exposure it was given: the shutter, the f-number and
@@ -3478,9 +3478,13 @@ export class SceneRenderer {
    * answer is the same whatever the sky (see RecordingMedium): the exposure a relative unit gives it
    * is worked out from those three, in middle greys, when the picture is finished (applyMedium).
    */
-  setMedium(medium: RecordingMedium | undefined, exposureSeconds: number | undefined, fNumber: number | undefined, iso?: number): void {
+  setMedium(medium: RecordingMedium | undefined, exposureSeconds: number | undefined, fNumber: number | undefined, iso?: number, metering?: MeteringMode): void {
+    // A speed stated for a device that sets its own is the device set by hand (a phone's manual mode): it then meters nothing.
     const next = medium && exposureSeconds !== undefined && exposureSeconds > 0 && fNumber !== undefined && fNumber > 0
-      ? { kind: medium.kind, iso: iso ?? medium.iso, autoExposure: medium.autoExposure === true, maxIso: medium.maxIso, exposureSeconds, fNumber }
+      ? {
+        kind: medium.kind, iso: iso ?? medium.iso, autoExposure: medium.autoExposure === true && iso === undefined, maxIso: medium.maxIso,
+        metering: metering ?? medium.metering ?? "average", exposureSeconds, fNumber
+      }
       : undefined
     if (JSON.stringify(next) === JSON.stringify(this.medium)) return
     this.medium = next
@@ -3507,33 +3511,52 @@ export class SceneRenderer {
     }
     EYE_UNIFORMS.uMedium.value = medium.kind === "negative" ? 1 : medium.kind === "slide" ? 2 : 3
     const sky = medium.autoExposure || this.skyUnknown ? this.scatteredSky?.sceneAdaptation : undefined
-    const metered = sky === undefined ? undefined : sky + this.meteredBodies()
+    const bodies = sky === undefined ? undefined : this.meteredBodies()
+    const metered = sky === undefined ? undefined : sky + bodies!.mean
     const set = (iso: number) => (0.065 * medium.exposureSeconds * iso * this.filterTransmittance) / (medium.fNumber * medium.fNumber * relativeScale)
+    let exposure = metered !== undefined && metered > 0 ? 1 / (relativeScale * metered) : undefined
+    // Kept from burning out the brightest light that takes up a fair part of the frame: that light then at the share of full the sensor
+    // keeps it at (see recorded, in EYE_RESPONSE_GLSL: a relative exposure h is shown as 0.18 h, full at 1).
+    if (exposure !== undefined && medium.metering === "highlights" && bodies!.brightest > 0) {
+      exposure = Math.min(exposure, SceneRenderer.HIGHLIGHT_KEPT_AT / (0.18 * relativeScale * bodies!.brightest))
+    }
     // A device exposing itself follows the light only as far as its sensor's gain goes.
-    EYE_UNIFORMS.uMediumExposure.value = metered !== undefined && metered > 0
-      ? Math.min(1 / (relativeScale * metered), medium.maxIso !== undefined ? set(medium.maxIso) : Infinity)
+    EYE_UNIFORMS.uMediumExposure.value = exposure !== undefined
+      ? Math.min(exposure, medium.maxIso !== undefined ? set(medium.maxIso) : Infinity)
       : set(medium.iso)
   }
 
   /**
-   * The mean luminance the bodies that glow whole add to the picture, cd/m²: the light of each one in the frame, its luminance times the
-   * solid angle it fills, over the frame's own. What a device that sets its own exposure meters of them beside the sky's: a phone pointed
-   * at a sky lantern twenty metres off exposes for the lantern, not for the night round it, and shows its paper orange rather than white.
+   * Where a device keeping its highlights (see MeteringMode) puts the mean luminance of the brightest light that takes up a fair part of
+   * its frame, as a share of full: ASSUMED, under a third, low enough for an orange to keep its colour, so that what is brighter than its mean (a lantern's paper by its flame) still
+   * burns out and what is dimmer keeps its colour.
    */
-  private meteredBodies(): number {
-    if (this.bodySystem.metered.size === 0) return 0
+  private static readonly HIGHLIGHT_KEPT_AT = 0.3
+  /** The share of the frame a light must take up for a device keeping its highlights to keep it: ASSUMED, a fiftieth of a percent, which a
+   * lantern a metre tall fills up to some fifty metres off through a phone's main camera, and a star never does. */
+  private static readonly HIGHLIGHT_SHARE = 0.0002
+
+  /**
+   * What a device that sets its own exposure meters of the bodies that glow whole in its frame, beside the sky: the mean luminance they add
+   * to the picture, cd/m² (the light of each, its luminance times the solid angle it fills, over the frame's own), and the luminance of the
+   * brightest of those that take up a fair part of it (see HIGHLIGHT_SHARE), which one keeping its highlights holds back for.
+   */
+  private meteredBodies(): { mean: number, brightest: number } {
+    if (this.bodySystem.metered.size === 0) return { mean: 0, brightest: 0 }
     const camera = this.camera
     camera.updateMatrixWorld()
     const vertical = (camera.fov * Math.PI) / 180
     const horizontal = 2 * Math.atan(Math.tan(vertical / 2) * camera.aspect)
     const frame = 4 * Math.asin(Math.sin(horizontal / 2) * Math.sin(vertical / 2))
     const seen = new Vector3()
-    let sum = 0
-    for (const { position, luminanceSr } of this.bodySystem.metered.values()) {
+    let sum = 0, brightest = 0
+    for (const { position, luminanceCdM2, solidAngleSr } of this.bodySystem.metered.values()) {
       seen.copy(position).project(camera)
-      if (seen.z < 1 && Math.abs(seen.x) <= 1 && Math.abs(seen.y) <= 1) sum += luminanceSr
+      if (!(seen.z < 1 && Math.abs(seen.x) <= 1 && Math.abs(seen.y) <= 1)) continue
+      sum += luminanceCdM2 * solidAngleSr
+      if (solidAngleSr >= SceneRenderer.HIGHLIGHT_SHARE * frame) brightest = Math.max(brightest, luminanceCdM2)
     }
-    return sum / frame
+    return { mean: sum / frame, brightest }
   }
 
   /** What a recording medium resolves, when the instrument has one — see lampBloomRadiusRad. */
