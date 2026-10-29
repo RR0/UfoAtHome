@@ -135,13 +135,25 @@ describe("SkyLantern", () => {
     const still = SkyLantern.trajectory(launch({ turbulence: laminar }), launch().releases![0])
     expect(Math.max(...still.map(point => point.tiltDeg))).toBeLessThan(0.01)
     const gusty = SkyLantern.trajectory(launch({ wind: { towardDeg: 90, speedMS: 3 } }), launch().releases![0])
-    const tilts = gusty.map(point => point.tiltDeg)
+    // While it flies lit, clear of the ground: just let go into a wind it has not caught up with yet, and once out, falling, it leans more.
+    const tilts = gusty.filter(point => point.light > 0.5 && point.z > 2).map(point => point.tiltDeg)
     expect(Math.max(...tilts)).toBeGreaterThan(1)
     expect(Math.max(...tilts)).toBeLessThan(35)
     // Let go into a wind, it is pushed the way the wind goes before it catches up with it.
     expect(Math.abs(((gusty[2].tiltTowardDeg - 90 + 540) % 360) - 180)).toBeLessThan(60)
     const [body] = SkyLantern.bodiesOf(launch({ wind: { towardDeg: 90, speedMS: 3 } }))
     expect(body.track[2].attitude!.pitchDeg).toBeLessThan(0)
+  })
+
+  it("rests on the ground, lit, when it cannot lift, rather than vanishing: until it burns out, or burns light enough to rise", () => {
+    // In a still air: the gusts would toss it about where it rests.
+    const cold = launch({ airTemperatureC: 35, lantern: { insideExcessK: 60 }, turbulence: { horizontalMS: 0, verticalMS: 0, timescaleS: 30 } })
+    const path = SkyLantern.trajectory(cold, cold.releases![0])
+    const last = path[path.length - 1]
+    expect((last.t - path[0].t) / 1000).toBeGreaterThan(SkyLantern.COMMON.burnS - 2)
+    const lit = path.filter(point => point.light > 0.5)
+    expect(Math.max(...lit.map(point => point.z))).toBeLessThan(0.01)
+    expect(Math.max(...lit.map(point => Math.hypot(point.x - path[0].x, point.y - path[0].y)))).toBeLessThan(0.01)
   })
 
   it("leaves an interpretation without lanterns as it is", () => {

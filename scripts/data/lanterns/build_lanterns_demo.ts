@@ -37,8 +37,9 @@ const launch: LanternLaunchJson = {
   // The first let go two metres in front of the phone, by whoever stands beside the one filming: it climbs past the phone, which looks up
   // into its mouth, at its flame, the brightest thing of the night and the one that throws a ghost in a phone's picture.
   releases: [{ t: 0, eastM: 6, northM: -1, seed: 3 }],
-  // Eleven more let go about every 8 s after it, across the terrace, each a little unlike the others.
-  group: { count: 11, fromT: 8000, untilT: 90000, radiusM: 3, burnS: { min: 570, max: 750 }, insideExcessK: { min: 120, max: 180 }, seed: 7 },
+  // Eleven more let go about every 8 s after it, across the terrace, each a little unlike the others. Each is held until it pulls upwards:
+  // in air this warm, only the hotter of what is sold rises, and those let go are those.
+  group: { count: 11, fromT: 8000, untilT: 90000, radiusM: 3, burnS: { min: 570, max: 750 }, insideExcessK: { min: 145, max: 185 }, seed: 7 },
   // A light breeze at the ground, from the north-east monsoon of the dry season, stronger aloft: they climb slowly in the warm air and
   // drift off towards the mountain, low over it.
   wind: { towardDeg: 250, speedMS: 1.2 },

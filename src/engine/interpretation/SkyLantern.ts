@@ -311,7 +311,7 @@ export class SkyLantern {
   }
 
   /**
-   * The path of one lantern from its release until it goes out (or comes down while still lit), sampled every `sampleMs`: positions in
+   * The path of one lantern from its release until it goes out (resting on the ground meanwhile if it comes down, or never rises), sampled every `sampleMs`: positions in
    * metres (x east, y north, z up, the recording's own frame) and the share of its full light at each. Integrated with the lift of its hot
    * air, its weight (lightening as its fuel burns), and a quadratic drag relative to the wind, in air thinning and cooling with height; what
    * it carries along (its own air, and the air it pushes aside) is part of what the forces move.
@@ -351,21 +351,27 @@ export class SkyLantern {
       state.vx = (state.vx + k * step * wind.x) / (1 + k * step)
       state.vy = (state.vy + k * step * wind.y) / (1 + k * step)
       state.vz = (state.vz + k * step * wind.z + (lift - mass * SkyLantern.G) / inertia * step) / (1 + k * step)
+      // On the ground and not lifting: it rests there, still burning, until its fuel, burning away, makes it light enough to rise, or it
+      // goes out. It used to vanish, lit, ten seconds after it was let go.
+      const resting = state.z <= ground && state.vz <= 0
+      if (resting) {
+        state.vx = 0
+        state.vy = 0
+        state.vz = 0
+      }
       state.x += state.vx * step
       state.y += state.vy * step
       state.z = Math.max(ground, state.z + state.vz * step)
-      const landed = state.z <= ground && elapsed > 10
-      if (i % perSample === 0 || i === steps || landed) {
+      if (i % perSample === 0 || i === steps) {
         // The air going past pushes on its paper while its weight hangs from its ring: it leans the way the air goes, as far as that push
         // is to its weight (a pendulum held aside), a few degrees in a gust it has not caught up with.
         const ax = wind.x - state.vx, ay = wind.y - state.vy
         const push = 0.5 * rho * type.dragAreaM2 * Math.hypot(ax, ay, wind.z - state.vz) * Math.hypot(ax, ay)
         samples.push({
           t: release.t + Math.round(elapsed * 1000), x: state.x, y: state.y, z: state.z, light: heat,
-          tiltDeg: Math.atan2(push, mass * SkyLantern.G) * 180 / Math.PI, tiltTowardDeg: (Math.atan2(ax, ay) * 180 / Math.PI + 360) % 360
+          tiltDeg: resting ? 0 : Math.atan2(push, mass * SkyLantern.G) * 180 / Math.PI, tiltTowardDeg: (Math.atan2(ax, ay) * 180 / Math.PI + 360) % 360
         })
       }
-      if (landed) break
     }
     return samples
   }
