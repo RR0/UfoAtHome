@@ -1058,7 +1058,7 @@ export class DecorSystem {
 
   /**
    * Applies the settings a model publishes (see ModelParameters.bindings) to its parts, found by the names its own file
-   * gives them: a colour tints the materials that match, on copies of them since a model's materials are shared by every
+   * gives them: a colour tints the materials that match (and filters what they give out, when they glow), on copies of them since a model's materials are shared by every
    * copy of it on the page (the copies are freed with the object: see dispose); a switch hides or shows the nodes that match,
    * on the copy of the model, which is the object's own. What is not bound keeps the model's own colours and parts, which
    * is what a model carries.
@@ -1091,6 +1091,13 @@ export class DecorSystem {
         if (!coloured.color || !patterns.some(pattern => pattern.test(material.name))) return material
         const copy = material.clone() as MeshLambertMaterial
         copy.color.set(color)
+        // A part that glows of itself lets its light through its colour, as paper does a flame's: what it gives out is filtered by it,
+        // and keeps how strong it was.
+        const glow = copy.emissive ? Math.max(copy.emissive.r, copy.emissive.g, copy.emissive.b) : 0
+        if (glow > 0) {
+          copy.emissive.multiply(copy.color)
+          copy.emissive.multiplyScalar(glow / (Math.max(copy.emissive.r, copy.emissive.g, copy.emissive.b) || 1))
+        }
         owned.push(copy)
         return copy
       }

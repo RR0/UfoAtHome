@@ -151,6 +151,12 @@ export interface BodyJson {
    */
   model: DecorModelRef
   /**
+   * The settings of its model, by the key the model publishes them under (see ModelParameters.parameters): the colour of a sky lantern's
+   * paper, say. Which of them applies, and how, is the model's own to say (ModelParameters.bindings), as for a decor object's
+   * (see DecorObject.modelParameters); a primitive has none.
+   */
+  modelParameters?: Record<string, string | number | boolean>
+  /**
    * Whether the observer carries it: its keyframes, stated FROM THE OBSERVER, are offsets from their eye that go with the eye, instead
    * of points of the world fixed where the eye was at each keyframe's instant. What a thing that is part of the place they stand in
    * needs — a spot of light on the glass of a flight deck, half a metre from an airline pilot's eye, which the relief under an

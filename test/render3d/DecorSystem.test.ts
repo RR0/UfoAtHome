@@ -558,6 +558,18 @@ describe("DecorSystem.applyModelParameters: a setting a model publishes reaches 
     expect(parts[2].material).toBe(shoes)
   })
 
+  it("filters what a glowing part gives out through the colour, keeping how strong it was: a flame's light through red paper", () => {
+    const paper = new MeshStandardMaterial({ name: "paper-0", color: new Color("#ffffff"), emissive: new Color(1, 0.5, 0.25) })
+    const model = new Group()
+    const part = new Mesh(new BoxGeometry(), paper)
+    model.add(part)
+    DecorSystem.applyModelParameters(model, { paperColor: "#ff0000" }, { paperColor: { materials: ["^paper"] } })
+    const glow = (part.material as MeshStandardMaterial).emissive
+    expect(glow.r).toBeCloseTo(1, 5)
+    expect(glow.g).toBeCloseTo(0, 5)
+    expect(paper.emissive.g).toBeCloseTo(0.5, 5)
+  })
+
   it("does nothing when the object states no value for it, or the model binds none", () => {
     const { model, suit, parts } = being()
     DecorSystem.applyModelParameters(model, undefined, costume)

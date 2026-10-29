@@ -9,6 +9,7 @@ import type { BodyPrimitive } from "../engine/interpretation/Interpretation.js"
 import type { DecorModelRef } from "../engine/model/Decor.js"
 import { FlameEffect } from "./FlameEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
+import type { ModelParameters } from "../engine/model/DecorTraits.js"
 import type { DecorObject } from "../engine/model/Decor.js"
 import { GroundPlume } from "./GroundPlume.js"
 import { Photometry } from "./Photometry.js"
@@ -25,7 +26,7 @@ const DEG_TO_RAD = Math.PI / 180
 
 /** Loads the glTF scene a model reference names, with the credit it must be shown with — or nothing,
  * when it cannot be had. Supplied by the renderer, which already resolves the decor's. */
-export type BodyModelLoader = (ref: DecorModelRef) => Promise<{ scene: Object3D, credit: unknown, headingOffsetDeg?: number } | undefined>
+export type BodyModelLoader = (ref: DecorModelRef) => Promise<{ scene: Object3D, credit: unknown, headingOffsetDeg?: number, bindings?: ModelParameters["bindings"] } | undefined>
 
 
 /** A material of a loaded model that glows of itself: what a body's stated luminance sets the
@@ -100,7 +101,8 @@ export const BODY_OVER_LAYER = 4
  */
 export class BodySystem {
   readonly group = new Group()
-  private readonly built = new Map<string, { holder: Group, signature: string, material?: MeshStandardMaterial, glowing?: Glow[], motions?: Map<string, AnimationAction> }>()
+  /** `whole`: a model that glows all over (see BodySystem.GLOWS_WHOLE), whose light is the body's own rather than its parts'. */
+  private readonly built = new Map<string, { holder: Group, signature: string, material?: MeshStandardMaterial, glowing?: Glow[], whole?: boolean, motions?: Map<string, AnimationAction> }>()
   /** Bumped whenever the set of bodies is replaced, so a model arriving for a previous one is
    * dropped. */
   private token = 0
@@ -155,7 +157,7 @@ export class BodySystem {
     const seen = new Set<string>()
     for (const state of states) {
       seen.add(state.id)
-      const signature = BodySystem.signatureOf(state.model)
+      const signature = BodySystem.signatureOf(state)
       let entry = this.built.get(state.id)
       if (!entry || entry.signature !== signature) {
         if (entry) this.remove(state.id)
@@ -163,7 +165,7 @@ export class BodySystem {
         this.built.set(state.id, entry)
         this.group.add(entry.holder)
       }
-      const { holder, material, glowing } = entry
+      const { holder, material, glowing, whole } = entry
       holder.visible = true
       holder.position.set(frame.originX + state.eastM, frame.originGroundY + state.upM, frame.originZ - state.northM)
       holder.rotation.set(state.attitude.pitchDeg * DEG_TO_RAD, -state.attitude.headingDeg * DEG_TO_RAD, -state.attitude.rollDeg * DEG_TO_RAD, "YXZ")
@@ -172,8 +174,8 @@ export class BodySystem {
       BodySystem.fade(holder, state.appearance.transparency)
       if (glowing) BodySystem.light(glowing, state, display)
       if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
-      this.shine(state, holder, glowing, frame)
-      this.shineLights(state, holder, glowing, frame)
+      this.shine(state, holder, whole ? undefined : glowing, frame)
+      this.shineLights(state, holder, whole ? undefined : glowing, frame)
       this.throwFlame(state, holder, seconds, display, frame.eye)
     }
     const kept = new Set(ids)
@@ -517,6 +519,13 @@ export class BodySystem {
 
   private static readonly DOWN = new Vector3(0, -1, 0)
 
+  /**
+   * What a model's scene says, among its extras, when it glows all over, as a sky lantern's paper does, rather than in parts, as a craft's
+   * windows do: its glare and, under a pixel, its point are then the whole body's, from the luminance and the colour it is given, as a
+   * primitive's are, and its lights only say how its parts glow when it is seen close.
+   */
+  static readonly GLOWS_WHOLE = "glowsWhole"
+
   /** Where a model says a flame comes out, unless the flame names another node. */
   static readonly EXHAUST_NODE = "exhaust"
 
@@ -763,7 +772,7 @@ export class BodySystem {
   private build(state: BodyState): { holder: Group, signature: string, material?: MeshStandardMaterial } {
     const holder = new Group()
     holder.name = `body:${state.id}`
-    const signature = BodySystem.signatureOf(state.model)
+    const signature = BodySystem.signatureOf(state)
     const primitive = BodySystem.primitiveOf(state.model)
     if (primitive === "figure") {
       // The decor's own figure, fitted into the unit cube like a model and painted in one colour:
@@ -806,6 +815,7 @@ export class BodySystem {
       holder.remove(placeholder)
       placeholder.geometry.dispose()
       material.dispose()
+      DecorSystem.applyModelParameters(loaded.scene, state.modelParameters, loaded.bindings)
       BodySystem.glaze(loaded.scene)
       holder.add(BodySystem.fit(loaded.scene, loaded.headingOffsetDeg ?? state.model.headingOffsetDeg ?? 0))
       BodySystem.overlay(holder)
@@ -814,6 +824,7 @@ export class BodySystem {
       if (entry) {
         entry.material = undefined
         entry.glowing = BodySystem.glowingOf(loaded.scene)
+        entry.whole = loaded.scene.userData[BodySystem.GLOWS_WHOLE] === true
         entry.motions = BodySystem.motionsOf(loaded.scene)
       }
       // The instant is set again on the model that has just arrived: its exhaust node turns the
@@ -999,8 +1010,9 @@ export class BodySystem {
       : undefined
   }
 
-  private static signatureOf(model: DecorModelRef): string {
-    return `${model.id ?? ""}|${model.url ?? ""}`
+  /** What the body is built from: its model and the settings applied to it once, as it arrives. */
+  private static signatureOf(state: BodyState): string {
+    return `${state.model.id ?? ""}|${state.model.url ?? ""}|${state.modelParameters ? JSON.stringify(state.modelParameters) : ""}`
   }
 
   /** A primitive, one metre along each axis and centred on the origin. */

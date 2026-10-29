@@ -108,6 +108,41 @@ describe("SkyLantern", () => {
     expect(seen[seen.length - 1].t - 5000).toBeGreaterThan(290000)
   })
 
+  it("is drawn as the lantern of its shape, its paper of its colour, which tints its light", () => {
+    const [classic] = SkyLantern.bodiesOf(launch())
+    expect(classic.model.id).toBe("ufoathome-sky-lantern-classic")
+    expect(classic.modelParameters).toEqual({ paperColor: "#ffffff" })
+    expect(classic.track[0].appearance!.color).toBe(SkyLantern.COMMON.color)
+    const [red] = SkyLantern.bodiesOf(launch({ lantern: { shape: "balloon", paperColor: "#ff0000" } }))
+    expect(red.model.id).toBe("ufoathome-sky-lantern-balloon")
+    expect(red.modelParameters).toEqual({ paperColor: "#ff0000" })
+    expect(red.track[0].appearance!.color).toBe("#ff0000")
+  })
+
+  it("glows most by its flame: its paper brighter at its mouth than at its top, and dark once out", () => {
+    const [body] = SkyLantern.bodiesOf(launch())
+    const lit = body.track[10].lights!
+    expect(lit["paper-0"]).toBeGreaterThan(lit["paper-3"] * 3)
+    expect(lit["paper-inside"]).toBeGreaterThan(lit["paper-3"])
+    expect(lit.flame).toBeGreaterThan(lit["paper-0"] * 10)
+    const out = body.track[body.track.length - 2].lights!
+    expect(out["paper-0"]).toBeLessThan(lit["paper-0"] * 0.05)
+  })
+
+  it("leans a few degrees the way the air going past pushes it, and stands upright in a still air", () => {
+    const laminar = { horizontalMS: 0, verticalMS: 0, timescaleS: 30 }
+    const still = SkyLantern.trajectory(launch({ turbulence: laminar }), launch().releases![0])
+    expect(Math.max(...still.map(point => point.tiltDeg))).toBeLessThan(0.01)
+    const gusty = SkyLantern.trajectory(launch({ wind: { towardDeg: 90, speedMS: 3 } }), launch().releases![0])
+    const tilts = gusty.map(point => point.tiltDeg)
+    expect(Math.max(...tilts)).toBeGreaterThan(1)
+    expect(Math.max(...tilts)).toBeLessThan(35)
+    // Let go into a wind, it is pushed the way the wind goes before it catches up with it.
+    expect(Math.abs(((gusty[2].tiltTowardDeg - 90 + 540) % 360) - 180)).toBeLessThan(60)
+    const [body] = SkyLantern.bodiesOf(launch({ wind: { towardDeg: 90, speedMS: 3 } }))
+    expect(body.track[2].attitude!.pitchDeg).toBeLessThan(0)
+  })
+
   it("leaves an interpretation without lanterns as it is", () => {
     const interpretation = { bodies: [] }
     expect(SkyLantern.expand(interpretation)).toBe(interpretation)

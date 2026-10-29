@@ -26,6 +26,8 @@ export interface LocalPoint {
 export interface BodyState {
   id: string
   model: DecorModelRef
+  /** See BodyJson.modelParameters. */
+  modelParameters?: Record<string, string | number | boolean>
   explains: string[]
   /** See BodyJson.outlineNode. */
   outlineNode?: string
@@ -254,6 +256,7 @@ export class BodyPlacement {
     return {
       id: this.body.id,
       model: this.body.model,
+      modelParameters: this.body.modelParameters,
       explains: this.body.explains ?? [],
       outlineNode: this.body.outlineNode,
       eastM,

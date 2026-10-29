@@ -2849,12 +2849,12 @@ export class SceneRenderer {
 
   /** A body's model, the way a decor object's is fetched (see loadDecorModel): by catalogue entry
    * or by url, and refused without a credit. */
-  private async loadBodyModel(ref: DecorModelRef): Promise<{ scene: Object3D, credit: DecorModelCredit, headingOffsetDeg?: number } | undefined> {
+  private async loadBodyModel(ref: DecorModelRef): Promise<{ scene: Object3D, credit: DecorModelCredit, headingOffsetDeg?: number, bindings?: NonNullable<DecorModelEntry["parameters"]>["bindings"] } | undefined> {
     const entry = ref.url ? undefined : ref.id ? await this.decorModelProvider.entry(ref.id) : undefined
     const url = this.modelUrl(ref) ?? entry?.url
     const credit = ref.credit ?? entry?.credit
     if (!url || !credit) return undefined
-    return { scene: await loadGltfScene(url), credit, headingOffsetDeg: ref.headingOffsetDeg ?? entry?.headingOffsetDeg }
+    return { scene: await loadGltfScene(url), credit, headingOffsetDeg: ref.headingOffsetDeg ?? entry?.headingOffsetDeg, bindings: entry?.parameters?.bindings }
   }
 
   /**

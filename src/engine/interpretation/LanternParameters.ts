@@ -188,8 +188,27 @@ export class LanternParameters {
           es: "La luz de su llama a través del papel, a pleno fuego.", it: "La luce della sua fiamma attraverso la carta, a piena fiamma." }
       },
       {
-        type: "colour", key: "lantern.color", group: LanternParameters.LANTERN,
-        label: { en: "Colour", fr: "Couleur", es: "Color", it: "Colore" }
+        type: "choice", key: "lantern.shape", group: LanternParameters.LANTERN,
+        effective: () => SkyLantern.COMMON.shape,
+        label: { en: "Shape", fr: "Forme", es: "Forma", it: "Forma" },
+        choices: [
+          { value: "classic", label: { en: "Round at the mouth, square at the top", fr: "Ronde à la base, carrée au sommet", es: "Redonda en la base, cuadrada arriba", it: "Rotonda alla base, quadrata in cima" } },
+          { value: "balloon", label: { en: "Balloon, lobed top", fr: "Montgolfière, sommet en lobes", es: "Globo, cima lobulada", it: "Mongolfiera, cima a lobi" } }
+        ]
+      },
+      {
+        type: "colour", key: "lantern.paperColor", group: LanternParameters.LANTERN, fallback: SkyLantern.COMMON.paperColor,
+        label: { en: "Paper colour", fr: "Couleur du papier", es: "Color del papel", it: "Colore della carta" },
+        hint: { en: "What it looks like by day; by night, what its flame's light comes through.",
+          fr: "Son aspect de jour ; de nuit, ce que traverse la lumière de sa flamme.",
+          es: "Su aspecto de día; de noche, lo que atraviesa la luz de su llama.",
+          it: "Il suo aspetto di giorno; di notte, ciò che attraversa la luce della sua fiamma." }
+      },
+      {
+        type: "colour", key: "lantern.color", group: LanternParameters.LANTERN, fallback: SkyLantern.COMMON.color,
+        label: { en: "Flame light", fr: "Lumière de la flamme", es: "Luz de la llama", it: "Luce della fiamma" },
+        hint: { en: "Its flame's light through white paper.", fr: "La lumière de sa flamme à travers un papier blanc.",
+          es: "La luz de su llama a través de un papel blanco.", it: "La luce della sua fiamma attraverso una carta bianca." }
       },
       {
         type: "number", key: "lantern.envelopeVolumeM3", min: 0.01, max: 10, step: 0.01, unit: "m³", group: LanternParameters.LANTERN,

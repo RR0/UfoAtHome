@@ -1405,6 +1405,76 @@
       }
     },
     {
+      "id": "ufoathome-sky-lantern-classic",
+      "kind": "aircraft",
+      "name": "Sky lantern, round at its mouth and square at its flat top",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "paperColor",
+            "fallback": "#ffffff",
+            "label": { "en": "Paper colour", "fr": "Couleur du papier", "es": "Color del papel", "it": "Colore della carta" },
+            "hint": {
+              "en": "The colour of its paper, which also filters its flame's light.",
+              "fr": "La couleur de son papier, qui filtre aussi la lumière de sa flamme.",
+              "es": "El color de su papel, que también filtra la luz de su llama.",
+              "it": "Il colore della sua carta, che filtra anche la luce della sua fiamma."
+            }
+          }
+        ],
+        "bindings": {
+          "paperColor": { "materials": ["^paper"] }
+        }
+      },
+      "file": "ufoathome-sky-lantern-classic/lantern.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 0.6, "lengthM": 0.6, "heightM": 1.0 },
+      "credit": {
+        "title": "Sky lantern (classic), after retailers' listings",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-sky-lanterns.ts"
+      }
+    },
+    {
+      "id": "ufoathome-sky-lantern-balloon",
+      "kind": "aircraft",
+      "name": "Sky lantern, balloon-shaped with a lobed top",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "paperColor",
+            "fallback": "#ffffff",
+            "label": { "en": "Paper colour", "fr": "Couleur du papier", "es": "Color del papel", "it": "Colore della carta" },
+            "hint": {
+              "en": "The colour of its paper, which also filters its flame's light.",
+              "fr": "La couleur de son papier, qui filtre aussi la lumière de sa flamme.",
+              "es": "El color de su papel, que también filtra la luz de su llama.",
+              "it": "Il colore della sua carta, che filtra anche la luce della sua fiamma."
+            }
+          }
+        ],
+        "bindings": {
+          "paperColor": { "materials": ["^paper"] }
+        }
+      },
+      "file": "ufoathome-sky-lantern-balloon/lantern.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 0.68, "lengthM": 0.62, "heightM": 1.0 },
+      "credit": {
+        "title": "Sky lantern (balloon), after retailers' listings",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-sky-lanterns.ts"
+      }
+    },
+    {
       "id": "ufoathome-mcminnville-object",
       "kind": "aircraft",
       "name": "McMinnville object as the 1950 prints show it: flat dark base, shouldered dome, small stub on top (stand-in)",

@@ -134,8 +134,28 @@ export interface LanternType {
   /** How wide and how tall its envelope is, m: the size of the glowing body drawn. */
   widthM: number
   heightM: number
-  /** The colour of its light through the paper, CSS. */
+  /** The colour of its flame's light through white paper, CSS: what its paper's colour then tints (see paperColor). */
   color: string
+  /** Its shape (see public/models/ufoathome-sky-lantern-*): "classic", round at its mouth and square at its flat top, or "balloon", narrow
+   * at its mouth and swelling to a wide, lobed top. */
+  shape: LanternShape
+  /** The colour of its paper, CSS: what it looks like by day, and what tints its light by night. */
+  paperColor: string
+}
+
+/** The shapes sky lanterns are sold in (see LanternType.shape). */
+export const LANTERN_SHAPES = ["classic", "balloon"] as const
+export type LanternShape = typeof LANTERN_SHAPES[number]
+
+/** One sample of a lantern's flight: where it is, how much of its light it gives, and how far it leans, which way (degrees from north). */
+export interface LanternSample {
+  t: number
+  x: number
+  y: number
+  z: number
+  light: number
+  tiltDeg: number
+  tiltTowardDeg: number
 }
 
 /** A state of one lantern, metres and seconds, x east, y north, z up from the recording's origin. */
@@ -173,8 +193,23 @@ export class SkyLantern {
     luminousIntensityCd: 10,
     widthM: 0.6,
     heightM: 1,
-    color: "#ffa250"
+    color: "#ffa250",
+    shape: "classic",
+    paperColor: "#ffffff"
   }
+
+  /**
+   * How bright its flame is, cd/m²: a paraffin flame a few centimetres tall, as bright as a candle's (some 5000 cd/m²). What is seen of it
+   * looking up into the mouth; from the side it is the paper that glows.
+   */
+  private static readonly FLAME_CDM2 = 5000
+  /** How much brighter the inside of its paper is than its outside: lit straight by the flame, where the outside has what the paper lets
+   * through. ASSUMED: rice paper lets through about half of what falls on it, and sends back most of the rest. */
+  private static readonly INSIDE_SHARE = 2
+  /** The share of the paper's mean luminance each band of its outside glows at, from the mouth up (see lightsOf). */
+  private static readonly PAPER_BANDS = [2.4, 1.1, 0.6, 0.35]
+  /** The paper's mean luminance at full burn of the common lantern, cd/m²: what the flame's own luminance is at full burn beside. */
+  private static readonly PAPER_FULL_CDM2 = SkyLantern.COMMON.luminousIntensityCd / (Math.PI * SkyLantern.COMMON.widthM / 2 * SkyLantern.COMMON.heightM / 2)
 
   /** How often a lantern's computed path is sampled into keyframes, ms: it moves metres per second, the player blends between them. */
   static readonly SAMPLE_MS = 1000
@@ -280,7 +315,7 @@ export class SkyLantern {
    * air, its weight (lightening as its fuel burns), and a quadratic drag relative to the wind, in air thinning and cooling with height; what
    * it carries along (its own air, and the air it pushes aside) is part of what the forces move.
    */
-  static trajectory(launch: LanternLaunchJson, release: LanternRelease, sampleMs = SkyLantern.SAMPLE_MS): { t: number, x: number, y: number, z: number, light: number }[] {
+  static trajectory(launch: LanternLaunchJson, release: LanternRelease, sampleMs = SkyLantern.SAMPLE_MS): LanternSample[] {
     const type = SkyLantern.typeOf(launch, release)
     const site = launch.site
     const ground = site.altitudeM ?? 0
@@ -290,7 +325,7 @@ export class SkyLantern {
     const state: LanternState = { x: site.eastM + (release.eastM ?? 0), y: site.northM + (release.northM ?? 0), z: release.altitudeM ?? ground, vx: 0, vy: 0, vz: 0, excessK: type.insideExcessK * SkyLantern.heatShare(type, burned) }
     const step = SkyLantern.STEP_S, perSample = Math.max(1, Math.round(sampleMs / 1000 / step))
     const steps = Math.ceil(Math.max(0, type.burnS - burned) / step)
-    const samples = [{ t: release.t, x: state.x, y: state.y, z: state.z, light: SkyLantern.heatShare(type, burned) }]
+    const samples: LanternSample[] = [{ t: release.t, x: state.x, y: state.y, z: state.z, light: SkyLantern.heatShare(type, burned), tiltDeg: 0, tiltTowardDeg: 0 }]
     const gust = SkyLantern.gusts(launch.turbulence ?? SkyLantern.TURBULENCE, SkyLantern.seedOf(release), step)
     for (let i = 1; i <= steps; i++) {
       // Seconds since it was let go, and since the recording first has it.
@@ -319,7 +354,16 @@ export class SkyLantern {
       state.y += state.vy * step
       state.z = Math.max(ground, state.z + state.vz * step)
       const landed = state.z <= ground && elapsed > 10
-      if (i % perSample === 0 || i === steps || landed) samples.push({ t: release.t + Math.round(elapsed * 1000), x: state.x, y: state.y, z: state.z, light: heat })
+      if (i % perSample === 0 || i === steps || landed) {
+        // The air going past pushes on its paper while its weight hangs from its ring: it leans the way the air goes, as far as that push
+        // is to its weight (a pendulum held aside), a few degrees in a gust it has not caught up with.
+        const ax = wind.x - state.vx, ay = wind.y - state.vy
+        const push = 0.5 * rho * type.dragAreaM2 * Math.hypot(ax, ay, wind.z - state.vz) * Math.hypot(ax, ay)
+        samples.push({
+          t: release.t + Math.round(elapsed * 1000), x: state.x, y: state.y, z: state.z, light: heat,
+          tiltDeg: Math.atan2(push, mass * SkyLantern.G) * 180 / Math.PI, tiltTowardDeg: (Math.atan2(ax, ay) * 180 / Math.PI + 360) % 360
+        })
+      }
       if (landed) break
     }
     return samples
@@ -364,15 +408,43 @@ export class SkyLantern {
     const fullLuminance = type.luminousIntensityCd / (Math.PI * type.widthM / 2 * type.heightM / 2)
     const path = SkyLantern.trajectory(launch, release)
     const size = { widthM: type.widthM, lengthM: type.widthM, heightM: type.heightM }
+    // Its light is its flame's through its paper: the paper's colour takes from it what it does not let through.
+    const color = SkyLantern.through(type.color, type.paperColor)
     const track: BodyKeyframe[] = path.map((point, i) => ({
       t: point.t,
       eastM: point.x,
       northM: point.y,
       altitudeM: point.z,
       ...(i === 0 ? { sizeM: size, present: true } : {}),
-      appearance: { color: type.color, luminanceCdM2: fullLuminance * point.light, ...(i === 0 ? { albedo: 0.6, haloScale: 1 } : {}) }
+      // Its top leaning the way the air pushes it: its front (see BodyAttitude) turned that way, and down.
+      attitude: { headingDeg: Math.round(point.tiltTowardDeg), pitchDeg: -Math.round(point.tiltDeg * 10) / 10 },
+      appearance: { color, luminanceCdM2: fullLuminance * point.light, ...(i === 0 ? { albedo: 0.6, haloScale: 1 } : {}) },
+      lights: SkyLantern.lightsOf(fullLuminance * point.light)
     }))
     track.push({ t: path[path.length - 1].t + 1, present: false })
-    return { id: `${launch.id}-lantern-${index + 1}`, title: launch.title, explains: release.explains, model: { id: "sphere" }, track }
+    return {
+      id: `${launch.id}-lantern-${index + 1}`, title: launch.title, explains: release.explains,
+      model: { id: `ufoathome-sky-lantern-${type.shape}` }, modelParameters: { paperColor: type.paperColor }, track
+    }
+  }
+
+  /**
+   * How bright each part of its model is when its paper glows at `paperCdM2` on the whole (see build-sky-lanterns.ts): the paper brightest
+   * by the flame and dimmest at the top (ASSUMED: the flame is four or five times further from the top than from the paper by the
+   * mouth, and lights it some seven times less, as photographs of them show; the whole as bright as `paperCdM2` on average), its inside brighter still, and the flame itself.
+   */
+  private static lightsOf(paperCdM2: number): Record<string, number> {
+    const lights: Record<string, number> = { "paper-inside": paperCdM2 * SkyLantern.INSIDE_SHARE, flame: paperCdM2 > 0 ? SkyLantern.FLAME_CDM2 * paperCdM2 / SkyLantern.PAPER_FULL_CDM2 : 0 }
+    SkyLantern.PAPER_BANDS.forEach((share, band) => { lights[`paper-${band}`] = paperCdM2 * share })
+    return lights
+  }
+
+  /** The colour of a light through a filter, both CSS: their channels multiplied, then brought back to the light's own brightest. */
+  private static through(light: string, filter: string): string {
+    const channels = (css: string) => [1, 3, 5].map(i => parseInt(css.slice(i, i + 2), 16) / 255)
+    const a = channels(light), b = channels(filter)
+    const mixed = a.map((value, i) => value * b[i])
+    const scale = Math.max(...a) / (Math.max(...mixed) || 1)
+    return "#" + mixed.map(value => Math.round(Math.min(1, value * scale) * 255).toString(16).padStart(2, "0")).join("")
   }
 }
