@@ -204,6 +204,8 @@ export class SkyLantern {
    * looking up into the mouth; from the side it is the paper that glows.
    */
   private static readonly FLAME_CDM2 = 5000
+  /** What each lantern is called where it is pointed at (the launch's own title names them all). */
+  static readonly TITLE: SaidText = { en: "Sky lantern", fr: "Lanterne céleste", es: "Farolillo volador", it: "Lanterna volante" }
   /** How much its flame's light wavers (see BodyJson.flicker): ASSUMED, a candle's, some 15 % in still air. */
   private static readonly FLICKER = 0.15
   /** How much brighter the inside of its paper is than its outside: lit straight by the flame, where the outside has what the paper lets
@@ -430,7 +432,8 @@ export class SkyLantern {
     }))
     track.push({ t: path[path.length - 1].t + 1, present: false })
     return {
-      id: `${launch.id}-lantern-${index + 1}`, title: launch.title, explains: release.explains,
+      // Each is pointed at, and named, one at a time: a lantern, not the launch it is one of.
+      id: `${launch.id}-lantern-${index + 1}`, title: SkyLantern.TITLE, explains: release.explains,
       model: { id: `ufoathome-sky-lantern-${type.shape}` }, modelParameters: { paperColor: type.paperColor }, flicker: SkyLantern.FLICKER,
       // Let go from the ground where it stands, not from the ground at the recording's origin.
       altitudeFrom: { eastM: path[0].x, northM: path[0].y }, track
