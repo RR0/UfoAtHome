@@ -2,7 +2,10 @@ import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
 
 /** A light of this colour and luminance as the scene draws it — relative to the eye's semi-saturation,
  * as the scene's own photometry has it (see ScatteredSky.relativeOfLuminance). */
-export type LuminanceDisplay = (linearRgb: readonly [number, number, number], luminanceCdM2: number) => readonly [number, number, number]
+export type LuminanceDisplay = ((linearRgb: readonly [number, number, number], luminanceCdM2: number) => readonly [number, number, number]) & {
+  /** Whether the picture is recorded on a medium (a sensor, a film) rather than seen by an eye: see Photometry.shown. */
+  recorded?: boolean
+}
 
 /**
  * What something that gives out light looks like on screen — a flame, a glowing body, the glow the
@@ -19,9 +22,21 @@ export class Photometry {
    * back as a white sliver, which is the one thing his drawing is not. So the scene decides how
    * bright, and the observer — or the diffraction that coloured a corona's rings — decides what
    * colour.
+   *
+   * That holds for an eye, whose colour grows with brightness rather than giving way to white. A
+   * sensor or a film does not: see the medium's case below.
    */
   static shown(colour: readonly [number, number, number], luminanceCdM2: number, display?: LuminanceDisplay): [number, number, number] {
     const white = display ? display([1, 1, 1], luminanceCdM2) : Photometry.withoutPhotometry([1, 1, 1], luminanceCdM2)
+    if (display?.recorded) {
+      // A medium answers the light it is given and nothing else: what it cannot hold any more, it loses, the colour first and then all
+      // of it (see EYE_RESPONSE_GLSL's recorded), so that a flame's light through paper, too bright for the exposure, is yellow, then
+      // white where it is brightest and orange only where it is not, as a photograph of a lantern is. The light goes to the finish as
+      // it is, in the colour given at the brightness the photometry gives a white.
+      const relative = Photometry.luminanceOf(white)
+      const peak = Math.max(colour[0], colour[1], colour[2]) || 1
+      return [colour[0] / peak * relative, colour[1] / peak * relative, colour[2] / peak * relative]
+    }
     // How light a white of that luminance is on the screen: its response, shown as a lightness.
     const brightness = EyeAdaptation.fromLightness(EyeAdaptation.respond(Photometry.luminanceOf(white)))
     const peak = Math.max(colour[0], colour[1], colour[2]) || 1

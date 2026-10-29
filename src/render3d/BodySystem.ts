@@ -9,6 +9,7 @@ import type { BodyPrimitive } from "../engine/interpretation/Interpretation.js"
 import type { DecorModelRef } from "../engine/model/Decor.js"
 import { FlameEffect } from "./FlameEffect.js"
 import { DecorSystem } from "./DecorSystem.js"
+import { LitFromWithin } from "./LitFromWithin.js"
 import type { ModelParameters } from "../engine/model/DecorTraits.js"
 import type { DecorObject } from "../engine/model/Decor.js"
 import { GroundPlume } from "./GroundPlume.js"
@@ -154,6 +155,7 @@ export class BodySystem {
     this.frame = frame
     this.lastSet = [states, frame, seconds, display, ids]
     this.pointLights.clear()
+    this.metered.clear()
     const seen = new Set<string>()
     for (const state of states) {
       seen.add(state.id)
@@ -195,6 +197,11 @@ export class BodySystem {
 
   /** The light of each body too small for a pixel, by its id, as an illuminance at the eye in the scene's own units (see shine). */
   private readonly pointLights = new Map<string, { position: Vector3, light: readonly [number, number, number] }>()
+  /**
+   * The light each body that glows whole sends the eye, by its id, as its luminance times the solid angle it fills, cd/m² × sr, where it
+   * stands: what a device that sets its own exposure meters of it, with the sky (see SceneRenderer.applyMedium).
+   */
+  readonly metered = new Map<string, { position: Vector3, luminanceSr: number }>()
 
   /** The point sources drawn for the bodies under a pixel — for what draws them at the picture's own pixels (see PointLayerPass). */
   get pointSources(): readonly Points[] {
@@ -305,6 +312,7 @@ export class BodySystem {
       return
     }
     veil.shine(holder.position, [light[0] * seen, light[1] * seen, light[2] * seen], (angularRadius * 180) / Math.PI * reach)
+    this.metered.set(state.id, { position: holder.position.clone(), luminanceSr: luminanceCdM2 * solidAngle * seen })
     // Under a pixel its disc is hit or missed by the rasteriser, and its light with it: a lantern two kilometres off was a point one frame
     // and nothing the next, or nothing at all. It is then drawn as a star is, by the light it sends (see PointSources).
     if (frame.pixelRad !== undefined && 2 * angularRadius < frame.pixelRad) {
@@ -816,6 +824,7 @@ export class BodySystem {
       placeholder.geometry.dispose()
       material.dispose()
       DecorSystem.applyModelParameters(loaded.scene, state.modelParameters, loaded.bindings)
+      LitFromWithin.apply(loaded.scene)
       BodySystem.glaze(loaded.scene)
       holder.add(BodySystem.fit(loaded.scene, loaded.headingOffsetDeg ?? state.model.headingOffsetDeg ?? 0))
       BodySystem.overlay(holder)

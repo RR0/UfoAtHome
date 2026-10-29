@@ -119,14 +119,15 @@ describe("SkyLantern", () => {
     expect(red.track[0].appearance!.color).toBe("#ff0000")
   })
 
-  it("glows most by its flame: its paper brighter at its mouth than at its top, and dark once out", () => {
+  it("states its paper's mean glow, its inside brighter, its flame far brighter, all dark once out", () => {
     const [body] = SkyLantern.bodiesOf(launch())
     const lit = body.track[10].lights!
-    expect(lit["paper-0"]).toBeGreaterThan(lit["paper-3"] * 3)
-    expect(lit["paper-inside"]).toBeGreaterThan(lit["paper-3"])
-    expect(lit.flame).toBeGreaterThan(lit["paper-0"] * 10)
+    expect(lit["paper-inside"]).toBeGreaterThan(lit.paper)
+    expect(lit.flame).toBeGreaterThan(lit.paper * 100)
+    // The paper's mean is the lantern's own: its light over the area it shows.
+    expect(lit.paper).toBeCloseTo(body.track[10].appearance!.luminanceCdM2!, 6)
     const out = body.track[body.track.length - 2].lights!
-    expect(out["paper-0"]).toBeLessThan(lit["paper-0"] * 0.05)
+    expect(out.paper).toBeLessThan(lit.paper * 0.05)
   })
 
   it("leans a few degrees the way the air going past pushes it, and stands upright in a still air", () => {

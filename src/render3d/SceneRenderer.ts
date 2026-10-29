@@ -2789,7 +2789,7 @@ export class SceneRenderer {
       occluders: [...this.decorGroups.values()],
       transmittance: (px, py, pz) => this.transmittanceTo(px, py, pz),
       pixelRad: (this.camera.fov * Math.PI) / 180 / Math.max(1, this.renderer.getDrawingBufferSize(this.bloomSize).y)
-    }, seconds, sky ? (rgb, luminance) => sky.relativeOfLuminance(rgb, luminance) : undefined, ids)
+    }, seconds, sky ? Object.assign((rgb: readonly [number, number, number], luminance: number) => sky.relativeOfLuminance(rgb, luminance), { recorded: sky.recorded }) : undefined, ids)
     this.bodySystem.setSmoke(smoke, seconds)
     // Something is there to cast a shadow, whatever the decor says.
     if (this.bodySystem.any) this.celestialLight.castShadow = true
@@ -3506,12 +3506,34 @@ export class SceneRenderer {
       return
     }
     EYE_UNIFORMS.uMedium.value = medium.kind === "negative" ? 1 : medium.kind === "slide" ? 2 : 3
-    const metered = medium.autoExposure || this.skyUnknown ? this.scatteredSky?.sceneAdaptation : undefined
+    const sky = medium.autoExposure || this.skyUnknown ? this.scatteredSky?.sceneAdaptation : undefined
+    const metered = sky === undefined ? undefined : sky + this.meteredBodies()
     const set = (iso: number) => (0.065 * medium.exposureSeconds * iso * this.filterTransmittance) / (medium.fNumber * medium.fNumber * relativeScale)
     // A device exposing itself follows the light only as far as its sensor's gain goes.
     EYE_UNIFORMS.uMediumExposure.value = metered !== undefined && metered > 0
       ? Math.min(1 / (relativeScale * metered), medium.maxIso !== undefined ? set(medium.maxIso) : Infinity)
       : set(medium.iso)
+  }
+
+  /**
+   * The mean luminance the bodies that glow whole add to the picture, cd/m²: the light of each one in the frame, its luminance times the
+   * solid angle it fills, over the frame's own. What a device that sets its own exposure meters of them beside the sky's: a phone pointed
+   * at a sky lantern twenty metres off exposes for the lantern, not for the night round it, and shows its paper orange rather than white.
+   */
+  private meteredBodies(): number {
+    if (this.bodySystem.metered.size === 0) return 0
+    const camera = this.camera
+    camera.updateMatrixWorld()
+    const vertical = (camera.fov * Math.PI) / 180
+    const horizontal = 2 * Math.atan(Math.tan(vertical / 2) * camera.aspect)
+    const frame = 4 * Math.asin(Math.sin(horizontal / 2) * Math.sin(vertical / 2))
+    const seen = new Vector3()
+    let sum = 0
+    for (const { position, luminanceSr } of this.bodySystem.metered.values()) {
+      seen.copy(position).project(camera)
+      if (seen.z < 1 && Math.abs(seen.x) <= 1 && Math.abs(seen.y) <= 1) sum += luminanceSr
+    }
+    return sum / frame
   }
 
   /** What a recording medium resolves, when the instrument has one — see lampBloomRadiusRad. */

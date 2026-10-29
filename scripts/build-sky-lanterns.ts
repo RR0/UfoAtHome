@@ -9,8 +9,8 @@
  * Both are seen from below as much as from the side: the mouth is open, the inside of the paper, lit straight by the flame, glows more
  * than its outside, and the flame burns on its fuel cell in the middle of the mouth, held there by two crossed wires.
  *
- * Their parts, each with its own material, named for what the recording says of them (see BodyKeyframe.lights): "paper-0" to "paper-3",
- * the outside in bands from the mouth up;
+ * Their parts, each with its own material, named for what the recording says of them (see BodyKeyframe.lights): "paper", the outside, lit
+ * by the flame point by point as a point source lights a surface (see LitFromWithin), brightest by the flame;
  * "paper-inside"; "flame"; "fuel-cell" and "frame", which do not glow. The paper's colour is a setting of the model (see the catalogue's
  * "paperColor"), and the scene says it glows all over (see BodySystem.GLOWS_WHOLE). Their proportions are what retailers list (0.9 to
  * 1.1 m tall, a ring of 0.3 to 0.4 m, a head of 0.5 to 0.7 m); a body stretches them to the size it states.
@@ -34,16 +34,13 @@ class SkyLanternModel {
   private static readonly AROUND = 40
   private static readonly SIDE = 16
   private static readonly TOP = 8
-  /**
-   * The rows of the outside each band of paper ends at, from the mouth up: the paper glows most near the flame and less towards the top,
-   * and each band glows as the recording says (see BodyKeyframe.lights), "paper-0" the lowest.
-   */
-  static readonly BANDS = [4, 9, 16, SkyLanternModel.SIDE + SkyLanternModel.TOP]
+  /** Where the flame burns, the light that lights the paper from within: on its fuel cell in the middle of the mouth. */
+  static readonly FLAME_AT: [number, number, number] = [0, 0.075, 0]
 
   readonly materials: GltfMaterial[] = [
     // Rice paper: white, glowing with the flame's light through it (see SkyLantern.COMMON.color). Its colour is the model's setting, which
     // filters that light too.
-    ...SkyLanternModel.BANDS.map((_, band) => GltfWriter.material(`paper-${band}`, "#ffffff", 0, 0.95, { emissiveFactor: GltfWriter.linear("#ffa250") })),
+    GltfWriter.material("paper", "#ffffff", 0, 0.95, { emissiveFactor: GltfWriter.linear("#ffa250") }),
     GltfWriter.material("paper-inside", "#ffffff", 0, 0.95, { emissiveFactor: GltfWriter.linear("#ffa250") }),
     GltfWriter.material("flame", "#000000", 0, 1, { emissiveFactor: [1, 0.78, 0.45] }),
     GltfWriter.material("fuel-cell", "#2a221a", 0, 0.9),
@@ -58,11 +55,14 @@ class SkyLanternModel {
   }
 
   write(writer: GltfWriter): void {
-    SkyLanternModel.BANDS.forEach((until, band) => {
-      const from = band === 0 ? 0 : SkyLanternModel.BANDS[band - 1]
-      writer.addMesh({ name: `paper-${band}`, geometry: this.envelope(false, from, until), material: this.materialOf(`paper-${band}`) })
-    })
-    writer.addMesh({ name: "paper-inside", geometry: this.envelope(true, 0, SkyLanternModel.SIDE + SkyLanternModel.TOP), material: this.materialOf("paper-inside") })
+    const rows = SkyLanternModel.SIDE + SkyLanternModel.TOP
+    for (const [name, inside] of [["paper", false], ["paper-inside", true]] as const) {
+      const geometry = this.envelope(inside, 0, rows)
+      // The flame lights the paper as a point source does (see LitFromWithin): the mean of what it gives it, which the luminance the
+      // recording states is the mean of.
+      this.materials[this.materialOf(name)].extras = { litFromWithin: { at: SkyLanternModel.FLAME_AT, mean: SkyLanternModel.meanLight(geometry) } }
+      writer.addMesh({ name, geometry, material: this.materialOf(name) })
+    }
     const ring = new TorusGeometry(this.ringM, 0.004, 6, SkyLanternModel.AROUND)
     ring.rotateX(Math.PI / 2)
     writer.addMesh({ name: "frame", geometry: SkyLanternModel.merged([ring, ...this.wires()]), material: this.materialOf("frame") })
@@ -71,7 +71,7 @@ class SkyLanternModel {
     writer.addMesh({ name: "fuel-cell", geometry: cell, material: this.materialOf("fuel-cell") })
     const flame = new SphereGeometry(1, 12, 10)
     flame.scale(0.022, 0.06, 0.022)
-    flame.translate(0, 0.075, 0)
+    flame.translate(...SkyLanternModel.FLAME_AT)
     writer.addMesh({ name: "flame", geometry: flame, material: this.materialOf("flame") })
   }
 
@@ -148,6 +148,29 @@ class SkyLanternModel {
     const seam = Math.exp(-(((Math.cos(angle) * inward) / 0.12) ** 2))
     const y = shoulderY + (height - shoulderY) * dome - 0.07 * dome * seam
     return [sx * inward, y, sz * inward]
+  }
+
+  /** The mean over a surface, by area, of what the flame gives each of its points: the cosine of its incidence over its distance squared. */
+  private static meanLight(geometry: BufferGeometry): number {
+    const position = geometry.getAttribute("position"), index = geometry.index!
+    const [fx, fy, fz] = SkyLanternModel.FLAME_AT
+    let lit = 0, area = 0
+    for (let i = 0; i < index.count; i += 3) {
+      const [a, b, c] = [0, 1, 2].map(k => {
+        const v = index.getX(i + k)
+        return [position.getX(v), position.getY(v), position.getZ(v)]
+      })
+      const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], w = [c[0] - a[0], c[1] - a[1], c[2] - a[2]]
+      const n = [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]]
+      const twice = Math.hypot(n[0], n[1], n[2])
+      if (twice === 0) continue
+      const centre = [(a[0] + b[0] + c[0]) / 3 - fx, (a[1] + b[1] + c[1]) / 3 - fy, (a[2] + b[2] + c[2]) / 3 - fz]
+      const d2 = centre[0] ** 2 + centre[1] ** 2 + centre[2] ** 2
+      const incidence = Math.abs(n[0] * centre[0] + n[1] * centre[1] + n[2] * centre[2]) / twice / Math.sqrt(d2)
+      lit += Math.min(incidence / d2, 1e6) * twice / 2
+      area += twice / 2
+    }
+    return lit / area
   }
 
   /** The point at `angle` of a superellipse of half-width `half`: a circle for an exponent of 2, a square as it grows. */

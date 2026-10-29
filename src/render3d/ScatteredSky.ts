@@ -577,6 +577,11 @@ export class ScatteredSky {
       [xyz[0] * scale, xyz[1] * scale, xyz[2] * scale], xyz[1] * scale, adapted, 0)
   }
 
+  /** Whether the picture is recorded on a medium (a sensor, a film) rather than seen by an eye (see setInstrument). */
+  get recorded(): boolean {
+    return !this.seenByEye
+  }
+
   /** The share of the seeing the rods do, for the eye as adapted now; none for a camera. */
   get rodShare(): number {
     const adapted = this.adaptingLuminance * this.exposureScale

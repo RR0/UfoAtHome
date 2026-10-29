@@ -206,8 +206,6 @@ export class SkyLantern {
   /** How much brighter the inside of its paper is than its outside: lit straight by the flame, where the outside has what the paper lets
    * through. ASSUMED: rice paper lets through about half of what falls on it, and sends back most of the rest. */
   private static readonly INSIDE_SHARE = 2
-  /** The share of the paper's mean luminance each band of its outside glows at, from the mouth up (see lightsOf). */
-  private static readonly PAPER_BANDS = [2.4, 1.1, 0.6, 0.35]
   /** The paper's mean luminance at full burn of the common lantern, cd/m²: what the flame's own luminance is at full burn beside. */
   private static readonly PAPER_FULL_CDM2 = SkyLantern.COMMON.luminousIntensityCd / (Math.PI * SkyLantern.COMMON.widthM / 2 * SkyLantern.COMMON.heightM / 2)
 
@@ -429,14 +427,15 @@ export class SkyLantern {
   }
 
   /**
-   * How bright each part of its model is when its paper glows at `paperCdM2` on the whole (see build-sky-lanterns.ts): the paper brightest
-   * by the flame and dimmest at the top (ASSUMED: the flame is four or five times further from the top than from the paper by the
-   * mouth, and lights it some seven times less, as photographs of them show; the whole as bright as `paperCdM2` on average), its inside brighter still, and the flame itself.
+   * How bright each part of its model is when its paper glows at `paperCdM2` on the whole (see build-sky-lanterns.ts): the paper's outside
+   * and inside as their mean, each point of it then as the flame lights it (see LitFromWithin), and the flame itself.
    */
   private static lightsOf(paperCdM2: number): Record<string, number> {
-    const lights: Record<string, number> = { "paper-inside": paperCdM2 * SkyLantern.INSIDE_SHARE, flame: paperCdM2 > 0 ? SkyLantern.FLAME_CDM2 * paperCdM2 / SkyLantern.PAPER_FULL_CDM2 : 0 }
-    SkyLantern.PAPER_BANDS.forEach((share, band) => { lights[`paper-${band}`] = paperCdM2 * share })
-    return lights
+    return {
+      paper: paperCdM2,
+      "paper-inside": paperCdM2 * SkyLantern.INSIDE_SHARE,
+      flame: paperCdM2 > 0 ? SkyLantern.FLAME_CDM2 * paperCdM2 / SkyLantern.PAPER_FULL_CDM2 : 0
+    }
   }
 
   /** The colour of a light through a filter, both CSS: their channels multiplied, then brought back to the light's own brightest. */

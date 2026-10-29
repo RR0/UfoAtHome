@@ -40,6 +40,8 @@ export interface GltfMaterial {
   doubleSided?: boolean
   /** glTF material extensions, by name — KHR_materials_transmission and KHR_materials_ior for glass. */
   extensions?: Record<string, object>
+  /** What the renderer reads of it beyond glTF's own (three's loader puts it in the material's userData): see LitFromWithin. */
+  extras?: Record<string, unknown>
 }
 
 export class GltfWriter {
