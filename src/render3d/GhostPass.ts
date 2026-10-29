@@ -6,17 +6,17 @@ import { GlassWetting, LensGhosts, type LensGhost, type LensOptics } from "../en
 import { EYE_UNIFORMS, FINISH_GLSL, type UnfinishedFrame } from "./colorSpace.js"
 
 /**
- * A light whose ghosts the picture's own light makes too faint (the Sun): where it is, in normalised device coordinates, and how wide its
- * disc is, as a share of the picture's height; the light it has beyond what the picture can hold (`flux`: a half float holds 65 504, the
- * Sun's disc far more), and the light the picture does hold of it (`shown`), each per channel times its disc's area in that same unit
- * squared. Its ghosts are given the first, and of the second what the fade near the frame's edge takes from the ghosts the picture makes.
+ * A light brighter than the picture can hold: a half float holds 65 504, and a pixel is given at most a little less (the Sun's disc is
+ * more than twice that). Its ghosts are made from the picture's light like every other's, and so would carry only what was drawn of it:
+ * the light it has beyond that is handed to them here, as the same ghosts (same scales, shares, defocus and fade), and nothing else —
+ * what the picture's storage cut, given back. Where it is, in normalised device coordinates, how wide its disc is, as a share of the
+ * picture's height, and that light beyond, per channel, times its disc's area in that same unit squared.
  */
 export interface BrightSource {
   x: number
   y: number
   radius: number
   flux: [number, number, number]
-  shown: [number, number, number]
 }
 
 /** A ghost found under a point of the picture (see GhostPass.pickAt): which, and where in the picture the light that makes it is. */
@@ -118,8 +118,7 @@ export class GhostPass {
         uRunning: { value: 0 },
         uBright: { value: new Vector2() },
         uBrightRadius: { value: 0 },
-        uBrightFlux: { value: new Vector3() },
-        uBrightShown: { value: new Vector3() }
+        uBrightFlux: { value: new Vector3() }
       },
       vertexShader,
       fragmentShader: `
@@ -144,7 +143,6 @@ export class GhostPass {
         uniform vec2 uBright;
         uniform float uBrightRadius;
         uniform vec3 uBrightFlux;
-        uniform vec3 uBrightShown;
         varying vec2 vUv;
 
         // The picture blurred to a disc of this radius, pixels, round this point: the level whose texels are as large as the disc, read at
@@ -314,6 +312,14 @@ export class GhostPass {
           return vec4(cover, pull / max(total, 1e-3) / size / vec2(aspect, 1.0), shade);
         }
 
+        // How much of a ghost shows for light at a point of the picture: none outside it, and fading in over its fade (a share of the
+        // picture's height) from its edges.
+        float GhostPass_edgeFade(vec2 at, float fade, vec2 size) {
+          vec2 edge = min(at, 1.0 - at) * vec2(size.x / size.y, 1.0);
+          if (edge.x <= 0.0 || edge.y <= 0.0) return 0.0;
+          return smoothstep(0.0, fade, edge.x) * smoothstep(0.0, fade, edge.y);
+        }
+
         void main() {
           vec3 sum = vec3(0.0);
           vec4 drop = uDrops > 0.0 || uImpacts > 0.0 ? drops(vUv) : vec4(0.0);
@@ -325,31 +331,26 @@ export class GhostPass {
             float k = uScale[i];
             // The light of a source the picture could not hold (see BrightSource), added as the same ghost: its disc scaled by k and
             // spread by the defocus, its light conserved over it.
-            if (uKind[i] < 1.5 && uBrightFlux.g + uBrightShown.g > 0.0) {
+            if (uKind[i] < 1.5 && uBrightFlux.g > 0.0) {
               vec2 centre = 0.5 + uOffset[i] + k * (uBright - 0.5);
               vec2 away = (vUv - centre) * vec2(uSize.x / uSize.y, 1.0);
               float radius = max(uBlur[i] + abs(k) * uBrightRadius, 1.5 / uSize.y);
-              // In the picture, and not faded near its edges as the picture's own light is (see below): that fade is for a lit
-              // foreground cut by the frame, which would draw its edge into the ghost; a disc has none, and the Sun in a corner of the
-              // frame throws its ghosts into the opposite one, plainly.
-              // What that fade took from the ghost the picture makes of its drawn disc is given back here.
-              bool inPicture = all(greaterThan(uBright, vec2(0.0))) && all(lessThan(uBright, vec2(1.0)));
-              vec2 brightEdge = min(uBright, 1.0 - uBright);
-              float faded = 1.0 - smoothstep(0.0, 0.15, brightEdge.x) * smoothstep(0.0, 0.15, brightEdge.y);
+              // Faded at the picture's edge as every light's ghosts are (see below).
+              float brightFade = max(2.0 * uBlur[i] * uSize.y / abs(k), 2.0) / uSize.y;
               float inside = smoothstep(radius, 0.8 * radius, length(away));
-              vec3 light = uBrightFlux + faded * uBrightShown;
-              if (inPicture) sum += uTint[i] * uShare[i] * light * inside / (3.14159265 * 0.81 * radius * radius);
+              sum += GhostPass_edgeFade(uBright, brightFade, uSize) * uTint[i] * uShare[i] * uBrightFlux * inside
+                / (3.14159265 * 0.81 * radius * radius);
             }
             // Where in the picture the light that lands here as this ghost came from.
             vec2 from = 0.5 + (vUv - 0.5 - uOffset[i]) / k;
             if (any(lessThan(from, vec2(0.0))) || any(greaterThan(from, vec2(1.0)))) continue;
-            // Light from near the edge of the field reaches the surfaces that make the ghost only in part, the lens's barrel cutting it off
-            // gradually: the ghost of a bright foreground fades out where its source leaves the picture, rather than ending in a hard
-            // rectangle of the picture's own edges.
-            vec2 edge = min(from, 1.0 - from);
-            float vignette = smoothstep(0.0, 0.15, edge.x) * smoothstep(0.0, 0.15, edge.y);
             // Its defocus, in the picture's pixels, read where the light came from: the ghost is that picture scaled by k.
             float radiusPx = uBlur[i] * uSize.y / abs(k);
+            // The picture ends where the field does not: light just outside it throws ghosts too, which this picture cannot know. Its
+            // ghosts fade out over their own defocus where their source reaches the edge, as the light beyond would have carried them on,
+            // rather than ending in a hard rectangle of the picture's own edges (a lit road cut by the frame). The same for every light.
+            float fade = max(2.0 * radiusPx, 2.0) / uSize.y;
+            float vignette = GhostPass_edgeFade(from, fade, uSize);
             vec3 light = uKind[i] < 0.5 ? shaped(from, radiusPx, k < 0.0 ? 3.14159265 : 0.0) : blurred(from, radiusPx);
             // A drop's halo is where the drops are, and as much brighter there as they leave the rest of the glass clear.
             float through = uKind[i] > 1.5 ? drop.x / 0.3 : 1.0;
@@ -430,9 +431,8 @@ export class GhostPass {
     uniforms.uRunning.value = optics.running
     ;(uniforms.uBright.value as Vector2).set(((bright?.x ?? 0) + 1) / 2, ((bright?.y ?? 0) + 1) / 2)
     uniforms.uBrightRadius.value = bright?.radius ?? 0
-    const flux = bright?.flux ?? [0, 0, 0], shown = bright?.shown ?? [0, 0, 0]
+    const flux = bright?.flux ?? [0, 0, 0]
     ;(uniforms.uBrightFlux.value as Vector3).set(flux[0] * gain, flux[1] * gain, flux[2] * gain)
-    ;(uniforms.uBrightShown.value as Vector3).set(shown[0] * gain, shown[1] * gain, shown[2] * gain)
     this.draw(renderer, this.ghostMaterial, this.ghostLayer)
     const develop = this.developMaterial.uniforms
     develop.uSource.value = source.scene.texture
@@ -459,9 +459,11 @@ export class GhostPass {
     for (const ghost of optics.ghosts) {
       const source = LensGhosts.sourceOf(ghost, { x: ndcX, y: ndcY })
       if (Math.abs(source.x) >= 1 || Math.abs(source.y) >= 1) continue
-      const edgeX = Math.min(1 + source.x, 1 - source.x) / 2, edgeY = Math.min(1 + source.y, 1 - source.y) / 2
-      const vignette = GhostPass.smoothstep(0, 0.15, edgeX) * GhostPass.smoothstep(0, 0.15, edgeY)
       const radius = Math.max(2, Math.round(ghost.blur * height / Math.abs(ghost.scale)))
+      // As the drawing fades it (see GhostPass_edgeFade): over its own defocus from the picture's edges, in heights.
+      const edgeX = Math.min(1 + source.x, 1 - source.x) / 2 * width / height, edgeY = Math.min(1 + source.y, 1 - source.y) / 2
+      const fade = Math.max(2 * ghost.blur * height / Math.abs(ghost.scale), 2) / height
+      const vignette = GhostPass.smoothstep(0, fade, edgeX) * GhostPass.smoothstep(0, fade, edgeY)
       const centre = at(source.x, source.y)
       const window = this.window(renderer, centre.x, centre.y, radius)
       if (!window) continue

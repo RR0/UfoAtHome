@@ -5731,26 +5731,22 @@ export class SceneRenderer {
   }
 
   /**
-   * The Sun as a light the picture cannot hold (see BrightSource): its disc is drawn at the most a pixel takes (BRIGHTEST_RELATIVE), far
-   * less than it is, and its ghosts, made from the picture's light, came out a few thousandths of what a lens throws — lost in a day's
-   * sky, where a phone pointed near the Sun shows them plainly. What is beyond that most, over its disc, is given to them on its own, and
-   * so is the rest near the frame's edge (see BrightSource). Undefined when the Sun is not in the picture, or hidden.
+   * The Sun as a light the picture cannot hold (see BrightSource): its disc is drawn at the most a pixel takes (BRIGHTEST_RELATIVE), less
+   * than half of what it is on a clear day, and its ghosts, made from the picture's light, carried only what was drawn. What is beyond
+   * that most, over its disc, is given back to them, as the
+   * same ghosts (see BrightSource). Undefined when the Sun is not in the picture, or hidden, or no brighter than a pixel holds — the only
+   * light that ever is.
    */
   private sunBeyondPicture(): BrightSource | undefined {
     const flare = this.lensFlare
     if (!flare || !flare.mesh.visible) return undefined
-    const unhidden = this.sunUnhiddenFraction
-    const shownDisc = this.sunDiscRadiance.map(light => Math.min(SceneRenderer.BRIGHTEST_RELATIVE, light) * unhidden)
-    const excess = this.sunDiscRadiance.map(light => Math.max(0, light - SceneRenderer.BRIGHTEST_RELATIVE) * unhidden)
+    const excess = this.sunDiscRadiance.map(light => Math.max(0, light - SceneRenderer.BRIGHTEST_RELATIVE) * this.sunUnhiddenFraction)
+    if (excess[1] <= 0) return undefined
     // Its disc's radius as a share of the picture's height: its angle through the camera's own field.
     const radius = Math.tan(flare.uniforms.uSourceRadiusDeg.value * Math.PI / 180) / flare.uniforms.uTanHalfFov.value / 2
     const area = Math.PI * radius * radius
     const position = flare.uniforms.uLensPosition.value
-    return {
-      x: position.x, y: position.y, radius,
-      flux: [excess[0] * area, excess[1] * area, excess[2] * area],
-      shown: [shownDisc[0] * area, shownDisc[1] * area, shownDisc[2] * area]
-    }
+    return { x: position.x, y: position.y, radius, flux: [excess[0] * area, excess[1] * area, excess[2] * area] }
   }
 
   /**
