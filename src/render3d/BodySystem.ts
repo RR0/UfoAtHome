@@ -137,6 +137,34 @@ export class BodySystem {
     this.group.name = "bodies"
   }
 
+  /** Each model asked for, loaded once, by its reference (see modelFor): kept as it came, never drawn itself. */
+  private readonly models = new Map<string, Promise<Awaited<ReturnType<BodyModelLoader>>>>()
+
+  /**
+   * A body's own copy of its model: the model loaded once for every body drawn as it, then copied for each, materials and all, since each
+   * body glows, is tinted and is faded on its own. A dozen lanterns used to load and read the same file a dozen times, each drawn as an
+   * oval while it did, the moment it was let go.
+   */
+  private async modelFor(ref: DecorModelRef): ReturnType<BodyModelLoader> {
+    const key = JSON.stringify(ref)
+    let loading = this.models.get(key)
+    if (!loading) {
+      loading = this.loadModel(ref)
+      this.models.set(key, loading)
+      // A model that could not be had is asked for again by the next body, rather than never.
+      loading.then(loaded => { if (!loaded) this.models.delete(key) }, () => this.models.delete(key))
+    }
+    const loaded = await loading
+    if (!loaded) return undefined
+    const scene = loaded.scene.clone(true)
+    scene.traverse(child => {
+      if (!(child instanceof Mesh)) return
+      child.material = Array.isArray(child.material) ? child.material.map(material => material.clone()) : child.material.clone()
+      child.userData.sharedGeometry = true
+    })
+    return { ...loaded, scene }
+  }
+
   /** The credits of every model on show — beside the decor's in the info panel. */
   get modelCredits(): unknown[] {
     return [...this.credits.values()]
@@ -884,7 +912,7 @@ export class BodySystem {
     holder.add(placeholder)
     BodySystem.overlay(holder)
     const token = this.token
-    void this.loadModel(state.model).then(loaded => {
+    void this.modelFor(state.model).then(loaded => {
       if (!loaded || token !== this.token || this.built.get(state.id)?.holder !== holder) return
       holder.remove(placeholder)
       placeholder.geometry.dispose()
@@ -1144,7 +1172,8 @@ export class BodySystem {
     entry.holder.removeFromParent()
     entry.holder.traverse(child => {
       if (!(child instanceof Mesh)) return
-      child.geometry.dispose()
+      // A model's shape is shared by every body drawn as it (see modelFor): it stays.
+      if (!child.userData.sharedGeometry) child.geometry.dispose()
       const materials = Array.isArray(child.material) ? child.material : [child.material]
       for (const material of materials) material.dispose()
     })
