@@ -178,6 +178,11 @@ export class BodySystem {
       if (glowing) BodySystem.light(glowing, state, display)
       if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
       this.shine(state, holder, whole ? undefined : glowing, frame)
+      if (whole && glowing) this.hideSpecks(holder, glowing, frame)
+      // Drawn as a point under a pixel (see shine), its shape is not drawn as well: hit or missed by the rasteriser, it lit a pixel with its
+      // whole luminance one frame and nothing the next.
+      const asPoint = this.pointLights.has(state.id)
+      for (const child of holder.children) child.visible = !asPoint
       // A device setting its own exposure follows the light over a second or so, not a flame's wavering (see BodyJson.flicker).
       const metered = this.metered.get(state.id)
       if (metered && state !== stated && state.appearance.luminanceCdM2 > 0) {
@@ -532,6 +537,33 @@ export class BodySystem {
   }
 
   private static readonly DOWN = new Vector3(0, -1, 0)
+
+  /** How many pixels across a small glowing part of a body that glows whole must show to be drawn for itself (see hideSpecks). */
+  private static readonly SPECK_PIXELS = 2
+
+  /**
+   * Hides the small glowing parts of a body that glows whole — a lantern's flame — while they show less than a couple of pixels across.
+   * Under a pixel, the rasteriser hits or misses such a part from one frame to the next, and when it hits gives the whole pixel its
+   * luminance: a flame of 5 000 cd/m² four centimetres wide lit a pixel a hundred metres off with far more light than it sends, which burnt
+   * out and threw ghosts, and was gone the next frame. Its light is the body's anyway, in its glare and its point far off (see shine).
+   */
+  private hideSpecks(holder: Group, glowing: Glow[], frame: BodyFrame): void {
+    const eye = frame.eye
+    holder.updateMatrixWorld(true)
+    const whole = new Box3().setFromObject(holder).getSize(new Vector3())
+    const largest = Math.max(whole.x, whole.y, whole.z)
+    for (const glow of glowing) {
+      const box = new Box3()
+      for (const mesh of glow.meshes) box.expandByObject(mesh)
+      const size = box.getSize(new Vector3())
+      const across = Math.max(size.x, size.y, size.z)
+      // Only what is small beside the body: its paper is the body, which shine draws as a point when it is under a pixel.
+      if (across >= largest / 4) continue
+      const distance = eye ? box.getCenter(new Vector3()).distanceTo(eye) : 0
+      const shown = frame.pixelRad === undefined || distance <= 0 || across / distance >= BodySystem.SPECK_PIXELS * frame.pixelRad
+      for (const mesh of glow.meshes) mesh.visible = shown
+    }
+  }
 
   /**
    * The body at `seconds` with its light wavering as its flicker says (see BodyJson.flicker): three waves of a few hertz, out of step with
