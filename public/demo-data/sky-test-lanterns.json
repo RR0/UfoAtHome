@@ -7,10 +7,10 @@
   "misidentification"
  ],
  "description": {
-  "en": "A dozen sky lanterns let go from a garden 1.6 km away, seen from a crossroads: a loose group of orange points drifting silently.",
-  "fr": "Une douzaine de lanternes célestes lâchées d'un jardin à 1,6 km, vues d'un carrefour : un groupe lâche de points orangés qui dérive en silence.",
-  "es": "Una docena de farolillos voladores soltados desde un jardín a 1,6 km, vistos desde un cruce: un grupo suelto de puntos anaranjados que deriva en silencio.",
-  "it": "Una dozzina di lanterne volanti lasciate andare da un giardino a 1,6 km, viste da un incrocio: un gruppo sparso di punti arancioni che deriva in silenzio."
+  "en": "A dozen sky lanterns let go from a garden 1.6 km away, seen from a crossroads: a loose group of orange points rising and drifting silently, until they go out one by one.",
+  "fr": "Une douzaine de lanternes célestes lâchées d'un jardin à 1,6 km, vues d'un carrefour : un groupe lâche de points orangés qui monte et dérive en silence, jusqu'à s'éteindre un à un.",
+  "es": "Una docena de farolillos voladores soltados desde un jardín a 1,6 km, vistos desde un cruce: un grupo suelto de puntos anaranjados que sube y deriva en silencio, hasta apagarse uno a uno.",
+  "it": "Una dozzina di lanterne volanti lasciate andare da un giardino a 1,6 km, viste da un incrocio: un gruppo sparso di punti arancioni che sale e deriva in silenzio, finché si spengono uno a uno."
  },
  "time": {
   "year": 2026,
@@ -21,7 +21,7 @@
   "second": 0
  },
  "utcOffsetHours": -6,
- "durationSeconds": 60,
+ "durationSeconds": 725,
  "place": [
   {
    "lat": 46.8606,
@@ -72,20 +72,9 @@
      "lat": 46.8606,
      "lng": -96.824,
      "elevationM": 1.6,
-     "headingDeg": 326,
-     "pitchDeg": 5,
-     "fovDeg": 60
-    }
-   },
-   {
-    "t": 60000,
-    "pose": {
-     "lat": 46.8606,
-     "lng": -96.824,
-     "elevationM": 1.6,
-     "headingDeg": 332,
-     "pitchDeg": 5,
-     "fovDeg": 60
+     "headingDeg": 333,
+     "pitchDeg": 14,
+     "fovDeg": 36
     }
    }
   ]
@@ -122,8 +111,8 @@
     },
     "group": {
      "count": 12,
-     "fromT": -330000,
-     "untilT": -198000,
+     "fromT": -60000,
+     "untilT": 72000,
      "radiusM": 25,
      "burnS": {
       "min": 570,
