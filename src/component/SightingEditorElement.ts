@@ -8234,6 +8234,7 @@ export class SightingEditorElement extends HTMLElement {
         sighting: () => this.ufoElement.sighting,
         said: () => this.said,
         writingLanguage: () => this.writingLanguage,
+        positionPlace: () => this.framePlace(),
         modelProvider: () => this.decorModelProvider,
         modelPicker: () => this.modelPicker,
         shapes: () => this.bodyShapeIds().map(id => ({ id, label: this.shapeLabel(id) })),

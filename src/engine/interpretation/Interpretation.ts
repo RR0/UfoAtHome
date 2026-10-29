@@ -1,3 +1,4 @@
+import type { SaidPosition } from "../model/SaidPosition.js"
 import type { DecorModelRef } from "../model/Decor.js"
 import type { People } from "../model/People.js"
 import type { SaidText } from "../model/SaidText.js"
@@ -206,6 +207,8 @@ export interface BodyKeyframe {
   t: number
   eastM?: number
   northM?: number
+  /** How `eastM`/`northM` were said, when not as metres from the observer: from a decor object, or as degrees (see SaidPosition). */
+  saidPosition?: SaidPosition
   azimuthDeg?: number
   altitudeDeg?: number
   distanceM?: number

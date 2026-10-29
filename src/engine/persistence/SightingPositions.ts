@@ -1,5 +1,6 @@
 import type { DecorObject } from "../model/Decor.js"
 import { resolveDecorPlacementAt } from "../model/Decor.js"
+import type { InterpretationJson } from "../interpretation/Interpretation.js"
 import type { ObserverTrackJson } from "../model/ObserverTrack.js"
 import type { Sighting } from "../model/Sighting.js"
 import type { GeoPoint, LocalPoint, PositionFrame, SaidPosition } from "../model/SaidPosition.js"
@@ -58,6 +59,29 @@ export class SightingPositions {
         const copy = { ...pose, saidPosition: said }
         if (!said) delete copy.saidPosition
         return { ...keyframe, pose: copy }
+      })
+    }
+  }
+
+  /** The interpretation as it is written: each body's place in the world, said from where things stand at the keyframe's instant. */
+  static restatedInterpretation(sighting: Sighting): InterpretationJson | undefined {
+    const interpretation = sighting.interpretation
+    if (!interpretation?.bodies.some(body => body.track.some(key => key.saidPosition))) return interpretation
+    const origin = SightingPositions.originOf(sighting)
+    return {
+      ...interpretation,
+      bodies: interpretation.bodies.map(body => !body.track.some(key => key.saidPosition) ? body : {
+        ...body,
+        track: body.track.map(key => {
+          if (!key.saidPosition) return key
+          const said = key.eastM !== undefined && key.northM !== undefined
+            ? SightingPositions.restated(key.saidPosition, { eastM: key.eastM, northM: key.northM }, SightingPositions.frameAt(sighting, key.t, origin))
+            : undefined
+          if (JSON.stringify(said) === JSON.stringify(key.saidPosition)) return key
+          const copy = { ...key, saidPosition: said }
+          if (!said) delete copy.saidPosition
+          return copy
+        })
       })
     }
   }

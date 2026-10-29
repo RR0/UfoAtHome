@@ -1,3 +1,4 @@
+import type { SaidPosition } from "../model/SaidPosition.js"
 import type { SaidText } from "../model/SaidText.js"
 import type { BodyJson, BodyKeyframe } from "./Interpretation.js"
 import type { NumberParameter, ParameterSet, ParameterSpec } from "./Parameters.js"
@@ -32,6 +33,8 @@ export interface BodyKeyframeView {
   distanceM: number
   eastM: number
   northM: number
+  /** How the place in the world was said, when this instant has a keyframe of its own that says it (see BodyKeyframe.saidPosition). */
+  saidPosition?: SaidPosition
   aboveGroundM: number
   onGround: boolean
   widthM: number
@@ -83,6 +86,7 @@ export class BodyKeyframes {
       distanceM: round(reading.distanceM),
       eastM: round(reading.eastM),
       northM: round(reading.northM),
+      saidPosition: body.track.find(key => key.t === t)?.saidPosition,
       aboveGroundM: round(reading.aboveGroundM),
       onGround: base?.onGround === true,
       widthM: round(reading.sizeM.widthM),
@@ -110,7 +114,7 @@ export class BodyKeyframes {
   static keyframeOf(view: BodyKeyframeView, t: number, existing: BodyKeyframe | undefined, appearanceEdited: boolean): BodyKeyframe {
     const finite = (value: number) => Number.isFinite(value) ? value : 0
     const position: BodyKeyframe = view.mode === "world"
-      ? { t, eastM: finite(view.eastM), northM: finite(view.northM), ...(view.onGround ? { onGround: true } : { altitudeAboveGroundM: finite(view.aboveGroundM) }) }
+      ? { t, eastM: finite(view.eastM), northM: finite(view.northM), ...(view.saidPosition ? { saidPosition: view.saidPosition } : {}), ...(view.onGround ? { onGround: true } : { altitudeAboveGroundM: finite(view.aboveGroundM) }) }
       : { t, azimuthDeg: finite(view.azimuthDeg), altitudeDeg: finite(view.elevationDeg), distanceM: Math.max(0.1, finite(view.distanceM)), ...(view.onGround ? { onGround: true } : {}) }
     const appearance = appearanceEdited
       ? { color: view.color, albedo: Math.max(0, Math.min(1, finite(view.albedo))), luminanceCdM2: Math.max(0, finite(view.luminanceCdM2)),
@@ -128,7 +132,7 @@ export class BodyKeyframes {
   /** A keyframe's statements other than where it is, how big and how turned. */
   private static withoutPlacement(key: BodyKeyframe | undefined): Partial<BodyKeyframe> {
     if (!key) return {}
-    const { eastM, northM, azimuthDeg, altitudeDeg, distanceM, onGround, altitudeAboveGroundM, sizeM, attitude, appearance, ...rest } = key
+    const { eastM, northM, saidPosition, azimuthDeg, altitudeDeg, distanceM, onGround, altitudeAboveGroundM, sizeM, attitude, appearance, ...rest } = key
     return rest
   }
 }
@@ -192,8 +196,11 @@ export class BodyParameterSets {
       BodyParameterSets.number("azimuthDeg", { en: "Azimuth", fr: "Azimut", es: "Acimut", it: "Azimut" }, 0, 360, 0.01, "°", { visibleWhen: view => view.mode === "observer" }),
       BodyParameterSets.number("elevationDeg", { en: "Elevation", fr: "Hauteur", es: "Elevación", it: "Elevazione" }, -90, 90, 0.01, "°", { visibleWhen: view => view.mode === "observer" }),
       BodyParameterSets.number("distanceM", { en: "Distance", fr: "Distance", es: "Distancia", it: "Distanza" }, 0.1, 30000, 0.1, "m", { visibleWhen: view => view.mode === "observer" }),
-      BodyParameterSets.number("eastM", { en: "East", fr: "Est", es: "Este", it: "Est" }, -30000, 30000, 0.1, "m", { visibleWhen: view => view.mode === "world" }),
-      BodyParameterSets.number("northM", { en: "North", fr: "Nord", es: "Norte", it: "Nord" }, -30000, 30000, 0.1, "m", { visibleWhen: view => view.mode === "world" }),
+      // From the observer where the recording sets off, from a decor object, or as degrees: see PositionInputElement.
+      {
+        type: "position", key: "eastM", secondKey: "northM", saidKey: "saidPosition", native: "local", step: 0.1,
+        label: { en: "In the world", fr: "Dans le monde", es: "En el mundo", it: "Nel mondo" }, visibleWhen: view => view.mode === "world"
+      },
       { type: "boolean", key: "onGround", label: { en: "On the ground", fr: "Au sol", es: "En el suelo", it: "A terra" } },
       BodyParameterSets.number("aboveGroundM", { en: "Above the ground", fr: "Au-dessus du sol", es: "Sobre el suelo", it: "Sopra il suolo" }, 0, 30000, 0.1, "m",
         { visibleWhen: view => view.mode === "world" && view.onGround !== true }),

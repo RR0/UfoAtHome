@@ -201,7 +201,7 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     lens: sighting.lens,
     lightPollution: sighting.lightPollution,
     observerMap: sighting.observerMap,
-    interpretation: sighting.interpretation,
+    interpretation: SightingPositions.restatedInterpretation(sighting),
     variants: sighting.variants.length > 0 ? sighting.variants : undefined,
     skyEvents: SkyEvents.written(sighting.skyEvents),
     frozen: sighting.frozen

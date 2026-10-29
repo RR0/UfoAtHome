@@ -10,6 +10,7 @@ import type { ModelPicker } from "./ModelPicker.js"
 import type { ModelSource } from "../render3d/decor/ModelSource.js"
 import { ElementList } from "./ElementList.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
+import type { PositionPlace } from "./ParameterForm.js"
 import { BodyKeyframes, BodyParameterSets } from "../engine/interpretation/BodyParameterSets.js"
 import type { BodyContext, BodyKeyframeContext, BodyKeyframeView } from "../engine/interpretation/BodyParameterSets.js"
 import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
@@ -29,6 +30,8 @@ export interface BodyEditorHost {
   modelPicker(): ModelPicker
   /** The shapes of the recording, as the Shape picker names them. */
   shapes(): { id: string, label: string }[]
+  /** What a place in the world is said from, and in what words (see PositionPlace); without it, only as metres from the observer. */
+  positionPlace?(): PositionPlace
   /** An edit was written onto the recording. */
   changed(): void
   /** Where a new body starts: the selected shape and the first keyframe that stands it where the
@@ -282,7 +285,8 @@ export class BodyEditor {
     this.keyForm.show(BodyParameterSets.KEYFRAME, new ParameterTarget(
       () => this.keyframeView() as unknown as ParameterHolder | undefined,
       (apply, spec) => this.editView(apply, BodyEditor.APPEARANCE_KEYS.includes(spec.key)),
-      () => this.keyframeContext()
+      () => this.keyframeContext(),
+      this.host.positionPlace?.()
     ), () => undefined)
     this.sync()
   }

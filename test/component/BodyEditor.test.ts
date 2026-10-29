@@ -4,6 +4,7 @@ import { BodyEditor } from "../../src/component/BodyEditor.js"
 import type { BodyEditorHost } from "../../src/component/BodyEditor.js"
 import type { InterpretationJson } from "../../src/engine/interpretation/Interpretation.js"
 import { SaidTexts } from "../../src/engine/model/SaidText.js"
+import { positionInputMessages_en } from "../../src/component/PositionInputElement.js"
 import type { Sighting } from "../../src/engine/model/Sighting.js"
 import type { DecorModelProvider } from "../../src/render3d/decor/DecorModelProvider.js"
 
@@ -44,6 +45,10 @@ class Fixture {
       modelPicker: () => picker,
       shapes: () => [{ id: "ufo-1", label: "Object" }, { id: "flame", label: "Flame" }],
       changed: () => { this.changes++ },
+      positionPlace: () => ({
+        frame: () => ({ origin: { lat: 44, lng: 5 }, references: [{ label: "the observer", eastM: 0, northM: 0 }, { id: "house", label: "House", eastM: 10, northM: 90 }] }),
+        messages: () => positionInputMessages_en
+      }),
       newBodyStart: () => this.start,
       lookAt: body => { this.lookedAt = body.id },
       currentTime: () => this.time,
@@ -195,6 +200,24 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.field("bodyKey.headingDeg").value).toBe("30")
     expect(fixture.field("bodyKey.azimuthDeg").closest("label")!.hidden).toBe(true)
     expect((fixture.container.querySelector("#body-key-delete") as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it("says a body in the world from a decor object, and keeps how it was said in its keyframe", () => {
+    const fixture = new Fixture()
+    fixture.time = 2500
+    fixture.editor.syncKeyframe()
+    const from = fixture.container.querySelector<HTMLSelectElement>("[id='bodyKey.eastM-from']")!
+    from.value = "house"
+    from.dispatchEvent(new Event("input", { bubbles: true }))
+    expect(fixture.field("bodyKey.eastM").value).toBe("7.36")
+    fixture.type("bodyKey.northM", "5")
+    const key = fixture.sighting.interpretation!.bodies[0].track.find(candidate => candidate.t === 2500)!
+    expect([key.eastM, key.northM]).toEqual([17.36, 95])
+    expect(key.saidPosition).toEqual({ relativeTo: "house", eastM: 7.36, northM: 5 })
+    // A body said from the observer again forgets how: it is said the way it is kept.
+    from.value = ""
+    from.dispatchEvent(new Event("input", { bubbles: true }))
+    expect(fixture.sighting.interpretation!.bodies[0].track.find(candidate => candidate.t === 2500)!.saidPosition).toBeUndefined()
   })
 
   it("lists the keyframes, shows the one at the playhead, and goes to the one picked", () => {
