@@ -6,15 +6,17 @@ import { GlassWetting, LensGhosts, type LensGhost, type LensOptics } from "../en
 import { EYE_UNIFORMS, FINISH_GLSL, type UnfinishedFrame } from "./colorSpace.js"
 
 /**
- * A light brighter than the picture can hold (the Sun: a half float holds 65 504, its disc is far more), whose ghosts the picture's own
- * light would therefore make far too faint: where it is, in normalised device coordinates, how wide its disc is, as a share of the
- * picture's height, and the light it has beyond what the picture holds, per channel, times its disc's area in that same unit squared.
+ * A light whose ghosts the picture's own light makes too faint (the Sun): where it is, in normalised device coordinates, and how wide its
+ * disc is, as a share of the picture's height; the light it has beyond what the picture can hold (`flux`: a half float holds 65 504, the
+ * Sun's disc far more), and the light the picture does hold of it (`shown`), each per channel times its disc's area in that same unit
+ * squared. Its ghosts are given the first, and of the second what the fade near the frame's edge takes from the ghosts the picture makes.
  */
 export interface BrightSource {
   x: number
   y: number
   radius: number
   flux: [number, number, number]
+  shown: [number, number, number]
 }
 
 /** A ghost found under a point of the picture (see GhostPass.pickAt): which, and where in the picture the light that makes it is. */
@@ -116,7 +118,8 @@ export class GhostPass {
         uRunning: { value: 0 },
         uBright: { value: new Vector2() },
         uBrightRadius: { value: 0 },
-        uBrightFlux: { value: new Vector3() }
+        uBrightFlux: { value: new Vector3() },
+        uBrightShown: { value: new Vector3() }
       },
       vertexShader,
       fragmentShader: `
@@ -141,6 +144,7 @@ export class GhostPass {
         uniform vec2 uBright;
         uniform float uBrightRadius;
         uniform vec3 uBrightFlux;
+        uniform vec3 uBrightShown;
         varying vec2 vUv;
 
         // The picture blurred to a disc of this radius, pixels, round this point: the level whose texels are as large as the disc, read at
@@ -321,14 +325,20 @@ export class GhostPass {
             float k = uScale[i];
             // The light of a source the picture could not hold (see BrightSource), added as the same ghost: its disc scaled by k and
             // spread by the defocus, its light conserved over it.
-            if (uKind[i] < 1.5 && uBrightFlux.g > 0.0) {
+            if (uKind[i] < 1.5 && uBrightFlux.g + uBrightShown.g > 0.0) {
               vec2 centre = 0.5 + uOffset[i] + k * (uBright - 0.5);
               vec2 away = (vUv - centre) * vec2(uSize.x / uSize.y, 1.0);
               float radius = max(uBlur[i] + abs(k) * uBrightRadius, 1.5 / uSize.y);
-              vec2 sourceEdge = min(uBright, 1.0 - uBright);
-              float sourceVignette = smoothstep(0.0, 0.15, sourceEdge.x) * smoothstep(0.0, 0.15, sourceEdge.y);
+              // In the picture, and not faded near its edges as the picture's own light is (see below): that fade is for a lit
+              // foreground cut by the frame, which would draw its edge into the ghost; a disc has none, and the Sun in a corner of the
+              // frame throws its ghosts into the opposite one, plainly.
+              // What that fade took from the ghost the picture makes of its drawn disc is given back here.
+              bool inPicture = all(greaterThan(uBright, vec2(0.0))) && all(lessThan(uBright, vec2(1.0)));
+              vec2 brightEdge = min(uBright, 1.0 - uBright);
+              float faded = 1.0 - smoothstep(0.0, 0.15, brightEdge.x) * smoothstep(0.0, 0.15, brightEdge.y);
               float inside = smoothstep(radius, 0.8 * radius, length(away));
-              sum += sourceVignette * uTint[i] * uShare[i] * uBrightFlux * inside / (3.14159265 * 0.81 * radius * radius);
+              vec3 light = uBrightFlux + faded * uBrightShown;
+              if (inPicture) sum += uTint[i] * uShare[i] * light * inside / (3.14159265 * 0.81 * radius * radius);
             }
             // Where in the picture the light that lands here as this ghost came from.
             vec2 from = 0.5 + (vUv - 0.5 - uOffset[i]) / k;
@@ -420,8 +430,9 @@ export class GhostPass {
     uniforms.uRunning.value = optics.running
     ;(uniforms.uBright.value as Vector2).set(((bright?.x ?? 0) + 1) / 2, ((bright?.y ?? 0) + 1) / 2)
     uniforms.uBrightRadius.value = bright?.radius ?? 0
-    const flux = bright?.flux ?? [0, 0, 0]
+    const flux = bright?.flux ?? [0, 0, 0], shown = bright?.shown ?? [0, 0, 0]
     ;(uniforms.uBrightFlux.value as Vector3).set(flux[0] * gain, flux[1] * gain, flux[2] * gain)
+    ;(uniforms.uBrightShown.value as Vector3).set(shown[0] * gain, shown[1] * gain, shown[2] * gain)
     this.draw(renderer, this.ghostMaterial, this.ghostLayer)
     const develop = this.developMaterial.uniforms
     develop.uSource.value = source.scene.texture
