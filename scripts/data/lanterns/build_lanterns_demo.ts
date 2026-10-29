@@ -1,6 +1,7 @@
 /**
- * Builds the sky lanterns demo: a dozen lanterns let go at dusk from a field at the foot of Doi Suthep, in Chiang Mai, on the evening of Yi
- * Peng, the festival when thousands are, filmed with a phone by one of those letting them go, a few steps from where they leave the ground:
+ * Builds the sky lanterns demo: a dozen lanterns let go at dusk from a rooftop terrace of Nimman, at the foot of Doi Suthep in Chiang Mai, on
+ * the evening of Yi Peng, the festival when thousands are, filmed with a phone by one of those letting them go, a few steps from where they
+ * leave the terrace, above the roofs round it:
  * over their whole flight, from the first let go to the last gone out (a lantern burns some ten minutes), the phone following the brightest
  * as a hand does, a little late: the first rising past the eye, the phone panning up from the hands that held it, then all carried off by
  * the wind aloft towards the mountain, dark against the last of the sunset, until they are a loose group of points far off, dying out one
@@ -9,7 +10,7 @@
  * The group's look far off is that of a video posted on X on 27 October 2026 (https://x.com/EnigmasEnX/status/2115166526068449372) as "an
  * invasion flotilla": some ten points in a loose, irregular group, steady, silent, drifting slowly.
  *
- * ASSUMED, all of it: the field, when each is let go, each one's flame and fuel cell (the common lantern within the spread of what is sold),
+ * ASSUMED, all of it: the terrace (12 m up), when each is let go, each one's flame and fuel cell (the common lantern within the spread of what is sold),
  * the winds (the north-east monsoon of November, light at the ground) and the warmth, and how the phone follows them. The evening is Yi
  * Peng 2025 (5 November). Computed by the engine: each lantern's flight and light, where it is from the observer, the dusk, the mountain.
  *
@@ -23,19 +24,21 @@ import type { LanternLaunchJson } from "../../../src/engine/interpretation/SkyLa
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "public", "demo-data", "sky-test-lanterns.json")
 const OBSERVER = { lat: 18.7955, lng: 98.9555, elevationM: 320, name: "Chiang Mai, foot of Doi Suthep" }
-const why = "Assumed: a field where lanterns are let go on the evening of Yi Peng."
+const why = "Assumed: a rooftop terrace from which lanterns are let go on the evening of Yi Peng."
+/** How high the terrace is above the street, m: four floors, above the roofs round it, which would hide the mountain. */
+const TERRACE_M = 12
 
 const launch: LanternLaunchJson = {
   id: "new-year",
   title: { en: "Sky lanterns", fr: "Lanternes célestes", es: "Farolillos voladores", it: "Lanterne volanti" },
   // A few steps downwind of the phone: what they leave from is in front of it.
-  // The lawn some fifteen metres west of the phone, towards the mountain.
-  site: { eastM: -14, northM: 3, originElevationM: OBSERVER.elevationM },
+  // The far end of the terrace, some eight metres west of the phone, towards the mountain.
+  site: { eastM: -8, northM: 1, altitudeM: TERRACE_M, originElevationM: OBSERVER.elevationM },
   // The first let go two metres in front of the phone, by whoever stands beside the one filming: it climbs past the phone, which looks up
   // into its mouth, at its flame, the brightest thing of the night and the one that throws a ghost in a phone's picture.
-  releases: [{ t: 0, eastM: 12, northM: -3, seed: 3 }],
-  // Eleven more let go about every 8 s after it, from round a small lawn, each a little unlike the others.
-  group: { count: 11, fromT: 8000, untilT: 90000, radiusM: 5, burnS: { min: 570, max: 750 }, insideExcessK: { min: 120, max: 180 }, seed: 7 },
+  releases: [{ t: 0, eastM: 6, northM: -1, seed: 3 }],
+  // Eleven more let go about every 8 s after it, across the terrace, each a little unlike the others.
+  group: { count: 11, fromT: 8000, untilT: 90000, radiusM: 3, burnS: { min: 570, max: 750 }, insideExcessK: { min: 120, max: 180 }, seed: 7 },
   // A light breeze at the ground, from the north-east monsoon of the dry season, stronger aloft: they climb slowly in the warm air and
   // drift off towards the mountain, low over it.
   wind: { towardDeg: 250, speedMS: 1.2 },
@@ -46,7 +49,7 @@ const launch: LanternLaunchJson = {
 // Every point of every flight while plainly lit: what the phone follows, and when the last dies out. Plainly: a flame on its last embers,
 // some kilometres off, is no longer a point anyone sees, and minutes of an empty sky after it would be the demo's, not the night's.
 const SEEN_LIGHT = 0.25
-const EYE_M = 1.6
+const EYE_M = TERRACE_M + 1.6
 const paths = SkyLantern.releasesOf(launch).map(release => SkyLantern.trajectory(launch, release))
 const lit = paths.flatMap(path => path.filter(point => point.t >= 0 && point.light >= SEEN_LIGHT))
 const DURATION_S = Math.ceil(Math.max(...lit.map(point => point.t)) / 1000) + 15
@@ -69,7 +72,7 @@ const groupAt = (t: number) => {
 const keyframes: { t: number, pose: object }[] = []
 // Before the first leaves the ground, the phone is on it, held a little below the horizon.
 const first = launch.releases![0]
-let aim = { x: launch.site.eastM + first.eastM!, y: launch.site.northM + first.northM!, z: 0.5 - EYE_M }
+let aim = { x: launch.site.eastM + first.eastM!, y: launch.site.northM + first.northM!, z: TERRACE_M + 0.5 - EYE_M }
 const keep = Math.exp(-STEP_MS / 1000 / LAG_S)
 for (let t = 0; t <= DURATION_S * 1000; t += STEP_MS) {
   const group = groupAt(t)
@@ -80,7 +83,7 @@ for (let t = 0; t <= DURATION_S * 1000; t += STEP_MS) {
   const heading = (Math.atan2(aim.x, aim.y) * 180 / Math.PI + 360) % 360
   // Never raised so far that the mountain leaves the frame's foot: whoever films keeps the place in the picture, the lanterns high in it.
   const pitch = Math.min(MOST_PITCH_DEG, Math.atan2(aim.z, Math.hypot(aim.x, aim.y)) * 180 / Math.PI)
-  keyframes.push({ t, pose: { lat: OBSERVER.lat, lng: OBSERVER.lng, elevationM: EYE_M, headingDeg: Math.round(heading * 10) / 10, pitchDeg: Math.round(pitch * 10) / 10, fovDeg: FOV_DEG } })
+  keyframes.push({ t, pose: { lat: OBSERVER.lat, lng: OBSERVER.lng, elevationM: TERRACE_M, headingDeg: Math.round(heading * 10) / 10, pitchDeg: Math.round(pitch * 10) / 10, fovDeg: FOV_DEG } })
 }
 const pitches = keyframes.map(keyframe => (keyframe.pose as { pitchDeg: number }).pitchDeg)
 console.log(`pitch ${Math.min(...pitches)}..${Math.max(...pitches)}, ${keyframes.length} keyframes, ${DURATION_S} s`)
@@ -124,7 +127,12 @@ const recording = {
   timeline: { keyframes: [{ t: 0, shapes: [] }], order: [], groups: [] },
   observerTrack: { keyframes },
   soundTrack: { keyframes: [] },
-  decor: [],
+  // The building whose roof the terrace is: the phone and the lanterns on it, the street four floors down.
+  decor: [{
+    id: "terrace", kind: "building", eastM: -3, northM: 0, headingDeg: 0, floors: 4, lit: true,
+    title: { en: "Rooftop terrace", fr: "Toit-terrasse", es: "Azotea", it: "Terrazza sul tetto" },
+    sizeM: { widthM: 22, lengthM: 14, heightM: TERRACE_M }
+  }],
   interpretation: {
     title: launch.title,
     bodies: [],

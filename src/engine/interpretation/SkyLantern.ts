@@ -425,7 +425,9 @@ export class SkyLantern {
     track.push({ t: path[path.length - 1].t + 1, present: false })
     return {
       id: `${launch.id}-lantern-${index + 1}`, title: launch.title, explains: release.explains,
-      model: { id: `ufoathome-sky-lantern-${type.shape}` }, modelParameters: { paperColor: type.paperColor }, flicker: SkyLantern.FLICKER, track
+      model: { id: `ufoathome-sky-lantern-${type.shape}` }, modelParameters: { paperColor: type.paperColor }, flicker: SkyLantern.FLICKER,
+      // Let go from the ground where it stands, not from the ground at the recording's origin.
+      altitudeFrom: { eastM: path[0].x, northM: path[0].y }, track
     }
   }
 

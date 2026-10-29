@@ -16,6 +16,15 @@ describe("BodyPlacement", () => {
     expect(placement.at(0)).toMatchObject({ eastM: 10, northM: 20, upM: 1 })
   })
 
+  it("counts its altitudes from the ground where it says, not from the ground at the origin: a lantern let go up a slope starts on it", () => {
+    const lantern = { ...craft([{ t: 0, eastM: 0, northM: 20, altitudeM: 0, sizeM: { widthM: 0.6, lengthM: 0.6, heightM: 1 } }]), altitudeFrom: { eastM: 0, northM: 20 } }
+    expect(new BodyPlacement(lantern, slope, eyeAtOrigin(slope)).at(0)!.upM).toBeCloseTo(2.5, 1)
+    expect(new BodyPlacement(craft(lantern.track), slope, eyeAtOrigin(slope)).at(0)!.upM).toBeCloseTo(0.5, 6)
+    // Drifting up the slope a metre above where it was let go, it rides over the ground there rather than through it.
+    const drifting = { ...craft([{ t: 0, eastM: 0, northM: 20, altitudeM: 1, sizeM: { widthM: 0.6, lengthM: 0.6, heightM: 1 } }, { t: 1000, eastM: 0, northM: 60, altitudeM: 1 }]), altitudeFrom: { eastM: 0, northM: 20 } }
+    expect(new BodyPlacement(drifting, slope, eyeAtOrigin(slope)).at(1000)!.upM).toBeCloseTo(6.5, 1)
+  })
+
   it("plays its model's movements where the track says: blended, held, and at nought before stated", () => {
     // Valensole's departure: the pivot drawn up, then the legs turning, the craft still on the ground.
     const placement = new BodyPlacement(craft([

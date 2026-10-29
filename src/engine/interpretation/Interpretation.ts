@@ -157,6 +157,12 @@ export interface BodyJson {
    */
   modelParameters?: Record<string, string | number | boolean>
   /**
+   * The point of the ground its keyframes' `altitudeM` are counted from, metres east and north of the recording's origin, instead of the
+   * ground at that origin: a sky lantern let go from a lawn fifteen metres off starts on that lawn, whatever the relief makes of it. The
+   * height of that ground is read from the relief as it is drawn.
+   */
+  altitudeFrom?: { eastM: number, northM: number }
+  /**
    * How much its light wavers, as a flame's does, as a share of it: 0.15 has it go some 15 % above and below what its track states, a few
    * times a second, alike every time the recording is played. Steady when absent.
    */

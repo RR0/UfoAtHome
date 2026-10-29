@@ -52,7 +52,8 @@ export interface BodyState {
 }
 
 /** Where a keyframe's vertical position comes from: the ground under it, or a fixed height. */
-type Vertical = { aboveGroundM: number } | { upM: number }
+/** `fromGround`: a height counted from the ground at that point rather than at the origin (see BodyJson.altitudeFrom). */
+type Vertical = { aboveGroundM: number } | { upM: number, fromGround?: { eastM: number, northM: number } }
 
 /** A keyframe, once its position has been put in the world. */
 interface PlacedKey {
@@ -302,9 +303,15 @@ export class BodyPlacement {
 
   /** The height of a key's centre, whichever way its vertical was stated. */
   private centreUpOf(key: PlacedKey): number {
-    return "upM" in key.vertical
-      ? key.vertical.upM
-      : this.groundUnderFootprint(key.eastM, key.northM, key.sizeM, key.attitude.headingDeg) + key.vertical.aboveGroundM + key.sizeM.heightM / 2
+    if (!("upM" in key.vertical)) {
+      return this.groundUnderFootprint(key.eastM, key.northM, key.sizeM, key.attitude.headingDeg) + key.vertical.aboveGroundM + key.sizeM.heightM / 2
+    }
+    const from = key.vertical.fromGround
+    if (!from) return key.vertical.upM
+    // Counted from the ground it left, and never under the ground it passes over: a lantern drifting low over a rise of the relief (or
+    // of what the relief makes of a hedge) rides over it rather than through it.
+    const up = key.vertical.upM + this.ground.heightAt(from.eastM, from.northM)
+    return Math.max(up, this.groundUnderFootprint(key.eastM, key.northM, key.sizeM, key.attitude.headingDeg) + key.sizeM.heightM / 2)
   }
 
   /** The highest of the ground at the centre and the four corners of the footprint. */
@@ -366,7 +373,7 @@ export class BodyPlacement {
     if (key.onGround) return { aboveGroundM: 0 }
     if (key.altitudeAboveGroundM !== undefined) return { aboveGroundM: key.altitudeAboveGroundM }
     // Its lowest point is where it says: the middle is half its height above that.
-    if (key.altitudeM !== undefined) return { upM: key.altitudeM + sizeM.heightM / 2 }
+    if (key.altitudeM !== undefined) return { upM: key.altitudeM + sizeM.heightM / 2, fromGround: this.body.altitudeFrom }
     return undefined
   }
 
