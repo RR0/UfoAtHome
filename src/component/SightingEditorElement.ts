@@ -25,6 +25,8 @@ import { MessageStyle } from "./MessageStyle.js"
 import { SceneryDates } from "./SceneryDates.js"
 import type { SurroundingsProvider } from "../render3d/terrain/SurroundingsProvider.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
+import type { PositionPlace } from "./ParameterForm.js"
+import type { PositionFrame, PositionReference, SaidPosition } from "../engine/model/SaidPosition.js"
 import { DecorParameterSets } from "../engine/model/DecorParameterSets.js"
 import { DecorBase } from "../engine/model/DecorBase.js"
 import type { DecorBaseContext } from "../engine/model/DecorBase.js"
@@ -71,6 +73,8 @@ import type { PopoverPickerElement, PickerNode } from "./PopoverPickerElement.js
 import { DATE_INPUT_ELEMENT_NAME, register as registerDateInput } from "./DateInputElement.js"
 import { INPUT_FILE_ELEMENT_NAME, InputFileElement, register as registerInputFile, type InputFilePick } from "./InputFileElement.js"
 import { DURATION_INPUT_ELEMENT_NAME, register as registerDurationInput } from "./DurationInputElement.js"
+import { POSITION_INPUT_ELEMENT_NAME, register as registerPositionInput } from "./PositionInputElement.js"
+import type { PositionChange, PositionInputElement } from "./PositionInputElement.js"
 import type { DurationInputElement } from "./DurationInputElement.js"
 import type { DateInputElement } from "./DateInputElement.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
@@ -702,8 +706,13 @@ export class SightingEditorElement extends HTMLElement {
   private readonly chosenSourceId = new Map<string, string>()
   private readonly labelPlaceName: HTMLElement
   private readonly labelPlaceMatch: HTMLElement
-  private readonly labelLatitude: HTMLElement
-  private readonly labelLongitude: HTMLElement
+  private readonly labelPosition: HTMLElement
+  /** How the observer's place at the playhead was said, when not as degrees (see ObserverPose.saidPosition). */
+  private observerSaid?: SaidPosition
+  /** The way of saying it last shown, so that it is said again only when it changed. */
+  private observerSaidShown?: string
+  /** Where the observer stands, said as degrees or from a decor object; its fields are `latInput` and `lngInput`. */
+  private readonly observerPosition: PositionInputElement
   private readonly labelHeading: HTMLElement
   private readonly labelPitch: HTMLElement
   private readonly labelRoll: HTMLElement
@@ -1130,6 +1139,7 @@ export class SightingEditorElement extends HTMLElement {
     for (const date of this.shadow.querySelectorAll<DateInputElement>(DATE_INPUT_ELEMENT_NAME)) date.build()
     for (const duration of this.shadow.querySelectorAll<DurationInputElement>(DURATION_INPUT_ELEMENT_NAME)) duration.build()
     for (const input of this.shadow.querySelectorAll<InputFileElement>(INPUT_FILE_ELEMENT_NAME)) input.build()
+    for (const position of this.shadow.querySelectorAll<PositionInputElement>(POSITION_INPUT_ELEMENT_NAME)) position.build()
 
     // Created imperatively (not left inline in the template markup) and inserted via
     // document.createElement, which — for an already-defined custom element — synchronously
@@ -1417,8 +1427,8 @@ export class SightingEditorElement extends HTMLElement {
     this.terrainSourceRows = this.shadow.getElementById("terrain-source-rows")!
     this.labelPlaceName = this.shadow.getElementById("label-place-name")!
     this.labelPlaceMatch = this.shadow.getElementById("label-place-match")!
-    this.labelLatitude = this.shadow.getElementById("label-lat")!
-    this.labelLongitude = this.shadow.getElementById("label-lng")!
+    this.labelPosition = this.shadow.getElementById("label-position")!
+    this.observerPosition = this.shadow.querySelector<PositionInputElement>(`${POSITION_INPUT_ELEMENT_NAME}[name="observer"]`)!
     this.labelHeading = this.shadow.getElementById("label-heading")!
     this.labelPitch = this.shadow.getElementById("label-pitch")!
     this.labelRoll = this.shadow.getElementById("label-roll")!
@@ -1952,6 +1962,16 @@ export class SightingEditorElement extends HTMLElement {
     for (const input of [this.focalLengthInput, this.fNumberInput, this.exposureInput, this.focusDistanceInput]) {
       input.addEventListener("input", () => this.updateObserver())
     }
+    // Told before the fields' own listeners above, since it made them first: how the place was said is known when it is written.
+    this.observerPosition.addEventListener("positionchange", event => {
+      this.observerSaid = (event as CustomEvent<PositionChange>).detail.said
+      if (!this.observerPosition.relative) return
+      // Said from a decor object, the observer is moved and the decor is not: where it sets off moves with them (see keepDecorInPlace).
+      const from = this.plantingCentre()
+      this.updateObserver()
+      this.keepDecorInPlace(from, this.plantingCentre())
+    })
+    this.observerPosition.addEventListener("basischange", event => this.writeObserverBasis((event as CustomEvent).detail.basis))
     this.searchPlaceButton.addEventListener("click", () => void this.searchPlace())
     // Enter in the name field runs the same search — the reflex in any search box, and the reason
     // the field isn't inside a <form> that would try to submit the page instead.
@@ -2136,7 +2156,7 @@ export class SightingEditorElement extends HTMLElement {
       this.headingInput.value = String(this.rounded(headingDeg))
       this.pitchInput.value = String(this.rounded(pitchDeg))
       this.updateObserver()
-    }, selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage)
+    }, selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage, this.framePlace())
     this.currentMilestoneT = this.ufoElement.sighting.milestones[0]?.t
     this.refreshMilestoneList()
     this.onSelectionOrTimeChanged()
@@ -3814,6 +3834,7 @@ export class SightingEditorElement extends HTMLElement {
         // so storing a zero on every pose would add a field to every recording ever made to say
         // what saying nothing says — and would rewrite files that never mentioned it.
         rollDeg: rollDeg === 0 ? undefined : rollDeg,
+        ...(this.observerSaid && lat !== undefined ? { saidPosition: this.observerSaid } : {}),
         fovDeg,
         fNumber,
         focusDistanceM,
@@ -5979,6 +6000,7 @@ export class SightingEditorElement extends HTMLElement {
     if (active !== this.lngInput) {
       this.lngInput.value = pose?.lng !== undefined ? String(pose.lng) : location ? String(location.lng) : ""
     }
+    this.syncObserverPosition()
     // Rounded for exactly the reason the decor's own fields are (see rounded()): a gaze read back
     // from an interpolated trajectory is a float, and printing it raw fills the field with sixteen
     // digits — "312.7835073245701" in a box asking for degrees.
@@ -8243,6 +8265,7 @@ export class SightingEditorElement extends HTMLElement {
         sighting: () => this.ufoElement.sighting,
         said: () => this.said,
         writingLanguage: () => this.writingLanguage,
+        positionPlace: () => this.framePlace(),
         shapes: () => this.bodyShapeIds().map(id => ({ id, label: this.shapeLabel(id) })),
         changed: () => {
           this.ufoElement.refresh()
@@ -8265,6 +8288,7 @@ export class SightingEditorElement extends HTMLElement {
         sighting: () => this.ufoElement.sighting,
         said: () => this.said,
         writingLanguage: () => this.writingLanguage,
+        positionPlace: () => this.framePlace(),
         changed: () => {
           this.ufoElement.refresh()
           this.refreshParamSummary()
@@ -8286,6 +8310,7 @@ export class SightingEditorElement extends HTMLElement {
         sighting: () => this.ufoElement.sighting,
         said: () => this.said,
         writingLanguage: () => this.writingLanguage,
+        positionPlace: () => this.framePlace(),
         changed: () => {
           this.ufoElement.refresh()
           this.refreshParamSummary()
@@ -9308,10 +9333,90 @@ export class SightingEditorElement extends HTMLElement {
         return current ? DecorBase.viewOf(current, this.ufoElement.currentTime, this.sceneElement.sunAltitudeDeg) as unknown as ParameterHolder : undefined
       },
       (apply, spec) => this.commitDecorBase(apply, spec.key),
-      () => this.decorBaseContext()
+      () => this.decorBaseContext(),
+      this.decorPositionPlace()
     )
     this.decorBaseForm.show(DecorBaseParameterSets.BASE, target(), () => undefined)
     this.decorStateForm.show(DecorBaseParameterSets.STATE, target(), () => undefined)
+  }
+
+  /**
+   * What a decor object's place is said from: the observer, or any other object where it stands at the playhead, in the frame the
+   * decor is kept in (metres from where the recording sets off, see DecorObject.eastM); and what it stands on, kept in the
+   * recording's provenance at the object's own east and north.
+   */
+  private decorPositionPlace(): PositionPlace {
+    const paths = () => {
+      const index = this.ufoElement.sighting.decor.findIndex(candidate => candidate.id === this.currentDecorId)
+      return index < 0 ? [] : [`decor.${index}.eastM`, `decor.${index}.northM`]
+    }
+    return {
+      frame: () => this.positionFrame(this.currentDecorId),
+      messages: () => this.messages,
+      basis: {
+        read: () => this.ufoElement.sighting.provenance.at(paths()[0] ?? "")?.basis,
+        write: (_spec, basis) => this.writePositionBasis(paths(), basis)
+      }
+    }
+  }
+
+  /** What a place outside the decor is said from (a launch, a beam, a lantern, a cloud), with no basis kept: see PositionPlace. */
+  private framePlace(): PositionPlace {
+    return { frame: () => this.positionFrame(), messages: () => this.messages }
+  }
+
+  /** The frame a position is said in (see PositionFrame): the recording's place where it sets off, the observer, and every decor object but `except`. */
+  private positionFrame(except?: string): PositionFrame {
+    const t = this.ufoElement.currentTime
+    const references: PositionReference[] = [{ label: this.messages.positionObserver, eastM: 0, northM: 0 }]
+    for (const decor of this.ufoElement.sighting.decor) {
+      if (decor.id === except) continue
+      const { eastM, northM } = resolveDecorPlacementAt(decor, t)
+      references.push({ id: decor.id, label: this.decorLabel(decor), eastM, northM })
+    }
+    return { origin: this.plantingCentre(), references }
+  }
+
+  /**
+   * Shows how the observer's place at the playhead was said, from what, and on what basis: the frame is the decor as it stands (the
+   * observer is not said from themself), and the way it is said is said again only when it changed, so that a switch the author just
+   * made is not undone by the next frame.
+   */
+  private syncObserverPosition(): void {
+    const sighting = this.ufoElement.sighting
+    const t = this.ufoElement.currentTime
+    this.observerSaid = sighting.observerTrack.getLatestPoseAt(t)?.saidPosition
+    const frame = this.positionFrame()
+    this.observerPosition.frame = { ...frame, references: frame.references.filter(reference => reference.id !== undefined) }
+    const signature = JSON.stringify(this.observerSaid ?? null)
+    if (signature !== this.observerSaidShown) {
+      this.observerSaidShown = signature
+      this.observerPosition.said = this.observerSaid
+    }
+    this.observerPosition.basis = sighting.provenance.at(this.observerPositionPaths()[0] ?? "")?.basis
+  }
+
+  /** Where the provenance of the observer's place at the playhead is kept: its keyframe's latitude and longitude. None while it has no keyframe there. */
+  private observerPositionPaths(): string[] {
+    const t = this.ufoElement.currentTime
+    const index = this.ufoElement.sighting.observerTrack.toJSON().keyframes.findIndex(keyframe => keyframe.t === t)
+    return index < 0 ? [] : [`observerTrack.keyframes.${index}.pose.lat`, `observerTrack.keyframes.${index}.pose.lng`]
+  }
+
+  /** Says what the observer's place stands on, at a keyframe of its own at the playhead. */
+  private writeObserverBasis(basis: Basis | undefined): void {
+    if (this.observerPositionPaths().length === 0) this.updateObserver()
+    this.writePositionBasis(this.observerPositionPaths(), basis)
+  }
+
+  /** Says what a position stands on, at each of the paths it is kept at; stated, the default, is said by saying nothing. */
+  private writePositionBasis(paths: string[], basis: Basis | undefined): void {
+    const provenance = this.ufoElement.sighting.provenance
+    for (const path of paths) {
+      if (basis === undefined || basis === "stated") provenance.clear(path)
+      else provenance.set(path, { basis })
+    }
+    this.dispatchEvent(new CustomEvent("sightingchange"))
   }
 
   /** What the form of the base properties needs of the object it edits, and of this editor. */
@@ -10692,8 +10797,8 @@ export class SightingEditorElement extends HTMLElement {
     this.placeNameInput.placeholder = messages.placeNamePlaceholder
     this.searchPlaceButton.textContent = messages.searchPlace
     this.labelPlaceMatch.textContent = messages.placeMatch
-    this.labelLatitude.textContent = messages.latitude
-    this.labelLongitude.textContent = messages.longitude
+    this.labelPosition.textContent = messages.positionLabel
+    this.observerPosition.messages = messages
     this.labelHeading.textContent = messages.heading
     this.headingInput.placeholder = messages.headingPlaceholder
     this.labelPitch.textContent = messages.pitch
@@ -12227,6 +12332,7 @@ class LegacyRecorderElement extends SightingEditorElement {
 
 export function register(): void {
   registerDateInput()
+  registerPositionInput()
   registerInputFile()
   registerPopoverPicker()
   registerProviderSettings()

@@ -13,7 +13,7 @@ import type { SaidText } from "../model/SaidText.js"
  * The labels are `SaidText`, so a kind published from outside this package (another repository's
  * asset) speaks the languages it has, and a reader whose language it lacks reads what it does have.
  */
-export type ParameterSpec = NumberParameter | ChoiceParameter | TextParameter | SaidParameter | SetParameter | BooleanParameter | ColourParameter
+export type ParameterSpec = NumberParameter | ChoiceParameter | TextParameter | SaidParameter | SetParameter | BooleanParameter | ColourParameter | PositionParameter
 
 interface ParameterBase {
   /**
@@ -128,6 +128,23 @@ export interface ColourParameter extends ParameterBase {
   type: "colour"
   /** The swatch a value the field cannot hold is shown as (a colour name, or no colour): a mid grey when absent. */
   fallback?: string
+}
+
+/**
+ * A place, in one field that says it either way it can be (see PositionInputElement): from something else in the scene, or as a
+ * latitude and a longitude. `key` and `secondKey` are where the recording keeps it, east and north in metres for `native` "local", a
+ * latitude and a longitude for "geo"; `saidKey` is where how it was said is kept beside it (see SaidPosition). Never empty: a place
+ * is always somewhere.
+ */
+export interface PositionParameter extends ParameterBase {
+  type: "position"
+  secondKey: string
+  native: "local" | "geo"
+  saidKey: string
+  /** The step of the metres. */
+  step?: number
+  /** How far from what it is said from it may be, metres: 30 km when absent. */
+  rangeM?: number
 }
 
 /** An element as its JSON, which is all that the parameters read and write. */

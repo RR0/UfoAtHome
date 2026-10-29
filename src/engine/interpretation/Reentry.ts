@@ -1,3 +1,4 @@
+import type { SaidPosition } from "../model/SaidPosition.js"
 import type { SaidText } from "../model/SaidText.js"
 
 /**
@@ -54,6 +55,8 @@ export interface ReentryKeyframe {
   t: number
   lat: number
   lng: number
+  /** How it was said, when not as degrees (see SaidPosition). */
+  saidPosition?: SaidPosition
   /** Height above the ellipsoid, km. */
   altitudeKm: number
 }

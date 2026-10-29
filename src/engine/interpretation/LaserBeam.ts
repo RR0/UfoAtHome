@@ -1,3 +1,4 @@
+import type { SaidPosition } from "../model/SaidPosition.js"
 import type { SaidText } from "../model/SaidText.js"
 import { AtmosphereProfile } from "../atmosphere/AtmosphereProfile.js"
 import type { AerialPerspective } from "../atmosphere/AerialPerspective.js"
@@ -43,6 +44,8 @@ export interface BeamJson {
 export interface BeamPoint {
   lat: number
   lng: number
+  /** How it was said, when not as degrees (see SaidPosition). */
+  saidPosition?: SaidPosition
   /** Altitude above the sea, metres. */
   altitudeM: number
 }

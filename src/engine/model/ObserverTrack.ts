@@ -1,3 +1,5 @@
+import type { SaidPosition } from "./SaidPosition.js"
+
 /**
  * The observer's (observer's) own pose over time — geographic position, elevation, and viewing
  * orientation — as a keyframe track alongside the UFO's Timeline. Kept as its own class rather
@@ -16,6 +18,8 @@ export interface ObserverPose {
    */
   lat?: number
   lng?: number
+  /** How `lat`/`lng` were said, when not as degrees: from a decor object (see SaidPosition). */
+  saidPosition?: SaidPosition
   /** Metres above the local ground under the observer, not above sea level: 0 for someone standing on
    * it, the height of a window or a cliff top otherwise. The eye's own height is added on top. */
   elevationM: number

@@ -46,18 +46,14 @@ export class LanternParameters {
     parameters: ([
       { type: "said", key: "title", label: { en: "Name", fr: "Nom", es: "Nombre", it: "Nome" }, group: LanternParameters.RELEASE },
       {
-        type: "number", key: "site.eastM", min: -100000, max: 100000, step: 1, unit: "m", required: true, group: LanternParameters.RELEASE,
-        label: { en: "East of the place", fr: "À l'est du lieu", es: "Al este del lugar", it: "A est del luogo" },
-        hint: { en: "Where they are let go, metres east of the recording's place (west when negative).",
-          fr: "D'où elles sont lâchées, en mètres à l'est du lieu de l'enregistrement (à l'ouest si négatif).",
-          es: "Desde dónde se sueltan, en metros al este del lugar de la grabación (al oeste si es negativo).",
-          it: "Da dove vengono lasciate andare, in metri a est del luogo della registrazione (a ovest se negativo)." }
-      },
-      {
-        type: "number", key: "site.northM", min: -100000, max: 100000, step: 1, unit: "m", required: true, group: LanternParameters.RELEASE,
-        label: { en: "North of the place", fr: "Au nord du lieu", es: "Al norte del lugar", it: "A nord del luogo" },
-        hint: { en: "Metres north of the recording's place (south when negative).", fr: "En mètres au nord du lieu de l'enregistrement (au sud si négatif).",
-          es: "En metros al norte del lugar de la grabación (al sur si es negativo).", it: "In metri a nord del luogo della registrazione (a sud se negativo)." }
+        // From the observer, from a decor object (a house, a field), or as degrees: see PositionInputElement.
+        type: "position", key: "site.eastM", secondKey: "site.northM", saidKey: "site.saidPosition", native: "local", step: 1, rangeM: 100000,
+        group: LanternParameters.RELEASE,
+        label: { en: "Where they are let go", fr: "Lieu du lâcher", es: "Lugar de la suelta", it: "Luogo del rilascio" },
+        hint: { en: "Where they are let go: from the observer, from something else in the scene, or as a latitude and a longitude.",
+          fr: "D'où elles sont lâchées : par rapport à l'observateur, à autre chose dans la scène, ou en latitude et longitude.",
+          es: "Desde dónde se sueltan: respecto al observador, a otra cosa de la escena, o en latitud y longitud.",
+          it: "Da dove vengono lasciate andare: rispetto all'osservatore, a qualcos'altro nella scena, o in latitudine e longitudine." }
       },
       {
         type: "number", key: "site.altitudeM", min: -1000, max: 5000, step: 0.1, unit: "m", group: LanternParameters.RELEASE, effective: () => 0,

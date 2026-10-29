@@ -1,6 +1,7 @@
 import type { DecorEngine } from "./Vehicle.js"
 import type { AircraftKind } from "../traffic/AircraftModels.js"
 import type { SaidText } from "./SaidText.js"
+import type { SaidPosition } from "./SaidPosition.js"
 
 /**
  * Static scenery placed around the observer — buildings, trees, streetlights, vehicles, other
@@ -472,6 +473,8 @@ export interface DecorObject {
    */
   eastM: number
   northM: number
+  /** How `eastM`/`northM` were said, when it was not as they are kept: from another object, or as a latitude and a longitude (see SaidPosition). */
+  saidPosition?: SaidPosition
   /** Degrees clockwise from true north, same convention as ObserverPose.headingDeg — which way a
    * vehicle is facing, or a observer looking. Ignored for building/tree/streetlight. */
   headingDeg?: number
@@ -688,6 +691,8 @@ export interface DecorPlacementKeyframe {
   t: number
   eastM: number
   northM: number
+  /** How this place was said (see DecorObject.saidPosition). */
+  saidPosition?: SaidPosition
   /** Meters above the observer's own elevation. Absent/0 is level with them, which is where all
    * scenery sits; an aircraft is the reason this exists. */
   altitudeM?: number

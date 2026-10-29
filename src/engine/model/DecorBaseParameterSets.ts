@@ -36,8 +36,8 @@ export class DecorBaseParameterSets {
     title: { en: "Object", fr: "Objet", es: "Objeto", it: "Oggetto" },
     parameters: ([
       { type: "said", key: "title", required: true, label: { en: "Name", fr: "Nom", es: "Nombre", it: "Nome" } },
-      DecorBaseParameterSets.number("eastM", { en: "Distance east", fr: "Distance à l'est", es: "Distancia al este", it: "Distanza a est" }, -30000, 30000, 0.5, "m"),
-      DecorBaseParameterSets.number("northM", { en: "Distance north", fr: "Distance au nord", es: "Distancia al norte", it: "Distanza a nord" }, -30000, 30000, 0.5, "m"),
+      // From the observer by default, or from another object, or as degrees: one field that says it any of these ways (see PositionInputElement).
+      { type: "position", key: "eastM", secondKey: "northM", saidKey: "saidPosition", native: "local", step: 0.5, label: { en: "Position", fr: "Position", es: "Posición", it: "Posizione" } },
       DecorBaseParameterSets.number("altitudeM", { en: "Altitude", fr: "Altitude", es: "Altitud", it: "Altitudine" }, -1000, 30000, 1, "m"),
       DecorBaseParameterSets.number("headingDeg", { en: "Heading", fr: "Orientation", es: "Orientación", it: "Orientamento" }, 0, 360, 1, "°"),
       {

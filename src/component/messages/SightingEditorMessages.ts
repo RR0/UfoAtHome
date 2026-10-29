@@ -2,12 +2,13 @@ import type { WitnessErrorMessages } from "./WitnessErrorMessages.js"
 import type { TimelineTracksMessages } from "../TimelineTracks.js"
 import type { SectionFoldMessages } from "../SectionFolds.js"
 import type { InputFileMessages } from "../InputFileElement.js"
+import type { PositionInputMessages } from "../PositionInputElement.js"
 import type { SightingLabels } from "./SightingLabels.js"
 
 /** Contract for `<rr0-sighting-editor>`'s user-visible label strings — implemented per language
  * under this directory (`SightingEditorMessages_en.ts`, `SightingEditorMessages_fr.ts`) and loaded
  * via `loadSightingEditorMessages`. */
-export interface SightingEditorMessages extends SectionFoldMessages, TimelineTracksMessages, InputFileMessages, SightingLabels {
+export interface SightingEditorMessages extends SectionFoldMessages, TimelineTracksMessages, InputFileMessages, PositionInputMessages, SightingLabels {
   oval: string
   /** The "Polygon" preset button — a plain quad, the starting point for a freeform shape (see
    * Shape.ts's own createCustomPolygon doc comment). */

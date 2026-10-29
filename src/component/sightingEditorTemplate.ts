@@ -240,8 +240,8 @@ export const html = `
     </div>
     <div class="form-section">
     <h3 class="section-title"><span id="label-section-coordinates">Coordinates</span></h3>
-    <label><span id="label-lat">Latitude</span> <input id="lat" type="number" min="-90" max="90" step="0.000001" placeholder="lat"/></label>
-    <label><span id="label-lng">Longitude</span> <input id="lng" type="number" min="-180" max="180" step="0.000001" placeholder="lng"/></label>
+    <!-- As degrees, or from a decor object ("20 m south of the house"): see PositionInputElement. The fields keep the ids lat and lng. -->
+    <div class="observer-position"><span id="label-position">Position</span> <rr0-input-position name="observer" native="geo" lat-id="lat" lng-id="lng"></rr0-input-position></div>
     <label><span id="label-elevation">Altitude</span>
       <input id="elevation" type="number" min="-500" max="9000" step="1" value="0"/> m</label>
     <output id="ground-elevation" class="ground-elevation" for="lat lng"></output>

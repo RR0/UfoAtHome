@@ -11,6 +11,7 @@ import { loadCloudEditorMessages } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { ElementList } from "./ElementList.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
+import type { PositionPlace } from "./ParameterForm.js"
 import { CloudParameterSets } from "../engine/model/CloudParameterSets.js"
 import type { CloudLayerContext } from "../engine/model/CloudParameterSets.js"
 import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
@@ -19,7 +20,9 @@ import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
  *
  * Built in English, and put in the reader's `language` once its messages have arrived: only that
  * language's module is ever downloaded, and none at all for English (see CloudEditorMessages). */
-export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, beforeEdit: (detachWeatherSource?: boolean) => void, pointAt: (headingDeg: number, pitchDeg: number) => void, language: UfoLanguage = "en") {
+export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, beforeEdit: (detachWeatherSource?: boolean) => void, pointAt: (headingDeg: number, pitchDeg: number) => void, language: UfoLanguage = "en",
+  /** What a cloud's place is said from (see PositionPlace); without it, only as metres from the observer. */
+  positionPlace?: PositionPlace) {
   let messages = cloudEditorMessages_en
   controls.innerHTML = CloudEditorTemplate.html(messages)
   const input = (id: string) => controls.querySelector<HTMLElement>("#" + id) as HTMLInputElement
@@ -105,7 +108,9 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
         apply(draft as unknown as ParameterHolder)
         return draft
       }) }))
-    }
+    },
+    undefined,
+    positionPlace
   ), () => undefined)
   // Pause before any field is edited, so a user's values cannot be committed at a moving playhead.
   controls.addEventListener("focusin", () => scene.ufoElement.pause())

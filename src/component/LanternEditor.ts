@@ -13,6 +13,7 @@ import type { UfoLanguage } from "./messages/index.js"
 import { loadLanternEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import { ElementList } from "./ElementList.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
+import type { PositionPlace } from "./ParameterForm.js"
 
 /** What the Lanterns part needs of the editor it stands in, read at every use. */
 export interface LanternEditorHost {
@@ -21,6 +22,8 @@ export interface LanternEditorHost {
   writingLanguage(): string
   /** The shapes of the account, which lanterns may stand for. */
   shapes(): { id: string, label: string }[]
+  /** What a place is said from, and in what words (see PositionPlace); without it, a place is said only the way it is kept. */
+  positionPlace?(): PositionPlace
   /** An edit was written onto the recording. */
   changed(): void
 }
@@ -80,7 +83,8 @@ export class LanternEditor {
     this.form.show(LanternParameters.SET, new ParameterTarget(
       () => this.current as unknown as ParameterHolder | undefined,
       apply => this.editLaunch(launch => apply(launch as unknown as ParameterHolder)),
-      (): LanternContext => ({ shapes: this.host.shapes().map(shape => ({ value: shape.id, label: shape.label })) })
+      (): LanternContext => ({ shapes: this.host.shapes().map(shape => ({ value: shape.id, label: shape.label })) }),
+      this.host.positionPlace?.()
     ), () => this.written())
   }
 

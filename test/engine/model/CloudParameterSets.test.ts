@@ -14,8 +14,9 @@ describe("CloudParameterSets", () => {
   })
 
   test("an individual cloud has a place, a size, a turn and a density", () => {
-    expect(CloudParameterSets.INSTANCE.parameters.map(p => p.key)).toEqual(
-      ["eastM", "northM", "baseM", "thicknessM", "widthM", "depthM", "rotationDeg", "density", "darkness"])
+    // The place is one field, east and north together (see PositionParameter).
+    expect(CloudParameterSets.INSTANCE.parameters.map(p => p.type === "position" ? `${p.key}+${p.secondKey}` : p.key)).toEqual(
+      ["eastM+northM", "baseM", "thicknessM", "widthM", "depthM", "rotationDeg", "density", "darkness"])
   })
 
   test("coverage is stored from 0 to 1 and typed in percent", () => {

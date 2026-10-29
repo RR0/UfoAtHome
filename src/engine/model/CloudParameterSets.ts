@@ -69,8 +69,8 @@ export class CloudParameterSets {
     kind: "cloud-instance",
     title: { en: "Individual cloud", fr: "Nuage individuel", es: "Nube individual", it: "Nuvola individuale" },
     parameters: ([
-      CloudParameterSets.number("eastM", { en: "East position", fr: "Position est", es: "Posición este", it: "Posizione est" }, -30000, 30000, 1, { unit: CloudParameterSets.METRES, required: true }),
-      CloudParameterSets.number("northM", { en: "North position", fr: "Position nord", es: "Posición norte", it: "Posizione nord" }, -30000, 30000, 1, { unit: CloudParameterSets.METRES, required: true }),
+      // From the observer, from a decor object, or as degrees: see PositionInputElement.
+      { type: "position", key: "eastM", secondKey: "northM", saidKey: "saidPosition", native: "local", step: 1, label: { en: "Position", fr: "Position", es: "Posición", it: "Posizione" } },
       CloudParameterSets.number("baseM", { en: "Cloud base", fr: "Base du nuage", es: "Base de la nube", it: "Base della nuvola" }, 0, 20000, 1, { unit: CloudParameterSets.METRES, required: true }),
       CloudParameterSets.number("thicknessM", { en: "Cloud thickness", fr: "Épaisseur du nuage", es: "Espesor de la nube", it: "Spessore della nuvola" }, 10, 8000, 1, { unit: CloudParameterSets.METRES, required: true }),
       CloudParameterSets.number("widthM", { en: "Cloud width", fr: "Largeur du nuage", es: "Anchura de la nube", it: "Larghezza della nuvola" }, 50, 20000, 10, { unit: CloudParameterSets.METRES, required: true }),

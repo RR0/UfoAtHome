@@ -10,6 +10,7 @@ import type { UfoLanguage } from "./messages/index.js"
 import { loadLaunchEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import { ElementList } from "./ElementList.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
+import type { PositionPlace } from "./ParameterForm.js"
 import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
 
 /** What the Launches part needs of the editor it stands in, read at every use. */
@@ -17,6 +18,8 @@ export interface LaunchEditorHost {
   sighting(): Sighting
   said(): SaidTexts
   writingLanguage(): string
+  /** What a place is said from, and in what words (see PositionPlace); without it, a place is said only the way it is kept. */
+  positionPlace?(): PositionPlace
   /** An edit was written onto the recording. */
   changed(): void
 }
@@ -187,7 +190,9 @@ export class LaunchEditor {
       this.placeForm = new ParameterForm(this.element("launch-place-parameters"), this.language, "launchPlace.")
       this.placeForm.show(LaunchParameters.PLACE, new ParameterTarget(
         () => this.current?.track[this.placeIndex] as unknown as ParameterHolder | undefined,
-        apply => this.editPlace(apply)
+        apply => this.editPlace(apply),
+        undefined,
+        this.host.positionPlace?.()
       ), () => undefined)
     } else {
       // Another place may have been stepped to with the focus still in a field of the last one: it is not being typed in.

@@ -1,3 +1,4 @@
+import type { SaidPosition } from "../model/SaidPosition.js"
 import type { SaidText } from "../model/SaidText.js"
 import type { BodyJson, BodyKeyframe, InterpretationJson } from "./Interpretation.js"
 
@@ -55,6 +56,8 @@ export interface LanternTurbulence {
 export interface LanternSite {
   eastM: number
   northM: number
+  /** How it was said, when not as metres from the observer (see SaidPosition). */
+  saidPosition?: SaidPosition
   /** Metres between where they are let go and the ground at the recording's origin. 0 when absent. */
   altitudeM?: number
   /** The height above sea level of the ground at the recording's origin, m: what sets how thin the air they climb into is. 0 when absent. */

@@ -69,8 +69,8 @@ export class BeamParameters {
     kind: "beam-place",
     title: { en: "Point of the path", fr: "Point du trajet", es: "Punto del trayecto", it: "Punto del percorso" },
     parameters: ([
-      { type: "number", key: "lat", min: -90, max: 90, step: 0.000001, unit: "°", required: true, label: { en: "Latitude", fr: "Latitude", es: "Latitud", it: "Latitudine" } },
-      { type: "number", key: "lng", min: -180, max: 180, step: 0.000001, unit: "°", required: true, label: { en: "Longitude", fr: "Longitude", es: "Longitud", it: "Longitudine" } },
+      // As degrees, or from the observer or a decor object (the house the laser was shot from): see PositionInputElement.
+      { type: "position", key: "lat", secondKey: "lng", saidKey: "saidPosition", native: "geo", step: 0.1, label: { en: "Position", fr: "Position", es: "Posición", it: "Posizione" } },
       {
         type: "number", key: "altitudeM", min: -500, max: 100000, step: 0.1, unit: "m", required: true,
         label: { en: "Altitude", fr: "Altitude", es: "Altitud", it: "Altitudine" },

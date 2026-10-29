@@ -465,6 +465,58 @@ describe("editing an object that is named in several languages", () => {
   })
 })
 
+describe("a place said from something else", () => {
+  const type = (input: HTMLInputElement, value: string) => {
+    input.value = value
+    input.dispatchEvent(new Event("input", { bubbles: true }))
+  }
+  const pick = (select: HTMLSelectElement, value: string) => {
+    select.value = value
+    select.dispatchEvent(new Event("input", { bubbles: true }))
+  }
+
+  it("keeps an object said from another, and what it stands on", async () => {
+    const element = mount()
+    addBuildings(element, 2)
+    const json = element.sightingData
+    element.sightingData = { ...json, place: [{ lat: 44, lng: 5 }], decor: json.decor!.map((decor, i) => ({ ...decor, eastM: i * 100, northM: 0 })) }
+    const [house, shed] = element.sightingData.decor!
+    const inside = element as unknown as { selectDecor(id: string): void }
+    inside.selectDecor(shed.id)
+    const root = element.shadowRoot!
+    pick(root.getElementById("decorBase.eastM-from") as HTMLSelectElement, house.id)
+    type(root.getElementById("decorBase.eastM") as HTMLInputElement, "20")
+    type(root.getElementById("decorBase.northM") as HTMLInputElement, "-5")
+    pick(root.getElementById("decorBase.eastM-basis") as HTMLSelectElement, "measured")
+    const written = element.sightingData.decor!.find(decor => decor.id === shed.id)!
+    // Written with what it stands on, as any value of a file may be (see StatedValue).
+    expect(written.eastM).toEqual({ value: 20, basis: "measured" })
+    expect(written.northM).toEqual({ value: -5, basis: "measured" })
+    expect(written.saidPosition).toEqual({ relativeTo: house.id, eastM: 20, northM: -5 })
+  })
+
+  it("puts the observer 30 m east of a house, which stays where it stands", async () => {
+    const element = mount()
+    addBuildings(element, 1)
+    const json = element.sightingData
+    element.sightingData = { ...json, place: [{ lat: 44, lng: 5 }], decor: json.decor!.map(decor => ({ ...decor, eastM: 100, northM: 0 })) }
+    const root = element.shadowRoot!
+    const house = element.sightingData.decor![0]
+    const position = root.querySelector("rr0-input-position[name=observer]") as HTMLElement
+    ;(position.querySelector(".position-mode") as HTMLButtonElement).click()
+    pick(root.getElementById("observer-from") as HTMLSelectElement, house.id)
+    type(root.getElementById("observer-east") as HTMLInputElement, "30")
+    type(root.getElementById("observer-north") as HTMLInputElement, "0")
+    const data = element.sightingData
+    const pose = data.observerTrack!.keyframes[0].pose
+    expect(pose.lat).toBeCloseTo(44, 6)
+    expect((pose.lng as number - 5) * 111320 * Math.cos(44 * Math.PI / 180)).toBeCloseTo(130, 1)
+    expect(pose.saidPosition).toEqual({ relativeTo: house.id, eastM: 30, northM: 0 })
+    // The house did not follow the observer: it is now 130 m west of where the recording sets off.
+    expect(data.decor![0].eastM).toBeCloseTo(-30, 2)
+  })
+})
+
 describe("the weather of a recording", () => {
   const record = {
     getWeather: () => Promise.resolve({

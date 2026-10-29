@@ -26,6 +26,7 @@ import { SkyEvents, type SkyEventsJson } from "../model/SkyEvents.js"
 import type { FrozenData } from "../model/FrozenData.js"
 import { sortedMilestones } from "../model/Milestone.js"
 import { SightingShapes } from "./SightingShapes.js"
+import { SightingPositions } from "./SightingPositions.js"
 import { Provenance } from "./Provenance.js"
 import { FormatVersion } from "./FormatVersion.js"
 
@@ -183,11 +184,12 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     summaryTime: sighting.event.summaryTime,
     tags: sighting.event.tags,
     timeline: sighting.timeline.toJSON(),
-    observerTrack: sighting.observerTrack.toJSON(),
+    // How each place was said, with the numbers of where it now is (see SightingPositions).
+    observerTrack: SightingPositions.restatedObserverTrack(sighting),
     weatherTrack: sighting.weatherTrack.toJSON(),
     soundTrack: sighting.soundTrack.toJSON(),
     weather: sighting.weather,
-    decor: sighting.decor,
+    decor: SightingPositions.restatedDecor(sighting),
     milestones: sighting.milestones.length > 0 ? sighting.milestones : undefined,
     references: sighting.references.length > 0 ? sighting.references : undefined,
     roads: sighting.roads.length > 0 ? sighting.roads : undefined,

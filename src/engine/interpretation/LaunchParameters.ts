@@ -194,8 +194,8 @@ export class LaunchParameters {
           es: "Segundos de la grabación; negativos antes de que empezara: una etapa vista minutos después de su lanzamiento ya estaba alta cuando empezó la grabación.",
           it: "Secondi della registrazione; negativi prima del suo inizio: uno stadio visto minuti dopo il lancio era già alto quando la registrazione è iniziata." }
       },
-      { type: "number", key: "lat", min: -90, max: 90, step: 0.0001, unit: "°", required: true, label: { en: "Latitude", fr: "Latitude", es: "Latitud", it: "Latitudine" } },
-      { type: "number", key: "lng", min: -180, max: 180, step: 0.0001, unit: "°", required: true, label: { en: "Longitude", fr: "Longitude", es: "Longitud", it: "Longitudine" } },
+      // As degrees, or from the observer or a decor object: see PositionInputElement.
+      { type: "position", key: "lat", secondKey: "lng", saidKey: "saidPosition", native: "geo", step: 1, label: { en: "Position", fr: "Position", es: "Posición", it: "Posizione" } },
       { type: "number", key: "altitudeKm", min: 0, max: 2000, step: 0.1, unit: "km", required: true, label: { en: "Altitude", fr: "Altitude", es: "Altitud", it: "Altitudine" } }
     ] satisfies ParameterSpec[])
   }

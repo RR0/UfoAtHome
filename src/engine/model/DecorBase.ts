@@ -1,8 +1,9 @@
-import type { DecorKind, DecorObject, DecorSide, DecorSize } from "./Decor.js"
+import type { DecorKind, DecorObject, DecorPlacementKeyframe, DecorSide, DecorSize } from "./Decor.js"
 import { canHoldObserver, resolveDecorHeadlightsAt, resolveDecorLitAt, resolveDecorPlacementAt } from "./Decor.js"
 import type { HeadlightMode } from "./Headlights.js"
 import { LightRigs } from "./LightRig.js"
 import type { SaidText } from "./SaidText.js"
+import type { SaidPosition } from "./SaidPosition.js"
 
 /** What the editor knows about the object on show, which the object alone cannot say. */
 export interface DecorBaseContext {
@@ -36,6 +37,8 @@ export interface DecorBaseView {
   title?: SaidText
   eastM: number
   northM: number
+  /** How the place at this instant was said: the object's own, or its track's keyframe at this very instant (see DecorObject.saidPosition). */
+  saidPosition?: SaidPosition
   altitudeM: number
   headingDeg: number
   color?: string
@@ -71,6 +74,7 @@ export class DecorBase {
       title: decor.title,
       eastM: round(placement.eastM),
       northM: round(placement.northM),
+      saidPosition: decor.track ? decor.track.find(keyframe => keyframe.t === t)?.saidPosition : decor.saidPosition,
       altitudeM: round(placement.altitudeM),
       headingDeg: round(placement.headingDeg ?? 0),
       color: decor.color,
@@ -93,6 +97,7 @@ export class DecorBase {
         return { ...decor, title: view.title }
       case "eastM":
       case "northM":
+      case "saidPosition":
       case "altitudeM":
       case "headingDeg":
         return DecorBase.placed(decor, view, t)
@@ -145,9 +150,12 @@ export class DecorBase {
     const headingDeg = ((view.headingDeg % 360) + 360) % 360
     const track = decor.track ?? (view.altitudeM !== 0 ? [] : undefined)
     if (track) {
-      const keyframe = { t, eastM: view.eastM, northM: view.northM, altitudeM: view.altitudeM, headingDeg }
+      const keyframe: DecorPlacementKeyframe = { t, eastM: view.eastM, northM: view.northM, altitudeM: view.altitudeM, headingDeg }
+      if (view.saidPosition) keyframe.saidPosition = view.saidPosition
       return { ...decor, track: [...track.filter(existing => existing.t !== t), keyframe].sort((a, b) => a.t - b.t) }
     }
-    return { ...decor, eastM: view.eastM, northM: view.northM, headingDeg }
+    const placed: DecorObject = { ...decor, eastM: view.eastM, northM: view.northM, headingDeg, saidPosition: view.saidPosition }
+    if (!placed.saidPosition) delete placed.saidPosition
+    return placed
   }
 }

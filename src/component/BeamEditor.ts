@@ -11,12 +11,15 @@ import type { UfoLanguage } from "./messages/index.js"
 import { loadBeamEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import { ElementList } from "./ElementList.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
+import type { PositionPlace } from "./ParameterForm.js"
 
 /** What the Beams part needs of the editor it stands in, read at every use. */
 export interface BeamEditorHost {
   sighting(): Sighting
   said(): SaidTexts
   writingLanguage(): string
+  /** What a place is said from, and in what words (see PositionPlace); without it, a place is said only the way it is kept. */
+  positionPlace?(): PositionPlace
   /** An edit was written onto the recording. */
   changed(): void
 }
@@ -162,7 +165,9 @@ export class BeamEditor {
           const place = { ...edited.path[this.placeIndex] }
           apply(place as unknown as ParameterHolder)
           edited.path = edited.path.map((other, i) => i === this.placeIndex ? place : other)
-        })
+        }),
+        undefined,
+        this.host.positionPlace?.()
       ), () => undefined)
     } else {
       this.placeForm.sync(force)

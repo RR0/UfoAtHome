@@ -1,8 +1,23 @@
 import { Parameters } from "../engine/interpretation/Parameters.js"
-import type { ChoiceParameter, NumberParameter, ParameterHolder, ParameterSet, ParameterSpec } from "../engine/interpretation/Parameters.js"
+import type { ChoiceParameter, NumberParameter, ParameterHolder, ParameterSet, ParameterSpec, PositionParameter } from "../engine/interpretation/Parameters.js"
+import type { Basis } from "../engine/persistence/Provenance.js"
+import type { GeoPoint, LocalPoint, PositionFrame, SaidPosition } from "../engine/model/SaidPosition.js"
 import type { SaidText } from "../engine/model/SaidText.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { NumberFields } from "./NumberFields.js"
+import { register as registerPositionInput } from "./PositionInputElement.js"
+import type { PositionChange, PositionInputElement, PositionInputMessages } from "./PositionInputElement.js"
+
+/**
+ * What a position field needs that the element alone cannot say (see PositionParameter): what else in the scene it can be said from and
+ * where the recording is on the Earth, the words of the field, and where what the position stands on is kept (see Provenance), when
+ * the host keeps it.
+ */
+export interface PositionPlace {
+  frame(): PositionFrame
+  messages(): PositionInputMessages
+  basis?: { read(spec: PositionParameter): Basis | undefined, write(spec: PositionParameter, basis: Basis | undefined): void }
+}
 
 /**
  * Where a form reads an element from and how an edit reaches it.
@@ -21,7 +36,7 @@ export class ParameterTarget {
    * the descriptions' `effective`, `bounds` and `visibleWhen` need: the general darkness a layer inherits.
    */
   constructor(readonly read: () => ParameterHolder | undefined, readonly edit: (apply: (draft: ParameterHolder) => void, spec: ParameterSpec) => void,
-    readonly context: () => unknown = () => undefined) {
+    readonly context: () => unknown = () => undefined, readonly place?: PositionPlace) {
   }
 
   /** An element edited where it stands. */
@@ -125,7 +140,7 @@ export class ParameterForm {
     // `force`: what is shown now is another element's (stepped to from the keyboard, with the focus still in a field): nothing is being typed.
     const active = force ? null : (this.container.getRootNode() as Document | ShadowRoot).activeElement
     for (const spec of this.set.parameters) {
-      const field = this.field(spec.key)
+      const field = spec.type === "position" ? this.positionOf(spec) : this.field(spec.key)
       if (!field) continue
       const row = (field.closest("label, .parameter-row") ?? field) as HTMLElement
       row.hidden = spec.visibleWhen !== undefined && !spec.visibleWhen(element, context)
@@ -162,6 +177,8 @@ export class ParameterForm {
         if (input !== active) input.value = ParameterForm.swatchOf(stated, spec.fallback ?? "#808080")
       } else if (spec.type === "set") {
         this.syncSet(spec, field, element, context)
+      } else if (spec.type === "position") {
+        this.syncPosition(spec, field as unknown as PositionInputElement, element)
       } else if (spec.type === "said") {
         const input = field as HTMLInputElement
         if (input !== active) input.value = this.values?.said().read(Parameters.read(element, spec.key) as SaidText | undefined) ?? ""
@@ -197,6 +214,8 @@ export class ParameterForm {
       select.addEventListener("input", () => this.write(spec, select.value === "" ? undefined : select.value))
       label.append(select)
       this.enhance?.(spec, select)
+    } else if (spec.type === "position") {
+      return this.setRow(spec, this.positionFieldOf(spec))
     } else if (spec.type === "set") {
       // Ticks, as many as the list offers: a box of its own, since a label can hold one field.
       const box = document.createElement("div")
@@ -281,6 +300,77 @@ export class ParameterForm {
     if (spec.type !== "said" || !spec.required) return
     input.classList.toggle("invalid", input.value === "")
     input.setAttribute("aria-invalid", String(input.value === ""))
+  }
+
+  /** The element a position is said in: its fields carry the keys, so that what reaches a field by its id or its key still does. */
+  private positionFieldOf(spec: PositionParameter): PositionInputElement {
+    registerPositionInput()
+    const element = document.createElement("rr0-input-position") as PositionInputElement
+    const base = `${this.idPrefix}${spec.key}`
+    element.setAttribute("name", base)
+    if (spec.native === "geo") element.setAttribute("native", "geo")
+    if (spec.step !== undefined) element.setAttribute("step", String(spec.step))
+    if (spec.rangeM !== undefined) element.setAttribute("range", String(spec.rangeM))
+    const ids = spec.native === "geo" ? ["lat-id", "lng-id"] : ["east-id", "north-id"]
+    if (this.idPrefix !== "") {
+      element.setAttribute(ids[0], `${this.idPrefix}${spec.key}`)
+      element.setAttribute(ids[1], `${this.idPrefix}${spec.secondKey}`)
+    }
+    element.dataset.position = spec.key
+    element.build()
+    const [first, second] = spec.native === "geo" ? [element.latInput, element.lngInput] : [element.eastInput, element.northInput]
+    first.dataset.key = spec.key
+    second.dataset.key = spec.secondKey
+    const place = this.target?.place
+    if (place) element.messages = place.messages()
+    // What a position stands on is shown where the host keeps it, and only there: a choice that writes nowhere would say it was kept.
+    element.basisShown = place?.basis !== undefined
+    element.addEventListener("positionchange", event => {
+      const { value, said } = (event as CustomEvent<PositionChange>).detail
+      this.writePosition(spec, value, said)
+    })
+    element.addEventListener("basischange", event => this.target?.place?.basis?.write(spec, (event as CustomEvent).detail.basis))
+    return element
+  }
+
+  private positionOf(spec: PositionParameter): PositionInputElement | undefined {
+    return this.container.querySelector<PositionInputElement>(`rr0-input-position[data-position="${spec.key}"]`) ?? undefined
+  }
+
+  /** Shows where the element is, said the way it was, from the frame as it is now. */
+  private syncPosition(spec: PositionParameter, element: PositionInputElement, holder: ParameterHolder): void {
+    const place = this.target?.place
+    if (place) {
+      element.messages = place.messages()
+      element.frame = place.frame()
+    }
+    const first = Parameters.read(holder, spec.key)
+    const second = Parameters.read(holder, spec.secondKey)
+    const stated = typeof first === "number" && typeof second === "number"
+    element.value = !stated ? undefined : spec.native === "geo" ? { lat: first, lng: second } : { eastM: first, northM: second }
+    // The way it is said changes only with another element, or a file read again: re-saying it at every sync would turn it back while it is being switched.
+    const said = Parameters.read(holder, spec.saidKey) as SaidPosition | undefined
+    const signature = JSON.stringify(said ?? null)
+    if (element.dataset.said !== signature) {
+      element.dataset.said = signature
+      element.said = said
+    }
+    element.basis = place?.basis?.read(spec)
+  }
+
+  private writePosition(spec: PositionParameter, value: LocalPoint | GeoPoint, said: SaidPosition | undefined): void {
+    const target = this.target
+    if (!target) return
+    const [first, second] = "lat" in value ? [value.lat, value.lng] : [value.eastM, value.northM]
+    const round = spec.native === "geo" ? (n: number) => Math.round(n * 1e7) / 1e7 : (n: number) => Math.round(n * 1000) / 1000
+    this.positionOf(spec)?.setAttribute("data-said", JSON.stringify(said ?? null))
+    target.edit(draft => {
+      Parameters.write(draft, spec.key, round(first))
+      Parameters.write(draft, spec.secondKey, round(second))
+      Parameters.write(draft, spec.saidKey, said)
+    }, spec)
+    this.changed()
+    this.sync()
   }
 
   /** A set's row: its name, and its ticks under it. */

@@ -1,3 +1,4 @@
+import type { SaidPosition } from "./SaidPosition.js"
 import type { Weather } from "./Weather.js"
 import { DEFAULT_CLOUD_BASE_M } from "./Weather.js"
 
@@ -7,6 +8,8 @@ export interface CloudInstance {
   /** Position relative to the recording's initial observer, in metres east/north. */
   eastM: number
   northM: number
+  /** How it was said, when not as metres from the observer (see SaidPosition). */
+  saidPosition?: SaidPosition
   baseM: number
   thicknessM: number
   widthM: number
