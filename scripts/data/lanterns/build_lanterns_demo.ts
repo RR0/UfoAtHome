@@ -94,6 +94,8 @@ const recording = {
   id: "sky-test-lanterns",
   // The picture the demo is summed up by: the group above the mountain, against the last of the dusk.
   summaryTime: 115,
+  // Photographed at summaryTime by scripts/share-cards/ShareCards.ts, for the card a shared link shows.
+  image: "https://ufoathome.org/demo-data/share/sky-test-lanterns.jpg",
   tags: ["lantern", "misidentification"],
   description: {
     en: "A dozen sky lanterns let go at dusk on the evening of Yi Peng, at the foot of Doi Suthep in Chiang Mai, filmed by one of those letting them go: they rise past the eye, then drift off towards the mountain until they are a loose group of orange points far away, going out one by one.",
