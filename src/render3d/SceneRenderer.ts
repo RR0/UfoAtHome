@@ -3532,14 +3532,19 @@ export class SceneRenderer {
    * burns out and what is dimmer keeps its colour.
    */
   private static readonly HIGHLIGHT_KEPT_AT = 0.3
-  /** The share of the frame a light must take up for a device keeping its highlights to keep it: ASSUMED, a fiftieth of a percent, which a
-   * lantern a metre tall fills up to some fifty metres off through a phone's main camera, and a star never does. */
+  /**
+   * The share of the frame a light must take up for a device keeping its highlights to keep it whole: ASSUMED, a fiftieth of a percent,
+   * which a lantern a metre tall fills up to some fifty metres off through a phone's main camera. A light taking up less is kept less, as
+   * the square of its share (ASSUMED: the fewer pixels it burns out, the less they weigh in what the device reads), so that a lantern drifting
+   * off goes from orange to a bright point as it goes, never all at once, and one some hundreds of metres off, like a star, a speck of the
+   * frame, is hardly kept at all.
+   */
   private static readonly HIGHLIGHT_SHARE = 0.0002
 
   /**
    * What a device that sets its own exposure meters of the bodies that glow whole in its frame, beside the sky: the mean luminance they add
-   * to the picture, cd/m² (the light of each, its luminance times the solid angle it fills, over the frame's own), and the luminance of the
-   * brightest of those that take up a fair part of it (see HIGHLIGHT_SHARE), which one keeping its highlights holds back for.
+   * to the picture, cd/m² (the light of each, its luminance times the solid angle it fills, over the frame's own), and the luminance one
+   * keeping its highlights holds back for: the brightest, each weighed by how much of the frame it takes up (see HIGHLIGHT_SHARE).
    */
   private meteredBodies(): { mean: number, brightest: number } {
     if (this.bodySystem.metered.size === 0) return { mean: 0, brightest: 0 }
@@ -3554,7 +3559,7 @@ export class SceneRenderer {
       seen.copy(position).project(camera)
       if (!(seen.z < 1 && Math.abs(seen.x) <= 1 && Math.abs(seen.y) <= 1)) continue
       sum += luminanceCdM2 * solidAngleSr
-      if (solidAngleSr >= SceneRenderer.HIGHLIGHT_SHARE * frame) brightest = Math.max(brightest, luminanceCdM2)
+      brightest = Math.max(brightest, luminanceCdM2 * Math.min(1, solidAngleSr / (SceneRenderer.HIGHLIGHT_SHARE * frame)) ** 2)
     }
     return { mean: sum / frame, brightest }
   }
