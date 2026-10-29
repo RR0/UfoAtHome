@@ -68,12 +68,24 @@ rr0-input-position .position-mode:hover:not(:disabled) { text-decoration-thickne
 rr0-input-position .position-mode:disabled { cursor: default; text-decoration: none; opacity: .75; }
 rr0-input-position .position-mode:focus-visible { outline: 2px solid #4af; outline-offset: 2px; border-radius: 2px; }
 rr0-input-position .position-axis { display: inline-flex; align-items: center; gap: .3em; white-space: nowrap; }
+/* East and North are two fields, each with its unit: room between the unit of one and the name of the next. */
+rr0-input-position :is(.position-local, .position-geo) { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .3em 1em; }
 rr0-input-position .position-from { display: inline-flex; align-items: center; gap: .3em; white-space: nowrap; }
 rr0-input-position .position-from select { width: auto; max-width: 14em; }
 rr0-input-position input[type="number"] { width: 7em; }
 rr0-input-position .position-geo input[type="number"] { width: 9.5em; }
-rr0-input-position .position-basis { width: auto; font-size: .85em; }
-rr0-input-position .position-basis.assumed { font-style: italic; }
+/* What it stands on looks as a date's does (see WitnessErrorView's basis mark): a pill after the name, shown on hover or while
+   edited, and always when it is not "stated". A list, for the keyboard, drawn as the pill. */
+rr0-input-position select.position-basis.position-basis {
+  order: -2; appearance: none; -webkit-appearance: none; width: auto; height: auto !important; min-height: 0; margin: 0;
+  padding: 0 8px !important; border: 1px solid var(--glow-dim, #b08a3e) !important; border-radius: 999px !important; background: none !important;
+  font: 600 11px/1.6 var(--sans, sans-serif) !important; color: var(--glow, #8a6a2a) !important; cursor: pointer; visibility: hidden;
+}
+:is(label, .parameter-row, .observer-position):is(:hover, :focus-within) rr0-input-position select.position-basis,
+rr0-input-position:is(:hover, :focus-within) select.position-basis,
+rr0-input-position select.position-basis:is(.measured, .derived, .assumed) { visibility: visible; }
+rr0-input-position select.position-basis:is(.assumed, .derived) { font-style: italic; }
+rr0-input-position .position-mode { order: -1; }
 rr0-input-position [hidden] { display: none !important; }
 `
 
