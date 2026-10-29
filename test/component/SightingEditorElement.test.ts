@@ -3061,6 +3061,18 @@ describe("SightingEditorElement canvas mode", () => {
     }
   })
 
+  it("keeps a reading's lanterns in the scene while the shapes are edited, without its bodies", () => {
+    const element = mount()
+    const lanterns = [{ id: "l", site: { eastM: 0, northM: 1500 }, group: { count: 3, fromT: 0, untilT: 10000 } }]
+    element.sightingData = { ...withPicture(), interpretation: { bodies: [{ id: "b", model: { id: "sphere" }, track: [] }], lanterns } }
+    open(element, "group-shape")
+    // What the scene holds is computed: the lanterns as bodies of their own, and none of the reading's.
+    const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as { interpretation?: { bodies: { id: string }[] } }
+    const ids = scene.interpretation?.bodies.map(body => body.id) ?? []
+    expect(ids).toContain("l-lantern-1")
+    expect(ids).not.toContain("b")
+  })
+
   it("turns the observer, not the picture, when the drag starts outside the picture", async () => {
     const element = mount()
     element.sightingData = withPicture()

@@ -6913,15 +6913,30 @@ export class SightingEditorElement extends HTMLElement {
    * Re-read after every edit of a body, and after a recording is loaded, since the scene holds the
    * interpretation it was last handed.
    */
+  /** The part of an interpretation that is computed in the sky rather than drawn as bodies, the same object for the same one (the scene
+   * computes it again when given another), undefined when it has none. */
+  private skyOf(interpretation: InterpretationJson | undefined): InterpretationJson | undefined {
+    if (!interpretation || (!interpretation.lanterns?.length && !interpretation.flares?.length)) return undefined
+    if (this.skyPart?.of !== interpretation) {
+      this.skyPart = { of: interpretation, sky: { bodies: [], lanterns: interpretation.lanterns, flares: interpretation.flares } }
+    }
+    return this.skyPart.sky
+  }
+
+  private skyPart?: { of: InterpretationJson, sky: InterpretationJson }
+
   private syncBodiesShown(): void {
     // A reading of an account has no shape of its own to protect: its bodies are all there is to see.
     const editingShapes = this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-shapes")?.hidden === false
     const shown = !editingShapes || this.isReading
-    const interpretation = shown ? this.ufoElement.sighting.interpretation : undefined
-    this.sceneElement.compareAccount = interpretation !== undefined
+    const whole = this.ufoElement.sighting.interpretation
+    // While the shapes are edited, the bodies of a reading are not drawn over them; what it computes in the sky (lanterns, decoy flares)
+    // is no body that stands for a shape, and stays, as the launches and beams do.
+    const interpretation = shown ? whole : this.skyOf(whole)
+    this.sceneElement.compareAccount = shown && interpretation !== undefined
     if (this.sceneElement.interpretation !== interpretation) this.sceneElement.interpretation = interpretation
     // The selector says what is shown, and a reading has no shapes to choose between.
-    this.accountViewSelect.value = interpretation !== undefined ? "bodies" : "shapes"
+    this.accountViewSelect.value = shown && interpretation !== undefined ? "bodies" : "shapes"
     this.syncSkyParts()
     this.shadow.getElementById("account-view-row")!.hidden = this.isReading
   }
