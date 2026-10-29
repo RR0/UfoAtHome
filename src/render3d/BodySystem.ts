@@ -155,6 +155,7 @@ export class BodySystem {
     this.frame = frame
     this.lastSet = [states, frame, seconds, display, ids]
     this.pointLights.clear()
+    this.shapeShares.clear()
     this.metered.clear()
     const seen = new Set<string>()
     for (const stated of states) {
@@ -179,10 +180,11 @@ export class BodySystem {
       if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
       this.shine(state, holder, whole ? undefined : glowing, frame)
       if (whole && glowing) this.hideSpecks(holder, glowing, frame)
-      // Drawn as a point under a pixel (see shine), its shape is not drawn as well: hit or missed by the rasteriser, it lit a pixel with its
-      // whole luminance one frame and nothing the next.
-      const asPoint = this.pointLights.has(state.id)
-      for (const child of holder.children) child.visible = !asPoint
+      // Drawn as a point under a pixel or two (see shine), its shape shows only its share of the light, and none at all under a pixel and a
+      // half: hit or missed by the rasteriser, it lit a pixel with its whole luminance one frame and nothing the next.
+      const shape = this.shapeShares.get(state.id) ?? 1
+      for (const child of holder.children) child.visible = shape > 0
+      if (shape < 1) BodySystem.fade(holder, 1 - (1 - state.appearance.transparency) * shape)
       // A device setting its own exposure follows the light over a second or so, not a flame's wavering (see BodyJson.flicker).
       const metered = this.metered.get(state.id)
       if (metered && state !== stated && state.appearance.luminanceCdM2 > 0) {
@@ -208,6 +210,11 @@ export class BodySystem {
 
   /** The light of each body too small for a pixel, by its id, as an illuminance at the eye in the scene's own units (see shine). */
   private readonly pointLights = new Map<string, { position: Vector3, light: readonly [number, number, number] }>()
+  /** How much of each glowing body's light its shape shows rather than its point, by its id (see shine): 1 for one many pixels across. */
+  private readonly shapeShares = new Map<string, number>()
+  /** How many pixels across a glowing body starts showing its shape, and shows it whole, the point it is drawn as below giving way to it. */
+  private static readonly SHAPE_FROM_PIXELS = 1.5
+  private static readonly SHAPE_FULL_PIXELS = 3
   /**
    * Each body that glows whole, by its id: where it stands, its luminance and the solid angle it fills — what a device that sets its own
    * exposure meters of it, with the sky (see SceneRenderer.applyMedium).
@@ -325,9 +332,15 @@ export class BodySystem {
     veil.shine(holder.position, [light[0] * seen, light[1] * seen, light[2] * seen], (angularRadius * 180) / Math.PI * reach)
     this.metered.set(state.id, { position: holder.position.clone(), luminanceCdM2: luminanceCdM2 * seen, solidAngleSr: solidAngle })
     // Under a pixel its disc is hit or missed by the rasteriser, and its light with it: a lantern two kilometres off was a point one frame
-    // and nothing the next, or nothing at all. It is then drawn as a star is, by the light it sends (see PointSources).
-    if (frame.pixelRad !== undefined && 2 * angularRadius < frame.pixelRad) {
-      this.pointLights.set(state.id, { position: holder.position.clone(), light: [light[0] * seen, light[1] * seen, light[2] * seen] })
+    // and nothing the next, or nothing at all. It is then drawn as a star is, by the light it sends (see PointSources). A few pixels
+    // across, a shape shows only some of that light, without the spread a star's has: it is drawn as both, the point's share going as the
+    // shape's comes (see SHAPE_FROM_PIXELS), so that a lantern drifting off does not brighten all at once as it passes under a pixel.
+    const pixels = frame.pixelRad !== undefined ? 2 * angularRadius / frame.pixelRad : Infinity
+    const shape = Math.min(1, Math.max(0, (pixels - BodySystem.SHAPE_FROM_PIXELS) / (BodySystem.SHAPE_FULL_PIXELS - BodySystem.SHAPE_FROM_PIXELS)))
+    this.shapeShares.set(state.id, shape)
+    if (shape < 1) {
+      const point = seen * (1 - shape)
+      this.pointLights.set(state.id, { position: holder.position.clone(), light: [light[0] * point, light[1] * point, light[2] * point] })
     }
   }
 
