@@ -20,10 +20,11 @@
  * of today's building and grounds (see public/models/ycpan3468-us-capitol/CREDITS.md), whose daylight is baked into its texture: it stands
  * for the floodlit building of the photograph, and its east front is the one extended in 1958-1962, which the photograph does not show.
  *
- * Then, the photograph left behind, the photographer walks towards the dome along the lawn, stopping every ten metres for another photograph
- * (a pose of two seconds taken walking is streaks), keeping the lamps low in the picture and the dome high: the lamps come nearer, brighter
- * and wider apart, and their ghosts, still each across the lens's axis from its lamp, grow brighter and move against them. The walk is
- * ASSUMED, as the rest.
+ * Then, the photograph left behind, the photographer walks straight towards the dome along the lawn, keeping the lamps low in the picture
+ * and the dome high, and stops for a photograph: the lamps nearer, brighter and wider apart, their ghosts, still each across the lens's axis
+ * from its lamp, brighter. Then steps to the left, facing the same way, and stops for another: the lamps nearer than the dome slide across
+ * the picture more than it, and their ghosts against them. Each stop is long enough for the aim to settle and a pose of two seconds (one
+ * taken walking is streaks). The walk is ASSUMED, as the rest.
  *
  * Writes ../../../public/demo-data/sky-test-washington-capitol.json. Run with `node --import tsx`.
  */
@@ -34,13 +35,14 @@ import { fileURLToPath } from "node:url"
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "public", "demo-data", "sky-test-washington-capitol.json")
 /** The photograph, at 2000 x 1322 px: a scan wider and finer than rr0.org's 344 x 286 crop of it, hosted beside the demo. */
 const PHOTO = "/demo-data/washington-capitol-1952.jpg"
-/** The photograph, then a moment, then the walk towards the dome in stages, each a few steps and a photograph, the last held. */
+/** The photograph, then a moment, then the walk: straight towards the dome, a stop, a step to the left, a stop. */
 const PHOTO_S = 12
 const WALK_FROM_S = 14
-/** How far each stage goes, m, at a walking pace, and how long the photographer then stands for the photograph: the aim settling, then a pose of 2 s. */
-const STAGE_M = 10
+/** A walking pace, m/s, and how long the photographer stands at each stop: the aim settling, then a pose of 2 s. */
 const PACE_MS = 1.4
 const STAND_S = 6
+/** How far to the left the photographer steps, m. */
+const SIDE_M = 30
 /** How near the dome the walk stops, m: the walks' lamps 40 m ahead, the balustrade's 75 m. */
 const WALK_TO_M = 150
 const why = "Assumed: the photograph is undated beyond July 1952, and its photographer, camera and standpoint are unknown."
@@ -55,11 +57,11 @@ const DOME = { lat: 38.88992, lng: -77.00906 }
 const DISTANCE_M = 228.5
 const METRES_PER_DEG_LNG = 111320 * Math.cos(DOME.lat * Math.PI / 180)
 const OBSERVER = { lat: DOME.lat, lng: DOME.lng - DISTANCE_M / METRES_PER_DEG_LNG }
-/** How many stages the walk is, when it ends, and the recording with it. */
-const STAGES = Math.round((DISTANCE_M - WALK_TO_M) / STAGE_M)
-const STAGE_S = STAGE_M / PACE_MS + STAND_S
-const WALK_UNTIL_S = WALK_FROM_S + STAGES * STAGE_S
-const DURATION_S = Math.ceil(WALK_UNTIL_S + 2)
+/** When the walk towards the dome ends, when the step to the left does, and the recording with it. */
+const APPROACH_UNTIL_S = WALK_FROM_S + (DISTANCE_M - WALK_TO_M) / PACE_MS
+const SIDE_FROM_S = APPROACH_UNTIL_S + STAND_S
+const SIDE_UNTIL_S = SIDE_FROM_S + SIDE_M / PACE_MS
+const DURATION_S = Math.ceil(SIDE_UNTIL_S + STAND_S)
 
 /**
  * The photograph, as measured on it: its size, the lens's axis in it, and its focal length in its own pixels. The focal length is the drum's
@@ -149,14 +151,28 @@ const raisedAt = (fromDomeM: number) => {
   return (globe + top) / 2
 }
 const pitchOffset = pitchDeg - raisedAt(DISTANCE_M)
-/** Where the photographer stands, at a distance from the dome: straight east along the lawn, the lens kept on its heading. */
-const standing = (fromDomeM: number) => ({ ...pose, lng: DOME.lng - fromDomeM / METRES_PER_DEG_LNG, pitchDeg: Math.round((raisedAt(fromDomeM) + pitchOffset) * 100) / 100 })
-/** The walk, stage by stage: walking the stage, then standing still for the photograph. */
-const walk = Array.from({ length: STAGES }, (_, i) => {
-  const arrive = WALK_FROM_S + i * STAGE_S + STAGE_M / PACE_MS
-  const fromDomeM = DISTANCE_M - (DISTANCE_M - WALK_TO_M) * (i + 1) / STAGES
-  return [{ t: Math.round(arrive * 1000), pose: standing(fromDomeM) }, { t: Math.round((arrive + STAND_S) * 1000), pose: standing(fromDomeM) }]
-}).flat()
+/**
+ * Where the photographer stands, at a distance from the dome and metres to the left (north) of the line to it: turned to keep the dome
+ * where it was in the picture, the lens raised as it goes.
+ */
+const standing = (fromDomeM: number, leftM = 0) => ({
+  ...pose, lat: DOME.lat + leftM / 111320, lng: DOME.lng - fromDomeM / METRES_PER_DEG_LNG,
+  headingDeg: Math.round((headingDeg + toDeg(Math.atan(leftM / fromDomeM))) * 100) / 100,
+  pitchDeg: Math.round((raisedAt(fromDomeM) + pitchOffset) * 100) / 100
+})
+/** Straight towards the dome at an even pace, a keyframe every four seconds for the lens to be raised as it goes; then the step left. */
+const approachS = APPROACH_UNTIL_S - WALK_FROM_S
+const approachSteps = Math.round(approachS / 4)
+const approach = Array.from({ length: approachSteps + 1 }, (_, i) => {
+  const s = approachS * i / approachSteps
+  return { t: Math.round((WALK_FROM_S + s) * 1000), pose: standing(DISTANCE_M - (DISTANCE_M - WALK_TO_M) * s / approachS) }
+})
+const near = standing(WALK_TO_M), left = standing(WALK_TO_M, SIDE_M)
+const walk = [
+  ...approach,
+  { t: Math.round(SIDE_FROM_S * 1000), pose: near },
+  { t: Math.round(SIDE_UNTIL_S * 1000), pose: left }
+]
 // The photograph laid over the scene: its own centre is off the lens's axis by as much as it was cropped.
 const centre = offAxis(PICTURE.width / 2, PICTURE.height / 2)
 const recording = {
@@ -201,7 +217,8 @@ const recording = {
     }]
   },
   timeline: { keyframes: [{ t: 0, shapes: [] }], order: [], groups: [] },
-  observerTrack: { keyframes: [{ t: 0, pose }, { t: WALK_FROM_S * 1000, pose }, ...walk, { t: DURATION_S * 1000, pose: walk[walk.length - 1].pose }] },
+  // Still until the walk sets off, its first keyframe where the photograph was taken.
+  observerTrack: { keyframes: [{ t: 0, pose }, ...walk, { t: DURATION_S * 1000, pose: left }] },
   soundTrack: { keyframes: [] },
   milestones: [
     {
@@ -225,10 +242,18 @@ const recording = {
     },
     {
       t: WALK_FROM_S * 1000, label: "C", note: {
-        en: "The photographer walks towards the dome, stopping for a photograph every ten metres (pause on one): the lamps come nearer, brighter and wider apart, and each ghost, always across the lens's axis from its lamp, brightens with it and moves against it.",
-        fr: "Le photographe s'approche du dôme en s'arrêtant tous les dix mètres pour une photo (mettez en pause sur l'une d'elles) : les candélabres se rapprochent, plus vifs et plus écartés, et chaque reflet, toujours à l'opposé de son candélabre par rapport à l'axe de l'objectif, s'avive avec lui et se déplace à l'inverse.",
-        es: "El fotógrafo se acerca a la cúpula deteniéndose cada diez metros para una foto (pausa en una de ellas): los candelabros se acercan, más vivos y más separados, y cada reflejo, siempre al otro lado del eje del objetivo respecto a su candelabro, se aviva con él y se mueve al revés.",
-        it: "Il fotografo si avvicina alla cupola fermandosi ogni dieci metri per una foto (metti in pausa su una di esse): i candelabri si avvicinano, più vivi e più distanziati, e ogni riflesso, sempre dalla parte opposta dell'asse dell'obiettivo rispetto al suo candelabro, si ravviva con esso e si muove al contrario."
+        en: "The photographer walks towards the dome, and stops for a photograph (pause on it): the lamps nearer, brighter and wider apart, and each ghost, always across the lens's axis from its lamp, brighter with it.",
+        fr: "Le photographe s'approche du dôme et s'arrête pour une photo (mettez en pause) : les candélabres plus proches, plus vifs et plus écartés, et chaque reflet, toujours à l'opposé de son candélabre par rapport à l'axe de l'objectif, plus vif avec lui.",
+        es: "El fotógrafo se acerca a la cúpula y se detiene para una foto (pausa en ella): los candelabros más cerca, más vivos y más separados, y cada reflejo, siempre al otro lado del eje del objetivo respecto a su candelabro, más vivo con él.",
+        it: "Il fotografo si avvicina alla cupola e si ferma per una foto (metti in pausa): i candelabri più vicini, più vivi e più distanziati, e ogni riflesso, sempre dalla parte opposta dell'asse dell'obiettivo rispetto al suo candelabro, più vivo con esso."
+      }
+    },
+    {
+      t: Math.round(SIDE_FROM_S * 1000), label: "D", note: {
+        en: "He steps to the left, keeping the dome in the middle of the picture, and stops for another: the lamps, nearer than the dome, slide to the right against it, and their ghosts, across the axis from them, to the left.",
+        fr: "Il se décale vers la gauche en gardant le dôme au milieu de l'image, et s'arrête pour une autre photo : les candélabres, plus proches que le dôme, glissent vers la droite par rapport à lui, et leurs reflets, à l'opposé par rapport à l'axe, vers la gauche.",
+        es: "Se desplaza hacia la izquierda manteniendo la cúpula en el centro de la imagen, y se detiene para otra foto: los candelabros, más cerca que la cúpula, se deslizan hacia la derecha respecto a ella, y sus reflejos, al otro lado del eje, hacia la izquierda.",
+        it: "Si sposta verso sinistra tenendo la cupola al centro dell'immagine, e si ferma per un'altra foto: i candelabri, più vicini della cupola, scivolano verso destra rispetto a essa, e i loro riflessi, dalla parte opposta dell'asse, verso sinistra."
       }
     }
   ],

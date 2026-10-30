@@ -30,7 +30,7 @@
   "second": 0
  },
  "utcOffsetHours": -4,
- "durationSeconds": 122,
+ "durationSeconds": 104,
  "place": [
   {
    "lat": 38.88992,
@@ -127,211 +127,211 @@
      "lat": 38.88992,
      "lng": -77.01169715745546,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 12.789070223238243,
+     "headingDeg": 88.11,
+     "pitchDeg": 12.79,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 21143,
+    "t": 18005,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01158390972009,
+     "lng": -77.01163244446381,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 13.42,
+     "headingDeg": 88.11,
+     "pitchDeg": 13.14,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 27143,
+    "t": 22010,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01158390972009,
+     "lng": -77.01156773147218,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 13.42,
+     "headingDeg": 88.11,
+     "pitchDeg": 13.51,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 34286,
+    "t": 26015,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01147066198472,
+     "lng": -77.01150301848054,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 14.1,
+     "headingDeg": 88.11,
+     "pitchDeg": 13.9,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 40286,
+    "t": 30020,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01147066198472,
+     "lng": -77.01143830548891,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 14.1,
+     "headingDeg": 88.11,
+     "pitchDeg": 14.31,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 47429,
+    "t": 34026,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01135741424936,
+     "lng": -77.01137359249726,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 14.86,
+     "headingDeg": 88.11,
+     "pitchDeg": 14.75,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 53429,
+    "t": 38031,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01135741424936,
+     "lng": -77.01130887950562,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 14.86,
+     "headingDeg": 88.11,
+     "pitchDeg": 15.21,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 60571,
+    "t": 42036,
     "pose": {
      "lat": 38.88992,
      "lng": -77.01124416651399,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
+     "headingDeg": 88.11,
      "pitchDeg": 15.7,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 66571,
+    "t": 46041,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01124416651399,
+     "lng": -77.01117945352235,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 15.7,
+     "headingDeg": 88.11,
+     "pitchDeg": 16.22,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 73714,
+    "t": 50046,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01113091877862,
+     "lng": -77.0111147405307,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 16.63,
+     "headingDeg": 88.11,
+     "pitchDeg": 16.78,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 79714,
+    "t": 54051,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01113091877862,
+     "lng": -77.01105002753907,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 16.63,
+     "headingDeg": 88.11,
+     "pitchDeg": 17.37,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 86857,
+    "t": 58056,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01101767104325,
+     "lng": -77.01098531454743,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 17.68,
+     "headingDeg": 88.11,
+     "pitchDeg": 18.01,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 92857,
+    "t": 62061,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01101767104325,
+     "lng": -77.0109206015558,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 17.68,
+     "headingDeg": 88.11,
+     "pitchDeg": 18.7,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 100000,
+    "t": 66066,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01090442330788,
+     "lng": -77.01085588856415,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 18.88,
+     "headingDeg": 88.11,
+     "pitchDeg": 19.45,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 106000,
-    "pose": {
-     "lat": 38.88992,
-     "lng": -77.01090442330788,
-     "elevationM": 0,
-     "headingDeg": 88.10714622600489,
-     "pitchDeg": 18.88,
-     "fovDeg": 30,
-     "fNumber": 4
-    }
-   },
-   {
-    "t": 113143,
+    "t": 70071,
     "pose": {
      "lat": 38.88992,
      "lng": -77.0107911755725,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
+     "headingDeg": 88.11,
      "pitchDeg": 20.26,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 119143,
+    "t": 76071,
     "pose": {
      "lat": 38.88992,
      "lng": -77.0107911755725,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
+     "headingDeg": 88.11,
      "pitchDeg": 20.26,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 122000,
+    "t": 97500,
     "pose": {
-     "lat": 38.88992,
+     "lat": 38.890189493352494,
      "lng": -77.0107911755725,
      "elevationM": 0,
-     "headingDeg": 88.10714622600489,
+     "headingDeg": 99.42,
+     "pitchDeg": 20.26,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 104000,
+    "pose": {
+     "lat": 38.890189493352494,
+     "lng": -77.0107911755725,
+     "elevationM": 0,
+     "headingDeg": 99.42,
      "pitchDeg": 20.26,
      "fovDeg": 30,
      "fNumber": 4
@@ -367,10 +367,20 @@
    "t": 14000,
    "label": "C",
    "note": {
-    "en": "The photographer walks towards the dome, stopping for a photograph every ten metres (pause on one): the lamps come nearer, brighter and wider apart, and each ghost, always across the lens's axis from its lamp, brightens with it and moves against it.",
-    "fr": "Le photographe s'approche du dôme en s'arrêtant tous les dix mètres pour une photo (mettez en pause sur l'une d'elles) : les candélabres se rapprochent, plus vifs et plus écartés, et chaque reflet, toujours à l'opposé de son candélabre par rapport à l'axe de l'objectif, s'avive avec lui et se déplace à l'inverse.",
-    "es": "El fotógrafo se acerca a la cúpula deteniéndose cada diez metros para una foto (pausa en una de ellas): los candelabros se acercan, más vivos y más separados, y cada reflejo, siempre al otro lado del eje del objetivo respecto a su candelabro, se aviva con él y se mueve al revés.",
-    "it": "Il fotografo si avvicina alla cupola fermandosi ogni dieci metri per una foto (metti in pausa su una di esse): i candelabri si avvicinano, più vivi e più distanziati, e ogni riflesso, sempre dalla parte opposta dell'asse dell'obiettivo rispetto al suo candelabro, si ravviva con esso e si muove al contrario."
+    "en": "The photographer walks towards the dome, and stops for a photograph (pause on it): the lamps nearer, brighter and wider apart, and each ghost, always across the lens's axis from its lamp, brighter with it.",
+    "fr": "Le photographe s'approche du dôme et s'arrête pour une photo (mettez en pause) : les candélabres plus proches, plus vifs et plus écartés, et chaque reflet, toujours à l'opposé de son candélabre par rapport à l'axe de l'objectif, plus vif avec lui.",
+    "es": "El fotógrafo se acerca a la cúpula y se detiene para una foto (pausa en ella): los candelabros más cerca, más vivos y más separados, y cada reflejo, siempre al otro lado del eje del objetivo respecto a su candelabro, más vivo con él.",
+    "it": "Il fotografo si avvicina alla cupola e si ferma per una foto (metti in pausa): i candelabri più vicini, più vivi e più distanziati, e ogni riflesso, sempre dalla parte opposta dell'asse dell'obiettivo rispetto al suo candelabro, più vivo con esso."
+   }
+  },
+  {
+   "t": 76071,
+   "label": "D",
+   "note": {
+    "en": "He steps to the left, keeping the dome in the middle of the picture, and stops for another: the lamps, nearer than the dome, slide to the right against it, and their ghosts, across the axis from them, to the left.",
+    "fr": "Il se décale vers la gauche en gardant le dôme au milieu de l'image, et s'arrête pour une autre photo : les candélabres, plus proches que le dôme, glissent vers la droite par rapport à lui, et leurs reflets, à l'opposé par rapport à l'axe, vers la gauche.",
+    "es": "Se desplaza hacia la izquierda manteniendo la cúpula en el centro de la imagen, y se detiene para otra foto: los candelabros, más cerca que la cúpula, se deslizan hacia la derecha respecto a ella, y sus reflejos, al otro lado del eje, hacia la izquierda.",
+    "it": "Si sposta verso sinistra tenendo la cupola al centro dell'immagine, e si ferma per un'altra foto: i candelabri, più vicini della cupola, scivolano verso destra rispetto a essa, e i loro riflessi, dalla parte opposta dell'asse, verso sinistra."
    }
   }
  ],
