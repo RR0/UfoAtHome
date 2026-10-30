@@ -2438,8 +2438,9 @@ export class SceneRenderer {
     const visible = this.compassHovered || this.compassForced
     if (!this.compassSprites.some(sprite => sprite.visible !== visible)) return
     for (const sprite of this.compassSprites) sprite.visible = visible
-    // Hover changes a viewing aid, not the observation. Keep the film and its progress intact.
-    if (this.developingExposure) {
+    // Hover changes a viewing aid, not the observation. Keep the film and its progress intact: but not while playing, when the film is not
+    // what is shown (see poseFollows), and showing it flashed an old pose over the playing picture.
+    if (this.developingExposure && !this.framesDriven) {
       if (this.exposureInstantsDone > 0) this.presentExposure()
     } else this.render()
   }
@@ -4695,9 +4696,9 @@ export class SceneRenderer {
         // Drawn as light, then finished with the lens's ghosts over it (see GhostPass).
         this.exposureSubjectBounds = []
         this.renderOnce(ghosts.frame)
-        // Shown until the pose started just below has a film to show (see presentExposure). It is not the pose, though, and the ghost a still
-        // pointer named was not found in it, its name going out at every frame of a playing pose: a pick does not read it back.
-        ghosts.develop(this.renderer, ghosts.frame, this.ghostOptics, 1, this.sunBeyondPicture(), !this.developingExposure)
+        // Shown until the pose started just below has a film to show (see presentExposure): then not what is shown, and not read back by a
+        // pick (the ghost a still pointer named was not found in it).
+        ghosts.develop(this.renderer, ghosts.frame, this.ghostOptics, 1, this.sunBeyondPicture(), !this.poseFollows)
         this.onMapSubjectBounds?.(this.exposureSubjectBounds)
       } else {
         this.renderOnce()
@@ -4706,7 +4707,17 @@ export class SceneRenderer {
     } finally {
       this.resolution.endDrawing()
     }
-    if (this.developingExposure) this.startExposure()
+    if (this.poseFollows) this.startExposure()
+  }
+
+  /**
+   * Whether the frame just drawn is followed by its pose, developed over the next frames (see startExposure): when the scene draws a pose,
+   * and is not being played. Played, the pose would start again at every frame and never get past its first instant or two, a picture
+   * of scattered beads gained up to its exposure, flashing between the instant drawn whole and that, frame after frame: the instant is
+   * shown instead, exposed as the pose, and the pose is developed once the playing stops.
+   */
+  private get poseFollows(): boolean {
+    return this.developingExposure && !this.framesDriven
   }
 
   private drawn = 0
@@ -6557,6 +6568,8 @@ export class SceneRenderer {
     // one the last motion had lowered it to would otherwise stay on it for good.
     const resized = !running && this.renderer.getPixelRatio() !== this.resolution.maximum
     if (resized) this.applyPixelRatio(this.resolution.maximum)
+    // Stopped, a pose is developed again from the instant the playing stopped at (see poseFollows).
+    if (!running && this.developingExposure) this.render()
     this.syncAnimationLoop()
     // The loop is what normally repaints; with it stopped, this is what leaves a coherent still —
     // and a frame asked for while a loop or a driver was expected to draw it must not wait forever
