@@ -125,14 +125,21 @@ export class LensGhosts {
 
   /**
    * A phone: few elements, but a sensor and its cover glass close behind them, which send back a ghost mirrored through the centre, small
-   * and nearly sharp — the familiar dot opposite every streetlight in a phone's night video, in the light's own colour. Two fainter, wider
-   * ones from the lens itself. The shares are ASSUMED (no measurement was found): set so that the mirrored ghost of a saturated traffic light
-   * shows plainly, as it does in such videos, while that of a moderately bright light does not.
+   * and nearly sharp — the familiar dot opposite every streetlight in a phone's night video, the light's colour less its red. Two fainter, wider
+   * ones from the lens itself, a tenth and a thirteenth of it, ASSUMED.
+   *
+   * MEASURED on a phone's photograph of the Sun through a cirrostratus (Royan, 29 October 2026, see the halo demo): the sensor's ghost adds,
+   * at its centre, as much light again as the grey sky round it (0.94 of it), in a disc of some 0.45 degrees, and it is turquoise: what it
+   * adds is red 0.41, green 1, blue 0.83, against a sky that is neutral grey. The green-blue is put down to the coatings of what it comes
+   * back through (users' reports; no maker's account was found). The lens's own two leave nothing measurable on that sky. The share that
+   * gives (5e-5, and the others in proportion) is a fortieth of the one first ASSUMED for a traffic light's ghost in a night video, which
+   * drew the Sun's as an opaque white disc. That video's ghosts still show: it is the phone's development that lifts them off a dark
+   * ground (see PhoneDevelopment), not a stronger reflection.
    */
   static readonly PHONE: readonly LensGhost[] = [
-    { scale: -1, share: 2e-3, blur: 0.006, cause: "sensor" },
-    { scale: -0.45, share: 2e-4, blur: 0.02, tint: [0.7, 1, 0.8] },
-    { scale: 0.55, share: 1.5e-4, blur: 0.035, tint: [1, 0.75, 1] }
+    { scale: -1, share: 5e-5, blur: 0.006, cause: "sensor", tint: [0.41, 1, 0.83] },
+    { scale: -0.45, share: 5e-6, blur: 0.02, tint: [0.7, 1, 0.8] },
+    { scale: 0.55, share: 3.75e-6, blur: 0.035, tint: [1, 0.75, 1] }
   ]
 
   /**

@@ -66,6 +66,7 @@ import { PointSources } from "./PointSources.js"
 import { Veil } from "./Veil.js"
 import { ProbeIrradiance } from "./ProbeIrradiance.js"
 import { FrameMeter } from "./FrameMeter.js"
+import { PhoneDevelopment } from "../engine/instrument/PhoneDevelopment.js"
 import { BRIGHT_STARS } from "../engine/astronomy/brightStarCatalog.js"
 import type { BrightStar } from "../engine/astronomy/brightStarCatalog.js"
 import { defaultTerrainProviders } from "./terrain/defaultTerrainProviders.js"
@@ -3473,7 +3474,8 @@ export class SceneRenderer {
   }
 
   /** What the picture is recorded on and how it was exposed — see setMedium. */
-  private medium?: { kind: RecordingMedium["kind"], iso: number, autoExposure: boolean, maxIso?: number, metering: MeteringMode, exposureSeconds: number, fNumber: number }
+  private medium?: { kind: RecordingMedium["kind"], iso: number, autoExposure: boolean, maxIso?: number, metering: MeteringMode, exposureSeconds: number, fNumber: number,
+    development?: RecordingMedium["development"] }
 
   /**
    * What the picture is recorded on, and the exposure it was given: the shutter, the f-number and
@@ -3486,7 +3488,7 @@ export class SceneRenderer {
     const next = medium && exposureSeconds !== undefined && exposureSeconds > 0 && fNumber !== undefined && fNumber > 0
       ? {
         kind: medium.kind, iso: iso ?? medium.iso, autoExposure: medium.autoExposure === true && iso === undefined, maxIso: medium.maxIso,
-        metering: metering ?? medium.metering ?? "average", exposureSeconds, fNumber
+        metering: metering ?? medium.metering ?? "average", exposureSeconds, fNumber, development: medium.development
       }
       : undefined
     if (JSON.stringify(next) === JSON.stringify(this.medium)) return
@@ -3512,7 +3514,8 @@ export class SceneRenderer {
       EYE_UNIFORMS.uMedium.value = 0
       return
     }
-    EYE_UNIFORMS.uMedium.value = medium.kind === "negative" ? 1 : medium.kind === "slide" ? 2 : 3
+    const developed = medium.kind === "sensor" && medium.development === "computational"
+    EYE_UNIFORMS.uMedium.value = medium.kind === "negative" ? 1 : medium.kind === "slide" ? 2 : developed ? 4 : 3
     // A device setting its own exposure reads its own frame (see FrameMeter); until it has, and for a sky nobody stated, the light the
     // scene is adapted to.
     const frame = medium.autoExposure ? this.frameLight : undefined
@@ -3531,9 +3534,15 @@ export class SceneRenderer {
       exposure = Math.min(exposure, SceneRenderer.ZONE_KEPT_AT / (0.18 * relativeScale * frame.brightest))
     }
     // A device exposing itself follows the light only as far as its sensor's gain goes.
-    EYE_UNIFORMS.uMediumExposure.value = exposure !== undefined
+    const exposed = exposure !== undefined
       ? Math.min(exposure, medium.maxIso !== undefined ? set(medium.maxIso) : Infinity)
       : set(medium.iso)
+    EYE_UNIFORMS.uMediumExposure.value = exposed
+    // A phone then develops what that exposure left under a middle grey back up to one (see PhoneDevelopment): nothing to do when
+    // nothing held its exposure down, a night's whole lift when its sensor's gain ran out.
+    EYE_UNIFORMS.uPhoneStrength.value = developed && metered !== undefined && metered > 0
+      ? PhoneDevelopment.strengthFor(PhoneDevelopment.MID_GREY * exposed * relativeScale * metered)
+      : 0
   }
 
   /**

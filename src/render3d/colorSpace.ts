@@ -87,11 +87,13 @@ vec3 purkinje(vec3 rgb) {
   return mix(rgb / y, tint, rods) * seen;
 }
 
-/** What records the picture: 0 an eye, 1 a printed negative, 2 a slide, 3 a sensor — see
+/** What records the picture: 0 an eye, 1 a printed negative, 2 a slide, 3 a sensor, 4 a sensor a phone develops — see
  * RecordingMedium and EYE_UNIFORMS. */
 uniform float uMedium;
 /** The exposure one relative unit gives the medium, in its middle greys. */
 uniform float uMediumExposure;
+/** How hard a phone lifts what its exposure left dark (see PhoneDevelopment): 0, a straight line. */
+uniform float uPhoneStrength;
 /** Where a printed negative's and a slide's curve put a middle grey (0.18) at an exposure of one. */
 const float MEDIUM_MID_GREY = 0.18;
 
@@ -100,9 +102,10 @@ const float MEDIUM_MID_GREY = 0.18;
  * own and the same whatever the sky, since a film does not adapt. The negative's and the slide's
  * are logistic in the logarithm of the exposure, which is what a film's characteristic curve is —
  * a toe, a straight line, a shoulder — the slide's steeper; the sensor's is straight and then
- * stops: past full it has nothing more to give.
+ * stops: past full it has nothing more to give. A phone's is that line developed by its own processing (see PhoneDevelopment).
  */
 float recorded(float h) {
+  if (uMedium > 3.5 && uPhoneStrength > 1e-3) return log(1.0 + uPhoneStrength * min(1.0, MEDIUM_MID_GREY * h)) / log(1.0 + uPhoneStrength);
   if (uMedium > 2.5) return min(1.0, MEDIUM_MID_GREY * h);
   float power = pow(h, uMedium > 1.5 ? 1.8 : 1.2);
   return power / (power + (1.0 / MEDIUM_MID_GREY - 1.0));
@@ -164,7 +167,7 @@ vec3 respond(vec3 relative) {
  */
 export const EYE_UNIFORMS = {
   uRodShare: { value: 0 }, uRelativeScale: { value: 1 }, uHasOverlay: { value: 1 },
-  uMedium: { value: 0 }, uMediumExposure: { value: 1 },
+  uMedium: { value: 0 }, uMediumExposure: { value: 1 }, uPhoneStrength: { value: 0 },
   uColorVision: { value: new Matrix3() }, uContrast: { value: 1 }
 }
 

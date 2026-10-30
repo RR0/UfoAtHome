@@ -117,6 +117,9 @@ export interface RecordingMedium {
   /** How such a device reads the light it is exposed by (see MeteringMode): "average" when absent. A recording states its own when it
    * knows it (Sighting.metering). */
   metering?: MeteringMode
+  /** How the device develops what its sensor records: "computational" for a phone's default processing, which underexposes to keep the
+   * highlights and lifts the rest back (see PhoneDevelopment); a raw sensor's straight line when absent. */
+  development?: "computational"
 }
 
 /**
@@ -419,7 +422,7 @@ export const INSTRUMENTS: Instrument[] = [
     // A sensor, which the phone exposes itself from the scene it sees, up to a gain of about ISO 3200 (ASSUMED: what main cameras of
     // recent phones reach in video, where the shutter cannot be slower than a frame), keeping its highlights as recent phones do (a
     // recording of an older one states "average", see Sighting.metering).
-    medium: { kind: "sensor", iso: 100, autoExposure: true, maxIso: 3200, metering: "highlights" }
+    medium: { kind: "sensor", iso: 100, autoExposure: true, maxIso: 3200, metering: "highlights", development: "computational" }
   },
   {
     // The same silicon, held the way people actually hold a phone. The picture is TALLER than it is
@@ -444,7 +447,7 @@ export const INSTRUMENTS: Instrument[] = [
     apertureBlades: undefined,
     // The same silicon held the other way up: the same 1.4 µm pixels.
     detailUm: 1.4,
-    medium: { kind: "sensor", iso: 100, autoExposure: true, maxIso: 3200, metering: "highlights" }
+    medium: { kind: "sensor", iso: 100, autoExposure: true, maxIso: 3200, metering: "highlights", development: "computational" }
   },
   // Sensors from Stellarium's Oculars catalogue (see DigitalSlrs): the digital bodies a recent
   // photograph is most likely to have been made with.
