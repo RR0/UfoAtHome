@@ -43,8 +43,8 @@ const PACE_MS = 1.4
 const STAND_S = 6
 /** How far to the left the photographer steps, m. */
 const SIDE_M = 30
-/** How near the dome the walk stops, m: the walks' lamps 40 m ahead, the balustrade's 75 m. */
-const WALK_TO_M = 150
+/** How near the dome the walk stops, m: some thirty metres on, twenty seconds' walk, the walks' lamps 90 m ahead, the balustrade's 125 m. */
+const WALK_TO_M = 200
 const why = "Assumed: the photograph is undated beyond July 1952, and its photographer, camera and standpoint are unknown."
 const stone = "#e6e0d2"
 

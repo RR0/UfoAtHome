@@ -30,7 +30,7 @@
   "second": 0
  },
  "utcOffsetHours": -4,
- "durationSeconds": 104,
+ "durationSeconds": 68,
  "place": [
   {
    "lat": 38.88992,
@@ -134,205 +134,97 @@
     }
    },
    {
-    "t": 18005,
+    "t": 18071,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01163244446381,
+     "lng": -77.0116313727837,
      "elevationM": 0,
      "headingDeg": 88.11,
-     "pitchDeg": 13.14,
+     "pitchDeg": 13.15,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 22010,
+    "t": 22143,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01156773147218,
+     "lng": -77.01156558811195,
      "elevationM": 0,
      "headingDeg": 88.11,
-     "pitchDeg": 13.51,
+     "pitchDeg": 13.52,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 26015,
+    "t": 26214,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01150301848054,
+     "lng": -77.01149980344019,
      "elevationM": 0,
      "headingDeg": 88.11,
-     "pitchDeg": 13.9,
+     "pitchDeg": 13.92,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 30020,
+    "t": 30286,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01143830548891,
+     "lng": -77.01143401876844,
      "elevationM": 0,
      "headingDeg": 88.11,
-     "pitchDeg": 14.31,
+     "pitchDeg": 14.34,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 34026,
+    "t": 34357,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01137359249726,
+     "lng": -77.01136823409668,
      "elevationM": 0,
      "headingDeg": 88.11,
-     "pitchDeg": 14.75,
+     "pitchDeg": 14.79,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 38031,
+    "t": 40357,
     "pose": {
      "lat": 38.88992,
-     "lng": -77.01130887950562,
+     "lng": -77.01136823409668,
      "elevationM": 0,
      "headingDeg": 88.11,
-     "pitchDeg": 15.21,
+     "pitchDeg": 14.79,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 42036,
-    "pose": {
-     "lat": 38.88992,
-     "lng": -77.01124416651399,
-     "elevationM": 0,
-     "headingDeg": 88.11,
-     "pitchDeg": 15.7,
-     "fovDeg": 30,
-     "fNumber": 4
-    }
-   },
-   {
-    "t": 46041,
-    "pose": {
-     "lat": 38.88992,
-     "lng": -77.01117945352235,
-     "elevationM": 0,
-     "headingDeg": 88.11,
-     "pitchDeg": 16.22,
-     "fovDeg": 30,
-     "fNumber": 4
-    }
-   },
-   {
-    "t": 50046,
-    "pose": {
-     "lat": 38.88992,
-     "lng": -77.0111147405307,
-     "elevationM": 0,
-     "headingDeg": 88.11,
-     "pitchDeg": 16.78,
-     "fovDeg": 30,
-     "fNumber": 4
-    }
-   },
-   {
-    "t": 54051,
-    "pose": {
-     "lat": 38.88992,
-     "lng": -77.01105002753907,
-     "elevationM": 0,
-     "headingDeg": 88.11,
-     "pitchDeg": 17.37,
-     "fovDeg": 30,
-     "fNumber": 4
-    }
-   },
-   {
-    "t": 58056,
-    "pose": {
-     "lat": 38.88992,
-     "lng": -77.01098531454743,
-     "elevationM": 0,
-     "headingDeg": 88.11,
-     "pitchDeg": 18.01,
-     "fovDeg": 30,
-     "fNumber": 4
-    }
-   },
-   {
-    "t": 62061,
-    "pose": {
-     "lat": 38.88992,
-     "lng": -77.0109206015558,
-     "elevationM": 0,
-     "headingDeg": 88.11,
-     "pitchDeg": 18.7,
-     "fovDeg": 30,
-     "fNumber": 4
-    }
-   },
-   {
-    "t": 66066,
-    "pose": {
-     "lat": 38.88992,
-     "lng": -77.01085588856415,
-     "elevationM": 0,
-     "headingDeg": 88.11,
-     "pitchDeg": 19.45,
-     "fovDeg": 30,
-     "fNumber": 4
-    }
-   },
-   {
-    "t": 70071,
-    "pose": {
-     "lat": 38.88992,
-     "lng": -77.0107911755725,
-     "elevationM": 0,
-     "headingDeg": 88.11,
-     "pitchDeg": 20.26,
-     "fovDeg": 30,
-     "fNumber": 4
-    }
-   },
-   {
-    "t": 76071,
-    "pose": {
-     "lat": 38.88992,
-     "lng": -77.0107911755725,
-     "elevationM": 0,
-     "headingDeg": 88.11,
-     "pitchDeg": 20.26,
-     "fovDeg": 30,
-     "fNumber": 4
-    }
-   },
-   {
-    "t": 97500,
+    "t": 61786,
     "pose": {
      "lat": 38.890189493352494,
-     "lng": -77.0107911755725,
+     "lng": -77.01136823409668,
      "elevationM": 0,
-     "headingDeg": 99.42,
-     "pitchDeg": 20.26,
+     "headingDeg": 96.64,
+     "pitchDeg": 14.79,
      "fovDeg": 30,
      "fNumber": 4
     }
    },
    {
-    "t": 104000,
+    "t": 68000,
     "pose": {
      "lat": 38.890189493352494,
-     "lng": -77.0107911755725,
+     "lng": -77.01136823409668,
      "elevationM": 0,
-     "headingDeg": 99.42,
-     "pitchDeg": 20.26,
+     "headingDeg": 96.64,
+     "pitchDeg": 14.79,
      "fovDeg": 30,
      "fNumber": 4
     }
@@ -374,7 +266,7 @@
    }
   },
   {
-   "t": 76071,
+   "t": 40357,
    "label": "D",
    "note": {
     "en": "He steps to the left, keeping the dome in the middle of the picture, and stops for another: the lamps, nearer than the dome, slide to the right against it, and their ghosts, across the axis from them, to the left.",
