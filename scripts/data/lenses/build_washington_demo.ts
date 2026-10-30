@@ -23,8 +23,7 @@
  * Then, the photograph left behind, the photographer walks straight towards the dome along the lawn, keeping the lamps low in the picture
  * and the dome high, and stops for a photograph: the lamps nearer, brighter and wider apart, their ghosts, still each across the lens's axis
  * from its lamp, brighter. Then steps to the left, facing the same way, and stops for another: the lamps nearer than the dome slide across
- * the picture more than it, and their ghosts against them. Each stop is long enough for the aim to settle and a pose of two seconds (one
- * taken walking is streaks). The walk is ASSUMED, as the rest.
+ * the picture more than it, and their ghosts against them. The walk is ASSUMED, as the rest.
  *
  * Writes ../../../public/demo-data/sky-test-washington-capitol.json. Run with `node --import tsx`.
  */
@@ -192,8 +191,10 @@ const recording = {
   durationSeconds: DURATION_S,
   place: [{ lat: OBSERVER.lat, lng: OBSERVER.lng, name: "Washington, D.C." }],
   instrument: "rectilinear-lens",
-  exposureSeconds: 2,
-  iso: 32,
+  // A thirtieth of a second at ISO 2000, as much light as the two seconds at ISO 32 the photograph may have had, without what a pose of the
+  // walk would add (see the walk).
+  exposureSeconds: 1 / 30,
+  iso: 2000,
   lens: { glass: { value: "filter", basis: "assumed", rationale: "The lights of the sky lie across the lens's axis from the lamps, nearly in focus: the ghost a flat glass on the lens makes." } },
   references: [{
     id: "capitol-1952", kind: "photo", src: PHOTO,

@@ -39,8 +39,8 @@
   }
  ],
  "instrument": "rectilinear-lens",
- "exposureSeconds": 2,
- "iso": 32,
+ "exposureSeconds": 0.03333333333333333,
+ "iso": 2000,
  "lens": {
   "glass": {
    "value": "filter",
