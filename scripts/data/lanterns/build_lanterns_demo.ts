@@ -135,6 +135,8 @@ const recording = {
   // The building whose roof the terrace is: the phone and the lanterns on it, the street four floors down.
   decor: [{
     id: "terrace", kind: "building", eastM: -3, northM: 0, headingDeg: 0, floors: 4, lit: true,
+    // Paved with pale stone, as a rooftop terrace is: its slabs and their grain show under the lanterns' light.
+    roof: { shape: "flat", color: "#b5ad9f", material: "stone" },
     title: { en: "Rooftop terrace", fr: "Toit-terrasse", es: "Azotea", it: "Terrazza sul tetto" },
     sizeM: { widthM: 22, lengthM: 14, heightM: TERRACE_M }
   }],

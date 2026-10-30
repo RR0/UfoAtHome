@@ -436,6 +436,9 @@ export interface DecorRoof {
   riseM?: number
   /** The colour of the roof seen from above, "#rrggbb", where it was measured (see RoofShapes): the walls keep their own. */
   color?: string
+  /** What its top is made of, where it shows up close: "stone", a terrace paved with slabs, their grain and their joints (see StoneSurface).
+   * Absent is a plain surface of its colour. */
+  material?: "stone"
 }
 
 /** What the walls of a building look like: their colour, and whether windows and a door are drawn on them. */

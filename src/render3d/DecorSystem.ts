@@ -9,6 +9,7 @@ import { canHoldObserver, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, li
 import type { RgbColor } from "./skyColors.js"
 import { BridgeGeometry } from "./BridgeGeometry.js"
 import { RoofGeometry } from "./RoofGeometry.js"
+import { StoneSurface } from "./StoneSurface.js"
 import { FacadeGeometry } from "./FacadeGeometry.js"
 import { FacadeTexture } from "./FacadeTexture.js"
 import { WireGeometry } from "./WireGeometry.js"
@@ -1124,9 +1125,18 @@ export class DecorSystem {
     // A height nobody stated is the walls' own (the floors it counts): the roof rises above it, not into its last floor.
     const walls = object.sizeM?.heightM === undefined ? size.heightM : DecorSystem.wallHeightOf(object, size.heightM)
     const rgb = DecorSystem.roofColor(roof.color)
-    const mesh = addPart(group, RoofGeometry.build(roof, size.widthM, size.lengthM), rgb, walls)
+    const geometry = RoofGeometry.build(roof, size.widthM, size.lengthM)
+    if (object.roof!.material === "stone") StoneSurface.layOn(geometry)
+    const mesh = addPart(group, geometry, rgb, walls)
+    const material = mesh.material as MeshLambertMaterial
     // Seen from below too: the pitched sides are single faces, and a roof is the one part of a building a low observer looks up at.
-    ;(mesh.material as MeshLambertMaterial).side = DoubleSide
+    material.side = DoubleSide
+    // A stone terrace shows its slabs, their grain and their joints, in its colour and in its relief (see StoneSurface).
+    if (object.roof!.material === "stone") {
+      material.map = StoneSurface.texture()
+      material.bumpMap = material.map
+      material.bumpScale = DecorSystem.STONE_BUMP
+    }
     mesh.name = DecorSystem.ROOF_NAME
   }
 
@@ -1145,6 +1155,8 @@ export class DecorSystem {
   }
 
   static readonly ROOF_NAME = "decor-roof"
+  /** How deep a stone roof's relief reads (see StoneSurface): its joints sunk, its grain rough, enough for a grazing light to show them. */
+  private static readonly STONE_BUMP = 2
   /** The wall of a facade that states no colour. */
   private static readonly PLASTER = "#d3cab8"
 

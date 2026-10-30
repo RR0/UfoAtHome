@@ -8352,6 +8352,11 @@
     "widthM": 22,
     "lengthM": 14,
     "heightM": 12
+   },
+   "roof": {
+    "shape": "flat",
+    "color": "#b5ad9f",
+    "material": "stone"
    }
   }
  ],
