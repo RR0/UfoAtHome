@@ -138,34 +138,35 @@ float coverageThreshold(float coverage, float mean, float spread) {
  * coverageThreshold needs to turn a coverage into the threshold that covers that much sky. */
 export const WATER_FIELD_MEAN = 0.495
 export const WATER_FIELD_SD = 0.075
-/** The same for the ice deck's fibrous field, which is narrower. It no longer says where the veil
- * is, nor how thick: it only frays the veil's edge (see ICE_FRAY). */
-export const ICE_FIBRE_MEAN = 0.5
-export const ICE_FIBRE_SD = 0.047
 /**
- * How much the fibres fray the edge of an ice veil, 0 to 1.
+ * How much the fibres decide where SPARSE ice is, 0 to 1 (see cirrusFrayOf).
  *
  * The veil's presence used to be the fibre field thresholded: a deck at 85% then left its 15% of
  * sky exactly where a field drawn out twenty-eight times longer than it is wide is low — long thin
  * lanes of blue between every pair of fibres, a sky combed into stripes. A real cirrostratus is a
- * continuous milky sheet, and where it does end, it ends in broad clear areas with ragged edges.
- * So the presence is read off a broad sheet (cirrusSheetAt), the fibres taking only this share of
- * it, enough to rag the edge. At 0.3 they still combed every edge, and the veil with them.
+ * continuous milky sheet, and where it does end, it ends in broad, soft clear areas. So the
+ * presence is read off a broad sheet (cirrusSheetAt). The fibres take this share of it only while
+ * the ice is sparse — scattered cirrus IS filaments, that is what tells it from a cirrostratus —
+ * and none once the deck covers most of the sky: at 0.3, and still at 0.12, they combed the veil.
  */
-export const ICE_FRAY = 0.12
+export const ICE_FRAY = 0.3
+/** The coverages between which the fibres fade out of the presence: filaments below, a veil above. */
+export const ICE_FIBROUS_BELOW = 0.3
+export const ICE_VEIL_ABOVE = 0.6
 /** The sheet's frequency on the deck's plane. The warp's own field, a seventh of this period, was
  * tried first for being free: it riddled an 85% veil with small blue holes, a cirrocumulus. */
 export const ICE_SHEET_SCALE = 0.0008
-/** What the ice deck's presence field (sheet ragged by fibres) measures over the sky. Its spread is
- * the one fitted on the sky the deck COVERS, over eight skies (within 1.3% from 12 to 88%): a field
- * this broad has tails wider than a logistic's. */
+/** What the ice deck's presence field measures over the sky: its mean, and its spread for the sheet
+ * alone (a veil) and with the fibres at ICE_FRAY (sparse cirrus), in between interpolated with
+ * the fray. Spreads fitted on the sky the deck COVERS, over eight skies: a field this broad has
+ * tails wider than a logistic's. */
 export const ICE_VEIL_MEAN = 0.5
-export const ICE_VEIL_SD = 0.065
+export const ICE_VEIL_SD = 0.08
+export const ICE_FRAYED_SD = 0.055
 /** Half the width of the ramp a deck's edge is drawn across, in shape units: the water deck's, and
- * the same fraction of the ice field's spread, so both edges are equally soft relative to their
- * field and a coverage stays the fraction of sky it names. */
+ * the same fraction of the ice field's spread (cirrusRampOf), so both edges are equally soft
+ * relative to their field and a coverage stays the fraction of sky it names. */
 export const WATER_RAMP = 0.08
-export const ICE_RAMP = WATER_RAMP * ICE_VEIL_SD / WATER_FIELD_SD
 
 /** How much ice cloud lies along a given direction, 0 to 1 — the ice deck's own coverage field,
  * pulled out so the halo shader can multiply by it. Mirrors the fibrous branch of the fragment
@@ -176,25 +177,41 @@ export const CIRRUS_COVER_GLSL = `
 float cirrusSheetAt(vec3 planePos) {
   return fbm(planePos * ${ICE_SHEET_SCALE} + 23.0) * 0.5 + 0.5;
 }
-// Where the veil is: the broad sheet, frayed by the fibres.
-float cirrusVeilOf(float sheet, float fibre) {
-  return sheet * ${(1 - ICE_FRAY).toFixed(3)} + fibre * ${ICE_FRAY.toFixed(3)};
+// How much the fibres decide where the ice is, at this coverage (see ICE_FRAY).
+float cirrusFrayOf(float coverage) {
+  return ${ICE_FRAY.toFixed(3)} * (1.0 - smoothstep(${ICE_FIBROUS_BELOW.toFixed(3)}, ${ICE_VEIL_ABOVE.toFixed(3)}, coverage));
+}
+// The spread of the presence field at this coverage, and the half-width of its edge.
+float cirrusSpreadOf(float coverage) {
+  return mix(${ICE_VEIL_SD.toFixed(4)}, ${ICE_FRAYED_SD.toFixed(4)}, cirrusFrayOf(coverage) / ${ICE_FRAY.toFixed(3)});
+}
+float cirrusRampOf(float coverage) {
+  return ${(WATER_RAMP / WATER_FIELD_SD).toFixed(4)} * cirrusSpreadOf(coverage);
+}
+// Where the ice is: the broad sheet, and the fibres while it is sparse.
+float cirrusVeilOf(float sheet, float fibre, float coverage) {
+  float fray = cirrusFrayOf(coverage);
+  return sheet * (1.0 - fray) + fibre * fray;
 }
 // How thick the veil is where it is, relative to its fullest: thinning towards its edges over
 // a broad band of the sheet, uniform inside. Not the fibres: drawn into the thickness, they combed
 // the whole veil into fine streaks a photograph of a cirrostratus does not show. Both the veil's
 // opacity and the display's light follow it, being the same crystals along the line of sight.
-float cirrusThicknessOf(float veil, float threshold) {
-  return mix(0.5, 1.0, smoothstep(threshold, threshold + ${(3 * ICE_VEIL_SD).toFixed(3)}, veil));
+float cirrusThicknessOf(float veil, float threshold, float coverage) {
+  return mix(0.5, 1.0, smoothstep(threshold, threshold + 3.0 * cirrusSpreadOf(coverage), veil));
+}
+float cirrusThresholdOf(float coverage) {
+  return coverageThreshold(coverage, ${ICE_VEIL_MEAN.toFixed(3)}, cirrusSpreadOf(coverage));
 }
 float cirrusCoverOf(float veil, float coverage) {
-  float threshold = coverageThreshold(coverage, ${ICE_VEIL_MEAN.toFixed(3)}, ${ICE_VEIL_SD.toFixed(3)});
-  float present = smoothstep(threshold - ${(2 * ICE_RAMP).toFixed(4)}, threshold + ${(2 * ICE_RAMP).toFixed(4)}, veil);
+  float threshold = cirrusThresholdOf(coverage);
+  float ramp = 2.0 * cirrusRampOf(coverage);
+  float present = smoothstep(threshold - ramp, threshold + ramp, veil);
   // GRADED, not a mask. A pure threshold saturates to 1 everywhere once the veil is thick — which
   // is exactly the sky a reader tested, 88 per cent cover — and the halo went back to being the
   // perfect circle of a diagram. A veil is not uniform just because it is complete: it has dense
   // fibres and thinner ones, and the display follows them, as the deck's own opacity does.
-  return present * cirrusThicknessOf(veil, threshold);
+  return present * cirrusThicknessOf(veil, threshold, coverage);
 }
 float cirrusCoverAt(vec3 dir, float layerHeight, float coverage, vec3 fieldOffset) {
   if (coverage <= 0.0 || dir.y < 0.0) return 0.0;
@@ -202,9 +219,9 @@ float cirrusCoverAt(vec3 dir, float layerHeight, float coverage, vec3 fieldOffse
   vec3 warpPos = planePos * 0.006;
   vec3 warp = vec3(fbm(warpPos + 12.3), fbm(warpPos + 47.1), fbm(warpPos + 91.7)) * 40.0;
   vec3 warpedPos = planePos + warp;
-  vec3 drawnOut = vec3(warpedPos.x * 0.0016, warpedPos.y * 0.02, warpedPos.z * 0.045);
-  float fibre = fbm(drawnOut) * 0.5 + 0.5;
-  return cirrusCoverOf(cirrusVeilOf(cirrusSheetAt(planePos), fibre), coverage);
+  float fibre = 0.5;
+  if (cirrusFrayOf(coverage) > 0.0) fibre = fbm(vec3(warpedPos.x * 0.0016, warpedPos.y * 0.02, warpedPos.z * 0.045)) * 0.5 + 0.5;
+  return cirrusCoverOf(cirrusVeilOf(cirrusSheetAt(planePos), fibre, coverage), coverage);
 }
 `
 
@@ -344,15 +361,20 @@ void main() {
   // axis and four times it across — so the same noise comes out as long parallel filaments instead
   // of blobs. No Worley at all: cells are what billowing looks like, and ice does not billow.
   if (fibrous > 0.0) {
-    vec3 drawnOut = vec3(warpedPos.x * 0.0016, warpedPos.y * 0.02, warpedPos.z * 0.045);
-    // Filtered: its fibres are a few pixels across where the deck is near the horizon, and less.
-    float fibre = fbmFiltered(drawnOut, lostA) * 0.5 + 0.5;
-    // The fibres no longer say where the veil is, only rag its edge (see ICE_FRAY); the sheet
-    // under them is far broader than a pixel. Nor do they model it: the veil is shaded off the
-    // sheet, smooth, its detail flat.
-    field = mix(field, cirrusVeilOf(cirrusSheetAt(planePos), fibre), fibrous);
+    // The fibres only shape sparse ice (see ICE_FRAY), and are not worked out for a veil. A
+    // branch on a uniform, so the derivatives fbmFiltered takes are still defined.
+    float fray = cirrusFrayOf(coverage);
+    float fibre = 0.5;
+    if (fray > 0.0) {
+      vec3 drawnOut = vec3(warpedPos.x * 0.0016, warpedPos.y * 0.02, warpedPos.z * 0.045);
+      // Filtered: its fibres are a few pixels across where the deck is near the horizon, and less.
+      fibre = fbmFiltered(drawnOut, lostA) * 0.5 + 0.5;
+    }
+    // Nor do they model the ice: it is shaded off its presence, smooth, its detail flat. The sheet
+    // under them is far broader than a pixel.
+    field = mix(field, cirrusVeilOf(cirrusSheetAt(planePos), fibre, coverage), fibrous);
     shape = mix(shape, field, fibrous);
-    unresolved = mix(unresolved, ${ICE_FRAY.toFixed(3)} * 0.5 * lostA, fibrous);
+    unresolved = mix(unresolved, fray * 0.5 * lostA, fibrous);
     detail = mix(detail, 0.5, fibrous);
   }
 
@@ -362,15 +384,15 @@ void main() {
   // Each field its own quantile, and its own ramp. The ice field is narrower than the water one
   // (see ICE_VEIL_SD): read at the water's threshold, a cirrus deck covered 8% of the sky at a
   // stated 12% and 94% at 88%, and its edge was not where the display — masked at the ice's own
-  // threshold — was drawn. The ramp is the same fraction of each field's spread (ICE_RAMP), or the
+  // threshold — was drawn. The ramp is the same fraction of each field's spread (cirrusRampOf), or the
   // water's ±0.08 across so narrow a field pulls every coverage towards a half: 17% at 12%.
   float threshold = mix(
     coverageThreshold(coverage, ${WATER_FIELD_MEAN.toFixed(3)}, ${WATER_FIELD_SD.toFixed(3)}),
-    coverageThreshold(coverage, ${ICE_VEIL_MEAN.toFixed(3)}, ${ICE_VEIL_SD.toFixed(3)}),
+    cirrusThresholdOf(coverage),
     fibrous);
   // Widened by what the pixel holds and cannot show: a logistic's half-width is about 1.7 of its
   // standard deviations.
-  float ramp = length(vec2(mix(${WATER_RAMP.toFixed(4)}, ${ICE_RAMP.toFixed(4)}, fibrous), 1.7 * unresolved));
+  float ramp = length(vec2(mix(${WATER_RAMP.toFixed(4)}, cirrusRampOf(coverage), fibrous), 1.7 * unresolved));
   float alpha = smoothstep(threshold - ramp, threshold + ramp, field);
   // This is what actually guarantees "total overcast, no sky visible" at cloudCover=1: force full
   // opacity everywhere as coverage approaches its max, overriding the noise field's own local value
@@ -384,7 +406,7 @@ void main() {
   // THROUGH — that is the entire reason it can make a halo at all — so an ice deck is held down to
   // a fraction of the opacity a water deck reaches, however completely it covers.
   // Within the veil, thinner towards its edges (see cirrusThicknessOf).
-  alpha *= mix(1.0, 0.38 * cirrusThicknessOf(field, threshold), fibrous);
+  alpha *= mix(1.0, 0.38 * cirrusThicknessOf(field, threshold, coverage), fibrous);
   alpha = 1.0 - pow(max(0.0, 1.0 - alpha), opticalDensity);
 
   // THE ICE DISPLAY, where this deck carries one: read off the very veil just worked out, where
@@ -601,19 +623,32 @@ export class CloudField {
    */
   static iceAlphaAt(direction: { x: number; y: number; z: number }, layerHeight: number, coverage: number, fieldOffset = { x: 0, z: 0 }): number {
     if (coverage <= 0) return 0
-    const threshold = CloudField.thresholdFor(coverage, ICE_VEIL_MEAN, ICE_VEIL_SD)
-    return CloudField.smoothstep(threshold - ICE_RAMP, threshold + ICE_RAMP, CloudField.iceVeilAt(direction, layerHeight, fieldOffset))
+    const spread = CloudField.iceSpreadOf(coverage)
+    const threshold = CloudField.thresholdFor(coverage, ICE_VEIL_MEAN, spread)
+    const ramp = WATER_RAMP * spread / WATER_FIELD_SD
+    return CloudField.smoothstep(threshold - ramp, threshold + ramp, CloudField.iceVeilAt(direction, layerHeight, coverage, fieldOffset))
   }
 
-  /** The ice deck's presence field, as the shader's cirrusVeilOf builds it: the broad sheet,
-   * frayed at its edges by the fibres. */
-  static iceVeilAt(direction: { x: number; y: number; z: number }, layerHeight: number, fieldOffset = { x: 0, z: 0 }): number {
-    const [warpedX, warpedY, warpedZ] = CloudField.warpedAt(direction, layerHeight, fieldOffset)
+  /** The shader's cirrusFrayOf. */
+  static iceFrayOf(coverage: number): number {
+    return ICE_FRAY * (1 - CloudField.smoothstep(ICE_FIBROUS_BELOW, ICE_VEIL_ABOVE, coverage))
+  }
+
+  /** The shader's cirrusSpreadOf. */
+  static iceSpreadOf(coverage: number): number {
+    return ICE_VEIL_SD + (ICE_FRAYED_SD - ICE_VEIL_SD) * CloudField.iceFrayOf(coverage) / ICE_FRAY
+  }
+
+  /** The ice deck's presence field, as the shader's cirrusVeilOf builds it: the broad sheet, and
+   * the fibres while the ice is sparse. */
+  static iceVeilAt(direction: { x: number; y: number; z: number }, layerHeight: number, coverage: number, fieldOffset = { x: 0, z: 0 }): number {
     const t = layerHeight / Math.max(Math.abs(direction.y), 0.04)
     const sheet = CloudField.fbm((direction.x * t + fieldOffset.x) * ICE_SHEET_SCALE + 23, (direction.y * t) * ICE_SHEET_SCALE + 23, (direction.z * t + fieldOffset.z) * ICE_SHEET_SCALE + 23) * 0.5 + 0.5
-    const x = warpedX * 0.0016, y = warpedY * 0.02, z = warpedZ * 0.045
-    const fibre = CloudField.fbm(x, y, z) * 0.5 + 0.5
-    return sheet * (1 - ICE_FRAY) + fibre * ICE_FRAY
+    const fray = CloudField.iceFrayOf(coverage)
+    if (fray <= 0) return sheet
+    const [warpedX, warpedY, warpedZ] = CloudField.warpedAt(direction, layerHeight, fieldOffset)
+    const fibre = CloudField.fbm(warpedX * 0.0016, warpedY * 0.02, warpedZ * 0.045) * 0.5 + 0.5
+    return sheet * (1 - fray) + fibre * fray
   }
 
   /** Where along the deck's plane a direction lands, domain-warped as the shader warps it. */

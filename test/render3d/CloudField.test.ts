@@ -115,7 +115,7 @@ describe("CloudField.iceAlphaAt", () => {
   it("covers about the fraction of sky the coverage states", () => {
     // Read at the water's threshold, 12% came out 8% and 88% came out 94%; at the ice's with the
     // water's ramp, 17% and 81%.
-    for (const coverage of [0.12, 0.3, 0.5, 0.7, 0.88]) {
+    for (const coverage of [0.12, 0.3, 0.45, 0.6, 0.7, 0.88]) {
       expect(Math.abs(fraction(coverage) - coverage)).toBeLessThan(0.045)
     }
   })
@@ -124,8 +124,7 @@ describe("CloudField.iceAlphaAt", () => {
     // A veil at 85% read off the fibres alone left its 15% as long thin lanes across them: blue
     // stripes combed through a sky that is, in a photo, one continuous milky sheet. Walk across the
     // fibres (along z on the deck's plane) and count, for every clear point, whether the sky is
-    // still clear a fibre's width (25 units) to either side. 67% of them were lanes; what is left
-    // is the ragged edge of the broad gaps (ICE_FRAY).
+    // still clear a fibre's width (25 units) to either side. 67% of them were lanes.
     const height = 1273
     let clear = 0
     let lanes = 0
@@ -144,7 +143,33 @@ describe("CloudField.iceAlphaAt", () => {
       }
     }
     expect(clear).toBeGreaterThan(100)
-    expect(lanes / clear).toBeLessThan(0.1)
+    expect(lanes / clear).toBeLessThan(0.02)
+  })
+
+  it("keeps sparse ice in filaments drawn out along the wind", () => {
+    // What tells scattered cirrus from a cirrostratus: the veil is a sheet, the sparse ice is
+    // fibres, long along x and narrow across z. Same step both ways, how often cloud stays cloud.
+    const height = 1273
+    const along = { same: 0, of: 0 }
+    const across = { same: 0, of: 0 }
+    for (let sky = 0; sky < 8; sky++) {
+      const fieldOffset = { x: sky * 7919, z: sky * 3571 }
+      const at = (x: number, z: number) => {
+        const length = Math.hypot(x, height, z)
+        return CloudField.iceAlphaAt({ x: x / length, y: height / length, z: z / length }, height, 0.2, fieldOffset) >= 0.5
+      }
+      for (let x = -2000; x <= 2000; x += 100) {
+        for (let z = -2000; z <= 2000; z += 100) {
+          if (!at(x, z)) continue
+          along.of++
+          across.of++
+          if (at(x + 40, z)) along.same++
+          if (at(x, z + 40)) across.same++
+        }
+      }
+    }
+    expect(along.of).toBeGreaterThan(100)
+    expect(along.same / along.of).toBeGreaterThan(across.same / across.of + 0.1)
   })
 
 })
