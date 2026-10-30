@@ -65,6 +65,7 @@ import type { StarCatalog } from "./StarCatalog.js"
 import { PointSources } from "./PointSources.js"
 import { Veil } from "./Veil.js"
 import { ProbeIrradiance } from "./ProbeIrradiance.js"
+import { FrameMeter } from "./FrameMeter.js"
 import { BRIGHT_STARS } from "../engine/astronomy/brightStarCatalog.js"
 import type { BrightStar } from "../engine/astronomy/brightStarCatalog.js"
 import { defaultTerrainProviders } from "./terrain/defaultTerrainProviders.js"
@@ -2404,7 +2405,8 @@ export class SceneRenderer {
     const [r, g, b] = this.sunArriving
     const green = Math.max(g, 1e-30)
     this.lensFlare.uniforms.uDazzleColour.value.setRGB(r / green, 1, b / green)
-    this.lensFlare.uniforms.uVeilStrength.value = Veil.K * g * this.sunUnhiddenFraction
+    // Scattered by an eye's media, or by a lens when the picture is a recording's (see Veil.LENS_K).
+    this.lensFlare.uniforms.uVeilStrength.value = (this.medium ? Veil.LENS_K : Veil.K) * g * this.sunUnhiddenFraction
   }
 
   /** What arrives of the Sun's light at the eye, relative, per channel — see arrivingIlluminance. */
@@ -3511,7 +3513,10 @@ export class SceneRenderer {
       return
     }
     EYE_UNIFORMS.uMedium.value = medium.kind === "negative" ? 1 : medium.kind === "slide" ? 2 : 3
-    const sky = medium.autoExposure || this.skyUnknown ? this.scatteredSky?.sceneAdaptation : undefined
+    // A device setting its own exposure reads its own frame (see FrameMeter); until it has, and for a sky nobody stated, the light the
+    // scene is adapted to.
+    const frame = medium.autoExposure ? this.frameLight : undefined
+    const sky = medium.autoExposure || this.skyUnknown ? frame?.mean ?? this.scatteredSky?.sceneAdaptation : undefined
     const bodies = sky === undefined ? undefined : this.meteredBodies()
     const metered = sky === undefined ? undefined : sky + bodies!.mean
     const set = (iso: number) => (0.065 * medium.exposureSeconds * iso * this.filterTransmittance) / (medium.fNumber * medium.fNumber * relativeScale)
@@ -3520,6 +3525,10 @@ export class SceneRenderer {
     // keeps it at (see recorded, in EYE_RESPONSE_GLSL: a relative exposure h is shown as 0.18 h, full at 1).
     if (exposure !== undefined && medium.metering === "highlights" && bodies!.brightest > 0) {
       exposure = Math.min(exposure, SceneRenderer.HIGHLIGHT_KEPT_AT / (0.18 * relativeScale * bodies!.brightest))
+    }
+    // And from burning out the brightest zone of its frame: the aureole round a Sun seen through ice, the sky by a lamp.
+    if (exposure !== undefined && medium.metering === "highlights" && frame && frame.brightest > 0) {
+      exposure = Math.min(exposure, SceneRenderer.ZONE_KEPT_AT / (0.18 * relativeScale * frame.brightest))
     }
     // A device exposing itself follows the light only as far as its sensor's gain goes.
     EYE_UNIFORMS.uMediumExposure.value = exposure !== undefined
@@ -3533,6 +3542,14 @@ export class SceneRenderer {
    * burns out and what is dimmer keeps its colour.
    */
   private static readonly HIGHLIGHT_KEPT_AT = 0.3
+  /**
+   * Where a device keeping its highlights puts the brightest zone of its frame (see FrameMeter), as a share of full: past it, the zone
+   * itself a little burned out, as a phone lets the few degrees round the Sun go white to keep the rest of a bright sky. Not
+   * HIGHLIGHT_KEPT_AT, which keeps a lantern's colour: a zone is a mean over some six degrees, and kept that low (0.85 was tried) it put the
+   * sky twenty degrees off the Sun at two thirds of the brightness a phone's photograph gives it. ASSUMED, then set on that photograph (the
+   * halo demo, Royan, 29 October 2026): a white core of 1.6 degrees against its 1.4, the sky at two degrees off 235 against 236.
+   */
+  private static readonly ZONE_KEPT_AT = 1.6
   /**
    * The share of the frame a light must take up for a device keeping its highlights to keep it whole: ASSUMED, a fiftieth of a percent,
    * which a lantern a metre tall fills up to some fifty metres off through a phone's main camera. A light taking up less is kept less, as
@@ -4984,6 +5001,8 @@ export class SceneRenderer {
     const astronomy = this.lastAstronomy
     if (!astronomy) return
     this.probeIrradiance ??= new ProbeIrradiance()
+    // The same photograph is what a device setting its own exposure meters, over its frame (see meterFrame).
+    this.framePhotograph = { texture: photograph, scale }
     const sources = [astronomy.sun, astronomy.moon]
       .filter(body => body.altitudeDeg > -2)
       .map(body => horizontalToCartesian(body.altitudeDeg, body.azimuthDeg, 1))
@@ -5027,6 +5046,32 @@ export class SceneRenderer {
   }
 
   private probeIrradiance?: ProbeIrradiance
+
+  /**
+   * Meters the frame of a device that sets its own exposure (see FrameMeter), on the latest photograph of the surroundings, and asks for a
+   * picture again when what it reads has moved: the exposure follows a frame late, as a device's own does.
+   */
+  private meterFrame(): void {
+    const photograph = this.framePhotograph
+    if (!this.medium?.autoExposure || !photograph) return
+    this.frameMeter ??= new FrameMeter()
+    const sun = this.lastAstronomy?.sun
+    const source = sun && sun.altitudeDeg > -2 ? horizontalToCartesian(sun.altitudeDeg, sun.azimuthDeg, 1) : undefined
+    this.frameMeter.measure(this.renderer, photograph.texture, this.camera, source, light => {
+      const next = { mean: light.mean / photograph.scale, brightest: light.brightest / photograph.scale }
+      const before = this.frameLight
+      const moved = (a: number, b: number) => Math.abs(a - b) > 0.05 * Math.max(a, b)
+      if (before && !moved(before.mean, next.mean) && !moved(before.brightest, next.brightest)) return
+      this.frameLight = next
+      this.render()
+    })
+  }
+
+  private frameMeter?: FrameMeter
+  /** The latest photograph of the surroundings, and the relative scale it was taken at (see measureSurroundings). */
+  private framePhotograph?: { texture: Texture, scale: number }
+  /** What a device setting its own exposure last read of its frame, cd/m² (see meterFrame). */
+  private frameLight?: { mean: number, brightest: number }
   /**
    * The lamps of the decor (a streetlamp's head, a car's headlamps, a declared light): kept out of the eye's probe, as the stars are. Each
    * is a speck in it, under a pixel of its 128, which the rasteriser hit or missed as the eye moved by a few centimetres, and with it its
@@ -5147,6 +5192,7 @@ export class SceneRenderer {
     // This scene's eye, for the finish every picture of the page shares (see EYE_UNIFORMS).
     EYE_UNIFORMS.uRodShare.value = this.scatteredSky?.rodShare ?? 0
     EYE_UNIFORMS.uRelativeScale.value = this.relativeScale
+    this.meterFrame()
     this.applyMedium()
     const overlaid = !!this.references?.any || this.phenomena.any || this.compassSprites.some(sprite => sprite.visible)
     EYE_UNIFORMS.uHasOverlay.value = overlaid ? 1 : 0

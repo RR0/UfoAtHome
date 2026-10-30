@@ -16,6 +16,12 @@ import { AdditiveBlending, Color, Mesh, PlaneGeometry, ShaderMaterial } from "th
 export class Veil {
   /** Stiles and Holladay's constant: cd/m² of veil per lux at the eye, times degrees squared. */
   static readonly K = 10
+  /**
+   * The same constant for a camera's or a phone's lens: the glass and its barrel scatter far less than an eye's media, so the Sun's white
+   * core through a lens is smaller than the one an eye is dazzled by. ASSUMED about a tenth, then checked on a phone's photograph of a halo
+   * (Royan, 29 October 2026, see the halo demo): its white core is a degree and a half across.
+   */
+  static readonly LENS_K = 1.5
   /** Where a veil stops being worth drawing: a thousandth of the eye's semi-saturation. */
   static readonly FAINTEST = 1e-3
   /**
