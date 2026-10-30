@@ -33,6 +33,8 @@ export interface FarEmitter {
  * terrace drew orange and left the terrace dark. Here each such system states what it gives out (see set), and all of it is lit by one
  * pool of lights: point lights for what is near, given to the ones that light the observer most, and directional ones for what is far.
  * EmitterLights.SYSTEMS says, for every system that draws, how its light reaches the scene, and a test holds every system to saying it.
+ * What states its light here is kept out of the photograph the eye's probe takes of the surroundings (see SceneRenderer.refreshReflections):
+ * photographed as well, it would light the scene a second time, spread round the observer.
  *
  * The pools are a fixed number of lights, built once, the first time anything glows, and never taken out of the scene again but put out:
  * three.js compiles every material for the number of lights, and a light that came and went would recompile the scene each time. They
@@ -51,7 +53,7 @@ export class EmitterLights {
    * why not. A system that draws and is not here fails the test that holds this list (EmitterLights.test).
    */
   static readonly SYSTEMS: Readonly<Record<string, string>> = {
-    BodySystem: "emitters: the bodies that glow whole, and their flames",
+    BodySystem: "emitters: the bodies that glow whole, the named lights of a model (a craft's lights), and their flames",
     MeteorSystem: "emitters: the heads of meteors, far, from their magnitude",
     ReentrySystem: "emitters: the heads of re-entries, far, from their magnitude",
     PhenomenonSystem: "none yet: a phenomenon states no luminance, only a colour as seen and a 0..1 dazzle, which say nothing of the light it gives",

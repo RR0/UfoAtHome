@@ -223,7 +223,7 @@ export class BodySystem {
       if (metered && state !== stated && state.appearance.luminanceCdM2 > 0) {
         metered.luminanceCdM2 *= stated.appearance.luminanceCdM2 / state.appearance.luminanceCdM2
       }
-      this.shineLights(state, holder, whole ? undefined : glowing, frame)
+      this.shineLights(state, holder, whole ? undefined : glowing, frame, emitters)
       this.throwFlame(state, holder, seconds, display, frame.eye, emitters)
       // What glows whole lights what is round it, its flame's wavering and all: the luminance it shows over the area it shows sideways.
       if (state.appearance.luminanceCdM2 > 0 && (whole || !glowing?.length)) {
@@ -659,7 +659,7 @@ export class BodySystem {
    * body's own hull is hidden by it; one passing behind the edge of a bridge's deck goes out as the
    * edge covers it, not all at once.
    */
-  private shineLights(state: BodyState, holder: Group, glowing: Glow[] | undefined, frame: BodyFrame): void {
+  private shineLights(state: BodyState, holder: Group, glowing: Glow[] | undefined, frame: BodyFrame, emitters: NearEmitter[]): void {
     const eye = frame.eye
     const named = state.lights
     if (!glowing || !named || !eye) {
@@ -684,6 +684,8 @@ export class BodySystem {
       const centre = box.getCenter(new Vector3())
       const size = box.getSize(new Vector3())
       const radiusM = Math.max(size.x, size.y, size.z) / 2
+      // It lights what is round it, whether the eye sees it or not: the ground under a craft's lights, the field a triangle hovers over.
+      emitters.push({ position: centre.clone(), candela: luminanceCdM2 * Math.PI * radiusM * radiusM, colour: glow.hue })
       const distanceM = Math.max(centre.distanceTo(eye), radiusM * 1.01, 1e-3)
       occluders ??= [holder, ...(frame.occluders ?? [])].map(object => ({ object, box: new Box3().setFromObject(object) }))
       const clear = this.clearShare(eye, box, centre, glow.meshes, occluders)

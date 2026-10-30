@@ -4980,14 +4980,18 @@ export class SceneRenderer {
     // Nor what is falling: in a probe of a hundred and twenty-eight pixels a side, the drops within
     // a metre of the eye cover the whole sky, and a moonbow night measured as a lit wall of rain
     // adapted the eye to three candela, three hundred times the night it was.
-    // Nor the bodies of the account (a sky lantern, a craft), for the reason the decor's lamps are not (see decorLamps): a lantern a few
+    // Nor what states its light to the emitters' lights (see EmitterLights): the bodies of the account (a sky lantern, a craft), the
+    // meteors and the re-entries. Their light reaches the scene from where they are, as lights; photographed too, they lit it twice, once
+    // as lights and once spread round the observer by the probe — which is all the light a bolide gave the ground before those lights,
+    // with no direction and no illuminance of its own. And for the reason the decor's lamps are not (see decorLamps): a lantern a few
     // metres off, flickering and rising, was caught by each photograph in another state, and the light round the observer jumped by up to
     // three times between photographs, the terrace it was let go from lighting up and going dark as the lanterns rose. A device's meter
     // reads the same photograph (see FrameMeter): it meters the bodies on their own (see meteredBodies), as it always did.
     const eyeHidden: Object3D[] = [...this.starTiers.map(tier => tier.points),
       ...[...this.bodyMeshes.values()].filter(mesh => mesh instanceof Points),
       ...[this.rainSystem?.points, this.precipitationPoints, this.rainSplashSystem?.points].filter((object): object is Points => object !== undefined),
-      ...this.cabinDecor(), ...this.decorLamps, ...this.bodySystem.group.children.filter(holder => holder.name.startsWith("body:"))]
+      ...this.cabinDecor(), ...this.decorLamps, ...this.bodySystem.group.children.filter(holder => holder.name.startsWith("body:")),
+      ...([this.meteorSystem?.object, this.reentrySystem?.object] as (Object3D | undefined)[]).filter((object): object is Object3D => object !== undefined)]
     const scale = this.relativeScale
     const version = this.sceneVersion
     // Behind the loader nothing is on screen to spare the GPU for: the eye's probe is taken as soon
