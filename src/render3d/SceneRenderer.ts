@@ -5058,20 +5058,28 @@ export class SceneRenderer {
     const sun = this.lastAstronomy?.sun
     const source = sun && sun.altitudeDeg > -2 ? horizontalToCartesian(sun.altitudeDeg, sun.azimuthDeg, 1) : undefined
     this.frameMeter.measure(this.renderer, photograph.texture, this.camera, source, light => {
-      const next = { mean: light.mean / photograph.scale, brightest: light.brightest / photograph.scale }
+      const read = { mean: light.mean / photograph.scale, brightest: light.brightest / photograph.scale }
       const before = this.frameLight
-      const moved = (a: number, b: number) => Math.abs(a - b) > 0.05 * Math.max(a, b)
-      if (before && !moved(before.mean, next.mean) && !moved(before.brightest, next.brightest)) return
+      const now = performance.now()
+      // Followed as a device's exposure follows its meter, not jumped to: by a share of the way in the ratio for the time since the last
+      // reading (see EXPOSURE_FOLLOW_MS), so that one reading off by a few zones does not flash the picture.
+      const share = before ? 1 - Math.exp(-(now - before.atMs) / SceneRenderer.EXPOSURE_FOLLOW_MS) : 1
+      const toward = (from: number, to: number) => from > 0 && to > 0 ? from * (to / from) ** share : to
+      const next = { mean: toward(before?.mean ?? 0, read.mean), brightest: toward(before?.brightest ?? 0, read.brightest), atMs: now }
       this.frameLight = next
-      this.render()
+      const moved = (a: number, b: number) => Math.abs(a - b) > 0.01 * Math.max(a, b)
+      if (!before || moved(before.mean, next.mean) || moved(before.brightest, next.brightest)) this.render()
     })
   }
+
+  /** How fast a device's exposure follows its meter: the time to go about two thirds of the way, ms. ASSUMED, a phone's settling. */
+  private static readonly EXPOSURE_FOLLOW_MS = 300
 
   private frameMeter?: FrameMeter
   /** The latest photograph of the surroundings, and the relative scale it was taken at (see measureSurroundings). */
   private framePhotograph?: { texture: Texture, scale: number }
   /** What a device setting its own exposure last read of its frame, cd/m² (see meterFrame). */
-  private frameLight?: { mean: number, brightest: number }
+  private frameLight?: { mean: number, brightest: number, atMs: number }
   /**
    * The lamps of the decor (a streetlamp's head, a car's headlamps, a declared light): kept out of the eye's probe, as the stars are. Each
    * is a speck in it, under a pixel of its 128, which the rasteriser hit or missed as the eye moved by a few centimetres, and with it its

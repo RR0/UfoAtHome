@@ -33,8 +33,13 @@ export class FrameMeter {
   static readonly ZONE_LEVEL = 3
   /** The cone left out round a source for the mean, degrees of radius: its disc spread over a texel of LEVEL. */
   static readonly SOURCE_CONE_DEG = 2
-  /** The same for the zones: its disc spread over a texel of ZONE_LEVEL. */
-  static readonly ZONE_SOURCE_CONE_DEG = 6
+  /**
+   * The same for the zones, faded in rather than cut: nothing of a zone nearer the source than the first angle counts, all of one beyond
+   * the second. A texel of ZONE_LEVEL is some six degrees, and read between texels the disc's light reaches a zone up to eight or eleven
+   * degrees off. Cut sharp at six, the samples of the frame's grid caught that light or missed it as the frame turned, the brightest zone
+   * went from sixty thousand to a hundred and seventy thousand candela from one picture to the next, and the Sun pulsed as the phone panned.
+   */
+  static readonly ZONE_SOURCE_FADE_DEG: readonly [number, number] = [8, 14]
 
   private readonly target = new WebGLRenderTarget(2, 1, { type: FloatType, minFilter: NearestFilter, magFilter: NearestFilter, depthBuffer: false })
   private readonly scene = new Scene()
@@ -67,7 +72,7 @@ export class FrameMeter {
         const vec3 LUMINANCE = vec3(0.2126, 0.7152, 0.0722);
         void main() {
           bool zones = int(gl_FragCoord.x) == 1;
-          float cone = zones ? ${Math.cos((FrameMeter.ZONE_SOURCE_CONE_DEG * Math.PI) / 180)} : ${Math.cos((FrameMeter.SOURCE_CONE_DEG * Math.PI) / 180)};
+          float cone = ${Math.cos((FrameMeter.SOURCE_CONE_DEG * Math.PI) / 180)};
           float sum = 0.0;
           float count = 0.0;
           float brightest = 0.0;
@@ -75,11 +80,16 @@ export class FrameMeter {
             for (int i = 0; i < ${FrameMeter.COLUMNS}; i++) {
               vec2 at = (vec2(float(i), float(j)) + 0.5) / vec2(${FrameMeter.COLUMNS}.0, ${FrameMeter.ROWS}.0) * 2.0 - 1.0;
               vec3 dir = normalize(uForward + at.x * uRight + at.y * uUp);
-              if (uSource.w <= 1.0 && dot(dir, uSource.xyz) > cone) continue;
-              float light = dot(textureCubeLodEXT(uProbe, dir, zones ? ${FrameMeter.ZONE_LEVEL}.0 : ${FrameMeter.LEVEL}.0).rgb, LUMINANCE);
-              sum += light;
+              float toSource = uSource.w <= 1.0 ? dot(dir, uSource.xyz) : -1.0;
+              if (zones) {
+                float counted = 1.0 - smoothstep(${Math.cos((FrameMeter.ZONE_SOURCE_FADE_DEG[1] * Math.PI) / 180)}, ${Math.cos((FrameMeter.ZONE_SOURCE_FADE_DEG[0] * Math.PI) / 180)}, toSource);
+                brightest = max(brightest, counted * dot(textureCubeLodEXT(uProbe, dir, ${FrameMeter.ZONE_LEVEL}.0).rgb, LUMINANCE));
+                count += 1.0;
+                continue;
+              }
+              if (toSource > cone) continue;
+              sum += dot(textureCubeLodEXT(uProbe, dir, ${FrameMeter.LEVEL}.0).rgb, LUMINANCE);
               count += 1.0;
-              brightest = max(brightest, light);
             }
           }
           gl_FragColor = vec4(zones ? brightest : (count > 0.0 ? sum / count : 0.0), count, 0.0, 1.0);
