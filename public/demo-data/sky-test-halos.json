@@ -6,14 +6,14 @@
     "halo",
     "atmospheric optics",
     "ice crystals",
-    "odd-radius halos",
-    "Lowitz arcs"
+    "lens flare",
+    "phone"
   ],
   "description": {
-    "fr": "Un ciel d'essai pour le cortège des halos. Rien ici n'est une forme posée : un prisme hexagonal de glace et la loi de Snell suffisent à tout produire, et aucun angle n'a été choisi. Le Soleil est à 20° de hauteur. Au départ, un voile de cirrus couvre 85 % du ciel et les cristaux tombent bien à plat (alignement 95 %) : anneau à 22°, parhélies de part et d'autre, arc tangent, circumzénithal, cercle parhélique. Puis le temps change sous vos yeux. De 10 à 19 s, les cristaux se mettent à tourbillonner (alignement 20 %) : parhélies et arcs s'éteignent, l'anneau reste ; ce réglage, que nul relevé au monde ne contient, décide à lui seul de ce qu'on voit. Ils se stabilisent de nouveau jusqu'à 26 s. De 26 à 31 s, le voile s'amincit à 25 % : le halo ne subsiste que par fragments, là où il reste de la glace. Il s'épaissit de nouveau jusqu'à 37 s, puis une couche de cumulus passe en dessous (70 % à 41 s) et cache le spectacle avant de se dissiper. Ensuite, de 50 à 56 s, les cristaux rares montent de 5 % à 55 % des cristaux tandis que l'alignement reste haut : des colonnes à bouts pyramidaux, qui dessinent les halos à rayon impair (9°, 20°, 35°), et des plaquettes libres de tourner autour d'un axe horizontal (orientation de Lowitz), dont les arcs filent des parhélies, toujours là. La caméra se rapproche du Soleil. Ces formes sont faibles à côté des parhélies : un halo de 9° a environ un dixième de leur éclat. Les angles du halo de 22° (bord rouge à 21,7°) et des parhélies (environ 22°) ont été vérifiés cohérents avec ceux d'Atmospheric Optics (https://atoptics.co.uk), la référence sur ces phénomènes.",
-    "en": "A test sky for the halo display. Nothing here is a placed shape: a hexagonal ice prism and Snell's law produce all of it, and not one angle was chosen. The Sun is 20° up. At first a veil of cirrus covers 85% of the sky and the crystals fall well flat (95% alignment): the 22° ring, sundogs on either side, the tangent arc, the circumzenithal arc, the parhelic circle. Then the weather changes as you watch. From 10 to 19 s the crystals start to tumble (20% alignment): the sundogs and arcs go out and the ring stays; that setting, which no meteorological record in the world contains, alone decides what one sees. They settle again until 26 s. From 26 to 31 s the veil thins to 25%: the display survives only in fragments, where there is still ice. It thickens again until 37 s, then a layer of cumulus passes beneath (70% at 41 s) and hides the show before clearing. Then, from 50 to 56 s, the rare crystals rise from 5% to 55% while the alignment stays high: pyramid-ended columns, which draw the odd-radius haloes (9°, 20°, 35°), and plates free to turn about a level axis (Lowitz orientation), whose arcs run down from the sundogs, still there. The camera moves in on the Sun. These forms are faint beside the sundogs: a 9° halo has about a tenth of their brightness. The angles of the 22° halo (red edge at 21.7°) and of the sundogs (about 22°) were checked against Atmospheric Optics (https://atoptics.co.uk), the reference on these phenomena, and agree.",
-    "es": "Un cielo de prueba para el despliegue de halos. Aquí nada es una forma colocada: un prisma hexagonal de hielo y la ley de Snell lo producen todo, y no se ha elegido ni un solo ángulo. El Sol está a 20° de altura. Al principio un velo de cirros cubre el 85% del cielo y los cristales caen bien planos (95% de alineación): el anillo de 22°, parhelios a ambos lados, el arco tangente, el arco circuncenital, el círculo parhélico. Luego el tiempo cambia ante tus ojos. De 10 a 19 s los cristales empiezan a dar tumbos (20% de alineación): los parhelios y los arcos se apagan y el anillo se queda; ese ajuste, que ningún registro meteorológico del mundo contiene, decide por sí solo lo que se ve. Vuelven a asentarse hasta los 26 s. De 26 a 31 s el velo se adelgaza hasta el 25%: el despliegue solo sobrevive a fragmentos, donde aún hay hielo. Vuelve a espesarse hasta los 37 s, y luego una capa de cúmulos pasa por debajo (70% a los 41 s) y oculta el espectáculo antes de despejarse. Luego, de 50 a 56 s, los cristales raros pasan del 5% al 55% mientras la alineación sigue alta: columnas con extremos piramidales, que dibujan los halos de radio impar (9°, 20°, 35°), y placas libres de girar en torno a un eje horizontal (orientación de Lowitz), cuyos arcos bajan desde los parhelios, que siguen ahí. La cámara se acerca al Sol. Estas formas son débiles junto a los parhelios: un halo de 9° tiene un décimo de su brillo. Los ángulos del halo de 22° (borde rojo a 21,7°) y de los parhelios (unos 22°) se han comprobado coherentes con los de Atmospheric Optics (https://atoptics.co.uk), la referencia sobre estos fenómenos.",
-    "it": "Un cielo di prova per lo spettacolo degli aloni. Nulla qui è una forma posizionata: un prisma esagonale di ghiaccio e la legge di Snell producono tutto, e non è stato scelto un solo angolo. Il Sole è a 20° di altezza. All'inizio un velo di cirri copre l'85% del cielo e i cristalli cadono ben piatti (95% di allineamento): l'anello di 22°, i pareli ai due lati, l'arco tangente, l'arco circumzenitale, il cerchio parelico. Poi il tempo cambia sotto i tuoi occhi. Da 10 a 19 s i cristalli cominciano a ruzzolare (20% di allineamento): i pareli e gli archi si spengono e l'anello resta; quel parametro, che nessun archivio meteorologico al mondo contiene, decide da solo ciò che si vede. Si stabilizzano di nuovo fino a 26 s. Da 26 a 31 s il velo si assottiglia al 25%: lo spettacolo sopravvive solo a frammenti, dove c'è ancora ghiaccio. Si ispessisce di nuovo fino a 37 s, poi uno strato di cumuli passa sotto (70% a 41 s) e nasconde lo spettacolo prima di diradarsi. Poi, da 50 a 56 s, i cristalli rari salgono dal 5% al 55% mentre l'allineamento resta alto: colonne con estremità piramidali, che disegnano gli aloni a raggio dispari (9°, 20°, 35°), e lastrine libere di ruotare attorno a un asse orizzontale (orientamento di Lowitz), i cui archi scendono dai pareli, sempre presenti. La camera si avvicina al Sole. Queste forme sono deboli accanto ai pareli: un alone di 9° ha circa un decimo della loro luminosità. Gli angoli dell'alone di 22° (bordo rosso a 21,7°) e dei pareli (circa 22°) sono stati verificati coerenti con quelli di Atmospheric Optics (https://atoptics.co.uk), il riferimento su questi fenomeni."
+    "fr": "Un halo photographié au téléphone, reconstitué là et à l'heure où il l'a été : Royan, le 29 octobre 2026 à 15 h 30, le Soleil à 21° de hauteur derrière un voile de cirrostratus (85 %) dont les cristaux tombent bien à plat (alignement 95 %). Rien ici n'est une forme posée : un prisme hexagonal de glace et la loi de Snell produisent l'anneau à 22°, les parhélies, l'arc tangent et le cercle parhélique, et aucun angle n'a été choisi. Le cadrage de départ est celui de la photographie, retrouvé sur elle : les deux parhélies, à 22,8° du Soleil, donnent le champ du téléphone (67° sur 53°), la place du Soleil donne le cap et l'inclinaison. Le ciel ne change pas, c'est le téléphone qui bouge. Le petit disque au-dessus du Soleil n'est pas dans le ciel mais dans l'objectif : une image du Soleil renvoyée entre ses lentilles. Les reflets de ce genre sont toujours alignés sur la droite qui joint le Soleil au centre de l'image, le plus visible de l'autre côté du centre. Quand le Soleil passe à gauche, il passe à droite ; quand le Soleil descend, il monte ; Soleil au centre, les reflets se confondent avec lui ; en zoomant, ils s'écartent. Les angles du halo de 22° (bord rouge à 21,7°) et des parhélies ont été vérifiés cohérents avec ceux d'Atmospheric Optics (https://atoptics.co.uk), la référence sur ces phénomènes.",
+    "en": "A halo photographed with a phone, rebuilt where and when it was taken: Royan, 29 October 2026 at 15:30, the Sun 21° up behind a veil of cirrostratus (85%) whose crystals fall well flat (95% alignment). Nothing here is a placed shape: a hexagonal ice prism and Snell's law produce the 22° ring, the sundogs, the tangent arc and the parhelic circle, and not one angle was chosen. The opening frame is the photograph's, found from it: the two sundogs, 22.8° from the Sun, give the phone's field (67° by 53°), and where the Sun stands gives the heading and the tilt. The sky does not change; the phone moves. The small disc above the Sun is not in the sky but in the lens: an image of the Sun thrown back between its glasses. Ghosts of that kind always lie on the line from the Sun through the centre of the picture, the brightest on the far side of the centre. As the Sun goes left, it goes right; as the Sun goes down, it goes up; with the Sun in the centre, the ghosts merge with it; zooming in, they spread out. The angles of the 22° halo (red edge at 21.7°) and of the sundogs were checked against Atmospheric Optics (https://atoptics.co.uk), the reference on these phenomena, and agree.",
+    "es": "Un halo fotografiado con un teléfono, reconstruido donde y cuando se tomó: Royan, el 29 de octubre de 2026 a las 15:30, el Sol a 21° de altura tras un velo de cirrostratos (85%) cuyos cristales caen bien planos (95% de alineación). Aquí nada es una forma colocada: un prisma hexagonal de hielo y la ley de Snell producen el anillo de 22°, los parhelios, el arco tangente y el círculo parhélico, y no se ha elegido ni un solo ángulo. El encuadre inicial es el de la fotografía, deducido de ella: los dos parhelios, a 22,8° del Sol, dan el campo del teléfono (67° por 53°), y la posición del Sol da el rumbo y la inclinación. El cielo no cambia; es el teléfono el que se mueve. El pequeño disco sobre el Sol no está en el cielo sino en el objetivo: una imagen del Sol devuelta entre sus lentes. Los reflejos de ese tipo siempre se alinean en la recta que une el Sol con el centro de la imagen, el más visible al otro lado del centro. Cuando el Sol pasa a la izquierda, él pasa a la derecha; cuando el Sol baja, él sube; con el Sol en el centro, los reflejos se confunden con él; al hacer zoom, se separan. Los ángulos del halo de 22° (borde rojo a 21,7°) y de los parhelios se han comprobado coherentes con los de Atmospheric Optics (https://atoptics.co.uk), la referencia sobre estos fenómenos.",
+    "it": "Un alone fotografato con un telefono, ricostruito dove e quando è stato scattato: Royan, il 29 ottobre 2026 alle 15:30, il Sole alto 21° dietro un velo di cirrostrati (85%) i cui cristalli cadono ben piatti (allineamento 95%). Nulla qui è una forma posizionata: un prisma esagonale di ghiaccio e la legge di Snell producono l'anello di 22°, i pareli, l'arco tangente e il cerchio parelico, e non è stato scelto un solo angolo. L'inquadratura iniziale è quella della fotografia, ricavata da essa: i due pareli, a 22,8° dal Sole, danno il campo del telefono (67° per 53°), e la posizione del Sole dà la direzione e l'inclinazione. Il cielo non cambia; è il telefono a muoversi. Il piccolo disco sopra il Sole non è nel cielo ma nell'obiettivo: un'immagine del Sole rimandata tra le sue lenti. I riflessi di questo tipo stanno sempre sulla retta che unisce il Sole al centro dell'immagine, il più visibile dall'altra parte del centro. Quando il Sole va a sinistra, lui va a destra; quando il Sole scende, lui sale; con il Sole al centro, i riflessi si confondono con lui; zoomando, si allontanano. Gli angoli dell'alone di 22° (bordo rosso a 21,7°) e dei pareli sono stati verificati coerenti con quelli di Atmospheric Optics (https://atoptics.co.uk), il riferimento su questi fenomeni."
   },
   "time": {
     "year": 2026,
@@ -74,594 +74,6 @@
           "storm": false,
           "rareIceCrystals": 0.05
         }
-      },
-      {
-        "t": 10000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.85,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.95,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.85,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0,
-          "highCloudCover": 0.85,
-          "iceCrystalAlignment": 0.95,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.05
-        }
-      },
-      {
-        "t": 19000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.85,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.2,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.85,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0,
-          "highCloudCover": 0.85,
-          "iceCrystalAlignment": 0.2,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.05
-        }
-      },
-      {
-        "t": 22000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.85,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.2,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.85,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0,
-          "highCloudCover": 0.85,
-          "iceCrystalAlignment": 0.2,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.05
-        }
-      },
-      {
-        "t": 26000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.85,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.95,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.85,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0,
-          "highCloudCover": 0.85,
-          "iceCrystalAlignment": 0.95,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.05
-        }
-      },
-      {
-        "t": 31000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.25,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.95,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.25,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0,
-          "highCloudCover": 0.25,
-          "iceCrystalAlignment": 0.95,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.05
-        }
-      },
-      {
-        "t": 33000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.25,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.95,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.25,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0,
-          "highCloudCover": 0.25,
-          "iceCrystalAlignment": 0.95,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.05
-        }
-      },
-      {
-        "t": 37000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.85,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.95,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.85,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0,
-          "highCloudCover": 0.85,
-          "iceCrystalAlignment": 0.95,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.05
-        }
-      },
-      {
-        "t": 41000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.85,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.95,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0.7,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.955,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0.7,
-          "highCloudCover": 0.85,
-          "iceCrystalAlignment": 0.95,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.05
-        }
-      },
-      {
-        "t": 43000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.85,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.95,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0.7,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.955,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0.7,
-          "highCloudCover": 0.85,
-          "iceCrystalAlignment": 0.95,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.05
-        }
-      },
-      {
-        "t": 46000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.85,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.95,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.85,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0,
-          "highCloudCover": 0.85,
-          "iceCrystalAlignment": 0.95,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.05
-        }
-      },
-      {
-        "t": 50000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.85,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.95,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.85,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0,
-          "highCloudCover": 0.85,
-          "iceCrystalAlignment": 0.95,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.05
-        }
-      },
-      {
-        "t": 56000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.85,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.95,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.85,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0,
-          "highCloudCover": 0.85,
-          "iceCrystalAlignment": 0.95,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.55
-        }
-      },
-      {
-        "t": 60000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.85,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.95,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.85,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0,
-          "highCloudCover": 0.85,
-          "iceCrystalAlignment": 0.95,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.55
-        }
-      },
-      {
-        "t": 66000,
-        "weather": {
-          "cloudLayers": [
-            {
-              "id": "halo-cirrus",
-              "type": "cirrus",
-              "baseM": 8000,
-              "thicknessM": 400,
-              "coverage": 0.85,
-              "sizeM": 2200,
-              "density": 0.35,
-              "darkness": 0.05,
-              "iceCrystalAlignment": 0.95,
-              "seed": 41
-            },
-            {
-              "id": "low-cumulus",
-              "type": "cumulus",
-              "baseM": 1500,
-              "thicknessM": 800,
-              "coverage": 0,
-              "sizeM": 1400,
-              "density": 1,
-              "darkness": 0.15,
-              "seed": 17
-            }
-          ],
-          "cloudCover": 0.85,
-          "cloudDarkness": 0.05,
-          "cloudBaseM": 8000,
-          "lowerCloudCover": 0,
-          "highCloudCover": 0.85,
-          "iceCrystalAlignment": 0.95,
-          "precipitationType": "none",
-          "precipitationIntensity": 0,
-          "windDirectionDeg": 90,
-          "windSpeed": 4,
-          "storm": false,
-          "rareIceCrystals": 0.55
-        }
       }
     ]
   },
@@ -685,8 +97,8 @@
           "elevationM": 0,
           "headingDeg": 223.1,
           "pitchDeg": 30.4,
-          "fovDeg": 53.1,
-          "rollDeg": -1.8
+          "rollDeg": -1.8,
+          "fovDeg": 53.1
         }
       },
       {
@@ -697,43 +109,80 @@
           "elevationM": 0,
           "headingDeg": 223.1,
           "pitchDeg": 30.4,
-          "fovDeg": 53.1,
-          "rollDeg": -1.8
+          "rollDeg": -1.8,
+          "fovDeg": 53.1
         }
       },
       {
-        "t": 10000,
+        "t": 14000,
         "pose": {
           "lat": 45.631536,
           "lng": -0.9868809,
           "elevationM": 0,
-          "headingDeg": 223.1,
-          "pitchDeg": 30.4,
-          "fovDeg": 53.1,
-          "rollDeg": -1.8
+          "headingDeg": 238,
+          "pitchDeg": 30,
+          "rollDeg": -1.0,
+          "fovDeg": 53.1
         }
       },
       {
-        "t": 46000,
+        "t": 22000,
         "pose": {
           "lat": 45.631536,
           "lng": -0.9868809,
           "elevationM": 0,
-          "headingDeg": 223.1,
-          "pitchDeg": 30.4,
-          "fovDeg": 53.1,
-          "rollDeg": -1.8
+          "headingDeg": 238,
+          "pitchDeg": 40,
+          "rollDeg": -1.2,
+          "fovDeg": 53.1
         }
       },
       {
-        "t": 52000,
+        "t": 30000,
+        "pose": {
+          "lat": 45.631536,
+          "lng": -0.9868809,
+          "elevationM": 0,
+          "headingDeg": 208,
+          "pitchDeg": 40,
+          "rollDeg": -2.5,
+          "fovDeg": 53.1
+        }
+      },
+      {
+        "t": 38000,
+        "pose": {
+          "lat": 45.631536,
+          "lng": -0.9868809,
+          "elevationM": 0,
+          "headingDeg": 208,
+          "pitchDeg": 22,
+          "rollDeg": -2.0,
+          "fovDeg": 53.1
+        }
+      },
+      {
+        "t": 44000,
         "pose": {
           "lat": 45.631536,
           "lng": -0.9868809,
           "elevationM": 0,
           "headingDeg": 222.6,
-          "pitchDeg": 22,
-          "fovDeg": 60
+          "pitchDeg": 20.7,
+          "rollDeg": 0,
+          "fovDeg": 53.1
+        }
+      },
+      {
+        "t": 50000,
+        "pose": {
+          "lat": 45.631536,
+          "lng": -0.9868809,
+          "elevationM": 0,
+          "headingDeg": 222.6,
+          "pitchDeg": 20.7,
+          "rollDeg": 0,
+          "fovDeg": 53.1
         }
       },
       {
@@ -743,8 +192,9 @@
           "lng": -0.9868809,
           "elevationM": 0,
           "headingDeg": 222.6,
-          "pitchDeg": 22,
-          "fovDeg": 45
+          "pitchDeg": 24,
+          "rollDeg": -1.0,
+          "fovDeg": 30
         }
       },
       {
@@ -754,8 +204,9 @@
           "lng": -0.9868809,
           "elevationM": 0,
           "headingDeg": 222.6,
-          "pitchDeg": 22,
-          "fovDeg": 45
+          "pitchDeg": 24,
+          "rollDeg": -1.0,
+          "fovDeg": 30
         }
       }
     ]
