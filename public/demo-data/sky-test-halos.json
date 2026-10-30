@@ -26,8 +26,8 @@
   "durationSeconds": 66,
   "place": [
     {
-      "lat": 45.6248,
-      "lng": -1.0281,
+      "lat": 45.631536,
+      "lng": -0.9868809,
       "name": "Royan, France"
     }
   ],
@@ -680,54 +680,58 @@
       {
         "t": 0,
         "pose": {
-          "lat": 45.6248,
-          "lng": -1.0281,
+          "lat": 45.631536,
+          "lng": -0.9868809,
           "elevationM": 0,
-          "headingDeg": 200,
-          "pitchDeg": 18,
-          "fovDeg": 90
+          "headingDeg": 223.1,
+          "pitchDeg": 30.4,
+          "fovDeg": 53.1,
+          "rollDeg": -1.8
         }
       },
       {
         "t": 6000,
         "pose": {
-          "lat": 45.6248,
-          "lng": -1.0281,
+          "lat": 45.631536,
+          "lng": -0.9868809,
           "elevationM": 0,
-          "headingDeg": 250,
-          "pitchDeg": 18,
-          "fovDeg": 90
+          "headingDeg": 223.1,
+          "pitchDeg": 30.4,
+          "fovDeg": 53.1,
+          "rollDeg": -1.8
         }
       },
       {
         "t": 10000,
         "pose": {
-          "lat": 45.6248,
-          "lng": -1.0281,
+          "lat": 45.631536,
+          "lng": -0.9868809,
           "elevationM": 0,
-          "headingDeg": 230,
-          "pitchDeg": 30,
-          "fovDeg": 90
+          "headingDeg": 223.1,
+          "pitchDeg": 30.4,
+          "fovDeg": 53.1,
+          "rollDeg": -1.8
         }
       },
       {
         "t": 46000,
         "pose": {
-          "lat": 45.6248,
-          "lng": -1.0281,
+          "lat": 45.631536,
+          "lng": -0.9868809,
           "elevationM": 0,
-          "headingDeg": 230,
-          "pitchDeg": 30,
-          "fovDeg": 90
+          "headingDeg": 223.1,
+          "pitchDeg": 30.4,
+          "fovDeg": 53.1,
+          "rollDeg": -1.8
         }
       },
       {
         "t": 52000,
         "pose": {
-          "lat": 45.6248,
-          "lng": -1.0281,
+          "lat": 45.631536,
+          "lng": -0.9868809,
           "elevationM": 0,
-          "headingDeg": 232,
+          "headingDeg": 222.6,
           "pitchDeg": 22,
           "fovDeg": 60
         }
@@ -735,10 +739,10 @@
       {
         "t": 58000,
         "pose": {
-          "lat": 45.6248,
-          "lng": -1.0281,
+          "lat": 45.631536,
+          "lng": -0.9868809,
           "elevationM": 0,
-          "headingDeg": 232,
+          "headingDeg": 222.6,
           "pitchDeg": 22,
           "fovDeg": 45
         }
@@ -746,10 +750,10 @@
       {
         "t": 66000,
         "pose": {
-          "lat": 45.6248,
-          "lng": -1.0281,
+          "lat": 45.631536,
+          "lng": -0.9868809,
           "elevationM": 0,
-          "headingDeg": 232,
+          "headingDeg": 222.6,
           "pitchDeg": 22,
           "fovDeg": 45
         }
@@ -759,7 +763,4763 @@
   "soundTrack": {
     "keyframes": []
   },
-  "decor": [],
+  "decor": [
+    {
+      "id": "ign-lidar-topo-1",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 1",
+        "en": "Tree 1",
+        "es": "Árbol 1",
+        "it": "Albero 1"
+      },
+      "eastM": -3.7,
+      "northM": 19.8,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.2,
+        "lengthM": 10.2,
+        "heightM": 8.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-2",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 2",
+        "en": "Tree 2",
+        "es": "Árbol 2",
+        "it": "Albero 2"
+      },
+      "eastM": -6.7,
+      "northM": 20.8,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.2,
+        "lengthM": 10.2,
+        "heightM": 8.9
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-3",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 3",
+        "en": "Tree 3",
+        "es": "Árbol 3",
+        "it": "Albero 3"
+      },
+      "eastM": 9.8,
+      "northM": 27.8,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.6,
+        "lengthM": 9.6,
+        "heightM": 8.9
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-4",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 4",
+        "en": "Tree 4",
+        "es": "Árbol 4",
+        "it": "Albero 4"
+      },
+      "eastM": -20.7,
+      "northM": 15.8,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.7,
+        "lengthM": 7.7,
+        "heightM": 8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-5",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 5",
+        "en": "Tree 5",
+        "es": "Árbol 5",
+        "it": "Albero 5"
+      },
+      "eastM": -37.7,
+      "northM": 9.3,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.3,
+        "lengthM": 9.3,
+        "heightM": 9.1
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-6",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 6",
+        "en": "Tree 6",
+        "es": "Árbol 6",
+        "it": "Albero 6"
+      },
+      "eastM": 21.8,
+      "northM": 5.3,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 2,
+        "lengthM": 2,
+        "heightM": 5.5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-7",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 7",
+        "en": "Tree 7",
+        "es": "Árbol 7",
+        "it": "Albero 7"
+      },
+      "eastM": 27.3,
+      "northM": 31.8,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.1,
+        "lengthM": 10.1,
+        "heightM": 8.4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-8",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 8",
+        "en": "Tree 8",
+        "es": "Árbol 8",
+        "it": "Albero 8"
+      },
+      "eastM": 26.8,
+      "northM": -26.2,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 13.3,
+        "lengthM": 13.3,
+        "heightM": 7
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-9",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 9",
+        "en": "Tree 9",
+        "es": "Árbol 9",
+        "it": "Albero 9"
+      },
+      "eastM": -54.2,
+      "northM": 2.3,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 8.1,
+        "lengthM": 8.1,
+        "heightM": 9
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-10",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 10",
+        "en": "Tree 10",
+        "es": "Árbol 10",
+        "it": "Albero 10"
+      },
+      "eastM": 18.8,
+      "northM": -34.2,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11,
+        "lengthM": 11,
+        "heightM": 6.9
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-11",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 11",
+        "en": "Tree 11",
+        "es": "Árbol 11",
+        "it": "Albero 11"
+      },
+      "eastM": 31.3,
+      "northM": -24.2,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 13,
+        "lengthM": 13,
+        "heightM": 6.7
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-12",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 12",
+        "en": "Tree 12",
+        "es": "Árbol 12",
+        "it": "Albero 12"
+      },
+      "eastM": 22.3,
+      "northM": -37.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11,
+        "lengthM": 11,
+        "heightM": 6.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-13",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 13",
+        "en": "Tree 13",
+        "es": "Árbol 13",
+        "it": "Albero 13"
+      },
+      "eastM": 39.3,
+      "northM": -25.2,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.4,
+        "lengthM": 9.4,
+        "heightM": 7.1
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-14",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 14",
+        "en": "Tree 14",
+        "es": "Árbol 14",
+        "it": "Albero 14"
+      },
+      "eastM": 45.3,
+      "northM": 38.3,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.6,
+        "lengthM": 9.6,
+        "heightM": 8.6
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-15",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 15",
+        "en": "Tree 15",
+        "es": "Árbol 15",
+        "it": "Albero 15"
+      },
+      "eastM": -13.7,
+      "northM": -87.2,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 8.1,
+        "lengthM": 8.1,
+        "heightM": 10.7
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-16",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 16",
+        "en": "Tree 16",
+        "es": "Árbol 16",
+        "it": "Albero 16"
+      },
+      "eastM": -71.7,
+      "northM": -5.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.3,
+        "lengthM": 10.3,
+        "heightM": 8.9
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-17",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 17",
+        "en": "Tree 17",
+        "es": "Árbol 17",
+        "it": "Albero 17"
+      },
+      "eastM": 61.8,
+      "northM": 45.3,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.2,
+        "lengthM": 11.2,
+        "heightM": 9.3
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-18",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 18",
+        "en": "Tree 18",
+        "es": "Árbol 18",
+        "it": "Albero 18"
+      },
+      "eastM": 21.8,
+      "northM": -43.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 6.9,
+        "lengthM": 6.9,
+        "heightM": 6.4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-19",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 19",
+        "en": "Tree 19",
+        "es": "Árbol 19",
+        "it": "Albero 19"
+      },
+      "eastM": 43.8,
+      "northM": -37.2,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.2,
+        "lengthM": 7.2,
+        "heightM": 7.1
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-20",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 20",
+        "en": "Tree 20",
+        "es": "Árbol 20",
+        "it": "Albero 20"
+      },
+      "eastM": 17.3,
+      "northM": -39.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 9.9,
+        "heightM": 5.7
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-21",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 21",
+        "en": "Tree 21",
+        "es": "Árbol 21",
+        "it": "Albero 21"
+      },
+      "eastM": -84.2,
+      "northM": -1.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.7,
+        "lengthM": 11.7,
+        "heightM": 9.5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-22",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 22",
+        "en": "Tree 22",
+        "es": "Árbol 22",
+        "it": "Albero 22"
+      },
+      "eastM": -7.2,
+      "northM": -92.2,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 8.6,
+        "lengthM": 8.6,
+        "heightM": 9.7
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-23",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 23",
+        "en": "Tree 23",
+        "es": "Árbol 23",
+        "it": "Albero 23"
+      },
+      "eastM": 69.3,
+      "northM": -7.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.4,
+        "lengthM": 7.4,
+        "heightM": 7.4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-24",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 24",
+        "en": "Tree 24",
+        "es": "Árbol 24",
+        "it": "Albero 24"
+      },
+      "eastM": -8.2,
+      "northM": -62.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 4.5,
+        "lengthM": 4.5,
+        "heightM": 6.1
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-25",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 25",
+        "en": "Tree 25",
+        "es": "Árbol 25",
+        "it": "Albero 25"
+      },
+      "eastM": 31.8,
+      "northM": -37.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.3,
+        "lengthM": 7.3,
+        "heightM": 5.1
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-26",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 26",
+        "en": "Tree 26",
+        "es": "Árbol 26",
+        "it": "Albero 26"
+      },
+      "eastM": -99.2,
+      "northM": 23.8,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 2,
+        "lengthM": 2,
+        "heightM": 8.5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-27",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 27",
+        "en": "Tree 27",
+        "es": "Árbol 27",
+        "it": "Albero 27"
+      },
+      "eastM": 15.8,
+      "northM": 50.3,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 4.3,
+        "lengthM": 4.3,
+        "heightM": 5.1
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-28",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 28",
+        "en": "Tree 28",
+        "es": "Árbol 28",
+        "it": "Albero 28"
+      },
+      "eastM": 28.8,
+      "northM": -39.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.9,
+        "lengthM": 7.9,
+        "heightM": 4.9
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-29",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 29",
+        "en": "Tree 29",
+        "es": "Árbol 29",
+        "it": "Albero 29"
+      },
+      "eastM": 35.3,
+      "northM": -35.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.5,
+        "lengthM": 9.5,
+        "heightM": 4.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-30",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 30",
+        "en": "Tree 30",
+        "es": "Árbol 30",
+        "it": "Albero 30"
+      },
+      "eastM": 49.8,
+      "northM": 13.3,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 2.9,
+        "lengthM": 2.9,
+        "heightM": 4.9
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-31",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 31",
+        "en": "Tree 31",
+        "es": "Árbol 31",
+        "it": "Albero 31"
+      },
+      "eastM": 21.3,
+      "northM": 52.3,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 4.8,
+        "lengthM": 4.8,
+        "heightM": 5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-32",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 32",
+        "en": "Tree 32",
+        "es": "Árbol 32",
+        "it": "Albero 32"
+      },
+      "eastM": -105.2,
+      "northM": -17.2,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 8.5,
+        "lengthM": 8.5,
+        "heightM": 8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-33",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 33",
+        "en": "Tree 33",
+        "es": "Árbol 33",
+        "it": "Albero 33"
+      },
+      "eastM": 8.8,
+      "northM": -97.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 3.9,
+        "lengthM": 3.9,
+        "heightM": 7.4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-34",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 34",
+        "en": "Tree 34",
+        "es": "Árbol 34",
+        "it": "Albero 34"
+      },
+      "eastM": 103.3,
+      "northM": 10.8,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 5.1,
+        "lengthM": 5.1,
+        "heightM": 7.5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-35",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 35",
+        "en": "Tree 35",
+        "es": "Árbol 35",
+        "it": "Albero 35"
+      },
+      "eastM": 6.8,
+      "northM": 46.3,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 3,
+        "lengthM": 3,
+        "heightM": 4.2
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-36",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 36",
+        "en": "Tree 36",
+        "es": "Árbol 36",
+        "it": "Albero 36"
+      },
+      "eastM": 2.8,
+      "northM": -57.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 3.9,
+        "lengthM": 3.9,
+        "heightM": 4.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-37",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 37",
+        "en": "Tree 37",
+        "es": "Árbol 37",
+        "it": "Albero 37"
+      },
+      "eastM": -122.7,
+      "northM": -22.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.5,
+        "lengthM": 9.5,
+        "heightM": 8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-38",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 38",
+        "en": "Tree 38",
+        "es": "Árbol 38",
+        "it": "Albero 38"
+      },
+      "eastM": 1.8,
+      "northM": -54.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 4,
+        "lengthM": 4,
+        "heightM": 4.4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-39",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 39",
+        "en": "Tree 39",
+        "es": "Árbol 39",
+        "it": "Albero 39"
+      },
+      "eastM": 25.8,
+      "northM": 53.3,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 4.6,
+        "lengthM": 4.6,
+        "heightM": 4.5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-40",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 40",
+        "en": "Tree 40",
+        "es": "Árbol 40",
+        "it": "Albero 40"
+      },
+      "eastM": -70.2,
+      "northM": -30.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 2,
+        "lengthM": 2,
+        "heightM": 5.4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-41",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 41",
+        "en": "Tree 41",
+        "es": "Árbol 41",
+        "it": "Albero 41"
+      },
+      "eastM": 46.3,
+      "northM": -46.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 3.6,
+        "lengthM": 3.6,
+        "heightM": 4.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-42",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 42",
+        "en": "Tree 42",
+        "es": "Árbol 42",
+        "it": "Albero 42"
+      },
+      "eastM": 38.8,
+      "northM": -80.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 4,
+        "lengthM": 4,
+        "heightM": 5.7
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-43",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 43",
+        "en": "Tree 43",
+        "es": "Árbol 43",
+        "it": "Albero 43"
+      },
+      "eastM": 30.3,
+      "northM": 55.8,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 3.3,
+        "lengthM": 3.3,
+        "heightM": 4.4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-44",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 44",
+        "en": "Tree 44",
+        "es": "Árbol 44",
+        "it": "Albero 44"
+      },
+      "eastM": -139.7,
+      "northM": -30.2,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 6.9,
+        "lengthM": 6.9,
+        "heightM": 7.6
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-45",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 45",
+        "en": "Tree 45",
+        "es": "Árbol 45",
+        "it": "Albero 45"
+      },
+      "eastM": -128.7,
+      "northM": 13.8,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 3.9,
+        "lengthM": 3.9,
+        "heightM": 6.5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-46",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 46",
+        "en": "Tree 46",
+        "es": "Árbol 46",
+        "it": "Albero 46"
+      },
+      "eastM": -71.7,
+      "northM": 19.8,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 2,
+        "lengthM": 2,
+        "heightM": 4.4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-47",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 47",
+        "en": "Tree 47",
+        "es": "Árbol 47",
+        "it": "Albero 47"
+      },
+      "eastM": 17.3,
+      "northM": -93.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 5.5,
+        "lengthM": 5.5,
+        "heightM": 5.1
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-48",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 48",
+        "en": "Tree 48",
+        "es": "Árbol 48",
+        "it": "Albero 48"
+      },
+      "eastM": 39.8,
+      "northM": 58.8,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 3.2,
+        "lengthM": 3.2,
+        "heightM": 4.2
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-49",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 49",
+        "en": "Tree 49",
+        "es": "Árbol 49",
+        "it": "Albero 49"
+      },
+      "eastM": 84.8,
+      "northM": -15.7,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 2,
+        "lengthM": 2,
+        "heightM": 4.7
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-50",
+      "kind": "tree",
+      "title": {
+        "fr": "Arbre 50",
+        "en": "Tree 50",
+        "es": "Árbol 50",
+        "it": "Albero 50"
+      },
+      "eastM": 43.8,
+      "northM": 60.3,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 3.1,
+        "lengthM": 3.1,
+        "heightM": 4.2
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2021-09-02"
+    },
+    {
+      "id": "ign-lidar-topo-51",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II",
+      "eastM": 36.6,
+      "northM": -41.8,
+      "headingDeg": 54,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.7,
+        "lengthM": 7.1,
+        "heightM": 6.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#63696e"
+      },
+      "facade": {
+        "color": "#e9dfcb",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-52",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (2)",
+      "eastM": 48.2,
+      "northM": -41.9,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 2.8,
+        "heightM": 5.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#636a6b"
+      },
+      "facade": {
+        "color": "#d4cbb9",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-53",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (3)",
+      "eastM": 16.4,
+      "northM": -63.9,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 51.6,
+        "lengthM": 24.7,
+        "heightM": 6.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#676d71"
+      },
+      "facade": {
+        "color": "#dad1be",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-54",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (4)",
+      "eastM": -55.6,
+      "northM": 45,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 27.6,
+        "lengthM": 19.8,
+        "heightM": 4.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6b757e"
+      },
+      "facade": {
+        "color": "#bcb4a4",
+        "plain": true,
+        "storeyM": 4.5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-55",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (5)",
+      "eastM": 65.7,
+      "northM": -33,
+      "headingDeg": 57,
+      "lit": false,
+      "sizeM": {
+        "widthM": 36.8,
+        "lengthM": 35.4,
+        "heightM": 5.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#656b71"
+      },
+      "facade": {
+        "color": "#e7ddc9",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-56",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (6)",
+      "eastM": 54,
+      "northM": -54,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 17,
+        "lengthM": 4.9,
+        "heightM": 5.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6d7278"
+      },
+      "facade": {
+        "color": "#eae0cc",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-57",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (7)",
+      "eastM": 31,
+      "northM": -72.8,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 38.2,
+        "lengthM": 5.7,
+        "heightM": 5.8
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#60656d"
+      },
+      "facade": {
+        "color": "#d8cfbd",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-58",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (8)",
+      "eastM": 13.5,
+      "northM": -84.8,
+      "headingDeg": 54,
+      "lit": false,
+      "sizeM": {
+        "widthM": 5.7,
+        "lengthM": 4.2,
+        "heightM": 5.8
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#62686d"
+      },
+      "facade": {
+        "color": "#cac1b0",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-59",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (9)",
+      "eastM": 8.2,
+      "northM": -88.7,
+      "headingDeg": 144,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.2,
+        "lengthM": 5.7,
+        "heightM": 6.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#63696e"
+      },
+      "facade": {
+        "color": "#ddd4c1",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-60",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (10)",
+      "eastM": -54.5,
+      "northM": 71.5,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 48.8,
+        "lengthM": 29,
+        "heightM": 4.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#676f78"
+      },
+      "facade": {
+        "color": "#cac1b0",
+        "plain": true,
+        "storeyM": 4.5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-61",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (11)",
+      "eastM": -84.1,
+      "northM": 39.4,
+      "headingDeg": 68.6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 15.9,
+        "lengthM": 13,
+        "heightM": 5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#f9faf9"
+      },
+      "facade": {
+        "color": "#d9d0bd",
+        "plain": true,
+        "storeyM": 5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-62",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (12)",
+      "eastM": 10.7,
+      "northM": 100.5,
+      "headingDeg": 69.8,
+      "lit": false,
+      "sizeM": {
+        "widthM": 64.4,
+        "lengthM": 50.6,
+        "heightM": 10.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#9ca3a9"
+      },
+      "facade": {
+        "color": "#e4dac7",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-63",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (13)",
+      "eastM": -81.6,
+      "northM": 66.2,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 21.2,
+        "lengthM": 5.7,
+        "heightM": 4.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#62676f"
+      },
+      "facade": {
+        "color": "#bdb5a5",
+        "plain": true,
+        "storeyM": 4.5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-64",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (14)",
+      "eastM": -110.6,
+      "northM": 27.2,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 17,
+        "lengthM": 14.8,
+        "heightM": 12.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6b727a"
+      },
+      "facade": {
+        "color": "#e0d7c4",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-65",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (15)",
+      "eastM": 76.9,
+      "northM": 97.3,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 21.2,
+        "lengthM": 9.2,
+        "heightM": 5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#dadee0"
+      },
+      "facade": {
+        "color": "#d5cbb9",
+        "plain": true,
+        "storeyM": 5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-66",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (16)",
+      "eastM": 50.3,
+      "northM": 116.3,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 63.6,
+        "lengthM": 14.8,
+        "heightM": 5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#92999e"
+      },
+      "facade": {
+        "color": "#d0c8b6",
+        "plain": true,
+        "storeyM": 5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-67",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (17)",
+      "eastM": 60.2,
+      "northM": 115.1,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 36.1,
+        "lengthM": 2.8,
+        "heightM": 5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#999fa3"
+      },
+      "facade": {
+        "color": "#c7bfae",
+        "plain": true,
+        "storeyM": 5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-68",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (18)",
+      "eastM": 135.2,
+      "northM": 4.6,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.1,
+        "lengthM": 5.7,
+        "heightM": 4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#696e72"
+      },
+      "facade": {
+        "color": "#e5dbc7",
+        "plain": true,
+        "storeyM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-69",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (19)",
+      "eastM": 113.8,
+      "northM": -73.8,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 50.9,
+        "lengthM": 3.5,
+        "heightM": 6.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#bbb3a3",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-70",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (20)",
+      "eastM": 118.1,
+      "northM": -66.8,
+      "headingDeg": 162,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 5.7,
+        "heightM": 5.7
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#dfd6c3",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-71",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (21)",
+      "eastM": 135.2,
+      "northM": 17.9,
+      "headingDeg": 117,
+      "lit": false,
+      "sizeM": {
+        "widthM": 18.4,
+        "lengthM": 4.2,
+        "heightM": 4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#dbd2bf",
+        "plain": true,
+        "storeyM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-72",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (22)",
+      "eastM": 109,
+      "northM": -84.4,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 73.5,
+        "lengthM": 12.7,
+        "heightM": 6.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#c0b8a7",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-73",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (23)",
+      "eastM": 142.3,
+      "northM": 20.2,
+      "headingDeg": 117,
+      "lit": false,
+      "sizeM": {
+        "widthM": 6.4,
+        "lengthM": 6.4,
+        "heightM": 4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#cfc6b5",
+        "plain": true,
+        "storeyM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-74",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (24)",
+      "eastM": 144.8,
+      "northM": 23.7,
+      "headingDeg": 26.6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 8.7,
+        "lengthM": 3.1,
+        "heightM": 3.7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#dae1e7"
+      },
+      "facade": {
+        "color": "#d0c7b6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-75",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (25)",
+      "eastM": 140.8,
+      "northM": -63.3,
+      "headingDeg": 116.6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 4,
+        "lengthM": 3.8,
+        "heightM": 4.1
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#676d74"
+      },
+      "facade": {
+        "color": "#e5dbc8"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-76",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (26)",
+      "eastM": 133.1,
+      "northM": -83.4,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 30.4,
+        "lengthM": 2.8,
+        "heightM": 6.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#c4bbab",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-77",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (27)",
+      "eastM": 160.6,
+      "northM": 14.4,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 48.8,
+        "lengthM": 16.3,
+        "heightM": 4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#e4dac6",
+        "plain": true,
+        "storeyM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-78",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (28)",
+      "eastM": 45.1,
+      "northM": 155.5,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 13.4,
+        "lengthM": 9.2,
+        "heightM": 5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6a747b"
+      },
+      "facade": {
+        "color": "#ebe1cd",
+        "plain": true,
+        "storeyM": 5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-79",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (29)",
+      "eastM": -142.5,
+      "northM": 83.3,
+      "headingDeg": 164.1,
+      "lit": false,
+      "sizeM": {
+        "widthM": 45,
+        "lengthM": 31.1,
+        "heightM": 8.676191329956055
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "gable",
+        "riseM": 4.511356830596924,
+        "color": "#959da3"
+      },
+      "facade": {
+        "color": "#d0c7b5",
+        "plain": true,
+        "storeyM": 4.16
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-80",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (30)",
+      "eastM": 172.8,
+      "northM": 8.1,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 30.4,
+        "lengthM": 4.2,
+        "heightM": 4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#e4dbc7",
+        "plain": true,
+        "storeyM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-81",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (31)",
+      "eastM": 170.8,
+      "northM": 31.1,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.1,
+        "lengthM": 3.5,
+        "heightM": 4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#828788"
+      },
+      "facade": {
+        "color": "#e5dcc8",
+        "plain": true,
+        "storeyM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-82",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (32)",
+      "eastM": 59.6,
+      "northM": 166,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 25.5,
+        "lengthM": 15.6,
+        "heightM": 5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#68717c"
+      },
+      "facade": {
+        "color": "#ccc3b2",
+        "plain": true,
+        "storeyM": 5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-83",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (33)",
+      "eastM": 129.5,
+      "northM": 120.5,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 42.9,
+        "lengthM": 22.3,
+        "heightM": 6.1
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ecf8fe"
+      },
+      "facade": {
+        "color": "#bfb7a7",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-84",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (34)",
+      "eastM": 174.5,
+      "northM": -37.2,
+      "headingDeg": 120,
+      "lit": false,
+      "sizeM": {
+        "widthM": 18.4,
+        "lengthM": 10.6,
+        "heightM": 3.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#67747f"
+      },
+      "facade": {
+        "color": "#c7bfae",
+        "plain": true,
+        "storeyM": 3.9
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-85",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (35)",
+      "eastM": 143.1,
+      "northM": 109,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 59.4,
+        "lengthM": 9.2,
+        "heightM": 4.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6b696a"
+      },
+      "facade": {
+        "color": "#c8c0af",
+        "plain": true,
+        "storeyM": 4.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-86",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (36)",
+      "eastM": 177.6,
+      "northM": 35.2,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12,
+        "lengthM": 9.9,
+        "heightM": 4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#d9cfbd",
+        "plain": true,
+        "storeyM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-87",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (37)",
+      "eastM": 86.2,
+      "northM": 161.9,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 14.1,
+        "lengthM": 4.2,
+        "heightM": 7.5
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#81848e"
+      },
+      "facade": {
+        "color": "#c2baa9",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-88",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (38)",
+      "eastM": 150.9,
+      "northM": 105.6,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 20.5,
+        "lengthM": 2.8,
+        "heightM": 4.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#686a71"
+      },
+      "facade": {
+        "color": "#e6dcc9",
+        "plain": true,
+        "storeyM": 4.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-89",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (39)",
+      "eastM": 182.9,
+      "northM": -26,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.2,
+        "lengthM": 4.2,
+        "heightM": 3.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6b7783"
+      },
+      "facade": {
+        "color": "#d2c9b7",
+        "plain": true,
+        "storeyM": 3.9
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-90",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (40)",
+      "eastM": -186,
+      "northM": 9.4,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 30.4,
+        "lengthM": 7.1,
+        "heightM": 6.1
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c7cbcf"
+      },
+      "facade": {
+        "color": "#cac1b0",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-91",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (41)",
+      "eastM": 184.8,
+      "northM": 28.2,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.1,
+        "lengthM": 6.4,
+        "heightM": 4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e6f0f1"
+      },
+      "facade": {
+        "color": "#c5bcab",
+        "plain": true,
+        "storeyM": 4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-92",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (42)",
+      "eastM": 59.7,
+      "northM": 177.8,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 17,
+        "lengthM": 6.4,
+        "heightM": 5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#65707a"
+      },
+      "facade": {
+        "color": "#ebe1cd",
+        "plain": true,
+        "storeyM": 5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-93",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (43)",
+      "eastM": 188.1,
+      "northM": 18.5,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.7,
+        "lengthM": 5.7,
+        "heightM": 3.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#c1b9a8",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-94",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (44)",
+      "eastM": 84.2,
+      "northM": 174.5,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 24.7,
+        "lengthM": 20.5,
+        "heightM": 7.5
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8a9097"
+      },
+      "facade": {
+        "color": "#ccc4b2",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-95",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (45)",
+      "eastM": 130.7,
+      "northM": 143.3,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 59.4,
+        "lengthM": 19.8,
+        "heightM": 6.864812850952148
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "gable",
+        "riseM": 2.2452239990234375,
+        "color": "#d3d8da"
+      },
+      "facade": {
+        "color": "#d1c8b6",
+        "plain": true,
+        "storeyM": 4.62
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-96",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (46)",
+      "eastM": 119.3,
+      "northM": 153.4,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.1,
+        "lengthM": 7.1,
+        "heightM": 4.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#7e8790"
+      },
+      "facade": {
+        "color": "#bfb7a7",
+        "plain": true,
+        "storeyM": 4.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-97",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (47)",
+      "eastM": 146.1,
+      "northM": 130.8,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 6.4,
+        "lengthM": 4.2,
+        "heightM": 4.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#60646d"
+      },
+      "facade": {
+        "color": "#e6dcc8",
+        "plain": true,
+        "storeyM": 4.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-98",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (48)",
+      "eastM": 69.7,
+      "northM": 183.3,
+      "headingDeg": 75,
+      "lit": false,
+      "sizeM": {
+        "widthM": 4.2,
+        "lengthM": 2.8,
+        "heightM": 7.5
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6a7075"
+      },
+      "facade": {
+        "color": "#d0c7b5",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-99",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (49)",
+      "eastM": -197.2,
+      "northM": -13.3,
+      "headingDeg": 162,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 4.2,
+        "heightM": 6.1
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#cacfd0"
+      },
+      "facade": {
+        "color": "#e7ddca",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-100",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (50)",
+      "eastM": 193.9,
+      "northM": -40.2,
+      "headingDeg": 120,
+      "lit": false,
+      "sizeM": {
+        "widthM": 31.1,
+        "lengthM": 25.5,
+        "heightM": 3.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#767e8b"
+      },
+      "facade": {
+        "color": "#c1b9a8",
+        "plain": true,
+        "storeyM": 3.9
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-101",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (51)",
+      "eastM": -201.1,
+      "northM": 11.2,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 44.5,
+        "lengthM": 19.8,
+        "heightM": 6.1
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ccd3d4"
+      },
+      "facade": {
+        "color": "#c0b8a7",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-102",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (52)",
+      "eastM": 157.7,
+      "northM": 131.3,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 21.9,
+        "lengthM": 17.7,
+        "heightM": 4.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#70757c"
+      },
+      "facade": {
+        "color": "#ccc3b2",
+        "plain": true,
+        "storeyM": 4.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-103",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (53)",
+      "eastM": 204,
+      "northM": -25.5,
+      "headingDeg": 30,
+      "lit": false,
+      "sizeM": {
+        "widthM": 21.9,
+        "lengthM": 4.2,
+        "heightM": 3.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#adb8c3"
+      },
+      "facade": {
+        "color": "#d2c9b7",
+        "plain": true,
+        "storeyM": 3.9
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-104",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (54)",
+      "eastM": -171.8,
+      "northM": 132.6,
+      "headingDeg": 177,
+      "lit": false,
+      "sizeM": {
+        "widthM": 48.8,
+        "lengthM": 19.1,
+        "heightM": 7.1
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#fdffff"
+      },
+      "facade": {
+        "color": "#cfc6b4",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-105",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (55)",
+      "eastM": 108,
+      "northM": 190,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 28.3,
+        "lengthM": 8.5,
+        "heightM": 7.5
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#909699"
+      },
+      "facade": {
+        "color": "#e0d6c3",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-106",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (56)",
+      "eastM": 116.6,
+      "northM": 185.3,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 15.6,
+        "lengthM": 6.4,
+        "heightM": 7.5
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8f9699"
+      },
+      "facade": {
+        "color": "#cdc4b3",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-107",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (57)",
+      "eastM": 220.6,
+      "northM": 43.5,
+      "headingDeg": 158.8,
+      "lit": false,
+      "sizeM": {
+        "widthM": 42.8,
+        "lengthM": 30.8,
+        "heightM": 6.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#c5bcac",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-108",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (58)",
+      "eastM": 185.1,
+      "northM": 130.3,
+      "headingDeg": 70,
+      "lit": false,
+      "sizeM": {
+        "widthM": 25.7,
+        "lengthM": 19.6,
+        "heightM": 6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#69757f"
+      },
+      "facade": {
+        "color": "#dcd2c0",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-109",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (59)",
+      "eastM": -227.1,
+      "northM": -8.1,
+      "headingDeg": 159.8,
+      "lit": false,
+      "sizeM": {
+        "widthM": 20.9,
+        "lengthM": 16.4,
+        "heightM": 6.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#d6cdbb",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-110",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (60)",
+      "eastM": 149.2,
+      "northM": 184.9,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 4.9,
+        "heightM": 8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#70777b"
+      },
+      "facade": {
+        "color": "#e5dcc8",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-111",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (61)",
+      "eastM": -236.9,
+      "northM": 21.1,
+      "headingDeg": 159.9,
+      "lit": false,
+      "sizeM": {
+        "widthM": 22.5,
+        "lengthM": 15.9,
+        "heightM": 4.1
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#777b81"
+      },
+      "facade": {
+        "color": "#c6bdac",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-112",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (62)",
+      "eastM": 140.1,
+      "northM": 193.1,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 19.8,
+        "lengthM": 17,
+        "heightM": 8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6e767e"
+      },
+      "facade": {
+        "color": "#c2baa9",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-113",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (63)",
+      "eastM": 232.7,
+      "northM": -59.6,
+      "headingDeg": 120.1,
+      "lit": false,
+      "sizeM": {
+        "widthM": 35,
+        "lengthM": 24.8,
+        "heightM": 6.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#656b74"
+      },
+      "facade": {
+        "color": "#e2d8c5",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-114",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (64)",
+      "eastM": -199.6,
+      "northM": 136.7,
+      "headingDeg": 90,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.6,
+        "lengthM": 6.4,
+        "heightM": 7.1
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#d4e0e3"
+      },
+      "facade": {
+        "color": "#d9cfbd",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-115",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (65)",
+      "eastM": 164.4,
+      "northM": 180.7,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 42.4,
+        "lengthM": 6.4,
+        "heightM": 5.1
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#dad1be",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-116",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (66)",
+      "eastM": -231.3,
+      "northM": 79.3,
+      "headingDeg": 78,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.7,
+        "lengthM": 4.2,
+        "heightM": 7.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#717a83"
+      },
+      "facade": {
+        "color": "#c8c0af",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-117",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (67)",
+      "eastM": 176.3,
+      "northM": 184.5,
+      "headingDeg": 69.9,
+      "lit": false,
+      "sizeM": {
+        "widthM": 43.5,
+        "lengthM": 19.4,
+        "heightM": 4.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#e2d8c5",
+        "plain": true,
+        "storeyM": 4.2
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-118",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (68)",
+      "eastM": 155.8,
+      "northM": 203.1,
+      "headingDeg": 161.6,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.4,
+        "lengthM": 6.6,
+        "heightM": 3.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#c0b8a8",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-119",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (69)",
+      "eastM": -243.2,
+      "northM": 84.4,
+      "headingDeg": 78,
+      "lit": false,
+      "sizeM": {
+        "widthM": 27.6,
+        "lengthM": 17,
+        "heightM": 7.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#777c82"
+      },
+      "facade": {
+        "color": "#e0d6c3",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-120",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (70)",
+      "eastM": 166.6,
+      "northM": 207.3,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 16.3,
+        "lengthM": 5.7,
+        "heightM": 5.8
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#e6ddc9",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-121",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (71)",
+      "eastM": 265.8,
+      "northM": 17,
+      "headingDeg": 126,
+      "lit": false,
+      "sizeM": {
+        "widthM": 15.6,
+        "lengthM": 7.8,
+        "heightM": 6.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6d7b84"
+      },
+      "facade": {
+        "color": "#c3baaa",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-122",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (72)",
+      "eastM": -269.3,
+      "northM": 4.2,
+      "headingDeg": 70.2,
+      "lit": false,
+      "sizeM": {
+        "widthM": 55.5,
+        "lengthM": 28,
+        "heightM": 7.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#64696f"
+      },
+      "facade": {
+        "color": "#d6cdbb",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-123",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (73)",
+      "eastM": 175.2,
+      "northM": 210,
+      "headingDeg": 68.2,
+      "lit": false,
+      "sizeM": {
+        "widthM": 6.9,
+        "lengthM": 2.8,
+        "heightM": 3.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#bbb3a3",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-124",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (74)",
+      "eastM": 274,
+      "northM": 24.2,
+      "headingDeg": 129,
+      "lit": false,
+      "sizeM": {
+        "widthM": 5.7,
+        "lengthM": 4.2,
+        "heightM": 6.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#8a96a0"
+      },
+      "facade": {
+        "color": "#d3cab8",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-125",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (75)",
+      "eastM": 268.8,
+      "northM": 61,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 42,
+        "lengthM": 29.4,
+        "heightM": 5.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ecfaff"
+      },
+      "facade": {
+        "color": "#cac1b0",
+        "plain": true,
+        "storeyM": 5.4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-126",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (76)",
+      "eastM": 281.2,
+      "northM": 12.8,
+      "headingDeg": 129,
+      "lit": false,
+      "sizeM": {
+        "widthM": 26.9,
+        "lengthM": 21.2,
+        "heightM": 6.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#747f8a"
+      },
+      "facade": {
+        "color": "#d1c8b6",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-127",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (77)",
+      "eastM": 224.4,
+      "northM": 172.2,
+      "headingDeg": 69,
+      "lit": false,
+      "sizeM": {
+        "widthM": 6.4,
+        "lengthM": 3.5,
+        "heightM": 7.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#7b7f83"
+      },
+      "facade": {
+        "color": "#dfd5c2",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-128",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (78)",
+      "eastM": 243.3,
+      "northM": 156.8,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 4.2,
+        "lengthM": 3.5,
+        "heightM": 7.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#928f8c"
+      },
+      "facade": {
+        "color": "#e0d6c3",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-129",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (79)",
+      "eastM": -290.9,
+      "northM": -7,
+      "headingDeg": 70,
+      "lit": false,
+      "sizeM": {
+        "widthM": 49,
+        "lengthM": 22.3,
+        "heightM": 6.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#64696e"
+      },
+      "facade": {
+        "color": "#c8bfae",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-130",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (80)",
+      "eastM": 295.7,
+      "northM": -50.3,
+      "headingDeg": 36.9,
+      "lit": false,
+      "sizeM": {
+        "widthM": 37,
+        "lengthM": 33.9,
+        "heightM": 6.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6f7b85"
+      },
+      "facade": {
+        "color": "#cbc2b1",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-131",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (81)",
+      "eastM": 223.4,
+      "northM": 200.9,
+      "headingDeg": 66,
+      "lit": false,
+      "sizeM": {
+        "widthM": 3.5,
+        "lengthM": 3.5,
+        "heightM": 7.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#a2abb2"
+      },
+      "facade": {
+        "color": "#c3bbaa",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-132",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (82)",
+      "eastM": -231,
+      "northM": 195.3,
+      "headingDeg": 141.3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 37.3,
+        "lengthM": 26.3,
+        "heightM": 4.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#feffff"
+      },
+      "facade": {
+        "color": "#e9e0cc",
+        "plain": true,
+        "storeyM": 4.6
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-133",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (83)",
+      "eastM": -307.2,
+      "northM": -40.1,
+      "headingDeg": 69.4,
+      "lit": false,
+      "sizeM": {
+        "widthM": 41.2,
+        "lengthM": 19.4,
+        "heightM": 5.4
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#637085"
+      },
+      "facade": {
+        "color": "#c8c0ae",
+        "plain": true,
+        "storeyM": 5.4
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-134",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (84)",
+      "eastM": 298.3,
+      "northM": 84.8,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.2,
+        "lengthM": 4.9,
+        "heightM": 6.7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#e1d8c4",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-135",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (85)",
+      "eastM": 268.3,
+      "northM": 166,
+      "headingDeg": 158.2,
+      "lit": false,
+      "sizeM": {
+        "widthM": 5.2,
+        "lengthM": 3.9,
+        "heightM": 5.8
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#b2b9bd"
+      },
+      "facade": {
+        "color": "#c0b8a7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-136",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (86)",
+      "eastM": 315.1,
+      "northM": -29.9,
+      "headingDeg": 126,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 5.7,
+        "heightM": 5.6
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#cac4c6"
+      },
+      "facade": {
+        "color": "#beb6a6"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-137",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (87)",
+      "eastM": 306.9,
+      "northM": 80.9,
+      "headingDeg": 129,
+      "lit": false,
+      "sizeM": {
+        "widthM": 20.5,
+        "lengthM": 10.6,
+        "heightM": 6.7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#cbc2b1",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-138",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (88)",
+      "eastM": 258.1,
+      "northM": 187.8,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 70.7,
+        "lengthM": 43.8,
+        "heightM": 7.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#d9e8f2"
+      },
+      "facade": {
+        "color": "#d3cab8",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-139",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (89)",
+      "eastM": 320.9,
+      "northM": -20.2,
+      "headingDeg": 126,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 4.9,
+        "heightM": 7.1
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#3f4c4f"
+      },
+      "facade": {
+        "color": "#dcd3c0"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-140",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (90)",
+      "eastM": -291.1,
+      "northM": 163.3,
+      "headingDeg": 75,
+      "lit": false,
+      "sizeM": {
+        "widthM": 23.3,
+        "lengthM": 3.5,
+        "heightM": 4.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#686a6d"
+      },
+      "facade": {
+        "color": "#bfb7a7",
+        "plain": true,
+        "storeyM": 4.6
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-141",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (91)",
+      "eastM": -327.6,
+      "northM": 79.2,
+      "headingDeg": 75,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.7,
+        "lengthM": 4.9,
+        "heightM": 4.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e5f0f4"
+      },
+      "facade": {
+        "color": "#d7cebb",
+        "plain": true,
+        "storeyM": 4.2
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-142",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (92)",
+      "eastM": -330.3,
+      "northM": 69.4,
+      "headingDeg": 72,
+      "lit": false,
+      "sizeM": {
+        "widthM": 3.5,
+        "lengthM": 3.5,
+        "heightM": 4.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ccd4d4"
+      },
+      "facade": {
+        "color": "#d0c7b5",
+        "plain": true,
+        "storeyM": 4.2
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-143",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (93)",
+      "eastM": -336.6,
+      "northM": 44.5,
+      "headingDeg": 162,
+      "lit": false,
+      "sizeM": {
+        "widthM": 29.7,
+        "lengthM": 18.4,
+        "heightM": 6.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#cbdde5"
+      },
+      "facade": {
+        "color": "#ddd4c1",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-144",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (94)",
+      "eastM": -341.8,
+      "northM": -46.5,
+      "headingDeg": 63.7,
+      "lit": false,
+      "sizeM": {
+        "widthM": 55.8,
+        "lengthM": 22,
+        "heightM": 5.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#84898c"
+      },
+      "facade": {
+        "color": "#e6dcc9",
+        "plain": true,
+        "storeyM": 5.3
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-145",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (95)",
+      "eastM": -247.8,
+      "northM": 241.5,
+      "headingDeg": 51,
+      "lit": false,
+      "sizeM": {
+        "widthM": 24.7,
+        "lengthM": 12,
+        "heightM": 6.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#dbe8f1"
+      },
+      "facade": {
+        "color": "#c4bba8",
+        "plain": true,
+        "storeyM": 3.1
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-146",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (96)",
+      "eastM": 342.6,
+      "northM": 49.2,
+      "headingDeg": 39,
+      "lit": false,
+      "sizeM": {
+        "widthM": 84.9,
+        "lengthM": 29,
+        "heightM": 6.7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#ded5c2",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-147",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (97)",
+      "eastM": -336.3,
+      "northM": 85.6,
+      "headingDeg": 72,
+      "lit": false,
+      "sizeM": {
+        "widthM": 31.1,
+        "lengthM": 6.4,
+        "heightM": 4.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#898e92"
+      },
+      "facade": {
+        "color": "#e7deca",
+        "plain": true,
+        "storeyM": 4.2
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-148",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (98)",
+      "eastM": -307.4,
+      "northM": 167,
+      "headingDeg": 75,
+      "lit": false,
+      "sizeM": {
+        "widthM": 37.5,
+        "lengthM": 26.2,
+        "heightM": 4.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#63676e"
+      },
+      "facade": {
+        "color": "#eae0cc",
+        "plain": true,
+        "storeyM": 4.6
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-149",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (99)",
+      "eastM": -271.5,
+      "northM": 221.5,
+      "headingDeg": 141,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 10.6,
+        "heightM": 6.1
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#dbe8f1"
+      },
+      "facade": {
+        "color": "#bfb7a7"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-150",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (100)",
+      "eastM": -344.9,
+      "northM": 83.5,
+      "headingDeg": 74.5,
+      "lit": false,
+      "sizeM": {
+        "widthM": 31.9,
+        "lengthM": 11.5,
+        "heightM": 4.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#898c91"
+      },
+      "facade": {
+        "color": "#d4cbb9",
+        "plain": true,
+        "storeyM": 4.5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-151",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (101)",
+      "eastM": -278.2,
+      "northM": 226.7,
+      "headingDeg": 177,
+      "lit": false,
+      "sizeM": {
+        "widthM": 8.5,
+        "lengthM": 2.8,
+        "heightM": 6.1
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#f0ffff"
+      },
+      "facade": {
+        "color": "#ded5c2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-152",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (102)",
+      "eastM": -325.4,
+      "northM": 153.4,
+      "headingDeg": 75,
+      "lit": false,
+      "sizeM": {
+        "widthM": 20.5,
+        "lengthM": 15.6,
+        "heightM": 4.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#656a71"
+      },
+      "facade": {
+        "color": "#e9dfcb",
+        "plain": true,
+        "storeyM": 4.6
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-153",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (103)",
+      "eastM": -276,
+      "northM": 231.9,
+      "headingDeg": 141,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.1,
+        "lengthM": 4.9,
+        "heightM": 6.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#cbdfee"
+      },
+      "facade": {
+        "color": "#e4d9c3",
+        "plain": true,
+        "storeyM": 3.1
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-154",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (104)",
+      "eastM": -359.8,
+      "northM": 43.2,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 15.6,
+        "lengthM": 7.8,
+        "heightM": 6.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#c5d2d6"
+      },
+      "facade": {
+        "color": "#e5dbc8",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-155",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (105)",
+      "eastM": -271.2,
+      "northM": 246.2,
+      "headingDeg": 141,
+      "lit": false,
+      "sizeM": {
+        "widthM": 42.4,
+        "lengthM": 12,
+        "heightM": 6.2
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#d7e5ee"
+      },
+      "facade": {
+        "color": "#d4cab5",
+        "plain": true,
+        "storeyM": 3.1
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-156",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (106)",
+      "eastM": -362.8,
+      "northM": 63.6,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.6,
+        "lengthM": 7.1,
+        "heightM": 5.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#c1b9a8",
+        "plain": true,
+        "storeyM": 5.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-157",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (107)",
+      "eastM": -362.1,
+      "northM": 88.6,
+      "headingDeg": 75,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 3.5,
+        "heightM": 5.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#c7bead",
+        "plain": true,
+        "storeyM": 5.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-158",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (108)",
+      "eastM": -368.8,
+      "northM": 76.3,
+      "headingDeg": 75,
+      "lit": false,
+      "sizeM": {
+        "widthM": 20.5,
+        "lengthM": 15.6,
+        "heightM": 5.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#eae0cc",
+        "plain": true,
+        "storeyM": 5.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-159",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (109)",
+      "eastM": 315.4,
+      "northM": 207.3,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 13.4,
+        "lengthM": 3.5,
+        "heightM": 4.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e1e8ed"
+      },
+      "facade": {
+        "color": "#cdc4b3"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-160",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (110)",
+      "eastM": -367,
+      "northM": 89.1,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 5.7,
+        "lengthM": 3.5,
+        "heightM": 5.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#e4dbc7",
+        "plain": true,
+        "storeyM": 5.8
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-161",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (111)",
+      "eastM": -353.7,
+      "northM": 140.1,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 10.6,
+        "lengthM": 4.2,
+        "heightM": 4.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#88969e"
+      },
+      "facade": {
+        "color": "#bab2a2",
+        "plain": true,
+        "storeyM": 4.3
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-162",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (112)",
+      "eastM": 320.5,
+      "northM": 205.8,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 4.2,
+        "lengthM": 2.8,
+        "heightM": 4.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e1eaec"
+      },
+      "facade": {
+        "color": "#e1d7c4"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-163",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (113)",
+      "eastM": -352.1,
+      "northM": 145.5,
+      "headingDeg": 72,
+      "lit": false,
+      "sizeM": {
+        "widthM": 5.7,
+        "lengthM": 3.5,
+        "heightM": 4.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#83888e"
+      },
+      "facade": {
+        "color": "#bfb7a7",
+        "plain": true,
+        "storeyM": 4.3
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-164",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (114)",
+      "eastM": -284.5,
+      "northM": 271.6,
+      "headingDeg": 51.3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 19.8,
+        "lengthM": 13.1,
+        "heightM": 7.4
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#c5bcac",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-165",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (115)",
+      "eastM": -365,
+      "northM": 151,
+      "headingDeg": 72,
+      "lit": false,
+      "sizeM": {
+        "widthM": 23.3,
+        "lengthM": 17.7,
+        "heightM": 4.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#898e97"
+      },
+      "facade": {
+        "color": "#d8cfbc",
+        "plain": true,
+        "storeyM": 4.3
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-166",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (116)",
+      "eastM": 347.6,
+      "northM": 196.4,
+      "headingDeg": 69.4,
+      "lit": false,
+      "sizeM": {
+        "widthM": 29,
+        "lengthM": 24.5,
+        "heightM": 7.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#ece2cd",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-167",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (117)",
+      "eastM": -302.8,
+      "northM": 265.3,
+      "headingDeg": 52.1,
+      "lit": false,
+      "sizeM": {
+        "widthM": 32.8,
+        "lengthM": 25,
+        "heightM": 6.9
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#d1c8b6",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-168",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (118)",
+      "eastM": -341.3,
+      "northM": 213.6,
+      "headingDeg": 164.7,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.9,
+        "lengthM": 3.9,
+        "heightM": 3.6
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#ddd3c1"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-169",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (119)",
+      "eastM": -377.4,
+      "northM": 153.3,
+      "headingDeg": 75,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12.7,
+        "lengthM": 4.2,
+        "heightM": 7.5
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e8f3fd"
+      },
+      "facade": {
+        "color": "#c7bead",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-170",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (120)",
+      "eastM": -377.2,
+      "northM": 169,
+      "headingDeg": 75,
+      "lit": false,
+      "sizeM": {
+        "widthM": 17.7,
+        "lengthM": 12.7,
+        "heightM": 7.5
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e7f4fe"
+      },
+      "facade": {
+        "color": "#d6ccba",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-171",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (121)",
+      "eastM": -391.5,
+      "northM": 139.1,
+      "headingDeg": 74.4,
+      "lit": false,
+      "sizeM": {
+        "widthM": 22.4,
+        "lengthM": 19.3,
+        "heightM": 7.8
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#929699"
+      },
+      "facade": {
+        "color": "#dad1be",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-172",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (122)",
+      "eastM": -352.7,
+      "northM": 221.5,
+      "headingDeg": 74.1,
+      "lit": false,
+      "sizeM": {
+        "widthM": 15.7,
+        "lengthM": 10.9,
+        "heightM": 5.3
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ddecf3"
+      },
+      "facade": {
+        "color": "#c1b8a8",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-173",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (123)",
+      "eastM": -382.3,
+      "northM": 178.5,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.2,
+        "lengthM": 3.5,
+        "heightM": 7.5
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#444d53"
+      },
+      "facade": {
+        "color": "#d7cdbb",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-174",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (124)",
+      "eastM": -359.8,
+      "northM": 231.2,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 4.2,
+        "lengthM": 4.2,
+        "heightM": 8.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#bcccd4"
+      },
+      "facade": {
+        "color": "#ccc3b2"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-175",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (125)",
+      "eastM": -364.3,
+      "northM": 227.2,
+      "headingDeg": 177,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.2,
+        "lengthM": 2.8,
+        "heightM": 8.2
+      },
+      "floors": 3,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#cdd9e5"
+      },
+      "facade": {
+        "color": "#c6bead"
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-176",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (126)",
+      "eastM": -379.6,
+      "northM": 209.5,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 48.1,
+        "lengthM": 21.2,
+        "heightM": 6.7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e7f4f9"
+      },
+      "facade": {
+        "color": "#d4cbb9",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-177",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (127)",
+      "eastM": -305.4,
+      "northM": 314.3,
+      "headingDeg": 51.3,
+      "lit": false,
+      "sizeM": {
+        "widthM": 30.9,
+        "lengthM": 21.2,
+        "heightM": 7.7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#c1b9a8",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-178",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (128)",
+      "eastM": -390,
+      "northM": 219.6,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 34.6,
+        "lengthM": 3.5,
+        "heightM": 6.7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ccdde6"
+      },
+      "facade": {
+        "color": "#cdc4b3",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-179",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (129)",
+      "eastM": 377.4,
+      "northM": 246.6,
+      "headingDeg": 158.2,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.2,
+        "lengthM": 4.4,
+        "heightM": 5.7
+      },
+      "floors": 2,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#c9c1af",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-180",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (130)",
+      "eastM": -393.3,
+      "northM": 226.4,
+      "headingDeg": 75,
+      "lit": false,
+      "sizeM": {
+        "widthM": 11.3,
+        "lengthM": 6.4,
+        "heightM": 6.7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#7a8289"
+      },
+      "facade": {
+        "color": "#ece2cd",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-181",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (131)",
+      "eastM": 396.4,
+      "northM": 231.5,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 54.4,
+        "lengthM": 37.5,
+        "heightM": 6.2
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#d8e1e5"
+      },
+      "facade": {
+        "color": "#e1d8c4",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-182",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (132)",
+      "eastM": -398.2,
+      "northM": 237.5,
+      "headingDeg": 74.7,
+      "lit": false,
+      "sizeM": {
+        "widthM": 13.5,
+        "lengthM": 3.6,
+        "heightM": 4.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#e1f1f1"
+      },
+      "facade": {
+        "color": "#d9d0be",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-183",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (133)",
+      "eastM": 416.5,
+      "northM": 213.5,
+      "headingDeg": 159,
+      "lit": false,
+      "sizeM": {
+        "widthM": 29.7,
+        "lengthM": 10.6,
+        "heightM": 6.2
+      },
+      "floors": 1,
+      "facade": {
+        "color": "#e9dfcb",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-184",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (134)",
+      "eastM": -419,
+      "northM": 232.3,
+      "headingDeg": 165,
+      "lit": false,
+      "sizeM": {
+        "widthM": 40.3,
+        "lengthM": 36.1,
+        "heightM": 6.7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#f2feff"
+      },
+      "facade": {
+        "color": "#cbc2b1",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-185",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (135)",
+      "eastM": -423.7,
+      "northM": 274,
+      "headingDeg": 164.4,
+      "lit": false,
+      "sizeM": {
+        "widthM": 52.4,
+        "lengthM": 29.8,
+        "heightM": 8.7
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#ddd4c1",
+        "plain": true
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-186",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (136)",
+      "eastM": -344.2,
+      "northM": 373.7,
+      "headingDeg": 87,
+      "lit": false,
+      "sizeM": {
+        "widthM": 20.5,
+        "lengthM": 19.8,
+        "heightM": 5.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#ffffff"
+      },
+      "facade": {
+        "color": "#cbc2b1",
+        "closedAtNight": true,
+        "storeyM": 5.5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-187",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (137)",
+      "eastM": -358.6,
+      "northM": 365.5,
+      "headingDeg": 177,
+      "lit": false,
+      "sizeM": {
+        "widthM": 9.9,
+        "lengthM": 9.9,
+        "heightM": 5.5
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#f8fbfe"
+      },
+      "facade": {
+        "color": "#bcb4a4",
+        "closedAtNight": true,
+        "storeyM": 5.5
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-188",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (138)",
+      "eastM": -394.8,
+      "northM": 357.5,
+      "headingDeg": 0,
+      "lit": false,
+      "sizeM": {
+        "widthM": 12,
+        "lengthM": 5.7,
+        "heightM": 5.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#686a6d"
+      },
+      "facade": {
+        "color": "#ded4c1",
+        "plain": true,
+        "storeyM": 5.3
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-189",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (139)",
+      "eastM": -384.6,
+      "northM": 378,
+      "headingDeg": 90,
+      "lit": false,
+      "sizeM": {
+        "widthM": 35.4,
+        "lengthM": 24,
+        "heightM": 5.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#6f7b89"
+      },
+      "facade": {
+        "color": "#c5bdac",
+        "plain": true,
+        "storeyM": 5.3
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    },
+    {
+      "id": "ign-lidar-topo-190",
+      "kind": "building",
+      "title": "Zone Industrielle de Royan II (140)",
+      "eastM": -399.4,
+      "northM": 364.3,
+      "headingDeg": 90,
+      "lit": false,
+      "sizeM": {
+        "widthM": 7.8,
+        "lengthM": 5.7,
+        "heightM": 5.3
+      },
+      "floors": 1,
+      "roof": {
+        "shape": "flat",
+        "riseM": 0,
+        "color": "#676d71"
+      },
+      "facade": {
+        "color": "#cfc7b5",
+        "plain": true,
+        "storeyM": 5.3
+      },
+      "origin": "ign-lidar-topo",
+      "surveyedOn": "2026-03-20"
+    }
+  ],
+  "sources": [
+    {
+      "title": "LiDAR HD, canopy height model and classification (the trees, the heights and the roofs of what stands round the spot), flown 2021-09-02",
+      "url": "https://geoservices.ign.fr/lidarhd",
+      "publication": {
+        "publisher": "IGN",
+        "time": "2021-09-02"
+      }
+    },
+    {
+      "title": "BD TOPO (the buildings with their heights and materials, the bridges and the lines round the spot), edited 2026-03-20",
+      "url": "https://geoservices.ign.fr/bdtopo",
+      "publication": {
+        "publisher": "IGN",
+        "time": "2026-03-20"
+      }
+    },
+    {
+      "title": "Aerial photograph of the IGN (the colour of the roofs), flown 2024-08-26",
+      "url": "https://geoservices.ign.fr/bdortho",
+      "publication": {
+        "publisher": "IGN",
+        "time": "2024-08-26"
+      }
+    }
+  ],
   "frozen": {
     "relief": {
       "src": "sky-test-halos.relief.zip",
@@ -791,5 +5551,6 @@
       "takenOn": "2026-10-30",
       "attribution": "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"
     }
-  }
+  },
+  "instrument": "phone-landscape"
 }
