@@ -1,6 +1,6 @@
 import {
   AnimationAction, AnimationMixer, LoopOnce, Box3, BoxGeometry, BufferAttribute, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Material, Mesh,
-  MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Points, type PointsMaterial, Quaternion, Raycaster, SphereGeometry, TorusGeometry, Vector2,
+  MeshPhysicalMaterial, MeshStandardMaterial, Object3D, PointLight, Points, type PointsMaterial, Quaternion, Raycaster, SphereGeometry, TorusGeometry, Vector2,
   Vector3
 } from "three"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
@@ -83,6 +83,14 @@ export interface BodyFrame {
  * supposed to be the picture's.
  */
 export const BODY_OVER_LAYER = 4
+
+/** A body that glows whole, as a light for what is round it (see BodySystem.castGlowLights). */
+interface GlowSource {
+  position: Vector3
+  /** Its luminous intensity, candela. */
+  candela: number
+  colour: [number, number, number]
+}
 
 /**
  * The bodies of an interpretation, standing in the scene — see InterpretationJson.
@@ -186,6 +194,7 @@ export class BodySystem {
     this.shapeShares.clear()
     this.metered.clear()
     const seen = new Set<string>()
+    const glowSources: GlowSource[] = []
     for (const stated of states) {
       const state = stated.flicker ? BodySystem.flickered(stated, seconds) : stated
       seen.add(state.id)
@@ -220,7 +229,16 @@ export class BodySystem {
       }
       this.shineLights(state, holder, whole ? undefined : glowing, frame)
       this.throwFlame(state, holder, seconds, display, frame.eye)
+      // What glows whole lights what is round it, its flame's wavering and all: the luminance it shows over the area it shows sideways.
+      if (state.appearance.luminanceCdM2 > 0 && (whole || !glowing?.length)) {
+        glowSources.push({
+          position: holder.position,
+          candela: state.appearance.luminanceCdM2 * (1 - state.appearance.transparency) * state.sizeM.widthM * state.sizeM.heightM,
+          colour: BodySystem.rgbOf(state.appearance.color)
+        })
+      }
     }
+    this.castGlowLights(glowSources, frame.eye)
     const kept = new Set(ids)
     for (const [id, { holder }] of [...this.built]) {
       if (seen.has(id)) continue
@@ -307,6 +325,45 @@ export class BodySystem {
    * tells against the sky, out to the width that carries its whole light at the cap, where it is
    * all the eye has left — which is what a observer means by "we could not look at it".
    */
+  /**
+   * How many of the bodies that glow whole light what is round them: the ones that light the observer most. A sky lantern let go from
+   * a terrace lights the terrace, and the people letting it go, less and less as it rises; a dozen of them lighting every pixel would be a
+   * dozen lights for the GPU, and the rest, further off, light it a hundredth as much.
+   */
+  static readonly GLOW_LIGHTS = 4
+
+  /** The lights the bodies that glow whole throw (see GLOW_LIGHTS): built once, the first time one glows, and never taken out of the
+   * scene again but put out, as a flame's is (see FlameEffect), since three.js compiles every material for the number of lights. */
+  private glowLights?: PointLight[]
+
+  /** Lights what is round the bodies that glow whole, the brightest at the observer first (see GLOW_LIGHTS), as point lights of their
+   * luminous intensity: the same units as a flame's light and a streetlamp's. No shadow, as a flame's casts none. */
+  private castGlowLights(sources: readonly GlowSource[], eye: Vector3 | undefined): void {
+    if (sources.length === 0 && !this.glowLights) return
+    this.glowLights ??= Array.from({ length: BodySystem.GLOW_LIGHTS }, () => {
+      const light = new PointLight(0xffffff, 0, 0, 2)
+      light.name = "body-glow-light"
+      this.group.add(light)
+      return light
+    })
+    const atEye = (source: GlowSource) => eye ? source.candela / Math.max(source.position.distanceToSquared(eye), 1e-6) : source.candela
+    const ranked = [...sources].sort((a, b) => atEye(b) - atEye(a))
+    const perLux = this.sceneUnitsPerLux()
+    this.glowLights.forEach((light, index) => {
+      const source = ranked[index]
+      if (!source) {
+        light.intensity = 0
+        return
+      }
+      light.position.copy(source.position)
+      // Its colour scaled to a luminance of one, so that the intensity alone says how much, as a flame's (see lightColourOf).
+      const [r, g, b] = source.colour
+      const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b || 1
+      light.color.setRGB(r / luminance, g / luminance, b / luminance)
+      light.intensity = source.candela * perLux
+    })
+  }
+
   private shine(state: BodyState, holder: Group, glowing: Glow[] | undefined, frame: BodyFrame): void {
     const eye = frame.eye
     const luminanceCdM2 = state.appearance.luminanceCdM2
