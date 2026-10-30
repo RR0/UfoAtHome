@@ -23,7 +23,8 @@ import { LIGHT_RIGS, TrafficSignals } from "../../../src/engine/model/LightRig.j
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "public", "demo-data", "sky-test-lens-ghosts.json")
 const PLACE = { lat: 48.3, lng: 1.7, name: "Beauce" }
-const DURATION_S = 46
+// Until the car has passed in front of the phone and left the frame on its left.
+const DURATION_S = 51
 const why = "Assumed: a crossroads made up to show lens ghosts."
 
 /** The road runs east and west, its centre 6 m north of the observer, who stands on its southern kerb; a lane goes north from 30 m east. */
@@ -43,13 +44,13 @@ const decor = [
     id: `lamp-${i + 1}`, kind: "streetlight", eastM, northM: 11, headingDeg: 180, sizeM: { widthM: 0.3, lengthM: 0.3, heightM: 8 }, lit: true,
     lamp: { lumens: 10000, colorTemperatureK: 4000 }
   })),
-  // A car coming from the east in the northern lane, slowing for the crossroads (about 35 km/h), dipped headlights on: from where the road
-  // comes out of a dip 200 m off, which hid it until then.
+  // A car coming from the east in the northern lane at about 35 km/h, dipped headlights on: from where the road comes out of a dip 200 m
+  // off, which hid it until then, through the crossroads and past the phone, to the end of the road in the west.
   {
     id: "car", kind: "vehicle", eastM: 230, northM: 7.8, headingDeg: 270, sizeM: { widthM: 1.8, lengthM: 4.4, heightM: 1.5 }, headlights: "dipped", lit: true,
     // Its lamps, drawn: the dipped headlights seen from the lane they face, some 800 candela each (assumed), and its tail lights.
     lights: LIGHT_RIGS.find(rig => rig.id === "car-headlights")!.create().map(light => light.id.startsWith("head") ? { ...light, intensity: 8 } : light),
-    track: [{ t: 26000, eastM: 230, northM: 7.8, headingDeg: 270 }, { t: 46000, eastM: 30, northM: 7.8, headingDeg: 270 }]
+    track: [{ t: 26000, eastM: 230, northM: 7.8, headingDeg: 270 }, { t: 46000, eastM: 30, northM: 7.8, headingDeg: 270 }, { t: 79000, eastM: -300, northM: 7.8, headingDeg: 270 }]
   }
 ]
 
@@ -60,7 +61,7 @@ const looks: [number, number, number][] = [
   [15, 66, 4],
   [17, 66, 9], [24, 66, 9],
   [27, 68, 4], [44, 68, 4],
-  [46, 68, 4]
+  [46, 68, 4], [51, 68, 4]
 ]
 const observerTrack = {
   keyframes: looks.map(([t, headingDeg, pitchDeg]) => ({ t: t * 1000, pose: { lat: PLACE.lat, lng: PLACE.lng, elevationM: 1.6, headingDeg, pitchDeg, fovDeg: 60 } }))
@@ -184,7 +185,7 @@ const wet = {
   },
   observerTrack: { keyframes: [{ t: 0, pose: wetPose(FACING) }, { t: WET_DURATION_S * 1000, pose: wetPose(FACING + 4) }] },
   decor: decor.map(object => object.id === "car"
-    ? { ...object, track: [{ t: 36000, eastM: 230, northM: 7.8, headingDeg: 270 }, { t: 56000, eastM: 30, northM: 7.8, headingDeg: 270 }] }
+    ? { ...object, track: [{ t: 36000, eastM: 230, northM: 7.8, headingDeg: 270 }, { t: 56000, eastM: 30, northM: 7.8, headingDeg: 270 }, { t: 89000, eastM: -300, northM: 7.8, headingDeg: 270 }] }
     : object),
   milestones: [
     {

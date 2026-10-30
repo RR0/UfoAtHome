@@ -22,7 +22,7 @@
   "second": 0
  },
  "utcOffsetHours": 1,
- "durationSeconds": 46,
+ "durationSeconds": 51,
  "place": [
   {
    "lat": 48.3,
@@ -146,6 +146,17 @@
    },
    {
     "t": 46000,
+    "pose": {
+     "lat": 48.3,
+     "lng": 1.7,
+     "elevationM": 1.6,
+     "headingDeg": 68,
+     "pitchDeg": 4,
+     "fovDeg": 60
+    }
+   },
+   {
+    "t": 51000,
     "pose": {
      "lat": 48.3,
      "lng": 1.7,
@@ -530,6 +541,12 @@
     {
      "t": 46000,
      "eastM": 30,
+     "northM": 7.8,
+     "headingDeg": 270
+    },
+    {
+     "t": 79000,
+     "eastM": -300,
      "northM": 7.8,
      "headingDeg": 270
     }

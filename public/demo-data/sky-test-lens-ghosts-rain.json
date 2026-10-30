@@ -647,6 +647,12 @@
      "eastM": 30,
      "northM": 7.8,
      "headingDeg": 270
+    },
+    {
+     "t": 89000,
+     "eastM": -300,
+     "northM": 7.8,
+     "headingDeg": 270
     }
    ]
   }
