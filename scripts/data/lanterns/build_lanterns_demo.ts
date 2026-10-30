@@ -103,9 +103,9 @@ const recording = {
     es: "Una docena de farolillos voladores soltados al anochecer la noche de Yi Peng, al pie del Doi Suthep en Chiang Mai, filmados por uno de quienes los sueltan: suben ante él y luego derivan hacia la montaña hasta ser a lo lejos un grupo suelto de puntos anaranjados, que se apagan uno a uno.",
     it: "Una dozzina di lanterne volanti lasciate andare al crepuscolo la sera di Yi Peng, ai piedi del Doi Suthep a Chiang Mai, filmate da uno di quelli che le lasciano andare: salgono davanti a lui, poi derivano verso la montagna finché sono in lontananza un gruppo sparso di punti arancioni, che si spengono uno a uno."
   },
-  // Yi Peng 2025, an hour after sunset (17:40), the Sun 12 degrees down: the end of the dusk, dark enough for a phone's picture to be a
+  // Yi Peng 2025, fifty minutes after sunset (17:40), the Sun ten degrees down: late dusk, dark enough for a phone's picture to be a
   // night's. At 18:20, eight degrees down, the phone's development lifted the sky to a pale evening blue.
-  time: { year: 2025, month: 11, day: 5, hour: 18, minute: 40, second: 0 },
+  time: { year: 2025, month: 11, day: 5, hour: 18, minute: 30, second: 0 },
   utcOffsetHours: 7,
   durationSeconds: DURATION_S,
   place: [{ lat: OBSERVER.lat, lng: OBSERVER.lng, name: OBSERVER.name }],
