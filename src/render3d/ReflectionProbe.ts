@@ -1,5 +1,5 @@
 import {
-  CubeCamera, HalfFloatType, LinearFilter, Object3D, PMREMGenerator, Scene, Texture, Vector3, WebGLCubeRenderTarget,
+  CubeCamera, HalfFloatType, LinearFilter, LinearMipmapLinearFilter, Object3D, PMREMGenerator, Scene, Texture, Vector3, WebGLCubeRenderTarget,
   WebGLRenderTarget, WebGLRenderer
 } from "three"
 
@@ -34,8 +34,10 @@ export class ReflectionProbe {
   /** Pixels on a side of each of the six views: under a degree each, enough for a lamp to land on one. */
   static readonly SIZE = 128
 
+  // With its mipmaps: what the eye's surroundings are measured on is read coarse (see ProbeIrradiance.LEVEL), a lamp's pixel averaged
+  // over the sky round it rather than hit or missed.
   private readonly target = new WebGLCubeRenderTarget(ReflectionProbe.SIZE, {
-    type: HalfFloatType, generateMipmaps: false, minFilter: LinearFilter, magFilter: LinearFilter
+    type: HalfFloatType, generateMipmaps: true, minFilter: LinearMipmapLinearFilter, magFilter: LinearFilter
   })
   private readonly camera = new CubeCamera(0.1, 200000, this.target)
   private filteredTarget?: WebGLRenderTarget

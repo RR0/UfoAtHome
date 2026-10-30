@@ -35,8 +35,16 @@ export interface ProbeLight {
 export class ProbeIrradiance {
   /** Directions sampled, spread evenly over the sphere. */
   static readonly SAMPLES = 4096
-  /** The cone left out round a source whose beam is a light of its own, degrees of radius. */
-  static readonly SOURCE_CONE_DEG = 1.5
+  /**
+   * The level of the probe's mipmaps read, 0 its own 128 pixels a side: 3, sixteen a side, a texel of some five degrees, as much of the
+   * sphere as each of the SAMPLES directions stands for. Read at its own pixels, a lamp of the decor took one of them, and the directions
+   * hit it or missed it as the eye moved by a few centimetres: the light round the observer, and the eye's adaptation with it, jumped ten
+   * and a hundred times with every step a walker took, the ground and the sky with them. Read averaged, a lamp counts for the light it
+   * gives, wherever it falls.
+   */
+  static readonly LEVEL = 3
+  /** The cone left out round a source whose beam is a light of its own, degrees of radius: its disc spread over the texels of LEVEL. */
+  static readonly SOURCE_CONE_DEG = 6
 
   private readonly target = new WebGLRenderTarget(3, 1, { type: FloatType, minFilter: NearestFilter, magFilter: NearestFilter, depthBuffer: false })
   private readonly scene = new Scene()
@@ -73,7 +81,7 @@ export class ProbeIrradiance {
             float phi = k * 2.399963229728653;
             vec3 dir = vec3(r * cos(phi), y, r * sin(phi));
             if (dot(dir, uExcludeA.xyz) > uExcludeA.w || dot(dir, uExcludeB.xyz) > uExcludeB.w) continue;
-            vec3 light = textureCube(uProbe, dir).rgb;
+            vec3 light = textureCubeLodEXT(uProbe, dir, ${ProbeIrradiance.LEVEL}.0).rgb;
             if (which == 0 && y > 0.0) sum += light * y;
             else if (which == 1 && y < 0.0) sum -= light * y;
             else if (which == 2 && y > 0.0) {

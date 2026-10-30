@@ -2565,6 +2565,7 @@ export class SceneRenderer {
       }
       else if (!this.reuseLoadedDecorModel(object, group)) void this.awaitArrival(this.loadDecorModel(object, this.decorModelToken))
     }
+    this.decorLamps = SceneRenderer.lampsOf(this.decorGroups.values())
     this.layStreetsIfWallsMoved(decor)
     // The code of the beams comes in only for a scene that has a vehicle, and a scene that has none never asks for it.
     if (decor.some(candidate => candidate.kind === "vehicle")) void this.loadHeadlights()
@@ -4936,7 +4937,7 @@ export class SceneRenderer {
     const eyeHidden: Object3D[] = [...this.starTiers.map(tier => tier.points),
       ...[...this.bodyMeshes.values()].filter(mesh => mesh instanceof Points),
       ...[this.rainSystem?.points, this.precipitationPoints, this.rainSplashSystem?.points].filter((object): object is Points => object !== undefined),
-      ...this.cabinDecor()]
+      ...this.cabinDecor(), ...this.decorLamps]
     const scale = this.relativeScale
     const version = this.sceneVersion
     // Behind the loader nothing is on screen to spare the GPU for: the eye's probe is taken as soon
@@ -5025,6 +5026,21 @@ export class SceneRenderer {
   }
 
   private probeIrradiance?: ProbeIrradiance
+  /**
+   * The lamps of the decor (a streetlamp's head, a car's headlamps, a declared light): kept out of the eye's probe, as the stars are. Each
+   * is a speck in it, under a pixel of its 128, which the rasteriser hit or missed as the eye moved by a few centimetres, and with it its
+   * whole light: the light round the observer, and the eye's adaptation, jumped tenfold with every step a walker took, the ground and the
+   * sky going light and dark with them (the Capitol, walked towards). Nor is a lamp's light a light round the observer, which lights every
+   * surface of the scene alike: what a lamp lights is the ground and the walls round it, which stay in the probe.
+   */
+  private decorLamps: Object3D[] = []
+
+  /** The lamps of decor groups (see decorLamps): the meshes DecorSystem marks as giving out light of their own. */
+  private static lampsOf(groups: Iterable<Object3D>): Object3D[] {
+    const lamps: Object3D[] = []
+    for (const group of groups) group.traverse(object => { if (object.userData.emissive === true) lamps.push(object) })
+    return lamps
+  }
   /** The light round the observer as last measured on the eye's photograph, lux — see
    * measureSurroundings. */
   private surroundings?: { up: [number, number, number], down: [number, number, number] }
@@ -6499,6 +6515,7 @@ export class SceneRenderer {
       DecorSystem.dispose(group)
     }
     this.decorGroups.clear()
+    this.decorLamps = []
     this.streetlightLights.clear()
     if (this.lensFlare) {
       this.lensFlare.mesh.removeFromParent()
