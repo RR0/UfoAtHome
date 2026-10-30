@@ -94,15 +94,22 @@ describe("CloudField.alphaAt", () => {
 
 /** The ice deck's field, which is not the water's: narrower, and fibrous. */
 describe("CloudField.iceAlphaAt", () => {
+  // Over several skies: the veil's presence is a field as broad as the deck is high, so one sky
+  // holds only a few of its features and its cover strays from the stated one, as a real sky does.
+  // At the height a cirrus deck at 8 km of size 2 200 m is drawn at.
   const fraction = (coverage: number) => {
     let sum = 0
     const count = 3000
-    for (let i = 0; i < count; i++) {
-      const altitude = Math.asin(0.05 + 0.95 * ((i * 0.618033988749895) % 1))
-      const azimuth = (i / count) * Math.PI * 2
-      sum += CloudField.iceAlphaAt({ x: Math.sin(azimuth) * Math.cos(altitude), y: Math.sin(altitude), z: -Math.cos(azimuth) * Math.cos(altitude) }, 200, coverage)
+    const skies = 8
+    for (let sky = 0; sky < skies; sky++) {
+      const fieldOffset = { x: sky * 7919, z: sky * 3571 }
+      for (let i = 0; i < count; i++) {
+        const altitude = Math.asin(0.05 + 0.95 * ((i * 0.618033988749895) % 1))
+        const azimuth = (i / count) * Math.PI * 2
+        sum += CloudField.iceAlphaAt({ x: Math.sin(azimuth) * Math.cos(altitude), y: Math.sin(altitude), z: -Math.cos(azimuth) * Math.cos(altitude) }, 1273, coverage, fieldOffset)
+      }
     }
-    return sum / count
+    return sum / (count * skies)
   }
 
   it("covers about the fraction of sky the coverage states", () => {
@@ -111,6 +118,33 @@ describe("CloudField.iceAlphaAt", () => {
     for (const coverage of [0.12, 0.3, 0.5, 0.7, 0.88]) {
       expect(Math.abs(fraction(coverage) - coverage)).toBeLessThan(0.045)
     }
+  })
+
+  it("leaves its gaps as broad clear areas, not lanes of sky between the fibres", () => {
+    // A veil at 85% read off the fibres alone left its 15% as long thin lanes across them: blue
+    // stripes combed through a sky that is, in a photo, one continuous milky sheet. Walk across the
+    // fibres (along z on the deck's plane) and count, for every clear point, whether the sky is
+    // still clear a fibre's width (25 units) to either side. 67% of them were lanes; what is left
+    // is the ragged edge of the broad gaps, frayed by the fibres on purpose (ICE_FRAY).
+    const height = 1273
+    let clear = 0
+    let lanes = 0
+    for (let sky = 0; sky < 8; sky++) {
+      const fieldOffset = { x: sky * 7919, z: sky * 3571 }
+      const at = (x: number, z: number) => {
+        const length = Math.hypot(x, height, z)
+        return CloudField.iceAlphaAt({ x: x / length, y: height / length, z: z / length }, height, 0.85, fieldOffset)
+      }
+      for (let x = -2000; x <= 2000; x += 200) {
+        for (let z = -2000; z <= 2000; z += 10) {
+          if (at(x, z) >= 0.5) continue
+          clear++
+          if (at(x, z - 25) >= 0.5 && at(x, z + 25) >= 0.5) lanes++
+        }
+      }
+    }
+    expect(clear).toBeGreaterThan(100)
+    expect(lanes / clear).toBeLessThan(0.25)
   })
 
 })
