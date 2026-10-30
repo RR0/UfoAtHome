@@ -82,6 +82,13 @@ export interface ReentryFragment {
    * fireball report gives — from which the brightness at the observer's actual distance follows.
    */
   absoluteMagnitude: number
+  /**
+   * How its brightness ran through its flight, when that is known: absolute magnitudes at instants of the recording (ms), joined
+   * linearly in magnitude between them, and held past either end. A great fireball is not one brightness: it brightens as it plunges
+   * into denser air, flares as it breaks up, and dies away (Chelyabinsk went from a faint streak at 95 km to brighter than the Sun at 30).
+   * `absoluteMagnitude` stands when absent.
+   */
+  lightCurve?: { t: number, absoluteMagnitude: number }[]
   /** Its colour, as a CSS hex colour. A fire-orange when absent. */
   color?: string
   /** How long a stretch of its own past path still glows behind it, seconds: the tail observers
@@ -157,6 +164,18 @@ export class ReentrySighting {
     return { lat, lng, heightM: (from.altitudeKm + (to.altitudeKm - from.altitudeKm) * f) * 1000 }
   }
 
+  /** A piece's absolute magnitude at `t`: from its light curve when it has one (see ReentryFragment.lightCurve), its one magnitude otherwise. */
+  static absoluteMagnitudeAt(fragment: ReentryFragment, t: number): number {
+    const curve = fragment.lightCurve
+    if (!curve || curve.length === 0) return fragment.absoluteMagnitude
+    if (t <= curve[0].t) return curve[0].absoluteMagnitude
+    for (let i = 1; i < curve.length; i++) {
+      const from = curve[i - 1], to = curve[i]
+      if (t <= to.t) return from.absoluteMagnitude + (to.absoluteMagnitude - from.absoluteMagnitude) * (t - from.t) / Math.max(to.t - from.t, 1)
+    }
+    return curve[curve.length - 1].absoluteMagnitude
+  }
+
   /**
    * Every piece of every re-entry the observer at `observer` sees at `t`: above their horizon, lit
    * by its own burning. A piece below the horizon, or not yet broken off, or burned out, is absent.
@@ -181,7 +200,7 @@ export class ReentrySighting {
         // A fraction of its light, as a magnitude: 2.5 log of the share. Floored so a piece at the
         // very instant it appears is merely too faint, not infinitely so.
         const fadeMagnitudes = -2.5 * Math.log10(Math.max(fade, 1e-3))
-        const magnitude = fragment.absoluteMagnitude + 5 * Math.log10(head.distanceKm / ReentrySighting.STANDARD_DISTANCE_KM) + fadeMagnitudes
+        const magnitude = ReentrySighting.absoluteMagnitudeAt(fragment, t) + 5 * Math.log10(head.distanceKm / ReentrySighting.STANDARD_DISTANCE_KM) + fadeMagnitudes
         const train: SkyPoint[] = [head]
         const trainMs = (fragment.trainS ?? ReentrySighting.DEFAULT_TRAIN_S) * 1000
         for (let k = 1; k <= ReentrySighting.TRAIN_POINTS; k++) {

@@ -24,6 +24,15 @@ export interface FarEmitter {
   readonly lux: readonly [number, number, number]
 }
 
+/** The box a far light's shadow is drawn in, as the Sun's is: half its side and half its depth, metres, the bias, and the map's side. */
+export interface FarShadow {
+  readonly halfExtentM: number
+  readonly depthHalfRangeM: number
+  readonly biasM: number
+  readonly normalBiasM: number
+  readonly mapSize: number
+}
+
 /**
  * Every light in the scene that is not the sky's, the Sun's or the Moon's: what gives out light lights what is round it, whatever it is,
  * without anybody having to say so.
@@ -37,8 +46,12 @@ export interface FarEmitter {
  * photographed as well, it would light the scene a second time, spread round the observer.
  *
  * The pools are a fixed number of lights, built once, the first time anything glows, and never taken out of the scene again but put out:
- * three.js compiles every material for the number of lights, and a light that came and went would recompile the scene each time. They
- * cast no shadow: a point light's shadow is the scene drawn six more times.
+ * three.js compiles every material for the number of lights, and a light that came and went would recompile the scene each time.
+ *
+ * The brightest far emitter casts a shadow, as the Sun does: a far light is a directional one, so its shadow is the scene drawn once more,
+ * not six times as a point light's is — and a bolide brighter than the Sun swings every shadow round as it crosses the sky (Chelyabinsk). Its
+ * shadow is always there, for the same reason as the lights (turning one on recompiles the scene), but drawn only while something far is
+ * alight. The near ones cast none yet: each would be a cube of six more drawings.
  */
 export class EmitterLights {
   /** How many near emitters light the scene at once: the ones that light the observer most. Past them, a further one lights it a hundredth as much. */
@@ -86,8 +99,12 @@ export class EmitterLights {
   /**
    * @param parent Where the lights are put: the scene.
    * @param sceneUnitsPerLux What a lux of illuminance is in this scene's own light units (see SceneRenderer.relativeScale): a candela at a metre.
+   * @param shadow The box the brightest far light's shadow is drawn in, round the observer, as the Sun's (see SceneRenderer).
    */
-  constructor(private readonly parent: Object3D, private readonly sceneUnitsPerLux: () => number) {}
+  constructor(private readonly parent: Object3D, private readonly sceneUnitsPerLux: () => number, private readonly shadow: FarShadow = EmitterLights.NO_SHADOW) {}
+
+  /** No shadow box: what a scene with nothing to cast or receive one passes (and a test). */
+  static readonly NO_SHADOW: FarShadow = { halfExtentM: 0, depthHalfRangeM: 0, biasM: 0, normalBiasM: 0, mapSize: 0 }
 
   /** What `source` gives out now, replacing what it gave before: kept until it says otherwise, whatever the frames drawn meanwhile. */
   set(source: string, near: readonly NearEmitter[], far: readonly FarEmitter[] = []): void {
@@ -117,10 +134,12 @@ export class EmitterLights {
       })
     }
     if (far.length > 0 || this.far) {
-      this.far ??= this.build(EmitterLights.FAR, () => new DirectionalLight(0xffffff, 0))
+      this.far ??= this.buildFar()
       const ranked = far.sort((a, b) => EmitterLights.luminanceOf(b.lux) - EmitterLights.luminanceOf(a.lux))
       this.far.forEach((light, index) => {
         const emitter = ranked[index]
+        // Its shadow drawn only while it lights anything.
+        if (light.castShadow) light.shadow.autoUpdate = emitter !== undefined
         if (!emitter) {
           light.intensity = 0
           return
@@ -138,6 +157,29 @@ export class EmitterLights {
   /** The lights, for what has to leave them out (none until something glowed). */
   get all(): readonly (PointLight | DirectionalLight)[] {
     return [...(this.near ?? []), ...(this.far ?? [])]
+  }
+
+  /** The far lights, the first of which (the brightest, once ranked) casts the shadow. */
+  private buildFar(): DirectionalLight[] {
+    const lights = this.build(EmitterLights.FAR, () => new DirectionalLight(0xffffff, 0))
+    const box = this.shadow
+    if (box.mapSize > 0) {
+      const shadow = lights[0].shadow
+      lights[0].castShadow = true
+      shadow.mapSize.set(box.mapSize, box.mapSize)
+      const camera = shadow.camera
+      camera.left = -box.halfExtentM
+      camera.right = box.halfExtentM
+      camera.top = box.halfExtentM
+      camera.bottom = -box.halfExtentM
+      camera.near = EmitterLights.FAR_DISTANCE - box.depthHalfRangeM
+      camera.far = EmitterLights.FAR_DISTANCE + box.depthHalfRangeM
+      camera.updateProjectionMatrix()
+      shadow.bias = -box.biasM / (2 * box.depthHalfRangeM)
+      shadow.normalBias = box.normalBiasM
+      shadow.autoUpdate = false
+    }
+    return lights
   }
 
   private build<T extends PointLight | DirectionalLight>(count: number, make: () => T): T[] {

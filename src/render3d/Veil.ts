@@ -29,8 +29,12 @@ export class Veil {
    * everything one sees. The default of 0 draws it under the relief, which cut the glare of a body off along the horizon.
    */
   static readonly OVER_EVERYTHING = 7
-  /** Never wider than this, whatever the source: the law is measured out to about thirty degrees. */
-  static readonly MAX_RADIUS_DEG = 30
+  /**
+   * Never wider than this, whatever the source. The law is measured out to about thirty degrees, but a source brighter than the Sun (the
+   * Chelyabinsk superbolide) still saturates the eye there, and a veil cut at thirty was a white disc with a hard rim: past what was
+   * measured, the law is carried on, and faded out over the outer half of the radius (see FRAGMENT).
+   */
+  static readonly MAX_RADIUS_DEG = 80
 
   readonly mesh: Mesh<PlaneGeometry, ShaderMaterial>
 
@@ -118,8 +122,9 @@ export class Veil {
       if (reach > 1.0) discard;
       float theta = max(degrees(atan(reach * uTanRadius)), max(uSourceDeg, uInnerDeg));
       float edge = degrees(atan(uTanRadius));
-      // Less the veil at the edge, so the quad ends where the veil is already at its faintest.
-      float veil = max(1.0 / (theta * theta) - 1.0 / (edge * edge), 0.0);
+      // Less the veil at the edge, so the quad ends where the veil is already at its faintest, and faded over the outer half: a veil so
+      // strong it is still white at its edge would otherwise end on a rim.
+      float veil = max(1.0 / (theta * theta) - 1.0 / (edge * edge), 0.0) * (1.0 - smoothstep(0.5 * edge, edge, theta));
       gl_FragColor = vec4(uColor * veil, 1.0);
     }
   `

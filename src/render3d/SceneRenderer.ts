@@ -1051,7 +1051,9 @@ export class SceneRenderer {
   private readonly decorModelCredits = new Map<string, DecorModelCredit>()
   /** The bodies of the interpretation being replayed, if one is — see setBodies. */
   /** Every light of what gives out light in the scene, but the sky's, the Sun's and the Moon's (see EmitterLights). */
-  private readonly emitterLights = new EmitterLights(this.scene, () => this.relativeScale)
+  private readonly emitterLights = new EmitterLights(this.scene, () => this.relativeScale, {
+    halfExtentM: SHADOW_HALF_EXTENT_M, depthHalfRangeM: SHADOW_DEPTH_HALF_RANGE_M, biasM: SHADOW_BIAS_M, normalBiasM: SHADOW_NORMAL_BIAS_M, mapSize: 1024
+  })
   private readonly bodySystem = new BodySystem(ref => this.awaitArrival(this.loadBodyModel(ref)), () => this.render(), () => this.relativeScale,
     emitters => this.emitterLights.set("bodies", emitters))
   /** Where the frame bodies (and the decor) are placed in stands in the world this tick — the t=0
@@ -4167,6 +4169,15 @@ export class SceneRenderer {
       (position, magnitude) => this.arrivingIlluminance(position, magnitude, 1))
     // Its heads light the ground, as the Moon does, through the air and the cloud between.
     this.emitterLights.set("reentries", [], views.map(view => this.farEmitterOf(view.head, view.magnitude)).filter(emitter => emitter !== undefined))
+    // And dazzle the eye as a star or the Moon does (see Veil): a superbolide brighter than the Sun was a few dots without it.
+    const glared = new Set<string>()
+    for (const view of views) {
+      const key = `reentry:${view.reentryId}:${view.fragmentId}`
+      const { x, y, z } = horizontalToCartesian(view.head.altitudeDeg, view.head.azimuthDeg, BODY_PLACEMENT_RADIUS)
+      this.setGlare(key, x, y, z, this.arrivingIlluminance(view.head, view.magnitude, this.cloudTransmission(view.head)), 0, SceneRenderer.POINT_VEIL_HOLD_DEG)
+      glared.add(key)
+    }
+    for (const key of [...this.glareSprites.keys()]) if (key.startsWith("reentry:") && !glared.has(key)) this.disposeGlare(key)
     this.render()
   }
 

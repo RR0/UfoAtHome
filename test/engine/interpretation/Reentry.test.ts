@@ -87,4 +87,19 @@ describe("ReentrySighting", () => {
     const r = reentry([{ absoluteMagnitude: -2 }])
     expect(ReentrySighting.viewsAt([r], 15000, { lat: 0, lng: 20, heightM: 0 })).toEqual([])
   })
+
+  test("follows a fragment's light curve where it has one, and its one magnitude where not", () => {
+    // A great fireball brightens as it plunges and dies away: Chelyabinsk was a faint streak at 95 km and brighter than the Sun at 30.
+    const curve = [{ t: 5000, absoluteMagnitude: -4 }, { t: 15000, absoluteMagnitude: -24 }, { t: 25000, absoluteMagnitude: -10 }]
+    const piece = { absoluteMagnitude: -2, lightCurve: curve }
+    expect(ReentrySighting.absoluteMagnitudeAt(piece, 0)).toBe(-4)
+    expect(ReentrySighting.absoluteMagnitudeAt(piece, 10000)).toBeCloseTo(-14, 9)
+    expect(ReentrySighting.absoluteMagnitudeAt(piece, 15000)).toBe(-24)
+    expect(ReentrySighting.absoluteMagnitudeAt(piece, 30000)).toBe(-10)
+    expect(ReentrySighting.absoluteMagnitudeAt({ absoluteMagnitude: -2 }, 10000)).toBe(-2)
+    // And the view an observer gets is that much brighter at the peak than at the start, at the same distance.
+    const observer = { lat: 0, lng: 1, heightM: 0 }
+    const [peak] = ReentrySighting.viewsAt([reentry([piece])], 15000, observer)
+    expect(peak.magnitude).toBeLessThan(-20)
+  })
 })
