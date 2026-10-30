@@ -1,4 +1,4 @@
-import type { Instrument } from "./Instrument.js"
+import { Instruments, type Instrument } from "./Instrument.js"
 import type { Weather } from "../model/Weather.js"
 
 /** What sends a ghost: whose surfaces the light bounced between, or what scattered it — what the tooltip of a ghost says it is. */
@@ -217,9 +217,9 @@ export class LensGhosts {
     }
     if (drops > 0) ghosts.push({ scale: 1, share: 0.12 * drops, blur: 0.025, cause: "drops" })
     const scattered = ghosts.filter(ghost => LensGhosts.scatters(ghost)).reduce((sum, ghost) => sum + ghost.share, 0)
-    // Blades show once the aperture is closed past where they swing clear of the beam: a lens wide open is round.
-    const widest = instrument.fNumberRange?.min ?? reference
-    const blades = instrument.apertureBlades !== undefined && set > widest * 1.15 ? instrument.apertureBlades : 0
+    // Blades show once the aperture is closed past where they swing clear of the beam: a lens wide open is round. The rule the star
+    // follows too (see Instruments.bladesShowing), so that a Sun is starred exactly when its ghosts have corners.
+    const blades = Instruments.bladesShowing(instrument, fNumber) >= 0.5 ? instrument.apertureBlades ?? 0 : 0
     const running = lens?.glass === "window" || lens?.glass === "windscreen" ? 1 : 0.25
     return { ghosts, blades, bladeAngleRad: 0.3, scattered: Math.min(0.9, scattered), drops, impacts, history, still: lens?.drops !== undefined, running }
   }

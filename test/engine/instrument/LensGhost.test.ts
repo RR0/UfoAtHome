@@ -52,6 +52,17 @@ describe("LensGhosts.optics", () => {
     expect(LensGhosts.optics(phone, undefined, undefined).blades).toBe(0)
   })
 
+  it("gives the ghosts corners exactly when the same aperture puts a star on a bright light", () => {
+    // One rule for both (Instruments.bladesShowing): through a lens wide open the Sun had six spikes and its ghosts were round.
+    const camera = Instruments.byId("rectilinear-lens")
+    for (const fNumber of [2, 2.2, 2.29, 2.31, 2.5, 4, 8, 22]) {
+      const cornered = LensGhosts.optics(camera, fNumber, undefined).blades > 0
+      expect(cornered).toBe(Instruments.starPointsOf(camera, fNumber) > 0)
+    }
+    expect(Instruments.starPointsOf(camera, 2)).toBe(0)
+    expect(Instruments.starPointsOf(camera, 8)).toBe(6)
+  })
+
   it("adds the ghost of a filter, or the twin of a pane, further off for a windscreen", () => {
     expect(LensGhosts.optics(slr, undefined, { glass: "filter" }).ghosts.some(ghost => ghost.cause === "filter" && ghost.scale === -1)).toBe(true)
     const pane = (glass: "window" | "windscreen") => LensGhosts.optics(phone, undefined, { glass }).ghosts.find(ghost => ghost.cause === "glass")!

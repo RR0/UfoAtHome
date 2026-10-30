@@ -4558,15 +4558,16 @@ export class SceneRenderer {
    * at. Drawing the same star whatever the sighting was made with is the same mistake as rendering
    * every observer through a camera lens, which this class already stopped making.
    */
-  setInstrument(instrument: Instrument): void {
+  setInstrument(instrument: Instrument, fNumber?: number): void {
     this.projectionKind = instrument.projection
     this.grain = instrument.detailUm !== undefined && instrument.frame
       ? { detailUm: instrument.detailUm, frameHeightMm: instrument.frame.heightMm }
       : undefined
     // The STAR a bright light grows through glass, derived from the device rather than dialled:
     // from the aperture's blades (an even count gives that many spikes, an odd one twice as many, a
-    // round opening none at all). The GHOSTS a lens throws are its own (see setLensGhosts).
-    const points = Instruments.starPointsOf(instrument)
+    // round opening none at all), and none from a lens wide open, whose ghosts are round by the same
+    // rule (see Instruments.bladesShowing). The GHOSTS a lens throws are its own (see setLensGhosts).
+    const points = Instruments.starPointsOf(instrument, fNumber)
     if (points === this.starPoints) return
     this.starPoints = points
     if (this.lensFlare) this.lensFlare.uniforms.uStarPoints.value = points

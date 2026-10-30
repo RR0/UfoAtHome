@@ -1974,8 +1974,9 @@ export class SceneElement extends HTMLElement {
     // Pushed every tick like the pose and the weather, and for the same reason: the recording it
     // describes can be swapped or edited under this element at any moment, and an instrument left
     // over from the previous one would render the whole scene through the wrong optics (see
-    // Instrument.ts). Cheap — SceneRenderer.setInstrument stores two numbers.
-    this.sceneRenderer.setInstrument(sighting.instrument)
+    // Instrument.ts). Cheap — SceneRenderer.setInstrument stores two numbers. At the aperture it is set
+    // to now, which decides whether its blades put a star on the Sun (see Instruments.bladesShowing).
+    this.sceneRenderer.setInstrument(sighting.instrument, resolveObserverPoseAt(sighting, t)?.fNumber)
     // The towns' glow at this place, if the recording states one: the sky it brightens is restated
     // by the setAstronomy below, and the stars with it.
     this.sceneRenderer.setLightPollution(sighting.lightPollution)
@@ -3036,7 +3037,7 @@ export class SceneElement extends HTMLElement {
       // Painted at the picture's own resolution, so a shape is as sharp in the scene as the overlay
       // drew it — and no sharper, since the picture is what the reader is looking at.
       scale: Math.max(1, this.sceneCanvas.height / Math.max(1, canvas.height)),
-      starPoints: Instruments.starPointsOf(sighting.instrument),
+      starPoints: Instruments.starPointsOf(sighting.instrument, pose?.fNumber),
       rollRad: (rollDeg * Math.PI) / 180
     })
   }

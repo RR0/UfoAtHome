@@ -2094,7 +2094,7 @@ export class UfoElement extends HTMLElement {
     // The instrument's own aperture decides whether a dazzling light wears a star — the same
     // statement SceneRenderer.setInstrument makes about the Sun, made here about the observer's own
     // object, which is painted on this overlay instead of in that scene.
-    this.canvasRenderer.setStarPoints(Instruments.starPointsOf(this.sighting.instrument))
+    this.canvasRenderer.setStarPoints(Instruments.starPointsOf(this.sighting.instrument, resolveObserverPoseAt(this.sighting, t)?.fNumber))
     // The observer's own walk turns the instrument a little as it carries it — a fraction of a degree
     // through an eye, the whole of it through a camera in a walking hand (see Gait, and
     // Instrument.stabilization). Added to the recorded roll here and to the scene's own camera in

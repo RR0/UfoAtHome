@@ -573,22 +573,23 @@ export class Instruments {
   }
 
   /**
-   * How far the diaphragm's blades actually stand in the beam, 0 to 1 — and so how much of a star
-   * they throw.
+   * How far the diaphragm's blades actually stand in the beam, 0 to 1 — the one rule both the star a
+   * bright light grows and the shape of the lens's ghosts follow.
    *
    * A lens WIDE OPEN has swung its blades clear: the opening is the round barrel itself, there is no
-   * straight edge left to diffract at, and the same lens that starbursts at f/16 gives a plain round
-   * blob at f/2. Stated as the fraction of the way from wide open to fully stopped down, so a device
-   * with no diaphragm at all (a phone, an eye) never gets one and a fixed-aperture box camera gets
-   * whatever its one aperture gives.
+   * straight edge left to diffract at nor any corner for a ghost to take, and the same lens that
+   * starbursts at f/16 gives a plain round blob at f/2. The blades come in as it is stopped down:
+   * half way at 1.15 times its widest f-number, wholly at 1.3. A diaphragm whose range nobody states
+   * (a fixed one, or one nobody knows) is taken as standing where it is set, blades showing; a device
+   * with no blades at all (a phone, an eye) never shows any.
    */
-  static bladesShowing(instrument: Instrument, fNumber: number | undefined): number {
+  static bladesShowing(instrument: Pick<Instrument, "apertureBlades" | "fNumber" | "fNumberRange">, fNumber: number | undefined): number {
+    if (instrument.apertureBlades === undefined) return 0
     const set = fNumber ?? instrument.fNumber
-    if (set === undefined || instrument.apertureBlades === undefined) return 0
-    const range = instrument.fNumberRange
-    if (!range) return 1
-    if (range.max <= range.min) return 1
-    return Math.max(0, Math.min(1, (set - range.min) / (range.max - range.min)))
+    const widest = instrument.fNumberRange?.min
+    if (set === undefined || widest === undefined) return 1
+    const t = Math.max(0, Math.min(1, (set / widest - 1) / 0.3))
+    return t * t * (3 - 2 * t)
   }
 
   /**
@@ -597,11 +598,12 @@ export class Instruments {
    *
    * Derived, not listed: an even blade count gives that many spikes because opposite blades are
    * parallel and their pairs of spikes coincide; an odd count gives twice as many because none of
-   * them do. Six blades, six spikes; five blades, ten. The eye gets none.
+   * them do. Six blades, six spikes; five blades, ten. The eye gets none, and neither does a lens
+   * wide open (see bladesShowing), whose ghosts are round for the same reason.
    */
-  static starPointsOf(instrument: Instrument): number {
+  static starPointsOf(instrument: Instrument, fNumber?: number): number {
     const blades = instrument.apertureBlades
-    if (blades === undefined || blades < 3) return 0
+    if (blades === undefined || blades < 3 || Instruments.bladesShowing(instrument, fNumber) < 0.5) return 0
     return blades % 2 === 0 ? blades : blades * 2
   }
 }
