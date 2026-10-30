@@ -4695,10 +4695,9 @@ export class SceneRenderer {
         // Drawn as light, then finished with the lens's ghosts over it (see GhostPass).
         this.exposureSubjectBounds = []
         this.renderOnce(ghosts.frame)
-        // A pose is shown from its film (see presentExposure), started just below: developing this single instant as well was shown for no
-        // frame, and left the picture a pick reads back holding it rather than what is shown, an instant without the pose's light, where
-        // the ghost a still pointer named was not found and its name went out at every frame of a playing pose.
-        if (!this.developingExposure) ghosts.develop(this.renderer, ghosts.frame, this.ghostOptics, 1, this.sunBeyondPicture())
+        // Shown until the pose started just below has a film to show (see presentExposure). It is not the pose, though, and the ghost a still
+        // pointer named was not found in it, its name going out at every frame of a playing pose: a pick does not read it back.
+        ghosts.develop(this.renderer, ghosts.frame, this.ghostOptics, 1, this.sunBeyondPicture(), !this.developingExposure)
         this.onMapSubjectBounds?.(this.exposureSubjectBounds)
       } else {
         this.renderOnce()

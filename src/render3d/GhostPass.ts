@@ -410,9 +410,10 @@ export class GhostPass {
    * Finishes `source` onto the canvas with the lens's ghosts laid over its light. `gain` is what its light is multiplied by first (see
    * ExposureAccumulation.develop).
    */
-  develop(renderer: WebGLRenderer, source: UnfinishedFrame, optics: LensOptics, gain = 1, bright?: BrightSource): void {
+  develop(renderer: WebGLRenderer, source: UnfinishedFrame, optics: LensOptics, gain = 1, bright?: BrightSource, readable = true): void {
     const previous = renderer.getRenderTarget()
-    this.readable = true
+    // Whether a pick may read this picture back (see readable): not one shown only until the picture it stands in for is there.
+    this.readable = readable
     this.copyMaterial.uniforms.uSource.value = source.scene.texture
     this.copyMaterial.uniforms.uGain.value = gain
     this.draw(renderer, this.copyMaterial, this.mips)
