@@ -1,4 +1,4 @@
-import { AdditiveBlending, Color, DoubleSide, LatheGeometry, Mesh, PointLight, ShaderMaterial, Vector2, Vector3 } from "three"
+import { AdditiveBlending, Color, DoubleSide, LatheGeometry, Mesh, ShaderMaterial, Vector2, Vector3 } from "three"
 import { Glare } from "./Glare.js"
 
 /**
@@ -18,15 +18,10 @@ import { Glare } from "./Glare.js"
  * Built one metre long and one metre across and scaled to the flame stated, pointing down its own
  * -Y from its origin, which is set on the node it comes out of.
  *
- * And it LIGHTS what is around it: a point light at the heart of the flame, of the flame's own
- * luminous intensity (see BodySystem), falling off as the square of the distance — the ground under
- * a craft on its legs, its own underside and legs, a car parked near it. It casts no shadow: six
- * more renders of the scene per frame, for the one light that is only ever there for seconds.
- *
- * The light is a sibling of the flame, not its child, and is never taken out of the scene while
- * the body that throws it is there: three.js compiles every material for the number of lights in
- * view, so a light that came and went with the flame would recompile the whole scene twice, a
- * stall at the very moment the flame catches. Out, it is still there, at an intensity of nothing.
+ * And it LIGHTS what is around it, from the heart of the flame (see lightAt), of the flame's own
+ * luminous intensity, falling off as the square of the distance — the ground under a craft on its
+ * legs, its own underside and legs, a car parked near it: BodySystem states it to the scene's one
+ * pool of lights for what glows (see EmitterLights), as it does a lantern.
  */
 export class FlameEffect {
   /** Drawn after the relief, which is itself transparent (its fading edge) and drawn in the
@@ -44,7 +39,6 @@ export class FlameEffect {
   static readonly GLOW_MAX_SHARE = Glare.MAX_SHARE
 
   readonly mesh: Mesh<LatheGeometry, ShaderMaterial>
-  readonly light = new PointLight(0xffffff, 0, 0, 2)
   /** The flame's glare, facing the eye — see glowFor and Glare, whose floor angle and bloom cap
    * this shares with every other thing in the scene that gives out light. */
   private readonly glare = new Glare("flame-glow", FlameEffect.RENDER_ORDER)
@@ -102,11 +96,10 @@ export class FlameEffect {
     this.glare.shine(this.scratch, radiusM, colour)
   }
 
-  /** Puts the flame out without taking its light out of the scene — see the class comment. */
+  /** Puts the flame out: it is then no longer stated as giving out light either (see BodySystem.throwFlame). */
   putOut(): void {
     this.mesh.visible = false
     this.glare.hide()
-    this.light.intensity = 0
   }
 
   /** Stands the flame on its node, pointing down the way the body points, `lengthM` × `widthM`. */
@@ -116,7 +109,11 @@ export class FlameEffect {
     this.mesh.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w)
     this.mesh.scale.set(widthM, lengthM, widthM)
     this.mesh.updateMatrixWorld()
-    this.light.position.set(0, -FlameEffect.LIGHT_AT, 0).applyMatrix4(this.mesh.matrixWorld)
+  }
+
+  /** Where its light comes from, into `target`: the middle of its brightest part, as last placed. */
+  lightAt(target: Vector3): Vector3 {
+    return target.set(0, -FlameEffect.LIGHT_AT, 0).applyMatrix4(this.mesh.matrixWorld)
   }
 
   /**
@@ -129,15 +126,6 @@ export class FlameEffect {
     ;(uniforms.uColor.value as Color).setRGB(nozzle[0], nozzle[1], nozzle[2])
     ;(uniforms.uTipColor.value as Color).setRGB(tip[0], tip[1], tip[2])
     uniforms.uTime.value = seconds
-  }
-
-  /**
-   * What the flame gives the scene around it: `intensity` in the scene's own light units at one
-   * metre (so its illuminance at d metres is that over d²), of this linear colour.
-   */
-  illuminate(intensity: number, linearColour: readonly [number, number, number]): void {
-    this.light.intensity = intensity
-    this.light.color.setRGB(linearColour[0], linearColour[1], linearColour[2])
   }
 
   dispose(): void {

@@ -66,6 +66,7 @@ import { PointSources } from "./PointSources.js"
 import { Veil } from "./Veil.js"
 import { ProbeIrradiance } from "./ProbeIrradiance.js"
 import { FrameMeter } from "./FrameMeter.js"
+import { EmitterLights, type FarEmitter } from "./EmitterLights.js"
 import { PhoneDevelopment } from "../engine/instrument/PhoneDevelopment.js"
 import { BRIGHT_STARS } from "../engine/astronomy/brightStarCatalog.js"
 import type { BrightStar } from "../engine/astronomy/brightStarCatalog.js"
@@ -1049,7 +1050,10 @@ export class SceneRenderer {
    * appear as models land and disappear with the objects that named them. */
   private readonly decorModelCredits = new Map<string, DecorModelCredit>()
   /** The bodies of the interpretation being replayed, if one is — see setBodies. */
-  private readonly bodySystem = new BodySystem(ref => this.awaitArrival(this.loadBodyModel(ref)), () => this.render(), () => this.relativeScale)
+  /** Every light of what gives out light in the scene, but the sky's, the Sun's and the Moon's (see EmitterLights). */
+  private readonly emitterLights = new EmitterLights(this.scene, () => this.relativeScale)
+  private readonly bodySystem = new BodySystem(ref => this.awaitArrival(this.loadBodyModel(ref)), () => this.render(), () => this.relativeScale,
+    emitters => this.emitterLights.set("bodies", emitters))
   /** Where the frame bodies (and the decor) are placed in stands in the world this tick — the t=0
    * reference as seen from the observer, set by updateDecorAnchoring. */
   private bodyOrigin = { x: 0, z: 0 }
@@ -4161,6 +4165,8 @@ export class SceneRenderer {
       : visibleMagnitudeLimit(-90, this.instrumentMagnitudeGain)
     this.reentrySystem.set(views, magnitudeLimit, position => this.cloudTransmission(position),
       (position, magnitude) => this.arrivingIlluminance(position, magnitude, 1))
+    // Its heads light the ground, as the Moon does, through the air and the cloud between.
+    this.emitterLights.set("reentries", [], views.map(view => this.farEmitterOf(view.head, view.magnitude)).filter(emitter => emitter !== undefined))
     this.render()
   }
 
@@ -4570,7 +4576,20 @@ export class SceneRenderer {
   /** Places the shower at the recording's own instant. Driven by the recording's clock and never by
    * a wall clock, so a paused scene freezes — the rule the whole scene follows. */
   updateMeteors(t: number): void {
-    this.meteorSystem?.update(t)
+    if (!this.meteorSystem) return
+    this.meteorSystem.update(t)
+    // A bright one lights the ground, as the Moon does, for the second it lasts.
+    this.emitterLights.set("meteors", [], this.meteorSystem.heads.map(head => this.farEmitterOf(head, head.magnitude)).filter(emitter => emitter !== undefined))
+  }
+
+  /** What something far up gives the observer's ground (see EmitterLights): its direction, and its light through the air and the cloud,
+   * lux. Nothing from under the horizon. */
+  private farEmitterOf(position: HorizontalPosition, magnitude: number): FarEmitter | undefined {
+    if (!(position.altitudeDeg > 0) || !Number.isFinite(magnitude)) return undefined
+    const scale = Math.max(this.relativeScale, 1e-30)
+    const arriving = this.arrivingIlluminance(position, magnitude, this.cloudTransmission(position))
+    const { x, y, z } = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, 1)
+    return { direction: new Vector3(x, y, z), lux: [arriving[0] / scale, arriving[1] / scale, arriving[2] / scale] }
   }
 
   /**
@@ -5199,6 +5218,8 @@ export class SceneRenderer {
     // After the pass exists and before the camera is widened for it: a pixel names a direction
     // under the projection the pass implements, at the field the recording states.
     this.phenomena.setCloudLayers(this.layeredClouds?.volumes ?? [])
+    // Every light of what glows (see EmitterLights), from where the eye is now.
+    this.emitterLights.cast(this.camera.position)
     this.phenomena.place(
       this.camera,
       (ndcX, ndcY, into) => this.directionAtScreenPoint(ndcX, ndcY, into),

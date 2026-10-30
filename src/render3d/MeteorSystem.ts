@@ -3,7 +3,7 @@ import { BufferAttribute, BufferGeometry, Mesh, type MeshBasicMaterial } from "t
 import { MeteorFall } from "../engine/astronomy/MeteorFall.js"
 import type { Meteor } from "../engine/astronomy/MeteorFall.js"
 import { SkyRibbons } from "./SkyRibbons.js"
-import { horizontalToCartesian } from "./skyColors.js"
+import { cartesianToHorizontal, horizontalToCartesian } from "./skyColors.js"
 
 interface Vector {
   x: number
@@ -62,6 +62,8 @@ export class MeteorSystem {
   private readonly positions: Float32Array
   private readonly colors: Float32Array
   private meteors: Meteor[] = []
+  /** The heads of the meteors falling at the last `update`, where they are and how bright, faded as they end: what lights the ground. */
+  heads: { altitudeDeg: number, azimuthDeg: number, magnitude: number }[] = []
   private radiantAltitudeDeg = 0
   private radiantAzimuthDeg = 0
 
@@ -106,6 +108,7 @@ export class MeteorSystem {
    */
   update(t: number): void {
     const geometry = this.object.geometry
+    this.heads = []
     if (this.meteors.length === 0) {
       geometry.setDrawRange(0, 0)
       return
@@ -128,6 +131,9 @@ export class MeteorSystem {
       const peak = (0.15 + 0.85 * meteor.brightness) * fade
       const brightnessAt = (share: number): number => peak * share ** 1.6
       const pointAt = (share: number) => this.onSphere(radiant, along, tail + (head - tail) * share)
+      // Its head gives out its light, its magnitude dimmed as it fades.
+      const front = pointAt(1)
+      if (fade > 0) this.heads.push({ ...cartesianToHorizontal(front.x, front.y, front.z), magnitude: MeteorFall.magnitudeOf(meteor) - 2.5 * Math.log10(fade) })
       // The glare spreads with the source: only the head of a bright meteor is wide, and it narrows
       // back to a thread along the dying wake.
       const halfWidthAt = (share: number): number =>

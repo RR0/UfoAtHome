@@ -1,6 +1,6 @@
 import {
   AnimationAction, AnimationMixer, LoopOnce, Box3, BoxGeometry, BufferAttribute, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Material, Mesh,
-  MeshPhysicalMaterial, MeshStandardMaterial, Object3D, PointLight, Points, type PointsMaterial, Quaternion, Raycaster, SphereGeometry, TorusGeometry, Vector2,
+  MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Points, type PointsMaterial, Quaternion, Raycaster, SphereGeometry, TorusGeometry, Vector2,
   Vector3
 } from "three"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
@@ -8,6 +8,7 @@ import { BODY_PRIMITIVES } from "../engine/interpretation/Interpretation.js"
 import type { BodyPrimitive } from "../engine/interpretation/Interpretation.js"
 import type { DecorModelRef } from "../engine/model/Decor.js"
 import { FlameEffect } from "./FlameEffect.js"
+import type { NearEmitter } from "./EmitterLights.js"
 import { DecorSystem } from "./DecorSystem.js"
 import { LitFromWithin } from "./LitFromWithin.js"
 import type { ModelParameters } from "../engine/model/DecorTraits.js"
@@ -84,14 +85,6 @@ export interface BodyFrame {
  */
 export const BODY_OVER_LAYER = 4
 
-/** A body that glows whole, as a light for what is round it (see BodySystem.castGlowLights). */
-interface GlowSource {
-  position: Vector3
-  /** Its luminous intensity, candela. */
-  candela: number
-  colour: [number, number, number]
-}
-
 /**
  * The bodies of an interpretation, standing in the scene — see InterpretationJson.
  *
@@ -138,10 +131,13 @@ export class BodySystem {
   private lastSet?: [BodyState[], BodyFrame, number, LuminanceDisplay | undefined, readonly string[]]
 
   /**
-   * @param sceneUnitsPerLux What a lux of illuminance is in this scene's own light units — how the
-   *   luminous intensity of a flame becomes a light of the same scene as the sun's (see throwFlame).
+   * @param sceneUnitsPerLux What a lux of illuminance is in this scene's own light units — how a body's veil and points are drawn in the
+   *   same light as the sun's (see shine).
+   * @param emit Where what the bodies give out goes, each `set`: their glow and their flames, as lights of what is round them (see
+   *   EmitterLights).
    */
-  constructor(private readonly loadModel: BodyModelLoader, private readonly onModelArrived: () => void, private readonly sceneUnitsPerLux: () => number = () => 0) {
+  constructor(private readonly loadModel: BodyModelLoader, private readonly onModelArrived: () => void, private readonly sceneUnitsPerLux: () => number = () => 0,
+    private readonly emit: (emitters: NearEmitter[]) => void = () => {}) {
     this.group.name = "bodies"
   }
 
@@ -194,7 +190,7 @@ export class BodySystem {
     this.shapeShares.clear()
     this.metered.clear()
     const seen = new Set<string>()
-    const glowSources: GlowSource[] = []
+    const emitters: NearEmitter[] = []
     for (const stated of states) {
       const state = stated.flicker ? BodySystem.flickered(stated, seconds) : stated
       seen.add(state.id)
@@ -228,17 +224,18 @@ export class BodySystem {
         metered.luminanceCdM2 *= stated.appearance.luminanceCdM2 / state.appearance.luminanceCdM2
       }
       this.shineLights(state, holder, whole ? undefined : glowing, frame)
-      this.throwFlame(state, holder, seconds, display, frame.eye)
+      this.throwFlame(state, holder, seconds, display, frame.eye, emitters)
       // What glows whole lights what is round it, its flame's wavering and all: the luminance it shows over the area it shows sideways.
       if (state.appearance.luminanceCdM2 > 0 && (whole || !glowing?.length)) {
-        glowSources.push({
+        emitters.push({
           position: holder.position,
           candela: state.appearance.luminanceCdM2 * (1 - state.appearance.transparency) * state.sizeM.widthM * state.sizeM.heightM,
           colour: BodySystem.rgbOf(state.appearance.color)
         })
       }
     }
-    this.castGlowLights(glowSources, frame.eye)
+    // Lit by the scene's one pool of lights for what glows (see EmitterLights), as everything that gives out light is.
+    this.emit(emitters)
     const kept = new Set(ids)
     for (const [id, { holder }] of [...this.built]) {
       if (seen.has(id)) continue
@@ -325,45 +322,6 @@ export class BodySystem {
    * tells against the sky, out to the width that carries its whole light at the cap, where it is
    * all the eye has left — which is what a observer means by "we could not look at it".
    */
-  /**
-   * How many of the bodies that glow whole light what is round them: the ones that light the observer most. A sky lantern let go from
-   * a terrace lights the terrace, and the people letting it go, less and less as it rises; a dozen of them lighting every pixel would be a
-   * dozen lights for the GPU, and the rest, further off, light it a hundredth as much.
-   */
-  static readonly GLOW_LIGHTS = 4
-
-  /** The lights the bodies that glow whole throw (see GLOW_LIGHTS): built once, the first time one glows, and never taken out of the
-   * scene again but put out, as a flame's is (see FlameEffect), since three.js compiles every material for the number of lights. */
-  private glowLights?: PointLight[]
-
-  /** Lights what is round the bodies that glow whole, the brightest at the observer first (see GLOW_LIGHTS), as point lights of their
-   * luminous intensity: the same units as a flame's light and a streetlamp's. No shadow, as a flame's casts none. */
-  private castGlowLights(sources: readonly GlowSource[], eye: Vector3 | undefined): void {
-    if (sources.length === 0 && !this.glowLights) return
-    this.glowLights ??= Array.from({ length: BodySystem.GLOW_LIGHTS }, () => {
-      const light = new PointLight(0xffffff, 0, 0, 2)
-      light.name = "body-glow-light"
-      this.group.add(light)
-      return light
-    })
-    const atEye = (source: GlowSource) => eye ? source.candela / Math.max(source.position.distanceToSquared(eye), 1e-6) : source.candela
-    const ranked = [...sources].sort((a, b) => atEye(b) - atEye(a))
-    const perLux = this.sceneUnitsPerLux()
-    this.glowLights.forEach((light, index) => {
-      const source = ranked[index]
-      if (!source) {
-        light.intensity = 0
-        return
-      }
-      light.position.copy(source.position)
-      // Its colour scaled to a luminance of one, so that the intensity alone says how much, as a flame's (see lightColourOf).
-      const [r, g, b] = source.colour
-      const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b || 1
-      light.color.setRGB(r / luminance, g / luminance, b / luminance)
-      light.intensity = source.candela * perLux
-    })
-  }
-
   private shine(state: BodyState, holder: Group, glowing: Glow[] | undefined, frame: BodyFrame): void {
     const eye = frame.eye
     const luminanceCdM2 = state.appearance.luminanceCdM2
@@ -524,12 +482,13 @@ export class BodySystem {
    * puts it out. Not a child of the body: the body is stretched to its size axis by axis, and a
    * flame stated in metres must not be stretched with it.
    */
-  private throwFlame(state: BodyState, holder: Group, seconds: number, display: LuminanceDisplay | undefined, eye: Vector3 | undefined): void {
+  private throwFlame(state: BodyState, holder: Group, seconds: number, display: LuminanceDisplay | undefined, eye: Vector3 | undefined,
+    emitters: NearEmitter[]): void {
     let effect = this.flames.get(state.id)
     if (!effect && state.throwsFlame) {
       effect = new FlameEffect()
       this.flames.set(state.id, effect)
-      this.group.add(effect.mesh, effect.light, effect.glow)
+      this.group.add(effect.mesh, effect.glow)
     }
     if (!effect) return
     const flame = state.flame
@@ -552,7 +511,8 @@ export class BodySystem {
       return this.throughAir(BodySystem.shown([colour.r, colour.g, colour.b], flame.luminanceCdM2, display), this.scratch)
     }
     effect.set(light(flame.color), light(flame.tipColor ?? flame.color), seconds)
-    effect.illuminate(BodySystem.luminousIntensityCd(flame) * this.sceneUnitsPerLux(), BodySystem.lightColourOf(flame))
+    // It lights what is round it, from the middle of its brightest part (see EmitterLights).
+    emitters.push({ position: effect.lightAt(new Vector3()), candela: BodySystem.luminousIntensityCd(flame), colour: BodySystem.lightColourOf(flame) })
     const glow = FlameEffect.glowFor(flame, eye ? effect.mesh.position.distanceTo(eye) : 0)
     const mixed = new Color(flame.color).lerp(new Color(flame.tipColor ?? flame.color), 0.5)
     effect.shine(glow.radiusM, this.throughAir(BodySystem.shown([mixed.r, mixed.g, mixed.b], glow.luminanceCdM2, display), this.scratch))
@@ -800,7 +760,6 @@ export class BodySystem {
     const effect = this.flames.get(id)
     if (!effect) return
     effect.mesh.removeFromParent()
-    effect.light.removeFromParent()
     effect.glow.removeFromParent()
     effect.dispose()
     this.flames.delete(id)
