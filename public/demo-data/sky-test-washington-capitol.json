@@ -30,7 +30,7 @@
   "second": 0
  },
  "utcOffsetHours": -4,
- "durationSeconds": 12,
+ "durationSeconds": 122,
  "place": [
   {
    "lat": 38.88992,
@@ -122,13 +122,217 @@
     }
    },
    {
-    "t": 12000,
+    "t": 14000,
     "pose": {
      "lat": 38.88992,
      "lng": -77.01169715745546,
      "elevationM": 0,
      "headingDeg": 88.10714622600489,
      "pitchDeg": 12.789070223238243,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 21143,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01158390972009,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 13.42,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 27143,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01158390972009,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 13.42,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 34286,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01147066198472,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 14.1,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 40286,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01147066198472,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 14.1,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 47429,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01135741424936,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 14.86,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 53429,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01135741424936,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 14.86,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 60571,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01124416651399,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 15.7,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 66571,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01124416651399,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 15.7,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 73714,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01113091877862,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 16.63,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 79714,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01113091877862,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 16.63,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 86857,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01101767104325,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 17.68,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 92857,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01101767104325,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 17.68,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 100000,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01090442330788,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 18.88,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 106000,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.01090442330788,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 18.88,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 113143,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.0107911755725,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 20.26,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 119143,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.0107911755725,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 20.26,
+     "fovDeg": 30,
+     "fNumber": 4
+    }
+   },
+   {
+    "t": 122000,
+    "pose": {
+     "lat": 38.88992,
+     "lng": -77.0107911755725,
+     "elevationM": 0,
+     "headingDeg": 88.10714622600489,
+     "pitchDeg": 20.26,
      "fovDeg": 30,
      "fNumber": 4
     }
@@ -157,6 +361,16 @@
     "fr": "Pourquoi pas de lumières devant le Capitole ? Il y a des reflets là aussi, ceux du dôme éclairé, renvoyés vers le bas : mais un reflet porte un millième de sa lumière, étalé. Mesurés ici, ils ajoutent 3 % à la façade éclairée, invisibles ; ceux des candélabres, des points sur un ciel noir, y brillent jusqu'à 500 fois plus que lui.",
     "es": "¿Por qué no hay luces delante del Capitolio? También hay reflejos ahí, los de la cúpula iluminada, devueltos hacia abajo: pero un reflejo lleva una milésima de su luz, extendida. Medidos aquí, añaden un 3 % a la fachada iluminada, invisibles; los de los candelabros, puntos sobre un cielo negro, brillan hasta 500 veces más que él.",
     "it": "Perché nessuna luce davanti al Campidoglio? Anche lì ci sono riflessi, quelli della cupola illuminata, rimandati verso il basso: ma un riflesso porta un millesimo della sua luce, sparsa. Misurati qui, aggiungono il 3 % alla facciata illuminata, invisibili; quelli dei candelabri, punti su un cielo nero, brillano fino a 500 volte più di esso."
+   }
+  },
+  {
+   "t": 14000,
+   "label": "C",
+   "note": {
+    "en": "The photographer walks towards the dome, stopping for a photograph every ten metres (pause on one): the lamps come nearer, brighter and wider apart, and each ghost, always across the lens's axis from its lamp, brightens with it and moves against it.",
+    "fr": "Le photographe s'approche du dôme en s'arrêtant tous les dix mètres pour une photo (mettez en pause sur l'une d'elles) : les candélabres se rapprochent, plus vifs et plus écartés, et chaque reflet, toujours à l'opposé de son candélabre par rapport à l'axe de l'objectif, s'avive avec lui et se déplace à l'inverse.",
+    "es": "El fotógrafo se acerca a la cúpula deteniéndose cada diez metros para una foto (pausa en una de ellas): los candelabros se acercan, más vivos y más separados, y cada reflejo, siempre al otro lado del eje del objetivo respecto a su candelabro, se aviva con él y se mueve al revés.",
+    "it": "Il fotografo si avvicina alla cupola fermandosi ogni dieci metri per una foto (metti in pausa su una di esse): i candelabri si avvicinano, più vivi e più distanziati, e ogni riflesso, sempre dalla parte opposta dell'asse dell'obiettivo rispetto al suo candelabro, si ravviva con esso e si muove al contrario."
    }
   }
  ],
