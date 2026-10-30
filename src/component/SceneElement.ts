@@ -521,8 +521,31 @@ export class SceneElement extends HTMLElement {
    * steps aside (hides its own tooltip) rather than duplicating that lookup. */
   private readonly handlePointerMove = (event: PointerEvent) => {
     this.lastHover = { clientX: event.clientX, clientY: event.clientY, altKey: event.altKey }
-    this.hoverAt(event)
+    // At once, then at most once more per frame shown, for where the pointer last was: a mouse reports several moves a frame, and what is
+    // under it may be read back from the picture, which waits for the picture being drawn to be done.
+    // Alt pressed or let go asks something else of the same point (see detail): that is answered at once.
+    if (this.hoverFrame !== undefined && event.altKey === this.hoverAlt) {
+      this.hoverPending = true
+      return
+    }
+    this.hoverAlt = event.altKey
+    this.hoverAt(this.lastHover)
+    if (this.hoverFrame !== undefined) return
+    this.hoverFrame = requestAnimationFrame(() => {
+      this.hoverFrame = undefined
+      if (this.hoverPending && this.lastHover) this.hoverAt(this.lastHover)
+      this.hoverPending = false
+    })
   }
+
+  /** The frame the next hover waits for, if one does, and whether the pointer moved meanwhile (see handlePointerMove). */
+  private hoverFrame?: number
+  private hoverPending = false
+  private hoverAlt = false
+  /** When what is under a still pointer was last asked again while playing (see handleTimeUpdate). */
+  private lastPlayingHoverMs = 0
+  /** How often it is: often enough for a ghost's way to its light to follow them, seldom enough not to wait on the picture at every frame. */
+  private static readonly PLAYING_HOVER_MS = 150
 
   /** Where the pointer last was over the picture, while it is: what is under it is asked again at each frame drawn while playing, a ghost
    * and its light moving under a still pointer (see handleTimeUpdate). */
@@ -1003,7 +1026,11 @@ export class SceneElement extends HTMLElement {
       this.sceneRenderer.frame(performance.now())
       // A ghost's way to its light follows them as they move under a still pointer — only while one is shown: the pick reads the picture
       // back, which is not free at every frame.
-      if (this.lastHover && !this.ghostPath.hasAttribute("hidden")) this.hoverAt(this.lastHover)
+      const now = performance.now()
+      if (this.lastHover && !this.ghostPath.hasAttribute("hidden") && now - this.lastPlayingHoverMs >= SceneElement.PLAYING_HOVER_MS) {
+        this.lastPlayingHoverMs = now
+        this.hoverAt(this.lastHover)
+      }
     }
     // What the player laid over the picture from a body was measured before the body moved.
     this.ufoElement.repaintChrome()

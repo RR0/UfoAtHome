@@ -230,6 +230,8 @@ describe("SceneElement star tooltip", () => {
     expect(hover(element)).toMatch(/^Vega — mag 0[.,]03, 40° sobre el horizonte$/)
     hit.star = { name: "Sirius", raHours: 6.7525, decDeg: -16.7161, mag: -1.44 }
     hit.altitudeDeg = -1
+    // A pointer is asked about at most once more per frame shown (see SceneElement.handlePointerMove): the next frame, then.
+    await new Promise(resolve => requestAnimationFrame(resolve))
     expect(hover(element)).toMatch(/^Sirio — mag -1[.,]4, 1° bajo la horizontal$/)
   })
 

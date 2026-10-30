@@ -497,14 +497,17 @@ export class GhostPass {
     const from = { x: Math.max(0, x - radius), y: Math.max(0, y - radius) }
     const to = { x: Math.min(this.mips.width - 1, x + radius), y: Math.min(this.mips.height - 1, y + radius) }
     if (from.x > to.x || from.y > to.y) return undefined
-    const w = to.x - from.x + 1
-    const row = new Uint16Array(w * 4)
+    const w = to.x - from.x + 1, h = to.y - from.y + 1
+    // In one read: each is a wait for the picture being drawn to be done, and reading a row at a time made a hover of a few ghosts dozens
+    // of them, which froze a playing scene.
+    const texels = new Uint16Array(w * h * 4)
+    renderer.readRenderTargetPixels(this.mips, from.x, from.y, w, h, texels)
     let sum = 0, count = 0, peak = -1
     let brightest = { x, y }
     for (let j = from.y; j <= to.y; j += step) {
-      renderer.readRenderTargetPixels(this.mips, from.x, j, w, 1, row)
+      const row = (j - from.y) * w * 4
       for (let i = 0; i < w; i += step) {
-        const luminance = 0.2126 * GhostPass.half(row[i * 4]) + 0.7152 * GhostPass.half(row[i * 4 + 1]) + 0.0722 * GhostPass.half(row[i * 4 + 2])
+        const luminance = 0.2126 * GhostPass.half(texels[row + i * 4]) + 0.7152 * GhostPass.half(texels[row + i * 4 + 1]) + 0.0722 * GhostPass.half(texels[row + i * 4 + 2])
         sum += luminance
         count++
         if (luminance > peak) {
